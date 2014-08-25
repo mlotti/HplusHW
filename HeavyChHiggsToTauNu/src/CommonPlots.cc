@@ -33,6 +33,7 @@ namespace HPlus {
     fPtBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("ptBins")),
     fEtaBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("etaBins")),
     fPhiBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("phiBins")),
+    fDeltaPhiBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("deltaPhiBins")),
     fRtauBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("rtauBins")),
     fNjetsBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("njetsBins")),
     fMetBinSettings(iConfig.getUntrackedParameter<edm::ParameterSet>("metBins")),
@@ -132,17 +133,29 @@ namespace HPlus {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausNjetsAfterJetSelectionAndMETSF, "NjetsAfterJetSelectionAndMETSF", "Number of selected jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
 
     // improved delta phi collinear cuts (currently the point of the std. selections)
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerCollinearMinimum,         "ImprovedDeltaPhiCutsCollinearMinimum", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet1,            "ImprovedDeltaPhiCutsJet1Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet2,            "ImprovedDeltaPhiCutsJet2Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet3,            "ImprovedDeltaPhiCutsJet3Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{3},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet4,            "ImprovedDeltaPhiCutsJet4Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{4},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerCollinearMinimum,         "ImprovedDeltaPhiCutsCollinearMinimum", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet1,            "ImprovedDeltaPhiCutsJet1Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{1},MET))^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet2,            "ImprovedDeltaPhiCutsJet2Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{2},MET))^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet3,            "ImprovedDeltaPhiCutsJet3Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{3},MET))^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerCollinearJet4,            "ImprovedDeltaPhiCutsJet4Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{4},MET))^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    // 2D
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DCollinearMinimum,        "ImprovedDeltaPhiCuts2DCollinearMinimum", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1..3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DCollinearJet1,           "ImprovedDeltaPhiCuts2DJet1Collinear", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DCollinearJet2,           "ImprovedDeltaPhiCuts2DJet2Collinear", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{2},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DCollinearJet3,           "ImprovedDeltaPhiCuts2DJet3Collinear", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DCollinearJet4,           "ImprovedDeltaPhiCuts2DJet4Collinear", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{4},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearMinimum, "ImprovedDeltaPhiCutsCollinearMinimum", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet1, "ImprovedDeltaPhiCutsJet1Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet2, "ImprovedDeltaPhiCutsJet2Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{2},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet3, "ImprovedDeltaPhiCutsJet3Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{3},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet4, "ImprovedDeltaPhiCutsJet4Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{4},MET))^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearMinimum, "ImprovedDeltaPhiCutsCollinearMinimum", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet1, "ImprovedDeltaPhiCutsJet1Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{1},MET))^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet2, "ImprovedDeltaPhiCutsJet2Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{2},MET))^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet3, "ImprovedDeltaPhiCutsJet3Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{3},MET))^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearJet4, "ImprovedDeltaPhiCutsJet4Collinear", "#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{4},MET))^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      // 2D
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DCollinearMinimum,        "ImprovedDeltaPhiCuts2DCollinearMinimum", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1..3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DCollinearJet1,           "ImprovedDeltaPhiCuts2DJet1Collinear", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DCollinearJet2,           "ImprovedDeltaPhiCuts2DJet2Collinear", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{2},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DCollinearJet3,           "ImprovedDeltaPhiCuts2DJet3Collinear", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DCollinearJet4,           "ImprovedDeltaPhiCuts2DJet4Collinear", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{4},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
     }
 
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauPtAfterStandardSelections, "SelectedTau_pT_AfterStandardSelections", "#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
@@ -175,21 +188,19 @@ namespace HPlus {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausJetEtaAfterStandardSelections, "JetEta_AfterStandardSelections", "Jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
     }
 
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerCollinearMinimumAfterStandardSelections,         "ImprovedDeltaPhiCutsCollinearMinimumAfterStandardSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerCollinearMinimumAfterStandardSelections,         "ImprovedDeltaPhiCutsCollinearMinimumAfterStandardSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterStandardSelections, "ImprovedDeltaPhiCutsCollinearMinimumAfterStandardSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterStandardSelections, "ImprovedDeltaPhiCutsCollinearMinimumAfterStandardSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
     }
 
     // MET selection
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMET,            "MET", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhi,         "METPhi", "MET #phi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiMinusTauPhi, "METPhiMinusTauPhi", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins()/2.0, 0.0, fPhiBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTauPlusMETPt,   "TauPlusMETPt", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhi,         "METPhi", "MET #phi, ^{#circ};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlTauPlusMETPt,   "TauPlusMETPt", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMET,    "MET", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhi, "METPhi", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiMinusTauPhi, "METPhiMinusTauPhi", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins()/2.0, 0.0, fPhiBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTauPlusMETPt, "TauPlusMETPt", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhi, "METPhi", "METPhi, ^{#circ};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTauPlusMETPt, "TauPlusMETPt", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     }
     // b tagging
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNbjets,            "NBjets", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
@@ -204,37 +215,56 @@ namespace HPlus {
     }
 
     // improved delta phi back to back cuts
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerBackToBackMinimum,        "ImprovedDeltaPhiCutsBackToBackMinimum", "min(#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet1,           "ImprovedDeltaPhiCutsJet1BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet2,           "ImprovedDeltaPhiCutsJet2BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet3,           "ImprovedDeltaPhiCutsJet3BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet4,           "ImprovedDeltaPhiCutsJet4BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerBackToBackMinimum,        "ImprovedDeltaPhiCutsBackToBackMinimum", "min(#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet1,           "ImprovedDeltaPhiCutsJet1BackToBack", "#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet2,           "ImprovedDeltaPhiCutsJet2BackToBack", "#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet3,           "ImprovedDeltaPhiCutsJet3BackToBack", "#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlQCDTailKillerBackToBackJet4,           "ImprovedDeltaPhiCutsJet4BackToBack", "#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET)^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlDeltaPhiTauMET, "DeltaPhiTauMET", "#Delta#phi(E_{T}^{miss}, #tau_{h}), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMinDeltaPhiTauJet, "MinDeltaPhiTauJet", "min(#Delta#phi(jet_{N}}, #tau_{h})), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMaxDeltaPhiTauJet, "MaxDeltaPhiTauJet", "max(#Delta#phi(jet_{N}}, #tau_{h})), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    // 2D
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DBackToBackMinimum,        "ImprovedDeltaPhiCuts2DBackToBackMinimum", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1..3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DBackToBackJet1,           "ImprovedDeltaPhiCuts2DJet1BackToBack", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DBackToBackJet2,           "ImprovedDeltaPhiCuts2DJet2BackToBack", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{2},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DBackToBackJet3,           "ImprovedDeltaPhiCuts2DJet3BackToBack", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DBackToBackJet4,           "ImprovedDeltaPhiCuts2DJet4BackToBack", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{4},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+
     if (fAnalysisType == kSignalAnalysis) {
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackMinimum, "ImprovedDeltaPhiCutsBackToBackMinimum", "min(#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet1,"ImprovedDeltaPhiCutsJet1BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet2,"ImprovedDeltaPhiCutsJet2BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet3,"ImprovedDeltaPhiCutsJet3BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet4,"ImprovedDeltaPhiCutsJet4BackToBack", "#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET)^{2}}, ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackMinimum, "ImprovedDeltaPhiCutsBackToBackMinimum", "min(#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet1,"ImprovedDeltaPhiCutsJet1BackToBack", "#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1},MET)^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet2,"ImprovedDeltaPhiCutsJet2BackToBack", "#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{2},MET)^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet3,"ImprovedDeltaPhiCutsJet3BackToBack", "#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{3},MET)^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackJet4,"ImprovedDeltaPhiCutsJet4BackToBack", "#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{4},MET)^{2}}, ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausDeltaPhiTauMET, "DeltaPhiTauMET", "#Delta#phi(E_{T}^{miss}, #tau_{h}), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMinDeltaPhiTauJet, "MinDeltaPhiTauJet", "min(#Delta#phi(jet_{N}}, #tau_{h})), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMaxDeltaPhiTauJet, "MaxDeltaPhiTauJet", "max(#Delta#phi(jet_{N}}, #tau_{h})), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      // 2D
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DBackToBackMinimum,        "ImprovedDeltaPhiCuts2DBackToBackMinimum", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1..3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet1,           "ImprovedDeltaPhiCuts2DJet1BackToBack", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet2,           "ImprovedDeltaPhiCuts2DJet2BackToBack", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{2},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet3,           "ImprovedDeltaPhiCuts2DJet3BackToBack", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet4,           "ImprovedDeltaPhiCuts2DJet4BackToBack", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{4},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
     }
 
     // top selection
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlTopPt,   "TopPt", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlWPt,     "WPt", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopMass, "TopMass", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopPt,   "TopPt", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWMass,   "WMass", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWPt,     "WPt", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     }
 
     // evt topology
 
     // ctrl plots after all selections
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerCollinearMinimumAfterMtSelections,         "ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerCollinearMinimumAfterMtSelections,         "ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterMtSelections, "ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterMtSelections, "ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections", "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{#circ}-#Delta#phi(jet_{1..3},MET))^{2}}), ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
     }
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauPtAfterMtSelections, "SelectedTau_pT_AfterMtSelections", "#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir, hCtrlSelectedTauEtaAfterMtSelections, "SelectedTau_eta_AfterMtSelections", "#tau #eta;N_{events} / 0.1", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
@@ -263,14 +293,12 @@ namespace HPlus {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausJetEtaAfterMtSelections, "JetEta_AfterMtSelections", "Jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
     }
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETAfterMtSelections,            "METAfterMtSelections", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiAfterMtSelections,         "METPhiAfterMtSelections", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiMinusTauPhiAfterMtSelections, "METPhiMinusTauPhiAfterMtSelections", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins()/2.0, 0.0, fPhiBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTauPlusMETPtAfterMtSelections,   "TauPlusMETPtAfterMtSelections", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMETPhiAfterMtSelections,         "METPhiAfterMtSelections", "METPhi, ^{#circ};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlTauPlusMETPtAfterMtSelections,   "TauPlusMETPtAfterMtSelections", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETAfterMtSelections,    "METAfterMtSelections", "MET, GeV;N_{events}", fMetBinSettings.bins(), fMetBinSettings.min(), fMetBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiAfterMtSelections, "METPhiAfterMtSelections", "METPhi, ^{o};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiMinusTauPhiAfterMtSelections, "METPhiMinusTauPhiAfterMtSelections", "MET #phi - #tau #phi, ^{o};N_{events}", fPhiBinSettings.bins()/2.0, 0.0, fPhiBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections, "TauPlusMETPtAfterMtSelections", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMETPhiAfterMtSelections, "METPhiAfterMtSelections", "METPhi, ^{#circ};N_{events}", fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections, "TauPlusMETPtAfterMtSelections", "p_{T}(#tau+MET), GeV;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     }
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlNbjetsAfterMtSelections,            "NBjetsAfterMtSelections", "Number of identified b jets;N_{events}", fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlBJetPtAfterMtSelections,            "BJetPtAfterMtSelections", "b jet p_{T}, GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
@@ -282,18 +310,36 @@ namespace HPlus {
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBJetEtaAfterMtSelections,        "BJetEtaAfterMtSelections", "b jet #eta;N_{events}", fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausBDiscriminatorAfterMtSelections, "BtagDiscriminatorAfterMtSelections", "Btag discriminator;b tag discriminator;N_{events}", fBJetDiscriminatorBinSettings.bins(), fBJetDiscriminatorBinSettings.min(), fBJetDiscriminatorBinSettings.max());
     }
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerBackToBackMinimumAfterMtSelections,        "ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections", "min(#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlQCDTailKillerBackToBackMinimumAfterMtSelections,        "ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections", "min(#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlDeltaPhiTauMETAfterMtSelections, "DeltaPhiTauMETAfterMtSelections", "#Delta#phi(E_{T}^{miss}, #tau_{h}), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMinDeltaPhiTauJetAfterMtSelections, "MinDeltaPhiTauJetAfterMtSelections", "min(#Delta#phi(jet_{N}}, #tau_{h})), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlMaxDeltaPhiTauJetAfterMtSelections, "MaxDeltaPhiTauJetAfterMtSelections", "max(#Delta#phi(jet_{N}}, #tau_{h})), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    // 2D
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DMinimum,        "ImprovedDeltaPhiCuts2DMinimum", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1..3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DJet1,           "ImprovedDeltaPhiCuts2DJet1", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DJet2,           "ImprovedDeltaPhiCuts2DJet2", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{2},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DJet3,           "ImprovedDeltaPhiCuts2DJet3", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlDir,            hCtrlQCDTailKiller2DJet4,           "ImprovedDeltaPhiCuts2DJet4", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{4},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackMinimumAfterMtSelections, "ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections", "min(#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{o};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKillerBackToBackMinimumAfterMtSelections, "ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections", "min(#sqrt{(180^{#circ}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}}), ^{#circ};N_{events}", fTailKiller1DSettings.bins(), fTailKiller1DSettings.min(), fTailKiller1DSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausDeltaPhiTauMETAfterMtSelections, "DeltaPhiTauMETAfterMtSelections", "#Delta#phi(E_{T}^{miss}, #tau_{h}), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMinDeltaPhiTauJetAfterMtSelections, "MinDeltaPhiTauJetAfterMtSelections", "min(#Delta#phi(jet_{N}}, #tau_{h})), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausMaxDeltaPhiTauJetAfterMtSelections, "MaxDeltaPhiTauJetAfterMtSelections", "max(#Delta#phi(jet_{N}}, #tau_{h})), ^{#circ};N_{events}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      // 2D
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DMinimum,        "ImprovedDeltaPhiCuts2DMinimum", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1..3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DJet1,           "ImprovedDeltaPhiCuts2DJet1", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{1},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DJet2,           "ImprovedDeltaPhiCuts2DJet2", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{2},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DJet3,           "ImprovedDeltaPhiCuts2DJet3", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{3},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kVital,   myCtrlEWKFakeTausDir, hCtrlEWKFakeTausQCDTailKiller2DJet4,           "ImprovedDeltaPhiCuts2DJet4", "#Delta#phi(#tau,MET)), ^{#circ};#Delta#phi(jet_{4},MET), ^{#circ}", fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max(), fDeltaPhiBinSettings.bins(), fDeltaPhiBinSettings.min(), fDeltaPhiBinSettings.max());
     }
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlTopMassAfterMtSelections, "TopMassAfterMtSelections", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlTopMassAfterMtSelections, "TopMassAfterMtSelections", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlTopPtAfterMtSelections,   "TopPtAfterMtSelections", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics,   myCtrlDir,            hCtrlWMassAfterMtSelections,   "WMassAfterMtSelections", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
+    fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlWMassAfterMtSelections,   "WMassAfterMtSelections", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
     fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative,   myCtrlDir,            hCtrlWPtAfterMtSelections,     "WPtAfterMtSelections", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     if (fAnalysisType == kSignalAnalysis) {
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopMassAfterMtSelections, "TopMassAfterMtSelections", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopMassAfterMtSelections, "TopMassAfterMtSelections", "m_{bqq'}, GeV/c^{2};N_{events}", fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausTopPtAfterMtSelections,   "TopPtAfterMtSelections", "p_{T}(bqq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
-      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kSystematics, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWMassAfterMtSelections,   "WMassAfterMtSelections", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
+      fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWMassAfterMtSelections,   "WMassAfterMtSelections", "m_{qq'}, GeV/c^{2};N_{events}", fWMassBinSettings.bins(), fWMassBinSettings.min(), fWMassBinSettings.max());
       fSplittedHistogramHandler.createShapeHistogram(HistoWrapper::kInformative, myCtrlEWKFakeTausDir, hCtrlEWKFakeTausWPtAfterMtSelections,     "WPtAfterMtSelections", "p_{T}(qq'), GeV/c;N_{events}", fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
     }
 
@@ -503,34 +549,53 @@ namespace HPlus {
     fQCDTailKillerData = data;
     bool myPassStatus = true;
     double myMinimumRadius = 999.;
+    int myMinimumIndex = -1;
     for (int i = 0; i < data.getNConsideredJets(); ++i) {
       double myRadius = data.getRadiusFromCollinearCorner(i);
-      if (myRadius < myMinimumRadius && data.collinearCutActiveForJet(i))
+      if (myRadius < myMinimumRadius && data.collinearCutActiveForJet(i)) {
         myMinimumRadius = myRadius;
+        myMinimumIndex = i;
+      }
       if (i == 0 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet1, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet1, myRadius); // Make control pl
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
+        }
       } else if (i == 1 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet2, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet2, myRadius); // Make control pl
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+        }
       } else if (i == 2 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet3, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet3, myRadius); // Make control pl
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+        }
       } else if (i == 3 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearJet4, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearJet4, myRadius); // Make control pl
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
+        }
       }
       if (!data.passCollinearCutForJet(i))
         myPassStatus = false;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerCollinearMinimum, myMinimumRadius);
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (myMinimumIndex >= 0)
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DCollinearMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerCollinearMinimum, myMinimumRadius);
-
+      if (myMinimumIndex >= 0)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DCollinearMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+    }
     if (myPassStatus) {
       // MET oscillation analysis
       if (bOptionEnableMETOscillationAnalysis) fMETPhiOscillationCorrectionAfterCollinearCuts->analyze(iEvent, fVertexData.getNumberOfAllVertices(), fMETData);
@@ -588,15 +653,10 @@ namespace HPlus {
     fMETData = data;
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMET, data.getSelectedMET()->et());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhi, data.getSelectedMET()->phi());
-    double myPhiDiff = std::fabs(data.getSelectedMET()->phi() - fTauData.getSelectedTau()->phi());
-    if (myPhiDiff > 3.1415926)
-      myPhiDiff -= 3.1415926 * 2.0;
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiMinusTauPhi, myPhiDiff);
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTauPlusMETPt, (fTauData.getSelectedTau()->p4()+data.getSelectedMET()->p4()).pt());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMET, data.getSelectedMET()->et());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhi, data.getSelectedMET()->phi());
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiMinusTauPhi, myPhiDiff);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTauPlusMETPt, (fTauData.getSelectedTau()->p4()+data.getSelectedMET()->p4()).pt());
     }
     if (data.passedEvent()) {
@@ -645,33 +705,67 @@ namespace HPlus {
     fQCDTailKillerData = data;
     bool myPassStatus = true;
     double myMinimumRadius = 999.;
+    int myMinimumIndex = -1;
     for (int i = 0; i < data.getNConsideredJets(); ++i) {
       double myRadius = data.getRadiusFromBackToBackCorner(i);
-      if (myRadius < myMinimumRadius && data.backToBackCutActiveForJet(i))
+      if (myRadius < myMinimumRadius && data.backToBackCutActiveForJet(i)) {
         myMinimumRadius = myRadius;
+        myMinimumIndex = i;
+      }
       if (i == 0 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet1, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet1, myRadius); // Make control plot before cut
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
+        }
       } else if (i == 1 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet2, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet2, myRadius); // Make control plot before cut
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+        }
       } else if (i == 2 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet3, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet3, myRadius); // Make control plot before cut
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+        }
       } else if (i == 3 && myPassStatus) {
         fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackJet4, myRadius); // Make control plot before cut
-        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
+        if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
           fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackJet4, myRadius); // Make control plot before cut
+          fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
+        }
       }
       if (!data.passBackToBackCutForJet(i))
         myPassStatus = false;
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackMinimum, myMinimumRadius);
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (myMinimumIndex >= 0)
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DBackToBackMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlDeltaPhiTauMET, myDeltaPhiTauMET);
+    double myMinDeltaPhiJetTau = 999.;
+    double myMaxDeltaPhiJetTau = -1.;
+    for (edm::PtrVector<pat::Jet>::const_iterator iJet = fJetData.getSelectedJets().begin(); iJet != fJetData.getSelectedJets().end(); ++iJet) {
+      double myDeltaPhi = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), **iJet) * 57.3;
+      if (myDeltaPhi < myMinDeltaPhiJetTau) myMinDeltaPhiJetTau = myDeltaPhi;
+      if (myDeltaPhi > myMaxDeltaPhiJetTau) myMaxDeltaPhiJetTau = myDeltaPhi;
+    }
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMinDeltaPhiTauJet, myMinDeltaPhiJetTau);
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMaxDeltaPhiTauJet, myMaxDeltaPhiJetTau);
+    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackMinimum, myMinimumRadius);
+      if (myMinimumIndex >= 0)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DBackToBackMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausDeltaPhiTauMET, myDeltaPhiTauMET);
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMinDeltaPhiTauJet, myMinDeltaPhiJetTau);
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMaxDeltaPhiTauJet, myMaxDeltaPhiJetTau);
+    }
   }
 
   void CommonPlots::fillControlPlotsAtTopSelection(const edm::Event& iEvent, const TopSelectionManager::Data& data) {
@@ -734,16 +828,25 @@ namespace HPlus {
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETAfterMtSelections, fMETData.getSelectedMET()->et());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
-    double myPhiDiff = std::fabs(fMETData.getSelectedMET()->phi() - fTauData.getSelectedTau()->phi());
-    if (myPhiDiff > 3.1415926)
-      myPhiDiff -= 3.1415926 * 2.0;
-    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMETPhiMinusTauPhiAfterMtSelections, myPhiDiff);
+    double myDeltaPhiTauMET = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), *(fMETData.getSelectedMET())) * 57.3; // converted to degrees
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlDeltaPhiTauMETAfterMtSelections, myDeltaPhiTauMET);
+    double myMinDeltaPhiJetTau = 999.;
+    double myMaxDeltaPhiJetTau = -1.;
+    for (edm::PtrVector<pat::Jet>::const_iterator iJet = fJetData.getSelectedJets().begin(); iJet != fJetData.getSelectedJets().end(); ++iJet) {
+      double myDeltaPhi = DeltaPhi::reconstruct(*(fTauData.getSelectedTau()), **iJet) * 57.3;
+      if (myDeltaPhi < myMinDeltaPhiJetTau) myMinDeltaPhiJetTau = myDeltaPhi;
+      if (myDeltaPhi > myMaxDeltaPhiJetTau) myMaxDeltaPhiJetTau = myDeltaPhi;
+    }
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMinDeltaPhiTauJetAfterMtSelections, myMinDeltaPhiJetTau);
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlMaxDeltaPhiTauJetAfterMtSelections, myMaxDeltaPhiJetTau);
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTauPlusMETPtAfterMtSelections, (fTauData.getSelectedTau()->p4()+fMETData.getSelectedMET()->p4()).pt());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETAfterMtSelections, fMETData.getSelectedMET()->et());
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiAfterMtSelections, fMETData.getSelectedMET()->phi());
-      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMETPhiMinusTauPhiAfterMtSelections, myPhiDiff);
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausTauPlusMETPtAfterMtSelections, (fTauData.getSelectedTau()->p4()+fMETData.getSelectedMET()->p4()).pt());
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausDeltaPhiTauMETAfterMtSelections, myDeltaPhiTauMET);
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMinDeltaPhiTauJetAfterMtSelections, myMinDeltaPhiJetTau);
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausMaxDeltaPhiTauJetAfterMtSelections, myMaxDeltaPhiJetTau);
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlNbjetsAfterMtSelections, fBJetData.getBJetCount());
     if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
@@ -763,14 +866,31 @@ namespace HPlus {
       }
     }
     myMinimumRadius = 999.;
+    int myMinimumIndex = -1;
     for (int i = 0; i < fQCDTailKillerData.getNConsideredJets(); ++i) {
       double myRadius = fQCDTailKillerData.getRadiusFromBackToBackCorner(i);
-      if (myRadius < myMinimumRadius && fQCDTailKillerData.backToBackCutActiveForJet(i))
+      if (myRadius < myMinimumRadius && fQCDTailKillerData.backToBackCutActiveForJet(i)) {
         myMinimumRadius = myRadius;
+        myMinimumIndex = i;
+      }
     }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKillerBackToBackMinimumAfterMtSelections, myMinimumRadius);
-    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis)
+    if (myMinimumIndex >= 0)
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+    fSplittedHistogramHandler.fillShapeHistogram(hCtrlQCDTailKiller2DJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
+    
+    if (fFakeTauData.isEWKFakeTauLike() && fAnalysisType == kSignalAnalysis) {
       fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKillerBackToBackMinimumAfterMtSelections, myMinimumRadius);
+      if (myMinimumIndex >= 0)
+        fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DMinimum, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(myMinimumIndex));
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet1, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(0));
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet2, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(1));
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet3, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(2));
+      fSplittedHistogramHandler.fillShapeHistogram(hCtrlEWKFakeTausQCDTailKiller2DJet4, fQCDTailKillerData.getDeltaPhiTauMET(), fQCDTailKillerData.getDeltaPhiJetMET(3));
+    }
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTopMassAfterMtSelections, fTopData.getTopMass());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlTopPtAfterMtSelections, fTopData.getTopP4().pt());
     fSplittedHistogramHandler.fillShapeHistogram(hCtrlWMassAfterMtSelections, fTopData.getWMass());
