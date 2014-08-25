@@ -101,7 +101,7 @@ def main():
     style = tdrstyle.TDRStyle()
     #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
 #    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2)
-    histograms.createLegend.moveDefaults(dx=-0.15, dy=-0.01, dh=-0.05)
+    histograms.createLegend.moveDefaults(dx=-0.15, dy=-0.01, dh=+0.05)
 #    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
     histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
 #    histograms.createLegendRatio.moveDefaults(dh=-0.1, dx=-0.53)
@@ -139,6 +139,7 @@ def doDataset(datasetsEmb, datasetsSig, optMode):
     doPlots(datasetsEmb, datasetsSig, plotter, optMode)
 
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=True, log=True, addMCUncertainty=True,
+                                  opts2={"ymin": 0, "ymax": 2},
                                   ratio=True, ratioType="errorScale", ratioCreateLegend=True, ratioYlabel="Data/Sim.",
                                   addLuminosityText=True)
 

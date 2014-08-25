@@ -64,7 +64,7 @@ def main():
     #    histograms.cmsTextMode = histograms.CMSMode.NONE
     #histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
     histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
-    histograms.createLegend.moveDefaults(dx=-0.15, dh=-0.05) # QCD removed
+    histograms.createLegend.moveDefaults(dx=-0.15, dh=0.05)#, dh=-0.05) # QCD removed
     plots._legendLabels["BackgroundStatError"] = "Sim. stat. unc."
     plots._legendLabels["BackgroundStatSystError"] = "Sim. stat.#oplussyst. unc."
 
