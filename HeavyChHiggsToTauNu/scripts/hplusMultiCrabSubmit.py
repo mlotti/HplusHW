@@ -107,6 +107,8 @@ def main(opts):
         # Actual submission
         for task, jobs in jobsToSubmit.iteritems():
             pretty = multicrab.prettyJobnums(jobs)
+            if len(jobs) == 1:
+                pretty += "," # CRAB thinks one number is number of jobs, the comma translates it to job ID
             command = ["crab", "-c", task, submitCommand, pretty]
             if opts.crabArgs != "":
                 command.extend(opts.crabArgs.split(" "))

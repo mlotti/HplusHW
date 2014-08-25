@@ -273,7 +273,7 @@ def doPlot(limits, legendLabels, graphs, name, ylabel, opts={}, plotLabel=None, 
     plot.draw()
 
     plot.setLuminosity(limits[0].getLuminosity())
-    plot.addStandardTexts()
+    plot.addStandardTexts(cmsTextPosition="outframe")
 
     size = 20
     x = 0.18
@@ -322,7 +322,7 @@ def doPlot2(limits, legendLabels, name):
     plot.draw()
 
     plot.setLuminosity(limits[0].getLuminosity())
-    plot.addStandardTexts()
+    plot.addStandardTexts(cmsTextPosition="outframe")
 
     size = 20
     x = 0.2

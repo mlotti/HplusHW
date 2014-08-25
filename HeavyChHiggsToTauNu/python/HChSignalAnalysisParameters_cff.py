@@ -820,6 +820,45 @@ embeddingMuonTriggerEfficiency = muonTriggerIDEfficiency.efficiency_trigger
 embeddingMuonTriggerEfficiency.variationEnabled = cms.bool(False)
 embeddingMuonTriggerEfficiency.useMaxUncertainty = cms.bool(True)
 
+## bin-based mT weighting
+# embeddingMTWeight = cms.untracked.PSet(
+#     data = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/embedding_mt_weight_met60_loose.json"),
+#     dataSelect = cms.vstring("Run2012ABCD"),
+#     mcSelect = cms.string("Run2012ABCD"),
+#     mode = cms.untracked.string("disabled"),
+#     type = cms.untracked.string("binned"),
+#     variationEnabled = cms.bool(False),
+#     useMaxUncertainty = cms.bool(False),
+# )
+
+# def setEmbeddingMTWeightBasedOnSelection(signalAnalysis, name):
+#     if signalAnalysis.embeddingMTWeight.mode.value() == "disabled":
+#         return
+#     if signalAnalysis.embeddingMTWeight.mode.value() != "dataEfficiency":
+#         raise Exception("Invalid value for embeddingMTWeight.mode '%s' for module %s" % (signalAnalysis.embeddingMTWeight.mode.value(), name))
+
+#     tailKiller = None
+#     strtk = str(signalAnalysis.QCDTailKiller)
+#     if strtk == str(QCDTailKillerNoCuts):
+#         tailKiller = "nocuts"
+#     elif strtk == str(QCDTailKillerLoosePlus):
+#         tailKiller = "loose"
+#     elif strtk == str(QCDTailKillerMediumPlus):
+#         tailKiller = "medium"
+#     elif strtk == str(QCDTailKillerTightPlus):
+#         tailKiller = "tight"
+#     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+#     signalAnalysis.embeddingMTWeight.data = HChTools.getEfficiencyJsonFullPath("Embedding mT weight", "embedding_mt_weight", "met%.0f_%s" % (signalAnalysis.MET.METCut.value(), tailKiller))
+#     print "Using embedding mT weight file %s for %s" % (str(signalAnalysis.embeddingMTWeight.data), name)
+## fit-based mT weighting
+embeddingMTWeight = cms.untracked.PSet(
+    formula = cms.string("(-0.0017*x+1.26)*(x<=160) + 1*(x>160)"), # average over MET{60,70,80} and tail killer scenarios, rounded
+    enabled = cms.bool(False),
+    variationEnabled = cms.bool(False),
+    variationDirection = cms.int32(0)
+)
+
+
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
 #for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):
