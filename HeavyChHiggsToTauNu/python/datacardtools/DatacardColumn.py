@@ -577,6 +577,10 @@ class DatacardColumn():
         # Look for negative bins in rate histogram
         for k in range(1, self._rateResult._histograms[0].GetNbinsX()+1):
             if self._rateResult._histograms[0].GetBinContent(k) < 0.000001:
+                if self._rateResult._histograms[0].GetBinContent(k) > 0.0 and self._rateResult._histograms[0].GetBinContent(k) < 1.0e10:
+                    print ShellStyles.WarningLabel()+"Rate value is zero or below 1e-10 in bin %d for column '%s' (it was %f)! Compensating up stat uncertainty!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
+                    self._rateResult._histograms[0].SetBinContent(k, 0.0)
+                    self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)                   
                 if self._rateResult._histograms[0].GetBinContent(k) < -0.001:
                     print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
                     self._rateResult._histograms[0].SetBinContent(k, 0.0)
