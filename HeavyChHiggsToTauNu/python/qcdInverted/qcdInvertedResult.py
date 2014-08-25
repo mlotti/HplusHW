@@ -77,6 +77,9 @@ class QCDInvertedShape:
                 hBin.SetTitle("NQCDFinal_%s_%s"%(shape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
                 hBin.SetName("NQCDFinal_%s_%s"%(shape.getPhaseSpaceBinFileFriendlyTitle(i).replace(" ",""), moduleInfoString))
                 self._histogramsList.append(hBin)
+        if isinstance(self._resultShape, ROOT.TH2):
+            self._doCalculate2D(nSplitBins, shape, normFactors, optionPrintPurityByBins, optionDoNQCDByBinHistograms, myUncertaintyLabels)
+            return
         # Intialize counters for purity calculation in final shape binning
         myShapeDataSum = []
         myShapeDataSumUncert = []
@@ -154,6 +157,96 @@ class QCDInvertedShape:
                     myString = ">%d"%(self._resultShape.GetXaxis().GetBinLowEdge(j))
                 myString += " %.3f %.3f"%(myPurity, myPurityUncert)
                 print myString
+
+    ## Calculates the result for 2D histograms
+    def _doCalculate2D(self, nSplitBins, shape, normFactors, optionPrintPurityByBins, optionDoNQCDByBinHistograms, myUncertaintyLabels):
+        # Intialize counters for purity calculation in final shape binning
+        myShapeDataSum = []
+        myShapeDataSumUncert = []
+        myShapeEwkSum = []
+        myShapeEwkSumUncert = []
+        myList = []
+        for k in range(1,self._resultShape.GetNbinsY()+1):
+            myList.append(0.0)
+        for j in range(1,self._resultShape.GetNbinsX()+1):
+            myShapeDataSum.append(myList[:])
+            myShapeDataSumUncert.append(myList[:])
+            myShapeEwkSum.append(myList[:])
+            myShapeEwkSumUncert.append(myList[:])
+        # Calculate results separately for each phase space bin and then combine
+        for i in range(0, nSplitBins):
+            # Get data-driven QCD, data, and MC EWK shape histogram for the phase space bin
+            h = shape.getDataDrivenQCDHistoForSplittedBin(i)
+            hData = shape.getDataHistoForSplittedBin(i)
+            hEwk = shape.getEwkHistoForSplittedBin(i)
+            # Get normalization factor
+            if not shape.getPhaseSpaceBinFileFriendlyTitle(i) in normFactors.keys():
+                raise Exception(ShellStyles.ErrorLabel()+"No normalization factors available for bin '%s' when accessing histogram %s!"%(shape.getPhaseSpaceBinFileFriendlyTitle(i),shape.getHistoName()))
+            wQCD = normFactors[shape.getPhaseSpaceBinFileFriendlyTitle(i)]
+            # Loop over bins in the shape histogram
+            for j in range(1,h.GetNbinsX()+1):
+                for k in range(1,h.GetNbinsY()+1):
+                    myResult = 0.0
+                    myStatDataUncert = 0.0
+                    myStatEwkUncert = 0.0
+                    if abs(h.GetBinContent(j,k)) > 0.00001: # Ignore zero bins
+                        # Calculate result
+                        myResult = h.GetBinContent(j,k) * wQCD
+                        # Calculate abs. stat. uncert. for data and for MC EWK
+                        myStatDataUncert = hData.GetBinError(j,k) * wQCD
+                        myStatEwkUncert = hEwk.GetBinError(j,k) * wQCD
+                        #errorPropagation.errorPropagationForProduct(hLeg1.GetBinContent(j), hLeg1Data.GetBinError(j), myEffObject.value(), myEffObject.uncertainty("statData"))
+                        # Do not calculate here MC EWK syst.
+                    myCountObject = extendedCount.ExtendedCount(myResult, [myStatDataUncert, myStatEwkUncert], myUncertaintyLabels)
+                    self._resultCountObject.add(myCountObject)
+                    if optionDoNQCDByBinHistograms:
+                        self._histogramsList[i].SetBinContent(j, k, myCountObject.value())
+                        self._histogramsList[i].SetBinError(j, k, myCountObject.statUncertainty())
+                    self._resultShape.SetBinContent(j, k, self._resultShape.GetBinContent(j, k) + myCountObject.value())
+                    self._resultShape.SetBinError(j, k, self._resultShape.GetBinError(j, k) + myCountObject.statUncertainty()**2) # Sum squared
+                    # Sum items for purity calculation
+                    myShapeDataSum[j-1][k-1] += hData.GetBinContent(j,k)*wQCD
+                    myShapeDataSumUncert[j-1][k-1] += (hData.GetBinError(j,k)*wQCD)**2
+                    myShapeEwkSum[j-1][k-1] += hEwk.GetBinContent(j,k)*wQCD
+                    myShapeEwkSumUncert[j-1][k-1] += (hEwk.GetBinError(j,k)*wQCD)**2
+            h.Delete()
+            hData.Delete()
+            hEwk.Delete()
+        # Take square root of uncertainties
+        for j in range(1,self._resultShape.GetNbinsX()+1):
+            for k in range(1,self._resultShape.GetNbinsY()+1):
+                self._resultShape.SetBinError(j, k, math.sqrt(self._resultShape.GetBinError(j, k)))
+        # Print result
+        print "NQCD Integral(%s) = %s "%(shape.getHistoName(), self._resultCountObject.getResultStringFull("%.1f"))
+        # Print purity as function of final shape bins
+        if optionPrintPurityByBins:
+            print "Purity of shape %s"%shape.getHistoName()
+            print "shapeBin purity purityUncert"
+        for j in range (1,self._resultShape.GetNbinsX()+1):
+            for k in range(1,self._resultShape.GetNbinsY()+1):
+                myPurity = 0.0
+                myPurityUncert = 0.0
+                if abs(myShapeDataSum[j-1][k-1]) > 0.000001:
+                    myPurity = 1.0 - myShapeEwkSum[j-1][k-1] / myShapeDataSum[j-1][k-1]
+                    myPurityUncert = errorPropagation.errorPropagationForDivision(myShapeEwkSum[j-1][k-1], math.sqrt(myShapeEwkSumUncert[j-1][k-1]), myShapeDataSum[j-1][k-1], math.sqrt(myShapeDataSumUncert[j-1][k-1]))
+                # Store MC EWK content
+                self._resultShapeEWK.SetBinContent(j, k, myShapeEwkSum[j-1][k-1])
+                self._resultShapeEWK.SetBinError(j, k, math.sqrt(myShapeEwkSumUncert[j-1][k-1]))
+                self._resultShapePurity.SetBinContent(j, k, myPurity)
+                self._resultShapePurity.SetBinError(j, k, myPurityUncert)
+                # Print purity info of final shape
+                if optionPrintPurityByBins:
+                    myString = ""
+                    if j < self._resultShape.GetNbinsX():
+                        myString = "%d..%d, "%(self._resultShape.GetXaxis().GetBinLowEdge(j),self._resultShape.GetXaxis().GetBinUpEdge(j))
+                    else:
+                        myString = ">%d, "%(self._resultShape.GetXaxis().GetBinLowEdge(j))
+                    if k < self._resultShape.GetNbinsY():
+                        myString = "%d..%d"%(self._resultShape.GetYaxis().GetBinLowEdge(k),self._resultShape.GetYaxis().GetBinUpEdge(k))
+                    else:
+                        myString = ">%d"%(self._resultShape.GetYaxis().GetBinLowEdge(k))
+                    myString += " %.3f %.3f"%(myPurity, myPurityUncert)
+                    print myString
 
 class QCDInvertedControlPlot: # OBSOLETE
     def __init__(self, shape, moduleInfoString, normFactors, title=""):
@@ -294,32 +387,35 @@ class QCDInvertedResultManager:
                     myCtrlPlotPurityHisto.SetTitle(item+"_Purity")
                     self._hCtrlPlots.append(myCtrlPlotPurityHisto)
                     myCtrlPlot.delete()
-                    # Do systematics coming from met shape difference for control plots
-                    myCtrlPlotSignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity, rebinList=myRebinList)
-                    myCtrlPlotControlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationControl",item), luminosity, rebinList=myRebinList)
-                    myCtrlPlotRegionTransitionSyst = systematicsForMetShapeDifference.SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlotHisto, moduleInfoString=moduleInfoString, quietMode=True)
-                    myCtrlPlotSignalRegionShape.delete()
-                    myCtrlPlotControlRegionShape.delete()
-                    # Up variation
-                    hUp = aux.Clone(myCtrlPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)
-                    hUp.SetTitle(item+"systQCDUp")
-                    self._hRegionSystUpCtrlPlots.append(hUp)
-                    # Down variation
-                    hDown = aux.Clone(myCtrlPlotRegionTransitionSyst.getDownHistogram(), "QCDfactMgrSystQCDSystDown%d"%i)
-                    hDown.SetTitle(item+"systQCDDown")
-                    self._hRegionSystDownCtrlPlots.append(hDown)
-                    # Source histograms
-                    hNum = aux.Clone(myCtrlPlotRegionTransitionSyst.getCombinedSignalRegionHistogram(), "QCDfactMgrSystQCDSystNumerator%d"%i)
-                    hNum.SetTitle(item+"systQCDNumerator")
-                    self._hRegionSystNumenatorCtrlPlots.append(hNum)
-                    hDenom = aux.Clone(myCtrlPlotRegionTransitionSyst.getCombinedCtrlRegionHistogram(), "QCDfactMgrSystQCDSystDenominator%d"%i)
-                    hDenom.SetTitle(item+"systQCDDenominator")
-                    self._hRegionSystDenominatorCtrlPlots.append(hDenom)
-                    # Free memory
-                    myCtrlPlotRegionTransitionSyst.delete()
-                    #print "\n***** memdebug %d\n"%i
-                    #if i <= 2:
-                    #    ROOT.gDirectory.GetList().ls()
+                    if isinstance(myCtrlPlotHisto, ROOT.TH2):
+                        print ShellStyles.WarningLabel()+"Skipping uncertainties because histogram has more than 1 dimensions!"
+                    else:
+                        # Do systematics coming from met shape difference for control plots
+                        myCtrlPlotSignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity, rebinList=myRebinList)
+                        myCtrlPlotControlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationControl",item), luminosity, rebinList=myRebinList)
+                        myCtrlPlotRegionTransitionSyst = systematicsForMetShapeDifference.SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlotHisto, moduleInfoString=moduleInfoString, quietMode=True)
+                        myCtrlPlotSignalRegionShape.delete()
+                        myCtrlPlotControlRegionShape.delete()
+                        # Up variation
+                        hUp = aux.Clone(myCtrlPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)
+                        hUp.SetTitle(item+"systQCDUp")
+                        self._hRegionSystUpCtrlPlots.append(hUp)
+                        # Down variation
+                        hDown = aux.Clone(myCtrlPlotRegionTransitionSyst.getDownHistogram(), "QCDfactMgrSystQCDSystDown%d"%i)
+                        hDown.SetTitle(item+"systQCDDown")
+                        self._hRegionSystDownCtrlPlots.append(hDown)
+                        # Source histograms
+                        hNum = aux.Clone(myCtrlPlotRegionTransitionSyst.getCombinedSignalRegionHistogram(), "QCDfactMgrSystQCDSystNumerator%d"%i)
+                        hNum.SetTitle(item+"systQCDNumerator")
+                        self._hRegionSystNumenatorCtrlPlots.append(hNum)
+                        hDenom = aux.Clone(myCtrlPlotRegionTransitionSyst.getCombinedCtrlRegionHistogram(), "QCDfactMgrSystQCDSystDenominator%d"%i)
+                        hDenom.SetTitle(item+"systQCDDenominator")
+                        self._hRegionSystDenominatorCtrlPlots.append(hDenom)
+                        # Free memory
+                        myCtrlPlotRegionTransitionSyst.delete()
+                        #print "\n***** memdebug %d\n"%i
+                        #if i <= 2:
+                        #    ROOT.gDirectory.GetList().ls()
                 myRootObject.Delete()
         myCtrlRegionShape.delete()
         mySignalRegionShape.delete()
