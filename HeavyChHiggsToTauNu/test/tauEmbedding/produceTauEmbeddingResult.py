@@ -142,7 +142,7 @@ class DatasetMany:
         for h in th1s[1:]:
             for bin in xrange(0, ret.GetNbinsX()+2):
                 ret.SetBinContent(bin, ret.GetBinContent(bin)+h.GetBinContent(bin))
-                ret.SetBinError(bin, math.sqrt(ret.GetBinError(bin)+h.GetBinError(bin)))
+                ret.SetBinError(bin, math.sqrt(ret.GetBinError(bin)**2+h.GetBinError(bin)**2))
         for bin in xrange(0, ret.GetNbinsX()+2):
             ret.SetBinContent(bin, ret.GetBinContent(bin)/len(th1s))
             ret.SetBinError(bin, ret.GetBinError(bin)/len(th1s))
