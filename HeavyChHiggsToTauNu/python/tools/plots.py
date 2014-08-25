@@ -2267,7 +2267,7 @@ class PlotDrawer:
     # \param rebinToWidthX       Default width of X bins to rebin to
     # \param rebinToWidthY       Default width of Y bins to rebin to (only applicable for TH2)
     # \param divideByBinWidth    Divide bin contents by bin width? (done after rebinning)
-    # \param errorBarsX          Add vertical error bars (for all TH1's in the plot)?
+    # \param errorBarsX          Add vertical error bars (for all TH1's in the plot)? None for True if divideByBinWidth is True
     # \param createLegend        Default legend creation parameters (None to not to create legend)
     # \param moveLegend          Default legend movement parameters (after creation)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
@@ -2304,8 +2304,8 @@ class PlotDrawer:
                  rebinY=None,
                  rebinToWidthX=None,
                  rebinToWidthY=None,
-                 divideByBinWidth=False,
-                 errorBarsX=False,
+                 divideByBinWidth=None,
+                 errorBarsX=None,
                  createLegend={},
                  moveLegend={},
                  customizeBeforeFrame=None,
@@ -2372,7 +2372,7 @@ class PlotDrawer:
                 raise Exception("No default value for '%s'"%name)
             setattr(self, name+"Default", value)
 
-    def _getValue(self, attr, p, args, attrPostfix="", **kwargs):
+    def _getValue(self, attr, p, args, attrPostfix="", useIfNone="", **kwargs):
         def _update(oldVal, newVal):
             if oldVal is None:
                 return copy.deepcopy(newVal)
@@ -2397,6 +2397,9 @@ class PlotDrawer:
             ret = _update(ret, args[attr])
         except KeyError:
             pass
+
+        if ret is None and useIfNone != "":
+            ret = self._getValue(useIfNone, p, args, attrPostfix=attrPostfix, **kwargs)
 
         return ret
 
@@ -2570,7 +2573,7 @@ class PlotDrawer:
         if rebinFunction is not None:
             p.histoMgr.forEachHisto(rebinFunction)
 
-        if kwargs.get("divideByBinWidth", self.divideByBinWidthDefault):
+        if self._getValue("divideByBinWidth", p, kwargs):
             # TH1::Scale() with "width" option divides the histogram by bin width
             p.histoMgr.forEachHisto(lambda h: h.getRootHistoWithUncertainties().Scale(1, "width"))
 
@@ -2669,7 +2672,7 @@ class PlotDrawer:
     # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
     # \li\a ratioCreateLegend  Dictionary forwarded to histograms.creteLegend() (if None, don't create legend, if True, create with default parameters)
     # \li\a ratioMoveLegend    Dictionary forwarded to histograms.moveLegend() after creating the legend
-    # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?
+    # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?  None for True if divideByBinWidth is True
     #
     # The default legend position should be set by modifying histograms.createLegend (see histograms.LegendCreator())
     def setLegend(self, p, **kwargs):
@@ -2677,7 +2680,7 @@ class PlotDrawer:
         moveLegend = self._getValue("moveLegend", p, kwargs)
 
         # Add X error bar also to legend entries
-        if self._getValue("errorBarsX", p, kwargs):
+        if self._getValue("errorBarsX", p, kwargs, useIfNone="divideByBinWidth"):
             # Add L to PE in legend styles
             histos = p.histoMgr.getHistos()
             if hasattr(p, "ratioHistoMgr"):
@@ -2751,7 +2754,7 @@ class PlotDrawer:
     # \li\a xlabel  X axis title (None for pick from first histogram)
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
-    # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?
+    # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?  None for True if divideByBinWidth is True
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
     # \li\a customizeBeforeDraw Function to customize the plot object before drawing the plot
     # \li\a customizeBeforeSave Function to customize the plot object before saving the plot
@@ -2796,7 +2799,7 @@ class PlotDrawer:
             p.addBlindingRangeString(blindingRangeString)
 
         # X error bar
-        errorBarsX = self._getValue("errorBarsX", p, kwargs)
+        errorBarsX = self._getValue("errorBarsX", p, kwargs, useIfNone="divideByBinWidth")
         if errorBarsX:
             # enable vertical error bar in the global TStyle
             errorXbackup = ROOT.gStyle.GetErrorX()
