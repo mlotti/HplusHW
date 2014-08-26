@@ -389,6 +389,26 @@ class QCDInvertedResultManager:
                     myCtrlPlot.delete()
                     if isinstance(myCtrlPlotHisto, ROOT.TH2):
                         print ShellStyles.WarningLabel()+"Skipping uncertainties because histogram has more than 1 dimensions!"
+                        # Create empty histograms
+                        myEmptyHisto = ROOT.TH1F("dummy","dummy",1,0,1)
+                        myEmptyHisto.SetXTitle("Empty for multidimensional histo")
+                        # Up variation
+                        hUp = aux.Clone(myEmptyHisto, "QCDfactMgrSystQCDSystUp%d"%i)
+                        hUp.SetTitle(item+"systQCDUp")
+                        self._hRegionSystUpCtrlPlots.append(hUp)
+                        # Down variation
+                        hDown = aux.Clone(myEmptyHisto, "QCDfactMgrSystQCDSystDown%d"%i)
+                        hDown.SetTitle(item+"systQCDDown")
+                        self._hRegionSystDownCtrlPlots.append(hDown)
+                        # Source histograms
+                        hNum = aux.Clone(myEmptyHisto, "QCDfactMgrSystQCDSystNumerator%d"%i)
+                        hNum.SetTitle(item+"systQCDNumerator")
+                        self._hRegionSystNumenatorCtrlPlots.append(hNum)
+                        hDenom = aux.Clone(myEmptyHisto, "QCDfactMgrSystQCDSystDenominator%d"%i)
+                        hDenom.SetTitle(item+"systQCDDenominator")
+                        self._hRegionSystDenominatorCtrlPlots.append
+                        # Clean up
+                        myEmptyHisto.Delete()
                     else:
                         # Do systematics coming from met shape difference for control plots
                         myCtrlPlotSignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity, rebinList=myRebinList)
