@@ -358,7 +358,10 @@ class QCDInvertedResultManager:
                         myEWKFoundStatus = False
                 if not myEWKFoundStatus:
                     myStatus = False
-                    print ShellStyles.WarningLabel()+"Skipping '%s', because it does not exist for all EWK datasets (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+ShellStyles.NormalStyle()
+                    if isinstance(self._hShape, ROOT.TH2):
+                        print ShellStyles.WarningLabel()+"Skipping uncertainties because histogram has more than 1 dimensions!"
+                    else:
+                        print ShellStyles.WarningLabel()+"Skipping '%s', because it does not exist for all EWK datasets (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+ShellStyles.NormalStyle()
                 else:
                     (myRootObject, myRootObjectName) = dsetMgr.getDataset("EWK").getFirstRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item))
                     if isinstance(myRootObject, ROOT.TH2):
