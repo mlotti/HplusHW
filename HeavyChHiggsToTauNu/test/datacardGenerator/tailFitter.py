@@ -433,22 +433,25 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
 	    myParams["blindingRangeString"] = myBlindingString
 	myParams["ratio"] = True
 	myParams["ratioType"] = "errorScale"
-	myParams["ratioYlabel"] = "Data/#Sigma Exp."
+	myParams["ratioYlabel"] = "Data/Bkg."
 	myParams["stackMCHistograms"] = True
 	myParams["addMCUncertainty"] = True
 	myParams["addLuminosityText"] = True
 	myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
 	myParams["ratioCreateLegend"] = True
 	myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-	myParams["xlabel"] = "m_{T}(#tau_{h},E_{T}^{miss})"
-	myParams["ylabel"] = "Events/#Deltam_{T} / "
+	myParams["xlabel"] = "m_{T} (GeV)"
+	if l:
+            myParams["ylabel"] = "< Events / bin >"
+        else:
+            myParams["ylabel"] = "Events"
 	a = hObsLocal.GetXaxis().GetBinWidth(1)
 	b = hObsLocal.GetXaxis().GetBinWidth(hObsLocal.GetNbinsX())
-	if abs(a-b) < 0.0001:
-	    myParams["ylabel"]  += "%d GeV"%a
-	else:
-	    myParams["ylabel"]  += "%d-%d GeV"%(a,b)
-	myParams["divideByBinWidth"] = True
+	#if abs(a-b) < 0.0001:
+	    #myParams["ylabel"]  += "%d GeV"%a
+	#else:
+	    #myParams["ylabel"]  += "%d-%d GeV"%(a,b)
+	myParams["divideByBinWidth"] = l
 	myParams["log"] = l
 	myPlotName = "PostTailFitShape_M%d"%float(m)
 	if l:
@@ -611,6 +614,8 @@ def main(opts):
                     # Add fit uncertainty as bin-by-bin type uncertainty
                     (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
                     (myBinByBinUpHistograms, myBinByBinDownHistograms) = createBinnedFitUncertaintyHistograms(myFittedRateHistograms[0], hupTotal, hdownTotal, myFitSettings["applyFrom"], opts)
+                    # print total uncertainty
+                    print "*** Syst. uncert. from fit: +",1.0-hupTotal.Integral()/myFittedRateHistograms[0].Integral(), "-", 1.0-hdownTotal.Integral()/myFittedRateHistograms[0].Integral()
                     if not opts.noFitUncert:
                         myHistogramCache.extend(myBinByBinUpHistograms)
                         myHistogramCache.extend(myBinByBinDownHistograms)
