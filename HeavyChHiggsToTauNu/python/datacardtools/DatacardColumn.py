@@ -548,7 +548,6 @@ class DatacardColumn():
                                         if isinstance(e,QCDShapeVariationExtractor):
                                             # Calculate and add QCD shape uncertainty to h
                                             if not isinstance(h.getRootHisto(),ROOT.TH2):
-                                                print h.getRootHisto(), c._histoTitle, e.getId()
                                                 e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor, rootHistoWithUncertainties=h)
                         # Scale if asked
                         if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":

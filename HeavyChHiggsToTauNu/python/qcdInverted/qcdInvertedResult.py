@@ -372,6 +372,7 @@ class QCDInvertedResultManager:
                     myCtrlShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList)
                     myCtrlPlot = QCDInvertedShape(myCtrlShape, moduleInfoString+"_"+item, normFactors)
                     myCtrlShape.delete()
+                    self._hCtrlPlotLabels.append(item)
                     myCtrlPlotHisto = aux.Clone(myCtrlPlot.getResultShape(), "ctrlPlotShapeInManager")
                     myCtrlPlotHisto.SetName(item+"%d"%i)
                     myCtrlPlotHisto.SetTitle(item)
@@ -388,7 +389,6 @@ class QCDInvertedResultManager:
                     myCtrlPlotPurityHisto.SetTitle(item+"_Purity")
                     self._hCtrlPlots.append(myCtrlPlotPurityHisto)
                     # Add labels
-                    self._hCtrlPlotLabels.append(item)
                     if not isinstance(myCtrlPlotHisto, ROOT.TH2):
                         self._hCtrlPlotLabelsForQCDSyst.append(item)
                     myCtrlPlot.delete()
