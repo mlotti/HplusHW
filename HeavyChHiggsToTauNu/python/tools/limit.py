@@ -29,8 +29,8 @@ def massUnit():
 BR = "#it{B}"
 
 ## The label for the physics process
-process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu"
-processHeavy = "pp #rightarrow tH^{+}, H^{+} #rightarrow #tau#nu"
+process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
+processHeavy = "pp #rightarrow #bar{t}(b)H^{+}, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
 
 ## Label for the H+->tau BR assumption
 #BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1"%BR
@@ -44,16 +44,16 @@ sigmaBRlimit = None
 
 def useParentheses():
     global BRlimit, sigmaBRlimit
-    BRlimit = "95%% CL limit for %s(t#rightarrowH^{+}b)#times%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
+    BRlimit = "95%% CL limit on %s(t#rightarrowH^{+}b)#times%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
     sigmaBRlimit = "95%% CL limit for #sigma(H^{+})#times%s(H^{+}#rightarrow#tau#nu) (pb)"%(BR)
 def useSubscript():
     global BRlimit, sigmaBRlimit
-    BRlimit = "95%% CL limit for %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
+    BRlimit = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
     sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{H^{+}#rightarrow#tau#nu} (pb)"%(BR)
 useSubscript()
 
 ## Y axis label for the tanbeta
-tanblimit = "tan #beta"
+tanblimit = "95 % CL Limit on tan #beta"
 
 ## Label for m(H+)
 def mHplus():
@@ -85,7 +85,7 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 0.9,
+    "default": 1.0,
 }
 
 
