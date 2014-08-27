@@ -180,13 +180,20 @@ class DatasetContainer:
         print "name =",self._name
         print "uncertainties = %s"%(", ".join(map(str, self._uncertaintyShapes)))
 
-    def doPlot(self, opts, myAllShapeNuisances, f, mass, luminosity):
+    def doPlot(self, opts, myAllShapeNuisances, f, mass, luminosity, signalTable):
         print "Doing plots for:",self._name
         hNominal = f.Get(self._name)
+        hNominalFine = f.Get(self._name+"_fineBinning")
         hNominalHisto = histograms.Histo(hNominal, self._name, drawStyle="HIST")
         # Determine label
-        myMCLabels = ["HH","HW","Hplus","MC"]
+        mySignalLabels = ["HH","HW","Hp"]
+        mySignalStatus = False
+        for l in mySignalLabels:
+            if l in self._name:
+                mySignalStatus = True
+        myMCLabels = ["HH","HW","Hp","MC"]
         myMCStatus = False
+        
         for mclab in myMCLabels:
             if mclab in self._name:
                 myMCStatus = True
@@ -200,8 +207,10 @@ class DatasetContainer:
             myShortName = uncName.replace("Up","")[1:]
             print "... uncertainty:",myShortName
             up = f.Get("%s%s"%(self._name,uncName))
+            upFine = f.Get("%s%s_fineBinning"%(self._name,uncName))
             nom = hNominal.Clone()
             down = f.Get("%s%s"%(self._name,uncName.replace("Up","Down")))
+            downFine = f.Get("%s%s_fineBinning"%(self._name,uncName.replace("Up","Down")))
             up.SetLineColor(ROOT.kRed)
             nom.SetLineColor(ROOT.kBlack)
             down.SetLineColor(ROOT.kBlue)
@@ -224,13 +233,30 @@ class DatasetContainer:
             myParams["addLuminosityText"] = True
             plots.drawPlot(plot, myPlotName, **myParams)
             myRatioContainer.addRatioPlot(plot, myShortName)
+            # Analyse up and down variation
+            if mySignalStatus:
+                a = abs(upFine.Integral()/hNominalFine.Integral() - 1.0)
+                b = abs(1.0 - downFine.Integral()/hNominalFine.Integral())
+                r = a
+                if b > a:
+                    r = b
+                if uncName in signalTable.keys():
+                    if r < signalTable[uncName]["min"]:
+                        signalTable[uncName]["min"] = r
+                    if r > signalTable[uncName]["max"]:
+                        signalTable[uncName]["max"] = r
+                else:
+                    signalTable[uncName] = {}
+                    signalTable[uncName]["min"] = r
+                    signalTable[uncName]["max"] = r
+            
         # Create plots with only the ratio plot
         if opts.individual:
             myRatioContainer.drawIndividually()
         else:
             myRatioContainer.drawAllInOne(myAllShapeNuisances, luminosity)
 
-def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,rootFilePattern):
+def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,rootFilePattern,signalTable):
     f = ROOT.TFile.Open(rootFilePattern%mass)
 
     content = f.GetListOfKeys()
@@ -284,7 +310,7 @@ def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,rootFilePattern):
     ## Do the actual plots
     for d in datasets:
         #d.debug()
-        d.doPlot(opts,allShapeNuisances,f,mass,luminosity)
+        d.doPlot(opts,allShapeNuisances,f,mass,luminosity,signalTable)
     # Close the file
     f.Close()
 
@@ -313,8 +339,13 @@ if __name__ == "__main__":
     print "The following masses are considered:",massPoints
     nameList = []
     allShapeNuisances = []
+    signalTable = {}
     for m in massPoints:
         # Obtain luminosity from datacard
         myLuminosity = float(limitTools.readLuminosityFromDatacard(".", mySettings.getDatacardPattern(limitTools.LimitProcessType.TAUJETS)%m))
         # Do plots
-        doPlot(opts,int(m),nameList,allShapeNuisances,myLuminosity,mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS))
+        doPlot(opts,int(m),nameList,allShapeNuisances,myLuminosity,mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS),signalTable)
+    # Print signal table
+    print "Max contracted uncertainty for signal:"
+    for k in signalTable.keys():
+        print "%s, %.3f--%.3f"%(k, signalTable[k]["min"],signalTable[k]["max"])
