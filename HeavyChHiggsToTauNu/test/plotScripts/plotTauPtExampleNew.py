@@ -71,9 +71,7 @@ h.setLegend(histograms.createLegend())
 h.draw()
 
 # Add the necessary pieces of text
-histograms.addCmsPreliminaryText()
-histograms.addEnergyText()
-h.addLuminosityText()
+h.addStandardTexts()
 
 # Save to .png, .eps and .C file
 h.save()
@@ -89,9 +87,7 @@ h.frame.GetXaxis().SetTitle("#tau p_{T} (GeV/c)")
 h.frame.GetYaxis().SetTitle("#tau cands / 1 GeV/c")
 h.setLegend(histograms.createLegend())
 h.draw()
-histograms.addCmsPreliminaryText()
-histograms.addEnergyText()
-h.addLuminosityText()
+h.addStandardTexts()
 h.save()
 
 # Script execution can be paused like this, it will continue after

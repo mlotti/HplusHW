@@ -117,7 +117,7 @@ if __name__ == "__main__":
     parser.add_option("--srmDir", dest="srmDir", default=None,
                       help="Specify the srm directory whose content to look (default is to pick the last one in the du.txt file)")
     parser.add_option("-a", "--aggregate", dest="aggregate", default=[], action="append",
-                      help="Aggregate directories, 'name=regex'")
+                      help="Aggregate directories, 'name=regex', if without '=' interpreted as 'name=name' (i.e. name is used as the regex)")
     parser.add_option("-r", dest="depth", default=0, type="int",
                       help="Recursion depth (default: 0, i.e. look for immediate subdirectories of srmDir")
     (opts, args) = parser.parse_args()

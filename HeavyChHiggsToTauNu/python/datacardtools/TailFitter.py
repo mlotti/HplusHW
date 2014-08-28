@@ -10,7 +10,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import WarningLabel
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import WarningLabel,HighlightStyle,NormalStyle
 
 #_fitOptions = "RMS"
 _fitOptions = "LRBS"
@@ -142,14 +142,14 @@ def doMinusVariation(self, func):
         func.SetParameter(i, func.GetParameter(i) - func.GetParError(i))
 
 class TailFitter:
-    def __init__(self, h, label, mass, fitFuncName, fitmin, fitmax):
+    def __init__(self, h, label, fitFuncName, fitmin, fitmax, applyFitFrom, doPlots=False):
         self._label = label
-        self._mass = mass
         self._fittedRate = None
         self._centralParams = None
         self._eigenVectors = None
         self._eigenValues = None
         self._fitmin = None
+        self._hRate = aux.Clone(h)
 
         # Initialize style
         myStyle = tdrstyle.TDRStyle()
@@ -167,25 +167,27 @@ class TailFitter:
         myFitResult = self._doFit(h, myBinList, fitFuncName, fitmin, fitmax)
         # Calculate eigenvectors and values
         self._calculateEigenVectorsAndValues(myFitResult, printStatus=True)
+
         # Create histograms and control plots
-        (hup, hdown) = self.calculateVariationHistograms(myBinList)
-        self.makeVariationPlotDetailed("FineBinning", h, self._hFitFineBinning, hup, hdown)
-        (hupTotal, hdownTotal) = self.calculateTotalVariationHistograms(myBinList, hup, hdown)
-        self.makeVariationPlotSimple("FineBinning", h, self._hFitFineBinning, hupTotal, hdownTotal)
+        if doPlots:
+            (hFitUncertaintyUp, hFitUncertaintyDown) = self.calculateVariationHistograms(myBinList, applyFitFrom)
+            self.makeVariationPlotDetailed("FineBinning", self._hRate, self._hFitFineBinning, hFitUncertaintyUp, hFitUncertaintyDown)
+            (hupTotal, hdownTotal) = self.calculateTotalVariationHistograms(self._hFitFineBinning, hFitUncertaintyUp, hFitUncertaintyDown)
+            self.makeVariationPlotSimple("FineBinning", self._hRate, self._hFitFineBinning, hupTotal, hdownTotal)
 
     #def __del__(self):
         #print "test"
         #self._eigenVectors.Delete()
         #self._eigenValues.Delete()
 
-    def getFittedRateHistogram(self, h, binlist):
+    def getFittedRateHistogram(self, h, binlist, applyFitFrom):
         if self._fittedRate == None:
             raise Exception(ErrorLabel()+"Call _doFit() first!")
         hFit = self._functionToHistogram(self._label, self._fittedRate, self._centralParams, binlist, self._fitmin)
         myArray = array.array("d",binlist)
         hClone = h.Rebin(len(binlist)-1,self._label+"_beforeFit",myArray)
         for i in range(1,hClone.GetNbinsX()+1):
-            if hClone.GetXaxis().GetBinLowEdge(i) < self._fitmin:
+            if hClone.GetXaxis().GetBinLowEdge(i) < applyFitFrom:
                 hFit.SetBinContent(i, hClone.GetBinContent(i))
                 hFit.SetBinError(i, hClone.GetBinError(i))
             else:
@@ -204,7 +206,7 @@ class TailFitter:
     def _doFit(self, h, binList, fitFuncName, fitmin, fitmax):
         # Do fit
         print "... Fitting tail for shape: %s, function=%s, range = %d-%d"%(self._label, fitFuncName, fitmin, fitmax)
-        self._fittedRate = ROOT.TF1("myFit", self._myFitFuncObject, fitmin, fitmax, self._myFitFuncObject.getNparam())
+        self._fittedRate = ROOT.TF1(self._label+"myFit", self._myFitFuncObject, fitmin, fitmax, self._myFitFuncObject.getNparam())
         self._myFitFuncObject.setParamLimits(self._fittedRate)
         myFitResult = h.Fit(self._fittedRate, _fitOptions)
 
@@ -212,7 +214,7 @@ class TailFitter:
         self._myChi2 = myFitResult.Prob()
         self._myNdof = h.FindBin(fitmax) - h.FindBin(fitmin)
         if not (myFitResult.Status() == 0 and myFitResult.CovMatrixStatus() == 3):
-            print "Fit failed (%d, %d)"%(myFitResult.Status(),myFitResult.CovMatrixStatus())
+            print WarningLabel()+"Fit failed (%d, %d)"%(myFitResult.Status(),myFitResult.CovMatrixStatus())
             # Note this does not work for Minuit2
         else:
             print "Fit success"
@@ -227,7 +229,7 @@ class TailFitter:
         self._centralParams = []
         for i in range(0, self._myFitFuncObject.getNparam()):
             self._centralParams.append(myFitResult.Parameter(i))
-        self._hFitFineBinning = self._functionToHistogram("fit", self._fittedRate, self._centralParams, binList, fitmin)
+        self._hFitFineBinning = self._functionToHistogram(self._label+"fit", self._fittedRate, self._centralParams, binList, fitmin)
         # Return fit result
         return myFitResult
 
@@ -247,7 +249,7 @@ class TailFitter:
         def printEigenValues(vector):
             s = "Eigenvalues: "
             for j in range(0, vector.GetNrows()):
-                if i > 0:
+                if j > 0:
                     s += " and "
                 s += "%f"%vector(j)
             print s
@@ -271,7 +273,7 @@ class TailFitter:
         if printStatus:
             printEigenValues(self._eigenValues)
 
-    def calculateVariationHistograms(self, binList):
+    def calculateVariationHistograms(self, binList, applyFitFrom):
         if self._fittedRate == None:
             raise Exception(ErrorLabel()+"Call _doFit() first!")
         if self._eigenValues == None:
@@ -289,7 +291,7 @@ class TailFitter:
             #myFirstBin = fitmin
             #if myFirstBin < myShiftUp and myShiftUp < h.GetXaxis().GetXmax():
                 #myM.setRange(0, h.GetBinLowEdge(h.FindBin(myShiftUp)))
-            hUp = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dUp"%i, self._fittedRate, myParams, binList, self._fitmin)
+            hUp = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dUp"%i, self._fittedRate, myParams, binList, applyFitFrom)
             hFitUncertaintyUp.append(hUp)
 
         # Down histograms
@@ -304,19 +306,19 @@ class TailFitter:
             #myFirstBin = fitmin
             #if myFirstBin < myShiftDown and myShiftDown < h.GetXaxis().GetXmax():
                 #myM.setRange(0, h.GetBinLowEdge(h.FindBin(myShiftDown)))
-            hDown = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dDown"%i, self._fittedRate, myParams, binList, self._fitmin)
+            hDown = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dDown"%i, self._fittedRate, myParams, binList, applyFitFrom)
             hFitUncertaintyDown.append(hDown)
 
         return (hFitUncertaintyUp, hFitUncertaintyDown)
 
-    def calculateTotalVariationHistograms(self, binList, hup, hdown):
+    def calculateTotalVariationHistograms(self, hRate, hup, hdown):
         # Calculate total uncertainty (only for reference, note that can give also negative results)
         hFitUncertaintyUpTotal = aux.Clone(hup[0], self._label+"_TailFitUp")
         hFitUncertaintyUpTotal.Reset()
         hFitUncertaintyDownTotal = aux.Clone(hup[0], self._label+"_TailFitDown")
         hFitUncertaintyDownTotal.Reset()
         for i in range(1, hup[0].GetNbinsX()+1):
-            myPedestal = self._hFitFineBinning.GetBinContent(i)
+            myPedestal = hRate.GetBinContent(i)
             myVarianceUp = 0.0
             myVarianceDown = 0.0
             for j in range(0, len(hup)):
@@ -342,11 +344,13 @@ class TailFitter:
         for i in range(0,len(parameters)):
             function.SetParameter(i, parameters[i])
         for i in range(1,h.GetNbinsX()+1):
-            if h.GetXaxis().GetBinLowEdge(i) >= cutoff:
+            if h.GetXaxis().GetBinLowEdge(i) >= cutoff-0.001:
                 myIntegral = function.Integral(h.GetXaxis().GetBinLowEdge(i), h.GetXaxis().GetBinUpEdge(i))
                 w = self._binWidthDuringFit
                 #print "integral: %d-%d, %d: %f"%(h.GetXaxis().GetBinLowEdge(i), h.GetXaxis().GetBinUpEdge(i), i, myIntegral/w)
                 h.SetBinContent(i, myIntegral / float(w))
+            else:
+                h.SetBinContent(i, self._hRate.Integral(self._hRate.GetXaxis().FindBin(h.GetXaxis().GetBinLowEdge(i)),self._hRate.GetXaxis().FindBin(h.GetXaxis().GetBinUpEdge(i)-0.001)))
         # Overflow bin
         myIntegral = h.Integral()
         if myIntegral > 0.0:
@@ -360,73 +364,89 @@ class TailFitter:
     def makeVariationPlotSimple(self, prefix, hNominal, hFit, hUp, hDown):
         # Make plot
         plot = plots.PlotBase()
-        hNominal.SetLineColor(ROOT.kBlack)
-        hNominal.SetLineWidth(2)
-        plot.histoMgr.appendHisto(histograms.Histo(hNominal,"nominal"))
-        self._hFitFineBinning.SetLineColor(ROOT.kMagenta)
-        self._hFitFineBinning.SetLineWidth(2)
-        plot.histoMgr.appendHisto(histograms.Histo(hFit,"fit"))
+        hNominalClone = aux.Clone(hNominal)
+        hNominalClone.SetLineColor(ROOT.kBlack)
+        hNominalClone.SetLineWidth(2)
+        # Remove fit line before drawing
+        myFunctions = hNominalClone.GetListOfFunctions()
+        for i in range(0, myFunctions.GetEntries()):
+            myFunctions.Delete()
+        plot.histoMgr.appendHisto(histograms.Histo(hNominalClone,"nominal",drawStyle="e"))
+
+        hFitClone = aux.Clone(hFit)
+        hFitClone.SetLineColor(ROOT.kMagenta)
+        hFitClone.SetLineWidth(2)
+        plot.histoMgr.appendHisto(histograms.Histo(hFitClone,"fit"))
         #for j in range(1, self._hFitFineBinning.GetNbinsX()+1):
         #    print "fit: %d: %f"%(j,self._hFitFineBinning.GetBinContent(j))
 
-        hUp.SetLineStyle(2)
-        hUp.SetLineColor(ROOT.kBlue)
-        hUp.SetLineWidth(2)
-        plot.histoMgr.appendHisto(histograms.Histo(hUp,"Total up"))
-        hDown.SetLineStyle(2)
-        hDown.SetLineColor(ROOT.kRed)
-        hDown.SetLineWidth(2)
-        plot.histoMgr.appendHisto(histograms.Histo(hDown,"Total down"))
+        hUpClone = aux.Clone(hUp)
+        hUpClone.SetLineStyle(2)
+        hUpClone.SetLineColor(ROOT.kBlue)
+        hUpClone.SetLineWidth(2)
+        plot.histoMgr.appendHisto(histograms.Histo(hUpClone,"Total up"))
+        hDownClone = aux.Clone(hDown)
+        hDownClone.SetLineStyle(2)
+        hDownClone.SetLineColor(ROOT.kRed)
+        hDownClone.SetLineWidth(2)
+        plot.histoMgr.appendHisto(histograms.Histo(hDownClone,"Total down"))
 
-        myName = "tailfit_total_uncertainty_%s_m%s_%s"%(self._label,self._mass,prefix)
+        myName = "tailfit_total_uncertainty_%s_%s"%(self._label,prefix)
         #plot.createFrame("tailfit_%s_%s"%(self._label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
         #plot.getPad().SetLogy(True)
-        #histograms.addCmsPreliminaryText()
-        #histograms.addEnergyText()
-        #histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        #histograms.addStandardTexts(lumi=self.lumi)
         myParams = {}
-        myParams["ylabel"] = "Events / %.0f GeV"
+        myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
         myParams["log"] = True
         myParams["opts"] = {"ymin": 1e-5}
+        myParams["divideByBinWidth"] = True
         myDrawer = plots.PlotDrawer()
         myDrawer(plot, myName, **myParams)
 
     def makeVariationPlotDetailed(self, prefix, hNominal, hFit, hFitUncertaintyUp, hFitUncertaintyDown):
         # Make plot
         plot = plots.PlotBase()
-        hNominal.SetLineColor(ROOT.kBlack)
-        hNominal.SetLineWidth(2)
-        plot.histoMgr.appendHisto(histograms.Histo(hNominal,"nominal"))
-        self._hFitFineBinning.SetLineColor(ROOT.kMagenta)
-        self._hFitFineBinning.SetLineWidth(2)
-        plot.histoMgr.appendHisto(histograms.Histo(hFit,"fit"))
+        hNominalClone = aux.Clone(hNominal)
+        hNominalClone.SetLineColor(ROOT.kBlack)
+        hNominalClone.SetLineWidth(2)
+        # Remove fit line before drawing
+        myFunctions = hNominalClone.GetListOfFunctions()
+        for i in range(0, myFunctions.GetEntries()):
+            myFunctions.Delete()
+        plot.histoMgr.appendHisto(histograms.Histo(hNominalClone,"nominal",drawStyle="e"))
+
+        hFitClone = aux.Clone(hFit)
+        hFitClone.SetLineColor(ROOT.kMagenta)
+        hFitClone.SetLineWidth(2)
+        plot.histoMgr.appendHisto(histograms.Histo(hFitClone,"fit"))
         #for j in range(1, self._hFitFineBinning.GetNbinsX()+1):
         #    print "fit: %d: %f"%(j,self._hFitFineBinning.GetBinContent(j))
 
         myColor = 2
         for i in range(0, len(hFitUncertaintyUp)):
-            hFitUncertaintyUp[i].SetLineStyle(myColor)
-            hFitUncertaintyUp[i].SetLineColor(ROOT.kBlue)
-            hFitUncertaintyUp[i].SetLineWidth(2)
+            hUpClone = aux.Clone(hFitUncertaintyUp[i])
+            hUpClone.SetLineStyle(myColor)
+            hUpClone.SetLineColor(ROOT.kBlue)
+            hUpClone.SetLineWidth(2)
             myColor += 1
-            plot.histoMgr.appendHisto(histograms.Histo(hFitUncertaintyUp[i],"Par%d up"%(i)))
+            plot.histoMgr.appendHisto(histograms.Histo(hUpClone,"Par%d up"%(i)))
         myColor = 2
         for i in range(0, len(hFitUncertaintyDown)):
-            hFitUncertaintyDown[i].SetLineStyle(myColor)
-            hFitUncertaintyDown[i].SetLineColor(ROOT.kRed)
-            hFitUncertaintyDown[i].SetLineWidth(2)
+            hDownClone = aux.Clone(hFitUncertaintyDown[i])
+            hDownClone.SetLineStyle(myColor)
+            hDownClone.SetLineColor(ROOT.kRed)
+            hDownClone.SetLineWidth(2)
             myColor += 1
-            plot.histoMgr.appendHisto(histograms.Histo(hFitUncertaintyDown[i],"Par%d down"%(i)))
+            plot.histoMgr.appendHisto(histograms.Histo(hDownClone,"Par%d down"%(i)))
 
-        myName = "tailfit_detailed_%s_m%s_%s"%(self._label,self._mass,prefix)
+        myName = "tailfit_detailed_%s_%s"%(self._label,prefix)
         #plot.createFrame("tailfit_%s_%s"%(self._label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
         #plot.getPad().SetLogy(True)
-        #histograms.addCmsPreliminaryText()
-        #histograms.addEnergyText()
-        #histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        #histograms.addStandardTexts(lumi=self.lumi)
         myParams = {}
-        myParams["ylabel"] = "Events / %.0f GeV"
+        myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
         myParams["log"] = True
         myParams["opts"] = {"ymin": 1e-5}
+        myParams["divideByBinWidth"] = True
         myDrawer = plots.PlotDrawer()
         myDrawer(plot, myName, **myParams)

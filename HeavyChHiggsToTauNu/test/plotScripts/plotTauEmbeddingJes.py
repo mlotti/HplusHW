@@ -173,9 +173,7 @@ def doPlot(datasets, analyses, path, name, rootFile=None, rootHistoName=None):
     p.frame.GetXaxis().SetTitle("m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})")
     p.frame.GetYaxis().SetTitle("Events / 20 GeV/c^{2}")
     p.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    p.addLuminosityText()
+    p.addStandardTexts()
     p.save()
 
 

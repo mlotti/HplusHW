@@ -240,8 +240,7 @@ def main():
     for gr in glist:
         gr.Draw("PC same")
     
-    histograms.addEnergyText()
-    histograms.addCmsPreliminaryText()
+    histograms.addStandardTexts()
 
     legend2 = histograms.createLegend(x1=0.5, y1=0.7, x2=0.9, y2=0.85)
 

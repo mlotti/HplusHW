@@ -44,7 +44,7 @@ def main():
         if match:
             jsonfile = match.group(0)
                                                                                 
-    limits = limit.BRLimits(limitsfile=jsonfile)
+    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/lightHplus_configuration.json")
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -93,7 +93,7 @@ def main():
 
     # Remove m=80
     for gr in graphs.values():
-        limit.cleanGraph(gr, minX=100)
+        limit.cleanGraph(gr, minX=90)
 
     print "Plotting graphs"                    
     for key in graphs.keys():
@@ -116,8 +116,21 @@ def main():
 
     graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
     graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.9+-3.0")
+    graphs["isomass"] = None
     
     doPlot("limitsTanb_light_"+scenario, graphs, limits, limit.mHplus(),scenario)
+
+    # mH+ -> mA
+    print "Replotting the graphs for (mA,tanb)"
+    for key in graphs.keys():
+        print key
+        #db.PrintGraph(graphs[key])
+        #print "check loop db.graphToMa"
+        db.graphToMa(graphs[key])
+
+    graphs["isomass"] = db.getIsoMass(160)
+
+    doPlot("limitsTanb_mA_light_"+scenario, graphs, limits, limit.mA(),scenario)
 
     sys.exit()
 
@@ -158,6 +171,8 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(graphs["obs"], "Observed", drawStyle="PL", legendStyle="lp"),
             histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
             histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
+            histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
+            histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
             histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
 #            histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
@@ -167,7 +182,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
 #            histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
 #            histograms.HistoGraph(graphs["exp2"], "Expected2", drawStyle="F", legendStyle="fl"),
             histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
-            histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl"),
+            histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl")
             ])
 
         plot.histoMgr.setHistoLegendLabelMany({
@@ -178,11 +193,18 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             "MinTanb": None,
             "AllowedCopy": None,
             "Expected1": "Expected median #pm 1#sigma",
-            "Expected2": "Expected median #pm 2#sigma"
+            "Expected2": "Expected median #pm 2#sigma",
+            "IsoMass": None,
+            "IsoMassCopy": None
             })
     else:
+        if not graphs["isomass"] == None:
+            graphs["isomass"].SetFillColor(0)
+            graphs["isomass"].SetFillStyle(1)
         plot = plots.PlotBase([
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
+            histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
+            histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
             histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{h} = 125.9#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
@@ -195,7 +217,9 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             "MinTanb": None,
             "AllowedCopy": None,
             "Expected1": "Expected median #pm 1#sigma",
-            "Expected2": "Expected median #pm 2#sigma"
+            "Expected2": "Expected median #pm 2#sigma",
+            "IsoMass": None,
+            "IsoMassCopy": None
             })
         
     plot.setLegend(histograms.createLegend(0.19, 0.60, 0.57, 0.80))
@@ -203,16 +227,15 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     plot.legend.SetFillStyle(1001)
     if blinded:
 	name += "_blinded"
-    plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": 100, "xmax": 160})
+    name = name.replace("-","_")
+    plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": 90, "xmax": 160})
     plot.frame.GetXaxis().SetTitle(xlabel)
     plot.frame.GetYaxis().SetTitle(limit.tanblimit)
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-#    histograms.addLuminosityText(x=None, y=None, lumi="2.3-4.9")
-    histograms.addLuminosityText(x=None, y=None, lumi="20")
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.2
@@ -221,15 +244,21 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     histograms.addText(x, 0.815,scenario, size=size)
     histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
 
+    if not graphs["isomass"] == None:
+        histograms.addText(0.8, 0.15, "m_{H^{#pm}} = 160 GeV/c^{2}", size=0.5*size)
+
     #Adding a LHC label:
 #    ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
     FH_version = db.getVersion("FeynHiggs")
-    HD_version = db.getVersion("HDECAY")
-    histograms.addText(x, 0.55, FH_version+" and "+HD_version, size=size)
+    histograms.addText(x, 0.55, FH_version)
+#    HD_version = db.getVersion("HDECAY")
+#    histograms.addText(x, 0.55, FH_version+" and "+HD_version, size=size)
 #    histograms.addText(x, 0.48, "Derived from", size=size)
 #    histograms.addText(x, 0.43, "CMS HIG-12-052", size=size)
 
     plot.save()
 
+    print "Created",name
+    
 if __name__ == "__main__":
     main()

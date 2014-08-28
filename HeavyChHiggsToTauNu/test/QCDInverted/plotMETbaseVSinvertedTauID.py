@@ -137,9 +137,7 @@ def dataMCExample(datasets):
     plot.draw()
 
     # Add the various texts to 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    plot.addLuminosityText()
+    plot.addStandardTexts(addLuminosityText=True)
 
     # Save the plot to files
     plot.save()
@@ -201,9 +199,8 @@ def distComparison(datasets):
     plot.draw()
 
     # Add the various texts to 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=datasets.getDataset("Data").getLuminosity())
+    plot.setLuminosity(datasets.getDataset("Data").getLuminosity())
+    plot.addStandardTexts()
 
     # Save the plot to files
     plot.save()

@@ -220,6 +220,9 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None, ful
     parser.add_option("--final", dest="unblinded", action="store_true", default=False,
                       help="Do not set to true unless you know what you are doing and have permission to do so")
 
+    parser.add_option("--nomlfit", dest="nomlfit", action="store_false", default=True,
+                      help="Disable ML fit")
+
     return parser
 
 ## Parse OptionParser object

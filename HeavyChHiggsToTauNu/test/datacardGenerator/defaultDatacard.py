@@ -6,7 +6,9 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-03-20"
 #Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots"
 #Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
-Path = "/home/wendland/data/v533/2014-07-01_nominal"
+#Path = "/home/wendland/data/xnortau"
+Path = "/home/wendland/data/xnominal"
+#Path = "/home/wendland/data/test_matti_met60_paramweight"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
@@ -19,8 +21,26 @@ LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
-#HeavyMassPoints      = [200]
-HeavyMassPoints      = []
+#HeavyMassPoints      = [400]
+#HeavyMassPoints      = []
+
+selectionReg = None
+if selectionReg == "A":
+    LightMassPoints = [80,90,100]
+    HeavyMassPoints = []
+    Path = "/home/wendland/data/xmet70"
+elif selectionReg == "B":
+    LightMassPoints = [120,140,150,155,160]
+    HeavyMassPoints = []
+    Path = "/home/wendland/data/xmet70"
+elif selectionReg == "C":
+    LightMassPoints = []
+    HeavyMassPoints = [180,190,200,220,250]
+    Path = "/home/wendland/data/xmet80"
+elif selectionReg == "D":
+    LightMassPoints = []
+    HeavyMassPoints = [300,400,500,600]
+    Path = "/home/wendland/data/xnominal"
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
 BlindAnalysis   = True
@@ -41,6 +61,7 @@ OptionGenuineTauBackgroundSource = "DataDriven"                          # State
 #OptionGenuineTauBackgroundSource = "MC_FullSystematics"               # MC used, fake and genuine taus separated (use for embedding closure test)
 #OptionGenuineTauBackgroundSource = "MC_RealisticProjection"            # MC used, fake and genuine taus separated (can be used for optimization)
 
+
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionTreatTriggerUncertaintiesAsAsymmetric = True # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
 OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produced multicrabs with doTauIDandMisIDSystematicsAsShapes=True
@@ -48,8 +69,9 @@ OptionIncludeSystematics = True # Set to true if you produced multicrabs with do
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = True
+OptionDoMergeFakeTauColumns = True # Merges the fake tau columns into one
 OptionCombineSingleColumnUncertainties = True # Makes limit running faster
-OptionCtrlPlotsAtMt = True
+OptionCtrlPlotsAtMt = True # Produce control plots after all selections (all selections for transverse mass)
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
 OptionRemoveHHDataGroup = False
@@ -192,7 +214,7 @@ myQCDFact = DataGroup(
     validMassPoints = MassPoints,
     datasetType  = "QCD factorised",
     datasetDefinition = "QCDfactorisedmt",
-    nuisances    = myQCDShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","xsect_tt_8TeV_forQCD"],
+    nuisances    = myQCDShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","xsect_tt_8TeV_forQCD","lumi_forQCD"],
     shapeHisto   = SignalShapeHisto,
 )
 
@@ -202,7 +224,7 @@ myQCDInv = DataGroup(
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
     datasetDefinition = "QCDinvertedmt",
-    nuisances    = myQCDShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","xsect_tt_8TeV_forQCD","QCDinvTemplateFit"],
+    nuisances    = myQCDShapeSystematics[:]+["b_tag","top_pt","QCD_metshape","xsect_tt_8TeV_forQCD","QCDinvTemplateFit","lumi_forQCD"],
     shapeHisto   = SignalShapeHisto,
 )
 
@@ -217,6 +239,7 @@ DataGroups.append(myQCDFact)
 DataGroups.append(myQCDInv)
 
 if OptionGenuineTauBackgroundSource == "DataDriven":
+    myEmbDataDrivenNuisances = ["Emb_QCDcontam","Emb_hybridCaloMET","Emb_reweighting"]
     # EWK + ttbar with genuine taus
     EmbeddingIdList = [3]
     DataGroups.append(DataGroup(
@@ -228,7 +251,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetDefinition   = "Data",
         validMassPoints = MassPoints,
         #additionalNormalisation = 0.25, # not needed anymore
-        nuisances    = myEmbeddingShapeSystematics[:]+["Emb_QCDcontam","Emb_hybridCaloMET"]
+        nuisances    = myEmbeddingShapeSystematics[:]+myEmbDataDrivenNuisances[:]
         #nuisances    = ["trg_tau_embedding","tau_ID","ES_taus","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb"]
     ))
 
@@ -250,7 +273,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_Wjets","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
@@ -268,7 +291,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_DYtoll","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
@@ -277,7 +300,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_VV","lumi","probBtag"],
     ))
 elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
@@ -364,7 +387,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_Wjets","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_Wjets","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
@@ -382,7 +405,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_DYtoll","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_DYtoll","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
@@ -391,7 +414,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_mistag_fakes","xsect_VV","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_VV","lumi","probBtag"],
     ))
 elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
     # Replace embedding and fakes with MC
@@ -412,7 +435,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_Wjets","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_Wjets","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_MC",
@@ -430,7 +453,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_DYtoll","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_DYtoll","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_MC",
@@ -439,7 +462,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_mistag","xsect_VV","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_VV","lumi"],
     ))
 else:
     raise Exception("Error: unknown value for flag OptionGenuineTauBackgroundSource!")
@@ -652,20 +675,20 @@ if OptionIncludeSystematics:
         function      = "ShapeVariation",
         systVariation = "BTagSF",
     ))
-    Nuisances.append(Nuisance(
-        id            = "b_mistag",
-        label         = "mistagging",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
-        systVariation = "BTagSF",
-    ))
-    Nuisances.append(Nuisance(
-        id            = "b_mistag_fakes",
-        label         = "mistagging EWK fake taus",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
-        systVariation = "BTagSF",
-    ))
+    #Nuisances.append(Nuisance(
+        #id            = "b_mistag",
+        #label         = "mistagging",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        #systVariation = "BTagSF",
+    #))
+    #Nuisances.append(Nuisance(
+        #id            = "b_mistag_fakes",
+        #label         = "mistagging EWK fake taus",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        #systVariation = "BTagSF",
+    #))
     Nuisances.append(Nuisance(
         id            = "top_pt",
         label         = "top pT reweighting",
@@ -717,14 +740,14 @@ else:
         value         = 0.05,
     ))
     Nuisances.append(Nuisance(
-        id            = "b_mistag",
+        id            = "b_tag",
         label         = "NON-EXACT VALUE for mistagging",
         distr         = "lnN",
         function      = "Constant",
         value         = 0.05,
     ))
     Nuisances.append(Nuisance(
-        id            = "b_mistag_fakes",
+        id            = "b_tag_fakes",
         label         = "NON-EXACT VALUE for mistagging EWK fake taus",
         distr         = "lnN",
         function      = "Constant",
@@ -809,6 +832,13 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
             function      = "Constant",
             value         = 0.007
         ))
+    Nuisances.append(Nuisance(
+        id            = "Emb_reweighting",
+        label         = "Embedding reweighting",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "EmbMTWeight",
+    ))
 
 if OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     Nuisances.append(Nuisance(
@@ -885,6 +915,14 @@ Nuisances.append(Nuisance(
     value         = systematics.getLuminosityUncertainty()
 ))
 
+Nuisances.append(Nuisance(
+    id            = "lumi_forQCD",
+    label         = "luminosity",
+    distr         = "lnN",
+    function      = "ConstantForQCD",
+    value         = systematics.getLuminosityUncertainty()
+))
+
 if OptionIncludeSystematics:
     Nuisances.append(Nuisance(
         id            = "pileup",
@@ -947,10 +985,10 @@ if "tau_ID_constShape" in myEmbeddingShapeSystematics:
 #MergeNuisances.append(["ES_METunclustered","ES_METunclustered_fakes"])
 MergeNuisances.append(["e_mu_veto","e_mu_veto_fakes"])
 MergeNuisances.append(["b_tag","b_tag_fakes"])
-MergeNuisances.append(["b_mistag","b_mistag_fakes"])
+#MergeNuisances.append(["b_tag","b_tag_fakes"])
 MergeNuisances.append(["pileup","pileup_fakes"])
 MergeNuisances.append(["xsect_tt_8TeV", "xsect_tt_8TeV_forQCD"])
-
+MergeNuisances.append(["lumi", "lumi_forQCD"])
 
 # Control plots
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
@@ -962,8 +1000,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "SelectedTau_pT_AfterStandardSelections",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "SelectedTau_pT_AfterStandardSelections",
-    details          = { "xlabel": "Selected #tau p_{T}",
-                         "ylabel": "Events/#Deltap_{T}",
+    details          = { "xlabel": "Selected #tau ^{}p_{T}",
+                         "ylabel": "Events/^{}#Deltap_{T}",
                          "divideByBinWidth": True,
                          "unit": "GeV/c",
                          "log": True,
@@ -1017,7 +1055,7 @@ ControlPlots.append(ControlPlotInput(
     details          = { "xlabel": "Selected #tau #phi",
                          "ylabel": "Events",
                          "divideByBinWidth": False,
-                         "unit": "^{o}",
+                         "unit": "{}^{o}",
                          "log": True,
                          "legendPosition": "SW",
                          "opts": {"ymin": 0.009} },
@@ -1032,8 +1070,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "SelectedTau_LeadingTrackPt_AfterStandardSelections",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "SelectedTau_LeadingTrackPt_AfterStandardSelections",
-    details          = { "xlabel": "#tau leading track p_{T}",
-                         "ylabel": "Events/#Deltap_{T}",
+    details          = { "xlabel": "#tau leading track ^{}p_{T}",
+                         "ylabel": "Events/^{}#Deltap_{T}",
                          "divideByBinWidth": True,
                          "unit": "GeV/c",
                          "log": True,
@@ -1068,7 +1106,7 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "SelectedTau_Rtau_AfterStandardSelections",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "SelectedTau_Rtau_AfterStandardSelections",
-    details          = { "xlabel": "Selected #tau R_{#tau}",
+    details          = { "xlabel": "Selected #tau ^{}R_{#tau}",
                          "ylabel": "Events",
                          "divideByBinWidth": False,
                          "unit": "",
@@ -1112,7 +1150,7 @@ ControlPlots.append(ControlPlotInput(
                          "opts": {"ymin": 0.9} },
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "^{}#tau_{h}+#geq3j", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -1121,8 +1159,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "JetPt_AfterStandardSelections",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "JetPt_AfterStandardSelections",
-    details          = { "xlabel": "jet p_{T}",
-                         "ylabel": "Events/#Deltap_{T}",
+    details          = { "xlabel": "jet ^{}p_{T}",
+                         "ylabel": "Events/^{}#Deltap_{T}",
                          "divideByBinWidth": True,
                          "unit": "GeV/c",
                          "log": True,
@@ -1160,7 +1198,7 @@ ControlPlots.append(ControlPlotInput(
         #"xlabel": "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}})",
                          "ylabel": "Events",
                          "divideByBinWidth": False,
-                         "unit": "^{o}",
+                         "unit": "{}^{o}",
                          "log": True,
                          "legendPosition": "SE",
                          "opts": {"ymin": 0.09} },
@@ -1211,8 +1249,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "BJetPt",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "BJetPt",
-    details          = { "xlabel": "b jet p_{T}",
-                         "ylabel": "Events/#Deltap_{T}",
+    details          = { "xlabel": "b jet ^{}p_{T}",
+                         "ylabel": "Events/^{}#Deltap_{T}",
                          "divideByBinWidth": True,
                          "unit": "GeV/c",
                          "log": True,
@@ -1248,14 +1286,14 @@ ControlPlots.append(ControlPlotInput(
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "MET",
     details          = { "xlabel": "E_{T}^{miss}",
-                         "ylabel": "Events/#DeltaE_{T}^{miss}",
+                         "ylabel": "Events/^{}#DeltaE_{T}^{miss}",
                          "divideByBinWidth": True,
                          "unit": "GeV",
                          "log": True,
                          "opts": {"ymin": 0.0009} },
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "^{}E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
@@ -1267,7 +1305,7 @@ ControlPlots.append(ControlPlotInput(
     details          = { "xlabel": "E_{T}^{miss} #phi",
                          "ylabel": "Events",
                          "divideByBinWidth": False,
-                         "unit": "^{o}",
+                         "unit": "{}^{o}",
                          "log": True,
                          "legendPosition": "SW",
                          "opts": {"ymin": 0.09} },
@@ -1281,11 +1319,11 @@ ControlPlots.append(ControlPlotInput(
     signalHistoPath  = "ForDataDrivenCtrlPlots",
     signalHistoName  = "METPhiMinusTauPhi",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
-    EWKfakeHistoName  = "METPhiMinusTauPt",
+    EWKfakeHistoName  = "METPhiMinusTauPhi",
     details          = { "xlabel": "E_{T}^{miss} #phi - #tau #phi",
                          "ylabel": "Events",
                          "divideByBinWidth": False,
-                         "unit": "^{o}",
+                         "unit": "{}^{o}",
                          "log": True,
                          "legendPosition": "SW",
                          "opts": {"ymin": 0.09} },
@@ -1300,8 +1338,8 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "TauPlusMETPt",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "TauPlusMETPt",
-    details          = { "xlabel": "p_{T}(#tau + E_{T}^{miss})",
-                         "ylabel": "Events/#Deltap_{T}",
+    details          = { "xlabel": "p_{T}(#tau + ^{}E_{T}^{miss})",
+                         "ylabel": "Events/^{}#Deltap_{T}",
                          "divideByBinWidth": True,
                          "unit": "GeV",
                          "log": True,
@@ -1325,7 +1363,7 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMax": 180.0,
                          #"variableBinSizeLowEdges": [0., 10., 20., 30., 40., 60., 80., 100., 120., 140., 160.], # if an empty list is given, then uniform bin width is used
                          #"binLabels": [], # leave empty to disable bin labels
-                         #"xlabel": "#Delta#phi(#tau_{h},E_{T}^{miss})",
+                         #"xlabel": "#Delta#phi(^{}#tau_{h},^{}E_{T}^{miss})",
                          #"ylabel": "Events",
                          #"unit": "^{o}",
                          #"log": True,
@@ -1334,7 +1372,7 @@ ControlPlots.append(ControlPlotInput(
                          #"ymax": -1},
     #blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
     #evaluationRange  = [], # specify range to be evaluated and saved into a file
-    #flowPlotCaption  = "N_{b jets}", # Leave blank if you don't want to include the item to the selection flow plot
+    #flowPlotCaption  = "^{}N_{b jets}", # Leave blank if you don't want to include the item to the selection flow plot
 #))
 
 #ControlPlots.append(ControlPlotInput(
@@ -1346,7 +1384,7 @@ ControlPlots.append(ControlPlotInput(
                          #"rangeMax": 180.0,
                          #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
                          #"binLabels": [], # leave empty to disable bin labels
-                         #"xlabel": "max(#Delta#phi(jet,E_{T}^{miss})",
+                         #"xlabel": "max(#Delta#phi(jet,^{}E_{T}^{miss})",
                          #"ylabel": "Events",
                          #"unit": "^{o}",
                          #"log": True,
@@ -1355,7 +1393,7 @@ ControlPlots.append(ControlPlotInput(
                          #"ymax": -1},
     #blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
     #evaluationRange  = [], # specify range to be evaluated and saved into a file
-    #flowPlotCaption  = "#Delta#phi(#tau_{h},E_{T}^{miss})", # Leave blank if you don't want to include the item to the selection flow plot
+    #flowPlotCaption  = "#Delta#phi(^{}#tau_{h},^{}E_{T}^{miss})", # Leave blank if you don't want to include the item to the selection flow plot
 #))
 
 #ControlPlots.append(ControlPlotInput(
@@ -1407,17 +1445,17 @@ ControlPlots.append(ControlPlotInput(
     signalHistoName  = "ImprovedDeltaPhiCutsBackToBackMinimum",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
     EWKfakeHistoName  = "ImprovedDeltaPhiCutsBackToBackMinimum",
-    details          = { "xlabel": "R_{bb}^{min}",
+    details          = { "xlabel": "^{}R_{bb}^{min}",
     #"xlabel": "min(#sqrt{(180^{o}-#Delta#phi(#tau,MET))^{2}+#Delta#phi(jet_{1..3},MET)^{2}})",
                          "ylabel": "Events",
                          "divideByBinWidth": False,
-                         "unit": "^{o}",
+                         "unit": "{}^{o}",
                          "log": True,
                          "legendPosition": "SE",
                          "opts": {"ymin": 0.09} },
     blindedRange     = [81,159], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
-    flowPlotCaption  = "R_{bb}^{min}", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "^{}R_{bb}^{min}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 if OptionMassShape == "TransverseMass":
@@ -1427,12 +1465,16 @@ if OptionMassShape == "TransverseMass":
         signalHistoName  = "shapeTransverseMass",
         EWKfakeHistoPath  = "",
         EWKfakeHistoName  = "shapeEWKFakeTausTransverseMass",
-        details          = { "xlabel": "m_{T}(#tau_{h},E_{T}^{miss})",
-                         "ylabel": "Events/#Deltam_{T}",
-                         "divideByBinWidth": True,
-                         "unit": "GeV",
-                         "log": False,
-                         "opts": {"ymin": 0.0}},
+        details          = {"cmsTextPosition": "right",
+                            #"xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss})",
+                            #"ylabel": "Events/^{}#Deltam_{T}",
+                            #"unit": "GeV",
+                            "xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss}) (GeV)",
+                            "ylabel": "< Events / GeV >", "ylabelBinInfo": False,
+                            "moveLegend": {"dx": -0.22, "dy": -0.1},
+                            "divideByBinWidth": True,
+                            "log": False,
+                            "opts": {"ymin": 0.0}},
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1443,12 +1485,16 @@ if OptionMassShape == "TransverseMass":
         signalHistoName  = "shapeTransverseMass",
         EWKfakeHistoPath  = "",
         EWKfakeHistoName  = "shapeEWKFakeTausTransverseMass",
-        details          = { "xlabel": "m_{T}(#tau_{h},E_{T}^{miss})",
-                         "ylabel": "Events/#Deltam_{T}",
-                         "divideByBinWidth": True,
-                         "unit": "GeV",
-                         "log": True,
-                         "opts": {"ymin": 0.009}},
+        details          = {"cmsTextPosition": "right",
+                            #"xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss})",
+                            #"ylabel": "Events/^{}#Deltam_{T}",
+                            #"unit": "GeV",
+                            "xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss}) (GeV)",
+                            "ylabel": "< Events / GeV >", "ylabelBinInfo": False,
+                            "moveLegend": {"dx": -0.22, "dy": -0.5},
+                            "divideByBinWidth": True,
+                            "log": True,
+                            "opts": {"ymin": 1e-5}},
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1460,13 +1506,14 @@ elif OptionMassShape == "FullMass":
         signalHistoName  = "shapeInvariantMass",
         EWKfakeHistoPath  = "",
         EWKfakeHistoName  = "shapeEWKFakeTausInvariantMass",
-        details          = { "xlabel": "m(#tau_{h},E_{T}^{miss})",
+        details          = { "xlabel": "m(^{}#tau_{h},^{}E_{T}^{miss})",
                              "ylabel": "Events/#Deltam",
                              "divideByBinWidth": True,
                              "unit": "GeV",
                              "log": False,
                              "opts": {"ymin": 0.0},
-                             "opts": {"ymin": 1e-5} },
+                             #"opts": {"ymin": 1e-5} },
+                           },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1479,8 +1526,8 @@ if OptionCtrlPlotsAtMt:
         signalHistoName  = "SelectedTau_pT_AfterMtSelections",
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "SelectedTau_pT_AfterMtSelections",
-        details          = { "xlabel": "Selected #tau p_{T}",
-                             "ylabel": "Events/#Deltap_{T}",
+        details          = { "xlabel": "Selected #tau ^{}p_{T}",
+                             "ylabel": "Events/^{}#Deltap_{T}",
                              "divideByBinWidth": True,
                              "unit": "GeV/c",
                              "log": True,
@@ -1534,7 +1581,7 @@ if OptionCtrlPlotsAtMt:
         details          = { "xlabel": "Selected #tau #phi",
                              "ylabel": "Events",
                              "divideByBinWidth": False,
-                             "unit": "^{o}",
+                             "unit": "{}^{o}",
                              "log": True,
                              "legendPosition": "SW",
                              "opts": {"ymin": 0.09} },
@@ -1549,8 +1596,8 @@ if OptionCtrlPlotsAtMt:
         signalHistoName  = "SelectedTau_LeadingTrackPt_AfterMtSelections",
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "SelectedTau_LeadingTrackPt_AfterMtSelections",
-        details          = { "xlabel": "#tau leading track p_{T}",
-                             "ylabel": "Events/#Deltap_{T}",
+        details          = { "xlabel": "#tau leading track p{}_{T}",
+                             "ylabel": "Events/^{}#Deltap_{T}",
                              "divideByBinWidth": True,
                              "unit": "GeV/c",
                              "log": True,
@@ -1638,8 +1685,8 @@ if OptionCtrlPlotsAtMt:
         signalHistoName  = "JetPt_AfterMtSelections",
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "JetPt_AfterMtSelections",
-        details          = { "xlabel": "jet p_{T}",
-                             "ylabel": "Events/Deltap_{T}",
+        details          = { "xlabel": "jet ^{}p_{T}",
+                             "ylabel": "Events/^{}Deltap_{T}",
                              "divideByBinWidth": True,
                              "unit": "GeV/c",
                              "log": True,
@@ -1677,7 +1724,7 @@ if OptionCtrlPlotsAtMt:
         #"xlabel": "min(#sqrt{#Delta#phi(#tau,MET)^{2}+(180^{o}-#Delta#phi(jet_{1..3},MET))^{2}})",
                              "ylabel": "Events",
                              "divideByBinWidth": False,
-                             "unit": "^{o}",
+                             "unit": "{}^{o}",
                              "log": True,
                              "legendPosition": "SE",
                              "opts": {"ymin": 0.09} },
@@ -1728,8 +1775,8 @@ if OptionCtrlPlotsAtMt:
         signalHistoName  = "BJetPtAfterMtSelections",
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "BJetPtAfterMtSelections",
-        details          = { "xlabel": "b jet p_{T}",
-                             "ylabel": "Events/#Deltap_{T}",
+        details          = { "xlabel": "b jet ^{}p_{T}",
+                             "ylabel": "Events/^{}#Deltap_{T}",
                              "divideByBinWidth": True,
                              "unit": "GeV/c",
                              "log": True,
@@ -1764,7 +1811,7 @@ if OptionCtrlPlotsAtMt:
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "METAfterMtSelections",
         details          = { "xlabel": "E_{T}^{miss}",
-                             "ylabel": "Events/#DeltaE_{T}^{miss}",
+                             "ylabel": "Events/^{}#DeltaE_{T}^{miss}",
                              "divideByBinWidth": True,
                              "unit": "GeV",
                              "log": True,
@@ -1781,9 +1828,9 @@ if OptionCtrlPlotsAtMt:
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "METPhiAfterMtSelections",
         details          = { "xlabel": "E_{T}^{miss} #phi",
-                             "ylabel": "Events/#DeltaE_{T}^{miss}#phi",
+                             "ylabel": "Events/^{}#DeltaE_{T}^{miss}#phi",
                              "divideByBinWidth": True,
-                             "unit": "^{o}",
+                             "unit": "{}^{o}",
                              "log": True,
                              "legendPosition": "SW",
                              "opts": {"ymin": 0.09} },
@@ -1797,9 +1844,9 @@ if OptionCtrlPlotsAtMt:
         signalHistoPath  = "ForDataDrivenCtrlPlots",
         signalHistoName  = "METPhiMinusTauPhiAfterMtSelections",
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "METPhiAfterMtSelections",
+        EWKfakeHistoName  = "METPhiMinusTauPhiAfterMtSelections",
         details          = { "xlabel": "E_{T}^{miss} #phi - #tau #phi",
-                             "ylabel": "Events/#Delta(E_{T}^{miss}#phi-#tau#phi)",
+                             "ylabel": "Events/#Delta(^{}E_{T}^{miss}#phi-#tau#phi)",
                              "divideByBinWidth": True,
                              "unit": "^{o}",
                              "log": True,
@@ -1816,8 +1863,8 @@ if OptionCtrlPlotsAtMt:
         signalHistoName  = "TauPlusMETPtAfterMtSelections",
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
         EWKfakeHistoName  = "TauPlusMETPtAfterMtSelections",
-        details          = { "xlabel": "p_{T}(#tau + E_{T}^{miss})",
-                             "ylabel": "Events/#Deltap_{T}",
+        details          = { "xlabel": "p_{T}(#tau + ^{}E_{T}^{miss})",
+                             "ylabel": "Events/^{}#Deltap_{T}",
                              "divideByBinWidth": True,
                              "unit": "GeV",
                              "log": True,
@@ -1838,7 +1885,7 @@ if OptionCtrlPlotsAtMt:
                              #"rangeMax": 180.0,
                              #"variableBinSizeLowEdges": [0., 10., 20., 30., 40., 60., 80., 100., 120., 140., 160.], # if an empty list is given, then uniform bin width is used
                              #"binLabels": [], # leave empty to disable bin labels
-                             #"xlabel": "#Delta#phi(#tau_{h},E_{T}^{miss})",
+                             #"xlabel": "#Delta#phi(#tau_{h},^{}E_{T}^{miss})",
                              #"ylabel": "Events",
                              #"unit": "^{o}",
                              #"log": True,
@@ -1847,7 +1894,7 @@ if OptionCtrlPlotsAtMt:
                              #"ymax": -1},
         #blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
         #evaluationRange  = [], # specify range to be evaluated and saved into a file
-        #flowPlotCaption  = "N_{b jets}", # Leave blank if you don't want to include the item to the selection flow plot
+        #flowPlotCaption  = "^{}N_{b jets}", # Leave blank if you don't want to include the item to the selection flow plot
     #))
 
     #ControlPlots.append(ControlPlotInput(
@@ -1859,7 +1906,7 @@ if OptionCtrlPlotsAtMt:
                              #"rangeMax": 180.0,
                              #"variableBinSizeLowEdges": [], # if an empty list is given, then uniform bin width is used
                              #"binLabels": [], # leave empty to disable bin labels
-                             #"xlabel": "max(#Delta#phi(jet,E_{T}^{miss})",
+                             #"xlabel": "max(#Delta#phi(jet,^{}E_{T}^{miss})",
                              #"ylabel": "Events",
                              #"unit": "^{o}",
                              #"log": True,
@@ -1868,7 +1915,7 @@ if OptionCtrlPlotsAtMt:
                              #"ymax": -1},
         #blindedRange     = [-1, 300], # specify range min,max if blinding applies to this control plot
         #evaluationRange  = [], # specify range to be evaluated and saved into a file
-        #flowPlotCaption  = "#Delta#phi(#tau_{h},E_{T}^{miss})", # Leave blank if you don't want to include the item to the selection flow plot
+        #flowPlotCaption  = "#Delta#phi(^{}#tau_{h},^{}E_{T}^{miss})", # Leave blank if you don't want to include the item to the selection flow plot
     #))
 
     #ControlPlots.append(ControlPlotInput(

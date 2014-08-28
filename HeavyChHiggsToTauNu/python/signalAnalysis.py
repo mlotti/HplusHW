@@ -47,6 +47,7 @@ def createEDFilter(param):
         GenParticleAnalysis = param.GenParticleAnalysis.clone(),
         embeddingMuonTriggerEfficiency = param.embeddingMuonTriggerEfficiency.clone(),
         embeddingMuonIdEfficiency = param.embeddingMuonIdEfficiency.clone(),
+        embeddingMTWeight = param.embeddingMTWeight.clone(),
         Tree = param.tree.clone(),
         eventCounter = param.eventCounter.clone(),
         oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),

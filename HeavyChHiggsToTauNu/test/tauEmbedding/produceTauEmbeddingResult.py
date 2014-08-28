@@ -75,14 +75,14 @@ class DatasetManagerMany:
 
     def _getDatasetsGeneric(self, methodName):
         datasets = [getattr(dm, methodName)() for dm in self._dsetMgrs]
-        tmp = []
-        for i in xrange(len(datasets[0])):
-            lst = []
-            for j in xrange(len(self._dsetMgrs)):
-                lst.append(datasets[j][i])
-            tmp.append(lst) # tmp[i]
+        lsts = []
+        for j in xrange(len(self._dsetMgrs)):
+            for i in xrange(len(datasets[j])):
+                if len(lsts) == i:
+                    lsts.append([])
+                lsts[i].append(datasets[j][i])
 
-        return [DatasetMany(t) for t in tmp]
+        return [DatasetMany(t) for t in lsts]
 
     def getDataDatasets(self):
         return self._getDatasetsGeneric("getDataDatasets")
@@ -142,7 +142,7 @@ class DatasetMany:
         for h in th1s[1:]:
             for bin in xrange(0, ret.GetNbinsX()+2):
                 ret.SetBinContent(bin, ret.GetBinContent(bin)+h.GetBinContent(bin))
-                ret.SetBinError(bin, math.sqrt(ret.GetBinError(bin)+h.GetBinError(bin)))
+                ret.SetBinError(bin, math.sqrt(ret.GetBinError(bin)**2+h.GetBinError(bin)**2))
         for bin in xrange(0, ret.GetNbinsX()+2):
             ret.SetBinContent(bin, ret.GetBinContent(bin)/len(th1s))
             ret.SetBinError(bin, ret.GetBinError(bin)/len(th1s))
@@ -303,6 +303,10 @@ if __name__ == "__main__":
                       help="Midfix to add to the output directory name")
     parser.add_option("--nosyst", dest="dosyst", default=True, action="store_false",
                       help="Don't process systematic variations")
+    parser.add_option("--nooptmodes", dest="dooptmodes", default=True, action="store_false",
+                      help="Don't process optimization modes")
+    parser.add_option("--outputName", dest="outputName", default=None,
+                      help="Name of output task directory")
     (opts, args) = parser.parse_args()
     if len(args) == 0:
         parser.error("Expected at least one multicrab directory, got %d" % len(args))
@@ -359,7 +363,10 @@ if __name__ == "__main__":
             eras = [tmp]
 
     # Create pseudo multicrab directory
+    
     dirname = "embedding"
+    if opts.outputName != None:
+        dirname += opts.outputName
     if datasetCreatorMC is not None:
         dirname += "_mc"
     if opts.midfix is not None:
@@ -411,7 +418,9 @@ if __name__ == "__main__":
             print "No search modes for DatasetManagerCreator with baseDirectory %s" % dc.getBaseDirectory()
         for searchMode in dc.getSearchModes():
             for era in eras:
-                optModes = dc.getOptimizationModes()
+                optModes = []
+                if opts.dooptmodes:
+                    optModes = dc.getOptimizationModes()
                 if len(optModes) == 0:
                     optModes = [None]
                 for optMode in optModes:

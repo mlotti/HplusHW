@@ -37,10 +37,20 @@ processHeavy = "pp #rightarrow tH^{+}, H^{+} #rightarrow #tau#nu"
 BRassumption = ""
 
 ## Y axis label for the BR
-BRlimit = "95%% CL limit for %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
+BRlimit = None
 
 ## Y axis label for the sigma x BR
-sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{H^{+}#rightarrow#tau#nu}, pb"%(BR)
+sigmaBRlimit = None
+
+def useParentheses():
+    global BRlimit, sigmaBRlimit
+    BRlimit = "95%% CL limit for %s(t#rightarrowH^{+}b)#times%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
+    sigmaBRlimit = "95%% CL limit for #sigma(H^{+})#times%s(H^{+}#rightarrow#tau#nu) (pb)"%(BR)
+def useSubscript():
+    global BRlimit, sigmaBRlimit
+    BRlimit = "95%% CL limit for %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
+    sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{H^{+}#rightarrow#tau#nu} (pb)"%(BR)
+useSubscript()
 
 ## Y axis label for the tanbeta
 tanblimit = "tan #beta"
@@ -67,7 +77,7 @@ _finalstateYmaxBR = {
     "etau": 0.4,
     "mutau": 0.4,
     "emu": 0.8,
-    "default": 0.02,
+    "default": 0.025,
 }
 
 ## Default y axis maximum values for sigma x BR limit for the final states
@@ -75,7 +85,7 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 1.0,
+    "default": 0.9,
 }
 
 
@@ -204,7 +214,79 @@ class BRLimits:
             else:
                 print format % (self.mass_string[i], "BLINDED", self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
         print
+        
+    ## Save the table as tex format
+    def saveAsLatexTable(self,unblindedStatus=False):
+        myLightStatus = True
+        if float(self.mass[0]) > 179.0:
+	    myLightStatus = False
+        
+        myDigits = 3
+        if myLightStatus:
+	    myDigits = 4
+        fstr = "%%.%df"%myDigits
+        
+        format = "%3s "
+        for i in range(0,5):
+	    format += "& %s "%fstr 
+	
+        if not unblindedStatus:
+	    format += "& Blinded "
+	else:
+	    format += "& %s "%fstr 
+        format += "\\\\ \n"
+        s = "% Table autocreated through tools.limits.saveAsLatexTable() \n"
+        s += "\\begin{tabular}{ c c c c c c c } \n"
+        s += "\\hline \n"
+        if myLightStatus:
+	    s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\BRtH\\times\\BRHtau$}\\\\ \n"
+	else:
+	    s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\sigmaHplus\\times\\BRHtau$}\\\\ \n"
+	s += "\\hline \n"
+	s += "\\mHpm & \\multicolumn{5}{ c }{Expected limit} & Observed \\\\ \\cline{2-6} \n"
+	s += "(GeV)   & $-2\\sigma$  & $-1\\sigma$ & median & +1$\\sigma$ & +2$\\sigma$  & limit \\\\ \n"
+	s += "\\hline \n"
+        for i in xrange(len(self.mass_string)):
+            if unblindedStatus:
+                s += format % (self.mass_string[i], float(self.expectedMinus2_string[i]), float(self.expectedMinus1_string[i]), float(self.expectedMedian_string[i]), float(self.expectedPlus1_string[i]), float(self.expectedPlus2_string[i]), float(self.observed_string[i]))
+            else:
+                s += format % (self.mass_string[i], float(self.expectedMinus2_string[i]), float(self.expectedMinus1_string[i]), float(self.expectedMedian_string[i]), float(self.expectedPlus1_string[i]), float(self.expectedPlus2_string[i]))
+	s += "\\hline \n"
+        s += "\\end{tabular} \n"
+        f = open("limitsTable.tex","w")
+        f.write(s)
+        f.close()
 
+    ## Divide the limits by another limit to obtain relative result
+    # \param refLimit  another BRLimits object
+    def divideByLimit(self, refLimit):
+        def protectedDivide(num, denom):
+            if denom == 0:
+                return 0.0
+            else:
+                return num / denom
+        
+        if not isinstance(refLimit, BRLimits):
+            raise Exception("The parameter needs to be a BRLimits object")
+        for i in xrange(len(self.mass_string)):
+            foundStatus = False
+            for ir in xrange(len(refLimit.mass_string)):
+                if self.mass_string[i] == refLimit.mass_string[ir]:
+                    foundStatus = True
+                    self.observed[i] = protectedDivide(self.observed[i], refLimit.observed[ir])
+                    self.expectedMedian[i] = protectedDivide(self.expectedMedian[i], refLimit.expectedMedian[ir])
+                    self.expectedMinus2[i] = protectedDivide(self.expectedMinus2[i], refLimit.expectedMinus2[ir])
+                    self.expectedMinus1[i] = protectedDivide(self.expectedMinus1[i], refLimit.expectedMinus1[ir])
+                    self.expectedPlus2[i] = protectedDivide(self.expectedPlus2[i], refLimit.expectedPlus2[ir])
+                    self.expectedPlus1[i] = protectedDivide(self.expectedPlus1[i], refLimit.expectedPlus1[ir])
+            if not foundStatus:
+                self.observed[i] = 0.0
+                self.expectedMedian[i] = 0.0
+                self.expectedMinus2[i] = 0.0
+                self.expectedMinus1[i] = 0.0
+                self.expectedPlus2[i] = 0.0
+                self.expectedPlus1[i] = 0.0
+        
     ## Construct TGraph for the observed limit
     #
     # \return TGraph of the observed limit, None if the observed limit does not exist

@@ -89,7 +89,9 @@ def customiseParamForTauEmbedding(process, param, options, dataVersion):
     # Notice that only the version corresponding to PF2PATVersion is produced
     replacePostfix = "TauEmbeddingMuonMatched"
     def replaceTauSrc(mod):
-        mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TriggerMatched"+PF2PATVersion, replacePostfix))
+        #mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TriggerMatched"+PF2PATVersion, replacePostfix))
+        #mod.src.setModuleLabel(mod.src.getModuleLabel()+replacePostfix) # "TriggerMatched" postfix is no longer there for embedding input
+        mod.src.setModuleLabel("tauEmbeddingGenTauVisibleMatchTauMatched")
     param.forEachTauSelection(replaceTauSrc)
 
     # Set the analyzer

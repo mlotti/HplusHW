@@ -29,6 +29,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMTWeightFit.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
@@ -165,6 +166,7 @@ namespace HPlus {
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
+    Count fEmbeddingMTWeightCounter;
     Count fQCDTailKillerBackToBackCounter;
     Count fTopReconstructionCounter;
     Count fSelectedEventsCounter;
@@ -203,6 +205,7 @@ namespace HPlus {
     METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
     EmbeddingMuonEfficiency fEmbeddingMuonTriggerEfficiency;
     EmbeddingMuonEfficiency fEmbeddingMuonIdEfficiency;
+    EmbeddingMTWeightFit fEmbeddingMTWeight;
     WeightReader fPrescaleWeightReader;
     WeightReader fPileupWeightReader;
     WeightReader fWJetsWeightReader;
@@ -301,6 +304,13 @@ namespace HPlus {
 
     // Control plots for fakes
 
+    // TTBar decay mode
+    WrappedTH1 *hTTBarDecayModeAfterVertexSelection;
+    WrappedTH1 *hTTBarDecayModeAfterVertexSelectionUnweighted;
+    WrappedTH1 *hTTBarDecayModeAfterStandardSelections;
+    WrappedTH1 *hTTBarDecayModeAfterStandardSelectionsUnweighted;
+    WrappedTH1 *hTTBarDecayModeAfterMtSelections;
+    WrappedTH1 *hTTBarDecayModeAfterMtSelectionsUnweighted;
 
     // FIXME move these to common plots
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;

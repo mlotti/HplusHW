@@ -116,10 +116,7 @@ def common(h, xlabel, ylabel, addLuminosityText=True):
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    if addLuminosityText:
-        h.addLuminosityText()
+    h.addStandardTexts(addLuminosityText=addLuminosityText)
     h.save()
 
 # Functions below are for plot-specific formattings. They all take the

@@ -34,6 +34,8 @@
 
 from math import sqrt
 
+import ShellStyles
+
 ## Helper class for a scalar uncertainty
 class ScalarUncertaintyItem:
     def __init__(self, uncertaintyName, *args, **kwargs):
@@ -86,6 +88,9 @@ class ScalarUncertaintyItem:
 
     def getUncertaintyUp(self):
         return self._uncertUp
+
+    def getUncertaintyMax(self):
+        return max([self._uncertUp, self._uncertDown])
 
 _crossSectionUncertainty = {
     "TTJets": ScalarUncertaintyItem("xsect", plus=0.0517, minus=0.060), # arxiv:1303.6254
@@ -144,10 +149,10 @@ _dataDrivenCtrlPlotBinning = {
     "ImprovedDeltaPhiCuts*": [0,20,40,60,80,100,120,140,160,180,200,220,240,260],
     "MET": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,170,190,220,250,300,400,500],
     "METPhi": [-3.14,-2.75,-2.36,-1.96,-1.57,-1.18,-0.79,-0.39,0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
-    "METPhiMinusTauPhi": [-3.14,-2.75,-2.36,-1.96,-1.57,-1.18,-0.79,-0.39,0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
+    "METPhiMinusTauPhi": [0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
     "METAfterMtSelections": [0,20,30,40,50,60,70,80,90,100,120,140,160,180,200,250,300,500],
     "METPhiAfterMtSelections": [-3.14,-2.36,-1.57,-0.79,0.00,0.79,1.57,2.36,3.14],
-    "METPhiMinusTauPhiAfterMtSelections": [-3.14,-2.36,-1.57,-0.79,0.00,0.79,1.57,2.36,3.14],
+    "METPhiMinusTauPhiAfterMtSelections": [0.00,0.39,0.79,1.18,1.57,1.96,2.36,2.75,3.14],
     "TauPlusMETPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,450,500],
     "TauPlusMETPtAfterMtSelections": [0,40,80,120,160,200,240,280,320,360,400,450,500],
     "NBjets": [0,1,2,3,4,5,6,7,8],
@@ -166,6 +171,7 @@ _dataDrivenCtrlPlotBinning = {
     "TopPtAfterMtSelections": [0,20,40,60,80,100,150,200,300,500],
     "WMassAfterMtSelections": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
     "WPtAfterMtSelections": [0,20,40,60,80,100,150,200,300,500],
+    #"shapeTransverseMass": [0,20,40,60,80,100,120,140,160,200,400],
     "shapeTransverseMass": [0,20,40,60,80,100,120,140,160,200,700],
     #"shapeTransverseMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400],
     #"shapeTransverseMass": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300,310,320,330,340,350,360,370,380,390,400],
