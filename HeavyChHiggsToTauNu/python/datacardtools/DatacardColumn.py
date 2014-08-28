@@ -583,14 +583,15 @@ class DatacardColumn():
         for k in range(1, self._rateResult._histograms[0].GetNbinsX()+1):
             if self._rateResult._histograms[0].GetBinContent(k) < config.MinimumStatUncertainty:
                 if self._rateResult._histograms[0].GetBinContent(k) >= 0.0 and self._rateResult._histograms[0].GetBinContent(k) < config.MinimumStatUncertainty:
-                    print ShellStyles.WarningLabel()+"Rate value is zero or below 1e-10 in bin %d for column '%s' (it was %f)! Compensating up stat uncertainty!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
-                    self._rateResult._histograms[0].SetBinContent(k, 0.0)
+                    print ShellStyles.WarningLabel()+"Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! Compensating up stat uncertainty to %f!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k), config.MinimumStatUncertainty)
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)                   
                 if self._rateResult._histograms[0].GetBinContent(k) < -0.001:
                     print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
                     self._rateResult._histograms[0].SetBinContent(k, 0.0)
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)
                     #raise Exception(ShellStyles.ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
+        # Update integral
+        self._rateResult._result = self._rateResult._histograms[0].Integral()
 
         for j in range(0,len(self._nuisanceResults)):
             myNewHistograms = []
