@@ -1362,11 +1362,11 @@ class CommonPlotter:
                         divideByBinWidth=True, opts={"ymin": 1e-3})
         drawControlPlot("SelectedTau_eta_AfterMtSelections", xlabel="Selected #tau #eta", 
                         #ylabel="Events / %.1f-%.1f",
-                        ylabel="Events / bin",
+                        ylabel="Events",
                         opts={"xmin": -2.5, "xmax": 2.5}, moveLegend={"dx": -0.3, "dy": -0.4})
         drawControlPlot("SelectedTau_phi_AfterMtSelections", xlabel="Selected #tau #phi",
                         #ylabel="Events / %.2f-%.2f",
-                        ylabel="Events / bin",
+                        ylabel="Events",
                         moveLegend={"dy": -0.4})
         drawControlPlot("SelectedTau_LeadingTrackPt_AfterMtSelections", rebin=range(0, 100, 10)+[150,200,300,400,500], divideByBinWidth=True, opts={"ymin": 1e-3})
 
@@ -1385,16 +1385,16 @@ class CommonPlotter:
                         divideByBinWidth=True, opts={"ymin": 1e-3}, moveLegend={"dx": -0.05, "dy":-0.2})
         drawControlPlot("METPhiAfterMtSelections", "E_{T}^{miss} #phi",
                         #ylabel="Events / %.2f-%.2f",
-                        ylabel="Events / bin",
+                        ylabel="Events",
                         moveLegend={"dy": -0.4}, opts={"ymaxfactor": 10})
         drawControlPlot("NBjetsAfterMtSelections", ylabel="Events", opts={"ymin": 1e-1})
         drawControlPlot("BJetPtAfterMtSelections",
                         #ylabel="Events / #Delta p_{T} / %.0f-%.0f GeV/c",
-                        ylabel="< Events / bin >",
+                        ylabel="< Events / GeV/c >",
                         divideByBinWidth=True)
         drawControlPlot("BJetEtaAfterMtSelections", ylabel="Events / %.1f", opts={"xmin": -2.5, "xmax": 2.5}, moveLegend={"dy": -0.4})
         drawControlPlot("BtagDiscriminatorAfterMtSelections", opts={"xmin": -1, "xmax": 1, "ymin": 1},
-                        ylabel="Events / bin",
+                        ylabel="Events",
                         #ylabel="Events / %.2f-%.2f",
                         moveLegend={"dy": -0.4})
         drawControlPlot("ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections", "R_{coll}^{min} (^{o})", ylabel="Events / %.0f^{o}", opts={"ymin": 1e-1}, moveLegend={"dy": -0.43, "dx": -0.3})
@@ -1414,7 +1414,7 @@ class CommonPlotter:
         #p.appendPlotObject(histograms.PlotText(0.6, 0.7, "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", size=20))
         self._drawPlot(p, "shapeTransverseMass", "m_{T}(^{}#tau_{h}, ^{}E_{T}^{miss}) (GeV)",
                        #ylabel="Events / #Delta m_{T} %.0f-%.0f GeV",
-                       ylabel="< Events / bin >",
+                       ylabel="< Events / GeV >",
                        log=False, moveLegend=moveLegend,
                        opts=opts,
                        opts2=opts2,
@@ -1424,7 +1424,7 @@ class CommonPlotter:
         p = self._createPlot("shapeTransverseMass")
         self._drawPlot(p, "shapeTransverseMass_log", "m_{T}(^{}#tau_{h}, ^{}E_{T}^{miss}) (GeV)",
                        #ylabel="Events / #Delta m_{T} %.0f-%.0f GeV",
-                       ylabel="< Events / bin >",
+                       ylabel="< Events / GeV >",
                        log=True, moveLegend=moveLegend,
                        opts={"ymin": 1e-3},
                        opts2=opts2,
@@ -1432,5 +1432,8 @@ class CommonPlotter:
                        cmsTextPosition="right"
                  )
 
-        self._drawPlot(self._createPlot("shapeInvariantMass"), "shapeInvariantMass", ylabel="< Events / bin >", log=False, divideByBinWidth=True)
+        self._drawPlot(self._createPlot("shapeInvariantMass"), "shapeInvariantMass", 
+                       xlabel="m_{H^{+}} (GeV/c^{2})",
+                       ylabel="< Events / GeV/c^{2} >",
+                       log=False, divideByBinWidth=True)
 

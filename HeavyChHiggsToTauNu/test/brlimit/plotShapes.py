@@ -12,6 +12,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 # Height settings for the all-in-one ratio plot
 _cHeaderHeight = 40
@@ -112,8 +113,10 @@ class RatioPlotContainer:
                 plot.GetXaxis().SetLabelSize(0)
             plot.GetYaxis().SetLabelSize(26)
             plot.GetYaxis().SetTitleOffset(0.34*myMaxSize+0.1) # 3.5/10, 1.8/5
-            plot.SetMinimum(0.001)
-            plot.SetMaximum(1.999)
+#            plot.SetMinimum(0.001)
+#            plot.SetMaximum(1.999)
+            plot.SetMinimum(0.601)
+            plot.SetMaximum(1.399)
             plot.Draw() # Plot frame for every nuisance
             if myPlotIndex != None:
                 self._ratioPlotList[myPlotIndex].ratioHistoMgr.draw() # Plot content only if affected
@@ -129,7 +132,7 @@ class RatioPlotContainer:
             histograms.addText(x=0.93, y=myHeight, text=self._dsetName, size=30, align="right")
             # Header labels
             if i == 0:
-                histograms.addStandardTexts(lumi=luminosity)
+                histograms.addStandardTexts(lumi=luminosity, cmsTextPosition="outframe")
             # Labels for non-existing nuisances
             if myPlotIndex == None:
                 myHeight = 0.44
@@ -145,6 +148,21 @@ class RatioPlotContainer:
         for suffix in [".png",".C",".eps"]:
             c.Print("%s/%s%s"%(_dirname,myPlotName,suffix))
         ROOT.gErrorIgnoreLevel = backup
+
+def customizeMarker(p):
+    for h in p.ratioHistoMgr.getHistos():
+        if h.getName() == "BackgroundStatError":
+            continue
+
+        h.setDrawStyle("P")
+        th1 = h.getRootHisto()
+        th1.SetMarkerSize(2)
+        th1.SetMarkerStyle(34) # or 2?
+        th1.SetMarkerColor(th1.GetLineColor())
+        #th1.SetLineWidth(0)
+        # I have no idea why "P" above is not enough...
+        for i in xrange(1, th1.GetNbinsX()+1):
+            th1.SetBinError(i, 0)
 
 class DatasetContainer:
     def __init__(self, shapeList):
@@ -231,6 +249,7 @@ class DatasetContainer:
             myParams["ratioType"] = "errorScale"
             myParams["ratioYlabel"] = "Var./Nom."
             myParams["addLuminosityText"] = True
+            myParams["customizeBeforeDraw"] = customizeMarker
             plots.drawPlot(plot, myPlotName, **myParams)
             myRatioContainer.addRatioPlot(plot, myShortName)
             # Analyse up and down variation
@@ -333,6 +352,8 @@ if __name__ == "__main__":
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.15)
+    histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
+    styles.ratioLineStyle.append(styles.StyleLine(lineColor=13))
     # Find out the mass points
     mySettings = limitTools.GeneralSettings(".",[])
     massPoints = mySettings.getMassPoints(limitTools.LimitProcessType.TAUJETS)
