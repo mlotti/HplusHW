@@ -11,6 +11,7 @@ from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
@@ -36,14 +37,7 @@ def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
         myArray = array.array("d",myBinning)
         # Rebin and move under/overflow bins to visible bins
         h = h.Rebin(len(myBinning)-1,"",myArray)
-        h.SetBinContent(1, h.GetBinContent(0)+h.GetBinContent(1))
-        h.SetBinError(1, math.sqrt(h.GetBinContent(0)**2 + h.GetBinContent(1)**2))
-        h.SetBinContent(h.GetNbinsX()+1, h.GetBinContent(h.GetNbinsX()+1)+h.GetBinContent(h.GetNbinsX()+2)) # bug, bins should be -= 1 ?
-        h.SetBinError(h.GetNbinsX()+1, math.sqrt(h.GetBinError(h.GetNbinsX()+1)**2 + h.GetBinError(h.GetNbinsX()+2)**2)) # bug, bins should be -= 1?
-        h.SetBinContent(0, 0.0)
-        h.SetBinError(0, 0.0)
-        h.SetBinContent(h.GetNbinsX()+2, 0.0) # bug, bins should be -= 1?
-        h.SetBinError(h.GetNbinsX()+2, 0.0) # bug, bins should be -= 1?
+        histogramsExtras.makeFlowBinsVisible(h)
         return h
 
     hbase.SetLineColor(ROOT.kBlack)
