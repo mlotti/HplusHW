@@ -147,6 +147,7 @@ class DatacardColumn():
         self._nuisanceIds = None
         self._nuisanceResults = None
         self._controlPlots = None
+        self._cachedShapeRootHistogramWithUncertainties.delete()
         self._cachedShapeRootHistogramWithUncertainties = None
         self._datasetMgrColumn = None
 
@@ -588,6 +589,7 @@ class DatacardColumn():
                 if self._rateResult._histograms[0].GetBinContent(k) < -0.001:
                     print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
                     self._rateResult._histograms[0].SetBinContent(k, 0.0)
+                    #FIXME: if one adjusts the bin content, one needs to adjust accordingly the nuisances !!!
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)
                     #raise Exception(ShellStyles.ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
         # Update integral
