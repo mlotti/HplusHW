@@ -423,7 +423,10 @@ class LHCTypeAsymptotic:
     def _parseResultFromCombineOutput(self, result, output):
         nMatches = 0
         lines = output.split("\n")
-        obsresult_re = re.compile("Observed Limit: r < \s*(?P<value>\d+\.\d+)")
+        if self.brlimit:
+            obsresult_re = re.compile("Observed Limit: BR < \s*(?P<value>\d+\.\d+)")
+        elif self.sigmabrlimit:
+            obsresult_re = re.compile("Observed Limit: r < \s*(?P<value>\d+\.\d+)")
         expresult_re = None
         if self.brlimit:
             expresult_re = re.compile("Expected \s*(?P<quantile>\d+\.\d+)%: BR < \s*(?P<value>\d+\.\d+)")
@@ -487,8 +490,11 @@ class LHCTypeAsymptotic:
         raise Exception("Unable to parse the output of command '%s'" % script)
 
     def _runMLFit(self, mass):
-        script = self.mlfitScripts[mass]
-        self._run(script, "mlfit_m_%s_output.txt" % mass)
+        if mass in self.mlfitScripts.keys():
+            script = self.mlfitScripts[mass]
+            self._run(script, "mlfit_m_%s_output.txt" % mass)
+        else:
+            print "Skipping ML fit for mass:",mass
 
 def parseDiffNuisancesOutput(outputFileName, configFileName, mass):
     # first read nuisance types from datacards
