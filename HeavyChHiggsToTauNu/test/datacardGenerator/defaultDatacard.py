@@ -7,6 +7,7 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-03-20_expCtrlPlots"
 #Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
 #Path = "/home/wendland/data/xnortau"
+#Path = "/home/wendland/data/test_nominal_dphi"
 Path = "/home/wendland/data/xnominal"
 #Path = "/home/wendland/data/test_matti_met60_paramweight"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
@@ -21,8 +22,8 @@ LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
-#HeavyMassPoints      = [400]
-#HeavyMassPoints      = []
+#HeavyMassPoints      = [300]
+HeavyMassPoints      = []
 
 selectionReg = None
 if selectionReg == "A":
@@ -1314,43 +1315,149 @@ ControlPlots.append(ControlPlotInput(
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
+#ControlPlots.append(ControlPlotInput(
+    #title            = "TauPlusMETPt",
+    #signalHistoPath  = "ForDataDrivenCtrlPlots",
+    #signalHistoName  = "TauPlusMETPt",
+    #EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+    #EWKfakeHistoName  = "TauPlusMETPt",
+    #details          = { "xlabel": "p_{T}(#tau + ^{}E_{T}^{miss})",
+                         #"ylabel": "Events/^{}#Deltap_{T}",
+                         #"divideByBinWidth": True,
+                         #"unit": "GeV",
+                         #"log": True,
+                         #"opts": {"ymin": 0.0009} },
+    #blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    #evaluationRange  = [], # specify range to be evaluated and saved into a file
+    #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+#))
+
+#for i in range(1,5):
+    #ControlPlots.append(ControlPlotInput(
+        #title            = "CollinearTailKiller2DJet%d"%i,
+        #signalHistoPath  = "ForDataDrivenCtrlPlots",
+        #signalHistoName  = "ImprovedDeltaPhiCuts2DJet%dCollinear"%i,
+        #EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        #EWKfakeHistoName  = "ImprovedDeltaPhiCuts2DJet%dCollinear"%i,
+        #details          = { "xlabel": "#Delta#phi(#tau,E_{T}^{miss})",
+                             #"ylabel": "#Delta#phi(jet_{%d},E_{T}^{miss})"%i,
+                            #"divideByBinWidth": False,
+                            #"unit": "{}^{o}",
+                            #"log": False,
+                            #"legendPosition": "NW",
+                            #"opts": {"zmin": 0.0} },
+        #blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        #evaluationRange  = [], # specify range to be evaluated and saved into a file
+        #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    #))
+    #ControlPlots.append(ControlPlotInput(
+        #title            = "BackToBackTailKiller2DJet%d"%i,
+        #signalHistoPath  = "ForDataDrivenCtrlPlots",
+        #signalHistoName  = "ImprovedDeltaPhiCuts2DJet%dBackToBack"%i,
+        #EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        #EWKfakeHistoName  = "ImprovedDeltaPhiCuts2DJet%dBackToBack"%i,
+        #details          = { "xlabel": "#Delta#phi(#tau,E_{T}^{miss})",
+                             #"ylabel": "#Delta#phi(jet_{%d},E_{T}^{miss})"%i,
+                            #"divideByBinWidth": False,
+                            #"unit": "{}^{o}",
+                            #"log": False,
+                            #"legendPosition": "NW",
+                            #"opts": {"zmin": 0.0} },
+        #blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        #evaluationRange  = [], # specify range to be evaluated and saved into a file
+        #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    #))
+
+#ControlPlots.append(ControlPlotInput(
+    #title            = "CollinearTailKiller2DMinimum",
+    #signalHistoPath  = "ForDataDrivenCtrlPlots",
+    #signalHistoName  = "ImprovedDeltaPhiCuts2DCollinearMinimum",
+    #EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+    #EWKfakeHistoName  = "ImprovedDeltaPhiCuts2DCollinearMinimum",
+    #details          = { "xlabel": "#Delta#phi(#tau,E_{T}^{miss})",
+                          #"ylabel": "#Delta#phi(jet_{1..3},E_{T}^{miss})",
+                        #"divideByBinWidth": False,
+                        #"unit": "{}^{o}",
+                        #"log": False,
+                        #"legendPosition": "NW",
+                        #"opts": {"zmin": 0.0} },
+    #blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    #evaluationRange  = [], # specify range to be evaluated and saved into a file
+    #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+#))
+
+#ControlPlots.append(ControlPlotInput(
+    #title            = "BackToBackTailKiller2DMinimum",
+    #signalHistoPath  = "ForDataDrivenCtrlPlots",
+    #signalHistoName  = "ImprovedDeltaPhiCuts2DBackToBackMinimum",
+    #EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+    #EWKfakeHistoName  = "ImprovedDeltaPhiCuts2DBackToBackMinimum",
+    #details          = { "xlabel": "#Delta#phi(#tau,E_{T}^{miss})",
+                          #"ylabel": "#Delta#phi(jet_{1..3},E_{T}^{miss})",
+                        #"divideByBinWidth": False,
+                        #"unit": "{}^{o}",
+                        #"log": False,
+                        #"legendPosition": "NW",
+                        #"opts": {"zmin": 0.0} },
+    #blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    #evaluationRange  = [], # specify range to be evaluated and saved into a file
+    #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+#))
+
 ControlPlots.append(ControlPlotInput(
-    title            = "METPhiMinusTauPhi",
+    title            = "DeltaPhiTauMET",
     signalHistoPath  = "ForDataDrivenCtrlPlots",
-    signalHistoName  = "METPhiMinusTauPhi",
+    signalHistoName  = "DeltaPhiTauMET",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
-    EWKfakeHistoName  = "METPhiMinusTauPhi",
-    details          = { "xlabel": "E_{T}^{miss} #phi - #tau #phi",
-                         "ylabel": "Events",
-                         "divideByBinWidth": False,
-                         "unit": "{}^{o}",
-                         "log": True,
-                         "legendPosition": "SW",
-                         "opts": {"ymin": 0.09} },
+    EWKfakeHistoName  = "DeltaPhiTauMET",
+    details          = { "xlabel": "#Delta#phi(#tau,E_{T}^{miss})",
+                          "ylabel": "Events",
+                        "divideByBinWidth": False,
+                        "unit": "{}^{o}",
+                        "log": True,
+                        "legendPosition": "NW",
+                        "opts": {"ymin": 0.9} },
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
 ControlPlots.append(ControlPlotInput(
-    title            = "TauPlusMETPt",
+    title            = "MinDeltaPhiTauJet",
     signalHistoPath  = "ForDataDrivenCtrlPlots",
-    signalHistoName  = "TauPlusMETPt",
+    signalHistoName  = "MinDeltaPhiTauJet",
     EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
-    EWKfakeHistoName  = "TauPlusMETPt",
-    details          = { "xlabel": "p_{T}(#tau + ^{}E_{T}^{miss})",
-                         "ylabel": "Events/^{}#Deltap_{T}",
-                         "divideByBinWidth": True,
-                         "unit": "GeV",
-                         "log": True,
-                         "opts": {"ymin": 0.0009} },
+    EWKfakeHistoName  = "MinDeltaPhiTauJet",
+    details          = { "xlabel": "min (#Delta#phi(jet_{1..3},E_{T}^{miss}))",
+                          "ylabel": "Events",
+                        "divideByBinWidth": False,
+                        "unit": "{}^{o}",
+                        "log": True,
+                        "legendPosition": "NW",
+                        "opts": {"ymin": 0.9} },
     blindedRange     = [], # specify range min,max if blinding applies to this control plot
     evaluationRange  = [], # specify range to be evaluated and saved into a file
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
-#TODO: add as preselection for all ctrl plots in signal analysis MET30 and/or collinear tail killer and/or full tail killer
-#TODO: Add to signal analysis ctrl plots tail killer plots
+ControlPlots.append(ControlPlotInput(
+    title            = "MaxDeltaPhiTauJet",
+    signalHistoPath  = "ForDataDrivenCtrlPlots",
+    signalHistoName  = "MaxDeltaPhiTauJet",
+    EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+    EWKfakeHistoName  = "MaxDeltaPhiTauJet",
+    details          = { "xlabel": "max (#Delta#phi(jet_{1..3},E_{T}^{miss}))",
+                          "ylabel": "Events",
+                        "divideByBinWidth": False,
+                        "unit": "{}^{o}",
+                        "log": True,
+                        "legendPosition": "NW",
+                        "opts": {"ymin": 0.9} },
+    blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    evaluationRange  = [], # specify range to be evaluated and saved into a file
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+))
+
 
 #ControlPlots.append(ControlPlotInput(
     #title            = "DeltaPhi",
@@ -1469,7 +1576,7 @@ if OptionMassShape == "TransverseMass":
                             #"xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss})",
                             #"ylabel": "Events/^{}#Deltam_{T}",
                             #"unit": "GeV",
-                            "xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss}) (GeV)",
+                            "xlabel": "m_{T} (GeV)",
                             "ylabel": "< Events / GeV >", "ylabelBinInfo": False,
                             "moveLegend": {"dx": -0.22, "dy": -0.1},
                             "divideByBinWidth": True,
@@ -1489,7 +1596,7 @@ if OptionMassShape == "TransverseMass":
                             #"xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss})",
                             #"ylabel": "Events/^{}#Deltam_{T}",
                             #"unit": "GeV",
-                            "xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss}) (GeV)",
+                            "xlabel": "m_{T} (GeV)",
                             "ylabel": "< Events / GeV >", "ylabelBinInfo": False,
                             "moveLegend": {"dx": -0.22, "dy": -0.5},
                             "divideByBinWidth": True,
@@ -1839,36 +1946,109 @@ if OptionCtrlPlotsAtMt:
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
 
+    #ControlPlots.append(ControlPlotInput(
+        #title            = "TauPlusMETPtAfterMtSelections",
+        #signalHistoPath  = "ForDataDrivenCtrlPlots",
+        #signalHistoName  = "TauPlusMETPtAfterMtSelections",
+        #EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        #EWKfakeHistoName  = "TauPlusMETPtAfterMtSelections",
+        #details          = { "xlabel": "p_{T}(#tau + ^{}E_{T}^{miss})",
+                             #"ylabel": "Events/^{}#Deltap_{T}",
+                             #"divideByBinWidth": True,
+                             #"unit": "GeV",
+                             #"log": True,
+                             #"opts": {"ymin": 0.0009} },
+        #blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        #evaluationRange  = [], # specify range to be evaluated and saved into a file
+        #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    #))
+
+    #for i in range(1,5):
+        #ControlPlots.append(ControlPlotInput(
+            #title            = "TailKiller2DJet%dAfterMtSelections"%i,
+            #signalHistoPath  = "ForDataDrivenCtrlPlots",
+            #signalHistoName  = "ImprovedDeltaPhiCuts2DJet%dBackToBack"%i,
+            #EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+            #EWKfakeHistoName  = "ImprovedDeltaPhiCuts2DJet%dBackToBack"%i,
+            #details          = { "xlabel": "#Delta#phi(#tau,E_{T}^{miss})",
+                                #"ylabel": "#Delta#phi(jet_{%d},E_{T}^{miss})"%i,
+                                #"divideByBinWidth": False,
+                                #"unit": "{}^{o}",
+                                #"log": False,
+                                #"legendPosition": "NW",
+                                #"opts": {"zmin": 0.0} },
+            #blindedRange     = [], # specify range min,max if blinding applies to this control plot
+            #evaluationRange  = [], # specify range to be evaluated and saved into a file
+            #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+        #))
+
+    #ControlPlots.append(ControlPlotInput(
+        #title            = "TailKiller2DMinimumAfterMtSelections",
+        #signalHistoPath  = "ForDataDrivenCtrlPlots",
+        #signalHistoName  = "ImprovedDeltaPhiCuts2DMinimum",
+        #EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        #EWKfakeHistoName  = "ImprovedDeltaPhiCuts2DMinimum",
+        #details          = { "xlabel": "#Delta#phi(#tau,E_{T}^{miss})",
+                              #"ylabel": "#Delta#phi(jet_{1..3},E_{T}^{miss})",
+                            #"divideByBinWidth": False,
+                            #"unit": "{}^{o}",
+                            #"log": False,
+                            #"legendPosition": "NW",
+                            #"opts": {"zmin": 0.0} },
+        #blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        #evaluationRange  = [], # specify range to be evaluated and saved into a file
+        #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    #))
+
     ControlPlots.append(ControlPlotInput(
-        title            = "METPhiMinusTauPhiAfterMtSelections",
+        title            = "DeltaPhiTauMETAfterMtSelections",
         signalHistoPath  = "ForDataDrivenCtrlPlots",
-        signalHistoName  = "METPhiMinusTauPhiAfterMtSelections",
+        signalHistoName  = "DeltaPhiTauMETAfterMtSelections",
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "METPhiMinusTauPhiAfterMtSelections",
-        details          = { "xlabel": "E_{T}^{miss} #phi - #tau #phi",
-                             "ylabel": "Events/#Delta(^{}E_{T}^{miss}#phi-#tau#phi)",
-                             "divideByBinWidth": True,
-                             "unit": "^{o}",
-                             "log": True,
-                             "legendPosition": "SW",
-                             "opts": {"ymin": 0.09} },
+        EWKfakeHistoName  = "DeltaPhiTauMETAfterMtSelections",
+        details          = { "xlabel": "#Delta#phi(#tau,E_{T}^{miss})",
+                              "ylabel": "Events",
+                            "divideByBinWidth": False,
+                            "unit": "{}^{o}",
+                            "log": True,
+                            "legendPosition": "NW",
+                            "opts": {"ymin": 0.9} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
     ))
 
     ControlPlots.append(ControlPlotInput(
-        title            = "TauPlusMETPtAfterMtSelections",
+        title            = "MinDeltaPhiTauJetAfterMtSelections",
         signalHistoPath  = "ForDataDrivenCtrlPlots",
-        signalHistoName  = "TauPlusMETPtAfterMtSelections",
+        signalHistoName  = "MinDeltaPhiTauJetAfterMtSelections",
         EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
-        EWKfakeHistoName  = "TauPlusMETPtAfterMtSelections",
-        details          = { "xlabel": "p_{T}(#tau + ^{}E_{T}^{miss})",
-                             "ylabel": "Events/^{}#Deltap_{T}",
-                             "divideByBinWidth": True,
-                             "unit": "GeV",
-                             "log": True,
-                             "opts": {"ymin": 0.0009} },
+        EWKfakeHistoName  = "MinDeltaPhiTauJetAfterMtSelections",
+        details          = { "xlabel": "min (#Delta#phi(jet_{1..3},E_{T}^{miss}))",
+                              "ylabel": "Events",
+                            "divideByBinWidth": False,
+                            "unit": "{}^{o}",
+                            "log": True,
+                            "legendPosition": "NW",
+                            "opts": {"ymin": 0.9} },
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+
+    ControlPlots.append(ControlPlotInput(
+        title            = "MaxDeltaPhiTauJetAfterMtSelections",
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "MaxDeltaPhiTauJetAfterMtSelections",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "MaxDeltaPhiTauJetAfterMtSelections",
+        details          = { "xlabel": "max (#Delta#phi(jet_{1..3},E_{T}^{miss}))",
+                              "ylabel": "Events",
+                            "divideByBinWidth": False,
+                            "unit": "{}^{o}",
+                            "log": True,
+                            "legendPosition": "NW",
+                            "opts": {"ymin": 0.9} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot

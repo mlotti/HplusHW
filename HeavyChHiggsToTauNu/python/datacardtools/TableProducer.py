@@ -22,7 +22,7 @@ import ROOT
 #   hRate  rate histogram
 #   xmin   float, specifies minimum value for which bin-by-bin histograms are created (default: all)
 #   xmax   float, specifies maximum value for which bin-by-bin histograms are created (default: all)
-def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
+def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=None, xmax=None):
     myList = []
     myName = hRate.GetTitle()
     # Construct range
@@ -41,7 +41,14 @@ def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
             hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"%(myName,myName,i))
             hUp.SetTitle(hUp.GetName())
             hDown.SetTitle(hDown.GetName())
-            hUp.SetBinContent(i, hUp.GetBinContent(i)+hUp.GetBinError(i))
+            if hRate.GetBinContent(i) < minimumStatUncertainty:
+                hUp.SetBinContent(i, minimumStatUncertainty)
+                print ShellStyles.WarningLabel()+"Rate is zero for bin %d, setting up stat. uncert. to %f."%(i,minimumStatUncertainty)
+                if hRate.GetBinContent(i) < 0.0:
+                    print ShellStyles.WarningLabel()+"Rate is negative for bin %d, continue at your own risk!"%i
+            else:
+                hUp.SetBinContent(i, hUp.GetBinContent(i)+hUp.GetBinError(i))
+            
             hDown.SetBinContent(i, hDown.GetBinContent(i)-hDown.GetBinError(i))
             # Clear uncertainty bins, because they have no effect on LandS/Combine
             for j in range(1, hRate.GetNbinsX()+1):
@@ -620,7 +627,7 @@ class TableProducer:
                 c.setResultHistogramsToRootFile(rootFile)
                 # Add bin-by-bin stat.uncert.
                 hRate = c._rateResult.getHistograms()[0]
-                myHistos = createBinByBinStatUncertHistograms(hRate)
+                myHistos = createBinByBinStatUncertHistograms(hRate, self._config.MinimumStatUncertainty)
                 for h in myHistos:
                     h.SetDirectory(rootFile)
                 c._rateResult._tempHistos.extend(myHistos)

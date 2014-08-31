@@ -1145,6 +1145,13 @@ class RootHistoWithUncertainties:
         if self._rootHisto.GetNbinsX() != th1.GetNbinsX():
             raise Exception("Adding uncertainty %s, histograms have different number of X bins (%d != %d)" % (name, self._rootHisto.GetNbinsX(), th1.GetNbinsX()))
 
+    def delete(self):
+        if self._rootHisto != None:
+            self._rootHisto.Delete()
+            for k in self._shapeUncertainties:
+              (u,d) = self._shapeUncertainties[k]
+        self._shapeUncertainties = None
+
     ## Set the ROOT histogram object
     #
     # \param newRootHisto   ROOT histogram object

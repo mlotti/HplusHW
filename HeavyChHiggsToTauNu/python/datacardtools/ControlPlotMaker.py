@@ -19,14 +19,21 @@ import ROOT
 
 _legendLabelQCD = "QCD (data)"
 _legendLabelEmbedding = "EWK+tt with #tau_{h} (data)"
-_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (MC)"
+_legendLabelEWKFakes = "EWK+tt no #tau_{h} (sim.)"
+#_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (sim.)"
 
 drawPlot = plots.PlotDrawer(opts2={"ymin": 0.5, "ymax": 1.5},
-                            ratio=True, ratioYlabel="Data/#Sigma Exp.", ratioCreateLegend=True,
+                            ratio=True, ratioYlabel="Data/Bkg.", ratioCreateLegend=True,
                             ratioType="errorScale", ratioErrorOptions={"numeratorStatSyst": False},
                             stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True,
                             cmsTextPosition="outframe")
 
+drawPlot2D = plots.PlotDrawer(opts2={"ymin": 0.5, "ymax": 1.5},
+                            ratio=False, #ratioYlabel="Data/Bkg.", ratioCreateLegend=True,
+                            #ratioType="errorScale", ratioErrorOptions={"numeratorStatSyst": False},
+                            #stackMCHistograms=True, addMCUncertainty=True, 
+                            addLuminosityText=True,
+                            cmsTextPosition="outframe")
 ##
 class ControlPlotMaker:
     ## Constructor
@@ -60,175 +67,196 @@ class ControlPlotMaker:
             selectionFlow = SelectionFlowPlotMaker(self._opts, self._config, m)
             myBlindedStatus = False
             for i in range(0,len(self._config.ControlPlots)):
-                myCtrlPlot = self._config.ControlPlots[i]
-                print "......", myCtrlPlot.title
-                myMassSuffix = "_M%d"%m
-                # Initialize histograms
-                hSignal = None
-                hQCD = None
-                hEmbedded = None
-                hEWKfake = None
-                hData = None
-                # Loop over dataset columns to find histograms
-                myStackList = []
-                for c in self._datasetGroups:
-                    if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn() and not c.getControlPlotByIndex(i) == None:
-                        h = c.getControlPlotByIndex(i)["shape"].Clone()
-                        if c.typeIsSignal():
-                            #print "signal:",c.getLabel()
-                            # Scale light H+ signal
-                            if m < 179:
-                                if c.getLabel()[:2] == "HH":
-                                    h.Scale(self._config.OptionBr**2)
-                                elif c.getLabel()[:2] == "HW":
-                                    h.Scale(2.0*self._config.OptionBr*(1.0-self._config.OptionBr))
-                            if hSignal == None:
-                                hSignal = h.Clone()
-                            else:
-                                hSignal.Add(h)
-                        elif c.typeIsQCD():
-                            #print "QCD:",c.getLabel()
-                            if hQCD == None:
-                                hQCD = h.Clone()
-                            else:
-                                hQCD.Add(h)
-                        elif c.typeIsEWK():
-                            #print "EWK genuine:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)
-                            if not self._config.OptionGenuineTauBackgroundSource == "DataDriven":
-                                myHisto = histograms.Histo(h,c._datasetMgrColumn)
-                                myHisto.setIsDataMC(isData=False, isMC=True)
-                                myStackList.append(myHisto)
-                            else:
-                                if hEmbedded == None:
-                                    hEmbedded = h.Clone()
+                if observation.getControlPlotByIndex(i) != None:
+                    myCtrlPlot = self._config.ControlPlots[i]
+                    print "......", myCtrlPlot.title
+                    myMassSuffix = "_M%d"%m
+                    # Initialize histograms
+                    hSignal = None
+                    hQCD = None
+                    hEmbedded = None
+                    hEWKfake = None
+                    hData = None
+                    # Loop over dataset columns to find histograms
+                    myStackList = []
+                    for c in self._datasetGroups:
+                        if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn() and not c.getControlPlotByIndex(i) == None:
+                            h = c.getControlPlotByIndex(i)["shape"].Clone()
+                            if c.typeIsSignal():
+                                #print "signal:",c.getLabel()
+                                # Scale light H+ signal
+                                if m < 179:
+                                    if c.getLabel()[:2] == "HH":
+                                        h.Scale(self._config.OptionBr**2)
+                                    elif c.getLabel()[:2] == "HW":
+                                        h.Scale(2.0*self._config.OptionBr*(1.0-self._config.OptionBr))
+                                if hSignal == None:
+                                    hSignal = h.Clone()
                                 else:
-                                    hEmbedded.Add(h)
-                        elif c.typeIsEWKfake():
-                            #print "EWK fake:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)
-                            if hEWKfake == None:
-                                hEWKfake = h.Clone()
-                            else:
-                                hEWKfake.Add(h)
-                if len(myStackList) > 0 or self._config.OptionGenuineTauBackgroundSource == "DataDriven":
-                    if hQCD != None:
-                        myHisto = histograms.Histo(hQCD,"QCD",legendLabel=_legendLabelQCD)
+                                    hSignal.Add(h)
+                            elif c.typeIsQCD():
+                                #print "QCD:",c.getLabel()
+                                if hQCD == None:
+                                    hQCD = h.Clone()
+                                else:
+                                    hQCD.Add(h)
+                            elif c.typeIsEWK():
+                                #print "EWK genuine:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)
+                                if not self._config.OptionGenuineTauBackgroundSource == "DataDriven":
+                                    myHisto = histograms.Histo(h,c._datasetMgrColumn)
+                                    myHisto.setIsDataMC(isData=False, isMC=True)
+                                    myStackList.append(myHisto)
+                                else:
+                                    if hEmbedded == None:
+                                        hEmbedded = h.Clone()
+                                    else:
+                                        hEmbedded.Add(h)
+                            elif c.typeIsEWKfake():
+                                #print "EWK fake:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)
+                                if hEWKfake == None:
+                                    hEWKfake = h.Clone()
+                                else:
+                                    hEWKfake.Add(h)
+                    if len(myStackList) > 0 or self._config.OptionGenuineTauBackgroundSource == "DataDriven":
+                        if hQCD != None:
+                            myHisto = histograms.Histo(hQCD,"QCD",legendLabel=_legendLabelQCD)
+                            myHisto.setIsDataMC(isData=False, isMC=True)
+                            myStackList.insert(0, myHisto)
+                        if hEmbedded != None:
+                            myHisto = histograms.Histo(hEmbedded,"Embedding",legendLabel=_legendLabelEmbedding)
+                            myHisto.setIsDataMC(isData=False, isMC=True)
+                            myStackList.append(myHisto)
+                        if hEWKfake != None:
+                            myHisto = histograms.Histo(hEWKfake,"EWKfakes",legendLabel=_legendLabelEWKFakes)
+                            myHisto.setIsDataMC(isData=False, isMC=True)
+                            myStackList.append(myHisto)
+                        hData = observation.getControlPlotByIndex(i)["shape"].Clone()
+                        hDataUnblinded = hData.Clone()
+                        # Apply blinding
+                        myBlindingString = None
+                        if self._config.BlindAnalysis:
+                            if len(myCtrlPlot.blindedRange) > 0:
+                                myBlindingString = self._applyBlinding(hData,myCtrlPlot.blindedRange)
+                            if self._config.OptionBlindThreshold != None:
+                                for k in xrange(1, hData.GetNbinsX()+1):
+                                    myExpValue = 0.0
+                                    for item in myStackList:
+                                        myExpValue += item.getRootHisto().GetBinContent(k)
+                                    if hSignal.getRootHisto().GetBinContent(k) >= myExpValue * self._config.OptionBlindThreshold:
+                                        hData.getRootHisto().SetBinContent(k, -1.0)
+                                        hData.getRootHisto().SetBinError(k, 0.0)
+                        # Data
+                        myDataHisto = histograms.Histo(hData,"Data")
+                        myDataHisto.setIsDataMC(isData=True, isMC=False)
+                        myStackList.insert(0, myDataHisto)
+                        # Add signal
+                        mySignalLabel = "TTToHplus_M%d"%m
+                        if m > 179:
+                            mySignalLabel = "HplusTB_M%d"%m
+                        myHisto = histograms.Histo(hSignal,mySignalLabel)
                         myHisto.setIsDataMC(isData=False, isMC=True)
-                        myStackList.insert(0, myHisto)
-                    if hEmbedded != None:
-                        myHisto = histograms.Histo(hEmbedded,"Embedding",legendLabel=_legendLabelEmbedding)
-                        myHisto.setIsDataMC(isData=False, isMC=True)
-                        myStackList.append(myHisto)
-                    if hEWKfake != None:
-                        myHisto = histograms.Histo(hEWKfake,"EWKfakes",legendLabel=_legendLabelEWKFakes)
-                        myHisto.setIsDataMC(isData=False, isMC=True)
-                        myStackList.append(myHisto)
-                    hData = observation.getControlPlotByIndex(i)["shape"].Clone()
-                    hDataUnblinded = hData.Clone()
-                    # Apply blinding
-                    myBlindingString = None
-                    if self._config.BlindAnalysis:
+                        myStackList.insert(1, myHisto)
+                        # Add data to selection flow plot
+                        #if myBlindedStatus:
+                        #    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
+                        #else:
+                        selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
                         if len(myCtrlPlot.blindedRange) > 0:
-                            myBlindingString = self._applyBlinding(hData,myCtrlPlot.blindedRange)
-                        if self._config.OptionBlindThreshold != None:
-                            for k in xrange(1, hData.GetNbinsX()+1):
-                                myExpValue = 0.0
-                                for item in myStackList:
-                                    myExpValue += item.getRootHisto().GetBinContent(k)
-                                if hSignal.getRootHisto().GetBinContent(k) >= myExpValue * self._config.OptionBlindThreshold:
-                                    hData.getRootHisto().SetBinContent(k, -1.0)
-                                    hData.getRootHisto().SetBinError(k, 0.0)
-                    # Data
-                    myDataHisto = histograms.Histo(hData,"Data")
-                    myDataHisto.setIsDataMC(isData=True, isMC=False)
-                    myStackList.insert(0, myDataHisto)
-                    # Add signal
-                    mySignalLabel = "TTToHplus_M%d"%m
-                    if m > 179:
-                        mySignalLabel = "HplusTB_M%d"%m
-                    myHisto = histograms.Histo(hSignal,mySignalLabel)
-                    myHisto.setIsDataMC(isData=False, isMC=True)
-                    myStackList.insert(1, myHisto)
-                    # Add data to selection flow plot
-                    #if myBlindedStatus:
-                    #    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
-                    #else:
-                    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,hDataUnblinded,myStackList[1:])
-                    if len(myCtrlPlot.blindedRange) > 0:
-                        myBlindedStatus = True
-                    else:
-                        myBlindedStatus = False
-                    # Make plot
-                    myStackPlot = plots.DataMCPlot2(myStackList)
-                    myStackPlot.setLuminosity(self._luminosity)
-                    myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
-                    myStackPlot.setDefaultStyles()
-                    myParams = myCtrlPlot.details.copy()
-                    # Tweak paramaters
-                    if not "unit" in myParams.keys():
-                        myParams["unit"] = ""
-                    if myParams["unit"] != "":
-                        myParams["xlabel"] = "%s (%s)"%(myParams["xlabel"],myParams["unit"])
-                    ylabelBinInfo = True
-                    if "ylabelBinInfo" in myParams:
-                        ylabelBinInfo = myParams["ylabelBinInfo"]
-                        del myParams["ylabelBinInfo"]
-                    if ylabelBinInfo:
-                        myMinWidth = 10000.0
-                        myMaxWidth = 0.0
-                        for j in range(1,hData.getRootHisto().GetNbinsX()+1):
-                            w = hData.getRootHisto().GetBinWidth(j)
-                            if w < myMinWidth:
-                                myMinWidth = w
-                            if w > myMaxWidth:
-                                myMaxWidth = w
-                        myWidthSuffix = ""
-                        myMinWidthString = "%d"%myMinWidth
-                        myMaxWidthString = "%d"%myMaxWidth
-                        if myMinWidth < 1.0:
-                            myFormat = "%%.%df"%(abs(int(log10(myMinWidth)))+1)
-                            myMinWidthString = myFormat%myMinWidth
-                        if myMaxWidth < 1.0:
-                            myFormat = "%%.%df"%(abs(int(log10(myMaxWidth)))+1)
-                            myMaxWidthString = myFormat%myMaxWidth
-                        myWidthSuffix = "%s-%s"%(myMinWidthString,myMaxWidthString)
-                        if abs(myMinWidth-myMaxWidth) < 0.001:
-                            myWidthSuffix = "%s"%(myMinWidthString)
-                        if not (myParams["unit"] == "" and myWidthSuffix == "1"):
-                            myParams["ylabel"] = "%s / %s %s"%(myParams["ylabel"],myWidthSuffix,myParams["unit"])
-                    if myBlindingString != None:
-                        if myParams["unit"] != "" and myParams["unit"][0] == "^":
-                            myParams["blindingRangeString"] = "%s%s"%(myBlindingString, myParams["unit"])
+                            myBlindedStatus = True
                         else:
-                            myParams["blindingRangeString"] = "%s %s"%(myBlindingString, myParams["unit"])
-                    if "legendPosition" in myParams.keys():
-                        # FIXME: there is a mixup of east and west here
-                        if myParams["legendPosition"] == "NW":
+                            myBlindedStatus = False
+                        # Make plot
+                        myStackPlot = None
+                        myParams = myCtrlPlot.details.copy()
+                        #if not isinstance(hData, ROOT.TH2):
+                            #for j in range(1,myStackList[0].getRootHisto().GetNbinsY()+1):
+                                #for i in range(1,myStackList[0].getRootHisto().GetNbinsX()+1):
+                                    #mySum = 0.0
+                                    #for h in range(2, len(myStackList)):
+                                        #mySum += myStackList[h].getRootHisto().GetBinContent(i,j)
+                                    #if mySum > 0.0:
+                                        #myStackList[0].getRootHisto().SetBinContent(i,j,myStackList[0].getRootHisto().GetBinContent(i,j) / mySum)
+                                    #else:
+                                        #myStackList[0].getRootHisto().SetBinContent(i,j,-10.0)
+                            #myStackList[0].getRootHisto().SetMinimum(-1.0)
+                            #myStackList[0].getRootHisto().SetMaximum(1.0)
+                            #myStackList = [myStackList[0]]
+                            #myStackPlot = plots.PlotBase(myStackList)
+                            #if "ylabelBinInfo" in myParams:
+                                #del myParams["ylabelBinInfo"]
+                            #del myParams["unit"]
+                            #drawPlot2D(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
+                        myStackPlot = plots.DataMCPlot2(myStackList)
+                        myStackPlot.setLuminosity(self._luminosity)
+                        myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
+                        myStackPlot.setDefaultStyles()
+                        # Tweak paramaters
+                        if not "unit" in myParams.keys():
+                            myParams["unit"] = ""
+                        if myParams["unit"] != "":
+                            myParams["xlabel"] = "%s (%s)"%(myParams["xlabel"],myParams["unit"])
+
+                        ylabelBinInfo = True
+                        if "ylabelBinInfo" in myParams:
+                            ylabelBinInfo = myParams["ylabelBinInfo"]
+                            del myParams["ylabelBinInfo"]
+                        if ylabelBinInfo:
+                            myMinWidth = 10000.0
+                            myMaxWidth = 0.0
+                            for j in range(1,hData.getRootHisto().GetNbinsX()+1):
+                                w = hData.getRootHisto().GetBinWidth(j)
+                                if w < myMinWidth:
+                                    myMinWidth = w
+                                if w > myMaxWidth:
+                                    myMaxWidth = w
+                            myWidthSuffix = ""
+                            myMinWidthString = "%d"%myMinWidth
+                            myMaxWidthString = "%d"%myMaxWidth
+                            if myMinWidth < 1.0:
+                                myFormat = "%%.%df"%(abs(int(log10(myMinWidth)))+1)
+                                myMinWidthString = myFormat%myMinWidth
+                            if myMaxWidth < 1.0:
+                                myFormat = "%%.%df"%(abs(int(log10(myMaxWidth)))+1)
+                                myMaxWidthString = myFormat%myMaxWidth
+                            myWidthSuffix = "%s-%s"%(myMinWidthString,myMaxWidthString)
+                            if abs(myMinWidth-myMaxWidth) < 0.001:
+                                myWidthSuffix = "%s"%(myMinWidthString)
+                            if not (myParams["unit"] == "" and myWidthSuffix == "1"):
+                                myParams["ylabel"] = "%s / %s %s"%(myParams["ylabel"],myWidthSuffix,myParams["unit"])
+                        if myBlindingString != None:
+                            if myParams["unit"] != "" and myParams["unit"][0] == "^":
+                                myParams["blindingRangeString"] = "%s%s"%(myBlindingString, myParams["unit"])
+                            else:
+                                myParams["blindingRangeString"] = "%s %s"%(myBlindingString, myParams["unit"])
+                        if "legendPosition" in myParams.keys():
+                            # FIXME: there is a mixup of east and west here
+                            if myParams["legendPosition"] == "NW":
+                                myParams["moveLegend"] = {"dx": -0.22, "dy": 0.00}
+                            elif myParams["legendPosition"] == "SW":
+                                myParams["moveLegend"] = {"dx": -0.22, "dy": -0.45}
+                            elif myParams["legendPosition"] == "SE":
+                                myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
+                            elif myParams["legendPosition"] == "NE":
+                                myParams["moveLegend"] = {"dx": -0.53, "dy": 0.00}
+                            else:
+                                raise Exception("Unknown value for option legendPosition: %s!", myParams["legendPosition"])
+                            del myParams["legendPosition"]
+                        elif not "moveLegend" in myParams:
                             myParams["moveLegend"] = {"dx": -0.22, "dy": 0.00}
-                        elif myParams["legendPosition"] == "SW":
-                            myParams["moveLegend"] = {"dx": -0.22, "dy": -0.45}
-                        elif myParams["legendPosition"] == "SE":
-                            myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
-                        elif myParams["legendPosition"] == "NE":
-                            myParams["moveLegend"] = {"dx": -0.53, "dy": 0.00}
+                        if "ratioLegendPosition" in myParams.keys():
+                            if myParams["ratioLegendPosition"] == "left":
+                                myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
+                            elif myParams["ratioLegendPosition"] == "right":
+                                myParams["ratioMoveLegend"] = {"dx": 0.00, "dy": 0.03}
+                            else:
+                                raise Exception("Unknown value for option ratioLegendPosition: %s!", myParams["ratioLegendPosition"])
+                            del myParams["ratioLegendPosition"]
                         else:
-                            raise Exception("Unknown value for option legendPosition: %s!", myParams["legendPosition"])
-                        del myParams["legendPosition"]
-                    elif not "moveLegend" in myParams:
-                        myParams["moveLegend"] = {"dx": -0.22, "dy": 0.00}
-                    if "ratioLegendPosition" in myParams.keys():
-                        if myParams["ratioLegendPosition"] == "left":
                             myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-                        elif myParams["ratioLegendPosition"] == "right":
-                            myParams["ratioMoveLegend"] = {"dx": 0.00, "dy": 0.03}
-                        else:
-                            raise Exception("Unknown value for option ratioLegendPosition: %s!", myParams["ratioLegendPosition"])
-                        del myParams["ratioLegendPosition"]
-                    else:
-                        myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-                    # Remove non-dientified keywords
-                    del myParams["unit"]
-                    # Do plotting
-                    drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
+                        # Remove non-dientified keywords
+                        del myParams["unit"]
+                        # Do plotting
+                        drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
 
             # Do selection flow plot
             selectionFlow.makePlot(self._dirname,m,len(self._config.ControlPlots),self._luminosity)

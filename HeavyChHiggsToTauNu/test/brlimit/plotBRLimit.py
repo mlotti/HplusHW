@@ -61,14 +61,14 @@ def doBRlimit(limits, unblindedStatus, log=False):
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma"
             })
-    legend = histograms.createLegend(0.5, 0.78, 0.85, 0.92)
-    # make room for the final state text
+    
     dy = -0.1
     if limit.BRassumption != "":
         dy -= 0.05
-    legend = histograms.moveLegend(legend, dy=dy)
     if len(limits.getFinalstates()) > 1:
-        legend = histograms.moveLegend(legend, dy=-0.1)
+        dy -= 0.1
+    legend = histograms.createLegend(0.5, 0.78+dy, 0.85, 0.92+dy)
+    # make room for the final state text
     plot.setLegend(legend)
 
     name = "limitsBr"

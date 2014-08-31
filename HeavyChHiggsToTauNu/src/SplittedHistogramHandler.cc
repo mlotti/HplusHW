@@ -129,6 +129,38 @@ namespace HPlus {
     std::string myTitle = title+"Inclusive";
     histoContainer.push_back(fHistoWrapper.makeTH<TH1F>(level, myDir, myTitle.c_str(), myTitle.c_str(), nbins, min, max));
   }
+  
+  void SplittedHistogramHandler::createShapeHistogram(HistoWrapper::HistoLevel level, TFileDirectory& fdir, std::vector<WrappedTH2*>& histoContainer, std::string title, std::string label, int nbinsX, double minX, double maxX, int nbinsY, double minY, double maxY) {
+    if (fNUnfoldedBins == 1) {
+      // Create just one histogram
+      std::string myHistoTitle = getFullBinDescriptionStringByBinIndex(0, 0, 0, 0) + ";" + label;
+      histoContainer.push_back(fHistoWrapper.makeTH<TH2F>(level, fdir, title.c_str(), myHistoTitle.c_str(), nbinsX, minX, maxX, nbinsY, minY, maxY));
+      return;
+    }
+
+    // Create directory for the N x TH1 histograms, where N is the number of unfolded bins
+    TFileDirectory myDir = fdir.mkdir(title.c_str());
+    // Create N x TH1 histograms, where N is the number of unfolded bins
+    int myTauPtBinIndexs = static_cast<int>(fTauPtBinLowEdges.size()) + 1;
+    int myTauEtaBinIndexs = static_cast<int>(fTauEtaBinLowEdges.size()) + 1;
+    int myNVerticesBins = static_cast<int>(fNVerticesBinLowEdges.size()) + 1;
+    int myDeltaPhiTauMetBins = static_cast<int>(fDeltaPhiTauMetBinLowEdges.size()) + 1;
+    for (int l = 0; l < myDeltaPhiTauMetBins; ++l) {
+      for (int k = 0; k < myNVerticesBins; ++k) {
+        for (int j = 0; j < myTauEtaBinIndexs; ++j) {
+          for (int i = 0; i < myTauPtBinIndexs; ++i) {
+            std::stringstream s;
+            s << title.c_str() << getShapeBinIndex(i,j,k,l);
+            std::string myHistoTitle = getFullBinDescriptionStringByBinIndex(i, j, k, l) + ";" + label;
+            histoContainer.push_back(fHistoWrapper.makeTH<TH2F>(level, myDir, s.str().c_str(), myHistoTitle.c_str(), nbinsX, minX, maxX, nbinsY, minY, maxY));
+          }
+        }
+      }
+    }
+    // Create inclusive histogram
+    std::string myTitle = title+"Inclusive";
+    histoContainer.push_back(fHistoWrapper.makeTH<TH2F>(level, myDir, myTitle.c_str(), myTitle.c_str(), nbinsX, minX, maxX, nbinsY, minY, maxY));    
+  }
 
   void SplittedHistogramHandler::fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value) {
     checkProperBinning();
@@ -155,6 +187,22 @@ namespace HPlus {
     // Fill inclusive histogram
     if (fNUnfoldedBins > 1)
       histoContainer[histoContainer.size()-1]->Fill(value, weight);
+  }
+
+  void SplittedHistogramHandler::fillShapeHistogram(std::vector<WrappedTH2*>& histoContainer, double valueX, double valueY) {
+    checkProperBinning();
+    histoContainer[fCurrentUnfoldedBinIndex]->Fill(valueX, valueY);
+    // Fill inclusive histogram
+    if (fNUnfoldedBins > 1)
+      histoContainer[histoContainer.size()-1]->Fill(valueX, valueY);
+  }
+
+  void SplittedHistogramHandler::fillShapeHistogram(std::vector<WrappedTH2*>& histoContainer, double valueX, double valueY, double weight) {
+    checkProperBinning();
+    histoContainer[fCurrentUnfoldedBinIndex]->Fill(valueX, valueY, weight);
+    // Fill inclusive histogram
+    if (fNUnfoldedBins > 1)
+      histoContainer[histoContainer.size()-1]->Fill(valueX, valueY, weight);
   }
 
   size_t SplittedHistogramHandler::getTauPtBinIndex(double pt) const {
