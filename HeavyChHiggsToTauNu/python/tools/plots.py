@@ -288,20 +288,20 @@ _legendLabels = {
     "MCStatSystError": "Sim. stat.#oplussyst. unc.",
 }
 for mass in _lightHplusMasses:
-    _legendLabels["TTToHplusBWB_M%d"%mass] = "H^{+}W^{-} m_{H^{#pm}}=%d"%mass
-    _legendLabels["TTToHplusBHminusB_M%d"%mass] = "H^{+}H^{-} m_{H^{#pm}}=%d" % mass
-    _legendLabels["TTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+    _legendLabels["TTToHplusBWB_M%d"%mass] = "H^{+}W^{-} m_{H^{#pm}}=%d GeV"%mass
+    _legendLabels["TTToHplusBHminusB_M%d"%mass] = "H^{+}H^{-} m_{H^{#pm}}=%d GeV" % mass
+    _legendLabels["TTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 
-    _legendLabels["Hplus_taunu_s-channel_M%d"%mass] = "t#rightarrowH^{+} (s) m_{H^{+}}=%d" % mass
-    _legendLabels["Hplus_taunu_t-channel_M%d"%mass] = "t#rightarrowH^{+} (t) m_{H^{+}}=%d" % mass
-    _legendLabels["Hplus_taunu_tW-channel_M%d"%mass] = "t#rightarrowH^{+} (tW) m_{H^{+}}=%d" % mass
+    _legendLabels["Hplus_taunu_s-channel_M%d"%mass] = "t#rightarrowH^{+} (s) m_{H^{+}}=%d GeV" % mass
+    _legendLabels["Hplus_taunu_t-channel_M%d"%mass] = "t#rightarrowH^{+} (t) m_{H^{+}}=%d GeV" % mass
+    _legendLabels["Hplus_taunu_tW-channel_M%d"%mass] = "t#rightarrowH^{+} (tW) m_{H^{+}}=%d GeV" % mass
     _legendLabels["Hplus_taunu_M%d"%mass] = "t#rightarrowH^{+} m_{H^{+}}=%d" % mass
 
-    _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+    _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 for mass in _heavyHplusMasses:
-    _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+    _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 for mass in _heavyHplusToTBbarMasses:
-    _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d" % mass
+    _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d GeV" % mass
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
@@ -564,7 +564,7 @@ def _createRatio(rootHisto1, rootHisto2, ytitle, isBinomial=False):
         function = _createRatioErrorPropagation
     return function(rootHisto1, rootHisto2, ytitle)
 
-def _createRatioHistos(histo1, histo2, ytitle, ratioType=None):
+def _createRatioHistos(histo1, histo2, ytitle, ratioType=None, ratioErrorOptions={}):
     if ratioType is None:
         ratioType = "errorPropagation"
 
@@ -577,7 +577,7 @@ def _createRatioHistos(histo1, histo2, ytitle, ratioType=None):
         h.setLegendLabel(None)
         ret.append(h)
     elif ratioType == "errorScale":
-        ret.extend(_createRatioHistosErrorScale(histo1, histo2, ytitle))
+        ret.extend(_createRatioHistosErrorScale(histo1, histo2, ytitle, **ratioErrorOptions))
     else:
         raise Exception("Invalid value for argument ratioType '%s', valid are 'errorPropagation', 'binomial', 'errorScale'")
     return ret        
@@ -758,14 +758,16 @@ def _createRatioBinomial(histo1, histo2, ytitle):
 #
 # \param histo1  TH1 dividend
 # \param histo2  TH1 divisor
-# \param ytitl   Y axis title
+# \param ytitle  Y axis title
+# \param numeratorStatSyst   Include stat.+syst. to numerator (if syst globally enabled)
+# \param denominatorStatSyst Include stat.+syst. to denominator (if syst globally enabled)
 #
 # \return list of histograms.Histo objects for histo1/histo2
 #
 # Scales the histo1 values+uncertainties, and histo2 uncertainties by
 # histo2 values. Creates separate entries for histo2 statistical and
 # stat+syst uncertainties, if systematic uncertainties exist.
-def _createRatioHistosErrorScale(histo1, histo2, ytitle):
+def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True, denominatorStatSyst=True):
     addAlsoHatchedUncertaintyHisto = False
     #addAlsoHatchedUncertaintyHisto = True
 
@@ -774,15 +776,29 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
         ratio = histo1.Clone()
         ratio.SetDirectory(0)
 
-        ratioErr = histo2.Clone()
-        ratioErr.SetDirectory(0)
-        for i in xrange(0, ratio.GetNbinsX()+2):
+        xvalues = []
+        xerrhigh = []
+        xerrlow = []
+        yvalues = []
+        yerrs = []
+        for i in xrange(1, ratio.GetNbinsX()+1):
             scale = histo2.GetBinContent(i)
             ratio.SetBinContent(i, _divideOrZero(histo1.GetBinContent(i), scale))
             ratio.SetBinError(i, _divideOrZero(histo1.GetBinError(i), scale))
 
-            ratioErr.SetBinContent(i, 1)
-            ratioErr.SetBinError(i, _divideOrZero(histo2.GetBinError(i), scale))
+            xval = histo2.GetXaxis().GetBinCenter(i)
+            xlow = xval-histo2.GetXaxis().GetBinLowEdge(i)
+            xhigh = histo2.GetXaxis().GetBinUpEdge(i)-xval
+            yerr = _divideOrZero(histo2.GetBinError(i), scale)
+            xvalues.append(xval)
+            xerrhigh.append(xhigh)
+            xerrlow.append(xlow)
+            yvalues.append(1.0)
+            yerrs.append(yerr)
+
+        ratioErr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues), array.array("d", yvalues),
+                                          array.array("d", xerrlow), array.array("d", xerrhigh),
+                                          array.array("d", yerrs), array.array("d", yerrs))
 
         ratio.GetYaxis().SetTitle(ytitle)
         ratioErr.GetYaxis().SetTitle(ytitle)
@@ -913,6 +929,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
             ratioSyst1.RemovePoint(i)
             ratioSyst2.RemovePoint(i)
 
+        ratioSyst1.SetName(histo1.GetName()+"_syst")
         ratioSyst2.GetYaxis().SetTitle(ytitle)
         name = "BackgroundStatSystError"
         ratioSyst2.SetName(name)
@@ -920,8 +937,10 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle):
             name = "BackgroundSystError"
         _plotStyles[name].apply(ratioSyst2)
 
-        ret.append(_createHisto(ratioSyst1, drawStyle="[]", legendLabel=None))
-        ret.append(_createHisto(ratioSyst2, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
+        if numeratorStatSyst:
+            ret.append(_createHisto(ratioSyst1, drawStyle="[]", legendLabel=None))
+        if denominatorStatSyst:
+            ret.append(_createHisto(ratioSyst2, drawStyle="2", legendLabel=_legendLabels[name], legendStyle="F"))
         if addAlsoHatchedUncertaintyHisto:
             ratioSyst2_2 = ratioSyst.Clone("BackgroundStatSystError2")
             styles.errorStyle.apply(ratioSyst2_2)
@@ -972,7 +991,7 @@ def _createRatioLine(xmin, xmax, yvalue=1.0):
 # examples.
 #
 # \return TPad 
-def _createCoverPad(xmin=0.065, ymin=0.285, xmax=0.165, ymax=0.33):
+def _createCoverPad(xmin=0.065, ymin=0.285, xmax=0.158, ymax=0.33):
     coverPad = ROOT.TPad("coverpad", "coverpad", xmin, ymin, xmax, ymax)
     coverPad.SetBorderMode(0)
     return coverPad
@@ -1125,14 +1144,14 @@ class PlotBase:
 
     ## Set the default legend styles
     #
-    # Default is "F", except for data "P" and for signal MC "L"
+    # Default is "F", except for data "PLE" and for signal MC "L"
     # 
     # Intended to be called from the deriving classes
     def _setLegendStyles(self):
         self.histoMgr.setHistoLegendStyleAll("F")
         for h in self.histoMgr.getHistos():
             if h.isData():
-                h.setLegendStyle("P")
+                h.setLegendStyle("PE")
             elif isSignal(h.getName()):
                 h.setLegendStyle("L")
 
@@ -1293,6 +1312,7 @@ class PlotBase:
     # to self.histoMgr. If setLuminosity() has been called with None,
     # no luminosity text is added.
     def addLuminosityText(self, x=None, y=None):
+        histograms._printTextDeprecationWarning("plots.PlotBase.addLuminosityText()", "plots.PlotBase.addStandardTexts()")
         if hasattr(self, "luminosity"):
             if self.luminosity != None:
                 histograms.addLuminosityText(x, y, self.luminosity)
@@ -1326,12 +1346,34 @@ class PlotBase:
     # specified in histograms is used. If setEnergy() has been called
     # with None, no energy text is added.
     def addEnergyText(self, x=None, y=None):
+        histograms._printTextDeprecationWarning("plots.PlotBase.addEnergyText()", "plots.PlotBase.addStandardTexts()")
         s = None
         if hasattr(self, "energies"):
             if self.energies != None:
                 s = ", ".join(self.energies)
                 s += " TeV"
         histograms.addEnergyText(x, y, s)
+
+    ## Add standard CMS texts
+    #
+    # \param addLuminosityText  If True, add luminosity text (use stored luminosity)
+    # \param kwargs             Keyword arguments, forwarded to histograms.addStandardTexts()
+    def addStandardTexts(self, addLuminosityText=False, **kwargs):
+        lumi = None
+        if hasattr(self, "luminosity"):
+            lumi = self.luminosity
+        elif self.histoMgr.hasLuminosity():
+            lumi = self.histoMgr.getLuminosity()
+        elif addLuminosityText:
+            raise Exception("addLuminosityText=True, but the Plot object does not have luminosity set, and plot.histoMgr has not been normalized by or to luminosity")
+
+        s = None
+        if hasattr(self, "energies"):
+            if self.energies is not None:
+                s = ", ".join(self.energies)
+                s += " TeV"
+
+        histograms.addStandardTexts(lumi=lumi, sqrts=s, **kwargs)
 
     ## Update drawing options
     #
@@ -1484,10 +1526,11 @@ class PlotRatioBase:
     # \param invertRatio      Invert the roles of numerator and denominator
     # \param ratioIsBinomial  True for binomial ratio (e.g. efficiency) (\b deprecated)
     # \param ratioType        Type of the ratio, forwarded to _createRatioHistos() (None for default)
+    # \param ratioErrorOptions Additional options for ratio error treatment
     # \param kwargs           Keyword arguments (forwarded to _createFrame())
     #
     # Intended for internal use only
-    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, ratioIsBinomial=False, ratioType=None, **kwargs):
+    def _createFrameRatio(self, filename, numerator, denominator, ytitle, invertRatio=False, ratioIsBinomial=False, ratioType=None, ratioErrorOptions={}, **kwargs):
         (num, denom) = (numerator, denominator)
         if invertRatio:
             (num, denom) = (denom, num)
@@ -1498,7 +1541,7 @@ class PlotRatioBase:
             print "WARNING: ratioIsBinomial is deprepcated, please yse ratioType='binomial' instead"
             ratioType = "binomial"
 
-        ratioHistos = _createRatioHistos(num, denom, ytitle, ratioType=ratioType)
+        ratioHistos = _createRatioHistos(num, denom, ytitle, ratioType=ratioType, ratioErrorOptions=ratioErrorOptions)
         self.setRatios(ratioHistos)
         reorder = []
         for n in ["BackgroundStatSystError", "BackgroundStatError"]:
@@ -1521,6 +1564,7 @@ class PlotRatioBase:
     # \param invertRatio      Invert the roles of numerator and denominator
     # \param ratioIsBinomial  True for binomial ratio (e.g. efficiency) (\b deprecated)
     # \param ratioType        Type of the ratio, forwarded to _createRatioHistos() (None for default)
+    # \param ratioErrorOptions Additional options for ratio error treatment
     # \param kwargs           Keyword arguments (forwarded to _createFrame())
     #
     # Creates one ratio histogram for each numerator, as
@@ -1528,7 +1572,7 @@ class PlotRatioBase:
     # formed as denominator/numerator.
     #
     # Intended for internal use only
-    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, ratioType=None, **kwargs):
+    def _createFrameRatioMany(self, filename, numerators, denominator, invertRatio=False, ratioIsBinomial=False, ratioType=None, ratioErrorOptions={}, **kwargs):
         
         if ratioIsBinomial:
             if ratioType is not None:
@@ -1543,7 +1587,7 @@ class PlotRatioBase:
             (num, denom) = (numer, denominator)
             if invertRatio:
                 (num, denom) = (denom, num)
-            ratioHistos = _createRatioHistos(num, denom, "Ratio", ratioType=ratioType)
+            ratioHistos = _createRatioHistos(num, denom, "Ratio", ratioType=ratioType, ratioErrorOptions=ratioErrorOptions)
             tmp = []
             for h in ratioHistos:
                 if h.getName() == "BackgroundStatSystError":
@@ -1553,13 +1597,10 @@ class PlotRatioBase:
                 else:
                     if isinstance(numer, histograms.Histo):
                         aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
-                        h.setName(numer.getName())
                     elif isinstance(numer, dataset.RootHistoWithUncertainties):
                         aux.copyStyle(numer.getRootHisto(), h.getRootHisto())
-                        h.setName(numer.GetName())
                     else:
                         aux.copyStyle(numer, h.getRootHisto())
-                        h.setName(numer.GetName())
                         h = _createHisto(h)
                     tmp.append(h)
             #if len(tmp) > 1:
@@ -1627,7 +1668,8 @@ class PlotRatioBase:
 
         # Add label for blinded range
         if hasattr(self, "blindingRangeString"):
-            histograms.addText(0.55, 0.33, "Data blinded: %s"%self.blindingRangeString, align="center", bold=True)
+            # MK: Why this is not implemented in terms of ratioPlotObjectsAfter?
+            histograms.addText(0.55, 0.38, "Data blinded: %s"%self.blindingRangeString, align="center", bold=True)
 
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
@@ -2211,6 +2253,7 @@ class PlotDrawer:
     # \param ratioInvert         Should the ratio be inverted?
     # \param ratioIsBinomial     Is the ratio binomal (i.e. use Clopper-Pearson?) (deprecated)
     # \param ratioType           Ratio type (None for default)
+    # \param ratioErrorOptions   Additional options for ratio error treatment
     # \param ratioCreateLegend   Default legend creation parameters for ratio (None to not to create legend, True to create with default parameters)
     # \param ratioMoveLegend     Default ratio legend movement parameters (after creation)
     # \param opts                Default frame bounds linear scale (see histograms._boundsArgs())
@@ -2224,6 +2267,7 @@ class PlotDrawer:
     # \param rebinToWidthX       Default width of X bins to rebin to
     # \param rebinToWidthY       Default width of Y bins to rebin to (only applicable for TH2)
     # \param divideByBinWidth    Divide bin contents by bin width? (done after rebinning)
+    # \param errorBarsX          Add vertical error bars (for all TH1's in the plot)? None for True if divideByBinWidth is True
     # \param createLegend        Default legend creation parameters (None to not to create legend)
     # \param moveLegend          Default legend movement parameters (after creation)
     # \param customizeBeforeFrame Function customize the plot before creating the canvas and frame
@@ -2232,7 +2276,11 @@ class PlotDrawer:
     # \param addLuminosityText   Should luminosity text be drawn?
     # \param stackMCHistograms   Should MC histograms be stacked?
     # \param addMCUncertainty    Should MC total (stat) uncertainty be drawn()
-    # \param cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis
+    # \param cmsText             If not None, overrides "CMS" text by-plot basis
+    # \param cmsExtraText        If not none, overrides the "Preliminary" text by-plot basis
+    # \param addCmsText          If False, do not add "CMS" text
+    # \param cmsTextPosition     CMS text position (None for default value, see histograms.addStandardTexts() for more)
+    # \param cmsExtraTextPosition CMS extra text position (None for default value, see histograms.addStandardTexts() for more)
     def __init__(self,
                  xlabel=None,
                  ylabel="Occurrances / %.0f",
@@ -2243,6 +2291,7 @@ class PlotDrawer:
                  ratioInvert=False,
                  ratioIsBinomial=False,
                  ratioType=None,
+                 ratioErrorOptions={},
                  ratioCreateLegend=None,
                  ratioMoveLegend={},
                  opts={},
@@ -2255,7 +2304,8 @@ class PlotDrawer:
                  rebinY=None,
                  rebinToWidthX=None,
                  rebinToWidthY=None,
-                 divideByBinWidth=False,
+                 divideByBinWidth=None,
+                 errorBarsX=None,
                  createLegend={},
                  moveLegend={},
                  customizeBeforeFrame=None,
@@ -2266,6 +2316,10 @@ class PlotDrawer:
                  addMCUncertainty=False,
                  blindingRangeString=None,
                  cmsText=None,
+                 cmsExtraText=None,
+                 addCmsText=True,
+                 cmsTextPosition=None,
+                 cmsExtraTextPosition=None,
                  ):
         self.xlabelDefault = xlabel
         self.ylabelDefault = ylabel
@@ -2276,6 +2330,7 @@ class PlotDrawer:
         self.ratioInvertDefault = ratioInvert
         self.ratioIsBinomialDefault = ratioIsBinomial
         self.ratioTypeDefault = ratioType
+        self.ratioErrorOptionsDefault = ratioErrorOptions
         self.ratioCreateLegendDefault = ratioCreateLegend
         self.ratioMoveLegendDefault = ratioMoveLegend
         self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
@@ -2292,6 +2347,7 @@ class PlotDrawer:
         self.rebinToWidthXDefault = rebinToWidthX
         self.rebinToWidthYDefault = rebinToWidthY
         self.divideByBinWidthDefault = divideByBinWidth
+        self.errorBarsXDefault = errorBarsX
         self.createLegendDefault = createLegend
         self.moveLegendDefault = moveLegend
         self.customizeBeforeFrameDefault = customizeBeforeFrame
@@ -2302,6 +2358,10 @@ class PlotDrawer:
         self.addMCUncertaintyDefault = addMCUncertainty
         self.blindingRangeStringDefault = None
         self.cmsTextDefault = cmsText
+        self.cmsExtraTextDefault = cmsExtraText
+        self.addCmsTextDefault = addCmsText
+        self.cmsTextPositionDefault = cmsTextPosition
+        self.cmsExtraTextPositionDefault = cmsExtraTextPosition
 
     ## Modify the defaults
     #
@@ -2312,7 +2372,7 @@ class PlotDrawer:
                 raise Exception("No default value for '%s'"%name)
             setattr(self, name+"Default", value)
 
-    def _getValue(self, attr, p, args, attrPostfix="", **kwargs):
+    def _getValue(self, attr, p, args, attrPostfix="", useIfNone="", **kwargs):
         def _update(oldVal, newVal):
             if oldVal is None:
                 return copy.deepcopy(newVal)
@@ -2337,6 +2397,9 @@ class PlotDrawer:
             ret = _update(ret, args[attr])
         except KeyError:
             pass
+
+        if ret is None and useIfNone != "":
+            ret = self._getValue(useIfNone, p, args, attrPostfix=attrPostfix, **kwargs)
 
         return ret
 
@@ -2510,7 +2573,7 @@ class PlotDrawer:
         if rebinFunction is not None:
             p.histoMgr.forEachHisto(rebinFunction)
 
-        if kwargs.get("divideByBinWidth", self.divideByBinWidthDefault):
+        if self._getValue("divideByBinWidth", p, kwargs):
             # TH1::Scale() with "width" option divides the histogram by bin width
             p.histoMgr.forEachHisto(lambda h: h.getRootHistoWithUncertainties().Scale(1, "width"))
 
@@ -2545,6 +2608,7 @@ class PlotDrawer:
     # \li\a ratioInvert  Should the ratio be inverted?
     # \li\a ratioIsBinomial  Is the ratio a binomial?
     # \li\a ratioType    Type of the ratio calculation
+    # \li\a ratioErrorOptions   Additional options for ratio error treatment
     # \li\a customizeBeforeFrame Function customize the plot before creating the canvas and frame
     # \li\a backgroundColor  Plot background color (None for white)
     def createFrame(self, p, name, **kwargs):
@@ -2569,6 +2633,7 @@ class PlotDrawer:
         if ratio:
             args["createRatio"] = True
             args["ratioType"] = self._getValue("ratioType", p, kwargs)
+            args["ratioErrorOptions"] = self._getValue("ratioErrorOptions", p, kwargs)
             if self._getValue("ratioInvert", p, kwargs):
                 args["invertRatio"] = True
             if self._getValue("ratioIsBinomial", p, kwargs):
@@ -2607,11 +2672,27 @@ class PlotDrawer:
     # \li\a ratio        Should ratio pad be drawn? (default given in __init__()/setDefaults())
     # \li\a ratioCreateLegend  Dictionary forwarded to histograms.creteLegend() (if None, don't create legend, if True, create with default parameters)
     # \li\a ratioMoveLegend    Dictionary forwarded to histograms.moveLegend() after creating the legend
+    # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?  None for True if divideByBinWidth is True
     #
     # The default legend position should be set by modifying histograms.createLegend (see histograms.LegendCreator())
     def setLegend(self, p, **kwargs):
         createLegend = self._getValue("createLegend", p, kwargs)
         moveLegend = self._getValue("moveLegend", p, kwargs)
+
+        # Add X error bar also to legend entries
+        if self._getValue("errorBarsX", p, kwargs, useIfNone="divideByBinWidth"):
+            # Add L to PE in legend styles
+            histos = p.histoMgr.getHistos()
+            if hasattr(p, "ratioHistoMgr"):
+                histos.extend(p.ratioHistoMgr.getHistos())
+            for histo in histos:
+                lst = histo.getLegendStyle()
+                if lst is None:
+                    continue
+                lst = lst.lower()
+                if "p" in lst and "e" in lst and not "l" in lst:
+                    histo.setLegendStyle(lst+"L")
+
         if createLegend is not None:
             p.setLegend(histograms.moveLegend(histograms.createLegend(**createLegend), **moveLegend))
 
@@ -2673,10 +2754,15 @@ class PlotDrawer:
     # \li\a xlabel  X axis title (None for pick from first histogram)
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
+    # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?  None for True if divideByBinWidth is True
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
-    # \lu\a customizeBeforeDraw Function to customize the plot object before drawing the plot
-    # \lu\a customizeBeforeSave Function to customize the plot object before saving the plot
-    # \li\a cmsText             If not None, overrides "CMS"/"CMS Preliminary" text by-plot basis (default given in __init__()/setDefaults())
+    # \li\a customizeBeforeDraw Function to customize the plot object before drawing the plot
+    # \li\a customizeBeforeSave Function to customize the plot object before saving the plot
+    # \li\a cmsText             If not None, overrides "CMS" text by-plot basis
+    # \li\a cmsExtraText        If not none, overrides the "Preliminary" text by-plot basis
+    # \li\a addCmsText          If False, do not add "CMS" text
+    # \param cmsTextPosition     CMS text position (None for default value, see histograms.addStandardTexts() for more)
+    # \param cmsExtraTextPosition CMS extra text position (None for default value, see histograms.addStandardTexts() for more)
     #
     # In addition of drawing and saving the plot, handles the X and Y
     # axis titles, and "CMS Preliminary", "sqrt(s)" and luminosity
@@ -2712,6 +2798,13 @@ class PlotDrawer:
         if blindingRangeString != None and isinstance(p, PlotRatioBase):
             p.addBlindingRangeString(blindingRangeString)
 
+        # X error bar
+        errorBarsX = self._getValue("errorBarsX", p, kwargs, useIfNone="divideByBinWidth")
+        if errorBarsX:
+            # enable vertical error bar in the global TStyle
+            errorXbackup = ROOT.gStyle.GetErrorX()
+            ROOT.gStyle.SetErrorX(0.5)
+
         p.draw()
 
         # Updates the possible Z axis label styles
@@ -2721,11 +2814,12 @@ class PlotDrawer:
         if zlabel is not None and paletteAxis != None:
             paletteAxis.GetAxis().SetTitle(zlabel)
 
-        cmsText = self._getValue("cmsText", p, kwargs)
-        histograms.addCmsPreliminaryText(text=cmsText)
-        p.addEnergyText()
-        if self._getValue("addLuminosityText", p, kwargs):
-            p.addLuminosityText()
+        p.addStandardTexts(addLuminosityText = self._getValue("addLuminosityText", p, kwargs),
+                           addCmsText = self._getValue("addCmsText", p, kwargs),
+                           cmsTextPosition = self._getValue("cmsTextPosition", p, kwargs),
+                           cmsExtraTextPosition = self._getValue("cmsExtraTextPosition", p, kwargs),
+                           cmsText = self._getValue("cmsText", p, kwargs),
+                           cmsExtraText = self._getValue("cmsExtraText", p, kwargs))
 
 
         customize2 = self._getValue("customizeBeforeSave", p, kwargs)
@@ -2733,6 +2827,9 @@ class PlotDrawer:
             customize2(p)
 
         p.save()
+
+        if errorBarsX:
+            ROOT.gStyle.SetErrorX(errorXbackup)
 
 
 drawPlot = PlotDrawer()

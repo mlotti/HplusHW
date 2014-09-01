@@ -612,9 +612,7 @@ def common(h, xlabel, ylabel, cutLine=None, cutBox=None, function=None):
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 

@@ -52,15 +52,15 @@ defaultNumberOfJobs = 20
 
 
 ## Default command line options for LHC-CLs (asymptotic, observed limit)
-lhcAsymptoticOptionsObserved = "-M Asymptotic --picky -v 2"
+lhcAsymptoticOptionsObserved = "-M Asymptotic --picky -v 2 --rAbsAcc 0.00001"
 ## Default command line options for LHC-CLs (asymptotic, expected limit)
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRminSigmaBr = "0.001" # pb
 lhcAsymptoticRminBrLimit = "0" # percent
 ## Default "Rmax" parameter for LHC-CLs (asymptotic)
-lhcAsymptoticRmaxSigmaBr = "500" # pb
-lhcAsymptoticRmaxBrLimit = "1" # percent
+lhcAsymptoticRmaxSigmaBr = "1.0" # pb
+lhcAsymptoticRmaxBrLimit = "1.0" # percent
 
 ## Deduces from directory listing the mass point list
 def obtainMassPoints(pattern):
@@ -310,8 +310,8 @@ class LHCTypeAsymptotic:
         opts += " --rMax %s"%self.rMax.getValue(mass)
         opts += " -m %s"%mass
         opts += " -n obs_m%s"%mass
-        if self.brlimit:
-            opts += " --rAbsAcc 0.00001" # increase accuracy of calculation for br limit
+#        if self.brlimit:
+#            opts += " --rAbsAcc 0.00001" # increase accuracy of calculation for br limit
         command = ["#!/bin/sh", ""]
         # Combine cards and prepare workspace for physics model, if necessary
         myInputDatacardName = _addCombinePreparationCommands(self.brlimit, datacardFiles, mass, command)
@@ -319,8 +319,10 @@ class LHCTypeAsymptotic:
         command.append("combine %s -d %s" % (opts, myInputDatacardName))
         aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.obsAndExpScripts[mass] = fileName
-
-        self._createMLFit(mass, fileName, myInputDatacardName)
+        if not self.opts.nomlfit:
+            self._createMLFit(mass, fileName, myInputDatacardName)
+        else:
+            print "skipping creation of ML fit scripts, to enable run with --nomlfit"
 
     ## Create the expected job script for a single mass point
     #
@@ -334,8 +336,8 @@ class LHCTypeAsymptotic:
         opts += " --rMax %s"%self.rMax.getValue(mass)
         opts += " -m %s"%mass
         opts += " -n blinded_m%s"%mass
-        if self.brlimit:
-            opts += " --rAbsAcc 0.00001" # increase accuracy of calculation for br limit
+#        if self.brlimit:
+#            opts += " --rAbsAcc 0.00001" # increase accuracy of calculation for br limit
         command = ["#!/bin/sh", ""]
         # Combine cards and prepare workspace for physics model, if necessary
         myInputDatacardName = _addCombinePreparationCommands(self.brlimit, datacardFiles, mass, command)
@@ -421,7 +423,10 @@ class LHCTypeAsymptotic:
     def _parseResultFromCombineOutput(self, result, output):
         nMatches = 0
         lines = output.split("\n")
-        obsresult_re = re.compile("Observed Limit: r < \s*(?P<value>\d+\.\d+)")
+        if self.brlimit:
+            obsresult_re = re.compile("Observed Limit: BR < \s*(?P<value>\d+\.\d+)")
+        elif self.sigmabrlimit:
+            obsresult_re = re.compile("Observed Limit: r < \s*(?P<value>\d+\.\d+)")
         expresult_re = None
         if self.brlimit:
             expresult_re = re.compile("Expected \s*(?P<quantile>\d+\.\d+)%: BR < \s*(?P<value>\d+\.\d+)")
@@ -485,8 +490,11 @@ class LHCTypeAsymptotic:
         raise Exception("Unable to parse the output of command '%s'" % script)
 
     def _runMLFit(self, mass):
-        script = self.mlfitScripts[mass]
-        self._run(script, "mlfit_m_%s_output.txt" % mass)
+        if mass in self.mlfitScripts.keys():
+            script = self.mlfitScripts[mass]
+            self._run(script, "mlfit_m_%s_output.txt" % mass)
+        else:
+            print "Skipping ML fit for mass:",mass
 
 def parseDiffNuisancesOutput(outputFileName, configFileName, mass):
     # first read nuisance types from datacards

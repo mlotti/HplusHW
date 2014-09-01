@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 import sys
+from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
@@ -11,13 +13,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 
-def main():
+def main(opts):
     # Assume by default that the observed limit should be blinded
-    unblindedStatus = False
-    # parse command line options
-    if "--unblinded" in sys.argv:
-        unblindedStatus = True
-    if not unblindedStatus:
+    if not opts.unblinded:
         print "Working in BLINDED mode, i.e. I will not tell you the observed limit before you say please ..."
 
     limits = limit.BRLimits()
@@ -30,15 +28,20 @@ def main():
         style.tdrStyle.SetTitleYOffset(1.6)
 
     # Set the paper mode
-    #limit.forPaper = True
-    if limit.forPaper:
+    limit.forPaper = True
+    if opts.paper:
         histograms.cmsTextMode = histograms.CMSMode.PAPER
 
-    doBRlimit(limits,unblindedStatus)
-    doLimitError(limits,unblindedStatus)
-    limits.print2(unblindedStatus)
+    if opts.parentheses:
+        limit.useParentheses()
 
-def doBRlimit(limits,unblindedStatus):
+    doBRlimit(limits, opts.unblinded)
+    doBRlimit(limits, opts.unblinded, log=True)
+    doLimitError(limits, opts.unblinded)
+    limits.print2(opts.unblinded)
+    limits.saveAsLatexTable(opts.unblinded)
+
+def doBRlimit(limits, unblindedStatus, log=False):
     graphs = []
     if unblindedStatus:
         gr = limits.observedGraph()
@@ -51,38 +54,56 @@ def doBRlimit(limits,unblindedStatus):
             ])
 
     plot = plots.PlotBase(graphs)
+    plot.setLuminosity(limits.getLuminosity())
 
     plot.histoMgr.setHistoLegendLabelMany({
             "Expected": None,
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma"
             })
-    legend = histograms.createLegend(0.48, 0.75, 0.85, 0.92)
+    
+    dy = -0.1
+    if limit.BRassumption != "":
+        dy -= 0.05
     if len(limits.getFinalstates()) > 1:
-        legend = histograms.moveLegend(legend, dy=-0.1)
+        dy -= 0.1
+    legend = histograms.createLegend(0.5, 0.78+dy, 0.85, 0.92+dy)
+    # make room for the final state text
     plot.setLegend(legend)
 
+    name = "limitsBr"
+    ymin = 0
+    if log:
+        name += "_log"
+        if limits.isHeavyStatus:
+            ymin = 1e-2
+        else:
+            ymin = 1e-3
     if len(limits.mass) == 1:
-        plot.createFrame("limitsBr", opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": 0, "ymax": limits.getFinalstateYmaxBR()})
+        plot.createFrame(name, opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": ymin, "ymax": limits.getFinalstateYmaxBR()})
     else:
-        plot.createFrame("limitsBr", opts={"ymin": 0, "ymax": limits.getFinalstateYmaxBR()})
+        plot.createFrame(name, opts={"ymin": ymin, "ymax": limits.getFinalstateYmaxBR()})
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     if limits.isHeavyStatus:
         plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
     else:
         plot.frame.GetYaxis().SetTitle(limit.BRlimit)
 
-    plot.draw()
+    if log:
+        plot.getPad().SetLogy(log)
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+    plot.draw()
+    plot.addStandardTexts()
 
     size = 20
-    x = 0.2
-    histograms.addText(x, 0.88, limit.process, size=size)
+    x = 0.51
+    process = limit.process
+    if limits.isHeavyStatus:
+        process = limit.processHeavy
+    histograms.addText(x, 0.88, process, size=size)
     histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.79, limit.BRassumption, size=size)
+    if limit.BRassumption != "":
+        histograms.addText(x, 0.79, limit.BRassumption, size=size)
 
     plot.save()
 
@@ -145,9 +166,8 @@ def doLimitError(limits,unblindedStatus):
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.2
@@ -164,4 +184,12 @@ def doLimitError(limits,unblindedStatus):
 
 
 if __name__ == "__main__":
-    main()
+    parser = OptionParser(usage="Usage: %prog [options]")
+    parser.add_option("--unblinded", dest="unblinded", default=False, action="store_true",
+                      help="Enable unblined mode")
+    parser.add_option("--paper", dest="paper", default=False, action="store_true",
+                      help="Paper mode")
+    parser.add_option("--parentheses", dest="parentheses", default=False, action="store_true",
+                      help="Use parentheses for sigma and BR")
+    (opts, args) = parser.parse_args()
+    main(opts)

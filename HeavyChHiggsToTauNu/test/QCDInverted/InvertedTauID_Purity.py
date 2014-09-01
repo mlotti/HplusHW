@@ -140,10 +140,9 @@ def main():
 #    histograms.addText(0.2, 0.3, "TailKiller: TightPlus", 18)
 
 
-
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText(s="%s TeV"%(datasets.getEnergies()[0]))
-    histograms.addLuminosityText(x=None, y=None, lumi=datasets.getDataset("Data").getLuminosity())
+    plot.setEnergy(datasets.getEnergies())
+    plot.setLuminosity(datasets.getDataset("Data").getLuminosity())
+    plot.addStandardTexts()
 
     plot.draw()
     plot.save()

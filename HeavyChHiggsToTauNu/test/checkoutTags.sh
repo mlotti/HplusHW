@@ -121,7 +121,7 @@ addpkg CondFormats/EgammaObjects  V00-04-00
 # With respect to V00-03-01 in the twiki page, this one contains only bugfixes
 cvs co -r V00-03-01 UserCode/CMG/CMGTools/External
 mkdir CMGTools
-mv UserCode/CMG/CMGTools/External CMSGTools/.
+mv UserCode/CMG/CMGTools/External CMGTools/.
 
 
 # Type I/II MET

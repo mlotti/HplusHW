@@ -528,6 +528,9 @@ class ConfigBuilder:
         runSetter(lambda module, name: param.setFakeTauSFAndSystematics(module.fakeTauSFandSystematics, module.tauSelection, name))
         # Set PU ID src for modules
         runSetter(lambda module, name: param.setJetPUIdSrc(module.jetSelection, name))
+        # Set embedding mT weight, not needed for fit-based
+        #if self.options.tauEmbeddingInput != 0:
+        #    runSetter(param.setEmbeddingMTWeightBasedOnSelection)
 
         # Optional output
         if self.edmOutput:
@@ -585,7 +588,7 @@ class ConfigBuilder:
         process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
         process.GlobalTag.globaltag = cms.string(self.dataVersion.getGlobalTag())
         if self.options.tauEmbeddingInput != 0:
-            process.GlobalTag.globaltag = "START44_V13::All"
+            process.GlobalTag.globaltag = "START53_V21::All"
         print "GlobalTag="+process.GlobalTag.globaltag.value()
 
         # Common stuff
@@ -680,6 +683,10 @@ class ConfigBuilder:
         if self.options.tauEmbeddingInput != 0:
             process.load("HiggsAnalysis.HeavyChHiggsToTauNu.WTauMuWeight_cfi")
             process.commonSequence += process.wtaumuWeight
+
+            # This was supposed to be saved in embedded pattuples, but apparently in v53_3 is not
+            process.embeddedTau = tauEmbeddingCustomisations.addTauEmbeddingMuonTausUsingVisible(process)
+            process.commonSequence += process.embeddedTau
 
             #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
             tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, self.options, self.dataVersion)
@@ -1092,6 +1099,14 @@ class ConfigBuilder:
                              process.commonSequence+genmatchFilter+genmatchCount)
                 mod2.eventCounter.counters.append(postfix+"GenMatchCount")
 
+            if True:
+                addIntermediateAnalyzer(mod, name, postfix)
+
+                postfix += "MTWeight"
+                mod = mod.clone()
+                #mod.embeddingMTWeight.mode = "dataEfficiency" # bin-based
+                mod.embeddingMTWeight.enabled = True # fit-based
+
             enablePrintCounter(mod)
             mod.histogramAmbientLevel = self.histogramAmbientLevel
             path = cms.Path(process.commonSequence * mod)
@@ -1409,6 +1424,15 @@ class ConfigBuilder:
         def addMuonIdDataEff(shiftBy, postfix):
             return addTrgDataEff("embeddingMuonIdEfficiency", shiftBy, "MuonIdDataEff"+postfix)
 
+        def addEmbeddingMTWeight(shiftBy, postfix):
+            # bin-based
+            # return addTrgDataEff("embeddingMTWeight", shiftBy, "EmbMTWeight"+postfix)
+            # fit-based
+            module = self._cloneForVariation(getattr(process, name))
+            module.embeddingMTWeight.variationEnabled = True
+            module.embeddingMTWeight.variationDirection = shiftBy
+            return self._addVariationModule(process, module, name+self.systPrefix+"EmbMTWeight"+postfix)
+
         def addBTagSF(shiftBy, postfix):
             module = self._cloneForVariation(getattr(process, name))
             module.bTagging.variationEnabled = True
@@ -1458,6 +1482,9 @@ class ConfigBuilder:
 
             names.append(addMuonIdDataEff( 1.0, "Plus"))
             names.append(addMuonIdDataEff( -1.0, "Minus"))
+
+            names.append(addEmbeddingMTWeight(1, "Plus"))
+            names.append(addEmbeddingMTWeight(-1, "Minus"))
 
             if not hasattr(process, "wtaumuWeightPlus"):
                 process.wtaumuWeightPlus = process.wtaumuWeight.clone(variationEnabled=True)

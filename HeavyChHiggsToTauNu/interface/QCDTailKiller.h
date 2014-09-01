@@ -23,7 +23,7 @@ namespace HPlus {
 
   class QCDTailKiller: public BaseSelection {
   public:
-    enum CutShape { kNoCut, kRectangle, kTriangle, kCircle };
+    enum CutShape { kNoCut, kRectangle, kTriangle, kCircle, kMinDeltaPhiJetMET };
     enum CutDirection { kCutUpperLeftCorner, kCutLowerRightCorner };
 
     /**

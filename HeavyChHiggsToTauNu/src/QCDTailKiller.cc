@@ -98,6 +98,8 @@ namespace HPlus {
       fCutShape = QCDTailKiller::kTriangle;
     } else if (cutShape == "circular") {
       fCutShape = QCDTailKiller::kCircle;
+    } else if (cutShape == "minDeltaPhiJetMET") {
+      fCutShape = QCDTailKiller::kMinDeltaPhiJetMET;
     } else {
       throw cms::Exception("LogicError") << "QCDTailKiller::CutItem by name '"+fName+"' unknown cutShape="+cutShape+"! (options: noCut, rectangular, triangular, circular)!" << std::endl;
     }
@@ -162,6 +164,11 @@ namespace HPlus {
         myPassedStatus = std::sqrt(std::pow(180.0-y,2)+std::pow(x,2)) > fCutX;
       } else {
         myPassedStatus = std::sqrt(std::pow(180.0-x,2)+std::pow(y,2)) > fCutX;
+      }
+    } else if (fCutShape == QCDTailKiller::kMinDeltaPhiJetMET) {
+      // Make the cut only in place of the back-to-back cut
+      if (fCutDirection == QCDTailKiller::kCutLowerRightCorner) {
+        myPassedStatus = y > fCutX;
       }
     }
     // Increment counter and return

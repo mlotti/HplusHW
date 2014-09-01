@@ -28,6 +28,8 @@ namespace HPlus {
     void createShapeHistogram(HistoWrapper::HistoLevel level, TFileDirectory& fdir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, std::string title, std::string label, int nbins, double min, double max);
     /// Create a histogram for a shape in factorisation bins
     void createShapeHistogram(HistoWrapper::HistoLevel level, TFileDirectory& fdir, std::vector<WrappedTH1*>& histoContainer, std::string title, std::string label, int nbins, double min, double max);
+    /// Create a histogram for a 2D shape in factorisation bins
+    void createShapeHistogram(HistoWrapper::HistoLevel level, TFileDirectory& fdir, std::vector<WrappedTH2*>& histoContainer, std::string title, std::string label, int nbinsX, double minX, double maxX, int nbinsY, double minY, double maxY);
     /// Fill method for a factorisation histogram containting a shape
     void fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value);
     /// Fill method for a factorisation histogram containting a shape, with unconventional weight
@@ -36,6 +38,10 @@ namespace HPlus {
     void fillShapeHistogram(std::vector<WrappedTH1*>& histoContainer, double value);
     /// Fill method for a factorisation histogram containting a shape, with unconventional weight
     void fillShapeHistogram(std::vector<WrappedTH1*>& histoContainer, double value, double weight);
+    /// Fill method for a 2D factorisation histogram containting a shape
+    void fillShapeHistogram(std::vector<WrappedTH2*>& histoContainer, double valueX, double valueY);
+    /// Fill method for a 2D factorisation histogram containting a shape, with unconventional weight
+    void fillShapeHistogram(std::vector<WrappedTH2*>& histoContainer, double valueX, double valueY, double weight);
 
   private:
     /// Returns index to tau pT bin; 0 is underflow and size() is highest bin

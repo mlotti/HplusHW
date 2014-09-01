@@ -34,6 +34,8 @@
 
 from math import sqrt
 
+import ShellStyles
+
 ## Helper class for a scalar uncertainty
 class ScalarUncertaintyItem:
     def __init__(self, uncertaintyName, *args, **kwargs):
@@ -86,6 +88,9 @@ class ScalarUncertaintyItem:
 
     def getUncertaintyUp(self):
         return self._uncertUp
+
+    def getUncertaintyMax(self):
+        return max([self._uncertUp, self._uncertDown])
 
 _crossSectionUncertainty = {
     "TTJets": ScalarUncertaintyItem("xsect", plus=0.0517, minus=0.060), # arxiv:1303.6254
@@ -158,6 +163,9 @@ _dataDrivenCtrlPlotBinning = {
     "BJetPtAfterMtSelections": [0,20,30,50,70,90,110,130,150,200,300,400],
     "BJetEtaAfterMtSelections": [-2.5,-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0,2.5],
     "BtagDiscriminatorAfterMtSelections": [-1.0,-0.9,0.0,0.2,0.4,0.6,0.8,1.0],
+    "DeltaPhiTauMET": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
+    "MinDeltaPhiTauJet": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
+    "MaxDeltaPhiTauJet": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "TopMass": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
     "TopPt": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,350,400,500],
     "WMass": [0,10,20,30,40,50,60,70,80,90,100,100,120,130,140,160,180,200,250,300],
@@ -187,6 +195,9 @@ _dataDrivenCtrlPlotBinning = {
     "SelectedTau_p_AfterMtSelections": [0,20,40,50,60,70,80,100,150,200,300,500],
     "SelectedTau_LeadingTrackP_AfterMtSelections": [0,41,60,80,100,150,200,300,500],
     "SelectedTau_DecayMode_AfterMtSelections": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],
+    "DeltaPhiTauMETAfterMtSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
+    "MinDeltaPhiTauJetAfterMtSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
+    "MaxDeltaPhiTauJetAfterMtSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
 }
 # Add EWK fake tau shape definitions
 for key in _dataDrivenCtrlPlotBinning.keys():

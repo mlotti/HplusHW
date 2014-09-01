@@ -12,6 +12,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 # Height settings for the all-in-one ratio plot
 _cHeaderHeight = 40
@@ -55,7 +56,7 @@ class RatioPlotContainer:
                 c.Print("%s/%s%s"%(_dirname,myPlotName,suffix))
             ROOT.gErrorIgnoreLevel = backup
 
-    def drawAllInOne(self, myAllShapeNuisances, cmsText, luminosity):
+    def drawAllInOne(self, myAllShapeNuisances, luminosity):
         myMaxSize = len(myAllShapeNuisances)
         # Create pads
         canvasHeight = _cHeaderHeight + _cBodyHeight * myMaxSize + _cFooterHeight
@@ -112,8 +113,10 @@ class RatioPlotContainer:
                 plot.GetXaxis().SetLabelSize(0)
             plot.GetYaxis().SetLabelSize(26)
             plot.GetYaxis().SetTitleOffset(0.34*myMaxSize+0.1) # 3.5/10, 1.8/5
-            plot.SetMinimum(0.001)
-            plot.SetMaximum(1.999)
+#            plot.SetMinimum(0.001)
+#            plot.SetMaximum(1.999)
+            plot.SetMinimum(0.601)
+            plot.SetMaximum(1.399)
             plot.Draw() # Plot frame for every nuisance
             if myPlotIndex != None:
                 self._ratioPlotList[myPlotIndex].ratioHistoMgr.draw() # Plot content only if affected
@@ -129,9 +132,7 @@ class RatioPlotContainer:
             histograms.addText(x=0.93, y=myHeight, text=self._dsetName, size=30, align="right")
             # Header labels
             if i == 0:
-                histograms.addEnergyText(y=0.84) # Does the 8 TeV get set properly for 2012?
-                histograms.addCmsPreliminaryText(y=0.84, text=cmsText)
-                histograms.addLuminosityText(x=None,y=0.84,lumi=luminosity)
+                histograms.addStandardTexts(lumi=luminosity, cmsTextPosition="outframe")
             # Labels for non-existing nuisances
             if myPlotIndex == None:
                 myHeight = 0.44
@@ -147,6 +148,21 @@ class RatioPlotContainer:
         for suffix in [".png",".C",".eps"]:
             c.Print("%s/%s%s"%(_dirname,myPlotName,suffix))
         ROOT.gErrorIgnoreLevel = backup
+
+def customizeMarker(p):
+    for h in p.ratioHistoMgr.getHistos():
+        if h.getName() == "BackgroundStatError":
+            continue
+
+        h.setDrawStyle("P")
+        th1 = h.getRootHisto()
+        th1.SetMarkerSize(2)
+        th1.SetMarkerStyle(34) # or 2?
+        th1.SetMarkerColor(th1.GetLineColor())
+        #th1.SetLineWidth(0)
+        # I have no idea why "P" above is not enough...
+        for i in xrange(1, th1.GetNbinsX()+1):
+            th1.SetBinError(i, 0)
 
 class DatasetContainer:
     def __init__(self, shapeList):
@@ -182,19 +198,26 @@ class DatasetContainer:
         print "name =",self._name
         print "uncertainties = %s"%(", ".join(map(str, self._uncertaintyShapes)))
 
-    def doPlot(self, opts, myAllShapeNuisances, f, mass, luminosity):
+    def doPlot(self, opts, myAllShapeNuisances, f, mass, luminosity, signalTable):
         print "Doing plots for:",self._name
         hNominal = f.Get(self._name)
+        hNominalFine = f.Get(self._name+"_fineBinning")
         hNominalHisto = histograms.Histo(hNominal, self._name, drawStyle="HIST")
         # Determine label
-        myMCLabels = ["HH","HW","Hplus","MC"]
+        mySignalLabels = ["HH","HW","Hp"]
+        mySignalStatus = False
+        for l in mySignalLabels:
+            if l in self._name:
+                mySignalStatus = True
+        myMCLabels = ["HH","HW","Hp","MC"]
         myMCStatus = False
+        
         for mclab in myMCLabels:
             if mclab in self._name:
                 myMCStatus = True
-        myCMSText = "CMS Preliminary"
+        histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
         if myMCStatus:
-            myCMSText = "CMS Simulation"
+            histograms.cmsTextMode = histograms.CMSMode.SIMULATION_PRELIMINARY
         x = 0.6
         size = 20
         myRatioContainer = RatioPlotContainer(self._name)
@@ -202,8 +225,10 @@ class DatasetContainer:
             myShortName = uncName.replace("Up","")[1:]
             print "... uncertainty:",myShortName
             up = f.Get("%s%s"%(self._name,uncName))
+            upFine = f.Get("%s%s_fineBinning"%(self._name,uncName))
             nom = hNominal.Clone()
             down = f.Get("%s%s"%(self._name,uncName.replace("Up","Down")))
+            downFine = f.Get("%s%s_fineBinning"%(self._name,uncName.replace("Up","Down")))
             up.SetLineColor(ROOT.kRed)
             nom.SetLineColor(ROOT.kBlack)
             down.SetLineColor(ROOT.kBlue)
@@ -223,17 +248,34 @@ class DatasetContainer:
             myParams["ratio"] = True
             myParams["ratioType"] = "errorScale"
             myParams["ratioYlabel"] = "Var./Nom."
-            myParams["cmsText"] = myCMSText
             myParams["addLuminosityText"] = True
+            myParams["customizeBeforeDraw"] = customizeMarker
             plots.drawPlot(plot, myPlotName, **myParams)
             myRatioContainer.addRatioPlot(plot, myShortName)
+            # Analyse up and down variation
+            if mySignalStatus:
+                a = abs(upFine.Integral()/hNominalFine.Integral() - 1.0)
+                b = abs(1.0 - downFine.Integral()/hNominalFine.Integral())
+                r = a
+                if b > a:
+                    r = b
+                if uncName in signalTable.keys():
+                    if r < signalTable[uncName]["min"]:
+                        signalTable[uncName]["min"] = r
+                    if r > signalTable[uncName]["max"]:
+                        signalTable[uncName]["max"] = r
+                else:
+                    signalTable[uncName] = {}
+                    signalTable[uncName]["min"] = r
+                    signalTable[uncName]["max"] = r
+            
         # Create plots with only the ratio plot
         if opts.individual:
             myRatioContainer.drawIndividually()
         else:
-            myRatioContainer.drawAllInOne(myAllShapeNuisances, myCMSText, luminosity)
+            myRatioContainer.drawAllInOne(myAllShapeNuisances, luminosity)
 
-def doPlot(opts,mass,nameList,luminosity,rootFilePattern):
+def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,rootFilePattern,signalTable):
     f = ROOT.TFile.Open(rootFilePattern%mass)
 
     content = f.GetListOfKeys()
@@ -251,37 +293,43 @@ def doPlot(opts,mass,nameList,luminosity,rootFilePattern):
     myPreviousKey = None
     while key:
         splitList = key.GetName().split("_")
-        if myPreviousSplitList != None:
-            if myPreviousSplitList[0] != splitList[0]:
-                # New dataset column
-                if not myPreviousKey in ["res.","data_obs"]:
-                    shapes.append(myPreviousKey)
-                    myDataset = DatasetContainer(shapes)
-                    # Make sure that dataset objects are stored for plot making only for unique names
-                    if not myDataset._name in nameList:
-                        datasets.append(myDataset)
-                        nameList.append(myDataset._name)
-                shapes = []
-            else:
-                shapes.append(myPreviousKey)
-        # Store old key
-        myPreviousSplitList = splitList
-        myPreviousKey = key.GetName()
+        if not "statBin" in key.GetName() and not "fitBin" in key.GetName() and not "fineBinning" in key.GetName() and not "b_mistag" in key.GetName():
+	    if myPreviousSplitList != None:
+		if myPreviousSplitList[0] != splitList[0]:
+		    # New dataset column
+		    if not "data_obs" in myPreviousKey and not "res." in myPreviousKey:
+			shapes.append(myPreviousKey)
+			myDataset = DatasetContainer(shapes)
+			# Make sure that dataset objects are stored for plot making only for unique names
+			if not myDataset._name in nameList:
+			    datasets.append(myDataset)
+			    nameList.append(myDataset._name)
+		    shapes = []
+		else:
+		    shapes.append(myPreviousKey)
+	    # Store old key
+	    myPreviousSplitList = splitList
+	    myPreviousKey = key.GetName()
         # Advance to next
         key = diriter.Next()
+    # Store last dataset
+    myDataset = DatasetContainer(shapes)
+    # Make sure that dataset objects are stored for plot making only for unique names
+    if not myDataset._name in nameList:
+	datasets.append(myDataset)
+	nameList.append(myDataset._name)
 
     # Obtain list of all shape nuisances
-    myAllShapeNuisances = []
     for d in datasets:
         for s in d._uncertaintyShapes:
             myCleanS = s.replace("Up","")[1:]
-            if not myCleanS in myAllShapeNuisances:
-                myAllShapeNuisances.append(myCleanS)
+            if not myCleanS in allShapeNuisances:
+                allShapeNuisances.append(myCleanS)
 
     ## Do the actual plots
     for d in datasets:
         #d.debug()
-        d.doPlot(opts,myAllShapeNuisances,f,mass,luminosity)
+        d.doPlot(opts,allShapeNuisances,f,mass,luminosity,signalTable)
     # Close the file
     f.Close()
 
@@ -304,13 +352,21 @@ if __name__ == "__main__":
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.15)
+    histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
+    styles.ratioLineStyle.append(styles.StyleLine(lineColor=13))
     # Find out the mass points
     mySettings = limitTools.GeneralSettings(".",[])
     massPoints = mySettings.getMassPoints(limitTools.LimitProcessType.TAUJETS)
     print "The following masses are considered:",massPoints
     nameList = []
+    allShapeNuisances = []
+    signalTable = {}
     for m in massPoints:
         # Obtain luminosity from datacard
         myLuminosity = float(limitTools.readLuminosityFromDatacard(".", mySettings.getDatacardPattern(limitTools.LimitProcessType.TAUJETS)%m))
         # Do plots
-        doPlot(opts,int(m),nameList,myLuminosity,mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS))
+        doPlot(opts,int(m),nameList,allShapeNuisances,myLuminosity,mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS),signalTable)
+    # Print signal table
+    print "Max contracted uncertainty for signal:"
+    for k in signalTable.keys():
+        print "%s, %.3f--%.3f"%(k, signalTable[k]["min"],signalTable[k]["max"])

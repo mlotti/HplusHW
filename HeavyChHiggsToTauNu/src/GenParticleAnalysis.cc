@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
@@ -15,7 +16,9 @@
 #include "TVector3.h"
 
 namespace HPlus {
-  GenParticleAnalysis::Data::Data() {}
+  GenParticleAnalysis::Data::Data():
+    fTTBarDecayMode(kTT_invalid)
+  {}
 
   GenParticleAnalysis::Data::~Data() {}
   void GenParticleAnalysis::Data::check() const {
@@ -99,6 +102,26 @@ namespace HPlus {
     hWPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genWPhi", "genWPhi", 64, -3.2, 3.2);    
   }
 
+  WrappedTH1 *GenParticleAnalysis::bookTTBarDecayModeHistogram(HistoWrapper& histoWrapper, HistoWrapper::HistoLevel histoLevel, TFileDirectory& dir, const std::string& name) {
+    WrappedTH1 *h = histoWrapper.makeTH<TH1F>(histoLevel, dir, name.c_str(), "TTBar decay mode", kTT_bbtautau, 1, kTT_bbtautau+1);
+    if(h->isActive()) {
+      TAxis *axis = h->GetXaxis();
+      axis->SetBinLabel(kTT_noTT,     "not t#bar{t}");
+      axis->SetBinLabel(kTT_unknown,  "unknown");
+      axis->SetBinLabel(kTT_bbqqqq,   "t#bar{T}#rightarrowbbqqqq");     // 46 %
+      axis->SetBinLabel(kTT_bbqqe,    "t#bar{T}#rightarrowbbqqe");      // 15 %
+      axis->SetBinLabel(kTT_bbqqmu,   "t#bar{T}#rightarrowbbqq#mu");    // 15 %
+      axis->SetBinLabel(kTT_bbqqtau,  "t#bar{T}#rightarrowbbqq#tau");   // 15 %
+      axis->SetBinLabel(kTT_bbee,     "t#bar{T}#rightarrowbbee");       //  1 %
+      axis->SetBinLabel(kTT_bbemu,    "t#bar{T}#rightarrowbbe#mu");     //  2 %
+      axis->SetBinLabel(kTT_bbetau,   "t#bar{T}#rightarrowbbe#tau");    //  2 %
+      axis->SetBinLabel(kTT_bbmumu,   "t#bar{T}#rightarrowbb#mu#mu");   //  1 %
+      axis->SetBinLabel(kTT_bbmutau,  "t#bar{T}#rightarrowbb#mu#tau");  //  2 %
+      axis->SetBinLabel(kTT_bbtautau, "t#bar{T}#rightarrowbb#tau#tau"); //  1 %
+    }
+    return h;
+  }
+
   GenParticleAnalysis::Data GenParticleAnalysis::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
     ensureSilentAnalyzeAllowed(iEvent);
 
@@ -142,6 +165,7 @@ namespace HPlus {
 
     hGenMET->Fill(output.fGenMet->et());
 
+    output.fTTBarDecayMode = findTTBarDecayMode(*genParticles);
 
     // loop over all genParticles
     for (size_t i=0; i < genParticles->size(); ++i){
@@ -527,7 +551,7 @@ namespace HPlus {
       double px_wrong = 0, py_wrong = 0;
       bool decaysHadronically = false;
       for(size_t d=0; d<daughters.size(); ++d) {
-        const reco::GenParticle dparticle = *daughters[d];
+        const reco::GenParticle& dparticle = *daughters[d];
         daughterId = dparticle.pdgId();
         if( abs(daughterId) == 24 ) {
           px += dparticle.px();
@@ -576,7 +600,7 @@ namespace HPlus {
       bool decaysToChHiggs = false;
       bool decaysToWBoson = false;
       for(size_t d=0; d<daughters.size(); ++d) {
-        const reco::GenParticle dparticle = *daughters[d];
+        const reco::GenParticle& dparticle = *daughters[d];
         daughterId = dparticle.pdgId();
 	// If top decays to W boson (and b quark):
         if( abs(daughterId) == 24 ) {
@@ -623,7 +647,7 @@ namespace HPlus {
       bool tauFound = false;
       bool neutrinoFound = false;
       for(size_t d=0; d<daughters.size(); ++d) {
-        const reco::GenParticle dparticle = *daughters[d];
+        const reco::GenParticle& dparticle = *daughters[d];
         daughterId = dparticle.pdgId();
 	// If tau among immediate daughters
         if( abs(daughterId) == 15 ) {
@@ -657,7 +681,130 @@ namespace HPlus {
   }
    //eof: void GenParticleAnalysis::analyze()
 
+  GenParticleAnalysis::TTBarDecayMode GenParticleAnalysis::findTTBarDecayMode(const std::vector<reco::GenParticle>& genParticles) const {
+    // First find ttbar
+    const reco::GenParticle *top = 0;
+    const reco::GenParticle *antitop = 0;
+    for(std::vector<reco::GenParticle>::const_iterator iGen = genParticles.begin(); iGen != genParticles.end(); ++iGen) {
+      const reco::GenParticle *gen = &(*iGen);
+      if(std::abs(gen->pdgId()) != 6)
+        continue;
 
+      if(gen->pdgId() == 6) {
+        if(top) {
+          //std::cout << "Top already found" << std::endl;
+          return kTT_noTT;
+        }
+        top = gen;
+      }
+      else {
+        if(antitop) {
+          //std::cout << "Anti-top already found" << std::endl;
+          return kTT_noTT;
+        }
+        antitop = gen;
+      }
+
+      if(top && antitop) break;
+    }
+    if(!top || !antitop) {
+      //std::cout << "Either top (" << top << ") or anti-top (" << antitop << ") not found" << std::endl;
+      return kTT_noTT;
+    }
+
+    top = GenParticleTools::rewindChainDown(top);
+    antitop = GenParticleTools::rewindChainDown(antitop);
+
+    const reco::GenParticle *topW = GenParticleTools::findMaxNonNeutrinoDaughter(top);
+    const reco::GenParticle *antitopW = GenParticleTools::findMaxNonNeutrinoDaughter(antitop);
+
+    if(std::abs(topW->pdgId()) != 24 || std::abs(antitopW->pdgId()) != 24) {
+      //std::cout << "Daughter of top (" << topW->pdgId() << ") or anti-top (" << antitopW->pdgId() << " not W (24)" << std::endl;
+      return kTT_noTT;
+    }
+
+    int n_q = 0;
+    int n_e = 0;
+    int n_mu = 0;
+    int n_tau = 0;
+
+    /*
+    std::cout << "topW numberOfDaughters " << topW->numberOfDaughters()
+              << " anti-topW numberOfDaughters " << antitopW->numberOfDaughters()
+              << std::endl;
+    */
+
+    size_t n = topW->numberOfDaughters();
+    for(size_t i=0; i<n; ++i) {
+      switch(std::abs(topW->daughter(i)->pdgId())) {
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+        ++n_q; break;
+      case 11: ++n_e; break;
+      case 13: ++n_mu; break;
+      case 15: ++n_tau; break;
+      default:
+        //std::cout << "Daughter of top->W " << topW->daughter(i)->pdgId() << std::endl;
+        break;
+      };
+    }
+    n = antitopW->numberOfDaughters();
+    for(size_t i=0; i<n; ++i) {
+      switch(std::abs(antitopW->daughter(i)->pdgId())) {
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+        ++n_q; break;
+      case 11: ++n_e; break;
+      case 13: ++n_mu; break;
+      case 15: ++n_tau; break;
+      default:
+        //std::cout << "Daughter of anti-top->W " << topW->daughter(i)->pdgId() << std::endl;
+        break;
+      };
+    }
+    if(!(n_q == 0 || n_q == 2 || n_q == 4))
+      throw cms::Exception("Assert") << __FILE__ << ":" << __LINE__ << ": Something weird is going on, got " << n_q << " quarks";
+    n_q = n_q/2;
+
+    if(n_q + n_e + n_mu + n_tau != 2)
+      throw cms::Exception("Assert") << __FILE__ << ":" << __LINE__ << ": Something weird is going on, got " << n_q << " quark pairs, " << n_e << " electrons, " << n_mu << " muons, and " << n_tau << " taus.";
+
+    if(n_q == 2)
+      return kTT_bbqqqq;
+    if(n_e == 2)
+      return kTT_bbee;
+    if(n_mu == 2)
+      return kTT_bbmumu;
+    if(n_tau == 2)
+      return kTT_bbtautau;
+    if(n_q == 1) {
+      if(n_e == 1)
+        return kTT_bbqqe;
+      if(n_mu == 1)
+        return kTT_bbqqmu;
+      if(n_tau == 1)
+        return kTT_bbqqtau;
+    }
+    if(n_e == 1) {
+      if(n_mu == 1)
+        return kTT_bbemu;
+      if(n_tau == 1)
+        return kTT_bbetau;
+    }
+    if(n_mu == 1)
+      if(n_tau == 1)
+        return kTT_bbmutau;
+
+    return kTT_unknown;
+  }
 
 
   /*

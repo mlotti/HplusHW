@@ -200,9 +200,7 @@ def plotCommon(h, rebin, xlabel, log, opts={}, opts2={}, coverPadOpts={}):
     if log:
         ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText(x=0.5, y=0.3)
+    h.addStandardTexts()
     h.save()
 
 
