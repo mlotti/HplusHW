@@ -386,10 +386,13 @@ class BRXSDatabaseInterface:
             x.append(mA)
             y.append(tanb)
 
-        x.append(160)
+        xarea = 160
+	if mHp > 175:
+            xarea = 100
+	x.append(xarea)
         y.append(75)
 
-        x.append(160)
+        x.append(xarea)
         y.append(1)
 
         x.append(x[0])
