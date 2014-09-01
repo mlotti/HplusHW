@@ -53,7 +53,7 @@ def useSubscript():
 useSubscript()
 
 ## Y axis label for the tanbeta
-tanblimit = "95 % CL Limit on tan #beta"
+tanblimit = "95 % CL limit on tan #beta"
 
 ## Label for m(H+)
 def mHplus():
