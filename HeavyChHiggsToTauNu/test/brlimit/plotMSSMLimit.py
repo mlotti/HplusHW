@@ -82,8 +82,8 @@ def main():
     if obs.GetN() > 0:
         graphs["obs"] = obs
         # Get theory uncertainties on observed
-        obs_th_plus = limit.getObservedPlus(obs)
-        obs_th_minus = limit.getObservedMinus(obs)
+        obs_th_plus = limit.getObservedPlus(obs,0.29)
+        obs_th_minus = limit.getObservedMinus(obs,0.29)
         for gr in [obs_th_plus, obs_th_minus]:
             gr.SetLineWidth(2)
             gr.SetLineStyle(9)
@@ -115,7 +115,10 @@ def main():
         print key,"done"
 
     graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
-    graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.9+-3.0")
+    if scenario == "lowMH-LHCHXSWG":
+	graphs["Allowed"] = db.mhLimit("mH","mHp",selection,"125.0+-3.0")
+    else:
+        graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.0+-3.0")
     graphs["isomass"] = None
     
     doPlot("limitsTanb_light_"+scenario, graphs, limits, limit.mHplus(),scenario)
@@ -139,7 +142,11 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     blinded = True
     if "obs" in graphs.keys():
         blinded = False
-        
+
+    higgs = "h"
+    if scenario == "lowMH-LHCHXSWG":
+	higgs = "H"
+       
     if not blinded:    
         obs = graphs["obs"]
         excluded = ROOT.TGraph(obs)
@@ -176,7 +183,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
 #            histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{h} = 125.9#pm3.0 GeV", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
 #            histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
@@ -205,7 +212,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{h} = 125.9#pm3.0 GeV", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
             histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
@@ -231,7 +238,10 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     if blinded:
 	name += "_blinded"
     name = name.replace("-","_")
-    plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": 90, "xmax": 160})
+    frameXmax = 160
+    if "_mA_" in name:
+        frameXmax = 140
+    plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": 90, "xmax": frameXmax})
     plot.frame.GetXaxis().SetTitle(xlabel)
     plot.frame.GetYaxis().SetTitle(limit.tanblimit)
 
