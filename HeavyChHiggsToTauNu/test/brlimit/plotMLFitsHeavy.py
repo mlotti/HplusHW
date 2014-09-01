@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import string
+import json
+from optparse import OptionParser 
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True 
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
@@ -16,15 +20,21 @@ def main():
     style = tdrstyle.TDRStyle()
 
     mlfit = limit.MLFitData()
+    lumi=None 	 	
+    if os.path.exists("limits.json"): 	 	
+        f = open("limits.json") 	 	
+        data = json.load(f) 	 	
+        f.close() 	 	
+        lumi = float(data["luminosity"]) 
+    doBkgFitPlots(mlfit,lumi)
 
-    doBkgFitPlots(mlfit)
-
-def doBkgFitPlots(mlfit):
+def doBkgFitPlots(mlfit,lumi):
     firstMass = mlfit.massPoints()[0]
 
     def createDrawPlot(gr, labels, fname):
         plot = plots.PlotBase([histograms.HistoGraph(gr, "Fitted", drawStyle="P")])
-    
+        plot.setLuminosity(lumi) 
+        
         canvasOpts = {}
         if len(labels) > 15:
             canvasOpts["addHeight"] = 0.03*(len(labels)-15)
@@ -55,7 +65,7 @@ def doBkgFitPlots(mlfit):
         plot.cf.frame.GetYaxis().SetLabelSize(0)
     
         plot.draw()
-        histograms.addCmsPreliminaryText(y=1-(1-histograms.textDefaults.getValues("cmsPreliminary", None, None)[1])*scale)
+        plot.addStandardTexts(cmsTextPosition="outframe")
     
         # Intentionally not NDC
         l = ROOT.TLatex()
@@ -88,5 +98,37 @@ def doBkgFitPlots(mlfit):
         print "Warning: %s" % str(e)
 
 
+datacardDirPrefix = "datacards_combine" 	 	
+_limitTaskDirPrefix = "CombineMultiCrab" 
+
 if __name__ == "__main__":
-    main()
+    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
+    parser.add_option("-r", dest="recursive", action="store_true", default=False, help="Print more information")
+    (opts, args) = parser.parse_args()
+
+    if opts.recursive:
+        # Build list of directories
+        myList = os.listdir(".")
+        myFilteredList = []
+        mySubCount = 0
+        for l in myList:
+            if l.startswith(_datacardDirPrefix):
+                mySubCount += 1
+                mySubList = os.listdir(l)
+                for s in mySubList:
+                    if s.startswith(_limitTaskDirPrefix):
+                        myFilteredList.append("%s/%s"%(l,s))
+        if mySubCount == 0:
+            raise Exception("Could not find datacard directories in this directory!")
+        if len(myFilteredList) == 0:
+            raise Exception("Could not find job directories for limit calculation in the datacard directories! Did you run the limits yet?")
+        for l in myFilteredList:
+            print "Running ML fit on directory: %s"%l
+            prevDir = os.getcwd()
+            os.chdir(l)
+            main()
+            os.chdir(prevDir)
+
+    else:
+        # Assume the script is being run in the working directory 
+        main()
