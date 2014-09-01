@@ -162,7 +162,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
 #        excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], 100)
 #        excluded.SetPoint(excluded.GetN(), 0, 100)
 #        excluded.SetPoint(excluded.GetN(), 0, obs.GetY()[0])
-        excluded.SetPoint(excluded.GetN(), 150, 65)
+        excluded.SetPoint(excluded.GetN(), 140, 65)
         excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
 
         for i in range(excluded.GetN()):
