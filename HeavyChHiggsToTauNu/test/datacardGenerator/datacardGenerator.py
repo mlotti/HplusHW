@@ -177,8 +177,8 @@ def main(opts, moduleSelector, multipleDirs):
                         if myHeavyStatus:
                             print "Doing tail fit ..."
                             os.chdir(myDir)
-                            os.system("../tailFitter.py -x tailFitSettings.py")
-                            os.chdir(..)
+                            os.system("../tailFitter.py -x ../tailFitSettings.py")
+                            os.chdir("..")
     print "\nDatacard generator is done."
     myEndTime = time.time()
     print "Running took on average %.1f s / datacard (total elapsed time: %.1f s)"%((myEndTime-myStartTime)/float(myDatacardCount), (myEndTime-myStartTime))

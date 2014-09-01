@@ -137,6 +137,8 @@ class TableProducer:
         elif opts.combine:
             myLimitCode = "combine"
         self._dirname = "datacards_%s_%s_%s_%s"%(myLimitCode,self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
+        if hasattr(self._config, "OptionSignalInjection"):
+            self._dirname += "_SignalInjection"
         os.mkdir(self._dirname)
         self._infoDirname = self._dirname + "/info"
         os.mkdir(self._infoDirname)
@@ -317,6 +319,8 @@ class TableProducer:
             myLimitCode = "LandS"
         elif self._opts.combine:
             myLimitCode = "Combine"
+        if hasattr(self._config, "OptionSignalInjection"):
+            myLimitCode = "SIGNALINJECTION(%s, norm=%f) %s"%(self._config.OptionSignalInjection["sample"], self._config.OptionSignalInjection["normalization"], myLimitCode)
         if mass == None:
             myString += "Description: %s datacard (auto generated) luminosity=%f 1/pb, %s/%s\n"%(myLimitCode, self._luminosity,self._config.DataCardName,self._outputPrefix)
         else:
@@ -350,7 +354,10 @@ class TableProducer:
             myResult = "Observation    %d\n"%myObsCount
         elif self._opts.combine:
             myResult =  "bin            taunuhadr\n"
-            myResult += "observation    %d\n"%myObsCount
+            if hasattr(self._config, "OptionSignalInjection"):
+                myResult += "observation    %f\n"%myObsCount
+            else:
+                myResult += "observation    %d\n"%myObsCount
         return myResult
 
     ## Generates header for rate table as list

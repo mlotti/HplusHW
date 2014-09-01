@@ -393,6 +393,20 @@ class DatacardColumn():
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myShapeHistograms = myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeHistograms)
+            # Do signal injection
+            if self.typeIsObservation() and hasattr(config, "OptionSignalInjection"):
+                if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
+                    dsetMgr.getDataset(config.OptionSignalInjection["sample"]).setCrossSection(1)
+                elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
+                     if abs(dsetMgr.getDataset(config.OptionSignalInjection["sample"]).getCrossSection() - 245.8) > 0.0001:
+                         print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 245.8 pb according to arXiv:1303.6254"
+                         dsetMgr.getDataset(config.OptionSignalInjection["sample"]).setCrossSection(245.8)
+                myDatasetRootHistoForInjection = dsetMgr.getDataset(config.OptionSignalInjection["sample"]).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+                myDatasetRootHistoForInjection.normalizeToLuminosity(luminosity)
+                hInjection = myDatasetRootHistoForInjection.getHistogram()
+                hInjection.Scale(config.OptionSignalInjection["normalization"])
+                myShapeHistograms[0].Add(hInjection)
+                print ShellStyles.WarningLabel()+"Injected to data signal %f events (normalization=%f), data integral is now %f"%(hInjection.Integral(),config.OptionSignalInjection["normalization"],myShapeHistograms[0].Integral())
         # Cache result
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
@@ -592,6 +606,11 @@ class DatacardColumn():
                     #FIXME: if one adjusts the bin content, one needs to adjust accordingly the nuisances !!!
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)
                     #raise Exception(ShellStyles.ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
+        # Convert bin content to integers for signal injection
+        if self.typeIsObservation() and hasattr(config, "OptionSignalInjection"):
+            for k in range(1, self._rateResult._histograms[0].GetNbinsX()+1):
+                self._rateResult._histograms[0].SetBinContent(k, round(self._rateResult._histograms[0].GetBinContent(k), 0))
+
         # Update integral
         self._rateResult._result = self._rateResult._histograms[0].Integral()
 
