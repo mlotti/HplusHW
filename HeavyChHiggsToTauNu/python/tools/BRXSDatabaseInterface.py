@@ -922,7 +922,7 @@ class BRXSDatabaseInterface:
 
         if target < self.getMinimum(variable,selection):
             #print "Warning,",variable,"target",target,"< minimum possible value",self.getMinimum(variable,selection),selection
-            return 1
+            return self.getMinimumTanb(variable,selection)
         if target > self.getMaximum(variable,selection):
             #print "Warning,",variable,"target",target,"> maximum possible value",self.getMaximum(variable,selection),selection
             if max < 10:
