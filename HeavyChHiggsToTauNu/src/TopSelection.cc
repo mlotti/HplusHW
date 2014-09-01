@@ -78,8 +78,8 @@ namespace HPlus {
       for(edm::PtrVector<pat::Jet>::const_iterator iter2 = jets.begin(); iter2 != jets.end(); ++iter2) {
         edm::Ptr<pat::Jet> iJet2 = *iter2;
 
-        //TODO: new condition: the same quark jet must not be used twice!
-        if (iter!=iter2 && ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJet2->p4()) < 0.4) continue;
+        //same jet must not be used twice
+        if (iter==iter2) continue;
 
         for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb) {
           edm::Ptr<pat::Jet> iJetb = *iterb;
@@ -114,10 +114,21 @@ namespace HPlus {
     hWMass->Fill(output.getWMass());
     hWEta->Fill(output.getWEta());
 
+    //Event selection based on top reconstruction
+    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
+      output.fPassedEvent = false;
+      htopMassRejected->Fill(output.getTopMass());
+      } else {
+      output.fPassedEvent = true;
+      htopMassAfterCut->Fill(output.getTopMass());      
+      } 
 
-//---------------------------------------------------------------------------------------------
-    // search correct combinations
-    if (!iEvent.isRealData()  && ptmax > 0 ) {
+    //MC matching for events that passed the top secletion
+    if (!iEvent.isRealData() && output.fPassedEvent == true ) {
+    
+    //alternative: MC matching for all events with a reconstructed top quark  
+    //if (!iEvent.isRealData() && && ptmax > 0  ) {
+
       edm::Handle <reco::GenParticleCollection> genParticles;
       iEvent.getByLabel(fSrc, genParticles);
 
@@ -200,15 +211,6 @@ namespace HPlus {
        }
       }
 
-    //Event selection based on top reconstruction
-    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
-      output.fPassedEvent = false;
-      htopMassRejected->Fill(output.getTopMass());
-      } else {
-      output.fPassedEvent = true;
-      htopMassAfterCut->Fill(output.getTopMass());      
-      //increment(fTopMassCount); //TODO
-      } 
     return output;
   }
   

@@ -99,7 +99,7 @@ namespace HPlus {
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet1 = *iter;
 
-    //for all combos of 3 jets close enough to each other...
+    //for all combos of 3 jets...
       for(edm::PtrVector<pat::Jet>::const_iterator iter2 = jets.begin(); iter2 != jets.end(); ++iter2) {
 	edm::Ptr<pat::Jet> iJet2 = *iter2;
 
@@ -146,11 +146,27 @@ namespace HPlus {
       hdeltaR_jets->Fill(dR_jets);
    }
           
-//---------------------------------------------------------------------------------------------
-    //Search correct combinations
+    //Event selection based on top reconstruction
+    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
+      output.fPassedEvent = false;
+      htopMassRejected->Fill(output.getTopMass());      
+      } else {
+      output.fPassedEvent = true;
+      topmassfound = true;
+      htopPtAfterCut->Fill(output.top.Pt());
+      htopMassAfterCut->Fill(output.getTopMass());
+      htopEtaAfterCut->Fill(output.getTopEta());
+      hWPtAfterCut->Fill(output.W.Pt());
+      hWMassAfterCut->Fill(output.getWMass());
+      hWEtaAfterCut->Fill(output.getWEta());
+      }
+      
+    //MC matching for events that passed the top secletion
+    if (!iEvent.isRealData() && output.fPassedEvent == true ) {
+    
+    //alternative: MC matching for all events with a reconstructed top quark  
+    //if (!iEvent.isRealData() && topmassfound ) {
 
-    //if (!iEvent.isRealData() && chi2Min < fChi2Cut ) {
-    if (!iEvent.isRealData() && topmassfound ) {
       edm::Handle <reco::GenParticleCollection> genParticles;
       iEvent.getByLabel(fSrc, genParticles);
 
@@ -240,20 +256,6 @@ namespace HPlus {
 
     }
 
-    //Event selection based on top reconstruction
-    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
-      output.fPassedEvent = false;
-      htopMassRejected->Fill(output.getTopMass());      
-      } else {
-      output.fPassedEvent = true;
-      topmassfound = true;
-      htopPtAfterCut->Fill(output.top.Pt());
-      htopMassAfterCut->Fill(output.getTopMass());
-      htopEtaAfterCut->Fill(output.getTopEta());
-      hWPtAfterCut->Fill(output.W.Pt());
-      hWMassAfterCut->Fill(output.getWMass());
-      hWEtaAfterCut->Fill(output.getWEta());
-      }
     return output;
   }
      

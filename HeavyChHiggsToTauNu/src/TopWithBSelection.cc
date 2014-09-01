@@ -75,7 +75,7 @@ namespace HPlus {
 
     //other histograms    
     hjjbMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "jjbMass", "jjbMass;m_{jjb} (GeV)", 80, 0., 400.);
-    hChi2Min = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Chi2Min", "Chi2Min; {#chi^2}_{min}", 200, 0., 40.);
+    hChi2Min = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "Chi2Min", "Chi2Min; #chi^{2}_{min}", 200, 0., 40.);
   }
 
   //destructor
@@ -103,13 +103,14 @@ namespace HPlus {
     double dR_Wb;
     double dPhi_Wb;
 
-    //for all combos of 3 jets close enough to each other...
+    //for all combos of 3 jets...
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet1 = *iter;
 
       for(edm::PtrVector<pat::Jet>::const_iterator iter2 = jets.begin(); iter2 != jets.end(); ++iter2) {
 	edm::Ptr<pat::Jet> iJet2 = *iter2;
 
+    //same jet must not be used twice
 	//if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJet2->p4()) < 0.4) continue;
     if (iter==iter2) continue;
       	
@@ -159,11 +160,30 @@ namespace HPlus {
     hdeltaPhi_jets->Fill(dPhi_jets);
     hdeltaR_jets->Fill(dR_jets);
     
-//---------------------------------------------------------------------------------------------
-    //Search correct combinations
+    //Event selection based on top reconstruction
+    if(output.getTopMass() < 120.0 || output.getTopMass() > 300.0 || output.getWMass() < 60.0 || output.getWMass() > 140.0){
+//    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
+//    if(output.top.Pt() > 300){
+//    if (chi2Min >= 10.0 || chi2Min < 0.1) {
+      output.fPassedEvent = false;
+      htopMassRejected->Fill(output.getTopMass());      
+      } 
+    else{
+      output.fPassedEvent = true;
+      htopPtAfterCut->Fill(output.top.Pt());
+      htopMassAfterCut->Fill(output.getTopMass());
+      htopEtaAfterCut->Fill(output.getTopEta());
+      hWPtAfterCut->Fill(output.W.Pt());
+      hWMassAfterCut->Fill(output.getWMass());
+      hWEtaAfterCut->Fill(output.getWEta());
+      } 
 
-    //if (!iEvent.isRealData() && chi2Min < fChi2Cut ) {
-    if (!iEvent.isRealData() && topmassfound ) {
+    //MC matching for events that passed the top secletion
+    if (!iEvent.isRealData() && output.fPassedEvent == true ) {
+    
+    //alternative: MC matching for all events with a reconstructed top quark  
+    //if (!iEvent.isRealData() && topmassfound ) {
+    
       edm::Handle <reco::GenParticleCollection> genParticles;
       iEvent.getByLabel(fSrc, genParticles);
 
@@ -252,23 +272,6 @@ namespace HPlus {
        }
       }
 
-    //Event selection based on top reconstruction
-    if(output.getTopMass() < 120.0 || output.getTopMass() > 300.0 || output.getWMass() < 60.0 || output.getWMass() > 140.0){
-//    if( output.getTopMass() < fTopMassLow || output.getTopMass() > fTopMassHigh ) {
-//    if(output.top.Pt() > 300){
-//    if (chi2Min >= 10.0 || chi2Min < 0.1) {
-      output.fPassedEvent = false;
-      htopMassRejected->Fill(output.getTopMass());      
-      } 
-    else{
-      output.fPassedEvent = true;
-      htopPtAfterCut->Fill(output.top.Pt());
-      htopMassAfterCut->Fill(output.getTopMass());
-      htopEtaAfterCut->Fill(output.getTopEta());
-      hWPtAfterCut->Fill(output.W.Pt());
-      hWMassAfterCut->Fill(output.getWMass());
-      hWEtaAfterCut->Fill(output.getWEta());
-      } 
     return output;
   }
      

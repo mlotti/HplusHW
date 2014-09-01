@@ -109,9 +109,12 @@ namespace HPlus {
     int nonbjets;
 
     // max pt b jet and b jet most far from tau jet
+    
+    // loop over b jets
     for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb) {
       edm::Ptr<pat::Jet> iJetb = *iterb;
 
+      //loop over jets and count non-b jets
       nonbjets = 0;
       // search non-b-jets
       for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter ) {
@@ -120,12 +123,13 @@ namespace HPlus {
 	if ( deltaR > 0.4 ) nonbjets++;
       }
 
-
+      //search the hardest b jet
       if (iJetb->pt() > pTmax ) {
 	pTmax = iJetb->pt();
 	bjetMaxFound = true;
 	BjetMaxPt = iJetb;
       }
+      //search the "top side" (W side) b jet, i.e. the one with highes dR from tau
       double deltaRtau = ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJetb->p4());
       hDeltaTauB->Fill(deltaRtau);  
       if ( deltaRtau > deltaRMax) {
@@ -142,6 +146,9 @@ namespace HPlus {
     hDeltaMaxTauB->Fill(deltaRMax); 
     hPtBjetMax->Fill(BjetMaxPt->pt());  
     hEtaBjetMax->Fill(BjetMaxPt->eta());  
+    
+    //old version: search the hardest b jet in the opposite hemisphere
+    
     //    std::cout << " Jets.size() " << jets.size()<< " bjets.size() " << bjets.size() <<" nonbjets " << nonbjets << std::endl; 
     /*
     // hardest b jet in opposite hemisphere
@@ -197,6 +204,8 @@ namespace HPlus {
 	const reco::Candidate & p = (*genParticles)[i];
 	int id = p.pdgId();
 	//	if(abs(id) == 6 ) printImmediateDaughters(p);
+	
+	// if particle is top and decays to H+
 	if(abs(id) == 6 && (hasImmediateDaughter(p,37) || hasImmediateDaughter(p,-37))) {
 	  idHiggsSide = id;
 	}
@@ -222,9 +231,11 @@ namespace HPlus {
       for (size_t i=0; i < genParticles->size(); ++i){
 	const reco::Candidate & p = (*genParticles)[i];
 	int id = p.pdgId();
+	//if particle is not b or is coming from b, skip
 	if ( abs(id) != 5 || hasImmediateMother(p,5) || hasImmediateMother(p,-5) )continue;
 	bEta = p.eta();
 	bPt = p.pt();
+	//if b comes from top, check which top
 	if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
 	  if ( id * idHiggsSide < 0 ) {
 	    bquarkTopSide.push_back(p.p4());
@@ -238,6 +249,7 @@ namespace HPlus {
 	  // 	    printImmediateMothers(p);
 	  //	std::cout << " b quark1 " << id <<  " idHiggsSide " <<   idHiggsSide << std::endl;
 	  
+	  //loop over b jets and store them into different vectors
 	  for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb ) {
 	    edm::Ptr<pat::Jet> iJetb = *iterb;
 	    double deltaR = ROOT::Math::VectorUtil::DeltaR(p.p4(), iJetb->p4());
@@ -266,6 +278,7 @@ namespace HPlus {
       for (size_t i=0; i < genParticles->size(); ++i){
 	const reco::Candidate & p = (*genParticles)[i];
 	int id = p.pdgId();
+	// if particle is not a light quark or is coming from a light quark, skip
 	if ( abs(id) > 4  )continue;
 	if ( hasImmediateMother(p,1) || hasImmediateMother(p,-1) )continue;
 	if ( hasImmediateMother(p,2) || hasImmediateMother(p,-2) )continue;
@@ -273,10 +286,12 @@ namespace HPlus {
 	if ( hasImmediateMother(p,4) || hasImmediateMother(p,-4) )continue;
 	bEta = p.eta();
 	bPt = p.pt();
+	// if light quark is coming from W
 	if(hasImmediateMother(p,24) || hasImmediateMother(p,-24)) {
 	  hQquarkFromTopSideEta->Fill(bEta);
 	  hQquarkFromTopSidePt->Fill(bPt);
 	  QquarksTopSide.push_back(p.p4());
+	  //loop over jets and select the light quarks coming from W
 	  for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter ) {
 	    edm::Ptr<pat::Jet> iJet = *iter;
 	    double deltaR = ROOT::Math::VectorUtil::DeltaR(p.p4(), iJet->p4());
@@ -348,6 +363,7 @@ namespace HPlus {
       
 	std::vector<LorentzVector> tausFromHp;
 
+    //search taus which come from H+
 	for (size_t i=0; i < genParticles->size(); ++i){
 	  const reco::Candidate & p = (*genParticles)[i];
 	  int id = p.pdgId();	  
