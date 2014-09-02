@@ -150,7 +150,22 @@ def doCounters(datasetsEmb, outputDir):
     eventCounter = counter.EventCounter(datasetsEmb)
     eventCounter.normalizeMCToLuminosity(datasetsEmb.getDataset("Data").getLuminosity())
     table = eventCounter.getMainCounterTable()
-    table.keepOnlyRows(["Selected events"])
+    table.keepOnlyRows([
+        "Trigger and HLT_MET cut",
+        "taus > 0",
+        "tau trigger scale factor",
+        "electron veto",
+        "muon veto",
+        "njets",
+        "MET trigger scale factor",
+        "QCD tail killer collinear",
+        "MET",
+        "btagging",
+        "btagging scale factor",
+        "Embedding: mT weight",
+        "QCD tail killer back-to-back",
+        "Selected events"
+    ])
     addMcSum(table)
 
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f', withPrecision=2))
