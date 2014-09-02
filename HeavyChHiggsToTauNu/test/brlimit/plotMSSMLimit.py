@@ -115,6 +115,7 @@ def main():
         print key,"done"
 
     graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
+    
     if scenario == "lowMH-LHCHXSWG":
 	graphs["Allowed"] = db.mhLimit("mH","mHp",selection,"125.0+-3.0")
     else:
@@ -240,7 +241,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     name = name.replace("-","_")
     frameXmax = 160
     if "_mA_" in name:
-        frameXmax = 140
+        frameXmax = 145
     plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": 90, "xmax": frameXmax})
     plot.frame.GetXaxis().SetTitle(xlabel)
     plot.frame.GetYaxis().SetTitle(limit.tanblimit)
@@ -252,8 +253,8 @@ def doPlot(name, graphs, limits, xlabel, scenario):
 
     histograms.addText(x, 0.9+dy, limit.process, size=size)
     histograms.addText(x, 0.863+dy, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.815+dy,scenario, size=size)
-    histograms.addText(0.2, 0.231+dy, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
+    histograms.addText(x, 0.815+dy, limit.getTypesetScenarioName(scenario), size=size)
+    histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
 
     if not graphs["isomass"] == None:
         histograms.addText(0.8, 0.15, "m_{H^{#pm}} = 160 GeV", size=0.5*size)
@@ -266,6 +267,8 @@ def doPlot(name, graphs, limits, xlabel, scenario):
 #    histograms.addText(x, 0.55, FH_version+" and "+HD_version, size=size)
 #    histograms.addText(x, 0.48, "Derived from", size=size)
 #    histograms.addText(x, 0.43, "CMS HIG-12-052", size=size)
+
+
 
     plot.save()
 

@@ -258,7 +258,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     size = 20
     histograms.addText(x, y+0.9, limit.processHeavy, size=size)
     histograms.addText(x, y+0.863, limits.getFinalstateText(), size=size)
-    histograms.addText(x, y+0.815,scenario, size=size)
+    histograms.addText(x, y+0.815, limit.getTypesetScenarioName(scenario), size=size)
 #    histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
 
     if not graphs["isomass"] == None:
