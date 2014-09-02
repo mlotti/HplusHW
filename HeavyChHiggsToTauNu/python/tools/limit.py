@@ -29,8 +29,8 @@ def massUnit():
 BR = "#it{B}"
 
 ## The label for the physics process
-process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu"
-processHeavy = "pp #rightarrow tH^{+}, H^{+} #rightarrow #tau#nu"
+process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
+processHeavy = "pp #rightarrow #bar{t}(b)H^{+}, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
 
 ## Label for the H+->tau BR assumption
 #BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1"%BR
@@ -44,16 +44,16 @@ sigmaBRlimit = None
 
 def useParentheses():
     global BRlimit, sigmaBRlimit
-    BRlimit = "95%% CL limit for %s(t#rightarrowH^{+}b)#times%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
+    BRlimit = "95%% CL limit on %s(t#rightarrowH^{+}b)#times%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
     sigmaBRlimit = "95%% CL limit for #sigma(H^{+})#times%s(H^{+}#rightarrow#tau#nu) (pb)"%(BR)
 def useSubscript():
     global BRlimit, sigmaBRlimit
-    BRlimit = "95%% CL limit for %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
+    BRlimit = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
     sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{H^{+}#rightarrow#tau#nu} (pb)"%(BR)
 useSubscript()
 
 ## Y axis label for the tanbeta
-tanblimit = "tan #beta"
+tanblimit = "95 % CL Limit on tan #beta"
 
 ## Label for m(H+)
 def mHplus():
@@ -85,7 +85,7 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 0.9,
+    "default": 1.0,
 }
 
 
@@ -567,6 +567,56 @@ class MLFitData:
 
         return (gr, labels, shapeStatNuisance)
 
+class SignificanceData:
+    def __init__(self, directory="."):
+        resultfile = "significance.json"
+        f = open(os.path.join(directory, resultfile))
+        self._data = json.load(f)
+        f.close()
+
+        self._masses = filter(lambda n: "expectedSignal" not in n, self._data.keys())
+        self._masses.sort(key=float)
+
+        self._isHeavyStatus = False
+        for m in self._masses:
+            if int(m) > 175:
+                self._isHeavyStatus = True
+
+    def isHeavyStatus(self):
+        return self._isHeavyStatus
+
+    def massPoints(self):
+        return self._masses
+
+    def lightExpectedSignal(self):
+        return self._data["expectedSignalBrLimit"]
+    def heavyExpectedSignal(self):
+        return self._data["expectedSignalSigmaBr"]
+
+    def _graph(self, expObs, pvalue):
+        masses = self.massPoints()
+        massArray = array.array("d", [float(m) for m in masses])
+        q = "significance"
+        if pvalue:
+            q = "pvalue"
+        dataArray = array.array("d", [float(self._data[m][expObs][q]) for m in masses])
+
+        gr = ROOT.TGraph(len(masses), massArray, dataArray)
+        gr.SetLineWidth(3)
+        gr.SetLineColor(ROOT.kBlack)
+        return gr
+
+    def expectedGraph(self, pvalue=False):
+        gr = self._graph("expected", pvalue)
+        gr.SetLineStyle(2)
+        gr.SetMarkerStyle(20)
+        return gr
+
+    def observedGraph(self, pvalue=False):
+        gr = self._graph("observed", pvalue)
+        gr.SetMarkerStyle(21)
+        gr.SetMarkerSize(1.5)
+        return gr
 
 ## Remove mass points lower than 100
 #
@@ -589,13 +639,13 @@ def cleanGraph(graph, minX=95):
 # \param graph   TGraph of the observed BR limit
 #
 # \return Clone of the TGraph for the -1sigma theory uncertainty band
-def getObservedMinus(graph):
+def getObservedMinus(graph,uncertainty):
     curve = graph.Clone()
     curve.SetName(curve.GetName()+"TheoryMinus")
     for i in xrange(0, graph.GetN()):
         curve.SetPoint(i,
                        graph.GetX()[i],
-                       graph.GetY()[i]*0.77)
+                       graph.GetY()[i]*(1-uncertainty))
     print "todo: CHECK minus coefficient f(m)"
     return curve
 
@@ -604,13 +654,13 @@ def getObservedMinus(graph):
 # \param graph   TGraph of the observed BR limit
 #
 # \return Clone of the TGraph for the +1sigma theory uncertainty band
-def getObservedPlus(graph):
+def getObservedPlus(graph,uncertainty):
     curve = graph.Clone()
     curve.SetName(curve.GetName()+"TheoryPlus")
     for i in xrange(0, graph.GetN()):
         curve.SetPoint(i,
                        graph.GetX()[i],
-                       graph.GetY()[i]*1.22)
+                       graph.GetY()[i]*(1+uncertainty))
     print "todo: CHECK plus coefficient f(m)"
     return curve
 

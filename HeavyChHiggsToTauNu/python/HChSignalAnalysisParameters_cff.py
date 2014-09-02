@@ -393,7 +393,7 @@ oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
 deltaPhiTauMET = cms.untracked.double(180.0) # less than this value in degrees, for heavy charged Higgs
 
 def QCDTailKillerBin(cutShape, cutX, cutY):
-    validShapes = ["noCut", "rectangular", "triangular", "circular"]
+    validShapes = ["noCut", "rectangular", "triangular", "circular", "minDeltaPhiJetMET"]
     if cutShape not in validShapes:
         raise Exception("QCDTailKiller config for cut shape '%s' is not valid! (options: %s)"%(cutShape,", ".join(map(str, validShapes))))
     return cms.untracked.PSet(
@@ -504,13 +504,46 @@ QCDTailKillerVeryTightPlus = QCDTailKiller.clone(
     )
 )
 
+QCDTailKillerLooseJetMET = QCDTailKiller.clone(
+    scenarioLabel = cms.untracked.string("LooseJetMet"),
+    backToBack = cms.untracked.VPSet(
+        QCDTailKillerBin("minDeltaPhiJetMET", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("minDeltaPhiJetMET", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("minDeltaPhiJetMET", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
+    ), # collinear values have no effect
+)
+
+QCDTailKillerMediumJetMET = QCDTailKiller.clone(
+    scenarioLabel = cms.untracked.string("MediumJetMet"),
+    backToBack = cms.untracked.VPSet(
+        QCDTailKillerBin("minDeltaPhiJetMET", 60.0, 60.0), # jet 1
+        QCDTailKillerBin("minDeltaPhiJetMET", 60.0, 60.0), # jet 2
+        QCDTailKillerBin("minDeltaPhiJetMET", 60.0, 60.0), # jet 3
+        QCDTailKillerBin("noCut", 60.0, 60.0), # jet 4
+    ), # collinear values have no effect
+)
+
+QCDTailKillerTightJetMET = QCDTailKiller.clone(
+    scenarioLabel = cms.untracked.string("TightJetMet"),
+    backToBack = cms.untracked.VPSet(
+        QCDTailKillerBin("minDeltaPhiJetMET", 80.0, 80.0), # jet 1
+        QCDTailKillerBin("minDeltaPhiJetMET", 80.0, 80.0), # jet 2
+        QCDTailKillerBin("minDeltaPhiJetMET", 80.0, 80.0), # jet 3
+        QCDTailKillerBin("noCut", 80.0, 80.0), # jet 4
+    ), # collinear values have no effect
+)
+
 # Define here QCD tail killer scenarios (note that the nominal module will be produced in addition to these)
 QCDTailKillerScenarios = ["QCDTailKillerNoCuts",
                           #"QCDTailKillerZeroPlus",
                           "QCDTailKillerLoosePlus",
                           "QCDTailKillerMediumPlus",
                           "QCDTailKillerTightPlus",
-                          #"QCDTailKillerVeryTightPlus"
+                          #"QCDTailKillerVeryTightPlus",
+                          #"QCDTailKillerLooseJetMET",
+                          #"QCDTailKillerMediumJetMET",
+                          #"QCDTailKillerTightJetMET",
                           ]
 
 # Define H+ Invariant Mass Reco options
@@ -679,6 +712,7 @@ commonPlotsSettings = cms.untracked.PSet(
     ptBins = SetHistogramBinSettings(50, 0., 500.),
     etaBins = SetHistogramBinSettings(60, -3., 3.),
     phiBins = SetHistogramBinSettings(72, -3.1415926, 3.1415926),
+    deltaPhiBins = SetHistogramBinSettings(18, 0., 180.), # used in 2D plots, i.e. putting high number of bins here will cause troubles
     rtauBins = SetHistogramBinSettings(55, 0., 1.1),
     njetsBins = SetHistogramBinSettings(20, 0., 20.),
     metBins = SetHistogramBinSettings(50, 0., 500.),

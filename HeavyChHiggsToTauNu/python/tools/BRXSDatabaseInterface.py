@@ -386,10 +386,13 @@ class BRXSDatabaseInterface:
             x.append(mA)
             y.append(tanb)
 
-        x.append(160)
+        xarea = 160
+	if mHp > 175:
+            xarea = 100
+	x.append(xarea)
         y.append(75)
 
-        x.append(160)
+        x.append(xarea)
         y.append(1)
 
         x.append(x[0])
@@ -922,7 +925,7 @@ class BRXSDatabaseInterface:
 
         if target < self.getMinimum(variable,selection):
             #print "Warning,",variable,"target",target,"< minimum possible value",self.getMinimum(variable,selection),selection
-            return 1
+            return self.getMinimumTanb(variable,selection)
         if target > self.getMaximum(variable,selection):
             #print "Warning,",variable,"target",target,"> maximum possible value",self.getMaximum(variable,selection),selection
             if max < 10:

@@ -11,6 +11,10 @@ finalBinning = {
 
 applyFitUncertaintyAsBinByBinUncertainty = True
 
+# Minimum stat. uncertainty to set to bins with zero events
+MinimumStatUncertaintySignal = 0.03
+MinimumStatUncertaintyBkg = 0.5
+
 # Fit settings for QCD
 QCD = {
     "id": "QCD",

@@ -288,20 +288,20 @@ _legendLabels = {
     "MCStatSystError": "Sim. stat.#oplussyst. unc.",
 }
 for mass in _lightHplusMasses:
-    _legendLabels["TTToHplusBWB_M%d"%mass] = "H^{+}W^{-} m_{H^{#pm}}=%d"%mass
-    _legendLabels["TTToHplusBHminusB_M%d"%mass] = "H^{+}H^{-} m_{H^{#pm}}=%d" % mass
-    _legendLabels["TTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+    _legendLabels["TTToHplusBWB_M%d"%mass] = "H^{+}W^{-} m_{H^{#pm}}=%d GeV"%mass
+    _legendLabels["TTToHplusBHminusB_M%d"%mass] = "H^{+}H^{-} m_{H^{#pm}}=%d GeV" % mass
+    _legendLabels["TTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 
-    _legendLabels["Hplus_taunu_s-channel_M%d"%mass] = "t#rightarrowH^{+} (s) m_{H^{+}}=%d" % mass
-    _legendLabels["Hplus_taunu_t-channel_M%d"%mass] = "t#rightarrowH^{+} (t) m_{H^{+}}=%d" % mass
-    _legendLabels["Hplus_taunu_tW-channel_M%d"%mass] = "t#rightarrowH^{+} (tW) m_{H^{+}}=%d" % mass
+    _legendLabels["Hplus_taunu_s-channel_M%d"%mass] = "t#rightarrowH^{+} (s) m_{H^{+}}=%d GeV" % mass
+    _legendLabels["Hplus_taunu_t-channel_M%d"%mass] = "t#rightarrowH^{+} (t) m_{H^{+}}=%d GeV" % mass
+    _legendLabels["Hplus_taunu_tW-channel_M%d"%mass] = "t#rightarrowH^{+} (tW) m_{H^{+}}=%d GeV" % mass
     _legendLabels["Hplus_taunu_M%d"%mass] = "t#rightarrowH^{+} m_{H^{+}}=%d" % mass
 
-    _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+    _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 for mass in _heavyHplusMasses:
-    _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d" % mass
+    _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 for mass in _heavyHplusToTBbarMasses:
-    _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d" % mass
+    _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d GeV" % mass
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {

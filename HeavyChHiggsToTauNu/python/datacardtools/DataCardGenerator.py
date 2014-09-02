@@ -508,7 +508,7 @@ class DataCardGenerator:
                                               landsProcess=dg.landsProcess,
                                               enabledForMassPoints = dg.validMassPoints,
                                               datasetType = dg.datasetType,
-                                              nuisanceIds = dg.nuisances,
+                                              nuisanceIds = dg.nuisances[:],
                                               datasetMgrColumn = dg.datasetDefinition,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
                                               shapeHisto = dg.shapeHisto)
@@ -518,7 +518,7 @@ class DataCardGenerator:
                                               landsProcess=dg.landsProcess,
                                               enabledForMassPoints = dg.validMassPoints,
                                               datasetType = dg.datasetType,
-                                              nuisanceIds = dg.nuisances,
+                                              nuisanceIds = dg.nuisances[:],
                                               datasetMgrColumn = dg.datasetDefinition,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
                                               shapeHisto = dg.shapeHisto)

@@ -147,6 +147,7 @@ class DatacardColumn():
         self._nuisanceIds = None
         self._nuisanceResults = None
         self._controlPlots = None
+        self._cachedShapeRootHistogramWithUncertainties.delete()
         self._cachedShapeRootHistogramWithUncertainties = None
         self._datasetMgrColumn = None
 
@@ -392,6 +393,20 @@ class DatacardColumn():
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myShapeHistograms = myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeHistograms)
+            # Do signal injection
+            if self.typeIsObservation() and hasattr(config, "OptionSignalInjection"):
+                if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
+                    dsetMgr.getDataset(config.OptionSignalInjection["sample"]).setCrossSection(1)
+                elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
+                     if abs(dsetMgr.getDataset(config.OptionSignalInjection["sample"]).getCrossSection() - 245.8) > 0.0001:
+                         print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 245.8 pb according to arXiv:1303.6254"
+                         dsetMgr.getDataset(config.OptionSignalInjection["sample"]).setCrossSection(245.8)
+                myDatasetRootHistoForInjection = dsetMgr.getDataset(config.OptionSignalInjection["sample"]).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+                myDatasetRootHistoForInjection.normalizeToLuminosity(luminosity)
+                hInjection = myDatasetRootHistoForInjection.getHistogram()
+                hInjection.Scale(config.OptionSignalInjection["normalization"])
+                myShapeHistograms[0].Add(hInjection)
+                print ShellStyles.WarningLabel()+"Injected to data signal %f events (normalization=%f), data integral is now %f"%(hInjection.Integral(),config.OptionSignalInjection["normalization"],myShapeHistograms[0].Integral())
         # Cache result
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
@@ -505,15 +520,17 @@ class DatacardColumn():
                         # Remove any variations not active for the column
                         h.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
                         # Rebin and move under/overflow bins to visible bins
-                        myArray = array("d",getBinningForPlot(c._histoName))
-                        h.Rebin(len(myArray)-1,"",myArray)
-                        h.makeFlowBinsVisible()
+                        if not isinstance(h.getRootHisto(), ROOT.TH2):
+                            myArray = array("d",getBinningForPlot(c._histoName))
+                            h.Rebin(len(myArray)-1,"",myArray)
+                            h.makeFlowBinsVisible()
                         # Apply any further scaling (only necessary for the unceratainties from variation)
                         for nid in self._nuisanceIds:
                             for e in extractors:
                                 if e.getId() == nid:
                                     if e.getDistribution() == "shapeQ" and abs(e.getScaleFactor() - 1.0) > 0.0:
-                                        h.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
+                                        if not isinstance(h.getRootHisto(),ROOT.TH2):
+                                            h.ScaleVariationUncertainty(e._systVariation, e.getScaleFactor())
                         # Add to RootHistogramWithUncertainties non-shape uncertainties
                         for n in self._nuisanceResults:
                             if not n.resultIsStatUncertainty() and len(n.getHistograms()) == 0: # systematic uncert., but not shapeQ
@@ -528,22 +545,25 @@ class DatacardColumn():
                                                 myResult = n.getResult().Clone()
                                                 myResult.scale((1.0-myAverageCtrlPlotPurity) / (1.0 - myAveragePurity))
                                                 #print n._exId, n.getResult().getUncertaintyUp(), myAverageCtrlPlotPurity, myResult.getUncertaintyUp()
-                                if isinstance(myResult, ScalarUncertaintyItem):
-                                    h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
-                                elif isinstance(myResult, list):
-                                    h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult[1], myResult[0])
-                                else:
-                                    h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult, myResult)
+                                if not isinstance(h.getRootHisto(),ROOT.TH2):
+                                    if isinstance(myResult, ScalarUncertaintyItem):
+                                        h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                                    elif isinstance(myResult, list):
+                                        h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult[1], myResult[0])
+                                    else:
+                                        h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult, myResult)
                             elif not n.resultIsStatUncertainty() and len(n.getHistograms()) > 0:
                                 if isinstance(n.getResult(), ScalarUncertaintyItem): # constantToShape
                                     if self._opts.verbose:
                                         print "    - Adding norm. uncertainty: %s"%n.getMasterId()
-                                    h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                                    if not isinstance(h.getRootHisto(),ROOT.TH2):
+                                        h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                                 for e in extractors:
                                     if e.getId() == n.getId():
                                         if isinstance(e,QCDShapeVariationExtractor):
                                             # Calculate and add QCD shape uncertainty to h
-                                            e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor, rootHistoWithUncertainties=h)
+                                            if not isinstance(h.getRootHisto(),ROOT.TH2):
+                                                e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor, rootHistoWithUncertainties=h)
                         # Scale if asked
                         if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
                             h.Scale(self._additionalNormalisationFactor)
@@ -576,12 +596,23 @@ class DatacardColumn():
                 self._rateResult._histograms.insert(0,h) # The first one is assumed to be the one with the final binning elsewhere
         # Look for negative bins in rate histogram
         for k in range(1, self._rateResult._histograms[0].GetNbinsX()+1):
-            if self._rateResult._histograms[0].GetBinContent(k) < 0.000001:
+            if self._rateResult._histograms[0].GetBinContent(k) < config.MinimumStatUncertainty:
+                if self._rateResult._histograms[0].GetBinContent(k) >= 0.0 and self._rateResult._histograms[0].GetBinContent(k) < config.MinimumStatUncertainty:
+                    print ShellStyles.WarningLabel()+"Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! Compensating up stat uncertainty to %f!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k), config.MinimumStatUncertainty)
+                    self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)                   
                 if self._rateResult._histograms[0].GetBinContent(k) < -0.001:
                     print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
                     self._rateResult._histograms[0].SetBinContent(k, 0.0)
+                    #FIXME: if one adjusts the bin content, one needs to adjust accordingly the nuisances !!!
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)
                     #raise Exception(ShellStyles.ErrorLabel()+"Bin %d rate value is negative for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, datasetColumn.getLabel(), h.GetBinContent(k)))
+        # Convert bin content to integers for signal injection
+        if self.typeIsObservation() and hasattr(config, "OptionSignalInjection"):
+            for k in range(1, self._rateResult._histograms[0].GetNbinsX()+1):
+                self._rateResult._histograms[0].SetBinContent(k, round(self._rateResult._histograms[0].GetBinContent(k), 0))
+
+        # Update integral
+        self._rateResult._result = self._rateResult._histograms[0].Integral()
 
         for j in range(0,len(self._nuisanceResults)):
             myNewHistograms = []

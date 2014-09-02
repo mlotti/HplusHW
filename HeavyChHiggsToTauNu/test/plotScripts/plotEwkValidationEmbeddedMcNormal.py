@@ -149,7 +149,7 @@ def doDataset(datasetsEmb, datasetsSig, outputDir, opts):
 #        doCounters(datasetsEmb, datasetsSig, name)
 
     if not opts.notrigger:
-        dop("EWKMC", addData=True)
+        dop("EWKMC") #, addData=True)
     dop("TTJets")
     return
     dop("WJets")
@@ -209,7 +209,8 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, outputDir, addData, 
         p.setLuminosity(lumi)
         legLabel = plots._legendLabels.get(datasetName, datasetName)
         legEmb = "Embedded "+legLabel
-        legSig = "Normal "+legLabel
+        #legSig = "Normal "+legLabel
+        legSig = legLabel
         if addEventCounts:
             legEmb += " ("+strIntegral(drhEmb.getHistogram())+")"
             legSig += " ("+strIntegral(drhSig.getHistogram())+")"
