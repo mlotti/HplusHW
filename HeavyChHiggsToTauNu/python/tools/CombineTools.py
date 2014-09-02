@@ -62,6 +62,15 @@ lhcAsymptoticRminBrLimit = "0" # percent
 lhcAsymptoticRmaxSigmaBr = "1.0" # pb
 lhcAsymptoticRmaxBrLimit = "1.0" # percent
 
+## Default command line options for observed significance
+lhcFreqSignificanceObserved = "-M ProfileLikelihood --significance --scanPoints 1000"
+lhcFreqSignificanceExpected = lhcFreqSignificanceObserved + " -t -1 --toysFreq"
+lhcFreqSignificanceExpectedSignalSigmaBr = "0.1" # pb
+lhcFreqSignificanceExpectedSignalBrLimit = "0.01" # %
+lhcFreqRmaxSigmaBr = "1.0" # pb
+lhcFreqRmaxBrLimit = "0.1" # %
+
+
 ## Deduces from directory listing the mass point list
 def obtainMassPoints(pattern):
     commonLimitTools.obtainMassPoints(pattern)
@@ -259,6 +268,7 @@ class LHCTypeAsymptotic:
         self.obsAndExpScripts = {}
         self.blindedScripts = {}
         self.mlfitScripts = {}
+        self.significanceScripts = {}
 
     ## Return the name of the CLs flavour (for serialization to configuration.json)
     def name(self):
@@ -295,6 +305,8 @@ class LHCTypeAsymptotic:
     def createScripts(self, mass, datacardFiles):
         if self.opts.unblinded:
             self._createObsAndExp(mass, datacardFiles)
+            if self.opts.significance:
+                self._createObsSignificance(mass, datacardFiles)
         else:
             self._createBlinded(mass, datacardFiles)
 
@@ -376,6 +388,56 @@ class LHCTypeAsymptotic:
 
         self.mlfitScripts[mass] = fname
 
+    ## Create the observed significance for a single mass point
+    #
+    # \param mass            String for the mass point
+    # \param datacardFiles   List of strings for datacard file names of the mass point
+    def _createObsSignificance(self, mass, datacardFiles):
+        if self.opts.unblinded:
+            fileName = "runCombineSignif_ObsAndExp_m" + mass
+        else:
+            fileName = "runCombineSignif_Exp_m" + mass
+
+        opts = " -m %s"%mass
+        opts += " -n signif_m%s"%mass
+        if self.brlimit:
+            opts += " --rMin %s --rMax %s" % (lhcAsymptoticRminBrLimit, lhcFreqRmaxBrLimit)
+        else:
+            opts += " --rMin %s --rMax %s" % (lhcAsymptoticRminSigmaBr, lhcFreqRmaxSigmaBr)
+            
+        command = ["#!/bin/sh", ""]
+        # Combine cards and prepare workspace for physics model, if necessary
+        myInputDatacardName = _addCombinePreparationCommands(self.brlimit, datacardFiles, mass, command)
+        # Add command for running combine
+        tmpfile = "signif_%s_data.txt" % mass
+        # First expected
+        optsExpected = lhcFreqSignificanceExpected + opts
+        if self.brlimit:
+            optsExpected += " --expectSignal %s" % lhcFreqSignificanceExpectedSignalBrLimit
+        else:
+            optsExpected += " --expectSignal %s" % lhcFreqSignificanceExpectedSignalSigmaBr
+
+        command.append("combine %s -d %s" % (optsExpected, myInputDatacardName))
+        command.append("echo '#### PVALUE AFTER THIS LINE ###'")
+        command.append("combine %s --pvalue -d %s" % (optsExpected, myInputDatacardName))
+        # then observed
+        if self.opts.unblinded:
+            command.append("echo '#### OBSERVED AFTER THIS LINE ###'")
+            optsObserved = lhcFreqSignificanceObserved + opts
+            command.append("combine %s -d %s" % (optsObserved, myInputDatacardName))
+            command.append("echo '#### PVALUE AFTER THIS LINE ###'")
+            command.append("combine %s --pvalue -d %s" % (optsObserved, myInputDatacardName))
+
+        # command.append("combine %s -d %s >%s 2>&1" % (opts, myInputDatacardName, tmpfile))
+        # command.append("echo '#### PVALUE AFTER THIS LINE ###' >>%s 2>&1" % tmpfile)
+        # # For some reason with combine trying to append truncates...
+        # command.append("combine %s -d %s --pvalue >%s_tmp 2>&1" % (opts, myInputDatacardName, tmpfile))
+        # command.append("cat %s_tmp >> %s" % (tmpfile, tmpfile))
+        # command.append("rm %s_tmp" % tmpfile)
+        # command.append("combineReadSignificance.py -f %s -m %s -o significance.json" % (tmpfile, mass))
+        aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
+        self.significanceScripts[mass] = fileName
+
     ## Run LandS for the observed and expected limits for a single mass point
     #
     # \param mass   String for the mass point
@@ -383,11 +445,15 @@ class LHCTypeAsymptotic:
     # \return Result object containing the limits for the mass point
     def runCombine(self, mass):
         result = commonLimitTools.Result(mass)
-        if self.opts.unblinded:
-            self._runObservedAndExpected(result, mass)
+        if self.opts.limit:
+            if self.opts.unblinded:
+                self._runObservedAndExpected(result, mass)
+            else:
+                self._runBlinded(result, mass)
         else:
-            self._runBlinded(result, mass)
+            print "Skipping limit for mass:", mass
         self._runMLFit(mass)
+        self._runObsSignificance(mass)
         return result
 
     ## Helper method to run a script
@@ -490,11 +556,32 @@ class LHCTypeAsymptotic:
         raise Exception("Unable to parse the output of command '%s'" % script)
 
     def _runMLFit(self, mass):
-        if mass in self.mlfitScripts.keys():
+        if mass in self.mlfitScripts:
             script = self.mlfitScripts[mass]
             self._run(script, "mlfit_m_%s_output.txt" % mass)
         else:
             print "Skipping ML fit for mass:",mass
+
+    def _runObsSignificance(self, mass):
+        jsonFile = os.path.join(self.dirname, "significance.json")
+
+        if os.path.exists(jsonFile):
+            f = open(jsonFile)
+            result = json.load(f)
+            f.close()
+        else:
+            result = {
+                "expectedSignalBrLimit": lhcFreqSignificanceExpectedSignalBrLimit,
+                "expectedSignalSigmaBr": lhcFreqSignificanceExpectedSignalSigmaBr
+            }
+        if mass in self.significanceScripts:
+            script = self.significanceScripts[mass]
+            output = self._run(script, "signif_m_%s_output.txt" % mass)
+            result[mass] = parseSignificanceOutput(mass, outputString=output)
+
+        f = open(jsonFile, "w")
+        json.dump(result, f, sort_keys=True, indent=2)
+        f.close()
 
 def parseDiffNuisancesOutput(outputFileName, configFileName, mass):
     # first read nuisance types from datacards
@@ -553,3 +640,73 @@ def parseDiffNuisancesOutput(outputFileName, configFileName, mass):
     ret_sbkg["nuisanceParameters"] = nuisanceNames
 
     return (ret_bkg, ret_sbkg, ret_rho)
+
+def parseSignificanceOutput(mass, outputFileName=None, outputString=None):
+    if outputFileName is None and outputString is None:
+        raise Exception("Must give either outputFileName or outputString")
+    if outputFileName is not None and outputString is not None:
+        raise Exception("Must not give both outputFileName and outputString")
+
+    content = []
+    if outputFileName is not None:
+        f = open(outputFileName)
+        content = f.readlines()
+        f.close()
+    else:
+        content = outputString.split("\n")
+
+    # Read the significance values
+
+    fl = "[+-]?\d+\.?\d*(e[+-]?\d+)?"
+
+    signif_re = re.compile("Significance: (?P<signif>%s)" % fl)
+    pvalue_re = re.compile("p-value of background: (?P<pvalue>%s)" % fl)
+
+    signif_exp = None
+    pvalue_exp = None
+    signif_obs = None
+    pvalue_obs = None
+
+    signif = None
+    pvalue = None
+
+    for line in content:
+        if "OBSERVED AFTER THIS LINE" in line:
+            if signif is None:
+                raise Exception("Expected significance not found from file %s" % outputFileName)
+            if pvalue is None:
+                raise Exception("Expected p-value not found from file %s" % outputFileName)
+            signif_exp = signif
+            pvalue_exp = pvalue
+            signif = None
+            pvalue = None
+
+        m = signif_re.search(line)
+        if m:
+            if signif is not None:
+                raise Exception("Significance already found, line %s" % line)
+            signif = m.group("signif")
+            continue
+        m = pvalue_re.search(line)
+        if m:
+            if pvalue is not None:
+                raise Exception("P-value already found, line %s" % line)
+            pvalue = m.group("pvalue")
+
+    signif_obs = signif
+    pvalue_obs = pvalue
+
+    if signif_exp is None:
+        raise Exception("Expected significance not found from file %s" % outputFileName)
+    if pvalue_exp is None:
+        raise Exception("Expected p-value not found from file %s" % outputFileName)
+
+    ret = {"expected": {"significance": signif_exp,
+                        "pvalue": pvalue_exp}}
+    if signif_obs is not None:
+        if pvalue_obs is None:
+            raise Exception("Found observed significance but not pvalue from file %s" % outputFileName)
+        ret["observed"] = {"significance": signif_obs,
+                           "pvalue": pvalue_obs}
+
+    return ret
