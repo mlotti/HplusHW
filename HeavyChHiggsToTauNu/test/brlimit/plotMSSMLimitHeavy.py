@@ -191,7 +191,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
             histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
             histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl"),
@@ -214,6 +214,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             graphs["isomass"].SetFillStyle(1)
         plot = plots.PlotBase([
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
+            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{h} = 125.9#pm3.0 GeV", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
             histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
@@ -231,8 +232,8 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             "IsoMassCopy": None
             })
 
-    x = 0.55
-    y = -0.05
+    x = 0.50
+    y = -0.25
     plot.setLegend(histograms.createLegend(x-0.01, y+0.60, x+0.37, y+0.80))
     plot.legend.SetFillColor(0)
     plot.legend.SetFillStyle(1001)
@@ -248,16 +249,16 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     plot.frame.GetYaxis().SetTitle(limit.tanblimit)
 
     plot.draw()
-
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts(cmsTextPosition="right")
 #    histograms.addLuminosityText(x=None, y=None, lumi="2.3-4.9")
-    histograms.addLuminosityText(x=None, y=None, lumi="20")
+
 
     size = 20
     histograms.addText(x, y+0.9, limit.processHeavy, size=size)
     histograms.addText(x, y+0.863, limits.getFinalstateText(), size=size)
-    histograms.addText(x, y+0.815,scenario, size=size)
+    histograms.addText(x, y+0.815, limit.getTypesetScenarioName(scenario), size=size)
 #    histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
 
     if not graphs["isomass"] == None:
@@ -266,7 +267,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     #Adding a LHC label:
 #    ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
     FH_version = db.getVersion("FeynHiggs")
-    histograms.addText(x, y+0.55, FH_version, size=size)	
+    histograms.addText(x, y+0.55, FH_version, size=size)
 #    HD_version = db.getVersion("HDECAY")
 #    histograms.addText(x, y+0.55, FH_version+" and", size=size)
 #    histograms.addText(x, y+0.50, HD_version, size=size)

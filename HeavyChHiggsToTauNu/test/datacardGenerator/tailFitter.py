@@ -368,7 +368,7 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             addOrReplace(myDict, "Hp", myRHWU)
         elif c.startswith("Hp"):
             addOrReplace(myDict, "Hp", myRHWU)
-        elif c == "EWK_Tau":
+        elif c == "EWK_Tau" or c == "MC_EWKTau":
             addOrReplace(myDict, "EWKtau", myRHWU)
             myAddToTotalStatus = True
         elif c.endswith("faketau"):
@@ -445,20 +445,24 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
 	myParams = {}
 	if myBlindedStatus:
 	    myParams["blindingRangeString"] = myBlindingString
+	myParams["cmsTextPosition"] = "right"
 	myParams["ratio"] = True
 	myParams["ratioType"] = "errorScale"
-	myParams["ratioYlabel"] = "Data/Bkg."
+	myParams["ratioYlabel"] = "Data/Bkg. "
 	myParams["stackMCHistograms"] = True
 	myParams["addMCUncertainty"] = True
 	myParams["addLuminosityText"] = True
-	myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
+	myParams["moveLegend"] = {"dx": -0.15, "dy": -0.10}
+	myParams["ratioErrorOptions"] = {"numeratorStatSyst": False}
 	myParams["ratioCreateLegend"] = True
-	myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
+	#myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
+	myParams["ratioMoveLegend"] = {"dx": -0.01, "dy": -0.03}
+	myParams["opts2"] = {"ymin": 0.0, "ymax": 2.5}
 	myParams["xlabel"] = "m_{T} (GeV)"
 	if l:
             myParams["ylabel"] = "< Events / bin >"
         else:
-            myParams["ylabel"] = "Events"
+            myParams["ylabel"] = "Events / 20 GeV"
 	a = hObsLocal.GetXaxis().GetBinWidth(1)
 	b = hObsLocal.GetXaxis().GetBinWidth(hObsLocal.GetNbinsX())
 	#if abs(a-b) < 0.0001:
