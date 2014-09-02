@@ -221,7 +221,7 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None, ful
                       help="Do not set to true unless you know what you are doing and have permission to do so")
 
     parser.add_option("--significance", dest="significance", action="store_true", default=False,
-                      help="Run also observed significance (requires --final)")
+                      help="Run also expected (and with --final also observed) significance")
 
     parser.add_option("--nomlfit", dest="nomlfit", action="store_false", default=True,
                       help="Disable ML fit")

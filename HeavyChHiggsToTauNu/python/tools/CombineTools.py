@@ -305,10 +305,10 @@ class LHCTypeAsymptotic:
     def createScripts(self, mass, datacardFiles):
         if self.opts.unblinded:
             self._createObsAndExp(mass, datacardFiles)
-            if self.opts.significance:
-                self._createObsSignificance(mass, datacardFiles)
         else:
             self._createBlinded(mass, datacardFiles)
+        if self.opts.significance:
+            self._createSignificance(mass, datacardFiles)
 
     ## Create the observed and expected job script for a single mass point
     #
@@ -392,7 +392,7 @@ class LHCTypeAsymptotic:
     #
     # \param mass            String for the mass point
     # \param datacardFiles   List of strings for datacard file names of the mass point
-    def _createObsSignificance(self, mass, datacardFiles):
+    def _createSignificance(self, mass, datacardFiles):
         if self.opts.unblinded:
             fileName = "runCombineSignif_ObsAndExp_m" + mass
         else:
@@ -453,7 +453,7 @@ class LHCTypeAsymptotic:
         else:
             print "Skipping limit for mass:", mass
         self._runMLFit(mass)
-        self._runObsSignificance(mass)
+        self._runSignificance(mass)
         return result
 
     ## Helper method to run a script
@@ -562,7 +562,7 @@ class LHCTypeAsymptotic:
         else:
             print "Skipping ML fit for mass:",mass
 
-    def _runObsSignificance(self, mass):
+    def _runSignificance(self, mass):
         jsonFile = os.path.join(self.dirname, "significance.json")
 
         if os.path.exists(jsonFile):
@@ -670,12 +670,19 @@ def parseSignificanceOutput(mass, outputFileName=None, outputString=None):
     signif = None
     pvalue = None
 
+    def error(message):
+        if outputFileName is not None:
+            raise Exception("%s from file %s" % (message, outputFileName))
+        print "Combine output"
+        print outputString
+        raise Exception("%s from the combine output (see above)" % message)
+
     for line in content:
         if "OBSERVED AFTER THIS LINE" in line:
             if signif is None:
-                raise Exception("Expected significance not found from file %s" % outputFileName)
+                error("Expected significance not found")
             if pvalue is None:
-                raise Exception("Expected p-value not found from file %s" % outputFileName)
+                error("Expected p-value not found")
             signif_exp = signif
             pvalue_exp = pvalue
             signif = None
@@ -693,19 +700,23 @@ def parseSignificanceOutput(mass, outputFileName=None, outputString=None):
                 raise Exception("P-value already found, line %s" % line)
             pvalue = m.group("pvalue")
 
-    signif_obs = signif
-    pvalue_obs = pvalue
+    if signif_exp is None:
+        signif_exp = signif
+        pvalue_exp = pvalue
+    else:
+        signif_obs = signif
+        pvalue_obs = pvalue
 
     if signif_exp is None:
-        raise Exception("Expected significance not found from file %s" % outputFileName)
+        error("Expected significance not found")
     if pvalue_exp is None:
-        raise Exception("Expected p-value not found from file %s" % outputFileName)
+        error("Expected p-value not found")
 
     ret = {"expected": {"significance": signif_exp,
                         "pvalue": pvalue_exp}}
     if signif_obs is not None:
         if pvalue_obs is None:
-            raise Exception("Found observed significance but not pvalue from file %s" % outputFileName)
+            error("Found observed significance but not pvalue")
         ret["observed"] = {"significance": signif_obs,
                            "pvalue": pvalue_obs}
 
