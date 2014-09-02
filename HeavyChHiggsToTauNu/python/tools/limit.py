@@ -639,13 +639,13 @@ def cleanGraph(graph, minX=95):
 # \param graph   TGraph of the observed BR limit
 #
 # \return Clone of the TGraph for the -1sigma theory uncertainty band
-def getObservedMinus(graph):
+def getObservedMinus(graph,uncertainty):
     curve = graph.Clone()
     curve.SetName(curve.GetName()+"TheoryMinus")
     for i in xrange(0, graph.GetN()):
         curve.SetPoint(i,
                        graph.GetX()[i],
-                       graph.GetY()[i]*0.77)
+                       graph.GetY()[i]*(1-uncertainty))
     print "todo: CHECK minus coefficient f(m)"
     return curve
 
@@ -654,13 +654,13 @@ def getObservedMinus(graph):
 # \param graph   TGraph of the observed BR limit
 #
 # \return Clone of the TGraph for the +1sigma theory uncertainty band
-def getObservedPlus(graph):
+def getObservedPlus(graph,uncertainty):
     curve = graph.Clone()
     curve.SetName(curve.GetName()+"TheoryPlus")
     for i in xrange(0, graph.GetN()):
         curve.SetPoint(i,
                        graph.GetX()[i],
-                       graph.GetY()[i]*1.22)
+                       graph.GetY()[i]*(1+uncertainty))
     print "todo: CHECK plus coefficient f(m)"
     return curve
 

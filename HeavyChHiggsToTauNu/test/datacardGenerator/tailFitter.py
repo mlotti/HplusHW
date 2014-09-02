@@ -51,6 +51,12 @@ def parseNuisanceNames(lines, columnNames):
             for i in range(2,len(mySplit)):
                 myDict[columnNames[i-2]] = mySplit[i]
             myNames.append(myDict)
+        if mySplit[0] == "observation":
+            # store observation
+            myDict = {}
+            myDict["name"] = "observation"
+            myDict["value"] = mySplit[1]
+            myNames.append(myDict)
         if mySplit[0] == "rate":
             # store rate
             myStatus = True
@@ -119,7 +125,7 @@ def getAndRebinNuisanceHistos(columnName, rootFile, nuisanceInfo, binlist):
     mySuffixes = ["Up_fineBinning","Down_fineBinning"]
     # Loop over nuisance info
     for n in nuisanceInfo:
-        if n["distribution"] == "shape" and n[columnName] == "1" and not "QCD_metshape" in n["name"]:
+        if n["name"] != "observation" and n["distribution"] == "shape" and n[columnName] == "1" and not "QCD_metshape" in n["name"]:
             for suffix in mySuffixes:
                 myName = "%s_%s%s"%(columnName,n["name"],suffix)
                 hOriginal = rootFile.Get(myName)
@@ -244,6 +250,10 @@ def addBinByBinStatUncert(config, currentColumn, hRate, columnNames, nuisanceInf
 
 def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo, opts):
     myOutput = ""
+    myObservedLine = ""
+    for n in nuisanceInfo:
+        if n["name"] == "observation":
+            myObservedLine = "observation    %d\n"%int(n["value"])
     myProcessLinePassed = False
     for l in originalCardLines:
         # write header lines
@@ -254,34 +264,38 @@ def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo, opts):
             if mySplit[0] == "process":
                 myProcessLinePassed = True
             if not myProcessLinePassed:
-                myOutput += l
+                if mySplit[0] == "observation":
+                    myOutput += myObservedLine
+                else:
+                    myOutput += l
     # Create tables
     myProcessTable = []
     myRateTable = []
     myNuisanceTable = []
     myStatTable = []
     for n in nuisanceInfo:
-        myRow = []
-        # add first two entries
-        if n["name"] == "rate" or n["name"] == "process":
-            myRow.append(n["name"])
-            myRow.append("")
-        else:
-            myRow.append(n["name"])
-            myRow.append(n["distribution"])
-        # add data from columns
-        for c in columnNames:
-            myRow.append(n[c])
-        # store
-        if n["name"] == "rate":
-            myRateTable.append(myRow)
-        elif n["name"] == "process":
-            myProcessTable.append(myRow)
-        elif "statBin" in n["name"]:
-            myStatTable.append(myRow)
-        else:
-            if not opts.noSystUncert:
-                myNuisanceTable.append(myRow)
+        if n["name"] != "observation":
+            myRow = []
+            # add first two entries
+            if n["name"] == "rate" or n["name"] == "process":
+                myRow.append(n["name"])
+                myRow.append("")
+            else:
+                myRow.append(n["name"])
+                myRow.append(n["distribution"])
+            # add data from columns
+            for c in columnNames:
+                myRow.append(n[c])
+            # store
+            if n["name"] == "rate":
+                myRateTable.append(myRow)
+            elif n["name"] == "process":
+                myProcessTable.append(myRow)
+            elif "statBin" in n["name"]:
+                myStatTable.append(myRow)
+            else:
+                if not opts.noSystUncert:
+                    myNuisanceTable.append(myRow)
     # Create table
     myWidths = []
     TableProducer.calculateCellWidths(myWidths, myProcessTable)
@@ -327,12 +341,12 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
         myRHWU = RootHistoWithUncertainties(hRate)
         for n in myNuisanceInfo:
             # Add shape uncertainties
-            if n["distribution"] == "shape" and n[c] == "1" and not "statBin" in n["name"]:
+            if n["name"] != "observation" and n["distribution"] == "shape" and n[c] == "1" and not "statBin" in n["name"]:
                 hUp = aux.Clone(getHisto(cachedHistos, "%s_%sUp"%(c,n["name"])))
                 hDown = aux.Clone(getHisto(cachedHistos, "%s_%sDown"%(c,n["name"])))
                 myRHWU.addShapeUncertaintyFromVariation(n["name"], hUp, hDown)
             # Add constant uncertainties
-            elif n["name"] != "rate" and n["name"] != "process" and n[c] != "-" and n[c] != "1" and not "statBin" in n["name"] and not "BinByBin" in n["name"]:
+            elif n["name"] != "observation" and n["name"] != "rate" and n["name"] != "process" and n[c] != "-" and n[c] != "1" and not "statBin" in n["name"] and not "BinByBin" in n["name"]:
                 diffUp = 0.0
                 diffDown = 0.0
                 if "/" in n[c]:
@@ -403,7 +417,7 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             myHisto = histograms.Histo(myDict["EWKfakes"].Clone(),"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
-        myBlindedStatus = True
+        myBlindedStatus = False
         myBlindingString = None
         hObsLocal = aux.Clone(hObs)
         if myBlindedStatus:
@@ -540,6 +554,13 @@ def main(opts):
         myFitParNuisanceInfo = None
         # Treat observation
         hObs = getAndRebinRateHisto("data_obs", myRootFile, config.finalBinning["shape"])
+        myPath = os.getcwd()
+        if "SignalInjection" in myPath:
+            for k in range (0, hObs.GetNbinsX()+1):
+                hObs.SetBinContent(k, round(hObs.GetBinContent(k)))
+            for n in myNuisanceInfo:
+                if n["name"] == "observation":
+                    n["value"] = hObs.Integral()
         myHistogramCache.append(hObs)
         # Loop over column names
         for c in myColumnNames:
@@ -586,7 +607,7 @@ def main(opts):
                         print "... Updated rate because of fitting %.1f -> %.1f (diff=%f)"%(hFineBinning.Integral(), myFittedRateHistograms[0].Integral(), myFittedRateHistograms[0].Integral()/hFineBinning.Integral())
                 # Update all those shape nuisances (update histograms only, no need to touch nuisance table)
                 for n in myNuisanceInfo:
-                    if n["distribution"] == "shape" and n[c] == "1":
+                    if n["name"] != "observation" and n["distribution"] == "shape" and n[c] == "1":
                         #print "... Updating shape nuisance '%s' tail"%n["name"]
                         myUpdatedNuisanceHistograms = updateNuisanceTail(hOriginalShape, myFittedRateHistograms[0], myRootFile, "%s_%s"%(c,n["name"]))
                         myHistogramCache.extend(myUpdatedNuisanceHistograms)

@@ -22,7 +22,7 @@ LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
-#HeavyMassPoints      = [300]
+HeavyMassPoints      = [300]
 HeavyMassPoints      = []
 
 selectionReg = None
@@ -44,8 +44,11 @@ elif selectionReg == "D":
     Path = "/home/wendland/data/xnominal"
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
-BlindAnalysis   = True
+BlindAnalysis   = False
 OptionBlindThreshold = None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
+
+# Uncomment following line to inject signal with certain mass and normalization into the observation
+#OptionSignalInjection = {"sample": "HplusTB_M250", "normalization": 0.28} # the normalization is relative to the normalization in the multicrab
 
 # Rate counter definitions
 SignalRateCounter = "Selected events"
