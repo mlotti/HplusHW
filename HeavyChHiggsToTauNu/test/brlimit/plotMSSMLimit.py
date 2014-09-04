@@ -233,7 +233,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     size = 20
     x = 0.2
     dy = -0.15
-    plot.setLegend(histograms.createLegend(x-0.01, 0.60+dy, x+0.37, 0.80+dy))
+    plot.setLegend(histograms.createLegend(x-0.01, 0.50+dy, x+0.37, 0.80+dy))
     plot.legend.SetFillColor(0)
     plot.legend.SetFillStyle(1001)
     if blinded:
