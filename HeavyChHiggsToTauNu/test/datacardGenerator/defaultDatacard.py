@@ -48,7 +48,10 @@ BlindAnalysis   = False
 OptionBlindThreshold = None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
 
 # Uncomment following line to inject signal with certain mass and normalization into the observation
-#OptionSignalInjection = {"sample": "HplusTB_M250", "normalization": 0.28} # the normalization is relative to the normalization in the multicrab
+#OptionSignalInjection = {"sample": "TTToHplusBWB_M120", "normalization": 0.0035} # the normalization is relative to the normalization in the multicrab
+#OptionSignalInjection = {"sample": "TTToHplusBWB_M160", "normalization": 0.0022} # the normalization is relative to the normalization in the multicrab
+#OptionSignalInjection = {"sample": "HplusTB_M250", "normalization": 0.28} # the normalization is relative to the normalization in the multicrabs
+#OptionSignalInjection = {"sample": "HplusTB_M500", "normalization": 0.035} # the normalization is relative to the normalization in the multicrabs
 
 # Rate counter definitions
 SignalRateCounter = "Selected events"
@@ -1580,11 +1583,14 @@ if OptionMassShape == "TransverseMass":
                             #"ylabel": "Events/^{}#Deltam_{T}",
                             #"unit": "GeV",
                             "xlabel": "m_{T} (GeV)",
-                            "ylabel": "< Events / GeV >", "ylabelBinInfo": False,
+                            "ylabel": "< Events / bin >", "ylabelBinInfo": False,
                             "moveLegend": {"dx": -0.22, "dy": -0.1},
+                            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
                             "divideByBinWidth": True,
                             "log": False,
-                            "opts": {"ymin": 0.0}},
+                            "opts": {"ymin": 0.0},
+                            "opts2": {"ymin": 0.0, "ymax": 2.0}
+                            },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [60, 180], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1600,11 +1606,14 @@ if OptionMassShape == "TransverseMass":
                             #"ylabel": "Events/^{}#Deltam_{T}",
                             #"unit": "GeV",
                             "xlabel": "m_{T} (GeV)",
-                            "ylabel": "< Events / GeV >", "ylabelBinInfo": False,
-                            "moveLegend": {"dx": -0.22, "dy": -0.5},
+                            "ylabel": "< Events / bin >", "ylabelBinInfo": False,
+                            "moveLegend": {"dx": -0.22, "dy": -0.1},
+                            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
                             "divideByBinWidth": True,
                             "log": True,
-                            "opts": {"ymin": 1e-5}},
+                            "opts": {"ymin": 1e-5},
+                            "opts2": {"ymin": 0.0, "ymax": 2.0}
+                           },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
         flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1622,7 +1631,7 @@ elif OptionMassShape == "FullMass":
                              "unit": "GeV",
                              "log": False,
                              "opts": {"ymin": 0.0},
-                             #"opts": {"ymin": 1e-5} },
+                             "opts2": {"ymin": 0.0, "ymax": 2.0},
                            },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [80, 180], # specify range to be evaluated and saved into a file

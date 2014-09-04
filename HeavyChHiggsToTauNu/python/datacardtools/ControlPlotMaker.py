@@ -22,8 +22,7 @@ _legendLabelEmbedding = "EWK+tt with #tau_{h} (data)"
 _legendLabelEWKFakes = "EWK+tt no #tau_{h} (sim.)"
 #_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (sim.)"
 
-drawPlot = plots.PlotDrawer(opts2={"ymin": 0.5, "ymax": 1.5},
-                            ratio=True, ratioYlabel="Data/Bkg.", ratioCreateLegend=True,
+drawPlot = plots.PlotDrawer(ratio=True, ratioYlabel="Data/Bkg. ", ratioCreateLegend=True,
                             ratioType="errorScale", ratioErrorOptions={"numeratorStatSyst": False},
                             stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True,
                             cmsTextPosition="outframe")
@@ -248,13 +247,19 @@ class ControlPlotMaker:
                                 myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
                             elif myParams["ratioLegendPosition"] == "right":
                                 myParams["ratioMoveLegend"] = {"dx": 0.00, "dy": 0.03}
+                            elif myParams["ratioLegendPosition"] == "SE":
+                                myParams["ratioMoveLegend"] = {"dx": -0.06, "dy": -0.33}
                             else:
                                 raise Exception("Unknown value for option ratioLegendPosition: %s!", myParams["ratioLegendPosition"])
                             del myParams["ratioLegendPosition"]
                         else:
-                            myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
+                            if not "ratioMoveLegend" in myParams:
+                                myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
                         # Remove non-dientified keywords
                         del myParams["unit"]
+                        # Ratio axis
+                        if not "opts2" in myParams.keys():
+                            myParams["opts2"] = {"ymin": 0.5, "ymax": 1.5}
                         # Do plotting
                         drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
 

@@ -53,7 +53,7 @@ def useSubscript():
 useSubscript()
 
 ## Y axis label for the tanbeta
-tanblimit = "95 % CL Limit on tan #beta"
+tanblimit = "95 % CL limit on tan #beta"
 
 ## Label for m(H+)
 def mHplus():
@@ -676,13 +676,13 @@ def cleanGraph(graph, minX=95):
 # \param graph   TGraph of the observed BR limit
 #
 # \return Clone of the TGraph for the -1sigma theory uncertainty band
-def getObservedMinus(graph):
+def getObservedMinus(graph,uncertainty):
     curve = graph.Clone()
     curve.SetName(curve.GetName()+"TheoryMinus")
     for i in xrange(0, graph.GetN()):
         curve.SetPoint(i,
                        graph.GetX()[i],
-                       graph.GetY()[i]*0.77)
+                       graph.GetY()[i]*(1-uncertainty))
     print "todo: CHECK minus coefficient f(m)"
     return curve
 
@@ -691,13 +691,13 @@ def getObservedMinus(graph):
 # \param graph   TGraph of the observed BR limit
 #
 # \return Clone of the TGraph for the +1sigma theory uncertainty band
-def getObservedPlus(graph):
+def getObservedPlus(graph,uncertainty):
     curve = graph.Clone()
     curve.SetName(curve.GetName()+"TheoryPlus")
     for i in xrange(0, graph.GetN()):
         curve.SetPoint(i,
                        graph.GetX()[i],
-                       graph.GetY()[i]*1.22)
+                       graph.GetY()[i]*(1+uncertainty))
     print "todo: CHECK plus coefficient f(m)"
     return curve
 
@@ -800,3 +800,27 @@ def divideGraph(num, denom):
             val = gr.GetY()[i]/y
         gr.SetPoint(i, gr.GetX()[i], val)
     return gr
+
+
+## Returns a properly typeset label for MSSM scenario
+#
+# \param scenario   string of the scenario rootfile name
+#
+# \return string with the typeset name
+def getTypesetScenarioName(scenario):
+    myTruncatedScenario = scenario.replace("-LHCHXSWG","")
+    if myTruncatedScenario == "lightstau":
+        return "MSSM light stau"
+    if myTruncatedScenario == "lightstop":
+        return "MSSM light stop"
+    if myTruncatedScenario == "lowMH":
+        return "MSSM low m_{H}"
+    if myTruncatedScenario == "mhmaxup":
+        return "MSSM updated m_{h}^{max}"
+    if myTruncatedScenario == "mhmodm":
+        return "MSSM  m_{h}^{mod-}"
+    if myTruncatedScenario == "mhmodp":
+        return "MSSM  m_{h}^{mod-}"
+    if myTruncatedScenario == "tauphobic":
+        return "MSSM #tau-phobic"
+    raise Exception("The typeset name for scenario '%s' is not defined in tools/limit.py::getTypesetScenarioName()! Please add it."%scenario)
