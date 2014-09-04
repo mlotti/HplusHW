@@ -23,7 +23,7 @@ namespace HPlus {
     ~TopChiSelection();
 
   private:
-    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<pat::Jet> iJetb);
     void init();
 
     // Input parameters
@@ -43,6 +43,9 @@ namespace HPlus {
     WrappedTH1* htopEta;
     WrappedTH1* htopPtAfterCut;
     WrappedTH1* htopMassAfterCut;
+    WrappedTH1* htopMassAfterTightChiCut;
+    WrappedTH1* htopMassAfterMediumChiCut;
+    WrappedTH1* htopMassAfterLooseChiCut;    
     WrappedTH1* htopEtaAfterCut;
     WrappedTH1* htopMassRejected;
     WrappedTH1* hWPt;
@@ -50,18 +53,31 @@ namespace HPlus {
     WrappedTH1* hWEta;
     WrappedTH1* hWPtAfterCut;
     WrappedTH1* hWMassAfterCut;
-    WrappedTH1* hWEtaAfterCut;    
+    WrappedTH1* hWEtaAfterCut;   
+    WrappedTH1* hdeltaPhi_Wb;
+    WrappedTH1* hdeltaR_Wb;
+    WrappedTH1* hdeltaPhi_jets;
+    WrappedTH1* hdeltaR_jets; 
+    WrappedTH1* htopPt_match;
+    WrappedTH1* hWPt_match;
+    WrappedTH1* hdeltaPhi_Wb_match;
+    WrappedTH1* hdeltaR_Wb_match;
+    WrappedTH1* hdeltaPhi_jets_match;
+    WrappedTH1* hdeltaR_jets_match; 
     WrappedTH1* hjjbMass;
     WrappedTH1* htopMassMatch;
     WrappedTH1* hWMassMatch;
     WrappedTH1* hChi2Min;
+    WrappedTH1* hChi2Top;
+    WrappedTH1* hChi2W;
     WrappedTH1* htopMassBMatch;
     WrappedTH1* hWMassBMatch;
     WrappedTH1* htopMassQMatch;
     WrappedTH1* hWMassQMatch;
     WrappedTH1* htopMassMatchWrongB;
     WrappedTH1* hWMassMatchWrongB;
-
+    WrappedTH1* hWMassLepton;
+    WrappedTH1* hWMassNotLepton;
   };
 }
 

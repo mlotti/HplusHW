@@ -16,7 +16,7 @@ namespace HPlus {
     {
     if (topRecoName == "chi"){   
         fSelectedAlgorithm = new TopChiSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topChiSelection"), eventCounter, fHistoWrapper);
-        }
+        }        
     else if (topRecoName == "std"){
         fSelectedAlgorithm = new TopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, fHistoWrapper);
         }
@@ -37,37 +37,40 @@ namespace HPlus {
   // analyze
   TopSelectionManager::Data TopSelectionManager::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, edm::Ptr<pat::Jet> bjet, bool bjetPassed) {
     TopSelectionManager::Data TopSelectionData;
-    if (fTopRecoName == "None") // LAW 3.12.2013 (note that fSelectedAlgorithm == NULL in this case, i.e. all events failed for top reco if topRecoName == "None")
-      TopSelectionData.makeEventPassed();
-    if(fSelectedAlgorithm){
-        if (fTopRecoName == "std")
-            TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjets);
-        else if (fTopRecoName == "chi")
-            TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjets);
-        else if (fTopRecoName == "Wselection" && bjetPassed)
-            TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjet);
-        else if (fTopRecoName == "Bselection" && bjetPassed)
-            TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjet);
+    //proceed with the top reconstruction if algorithm is specified correctly
+    //for Wselection and Bselection proceed only if b-tagging has succeeded
+    bool proceed = true;
+    if (fTopRecoName == "Wselection" || fTopRecoName == "Bselection") 
+        proceed = bjetPassed;
+    if(fSelectedAlgorithm && proceed){
+        fSelectedAlgorithm->ensureAnalyzeAllowed(iEvent);    
+        TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjets, bjet);
         }
+    else
+        TopSelectionData.makeEventPassed();    
     return TopSelectionData;
     }       
     
     // silentAnalyze
    TopSelectionManager::Data TopSelectionManager::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, edm::Ptr<pat::Jet> bjet, bool bjetPassed){
-    TopSelectionManager::Data TopSelectionData;
-    if (fTopRecoName == "None")  // LAW 3.12.2013 (note that fSelectedAlgorithm == NULL in this case, i.e. all events failed for top reco if topRecoName == "None")
-      TopSelectionData.makeEventPassed();
 
-    if(fSelectedAlgorithm){
-        if (fTopRecoName == "std")
-            TopSelectionData = fSelectedAlgorithm->silentAnalyze(iEvent, iSetup, jets, bjets);
-        else if (fTopRecoName == "chi")
-            TopSelectionData = fSelectedAlgorithm->silentAnalyze(iEvent, iSetup, jets, bjets);
-        else if (fTopRecoName == "Wselection" && bjetPassed)
-            TopSelectionData = fSelectedAlgorithm->silentAnalyze(iEvent, iSetup, jets, bjet);
-        else if (fTopRecoName == "Bselection" && bjetPassed)
-            TopSelectionData = fSelectedAlgorithm->silentAnalyze(iEvent, iSetup, jets, bjet);
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = eventCounter.disableTemporarily();
+   
+    TopSelectionManager::Data TopSelectionData;
+    //proceed with the top reconstruction if algorithm is specified correctly
+    //for Wselection and Bselection proceed only if b-tagging has succeeded
+    bool proceed = true;
+    if (fTopRecoName == "Wselection" || fTopRecoName == "Bselection") 
+        proceed = bjetPassed;
+    if(fSelectedAlgorithm && proceed){
+        fSelectedAlgorithm->ensureSilentAnalyzeAllowed(iEvent);
+        TopSelectionData = fSelectedAlgorithm->analyze(iEvent, iSetup, jets, bjets, bjet);
         }
+    else
+        TopSelectionData.makeEventPassed();    
     return TopSelectionData;
     }   
     
