@@ -184,7 +184,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
 #            histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "m_{"+higgs+"} = 125.0#pm3.0 GeV", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
 #            histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
@@ -213,7 +213,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "m_{"+higgs+"} = 125.0#pm3.0 GeV", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
             histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
@@ -261,8 +261,8 @@ def doPlot(name, graphs, limits, xlabel, scenario):
 
     #Adding a LHC label:
 #    ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
-    FH_version = db.getVersion("FeynHiggs")
-    histograms.addText(x, 0.55+dy, FH_version, size=size)
+    #FH_version = db.getVersion("FeynHiggs")
+    #histograms.addText(x, 0.55+dy, FH_version, size=size)
 #    HD_version = db.getVersion("HDECAY")
 #    histograms.addText(x, 0.55, FH_version+" and "+HD_version, size=size)
 #    histograms.addText(x, 0.48, "Derived from", size=size)
