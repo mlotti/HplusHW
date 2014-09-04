@@ -87,9 +87,12 @@ namespace HPlus {
 //---------------------------------------------------------------------------------------------
 
   //privateAnalyze
-  TopChiSelection::Data TopChiSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+  TopChiSelection::Data TopChiSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<pat::Jet> iJetb) {
     Data output;
 
+    // Suppress warning about unused variable
+    (void)iJetb;
+    
     // Reset variables
     double chi2Min = 999999;
     double nominalTop = 172.5; //value used in simulation (used to be 172.9)

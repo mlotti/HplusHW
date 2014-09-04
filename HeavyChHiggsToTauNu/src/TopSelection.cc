@@ -60,9 +60,12 @@ namespace HPlus {
 //---------------------------------------------------------------------------------------------
 
   //privateAnalyze
-  TopSelection::Data TopSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+  TopSelection::Data TopSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<pat::Jet> bjet) {
 
     Data output;
+
+    // Suppress warning about unused variable
+    (void)bjet;
 
     // Reset variables
     double ptmax = 0;
