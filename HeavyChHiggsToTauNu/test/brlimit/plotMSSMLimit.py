@@ -82,8 +82,8 @@ def main():
     if obs.GetN() > 0:
         graphs["obs"] = obs
         # Get theory uncertainties on observed
-        obs_th_plus = limit.getObservedPlus(obs,0.29)
-        obs_th_minus = limit.getObservedMinus(obs,0.29)
+        obs_th_plus = limit.getObservedPlus(obs,0.21)
+        obs_th_minus = limit.getObservedMinus(obs,0.21)
         for gr in [obs_th_plus, obs_th_minus]:
             gr.SetLineWidth(2)
             gr.SetLineStyle(9)
