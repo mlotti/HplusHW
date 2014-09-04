@@ -53,7 +53,7 @@ def useSubscript():
 useSubscript()
 
 ## Y axis label for the tanbeta
-tanblimit = "95 % CL Limit on tan #beta"
+tanblimit = "95 % CL limit on tan #beta"
 
 ## Label for m(H+)
 def mHplus():
@@ -504,6 +504,44 @@ class MLFitData:
 
         return (gr, labels)
 
+    def fittedGraphHeavy(self, mass, backgroundOnly=False, signalPlusBackground=False):
+        if not backgroundOnly and not signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
+        if backgroundOnly and signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (both were)")
+        if signalPlusBackground:
+            backgroundOnly = False
+
+        labels = []
+        values = []
+        uncertainties = []
+        
+        if backgroundOnly:
+            content = self.data[mass]["background"]
+        else:
+            content = self.data[mass]["signal+background"]
+        labels = content["nuisanceParameters"][:]
+
+        for nuis in labels[:]:
+            if "BinByBin" in nuis:
+                del labels[labels.index(nuis)]
+                continue               
+            if not nuis in content or content[nuis]["type"] == "shapeStat":
+                del labels[labels.index(nuis)]
+                continue
+            values.append(float(content[nuis]["fitted_value"]))
+            uncertainties.append(float(content[nuis]["fitted_uncertainty"]))
+
+        yvalues = range(1, len(values)+1)
+
+        yvalues.reverse()
+
+        gr = ROOT.TGraphErrors(len(values),
+                               array.array("d", values), array.array("d", yvalues),
+                               array.array("d", uncertainties))
+
+        return (gr, labels)
+
     def fittedGraphShapeStat(self, mass, backgroundOnly=False, signalPlusBackground=False):
         if not backgroundOnly and not signalPlusBackground:
             raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
@@ -514,6 +552,7 @@ class MLFitData:
 
         shapeStatNuisance = None
         labels = []
+        labels2= []
         values = []
         uncertainties = []
         
@@ -524,9 +563,19 @@ class MLFitData:
 
         isCombine = False
 
-        for nuis in content["nuisanceParameters"]:
+#        for nuis in content["nuisanceParameters"]:
+#            if not nuis in content or content[nuis]["type"] != "shapeStat":
+#                continue
+
+###
+        labels2 = content["nuisanceParameters"]
+        for nuis in labels2:             
+            if "Hp" in nuis:
+                del labels2[labels2.index(nuis)]
+                continue               
             if not nuis in content or content[nuis]["type"] != "shapeStat":
                 continue
+###
 
             shapeStatNuisance = nuis
             if "fitted_value" in content[nuis]:
@@ -543,7 +592,7 @@ class MLFitData:
                 for l in labels:
                     values.append(float(content[nuis][l]["fitted_value"]))
                     uncertainties.append(float(content[nuis][l]["fitted_uncertainty"]))
-
+    
         if shapeStatNuisance is None:
             raise Exception("No shapeStat nuisance parameters found")
 
@@ -566,6 +615,96 @@ class MLFitData:
                                array.array("d", uncertainties))
 
         return (gr, labels, shapeStatNuisance)
+
+
+class SignificanceData:
+    def __init__(self, directory="."):
+        resultfile = "significance.json"
+        f = open(os.path.join(directory, resultfile))
+        self._data = json.load(f)
+        f.close()
+
+        self._masses = filter(lambda n: "expectedSignal" not in n, self._data.keys())
+        self._masses.sort(key=float)
+
+        self._isHeavyStatus = False
+        for m in self._masses:
+            if int(m) > 175:
+                self._isHeavyStatus = True
+
+    def isHeavyStatus(self):
+        return self._isHeavyStatus
+
+    def massPoints(self):
+        return self._masses
+
+    def lightExpectedSignal(self):
+        return self._data["expectedSignalBrLimit"]
+    def heavyExpectedSignal(self):
+        return self._data["expectedSignalSigmaBr"]
+
+    def _graph(self, expObs, pvalue):
+        masses = self.massPoints()
+        massArray = array.array("d", [float(m) for m in masses])
+        q = "significance"
+        if pvalue:
+            q = "pvalue"
+        dataArray = array.array("d", [float(self._data[m][expObs][q]) for m in masses])
+
+        gr = ROOT.TGraph(len(masses), massArray, dataArray)
+        gr.SetLineWidth(3)
+        gr.SetLineColor(ROOT.kBlack)
+        return gr
+
+    def expectedGraph(self, pvalue=False):
+        gr = self._graph("expected", pvalue)
+        gr.SetLineStyle(2)
+        gr.SetMarkerStyle(20)
+        return gr
+
+    def observedGraph(self, pvalue=False):
+        gr = self._graph("observed", pvalue)
+        gr.SetMarkerStyle(21)
+        gr.SetMarkerSize(1.5)
+        return gr
+    
+    def fittedGraphShapeBinByBinHeavy(self, mass, backgroundOnly=False, signalPlusBackground=False):
+        if not backgroundOnly and not signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
+        if backgroundOnly and signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (both were)")
+        if signalPlusBackground:
+            backgroundOnly = False
+
+        labels = []
+        values = []
+        uncertainties = []
+        
+        if backgroundOnly:
+            content = self.data[mass]["background"]
+        else:
+            content = self.data[mass]["signal+background"]
+        labels = content["nuisanceParameters"][:]
+
+        for nuis in labels[:]:
+            if not "BinByBin" in nuis:
+                del labels[labels.index(nuis)]
+                continue     
+            if not nuis in content or content[nuis]["type"] == "shapeStat":
+                del labels[labels.index(nuis)]
+                continue
+            values.append(float(content[nuis]["fitted_value"]))
+            uncertainties.append(float(content[nuis]["fitted_uncertainty"]))
+
+        yvalues = range(1, len(values)+1)
+
+        yvalues.reverse()
+
+        gr = ROOT.TGraphErrors(len(values),
+                               array.array("d", values), array.array("d", yvalues),
+                               array.array("d", uncertainties))
+
+        return (gr, labels)
 
 
 ## Remove mass points lower than 100
@@ -713,3 +852,27 @@ def divideGraph(num, denom):
             val = gr.GetY()[i]/y
         gr.SetPoint(i, gr.GetX()[i], val)
     return gr
+
+
+## Returns a properly typeset label for MSSM scenario
+#
+# \param scenario   string of the scenario rootfile name
+#
+# \return string with the typeset name
+def getTypesetScenarioName(scenario):
+    myTruncatedScenario = scenario.replace("-LHCHXSWG","")
+    if myTruncatedScenario == "lightstau":
+        return "MSSM light stau"
+    if myTruncatedScenario == "lightstop":
+        return "MSSM light stop"
+    if myTruncatedScenario == "lowMH":
+        return "MSSM low m_{H}"
+    if myTruncatedScenario == "mhmaxup":
+        return "MSSM updated m_{h}^{max}"
+    if myTruncatedScenario == "mhmodm":
+        return "MSSM  m_{h}^{mod-}"
+    if myTruncatedScenario == "mhmodp":
+        return "MSSM  m_{h}^{mod-}"
+    if myTruncatedScenario == "tauphobic":
+        return "MSSM #tau-phobic"
+    raise Exception("The typeset name for scenario '%s' is not defined in tools/limit.py::getTypesetScenarioName()! Please add it."%scenario)
