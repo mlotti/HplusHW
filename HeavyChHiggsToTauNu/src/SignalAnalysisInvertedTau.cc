@@ -893,7 +893,7 @@ namespace HPlus {
     fCommonPlots.fillControlPlotsAtBtagging(iEvent, btagData);
     if (!btagData.passedEvent()) {
       // Inverted btag control region
-      if (qcdTailKillerDataCollinear.passedBackToBackCuts() && topSelectionDataTmp.passedEvent()) {
+      if (metDataTmp.passedEvent() && qcdTailKillerDataCollinear.passedBackToBackCuts() && topSelectionDataTmp.passedEvent()) {
         myHandler.fillShapeHistogram(hMTInvertedTauIdFinalReversedBtag, transverseMass);
         if (fullHiggsMassDataTmp.passedEvent()) {
           myHandler.fillShapeHistogram(hInvMassInvertedTauIdFinalReversedBtag, fullHiggsMassDataTmp.getHiggsMass());

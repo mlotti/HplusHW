@@ -406,6 +406,8 @@ class DatacardColumn():
                 hInjection = myDatasetRootHistoForInjection.getHistogram()
                 hInjection.Scale(config.OptionSignalInjection["normalization"])
                 myShapeHistograms[0].Add(hInjection)
+                myShapeHistograms[0].SetBinContent(myShapeHistograms[0].GetNbinsX(), myShapeHistograms[0].GetBinContent(myShapeHistograms[0].GetNbinsX()) + myShapeHistograms[0].GetBinContent(myShapeHistograms[0].GetNbinsX()+1))
+                myShapeHistograms[0].SetBinContent(myShapeHistograms[0].GetNbinsX()+1, 0.0)
                 print ShellStyles.WarningLabel()+"Injected to data signal %f events (normalization=%f), data integral is now %f"%(hInjection.Integral(),config.OptionSignalInjection["normalization"],myShapeHistograms[0].Integral())
         # Cache result
         self._rateResult = ExtractorResult("rate", "rate",

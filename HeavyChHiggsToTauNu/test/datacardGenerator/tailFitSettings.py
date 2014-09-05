@@ -38,11 +38,11 @@ EWKTau = {
 
 # Fit settings for EWK+tt with taus
 EWKTauMC = {
-    "id": "pseudo_emb",
+    "id": "MC_EWKTau",
     #"fitfunc": "FitFuncSimpleExp",
     #"fitfunc": "FitFuncExpTailExo",
     "fitfunc": "FitFuncExpTailExoAlternate",
-    "fitmin": 140, # 140
+    "fitmin": 120, # 140
     "fitmax": 300,
     "applyFrom": 200,
 }
