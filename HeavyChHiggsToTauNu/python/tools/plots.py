@@ -1607,10 +1607,19 @@ class PlotRatioBase:
                 #raise Exception("This shouldn't happen")
             self.extendRatios(tmp)
 
-        if statError is not None:
-            self.ratioHistoMgr.appendHisto(statError)
+        reorder = []
         if statSysError is not None:
             self.ratioHistoMgr.appendHisto(statSysError)
+            reorder.append(statSysError.getName())
+        if statError is not None:
+            self.ratioHistoMgr.appendHisto(statError)
+            reorder.append(statError.getName())
+        if len(reorder) > 0:
+            self.ratioHistoMgr.reverse()
+            self.ratioHistoMgr.reorderDraw(reorder)
+            reorder.reverse()
+            self.ratioHistoMgr.reorderLegend(reorder)
+            self.ratioHistoMgr.reverse()
 
         self._createFrame(filename, **kwargs)
 
