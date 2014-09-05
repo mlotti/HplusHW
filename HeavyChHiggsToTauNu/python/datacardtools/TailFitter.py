@@ -324,10 +324,18 @@ class TailFitter:
             for j in range(0, len(hup)):
                 a = 0.0
                 b = 0.0
-                if hup[j].GetBinContent(i) > 1e-10:
+                #if hup[j].GetBinContent(i) > 1e-10:
+                    #a = hup[j].GetBinContent(i) - myPedestal
+                #if hdown[j].GetBinContent(i) > 1e-10:
+                    #b = hdown[j].GetBinContent(i) - myPedestal
+                if hup[j].GetBinContent(i) > 0.0:
                     a = hup[j].GetBinContent(i) - myPedestal
-                if hdown[j].GetBinContent(i) > 1e-10:
+                else:
+                    a = -myPedestal;
+                if hdown[j].GetBinContent(i) > 0.0:
                     b = hdown[j].GetBinContent(i) - myPedestal
+                else:
+                    b = -myPedestal;
                 (varA, varB) = aux.getProperAdditivesForVariationUncertainties(a,b)
                 myVarianceUp += varA
                 myVarianceDown += varB
