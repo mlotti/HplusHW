@@ -101,11 +101,17 @@ def main():
     style = tdrstyle.TDRStyle()
     #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
 #    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2)
-    histograms.createLegend.moveDefaults(dx=-0.15, dy=-0.01, dh=+0.05)
+#    histograms.createLegend.moveDefaults(dx=-0.15, dy=-0.01, dh=+0.05)
 #    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
     histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
 #    histograms.createLegendRatio.moveDefaults(dh=-0.1, dx=-0.53)
-    histograms.createLegendRatio.moveDefaults(dx=-0.08)
+#    histograms.createLegendRatio.moveDefaults(dx=-0.08)
+    histograms.createLegend.setDefaults(textSize=0.04)
+    histograms.createLegend.moveDefaults(dx=-0.25, dh=0.1)#, dh=-0.05) # QCD removed
+
+    histograms.createLegendRatio.setDefaults(ncolumns=2, textSize=0.08, columnSeparation=0.3)
+    histograms.createLegendRatio.moveDefaults(dx=-0.35, dh=-0.1, dw=0.25)
+
 #    plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
     plots._legendLabels["BackgroundStatError"] = "Sim. stat. unc" #"Norm. stat. unc."
     plots._legendLabels["BackgroundStatSystError"] = "Sim. stat.#oplussyst. unc." # "Norm. stat.#oplussyst. unc."
@@ -167,12 +173,18 @@ def doPlots(datasetsEmb, datasetsSig, plotter, optMode):
     drawPlotCommon.setDefaults(customizeBeforeDraw=addDataStatSyst)
 
     custom = {
-        "NBjets": {"moveLegend": {"dx": 0, "dy": 0}},
-        "METAfterMtSelections": {"moveLegend": {"dx": 0, "dy": 0}},
-        "BtagDiscriminatorAfterMtSelections": {"moveLegend": {"dx": -0.4, "dy": 0}},
+        "Njets_AfterStandardSelections": {"moveLegend": {"dx": 0.1, "dy": 0}},
+        "NBjets": {"moveLegend": {"dx": 0.1, "dy": 0}},
+        "MET": {"moveLegend": {"dx": 0.1, "dy": 0}},
+        "ImprovedDeltaPhiCutsBackToBackMinimum": {"moveLegend": {"dx": -0.3, "dy": -0.4}},
+        "Njets_AfterMtSelections": {"moveLegend": {"dx": -0.3, "dy": -0.3}},
+        "METAfterMtSelections": {"moveLegend": {"dx": 0.15, "dy": 0}},
+        "NBJetsAfterMtSelections": {"moveLegend": {"dx": 0.1}},
+        "BJetPtAfterMtSelections": {"moveLegend": {"dx": 0.1}},
+        "BtagDiscriminatorAfterMtSelections": {"moveLegend": {"dx": -0.3, "dy": 0}},
         "ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections": {"moveLegend": {"dx": 0, "dy": 0}},
-        "shapeTransverseMass": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.23}},
-        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.23}}
+        "shapeTransverseMass": {"moveLegend": {"dy": -0.12}},
+        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}},
     }
 
     plotter.plot(None, createPlot, custom)
