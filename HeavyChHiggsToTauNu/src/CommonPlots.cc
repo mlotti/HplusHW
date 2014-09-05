@@ -787,6 +787,7 @@ namespace HPlus {
   }
 
   void CommonPlots::fillControlPlotsAfterAllSelections(const edm::Event& iEvent, double transverseMass) {
+//    if (fMETData.getSelectedMET()->phi() > -1.57) return; //for testing
     // ctrl plots after all selections
     double myMinimumRadius = 999.;
     for (int i = 0; i < fQCDTailKillerData.getNConsideredJets(); ++i) {
@@ -920,6 +921,8 @@ namespace HPlus {
   }
 
   void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const edm::Event& iEvent, double transverseMass) {
+//    if (fMETData.getSelectedMET()->phi() > -1.57) return; //for testing
+
     if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
       fSplittedHistogramHandler.fillShapeHistogram(hShapeProbabilisticBtagTransverseMass, transverseMass);
       if (fFakeTauData.isEWKFakeTauLike())

@@ -3,6 +3,7 @@
 import sys
 import re
 import array
+import os
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -82,8 +83,8 @@ def main():
     if obs.GetN() > 0:
         graphs["obs"] = obs
         # Get theory uncertainties on observed
-        obs_th_plus = limit.getObservedPlus(obs,0.29)
-        obs_th_minus = limit.getObservedMinus(obs,0.29)
+        obs_th_plus = limit.getObservedPlus(obs,0.21)
+        obs_th_minus = limit.getObservedMinus(obs,0.21)
         for gr in [obs_th_plus, obs_th_minus]:
             gr.SetLineWidth(2)
             gr.SetLineStyle(9)
@@ -105,7 +106,8 @@ def main():
 
     # Interpret in MSSM
     xVariable = "mHp"
-    selection = "mu==200"
+#    selection = "mu==200"
+    selection = "mHp > 0"
 #    scenario = "MSSM m_{h}^{max}"
     scenario = rootfile.replace(".root","")
 
@@ -115,6 +117,7 @@ def main():
         print key,"done"
 
     graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
+    
     if scenario == "lowMH-LHCHXSWG":
 	graphs["Allowed"] = db.mhLimit("mH","mHp",selection,"125.0+-3.0")
     else:
@@ -183,7 +186,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
 #            histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "m_{"+higgs+"} = 125.0#pm3.0 GeV", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
 #            histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
@@ -212,7 +215,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "m_{"+higgs+"} = 125.0#pm3.0 GeV", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
             histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
@@ -229,44 +232,46 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             "IsoMassCopy": None
             })
         
-    plot.setLegend(histograms.createLegend(0.19, 0.60, 0.57, 0.80))
+    size = 20
+    x = 0.2
+    dy = -0.15
+    plot.setLegend(histograms.createLegend(x-0.01, 0.50+dy, x+0.37, 0.80+dy))
     plot.legend.SetFillColor(0)
     plot.legend.SetFillStyle(1001)
     if blinded:
 	name += "_blinded"
+    name = os.path.basename(name)
     name = name.replace("-","_")
     frameXmax = 160
     if "_mA_" in name:
-        frameXmax = 140
+        frameXmax = 145
     plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": 90, "xmax": frameXmax})
     plot.frame.GetXaxis().SetTitle(xlabel)
     plot.frame.GetYaxis().SetTitle(limit.tanblimit)
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-#    histograms.addLuminosityText(x=None, y=None, lumi="2.3-4.9")
-    histograms.addLuminosityText(x=None, y=None, lumi="20")
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts()
 
-    size = 20
-    x = 0.2
-    histograms.addText(x, 0.9, limit.process, size=size)
-    histograms.addText(x, 0.863, limits.getFinalstateText(), size=size)
-    histograms.addText(x, 0.815,scenario, size=size)
-    histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
+    histograms.addText(x, 0.9+dy, limit.process, size=size)
+    histograms.addText(x, 0.863+dy, limits.getFinalstateText(), size=size)
+    histograms.addText(x, 0.815+dy, limit.getTypesetScenarioName(scenario), size=size)
+    #histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
 
     if not graphs["isomass"] == None:
-        histograms.addText(0.8, 0.15, "m_{H^{#pm}} = 160 GeV/c^{2}", size=0.5*size)
+        histograms.addText(0.8, 0.15, "m_{H^{#pm}} = 160 GeV", size=0.5*size)
 
     #Adding a LHC label:
 #    ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
-    FH_version = db.getVersion("FeynHiggs")
-    histograms.addText(x, 0.55, FH_version)
+    #FH_version = db.getVersion("FeynHiggs")
+    #histograms.addText(x, 0.55+dy, FH_version, size=size)
 #    HD_version = db.getVersion("HDECAY")
 #    histograms.addText(x, 0.55, FH_version+" and "+HD_version, size=size)
 #    histograms.addText(x, 0.48, "Derived from", size=size)
 #    histograms.addText(x, 0.43, "CMS HIG-12-052", size=size)
+
+
 
     plot.save()
 
