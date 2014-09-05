@@ -452,28 +452,30 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
 	myParams["stackMCHistograms"] = True
 	myParams["addMCUncertainty"] = True
 	myParams["addLuminosityText"] = True
-	myParams["moveLegend"] = {"dx": -0.15, "dy": -0.10}
+	myParams["moveLegend"] = {"dx": -0.14, "dy": -0.10}
 	myParams["ratioErrorOptions"] = {"numeratorStatSyst": False}
 	myParams["ratioCreateLegend"] = True
 	#myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
 	myParams["ratioMoveLegend"] = {"dx": -0.01, "dy": -0.03}
 	myParams["opts2"] = {"ymin": 0.0, "ymax": 2.5}
 	myParams["xlabel"] = "m_{T} (GeV)"
-	if l:
-            myParams["ylabel"] = "< Events / bin >"
-        else:
-            myParams["ylabel"] = "Events / 20 GeV"
+	#if l:
+        #    myParams["ylabel"] = "< Events / bin >"
+        #else:
+        myParams["ylabel"] = "Events / 20 GeV"
 	a = hObsLocal.GetXaxis().GetBinWidth(1)
 	b = hObsLocal.GetXaxis().GetBinWidth(hObsLocal.GetNbinsX())
 	#if abs(a-b) < 0.0001:
 	    #myParams["ylabel"]  += "%d GeV"%a
 	#else:
 	    #myParams["ylabel"]  += "%d-%d GeV"%(a,b)
-	myParams["divideByBinWidth"] = l
+        #myParams["divideByBinWidth"] = l
 	myParams["log"] = l
 	myPlotName = "PostTailFitShape_M%d"%float(m)
 	if l:
-	    myParams["opts"] = {"ymin": 1e-5}
+            # scale ymin by 20 in order to compare the rebinned mT with same y-scale
+            # ymax(factor) takes care of max automatically
+	    myParams["opts"] = {"ymin": 20*1e-5}
 	else:
 	    myParams["opts"] = {"ymin": 0.0}
 	    myPlotName += "_Linear"
@@ -600,7 +602,7 @@ def main(opts):
                         print "... using fitfunc: %s and range %d-%d"%(s["fitfunc"],s["fitmin"],s["fitmax"])
                 if myFitSettings == None:
                     raise Exception("Could not determine fit function for column '%s'!"%c)
-                myFitter = TailFitter.TailFitter(hFineBinning, c, myFitSettings["fitfunc"], myFitSettings["fitmin"], myFitSettings["fitmax"], myFitSettings["applyFrom"], doPlots=myDrawPlotsStatus)
+                myFitter = TailFitter.TailFitter(hFineBinning, c, myFitSettings["fitfunc"], myFitSettings["fitmin"], myFitSettings["fitmax"], myFitSettings["applyFrom"], doPlots=myDrawPlotsStatus, luminosity=myLuminosity)
                 # Obtain fitted rate with final binning
                 myFittedRateHistograms = myFitter.getFittedRateHistogram(hFineBinning, config.finalBinning["shape"], myFitSettings["applyFrom"])
                 myHistogramCache.extend(myFittedRateHistograms)
