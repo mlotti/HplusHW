@@ -3,6 +3,7 @@
 import sys
 import re
 import array
+import os
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -105,7 +106,8 @@ def main():
 
     # Interpret in MSSM
     xVariable = "mHp"
-    selection = "mu==200"
+#    selection = "mu==200"
+    selection = "mHp > 0"
 #    scenario = "MSSM m_{h}^{max}"
     scenario = rootfile.replace(".root","")
 
@@ -238,6 +240,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     plot.legend.SetFillStyle(1001)
     if blinded:
 	name += "_blinded"
+    name = os.path.basename(name)
     name = name.replace("-","_")
     frameXmax = 160
     if "_mA_" in name:

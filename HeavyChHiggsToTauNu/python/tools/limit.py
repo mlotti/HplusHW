@@ -616,6 +616,58 @@ class MLFitData:
 
         return (gr, labels, shapeStatNuisance)
 
+
+class SignificanceData:
+    def __init__(self, directory="."):
+        resultfile = "significance.json"
+        f = open(os.path.join(directory, resultfile))
+        self._data = json.load(f)
+        f.close()
+
+        self._masses = filter(lambda n: "expectedSignal" not in n, self._data.keys())
+        self._masses.sort(key=float)
+
+        self._isHeavyStatus = False
+        for m in self._masses:
+            if int(m) > 175:
+                self._isHeavyStatus = True
+
+    def isHeavyStatus(self):
+        return self._isHeavyStatus
+
+    def massPoints(self):
+        return self._masses
+
+    def lightExpectedSignal(self):
+        return self._data["expectedSignalBrLimit"]
+    def heavyExpectedSignal(self):
+        return self._data["expectedSignalSigmaBr"]
+
+    def _graph(self, expObs, pvalue):
+        masses = self.massPoints()
+        massArray = array.array("d", [float(m) for m in masses])
+        q = "significance"
+        if pvalue:
+            q = "pvalue"
+        dataArray = array.array("d", [float(self._data[m][expObs][q]) for m in masses])
+
+        gr = ROOT.TGraph(len(masses), massArray, dataArray)
+        gr.SetLineWidth(3)
+        gr.SetLineColor(ROOT.kBlack)
+        return gr
+
+    def expectedGraph(self, pvalue=False):
+        gr = self._graph("expected", pvalue)
+        gr.SetLineStyle(2)
+        gr.SetMarkerStyle(20)
+        return gr
+
+    def observedGraph(self, pvalue=False):
+        gr = self._graph("observed", pvalue)
+        gr.SetMarkerStyle(21)
+        gr.SetMarkerSize(1.5)
+        return gr
+    
     def fittedGraphShapeBinByBinHeavy(self, mass, backgroundOnly=False, signalPlusBackground=False):
         if not backgroundOnly and not signalPlusBackground:
             raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")

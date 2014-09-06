@@ -220,8 +220,13 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None, ful
     parser.add_option("--final", dest="unblinded", action="store_true", default=False,
                       help="Do not set to true unless you know what you are doing and have permission to do so")
 
+    parser.add_option("--significance", dest="significance", action="store_true", default=False,
+                      help="Run also expected (and with --final also observed) significance")
+
     parser.add_option("--nomlfit", dest="nomlfit", action="store_false", default=True,
                       help="Disable ML fit")
+    parser.add_option("--nolimit", dest="limit", action="store_false", default=True,
+                      help="Disable limit calculation (for e.g. just ML fit or significance)")
 
     return parser
 
