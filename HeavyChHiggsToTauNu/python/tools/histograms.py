@@ -1013,7 +1013,8 @@ class CanvasFrame:
         # Infer the default based on the existence of COLZ drawing option
         canvasAddWidth = None
         for h in histos:
-            if "colz" in h.getDrawStyle().lower():
+            drawStyle = h.getDrawStyle()
+            if drawStyle is not None and "colz" in drawStyle.lower():
                 canvasAddWidth = 0.13
 
         canvasAddWidth = canvasOpts.get("addWidth", canvasAddWidth)
@@ -1465,7 +1466,7 @@ class Histo:
         self._uncertaintyLegendStyle = style
 
     def _addToLegendHisto(self, legend):
-        if self.legendLabel is None or self.drawStyle is None:
+        if self.legendLabel is None or self.legendStyle is None:
             return
         h = self.getRootHisto()
         if h is None:
