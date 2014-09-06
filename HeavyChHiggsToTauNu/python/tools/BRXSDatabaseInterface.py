@@ -406,7 +406,7 @@ class BRXSDatabaseInterface:
         retGraph.SetLineWidth(1)
         retGraph.SetLineStyle(7)
         retGraph.SetFillColor(0)
-        retGraph.SetFillStyle(1)
+        retGraph.SetFillStyle(1001)
         return retGraph
                    
     def getLimitsLT(self,higgs,xVariableName,yVariableName,selection,limit):
