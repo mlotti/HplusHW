@@ -93,7 +93,7 @@ class FitFuncExpTailExoAlternate(FitFuncBase):
         FitFuncBase.__init__(self, 2, fitmin, scalefactor)
 
     def __call__(self, x, par):
-        m = x[0]#-self._fitmin
+        m = x[0]-self._fitmin
         return self._scalefactor*par[0]*ROOT.TMath.Exp(-m * (par[1]))
         #return self._scalefactor*par[0]*ROOT.TMath.Exp(-m/(par[1]+par[2]*m))
         #return par[0]*ROOT.TMath.Exp(-m * (par[1] + m / par[2]))
