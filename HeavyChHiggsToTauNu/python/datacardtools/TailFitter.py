@@ -204,7 +204,7 @@ def doMinusVariation(self, func):
         func.SetParameter(i, func.GetParameter(i) - func.GetParError(i))
 
 class TailFitter:
-    def __init__(self, h, label, fitFuncName, fitmin, fitmax, applyFitFrom, doPlots=False):
+    def __init__(self, h, label, fitFuncName, fitmin, fitmax, applyFitFrom, doPlots=False, luminosity=None):
         self._label = label
         self._fittedRate = None
         self._centralParams = None
@@ -212,6 +212,7 @@ class TailFitter:
         self._eigenValues = None
         self._fitmin = fitmin
         self._hRate = aux.Clone(h)
+        self._luminosity = luminosity
 
         # Initialize style
         myStyle = tdrstyle.TDRStyle()
@@ -477,11 +478,13 @@ class TailFitter:
         hNominalClone = aux.Clone(hNominal)
         hNominalClone.SetLineColor(ROOT.kBlack)
         hNominalClone.SetLineWidth(2)
+        hNominalClone.SetMarkerStyle(22)
+        hNominalClone.SetMarkerSize(1.5)
         # Remove fit line before drawing
         myFunctions = hNominalClone.GetListOfFunctions()
         for i in range(0, myFunctions.GetEntries()):
             myFunctions.Delete()
-        plot.histoMgr.appendHisto(histograms.Histo(hNominalClone,"nominal",drawStyle="e"))
+        plot.histoMgr.appendHisto(histograms.Histo(hNominalClone,"nominal",drawStyle="pe", legendStyle="pe"))
 
         hFitClone = aux.Clone(hFit)
         hFitClone.SetLineColor(ROOT.kMagenta)
@@ -501,15 +504,40 @@ class TailFitter:
         hDownClone.SetLineWidth(2)
         plot.histoMgr.appendHisto(histograms.Histo(hDownClone,"Total down"))
 
+        # ugly hardcoding...
+        fitStart = 200
+        if "QCD" in self._label:
+            fitStart = 160
+        nominal = "Nominal"
+        if "QCD" in self._label:
+            nominal += " multijets"
+        elif "EWK_Tau" in self._label:
+            nominal += " EWK+t#bar{t} with #tau_{h}"
+        elif "MC_faketau" in self._label:
+            nominal += " EWK+t#bar{t} no #tau_{h}"
+
+        plot.histoMgr.setHistoLegendLabelMany({
+            "nominal": nominal,
+            "fit": "With fit for m_{T} > %d GeV" % fitStart,
+            "Total up": "+1#sigma uncertainty",
+            "Total down": "-1#sigma uncertainty"
+        })
+        if self._luminosity is not None:
+            plot.setLuminosity(self._luminosity)
+
         myName = "tailfit_total_uncertainty_%s_%s"%(self._label,prefix)
         #plot.createFrame("tailfit_%s_%s"%(self._label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
         #plot.getPad().SetLogy(True)
         #histograms.addStandardTexts(lumi=self.lumi)
         myParams = {}
-        myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
+        #myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
+        myParams["ylabel"] = "Events / %.0f GeV"
         myParams["log"] = True
-        myParams["opts"] = {"ymin": 1e-5}
-        myParams["divideByBinWidth"] = True
+        myParams["opts"] = {"ymin": 20*1e-5} # compensate for the bin width
+        #myParams["divideByBinWidth"] = True
+	myParams["cmsTextPosition"] = "right"
+	myParams["moveLegend"] = {"dx": -0.215, "dy": -0.1, "dh": -0.1, "dw": -0.05}
+	myParams["xlabel"] = "m_{T} (GeV)"
         myDrawer = plots.PlotDrawer()
         myDrawer(plot, myName, **myParams)
 

@@ -1412,22 +1412,22 @@ class CommonPlotter:
         moveLegend = {"DYJetsToLL": {"dx": -0.02}}.get(datasetName, {})
         p = self._createPlot("shapeTransverseMass")
         #p.appendPlotObject(histograms.PlotText(0.6, 0.7, "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", size=20))
-        self._drawPlot(p, "shapeTransverseMass", "m_{T}(^{}#tau_{h}, ^{}E_{T}^{miss}) (GeV)",
+        self._drawPlot(p, "shapeTransverseMass", "m_{T} (GeV)", # (^{}#tau_{h}, ^{}E_{T}^{miss}) (GeV)",
                        #ylabel="Events / #Delta m_{T} %.0f-%.0f GeV",
                        ylabel="< Events / GeV >",
                        log=False, moveLegend=moveLegend,
                        opts=opts,
-                       opts2=opts2,
+                       #opts2=opts2,
                        divideByBinWidth=True,
                        cmsTextPosition="right"
                  )
         p = self._createPlot("shapeTransverseMass")
-        self._drawPlot(p, "shapeTransverseMass_log", "m_{T}(^{}#tau_{h}, ^{}E_{T}^{miss}) (GeV)",
+        self._drawPlot(p, "shapeTransverseMass_log", "m_{T} (GeV)", #"m_{T}(^{}#tau_{h}, ^{}E_{T}^{miss}) (GeV)",
                        #ylabel="Events / #Delta m_{T} %.0f-%.0f GeV",
                        ylabel="< Events / GeV >",
                        log=True, moveLegend=moveLegend,
                        opts={"ymin": 1e-3},
-                       opts2=opts2,
+                       #opts2=opts2,
                        divideByBinWidth=True,
                        cmsTextPosition="right"
                  )

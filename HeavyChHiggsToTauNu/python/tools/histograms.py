@@ -537,7 +537,7 @@ class LegendCreator:
     # \param borderSize  Default border size
     # \param fillStyle   Default fill style
     # \param fillColor   Default fill color
-    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.035, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
+    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.035, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite, ncolumns=1, columnSeparation=None):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
@@ -546,6 +546,8 @@ class LegendCreator:
         self.borderSize = borderSize
         self.fillStyle = fillStyle
         self.fillColor = fillColor
+        self.ncolumns = ncolumns
+        self.columnSeparation = columnSeparation
         self._keys = ["x1", "y1", "x2", "y2"]
 
     ## Create a copy of the object
@@ -623,6 +625,12 @@ class LegendCreator:
             legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
         legend.SetTextSize(self.textSize)
         #legend.SetMargin(0.1)
+
+        if self.ncolumns > 1:
+            legend.SetNColumns(self.ncolumns)
+            if self.columnSeparation is not None:
+                legend.SetColumnSeparation(self.columnSeparation)
+
         return legend
 
     ## \var x1
@@ -1005,7 +1013,8 @@ class CanvasFrame:
         # Infer the default based on the existence of COLZ drawing option
         canvasAddWidth = None
         for h in histos:
-            if "colz" in h.getDrawStyle().lower():
+            drawStyle = h.getDrawStyle()
+            if drawStyle is not None and "colz" in drawStyle.lower():
                 canvasAddWidth = 0.13
 
         canvasAddWidth = canvasOpts.get("addWidth", canvasAddWidth)
@@ -1457,7 +1466,7 @@ class Histo:
         self._uncertaintyLegendStyle = style
 
     def _addToLegendHisto(self, legend):
-        if self.legendLabel is None or self.drawStyle is None:
+        if self.legendLabel is None or self.legendStyle is None:
             return
         h = self.getRootHisto()
         if h is None:

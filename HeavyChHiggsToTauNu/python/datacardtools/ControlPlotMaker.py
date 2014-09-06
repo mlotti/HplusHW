@@ -17,9 +17,10 @@ import os
 import sys
 import ROOT
 
+
 _legendLabelQCD = "Multijets (data)"
-_legendLabelEmbedding = "EWK+tt with #tau_{h} (data)"
-_legendLabelEWKFakes = "EWK+tt no #tau_{h} (sim.)"
+_legendLabelEmbedding = "EWK+t#bar{t} with #tau_{h} (data)"
+_legendLabelEWKFakes = "EWK+t#bar{t} no #tau_{h} (sim.)"
 #_legendLabelEWKFakes = "EWK+tt with e/#mu/jet#rightarrow#tau_{h} (sim.)"
 
 drawPlot = plots.PlotDrawer(ratio=True, ratioYlabel="Data/Bkg. ", ratioCreateLegend=True,

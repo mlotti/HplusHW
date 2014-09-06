@@ -866,13 +866,13 @@ def getTypesetScenarioName(scenario):
     if myTruncatedScenario == "lightstop":
         return "MSSM light stop"
     if myTruncatedScenario == "lowMH":
-        return "MSSM low m_{H}"
+        return "MSSM low ^{}m_{H}"
     if myTruncatedScenario == "mhmaxup":
-        return "MSSM updated m_{h}^{max}"
+        return "MSSM updated ^{}m_{h}^{max}"
     if myTruncatedScenario == "mhmodm":
-        return "MSSM  m_{h}^{mod-}"
+        return "MSSM ^{}m_{h}^{mod-}"
     if myTruncatedScenario == "mhmodp":
-        return "MSSM  m_{h}^{mod+}"
+        return "MSSM ^{}m_{h}^{mod+}"
     if myTruncatedScenario == "tauphobic":
         return "MSSM #tau-phobic"
     raise Exception("The typeset name for scenario '%s' is not defined in tools/limit.py::getTypesetScenarioName()! Please add it."%scenario)
