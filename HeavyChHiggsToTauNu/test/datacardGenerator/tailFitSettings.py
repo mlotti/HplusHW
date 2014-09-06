@@ -15,14 +15,17 @@ applyFitUncertaintyAsBinByBinUncertainty = True
 MinimumStatUncertaintySignal = 0.03
 MinimumStatUncertaintyBkg = 0.5
 
+fitstart = 160
+fitstop = 700
+
 # Fit settings for QCD
 QCD = {
     "id": "QCD",
     #"fitfunc": "FitFuncExpTailFourParamAlternate",
     "fitfunc": "FitFuncExpTailExoAlternate",
-    "fitmin": 140, #140
-    "fitmax": 300,
-    "applyFrom": 160, # 160
+    "fitmin": fitstart, #140
+    "fitmax": fitstop,
+    "applyFrom": fitstart, # 160
 }
 
 # Fit settings for EWK+tt with taus
@@ -31,9 +34,9 @@ EWKTau = {
     #"fitfunc": "FitFuncSimpleExp",
     #"fitfunc": "FitFuncExpTailExo",
     "fitfunc": "FitFuncExpTailExoAlternate",
-    "fitmin": 120, #120
-    "fitmax": 300,
-    "applyFrom": 200,
+    "fitmin": fitstart, #120
+    "fitmax": fitstop,
+    "applyFrom": fitstart,
 }
 
 # Fit settings for EWK+tt with taus
@@ -42,9 +45,9 @@ EWKTauMC = {
     #"fitfunc": "FitFuncSimpleExp",
     #"fitfunc": "FitFuncExpTailExo",
     "fitfunc": "FitFuncExpTailExoAlternate",
-    "fitmin": 120, # 140
-    "fitmax": 300,
-    "applyFrom": 200,
+    "fitmin": fitstart, # 140
+    "fitmax": fitstop,
+    "applyFrom": fitstart,
 }
 
 # Fit settings for EWK+tt with fake taus
@@ -53,9 +56,9 @@ EWKFake = {
     #"fitfunc": "FitFuncSimpleExp",
     #"fitfunc": "FitFuncExpTailExo",
     "fitfunc": "FitFuncExpTailExoAlternate",
-    "fitmin": 160, # 140
-    "fitmax": 300,
-    "applyFrom": 200,
+    "fitmin": fitstart, # 140
+    "fitmax": fitstop,
+    "applyFrom": fitstart,
 }
 
 # List of backgrounds, for which no fit is done
