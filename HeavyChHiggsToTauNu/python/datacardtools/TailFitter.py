@@ -88,6 +88,25 @@ class FitFuncPreFitForIntegral(FitFuncBase):
         fit.SetParameter(1, 0.1)
         #fit.SetParameter(2, 1.0)
 
+class FitFuncExpTailExoAlternate2(FitFuncBase):
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 3, fitmin, scalefactor)
+
+    def __call__(self, x, par):
+        m = x[0]-self._fitmin
+        return self._scalefactor*par[0]*ROOT.TMath.Exp(-m * (par[1])+m**2*par[2]*0.001)
+        #return self._scalefactor*par[0]*ROOT.TMath.Exp(-m/(par[1]+par[2]*m))
+        #return par[0]*ROOT.TMath.Exp(-m * (par[1] + m / par[2]))
+        #return par[0]*ROOT.TMath.Exp(-(x[0]-par[3]) * (par[1] + (x[0]-par[3]) / par[2]))
+
+    def setParamLimits(self, fit):
+        fit.SetParLimits(0,0.001,10)
+        fit.SetParLimits(1,0.001,10)
+        fit.SetParLimits(2,-1,1)
+        fit.SetParameter(0, 0.1)
+        fit.SetParameter(1, 0.1)
+        fit.SetParameter(2, 0.001)
+
 class FitFuncExpTailExoAlternate(FitFuncBase):
     def __init__(self, fitmin, scalefactor):
         FitFuncBase.__init__(self, 2, fitmin, scalefactor)
@@ -339,16 +358,16 @@ class TailFitter:
         for j in range(0, len(self._eigenValues)):
             myParams = list(self._centralParams)
             for i in range(0,len(self._centralParams)):
-                print i,j,self._centralParams[i], self._eigenValues[j], self._eigenVectors(i,j), self._eigenValues[i]*self._eigenVectors(i,j)
+                #print i,j,self._centralParams[i], self._eigenValues[j], self._eigenVectors(i,j), self._eigenValues[i]*self._eigenVectors(i,j)
                 myParams[i] = self._centralParams[i] + self._eigenValues[j]*self._eigenVectors(i,j)
-                if myParams[i] < 0:
-                    myParams[i] = 0
-            print "par: %d, function params: (%s)"%(i, ", ".join(map(str,myParams)))
+                #if myParams[i] < 0:
+                #    myParams[i] = 0
+            print "eigenvalue: %d, function params: (%s)"%(j, ", ".join(map(str,myParams)))
             #myShiftUp = (-1.0 * myA.getVal() / myB.getVal())
             #myFirstBin = fitmin
             #if myFirstBin < myShiftUp and myShiftUp < h.GetXaxis().GetXmax():
                 #myM.setRange(0, h.GetBinLowEdge(h.FindBin(myShiftUp)))
-            hUp = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dUp"%i, self._fittedRate, myParams, binList, applyFitFrom)
+            hUp = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dUp"%j, self._fittedRate, myParams, binList, applyFitFrom)
             hFitUncertaintyUp.append(hUp)
 
         # Down histograms
@@ -357,16 +376,16 @@ class TailFitter:
         for j in range(0, len(self._eigenValues)):
             myParams = list(self._centralParams)
             for i in range(0,len(self._centralParams)):
-                print i,j,self._centralParams[i], self._eigenValues[j], self._eigenVectors(i,j), self._eigenValues[i]*self._eigenVectors(i,j)
+                #print i,j,self._centralParams[i], self._eigenValues[j], self._eigenVectors(i,j), self._eigenValues[i]*self._eigenVectors(i,j)
                 myParams[i] = self._centralParams[i] - self._eigenValues[j]*self._eigenVectors(i,j)
-                if myParams[i] < 0:
-                    myParams[i] = 0
-            print "par: %d, function params: (%s)"%(i, ", ".join(map(str,myParams)))
+                #if myParams[i] < 0:
+                #    myParams[i] = 0
+            print "eigenvalue: %d, function params: (%s)"%(j, ", ".join(map(str,myParams)))
             #myShiftDown = (-1.0 * myA.getVal() / myB.getVal())
             #myFirstBin = fitmin
             #if myFirstBin < myShiftDown and myShiftDown < h.GetXaxis().GetXmax():
                 #myM.setRange(0, h.GetBinLowEdge(h.FindBin(myShiftDown)))
-            hDown = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dDown"%i, self._fittedRate, myParams, binList, applyFitFrom)
+            hDown = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dDown"%j, self._fittedRate, myParams, binList, applyFitFrom)
             hFitUncertaintyDown.append(hDown)
 
         return (hFitUncertaintyUp, hFitUncertaintyDown)
@@ -396,9 +415,10 @@ class TailFitter:
                     b = hdown[j].GetBinContent(i) - myPedestal
                 else:
                     b = -myPedestal;
-                (varA, varB) = aux.getProperAdditivesForVariationUncertainties(a,b)
-                myVarianceUp += varA
-                myVarianceDown += varB
+                if abs(a) != float('Inf') and not math.isnan(a) and abs(b) != float('Inf') and not math.isnan(b):
+                    (varA, varB) = aux.getProperAdditivesForVariationUncertainties(a,b)
+                    myVarianceUp += varA
+                    myVarianceDown += varB
                 #print j,hup[j].GetBinContent(i),hdown[j].GetBinContent(i),a,b,varA,varB
             #print self._hFitFineBinning.GetXaxis().GetBinLowEdge(i),":", myPedestal,math.sqrt(myVarianceUp), math.sqrt(myVarianceDown), myPedestal+math.sqrt(myVarianceUp), myPedestal-math.sqrt(myVarianceDown)
             hFitUncertaintyUpTotal.SetBinContent(i, myPedestal + math.sqrt(myVarianceUp))
