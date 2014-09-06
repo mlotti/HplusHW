@@ -104,7 +104,7 @@ class BRXSDatabaseInterface:
             yselection = xVariableName+"=="+str(xval)+"&&"+selection
             yval = graph.GetY()[i]
             ylimit = self.getTanbFromLightHpBR(yval,yselection,highTanbRegion)
-            if highTanbRegion and ylimit < 0:
+            if highTanbRegion and ylimit <= 1:
 		print "    ",i, xval, yval, ylimit
                 ylimit = 80
             graph.SetPoint(i, xval, ylimit)
@@ -326,6 +326,8 @@ class BRXSDatabaseInterface:
                     y.append(upper_y[j])
 
         for i in range(0,len(upper_x0)):
+            if i == 0 and upper_y0[0] == y[len(y)-1]:
+                continue
             if len(upper_x00) == 0:
                 x.append(upper_x0[i])
                 y.append(upper_y0[i])
