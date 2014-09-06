@@ -13,7 +13,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import WarningLabel,HighlightStyle,NormalStyle
 
 #_fitOptions = "RMS"
-_fitOptions = "LRBS"
+_fitOptions = "WL R B S"
 
 # Fitting functions
 class FitFuncBase:
@@ -88,24 +88,43 @@ class FitFuncPreFitForIntegral(FitFuncBase):
         fit.SetParameter(1, 0.1)
         #fit.SetParameter(2, 1.0)
 
+class FitFuncExpTailTauTauAlternate(FitFuncBase):
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 3, fitmin, scalefactor)
+
+    def __call__(self, x, par):
+        m = x[0]-self._fitmin
+        return self._scalefactor*par[0]*ROOT.TMath.Exp(-m / (par[1] - (m)*0.001*par[2]))
+        #return self._scalefactor*par[0]*ROOT.TMath.Exp(-m/(par[1]+par[2]*m))
+        #return par[0]*ROOT.TMath.Exp(-m * (par[1] + m / par[2]))
+        #return par[0]*ROOT.TMath.Exp(-(x[0]-par[3]) * (par[1] + (x[0]-par[3]) / par[2]))
+
+    def setParamLimits(self, fit):
+        fit.SetParLimits(0,0.001,1000)
+        fit.SetParLimits(1,0.001,10000)
+        fit.SetParLimits(2,0.001,1)
+        fit.SetParameter(0, 0.1)
+        fit.SetParameter(1, 0.1)
+        fit.SetParameter(2, 0.001)
+
 class FitFuncExpTailExoAlternate2(FitFuncBase):
     def __init__(self, fitmin, scalefactor):
         FitFuncBase.__init__(self, 3, fitmin, scalefactor)
 
     def __call__(self, x, par):
         m = x[0]-self._fitmin
-        return self._scalefactor*par[0]*ROOT.TMath.Exp(-m * (par[1])+m**2*par[2]*0.001)
+        return self._scalefactor*par[0]*ROOT.TMath.Exp(-m * (par[1] - m*(par[2])))
         #return self._scalefactor*par[0]*ROOT.TMath.Exp(-m/(par[1]+par[2]*m))
         #return par[0]*ROOT.TMath.Exp(-m * (par[1] + m / par[2]))
         #return par[0]*ROOT.TMath.Exp(-(x[0]-par[3]) * (par[1] + (x[0]-par[3]) / par[2]))
 
     def setParamLimits(self, fit):
-        fit.SetParLimits(0,0.001,10)
-        fit.SetParLimits(1,0.001,10)
-        fit.SetParLimits(2,-1,1)
+        fit.SetParLimits(0,0.001,1000)
+        fit.SetParLimits(1,0.00001,10000)
+        fit.SetParLimits(2,-0.001,0.001)
         fit.SetParameter(0, 0.1)
-        fit.SetParameter(1, 0.1)
-        fit.SetParameter(2, 0.001)
+        fit.SetParameter(1, 0.002)
+        fit.SetParameter(2, 0.1)
 
 class FitFuncExpTailExoAlternate(FitFuncBase):
     def __init__(self, fitmin, scalefactor):
@@ -331,13 +350,14 @@ class TailFitter:
         myDiagonalizedMatrix = ROOT.TMatrixDSymEigen(myCovMatrix)
         self._eigenVectors = ROOT.TMatrixD(self._myFitFuncObject.getNparam(),self._myFitFuncObject.getNparam())
         self._eigenVectors = myDiagonalizedMatrix.GetEigenVectors()
+        print "Diagonalized matrix:"
+        myDiagonalizedMatrix.GetEigenVectors().Print()
         if printStatus:
             printEigenVectors(self._eigenVectors)
         # Get eigenvalues 
         eigenValues = ROOT.TVectorD(self._myFitFuncObject.getNparam())
         eigenValues = myDiagonalizedMatrix.GetEigenValues()
         self._eigenValues = []
-        printEigenValues(eigenValues)
         for i in range(0, eigenValues.GetNrows()):
             if eigenValues(i) < 0: # This can happen because of small fluctuations
                 self._eigenValues.append(0.0)
@@ -353,6 +373,7 @@ class TailFitter:
             raise Exception(ErrorLabel()+"Call _calculateEigenVectorsAndValues() first!")
         # Construct from eigenvalues and vectors the orthogonal variations
         # Up histograms
+        print "Nominal parameters: (%s)"%(", ".join(map(str,self._centralParams)))
         print "Varying parameters up"
         hFitUncertaintyUp = []
         for j in range(0, len(self._eigenValues)):
