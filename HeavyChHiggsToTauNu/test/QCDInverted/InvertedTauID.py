@@ -1610,19 +1610,22 @@ class InvertedTauID:
         if self.label=="taup_Tlt50":
             txt = "p_{T}^{#tau_{h}}< 50 GeV"
             x = 0.6
-        if self.label=="taup_Teq50to60": 
-            txt = "50 GeV < p_{T}^{#tau_{h}}< 60 GeV"
-        if self.label=="taup_Teq60to70": 
-            txt = "60 GeV < p_{T}^{#tau_{h}}< 70 GeV"
-        if self.label=="taup_Teq70to80": 
-            txt = "70 GeV < p_{T}^{#tau_{h}}< 80 GeV"
-        if self.label=="taup_Teq80to100": 
-            txt = "80 GeV < p_{T}^{#tau_{h}}< 100 GeV"
-        if self.label=="taup_Teq100to120": 
-            txt = "100 GeV < p_{T}^{#tau_{h}}< 120 GeV"
+        elif self.label=="taup_Teq50to60": 
+            txt = "50 GeV < ^{}p_{T}^{#tau_{h}}< 60 GeV"
+        elif self.label=="taup_Teq60to70": 
+            txt = "60 GeV < ^{}p_{T}^{#tau_{h}}< 70 GeV"
+        elif self.label=="taup_Teq70to80": 
+            txt = "70 GeV < ^{}p_{T}^{#tau_{h}}< 80 GeV"
+        elif self.label=="taup_Teq80to100": 
+            txt = "80 GeV < ^{}p_{T}^{#tau_{h}}< 100 GeV"
+            x = 0.48
+        elif self.label=="taup_Teq100to120": 
+            txt = "100 GeV < ^{}p_{T}^{#tau_{h}}< 120 GeV"
             x = 0.45
-        if self.label=="taup_Tgt120": 
-            txt = "p_{T}^{#tau_{h}}> 120 GeV"
+        elif self.label=="taup_Tgt120": 
+            #txt = "p_{T}^{#tau_{h}}> 120 GeV"
+            txt = "120 GeV < p_{T}^{#tau_{h}}"
+            x = 0.6
         if txt is not None:
             plot.appendPlotObject(histograms.PlotText(x,0.6,txt))
 
@@ -1659,10 +1662,15 @@ class InvertedTauID:
         def setDivisions(p):
             p.getFrame().SetNdivisions(505)
 
-        plots.drawPlot(plot, "combinedfit"+self.label, opts={"ymin": 3e-1, #1e-5,
-                                                             "ymaxfactor": 2.},
+        opts = {"ymin": 3e-1} #1e-5,
+        if self.label == "Inclusive":
+            opts["ymaxfactor"] = 2
+        else:
+            opts["ymax"] = 4e2
+
+        plots.drawPlot(plot, "combinedfit"+self.label, opts=opts,
                        log=True,
-                       moveLegend={"dx": -0.26, "dy": -0.1, "dh": -0.15},
+                       moveLegend={"dx": -0.26, "dy": -0.11, "dh": -0.15},
                        #xlabel="Type I PFMET (GeV)",
                        xlabel="E_{T}^{miss} (GeV)",
                        ylabel="Events / %.0f GeV",
