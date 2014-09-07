@@ -627,6 +627,9 @@ def main(opts):
                     myFitter.makeVariationPlotDetailed("", hFinalBinning, myFittedRateHistograms[0], huplist, hdownlist)
                     (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
                     myFitter.makeVariationPlotSimple("", hFinalBinning, myFittedRateHistograms[0], hupTotal, hdownTotal)
+                    # print total uncertainty
+                    print "*** Syst. uncert. from fit: +",1.0-hupTotal.Integral()/myFittedRateHistograms[0].Integral(), "-", 1.0-hdownTotal.Integral()/myFittedRateHistograms[0].Integral()
+
                     hFinalBinning.Delete()
 
                 # Treat blancs (norm == 0)
@@ -641,8 +644,6 @@ def main(opts):
                     # Add fit uncertainty as bin-by-bin type uncertainty
                     (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
                     (myBinByBinUpHistograms, myBinByBinDownHistograms) = createBinnedFitUncertaintyHistograms(myFittedRateHistograms[0], hupTotal, hdownTotal, myFitSettings["applyFrom"], opts)
-                    # print total uncertainty
-                    print "*** Syst. uncert. from fit: +",1.0-hupTotal.Integral()/myFittedRateHistograms[0].Integral(), "-", 1.0-hdownTotal.Integral()/myFittedRateHistograms[0].Integral()
                     if not opts.noFitUncert:
                         myHistogramCache.extend(myBinByBinUpHistograms)
                         myHistogramCache.extend(myBinByBinDownHistograms)

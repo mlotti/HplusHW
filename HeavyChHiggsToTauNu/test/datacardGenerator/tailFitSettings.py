@@ -9,20 +9,27 @@ finalBinning = {
     #"shapeInvariantMass": [0,20,40,60,80,100,120,140,160,200,400],
 }
 
-applyFitUncertaintyAsBinByBinUncertainty = True
+applyFitUncertaintyAsBinByBinUncertainty = False
 
 # Minimum stat. uncertainty to set to bins with zero events
 MinimumStatUncertaintySignal = 0.03
 MinimumStatUncertaintyBkg = 0.5
 
+
+fitstart = 160
+fitstop = 700
+applyfrom = fitstart
+function = "FitFuncExpTailExoAlternate"
+#function = "FitFuncExpTailTauTauAlternate"
+
 # Fit settings for QCD
 QCD = {
     "id": "QCD",
     #"fitfunc": "FitFuncExpTailFourParamAlternate",
-    "fitfunc": "FitFuncExpTailExoAlternate",
-    "fitmin": 140, #140
-    "fitmax": 300,
-    "applyFrom": 160, # 160
+    "fitfunc": function,
+    "fitmin": fitstart, #140
+    "fitmax": fitstop,
+    "applyFrom": applyfrom, # 160
 }
 
 # Fit settings for EWK+tt with taus
@@ -30,10 +37,10 @@ EWKTau = {
     "id": "EWK_Tau",
     #"fitfunc": "FitFuncSimpleExp",
     #"fitfunc": "FitFuncExpTailExo",
-    "fitfunc": "FitFuncExpTailExoAlternate",
-    "fitmin": 120, #120
-    "fitmax": 300,
-    "applyFrom": 200,
+    "fitfunc": function,
+    "fitmin": fitstart, #120
+    "fitmax": fitstop,
+    "applyFrom": applyfrom,
 }
 
 # Fit settings for EWK+tt with taus
@@ -41,10 +48,10 @@ EWKTauMC = {
     "id": "MC_EWKTau",
     #"fitfunc": "FitFuncSimpleExp",
     #"fitfunc": "FitFuncExpTailExo",
-    "fitfunc": "FitFuncExpTailExoAlternate",
-    "fitmin": 120, # 140
-    "fitmax": 300,
-    "applyFrom": 200,
+    "fitfunc": function,
+    "fitmin": fitstart, # 140
+    "fitmax": fitstop,
+    "applyFrom": applyfrom,
 }
 
 # Fit settings for EWK+tt with fake taus
@@ -52,10 +59,10 @@ EWKFake = {
     "id": "MC_faketau",
     #"fitfunc": "FitFuncSimpleExp",
     #"fitfunc": "FitFuncExpTailExo",
-    "fitfunc": "FitFuncExpTailExoAlternate",
-    "fitmin": 160, # 140
-    "fitmax": 300,
-    "applyFrom": 200,
+    "fitfunc": function,
+    "fitmin": fitstart, # 140
+    "fitmax": fitstop,
+    "applyFrom": applyfrom,
 }
 
 # List of backgrounds, for which no fit is done
