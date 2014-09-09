@@ -88,6 +88,9 @@ _finalstateYmaxSigmaBR = {
     "default": 1.0,
 }
 
+def setExcludedStyle(graph):
+    graph.SetFillColorAlpha(ROOT.kViolet+6, 0.3) # transparency
+
 
 ## Class for reading the BR limits from the JSON file produced by
 ## landsMergeHistograms.py

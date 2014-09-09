@@ -166,7 +166,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
         excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
         excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
 
-        excluded.SetFillColorAlpha(ROOT.kViolet+6, 0.3) # transparency
+        limit.setExcludedStyle(excluded)
         excluded.SetLineWidth(0)
         excluded.SetLineColor(ROOT.kWhite)
 
@@ -188,7 +188,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
         graphs["obs_th_plus"].SetLineStyle(9)
         graphs["obs_th_minus"].SetLineStyle(9)
         obsCopy = graphs["obs"].Clone() # just for the legend style
-        obsCopy.SetFillColorAlpha(ROOT.kViolet+6, 0.3) # transparency
+        limit.setExcludedStyle(obsCopy)
         plot = plots.PlotBase([
             histograms.HistoGraph(graphs["obs"], "Observed", drawStyle="PL", legendStyle="lp"),
             histograms.HistoGraph(obsCopy, "ObservedCopy", drawStyle=None, legendStyle="lpf"),
