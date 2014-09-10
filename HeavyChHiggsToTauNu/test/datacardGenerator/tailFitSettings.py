@@ -16,7 +16,7 @@ MinimumStatUncertaintySignal = 0.03
 MinimumStatUncertaintyBkg = 0.5
 
 
-fitstart = 160
+fitstart = 180
 fitstop = 700
 applyfrom = fitstart
 function = "FitFuncExpTailExoAlternate"
