@@ -146,7 +146,7 @@ def main():
     doPlot("limitsTanb_mA_light_"+scenario, graphs, limits, limit.mA(),scenario)
 
     
-def doPlot(name, graphs, limits, xlabel, scenario):
+def doPlot(name, graphs, limits, xlabel, scenario, isMA=False):
     blinded = True
     if "obs" in graphs.keys():
         blinded = False
@@ -160,7 +160,13 @@ def doPlot(name, graphs, limits, xlabel, scenario):
         excluded = ROOT.TGraph(obs)
         excluded.SetName("ExcludedArea")
 
-        excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], 1)
+        if "_mA_" in name:
+            rightX = obs.GetX()[obs.GetN()-1]+100
+            rightY = obs.GetY()[obs.GetN()-1]
+            excluded.SetPoint(excluded.GetN(), rightX, rightY)
+            excluded.SetPoint(excluded.GetN(), rightX, 1)
+        else:
+            excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], 1)
         excluded.SetPoint(excluded.GetN(), 0, 1)
         excluded.SetPoint(excluded.GetN(), 0, tanbMax)
         excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
@@ -186,20 +192,20 @@ def doPlot(name, graphs, limits, xlabel, scenario):
 
     if not blinded:
         graphs["obs_th_plus"].SetLineStyle(9)
-        graphs["obs_th_minus"].SetLineStyle(9)
-        obsCopy = graphs["obs"].Clone() # just for the legend style
-        limit.setExcludedStyle(obsCopy)
+#        graphs["obs_th_minus"].SetLineStyle(9)
+        excludedCopy = excluded.Clone()
+        excludedCopy.SetFillColorAlpha(ROOT.kWhite, 0.0) # actual color doesn't matter, want fully transparent
         plot = plots.PlotBase([
             histograms.HistoGraph(graphs["obs"], "Observed", drawStyle="PL", legendStyle="lp"),
-            histograms.HistoGraph(obsCopy, "ObservedCopy", drawStyle=None, legendStyle="lpf"),
             histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
             histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
-            histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
+            histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle=None),
+            histograms.HistoGraph(excludedCopy, "ExcludedCopy", drawStyle=None, legendStyle="f"),
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
 #            histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
-            histograms.HistoGraph(graphs["Allowed"], "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV", drawStyle="L", legendStyle="lf"),
+            histograms.HistoGraph(graphs["Allowed"], "Allowed", drawStyle="L", legendStyle="lf"),
 #            histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
 #            histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
@@ -211,14 +217,13 @@ def doPlot(name, graphs, limits, xlabel, scenario):
         )
 
         plot.histoMgr.setHistoLegendLabelMany({
-	    "Observed": None,
-	    "ObservedCopy": "Observed",
             "ObservedPlus": "Observed #pm1#sigma (th.)",
             "ObservedMinus": None,
-            "Expected": None,
             "Excluded": None,
+            "ExcludedCopy": "Excluded",
+            "Expected": None,
             "MinTanb": None,
-            "AllowedCopy": None,
+            "Allowed": "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV",
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma",
             "IsoMass": None,
@@ -232,7 +237,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
-            histograms.HistoGraph(graphs["Allowed"], "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV", drawStyle="L", legendStyle="lf"),
+            histograms.HistoGraph(graphs["Allowed"], "Allowed", drawStyle="L", legendStyle="lf"),
 #            histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(graphs["mintanb"], "MinTanb", drawStyle="L"),
             histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
@@ -244,7 +249,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
         plot.histoMgr.setHistoLegendLabelMany({
             "Expected": None,
             "MinTanb": None,
-            "AllowedCopy": None,
+            "Allowed": "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV",
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma",
             "IsoMass": None,
@@ -259,9 +264,10 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     x = 0.2
     dy = -0.15
     plot.setLegend(histograms.createLegend(x-0.01, 0.50+dy, x+0.45, 0.80+dy))
-    plot.legend.SetFillColor(0)
+    plot.legend.SetMargin(0.17)
+ #    plot.legend.SetFillColor(0)
     #plot.legend.SetFillColorAlpha(ROOT.kWhite, 50)
-    plot.legend.SetFillStyle(1001)
+#    plot.legend.SetFillStyle(1001)
     if blinded:
 	name += "_blinded"
     name = os.path.basename(name)
