@@ -319,6 +319,11 @@ class BRXSDatabaseInterface:
                     x.append(lower_x[i])
                     y.append(lower_y[i])
 
+            # To not show a line on right edge of the plot in case there is an upper and lower band
+            if len(upper_x) > 0:
+                x.append(610)
+                y.append(y[-1])
+
             for i in range(0,len(upper_x)):
                 j = len(upper_x) -1 -i
                 if upper_x[j] > upper_x0[0]:
@@ -337,10 +342,6 @@ class BRXSDatabaseInterface:
                     y.append(upper_y0[i])
 
         if higgs == "mh":
-            if len(upper_x0) == 0:
-                x.append(600)
-                y.append(100)
-                                        
             for i in range(0,len(upper_x00)):
                 x.append(upper_x00[i])
                 y.append(upper_y00[i])

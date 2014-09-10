@@ -8,6 +8,10 @@ from optparse import OptionParser
 import array
 from collections import OrderedDict
 
+import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.gROOT.SetBatch(True) # no flashing canvases
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TailFitter as TailFitter
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer as TableProducer
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker as ControlPlotMaker
@@ -19,10 +23,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDiffere
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-
-import ROOT
-ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.gROOT.SetBatch(True) # no flashing canvases
 
 _myOriginalDir = "originalDatacards"
 
@@ -399,6 +399,13 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             #myDict[item].Debug()
             print "%11s: %.1f +- %.1f (stat.) + %.1f - %.1f (syst.)"%(item,rate,stat,systUp,systDown)
     print "Observation: %d\n"%hObs.Integral(0,hObs.GetNbinsX()+2)
+
+    def setTailFitUncToStat(rhwu):
+        tailfitNames = filter(lambda n: "_TailFit_" in n, rhwu.getShapeUncertaintyNames())
+        rhwu.setShapeUncertaintiesAsStatistical(tailfitNames)
+        #rhwu.printUncertainties()
+        #print rhwu.getShapeUncertaintiesAsStatistical()
+        return rhwu
     
     myLogList = [False,True]
     for l in myLogList:
@@ -406,15 +413,15 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
         # Create post fit shape
         myStackList = []
         if "QCD" in myDict.keys():
-            myHisto = histograms.Histo(myDict["QCD"].Clone(),"QCD",legendLabel=ControlPlotMaker._legendLabelQCD)
+            myHisto = histograms.Histo(setTailFitUncToStat(myDict["QCD"].Clone()),"QCD",legendLabel=ControlPlotMaker._legendLabelQCD)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         if "EWKtau" in myDict.keys():
-            myHisto = histograms.Histo(myDict["EWKtau"].Clone(),"Embedding",legendLabel=ControlPlotMaker._legendLabelEmbedding)
+            myHisto = histograms.Histo(setTailFitUncToStat(myDict["EWKtau"].Clone()),"Embedding",legendLabel=ControlPlotMaker._legendLabelEmbedding)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         if "EWKfakes" in myDict.keys():
-            myHisto = histograms.Histo(myDict["EWKfakes"].Clone(),"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
+            myHisto = histograms.Histo(setTailFitUncToStat(myDict["EWKfakes"].Clone()),"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         myBlindedStatus = False
@@ -456,7 +463,7 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
 	myParams["ratioErrorOptions"] = {"numeratorStatSyst": False}
 	myParams["ratioCreateLegend"] = True
 	#myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-	myParams["ratioMoveLegend"] = {"dx": -0.01, "dy": -0.03}
+	myParams["ratioMoveLegend"] = {"dx": -0.06, "dy": -0.1}
 	myParams["opts2"] = {"ymin": 0.0, "ymax": 2.5}
 	myParams["xlabel"] = "m_{T} (GeV)"
 	#if l:
@@ -697,6 +704,11 @@ if __name__ == "__main__":
 
     myStyle = tdrstyle.TDRStyle()
     myStyle.setOptStat(False)
+
+    plots._legendLabels["MCStatError"] = "Bkg. stat."
+    plots._legendLabels["MCStatSystError"] = "Bkg. stat.#oplussyst."
+    plots._legendLabels["BackgroundStatError"] = "Bkg. stat. unc"
+    plots._legendLabels["BackgroundStatSystError"] = "Bkg. stat.#oplussyst. unc."
 
     if opts.recursive:
 	opts.settings = "../"+opts.settings

@@ -53,7 +53,8 @@ def useSubscript():
 useSubscript()
 
 ## Y axis label for the tanbeta
-tanblimit = "95 % CL limit on tan #beta"
+#tanblimit = "95 % CL limit on tan #beta"
+tanblimit = "tan #beta"
 
 ## Label for m(H+)
 def mHplus():
@@ -87,6 +88,9 @@ _finalstateYmaxSigmaBR = {
     "emu": 10.0, # FIXME
     "default": 1.0,
 }
+
+def setExcludedStyle(graph):
+    graph.SetFillColorAlpha(ROOT.kViolet+6, 0.3) # transparency
 
 
 ## Class for reading the BR limits from the JSON file produced by

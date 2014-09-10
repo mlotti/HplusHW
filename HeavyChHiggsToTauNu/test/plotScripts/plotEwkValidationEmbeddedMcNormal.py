@@ -230,10 +230,20 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, outputDir, addData, 
                 "Embedded": legEmb,
                 "Normal": legSig,
                 })
-        p.histoMgr.forEachHisto(styles.generator())
+        #p.histoMgr.forEachHisto(styles.generator())
         hemb = p.histoMgr.getHisto("Embedded")
-        hemb.setDrawStyle("EP")
-        hemb.setLegendStyle("EPL")
+        hemb.setDrawStyle("HIST E")
+        hemb.setLegendStyle("L")
+        themb = hemb.getRootHisto()
+        #styles.ttStyle.apply(themb)
+        themb.SetLineColor(ROOT.kBlue)
+        themb.SetLineWidth(2)
+        themb.SetMarkerStyle(0)
+        hsig = p.histoMgr.getHisto("Normal")
+        hsig.setLegendStyle("F")
+        thsig = hsig.getRootHisto()
+        thsig.SetFillColor(ROOT.kGray)
+        thsig.SetLineColor(thsig.GetFillColor())
         histoOrder = ["Embedded", "Normal"]
         if addData:
             legData = "Embedded data"

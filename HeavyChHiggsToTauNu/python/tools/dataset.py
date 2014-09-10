@@ -1133,6 +1133,9 @@ class RootHistoWithUncertainties:
         # The numbers are stored into the bin content as absolute uncertainties
         self._shapeUncertainties = {}
 
+        # Treat these shape uncertainties as statistical uncertainties in getSystematicUncertaintyGraph()
+        self._treatShapesAsStat = set() # use set to avoid duplicates
+
         # Boolean to save the status if the under- and overflow bins have been made visible (i.e. summed to the first and last bin)
         self._flowBinsVisibleStatus = False
 
@@ -1180,6 +1183,8 @@ class RootHistoWithUncertainties:
     def getRateStatUncertainty(self):
         if not self._flowBinsVisibleStatus:
             raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        if len(self._treatShapesAsStat) > 0:
+            print "WARNING: some shapes are treated as statistical uncertainty, but they have not been implemented yet to getRateStatUncertainty()!"
         mySum = 0.0
         if isinstance(self._rootHisto, ROOT.TH2):
             raise Exception("getRateStatUncertainty() supported currently only for TH1!")
@@ -1333,9 +1338,24 @@ class RootHistoWithUncertainties:
     def getShapeUncertainties(self):
         return self._shapeUncertainties
 
+    def getShapeUncertaintyNames(self):
+        return self._shapeUncertainties.keys()
+
     ## Return True if this histogram has any systematic uncertainties associated to it
     def hasSystematicUncertainties(self):
         return len(self._shapeUncertainties) > 0
+
+    ## Set the list of shape uncertainty names that should be treated as statistical uncertainties
+    def setShapeUncertaintiesAsStatistical(self, names):
+        self._treatShapesAsStat = set(names)
+
+    ## Add a shape uncertainty name to the list of that should be treated as statistical uncertainties
+    def addShapeUncertaintiesAsStatistical(self, name):
+        self._treatShapesAsStat.add(name)
+
+    ## Get the set of shape uncertainty names that should be treated as statistical uncertainties
+    def getShapeUncertaintiesAsStatistical(self):
+        return self._treatShapesAsStat
 
     ## Create TGraphAsymmErrors for the sum of uncertainties
     #
@@ -1400,6 +1420,24 @@ class RootHistoWithUncertainties:
         else:
             wrapper = WrapTH1(self._rootHisto)
 
+        # Set shapes to stat, syst, or stat+syst according to what was
+        # requested
+        shapes = []
+        if addStatistical and len(self._treatShapesAsStat) > 0:
+            if addSystematic:
+                # stat+syst, so we can just add all shape uncertainties
+                shapes = self._shapeUncertainties.values()
+            else:
+                # only stat, so get only them
+                for name in self._treatShapesAsStat:
+                    shapes.append(self._shapeUncertainties[name])
+        elif addSystematic:
+            # in this case all shapes are syst
+            shapes = self._shapeUncertainties.values()
+
+        #shapes.sort()
+        #print addStatistical, addSystematic, "\n  ".join([x[0].GetName() for x in shapes])
+
         for i in xrange(wrapper.begin(), wrapper.end()):
             (xval, xlow, xhigh) = wrapper.xvalues(i)
 
@@ -1412,8 +1450,8 @@ class RootHistoWithUncertainties:
                 yhighSquareSum += statHigh**2
                 ylowSquareSum += statLow**2
 
-            if addSystematic:
-                for shapePlus, shapeMinus in self._shapeUncertainties.itervalues():
+            if len(shapes) > 0:
+                for shapePlus, shapeMinus in shapes:
                     diffPlus = shapePlus.GetBinContent(i) # Note that this could have + or - sign
                     diffMinus = shapeMinus.GetBinContent(i) # Note that this could have + or - sign
                     (addPlus, addMinus) = aux.getProperAdditivesForVariationUncertainties(diffPlus, diffMinus)
@@ -1618,6 +1656,9 @@ class RootHistoWithUncertainties:
         # Add histo
         self._rootHisto.Add(other._rootHisto, *args)
 
+        # Add shape uncertainties treated as stat
+        self._treatShapesAsStat.update(other._treatShapesAsStat)
+
     ## Scale the histogram
     #
     # It is enough to forward the call to self._rootHisto and
@@ -1659,6 +1700,7 @@ class RootHistoWithUncertainties:
         for key, value in self._shapeUncertainties.iteritems():
             (plus, minus) = (aux.Clone(value[0]), aux.Clone(value[1]))
             clone._shapeUncertainties[key] = (plus, minus)
+        clone._treatShapesAsStat = set(self._treatShapesAsStat)
         clone._flowBinsVisibleStatus = self._flowBinsVisibleStatus
         return clone
 

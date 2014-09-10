@@ -17,7 +17,6 @@ import os
 import sys
 import ROOT
 
-
 _legendLabelQCD = "Multijets (data)"
 _legendLabelEmbedding = "EWK+t#bar{t} with #tau_{h} (data)"
 _legendLabelEWKFakes = "EWK+t#bar{t} no #tau_{h} (sim.)"
