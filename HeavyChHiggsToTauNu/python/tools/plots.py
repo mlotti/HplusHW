@@ -937,9 +937,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True,
     elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
         #h1 = histo1.getRootHisto()
         #h2 = histo2.getRootHisto()
-        print "Numerator stat"
         gr1 = histo1.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
-        print "Denominator stat"
         gr2 = histo2.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
 
         # Add scaled stat uncertainty
@@ -951,9 +949,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True,
         # Then add scaled stat+syst uncertainty
 
         # Get new TGraphAsymmErrors for stat+syst, then scale it
-        print "Numerator syst"
         ratioSyst1 = histo1.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
-        print "Denominator syst"
         ratioSyst2 = histo2.getSystematicUncertaintyGraph(addStatistical=histograms.uncertaintyMode.addStatToSyst())
         removes = []
         for i in xrange(0, ratioSyst2.GetN()):
