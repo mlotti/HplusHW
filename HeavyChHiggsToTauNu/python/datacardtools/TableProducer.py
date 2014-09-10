@@ -43,7 +43,7 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
             hDown.SetTitle(hDown.GetName())
             if hRate.GetBinContent(i) < minimumStatUncertainty:
                 hUp.SetBinContent(i, minimumStatUncertainty)
-                print ShellStyles.WarningLabel()+"Rate is zero for bin %d, setting up stat. uncert. to %f."%(i,minimumStatUncertainty)
+                print ShellStyles.WarningLabel()+"Rate is zero for bin %d, setting up stat. uncert. to %f for %s."%(i,minimumStatUncertainty,hRate.GetTitle())
                 if hRate.GetBinContent(i) < 0.0:
                     print ShellStyles.WarningLabel()+"Rate is negative for bin %d, continue at your own risk!"%i
             else:
@@ -709,6 +709,7 @@ class TableProducer:
             # Initialize
             HH = None
             HW = None
+            HST = None # Single top signal
             QCD = None
             Embedding = None
             EWKFakes = None
@@ -722,6 +723,8 @@ class TableProducer:
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.getLabel().startswith("Hp"):
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                    elif c.getLabel().startswith("HST"):
+                        HST = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.typeIsQCD():
                         if QCD == None:
                             QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
@@ -749,6 +752,9 @@ class TableProducer:
             if HH != None:
                 HH.Scale(myBr**2)
                 HW.Add(HH)
+            if HST != None:
+                HST.Scale(myBr)
+                HW.Add(HST)
             # From this line on, HW includes all signal
             # Calculate expected yield
             TotalExpected = QCD.Clone()

@@ -472,7 +472,7 @@ class TailFitter:
 
         return h
 
-    def makeVariationPlotSimple(self, prefix, hNominal, hFit, hUp, hDown):
+    def makeVariationPlotSimple(self, prefix, hNominal, hFit, hUp, hDown, fitmin=180):
         # Make plot
         plot = plots.PlotBase()
         hNominalClone = aux.Clone(hNominal)
@@ -505,9 +505,7 @@ class TailFitter:
         plot.histoMgr.appendHisto(histograms.Histo(hDownClone,"Total down"))
 
         # ugly hardcoding...
-        fitStart = 200
-        if "QCD" in self._label:
-            fitStart = 160
+        fitStart = fitmin
         nominal = "Nominal"
         if "QCD" in self._label:
             nominal += " multijets"

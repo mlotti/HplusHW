@@ -342,16 +342,29 @@ class DataCardGenerator:
         self.doDataMining()
 
         # Merge columns, if necessary
-        if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
-            if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKFakeIdList) > 0:
-                # For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
-                print "\nPerforming merge for MC genuine tau column"
-                self.separateMCEWKTausAndFakes(targetColumn=self._config.EmbeddingIdList[0],targetColumnNewName="MC_EWKTau",addColumnList=None,subtractColumnList=self._config.EWKFakeIdList)
-        if self._config.OptionDoMergeFakeTauColumns:
-            if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKFakeIdList) > 0:
-                # For data-driven, merge fake tau columns into one
-                print "\nPerforming merge for MC fake tau column"
-                self.separateMCEWKTausAndFakes(targetColumn=self._config.EWKFakeIdList[0],targetColumnNewName="MC_faketau",addColumnList=self._config.EWKFakeIdList[1:],subtractColumnList=[])
+        if hasattr(self._config, "mergeColumnsByLabel"):
+            for item in self._config.mergeColumnsByLabel:
+                mySubtractColumnList = []
+                if "subtractList" in item.keys():
+                    mySubtractColumnList = item["subtractList"][:]
+                print "\nPerforming merge for %s"%item["label"]
+                self.separateMCEWKTausAndFakes(targetColumn=item["mergeList"][0],targetColumnNewName=item["label"],addColumnList=item["mergeList"][1:],subtractColumnList=mySubtractColumnList)
+        
+        #if self._config.OptionGenuineTauBackgroundSource == "MC_FullSystematics" or self._config.OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
+            #if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKFakeIdList) > 0:
+                ## For realistic embedding, merge MC EWK and subtract fakes from it (use the cached results)
+                #print "\nPerforming merge for MC genuine tau column"
+                #self.separateMCEWKTausAndFakes(targetColumn=self._config.EmbeddingIdList[0],targetColumnNewName="MC_EWKTau",addColumnList=None,subtractColumnList=self._config.EWKFakeIdList)
+        #if self._config.OptionDoMergeFakeTauColumns:
+            #if hasattr(self._config, "EWKFakeIdList") and len(self._config.EWKMergeList) > 0:
+                #if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
+                    ## For data-driven, merge fake tau columns into one
+                    #print "\nMerging non-top EWK+tt MC columns"
+                    #self.separateMCEWKTausAndFakes(targetColumn=self._config.EWKMergeList[0],targetColumnNewName="MC_non_top_EWK",addColumnList=self._config.EWKMergeList[1:],subtractColumnList=[])
+                #else:
+                    ## For data-driven, merge fake tau columns into one
+                    #print "\nPerforming merge for MC fake tau column"
+                    #self.separateMCEWKTausAndFakes(targetColumn=self._config.EWKFakeIdList[0],targetColumnNewName="MC_faketau",addColumnList=self._config.EWKFakeIdList[1:],subtractColumnList=[])
 
         # Do rebinning of results, store a fine binned copy of all histograms as well
         for c in self._columns:
@@ -568,10 +581,10 @@ class DataCardGenerator:
         # Obtain column for embedding
         myEmbColumn = None
         for c in self._columns:
-            if c.getLandsProcess() == targetColumn:
+            if c.getLabel() == targetColumn:
                 myEmbColumn = c
         if myEmbColumn == None:
-            raise Exception(ShellStyles.ErrorLabel()+"Could not find column with landsProcess %d!"%targetColumn)
+            raise Exception(ShellStyles.ErrorLabel()+"Could not find column with label %s!"%targetColumn)
         # Rename column and cached histograms
         print ".. renaming column '%s' -> '%s'"%(myEmbColumn.getLabel(), targetColumnNewName)
         for i in range(0,len(myEmbColumn._rateResult._histograms)):
@@ -590,7 +603,7 @@ class DataCardGenerator:
         myNuisanceIdList = list(myEmbColumn.getNuisanceIds())
         for myid in addColumnList:
             for c in self._columns:
-                if c.getLandsProcess() == myid:
+                if c.getLabel() == myid:
                     print ".. adding column '%s' -> '%s'"%(c.getLabel(), targetColumnNewName)
                     # Merge rate result, (ExtractorResult objects)
                     # Merge cached shape histo
@@ -610,7 +623,7 @@ class DataCardGenerator:
         # Subtract results from dataset columns in EWKFakeIdList list
         for fakeId in subtractColumnList:
             for c in self._columns:
-                if c.getLandsProcess() == fakeId:
+                if c.getLabel() == fakeId:
                     print ".. subtracting column '%s' from '%s'"%(c.getLabel(), targetColumnNewName)
                     # Subtract rate result, (ExtractorResult objects)
                     # Merge cached shape histo
@@ -722,6 +735,8 @@ class DataCardGenerator:
 
     ## Check landsProcess in datacard columns
     def checkDatacardColumns(self):
+        if self._opts.combine:
+            return # Disable for combine
         for m in self._config.MassPoints:
             i = 0
             myFirstValue = 0
