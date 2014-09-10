@@ -39,17 +39,18 @@ def main(opts):
     if opts.parentheses:
         limit.useParentheses()
 
-    doBRlimit(limits, opts.unblinded)
-    doBRlimit(limits, opts.unblinded, log=True)
+    doBRlimit(limits, opts.unblinded, opts)
+    doBRlimit(limits, opts.unblinded, opts, log=True)
     doLimitError(limits, opts.unblinded)
     limits.print2(opts.unblinded)
     limits.saveAsLatexTable(opts.unblinded)
 
-def doBRlimit(limits, unblindedStatus, log=False):
+def doBRlimit(limits, unblindedStatus, opts, log=False):
     graphs = []
     if unblindedStatus:
         gr = limits.observedGraph()
         if gr != None:
+            gr.SetPoint(gr.GetN()-1, gr.GetX()[gr.GetN()-1]-1e-10, gr.GetY()[gr.GetN()-1])
             if opts.excludedArea:
                 graphs.append(histograms.HistoGraph(gr, "Observed", drawStyle="PL", legendStyle=None))
                 excluded = gr.Clone()
@@ -67,7 +68,12 @@ def doBRlimit(limits, unblindedStatus, log=False):
             histograms.HistoGraph(limits.expectedBandGraph(sigma=2), "Expected2", drawStyle="F", legendStyle="fl"),
             ])
 
-    plot = plots.PlotBase(graphs, saveFormats=[".png", ".pdf", ".C"])
+    saveFormats = [".png", ".C"]
+    if opts.excludedArea:
+        saveFormats.append(".pdf")
+    else:
+        saveFormats.append(".eps")
+    plot = plots.PlotBase(graphs, saveFormats=saveFormats)
     plot.setLuminosity(limits.getLuminosity())
 
     plot.histoMgr.setHistoLegendLabelMany({
@@ -153,8 +159,7 @@ def doLimitError(limits,unblindedStatus):
 
     if len(expRelErrors) == 0 and len(obsRelErrors) == 0:
         return
-        
-    plot = plots.PlotBase(saveFormats=[".png", ".pdf", ".C"])
+    plot = plots.PlotBase()
     if len(expRelErrors) > 0:
         plot.histoMgr.extendHistos([histograms.HistoGraph(x[0], x[1], drawStyle="PL", legendStyle="lp") for x in expRelErrors])
         plot.histoMgr.forEachHisto(styles.generator())
