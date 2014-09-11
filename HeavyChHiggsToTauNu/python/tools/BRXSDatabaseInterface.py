@@ -368,6 +368,103 @@ class BRXSDatabaseInterface:
         retGraph.SetFillStyle(3008)
         return retGraph
 
+    def muLimit(self,hmass,xVariableName,selection,obsLimit):
+
+        print "    mu limit",hmass,obsLimit
+
+        x = []
+        y = []
+
+        mus = self.getValues("mu","mHp==%s"%hmass)
+        highTanbRegion = False
+
+        for mu in mus:
+            xval = mu
+            yselection = xVariableName+"=="+str(xval) + "&&" + "mHp==%s"%hmass
+            if len(selection) > 0:
+                yselection += "&&"+selection
+
+            graph = self.getGraph("tanb","BR_tHpb*BR_Hp_taunu","mu==%s&&mHp==%s"%(xval,hmass))
+            first = graph.GetX()[0]
+            last = graph.GetX()[graph.GetN()-1]
+            crossOverPoints0,crossOverPoints1,directions = self.getCrossOver(graph,obsLimit)
+            ys = []
+            for i in range(len(crossOverPoints0)):
+                tanbmin = crossOverPoints0[i]
+                tanbmax = crossOverPoints1[i]
+                self.nInterpolation = 0
+                limit = self.linearBRInterpolation(self.BRvariable,obsLimit,tanbmin,tanbmax,self.floatSelection(yselection))
+                #print tanbmin,tanbmax,limit
+                ys.append(limit)
+            #print ys
+            if len(directions) == 0 or (len(directions) > 0 and directions[0] < 0):
+                tmp = [first]
+                tmp.extend(ys)
+                ys = tmp
+            if len(ys)%2:
+                ys.append(last)
+            #print xval,ys
+            if len(ys) > 0:
+                x.append(xval)
+                y.append(ys)
+
+        xgr = []
+        ygr = []
+        for i in range(len(x)):
+            if len(y[i]) > 0:
+                xgr.append(x[i])
+                ygr.append(y[i][0])
+        for i in reversed(range(len(x))):
+            if i < len(x) and not len(y[i]) == len(y[i-1]):
+                break
+            if len(y[i]) > 1:
+                xgr.append(x[i])
+                ygr.append(y[i][1])
+        for i in range(len(x)):
+            if len(y[i]) > 2:
+                xgr.append(x[i])
+                ygr.append(y[i][2])
+        yi = 3
+        for i in reversed(range(len(x))):
+            if len(y[i]) > yi:
+                xgr.append(x[i])
+                ygr.append(y[i][yi])
+            if i < len(x) and not len(y[i]) == len(y[i-1]):
+                    yi = 1
+
+        xgr.append(x[0])
+        ygr.append(y[0][0])
+
+#        for i in range(len(xgr)):
+#            print xgr[i],ygr[i]
+
+        retGraph = ROOT.TGraph(len(xgr),array('d',xgr,),array('d',ygr))
+        retGraph.SetName("muLimit")
+        retGraph.SetLineWidth(1)
+        retGraph.SetLineStyle(7)
+        retGraph.SetFillColor(8)
+        retGraph.SetFillStyle(3008)
+        return retGraph
+
+    def getCrossOver(self,graph,limit):
+        crossover0 = []
+        crossover1 = []
+        direction = []
+        for i in range(0,graph.GetN()-1):
+            x0 = graph.GetX()[i]
+            y0 = graph.GetY()[i]
+            x1 = graph.GetX()[i+1]
+            y1 = graph.GetY()[i+1]
+            if y0 < limit and y1 > limit:
+                crossover0.append(x0)
+                crossover1.append(x1)
+                direction.append(1)
+            if y0 > limit and y1 < limit:
+                crossover0.append(x0)
+                crossover1.append(x1)
+                direction.append(-1)
+        return crossover0,crossover1,direction
+
     def getIsoMass(self,mHp):
         x = []
         y = []
