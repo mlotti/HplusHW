@@ -88,21 +88,31 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+
+    styles.styles[1] = styles.StyleCompound([styles.styles[1], styles.StyleMarker(markerStyle=25)])
+
     histograms.cmsTextMode = histograms.CMSMode.SIMULATION_PRELIMINARY
     #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
-    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2, dy=-0.1)
+    histograms.createLegend.setDefaults(textSize=0.04)
+    histograms.createLegend.moveDefaults(dx=-0.25, dh=-0.2, dy=-0.12)
+
+    histograms.createLegendRatio.setDefaults(ncolumns=2, textSize=0.08, columnSeparation=0.6)
+    histograms.createLegendRatio.moveDefaults(dx=-0.48, dh=-0.1, dw=0.25)
+
     if opts.dofit:
         histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
-        histograms.createLegendRatio.moveDefaults(dh=-0.1)
+        histograms.createLegendRatio.moveDefaults(dw=-0.25)
         plots._legendLabels["BackgroundStatError"] = "Emb. stat. unc."
         plots._legendLabels["BackgroundStatSystError"] = "Emb. stat.#oplussyst. unc."
     else:
         histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
-        plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
-        plots._legendLabels["BackgroundStatSystError"] = "Norm. stat.#oplussyst. unc."
-    histograms.createLegendRatio.moveDefaults(dx=-0.1)
+#        plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
+#        plots._legendLabels["BackgroundStatSystError"] = "Norm. stat.#oplussyst. unc."
+        plots._legendLabels["BackgroundStatError"] = "Non-emb. stat. unc."
+        plots._legendLabels["BackgroundStatSystError"] = "Non-emb. stat.#oplussyst. unc."
     plots._legendLabels["Data"] = "Embedded data"
     plots._legendLabels["EWKMC"] = "EWK+t#bar{t}"
+#    plots._legendLabels["EWKMC"] = "Non-emb. EWK+t#bar{t} with ^{}#tau_{h}"
 
     postfix =""
     if opts.dofit:
@@ -149,7 +159,7 @@ def doDataset(datasetsEmb, datasetsSig, outputDir, opts):
 #        doCounters(datasetsEmb, datasetsSig, name)
 
     if not opts.notrigger:
-        dop("EWKMC", addData=True)
+        dop("EWKMC") #, addData=True)
     dop("TTJets")
     return
     dop("WJets")
@@ -164,6 +174,7 @@ def doDataset(datasetsEmb, datasetsSig, outputDir, opts):
 #drawPlotCommon = tauEmbedding.PlotDrawerTauEmbeddingEmbeddedNormal(ylabel="Events / %.0f GeV", stackMCHistograms=False, log=True, addMCUncertainty=True, ratio=True, addLuminosityText=True)
 drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=False, log=True, addMCUncertainty=True,
                                   ratio=True, ratioType="errorScale", ratioCreateLegend=True,
+                                  opts2={"ymin": 0, "ymax": 2},
                                   addLuminosityText=True, errorBarsX=True
 )
 
@@ -209,7 +220,9 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, outputDir, addData, 
         p.setLuminosity(lumi)
         legLabel = plots._legendLabels.get(datasetName, datasetName)
         legEmb = "Embedded "+legLabel
-        legSig = "Normal "+legLabel
+        #legSig = "Normal "+legLabel
+        #legSig = legLabel
+        legSig = "Non-emb. %s with ^{}#tau_{h}" % legLabel
         if addEventCounts:
             legEmb += " ("+strIntegral(drhEmb.getHistogram())+")"
             legSig += " ("+strIntegral(drhSig.getHistogram())+")"
@@ -217,9 +230,24 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, outputDir, addData, 
                 "Embedded": legEmb,
                 "Normal": legSig,
                 })
-        p.histoMgr.forEachHisto(styles.generator())
+        #p.histoMgr.forEachHisto(styles.generator())
+        hemb = p.histoMgr.getHisto("Embedded")
+        hemb.setDrawStyle("HIST E")
+        hemb.setLegendStyle("L")
+        themb = hemb.getRootHisto()
+        #styles.ttStyle.apply(themb)
+        themb.SetLineColor(ROOT.kBlue)
+        themb.SetLineWidth(2)
+        themb.SetMarkerStyle(0)
+        hsig = p.histoMgr.getHisto("Normal")
+        hsig.setLegendStyle("F")
+        thsig = hsig.getRootHisto()
+        thsig.SetFillColor(ROOT.kGray)
+        thsig.SetLineColor(thsig.GetFillColor())
+        histoOrder = ["Embedded", "Normal"]
         if addData:
             legData = "Embedded data"
+            histoOrder.append("Embedded data")
             if addEventCounts:
                 legData += " ("+strIntegral(drhEmbData.getHistogram())+")"
             p.histoMgr.setHistoLegendLabelMany({"Embedded data": legData})
@@ -235,11 +263,28 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, outputDir, addData, 
                                  rebin=range(0, 160, 20) + binning[binning.index(160):]
                              )
         else:
-            p.setDrawOptions(ratioYlabel="Emb./Norm.")
+#            p.setDrawOptions(ratioYlabel="Emb./Norm.")
+            p.setDrawOptions(ratioYlabel="Emb./Non-emb.")
+        p.histoMgr.reorder(histoOrder)
         return p
 
+    def addEmbStatSyst(p):
+        rhwu = p.histoMgr.getHisto("Embedded").getRootHistoWithUncertainties()
+        embStatSyst = rhwu.getSystematicUncertaintyGraph(addStatistical=True)
+        for i in xrange(0, embStatSyst.GetN()):
+            embStatSyst.SetPointEXhigh(i, 0)
+            embStatSyst.SetPointEXlow(i, 0)
+        aux.copyStyle(rhwu.getRootHisto(), embStatSyst)
+        p.appendPlotObject(histograms.HistoGraph(embStatSyst, "EmbStatSyst", legendStyle=None, drawStyle="[]"))
+    drawPlotCommon.setDefaults(customizeBeforeDraw=addEmbStatSyst)
+
     custom = {
-        "NBjets": {"moveLegend": {"dx": -0.4, "dy": -0.45}}
+        "NBjets": {"moveLegend": {"dx": -0.3, "dy": -0.5}},
+        "ImprovedDeltaPhiCutsBackToBackMinimum": {"moveLegend": {"dx": -0.3, "dy": -0.4}},
+        "Njets_AfterMtSelections": {"moveLegend": {"dx": -0.3, "dy": -0.4}},
+        "BtagDiscriminatorAfterMtSelections": {"moveLegend": {"dx": -0.3}},
+        "METAfterMtSelections": {"moveLegend": {"dx": 0}},
+        "shapeTransverseMass": {"opts": {"ymax": 4}},
     }
     if opts.nortau:
         for hname in ["SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterMtSelections"]:
@@ -248,6 +293,8 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, outputDir, addData, 
             nbins = int(binning[0] / width)
             systematics._dataDrivenCtrlPlotBinning[hname] = [x*width for x in range(0, nbins)] + binning
             custom[hname] = {"opts": {"xmin": 0}}
+
+
 
     plotter.plot(datasetName, createPlot, custom)
 

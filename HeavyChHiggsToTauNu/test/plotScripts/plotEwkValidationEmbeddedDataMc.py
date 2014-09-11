@@ -64,7 +64,12 @@ def main():
     #    histograms.cmsTextMode = histograms.CMSMode.NONE
     #histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
     histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
-    histograms.createLegend.moveDefaults(dx=-0.15, dh=0.05)#, dh=-0.05) # QCD removed
+    #histograms.createLegend.moveDefaults(dx=-0.15, dh=0.05)#, dh=-0.05) # QCD removed
+    histograms.createLegend.setDefaults(textSize=0.04)
+    histograms.createLegend.moveDefaults(dx=-0.25, dh=0.1)#, dh=-0.05) # QCD removed
+
+    histograms.createLegendRatio.setDefaults(ncolumns=2, textSize=0.08, columnSeparation=0.3)
+    histograms.createLegendRatio.moveDefaults(dx=-0.35, dh=-0.1, dw=0.25)
     plots._legendLabels["BackgroundStatError"] = "Sim. stat. unc."
     plots._legendLabels["BackgroundStatSystError"] = "Sim. stat.#oplussyst. unc."
 
@@ -136,8 +141,9 @@ def doPlots(datasetsEmb, outputDir):
     plotter.plot(None, createPlot, {
 #        "NBjets": {"moveLegend": {"dx": -0.4, "dy": -0.45}}
 #        "ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections": {"moveLegend": 
-        "shapeTransverseMass": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.3}}, 
-        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}, "ratioMoveLegend": {"dx": -0.3}}
+        "shapeTransverseMass": {"moveLegend": {"dy": -0.12}},
+                                #{"dx": -0.3}}, 
+        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}}#, "ratioMoveLegend": {"dx": -0.3}}
     })
     return
 
@@ -150,7 +156,22 @@ def doCounters(datasetsEmb, outputDir):
     eventCounter = counter.EventCounter(datasetsEmb)
     eventCounter.normalizeMCToLuminosity(datasetsEmb.getDataset("Data").getLuminosity())
     table = eventCounter.getMainCounterTable()
-    table.keepOnlyRows(["Selected events"])
+    table.keepOnlyRows([
+        "Trigger and HLT_MET cut",
+        "taus > 0",
+        "tau trigger scale factor",
+        "electron veto",
+        "muon veto",
+        "njets",
+        "MET trigger scale factor",
+        "QCD tail killer collinear",
+        "MET",
+        "btagging",
+        "btagging scale factor",
+        "Embedding: mT weight",
+        "QCD tail killer back-to-back",
+        "Selected events"
+    ])
     addMcSum(table)
 
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f', withPrecision=2))

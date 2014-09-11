@@ -3,6 +3,7 @@
 import sys
 import re
 import array
+import os
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -24,6 +25,8 @@ def usage():
     print
     print "### Usage:  ",sys.argv[0],"<root file> [<limits json>]"
     print "### Example:",sys.argv[0],"mhmax.root"
+    print
+    print "Note that because of transparent colors, the output will be PDF instead of EPS, and you need recent-enough ROOT"
     print
     sys.exit()
     
@@ -47,10 +50,14 @@ def main():
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="configurationHeavy.json")
     limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/heavyHplus_configuration.json")
 
+    # Enable OpenGL
+    ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
+
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     if limit.forPaper:
         histograms.cmsTextMode = histograms.CMSMode.PAPER
+    limit.forPaper = True # to get GeV without c^2
 
     # Get BR limits
 
@@ -84,8 +91,8 @@ def main():
     if obs.GetN() > 0:
         graphs["obs"] = obs
         # Get theory uncertainties on observed
-        obs_th_plus = limit.getObservedPlus(obs,0.40)
-        obs_th_minus = limit.getObservedMinus(obs,0.40)
+        obs_th_plus = limit.getObservedPlus(obs,0.32)
+        obs_th_minus = limit.getObservedMinus(obs,0.32)
         for gr in [obs_th_plus, obs_th_minus]:
             gr.SetLineWidth(2)
             gr.SetLineStyle(9)
@@ -106,9 +113,9 @@ def main():
 
     # Interpret in MSSM
     xVariable = "mHp"
-    selection = "mu==200"
+    selection = "mHp > 0"
 #    scenario = "MSSM m_{h}^{max}"
-    scenario = rootfile.replace(".root","")
+    scenario = os.path.split(rootfile)[-1].replace(".root","")
     print scenario
 
     for key in graphs.keys():
@@ -137,8 +144,6 @@ def main():
 
     doPlot("limitsTanb_mA_heavy_"+scenario, graphs, limits, limit.mA(),scenario)	
 
-    sys.exit()
-
     
 def doPlot(name, graphs, limits, xlabel, scenario):
     blinded = True
@@ -148,12 +153,11 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     higgs = "h"
     if scenario == "lowMH-LHCHXSWG":
         higgs = "H"
-        
+
     if not blinded:    
         obs = graphs["obs"]
         excluded = ROOT.TGraph(obs)
         excluded.SetName("ExcludedArea")
-        excluded.SetFillColor(ROOT.kGray)
 
         for i in reversed(range(excluded.GetN())):
             if excluded.GetY()[i] > 99 and i+1 < excluded.GetN():
@@ -168,8 +172,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
         for i in range(excluded.GetN()):
             print "Excluded",excluded.GetX()[i],excluded.GetY()[i]
 
-        excluded.SetFillColor(ROOT.kGray)
-        excluded.SetFillStyle(3354)
+        limit.setExcludedStyle(excluded)
         excluded.SetLineWidth(0)
         excluded.SetLineColor(ROOT.kWhite)
 
@@ -179,6 +182,13 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     expected1.SetLineStyle(2)
     expected2 = graphs["exp2"]
     expected2.SetLineStyle(2)
+
+    allowed = graphs["Allowed"]
+    allowed.SetFillStyle(3005)
+    allowed.SetFillColor(ROOT.kRed)
+    allowed.SetLineWidth(-302)
+    allowed.SetLineColor(ROOT.kRed)
+    allowed.SetLineStyle(1)
 
     if not blinded:
         graphs["obs_th_plus"].SetLineStyle(9)
@@ -191,18 +201,19 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
             histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV", drawStyle="F", legendStyle="f"),
-            histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "Allowed", drawStyle="L", legendStyle="lf"),
+#            histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
             histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl"),
-            ])
+            ],
+           saveFormats=[".png", ".pdf", ".C"]
+        )
 
         plot.histoMgr.setHistoLegendLabelMany({
-	    "Observed": "Observed",
             "ObservedPlus": "Observed #pm1#sigma (th.)",
             "ObservedMinus": None,
             "Expected": None,
-            "AllowedCopy": None,
+            "Allowed": "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV",
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma",
             "IsoMass": None,
@@ -214,31 +225,41 @@ def doPlot(name, graphs, limits, xlabel, scenario):
             graphs["isomass"].SetFillStyle(1)
         plot = plots.PlotBase([
             histograms.HistoGraph(expected, "Expected", drawStyle="L"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{h} = 125.9#pm3.0 GeV", drawStyle="F", legendStyle="f"),
+ #           histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{h} = 125.9#pm3.0 GeV", drawStyle="F", legendStyle="f"),
             histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
             histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F"),
-            histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
-            histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
+            histograms.HistoGraph(graphs["Allowed"], "Allowed", drawStyle="L", legendStyle="lf"),
+#            histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
             histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
             histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl"),
-            ])
+            ],
+           saveFormats=[".png", ".pdf", ".C"]
+        )
 
         plot.histoMgr.setHistoLegendLabelMany({
             "Expected": None,
-            "AllowedCopy": None,
+            "Allowed": "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV",
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma",
             "IsoMass": None,
             "IsoMassCopy": None
             })
 
+    # Move the m_h,H allowed region to the last in the legend
+    histoNames = [h.getName() for h in plot.histoMgr.getHistos()]
+    plot.histoMgr.reorderLegend(filter(lambda n: "Allowed" not in n, histoNames))
+
     x = 0.50
     y = -0.25
-    plot.setLegend(histograms.createLegend(x-0.01, y+0.60, x+0.37, y+0.80))
-    plot.legend.SetFillColor(0)
-    plot.legend.SetFillStyle(1001)
+    if scenario.replace("-LHCHXSWG", "") in ["lightstop", "mhmaxup"]:
+        y += 0.05
+    plot.setLegend(histograms.createLegend(x-0.01, y+0.50, x+0.45, y+0.80))
+    plot.legend.SetMargin(0.17)
+    #plot.legend.SetFillColor(0)
+    #plot.legend.SetFillStyle(1001)
     if blinded:
         name += "_blinded"
+    name = os.path.basename(name)
     name = name.replace("-","_")
 
     frameXmin = 180
@@ -261,13 +282,14 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     histograms.addText(x, y+0.815, limit.getTypesetScenarioName(scenario), size=size)
 #    histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
 
-    if not graphs["isomass"] == None:
-        histograms.addText(0.2, 0.15, "m_{H^{#pm}} = 180 GeV/c^{2}", size=0.5*size)
+    # Too small to be visible
+#    if not graphs["isomass"] == None:
+#        histograms.addText(0.2, 0.15, "m_{H^{#pm}} = 180 GeV/c^{2}", size=0.5*size)
 
     #Adding a LHC label:
 #    ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
-    FH_version = db.getVersion("FeynHiggs")
-    histograms.addText(x, y+0.55, FH_version, size=size)
+    #FH_version = db.getVersion("FeynHiggs")
+    #histograms.addText(x, y+0.55, FH_version, size=size)
 #    HD_version = db.getVersion("HDECAY")
 #    histograms.addText(x, y+0.55, FH_version+" and", size=size)
 #    histograms.addText(x, y+0.50, HD_version, size=size)

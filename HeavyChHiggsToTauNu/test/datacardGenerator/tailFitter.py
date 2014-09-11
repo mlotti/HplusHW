@@ -8,6 +8,10 @@ from optparse import OptionParser
 import array
 from collections import OrderedDict
 
+import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.gROOT.SetBatch(True) # no flashing canvases
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TailFitter as TailFitter
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer as TableProducer
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker as ControlPlotMaker
@@ -19,10 +23,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDiffere
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-
-import ROOT
-ROOT.PyConfig.IgnoreCommandLineOptions = True
-ROOT.gROOT.SetBatch(True) # no flashing canvases
 
 _myOriginalDir = "originalDatacards"
 
@@ -399,6 +399,13 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             #myDict[item].Debug()
             print "%11s: %.1f +- %.1f (stat.) + %.1f - %.1f (syst.)"%(item,rate,stat,systUp,systDown)
     print "Observation: %d\n"%hObs.Integral(0,hObs.GetNbinsX()+2)
+
+    def setTailFitUncToStat(rhwu):
+        tailfitNames = filter(lambda n: "_TailFit_" in n, rhwu.getShapeUncertaintyNames())
+        rhwu.setShapeUncertaintiesAsStatistical(tailfitNames)
+        #rhwu.printUncertainties()
+        #print rhwu.getShapeUncertaintiesAsStatistical()
+        return rhwu
     
     myLogList = [False,True]
     for l in myLogList:
@@ -406,15 +413,15 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
         # Create post fit shape
         myStackList = []
         if "QCD" in myDict.keys():
-            myHisto = histograms.Histo(myDict["QCD"].Clone(),"QCD",legendLabel=ControlPlotMaker._legendLabelQCD)
+            myHisto = histograms.Histo(setTailFitUncToStat(myDict["QCD"].Clone()),"QCD",legendLabel=ControlPlotMaker._legendLabelQCD)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         if "EWKtau" in myDict.keys():
-            myHisto = histograms.Histo(myDict["EWKtau"].Clone(),"Embedding",legendLabel=ControlPlotMaker._legendLabelEmbedding)
+            myHisto = histograms.Histo(setTailFitUncToStat(myDict["EWKtau"].Clone()),"Embedding",legendLabel=ControlPlotMaker._legendLabelEmbedding)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         if "EWKfakes" in myDict.keys():
-            myHisto = histograms.Histo(myDict["EWKfakes"].Clone(),"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
+            myHisto = histograms.Histo(setTailFitUncToStat(myDict["EWKfakes"].Clone()),"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         myBlindedStatus = False
@@ -452,28 +459,30 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
 	myParams["stackMCHistograms"] = True
 	myParams["addMCUncertainty"] = True
 	myParams["addLuminosityText"] = True
-	myParams["moveLegend"] = {"dx": -0.15, "dy": -0.10}
+	myParams["moveLegend"] = {"dx": -0.14, "dy": -0.10}
 	myParams["ratioErrorOptions"] = {"numeratorStatSyst": False}
 	myParams["ratioCreateLegend"] = True
 	#myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-	myParams["ratioMoveLegend"] = {"dx": -0.01, "dy": -0.03}
+	myParams["ratioMoveLegend"] = {"dx": -0.06, "dy": -0.1}
 	myParams["opts2"] = {"ymin": 0.0, "ymax": 2.5}
 	myParams["xlabel"] = "m_{T} (GeV)"
-	if l:
-            myParams["ylabel"] = "< Events / bin >"
-        else:
-            myParams["ylabel"] = "Events / 20 GeV"
+	#if l:
+        #    myParams["ylabel"] = "< Events / bin >"
+        #else:
+        myParams["ylabel"] = "Events / 20 GeV"
 	a = hObsLocal.GetXaxis().GetBinWidth(1)
 	b = hObsLocal.GetXaxis().GetBinWidth(hObsLocal.GetNbinsX())
 	#if abs(a-b) < 0.0001:
 	    #myParams["ylabel"]  += "%d GeV"%a
 	#else:
 	    #myParams["ylabel"]  += "%d-%d GeV"%(a,b)
-	myParams["divideByBinWidth"] = l
+        #myParams["divideByBinWidth"] = l
 	myParams["log"] = l
 	myPlotName = "PostTailFitShape_M%d"%float(m)
 	if l:
-	    myParams["opts"] = {"ymin": 1e-5}
+            # scale ymin by 20 in order to compare the rebinned mT with same y-scale
+            # ymax(factor) takes care of max automatically
+	    myParams["opts"] = {"ymin": 20*1e-5}
 	else:
 	    myParams["opts"] = {"ymin": 0.0}
 	    myPlotName += "_Linear"
@@ -600,7 +609,7 @@ def main(opts):
                         print "... using fitfunc: %s and range %d-%d"%(s["fitfunc"],s["fitmin"],s["fitmax"])
                 if myFitSettings == None:
                     raise Exception("Could not determine fit function for column '%s'!"%c)
-                myFitter = TailFitter.TailFitter(hFineBinning, c, myFitSettings["fitfunc"], myFitSettings["fitmin"], myFitSettings["fitmax"], myFitSettings["applyFrom"], doPlots=myDrawPlotsStatus)
+                myFitter = TailFitter.TailFitter(hFineBinning, c, myFitSettings["fitfunc"], myFitSettings["fitmin"], myFitSettings["fitmax"], myFitSettings["applyFrom"], doPlots=myDrawPlotsStatus, luminosity=myLuminosity)
                 # Obtain fitted rate with final binning
                 myFittedRateHistograms = myFitter.getFittedRateHistogram(hFineBinning, config.finalBinning["shape"], myFitSettings["applyFrom"])
                 myHistogramCache.extend(myFittedRateHistograms)
@@ -625,6 +634,9 @@ def main(opts):
                     myFitter.makeVariationPlotDetailed("", hFinalBinning, myFittedRateHistograms[0], huplist, hdownlist)
                     (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
                     myFitter.makeVariationPlotSimple("", hFinalBinning, myFittedRateHistograms[0], hupTotal, hdownTotal)
+                    # print total uncertainty
+                    print "*** Syst. uncert. from fit: +",1.0-hupTotal.Integral()/myFittedRateHistograms[0].Integral(), "-", 1.0-hdownTotal.Integral()/myFittedRateHistograms[0].Integral()
+
                     hFinalBinning.Delete()
 
                 # Treat blancs (norm == 0)
@@ -639,8 +651,6 @@ def main(opts):
                     # Add fit uncertainty as bin-by-bin type uncertainty
                     (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
                     (myBinByBinUpHistograms, myBinByBinDownHistograms) = createBinnedFitUncertaintyHistograms(myFittedRateHistograms[0], hupTotal, hdownTotal, myFitSettings["applyFrom"], opts)
-                    # print total uncertainty
-                    print "*** Syst. uncert. from fit: +",1.0-hupTotal.Integral()/myFittedRateHistograms[0].Integral(), "-", 1.0-hdownTotal.Integral()/myFittedRateHistograms[0].Integral()
                     if not opts.noFitUncert:
                         myHistogramCache.extend(myBinByBinUpHistograms)
                         myHistogramCache.extend(myBinByBinDownHistograms)
@@ -694,6 +704,11 @@ if __name__ == "__main__":
 
     myStyle = tdrstyle.TDRStyle()
     myStyle.setOptStat(False)
+
+    plots._legendLabels["MCStatError"] = "Bkg. stat."
+    plots._legendLabels["MCStatSystError"] = "Bkg. stat.#oplussyst."
+    plots._legendLabels["BackgroundStatError"] = "Bkg. stat. unc"
+    plots._legendLabels["BackgroundStatSystError"] = "Bkg. stat.#oplussyst. unc."
 
     if opts.recursive:
 	opts.settings = "../"+opts.settings
