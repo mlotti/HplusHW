@@ -9,6 +9,7 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/xnortau"
 #Path = "/home/wendland/data/test_nominal_dphi"
 Path = "/home/wendland/data/xnominal"
+#Path = "/home/wendland/data/xnominal"
 #Path = "/home/wendland/data/test_matti_met60_paramweight"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
@@ -25,23 +26,6 @@ HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-6
 HeavyMassPoints      = [300]
 HeavyMassPoints      = []
 
-selectionReg = None
-if selectionReg == "A":
-    LightMassPoints = [80,90,100]
-    HeavyMassPoints = []
-    Path = "/home/wendland/data/xmet70"
-elif selectionReg == "B":
-    LightMassPoints = [120,140,150,155,160]
-    HeavyMassPoints = []
-    Path = "/home/wendland/data/xmet70"
-elif selectionReg == "C":
-    LightMassPoints = []
-    HeavyMassPoints = [180,190,200,220,250]
-    Path = "/home/wendland/data/xmet80"
-elif selectionReg == "D":
-    LightMassPoints = []
-    HeavyMassPoints = [300,400,500,600]
-    Path = "/home/wendland/data/xnominal"
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
 BlindAnalysis   = False
@@ -84,6 +68,8 @@ OptionNumberOfDecimalsInSummaries = 1
 OptionRemoveHHDataGroup = False
 OptionLimitOnSigmaBr = False # Is automatically set to true for heavy H+
 OptionDoTBbarForHeavy = False # NOTE: usable only for 2012
+OptionAddSingleTopDependencyForMuParameter = False # Affects only light H+
+OptionAddSingleTopSignal = False # Affects only light H+
 
 # For projections
 trg_MET_dataeffScaleFactor = None # Default is None, i.e. 1.0
@@ -179,6 +165,8 @@ EWKFakeIdList = []
 signalTemplate = DataGroup(datasetType="Signal",
                            shapeHisto=SignalShapeHisto)
 
+mergeColumnsByLabel = []
+
 for mass in LightMassPoints:
     myMassList = [mass]
     hhx = signalTemplate.clone()
@@ -196,6 +184,21 @@ for mass in LightMassPoints:
     hwx.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_tt_8TeV","lumi"])
     hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass))
     DataGroups.append(hwx)
+    
+    if OptionAddSingleTopSignal:
+        mySuffix = ["s","t","tW"]
+        myLabelList = []
+        for i in range(0,len(mySuffix)):
+            hst = signalTemplate.clone()
+            label = "HST%d_%s"%(mass, mySuffix[i])
+            myLabelList.append(label)
+            hst.setLabel(label)
+            hst.setLandSProcess(-2)
+            hst.setValidMassPoints(myMassList)
+            hst.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_singleTop","lumi"])
+            hst.setDatasetDefinition("Hplus_taunu_%s-channel_M%d"%(mySuffix[i],mass))
+            DataGroups.append(hst)
+        mergeColumnsByLabel.append({"label": label.replace("_%s"%mySuffix[i],""), "mergeList": myLabelList[:]})
 
 for mass in HeavyMassPoints:
     myMassList = [mass]
@@ -263,7 +266,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     ))
 
     # EWK + ttbar with fake taus
-    EWKFakeIdList = [1,5,6,7,8]
+    mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
         landsProcess = 1,
@@ -311,8 +314,9 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     ))
 elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
-    EmbeddingIdList = [4]
     myEmbeddingShapeSystematics = []
+    mergeColumnsByLabel.append({"label": "MC_EWKTau", "mergeList": ["pseudo_emb_TTJets_MC","pseudo_emb_Wjets_MC","pseudo_emb_t_MC","pseudo_emb_DY_MC","pseudo_emb_VV_MC"], 
+                                "subtractList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     if OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
         # Mimic with uncertainties the outcome of data-driven embedding
         if OptionTreatTriggerUncertaintiesAsAsymmetric:
@@ -377,7 +381,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         validMassPoints = MassPoints,
         nuisances    = myEmbeddingShapeSystematics,
     ))
-    EWKFakeIdList = [1,5,6,7,8]
+    mergeColumnsByLabel.append({"label": "MC_EWKFakeTau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
         landsProcess = 1,
@@ -425,7 +429,12 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
     ))
 elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
     # Replace embedding and fakes with MC
-    EmbeddingIdList = [1,4,5,6,7]
+    myList = ["Wjets_MC","DY_MC","VV_MC"]
+    if not OptionAddSingleTopDependencyForMuParameter:
+        myList.append("sngltop_MC")
+        mergeColumnsByLabel.append({"label": "EWKnontop_MC", "mergeList": myList[:]})
+    else:
+        mergeColumnsByLabel.append({"label": "EWKnontt_MC", "mergeList": myList[:]})
     DataGroups.append(DataGroup(
         label        = "ttbar_MC",
         landsProcess = 1,
@@ -445,7 +454,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_Wjets","lumi"],
     ))
     DataGroups.append(DataGroup(
-        label        = "t_MC",
+        label        = "sngltop_MC",
         landsProcess = 5,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
@@ -475,12 +484,13 @@ else:
     raise Exception("Error: unknown value for flag OptionGenuineTauBackgroundSource!")
 
 # Reserve column 2
-DataGroups.append(DataGroup(
-    label        = "res.",
-    landsProcess = 2,
-    datasetType  = "None",
-    validMassPoints = MassPoints,
-))
+if not OptionAddSingleTopSignal:
+    DataGroups.append(DataGroup(
+        label        = "res.",
+        landsProcess = 2,
+        datasetType  = "None",
+        validMassPoints = MassPoints,
+    ))
 
 
 ##############################################################################

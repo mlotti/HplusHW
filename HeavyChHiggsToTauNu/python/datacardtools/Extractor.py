@@ -406,8 +406,8 @@ class RatioExtractor(ExtractorBase):
         myNumeratorCount = mainCounterTable.getCount(rowName=self._numeratorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         myDenominatorCount = mainCounterTable.getCount(rowName=self._denominatorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Protection against div by zero
-        if myDenominatorCount.value() == 0.0:
-            print ShellStyles.WarningLabel()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
+        if myNumeratorCount.value() == 0.0:
+            print ShellStyles.WarningLabel()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._numeratorCounterItem+"') value is zero!"
             myResult = 0.0
         else:
             myResult = (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale

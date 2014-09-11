@@ -633,7 +633,7 @@ def main(opts):
                     hFinalBinning = hFineBinning.Rebin(len(myArray)-1, "", myArray)
                     myFitter.makeVariationPlotDetailed("", hFinalBinning, myFittedRateHistograms[0], huplist, hdownlist)
                     (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
-                    myFitter.makeVariationPlotSimple("", hFinalBinning, myFittedRateHistograms[0], hupTotal, hdownTotal)
+                    myFitter.makeVariationPlotSimple("", hFinalBinning, myFittedRateHistograms[0], hupTotal, hdownTotal, s["fitmin"])
                     # print total uncertainty
                     print "*** Syst. uncert. from fit: +",1.0-hupTotal.Integral()/myFittedRateHistograms[0].Integral(), "-", 1.0-hdownTotal.Integral()/myFittedRateHistograms[0].Integral()
 
