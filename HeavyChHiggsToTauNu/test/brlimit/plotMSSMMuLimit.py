@@ -101,12 +101,14 @@ def main():
             gr.SetLineWidth(2)
             gr.SetLineStyle(9)
 
+        graphs["Allowed"]  = db.getHardCoded_mH_limitForMu(mass,0)
+        graphs["Allowed2"] = db.getHardCoded_mH_limitForMu(mass,1)
+
         graphs["observed"] = graphs["muexcluded"].Clone()
         graphs["observed"].SetLineWidth(2)
         graphs["observed"].SetLineStyle(ROOT.kSolid)
         graphs["observed"].SetLineColor(ROOT.kBlack)
 
-#        graphs["Allowed"] = db.mhLimit("mH","mu",selection,"125.0+-3.0")
 
         # Remove obs point
         for name in ["observed", "obs_th_plus", "obs_th_minus"]:
@@ -154,6 +156,10 @@ def doPlot(name, graphs, limits, xlabel, scenario, mass):
         grs.extend([
             histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
             histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
+        histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
+        histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
+        histograms.HistoGraph(graphs["Allowed2"], "Allowed2", drawStyle="F", legendStyle="f"),
+        histograms.HistoGraph(graphs["Allowed2"], "Allowed2Copy", drawStyle="L", legendStyle="f"),
             ])
         legend_dh = 0.05
     grs.extend([
@@ -169,6 +175,9 @@ def doPlot(name, graphs, limits, xlabel, scenario, mass):
         "ObservedPlus": "Observed #pm1#sigma (th.)",
         "ObservedMinus": None,
         "Allowed": "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV",
+        "AllowedCopy": None,
+        "Allowed2": None,
+        "Allowed2Copy": None,
         })
 
     textPos = "left"
