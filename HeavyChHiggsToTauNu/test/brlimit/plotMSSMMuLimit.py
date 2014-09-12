@@ -60,9 +60,6 @@ def main():
     masses = limits.mass
     brs    = limits.observed
 
-    masses = [masses[7]]
-    brs = [brs[7]]
-
     print "Observed masses and BR's"
     for i in range(len(masses)):
         print "    ",masses[i],brs[i]
@@ -94,30 +91,31 @@ def main():
 	selection = "mHp == %s"%mass 
         graphs["muexcluded"] = db.muLimit(mass,"mu",selection,brlimit)
 
-	graphs["obs_th_plus"] = db.muLimit(mass,"mu",selection,brlimit*(1+0.29))
-        graphs["obs_th_minus"] = db.muLimit(mass,"mu",selection,brlimit*(1-0.29))
 
-        for gr in [graphs["obs_th_plus"], graphs["obs_th_minus"]]:
-            gr.SetLineWidth(2)
-            gr.SetLineStyle(9)
+        if int(mass) in [155, 160]:
+            graphs["obs_th_plus"] = db.muLimit(mass,"mu",selection,brlimit*(1+0.29))
+            graphs["obs_th_minus"] = db.muLimit(mass,"mu",selection,brlimit*(1-0.29))
+
+            for gr in [graphs["obs_th_plus"], graphs["obs_th_minus"]]:
+                gr.SetLineWidth(2)
+                gr.SetLineStyle(9)
+
+            graphs["observed"] = graphs["muexcluded"].Clone()
+            graphs["observed"].SetLineWidth(2)
+            graphs["observed"].SetLineStyle(ROOT.kSolid)
+            graphs["observed"].SetLineColor(ROOT.kBlack)
+
+            # Remove obs point
+            for name in ["observed", "obs_th_plus", "obs_th_minus"]:
+                gr = graphs[name]
+                print "Graph", name
+                for i in reversed(range(0,gr.GetN())):
+                    if gr.GetY()[i] < 2:
+                        print "    REMOVING POINT",gr.GetY()[i]," corresponding mass=",gr.GetX()[i]
+                        gr.RemovePoint(i)
 
         graphs["Allowed"]  = db.getHardCoded_mH_limitForMu(mass,0)
         graphs["Allowed2"] = db.getHardCoded_mH_limitForMu(mass,1)
-
-        graphs["observed"] = graphs["muexcluded"].Clone()
-        graphs["observed"].SetLineWidth(2)
-        graphs["observed"].SetLineStyle(ROOT.kSolid)
-        graphs["observed"].SetLineColor(ROOT.kBlack)
-
-
-        # Remove obs point
-        for name in ["observed", "obs_th_plus", "obs_th_minus"]:
-            gr = graphs[name]
-            print "Graph", name
-            for i in reversed(range(0,gr.GetN())):
-                if gr.GetY()[i] < 2:
-                    print "    REMOVING POINT",gr.GetY()[i]," corresponding mass=",gr.GetX()[i]
-                    gr.RemovePoint(i)
 
         doPlot(("limitsMu_light_mHp%s_"+scenario)%(int(mass)), graphs, limits, "#mu (GeV)",scenario, int(mass))
     sys.exit()
@@ -143,51 +141,58 @@ def doPlot(name, graphs, limits, xlabel, scenario, mass):
 
 
     # Uncomment when we have allowed
-    #allowed = graphs["Allowed"]
-    #allowed.SetFillStyle(3005)
-    #allowed.SetFillColor(ROOT.kRed)
-    #allowed.SetLineWidth(-302)
-    #allowed.SetLineColor(ROOT.kRed)
-    #allowed.SetLineStyle(1)
+    for n in ["Allowed", "Allowed2"]:
+        a = graphs[n]
+        if a is None:
+            continue
+        a.SetFillStyle(3005)
+        a.SetFillColor(ROOT.kRed)
+        a.SetLineWidth(-302)
+        a.SetLineColor(ROOT.kRed)
+        a.SetLineStyle(1)
 
-    grs = [histograms.HistoGraph(graphs["observed"], "Observed", drawStyle="L", legendStyle="l")]
     legend_dh = 0
-    if mass in [155, 160]:
+    grs = []
+    if "observed" in graphs:
         grs.extend([
+            histograms.HistoGraph(graphs["observed"], "Observed", drawStyle="L", legendStyle="l"),
             histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
-            histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
-        histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
-        histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
-        histograms.HistoGraph(graphs["Allowed2"], "Allowed2", drawStyle="F", legendStyle="f"),
-        histograms.HistoGraph(graphs["Allowed2"], "Allowed2Copy", drawStyle="L", legendStyle="f"),
+            histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L", legendStyle=None),
             ])
-        legend_dh = 0.05
+        legend_dh = 0.1
     grs.extend([
-        histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle=None),
+        histograms.HistoGraph(excluded, "Excluded", drawStyle="F"),
         histograms.HistoGraph(excludedCopy, "ExcludedCopy", drawStyle=None, legendStyle="f"),
-        #histograms.HistoGraph(graphs["Allowed"], "Allowed", drawStyle="L", legendStyle="lf"),
+        histograms.HistoGraph(graphs["Allowed"], "Allowed", drawStyle="L", legendStyle="lf"),
     ])
+    if graphs["Allowed2"] is not None:
+        grs.append(histograms.HistoGraph(graphs["Allowed2"], "Allowed2", drawStyle="L", legendStyle=None))
+
 
     plot = plots.PlotBase(grs, saveFormats=[".png", ".pdf", ".C"])
 
     plot.histoMgr.setHistoLegendLabelMany({
    	"ExcludedCopy": "Excluded",
-        "ObservedPlus": "Observed #pm1#sigma (th.)",
-        "ObservedMinus": None,
         "Allowed": "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV",
-        "AllowedCopy": None,
-        "Allowed2": None,
-        "Allowed2Copy": None,
+        "Excluded": None,
+        })
+    if "observed" in graphs:
+        plot.histoMgr.setHistoLegendLabelMany({
+            "ObservedPlus": "Observed #pm1#sigma (th.)",
         })
 
     textPos = "left"
     dx = 0
-    if mass in [90]:
-        textPos = "right"
-        dx = 0.36
-
     dy = -0.15
-    plot.setLegend(histograms.createLegend(0.19+dx, 0.70+dy-legend_dh, 0.57+dx, 0.80+dy))
+    if mass in [90, 150]:
+        textPos = "right"
+        dx = 0.35
+    if mass in [155, 160]:
+        textPos = "right"
+        dy = -0.02
+
+    plot.setLegend(histograms.createLegend(0.19+dx, 0.75+dy-legend_dh, 0.57+dx, 0.80+dy))
+    histograms.moveLegend(plot.legend, dh=0.05, dy=-0.05)
     #plot.legend.SetFillColor(0)
     #plot.legend.SetFillStyle(1001)
 
@@ -206,6 +211,7 @@ def doPlot(name, graphs, limits, xlabel, scenario, mass):
     histograms.addText(x, 0.9+dy, limit.process, size=size)
     histograms.addText(x, 0.863+dy, limits.getFinalstateText(), size=size)
     histograms.addText(x, 0.815+dy, limit.getTypesetScenarioName(scenario.replace("_mu", "")), size=size)
+    histograms.addText(x, 0.767+dy, "m_{H^{+}}=%d GeV" % mass, size=size)
 #    histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
 
 
