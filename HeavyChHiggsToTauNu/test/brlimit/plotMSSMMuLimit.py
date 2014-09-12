@@ -90,7 +90,8 @@ def main():
 	graphs["obs_th_plus"] = db.muLimit(mass,"mu",selection,brlimit*(1+0.29))
         graphs["obs_th_minus"] = db.muLimit(mass,"mu",selection,brlimit*(1-0.29))
 
-#        graphs["Allowed"] = db.mhLimit("mH","mu",selection,"125.0+-3.0")
+        graphs["Allowed"]  = db.getHardCoded_mH_limitForMu(mass,0)
+        graphs["Allowed2"] = db.getHardCoded_mH_limitForMu(mass,1)
 
         # Remove obs points
         for i in reversed(range(0,graphs["obs_th_plus"].GetN())):
@@ -116,12 +117,19 @@ def doPlot(name, graphs, limits, xlabel, scenario):
         histograms.HistoGraph(graphs["muexcluded"], "Excluded", drawStyle="F", legendStyle="f"),    
         histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
         histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
+        histograms.HistoGraph(graphs["Allowed"], "Allowed by \nm_{"+higgs+"} = 125.0#pm3.0 GeV/c^{2}", drawStyle="F", legendStyle="f"),
+        histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
+        histograms.HistoGraph(graphs["Allowed2"], "Allowed2", drawStyle="F", legendStyle="f"),
+        histograms.HistoGraph(graphs["Allowed2"], "Allowed2Copy", drawStyle="L", legendStyle="f"),
         ])
 
     plot.histoMgr.setHistoLegendLabelMany({
    	"Excluded": "Excluded",
         "ObservedPlus": "Observed #pm1#sigma (th.)",
         "ObservedMinus": None,
+        "AllowedCopy": None,
+        "Allowed2": None,
+        "Allowed2Copy": None,
         })
         
     plot.setLegend(histograms.createLegend(0.19, 0.70, 0.57, 0.80))
