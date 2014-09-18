@@ -17,8 +17,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult as qcdInv
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pseudoMultiCrabCreator as pseudoMultiCrabCreator
 
-#myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
-myNormalizationFactorSource = "QCDPlusEWKFakeTauNormalizationFactors.py" # (emod)
+myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
+#myNormalizationFactorSource = "QCDPlusEWKFakeTauNormalizationFactors.py" # (emod)
 
 def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myNormFactors,myDisplayStatus,dataDrivenFakeTaus):
     # Construct info string of module
@@ -31,7 +31,6 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     dsetMgr.loadLuminosities()
     plots.mergeRenameReorderForDataMC(dsetMgr)
     dsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
-    #dsetMgr.merge("EWK", ["WJets","DYJetsToLL","SingleTop","Diboson"])
     # Obtain luminosity
     myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
     # Print info so that user can check that merge went correct
@@ -82,8 +81,7 @@ def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,m
     systDsetMgr.updateNAllEventsToPUWeighted()
     systDsetMgr.loadLuminosities()
     plots.mergeRenameReorderForDataMC(systDsetMgr)
-    #systDsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
-    systDsetMgr.merge("EWK", ["WJets","DYJetsToLL","SingleTop","Diboson"])
+    systDsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
     myLuminosity = systDsetMgr.getDataset("Data").getLuminosity()
     # Obtain results
     mySystModuleResults = pseudoMultiCrabCreator.PseudoMultiCrabModule(systDsetMgr, era, searchMode, optimizationMode, syst)
