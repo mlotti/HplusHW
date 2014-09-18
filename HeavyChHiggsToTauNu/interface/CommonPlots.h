@@ -336,6 +336,7 @@ namespace HPlus {
     std::vector<WrappedTH1*> hCtrlQCDTailKillerCollinearMinimumAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlEWKFakeTausQCDTailKillerCollinearMinimumAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauPtAfterMtSelections;
+    std::vector<WrappedTH1*> hCtrlSelectedGenuineTauPtAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauEtaAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauPhiAfterMtSelections;
     std::vector<WrappedTH1*> hCtrlSelectedTauLeadingTrkPtAfterMtSelections;
