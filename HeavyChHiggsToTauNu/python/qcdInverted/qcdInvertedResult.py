@@ -218,7 +218,7 @@ class QCDInvertedResultManager:
         if not noRebin:
             myRebinList = systematics.getBinningForPlot(shapeString)
 
-        myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", shapeString, luminosity, myRebinList)
+        myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", shapeString, luminosity, myRebinList,dataDrivenFakeTaus=dataDrivenFakeTaus)
         # Calculate final shape in signal region (leg1 * leg2 / basic)
         myResult = QCDInvertedShape(myShape, moduleInfoString, normFactors, optionPrintPurityByBins=displayPurityBreakdown)
         myShape.delete()
@@ -275,7 +275,7 @@ class QCDInvertedResultManager:
                     self._hCtrlPlotLabels.append(item)
                     self._hCtrlPlotLabelsForQCDSyst.append(item)
                     myRebinList = None # Do rebinning in datacard generator
-                    myCtrlShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList)
+                    myCtrlShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList,dataDrivenFakeTaus=dataDrivenFakeTaus)
                     myCtrlPlot = QCDInvertedShape(myCtrlShape, moduleInfoString+"_"+item, normFactors)
                     myCtrlShape.delete()
                     myCtrlPlotHisto = aux.Clone(myCtrlPlot.getResultShape(), "ctrlPlotShapeInManager")
@@ -295,8 +295,8 @@ class QCDInvertedResultManager:
                     self._hCtrlPlots.append(myCtrlPlotPurityHisto)
                     myCtrlPlot.delete()
                     # Do systematics coming from met shape difference for control plots
-                    myCtrlPlotSignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity, rebinList=myRebinList)
-                    myCtrlPlotControlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationControl",item), luminosity, rebinList=myRebinList)
+                    myCtrlPlotSignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity, rebinList=myRebinList, dataDrivenFakeTaus=dataDrivenFakeTaus)
+                    myCtrlPlotControlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationControl",item), luminosity, rebinList=myRebinList, dataDrivenFakeTaus=dataDrivenFakeTaus)
                     myCtrlPlotRegionTransitionSyst = systematicsForMetShapeDifference.SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlotHisto, moduleInfoString=moduleInfoString, quietMode=True)
                     myCtrlPlotSignalRegionShape.delete()
                     myCtrlPlotControlRegionShape.delete()
