@@ -24,7 +24,7 @@ HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-6
 #HeavyMassPoints      = []
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
-BlindAnalysis   = True
+BlindAnalysis   = False
 OptionBlindThreshold = None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
 
 # Rate counter definitions
@@ -50,7 +50,7 @@ OptionIncludeSystematics = True # Set to true if you produced multicrabs with do
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 #OptionDoControlPlots = True
 OptionDoMergeFakeTauColumns = False
-OptionDoControlPlots = False #!!!!!!!!
+OptionDoControlPlots = True
 OptionCombineSingleColumnUncertainties = True # Makes limit running faster
 OptionCtrlPlotsAtMt = True
 OptionDisplayEventYieldSummary = True
@@ -155,13 +155,14 @@ signalTemplate = DataGroup(datasetType="Signal",
 
 for mass in LightMassPoints:
     myMassList = [mass]
-    hhx = signalTemplate.clone()
-    hhx.setLabel("HH"+str(mass)+"_a")
-    hhx.setLandSProcess(-1)
-    hhx.setValidMassPoints(myMassList)
-    hhx.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_tt_8TeV","lumi"])
-    hhx.setDatasetDefinition("TTToHplusBHminusB_M"+str(mass))
-    DataGroups.append(hhx)
+    if not OptionRemoveHHDataGroup:
+        hhx = signalTemplate.clone()
+        hhx.setLabel("HH"+str(mass)+"_a")
+        hhx.setLandSProcess(-1)
+        hhx.setValidMassPoints(myMassList)
+        hhx.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_tt_8TeV","lumi"])
+        hhx.setDatasetDefinition("TTToHplusBHminusB_M"+str(mass))
+        DataGroups.append(hhx)
 
     hwx = signalTemplate.clone()
     hwx.setLabel("HW"+str(mass)+"_a")
