@@ -74,8 +74,7 @@ class TDRStyle:
 
         self.tdrStyle.SetEndErrorSize(2)
         # self.tdrStyle.SetErrorMarker(20)
-        #self.tdrStyle.SetErrorX(0.)
-        self.tdrStyle.SetErrorX(0.5) # needed for uncertainty histograms
+        self.tdrStyle.SetErrorX(0.)
 
         self.tdrStyle.SetMarkerStyle(20)
 
@@ -116,6 +115,14 @@ class TDRStyle:
         self.tdrStyle.SetPadLeftMargin(0.16)
         self.tdrStyle.SetPadRightMargin(self.rightMargin) # default
         #self.tdrStyle.SetPadRightMargin(0.13)
+
+        # Based on the new example myMacro.C, increase top margin
+        # slightly
+        # https://ghm.web.cern.ch/ghm/plots/
+        self.tdrStyle.SetPadTopMargin(0.06)
+        #self.tdrStyle.SetPadBottomMargin(0.12)
+        #self.tdrStyle.SetPadLeftMargin(0.12)
+        #self.tdrStyle.SetPadRightMargin(0.04)
 
         # For the Global title:
 

@@ -281,9 +281,8 @@ class InvertedTauID:
             plot.setLegend(histograms.createLegend(0.55,0.75,0.95,0.90))
   
   
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
         if "JetsInvertedVsBaselineAfterMet" in name:
             histograms.addText(0.6, 0.72, "After MET cut", 25)
@@ -434,9 +433,8 @@ class InvertedTauID:
         if "DphiInvertedVsBaseline" in name:            
             plot.setLegend(histograms.createLegend(0.35,0.75,0.75,0.90))
   
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
         if "JetsInvertedVsBaselineAfterMet" in name:
             histograms.addText(0.6, 0.72, "After MET cut", 25)
@@ -844,10 +842,8 @@ class InvertedTauID:
         if "MtWithAllCutsTailKillerClosure" in name:              
             plot.setLegend(histograms.createLegend(0.6,0.75,0.95,0.9))
 
-            
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
         
         if "MtNormalisedBvetoNoDphiCuts" in name:
             histograms.addText(0.3, 0.85, "Factorised b tagging/b veto", 25)
@@ -1013,9 +1009,8 @@ class InvertedTauID:
 
 	plot.setLegend(histograms.createLegend(0.4,0.82,0.9,0.93))
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
  
            
         plot.draw()
@@ -1125,9 +1120,8 @@ class InvertedTauID:
 
         plot.setLegend(histograms.createLegend(0.4,0.82,0.9,0.93))
         
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText() 
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1158,10 +1152,8 @@ class InvertedTauID:
 #        plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-1, "ymax": 1})
         plot2.createFrame("shapeUncertainty"+self.label, opts={"ymin":-0.1, "ymax": 1.1, "xmax": 80})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
-
+        plot2.setLuminosity(self.lumi)
+        plot2.addStandardTexts()
 
 	rangeMin = hError.GetXaxis().GetXmin()
         rangeMax = hError.GetXaxis().GetXmax()
@@ -1214,10 +1206,9 @@ class InvertedTauID:
 #        if "MtBtaggingNoBtaggingInverted" in name:
         histograms.addText(0.6, 0.67, "Inverted #tau selection", 22)
         histograms.addText(0.6, 0.6, "TailKiller: Loose", 22)
-                                                  
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
         plot.getPad().SetLogy(True)
 
@@ -1308,9 +1299,8 @@ class InvertedTauID:
         plot.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        histograms.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1390,9 +1380,8 @@ class InvertedTauID:
 	plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
 	plot.createFrame("qcdfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
 	self.normInvQCD = histo.Integral(0,histo.GetNbinsX())
 
@@ -1560,9 +1549,8 @@ class InvertedTauID:
 
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        plot.setLuminosity(self.lumi)
+        plot.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1606,47 +1594,50 @@ class InvertedTauID:
         plot = plots.PlotBase()
         histo.SetName(os.path.basename(histo.GetName()))
         histo.SetStats(0)
-        plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
-        plot.createFrame("combinedfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+        plot.histoMgr.appendHisto(histograms.Histo(histo, "data", drawStyle="EP", legendStyle="EP"))
 
         self.nBaseData = histo.Integral(0,histo.GetNbinsX())
 	print "data events ",self.nBaseData
 
-        histo.Fit(theFit,options)
+        histo.Fit(theFit,options+"N") # N=do not store/draw fit result is purely plotting technical => should be ok to do here
 
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
-        theFit.SetLineStyle(2)
+        theFit.SetLineStyle(1)
         theFit.SetLineColor(4)
-        theFit.SetLineWidth(3)
-        histo.GetYaxis().SetTitle("Events ")
-        histo.GetXaxis().SetTitle("Type I PFMET (GeV)")
-        if self.label=="taup_Tlt50": 
-            histograms.addText(0.45,0.75,"p_{T}^{#tau jet}< 50 GeV")
-        if self.label=="taup_Teq50to60": 
-            histograms.addText(0.45,0.75,"50 GeV < p_{T}^{#tau jet}< 60 GeV")
-        if self.label=="taup_Teq60to70": 
-            histograms.addText(0.45,0.75,"60 GeV < p_{T}^{#tau jet}< 70 GeV")
-        if self.label=="taup_Teq70to80": 
-            histograms.addText(0.45,0.75,"70 GeV < p_{T}^{#tau jet}< 80 GeV")
-        if self.label=="taup_Teq80to100": 
-            histograms.addText(0.45,0.75,"80 GeV < p_{T}^{#tau jet}< 100 GeV")
-        if self.label=="taup_Teq100to120": 
-            histograms.addText(0.45,0.75,"100 GeV < p_{T}^{#tau jet}< 120 GeV")   
-        if self.label=="taup_Tgt120": 
-            histograms.addText(0.45,0.75,"p_{T}^{#tau jet}> 120 GeV")
+        theFit.SetLineWidth(4)
+        txt = None
+        x = 0.5
+        if self.label=="taup_Tlt50":
+            txt = "p_{T}^{#tau_{h}}< 50 GeV"
+            x = 0.6
+        elif self.label=="taup_Teq50to60": 
+            txt = "50 GeV < ^{}p_{T}^{#tau_{h}}< 60 GeV"
+        elif self.label=="taup_Teq60to70": 
+            txt = "60 GeV < ^{}p_{T}^{#tau_{h}}< 70 GeV"
+        elif self.label=="taup_Teq70to80": 
+            txt = "70 GeV < ^{}p_{T}^{#tau_{h}}< 80 GeV"
+        elif self.label=="taup_Teq80to100": 
+            txt = "80 GeV < ^{}p_{T}^{#tau_{h}}< 100 GeV"
+            x = 0.48
+        elif self.label=="taup_Teq100to120": 
+            txt = "100 GeV < ^{}p_{T}^{#tau_{h}}< 120 GeV"
+            x = 0.45
+        elif self.label=="taup_Tgt120": 
+            #txt = "p_{T}^{#tau_{h}}> 120 GeV"
+            txt = "120 GeV < p_{T}^{#tau_{h}}"
+            x = 0.6
+        if txt is not None:
+            plot.appendPlotObject(histograms.PlotText(x,0.6,txt))
 
-            
-        theFit.Draw("same")
 
-
+           
 	par = theFit.GetParameters()
 
 	qcdOnly = TF1("qcdOnly",QCDOnly(),rangeMin,rangeMax,numberOfParameters)
 	qcdOnly.FixParameter(0,par[0])
 	qcdOnly.FixParameter(1,par[1])
 	qcdOnly.SetLineStyle(2)
-        qcdOnly.SetLineWidth(3)
-	qcdOnly.Draw("same")
+        qcdOnly.SetLineWidth(4)
 
  #       histograms.addText(0.35,0.8,"Data, Baseline selection")
  #       histograms.addText(0.25,0.3,"QCD shape",20)
@@ -1654,19 +1645,38 @@ class InvertedTauID:
  #       histo.GetYaxis().SetTitle("Events / 10 GeV")
  #       histo.GetXaxis().SetTitle("MET  (GeV)")
 
-        histograms.addText(0.4,0.85,"Data, Baseline TauID")
+       # plot.appendPlotObject(histograms.PlotText(0.45,0.8,"Data, Baseline TauID"))
        # histograms.addText(0.45,0.25,"QCD",20)
 
         plot.histoMgr.appendHisto(histograms.Histo(qcdOnly,"qcdOnly"))
+        plot.histoMgr.appendHisto(histograms.Histo(theFit, "total"))
+
+        plot.histoMgr.setHistoLegendLabelMany({
+            "data": "Data",
+            "qcdOnly": "Multijet template",
+            "total": "Multijet + EWK+t#bar{t} template",
+            })
         
-        plot.getPad().SetLogy(True)
+        plot.setLuminosity(self.lumi)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        def setDivisions(p):
+            p.getFrame().SetNdivisions(505)
 
-        plot.draw()
-        plot.save()
+        opts = {"ymin": 3e-1} #1e-5,
+        if self.label == "Inclusive":
+            opts["ymaxfactor"] = 2
+        else:
+            opts["ymax"] = 4e2
+
+        plots.drawPlot(plot, "combinedfit"+self.label, opts=opts,
+                       log=True,
+                       moveLegend={"dx": -0.26, "dy": -0.11, "dh": -0.15},
+                       #xlabel="Type I PFMET (GeV)",
+                       xlabel="E_{T}^{miss} (GeV)",
+                       ylabel="Events / %.0f GeV",
+                       cmsTextPosition="right",
+                       customizeBeforeDraw=setDivisions
+        )
                                         
         fitPars = "fit parameters "
         i = 0

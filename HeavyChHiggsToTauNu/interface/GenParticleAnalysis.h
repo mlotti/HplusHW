@@ -17,6 +17,7 @@ namespace edm {
   class Event;
   class EventSetup;
 }
+class TFileDirectory;
 
 namespace HPlus {
   class HistoWrapper;
@@ -24,6 +25,22 @@ namespace HPlus {
   
   class GenParticleAnalysis: public BaseSelection {
   public:
+    enum TTBarDecayMode {
+      kTT_invalid = 0,
+      kTT_noTT,
+      kTT_unknown,
+      kTT_bbqqqq,
+      kTT_bbqqe,
+      kTT_bbqqmu,
+      kTT_bbqqtau,
+      kTT_bbee,
+      kTT_bbemu,
+      kTT_bbetau,
+      kTT_bbmumu,
+      kTT_bbmutau,
+      kTT_bbtautau
+    };
+
     class Data {
     public:
       Data();
@@ -37,10 +54,16 @@ namespace HPlus {
         return fGenMet;
       }
 
+      TTBarDecayMode getTTBarDecayMode() const {
+        check();
+        return fTTBarDecayMode;
+      }
+
       friend class GenParticleAnalysis;
 
     private:
       edm::Ptr<reco::GenMET> fGenMet;
+      TTBarDecayMode fTTBarDecayMode;
     };
 
     GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
@@ -54,10 +77,14 @@ namespace HPlus {
     std::vector<const reco::Candidate*> doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
     // double doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
 
+    static WrappedTH1 *bookTTBarDecayModeHistogram(HistoWrapper& histoWrapper, HistoWrapper::HistoLevel histoLevel, TFileDirectory& dir, const std::string& name);
+
   private:
     Data privateAnalyze(const edm::Event&, const edm::EventSetup&);
 
     void init(HistoWrapper& histoWrapper);
+
+    TTBarDecayMode findTTBarDecayMode(const std::vector<reco::GenParticle>& genParticles) const;
     /*
     std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
     std::vector<const reco::GenParticle*> getMothers(const reco::Candidate&);

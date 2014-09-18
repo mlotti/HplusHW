@@ -72,8 +72,7 @@ def plot(datasets):
     plot.frame.GetYaxis().SetTitle("B-tagging eff.")
 
     histograms.addText(0.2, 0.8, "MC: "+datasetName, 25)
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    plot.addStandardTexts()
 
     plot.draw()
     plot.save()

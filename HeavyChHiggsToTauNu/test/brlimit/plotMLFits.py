@@ -2,6 +2,7 @@
 
 import os
 import sys
+import json
 from optparse import OptionParser
 
 import ROOT
@@ -18,14 +19,21 @@ def main():
     style = tdrstyle.TDRStyle()
 
     mlfit = limit.MLFitData()
+    lumi=None
+    if os.path.exists("limits.json"):
+        f = open("limits.json")
+        data = json.load(f)
+        f.close()
+        lumi = float(data["luminosity"])
 
-    doBkgFitPlots(mlfit)
+    doBkgFitPlots(mlfit, lumi)
 
-def doBkgFitPlots(mlfit):
+def doBkgFitPlots(mlfit, lumi):
     firstMass = mlfit.massPoints()[0]
 
     def createDrawPlot(gr, labels, fname):
         plot = plots.PlotBase([histograms.HistoGraph(gr, "Fitted", drawStyle="P")])
+        plot.setLuminosity(lumi)
     
         canvasOpts = {}
         if len(labels) > 15:
@@ -57,7 +65,7 @@ def doBkgFitPlots(mlfit):
         plot.cf.frame.GetYaxis().SetLabelSize(0)
     
         plot.draw()
-        histograms.addCmsPreliminaryText(y=1-(1-histograms.textDefaults.getValues("cmsPreliminary", None, None)[1])*scale)
+        plot.addStandardTexts(cmsTextPosition="outframe")
     
         # Intentionally not NDC
         l = ROOT.TLatex()
@@ -114,9 +122,10 @@ if __name__ == "__main__":
             raise Exception("Could not find job directories for limit calculation in the datacard directories! Did you run the limits yet?")
         for l in myFilteredList:
             print "Running ML fit on directory: %s"%l
+            prevDir = os.getcwd()
             os.chdir(l)
             main()
-            os.chdir("../..")
+            os.chdir(prevDir)
 
     else:
         # Assume the script is being run in the working directory 

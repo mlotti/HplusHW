@@ -13,19 +13,21 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import WarningLabel,HighlightStyle,NormalStyle
 
 #_fitOptions = "RMS"
-_fitOptions = "LRBS"
+_fitOptions = "WL R B S"
 
 # Fitting functions
 class FitFuncBase:
-    def __init__(self, npar):
+    def __init__(self, npar, fitmin, scalefactor):
         self._npar = npar
+        self._fitmin = fitmin
+        self._scalefactor = scalefactor
 
     def getNparam(self):
         return self._npar
 
 class FitFuncSimpleExp(FitFuncBase):
-    def __init__(self):
-        FitFuncBase.__init__(self, 2)
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 2, fitmin, scalefactor)
 
     def __call__(self, x, par):
         return par[0]*ROOT.TMath.Exp(-x[0] * par[1])
@@ -37,8 +39,8 @@ class FitFuncSimpleExp(FitFuncBase):
         fit.SetParameter(1,0.002)
 
 class FitFuncGausExpTail(FitFuncBase):
-    def __init__(self):
-        FitFuncBase.__init__(self, 4)
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 4, fitmin, scalefactor)
 
     def __call__(self, x, par):
         return par[0]*ROOT.TMath.Exp(-x[0] * par[1])*ROOT.TMath.Exp(-(x[0]-par[2])**2 / par[3])
@@ -54,8 +56,8 @@ class FitFuncGausExpTail(FitFuncBase):
         fit.SetParameter(3, 100.0)
 
 class FitFuncExpTailExo(FitFuncBase):
-    def __init__(self):
-        FitFuncBase.__init__(self, 3)
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 3, fitmin, scalefactor)
 
     def __call__(self, x, par):
         return par[0]*ROOT.TMath.Exp(-x[0] * par[1] - (x[0]**2*par[2]))
@@ -68,24 +70,84 @@ class FitFuncExpTailExo(FitFuncBase):
         fit.SetParameter(1,0.002)
         fit.SetParameter(2,0.00001)
 
-class FitFuncExpTailExoAlternate(FitFuncBase):
-    def __init__(self):
-        FitFuncBase.__init__(self, 3)
+class FitFuncPreFitForIntegral(FitFuncBase):
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 2, fitmin, scalefactor)
 
     def __call__(self, x, par):
-        return par[0]*ROOT.TMath.Exp(-x[0] * par[1] + x[0] / par[2])
+        m = x[0]-self._fitmin
+        return par[0]*ROOT.TMath.Exp(-m * (par[1]))
+        #return par[0]*ROOT.TMath.Exp(-m * (par[1] + m / par[2]))
+        #return par[0]*ROOT.TMath.Exp(-(x[0]-par[3]) * (par[1] + (x[0]-par[3]) / par[2]))
 
     def setParamLimits(self, fit):
-        fit.SetParLimits(0,0.0000001,1000)
-        fit.SetParLimits(1,0.0000001,1000)
-        fit.SetParLimits(2,-10,10)
-        fit.SetParameter(0, 1.0)
-        fit.SetParameter(1, 1.0)
-        fit.SetParameter(2, 1.0)
+        fit.SetParLimits(0,0.001,10)
+        fit.SetParLimits(1,0.001,10)
+        #fit.SetParLimits(2,-10,10)
+        fit.SetParameter(0, 0.1)
+        fit.SetParameter(1, 0.1)
+        #fit.SetParameter(2, 1.0)
+
+class FitFuncExpTailTauTauAlternate(FitFuncBase):
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 3, fitmin, scalefactor)
+
+    def __call__(self, x, par):
+        m = x[0]-self._fitmin
+        return self._scalefactor*par[0]*ROOT.TMath.Exp(-m / (par[1] - (m)*0.001*par[2]))
+        #return self._scalefactor*par[0]*ROOT.TMath.Exp(-m/(par[1]+par[2]*m))
+        #return par[0]*ROOT.TMath.Exp(-m * (par[1] + m / par[2]))
+        #return par[0]*ROOT.TMath.Exp(-(x[0]-par[3]) * (par[1] + (x[0]-par[3]) / par[2]))
+
+    def setParamLimits(self, fit):
+        fit.SetParLimits(0,0.001,1000)
+        fit.SetParLimits(1,0.001,10000)
+        fit.SetParLimits(2,0.001,1)
+        fit.SetParameter(0, 0.1)
+        fit.SetParameter(1, 0.1)
+        fit.SetParameter(2, 0.001)
+
+class FitFuncExpTailExoAlternate2(FitFuncBase):
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 3, fitmin, scalefactor)
+
+    def __call__(self, x, par):
+        m = x[0]-self._fitmin
+        return self._scalefactor*par[0]*ROOT.TMath.Exp(-m * (par[1] - m*(par[2])))
+        #return self._scalefactor*par[0]*ROOT.TMath.Exp(-m/(par[1]+par[2]*m))
+        #return par[0]*ROOT.TMath.Exp(-m * (par[1] + m / par[2]))
+        #return par[0]*ROOT.TMath.Exp(-(x[0]-par[3]) * (par[1] + (x[0]-par[3]) / par[2]))
+
+    def setParamLimits(self, fit):
+        fit.SetParLimits(0,0.001,1000)
+        fit.SetParLimits(1,0.00001,10000)
+        fit.SetParLimits(2,-0.001,0.001)
+        fit.SetParameter(0, 0.1)
+        fit.SetParameter(1, 0.002)
+        fit.SetParameter(2, 0.1)
+
+class FitFuncExpTailExoAlternate(FitFuncBase):
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 2, fitmin, scalefactor)
+
+    def __call__(self, x, par):
+        m = x[0]-self._fitmin
+        return self._scalefactor*par[0]*ROOT.TMath.Exp(-m * (par[1]))
+        #return self._scalefactor*par[0]*ROOT.TMath.Exp(-m/(par[1]+par[2]*m))
+        #return par[0]*ROOT.TMath.Exp(-m * (par[1] + m / par[2]))
+        #return par[0]*ROOT.TMath.Exp(-(x[0]-par[3]) * (par[1] + (x[0]-par[3]) / par[2]))
+
+    def setParamLimits(self, fit):
+        fit.SetParLimits(0,0.001,10)
+        fit.SetParLimits(1,0.001,10)
+        #fit.SetParLimits(2,0.000001,1)
+        fit.SetParameter(0, 0.1)
+        fit.SetParameter(1, 0.1)
+        #fit.SetParameter(2, 0.001)
 
 class FitFuncExpTailThreeParam(FitFuncBase):
-    def __init__(self):
-        FitFuncBase.__init__(self, 3)
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 3, fitmin, scalefactor)
 
     def __call__(self, x, par):
         return par[0]*ROOT.TMath.Exp(-x[0] / (par[1] + x[0]*par[2]))
@@ -99,8 +161,8 @@ class FitFuncExpTailThreeParam(FitFuncBase):
         fit.SetParameter(2,0.00001)
 
 class FitFuncExpTailFourParam(FitFuncBase):
-    def __init__(self):
-        FitFuncBase.__init__(self, 4)
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 4, fitmin, scalefactor)
 
     def __call__(self, x, par):
         return par[3]*ROOT.TMath.Exp(-(x[0]-par[2]) / (par[0] + (x[0]-par[2])*par[1]))
@@ -116,8 +178,8 @@ class FitFuncExpTailFourParam(FitFuncBase):
         fit.SetParameter(3,1.0)
 
 class FitFuncExpTailFourParamAlternate(FitFuncBase):
-    def __init__(self):
-        FitFuncBase.__init__(self, 4)
+    def __init__(self, fitmin, scalefactor):
+        FitFuncBase.__init__(self, 4, fitmin, scalefactor)
 
     def __call__(self, x, par):
         return par[3]*ROOT.TMath.Exp(-(x[0]-par[2]) / (par[0] + (x[0]-par[2])/par[1]))
@@ -142,14 +204,15 @@ def doMinusVariation(self, func):
         func.SetParameter(i, func.GetParameter(i) - func.GetParError(i))
 
 class TailFitter:
-    def __init__(self, h, label, fitFuncName, fitmin, fitmax, applyFitFrom, doPlots=False):
+    def __init__(self, h, label, fitFuncName, fitmin, fitmax, applyFitFrom, doPlots=False, luminosity=None):
         self._label = label
         self._fittedRate = None
         self._centralParams = None
         self._eigenVectors = None
         self._eigenValues = None
-        self._fitmin = None
+        self._fitmin = fitmin
         self._hRate = aux.Clone(h)
+        self._luminosity = luminosity
 
         # Initialize style
         myStyle = tdrstyle.TDRStyle()
@@ -157,7 +220,8 @@ class TailFitter:
         myStyle.tdrStyle.SetOptFit(True)
 
         # Find fit function class
-        self._myFitFuncObject = self._findFitFunction(fitFuncName)
+        scaleFactor = h.Integral(h.FindBin(fitmin),h.GetNbinsX()+1)*1.01
+        self._myFitFuncObject = self._findFitFunction(fitFuncName, scaleFactor)
         # Obtain bin list for fine binning (compatibility with fine binning)
         myBinList = []
         for i in range(1, h.GetNbinsX()+1):
@@ -194,15 +258,35 @@ class TailFitter:
                 hFit.SetBinError(i, 0.0)
         return [hFit, hClone]
 
-    def _findFitFunction(self, fitfunc):
+    def _findFitFunction(self, fitfunc, scalefactor):
         # Find fit function class
         myFitFunc = None
         for name, obj in inspect.getmembers(sys.modules[__name__]):
             if fitfunc == name:
-                return obj()
+                return obj(self._fitmin, scalefactor)
         if myFitFunc == None:
             raise Exception("This should not happen...")
 
+    def _obtainScaleFactor(self, h, fitmin, fitmax):
+        raise Exception("There is something fishy in this function, validate before using")
+        minbin = h.GetXaxis().FindBin(fitmin)
+        maxbin = h.GetXaxis().FindBin(fitmax)
+        hh = aux.Clone(h)
+        preFactor = hh.Integral(minbin, hh.GetNbinsX()+1)
+        hh.Scale(1.0/preFactor)
+        myFitFunc = FitFuncPreFitForIntegral(self._fitmin)
+        myFittedRate = ROOT.TF1(self._label+"myFitForIntegral", myFitFunc, fitmin, fitmax, myFitFunc.getNparam())
+        myFitResult = hh.Fit(myFittedRate, _fitOptions)
+        # Set fitted params to function
+        for i in range(0, myFitFunc.getNparam()):
+            myFittedRate.SetParameter(i, myFitResult.Parameter(i))
+        # Calculate integral from fitmin to infinity and divide by bin width to normalize
+        myBinWidth = (hh.GetXaxis().GetBinLowEdge(maxbin)-hh.GetXaxis().GetBinLowEdge(minbin)) / (maxbin-minbin)
+        myScaleFactor = myFittedRate.Integral(minbin, 1e5) / myBinWidth * preFactor
+        print "Scale factor calc cross-check: integral from histogram = %f, integral from fit = %f"%(preFactor, myScaleFactor)
+        print myFittedRate.Integral(minbin, 1e5), myBinWidth,preFactor
+        return myScaleFactor
+        
     def _doFit(self, h, binList, fitFuncName, fitmin, fitmax):
         # Do fit
         print "... Fitting tail for shape: %s, function=%s, range = %d-%d"%(self._label, fitFuncName, fitmin, fitmax)
@@ -258,20 +342,30 @@ class TailFitter:
             raise Exception(ErrorLabel()+"Call _doFit() first!")
         # Get eigenvectors
         myCovMatrix = fitResult.GetCovarianceMatrix()
+        print "Covariance matrix:"
+        for i in range(0, myCovMatrix.GetNcols()):
+            s = []
+            for j in range(0, myCovMatrix.GetNrows()):
+                s.append("%f"%myCovMatrix(i,j))
+            print "  (%s)"%", ".join(map(str,s))
         myDiagonalizedMatrix = ROOT.TMatrixDSymEigen(myCovMatrix)
         self._eigenVectors = ROOT.TMatrixD(self._myFitFuncObject.getNparam(),self._myFitFuncObject.getNparam())
         self._eigenVectors = myDiagonalizedMatrix.GetEigenVectors()
+        print "Diagonalized matrix:"
+        myDiagonalizedMatrix.GetEigenVectors().Print()
         if printStatus:
             printEigenVectors(self._eigenVectors)
-        # Get eigenvalues
-        self._eigenValues = ROOT.TVectorD(self._myFitFuncObject.getNparam())
-        self._eigenValues = myDiagonalizedMatrix.GetEigenValues()
-        for i in range(0, self._eigenValues.GetNrows()):
-            if self._eigenValues(i) < 0: # This can happen because of small fluctuations
-                self._eigenValues[i] = 0
-            self._eigenValues[i] = math.sqrt(self._eigenValues(i))
+        # Get eigenvalues 
+        eigenValues = ROOT.TVectorD(self._myFitFuncObject.getNparam())
+        eigenValues = myDiagonalizedMatrix.GetEigenValues()
+        self._eigenValues = []
+        for i in range(0, eigenValues.GetNrows()):
+            if eigenValues(i) < 0: # This can happen because of small fluctuations
+                self._eigenValues.append(0.0)
+            self._eigenValues.append(math.sqrt(eigenValues(i)))
         if printStatus:
-            printEigenValues(self._eigenValues)
+            #printEigenValues(self._eigenValues)
+            print self._eigenValues
 
     def calculateVariationHistograms(self, binList, applyFitFrom):
         if self._fittedRate == None:
@@ -280,33 +374,40 @@ class TailFitter:
             raise Exception(ErrorLabel()+"Call _calculateEigenVectorsAndValues() first!")
         # Construct from eigenvalues and vectors the orthogonal variations
         # Up histograms
+        print "Nominal parameters: (%s)"%(", ".join(map(str,self._centralParams)))
+        print "Varying parameters up"
         hFitUncertaintyUp = []
-        for i in range(0, self._eigenValues.GetNrows()):
+        for j in range(0, len(self._eigenValues)):
             myParams = list(self._centralParams)
-            for j in range(0,len(self._centralParams)):
-                myParams[j] = self._centralParams[j] + self._eigenValues(i)*self._eigenVectors(j,i)
-                if myParams[j] < 0:
-                    myParams[j] = 1e-10
+            for i in range(0,len(self._centralParams)):
+                #print i,j,self._centralParams[i], self._eigenValues[j], self._eigenVectors(i,j), self._eigenValues[i]*self._eigenVectors(i,j)
+                myParams[i] = self._centralParams[i] + self._eigenValues[j]*self._eigenVectors(i,j)
+                #if myParams[i] < 0:
+                #    myParams[i] = 0
+            print "eigenvalue: %d, function params: (%s)"%(j, ", ".join(map(str,myParams)))
             #myShiftUp = (-1.0 * myA.getVal() / myB.getVal())
             #myFirstBin = fitmin
             #if myFirstBin < myShiftUp and myShiftUp < h.GetXaxis().GetXmax():
                 #myM.setRange(0, h.GetBinLowEdge(h.FindBin(myShiftUp)))
-            hUp = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dUp"%i, self._fittedRate, myParams, binList, applyFitFrom)
+            hUp = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dUp"%j, self._fittedRate, myParams, binList, applyFitFrom)
             hFitUncertaintyUp.append(hUp)
 
         # Down histograms
+        print "Varying parameters down"
         hFitUncertaintyDown = []
-        for i in range(0, self._eigenValues.GetNrows()):
+        for j in range(0, len(self._eigenValues)):
             myParams = list(self._centralParams)
-            for j in range(0,len(self._centralParams)):
-                myParams[j] = self._centralParams[j] - self._eigenValues(i)*self._eigenVectors(j,i)
-                if myParams[j] < 0:
-                    myParams[j] = 0
+            for i in range(0,len(self._centralParams)):
+                #print i,j,self._centralParams[i], self._eigenValues[j], self._eigenVectors(i,j), self._eigenValues[i]*self._eigenVectors(i,j)
+                myParams[i] = self._centralParams[i] - self._eigenValues[j]*self._eigenVectors(i,j)
+                #if myParams[i] < 0:
+                #    myParams[i] = 0
+            print "eigenvalue: %d, function params: (%s)"%(j, ", ".join(map(str,myParams)))
             #myShiftDown = (-1.0 * myA.getVal() / myB.getVal())
             #myFirstBin = fitmin
             #if myFirstBin < myShiftDown and myShiftDown < h.GetXaxis().GetXmax():
                 #myM.setRange(0, h.GetBinLowEdge(h.FindBin(myShiftDown)))
-            hDown = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dDown"%i, self._fittedRate, myParams, binList, applyFitFrom)
+            hDown = self._functionToHistogram(self._label+"_"+self._label+"_TailFit_par%dDown"%j, self._fittedRate, myParams, binList, applyFitFrom)
             hFitUncertaintyDown.append(hDown)
 
         return (hFitUncertaintyUp, hFitUncertaintyDown)
@@ -324,13 +425,22 @@ class TailFitter:
             for j in range(0, len(hup)):
                 a = 0.0
                 b = 0.0
-                if hup[j].GetBinContent(i) > 1e-10:
+                #if hup[j].GetBinContent(i) > 1e-10:
+                    #a = hup[j].GetBinContent(i) - myPedestal
+                #if hdown[j].GetBinContent(i) > 1e-10:
+                    #b = hdown[j].GetBinContent(i) - myPedestal
+                if hup[j].GetBinContent(i) > 0.0:
                     a = hup[j].GetBinContent(i) - myPedestal
-                if hdown[j].GetBinContent(i) > 1e-10:
+                else:
+                    a = -myPedestal;
+                if hdown[j].GetBinContent(i) > 0.0:
                     b = hdown[j].GetBinContent(i) - myPedestal
-                (varA, varB) = aux.getProperAdditivesForVariationUncertainties(a,b)
-                myVarianceUp += varA
-                myVarianceDown += varB
+                else:
+                    b = -myPedestal;
+                if abs(a) != float('Inf') and not math.isnan(a) and abs(b) != float('Inf') and not math.isnan(b):
+                    (varA, varB) = aux.getProperAdditivesForVariationUncertainties(a,b)
+                    myVarianceUp += varA
+                    myVarianceDown += varB
                 #print j,hup[j].GetBinContent(i),hdown[j].GetBinContent(i),a,b,varA,varB
             #print self._hFitFineBinning.GetXaxis().GetBinLowEdge(i),":", myPedestal,math.sqrt(myVarianceUp), math.sqrt(myVarianceDown), myPedestal+math.sqrt(myVarianceUp), myPedestal-math.sqrt(myVarianceDown)
             hFitUncertaintyUpTotal.SetBinContent(i, myPedestal + math.sqrt(myVarianceUp))
@@ -357,7 +467,8 @@ class TailFitter:
             myOverflow = function.Integral(h.GetXaxis().GetBinUpEdge(h.GetNbinsX()), 1e5)
             if myOverflow / myIntegral > 0.10:
                 print WarningLabel()+"In parametrized histogram '%s', the overflow bin is very large (%f %% of total); this could mean converging problems because of badly chosen fit function or range"%(name,myOverflow / myIntegral*100.0)
-            h.SetBinContent(h.GetNbinsX(),h.GetBinContent(h.GetNbinsX()) + myOverflow)
+            w = self._binWidthDuringFit
+            h.SetBinContent(h.GetNbinsX(),h.GetBinContent(h.GetNbinsX()) + myOverflow/float(w))
 
         return h
 
@@ -367,11 +478,13 @@ class TailFitter:
         hNominalClone = aux.Clone(hNominal)
         hNominalClone.SetLineColor(ROOT.kBlack)
         hNominalClone.SetLineWidth(2)
+        hNominalClone.SetMarkerStyle(22)
+        hNominalClone.SetMarkerSize(1.5)
         # Remove fit line before drawing
         myFunctions = hNominalClone.GetListOfFunctions()
         for i in range(0, myFunctions.GetEntries()):
             myFunctions.Delete()
-        plot.histoMgr.appendHisto(histograms.Histo(hNominalClone,"nominal",drawStyle="e"))
+        plot.histoMgr.appendHisto(histograms.Histo(hNominalClone,"nominal",drawStyle="pe", legendStyle="pe"))
 
         hFitClone = aux.Clone(hFit)
         hFitClone.SetLineColor(ROOT.kMagenta)
@@ -391,17 +504,40 @@ class TailFitter:
         hDownClone.SetLineWidth(2)
         plot.histoMgr.appendHisto(histograms.Histo(hDownClone,"Total down"))
 
+        # ugly hardcoding...
+        fitStart = 200
+        if "QCD" in self._label:
+            fitStart = 160
+        nominal = "Nominal"
+        if "QCD" in self._label:
+            nominal += " multijets"
+        elif "EWK_Tau" in self._label:
+            nominal += " EWK+t#bar{t} with #tau_{h}"
+        elif "MC_faketau" in self._label:
+            nominal += " EWK+t#bar{t} no #tau_{h}"
+
+        plot.histoMgr.setHistoLegendLabelMany({
+            "nominal": nominal,
+            "fit": "With fit for m_{T} > %d GeV" % fitStart,
+            "Total up": "+1#sigma uncertainty",
+            "Total down": "-1#sigma uncertainty"
+        })
+        if self._luminosity is not None:
+            plot.setLuminosity(self._luminosity)
+
         myName = "tailfit_total_uncertainty_%s_%s"%(self._label,prefix)
         #plot.createFrame("tailfit_%s_%s"%(self._label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
         #plot.getPad().SetLogy(True)
-        #histograms.addCmsPreliminaryText()
-        #histograms.addEnergyText()
-        #histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        #histograms.addStandardTexts(lumi=self.lumi)
         myParams = {}
-        myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
+        #myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
+        myParams["ylabel"] = "Events / %.0f GeV"
         myParams["log"] = True
-        myParams["opts"] = {"ymin": 1e-5}
-        myParams["divideByBinWidth"] = True
+        myParams["opts"] = {"ymin": 20*1e-5} # compensate for the bin width
+        #myParams["divideByBinWidth"] = True
+	myParams["cmsTextPosition"] = "right"
+	myParams["moveLegend"] = {"dx": -0.215, "dy": -0.1, "dh": -0.1, "dw": -0.05}
+	myParams["xlabel"] = "m_{T} (GeV)"
         myDrawer = plots.PlotDrawer()
         myDrawer(plot, myName, **myParams)
 
@@ -444,9 +580,7 @@ class TailFitter:
         myName = "tailfit_detailed_%s_%s"%(self._label,prefix)
         #plot.createFrame("tailfit_%s_%s"%(self._label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
         #plot.getPad().SetLogy(True)
-        #histograms.addCmsPreliminaryText()
-        #histograms.addEnergyText()
-        #histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        #histograms.addStandardTexts(lumi=self.lumi)
         myParams = {}
         myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
         myParams["log"] = True

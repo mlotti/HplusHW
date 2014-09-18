@@ -23,15 +23,17 @@ class CMSMode:
     PRELIMINARY = 1
     PAPER = 2
     SIMULATION = 3
+    SIMULATION_PRELIMINARY = 4
 
 ## Global variable to hold CMS text mode
 cmsTextMode = CMSMode.PRELIMINARY
 ## Global dictionary to hold the CMS text labels
 cmsText = {
-    CMSMode.NONE: "",
-    CMSMode.PRELIMINARY: "CMS Preliminary",
-    CMSMode.PAPER: "CMS",
-    CMSMode.SIMULATION : "CMS Simulation"
+    CMSMode.NONE: None,
+    CMSMode.PRELIMINARY: "Preliminary",
+    CMSMode.PAPER: "",
+    CMSMode.SIMULATION : "Simulation",
+    CMSMode.SIMULATION_PRELIMINARY : "Preliminary simulation"
     }
 
 ## Global uncertainty mode
@@ -178,7 +180,8 @@ class PlotText:
     # \param bold    Should the text be bold?
     # \param align   Alignment of text (left, center, right)
     # \param color   Color of the text
-    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack):
+    # \param font    Specify font explicitly
+    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack, font=None):
         self.x = x
         self.y = y
         self.text = text
@@ -187,16 +190,21 @@ class PlotText:
         self.l.SetNDC()
         if not bold:
             self.l.SetTextFont(self.l.GetTextFont()-20) # bold -> normal
-        if size != None:
+        if font is not None:
+            self.l.SetTextFont(font)
+        if size is not None:
             self.l.SetTextSize(size)
-        if align.lower() == "left":
-            self.l.SetTextAlign(11)
-        elif align.lower() == "center":
-            self.l.SetTextAlign(21)
-        elif align.lower() == "right":
-            self.l.SetTextAlign(31)
+        if isinstance(align, basestring):
+            if align.lower() == "left":
+                self.l.SetTextAlign(11)
+            elif align.lower() == "center":
+                self.l.SetTextAlign(21)
+            elif align.lower() == "right":
+                self.l.SetTextAlign(31)
+            else:
+                raise Exception("Error: Invalid option '%s' for text alignment! Options are: 'left', 'center', 'right'."%align)
         else:
-            raise Exception("Error: Invalid option '%s' for text alignment! Options are: 'left', 'center', 'right'."%align)
+            self.l.SetTextAlign(align)
         self.l.SetTextColor(color)
 
     ## Draw the text to the current TPad
@@ -282,11 +290,22 @@ class PlotTextBox:
         for t in self.texts:
             t.Draw(options)
 
+def _printTextDeprecationWarning(oldFunctionName, newFunctionName="histograms.addStandardTexts()"):
+    import traceback
+    print "#################### WARNING ####################"
+    print
+    print "%s is deprecated, please use %s instead" % (oldFunctionName, newFunctionName)
+    print "Traceback (most recent call last):"
+    stack = traceback.extract_stack()[:-2] # take out calls to this and the caller
+    print "".join(traceback.format_list(stack))
+    print "#################################################"
+
 ## Draw the "CMS Preliminary" text to the current TPad
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
 def addCmsPreliminaryText(x=None, y=None, text=None):
+    _printTextDeprecationWarning("histograms.addCmsPreliminaryText()")
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
     if text == None:
         txt  = cmsText[cmsTextMode]
@@ -300,6 +319,7 @@ def addCmsPreliminaryText(x=None, y=None, text=None):
 # \param y   Y coordinate of the text (None for default value)
 # \param s   Center-of-mass energy text with the unit (None for the default value, dataset.energyText
 def addEnergyText(x=None, y=None, s=None):
+    _printTextDeprecationWarning("histograms.addEnergyText()")
     (x, y) = textDefaults.getValues("energy", x, y)
     text = energyText
     if s != None:
@@ -313,7 +333,7 @@ def formatLuminosityInFb(lumi):
     lumiInFb = lumi/1000.
     log = math.log10(lumiInFb)
     ndigis = int(log)
-    format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
+    format = "%.1f" # ndigis >= 1, 10 <= lumiInFb
     if ndigis == 0: 
         if log >= 0: # 1 <= lumiInFb < 10
             format = "%.1f"
@@ -331,6 +351,7 @@ def formatLuminosityInFb(lumi):
 # \param lumi  Value of the integrated luminosity in pb^-1
 # \param unit  Unit of the integrated luminosity value (should be fb^-1)
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
+    _printTextDeprecationWarning("histograms.addLuminosityText()")
     (x, y) = textDefaults.getValues("lumi", x, y)
     lumiStr = "L="
     if isinstance(lumi, basestring):
@@ -343,6 +364,107 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
+
+## Draw the CMS standard texts
+#
+# Updated version of addCmsPreliminaryText(), addEnergyText() and
+# addLuminosityText() following the new guidelines at
+# https://ghm.web.cern.ch/ghm/plots/
+#
+# \param lumi        Luminosity as float in pb^-1 (or as string in fb^1), None to ignore completely
+# \param sqrts       Centre-of-mass energy text with the unit
+# \param addCmsText  If True, add the CMS text
+# \param cmsTextPosition Position of CMS text ("left", "right", "outframe", pair of (x, y) in NDC
+# \param cmsExtraTextPosition Position of CMS extra text (None for default, pair of (x, y) for explicit)
+# \param cmsText         If not None, override the "CMS" text
+# \param cmsExtraText    If not None, override the CMS extra text (e.g. "Preliminary")
+def addStandardTexts(lumi=None, sqrts=None, addCmsText=True, cmsTextPosition=None, cmsExtraTextPosition=None, cmsText=None, cmsExtraText=None):
+    if cmsTextPosition is None:
+        cmsTextPosition = "left"
+
+    lumiTextSize = 40*0.6
+    cmsTextFrac = 0.75
+    cmsTextSize = 40*cmsTextFrac
+    cmsExtraTextSize = cmsTextSize * 0.76
+
+    # Lumi + energy text
+    lumiText = ""
+    if lumi is not None:
+        if isinstance(lumi, basestring):
+            lumiText = lumi
+        else:
+            lumiText = formatLuminosityInFb(lumi)
+        lumiText += " fb^{-1} ("
+    if sqrts is not None:
+        lumiText += sqrts
+    else:
+        lumiText += energyText
+    if lumi is not None:
+        lumiText += ")"
+
+    lumiTextOffset = 0.2
+    l = ROOT.gPad.GetLeftMargin()
+    t = ROOT.gPad.GetTopMargin()
+    r = ROOT.gPad.GetRightMargin()
+    b = ROOT.gPad.GetBottomMargin()
+
+    addText(1-r, 1-t+lumiTextOffset*t, lumiText, size=lumiTextSize, bold=False, align="right")
+
+    if not addCmsText:
+        return
+
+    cmsExtraTextDefault = globals()["cmsText"][cmsTextMode]
+    if cmsExtraTextDefault is None:
+        return
+
+    # CMS + extratext
+    relPosX = 0.045
+    relPosY = 0.035
+    relExtraDY = 1.2
+
+    posY = 1-t - relPosY*(1-t-b)
+    if isinstance(cmsTextPosition, basestring):
+        p = cmsTextPosition.lower()
+        if p == "left":
+            posX = l + relPosX*(1-l-r)
+            align = 13 # left, top
+            posXe = posX
+            posYe = posY - relExtraDY*cmsTextFrac*t
+        elif p == "right":
+            posX = 1-r - relPosX*(1-l-r)
+            align = 33 # right, top
+            posXe = posX
+            posYe = posY - relExtraDY*cmsTextFrac*t
+        elif cmsTextPosition.lower() == "outframe":
+            posX = l
+            posY = 1-t+lumiTextOffset*t
+            align = 11 # left, bottom
+            posXe = l + 0.14*(1-l-r)
+            posYe = posY
+        else:
+            raise Exception("Invalid value for cmsTextPosition '%s', valid are left, right, outframe" % (cmsTextPosition))
+    else:
+        posX = cmsTextPosition[0]
+        posY = cmsTextPosition[1]
+        align = 13 # left, top
+        posXe = posX
+        posYe = posY - relExtraDY*cmsTextFrac*t
+
+    cms = "CMS"
+    if cmsText is not None:
+        cms = cmsText
+
+    if cms != "":
+        addText(posX, posY, cms, size=cmsTextSize, font=63, align=align)
+
+    extraText = cmsExtraText
+    if extraText is None:
+        extraText = cmsExtraTextDefault
+    if extraText is not None and extraText != "":
+        if cmsExtraTextPosition is not None:
+            posXe = cmsExtraTextPosition[0]
+            posYe = cmsExtraTextPosition[1]
+        addText(posXe, posYe, extraText, size=cmsExtraTextSize, font=53, align=align)
 
 ## Class to create signal information box on plots
 class SignalTextCreator:
@@ -415,7 +537,7 @@ class LegendCreator:
     # \param borderSize  Default border size
     # \param fillStyle   Default fill style
     # \param fillColor   Default fill color
-    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.03, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
+    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.035, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite, ncolumns=1, columnSeparation=None):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
@@ -424,6 +546,8 @@ class LegendCreator:
         self.borderSize = borderSize
         self.fillStyle = fillStyle
         self.fillColor = fillColor
+        self.ncolumns = ncolumns
+        self.columnSeparation = columnSeparation
         self._keys = ["x1", "y1", "x2", "y2"]
 
     ## Create a copy of the object
@@ -501,6 +625,12 @@ class LegendCreator:
             legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
         legend.SetTextSize(self.textSize)
         #legend.SetMargin(0.1)
+
+        if self.ncolumns > 1:
+            legend.SetNColumns(self.ncolumns)
+            if self.columnSeparation is not None:
+                legend.SetColumnSeparation(self.columnSeparation)
+
         return legend
 
     ## \var x1
@@ -883,7 +1013,8 @@ class CanvasFrame:
         # Infer the default based on the existence of COLZ drawing option
         canvasAddWidth = None
         for h in histos:
-            if "colz" in h.getDrawStyle().lower():
+            drawStyle = h.getDrawStyle()
+            if drawStyle is not None and "colz" in drawStyle.lower():
                 canvasAddWidth = 0.13
 
         canvasAddWidth = canvasOpts.get("addWidth", canvasAddWidth)
@@ -1032,7 +1163,6 @@ class CanvasFrameTwo:
             raise Exception("Empty set of histograms for second pad!")
 
         canvasFactor = kwargs.get("canvasFactor", 1.25)
-        canvasHeightCorrection = kwargs.get("canvasHeightCorrection", 0.022)
         divisionPoint = 1-1/canvasFactor
 
         # Do it like this (create empty, update from kwargs) in order
@@ -1060,30 +1190,39 @@ class CanvasFrameTwo:
         # Create the canvas, divide it to two
         self.canvas = ROOT.TCanvas(name, name, ROOT.gStyle.GetCanvasDefW(), int(ROOT.gStyle.GetCanvasDefH()*canvasFactor))
         self.canvas.Divide(1, 2)
-        
+
+        topMargin = ROOT.gStyle.GetPadTopMargin()
+        bottomMargin = ROOT.gStyle.GetPadBottomMargin()
+        divisionPoint += (1-divisionPoint)*bottomMargin # correct for (almost-)zeroing bottom margin of pad1
+        divisionPointForPad1 = 1-( (1-divisionPoint) / (1-0.02) ) # then correct for the non-zero bottom margin, but for pad1 only
+
         # Set the lower point of the upper pad to divisionPoint
         self.pad1 = self.canvas.cd(1)
-        (xlow, ylow, xup, yup) = [ROOT.Double(x) for x in [0.0]*4]
-        self.pad1.GetPadPar(xlow, ylow, xup, yup)
-        self.pad1.SetPad(xlow, divisionPoint, xup, yup)
+        yup = 1.0
+        ylow = divisionPointForPad1
+        xup = 1.0
+        xlow = 0.0
+        self.pad1.SetPad(xlow, ylow, xup, yup)
         self.pad1.SetFillStyle(4000) # transparent
+        self.pad1.SetBottomMargin(0.02) # need some bottom margin here for eps/pdf output (at least in ROOT 5.34)
 
         # Set the upper point of the lower pad to divisionPoint
         self.pad2 = self.canvas.cd(2)
-        self.pad2.GetPadPar(xlow, ylow, xup, yup)
-        self.pad2.SetPad(xlow, ylow, xup,
-                         divisionPoint+ROOT.gStyle.GetPadBottomMargin()-ROOT.gStyle.GetPadTopMargin()+canvasHeightCorrection)
+        yup = divisionPoint
+        ylow = 0.0
+        self.pad2.SetPad(xlow, ylow, xup, yup)
         self.pad2.SetFillStyle(4000) # transparent
         self.pad2.SetTopMargin(0.0)
-        #self.pad2.SetBottomMargin(self.pad2.GetBottomMargin()+0.06)
-        self.pad2.SetBottomMargin(self.pad2.GetBottomMargin()+0.16)
+        self.pad2.SetBottomMargin(bottomMargin/(canvasFactor*divisionPoint))
 
         self.canvas.cd(1)
 
-        yoffsetFactor = canvasFactor*1.15
+        yoffsetFactor = canvasFactor#*1.15
         #xoffsetFactor = canvasFactor*1.6
         #xoffsetFactor = canvasFactor*2
-        xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
+        #xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
+        #xoffsetFactor = 1/(canvasFactor*divisionPoint)
+        xoffsetFactor = 1/divisionPoint
 
         # Check if the first histogram has x axis bin labels
         rootHisto = histos1[0].getRootHisto()
@@ -1311,6 +1450,9 @@ class Histo:
     def setUncertaintyLegendLabel(self, label):
         self._uncertaintyLegendLabel = label
 
+    def getLegendStyle(self):
+        return self.legendStyle
+
     ## Set the legend style
     #
     # \param style  New histogram style for TLegend
@@ -1324,7 +1466,7 @@ class Histo:
         self._uncertaintyLegendStyle = style
 
     def _addToLegendHisto(self, legend):
-        if self.legendLabel is None or self.drawStyle is None:
+        if self.legendLabel is None or self.legendStyle is None:
             return
         h = self.getRootHisto()
         if h is None:
@@ -1504,46 +1646,6 @@ class HistoWithDatasetFakeMC(HistoWithDataset):
         HistoWithDataset.__init__(self, dataset, rootHisto, name, **kwargs)
         self.setIsDataMC(False, True)
 
-## Represents combined (statistical) uncertainties of multiple histograms.
-class HistoTotalUncertainty(Histo):
-    ## Constructor
-    #
-    # \param histos  List of histograms.Histo objects
-    # \param name    Name of the uncertainty histogram
-    def __init__(self, histos, name):
-        rootHistosWithUnc = []
-        for h in histos:
-            if hasattr(h, "getSumRootHistoWithUncertainties"):
-                ret = h.getSumRootHistoWithUncertainties()
-            else:
-                ret = h.getRootHistoWithUncertainties()
-            if ret is not None:
-                rootHistosWithUnc.append(ret)
-        if len(rootHistosWithUnc) == 0:
-            raise Exception("Got 0 histograms, or all input histograms are None")
-
-        tmp = rootHistosWithUnc[0].Clone()
-        tmp.SetDirectory(0)
-        Histo.__init__(self, tmp, name, "F", "E2")
-
-        self._histo.SetName(self._histo.GetName()+"_errors")
-        self.histos = histos
-
-        for h in rootHistosWithUnc[1:]:
-            self._histo.Add(h)
-        self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
-
-        if self._histo.hasSystematicUncertainties() and not uncertaintyMode.equal(Uncertainty.StatOnly):
-            self._uncertaintyGraph = self._histo.getSystematicUncertaintyGraph(uncertaintyMode.addStatToSyst())
-            self._uncertaintyGraphValid = True
-            self.setUncertaintyDrawStyle("E2")
-
-        if not uncertaintyMode.showStatOnly():
-            self.setDrawStyle(None)
-
-    ## \var histos
-    # List of histograms.Histo objects from which the total uncertaincy is calculated
-
 ## Represents stacked TH1 histograms
 #
 # Stacking is done with the help of THStack object
@@ -1707,6 +1809,45 @@ class HistoGraphWithDataset(HistoGraph):
 
     def getDataset(self):
         return self.dataset
+
+## Represents combined (statistical) uncertainties of multiple histograms.
+class HistoTotalUncertainty(HistoGraph):
+    ## Constructor
+    #
+    # \param histos  List of histograms.Histo objects
+    # \param name    Name of the uncertainty histogram
+    def __init__(self, histos, name):
+        rootHistosWithUnc = []
+        for h in histos:
+            if hasattr(h, "getSumRootHistoWithUncertainties"):
+                ret = h.getSumRootHistoWithUncertainties()
+            else:
+                ret = h.getRootHistoWithUncertainties()
+            if ret is not None:
+                rootHistosWithUnc.append(ret)
+        if len(rootHistosWithUnc) == 0:
+            raise Exception("Got 0 histograms, or all input histograms are None")
+
+        tmp = rootHistosWithUnc[0].Clone()
+        tmp.SetDirectory(0)
+        for h in rootHistosWithUnc[1:]:
+            tmp.Add(h)
+        tmpgr = tmp.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
+        HistoGraph.__init__(self, dataset.RootHistoWithUncertainties(tmpgr), name, "F", "E2")
+        self._histo.SetName(rootHistosWithUnc[0].GetName()+"_errors")
+        self.histos = histos
+        self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
+
+        if tmp.hasSystematicUncertainties() and not uncertaintyMode.equal(Uncertainty.StatOnly):
+            self._uncertaintyGraph = tmp.getSystematicUncertaintyGraph(uncertaintyMode.addStatToSyst())
+            self._uncertaintyGraphValid = True
+            self.setUncertaintyDrawStyle("E2")
+
+        if not uncertaintyMode.showStatOnly():
+            self.setDrawStyle(None)
+
+    ## \var histos
+    # List of histograms.Histo objects from which the total uncertaincy is calculated
 
 ## Represents TEfficiency objects
 class HistoEfficiency(Histo):
@@ -2270,6 +2411,9 @@ class HistoManager:
 #        for h in self.datasetRootHistos:
 #            h.scale(value)
 
+    def hasLuminosity(self):
+        return self.luminosity is not None
+
     ## Get the integrated luminosity to which the MC datasets have been normalized to.
     def getLuminosity(self):
         if self.luminosity == None:
@@ -2281,6 +2425,7 @@ class HistoManager:
     # \param x   X coordinate of the text (\a None for default)
     # \param y   Y coordinate of the text (\a None for default)
     def addLuminosityText(self, x=None, y=None):
+        _printTextDeprecationWarning("histograms.HistoManager.addLuminosityText()", "histograms.addStandardTexts() with histograms.HistoManager.getLuminosity()")
         addLuminosityText(x, y, self.getLuminosity())
 
     ## Create the HistoManagerImpl object.

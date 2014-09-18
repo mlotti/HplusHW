@@ -88,6 +88,7 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("btagging")),
 
     fBTaggingScaleFactorCounter(eventCounter.addCounter("btagging scale factor")),
+    fEmbeddingMTWeightCounter(eventCounter.addCounter("Embedding: mT weight")),
     fQCDTailKillerBackToBackCounter(eventCounter.addCounter("QCD tail killer back-to-back")),
     fTopReconstructionCounter(eventCounter.addCounter("Top reconstruction")),
     fSelectedEventsCounter(eventCounter.addCounter("Selected events")),
@@ -132,6 +133,7 @@ namespace HPlus {
     fMETTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("metTriggerEfficiencyScaleFactor"), fHistoWrapper),
     fEmbeddingMuonTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonTriggerEfficiency")),
     fEmbeddingMuonIdEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMuonIdEfficiency")),
+    fEmbeddingMTWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("embeddingMTWeight")),
     fPrescaleWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("prescaleWeightReader"), fHistoWrapper, "PrescaleWeight"),
     fPileupWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("pileupWeightReader"), fHistoWrapper, "PileupWeight"),
     fWJetsWeightReader(iConfig.getUntrackedParameter<edm::ParameterSet>("wjetsWeightReader"), fHistoWrapper, "WJetsWeight"),
@@ -344,6 +346,16 @@ namespace HPlus {
     hReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode1NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
     hReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons = fHistoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, *fs, "DeltaPtDecayMode2NoNeutralHadrons", "ReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons;#tau p_{T} - ref.jet p_{T}, GeV/c;N_{events}", 200, -200., 200.);
 
+    TFileDirectory ttbarDir = fs->mkdir("TTBarDecayMode");
+    hTTBarDecayModeAfterVertexSelection = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayMode_AfterVertexSelection");
+    hTTBarDecayModeAfterVertexSelectionUnweighted = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayModeUnweighted_AfterVertexSelection");
+    hTTBarDecayModeAfterStandardSelections = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayMode_AfterStandardSelections");
+    hTTBarDecayModeAfterStandardSelectionsUnweighted = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayModeUnweighted_AfterStandardSelections");
+    hTTBarDecayModeAfterMtSelections = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayMode_AfterMtSelections");
+    hTTBarDecayModeAfterMtSelectionsUnweighted = GenParticleAnalysis::bookTTBarDecayModeHistogram(fHistoWrapper, HistoWrapper::kVital, ttbarDir, "ttbarDecayModeUnweighted_AfterMtSelections");
+
+
+
     // Print info about number of booked histograms
     std::string myModuleLabel = iConfig.getParameter<std::string>("@module_label");
     
@@ -471,6 +483,10 @@ namespace HPlus {
 
     //fCommonPlotsAfterVertexSelection->fill();
     fCommonPlots.fillControlPlotsAfterVertexSelection(iEvent, pvData);
+    if(genData.isValid()) {
+      hTTBarDecayModeAfterVertexSelection->Fill(genData.getTTBarDecayMode());
+      hTTBarDecayModeAfterVertexSelectionUnweighted->Fill(genData.getTTBarDecayMode(), 1.0);
+    }
 
 //------ Apply filter (if chosen) to select tail events
     //if (!selectTailEvents(iEvent, iSetup, pvData)) return false;
@@ -764,9 +780,20 @@ namespace HPlus {
       iEvent.put(saveBJets, "selectedBJets");
     }
 
+    // For embedding, performt mT weighting
+    if(bTauEmbeddingStatus) {
+      EmbeddingMTWeightFit::Data data = fEmbeddingMTWeight.getEventWeight(transverseMass);
+      fEventWeight.multiplyWeight(data.getEventWeight());
+    }
+    increment(fEmbeddingMTWeightCounter);
+
 
 //------ ttbar topology selected
     fCommonPlots.fillControlPlotsAfterTopologicalSelections(iEvent);
+    if(genData.isValid()) {
+      hTTBarDecayModeAfterStandardSelections->Fill(genData.getTTBarDecayMode());
+      hTTBarDecayModeAfterStandardSelectionsUnweighted->Fill(genData.getTTBarDecayMode(), 1.0);
+    }
 
 
 //------ MET cut
@@ -808,6 +835,8 @@ namespace HPlus {
     if (!iEvent.isRealData() && genData.isValid()) {
       fMCAnalysisOfSelectedEvents.analyze(iEvent, iSetup, tauData, metData, genData);
       // doMCAnalysisOfSelectedEvents(iEvent, tauData, vetoTauData, metData, genData);
+      hTTBarDecayModeAfterMtSelections->Fill(genData.getTTBarDecayMode());
+      hTTBarDecayModeAfterMtSelectionsUnweighted->Fill(genData.getTTBarDecayMode(), 1.0);
     }
 
 //------ Top reconstruction

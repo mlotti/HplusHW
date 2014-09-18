@@ -29,20 +29,31 @@ def massUnit():
 BR = "#it{B}"
 
 ## The label for the physics process
-process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau#nu"
-processHeavy = "pp #rightarrow tH^{+}, H^{+} #rightarrow #tau#nu"
+process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
+processHeavy = "pp #rightarrow #bar{t}(b)H^{+}, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
 
 ## Label for the H+->tau BR assumption
 #BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1"%BR
 BRassumption = ""
 
 ## Y axis label for the BR
-BRlimit = "95%% CL limit for %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
+BRlimit = None
 
 ## Y axis label for the sigma x BR
-sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{H^{+}#rightarrow#tau#nu}, pb"%(BR)
+sigmaBRlimit = None
+
+def useParentheses():
+    global BRlimit, sigmaBRlimit
+    BRlimit = "95%% CL limit on %s(t#rightarrowH^{+}b)#times%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
+    sigmaBRlimit = "95%% CL limit for #sigma(H^{+})#times%s(H^{+}#rightarrow#tau#nu) (pb)"%(BR)
+def useSubscript():
+    global BRlimit, sigmaBRlimit
+    BRlimit = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
+    sigmaBRlimit = "95%% CL limit for #sigma_{H^{+}}#times%s_{H^{+}#rightarrow#tau#nu} (pb)"%(BR)
+useSubscript()
 
 ## Y axis label for the tanbeta
+#tanblimit = "95 % CL limit on tan #beta"
 tanblimit = "tan #beta"
 
 ## Label for m(H+)
@@ -67,7 +78,7 @@ _finalstateYmaxBR = {
     "etau": 0.4,
     "mutau": 0.4,
     "emu": 0.8,
-    "default": 0.02,
+    "default": 0.025,
 }
 
 ## Default y axis maximum values for sigma x BR limit for the final states
@@ -75,8 +86,11 @@ _finalstateYmaxSigmaBR = {
     "etau": 10.0, # FIXME
     "mutau": 10.0, # FIXME
     "emu": 10.0, # FIXME
-    "default": 0.8,
+    "default": 1.0,
 }
+
+def setExcludedStyle(graph):
+    graph.SetFillColorAlpha(ROOT.kViolet+6, 0.3) # transparency
 
 
 ## Class for reading the BR limits from the JSON file produced by
@@ -205,7 +219,6 @@ class BRLimits:
                 print format % (self.mass_string[i], "BLINDED", self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
         print
         
-
     ## Save the table as tex format
     def saveAsLatexTable(self,unblindedStatus=False):
         myLightStatus = True
@@ -247,6 +260,36 @@ class BRLimits:
         f = open("limitsTable.tex","w")
         f.write(s)
         f.close()
+
+    ## Divide the limits by another limit to obtain relative result
+    # \param refLimit  another BRLimits object
+    def divideByLimit(self, refLimit):
+        def protectedDivide(num, denom):
+            if denom == 0:
+                return 0.0
+            else:
+                return num / denom
+        
+        if not isinstance(refLimit, BRLimits):
+            raise Exception("The parameter needs to be a BRLimits object")
+        for i in xrange(len(self.mass_string)):
+            foundStatus = False
+            for ir in xrange(len(refLimit.mass_string)):
+                if self.mass_string[i] == refLimit.mass_string[ir]:
+                    foundStatus = True
+                    self.observed[i] = protectedDivide(self.observed[i], refLimit.observed[ir])
+                    self.expectedMedian[i] = protectedDivide(self.expectedMedian[i], refLimit.expectedMedian[ir])
+                    self.expectedMinus2[i] = protectedDivide(self.expectedMinus2[i], refLimit.expectedMinus2[ir])
+                    self.expectedMinus1[i] = protectedDivide(self.expectedMinus1[i], refLimit.expectedMinus1[ir])
+                    self.expectedPlus2[i] = protectedDivide(self.expectedPlus2[i], refLimit.expectedPlus2[ir])
+                    self.expectedPlus1[i] = protectedDivide(self.expectedPlus1[i], refLimit.expectedPlus1[ir])
+            if not foundStatus:
+                self.observed[i] = 0.0
+                self.expectedMedian[i] = 0.0
+                self.expectedMinus2[i] = 0.0
+                self.expectedMinus1[i] = 0.0
+                self.expectedPlus2[i] = 0.0
+                self.expectedPlus1[i] = 0.0
         
     ## Construct TGraph for the observed limit
     #
@@ -465,6 +508,44 @@ class MLFitData:
 
         return (gr, labels)
 
+    def fittedGraphHeavy(self, mass, backgroundOnly=False, signalPlusBackground=False):
+        if not backgroundOnly and not signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
+        if backgroundOnly and signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (both were)")
+        if signalPlusBackground:
+            backgroundOnly = False
+
+        labels = []
+        values = []
+        uncertainties = []
+        
+        if backgroundOnly:
+            content = self.data[mass]["background"]
+        else:
+            content = self.data[mass]["signal+background"]
+        labels = content["nuisanceParameters"][:]
+
+        for nuis in labels[:]:
+            if "BinByBin" in nuis:
+                del labels[labels.index(nuis)]
+                continue               
+            if not nuis in content or content[nuis]["type"] == "shapeStat":
+                del labels[labels.index(nuis)]
+                continue
+            values.append(float(content[nuis]["fitted_value"]))
+            uncertainties.append(float(content[nuis]["fitted_uncertainty"]))
+
+        yvalues = range(1, len(values)+1)
+
+        yvalues.reverse()
+
+        gr = ROOT.TGraphErrors(len(values),
+                               array.array("d", values), array.array("d", yvalues),
+                               array.array("d", uncertainties))
+
+        return (gr, labels)
+
     def fittedGraphShapeStat(self, mass, backgroundOnly=False, signalPlusBackground=False):
         if not backgroundOnly and not signalPlusBackground:
             raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
@@ -475,6 +556,7 @@ class MLFitData:
 
         shapeStatNuisance = None
         labels = []
+        labels2= []
         values = []
         uncertainties = []
         
@@ -485,9 +567,19 @@ class MLFitData:
 
         isCombine = False
 
-        for nuis in content["nuisanceParameters"]:
+#        for nuis in content["nuisanceParameters"]:
+#            if not nuis in content or content[nuis]["type"] != "shapeStat":
+#                continue
+
+###
+        labels2 = content["nuisanceParameters"]
+        for nuis in labels2:             
+            if "Hp" in nuis:
+                del labels2[labels2.index(nuis)]
+                continue               
             if not nuis in content or content[nuis]["type"] != "shapeStat":
                 continue
+###
 
             shapeStatNuisance = nuis
             if "fitted_value" in content[nuis]:
@@ -504,7 +596,7 @@ class MLFitData:
                 for l in labels:
                     values.append(float(content[nuis][l]["fitted_value"]))
                     uncertainties.append(float(content[nuis][l]["fitted_uncertainty"]))
-
+    
         if shapeStatNuisance is None:
             raise Exception("No shapeStat nuisance parameters found")
 
@@ -529,6 +621,96 @@ class MLFitData:
         return (gr, labels, shapeStatNuisance)
 
 
+class SignificanceData:
+    def __init__(self, directory="."):
+        resultfile = "significance.json"
+        f = open(os.path.join(directory, resultfile))
+        self._data = json.load(f)
+        f.close()
+
+        self._masses = filter(lambda n: "expectedSignal" not in n, self._data.keys())
+        self._masses.sort(key=float)
+
+        self._isHeavyStatus = False
+        for m in self._masses:
+            if int(m) > 175:
+                self._isHeavyStatus = True
+
+    def isHeavyStatus(self):
+        return self._isHeavyStatus
+
+    def massPoints(self):
+        return self._masses
+
+    def lightExpectedSignal(self):
+        return self._data["expectedSignalBrLimit"]
+    def heavyExpectedSignal(self):
+        return self._data["expectedSignalSigmaBr"]
+
+    def _graph(self, expObs, pvalue):
+        masses = self.massPoints()
+        massArray = array.array("d", [float(m) for m in masses])
+        q = "significance"
+        if pvalue:
+            q = "pvalue"
+        dataArray = array.array("d", [float(self._data[m][expObs][q]) for m in masses])
+
+        gr = ROOT.TGraph(len(masses), massArray, dataArray)
+        gr.SetLineWidth(3)
+        gr.SetLineColor(ROOT.kBlack)
+        return gr
+
+    def expectedGraph(self, pvalue=False):
+        gr = self._graph("expected", pvalue)
+        gr.SetLineStyle(2)
+        gr.SetMarkerStyle(20)
+        return gr
+
+    def observedGraph(self, pvalue=False):
+        gr = self._graph("observed", pvalue)
+        gr.SetMarkerStyle(21)
+        gr.SetMarkerSize(1.5)
+        return gr
+    
+    def fittedGraphShapeBinByBinHeavy(self, mass, backgroundOnly=False, signalPlusBackground=False):
+        if not backgroundOnly and not signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
+        if backgroundOnly and signalPlusBackground:
+            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (both were)")
+        if signalPlusBackground:
+            backgroundOnly = False
+
+        labels = []
+        values = []
+        uncertainties = []
+        
+        if backgroundOnly:
+            content = self.data[mass]["background"]
+        else:
+            content = self.data[mass]["signal+background"]
+        labels = content["nuisanceParameters"][:]
+
+        for nuis in labels[:]:
+            if not "BinByBin" in nuis:
+                del labels[labels.index(nuis)]
+                continue     
+            if not nuis in content or content[nuis]["type"] == "shapeStat":
+                del labels[labels.index(nuis)]
+                continue
+            values.append(float(content[nuis]["fitted_value"]))
+            uncertainties.append(float(content[nuis]["fitted_uncertainty"]))
+
+        yvalues = range(1, len(values)+1)
+
+        yvalues.reverse()
+
+        gr = ROOT.TGraphErrors(len(values),
+                               array.array("d", values), array.array("d", yvalues),
+                               array.array("d", uncertainties))
+
+        return (gr, labels)
+
+
 ## Remove mass points lower than 100
 #
 # \param graph   TGraph to operate
@@ -550,13 +732,13 @@ def cleanGraph(graph, minX=95):
 # \param graph   TGraph of the observed BR limit
 #
 # \return Clone of the TGraph for the -1sigma theory uncertainty band
-def getObservedMinus(graph):
+def getObservedMinus(graph,uncertainty):
     curve = graph.Clone()
     curve.SetName(curve.GetName()+"TheoryMinus")
     for i in xrange(0, graph.GetN()):
         curve.SetPoint(i,
                        graph.GetX()[i],
-                       graph.GetY()[i]*0.77)
+                       graph.GetY()[i]*(1-uncertainty))
     print "todo: CHECK minus coefficient f(m)"
     return curve
 
@@ -565,13 +747,13 @@ def getObservedMinus(graph):
 # \param graph   TGraph of the observed BR limit
 #
 # \return Clone of the TGraph for the +1sigma theory uncertainty band
-def getObservedPlus(graph):
+def getObservedPlus(graph,uncertainty):
     curve = graph.Clone()
     curve.SetName(curve.GetName()+"TheoryPlus")
     for i in xrange(0, graph.GetN()):
         curve.SetPoint(i,
                        graph.GetX()[i],
-                       graph.GetY()[i]*1.22)
+                       graph.GetY()[i]*(1+uncertainty))
     print "todo: CHECK plus coefficient f(m)"
     return curve
 
@@ -674,3 +856,27 @@ def divideGraph(num, denom):
             val = gr.GetY()[i]/y
         gr.SetPoint(i, gr.GetX()[i], val)
     return gr
+
+
+## Returns a properly typeset label for MSSM scenario
+#
+# \param scenario   string of the scenario rootfile name
+#
+# \return string with the typeset name
+def getTypesetScenarioName(scenario):
+    myTruncatedScenario = scenario.replace("-LHCHXSWG","")
+    if myTruncatedScenario == "lightstau":
+        return "MSSM light stau"
+    if myTruncatedScenario == "lightstop":
+        return "MSSM light stop"
+    if myTruncatedScenario == "lowMH":
+        return "MSSM low ^{}m_{H}"
+    if myTruncatedScenario == "mhmaxup":
+        return "MSSM updated ^{}m_{h}^{max}"
+    if myTruncatedScenario == "mhmodm":
+        return "MSSM ^{}m_{h}^{mod-}"
+    if myTruncatedScenario == "mhmodp":
+        return "MSSM ^{}m_{h}^{mod+}"
+    if myTruncatedScenario == "tauphobic":
+        return "MSSM #tau-phobic"
+    raise Exception("The typeset name for scenario '%s' is not defined in tools/limit.py::getTypesetScenarioName()! Please add it."%scenario)

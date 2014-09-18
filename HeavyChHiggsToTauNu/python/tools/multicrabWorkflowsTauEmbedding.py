@@ -509,7 +509,7 @@ def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitio
         "SingleMu_193834-196531_2012B_Jan22": TaskDef(njobsIn=2000, njobsOut=4),
         "SingleMu_198022-200381_2012C_Jan22": TaskDef(njobsIn=1500, njobsOut=4),
         "SingleMu_200466-203742_2012C_Jan22": TaskDef(njobsIn=2000, njobsOut=4),
-        "SingleMu_203777-205834_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=1),
+        "SingleMu_203777-205834_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=4),
         "SingleMu_205908-207100_2012D_Jan22": TaskDef(njobsIn=1200, njobsOut=4),
         "SingleMu_207214-208686_2012D_Jan22": TaskDef(njobsIn=1300, njobsOut=3),
 
@@ -523,8 +523,8 @@ def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitio
         "W3Jets_TuneZ2star_Summer12":              TaskDef(njobsIn= 800, njobsOut=35),
         "W4Jets_TuneZ2star_Summer12":              TaskDef(njobsIn=1100, njobsOut=40),
         "TTJets_TuneZ2star_Summer12":              TaskDef(njobsIn= 400, njobsOut=25),
-        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=1800, njobsOut=50),
-        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=2200, njobsOut=100),
+        "TTJets_FullLept_TuneZ2star_Summer12":     TaskDef(njobsIn=1800, njobsOut=25),
+        "TTJets_SemiLept_TuneZ2star_Summer12":     TaskDef(njobsIn=2200, njobsOut=50),
         "TTJets_Hadronic_TuneZ2star_ext_Summer12": TaskDef(njobsIn= 200, njobsOut=5),
         "DYJetsToLL_M50_TuneZ2star_Summer12":      TaskDef(njobsIn= 900, njobsOut=40),
         "T_t-channel_TuneZ2star_Summer12":         TaskDef(njobsIn=  50, njobsOut=3),
@@ -587,86 +587,6 @@ def addEmbeddingEmbedding_53X(sourceWorkflow, version, datasets, updateDefinitio
             wf_analysis.addCrabLine("CMSSW.total_number_of_lumis = -1")
             dataset.addWorkflow(wf_analysis)
  
-def addEmbeddingSkim_v44_4_2(datasets):
-    definitions = {
-        # 113 files, min 86 MB, max, 111 MB
-        "SingleMu_160431-163261_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_160431_tauembedding_skim_v44_4_2-d9eec32ec495d473673489f496724114/USER"),
-        # 125 files, min 69 MB, max 235 MB
-        "SingleMu_163270-163869_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_163270_tauembedding_skim_v44_4_2-f2f022e2f1824ce67ef0c386cf58329f/USER", njobsIn=140),
-        # 373 files, min 3.5 MB, max 134 MB
-        "SingleMu_165088-166150_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_165088_tauembedding_skim_v44_4_2-70b45374fbabe2248133e36a2cbe01e2/USER"),
-        # 2 files, min 9.8 MB, max 138 MB
-        "SingleMu_166161-166164_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166161_tauembedding_skim_v44_4_2-0a9e46f53bac3a3199fc5d08e63772d3/USER"),
-        # 2 files, min 116 MB, max 142 MB
-        "SingleMu_166346-166346_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166346_tauembedding_skim_v44_4_2-91fdceb3c5af341c67f22e9c64363c60/USER"),
-        # 260 files, min 32 MB, max 142 MB
-        "SingleMu_166374-167043_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_166374_tauembedding_skim_v44_4_2-0a9e46f53bac3a3199fc5d08e63772d3/USER"),
-        # 191 files, min 13 MB, max 113 MB
-        "SingleMu_167078-167913_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_167078_tauembedding_skim_v44_4_2-c4a8eba430793887b650ad5b083c7ed7/USER"),
-        # 177 files, min 60 MB, max 272 MB
-        "SingleMu_170722-172619_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_170722_tauembedding_skim_v44_4_2-859a149425fa4c077a5b33666a7b993a/USER"),
-        # 203 files, min 44 MB, max 217 MB
-        "SingleMu_172620-173198_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_172620_tauembedding_skim_v44_4_2-859a149425fa4c077a5b33666a7b993a/USER"),
-        # 108 files, min 25 MB, max 246 MB
-        "SingleMu_173236-173692_2011A_Nov08": TaskDef("/SingleMu/local-Run2011A_08Nov2011_v1_AOD_173236_tauembedding_skim_v44_4_2-e4bb75f1eb1d67eb9cca9dc53de3dd14/USER", njobsIn=120),
-        # 417 files, min 18 MB, max 405 MB
-        "SingleMu_173693-177452_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_173693_tauembedding_skim_v44_4_2-e4bb75f1eb1d67eb9cca9dc53de3dd14/USER"),
-        # 263 files, min 21 MB, max 449 MB
-        "SingleMu_177453-178380_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_177453_tauembedding_skim_v44_4_2-e4bb75f1eb1d67eb9cca9dc53de3dd14/USER"),
-        # 259 files, min 104 MB, max 421 MB
-        "SingleMu_178411-179889_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_178411_tauembedding_skim_v44_4_2-ce29afbda8ffd97a0d906ada6ad5e907/USER"),
-        # 53 files, min 134 MB, max 291 MB
-        "SingleMu_179942-180371_2011B_Nov19": TaskDef("/SingleMu/local-Run2011B_19Nov2011_v1_AOD_179942_tauembedding_skim_v44_4_2-2fa526d919657b36eff79f06bc501a9c/USER"),
-        # 4961 files, min 3.3 MB, max 232 MB
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
-        # 998 files, min 19 MB, max 104 MB
-        "WJets_TuneZ2_Fall11":                TaskDef("/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=990),
-        # 989 files, min 74 MB, max 252 MB
-        "DYJetsToLL_M50_TuneZ2_Fall11":       TaskDef("/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=990),
-        # 492 files, min 9.8 MB, max 45 MB
-        "T_t-channel_TuneZ2_Fall11":          TaskDef("/T_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=300),
-        # 162 files, min 6.1 MB, max 63 MB
-        "Tbar_t-channel_TuneZ2_Fall11":       TaskDef("/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=70),
-        # 91 files, min 5.1 MB, max 156 MB
-        "T_tW-channel_TuneZ2_Fall11":         TaskDef("/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=90),
-        # 92 files, min 11 MB, max 149 MB
-        "Tbar_tW-channel_TuneZ2_Fall11":      TaskDef("/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=90),
-        # 51 files, min 4.9 MB, max 40 MB
-        "T_s-channel_TuneZ2_Fall11":          TaskDef("/T_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=25),
-        # 12 files, min 20 MB, max 83 MB
-        "Tbar_s-channel_TuneZ2_Fall11":       TaskDef("/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=5),
-        # 201 files, min 3.9 MB, max 136 MB
-        "WW_TuneZ2_Fall11":                   TaskDef("/WW_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=150),
-        # 201 files, min 26 MB, max 122 MB
-        "WZ_TuneZ2_Fall11":                   TaskDef("/WZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=150),
-        # 352 files, min 19 MB, max 77 MB
-        "ZZ_TuneZ2_Fall11":                   TaskDef("/ZZ_TuneZ2_7TeV_pythia6_tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER"),
-        # 493 files, min 14 MB, max 54 MB
-        "QCD_Pt20_MuEnriched_TuneZ2_Fall11":  TaskDef("/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_skim_v44_4_2-80448358a193f69c52fb3eaa57e02bff/USER", njobsIn=490),
-        }
-    addEmbeddingSkim_44X("v44_4_2", datasets, definitions)
-
-def addEmbeddingEmbedding_v44_4_2(datasets):
-    skimVersion = "tauembedding_skim_v44_4_2"
-
-    def addEmbedding(version, definitions):
-        addEmbeddingEmbedding_44X(skimVersion, version, datasets, definitions)
-
-    addEmbedding("v44_4_2_muiso0", {
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_muiso0-50da2d6a5b0c9c8a2f96f633ada0c1c6/USER"),
-        })
-    addEmbedding("v44_4_2_muiso1", {
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_muiso1-50da2d6a5b0c9c8a2f96f633ada0c1c6/USER"),
-        })
-
-    addEmbedding("v44_4_2_seed0", {
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed0-2dedf078d8faded30b2dddce6fe8cdec/USER"),
-        })
-    
-    addEmbedding("v44_4_2_seed1", {
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_4_2_seed1-2dedf078d8faded30b2dddce6fe8cdec/USER"),
-        })
-
 def addEmbeddingGenTauSkim_v44_5(datasets):
     definitions = {
         # 6662721 events, 4002 jobs
@@ -847,49 +767,6 @@ def addEmbeddingSkim_v44_5_1(datasets):
         "TTToHplusBHminusB_M160_Fall11":    TaskDef(""),
         }
     addEmbeddingSkim_44X("v44_5_1", datasets, definitions)
-
-
-def addEmbeddingEmbedding_v44_5_1(datasets):
-    skimVersion = "tauembedding_skim_v44_5_1"
-
-    def addEmbedding(version, definitions):
-        addEmbeddingEmbedding_44X(skimVersion, version, datasets, definitions)
-
-    addEmbedding("v44_5_1_notrg2", {
-        # 5296176 events, 2254 jobs
-        # User mean 11404.4, min 9613.9, max 16618.0
-        # Mean 369.0 MB, min 314.1 MB, max 530.3 MB
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_notrg2-b4444849cbd68cba8058d20690fa09f4/USER", args={"triggerMC": 0}),
-        })
-
-    addEmbedding("v44_5_1", {
-        # 4741432 events, 2254 jobs
-        # User mean 10503.6, min 8873.8, max 15635.7
-        # Mean 341.6 MB, min 290.8 MB, max 498.7 MB
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1-7e75763c5b9284e37debaf454cd27985/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1}),
-        })
-
-    addEmbedding("v44_5_1_tauhad", {
-        # 4883090 events, 2254 jobs
-        # User mean 11790.0, min 9915.0, max 17016.8
-        # Mean 344.0 MB, min 291.0 MB, max 499.5 MB
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad-d57ea742826c3abce18a6ceed0c3bca3/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1, "tauDecayMode": 230}),
-        })
-
-    # addEmbedding("v44_5_1_tauhad_vispt10", {
-    #     "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 1, "tauDecayMode": 230, "tauMinVisPt": 10}),
-    #     })
-
-    # addEmbedding("v44_5_1_tauhad_vispt20", {
-    #     "TTJets_TuneZ2_Fall11":               TaskDef("", args={"triggerMC": 1, "tauDecayMode": 230, "tauMinVisPt": 20}),
-    #     })
-
-    addEmbedding("v44_5_1_tauhad_vispt30", {
-        # 4933858 events, 2254 jobs
-        # User mean 13113.8, min 10899.2, max 19112.7
-        # Mean 345.6 MB, min 291.8 MB, max 500.5 MB
-        "TTJets_TuneZ2_Fall11":               TaskDef("/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall11_PU_S6_START44_V9B_v1_AODSIM_tauembedding_embedding_v44_5_1_tauhad_vispt30_b-d57ea742826c3abce18a6ceed0c3bca3/USER", args={"triggerMC": 0, "triggerMCInAnalysis": 1, "tauDecayMode": 230, "tauMinVisPt": 30}, publishPostfix="_b"),
-        })
 
 
 def addEmbeddingEmbedding_v44_5_2(datasets):

@@ -51,6 +51,12 @@ def ls_internal(url):
         host_re = re.compile("^(?P<host>[^:/]+://[^:/]+(:\d+)?/)(?P<dir>.*)$")
         m = host_re.search(str)
         return m.group("host")+"/".join(filter(isNotEmpty, m.group("dir").split("/")))
+
+    def doLs(count, offset):
+        output = execute(srmls(count, offset) + [url])
+        if len(output) > 0 and ("srm" in output[0] and "client" in output[0] and "error" in output[0]):
+            raise SrmException("\n".join(output))
+        return output
         
     ret = []
     max_size = 1
@@ -64,10 +70,16 @@ def ls_internal(url):
         offset = iter*count
         iter += 1
 
-        output = execute(srmls(count, offset) + [url])
-        if len(output) > 0 and ("srm" in output[0] and "client" in output[0] and "error" in output[0]):
-            raise SrmException("\n".join(output))
-
+        retries = 10
+        while retries > 0:
+            try:
+                output = doLs(count, offset)
+                break
+            except SrmException, e:
+                if "try again" in str(e):
+                    retries -= 1
+                    continue
+                raise
 
         files = []
 

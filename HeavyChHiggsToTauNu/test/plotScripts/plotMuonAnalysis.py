@@ -512,9 +512,7 @@ def doPlotsWTauMu(datasets, name, datasetName, ntupleCache, selectorName, unweig
     p.appendPlotObject(histograms.PlotText(0.5, 0.9, plots._legendLabels.get(datasetName, datasetName), size=18))
 
     p.draw()
-    histograms.addCmsPreliminaryText()
-    p.addEnergyText()
-    p.addLuminosityText()
+    p.addStandardTexts()
     p.save()
 
     # Clear list of functions

@@ -1,0 +1,206 @@
+{
+  "_multicrab_embedded": "/home/mkortela/hplus/embedding/CMSSW_5_3_9_patch3/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/optimization_met80/embedding_mc_average_2ttjets_140815_170202", 
+  "_multicrab_signalAnalysisGenTau": "../multicrab_signalAnalysisGenTau_140808_171416/", 
+  "dataParameters": {
+    "Run2012ABCD": {
+      "firstRun": 1, 
+      "lastRun": 208686, 
+      "luminosity": 1, 
+      "bins": [
+        {
+          "mt": 0.0, 
+          "efficiency": 1.2488675109288112, 
+          "uncertaintyPlus": 0.15059200151570726, 
+          "uncertaintyMinus": 0.15061399602939141
+        }, 
+        {
+          "mt": 20.0, 
+          "efficiency": 1.1574137175537926, 
+          "uncertaintyPlus": 0.13957341171883639, 
+          "uncertaintyMinus": 0.13958467235731117
+        }, 
+        {
+          "mt": 40.0, 
+          "efficiency": 1.1727171438448909, 
+          "uncertaintyPlus": 0.1414246944455046, 
+          "uncertaintyMinus": 0.14143027924932483
+        }, 
+        {
+          "mt": 60.0, 
+          "efficiency": 1.1899579508478166, 
+          "uncertaintyPlus": 0.14350694542497788, 
+          "uncertaintyMinus": 0.14350951638048975
+        }, 
+        {
+          "mt": 80.0, 
+          "efficiency": 1.1886071546288011, 
+          "uncertaintyPlus": 0.14334295911523159, 
+          "uncertaintyMinus": 0.14334656204585342
+        }, 
+        {
+          "mt": 100.0, 
+          "efficiency": 1.0440097913968096, 
+          "uncertaintyPlus": 0.12590315539700955, 
+          "uncertaintyMinus": 0.12590812118891137
+        }, 
+        {
+          "mt": 120.0, 
+          "efficiency": 1.0088701022130642, 
+          "uncertaintyPlus": 0.12166212138946518, 
+          "uncertaintyMinus": 0.12167022546196514
+        }, 
+        {
+          "mt": 140.0, 
+          "efficiency": 1.0066249496344941, 
+          "uncertaintyPlus": 0.12139666807266548, 
+          "uncertaintyMinus": 0.12139954994472457
+        }, 
+        {
+          "mt": 160.0, 
+          "efficiency": 1.0757810346292351, 
+          "uncertaintyPlus": 0.1297296683419511, 
+          "uncertaintyMinus": 0.12973966301402173
+        }, 
+        {
+          "mt": 200.0, 
+          "efficiency": 1.1589604171316115, 
+          "uncertaintyPlus": 0.13974349963113364, 
+          "uncertaintyMinus": 0.13977111736305442
+        }
+      ]
+    }, 
+    "Run2012ABCD_statOnly": {
+      "firstRun": 1, 
+      "lastRun": 208686, 
+      "luminosity": 1, 
+      "bins": [
+        {
+          "mt": 0.0, 
+          "efficiency": 1.2488675109288112, 
+          "uncertaintyPlus": 0.10132306911231247, 
+          "uncertaintyMinus": 0.10132306911231247
+        }, 
+        {
+          "mt": 20.0, 
+          "efficiency": 1.1574137175537926, 
+          "uncertaintyPlus": 0.073587614936237555, 
+          "uncertaintyMinus": 0.073587614936237555
+        }, 
+        {
+          "mt": 40.0, 
+          "efficiency": 1.1727171438448909, 
+          "uncertaintyPlus": 0.048158377896979611, 
+          "uncertaintyMinus": 0.048158377896979611
+        }, 
+        {
+          "mt": 60.0, 
+          "efficiency": 1.1899579508478166, 
+          "uncertaintyPlus": 0.046176923146517911, 
+          "uncertaintyMinus": 0.046176923146517911
+        }, 
+        {
+          "mt": 80.0, 
+          "efficiency": 1.1886071546288011, 
+          "uncertaintyPlus": 0.065101791482756174, 
+          "uncertaintyMinus": 0.065101791482756174
+        }, 
+        {
+          "mt": 100.0, 
+          "efficiency": 1.0440097913968096, 
+          "uncertaintyPlus": 0.077728944657988353, 
+          "uncertaintyMinus": 0.077728944657988353
+        }, 
+        {
+          "mt": 120.0, 
+          "efficiency": 1.0088701022130642, 
+          "uncertaintyPlus": 0.079658161683915221, 
+          "uncertaintyMinus": 0.079658161683915221
+        }, 
+        {
+          "mt": 140.0, 
+          "efficiency": 1.0066249496344941, 
+          "uncertaintyPlus": 0.09135935970152835, 
+          "uncertaintyMinus": 0.09135935970152835
+        }, 
+        {
+          "mt": 160.0, 
+          "efficiency": 1.0757810346292351, 
+          "uncertaintyPlus": 0.090868024085589111, 
+          "uncertaintyMinus": 0.090868024085589111
+        }, 
+        {
+          "mt": 200.0, 
+          "efficiency": 1.1589604171316115, 
+          "uncertaintyPlus": 0.14664083151941942, 
+          "uncertaintyMinus": 0.14664083151941942
+        }
+      ]
+    }
+  }, 
+  "mcParameters": {
+    "Run2012ABCD": {
+      "bins": [
+        {
+          "mt": 0.0, 
+          "efficiency": 1.0, 
+          "uncertaintyPlus": 0.0, 
+          "uncertaintyMinus": 0.0
+        }, 
+        {
+          "mt": 20.0, 
+          "efficiency": 1.0, 
+          "uncertaintyPlus": 0.0, 
+          "uncertaintyMinus": 0.0
+        }, 
+        {
+          "mt": 40.0, 
+          "efficiency": 1.0, 
+          "uncertaintyPlus": 0.0, 
+          "uncertaintyMinus": 0.0
+        }, 
+        {
+          "mt": 60.0, 
+          "efficiency": 1.0, 
+          "uncertaintyPlus": 0.0, 
+          "uncertaintyMinus": 0.0
+        }, 
+        {
+          "mt": 80.0, 
+          "efficiency": 1.0, 
+          "uncertaintyPlus": 0.0, 
+          "uncertaintyMinus": 0.0
+        }, 
+        {
+          "mt": 100.0, 
+          "efficiency": 1.0, 
+          "uncertaintyPlus": 0.0, 
+          "uncertaintyMinus": 0.0
+        }, 
+        {
+          "mt": 120.0, 
+          "efficiency": 1.0, 
+          "uncertaintyPlus": 0.0, 
+          "uncertaintyMinus": 0.0
+        }, 
+        {
+          "mt": 140.0, 
+          "efficiency": 1.0, 
+          "uncertaintyPlus": 0.0, 
+          "uncertaintyMinus": 0.0
+        }, 
+        {
+          "mt": 160.0, 
+          "efficiency": 1.0, 
+          "uncertaintyPlus": 0.0, 
+          "uncertaintyMinus": 0.0
+        }, 
+        {
+          "mt": 200.0, 
+          "efficiency": 1.0, 
+          "uncertaintyPlus": 0.0, 
+          "uncertaintyMinus": 0.0
+        }
+      ]
+    }
+  }
+}

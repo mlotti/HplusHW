@@ -6,6 +6,11 @@ import sys
 import inspect
 from optparse import OptionParser
 import array
+from collections import OrderedDict
+
+import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.gROOT.SetBatch(True) # no flashing canvases
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TailFitter as TailFitter
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer as TableProducer
@@ -49,6 +54,12 @@ def parseNuisanceNames(lines, columnNames):
             myDict["distribution"] = mySplit[1]
             for i in range(2,len(mySplit)):
                 myDict[columnNames[i-2]] = mySplit[i]
+            myNames.append(myDict)
+        if mySplit[0] == "observation":
+            # store observation
+            myDict = {}
+            myDict["name"] = "observation"
+            myDict["value"] = mySplit[1]
             myNames.append(myDict)
         if mySplit[0] == "rate":
             # store rate
@@ -118,7 +129,7 @@ def getAndRebinNuisanceHistos(columnName, rootFile, nuisanceInfo, binlist):
     mySuffixes = ["Up_fineBinning","Down_fineBinning"]
     # Loop over nuisance info
     for n in nuisanceInfo:
-        if n["distribution"] == "shape" and n[columnName] == "1" and not "QCD_metshape" in n["name"]:
+        if n["name"] != "observation" and n["distribution"] == "shape" and n[columnName] == "1" and not "QCD_metshape" in n["name"]:
             for suffix in mySuffixes:
                 myName = "%s_%s%s"%(columnName,n["name"],suffix)
                 hOriginal = rootFile.Get(myName)
@@ -224,14 +235,16 @@ def addNuisanceForIndividualColumn(columnNames,nuisanceInfo,currentColumn,nuisan
             myDict[cc] = "-"
     nuisanceInfo.append(myDict)
 
-def addBinByBinStatUncert(currentColumn, hRate, columnNames, nuisanceInfo, fitmin=None, fitmax=None):
+def addBinByBinStatUncert(config, currentColumn, hRate, columnNames, nuisanceInfo, fitmin=None, fitmax=None, isSignal=False):
     if fitmin == None:
         fitmin = hRate.GetXaxis().GetBinLowEdge(1)
     if fitmax == None:
         fitmax = hRate.GetXaxis().GetBinUpEdge(hRate.GetNbinsX())
     print "... Adding bin-by-bin stat. uncert '%s' for range %d-%d"%(currentColumn,fitmin,fitmax)
-    myStatHistograms = TableProducer.createBinByBinStatUncertHistograms(hRate, fitmin, fitmax)
-    myHistogramCache.extend(myStatHistograms)
+    myMinStatUncertainty = config.MinimumStatUncertaintyBkg
+    if isSignal:
+        myMinStatUncertainty = config.MinimumStatUncertaintySignal
+    myStatHistograms = TableProducer.createBinByBinStatUncertHistograms(hRate, myMinStatUncertainty, fitmin, fitmax)
     # Add bin-by-bin stat. nuisances to nuisance table
     for h in myStatHistograms:
         if h.GetTitle().endswith("Up"):
@@ -241,6 +254,10 @@ def addBinByBinStatUncert(currentColumn, hRate, columnNames, nuisanceInfo, fitmi
 
 def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo, opts):
     myOutput = ""
+    myObservedLine = ""
+    for n in nuisanceInfo:
+        if n["name"] == "observation":
+            myObservedLine = "observation    %d\n"%int(n["value"])
     myProcessLinePassed = False
     for l in originalCardLines:
         # write header lines
@@ -251,34 +268,38 @@ def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo, opts):
             if mySplit[0] == "process":
                 myProcessLinePassed = True
             if not myProcessLinePassed:
-                myOutput += l
+                if mySplit[0] == "observation":
+                    myOutput += myObservedLine
+                else:
+                    myOutput += l
     # Create tables
     myProcessTable = []
     myRateTable = []
     myNuisanceTable = []
     myStatTable = []
     for n in nuisanceInfo:
-        myRow = []
-        # add first two entries
-        if n["name"] == "rate" or n["name"] == "process":
-            myRow.append(n["name"])
-            myRow.append("")
-        else:
-            myRow.append(n["name"])
-            myRow.append(n["distribution"])
-        # add data from columns
-        for c in columnNames:
-            myRow.append(n[c])
-        # store
-        if n["name"] == "rate":
-            myRateTable.append(myRow)
-        elif n["name"] == "process":
-            myProcessTable.append(myRow)
-        elif "statBin" in n["name"]:
-            myStatTable.append(myRow)
-        else:
-            if not opts.noSystUncert:
-                myNuisanceTable.append(myRow)
+        if n["name"] != "observation":
+            myRow = []
+            # add first two entries
+            if n["name"] == "rate" or n["name"] == "process":
+                myRow.append(n["name"])
+                myRow.append("")
+            else:
+                myRow.append(n["name"])
+                myRow.append(n["distribution"])
+            # add data from columns
+            for c in columnNames:
+                myRow.append(n[c])
+            # store
+            if n["name"] == "rate":
+                myRateTable.append(myRow)
+            elif n["name"] == "process":
+                myProcessTable.append(myRow)
+            elif "statBin" in n["name"]:
+                myStatTable.append(myRow)
+            else:
+                if not opts.noSystUncert:
+                    myNuisanceTable.append(myRow)
     # Create table
     myWidths = []
     TableProducer.calculateCellWidths(myWidths, myProcessTable)
@@ -313,7 +334,7 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
         raise Exception("Cannot find histogram '%s'!"%name)
 
     # Create for each column a root histo with uncertainties
-    myDict = {}
+    myDict = OrderedDict()
     myDict["Hp"] = None
     myDict["QCD"] = None
     myDict["EWKtau"] = None
@@ -324,12 +345,12 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
         myRHWU = RootHistoWithUncertainties(hRate)
         for n in myNuisanceInfo:
             # Add shape uncertainties
-            if n["distribution"] == "shape" and n[c] == "1" and not "statBin" in n["name"]:
+            if n["name"] != "observation" and n["distribution"] == "shape" and n[c] == "1" and not "statBin" in n["name"]:
                 hUp = aux.Clone(getHisto(cachedHistos, "%s_%sUp"%(c,n["name"])))
                 hDown = aux.Clone(getHisto(cachedHistos, "%s_%sDown"%(c,n["name"])))
                 myRHWU.addShapeUncertaintyFromVariation(n["name"], hUp, hDown)
             # Add constant uncertainties
-            elif n["name"] != "rate" and n["name"] != "process" and n[c] != "-" and n[c] != "1" and not "statBin" in n["name"] and not "BinByBin" in n["name"]:
+            elif n["name"] != "observation" and n["name"] != "rate" and n["name"] != "process" and n[c] != "-" and n[c] != "1" and not "statBin" in n["name"] and not "BinByBin" in n["name"]:
                 diffUp = 0.0
                 diffDown = 0.0
                 if "/" in n[c]:
@@ -380,9 +401,15 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             stat = myDict[item].getRateStatUncertainty()
             (systUp,systDown) = myDict[item].getRateSystUncertainty()
             #myDict[item].Debug()
-            print "%10s: %.1f +- %.1f (stat.) + %.1f - %.1f (syst.)"%(item,rate,stat,systUp,systDown)
-    print ""
-    
+            print "%11s: %.1f +- %.1f (stat.) + %.1f - %.1f (syst.)"%(item,rate,stat,systUp,systDown)
+    print "Observation: %d\n"%hObs.Integral(0,hObs.GetNbinsX()+2)
+
+    def setTailFitUncToStat(rhwu):
+        tailfitNames = filter(lambda n: "_TailFit_" in n, rhwu.getShapeUncertaintyNames())
+        rhwu.setShapeUncertaintiesAsStatistical(tailfitNames)
+        #rhwu.printUncertainties()
+        #print rhwu.getShapeUncertaintiesAsStatistical()
+        return rhwu
     
     myLogList = [False,True]
     for l in myLogList:
@@ -390,18 +417,18 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
         # Create post fit shape
         myStackList = []
         if "QCD" in myDict.keys():
-            myHisto = histograms.Histo(myDict["QCD"].Clone(),"QCD",legendLabel=ControlPlotMaker._legendLabelQCD)
+            myHisto = histograms.Histo(setTailFitUncToStat(myDict["QCD"].Clone()),"QCD",legendLabel=ControlPlotMaker._legendLabelQCD)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         if "EWKtau" in myDict.keys():
-            myHisto = histograms.Histo(myDict["EWKtau"].Clone(),"Embedding",legendLabel=ControlPlotMaker._legendLabelEmbedding)
+            myHisto = histograms.Histo(setTailFitUncToStat(myDict["EWKtau"].Clone()),"Embedding",legendLabel=ControlPlotMaker._legendLabelEmbedding)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         if "EWKfakes" in myDict.keys() and myDict["EWKfakes"] != None:
             myHisto = histograms.Histo(myDict["EWKfakes"].Clone(),"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
-        myBlindedStatus = True
+        myBlindedStatus = False
         myBlindingString = None
         hObsLocal = aux.Clone(hObs)
         if myBlindedStatus:
@@ -429,28 +456,37 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
 	myParams = {}
 	if myBlindedStatus:
 	    myParams["blindingRangeString"] = myBlindingString
+	myParams["cmsTextPosition"] = "right"
 	myParams["ratio"] = True
 	myParams["ratioType"] = "errorScale"
-	myParams["ratioYlabel"] = "Data/#Sigma Exp."
+	myParams["ratioYlabel"] = "Data/Bkg. "
 	myParams["stackMCHistograms"] = True
 	myParams["addMCUncertainty"] = True
 	myParams["addLuminosityText"] = True
-	myParams["moveLegend"] = {"dx": -0.2, "dy": 0.00}
+	myParams["moveLegend"] = {"dx": -0.14, "dy": -0.10}
+	myParams["ratioErrorOptions"] = {"numeratorStatSyst": False}
 	myParams["ratioCreateLegend"] = True
-	myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
-	myParams["xlabel"] = "m_{T}(#tau_{h},E_{T}^{miss})"
-	myParams["ylabel"] = "Events/#Deltam_{T} / "
+	#myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
+	myParams["ratioMoveLegend"] = {"dx": -0.06, "dy": -0.1}
+	myParams["opts2"] = {"ymin": 0.0, "ymax": 2.5}
+	myParams["xlabel"] = "m_{T} (GeV)"
+	#if l:
+        #    myParams["ylabel"] = "< Events / bin >"
+        #else:
+        myParams["ylabel"] = "Events / 20 GeV"
 	a = hObsLocal.GetXaxis().GetBinWidth(1)
 	b = hObsLocal.GetXaxis().GetBinWidth(hObsLocal.GetNbinsX())
-	if abs(a-b) < 0.0001:
-	    myParams["ylabel"]  += "%d GeV"%a
-	else:
-	    myParams["ylabel"]  += "%d-%d GeV"%(a,b)
-	myParams["divideByBinWidth"] = True
+	#if abs(a-b) < 0.0001:
+	    #myParams["ylabel"]  += "%d GeV"%a
+	#else:
+	    #myParams["ylabel"]  += "%d-%d GeV"%(a,b)
+        #myParams["divideByBinWidth"] = l
 	myParams["log"] = l
 	myPlotName = "PostTailFitShape_M%d"%float(m)
 	if l:
-	    myParams["opts"] = {"ymin": 1e-5}
+            # scale ymin by 20 in order to compare the rebinned mT with same y-scale
+            # ymax(factor) takes care of max automatically
+	    myParams["opts"] = {"ymin": 20*1e-5}
 	else:
 	    myParams["opts"] = {"ymin": 0.0}
 	    myPlotName += "_Linear"
@@ -482,18 +518,7 @@ def createBinnedFitUncertaintyHistograms(hRate, hUp, hDown, applyFrom, opts):
     # Return histogram lists
     return (hupList, hDownList)
 
-if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
-    parser.add_option("-x", "--settings", dest="settings", action="store", help="Name (incl. path) of the settings file to be used as an input")
-    parser.add_option("--noFitUncert", dest="noFitUncert", action="store_true", default=False, help="No fit uncertainty")
-    parser.add_option("--doubleFitUncert", dest="doubleFitUncert", action="store_true", default=False, help="Double the fit uncertainty")
-    parser.add_option("--noSystUncert", dest="noSystUncert", action="store_true", default=False, help="Remove all syst. uncertainties")
-    (opts, args) = parser.parse_args()
-
-    myStyle = tdrstyle.TDRStyle()
-    myStyle.setOptStat(False)
-    
+def main(opts):
     # Check that input arguments are sufficient
     if opts.settings == None:
         raise Exception(ErrorLabel()+"Please provide input parameter file with -x or --params !")
@@ -546,6 +571,13 @@ if __name__ == "__main__":
         myFitParNuisanceInfo = None
         # Treat observation
         hObs = getAndRebinRateHisto("data_obs", myRootFile, config.finalBinning["shape"])
+        myPath = os.getcwd()
+        if "SignalInjection" in myPath:
+            for k in range (0, hObs.GetNbinsX()+1):
+                hObs.SetBinContent(k, round(hObs.GetBinContent(k)))
+            for n in myNuisanceInfo:
+                if n["name"] == "observation":
+                    n["value"] = hObs.Integral()
         myHistogramCache.append(hObs)
         # Loop over column names
         for c in myColumnNames:
@@ -562,7 +594,7 @@ if __name__ == "__main__":
                 hNuisances = getAndRebinQCDShapeNuisanceHistos(c, myRootFile, hRate, myNuisanceInfo, config.finalBinning["shape"])
                 myHistogramCache.extend(hNuisances)
                 # Create bin-by-bin stat. histograms for fitted distribution and update the nuisance table
-                myStatHistograms = addBinByBinStatUncert(c, hRate, myColumnNames, myNuisanceInfo)
+                myStatHistograms = addBinByBinStatUncert(config, c, hRate, myColumnNames, myNuisanceInfo, isSignal=True)
                 myHistogramCache.extend(myStatHistograms)
             else:
                 # Not signal or blacklist, do fit
@@ -581,7 +613,7 @@ if __name__ == "__main__":
                         print "... using fitfunc: %s and range %d-%d"%(s["fitfunc"],s["fitmin"],s["fitmax"])
                 if myFitSettings == None:
                     raise Exception("Could not determine fit function for column '%s'!"%c)
-                myFitter = TailFitter.TailFitter(hFineBinning, c, myFitSettings["fitfunc"], myFitSettings["fitmin"], myFitSettings["fitmax"], myFitSettings["applyFrom"], doPlots=myDrawPlotsStatus)
+                myFitter = TailFitter.TailFitter(hFineBinning, c, myFitSettings["fitfunc"], myFitSettings["fitmin"], myFitSettings["fitmax"], myFitSettings["applyFrom"], doPlots=myDrawPlotsStatus, luminosity=myLuminosity)
                 # Obtain fitted rate with final binning
                 myFittedRateHistograms = myFitter.getFittedRateHistogram(hFineBinning, config.finalBinning["shape"], myFitSettings["applyFrom"])
                 myHistogramCache.extend(myFittedRateHistograms)
@@ -592,7 +624,7 @@ if __name__ == "__main__":
                         print "... Updated rate because of fitting %.1f -> %.1f (diff=%f)"%(hFineBinning.Integral(), myFittedRateHistograms[0].Integral(), myFittedRateHistograms[0].Integral()/hFineBinning.Integral())
                 # Update all those shape nuisances (update histograms only, no need to touch nuisance table)
                 for n in myNuisanceInfo:
-                    if n["distribution"] == "shape" and n[c] == "1":
+                    if n["name"] != "observation" and n["distribution"] == "shape" and n[c] == "1":
                         #print "... Updating shape nuisance '%s' tail"%n["name"]
                         myUpdatedNuisanceHistograms = updateNuisanceTail(hOriginalShape, myFittedRateHistograms[0], myRootFile, "%s_%s"%(c,n["name"]))
                         myHistogramCache.extend(myUpdatedNuisanceHistograms)
@@ -606,6 +638,9 @@ if __name__ == "__main__":
                     myFitter.makeVariationPlotDetailed("", hFinalBinning, myFittedRateHistograms[0], huplist, hdownlist)
                     (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
                     myFitter.makeVariationPlotSimple("", hFinalBinning, myFittedRateHistograms[0], hupTotal, hdownTotal)
+                    # print total uncertainty
+                    print "*** Syst. uncert. from fit: +",1.0-hupTotal.Integral()/myFittedRateHistograms[0].Integral(), "-", 1.0-hdownTotal.Integral()/myFittedRateHistograms[0].Integral()
+
                     hFinalBinning.Delete()
 
                 # Treat blancs (norm == 0)
@@ -635,7 +670,7 @@ if __name__ == "__main__":
                         for hup in huplist:
                             addNuisanceForIndividualColumn(myColumnNames,myNuisanceInfo,c,hup.GetTitle())
                 # Create bin-by-bin stat. histograms for fitted distribution and update the nuisance table
-                myStatHistograms = addBinByBinStatUncert(c, myFittedRateHistograms[0], myColumnNames, myNuisanceInfo, 0.0, myFitSettings["applyFrom"])
+                myStatHistograms = addBinByBinStatUncert(config, c, myFittedRateHistograms[0], myColumnNames, myNuisanceInfo, 0.0, myFitSettings["applyFrom"], isSignal=False)
                 myHistogramCache.extend(myStatHistograms)
                 # Clear memory
                 hFineBinning.Delete()
@@ -660,4 +695,37 @@ if __name__ == "__main__":
         myFile.write(myOutput)
         myFile.close()
         print "... Generated datacard files %s and %s"%(myFilename, myRootFilename)
+
+if __name__ == "__main__":
+    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
+    parser.add_option("-x", "--settings", dest="settings", action="store", help="Name (incl. path) of the settings file to be used as an input")
+    parser.add_option("-r", "--recursive", dest="recursive", action="store_true", default=False, help="Do tail fit recursively to all subdirectories")
+    parser.add_option("--noFitUncert", dest="noFitUncert", action="store_true", default=False, help="No fit uncertainty")
+    parser.add_option("--doubleFitUncert", dest="doubleFitUncert", action="store_true", default=False, help="Double the fit uncertainty")
+    parser.add_option("--noSystUncert", dest="noSystUncert", action="store_true", default=False, help="Remove all syst. uncertainties")
+    (opts, args) = parser.parse_args()
+
+    myStyle = tdrstyle.TDRStyle()
+    myStyle.setOptStat(False)
+
+    plots._legendLabels["MCStatError"] = "Bkg. stat."
+    plots._legendLabels["MCStatSystError"] = "Bkg. stat.#oplussyst."
+    plots._legendLabels["BackgroundStatError"] = "Bkg. stat. unc"
+    plots._legendLabels["BackgroundStatSystError"] = "Bkg. stat.#oplussyst. unc."
+
+    if opts.recursive:
+	opts.settings = "../"+opts.settings
+	myList = os.listdir(".")
+	myShortList = []
+	for l in myList:
+	    if l.startswith("datacards_combine_") and os.path.isdir(l):
+		myShortList.append(l)
+	for l in myShortList:
+	    print "\n*** TailFit for subdirectory %s ***"%l
+	    os.chdir(l)
+	    main(opts)
+	    os.chdir("..")
+    else:
+	main(opts)
 

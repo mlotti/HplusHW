@@ -46,14 +46,15 @@ dataEra = "Run2012ABCD"
 #optMode = "OptQCDTailKillerLoosePlus"
 
 def main():
-    dirEmb = "../embedding_mc_average_140603_153734"
+#    dirEmb = "../embedding_mc_nooptmodes_140826_094514"
+    dirEmb = "../embedding_mc_mtweightedfit_140822_101246"
     dirSig = "."
 
     for optMode in [
-#        "OptQCDTailKillerLoosePlus",
+        "OptQCDTailKillerLoosePlus",
 #        "OptQCDTailKillerMediumPlus",
 #        "OptQCDTailKillerTightPlus",
-            None
+#            None
         ]:
         datasetsEmb = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, dataEra=dataEra, analysisName=analysisEmb, optimizationMode=optMode)
         datasetsSig = dataset.getDatasetsFromMulticrabCfg(directory=dirSig, dataEra=dataEra, analysisName=analysisSig, optimizationMode=optMode)
@@ -78,7 +79,7 @@ def doDataset(datasetsEmb, datasetsSig, optMode):
     histograms.cmsTextMode = histograms.CMSMode.SIMULATION
     histograms.cmsText[histograms.CMSMode.SIMULATION] = "Simulation"
     #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
-    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2)
+    histograms.createLegend.moveDefaults(dx=-0.15, dh=-0.2)
     #histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
     #histograms.uncertaintyMode.set(histograms.uncertaintyMode.SystOnly)
     histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatPlusSyst)
@@ -163,7 +164,9 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, optMode, addData, mt
         return p
 
     plotter.plot(datasetName, createPlot, {
-        "NBjets": {"moveLegend": {"dx": -0.4, "dy": -0.45}}
+        "NBjets": {"moveLegend": {"dx": -0.4, "dy": -0.45}},
+        "shapeTransverseMass": {"moveLegend": {"dy": -0.12}}, #"ratioMoveLegend": {"dx": -0.3}}, 
+        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}},# "ratioMoveLegend": {"dx": -0.3}}
     })
 
 

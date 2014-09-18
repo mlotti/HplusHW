@@ -22,7 +22,7 @@ import ROOT
 #   hRate  rate histogram
 #   xmin   float, specifies minimum value for which bin-by-bin histograms are created (default: all)
 #   xmax   float, specifies maximum value for which bin-by-bin histograms are created (default: all)
-def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
+def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=None, xmax=None):
     myList = []
     myName = hRate.GetTitle()
     # Construct range
@@ -41,7 +41,14 @@ def createBinByBinStatUncertHistograms(hRate, xmin=None, xmax=None):
             hDown = aux.Clone(hRate, "%s_%s_statBin%dDown"%(myName,myName,i))
             hUp.SetTitle(hUp.GetName())
             hDown.SetTitle(hDown.GetName())
-            hUp.SetBinContent(i, hUp.GetBinContent(i)+hUp.GetBinError(i))
+            if hRate.GetBinContent(i) < minimumStatUncertainty:
+                hUp.SetBinContent(i, minimumStatUncertainty)
+                print ShellStyles.WarningLabel()+"Rate is zero for bin %d, setting up stat. uncert. to %f."%(i,minimumStatUncertainty)
+                if hRate.GetBinContent(i) < 0.0:
+                    print ShellStyles.WarningLabel()+"Rate is negative for bin %d, continue at your own risk!"%i
+            else:
+                hUp.SetBinContent(i, hUp.GetBinContent(i)+hUp.GetBinError(i))
+            
             hDown.SetBinContent(i, hDown.GetBinContent(i)-hDown.GetBinError(i))
             # Clear uncertainty bins, because they have no effect on LandS/Combine
             for j in range(1, hRate.GetNbinsX()+1):
@@ -130,6 +137,8 @@ class TableProducer:
         elif opts.combine:
             myLimitCode = "combine"
         self._dirname = "datacards_%s_%s_%s_%s"%(myLimitCode,self._timestamp,self._config.DataCardName.replace(" ","_"),self._outputPrefix)
+        if hasattr(self._config, "OptionSignalInjection"):
+            self._dirname += "_SignalInjection"
         os.mkdir(self._dirname)
         self._infoDirname = self._dirname + "/info"
         os.mkdir(self._infoDirname)
@@ -310,6 +319,8 @@ class TableProducer:
             myLimitCode = "LandS"
         elif self._opts.combine:
             myLimitCode = "Combine"
+        if hasattr(self._config, "OptionSignalInjection"):
+            myLimitCode = "SIGNALINJECTION(%s, norm=%f) %s"%(self._config.OptionSignalInjection["sample"], self._config.OptionSignalInjection["normalization"], myLimitCode)
         if mass == None:
             myString += "Description: %s datacard (auto generated) luminosity=%f 1/pb, %s/%s\n"%(myLimitCode, self._luminosity,self._config.DataCardName,self._outputPrefix)
         else:
@@ -343,7 +354,10 @@ class TableProducer:
             myResult = "Observation    %d\n"%myObsCount
         elif self._opts.combine:
             myResult =  "bin            taunuhadr\n"
-            myResult += "observation    %d\n"%myObsCount
+            if hasattr(self._config, "OptionSignalInjection"):
+                myResult += "observation    %f\n"%myObsCount
+            else:
+                myResult += "observation    %d\n"%myObsCount
         return myResult
 
     ## Generates header for rate table as list
@@ -620,7 +634,7 @@ class TableProducer:
                 c.setResultHistogramsToRootFile(rootFile)
                 # Add bin-by-bin stat.uncert.
                 hRate = c._rateResult.getHistograms()[0]
-                myHistos = createBinByBinStatUncertHistograms(hRate)
+                myHistos = createBinByBinStatUncertHistograms(hRate, self._config.MinimumStatUncertainty)
                 for h in myHistos:
                     h.SetDirectory(rootFile)
                 c._rateResult._tempHistos.extend(myHistos)
@@ -760,10 +774,10 @@ class TableProducer:
                 if EWKFakes != None:
                     myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
             myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
-            if self._config.BlindAnalysis:
-                myOutput += "                            Observed: BLINDED\n\n"
-            else:
-                myOutput += "                            Observed: %5d\n\n"%Data.getRate()
+            #if self._config.BlindAnalysis:
+            #    myOutput += "                            Observed: BLINDED\n\n"
+            #else:
+	    myOutput += "                            Observed: %5d\n\n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
             # Print to screen
             if self._config.OptionDisplayEventYieldSummary:
                 print myOutput
@@ -801,10 +815,10 @@ class TableProducer:
                     myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  Total expected from the SM              & %s \\\\ \n"%getLatexResultString(TotalExpected,formatStr,myPrecision)
-            if self._config.BlindAnalysis:
-                myOutputLatex += "  Observed: & BLINDED \\\\ \n"
-            else:
-                myOutputLatex += "  Observed: & %5d \\\\ \n"%Data.getRate()
+            #if self._config.BlindAnalysis:
+            #    myOutputLatex += "  Observed: & BLINDED \\\\ \n"
+            #else:
+	    myOutputLatex += "  Observed: & %5d \\\\ \n"%self._observation.getCachedShapeRootHistogramWithUncertainties().getRate()
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  \\end{tabular}\n"
             myOutputLatex += "\\end{table}\n"

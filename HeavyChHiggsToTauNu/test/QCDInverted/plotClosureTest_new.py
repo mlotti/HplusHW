@@ -11,15 +11,15 @@ from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult as qcdInvertedResult
-
-myCMSText = "CMS Preliminary"
 
 def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
     def rebin(h, name):
@@ -30,46 +30,56 @@ def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
             myBinning = systematics.getBinningForPlot("shapeInvariantMass")
         else:
             raise Exception("Unknown binning information")
+        maxBin = h.GetXaxis().GetBinUpEdge(h.GetNbinsX())
+        if maxBin < myBinning[-1]:
+            print WarningLabel()+"Adjust rebinning last bin from %.0f to %.0f because that is the up edge of last bin in the historam" % (myBinning[-1], maxBin)
+            myBinning[-1] = 500
         myArray = array.array("d",myBinning)
         # Rebin and move under/overflow bins to visible bins
         h = h.Rebin(len(myBinning)-1,"",myArray)
-        h.SetBinContent(1, h.GetBinContent(0)+h.GetBinContent(1))
-        h.SetBinError(1, math.sqrt(h.GetBinContent(0)**2 + h.GetBinContent(1)**2))
-        h.SetBinContent(h.GetNbinsX()+1, h.GetBinContent(h.GetNbinsX()+1)+h.GetBinContent(h.GetNbinsX()+2))
-        h.SetBinError(h.GetNbinsX()+1, math.sqrt(h.GetBinError(h.GetNbinsX()+1)**2 + h.GetBinError(h.GetNbinsX()+2)**2))
-        h.SetBinContent(0, 0.0)
-        h.SetBinError(0, 0.0)
-        h.SetBinContent(h.GetNbinsX()+2, 0.0)
-        h.SetBinError(h.GetNbinsX()+2, 0.0)
+        histogramsExtras.makeFlowBinsVisible(h)
         return h
 
-    hbase.SetLineColor(ROOT.kBlack)
-    hinv.SetLineColor(ROOT.kRed)
+    #hbase.SetFillColor(ROOT.kGray)
+    hbase.SetLineColor(ROOT.kGray)
+    hbase.SetFillColor(hbase.GetLineColor())
+    hinv.SetLineColor(ROOT.kBlue)
     # Rebin
     hbase = rebin(hbase, histoName)
     hinv = rebin(hinv, histoName)
     # Normalize
     print "baseline: %.1f events, inverted %.1f events"%(hbase.Integral(), hinv.Integral())
-    #hbase.Scale(1.0 / hbase.Integral())
-    #hinv.Scale(1.0 / hinv.Integral())
+    toUnitArea = True
+    if toUnitArea:
+        hbase.Scale(1.0 / hbase.Integral())
+        hinv.Scale(1.0 / hinv.Integral())
     # Plot
-    baseHisto = histograms.Histo(hbase, "Isolated", drawStyle="HIST", legendStyle="l")
-    invHisto = histograms.Histo(hinv, "Anti-isolated", drawStyle="HIST", legendStyle="l")
-    plot = plots.ComparisonPlot(baseHisto, invHisto)
+    baseHisto = histograms.Histo(hbase, "Isolated", drawStyle="HIST", legendStyle="F")
+    invHisto = histograms.Histo(hinv, "Anti-isolated", drawStyle="HIST E", legendStyle="l")
+    plot = plots.ComparisonPlot(invHisto, baseHisto)
     plot.setLuminosity(luminosity)
     plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(3))
+    if toUnitArea:
+        plot.appendPlotObject(histograms.PlotText(0.5, 0.6, "Normalized to unit area", size=20))
     myPlotName = "%s/QCDInv_ClosureTest_%s"%(myDir, histoName)
     myParams = {}
-    myParams["ylabel"] = "Events/#Deltam_{T}, normalized to 1"
+    if toUnitArea:
+        myParams["ylabel"] = "A.u.    "
+    else:
+        myParams["ylabel"] = "< Events / GeV >"
+    myParams["xlabel"] = "m_{T} (GeV)"
     myParams["log"] = False
     myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
     myParams["opts"] = {"ymin": 0.0}
     myParams["ratio"] = True
     myParams["ratioType"] = "errorScale"
-    myParams["ratioYlabel"] = "Var./Nom."
-    myParams["cmsText"] = myCMSText
+    myParams["ratioYlabel"] = "Anti-isol./Isol."
+    myParams["ratioCreateLegend"] = True
+    myParams["ratioMoveLegend"] = {"dx": -0.05, "dy": -0.4, "dh": -0.1}
+    myParams["cmsTextPosition"] = "right"
     myParams["addLuminosityText"] = True
     myParams["divideByBinWidth"] = True
+    plots._legendLabels["BackgroundStatError"] = "Isol. stat. unc."
     plots.drawPlot(plot, myPlotName, **myParams)
 
 def doClosureTestPlots(opts, dsetMgr, moduleInfoString, myDir, luminosity, normFactors):
@@ -205,7 +215,8 @@ if __name__ == "__main__":
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.15)
+    histograms.createLegend.moveDefaults(dx=-0.1, dy=-0.12, dh=-0.2)
+    histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
 
     myDisplayStatus = True
     # Loop over era/searchMode/optimizationMode options

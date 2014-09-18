@@ -141,9 +141,8 @@ def doPlot(name, graphs, limits, xlabel):
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.2
@@ -173,9 +172,8 @@ def doPlotMu(name, graphs, styleList, limits, xlabel):
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.2

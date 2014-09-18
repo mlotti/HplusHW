@@ -393,7 +393,7 @@ oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng")
 deltaPhiTauMET = cms.untracked.double(180.0) # less than this value in degrees, for heavy charged Higgs
 
 def QCDTailKillerBin(cutShape, cutX, cutY):
-    validShapes = ["noCut", "rectangular", "triangular", "circular"]
+    validShapes = ["noCut", "rectangular", "triangular", "circular", "minDeltaPhiJetMET"]
     if cutShape not in validShapes:
         raise Exception("QCDTailKiller config for cut shape '%s' is not valid! (options: %s)"%(cutShape,", ".join(map(str, validShapes))))
     return cms.untracked.PSet(
@@ -504,13 +504,46 @@ QCDTailKillerVeryTightPlus = QCDTailKiller.clone(
     )
 )
 
+QCDTailKillerLooseJetMET = QCDTailKiller.clone(
+    scenarioLabel = cms.untracked.string("LooseJetMet"),
+    backToBack = cms.untracked.VPSet(
+        QCDTailKillerBin("minDeltaPhiJetMET", 40.0, 40.0), # jet 1
+        QCDTailKillerBin("minDeltaPhiJetMET", 40.0, 40.0), # jet 2
+        QCDTailKillerBin("minDeltaPhiJetMET", 40.0, 40.0), # jet 3
+        QCDTailKillerBin("noCut", 40.0, 40.0), # jet 4
+    ), # collinear values have no effect
+)
+
+QCDTailKillerMediumJetMET = QCDTailKiller.clone(
+    scenarioLabel = cms.untracked.string("MediumJetMet"),
+    backToBack = cms.untracked.VPSet(
+        QCDTailKillerBin("minDeltaPhiJetMET", 60.0, 60.0), # jet 1
+        QCDTailKillerBin("minDeltaPhiJetMET", 60.0, 60.0), # jet 2
+        QCDTailKillerBin("minDeltaPhiJetMET", 60.0, 60.0), # jet 3
+        QCDTailKillerBin("noCut", 60.0, 60.0), # jet 4
+    ), # collinear values have no effect
+)
+
+QCDTailKillerTightJetMET = QCDTailKiller.clone(
+    scenarioLabel = cms.untracked.string("TightJetMet"),
+    backToBack = cms.untracked.VPSet(
+        QCDTailKillerBin("minDeltaPhiJetMET", 80.0, 80.0), # jet 1
+        QCDTailKillerBin("minDeltaPhiJetMET", 80.0, 80.0), # jet 2
+        QCDTailKillerBin("minDeltaPhiJetMET", 80.0, 80.0), # jet 3
+        QCDTailKillerBin("noCut", 80.0, 80.0), # jet 4
+    ), # collinear values have no effect
+)
+
 # Define here QCD tail killer scenarios (note that the nominal module will be produced in addition to these)
 QCDTailKillerScenarios = [#"QCDTailKillerNoCuts",
                           #"QCDTailKillerZeroPlus",
                           "QCDTailKillerLoosePlus",
-                          #"QCDTailKillerMediumPlus",
-                          #"QCDTailKillerTightPlus",
-                          #"QCDTailKillerVeryTightPlus"
+                          "QCDTailKillerMediumPlus",
+                          "QCDTailKillerTightPlus",
+                          #"QCDTailKillerVeryTightPlus",
+                          #"QCDTailKillerLooseJetMET",
+                          #"QCDTailKillerMediumJetMET",
+                          #"QCDTailKillerTightJetMET",
                           ]
 
 # Define H+ Invariant Mass Reco options
@@ -679,6 +712,7 @@ commonPlotsSettings = cms.untracked.PSet(
     ptBins = SetHistogramBinSettings(50, 0., 500.),
     etaBins = SetHistogramBinSettings(60, -3., 3.),
     phiBins = SetHistogramBinSettings(72, -3.1415926, 3.1415926),
+    deltaPhiBins = SetHistogramBinSettings(18, 0., 180.), # used in 2D plots, i.e. putting high number of bins here will cause troubles
     rtauBins = SetHistogramBinSettings(55, 0., 1.1),
     njetsBins = SetHistogramBinSettings(20, 0., 20.),
     metBins = SetHistogramBinSettings(50, 0., 500.),
@@ -819,6 +853,45 @@ embeddingMuonIdEfficiency.useMaxUncertainty = cms.bool(True)
 embeddingMuonTriggerEfficiency = muonTriggerIDEfficiency.efficiency_trigger
 embeddingMuonTriggerEfficiency.variationEnabled = cms.bool(False)
 embeddingMuonTriggerEfficiency.useMaxUncertainty = cms.bool(True)
+
+## bin-based mT weighting
+# embeddingMTWeight = cms.untracked.PSet(
+#     data = cms.FileInPath("HiggsAnalysis/HeavyChHiggsToTauNu/data/embedding_mt_weight_met60_loose.json"),
+#     dataSelect = cms.vstring("Run2012ABCD"),
+#     mcSelect = cms.string("Run2012ABCD"),
+#     mode = cms.untracked.string("disabled"),
+#     type = cms.untracked.string("binned"),
+#     variationEnabled = cms.bool(False),
+#     useMaxUncertainty = cms.bool(False),
+# )
+
+# def setEmbeddingMTWeightBasedOnSelection(signalAnalysis, name):
+#     if signalAnalysis.embeddingMTWeight.mode.value() == "disabled":
+#         return
+#     if signalAnalysis.embeddingMTWeight.mode.value() != "dataEfficiency":
+#         raise Exception("Invalid value for embeddingMTWeight.mode '%s' for module %s" % (signalAnalysis.embeddingMTWeight.mode.value(), name))
+
+#     tailKiller = None
+#     strtk = str(signalAnalysis.QCDTailKiller)
+#     if strtk == str(QCDTailKillerNoCuts):
+#         tailKiller = "nocuts"
+#     elif strtk == str(QCDTailKillerLoosePlus):
+#         tailKiller = "loose"
+#     elif strtk == str(QCDTailKillerMediumPlus):
+#         tailKiller = "medium"
+#     elif strtk == str(QCDTailKillerTightPlus):
+#         tailKiller = "tight"
+#     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+#     signalAnalysis.embeddingMTWeight.data = HChTools.getEfficiencyJsonFullPath("Embedding mT weight", "embedding_mt_weight", "met%.0f_%s" % (signalAnalysis.MET.METCut.value(), tailKiller))
+#     print "Using embedding mT weight file %s for %s" % (str(signalAnalysis.embeddingMTWeight.data), name)
+## fit-based mT weighting
+embeddingMTWeight = cms.untracked.PSet(
+    formula = cms.string("(-0.0017*x+1.26)*(x<=160) + 1*(x>160)"), # average over MET{60,70,80} and tail killer scenarios, rounded
+    enabled = cms.bool(False),
+    variationEnabled = cms.bool(False),
+    variationDirection = cms.int32(0)
+)
+
 
 # Look up dynamically the triggers for which the parameters exist
 #import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff

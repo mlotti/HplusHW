@@ -166,7 +166,19 @@ def main(opts, moduleSelector, multipleDirs):
                         print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sinverted%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
                     dcgen.setDsetMgrCreators(signalDsetCreator,embeddingDsetCreator,myQCDDsetCreator)
                     # Do the heavy stuff
-                    myOutputDirectories.append(dcgen.doDatacard(era,searchMode,optimizationMode,mcrabInfoOutput))
+                    myDir = dcgen.doDatacard(era,searchMode,optimizationMode,mcrabInfoOutput)
+                    myOutputDirectories.append(myDir)
+                    # Do tail fit for heavy H+ if asked
+                    if opts.dotailfit:
+                        myHeavyStatus = True
+                        for m in config.MassPoints:
+                            if m < 175:
+                                myHeavyStatus = False
+                        if myHeavyStatus:
+                            print "Doing tail fit ..."
+                            os.chdir(myDir)
+                            os.system("../tailFitter.py -x ../tailFitSettings.py")
+                            os.chdir("..")
     print "\nDatacard generator is done."
     myEndTime = time.time()
     print "Running took on average %.1f s / datacard (total elapsed time: %.1f s)"%((myEndTime-myStartTime)/float(myDatacardCount), (myEndTime-myStartTime))
@@ -218,6 +230,7 @@ if __name__ == "__main__":
     parser.add_option("--multipleDirs", dest="multipleDirs", action="store", help="Name of base dir for creating datacards for multiple directories (wildcard is added at the end)")
     parser.add_option("--systAnalysis", dest="systAnalysis", action="store_true", default=False, help="Runs the macro for generating systematic uncertainties plots")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
+    parser.add_option("--tailfit", dest="dotailfit", action="store_true", default=False, help="Runs the tail fitter for heavy H+ after the cards are done")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
     parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
     parser.add_option("--debugDatasets", dest="debugDatasets", action="store_true", default=False, help="Enable debugging print for datasetMgr contents")
