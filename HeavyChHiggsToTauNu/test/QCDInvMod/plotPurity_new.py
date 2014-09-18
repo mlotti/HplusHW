@@ -25,6 +25,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
 #                 "ForDataDrivenCtrlPlots/SelectedTau_pT_AfterMtSelections"]
 #histoNameList = ["shapeTransverseMass"]
 #histoNameList = ["shapeEWKGenuineTausTransverseMass"]
+#histoNameList = ["ForDataDrivenCtrlPlots/SelectedTau_pT_AfterMtSelections","ForDataDrivenCtrlPlots/SelectedGenuineTau_pT_AfterMtSelections","shapeTransverseMass", "shapeEWKGenuineTausTransverseMass"]
 histoNameList = ["shapeTransverseMass", "shapeEWKGenuineTausTransverseMass"]
 
 def doSinglePlot(histograms, myDir, histoName, luminosity):
@@ -45,7 +46,7 @@ def doSinglePlot(histograms, myDir, histoName, luminosity):
     #myParams["ratioYlabel"] = "Var./Nom."
     myParams["cmsText"] = "CMS preliminary"
     myParams["addLuminosityText"] = True
-    if histoName == "shapeEWKGenuineTausTransverseMass":
+    if "Genuine" in histoName:
         myParams["moveLegend"] = {"dx": -0.05, "dy": -0.45}
     else:
         myParams["moveLegend"] = {"dx": -0.05, "dy": 0.0}
