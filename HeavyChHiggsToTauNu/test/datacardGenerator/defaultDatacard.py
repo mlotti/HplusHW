@@ -87,6 +87,11 @@ OptionConvertFromShapeToConstantList = ["trg_tau","trg_tau_dataeff","trg_tau_MCe
                                         "pileup", "pileup_fakes", # pileup
                                         ]
 
+# Separate in the following shape nuisances the shape and normalization components
+OptionSeparateShapeAndNormalizationFromSystVariationList = [
+                                                            #"ES_taus"
+                                                           ]
+
 # For projections
 trg_MET_dataeffScaleFactor = None # Default is None, i.e. 1.0
 
@@ -1026,6 +1031,9 @@ MergeNuisances.append(["lumi", "lumi_forQCD"])
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import convertFromSystVariationToConstant
 convertFromSystVariationToConstant(Nuisances, OptionConvertFromShapeToConstantList)
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import separateShapeAndNormalizationFromSystVariation
+separateShapeAndNormalizationFromSystVariation(Nuisances, OptionSeparateShapeAndNormalizationFromSystVariationList)
 
 # Control plots
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput

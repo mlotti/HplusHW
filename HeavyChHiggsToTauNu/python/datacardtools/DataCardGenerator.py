@@ -398,6 +398,21 @@ class DataCardGenerator:
                         #applyWeighting(down, myJsonBins)
                     ##c.getCachedShapeRootHistogramWithUncertainties().Debug()
 
+        # Separate nuisances with additional information into an individual nuisance (horror!)
+        for c in self._columns:
+            myNewNuisanceIdsList = c.doSeparateAdditionalResults()
+            # Append
+            for item in myNewNuisanceIdsList:
+                myFoundStatus = False
+                for e in self._extractors:
+                    if item == e.getId():
+                        myFoundStatus = True
+                if not myFoundStatus:
+                    myExtractor = Extractor.ConstantExtractor(exid = item, constantValue = -1.0, distribution = "lnN", 
+                                                              description = item+" normalization",
+                                                              mode = Extractor.ExtractorMode.ASYMMETRICNUISANCE)
+                    self._extractors.append(myExtractor)
+
         # Make datacards
         myProducer = TableProducer.TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
                                    luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
@@ -833,6 +848,14 @@ class DataCardGenerator:
                                                        scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "ShapeVariation":
                 self._extractors.append(Extractor.ShapeVariationExtractor(exid = n.id,
+                                                                distribution = n.distr,
+                                                                description = n.label,
+                                                                systVariation = n.getArg("systVariation"),
+                                                                mode = Extractor.ExtractorMode.SHAPENUISANCE,
+                                                                opts = self._opts,
+                                                                scaleFactor = n.getArg("scaleFactor")))
+            elif n.function == "ShapeVariationSeparateShapeAndNormalization":
+                self._extractors.append(Extractor.ShapeVariationSeparateShapeAndNormalization(exid = n.id,
                                                                 distribution = n.distr,
                                                                 description = n.label,
                                                                 systVariation = n.getArg("systVariation"),
