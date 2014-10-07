@@ -389,8 +389,8 @@ class LHCTypeAsymptotic:
             opts3 = " --bkgonlyfit"
         else:
             opts3 = " --sbfit"
-        if int(mass) > 173:
-            opts3 += " --heavy"
+        #if int(mass) > 173:
+        #    opts3 += " --heavy"
         command.append("python %s/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit/plotMLFits.py -m %s %s" % (os.environ["CMSSW_BASE"], mass, opts3))
         
         aux.writeScript(os.path.join(self.dirname, fname), "\n".join(command)+"\n")
