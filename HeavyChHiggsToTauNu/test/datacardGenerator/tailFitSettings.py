@@ -65,6 +65,18 @@ EWKFake = {
     "applyFrom": applyfrom,
 }
 
+# Fit settings for EWK+tt with fake taus
+EWKFake = {
+    "id": "EWKnontt_faketau",
+    #"fitfunc": "FitFuncSimpleExp",
+    #"fitfunc": "FitFuncExpTailExo",
+    "fitfunc": function,
+    "fitmin": fitstart, # 140
+    "fitmax": fitstop,
+    "applyFrom": applyfrom,
+}
+
+
 # List of backgrounds, for which no fit is done
 Blacklist = [
   #"t_EWK_faketau",
