@@ -20,12 +20,12 @@ Path = "/home/wendland/data/test_2014-09-05"
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 #LightMassPoints      = [80,120,160]
-#LightMassPoints      = [120]
+LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
 #HeavyMassPoints      = [300]
-#HeavyMassPoints      = []
+HeavyMassPoints      = []
 
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
@@ -60,10 +60,10 @@ OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produce
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = not True
+OptionDoControlPlots = True
 OptionDoMergeFakeTauColumns = True # Merges the fake tau columns into one
 OptionCombineSingleColumnUncertainties = True # Makes limit running faster
-OptionCtrlPlotsAtMt = not True # Produce control plots after all selections (all selections for transverse mass)
+OptionCtrlPlotsAtMt = True # Produce control plots after all selections (all selections for transverse mass)
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
 OptionRemoveHHDataGroup = False
