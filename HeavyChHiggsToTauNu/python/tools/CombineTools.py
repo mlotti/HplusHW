@@ -57,10 +57,10 @@ lhcAsymptoticOptionsObserved = "-M Asymptotic --picky -v 2 --rAbsAcc 0.00001"
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRminSigmaBr = "0.001" # pb
-lhcAsymptoticRminBrLimit = "0" # percent
+lhcAsymptoticRminBrLimit = "0" # plain number
 ## Default "Rmax" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRmaxSigmaBr = "1.0" # pb
-lhcAsymptoticRmaxBrLimit = "1.0" # percent
+lhcAsymptoticRmaxBrLimit = "0.03" # plain number
 
 ## Deduces from directory listing the mass point list
 def obtainMassPoints(pattern):
