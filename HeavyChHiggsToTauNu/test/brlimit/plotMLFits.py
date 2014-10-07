@@ -87,7 +87,7 @@ def doBkgFitPlots(mlfit, lumi):
         plot.save()
     
 
-    (gr, labels) = mlfit.fittedGraph(firstMass, backgroundOnly=True)
+    (gr, labels) = mlfit.fittedGraph(firstMass, backgroundOnly=opts.bkgonlyfit, signalPlusBackground=opts.sbfit, heavyHplusMode=opts.heavyhplus)
     createDrawPlot(gr, labels, "mlfit_backgroundOnly")
 
     try:
@@ -101,8 +101,14 @@ _limitTaskDirPrefix = "CombineMultiCrab"
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-r", dest="recursive", action="store_true", default=False, help="Print more information")
+    parser.add_option("--bkgonlyfit", dest="bkgonlyfit", action="store_true", default=False, help="Background-only fit (default)")
+    parser.add_option("--sbfit", dest="sbfit", action="store_true", default=False, help="Signal+background fit")
+    parser.add_option("-r", dest="recursive", action="store_true", default=False, help="Find datacard directories recursively")
+    parser.add_option("--heavy", dest="heavyhplus", action="store_true", default=False, help="Plotting for heavy H+")
+    
     (opts, args) = parser.parse_args()
+    if not opts.sbfit:
+        opts.bkgonlyfit = True
 
     if opts.recursive:
         # Build list of directories
