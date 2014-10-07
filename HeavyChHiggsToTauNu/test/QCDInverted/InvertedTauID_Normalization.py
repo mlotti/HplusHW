@@ -33,6 +33,8 @@ dataEra = "Run2012ABCD"
 searchMode = "Light"
 #searchMode = "Heavy"
 
+optimizationMode = "OptQCDTailKillerLoosePlus"
+
 def usage():
     print "\n"
     print "### Usage:   InvertedTauID_Normalization.py <multicrab dir>\n"
@@ -60,7 +62,7 @@ def main(argv):
     # Create all datasets from a multicrab task
     # datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
     #datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis, optimizationMode=optimizationMode)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
 
     # Check multicrab consistency
