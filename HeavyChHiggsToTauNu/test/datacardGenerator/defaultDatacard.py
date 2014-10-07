@@ -8,7 +8,8 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
 #Path = "/home/wendland/data/xnortau"
 #Path = "/home/wendland/data/test_nominal_dphi"
-Path = "/home/wendland/data/xnominal"
+#Path = "/home/wendland/data/xnominal"
+Path = "/home/wendland/data/test_2014-09-05"
 #Path = "/home/wendland/data/xnominal"
 #Path = "/home/wendland/data/test_matti_met60_paramweight"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
@@ -19,12 +20,12 @@ Path = "/home/wendland/data/xnominal"
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 #LightMassPoints      = [80,120,160]
-LightMassPoints      = [120]
+#LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
-HeavyMassPoints      = [300]
-HeavyMassPoints      = []
+#HeavyMassPoints      = [300]
+#HeavyMassPoints      = []
 
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
@@ -59,10 +60,10 @@ OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produce
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = True
+OptionDoControlPlots = not True
 OptionDoMergeFakeTauColumns = True # Merges the fake tau columns into one
 OptionCombineSingleColumnUncertainties = True # Makes limit running faster
-OptionCtrlPlotsAtMt = True # Produce control plots after all selections (all selections for transverse mass)
+OptionCtrlPlotsAtMt = not True # Produce control plots after all selections (all selections for transverse mass)
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
 OptionRemoveHHDataGroup = False
@@ -81,7 +82,7 @@ OptionSqrtS = 8 # sqrt(s)
 # Tolerance for throwing error on luminosity difference (0.01 = 1 percent agreement is required)
 ToleranceForLuminosityDifference = 0.05
 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
-ToleranceForMinimumRate = 1.5
+ToleranceForMinimumRate = 0.0 # 1.5
 # Minimum stat. uncertainty to set to bins with zero events
 MinimumStatUncertainty = 0.5
 
@@ -430,11 +431,12 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
 elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
     # Replace embedding and fakes with MC
     myList = ["Wjets_MC","DY_MC","VV_MC"]
-    if not OptionAddSingleTopDependencyForMuParameter:
-        myList.append("sngltop_MC")
-        mergeColumnsByLabel.append({"label": "EWKnontop_MC", "mergeList": myList[:]})
-    else:
-        mergeColumnsByLabel.append({"label": "EWKnontt_MC", "mergeList": myList[:]})
+    if OptionDoMergeFakeTauColumns:
+        if not OptionAddSingleTopDependencyForMuParameter:
+            myList.append("sngltop_MC")
+            mergeColumnsByLabel.append({"label": "EWKnontop_MC", "mergeList": myList[:]})
+        else:
+            mergeColumnsByLabel.append({"label": "EWKnontt_MC", "mergeList": myList[:]})
     DataGroups.append(DataGroup(
         label        = "ttbar_MC",
         landsProcess = 1,
@@ -653,29 +655,37 @@ if OptionIncludeSystematics:
     Nuisances.append(Nuisance(
         id            = "ES_taus",
         label         = "TES bin-by-bin uncertainty",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        distr         = "lnN",
+        function      = "ShapeVariationToConstant",
         systVariation = "TES",
     ))
     Nuisances.append(Nuisance(
         id            = "ES_jets",
         label         = "JES bin-by-bin uncertainty",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        distr         = "lnN",
+        function      = "ShapeVariationToConstant",
         systVariation = "JES",
     ))
     Nuisances.append(Nuisance(
         id            = "JER",
         label         = "Jet energy resolution",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        distr         = "lnN",
+        function      = "ShapeVariationToConstant",
         systVariation = "JER",
     ))
     Nuisances.append(Nuisance(
         id            = "ES_METunclustered",
         label         = "MET unclustered scale bin-by-bin uncertainty",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        distr         = "lnN",
+        function      = "ShapeVariationToConstant",
         systVariation = "MET",
     ))
     Nuisances.append(Nuisance(
@@ -944,16 +954,20 @@ if OptionIncludeSystematics:
     Nuisances.append(Nuisance(
         id            = "pileup",
         label         = "pileup",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
+#        distr         = "shapeQ",
+#        function      = "ShapeVariation",
+        distr         = "lnN",
+        function      = "ShapeVariationToConstant",
         systVariation = "PUWeight",
     ))
 
     Nuisances.append(Nuisance(
         id            = "pileup_fakes",
         label         = "pileup",
-        distr         = "shapeQ",
-        function      = "ShapeVariation",
+        #distr         = "shapeQ",
+        #function      = "ShapeVariation",
+        distr         = "lnN",
+        function      = "ShapeVariationToConstant",
         systVariation = "PUWeight",
     ))
 else:
@@ -1594,7 +1608,7 @@ if OptionMassShape == "TransverseMass":
                             #"unit": "GeV",
                             "xlabel": "m_{T} (GeV)",
                             "ylabel": "< Events / bin >", "ylabelBinInfo": False,
-                            "moveLegend": {"dx": -0.22, "dy": -0.1},
+                            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
                             "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
                             "divideByBinWidth": True,
                             "log": False,
@@ -1617,11 +1631,11 @@ if OptionMassShape == "TransverseMass":
                             #"unit": "GeV",
                             "xlabel": "m_{T} (GeV)",
                             "ylabel": "< Events / bin >", "ylabelBinInfo": False,
-                            "moveLegend": {"dx": -0.22, "dy": -0.1},
+                            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
                             "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
                             "divideByBinWidth": True,
                             "log": True,
-                            "opts": {"ymin": 1e-5},
+                            "opts": {"ymin": 1e-3},
                             "opts2": {"ymin": 0.0, "ymax": 2.0}
                            },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot

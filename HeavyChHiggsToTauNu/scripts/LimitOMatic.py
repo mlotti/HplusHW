@@ -68,10 +68,12 @@ class Result:
             myGridStatus = False
         if myGridStatus:
             myCommand += " --create"
-        if not self._opts.nomlfit:
+        if self._opts.nomlfit:
             myCommand += " --nomlfit"
         if self._opts.significance:
             myCommand += " --significance"
+        if self._opts.unblinded:
+            myCommand += " --final"
         print "Creating jobs with:",myCommand
         os.system(myCommand)
         if myGridStatus:

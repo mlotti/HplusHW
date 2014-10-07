@@ -57,10 +57,10 @@ lhcAsymptoticOptionsObserved = "-M Asymptotic --picky -v 2 --rAbsAcc 0.00001"
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRminSigmaBr = "0.001" # pb
-lhcAsymptoticRminBrLimit = "0" # percent
+lhcAsymptoticRminBrLimit = "0" # plain number
 ## Default "Rmax" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRmaxSigmaBr = "1.0" # pb
-lhcAsymptoticRmaxBrLimit = "1.0" # percent
+lhcAsymptoticRmaxBrLimit = "0.03" # plain number
 
 ## Default command line options for observed significance
 lhcFreqSignificanceObserved = "-M ProfileLikelihood --significance --scanPoints 1000"
@@ -565,7 +565,7 @@ class LHCTypeAsymptotic:
         raise Exception("Unable to parse the output of command '%s'" % script)
 
     def _runMLFit(self, mass):
-        if mass in self.mlfitScripts:
+        if mass in self.mlfitScripts.keys():
             script = self.mlfitScripts[mass]
             self._run(script, "mlfit_m_%s_output.txt" % mass)
         else:
