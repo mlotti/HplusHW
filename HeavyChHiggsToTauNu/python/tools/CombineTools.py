@@ -331,10 +331,7 @@ class LHCTypeAsymptotic:
         command.append("combine %s -d %s" % (opts, myInputDatacardName))
         aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.obsAndExpScripts[mass] = fileName
-        if not self.opts.nomlfit:
-            self._createMLFit(mass, fileName, myInputDatacardName)
-        else:
-            print "skipping creation of ML fit scripts, to enable run with --nomlfit"
+        self._createMLFit(mass, fileName, myInputDatacardName, blindedMode=False)
 
     ## Create the expected job script for a single mass point
     #
@@ -357,10 +354,13 @@ class LHCTypeAsymptotic:
         command.append("combine %s -d %s" % (opts, myInputDatacardName))
         aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.blindedScripts[mass] = fileName
+        self._createMLFit(mass, fileName, myInputDatacardName, blindedMode=True)
 
-        self._createMLFit(mass, fileName, myInputDatacardName)
-
-    def _createMLFit(self, mass, fileName, datacardName):
+    def _createMLFit(self, mass, fileName, datacardName, blindedMode):
+        if self.opts.nomlfit:
+            print "skipping creation of ML fit scripts, to enable run without --nomlfit"
+            return
+          
         fname = fileName.replace("runCombine", "runCombineMLFit")
         outputdir = "mlfit_m%s" % mass
         opts = "-M MaxLikelihoodFit"
@@ -384,6 +384,15 @@ class LHCTypeAsymptotic:
         opts2 = opts + " --vtol 99. --stol 0.50 --vtol2 99. --stol2 0.90" 
         command.append("python %s/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py %s %s/mlfit.root > %s/diffNuisances_largest_constraints.txt" % (os.environ["CMSSW_BASE"], opts2, outputdir, outputdir))
         command.append("combineReadMLFit.py -f %s/diffNuisances.txt -c configuration.json -m %s -o mlfit.json" % (outputdir, mass))
+        opts3 = ""
+        if blindedMode:
+            opts3 = " --bkgonlyfit"
+        else:
+            opts3 = " --sbfit"
+        if int(mass) > 173:
+            opts3 += " --heavy"
+        command.append("python %s/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit/plotMLFits.py -m %s %s" % (os.environ["CMSSW_BASE"], mass, opts3))
+        
         aux.writeScript(os.path.join(self.dirname, fname), "\n".join(command)+"\n")
 
         self.mlfitScripts[mass] = fname
