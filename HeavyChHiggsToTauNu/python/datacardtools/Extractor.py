@@ -648,7 +648,7 @@ class ShapeVariationExtractor(ExtractorBase):
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
-        print "ShapeExtractor"
+        print "ShapeVariationExtractor"
         ExtractorBase.printDebugInfo(self)
 
 ## ShapeVariationExtractor class
