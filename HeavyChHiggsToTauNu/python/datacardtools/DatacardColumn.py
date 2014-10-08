@@ -7,7 +7,7 @@ import sys
 import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,QCDShapeVariationExtractor,ConstantExtractor,ShapeVariationFromJsonExtractor
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,QCDShapeVariationExtractor,ConstantExtractor,ShapeVariationFromJsonExtractor,ShapeVariationToConstantExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
@@ -331,8 +331,9 @@ class DatacardColumn():
         myShapeVariationList = []
         for nid in self._nuisanceIds:
             for e in extractors:
-                if e.getId() == nid and e.getDistribution() == "shapeQ" and not isinstance(e, ConstantExtractor):
-                    myShapeVariationList.append(e._systVariation)
+                if e.getId() == nid:
+                    if (e.getDistribution() == "shapeQ" and not isinstance(e, ConstantExtractor)) or isinstance(e, ShapeVariationToConstantExtractor):
+                        myShapeVariationList.append(e._systVariation)
         # Check status for HH
         if self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr):
             print ShellStyles.WarningLabel()+"Skipping ..."
@@ -496,6 +497,7 @@ class DatacardColumn():
         # Print list of uncertainties
         if self._opts.verbose and dsetMgr != None and not self.typeIsEmptyColumn():
             print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
+        #self._cachedShapeRootHistogramWithUncertainties.Debug()
 
         # Obtain results for control plots
         if config.OptionDoControlPlots:
