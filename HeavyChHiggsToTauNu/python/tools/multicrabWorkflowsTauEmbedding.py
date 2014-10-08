@@ -203,6 +203,14 @@ def getDefaultDefinitions_53X():
         "TTToHplusBHminusB_M150_ext_Summer12":     TaskDefMC(),
         "TTToHplusBHminusB_M155_ext_Summer12":     TaskDefMC(),
         "TTToHplusBHminusB_M160_ext_Summer12":     TaskDefMC(),
+        "HplusTB_M180_ext_Summer12":               TaskDefMC(),
+        "HplusTB_M200_ext_Summer12":               TaskDefMC(),
+        "HplusTB_M300_ext_Summer12":               TaskDefMC(),
+        "HplusTB_M600_Summer12":                   TaskDefMC(),
+        "HplusToTBbar_M180_Summer12":              TaskDefMC(),
+        "HplusToTBbar_M200_Summer12":              TaskDefMC(),
+        "HplusToTBbar_M300_Summer12":              TaskDefMC(),
+        "HplusToTBbar_M600_Summer12":              TaskDefMC(),
         }
 
 
@@ -365,7 +373,15 @@ def addEmbeddingSkim_53X(version, datasets, updateDefinitions):
         "TTToHplusBHminusB_M150_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
         "TTToHplusBHminusB_M155_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
         "TTToHplusBHminusB_M160_ext_Summer12":     TaskDef(njobsIn= 150, njobsOut=1), # FIXME: set njobsOut
-        }
+        "HplusTB_M180_ext_Summer12":               TaskDef(njobsIn= 150, njobsOut=1),
+        "HplusTB_M200_ext_Summer12":               TaskDef(njobsIn= 150, njobsOut=1),
+        "HplusTB_M300_ext_Summer12":               TaskDef(njobsIn= 150, njobsOut=1),
+        "HplusTB_M600_Summer12":                   TaskDef(njobsIn= 150, njobsOut=1),
+        "HplusToTBbar_M180_Summer12":              TaskDef(njobsIn= 50, njobsOut=1),
+        "HplusToTBbar_M200_Summer12":              TaskDef(njobsIn= 50, njobsOut=1),
+        "HplusToTBbar_M300_Summer12":              TaskDef(njobsIn= 50, njobsOut=1),
+        "HplusToTBbar_M600_Summer12":              TaskDef(njobsIn= 50, njobsOut=1),
+    }
 
     workflowName = "tauembedding_skim_"+version
 
@@ -1011,22 +1027,50 @@ def addEmbeddingSkim_v53_3(datasets):
         # User mean 2023.1, min 308.4, max 3119.9
         # Mean 140.8 MB, min 13.9 MB, max 159.0 MB
         "QCD_Pt20_MuEnriched_TuneZ2star_Summer12": TaskDef("/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6/local-Summer12_DR53X_PU_S10_START53_V7A_v3_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER"),
-        "TTToHplusBWB_M80_ext_Summer12":           TaskDef(""),
-        "TTToHplusBWB_M90_ext_Summer12":           TaskDef(""),
-        "TTToHplusBWB_M100_ext_Summer12":          TaskDef(""),
-        "TTToHplusBWB_M120_ext_Summer12":          TaskDef(""),
-        "TTToHplusBWB_M140_ext_Summer12":          TaskDef(""),
-        "TTToHplusBWB_M150_ext_Summer12":          TaskDef(""),
-        "TTToHplusBWB_M155_ext_Summer12":          TaskDef(""),
-        "TTToHplusBWB_M160_ext_Summer12":          TaskDef(""),
-        "TTToHplusBHminusB_M80_ext_Summer12":      TaskDef(""),
-        "TTToHplusBHminusB_M90_Summer12":          TaskDef(""),
-        "TTToHplusBHminusB_M100_ext_Summer12":     TaskDef(""),
-        "TTToHplusBHminusB_M120_ext_Summer12":     TaskDef(""),
-        "TTToHplusBHminusB_M140_ext_Summer12":     TaskDef(""),
-        "TTToHplusBHminusB_M150_ext_Summer12":     TaskDef(""),
-        "TTToHplusBHminusB_M155_ext_Summer12":     TaskDef(""),
-        "TTToHplusBHminusB_M160_ext_Summer12":     TaskDef(""),
+        # 150 jobs
+        # User mean 1106.8, min 492.1, max 1564.0
+        # Mean 133.5 MB, min 48.3 MB, max 150.5 MB
+        "TTToHplusBWB_M80_ext_Summer12":           TaskDef("/TTToHplusBWB_M-80_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
+        # 151 jobs
+        # User mean 1145.9, min 121.4, max 1627.7
+        # Mean 138.3 MB, min 4.7 MB, max 155.0 MB
+        "TTToHplusBWB_M120_ext_Summer12":          TaskDef("/TTToHplusBWB_M-120_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
+        # 151 jobs
+        # User mean 1220.7, min 526.7, max 1640.0
+        # Mean 143.6 MB, min 65.7 MB, max 162.1 MB
+        "TTToHplusBWB_M160_ext_Summer12":          TaskDef("/TTToHplusBWB_M-160_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
+        # 151 jobs
+        # User mean 1518.6, min 625.9, max 2061.7
+        # Mean 175.7 MB, min 71.3 MB, max 202.1 MB
+        "HplusTB_M180_ext_Summer12":               TaskDef("/HplusTB_M-180_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
+        # 152 jobs
+        # User mean 1615.7, min 328.6, max 2254.6
+        # Mean 182.2 MB, min 34.4 MB, max 204.4 MB
+        "HplusTB_M200_ext_Summer12":               TaskDef("/HplusTB_M-200_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
+        # 152 jobs
+        # User mean 1803.2, min 417.9, max 2572.5
+        # Mean 221.1 MB, min 48.1 MB, max 245.7 MB
+        "HplusTB_M300_ext_Summer12":               TaskDef("/HplusTB_M-300_8TeV_ext-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
+        # 152 jobs
+        # User mean 2350.8, min 156.1, max 3243.5
+        # Mean 293.7 MB, min 11.5 MB, max 321.4 MB
+        "HplusTB_M600_Summer12":                   TaskDef("/HplusTB_M-600_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V7C_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
+        # 50 jobs
+        # User mean 1715.2, min 1154.3, max 2292.1
+        # Mean 206.3 MB, min 186.9 MB, max 221.3 MB
+        "HplusToTBbar_M180_Summer12":              TaskDef("/HplusToTBbar_M-180_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
+        # 50 jobs
+        # User mean 1854.3, min 1288.2, max 2355.9
+        # Mean 208.6 MB, min 195.5 MB, max 221.5 MB
+        "HplusToTBbar_M200_Summer12":              TaskDef("/HplusToTBbar_M-200_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
+        # 50 jobs
+        # User mean 2156.0, min 1259.3, max 3027.0
+        # Mean 236.5 MB, min 220.9 MB, max 258.6 MB
+        "HplusToTBbar_M300_Summer12":              TaskDef("/HplusToTBbar_M-300_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
+        # 51 jobs
+        # User mean 2993.6, min 1440.6, max 3636.2
+        # Mean 328.6 MB, min 157.1 MB, max 356.3 MB
+        "HplusToTBbar_M600_Summer12":              TaskDef("/HplusToTBbar_M-600_8TeV-pythia6-tauola/local-Summer12_DR53X_PU_S10_START53_V19_v1_AODSIM_tauembedding_skim_v53_3-8832fd6cee6cb431f37d162280985223/USER", dbs="phys03"),
         }
     addEmbeddingSkim_53X("v53_3", datasets, definitions)
 
