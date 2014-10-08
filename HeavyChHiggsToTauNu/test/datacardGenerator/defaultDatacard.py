@@ -8,7 +8,8 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
 #Path = "/home/wendland/data/xnortau"
 #Path = "/home/wendland/data/test_nominal_dphi"
-Path = "/home/wendland/data/xnominal"
+#Path = "/home/wendland/data/xnominal"
+Path = "/home/wendland/data/test_2014-09-05"
 #Path = "/home/wendland/data/xnominal"
 #Path = "/home/wendland/data/test_matti_met60_paramweight"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
@@ -23,7 +24,7 @@ LightMassPoints      = [120]
 #LightMassPoints      = []
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
-HeavyMassPoints      = [300]
+#HeavyMassPoints      = [300]
 HeavyMassPoints      = []
 
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
@@ -71,6 +72,26 @@ OptionDoTBbarForHeavy = False # NOTE: usable only for 2012
 OptionAddSingleTopDependencyForMuParameter = False # Affects only light H+
 OptionAddSingleTopSignal = False # Affects only light H+
 
+# Convert the following nuisances from shape to constant
+OptionConvertFromShapeToConstantList = ["trg_tau","trg_tau_dataeff","trg_tau_MCeff","trg_L1ETM_dataeff","trg_L1ETM_MCeff","trg_L1ETM","trg_muon_dataeff", # triggers
+                                        #"tau_ID_shape", "tau_ID_constShape", # tau ID
+                                        "tau_ID_eToTauEndcap_shape", # tau mis-ID
+                                        #"tau_ID_eToTauBarrel_shape", "tau_ID_muToTau_shape", "tau_ID_jetToTau_shape", # other tau mis-ID
+                                        "ES_jets","JER","ES_METunclustered", # jet, MET
+                                        #"ES_taus", # tau ES
+                                        #"b_tag", "b_tag_fakes", # btag
+                                        "Emb_mu_ID", "Emb_WtauTomu", # embedding-specific
+                                        "Emb_reweighting", # other embedding-specific
+                                        #"QCD_metshape", # multijets specific
+                                        #"top_pt", # top pt reweighting
+                                        "pileup", "pileup_fakes", # pileup
+                                        ]
+
+# Separate in the following shape nuisances the shape and normalization components
+OptionSeparateShapeAndNormalizationFromSystVariationList = [
+                                                            #"ES_taus"
+                                                           ]
+
 # For projections
 trg_MET_dataeffScaleFactor = None # Default is None, i.e. 1.0
 
@@ -81,7 +102,7 @@ OptionSqrtS = 8 # sqrt(s)
 # Tolerance for throwing error on luminosity difference (0.01 = 1 percent agreement is required)
 ToleranceForLuminosityDifference = 0.05
 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
-ToleranceForMinimumRate = 1.5
+ToleranceForMinimumRate = 0.0 # 1.5
 # Minimum stat. uncertainty to set to bins with zero events
 MinimumStatUncertainty = 0.5
 
@@ -430,11 +451,12 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
 elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
     # Replace embedding and fakes with MC
     myList = ["Wjets_MC","DY_MC","VV_MC"]
-    if not OptionAddSingleTopDependencyForMuParameter:
-        myList.append("sngltop_MC")
-        mergeColumnsByLabel.append({"label": "EWKnontop_MC", "mergeList": myList[:]})
-    else:
-        mergeColumnsByLabel.append({"label": "EWKnontt_MC", "mergeList": myList[:]})
+    if OptionDoMergeFakeTauColumns:
+        if not OptionAddSingleTopDependencyForMuParameter:
+            myList.append("sngltop_MC")
+            mergeColumnsByLabel.append({"label": "EWKnontop_MC", "mergeList": myList[:]})
+        else:
+            mergeColumnsByLabel.append({"label": "EWKnontt_MC", "mergeList": myList[:]})
     DataGroups.append(DataGroup(
         label        = "ttbar_MC",
         landsProcess = 1,
@@ -1006,6 +1028,12 @@ MergeNuisances.append(["b_tag","b_tag_fakes"])
 MergeNuisances.append(["pileup","pileup_fakes"])
 MergeNuisances.append(["xsect_tt_8TeV", "xsect_tt_8TeV_forQCD"])
 MergeNuisances.append(["lumi", "lumi_forQCD"])
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import convertFromSystVariationToConstant
+convertFromSystVariationToConstant(Nuisances, OptionConvertFromShapeToConstantList)
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import separateShapeAndNormalizationFromSystVariation
+separateShapeAndNormalizationFromSystVariation(Nuisances, OptionSeparateShapeAndNormalizationFromSystVariationList)
 
 # Control plots
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
@@ -1594,7 +1622,7 @@ if OptionMassShape == "TransverseMass":
                             #"unit": "GeV",
                             "xlabel": "m_{T} (GeV)",
                             "ylabel": "< Events / bin >", "ylabelBinInfo": False,
-                            "moveLegend": {"dx": -0.22, "dy": -0.1},
+                            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
                             "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
                             "divideByBinWidth": True,
                             "log": False,
@@ -1617,11 +1645,11 @@ if OptionMassShape == "TransverseMass":
                             #"unit": "GeV",
                             "xlabel": "m_{T} (GeV)",
                             "ylabel": "< Events / bin >", "ylabelBinInfo": False,
-                            "moveLegend": {"dx": -0.22, "dy": -0.1},
+                            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
                             "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
                             "divideByBinWidth": True,
                             "log": True,
-                            "opts": {"ymin": 1e-5},
+                            "opts": {"ymin": 1e-3},
                             "opts2": {"ymin": 0.0, "ymax": 2.0}
                            },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot

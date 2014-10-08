@@ -473,7 +473,7 @@ class MLFitData:
         masses.sort()
         return masses
 
-    def fittedGraph(self, mass, backgroundOnly=False, signalPlusBackground=False):
+    def fittedGraph(self, mass, backgroundOnly=False, signalPlusBackground=False, heavyHplusMode=False):
         if not backgroundOnly and not signalPlusBackground:
             raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
         if backgroundOnly and signalPlusBackground:
@@ -487,49 +487,16 @@ class MLFitData:
         
         if backgroundOnly:
             content = self.data[mass]["background"]
+            print "MLfit: using as input background-only fit"
         else:
             content = self.data[mass]["signal+background"]
+            print "MLfit: using as input signal+background fit"
         labels = content["nuisanceParameters"][:]
 
         for nuis in labels[:]:
-            if not nuis in content or content[nuis]["type"] == "shapeStat":
+            if heavyHplusMode and "BinByBin" in nuis:
                 del labels[labels.index(nuis)]
                 continue
-            values.append(float(content[nuis]["fitted_value"]))
-            uncertainties.append(float(content[nuis]["fitted_uncertainty"]))
-
-        yvalues = range(1, len(values)+1)
-
-        yvalues.reverse()
-
-        gr = ROOT.TGraphErrors(len(values),
-                               array.array("d", values), array.array("d", yvalues),
-                               array.array("d", uncertainties))
-
-        return (gr, labels)
-
-    def fittedGraphHeavy(self, mass, backgroundOnly=False, signalPlusBackground=False):
-        if not backgroundOnly and not signalPlusBackground:
-            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (neither was)")
-        if backgroundOnly and signalPlusBackground:
-            raise Exception("Either backgroundOnly or signalPlusBackground should be set to True (both were)")
-        if signalPlusBackground:
-            backgroundOnly = False
-
-        labels = []
-        values = []
-        uncertainties = []
-        
-        if backgroundOnly:
-            content = self.data[mass]["background"]
-        else:
-            content = self.data[mass]["signal+background"]
-        labels = content["nuisanceParameters"][:]
-
-        for nuis in labels[:]:
-            if "BinByBin" in nuis:
-                del labels[labels.index(nuis)]
-                continue               
             if not nuis in content or content[nuis]["type"] == "shapeStat":
                 del labels[labels.index(nuis)]
                 continue

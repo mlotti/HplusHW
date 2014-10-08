@@ -398,6 +398,21 @@ class DataCardGenerator:
                         #applyWeighting(down, myJsonBins)
                     ##c.getCachedShapeRootHistogramWithUncertainties().Debug()
 
+        # Separate nuisances with additional information into an individual nuisance (horror!)
+        for c in self._columns:
+            myNewNuisanceIdsList = c.doSeparateAdditionalResults()
+            # Append
+            for item in myNewNuisanceIdsList:
+                myFoundStatus = False
+                for e in self._extractors:
+                    if item == e.getId():
+                        myFoundStatus = True
+                if not myFoundStatus:
+                    myExtractor = Extractor.ConstantExtractor(exid = item, constantValue = -1.0, distribution = "lnN", 
+                                                              description = item+" normalization",
+                                                              mode = Extractor.ExtractorMode.ASYMMETRICNUISANCE)
+                    self._extractors.append(myExtractor)
+
         # Make datacards
         myProducer = TableProducer.TableProducer(opts=self._opts, config=self._config, outputPrefix=self._outputPrefix,
                                    luminosity=self._dsetMgrManager.getLuminosity(DatacardDatasetMgrSourceType.SIGNALANALYSIS),
@@ -569,7 +584,7 @@ class DataCardGenerator:
             myDsetMgr = self._dsetMgrManager.getDatasetMgr(myDsetMgrIndex)
             myLuminosity = self._dsetMgrManager.getLuminosity(myDsetMgrIndex)
             myMainCounterTable = self._dsetMgrManager.getMainCounterTable(myDsetMgrIndex)
-            if c.getLandsProcess() in self._config.EWKFakeIdList:
+            if c.typeIsEWKfake():
                 #cProfile.runctx("c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractorsEWKfake)",globals(),locals())
                 c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractorsEWKfake)
             else:
@@ -719,10 +734,10 @@ class DataCardGenerator:
             raise Exception("This should not happen")
 
         # Set type of control plots
-        for i in range(0, len(myEmbColumn._controlPlots)):
-            if myEmbColumn._controlPlots[i] != None:
-                myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
-                myEmbColumn._controlPlots[i]["typeIsEWK"] = True
+        #for i in range(0, len(myEmbColumn._controlPlots)):
+            #if myEmbColumn._controlPlots[i] != None:
+                #myEmbColumn._controlPlots[i]["typeIsEWKfake"] = False
+                #myEmbColumn._controlPlots[i]["typeIsEWK"] = True
 
         #print "Final:"
         #myEmbColumn._cachedShapeRootHistogramWithUncertainties.Debug()
@@ -837,6 +852,22 @@ class DataCardGenerator:
                                                                 description = n.label,
                                                                 systVariation = n.getArg("systVariation"),
                                                                 mode = Extractor.ExtractorMode.SHAPENUISANCE,
+                                                                opts = self._opts,
+                                                                scaleFactor = n.getArg("scaleFactor")))
+            elif n.function == "ShapeVariationSeparateShapeAndNormalization":
+                self._extractors.append(Extractor.ShapeVariationSeparateShapeAndNormalization(exid = n.id,
+                                                                distribution = n.distr,
+                                                                description = n.label,
+                                                                systVariation = n.getArg("systVariation"),
+                                                                mode = Extractor.ExtractorMode.SHAPENUISANCE,
+                                                                opts = self._opts,
+                                                                scaleFactor = n.getArg("scaleFactor")))
+            elif n.function == "ShapeVariationToConstant":
+                self._extractors.append(Extractor.ShapeVariationToConstantExtractor(exid = n.id,
+                                                                distribution = n.distr,
+                                                                description = n.label,
+                                                                systVariation = n.getArg("systVariation"),
+                                                                mode = myMode,
                                                                 opts = self._opts,
                                                                 scaleFactor = n.getArg("scaleFactor")))
             elif n.function == "ShapeVariationFromJson":
