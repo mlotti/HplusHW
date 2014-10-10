@@ -345,7 +345,7 @@ class LEPType:
     ## Get the configuration dictionary for serialization.
     #
     # LEP-type CLs does not need any specific information to be stored
-    def getConfiguration(self):
+    def getConfiguration(self, mcconf):
         return None
 
     ## Clone the object, possibly overriding some options
@@ -635,7 +635,7 @@ class LHCType:
     ## Get the configuration dictionary for serialization.
     #
     # For LHC-type CLs the \a scanRmin and \a scanRmax are stored
-    def getConfiguration(self):
+    def getConfiguration(self, mcconf):
         return self.configuration
 
     ## Clone the object, possibly overriding some options
@@ -889,7 +889,7 @@ class LHCTypeAsymptotic:
     ## Get the configuration dictionary for serialization.
     #
     # LHC-type asymptotic CLs does not need any specific information to be stored
-    def getConfiguration(self):
+    def getConfiguration(self, mcconf):
         return None
 
     ## Clone the object, possibly overriding some options

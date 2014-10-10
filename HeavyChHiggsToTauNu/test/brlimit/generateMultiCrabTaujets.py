@@ -135,6 +135,9 @@ def main(opts, settings, myDir):
         elif opts.lhcType:
             raise Exception("LHC type Hybrid CLs not implemented yet for combine")
         elif opts.lhcTypeAsymptotic:
+            pfix = postfix+"_lhcasy"
+            if opts.postfix != "":
+                pfix += "_"+opts.postfix
             combine.produceLHCAsymptotic(
                 opts,
                 myDir,
@@ -142,7 +145,7 @@ def main(opts, settings, myDir):
                 datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)],
                 rootfilePatterns = [settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS)],
                 clsType = combine.LHCTypeAsymptotic(opts),
-                postfix = postfix+"_lhcasy"
+                postfix = pfix
                 )
         else:
             return False
@@ -150,6 +153,8 @@ def main(opts, settings, myDir):
 
 if __name__ == "__main__":
     parser = commonLimitTools.createOptionParser(lepType, lhcType, lhcTypeAsymptotic)
+    parser.add_option("--postfix", dest="postfix", default="",
+                      help="Postfix to add to output directory name")
     opts = commonLimitTools.parseOptionParser(parser)
     # General settings
 
