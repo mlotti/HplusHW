@@ -229,6 +229,7 @@ if __name__ == "__main__":
     parser.add_option("--combine", dest="combine", action="store_true", default=False, help="Generate datacards for Combine")
     parser.add_option("--multipleDirs", dest="multipleDirs", action="store", help="Name of base dir for creating datacards for multiple directories (wildcard is added at the end)")
     parser.add_option("--systAnalysis", dest="systAnalysis", action="store_true", default=False, help="Runs the macro for generating systematic uncertainties plots")
+    parser.add_option("--testShapeSensitivity", dest="testShapeSensitivity", action="store_true", default=False, help="Creates datacards for varying each shape nuisance up and down by 1 sigma")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
     parser.add_option("--tailfit", dest="dotailfit", action="store_true", default=False, help="Runs the tail fitter for heavy H+ after the cards are done")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")

@@ -70,6 +70,39 @@ class ExtractorResult():
     def getHistograms(self):
         return self._histograms
 
+    def getFinalBinningHistograms(self, blackList=[]):
+        myMinBins = 999
+        for h in self._histograms:
+            if h.GetNbinsX() < myMinBins:
+                myMinBins = h.GetNbinsX()
+        myList = []
+        for h in self._histograms:
+            if h.GetNbinsX() == myMinBins:
+                myStatus = True
+                for item in blackList:
+                    if item in h.GetName():
+                        myStatus = False
+                if myStatus:
+                    myList.append(h)
+        return myList
+
+    def getFineBinnedHistograms(self, blackList=[]):
+        myMinBins = 999
+        for h in self._histograms:
+            if h.GetNbinsX() < myMinBins:
+                myMinBins = h.GetNbinsX()
+        myList = []
+        for h in self._histograms:
+            if h.GetNbinsX() > myMinBins:
+                myStatus = True
+                for item in blackList:
+                    if item in h.GetName():
+                        myStatus = False
+                if myStatus:
+                    myList.append(h)
+
+        return myList
+
     def linkHistogramsToRootFile(self,rootfile):
         # Note: Do not call destructor for the tempHistos.
         #       Closing the root file to which they have been assigned to destructs them.
