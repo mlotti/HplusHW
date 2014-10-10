@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import glob
 import json
@@ -16,7 +17,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 
-def main(opts):
+def main(opts, args):
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     histograms.cmsTextMode = histograms.CMSMode.NONE
@@ -28,6 +29,7 @@ def main(opts):
 
 #    compareTauJetsDeltaPhi(opts)
     compareHplus(opts)
+#    compareInjected(opts, args)
 
 def compareTauJets(opts):
     doCompare("taujets", [
@@ -145,6 +147,36 @@ def compareHplus(opts):
               moveLegend={"dx":-0.04, "dy": 0.01},
               log=not opts.relative,
               expectedMedianOpts= myOpts,
+              )
+
+def compareInjected(opts, args):
+    if len(args) == 0:
+        print "Please give the list of multicrab directories as arguments"
+        sys.exit(1)
+    if opts.name is None:
+        print "--name argument is missing"
+        sys.exit(1)
+
+    lst = []
+    for d in args:
+        f = open(os.path.join(d, "configuration.json"))
+        conf = json.load(f)
+        f.close()
+        clsconf = conf["clsConfig"]
+        label = "No injection"
+        if "signalInjection" in clsconf:
+            #label = "Injected m=%s, #it{B}(t#rightarrow^{}H^{+})=%s, #it{B}(^{}H^{+}#rightarrow#tau)=%s" % (
+            label = "Injected m=%s, #it{B}_{t#rightarrowH^{+}}=%s, #it{B}_{H^{+}#rightarrow#tau}=%s" % (
+                clsconf["signalInjection"]["mass"],
+                clsconf["signalInjection"]["brTop"],
+                clsconf["signalInjection"]["brHplus"])
+
+        lst.append( (label, d) )
+
+    histograms.createLegend.setDefaults(textSize=0.025)
+
+    doCompare(opts.name, lst, opts,
+              moveLegend={"dx":-0.04, "dy": 0.01}
               )
 
 
@@ -339,7 +371,8 @@ if __name__ == "__main__":
     parser.add_option("--heavy", dest="heavyHplus", action="store_true", default=False, help="Heavy H+ comparison")
     parser.add_option("--tailFit", dest="tailFit", action="store_true", default=False, help="tailFit comparison")
     parser.add_option("--relative", dest="relative", action="store_true", default=False, help="Do comparison relative to the first item")
+    parser.add_option("--name", dest="name", type="string", default=None, help="Name of the output plot")
 
     (opts, args) = parser.parse_args()
 
-    main(opts)
+    main(opts, args)

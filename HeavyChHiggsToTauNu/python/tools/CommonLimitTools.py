@@ -228,6 +228,19 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None, ful
     parser.add_option("--nolimit", dest="limit", action="store_false", default=True,
                       help="Disable limit calculation (for e.g. just ML fit or significance)")
 
+    parser.add_option("--injectSignal", dest="injectSignal", action="store_true", default=False,
+                      help="Inject signal (implied by --injectSignalBRTop and --injectSignalBRHplus)")
+    parser.add_option("--injectSignalBRTop", dest="injectSignalBRTop", type="string", default="0.0",
+                      help="Inject signal with this BR(t -> H+)")
+    parser.add_option("--injectSignalBRHplus", dest="injectSignalBRHplus", type="string", default="0.0",
+                      help="Inject signal with this BR(H+ -> tau)")
+    parser.add_option("--injectSignalMass", dest="injectSignalMass", type="string", default=None,
+                      help="Inject signal with this mass")
+    parser.add_option("--injectNumberToys", dest="injectNumberToys", type="int", default=100,
+                      help="Number of toys per job for signal injection")
+    parser.add_option("--injectNumberJobs", dest="injectNumberJobs", type="int", default=10,
+                      help="Number of jobs per mass point for signal injection")
+
     return parser
 
 ## Parse OptionParser object
@@ -264,6 +277,14 @@ def parseOptionParser(parser):
             raise Exception("Error: Please enable only --brlimit or --sigmabrlimit !")
         else:
             raise Exception("Error: Please enable --brlimit or --sigmabrlimit !")
+    if float(opts.injectSignalBRTop) > 0 or float(opts.injectSignalBRHplus) > 0:
+        opts.injectSignal = True
+    if opts.injectSignal:
+        if opts.injectSignalMass is None:
+            raise Exception("Signal injection enabled with --injectSignal, --injectSignalBRTop --injectSignalBRHplus, but injected mass point not specified with --injectSignalMass")
+        opts.nomlfit = False
+        opts.limit = False
+
     return opts
 
 ## Class to hold the limit results
@@ -475,7 +496,7 @@ class LimitMultiCrabBase:
             "codeVersion": git.getCommitId(),
             "clsType": self.clsType.name(),
         }
-        clsConfig = self.clsType.getConfiguration()
+        clsConfig = self.clsType.getConfiguration(self.configuration)
         if clsConfig != None:
             self.configuration["clsConfig"] = clsConfig
 
@@ -588,6 +609,8 @@ class LimitMultiCrabBase:
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")
         json.dump(self.configuration, f, sort_keys=True, indent=2)
         f.close()
+
+        print "Wrote multicrab.cfg to %s" % self.dirname
 
     ## Run 'multicrab create' inside the multicrab directory
     def createMultiCrab(self):
