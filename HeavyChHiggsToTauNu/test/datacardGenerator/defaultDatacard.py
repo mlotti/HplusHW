@@ -74,7 +74,7 @@ OptionAddSingleTopSignal = False # Affects only light H+
 
 # Convert the following nuisances from shape to constant
 OptionConvertFromShapeToConstantList = ["trg_tau","trg_tau_dataeff","trg_tau_MCeff","trg_L1ETM_dataeff","trg_L1ETM_MCeff","trg_L1ETM","trg_muon_dataeff", # triggers
-                                        #"tau_ID_shape", "tau_ID_constShape", # tau ID
+                                        #"tau_ID_shape", # tau ID
                                         "tau_ID_eToTauEndcap_shape", # tau mis-ID
                                         #"tau_ID_eToTauBarrel_shape", "tau_ID_muToTau_shape", "tau_ID_jetToTau_shape", # other tau mis-ID
                                         "ES_jets","JER","ES_METunclustered", # jet, MET
@@ -618,13 +618,13 @@ if not "tau_ID_shape" in myShapeSystematics:
         value         = 0.15, # FIXME
     ))
 
-Nuisances.append(Nuisance(
-    id            = "tau_ID_constShape",
-    label         = "tau-jet ID (no Rtau)",
-    distr         = "shapeQ",
-    function      = "ConstantToShape",
-    value         = systematics.getTauIDUncertainty(isGenuineTau=True)
-))
+#Nuisances.append(Nuisance(
+    #id            = "tau_ID_constShape",
+    #label         = "tau-jet ID (no Rtau)",
+    #distr         = "shapeQ",
+    #function      = "ConstantToShape",
+    #value         = systematics.getTauIDUncertainty(isGenuineTau=True)
+#))
 
 if "tau_ID_shape" in myShapeSystematics:
     Nuisances.append(Nuisance(
