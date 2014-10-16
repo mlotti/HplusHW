@@ -3,6 +3,7 @@
 import sys
 import os
 from optparse import OptionParser
+import math
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -10,6 +11,7 @@ ROOT.gROOT.SetBatch(True)
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
@@ -161,8 +163,12 @@ def customizeMarker(p):
         th1.SetMarkerColor(th1.GetLineColor())
         #th1.SetLineWidth(0)
         # I have no idea why "P" above is not enough...
-        for i in xrange(1, th1.GetNbinsX()+1):
-            th1.SetBinError(i, 0)
+        #for i in xrange(1, th1.GetNbinsX()+1):
+        #    th1.SetBinError(i, 0)
+        # th1 is no longer a th1 but instead a TGraphAsymmErrors object
+        for i in xrange(0, th1.GetN()):
+            th1.SetPointEYhigh(i, 0)
+            th1.SetPointEYlow(i, 0)
 
 class DatasetContainer:
     def __init__(self, shapeList):
@@ -191,7 +197,7 @@ class DatasetContainer:
         self._uncertaintyShapes = []
         for s in shapeList:
             uncName = s.replace(self._name,"")
-            if "Up" in uncName and uncName != "" and not "stat_binByBin" in uncName:
+            if "Up" in uncName and uncName != "" and not "stat_binByBin" in uncName and not "TailFit" in uncName:
                 self._uncertaintyShapes.append(uncName)
 
     def debug(self):
@@ -224,17 +230,29 @@ class DatasetContainer:
         for uncName in self._uncertaintyShapes:
             myShortName = uncName.replace("Up","")[1:]
             print "... uncertainty:",myShortName
-            up = f.Get("%s%s"%(self._name,uncName))
+            up = dataset.RootHistoWithUncertainties(f.Get("%s%s"%(self._name,uncName)))
             upFine = f.Get("%s%s_fineBinning"%(self._name,uncName))
-            nom = hNominal.Clone()
-            down = f.Get("%s%s"%(self._name,uncName.replace("Up","Down")))
+            nom = dataset.RootHistoWithUncertainties(hNominal.Clone())
+            nom.makeFlowBinsVisible()
+            down = dataset.RootHistoWithUncertainties(f.Get("%s%s"%(self._name,uncName.replace("Up","Down"))))
             downFine = f.Get("%s%s_fineBinning"%(self._name,uncName.replace("Up","Down")))
-            up.SetLineColor(ROOT.kRed)
-            nom.SetLineColor(ROOT.kBlack)
-            down.SetLineColor(ROOT.kBlue)
-            upHisto = histograms.Histo(up, "Up %.1f"%_integral(up), drawStyle="HIST", legendStyle="l")
-            downHisto = histograms.Histo(down, "Down %.1f"%_integral(down), drawStyle="HIST", legendStyle="l")
-            nomHisto = histograms.Histo(nom, "Nominal %.1f"%_integral(nom), drawStyle="HIST", legendStyle="l")
+            up.getRootHisto().SetLineColor(ROOT.kRed)
+            nom.getRootHisto().SetLineColor(ROOT.kBlack)
+            down.getRootHisto().SetLineColor(ROOT.kBlue)
+            upHisto = histograms.Histo(up, "Up %.1f"%_integral(up.getRootHisto()), drawStyle="HIST", legendStyle="l")
+            downHisto = histograms.Histo(down, "Down %.1f"%_integral(down.getRootHisto()), drawStyle="HIST", legendStyle="l")
+            nomHisto = histograms.Histo(nom, "Nominal %.1f"%_integral(nom.getRootHisto()), drawStyle="HIST", legendStyle="l")
+            # Add fit uncert. as stat uncert.
+            for i in range(0,9):
+                tailFitUp = f.Get("%s_%s_TailFit_par%dUp"%(self._name,self._name,i))
+                tailFitDown = f.Get("%s_%s_TailFit_par%dDown"%(self._name,self._name,i))
+                if tailFitUp != None and tailFitDown != None:
+                    nom.addShapeUncertaintyFromVariation("%s_TailFit_par%d"%(self._name,i),tailFitUp,tailFitDown)
+                    tailFitUp.Delete()
+                    tailFitDown.Delete()
+            tailfitNames = filter(lambda n: "_TailFit_" in n, nom.getShapeUncertaintyNames())
+            nom.setShapeUncertaintiesAsStatistical(tailfitNames)
+            # Do plot
             plot = plots.ComparisonManyPlot(nomHisto, [upHisto, downHisto])
             plot.setLuminosity(luminosity)
             plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(3))
@@ -250,10 +268,13 @@ class DatasetContainer:
             myParams["ratioYlabel"] = "Var./Nom."
             myParams["addLuminosityText"] = True
             myParams["customizeBeforeDraw"] = customizeMarker
+            #myParams["ratioErrorOptions"] = {"numeratorStatSyst": False}
+            myParams["addMCUncertainty"] = True
+            
             plots.drawPlot(plot, myPlotName, **myParams)
             myRatioContainer.addRatioPlot(plot, myShortName)
             # Analyse up and down variation
-            if mySignalStatus:
+            if mySignalStatus and upFine != None and downFine != None:
                 a = abs(upFine.Integral()/hNominalFine.Integral() - 1.0)
                 b = abs(1.0 - downFine.Integral()/hNominalFine.Integral())
                 r = a
