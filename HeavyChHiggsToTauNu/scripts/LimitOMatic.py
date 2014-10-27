@@ -54,6 +54,8 @@ class Result:
             raise Exception("Error: Could not find test/brlimit directory!")
         # Create jobs
         myCommand = "%sbrlimit/generateMultiCrabTaujets.py"%(s)
+        if self._opts.combination:
+            myCommand = "%sbrlimit/generateMultiCrabCombination.py"%(s)
         if self._opts.brlimit:
             myCommand += " --brlimit"
         if self._opts.sigmabrlimit:
@@ -210,6 +212,7 @@ class Result:
 if __name__ == "__main__":
     parser = commonLimitTools.createOptionParser(lepDefault=None, lhcDefault=False, lhcasyDefault=False, fullOptions=False)
     parser.add_option("--printonly", dest="printonly", action="store_true", default=False, help="Print only the ready results")
+    parser.add_option("--combination", dest="combination", action="store_true", default=False, help="Run combination instead of only taunu fully hadr.")
     opts = commonLimitTools.parseOptionParser(parser)
 
     # Obtain directory list
