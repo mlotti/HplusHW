@@ -89,7 +89,8 @@ class DataCardDirectoryManager:
                 # Loop over root objects
                 for objectName in myList:
                     o = self._datacards[m].getRootFileObject(objectName)
-                    o.SetName(o.GetName().replace(item, replaceDictionary[item]))
+                    if "_"+item+"Up" in o.GetName() or "_"+item+"Down" in o.GetName():
+                        o.SetName(o.GetName().replace(item, replaceDictionary[item]))
 
     def recreateShapeStatUncert(self):
         for m in self._datacards.keys():
@@ -141,6 +142,100 @@ class DataCardDirectoryManager:
                             hDown.SetBinError(k, 0.0)
                         dcard.addHistogram(hUp)
                         dcard.addHistogram(hDown)
+
+    def addNuisance(self, name, distribution, columns, value):
+        for m in self._datacards.keys():
+            dcard = self._datacards[m]
+            myDict = {}
+            myDict["name"] = name
+            myDict["distribution"] = distribution
+            for c in dcard.getDatasetNames():
+                if c in columns:
+                    myDict[c] = value
+                else:
+                    myDict[c] = "1.000"
+            dcard._datasetNuisances.append(myDict)
+
+    def removeNuisance(self, name):
+        for m in self._datacards.keys():
+            dcard = self._datacards[m]
+            # Remove histograms
+            while i < len(dcard._hCache):
+                if "_"+name+"Up" in dcard._hCache[i].GetName() or "_"+name+"Down" in dcard._hCache[i].GetName():
+                    dcard._hCache[i].Delete()
+                    dcard._hCache.remove(dcard._hCache[i])
+                i += 1
+            # Remove nuisances
+            i = 0
+            while i < len(dcard._datasetNuisances):
+                if dcard._datasetNuisances[i]["name"] == name:
+                    dcard._datasetNuisances[i].remove(dcard._datasetNuisances[i])
+                i += 1
+
+    def replaceNuisanceValue(self, name, newValue):
+        for m in self._datacards.keys():
+            dcard = self._datacards[m]
+            for i in range(0,len(dcard._datasetNuisances)):
+                if dcard._datasetNuisances[i]["name"] == name:
+                    if dcard._datasetNuisances[i]["distribution"] == "shape":
+                        raise Exception("Error: replaceNuisanceValue works only for normalization nuisances; '%s' is a shape nuisance!"%name)
+                    for k in dcard._datasetNuisances[i].keys():
+                        if k != "name" and k != "distribution":
+                            if dcard._datasetNuisances[i][k] != "1.000" and dcard._datasetNuisances[i][k] != "1" and dcard._datasetNuisances[i][k] != "-":
+                                dcard._datasetNuisances[i][k] = newValue
+
+    def mergeShapeNuisances(self, namesList, newName):
+        if len(namesList) < 2:
+            raise Exception("Error: mergeShapeNuisances needs at least two nuisance names for the merge!")
+        for m in self._datacards.keys():
+            dcard = self._datacards[m]
+            # Look for first item
+            targetIndex = None
+            for i in range(0,len(dcard._datasetNuisances)):
+                if dcard._datasetNuisances[i]["name"] == namesList[0]:
+                    if dcard._datasetNuisances[i]["distribution"] != "shape":
+                        raise Exception("Error: mergeShapeNuisances: nuisance '%s' is not a shape nuisance!"%namesList[0])
+                    targetIndex = i
+            # Do merge
+            for item in namesList[1:]:
+                for i in range(0,len(dcard._datasetNuisances)):
+                if dcard._datasetNuisances[i]["name"] == namesList[0]:
+                    if dcard._datasetNuisances[i]["distribution"] != "shape":
+                        raise Exception("Error: mergeShapeNuisances: nuisance '%s' is not a shape nuisance!"%namesList[0])
+                    # Update nuisance histograms and datacard nuisance lines
+                    for c in dcard.getDatasetNames():
+                        if dcard._datasetNuisances[i][c] == "1":
+                            if dcard._datasetNuisances[i][targetIndex] == "1":
+                                # Add histogram contents
+                                myTargetList = dcard.getRootFileObjectsWithPattern("%s_%s"%(c, dcard._datasetNuisances[targetIndex]["name"]))
+                                mySourceList = dcard.getRootFileObjectsWithPattern("%s_%s"%(c, dcard._datasetNuisances[i]["name"]))
+                                myRateHisto = dcard.getRateHisto(c)
+                                if len(myTargetList) != len(mySourceList):
+                                    raise Exception("This should not happen")
+                                for h in range(0, len(myTargetList)):
+                                    for k in len(1, myTargetList[h].GetNbinsX()+1):
+                                        myOffset = myRateHisto.GetBinContent(k)
+                                        myVariation = (myTargetList[h].GetBinContent(k) - myOffset)**2
+                                        myVariation += (mySourceList[h].GetBinContent(k) - myOffset)**2
+                                        myTargetList[h].SetBinContent(k, math.sqrt(myVariation)+myOffset)
+                            else:
+                                # Update nuisance line
+                                dcard._datasetNuisances[i][c] = "1"
+                                # Copy histogram
+                                mySourceList = dcard.getRootFileObjectsWithPattern("%s_%s"%(c, dcard._datasetNuisances[i]["name"]))
+                                for h in mySourceList:
+                                    if h.GetName().endswith("Up"):
+                                        hnew = aux.Clone(h, "%s_%sUp"%(c, dcard._datasetNuisances[i]["name"]))
+                                        dcard._hCache.append(hnew)
+                                    elif h.GetName().endswith("Down"):
+                                        hnew = aux.Clone(h, "%s_%sDown"%(c, dcard._datasetNuisances[i]["name"]))
+                                        dcard._hCache.append(hnew)
+        # Rename
+        myDict = {namesList[0]: newName}
+        self.replaceNuisanceNames(myDict)
+        # Remove items
+        for item in namesList[1:]:
+            self.removeNuisance(item)
 
 ## Calculates maximum width of each table cell
 def calculateCellWidths(widths,table):
@@ -290,7 +385,7 @@ class DataCardReader:
         if not os.path.exists(_originalDatacardDirectory):
             os.mkdir(_originalDatacardDirectory)
         if not os.path.exists(os.path.join(_originalDatacardDirectory,self._rootFilename)):
-            os.system("cp %s %s/."%(os.path.join(_originalDatacardDirectory,self._rootFilename), _originalDatacardDirectory))
+            os.system("cp %s %s/."%(os.path.join(directory,self._rootFilename), _originalDatacardDirectory))
         else:
             os.system("cp %s ."%(os.path.join(_originalDatacardDirectory,self._rootFilename)))
         # Open file
@@ -319,7 +414,7 @@ class DataCardReader:
             raise Exception("Error opening file '%s'!"%self._rootFilename)
         for h in self._hCache:
             h.SetDirectory(f)
-            print h.GetName()
+            #print h.GetName()
         f.Write()
         f.Close()
         self._hCache = []
@@ -343,7 +438,7 @@ class DataCardReader:
         if not os.path.exists(_originalDatacardDirectory):
             os.mkdir(_originalDatacardDirectory)
         if not os.path.exists(os.path.join(_originalDatacardDirectory,self._datacardFilename)):
-            os.system("cp %s %s/."%(os.path.join(_originalDatacardDirectory,self._datacardFilename), _originalDatacardDirectory))
+            os.system("cp %s %s/."%(os.path.join(directory,self._datacardFilename), _originalDatacardDirectory))
         else:
             os.system("cp %s ."%(os.path.join(_originalDatacardDirectory,self._datacardFilename)))
         # Obtain datacard
@@ -462,22 +557,24 @@ class DataCardReader:
         myNames = []
         myRateLinePassedStatus = False
         for l in lines:
-            mySplit = l.split()
-            if myRateLinePassedStatus and len(mySplit) > 1:# and not "statBin" in mySplit[0]:
-                # store nuisance
-                myDict = {}
-                myDict["name"] = mySplit[0]
-                myDict["distribution"] = mySplit[1]
-                for i in range(2,len(mySplit)):
-                    myDict[self._datacardColumnNames[i-2]] = mySplit[i]
-                self._datasetNuisances.append(myDict)
-            if mySplit[0] == "observation":
-                # store observation
-                self._observationValue = mySplit[1]
-            if mySplit[0] == "rate":
-                # store rate
-                self._rateValues = mySplit[1:]
-                myRateLinePassedStatus = True
+            if l != "\n":
+                mySplit = l.split()
+                if myRateLinePassedStatus and len(mySplit) > 1:# and not "statBin" in mySplit[0]:
+                    # store nuisance
+                    myDict = {}
+                    myDict["name"] = mySplit[0]
+                    myDict["distribution"] = mySplit[1]
+                    for i in range(0,len(self._datacardColumnNames)):
+                        myDict[self._datacardColumnNames[i]] = mySplit[i+2]
+                    self._datasetNuisances.append(myDict)
+                if len(mySplit[0]) > 3:
+                    if mySplit[0] == "observation":
+                    # store observation
+                        self._observationValue = mySplit[1]
+                    if mySplit[0] == "rate":
+                        # store rate
+                        self._rateValues = mySplit[1:]
+                        myRateLinePassedStatus = True
         if len(self._datasetNuisances) == 0:
             raise Exception("No nuisances found!")
 
