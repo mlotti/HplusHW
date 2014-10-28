@@ -12,8 +12,8 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014_02_14_v3_decaymode1"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
 #Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
-#Path = "/mnt/flustre/epekkari/FakeTauDatacard"
-Path = "/mnt/flustre/epekkari/NominalDatacard"
+Path = "/mnt/flustre/epekkari/FakeTauDatacard"
+#Path = "/mnt/flustre/epekkari/NominalDatacard"
 
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 #LightMassPoints      = [80,120,160]
@@ -193,7 +193,7 @@ myQCDShapeSystematics = myShapeSystematics[:]
 
 myQCDFact = DataGroup(
     label        = "QCDfact",
-    landsProcess = 2,
+    landsProcess = 3,
     validMassPoints = MassPoints,
     datasetType  = "QCD factorised",
     datasetDefinition = "QCDfactorisedmt",
@@ -203,7 +203,7 @@ myQCDFact = DataGroup(
 
 myQCDInv = DataGroup(
     label        = "QCDinv",
-    landsProcess = 2,
+    landsProcess = 3,
     validMassPoints = MassPoints,
     datasetType  = "QCD inverted",
     datasetDefinition = "QCDinvertedmt",
@@ -236,7 +236,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         nuisances    = myEmbeddingShapeSystematics[:]+["Emb_QCDcontam","Emb_hybridCaloMET"]
         #nuisances    = ["trg_tau_embedding","tau_ID","ES_taus","Emb_QCDcontam","Emb_WtauTomu","Emb_musel_ditau_mutrg","stat_Emb"]
     ))
-    EWKFakeIdList = []
+    EWKFakeIdList = [] #this is used
 
 elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
@@ -404,12 +404,12 @@ else:
     raise Exception("Error: unknown value for flag OptionGenuineTauBackgroundSource!")
 
 # Reserve column 2
-#DataGroups.append(DataGroup(
-#    label        = "res.",
-#    landsProcess = 2,
-#    datasetType  = "None",
-#    validMassPoints = MassPoints,
-#))
+DataGroups.append(DataGroup(
+    label        = "res.",
+    landsProcess = 2,
+    datasetType  = "None",
+    validMassPoints = MassPoints,
+))
 
 
 ##############################################################################

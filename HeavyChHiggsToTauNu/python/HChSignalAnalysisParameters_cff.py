@@ -535,7 +535,7 @@ QCDTailKillerTightJetMET = QCDTailKiller.clone(
 )
 
 # Define here QCD tail killer scenarios (note that the nominal module will be produced in addition to these)
-QCDTailKillerScenarios = [#"QCDTailKillerNoCuts",
+QCDTailKillerScenarios = ["QCDTailKillerNoCuts",
                           #"QCDTailKillerZeroPlus",
                           "QCDTailKillerLoosePlus",
                           "QCDTailKillerMediumPlus",
