@@ -17,10 +17,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult as qcdInv
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pseudoMultiCrabCreator as pseudoMultiCrabCreator
 
-myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
-#myNormalizationFactorSource = "QCDPlusEWKFakeTauNormalizationFactors.py" # (emod)
+#myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
+myNormalizationFactorSource = "QCDPlusEWKFakeTauNormalizationFactors.py" 
 
-def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myNormFactors,myDisplayStatus,dataDrivenFakeTaus):
+def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myNormFactors,myQCDNormFactors,myEWKFakeTauNormFactors,myDisplayStatus,dataDrivenFakeTaus):
     # Construct info string of module
     myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
     # Obtain dataset manager
@@ -65,6 +65,26 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
         myLabels[i] = myLabels[i].replace("Numerator","Denominator")
     myQCDNormalizationSystResults.addDataDrivenControlPlots(myResult.getRegionSystDenominatorCtrlPlots(),myLabels)
     myOutputCreator.addModule(myQCDNormalizationSystResults)
+
+    # qg systematics
+    # normalization with only qcd (plus)
+    myQCDqgReweightingSystResultsPlus = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDqgReweightingPlus")
+    myResult_qgPlus = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity,myModuleInfoString, myQCDNormFactors, dataDrivenFakeTaus=dataDrivenFakeTaus, shapeOnly=False, displayPurityBreakdown=True, noRebin=True)                                                                                           
+    myQCDqgReweightingSystResultsPlus.addShape(myResult_qgPlus.getShape(), myShapeString)
+    myQCDqgReweightingSystResultsPlus.addShape(myResult_qgPlus.getShapeMCEWK(), myShapeString+"_MCEWK")
+    myQCDqgReweightingSystResultsPlus.addShape(myResult_qgPlus.getShapePurity(), myShapeString+"_Purity")
+    myQCDqgReweightingSystResultsPlus.addDataDrivenControlPlots(myResult_qgPlus.getControlPlots(),myResult.getControlPlotLabels())
+    myOutputCreator.addModule(myQCDqgReweightingSystResultsPlus)
+
+    # normalization with only fake taus (minus)
+    myQCDqgReweightingSystResultsMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDqgReweightingMinus")
+    myResult_qgMinus = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity,myModuleInfoString, myEWKFakeTauNormFactors, dataDrivenFakeTaus=dataDrivenFakeTaus, shapeOnly=False, displayPurityBreakdown=True, noRebin=True)                                                                                           
+    myQCDqgReweightingSystResultsMinus.addShape(myResult_qgMinus.getShape(), myShapeString)
+    myQCDqgReweightingSystResultsMinus.addShape(myResult_qgMinus.getShapeMCEWK(), myShapeString+"_MCEWK")
+    myQCDqgReweightingSystResultsMinus.addShape(myResult_qgMinus.getShapePurity(), myShapeString+"_Purity")
+    myQCDqgReweightingSystResultsMinus.addDataDrivenControlPlots(myResult_qgMinus.getControlPlots(),myResult.getControlPlotLabels())
+    myOutputCreator.addModule(myQCDqgReweightingSystResultsMinus)
+
     # Clean up
     myResult.delete()
     dsetMgr.close()
@@ -113,10 +133,12 @@ if __name__ == "__main__":
     myNormFactors = None
     myNormFactorsSafetyCheck = None
     if os.path.exists(myNormalizationFactorSource):
-        myNormFactorsImport = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalization")
-        myNormFactorsSafetyCheck = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalizationSafetyCheck")
+        myQCDNormFactorsImport = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalizationOnlyQCD")
+        myEWKFakeTauNormFactorsImport = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalizationOnlyEWKFakeTau")
+        myQCDNormFactorsSafetyCheck = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalizationSafetyCheck")
         #QCDInvertedNormalizationSafetyCheck(era)
-        myNormFactors = myNormFactorsImport.copy()
+        myQCDNormFactors = myQCDNormFactorsImport.copy()
+        myEWKFakeTauNormFactors = myEWKFakeTauNormFactorsImport.copy()
     else:
         raise Exception(ShellStyles.ErrorLabel()+"Normalisation factors ('%s.py') not found!\nRun script InvertedTauID_Normalization.py to generate the normalization factors."%myNormalizationFactorSource)
     # Object for selecting data eras, search modes, and optimization modes
@@ -185,14 +207,23 @@ if __name__ == "__main__":
         print ShellStyles.HighlightStyle()+"Creating dataset for shape: %s%s"%(massType,ShellStyles.NormalStyle())
         for era in myModuleSelector.getSelectedEras():
             # Check if normalization coefficients are suitable for era
-            myNormFactorsSafetyCheck(era)
+            #myNormFactorsSafetyCheck(era) #TODO
             for searchMode in myModuleSelector.getSelectedSearchModes():
                 for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
+                    if os.path.exists(myNormalizationFactorSource):
+                        myNormFactorsImport = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalization"+optimizationMode)
+                        myNormFactorsSafetyCheck = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalizationSafetyCheck")
+                        #QCDInvertedNormalizationSafetyCheck(era)
+                        myNormFactorsSafetyCheck(era)
+                        myNormFactors = myNormFactorsImport.copy()
+                    else:
+                        raise Exception(ShellStyles.ErrorLabel()+"Normalisation factors ('%s.py') not found!\nRun script InvertedTauID_Normalization.py to generate the normalization factors."%myNormalizationFactorSource)
+
                     myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
                     n += 1
                     print ShellStyles.CaptionStyle()+"Module %d/%d: %s/%s%s"%(n,myTotalModules,myModuleInfoString,massType,ShellStyles.NormalStyle())
                     myStartTime = time.time()
-                    doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myNormFactors,myDisplayStatus,dataDrivenFakeTaus)
+                    doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myNormFactors,myQCDNormFactors,myEWKFakeTauNormFactors,myDisplayStatus,dataDrivenFakeTaus)
                     printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
                     # Now do the rest of systematics variations
                     for syst in mySystematicsNames:
