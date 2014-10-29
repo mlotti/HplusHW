@@ -32,19 +32,22 @@ if __name__ == "__main__":
     myNuisanceReplaces["jer"] = "JER"
     myNuisanceReplaces["umet"] = "ES_METunclustered"
     #myNuisanceReplaces["btag"] = "b_tag" 
-    myNuisanceReplaces["btag"] = "btag_CSVM"
-    myNuisanceReplaces["unbtag"] = "unbtag_CSVM"
+    #myNuisanceReplaces["btag"] = "btag_CSVM"
+    #myNuisanceReplaces["unbtag"] = "unbtag_CSVM"
     myNuisanceReplaces["singletopCrossSection"] = "xsect_singleTop"
     myNuisanceReplaces["zllCrossSection"] = "xsect_DYtoll"
     myNuisanceReplaces["dibosonCrossSection"] = "xsect_VV"
     myNuisanceReplaces["lumi_8TeV"] = "lumi"
     myNuisanceReplaces["pu"] = "pileup"
     #myNuisanceReplaces[""] = ""
-    
     myMgr.replaceNuisanceNames(myNuisanceReplaces)
+
+    myMgr.mergeShapeNuisances(["btag","unbtag"], "b_tag")
     
     myMgr.addNuisance(name="xsect_tt_8TeV", distribution="lnN", columns=["tt_ltau","tt_ll"], value="0.948/1.045")
     myMgr.replaceNuisanceValue("tau_ID_jetToTau_shape", "1.200")
+
+    myMgr.convertShapeToNormalizationNuisance(["ES_jets"])
 
     # Redo stat. uncert. shape histograms
     myMgr.recreateShapeStatUncert()

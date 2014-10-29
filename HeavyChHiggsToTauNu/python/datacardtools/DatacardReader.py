@@ -4,6 +4,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 #import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 
 import os
+import math
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
@@ -160,17 +161,20 @@ class DataCardDirectoryManager:
         for m in self._datacards.keys():
             dcard = self._datacards[m]
             # Remove histograms
+            i = 0
             while i < len(dcard._hCache):
                 if "_"+name+"Up" in dcard._hCache[i].GetName() or "_"+name+"Down" in dcard._hCache[i].GetName():
                     dcard._hCache[i].Delete()
                     dcard._hCache.remove(dcard._hCache[i])
-                i += 1
+                else:
+                    i += 1
             # Remove nuisances
             i = 0
             while i < len(dcard._datasetNuisances):
                 if dcard._datasetNuisances[i]["name"] == name:
-                    dcard._datasetNuisances[i].remove(dcard._datasetNuisances[i])
-                i += 1
+                    del dcard._datasetNuisances[i]
+                else:
+                    i += 1
 
     def replaceNuisanceValue(self, name, newValue):
         for m in self._datacards.keys():
@@ -184,6 +188,35 @@ class DataCardDirectoryManager:
                             if dcard._datasetNuisances[i][k] != "1.000" and dcard._datasetNuisances[i][k] != "1" and dcard._datasetNuisances[i][k] != "-":
                                 dcard._datasetNuisances[i][k] = newValue
 
+    def convertShapeToNormalizationNuisance(self, nameList):
+        myList = []
+        if isinstance(nameList, str):
+            myList.append(nameList)
+        elif isinstance(nameList, list):
+            myList.extend(nameList)
+        for m in self._datacards.keys():
+            dcard = self._datacards[m]
+            for item in myList:
+                for i in range(0,len(dcard._datasetNuisances)):
+                    if dcard._datasetNuisances[i]["name"] == item:
+                        for c in dcard.getDatasetNames():
+                            if dcard._datasetNuisances[i][c] == "1":
+                                # Find histograms
+                                hup = dcard.getRootFileObject("%s_%sUp"%(c, dcard._datasetNuisances[i]["name"]))
+                                hdown = dcard.getRootFileObject("%s_%sDown"%(c, dcard._datasetNuisances[i]["name"]))
+                                hRate = dcard.getRateHisto(c)
+                                # Calculate nuisance value by integrating
+                                myNominalRate = hRate.Integral()
+                                s = "%.3f/%.3f"%(hdown.Integral()/myNominalRate, hup.Integral()/myNominalRate)
+                                # Remove histograms
+                                dcard._hCache.remove(hup)
+                                dcard._hCache.remove(hdown)
+                                hup.Delete()
+                                hdown.Delete()
+                                # Replace value for column in datacard
+                                dcard._datasetNuisances[i][c] = s
+                                dcard._datasetNuisances[i]["distribution"] = "lnN"
+    
     def mergeShapeNuisances(self, namesList, newName):
         if len(namesList) < 2:
             raise Exception("Error: mergeShapeNuisances needs at least two nuisance names for the merge!")
@@ -199,37 +232,40 @@ class DataCardDirectoryManager:
             # Do merge
             for item in namesList[1:]:
                 for i in range(0,len(dcard._datasetNuisances)):
-                if dcard._datasetNuisances[i]["name"] == namesList[0]:
-                    if dcard._datasetNuisances[i]["distribution"] != "shape":
-                        raise Exception("Error: mergeShapeNuisances: nuisance '%s' is not a shape nuisance!"%namesList[0])
-                    # Update nuisance histograms and datacard nuisance lines
-                    for c in dcard.getDatasetNames():
-                        if dcard._datasetNuisances[i][c] == "1":
-                            if dcard._datasetNuisances[i][targetIndex] == "1":
-                                # Add histogram contents
-                                myTargetList = dcard.getRootFileObjectsWithPattern("%s_%s"%(c, dcard._datasetNuisances[targetIndex]["name"]))
-                                mySourceList = dcard.getRootFileObjectsWithPattern("%s_%s"%(c, dcard._datasetNuisances[i]["name"]))
-                                myRateHisto = dcard.getRateHisto(c)
-                                if len(myTargetList) != len(mySourceList):
-                                    raise Exception("This should not happen")
-                                for h in range(0, len(myTargetList)):
-                                    for k in len(1, myTargetList[h].GetNbinsX()+1):
-                                        myOffset = myRateHisto.GetBinContent(k)
-                                        myVariation = (myTargetList[h].GetBinContent(k) - myOffset)**2
-                                        myVariation += (mySourceList[h].GetBinContent(k) - myOffset)**2
-                                        myTargetList[h].SetBinContent(k, math.sqrt(myVariation)+myOffset)
-                            else:
-                                # Update nuisance line
-                                dcard._datasetNuisances[i][c] = "1"
-                                # Copy histogram
-                                mySourceList = dcard.getRootFileObjectsWithPattern("%s_%s"%(c, dcard._datasetNuisances[i]["name"]))
-                                for h in mySourceList:
-                                    if h.GetName().endswith("Up"):
-                                        hnew = aux.Clone(h, "%s_%sUp"%(c, dcard._datasetNuisances[i]["name"]))
-                                        dcard._hCache.append(hnew)
-                                    elif h.GetName().endswith("Down"):
-                                        hnew = aux.Clone(h, "%s_%sDown"%(c, dcard._datasetNuisances[i]["name"]))
-                                        dcard._hCache.append(hnew)
+                    if dcard._datasetNuisances[i]["name"] == item:
+                        if dcard._datasetNuisances[i]["distribution"] != "shape":
+                            raise Exception("Error: mergeShapeNuisances: nuisance '%s' is not a shape nuisance!"%item)
+                        # Update nuisance histograms and datacard nuisance lines
+                        for c in dcard.getDatasetNames():
+                            if dcard._datasetNuisances[i][c] == "1":
+                                if dcard._datasetNuisances[targetIndex][c] == "1":
+                                    # Add histogram contents
+                                    myTargetList = dcard.getRootFileObjectsWithPattern("%s_%s"%(c, dcard._datasetNuisances[targetIndex]["name"]))
+                                    mySourceList = dcard.getRootFileObjectsWithPattern("%s_%s"%(c, dcard._datasetNuisances[i]["name"]))
+                                    myRateHisto = dcard.getRateHisto(c)
+                                    if len(myTargetList) != len(mySourceList):
+                                        raise Exception("This should not happen")
+                                    for h in range(0, len(myTargetList)):
+                                        hTarget = dcard.getRootFileObject(myTargetList[h])
+                                        hSource = dcard.getRootFileObject(mySourceList[h])
+                                        for k in range(1, hTarget.GetNbinsX()+1):
+                                            myOffset = myRateHisto.GetBinContent(k)
+                                            myVariation = (hTarget.GetBinContent(k) - myOffset)**2
+                                            myVariation += (hSource.GetBinContent(k) - myOffset)**2
+                                            hTarget.SetBinContent(k, math.sqrt(myVariation)+myOffset)
+                                else:
+                                    # Update nuisance line
+                                    dcard._datasetNuisances[i][c] = "1"
+                                    # Copy histogram
+                                    mySourceList = dcard.getRootFileObjectsWithPattern("%s_%s"%(c, dcard._datasetNuisances[i]["name"]))
+                                    for h in mySourceList:
+                                        hSource = dcard.getRootFileObject(h)
+                                        if hSource.GetName().endswith("Up"):
+                                            hnew = aux.Clone(hSource, "%s_%sUp"%(c, dcard._datasetNuisances[i]["name"]))
+                                            dcard._hCache.append(hnew)
+                                        elif hSource.GetName().endswith("Down"):
+                                            hnew = aux.Clone(hSource, "%s_%sDown"%(c, dcard._datasetNuisances[i]["name"]))
+                                            dcard._hCache.append(hnew)
         # Rename
         myDict = {namesList[0]: newName}
         self.replaceNuisanceNames(myDict)
