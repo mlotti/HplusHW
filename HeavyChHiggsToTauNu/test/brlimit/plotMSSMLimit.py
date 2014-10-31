@@ -174,7 +174,7 @@ def doPlot(name, graphs, limits, xlabel, scenario, isMA=False):
 
         limit.setExcludedStyle(excluded)
         excluded.SetLineWidth(0)
-        excluded.SetLineColor(ROOT.kWhite)
+        excluded.SetLineColor(ROOT.kBlack)
 
     expected = graphs["exp"]
     expected.SetLineStyle(2)
