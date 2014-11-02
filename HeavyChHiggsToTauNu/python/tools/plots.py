@@ -2298,6 +2298,7 @@ class PlotDrawer:
     # \param xlabel              Default X axis title (None for pick from first TH1)
     # \param ylabel              Default Y axis title (None for pick from first TH1)
     # \param zlabel              Default Z axis title (None for not to show)
+    # \param zhisto              Histo name for the Z information (for updating palette etc) (None for first histogram)
     # \param log                 Should Y axis be in log scale by default?
     # \param ratio               Should the ratio pad be drawn?
     # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
@@ -2336,6 +2337,7 @@ class PlotDrawer:
                  xlabel=None,
                  ylabel="Occurrances / %.0f",
                  zlabel=None,
+                 zhisto=None,
                  log=False,
                  ratio=False,
                  ratioYlabel=None,
@@ -2375,6 +2377,7 @@ class PlotDrawer:
         self.xlabelDefault = xlabel
         self.ylabelDefault = ylabel
         self.zlabelDefault = zlabel
+        self.zhistoDefault = zhisto
         self.logDefault = log
         self.ratioDefault = ratio
         self.ratioYlabelDefault = ratioYlabel
@@ -2815,6 +2818,7 @@ class PlotDrawer:
     # \li\a xlabel  X axis title (None for pick from first histogram)
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
+    # \li\a zhisto              Histo name for the Z information (for updating palette etc) (None for first histogram)
     # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?  None for True if divideByBinWidth is True
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
     # \li\a customizeBeforeDraw Function to customize the plot object before drawing the plot
@@ -2871,7 +2875,12 @@ class PlotDrawer:
         # Updates the possible Z axis label styles
         # Does nothing if the Z axis does not exist
         zlabel = self._getValue("zlabel", p, kwargs)
-        paletteAxis = histograms.updatePaletteStyle(p.histoMgr.getHistos()[0].getRootHisto())
+        zhisto = self._getValue("zhisto", p, kwargs)
+        if zhisto is None:
+            zrh = p.histoMgr.getHistos()[0].getRootHisto()
+        else:
+            zrh = p.histoMgr.getHisto(zhisto).getRootHisto()
+        paletteAxis = histograms.updatePaletteStyle(zrh)
         if zlabel is not None and paletteAxis != None:
             paletteAxis.GetAxis().SetTitle(zlabel)
 
