@@ -70,6 +70,7 @@ if __name__ == "__main__":
         rootFilePatterns = []
         myMassPoints = []
         # taunu, tau+jets final state
+        settings = commonLimitTools.GeneralSettings(myDir, opts.masspoints)
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS), settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS))
         # taunu, tau mu final state
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "datacard_mutau_taunu_m%s_mutau.txt", "shapes_taunu_m%s_btagmultiplicity_j.root")

@@ -131,8 +131,12 @@ def getSoftware(directory="."):
             if item.endswith(".txt") and "%s_datacard"%value in item:
                 print "Datacards for limit calculation software '%s' auto-detected"%value
                 return (key,value)
-    raise Exception("Automatic detection of limit calculation software failed! Please run this script in the directory of the datacards!")
-
+              
+    
+    print "Automatic detection of limit calculation software failed! Please run this script in the directory of the datacards!"
+    print "Assuming combine :)"
+    return (LimitSoftwareType.COMBINE, mySoftware[LimitSoftwareType.COMBINE])
+    
 ## Deduces from directory listing the mass point list
 def obtainMassPoints(pattern, directory):
     mass_re = re.compile(pattern%"(?P<mass>\S+)")
