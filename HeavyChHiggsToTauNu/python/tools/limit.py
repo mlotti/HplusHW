@@ -155,7 +155,7 @@ class BRLimits:
             setattr(self, attr, [float(m) for m in getattr(self, attr)])
 
        
-
+        print "Opening file '%s' for input"%os.path.join(directory, configfile)
         f = open(os.path.join(directory, configfile), "r")
         config = json.load(f)
         f.close()
