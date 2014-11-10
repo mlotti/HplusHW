@@ -76,20 +76,27 @@ def main(opts):
     fsig.Close()
 
     # Randomize
-    print "Using seed %d" % opts.seed
-    rnd = ROOT.TRandom3()
-    rnd.SetSeed(opts.seed)
-    for i in xrange(1, hsum.GetNbinsX()+1):
-        value = rnd.Poisson(hsum.GetBinContent(i))
-        hobs.SetBinContent(i, value)
-        hobs.SetBinError(i, math.sqrt(value))
+    if opts.toys:
+        print "Using seed %d" % opts.seed
+        rnd = ROOT.TRandom3()
+        rnd.SetSeed(opts.seed)
+        for i in xrange(1, hsum.GetNbinsX()+1):
+            value = rnd.Poisson(hsum.GetBinContent(i))
+            hobs.SetBinContent(i, value)
+            hobs.SetBinError(i, math.sqrt(value))
+    else:
+        print "Not using toys, rounding bins to nearest integer"
+        for i in xrange(1, hsum.GetNbinsX()+1):
+            value = round(hsum.GetBinContent(i))
+            hobs.SetBinContent(i, value)
+            hobs.SetBinError(i, math.sqrt(value))
 
     # Make sure the integral is integer
     if hobs.Integral() != 0:
         hobs.Scale( ROOT.TMath.Nint(hobs.Integral()) / hobs.Integral() )
 
     nevents = int(hobs.Integral())
-    print "Original N(events) %d, randomized %d" % (int(hsum.Integral()), int(hobs.Integral()))
+    print "Original N(events) %.2f, randomized %.2f" % (int(hsum.Integral()), int(hobs.Integral()))
 
     # Write result
     fout = ROOT.TFile.Open(opts.outputRoot, "RECREATE")
@@ -121,6 +128,8 @@ if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("-s", dest="seed", type="int", default=12345,
                       help="Seed for random number generator")
+    parser.add_option("--notoys", dest="toys", default=True, action="store_false",
+                      help="Do not generate poisson toys, just plain background+signal (i.e. more or less the Asimov dataset)")
     parser.add_option("--brtop", dest="brtop", type="float", default=0.0,
                       help="BR(top -> b H+")
     parser.add_option("--brh", dest="brh", type="float", default=0.0,
