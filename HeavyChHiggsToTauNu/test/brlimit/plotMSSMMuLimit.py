@@ -110,7 +110,7 @@ def main():
                 gr = graphs[name]
                 print "Graph", name
                 for i in reversed(range(0,gr.GetN())):
-                    if gr.GetY()[i] < 2:
+                    if gr.GetY()[i] < 2 or gr.GetY()[i] > 65:
                         print "    REMOVING POINT",gr.GetY()[i]," corresponding mass=",gr.GetX()[i]
                         gr.RemovePoint(i)
 

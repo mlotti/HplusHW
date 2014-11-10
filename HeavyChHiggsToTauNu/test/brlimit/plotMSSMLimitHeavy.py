@@ -57,6 +57,8 @@ def main():
     style = tdrstyle.TDRStyle()
     if limit.forPaper:
         histograms.cmsTextMode = histograms.CMSMode.PAPER
+    #histograms.cmsTextMode = histograms.CMSMode.PAPER # tmp
+    histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED # tmp
     limit.forPaper = True # to get GeV without c^2
 
     # Get BR limits
@@ -140,7 +142,7 @@ def main():
 	#print "check loop db.graphToMa"
         db.graphToMa(graphs[key])
 
-    graphs["isomass"] = db.getIsoMass(180)
+    graphs["isomass"] = db.getIsoMass(200)
 
     doPlot("limitsTanb_mA_heavy_"+scenario, graphs, limits, limit.mA(),scenario)	
 
@@ -174,7 +176,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
 
         limit.setExcludedStyle(excluded)
         excluded.SetLineWidth(0)
-        excluded.SetLineColor(ROOT.kWhite)
+        excluded.SetLineColor(ROOT.kBlack)
 
     expected = graphs["exp"]
     expected.SetLineStyle(2)
@@ -262,7 +264,7 @@ def doPlot(name, graphs, limits, xlabel, scenario):
     name = os.path.basename(name)
     name = name.replace("-","_")
 
-    frameXmin = 180
+    frameXmin = 200
     if "_mA_" in name:
         frameXmin = 140
     plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax, "xmin": frameXmin, "xmax": 600})

@@ -72,6 +72,26 @@ OptionDoTBbarForHeavy = False # NOTE: usable only for 2012
 OptionAddSingleTopDependencyForMuParameter = False # Affects only light H+
 OptionAddSingleTopSignal = False # Affects only light H+
 
+# Convert the following nuisances from shape to constant
+OptionConvertFromShapeToConstantList = ["trg_tau","trg_tau_dataeff","trg_tau_MCeff","trg_L1ETM_dataeff","trg_L1ETM_MCeff","trg_L1ETM","trg_muon_dataeff", # triggers
+                                        #"tau_ID_shape", # tau ID
+                                        "tau_ID_eToTauEndcap_shape", # tau mis-ID
+                                        #"tau_ID_eToTauBarrel_shape", "tau_ID_muToTau_shape", "tau_ID_jetToTau_shape", # other tau mis-ID
+                                        "ES_jets","JER","ES_METunclustered", # jet, MET
+                                        #"ES_taus", # tau ES
+                                        #"b_tag", "b_tag_fakes", # btag
+                                        "Emb_mu_ID", "Emb_WtauTomu", # embedding-specific
+                                        "Emb_reweighting", # other embedding-specific
+                                        #"QCD_metshape", # multijets specific
+                                        #"top_pt", # top pt reweighting
+                                        "pileup", "pileup_fakes", # pileup
+                                        ]
+
+# Separate in the following shape nuisances the shape and normalization components
+OptionSeparateShapeAndNormalizationFromSystVariationList = [
+                                                            #"ES_taus"
+                                                           ]
+
 # For projections
 trg_MET_dataeffScaleFactor = None # Default is None, i.e. 1.0
 
@@ -598,13 +618,13 @@ if not "tau_ID_shape" in myShapeSystematics:
         value         = 0.15, # FIXME
     ))
 
-Nuisances.append(Nuisance(
-    id            = "tau_ID_constShape",
-    label         = "tau-jet ID (no Rtau)",
-    distr         = "shapeQ",
-    function      = "ConstantToShape",
-    value         = systematics.getTauIDUncertainty(isGenuineTau=True)
-))
+#Nuisances.append(Nuisance(
+    #id            = "tau_ID_constShape",
+    #label         = "tau-jet ID (no Rtau)",
+    #distr         = "shapeQ",
+    #function      = "ConstantToShape",
+    #value         = systematics.getTauIDUncertainty(isGenuineTau=True)
+#))
 
 if "tau_ID_shape" in myShapeSystematics:
     Nuisances.append(Nuisance(
@@ -655,37 +675,29 @@ if OptionIncludeSystematics:
     Nuisances.append(Nuisance(
         id            = "ES_taus",
         label         = "TES bin-by-bin uncertainty",
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        distr         = "lnN",
-        function      = "ShapeVariationToConstant",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
         systVariation = "TES",
     ))
     Nuisances.append(Nuisance(
         id            = "ES_jets",
         label         = "JES bin-by-bin uncertainty",
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        distr         = "lnN",
-        function      = "ShapeVariationToConstant",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
         systVariation = "JES",
     ))
     Nuisances.append(Nuisance(
         id            = "JER",
         label         = "Jet energy resolution",
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        distr         = "lnN",
-        function      = "ShapeVariationToConstant",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
         systVariation = "JER",
     ))
     Nuisances.append(Nuisance(
         id            = "ES_METunclustered",
         label         = "MET unclustered scale bin-by-bin uncertainty",
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        distr         = "lnN",
-        function      = "ShapeVariationToConstant",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
         systVariation = "MET",
     ))
     Nuisances.append(Nuisance(
@@ -954,20 +966,16 @@ if OptionIncludeSystematics:
     Nuisances.append(Nuisance(
         id            = "pileup",
         label         = "pileup",
-#        distr         = "shapeQ",
-#        function      = "ShapeVariation",
-        distr         = "lnN",
-        function      = "ShapeVariationToConstant",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
         systVariation = "PUWeight",
     ))
 
     Nuisances.append(Nuisance(
         id            = "pileup_fakes",
         label         = "pileup",
-        #distr         = "shapeQ",
-        #function      = "ShapeVariation",
-        distr         = "lnN",
-        function      = "ShapeVariationToConstant",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
         systVariation = "PUWeight",
     ))
 else:
@@ -1020,6 +1028,12 @@ MergeNuisances.append(["b_tag","b_tag_fakes"])
 MergeNuisances.append(["pileup","pileup_fakes"])
 MergeNuisances.append(["xsect_tt_8TeV", "xsect_tt_8TeV_forQCD"])
 MergeNuisances.append(["lumi", "lumi_forQCD"])
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import convertFromSystVariationToConstant
+convertFromSystVariationToConstant(Nuisances, OptionConvertFromShapeToConstantList)
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import separateShapeAndNormalizationFromSystVariation
+separateShapeAndNormalizationFromSystVariation(Nuisances, OptionSeparateShapeAndNormalizationFromSystVariationList)
 
 # Control plots
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput

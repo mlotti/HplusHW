@@ -20,10 +20,11 @@ from array import array
 # Helper class to cache the result for each extractor in each datacard column
 class ExtractorResult():
     ## Constructor(
-    def __init__(self, exId = "-1", masterId = "-1", result=None, histograms=None, resultIsStat=False):
+    def __init__(self, exId = "-1", masterId = "-1", result=None, histograms=None, resultIsStat=False, additionalResult=None):
         self._exId = exId
         self._masterId = masterId
         self._result = result
+        self._additionalResult = additionalResult
         self._resultIsStat = resultIsStat
         self._purityHistogram = None # Only used for QCD
 
@@ -43,6 +44,9 @@ class ExtractorResult():
 
     def getResult(self):
         return self._result
+
+    def getAdditionalResult(self):
+        return self._additionalResult
 
     def setPurityHistogram(self, h):
         self._purityHistogram = h
@@ -65,6 +69,39 @@ class ExtractorResult():
 
     def getHistograms(self):
         return self._histograms
+
+    def getFinalBinningHistograms(self, blackList=[]):
+        myMinBins = 999
+        for h in self._histograms:
+            if h.GetNbinsX() < myMinBins:
+                myMinBins = h.GetNbinsX()
+        myList = []
+        for h in self._histograms:
+            if h.GetNbinsX() == myMinBins:
+                myStatus = True
+                for item in blackList:
+                    if item in h.GetName():
+                        myStatus = False
+                if myStatus:
+                    myList.append(h)
+        return myList
+
+    def getFineBinnedHistograms(self, blackList=[]):
+        myMinBins = 999
+        for h in self._histograms:
+            if h.GetNbinsX() < myMinBins:
+                myMinBins = h.GetNbinsX()
+        myList = []
+        for h in self._histograms:
+            if h.GetNbinsX() > myMinBins:
+                myStatus = True
+                for item in blackList:
+                    if item in h.GetName():
+                        myStatus = False
+                if myStatus:
+                    myList.append(h)
+
+        return myList
 
     def linkHistogramsToRootFile(self,rootfile):
         # Note: Do not call destructor for the tempHistos.
@@ -446,8 +483,10 @@ class DatacardColumn():
                     myFoundStatus = True
                     # Obtain result
                     myResult = 0.0
+                    myAdditionalResult = None
                     if dsetMgr != None:
                         myResult = e.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                        myAdditionalResult = e.extractAdditionalResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     # Obtain histograms
                     myHistograms = []
                     if e.isShapeNuisance():
@@ -491,7 +530,8 @@ class DatacardColumn():
                                                                  e.getMasterId(),
                                                                  myResult,
                                                                  myHistograms,
-                                                                 "Stat." in e.getDescription() or "stat." in e.getDescription() or e.getDistribution()=="shapeStat"))
+                                                                 "Stat." in e.getDescription() or "stat." in e.getDescription() or e.getDistribution()=="shapeStat",
+                                                                 additionalResult=myAdditionalResult))
             if not myFoundStatus:
                 raise Exception("\n"+ShellStyles.ErrorLabel()+"(data group ='"+self._label+"'): Cannot find nuisance with id '"+nid+"'!")
         # Print list of uncertainties
@@ -724,6 +764,23 @@ class DatacardColumn():
             print "  nuisances:", self._nuisanceIds
         print "  shape histogram:", self._shapeHisto
 
+    def doSeparateAdditionalResults(self):
+        myNewNuisancesList = []
+        myNewNuisanceIdsList = []
+        for n in self.getNuisanceResults():
+            if n.getAdditionalResult() != None:
+                # Create new cached result
+                myId = n._exId+"_normOnly"
+                myMasterId = n._masterId
+                if myMasterId != "-1":
+                    myMasterId += "_normOnly"
+                myNewResult = ExtractorResult(myId, myMasterId, n.getAdditionalResult(), [])
+                myNewNuisancesList.append(myNewResult)
+                myNewNuisanceIdsList.append(myId)
+                n._exId += "_shapeOnly"
+        self._nuisanceResults.extend(myNewNuisancesList)
+        self._nuisanceIds.extend(myNewNuisanceIdsList)
+        return myNewNuisanceIdsList
 
     ## \var _additionalNormalisationFactor
     # Normalisation factor is multiplied by this factor (needed for EWK)

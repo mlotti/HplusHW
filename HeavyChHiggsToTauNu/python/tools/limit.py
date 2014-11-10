@@ -90,7 +90,10 @@ _finalstateYmaxSigmaBR = {
 }
 
 def setExcludedStyle(graph):
-    graph.SetFillColorAlpha(ROOT.kViolet+6, 0.3) # transparency
+    ci = ROOT.TColor.GetColor(156, 156, 156)
+#    ci = ROOT.TColor.GetColor(209, 209, 209)
+    graph.SetFillColorAlpha(ci, 0.3) # transparency
+#    graph.SetFillColorAlpha(ROOT.kViolet+6, 0.3) # transparency
 
 
 ## Class for reading the BR limits from the JSON file produced by
@@ -152,7 +155,7 @@ class BRLimits:
             setattr(self, attr, [float(m) for m in getattr(self, attr)])
 
        
-
+        print "Opening file '%s' for input"%os.path.join(directory, configfile)
         f = open(os.path.join(directory, configfile), "r")
         config = json.load(f)
         f.close()

@@ -56,6 +56,8 @@ def main():
     style = tdrstyle.TDRStyle()
     if limit.forPaper:
         histograms.cmsTextMode = histograms.CMSMode.PAPER
+    #histograms.cmsTextMode = histograms.CMSMode.PAPER # tmp
+    #histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED # tmp
     limit.forPaper = True # to get GeV without c^2
 
     # Get BR limits
@@ -174,7 +176,7 @@ def doPlot(name, graphs, limits, xlabel, scenario, isMA=False):
 
         limit.setExcludedStyle(excluded)
         excluded.SetLineWidth(0)
-        excluded.SetLineColor(ROOT.kWhite)
+        excluded.SetLineColor(ROOT.kBlack)
 
     expected = graphs["exp"]
     expected.SetLineStyle(2)
