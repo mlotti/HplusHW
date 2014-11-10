@@ -494,9 +494,9 @@ class MLFitData:
         labels = content["nuisanceParameters"][:]
 
         for nuis in labels[:]:
-            if heavyHplusMode and "BinByBin" in nuis:
-                del labels[labels.index(nuis)]
-                continue
+            #if heavyHplusMode and "BinByBin" in nuis:
+            #    del labels[labels.index(nuis)]
+            #    continue
             if not nuis in content or content[nuis]["type"] == "shapeStat":
                 del labels[labels.index(nuis)]
                 continue
