@@ -182,6 +182,11 @@ def compareInjected(opts, args):
 
 styleList = [styles.Style(24, ROOT.kBlack)] + styles.getStyles()
 
+def _ifNotNone(value, default):
+    if value is None:
+        return default
+    return value
+
 def doCompare(name, compareList, opts, **kwargs):
     legendLabels = []
     limits = []
@@ -197,7 +202,7 @@ def doCompare(name, compareList, opts, **kwargs):
 
     doPlot2(limits, legendLabels, name)
 
-    limitOpts = kwargs.get("limitOpts", {"ymax": limits[0].getFinalstateYmaxBR()})
+    limitOpts = kwargs.get("limitOpts", {"ymax": _ifNotNone(opts.ymax, limits[0].getFinalstateYmaxBR())})
     expectedSigmaRelativeOpts = kwargs.get("expectedSigmaRelativeOpts", {"ymaxfactor": 1.2})
     moveLegend = kwargs.get("moveLegend", {})
 
@@ -221,12 +226,27 @@ def doCompare(name, compareList, opts, **kwargs):
             limits[0].expectedPlus1[j] = 1.0
             limits[0].observed[j] = 1.0
         # Set y scale and require it to be linear
-        kwargs["expectedMedianOptsRelative"] = {"ymin": 0.5, "ymax":1.5}
+        kwargs["expectedMedianOptsRelative"] = {"ymin": 0.5, "ymax": _ifNotNone(opts.relativeYmax, 1.5)}
         kwargs["log"] = False
         doPlot(limits, legendLabels, [l.expectedGraph() for l in limits],
-              name+"_expectedMedianRelative", "Expected limit vs. nominal", opts=kwargs.get("expectedMedianOptsRelative", limitOpts), moveLegend=moveLegend, log=kwargs.get("log",False),
+              name+"_expectedMedianRelative", opts.relativeYlabel, opts=kwargs.get("expectedMedianOptsRelative", limitOpts), moveLegend=moveLegend, log=kwargs.get("log",False),
               plotLabel="Expected median")
         print "Skipping +-1 and 2 sigma plots for --relative"
+        sys.exit()
+
+    if opts.relativePairs:
+        if len(limits) % 2 != 0:
+            print "Number of limits is not even!"
+            sys.exit(1)
+        divPoint = len(limits) / 2
+        denoms = limits[:divPoint]
+        numers = limits[divPoint:]
+        for i in xrange(0, divPoint):
+            numers[i].divideByLimit(denoms[i])
+        doPlot(numers, legendLabels[:divPoint], [l.expectedGraph() for l in numers],
+               name+"_expectedMedianRelative", opts.relativeYlabel, opts={"ymin": 0.5, "ymax": _ifNotNone(opts.relativeYmax, 1.5)},
+               plotLabel="Expected median")
+        print "Skipping +-1 and 2 sigma plots for --relativePairs"
         sys.exit()
 
     legendLabels2 = legendLabels + [None]*len(legendLabels)
@@ -371,7 +391,11 @@ if __name__ == "__main__":
     parser.add_option("--heavy", dest="heavyHplus", action="store_true", default=False, help="Heavy H+ comparison")
     parser.add_option("--tailFit", dest="tailFit", action="store_true", default=False, help="tailFit comparison")
     parser.add_option("--relative", dest="relative", action="store_true", default=False, help="Do comparison relative to the first item")
+    parser.add_option("--relativePairs", dest="relativePairs", action="store_true", default=False, help="Do multiple relative comparisons. The list of input directories is halved, the first half is the denominator and the second half is the numerator.")
     parser.add_option("--name", dest="name", type="string", default=None, help="Name of the output plot")
+    parser.add_option("--ymax", dest="ymax", type="float", default=None, help="Maximum y-axis value for regular plots")
+    parser.add_option("--relativeYmax", dest="relativeYmax", type="float", default=None, help="Maximum y-value for relative plots")
+    parser.add_option("--relativeYlabel", dest="relativeYlabel", default="Expected limit vs. nominal", help="Y-axis title for relative plots")
 
     (opts, args) = parser.parse_args()
 
