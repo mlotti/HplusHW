@@ -56,6 +56,8 @@ def main():
     style = tdrstyle.TDRStyle()
     if limit.forPaper:
         histograms.cmsTextMode = histograms.CMSMode.PAPER
+    #histograms.cmsTextMode = histograms.CMSMode.PAPER # tmp
+    #histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED # tmp
     limit.forPaper = True # to get GeV without c^2
 
     # Get BR limits
