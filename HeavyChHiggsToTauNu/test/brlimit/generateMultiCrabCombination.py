@@ -3,6 +3,7 @@
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CombineTools as combine
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
+import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as DatacardReader
 
 lepType = False
 lhcType = False
@@ -16,11 +17,8 @@ lhcTypeAsymptotic = False
 #massPoints = massPoints[1:]
 #massPoints = ["80", "160"]
 
-def main(opts, settings, myDir):
+def main(opts, myDir, datacardPatterns, rootFilePatterns):
     postfix = "combination"
-
-    furtherDatacards = ["datacard_mutau_taunu_m%s_mutau.txt"]
-    furtherRootFiles = ["shapes_taunu_m%s_btagmultiplicity_j.root"]
 
     crabScheduler = "arc"
     crabOptions = {
@@ -29,67 +27,34 @@ def main(opts, settings, myDir):
 #            "ce_white_list = korundi.grid.helsinki.fi",
 #            ]
         }
-    # Obtain mass mass points
-    massPoints = settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS)
     
     # run
-    if settings.isLands():
-        print "no guarantees than LandS works ... proceed at your own risk"
-        if opts.lepType:
-            lands.generateMultiCrab(
-                opts,
-                massPoints = massPoints,
-                datacardPatterns = datacards,
-                rootfilePatterns = [lands.taujetsRootfilePattern],
-                clsType = lands.LEPType(toysPerJob=100),
-                numberOfJobs = 10,
-                postfix = postfix+"_lep_toys1k",
-                crabScheduler=crabScheduler, crabOptions=crabOptions)
-        if opts.lhcType:
-            lands.generateMultiCrab(
-                opts,
-                massPoints = massPoints,
-                datacardPatterns = datacards,
-                rootfilePatterns = [lands.taujetsRootfilePattern],
-                clsType = lands.LHCType(toysCLsb=100,
-                                        toysCLb=50,
-                                        vR=("0.005", "0.06"),
-                                        options = {"default": lands.lhcHybridOptions,
-                                                  "80": lands.lhcHybridOptionsMinos,
-                                                  "160": lands.lhcHybridOptionsMinos,
-                                                  },
-                                        ),
-                numberOfJobs = 120,
-                postfix = postfix+"_lhc_jobs120_sb100_b50",
-                crabScheduler=crabScheduler, crabOptions=crabOptions)
-        if opts.lhcTypeAsymptotic:
-            lands.produceLHCAsymptotic(
-                opts,
-                massPoints = massPoints,
-                datacardPatterns = datacards,
-                rootfilePatterns = [lands.taujetsRootfilePattern],
-                postfix = postfix+"_lhcasy"
-                )
-    elif settings.isCombine():
-        if opts.lepType:
-            raise Exception("LEP type Hybrid CLs not implemented yet for combine")
-        elif opts.lhcType:
-            raise Exception("LHC type Hybrid CLs not implemented yet for combine")
-        elif opts.lhcTypeAsymptotic:
-            combine.produceLHCAsymptotic(
-                opts,
-                myDir,
-                massPoints = massPoints,
-                datacardPatterns = [settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS)]+furtherDatacards[:],
-                rootfilePatterns = [settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS)]+furtherRootFiles[:],
-                clsType = combine.LHCTypeAsymptotic(opts),
-                postfix = postfix+"_lhcasy"
-                )
-        else:
-            return False
+    if opts.lepType:
+        raise Exception("LEP type Hybrid CLs not implemented yet for combine")
+    elif opts.lhcType:
+        raise Exception("LHC type Hybrid CLs not implemented yet for combine")
+    elif opts.lhcTypeAsymptotic:
+        combine.produceLHCAsymptotic(
+            opts,
+            myDir,
+            massPoints = massPoints,
+            datacardPatterns = datacardPatterns,
+            rootfilePatterns = rootFilePatterns,
+            clsType = combine.LHCTypeAsymptotic(opts),
+            postfix = postfix+"_lhcasy"
+            )
+    else:
+        return False
     return True
 
 if __name__ == "__main__":
+    def addToDatacards(myDir, massPoints, dataCardList, rootFileList, dataCardPattern, rootFilePattern):
+        m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern)
+        if len(m) > 0:
+            massPoints = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern, massPoints)
+            dataCardList.append(dataCardPattern)
+            rootFileList.append(rootFilePattern)
+    
     parser = commonLimitTools.createOptionParser(lepType, lhcType, lhcTypeAsymptotic)
     opts = commonLimitTools.parseOptionParser(parser)
     # General settings
@@ -100,9 +65,27 @@ if __name__ == "__main__":
 
     for myDir in myDirs:
         print "Considering directory:",myDir
-        settings = commonLimitTools.GeneralSettings(myDir, opts.masspoints)
-        print "The following masses are considered:",settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS)
-        if not main(opts, settings, myDir):
+        
+        datacardPatterns = []
+        rootFilePatterns = []
+        myMassPoints = []
+        # taunu, tau+jets final state
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS), settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS))
+        # taunu, tau mu final state
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "datacard_mutau_taunu_m%s_mutau.txt", "shapes_taunu_m%s_btagmultiplicity_j.root")
+        # taunu, dilepton final states
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_ee_taunu_m%s.txt", "CrossSectionShapes_taunu_m%s_ee.root")
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_emu_taunu_m%s.txt", "CrossSectionShapes_taunu_m%s_emu.root")
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_mumu_taunu_m%s.txt", "CrossSectionShapes_taunu_m%s_mumu.root")
+        # tb, tau mu final state
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "datacard_mutau_tb_m%s_mutau.txt", "shapes_tb_m%s_btagmultiplicity_j.root")
+        # tb, dilepton final states
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_ee_tb_m%s.txt", "CrossSectionShapes_tb_m%s_ee.root")
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_emu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_emu.root")
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_mumu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_mumu.root")
+
+        print "The following masses are considered:",myMassPoints
+        if not main(opts, myDir, datacardPatterns, rootFilePatterns):
             print ""
             parser.print_help()
             print ""

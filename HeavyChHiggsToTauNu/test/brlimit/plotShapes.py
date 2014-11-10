@@ -12,6 +12,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as DatacardReader
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
@@ -90,7 +91,11 @@ class RatioPlotContainer:
             p.SetTopMargin(myTopMargin)
             p.SetBottomMargin(myBottomMargin)
         # Draw plots
-        myEmptyPlot = aux.Clone(self._ratioPlotList[0].getFrame2()) # Keep the clone if it is needed to draw the x axis
+        if len(self._ratioPlotList) == 0:
+            print "No ratioplots in list! Cannot draw all-in-one plot!"
+            return
+        o = self._ratioPlotList[0].getFrame2()
+        myEmptyPlot = aux.Clone(o) # Keep the clone if it is needed to draw the x axis
         for i in range(0,myMaxSize):
             p = c.cd(i+1)
             # Find plot
@@ -171,34 +176,10 @@ def customizeMarker(p):
             th1.SetPointEYlow(i, 0)
 
 class DatasetContainer:
-    def __init__(self, shapeList):
-        self._name = None
-        self._uncertaintyShapes = None
-        self._distentangleName(shapeList)
-        self._distentangleUncertainties(shapeList)
-
-    def _distentangleName(self, shapeList):
-        # Find name
-        myLength = 0
-        if len(shapeList) > 1:
-            mySplitList1 = shapeList[0].split("_")
-            mySplitList2 = shapeList[1].split("_")
-            myStatus = True
-            while myStatus and myLength < len(mySplitList1):
-                if mySplitList1[myLength] == mySplitList2[myLength]:
-                    myLength += 1
-                else:
-                    myStatus = False
-            self._name = "_".join(map(str, mySplitList1[:(myLength)]))
-        else:
-            self._name = shapeList[0]
-
-    def _distentangleUncertainties(self, shapeList):
-        self._uncertaintyShapes = []
-        for s in shapeList:
-            uncName = s.replace(self._name,"")
-            if "Up" in uncName and uncName != "" and not "stat_binByBin" in uncName and not "TailFit" in uncName:
-                self._uncertaintyShapes.append(uncName)
+    def __init__(self, name, label, shapeList):
+        self._name = name
+        self._label = label
+        self._uncertaintyShapes = shapeList
 
     def debug(self):
         print "name =",self._name
@@ -207,6 +188,7 @@ class DatasetContainer:
     def doPlot(self, opts, myAllShapeNuisances, f, mass, luminosity, signalTable):
         print "Doing plots for:",self._name
         hNominal = f.Get(self._name)
+        hNominal.SetFillStyle(0)
         hNominalFine = f.Get(self._name+"_fineBinning")
         hNominalHisto = histograms.Histo(hNominal, self._name, drawStyle="HIST")
         # Determine label
@@ -226,16 +208,20 @@ class DatasetContainer:
             histograms.cmsTextMode = histograms.CMSMode.SIMULATION_PRELIMINARY
         x = 0.6
         size = 20
-        myRatioContainer = RatioPlotContainer(self._name)
+        myRatioContainer = RatioPlotContainer(self._label)
         for uncName in self._uncertaintyShapes:
-            myShortName = uncName.replace("Up","")[1:]
+            myShortName = uncName
             print "... uncertainty:",myShortName
-            up = dataset.RootHistoWithUncertainties(f.Get("%s%s"%(self._name,uncName)))
-            upFine = f.Get("%s%s_fineBinning"%(self._name,uncName))
+            hup = f.Get("%s_%sUp"%(self._name,uncName))
+            hup.SetFillStyle(0)
+            up = dataset.RootHistoWithUncertainties(hup)
+            upFine = f.Get("%s_%sUp_fineBinning"%(self._name,uncName))
             nom = dataset.RootHistoWithUncertainties(hNominal.Clone())
             nom.makeFlowBinsVisible()
-            down = dataset.RootHistoWithUncertainties(f.Get("%s%s"%(self._name,uncName.replace("Up","Down"))))
-            downFine = f.Get("%s%s_fineBinning"%(self._name,uncName.replace("Up","Down")))
+            hdown = f.Get("%s_%sDown"%(self._name,uncName))
+            hdown.SetFillStyle(0)
+            down = dataset.RootHistoWithUncertainties(hdown)
+            downFine = f.Get("%s_%sDown_fineBinning"%(self._name,uncName))
             up.getRootHisto().SetLineColor(ROOT.kRed)
             nom.getRootHisto().SetLineColor(ROOT.kBlack)
             down.getRootHisto().SetLineColor(ROOT.kBlue)
@@ -256,7 +242,7 @@ class DatasetContainer:
             plot = plots.ComparisonManyPlot(nomHisto, [upHisto, downHisto])
             plot.setLuminosity(luminosity)
             plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(3))
-            myPlotName = "%s/shapeSyst_%s_syst%s" % (_dirname, self._name, uncName.replace("Up",""))
+            myPlotName = "%s/shapeSyst_%s_syst%s" % (_dirname, self._label, uncName.replace("Up",""))
             myParams = {}
             myParams["ylabel"] = "Events"
             myParams["log"] = False
@@ -296,7 +282,7 @@ class DatasetContainer:
         else:
             myRatioContainer.drawAllInOne(myAllShapeNuisances, luminosity)
 
-def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,rootFilePattern,signalTable):
+def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,myDatacardPattern,rootFilePattern,signalTable):
     f = ROOT.TFile.Open(rootFilePattern%mass)
 
     content = f.GetListOfKeys()
@@ -306,51 +292,37 @@ def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,rootFilePattern,signa
     diriter = content.MakeIterator()
     ROOT.gErrorIgnoreLevel = backup
 
+    # Find the datacard and nuisance names
+    myCardReader = DatacardReader.DataCardReader(".", mass, myDatacardPattern, rootFilePattern)
+    myDatasetNames = myCardReader.getDatasetNames()
     # Find the name stem and the name of the uncertainties
     datasets = []
     shapes = []
-    key = diriter.Next()
-    myPreviousSplitList = None
-    myPreviousKey = None
-    while key:
-        splitList = key.GetName().split("_")
-        if not "statBin" in key.GetName() and not "fitBin" in key.GetName() and not "fineBinning" in key.GetName() and not "b_mistag" in key.GetName():
-	    if myPreviousSplitList != None:
-		if myPreviousSplitList[0] != splitList[0]:
-		    # New dataset column
-		    if not "data_obs" in myPreviousKey and not "res." in myPreviousKey:
-			shapes.append(myPreviousKey)
-			myDataset = DatasetContainer(shapes)
-			# Make sure that dataset objects are stored for plot making only for unique names
-			if not myDataset._name in nameList:
-			    datasets.append(myDataset)
-			    nameList.append(myDataset._name)
-		    shapes = []
-		else:
-		    shapes.append(myPreviousKey)
-	    # Store old key
-	    myPreviousSplitList = splitList
-	    myPreviousKey = key.GetName()
-        # Advance to next
-        key = diriter.Next()
-    # Store last dataset
-    myDataset = DatasetContainer(shapes)
-    # Make sure that dataset objects are stored for plot making only for unique names
-    if not myDataset._name in nameList:
-	datasets.append(myDataset)
-	nameList.append(myDataset._name)
-
-    # Obtain list of all shape nuisances
-    for d in datasets:
-        for s in d._uncertaintyShapes:
-            myCleanS = s.replace("Up","")[1:]
-            if not myCleanS in allShapeNuisances:
-                allShapeNuisances.append(myCleanS)
+    for d in myDatasetNames:
+        myLabel = d
+        myStatus = not d in nameList
+        if d == myDatasetNames[0]:
+            myStatus = True
+            if not str(mass) in d:
+                myLabel = "%sm%d"%(d,mass)
+        
+        myShapeNuisanceNames = myCardReader.getShapeNuisanceNames(d)
+        myFilteredShapeNuisances = []
+        for n in myShapeNuisanceNames:
+            if not "statBin" in n:
+                myFilteredShapeNuisances.append(n)
+        if myStatus:
+            myDataset = DatasetContainer(d, myLabel, myFilteredShapeNuisances)
+            datasets.append(myDataset)
+            nameList.append(d)
+        for n in myFilteredShapeNuisances:
+            if not n in shapes:
+                shapes.append(n)
 
     ## Do the actual plots
     for d in datasets:
         #d.debug()
-        d.doPlot(opts,allShapeNuisances,f,mass,luminosity,signalTable)
+        d.doPlot(opts,shapes,f,mass,luminosity,signalTable)
     # Close the file
     f.Close()
 
@@ -362,6 +334,8 @@ if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
     parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
     parser.add_option("--individual", dest="individual", action="store_true", default=False, help="Generates individual plots for shape ratios instead of one large plot")
+    parser.add_option("--cardpattern", dest="cardPattern", action="store", default=None, help="Pattern of datacard with MM denoting mass value")
+    parser.add_option("--rootfilepattern", dest="rootfilePattern", action="store", default=None, help="Pattern of root file with MM denoting mass value")
     (opts, args) = parser.parse_args()
     if opts.helpStatus:
         parser.print_help()
@@ -376,17 +350,26 @@ if __name__ == "__main__":
     histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
     styles.ratioLineStyle.append(styles.StyleLine(lineColor=13))
     # Find out the mass points
-    mySettings = limitTools.GeneralSettings(".",[])
-    massPoints = mySettings.getMassPoints(limitTools.LimitProcessType.TAUJETS)
-    print "The following masses are considered:",massPoints
+    #mySettings = limitTools.GeneralSettings(".",[])
+    
     nameList = []
     allShapeNuisances = []
     signalTable = {}
+    myDatacardPattern = ""
+    myRootfilePattern = ""
+    if opts.cardPattern == None:
+        myDatacardPattern = mySettings.getDatacardPattern(limitTools.LimitProcessType.TAUJETS)
+        myRootfilePattern = mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS)
+    else:
+        myDatacardPattern = opts.cardPattern.replace("MM","%s")
+        myRootfilePattern = opts.rootfilePattern.replace("MM","%s")
+    massPoints = DatacardReader.getMassPointsForDatacardPattern(".", myDatacardPattern)
+    print "The following masses are considered:",massPoints
     for m in massPoints:
         # Obtain luminosity from datacard
-        myLuminosity = float(limitTools.readLuminosityFromDatacard(".", mySettings.getDatacardPattern(limitTools.LimitProcessType.TAUJETS)%m))
+        myLuminosity = float(limitTools.readLuminosityFromDatacard(".",myDatacardPattern%m))
         # Do plots
-        doPlot(opts,int(m),nameList,allShapeNuisances,myLuminosity,mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS),signalTable)
+        doPlot(opts,int(m),nameList,allShapeNuisances,myLuminosity,myDatacardPattern,myRootfilePattern,signalTable)
     # Print signal table
     print "Max contracted uncertainty for signal:"
     for k in signalTable.keys():
