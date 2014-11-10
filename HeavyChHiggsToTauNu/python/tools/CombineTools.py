@@ -473,8 +473,8 @@ class LHCTypeAsymptotic:
 SEED_START=1
 NUMBER_OF_ITERATIONS={NTOYS}
 
-if [ "x$@" = "x2" ]; then
-    SEED_START=$1
+if [ $# -ge 1 ]; then
+    SEED_START=$(($1 * 10000))
 fi
 
 tar zxf python.tar.gz
