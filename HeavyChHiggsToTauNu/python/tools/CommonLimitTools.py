@@ -166,7 +166,8 @@ def readLuminosityFromDatacard(myPath, filename):
             myLuminosity = match.group("lumi")
             f.close()
             return myLuminosity
-    raise Exception("Did not find luminosity information from '%s'" % fname)
+    print "Did not find luminosity information from '%s', using 0" % fname
+    return 0.0
 
 ## Returns true if mass list contains only heavy H+
 def isHeavyHiggs(massList):
