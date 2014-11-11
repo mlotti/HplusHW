@@ -49,11 +49,13 @@ if __name__ == "__main__":
         m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern)
         print m
         if len(m) > 0:
-            massPoints = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern, massPoints)
-            print massPoints
+            m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern, massPoints)
+            del massPoints[:]
+            massPoints.extend(m)
+            print m, massPoints
             dataCardList.append(dataCardPattern)
             rootFileList.append(rootFilePattern)
-    
+
     parser = commonLimitTools.createOptionParser(lepType, lhcType, lhcTypeAsymptotic)
     opts = commonLimitTools.parseOptionParser(parser)
     # General settings
@@ -67,6 +69,8 @@ if __name__ == "__main__":
         datacardPatterns = []
         rootFilePatterns = []
         myMassPoints = []
+        if len(opts.masspoints) > 0:
+            myMassPoints = opts.masspoints[:]
         # taunu, tau+jets final state
         settings = commonLimitTools.GeneralSettings(myDir, opts.masspoints)
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, settings.getDatacardPattern(commonLimitTools.LimitProcessType.TAUJETS), settings.getRootfilePattern(commonLimitTools.LimitProcessType.TAUJETS))
@@ -82,6 +86,7 @@ if __name__ == "__main__":
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_ee_tb_m%s.txt", "CrossSectionShapes_tb_m%s_ee.root")
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_emu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_emu.root")
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_mumu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_mumu.root")
+        print myMassPoints, datacardPatterns, rootFilePatterns
 
         print "The following masses are considered:",myMassPoints
         if len(myMassPoints) > 0:
