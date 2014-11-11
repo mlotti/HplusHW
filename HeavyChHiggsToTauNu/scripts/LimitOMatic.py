@@ -168,7 +168,7 @@ class Result:
         s = ""
         for i in range(0,len(mySplit)-1):
             s += "../"
-        if s = "":
+        if s == "":
             s = "."
         return s 
 
