@@ -532,7 +532,7 @@ class DataCardReader:
         # Note: both need to be scaled 
         olist = self.getRootFileObjectsWithPattern(signalColumn)
         hRate = self.getRateHisto(signalColumn)
-        hOriginalRate = aux.Clone(hRate)
+        hOriginalRate = Clone(hRate)
         hRate.Scale(value)
         for oname in olist:
             if oname.startswith(signalColumn+"_"): # Do not apply twice to rate histogram
