@@ -231,6 +231,7 @@ if __name__ == "__main__":
     myDirs.sort()
     myResults = []
     for d in myDirs:
+        print "LimitOMatic: considering directory:",d
         myResults.append(Result(opts,d))
 
     # Summary of results
