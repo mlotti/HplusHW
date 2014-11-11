@@ -63,8 +63,6 @@ if __name__ == "__main__":
 
     for myDir in myDirs:
         print "Considering directory:",myDir
-        print os.listdir(myDir)
-        
         datacardPatterns = []
         rootFilePatterns = []
         myMassPoints = []
