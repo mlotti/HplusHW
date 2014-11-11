@@ -517,7 +517,7 @@ class LHCTypeAsymptotic:
         myResultList = []
         if myTree == None:
             raise Exception("Error: Cannot open TTree in file '%s'!"%name)
-        for i in range(0, t.GetEntries()):
+        for i in range(0, myTree.GetEntries()):
             myTree.GetEvent(i)
             myResultList.append(x[0])
         f.Close()
