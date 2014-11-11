@@ -430,11 +430,13 @@ class DataCardReader:
         self._readDatacardContents(directory, mass)
         self._readRootFileContents(directory, mass)
         
-    def close(self):
-        print "Writing datacard:",self._datacardFilename
+    def close(self, silent=False):
+        if not silent:
+            print "Writing datacard:",self._datacardFilename
         self._writeDatacardContents()
         
-        print "Closing file:",self._rootFilename
+        if not silent:
+            print "Closing file:",self._rootFilename
         self._writeRootFileContents()
 
     def getDatasetNames(self):
@@ -521,6 +523,23 @@ class DataCardReader:
             #print "..  dset=%s has shape nuisances:"%n
             #print ".... %s"%", ".join(map(str,self.getNuisanceNamesByDatasetName(n)))
     
+    def scaleSignal(self, value):
+        signalColumn = self._datacardColumnNames[0]
+        # Update rate
+        self._rateValues[0] = self._rateValues[0]*value
+        # Update rate and nuisance histograms
+        # Note: both need to be scaled 
+        olist = self.getRootFileObjectsWithPattern(signalColumn)
+        hRate = self.getRateHisto(signalColumn)
+        hOriginalRate = aux.Clone(hRate)
+        hRate.Scale(value)
+        for oname in olist:
+            if oname.startswith(signalColumn+"_"): # Do not apply twice to rate histogram
+                h = self.getRootFileObject(oname)
+                h.Add(hOriginalRate, -1.0)
+                h.Scale(value)
+                h.Add(hRate, 1.0)
+
     def addHistogram(self, h):
         self._hCache.append(Clone(h))
     

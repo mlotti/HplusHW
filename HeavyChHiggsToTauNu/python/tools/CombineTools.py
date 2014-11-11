@@ -59,7 +59,7 @@ lhcAsymptoticOptionsObserved = "-M Asymptotic --picky -v 2 --rAbsAcc 0.00001"
 ## Default command line options for LHC-CLs (asymptotic, expected limit)
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
-lhcAsymptoticRminSigmaBr = "0.0" # pb
+lhcAsymptoticRminSigmaBr = "0.001" # pb
 lhcAsymptoticRminBrLimit = "0.0" # plain number
 ## Default "Rmax" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRmaxSigmaBr = "1.0" # pb
@@ -135,7 +135,8 @@ def produceLHCAsymptotic(opts, directory,
                          datacardPatterns,
                          rootfilePatterns,
                          clsType = None,
-                         postfix=""
+                         postfix="",
+                         returnResult=False
                          ):
 
     cls = clsType
@@ -149,7 +150,7 @@ def produceLHCAsymptotic(opts, directory,
     mcc.createMultiCrabDir(postfix)
     mcc.copyInputFiles()
     mcc.writeScripts()
-    mcc.runCombineForAsymptotic()
+    mcc.runCombineForAsymptotic(returnResult=returnResult)
 
 ## Class to generate (LEP-CLs, LHC-CLs) multicrab configuration, or run (LHC-CLs asymptotic) LandS
 #
@@ -182,8 +183,9 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
     #
     # This is so fast at the moment that using crab jobs for that
     # would be waste of resources and everybodys time.
-    def runCombineForAsymptotic(self):
-        print "Running Combine for asymptotic limits, saving results to %s" % self.dirname
+    def runCombineForAsymptotic(self, returnResult=False):
+        if not returnResult:
+            print "Running Combine for asymptotic limits, saving results to %s" % self.dirname
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")
         json.dump(self.configuration, f, sort_keys=True, indent=2)
         f.close()
@@ -192,15 +194,19 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
         for mass in self.massPoints:
             myResult = self.clsType.runCombine(mass)
             if myResult.failed:
-                print "Fit failed for mass point %s, skipping ..." % mass
+                if not returnResult:
+                    print "Fit failed for mass point %s, skipping ..." % mass
             else:
                 results.append(myResult)
-                print "Processed successfully mass point %s" % mass
-        print
-
-        results.print2()
-        fname = results.saveJson()
-        print "Wrote results to %s" % fname
+                if not returnResult:
+                    print "Processed successfully mass point %s" % mass
+        if not returnResult:
+            print
+            results.print2()
+            fname = results.saveJson()
+            print "Wrote results to %s" % fname
+        else:
+            return results
 
 ## Adds to the commands list the necessary commands and returns the input datacard name
 #

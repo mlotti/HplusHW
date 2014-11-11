@@ -7,6 +7,7 @@ import math
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
@@ -350,14 +351,14 @@ if __name__ == "__main__":
     histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
     styles.ratioLineStyle.append(styles.StyleLine(lineColor=13))
     # Find out the mass points
-    #mySettings = limitTools.GeneralSettings(".",[])
-    
+   
     nameList = []
     allShapeNuisances = []
     signalTable = {}
     myDatacardPattern = ""
     myRootfilePattern = ""
     if opts.cardPattern == None:
+        mySettings = limitTools.GeneralSettings(".",[])
         myDatacardPattern = mySettings.getDatacardPattern(limitTools.LimitProcessType.TAUJETS)
         myRootfilePattern = mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS)
     else:
