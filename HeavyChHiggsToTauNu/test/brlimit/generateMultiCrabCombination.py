@@ -47,12 +47,10 @@ def main(opts, myDir, datacardPatterns, rootFilePatterns, myMassPoints):
 if __name__ == "__main__":
     def addToDatacards(myDir, massPoints, dataCardList, rootFileList, dataCardPattern, rootFilePattern):
         m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern)
-        print m
         if len(m) > 0:
             m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern, massPoints)
             del massPoints[:]
             massPoints.extend(m)
-            print m, massPoints
             dataCardList.append(dataCardPattern)
             rootFileList.append(rootFilePattern)
 
@@ -86,9 +84,8 @@ if __name__ == "__main__":
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_ee_tb_m%s.txt", "CrossSectionShapes_tb_m%s_ee.root")
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_emu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_emu.root")
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_mumu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_mumu.root")
-        print myMassPoints, datacardPatterns, rootFilePatterns
 
-        print "The following masses are considered:",myMassPoints
+        print "The following masses are considered:",", ".join(map(str, myMassPoints))
         if len(myMassPoints) > 0:
             if not main(opts, myDir, datacardPatterns, rootFilePatterns, myMassPoints):
                 print ""

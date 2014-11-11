@@ -282,16 +282,18 @@ class DataCardDirectoryManager:
                                     if len(myTargetList) != len(mySourceList):
                                         raise Exception("This should not happen")
                                     for h in range(0, len(myTargetList)):
-                                        hTarget = dcard.getRootFileObject(myTargetList[h])
-                                        hSource = dcard.getRootFileObject(mySourceList[h])
-                                        for k in range(1, hTarget.GetNbinsX()+1):
-                                            myOffset = myRateHisto.GetBinContent(k)
-                                            myVariation = (hTarget.GetBinContent(k) - myOffset)**2
-                                            myVariation += (hSource.GetBinContent(k) - myOffset)**2
-                                            if mySourceList[h].endswith("Up"):
-                                                hTarget.SetBinContent(k, math.sqrt(myVariation)+myOffset)
-                                            elif mySourceList[h].endswith("Down"):
-                                                hTarget.SetBinContent(k, myOffset-math.sqrt(myVariation))
+                                        if myTargetList[h].startswith(c):
+                                            hTarget = dcard.getRootFileObject(myTargetList[h])
+                                            hSource = dcard.getRootFileObject(mySourceList[h])
+                                            for k in range(1, hTarget.GetNbinsX()+1):
+                                                myOffset = myRateHisto.GetBinContent(k)
+                                                myVariation = (hTarget.GetBinContent(k) - myOffset)**2
+                                                myVariation += (hSource.GetBinContent(k) - myOffset)**2
+                                                #print c, hTarget.GetBinContent(k), hSource.GetBinContent(k), myOffset, math.sqrt(myVariation), math.sqrt(myVariation)+myOffset, myOffset-math.sqrt(myVariation)
+                                                if mySourceList[h].endswith("Up"):
+                                                    hTarget.SetBinContent(k, math.sqrt(myVariation)+myOffset)
+                                                elif mySourceList[h].endswith("Down"):
+                                                    hTarget.SetBinContent(k, myOffset-math.sqrt(myVariation))
                                 else:
                                     # Update nuisance line
                                     dcard._datasetNuisances[i][c] = "1"
