@@ -50,6 +50,7 @@ if __name__ == "__main__":
         print m
         if len(m) > 0:
             massPoints = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern, massPoints)
+            print massPoints
             dataCardList.append(dataCardPattern)
             rootFileList.append(rootFilePattern)
     

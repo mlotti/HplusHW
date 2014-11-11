@@ -54,11 +54,12 @@ def getMassPointsForDatacardPattern(directory, datacardFilePattern, massPoints =
     if len(masses) > 0:
         masses.sort()
 
-    if len(masses) > 0 and len(massPoints) > 0:
-        i = 0
-        while i < len(massPoints):
-            if not massPoints[i] in masses:
-                massPoints.remove(massPoints[i])
+    if len(massPoints) > 0:
+        if len(masses) > 0:
+            i = 0
+            while i < len(massPoints):
+                if not massPoints[i] in masses:
+                  massPoints.remove(massPoints[i])
         return massPoints
     return masses
 
