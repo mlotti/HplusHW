@@ -59,8 +59,7 @@ def getMassPointsForDatacardPattern(directory, datacardFilePattern, massPoints =
         while i < len(massPoints):
             if not massPoints[i] in masses:
                 massPoints.remove(massPoints[i])
-        return massPoints
-    return masses
+    massPoints = masses[:]
 
 class DataCardDirectoryManager:
     def __init__(self, directory, datacardFilePattern, rootFilePattern, rootFileDirectory="", readOnly=False):
