@@ -13,11 +13,8 @@ lhcTypeAsymptotic = False
 #lhcType = True
 #lhcTypeAsymptotic = True
 
-#massPoints = lands.allMassPoints
-#massPoints = massPoints[1:]
-#massPoints = ["80", "160"]
 
-def main(opts, myDir, datacardPatterns, rootFilePatterns):
+def main(opts, myDir, datacardPatterns, rootFilePatterns, myMassPoints):
     postfix = "combination"
 
     crabScheduler = "arc"
@@ -37,7 +34,7 @@ def main(opts, myDir, datacardPatterns, rootFilePatterns):
         combine.produceLHCAsymptotic(
             opts,
             myDir,
-            massPoints = massPoints,
+            massPoints = myMassPoints,
             datacardPatterns = datacardPatterns,
             rootfilePatterns = rootFilePatterns,
             clsType = combine.LHCTypeAsymptotic(opts),
@@ -50,6 +47,7 @@ def main(opts, myDir, datacardPatterns, rootFilePatterns):
 if __name__ == "__main__":
     def addToDatacards(myDir, massPoints, dataCardList, rootFileList, dataCardPattern, rootFilePattern):
         m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern)
+        print m
         if len(m) > 0:
             massPoints = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern, massPoints)
             dataCardList.append(dataCardPattern)
@@ -65,6 +63,7 @@ if __name__ == "__main__":
 
     for myDir in myDirs:
         print "Considering directory:",myDir
+        print os.listdir(myDir)
         
         datacardPatterns = []
         rootFilePatterns = []
@@ -86,9 +85,10 @@ if __name__ == "__main__":
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_mumu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_mumu.root")
 
         print "The following masses are considered:",myMassPoints
-        if not main(opts, myDir, datacardPatterns, rootFilePatterns):
-            print ""
-            parser.print_help()
-            print ""
-            raise Exception("You forgot to specify limit calculation method as a command line parameter!")
+        if len(myMassPoints) > 0:
+            if not main(opts, myDir, datacardPatterns, rootFilePatterns, myMassPoints):
+                print ""
+                parser.print_help()
+                print ""
+                raise Exception("You forgot to specify limit calculation method as a command line parameter!")
     

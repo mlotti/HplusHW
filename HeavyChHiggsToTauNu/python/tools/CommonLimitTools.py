@@ -133,8 +133,7 @@ def getSoftware(directory="."):
                 return (key,value)
               
     
-    print "Automatic detection of limit calculation software failed! Please run this script in the directory of the datacards!"
-    print "Assuming combine :)"
+    print "Automatic detection of limit calculation software failed! Assuming combine :)"
     return (LimitSoftwareType.COMBINE, mySoftware[LimitSoftwareType.COMBINE])
     
 ## Deduces from directory listing the mass point list
