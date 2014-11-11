@@ -504,8 +504,8 @@ class LHCTypeAsymptotic:
                         ]
         name = None
         for n in possibleNames:
-            if os.path.exists(n):
-                name = n
+            if os.path.exists(os.path.join(self.dirname,n)):
+                name = os.path.join(self.dirname,n)
         if name == None:
             raise Exception("Error: Could not find combine output root file! (checked: %s)"%", ".join(map(str, possibleNames)))
         # Open root file

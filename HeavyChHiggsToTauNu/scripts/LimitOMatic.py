@@ -190,12 +190,16 @@ class Result:
         myResults = json.load(myFile)
         masspoints = myResults["masspoints"]
         myKeys = ["median","-2sigma","-1sigma","+1sigma","+2sigma"]
-        line = "mass  "
+        line = "mass  obs.      "
         for item in myKeys:
             line += "%9s "%item
         print line+"   Rel. errors in same order"
         for k in sorted(masspoints.keys()):
             line = "%4d "%int(k)
+            if self._opts.unblinded:
+                line += " %9.5f"%float(masspoints[k]["observed"])
+            else:
+                line += " (blinded) "
             for item in myKeys:
                 line += " %9.5f"%(float(masspoints[k]["expected"][item]))
             for item in myKeys:
