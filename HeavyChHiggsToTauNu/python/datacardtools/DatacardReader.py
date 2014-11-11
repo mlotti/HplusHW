@@ -526,7 +526,8 @@ class DataCardReader:
     def scaleSignal(self, value):
         signalColumn = self._datacardColumnNames[0]
         # Update rate
-        self._rateValues[0] = self._rateValues[0]*value
+        a = float(self._rateValues[0])*value
+        self._rateValues[0] = "%.3f"%a
         # Update rate and nuisance histograms
         # Note: both need to be scaled 
         olist = self.getRootFileObjectsWithPattern(signalColumn)
