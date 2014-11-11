@@ -30,6 +30,7 @@ import multicrab
 import multicrabWorkflows
 import git
 import aux
+import array
 
 import ROOT
 
