@@ -556,7 +556,10 @@ class DataCardReader:
                 os.system("cp %s ."%(os.path.join(_originalDatacardDirectory,self._rootFilename)))
         # Open file
         print "Opening file:",self._rootFilename
+        backup = ROOT.gErrorIgnoreLevel
+        ROOT.gErrorIgnoreLevel = ROOT.kError
         f = ROOT.TFile.Open(self._rootFilename)
+        ROOT.gErrorIgnoreLevel = backup
         if f == None:
             raise Exception("Error opening file '%s'!"%self._rootFilename)
         f.Cd(self._rootFileDirectory)

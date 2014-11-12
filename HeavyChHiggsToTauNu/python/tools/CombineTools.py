@@ -150,7 +150,9 @@ def produceLHCAsymptotic(opts, directory,
     mcc.createMultiCrabDir(postfix)
     mcc.copyInputFiles()
     mcc.writeScripts()
-    mcc.runCombineForAsymptotic(returnResult=returnResult)
+    result = mcc.runCombineForAsymptotic(returnResult=returnResult)
+    if returnResult:
+        return result
 
 ## Class to generate (LEP-CLs, LHC-CLs) multicrab configuration, or run (LHC-CLs asymptotic) LandS
 #
