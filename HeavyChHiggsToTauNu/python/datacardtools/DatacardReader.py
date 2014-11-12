@@ -537,9 +537,14 @@ class DataCardReader:
         for oname in olist:
             if oname.startswith(signalColumn+"_"): # Do not apply twice to rate histogram
                 h = self.getRootFileObject(oname)
+                deltaOriginal = None
+                deltaOriginal = h.Integral() / hOriginalRate.Integral()
                 h.Add(hOriginalRate, -1.0)
                 h.Scale(value)
                 h.Add(hRate, 1.0)
+                deltaNew = h.Integral() / hRate.Integral()
+                if abs(deltaOriginal-deltaNew) > 0.0001:
+                    print "Something is wrong, the rel. uncertainty is not concerved: %f->%f!"%(deltaOriginal, deltaNew)
 
     def addHistogram(self, h):
         self._hCache.append(Clone(h))
