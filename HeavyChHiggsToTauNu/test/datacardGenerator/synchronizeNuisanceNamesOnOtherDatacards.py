@@ -13,7 +13,15 @@ def hplusTauNuToTauMu(myDir, doCorrelation):
 
     # Replace column names
     myColumnReplaces = {}
-    myColumnReplaces["TBH"] = "HpTauNu"
+    myColumnReplaces["TBH"] = "HpTauNu_tnmt"
+    myColumnReplaces["tau_fake"] = "taufake_tnmt"
+    myColumnReplaces["tt_ltau"] = "ttltau_tnmt"
+    myColumnReplaces["tt_ll"] = "ttll_tnmt"
+    myColumnReplaces["singleTop"] = "singleTop_tnmt"
+    myColumnReplaces["di_boson"] = "diboson_tnmt"
+    myColumnReplaces["Z_tautau"] = "Ztautau_tnmt"
+    myColumnReplaces["Z_eemumu"] = "Zeemumu_tnmt"
+    
     myMgr.replaceColumnNames(myColumnReplaces)
 
     # Replace nuisance names
@@ -137,7 +145,15 @@ def hplusTbToTauMu(myDir, doCorrelation):
 
     # Replace column names
     myColumnReplaces = {}
-    myColumnReplaces["HTB"] = "HpTB"
+    myColumnReplaces["HTB"] = "HpTB_tbmt"
+    myColumnReplaces["tau_fake"] = "taufake_tbmt"
+    myColumnReplaces["tt_ltau"] = "ttltau_tbmt"
+    myColumnReplaces["tt_ll"] = "ttll_tbmt"
+    myColumnReplaces["singleTop"] = "singleTop_tbmt"
+    myColumnReplaces["di_boson"] = "diboson_tbmt"
+    myColumnReplaces["Z_tautau"] = "Ztautau_tbmt"
+    myColumnReplaces["Z_eemumu"] = "Zeemumu_tbmt"
+    
     myMgr.replaceColumnNames(myColumnReplaces)
 
     # Replace nuisance names
@@ -232,12 +248,12 @@ def hplusTbToDilepton(myDir, doCorrelation):
         
         # Replace column names
         myColumnReplaces = {}
-        myColumnReplaces["HTB"] = "HpTB%s"%suffix.upper()
-        myColumnReplaces["vv"] = "vv%s"%suffix.upper()
-        myColumnReplaces["otherttbar"] = "otherttbar%s"%suffix.upper()
-        myColumnReplaces["st"] = "st%s"%suffix.upper()
-        myColumnReplaces["dy"] = "dy%s"%suffix.upper()
-        myColumnReplaces["ttbar"] = "ttbar%s"%suffix.upper()
+        myColumnReplaces["HTB"] = "HpTB_tb%s"%suffix.upper()
+        myColumnReplaces["vv"] = "vv_tb%s"%suffix.upper()
+        myColumnReplaces["otherttbar"] = "otherttbar_tb%s"%suffix.upper()
+        myColumnReplaces["st"] = "st_tb%s"%suffix.upper()
+        myColumnReplaces["dy"] = "dy_tb%s"%suffix.upper()
+        myColumnReplaces["ttbar"] = "ttbar_tb%s"%suffix.upper()
         myMgr.replaceColumnNames(myColumnReplaces)
         
         myNuisanceReplaces = {}
