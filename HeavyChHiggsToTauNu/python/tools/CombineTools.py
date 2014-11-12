@@ -277,6 +277,10 @@ class LHCTypeAsymptotic:
         elif self.sigmabrlimit:
             self.rMin = aux.ValuePerMass(aux.ifNotNoneElse(rMin, lhcAsymptoticRminSigmaBr))
             self.rMax = aux.ValuePerMass(aux.ifNotNoneElse(rMax, lhcAsymptoticRmaxSigmaBr))
+        if opts.rmin != None:
+            self.rMin = opts.rmin
+        if opts.rmax != None:
+            self.rMax = opts.rmax
 
         self.obsAndExpScripts = {}
         self.blindedScripts = {}
@@ -532,6 +536,10 @@ class LHCTypeAsymptotic:
             myResultList.append(x[0])
         f.Close()
         # Store results
+        if len(myResultList) < 5:
+            print "Combine failed to produce results, perhaps rmin-rmax range is not wide enough"
+            result.failed = True
+            return -1
         result.expectedMinus2Sigma = myResultList[0]
         result.expectedMinus1Sigma = myResultList[1]
         result.expected = myResultList[2]
@@ -540,42 +548,6 @@ class LHCTypeAsymptotic:
         if len(myResultList) == 6:
             result.observed = myResultList[5]
         return len(myResultList)
-        #nMatches = 0
-        #lines = output.split("\n")
-        #if self.brlimit:
-            #obsresult_re = re.compile("Observed Limit: BR < \s*(?P<value>\d+\.\d+)")
-        #elif self.sigmabrlimit:
-            #obsresult_re = re.compile("Observed Limit: r < \s*(?P<value>\d+\.\d+)")
-        #expresult_re = None
-        #if self.brlimit:
-            #expresult_re = re.compile("Expected \s*(?P<quantile>\d+\.\d+)%: BR < \s*(?P<value>\d+\.\d+)")
-        #elif self.sigmabrlimit:
-            #expresult_re = re.compile("Expected \s*(?P<quantile>\d+\.\d+)%: r < \s*(?P<value>\d+\.\d+)")
-        #myExp = []
-        #for line in lines:
-            #if line.startswith("Observed"):
-                #match = obsresult_re.search(line)
-                #if match:
-                    #result.observed = match.group("value")
-                    #nMatches += 1
-            #elif line.startswith("Expected"):
-                #match = expresult_re.search(line)
-                #if match:
-                    #myExp.append(match.group("value"))
-                    #nMatches += 1
-            #if line.startswith("fail") or line.startswith("Fail"):
-                #print line
-                #result.failed = True
-                #return -1
-        #if not len(myExp) == 5:
-            #print output
-            #raise Exception("Oops, was expecting 5 values for expected")
-        #result.expectedMinus2Sigma = myExp[0]
-        #result.expectedMinus1Sigma = myExp[1]
-        #result.expected = myExp[2]
-        #result.expectedPlus1Sigma = myExp[3]
-        #result.expectedPlus2Sigma = myExp[4]
-        #return nMatches
 
     ## Run LandS for the observed limit
     #

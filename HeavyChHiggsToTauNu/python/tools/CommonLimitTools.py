@@ -231,6 +231,10 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None, ful
                       help="Disable ML fit")
     parser.add_option("--nolimit", dest="limit", action="store_false", default=True,
                       help="Disable limit calculation (for e.g. just ML fit or significance)")
+    parser.add_option("--rmin", dest="rmin", action="store", default=None,
+                      help="minimum r parameter for finding limit")
+    parser.add_option("--rmax", dest="rmax", action="store", default=None,
+                      help="maximum r parameter for finding limit")
 
     return parser
 
