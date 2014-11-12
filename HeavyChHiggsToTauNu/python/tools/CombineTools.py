@@ -199,13 +199,13 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
                 if not quietStatus:
                     print "Fit failed for mass point %s, skipping ..." % mass
             else:
-                results.append(myResult)
+                self._results.append(myResult)
                 if not quietStatus:
                     print "Processed successfully mass point %s" % mass
         if not quietStatus:
             print
-            results.print2()
-            fname = results.saveJson()
+            self._results.print2()
+            fname = self._results.saveJson()
             print "Wrote results to %s" % fname
 
     ## Return result container (ResultContainer object)
