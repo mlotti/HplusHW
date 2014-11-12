@@ -278,9 +278,9 @@ class LHCTypeAsymptotic:
             self.rMin = aux.ValuePerMass(aux.ifNotNoneElse(rMin, lhcAsymptoticRminSigmaBr))
             self.rMax = aux.ValuePerMass(aux.ifNotNoneElse(rMax, lhcAsymptoticRmaxSigmaBr))
         if opts.rmin != None:
-            self.rMin = opts.rmin
+            self.rMin = aux.ValuePerMass(opts.rmin)
         if opts.rmax != None:
-            self.rMax = opts.rmax
+            self.rMax = aux.ValuePerMass(opts.rmax)
 
         self.obsAndExpScripts = {}
         self.blindedScripts = {}
