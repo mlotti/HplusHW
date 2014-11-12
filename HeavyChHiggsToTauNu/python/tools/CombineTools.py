@@ -208,9 +208,9 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
             fname = results.saveJson()
             print "Wrote results to %s" % fname
 
-     ## Return result container (ResultContainer object)
-     def getResults(self):
-          return self._results
+    ## Return result container (ResultContainer object)
+    def getResults(self):
+         return self._results
 
 ## Adds to the commands list the necessary commands and returns the input datacard name
 #
