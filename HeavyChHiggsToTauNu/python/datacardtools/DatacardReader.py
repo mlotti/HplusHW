@@ -539,9 +539,12 @@ class DataCardReader:
                 h = self.getRootFileObject(oname)
                 deltaOriginal = None
                 deltaOriginal = h.Integral() / hOriginalRate.Integral()
+                backup = ROOT.gErrorIgnoreLevel
+                ROOT.gErrorIgnoreLevel = ROOT.kError # suppress complaints about different bin labels
                 h.Add(hOriginalRate, -1.0)
                 h.Scale(value)
                 h.Add(hRate, 1.0)
+                ROOT.gErrorIgnoreLevel = backup
                 deltaNew = h.Integral() / hRate.Integral()
                 if abs(deltaOriginal-deltaNew) > 0.0001:
                     print "Something is wrong, the rel. uncertainty is not concerved: %f->%f!"%(deltaOriginal, deltaNew)
