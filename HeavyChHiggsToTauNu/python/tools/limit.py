@@ -856,7 +856,7 @@ def getTypesetScenarioName(scenario):
     if myTruncatedScenario == "lightstop":
         return "MSSM light stop"
     if myTruncatedScenario == "lowMH":
-        return "MSSM low ^{}m_{H}"
+        return "MSSM low-M_{H}"
     if myTruncatedScenario == "mhmaxup":
         return "MSSM updated ^{}m_{h}^{max}"
     if myTruncatedScenario == "mhmodm":

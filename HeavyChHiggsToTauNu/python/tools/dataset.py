@@ -4009,11 +4009,10 @@ class DatasetManagerCreator:
 
         # First check that if some of these is not given, if there is
         # exactly one it available, use that.
+        # As optimizationMode and systematicVariation are optional, they are not considered here
         for arg, attr in [("analysisName", "getAnalyses"),
                           ("searchMode", "getSearchModes"),
-                          ("dataEra", "getMCDataEras"),
-                          ("optimizationMode", "getOptimizationModes"),
-                          ("systematicVariation", "getSystematicVariations")]:
+                          ("dataEra", "getMCDataEras")]:
             lst = getattr(self, attr)()
             if (arg not in _args or _args[arg] is None) and len(lst) == 1:
                 _args[arg] = lst[0]
