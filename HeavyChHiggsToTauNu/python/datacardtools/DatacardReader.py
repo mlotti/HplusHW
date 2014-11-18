@@ -93,15 +93,17 @@ class DataCardDirectoryManager:
                         dcard._datasetNuisances[i][replaceDictionary[item]] = dcard._datasetNuisances[i][item]
                         del dcard._datasetNuisances[i][item]
                     if dcard._datasetNuisances[i]["name"].startswith(item+"_"):
-                        dcard._datasetNuisances[i]["name"] = dcard._datasetNuisances[i]["name"].replace(item, replaceDictionary[item])
+                        name = replaceDictionary[item]+dcard._datasetNuisances[i]["name"][len(item):]
+                        dcard._datasetNuisances[i]["name"] = name
             # Do Replace in root file
             for item in replaceDictionary.keys():
                 myList = dcard.getRootFileObjectsWithPattern(item)
                 # Loop over root objects
                 for objectName in myList:
-                    if item+"_" in objectName:
+                    if objectName.startswith(item+"_"):
                         o = dcard.getRootFileObject(objectName)
-                        o.SetName(o.GetName().replace(item+"_", replaceDictionary[item]+"_"))
+                        name = replaceDictionary[item]+o.GetName()[len(item):]
+                        o.SetName(name)
                     elif item == objectName:
                         o = dcard.getRootFileObject(objectName)
                         o.SetName(replaceDictionary[item])

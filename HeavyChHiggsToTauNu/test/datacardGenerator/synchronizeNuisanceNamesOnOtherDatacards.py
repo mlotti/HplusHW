@@ -131,6 +131,12 @@ def hplusTauNuToDilepton(myDir, doCorrelation):
         myMgr.removeNuisance("fakes")
         #myMgr.removeNuisance("unbtag")
         myMgr.removeNuisance("br")
+        myMgr.removeNuisance("theoryUncXS_vv")
+        myMgr.removeNuisance("theoryUncXS_wjets")
+        myMgr.removeNuisance("theoryUncXS_otherttbar")
+        myMgr.removeNuisance("theoryUncXS_st")
+        myMgr.removeNuisance("theoryUncXS_dy")
+        myMgr.removeNuisance("theoryUncXS_ttbar")
         
         # Redo stat. uncert. shape histograms
         myMgr.fixTooSmalltatUncertProblem(signalMinimumAbsStatValue=0.4, bkgMinimumAbsStatValue=0.4)
@@ -265,6 +271,12 @@ def hplusTbToDilepton(myDir, doCorrelation):
         myMgr.removeNuisance("fakes")
         #myMgr.removeNuisance("unbtag")
         myMgr.removeNuisance("br")
+        myMgr.removeNuisance("theoryUncXS_vv")
+        myMgr.removeNuisance("theoryUncXS_wjets")
+        myMgr.removeNuisance("theoryUncXS_otherttbar")
+        myMgr.removeNuisance("theoryUncXS_st")
+        myMgr.removeNuisance("theoryUncXS_dy")
+        myMgr.removeNuisance("theoryUncXS_ttbar")
         
         # Redo stat. uncert. shape histograms
         myMgr.fixTooSmalltatUncertProblem(signalMinimumAbsStatValue=0.4, bkgMinimumAbsStatValue=0.4)
