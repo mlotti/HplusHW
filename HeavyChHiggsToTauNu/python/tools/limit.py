@@ -14,6 +14,8 @@ ROOT.gROOT.SetBatch(True)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.statisticalFunctions as statisticalFunctions
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.BRdataInterface as BRdataInterface
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 
 ## Flag for stating if the plots are for paper (True) or not (False)
 forPaper = False
@@ -31,6 +33,7 @@ BR = "#it{B}"
 ## The label for the physics process
 process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
 processHeavy = "pp #rightarrow #bar{t}(b)H^{+}, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
+processCombination = "pp #rightarrow #bar{t}(b)H^{+}"
 
 ## Label for the H+->tau BR assumption
 #BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1"%BR
@@ -95,6 +98,30 @@ def setExcludedStyle(graph):
     graph.SetFillColorAlpha(ci, 0.3) # transparency
 #    graph.SetFillColorAlpha(ROOT.kViolet+6, 0.3) # transparency
 
+def setObservedStyle(graph):
+    graph.SetMarkerStyle(21)
+    graph.SetMarkerSize(1.3)
+    graph.SetMarkerColor(ROOT.kBlack)
+    graph.SetLineWidth(3)
+    graph.SetLineColor(ROOT.kBlack)
+    
+def setTheoreticalErrorStyle(graph):    
+    graph.SetLineStyle(9)
+    graph.SetLineWidth(2)
+
+def setExpectedStyle(graph):
+    graph.SetLineStyle(2)
+    graph.SetLineWidth(3)
+    graph.SetLineColor(ROOT.kBlack)
+    graph.SetMarkerStyle(20)
+
+def setExpectedGreenBandStyle(graph):
+    graph.SetFillColor(ROOT.kGreen-3)
+    setExpectedStyle(graph)
+    
+def setExpectedYellowBandStyle(graph):
+    graph.SetFillColor(ROOT.kYellow)
+    setExpectedStyle(graph)
 
 ## Class for reading the BR limits from the JSON file produced by
 ## landsMergeHistograms.py
@@ -305,11 +332,7 @@ class BRLimits:
                          array.array("d", self.mass),
                          array.array("d", self.observed)
                          )
-        gr.SetMarkerStyle(21)
-        gr.SetMarkerSize(1.3)
-        gr.SetMarkerColor(ROOT.kBlack)
-        gr.SetLineWidth(3)
-        gr.SetLineColor(ROOT.kBlack)
+        setObservedStyle(gr)
         gr.SetName("Observed")
 
         return gr
@@ -359,10 +382,7 @@ class BRLimits:
         else:
             raise Exception("Invalid value of sigma '%d', valid values are 0,1,2" % sigma)
 
-        gr.SetLineStyle(2)
-        gr.SetLineWidth(3)
-        gr.SetLineColor(ROOT.kBlack)
-        gr.SetMarkerStyle(20)
+        setExpectedStyle(gr)
 
         return gr
 
@@ -406,7 +426,8 @@ class BRLimits:
                              array.array("d", self.mass+tmp1),
                              array.array("d", self.expectedMinus1 + tmp2))
 
-            gr.SetFillColor(ROOT.kGreen-3)
+            setExpectedGreenBandStyle(gr)
+            
             gr.SetName("Expected1Sigma")
         elif sigma == 2:
             tmp1 = self.mass[:]
@@ -421,15 +442,10 @@ class BRLimits:
                              array.array("d", self.mass+tmp1),
                              array.array("d", self.expectedMinus2 + tmp2))
 
-            gr.SetFillColor(ROOT.kYellow)
+            setExpectedYellowBandStyle(gr)
             gr.SetName("Expected2Sigma")
         else:
             raise Exception("Invalid value of sigma '%d', valid values are 0,1,2" % sigma)
-
-        gr.SetLineStyle(2)
-        gr.SetLineWidth(3)
-        gr.SetLineColor(ROOT.kBlack)
-        gr.SetMarkerStyle(20)
 
         return gr
                                           
@@ -850,3 +866,248 @@ def getTypesetScenarioName(scenario):
     if myTruncatedScenario == "tauphobic":
         return "MSSM #tau-phobic"
     raise Exception("The typeset name for scenario '%s' is not defined in tools/limit.py::getTypesetScenarioName()! Please add it."%scenario)
+
+
+## Plots tan beta plot
+#
+# \param name    string of filename prefix for plot
+# \param graphs  dictionary of TGraph objects
+# \param luminosity luminosity for plot
+# \param finalstateText label of final state
+# \param xlabel  x-axis label
+# \param scenario name of scenario
+def doTanBetaPlotHeavy(name, graphs, luminosity, finalstateText, xlabel, scenario):
+    doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scenario, regime="heavy")
+
+## Plots tan beta plot
+#
+# \param name    string of filename prefix for plot
+# \param graphs  dictionary of TGraph objects
+# \param luminosity luminosity for plot
+# \param finalstateText label of final state
+# \param xlabel  x-axis label
+# \param scenario name of scenario
+def doTanBetaPlotLight(name, graphs, luminosity, finalstateText, xlabel, scenario):
+    doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scenario, regime="light")
+
+## Plots tan beta plot
+#
+# \param name    string of filename prefix for plot
+# \param graphs  dictionary of TGraph objects
+# \param luminosity luminosity for plot
+# \param finalstateText label of final state
+# \param xlabel  x-axis label
+# \param scenario name of scenario
+def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scenario, regime):
+    isHeavy = regime != "light"
+
+    blinded = True
+    if "obs" in graphs.keys():
+        blinded = False
+
+    higgs = "h"
+    if scenario == "lowMH-LHCHXSWG":
+        higgs = "H"
+
+    if not blinded:    
+        obs = graphs["obs"]
+        excluded = ROOT.TGraph(obs)
+        excluded.SetName("ExcludedArea")
+
+
+        for i in reversed(range(excluded.GetN())):
+            yValue = excluded.GetY()[i]
+            if (yValue > 99 or yValue < 0) and i+1 < excluded.GetN():
+                excluded.RemovePoint(i+1)
+
+        if isHeavy:
+    #        excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], 100)
+    #        excluded.SetPoint(excluded.GetN(), 0, 100)
+    #        excluded.SetPoint(excluded.GetN(), 0, obs.GetY()[0])
+            excluded.SetPoint(excluded.GetN(), 140, 65)
+            excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
+        else:
+            if "_mA_" in name:
+                rightX = obs.GetX()[obs.GetN()-1]+100
+                rightY = obs.GetY()[obs.GetN()-1]
+                excluded.SetPoint(excluded.GetN(), rightX, rightY)
+                excluded.SetPoint(excluded.GetN(), rightX, 1)
+            else:
+                excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], 1)
+            excluded.SetPoint(excluded.GetN(), 0, 1)
+            excluded.SetPoint(excluded.GetN(), 0, tanbMax)
+            excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
+            excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
+
+        #for i in range(excluded.GetN()):
+            #print "Excluded",excluded.GetX()[i],excluded.GetY()[i]
+
+        setExcludedStyle(excluded)
+        excluded.SetLineWidth(0)
+        excluded.SetLineColor(ROOT.kBlack)
+
+    
+    expected = graphs["exp"]
+    setExpectedStyle(expected)
+    expected1 = graphs["exp1"]
+    setExpectedGreenBandStyle(expected1)
+    expected2 = graphs["exp2"]
+    setExpectedYellowBandStyle(expected2)
+
+    allowed = graphs["Allowed"]
+    allowed.SetFillStyle(3005)
+    allowed.SetFillColor(ROOT.kRed)
+    allowed.SetLineWidth(-302)
+    allowed.SetLineColor(ROOT.kRed)
+    allowed.SetLineStyle(1)
+
+    setExpectedStyle(graphs["exp"])
+    
+
+    if not blinded:
+        setTheoreticalErrorStyle(graphs["obs_th_plus"])
+        setTheoreticalErrorStyle(graphs["obs_th_minus"])
+        setObservedStyle(graphs["obs"])
+        
+        # plots
+        plotsList = []
+        plotsList.append(histograms.HistoGraph(graphs["obs"], "Observed", drawStyle="PL", legendStyle="lp"))
+        
+        if "obs_th_plus" in graphs.keys():
+            plotsList.extend([histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
+                              histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L")])
+        if "isomass" in graphs.keys():
+            plotsList.extend([histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
+                              histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F")])
+        plotsList.extend([histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
+                          histograms.HistoGraph(expected, "Expected", drawStyle="L"),
+                          histograms.HistoGraph(graphs["Allowed"], "Allowed", drawStyle="L", legendStyle="lf"),
+                          #histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
+                          histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
+                          histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl")])
+        plot = plots.PlotBase(plotsList, saveFormats=[".png", ".pdf", ".C"])
+
+        plot.histoMgr.setHistoLegendLabelMany({
+            "ObservedPlus": "Observed #pm1#sigma (th.)",
+            "ObservedMinus": None,
+            "Expected": None,
+            "Allowed": "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV",
+            "Expected1": "Expected median #pm 1#sigma",
+            "Expected2": "Expected median #pm 2#sigma",
+            #"IsoMass": None,
+            #"IsoMassCopy": None
+            })
+    else:
+        if not graphs["isomass"] == None:
+            graphs["isomass"].SetFillColor(0)
+            graphs["isomass"].SetFillStyle(1)
+        # plots
+        plotsList = []
+        if "isomass" in graphs.keys():
+            plotsList.extend([histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L"),
+                              histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F")])
+        plotsList.extend([histograms.HistoGraph(excluded, "Excluded", drawStyle="F", legendStyle="f"),
+                          histograms.HistoGraph(expected, "Expected", drawStyle="L"),
+                          histograms.HistoGraph(graphs["Allowed"], "Allowed", drawStyle="L", legendStyle="lf"),
+                          #histograms.HistoGraph(graphs["Allowed"], "AllowedCopy", drawStyle="L", legendStyle="f"),
+                          histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"),
+                          histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl")])
+
+        plot = plots.PlotBase(plotsList, saveFormats=[".png", ".pdf", ".C"])
+
+        plot.histoMgr.setHistoLegendLabelMany({
+            "Expected": None,
+            "Allowed": "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV",
+            "Expected1": "Expected median #pm 1#sigma",
+            "Expected2": "Expected median #pm 2#sigma",
+            #"IsoMass": None,
+            #"IsoMassCopy": None
+            })
+
+    # Move the m_h,H allowed region to the last in the legend
+    histoNames = [h.getName() for h in plot.histoMgr.getHistos()]
+    plot.histoMgr.reorderLegend(filter(lambda n: "Allowed" not in n, histoNames))
+
+    captionLineSpacing = 0.042
+    captionLines = 3
+    if isinstance(finalstateText, list):
+        captionLines += len(finalstateText) - 1
+
+    if isHeavy:
+        x = 0.50
+        y = -0.11
+        #if scenario.replace("-LHCHXSWG", "") in ["lightstop", "mhmaxup"]:
+        #    y += 0.05
+    else:
+        x = 0.2
+        y = -0.15
+    plot.setLegend(histograms.createLegend(x-0.01, y+0.65-(captionLines-0.2)*captionLineSpacing, x+0.45, y+0.9-(captionLines-0.2)*captionLineSpacing))
+    plot.legend.SetMargin(0.17)
+
+    #plot.legend.SetFillColor(0)
+    #plot.legend.SetFillStyle(1001)
+    if blinded:
+        name += "_blinded"
+    name = os.path.basename(name)
+    name = name.replace("-","_")
+    
+    tanbMax = 65
+    if isHeavy:
+        frameXmin = 200
+        if "_mA_" in name:
+            frameXmin = 140
+        plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": 600})
+    else:
+        frameXmax = 160
+        if "_mA_" in name:
+            frameXmax = 145
+        plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": 90, "xmax": frameXmax})
+
+    plot.frame.GetXaxis().SetTitle(xlabel)
+    plot.frame.GetYaxis().SetTitle(tanblimit)
+
+    plot.draw()
+    
+    plot.setLuminosity(luminosity)
+    plot.addStandardTexts(cmsTextPosition="right")
+#    histograms.addLuminosityText(x=None, y=None, lumi="2.3-4.9")
+
+    size = 20
+    if regime == "light":
+        histograms.addText(x, y+0.9, process, size=size)
+    elif regime == "heavy":
+        histograms.addText(x, y+0.9, processHeavy, size=size)
+    elif regime == "combination":
+        histograms.addText(x, y+0.9, processCombination, size=size)
+    else:
+        raise Exception("Unknown option for regime")
+    y -= captionLineSpacing
+    if isinstance(finalstateText, str):
+        histograms.addText(x, y+0.9, finalstateText, size=size)
+    elif isinstance(finalstateText, list):
+        for l in finalstateText:
+            histograms.addText(x, y+0.9, l, size=size)
+            y -= captionLineSpacing
+    else:
+        raise Exception("not implemented")
+    histograms.addText(x, y+0.895, "^{}%s"%getTypesetScenarioName(scenario), size=size)
+#    histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
+
+    # Too small to be visible
+#    if not graphs["isomass"] == None:
+#        histograms.addText(0.2, 0.15, "m_{H^{#pm}} = 180 GeV/c^{2}", size=0.5*size)
+
+    #Adding a LHC label:
+#    ROOT.LHCHIGGS_LABEL(0.97,0.72,1)
+    #FH_version = db.getVersion("FeynHiggs")
+    #histograms.addText(x, y+0.55, FH_version, size=size)
+#    HD_version = db.getVersion("HDECAY")
+#    histograms.addText(x, y+0.55, FH_version+" and", size=size)
+#    histograms.addText(x, y+0.50, HD_version, size=size)
+#    histograms.addText(x, 0.48, "Derived from", size=size)
+#    histograms.addText(x, 0.43, "CMS HIG-12-052", size=size)
+
+    plot.save()
+
+    print "Created",name
+    

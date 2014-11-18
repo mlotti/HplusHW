@@ -57,8 +57,8 @@ class DatabaseReader:
                     # Store value
                     result = {}
                     sigma = sigmaInTree[0]*2.0*0.001 # both charges of H+; fb->pb
-                    result["taunu"] = sigma*brTauNuInTree[0];
-                    result["tb"] = sigma*brTbInTree[0];
+                    result["taunu"] = sigma*brTauNuInTree[0]
+                    result["tb"] = sigma*brTbInTree[0]
                     result["other"] = sigma*(1.0-brTauNuInTree[0]-brTbInTree[0])
                     result["bigtwo"] = sigma*(brTauNuInTree[0]+brTbInTree[0])
                     self._results["%04.1f"%tanbInTree[0]] = result
@@ -155,57 +155,84 @@ if __name__ == "__main__":
     style = tdrstyle.TDRStyle()
   
     # MSSM scenario settings
-    myScenarios = ["mhmaxup", "mhmodm", "mhmodp", "lightstau", "lightstop", "tauphobic"]
-    myScenarios = ["mhmaxup", "mhmodm", "mhmodp"]# "lightstau", "lightstop", "tauphobic"]
+    myAllScenarios = ["mhmaxup", "mhmodm", "mhmodp", "lightstau", "lightstop", "tauphobic"]
+    #myScenarios = ["mhmaxup", "mhmodm", "mhmodp"]# "lightstau", "lightstop", "tauphobic"]
     #myScenarios = ["mhmaxup"]
+    myScenariosPerPlot = 3
     myMassPoints = ["200", "220", "250", "300", "400", "500", "600"]
 
+    
+
     for m in myMassPoints:
-        myPlotObjects = []
-        myTauNuLegend = {}
-        myLegend = {}
-        for scen in myScenarios:
-            # Read 
-            myReader = DatabaseReader(scen, float(m))
-            # Obtain graph for taunu
-            gTauNu = myReader.getBrGraph("taunu")
-            gTauNu.SetMarkerColor(ROOT.kBlue)
-            gTauNu.SetLineColor(ROOT.kBlue)
-            updateStyle(gTauNu, scen)
-            myPlotObjects.append(histograms.HistoGraph(gTauNu, "taunu%s"%scen, drawStyle="PL", legendStyle="lp"))
-            myLegend["taunu%s"%scenToLabe(scen)] = "%s, #sigma#timesBr(H^{+}#rightarrow#tau^{+}#nu_{#tau})"%scen
-        for scen in myScenarios:
-            # Read 
-            myReader = DatabaseReader(scen, float(m))
-            # Obtain graph for tb
-            gTB = myReader.getBrGraph("tb")
-            gTB.SetMarkerColor(ROOT.kRed)
-            gTB.SetLineColor(ROOT.kRed)
-            updateStyle(gTB, scen)
-            myPlotObjects.append(histograms.HistoGraph(gTB, "tb%s"%scen, drawStyle="PL", legendStyle="lp"))
-            myLegend["tb%s"%scenToLabe(scen)] = "%s, #sigma#timesBr(H^{+}#rightarrowt#bar{b})"%scen
-        for scen in myScenarios:
-            # Read 
-            myReader = DatabaseReader(scen, float(m))
-            # Obtain graph for other
-            gOther = myReader.getBrGraph("other")
-            gOther.SetMarkerColor(ROOT.kGreen+2)
-            gOther.SetLineColor(ROOT.kGreen+2)
-            updateStyle(gOther, scen)
-            myPlotObjects.append(histograms.HistoGraph(gOther, "other%s"%scen, drawStyle="PL", legendStyle="lp"))
-            myLegend["other%s"%scenToLabe(scen)] = "%s, #sigma#timesBr(H^{+}#rightarrowother)"%scen
-        # Do plot
-        plot = plots.PlotBase(myPlotObjects, saveFormats=[".png", ".pdf", ".C"])
-        plot.histoMgr.setHistoLegendLabelMany(myLegend)
-        x = 0.2
-        dy = 0.10
-        plot.setLegend(histograms.createLegend(x-0.01, 0.50+dy, x+0.45, 0.80+dy))
-        name = "mssmCurvesHpm%s"%m
-        plot.createFrame(name, opts={"ymin": 1e-5, "ymax": 20, "xmin": 1, "xmax": 75})
-        print plot.getPad()
-        plot.getPad().SetLogy(True)
-        plot.frame.GetXaxis().SetTitle("tan #beta")
-        plot.frame.GetYaxis().SetTitle("#sigma#timesBr (pb)")
-        plot.draw()
-        plot.save()
-        print "Created plot %s"%name
+        for k in range(0, len(myAllScenarios) / myScenariosPerPlot):
+            myScenarios = myAllScenarios[k*myScenariosPerPlot:(k+1)*myScenariosPerPlot]
+            myPlotObjects = []
+            myFinalStates = []
+            myObjects = []
+            for scen in myScenarios:
+                # Read 
+                myReader = DatabaseReader(scen, float(m))
+                # Obtain graph for taunu
+                gTauNu = myReader.getBrGraph("taunu")
+                gTauNu.SetMarkerColor(ROOT.kBlue)
+                gTauNu.SetLineColor(ROOT.kBlue)
+                updateStyle(gTauNu, scen)
+                myPlotObjects.append(histograms.HistoGraph(gTauNu, "taunu%s"%scen, drawStyle="PL", legendStyle="lp"))
+                myObjects.append(gTauNu)
+            myFinalStates.append("#sigma#timesBr(H^{+}#rightarrow#tau^{+}#nu_{#tau}):")
+            for scen in myScenarios:
+                # Read 
+                myReader = DatabaseReader(scen, float(m))
+                # Obtain graph for tb
+                gTB = myReader.getBrGraph("tb")
+                gTB.SetMarkerColor(ROOT.kRed)
+                gTB.SetLineColor(ROOT.kRed)
+                updateStyle(gTB, scen)
+                myPlotObjects.append(histograms.HistoGraph(gTB, "tb%s"%scen, drawStyle="PL", legendStyle="lp"))
+                myObjects.append(gTB)
+            myFinalStates.append("#sigma#timesBr(H^{+}#rightarrowt#bar{b}):")
+            for scen in myScenarios:
+                # Read 
+                myReader = DatabaseReader(scen, float(m))
+                # Obtain graph for other
+                gOther = myReader.getBrGraph("other")
+                gOther.SetMarkerColor(ROOT.kGreen+2)
+                gOther.SetLineColor(ROOT.kGreen+2)
+                updateStyle(gOther, scen)
+                myPlotObjects.append(histograms.HistoGraph(gOther, "other%s"%scen, drawStyle="PL", legendStyle="lp"))
+                myObjects.append(gOther)
+            myFinalStates.append("#sigma#timesBr(H^{+}#rightarrowother):")
+            # Do plot
+            plot = plots.PlotBase(myPlotObjects, saveFormats=[".png", ".pdf", ".C"])
+            name = "mssmCurvesHpm%s_set%d"%(m,k)
+            plot.histoMgr.setHistoLegendLabelMany({})
+            plot.createFrame(name, opts={"ymin": 3e-6, "ymax": 5000, "xmin": 1, "xmax": 75})
+            
+            plot.getPad().SetLogy(True)
+            plot.frame.GetXaxis().SetTitle("tan #beta")
+            plot.frame.GetYaxis().SetTitle("#sigma#timesBr (pb)")
+            plot.draw()
+            # Legend
+            x = 0.2
+            dy = 0.12
+            legend = ROOT.TLegend(x-0.01, 0.50+dy, x+0.55, 0.80+dy)
+            for j in range(0, len(myFinalStates)):
+                for i in range(0, len(myScenarios)):
+                    if i == 0:
+                        legend.AddEntry("", myFinalStates[j], "")
+                    else:
+                        legend.AddEntry("","","")
+                for i in range(0, len(myScenarios)):
+                    legend.AddEntry(myObjects[j*len(myScenarios)+i], scenToLabel(myScenarios[i]), "lp")
+            legend.SetNColumns(len(myScenarios))
+            legend.SetFillStyle(0)
+            legend.SetBorderSize(0)
+            #legend.SetTextSize(20)
+            legend.Draw()
+            #plot.setLegend(legend)
+            #plot.draw()
+            # Save plot
+            histograms.addText(0.45, 0.23, "Values from LHCHXSWG used", size=20)
+            histograms.addText(0.45, 0.18, "m_{H^{+}}=%s GeV"%m, size=20)
+            plot.save()
+            print "Created plot %s"%name

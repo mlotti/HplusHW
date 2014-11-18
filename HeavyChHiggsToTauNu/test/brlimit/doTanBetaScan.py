@@ -11,6 +11,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CombineTools as combine
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as DatacardReader
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.BRXSDatabaseInterface as BRXSDB
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 
 import os
 import array
@@ -20,7 +23,128 @@ ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 _resultFilename = "results.txt"
+_theoreticalUncertainty = 0.32
 
+class TanBetaResultContainer:
+    def __init__(self, mssmModel, massPoints):
+        self._mssmModel = mssmModel
+        self._massPoints = massPoints[:]
+        self._resultKeys = []
+        self._resultsLow = {} # dictionary, where key is resultKey and values are dictionaries of tan beta limits for masses
+        self._resultsHigh = {} # dictionary, where key is resultKey and values are dictionaries of tan beta limits for masses
+
+    def addLowResult(self, mass, resultKey, tanbetalimit):
+        if not resultKey in self._resultKeys:
+            self._resultKeys.append(resultKey)
+        if not resultKey in self._resultsLow.keys():
+            self._resultsLow[resultKey] = {}
+            for m in self._massPoints:
+                self._resultsLow[resultKey][m] = -1.0
+        if tanbetalimit != None:
+            #if mass in self._resultsLow[resultKey].keys():
+            #    print "Warning: overriding low limit for (%s) / m=%s / %s"%(self._mssmModel, mass, resultKey)
+            if tanbetalimit < 10:
+                self._resultsLow[resultKey][mass] = tanbetalimit
+            #self._resultsLow[resultKey][mass] = -1.0
+
+    def addHighResult(self, mass, resultKey, tanbetalimit):
+        if not resultKey in self._resultKeys:
+            self._resultKeys.append(resultKey)
+        if not resultKey in self._resultsHigh.keys():
+            self._resultsHigh[resultKey] = {}
+            for m in self._massPoints:
+                self._resultsHigh[resultKey][m] = 75.0
+        if tanbetalimit != None:
+            #if mass in self._resultsHigh[resultKey].keys():
+            #    print "Warning: overriding low limit for (%s) / m=%s / %s"%(self._mssmModel, mass, resultKey)
+            self._resultsHigh[resultKey][mass] = tanbetalimit
+        
+    def _getResultGraphForTwoKeys(self, firstKey, secondKey):
+        if not firstKey in self._resultsLow.keys() or not secondKey in self._resultsLow.keys():
+            return None
+        lenm = len(self._massPoints)
+        g = ROOT.TGraph(lenm*4+2)
+        # Low limit, bottom pass left to right
+        for i in range(0, lenm):
+            g.SetPoint(i, float(self._massPoints[i]), self._resultsLow[firstKey][self._massPoints[i]])
+        # Low limit, top pass right to left
+        for i in range(0, lenm):
+            j = lenm - i - 1
+            g.SetPoint(i+lenm, float(self._massPoints[j]), self._resultsLow[secondKey][self._massPoints[j]])
+        # intermediate points
+        g.SetPoint(lenm*2, -1.0, self._resultsLow[secondKey][self._massPoints[lenm-1]])
+        g.SetPoint(lenm*2+1, -1.0, self._resultsHigh[firstKey][self._massPoints[0]])
+        # Upper limit, bottom pass left to right
+        for i in range(0, lenm):
+            g.SetPoint(i+lenm*2+2, float(self._massPoints[i]), self._resultsHigh[firstKey][self._massPoints[i]])
+        # Upper limit, top pass right to left
+        for i in range(0, lenm):
+            j = lenm - i - 1
+            g.SetPoint(i+lenm*3+2, float(self._massPoints[j]), self._resultsHigh[secondKey][self._massPoints[j]])
+        return g
+
+    def _getResultGraphForOneKey(self, resultKey):
+        if not resultKey in self._resultsLow.keys():
+            return None
+        lenm = len(self._massPoints)
+        g = ROOT.TGraph(lenm*2+5)
+        # Upper limit, top part left to right
+        g.SetPoint(0, -1.0, 100.0)
+        g.SetPoint(1, 1000.0, 100.0)
+        # Upper limit, pass right to left
+        for i in range(0, lenm):
+            j = lenm - i - 1
+            g.SetPoint(i+2, float(self._massPoints[j]), self._resultsHigh[resultKey][self._massPoints[j]])
+        # intermediate points
+        g.SetPoint(lenm+2, -1.0, self._resultsLow[resultKey][self._massPoints[lenm-1]])
+        g.SetPoint(lenm+3, -1.0, self._resultsHigh[resultKey][self._massPoints[0]])
+        # Low limit, pass left to right
+        for i in range(0, lenm):
+            g.SetPoint(i+lenm+3, float(self._massPoints[i]), self._resultsLow[resultKey][self._massPoints[i]])
+        # Low limit, bottom part right to left
+        g.SetPoint(lenm*2+4, 1000.0, 0.0)
+        g.SetPoint(lenm*2+5, -1.0, 0.0)
+        return g
+
+    def doPlot(self):
+        graphs = {}
+        #["observed", "observedPlusTheorUncert", "observedMinusTheorUncert", "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]
+        graphs["exp"] = self._getResultGraphForOneKey("expected")
+        graphs["exp1"] = self._getResultGraphForTwoKeys("expectedPlus1Sigma", "expectedMinus1Sigma")
+        graphs["exp2"] = self._getResultGraphForTwoKeys("expectedPlus2Sigma", "expectedMinus2Sigma")
+        graphs["obs"] = self._getResultGraphForOneKey("observed")
+        graphs["obs_th_plus"] = self._getResultGraphForOneKey("observedPlusTheorUncert")
+        graphs["obs_th_minus"] = self._getResultGraphForOneKey("observedMinusTheorUncert")
+        myName = "%s-LHCHXSWG.root"%self._mssmModel
+        if not os.path.exists(myName):
+            raise Exception("Error: Cannot find file '%s'!"%myName)
+        db = BRXSDB.BRXSDatabaseInterface(myName)
+        graphs["Allowed"] = db.mhLimit("mh","mHp","mHp > 0","125.0+-3.0")
+        if self._mssmModel == "tauphobic":
+            # Fix a buggy second upper limit (the order of points is left to right, then right to left; remove further passes to fix the bug)
+            decreasingStatus = False
+            i = 0
+            while i < graphs["Allowed"].GetN():
+                removeStatus = False
+                y = graphs["Allowed"].GetY()[i]
+                if i > 0:
+                    if graphs["Allowed"].GetY()[i-1] - y < 0:
+                        decreasingStatus = True
+                    else:
+                        if decreasingStatus:
+                            graphs["Allowed"].RemovePoint(i)
+                            removeStatus = True
+                if not removeStatus:
+                    i += 1
+            #for i in range(0, graphs["Allowed"].GetN()):
+                #print graphs["Allowed"].GetX()[i], graphs["Allowed"].GetY()[i]
+        myFinalStateLabel = []
+        myFinalStateLabel.append("^{}H^{+}#rightarrow#tau^{+}#nu_{#tau} final states:")
+        myFinalStateLabel.append("  ^{}#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu")
+        myFinalStateLabel.append("^{}H^{+}#rightarrowt#bar{b} final states:")
+        myFinalStateLabel.append("  ^{}#mu#tau_{h}, ee, e#mu, #mu#mu")
+        limit.doTanBetaPlotGeneric("limitsTanbCombination_heavy_"+self._mssmModel, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="combination")
+                                                                           
 class BrContainer:
     def __init__(self, label, datacardPatterns, rootFilePatterns, branchingLabel, mssmModel):
         if len(datacardPatterns) != len(rootFilePatterns):
@@ -110,29 +234,29 @@ class BrContainer:
     def resultExists(self, tanbeta):
         a = ""
         if isinstance(tanbeta, str):
-            a = tanbeta
+            a = "%04.1f"%(float(tanbeta))
         else:
-            a = "%.1f"%tanbeta
-        if len(self._datacardPatterns) == 0:
+            a = "%04.1f"%tanbeta
+        if len(self._results) == 0:
             return False
         return a in self._results.keys()
     
     def setCombineResult(self, tanbeta, result):
         a = ""
         if isinstance(tanbeta, str):
-            a = tanbeta
+            a = "%04.1f"%(float(tanbeta))
         else:
-            a = "%.1f"%tanbeta
-        if len(self._datacardPatterns) == 0:
+            a = "%04.1f"%tanbeta
+        if len(self._results) == 0:
             return None
         self._results[a]["combineResult"] = result
     
     def getResult(self, tanbeta):
         a = ""
         if isinstance(tanbeta, str):
-            a = tanbeta
+            a = "%04.1f"%(float(tanbeta))
         else:
-            a = "%.1f"%tanbeta
+            a = "%04.1f"%tanbeta
         return self._results[a]
 
     def getCombineResultByKey(self, tanbeta, resultKey):
@@ -168,6 +292,10 @@ def getCombineResultPassedStatus(opts, taunuContainer, tbContainer, mHp, tanbeta
             quietStatus = True)
         if len(resultContainer.results) > 0:
             result = resultContainer.results[0]
+            # Add theoretical uncertainty
+            result.observedPlusTheorUncert = result.observed * (1.0 + _theoreticalUncertainty)
+            result.observedMinusTheorUncert = result.observed * (1.0 - _theoreticalUncertainty)
+            # Store result
             taunuContainer.setCombineResult(tanbeta, result)
             tbContainer.setCombineResult(tanbeta, result)
     else:
@@ -187,7 +315,7 @@ def getCombineResultPassedStatus(opts, taunuContainer, tbContainer, mHp, tanbeta
     else:
         s += " sigmaCombine (%s)=%.3f, passed=%d"%(resultKey, myContainer.getCombineResultByKey(tanbeta, resultKey), myContainer.getPassedStatus(tanbeta, resultKey))
     if not reuseStatus:
-        print s+suffix
+        print s
     # return limit from combine
     if myContainer.getFailedStatus(tanbeta):
         return None
@@ -229,6 +357,51 @@ def scanRanges(opts, taunuContainer, tbContainer, mHp, tanbetaMin, tanbetaMax, r
     for l in myRanges:
         scanRanges(opts, taunuContainer, tbContainer, mHp, l[0], l[1], resultKey, scen)
 
+def readResults(opts, taunuContainer, tbContainer, m, myKey, scen):
+    myList = os.listdir(".")
+    for name in myList:
+        if name.startswith("results_") and name.endswith(".txt"):
+            print "Opening file '%s' ..."%name
+            f = open(name)
+            if f == None:
+                raise Exception("Error: Could not open result file '%s' for input!"%name)
+            lines = f.readlines()
+            f.close()
+            # Analyse lines
+            myBlockStart = None
+            myBlockEnd = None
+            myLine = 0
+            while myLine < len(lines) and myBlockEnd == None:
+                if lines[myLine].startswith("Tan beta limit scan ("):
+                    if myBlockStart == None:
+                        s = lines[myLine].replace("Tan beta limit scan (","").replace(") for m=",",").replace(" and key: ",",").replace("\n","")
+                        mySplit = s.split(",")
+                        if scen == mySplit[0] and m == mySplit[1] and myKey == mySplit[2]:
+                            # Entry found, store beginning
+                            myBlockStart = myLine
+                    else:
+                        myBlockEnd = myLine
+                myLine += 1
+            if myBlockStart == None or myLine - myBlockStart > 100:
+                print "... could not find results"
+            else:
+                myBlockEnd = myLine
+            if myBlockEnd != None:
+                for i in range(myBlockStart+1, myBlockEnd-1):
+                    s = lines[i].replace("  tan beta=","").replace(" xsecTheor=","").replace(" pb, limit(%s)="%myKey,",").replace(" pb, passed=",",")
+                    mySplit = s.split(",")
+                    if len(mySplit) > 1:
+                        tanbetakey = "%04.1f"%(float(mySplit[0]))
+                        if not taunuContainer.resultExists(tanbetakey):
+                            taunuContainer._results[tanbetakey] = {}
+                            taunuContainer._results[tanbetakey]["sigmaTheory"] = float(mySplit[1])
+                            result = commonLimitTools.Result(0)
+                            setattr(result, myKey, float(mySplit[2]))
+                            taunuContainer.setCombineResult(tanbetakey, result)
+                        else:
+                            # Add result key
+                            setattr(taunuContainer._results[tanbetakey]["combineResult"], myKey, float(mySplit[2]))
+
 def linearCrossOverOfTanBeta(container, tblow, tbhigh, resultKey):
     limitLow = getattr(container.getResult(tblow)["combineResult"], resultKey)
     limitHigh = getattr(container.getResult(tbhigh)["combineResult"], resultKey)
@@ -248,11 +421,14 @@ def linearCrossOverOfTanBeta(container, tblow, tbhigh, resultKey):
         tbinterpolation = tbHighValue
     return tbinterpolation
 
-def main(opts, taunuContainer, tbContainer, m, scen):
-    resultKeys = ["observed", "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]
+def main(opts, taunuContainer, tbContainer, m, scen, plotContainers):
+    resultKeys = ["observed", "observedPlusTheorUncert", "observedMinusTheorUncert", "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]
     #resultKeys = ["observed","expected"]
     for myKey in resultKeys:
-        scanRanges(opts, taunuContainer, tbContainer, m, 1.1, 75, myKey, scen)
+        if opts.analyseOutput:
+            readResults(opts, taunuContainer, tbContainer, m, myKey, scen)
+        else:
+            scanRanges(opts, taunuContainer, tbContainer, m, 1.1, 75, myKey, scen)
     
     outtxt = ""
     # Print results
@@ -274,6 +450,8 @@ def main(opts, taunuContainer, tbContainer, m, scen):
     for myResultKey in resultKeys:
         myLowTanBetaLimit = 1.0
         myHighTanBetaLimit = 75
+        lowFound = False
+        highFound = False
         myPreviousStatus = None
         for i in range(0, len(myTanBetaKeys)):
             if not taunuContainer.getFailedStatus(myTanBetaKeys[i]):
@@ -282,13 +460,23 @@ def main(opts, taunuContainer, tbContainer, m, scen):
                     if myPreviousStatus != myCurrentStatus:
                         # Cross-over point, check direction
                         myTbvalue = linearCrossOverOfTanBeta(taunuContainer, myTanBetaKeys[i-1], myTanBetaKeys[i], myResultKey)
-                        if not myPreviousStatus:
-                            myLowTanBetaLimit = myTbvalue
-                        else:
-                            myHighTanBetaLimit = myTbvalue
+                        combineValue = getattr(taunuContainer.getResult(k)["combineResult"], myResultKey)
+                        if combineValue < 2.0:
+                            if not myPreviousStatus:
+                                myLowTanBetaLimit = myTbvalue
+                                plotContainers[scen].addLowResult(m, myResultKey, myTbvalue)
+                                lowFound = True
+                            else:
+                                myHighTanBetaLimit = myTbvalue
+                                plotContainers[scen].addHighResult(m, myResultKey, myTbvalue)
+                                highFound = True
                 myPreviousStatus = myCurrentStatus
         outtxt +=  "  key='%s' allowed range: %.2f - %.2f\n"%(myResultKey, myLowTanBetaLimit, myHighTanBetaLimit)
-    
+        if not lowFound:
+            plotContainers[scen].addLowResult(m, myResultKey, None)
+        if not highFound:
+            plotContainers[scen].addHighResult(m, myResultKey, None)
+        
     print outtxt
     f = open(_resultFilename, "a")
     f.write(outtxt)
@@ -305,6 +493,7 @@ if __name__ == "__main__":
             rootFileList.append(rootFilePattern)
 
     parser = commonLimitTools.createOptionParser(False, False, True)
+    parser.add_option("--analyseOutput", dest="analyseOutput", action="store_true", default=False, help="Read only output and print summary")
     opts = commonLimitTools.parseOptionParser(parser)
     if opts.rmin == None:
         opts.rmin = "0"
@@ -313,6 +502,7 @@ if __name__ == "__main__":
     
     # MSSM scenario settings
     myScenarios = ["mhmaxup", "mhmodm", "mhmodp", "lightstau", "lightstop", "tauphobic"]
+    myPlots = {}
     #myScenarios = ["mhmaxup"]
     
     # General settings
@@ -357,11 +547,21 @@ if __name__ == "__main__":
                 myMassPoints.remove(myMassPoints[i])
             else:
                 i += 1
+        if len(myMassPoints) == 0:
+            print "Automatic mass identification failed, trying default range (this could of course fail)"
+            myMassPoints.extend(["200", "220", "250", "300", "400", "500", "600"])
         print "The following masses are considered:",", ".join(map(str, myMassPoints))
         for m in myMassPoints:
             for scen in myScenarios:
+                if not scen in myPlots.keys():
+                    myPlots[scen] = TanBetaResultContainer(scen, myMassPoints)
                 taunuContainer = BrContainer("Hp_taunu",datacardPatternsTauNu, rootFilePatternsTauNu, "BR_Hp_taunu", scen)
                 tbContainer = BrContainer("Hp_tb",datacardPatternsTB, rootFilePatternsTB, "BR_Hp_tb", scen)
-                main(opts, taunuContainer, tbContainer, m, scen)
-            raise Exception()
+                main(opts, taunuContainer, tbContainer, m, scen, myPlots)
     print "\nTan beta scan is done, results have been saved to %s"%_resultFilename
+    
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
+
+    for scen in myScenarios:
+        myPlots[scen].doPlot()
