@@ -2670,6 +2670,14 @@ class Dataset:
         else:
             (histos, realName) = self.getRootObjects(name, **kwargs)
             if len(histos) == 1:
+                # Check if object is indeed a histogram or a directory (usecase: splitted phase space histograms)
+                if isinstance(histos[0], ROOT.TDirectoryFile):
+                    (path, filename) = os.path.split(name)
+                    newName = ""
+                    if len(path) > 0:
+                        newName = "%s/"%path
+                    newName += "%s/%sInclusive"%(filename,filename)
+                    (histos, realName) = self.getRootObjects(newName, **kwargs)
                 h = histos[0]
             else:
                 h = histos[0]
