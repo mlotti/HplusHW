@@ -158,10 +158,8 @@ if __name__ == "__main__":
     myAllScenarios = ["mhmaxup", "mhmodm", "mhmodp", "lightstau", "lightstop", "tauphobic"]
     #myScenarios = ["mhmaxup", "mhmodm", "mhmodp"]# "lightstau", "lightstop", "tauphobic"]
     #myScenarios = ["mhmaxup"]
-    myScenariosPerPlot = 3
+    myScenariosPerPlot = 3 # Good values are 1 and 3
     myMassPoints = ["200", "220", "250", "300", "400", "500", "600"]
-
-    
 
     for m in myMassPoints:
         for k in range(0, len(myAllScenarios) / myScenariosPerPlot):
@@ -206,7 +204,7 @@ if __name__ == "__main__":
             plot = plots.PlotBase(myPlotObjects, saveFormats=[".png", ".pdf", ".C"])
             name = "mssmCurvesHpm%s_set%d"%(m,k)
             plot.histoMgr.setHistoLegendLabelMany({})
-            plot.createFrame(name, opts={"ymin": 3e-6, "ymax": 5000, "xmin": 1, "xmax": 75})
+            plot.createFrame(name, opts={"ymin": 3e-6, "ymax": 5000, "xmin": 1, "xmax": 65})
             
             plot.getPad().SetLogy(True)
             plot.frame.GetXaxis().SetTitle("tan #beta")
@@ -215,15 +213,23 @@ if __name__ == "__main__":
             # Legend
             x = 0.2
             dy = 0.12
-            legend = ROOT.TLegend(x-0.01, 0.50+dy, x+0.55, 0.80+dy)
+            legend = ROOT.TLegend(x-0.01, 0.50+dy, x+0.40+0.30*(len(myScenarios)>1), 0.80+dy)
+            if len(myScenarios) == 1:
+                legend.AddEntry("", "MSSM %s"%scenToLabel(myScenarios[0]), "")
             for j in range(0, len(myFinalStates)):
-                for i in range(0, len(myScenarios)):
-                    if i == 0:
-                        legend.AddEntry("", myFinalStates[j], "")
-                    else:
-                        legend.AddEntry("","","")
-                for i in range(0, len(myScenarios)):
-                    legend.AddEntry(myObjects[j*len(myScenarios)+i], scenToLabel(myScenarios[i]), "lp")
+                if len(myScenarios) == 1:
+                    # One scenario in one plot
+                    legend.AddEntry(myObjects[j], myFinalStates[j].replace(":",""), "lp")
+                else:
+                    # Multiple scenarios in one plot
+                    for i in range(0, len(myScenarios)):
+                        
+                        if i == 0:
+                            legend.AddEntry("", myFinalStates[j], "")
+                        else:
+                            legend.AddEntry("","","")
+                    for i in range(0, len(myScenarios)):
+                        legend.AddEntry(myObjects[j*len(myScenarios)+i], "MSSM %s"%scenToLabel(myScenarios[i]), "lp")
             legend.SetNColumns(len(myScenarios))
             legend.SetFillStyle(0)
             legend.SetBorderSize(0)
