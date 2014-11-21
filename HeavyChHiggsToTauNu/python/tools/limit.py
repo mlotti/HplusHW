@@ -18,8 +18,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 
 ## Flag for stating if the plots are for paper (True) or not (False)
-forPaper = False
-#forPaper = True
+#forPaper = False
+forPaper = True
 
 ## Unit for mass (GeV vs. GeV/c^2
 def massUnit():
@@ -213,7 +213,7 @@ class BRLimits:
 
     ## Get the label of the final states
     def getFinalstateText(self):
-        if len(self.finalstates) == 1:
+        if len(self.finalstates) <= 1:
             return "%s final state" % _finalstateLabels[self.finalstates[0]]
 
         ret = ", ".join([_finalstateLabels[x] for x in self.finalstates[:-1]])
@@ -899,7 +899,15 @@ def doTanBetaPlotLight(name, graphs, luminosity, finalstateText, xlabel, scenari
 # \param xlabel  x-axis label
 # \param scenario name of scenario
 def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scenario, regime):
+    # Enable OpenGL
+    #if opts.excludedArea:
+    ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
+    
     isHeavy = regime != "light"
+    tanbMax = 65
+
+    if forPaper:
+        histograms.cmsTextMode = histograms.CMSMode.PAPER
 
     blinded = True
     if "obs" in graphs.keys():
@@ -994,8 +1002,8 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
             "Allowed": "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV",
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma",
-            #"IsoMass": None,
-            #"IsoMassCopy": None
+            "IsoMass": None,
+            "IsoMassCopy": None
             })
     else:
         if not graphs["isomass"] == None:
@@ -1020,8 +1028,8 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
             "Allowed": "m_{"+higgs+"}^{MSSM} #neq 125#pm3 GeV",
             "Expected1": "Expected median #pm 1#sigma",
             "Expected2": "Expected median #pm 2#sigma",
-            #"IsoMass": None,
-            #"IsoMassCopy": None
+            "IsoMass": None,
+            "IsoMassCopy": None
             })
 
     # Move the m_h,H allowed region to the last in the legend
@@ -1051,7 +1059,6 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     name = os.path.basename(name)
     name = name.replace("-","_")
     
-    tanbMax = 65
     if isHeavy:
         frameXmin = 200
         if "_mA_" in name:
@@ -1084,6 +1091,7 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     y -= captionLineSpacing
     if isinstance(finalstateText, str):
         histograms.addText(x, y+0.9, finalstateText, size=size)
+        y -= captionLineSpacing
     elif isinstance(finalstateText, list):
         for l in finalstateText:
             histograms.addText(x, y+0.9, l, size=size)
