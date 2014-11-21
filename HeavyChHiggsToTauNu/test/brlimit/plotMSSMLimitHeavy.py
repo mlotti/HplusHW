@@ -79,6 +79,7 @@ def main():
 
     graphs = {}
     obs = limits.observedGraph()
+
     # Remove blinded obs points
     for i in reversed(range(0,obs.GetN())):
         if obs.GetY()[i] < 0.00000001:
@@ -93,13 +94,13 @@ def main():
     if obs.GetN() > 0:
         graphs["obs"] = obs
         # Get theory uncertainties on observed
-        obs_th_plus = limit.getObservedPlus(obs,0.32)
-        obs_th_minus = limit.getObservedMinus(obs,0.32)
-        for gr in [obs_th_plus, obs_th_minus]:
-            gr.SetLineWidth(2)
-            gr.SetLineStyle(9)
-        graphs["obs_th_plus"] = obs_th_plus
-        graphs["obs_th_minus"] = obs_th_minus
+#        obs_th_plus = limit.getObservedPlus(obs,0.32)
+#        obs_th_minus = limit.getObservedMinus(obs,0.32)
+#        for gr in [obs_th_plus, obs_th_minus]:
+#            gr.SetLineWidth(2)
+#            gr.SetLineStyle(9)
+#        graphs["obs_th_plus"] = obs_th_plus
+#        graphs["obs_th_minus"] = obs_th_minus
 
     # Remove m=180,190
 #    for gr in graphs.values():
@@ -123,7 +124,13 @@ def main():
     for key in graphs.keys():
         print "Graph--------------------------------",key
         graphs[key] = db.graphToTanBeta(graphs[key],xVariable,selection,highTanbRegion=True)
+        if key == "obs":
+            obsplus = db.getTheorUncert(graphs[key],xVariable,selection,"+")
+            graphs["obs_th_plus"] = db.graphToTanBeta(obsplus,xVariable,selection)
+            obsminus = db.getTheorUncert(graphs[key],xVariable,selection,"-")
+            graphs["obs_th_minus"] = db.graphToTanBeta(obsminus,xVariable,selection)
         print key,"done"
+
 
 #    graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
     if scenario == "lowMH-LHCHXSWG":
@@ -152,7 +159,7 @@ def main():
         
     graphs["isomass"] = None
     
-    limit.doTanBetaPlotLight("limitsTanb_heavy_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario)
+    limit.doTanBetaPlotHeavy("limitsTanb_heavy_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario)
 	
     # mH+ -> mA
     print "Replotting the graphs for (mA,tanb)"
@@ -164,9 +171,9 @@ def main():
 
     graphs["isomass"] = db.getIsoMass(200)
 
-    doPlot("limitsTanb_mA_heavy_"+scenario, graphs, limits, limit.mA(),scenario)
+#    doPlot("limitsTanb_mA_heavy_"+scenario, graphs, limits, limit.mA(),scenario)
     
-    limit.doTanBetaPlotLight("limitsTanb_mA_heavy_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mA(), scenario)
+    limit.doTanBetaPlotHeavy("limitsTanb_mA_heavy_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mA(), scenario)
 
 if __name__ == "__main__":
     main()

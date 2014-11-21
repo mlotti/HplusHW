@@ -91,13 +91,13 @@ def main():
     if obs.GetN() > 0:
         graphs["obs"] = obs
         # Get theory uncertainties on observed
-        obs_th_plus = limit.getObservedPlus(obs,0.21)
-        obs_th_minus = limit.getObservedMinus(obs,0.21)
-        for gr in [obs_th_plus, obs_th_minus]:
-            gr.SetLineWidth(2)
-            gr.SetLineStyle(9)
-        graphs["obs_th_plus"] = obs_th_plus
-        graphs["obs_th_minus"] = obs_th_minus
+#        obs_th_plus = limit.getObservedPlus(obs,0.21)
+#        obs_th_minus = limit.getObservedMinus(obs,0.21)
+#        for gr in [obs_th_plus, obs_th_minus]:
+#            gr.SetLineWidth(2)
+#            gr.SetLineStyle(9)
+#        graphs["obs_th_plus"] = obs_th_plus
+#        graphs["obs_th_minus"] = obs_th_minus
         
 
     # Remove m=80
@@ -122,6 +122,11 @@ def main():
     for key in graphs.keys():
         print "Graph--------------------------------",key
         graphs[key] = db.graphToTanBetaCombined(graphs[key],xVariable,selection)
+        if key == "obs":
+            obsplus = db.getTheorUncert(graphs[key],xVariable,selection,"+")
+            graphs["obs_th_plus"] = db.graphToTanBetaCombined(obsplus,xVariable,selection)
+            obsminus = db.getTheorUncert(graphs[key],xVariable,selection,"-")
+            graphs["obs_th_minus"] = db.graphToTanBetaCombined(obsminus,xVariable,selection)
         print key,"done"
 
     graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)

@@ -33,6 +33,102 @@ class BRXSDatabaseInterface:
             branch.SetAddress(variable)
             self.variables.append(variable)
             self.names.append(branch.GetName())
+
+    def getTheorUncert(self,graph,xVariable,selection,pm):
+
+        sign = 1
+        if pm == "-":
+            sign = -1
+
+        thvars = []
+        for v in self.BRvariable.split("*"):
+            if "BR" in v or "xsec" in v:
+                thvars.append(v)
+
+        xnew = []
+        ynew = []
+
+        print "Graph-------------------------------- obs %s1sigma theor"%pm
+
+        masses = self.expLimit.keys()
+        masses_int = []
+        for m in masses:
+            masses_int.append(int(m))
+        for m in sorted(masses_int):
+            modelIndependentLimit = float(self.expLimit[str(m)])
+
+            tanb = graph.Eval(m)
+
+            if m < 175 and tanb < 1:
+                mintanb = self.getMinimumTanb(self.BRvariable,selection+"&& mHp==%s"%m)
+                tanb = mintanb
+
+            uncert = 0
+            for v in thvars:
+                if "xsec" in v:
+                    uncert += self.xsecUncert(xVariable,"tanb",v,m,tanb,pm)
+                else:
+                    uncert += self.brUncert(xVariable,"tanb",v,m,tanb,pm)
+                    if v == "BR_tHpb":
+                        uncert += uncert_missing_HO_tt
+
+            modelIndependentLimit = modelIndependentLimit*(1+sign*uncert)
+
+            xnew.append(m)
+            ynew.append(modelIndependentLimit)
+        newGraph = ROOT.TGraph(len(xnew),array('d',xnew),array('d',ynew))
+        newGraph.SetLineWidth(2)
+        newGraph.SetLineStyle(9)
+        #print "ThUncertGraph"                                                                                                                         
+        #self.PrintGraph(newGraph)                                                                                                                     
+        return newGraph
+
+    def xsecUncert(self,xaxisName,yaxisName,v,x,y,pm):
+
+        uncert = uncert_deltab
+        tmpgraph = self.getGraph(yaxisName,"tHp_xsec","%s == %s"%(xaxisName,x))
+        sigma = tmpgraph.Eval(y)
+
+        if pm == "+":
+            xsecname = "tHp_xsec_plusErr"
+        else:
+            xsecname = "tHp_xsec_minusErr"
+
+        tmpgraph = self.getGraph(yaxisName,xsecname,"%s == %s"%(xaxisName,x))
+        sigma_prime = tmpgraph.Eval(y)
+
+        uncert += abs(sigma_prime - sigma) / sigma
+        #print "xsec",sigma_prime,sigma,x,y,uncert                                                                                                     
+        return uncert
+
+    def brUncert(self,xaxisName,yaxisName,v,x,y,pm):
+
+        gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
+        if v == "BR_tHpb":
+            gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD
+
+        tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
+        br_i = tmpgraph.Eval(y)
+
+        gamma_v = v.replace("BR","GAMMA")
+        tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
+        gamma_i = tmpgraph.Eval(y)
+
+        gammatot = gamma_i/br_i
+
+        sign = 1
+        if pm == "-":
+            sign = -1
+
+        br_prime1 = gamma_i*(1+sign*gamma_uncert) / (gamma_i*(1+sign*gamma_uncert) + gammatot-gamma_i)
+        br_uncert1 = abs(br_prime1 - br_i) / br_i
+
+        br_prime2 = gamma_i / (gamma_i + (gammatot-gamma_i)*(1+sign*gamma_uncert))
+        br_uncert2 = abs(br_prime2 - br_i) / br_i
+
+        br_uncert = br_uncert1 + br_uncert2
+        #print "BR uncertainty",v,br_uncert                                                                                                            
+        return br_uncert
         
     def setSelection(self,selection):
 	self.selection = selection
