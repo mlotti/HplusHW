@@ -27,7 +27,7 @@ def hplusTauNuToTauMu(myDir, doCorrelation):
     # Replace nuisance names
     myNuisanceReplaces = {}
     myNuisanceReplaces["tauId"] = "tau_ID_shape"
-    myNuisanceReplaces["jetTauMisId"] = "tau_ID_eToTauBarrel_shape"
+    myNuisanceReplaces["jetTauMisId"] = "tau_ID_jetToTau_shape"
     #myNuisanceReplaces["fakesSyst"] = "???"
     myNuisanceReplaces["tes"] = "ES_taus"
     myNuisanceReplaces["topptunc"] = "top_pt"
@@ -54,14 +54,16 @@ def hplusTauNuToTauMu(myDir, doCorrelation):
         myMgr.replaceNuisanceValue("xsect_tt_8TeV", "0.948/1.060")
         myMgr.replaceNuisanceValue("xsect_singleTop", "1.091")
     
-        myMgr.convertShapeToNormalizationNuisance(["ES_jets"])
+        myMgr.convertShapeToNormalizationNuisance(["ES_jets","JER","ES_METunclustered"])
 
-        myMgr.subtractPedestalFromShapeNuisances("btag")
-        myMgr.subtractPedestalFromShapeNuisances("unbtag")
+        #myMgr.subtractPedestalFromShapeNuisances("btag")
+        #myMgr.subtractPedestalFromShapeNuisances("unbtag")
         myMgr.mergeShapeNuisances(["btag","unbtag"], "b_tag")
 
-    #myMgr.convertShapeToNormalizationNuisance(["btag","unbtag"])
+    #myMgr.convertShapeToNormalizationNuisance(["btag","unbtag","ES_jets","JER","ES_taus","ES_METunclustered","top_pt"]) # tmp
     #myMgr.convertShapeToNormalizationNuisance(["b_tag"])
+    
+    #myMgr.addNuisance("btagshapePDF", distribution="lnN", columns=["ttltau_tnmt","ttll_tnmt"], value="1.050")
     
     # Redo stat. uncert. shape histograms
     myMgr.fixTooSmalltatUncertProblem(signalMinimumAbsStatValue=0.4, bkgMinimumAbsStatValue=0.4)
@@ -111,11 +113,15 @@ def hplusTauNuToDilepton(myDir, doCorrelation):
             myMgr.addNuisance("xsect_DYtoll", distribution="lnN", columns=["dy"], value="1.040")
             myMgr.addNuisance("xsect_VV", distribution="lnN", columns=["vv"], value="1.040")
             myMgr.mergeShapeNuisances(["btag","unbtag"], "b_tag")
+            #myMgr.removeNuisance("unbtag")
+
+        #myMgr.addNuisance("btagshapePDF", distribution="lnN", columns=["ttbar","otherttbar"], value="1.050")
         
         # Replace column names
         myColumnReplaces = {}
         myColumnReplaces["TBH"] = "HpTauNu%s"%suffix.upper()
         myColumnReplaces["vv"] = "vv%s"%suffix.upper()
+        myColumnReplaces["wjets"] = "wjets%s"%suffix.upper()
         myColumnReplaces["otherttbar"] = "otherttbar%s"%suffix.upper()
         myColumnReplaces["st"] = "st%s"%suffix.upper()
         myColumnReplaces["dy"] = "dy%s"%suffix.upper()
@@ -127,9 +133,9 @@ def hplusTauNuToDilepton(myDir, doCorrelation):
         myMgr.replaceNuisanceNames(myNuisanceReplaces)
         
         myMgr.convertShapeToNormalizationNuisance(["JER","ES_jets","leff","pileup","ES_METunclustered"])
+        #myMgr.convertShapeToNormalizationNuisance(["btag","unbtag","top_pt","b_tag"]) # TMP
         
         myMgr.removeNuisance("fakes")
-        #myMgr.removeNuisance("unbtag")
         myMgr.removeNuisance("br")
         myMgr.removeNuisance("theoryUncXS_vv")
         myMgr.removeNuisance("theoryUncXS_wjets")
@@ -165,7 +171,6 @@ def hplusTbToTauMu(myDir, doCorrelation):
     # Replace nuisance names
     myNuisanceReplaces = {}
     myNuisanceReplaces["tauId"] = "tau_ID_shape"
-    myNuisanceReplaces["jetTauMisId"] = "tau_ID_eToTauBarrel_shape"
     #myNuisanceReplaces["fakesSyst"] = "???"
     myNuisanceReplaces["tes"] = "ES_taus"
     myNuisanceReplaces["topptunc"] = "top_pt"
@@ -192,12 +197,14 @@ def hplusTbToTauMu(myDir, doCorrelation):
         myMgr.replaceNuisanceValue("xsect_tt_8TeV", "0.948/1.060")
         myMgr.replaceNuisanceValue("xsect_singleTop", "1.091")
     
-        myMgr.subtractPedestalFromShapeNuisances("btag")
-        myMgr.subtractPedestalFromShapeNuisances("unbtag")
+        #myMgr.subtractPedestalFromShapeNuisances("btag")
+        #myMgr.subtractPedestalFromShapeNuisances("unbtag")
         myMgr.mergeShapeNuisances(["btag","unbtag"], "b_tag")
 
 
-    myMgr.convertShapeToNormalizationNuisance(["JER","ES_METunclustered"])
+    #myMgr.addNuisance("btagshapePDF", distribution="lnN", columns=["tt_ltau_tbmt","tt_ll_tbmt"], value="1.050")
+
+    myMgr.convertShapeToNormalizationNuisance(["JER","ES_METunclustered","ES_jets"])
     
     #myMgr.convertShapeToNormalizationNuisance(["btag","unbtag"])
     #myMgr.convertShapeToNormalizationNuisance(["b_tag"])
@@ -252,10 +259,13 @@ def hplusTbToDilepton(myDir, doCorrelation):
             
             myMgr.mergeShapeNuisances(["btag","unbtag"], "b_tag")
         
+        #myMgr.addNuisance("btagshapePDF", distribution="lnN", columns=["ttbar","otherttbar"], value="1.050")
+        
         # Replace column names
         myColumnReplaces = {}
         myColumnReplaces["HTB"] = "HpTB_tb%s"%suffix.upper()
         myColumnReplaces["vv"] = "vv_tb%s"%suffix.upper()
+        myColumnReplaces["wjets"] = "wjets_tb%s"%suffix.upper()
         myColumnReplaces["otherttbar"] = "otherttbar_tb%s"%suffix.upper()
         myColumnReplaces["st"] = "st_tb%s"%suffix.upper()
         myColumnReplaces["dy"] = "dy_tb%s"%suffix.upper()
