@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-
+ 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
 dataVersion="44XmcS6"     # Fall11 MC
