@@ -8,6 +8,11 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
+uncert_missing1loopEW  = 0.05
+uncert_missing2loopQCD = 0.02
+uncert_deltab          = 0.03
+uncert_missing_HO_tt   = 0.03
+
 class BRXSDatabaseInterface:
     def __init__(self,rootfile):
         print "BRXSDatabaseInterface: reading file",rootfile
@@ -66,7 +71,8 @@ class BRXSDatabaseInterface:
             uncert = 0
             for v in thvars:
                 if "xsec" in v:
-                    uncert += self.xsecUncert(xVariable,"tanb",v,m,tanb,pm)
+####                    uncert += self.xsecUncert(xVariable,"tanb",v,m,tanb,pm)
+                    uncert += self.xsecUncertOrig(xVariable,"tanb",v,m,tanb,pm)
                 else:
                     uncert += self.brUncert(xVariable,"tanb",v,m,tanb,pm)
                     if v == "BR_tHpb":
@@ -99,6 +105,28 @@ class BRXSDatabaseInterface:
 
         uncert += abs(sigma_prime - sigma) / sigma
         #print "xsec",sigma_prime,sigma,x,y,uncert                                                                                                     
+        return uncert
+
+    def xsecUncertOrig(self,xaxisName,yaxisName,v,x,y,pm):
+
+        self.savecopy = self.tree
+        self.tree = self.fIN.Get("LHCHXSWG_results")
+
+        uncert = uncert_deltab
+        tmpgraph = self.getGraph(yaxisName,"tHp_xsec","%s == %s"%(xaxisName,x))
+        sigma = tmpgraph.Eval(y)
+
+        if pm == "+":
+            xsecname = "tHp_xsec_plusErr"
+        else:
+            xsecname = "tHp_xsec_minusErr"
+
+        tmpgraph = self.getGraph(yaxisName,xsecname,"%s == %s"%(xaxisName,x))
+        sigma_prime = tmpgraph.Eval(y)
+
+        uncert += sigma_prime / sigma
+
+        self.tree = self.savecopy
         return uncert
 
     def brUncert(self,xaxisName,yaxisName,v,x,y,pm):
