@@ -745,7 +745,7 @@ class ShapeVariationToConstantExtractor(ExtractorBase):
         hSystUp.Delete()
         hSystDown.Delete()
         # Construct end result
-        myUncertainty = ScalarUncertaintyItem(self._exid,plus=myUpValue*self._scaleFactor,minus=myDownValue*self._scaleFactor)
+        myUncertainty = ScalarUncertaintyItem(self._exid,max(myUpValue,myDownValue)*self._scaleFactor)
         return myUncertainty
 
     ## Virtual method for extracting histograms
