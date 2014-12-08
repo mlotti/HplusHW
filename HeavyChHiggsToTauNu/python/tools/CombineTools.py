@@ -24,6 +24,7 @@ import json
 import time
 import random
 import shutil
+import tarfile
 import subprocess
 
 import multicrab
@@ -59,7 +60,7 @@ lhcAsymptoticOptionsObserved = "-M Asymptotic --picky -v 2 --rAbsAcc 0.00001"
 ## Default command line options for LHC-CLs (asymptotic, expected limit)
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
-lhcAsymptoticRminSigmaBr = "0.001" # pb
+lhcAsymptoticRminSigmaBr = "0.0" # pb
 lhcAsymptoticRminBrLimit = "0.0" # plain number
 ## Default "Rmax" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRmaxSigmaBr = "1.0" # pb
@@ -72,26 +73,6 @@ lhcFreqSignificanceExpectedSignalSigmaBr = "0.1" # pb
 lhcFreqSignificanceExpectedSignalBrLimit = "0.01" # %
 lhcFreqRmaxSigmaBr = "1.0" # pb
 lhcFreqRmaxBrLimit = "0.1" # %
-
-
-## Deduces from directory listing the mass point list
-def obtainMassPoints(pattern):
-    commonLimitTools.obtainMassPoints(pattern)
-
-def readLuminosityFromDatacard(myPath, filename):
-    commonLimitTools.readLuminosityFromDatacard(myPath, filename)
-
-## Returns true if mass list contains only heavy H+
-def isHeavyHiggs(massList):
-    commonLimitTools.isHeavyHiggs(massList)
-
-## Returns true if mass list contains only light H+
-def isLightHiggs(massList):
-    commonLimitTools.isLightHiggs(massList)
-
-#class ParseLandsOutput:
-#def parseLandsMLOutput(outputFileName):
-
 
 ## Create OptionParser, and add common LandS options to OptionParser object
 #
@@ -150,8 +131,15 @@ def produceLHCAsymptotic(opts, directory,
     mcc.createMultiCrabDir(postfix)
     mcc.copyInputFiles()
     mcc.writeScripts()
-    mcc.runCombineForAsymptotic(quietStatus=quietStatus)
-    return mcc.getResults()
+    if opts.injectSignal:
+        mcc.writeCrabCfg("arc", [], ["dummy"])
+        mcc.writeMultiCrabCfg(aux.ValuePerMass(opts.injectNumberJobs))
+        if opts.multicrabCreate:
+            mcc.createMultiCrab()
+    else:
+        mcc.runCombineForAsymptotic(quietStatus=quietStatus)
+        return mcc.getResults()
+
 
 ## Class to generate (LEP-CLs, LHC-CLs) multicrab configuration, or run (LHC-CLs asymptotic) LandS
 #
@@ -286,6 +274,9 @@ class LHCTypeAsymptotic:
         self.blindedScripts = {}
         self.mlfitScripts = {}
         self.significanceScripts = {}
+        self.signalInjectionScripts = {}
+
+        self.configuration = {}
 
     ## Return the name of the CLs flavour (for serialization to configuration.json)
     def name(self):
@@ -298,8 +289,9 @@ class LHCTypeAsymptotic:
     ## Get the configuration dictionary for serialization.
     #
     # LHC-type asymptotic CLs does not need any specific information to be stored
-    def getConfiguration(self):
-        return None
+    def getConfiguration(self, mcconf):
+        self.multicrabConfiguration = mcconf
+        return self.configuration
 
     ## Clone the object, possibly overriding some options
     #
@@ -326,6 +318,8 @@ class LHCTypeAsymptotic:
             self._createBlinded(mass, datacardFiles)
         if self.opts.significance:
             self._createSignificance(mass, datacardFiles)
+        if self.opts.injectSignal:
+            self._createInjection(mass, datacardFiles)
 
     ## Create the observed and expected job script for a single mass point
     #
@@ -463,6 +457,91 @@ class LHCTypeAsymptotic:
         # command.append("combineReadSignificance.py -f %s -m %s -o significance.json" % (tmpfile, mass))
         aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.significanceScripts[mass] = fileName
+
+
+    def _createInjection(self, mass, datacardFiles):
+        if not self.brlimit:
+            raise Exception("Signal injection supported only for brlimit for now")
+        if len(datacardFiles) != 1:
+            raise Exception("Signal injection supported only for one datacard for now (got %d)" % len(datacardFiles))
+        if len(self.multicrabConfiguration["rootfiles"]) != 1:
+            raise Exception("Signal injection supported only for one root file for now (got %d)" % len(self.configuration["rootfiles"]))
+
+        fileName = "runCombine_LHCasy_SignalInjected_m" + mass
+
+        shutil.copy(os.path.join(os.environ["CMSSW_BASE"], "bin", os.environ["SCRAM_ARCH"], "combine"), self.dirname)
+        shutil.copy(os.path.join(os.environ["CMSSW_BASE"], "bin", os.environ["SCRAM_ARCH"], "text2workspace.py"), self.dirname)
+        shutil.copy(os.path.join(os.environ["CMSSW_BASE"], "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "scripts", "combineInjectSignalLight.py"), self.dirname)
+        tar = tarfile.open(os.path.join(self.dirname, "python.tar.gz"), mode="w:gz", dereference=True)
+        tar.add(os.path.join(os.environ["CMSSW_BASE"], "python"), arcname="python")
+        tar.close()
+
+        datacard = datacardFiles[0]
+        rootfile = self.multicrabConfiguration["rootfiles"][0] % mass
+        rootfileSignal = self.multicrabConfiguration["rootfiles"][0] % self.opts.injectSignalMass
+
+        rfs = ""
+        if rootfileSignal != rootfile:
+            rfs = rootfileSignal
+
+        command = """
+#!/bin/bash
+
+SEED_START=1
+NUMBER_OF_ITERATIONS={NTOYS}
+
+if [ $# -ge 1 ]; then
+    SEED_START=$(($1 * 10000))
+fi
+
+tar zxf python.tar.gz
+export PYTHONPATH=$PWD/python:$PYTHONPATH
+
+if [ ! -d original ]; then
+    mkdir original
+    mv {DATACARD} {ROOTFILE} {ROOTFILESIGNAL_OR_EMPTY} original
+fi
+
+function runcombine {{
+    ./combineInjectSignalLight.py --inputDatacard original/{DATACARD} --inputRoot original/{ROOTFILE} --inputRootSignal original/{ROOTFILESIGNAL} --outputDatacard {DATACARD} --outputRoot {ROOTFILE} --brtop {BRTOP} --brh {BRHPLUS} -s $1
+    ./text2workspace.py ./{DATACARD} -P HiggsAnalysis.CombinedLimit.ChargedHiggs:brChargedHiggs -o workspaceM{MASS}.root
+#    combine  -M Asymptotic --picky -v 2 --rAbsAcc 0.00001 --rMin 0 --rMax 1.0 -m {MASS} -n obs_m{MASS} -d workspaceM{MASS}.root
+    ./combine {OPTS} --rMin {RMIN} --rMax {RMAX} -m {MASS} -n inj_m{MASS} -d workspaceM{MASS}.root
+    mv higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.seed$1.root
+}}
+
+
+for ((I=0; I<$NUMBER_OF_ITERATIONS; I++)); do
+    runcombine $(($SEED_START+$I))
+done
+
+hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.seed*.root
+
+""".format(
+    DATACARD=datacard, ROOTFILE=rootfile, ROOTFILESIGNAL=rootfileSignal, ROOTFILESIGNAL_OR_EMPTY=rfs,
+    BRTOP=self.opts.injectSignalBRTop, BRHPLUS=self.opts.injectSignalBRHplus,
+    NTOYS=self.opts.injectNumberToys, MASS=mass,
+    OPTS=self.optionsObservedAndExpected.getValue(mass),
+    RMIN=self.rMin.getValue(mass),
+    RMAX=self.rMax.getValue(mass),
+)
+
+        if "signalInjection" not in self.configuration:
+            self.configuration["signalInjection"] = {
+                "mass": self.opts.injectSignalMass,
+                "brTop": self.opts.injectSignalBRTop,
+                "brHplus": self.opts.injectSignalBRHplus
+            }
+        if not os.path.exists(os.path.join(self.dirname, "limits.json")):
+            # Insert luminosity to limits.json already here
+            limits = {"luminosity": commonLimitTools.readLuminosityFromDatacard(self.dirname, datacard)}
+            f = open(os.path.join(self.dirname, "limits.json"), "w")
+            json.dump(limits, f, sort_keys=True, indent=2)
+            f.close()
+
+        aux.writeScript(os.path.join(self.dirname, fileName), command)
+        self.signalInjectionScripts[mass] = fileName
+
 
     ## Run LandS for the observed and expected limits for a single mass point
     #
@@ -608,6 +687,20 @@ class LHCTypeAsymptotic:
         f = open(jsonFile, "w")
         json.dump(result, f, sort_keys=True, indent=2)
         f.close()
+
+    def writeMultiCrabConfig(self, opts, output, mass, inputFiles, njobs):
+        if self.opts.injectSignal:
+            self.writeInjectedMultiCrabConfig(opts, output, mass, inputFiles, njobs)
+
+    def writeInjectedMultiCrabConfig(self, opts, output, mass, inputFiles, njobs):
+        inp = inputFiles[:]
+        if mass != str(opts.injectSignalMass):
+            inp.append(self.multicrabConfiguration["rootfiles"][0] % self.opts.injectSignalMass)
+        output.write("[Injected_m%s]\n" % mass)
+        output.write("USER.script_exe = %s\n" % self.signalInjectionScripts[mass])
+        output.write("USER.additional_input_files = text2workspace.py,combineInjectSignalLight.py,python.tar.gz,%s\n" % ",".join(inp))
+        output.write("CMSSW.number_of_jobs = %d\n" % njobs)
+        output.write("CMSSW.output_file = higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root\n".format(MASS=mass))
 
 def parseDiffNuisancesOutput(outputFileName, configFileName, mass):
     # first read nuisance types from datacards

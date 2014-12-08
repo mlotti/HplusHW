@@ -137,6 +137,11 @@ class RatioPlotContainer:
             elif i == myMaxSize-1:
                 myHeight = (myHeight*float(_cBodyHeight)+float(_cFooterHeight)) / float(_cFooterHeight +_cBodyHeight)
             histograms.addText(x=0.18, y=myHeight, text=myAllShapeNuisances[i], size=30)
+            myHeight = 0.08
+            if i == 0:
+                myHeight = myHeight*float(_cBodyHeight) / float(_cHeaderHeight+_cBodyHeight)
+            elif i == myMaxSize-1:
+                myHeight = (myHeight*float(_cBodyHeight)+float(_cFooterHeight)) / float(_cFooterHeight +_cBodyHeight)
             histograms.addText(x=0.93, y=myHeight, text=self._dsetName, size=30, align="right")
             # Header labels
             if i == 0:

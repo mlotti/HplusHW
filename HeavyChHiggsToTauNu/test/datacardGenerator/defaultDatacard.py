@@ -21,10 +21,11 @@ Path = "/home/wendland/data/test_2014-09-05"
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 #LightMassPoints      = [80,120,160]
 LightMassPoints      = [120]
-#LightMassPoints      = []
+LightMassPoints      = []
+
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
-#HeavyMassPoints      = [300]
+HeavyMassPoints      = [300]
 HeavyMassPoints      = []
 
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
@@ -53,6 +54,7 @@ OptionGenuineTauBackgroundSource = "DataDriven"                          # State
 #OptionGenuineTauBackgroundSource = "MC_FullSystematics"               # MC used, fake and genuine taus separated (use for embedding closure test)
 #OptionGenuineTauBackgroundSource = "MC_RealisticProjection"            # MC used, fake and genuine taus separated (can be used for optimization)
 
+OptionSeparateFakeTtbarFromFakeBackground = False # NOTE: this flag should be put true for light H+ and to false for heavy H+
 
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionTreatTriggerUncertaintiesAsAsymmetric = True # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
@@ -60,9 +62,9 @@ OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produce
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = True
+OptionDoControlPlots = not True
 OptionDoMergeFakeTauColumns = True # Merges the fake tau columns into one
-OptionCombineSingleColumnUncertainties = True # Makes limit running faster
+OptionCombineSingleColumnUncertainties = not True # Makes limit running faster
 OptionCtrlPlotsAtMt = True # Produce control plots after all selections (all selections for transverse mass)
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
@@ -81,7 +83,7 @@ OptionConvertFromShapeToConstantList = ["trg_tau","trg_tau_dataeff","trg_tau_MCe
                                         #"ES_taus", # tau ES
                                         #"b_tag", "b_tag_fakes", # btag
                                         "Emb_mu_ID", "Emb_WtauTomu", # embedding-specific
-                                        "Emb_reweighting", # other embedding-specific
+                                        #"Emb_reweighting", # other embedding-specific
                                         #"QCD_metshape", # multijets specific
                                         #"top_pt", # top pt reweighting
                                         "pileup", "pileup_fakes", # pileup
@@ -275,7 +277,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     EmbeddingIdList = [3]
     DataGroups.append(DataGroup(
         label        = "EWK_Tau",
-        landsProcess = 4,
+        landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
         #datasetDefinition   = ["SingleMu"],
@@ -287,10 +289,13 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     ))
 
     # EWK + ttbar with fake taus
-    mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
+    if not OptionSeparateFakeTtbarFromFakeBackground:
+        mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
+    else:
+        mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
-        landsProcess = 1,
+        landsProcess = 4,
         shapeHisto   = FakeShapeTTbarHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
@@ -359,7 +364,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         myEmbeddingShapeSystematics = myShapeSystematics[:]+["top_pt","e_mu_veto","b_tag","xsect_tt_8TeV","lumi"]
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_TTJets_MC",
-        landsProcess = 4,
+        landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
@@ -405,7 +410,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
     mergeColumnsByLabel.append({"label": "MC_EWKFakeTau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
-        landsProcess = 1,
+        landsProcess = 4,
         shapeHisto   = FakeShapeTTbarHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",

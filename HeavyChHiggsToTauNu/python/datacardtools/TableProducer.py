@@ -518,7 +518,7 @@ class TableProducer:
                                 elif self._opts.combine:
                                     myRow.append("-")
                             else:
-                                myRow.append("1")
+                                myRow.append("-")
                 if self._opts.lands:
                     # Add description to end of the row for LandS
                     if n.getId() in myVirtualMergeInformation.keys():

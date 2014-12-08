@@ -19,13 +19,14 @@ import aux
 
 ## Enumeration class for CMS text mode
 class CMSMode:
-    NONE = 0
-    PRELIMINARY = 1
-    PAPER = 2
-    UNPUBLISHED = 3
-    SIMULATION = 4
-    SIMULATION_PRELIMINARY = 5
-    SIMULATION_UNPUBLISHED = 6
+    class NONE: pass
+    class PRELIMINARY: pass
+    class PAPER: pass
+    class UNPUBLISHED: pass
+    class SIMULATION: pass
+    class SIMULATION_PRELIMINARY: pass
+    class SIMULATION_UNPUBLISHED: pass
+
 
 ## Global variable to hold CMS text mode
 cmsTextMode = CMSMode.PRELIMINARY
@@ -37,7 +38,7 @@ cmsText = {
     CMSMode.UNPUBLISHED: "Unpublished",
     CMSMode.SIMULATION : "Simulation",
     CMSMode.SIMULATION_PRELIMINARY : "Preliminary simulation",
-    CMSMode.SIMULATION_UNPUBLISHED : "Unpublished simulation"
+    CMSMode.SIMULATION_UNPUBLISHED: "Simulation unpublished",
     }
 
 ## Global uncertainty mode
