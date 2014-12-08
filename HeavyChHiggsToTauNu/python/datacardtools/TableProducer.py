@@ -43,7 +43,7 @@ def createBinByBinStatUncertHistograms(hRate, minimumStatUncertainty=0.5, xmin=N
             hDown.SetTitle(hDown.GetName())
             if hRate.GetBinContent(i) < minimumStatUncertainty:
                 hUp.SetBinContent(i, minimumStatUncertainty)
-                print ShellStyles.WarningLabel()+"Rate is zero for bin %d, setting up stat. uncert. to %f."%(i,minimumStatUncertainty)
+                print ShellStyles.WarningLabel()+"Rate is zero for bin %d, setting up stat. uncert. to %f for %s."%(i,minimumStatUncertainty,hRate.GetTitle())
                 if hRate.GetBinContent(i) < 0.0:
                     print ShellStyles.WarningLabel()+"Rate is negative for bin %d, continue at your own risk!"%i
             else:
@@ -121,7 +121,8 @@ class TableProducer:
         self._luminosity = luminosity
         self._observation = observation
         self._datasetGroups = datasetGroups
-        self._extractors = extractors
+        self._purgeColumnsWithSmallRateDoneStatus = False
+        self._extractors = extractors[:]
         self._timestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
         if self._opts.lands:
             self._outputFileStem = "lands_datacard_hplushadronic_m"
@@ -183,7 +184,13 @@ class TableProducer:
         f = open(os.path.join(self._infoDirname, "codeDiff.txt"), "w")
         f.write(git.getDiff()+"\n")
         f.close()
-
+        
+        self._extractors = extractors[:]
+        
+        # Create for each shape nuisance a variation 
+        if opts.testShapeSensitivity:
+            self._createDatacardsForShapeSensitivityTest()
+            
     ## Returns name of results directory
     def getDirectory(self):
         return self._dirname
@@ -192,7 +199,7 @@ class TableProducer:
     def makeDataCards(self):
 
         # For combine, do some formatting
-        if self._opts.combine:
+        if self._opts.combine and not self._purgeColumnsWithSmallRateDoneStatus:
             mySubtractAfterId = None
             mySmallestColumnId = 9
             # Find and remove empty column
@@ -285,6 +292,8 @@ class TableProducer:
 
     ## Purge columns with zero rate
     def _purgeColumnsWithSmallRate(self):
+        if self._purgeColumnsWithSmallRateDoneStatus:
+            return
         myLastUntouchableLandsProcessNumber = 0 # For sigma x br
         if not self._config.OptionLimitOnSigmaBr and (self._datasetGroups[0].getLabel()[:2] == "HW" or self._datasetGroups[1].getLabel()[:2] == "HW"):
             if self._opts.lands:
@@ -310,6 +319,7 @@ class TableProducer:
                 if int(c.getLandsProcess()) > int(i):
                     offset += 1
             c._landsProcess -= offset
+        self._purgeColumnsWithSmallRateDoneStatus = True
 
     ## Generates header of datacard
     def _generateHeader(self, mass=None):
@@ -347,14 +357,14 @@ class TableProducer:
         # Obtain observed number of events
         if self._observation == None:
             return "Observation    is not specified\n"
-        myObsCount = self._observation.getRateResult()
+        myObsCount = self._observation._rateResult._histograms[0].Integral()
         if self._opts.debugMining:
             print "  Observation is %d"%myObsCount
         if self._opts.lands:
             myResult = "Observation    %d\n"%myObsCount
         elif self._opts.combine:
             myResult =  "bin            taunuhadr\n"
-            if hasattr(self._config, "OptionSignalInjection"):
+            if hasattr(self._config, "OptionSignalInjection") or self._opts.testShapeSensitivity:
                 myResult += "observation    %f\n"%myObsCount
             else:
                 myResult += "observation    %d\n"%myObsCount
@@ -383,10 +393,10 @@ class TableProducer:
         myOffset = 0
         for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
             if c.isActiveForMass(mass,self._config):
-                myRow.append(str(c.getLandsProcess()+myOffset))
-            else:
                 if c.getLabel() == "res.": # Take into account that the empty column is no longer needed for sigma x Br limits
                     myOffset -= 1
+                else:
+                    myRow.append(str(c.getLandsProcess()+myOffset))
         myResult.append(myRow)
         return myResult
 
@@ -508,7 +518,7 @@ class TableProducer:
                                 elif self._opts.combine:
                                     myRow.append("-")
                             else:
-                                myRow.append("1")
+                                myRow.append("-")
                 if self._opts.lands:
                     # Add description to end of the row for LandS
                     if n.getId() in myVirtualMergeInformation.keys():
@@ -709,6 +719,7 @@ class TableProducer:
             # Initialize
             HH = None
             HW = None
+            HST = None # Single top signal
             QCD = None
             Embedding = None
             EWKFakes = None
@@ -722,6 +733,8 @@ class TableProducer:
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.getLabel().startswith("Hp"):
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                    elif c.getLabel().startswith("HST"):
+                        HST = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.typeIsQCD():
                         if QCD == None:
                             QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
@@ -749,6 +762,9 @@ class TableProducer:
             if HH != None:
                 HH.Scale(myBr**2)
                 HW.Add(HH)
+            if HST != None:
+                HST.Scale(myBr)
+                HW.Add(HST)
             # From this line on, HW includes all signal
             # Calculate expected yield
             TotalExpected = QCD.Clone()
@@ -1012,3 +1028,86 @@ class TableProducer:
         myFile.write(s.replace("#W#","Warning:"))
         myFile.close()
         h.IsA().Destructor(h)
+
+    ## Creates datacards with 0 +-1 -> 1 +- 0 shift for each shape nuisance
+    def _createDatacardsForShapeSensitivityTest(self):
+        myIdList = []
+        myBlackList = ["umerator","enominator"]
+        # Obtain list of shape nuisances
+        for e in self._extractors:
+            #print e.getId()
+            if e.isShapeNuisance() and e.getId() == e.getMasterId():
+                #print "***"
+                myIdList.append(e.getId())
+        # Loop over shape nuisances
+        myOriginalDirName = self._dirname
+        hOriginalObservationFinalHistogram = self._observation._rateResult.getFinalBinningHistograms()[0]
+        hOriginalObservationFineBinningHistogram = self._observation._rateResult.getFineBinnedHistograms()[0]
+        myOriginalExtractors = self._extractors[:]
+        # Calculate sum of backgrounds
+        hTmpFinal = aux.Clone(hOriginalObservationFinalHistogram)
+        hTmpFinal.Reset()
+        hTmpFine = aux.Clone(hOriginalObservationFineBinningHistogram)
+        hTmpFine.Reset()
+        hBkgSum = [hTmpFinal, hTmpFine]
+        #for h in hBkgSum:
+        #     print "DEBUG bkgsum: %s"%h.GetTitle()
+        for b in self._datasetGroups:
+            if b.typeIsEWK() or b.typeIsEWKfake() or b.typeIsQCD():
+                for i in range(0,len(hBkgSum)):
+                    hBkgSum[i].Add(b._rateResult._histograms[i])
+        # Create control
+        myOutList = []
+        self._extractors = myOriginalExtractors[:]
+        self._dirname = "%s_SHAPETEST_CONTROL"%(myOriginalDirName)
+        self._observation._rateResult._histograms = [hOriginalObservationFinalHistogram, hOriginalObservationFineBinningHistogram]
+        myControlIntegral = hBkgSum[0].Integral()
+        self._observation._result = myControlIntegral
+        myOutList.append("... shape sensitivity test CONTROL: obs integral = %f"%(myControlIntegral))
+        os.mkdir(self._dirname)
+        self.makeDataCards()
+        # Loop over shape nuisances
+        for direction in [0,1]:
+            dirStr = "UP"
+            if direction == 1:
+                dirStr = "DOWN"
+            for item in myIdList:
+                self._dirname = "%s_SHAPETEST_%s%s"%(myOriginalDirName, item, dirStr)
+                self._extractors = []
+                hBkgSumCloned = []
+                for h in hBkgSum:
+                    hh = aux.Clone(h)
+                    hBkgSumCloned.append(hh)
+                for e in myOriginalExtractors:
+                    if e.isShapeNuisance() and e.getMasterId() == item:
+                        # Replace observation by bkg rate sum + 1 sigma shift
+                        for b in self._datasetGroups:
+                            if b.typeIsEWK() or b.typeIsEWKfake() or b.typeIsQCD():
+                                #for result in b._nuisanceResults:
+                                #    print item,result.getMasterId()
+                                if b.hasNuisanceByMasterId(item):
+                                    myResult = b.getFullNuisanceResultByMasterId(item)
+                                    hBkgSumCloned[0].Add(myResult.getFinalBinningHistograms(blackList=myBlackList)[direction])
+                                    hBkgSumCloned[0].Add(b._rateResult.getFinalBinningHistograms(blackList=myBlackList)[0], -1.0)
+                                    hBkgSumCloned[1].Add(myResult.getFineBinnedHistograms(blackList=myBlackList)[direction])
+                                    hBkgSumCloned[1].Add(b._rateResult.getFineBinnedHistograms(blackList=myBlackList)[0], -1.0)
+                                    #for h in myResult.getFineBinnedHistograms(blackList=myBlackList):
+                                    #    print "DEBUG nuisance %s column %s dir %s: %s bins %d"%(item, b.getLabel(), dirStr, h.GetName(),h.GetNbinsX())
+                    else:
+                        self._extractors.append(e)
+                myOutList.append("... shape sensitivity test for %s%s: obs integral = %f (diff to ctrl: %f)"%(item, dirStr, hBkgSumCloned[0].Integral(), hBkgSumCloned[0].Integral()/myControlIntegral))
+                self._observation._rateResult._histograms = hBkgSumCloned[:]
+                self._observation._result = hBkgSumCloned[0].Integral()
+                print "shape sensitivity test %s, %s"%(item, dirStr)
+                os.mkdir(self._dirname)
+                self.makeDataCards()
+        # Revert
+        myOriginalDirName = self._dirname
+        self._observation._rateResult._histograms = [hOriginalObservationFinalHistogram, hOriginalObservationFineBinningHistogram]
+        self._observation._result = hOriginalObservationFinalHistogram.Integral()
+        self._extractors = myOriginalExtractors[:]
+        # Output
+        print "\nCreated datacards with 0 +-1 -> 1 +- 0 shift for each shape nuisance"
+        for item in myOutList:
+            print item
+        

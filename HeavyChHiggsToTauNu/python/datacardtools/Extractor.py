@@ -143,9 +143,13 @@ class ExtractorBase:
                 return i
         raise Exception(ErrorStyle()+"Error:"+ShellStyles.NormalStyle()+" Cannot find counter by name "+counterItem+"!")
 
-    ## Virtual method for extracking information
+    ## Virtual method for extracting information
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         return -1.0
+
+    ## Virtual method for extracting additional information (returns None if not implemented)
+    def extractAdditionalResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        return None
 
     ## Virtual method for extracting histograms
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -406,8 +410,8 @@ class RatioExtractor(ExtractorBase):
         myNumeratorCount = mainCounterTable.getCount(rowName=self._numeratorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         myDenominatorCount = mainCounterTable.getCount(rowName=self._denominatorCounterItem, colName=datasetColumn.getDatasetMgrColumn())
         # Protection against div by zero
-        if myDenominatorCount.value() == 0.0:
-            print ShellStyles.WarningLabel()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._counterItem+"') value is zero!"
+        if myNumeratorCount.value() == 0.0:
+            print ShellStyles.WarningLabel()+" In Nuisance with id='"+self._exid+"' for column '"+datasetColumn.getLabel()+"' denominator counter ('"+self._numeratorCounterItem+"') value is zero!"
             myResult = 0.0
         else:
             myResult = (myDenominatorCount.value() / myNumeratorCount.value() - 1.0) * self._scale
@@ -648,7 +652,110 @@ class ShapeVariationExtractor(ExtractorBase):
 
     ## Virtual method for printing debug information
     def printDebugInfo(self):
-        print "ShapeExtractor"
+        print "ShapeVariationExtractor"
+        ExtractorBase.printDebugInfo(self)
+
+## ShapeVariationSeparateShapeAndNormalization class
+# Extracts histogram shapes from up and down variation, but separates the shape and normalization to separate lines to datacard
+class ShapeVariationSeparateShapeAndNormalization(ExtractorBase):
+    ## Constructor
+    def __init__(self, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
+        self._systVariation = systVariation
+        if not "SystVar" in self._systVariation:
+            self._systVariation = "SystVar%s"%self._systVariation
+        if self.isRate() or self.isObservation():
+            raise Exception(ShellStyles.ErrorLabel()+"Rate or observation not allowed for ShapeVariationExtractor!"+ShellStyles.NormalStyle())
+
+    ## Method for extracting result
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
+        if not self._systVariation in myShapeUncertDict.keys():
+            return 0.0
+        # Tell Lands / Combine that the nuisance is active for the given column, histogram is added to input root file via extractHistograms()
+        return 1.0
+
+    ## Method for extracting additional result
+    def extractAdditionalResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
+        if not self._systVariation in myShapeUncertDict.keys():
+            print ShellStyles.ErrorLabel()+"Failed to extract systvariation '%s' from column '%s'!"%(self._systVariation,datasetColumn.getLabel())
+            print "Available syst.vars.:%s"%", ".join(map(str,myShapeUncertDict.keys()))
+            #datasetColumn.getCachedShapeRootHistogramWithUncertainties().Debug()
+            raise Exception()
+        # Calculate variations from integrals
+        (hSystUp, hSystDown) = myShapeUncertDict[self._systVariation]
+        myInt = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto().Integral()
+        myUpValue = hSystUp.Integral() / myInt
+        myDownValue = hSystDown.Integral() / myInt
+        # Normalize here to same area like in nominal histogram
+        myInt = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto().Integral()
+        hSystUp.Add(datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto())
+        hSystDown.Add(datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto())
+        hSystUp.Scale(myInt / hSystUp.Integral())
+        hSystDown.Scale(myInt / hSystDown.Integral())
+        hSystUp.Add(datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto(), -1.0)
+        hSystDown.Add(datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto(), -1.0)
+        #print myInt, hSystUp.Integral()+myInt, hSystDown.Integral()+myInt
+        #datasetColumn.getCachedShapeRootHistogramWithUncertainties().Debug()
+        # Construct end result
+        myUncertainty = ScalarUncertaintyItem(self._exid,plus=myUpValue*self._scaleFactor,minus=myDownValue*self._scaleFactor)
+        return myUncertainty
+
+    ## Virtual method for extracting histograms
+    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        # Obsolete
+        raise Exception("obsolete")
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "ShapeVariationExtractor"
+        ExtractorBase.printDebugInfo(self)
+
+
+## ShapeVariationToConstantExtractor class
+# Converts up and down variation histograms to asymmetric normalization uncertainty
+class ShapeVariationToConstantExtractor(ExtractorBase):
+    ## Constructor
+    def __init__(self, systVariation, mode = ExtractorMode.SHAPENUISANCE, exid = "", distribution = "shapeQ", description = "", opts=None, scaleFactor=1.0):
+        ExtractorBase.__init__(self, mode, exid, distribution, description, opts=opts, scaleFactor=scaleFactor)
+        self._systVariation = systVariation
+        if not "SystVar" in self._systVariation:
+            self._systVariation = "SystVar%s"%self._systVariation
+        if self.isRate() or self.isObservation():
+            raise Exception(ShellStyles.ErrorLabel()+"Rate or observation not allowed for ShapeVariationToConstantExtractor!"+ShellStyles.NormalStyle())
+
+    ## Method for extracking result
+    def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        myShapeUncertDict = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getShapeUncertainties()
+        if not self._systVariation in myShapeUncertDict.keys():
+            print ShellStyles.ErrorLabel()+"Failed to extract systvariation '%s' from column '%s'!"%(self._systVariation,datasetColumn.getLabel())
+            print "Available syst.vars.:%s"%", ".join(map(str,myShapeUncertDict.keys()))
+            #datasetColumn.getCachedShapeRootHistogramWithUncertainties().Debug()
+            raise Exception()
+        # Calculate variations from integrals
+        (hSystUp, hSystDown) = myShapeUncertDict[self._systVariation]
+        myInt = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto().Integral()
+        myUpValue = hSystUp.Integral() / myInt
+        myDownValue = hSystDown.Integral() / myInt
+        #print "DEBUG: syst.var.->scalar %s (%s): + %f - %f"%(self._systVariation,datasetColumn.getLabel(),myUpValue,myDownValue)
+        # Remove entry from syst variation
+        #print "DEBUG: remove %s from column %s"%(self._systVariation,datasetColumn.getLabel())
+        del myShapeUncertDict[self._systVariation]
+        hSystUp.Delete()
+        hSystDown.Delete()
+        # Construct end result
+        myUncertainty = ScalarUncertaintyItem(self._exid,plus=myUpValue*self._scaleFactor,minus=-myDownValue*self._scaleFactor)
+        return myUncertainty
+
+    ## Virtual method for extracting histograms
+    def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
+        # Must return an empty list only
+        return []
+
+    ## Virtual method for printing debug information
+    def printDebugInfo(self):
+        print "ShapeVariationToConstantExtractor"
         ExtractorBase.printDebugInfo(self)
 
 ## QCDShapeVariationExtractor class

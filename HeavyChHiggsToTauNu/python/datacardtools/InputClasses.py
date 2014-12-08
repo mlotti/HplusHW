@@ -109,6 +109,65 @@ class DataGroup:
 #            self.datagroups[key].Print()
 #        print
 
+## Converts a single or a bunch of nuisances by ID from syst. variation to norm. uncertainty
+def convertFromSystVariationToConstant(nuisanceList, name):
+    myList = []
+    if isinstance(name, str):
+        myList.append(name)
+    elif isinstance(name, list):
+        myList.extend(name)
+    else:
+        raise Exception()
+
+    for n in myList:
+        myFoundStatus = False
+        for item in nuisanceList:
+            if item.id == n:
+                myFoundStatus = True
+                item.setDistribution("lnN")
+                if item.function == "ShapeVariation":
+                    item.setFunction("ShapeVariationToConstant")
+                elif item.function == "ConstantToShape":
+                    item.function == "Constant"
+                else:
+                    raise Exception("Don't know what to do for function '%s'!"%item.function)
+        #if not myFoundStatus:
+        #    raise Exception("Error: cannot find name '%s' in nuisance names!"%n)
+    # Print remaining shape variations
+    print "\nShape uncertainties:"
+    for item in nuisanceList:
+        if item.distr == "shapeQ":
+            print "... %s"%item.id
+    print ""
+
+def separateShapeAndNormalizationFromSystVariation(nuisanceList, name):
+    myList = []
+    if isinstance(name, str):
+        myList.append(name)
+    elif isinstance(name, list):
+        myList.extend(name)
+    else:
+        raise Exception()
+
+    for n in myList:
+        myFoundStatus = False
+        for item in nuisanceList:
+            if item.id == n:
+                myFoundStatus = True
+                #item.setDistribution("lnN")
+                if item.function == "ShapeVariation":
+                    item.setFunction("ShapeVariationSeparateShapeAndNormalization")
+                else:
+                    raise Exception("Don't know what to do for function '%s'!"%item.function)
+        #if not myFoundStatus:
+        #    raise Exception("Error: cannot find name '%s' in nuisance names!"%n)
+    # Print remaining shape variations
+    print "\nShape and normalization uncertainties separated:"
+    for item in nuisanceList:
+        if item.distr == "shapeQ" and item.function == "ShapeVariationSeparateShapeAndNormalization":
+            print "... %s"%item.id
+    print ""
+    
 
 class Nuisance:
     def __init__(self,

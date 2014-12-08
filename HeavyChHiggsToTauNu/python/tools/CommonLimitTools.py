@@ -131,8 +131,11 @@ def getSoftware(directory="."):
             if item.endswith(".txt") and "%s_datacard"%value in item:
                 print "Datacards for limit calculation software '%s' auto-detected"%value
                 return (key,value)
-    raise Exception("Automatic detection of limit calculation software failed! Please run this script in the directory of the datacards!")
-
+              
+    
+    print "Automatic detection of limit calculation software failed! Assuming combine :)"
+    return (LimitSoftwareType.COMBINE, mySoftware[LimitSoftwareType.COMBINE])
+    
 ## Deduces from directory listing the mass point list
 def obtainMassPoints(pattern, directory):
     mass_re = re.compile(pattern%"(?P<mass>\S+)")
@@ -166,7 +169,8 @@ def readLuminosityFromDatacard(myPath, filename):
             myLuminosity = match.group("lumi")
             f.close()
             return myLuminosity
-    raise Exception("Did not find luminosity information from '%s'" % fname)
+    print "Did not find luminosity information from '%s', using 0" % fname
+    return 0.0
 
 ## Returns true if mass list contains only heavy H+
 def isHeavyHiggs(massList):
@@ -227,6 +231,23 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None, ful
                       help="Disable ML fit")
     parser.add_option("--nolimit", dest="limit", action="store_false", default=True,
                       help="Disable limit calculation (for e.g. just ML fit or significance)")
+    parser.add_option("--rmin", dest="rmin", action="store", default=None,
+                      help="minimum r parameter for finding limit")
+    parser.add_option("--rmax", dest="rmax", action="store", default=None,
+                      help="maximum r parameter for finding limit")
+
+    parser.add_option("--injectSignal", dest="injectSignal", action="store_true", default=False,
+                      help="Inject signal (implied by --injectSignalBRTop and --injectSignalBRHplus)")
+    parser.add_option("--injectSignalBRTop", dest="injectSignalBRTop", type="string", default="0.0",
+                      help="Inject signal with this BR(t -> H+)")
+    parser.add_option("--injectSignalBRHplus", dest="injectSignalBRHplus", type="string", default="0.0",
+                      help="Inject signal with this BR(H+ -> tau)")
+    parser.add_option("--injectSignalMass", dest="injectSignalMass", type="string", default=None,
+                      help="Inject signal with this mass")
+    parser.add_option("--injectNumberToys", dest="injectNumberToys", type="int", default=100,
+                      help="Number of toys per job for signal injection")
+    parser.add_option("--injectNumberJobs", dest="injectNumberJobs", type="int", default=10,
+                      help="Number of jobs per mass point for signal injection")
 
     return parser
 
@@ -264,6 +285,14 @@ def parseOptionParser(parser):
             raise Exception("Error: Please enable only --brlimit or --sigmabrlimit !")
         else:
             raise Exception("Error: Please enable --brlimit or --sigmabrlimit !")
+    if float(opts.injectSignalBRTop) > 0 or float(opts.injectSignalBRHplus) > 0:
+        opts.injectSignal = True
+    if opts.injectSignal:
+        if opts.injectSignalMass is None:
+            raise Exception("Signal injection enabled with --injectSignal, --injectSignalBRTop --injectSignalBRHplus, but injected mass point not specified with --injectSignalMass")
+        opts.nomlfit = False
+        opts.limit = False
+
     return opts
 
 ## Class to hold the limit results
@@ -346,7 +375,10 @@ class ResultContainer:
                 break
         f.close()
         if lumi == None:
-            raise Exception("Did not find luminosity information from '%s'" % fname)
+            #raise Exception("Did not find luminosity information from '%s'" % fname)
+            self.lumi = "0.0"
+            print "Did not find luminosity information from '%s', assuming 0.0" % fname
+            return
         if scale != None:
             lumi *= scale
         self.lumi = str(lumi)
@@ -475,7 +507,7 @@ class LimitMultiCrabBase:
             "codeVersion": git.getCommitId(),
             "clsType": self.clsType.name(),
         }
-        clsConfig = self.clsType.getConfiguration()
+        clsConfig = self.clsType.getConfiguration(self.configuration)
         if clsConfig != None:
             self.configuration["clsConfig"] = clsConfig
 
@@ -588,6 +620,8 @@ class LimitMultiCrabBase:
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")
         json.dump(self.configuration, f, sort_keys=True, indent=2)
         f.close()
+
+        print "Wrote multicrab.cfg to %s" % self.dirname
 
     ## Run 'multicrab create' inside the multicrab directory
     def createMultiCrab(self):

@@ -144,6 +144,23 @@ def getAndRebinNuisanceHistos(columnName, rootFile, nuisanceInfo, binlist):
                 myHistograms.append(h)
     return myHistograms
 
+def getAndRebinShapeSensitivityNuisanceHistos(columnName, rootFile, nuisanceName, binlist):
+    #mySuffixes = ["Up_fineBinning","Down_fineBinning"]
+    # Loop over nuisance info
+    for n in nuisanceInfo:
+        if n["name"] != "observation" and n["distribution"] == "shape" and n[columnName] == "1" and not "QCD_metshape" in n["name"]:
+            myName = "%s_%s_fineBinning"%(columnName,n["name"])
+            hOriginal = rootFile.Get(myName)
+            if hOriginal == None:
+                return None
+            myArray = array.array("d",binlist)
+            h = hOriginal.Rebin(len(myArray)-1, "", myArray)
+            hOriginal.Delete()
+            h.SetTitle(myName.replace("_fineBinning",""))
+            h.SetName(myName.replace("_fineBinning",""))
+            return h
+    return None
+
 def getAndRebinQCDShapeNuisanceHistos(columnName, rootFile, hRate, nuisanceInfo, binlist):
     if not "QCD" in columnName:
         return []
@@ -178,14 +195,17 @@ def getAndRebinQCDShapeNuisanceHistos(columnName, rootFile, hRate, nuisanceInfo,
 
 ## Calculates the shape nuisance histogram for the new binning
 ## Basic principle: keep relative uncertainty constant between unfitted and fitted distributions
-def updateNuisanceTail(hOriginalShape, hFittedShape, rootFile, histoName):
+def updateNuisanceTail(hOriginalShape, hFittedShape, rootFile, histoName, skipNotFoundTest=False):
     myList = []
     myPostfixes = ["Up","Down"]
     for postfix in myPostfixes:
         # Obtain original nuisance histogram
         hOriginalNuisance = rootFile.Get(histoName+postfix)
         if hOriginalNuisance == None:
-            raise Exception(ErrorLabel()+"Cannot open histogram '%s'!"%(histoName+postfix))
+            if skipNotFoundTest:
+                return []
+            else:
+                raise Exception(ErrorLabel()+"Cannot open histogram '%s'!"%(histoName+postfix))
         # Sanity check
         if hOriginalShape.GetNbinsX() != hOriginalNuisance.GetNbinsX():
             raise Exception("This should not happen")
@@ -253,12 +273,16 @@ def addBinByBinStatUncert(config, currentColumn, hRate, columnNames, nuisanceInf
             addNuisanceForIndividualColumn(columnNames,nuisanceInfo,currentColumn,myName)
     return myStatHistograms
 
-def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo, opts):
+def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo, opts, obsRate):
     myOutput = ""
     myObservedLine = ""
     for n in nuisanceInfo:
         if n["name"] == "observation":
-            myObservedLine = "observation    %d\n"%int(n["value"])
+            myValue = obsRate
+            if abs(myValue - round(myValue)) < 0.0001:
+                myObservedLine = "observation    %d\n"%int(myValue)
+            else:
+                myObservedLine = "observation    %f\n"%myValue
     myProcessLinePassed = False
     for l in originalCardLines:
         # write header lines
@@ -556,6 +580,8 @@ def main(opts):
 
     # Loop over mass points
     myDrawPlotsStatus = True
+    myShapeSensitivityTestStatus = False
+    myShapeSensitivityTestLabel = ""
     for m in massPoints:
         myHistogramCache = []
         # Obtain luminosity
@@ -579,6 +605,14 @@ def main(opts):
             for n in myNuisanceInfo:
                 if n["name"] == "observation":
                     n["value"] = hObs.Integral()
+        if "SHAPETEST" in myPath:
+            hObs.Reset()
+            myShapeSensitivityTestStatus = True
+            mySplit = myPath.split("_")
+            for i in range(0,len(mySplit)):
+                if mySplit[i] == "SHAPETEST":
+                    myShapeSensitivityTestLabel = "_".join(map(str,mySplit[i+1:len(mySplit)]))
+                    myShapeSensitivityTestLabel = myShapeSensitivityTestLabel.replace("UP","Up").replace("DOWN","Down")
         myHistogramCache.append(hObs)
         # Loop over column names
         for c in myColumnNames:
@@ -597,6 +631,13 @@ def main(opts):
                 # Create bin-by-bin stat. histograms for fitted distribution and update the nuisance table
                 myStatHistograms = addBinByBinStatUncert(config, c, hRate, myColumnNames, myNuisanceInfo, isSignal=True)
                 myHistogramCache.extend(myStatHistograms)
+                if myShapeSensitivityTestStatus and not _isSignal(c):
+                    hObs.Add(hRate) # Add the fitted histogram
+                    # Add the nuisance with proper binning
+                    for h in hNuisances:
+                        if myShapeSensitivityTestLabel in h.GetName():
+                            hObs.Add(h)
+                            hObs.Add(hRate, -1.0)
             else:
                 # Not signal or blacklist, do fit
                 hFineBinning = myRootFile.Get(c+"_fineBinning")
@@ -629,6 +670,24 @@ def main(opts):
                         #print "... Updating shape nuisance '%s' tail"%n["name"]
                         myUpdatedNuisanceHistograms = updateNuisanceTail(hOriginalShape, myFittedRateHistograms[0], myRootFile, "%s_%s"%(c,n["name"]))
                         myHistogramCache.extend(myUpdatedNuisanceHistograms)
+                if myShapeSensitivityTestStatus:
+                    # Check if the nuisance histograms exist for this column
+                    myHistoName = "%s_%s"%(c,myShapeSensitivityTestLabel.replace("Up","").replace("Down",""))
+                    myList = updateNuisanceTail(hOriginalShape, myFittedRateHistograms[0], myRootFile, myHistoName, skipNotFoundTest=True)
+                    #print "DEBUG",myHistoName,len(myList)
+                    if len(myList) > 0:
+                        # Add the nuisance with proper binning
+                        if "Up" in myShapeSensitivityTestLabel:
+                            hObs.Add(myList[0])
+                            #print "DEBUG: Added nuisance",myShapeSensitivityTestLabel,myList[0].GetName(),myList[0].Integral()
+                        elif "Down" in myShapeSensitivityTestLabel:
+                            hObs.Add(myList[1])
+                            #print "DEBUG: Added nuisance",myShapeSensitivityTestLabel,myList[1].GetName(),myList[1].Integral()
+                        else:
+                            raise Exception() # Should not happen
+                    else:
+                        hObs.Add(myFittedRateHistograms[0]) # Add the fitted histogram
+                        #print "DEBUG: Added",myFittedRateHistograms[0].Integral()
                 print "Updated shape nuisance tails (rel.uncert. kept constant, but central value changed to the fitted one)"
                 # Obtain fit uncertainty histograms and add them to cache
                 (huplist, hdownlist) = myFitter.calculateVariationHistograms(config.finalBinning["shape"], myFitSettings["applyFrom"])
@@ -638,7 +697,7 @@ def main(opts):
                     hFinalBinning = hFineBinning.Rebin(len(myArray)-1, "", myArray)
                     myFitter.makeVariationPlotDetailed("", hFinalBinning, myFittedRateHistograms[0], huplist, hdownlist)
                     (hupTotal, hdownTotal) = myFitter.calculateTotalVariationHistograms(myFittedRateHistograms[0], huplist, hdownlist)
-                    myFitter.makeVariationPlotSimple("", hFinalBinning, myFittedRateHistograms[0], hupTotal, hdownTotal)
+                    myFitter.makeVariationPlotSimple("", hFinalBinning, myFittedRateHistograms[0], hupTotal, hdownTotal, s["fitmin"])
                     # print total uncertainty
                     print "*** Syst. uncert. from fit: +",1.0-hupTotal.Integral()/myFittedRateHistograms[0].Integral(), "-", 1.0-hdownTotal.Integral()/myFittedRateHistograms[0].Integral()
 
@@ -677,6 +736,7 @@ def main(opts):
                 hFineBinning.Delete()
                 hOriginalShape.Delete()
         myDrawPlotsStatus = False
+        myObsIntegral = hObs.Integral()
         # Print summary info
         printSummaryInfo(myColumnNames, myNuisanceInfo, myHistogramCache, hObs, m, myLuminosity)
         # Histogram cache contains now all root files and nuisance table is now up to date
@@ -690,7 +750,7 @@ def main(opts):
         myRootFile.Write()
         myRootFile.Close()
         # Create new datacard file and write
-        myOutput = createDatacardOutput(myOriginalCardLines, myColumnNames, myNuisanceInfo, opts)
+        myOutput = createDatacardOutput(myOriginalCardLines, myColumnNames, myNuisanceInfo, opts, myObsIntegral)
         myFilename = myDatacardPattern%m
         myFile = open(myFilename, "w")
         myFile.write(myOutput)
