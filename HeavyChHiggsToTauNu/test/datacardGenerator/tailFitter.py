@@ -6,7 +6,8 @@ import sys
 import inspect
 from optparse import OptionParser
 import array
-from collections import OrderedDict
+#from collections import OrderedDict
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.OrderedDict import *
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
