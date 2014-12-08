@@ -375,7 +375,10 @@ class ResultContainer:
                 break
         f.close()
         if lumi == None:
-            raise Exception("Did not find luminosity information from '%s'" % fname)
+            #raise Exception("Did not find luminosity information from '%s'" % fname)
+            self.lumi = "0.0"
+            print "Did not find luminosity information from '%s', assuming 0.0" % fname
+            return
         if scale != None:
             lumi *= scale
         self.lumi = str(lumi)
