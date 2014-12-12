@@ -132,8 +132,8 @@ class BRXSDatabaseInterface:
     def brUncert(self,xaxisName,yaxisName,v,x,y,pm):
 
         gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
-        if v == "BR_tHpb":
-            gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD
+#        if v == "BR_tHpb":
+#            gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD
 
         tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
         br_i = tmpgraph.Eval(y)
