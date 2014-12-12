@@ -75,8 +75,8 @@ class BRXSDatabaseInterface:
                     uncert += self.xsecUncertOrig(xVariable,"tanb",v,m,tanb,pm)
                 else:
                     uncert += self.brUncert(xVariable,"tanb",v,m,tanb,pm)
-                    if v == "BR_tHpb":
-                        uncert += uncert_missing_HO_tt
+####                    if v == "BR_tHpb":
+####                        uncert += uncert_missing_HO_tt # this uncert is moved to datacards 12122014/SL
 
             modelIndependentLimit = modelIndependentLimit*(1+sign*uncert)
 
