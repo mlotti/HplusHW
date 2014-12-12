@@ -75,8 +75,8 @@ class BRXSDatabaseInterface:
                     uncert += self.xsecUncertOrig(xVariable,"tanb",v,m,tanb,pm)
                 else:
                     uncert += self.brUncert(xVariable,"tanb",v,m,tanb,pm)
-                    if v == "BR_tHpb":
-                        uncert += uncert_missing_HO_tt
+####                    if v == "BR_tHpb":
+####                        uncert += uncert_missing_HO_tt # this uncert is moved to datacards 12122014/SL
 
             modelIndependentLimit = modelIndependentLimit*(1+sign*uncert)
 
@@ -132,8 +132,8 @@ class BRXSDatabaseInterface:
     def brUncert(self,xaxisName,yaxisName,v,x,y,pm):
 
         gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
-        if v == "BR_tHpb":
-            gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD
+#        if v == "BR_tHpb":
+#            gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD
 
         tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
         br_i = tmpgraph.Eval(y)
@@ -157,6 +157,48 @@ class BRXSDatabaseInterface:
         br_uncert = br_uncert1 + br_uncert2
         #print "BR uncertainty",v,br_uncert                                                                                                            
         return br_uncert
+
+    def brUncert2(self,xaxisName,yaxisName,v,w,x,y,pm):
+        # usage: uncert = self.brUncert2("mHp","tanb","BR_Hp_taunu","BR_Hp_tb",Hp_mass,tanb,"+")
+
+        gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
+
+        #### first Gamma
+        tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
+        br_i = tmpgraph.Eval(y)
+
+        gamma_v = v.replace("BR","GAMMA")
+        tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
+        gamma_i = tmpgraph.Eval(y)
+
+        gammatot = gamma_i/br_i
+
+        #### second Gamma
+        tmpgraph = self.getGraph(yaxisName,w,"%s == %s"%(xaxisName,x))
+        br_j = tmpgraph.Eval(y)
+
+        gamma_w = w.replace("BR","GAMMA")
+        tmpgraph = self.getGraph(yaxisName,gamma_w,"%s == %s"%(xaxisName,x))
+        gamma_j = tmpgraph.Eval(y)
+
+        ####
+
+        sign = 1
+        if pm == "-":
+            sign = -1
+
+        br_prime1 = (gamma_i*(1+sign*gamma_uncert) + gamma_j)/ (gamma_i*(1+sign*gamma_uncert) + gamma_j + gammatot-gamma_i-gamma_j)
+        br_uncert1 = abs(br_prime1 - br_i - br_j) / (br_i + br_j)
+
+        br_prime2 = (gamma_i + gamma_j*(1+sign*gamma_uncert))/ (gamma_i + gamma_j*(1+sign*gamma_uncert) + gammatot-gamma_i-gamma_j)
+        br_uncert2 = abs(br_prime2 - br_i - br_j) / (br_i + br_j)
+
+        br_prime3 = (gamma_i + gamma_j)/ (gamma_i + gamma_j + (gammatot-gamma_i-gamma_j)*(1+sign*gamma_uncert))
+        br_uncert3 = abs(br_prime3 - br_i - br_j) / (br_i + br_j)
+
+        br_uncert = br_uncert1 + br_uncert2 + br_uncert3
+        return br_uncert
+
         
     def setSelection(self,selection):
 	self.selection = selection
