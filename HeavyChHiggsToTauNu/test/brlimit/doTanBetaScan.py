@@ -158,6 +158,22 @@ class BrContainer:
                 if dmkey not in self._brkeys:
                     self._brkeys[dmkey] = array.array('d',[0])
 
+    def getDatacardPatterns(self):
+        myList = []
+        for fskey in self._decayModeMatrix.keys():
+            # Get only the first decay mode key 
+            myFirstDMKey = self._decayModeMatrix[fskey].keys()[0]
+            myList.append(self._decayModeMatrix[fskey][myFirstDMKey][0])
+        return myList
+      
+    def getRootfilePatterns(self):
+        myList = []
+        for fskey in self._decayModeMatrix.keys():
+            # Get only the first decay mode key 
+            myFirstDMKey = self._decayModeMatrix[fskey].keys()[0]
+            myList.append(self._decayModeMatrix[fskey][myFirstDMKey][1])
+        return myList
+
     def _readFromDatabase(self, mHp, tanbeta):
         #if not os.path.exists(self._datacardPatterns[0]%mHp):
         #    raise Exception("Error: no support for template morphing between mass points; use one of the mass points!")
@@ -326,7 +342,6 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
         # Result does not exist, let's calculate it
         # Produce cards
         brContainer.produceScaledCards(mHp, tanbeta)
-        raise Exception()
         # Run Combine
         resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=[mHp],
             datacardPatterns = brContainer.getDatacardPatterns(),
