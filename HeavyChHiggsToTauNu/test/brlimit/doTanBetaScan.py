@@ -486,7 +486,7 @@ def main(opts, brContainer, m, scen, plotContainers):
         if opts.analyseOutput:
             readResults(opts, brContainer, m, myKey, scen)
         else:
-            scanRanges(opts, brContainer, m, 1.0, 8.0, myKey, scen)
+            scanRanges(opts, brContainer, m, 1.1, 8.0, myKey, scen)
             scanRanges(opts, brContainer, m, 8.0, 75, myKey, scen)
     
     outtxt = ""
