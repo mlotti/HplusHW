@@ -625,7 +625,7 @@ if __name__ == "__main__":
     if opts.rmin == None:
         opts.rmin = "0"
     if opts.rmax == None:
-        opts.rmax = "1000" # To facilitate the search for different tan beta values
+        opts.rmax = "10" # To facilitate the search for different tan beta values
     
     # MSSM scenario settings
     myScenarios = ["mhmaxup", "mhmodm", "mhmodp", "lightstau", "lightstop", "tauphobic"]
