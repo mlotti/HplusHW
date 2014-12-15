@@ -26,7 +26,7 @@ _CommonNuisanceReplaces["trg_muon_dataeff"] = "CMS_trg_mu_dataEff"
 
 _MinimumStatUncertByBkg = {}
 _MinimumStatUncertByBkg["st"] = 0.45
-_MinimumStatUncertByBkg["wjets"] = 10 # 40 would be the proper number
+_MinimumStatUncertByBkg["wjets"] = 10
 _MinimumStatUncertByBkg["dy"] = 2.3
 _MinimumStatUncertByBkg["Ztt"] = 2.3
 _MinimumStatUncertByBkg["Zeemm"] = 2.3
@@ -348,8 +348,8 @@ def hplusTbToTauMu(myDir, doCorrelation, nobtagcorr):
     if doCorrelation:
         #myMgr.replaceNuisanceValue("CMS_eff_t", "1.060", "CMS_Hptbmt_Ztt")
         myMgr.replaceNuisanceValue("CMS_eff_t", "-", ["CMS_Hptbmt_taufake","CMS_Hptbmt_Zeemm","CMS_Hptbmt_ttll"])
-        myMgr.replaceNuisanceValue("CMS_fake_jetToTau", "-", ["CMS_Hptbmt_Hptn","CMS_Hptbmt_taufake","CMS_Hptbmt_ttltau","CMS_Hptbmt_singleTop","CMS_Hptbmt_vv","CMS_Hptbmt_Ztt"])
-        myMgr.replaceNuisanceValue("CMS_Hptbmt_fakebkg_syst", "-", ["CMS_Hptbmt_Hptn","CMS_Hptbmt_ttltau","CMS_Hptbmt_ttll","CMS_Hptbmt_singleTop","CMS_Hptbmt_vv","CMS_Hptbmt_Ztt","CMS_Hptbmt_Zeemm"])
+        myMgr.replaceNuisanceValue("CMS_fake_jetToTau", "-", ["CMS_Hptbmt_Hptb","CMS_Hptbmt_taufake","CMS_Hptbmt_ttltau","CMS_Hptbmt_singleTop","CMS_Hptbmt_vv","CMS_Hptbmt_Ztt"])
+        myMgr.replaceNuisanceValue("CMS_Hptbmt_fakebkg_syst", "-", ["CMS_Hptbmt_Hptb","CMS_Hptbmt_ttltau","CMS_Hptbmt_ttll","CMS_Hptbmt_singleTop","CMS_Hptbmt_vv","CMS_Hptbmt_Ztt","CMS_Hptbmt_Zeemm"])
         myMgr.replaceNuisanceValue("CMS_eff_m", "-", "CMS_Hptbmt_taufake")
         myMgr.replaceNuisanceValue("lumi_8TeV", "-", "CMS_Hptbmt_taufake")
         myMgr.replaceNuisanceValue("pileup", "-", "CMS_Hptbmt_taufake")
@@ -472,7 +472,7 @@ if __name__ == "__main__":
     
     # tau jets
     hplusTauNuToTauJets(myDir, doCorrelation=doCorrelation, nobtagcorr=nobtagcorr)
-    sys.exit()
+    
     # tau nu decay mode
     hplusTauNuToTauMu(myDir, doCorrelation=doCorrelation, nobtagcorr=nobtagcorr)
     

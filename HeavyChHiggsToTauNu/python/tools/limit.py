@@ -560,10 +560,12 @@ class MLFitData:
 ###
         labels2 = content["nuisanceParameters"]
         for nuis in labels2:             
-            if "Hp" in nuis:
-                del labels2[labels2.index(nuis)]
-                continue               
-            if not nuis in content or content[nuis]["type"] != "shapeStat":
+            #if "Hp" in nuis:
+                #del labels2[labels2.index(nuis)]
+                #continue               
+            #if not nuis in content or content[nuis]["type"] != "shapeStat":
+                #continue
+            if not "statBin" in nuis:
                 continue
 ###
 
