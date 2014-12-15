@@ -14,10 +14,12 @@ uncert_deltab          = 0.03
 uncert_missing_HO_tt   = 0.03
 
 class BRXSDatabaseInterface:
-    def __init__(self,rootfile):
-        print "BRXSDatabaseInterface: reading file",rootfile
-	self.rootfile  = rootfile
-	self.fIN       = ROOT.TFile.Open(rootfile)
+    def __init__(self,rootfile, silentStatus=False):
+        self.silentStatus = silentStatus
+        if not self.silentStatus:
+            print "BRXSDatabaseInterface: reading file",rootfile
+        self.rootfile  = rootfile
+        self.fIN       = ROOT.TFile.Open(rootfile)
 	self.program   = "FeynHiggs"
 	self.selection = ""
 
@@ -38,6 +40,10 @@ class BRXSDatabaseInterface:
             branch.SetAddress(variable)
             self.variables.append(variable)
             self.names.append(branch.GetName())
+
+    def __delete__(self):
+        if self.fIn != None:
+            self.fIn.Close()
 
     def getTheorUncert(self,graph,xVariable,selection,pm):
 
@@ -94,6 +100,7 @@ class BRXSDatabaseInterface:
         uncert = uncert_deltab
         tmpgraph = self.getGraph(yaxisName,"tHp_xsec","%s == %s"%(xaxisName,x))
         sigma = tmpgraph.Eval(y)
+        tmpgraph.Delete()
 
         if pm == "+":
             xsecname = "tHp_xsec_plusErr"
@@ -102,6 +109,7 @@ class BRXSDatabaseInterface:
 
         tmpgraph = self.getGraph(yaxisName,xsecname,"%s == %s"%(xaxisName,x))
         sigma_prime = tmpgraph.Eval(y)
+        tmpgraph.Delete()
 
         uncert += abs(sigma_prime - sigma) / sigma
         #print "xsec",sigma_prime,sigma,x,y,uncert                                                                                                     
@@ -123,6 +131,7 @@ class BRXSDatabaseInterface:
 
         tmpgraph = self.getGraph(yaxisName,xsecname,"%s == %s"%(xaxisName,x))
         sigma_prime = tmpgraph.Eval(y)
+        tmpgraph.Delete()
 
         uncert += sigma_prime / sigma
 
@@ -137,10 +146,12 @@ class BRXSDatabaseInterface:
 
         tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
         br_i = tmpgraph.Eval(y)
+        tmpgraph.Delete()
 
         gamma_v = v.replace("BR","GAMMA")
         tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
         gamma_i = tmpgraph.Eval(y)
+        tmpgraph.Delete()
 
         gammatot = gamma_i/br_i
 
@@ -166,20 +177,24 @@ class BRXSDatabaseInterface:
         #### first Gamma
         tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
         br_i = tmpgraph.Eval(y)
+        tmpgraph.Delete()
 
         gamma_v = v.replace("BR","GAMMA")
         tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
         gamma_i = tmpgraph.Eval(y)
+        tmpgraph.Delete()
 
         gammatot = gamma_i/br_i
 
         #### second Gamma
         tmpgraph = self.getGraph(yaxisName,w,"%s == %s"%(xaxisName,x))
         br_j = tmpgraph.Eval(y)
+        tmpgraph.Delete()
 
         gamma_w = w.replace("BR","GAMMA")
         tmpgraph = self.getGraph(yaxisName,gamma_w,"%s == %s"%(xaxisName,x))
         gamma_j = tmpgraph.Eval(y)
+        tmpgraph.Delete()
 
         ####
 
