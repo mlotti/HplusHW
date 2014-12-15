@@ -486,6 +486,11 @@ def main(opts, brContainer, m, scen, plotContainers):
         if opts.analyseOutput:
             readResults(opts, brContainer, m, myKey, scen)
         else:
+            # Force calculation of few first points
+            getCombineResultPassedStatus(opts, brContainer, mHp, 1.1, myKey, scen)
+            getCombineResultPassedStatus(opts, brContainer, mHp, 1.2, myKey, scen)
+            getCombineResultPassedStatus(opts, brContainer, mHp, 1.3, myKey, scen)
+            getCombineResultPassedStatus(opts, brContainer, mHp, 1.4, myKey, scen)
             scanRanges(opts, brContainer, m, 1.1, 8.0, myKey, scen)
             scanRanges(opts, brContainer, m, 8.0, 75, myKey, scen)
     
