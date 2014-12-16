@@ -398,12 +398,10 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
     else:
         reuseStatus = True
     myContainer = None
-    if brContainer.resultExists(tanbeta):
-        myContainer = brContainer
-    elif tbContainer.resultExists(tanbeta):
-        myContainer = tbContainer
-    else:
-        raise Exception("No datacards present")
+    #if brContainer.resultExists(tanbeta):
+        #myContainer = brContainer
+    #else:
+        #raise Exception("No datacards present")
     
     # Print output
     s = "- mHp=%s, tanbeta=%.1f, sigmaTheory=%.3f"%(mHp, tanbeta, myContainer.getResult(tanbeta)["sigmaTheory"])
