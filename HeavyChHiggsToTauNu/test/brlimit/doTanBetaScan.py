@@ -341,8 +341,7 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
     reuseStatus = False
     if not brContainer.resultExists(tanbeta):
         # Produce cards
-        brContainer.produceScaledCards(mHp, tanbeta)
-        
+        brContainer._readFromDatabase(mHp, tanbeta)
         myPostFix = "lhcasy_%s_mHp%s_tanbetascan%.1f"%(scen,mHp,tanbeta)
         myList = os.listdir(".")
         myList.sort()
