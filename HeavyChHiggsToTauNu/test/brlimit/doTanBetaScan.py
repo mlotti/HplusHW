@@ -53,7 +53,7 @@ class TanBetaResultContainer:
         if not resultKey in self._resultsHigh.keys():
             self._resultsHigh[resultKey] = {}
             for m in self._massPoints:
-                self._resultsHigh[resultKey][m] = 75.0
+                self._resultsHigh[resultKey][m] = 70.0
         if tanbetalimit != None:
             #if mass in self._resultsHigh[resultKey].keys():
             #    print "Warning: overriding low limit for (%s) / m=%s / %s"%(self._mssmModel, mass, resultKey)
@@ -492,7 +492,7 @@ def main(opts, brContainer, m, scen, plotContainers):
             getCombineResultPassedStatus(opts, brContainer, m, 1.3, myKey, scen)
             getCombineResultPassedStatus(opts, brContainer, m, 1.4, myKey, scen)
             scanRanges(opts, brContainer, m, 1.1, 8.0, myKey, scen)
-            scanRanges(opts, brContainer, m, 8.0, 75, myKey, scen)
+            scanRanges(opts, brContainer, m, 8.0, 70, myKey, scen)
     
     outtxt = ""
     # Print results
