@@ -339,23 +339,61 @@ class BrContainer:
 def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, scen):
     reuseStatus = False
     if not brContainer.resultExists(tanbeta):
-        # Result does not exist, let's calculate it
-        # Produce cards
-        brContainer.produceScaledCards(mHp, tanbeta)
-        # Run Combine
-        resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=[mHp],
-            datacardPatterns = brContainer.getDatacardPatterns(),
-            rootfilePatterns = brContainer.getRootfilePatterns(),
-            clsType = combine.LHCTypeAsymptotic(opts),
-            postfix = "lhcasy_%s_mHp%s_tanbetascan%.1f"%(scen,mHp,tanbeta),
-            quietStatus = True)
-        if len(resultContainer.results) > 0:
-            result = resultContainer.results[0]
-            # Add theoretical uncertainty
-            result.observedPlusTheorUncert = result.observed * (1.0 + _theoreticalUncertainty)
-            result.observedMinusTheorUncert = result.observed * (1.0 - _theoreticalUncertainty)
-            # Store result
-            brContainer.setCombineResult(tanbeta, result)
+        myPostFix = "lhcasy_%s_mHp%s_tanbetascan%.1f"%(scen,mHp,tanbeta)
+        myList = os.listdir(".")
+        myList.sort()
+        myResultDir = None
+        myResultFound = False
+        for item in myList:
+            if myPostFix in item:
+                myResultDir = item
+        if myResultDir != None:
+            myList = os.listdir("./%s"%myResultDir)
+            for item in myList:
+                if item.startswith("higgsCombineobs"):
+                    f = TFile.Open(item)
+                    myTree = f.Get("limit")
+                    myValue = array.array('d',[0])
+                    myTree.SetBranchAddress("limit", myValue)
+                    myResult = commonLimitTools.Result(mHp)
+                    if myTree.GetEntries() != 6
+                        myResult.failed = True
+                    else:
+                        myResult.failed = False
+                        i = 0
+                        while i < myTree.GetEntries():
+                            myTree.GetEvent(i)
+                            if i == 0:
+                                myResult.expectedMinus2Sigma = myValue[0]
+                            elif i == 1:
+                                myResult.expectedMinus1Sigma = myValue[0]
+                            elif i == 2:
+                                myResult.expected = myValue[0]
+                            elif i == 3:
+                                myResult.expectedPlus1Sigma = myValue[0]
+                            elif i == 4:
+                                myResult.expectedPlus2Sigma = myValue[0]
+                            elif i == 5:
+                                myResult.observed = myValue[0]
+                            i += 1
+                    f.Close()
+                    myResultFound = True
+                    brContainer.setCombineResult(tanbeta, myResult)
+        if not myResultFound:
+            # Result does not exist, let's calculate it
+            # Produce cards
+            brContainer.produceScaledCards(mHp, tanbeta)
+            # Run Combine
+            resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=[mHp],
+                datacardPatterns = brContainer.getDatacardPatterns(),
+                rootfilePatterns = brContainer.getRootfilePatterns(),
+                clsType = combine.LHCTypeAsymptotic(opts),
+                postfix = myPostFix,
+                quietStatus = True)
+            if len(resultContainer.results) > 0:
+                result = resultContainer.results[0]
+                # Store result
+                brContainer.setCombineResult(tanbeta, result)
     else:
         reuseStatus = True
     myContainer = None
@@ -480,19 +518,23 @@ def linearCrossOverOfTanBeta(container, tblow, tbhigh, resultKey):
     return tbinterpolation
 
 def main(opts, brContainer, m, scen, plotContainers):
-    resultKeys = ["observed", "observedPlusTheorUncert", "observedMinusTheorUncert", "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]
+    resultKeys = ["observed",  "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]
     #resultKeys = ["observed","expected"]
     for myKey in resultKeys:
         if opts.analyseOutput:
             readResults(opts, brContainer, m, myKey, scen)
         else:
             # Force calculation of few first points
-            getCombineResultPassedStatus(opts, brContainer, m, 1.1, myKey, scen)
-            getCombineResultPassedStatus(opts, brContainer, m, 1.2, myKey, scen)
-            getCombineResultPassedStatus(opts, brContainer, m, 1.3, myKey, scen)
-            getCombineResultPassedStatus(opts, brContainer, m, 1.4, myKey, scen)
-            scanRanges(opts, brContainer, m, 1.1, 8.0, myKey, scen)
-            scanRanges(opts, brContainer, m, 8.0, 70, myKey, scen)
+            if len(opts.tanbeta) > 0:
+                for tb in opts.tanbeta:
+                    getCombineResultPassedStatus(opts, brContainer, m, float(tb), myKey, scen)
+            else:
+                getCombineResultPassedStatus(opts, brContainer, m, 1.1, myKey, scen)
+                getCombineResultPassedStatus(opts, brContainer, m, 1.2, myKey, scen)
+                getCombineResultPassedStatus(opts, brContainer, m, 1.3, myKey, scen)
+                getCombineResultPassedStatus(opts, brContainer, m, 1.4, myKey, scen)
+                scanRanges(opts, brContainer, m, 1.1, 8.0, myKey, scen)
+                scanRanges(opts, brContainer, m, 8.0, 70, myKey, scen)
     
     outtxt = ""
     # Print results
@@ -622,6 +664,7 @@ if __name__ == "__main__":
     parser = commonLimitTools.createOptionParser(False, False, True)
     parser.add_option("--analyseOutput", dest="analyseOutput", action="store_true", default=False, help="Read only output and print summary")
     parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
+    parser.add_option("--tanbeta", dest="tanbeta", action="append", default=[], help="tanbeta values (will scan only these)")
     opts = commonLimitTools.parseOptionParser(parser)
     if opts.rmin == None:
         opts.rmin = "0"
