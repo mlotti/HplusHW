@@ -377,9 +377,9 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
                             elif i == 5:
                                 myResult.observed = myValue[0]
                             i += 1
+                        myResultFound = True
+                        brContainer.setCombineResult(tanbeta, myResult)
                     f.Close()
-                    myResultFound = True
-                    brContainer.setCombineResult(tanbeta, myResult)
         if not myResultFound:
             # Result does not exist, let's calculate it
             # Produce cards
