@@ -356,7 +356,7 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
                     myValue = array.array('d',[0])
                     myTree.SetBranchAddress("limit", myValue)
                     myResult = commonLimitTools.Result(mHp)
-                    if myTree.GetEntries() != 6
+                    if myTree.GetEntries() != 6:
                         myResult.failed = True
                     else:
                         myResult.failed = False
