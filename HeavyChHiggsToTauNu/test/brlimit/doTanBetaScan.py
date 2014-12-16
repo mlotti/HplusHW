@@ -621,6 +621,7 @@ if __name__ == "__main__":
 
     parser = commonLimitTools.createOptionParser(False, False, True)
     parser.add_option("--analyseOutput", dest="analyseOutput", action="store_true", default=False, help="Read only output and print summary")
+    parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
     opts = commonLimitTools.parseOptionParser(parser)
     if opts.rmin == None:
         opts.rmin = "0"
@@ -629,6 +630,9 @@ if __name__ == "__main__":
     
     # MSSM scenario settings
     myScenarios = ["mhmaxup", "mhmodm", "mhmodp", "lightstau", "lightstop", "tauphobic"]
+    if len(opts.scenarios) > 0:
+        myScenarios = opts.scenarios[:]
+    
     myPlots = {}
     #myScenarios = ["mhmaxup"]
     
