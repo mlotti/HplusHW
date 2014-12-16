@@ -405,7 +405,7 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
     
     # Print output
     s = "- mHp=%s, tanbeta=%.1f, sigmaTheory=%.3f"%(mHp, tanbeta, brContainer.getResult(tanbeta)["sigmaTheory"])
-    if myContainer.getFailedStatus(tanbeta):
+    if brContainer.getFailedStatus(tanbeta):
         s += " sigmaCombine (%s)=failed"%resultKey
     else:
         s += " sigmaCombine (%s)=%.3f, passed=%d"%(resultKey, brContainer.getCombineResultByKey(tanbeta, resultKey), brContainer.getPassedStatus(tanbeta, resultKey))
