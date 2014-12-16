@@ -341,7 +341,6 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
     reuseStatus = False
     if not brContainer.resultExists(tanbeta):
         # Produce cards
-        brContainer._readFromDatabase(mHp, tanbeta)
         myPostFix = "lhcasy_%s_mHp%s_tanbetascan%.1f"%(scen,mHp,tanbeta)
         myList = os.listdir(".")
         myList.sort()
@@ -380,10 +379,12 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
                                 myResult.observed = myValue[0]
                             i += 1
                         myResultFound = True
+                        brContainer._readFromDatabase(mHp, tanbeta)
                         brContainer.setCombineResult(tanbeta, myResult)
                     f.Close()
         if not myResultFound:
             # Result does not exist, let's calculate it
+            brContainer.produceScaledCards(mHp, tanbeta)
             # Run Combine
             resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=[mHp],
                 datacardPatterns = brContainer.getDatacardPatterns(),
