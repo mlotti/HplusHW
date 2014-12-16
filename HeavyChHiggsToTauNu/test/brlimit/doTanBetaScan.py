@@ -23,7 +23,8 @@ import os
 import array
 
 _resultFilename = "results.txt"
-_theoreticalUncertainty = 0.32
+_theoreticalUncertainty = 0.32 # OBSOLETE
+_maxTanBeta = 69.0
 
 class TanBetaResultContainer:
     def __init__(self, mssmModel, massPoints):
@@ -53,7 +54,7 @@ class TanBetaResultContainer:
         if not resultKey in self._resultsHigh.keys():
             self._resultsHigh[resultKey] = {}
             for m in self._massPoints:
-                self._resultsHigh[resultKey][m] = 70.0
+                self._resultsHigh[resultKey][m] = _maxTanBeta
         if tanbetalimit != None:
             #if mass in self._resultsHigh[resultKey].keys():
             #    print "Warning: overriding low limit for (%s) / m=%s / %s"%(self._mssmModel, mass, resultKey)
@@ -534,7 +535,7 @@ def main(opts, brContainer, m, scen, plotContainers):
                 getCombineResultPassedStatus(opts, brContainer, m, 1.3, myKey, scen)
                 getCombineResultPassedStatus(opts, brContainer, m, 1.4, myKey, scen)
                 scanRanges(opts, brContainer, m, 1.1, 8.0, myKey, scen)
-                scanRanges(opts, brContainer, m, 8.0, 70, myKey, scen)
+                scanRanges(opts, brContainer, m, 8.0, _maxTanBeta, myKey, scen)
     
     outtxt = ""
     # Print results
