@@ -398,24 +398,23 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
                 brContainer.setCombineResult(tanbeta, result)
     else:
         reuseStatus = True
-    myContainer = None
     #if brContainer.resultExists(tanbeta):
         #myContainer = brContainer
     #else:
         #raise Exception("No datacards present")
     
     # Print output
-    s = "- mHp=%s, tanbeta=%.1f, sigmaTheory=%.3f"%(mHp, tanbeta, myContainer.getResult(tanbeta)["sigmaTheory"])
+    s = "- mHp=%s, tanbeta=%.1f, sigmaTheory=%.3f"%(mHp, tanbeta, brContainer.getResult(tanbeta)["sigmaTheory"])
     if myContainer.getFailedStatus(tanbeta):
         s += " sigmaCombine (%s)=failed"%resultKey
     else:
-        s += " sigmaCombine (%s)=%.3f, passed=%d"%(resultKey, myContainer.getCombineResultByKey(tanbeta, resultKey), myContainer.getPassedStatus(tanbeta, resultKey))
+        s += " sigmaCombine (%s)=%.3f, passed=%d"%(resultKey, brContainer.getCombineResultByKey(tanbeta, resultKey), brContainer.getPassedStatus(tanbeta, resultKey))
     if not reuseStatus:
         print s
     # return limit from combine
-    if myContainer.getFailedStatus(tanbeta):
+    if brContainer.getFailedStatus(tanbeta):
         return None
-    return myContainer.getPassedStatus(tanbeta, resultKey)
+    return brContainer.getPassedStatus(tanbeta, resultKey)
 
 def findMiddlePoint(tanbetaMin, tanbetaMax):
     a = (tanbetaMax + tanbetaMin) / 2.0
