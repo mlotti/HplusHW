@@ -352,7 +352,7 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
             myList = os.listdir("./%s"%myResultDir)
             for item in myList:
                 if item.startswith("higgsCombineobs"):
-                    f = TFile.Open(item)
+                    f = ROOT.TFile.Open(item)
                     myTree = f.Get("limit")
                     myValue = array.array('d',[0])
                     myTree.SetBranchAddress("limit", myValue)
