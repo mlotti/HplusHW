@@ -20,6 +20,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 
 import os
+import sys
 import array
 
 _resultFilename = "results.txt"
@@ -114,31 +115,34 @@ class TanBetaResultContainer:
         graphs["exp1"] = self._getResultGraphForTwoKeys("expectedPlus1Sigma", "expectedMinus1Sigma")
         graphs["exp2"] = self._getResultGraphForTwoKeys("expectedPlus2Sigma", "expectedMinus2Sigma")
         graphs["obs"] = self._getResultGraphForOneKey("observed")
-        graphs["obs_th_plus"] = self._getResultGraphForOneKey("observedPlusTheorUncert")
-        graphs["obs_th_minus"] = self._getResultGraphForOneKey("observedMinusTheorUncert")
         myName = "%s-LHCHXSWG.root"%self._mssmModel
         if not os.path.exists(myName):
             raise Exception("Error: Cannot find file '%s'!"%myName)
         db = BRXSDB.BRXSDatabaseInterface(myName)
         graphs["Allowed"] = db.mhLimit("mh","mHp","mHp > 0","125.0+-3.0")
+        db.close()
         if self._mssmModel == "tauphobic":
-            # Fix a buggy second upper limit (the order of points is left to right, then right to left; remove further passes to fix the bug)
-            decreasingStatus = False
-            i = 0
-            while i < graphs["Allowed"].GetN():
-                removeStatus = False
-                y = graphs["Allowed"].GetY()[i]
-                if i > 0:
-                    if graphs["Allowed"].GetY()[i-1] - y < 0:
-                        decreasingStatus = True
-                    else:
-                        if decreasingStatus:
-                            graphs["Allowed"].RemovePoint(i)
-                            removeStatus = True
-                if not removeStatus:
-                    i += 1
+            ## Fix a buggy second upper limit (the order of points is left to right, then right to left; remove further passes to fix the bug)
+            #decreasingStatus = False
+            #i = 0
+            #while i < graphs["Allowed"].GetN():
+                #removeStatus = False
+                #y = graphs["Allowed"].GetY()[i]
+                #if i > 0:
+                    #if graphs["Allowed"].GetY()[i-1] - y < 0:
+                        #decreasingStatus = True
+                    #else:
+                        #if decreasingStatus:
+                            #graphs["Allowed"].RemovePoint(i)
+                            #removeStatus = True
+                #if not removeStatus:
+                    #i += 1
             #for i in range(0, graphs["Allowed"].GetN()):
                 #print graphs["Allowed"].GetX()[i], graphs["Allowed"].GetY()[i]
+            ## Fix m=500 and m=600
+            n = graphs["Allowed"].GetN()
+            graphs["Allowed"].SetPoint(n-2, 500, 4.77)
+            graphs["Allowed"].SetPoint(n-1, 600, 4.71)
         myFinalStateLabel = []
         myFinalStateLabel.append("^{}H^{+}#rightarrow#tau^{+}#nu_{#tau} final states:")
         myFinalStateLabel.append("  ^{}#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu")
@@ -285,6 +289,7 @@ class BrContainer:
                 myTheorUncertLabel += "_plus_Br%s_and_Br%s"%(myDecayModeKeys[0], myDecayModeKeys[1])
             else:
                 raise Exception("N(decaymodes) == %d case is not supported at the moment"%len(myDecayModeKeys))
+            db.close()
             myUncertValueString = "%.3f/%.3f"%(1-(myXsecUncert[0]+myBrUncert[0]), 1+(myXsecUncert[1]+myBrUncert[1]))
             print "    . final state %10s: H+ xsec uncert: +%.3f -%.3f, Br uncert: +%.3f -%.3f, Total: %s"%(fskey, myXsecUncert[1], myXsecUncert[0], myBrUncert[1], myBrUncert[0], myUncertValueString)
             mySignalName = myPrimaryReader.getDatasetNames()[0]
@@ -485,7 +490,7 @@ def readResults(opts, brContainer, m, myKey, scen):
                 for i in range(myBlockStart+1, myBlockEnd-1):
                     s = lines[i].replace("  tan beta=","").replace(" xsecTheor=","").replace(" pb, limit(%s)="%myKey,",").replace(" pb, passed=",",")
                     mySplit = s.split(",")
-                    if len(mySplit) > 1 and s[0] != "#":
+                    if len(mySplit) > 1 and s[0] != "#" and mySplit[2] != "failed":
                         tanbetakey = "%04.1f"%(float(mySplit[0]))
                         if not brContainer.resultExists(tanbetakey):
                             brContainer._results[tanbetakey] = {}
@@ -650,6 +655,71 @@ def purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints):
         myMassPoints.extend(myCommonMassPoints)
     myMassPoints.sort()
 
+def evaluateUncertainties(myScenarios):
+    print "Evaluating theoretical syst. uncertainties"
+    myMassPoints = ["200", "300", "400", "500", "600"]
+    tanbMin = 10
+    tanbMax = 60
+    #hXsectUncert = ROOT.TH2F("xsectUncert","xsectUncert",len(myMassPoints),myMassPoints[0],myMassPoints[len(myMassPoints)-1], tanbMax-tanbMin, tanbMin, tanbMax)
+    #hBrTaunuUncert = ROOT.TH2F("BrTaunuUncert","BrTaunuUncert",len(myMassPoints),myMassPoints[0],myMassPoints[len(myMassPoints)-1], tanbMax-tanbMin, tanbMin, tanbMax)
+    #hBrTBUncert = ROOT.TH2F("BrTBUncert","BrTBUncert",len(myMassPoints),myMassPoints[0],myMassPoints[len(myMassPoints)-1], tanbMax-tanbMin, tanbMin, tanbMax)
+    for scen in myScenarios:
+        xsectUncertPlusMin = 9999
+        xsectUncertPlusMax = 0
+        xsectUncertMinusMin = 9999
+        xsectUncertMinusMax = 0
+        brTaunuUncertPlusMin = 9999
+        brTaunuUncertPlusMax = 0
+        brTaunuUncertMinusMin = 9999
+        brTaunuUncertMinusMax = 0
+        brTBUncertPlusMin = 9999
+        brTBUncertPlusMax = 0
+        brTBUncertMinusMin = 9999
+        brTBUncertMinusMax = 0
+        brCombUncertPlusMin = 9999
+        brCombUncertPlusMax = 0
+        brCombUncertMinusMin = 9999
+        brCombUncertMinusMax = 0
+        myDbInputName = "%s-LHCHXSWG.root"%scen
+        if not os.path.exists(myDbInputName):
+            raise Exception("Error: Cannot find file '%s'!"%myDbInputName)
+        db = BRXSDB.BRXSDatabaseInterface(myDbInputName, silentStatus=True)
+        for mHp in myMassPoints:
+            print scen,mHp
+            for tanbeta in range(tanbMin, tanbMax):
+                myTheorUncertLabel = "theory_Hpxsection"
+                value = db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "-")
+                xsectUncertMinusMin = min(xsectUncertMinusMin, value)
+                xsectUncertMinusMax = max(xsectUncertMinusMin, value)
+                value = db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "+")
+                xsectUncertPlusMin = min(xsectUncertPlusMin, value)
+                xsectUncertPlusMax = max(xsectUncertPlusMin, value)
+                value = db.brUncert("mHp", "tanb", "BR_Hp_taunu", mHp, tanbeta, "-")
+                brTaunuUncertMinusMin = min(brTaunuUncertMinusMin, value)
+                brTaunuUncertMinusMax = max(brTaunuUncertMinusMax, value)
+                value = db.brUncert("mHp", "tanb", "BR_Hp_taunu", mHp, tanbeta, "+")
+                brTaunuUncertPlusMin = min(brTaunuUncertPlusMin, value)
+                brTaunuUncertPlusMax = max(brTaunuUncertPlusMax, value)
+                value = db.brUncert("mHp", "tanb", "BR_Hp_tb", mHp, tanbeta, "-")
+                brTBUncertMinusMin = min(brTBUncertMinusMin, value)
+                brTBUncertMinusMax = max(brTBUncertMinusMax, value)
+                value = db.brUncert("mHp", "tanb", "BR_Hp_tb", mHp, tanbeta, "+")
+                brTBUncertPlusMin = min(brTBUncertPlusMin, value)
+                brTBUncertPlusMax = max(brTBUncertPlusMax, value)
+                db.brUncert2("mHp", "tanb", "BR_Hp_taunu", "BR_Hp_tb", mHp, tanbeta, "-")
+                brCombUncertMinusMin = min(brCombUncertMinusMin, value)
+                brCombUncertMinusMax = max(brCombUncertMinusMax, value)
+                db.brUncert2("mHp", "tanb", "BR_Hp_taunu", "BR_Hp_tb", mHp, tanbeta, "+")
+                brCombUncertPlusMin = min(brCombUncertPlusMin, value)
+                brCombUncertPlusMax = max(brCombUncertPlusMax, value)
+        db.close()
+        print "Syst. uncertainties for %s, mHp=%s-%s, tanbeta=%s-%s"%(scen, myMassPoints[0],myMassPoints[len(myMassPoints)-1], tanbMin, tanbMax)
+        print "xsect uncert: minus: %f-%f, plus %f-%f"%(xsectUncertMinusMin,xsectUncertMinusMax,xsectUncertPlusMin,xsectUncertPlusMax)
+        print "br(taunu) uncert: minus: %f-%f, plus %f-%f"%(brTaunuUncertMinusMin,brTaunuUncertMinusMax,brTaunuUncertPlusMin,brTaunuUncertPlusMax)
+        print "br(tb) uncert: minus: %f-%f, plus %f-%f"%(brTBUncertMinusMin,brTBUncertMinusMax,brTBUncertPlusMin,brTBUncertPlusMax)
+        print "br(taunu+tb) uncert: minus: %f-%f, plus %f-%f"%(brCombUncertMinusMin,brCombUncertMinusMax,brCombUncertPlusMin,brCombUncertPlusMax)
+  
+
 if __name__ == "__main__":
     def addToDatacards(myDir, massPoints, dataCardList, rootFileList, dataCardPattern, rootFilePattern):
         m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern)
@@ -664,6 +734,7 @@ if __name__ == "__main__":
     parser.add_option("--analyseOutput", dest="analyseOutput", action="store_true", default=False, help="Read only output and print summary")
     parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
     parser.add_option("--tanbeta", dest="tanbeta", action="append", default=[], help="tanbeta values (will scan only these)")
+    parser.add_option("--evalUuncert", dest="evaluateUncertainties", action="store_true", default=False, help="Make plots of theoretical uncertainties")
     opts = commonLimitTools.parseOptionParser(parser)
     if opts.rmin == None:
         opts.rmin = "0"
@@ -674,6 +745,10 @@ if __name__ == "__main__":
     myScenarios = ["mhmaxup", "mhmodm", "mhmodp", "lightstau", "lightstop", "tauphobic"]
     if len(opts.scenarios) > 0:
         myScenarios = opts.scenarios[:]
+    
+    if opts.evaluateUncertainties:
+        evaluateUncertainties(myScenarios)
+        sys.exit()
     
     myPlots = {}
     #myScenarios = ["mhmaxup"]
