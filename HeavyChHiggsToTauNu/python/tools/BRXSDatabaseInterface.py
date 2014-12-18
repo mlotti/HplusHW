@@ -42,8 +42,12 @@ class BRXSDatabaseInterface:
             self.names.append(branch.GetName())
 
     def __delete__(self):
-        if self.fIn != None:
-            self.fIn.Close()
+        self.close()
+
+    def close(self):
+        if self.fIN != None:
+            self.fIN.Close()
+        self.fIN = None
 
     def getTheorUncert(self,graph,xVariable,selection,pm):
 
