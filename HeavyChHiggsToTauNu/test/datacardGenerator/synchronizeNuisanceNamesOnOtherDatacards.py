@@ -33,6 +33,14 @@ _MinimumStatUncertByBkg["Zeemm"] = 2.3
 _MinimumStatUncertByBkg["ttbar"] = 0.09
 _MinimumStatUncertByBkg["vv"] = 0.11
 
+_MinimumStatUncertByBkg["OtherTop"] = 0.45
+_MinimumStatUncertByBkg["Wlight"] = 10
+_MinimumStatUncertByBkg["Wheavy"] = 10
+_MinimumStatUncertByBkg["ZJets_M50"] = 2.3
+_MinimumStatUncertByBkg["qcd"] = 20
+_MinimumStatUncertByBkg["TTbar"] = 0.09
+_MinimumStatUncertByBkg["OtherEwk"] = 0.11
+
 _removeUncertainties = None
 _keepUncertainties = ["*"]
 
@@ -183,7 +191,7 @@ def hplusTauNuToTauMu(myDir, doCorrelation, nobtagcorr):
         #myMgr.replaceNuisanceValue("CMS_scale_met", "1.020", ["CMS_Hptnmt_Ztt","CMS_Hptnmt_Zeemm"])
     
     # Redo stat. uncert. shape histograms
-    myMgr.fixTooSmalltatUncertProblem(signalMinimumAbsStatValue=0.2, bkgMinimumAbsStatValue=_MinimumStatUncertByBkg)
+    myMgr.fixTooSmallStatUncertProblem(signalMinimumAbsStatValue=0.2, bkgMinimumAbsStatValue=_MinimumStatUncertByBkg)
     myMgr.recreateShapeStatUncert()
 
     #myMgr.removeStatUncert()
@@ -278,7 +286,7 @@ def hplusTauNuToDilepton(myDir, doCorrelation, nobtagcorr):
         myMgr.replaceNuisanceValue("lumi_8TeV", "1.026")
                 
         # Redo stat. uncert. shape histograms
-        myMgr.fixTooSmalltatUncertProblem(signalMinimumAbsStatValue=0.2, bkgMinimumAbsStatValue=_MinimumStatUncertByBkg)
+        myMgr.fixTooSmallStatUncertProblem(signalMinimumAbsStatValue=0.2, bkgMinimumAbsStatValue=_MinimumStatUncertByBkg)
         myMgr.recreateShapeStatUncert()
         
 
@@ -360,7 +368,7 @@ def hplusTbToTauMu(myDir, doCorrelation, nobtagcorr):
         #myMgr.replaceNuisanceValue("CMS_scale_met", "1.020", ["CMS_Hptbmt_Ztt","CMS_Hptbmt_Zeemm"])
     
     # Redo stat. uncert. shape histograms
-    myMgr.fixTooSmalltatUncertProblem(signalMinimumAbsStatValue=0.2, bkgMinimumAbsStatValue=_MinimumStatUncertByBkg)
+    myMgr.fixTooSmallStatUncertProblem(signalMinimumAbsStatValue=0.2, bkgMinimumAbsStatValue=_MinimumStatUncertByBkg)
     myMgr.recreateShapeStatUncert()
 
     #myMgr.removeStatUncert()
@@ -455,13 +463,123 @@ def hplusTbToDilepton(myDir, doCorrelation, nobtagcorr):
         myMgr.replaceNuisanceValue("lumi_8TeV", "1.026")
                 
         # Redo stat. uncert. shape histograms
-        myMgr.fixTooSmalltatUncertProblem(signalMinimumAbsStatValue=0.2, bkgMinimumAbsStatValue=_MinimumStatUncertByBkg)
+        myMgr.fixTooSmallStatUncertProblem(signalMinimumAbsStatValue=0.2, bkgMinimumAbsStatValue=_MinimumStatUncertByBkg)
         myMgr.recreateShapeStatUncert()
         
 
         myMgr.removeManyNuisances(_removeUncertainties)
         myMgr.keepManyNuisances(_keepUncertainties)
         myMgr.close()
+
+def hplusTBToSingleLepton(myDir, label, lepton):
+    print "*** H+ -> tb, single %s / %s final state ***"%(lepton,label)
+    datacardPattern = "ChargedHiggs_datacard_"+label+"_"+lepton+"_%s_shape.txt"
+    rootFilePattern = "HT_whf_limits_M%s_rebin_combine_stat2_shape.root"
+    rootFileDirectory = ""
+    myMgr = DatacardReader.DataCardDirectoryManager(myDir, datacardPattern, rootFilePattern, rootFileDirectory=rootFileDirectory, readOnly=False, outSuffix="%s_%s"%(lepton,label))
+
+    #myMgr.addNuisance("xsect_tt_8TeV", distribution="lnN", columns=["ttbar","otherttbar"], value="0.940/1.052")
+    #myMgr.addNuisance("xsect_singleTop", distribution="lnN", columns=["st"], value="1.091")
+    #myMgr.addNuisance("xsect_DYtoll", distribution="lnN", columns=["dy"], value="1.040")
+    #myMgr.addNuisance("xsect_VV", distribution="lnN", columns=["vv"], value="1.040")
+    #if suffix in ["ee","emu"]:
+    #    myMgr.addNuisance("xsect_Wjets", distribution="lnN", columns=["wjets"], value="0.963/1.040")
+    #myMgr.removeColumn("wjets")
+    #myMgr.removeColumn("vv")
+    #myMgr.removeColumn("otherttbar")
+
+    # Replace column names
+    myColumnReplaces = {}
+    for m in myMgr._massPoints:
+        myColumnReplaces["Hplus%s"%m] = "CMS_Hptb%sX_%s"%(lepton, label)
+    myColumnReplaces["TTbar"] = "CMS_Hptb%sX_%s_vv"%(lepton, label)
+    myColumnReplaces["Wlight"] = "CMS_Hptb%sX_%s_Wlight"%(lepton, label)
+    myColumnReplaces["Wheavy"] = "CMS_Hptb%sX_%s_Wheavy"%(lepton, label)
+    myColumnReplaces["qcd"] = "CMS_Hptb%sX_%s_qcd"%(lepton, label)
+    myColumnReplaces["ZJets_M50"] = "CMS_Hptb%sX_%s_ZJets_M50"%(lepton, label)
+    myColumnReplaces["OtherTop"] = "CMS_Hptb%sX_%s_OtherTop"%(lepton, label)
+    myColumnReplaces["OtherEwk"] = "CMS_Hptb%sX_%s_OtherEwk"%(lepton, label)
+    myColumnReplaces["TTbar"] = "CMS_Hptb%sX_%s_ttbar"%(lepton, label)
+    #myMgr.replaceColumnNames(myColumnReplaces)
+    
+    # Replace nuisance names
+    myNuisanceReplaces = {}
+    myNuisanceReplaces["trigger_mu"] = "CMS_trg_mu_dataMC"
+    myNuisanceReplaces["lepton_mu"] = "CMS_eff_m"
+    myNuisanceReplaces["xsec_OTop"] = "xsect_singleTop"
+    myNuisanceReplaces["xsec_ZJets"] = "xsect_DYtoll"
+    myNuisanceReplaces["xsec_QCD"] = "xsect_QCD"
+    myNuisanceReplaces["xsec_OEwk"] = "xsect_VV"
+    myNuisanceReplaces["ttbar_SF_mu"] = "CMS_Hptb%sX_ttbarNorm"
+    myNuisanceReplaces["wlight_SF_mu"] = "CMS_Hptb%sX_wlightNorm"
+    myNuisanceReplaces["wheavy_SF_mu"] = "CMS_Hptb%sX_wheavyNorm"
+    myNuisanceReplaces["jes"] = "CMS_scale_j"
+    myNuisanceReplaces["jer"] = "CMS_res_j"
+    #myNuisanceReplaces["pdf"] = "ttbarPDFVariation"
+    myNuisanceReplaces["scale"] = "ttbarQ2Scale"
+    myNuisanceReplaces["matching"] = "ttbarMatchingVariation"
+    myNuisanceReplaces["top"] = "CMS_Hptb%sX_%s_topPtReweighting"%(lepton, label)
+    myNuisanceReplaces["btag"] = "CMS_btaguntag_CSVM"
+    myNuisanceReplaces["btag"] = "CMS_btaguntag_CSVM"
+    myMgr.replaceNuisanceNames(myNuisanceReplaces)
+    myMgr.replaceNuisanceNames(_CommonNuisanceReplaces)
+    
+    #myMgr.addNuisance("btagshapePDF", distribution="lnN", columns=["ttbar","otherttbar"], value="1.050")
+
+    #myMgr.convertShapeToNormalizationNuisance(["CMS_scale_j","CMS_res_j","CMS_scale_met","pileup"])
+    #myMgr.convertShapeToNormalizationNuisance(["CMS_btag_CSVL","CMS_unbtag_CSVL"])
+    #myMgr.convertShapeToNormalizationNuisance(["CMS_btag_CSVL","CMS_unbtag_CSVL"],columnList=myNonTTColumns)
+    #myMgr.convertShapeToNormalizationNuisance(["CMS_Hptb%s_topPtReweighting"%suffix],columnList=myNonTTColumns)
+    #myMgr.convertShapeToNormalizationNuisance(["btag","unbtag","top_pt","b_tag"]) # TMP
+    
+    #myMgr.replaceNuisanceValue("lumi_8TeV", "1.026")
+
+    # Rebin
+    if False:
+        rebinList = []
+        if label == "nB1":
+            rebinList = [0,195,235,275,315,355,395,435,475,515,555,595,635,675,715,755,795,835,875,915,955,995,1095,1195,1305,1425,1545,1690,1800,1910,2500]
+        elif label == "nB2p":
+            rebinList = [0,190,230,270,310,350,390,430,470,510,550,590,630,670,710,750,790,830,870,910,950,990,1090,1190,1290,1390,1490,1590,1670,1830,2500]
+        myMgr.rebinShapes(rebinList)
+
+    # Smoothen QCD background
+    #myMgr.smoothBackgroundByLinearExtrapolation("CMS_HptbmuX_%s_qcd"%label)
+    # Redo stat. uncert. shape histograms
+    
+    
+    # Insert QCD events to the tail
+    if False:
+        column = "qcd"
+        for m in myMgr._datacards.keys():
+            dcard = myMgr._datacards[m]
+            datasetIndex = 0
+            for c in dcard.getDatasetNames():
+                if c == column:
+                    hRate = dcard.getRateHisto(c)
+                    nbins = hRate.GetNbinsX()
+                    hRate.SetBinContent(nbins-1, 10)
+                    hRate.SetBinError(nbins-1, 10)
+                    # Update rate number in table
+                    print "sample yield changed %s -> %f"%(dcard._rateValues[datasetIndex], hRate.Integral())
+                    dcard._rateValues[datasetIndex] = "%f"%hRate.Integral()
+                    # Update stat uncert
+                    for h in dcard._hCache:
+                        if column in h.GetName() and h.GetName().endswith("statUp"):
+                            h.SetBinContent(nbins-1, hRate.GetBinContent(nbins-1)+hRate.GetBinError(nbins-1))
+                            print "stat.uncert. updated"
+                        if column in h.GetName() and h.GetName().endswith("statDown"):
+                            h.SetBinContent(nbins-1, hRate.GetBinContent(nbins-1)-hRate.GetBinError(nbins-1))
+                            if h.GetBinContent(nbins-1) < 0:
+                                h.SetBinContent(nbins-1, 0.0)
+                datasetIndex += 1
+
+    #myMgr.fixTooSmallStatUncertProblem(signalMinimumAbsStatValue=0.2, bkgMinimumAbsStatValue=_MinimumStatUncertByBkg)
+    #myMgr.recreateShapeStatUncert()
+    
+    myMgr.removeManyNuisances(_removeUncertainties)
+    myMgr.keepManyNuisances(_keepUncertainties)
+    myMgr.close()
 
 if __name__ == "__main__":
     # Read datacards
@@ -482,4 +600,10 @@ if __name__ == "__main__":
     # tb decay mode
     hplusTbToTauMu(myDir, doCorrelation=doCorrelation, nobtagcorr=nobtagcorr)
     hplusTbToDilepton(myDir, doCorrelation=doCorrelation, nobtagcorr=nobtagcorr)
+
+    # tb to single mu
+    hplusTBToSingleLepton(myDir, "nB2p", "mu")
+    hplusTBToSingleLepton(myDir, "nB1", "mu")
+    hplusTBToSingleLepton(myDir, "nB2p", "el")
+    hplusTBToSingleLepton(myDir, "nB1", "el")
 
