@@ -14,16 +14,23 @@ ROOT.gROOT.SetBatch(True) # no flashing canvases
 
 ## Container class for information of data and MC EWK at certain point of selection
 class DataDrivenQCDShape:
-    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, luminosity, rebinList=None, dataDrivenFakeTaus=False):
+    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, luminosity, EWKUncertaintyFactor=1.0, rebinList=None, dataDrivenFakeTaus=False):
         self._uniqueN = 0
         self._splittedHistoReader = splittedHistoReader.SplittedHistoReader(dsetMgr, dsetLabelData)
         self._histoName = histoName
         self._dataList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, histoName, luminosity))
-        # filtered ewk fakes (emod)
+        # filtered ewk fakes
         if dataDrivenFakeTaus:
             histoName = histoName.replace("TransverseMass","EWKGenuineTausTransverseMass")
             histoName = histoName.replace("AfterCollinearCuts","AfterCollinearCutsPlusFilteredEWKFakeTaus")
         self._ewkList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, histoName, luminosity))
+
+        #scale with scalar uncertainty
+        if EWKUncertaintyFactor != None and EWKUncertaintyFactor != 1.0:
+            print EWKUncertaintyFactor
+            for i in range(0,len(self._ewkList)):
+                self._ewkList[i].Scale(EWKUncertaintyFactor)
+
         self._rebinDoneStatus = True
         if rebinList != None:
             # Rebin

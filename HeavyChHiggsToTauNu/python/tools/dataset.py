@@ -2670,14 +2670,6 @@ class Dataset:
         else:
             (histos, realName) = self.getRootObjects(name, **kwargs)
             if len(histos) == 1:
-                # Check if object is indeed a histogram or a directory (usecase: splitted phase space histograms)
-                if isinstance(histos[0], ROOT.TDirectoryFile):
-                    (path, filename) = os.path.split(name)
-                    newName = ""
-                    if len(path) > 0:
-                        newName = "%s/"%path
-                    newName += "%s/%sInclusive"%(filename,filename)
-                    (histos, realName) = self.getRootObjects(newName, **kwargs)
                 h = histos[0]
             else:
                 h = histos[0]
@@ -4009,10 +4001,11 @@ class DatasetManagerCreator:
 
         # First check that if some of these is not given, if there is
         # exactly one it available, use that.
-        # As optimizationMode and systematicVariation are optional, they are not considered here
         for arg, attr in [("analysisName", "getAnalyses"),
                           ("searchMode", "getSearchModes"),
-                          ("dataEra", "getMCDataEras")]:
+                          ("dataEra", "getMCDataEras"),
+                          ("optimizationMode", "getOptimizationModes"),
+                          ("systematicVariation", "getSystematicVariations")]:
             lst = getattr(self, attr)()
             if (arg not in _args or _args[arg] is None) and len(lst) == 1:
                 _args[arg] = lst[0]
