@@ -814,24 +814,24 @@ class QCDShapeVariationExtractor(ExtractorBase):
         hDenomSource.SetTitle(mySourceNamePrefix+"_Denominator")
         histogramsExtras.makeFlowBinsVisible(hDenomSource)
         myHistograms.append(hDenomSource)
-        # Rebin histograms
-        myArray = array("d",getBinningForPlot(myHistoNameShort))
-        hRebinnedNum = hNum.Rebin(len(myArray)-1,"",myArray)
-        hRebinnedDenom = hDenom.Rebin(len(myArray)-1,"",myArray)
-        hNum.Delete()
-        hDenom.Delete()
+        # do not rebin here, it is done later
+        #myArray = array("d",getBinningForPlot(myHistoNameShort))
+        #hRebinnedNum = hNum.Rebin(len(myArray)-1,"",myArray)
+        #hRebinnedDenom = hDenom.Rebin(len(myArray)-1,"",myArray)
+        #hNum.Delete()
+        #hDenom.Delete()
         # Handle under/overflow bins
-        histogramsExtras.makeFlowBinsVisible(hRebinnedNum)
-        histogramsExtras.makeFlowBinsVisible(hRebinnedDenom)
+        histogramsExtras.makeFlowBinsVisible(hNum)
+        histogramsExtras.makeFlowBinsVisible(hDenom)
         # Create output histograms
         hUp = aux.Clone(myRateHisto)
+        hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
         hUp.Reset()
         hDown = aux.Clone(myRateHisto)
-        hDown.Reset()
-        hUp.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Up")
         hDown.SetTitle(datasetColumn.getLabel()+"_"+self._masterExID+"Down")
+        hDown.Reset()
         # Do calculation and fill output histograms
-        systematicsForMetShapeDifference.createSystHistograms(myRateHisto, hUp, hDown, hRebinnedNum, hRebinnedDenom)
+        systematicsForMetShapeDifference.createSystHistograms(myRateHisto, hUp, hDown, hNum, hDenom)
         # Store uncertainty histograms
         if rootHistoWithUncertainties == None:
             datasetColumn.getCachedShapeRootHistogramWithUncertainties().addShapeUncertaintyFromVariation(self._systVariation, hUp, hDown)

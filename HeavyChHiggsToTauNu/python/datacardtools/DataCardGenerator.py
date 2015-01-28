@@ -526,7 +526,11 @@ class DataCardGenerator:
             for validMass in dg.validMassPoints:
                 if validMass in self._config.MassPoints:
                     myMassIsConsideredStatus = True
-            if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus:
+            myRemoveHHStatus = False
+            if dg.label.startswith("HH") and (self._config.OptionRemoveHHDataGroup or self._config.OptionLimitOnSigmaBr):
+                print ShellStyles.WarningLabel()+"Skipping column: %s"%dg.label
+                myRemoveHHStatus = True
+            if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus and not myRemoveHHStatus:
                 print "Constructing datacard column for data group: "+ShellStyles.HighlightStyle()+""+dg.label+""+ShellStyles.NormalStyle()
                 # Construct datacard column object
                 myColumn = None

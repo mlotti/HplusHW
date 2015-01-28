@@ -770,7 +770,8 @@ class TableProducer:
             TotalExpected = QCD.Clone()
             TotalExpected.Add(Embedding)
             if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                TotalExpected.Add(EWKFakes)
+                if EWKFakes != None:
+                    TotalExpected.Add(EWKFakes)
             # Construct table
             myOutput = "*** Event yield summary ***\n"
             myOutput += self._generateHeader(m)
@@ -786,7 +787,8 @@ class TableProducer:
                 myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
             else:
                 myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
-                myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
+                if EWKFakes != None:
+                    myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
             myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
             #if self._config.BlindAnalysis:
             #    myOutput += "                            Observed: BLINDED\n\n"
@@ -825,7 +827,8 @@ class TableProducer:
                 myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
             else:
                 myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
-                myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
+                if EWKFakes != None:
+                    myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  Total expected from the SM              & %s \\\\ \n"%getLatexResultString(TotalExpected,formatStr,myPrecision)
             #if self._config.BlindAnalysis:
