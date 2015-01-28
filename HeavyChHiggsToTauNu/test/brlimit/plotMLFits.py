@@ -42,8 +42,9 @@ def doBkgFitPlots(mlfit, lumi, options):
         canvasOpts = {}
         if len(labels) > 15:
             canvasOpts["addHeight"] = 0.03*(len(labels)-15)
+            canvasOpts["addWidth"] = 0.2
 
-        plot.createFrame(fname, opts={"ymin": 0, "xmin": -3.2, "xmax": 2.5}, canvasOpts=canvasOpts)
+        plot.createFrame(fname, opts={"ymin": 0, "xmin": -4.2, "xmax": 2.5}, canvasOpts=canvasOpts)
         plot.getFrame().GetXaxis().SetTitle("Fitted value")
 
         scale = 1
@@ -52,6 +53,11 @@ def doBkgFitPlots(mlfit, lumi, options):
             plot.getFrame().GetXaxis().SetTickLength(plot.getFrame().GetXaxis().GetTickLength()*scale)
             plot.getPad().SetBottomMargin(plot.getPad().GetBottomMargin()*scale)
             plot.getPad().SetTopMargin(plot.getPad().GetTopMargin()*scale)
+        if "addWidth" in canvasOpts:
+            scale = 1/(1+canvasOpts["addWidth"])
+            #plot.getFrame().GetXaxis().SetTickLength(plot.getFrame().GetXaxis().GetTickLength()*scale)
+            plot.getPad().SetRightMargin(0.04)
+            plot.getPad().SetLeftMargin(0.04)
 
         plot.getPad().SetLeftMargin(plot.getPad().GetRightMargin())
         plot.getPad().Update()
@@ -76,7 +82,7 @@ def doBkgFitPlots(mlfit, lumi, options):
         l.SetTextFont(l.GetTextFont()-20) # bold->normal
         l.SetTextSize(17)
 
-        x_nuis = -3.0
+        x_nuis = -4.0
         x_value = 1.5
 
         l.DrawLatex(x_nuis, ymax*0.93, "Nuisance parameter")
@@ -85,7 +91,7 @@ def doBkgFitPlots(mlfit, lumi, options):
         for i, label in enumerate(labels):
             y = gr.GetY()[i]-0.3
     
-            l.DrawLatex(x_nuis, y, label[:20])
+            l.DrawLatex(x_nuis, y, label[:40])
             l.DrawLatex(x_value, y, "%.2f #pm %.2f" % (gr.GetX()[i], gr.GetErrorX(i)))
         
         plot.save()
@@ -102,6 +108,7 @@ def doBkgFitPlots(mlfit, lumi, options):
     
     createDrawPlot(gr, labels, myPlotName)
 
+    (gr, labels, shapeStatNuisance) = mlfit.fittedGraphShapeStat(firstMass, backgroundOnly=options.bkgonlyfit, signalPlusBackground=options.sbfit)
     try:
         (gr, labels, shapeStatNuisance) = mlfit.fittedGraphShapeStat(firstMass, backgroundOnly=options.bkgonlyfit, signalPlusBackground=options.sbfit)
         createDrawPlot(gr, labels, myPlotName+"_ShapeStat")

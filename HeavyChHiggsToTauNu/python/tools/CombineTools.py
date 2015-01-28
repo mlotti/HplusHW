@@ -640,8 +640,11 @@ hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.As
             return result
         if n < 0: # fit failed
             return result
-        print output
-        raise Exception("Unable to parse the output of command '%s'" % script)
+        result.failed = True
+        print "Fit failed"
+        return result
+        #print output
+        #raise Exception("Unable to parse the output of command '%s'" % script)
 
     ## Run LandS for the expected limit
     #
@@ -656,9 +659,11 @@ hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.As
             return result
         if n < 0: # fit failed
             return result
-
-        print output
-        raise Exception("Unable to parse the output of command '%s'" % script)
+        result.failed = True
+        print "Fit failed"
+        return result
+        #print output
+        #raise Exception("Unable to parse the output of command '%s'" % script)
 
     def _runMLFit(self, mass):
         if mass in self.mlfitScripts.keys():

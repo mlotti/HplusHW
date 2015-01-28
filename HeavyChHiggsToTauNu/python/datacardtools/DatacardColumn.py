@@ -16,6 +16,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDiffere
 from math import sqrt,pow
 from array import array
 
+_fineBinningSuffix = "_fineBinning"
+
 ## ExtractorResult
 # Helper class to cache the result for each extractor in each datacard column
 class ExtractorResult():
@@ -371,10 +373,6 @@ class DatacardColumn():
                 if e.getId() == nid:
                     if (e.getDistribution() == "shapeQ" and not isinstance(e, ConstantExtractor)) or isinstance(e, ShapeVariationToConstantExtractor):
                         myShapeVariationList.append(e._systVariation)
-        # Check status for HH
-        if self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr):
-            print ShellStyles.WarningLabel()+"Skipping ..."
-            return
         # Obtain root histogram with uncertainties for shape and cache it
         hRateWithFineBinning = None
         if not (self.typeIsEmptyColumn() or dsetMgr == None):
@@ -565,7 +563,7 @@ class DatacardColumn():
                         h.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
                         # Rebin and move under/overflow bins to visible bins
                         if not isinstance(h.getRootHisto(), ROOT.TH2):
-                            myArray = array("d",getBinningForPlot(c._histoName))
+                            myArray = array("d",getBinningForPlot(c._histoTitle))
                             h.Rebin(len(myArray)-1,"",myArray)
                             h.makeFlowBinsVisible()
                         # Apply any further scaling (only necessary for the unceratainties from variation)
@@ -632,7 +630,7 @@ class DatacardColumn():
         myArray = array("d",config.ShapeHistogramsDimensions)
         for i in range(0,len(self._rateResult._histograms)):
             myTitle = self._rateResult._histograms[i].GetTitle()
-            self._rateResult._histograms[i].SetTitle(myTitle+"_fineBinning")
+            self._rateResult._histograms[i].SetTitle(myTitle+_fineBinningSuffix)
             # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
             if self._rateResult._histograms[i].GetNbinsX() > 1:
                 # Note that Rebin() does a clone operation in this case
@@ -664,7 +662,7 @@ class DatacardColumn():
             myNewHistograms = []
             for i in range(0,len(self._nuisanceResults[j]._histograms)):
                 myTitle = self._nuisanceResults[j]._histograms[i].GetTitle()
-                self._nuisanceResults[j]._histograms[i].SetTitle(myTitle+"_fineBinning")
+                self._nuisanceResults[j]._histograms[i].SetTitle(myTitle+_fineBinningSuffix)
                 # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
                 h = self._nuisanceResults[j]._histograms[i].Rebin(len(config.ShapeHistogramsDimensions)-1,myTitle,myArray)
                 h.SetTitle(myTitle)
@@ -672,14 +670,16 @@ class DatacardColumn():
                 myNewHistograms.append(h)
             self._nuisanceResults[j]._histograms.extend(myNewHistograms)
 	# Treat QCD MET shape nuisance
+	myQCDMetshapeFoundStatus = False
 	for j in range(0,len(self._nuisanceResults)):
 	    if self._nuisanceResults[j].getId() == "QCD_metshape":
+                myQCDMetshapeFoundStatus = True
 		hDenominator = None
 		hNumerator = None
 		hUp = None
 		hDown = None
 		for i in range(0,len(self._nuisanceResults[j]._histograms)):
-		    if not "fineBinning" in self._nuisanceResults[j]._histograms[i].GetTitle():
+		    if not _fineBinningSuffix in self._nuisanceResults[j]._histograms[i].GetTitle():
 			if "Numerator" in self._nuisanceResults[j]._histograms[i].GetTitle():
 			    hNumerator = self._nuisanceResults[j]._histograms[i]
 			if "Denominator" in self._nuisanceResults[j]._histograms[i].GetTitle():
@@ -690,10 +690,36 @@ class DatacardColumn():
 			    hDown = self._nuisanceResults[j]._histograms[i]
 		if hDenominator == None or hNumerator == None or hUp == None or hDown == None:
 		    raise Exception()
-		systematicsForMetShapeDifference.createSystHistograms(self._rateResult._histograms[0], hUp, hDown, hNumerator, hDenominator)
-		# Add rate histogram to make the histograms compatible with LandS/Combine
-		#hUp.Add(self._rateResult._histograms[0])
-		#hDown.Add(self._rateResult._histograms[0])  
+                if hDenominator.GetNbinsX() != hUp.GetNbinsX():
+                    raise Exception()
+                if hDenominator.GetNbinsX() != self._rateResult._histograms[0].GetNbinsX():
+                    raise Exception()
+		systematicsForMetShapeDifference.createSystHistograms(self._rateResult._histograms[0], hUp, hDown, hNumerator, hDenominator, quietMode=False)
+        if not myQCDMetshapeFoundStatus and self.typeIsQCD():
+            print ShellStyles.WarningLabel()+"QCD metshape uncertainty has not been rebinned, please check that it has the name 'QCD_metshape'!"
+        # Update root histo with uncertainties to contain the binned version
+        if self._cachedShapeRootHistogramWithUncertainties != None:
+            #self._cachedShapeRootHistogramWithUncertainties.Debug()
+            self._cachedShapeRootHistogramWithUncertainties.delete()
+            self._cachedShapeRootHistogramWithUncertainties.setRootHisto(self._rateResult._histograms[0])
+            for j in range(0,len(self._nuisanceResults)):
+                # shape nuisance
+                hUp = None
+                hDown = None
+                for i in range(0,len(self._nuisanceResults[j]._histograms)):
+                    myTitle = self._nuisanceResults[j]._histograms[i].GetTitle()
+                    if not _fineBinningSuffix in myTitle:
+                        if myTitle.endswith("Up"):
+                            hUp = self._nuisanceResults[j]._histograms[i]
+                        if myTitle.endswith("Down"):
+                            hDown = self._nuisanceResults[j]._histograms[i]
+                if hUp == None or hDown == None:
+                    # constant nuisance
+                    myResult = self._nuisanceResults[j].getResult()
+                    self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(self._nuisanceResults[j].getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                else:
+                    self._cachedShapeRootHistogramWithUncertainties.addShapeUncertaintyFromVariation(self._nuisanceResults[j].getId(), hUp, hDown)
+            #self._cachedShapeRootHistogramWithUncertainties.Debug()
 
     ## Returns rate for column
     def getRateResult(self):

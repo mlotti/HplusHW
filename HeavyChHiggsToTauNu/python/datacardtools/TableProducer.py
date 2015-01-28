@@ -771,7 +771,8 @@ class TableProducer:
             TotalExpected.Add(Embedding)
             if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 if EWKFakes != None:
-                   TotalExpected.Add(EWKFakes)
+                    TotalExpected.Add(EWKFakes)
+
             # Construct table
             myOutput = "*** Event yield summary ***\n"
             myOutput += self._generateHeader(m)

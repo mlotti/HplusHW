@@ -124,11 +124,11 @@ def main():
     for key in graphs.keys():
         print "Graph--------------------------------",key
         graphs[key] = db.graphToTanBeta(graphs[key],xVariable,selection,highTanbRegion=True)
-        if key == "obs":
-            obsplus = db.getTheorUncert(graphs[key],xVariable,selection,"+")
-            graphs["obs_th_plus"] = db.graphToTanBeta(obsplus,xVariable,selection)
-            obsminus = db.getTheorUncert(graphs[key],xVariable,selection,"-")
-            graphs["obs_th_minus"] = db.graphToTanBeta(obsminus,xVariable,selection)
+        #if key == "obs":
+            #obsplus = db.getTheorUncert(graphs[key],xVariable,selection,"+")
+            #graphs["obs_th_plus"] = db.graphToTanBeta(obsplus,xVariable,selection)
+            #obsminus = db.getTheorUncert(graphs[key],xVariable,selection,"-")
+            #graphs["obs_th_minus"] = db.graphToTanBeta(obsminus,xVariable,selection)
         print key,"done"
 
 

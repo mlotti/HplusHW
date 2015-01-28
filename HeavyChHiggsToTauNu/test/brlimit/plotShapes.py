@@ -4,6 +4,7 @@ import sys
 import os
 from optparse import OptionParser
 import math
+import array
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -182,20 +183,31 @@ def customizeMarker(p):
             th1.SetPointEYlow(i, 0)
 
 class DatasetContainer:
-    def __init__(self, name, label, shapeList):
-        self._name = name
+    def __init__(self, column, label, nuisances, cardReader):
+        self._name = column
         self._label = label
-        self._uncertaintyShapes = shapeList
+        self._uncertaintyShapes = nuisances
+        self._cardReader = cardReader
 
     def debug(self):
         print "name =",self._name
         print "uncertainties = %s"%(", ".join(map(str, self._uncertaintyShapes)))
 
-    def doPlot(self, opts, myAllShapeNuisances, f, mass, luminosity, signalTable):
+    def doPlot(self, opts, myAllShapeNuisances, f, mass, luminosity, signalTable, rebinList=None):
+        def rebin(h, rebinList):
+            if rebinList == None or h == None:
+                return h
+            myArray = array.array("d",rebinList)
+            hnew = h.Rebin(len(rebinList)-1,h.GetTitle(),myArray)
+            h.Delete()
+            return hnew
+        
         print "Doing plots for:",self._name
-        hNominal = f.Get(self._name)
+        hNominal = f.Get(self._cardReader.getHistoNameForColumn(self._name))
+        hNominal = rebin(hNominal, rebinList)
         hNominal.SetFillStyle(0)
-        hNominalFine = f.Get(self._name+"_fineBinning")
+        hNominalFine = f.Get(self._cardReader.getHistoNameForColumn(self._name)+"_fineBinning")
+        hNominalFine = rebin(hNominalFine, rebinList)
         hNominalHisto = histograms.Histo(hNominal, self._name, drawStyle="HIST")
         # Determine label
         mySignalLabels = ["HH","HW","Hp"]
@@ -218,16 +230,21 @@ class DatasetContainer:
         for uncName in self._uncertaintyShapes:
             myShortName = uncName
             print "... uncertainty:",myShortName
-            hup = f.Get("%s_%sUp"%(self._name,uncName))
+            myLongName = self._cardReader.getHistoNameForNuisance(self._name, uncName)
+            hup = f.Get("%sUp"%(myLongName))
+            hup = rebin(hup, rebinList)
             hup.SetFillStyle(0)
             up = dataset.RootHistoWithUncertainties(hup)
-            upFine = f.Get("%s_%sUp_fineBinning"%(self._name,uncName))
+            upFine = f.Get("%sUp_fineBinning"%(myLongName))
+            upFine = rebin(upFine, rebinList)
             nom = dataset.RootHistoWithUncertainties(hNominal.Clone())
             nom.makeFlowBinsVisible()
-            hdown = f.Get("%s_%sDown"%(self._name,uncName))
+            hdown = f.Get("%sDown"%(myLongName))
+            hdown = rebin(hdown, rebinList)
             hdown.SetFillStyle(0)
             down = dataset.RootHistoWithUncertainties(hdown)
-            downFine = f.Get("%s_%sDown_fineBinning"%(self._name,uncName))
+            downFine = f.Get("%sDown_fineBinning"%(myLongName))
+            downFine = rebin(downFine, rebinList)
             up.getRootHisto().SetLineColor(ROOT.kRed)
             nom.getRootHisto().SetLineColor(ROOT.kBlack)
             down.getRootHisto().SetLineColor(ROOT.kBlue)
@@ -236,8 +253,8 @@ class DatasetContainer:
             nomHisto = histograms.Histo(nom, "Nominal %.1f"%_integral(nom.getRootHisto()), drawStyle="HIST", legendStyle="l")
             # Add fit uncert. as stat uncert.
             for i in range(0,9):
-                tailFitUp = f.Get("%s_%s_TailFit_par%dUp"%(self._name,self._name,i))
-                tailFitDown = f.Get("%s_%s_TailFit_par%dDown"%(self._name,self._name,i))
+                tailFitUp = f.Get("%s_TailFit_par%dUp"%(myLongName,i))
+                tailFitDown = f.Get("%s_TailFit_par%dDown"%(myLongName,i))
                 if tailFitUp != None and tailFitDown != None:
                     nom.addShapeUncertaintyFromVariation("%s_TailFit_par%d"%(self._name,i),tailFitUp,tailFitDown)
                     tailFitUp.Delete()
@@ -315,20 +332,23 @@ def doPlot(opts,mass,nameList,allShapeNuisances,luminosity,myDatacardPattern,roo
         myShapeNuisanceNames = myCardReader.getShapeNuisanceNames(d)
         myFilteredShapeNuisances = []
         for n in myShapeNuisanceNames:
-            if not "statBin" in n:
+            if not "statBin" in n and not n.endswith("_statUp") and not n.endswith("_statDown"):
                 myFilteredShapeNuisances.append(n)
         if myStatus:
-            myDataset = DatasetContainer(d, myLabel, myFilteredShapeNuisances)
+            myDataset = DatasetContainer(column=d, label=myLabel, nuisances=myFilteredShapeNuisances, cardReader=myCardReader)
             datasets.append(myDataset)
             nameList.append(d)
         for n in myFilteredShapeNuisances:
             if not n in shapes:
                 shapes.append(n)
 
+    rebinList = None
+    #rebinList = [0,200,250,300,350,400,450,500,550,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500]
+
     ## Do the actual plots
     for d in datasets:
         #d.debug()
-        d.doPlot(opts,shapes,f,mass,luminosity,signalTable)
+        d.doPlot(opts,shapes,f,mass,luminosity,signalTable,rebinList)
     # Close the file
     f.Close()
 
@@ -367,8 +387,8 @@ if __name__ == "__main__":
         myDatacardPattern = mySettings.getDatacardPattern(limitTools.LimitProcessType.TAUJETS)
         myRootfilePattern = mySettings.getRootfilePattern(limitTools.LimitProcessType.TAUJETS)
     else:
-        myDatacardPattern = opts.cardPattern.replace("MM","%s")
-        myRootfilePattern = opts.rootfilePattern.replace("MM","%s")
+        myDatacardPattern = opts.cardPattern.replace("MMM","M%s").replace("MM","%s")
+        myRootfilePattern = opts.rootfilePattern.replace("MMM","M%s").replace("MM","%s")
     massPoints = DatacardReader.getMassPointsForDatacardPattern(".", myDatacardPattern)
     print "The following masses are considered:",massPoints
     for m in massPoints:

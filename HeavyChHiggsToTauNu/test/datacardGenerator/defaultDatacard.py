@@ -10,7 +10,7 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/test_nominal_dphi"
 #Path = "/home/wendland/data/xnominal"
 Path = "/home/wendland/data/test_2014-09-05"
-#Path = "/home/wendland/data/xnominal"
+Path = "/home/wendland/data/nortau"
 #Path = "/home/wendland/data/test_matti_met60_paramweight"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
@@ -21,12 +21,12 @@ Path = "/home/wendland/data/test_2014-09-05"
 LightMassPoints      = [80,90,100,120,140,150,155,160]
 #LightMassPoints      = [80,120,160]
 LightMassPoints      = [120]
-LightMassPoints      = []
+#LightMassPoints      = []
 
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
-HeavyMassPoints      = [300]
-HeavyMassPoints      = []
+#HeavyMassPoints      = [300]
+#HeavyMassPoints      = []
 
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
@@ -62,7 +62,7 @@ OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produce
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
-OptionDoControlPlots = not True
+OptionDoControlPlots = True
 OptionDoMergeFakeTauColumns = True # Merges the fake tau columns into one
 OptionCombineSingleColumnUncertainties = not True # Makes limit running faster
 OptionCtrlPlotsAtMt = True # Produce control plots after all selections (all selections for transverse mass)
@@ -1800,6 +1800,25 @@ if OptionCtrlPlotsAtMt:
                              "unit": "",
                              "log": True,
                              "legendPosition": "SE",
+                             "opts": {"ymin": 0.009} },
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+
+    ControlPlots.append(ControlPlotInput(
+        title            = "SelectedTau_Rtau_FullRange_AfterMtSelections",
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "SelectedTau_Rtau_AfterMtSelections",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "SelectedTau_Rtau_AfterMtSelections",
+        details          = { "xlabel": "Selected #tau R_{#tau}",
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
+                             "unit": "",
+                             "log": True,
+                             "legendPosition": "SW",
+                             "opts2": {"ymin": 0.2, "ymax": 1.8},
                              "opts": {"ymin": 0.009} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file
