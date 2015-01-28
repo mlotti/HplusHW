@@ -843,6 +843,18 @@ def divideGraph(num, denom):
         gr.SetPoint(i, gr.GetX()[i], val)
     return gr
 
+## Subtract two TGraphs
+#
+# \param minuend     Minuend TGraph
+# \param subtrahend  Subtrahend TGraph
+#
+# \return new TGraph as the difference of the two TGraphs
+def subtractGraph(minuend, subtrahend):
+    gr = ROOT.TGraph(minuend)
+    for i in xrange(gr.GetN()):
+        val = gr.GetY() - subtrahend.GetY()[i]
+        gr.SetPoint(i, gr.GetX()[i], val)
+    return gr
 
 ## Returns a properly typeset label for MSSM scenario
 #
