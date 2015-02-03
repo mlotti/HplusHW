@@ -198,10 +198,10 @@ namespace HPlus {
       
       
     //MC matching for events that passed the top secletion
-    if (!iEvent.isRealData() && output.fPassedEvent == true ) {
+    //if (!iEvent.isRealData() && output.fPassedEvent == true ) {
     
     //alternative: MC matching for all events with a reconstructed top quark  
-    //if (!iEvent.isRealData() && topmassfound ) {
+    if (!iEvent.isRealData() && topmassfound ) {
 
       edm::Handle <reco::GenParticleCollection> genParticles;
       iEvent.getByLabel(fSrc, genParticles);
@@ -221,7 +221,13 @@ namespace HPlus {
         if(abs(id) == 6 && (hasImmediateDaughter(p,37) || hasImmediateDaughter(p,-37))) {
           idHiggsSide = id;
           }
+        //NEW, FOR HEAVY H+: if b quark and has immediate Higgs daughter:
+        if(idHiggsSide == 0){
+          if(abs(id) == 37) {
+            idHiggsSide = id;
+          }
         }
+      }
              
     //Test if b-jet is W-side or Higgs-side
       for (size_t i=0; i < genParticles->size(); ++i){

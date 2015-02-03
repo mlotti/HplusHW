@@ -7,6 +7,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisati
 optimisation = HPlusOptimisationScheme()
 #optimisation.printOptions() # Uncomment to find out the implemented methods
 
-#optimisation.addTopRecoVariation(["None","chi","std","Wselection","Bselection"]) # Valid options: None, chi, std, Wselection, Bselection
-optimisation.addTopRecoVariation(["chi"])
+optimisation.addTopRecoVariation(["None","chi","Wselection","Bselection"]) # Valid options: None, chi, std, Wselection, Bselection
+#optimisation.addTopRecoVariation(["chi"])
 #optimisation.addTopRecoVariation(["None","chi","Bselection"])

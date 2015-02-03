@@ -31,8 +31,8 @@ namespace HPlus {
     hDeltaMaxTauB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaMaxTauB", "DeltaMaxTauB", 200, 0., 6.);
     hPtBjetTauSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtBjetTauSide", "PtBjetTauSide", 200, 0., 400.);
     hEtaBjetTauSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtaBjetTauSide", "EtaBjetTauSide", 250, -5., 5.);
-    hPtBjetTopSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtBjetTopSide", "PtBjetTopSide", 200, 0., 400.);
-    hEtaBjetTopSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtaBjetTopSide", "EtaBjetTopSide", 250, -5.,5.);
+    hPtBjetTopSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "PtBjetTopSide", "PtBjetTopSide", 200, 0., 400.);
+    hEtaBjetTopSide = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "EtaBjetTopSide", "EtaBjetTopSide", 250, -5.,5.);
     hPtBjetMax = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtBjetMax", "PtBjetMax", 200, 0., 400.);
     hEtaBjetMax = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtaBjetMax", "EtaBjetMax", 250, -5.,5.);
     hPtBjetMaxTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtBjetMaxTrue", "PtBjetMaxTrue", 200, 0., 400.);
@@ -41,8 +41,8 @@ namespace HPlus {
     hDeltaMaxTopBTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaMaxTopBTrue", "DeltaMaxTopBTrue", 200, 0., 6.);
     hPtBjetTauSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtBjetTauSideTrue", "PtBjetTauSideTrue", 200, 0., 400.);
     hEtaBjetTauSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtaBjetTauSideTrue", "EtaBjetTauSideTrue", 250, -5., 5.);
-    hPtBjetTopSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "PtBjetTopSideTrue", "PtBjetTopSideTrue", 200, 0., 400.);
-    hEtaBjetTopSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "EtaBjetTopSideTrue", "EtaBjetTopSideTrue", 250, -5.,5.);
+    hPtBjetTopSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "PtBjetTopSideTrue", "PtBjetTopSideTrue", 200, 0., 400.);
+    hEtaBjetTopSideTrue = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "EtaBjetTopSideTrue", "EtaBjetTopSideTrue", 250, -5.,5.);
     hMassTopTop = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MassTopTop_matchJets", "MassTopTop_matchJets",400, 0.,400.);
     hMassTopHiggs = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MassTopHiggs_matchJets", "MassTopHiggs_matchJets",400, 0.,400.);
     hMassW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "MassW_matchJets", "MassW_matchJets",300, 0.,300.);

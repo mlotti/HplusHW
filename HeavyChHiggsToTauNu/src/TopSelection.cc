@@ -149,7 +149,13 @@ namespace HPlus {
         if(abs(id) == 6 && (hasImmediateDaughter(p,37) || hasImmediateDaughter(p,-37))) {
           idHiggsSide = id;
           }
+        //NEW, FOR HEAVY H+: if b quark and has immediate Higgs daughter:
+        if(idHiggsSide == 0){
+          if(abs(id) == 37) {
+            idHiggsSide = id;
+          }
         }
+      }
              
     //Test if b-jet is tau-side or Higgs-side
       for (size_t i=0; i < genParticles->size(); ++i){
