@@ -54,6 +54,8 @@ class Result:
             raise Exception("Error: Could not find test/brlimit directory!")
         # Create jobs
         myCommand = "%sbrlimit/generateMultiCrabTaujets.py"%(s)
+        if self._opts.combination:
+            myCommand = "%sbrlimit/generateMultiCrabCombination.py"%(s)
         if self._opts.brlimit:
             myCommand += " --brlimit"
         if self._opts.sigmabrlimit:
@@ -89,7 +91,9 @@ class Result:
             (out, err) = proc.communicate()
             print out
         # Change directory back
-        os.chdir(self._backToTopLevel())
+        s = self._backToTopLevel()
+        if len(s) > 1:
+            os.chdir(s)
         #print "current dir =",os.getcwd()
 
     def _getOutput(self):
@@ -166,6 +170,8 @@ class Result:
         s = ""
         for i in range(0,len(mySplit)-1):
             s += "../"
+        if s == "":
+            s = "."
         return s 
 
     def _runSubProcess(self, inputList):
@@ -186,12 +192,16 @@ class Result:
         myResults = json.load(myFile)
         masspoints = myResults["masspoints"]
         myKeys = ["median","-2sigma","-1sigma","+1sigma","+2sigma"]
-        line = "mass  "
+        line = "mass  obs.      "
         for item in myKeys:
             line += "%9s "%item
         print line+"   Rel. errors in same order"
         for k in sorted(masspoints.keys()):
             line = "%4d "%int(k)
+            if self._opts.unblinded:
+                line += " %9.5f"%float(masspoints[k]["observed"])
+            else:
+                line += " (blinded) "
             for item in myKeys:
                 line += " %9.5f"%(float(masspoints[k]["expected"][item]))
             for item in myKeys:
@@ -210,6 +220,7 @@ class Result:
 if __name__ == "__main__":
     parser = commonLimitTools.createOptionParser(lepDefault=None, lhcDefault=False, lhcasyDefault=False, fullOptions=False)
     parser.add_option("--printonly", dest="printonly", action="store_true", default=False, help="Print only the ready results")
+    parser.add_option("--combination", dest="combination", action="store_true", default=False, help="Run combination instead of only taunu fully hadr.")
     opts = commonLimitTools.parseOptionParser(parser)
 
     # Obtain directory list
@@ -226,6 +237,7 @@ if __name__ == "__main__":
     myDirs.sort()
     myResults = []
     for d in myDirs:
+        print "LimitOMatic: considering directory:",d
         myResults.append(Result(opts,d))
 
     # Summary of results

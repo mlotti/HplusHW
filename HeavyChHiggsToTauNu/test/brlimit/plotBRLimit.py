@@ -35,6 +35,8 @@ def main(opts):
     limit.forPaper = True
     if opts.paper:
         histograms.cmsTextMode = histograms.CMSMode.PAPER
+    if opts.unpublished:
+        histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED
 
     if opts.parentheses:
         limit.useParentheses()
@@ -211,6 +213,8 @@ if __name__ == "__main__":
                       help="Enable unblined mode")
     parser.add_option("--paper", dest="paper", default=False, action="store_true",
                       help="Paper mode")
+    parser.add_option("--unpub", dest="unpublished", default=False, action="store_true",
+                      help="Unpublished mode")
     parser.add_option("--parentheses", dest="parentheses", default=False, action="store_true",
                       help="Use parentheses for sigma and BR")
     parser.add_option("--excludedArea", dest="excludedArea", default=False, action="store_true",

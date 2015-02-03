@@ -10,7 +10,7 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/test_nominal_dphi"
 #Path = "/home/wendland/data/xnominal"
 Path = "/home/wendland/data/test_2014-09-05"
-#Path = "/home/wendland/data/xnominal"
+Path = "/home/wendland/data/nortau"
 #Path = "/home/wendland/data/test_matti_met60_paramweight"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
@@ -22,10 +22,11 @@ LightMassPoints      = [80,90,100,120,140,150,155,160]
 #LightMassPoints      = [80,120,160]
 LightMassPoints      = [120]
 #LightMassPoints      = []
+
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
 #HeavyMassPoints      = [300]
-HeavyMassPoints      = []
+#HeavyMassPoints      = []
 
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
@@ -53,6 +54,7 @@ OptionGenuineTauBackgroundSource = "DataDriven"                          # State
 #OptionGenuineTauBackgroundSource = "MC_FullSystematics"               # MC used, fake and genuine taus separated (use for embedding closure test)
 #OptionGenuineTauBackgroundSource = "MC_RealisticProjection"            # MC used, fake and genuine taus separated (can be used for optimization)
 
+OptionSeparateFakeTtbarFromFakeBackground = False # NOTE: this flag should be put true for light H+ and to false for heavy H+
 
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionTreatTriggerUncertaintiesAsAsymmetric = True # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
@@ -62,7 +64,7 @@ OptionIncludeSystematics = True # Set to true if you produced multicrabs with do
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = True
 OptionDoMergeFakeTauColumns = True # Merges the fake tau columns into one
-OptionCombineSingleColumnUncertainties = True # Makes limit running faster
+OptionCombineSingleColumnUncertainties = not True # Makes limit running faster
 OptionCtrlPlotsAtMt = True # Produce control plots after all selections (all selections for transverse mass)
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
@@ -74,14 +76,14 @@ OptionAddSingleTopSignal = False # Affects only light H+
 
 # Convert the following nuisances from shape to constant
 OptionConvertFromShapeToConstantList = ["trg_tau","trg_tau_dataeff","trg_tau_MCeff","trg_L1ETM_dataeff","trg_L1ETM_MCeff","trg_L1ETM","trg_muon_dataeff", # triggers
-                                        #"tau_ID_shape", "tau_ID_constShape", # tau ID
+                                        #"tau_ID_shape", # tau ID
                                         "tau_ID_eToTauEndcap_shape", # tau mis-ID
                                         #"tau_ID_eToTauBarrel_shape", "tau_ID_muToTau_shape", "tau_ID_jetToTau_shape", # other tau mis-ID
                                         "ES_jets","JER","ES_METunclustered", # jet, MET
                                         #"ES_taus", # tau ES
                                         #"b_tag", "b_tag_fakes", # btag
                                         "Emb_mu_ID", "Emb_WtauTomu", # embedding-specific
-                                        "Emb_reweighting", # other embedding-specific
+                                        #"Emb_reweighting", # other embedding-specific
                                         #"QCD_metshape", # multijets specific
                                         #"top_pt", # top pt reweighting
                                         "pileup", "pileup_fakes", # pileup
@@ -275,7 +277,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     EmbeddingIdList = [3]
     DataGroups.append(DataGroup(
         label        = "EWK_Tau",
-        landsProcess = 4,
+        landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
         #datasetDefinition   = ["SingleMu"],
@@ -287,10 +289,13 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     ))
 
     # EWK + ttbar with fake taus
-    mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
+    if not OptionSeparateFakeTtbarFromFakeBackground:
+        mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
+    else:
+        mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
-        landsProcess = 1,
+        landsProcess = 4,
         shapeHisto   = FakeShapeTTbarHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
@@ -359,7 +364,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         myEmbeddingShapeSystematics = myShapeSystematics[:]+["top_pt","e_mu_veto","b_tag","xsect_tt_8TeV","lumi"]
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_TTJets_MC",
-        landsProcess = 4,
+        landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
@@ -405,7 +410,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
     mergeColumnsByLabel.append({"label": "MC_EWKFakeTau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
-        landsProcess = 1,
+        landsProcess = 4,
         shapeHisto   = FakeShapeTTbarHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
@@ -618,13 +623,13 @@ if not "tau_ID_shape" in myShapeSystematics:
         value         = 0.15, # FIXME
     ))
 
-Nuisances.append(Nuisance(
-    id            = "tau_ID_constShape",
-    label         = "tau-jet ID (no Rtau)",
-    distr         = "shapeQ",
-    function      = "ConstantToShape",
-    value         = systematics.getTauIDUncertainty(isGenuineTau=True)
-))
+#Nuisances.append(Nuisance(
+    #id            = "tau_ID_constShape",
+    #label         = "tau-jet ID (no Rtau)",
+    #distr         = "shapeQ",
+    #function      = "ConstantToShape",
+    #value         = systematics.getTauIDUncertainty(isGenuineTau=True)
+#))
 
 if "tau_ID_shape" in myShapeSystematics:
     Nuisances.append(Nuisance(
@@ -1795,6 +1800,25 @@ if OptionCtrlPlotsAtMt:
                              "unit": "",
                              "log": True,
                              "legendPosition": "SE",
+                             "opts": {"ymin": 0.009} },
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+
+    ControlPlots.append(ControlPlotInput(
+        title            = "SelectedTau_Rtau_FullRange_AfterMtSelections",
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "SelectedTau_Rtau_AfterMtSelections",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "SelectedTau_Rtau_AfterMtSelections",
+        details          = { "xlabel": "Selected #tau R_{#tau}",
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
+                             "unit": "",
+                             "log": True,
+                             "legendPosition": "SW",
+                             "opts2": {"ymin": 0.2, "ymax": 1.8},
                              "opts": {"ymin": 0.009} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file

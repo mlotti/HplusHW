@@ -8,11 +8,18 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
+uncert_missing1loopEW  = 0.05
+uncert_missing2loopQCD = 0.02
+uncert_deltab          = 0.03
+uncert_missing_HO_tt   = 0.03
+
 class BRXSDatabaseInterface:
-    def __init__(self,rootfile):
-        print "BRXSDatabaseInterface: reading file",rootfile
-	self.rootfile  = rootfile
-	self.fIN       = ROOT.TFile.Open(rootfile)
+    def __init__(self,rootfile, silentStatus=False):
+        self.silentStatus = silentStatus
+        if not self.silentStatus:
+            print "BRXSDatabaseInterface: reading file",rootfile
+        self.rootfile  = rootfile
+        self.fIN       = ROOT.TFile.Open(rootfile)
 	self.program   = "FeynHiggs"
 	self.selection = ""
 
@@ -33,6 +40,184 @@ class BRXSDatabaseInterface:
             branch.SetAddress(variable)
             self.variables.append(variable)
             self.names.append(branch.GetName())
+
+    def __delete__(self):
+        self.close()
+
+    def close(self):
+        if self.fIN != None:
+            self.fIN.Close()
+        self.fIN = None
+
+    def getTheorUncert(self,graph,xVariable,selection,pm):
+
+        sign = 1
+        if pm == "-":
+            sign = -1
+
+        thvars = []
+        for v in self.BRvariable.split("*"):
+            if "BR" in v or "xsec" in v:
+                thvars.append(v)
+
+        xnew = []
+        ynew = []
+
+        print "Graph-------------------------------- obs %s1sigma theor"%pm
+
+        masses = self.expLimit.keys()
+        masses_int = []
+        for m in masses:
+            masses_int.append(int(m))
+        for m in sorted(masses_int):
+            modelIndependentLimit = float(self.expLimit[str(m)])
+
+            tanb = graph.Eval(m)
+
+            if m < 175 and tanb < 1:
+                mintanb = self.getMinimumTanb(self.BRvariable,selection+"&& mHp==%s"%m)
+                tanb = mintanb
+
+            uncert = 0
+            for v in thvars:
+                if "xsec" in v:
+####                    uncert += self.xsecUncert(xVariable,"tanb",v,m,tanb,pm)
+                    uncert += self.xsecUncertOrig(xVariable,"tanb",v,m,tanb,pm)
+                else:
+                    uncert += self.brUncert(xVariable,"tanb",v,m,tanb,pm)
+####                    if v == "BR_tHpb":
+####                        uncert += uncert_missing_HO_tt # this uncert is moved to datacards 12122014/SL
+
+            modelIndependentLimit = modelIndependentLimit*(1+sign*uncert)
+
+            xnew.append(m)
+            ynew.append(modelIndependentLimit)
+        newGraph = ROOT.TGraph(len(xnew),array('d',xnew),array('d',ynew))
+        newGraph.SetLineWidth(2)
+        newGraph.SetLineStyle(9)
+        #print "ThUncertGraph"                                                                                                                         
+        #self.PrintGraph(newGraph)                                                                                                                     
+        return newGraph
+
+    def xsecUncert(self,xaxisName,yaxisName,v,x,y,pm):
+
+        uncert = uncert_deltab
+        tmpgraph = self.getGraph(yaxisName,"tHp_xsec","%s == %s"%(xaxisName,x))
+        sigma = tmpgraph.Eval(y)
+        tmpgraph.Delete()
+
+        if pm == "+":
+            xsecname = "tHp_xsec_plusErr"
+        else:
+            xsecname = "tHp_xsec_minusErr"
+
+        tmpgraph = self.getGraph(yaxisName,xsecname,"%s == %s"%(xaxisName,x))
+        sigma_prime = tmpgraph.Eval(y)
+        tmpgraph.Delete()
+
+        uncert += abs(sigma_prime - sigma) / sigma
+        #print "xsec",sigma_prime,sigma,x,y,uncert                                                                                                     
+        return uncert
+
+    def xsecUncertOrig(self,xaxisName,yaxisName,v,x,y,pm):
+
+        self.savecopy = self.tree
+        self.tree = self.fIN.Get("LHCHXSWG_results")
+
+        uncert = uncert_deltab
+        tmpgraph = self.getGraph(yaxisName,"tHp_xsec","%s == %s"%(xaxisName,x))
+        sigma = tmpgraph.Eval(y)
+
+        if pm == "+":
+            xsecname = "tHp_xsec_plusErr"
+        else:
+            xsecname = "tHp_xsec_minusErr"
+
+        tmpgraph = self.getGraph(yaxisName,xsecname,"%s == %s"%(xaxisName,x))
+        sigma_prime = tmpgraph.Eval(y)
+        tmpgraph.Delete()
+
+        uncert += sigma_prime / sigma
+
+        self.tree = self.savecopy
+        return uncert
+
+    def brUncert(self,xaxisName,yaxisName,v,x,y,pm):
+
+        gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
+#        if v == "BR_tHpb":
+#            gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD
+
+        tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
+        br_i = tmpgraph.Eval(y)
+        tmpgraph.Delete()
+
+        gamma_v = v.replace("BR","GAMMA")
+        tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
+        gamma_i = tmpgraph.Eval(y)
+        tmpgraph.Delete()
+
+        gammatot = gamma_i/br_i
+
+        sign = 1
+        if pm == "-":
+            sign = -1
+
+        br_prime1 = gamma_i*(1+sign*gamma_uncert) / (gamma_i*(1+sign*gamma_uncert) + gammatot-gamma_i)
+        br_uncert1 = abs(br_prime1 - br_i) / br_i
+
+        br_prime2 = gamma_i / (gamma_i + (gammatot-gamma_i)*(1+sign*gamma_uncert))
+        br_uncert2 = abs(br_prime2 - br_i) / br_i
+
+        br_uncert = br_uncert1 + br_uncert2
+        #print "BR uncertainty",v,br_uncert                                                                                                            
+        return br_uncert
+
+    def brUncert2(self,xaxisName,yaxisName,v,w,x,y,pm):
+        # usage: uncert = self.brUncert2("mHp","tanb","BR_Hp_taunu","BR_Hp_tb",Hp_mass,tanb,"+")
+
+        gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
+
+        #### first Gamma
+        tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
+        br_i = tmpgraph.Eval(y)
+        tmpgraph.Delete()
+
+        gamma_v = v.replace("BR","GAMMA")
+        tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
+        gamma_i = tmpgraph.Eval(y)
+        tmpgraph.Delete()
+
+        gammatot = gamma_i/br_i
+
+        #### second Gamma
+        tmpgraph = self.getGraph(yaxisName,w,"%s == %s"%(xaxisName,x))
+        br_j = tmpgraph.Eval(y)
+        tmpgraph.Delete()
+
+        gamma_w = w.replace("BR","GAMMA")
+        tmpgraph = self.getGraph(yaxisName,gamma_w,"%s == %s"%(xaxisName,x))
+        gamma_j = tmpgraph.Eval(y)
+        tmpgraph.Delete()
+
+        ####
+
+        sign = 1
+        if pm == "-":
+            sign = -1
+
+        br_prime1 = (gamma_i*(1+sign*gamma_uncert) + gamma_j)/ (gamma_i*(1+sign*gamma_uncert) + gamma_j + gammatot-gamma_i-gamma_j)
+        br_uncert1 = abs(br_prime1 - br_i - br_j) / (br_i + br_j)
+
+        br_prime2 = (gamma_i + gamma_j*(1+sign*gamma_uncert))/ (gamma_i + gamma_j*(1+sign*gamma_uncert) + gammatot-gamma_i-gamma_j)
+        br_uncert2 = abs(br_prime2 - br_i - br_j) / (br_i + br_j)
+
+        br_prime3 = (gamma_i + gamma_j)/ (gamma_i + gamma_j + (gammatot-gamma_i-gamma_j)*(1+sign*gamma_uncert))
+        br_uncert3 = abs(br_prime3 - br_i - br_j) / (br_i + br_j)
+
+        br_uncert = br_uncert1 + br_uncert2 + br_uncert3
+        return br_uncert
+
         
     def setSelection(self,selection):
 	self.selection = selection
@@ -270,6 +455,42 @@ class BRXSDatabaseInterface:
         retGraph.SetLineStyle(3)
         return retGraph
 
+    def LogicalAnd(self,selection1,selection2):
+        if len(selection1) > 0 and len(selection2) > 0:
+            return selection1 + "&&" + selection2
+        if len(selection1) > 0 and len(selection2) == 0:
+            return selection1
+        if len(selection1) == 0 and len(selection2) > 0:
+            return selection2
+        return ""
+
+    def inaccessible(self,xVariableName,selection):
+        selection = self.LogicalAnd(selection,self.selection)
+
+        graphX = []
+        graphY = []
+
+        yVariableName = "tanb"
+        xValues = self.getValues(xVariableName,selection)
+        graphX.append(xValues[0])
+        graphY.append(0.5)
+        
+        for x in xValues:
+            ysel = self.LogicalAnd(selection,self.floatSelection("%s==%s"%(xVariableName,x)))
+            y = min(self.getValues(yVariableName,ysel,roundValues=-1))
+            graphX.append(x)
+            graphY.append(y)
+
+        graphX.append(xValues[len(xValues)-1])
+        graphY.append(0.5)
+
+        retGraph = ROOT.TGraph(len(graphX),array('d',graphX),array('d',graphY))
+        retGraph.SetName("TheoreticallyInaccessible")
+        retGraph.SetFillColor(4)
+        self.PrintGraph(retGraph)
+        return retGraph
+    
+
     def mhLimit(self,higgs,xVariableName,selection,mhMeasurement):
 
         x = []
@@ -357,13 +578,460 @@ class BRXSDatabaseInterface:
 	    x.append(0)
             y.append(100)
 
-#        for i in range(0,len(x)):
-#            print "mhlimit:  m,tanb",x[i],y[i]
+        for i in range(0,len(x)):
+            print "mhlimit:  m,tanb",x[i],y[i]
         retGraph = ROOT.TGraph(len(x),array('d',x,),array('d',y))
         retGraph.SetName("mhLimit")
         retGraph.SetLineWidth(1)
         retGraph.SetLineStyle(7)
 #        retGraph.SetFillColor(ROOT.TColor.GetColor("#ffffcc"))
+        retGraph.SetFillColor(7)
+        retGraph.SetFillStyle(3008)
+        return retGraph
+
+    def mHLimit_mA(self,higgs,xVariableName,selection,mhMeasurement):
+        print "mHLimit_mA",higgs,xVariableName,selection
+
+        graph1_x = []
+        graph1_y = []
+
+        graph2_x = []
+        graph2_y = []
+
+        graph3_x = []
+        graph3_y = []
+
+        xvalues = self.getValues(xVariableName,selection)
+        print xvalues
+        limit = self.lowerLimit(mhMeasurement)
+        for xv in xvalues:
+#            print "x=",xv
+            xval = float(xv)
+            theSelection = selection+"&&"+self.floatSelection(xVariableName+"==%s"%xval)
+            graph = self.getGraph("tanb",higgs,theSelection)
+            xg,yg = self.graph2arrays(graph)
+#            crossOverPoints0 = []
+#            crossOverPoints1 = []
+#            directions = []
+            ntimes = 0
+            for i in range(1,len(xg)):
+                x0 = xg[i-1]
+                y0 = yg[i-1]
+                x1 = xg[i]
+                y1 = yg[i]
+                print "mu,tanb,mH",xv,xg[i],yg[i]
+                if y0 < limit and y1 > limit:
+                    tanblimit = self.linearFunction(limit,y0,x0,y1,x1)
+                    if ntimes == 0:
+                        graph1_x.append(xval)
+                        graph1_y.append(tanblimit)
+                        ntimes += 1
+                    else:
+                        graph2_x.append(xval)
+                        graph2_y.append(tanblimit)
+
+                if y0 > limit and y1 < limit:
+                    tanblimit = self.linearFunction(limit,y0,x0,y1,x1)
+                    graph3_x.append(xval)
+                    graph3_y.append(tanblimit)
+
+        graph5_x = []
+        graph5_y = []
+
+        graph6_x = []
+        graph6_y = []
+
+        graph7_x = []
+        graph7_y = []
+
+        limit = self.upperLimit(mhMeasurement)
+        for xv in xvalues:
+#            print "x=",xv
+            xval = float(xv)
+            theSelection = selection+"&&"+self.floatSelection(xVariableName+"==%s"%xval)
+            graph = self.getGraph("tanb",higgs,theSelection)
+            xg,yg = self.graph2arrays(graph)
+            ntimes = 0
+            for i in range(1,len(xg)):
+                x0 = xg[i-1]
+                y0 = yg[i-1]
+                x1 = xg[i]
+                y1 = yg[i]
+
+                if y0 < limit and y1 > limit:
+                    tanblimit = self.linearFunction(limit,y0,x0,y1,x1)
+                    if ntimes == 0:
+                        graph5_x.append(xval)
+                        graph5_y.append(tanblimit)
+                        ntimes += 1
+                    else:
+                        graph6_x.append(xval)
+                        graph6_y.append(tanblimit)
+                if y0 > limit and y1 < limit:
+                    tanblimit = self.linearFunction(limit,y0,x0,y1,x1)
+                    graph7_x.append(xval)
+                    graph7_y.append(tanblimit)
+
+#                    crossOverPoints0.append(x0)
+#                    crossOverPoints1.append(x1)
+#                    directions.append(-1)
+#            ys = []
+#            for i in range(len(crossOverPoints0)):
+#                tanbmin = crossOverPoints0[i]
+#                tanbmax = crossOverPoints1[i]
+#                print "tanbmin,max",tanbmin,tanbmax
+#                self.nInterpolation = 0
+#                tanblimit = self.linearFunction(limit,mHmin,tanbmin,mHmax,tanbmax)
+#                ys.append(tanblimit)
+    
+#            print "ys",ys
+#            self.PrintGraph(graph)
+#        sys.exit()
+#        tanbStart = 1
+#        print "check mHLimit_mA",higgs,xVariableName,selection
+#        lower_y0,lower_x0 = self.getLimits(higgs,"tanb",xVariableName,selection+"&&tanb>=%s"%tanbStart,self.lowerLimit(mhMeasurement))
+#        upper_y0,upper_x0 = self.getLimits(higgs,"tanb",xVariableName,selection+"&&tanb>=%s"%tanbStart,self.upperLimit(mhMeasurement))
+
+#        print lower_y0,lower_x0
+#        sys.exit()
+#        for i in range(0,len(lower_x0)):
+#            j = len(lower_x0) -1 -i
+#            if lower_y0[j] < 30:
+#                x.append(lower_x0[j])
+#                y.append(lower_y0[j])
+#            else:
+#                if lower_x0[j] <= mHpStart:
+#                    x.append(lower_x0[j])
+#                    y.append(lower_y0[j])
+
+
+        print            
+        for i in range(len(graph1_x)):
+            print "                    %s, %s,"%(graph1_x[i],graph1_y[i])
+        print
+        for i in reversed(range(len(graph3_x))):
+            print "                    %s, %s,"%(graph3_x[i],graph3_y[i])
+        print
+        for i in range(len(graph2_x)):
+            print "                    %s, %s,"%(graph2_x[i],graph2_y[i])
+        print
+#        for i in range(len(graph3_x)):
+#            print "                    %s, %s,"%(graph3_x[i],graph3_y[i])
+#        print
+        for i in reversed(range(len(graph5_x))):
+            print "                    %s, %s,"%(graph5_x[i],graph5_y[i])
+        print
+        for i in reversed(range(len(graph6_x))):
+            print "                    %s, %s,"%(graph6_x[i],graph6_y[i])
+        print
+        for i in range(len(graph7_x)):
+            print "                    %s, %s,"%(graph7_x[i],graph7_y[i])
+
+        x = []
+        y = []
+        x.extend(xinc)
+        y.extend(yinc)
+#        x.extend(reversed(xdec))
+#        y.extend(reversed(ydec))
+
+        for i in range(0,len(x)):
+            print "mhlimit:  m,tanb",x[i],y[i]
+        sys.exit()    
+        retGraph = ROOT.TGraph(len(x),array('d',x,),array('d',y))
+        retGraph.SetName("mhLimit")
+        retGraph.SetLineWidth(1)
+        retGraph.SetLineStyle(7)
+        retGraph.SetFillColor(7)
+        retGraph.SetFillStyle(3008)
+        return retGraph
+
+    def getHardCoded_mH_limitForMu_mA(self,mass,region=0):
+        data = []
+        if mass == 110:
+            if region == 0:
+                # data: mu,tanb, mu,tanb,...
+                data = [
+                    1800.0, 0.854132486576,
+                    1900.0, 0.99914738702,
+                    2000.0, 1.12000529022,
+                    2100.0, 1.24671046729,
+                    2200.0, 1.38811361838,
+                    2300.0, 1.56947172561,
+                    2400.0, 1.8310179733,
+                    2410.0, 1.86687719376,
+                    2420.0, 1.90131151193,
+                    2430.0, 1.94757719069,
+                    2440.0, 1.99100507708,
+                    2450.0, 2.04618952282,
+                    2460.0, 2.10167495697,
+                    2470.0, 2.17667259999,
+                    2480.0, 2.2679850711,
+                    2490.0, 2.39420811635,
+                    2490.0, 3.20135489301,
+                    2480.0, 3.51597560986,
+                    2470.0, 3.92531042401,
+                    2470.0, 4.34060804699,
+                    2480.0, 4.63642573942,
+                    2490.0, 4.79583908008,
+                    2500.0, 4.91310503882,
+                    2600.0, 5.50184465864,
+                    2700.0, 5.77264941389,
+                    2800.0, 5.92869959732,
+                    2900.0, 6.02021573136,
+                    3000.0, 6.06971683218,
+                    3100.0, 6.08939343345,
+                    3200.0, 6.08735144045,
+                    3300.0, 6.06884643992,
+
+                    3500.0, 6.0,
+                    3500.0, 23.7,
+
+                    3300.0, 23.7179108091,
+                    3200.0, 25.2994600794,
+                    3100.0, 27.0838402694,
+                    3000.0, 29.1309411324,
+                    2900.0, 31.5019452343,
+                    2800.0, 34.2770039897,
+                    2700.0, 37.60201053,
+                    2600.0, 41.6873822408,
+                    2500.0, 46.9261505569,
+                    2400.0, 54.2523244912,
+                    2300.0, 68.3855635511,
+
+                    280.0, 72.7139444289,
+                    270.0, 70.2778562327,
+                    260.0, 67.8642225713,
+                    250.0, 65.4627438648,
+                    240.0, 63.0672229295,
+                    230.0, 60.660591108,
+                    220.0, 58.2318402539,
+                    210.0, 55.7574199652,
+                    200.0, 53.2071830624,
+
+                    100.0, 40,
+
+                    200.0, 24.5183379961,
+                    210.0, 23.5290332815,
+                    220.0, 22.6641518048,
+                    230.0, 21.8870446993,
+                    240.0, 21.2014059677,
+                    250.0, 20.581887486,
+                    260.0, 19.9859996724,
+                    270.0, 19.4760503994,
+                    280.0, 18.9639384265,
+                    290.0, 18.5241367976,
+                    300.0, 18.076685924,
+                    400.0, 14.8585813979,
+                    500.0, 12.7513458894,
+                    600.0, 11.1889526711,
+                    700.0, 9.94188555152,
+                    800.0, 8.93012352062,
+                    900.0, 8.06882728289,
+                    1000.0, 7.31840136675,
+                    1100.0, 6.65458545374,
+                    1200.0, 6.05084697701,
+                    1300.0, 5.53550867791,
+                    1400.0, 5.08365856105,
+                    1500.0, 4.67822768017,
+                    1600.0, 4.31256884738,
+                    1700.0, 3.95306255817,
+                    1800.0, 3.59415089194,
+                    1900.0, 3.22883986762,
+                    2000.0, 2.83935975369,
+                    2100.0, 2.33848046492,
+                    2110.0, 2.26189830023,
+                    2120.0, 2.16263791536,
+                    2100.0, 1.6762319659,
+                    2000.0, 1.37087645279,
+                    1900.0, 1.18831423144,
+                    1800.0, 1.04450965004,
+                    1700.0, 0.903851991518,
+                    1660.0, 0.838744349747,
+                    1650.0, 0.818514828969,
+                    1640.0, 0.8,
+                    1630.0, 0.77,
+                    ]
+            if region == 1:
+                # data: mu,tanb, mu,tanb,...                                                                                                 
+                data = [
+                    ]
+
+        if mass == 140:
+            if region == 0:
+                # data: mu,tanb, mu,tanb,...                                                                                                 
+                data = [
+
+                    1900.0, 0.854594234856,
+                    2000.0, 0.925465205775,
+                    2100.0, 0.99330023211,
+                    2200.0, 1.0614599614,
+                    2210.0, 1.06805851318,
+                    2220.0, 1.07468801065,
+                    2230.0, 1.08137237353,
+                    2240.0, 1.08813736601,
+                    2250.0, 1.09501079666,
+                    2260.0, 1.10228292342,
+                    2270.0, 1.11015899727,
+                    2280.0, 1.1178865973,
+                    2290.0, 1.12547702577,
+                    2300.0, 1.13294192473,
+                    2310.0, 1.14029334631,
+                    2400.0, 1.20461893525,
+                    2500.0, 1.28568536635,
+                    2600.0, 1.37547851167,
+                    2700.0, 1.47630962412,
+                    2800.0, 1.59315302022,
+                    2810.0, 1.60610846207,
+                    2820.0, 1.62122837512,
+                    2830.0, 1.63602253697,
+                    2840.0, 1.65050592148,
+                    2850.0, 1.66469328465,
+                    2860.0, 1.67859920028,
+                    2870.0, 1.69223810928,
+                    2880.0, 1.70763941972,
+                    2890.0, 1.72542420108,
+                    2900.0, 1.74280071852,
+                    3000.0, 1.94153432173,
+                    3100.0, 2.27634393257,
+                    3110.0, 2.33087162867,
+                    3120.0, 2.39210511409,
+                    3130.0, 2.47337701317,
+                    3140.0, 2.58158408276,
+                    3150.0, 2.76368840664,
+
+                    3150.0, 3.02129080594,
+                    3140.0, 3.25421293234,
+                    3130.0, 3.40572262171,
+                    3120.0, 3.53155775679,
+                    3110.0, 3.64494984562,
+                    3100.0, 3.75036346677,
+                    3000.0, 4.65688752156,
+                    2900.0, 5.62089846744,
+                    2890.0, 5.79467749462,
+
+                    2890.0, 5.90032939913,
+                    2900.0, 5.97641603594,
+                    3000.0, 6.03079347159,
+                    3100.0, 5.97386748483,
+                    3110.0, 5.96695013308,
+                    3120.0, 5.9599314519,
+                    3130.0, 5.95281978802,
+                    3140.0, 5.94562230279,
+                    3150.0, 5.93834521047,
+                    3160.0, 5.9309939226,
+                    3170.0, 5.9235731948,
+                    3180.0, 5.91608722309,
+                    3190.0, 5.90853971249,
+                    3200.0, 5.90093398858,
+                    3300.0, 5.82245908891,
+
+                    3500.0, 5.8,
+                    3500.0, 10.7,
+
+                    3300.0, 10.6991584193,
+                    3200.0, 10.8234968864,
+                    3190.0, 10.8349294403,
+                    3180.0, 10.8461697924,
+                    3170.0, 10.8572151475,
+                    3160.0, 10.868062628,
+                    3150.0, 10.8787092626,
+                    3140.0, 10.8891520022,
+                    3130.0, 10.8993876692,
+                    3120.0, 10.9094130031,
+                    3110.0, 10.9192246529,
+                    3100.0, 10.9288191303,
+                    3000.0, 11.0141984977,
+                    2900.0, 11.0815519803,
+                    2890.0, 11.0863110175,
+                    2880.0, 11.0906766372,
+
+                    2870.0, 11.0946391412,
+                    2860.0, 11.0981883227,
+                    2850.0, 11.1013135126,
+                    2840.0, 11.1040035312,
+                    2830.0, 11.1062466612,
+                    2820.0, 11.108030615,
+                    2810.0, 11.1093424978,
+                    2800.0, 11.1101687831,
+                    2700.0, 11.0881791564,
+                    2600.0, 10.9963346755,
+                    2500.0, 10.8273492631,
+                    2400.0, 10.4857786653,
+                    2310.0, 9.84459018792,
+                    2300.0, 9.72899907843,
+                    2290.0, 9.59241710144,
+                    2280.0, 9.42177567799,
+                    2270.0, 9.18403669588,
+
+                    2270.0, 8.06679614195,
+                    2280.0, 7.78195723276,
+                    2290.0, 7.56559939746,
+                    2300.0, 7.38192803438,
+                    2310.0, 7.21981738414,
+                    2400.0, 6.16877546906,
+                    2500.0, 5.3413550539,
+                    2600.0, 4.65542582929,
+                    2700.0, 4.03019100166,
+                    2800.0, 3.38944914231,
+                    2810.0, 3.31834216638,
+                    2820.0, 3.24408141947,
+                    2830.0, 3.16587805124,
+                    2840.0, 3.08214094485,
+                    2850.0, 2.98966018248,
+                    2860.0, 2.87908797196,
+                    2870.0, 2.73222329284,
+
+                    2870.0, 2.32581136291,
+                    2860.0, 2.22270605111,
+                    2850.0, 2.15400803826,
+                    2840.0, 2.09380976977,
+                    2830.0, 2.05010565045,
+                    2820.0, 2.00436443931,
+                    2810.0, 1.97051586584,
+                    2800.0, 1.93681773453,
+                    2700.0, 1.69309369551,
+                    2600.0, 1.5361155526,
+                    2500.0, 1.40974277028,
+                    2400.0, 1.30599159577,
+                    2310.0, 1.22713955996,
+                    2300.0, 1.21763736127,
+                    2290.0, 1.20790853644,
+                    2280.0, 1.19855352251,
+                    2270.0, 1.19142908776,
+                    2260.0, 1.18421189753,
+                    2250.0, 1.17688969248,
+                    2240.0, 1.16945060875,
+                    2230.0, 1.16188310993,
+                    2220.0, 1.1541759229,
+                    2210.0, 1.14631797626,
+                    2200.0, 1.13829834295,
+                    2100.0, 1.06270314641,
+                    2000.0, 0.988987097841,
+                    1900.0, 0.919892755008,
+                    1800.0, 0.849618822569,
+                    1700.0, 0.767531892104,
+                    ]
+            if region == 1:
+                # data: mu,tanb, mu,tanb,...
+                data = [
+                    ]
+
+        if len(data) == 0:
+            return None
+
+        x = []
+        y = []
+        for i in range(len(data)/2):
+            xp = data[2*i]
+            yp = data[2*i+1]
+            x.append(xp)
+            y.append(yp)
+
+        retGraph = ROOT.TGraph(len(x),array('d',x,),array('d',y))
+        retGraph.SetName("mhLimit")
+        retGraph.SetLineWidth(1)
+        retGraph.SetLineStyle(7)
+        #retGraph.SetFillColor(ROOT.TColor.GetColor("#ffffcc"))                                                                              
         retGraph.SetFillColor(7)
         retGraph.SetFillStyle(3008)
         return retGraph
@@ -942,6 +1610,132 @@ class BRXSDatabaseInterface:
         retGraph.SetFillStyle(3008)
         return retGraph
 
+    def muLimit_mA(self,mA,xVariableName,selection):
+
+        print "    mu limit, mA =",mA
+
+        x = []
+        y = []
+
+        mus = self.getValues(xVariableName,"mA==%s"%mA)
+        highTanbRegion = False
+
+        for mu in mus:
+            xval = mu
+            yselection = xVariableName+"=="+str(xval) + "&&" + "mA==%s"%mA
+            if len(selection) > 0:
+                yselection += "&&"+selection
+
+            print yselection    
+            graph = self.getGraph("tanb","BR_tHpb*BR_Hp_taunu","mu==%s&&mA==%s"%(xval,mA))
+            xg,yg = self.graph2arrays(graph)
+            first = xg[0]
+            last = xg[len(xg)-1]
+            crossOverPoints0 = []
+            crossOverPoints1 = []
+            directions = []
+            for i in range(len(xg)-1):
+                tanb = xg[i]
+                br   = yg[i]
+                mHpselection = yselection + "&& tanb == %s"%tanb
+                mHp = self.getMHp(mA,mHpselection)
+                expBRlimit = self.getExpLimitInterpolated(mHp,mHpselection)
+                #print "Target brlimit",mHp,tanb,expBRlimit,br
+
+                x0 = xg[i]
+                y0 = yg[i]
+
+                x1 = xg[i+1]
+                y1 = yg[i+1]
+                
+                limit = expBRlimit
+
+                if y0 < limit and y1 > limit:
+                    crossOverPoints0.append(x0)
+                    crossOverPoints1.append(x1)
+                    directions.append(1)
+                    print "Target brlimit",mHp,tanb,expBRlimit,br
+                if y0 > limit and y1 < limit:
+                    crossOverPoints0.append(x0)
+                    crossOverPoints1.append(x1)
+                    directions.append(-1)
+                    print "Target brlimit",mHp,tanb,expBRlimit,br
+
+            ys = []
+            for i in range(len(crossOverPoints0)):
+                tanbmin = crossOverPoints0[i]
+                tanbmax = crossOverPoints1[i]
+
+                mHpselection = yselection + "&& tanb == %s"%tanbmin
+                mHp = self.getMHp(mA,mHpselection)
+                #print "check mHp",mHp,mA,tanbmin,mu
+                expBRlimit = self.getExpLimitInterpolated(mHp,mHpselection)
+                obsLimit = expBRlimit
+
+                self.nInterpolation = 0
+                limit = self.linearBRInterpolation(self.BRvariable,obsLimit,tanbmin,tanbmax,self.floatSelection(yselection))
+                ys.append(limit)
+
+            if len(directions) == 0 or (len(directions) > 0 and directions[0] < 0):
+                tmp = [first]
+                tmp.extend(ys)
+                ys = tmp
+            if len(ys)%2:
+                ys.append(last)
+
+            if len(ys) > 0:
+                x.append(xval)
+                y.append(ys)
+
+        xgr = []
+        ygr = []
+        for i in range(len(x)):
+            if len(y[i]) > 0:
+                xgr.append(x[i])
+                ygr.append(y[i][0])
+        for i in reversed(range(len(x))):
+            if i < len(x) and not len(y[i]) == len(y[i-1]):
+                break
+            if len(y[i]) > 1:
+                xgr.append(x[i])
+                ygr.append(y[i][1])
+                if i == 0 and x[i] == mus[0]:
+                    xgr.append(0)
+                    ygr.append(y[i][1])
+        for i in range(len(x)):
+            if len(y[i]) > 2:
+                xgr.append(x[i])
+                ygr.append(y[i][2])
+        yi = 3
+        for i in reversed(range(len(x))):
+            if len(y[i]) > yi:
+                xgr.append(x[i])
+                ygr.append(y[i][yi])
+            if i < len(x) and not len(y[i]) == len(y[i-1]):
+                    yi = 1
+
+        xgr.append(x[0])
+        ygr.append(y[0][0])
+
+        retGraph = ROOT.TGraph(len(xgr),array('d',xgr,),array('d',ygr))
+        retGraph.SetName("muLimit")
+        retGraph.SetLineWidth(1)
+        retGraph.SetLineStyle(7)
+        retGraph.SetFillColor(8)
+        retGraph.SetFillStyle(3008)
+#        self.PrintGraph(retGraph)
+        for i in range(len(xgr)):
+            print "    x.append(",xgr[i],"); y.append(",ygr[i],")"
+        return retGraph
+
+    def graph2arrays(self,graph):
+        x = []
+        y = []
+        for i in range(graph.GetN()):
+            x.append(graph.GetX()[i])
+            y.append(graph.GetY()[i])
+        return x,y
+
     def getCrossOver(self,graph,limit):
         crossover0 = []
         crossover1 = []
@@ -961,30 +1755,40 @@ class BRXSDatabaseInterface:
                 direction.append(-1)
         return crossover0,crossover1,direction
 
-    def getIsoMass(self,mHp):
+    def getIsoMass(self,mHp,xaxis="mA"):
         x = []
         y = []
 
         sele = self.selection
-        
+        print "selection",sele
         tanbs = self.getValues("tanb",sele,roundValues=-1)
         for tanb in tanbs:
+#            if not tanb == 25:
+#                continue
             selection = "tanb==%s"%tanb
             mHps = self.getValues("mHp",selection,roundValues=-1)
             #print "check mHps",mHps
             mAs = []
             for m in mHps:
                 sele = self.floatSelection(selection+"&&mHp==%s"%m)
-                value = self.getValues("mA",sele,roundValues=-1)
+                value = self.getValues(xaxis,sele,roundValues=-1)
                 mAs.append(value[0])
             mgraph = ROOT.TGraph(len(mHps),array("d",mHps),array("d",mAs))
-            mA = mgraph.Eval(mHp,None,"S")
+#            self.PrintGraph(mgraph)
+#            print 
+#            mA = mgraph.Eval(mHp,0,"S")
+            mA = mgraph.Eval(mHp)
+#            print mHp,mA
+            if mA < 0:
+                continue
             x.append(mA)
             y.append(tanb)
-
+#            print "x,y",x,y
+#            sys.exit()
         xarea = 160
 	if mHp > 175:
             xarea = 100
+        """    
 	x.append(xarea)
         y.append(75)
 
@@ -993,7 +1797,7 @@ class BRXSDatabaseInterface:
 
         x.append(x[0])
         y.append(y[0])
-        
+        """
         for i in range(0,len(x)):
             print "isomass:  m,tanb",x[i],y[i]
 
@@ -1215,6 +2019,43 @@ class BRXSDatabaseInterface:
 		    sys.exit()
 	print "No mass selection in",selection,", cannot determine explimit. Exiting.."
 	sys.exit()
+
+    def getExpLimitInterpolated(self,mHp,selection):
+        massKeys = self.expLimit.keys()
+        massValues = []
+        for m in massKeys:
+            massValues.append(int(m))
+        massValues = sorted(massValues)
+        massMin = 0
+        massMax = 999
+        for i in range(0,len(massValues)-1):
+            if massValues[i] == mHp:
+                return self.expLimit[str(massValues[i])]
+            if massValues[i] < mHp and massValues[i+1] > mHp:
+                x1 = massValues[i]
+                y1 = float(self.expLimit[str(massValues[i])])
+                x2 = massValues[i+1]
+                y2 = float(self.expLimit[str(massValues[i+1])])
+                return self.linearFunction(mHp,x1,y1,x2,y2)
+        for i in reversed(range(1,len(massValues))):
+            if massValues[i] < mHp and massValues[i-1] < mHp:
+                x1 = massValues[i-1]
+                y1 = float(self.expLimit[str(massValues[i-1])])
+                x2 = massValues[i]
+                y2 = float(self.expLimit[str(massValues[i])])
+                return self.linearFunction(mHp,x1,y1,x2,y2)
+
+        print "getExpLimitInterpolated: Mass out of range, exiting.."
+        sys.exit()
+
+    def getMHp(self,mA,selection):
+        mAs = self.getValues("mA",selection,roundValues=-1)
+        sele = self.floatSelection(selection+"&&mA==%s"%mA)
+        mHp = self.getValues("mHp",sele,roundValues=-1)
+        if len(mHp) > 1:
+            print "getMHp: more than 1 mHp found, exiting..",mHp,mA,sele 
+            sys.exit()
+        return mHp[0]
 
     def addExperimentalBRLimit(self,mass,limit):
 	self.expLimit[str(int(mass))] = str(limit)
@@ -1653,7 +2494,16 @@ def test():
     if match:
 
 	db = BRXSDatabaseInterface(match.group(0))
-        graph = db.getIsoMass(160)
+#        db.Print(variable="mH",selection="mA==110 && mu==3300")
+#        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mA==110 && mu==3300")
+#        db.Print(variable="mHp",selection="mA==110 && mu==3300")
+
+#        db.Print(variable="0.001*2*tHp_xsec*BR_Hp_taunu",selection="mHp==200")
+        db.Print(variable="tHp_xsec",selection="mHp==200 && tanb== 40")
+
+#        db.getExpLimitInterpolated(120,"")
+
+#        graph = db.getIsoMass(160)
         
 #        x = array('d',[180.0,190,200.0,220.0,250.0,300.0,400])
 #        y = array('d',[26.8026641155,29.014188416,30.7101331784,35.8734454992,43.1435998472,52.0940183849,75.0])
