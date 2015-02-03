@@ -328,7 +328,7 @@ def _setHplusCrossSections(datasets, whFunction, hhFunction, hFunction, heavyFun
 # \param datasets  dataset.DatasetManager object
 def setHplusCrossSectionsToTop(datasets):
     function = lambda mass, energy: (backgroundCrossSections.crossSection("TTJets", energy), None)
-    _setHplusCrossSections(datasets, function, function,function)
+    _setHplusCrossSections(datasets, function, function)
 
 ## Set signal dataset cross sections to MSSM cross section
 #
