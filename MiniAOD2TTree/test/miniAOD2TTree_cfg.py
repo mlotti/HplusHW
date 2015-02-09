@@ -10,10 +10,10 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #        'file:miniAOD-prod_PAT_TT_RECO_721_11112014.root'
-#	'file:miniAOD-prod_PAT_TT_RECO_740p1_02122014.root'
+	'file:miniAOD-prod_PAT_TT_RECO_740p1_02122014.root'
 #	'file:miniAOD-prod_PAT_Hp200_RECO_740p1_09122014.root'
 #	'file:miniAOD-prod_PAT_SingleMu_Run2012D_v1_RECO.root'
-	'file:PYTHIA6_Tauola_TTbar_H160_taunu_13TeV_cff_py_GEN.root'
+#	'file:PYTHIA6_Tauola_TTbar_H160_taunu_13TeV_cff_py_GEN.root'
     )
 )
 
@@ -39,10 +39,65 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("Taus"),
             src = cms.InputTag("slimmedTaus"),
             discriminators = cms.vstring(
-		"againstElectronMedium",
-		"againstMuonTight3",
-		"decayModeFinding",
-		"byLooseCombinedIsolationDeltaBetaCorr3Hits"
+                "againstElectronLoose",
+                "againstElectronLooseMVA5",
+                "againstElectronMVA5category",
+                "againstElectronMVA5raw",
+                "againstElectronMedium",
+                "againstElectronMediumMVA5",
+                "againstElectronTight",
+                "againstElectronTightMVA5",
+                "againstElectronVLooseMVA5",
+                "againstElectronVTightMVA5",
+                "againstMuonLoose",
+                "againstMuonLoose2",
+                "againstMuonLoose3",
+                "againstMuonLooseMVA",
+                "againstMuonMVAraw",
+                "againstMuonMedium",
+                "againstMuonMedium2",
+                "againstMuonMediumMVA",
+                "againstMuonTight",
+                "againstMuonTight2",
+                "againstMuonTight3",
+                "againstMuonTightMVA",
+                "byCombinedIsolationDeltaBetaCorrRaw3Hits",
+                "byIsolationMVA3newDMwLTraw",
+                "byIsolationMVA3newDMwoLTraw",
+                "byIsolationMVA3oldDMwLTraw",
+                "byIsolationMVA3oldDMwoLTraw",
+                "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+                "byLooseIsolationMVA3newDMwLT",
+                "byLooseIsolationMVA3newDMwoLT",
+                "byLooseIsolationMVA3oldDMwLT",
+                "byLooseIsolationMVA3oldDMwoLT",
+                "byMediumCombinedIsolationDeltaBetaCorr3Hits",
+                "byMediumIsolationMVA3newDMwLT",
+                "byMediumIsolationMVA3newDMwoLT",
+                "byMediumIsolationMVA3oldDMwLT",
+                "byMediumIsolationMVA3oldDMwoLT",
+                "byTightCombinedIsolationDeltaBetaCorr3Hits",
+                "byTightIsolationMVA3newDMwLT",
+                "byTightIsolationMVA3newDMwoLT",
+                "byTightIsolationMVA3oldDMwLT",
+                "byTightIsolationMVA3oldDMwoLT",
+                "byVLooseIsolationMVA3newDMwLT",
+                "byVLooseIsolationMVA3newDMwoLT",
+                "byVLooseIsolationMVA3oldDMwLT",
+                "byVLooseIsolationMVA3oldDMwoLT",
+                "byVTightIsolationMVA3newDMwLT",
+                "byVTightIsolationMVA3newDMwoLT",
+                "byVTightIsolationMVA3oldDMwLT",
+                "byVTightIsolationMVA3oldDMwoLT",
+                "byVVTightIsolationMVA3newDMwLT",
+                "byVVTightIsolationMVA3newDMwoLT",
+                "byVVTightIsolationMVA3oldDMwLT",
+                "byVVTightIsolationMVA3oldDMwoLT",
+                "chargedIsoPtSum",
+                "decayModeFinding",
+                "decayModeFindingNewDMs",
+                "neutralIsoPtSum",
+                "puCorrPtSum"
 	    ),
             filter = cms.untracked.bool(False)
         )
@@ -66,6 +121,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("Jets"),       
             src = cms.InputTag("slimmedJets"),      
             discriminators = cms.vstring(
+		"secondaryVertex",
 		"trackCountingHighPurBJetTags",
 		"trackCountingHighEffBJetTags"
             )
@@ -76,10 +132,10 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("MET_Type1"),
             src = cms.InputTag("slimmedMETs")
         ),
-        cms.PSet(
-            branchname = cms.untracked.string("CaloMET"),
-            src = cms.InputTag("patMETCalo")
-        )
+#        cms.PSet(
+#            branchname = cms.untracked.string("CaloMET"),
+#            src = cms.InputTag("patMETCalo")
+#        )
     )
 )
 
