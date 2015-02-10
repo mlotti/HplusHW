@@ -63,6 +63,7 @@ def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
     myPlotName = "%s/QCDInv_ClosureTest_%s"%(myDir, histoName)
     myParams = {}
     myParams["ylabel"] = "Events/#Deltam_{T}, normalized to 1"
+    myParams["xlabel"] = "m_{T}(tau,MET), GeV"
     myParams["log"] = False
     myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
     #myParams["opts2"] = {"ymin": 0.8, "ymax":1.2}

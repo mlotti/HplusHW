@@ -95,7 +95,9 @@ def plotClosure(mt_nom, mt_var, name, optMode):
     style = tdrstyle.TDRStyle() 
     plot = plots.ComparisonPlot(mt_var, mt_nom)
     plot.createFrame(optMode.replace("Opt","mT_Closure_"+ name +"_"), createRatio=True, opts2={"ymin": 0.73, "ymax": 1.27})
-    moveLegend={"dx": -0.3,"dy": 0.02}
+    plot.frame.GetXaxis().SetTitle("m_{T}(tau,MET), GeV")
+    plot.frame.GetYaxis().SetTitle("#LT Events / bin #GT")
+    moveLegend={"dx": -0.3,"dy": 0.04}
     plot.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
     histograms.addStandardTexts()
     plot.draw()
@@ -159,6 +161,13 @@ def main():
     qcd_mt = qcd_mt.Rebin(len(defaultBinning)-1,"", array.array("d",defaultBinning))
     fakeTau_mt = fakeTau_mt.Rebin(len(defaultBinning)-1,"", array.array("d",defaultBinning))
     
+    # Divide by binwidth
+    for i in range(0,qcd_mt.GetSize()):
+        qcd_mt.SetBinContent(i, qcd_mt.GetBinContent(i)/qcd_mt.GetBinWidth(i))
+        fakeTau_mt.SetBinContent(i, fakeTau_mt.GetBinContent(i)/fakeTau_mt.GetBinWidth(i))
+        qcd_mt.SetBinError(i, qcd_mt.GetBinError(i)/qcd_mt.GetBinWidth(i))
+        fakeTau_mt.SetBinError(i, fakeTau_mt.GetBinError(i)/fakeTau_mt.GetBinWidth(i))
+
     # Plot results
     plotClosure(qcd_mt, fakeTau_mt, "Inclusive", optimizationMode)
     plotFakeRateProbabilities(myFakeRateWeightCalculator.getWeights(), myFakeRateWeightCalculator.getWeightErrors(), myFakeRateWeightCalculator.getSortedFactors(), optimizationMode)

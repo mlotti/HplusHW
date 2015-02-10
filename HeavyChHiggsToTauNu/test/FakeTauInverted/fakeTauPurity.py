@@ -41,6 +41,7 @@ def doSinglePlot(histograms, myDir, histoName, luminosity):
     else:
         myParams["ylabel"] = "QCD purity"
         myParams["moveLegend"] = {"dx": -0.05, "dy": 0.0}
+    myParams["xlabel"] = "m_{T}(tau,MET), GeV"
     myParams["log"] = False
     #myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
     myParams["opts"] = {"ymin": 0.0, "ymax":1.2}
