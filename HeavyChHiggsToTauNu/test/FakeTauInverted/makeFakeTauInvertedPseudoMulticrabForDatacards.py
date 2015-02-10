@@ -16,14 +16,14 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector as analysi
 import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult as qcdInvertedResult
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pseudoMultiCrabCreator as pseudoMultiCrabCreator
-import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.fakeRateWeighting as fakeRateWeighting
+import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.fakeRate as fakeRate
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
 myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
 #myNormalizationFactorSource = "QCDPlusEWKFakeTauNormalizationFactors.py" 
 #myNormalizationFactorSource = "QCDInvertedCombinedNormalizationFactors.py"
 
-myScalarUncertainties = {"xsect_tt_8TeV" : systematics.getCrossSectionUncertainty("TTJets"), "lumi" : systematics.getLuminosityUncertainty()}
+myScalarUncertainties = {"xsect_tt_8TeV_forQCD" : systematics.getCrossSectionUncertainty("TTJets"), "lumi_forQCD" : systematics.getLuminosityUncertainty(), "probBtag" : systematics.getProbabilisticBtagUncertainty(), "lepton_veto" : systematics.getLeptonVetoUncertainty()}
 
 #"MTInvertedTauIdAfterCollinearCuts"
 #"MTInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus"/baseline
@@ -39,17 +39,28 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     dsetMgr.loadLuminosities()
     plots.mergeRenameReorderForDataMC(dsetMgr)
     dsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
+
+    # dataset manager with tt contribution in ewk separated
+    dsetMgrSeparatedTT = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+    # Do the usual normalisation
+    dsetMgrSeparatedTT.updateNAllEventsToPUWeighted()
+    dsetMgrSeparatedTT.loadLuminosities()
+    plots.mergeRenameReorderForDataMC(dsetMgrSeparatedTT)
+    # TT separated
+    dsetMgrSeparatedTT.merge("EWKNoTT", ["WJets","DYJetsToLL","SingleTop","Diboson"])
+    dsetMgrSeparatedTT.merge("EWKTT", ["TTJets"])
+
     # Obtain luminosity
     myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
 
-    myFakeRateWeightCalculator = fakeRateWeighting.FakeRateWeightCalculator(dsetMgr, myShapeString, myNormFactors, myLuminosity)
+    myFakeRateCalculator = fakeRate.FakeRateCalculator(dsetMgr, myShapeString, myNormFactors, myLuminosity, dataDrivenFakeTaus = dataDrivenFakeTaus)
     #myFakeRateWeightCalculatorAtNorm = fakeRateWeighting.FakeRateWeightCalculator(dsetMgr, "Inverted/MTInvertedTauIdAfterCollinearCuts", myNormFactors, myLuminosity)
     #print "AT NORM:"
     #myFakeRateWeightCalculatorAtNorm.printWeights()
 
     #print "Normalization:"
     #print myFakeRateWeightCalculator.getTotalFakeRateProbabilities()
-    
+
     # Print info so that user can check that merge went correct
     if myDisplayStatus:
         dsetMgr.printDatasetTree()
@@ -61,7 +72,7 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     myModuleResults = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode)
     myQCDNormalizationSystResults = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarQCDNormSource")
     # Obtain results
-    myResult = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity, myModuleInfoString, myFakeRateWeightCalculator.getTotalFakeRateProbabilities(), dataDrivenFakeTaus=dataDrivenFakeTaus, shapeOnly=False, displayPurityBreakdown=True, noRebin=True)
+    myResult = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity, myModuleInfoString, myFakeRateCalculator.getTotalFakeRateProbabilities(), dataDrivenFakeTaus=dataDrivenFakeTaus, shapeOnly=False, displayPurityBreakdown=True, noRebin=True)
     # Store results
     myModuleResults.addShape(myResult.getShape(), myShapeString)
     myModuleResults.addShape(myResult.getShapeMCEWK(), myShapeString+"_MCEWK")
@@ -76,10 +87,10 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     denominator = myResult.getRegionSystDenominator()
     #scale errors with weight at normalization point
     #norm_weight = myFakeRateWeightCalculatorAtNorm.getAverageWeight()
-    average_weight = myFakeRateWeightCalculator.getAverageWeight()
+    average_weight = myFakeRateCalculator.getAverageWeight()
     #print average_weight
-    fakeRateWeighting.scaleErrors(numerator, average_weight)
-    fakeRateWeighting.scaleErrors(denominator, average_weight)
+    fakeRate.scaleErrors(numerator, average_weight)
+    fakeRate.scaleErrors(denominator, average_weight)
     myQCDNormalizationSystResults.addShape(numerator, myShapeString+"Numerator")
     myQCDNormalizationSystResults.addShape(denominator, myShapeString+"Denominator")
     myLabels = myResult.getControlPlotLabelsForQCDSyst()
@@ -93,7 +104,7 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
 
     # Up variation of fake weighting
     myFakeWeightingSystResultsPlus = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarFakeWeightingPlus")
-    myResult_FakeWeightingPlus = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity,myModuleInfoString, myFakeRateWeightCalculator.getTotalFakeRateProbabilitiesSystVarUp(), dataDrivenFakeTaus=dataDrivenFakeTaus, shapeOnly=False, displayPurityBreakdown=True, noRebin=True)                                                                                           
+    myResult_FakeWeightingPlus = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity,myModuleInfoString, myFakeRateCalculator.getTotalFakeRateProbabilitiesSystVarUp(), dataDrivenFakeTaus=dataDrivenFakeTaus, shapeOnly=False, displayPurityBreakdown=True, noRebin=True)                                                                                           
     myFakeWeightingSystResultsPlus.addShape(myResult_FakeWeightingPlus.getShape(), myShapeString)
     myFakeWeightingSystResultsPlus.addShape(myResult_FakeWeightingPlus.getShapeMCEWK(), myShapeString+"_MCEWK")
     myFakeWeightingSystResultsPlus.addShape(myResult_FakeWeightingPlus.getShapePurity(), myShapeString+"_Purity")
@@ -102,32 +113,40 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
 
     # Down variation of fake weighting
     myFakeWeightingSystResultsMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVarFakeWeightingMinus")
-    myResult_FakeWeightingMinus = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity,myModuleInfoString, myFakeRateWeightCalculator.getTotalFakeRateProbabilitiesSystVarDown(), dataDrivenFakeTaus=dataDrivenFakeTaus, shapeOnly=False, displayPurityBreakdown=True, noRebin=True)                                                                                           
+    myResult_FakeWeightingMinus = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", dsetMgr, myLuminosity,myModuleInfoString, myFakeRateCalculator.getTotalFakeRateProbabilitiesSystVarDown(), dataDrivenFakeTaus=dataDrivenFakeTaus, shapeOnly=False, displayPurityBreakdown=True, noRebin=True)                                                                                           
     myFakeWeightingSystResultsMinus.addShape(myResult_FakeWeightingMinus.getShape(), myShapeString)
     myFakeWeightingSystResultsMinus.addShape(myResult_FakeWeightingMinus.getShapeMCEWK(), myShapeString+"_MCEWK")
     myFakeWeightingSystResultsMinus.addShape(myResult_FakeWeightingMinus.getShapePurity(), myShapeString+"_Purity")
     myFakeWeightingSystResultsMinus.addDataDrivenControlPlots(myResult_FakeWeightingMinus.getControlPlots(),myResult.getControlPlotLabels())
     myOutputCreator.addModule(myFakeWeightingSystResultsMinus)
 
+
     # Scalar uncertainties as shapes for MC EWK
+    # does lepton veto affect ewk genuine tau events?
     for scalarName in myScalarUncertainties.keys():
-        upScalarFakeRateWeightCalculator = fakeRateWeighting.FakeRateWeightCalculator(dsetMgr, myShapeString, myNormFactors, myLuminosity, EWKUncertaintyFactor=1+myScalarUncertainties[scalarName].getUncertaintyUp())
-        downScalarFakeRateWeightCalculator = fakeRateWeighting.FakeRateWeightCalculator(dsetMgr, myShapeString, myNormFactors, myLuminosity, EWKUncertaintyFactor=1-myScalarUncertainties[scalarName].getUncertaintyDown())
+        if scalarName == "probBtag":
+            myScalarDsetMgr = dsetMgrSeparatedTT
+            uncertAffectsTT = False 
+        else:
+            myScalarDsetMgr = dsetMgr
+            uncertAffectsTT = True
+        upScalarFakeRateCalculator = fakeRate.FakeRateCalculator(myScalarDsetMgr, myShapeString, myNormFactors, myLuminosity, EWKUncertaintyFactor=1+myScalarUncertainties[scalarName].getUncertaintyUp(), UncertAffectsTT = uncertAffectsTT, dataDrivenFakeTaus = dataDrivenFakeTaus)
+        downScalarFakeRateCalculator = fakeRate.FakeRateCalculator(myScalarDsetMgr, myShapeString, myNormFactors, myLuminosity, EWKUncertaintyFactor=1-myScalarUncertainties[scalarName].getUncertaintyDown(), UncertAffectsTT = uncertAffectsTT, dataDrivenFakeTaus = dataDrivenFakeTaus)
         #print "Scalar uncertainty:", scalarName, myScalarUncertainties[scalarName].getUncertaintyDown(), myScalarUncertainties[scalarName].getUncertaintyUp()
-        upShape = qcdInvertedResult.QCDInvertedShape(upScalarFakeRateWeightCalculator.getFakeTauShape(), myModuleInfoString, upScalarFakeRateWeightCalculator.getTotalFakeRateProbabilities(), optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False)
-        downShape = qcdInvertedResult.QCDInvertedShape(downScalarFakeRateWeightCalculator.getFakeTauShape(), myModuleInfoString, downScalarFakeRateWeightCalculator.getTotalFakeRateProbabilities(), optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False)
+        upShape = qcdInvertedResult.QCDInvertedShape(upScalarFakeRateCalculator.getShape(), myModuleInfoString, upScalarFakeRateCalculator.getTotalFakeRateProbabilities(), optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False) # prev: .getFakeTauShape()
+        downShape = qcdInvertedResult.QCDInvertedShape(downScalarFakeRateCalculator.getShape(), myModuleInfoString, downScalarFakeRateCalculator.getTotalFakeRateProbabilities(), optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False) # prev: .getFakeTauShape()
         # Up variation module
-        myScalarSystPlus = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVar%s_forQCDPlus"%scalarName)
+        myScalarSystPlus = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVar%sPlus"%scalarName)
         myScalarSystPlus.addShape(upShape.getResultShape(), myShapeString)
         myScalarSystPlus.addShape(upShape.getResultMCEWK(), myShapeString+"_MCEWK")
         myScalarSystPlus.addShape(upShape.getResultPurity(), myShapeString+"_Purity")
         #myScalarSystPlus.addDataDrivenControlPlots(myResult_FakeWeightingMinus.getControlPlots(),myResult.getControlPlotLabels())
         myOutputCreator.addModule(myScalarSystPlus)
         # Down variation module
-        myScalarSystMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVar%s_forQCDMinus"%scalarName)
-        myScalarSystMinus.addShape(upShape.getResultShape(), myShapeString)
-        myScalarSystMinus.addShape(upShape.getResultMCEWK(), myShapeString+"_MCEWK")
-        myScalarSystMinus.addShape(upShape.getResultPurity(), myShapeString+"_Purity")
+        myScalarSystMinus = pseudoMultiCrabCreator.PseudoMultiCrabModule(dsetMgr, era, searchMode, optimizationMode, "SystVar%sMinus"%scalarName)
+        myScalarSystMinus.addShape(downShape.getResultShape(), myShapeString)
+        myScalarSystMinus.addShape(downShape.getResultMCEWK(), myShapeString+"_MCEWK")
+        myScalarSystMinus.addShape(downShape.getResultPurity(), myShapeString+"_Purity")
         #myScalarSystMinus.addDataDrivenControlPlots(myResult_FakeWeightingMinus.getControlPlots(),myResult.getControlPlotLabels())
         myOutputCreator.addModule(myScalarSystMinus)
 
@@ -150,11 +169,11 @@ def doSystematicsVariation(myMulticrabDir,era,searchMode,optimizationMode,syst,m
     systDsetMgr.merge("EWK", ["TTJets","WJets","DYJetsToLL","SingleTop","Diboson"])
     myLuminosity = systDsetMgr.getDataset("Data").getLuminosity()
 
-    myFakeRateWeightCalculator = fakeRateWeighting.FakeRateWeightCalculator(systDsetMgr, myShapeString, myNormFactors, myLuminosity)
+    myFakeRateCalculator = fakeRate.FakeRateCalculator(systDsetMgr, myShapeString, myNormFactors, myLuminosity, dataDrivenFakeTaus = dataDrivenFakeTaus)
 
     # Obtain results
     mySystModuleResults = pseudoMultiCrabCreator.PseudoMultiCrabModule(systDsetMgr, era, searchMode, optimizationMode, syst)
-    mySystResult = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", systDsetMgr, myLuminosity, myModuleInfoString, myFakeRateWeightCalculator.getTotalFakeRateProbabilities(), dataDrivenFakeTaus=dataDrivenFakeTaus, shapeOnly=False, displayPurityBreakdown=False, noRebin=True)
+    mySystResult = qcdInvertedResult.QCDInvertedResultManager(myShapeString, "AfterCollinearCuts", systDsetMgr, myLuminosity, myModuleInfoString, myFakeRateCalculator.getTotalFakeRateProbabilities(), dataDrivenFakeTaus=dataDrivenFakeTaus, shapeOnly=False, displayPurityBreakdown=False, noRebin=True)
     mySystModuleResults.addShape(mySystResult.getShape(), myShapeString)
     mySystModuleResults.addShape(mySystResult.getShapeMCEWK(), myShapeString+"_MCEWK")
     mySystModuleResults.addShape(mySystResult.getShapePurity(), myShapeString+"_Purity")
@@ -222,8 +241,8 @@ if __name__ == "__main__":
         mySystematicsNames.append("%sPlus"%item)
         mySystematicsNames.append("%sMinus"%item)
     if opts.test:
-        #mySystematicsNames = []
-        mySystematicsNames = [mySystematicsNames[0]]
+        mySystematicsNames = []
+        #mySystematicsNames = [mySystematicsNames[0]]
 
     # Obtain systematics names
     # myScalarSystematics = systematics.getScalarUncertainties("pseudo", False)

@@ -13,12 +13,12 @@ import math
 import ROOT
 import re
 
-class FakeRateWeightCalculator:
-    def __init__(self, dsetMgr, shapeString, myNormfactors, luminosity, EWKUncertaintyFactor=1.0):
+class FakeRateCalculator:
+    def __init__(self, dsetMgr, shapeString, myNormfactors, luminosity, EWKUncertaintyFactor=1.0, UncertAffectsTT = True, dataDrivenFakeTaus = True):
         self.sortedFactors = {}
         self.sortedFactors = self.sortFactors(myNormfactors)
-        self.qcdShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", shapeString, luminosity, EWKUncertaintyFactor=EWKUncertaintyFactor, dataDrivenFakeTaus=False)
-        self.faketauShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", shapeString, luminosity, EWKUncertaintyFactor=EWKUncertaintyFactor, dataDrivenFakeTaus=True)
+        self.qcdShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", shapeString, luminosity, EWKUncertaintyFactor=EWKUncertaintyFactor, dataDrivenFakeTaus=False,  UncertAffectsTT = UncertAffectsTT)
+        self.faketauShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", shapeString, luminosity, EWKUncertaintyFactor=EWKUncertaintyFactor, dataDrivenFakeTaus=True, UncertAffectsTT = UncertAffectsTT)
         self.weights = []
         self.weightErrors = []
         self.weightsSystVarUp = []
@@ -28,6 +28,8 @@ class FakeRateWeightCalculator:
         self.fakeratesSystVarUp = {}
         self.fakeratesSystVarDown = {}
         self.sortedfakerates = {}
+
+        self.dataDrivenFakeTaus = dataDrivenFakeTaus
 
         self.averageWeight = 0
 
@@ -43,7 +45,10 @@ class FakeRateWeightCalculator:
             nEWKgenuine = self.faketauShape.getEwkHistoForSplittedBin(i).Integral() 
             nQCD = nData - nEWKincl
             nFakeTau = nData - nEWKgenuine
-            w = nQCD/nFakeTau
+            if self.dataDrivenFakeTaus:
+                w = nQCD/nFakeTau
+            else:
+                w = 1.0
             wError = math.sqrt(nQCD*(1-w))/nFakeTau
             #print "Bin", i, "w = ", w
             self.weights.append(w)
@@ -171,6 +176,12 @@ class FakeRateWeightCalculator:
 
     def getFakeTauShape(self):
         return self.faketauShape
+
+    def getShape(self):
+        if self.dataDrivenFakeTaus:
+            return self.faketauShape
+        else:
+            return self.qcdShape
 
 def scaleErrors(histo, weight):
     for i in range(0, histo.GetSize()+1):
