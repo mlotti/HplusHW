@@ -1238,16 +1238,17 @@ class RootHistoWithUncertainties:
             myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
             if not myStatus:
                 raise Exception("addShapeUncertaintyFromVariation(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
-
-        self._checkConsistency(name, th1Plus)
-        self._checkConsistency(name, th1Minus)
+        plusClone = aux.Clone(th1Plus)
+        minusClone = aux.Clone(th1Minus)
+        self._checkConsistency(name, plusClone)
+        self._checkConsistency(name, minusClone)
         # Subtract nominal to get absolute uncertainty (except for source histograms)
         if name in self._shapeUncertainties.keys():
             raise Exception("Uncertainty '%s' has already been added!"%name)
-        th1Plus.Add(self._rootHisto, -1.0)
-        th1Minus.Add(self._rootHisto, -1.0)
+        plusClone.Add(self._rootHisto, -1.0)
+        minusClone.Add(self._rootHisto, -1.0)
         # Store
-        self._shapeUncertainties[name] = (aux.Clone(th1Plus), aux.Clone(th1Minus))
+        self._shapeUncertainties[name] = (plusClone, minusClone)
 
     ## Remove superfluous shape variation uncertainties
     #
