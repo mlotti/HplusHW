@@ -504,8 +504,16 @@ class TableProducer:
                             if n.getId() in myVirtualMergeInformation.keys():
                                 myValue = myVirtualMergeInformation[n.getId()] # Overwrite virtually merged value
                             myValueString = ""
+                            # Check if the slave is a shape nuisance
+                            isShapeStatus = False
+                            for columnNuisanceId in c._nuisanceIds:
+                                for tmpNuisance in self._extractors:
+                                   if tmpNuisance.getId() == columnNuisanceId:
+                                       if n.getId() == tmpNuisance.getId() or n.getId() == tmpNuisance.getMasterId():
+                                           isShapeStatus = tmpNuisance.isShapeNuisance()
+
                             # Check output format
-                            if myValue == None or n.isShapeNuisance():
+                            if isShapeStatus:
                                 myValueString = "1"
                             else:
                                 if isinstance(myValue, ScalarUncertaintyItem):
