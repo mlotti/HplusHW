@@ -27,7 +27,8 @@ class EventInfoDumper {
     private:
         bool filter();
 
-	int event,run,lumi;
+	unsigned long long event;
+	unsigned int run,lumi;
 	int nPU;
 	int NUP;
 	int nGoodOfflinePV;
