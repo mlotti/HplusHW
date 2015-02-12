@@ -39,11 +39,22 @@ class TriggerDumper {
 	bool booked;
 
 	edm::InputTag triggerResults;
+        edm::InputTag triggerObjects;
+	edm::InputTag l1extra;
+
 	bool *iBit; 
 	edm::ParameterSet inputCollection;
 	edm::Handle<edm::TriggerResults> handle;
 	std::vector<std::string> triggerBits;
 
 	double L1MET;
+        double L1METphi;
+	double HLTMET;
+	double HLTMETphi;
+
+        std::vector<double> HLTTau_pt;
+        std::vector<double> HLTTau_eta;
+        std::vector<double> HLTTau_phi;
+        std::vector<double> HLTTau_e;
 };
 #endif

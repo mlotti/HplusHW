@@ -9,8 +9,8 @@ process.maxEvents = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#        'file:miniAOD-prod_PAT_TT_RECO_721_11112014.root'
-	'file:miniAOD-prod_PAT_TT_RECO_740p1_02122014.root'
+        'file:miniAOD-prod_PAT_TT_RECO_721_11112014.root'
+#	'file:miniAOD-prod_PAT_TT_RECO_740p1_02122014.root'
 #	'file:miniAOD-prod_PAT_Hp200_RECO_740p1_09122014.root'
 #	'file:miniAOD-prod_PAT_SingleMu_Run2012D_v1_RECO.root'
 #	'file:PYTHIA6_Tauola_TTbar_H160_taunu_13TeV_cff_py_GEN.root'
@@ -32,6 +32,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 #	    "HLT_IsoMu24_IterTrk02_v1"
         ),
 	L1Extra = cms.InputTag("l1extraParticles::MET"),
+	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	filter = cms.untracked.bool(False)
     ),
     Taus = cms.VPSet(

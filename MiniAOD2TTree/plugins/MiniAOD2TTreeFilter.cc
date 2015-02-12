@@ -119,7 +119,7 @@ void MiniAOD2TTreeFilter::endJob(){
     versionString->Write(versionName);
 
 // write TTree
-//    Events->Write();
+    Events->Write();
 
     std::cout << std::endl << "List of branches:" << std::endl;
     TObjArray* branches = Events->GetListOfBranches();
