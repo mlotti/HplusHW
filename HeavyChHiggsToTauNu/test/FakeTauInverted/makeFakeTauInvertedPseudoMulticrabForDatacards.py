@@ -130,8 +130,9 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
         else:
             myScalarDsetMgr = dsetMgr
             uncertAffectsTT = True
-        upScalarFakeRateCalculator = fakeRate.FakeRateCalculator(myScalarDsetMgr, myShapeString, myNormFactors, myLuminosity, EWKUncertaintyFactor=1+myScalarUncertainties[scalarName].getUncertaintyUp(), UncertAffectsTT = uncertAffectsTT, dataDrivenFakeTaus = dataDrivenFakeTaus)
-        downScalarFakeRateCalculator = fakeRate.FakeRateCalculator(myScalarDsetMgr, myShapeString, myNormFactors, myLuminosity, EWKUncertaintyFactor=1-myScalarUncertainties[scalarName].getUncertaintyDown(), UncertAffectsTT = uncertAffectsTT, dataDrivenFakeTaus = dataDrivenFakeTaus)
+        # anti-correlation: flipped sign of variation
+        upScalarFakeRateCalculator = fakeRate.FakeRateCalculator(myScalarDsetMgr, myShapeString, myNormFactors, myLuminosity, EWKUncertaintyFactor=1-myScalarUncertainties[scalarName].getUncertaintyUp(), UncertAffectsTT = uncertAffectsTT, dataDrivenFakeTaus = dataDrivenFakeTaus)
+        downScalarFakeRateCalculator = fakeRate.FakeRateCalculator(myScalarDsetMgr, myShapeString, myNormFactors, myLuminosity, EWKUncertaintyFactor=1+myScalarUncertainties[scalarName].getUncertaintyDown(), UncertAffectsTT = uncertAffectsTT, dataDrivenFakeTaus = dataDrivenFakeTaus)
         #print "Scalar uncertainty:", scalarName, myScalarUncertainties[scalarName].getUncertaintyDown(), myScalarUncertainties[scalarName].getUncertaintyUp()
         upShape = qcdInvertedResult.QCDInvertedShape(upScalarFakeRateCalculator.getShape(), myModuleInfoString, upScalarFakeRateCalculator.getTotalFakeRateProbabilities(), optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False) # prev: .getFakeTauShape()
         downShape = qcdInvertedResult.QCDInvertedShape(downScalarFakeRateCalculator.getShape(), myModuleInfoString, downScalarFakeRateCalculator.getTotalFakeRateProbabilities(), optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False) # prev: .getFakeTauShape()
