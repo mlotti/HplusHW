@@ -480,7 +480,19 @@ class TableProducer:
                 if self._opts.lands:
                     myRow.append(n.getDistribution())
                 elif self._opts.combine:
-                    myRow.append(n.getDistribution().replace("shapeQ","shape").replace("shapeStat","shape"))
+                    # Check if there are shapes and scalars on the same row
+                    shapeAndScalarStatus = False
+                    for subN in self._extractors:
+                        if n != subN:
+                            if subN.getMasterId() == n.getId():
+                                nIsShape = n.getDistribution().startswith("shape")
+                                subnIsShape = subN.getDistribution().startswith("shape")
+                                if (nIsShape and not subnIsShape) or (not nIsShape and subnIsShape):
+                                    shapeAndScalarStatus = True
+                    if shapeAndScalarStatus:
+                        myRow.append("shape?")
+                    else:
+                        myRow.append(n.getDistribution().replace("shapeQ","shape").replace("shapeStat","shape"))
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
                     if c.isActiveForMass(mass,self._config):
@@ -492,8 +504,16 @@ class TableProducer:
                             if n.getId() in myVirtualMergeInformation.keys():
                                 myValue = myVirtualMergeInformation[n.getId()] # Overwrite virtually merged value
                             myValueString = ""
+                            # Check if the slave is a shape nuisance
+                            isShapeStatus = False
+                            for columnNuisanceId in c._nuisanceIds:
+                                for tmpNuisance in self._extractors:
+                                   if tmpNuisance.getId() == columnNuisanceId:
+                                       if n.getId() == tmpNuisance.getId() or n.getId() == tmpNuisance.getMasterId():
+                                           isShapeStatus = tmpNuisance.isShapeNuisance()
+
                             # Check output format
-                            if myValue == None or n.isShapeNuisance():
+                            if isShapeStatus:
                                 myValueString = "1"
                             else:
                                 if isinstance(myValue, ScalarUncertaintyItem):
@@ -770,7 +790,8 @@ class TableProducer:
             TotalExpected = QCD.Clone()
             TotalExpected.Add(Embedding)
             if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
-                TotalExpected.Add(EWKFakes)
+                if EWKFakes != None:
+                    TotalExpected.Add(EWKFakes)
             # Construct table
             myOutput = "*** Event yield summary ***\n"
             myOutput += self._generateHeader(m)
@@ -786,7 +807,8 @@ class TableProducer:
                 myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
             else:
                 myOutput += "                    EWK+tt with taus: %s"%getResultString(Embedding,formatStr,myPrecision)
-                myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
+                if EWKFakes != None:
+                    myOutput += "               EWK+tt with fake taus: %s"%getResultString(EWKFakes,formatStr,myPrecision)
             myOutput += "                      Total expected: %s"%getResultString(TotalExpected,formatStr,myPrecision)
             #if self._config.BlindAnalysis:
             #    myOutput += "                            Observed: BLINDED\n\n"
@@ -825,7 +847,8 @@ class TableProducer:
                 myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
             else:
                 myOutputLatex += "  EWK+\\ttbar with $\\tau$ (data-driven)    & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
-                myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
+                if EWKFakes != None:
+                    myOutputLatex += "  EWK+\\ttbar with e/\\mu/jet\\to$\\tau$ (MC) & %s \\\\ \n"%getLatexResultString(EWKFakes,formatStr,myPrecision)
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  Total expected from the SM              & %s \\\\ \n"%getLatexResultString(TotalExpected,formatStr,myPrecision)
             #if self._config.BlindAnalysis:

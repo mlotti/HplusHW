@@ -1121,17 +1121,19 @@ class SystematicsHelper:
 
 ## Class to encapsulate a ROOT histogram with a bunch of uncertainties
 #
-# Looks almost as TH1, except holds bunch of uncertainties
+# Looks almost as TH1, except holds bunch of uncertainties; the histograms contained are clones and therefore owned by the class
 class RootHistoWithUncertainties:
     def __init__(self, rootHisto):
-        self._rootHisto = rootHisto
-
+        self._rootHisto = None
+        
         # dictionary of name -> (th1Plus, th1Minus)
         # This dictionary contains the variation uncertainties
         # Laterally (i.e. for combining same uncertainty between bins or samples, i.e. relative uncertainty is constant), linear sum is used
         # Vertically (i.e. for different source of uncertainties), quadratic sum is used
         # The numbers are stored into the bin content as absolute uncertainties
         self._shapeUncertainties = {}
+
+        self.setRootHisto(rootHisto)
 
         # Treat these shape uncertainties as statistical uncertainties in getSystematicUncertaintyGraph()
         self._treatShapesAsStat = set() # use set to avoid duplicates
@@ -1151,9 +1153,12 @@ class RootHistoWithUncertainties:
     def delete(self):
         if self._rootHisto != None:
             self._rootHisto.Delete()
-            for k in self._shapeUncertainties:
-              (u,d) = self._shapeUncertainties[k]
-        self._shapeUncertainties = None
+            self._rootHisto = None
+        for k in self._shapeUncertainties.keys():
+            (u,d) = self._shapeUncertainties[k]
+            u.Delete()
+            d.Delete()
+        self._shapeUncertainties = {}
 
     ## Set the ROOT histogram object
     #
@@ -1161,9 +1166,9 @@ class RootHistoWithUncertainties:
     #
     # This method can be called only in absence of shape variation uncertainties
     def setRootHisto(self, newRootHisto):
-        if len(self._shapeUncertainties) != 0:
-            raise Exception("There are shape uncertanties, you should not set the original histogram!")
-        self._rootHisto = newRootHisto
+        if len(self._shapeUncertainties.keys()) != 0 or self._rootHisto != None:
+            raise Exception("There are shape uncertanties, you should not set the original histogram (call delete() before)!")
+        self._rootHisto = aux.Clone(newRootHisto)
 
     ## Get the ROOT histogram object
     def getRootHisto(self):
@@ -1233,16 +1238,17 @@ class RootHistoWithUncertainties:
             myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
             if not myStatus:
                 raise Exception("addShapeUncertaintyFromVariation(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
-
-        self._checkConsistency(name, th1Plus)
-        self._checkConsistency(name, th1Minus)
+        plusClone = aux.Clone(th1Plus)
+        minusClone = aux.Clone(th1Minus)
+        self._checkConsistency(name, plusClone)
+        self._checkConsistency(name, minusClone)
         # Subtract nominal to get absolute uncertainty (except for source histograms)
         if name in self._shapeUncertainties.keys():
             raise Exception("Uncertainty '%s' has already been added!"%name)
-        th1Plus.Add(self._rootHisto, -1.0)
-        th1Minus.Add(self._rootHisto, -1.0)
+        plusClone.Add(self._rootHisto, -1.0)
+        minusClone.Add(self._rootHisto, -1.0)
         # Store
-        self._shapeUncertainties[name] = (aux.Clone(th1Plus), aux.Clone(th1Minus))
+        self._shapeUncertainties[name] = (plusClone, minusClone)
 
     ## Remove superfluous shape variation uncertainties
     #

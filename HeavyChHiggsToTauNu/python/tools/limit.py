@@ -975,8 +975,9 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     
 
     if not blinded:
-        setTheoreticalErrorStyle(graphs["obs_th_plus"])
-        setTheoreticalErrorStyle(graphs["obs_th_minus"])
+        if "obs_th_plus" in graphs.keys():
+            setTheoreticalErrorStyle(graphs["obs_th_plus"])
+            setTheoreticalErrorStyle(graphs["obs_th_minus"])
         setObservedStyle(graphs["obs"])
         
         # plots
@@ -1074,6 +1075,8 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
 
     plot.frame.GetXaxis().SetTitle(xlabel)
     plot.frame.GetYaxis().SetTitle(tanblimit)
+
+    plot.getPad().SetLogy(True)
 
     plot.draw()
     

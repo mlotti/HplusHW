@@ -20,10 +20,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 
 import os
+import sys
 import array
 
 _resultFilename = "results.txt"
-_theoreticalUncertainty = 0.32
+_theoreticalUncertainty = 0.32 # OBSOLETE
+_maxTanBeta = 69.0
+_linearSummingForTheoryUncertainties = not True
 
 class TanBetaResultContainer:
     def __init__(self, mssmModel, massPoints):
@@ -53,7 +56,7 @@ class TanBetaResultContainer:
         if not resultKey in self._resultsHigh.keys():
             self._resultsHigh[resultKey] = {}
             for m in self._massPoints:
-                self._resultsHigh[resultKey][m] = 75.0
+                self._resultsHigh[resultKey][m] = _maxTanBeta
         if tanbetalimit != None:
             #if mass in self._resultsHigh[resultKey].keys():
             #    print "Warning: overriding low limit for (%s) / m=%s / %s"%(self._mssmModel, mass, resultKey)
@@ -113,31 +116,34 @@ class TanBetaResultContainer:
         graphs["exp1"] = self._getResultGraphForTwoKeys("expectedPlus1Sigma", "expectedMinus1Sigma")
         graphs["exp2"] = self._getResultGraphForTwoKeys("expectedPlus2Sigma", "expectedMinus2Sigma")
         graphs["obs"] = self._getResultGraphForOneKey("observed")
-        graphs["obs_th_plus"] = self._getResultGraphForOneKey("observedPlusTheorUncert")
-        graphs["obs_th_minus"] = self._getResultGraphForOneKey("observedMinusTheorUncert")
         myName = "%s-LHCHXSWG.root"%self._mssmModel
         if not os.path.exists(myName):
             raise Exception("Error: Cannot find file '%s'!"%myName)
         db = BRXSDB.BRXSDatabaseInterface(myName)
         graphs["Allowed"] = db.mhLimit("mh","mHp","mHp > 0","125.0+-3.0")
+        db.close()
         if self._mssmModel == "tauphobic":
-            # Fix a buggy second upper limit (the order of points is left to right, then right to left; remove further passes to fix the bug)
-            decreasingStatus = False
-            i = 0
-            while i < graphs["Allowed"].GetN():
-                removeStatus = False
-                y = graphs["Allowed"].GetY()[i]
-                if i > 0:
-                    if graphs["Allowed"].GetY()[i-1] - y < 0:
-                        decreasingStatus = True
-                    else:
-                        if decreasingStatus:
-                            graphs["Allowed"].RemovePoint(i)
-                            removeStatus = True
-                if not removeStatus:
-                    i += 1
+            ## Fix a buggy second upper limit (the order of points is left to right, then right to left; remove further passes to fix the bug)
+            #decreasingStatus = False
+            #i = 0
+            #while i < graphs["Allowed"].GetN():
+                #removeStatus = False
+                #y = graphs["Allowed"].GetY()[i]
+                #if i > 0:
+                    #if graphs["Allowed"].GetY()[i-1] - y < 0:
+                        #decreasingStatus = True
+                    #else:
+                        #if decreasingStatus:
+                            #graphs["Allowed"].RemovePoint(i)
+                            #removeStatus = True
+                #if not removeStatus:
+                    #i += 1
             #for i in range(0, graphs["Allowed"].GetN()):
                 #print graphs["Allowed"].GetX()[i], graphs["Allowed"].GetY()[i]
+            ## Fix m=500 and m=600
+            n = graphs["Allowed"].GetN()
+            graphs["Allowed"].SetPoint(n-2, 500, 4.77)
+            graphs["Allowed"].SetPoint(n-1, 600, 4.71)
         myFinalStateLabel = []
         myFinalStateLabel.append("^{}H^{+}#rightarrow#tau^{+}#nu_{#tau} final states:")
         myFinalStateLabel.append("  ^{}#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu")
@@ -247,6 +253,8 @@ class BrContainer:
         # Scale datacards
         myResult = self.getResult(tanbeta)
         for fskey in self._decayModeMatrix.keys():
+            print "    . final state %10s:"%fskey
+            myOriginalRates = []
             myPrimaryReader = None
             for dmkey in self._decayModeMatrix[fskey].keys():
                 myDatacardPattern = self._decayModeMatrix[fskey][dmkey][0]
@@ -256,38 +264,45 @@ class BrContainer:
                 if dmkey == self._decayModeMatrix[fskey].keys()[0]:
                     myPrimaryReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
                     myPrimaryReader.scaleSignal(mySignalScaleFactor)
+                    myOriginalRates.append(float(myPrimaryReader.getRateValue(myPrimaryReader.getDatasetNames()[0])))
+                    #print fskey,dmkey,myOriginalRates[len(myOriginalRates)-1]
                 else:
                     # Scale according to br and add signal to primary (i.e. only one datacard for the decay modes)
                     myReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
                     myReader.scaleSignal(mySignalScaleFactor)
+                    myOriginalRates.append(float(myReader.getRateValue(myReader.getDatasetNames()[0])))
+                    #print fskey,dmkey,myOriginalRates[len(myOriginalRates)-1]
                     myPrimaryReader.addSignal(myReader)
                     myReader.close()
                     # Remove datacard from current directory so that it is not used for limit calculation (a copy of them is at originalDatacards directory)
                     if os.path.exists(myDatacardPattern%mHp):
                         os.system("rm %s"%(myDatacardPattern%mHp))
                         os.system("rm %s"%(myRootFilePattern%mHp))
-                
-            # Add theoretical uncertainties to datacard (depends on how many decay modes are combined)
+            mySignalColumnName = myPrimaryReader.getDatasetNames()[0]
+            myUpdatedRate = float(myPrimaryReader.getRateValue(myPrimaryReader.getDatasetNames()[0]))
+            myTheorUncertPrefix = "theory_"
+            # Add theoretical cross section uncertainties to datacard 
             db = BRXSDB.BRXSDatabaseInterface(myDbInputName, silentStatus=True)
-            myTheorUncertLabel = "theory_Hpxsection"
             myXsecUncert = [db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "-"),
                             db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "+")]
+            myUncertValueString = "%.3f/%.3f"%(1.0-myXsecUncert[0], 1.0+myXsecUncert[1])
+            myNuisanceName = "%sxsectionHp"%myTheorUncertPrefix
+            myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
+            print "      . H+ xsec uncert: %s"%myUncertValueString
+            # Add theoretical branching ratio uncertainties to datacard (depends on how many decay modes are combined)
             myDecayModeKeys = self._decayModeMatrix[fskey].keys()
-            myBrUncert = []
-            if len(myDecayModeKeys) == 1:
-                myBrUncert.append(db.brUncert("mHp", "tanb", "BR_%s"%myDecayModeKeys[0], mHp, tanbeta, "-"))
-                myBrUncert.append(db.brUncert("mHp", "tanb", "BR_%s"%myDecayModeKeys[0], mHp, tanbeta, "+"))
-                myTheorUncertLabel += "_plus_Br%s"%myDecayModeKeys[0]
-            elif len(myDecayModeKeys) == 2:
-                myBrUncert.append(db.brUncert2("mHp", "tanb", "BR_%s"%myDecayModeKeys[0], "BR_%s"%myDecayModeKeys[1], mHp, tanbeta, "-"))
-                myBrUncert.append(db.brUncert2("mHp", "tanb", "BR_%s"%myDecayModeKeys[0], "BR_%s"%myDecayModeKeys[1], mHp, tanbeta, "+"))
-                myTheorUncertLabel += "_plus_Br%s_and_Br%s"%(myDecayModeKeys[0], myDecayModeKeys[1])
-            else:
-                raise Exception("N(decaymodes) == %d case is not supported at the moment"%len(myDecayModeKeys))
-            myUncertValueString = "%.3f/%.3f"%(1-(myXsecUncert[0]+myBrUncert[0]), 1+(myXsecUncert[1]+myBrUncert[1]))
-            print "    . final state %10s: H+ xsec uncert: +%.3f -%.3f, Br uncert: +%.3f -%.3f, Total: %s"%(fskey, myXsecUncert[1], myXsecUncert[0], myBrUncert[1], myBrUncert[0], myUncertValueString)
-            mySignalName = myPrimaryReader.getDatasetNames()[0]
-            myPrimaryReader.addNuisance(myTheorUncertLabel, "lnN", mySignalName, myUncertValueString)
+            for i in range(len(myDecayModeKeys)):
+                myDecayModeKeys[i] = "BR_%s"%myDecayModeKeys[i]
+            myBrUncert = db.brUncert("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)
+            for i in range(len(myDecayModeKeys)):
+                for k in myBrUncert.keys():
+                    if myDecayModeKeys[i] in k:
+                        # Scale uncertainty according to amount of signal from that decay mode
+                        myUncertValue = myBrUncert[k] * myOriginalRates[i] / myUpdatedRate
+                        myNuisanceName = "%s%s"%(myTheorUncertPrefix,k)
+                        myUncertValueString = "%.3f"%(1.0+myUncertValue)
+                        myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
+                        print "      . H+ Br uncert(%s): %s"%(k, myUncertValueString)
             # Write changes to datacard
             myPrimaryReader.close()
             
@@ -339,45 +354,81 @@ class BrContainer:
 def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, scen):
     reuseStatus = False
     if not brContainer.resultExists(tanbeta):
-        # Result does not exist, let's calculate it
         # Produce cards
-        brContainer.produceScaledCards(mHp, tanbeta)
-        # Run Combine
-        resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=[mHp],
-            datacardPatterns = brContainer.getDatacardPatterns(),
-            rootfilePatterns = brContainer.getRootfilePatterns(),
-            clsType = combine.LHCTypeAsymptotic(opts),
-            postfix = "lhcasy_%s_mHp%s_tanbetascan%.1f"%(scen,mHp,tanbeta),
-            quietStatus = True)
-        if len(resultContainer.results) > 0:
-            result = resultContainer.results[0]
-            # Add theoretical uncertainty
-            result.observedPlusTheorUncert = result.observed * (1.0 + _theoreticalUncertainty)
-            result.observedMinusTheorUncert = result.observed * (1.0 - _theoreticalUncertainty)
-            # Store result
-            brContainer.setCombineResult(tanbeta, result)
+        myPostFix = "lhcasy_%s_mHp%s_tanbetascan%.1f"%(scen,mHp,tanbeta)
+        myList = os.listdir(".")
+        myList.sort()
+        myResultDir = None
+        myResultFound = False
+        for item in myList:
+            if myPostFix in item:
+                myResultDir = item
+        if myResultDir != None:
+            myList = os.listdir("./%s"%myResultDir)
+            for item in myList:
+                if item.startswith("higgsCombineobs"):
+                    f = ROOT.TFile.Open(os.path.join(myResultDir, item))
+                    myTree = f.Get("limit")
+                    myValue = array.array('d',[0])
+                    myTree.SetBranchAddress("limit", myValue)
+                    myResult = commonLimitTools.Result(mHp)
+                    if myTree.GetEntries() != 6:
+                        myResult.failed = True
+                    else:
+                        myResult.failed = False
+                        i = 0
+                        while i < myTree.GetEntries():
+                            myTree.GetEvent(i)
+                            if i == 0:
+                                myResult.expectedMinus2Sigma = myValue[0]
+                            elif i == 1:
+                                myResult.expectedMinus1Sigma = myValue[0]
+                            elif i == 2:
+                                myResult.expected = myValue[0]
+                            elif i == 3:
+                                myResult.expectedPlus1Sigma = myValue[0]
+                            elif i == 4:
+                                myResult.expectedPlus2Sigma = myValue[0]
+                            elif i == 5:
+                                myResult.observed = myValue[0]
+                            i += 1
+                        myResultFound = True
+                        brContainer._readFromDatabase(mHp, tanbeta)
+                        brContainer.setCombineResult(tanbeta, myResult)
+                    f.Close()
+        if not myResultFound:
+            # Result does not exist, let's calculate it
+            brContainer.produceScaledCards(mHp, tanbeta)
+            # Run Combine
+            resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=[mHp],
+                datacardPatterns = brContainer.getDatacardPatterns(),
+                rootfilePatterns = brContainer.getRootfilePatterns(),
+                clsType = combine.LHCTypeAsymptotic(opts),
+                postfix = myPostFix,
+                quietStatus = True)
+            if len(resultContainer.results) > 0:
+                result = resultContainer.results[0]
+                # Store result
+                brContainer.setCombineResult(tanbeta, result)
     else:
         reuseStatus = True
-    myContainer = None
-    if brContainer.resultExists(tanbeta):
-        myContainer = brContainer
-    elif tbContainer.resultExists(tanbeta):
-        myContainer = tbContainer
-    else:
-        raise Exception("No datacards present")
+    #if brContainer.resultExists(tanbeta):
+        #myContainer = brContainer
+    #else:
+        #raise Exception("No datacards present")
     
     # Print output
-    s = "- mHp=%s, tanbeta=%.1f, sigmaTheory=%.3f"%(mHp, tanbeta, myContainer.getResult(tanbeta)["sigmaTheory"])
-    if myContainer.getFailedStatus(tanbeta):
+    s = "- mHp=%s, tanbeta=%.1f, sigmaTheory=%.3f"%(mHp, tanbeta, brContainer.getResult(tanbeta)["sigmaTheory"])
+    if brContainer.getFailedStatus(tanbeta):
         s += " sigmaCombine (%s)=failed"%resultKey
     else:
-        s += " sigmaCombine (%s)=%.3f, passed=%d"%(resultKey, myContainer.getCombineResultByKey(tanbeta, resultKey), myContainer.getPassedStatus(tanbeta, resultKey))
+        s += " sigmaCombine (%s)=%.3f, passed=%d"%(resultKey, brContainer.getCombineResultByKey(tanbeta, resultKey), brContainer.getPassedStatus(tanbeta, resultKey))
     if not reuseStatus:
         print s
     # return limit from combine
-    if myContainer.getFailedStatus(tanbeta):
+    if brContainer.getFailedStatus(tanbeta):
         return None
-    return myContainer.getPassedStatus(tanbeta, resultKey)
+    return brContainer.getPassedStatus(tanbeta, resultKey)
 
 def findMiddlePoint(tanbetaMin, tanbetaMax):
     a = (tanbetaMax + tanbetaMin) / 2.0
@@ -448,7 +499,7 @@ def readResults(opts, brContainer, m, myKey, scen):
                 for i in range(myBlockStart+1, myBlockEnd-1):
                     s = lines[i].replace("  tan beta=","").replace(" xsecTheor=","").replace(" pb, limit(%s)="%myKey,",").replace(" pb, passed=",",")
                     mySplit = s.split(",")
-                    if len(mySplit) > 1 and s[0] != "#":
+                    if len(mySplit) > 1 and s[0] != "#" and mySplit[2] != "failed":
                         tanbetakey = "%04.1f"%(float(mySplit[0]))
                         if not brContainer.resultExists(tanbetakey):
                             brContainer._results[tanbetakey] = {}
@@ -480,19 +531,23 @@ def linearCrossOverOfTanBeta(container, tblow, tbhigh, resultKey):
     return tbinterpolation
 
 def main(opts, brContainer, m, scen, plotContainers):
-    resultKeys = ["observed", "observedPlusTheorUncert", "observedMinusTheorUncert", "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]
+    resultKeys = ["observed",  "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]
     #resultKeys = ["observed","expected"]
     for myKey in resultKeys:
         if opts.analyseOutput:
             readResults(opts, brContainer, m, myKey, scen)
         else:
             # Force calculation of few first points
-            getCombineResultPassedStatus(opts, brContainer, m, 1.1, myKey, scen)
-            getCombineResultPassedStatus(opts, brContainer, m, 1.2, myKey, scen)
-            getCombineResultPassedStatus(opts, brContainer, m, 1.3, myKey, scen)
-            getCombineResultPassedStatus(opts, brContainer, m, 1.4, myKey, scen)
-            scanRanges(opts, brContainer, m, 1.1, 8.0, myKey, scen)
-            scanRanges(opts, brContainer, m, 8.0, 75, myKey, scen)
+            if len(opts.tanbeta) > 0:
+                for tb in opts.tanbeta:
+                    getCombineResultPassedStatus(opts, brContainer, m, float(tb), myKey, scen)
+            else:
+                getCombineResultPassedStatus(opts, brContainer, m, 1.1, myKey, scen)
+                getCombineResultPassedStatus(opts, brContainer, m, 1.2, myKey, scen)
+                getCombineResultPassedStatus(opts, brContainer, m, 1.3, myKey, scen)
+                getCombineResultPassedStatus(opts, brContainer, m, 1.4, myKey, scen)
+                scanRanges(opts, brContainer, m, 1.1, 8.0, myKey, scen)
+                scanRanges(opts, brContainer, m, 8.0, _maxTanBeta, myKey, scen)
     
     outtxt = ""
     # Print results
@@ -605,9 +660,75 @@ def purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints):
         while i < len(myMassPoints):
             if not myMassPoints[i] in myCommonMassPoints:
                 del myMassPoints[i]
+            i += 1
     else:
         myMassPoints.extend(myCommonMassPoints)
     myMassPoints.sort()
+
+def evaluateUncertainties(myScenarios):
+    print "Evaluating theoretical syst. uncertainties"
+    myMassPoints = ["200", "300", "400", "500", "600"]
+    tanbMin = 10
+    tanbMax = 60
+    #hXsectUncert = ROOT.TH2F("xsectUncert","xsectUncert",len(myMassPoints),myMassPoints[0],myMassPoints[len(myMassPoints)-1], tanbMax-tanbMin, tanbMin, tanbMax)
+    #hBrTaunuUncert = ROOT.TH2F("BrTaunuUncert","BrTaunuUncert",len(myMassPoints),myMassPoints[0],myMassPoints[len(myMassPoints)-1], tanbMax-tanbMin, tanbMin, tanbMax)
+    #hBrTBUncert = ROOT.TH2F("BrTBUncert","BrTBUncert",len(myMassPoints),myMassPoints[0],myMassPoints[len(myMassPoints)-1], tanbMax-tanbMin, tanbMin, tanbMax)
+    for scen in myScenarios:
+        xsectUncertPlusMin = 9999
+        xsectUncertPlusMax = 0
+        xsectUncertMinusMin = 9999
+        xsectUncertMinusMax = 0
+        brTaunuUncertPlusMin = 9999
+        brTaunuUncertPlusMax = 0
+        brTaunuUncertMinusMin = 9999
+        brTaunuUncertMinusMax = 0
+        brTBUncertPlusMin = 9999
+        brTBUncertPlusMax = 0
+        brTBUncertMinusMin = 9999
+        brTBUncertMinusMax = 0
+        brCombUncertPlusMin = 9999
+        brCombUncertPlusMax = 0
+        brCombUncertMinusMin = 9999
+        brCombUncertMinusMax = 0
+        myDbInputName = "%s-LHCHXSWG.root"%scen
+        if not os.path.exists(myDbInputName):
+            raise Exception("Error: Cannot find file '%s'!"%myDbInputName)
+        db = BRXSDB.BRXSDatabaseInterface(myDbInputName, silentStatus=True)
+        for mHp in myMassPoints:
+            print scen,mHp
+            for tanbeta in range(tanbMin, tanbMax):
+                myTheorUncertLabel = "theory_Hpxsection"
+                value = db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "-")
+                xsectUncertMinusMin = min(xsectUncertMinusMin, value)
+                xsectUncertMinusMax = max(xsectUncertMinusMin, value)
+                value = db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "+")
+                xsectUncertPlusMin = min(xsectUncertPlusMin, value)
+                xsectUncertPlusMax = max(xsectUncertPlusMin, value)
+                value = db.brUncert("mHp", "tanb", "BR_Hp_taunu", mHp, tanbeta, "-")
+                brTaunuUncertMinusMin = min(brTaunuUncertMinusMin, value)
+                brTaunuUncertMinusMax = max(brTaunuUncertMinusMax, value)
+                value = db.brUncert("mHp", "tanb", "BR_Hp_taunu", mHp, tanbeta, "+")
+                brTaunuUncertPlusMin = min(brTaunuUncertPlusMin, value)
+                brTaunuUncertPlusMax = max(brTaunuUncertPlusMax, value)
+                value = db.brUncert("mHp", "tanb", "BR_Hp_tb", mHp, tanbeta, "-")
+                brTBUncertMinusMin = min(brTBUncertMinusMin, value)
+                brTBUncertMinusMax = max(brTBUncertMinusMax, value)
+                value = db.brUncert("mHp", "tanb", "BR_Hp_tb", mHp, tanbeta, "+")
+                brTBUncertPlusMin = min(brTBUncertPlusMin, value)
+                brTBUncertPlusMax = max(brTBUncertPlusMax, value)
+                db.brUncert2("mHp", "tanb", "BR_Hp_taunu", "BR_Hp_tb", mHp, tanbeta, "-")
+                brCombUncertMinusMin = min(brCombUncertMinusMin, value)
+                brCombUncertMinusMax = max(brCombUncertMinusMax, value)
+                db.brUncert2("mHp", "tanb", "BR_Hp_taunu", "BR_Hp_tb", mHp, tanbeta, "+")
+                brCombUncertPlusMin = min(brCombUncertPlusMin, value)
+                brCombUncertPlusMax = max(brCombUncertPlusMax, value)
+        db.close()
+        print "Syst. uncertainties for %s, mHp=%s-%s, tanbeta=%s-%s"%(scen, myMassPoints[0],myMassPoints[len(myMassPoints)-1], tanbMin, tanbMax)
+        print "xsect uncert: minus: %f-%f, plus %f-%f"%(xsectUncertMinusMin,xsectUncertMinusMax,xsectUncertPlusMin,xsectUncertPlusMax)
+        print "br(taunu) uncert: minus: %f-%f, plus %f-%f"%(brTaunuUncertMinusMin,brTaunuUncertMinusMax,brTaunuUncertPlusMin,brTaunuUncertPlusMax)
+        print "br(tb) uncert: minus: %f-%f, plus %f-%f"%(brTBUncertMinusMin,brTBUncertMinusMax,brTBUncertPlusMin,brTBUncertPlusMax)
+        print "br(taunu+tb) uncert: minus: %f-%f, plus %f-%f"%(brCombUncertMinusMin,brCombUncertMinusMax,brCombUncertPlusMin,brCombUncertPlusMax)
+  
 
 if __name__ == "__main__":
     def addToDatacards(myDir, massPoints, dataCardList, rootFileList, dataCardPattern, rootFilePattern):
@@ -621,14 +742,24 @@ if __name__ == "__main__":
 
     parser = commonLimitTools.createOptionParser(False, False, True)
     parser.add_option("--analyseOutput", dest="analyseOutput", action="store_true", default=False, help="Read only output and print summary")
+    parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
+    parser.add_option("--tanbeta", dest="tanbeta", action="append", default=[], help="tanbeta values (will scan only these)")
+    parser.add_option("--evalUuncert", dest="evaluateUncertainties", action="store_true", default=False, help="Make plots of theoretical uncertainties")
     opts = commonLimitTools.parseOptionParser(parser)
     if opts.rmin == None:
         opts.rmin = "0"
     if opts.rmax == None:
-        opts.rmax = "1000" # To facilitate the search for different tan beta values
+        opts.rmax = "10" # To facilitate the search for different tan beta values
     
     # MSSM scenario settings
     myScenarios = ["mhmaxup", "mhmodm", "mhmodp", "lightstau", "lightstop", "tauphobic"]
+    if len(opts.scenarios) > 0:
+        myScenarios = opts.scenarios[:]
+    
+    if opts.evaluateUncertainties:
+        evaluateUncertainties(myScenarios)
+        sys.exit()
+    
     myPlots = {}
     #myScenarios = ["mhmaxup"]
     

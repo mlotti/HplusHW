@@ -91,7 +91,9 @@ class Result:
             (out, err) = proc.communicate()
             print out
         # Change directory back
-        os.chdir(self._backToTopLevel())
+        s = self._backToTopLevel()
+        if len(s) > 1:
+            os.chdir(s)
         #print "current dir =",os.getcwd()
 
     def _getOutput(self):

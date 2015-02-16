@@ -5,6 +5,7 @@
 
 import os
 import math
+import array
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
@@ -67,14 +68,14 @@ def getMassPointsForDatacardPattern(directory, datacardFilePattern, massPoints =
     return masses
 
 class DataCardDirectoryManager:
-    def __init__(self, directory, datacardFilePattern, rootFilePattern, rootFileDirectory="", readOnly=False):
+    def __init__(self, directory, datacardFilePattern, rootFilePattern, rootFileDirectory="", readOnly=False, outSuffix=None):
         self._datacards = {} # Dictionary, where key is mass and value is DataCardReader object for that mass point
         self._massPoints = getMassPointsForDatacardPattern(directory, datacardFilePattern)
 
         # initialize datacard objects
         print "Found mass points:",self._massPoints
         for m in self._massPoints:
-            self._datacards[m] = DataCardReader(directory, m, datacardFilePattern, rootFilePattern, rootFileDirectory=rootFileDirectory, readOnly=readOnly)
+            self._datacards[m] = DataCardReader(directory, m, datacardFilePattern, rootFilePattern, rootFileDirectory=rootFileDirectory, readOnly=readOnly, outSuffix=outSuffix)
         # check integrity
         self.checkIntegrity()
 
@@ -88,10 +89,12 @@ class DataCardDirectoryManager:
         return []
 
     def replaceColumnNames(self, replaceDictionary):
+        print "datacards: replacing column names"
         for m in self._datacards.keys():
             self._datacards[m].replaceColumnNames(replaceDictionary)
     
     def replaceNuisanceNames(self, replaceDictionary):
+        print "datacards: replacing nuisance names"
         for m in self._datacards.keys():
             dcard = self._datacards[m]
             # Do replace in txt file
@@ -113,8 +116,15 @@ class DataCardDirectoryManager:
             self._datacards[m].removeStatUncert(signalOnly)
 
     def recreateShapeStatUncert(self, signalOnly=False):
+        print "datacards: recreating shape stat. uncert. entries and histograms"
         for m in self._datacards.keys():
             self._datacards[m].recreateShapeStatUncert(signalOnly)
+
+    ## This method is for testing the effect of zero bins for the background
+    def smoothBackgroundByLinearExtrapolation(self, column):
+        print "datacards: smoothening background '%s' with linear extrapolation"%column
+        for m in self._datacards.keys():
+            self._datacards[m].smoothBackgroundByLinearExtrapolation(column)
 
     def removeColumn(self, name):
         for m in self._datacards.keys():
@@ -344,9 +354,16 @@ class DataCardDirectoryManager:
                     #print "... Pedestal correction applied to shape '%s': new nuisance up: %f down: %f"%(target, hTargetUp.Integral() / myNominalRate, hTargetDown.Integral() / myNominalRate)
 
     ## Set minimum stat. uncert. for bins with zero rate or very small rate
-    def fixTooSmalltatUncertProblem(self, signalMinimumAbsStatValue, bkgMinimumAbsStatValue, signalOnly=False):
+    def fixTooSmallStatUncertProblem(self, signalMinimumAbsStatValue, bkgMinimumAbsStatValue, signalOnly=False):
+        print "datacards: Checking for and fixing if stat. uncert. is too small"
         for m in self._datacards.keys():
-            self._datacards[m].fixTooSmalltatUncertProblem(signalMinimumAbsStatValue, bkgMinimumAbsStatValue, signalOnly)
+            self._datacards[m].fixTooSmallStatUncertProblem(signalMinimumAbsStatValue, bkgMinimumAbsStatValue, signalOnly)
+
+    ## Rebins the shape histograms (assumes that only shape variations are used)
+    def rebinShapes(self, rebinList):
+        print "datacards: Rebinning shapes"
+        for m in self._datacards.keys():
+            self._datacards[m].rebinShapes(rebinList)
 
     ## Checks if the root file background and observation items are the same between the datacards
     def checkIntegrity(self):
@@ -429,7 +446,7 @@ def getTableOutput(widths,table,latexMode=False):
 
 ## Class for containing all information related to a single datacard
 class DataCardReader:
-    def __init__(self, directory, mass, datacardFilePattern, rootFilePattern, rootFileDirectory="", readOnly=True, silent=True):
+    def __init__(self, directory, mass, datacardFilePattern, rootFilePattern, rootFileDirectory="", readOnly=True, silent=True, outSuffix=None):
         # Initialize
         self._directory = directory
         self._mass = mass
@@ -437,6 +454,7 @@ class DataCardReader:
         self._rootFilePattern = rootFilePattern
         self._rootFileDirectory = rootFileDirectory
         self._readOnly = readOnly
+        self._outSuffix = outSuffix
         self._rootFilename = None
         self._datacardFilename = None
         self._hCache = [] # Cache for persistent histograms
@@ -467,6 +485,9 @@ class DataCardReader:
     def getDatasetNames(self):
         return self._datacardColumnNames
 
+    def getRateValue(self, column):
+        return self._rateValues[column]
+
     #def getNuisanceNamesByDatasetName(self, datasetName):
         #self.hasDatasetByName(datasetName, exceptionOnFail=True)
         #return self._datasetNuisances[datasetName]
@@ -488,7 +509,7 @@ class DataCardReader:
       
     def getRateHisto(self, datasetName, fineBinned=False, exceptionOnFail=True):
         self.hasDatasetByName(datasetName, exceptionOnFail=True)
-        name = datasetName
+        name = self.getHistoNameForColumn(datasetName)
         if fineBinned:
             name += _fineBinningSuffix
         for item in self._hCache:
@@ -519,7 +540,7 @@ class DataCardReader:
     
     def getNuisanceHistos(self, datasetName, nuisanceName, exceptionOnFail=True, fineBinned=False):
         self.datasetHasNuisance(datasetName, nuisanceName, exceptionOnFail=True)
-        name = "%s_%s"%(datasetName, nuisanceName)
+        name = self.getHistoNameForNuisance(datasetName, nuisanceName)
         if "Bin" in name:
             name = "%s_%s"%(datasetName, name) # bin-by-bin uncert. replicate the dataset name
         if fineBinned:
@@ -568,8 +589,8 @@ class DataCardReader:
     def scaleSignal(self, value):
         signalColumn = self._datacardColumnNames[0]
         # Update rate
-        a = float(self._rateValues[0])*value
-        self._rateValues[0] = "%.6f"%a
+        a = float(self._rateValues[signalColumn])*value
+        self._rateValues[signalColumn] = "%.6f"%a
         # Update rate and nuisance histograms
         # Note: both need to be scaled 
         olist = self.getRootFileObjectsWithPattern(signalColumn)
@@ -642,29 +663,56 @@ class DataCardReader:
         for item in replaceDictionary.keys():
             for i in range(0,len(self.getDatasetNames())):
                 if self._datacardColumnNames[i] == item:
-                    self._datacardColumnNames[i] = self._datacardColumnNames[i].replace(item, replaceDictionary[item])
+                    self._datacardColumnNames[i] = replaceDictionary[item]
             for i in range(0,len(self._datasetNuisances)):
                 if item in self._datasetNuisances[i].keys():
                     self._datasetNuisances[i][replaceDictionary[item]] = self._datasetNuisances[i][item]
                     del self._datasetNuisances[i][item]
-                if self._datasetNuisances[i]["name"].startswith(item+"_"):
+                if self._datasetNuisances[i]["name"].startswith(item):
                     name = replaceDictionary[item]+self._datasetNuisances[i]["name"][len(item):]
                     self._datasetNuisances[i]["name"] = name
+        # Do replace in header lines of datacard file
+        for i in range(len(self._datacardHeaderLines)):
+            s = self._datacardHeaderLines[i].split()
+            if s[0] == "shapes":
+                for item in replaceDictionary.keys():
+                    if s[1] == item:
+                        s[1] = replaceDictionary[item]
+                        self._datacardHeaderLines[i] = " ".join(map(str, s))+"\n"
         # Do replace in root file
         for item in replaceDictionary.keys():
             myList = self.getRootFileObjectsWithPattern(item)
             # Loop over root objects
             for objectName in myList:
                 o = self.getRootFileObject(objectName)
-                if objectName.startswith(item+"_"+item+"_"):
-                    s = item+"_"+item+"_"
-                    name = "%s_%s_"%(replaceDictionary[item],replaceDictionary[item])+o.GetName()[len(s):]
-                    o.SetName(name)
-                elif objectName.startswith(item+"_"):
-                    name = replaceDictionary[item]+o.GetName()[len(item):]
-                    o.SetName(name)
-                elif item == objectName:
-                    o.SetName(replaceDictionary[item])
+                if self.getHistoNameForColumn(item) == objectName:
+                    # Rate
+                    o.SetName(self.getHistoNameForColumn(replaceDictionary[item]))
+                else:
+                    # Shape nuisances (no stat)
+                    for i in range(0,len(self._datasetNuisances)):
+                        if objectName.startswith(self.getHistoNameForNuisance(item, self._datasetNuisances[i]["name"])):
+                            name = objectName.replace(self.getHistoNameForNuisance(item, self._datasetNuisances[i]["name"]),self.getHistoNameForNuisance(replaceDictionary[item], self._datasetNuisances[i]["name"]))
+                            o.SetName(name)
+                    # stat nuisance FIXME: it seems that this does not work in all cases
+                    if "%s_%s"%(item,item) in objectName:
+                        name = objectName.replace(self.getHistoNameForNuisance(item, item),self.getHistoNameForNuisance(replaceDictionary[item], replaceDictionary[item]))
+                        o.SetName(name)
+                            
+                #if objectName.startswith(self.getHistoNameForNuisance(item,"")):
+                    #s = item+"_"+item+"_"
+                    #name = "%s_%s_"%(replaceDictionary[item],replaceDictionary[item])+o.GetName()[len(s):]
+                    #o.SetName(name)
+                #elif objectName.startswith(item+"_"):
+                    #name = replaceDictionary[item]+o.GetName()[len(item):]
+                    #o.SetName(name)
+        # Do replace in data structures
+        for item in replaceDictionary.keys():
+            for key in self._rateValues.keys():
+                if item == key:
+                    self._rateValues[replaceDictionary[item]] = self._rateValues[key]
+                    del self._rateValues[key]
+        
     
     def removeStatUncert(self, signalOnly=False):
         # Remove previous entries from datacard
@@ -719,8 +767,8 @@ class DataCardReader:
                         # Add histograms
                         hUp = Clone(hRate)
                         hDown = Clone(hRate)
-                        hUp.SetName("%s_%s_statBin%dUp"%(c, c, nbin))
-                        hDown.SetName("%s_%s_statBin%dDown"%(c, c, nbin))
+                        hUp.SetName(self.getHistoNameForNuisance(c, "%s_statBin%dUp"%(c, nbin)))
+                        hDown.SetName(self.getHistoNameForNuisance(c, "%s_statBin%dDown"%(c, nbin)))
                         hUp.SetBinContent(nbin, hUp.GetBinContent(nbin)+hUp.GetBinError(nbin))
                         myMinValue = max(hDown.GetBinContent(nbin)-hDown.GetBinError(nbin), 0.0)
                         hDown.SetBinContent(nbin, myMinValue)
@@ -730,7 +778,51 @@ class DataCardReader:
                         self.addHistogram(hUp)
                         self.addHistogram(hDown)
     
-    def fixTooSmalltatUncertProblem(self, signalMinimumAbsStatValue, bkgMinimumAbsStatValue, signalOnly=False):
+    ## This method is for testing the effect of zero bins for the background
+    def smoothBackgroundByLinearExtrapolation(self, column):
+        myFoundStatus = False
+        datasetIndex = 0
+        for c in self.getDatasetNames():
+            if c == column:
+                myFoundStatus = True
+                hRate = self.getRateHisto(c)
+                # Obtain list of non-zero bins
+                binList = []
+                for k in range(1, hRate.GetNbinsX()+1):
+                    if abs(hRate.GetBinContent(k)) > 0.0000001:
+                        binList.append(k)
+                # Add last bin
+                if hRate.GetNbinsX() not in binList:
+                    binList.append(hRate.GetNbinsX())
+                # Tweak to see if the tail matters
+                #hRate.SetBinContent(hRate.GetNbinsX(), 10.0)
+                # Interpolate
+                for i in range(len(binList)-1):
+                    # y = ax + b, parametrize content
+                    adenom = float(hRate.GetXaxis().GetBinCenter(binList[i+1])) - float(hRate.GetXaxis().GetBinCenter(binList[i]))
+                    anum = hRate.GetBinContent(binList[i+1]) - hRate.GetBinContent(binList[i])
+                    a = 0.0
+                    if abs(adenom) > 0.0000001:
+                        a = anum / adenom
+                    b = hRate.GetBinContent(binList[i+1]) - float(hRate.GetXaxis().GetBinCenter(binList[i+1])) * a
+                    for k in range(binList[i]+1,binList[i+1]):
+                        hRate.SetBinContent(k, a*hRate.GetXaxis().GetBinCenter(k) + b)
+                    # parametrize uncertainty (linear interpolation also here)
+                    anum = hRate.GetBinError(binList[i+1]) - hRate.GetBinError(binList[i])
+                    a = 0.0
+                    if abs(adenom) > 0.0000001:
+                        a = anum / adenom
+                    b = hRate.GetBinError(binList[i+1]) - float(hRate.GetXaxis().GetBinCenter(binList[i+1])) * a
+                    for k in range(binList[i]+1,binList[i+1]):
+                        hRate.SetBinError(k, a*hRate.GetXaxis().GetBinCenter(k) + b)
+                # Update rate number in table
+                print "sample yield changed %s -> %f"%(self._rateValues[datasetIndex], hRate.Integral())
+                self._rateValues[datasetIndex] = "%f"%hRate.Integral()
+            datasetIndex += 1
+        if not myFoundStatus:
+            raise Exception("Error: cannot find background '%s'!"%column)
+    
+    def fixTooSmallStatUncertProblem(self, signalMinimumAbsStatValue, bkgMinimumAbsStatValue, signalOnly=False):
         # Loop over columns
         for c in self.getDatasetNames():
             myStatus = True
@@ -773,13 +865,14 @@ class DataCardReader:
             raise Exception("Error opening file '%s'!"%self._rootFilename)
         f.Cd(self._rootFileDirectory)
         # Read histograms to cache
-        myHistoNames = ["data_obs"]
+        myHistoNames = []
         for c in self._datacardColumnNames:
-            myHistoNames.append(c)
+            myHistoNames.append(self.getHistoNameForColumn(c))
             for n in self._datasetNuisances:
+                myTemplate = self.getHistoNameForNuisance(c, n["name"])
                 if n["distribution"] == "shape" and n[c] == "1":
-                    myHistoNames.append("%s_%sUp"%(c,n["name"]))
-                    myHistoNames.append("%s_%sDown"%(c,n["name"]))
+                    myHistoNames.append(myTemplate+"Up")
+                    myHistoNames.append(myTemplate+"Down")
         myDir = f.GetDirectory(self._rootFileDirectory)
         klist = myDir.GetListOfKeys()
         for name in myHistoNames:
@@ -788,7 +881,17 @@ class DataCardReader:
                 raise Exception("Error: cannot find histo '%s' in root file '%s'!"%(name, self._rootFilename))
             o = k.ReadObj()
             o.SetName(k.GetName()) # The key has the correct name, but the histogram name might be something else
+            #print k.GetName()
             self._hCache.append(Clone(o))
+        # Add also histogram for observation
+        myDataName = self.getHistoNameForData()
+        k = klist.FindObject(myDataName)
+        if k == None:
+            raise Exception("Error: cannot find histo '%s' in root file '%s'!"%(name, myDataName))
+        o = k.ReadObj()
+        o.SetName(k.GetName()) # The key has the correct name, but the histogram name might be something else
+        #print k.GetName()
+        self._hCache.append(Clone(o))
         f.Close()
         
         if not self._silentStatus:
@@ -802,10 +905,25 @@ class DataCardReader:
                     myTotal += hRate.GetBinContent(nbin)
                 print "  %s / m%s: stat.uncert.: %f"%(c, self._mass, math.sqrt(myTotalUp)/myTotal)
 
+    def getHistoNameForData(self):
+        return self._datacardShapeDataTemplate.replace("$CHANNEL",self._datacardBinName)
+
+    def getHistoNameForColumn(self, columnName):
+        if self._datacardShapeColumnTemplate == None:
+            raise Exception()
+        return self._datacardShapeColumnTemplate.replace("$PROCESS",columnName).replace("$CHANNEL",self._datacardBinName)
+    
+    def getHistoNameForNuisance(self, columnName, nuisanceName):
+        if self._datacardShapeNuisanceTemplate == None:
+            raise Exception()
+        return self._datacardShapeNuisanceTemplate.replace("$PROCESS",columnName).replace("$CHANNEL",self._datacardBinName).replace("$SYSTEMATIC",nuisanceName)
+    
     def _writeRootFileContents(self):
         if self._readOnly:
             return
         myFilename = self._rootFilename
+        if self._outSuffix != None:
+            myFilename = myFilename.replace(".root","_%s.root"%self._outSuffix)
         if len(self._rootFileDirectory) > 0:
             myFilename = myFilename.replace(".root","_%s.root"%self._rootFileDirectory)
         f = ROOT.TFile.Open(myFilename, "RECREATE")
@@ -864,7 +982,7 @@ class DataCardReader:
             if i <= -self._datacardColumnStartIndex:
                 mySortList.append((i, 100000000-i))
             else:
-                mySortList.append((i, float(self._rateValues[i])))
+                mySortList.append((i, float(self._rateValues[self._datacardColumnNames[i]])))
         mySortList.sort(key=lambda x: x[1], reverse=True)
         myOutput = ""
         myObservedLine = ""
@@ -895,7 +1013,7 @@ class DataCardReader:
         myRateTable = []
         myLine = ["rate",""]
         for i in range(len(self._datacardColumnNames)):
-            myLine.append(self._rateValues[mySortList[i][0]])
+            myLine.append(self._rateValues[self._datacardColumnNames[mySortList[i][0]]])
         myRateTable.append(myLine)
         # Create nuisance table
         myNuisanceTable = []
@@ -944,15 +1062,44 @@ class DataCardReader:
 
     ## Parse header from datacard file
     def _parseDatacardHeader(self, lines):
+        self._dataObsName = None
+        self._datacardBinName = None
+        self._datacardShapeDataTemplate = "data_obs"
+        self._datacardShapeColumnTemplate = None
+        self._datacardShapeNuisanceTemplate = None
         self._datacardHeaderLines = []
         for l in lines:
             mySplit = l.split()
-            if mySplit[0] == "bin" and self._datacardBinName == None:
-                self._datacardBinName = mySplit[1]
+            if mySplit[0] == "bin":
+                if self._dataObsName == None:
+                    self._dataObsName  = mySplit[1]
+                elif self._datacardBinName == None:
+                    self._datacardBinName = mySplit[1]
             if mySplit[0] == "process":
                 del self._datacardHeaderLines[len(self._datacardHeaderLines)-1]
                 return
-            self._datacardHeaderLines.append(l)
+            if mySplit[0] == "shapes":
+                if len(mySplit) == 5:
+                    if mySplit[1] == "data_obs":
+                        self._datacardShapeDataTemplate = mySplit[4]
+                if len(mySplit) == 6:
+                    self._datacardShapeColumnTemplate = mySplit[4]
+                    self._datacardShapeNuisanceTemplate = mySplit[5]
+            # Store header line
+            if mySplit[0] == "shapes":
+                # Remove path from root file
+                s = mySplit[3].split("/")
+                mySplit[3] = s[len(s)-1]
+                # Add suffix to fle
+                if self._outSuffix != None:
+                    mySplit[3] = mySplit[3].replace(".root", "_%s.root"%self._outSuffix)
+                self._datacardHeaderLines.append(" ".join(map(str,mySplit))+"\n")
+            elif mySplit[0] == "kmax":
+                # Set number of nuisance parameters to auto-detect
+                mySplit[1] = "*"
+                self._datacardHeaderLines.append(" ".join(map(str,mySplit))+"\n")
+            else:
+                self._datacardHeaderLines.append(l)
         raise Exception("This line should never be reached")
     
     ## Parse column names from datacard file
@@ -994,10 +1141,38 @@ class DataCardReader:
                         self._observationValue = mySplit[1]
                     if mySplit[0] == "rate":
                         # store rate
-                        self._rateValues = mySplit[1:]
+                        for i in range(1,len(mySplit)):
+                            self._rateValues[self._datacardColumnNames[i-1]] = mySplit[i]
                         myRateLinePassedStatus = True
         if len(self._datasetNuisances) == 0:
             raise Exception("No nuisances found!")
+
+    ## Rebins the shape histograms (assumes that only shape variations are used)
+    def rebinShapes(self, rebinList):
+        # Check that bin edges make sense
+        for h in self._hCache:
+            for i in range(len(rebinList)-1):
+                myFoundStatus = False
+                k = 0
+                while not myFoundStatus and k < h.GetNbinsX():
+                    if h.GetXaxis().GetBinLowEdge(k+1) == rebinList[i]:
+                        myFoundStatus = True
+                    k += 1
+                if not myFoundStatus:
+                    l = []
+                    for k in range(h.GetNbinsX()):
+                        l.append("%f"%h.GetXaxis().GetBinLowEdge(k+1))
+                    print "Histogram (%s) binning: %s"%(h.GetName(), ", ".join(map(str, l)))
+                    raise Exception("Error: specified rebin edge (%f) is not found in the bin low edges!"%rebinList[i])
+        # Rebin
+        hlist = []
+        for h in self._hCache:
+            myArray = array.array("d",rebinList)
+            hnew = h.Rebin(len(rebinList)-1,h.GetName(),myArray)
+            h.Delete()
+            hlist.append(hnew)
+        # Store
+        self._hCache = hlist[:]
 
     ## Add signal from another datacard (usecase: combination of inclusive signals for tan beta limits)
     def addSignal(self, reader):
@@ -1015,13 +1190,13 @@ class DataCardReader:
         sourceRate = None
         for i in range(len(reader._datacardColumnNames)):
             if reader._datacardColumnNames[i] == sourceColumnName:
-                sourceRate = float(reader._rateValues[i])
+                sourceRate = float(reader._rateValues[reader._datacardColumnNames[i]])
         targetColumnName = self._datacardColumnNames[0]
         targetRate = None
         targetRateIndex = None
         for i in range(len(self._datacardColumnNames)):
             if self._datacardColumnNames[i] == targetColumnName:
-                targetRate = float(self._rateValues[i])
+                targetRate = float(self._rateValues[self._datacardColumnNames[i]])
                 targetRateIndex = i
         # Find source and target nuisance names and shape nuisance names
         sourceNuisances = reader.getNuisanceNames(sourceColumnName)
@@ -1031,10 +1206,10 @@ class DataCardReader:
         #print "target:",targetNuisances
         #print "source:",sourceNuisances
         # Update rate value (signal only)
-        self._rateValues[targetRateIndex] = "%.6f"%(sourceRate+targetRate)
+        self._rateValues[self._datacardColumnNames[targetRateIndex]] = "%.6f"%(sourceRate+targetRate)
         # Update shape nuisance histograms (signal only)
         for sourceShapeName in sourceShapeNuisances:
-            if not "statBin" in sourceShapeName:
+            if not "statBin" in sourceShapeName and not sourceShapeName.endswith("_stat"):
                 myFoundStatus = False
                 for targetShapeName in targetShapeNuisances:
                     #if sourceShapeName.replace(sourceColumnName,"") == targetShapeName.replace(targetColumnName,""):
@@ -1053,7 +1228,7 @@ class DataCardReader:
                     # that was the easy part, now one should add the the nuisance to the nuisance table
                     raise Exception("operation not supported at the moment")
         for targetShapeName in targetShapeNuisances:
-            if not "statBin" in targetShapeName:
+            if not "statBin" in targetShapeName and not targetShapeName.endswith("_stat"):
                 myFoundStatus = False
                 for sourceShapeName in sourceShapeNuisances:
                     if sourceShapeName == targetShapeName:
@@ -1067,7 +1242,7 @@ class DataCardReader:
         self.getRootFileObject(targetColumnName).Add(reader.getRootFileObject(sourceColumnName))
         # Add normalization nuisances (signal only)
         for sourceName in sourceNuisances:
-            if not "statBin" in sourceName and not sourceName in sourceShapeNuisances:
+            if not "statBin" in sourceName and not sourceShapeName.endswith("_stat") and not sourceName in sourceShapeNuisances:
                 myFoundStatus = False
                 for targetName in targetNuisances:
                     if sourceName == targetName:
@@ -1095,7 +1270,7 @@ class DataCardReader:
                 if not myFoundStatus:
                     raise Exception("operation not supported at the moment (%s/%s was not found in source)"%(sourceColumnName,sourceName))
         for targetName in targetNuisances:
-            if not "statBin" in targetName and not targetName in targetShapeNuisances:
+            if not "statBin" in targetName and not targetShapeName.endswith("_stat") and not targetName in targetShapeNuisances:
                 myFoundStatus = False
                 for sourceName in sourceNuisances:
                     if sourceName == targetName:
@@ -1107,7 +1282,7 @@ class DataCardReader:
         myReplaceDict[targetColumnName] = "%s_and_%s"%(targetColumnName, sourceColumnName.replace("CMS_",""))
         self.replaceColumnNames(myReplaceDict)
         # Redo stat.uncertainties (signal only)
-        self.fixTooSmalltatUncertProblem(signalMinimumAbsStatValue=0.3, bkgMinimumAbsStatValue=0.0, signalOnly=True)
+        self.fixTooSmallStatUncertProblem(signalMinimumAbsStatValue=0.3, bkgMinimumAbsStatValue=0.0, signalOnly=True)
         self.recreateShapeStatUncert(signalOnly=True)
 
 #def validateDatacards(directory="."):
