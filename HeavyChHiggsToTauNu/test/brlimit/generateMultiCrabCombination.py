@@ -84,6 +84,11 @@ if __name__ == "__main__":
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_ee_tb_m%s.txt", "CrossSectionShapes_tb_m%s_ee.root")
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_emu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_emu.root")
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_mumu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_mumu.root")
+        # tb, single lepton final states
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "ChargedHiggs_datacard_nB1_mu_%s_shape.txt", "HT_whf_limits_M%s_rebin_combine_stat2_shape_mu_nB1.root")
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "ChargedHiggs_datacard_nB2p_mu_%s_shape.txt", "HT_whf_limits_M%s_rebin_combine_stat2_shape_mu_nB2p.root")
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "ChargedHiggs_datacard_nB1_el_%s_shape.txt", "HT_whf_limits_M%s_rebin_combine_stat2_shape_el_nB1.root")
+        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "ChargedHiggs_datacard_nB2p_el_%s_shape.txt", "HT_whf_limits_M%s_rebin_combine_stat2_shape_el_nB2p.root")
 
         print "The following masses are considered:",", ".join(map(str, myMassPoints))
         if len(myMassPoints) > 0:

@@ -585,8 +585,8 @@ class MLFitData:
                     values.append(float(content[nuis][l]["fitted_value"]))
                     uncertainties.append(float(content[nuis][l]["fitted_uncertainty"]))
     
-        if shapeStatNuisance is None:
-            raise Exception("No shapeStat nuisance parameters found")
+        #if shapeStatNuisance is None:
+        #    raise Exception("No shapeStat nuisance parameters found")
 
         if isCombine:
             toSort = zip(labels, values, uncertainties)
