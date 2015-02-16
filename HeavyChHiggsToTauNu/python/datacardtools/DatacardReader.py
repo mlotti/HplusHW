@@ -589,8 +589,8 @@ class DataCardReader:
     def scaleSignal(self, value):
         signalColumn = self._datacardColumnNames[0]
         # Update rate
-        a = float(self._rateValues[0])*value
-        self._rateValues[0] = "%.6f"%a
+        a = float(self._rateValues[signalColumn])*value
+        self._rateValues[signalColumn] = "%.6f"%a
         # Update rate and nuisance histograms
         # Note: both need to be scaled 
         olist = self.getRootFileObjectsWithPattern(signalColumn)
@@ -706,6 +706,13 @@ class DataCardReader:
                 #elif objectName.startswith(item+"_"):
                     #name = replaceDictionary[item]+o.GetName()[len(item):]
                     #o.SetName(name)
+        # Do replace in data structures
+        for item in replaceDictionary.keys():
+            for key in self._rateValues.keys():
+                if item == key:
+                    self._rateValues[replaceDictionary[item]] = self._rateValues[key]
+                    del self._rateValues[key]
+        
     
     def removeStatUncert(self, signalOnly=False):
         # Remove previous entries from datacard
@@ -975,7 +982,7 @@ class DataCardReader:
             if i <= -self._datacardColumnStartIndex:
                 mySortList.append((i, 100000000-i))
             else:
-                mySortList.append((i, float(self._rateValues[i])))
+                mySortList.append((i, float(self._rateValues[self._datacardColumnNames[i]])))
         mySortList.sort(key=lambda x: x[1], reverse=True)
         myOutput = ""
         myObservedLine = ""
@@ -1006,7 +1013,7 @@ class DataCardReader:
         myRateTable = []
         myLine = ["rate",""]
         for i in range(len(self._datacardColumnNames)):
-            myLine.append(self._rateValues[mySortList[i][0]])
+            myLine.append(self._rateValues[self._datacardColumnNames[mySortList[i][0]]])
         myRateTable.append(myLine)
         # Create nuisance table
         myNuisanceTable = []
@@ -1134,7 +1141,8 @@ class DataCardReader:
                         self._observationValue = mySplit[1]
                     if mySplit[0] == "rate":
                         # store rate
-                        self._rateValues = mySplit[1:]
+                        for i in range(1,len(mySplit)):
+                            self._rateValues[self._datacardColumnNames[i-1]] = mySplit[i]
                         myRateLinePassedStatus = True
         if len(self._datasetNuisances) == 0:
             raise Exception("No nuisances found!")
@@ -1182,13 +1190,13 @@ class DataCardReader:
         sourceRate = None
         for i in range(len(reader._datacardColumnNames)):
             if reader._datacardColumnNames[i] == sourceColumnName:
-                sourceRate = float(reader._rateValues[i])
+                sourceRate = float(reader._rateValues[reader._datacardColumnNames[i]])
         targetColumnName = self._datacardColumnNames[0]
         targetRate = None
         targetRateIndex = None
         for i in range(len(self._datacardColumnNames)):
             if self._datacardColumnNames[i] == targetColumnName:
-                targetRate = float(self._rateValues[i])
+                targetRate = float(self._rateValues[self._datacardColumnNames[i]])
                 targetRateIndex = i
         # Find source and target nuisance names and shape nuisance names
         sourceNuisances = reader.getNuisanceNames(sourceColumnName)
@@ -1198,7 +1206,7 @@ class DataCardReader:
         #print "target:",targetNuisances
         #print "source:",sourceNuisances
         # Update rate value (signal only)
-        self._rateValues[targetRateIndex] = "%.6f"%(sourceRate+targetRate)
+        self._rateValues[self._datacardColumnNames[targetRateIndex]] = "%.6f"%(sourceRate+targetRate)
         # Update shape nuisance histograms (signal only)
         for sourceShapeName in sourceShapeNuisances:
             if not "statBin" in sourceShapeName and not sourceShapeName.endswith("_stat"):

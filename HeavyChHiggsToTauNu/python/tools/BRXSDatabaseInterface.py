@@ -3,6 +3,7 @@
 import sys
 import re
 from array import array
+import math
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -169,7 +170,7 @@ class BRXSDatabaseInterface:
         br_i = {}
         for v in myVertices:
             tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
-            br_i{v} = tmpgraph.Eval(y)
+            br_i[v] = tmpgraph.Eval(y)
             tmpgraph.Delete()
         
         # Obtain sum of Br of non-considered processes
@@ -185,7 +186,7 @@ class BRXSDatabaseInterface:
             gamma_i[v] = tmpgraph.Eval(y)
             tmpgraph.Delete()
             # Calculate total width
-            gammatot = gamma_i/br_i
+            gammatot = gamma_i[v]/br_i[v]
 
         # Use error propagation on Br_i = (Gamma_i) / (Gamma_i + Gamma_other)
         # I.e. vary Gamma_i, ..., and Gamma_other
@@ -199,18 +200,21 @@ class BRXSDatabaseInterface:
                 for vsub in myVertices:
                     myValue = myBrUncertaintySources[k]
                     if v == vsub:
-                        # uncert = delta_rel*B_i*(1-B_i)
-                        myValue *= br_i[v] * br_other
+                        myValue *= br_i[v] * (1.0 - br_i[v])
                     else:
-                        # uncert = -delta_rel*B_i*(B_other)
-                        myValue *= br_i[v] * brsub_i[v]
+                        myValue *= br_i[v] * br_i[vsub]
                     myUncertainties.append(myValue)
+                    #print "***",v,vsub,myValue,k
                 # Add uncertainty from other Br's
-                if (not v == "BR_tHpb" and k == "DeltaBCorrections"):
+                myStatus = True
+                if v == "BR_tHpb" and k == "DeltaBCorrections":
+                    myStatus = False
+                if myStatus:
                     # Do not add delta_b corrections for t->bW (== 1-Br(t->bH+))
                     myValue = myBrUncertaintySources[k]
                     myValue *= br_i[v] * br_other
                     myUncertainties.append(myValue)
+                    #print "***",v,"other",myValue,k
                 # Calculate total uncertainty
                 myUncert = 0.0
                 for a in myUncertainties:
@@ -219,7 +223,7 @@ class BRXSDatabaseInterface:
                     else:
                         myUncert += a**2
                 if not linearSummation:
-                    myUncert = sqrt(myUncert)
+                    myUncert = math.sqrt(myUncert)
                     myResult["%s_%s"%(v,k)] = myUncert
                 else:
                     myTotalUncertainty += myUncert
@@ -227,9 +231,9 @@ class BRXSDatabaseInterface:
                 myResult["%s"%(v)] = myTotalUncertainty
         # Print info
         if not silentStatus:
-            print "Br uncertainties for %s=%s, %s=%s:"%(xaxisName,x,yaxisName,y)
+            print "         ** Br uncertainties for %s=%s, %s=%s, %s:"%(xaxisName,x,yaxisName,y, self.rootfile)
             for k in myResult.keys():
-                print "Br uncert [%s] = %f"%(k, myResult[k])
+                print "       ** Br uncert [%s] = %f"%(k, myResult[k])
         # Return dictionary with results
         return myResult
 
