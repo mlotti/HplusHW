@@ -252,7 +252,10 @@ class BrContainer:
         # Scale datacards
         myResult = self.getResult(tanbeta)
         for fskey in self._decayModeMatrix.keys():
+            print "    . final state %10s:"%fskey
+            myOriginalRates = []
             myPrimaryReader = None
+            mySignalColumnName = myPrimaryReader.getDatasetNames()[0]
             for dmkey in self._decayModeMatrix[fskey].keys():
                 myDatacardPattern = self._decayModeMatrix[fskey][dmkey][0]
                 myRootFilePattern = self._decayModeMatrix[fskey][dmkey][1]
@@ -261,39 +264,42 @@ class BrContainer:
                 if dmkey == self._decayModeMatrix[fskey].keys()[0]:
                     myPrimaryReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
                     myPrimaryReader.scaleSignal(mySignalScaleFactor)
+                    myOriginalRates.append(myPrimaryReader.getRateValue(myPrimaryReader.getDatasetNames()[0]))
                 else:
                     # Scale according to br and add signal to primary (i.e. only one datacard for the decay modes)
                     myReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
                     myReader.scaleSignal(mySignalScaleFactor)
+                    myOriginalRates.append(myReader.getRateValue(myReader.getDatasetNames()[0]))
                     myPrimaryReader.addSignal(myReader)
                     myReader.close()
                     # Remove datacard from current directory so that it is not used for limit calculation (a copy of them is at originalDatacards directory)
                     if os.path.exists(myDatacardPattern%mHp):
                         os.system("rm %s"%(myDatacardPattern%mHp))
                         os.system("rm %s"%(myRootFilePattern%mHp))
-                
-            # Add theoretical uncertainties to datacard (depends on how many decay modes are combined)
+            myUpdatedRate = myPrimaryReader.getRateValue(myPrimaryReader.getDatasetNames()[0])
+            myTheorUncertPrefix = "theory_"
+            # Add theoretical cross section uncertainties to datacard 
             db = BRXSDB.BRXSDatabaseInterface(myDbInputName, silentStatus=True)
-            myTheorUncertLabel = "theory_Hpxsection"
             myXsecUncert = [db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "-"),
                             db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "+")]
+            myUncertValueString = "%.3f/%.3f"%(1.0-myXsecUncert[0], 1.0+myXsecUncert[1])
+            myNuisanceName = "%sxsectionHp"%myTheorUncertPrefix
+            myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
+            print "      . H+ xsec uncert: %s"%myUncertValueString
+            # Add theoretical branching ratio uncertainties to datacard (depends on how many decay modes are combined)
             myDecayModeKeys = self._decayModeMatrix[fskey].keys()
-            myBrUncert = []
-            if len(myDecayModeKeys) == 1:
-                myBrUncert.append(db.brUncert("mHp", "tanb", "BR_%s"%myDecayModeKeys[0], mHp, tanbeta, "-"))
-                myBrUncert.append(db.brUncert("mHp", "tanb", "BR_%s"%myDecayModeKeys[0], mHp, tanbeta, "+"))
-                myTheorUncertLabel += "_plus_Br%s"%myDecayModeKeys[0]
-            elif len(myDecayModeKeys) == 2:
-                myBrUncert.append(db.brUncert2("mHp", "tanb", "BR_%s"%myDecayModeKeys[0], "BR_%s"%myDecayModeKeys[1], mHp, tanbeta, "-"))
-                myBrUncert.append(db.brUncert2("mHp", "tanb", "BR_%s"%myDecayModeKeys[0], "BR_%s"%myDecayModeKeys[1], mHp, tanbeta, "+"))
-                myTheorUncertLabel += "_plus_Br%s_and_Br%s"%(myDecayModeKeys[0], myDecayModeKeys[1])
-            else:
-                raise Exception("N(decaymodes) == %d case is not supported at the moment"%len(myDecayModeKeys))
-            db.close()
-            myUncertValueString = "%.3f/%.3f"%(1-(myXsecUncert[0]+myBrUncert[0]), 1+(myXsecUncert[1]+myBrUncert[1]))
-            print "    . final state %10s: H+ xsec uncert: +%.3f -%.3f, Br uncert: +%.3f -%.3f, Total: %s"%(fskey, myXsecUncert[1], myXsecUncert[0], myBrUncert[1], myBrUncert[0], myUncertValueString)
-            mySignalName = myPrimaryReader.getDatasetNames()[0]
-            myPrimaryReader.addNuisance(myTheorUncertLabel, "lnN", mySignalName, myUncertValueString)
+            for i in range(myDecayModeKeys):
+                myDecayModeKeys[i] = "BR_%s"%myDecayModeKeys[i]
+            myBrUncert = db.brUncert("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=True, silentStatus=True)
+            for i in range(myDecayModeKeys):
+                for k in myBrUncert.keys():
+                    if myDecayModeKeys[i] in k:
+                        # Scale uncertainty according to amount of signal from that decay mode
+                        myUncertValue = myBrUncert[k] * myOriginalRates[i] / myUpdatedRate
+                        myNuisanceName = "%s%s"%k
+                        myUncertValueString = "%.3f/%.3f"%(1.0-myUncertValue, 1.0+myUncertValue)
+                        myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
+                        print "      . H+ Br uncert(%s): %s"%(k, myUncertValueString)
             # Write changes to datacard
             myPrimaryReader.close()
             

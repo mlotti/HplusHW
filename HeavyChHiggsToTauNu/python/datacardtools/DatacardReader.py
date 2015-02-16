@@ -485,6 +485,9 @@ class DataCardReader:
     def getDatasetNames(self):
         return self._datacardColumnNames
 
+    def getRateValue(self, column):
+        return self._rateValues[column]
+
     #def getNuisanceNamesByDatasetName(self, datasetName):
         #self.hasDatasetByName(datasetName, exceptionOnFail=True)
         #return self._datasetNuisances[datasetName]

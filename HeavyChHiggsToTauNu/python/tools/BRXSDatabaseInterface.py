@@ -99,6 +99,7 @@ class BRXSDatabaseInterface:
         #self.PrintGraph(newGraph)                                                                                                                     
         return newGraph
 
+    ## Returns the relative uncertainty on the theoretical cross section
     def xsecUncert(self,xaxisName,yaxisName,v,x,y,pm):
 
         uncert = uncert_deltab
@@ -141,82 +142,141 @@ class BRXSDatabaseInterface:
 
         self.tree = self.savecopy
         return uncert
+    
+    ## Returns a dictionary of the relative uncertainties on the theoretical branching fraction v
+    # \param xaxisName  name of the x-axis (e.g. "mHp")
+    # \param yaxisName  name of the y-axis (e.g. "tanb")
+    # \param v          list of branchings (e.g. ["BR_Hp_taunu"])
+    # \param x          value for x variable (e.g. "200")
+    # \param y          value for y variable (e.g. "20")
+    # \param linearSummation  sum uncertainties linearly if true, otherwise squared sum
+    # \param silentStatus  skip printing messages if true
+    # \return Returns a dictionary of label/relative uncert. value pairs
+    def brUncert(self,xaxisName,yaxisName,v,x,y,linearSummation=True,silentStatus=True):
+        myVertices = []
+        if not isinstance(v, list):
+            myVertices.append(v)
+        else:
+            myVertices = v[:]
+        
+        # Make list of branching fraction relative uncertainties
+        myBrUncertaintySources = {}
+        myBrUncertaintySources["MissingOneLoopEW"] = uncert_missing1loopEW
+        myBrUncertaintySources["MissingTwoLoopQCD"] = uncert_missing2loopQCD
+        myBrUncertaintySources["DeltaBCorrections"] = uncert_deltab
 
-    def brUncert(self,xaxisName,yaxisName,v,x,y,pm):
+        # Obtain theoretical branching fractions for vertices
+        br_i = {}
+        for v in myVertices:
+            tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
+            br_i{v} = tmpgraph.Eval(y)
+            tmpgraph.Delete()
+        
+        # Obtain sum of Br of non-considered processes
+        br_other = 1.0
+        for v in myVertices:
+            br_other -= br_i[v]
 
-        gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
-#        if v == "BR_tHpb":
-#            gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD
+        # Obtain decay width (Gamma) for label v
+        gamma_i = {}
+        for v in myVertices:
+            gamma_v = v.replace("BR","GAMMA")
+            tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
+            gamma_i[v] = tmpgraph.Eval(y)
+            tmpgraph.Delete()
+            # Calculate total width
+            gammatot = gamma_i/br_i
 
-        tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
-        br_i = tmpgraph.Eval(y)
-        tmpgraph.Delete()
+        # Use error propagation on Br_i = (Gamma_i) / (Gamma_i + Gamma_other)
+        # I.e. vary Gamma_i, ..., and Gamma_other
+        myResult = {}
+        for v in myVertices:
+            myTotalUncertainty = 0.0
+            # Obtain uncertainty for B_i's; B_other = 1-B_i's 
+            for k in myBrUncertaintySources.keys():
+                myUncertainties = []
+                # Add uncertainty from B_i's
+                for vsub in myVertices:
+                    myValue = myBrUncertaintySources[k]
+                    if v == vsub:
+                        # uncert = delta_rel*B_i*(1-B_i)
+                        myValue *= br_i[v] * br_other
+                    else:
+                        # uncert = -delta_rel*B_i*(B_other)
+                        myValue *= br_i[v] * brsub_i[v]
+                    myUncertainties.append(myValue)
+                # Add uncertainty from other Br's
+                if (not v == "BR_tHpb" and k == "DeltaBCorrections"):
+                    # Do not add delta_b corrections for t->bW (== 1-Br(t->bH+))
+                    myValue = myBrUncertaintySources[k]
+                    myValue *= br_i[v] * br_other
+                    myUncertainties.append(myValue)
+                # Calculate total uncertainty
+                myUncert = 0.0
+                for a in myUncertainties:
+                    if linearSummation:
+                        myUncert += a
+                    else:
+                        myUncert += a**2
+                if not linearSummation:
+                    myUncert = sqrt(myUncert)
+                    myResult["%s_%s"%(v,k)] = myUncert
+                else:
+                    myTotalUncertainty += myUncert
+            if linearSummation:
+                myResult["%s"%(v)] = myTotalUncertainty
+        # Print info
+        if not silentStatus:
+            print "Br uncertainties for %s=%s, %s=%s:"%(xaxisName,x,yaxisName,y)
+            for k in myResult.keys():
+                print "Br uncert [%s] = %f"%(k, myResult[k])
+        # Return dictionary with results
+        return myResult
 
-        gamma_v = v.replace("BR","GAMMA")
-        tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
-        gamma_i = tmpgraph.Eval(y)
-        tmpgraph.Delete()
+    #def brUncert2(self,xaxisName,yaxisName,v,w,x,y,pm):
+        ## usage: uncert = self.brUncert2("mHp","tanb","BR_Hp_taunu","BR_Hp_tb",Hp_mass,tanb,"+")
 
-        gammatot = gamma_i/br_i
+        #gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
 
-        sign = 1
-        if pm == "-":
-            sign = -1
+        ##### first Gamma
+        #tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
+        #br_i = tmpgraph.Eval(y)
+        #tmpgraph.Delete()
 
-        br_prime1 = gamma_i*(1+sign*gamma_uncert) / (gamma_i*(1+sign*gamma_uncert) + gammatot-gamma_i)
-        br_uncert1 = abs(br_prime1 - br_i) / br_i
+        #gamma_v = v.replace("BR","GAMMA")
+        #tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
+        #gamma_i = tmpgraph.Eval(y)
+        #tmpgraph.Delete()
 
-        br_prime2 = gamma_i / (gamma_i + (gammatot-gamma_i)*(1+sign*gamma_uncert))
-        br_uncert2 = abs(br_prime2 - br_i) / br_i
+        #gammatot = gamma_i/br_i
 
-        br_uncert = br_uncert1 + br_uncert2
-        #print "BR uncertainty",v,br_uncert                                                                                                            
-        return br_uncert
+        ##### second Gamma
+        #tmpgraph = self.getGraph(yaxisName,w,"%s == %s"%(xaxisName,x))
+        #br_j = tmpgraph.Eval(y)
+        #tmpgraph.Delete()
 
-    def brUncert2(self,xaxisName,yaxisName,v,w,x,y,pm):
-        # usage: uncert = self.brUncert2("mHp","tanb","BR_Hp_taunu","BR_Hp_tb",Hp_mass,tanb,"+")
+        #gamma_w = w.replace("BR","GAMMA")
+        #tmpgraph = self.getGraph(yaxisName,gamma_w,"%s == %s"%(xaxisName,x))
+        #gamma_j = tmpgraph.Eval(y)
+        #tmpgraph.Delete()
 
-        gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
+        #####
 
-        #### first Gamma
-        tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
-        br_i = tmpgraph.Eval(y)
-        tmpgraph.Delete()
+        #sign = 1
+        #if pm == "-":
+            #sign = -1
 
-        gamma_v = v.replace("BR","GAMMA")
-        tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
-        gamma_i = tmpgraph.Eval(y)
-        tmpgraph.Delete()
+        #br_prime1 = (gamma_i*(1+sign*gamma_uncert) + gamma_j)/ (gamma_i*(1+sign*gamma_uncert) + gamma_j + gammatot-gamma_i-gamma_j)
+        #br_uncert1 = abs(br_prime1 - br_i - br_j) / (br_i + br_j)
 
-        gammatot = gamma_i/br_i
+        #br_prime2 = (gamma_i + gamma_j*(1+sign*gamma_uncert))/ (gamma_i + gamma_j*(1+sign*gamma_uncert) + gammatot-gamma_i-gamma_j)
+        #br_uncert2 = abs(br_prime2 - br_i - br_j) / (br_i + br_j)
 
-        #### second Gamma
-        tmpgraph = self.getGraph(yaxisName,w,"%s == %s"%(xaxisName,x))
-        br_j = tmpgraph.Eval(y)
-        tmpgraph.Delete()
+        #br_prime3 = (gamma_i + gamma_j)/ (gamma_i + gamma_j + (gammatot-gamma_i-gamma_j)*(1+sign*gamma_uncert))
+        #br_uncert3 = abs(br_prime3 - br_i - br_j) / (br_i + br_j)
 
-        gamma_w = w.replace("BR","GAMMA")
-        tmpgraph = self.getGraph(yaxisName,gamma_w,"%s == %s"%(xaxisName,x))
-        gamma_j = tmpgraph.Eval(y)
-        tmpgraph.Delete()
-
-        ####
-
-        sign = 1
-        if pm == "-":
-            sign = -1
-
-        br_prime1 = (gamma_i*(1+sign*gamma_uncert) + gamma_j)/ (gamma_i*(1+sign*gamma_uncert) + gamma_j + gammatot-gamma_i-gamma_j)
-        br_uncert1 = abs(br_prime1 - br_i - br_j) / (br_i + br_j)
-
-        br_prime2 = (gamma_i + gamma_j*(1+sign*gamma_uncert))/ (gamma_i + gamma_j*(1+sign*gamma_uncert) + gammatot-gamma_i-gamma_j)
-        br_uncert2 = abs(br_prime2 - br_i - br_j) / (br_i + br_j)
-
-        br_prime3 = (gamma_i + gamma_j)/ (gamma_i + gamma_j + (gammatot-gamma_i-gamma_j)*(1+sign*gamma_uncert))
-        br_uncert3 = abs(br_prime3 - br_i - br_j) / (br_i + br_j)
-
-        br_uncert = br_uncert1 + br_uncert2 + br_uncert3
-        return br_uncert
+        #br_uncert = br_uncert1 + br_uncert2 + br_uncert3
+        #return br_uncert
 
         
     def setSelection(self,selection):
