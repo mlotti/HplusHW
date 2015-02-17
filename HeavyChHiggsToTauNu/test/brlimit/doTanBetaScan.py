@@ -305,7 +305,11 @@ class BrContainer:
                         print "      . H+ Br uncert(%s): %s"%(k, myUncertValueString)
             # Write changes to datacard
             myPrimaryReader.close()
-            
+            # Something in memory management leaks - the following helps dramatically to recude the leak
+            ROOT.gROOT.CloseFiles()
+            ROOT.gROOT.GetListOfCanvases().Delete()
+            ROOT.gDirectory.GetList().Delete()
+
     def resultExists(self, tanbeta):
         a = ""
         if isinstance(tanbeta, str):
@@ -400,16 +404,19 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
             # Result does not exist, let's calculate it
             brContainer.produceScaledCards(mHp, tanbeta)
             # Run Combine
-            resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=[mHp],
-                datacardPatterns = brContainer.getDatacardPatterns(),
-                rootfilePatterns = brContainer.getRootfilePatterns(),
-                clsType = combine.LHCTypeAsymptotic(opts),
-                postfix = myPostFix,
-                quietStatus = True)
-            if len(resultContainer.results) > 0:
-                result = resultContainer.results[0]
-                # Store result
-                brContainer.setCombineResult(tanbeta, result)
+            if "CMSSW_BASE" in os.environ:
+                resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=[mHp],
+                    datacardPatterns = brContainer.getDatacardPatterns(),
+                    rootfilePatterns = brContainer.getRootfilePatterns(),
+                    clsType = combine.LHCTypeAsymptotic(opts),
+                    postfix = myPostFix,
+                    quietStatus = True)
+                if len(resultContainer.results) > 0:
+                    result = resultContainer.results[0]
+                    # Store result
+                    brContainer.setCombineResult(tanbeta, result)
+            else:
+                print "... Skipping combine (assuming debug is intended; to run combine, do first cmsenv) ..."
     else:
         reuseStatus = True
     #if brContainer.resultExists(tanbeta):
