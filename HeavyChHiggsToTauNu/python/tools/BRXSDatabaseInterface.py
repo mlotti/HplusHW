@@ -125,6 +125,8 @@ class BRXSDatabaseInterface:
 
         self.savecopy = self.tree
         self.tree = self.fIN.Get("LHCHXSWG_results")
+        if self.tree == None:
+            raise Exception("Cannot find tree for cross section uncertainties in root file!")
 
         uncert = uncert_deltab
         tmpgraph = self.getGraph(yaxisName,"tHp_xsec","%s == %s"%(xaxisName,x))

@@ -25,10 +25,9 @@ import array
 import math
 
 _resultFilename = "results.txt"
-_theoreticalUncertainty = 0.32 # OBSOLETE
 _maxTanBeta = 69.0
-_linearSummingForTheoryUncertainties = True
-_separateTheoreticalXsectionAndBrUncertainties = True
+_linearSummingForTheoryUncertainties = True # LHCHXSWG recommendation True
+_separateTheoreticalXsectionAndBrUncertainties = False # LHCHXSWG recommendation False (because of correlations)
 
 
 class TanBetaResultContainer:
@@ -288,8 +287,9 @@ class BrContainer:
             db = BRXSDB.BRXSDatabaseInterface(myDbInputName, silentStatus=True)
             myXsecUncert = [db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "-"),
                             db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "+")]
-            myNuisanceName = "%sxsectionHp"%myTheorUncertPrefix
+            
             if _separateTheoreticalXsectionAndBrUncertainties:
+                myNuisanceName = "%sxsectionHp"%myTheorUncertPrefix
                 myUncertValueString = "%.3f/%.3f"%(1.0-myXsecUncert[0], 1.0+myXsecUncert[1])
                 myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
                 print "      . H+ xsec uncert: %s"%myUncertValueString
@@ -315,8 +315,8 @@ class BrContainer:
                             else:
                                 myXsecUncert[0] = math.sqrt(myXsecUncert[0]**2 + myUncertValue**2)
                                 myXsecUncert[1] = math.sqrt(myXsecUncert[1]**2 + myUncertValue**2)
-                            myNuisanceName += "_%s"%(k)
             if not _separateTheoreticalXsectionAndBrUncertainties:
+                myNuisanceName = "%sxsectionHp_and_Br"%myTheorUncertPrefix
                 myUncertValueString = "%.3f/%.3f"%(1.0-myXsecUncert[0], 1.0+myXsecUncert[1])
                 myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
                 print "      . %s: %s"%(myNuisanceName, myUncertValueString)
