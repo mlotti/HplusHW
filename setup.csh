@@ -3,8 +3,15 @@
 #
 # Usage:
 #
-# In HiggsAnalysis/HeavyChHiggsToTauNu/test do
-# source setupStandalone.csh
+# In HiggsAnalysis do
+# source setup.csh
+
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo "!" 
+echo "! This file needs to be updated, please see setup.sh for an example"
+echo "!" 
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+
 
 #set pwd $PWD
 if( ! -e .python) then
