@@ -92,6 +92,7 @@ void GenParticleDumper::reset(){
         phi[ic].clear();
         e[ic].clear();
 	pdgId[ic].clear();
+	status[ic].clear();
       }
     }
 }
