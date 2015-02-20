@@ -114,7 +114,7 @@ void MiniAOD2TTreeFilter::endJob(){
     dateString->Write(dateName);
 
 // write commit string
-    TString versionName = codeVersion;
+    TString versionName = "Commit "+codeVersion;
     TNamed* versionString = new TNamed("","");
     versionString->Write(versionName);
 
