@@ -1,0 +1,70 @@
+[CRAB]
+
+jobtype                 = cmssw
+#scheduler               = glite
+scheduler		= remoteGlidein
+
+#use_server		= 1
+
+[CMSSW]
+
+#datasetpath            = /SingleMu/pflow-tau-TauTriggerEff_SingleMu_Run2011A_Tau_May10ReReco_v1_RAW_RECO_TTEffSkim_v428_V00_09_01_v1-2f8b69e2fff05af41537abce2129a6b2/USER
+#datasetpath            = /SingleMu/pflow-tau-TauTriggerEff_SingleMu_Run2011A_Tau_PromptSkim_v4RAW_RECO_TTEffSkim_v428_V00_09_03_v1-2f8b69e2fff05af41537abce2129a6b2/USER
+#datasetpath            = /SingleMu/pflow-tau-TauTriggerEff_SingleMu_Run2011A_Tau_PromptSkim_v6_RAW_RECO_TTEffSkim_v428_V00_09_03_v1-2f8b69e2fff05af41537abce2129a6b2/USER
+#datasetpath		= /SingleMu/pflow-tau-TauTriggerEff_SingleMuRun2011B_Tau_PromptSkim_v1_RAW_RECO_TTEffSkim_v428_V00_09_05_v4-2f8b69e2fff05af41537abce2129a6b2/USER
+#datasetpath             = /DYtoTauTau_M-20_TuneP0_7TeV-pythia6-tauola/pflow-tau-TauTriggerEff_DYtoTauTau_M_20_TuneP0_7TeV_pythia6_tauola_Summer11_PU_S4_START42_V11_v2_RAW_TTEffSkim_v428_V00_09_05_v2-d0958e8d9ae36c83627ed150141b0d1e/USER
+#datasetpath		= /DYToTauTau_M-20_TuneZ2_7TeV-pythia6-tauola/pflow-tau-TauTriggerEff_DYToTauTau_M_20_TuneZ2_7TeV_pythia6_tauola_Fall11_PU_S6_START42_V14B_v1_RAW_TTEffSkim_ZSkim_v444_V00_09_19_v3-f3dca1ab8d4995970b73e79729b5194a/USER
+#datasetpath		= /QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/pflow-tau-TauTriggerEff_QCD_Pt_20_MuEnrichedPt_15_TuneZ2_7TeV_pythia6_Summer11_PU_S4_START42_V11_v2_RAW_TTEffSkim_v428_V00_09_05_v2-d0958e8d9ae36c83627ed150141b0d1e/USER
+#datasetpath		= /TTToHplusBWB_M-90_7TeV-pythia6-tauola/pflow-tau-TauTriggerEff_TTToHplusBWB_M_90_7TeV_pythia6_tauola_Fall11_E7TeV_Ave23_50ns_v2_RAW_RECO_TTEffSkim_v442p9_V00_09_08_v3-f8bd0aaf38ca4295f4db0dae637e52d6/USER
+#datasetpath		= /SingleMu/pflow-tau-TauTriggerEff_SingleMuRun2011A_Tau_May10ReReco_v1_RAW_RECO_TTEffSkim_v444_V00_09_19_v3-56f4c8370c739df5e40aca76d329cab7/USER
+#datasetpath		= /SingleMu/pflow-tau-TauTriggerEff_SingleMuRun2011B_Tau_PromptSkim_v1_RAW_RECO_TTEffSkim_v444_V00_09_19_v3-56f4c8370c739df5e40aca76d329cab7/USER
+#datasetpath		= /SingleMu/pflow-tau-TauTriggerEff_SingleMuRun2011A_Tau_08Nov2011_v6_RAW_RECO_TTEffSkim_v444_V00_09_19_v3-56f4c8370c739df5e40aca76d329cab7/USER
+#datasetpath		= /TauPlusX/pflow-tau-TauTriggerEff_TauPlusX_Run2012A_v1_RAWTTEffSkim_v525_V00_10_06_v1-fa2455f6114dcbd024328d5847b7d6f3/USER
+#datasetpath		= /Tau/pflow-tau-TauTriggerEff_Tau_Run2012A_v1_RAWTTEffSkim_v525_V00_10_06_v2-c6b6ff6cd8fe014939d36c12cf7886f1/USER
+#datasetpath		= /TauPlusX/pflow-tau-TauTriggerEff_TauPlusX_Run2012B_PromptReco_v1_AOD_TTEffSkim_v525_V00_10_06_v1-be6ecd52f198917de1be5ff208a419ce/USER
+#datasetpath		= /Tau/pflow-tau-TauTriggerEff_Tau_Run2012B_PromptReco_v1_AOD_TTEffSkim_v525_V00_10_06_v1-9fded3080b2c6ec1cb48ec7a6e535885/USER
+#datasetpath		= /TauPlusX/pflow-tau-TauTriggerEff_TauPlusX_Run2012C_PromptReco_v2_AOD_TTEffSkim_v533_V00_11_02_v2-b0b4d9e248727df06ef99dd59d75a5a9/USER
+datasetpath		= /Tau/pflow-tau-TauTriggerEff_Tau_Run2012C_PromptReco_v2_AOD_TTEffSkim_v533_V00_11_02_v3-f52268a77ce902b75b9dbf7fcc33365f/USER
+
+
+pset                    = TTEffAnalyzer3_cfg.py
+#total_number_of_events  = -1
+#events_per_job          = 1000
+total_number_of_lumis   = -1
+#lumis_per_job           = 1
+#output_file             = tteffAnalysis.root
+
+# Example for multiple output file retrieval, this probably doesn't
+# work if output is going to SE
+#output_file             = tteffAnalysis-hltcalotau-pftau.root, tteffAnalysis-hltpftau-pftau.root, tteffAnalysis-hltpftautight-pftau.root, tteffAnalysis-l1tau.root, tteffAnalysis-l1cen.root
+#output_file		= tteffAnalysis-hltcalotau-hpspftau.root, tteffAnalysis-hltpftautight-hpspftau.root, tteffAnalysis-hltpftau-hpspftau.root, tteffAnalysis-hltpftautight-hpspftau-highpurity.root, tteffAnalysis-hltpftautight-hpspftau-l1emu.root, tteffAnalysis-hltpftautight-hpspftau-l1emu-highpurity.root
+#output_file		= tteffAnalysis-hltpftautight-hpspftau-highpurity.root, tteffAnalysis-hltpftautight-hpspftau-l1emu-highpurity.root
+#output_file		= tteffAnalysis-hltpftau-hpspftau.root, tteffAnalysis-hltpftautight-hpspftau.root, tteffAnalysis-hltpftau-hpspftau-highpurity.root, tteffAnalysis-hltpftautight-hpspftau-highpurity.root
+#output_file		= tteffAnalysis-hltpftau-hpspftau.root,tteffAnalysis-hltpftaumedium-hpspftau.root,tteffAnalysis-hltpftaumediuml2global-hpspftau.root,tteffAnalysis-hltpftau-hpspftau-highpurity.root
+output_file		= tteffAnalysis-metleg.root
+
+skip_TFileService_output = 1
+
+#dbs_url                 = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_01_writer/servlet/DBSServlet
+#dbs_url 		= https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
+dbs_url			= phys03
+
+[USER]
+return_data             = 1
+copy_data 		= 0
+
+use_central_bossDB      = 0
+use_boss_rt             = 0
+
+
+[GRID]
+rb                      = CERN 
+proxy_server            = myproxy.cern.ch 
+virtual_organization    = cms
+retry_count             = 2
+lcg_catalog_type        = lfc
+lfc_host                = lfc-cms-test.cern.ch
+lfc_home                = /grid/cms
+
+#CE_white_list = T2_IT_Pisa
+#CE_white_list = jade-cms.hip.fi

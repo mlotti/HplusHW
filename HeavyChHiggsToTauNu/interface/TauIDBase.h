@@ -39,6 +39,7 @@ namespace HPlus {
 
     void incrementAllCandidates();
     virtual bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) = 0;
+    bool passVertexZCut(const edm::Ptr<pat::Tau> tau, double vertexZ);
     bool passKinematicSelection(const edm::Ptr<pat::Tau> tau);
     bool passKinematicSelectionPt(const edm::Ptr<pat::Tau>& tau);
     bool passKinematicSelectionEta(const edm::Ptr<pat::Tau>& tau);
@@ -62,15 +63,19 @@ namespace HPlus {
     /// Call at the end of event (after looping over all tau-jet candidates)
     void updatePassedCounters();
 
+    std::string getIsolationDiscriminator() const { return fIsolationDiscriminator; }
+
   protected:
     TFileDirectory fMyDir;
     
     // Input parameters
+    const double fVertexZCut;
     const double fPtCut;
     const double fEtaCut;
     const double fLeadTrkPtCut;
     const std::string fAgainstElectronDiscriminator;
     const bool fApplyVetoForDeadECALCells;
+    const double fDeadECALCellsDeltaR;
     const std::string fAgainstMuonDiscriminator;
     const size_t fProngCount;
     const std::string fIsolationDiscriminator;
@@ -82,6 +87,7 @@ namespace HPlus {
     // Tau-jet candidate selections (same for all tau ID algorithms)
     size_t fIDAllTauCandidates;
     size_t fIDDecayModeFinding;
+    size_t fIDVertexZCut;
     size_t fIDJetPtCut;
     size_t fIDJetEtaCut;
     size_t fIDLdgTrackExistsCut;

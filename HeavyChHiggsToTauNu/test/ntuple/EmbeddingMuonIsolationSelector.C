@@ -13,7 +13,7 @@ public:
   ~EmbeddingMuonIsolationSelector();
 
   void setOutput(TDirectory *dir);
-  void setupBranches(TTree *tree);
+  void setupBranches(BranchManager& branchManager);
   bool process(Long64_t entry);
 
 private:
@@ -23,96 +23,113 @@ private:
   TauCollection fTaus;
 
   std::string fPuWeightName;
-  Branch<double> fPuWeight;
-  Branch<unsigned> fVertexCount;
+  Branch<double> *fPuWeight;
+  Branch<unsigned> *fVertexCount;
+  Branch<bool> *fIsoMuTrigger;
 
   EmbeddingMuonIsolation::Mode fIsolationMode;
-
-  TH1 *makeEta(const char *name);
-  TH1 *makePt(const char *name);
-  TH1 *makePhi(const char *name);
-  TH1 *makeRtau(const char *name);
-  TH1 *makeVertexCount(const char *name);
 
   // Output
   // Counts
   EventCounter::Count cAll;
   EventCounter::Count cTauID;
   EventCounter::Count cMuonIsolation;
+  EventCounter::Count cIsoMuTrigger;
 
   // Histograms
-  TH1 *hTauEta_AfterTauID;
-  TH1 *hTauPt_AfterTauID;
-  TH1 *hTauPhi_AfterTauID;
-  TH1 *hTauLeadingTrackPt_AfterTauID;
-  TH1 *hTauRtau_AfterTauID;
-  TH1 *hVertexCount_AfterTauID;
+  class Histos {
+  public:
+    Histos(const std::string& postfix): fPostfix(postfix) {}
 
-  TH1 *hTauEta_AfterMuonIsolation;
-  TH1 *hTauPt_AfterMuonIsolation;
-  TH1 *hTauPhi_AfterMuonIsolation;
-  TH1 *hTauLeadingTrackPt_AfterMuonIsolation;
-  TH1 *hTauRtau_AfterMuonIsolation;
-  TH1 *hVertexCount_AfterMuonIsolation;
+    void makeHistos();
+
+    void fillTau(TauCollection::Tau& tau, double weight);
+    void fillVertex(unsigned nvertex, double weight);
+  private:
+    TH1 *makeEta(const char *name);
+    TH1 *makePt(const char *name);
+    TH1 *makePhi(const char *name);
+    TH1 *makeRtau(const char *name);
+    TH1 *makeVertexCount(const char *name);
+
+    std::string fPostfix;
+    TH1 *hTauEta;
+    TH1 *hTauPt;
+    TH1 *hTauPhi;
+    TH1 *hTauLeadingTrackPt;
+    TH1 *hTauRtau;
+    TH1 *hVertexCount;
+  };
+
+  Histos hAfterTauID;
+  Histos hAfterMuonIsolation;
+  Histos hAfterIsoMuTrigger;
 };
 
 EmbeddingMuonIsolationSelector::EmbeddingMuonIsolationSelector(const std::string& puWeight, const std::string& isolationMode):
   BaseSelector(),
-  fMuons("Emb"),
+  fMuons(),
   fPuWeightName(puWeight),
   fIsolationMode(EmbeddingMuonIsolation::stringToMode(isolationMode)),
   cAll(fEventCounter.addCounter("All events")),
   cTauID(fEventCounter.addCounter("Tau ID")),
-  cMuonIsolation(fEventCounter.addCounter("Muon isolation"))
+  cMuonIsolation(fEventCounter.addCounter("Muon isolation")),
+  cIsoMuTrigger(fEventCounter.addCounter("IsoMu trigger")),
+  hAfterTauID("AfterTauID"),
+  hAfterMuonIsolation("AfterMuonIsolation"),
+  hAfterIsoMuTrigger("AfterIsoMuTrigger")
 {}
 
 EmbeddingMuonIsolationSelector::~EmbeddingMuonIsolationSelector() {}
 
-TH1 *EmbeddingMuonIsolationSelector::makeEta(const char *name) { return makeTH<TH1F>(name, "Tau eta", 25, -2.5, 2.5); }
-TH1 *EmbeddingMuonIsolationSelector::makePt(const char *name)  { return makeTH<TH1F>(name, "Tau pt", 25, 0, 250); }
-TH1 *EmbeddingMuonIsolationSelector::makePhi(const char *name)  { return makeTH<TH1F>(name, "Tau phi", 32, -3.2, 3.2); }
-TH1 *EmbeddingMuonIsolationSelector::makeRtau(const char *name)  { return makeTH<TH1F>(name, "Rtau", 10, 0.6, 1.1); }
-TH1 *EmbeddingMuonIsolationSelector::makeVertexCount(const char *name) { return makeTH<TH1F>(name, "Vertex count", 30, 0, 30); }
+TH1 *EmbeddingMuonIsolationSelector::Histos::makeEta(const char *name) { return makeTH<TH1F>(name, "Tau eta", 25, -2.5, 2.5); }
+TH1 *EmbeddingMuonIsolationSelector::Histos::makePt(const char *name)  { return makeTH<TH1F>(name, "Tau pt", 25, 0, 250); }
+TH1 *EmbeddingMuonIsolationSelector::Histos::makePhi(const char *name)  { return makeTH<TH1F>(name, "Tau phi", 32, -3.2, 3.2); }
+TH1 *EmbeddingMuonIsolationSelector::Histos::makeRtau(const char *name)  { return makeTH<TH1F>(name, "Rtau", 10, 0.6, 1.1); }
+TH1 *EmbeddingMuonIsolationSelector::Histos::makeVertexCount(const char *name) { return makeTH<TH1F>(name, "Vertex count", 30, 0, 30); }
+
+void EmbeddingMuonIsolationSelector::Histos::makeHistos() {
+  hTauPt = makePt(("tauPt_"+fPostfix).c_str());
+  hTauEta = makeEta(("tauEta_"+fPostfix).c_str());
+  hTauPhi = makePhi(("tauPhi_"+fPostfix).c_str());
+  hTauLeadingTrackPt = makePt(("tauLeadingTrackPt_"+fPostfix).c_str());
+  hTauRtau = makeRtau(("tauRtau_"+fPostfix).c_str());
+  hVertexCount = makeVertexCount(("vertexCount_"+fPostfix).c_str());
+}
+void EmbeddingMuonIsolationSelector::Histos::fillTau(TauCollection::Tau& tau, double weight) {
+  hTauPt->Fill(tau.p4().Pt(), weight);
+  hTauEta->Fill(tau.p4().Eta(), weight);
+  hTauPhi->Fill(tau.p4().Phi(), weight);
+  hTauLeadingTrackPt->Fill(tau.leadPFChargedHadrCandP4().Pt(), weight);
+  hTauRtau->Fill(tau.rtau(), weight);
+}
+void EmbeddingMuonIsolationSelector::Histos::fillVertex(unsigned nvertex, double weight) {
+  hVertexCount->Fill(nvertex, weight);
+}
 
 void EmbeddingMuonIsolationSelector::setOutput(TDirectory *dir) {
   if(dir)
     dir->cd();
 
-  hTauPt_AfterTauID = makePt("tauPt_AfterTauID");
-  hTauEta_AfterTauID = makeEta("tauEta_AfterTauID");
-  hTauPhi_AfterTauID = makePhi("tauPhi_AfterTauID");
-  hTauLeadingTrackPt_AfterTauID = makePt("tauLeadingTrackPt_AfterTauID");
-  hTauRtau_AfterTauID = makeRtau("tauRtau_AfterTauID");
-  hVertexCount_AfterTauID = makeVertexCount("vertexCount_AfterTauID");
-
-  hTauPt_AfterMuonIsolation = makePt("tauPt_AfterMuonIsolation");
-  hTauEta_AfterMuonIsolation = makeEta("tauEta_AfterMuonIsolation");
-  hTauPhi_AfterMuonIsolation = makePhi("tauPhi_AfterMuonIsolation");
-  hTauLeadingTrackPt_AfterMuonIsolation = makePt("tauLeadingTrackPt_AfterMuonIsolation");
-  hTauRtau_AfterMuonIsolation = makeRtau("tauRtau_AfterMuonIsolation");
-  hVertexCount_AfterMuonIsolation = makeVertexCount("vertexCount_AfterMuonIsolation");
-
+  hAfterTauID.makeHistos();
+  hAfterMuonIsolation.makeHistos();
+  hAfterIsoMuTrigger.makeHistos();
 }
 
-void EmbeddingMuonIsolationSelector::setupBranches(TTree *tree) {
-  fEventInfo.setupBranches(tree);
-  fMuons.setupBranches(tree, isMC());
-  fTaus.setupBranches(tree);
+void EmbeddingMuonIsolationSelector::setupBranches(BranchManager& branchManager) {
+  fEventInfo.setupBranches(branchManager);
+  fMuons.setupBranches(branchManager, isMC());
+  fTaus.setupBranches(branchManager);
   if(!fPuWeightName.empty())
-    fPuWeight.setupBranch(tree, fPuWeightName.c_str());
-  fVertexCount.setupBranch(tree, "goodPrimaryVertex_count");
+    branchManager.book(fPuWeightName, &fPuWeight);
+  branchManager.book("goodPrimaryVertex_count", &fVertexCount);
+  branchManager.book("trigger_IsoMu30_eta2p1", &fIsoMuTrigger);
 }
 
 bool EmbeddingMuonIsolationSelector::process(Long64_t entry) {
-  fEventInfo.setEntry(entry);
-  fMuons.setEntry(entry);
-  fTaus.setEntry(entry);
-  fPuWeight.setEntry(entry);
-  fVertexCount.setEntry(entry);
-
   double weight = 1.0;
   if(!fPuWeightName.empty()) {
-    weight *= fPuWeight.value();
+    weight *= fPuWeight->value();
   }
   fEventCounter.setWeight(weight);
   //std::cout << weight << std::endl;
@@ -134,17 +151,12 @@ bool EmbeddingMuonIsolationSelector::process(Long64_t entry) {
     if(!TauID::oneProng(tau)) continue;
     if(!TauID::rtau(tau)) continue;
  
-    hTauPt_AfterTauID->Fill(tau.p4().Pt(), weight);
-    hTauEta_AfterTauID->Fill(tau.p4().Eta(), weight);
-    hTauPhi_AfterTauID->Fill(tau.p4().Phi(), weight);
-    hTauLeadingTrackPt_AfterTauID->Fill(tau.leadPFChargedHadrCandP4().Pt(), weight);
-    hTauRtau_AfterTauID->Fill(tau.rtau(), weight);
-
+    hAfterTauID.fillTau(tau, weight);
     selectedTaus.push_back(tau);
   }
   if(selectedTaus.empty()) return true;
   cTauID.increment();
-  hVertexCount_AfterTauID->Fill(fVertexCount.value(), weight);
+  hAfterTauID.fillVertex(fVertexCount->value(), weight);
 
   // Muon isolation
   std::vector<EmbeddingMuonCollection::Muon> selectedMuons;
@@ -158,13 +170,19 @@ bool EmbeddingMuonIsolationSelector::process(Long64_t entry) {
 
   for(size_t i=0; i<selectedTaus.size(); ++i) {
     TauCollection::Tau& tau = selectedTaus[i];
-    hTauPt_AfterMuonIsolation->Fill(tau.p4().Pt(), weight);
-    hTauEta_AfterMuonIsolation->Fill(tau.p4().Eta(), weight);
-    hTauPhi_AfterMuonIsolation->Fill(tau.p4().Phi(), weight);
-    hTauLeadingTrackPt_AfterMuonIsolation->Fill(tau.leadPFChargedHadrCandP4().Pt(), weight);
-    hTauRtau_AfterMuonIsolation->Fill(tau.rtau(), weight);
+    hAfterMuonIsolation.fillTau(tau, weight);
   }
-  hVertexCount_AfterMuonIsolation->Fill(fVertexCount.value(), weight);
+  hAfterMuonIsolation.fillVertex(fVertexCount->value(), weight);
+
+  // Mu trigger
+  if(!fIsoMuTrigger->value()) return true;
+  cIsoMuTrigger.increment();
+
+  for(size_t i=0; i<selectedTaus.size(); ++i) {
+    TauCollection::Tau& tau = selectedTaus[i];
+    hAfterIsoMuTrigger.fillTau(tau, weight);
+  }
+  hAfterIsoMuTrigger.fillVertex(fVertexCount->value(), weight);
 
   return true;
 }

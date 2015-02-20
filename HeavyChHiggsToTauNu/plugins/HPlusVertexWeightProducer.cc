@@ -3,6 +3,8 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
 class HPlusVertexWeightProducer: public edm::EDProducer {
 public:
@@ -12,12 +14,16 @@ public:
 private:
   virtual void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
+  HPlus::EventWeight eventWeight;
+  HPlus::HistoWrapper histoWrapper;
   HPlus::VertexWeight fVertexWeight;
   std::string fAlias;
 };
 
 HPlusVertexWeightProducer::HPlusVertexWeightProducer(const edm::ParameterSet& iConfig):
-  fVertexWeight(iConfig),
+  eventWeight(iConfig),
+  histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  fVertexWeight(iConfig, histoWrapper),
   fAlias(iConfig.getParameter<std::string>("alias"))
 {
   produces<double>().setBranchAlias(fAlias);

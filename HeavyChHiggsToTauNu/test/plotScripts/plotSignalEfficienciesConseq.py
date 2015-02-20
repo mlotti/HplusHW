@@ -36,7 +36,7 @@ analysis = "signalAnalysis"
 # main function
 def main():
     # Read the datasets
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=analysis+"Counters")
+    datasets = dataset.getDatasetsFromMulticrabCfg(counters=analysis+"/counters")
     datasets.updateNAllEventsToPUWeighted()
     datasets.loadLuminosities()
 
@@ -83,6 +83,14 @@ def doCounters(datasets):
         "TTToHplusBWB_M150",
         "TTToHplusBWB_M155",
         "TTToHplusBWB_M160",
+#        "TTToHplusBHminusB_M80",
+#        "TTToHplusBHminusB_M90",
+#        "TTToHplusBHminusB_M100",
+#        "TTToHplusBHminusB_M120",
+#        "TTToHplusBHminusB_M140",
+#        "TTToHplusBHminusB_M150",
+#        "TTToHplusBHminusB_M155",
+#        "TTToHplusBHminusB_M160",
         ]
     allName = "All events"
 
@@ -96,10 +104,12 @@ def doCounters(datasets):
         "njets",
         "MET",
         "btagging",
-        "btagging scale factor"
+        "btagging scale factor",
+        "DeltaPhi(Tau,MET) upper limit"
         ]
 
     xvalues = [80, 90, 100, 120, 140, 150, 155, 160]
+#    xvalues = [80, 90, 120, 140, 150, 155, 160]
     xerrs = [0]*len(xvalues)
     yvalues = {}
     yerrs = {}
@@ -116,27 +126,30 @@ def doCounters(datasets):
         for cut in cuts:
             cutCount = column.getCount(column.getRowNames().index(cut))
             if column.getRowNames().index(cut) == 1: ## trigger
-                allCount = column.getCount(column.getRowNames().index("All events"))
+                allCount = column.getCount(column.getRowNames().index("Offline selection begins"))
                 
             if column.getRowNames().index(cut) == 4: ## tau id
                 allCount = column.getCount(column.getRowNames().index("Trigger and HLT_MET cut"))
                 
-            if column.getRowNames().index(cut) == 7: ## electron veto
+            if column.getRowNames().index(cut) == 9: ## electron veto
                 allCount = column.getCount(column.getRowNames().index("taus == 1"))
                 
-            if column.getRowNames().index(cut) == 8:  ## muon veto
+            if column.getRowNames().index(cut) == 10:  ## muon veto
                 ## muon veto for lepton veto
-                allCount = column.getCount(column.getRowNames().index("taus == 1"))
+                allCount = column.getCount(column.getRowNames().index("trigger scale factor"))
 #                allCount = column.getCount(column.getRowNames().index("electron veto"))
 
-            if column.getRowNames().index(cut) == 9: ## njets
+            if column.getRowNames().index(cut) == 12: ## njets
                 allCount = column.getCount(column.getRowNames().index("muon veto"))
                 
-            if column.getRowNames().index(cut) == 10: ## MET
+            if column.getRowNames().index(cut) == 13: ## MET
                 allCount = column.getCount(column.getRowNames().index("njets"))
                 
-            if column.getRowNames().index(cut) == 12: ## btagging
+            if column.getRowNames().index(cut) == 15: ## btagging
                 allCount = column.getCount(column.getRowNames().index("MET"))
+
+            if column.getRowNames().index(cut) == 16: ## DeltaPhi(Tau,MET) upper limit
+                allCount = column.getCount(column.getRowNames().index("btagging scale factor"))
                                  
             eff = cutCount.clone()
             eff.divide(allCount) # N(cut) / N(all)
@@ -144,7 +157,7 @@ def doCounters(datasets):
                                            
             yvalues[cut].append(eff.value())
             yerrs[cut].append(eff.uncertainty())
-            if column.getRowNames().index(cut) == 9: ## btagging             
+            if column.getRowNames().index(cut) == 9: ## DeltaPhi(Tau,MET) upper              
                 print cut,eff.value()
 
     def createErrors(cutname):
@@ -163,7 +176,8 @@ def doCounters(datasets):
     gtrig.SetMarkerStyle(20)
     gtrig.SetMarkerSize(2)
     gtrig.SetLineStyle(1)  ## 8
-    gtrig.SetLineWidth(4) 
+    gtrig.SetLineWidth(4)
+    
     gtau = createErrors("taus == 1")
     gtau.SetLineColor(2)
     gtau.SetMarkerColor(2)
@@ -199,13 +213,20 @@ def doCounters(datasets):
     gbtag.SetMarkerStyle(25)
     gbtag.SetMarkerSize(2)
     gbtag.SetLineStyle(1) ## 6
-    gbtag.SetLineWidth(4) 
+    gbtag.SetLineWidth(4)
+    gdphi= createErrors("DeltaPhi(Tau,MET) upper limit")
+    gdphi.SetLineColor(93)
+    gdphi.SetMarkerColor(93)
+    gdphi.SetMarkerStyle(26)
+    gdphi.SetMarkerSize(2)
+    gdphi.SetLineStyle(1) ## 6
+    gdphi.SetLineWidth(4) 
     #gtau = createErrors("trigger scale factor")
 
                         
-    glist = [gtrig, gtau, gveto, gjets, gmet, gbtag]
+    glist = [gtrig, gtau, gveto, gjets, gmet, gbtag, gdphi ]
     
-    opts = {"xmin": 75, "xmax": 165, "ymin": 0.03}
+    opts = {"xmin": 75, "xmax": 165, "ymin": 0.06}
     canvasFrame = histograms.CanvasFrame([histograms.HistoGraph(g, "", "") for g in glist], "SignalEfficiencyConseq", **opts)
     canvasFrame.frame.GetYaxis().SetTitle("Selection efficiency")
     canvasFrame.frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
@@ -215,10 +236,20 @@ def doCounters(datasets):
     for gr in glist:
         gr.Draw("PC same")
     
-    histograms.addEnergyText()
-    histograms.addCmsPreliminaryText()
+    histograms.addStandardTexts()
 
-    legend = histograms.createLegend(x1=0.5, y1=0.53, x2=0.85, y2=0.75)
+    
+    
+#    tex5 = ROOT.TLatex(120,0.11,"t#bar{t} -> bH^{#pm}bH^{#pm}")
+    tex5 = ROOT.TLatex(120,0.3,"t#bar{t} -> bH^{#pm}bW")
+   
+#    tex5.SetNDC()
+    tex5.SetTextSize(25)
+    tex5.Draw()
+
+
+
+    legend = histograms.createLegend(x1=0.2, y1=0.36, x2=0.5, y2=0.65)
 
     legend.AddEntry(gtrig,"Trigger", "lp"); 
     legend.AddEntry(gtau, "#tau identification", "lp"); 
@@ -226,6 +257,7 @@ def doCounters(datasets):
     legend.AddEntry(gjets ,"3 jets", "lp"); 
     legend.AddEntry(gmet,"MET ", "lp")
     legend.AddEntry(gbtag,"b tagging ", "lp")
+    legend.AddEntry(gdphi,"DeltaPhi(Tau,MET)", "lp")
     legend.Draw()
     
     canvasFrame.canvas.SaveAs(".png")

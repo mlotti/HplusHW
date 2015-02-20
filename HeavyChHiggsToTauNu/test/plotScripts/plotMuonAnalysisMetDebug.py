@@ -255,9 +255,7 @@ class PlotMet:
         h.frame.GetXaxis().SetTitle(self.xlabel(met))
         h.frame.GetYaxis().SetTitle(self.ylabel)
         h.draw()
-        addCmsPreliminaryText()
-        addEnergyText()
-        h.histos.addLuminosityText()
+        h.addStandardTexts()
         h.save()
 
     def _plotLog(self, h, selection, met):
@@ -266,9 +264,7 @@ class PlotMet:
         h.frame.GetYaxis().SetTitle(self.ylabel)
         ROOT.gPad.SetLogy(True)
         h.draw()
-        addCmsPreliminaryText()
-        addEnergyText()
-        #h.histos.addLuminosityText()
+        h.addStandardTexts()
         h.save()
 
     def _createHisto(self, met, selection, calcNumEvents=False):

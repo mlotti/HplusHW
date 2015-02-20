@@ -1,256 +1,202 @@
 import FWCore.ParameterSet.Config as cms
 import sys
 import ctypes
+import copy
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
 
+class Scenario:
+    def __init__(self, *args, **kwargs):
+        if len(args) != 1:
+            raise Exception("You must give exactly one positional argument for the scenario name, got %d" % len(args))
+        self._name = args[0]
+        self._data = copy.deepcopy(kwargs)
+
+    def applyToPSet(self, pset):
+        for key, value in self._data.iteritems():
+            setattr(pset, key, value)
+
+    def __str__(self):
+        return self._name
+
+class OptimisationItem:
+    def __init__(self, name, variationList, attributeToChange, formatString):
+        # Initialize
+        self._name = name
+        self._variationList = []
+        if isinstance(variationList, list):
+            self._variationList.extend(variationList)
+        else:
+            self._variationList.append(variationList)
+        self._attributeToChange = attributeToChange
+        self._formatString = formatString
+
+    def getNumberOfVariations(self):
+        return len(self._variationList)
+
+    def getSuffixForName(self, idx):
+        return self._formatString%self._variationList[idx]
+
+    def setVariation(self, module, idx):
+        def deepgetattr(obj, attr):
+            #Recurses through an attribute chain to get the ultimate value.
+            return reduce(getattr, attr.split('.'), obj)
+
+        def deepsetattr(obj, attr, value):
+            #Recurses through an attribute chain to set the ultimate value.
+            if len(attr.split(".")) > 1:
+                deepsetattr(getattr(obj, attr.split(".")[0]), attr[attr.find(".")+1:], value)
+            else:
+                if hasattr(value, "applyToPSet"):
+                    value.applyToPSet(getattr(obj, attr))
+                else:
+                    setattr(obj, attr, value)
+
+        if self.isDirectionalParameter():
+            # separate direction and digit (operators are "GT","GEQ","NEQ","EQ","LT","LEQ")
+            myDirection = ""
+            myDigit = 0
+            if self._variationList[idx][2].isdigit():
+                myDirection = self._variationList[idx][:1]
+                myDigit = int(self._variationList[idx][2:])
+            else:
+                myDirection = self._variationList[idx][:2]
+                myDigit = int(self._variationList[idx][3:])
+            deepsetattr(module, self._attributeToChange, myDigit)
+            deepsetattr(module, self._attributeToChange+"CutDirection", myDirection)
+        else:
+            #print "value is: %s"%deepgetattr(module, self._attributeToChange)
+            deepsetattr(module, self._attributeToChange, self._variationList[idx]) # FIXME
+            #print "test: new attribute is: %s"%deepgetattr(module, self._attributeToChange)
+
+    def isDirectionalParameter(self):
+        # (operators are "GT","GEQ","NEQ","EQ","LT","LEQ")
+        if "EQ" in self._attributeToChange:
+            return True
+        if "LT" in self._attributeToChange:
+            return True
+        if "GT" in self._attributeToChange:
+            return True
+        return False
+
+    def printLabelAndValues(self):
+        print "  %s: [%s]"%(self._name, (', '.join(map(str, self._variationList))))
+
 ## Class for generating variations to the analysis for optimisation
-class HPlusOptimisationScheme():
+class HPlusOptimisationScheme:
     ## Constructor
     def __init__(self):
         # initialise internal variables
-        self._tauPtVariation = []
-        self._tauIsolationVariation = []
-        self._tauIsolationContinuousVariation = []
-        self._rtauVariation = []
-        self._jetNumberVariation = []
-        self._jetEtVariation = []
-        self._jetBetaVariation = []
-        self._METSelectionVariation = []
-        self._bjetLeadingDiscriminatorVariation = []
-        self._bjetSubLeadingDiscriminatorVariation = []
-        self._bjetEtVariation = []
-        self._bjetNumberVariation = []
-        self._deltaPhiVariation = []
-        self._topRecoVatiation = []
-        self._maxVariations = 200
+        self._variationItems = []
 
-    def disableMaxVariations(self):
-        self._maxVariations = -1
+    def addTauPtVariation(self, values):
+        self._variationItems.append(OptimisationItem("tau pT", values, "tauSelection.ptCut", "Taupt%.0f"))
 
-    def addTauPtVariation(self, value):
-        if isinstance(value, list):
-            self._tauPtVariation.extend(value)
+    def addTauIsolationVariation(self, values):
+        self._variationItems.append(OptimisationItem("tau isolation", values, "tauSelection.isolationDiscriminator", "Tau%s"))
+
+    def addRtauVariation(self, values):
+        self._variationItems.append(OptimisationItem("tau Rtau cut", values, "tauSelection.rtauCut", "Rtau%.1f"))
+
+    def addTauVariations(self, scenarios):
+        self._variationItems.append(OptimisationItem("tau", scenarios, "tauSelection", "Tau%s"))
+
+    def addJetNumberSelectionVariation(self, values):
+        self._variationItems.append(OptimisationItem("jet Njets", values, "jetSelection.jetNumber", "Jets%s"))
+
+    def addJetEtVariation(self, values):
+        self._variationItems.append(OptimisationItem("jet pT", values, "jetSelection.ptCut", "Jetpt%d"))
+
+    def addJetVariations(self, scenarios):
+        self._variationItems.append(OptimisationItem("jet", scenarios, "jetSelection", "Jets%s"))
+
+    def addMETSelectionVariation(self, values):
+        self._variationItems.append(OptimisationItem("MET", values, "MET.METCut", "MET%.0f"))
+
+    def addMETVariations(self, scenarios):
+        self._variationItems.append(OptimisationItem("MET", scenarios, "MET", "MET%s"))
+
+    def addBJetLeadingDiscriminatorVariation(self, values):
+        self._variationItems.append(OptimisationItem("btag discriminator", values, "bTagging.leadingDiscriminatorCut", "Bdiscr%.1f"))
+
+    def addBJetSubLeadingDiscriminatorVariation(self, values):
+        self._variationItems.append(OptimisationItem("btag subleading discriminator", values, "bTagging.subleadingDiscriminatorCut", "Bsubdiscr%.1f"))
+
+    def addBJetNumberVariation(self, values):
+        self._variationItems.append(OptimisationItem("btag Njets", values, "bTagging.jetNumber", "Bjets%d"))
+
+    def addBJetEtVariation(self, values):
+        self._variationItems.append(OptimisationItem("btag pT", values, "bTagging.ptCut", "BpT%.0f"))
+
+    def addBTagVariations(self, scenarios):
+        self._variationItems.append(OptimisationItem("btag", scenarios, "bTagging", "Btag%s"))
+
+    def addTopRecoVariation(self, values):
+        self._variationItems.append(OptimisationItem("top reco algorithm", values, "topReconstruction", "Top%s"))
+
+    def addInvariantMassVariation(self, scenarios):
+        self._variationItems.append(OptimisationItem("invariant mass algorithm", scenarios, "invMassReco", "InvMassReco%s"))
+
+    def printOptimisationConfig(self, analysisName):
+        print "Optimisation configuration for module %s:"%analysisName
+        if len(self._variationItems) == 0:
+            print "  No optimisation variations!"
+            return
+        for item in self._variationItems:
+            item.printLabelAndValues()
+
+    def printOptions(self):
+        print "Implemented variation options in OptimisationScheme.py:"
+        for item in dir(self):
+            if "add" in item:
+                print "  ",item
+        sys.exit()
+
+    def createVariationModule(self, idxlist, nominalAnalysis):
+        myModule = nominalAnalysis.clone()
+        for i in range(0, len(self._variationItems)):
+            self._variationItems[i].setVariation(myModule, idxlist[i])
+        return myModule
+
+    def getVariationName(self, analysisName, idxlist):
+        myName = "%sOpt"%analysisName
+        for i in range(0, len(self._variationItems)):
+            myName += "%s"%self._variationItems[i].getSuffixForName(idxlist[i])
+        return myName.replace(".","")
+
+    def doVariation(self, depth, idxlist, process, additionalCounters, commonSequence, nominalAnalysis, analysisName):
+        myModuleNames = []
+        if depth == len(idxlist):
+            # Top reached, create module
+            myVariationName = self.getVariationName(analysisName, idxlist)
+            addAnalysis(process,
+                        myVariationName,
+                        self.createVariationModule(idxlist, nominalAnalysis),
+                        preSequence=commonSequence,
+                        additionalCounters=additionalCounters,
+                        signalAnalysisCounters=True)
+            myModuleNames.append(myVariationName)
+            #print "Added module:",myVariationName
         else:
-            self._tauPtVariation.append(value)
-
-    def addTauIsolationVariation(self, value):
-        if isinstance(value, list):
-            self._tauIsolationVariation.extend(value)
-        else:
-            self._tauIsolationVariation.append(value)
-
-    def addTauIsolationContinuousVariation(self, value):
-        if isinstance(value, list):
-            self._tauIsolationContinuousVariation.extend(value)
-        else:
-            self._tauIsolationContinuousVariation.append(value)
-
-    def addRtauVariation(self, value):
-        if isinstance(value, list):
-            self._rtauVariation.extend(value)
-        else:
-            self._rtauVariation.append(value)
-
-    def addJetNumberSelectionVariation(self, value):
-        if isinstance(value, list):
-            self._jetNumberVariation.extend(value)
-        else:
-            self._jetNumberVariation.append(value)
-
-    def addJetEtVariation(self, value):
-        if isinstance(value, list):
-            self._jetEtVariation.extend(value)
-        else:
-            self._jetEtVariation.append(value)
-
-    def addJetBetaVariation(self, value):
-        if isinstance(value, list):
-            self._jetBetaVariation.extend(value)
-        else:
-            self._jetBetaVariation.append(value)
-
-    def addMETSelectionVariation(self, value):
-        if isinstance(value, list):
-            self._METSelectionVariation.extend(value)
-        else:
-            self._METSelectionVariation.append(value)
-
-    def addBJetLeadingDiscriminatorVariation(self, value):
-        if isinstance(value, list):
-            self._bjetLeadingDiscriminatorVariation.extend(value)
-        else:
-            self._bjetLeadingDiscriminatorVariation.append(value)
-
-    def addBJetSubLeadingDiscriminatorVariation(self, value):
-        if isinstance(value, list):
-            self._bjetSubLeadingDiscriminatorVariation.extend(value)
-        else:
-            self._bjetSubLeadingDiscriminatorVariation.append(value)
-
-    def addBJetEtVariation(self, value):
-        if isinstance(value, list):
-            self._bjetEtVariation.extend(value)
-        else:
-            self._bjetEtVariation.append(value)
-
-    def addBJetNumberVariation(self, value):
-        if isinstance(value, list):
-            self._bjetNumberVariation.extend(value)
-        else:
-            self._bjetNumberVariation.append(value)
-
-    def addDeltaPhiVariation(self, value):
-        if isinstance(value, list):
-            self._deltaPhiVariation.extend(value)
-        else:
-            self._deltaPhiVariation.append(value)
-
-    def addTopRecoVariation(self, value):
-        if isinstance(value, list):
-            self._topRecoVatiation.extend(value)
-        else:
-            self._topRecoVatiation.append(value)
-
-    def _dealWithEmptyVariations(self, nominalAnalysis):
-        if len(self._tauPtVariation) == 0:
-            self._tauPtVariation.append(nominalAnalysis.tauSelection.ptCut.value())
-        if len(self._tauIsolationVariation) == 0:
-            self._tauIsolationVariation.append(nominalAnalysis.tauSelection.isolationDiscriminator.value())
-        if len(self._tauIsolationContinuousVariation) == 0:
-            self._tauIsolationContinuousVariation.append(nominalAnalysis.tauSelection.isolationDiscriminatorContinuousCutPoint.value())
-        if len(self._rtauVariation) == 0:
-            self._rtauVariation.append(nominalAnalysis.tauSelection.rtauCut.value())
-        if len(self._jetEtVariation) == 0:
-            self._jetEtVariation.append(nominalAnalysis.jetSelection.ptCut.value())
-        if len(self._jetNumberVariation) == 0:
-            self._jetNumberVariation.append("%s%d"%(nominalAnalysis.jetSelection.jetNumberCutDirection.value(),nominalAnalysis.jetSelection.jetNumber.value()))
-        if len(self._jetBetaVariation) == 0:
-            self._jetBetaVariation.append("%s%.1f"%(nominalAnalysis.jetSelection.betaCutDirection.value(),nominalAnalysis.jetSelection.betaCut.value()))
-        if len(self._METSelectionVariation) == 0:
-            self._METSelectionVariation.append(nominalAnalysis.MET.METCut.value())
-        if len(self._bjetLeadingDiscriminatorVariation) == 0:
-            self._bjetLeadingDiscriminatorVariation.append(nominalAnalysis.bTagging.leadingDiscriminatorCut.value())
-        if len(self._bjetSubLeadingDiscriminatorVariation) == 0:
-            self._bjetSubLeadingDiscriminatorVariation.append(nominalAnalysis.bTagging.subleadingDiscriminatorCut.value())
-        if len(self._bjetEtVariation) == 0:
-            self._bjetEtVariation.append(nominalAnalysis.bTagging.ptCut.value())
-        if len(self._bjetNumberVariation) == 0:
-            self._bjetNumberVariation.append("%s%d"%(nominalAnalysis.bTagging.jetNumberCutDirection.value(),nominalAnalysis.bTagging.jetNumber.value()))
-        if len(self._deltaPhiVariation) == 0:
-            self._deltaPhiVariation.append(nominalAnalysis.deltaPhiTauMET.value())
-        if len(self._topRecoVatiation) == 0:
-            self._topRecoVatiation.append("None") # FIXME
-
-    def printOptimisationConfig(self):
-        print "Optimisation configuration:"
-        print "  tau pT",self._tauPtVariation
-        print "  tau isolation",self._tauIsolationVariation
-        print "  tau cont. isolation discr. values",self._tauIsolationContinuousVariation
-        print "  rtau",self._rtauVariation
-        print "  jet ET",self._jetEtVariation
-        print "  jet number",self._jetNumberVariation
-        print "  jet beta cut",self._jetBetaVariation
-        print "  MET",self._METSelectionVariation
-        print "  btag leading disriminator values",self._bjetLeadingDiscriminatorVariation
-        print "  btag subleading disriminator values",self._bjetSubLeadingDiscriminatorVariation
-        print "  btag ET",self._bjetEtVariation
-        print "  btag number",self._bjetNumberVariation
-        print "  delta phi (tau,MET) cut",self._deltaPhiVariation
-        print "  top mass reco",self._topRecoVatiation
-
-    def getOperatorFromCutWithDirection(self, variation):
-        myValidOperators = ["GT","GEQ","NEQ","EQ","LT","LEQ"]
-        myRange = 2
-        if variation[2] == 'Q':
-            myRange = 3
-        myOperator = variation[:myRange]
-        if myOperator not in myValidOperators:
-            raise Exception("Error: valid operators for cut direction are ",myValidOperators)
-        return myOperator
-
-    def getNumberFromCutWithDirection(self, variation):
-        myRange = 2
-        if variation[2] == 'Q':
-            myRange = 3
-        myNumber = float(variation[myRange:])
-        return myNumber
-
-    def getVariationName(self, analysisName,taupt,tauIsol,tauIsolCont,rtau,jetNumber,jetEt,jetBeta,met,bjetNumber,bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr,dphi,topreco):
-        myVariationName = "%s_Opt"%analysisName
-        myVariationName += "_Taupt%.0f"%taupt
-        myVariationName += "_%s"%tauIsol
-        if tauIsolCont > 0:
-            myVariationName += "%.1f"%tauIsolCont
-        myVariationName += "_Rtau%.1f"%rtau
-        myVariationName += "_Jet%s"%jetNumber
-        myVariationName += "_Et%.0f"%jetEt
-        myVariationName += "_Beta%s"%jetBeta
-        myVariationName += "_Met%.0f"%met
-        myVariationName += "_Bjet%s"%bjetNumber
-        myVariationName += "_Et%.0f_discr%.1fand%.1f"%(bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr)
-        myVariationName += "_Dphi%.0f"%dphi
-        myVariationName += "_Topreco"+topreco
-        myVariationName = myVariationName.replace(".","") # remove dots from name since they are forbidden
-        myVariationName = myVariationName.replace("_","") # remove underscores from name since they are forbidden
-        return myVariationName
+            for i in range(0, self._variationItems[depth].getNumberOfVariations()):
+                # Enter recursion
+                idxlist[depth] = i
+                myModuleNames.extend(self.doVariation(depth+1, idxlist, process, additionalCounters, commonSequence, nominalAnalysis, analysisName))
+        return myModuleNames
 
     def generateVariations(self, process, additionalCounters, commonSequence, nominalAnalysis, analysisName):
-        # if no variations were supplied, take the default value
-        self._dealWithEmptyVariations(nominalAnalysis)
+        #self.printOptions()
         # Print info
-        self.printOptimisationConfig()
+        self.printOptimisationConfig(analysisName)
         # loop over variations
-        nVariations = 0
-        variationModuleNames = []
-        for taupt in self._tauPtVariation:
-            for tauIsol in self._tauIsolationVariation:
-                for tauIsolCont in self._tauIsolationContinuousVariation:
-                    for rtau in self._rtauVariation:
-                        for jetEt in self._jetEtVariation:
-                            for jetNumber in self._jetNumberVariation:
-                                for jetBeta in self._jetBetaVariation:
-                                    for met in self._METSelectionVariation:
-                                        for bjetLeadingDiscr in self._bjetLeadingDiscriminatorVariation:
-                                            for bjetSubLeadingDiscr in self._bjetSubLeadingDiscriminatorVariation:
-                                                for bjetEt in self._bjetEtVariation:
-                                                    for bjetNumber in self._bjetNumberVariation:
-                                                        for dphi in self._deltaPhiVariation:
-                                                            for topreco in self._topRecoVatiation:
-                                                                nVariations += 1
-                                                                # Construct name for variation
-                                                                myVariationName = self.getVariationName(analysisName,taupt,tauIsol,tauIsolCont,rtau,jetNumber,jetEt,jetBeta,met,bjetNumber,bjetEt,bjetLeadingDiscr,bjetSubLeadingDiscr,dphi,topreco)
-                                                                #print "Generating variation",myVariationName
-                                                                # Clone module and make changes
-                                                                myModule = nominalAnalysis.clone()
-                                                                myModule.tauSelection.ptCut = taupt
-                                                                myModule.tauSelection.isolationDiscriminator = tauIsol
-                                                                myModule.tauSelection.isolationDiscriminatorContinuousCutPoint = tauIsolCont
-                                                                myModule.tauSelection.rtauCut = rtau
-                                                                myModule.jetSelection.ptCut = jetEt
-                                                                myModule.jetSelection.betaCut = self.getNumberFromCutWithDirection(jetBeta)
-                                                                myModule.jetSelection.betaCutDirection = self.getOperatorFromCutWithDirection(jetBeta)
-                                                                myModule.jetSelection.jetNumberCutDirection = self.getOperatorFromCutWithDirection(jetNumber)
-                                                                myModule.jetSelection.jetNumber = (int)(self.getNumberFromCutWithDirection(jetNumber))
-                                                                myModule.MET.METCut = met
-                                                                myModule.bTagging.leadingDiscriminatorCut = bjetLeadingDiscr
-                                                                myModule.bTagging.subleadingDiscriminatorCut = bjetSubLeadingDiscr
-                                                                myModule.bTagging.ptCut = bjetEt
-                                                                myModule.bTagging.jetNumberCutDirection = self.getOperatorFromCutWithDirection(bjetNumber)
-                                                                myModule.bTagging.jetNumber = (int)(self.getNumberFromCutWithDirection(bjetNumber))
-                                                                myModule.deltaPhiTauMET = dphi
-                                                                myModule.topReconstruction = topreco
-                                                                # Add analysis
-                                                                addAnalysis(process, myVariationName, myModule,
-                                                                            preSequence=commonSequence,
-                                                                            additionalCounters=additionalCounters,
-                                                                            signalAnalysisCounters=True)
-                                                                variationModuleNames.append(myVariationName)
-                                                                print myVariationName
-        if self._maxVariations > 0:
-            if nVariations > self._maxVariations:
-                print "You generated %d variations, which is more than the safety limit (%d)!"%(nVariations,self._maxVariations)
-                print "To remove the safety switch (if you REALLY know what you are doing), call disableMaxVariations()"
-                sys.exit()
-        print "Added %d variations to the analysis"%nVariations
+        idxlist = []
+        for item in self._variationItems:
+            idxlist.append(0)
+        variationModuleNames = self.doVariation(0, idxlist, process, additionalCounters, commonSequence, nominalAnalysis, analysisName)
+        #if self._maxVariations > 0:
+            #if nVariations > self._maxVariations:
+                #print "You generated %d variations, which is more than the safety limit (%d)!"%(nVariations,self._maxVariations)
+                #print "To remove the safety switch (if you REALLY know what you are doing), call disableMaxVariations()"
+                #sys.exit()
+        print "Added %d variations to the analysis"%len(variationModuleNames)
         return variationModuleNames

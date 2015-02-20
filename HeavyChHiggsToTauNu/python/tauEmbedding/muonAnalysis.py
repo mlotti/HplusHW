@@ -521,27 +521,29 @@ class MuonAnalysis:
         )
         del m.checkOverlaps.jets
 
-        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import GlobalMuonVeto
+        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import MuonSelection
+        import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as muonVeto
         am = self.analysis.addAnalysisModule(name,
             selector = m,
-            filter = cms.EDFilter("HPlusGlobalMuonVetoFilter",
-                vertexSrc = cms.InputTag("firstPrimaryVertex"),
-                GlobalMuonVeto=GlobalMuonVeto.clone(),
-                filter = cms.bool(True)                  
+            filter = muonVeto.hPlusGlobalMuonVetoFilter.clone(
+                vertexSrc = "firstPrimaryVertex",
+                MuonSelection=MuonSelection.clone(),
+                filter = True
             ),
             counter=True)
-        am.setFilterSrcToSelector(lambda f: f.GlobalMuonVeto.MuonCollectionName)
+        am.setFilterSrcToSelector(lambda f: f.MuonSelection.MuonCollectionName)
         self.cloneAnalyzers(name)
 #        self.multipAnalyzer.cleanedMuons = self.multipAnalyzer.selMuons.clone(src = am.selectorName)
         return name
 
     def electronVetoSignalAnalysis(self):
         name = "ElectronVeto"
-        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import GlobalElectronVeto
+        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import ElectronSelection
+        import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as electronVeto
         self.analysis.addAnalysisModule(name,
-            filter = cms.EDFilter("HPlusGlobalElectronVetoFilter",
-                GlobalElectronVeto=GlobalElectronVeto.clone(),
-                filter = cms.bool(True)                  
+            filter = electronVeto.hPlusGlobalElectronVetoFilter.clone(
+                ElectronSelection=ElectronSelection.clone(),
+                filter = True
             ),
             counter=True)
         self.cloneAnalyzers(name)

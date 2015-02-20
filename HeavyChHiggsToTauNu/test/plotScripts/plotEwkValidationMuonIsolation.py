@@ -133,13 +133,16 @@ def doCounters(datasets, datasetName, selectionName, ntupleCache):
 
     nTauID = table.getCount(colName=datasetName, rowName="Tau ID").clone()
     nMuonIso = table.getCount(colName=datasetName, rowName="Muon isolation").clone()
+    nIsoMuTrigger = table.getCount(colName=datasetName, rowName="IsoMu trigger").clone()
 
     eff = dataset.divideBinomial(nMuonIso, nTauID)
+    effTrg = dataset.divideBinomial(nIsoMuTrigger, nMuonIso)
 
     out = StringIO.StringIO()
     out.write(table.format())
     out.write("\n")
-    out.write("Muon isolation/Tau ID = %.6f + %.6f - %.6f\n" % (eff.value(), eff.uncertaintyHigh(), eff.uncertaintyLow()))
+    out.write("Muon isolation/Tau ID        = %.6f + %.6f - %.6f\n" % (eff.value(), eff.uncertaintyHigh(), eff.uncertaintyLow()))
+    out.write("IsoMu trigger/Muon isolation = %.6f + %.6f - %.6f\n" % (effTrg.value(), effTrg.uncertaintyHigh(), effTrg.uncertaintyLow()))
     print "Isolation mode", selectionName
     print out.getvalue()
 

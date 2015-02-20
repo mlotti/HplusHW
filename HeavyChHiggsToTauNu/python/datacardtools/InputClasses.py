@@ -8,37 +8,15 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 # data structures for the config file information
 
 class ObservationInput:
-    def __init__(self, dirPrefix, rateCounter, datasetDefinitions, shapeHisto):
-	self.setDirPrefix(dirPrefix)
-	self.setRateCounter(rateCounter)
-	self.setDatasetDefinitions(datasetDefinitions)
-	self.setShapeHisto(shapeHisto)
-
-    def setDirPrefix(self,dir):
-	self.dirPrefix = dir
-
-    def setRateCounter(self,rateCounter):
-	self.rateCounter = rateCounter
-
-    def setDatasetDefinitions(self,datasetDefinitions):
-        self.datasetDefinitions = datasetDefinitions
-
-    def setShapeHisto(self,histo):
-	self.shapeHisto = histo
-
-    def getDirPrefix(self):
-        return self.dirPrefix
-
-    def getRateCounter(self):
-        return self.rateCounter
+    def __init__(self, datasetDefinition, shapeHisto):
+        self.datasetDefinition = datasetDefinition
+        self.shapeHisto = shapeHisto
 
     def getShapeHisto(self):
         return self.shapeHisto
 
     def Print(self):
 	print "ObservationInput :"
-	print "    dirPrefix   ",self.dirPrefix
-	print "    rate counter",self.rateCounter
 	print "    shapeHisto  ",self.shapeHisto
 
 class DataGroup:
@@ -48,11 +26,8 @@ class DataGroup:
                  label = "", 
                  nuisances = [], 
                  shapeHisto = "", 
-                 dirPrefix = "",
-                 rateCounter = "",
                  datasetType = "",
-                 datasetDefinitions = [],
-                 MCEWKDatasetDefinitions = [],
+                 datasetDefinition = None,
                  QCDfactorisedInfo = None,
                  additionalNormalisation = 1.0):
 	self.landsProcess  = landsProcess
@@ -60,11 +35,8 @@ class DataGroup:
 	self.label         = label
 	self.nuisances     = nuisances
 	self.shapeHisto    = shapeHisto
-	self.dirPrefix    = dirPrefix
-	self.rateCounter   = rateCounter
         self.datasetType   = datasetType
-        self.datasetDefinitions = datasetDefinitions
-        self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
+        self.datasetDefinition = datasetDefinition
         self.QCDfactorisedInfo = QCDfactorisedInfo
         self.additionalNormalisation = additionalNormalisation
 
@@ -77,11 +49,8 @@ class DataGroup:
                          label        = self.label,
                          nuisances    = self.nuisances,
                          shapeHisto   = self.shapeHisto,
-                         dirPrefix   = self.dirPrefix,
-                         rateCounter  = self.rateCounter,
                          datasetType  = self.datasetType,
-                         datasetDefinitions = self.datasetDefinitions,
-                         MCEWKDatasetDefinitions = self.MCEWKDatasetDefinitions,
+                         datasetDefinition = self.datasetDefinition,
                          QCDfactorisedInfo = self.QCDfactorisedInfo,
                          additionalNormalisation= self.additionalNormalisation)
 
@@ -89,31 +58,22 @@ class DataGroup:
 	self.landsProcess = landsProcess
 
     def setValidMassPoints(self,validMassPoints):
-	self.validMassPoints = validMassPoints
+	self.validMassPoints = list(validMassPoints)
 
     def setLabel(self, label):
 	self.label = label
 
     def setNuisances(self,nuisances):
-	self.nuisances = nuisances
+	self.nuisances = nuisances[:]
 
     def setShapeHisto(self,histo):
 	self.shapeHisto = histo
 
-    def setCounterHisto(self,dirPrefix):
-	self.dirPrefix = dirPrefix
-
-    def setRateCounter(self, rateCounter):
-        self.rateCounter = rateCounter
-
     def setDatasetType(self,datasetType):
         self.datasetType = datasetType
 
-    def setDatasetDefinitions(self,datasetDefinitions):
-        self.datasetDefinitions = datasetDefinitions
-
-    def setMCEWKDatasetDefinitions(self,MCEWKDatasetDefinitions):
-        self.MCEWKDatasetDefinitions = MCEWKDatasetDefinitions
+    def setDatasetDefinition(self,datasetDefinition):
+        self.datasetDefinition = datasetDefinition
 
     def setQCDfactorisedInfo(self,QCDfactorisedInfo):
         self.QCDfactorisedInfo = QCDfactorisedInfo
@@ -125,10 +85,8 @@ class DataGroup:
 	print "    Label        ",self.label
 	print "    LandS process",self.landsProcess
 	print "    Valid mass points",self.validMassPoints
-	print "    dir. prefix      ",self.dirPrefix
 	print "    datasetType  ",self.datasetType
-	print "    datasetDefinitions",self.datasetDefinitions
-	print "    MCEWKDatasetDefinitions",self.MCEWKDatasetDefinitions
+	print "    datasetDefinition",self.datasetDefinition
 	print "    Additional normalisation",self.additionalNormalisation
 	print "    Nuisances    ",self.nuisances
         print
@@ -151,6 +109,65 @@ class DataGroup:
 #            self.datagroups[key].Print()
 #        print
 
+## Converts a single or a bunch of nuisances by ID from syst. variation to norm. uncertainty
+def convertFromSystVariationToConstant(nuisanceList, name):
+    myList = []
+    if isinstance(name, str):
+        myList.append(name)
+    elif isinstance(name, list):
+        myList.extend(name)
+    else:
+        raise Exception()
+
+    for n in myList:
+        myFoundStatus = False
+        for item in nuisanceList:
+            if item.id == n:
+                myFoundStatus = True
+                item.setDistribution("lnN")
+                if item.function == "ShapeVariation":
+                    item.setFunction("ShapeVariationToConstant")
+                elif item.function == "ConstantToShape":
+                    item.function == "Constant"
+                else:
+                    raise Exception("Don't know what to do for function '%s'!"%item.function)
+        #if not myFoundStatus:
+        #    raise Exception("Error: cannot find name '%s' in nuisance names!"%n)
+    # Print remaining shape variations
+    print "\nShape uncertainties:"
+    for item in nuisanceList:
+        if item.distr == "shapeQ":
+            print "... %s"%item.id
+    print ""
+
+def separateShapeAndNormalizationFromSystVariation(nuisanceList, name):
+    myList = []
+    if isinstance(name, str):
+        myList.append(name)
+    elif isinstance(name, list):
+        myList.extend(name)
+    else:
+        raise Exception()
+
+    for n in myList:
+        myFoundStatus = False
+        for item in nuisanceList:
+            if item.id == n:
+                myFoundStatus = True
+                #item.setDistribution("lnN")
+                if item.function == "ShapeVariation":
+                    item.setFunction("ShapeVariationSeparateShapeAndNormalization")
+                else:
+                    raise Exception("Don't know what to do for function '%s'!"%item.function)
+        #if not myFoundStatus:
+        #    raise Exception("Error: cannot find name '%s' in nuisance names!"%n)
+    # Print remaining shape variations
+    print "\nShape and normalization uncertainties separated:"
+    for item in nuisanceList:
+        if item.distr == "shapeQ" and item.function == "ShapeVariationSeparateShapeAndNormalization":
+            print "... %s"%item.id
+    print ""
+    
 
 class Nuisance:
     def __init__(self,
@@ -158,32 +175,12 @@ class Nuisance:
 		label="",
 		distr="",
 		function = "",
-		QCDmode = "",
-		value = -1,
-		upperValue = -1,
-		counter = "",
-		numerator = -1, 
-		denominator = -1, 
-		histoDir = [],
-		histograms = [],
-		normalisation = [],
-		scaling = 1.0,
-		addUncertaintyInQuadrature = 0.0):
+		**kwargs):
 	self.setId(id)
 	self.setLabel(label)
 	self.setDistribution(distr)
 	self.setFunction(function)
-	self.setQCDmode(QCDmode)
-	self.setValue(value)
-	self.setUpperValue(upperValue)
-	self.setCounter(counter)
-	self.setNumerator(numerator)
-	self.setDenominator(denominator)
-        self.setHistoDir(histoDir)
-	self.setHistograms(histograms)
-        self.setNormalisation(normalisation)
-        self.setScaling(scaling)
-        self.setAddUncertaintyInQuadrature(addUncertaintyInQuadrature)
+	self.kwargs = kwargs
 
     def setId(self,id):
 	self.id = id
@@ -197,42 +194,11 @@ class Nuisance:
     def setFunction(self, function):
 	self.function = function
 
-    def setQCDmode(self, QCDmode):
-        self.QCDmode = QCDmode
-
-    def setValue(self,value):
-	self.value = value
-
-    def setUpperValue(self,upperValue):
-        self.upperValue = upperValue
-
-    def setCounterHisto(self, value):
-	self.dirPrefix = value
-
-    def setCounter(self, value):
-	self.counter = value
-
-    def setNumerator(self,value):
-	self.numerator = value
-
-    def setDenominator(self,value):
-	self.denominator = value
-
-    def setHistoDir(self, histoDir):
-	self.histoDir = histoDir
-
-    def setHistograms(self, histo):
-	self.histo = histo
-
-    def setNormalisation(self, norm):
-	self.norm = norm
-
-    def setScaling(self, scaling):
-        self.scaling = scaling
-
-    def setAddUncertaintyInQuadrature(self, addUncertaintyInQuadrature):
-        self.addUncertaintyInQuadrature = addUncertaintyInQuadrature
-
+    def getArg(self, keyword):
+        if keyword in self.kwargs.keys():
+            return self.kwargs[keyword]
+        return None
+	
     def getId(self):
 	return self.id
 
@@ -241,18 +207,16 @@ class Nuisance:
 	print "    Label         =",self.label
         print "    Distribution  =",self.distr
         print "    Function      =",self.function
-        if self.value > 0:
-            print "    Value         =",self.value
-        if len(self.dirPrefix) > 0:
-            print "    CounterHisto  =",self.dirPrefix
-        if len(self.counter) > 0:
-            print "    Counter       =",self.counter
-        if len(self.paths) > 0:
-            print "    Paths         =",self.paths
-        if len(self.histo) > 0:
-            print "    Histograms    =",self.histo
-        if len(self.norm) > 0:
-            print "    Normalisation =",self.norm
+        #if self.value > 0:
+            #print "    Value         =",self.value
+        #if len(self.counter) > 0:
+            #print "    Counter       =",self.counter
+        #if len(self.paths) > 0:
+            #print "    Paths         =",self.paths
+        #if len(self.histo) > 0:
+            #print "    Histograms    =",self.histo
+        #if len(self.norm) > 0:
+            #print "    Normalisation =",self.norm
 	print
 
 #class NuisanceTable:
@@ -292,35 +256,19 @@ class Nuisance:
 class ControlPlotInput:
     def __init__(self,
                  title,
-                 signalHHid,
-                 signalHWid,
-                 QCDid,
-                 embeddingId,
-                 EWKfakeId,
                  signalHistoPath,
                  signalHistoName,
                  EWKfakeHistoPath,
                  EWKfakeHistoName,
-                 QCDFactNormalisation,
-                 QCDFactHistoPath,
-                 QCDFactHistoName,
                  details,
                  blindedRange,
                  evaluationRange,
                  flowPlotCaption):
         self.title = title
-        self.signalHHid = signalHHid
-        self.signalHWid = signalHWid
-        self.QCDid = QCDid
-        self.embeddingId = embeddingId
-        self.EWKfakeId = EWKfakeId
         self.signalHistoPath = signalHistoPath
         self.signalHistoName = signalHistoName
         self.EWKfakeHistoPath = EWKfakeHistoPath
         self.EWKfakeHistoName = EWKfakeHistoName
-        self.QCDFactNormalisation = QCDFactNormalisation
-        self.QCDFactHistoPath = QCDFactHistoPath
-        self.QCDFactHistoName = QCDFactHistoName
         self.details = details
         self.blindedRange = blindedRange
         self.evaluationRange = evaluationRange

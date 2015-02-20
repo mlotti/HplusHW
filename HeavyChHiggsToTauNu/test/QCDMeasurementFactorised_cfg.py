@@ -2,48 +2,88 @@ import FWCore.ParameterSet.Config as cms
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
-dataVersion="44XmcS6"     # Fall11 MC
-#dataVersion="44Xdata"    # Run2011 08Nov and 19Nov ReRecos
+dataVersion="53XmcS10"
+#dataVersion="53Xdata24Aug2012" # Now we have multiple dataVersions for data too, see HChDataVersion for them
 
 dataEras = [
-    "Run2011AB", # This is the one for pickEvents, and for counter printout in CMSSW job
-    "Run2011A",
-    "Run2011B",
+    "Run2012ABCD", # This is the one for pickEvents, and for counter printout in CMSSW job
+#    "Run2012ABC",
+    "Run2012AB",
+#    "Run2012A",
+#    "Run2012B",
+    "Run2012C",
+    "Run2012D",
 ]
 
 # Note: Keep number of variations below 200 to keep file sizes reasonable
 # Note: Currently it is not possible to vary the tau selection -related variables, because only one JES and MET producer is made (tau selection influences type I MET correction and JES)
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.OptimisationScheme import HPlusOptimisationScheme
-myOptimisation = HPlusOptimisationScheme()
-#myOptimisation.addTauPtVariation([40.0, 50.0])
-#myOptimisation.addTauIsolationVariation([])
-#myOptimisation.addTauIsolationContinuousVariation([])
-#myOptimisation.addRtauVariation([0.0, 0.7])
-#myOptimisation.addJetNumberSelectionVariation(["GEQ3", "GEQ4"])
-#myOptimisation.addJetEtVariation([20.0, 30.0])
-#myOptimisation.addJetBetaVariation(["GT0.0","GT0.5","GT0.7"])
-#myOptimisation.addMETSelectionVariation([50.0, 60.0, 70.0])
-#myOptimisation.addBJetLeadingDiscriminatorVariation([0.898, 0.679])
-#myOptimisation.addBJetSubLeadingDiscriminatorVariation([0.679, 0.244])
-#myOptimisation.addBJetEtVariation([])
-#myOptimisation.addBJetNumberVariation(["GEQ1", "GEQ2"])
-#myOptimisation.addDeltaPhiVariation([180.0,160.0,140.0])
-#myOptimisation.addTopRecoVariation(["None","chi"]) # Valid options: None, chi, std, Wselection
-#myOptimisation.disableMaxVariations()
+### Boolean flags
+bCustomizeTailKiller = False
 
 def customize(signalAnalysis):
-    # Apply beta cut for jets to reject PU jets
-    signalAnalysis.jetSelection.betaCut = 0.2 # Disable by setting to 0.0; if you want to enable, set to 0.2
+    # Choice of tau selection for tau candidate selection
+    signalAnalysis.applyNprongsCutForTauCandidate = False
+    signalAnalysis.applyRtauCutForTauCandidate = False
+    # Splitting of analysis phase space (note that first bin is below the first number and last bin is greater than the last number)
+    signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauPtBinLowEdges = cms.untracked.vdouble(50., 60., 70., 80., 100., 120., 150.)
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByTauEtaBinLowEdges = cms.untracked.vdouble(-1.5, 1.5)
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByNVerticesBinLowEdges = cms.untracked.vint32(10)
+    #signalAnalysis.commonPlotsSettings.histogramSplitting.splitHistogramByDeltaPhiTauMetInDegrees = cms.untracked.vdouble(90.) # If used, one could disable collinear cuts
+    #signalAnalysis.QCDTailKiller.disableCollinearCuts = True # enable, if splitting by delta phi(tau,MET)
+    print "Phase space is splitted in analysis as follows:"
+    print signalAnalysis.commonPlotsSettings.histogramSplitting
+    # Variation options
+    signalAnalysis.analysisMode = cms.untracked.string("traditional") # options: "traditional", "ABCD"
+    # MET cut
+    #signalAnalysis.MET.METCut = 60.0
+    signalAnalysis.MET.METCut = 50.0
+    #signalAnalysis.MET.preMETCut = 30.0
+    signalAnalysis.MET.doTypeICorrectionForPossiblyIsolatedTaus = "always"
+    # Tail-Killer 
+    if bCustomizeTailKiller:
+        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import QCDTailKillerBin
+        signalAnalysis.QCDTailKiller.maxJetsToConsider = cms.untracked.uint32(4)
+        # Back-To-Back
+        signalAnalysis.QCDTailKiller.backToBack = cms.untracked.VPSet(
+            QCDTailKillerBin("circular", 60.0, 60.0), # jet 1
+            QCDTailKillerBin("circular", 60.0, 60.0), # jet 2
+            QCDTailKillerBin("circular", 60.0, 60.0), # jet 3
+            QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
+            )
+        # Collinear
+        signalAnalysis.QCDTailKiller.collinear = cms.untracked.VPSet(
+            QCDTailKillerBin("triangular", 40.0, 40.0), # jet 1
+            QCDTailKillerBin("triangular", 40.0, 40.0), # jet 2
+            QCDTailKillerBin("triangular", 40.0, 40.0), # jet 3
+            QCDTailKillerBin("noCut", 0.0, 0.0), # jet 4
+            )
 
+    # Info    
+    print "\n*** QCD factorised customisations applied ***"
+    print "- Nprongs cut included in tau candidate selections:",signalAnalysis.applyNprongsCutForTauCandidate.value()
+    print "- Rtau cut included in tau candidate selections:",signalAnalysis.applyRtauCutForTauCandidate.value()
+    print "- Analysis method used:",signalAnalysis.analysisMode.value()
+    print "- MET cut:",signalAnalysis.MET.METCut.value()
+    print "- pre-MET cut:",signalAnalysis.MET.preMETCut.value()
+    print "- Tail-Killer:", signalAnalysis.QCDTailKiller
+    
 from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilder
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=1000, # default is -1
+                        customizeLightAnalysis=customize,
+                        #doHeavyAnalysis=True,
+                        #customizeHeavyAnalysis=customize,
+                        #useCHSJets=True,
+                        applyTauTriggerScaleFactor=True,
+                        #applyTauTriggerLowPurityScaleFactor=True,
+                        #applyMETTriggerScaleFactor=True,
                         tauSelectionOperatingMode="tauCandidateSelectionOnly",
-                        #doAgainstElectronScan=True,
                         #doSystematics=True,
-                        histogramAmbientLevel = "Informative", # Vital
-                        #doOptimisation=True, optimisationScheme=myOptimisation
+                        #doQCDTailKillerScenarios=True,
+                        doFillTree=False,
+                        #histogramAmbientLevel = "Vital", # Informative by default
+                        #doOptimisation=True, optimisationScheme="myOptimisation"
                         )
 
 process = builder.buildQCDMeasurementFactorised()

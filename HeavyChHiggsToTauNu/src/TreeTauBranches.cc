@@ -13,7 +13,8 @@
 
 namespace HPlus {
   TreeTauBranches::TreeTauBranches(const edm::ParameterSet& iConfig):
-    fTauSrc(iConfig.getParameter<edm::InputTag>("tauSrc"))
+    fTauSrc(iConfig.getParameter<edm::InputTag>("tauSrc")),
+    fTausGenMatch("taus_genmatch")
   {
     edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("tauFunctions");
     std::vector<std::string> names = pset.getParameterNames();
@@ -37,13 +38,7 @@ namespace HPlus {
       fTausFunctions[i].book(tree);
     }
 
-    tree->Branch("taus_pdgid", &fTausPdgId);
-    tree->Branch("taus_mother_pdgid", &fTausMotherPdgId);
-    tree->Branch("taus_grandmother_pdgid", &fTausGrandMotherPdgId);
-    tree->Branch("taus_daughter_pdgid", &fTausDaughterPdgId);
-
-    tree->Branch("taus_genmatch_p4", &fTausGenMatch);
-    //tree->Branch("taus_genmatchvisible_p4", &fTausGenMatchVisible);
+    fTausGenMatch.book(tree);
   }
 
   void TreeTauBranches::setValues(const edm::Event& iEvent) {
@@ -59,41 +54,15 @@ namespace HPlus {
 
     for(size_t i=0; i<htaus->size(); ++i) {
       const pat::Tau& tau = htaus->at(i);
-      const reco::GenParticle *gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 15, tau, 0.5);
+      const reco::GenParticle *gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 15, tau, 0.5, true);
       if(!gen) {
-        const reco::GenParticle *gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 13, tau, 0.5);
+        gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 13, tau, 0.5);
       }
       if(!gen) {
-        const reco::GenParticle *gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 11, tau, 0.5);
+        gen = GenParticleTools::findMatching(genParticles.begin(), genParticles.end(), 11, tau, 0.5);
       }
 
-      int pdgId = 0;
-      int motherPdgId = 0;
-      int grandMotherPdgId = 0;
-      int daughterPdgId = 0;
-      XYZTLorentzVector matchP4;
-      //XYZTLorentzVector matchP4Visible;
-      if(gen) {
-        pdgId = gen->pdgId();
-        matchP4 = gen->p4();
-        const reco::GenParticle *mother = GenParticleTools::findMother(gen);
-        if(mother) {
-          motherPdgId = mother->pdgId();
-          const reco::GenParticle *grandMother = GenParticleTools::findMother(mother);
-          if(grandMother)
-            grandMotherPdgId = grandMother->pdgId();
-        }
-
-        const reco::GenParticle *daughter = GenParticleTools::findTauDaughter(gen);
-        if(daughter)
-          daughterPdgId = daughter->pdgId();
-      }
-
-      fTausPdgId.push_back(pdgId);
-      fTausMotherPdgId.push_back(motherPdgId);
-      fTausGrandMotherPdgId.push_back(grandMotherPdgId);
-      fTausDaughterPdgId.push_back(daughterPdgId);
-      fTausGenMatch.push_back(matchP4);
+      fTausGenMatch.addValue(gen);
     }
   }
 
@@ -124,10 +93,6 @@ namespace HPlus {
     for(size_t i=0; i<fTausFunctions.size(); ++i)
       fTausFunctions[i].reset();
 
-    fTausPdgId.clear();
-    fTausMotherPdgId.clear();
-    fTausGrandMotherPdgId.clear();
-    fTausDaughterPdgId.clear();
-    fTausGenMatch.clear();
+    fTausGenMatch.reset();
   }
 }

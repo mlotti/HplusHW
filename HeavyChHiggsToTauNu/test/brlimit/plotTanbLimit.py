@@ -25,24 +25,30 @@ def main():
     # Get BR limits
     graphs = {}
     obs = limits.observedGraph()
-    graphs["obs"] = obs
+    myBlindedStatus = True
+    for i in xrange(0,obs.GetN()):
+        if abs(obs.GetY()[i]) > 0.00001:
+            myBlindedStatus = False
+
+    if not myBlindedStatus:
+        graphs["obs"] = obs
     graphs["exp"] = limits.expectedGraph()
     graphs["exp1"] = limits.expectedBandGraph(sigma=1)
     graphs["exp2"] = limits.expectedBandGraph(sigma=2)
-
     # Remove m=80
     for gr in graphs.values():
         limit.cleanGraph(gr, minX=100)
 
     # Get theory uncertainties on observed
-    obs_th_plus = limit.getObservedPlus(obs)
-    obs_th_minus = limit.getObservedMinus(obs)
-    for gr in [obs_th_plus, obs_th_minus]:
-        gr.SetLineWidth(3)
-        gr.SetLineStyle(5)
-#        gr.SetLineStyle(9)
-    graphs["obs_th_plus"] = obs_th_plus
-    graphs["obs_th_minus"] = obs_th_minus
+    if not myBlindedStatus:
+        obs_th_plus = limit.getObservedPlus(obs)
+        obs_th_minus = limit.getObservedMinus(obs)
+        for gr in [obs_th_plus, obs_th_minus]:
+            gr.SetLineWidth(3)
+            gr.SetLineStyle(5)
+    #        gr.SetLineStyle(9)
+        graphs["obs_th_plus"] = obs_th_plus
+        graphs["obs_th_minus"] = obs_th_minus
 
     # Interpret in MSSM
     global mu
@@ -57,6 +63,9 @@ def main():
 
     doPlot("limitsTanb_ma", graphs, limits, limit.mA())
 
+    if myBlindedStatus:
+        print "Refusing cowardly to do mu variation plots for blinded results"
+        return
 
     # Mu variations
     mus = [1000, 200, -200, -1000]
@@ -82,18 +91,21 @@ def main():
     doPlotMu("limitsTanb_mus_ma", muGraphs, st, limits, limit.mA())
 
 def doPlot(name, graphs, limits, xlabel):
-    obs = graphs["obs"]
-    excluded = ROOT.TGraph(obs)
-    excluded.SetName("ExcludedArea")
-    excluded.SetFillColor(ROOT.kGray)
-    excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], tanbMax)
-    excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
-    excluded.SetFillColor(ROOT.kGray)
-    excluded.SetFillStyle(3354)
-    excluded.SetLineWidth(0)
-    excluded.SetLineColor(ROOT.kWhite)
+    if "obs" in graphs.keys():
+        obs = graphs["obs"]
+        excluded = ROOT.TGraph(obs)
+        excluded.SetName("ExcludedArea")
+        excluded.SetFillColor(ROOT.kGray)
+        excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], tanbMax)
+        excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
+        excluded.SetFillColor(ROOT.kGray)
+        excluded.SetFillStyle(3354)
+        excluded.SetLineWidth(0)
+        excluded.SetLineColor(ROOT.kWhite)
 
-    plot = plots.PlotBase([
+    plot = None
+    if "obs" in graphs.keys():
+        plot = plots.PlotBase([
             histograms.HistoGraph(graphs["obs"], "Observed", drawStyle="PL", legendStyle="lp"),
             histograms.HistoGraph(graphs["obs_th_plus"], "ObservedPlus", drawStyle="L", legendStyle="l"),
             histograms.HistoGraph(graphs["obs_th_minus"], "ObservedMinus", drawStyle="L"),
@@ -101,15 +113,26 @@ def doPlot(name, graphs, limits, xlabel):
             histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
             histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
             histograms.HistoGraph(graphs["exp2"], "Expected2", drawStyle="F", legendStyle="fl"),
-            ])
+        ])
+        plot.histoMgr.setHistoLegendLabelMany({
+                "ObservedPlus": "Observed #pm1#sigma (th.)",
+                "ObservedMinus": None,
+                "Expected": None,
+                "Expected1": "Expected median #pm 1#sigma",
+                "Expected2": "Expected median #pm 2#sigma"
+                })
+    else:
+        plot = plots.PlotBase([
+            histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L"),
+            histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"),
+            histograms.HistoGraph(graphs["exp2"], "Expected2", drawStyle="F", legendStyle="fl"),
+        ])
+        plot.histoMgr.setHistoLegendLabelMany({
+                "Expected": None,
+                "Expected1": "Expected median #pm 1#sigma",
+                "Expected2": "Expected median #pm 2#sigma"
+                })
 
-    plot.histoMgr.setHistoLegendLabelMany({
-            "ObservedPlus": "Observed #pm1#sigma (th.)",
-            "ObservedMinus": None,
-            "Expected": None,
-            "Expected1": "Expected median #pm 1#sigma",
-            "Expected2": "Expected median #pm 2#sigma"
-            })
     plot.setLegend(histograms.createLegend(0.57, 0.155, 0.87, 0.355))
 
     plot.createFrame(name, opts={"ymin": 0, "ymax": tanbMax})
@@ -118,9 +141,8 @@ def doPlot(name, graphs, limits, xlabel):
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.2
@@ -150,9 +172,8 @@ def doPlotMu(name, graphs, styleList, limits, xlabel):
 
     plot.draw()
 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=limits.getLuminosity())
+    plot.setLuminosity(limits.getLuminosity())
+    plot.addStandardTexts()
 
     size = 20
     x = 0.2

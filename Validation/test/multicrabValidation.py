@@ -2,14 +2,15 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-cfg = "validation_cfg.py"
+####cfg = "validation_cfg.py"
+cfg = "tauvalidation_cfg.py"
 multicrab = Multicrab("crab_analysis.cfg", cfg, lumiMaskDir="../../HeavyChHiggsToTauNu/test")
 
 # Select the pattuple version to use as an input
-pattupleVersion = "pattuple_v18"
+pattupleVersion = "pattuple_taumet_v53_3"
 
 #era = "EPS"
-era = "Run2011A"
+era = "Run2012ABCD"
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -24,8 +25,9 @@ if runPatOnTheFly:
 # The dataset definitions are in python/tools/multicrabDatasets.py
 
 datasetsMC = [
-        "TTJets_TuneZ2_Summer11",
-        "WJets_TuneZ2_Summer11",
+	"TTToHplusBWB_M120_ext_Summer12",
+        "TTJets_TuneZ2star_Summer12",
+        "DYJetsToLL_M50_TuneZ2star_Summer12",
         ]
 
 datasets = []

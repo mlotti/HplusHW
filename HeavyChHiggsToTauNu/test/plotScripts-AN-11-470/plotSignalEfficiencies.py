@@ -201,12 +201,14 @@ def doPlots(mainTable, xvalues, signalDatasets, signalPostfix, consequtive=True)
         legend = histograms.moveLegend(legend, dy=0.05)
 
     legend.AddEntry(gtrig,"Trigger", "lp"); 
-    legend.AddEntry(gtau, "#tau-jet identification", "lp"); 
+#    legend.AddEntry(gtau, "#tau-jet identification", "lp"); 
+    legend.AddEntry(gtau, "#tau_{h} identification", "lp"); 
     legend.AddEntry(gveto ,"lepton vetoes", "lp"); 
     legend.AddEntry(gjets ,"3 jets", "lp"); 
     legend.AddEntry(gmet,"E_{T}^{miss}", "lp")
     legend.AddEntry(gbtag,"b tagging", "lp")
-    legend.AddEntry(gdphi,"#Delta#phi(#tau, E_{T}^{miss})<160^{o} ", "lp")
+#    legend.AddEntry(gdphi,"#Delta#phi(#tau, E_{T}^{miss})<160^{o} ", "lp")
+    legend.AddEntry(gdphi,"#Delta#phi(#tau_{h}, E_{T}^{miss})<160^{o} ", "lp")
     legend.Draw()
 
     process = {    

@@ -3,13 +3,10 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_TriggerSelection_h
 
 #include "FWCore/Utilities/interface/InputTag.h"
-
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
-// 
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
 
 #include <string>
@@ -32,7 +29,7 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class TriggerSelection {
+  class TriggerSelection: public BaseSelection {
   enum TriggerSelectionType {
     kTriggerSelectionByTriggerBit,
     kTriggerSelectionDisabled
@@ -57,7 +54,8 @@ namespace HPlus {
       std::string fPath;
 
       // Counters
-      Count fTriggerCount;
+      Count fTriggerPathFoundCount;
+      Count fTriggerPathAcceptedCount;
 
       pat::TriggerObjectRefVector fMets;
       pat::TriggerObjectRefVector fTaus;
@@ -73,43 +71,45 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TriggerSelection *triggerSelection, const TriggerPath *triggerPath, bool passedEvent);
+      Data();
       ~Data();
 
-      bool passedEvent() const { return fPassedEvent; }
+      const bool passedEvent() const { return fPassedEvent; }
+      const pat::TriggerObjectRef getL1MetObject() const { return fL1Met; }
+      const pat::TriggerObjectRef getHltMetObject() const { return fHltMet; }
+      const bool hasTriggerPath() const { return fHasTriggerPath; }
+      const size_t getTriggerTauSize() const { return fHltTaus.size(); }
+      const pat::TriggerObjectRefVector& getTriggerTaus() const { return fHltTaus; }
 
-      pat::TriggerObjectRef getHltMetObject() const {
-        return fTriggerSelection->fHltMet;
-      }
-
-      bool hasTriggerPath() const {
-        return fTriggerPath;
-      }
-
-      size_t getTriggerTauSize() const {
-        return fTriggerPath->getTauObjects().size();
-      }
-
-      const pat::TriggerObjectRefVector& getTriggerTaus() const { return fTriggerPath->getTauObjects(); }
+      friend class TriggerSelection;
 
     private:
-      const TriggerSelection *fTriggerSelection;
-      const TriggerPath *fTriggerPath;
-      const bool fPassedEvent;
+      // Analysis results
+      pat::TriggerObjectRef fL1Met;
+      pat::TriggerObjectRef fHltMet;
+      pat::TriggerObjectRefVector fHltTaus;
+
+      bool fHasTriggerPath;
+      bool fPassedEvent;
     };
 
     TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~TriggerSelection();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     
   private:
-    bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath);
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath, TriggerSelection::Data& output);
 
   private:
     std::vector<TriggerPath* > triggerPaths;
     const edm::InputTag fTriggerSrc;
     const edm::InputTag fPatSrc;
+    std::string fL1MetCollection;
+    const double fL1MetCut;
     const double fMetCut;
 
     TriggerMETEmulation fTriggerCaloMet;
@@ -121,6 +121,8 @@ namespace HPlus {
     Count fTriggerCaloMetCount;
     Count fTriggerCount;
 
+    Count fTriggerDebugAllCount;
+    Count fTriggerL1MetPassedCount;
     Count fTriggerHltMetExistsCount;
     Count fTriggerHltMetPassedCount;
 
@@ -133,8 +135,6 @@ namespace HPlus {
     WrappedTH1 *hTriggerParametrisationWeight;
     WrappedTH1 *hControlSelectionType;
 
-    // Analysis results
-    pat::TriggerObjectRef fHltMet;
 
     bool fThrowIfNoMet;
   };

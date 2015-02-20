@@ -6,6 +6,12 @@
 # In HiggsAnalysis/HeavyChHiggsToTauNu/test do
 # source setupStandalone.sh
 
+
+if [ "x$HIGGSANALYSIS_BASE" != "x" ]; then
+    echo "Standalone environment already loaded"
+    return
+fi
+
 pwd=$PWD
 if [ ! -e .python/HiggsAnalysis ]; then
     mkdir -p .python/HiggsAnalysis
@@ -29,4 +35,4 @@ fi
 
 #export PATH=$PATH:$PWD/../scripts
 export PATH=$PATH:$PWD/../../HeavyChHiggsToTauNu/scripts
-export CMSSW_BASE=$PWD/../../../..
+export HIGGSANALYSIS_BASE=$PWD/../..

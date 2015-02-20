@@ -1,13 +1,12 @@
 // -*- c++ -*-
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_DeltaRTauJets_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_DeltaRtauJets_h
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
+
+#include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
 namespace reco {
   class Candidate;
-  class JetSelection;
-
 }
 
 namespace HPlus {

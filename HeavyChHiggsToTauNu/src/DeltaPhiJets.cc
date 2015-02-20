@@ -1,7 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhiJets.h"
 
 #include "DataFormats/Candidate/interface/Candidate.h"
-#include "DataFormats/METReco/interface/MET.h"
 
 #include "TLorentzVector.h"
 

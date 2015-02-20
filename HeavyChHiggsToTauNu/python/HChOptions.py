@@ -2,6 +2,15 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import sys
 
+validSampleValues = [
+    "WJets",
+    "W1Jets",
+    "W2Jets",
+    "W3Jets",
+    "W4Jets",
+    "TTJets",
+]
+
 # https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideAboutPythonConfigFile#Passing_Command_Line_Arguments_T
 def getOptions(options=None):
     if options == None:
@@ -50,6 +59,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Should MC be triggered? (default: 0) If MC is to be triggered, the default trigger is taken from HChDataVersion (called signalTrigger in there). This can be overridden with the 'trigger' command line argument.")
+    options.register("triggerMCInAnalysis",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Should MC be triggered in analysis job, if triggerMC=0? (default: 0)")
     options.register("skimConfig",
                      [],
                      options.multiplicity.list,
@@ -60,13 +74,19 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.string,
                      "Configuration fragment for a primary vertex selection (default is to use offlinePrimaryVertices as it is")
+    options.register("customizeConfig",
+                     [],
+                     options.multiplicity.list,
+                     options.varType.string,
+                     "Configuration fragment for a generic customization")
     options.register("tauEmbeddingInput",
                      0,
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Input is from tau embedding (default: 0)")
     options.register("tauEmbeddingCaloMet",
-                     "caloMetNoHFSum",
+#                     "caloMetNoHFSum", no-HF in first part of 2011A, after that HF is included
+                     "caloMetSum",
                      options.multiplicity.singleton, options.varType.string,
                      "What calo MET object to use in signal analysis of tau embedded samples")
     options.register("tauEmbeddingTauTrigger",
@@ -97,6 +117,27 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int, # Use integer for now, if we later need e.g. 12.5 TeV, let's use string then
                      "Centre-of-mass energy in TeV")
+    options.register("wjetsWeighting",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Set to 1 WJets inclusive+exclusive weighting should be enabled")
+    options.register("sample",
+                     "",
+                     options.multiplicity.singleton,
+                     options.varType.string,
+                     "Sample name for specific weighting schemes (valid values are: "+", ".join(validSampleValues))
+    options.register("bquarkNumFilter",
+                     -1,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "b-quark filtering option (-1=disabled, 0=0b, 1=1b, 2=2b, 3=at least 3b)")
+    options.register("trgAnalysis",
+                     "",
+                     options.multiplicity.singleton,
+                     options.varType.string,
+                     "Giving TTEffAnalyzer info about whether it is TauLeg, MetLeg or QuadJet in question")
+    
 
     # Protection in case sys.argv is missing due to various edm tools
     if not hasattr(sys, "argv"):
@@ -111,6 +152,8 @@ def getOptions(options=None):
 
     if options.doPat != 0 and options.doTauHLTMatchingInAnalysis != 0:
         raise Exception("doTauHLTMatchingInAnalysis may not be used with doPat=1 (use PAT trigger matching instead)")
+    if options.sample != "" and options.sample not in validSampleValues:
+        raise Exception("Invalid value '%s' of 'sample' command line parameter, valid values are %s" % (options.sample, ", ".join(validSampleValues)))
 
     return options
 

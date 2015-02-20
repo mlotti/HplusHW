@@ -5,37 +5,71 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 
 namespace HPlus {
-  VertexSelection::Data::Data(const VertexSelection *vertexSelection, bool passedEvent):
-    fVertexSelection(vertexSelection), fPassedEvent(passedEvent) {}
+  VertexSelection::Data::Data():
+    fPassedEvent(false), fNumberOfAllVertices(0) {}
   VertexSelection::Data::~Data() {}
 
   VertexSelection::VertexSelection(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper):
-    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
+    BaseSelection(eventCounter, histoWrapper),
+    fSelectedSrc(iConfig.getUntrackedParameter<edm::InputTag>("selectedSrc")),
+    fAllSrc(iConfig.getUntrackedParameter<edm::InputTag>("allSrc")),
+    fSumPtSrc(iConfig.getUntrackedParameter<edm::InputTag>("sumPtSrc")),
     fEnabled(iConfig.getUntrackedParameter<bool>("enabled"))
   {}
 
   VertexSelection::~VertexSelection() {}
 
-  VertexSelection::Data VertexSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    // Reset variables
-    fSelectedVertex = edm::Ptr<reco::Vertex>();
+  VertexSelection::Data VertexSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureSilentAnalyzeAllowed(iEvent);
 
-    if(!fEnabled)
-      return Data(this, true);
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup);
+  }
+
+  VertexSelection::Data VertexSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup);
+  }
+
+  VertexSelection::Data VertexSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    Data output;
+
+    edm::Handle<edm::View<reco::Vertex> > hvertexall;
+    iEvent.getByLabel(fAllSrc, hvertexall);
+    output.fNumberOfAllVertices = hvertexall->size();
+
+    if(!fEnabled) {
+      output.fPassedEvent = true;
+      return output;
+    }
 
     edm::Handle<edm::View<reco::Vertex> > hvertex;
-    iEvent.getByLabel(fSrc, hvertex);
+    iEvent.getByLabel(fSelectedSrc, hvertex);
 
-    if(hvertex->empty())
-      return Data(this, false);
+    if(hvertex->empty()) {
+      output.fPassedEvent = false;
+      return output;
+    }
 
-    fSelectedVertex = hvertex->ptrAt(0);
-    return Data(this, true);
+    output.fSelectedVertex = hvertex->ptrAt(0);
+    output.fPassedEvent = true;
+
+    edm::Handle<edm::ValueMap<float> > hSumPt;
+    iEvent.getByLabel(fSumPtSrc, hSumPt);
+    output.fSumPt = (*hSumPt)[hvertexall->ptrAt(0)];
+
+    return output;
   }
 }

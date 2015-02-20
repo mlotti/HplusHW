@@ -2,6 +2,9 @@ import FWCore.ParameterSet.Config as cms
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
+import os
+import glob
+
 def addConfigInfo(process, options, dataVersion):
     process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",
         dataVersion = cms.untracked.string(dataVersion.version),
@@ -26,6 +29,58 @@ def insertPSetContentsTo(src, dst):
     names = src.parameterNames_()
     for n in names:
         setattr(dst, n, getattr(src, n))
+
+def removeEverywhere(process, moduleName):
+    try:
+        module = getattr(process, moduleName)
+    except KeyError:
+        print "Trying to remove nonexistent module '%s'" % moduleName
+        return
+
+    for seqName, seq in process.sequences_().iteritems():
+        seq.remove(module)
+    for pthName, pth in process.paths_().iteritems():
+        pth.remove(module)
+
+    delattr(process, moduleName)
+
+def dumpPSetAsJson(pset, outputFile=None):
+    def dumpRec(pset):
+        ret = {}
+        for name in pset.parameterNames_():
+            val = getattr(pset, name)
+            if isinstance(val, cms.PSet):
+                ret[name] = dumpRec(val)
+            elif isinstance(val, cms.VPSet):
+                ret[name] = [dumpRec(ps) for ps in val]
+            else:
+                ret[name] = val.value()
+        return ret
+
+    data = {
+        "dataParameters": dumpRec(pset.dataParameters),
+        "mcParameters": dumpRec(pset.mcParameters)
+        }
+
+    import json
+    kwargs = {"sort_keys": True, "indent": 2, "separators": (",", ":")}
+    if outputFile is None:
+        print json.dumps(data, **kwargs)
+    else:
+        f = open(outputFile, "w")
+        json.dump(data, f, **kwargs)
+        f.close()
+
+def getEfficiencyJsonFullPath(name, prefix, setname):
+    datapath = "HiggsAnalysis/HeavyChHiggsToTauNu/data"
+    fullprefix = os.path.join(datapath, prefix)
+    fullpath = fullprefix + "_%s.json" % setname
+    if not os.path.exists(os.path.join(os.environ["CMSSW_BASE"], "src", fullpath)):
+        globprefix = os.path.join(os.environ["CMSSW_BASE"], "src", fullprefix+"_")
+        available = glob.glob(globprefix+"*.json")
+        available = [a.replace(globprefix, "").replace(".json", "") for a in available]
+        raise Exception("No %s for %s. Available (in %s):\n%s" % (name, setname, datapath, "\n".join(available)))
+    return fullpath
 
 # Add an array of analysis+counter modules by varying one
 # configuration parameter of the analysis module. This is done by
