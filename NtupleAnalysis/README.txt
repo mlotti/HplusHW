@@ -33,7 +33,8 @@ non-test object files are linked to a single shared object library
 Running
 =======
 
-After compilation, in the main directory run './exampleAnalysis.py'.
+After compilation, in the main directory run
+'./exampleAnalysis.py <path-to-multicrab-directory>'
 
 
 Data handling
