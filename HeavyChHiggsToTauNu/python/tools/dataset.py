@@ -3835,7 +3835,8 @@ class DatasetPrecursor:
 
             dv = aux.Get(rf, "configInfo/dataVersion")
             if dv == None:
-                raise Exception("Unable to find 'configInfo/dataVersion' from ROOT file '%s'" % name)
+                print "Unable to find 'configInfo/dataVersion' from ROOT file '%s', I have no idea if this file is data, MC, or pseudo" % name
+                continue
                 
             if dataVersion is None:
                 dataVersion = dv.GetTitle()
@@ -3843,15 +3844,23 @@ class DatasetPrecursor:
                 if dataVersion != dv.GetTitle():
                     raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
 
-        self._isData = "data" in dataVersion
-        self._isPseudo = "pseudo" in dataVersion
-        self._isMC = not (self._isData or self._isPseudo)
+        if dataVersion is None:
+            self._isData = False
+            self._isPseudo = False
+            self._isMC = False
+        else:
+            self._isData = "data" in dataVersion
+            self._isPseudo = "pseudo" in dataVersion
+            self._isMC = not (self._isData or self._isPseudo)
 
     def getName(self):
         return self._name
 
     def getFiles(self):
         return self._rootFiles
+
+    def getFileNames(self):
+        return self._filenames
 
     def isData(self):
         return self._isData
@@ -4105,6 +4114,9 @@ class DatasetManagerCreator:
             manager._setBaseDirectory(self._baseDirectory)
 
         return manager
+
+    def getDatasetPrecursors(self):
+        return self._precursors
 
     def getDatasetNames(self):
         return [d.getName() for d in self._precursors]

@@ -7,7 +7,8 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-import datasets
+import datasets as datasetsTest
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 
 class PSet:
     def __init__(self, **kwargs):
@@ -77,13 +78,23 @@ class Process:
 
     def addDataset(self, name, files=None):
         if files is None:
-            files = datasets.getFiles(name)
+            files = datasetsTest.getFiles(name)
 
         self._datasets.append( (name, files) )
 
     def addDatasets(self, names): # no explicit files possible here
         for name in names:
             self.addDataset(name)
+
+    def addDatasetsFromMulticrab(self, directory):
+        dataset._optionDefaults["input"] = "miniaod2tree_*.root"
+        dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory)
+        dsets = dsetMgrCreator.getDatasetPrecursors()
+
+        for dset in dsets:
+            self.addDataset(dset.getName(), dset.getFileNames())
+
+        dsetMgrCreator.close()
 
     def addAnalyzer(self, name, analyzer):
         if self.hasAnalyzer(name):
