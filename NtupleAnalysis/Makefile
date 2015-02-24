@@ -4,6 +4,10 @@
 #
 ##########################
 
+ifeq "$(HIGGSANALYSIS_BASE)" ""
+$(error $$HIGGSANALYSIS_BASE is not defined, please do first 'cd ..; source setup.(c)sh; cd NtupleAnalysis')
+endif
+
 # Source code directory
 SRCDIR := src
 
