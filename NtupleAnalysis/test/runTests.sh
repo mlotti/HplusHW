@@ -10,13 +10,15 @@ $HIGGSANALYSIS_BASE/NtupleAnalysis/test/main
 RET=$?
 
 echo "Running python unit tests"
-for i in $(find $HIGGSANALYSIS_BASE/NtupleAnalysis/python -name "*.py" | xargs fgrep "import unittest" | cut -d : -f 1); do
-    echo $i
-    python $i
-    FOO=$?
-    if [ $RET = 0 -a $FOO != 0 ]; then
-        RET=$FOO
-    fi
+for dir in NtupleAnalysis HeavyChHiggsToTauNu; do
+    for i in $(find $HIGGSANALYSIS_BASE/$dir/python -name "*.py" | xargs fgrep "import unittest" | cut -d : -f 1); do
+        echo $i
+        python $i
+        FOO=$?
+        if [ $RET = 0 -a $FOO != 0 ]; then
+            RET=$FOO
+        fi
+    done
 done
 
 echo
