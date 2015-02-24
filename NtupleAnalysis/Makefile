@@ -34,6 +34,8 @@ CXXFLAGS := -O2 -Wall -fPIC -D_REENTRANT $(ROOTINC) $(INC) -Iexternal
 GCC_NEED_ZX := $(shell expr `gcc -dumpversion | cut -f2 -d.` \<= 6)
 ifeq "$(GCC_NEED_ZX)" "1"
     CXXFLAGS += -std=c++0x
+else
+    CXXFLAGS += -std=c++11
 endif
 
 # Link flags
