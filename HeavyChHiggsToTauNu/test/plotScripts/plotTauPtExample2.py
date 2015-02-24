@@ -24,12 +24,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
-analysis = "signalAnalysis"
-counters = analysis+"Counters"
-
 def main():
     # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabCfg(dataEra="Run2012ABCD")
 
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
@@ -41,6 +38,8 @@ def main():
 
     # Include only 120 mass bin of HW and HH datasets
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "Hplus_taunu_" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB_M" in name, datasets.getAllDatasetNames()))
 
     # Default merging nad ordering of data and MC datasets
     # All data datasets to "Data"
@@ -74,7 +73,13 @@ def dataMCExample(datasets):
     # - plot styles (defined in plots._plotStyles, and in styles)
     # - drawing styles ('HIST' for MC, 'EP' for data)
     # - legend styles ('L' for MC, 'P' for data)
-    plot = plots.DataMCPlot(datasets, analysis+"/SelectedTau_pT_AfterTauID")
+    plot = plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/SelectedTau_pT_AfterStandardSelections")
+
+    # Same as below, but more compact
+    #plots.drawPlot(plot, "taupt", xlabel="Tau p_{T} (GeV/c)", ylabel="Number of events",
+    #               rebin=10, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True,
+    #               opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
+    #return
 
     # Example of how to rebin all histograms in a histogram manager of a plot
     plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
@@ -112,9 +117,7 @@ def dataMCExample(datasets):
     plot.draw()
 
     # Add the various texts to 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    plot.addLuminosityText()
+    plot.addStandardTexts()
 
     # Save the plot to files
     plot.save()
@@ -126,22 +129,22 @@ def setName(drh, name):
 def distComparison(datasets):
     # Create a comparison plot of two distributions (must have the same binning)
     # Set the names of DatasetRootHisto objects in order to be able easily reference them later
-    drh1 = datasets.getDataset("Data").getDatasetRootHisto(analysis+"/SelectedTau_pT_AfterTauID")
-    drh1.setName("afterTauID")
-    drh2 = datasets.getDataset("Data").getDatasetRootHisto(analysis+"/SelectedTau_pT_AfterMetCut")
-    drh2.setName("afterMet")
+    drh1 = datasets.getDataset("Data").getDatasetRootHisto("ForDataDrivenCtrlPlots/SelectedTau_pT_AfterStandardSelections")
+    drh1.setName("AfterStandardSelections")
+    drh2 = datasets.getDataset("Data").getDatasetRootHisto("ForDataDrivenCtrlPlots/SelectedTau_pT_AfterMtSelections")
+    drh2.setName("AfterMtSelections")
     plot = plots.ComparisonPlot(drh1, drh2)
 
     # Set the styles
     st1 = styles.getDataStyle().clone()
     st2 = st1.clone()
     st2.append(styles.StyleLine(lineColor=ROOT.kRed))
-    plot.histoMgr.forHisto("afterTauID", st1)
-    plot.histoMgr.forHisto("afterMet", st2)
+    plot.histoMgr.forHisto("AfterStandardSelections", st1)
+    plot.histoMgr.forHisto("AfterMtSelections", st2)
 
     # Set the legend labels
-    plot.histoMgr.setHistoLegendLabelMany({"afterTauID": "After tau ID",
-                                           "afterMet": "After MET cut"})
+    plot.histoMgr.setHistoLegendLabelMany({"AfterStandardSelections": "After standard selections",
+                                           "AfterMtSelections": "After all selections"})
     # Set the legend styles
     plot.histoMgr.setHistoLegendStyleAll("L")
     #plot.histoMgr.setHistoLegendStyle("afterTauID", "P") # exception to the general rule
@@ -172,9 +175,7 @@ def distComparison(datasets):
     plot.draw()
 
     # Add the various texts to 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=datasets.getDataset("Data").getLuminosity())
+    histograms.addStandardTexts(lumi=datasets.getDataset("Data").getLuminosity())
 
     # Save the plot to files
     plot.save()

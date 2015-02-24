@@ -1,4 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleTools.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
@@ -13,31 +15,25 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
-std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
-bool  hasImmediateMother(const reco::Candidate& p, int id);
-bool  hasMother(const reco::Candidate& p, int id);
-void  printImmediateMothers(const reco::Candidate& p);
-void  printMothers(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>  getImmediateDaughters(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p);
-bool  hasImmediateDaughter(const reco::Candidate& p, int id);
-bool  hasDaughter(const reco::Candidate& p, int id);
-void  printImmediateDaughters(const reco::Candidate& p);
-void printDaughters(const reco::Candidate& p);
-
-
-
 namespace HPlus {
-  GenParticleAnalysis::Data::Data(const GenParticleAnalysis *analysis): fAnalysis(analysis) {}
+  GenParticleAnalysis::Data::Data():
+    fTTBarDecayMode(kTT_invalid)
+  {}
+
   GenParticleAnalysis::Data::~Data() {}
+  void GenParticleAnalysis::Data::check() const {
+    if(!isValid())
+      throw cms::Exception("Assert") << "GenParticleAnalysis::Data: This Data object was constructed with the default constructor, not with GenParticleAnalysis::(silent)analyze(). There is something wrong in your code." << std::endl;
+  }
 
   GenParticleAnalysis::GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fMetSrc(iConfig.getUntrackedParameter<edm::InputTag>("metSrc")),
     fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
     fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
-    fThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("threeProngTauSrc"))
+    fThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("threeProngTauSrc")),
+    fEnabled(iConfig.getUntrackedParameter<bool>("enabled"))
   {
     init(histoWrapper);
   }
@@ -45,57 +41,107 @@ namespace HPlus {
   GenParticleAnalysis::~GenParticleAnalysis() {}
 
   void GenParticleAnalysis::init(HPlus::HistoWrapper& histoWrapper){
+    if(!fEnabled)
+      return;
+
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("GenParticleAnalysis");
 
-    hRtau1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genRtau1ProngHp", "genRtau1ProngHp", 100, 0., 1.2);
-    hRtau13pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genRtau13ProngHp", "genRtau13ProngHp", 100, 0., 1.2);
-    hRtau3pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genRtau3ProngHp", "genRtau3ProngHp", 100, 0., 1.2);
-    hRtau1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genRtau1ProngW", "genRtau1ProngW", 100, 0., 1.2);
-    hRtau13pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genRtau13ProngW", "genRtau13ProngW", 100, 0., 1.2);
-    hRtau3pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genRtau3ProngW", "genRtau3ProngW", 100, 0., 1.2);
-    hptVisibleTau1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genptVisibleTau1ProngHp", "ptVisibleTau1ProngHp", 100, 0., 200);
-    hptVisibleTau13pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genptVisibleTau13ProngHp", "ptVisibleTau13ProngHp", 100, 0., 200);
-    hptVisibleTau3pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genptVisibleTau3ProngHp", "ptVisibleTau3ProngHp", 100, 0., 200);
-    hEtaVisibleTau1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genEtaVisibleTau1ProngHp", "etaVisibleTau1ProngHp", 100, -5., 5);
-    hLeadingTrack1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genLeadingTrack1ProngHp", "LeadingTrack1ProngHp", 100, 0., 200);
-    hptVisibleTau1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genPtVisibleTau1ProngW", "ptVisibleTau1ProngW", 100, 0., 200);
-    hptVisibleTau13pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genPtVisibleTau13ProngW", "ptVisibleTau13ProngW", 100, 0., 200);
-    hptVisibleTau3pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genPtVisibleTau3ProngW", "ptVisibleTau3ProngW", 100, 0., 200);
-    hEtaVisibleTau1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genEtaVisibleTau1ProngW", "etaVisibleTau1ProngW", 100, -5., 5);
-    hLeadingTrack1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genLeadingTrack1ProngW", "LeadingTrack1ProngW", 100, 0., 200);
-    hTauMass1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTauMass1pHp", "genTauMass1pHp", 100, 0., 2.);
-    hTauMass1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTauMass1pW", "genTauMass1pW", 100, 0., 2.);
-    hThetaCM1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genThetaCM1pHp", "genThetaCMs1pHp", 100, 0., 3.);
-    hThetaCM1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genThetaCM1pW", "genThetaCMs1pW", 100, 0., 3.);
-    hMagCM1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genMagCM1pHp", "genMagCMs1pHp", 100, 0.95, 1.);
-    hMagCM1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genMagCM1pW", "genMagCMs1pW", 100, 0.95, 1.);
-    hHpMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "HpMass", "HpMass", 100, 100, 200.);
-    hBquarkMultiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_Multiplicity", "genBquark_Multiplicity", 20, -0.5, 19.5);
-    hBquarkStatus2Multiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_Status2_Multiplicity", "genBquark_Status2_Multiplicity", 20, -0.5, 19.5);
-    hBquarkStatus3Multiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_Status3_Multiplicity", "genBquark_Status3_Multiplicity", 20, -0.5, 19.5);
-    hBquarkFromTopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTop_Eta", "genBquark_FromTop_Eta", 300, -6.0, 6.0);
-    hBquarkNotFromTopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_NotFromTop_Eta", "genBquark_NotFromTop_Eta", 300, -6.0, 6.0);
-    hBquarkFromTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTop_Pt", "genBquark_FromTop_Pt", 400, 0., 800.);
-    hBquarkNotFromTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_NotFromTop_Pt", "genBquark_NotFromTop_Pt", 400, 0., 800.);
-    hBquarkFromTopDeltaRTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTop_DeltaRTau", "genBquark_FromTop_DeltaRTau", 300, 0., 8.);
-    hBquarkNotFromTopDeltaRTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_NotFromTop_DeltaRTau", "genBquark_NotFromTop_DeltaRTau", 400, 0., 8.);
-    hGenDeltaRHiggsSide= histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromHiggsSide_DeltaRTau", "genBquark_FromHiggsSide_DeltaRTau", 350, 0., 7.);
-    hGenBquarkFromHiggsSideEta= histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromHiggsSide_Eta", "genBquark_FromHiggsSide_Eta", 250, -5.0, 5.0);
-    hGenBquarkFromHiggsSidePt= histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromHiggsSide_Pt", "genBquark_FromHiggsSide_Pt", 200, 0., 400.);
-    hGenDeltaRTopSide= histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTopSide_DeltaRTau", "genBquark_FromTopSide_DeltaRTau", 350, 0., 7.);
-    hGenBquarkFromTopSideEta= histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTopSide_Eta", "genBquark_FromTopSide_Eta", 250, -5.0, 5.0);
-    hGenBquarkFromTopSidePt= histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genBquark_FromTopSide_Pt", "genBquark_FromTopSide_Pt", 200, 0., 400.);
+    hRtau1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genRtau1ProngHp", "genRtau1ProngHp", 100, 0., 1.2);
+    hRtau13pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genRtau13ProngHp", "genRtau13ProngHp", 100, 0., 1.2);
+    hRtau3pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genRtau3ProngHp", "genRtau3ProngHp", 100, 0., 1.2);
+    hRtau1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genRtau1ProngW", "genRtau1ProngW", 100, 0., 1.2);
+    hRtau13pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genRtau13ProngW", "genRtau13ProngW", 100, 0., 1.2);
+    hRtau3pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genRtau3ProngW", "genRtau3ProngW", 100, 0., 1.2);
+    hptVisibleTau1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genptVisibleTau1ProngHp", "ptVisibleTau1ProngHp", 100, 0., 200);
+    hptVisibleTau13pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genptVisibleTau13ProngHp", "ptVisibleTau13ProngHp", 100, 0., 200);
+    hptVisibleTau3pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genptVisibleTau3ProngHp", "ptVisibleTau3ProngHp", 100, 0., 200);
+    hEtaVisibleTau1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genEtaVisibleTau1ProngHp", "etaVisibleTau1ProngHp", 100, -5., 5);
+    hLeadingTrack1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genLeadingTrack1ProngHp", "LeadingTrack1ProngHp", 100, 0., 200);
+    hptVisibleTau1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genPtVisibleTau1ProngW", "ptVisibleTau1ProngW", 100, 0., 200);
+    hptVisibleTau13pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genPtVisibleTau13ProngW", "ptVisibleTau13ProngW", 100, 0., 200);
+    hptVisibleTau3pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genPtVisibleTau3ProngW", "ptVisibleTau3ProngW", 100, 0., 200);
+    hEtaVisibleTau1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genEtaVisibleTau1ProngW", "etaVisibleTau1ProngW", 100, -5., 5);
+    hLeadingTrack1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genLeadingTrack1ProngW", "LeadingTrack1ProngW", 100, 0., 200);
+    hTauMass1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genTauMass1pHp", "genTauMass1pHp", 100, 0., 2.);
+    hTauMass1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genTauMass1pW", "genTauMass1pW", 100, 0., 2.);
+    hThetaCM1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genThetaCM1pHp", "genThetaCMs1pHp", 100, 0., 3.);
+    hThetaCM1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genThetaCM1pW", "genThetaCMs1pW", 100, 0., 3.);
+    hMagCM1pHp = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genMagCM1pHp", "genMagCMs1pHp", 100, 0.95, 1.);
+    hMagCM1pW = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genMagCM1pW", "genMagCMs1pW", 100, 0.95, 1.);
+    hHpMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "HpMass", "HpMass", 100, 100, 200.);
+    hBquarkMultiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_Multiplicity", "genBquark_Multiplicity", 20, -0.5, 19.5);
+    hBquarkStatus2Multiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_Status2_Multiplicity", "genBquark_Status2_Multiplicity", 20, -0.5, 19.5);
+    hBquarkStatus3Multiplicity = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_Status3_Multiplicity", "genBquark_Status3_Multiplicity", 20, -0.5, 19.5);
+    hBquarkFromTopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromTop_Eta", "genBquark_FromTop_Eta", 300, -6.0, 6.0);
+    hBquarkNotFromTopEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_NotFromTop_Eta", "genBquark_NotFromTop_Eta", 300, -6.0, 6.0);
+    hBquarkFromTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromTop_Pt", "genBquark_FromTop_Pt", 250, 0., 500.);
+    hBquarkNotFromTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_NotFromTop_Pt", "genBquark_NotFromTop_Pt", 250, 0., 500.);
+    hBquarkFromTopEtaPtCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromTop_Eta_ptcut", "genBquark_FromTop_Eta_ptcut", 300, -6.0, 6.0);
+    hBquarkNotFromTopEtaPtCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_NotFromTop_Eta_ptcut", "genBquark_NotFromTop_Eta_ptcut", 300, -6.0, 6.0);
+    hBquarkFromTopPtEtaCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromTop_Pt_etacut", "genBquark_FromTop_Pt_etacut", 250, 0., 500.);
+    hBquarkNotFromTopPtEtaCut = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_NotFromTop_Pt_etacut", "genBquark_NotFromTop_Pt_etacut", 250, 0., 500.);
+    hBquarkFromTopDeltaRTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromTop_DeltaRTau", "genBquark_FromTop_DeltaRTau", 300, 0., 8.);
+    hBquarkNotFromTopDeltaRTau = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_NotFromTop_DeltaRTau", "genBquark_NotFromTop_DeltaRTau", 400, 0., 8.);
+    hGenDeltaRHiggsSide= histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromHiggsSide_DeltaRTau", "genBquark_FromHiggsSide_DeltaRTau", 350, 0., 7.);
+    hGenBquarkFromHiggsSideEta= histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromHiggsSide_Eta", "genBquark_FromHiggsSide_Eta", 250, -5.0, 5.0);
+    hGenBquarkFromHiggsSidePt= histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromHiggsSide_Pt", "genBquark_FromHiggsSide_Pt", 200, 0., 400.);
+    hGenDeltaRTopSide= histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromTopSide_DeltaRTau", "genBquark_FromTopSide_DeltaRTau", 350, 0., 7.);
+    hGenBquarkFromTopSideEta= histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromTopSide_Eta", "genBquark_FromTopSide_Eta", 250, -5.0, 5.0);
+    hGenBquarkFromTopSidePt= histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genBquark_FromTopSide_Pt", "genBquark_FromTopSide_Pt", 200, 0., 400.);
 
+    hTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genTopPt", "genTopPt", 300, 0., 600);
+    hTopPt_wrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genTopPt_wrongB", "genTopPt_wrongB", 300, 0., 600);
+    hTopToChHiggsMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopToChHiggsMass", "genTopToChHiggsMass", 300, 0., 600);
+    hTopToWBosonMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopToWBosonMass", "genTopToWBosonMass", 300, 0., 600);
+    hFullHiggsMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genFullHiggsMass", "genFullHiggsMass", 300, 0., 600);
     hTopPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopPt", "genTopPt", 300, 0., 600);
-    hTopPt_wrongB = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genTopPt_wrongB", "genTopPt_wrongB", 300, 0., 600);
-    hGenMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genMET", "genMET", 40, 0., 400);
-    hWPt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genWPt", "genWPt", 120, 0., 600);
-    hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genWEta", "genWEta", 100, -5., 5.);    
-    hWPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "genWPhi", "genWPhi", 64, -3.2, 3.2);    
+    hGenMET = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genMET", "genMET", 40, 0., 400);
+    hWPt  = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genWPt", "genWPt", 120, 0., 600);
+    hWEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genWEta", "genWEta", 100, -5., 5.);    
+    hWPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "genWPhi", "genWPhi", 64, -3.2, 3.2);    
+  }
+
+  WrappedTH1 *GenParticleAnalysis::bookTTBarDecayModeHistogram(HistoWrapper& histoWrapper, HistoWrapper::HistoLevel histoLevel, TFileDirectory& dir, const std::string& name) {
+    WrappedTH1 *h = histoWrapper.makeTH<TH1F>(histoLevel, dir, name.c_str(), "TTBar decay mode", kTT_bbtautau, 1, kTT_bbtautau+1);
+    if(h->isActive()) {
+      TAxis *axis = h->GetXaxis();
+      axis->SetBinLabel(kTT_noTT,     "not t#bar{t}");
+      axis->SetBinLabel(kTT_unknown,  "unknown");
+      axis->SetBinLabel(kTT_bbqqqq,   "t#bar{T}#rightarrowbbqqqq");     // 46 %
+      axis->SetBinLabel(kTT_bbqqe,    "t#bar{T}#rightarrowbbqqe");      // 15 %
+      axis->SetBinLabel(kTT_bbqqmu,   "t#bar{T}#rightarrowbbqq#mu");    // 15 %
+      axis->SetBinLabel(kTT_bbqqtau,  "t#bar{T}#rightarrowbbqq#tau");   // 15 %
+      axis->SetBinLabel(kTT_bbee,     "t#bar{T}#rightarrowbbee");       //  1 %
+      axis->SetBinLabel(kTT_bbemu,    "t#bar{T}#rightarrowbbe#mu");     //  2 %
+      axis->SetBinLabel(kTT_bbetau,   "t#bar{T}#rightarrowbbe#tau");    //  2 %
+      axis->SetBinLabel(kTT_bbmumu,   "t#bar{T}#rightarrowbb#mu#mu");   //  1 %
+      axis->SetBinLabel(kTT_bbmutau,  "t#bar{T}#rightarrowbb#mu#tau");  //  2 %
+      axis->SetBinLabel(kTT_bbtautau, "t#bar{T}#rightarrowbb#tau#tau"); //  1 %
+    }
+    return h;
+  }
+
+  GenParticleAnalysis::Data GenParticleAnalysis::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup);
   }
 
   GenParticleAnalysis::Data GenParticleAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup);
+  }
+
+  GenParticleAnalysis::Data GenParticleAnalysis::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
+    Data output;
+    
+    if (iEvent.isRealData() || !fEnabled) return output;
 
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel(fSrc, genParticles);
@@ -115,10 +161,11 @@ namespace HPlus {
 
     edm::Handle<edm::View<reco::GenMET> > hmet;
     iEvent.getByLabel(fMetSrc, hmet);
-    fGenMet = hmet->ptrAt(0);
+    output.fGenMet = hmet->ptrAt(0);
 
-    hGenMET->Fill(fGenMet->et());
+    hGenMET->Fill(output.fGenMet->et());
 
+    output.fTTBarDecayMode = findTTBarDecayMode(*genParticles);
 
     // loop over all genParticles
     for (size_t i=0; i < genParticles->size(); ++i){
@@ -455,6 +502,8 @@ namespace HPlus {
       if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
         hBquarkFromTopEta->Fill(bEta);
         hBquarkFromTopPt->Fill(bPt);
+	if (bPt > 20) hBquarkFromTopEtaPtCut->Fill(bEta);
+        if (fabs(bEta) < 2.4) hBquarkFromTopPtEtaCut->Fill(bPt);
         for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {
           // Check that the tau comes from H+
           bool tauFromHp = false;
@@ -471,8 +520,8 @@ namespace HPlus {
         }
       }
       else {
-        hBquarkNotFromTopEta->Fill(bEta);
-        hBquarkNotFromTopPt->Fill(bPt);
+        if (bPt > 20) hBquarkNotFromTopEtaPtCut->Fill(bEta);
+        if (fabs(bEta) < 2.4) hBquarkNotFromTopPtEtaCut->Fill(bPt);
         for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {
           // Check that the tau comes from H+
           bool tauFromHp = false;
@@ -489,8 +538,6 @@ namespace HPlus {
         }
       }
     }
-    
-        
         
     // loop over all genParticles, search tops that decay to u and d and calculate pt
     // also calculate the "wrong" pt, by picking the b quark that does not come from the t
@@ -504,7 +551,7 @@ namespace HPlus {
       double px_wrong = 0, py_wrong = 0;
       bool decaysHadronically = false;
       for(size_t d=0; d<daughters.size(); ++d) {
-        const reco::GenParticle dparticle = *daughters[d];
+        const reco::GenParticle& dparticle = *daughters[d];
         daughterId = dparticle.pdgId();
         if( abs(daughterId) == 24 ) {
           px += dparticle.px();
@@ -541,11 +588,223 @@ namespace HPlus {
       }
     }
 
-    return Data(this);
+    // Loop over all gen particles, find tops that decay via t -> Wb and t -> Hb
+    // and add their masses to different histograms
+    for (size_t i=0; i < genParticles->size(); ++i){
+      const reco::Candidate & p = (*genParticles)[i];
+      int id = p.pdgId();
+      if ( abs(id) != 6 || hasImmediateMother(p,id)) continue;
+      std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
+      int daughterId=9999;
+      double px = 0, py = 0, pz = 0, E = 0;
+      bool decaysToChHiggs = false;
+      bool decaysToWBoson = false;
+      for(size_t d=0; d<daughters.size(); ++d) {
+        const reco::GenParticle& dparticle = *daughters[d];
+        daughterId = dparticle.pdgId();
+	// If top decays to W boson (and b quark):
+        if( abs(daughterId) == 24 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+	  decaysToWBoson = true;
+        }
+	// If top decays to charged Higgs boson (and b quark):
+        if( abs(daughterId) == 37 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+	  decaysToChHiggs = true;
+        }
+	// In either case (t -> Wb || t -> Hb), add four momentum of b quark
+        if( abs(daughterId) == 5 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+        }
+      }
+      if(decaysToWBoson) {
+        hTopToWBosonMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
+      }
+      if(decaysToChHiggs) {
+        hTopToChHiggsMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
+      }
+    }
+
+    // Loop over all gen particles, find charged Higgs bosons decaying to tau+nu and put their full mass
+    // in a histogram (i.e. norm of four-momentum)
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      int id = p.pdgId();
+      // If charged Higgs
+      if ( abs(id) != 37 || hasImmediateMother(p,id)) continue;
+      std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
+      int daughterId=9999;
+      double px = 0, py = 0, pz = 0, E = 0;
+      bool tauFound = false;
+      bool neutrinoFound = false;
+      for(size_t d=0; d<daughters.size(); ++d) {
+        const reco::GenParticle& dparticle = *daughters[d];
+        daughterId = dparticle.pdgId();
+	// If tau among immediate daughters
+        if( abs(daughterId) == 15 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+	  //	  std::cout << "Tau found." << std::endl;
+	  tauFound = true;
+        }
+	// If tau neutrino among immediate daughters
+        if( abs(daughterId) == 16 ) {
+          px += dparticle.px();
+          py += dparticle.py();
+	  pz += dparticle.pz();
+	  E  += dparticle.energy();
+	  neutrinoFound = true;
+        }
+      } // end of loop over daughters of charged Higgs
+      // If both tau and tau neutrino found among immediate daughters, add mass to histogram
+      if( tauFound && neutrinoFound) {
+	hFullHiggsMass->Fill(sqrt(E*E - px*px - py*py - pz*pz));
+	//	  std::cout << "Mass put in histogram" << std::endl;
+      }
+      else {
+	//	  std::cout << "Charged Higgs boson NOT decaying to tauNu found" << std::endl;
+      }
+    }    
+
+    return output;
   }
    //eof: void GenParticleAnalysis::analyze()
 
+  GenParticleAnalysis::TTBarDecayMode GenParticleAnalysis::findTTBarDecayMode(const std::vector<reco::GenParticle>& genParticles) const {
+    // First find ttbar
+    const reco::GenParticle *top = 0;
+    const reco::GenParticle *antitop = 0;
+    for(std::vector<reco::GenParticle>::const_iterator iGen = genParticles.begin(); iGen != genParticles.end(); ++iGen) {
+      const reco::GenParticle *gen = &(*iGen);
+      if(std::abs(gen->pdgId()) != 6)
+        continue;
 
+      if(gen->pdgId() == 6) {
+        if(top) {
+          //std::cout << "Top already found" << std::endl;
+          return kTT_noTT;
+        }
+        top = gen;
+      }
+      else {
+        if(antitop) {
+          //std::cout << "Anti-top already found" << std::endl;
+          return kTT_noTT;
+        }
+        antitop = gen;
+      }
+
+      if(top && antitop) break;
+    }
+    if(!top || !antitop) {
+      //std::cout << "Either top (" << top << ") or anti-top (" << antitop << ") not found" << std::endl;
+      return kTT_noTT;
+    }
+
+    top = GenParticleTools::rewindChainDown(top);
+    antitop = GenParticleTools::rewindChainDown(antitop);
+
+    const reco::GenParticle *topW = GenParticleTools::findMaxNonNeutrinoDaughter(top);
+    const reco::GenParticle *antitopW = GenParticleTools::findMaxNonNeutrinoDaughter(antitop);
+
+    if(std::abs(topW->pdgId()) != 24 || std::abs(antitopW->pdgId()) != 24) {
+      //std::cout << "Daughter of top (" << topW->pdgId() << ") or anti-top (" << antitopW->pdgId() << " not W (24)" << std::endl;
+      return kTT_noTT;
+    }
+
+    int n_q = 0;
+    int n_e = 0;
+    int n_mu = 0;
+    int n_tau = 0;
+
+    /*
+    std::cout << "topW numberOfDaughters " << topW->numberOfDaughters()
+              << " anti-topW numberOfDaughters " << antitopW->numberOfDaughters()
+              << std::endl;
+    */
+
+    size_t n = topW->numberOfDaughters();
+    for(size_t i=0; i<n; ++i) {
+      switch(std::abs(topW->daughter(i)->pdgId())) {
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+        ++n_q; break;
+      case 11: ++n_e; break;
+      case 13: ++n_mu; break;
+      case 15: ++n_tau; break;
+      default:
+        //std::cout << "Daughter of top->W " << topW->daughter(i)->pdgId() << std::endl;
+        break;
+      };
+    }
+    n = antitopW->numberOfDaughters();
+    for(size_t i=0; i<n; ++i) {
+      switch(std::abs(antitopW->daughter(i)->pdgId())) {
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+        ++n_q; break;
+      case 11: ++n_e; break;
+      case 13: ++n_mu; break;
+      case 15: ++n_tau; break;
+      default:
+        //std::cout << "Daughter of anti-top->W " << topW->daughter(i)->pdgId() << std::endl;
+        break;
+      };
+    }
+    if(!(n_q == 0 || n_q == 2 || n_q == 4))
+      throw cms::Exception("Assert") << __FILE__ << ":" << __LINE__ << ": Something weird is going on, got " << n_q << " quarks";
+    n_q = n_q/2;
+
+    if(n_q + n_e + n_mu + n_tau != 2)
+      throw cms::Exception("Assert") << __FILE__ << ":" << __LINE__ << ": Something weird is going on, got " << n_q << " quark pairs, " << n_e << " electrons, " << n_mu << " muons, and " << n_tau << " taus.";
+
+    if(n_q == 2)
+      return kTT_bbqqqq;
+    if(n_e == 2)
+      return kTT_bbee;
+    if(n_mu == 2)
+      return kTT_bbmumu;
+    if(n_tau == 2)
+      return kTT_bbtautau;
+    if(n_q == 1) {
+      if(n_e == 1)
+        return kTT_bbqqe;
+      if(n_mu == 1)
+        return kTT_bbqqmu;
+      if(n_tau == 1)
+        return kTT_bbqqtau;
+    }
+    if(n_e == 1) {
+      if(n_mu == 1)
+        return kTT_bbemu;
+      if(n_tau == 1)
+        return kTT_bbetau;
+    }
+    if(n_mu == 1)
+      if(n_tau == 1)
+        return kTT_bbmutau;
+
+    return kTT_unknown;
+  }
 
 
   /*

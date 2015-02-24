@@ -4,151 +4,248 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
+datasets_Tau = [
+    "Tau_190456-190738_2012A_Jul13",
+    "Tau_190782-190949_2012A_Aug06",
+    "Tau_191043-193621_2012A_Jul13",
+    "Tau_193834-196531_2012B_Jul13",
+    "Tau_198022-198523_2012C_Aug24",
+    "Tau_198941-202504_2012C_Prompt",
+    "Tau_201191-201191_2012C_Dec11",
+    "Tau_202972-203742_2012C_Prompt",
+    "Tau_203777-208686_2012D_Prompt",
+]
 
-datasets = [
-########
-#
-# 44X
-#
-########
+datasets_MultiJet = [
+    "MultiJet_190456-190738_2012A_Jul13",
+    "MultiJet_190782-190949_2012A_Aug06",
+    "MultiJet_191043-193621_2012A_Jul13",
+#    "MultiJet_193834-194225_2012B_Jul13",
+#    "MultiJet_194270-196531_2012B_Jul13",
+#    "MultiJet_198022-198523_2012C_Aug24",
+#    "MultiJet_198941-203742_2012C_Prompt",
+#    "MultiJet_203777-208686_2012D_Prompt",
+    "MultiJet1Parked_198022-198523_2012C_Nov05",
+]
 
-        # Data 2011
-        # tau+met trigger
-#       "Tau_160431-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
-#       "Tau_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-#       "Tau_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
-#       "Tau_175860-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
-        # single tau trigger
-#       "Tau_Single_165970-167913_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET45_v{1,2,4,6}, 2011A HLT_IsoPFTau35_Trk20_MET60_v{2,3,4}
-#       "Tau_Single_170722-173198_2011A_Nov08",    # 2011A HLT_IsoPFTau35_Trk20_MET60_v6
-#       "Tau_Single_173236-173692_2011A_Nov08",    # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
-#       "Tau_Single_175832-180252_2011B_Nov19",    # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v{1,5,6}
+datasets_Tau_W13 = [
+    "Tau_190456-193621_2012A_Jan22",
+    "TauParked_193834-196531_2012B_Jan22",
+    "TauParked_198022-202504_2012C_Jan22",
+    "TauParked_202972-203742_2012C_Jan22",
+    "TauParked_203777-208686_2012D_Jan22",
+]
 
-        # single mu
-#       "SingleMu_160431-163261_2011A_Nov08",     # 2011A
-#       "SingleMu_163270-163869_2011A_Nov08",     # 2011A
-#       "SingleMu_165088-165633_2011A_Nov08",     # 2011A
-#       "SingleMu_165970-166150_2011A_Nov08",     # 2011A
-#       "SingleMu_166161-166164_2011A_Nov08",     # 2011A
-#       "SingleMu_166346-166346_2011A_Nov08",     # 2011A
-#       "SingleMu_166374-166967_2011A_Nov08",     # 2011A
-#       "SingleMu_167039-167043_2011A_Nov08",     # 2011A
-#       "SingleMu_167078-167913_2011A_Nov08",     # 2011A
-#       "SingleMu_170722-172619_2011A_Nov08",     # 2011A
-#       "SingleMu_172620-173198_2011A_Nov08",     # 2011A
-#       "SingleMu_173236-173692_2011A_Nov08",     # 2011A
-#       "SingleMu_175860-176469_2011A_Nov19",     # 2011B
-#       "SingleMu_176545-177053_2011B_Nov19",     # 2011B
-#       "SingleMu_177074-177452_2011B_Nov19",     # 2011B
-#       "SingleMu_177718-178380_2011B_Nov19",     # 2011B
-#       "SingleMu_178420-178866_2011B_Nov19",     # 2011B
-#       "SingleMu_178871-179889_2011B_Nov19",     # 2011B
-#       "SingleMu_179959-180252_2011B_Nov19",     # 2011B
+datasets_Signal = [
+    "TTToHplusBWB_M80_Summer12",
+    "TTToHplusBWB_M90_Summer12",
+    "TTToHplusBWB_M100_Summer12",
+    "TTToHplusBWB_M120_Summer12",
+    "TTToHplusBWB_M140_Summer12",
+    "TTToHplusBWB_M150_Summer12",
+    "TTToHplusBWB_M155_Summer12",
+    "TTToHplusBWB_M160_Summer12",
 
-        # Fall11
-        # Signal MC (WH)
-#        "TTToHplusBWB_M80_Fall11",
-#        "TTToHplusBWB_M90_Fall11",
-        "TTToHplusBWB_M100_Fall11",
-#        "TTToHplusBWB_M120_Fall11",
-#        "TTToHplusBWB_M140_Fall11",
-#        "TTToHplusBWB_M150_Fall11",
-#        "TTToHplusBWB_M155_Fall11",
-#        "TTToHplusBWB_M160_Fall11",
-        # Signal MC (HH)
-#        "TTToHplusBHminusB_M80_Fall11",
-#        "TTToHplusBHminusB_M90_Fall11",
-        "TTToHplusBHminusB_M100_Fall11",
-#        "TTToHplusBHminusB_M120_Fall11",
-#        "TTToHplusBHminusB_M140_Fall11",
-#        "TTToHplusBHminusB_M150_Fall11",
-#        "TTToHplusBHminusB_M155_Fall11",
-#        "TTToHplusBHminusB_M160_Fall11",
-        # Signal MC (Heavy)
-#        "HplusTB_M180_Fall11",
-#        "HplusTB_M190_Fall11",
-#        "HplusTB_M200_Fall11",
-#        "HplusTB_M220_Fall11",
-#        "HplusTB_M250_Fall11",
-#        "HplusTB_M300_Fall11",
-        # Background MC
-#        "TTJets_TuneZ2_Fall11",
-#        "WJets_TuneZ2_Fall11",
-#        "W2Jets_TuneZ2_Fall11",
-#        "W3Jets_TuneZ2_Fall11",
-#        "W4Jets_TuneZ2_Fall11",
-#        "DYJetsToLL_M10to50_TuneZ2_Fall11",
-#        "DYJetsToLL_M50_TuneZ2_Fall11",
-#        "T_t-channel_TuneZ2_Fall11",
-#        "Tbar_t-channel_TuneZ2_Fall11",
-#        "T_tW-channel_TuneZ2_Fall11",
-#        "Tbar_tW-channel_TuneZ2_Fall11",
-#        "T_s-channel_TuneZ2_Fall11",
-#        "Tbar_s-channel_TuneZ2_Fall11",
-#        "WW_TuneZ2_Fall11",
-#        "WZ_TuneZ2_Fall11",
-#        "ZZ_TuneZ2_Fall11",
-#        "QCD_Pt20_MuEnriched_TuneZ2_Fall11",
-#         "QCD_Pt30to50_TuneZ2_Fall11",
-#         "QCD_Pt50to80_TuneZ2_Fall11",
-#         "QCD_Pt80to120_TuneZ2_Fall11",
-#         "QCD_Pt120to170_TuneZ2_Fall11",
-#         "QCD_Pt170to300_TuneZ2_Fall11",
-#         "QCD_Pt300to470_TuneZ2_Fall11",
+    "TTToHplusBWB_M80_ext_Summer12",
+    "TTToHplusBWB_M90_ext_Summer12",
+    "TTToHplusBWB_M100_ext_Summer12",
+    "TTToHplusBWB_M120_ext_Summer12",
+    "TTToHplusBWB_M140_ext_Summer12",
+    "TTToHplusBWB_M150_ext_Summer12",
+    "TTToHplusBWB_M155_ext_Summer12",
+    "TTToHplusBWB_M160_ext_Summer12",
 
-######
-# 44X high PU
-#         "TTToHplusBWB_M90_Fall11_HighPU",
-#         "TTToHplusBWB_M160_Fall11_HighPU",
-#         "TTJets_TuneZ2_Fall11_HighPU",
+    "TTToHplusBHminusB_M80_Summer12",
+    "TTToHplusBHminusB_M90_Summer12",
+    "TTToHplusBHminusB_M100_Summer12",
+    "TTToHplusBHminusB_M120_Summer12",
+    "TTToHplusBHminusB_M140_Summer12",
+    "TTToHplusBHminusB_M150_Summer12",
+    "TTToHplusBHminusB_M155_Summer12",
+    "TTToHplusBHminusB_M160_Summer12",
+
+    "TTToHplusBHminusB_M80_ext_Summer12",
+    "TTToHplusBHminusB_M100_ext_Summer12",
+    "TTToHplusBHminusB_M120_ext_Summer12",
+    "TTToHplusBHminusB_M140_ext_Summer12",
+    "TTToHplusBHminusB_M150_ext_Summer12",
+    "TTToHplusBHminusB_M155_ext_Summer12",
+    "TTToHplusBHminusB_M160_ext_Summer12",
+
+    "Hplus_taunu_t-channel_M80_Summer12",
+    "Hplus_taunu_t-channel_M90_Summer12",
+    "Hplus_taunu_t-channel_M100_Summer12",
+    "Hplus_taunu_t-channel_M120_Summer12",
+    "Hplus_taunu_t-channel_M140_Summer12",
+    "Hplus_taunu_t-channel_M150_Summer12",
+    "Hplus_taunu_t-channel_M155_Summer12",
+    "Hplus_taunu_t-channel_M160_Summer12",
+
+    "Hplus_taunu_tW-channel_M80_Summer12",
+    "Hplus_taunu_tW-channel_M90_Summer12",
+    "Hplus_taunu_tW-channel_M100_Summer12",
+    "Hplus_taunu_tW-channel_M120_Summer12",
+    "Hplus_taunu_tW-channel_M140_Summer12",
+    "Hplus_taunu_tW-channel_M150_Summer12",
+    "Hplus_taunu_tW-channel_M155_Summer12",
+    "Hplus_taunu_tW-channel_M160_Summer12",
+
+    "Hplus_taunu_s-channel_M80_Summer12",
+    "Hplus_taunu_s-channel_M90_Summer12",
+    "Hplus_taunu_s-channel_M100_Summer12",
+    "Hplus_taunu_s-channel_M120_Summer12",
+    "Hplus_taunu_s-channel_M140_Summer12",
+    "Hplus_taunu_s-channel_M150_Summer12",
+    "Hplus_taunu_s-channel_M155_Summer12",
+    "Hplus_taunu_s-channel_M160_Summer12",
+
+    "HplusTB_M180_Summer12",
+    "HplusTB_M190_Summer12",
+    "HplusTB_M200_Summer12",
+    "HplusTB_M220_Summer12",
+    "HplusTB_M250_Summer12",
+    "HplusTB_M300_Summer12",
+    "HplusTB_M400_Summer12",
+    "HplusTB_M500_Summer12",
+    "HplusTB_M600_Summer12",
+
+    "HplusTB_M180_ext_Summer12",
+    "HplusTB_M190_ext_Summer12",
+    "HplusTB_M200_ext_Summer12",
+    "HplusTB_M220_ext_Summer12",
+    "HplusTB_M250_ext_Summer12",
+    "HplusTB_M300_ext_Summer12",
+]
+
+datasets_Signal_TB = [
+    "HplusToTBbar_M180_Summer12",
+    "HplusToTBbar_M200_Summer12",
+    "HplusToTBbar_M220_Summer12",
+    "HplusToTBbar_M240_Summer12",
+    "HplusToTBbar_M250_Summer12",
+    "HplusToTBbar_M260_Summer12",
+    "HplusToTBbar_M280_Summer12",
+    "HplusToTBbar_M300_Summer12",
+    "HplusToTBbar_M350_Summer12",
+    "HplusToTBbar_M400_Summer12",
+    "HplusToTBbar_M500_Summer12",
+    "HplusToTBbar_M600_Summer12",
+    "HplusToTBbar_M700_Summer12",
+]
+
+datasets_QCD = [
+    "QCD_Pt30to50_TuneZ2star_Summer12",
+    "QCD_Pt50to80_TuneZ2star_Summer12",
+    "QCD_Pt80to120_TuneZ2star_Summer12",
+    "QCD_Pt120to170_TuneZ2star_Summer12",
+    "QCD_Pt170to300_TuneZ2star_Summer12",
+    "QCD_Pt170to300_TuneZ2star_v2_Summer12",
+    "QCD_Pt300to470_TuneZ2star_Summer12",
+    "QCD_Pt300to470_TuneZ2star_v2_Summer12",
+    "QCD_Pt300to470_TuneZ2star_v3_Summer12",
+]
+
+datasets_VV =[
+    "WW_TuneZ2star_Summer12",
+    "WZ_TuneZ2star_Summer12",
+    "ZZ_TuneZ2star_Summer12",
+]
+
+datasets_TT = [
+#    "TTJets_TuneZ2star_Summer12",
+    "TTJets_FullLept_TuneZ2star_Summer12",
+    "TTJets_SemiLept_TuneZ2star_Summer12",
+    "TTJets_Hadronic_TuneZ2star_ext_Summer12",
 ]
 
 
+datasets_EWK = [
+    "WJets_TuneZ2star_v1_Summer12",
+    "WJets_TuneZ2star_v2_Summer12",
+    "W1Jets_TuneZ2star_Summer12",
+    "W2Jets_TuneZ2star_Summer12",
+    "W3Jets_TuneZ2star_Summer12",
+    "W4Jets_TuneZ2star_Summer12",
+    "DYJetsToLL_M50_TuneZ2star_Summer12",
+    "DYJetsToLL_M10to50_TuneZ2star_Summer12"
+]
 
-workflow = "pattuple_v44_4"
-multicrab.extendDatasets(workflow, datasets)
+datasets_SingleTop = [
+    "T_t-channel_TuneZ2star_Summer12",
+    "Tbar_t-channel_TuneZ2star_Summer12",
+    "T_tW-channel_TuneZ2star_Summer12",
+    "Tbar_tW-channel_TuneZ2star_Summer12",
+    "T_s-channel_TuneZ2star_Summer12",
+    "Tbar_s-channel_TuneZ2star_Summer12",
+]
 
-# local_stage_out doesn't work due to denied permission because we're
-# writing to /store/group/local ...
-#multicrab.appendLineAll("USER.local_stage_out=1")
+workflow = "pattuple_taumet_v53_3"
+#workflow = "pattuple_quadjet_v53_3"
 
-multicrab.appendLineAll("GRID.maxtarballsize = 15")
+tasks = []
+if "taumet" in workflow:
+    tasks.extend([
+            ("Tau_W13", datasets_Tau_W13),
+            ])
+elif "quadjet" in workflow:
+    tasks.extend([
+            ("MultiJet", datasets_MultiJet),
+            ])
+    # These are run as non-triggered for taumet workflow, no need to rerun for quadjet
+    for name in ["TTToHplusBWB_M100_ext_Summer12", "TTToHplusBWB_M160_ext_Summer12", "HplusTB_M200_ext_Summer12", "HplusTB_M400_Summer12"]:
+        try:
+            del datasets_Signal[datasets_Signal.index(name)]
+        except ValueError:
+            pass
 
-def addCopyConfig(dataset):
-    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
-    dataset.appendCopyFile("../copy_cfg.py")
-multicrab.forEachDataset(addCopyConfig)
-
-# For collision data stageout from US doesn't seem to be a problem
-#allowUS = ["TT", "TTJets", "TTToHplusBWB_M90", "TTToHplusBWB_M100", "TTToHplusBWB_M120", "TTToHplusBWB_M140", "TTToHplusBWB_M160"]
-#def blacklistUS(dataset):
-#    if dataset.isMC() and not dataset.getName() in allowUS:
-#        dataset.extendBlackWhiteList("se_black_list", ["T2_US"])
-#multicrab.forEachDataset(blacklistUS)
-
-# Many failures with 60307 and 70500 from T2_UK_London_Brunel for
-# pattuple_v6_1 while the similar jobs stageout fine in other T2s
-multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
-
-prefix = "multicrab"
-configOnly = False # Create task configuration only?
-# Leave configOnly as false and specify site whitelist on command line when submitting the jobs
-
-# Create multicrab task configuration and run 'multicrab -create'
-taskDir = multicrab.createTasks(prefix=prefix, configOnly=configOnly)
+tasks = []
+tasks.extend([
+    ("Signal", datasets_Signal),
+     ("Signal_TB", datasets_Signal_TB),
+    ("QCD_VV_SingleTop", datasets_QCD+datasets_VV+datasets_SingleTop),
+    ("TT", datasets_TT),
+    ("EWK", datasets_EWK),
+])
 
 # patch CMSSW.sh
 #
 # Running CMSSW again in each job just to copy the file seems to
 # somehow "linearize" the file, and the subsequent file access is fast
-class Wrapper:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
+# class Wrapper:
+#     def __init__(self, **kwargs):
+#         self.__dict__.update(kwargs)
 
-if not configOnly:
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
-    import os
-    os.chdir(taskDir)
-    patch.main(Wrapper(dirs=datasets, input="pattuple"))
-    os.chdir("..")
+for midfix, datasets in tasks:
+    multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
+
+    multicrab.extendDatasets(workflow, datasets)
+
+    # local_stage_out doesn't work due to denied permission because we're
+    # writing to /store/group/local ...
+    #multicrab.appendLineAll("USER.local_stage_out=1")
+
+    #multicrab.appendLineAll("GRID.maxtarballsize = 35")
+
+    #def addCopyConfig(dataset):
+    #    dataset.appendLine("USER.additional_input_files = copy_cfg.py")
+    #    dataset.appendCopyFile("../copy_cfg.py")
+    #multicrab.forEachDataset(addCopyConfig)
+
+    multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
+
+    prefix = "multicrab_"+workflow+"_"+midfix
+    configOnly = False # Create task configuration only?
+    configOnly = True
+    # Leave configOnly as false and specify site whitelist on command line when submitting the jobs
+
+    # Create multicrab task configuration and run 'multicrab -create'
+    taskDir = multicrab.createTasks(prefix=prefix, configOnly=configOnly)
+
+    # patch CMSSW.sh, part 2
+    #
+    # if not configOnly:
+    #     import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crabPatchCMSSWsh as patch
+    #     import os
+    #     os.chdir(taskDir)
+    #     patch.main(Wrapper(dirs=datasets, input="pattuple"))
+    #     os.chdir("..")

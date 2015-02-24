@@ -3,6 +3,8 @@ import FWCore.ParameterSet.Config as cms
 
 # write as function , params: process and postfix
 
+muonGlobalPtEta = "isGlobalMuon() && pt() > 35 && abs(eta()) < 2.1"
+
 def getTightMuonsDefinition(postfix=""):
     src = "selectedPatMuons"
     if postfix != "":
@@ -11,18 +13,40 @@ def getTightMuonsDefinition(postfix=""):
 
     tightMuons = cms.EDFilter("PATMuonSelector",
         src = cms.InputTag(src),
-        cut = cms.string(
-        "isGlobalMuon() && isTrackerMuon()"
-        "&& pt() > 35 && abs(eta()) < 2.1"
-        "&& muonID('GlobalMuonPromptTight')"
-        "&& innerTrack().numberOfValidHits() > 10"
-        "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
-        "&& numberOfMatches() > 1"
-        "&& abs(dB()) < 0.02"
+        # Take out chi2<10 cut for testing TuneP cocktail
+        cut = cms.string("%s && globalTrack().hitPattern().numberOfValidMuonHits() > 0" % muonGlobalPtEta)
+#        cut = cms.string("%s && muonID('GlobalMuonPromptTight')" % muonGlobalPtEta)
+#        "&& innerTrack().numberOfValidHits() > 10"
+#        "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
+#        "&& numberOfMatches() > 1"
+#        "&& abs(dB()) < 0.02"
     #    "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.05",
-        )
+#        )
     )
     return tightMuons
+
+def addMuonPreSelectionForEmbedding(process):
+    sequence = cms.Sequence()
+
+    process.muonPreSelectionAllEvents = cms.EDProducer("EventCountProducer")
+    sequence *= process.muonPreSelectionAllEvents
+
+    process.muonPreSelectionMuons = cms.EDFilter("CandPtrSelector",
+        src = cms.InputTag(process.patMuons.muonSource.value()),
+        cut = cms.string(muonGlobalPtEta)
+    )
+    sequence *= process.muonPreSelectionMuons
+
+    process.muonPreSelectionMuonsFilter = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag("muonPreSelectionMuons"),
+        minNumber = cms.uint32(1)
+    )
+    sequence *= process.muonPreSelectionMuonsFilter
+
+    process.muonPreSelectionPassed = cms.EDProducer("EventCountProducer")
+    sequence *= process.muonPreSelectionPassed
+
+    return sequence
 
 def addMuonSelectionForEmbedding(process, postfix=""):
     muonSelectionAllEvents = cms.EDProducer("EventCountProducer")
@@ -154,7 +178,30 @@ def addMuonSelectionForEmbedding(process, postfix=""):
     )
     return muonSelectionSequence
     
-def getMuonSelectionCountersForEmbedding(dataVersion, postfix=""):
+
+def getMuonPreSelectionCountersForEmbedding():
+    return ["muonPreSelectionAllEvents",
+            "muonPreSelectionPassed"]
+
+def getMuonSelectionCountersForEmbedding(dataVersion, jetPostfixes=["", "Chs"]):
+    muonSelectionCounters = [
+        "muonSelectionAllEvents",
+        "muonSelectionPrimaryVertex",
+        "muonSelectionMuons"
+        ]
+    muonSelectionCounters.extend(["muonSelectionJets"+p for p in jetPostfixes])
+    if dataVersion.isMC():
+        for postfix in jetPostfixes:
+            muonSelectionCounters.extend([
+                    "muonSelectionJetsSmeared"+postfix, 
+                    "muonSelectionJetsResDown"+postfix,
+                    "muonSelectionJetsResUp"+postfix,
+                    "muonSelectionJetsEnDown"+postfix,
+                    "muonSelectionJetsEnUp"+postfix
+            ])
+    return muonSelectionCounters
+
+def getMuonSelectionCountersForEmbeddingPF2PAT(dataVersion, postfix=""):
     muonSelectionCounters = [
         "muonSelectionAllEvents"+postfix,
         "muonSelectionPrimaryVertex"+postfix,

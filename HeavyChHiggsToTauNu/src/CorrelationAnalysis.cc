@@ -10,18 +10,21 @@
 
 namespace HPlus {
 
-  CorrelationAnalysis::CorrelationAnalysis(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper) {
-    init(histoWrapper);
+  CorrelationAnalysis::CorrelationAnalysis(const edm::ParameterSet& iConfig, HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper, std::string HistoName):
+  BaseSelection(eventCounter, histoWrapper) {
+    init(histoWrapper, HistoName);
   }
-  CorrelationAnalysis::CorrelationAnalysis(HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper) {
-    init(histoWrapper);
+  CorrelationAnalysis::CorrelationAnalysis(HPlus::EventCounter& eventCounter, HistoWrapper& histoWrapper,std::string HistoName):
+  BaseSelection(eventCounter, histoWrapper) {
+    init(histoWrapper, HistoName);
   }
 
   CorrelationAnalysis::~CorrelationAnalysis() {}
 
-  void CorrelationAnalysis::init(HistoWrapper& histoWrapper){
+  void CorrelationAnalysis::init(HistoWrapper& histoWrapper, std::string HistoName){
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("BCorrelationAnalysis");
+    //    TFileDirectory myDir = fs->mkdir("BCorrelationAnalysis");
+    TFileDirectory myDir = fs->mkdir(HistoName);
     hPtB1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_pt", "bjet1_pt", 100, 0., 200.);
     hPtB2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet2_pt", "bjet2_pt", 100, 0., 200.);
     hEtaB1 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "bjet1_eta", "bjet1_eta", 60, -3., 3.);
@@ -30,8 +33,23 @@ namespace HPlus {
     hDeltaR_tauB2 = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "DeltaR_tauB2", "DeltaR_tauB2", 100, 0., 5.);
   }
 
-  void CorrelationAnalysis::analyze(const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2){
+  void CorrelationAnalysis::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2, std::string HistoName){
+    ensureSilentAnalyzeAllowed(iEvent);
 
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, input1, input2, HistoName);
+  }
+
+  void CorrelationAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2, std::string HistoName){
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, input1, input2, HistoName);
+  }
+
+  void CorrelationAnalysis::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2, std::string HistoName){
     double DeltaR_tauB1 = -999;
     double DeltaR_tauB2 = -999;
     int ntaus = 0;

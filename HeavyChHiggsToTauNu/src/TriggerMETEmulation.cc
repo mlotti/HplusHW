@@ -9,11 +9,12 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 namespace HPlus {
-  TriggerMETEmulation::Data::Data(const TriggerMETEmulation *triggerMETEmulation, bool passedEvent):
-    fTriggerMETEmulation(triggerMETEmulation), fPassedEvent(passedEvent) {}
+  TriggerMETEmulation::Data::Data():
+    fPassedEvent(false) {}
   TriggerMETEmulation::Data::~Data() {}
 
   TriggerMETEmulation::TriggerMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fmetEmulationCutCount(eventCounter.addSubCounter("Trigger MET emulation","Trigger met emulation cut"))
@@ -25,8 +26,25 @@ namespace HPlus {
 
   TriggerMETEmulation::~TriggerMETEmulation() {}
 
+
+  TriggerMETEmulation::Data TriggerMETEmulation::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup);
+  }
+
   TriggerMETEmulation::Data TriggerMETEmulation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    bool passEvent = false;
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup);
+  }
+
+  TriggerMETEmulation::Data TriggerMETEmulation::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    Data output;
 
     edm::Handle<edm::View<reco::MET> > hmet;
     iEvent.getByLabel(fSrc, hmet);
@@ -35,11 +53,13 @@ namespace HPlus {
 
     hMetBeforeEmulation->Fill(met->et());
     if(met->et() > fmetEmulationCut) {
-      passEvent = true;
+      output.fPassedEvent = true;
       hMetAfterEmulation->Fill(met->et());
       increment(fmetEmulationCutCount);
+    } else {
+      output.fPassedEvent = false;
     }
-    fSelectedTriggerMET = met;
-    return Data(this, passEvent);
+    output.fSelectedTriggerMET = met;
+    return output;
   }
 }

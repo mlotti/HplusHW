@@ -14,9 +14,10 @@ class MulticrabDirectoryDataType:
     OBSERVATION = 1
     SIGNAL = 2
     EWKTAUS = 3
-    QCDFACTORISED = 4
-    QCDINVERTED = 5
-    DUMMY = 6
+    EWKFAKETAUS = 4
+    QCDFACTORISED = 5
+    QCDINVERTED = 6
+    DUMMY = 7
 
 class MulticrabPathFinder:
     def __init__(self, path):
@@ -37,6 +38,9 @@ class MulticrabPathFinder:
 
     def getQCDInvertedPaths(self):
         return self.getSignalPath(),self.getEWKPath(),self.getQCDinvPath()
+
+    def getQCDInvertedPath(self):
+        return self.getQCDinvPath()
 
     def getSignalPath(self):
         return self._signal_path
@@ -84,21 +88,21 @@ class MulticrabPathFinder:
         #return self.selectLatest(self.grep(dirs,"mbedding",file="inputInfo.txt"))
 
     def signalfind(self,dirs):
-        ret_dirs = []
-        signaldirs = self.grep(dirs,"signalAnalysis_cfg")
-        for dir in signaldirs:
-            adir = []
-            adir.append(dir)
-            ewkdir = self.ewkfind(adir)
-            if len(ewkdir) == 0:
-                ret_dirs.append(dir)
-        return self.selectLatest(ret_dirs)
+	return self.selectLatest(self.grep(dirs,"signalAnalysis_",file="multicrab.cfg"))
 
     def qcdfactfind(self,dirs):
-        return self.selectLatest(self.grep(dirs,"QCDMeasurement_basic"))
+        myList = []
+        for d in dirs:
+            if "pseudoMulticrab_QCDfactorised" in d:
+                myList.append(d)
+        return self.selectLatest(myList)
 
     def qcdinvfind(self,dirs):
-        return self.selectLatest(self.grep(dirs,"signalAnalysisInverted"))
+        myList = []
+        for d in dirs:
+            if "pseudoMulticrab_QCDinverted" in d:
+                myList.append(d)
+        return self.selectLatest(myList)
 
     def grep(self,dirs,word,file="multicrab.cfg"):
         command = "grep " + word + " "

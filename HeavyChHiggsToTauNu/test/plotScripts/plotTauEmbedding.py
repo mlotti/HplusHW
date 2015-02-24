@@ -210,8 +210,7 @@ def drawSave(h, updatePaletteStyle=False):
     h.draw()
     if updatePaletteStyle:
         histograms.updatePaletteStyle(h.histoMgr.getHistos()[0].getRootHisto())
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
+    h,addStandardTexts()
     h.save()
 
 
@@ -610,8 +609,7 @@ class PlotMet:
         h.draw()
         line.Draw("L")
         histograms.updatePaletteStyle(h.histoMgr.getHistos()[0].getRootHisto())
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
+        h.addStandardTexts()
         h.save()
 
         h.createFrame(name+"_log", xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
@@ -622,8 +620,7 @@ class PlotMet:
         h.draw()
         line.Draw("L")
         histograms.updatePaletteStyle(h.histoMgr.getHistos()[0].getRootHisto())
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
+        h.addStandardTexts()
         h.save()
 
         style.setWide(False)
@@ -709,8 +706,7 @@ class PlotMuonTauMetDeltaPhi:
         #box.SetY1NDC(0.8)
         #box.SetY2NDC(0.92)
         #box.Draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
+        h.addStandardTexts()
         h.save()
         #style.setOptStat(0)
    

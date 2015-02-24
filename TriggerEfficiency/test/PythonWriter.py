@@ -2,7 +2,10 @@
 
 import os
 import re
+import sys
 from math import sqrt
+
+import ROOT
 
 class PythonWriter:
     class Parameters:
@@ -13,13 +16,26 @@ class PythonWriter:
             self.lumi     = lumi
             self.eff      = eff
         def Print(self):
-            print "check Parameters",self.name,self.label,self.runrange,self.lumi
+            print "Parameters",self.name,self.label,self.runrange,self.lumi
 
-    def __init__(self):
+    def __init__(self,title):
+        self.title  = title
         self.ranges = []
         self.mcs    = []
         self.namedSelection = []
         self.bins   = []
+        self.plotDir = "./"
+
+        self.rootVersion = ROOT.gROOT.GetVersion()
+
+    def setInput(self,inString):
+        self.inString = os.path.basename(inString)
+
+    def setPlotDir(self,dirname):
+        self.plotDir = dirname
+
+    def setStatOption(self,statOption):
+        self.statOption = statOption
 
     def addParameters(self,name,path,label,runrange,lumi,eff):
         #print "check addParameters",name,path,label,runrange,lumi 
@@ -27,7 +43,7 @@ class PythonWriter:
         for r in self.ranges:
             if r.name == name and r.label == label and r.runrange == runrange:
                 labelFound = True
-        if not labelFound:
+        if not labelFound and not label == "Unweighted":
             self.ranges.append(self.Parameters(name,label,runrange,lumi,eff))
             self.dumpParameters(path,label,runrange,lumi,eff)
         #print "check self.ranges size",len(self.ranges)
@@ -58,9 +74,12 @@ class PythonWriter:
 
         self.writeParameters(fOUT,label,runrange,lumi,eff)
 
-    def write(self,fName):
+    def write(self,fileName):
+        fName = os.path.join(self.plotDir,fileName)
         fOUT = open(fName,"w")
-        self.timeStamp(fOUT)
+        time = self.timeStamp()
+        fOUT.write("# Generated on "+time+"\n")
+        fOUT.write("# by HiggsAnalysis/TriggerEfficiency/test/PythonWriter.py\n\n")
 
         for r in self.ranges:
             self.findBins(r.eff)
@@ -71,7 +90,8 @@ class PythonWriter:
         fOUT.write("    return cms.PSet(\n")
         fOUT.write("        pt = cms.double(pt),\n")
         fOUT.write("        efficiency = cms.double(efficiency),\n")
-        fOUT.write("        uncertainty = cms.double(uncertainty)\n")
+        fOUT.write("        uncertaintyPlus = cms.double(uncertaintyPlus),\n")
+        fOUT.write("        uncertaintyMinus = cms.double(uncertaintyMinus)\n")
         fOUT.write("    )\n\n")
 
         #print "check self.namedSelection",self.namedSelection
@@ -80,7 +100,8 @@ class PythonWriter:
             name      = ns[0]
             selection = ns[1]
 
-            fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
+            #fOUT.write("\ntauLegEfficiency_"+name+" = cms.untracked.PSet(\n")
+            fOUT.write("\n"+self.title+"_"+name+" = cms.untracked.PSet(\n")
 
             fOUT.write("    # The selected triggers for the efficiency. If one trigger is\n")
             fOUT.write("    # given, the parametrization of it is used as it is (i.e.\n")
@@ -97,6 +118,8 @@ class PythonWriter:
             fOUT.write("    # looked dynamically from TriggerEfficiency_cff.py\n\n")
 
             fOUT.write("    # Offline selection: "+selection+"\n\n")
+
+            fOUT.write("    # Used input: "+self.inString+"\n\n")
 
             fOUT.write("    dataParameters = cms.PSet(\n")
             for r in self.ranges:
@@ -115,6 +138,8 @@ class PythonWriter:
             fOUT.write("    mcSelect = cms.string(\""+self.mcs[0].label+"\"),\n")
             fOUT.write("    mode = cms.untracked.string(\"disabled\") # dataEfficiency, scaleFactor, disabled\n")
             fOUT.write(")\n")
+
+            self.writeJSON(ns)
 
     def writeParameters(self,fOUT,label,runrange,lumi,eff):
         runrange_re = re.compile("(?P<firstRun>(\d+))-(?P<lastRun>(\d+))")
@@ -139,19 +164,21 @@ class PythonWriter:
     def writeBins(self,fOUT,label,eff,ihisto=0):
         fOUT.write("            bins = cms.VPSet(\n")
         nbins = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetN()
-        for i in range(nbins):
+        for i in range(1,nbins):
             binLowEdge = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetX()[i]
             binLowEdge-= eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorX(i)
             efficiency = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetY()[i]
-            error      = max(eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYhigh(i),eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYlow(i))
+#            error      = max(eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYhigh(i),eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYlow(i))
+            errorPlus = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYhigh(i)
+            errorMinus = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYlow(i)
 #            efficiency = eff.ratios[0].getRootGraph().GetY()[i]
 #            error = max(eff.ratios[0].getRootGraph().GetErrorYhigh(i),eff.ratios[0].getRootGraph().GetErrorYlow(i))
-            fOUT.write("                triggerBin("+str(binLowEdge)+", "+str(efficiency)+", "+str(error)+"),\n")
+            fOUT.write("                triggerBin("+str(binLowEdge)+", "+str(efficiency)+", "+str(errorPlus)+", "+str(errorMinus)+"),\n")
         #print "check writeBins",nbins,len(self.bins)
         if nbins < len(self.bins):
             for i in range(nbins,len(self.bins)):
                 #print self.bins[i],efficiency,error
-                fOUT.write("                triggerBin("+str(self.bins[i])+", "+str(efficiency)+", "+str(error)+"), # duplicated bin\n")
+                fOUT.write("                triggerBin("+str(self.bins[i])+", "+str(efficiency)+", "+str(errorPlus)+", "+str(errorMinus)+"), # duplicated bin\n")
         fOUT.write("            ),\n")
 
     def findBins(self,eff):
@@ -162,11 +189,10 @@ class PythonWriter:
             if binLowEdge not in self.bins:
                 self.bins.append(binLowEdge)
 
-    def timeStamp(self,fOUT):
+    def timeStamp(self):
         import datetime
         time = datetime.datetime.now().ctime()
-        fOUT.write("# Generated on "+time+"\n")
-        fOUT.write("# by HiggsAnalysis/TriggerEfficiency/test/PythonWriter.py\n\n")
+        return time
 
     def sysError(self):
         ihisto = 0
@@ -214,3 +240,113 @@ class PythonWriter:
                         runMax = lastRun
                     returnRanges.append(r)
         return returnRanges
+
+    def writeJSON(self,namedSelection):
+
+        name      = namedSelection[0]
+        selection = namedSelection[1]
+        selection = selection.replace("&&","\n                   &&")
+
+        fName = os.path.join(self.plotDir,self.title+"_"+name+".json")
+        fOUT = open(fName,"w")
+        fOUT.write("{\n")
+        time = self.timeStamp()
+        fOUT.write("  \"_timestamp\":   \"Generated on "+time+",\n")
+        fOUT.write("                   by HiggsAnalysis/TriggerEfficiency/test/PythonWriter.py\",\n")
+        fOUT.write("  \"_rootVersion\": \"%s\",\n"%self.rootVersion)
+        fOUT.write("  \"_statOption\" : %s,\n"%self.statOption)
+        fOUT.write("  \"_selection\"  : \""+selection+"\",\n")
+        fOUT.write("  \"_input\"      : \""+self.inString+"\",\n")
+
+        fOUT.write("  \"dataParameters\": {\n")
+        runrange_re = re.compile("(?P<firstRun>(\d+))-(?P<lastRun>(\d+))")
+        comma = ","
+        subranges = []
+        for r in self.ranges:
+            if r.name == name:
+                subranges.append(r)
+        for i,r in enumerate(subranges):
+            if i == len(subranges)-1:
+                comma = ""
+            if r.name == name:
+                match = runrange_re.search(r.runrange)
+                if not match:
+                    print "Run range not valid",r.runrange
+                    sys.exit()
+
+                fOUT.write("      \"runs_"+match.group("firstRun")+"_"+match.group("lastRun")+"\": {\n")
+		fOUT.write("          \"era\": \""+r.label+"\",\n")
+                fOUT.write("          \"firstRun\"  :"+match.group("firstRun")+",\n")
+                fOUT.write("          \"lastRun\"   :"+match.group("lastRun")+",\n")
+                fOUT.write("          \"luminosity\": %s,\n"%r.lumi)
+                self.writeJSONBins(fOUT,r.label,r.eff)
+                fOUT.write("      }"+comma+"\n")
+        fOUT.write("  },\n")
+
+        fOUT.write("  \"mcParameters\": {\n")
+        comma = ","
+        subranges = []
+        for mc in self.mcs:
+            if mc.name == name:
+                subranges.append(mc)
+        for i,mc in enumerate(subranges):
+            if i == len(subranges)-1:
+                comma = ""
+            if mc.name == name:
+                fOUT.write("      \""+mc.label+"\": {\n")
+                self.writeJSONBins(fOUT,mc.label,mc.eff,ihisto=1)
+                fOUT.write("      }"+comma+"\n")
+        fOUT.write("  }\n")
+
+        fOUT.write("}\n")
+        fOUT.close()
+
+    def writeParametersJSON(self,fOUT,label,runrange,lumi,eff):
+        runrange_re = re.compile("(?P<firstRun>(\d+))-(?P<lastRun>(\d+))")
+        match = runrange_re.search(runrange)
+        if not match:
+            print "Run range not valid",runrange
+            sys.exit()
+
+        fOUT.write("      \"era\":"+label+",\n")
+        fOUT.write("      \"runs_"+match.group("firstRun")+"_"+match.group("lastRun")+"\": {\n")
+        fOUT.write("          \"firstRun\"  :"+match.group("firstRun")+",\n")
+        fOUT.write("          \"lastRun\"   :"+match.group("lastRun")+",\n")
+        fOUT.write("          \"luminosity\": %s,\n"%lumi)
+        self.writeBinsJSON(fOUT,label,eff)
+        fOUT.write("      }\n")
+
+    def writeJSONBins(self,fOUT,label,eff,ihisto=0):
+        fOUT.write("          \"bins\" : [\n")
+        nbins = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetN()
+        comma = ","
+        for i in range(1,nbins):
+            if i == nbins-1:
+                comma = ""
+            binLowEdge = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetX()[i]
+            binLowEdge-= eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorX(i)
+            efficiency = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetY()[i]
+            errorPlus = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYhigh(i)
+            errorMinus = eff.histoMgr.getHistos()[ihisto].getRootHisto().GetErrorYlow(i)
+
+            fOUT.write("             {\n")
+            fOUT.write("               \"pt\"              :"+str(binLowEdge)+",\n")
+            fOUT.write("               \"efficiency\"      :"+str(efficiency)+",\n")
+            fOUT.write("               \"uncertaintyPlus\" :"+str(errorPlus)+",\n")
+            fOUT.write("               \"uncertaintyMinus\":"+str(errorMinus)+"\n")
+            fOUT.write("             }%s\n"%comma)
+
+        if nbins < len(self.bins):
+            comma = ","
+            for i in range(nbins,len(self.bins)):
+                #print self.bins[i],efficiency,error                                                       
+                if i == len(self.bins)-1:
+                    comma = ""
+                fOUT.write("             {\n")
+                fOUT.write("               \"pt\"              :"+str(self.bins[i])+",\n")
+                fOUT.write("               \"efficiency\"      :"+str(efficiency)+",\n")
+                fOUT.write("               \"uncertaintyPlus\" :"+str(errorPlus)+",\n")
+                fOUT.write("               \"uncertaintyMinus\":"+str(errorMinus)+"\n")
+                fOUT.write("             }\n")
+
+        fOUT.write("          ]\n")

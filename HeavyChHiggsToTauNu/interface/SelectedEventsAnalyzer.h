@@ -10,8 +10,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerTauMETEmulation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
@@ -26,8 +26,8 @@ namespace HPlus {
 
     void fill(edm::PtrVector<pat::Tau>& selectedTau,
 	      const TauSelection::Data& tauData,
-	      const GlobalElectronVeto::Data& eVetoData,
-	      const GlobalMuonVeto::Data& muVetoData,
+	      const ElectronSelection::Data& eVetoData,
+	      const MuonSelection::Data& muVetoData,
 	      const JetSelection::Data& jetData,
 	      const BTagging::Data& btagData,
 	      const METSelection::Data& METData,

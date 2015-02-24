@@ -14,7 +14,7 @@ def main(opts, f):
     tf = ROOT.TFile.Open(f)
     ROOT.gErrorIgnoreLevel = backup
 
-    named = tf.Get("%s/parameterSet" % opts.directory)
+    named = tf.Get("%s/configInfo/parameterSet" % opts.directory)
     print named.GetTitle()
 
     tf.Close()

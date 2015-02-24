@@ -38,6 +38,11 @@ analysisEmb = "signalAnalysisCaloMet60TEff"
 
 counters = "Counters/weighted"
 
+#taujet = "#tau jet"
+#taujetH = "#tau-jet"
+taujet = "#tau_{h}"
+taujetH = "#tau_{h}"
+
 def main():
     # Adjust paths such that this script can be run inside the first embedding trial directory
     dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
@@ -92,7 +97,8 @@ def doPlots(datasetsEmb):
         return p
 
     drawPlot = tauEmbedding.drawPlot
-    drawPlot.setDefaults(ratio=True, addLuminosityText=True
+    drawPlot.setDefaults(ratio=True, addLuminosityText=True,
+                         ratioYlabel="Ratio",
                          #normalize=False,
                          )
 
@@ -105,12 +111,12 @@ def doPlots(datasetsEmb):
         drawPlot(createPlot("ControlPlots/"+path), prefix+path+postfix, xlabel, opts2=opts2, **kwargs)
 
     # After tau ID
-    drawControlPlot("SelectedTau_pT_AfterStandardSelections", "#tau-jet p_{T} (GeV/c)", opts={"xmax": 250}, rebin=2, cutBox={"cutValue": 40, "greaterThan": True})
-    drawControlPlot("SelectedTau_eta_AfterStandardSelections", "#tau-jet #eta", opts={"xmin": -2.2, "xmax": 2.2}, ylabel="Events / %.1f", rebin=4, moveLegend={"dy":-0.52, "dx":-0.2})
-    drawControlPlot("SelectedTau_LeadingTrackPt_AfterStandardSelections", "#tau-jet ldg. charged particle p_{T} (GeV/c)", opts={"xmax": 250}, rebin=2, cutBox={"cutValue": 20, "greaterThan": True})
-    drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", "R_{#tau} = p^{ldg. charged particle}/p^{#tau jet}", opts={"xmin": 0.65, "xmax": 1.05, "ymin": 1e-1, "ymaxfactor": 10}, rebin=5, ylabel="Events / %.2f", moveLegend={"dx":-0.4, "dy": 0.01, "dh": -0.03}, cutBox={"cutValue":0.7, "greaterThan":True})
+    drawControlPlot("SelectedTau_pT_AfterStandardSelections", taujetH+" ^{}p_{T} (GeV/c)", opts={"xmax": 250}, rebin=2, cutBox={"cutValue": 40, "greaterThan": True})
+    drawControlPlot("SelectedTau_eta_AfterStandardSelections", taujetH+" #eta", opts={"xmin": -2.2, "xmax": 2.2}, ylabel="Events / %.1f", rebin=4, moveLegend={"dy":-0.52, "dx":-0.2})
+    drawControlPlot("SelectedTau_LeadingTrackPt_AfterStandardSelections", taujetH+" ldg. charged particle ^{}p_{T} (GeV/c)", opts={"xmax": 250}, rebin=2, cutBox={"cutValue": 20, "greaterThan": True})
+    drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", "R_{#tau} = p^{ldg. charged particle}/^{}p^{%s}"%taujet, opts={"xmin": 0.65, "xmax": 1.05, "ymin": 1e-1, "ymaxfactor": 10}, rebin=5, ylabel="Events / %.2f", moveLegend={"dx":-0.4, "dy": 0.01, "dh": -0.03}, cutBox={"cutValue":0.7, "greaterThan":True})
 
-    drawControlPlot("MET", "Uncorrected PF E_{T}^{miss} (GeV)", rebin=5, opts={"xmax": 400}, cutLine=50)
+    drawControlPlot("MET", "Uncorrected PF ^{}E_{T}^{miss} (GeV)", rebin=5, opts={"xmax": 400}, cutLine=50)
 
     # After MET cut
     drawControlPlot("NBjets", "Number of selected b jets", opts={"xmax": 6}, ylabel="Events", cutLine=1)
@@ -124,13 +130,13 @@ def doPlots(datasetsEmb):
     def customDeltaPhi(h):
         yaxis = h.getFrame().GetYaxis()
         yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
-    drawPlot(createPlot(tdDeltaPhi.clone(selection=And(tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut))), prefix+"deltaPhi_3AfterBTagging", "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})", log=False, opts={"ymax": 30}, opts2=opts2, ylabel="Events / %.0f^{o}", function=customDeltaPhi, moveLegend={"dx": -0.22}, cutLine=[130, 160])
+    drawPlot(createPlot(tdDeltaPhi.clone(selection=And(tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut))), prefix+"deltaPhi_3AfterBTagging", "#Delta#phi(^{}%s, ^{}E_{T}^{miss}) (^{o})"%taujet, log=False, opts={"ymax": 30}, opts2=opts2, ylabel="Events / ^{}%.0f^{o}", function=customDeltaPhi, moveLegend={"dx": -0.22}, cutLine=[130, 160])
 
     # Transverse mass
     for name, label, selection in [
-        ("3AfterBTagging", "Without #Delta#phi(#tau jet, E_{T}^{miss}) selection", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut]),
-        ("4AfterDeltaPhi160", "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut, tauEmbedding.signalNtuple.deltaPhi160Cut]),
-        ("5AfterDeltaPhi130", "#Delta#phi(#tau jet, E_{T}^{miss}) < 130^{o}", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut, tauEmbedding.signalNtuple.deltaPhi130Cut])]:
+        ("3AfterBTagging", "Without #Delta#phi(^{}%s, ^{}E_{T}^{miss}) selection"%taujet, [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut]),
+        ("4AfterDeltaPhi160", "#Delta#phi(^{}%s, ^{}E_{T}^{miss}) < ^{}160^{o}"%taujet, [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut, tauEmbedding.signalNtuple.deltaPhi160Cut]),
+        ("5AfterDeltaPhi130", "#Delta#phi(^{}%s, ^{}E_{T}^{miss}) < ^{}130^{o}"%taujet, [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut, tauEmbedding.signalNtuple.deltaPhi130Cut])]:
 
         p = createPlot(tdMt.clone(selection=And(*selection)))
         p.appendPlotObject(histograms.PlotText(0.42, 0.62, label, size=20))
@@ -138,7 +144,7 @@ def doPlots(datasetsEmb):
             histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
         else:
             histograms.cmsTextMode = histograms.CMSMode.NONE
-        drawPlot(p, prefix+"transverseMass_"+name, "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts={"ymax": 35}, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
+        drawPlot(p, prefix+"transverseMass_"+name, "m_{T}(^{}%s, ^{}E_{T}^{miss}) (GeV/^{}c^{2})"%taujet, opts={"ymax": 35}, opts2=opts2, ylabel="Events / %.0f GeV/^{}c^{2}", log=False)
 
 
 

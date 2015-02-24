@@ -30,6 +30,7 @@ def addDataSelection(process, dataVersion, options, calculateEventCleaning=False
 
     # Filter out Beam Scraping events, see
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/Collisions2010Recipes#Removal_of_Beam_Scraping_Events
+    # http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/RecoMET/METFilters/test/exampleICHEPrecommendation_cfg.py?revision=1.3&view=markup&pathrev=V00-00-13
     process.scrapingVeto = cms.EDFilter("FilterOutScraping",
         applyfilter = cms.untracked.bool(True),
         debugOn = cms.untracked.bool(False),
@@ -53,13 +54,8 @@ def addHBHENoiseFilterResultProducer(process, sequence):
     # https://hypernews.cern.ch/HyperNews/CMS/get/hcal-noise/93.html
     # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters#HBHE_Noise_Filter
     process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
-    process.HBHENoiseFilterResultProducerMETWG = process.HBHENoiseFilterResultProducer.clone()
-    process.HBHENoiseFilterResultProducer.minNumIsolatedNoiseChannels = 9999
-    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumE = 9999
-    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumEt = 9999
     sequence *= (
-        process.HBHENoiseFilterResultProducer *
-        process.HBHENoiseFilterResultProducerMETWG
+        process.HBHENoiseFilterResultProducer
     )
     
 

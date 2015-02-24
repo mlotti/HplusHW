@@ -186,9 +186,7 @@ def transverseMass(h, rebin=5, ratio=False, particle="#tau"):
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend())
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
     name += "_log"
@@ -198,9 +196,7 @@ def transverseMass(h, rebin=5, ratio=False, particle="#tau"):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 

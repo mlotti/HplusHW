@@ -38,8 +38,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 analysisEmb = "signalAnalysisCaloMet60TEff"
 analysisSig = "signalAnalysisGenuineTau" # require that the selected tau is genuine, valid comparison after njets
 
-plotStyles = styles.styles[0:2]
+plotStyles = [styles.StyleCompound([s, styles.StyleLine(lineWidth=4)]) for s in styles.styles[0:2]]
 plotStyles[0] = styles.StyleCompound([plotStyles[0], styles.StyleMarker(markerStyle=21, markerSize=1.2)])
+
+#taujet = "#tau jet"
+#taujetH = "#tau-jet"
+taujet = "#tau_{h}"
+taujetH = "#tau_{h}"
 
 def main():
     # Adjust paths such that this script can be run inside the first embedding trial directory
@@ -73,6 +78,8 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+    ROOT.gStyle.SetHatchesLineWidth(2)
+
     histograms.cmsTextMode = histograms.CMSMode.NONE
     ROOT.gStyle.SetEndErrorSize(5)
     histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.49, x2=0.9)
@@ -120,7 +127,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     # Control plots
     optsdef = {}
     opts = optsdef
-    drawControlPlot("SelectedTau_pT_AfterStandardSelections", "#tau-jet p_{T} (GeV/c)", opts=update(opts, {"xmax": 250}), rebin=2, cutBox={"cutValue": 40, "greaterThan": 40})
+    drawControlPlot("SelectedTau_pT_AfterStandardSelections", taujetH+" ^{}p_{T} (GeV/c)", opts=update(opts, {"xmax": 250}), rebin=2, cutBox={"cutValue": 40, "greaterThan": 40})
 
     moveLegend = {"dy":-0.6, "dx":-0.2}
     opts = {
@@ -128,21 +135,21 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
         }.get(datasetName, {"ymaxfactor": 1.4})
     if datasetName != "TTJets":
         moveLegend = {"dx": -0.32}
-    drawControlPlot("SelectedTau_eta_AfterStandardSelections", "#tau-jet #eta", opts=update(opts, {"xmin": -2.2, "xmax": 2.2}), ylabel="Events / %.1f", rebin=4, log=False, moveLegend=moveLegend)
+    drawControlPlot("SelectedTau_eta_AfterStandardSelections", taujetH+" #eta", opts=update(opts, {"xmin": -2.2, "xmax": 2.2}), ylabel="Events / %.1f", rebin=4, log=False, moveLegend=moveLegend)
 
-    drawControlPlot("SelectedTau_LeadingTrackPt_AfterStandardSelections", "#tau-jet ldg. charged particle p_{T} (GeV/c)", opts=update(opts, {"xmax": 300}), rebin=2, cutBox={"cutValue": 20, "greaterThan": True})
+    drawControlPlot("SelectedTau_LeadingTrackPt_AfterStandardSelections", taujetH+" ldg. charged particle ^{}p_{T} (GeV/c)", opts=update(opts, {"xmax": 300}), rebin=2, cutBox={"cutValue": 20, "greaterThan": True})
 
     opts = {"ymin": 1e-1, "ymaxfactor": 5}
     moveLegend = {"dx": -0.22}
     if datasetName == "Diboson":
         opts["ymin"] = 1e-2
-    drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", "R_{#tau} = p^{ldg. charged particle}/p^{#tau jet}", opts=update(opts, {"xmin": 0.65, "xmax": 1.05}), rebin=5, ylabel="Events / %.2f", moveLegend=moveLegend, cutBox={"cutValue":0.7, "greaterThan":True})
+    drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", "R_{#tau} = p^{ldg. charged particle}/^{}p^{%s}"%taujet, opts=update(opts, {"xmin": 0.65, "xmax": 1.05}), rebin=5, ylabel="Events / %.2f", moveLegend=moveLegend, cutBox={"cutValue":0.7, "greaterThan":True})
 
     opts = optsdef
     drawControlPlot("Njets_AfterStandardSelections", "Number of jets", ylabel="Events")
 
     # After Njets
-    drawControlPlot("MET", "Uncorrected PF E_{T}^{miss} (GeV)", rebin=5, opts=update(opts, {"xmax": 400}), cutLine=50,
+    drawControlPlot("MET", "Uncorrected PF ^{}E_{T}^{miss} (GeV)", rebin=5, opts=update(opts, {"xmax": 400}), cutLine=50,
                     moveLegend={"dx": -0.2, "dy": -0.55}
                     )
 
@@ -161,7 +168,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     tdDeltaPhi = treeDraw.clone(varexp="%s >>tmp(18, 0, 180)" % tauEmbedding.signalNtuple.deltaPhiExpression)
 
     # DeltapPhi
-    xlabel = "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})"
+    xlabel = "#Delta#phi(^{}%s, ^{}E_{T}^{miss}) (^{o})" % taujet
     def customDeltaPhi(h):
         yaxis = h.getFrame().GetYaxis()
         yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
@@ -175,7 +182,7 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
         "WJets": {"ymin": 0, "ymax": 3}
         }.get(datasetName, opts2def)
     selection = And(*[getattr(tauEmbedding.signalNtuple, cut) for cut in ["metCut", "bTaggingCut"]])
-    drawPlot(createPlot(tdDeltaPhi.clone(selection=selection)), prefix+"deltaPhi_3AfterBTagging", xlabel, log=False, opts=opts, opts2=opts2, ylabel="Events / %.0f^{o}", function=customDeltaPhi, moveLegend={"dx":-0.22}, cutLine=[130, 160])
+    drawPlot(createPlot(tdDeltaPhi.clone(selection=selection)), prefix+"deltaPhi_3AfterBTagging", xlabel, log=False, opts=opts, opts2=opts2, ylabel="Events / ^{}%.0f^{o}", function=customDeltaPhi, moveLegend={"dx":-0.22}, cutLine=[130, 160])
 
 
     # After all cuts
@@ -202,8 +209,8 @@ def doPlots(datasetsEmb, datasetsSig, datasetName):
     
     p = createPlot(tdMt.clone(selection=selection))
     histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
-    p.appendPlotObject(histograms.PlotText(0.6, 0.7, "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", size=20))
-    drawPlot(p, prefix+"transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts=opts, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
+    p.appendPlotObject(histograms.PlotText(0.6, 0.7, "#Delta#phi(^{}%s, ^{}E_{T}^{miss}) < ^{}160^{o}"%taujet, size=20))
+    drawPlot(p, prefix+"transverseMass_4AfterDeltaPhi160", "m_{T}(^{}%s, ^{}E_{T}^{miss}) (GeV/^{}c^{2})"%taujet, opts=opts, opts2=opts2, ylabel="Events / %.0f GeV/^{}c^{2}", log=False)
     histograms.cmsTextMode = histograms.CMSMode.NONE
 
 def doCounters(datasetsEmb, datasetsSig):
