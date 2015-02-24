@@ -1,3 +1,15 @@
+Quick start
+===========
+
+----
+cd HiggsAnalysis
+source setup.sh
+cd NtupleAnalysis
+make
+./exampleAnalysis.py <path-to-multicrab-directory>
+----
+
+
 Dependencies
 ============
 
