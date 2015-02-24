@@ -151,6 +151,7 @@ import sys
 import subprocess, errno
 import time
 import math
+import glob
 import shutil
 import select
 import ConfigParser
@@ -217,30 +218,16 @@ def getTaskDirectories(opts, filename="multicrab.cfg", directory=""):
         return ret
     else:
         fname = os.path.join(directory, filename)
-        if not os.path.exists(fname):
-            raise Exception("Multicrab configuration file '%s' does not exist" % fname)
-
-        dirname = os.path.dirname(fname)
-
-        mc_ignore = ["MULTICRAB", "COMMON"]
-        mc_parser = ConfigParser.ConfigParser(dict_type=OrderedDict.OrderedDict)
-        mc_parser.read(fname)
-
-        sections = mc_parser.sections()
-
-        for i in mc_ignore:
-            try:
-                sections.remove(i)
-            except ValueError:
-                pass
-
-#        sections.sort()
+        if os.path.exists(fname):
+            taskNames = _getTaskDirectories_crab2(fname)
+            taskNames = [os.path.join(dirname, task) for task in taskNames]
+        else:
+            taskNames = _getTaskDirectories_crab3(directory)
 
         def filt(dir):
             if opts.filter in dir:
                 return True
             return False
-        taskNames = [os.path.join(dirname, sec) for sec in sections]
         if opts != None:
             if opts.filter != "":
                 taskNames = filter(filt, taskNames)
@@ -249,6 +236,31 @@ def getTaskDirectories(opts, filename="multicrab.cfg", directory=""):
                     taskNames = filter(lambda n: skip not in n, taskNames)
 
         return taskNames
+
+def _getTaskDirectories_crab2(filename):
+    if not os.path.exists(filename):
+        raise Exception("Multicrab configuration file '%s' does not exist" % filename)
+
+    dirname = os.path.dirname(filename)
+
+    mc_ignore = ["MULTICRAB", "COMMON"]
+    mc_parser = ConfigParser.ConfigParser(dict_type=OrderedDict.OrderedDict)
+    mc_parser.read(fname)
+
+    sections = mc_parser.sections()
+
+    for i in mc_ignore:
+        try:
+            sections.remove(i)
+        except ValueError:
+            pass
+
+    return sections
+
+def _getTaskDirectories_crab3(directory):
+    dirs = glob.glob(os.path.join(directory, "crab_*"))
+    dirs = filter(lambda d: os.path.isdir(d), dirs)
+    return dirs
 
 ## Add common MultiCRAB options to OptionParser object.
 #

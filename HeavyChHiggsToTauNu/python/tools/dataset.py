@@ -217,13 +217,21 @@ def readFromCrabDirs(taskdirs, emptyDatasetsAsNone=False, **kwargs):
     dlist = []
     noFiles = False
     for d in taskdirs:
-        files = glob.glob(os.path.join(d, "res", inputFile))
+        # crab2
+        resdir = os.path.join(d, "res")
+        name = os.path.basename(d)
+        if os.path.exists(resdir):
+            files = glob.glob(os.path.join(resdir, inputFile))
+        else:
+            # crab3
+            files = glob.glob(os.path.join(d, "results", inputFile))
+            name = name.replace("crab_", "")
         if len(files) == 0:
             print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, inputFile, os.path.join(d, "res"))
             noFiles = True
             continue
 
-        dlist.append( (os.path.basename(d)+postfix, files) )
+        dlist.append( (name+postfix, files) )
 
     if noFiles:
         print >> sys.stderr, ""
