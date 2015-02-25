@@ -49,6 +49,21 @@ After compilation, in the main directory run
 './exampleAnalysis.py <path-to-multicrab-directory>'
 
 
+Proof (optional)
+----------------
+
+Non-I/O-dominated workloads may benefit from using additional CPUs. In
+this application the parallelization is achieved with PROOF lite. It
+can be enabled in e.g. the exampleAnalysis.py by calling the
+Process.run() with 'proof=True' argument:
+
+----
+process.run(proof=True)
+----
+
+Everything else works as the same.
+
+
 Data handling
 =============
 

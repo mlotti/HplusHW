@@ -21,3 +21,7 @@ process.addAnalyzer("test", Analyzer("ExampleAnalysis",
 
 # Run the analysis
 process.run()
+
+# Run the analysis with PROOF
+# By default it uses all cores, but you can give proofWorkers=<N> as a parameter
+#process.run(proof=True)

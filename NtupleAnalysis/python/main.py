@@ -67,9 +67,8 @@ class Process:
     def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents=-1):
         ROOT.gSystem.Load("libHPlusAnalysis.so")
 
-        self._outputDir = outputPrefix+"_"+time.strftime("%y%m%d_%H%M%S")
-        if outputPostfix != "":
-            self._outputDir += "_"+outputPostfix
+        self._outputPrefix = outputPrefix
+        self._outputPostfix = outputPostfix
 
         self._datasets = []
         self._analyzers = {}
@@ -119,25 +118,40 @@ class Process:
         for key, value in kwargs.iteritems():
             setattr(self._options, key, value)
 
-    def run(self):
-        os.mkdir(self._outputDir)
-        multicrabCfg = os.path.join(self._outputDir, "multicrab.cfg")
+    def run(self, proof=False, proofWorkers=None):
+        outputDir = self._outputPrefix+"_"+time.strftime("%y%m%d_%H%M%S")
+        if self._outputPostfix != "":
+            outputDir += "_"+self._outputPostfix
+
+        os.mkdir(outputDir)
+        multicrabCfg = os.path.join(outputDir, "multicrab.cfg")
         f = open(multicrabCfg, "w")
         for dsetName, x in self._datasets:
             f.write("[%s]\n\n"%dsetName)
         f.close()
 
+        _proof = None
+        if proof:
+            opt = ""
+            if proofWorkers is not None:
+                opt = "workers=%d"%proofWorkers
+            _proof = ROOT.TProof.Open(opt)
+            _proof.Exec("gSystem->Load(\"libHPlusAnalysis.so\");")
+
         for dsetName, dsetFiles in self._datasets:
             print "Processing dataset", dsetName
 
-            resDir = os.path.join(self._outputDir, dsetName, "res")
+            resDir = os.path.join(outputDir, dsetName, "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dsetName)
             os.makedirs(resDir)
-            resFile = ROOT.TFile(resFileName, "RECREATE")
 
             tchain = ROOT.TChain("Events")
             for f in dsetFiles:
                 tchain.Add(f)
+            tchain.SetCacheLearnEntries(100);
+
+            tselector = ROOT.SelectorImpl()
+            inputList = ROOT.TList()
 
             # FIXME: TChain.GetEntries() is needed only to give a time
             # estimate for the analysis. If this turns out to be slow,
@@ -146,15 +160,19 @@ class Process:
             #
             # FIXME: How do we know here if a dataset is MC or Data?
             # Add also this along the other dataset metadata?
-            tselector = ROOT.SelectorImpl(resFile, tchain.GetEntries(), False, self._options.serialize_())
+            inputList.Add(ROOT.SelectorImplParams(tchain.GetEntries(), False, self._options.serialize_(), True))
+
+            if _proof is not None:
+                tchain.SetProof(True)
+                inputList.Add(ROOT.TNamed("PROOF_OUTPUTFILE_LOCATION", resFileName))
+            else:
+                inputList.Add(ROOT.TNamed("OUTPUTFILE_LOCATION", resFileName))
 
             for aname, analyzer in self._analyzers.iteritems():
-                tselector.addSelector(aname, analyzer.className_(), analyzer.config_())
+                inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
 
-            useCache = True
-            if useCache:
-                tchain.SetCacheSize(1024*1024) # 10 MB
-                tchain.SetCacheLearnEntries(100);
+            tselector.SetInputList(inputList)
+
 
             readBytesStart = ROOT.TFile.GetFileBytesRead()
             readCallsStart = ROOT.TFile.GetFileReadCalls()
@@ -171,16 +189,23 @@ class Process:
             clockStop = time.clock()
             readCallsStop = ROOT.TFile.GetFileReadCalls()
             readBytesStop = ROOT.TFile.GetFileBytesRead()
-            cpuTime = clockStop-clockStart
-            realTime = timeStop-timeStart
-            readMbytes = float(readBytesStop-readBytesStart)/1024/1024
-            print "Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB (%d calls), read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, readCallsStop-readCallsStart, readMbytes/realTime)
 
-            resFile.Write()
-            resFile.Close()
+            calls = ""
+            if _proof is not None:
+                tchain.SetProof(False)
+                queryResult = _proof.GetQueryResult()
+                cpuTime = queryResult.GetUsedCPU()
+                readMbytes = queryResult.GetBytes()/1024/1024
+            else:
+                cpuTime = clockStop-clockStart
+                readMbytes = float(readBytesStop-readBytesStart)/1024/1024
+                calls = " (%d calls)" % (readCallsStop-readCallsStart)
+            realTime = timeStop-timeStart
+            print "Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB%s, read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, calls, readMbytes/realTime)
 
         print
-        print "Results are in", self._outputDir
+        print "Results are in", outputDir
+
 
 if __name__ == "__main__":
     import unittest
