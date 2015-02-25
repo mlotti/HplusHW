@@ -27,6 +27,8 @@ if ( $LOCATION == "" ) then
     endif
 endif
 
+setenv HIGGSANALYSIS_BASE $PWD
+
 if ( $LOCATION == "lxplus" ) then
     echo "Sourcing lxplus environments for gcc 4.8 and ROOT 5.34"
     source /afs/cern.ch/sw/lcg/contrib/gcc/4.8/x86_64-slc6-gcc48-opt/setup.csh 
@@ -48,6 +50,7 @@ if ( $LOCATION == "jade" ) then
 
     # scram tool info root_interface
     setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc491/lcg/root/5.34.22-cms2
+#    setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc491/lcg/root/6.02.00-cms4
 
     # scram tool info xrootd
     set XROOTD_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external/xrootd/4.0.4
@@ -62,17 +65,21 @@ if ( $LOCATION == "jade" ) then
 
     setenv PATH $GCC_BASE/bin:$XROOTD_BASE/bin:$PATH
 
-    pushd $ROOTSYS >/dev/null
-    source bin/thisroot.csh
-    popd >/dev/null
+    if ($?PYTHONPATH) then
+	setenv PYTHONPATH "$ROOTSYS/lib:$PYTHONPATH"
+    else
+	setenv PYTHONPATH "$ROOTSYS/lib"
+    endif
+#    pushd $ROOTSYS >/dev/null
+#    source bin/thisroot.csh
+#    popd >/dev/null
 endif
 
-setenv HIGGSANALYSIS_BASE $PWD
 set LD_LIBRARY_PATH_APPEND="$HIGGSANALYSIS_BASE/NtupleAnalysis/lib"
 if ( ! $?LD_LIBRARY_PATH ) then
-    setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH_APPEND
+    setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH_APPEND}"
 else
-    setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH_APPEND":"$LD_LIBRARY_PATH
+    setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH_APPEND}:${LD_LIBRARY_PATH}"
 endif
 if ( $LOCATION == "CMSSW" ) then
     if ( ! $?CMSSW_BASE || ! -e $CMSSW_BASE/python/HiggsAnalysis/NtupleAnalysis ) then
@@ -97,14 +104,14 @@ else
     end
 
     if ( -z PYTHONPATH ) then
-        setenv PYTHONPATH $PWD/.python
+        setenv PYTHONPATH "${PWD}/.python"
     else
-        setenv PYTHONPATH $PWD/.python:$PYTHONPATH
+        setenv PYTHONPATH "${PWD}/.python:${PYTHONPATH}"
     endif
 
 endif
 
-setenv PATH $HIGGSANALYSIS_BASE/HeavyChHiggsToTauNu/scripts:$HIGGSANALYSIS_BASE/NtupleAnalysis/scripts:$PATH
+setenv PATH "${HIGGSANALYSIS_BASE}/HeavyChHiggsToTauNu/scripts:${HIGGSANALYSIS_BASE}/NtupleAnalysis/scripts:${PATH}"
 
 
 
