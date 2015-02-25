@@ -6,7 +6,7 @@
 # In HiggsAnalysis do
 # source setup.csh
 
-# Note: tested so far only on local machine, i.e. LOCATION=""
+# Note: tested so far LOCATION="" and LOCATION="jade"
 
 if ( $?HIGGSANALYSIS_BASE ) then
     echo "Standalone environment already loaded"
@@ -49,8 +49,8 @@ if ( $LOCATION == "jade" ) then
     set GCC_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external/gcc/4.9.1-cms
 
     # scram tool info root_interface
-    setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc491/lcg/root/5.34.22-cms2
-#    setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc491/lcg/root/6.02.00-cms4
+#    setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc491/lcg/root/5.34.22-cms2
+    setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc491/lcg/root/6.02.00-cms4
 
     # scram tool info xrootd
     set XROOTD_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external/xrootd/4.0.4
@@ -61,9 +61,9 @@ if ( $LOCATION == "jade" ) then
     # scram tool info python
     set PYTHON_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external/python/2.7.6-cms
 
-    set LD_LIBRARY_PATH_APPEND=$GCC_BASE/lib64:$GCC_BASE/lib:$XROOTD_BASE/lib:$XZ_BASE/lib:$PYTHON_BASE/lib
+    set LD_LIBRARY_PATH_APPEND=$ROOTSYS/lib:$GCC_BASE/lib64:$GCC_BASE/lib:$XROOTD_BASE/lib:$XZ_BASE/lib:$PYTHON_BASE/lib
 
-    setenv PATH $GCC_BASE/bin:$XROOTD_BASE/bin:$PATH
+    setenv PATH $ROOTSYS/bin:$GCC_BASE/bin:$XROOTD_BASE/bin:$PATH
 
     if ($?PYTHONPATH) then
 	setenv PYTHONPATH "$ROOTSYS/lib:$PYTHONPATH"
@@ -75,9 +75,9 @@ if ( $LOCATION == "jade" ) then
 #    popd >/dev/null
 endif
 
-set LD_LIBRARY_PATH_APPEND="$HIGGSANALYSIS_BASE/NtupleAnalysis/lib"
+set LD_LIBRARY_PATH_APPEND="$HIGGSANALYSIS_BASE/NtupleAnalysis/lib:${LD_LIBRARY_PATH_APPEND}"
 if ( ! $?LD_LIBRARY_PATH ) then
-    setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH_APPEND}"
+    setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH_APPEND}"
 else
     setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH_APPEND}:${LD_LIBRARY_PATH}"
 endif
@@ -112,8 +112,6 @@ else
 endif
 
 setenv PATH "${HIGGSANALYSIS_BASE}/HeavyChHiggsToTauNu/scripts:${HIGGSANALYSIS_BASE}/NtupleAnalysis/scripts:${PATH}"
-
-
 
 # echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 # echo "!" 
