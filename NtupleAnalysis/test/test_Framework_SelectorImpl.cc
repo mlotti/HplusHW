@@ -85,58 +85,79 @@ REGISTER_SELECTOR(SelectorTestSelectorImpl);
 
 TEST_CASE("SelectorImpl works", "[Framework]") {
   std::unique_ptr<TTree> tree = createSimpleTree();
-  TDirectory dir("rootdir", "rootdir");
-  SelectorImpl tselector(&dir, tree->GetEntries(), true, "{}");
-  tselector.setPrintStatus(false);
+  SelectorImpl tselector;
+  TList inputList;
+  tselector.SetInputList(&inputList); // takes pointer to input list
+  inputList.Add(new SelectorImplParams(tree->GetEntries(), true, "{}", false));
 
   SECTION("Single empty selector") {
-    tselector.addSelector("test", "SelectorTestSelectorImplEmpty", "{}");
+    inputList.Add(new TNamed("analyzer_test", "SelectorTestSelectorImplEmpty:{}"));
     tree->Process(&tselector);
-    REQUIRE( dir.Get("test") );
-    REQUIRE( dir.Get("test/counters") );
-    REQUIRE( dir.Get("test/counters/weighted") );
-    CHECK( !dir.Get("test/counters/counter") );
-    CHECK( !dir.Get("test/counters/weighted/counter") );
+
+    TList *output = tselector.GetOutputList();
+    REQUIRE( output );
+    TObject *tmp = output->FindObject("test");
+    REQUIRE( tmp );
+    TDirectory *dir = dynamic_cast<TDirectory *>(tmp);
+    REQUIRE( dir );
+    REQUIRE( dir->Get("counters") );
+    REQUIRE( dir->Get("counters/weighted") );
+    CHECK( !dir->Get("counters/counter") );
+    CHECK( !dir->Get("counters/weighted/counter") );
     TNamed *config = nullptr;
-    dir.GetObject("test/config", config);
+    dir->GetObject("config", config);
     REQUIRE( config );
     CHECK( config->GetTitle() == std::string("{}") );
   }
 
   SECTION("Two selectors with same name are not allowed") {
-    tselector.addSelector("test", "SelectorTestSelectorImplEmpty", "{}");
-    REQUIRE_THROWS_AS( tselector.addSelector("test", "SelectorTestSelectorImplEmpty", "{}"), std::logic_error );
+    inputList.Add(new TNamed("analyzer_test", "SelectorTestSelectorImplEmpty:{}"));
+    inputList.Add(new TNamed("analyzer_test", "SelectorTestSelectorImplEmpty:{}"));
+
+    REQUIRE_THROWS_AS( tree->Process(&tselector), std::logic_error );
   }
 
   SECTION("Two selectors doing some work") {
-    tselector.addSelector("test", "SelectorTestSelectorImpl", "{\"mode\": 0}");
-    tselector.addSelector("test2", "SelectorTestSelectorImpl", "{\"mode\": 1}");
+    inputList.Add(new TNamed("analyzer_test", "SelectorTestSelectorImpl:{\"mode\": 0}"));
+    inputList.Add(new TNamed("analyzer_test2", "SelectorTestSelectorImpl:{\"mode\": 1}"));
 
+    tree->Process(&tselector);
+
+    TList *output = tselector.GetOutputList();
+    REQUIRE( output );
+    TObject *tmp = output->FindObject("test");
+    REQUIRE( tmp );
+    TDirectory *dir = dynamic_cast<TDirectory *>(tmp);
+    REQUIRE( dir );
     TNamed *config = nullptr;
-    dir.GetObject("test/config", config);
+    dir->GetObject("config", config);
     REQUIRE( config );
     CHECK( config->GetTitle() == std::string("{\"mode\": 0}") );
-    dir.GetObject("test2/config", config);
+
+    tmp = output->FindObject("test2");
+    REQUIRE( tmp );
+    TDirectory *dir2 = dynamic_cast<TDirectory *>(tmp);
+    REQUIRE( dir2 );
+    dir2->GetObject("config", config);
     REQUIRE( config );
     CHECK( config->GetTitle() == std::string("{\"mode\": 1}") );
 
-    tree->Process(&tselector);
     TH1 *h = nullptr;
-    dir.GetObject("test/counters/counter", h);
+    dir->GetObject("counters/counter", h);
     REQUIRE( h );
     REQUIRE( h->GetNbinsX() == 3 );
     CHECK( h->GetBinContent(1) == 3 );
     CHECK( h->GetBinContent(2) == 3 );
     CHECK( h->GetBinContent(3) == 3 );
 
-    dir.GetObject("test/counters/weighted/counter", h);
+    dir->GetObject("counters/weighted/counter", h);
     REQUIRE( h );
     REQUIRE( h->GetNbinsX() == 3 );
     CHECK( h->GetBinContent(1) == 3 );
     CHECK( h->GetBinContent(2) == 3 );
     CHECK( h->GetBinContent(3) == 1.5 );
 
-    dir.GetObject("test/histo1", h);
+    dir->GetObject("histo1", h);
     REQUIRE( h );
     REQUIRE( h->GetNbinsX() == 10 );
     CHECK( h->GetEntries() == 3 );
@@ -146,7 +167,7 @@ TEST_CASE("SelectorImpl works", "[Framework]") {
     CHECK( h->GetBinContent(4) == 1 );
     CHECK( h->GetBinContent(5) == 0 );
 
-    dir.GetObject("test/histo2", h);
+    dir->GetObject("histo2", h);
     REQUIRE( h );
     REQUIRE( h->GetNbinsX() == 100 );
     REQUIRE( h->GetEntries() == 9 );
@@ -163,7 +184,7 @@ TEST_CASE("SelectorImpl works", "[Framework]") {
     CHECK( h->GetBinContent(100) == 0 );
     CHECK( h->GetBinContent(101) == 2 );
 
-    dir.GetObject("test/histo3", h);
+    dir->GetObject("histo3", h);
     REQUIRE( h );
     REQUIRE( h->GetNbinsX() == 100 );
     REQUIRE( h->GetEntries() == 9 );
@@ -180,21 +201,21 @@ TEST_CASE("SelectorImpl works", "[Framework]") {
     CHECK( h->GetBinContent(100) == 0 );
     CHECK( h->GetBinContent(101) == 1 );
 
-    dir.GetObject("test2/counters/counter", h);
+    dir2->GetObject("counters/counter", h);
     REQUIRE( h );
     REQUIRE( h->GetNbinsX() == 3 );
     CHECK( h->GetBinContent(1) == 3 );
     CHECK( h->GetBinContent(2) == 2 );
     CHECK( h->GetBinContent(3) == 2 );
 
-    dir.GetObject("test2/counters/weighted/counter", h);
+    dir2->GetObject("counters/weighted/counter", h);
     REQUIRE( h );
     REQUIRE( h->GetNbinsX() == 3 );
     CHECK( h->GetBinContent(1) == 3 );
     CHECK( h->GetBinContent(2) == 2 );
     CHECK( h->GetBinContent(3) == 1 );
 
-    dir.GetObject("test2/histo1", h);
+    dir2->GetObject("histo1", h);
     REQUIRE( h );
     REQUIRE( h->GetNbinsX() == 10 );
     CHECK( h->GetEntries() == 3 );
@@ -204,7 +225,7 @@ TEST_CASE("SelectorImpl works", "[Framework]") {
     CHECK( h->GetBinContent(4) == 1 );
     CHECK( h->GetBinContent(5) == 0 );
 
-    dir.GetObject("test2/histo2", h);
+    dir2->GetObject("histo2", h);
     REQUIRE( h );
     REQUIRE( h->GetNbinsX() == 100 );
     CHECK( h->GetEntries() == 8 );
@@ -221,7 +242,7 @@ TEST_CASE("SelectorImpl works", "[Framework]") {
     CHECK( h->GetBinContent(100) == 0 );
     CHECK( h->GetBinContent(101) == 2 );
 
-    dir.GetObject("test2/histo3", h);
+    dir2->GetObject("histo3", h);
     REQUIRE( h );
     REQUIRE( h->GetNbinsX() == 100 );
     CHECK( h->GetEntries() == 8 );

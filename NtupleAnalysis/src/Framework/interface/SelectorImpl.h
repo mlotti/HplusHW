@@ -7,21 +7,47 @@
 
 #include <string>
 #include <vector>
-#include <utility>
 
 class TDirectory;
+class TFile;
+class TProofOutputFile;
 
 class BaseSelector;
 class BranchManager;
 class EventSaver;
+
+class SelectorImplParams: public TObject {
+public:
+  SelectorImplParams(): fOptions("{}"), fEntries(-1), fIsMC(false), fPrintStatus(false) {}
+  SelectorImplParams(Long64_t entries, bool isMC, const std::string& options, bool printStatus):
+    fOptions(options), fEntries(entries), fIsMC(isMC), fPrintStatus(printStatus)
+  {}
+  virtual ~SelectorImplParams();
+
+  virtual const char *GetName() const;
+
+  const std::string& options() const { return fOptions; }
+  Long64_t entries() const { return fEntries; }
+  bool isMC() const { return fIsMC; }
+  bool printStatus() const { return fPrintStatus; }
+
+  ClassDef(SelectorImplParams, 0);
+
+private:
+  std::string fOptions;
+  Long64_t fEntries;
+  bool fIsMC;
+  bool fPrintStatus;
+};
 
 // TSelector Implementation
 class SelectorImpl: public TSelector {
 public:
 
   //SelectorImpl(TTree * /*tree*/ =0);
-  SelectorImpl(TDirectory *outputDir, Long64_t entries, bool isMC, const std::string& options);
+  SelectorImpl();
   virtual ~SelectorImpl();
+
   Int_t   Version() const;
   void    Begin(TTree *tree);
   void    SlaveBegin(TTree *tree);
@@ -33,11 +59,9 @@ public:
 
   ClassDef(SelectorImpl,0);
 
-  void setPrintStatus(bool status);
-
-  void addSelector(const std::string& name, const std::string& className, const std::string& config);
-
 private:
+  SelectorImpl(const SelectorImpl&); // not implemented, not using =delete because of CINT dictionaries
+
   void printStatus();
   void resetStatus();
 
@@ -47,9 +71,12 @@ private:
   BranchManager *fBranchManager;
   EventSaver *fEventSaver;
 
-  TDirectory               *fOutputDir;
   TTree                    *fChain;   //!pointer to the analyzed TTree or TChain
-  std::vector<std::pair<std::string, BaseSelector *> > fSelectors;
+
+  std::vector<BaseSelector *> fSelectors;
+
+  TProofOutputFile *fProofFile;
+  TFile *fOutputFile;
 
   TStopwatch                 fStopwatch;
   Long64_t fPrintStep;
@@ -57,7 +84,6 @@ private:
   double fPrintLastTime;
   int fPrintAdaptCount;
   bool fPrintStatus;
-  bool fIsMC;
 };
 
 #endif

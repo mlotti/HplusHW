@@ -1,7 +1,6 @@
 #include "Framework/interface/EventSaver.h"
 
-#include "TDirectory.h"
-#include "TFile.h"
+#include "TList.h"
 #include "TEntryList.h"
 
 #include "boost/optional.hpp"
@@ -13,29 +12,15 @@ namespace {
   }
 }
 
-EventSaver::EventSaver(const boost::property_tree::ptree& config, TDirectory *histoOutputDir):
+EventSaver::EventSaver(const boost::property_tree::ptree& config, TList *outputList):
   fEnabled(isEnabled(config)),
   fSave(false),
-  fOutput(nullptr),
-  fOutputFile(nullptr),
   fEntryList(nullptr)
 {
   if(!fEnabled) return;
 
-  TFile *outputFile = histoOutputDir->GetFile();
-
-  if(!outputFile) {
-    fOutput = histoOutputDir;
-  }
-  else {
-    std::string fname = outputFile->GetName();
-    fname.replace(fname.rfind(".root"), 5, "-entrylist.root");
-    fOutputFile = TFile::Open(fname.c_str(), "RECREATE");
-    fOutput = fOutputFile;
-  }
-
-  fOutput->cd();
   fEntryList = new TEntryList("entrylist", "List of selected entries");
+  outputList->Add(fEntryList);
 }
 
 EventSaver::~EventSaver() {}
@@ -55,9 +40,4 @@ void EventSaver::endEvent(Long64_t entry) {
 void EventSaver::terminate() {
   if(fEntryList)
     fEntryList->OptimizeStorage();
-  if(fOutputFile) {
-    fOutputFile->Write();
-    fOutputFile->Close();
-    delete fOutputFile;
-  }
 }

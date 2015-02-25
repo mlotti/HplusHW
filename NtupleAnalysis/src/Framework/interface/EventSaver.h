@@ -8,11 +8,11 @@
 class TDirectory;
 class TEntryList;
 class TTree;
-class TFile;
+class TList;
 
 class EventSaver {
 public:
-  explicit EventSaver(const boost::property_tree::ptree& config, TDirectory *histoOutputDir);
+  EventSaver(const boost::property_tree::ptree& config, TList *outputList);
   ~EventSaver();
 
   void beginTree(const TTree *tree);
@@ -27,8 +27,6 @@ private:
   const bool fEnabled;
   bool fSave;
 
-  TDirectory *fOutput;
-  TFile *fOutputFile;
   TEntryList *fEntryList;
 };
 

@@ -6,6 +6,7 @@
 #pragma link C++ nestedclasses;
 
 #pragma link C++ class SelectorImpl+;
+#pragma link C++ class SelectorImplParams+;
 // rootcint complains that this is already defined, but without TTree
 // complains that it is not
 #pragma link C++ class std::vector<float>+;

@@ -14,9 +14,9 @@ TEST_CASE("EventSaver", "[Framework]") {
   boost::property_tree::ptree config;
   config.put("EventSaver.enabled", true);
 
-  TDirectory dir("rootdir", "rootdir");
+  TList list;
 
-  EventSaver eventSaver(config, &dir);
+  EventSaver eventSaver(config, &list);
   EventSaverClient saver;
   saver.setSaver(&eventSaver);
 
@@ -38,8 +38,9 @@ TEST_CASE("EventSaver", "[Framework]") {
   eventSaver.terminate();
 
   SECTION("Results") {
-    TEntryList *entrylist = nullptr;
-    dir.GetObject("entrylist", entrylist);
+    TObject *obj = list.FindObject("entrylist");
+    REQUIRE( obj );
+    TEntryList *entrylist = dynamic_cast<TEntryList *>(obj);
     REQUIRE( entrylist );
     REQUIRE( entrylist->GetN() == 2);
     CHECK( entrylist->Next() == 0 );

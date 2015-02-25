@@ -41,8 +41,8 @@ void EventCounter::Counter::book(TDirectory *dir) {
   if(labels.empty())
     return;
 
-  dir->cd();
   counter = new TH1F(name.c_str(), name.c_str(), labels.size(), 0, labels.size());
+  counter->SetDirectory(dir);
   for(size_t i=0; i<labels.size(); ++i)
     counter->GetXaxis()->SetBinLabel(i+1, labels[i].c_str());
 }
@@ -50,8 +50,8 @@ void EventCounter::Counter::bookWeighted(TDirectory *dir) {
   if(labels.empty())
     return;
 
-  dir->cd();
   weightedCounter = new TH1F(name.c_str(), ("Weighted "+name).c_str(), labels.size(), 0, labels.size());
+  weightedCounter->SetDirectory(dir);
   for(size_t i=0; i<labels.size(); ++i)
     weightedCounter->GetXaxis()->SetBinLabel(i+1, labels[i].c_str());
 }

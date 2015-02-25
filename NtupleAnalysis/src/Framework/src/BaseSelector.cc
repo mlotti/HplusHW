@@ -5,5 +5,7 @@ BaseSelector::BaseSelector(const boost::property_tree::ptree& config):
   fHistoWrapper(fEventWeight, config.get("histogramAmbientLevel", "Vital")),
   fIsMC(false)
 {}
-BaseSelector::~BaseSelector() {}
+BaseSelector::~BaseSelector() {
+  fEventCounter.serialize();
+}
 

@@ -39,7 +39,7 @@ else
 endif
 
 # Link flags
-LDFLAGS := $(ROOTLIBS) -Llib
+LDFLAGS := $(ROOTLIBS) -lProof -Llib
 
 # Debugging
 ifeq "$(DEBUG)" "yes"

@@ -36,9 +36,6 @@ public:
     fEventCounter.setOutput(dir);
     book(dir);
   }
-  void terminate() {
-    fEventCounter.serialize();
-  }
 
   void processInternal(Long64_t entry) {
     fEventWeight.beginEvent();

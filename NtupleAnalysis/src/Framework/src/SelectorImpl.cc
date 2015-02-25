@@ -6,6 +6,8 @@
 
 #include "TTree.h"
 #include "TFile.h"
+#include "TProofOutputFile.h"
+#include "TIterator.h"
 
 #include "boost/property_tree/json_parser.hpp"
 
@@ -13,27 +15,26 @@
 #include <iomanip>
 #include <stdexcept>
 #include <sstream>
+#include <unordered_set>
+
+ClassImp(SelectorImplParams)
 
 ClassImp(SelectorImpl)
 
-SelectorImpl::SelectorImpl(TDirectory *outputDir, Long64_t entries, bool isMC, const std::string& options):
-  fEntries(entries), fProcessed(0),
-  fOutputDir(outputDir), fChain(nullptr),
-  fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0), fPrintStatus(true), fIsMC(isMC)
-{
-  fBranchManager = new BranchManager();
-
-  boost::property_tree::ptree tree;
-  std::stringstream ss(options);
-  boost::property_tree::read_json(ss, tree);
-  fEventSaver = new EventSaver(tree, fOutputDir);
+SelectorImplParams::~SelectorImplParams() {}
+const char *SelectorImplParams::GetName() const {
+  return "PARAMS";
 }
 
+SelectorImpl::SelectorImpl():
+  fEntries(-1), fProcessed(0),
+  fBranchManager(nullptr), fEventSaver(nullptr),
+  fChain(nullptr),
+  fProofFile(nullptr), fOutputFile(nullptr),
+  fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0), fPrintStatus(false)
+{}
+
 SelectorImpl::~SelectorImpl() {
-  for(auto& nameSelector: fSelectors)
-    delete nameSelector.second;
-  delete fBranchManager;
-  delete fEventSaver;
 }
 
 Int_t SelectorImpl::Version() const {
@@ -56,8 +57,8 @@ void SelectorImpl::Init(TTree *tree) {
 
   // Set up variable and cut branches for the new TTree
   fBranchManager->setTree(tree);
-  for(auto& nameSelector: fSelectors)
-    nameSelector.second->setupBranches(*fBranchManager);
+  for(BaseSelector *selector: fSelectors)
+    selector->setupBranches(*fBranchManager);
 }
 
 
@@ -68,9 +69,11 @@ Bool_t SelectorImpl::Notify() {
   // to the generated code, but the routine can be extended by the
   // user if needed. The return value is currently not used.
 
+  /*
   auto file = fChain->GetCurrentFile();
   if(fPrintStatus && file)
     std::cout << "Processing file " << file->GetName() << std::endl;
+  */
 
   fEventSaver->beginTree(fChain);
 
@@ -82,12 +85,96 @@ void SelectorImpl::Begin(TTree * /*tree*/) {
   // The Begin() function is called at the start of the query.
   // When running with PROOF Begin() is only called on the client.
   // The tree argument is deprecated (on PROOF 0 is passed).
+
+  // Check already here that we don't have two analyzers with same names
+  // Why here and not SlaveBegin? Because we want the exception thrown in PROOF master
+
+  if(!fInput)
+    throw std::runtime_error("No input list to SelectorImpl!");
+
+  if(!dynamic_cast<const SelectorImplParams *>(fInput->FindObject("PARAMS"))) {
+    throw std::logic_error("No SelectorImplParams with name PARAMS in the input list");
+  }
+
+  std::unordered_set<std::string> analyzerNames;
+  TIter next(fInput);
+  while(const TObject *obj = next()) {
+    if(std::strncmp(obj->GetName(), "analyzer_", 9) == 0) {
+      std::string name(obj->GetName());
+      name = name.substr(9);
+      if(analyzerNames.find(name) != analyzerNames.end())
+        throw std::logic_error("Analyzer with name "+name+" already exists");
+      analyzerNames.insert(name);
+    }
+  }
 }
 
 void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   // The SlaveBegin() function is called after the Begin() function.
   // When running with PROOF SlaveBegin() is called on each slave server.
   // The tree argument is deprecated (on PROOF 0 is passed).
+
+  // Pick parameters
+  const SelectorImplParams *params = dynamic_cast<const SelectorImplParams *>(fInput->FindObject("PARAMS"));
+  fEntries = params->entries();
+  fPrintStatus = params->printStatus();
+
+  // Use TProofOutputFile if requested (for PROOF)
+  const TNamed *out = dynamic_cast<const TNamed *>(fInput->FindObject("PROOF_OUTPUTFILE_LOCATION"));
+  if(out) {
+    fProofFile = new TProofOutputFile("histograms.root", "M");
+    fProofFile->SetOutputFileName(out->GetTitle());
+    fOutputFile = fProofFile->OpenFile("RECREATE");
+    fOutputFile->cd();
+    fPrintStatus = false;
+  }
+  else {
+    // Use regular file if requested (non-PROOF running)
+    out = dynamic_cast<const TNamed *>(fInput->FindObject("OUTPUTFILE_LOCATION"));
+    if(out) {
+      fOutputFile = TFile::Open(out->GetTitle(), "RECREATE");
+      fOutputFile->cd();
+    }
+  }
+  // Otherwise use the fOutput list (unit tests)
+
+  fBranchManager = new BranchManager();
+
+  boost::property_tree::ptree tree;
+  std::stringstream ss(params->options());
+  boost::property_tree::read_json(ss, tree);
+  fEventSaver = new EventSaver(tree, fOutput);
+
+  TDirectory::AddDirectory(kFALSE);
+  TH1::AddDirectory(kFALSE);
+  TIter next(fInput);
+  while(const TObject *obj = next()) {
+    if(std::strncmp(obj->GetName(), "analyzer_", 9) == 0) {
+      const TNamed *nm = dynamic_cast<const TNamed *>(obj);
+      std::string name(nm->GetName());
+      name = name.substr(9);
+      std::string title(nm->GetTitle());
+      std::string::size_type pos = title.find(":");
+      std::string className = title.substr(0, pos);
+      std::string config = title.substr(pos+1);
+
+      auto selector = SelectorFactory::create(className, config);
+      selector->setMCStatus(params->isMC());
+      selector->setEventSaver(fEventSaver);
+      TDirectory *subdir = nullptr;
+      if(fOutputFile) {
+        subdir = fOutputFile->mkdir(name.c_str());
+      }
+      else {
+        subdir = new TDirectory(name.c_str(), name.c_str());
+        fOutput->Add(subdir);
+      }
+      TNamed *saveConfig = new TNamed("config", config.c_str());
+      subdir->Append(saveConfig);
+      selector->setOutput(subdir);
+      fSelectors.push_back(selector.release());
+    }
+  }
 }
 
 Bool_t SelectorImpl::Process(Long64_t entry) {
@@ -114,9 +201,8 @@ Bool_t SelectorImpl::Process(Long64_t entry) {
 
   fEventSaver->beginEvent();
   fBranchManager->setEntry(entry);
-  for(auto& nameSelector: fSelectors) {
-    //std::cout << "Selector " << nameSelector.first << std::endl;
-    nameSelector.second->processInternal(entry);
+  for(BaseSelector *selector: fSelectors) {
+    selector->processInternal(entry);
   }
   fEventSaver->endEvent(entry);
 
@@ -129,6 +215,26 @@ void SelectorImpl::SlaveTerminate() {
   // on each slave server.
 
   resetStatus();
+
+  for(BaseSelector *selector: fSelectors) {
+    delete selector;
+  }
+  fSelectors.clear();
+
+  fEventSaver->terminate();
+
+  delete fEventSaver;
+  delete fBranchManager;
+
+  if(fOutputFile) {
+    fOutputFile->Write();
+    fOutputFile->Close();
+    if(fProofFile) {
+      fOutput->Add(fProofFile);
+    }
+  }
+  fOutputFile = nullptr;
+  fProofFile = nullptr;
 }
 
 void SelectorImpl::Terminate() {
@@ -136,33 +242,6 @@ void SelectorImpl::Terminate() {
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
 
-  for(auto& nameSelector: fSelectors) {
-    nameSelector.second->terminate();
-  }
-
-  fEventSaver->terminate();
-}
-
-void SelectorImpl::setPrintStatus(bool status) {
-  fPrintStatus = status;
-}
-
-void SelectorImpl::addSelector(const std::string& name, const std::string& className, const std::string& config) {
-  auto found = std::find_if(fSelectors.begin(), fSelectors.end(), [&](const std::pair<std::string, BaseSelector *>& a) {
-      return a.first == name;
-    });
-  if(found != fSelectors.end())
-    throw std::logic_error("Selector with name "+name+" already exists");
-
-  auto selector = SelectorFactory::create(className, config);
-  selector->setMCStatus(fIsMC);
-  selector->setEventSaver(fEventSaver);
-  TDirectory *subdir = fOutputDir->mkdir(name.c_str());
-  subdir->cd();
-  TNamed *saveConfig = new TNamed("config", config.c_str());
-  subdir->Append(saveConfig);
-  selector->setOutput(subdir);
-  fSelectors.push_back(std::make_pair(name, selector.release()));
 }
 
 void SelectorImpl::printStatus() {
@@ -225,7 +304,7 @@ void SelectorImpl::resetStatus() {
   if(!fPrintStatus) return;
 
   fStopwatch.Stop();
-  std::cout << "\rDataset processed (" << fProcessed << " entries). ";
+  std::cout << "\rDataset processed (" << fProcessed << " entries). " << std::endl;
   //fStopwatch.Print();
   fPrintStep = 20000;
 }
