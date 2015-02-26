@@ -125,6 +125,12 @@ CLEAN_FILES := $(FILES_OBJ) $(ALL_DEPENDS) $(LIBPATH) $(FILES_DICT) $(FILES_DICT
 clean:
 	rm -f $(CLEAN_FILES)
 
+# GNU Make's own filter function is too limited
+# http://stackoverflow.com/questions/6145041/makefile-filter-out-strings-containing-a-character
+FILTER = $(foreach v,$(2),$(if $(findstring $(1),$(v)),$(v),))
+cleanSubdirectory:
+	rm -f $(call FILTER,$(SUBDIRECTORY),$(CLEAN_FILES))
+
 # Include dependency information
 -include $(ALL_DEPENDS)
 
