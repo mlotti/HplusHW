@@ -120,8 +120,10 @@ build: $(LIBPATH)
 all: build test
 all: ;
 
+CLEAN_FILES := $(FILES_OBJ) $(ALL_DEPENDS) $(LIBPATH) $(FILES_DICT) $(FILES_DICTHEAD) $(TEST_OBJ) $(TEST_MAIN)
+
 clean:
-	rm -f $(FILES_OBJ) $(ALL_DEPENDS) $(LIBPATH) $(FILES_DICT) $(FILES_DICTHEAD) $(TEST_OBJ)
+	rm -f $(CLEAN_FILES)
 
 # Include dependency information
 -include $(ALL_DEPENDS)
