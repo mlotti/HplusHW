@@ -4,6 +4,7 @@
 
 #include "Framework/interface/BranchBase.h"
 #include "Framework/interface/BranchTraits.h"
+#include "Framework/interface/type.h"
 
 #include "TTree.h"
 #include "TBranch.h"
@@ -33,8 +34,8 @@ public:
     return BranchTraits<T>::get(data);
   }
 
-  virtual const char *getTypeidName() const {
-    return typeid(T).name();
+  virtual std::string getTypeName() const {
+    return type<T>();
   }
 
 private:

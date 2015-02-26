@@ -17,7 +17,7 @@ public:
 
   const std::string& getName() const { return name; }
 
-  virtual const char *getTypeidName() const = 0;
+  virtual std::string getTypeName() const = 0;
 
 protected:
   void assertValid() const;
