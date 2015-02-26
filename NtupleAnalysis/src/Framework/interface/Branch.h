@@ -21,7 +21,8 @@ public:
   void setupBranch(TTree *tree) {
     // Protect SetBranchAddress() to avoid warning message, we'll deal
     // non-existing branches in another way
-    if(tree->GetBranch(this->name.c_str())) {
+    TBranch *branch = tree->GetBranch(this->name.c_str());
+    if(branch && isBranchTypeOk(std::string(branch->GetClassName()))) {
       tree->SetBranchAddress(this->name.c_str(), &data, &this->branch);
     }
   }

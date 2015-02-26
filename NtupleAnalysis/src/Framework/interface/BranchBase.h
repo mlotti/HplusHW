@@ -19,6 +19,9 @@ public:
 
   virtual std::string getTypeName() const = 0;
 
+  // public only to allow testability
+  bool isBranchTypeOk(const std::string& actualType, bool print=true) const;
+
 protected:
   void assertValid() const;
 
