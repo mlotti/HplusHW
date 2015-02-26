@@ -30,11 +30,23 @@ endif
 setenv HIGGSANALYSIS_BASE $PWD
 
 if ( $LOCATION == "lxplus" ) then
-    echo "Sourcing lxplus environments for gcc 4.8 and ROOT 5.34"
-    source /afs/cern.ch/sw/lcg/contrib/gcc/4.8/x86_64-slc6-gcc48-opt/setup.csh 
-    pushd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.23/x86_64-slc6-gcc48-opt/root >/dev/null 
-    source bin/thisroot.csh
-    popd >/dev/null
+#    echo "Sourcing lxplus environments for gcc 4.8 and ROOT 5.34"
+    echo "Sourcing lxplus environments for gcc 4.8 and ROOT 6.03"
+    source /afs/cern.ch/sw/lcg/contrib/gcc/4.8/x86_64-slc6-gcc48-opt/setup.csh
+
+#    setenv ROOTSYS /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.23/x86_64-slc6-gcc48-opt/root
+    setenv ROOTSYS /afs/cern.ch/sw/lcg/app/releases/ROOT/6.03.02/x86_64-slc6-gcc48-opt/root
+    setenv LD_LIBRARY_PATH "${ROOTSYS}/lib:${LD_LIBRARY_PATH}"
+    setenv PATH "${ROOTSYS}/bin:${PATH}"
+
+    if ($?PYTHONPATH) then
+        setenv PYTHONPATH "$ROOTSYS/lib:$PYTHONPATH"
+    else
+        setenv PYTHONPATH "$ROOTSYS/lib"
+    endif 
+#    pushd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.23/x86_64-slc6-gcc48-opt/root >/dev/null 
+#    source bin/thisroot.csh
+#    popd >/dev/null
 endif
 
 set LD_LIBRARY_PATH_APPEND=""
