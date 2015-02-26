@@ -6,10 +6,10 @@
 #include "TH1F.h"
 #include "TDirectory.h"
 
-class ExampleAnalysis: public BaseSelector {
+class TriggerEfficiency: public BaseSelector {
 public:
-  explicit ExampleAnalysis(const boost::property_tree::ptree& config);
-  virtual ~ExampleAnalysis() {}
+  explicit TriggerEfficiency(const boost::property_tree::ptree& config);
+  virtual ~TriggerEfficiency() {}
 
   virtual void book(TDirectory *dir) override;
   virtual void setupBranches(BranchManager& branchManager) override;
