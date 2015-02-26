@@ -17,7 +17,10 @@ public:
 
   const std::string& getName() const { return name; }
 
-  virtual const char *getTypeidName() const = 0;
+  virtual std::string getTypeName() const = 0;
+
+  // public only to allow testability
+  bool isBranchTypeOk(const std::string& actualType, bool print=true) const;
 
 protected:
   void assertValid() const;

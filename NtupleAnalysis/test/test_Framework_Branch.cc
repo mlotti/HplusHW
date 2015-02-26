@@ -89,3 +89,23 @@ TEST_CASE("Branch works", "[Framework]") {
   }
   */
 }
+
+namespace {
+  template <typename T>
+  bool branchOk(const std::string& name) {
+    return Branch<T>("tmp").isBranchTypeOk(name, false);
+  }
+
+}
+
+TEST_CASE("BranchBase type checking", "[Framework]") {
+  CHECK(  branchOk<bool>              ("bool") );
+  CHECK(  branchOk<int >              ("int") );
+  CHECK(  branchOk<int >              ("unsigned int") );
+  CHECK(  branchOk<float>             ("double") );
+  CHECK(  branchOk<std::vector<int>>  ("vector<int>") );
+  CHECK(  branchOk<std::vector<float>>("vector<double>") );
+
+  CHECK( !branchOk<int>              ("vector<int>") );
+  CHECK( !branchOk<std::vector<bool>>("vector<int>") );
+}

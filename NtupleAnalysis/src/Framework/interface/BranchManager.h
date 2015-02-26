@@ -32,7 +32,7 @@ public:
       found = fBranches.insert(found, std::move(tmp));
     }
     Branch<T> *ptr = dynamic_cast<Branch<T> *>(found->get());
-    if(!ptr) throwTypeMismatch(branchName, (*found)->getTypeidName(), typeid(T).name());
+    if(!ptr) throwTypeMismatch(branchName, (*found)->getTypeName(), type<T>());
     ptr->setupBranch(fTree);
     *returnValue = ptr;
   }
@@ -44,7 +44,7 @@ public:
   }
 
 private:
-  void throwTypeMismatch(const std::string& name, const char *oldType, const char *newType) const;
+  void throwTypeMismatch(const std::string& name, const std::string& oldType, const std::string& newType) const;
   TTree *fTree; // not the owner
   std::vector<std::unique_ptr<BranchBase>> fBranches;  // owner
 };
