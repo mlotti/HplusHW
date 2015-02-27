@@ -7,21 +7,22 @@
 ifeq "$(HIGGSANALYSIS_BASE)" ""
 $(error $$HIGGSANALYSIS_BASE is not defined, please do first 'cd ..; source setup.(c)sh; cd NtupleAnalysis')
 endif
+BASEDIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 # Source code directory
-SRCDIR := src
+SRCDIR := $(BASEDIR)/src
 
 # Include files
-INC := -I$(SRCDIR)
+INC := -I$(SRCDIR) -I$(BASEDIR)/external
 
 # Directory where to put objects and dependency files
-OBJDIR := obj
+OBJDIR := $(BASEDIR)/obj
 
 # Directory where to put the resulting library
-LIBDIR := lib
+LIBDIR := $(BASEDIR)/lib
 
 # Directory where the tests are
-TESTDIR := test
+TESTDIR := $(BASEDIR)/test
 
 # ROOT
 ROOTINC := $(shell root-config --cflags)
@@ -29,7 +30,7 @@ ROOTINC := $(shell root-config --cflags)
 ROOTLIBS := $(shell root-config --glibs)
 
 # Compile flags
-CXXFLAGS := -O2 -Wall -fPIC -D_REENTRANT $(ROOTINC) $(INC) -Iexternal
+CXXFLAGS := -O2 -Wall -fPIC -D_REENTRANT $(ROOTINC) $(INC)
 
 GCC_NEED_ZX := $(shell expr `gcc -dumpversion | cut -f2 -d.` \<= 6)
 ifeq "$(GCC_NEED_ZX)" "1"
@@ -173,7 +174,7 @@ $(1)_CLASSES := $$(shell fgrep //HPlus $(1) | sed -e 's|//HPlus||')
 $(1)_HEADERPATH := $$(patsubst %src/,%interface/,$$(dir $(1)))
 $(1)_HEADERS := $$(patsubst %,$$($(1)_HEADERPATH)%.h,$$($(1)_CLASSES))
 $$($(1)_DICT): $$($(1)_HEADERS) $(1)
-	rootcint -f $$@ -c $(filter-out -std=c++11,$(CXXFLAGS)) -p $$(patsubst src/%,%,$$^)
+	rootcint -f $$@ -c $(filter-out -std=c++11,$(CXXFLAGS)) -p $$(patsubst $(SRCDIR)/%,%,$$^)
 endef
 $(foreach linkdef,$(FILES_LINKDEF),$(eval $(call DICT_template,$(linkdef))))
 
