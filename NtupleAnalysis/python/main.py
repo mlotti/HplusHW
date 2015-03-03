@@ -348,5 +348,10 @@ if __name__ == "__main__":
             self.assertEqual(p._options.Plop.x, 1)
             self.assertEqual(p._options.Plop.b, 3)
 
+        def testSelectorImpl(self):
+            t = ROOT.SelectorImpl()
+
+            # dummy test
+            self.assertEqual(isinstance(t, ROOT.TSelector), True)
 
     unittest.main()
