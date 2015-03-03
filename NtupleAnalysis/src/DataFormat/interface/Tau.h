@@ -5,6 +5,10 @@
 #include "DataFormat/interface/TauGenerated.h"
 #include "DataFormat/interface/ParticleIterator.h"
 
+#include "boost/property_tree/ptree.hpp"
+
+#include <vector>
+
 class Tau;
 
 class TauCollection: public TauGeneratedCollection, public ParticleIteratorAdaptor<TauCollection> {
@@ -12,8 +16,12 @@ public:
   using value_type = Tau;
 
   TauCollection() {}
-  TauCollection(const std::string& prefix): TauGeneratedCollection(prefix) {}
+  explicit TauCollection(const std::string& prefix): TauGeneratedCollection(prefix) {}
   ~TauCollection() {}
+
+  void setConfigurableDiscriminators(const std::vector<std::string>& names) {
+    fConfigurableDiscriminatorNames = names;
+  }
 
   void setupBranches(BranchManager& mgr);
 
@@ -25,6 +33,10 @@ public:
   friend class Particle<TauCollection>;
 
 protected:
+  std::vector<Branch<std::vector<bool>> *> fConfigurableDiscriminators;
+
+private:
+  std::vector<std::string> fConfigurableDiscriminatorNames;
 };
 
 class Tau: public TauGenerated {
@@ -32,6 +44,14 @@ public:
   Tau() {}
   Tau(TauCollection* coll, size_t index): TauGenerated(coll, index) {}
   ~Tau() {}
+
+  bool configurableDiscriminators() {
+    for(auto& disc: static_cast<TauCollection *>(fCollection)->fConfigurableDiscriminators) {
+      if(!disc->value()[index()])
+        return false;
+    }
+    return true;
+  }
 };
 
 inline

@@ -153,4 +153,118 @@ TEST_CASE("Tau", "[DataFormat]") {
       CHECK( p.decayModeFinding() == true );
     }
   }
+
+  SECTION("Configurable discriminators") {
+    std::unique_ptr<TTree> tree = createRealisticTree();
+
+    BranchManager mgr;
+    mgr.setTree(tree.get());
+
+    TauCollection coll;
+
+    SECTION("One discriminator") {
+      coll.setConfigurableDiscriminators(std::vector<std::string>{"discriminator1"});
+      coll.setupBranches(mgr);
+
+      mgr.setEntry(0);
+      REQUIRE( coll.size() == 4 );
+      CHECK( coll[0].configurableDiscriminators() == true );
+      CHECK( coll[1].configurableDiscriminators() == true );
+      CHECK( coll[2].configurableDiscriminators() == true );
+      CHECK( coll[3].configurableDiscriminators() == false );
+
+      mgr.setEntry(1);
+      REQUIRE( coll.size() == 1 );
+      CHECK( coll[0].configurableDiscriminators() == true );
+
+      mgr.setEntry(2);
+      REQUIRE( coll.size() == 2 );
+      CHECK( coll[0].configurableDiscriminators() == true );
+      CHECK( coll[1].configurableDiscriminators() == true );
+    }
+
+    SECTION("Other discriminator") {
+      coll.setConfigurableDiscriminators(std::vector<std::string>{"discriminator2"});
+      coll.setupBranches(mgr);
+
+      mgr.setEntry(0);
+      REQUIRE( coll.size() == 4 );
+      CHECK( coll[0].configurableDiscriminators() == true );
+      CHECK( coll[1].configurableDiscriminators() == true );
+      CHECK( coll[2].configurableDiscriminators() == false );
+      CHECK( coll[3].configurableDiscriminators() == true );
+
+      mgr.setEntry(1);
+      REQUIRE( coll.size() == 1 );
+      CHECK( coll[0].configurableDiscriminators() == false );
+
+      mgr.setEntry(2);
+      REQUIRE( coll.size() == 2 );
+      CHECK( coll[0].configurableDiscriminators() == false );
+      CHECK( coll[1].configurableDiscriminators() == false );
+    }
+
+    SECTION("Two discriminators") {
+      coll.setConfigurableDiscriminators(std::vector<std::string>{"discriminator1", "discriminator2"});
+      coll.setupBranches(mgr);
+
+      mgr.setEntry(0);
+      REQUIRE( coll.size() == 4 );
+      CHECK( coll[0].configurableDiscriminators() == true );
+      CHECK( coll[1].configurableDiscriminators() == true );
+      CHECK( coll[2].configurableDiscriminators() == false );
+      CHECK( coll[3].configurableDiscriminators() == false );
+
+      mgr.setEntry(1);
+      REQUIRE( coll.size() == 1 );
+      CHECK( coll[0].configurableDiscriminators() == false );
+
+      mgr.setEntry(2);
+      REQUIRE( coll.size() == 2 );
+      CHECK( coll[0].configurableDiscriminators() == false );
+      CHECK( coll[1].configurableDiscriminators() == false );
+    }
+
+    SECTION("Two discriminators, other way around") {
+      coll.setConfigurableDiscriminators(std::vector<std::string>{"discriminator2", "discriminator1"});
+      coll.setupBranches(mgr);
+
+      mgr.setEntry(0);
+      REQUIRE( coll.size() == 4 );
+      CHECK( coll[0].configurableDiscriminators() == true );
+      CHECK( coll[1].configurableDiscriminators() == true );
+      CHECK( coll[2].configurableDiscriminators() == false );
+      CHECK( coll[3].configurableDiscriminators() == false );
+
+      mgr.setEntry(1);
+      REQUIRE( coll.size() == 1 );
+      CHECK( coll[0].configurableDiscriminators() == false );
+
+      mgr.setEntry(2);
+      REQUIRE( coll.size() == 2 );
+      CHECK( coll[0].configurableDiscriminators() == false );
+      CHECK( coll[1].configurableDiscriminators() == false );
+    }
+
+    SECTION("Three discriminators") {
+      coll.setConfigurableDiscriminators(std::vector<std::string>{"discriminator1", "discriminator2", "discriminator3"});
+      coll.setupBranches(mgr);
+
+      mgr.setEntry(0);
+      REQUIRE( coll.size() == 4 );
+      CHECK( coll[0].configurableDiscriminators() == true );
+      CHECK( coll[1].configurableDiscriminators() == false );
+      CHECK( coll[2].configurableDiscriminators() == false );
+      CHECK( coll[3].configurableDiscriminators() == false );
+
+      mgr.setEntry(1);
+      REQUIRE( coll.size() == 1 );
+      CHECK( coll[0].configurableDiscriminators() == false );
+
+      mgr.setEntry(2);
+      REQUIRE( coll.size() == 2 );
+      CHECK( coll[0].configurableDiscriminators() == false );
+      CHECK( coll[1].configurableDiscriminators() == false );
+    }
+  }
 }

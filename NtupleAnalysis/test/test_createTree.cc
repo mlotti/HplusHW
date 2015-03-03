@@ -61,6 +61,9 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   std::vector<float> tau_e;   tree->Branch((tauPrefix+"_e").c_str(),   &tau_e);
   std::vector<bool> tau_decayModeFinding;
   tree->Branch((tauPrefix+"_decayModeFinding").c_str(), &tau_decayModeFinding);
+  std::vector<bool> tau_discriminator1; tree->Branch((tauPrefix+"_discriminator1").c_str(), &tau_discriminator1);
+  std::vector<bool> tau_discriminator2; tree->Branch((tauPrefix+"_discriminator2").c_str(), &tau_discriminator2);
+  std::vector<bool> tau_discriminator3; tree->Branch((tauPrefix+"_discriminator3").c_str(), &tau_discriminator3);
 
   std::vector<float> tau_pt_esup; tree->Branch((tauPrefix+"_pt_systVarTESUp").c_str(),  &tau_pt_esup);
   std::vector<float> tau_e_esup;  tree->Branch((tauPrefix+"_e_systVarTESUp").c_str(),   &tau_e_esup);
@@ -84,6 +87,9 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   tau_pt_esup = esScale(tau_pt, TAU_ESUP);
   tau_e_esup = esScale(tau_e, TAU_ESUP);
   tau_decayModeFinding = std::vector<bool>{true, false, true, false};
+  tau_discriminator1 = std::vector<bool>{true, true,  true,  false};
+  tau_discriminator2 = std::vector<bool>{true, true, false, true};
+  tau_discriminator3 = std::vector<bool>{true, false, false, false};
   MET_et = 50;
   MET_phi = 0.1;
   MET_et_tesup = 60.0;
@@ -98,6 +104,9 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   tau_pt_esup = esScale(tau_pt, TAU_ESUP);
   tau_e_esup = esScale(tau_e, TAU_ESUP);
   tau_decayModeFinding = std::vector<bool>{true};
+  tau_discriminator1 = std::vector<bool>{true};
+  tau_discriminator2 = std::vector<bool>{false};
+  tau_discriminator3 = std::vector<bool>{true};
   MET_et = 45.0;
   MET_phi = 3.1;
   MET_et_tesup = 30.0;
@@ -113,6 +122,9 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   tau_pt_esup = esScale(tau_pt, TAU_ESUP);
   tau_e_esup = esScale(tau_e, TAU_ESUP);
   tau_decayModeFinding = std::vector<bool>{false, false};
+  tau_discriminator1 = std::vector<bool>{true, true};
+  tau_discriminator2 = std::vector<bool>{false, false};
+  tau_discriminator3 = std::vector<bool>{false, true};
   MET_et = 200.0;
   MET_phi = -2.4;
   MET_et_tesup = 150.0;
