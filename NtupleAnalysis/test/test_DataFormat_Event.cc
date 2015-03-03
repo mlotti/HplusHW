@@ -97,4 +97,60 @@ TEST_CASE("Event", "[DataFormat]") {
 
     REQUIRE_THROWS_AS( Event event(config), std::runtime_error );
   }
+
+  SECTION("Tau configurable discriminators") {
+    std::unique_ptr<TTree> tree = createRealisticTree();
+
+    BranchManager mgr;
+    mgr.setTree(tree.get());
+
+    boost::property_tree::ptree config;
+
+    SECTION("One discriminator") {
+      boost::property_tree::ptree discrs;
+      boost::property_tree::ptree child;
+      child.put("", "discriminator3");
+      discrs.push_back(std::make_pair("", child));
+
+      config.add_child("TauSelection.discriminators", discrs);
+
+      Event event(config);
+      event.setupBranches(mgr);
+
+      mgr.setEntry(0);
+      REQUIRE( event.taus().size() == 4 );
+      CHECK( event.taus()[0].configurableDiscriminators() == true );
+      CHECK( event.taus()[3].configurableDiscriminators() == false );
+
+      mgr.setEntry(1);
+      REQUIRE( event.taus().size() == 1 );
+      CHECK( event.taus()[0].configurableDiscriminators() == true );
+    }
+
+    SECTION("Three discriminators") {
+      boost::property_tree::ptree discrs;
+      boost::property_tree::ptree child;
+      child.put("", "discriminator1");
+      discrs.push_back(std::make_pair("", child));
+      child.put("", "discriminator2");
+      discrs.push_back(std::make_pair("", child));
+      child.put("", "discriminator3");
+      discrs.push_back(std::make_pair("", child));
+
+      config.add_child("TauSelection.discriminators", discrs);
+
+      Event event(config);
+      event.setupBranches(mgr);
+
+      mgr.setEntry(0);
+      REQUIRE( event.taus().size() == 4 );
+      CHECK( event.taus()[0].configurableDiscriminators() == true );
+      CHECK( event.taus()[1].configurableDiscriminators() == false );
+      CHECK( event.taus()[3].configurableDiscriminators() == false );
+
+      mgr.setEntry(1);
+      REQUIRE( event.taus().size() == 1 );
+      CHECK( event.taus()[0].configurableDiscriminators() == false );
+    }
+  }
 }
