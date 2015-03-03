@@ -90,7 +90,7 @@ FILES_SRC += $(FILES_DICT)
 
 TEST_MAIN := $(TESTDIR)/main
 TEST_SRC := $(wildcard $(TESTDIR)/*.cc)
-TEST_OBJ := $(patsubst %,$(OBJDIR)/%,$(TEST_SRC:.cc=.o))
+TEST_OBJ := $(patsubst $(BASEDIR)%,$(OBJDIR)%,$(TEST_SRC:.cc=.o))
 TEST_DEP := $(TEST_OBJ:.o=.d)
 ALL_DEPENDS += $(TEST_DEP)
 
