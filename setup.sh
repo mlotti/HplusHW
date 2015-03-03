@@ -25,9 +25,12 @@ if [ "x$LOCATION" = "x" ]; then
 fi
 
 if [ "x$LOCATION" = "xlxplus" ]; then
-    echo "Sourcing lxplus environments for gcc 4.8 and ROOT 5.34"
-    source /afs/cern.ch/sw/lcg/contrib/gcc/4.8/x86_64-slc6-gcc48-opt/setup.sh 
-    pushd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.23/x86_64-slc6-gcc48-opt/root >/dev/null 
+#    echo "Sourcing lxplus environments for gcc 4.8 and ROOT 5.34"
+    echo "Sourcing lxplus environments for gcc 4.8 and ROOT 6.03"
+    source /afs/cern.ch/sw/lcg/contrib/gcc/4.8/x86_64-slc6-gcc48-opt/setup.sh
+
+#    pushd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.23/x86_64-slc6-gcc48-opt/root >/dev/null 
+    pushd /afs/cern.ch/sw/lcg/app/releases/ROOT/6.03.02/x86_64-slc6-gcc48-opt/root >/dev/null 
     source bin/thisroot.sh
     popd >/dev/null
 fi
