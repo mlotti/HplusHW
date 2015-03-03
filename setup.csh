@@ -31,7 +31,7 @@ setenv HIGGSANALYSIS_BASE $PWD
 
 if ( $LOCATION == "lxplus" ) then
 #    echo "Sourcing lxplus environments for gcc 4.8 and ROOT 5.34"
-    echo "Sourcing lxplus environments for gcc 4.8 and ROOT 6.03"
+    echo "Sourcing lxplus environments for gcc 4.8 and ROOT 6.02"
     source /afs/cern.ch/sw/lcg/contrib/gcc/4.8/x86_64-slc6-gcc48-opt/setup.csh
 
 #    setenv ROOTSYS /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.23/x86_64-slc6-gcc48-opt/root
