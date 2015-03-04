@@ -2,6 +2,8 @@
 #ifndef DataFormat_Event_h
 #define DataFormat_Event_h
 
+#include "Framework/interface/ParameterSet.h"
+
 #include "DataFormat/interface/EventID.h"
 #include "DataFormat/interface/Tau.h"
 #include "DataFormat/interface/Jet.h"
@@ -9,14 +11,12 @@
 #include "DataFormat/interface/Muon.h"
 #include "DataFormat/interface/MET.h"
 
-#include "boost/property_tree/ptree.hpp"
-
 class BranchManager;
 
 class Event {
 public:
   Event();
-  explicit Event(const boost::property_tree::ptree& config);
+  explicit Event(const ParameterSet& config);
   ~Event();
 
   void setupBranches(BranchManager& mgr);

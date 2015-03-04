@@ -1,9 +1,9 @@
 #ifndef Framework_EventSaver_h
 #define Framework_EventSaver_h
 
-#include "Rtypes.h"
+#include "Framework/interface/ParameterSet.h"
 
-#include "boost/property_tree/ptree.hpp"
+#include "Rtypes.h"
 
 class TDirectory;
 class TEntryList;
@@ -12,7 +12,7 @@ class TList;
 
 class EventSaver {
 public:
-  EventSaver(const boost::property_tree::ptree& config, TList *outputList);
+  EventSaver(const ParameterSet& config, TList *outputList);
   ~EventSaver();
 
   void beginTree(const TTree *tree);

@@ -6,12 +6,12 @@
 namespace {
   class SelectorTestSelectorFactory: public BaseSelector {
   public:
-    SelectorTestSelectorFactory(const boost::property_tree::ptree& config):
+    SelectorTestSelectorFactory(const ParameterSet& config):
       BaseSelector(config),
-      name(config.get<std::string>("name")),
-      intvalue(config.get<int>("intvalue")),
-      floatvalue(config.get<float>("floatvalue")),
-      nested_intvalue(config.get_child("nested").get<int>("intvalue"))
+      name(config.getParameter<std::string>("name")),
+      intvalue(config.getParameter<int>("intvalue")),
+      floatvalue(config.getParameter<float>("floatvalue")),
+      nested_intvalue(config.getParameter<int>("nested.intvalue"))
     {}
     virtual ~SelectorTestSelectorFactory() {}
 

@@ -55,8 +55,9 @@ TEST_CASE("Event", "[DataFormat]") {
     BranchManager mgr;
     mgr.setTree(tree.get());
 
-    boost::property_tree::ptree config;
-    config.put("TauSelection.systematicVariation", "systVarTESUp");
+    boost::property_tree::ptree tmp;
+    tmp.put("TauSelection.systematicVariation", "systVarTESUp");
+    ParameterSet config(tmp);
 
     Event event(config);
     event.setupBranches(mgr);
@@ -91,9 +92,10 @@ TEST_CASE("Event", "[DataFormat]") {
   }
 
   SECTION("Multiple systematic variations") {
-    boost::property_tree::ptree config;
-    config.put("TauSelection.systematicVariation", "systVarTESUp");
-    config.put("JetSelection.systematicVariation", "systVarJESUp");
+    boost::property_tree::ptree tmp;
+    tmp.put("TauSelection.systematicVariation", "systVarTESUp");
+    tmp.put("JetSelection.systematicVariation", "systVarJESUp");
+    ParameterSet config(tmp);
 
     REQUIRE_THROWS_AS( Event event(config), std::runtime_error );
   }
@@ -104,7 +106,7 @@ TEST_CASE("Event", "[DataFormat]") {
     BranchManager mgr;
     mgr.setTree(tree.get());
 
-    boost::property_tree::ptree config;
+    boost::property_tree::ptree tmp;
 
     SECTION("One discriminator") {
       boost::property_tree::ptree discrs;
@@ -112,8 +114,9 @@ TEST_CASE("Event", "[DataFormat]") {
       child.put("", "discriminator3");
       discrs.push_back(std::make_pair("", child));
 
-      config.add_child("TauSelection.discriminators", discrs);
+      tmp.add_child("TauSelection.discriminators", discrs);
 
+      ParameterSet config(tmp);
       Event event(config);
       event.setupBranches(mgr);
 
@@ -137,8 +140,9 @@ TEST_CASE("Event", "[DataFormat]") {
       child.put("", "discriminator3");
       discrs.push_back(std::make_pair("", child));
 
-      config.add_child("TauSelection.discriminators", discrs);
+      tmp.add_child("TauSelection.discriminators", discrs);
 
+      ParameterSet config(tmp);
       Event event(config);
       event.setupBranches(mgr);
 

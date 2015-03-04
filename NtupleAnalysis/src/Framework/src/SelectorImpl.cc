@@ -140,10 +140,8 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
 
   fBranchManager = new BranchManager();
 
-  boost::property_tree::ptree tree;
-  std::stringstream ss(params->options());
-  boost::property_tree::read_json(ss, tree);
-  fEventSaver = new EventSaver(tree, fOutput);
+  ParameterSet options(params->options());
+  fEventSaver = new EventSaver(options, fOutput);
 
   TDirectory::AddDirectory(kFALSE);
   TH1::AddDirectory(kFALSE);

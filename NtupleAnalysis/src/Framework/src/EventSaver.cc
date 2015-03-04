@@ -6,13 +6,13 @@
 #include "boost/optional.hpp"
 
 namespace {
-  bool isEnabled(const boost::property_tree::ptree& config) {
-    boost::optional<bool> enabled = config.get_optional<bool>("EventSaver.enabled");
+  bool isEnabled(const ParameterSet& config) {
+    boost::optional<bool> enabled = config.getParameterOptional<bool>("EventSaver.enabled");
     return enabled && *enabled;
   }
 }
 
-EventSaver::EventSaver(const boost::property_tree::ptree& config, TList *outputList):
+EventSaver::EventSaver(const ParameterSet& config, TList *outputList):
   fEnabled(isEnabled(config)),
   fSave(false),
   fEntryList(nullptr)

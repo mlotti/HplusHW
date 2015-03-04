@@ -8,7 +8,7 @@
 
 class TriggerEfficiency: public BaseSelector {
 public:
-  explicit TriggerEfficiency(const boost::property_tree::ptree& config);
+  explicit TriggerEfficiency(const ParameterSet& config);
   virtual ~TriggerEfficiency() {}
 
   virtual void book(TDirectory *dir) override;
@@ -26,10 +26,10 @@ private:
 #include "Framework/interface/SelectorFactory.h"
 REGISTER_SELECTOR(TriggerEfficiency);
 
-TriggerEfficiency::TriggerEfficiency(const boost::property_tree::ptree& config):
+TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   BaseSelector(config),
   fEvent(config),
-  fTauPtCut(config.get<float>("tauPtCut"))
+  fTauPtCut(config.getParameter<float>("tauPtCut"))
 {}
 
 void TriggerEfficiency::book(TDirectory *dir) {

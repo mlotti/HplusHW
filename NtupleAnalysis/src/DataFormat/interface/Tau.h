@@ -5,8 +5,6 @@
 #include "DataFormat/interface/TauGenerated.h"
 #include "DataFormat/interface/ParticleIterator.h"
 
-#include "boost/property_tree/ptree.hpp"
-
 #include <vector>
 
 class Tau;

@@ -1,8 +1,8 @@
 #include "Framework/interface/BaseSelector.h"
 
-BaseSelector::BaseSelector(const boost::property_tree::ptree& config):
+BaseSelector::BaseSelector(const ParameterSet& config):
   fEventCounter(fEventWeight),
-  fHistoWrapper(fEventWeight, config.get("histogramAmbientLevel", "Vital")),
+  fHistoWrapper(fEventWeight, config.getParameter<std::string>("histogramAmbientLevel", "Vital")),
   fIsMC(false)
 {}
 BaseSelector::~BaseSelector() {

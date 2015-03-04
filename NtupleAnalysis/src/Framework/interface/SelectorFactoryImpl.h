@@ -2,7 +2,7 @@
 #ifndef Framework_SelectorFactoryImpl_h
 #define Framework_SelectorFactoryImpl_h
 
-#include "boost/property_tree/ptree.hpp"
+#include "Framework/interface/ParameterSet.h"
 
 #include <unordered_map>
 #include <string>
@@ -17,7 +17,7 @@ namespace SelectorFactory {
       CreatorBase();
       virtual ~CreatorBase();
 
-      virtual BaseSelector *create(const boost::property_tree::ptree& config) const = 0;
+      virtual BaseSelector *create(const ParameterSet& config) const = 0;
     };
 
     template <typename T>
@@ -26,7 +26,7 @@ namespace SelectorFactory {
       Creator() {};
       virtual ~Creator() {};
 
-      virtual BaseSelector *create(const boost::property_tree::ptree& config) const override {
+      virtual BaseSelector *create(const ParameterSet& config) const override {
         return new T(config);
       };
     };

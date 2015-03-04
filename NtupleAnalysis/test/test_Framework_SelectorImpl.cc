@@ -12,7 +12,7 @@
 namespace {
   class SelectorTestSelectorImplEmpty: public BaseSelector {
   public:
-    explicit SelectorTestSelectorImplEmpty(const boost::property_tree::ptree& config):
+    explicit SelectorTestSelectorImplEmpty(const ParameterSet& config):
       BaseSelector(config) {}
     virtual ~SelectorTestSelectorImplEmpty() {}
 
@@ -23,9 +23,9 @@ namespace {
 
   class SelectorTestSelectorImpl: public BaseSelector {
   public:
-    explicit SelectorTestSelectorImpl(const boost::property_tree::ptree& config):
+    explicit SelectorTestSelectorImpl(const ParameterSet& config):
       BaseSelector(config),
-      mode(config.get<int>("mode")),
+      mode(config.getParameter<int>("mode")),
       b_event(nullptr), b_num1(nullptr),
       c1(fEventCounter.addCounter("all")),
       c2(fEventCounter.addCounter("selected")),

@@ -8,7 +8,7 @@
 
 class ExampleAnalysis: public BaseSelector {
 public:
-  explicit ExampleAnalysis(const boost::property_tree::ptree& config);
+  explicit ExampleAnalysis(const ParameterSet& config);
   virtual ~ExampleAnalysis() {}
 
   virtual void book(TDirectory *dir) override;
@@ -44,10 +44,10 @@ private:
 #include "Framework/interface/SelectorFactory.h"
 REGISTER_SELECTOR(ExampleAnalysis);
 
-ExampleAnalysis::ExampleAnalysis(const boost::property_tree::ptree& config):
+ExampleAnalysis::ExampleAnalysis(const ParameterSet& config):
   BaseSelector(config),
   fEvent(config),
-  fTauPtCut(config.get<float>("tauPtCut")),
+  fTauPtCut(config.getParameter<float>("tauPtCut")),
   cAllEvents(fEventCounter.addCounter("All events")),
   cWeighted(fEventCounter.addCounter("Weighted")),
   cTauSelection(fEventCounter.addCounter("Tau selection")),

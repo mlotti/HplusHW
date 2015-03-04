@@ -11,8 +11,9 @@
 TEST_CASE("EventSaver", "[Framework]") {
   std::unique_ptr<TTree> tree = createRealisticTree();
 
-  boost::property_tree::ptree config;
-  config.put("EventSaver.enabled", true);
+  boost::property_tree::ptree tmp;
+  tmp.put("EventSaver.enabled", true);
+  ParameterSet config(tmp);
 
   TList list;
 
