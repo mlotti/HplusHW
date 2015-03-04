@@ -19,7 +19,7 @@ public:
   friend class Particle<MuonGeneratedCollection>;
 
 protected:
-
+  Branch<std::vector<bool>> *fIsGlobalMuon;
 };
 
 
@@ -29,6 +29,7 @@ public:
   MuonGenerated(MuonGeneratedCollection* coll, size_t index): Particle<MuonGeneratedCollection>(coll, index) {}
   ~MuonGenerated() {}
 
+  bool isGlobalMuon() { return fCollection->fIsGlobalMuon->value()[index()]; }
 
 };
 

@@ -16,7 +16,7 @@ process.addDatasetsFromMulticrab(sys.argv[1])
 
 # Example of adding an analyzer
 process.addAnalyzer("test", Analyzer("TriggerEfficiency",
-                                     tauPtCut = 10
+    offlineSelection = "taulegSelection",
 ))
 
 # Run the analysis

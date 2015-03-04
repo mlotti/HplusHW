@@ -5,5 +5,5 @@
 
 void MuonGeneratedCollection::setupBranches(BranchManager& mgr) {
   ParticleCollection::setupBranches(mgr);
-
+  mgr.book(prefix()+"_isGlobalMuon", &fIsGlobalMuon);
 }
