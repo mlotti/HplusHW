@@ -11,6 +11,13 @@ public:
   explicit BranchBase(const std::string& n): name(n), branch(0), entry(0), cached(false) {}
   virtual ~BranchBase();
 
+  // Disable copying, assignment, and moving
+  // Mainly because according to the design, there should be no need for them
+  BranchBase(const BranchBase&) = delete;
+  BranchBase(BranchBase&&) = delete;
+  BranchBase& operator=(const BranchBase&) = delete;
+  BranchBase& operator=(BranchBase&&) = delete;
+
   bool isValid() const { return branch != 0; }
 
   void setEntry(Long64_t e) { entry = e; cached = false; }

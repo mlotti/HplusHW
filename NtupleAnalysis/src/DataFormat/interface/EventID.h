@@ -11,6 +11,13 @@ public:
   EventID();
   ~EventID();
 
+  // Disable copying, assignment, and moving
+  // Mainly because according to the design, there should be no need for them
+  EventID(const EventID&) = delete;
+  EventID(EventID&&) = delete;
+  EventID& operator=(const EventID&) = delete;
+  EventID& operator=(EventID&&) = delete;
+
   void setupBranches(BranchManager& mgr);
 
   unsigned long long event() { return fEvent->value(); }

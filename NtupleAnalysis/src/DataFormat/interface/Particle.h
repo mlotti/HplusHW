@@ -106,6 +106,13 @@ public:
   explicit ParticleCollectionBase(const std::string& prefix);
   ~ParticleCollectionBase();
 
+  // Disable copying, assignment, and moving
+  // Mainly because according to the design, there should be no need for them
+  ParticleCollectionBase(const ParticleCollectionBase&) = delete;
+  ParticleCollectionBase(ParticleCollectionBase&&) = delete;
+  ParticleCollectionBase& operator=(const ParticleCollectionBase&) = delete;
+  ParticleCollectionBase& operator=(ParticleCollectionBase&&) = delete;
+
   void setEnergySystematicsVariation(const std::string& scenario);
 
 protected:

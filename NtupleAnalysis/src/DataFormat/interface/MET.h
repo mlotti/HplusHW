@@ -30,6 +30,13 @@ public:
   explicit METBase(const std::string& prefix);
   ~METBase();
 
+  // Disable copying, assignment, and moving
+  // Mainly because according to the design, there should be no need for them
+  METBase(const METBase&) = delete;
+  METBase(METBase&&) = delete;
+  METBase& operator=(const METBase&) = delete;
+  METBase& operator=(METBase&&) = delete;
+
   void setEnergySystematicsVariation(const std::string& scenario);
 
 protected:
