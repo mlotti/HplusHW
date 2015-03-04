@@ -87,13 +87,12 @@ namespace ParameterSetImpl {
       return defaultValue;
     }
 
-
     static
-    boost::optional<T> getOptional(const boost::property_tree::ptree& config, const std::string& name) {
+    boost::optional<std::vector<T> > getOptional(const boost::property_tree::ptree& config, const std::string& name) {
       boost::optional<std::vector<T>> res;
       boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
       if(child) {
-        res = to_vector<T>(*child);
+        res = to_vector(*child);
       }
       return res;
     }

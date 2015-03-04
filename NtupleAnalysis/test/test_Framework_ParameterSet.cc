@@ -50,15 +50,6 @@ TEST_CASE("ParameterSet", "[Framework]") {
       REQUIRE_THROWS_AS( pset.getParameter<int>("TauSelection.systematicVariation"), std::runtime_error );
     }
 
-    SECTION("Optional") {
-      boost::optional<int> t1 = pset.getParameterOptional<int>("TauSelection.minProngs");
-      REQUIRE( static_cast<bool>(t1) == true );
-      CHECK( *t1 == 3 );
-
-      boost::optional<std::string> t2 = pset.getParameterOptional<std::string>("foo");
-      CHECK( static_cast<bool>(t2) == false );
-    }
-
     SECTION("Vector parameters") {
       auto discrs = pset.getParameter<std::vector<std::string> >("TauSelection.discriminators");
       REQUIRE( discrs.size() == 3 );
@@ -95,6 +86,43 @@ TEST_CASE("ParameterSet", "[Framework]") {
       CHECK( psets[1].getParameter<int>("foo") == 2 );
       CHECK( psets[2].getParameter<int>("foo") == 3 );
       CHECK( psets[3].getParameter<int>("foo") == 4 );
+    }
+
+    SECTION("Optional") {
+      boost::optional<int> t1 = pset.getParameterOptional<int>("TauSelection.minProngs");
+      REQUIRE( static_cast<bool>(t1) == true );
+      CHECK( *t1 == 3 );
+
+      boost::optional<std::string> t2 = pset.getParameterOptional<std::string>("foo");
+      CHECK( static_cast<bool>(t2) == false );
+
+
+      boost::optional<std::vector<std::string> > t3 = pset.getParameterOptional<std::vector<std::string > >("TauSelection.discriminators");
+      REQUIRE( static_cast<bool>(t3) == true);
+      REQUIRE( t3->size() == 3 );
+      CHECK( (*t3)[0] == "discriminator1" );
+      CHECK( (*t3)[1] == "discriminator2" );
+      CHECK( (*t3)[2] == "discriminator3" );
+
+      boost::optional<std::vector<int> > t4 = pset.getParameterOptional<std::vector<int> >("foo");
+      CHECK( static_cast<bool>(t4) == false );
+
+
+      boost::optional<ParameterSet> t5 = pset.getParameterOptional<ParameterSet>("TauSelection");
+      REQUIRE( static_cast<bool>(t5) == true );
+      CHECK( t5->getParameter<int>("minProngs") == 3);
+
+      boost::optional<ParameterSet> t6 = pset.getParameterOptional<ParameterSet>("foo");
+      CHECK( static_cast<bool>(t6) == false );
+
+
+      boost::optional<std::vector<ParameterSet> > t7 = pset.getParameterOptional<std::vector<ParameterSet> >("TauSelection.psetvector");
+      REQUIRE( static_cast<bool>(t7) == true );
+      REQUIRE( t7->size() == 4 );
+      CHECK( (*t7)[0].getParameter<int>("foo") == 1 );
+      CHECK( (*t7)[1].getParameter<int>("foo") == 2 );
+      CHECK( (*t7)[2].getParameter<int>("foo") == 3 );
+      CHECK( (*t7)[3].getParameter<int>("foo") == 4 );
     }
 
     SECTION("Default value") {
