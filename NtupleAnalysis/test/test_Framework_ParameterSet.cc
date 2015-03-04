@@ -19,6 +19,12 @@ TEST_CASE("ParameterSet", "[Framework]") {
     config += "    ],\n";
     config += "    \"floatvector\": [\n";
     config += "       -2.0, 0.5, 3.14159\n";
+    config += "    ],\n";
+    config += "    \"psetvector\": [\n";
+    config += "       {\"foo\": 1},\n";
+    config += "       {\"foo\": 2},\n";
+    config += "       {\"foo\": 3},\n";
+    config += "       {\"foo\": 4}\n";
     config += "    ]\n";
     config += "  }\n";
     config += "}\n";
@@ -79,6 +85,16 @@ TEST_CASE("ParameterSet", "[Framework]") {
       CHECK( tau.getParameter<int>("minProngs") == 3 );
       CHECK( tau.getParameter<double>("ptCut") == 40. );
       CHECK( tau.getParameter<std::string>("systematicVariation") == "systVarTESUp" );
+    }
+
+    SECTION("Vector<ParameterSet> parameters") {
+      std::vector<ParameterSet> psets = pset.getParameter<std::vector<ParameterSet> >("TauSelection.psetvector");
+
+      REQUIRE( psets.size() == 4 );
+      CHECK( psets[0].getParameter<int>("foo") == 1 );
+      CHECK( psets[1].getParameter<int>("foo") == 2 );
+      CHECK( psets[2].getParameter<int>("foo") == 3 );
+      CHECK( psets[3].getParameter<int>("foo") == 4 );
     }
   }
 

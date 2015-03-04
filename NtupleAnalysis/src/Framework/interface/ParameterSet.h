@@ -64,7 +64,7 @@ namespace ParameterSetImpl {
     std::vector<T> to_vector(const Child& child) {
       std::vector<T> res;
       for(const auto& item: child) {
-        res.push_back(item.second.template get<T>(""));
+        res.push_back(ParameterGetter<T>::get(item.second, ""));
       }
     return res;
     }
