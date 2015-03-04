@@ -11,9 +11,11 @@
 namespace ParameterSetImpl {
   template <typename T>
   struct ParameterGetter {
+    // For simple types, just perfect-forward the possible default parameter
+    template <typename ...Args>
     static
-    T get(const boost::property_tree::ptree& config, const std::string& name) {
-      return config.get<T>(name);
+    T get(const boost::property_tree::ptree& config, const std::string& name, Args&&... args) {
+      return config.get<T>(name, std::forward<Args>(args)...);
     };
 
     static
@@ -29,9 +31,9 @@ public:
   explicit ParameterSet(const std::string& config);
   explicit ParameterSet(const boost::property_tree::ptree& config);
 
-  template <typename T>
-  T getParameter(const std::string& name) const {
-    return ParameterSetImpl::ParameterGetter<T>::get(fConfig, name);
+  template <typename T, typename ...Args>
+  T getParameter(const std::string& name, Args&&... args) const {
+    return ParameterSetImpl::ParameterGetter<T>::get(fConfig, name, std::forward<Args>(args)...);
   }
 
   template <typename T>
@@ -75,6 +77,17 @@ namespace ParameterSetImpl {
       return to_vector(config.get_child(name));
     }
 
+    // For vector, provide an overload for the default
+    static
+    std::vector<T> get(const boost::property_tree::ptree& config, const std::string& name, const std::vector<T>& defaultValue) {
+      boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
+      if(child)
+        return to_vector(*child);
+
+      return defaultValue;
+    }
+
+
     static
     boost::optional<T> getOptional(const boost::property_tree::ptree& config, const std::string& name) {
       boost::optional<std::vector<T>> res;
@@ -92,6 +105,15 @@ namespace ParameterSetImpl {
     static
     ParameterSet get(const boost::property_tree::ptree& config, const std::string& name) {
       return ParameterSet(config.get_child(name));
+    };
+
+    // For ParameterSet, provide an overload for the default
+    static
+    ParameterSet get(const boost::property_tree::ptree& config, const std::string& name, const ParameterSet& defaultValue) {
+      boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
+      if(child)
+        return ParameterSet(*child);
+      return defaultValue;
     };
 
     static

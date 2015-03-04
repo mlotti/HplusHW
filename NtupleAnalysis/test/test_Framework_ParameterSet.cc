@@ -96,6 +96,37 @@ TEST_CASE("ParameterSet", "[Framework]") {
       CHECK( psets[2].getParameter<int>("foo") == 3 );
       CHECK( psets[3].getParameter<int>("foo") == 4 );
     }
+
+    SECTION("Default value") {
+      CHECK( pset.getParameter<int>("foo", 3) == 3 );
+      CHECK( pset.getParameter<double>("foo", 6.5) == 6.5 );
+      CHECK( pset.getParameter<int>("foo", 6.5) == 6 );
+
+      auto vec = pset.getParameter<std::vector<int> >("vectest", std::vector<int>{1, 20, 500, 1000});
+      REQUIRE( vec.size() == 4 );
+      CHECK( vec[0] == 1 );
+      CHECK( vec[1] == 20 );
+      CHECK( vec[2] == 500 );
+      CHECK( vec[3] == 1000 );
+
+      auto ps = pset.getParameter<ParameterSet>("foo", ParameterSet("{\"bar\": 10}"));
+      CHECK( ps.getParameter<int>("bar") == 10 );
+
+      auto vecps = pset.getParameter<std::vector<ParameterSet> >("vecpset",
+                     std::vector<ParameterSet>{
+                       ParameterSet("{\"plop\": 1}"),
+                       ParameterSet("{\"plop\": 2}"),
+                       ParameterSet("{\"plop\": 3}"),
+                       ParameterSet("{\"plop\": 4}"),
+                       ParameterSet("{\"plop\": 5}")
+                     });
+      REQUIRE( vecps.size() == 5 );
+      CHECK( vecps[0].getParameter<int>("plop") == 1 );
+      CHECK( vecps[1].getParameter<int>("plop") == 2 );
+      CHECK( vecps[2].getParameter<int>("plop") == 3 );
+      CHECK( vecps[3].getParameter<int>("plop") == 4 );
+      CHECK( vecps[4].getParameter<int>("plop") == 5 );
+    }
   }
 
 
