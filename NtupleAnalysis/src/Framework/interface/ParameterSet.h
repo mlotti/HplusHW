@@ -24,6 +24,7 @@ namespace ParameterSetImpl {
 
 class ParameterSet {
 public:
+  explicit ParameterSet(const std::string& config);
   explicit ParameterSet(const boost::property_tree::ptree& config);
 
   template <typename T>
