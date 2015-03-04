@@ -25,9 +25,13 @@ class MuonDumper : public BaseDumper {
 	MuonDumper(std::vector<edm::ParameterSet>);
 	~MuonDumper();
 
-	bool fill(edm::Event&, const edm::EventSetup&);
+        void book(TTree*);
+        bool fill(edm::Event&, const edm::EventSetup&);
+        void reset();
 
     private:
 	edm::Handle<edm::View<pat::Muon> > *handle;
+
+        std::vector<bool> *isGlobalMuon;
 };
 #endif
