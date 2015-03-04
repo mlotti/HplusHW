@@ -13,6 +13,12 @@ TEST_CASE("ParameterSet", "[Framework]") {
     config += "      \"discriminator1\",\n";
     config += "      \"discriminator2\",\n";
     config += "      \"discriminator3\"\n";
+    config += "    ],\n";
+    config += "    \"intvector\": [\n";
+    config += "       1,2,42\n";
+    config += "    ],\n";
+    config += "    \"floatvector\": [\n";
+    config += "       -2.0, 0.5, 3.14159\n";
     config += "    ]\n";
     config += "  }\n";
     config += "}\n";
@@ -45,6 +51,26 @@ TEST_CASE("ParameterSet", "[Framework]") {
 
       boost::optional<std::string> t2 = pset.getParameterOptional<std::string>("foo");
       CHECK( static_cast<bool>(t2) == false );
+    }
+
+    SECTION("Vector parameters") {
+      auto discrs = pset.getParameter<std::vector<std::string> >("TauSelection.discriminators");
+      REQUIRE( discrs.size() == 3 );
+      CHECK( discrs[0] == "discriminator1" );
+      CHECK( discrs[1] == "discriminator2" );
+      CHECK( discrs[2] == "discriminator3" );
+
+      auto ints = pset.getParameter<std::vector<int>>("TauSelection.intvector");
+      REQUIRE( ints.size() == 3 );
+      CHECK( ints[0] == 1 );
+      CHECK( ints[1] == 2 );
+      CHECK( ints[2] == 42 );
+
+      auto doubles = pset.getParameter<std::vector<double>>("TauSelection.floatvector");
+      REQUIRE( doubles.size() == 3 );
+      CHECK( doubles[0] == -2.0 );
+      CHECK( doubles[1] == 0.5 );
+      CHECK( doubles[2] == 3.14159 );
     }
   }
 
