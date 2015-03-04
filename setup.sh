@@ -47,7 +47,8 @@ if [ "x$LOCATION" = "xjade" ]; then
     GCC_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external/gcc/4.9.1-cms
 
     # scram tool info root_interface
-    export ROOTSYS=/cvmfs/cms.cern.ch/slc6_amd64_gcc491/lcg/root/5.34.22-cms2
+    #export ROOTSYS=/cvmfs/cms.cern.ch/slc6_amd64_gcc491/lcg/root/5.34.22-cms2
+    export ROOTSYS=/cvmfs/cms.cern.ch/slc6_amd64_gcc491/lcg/root/6.02.00-cms4
 
     # scram tool info xrootd
     XROOTD_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external/xrootd/4.0.4
