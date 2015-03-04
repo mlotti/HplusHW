@@ -7,6 +7,7 @@
 
 #include <type_traits>
 
+// Partial specializations at the end
 namespace ParameterSetImpl {
   template <typename T>
   struct ParameterGetter {
@@ -20,7 +21,40 @@ namespace ParameterSetImpl {
       return config.get_optional<T>(name);
     }
   };
+}
 
+
+class ParameterSet {
+public:
+  explicit ParameterSet(const std::string& config);
+  explicit ParameterSet(const boost::property_tree::ptree& config);
+
+  template <typename T>
+  T getParameter(const std::string& name) const {
+    return ParameterSetImpl::ParameterGetter<T>::get(fConfig, name);
+  }
+
+  template <typename T>
+  boost::optional<T> getParameterOptional(const std::string& name) const {
+    return ParameterSetImpl::ParameterGetter<T>::getOptional(fConfig, name);
+  }
+
+private:
+  template <typename T, typename PChild>
+  std::vector<T> toVector(const PChild& child) {
+    std::vector<T> res;
+    for(const auto& item: child) {
+      res.push_back(item.second.data());
+    }
+    return res;
+  }
+
+  boost::property_tree::ptree fConfig;
+};
+
+
+// Partial specializations
+namespace ParameterSetImpl {
   // Partial specialization for vector<T>
   template <typename T>
   struct ParameterGetter<std::vector<T> > {
@@ -51,34 +85,27 @@ namespace ParameterSetImpl {
       return res;
     }
   };
-}
 
-class ParameterSet {
-public:
-  explicit ParameterSet(const std::string& config);
-  explicit ParameterSet(const boost::property_tree::ptree& config);
+  //Partial specialization for ParameterSet
+  template <>
+  struct ParameterGetter<ParameterSet> {
+    static
+    ParameterSet get(const boost::property_tree::ptree& config, const std::string& name) {
+      return ParameterSet(config.get_child(name));
+    };
 
-  template <typename T>
-  T getParameter(const std::string& name) const {
-    return ParameterSetImpl::ParameterGetter<T>::get(fConfig, name);
-  }
+    static
+    boost::optional<ParameterSet> getOptional(const boost::property_tree::ptree& config, const std::string& name) {
+      boost::optional<ParameterSet> res;
 
-  template <typename T>
-  boost::optional<T> getParameterOptional(const std::string& name) const {
-    return ParameterSetImpl::ParameterGetter<T>::getOptional(fConfig, name);
-  }
+      boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
+      if(child) {
+        res = ParameterSet(*child);
+      }
 
-private:
-  template <typename T, typename PChild>
-  std::vector<T> toVector(const PChild& child) {
-    std::vector<T> res;
-    for(const auto& item: child) {
-      res.push_back(item.second.data());
+      return res;
     }
-    return res;
-  }
-
-  boost::property_tree::ptree fConfig;
-};
+  };
+}
 
 #endif

@@ -72,7 +72,16 @@ TEST_CASE("ParameterSet", "[Framework]") {
       CHECK( doubles[1] == 0.5 );
       CHECK( doubles[2] == 3.14159 );
     }
+
+    SECTION("ParameterSet parameters") {
+      ParameterSet tau = pset.getParameter<ParameterSet>("TauSelection");
+
+      CHECK( tau.getParameter<int>("minProngs") == 3 );
+      CHECK( tau.getParameter<double>("ptCut") == 40. );
+      CHECK( tau.getParameter<std::string>("systematicVariation") == "systVarTESUp" );
+    }
   }
+
 
   SECTION("property_tree argument") {
     boost::property_tree::ptree config;
