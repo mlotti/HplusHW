@@ -1,10 +1,10 @@
-#ifndef __taulegSelection__
-#define __taulegSelection__
+#ifndef TriggerEfficiency_taulegEfficiency_h
+#define TriggerEfficiency_taulegEfficiency_h
 
 #include "DataFormat/interface/Event.h"
 #include "Math/GenVector/LorentzVector.h"
 
-bool taulegSelection(Event& fEvent){
+inline bool taulegSelection(Event& fEvent){
 
   boost::optional<Tau> selectedTau;
   size_t ntaus = 0;
