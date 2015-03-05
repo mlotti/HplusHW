@@ -27,7 +27,7 @@ public:
   std::vector<Tau> toVector();
 
   friend class Tau;
-  friend class TauGenerated;
+  friend class TauGenerated<TauCollection>;
   friend class Particle<TauCollection>;
 
 protected:
@@ -37,14 +37,14 @@ private:
   std::vector<std::string> fConfigurableDiscriminatorNames;
 };
 
-class Tau: public TauGenerated {
+class Tau: public TauGenerated<TauCollection> {
 public:
   Tau() {}
   Tau(TauCollection* coll, size_t index): TauGenerated(coll, index) {}
   ~Tau() {}
 
   bool configurableDiscriminators() {
-    for(auto& disc: static_cast<TauCollection *>(fCollection)->fConfigurableDiscriminators) {
+    for(auto& disc: fCollection->fConfigurableDiscriminators) {
       if(!disc->value()[index()])
         return false;
     }

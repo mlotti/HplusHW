@@ -21,13 +21,13 @@ public:
   std::vector<Electron> toVector();
 
   friend class Electron;
-  friend class ElectronGenerated;
+  friend class ElectronGenerated<ElectronCollection>;
   friend class Particle<ElectronCollection>;
 
 protected:
 };
 
-class Electron: public ElectronGenerated {
+class Electron: public ElectronGenerated<ElectronCollection> {
 public:
   Electron() {}
   Electron(ElectronCollection* coll, size_t index): ElectronGenerated(coll, index) {}

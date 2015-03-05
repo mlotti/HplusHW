@@ -21,13 +21,13 @@ public:
   std::vector<Muon> toVector();
 
   friend class Muon;
-  friend class MuonGenerated;
+  friend class MuonGenerated<MuonCollection>;
   friend class Particle<MuonCollection>;
 
 protected:
 };
 
-class Muon: public MuonGenerated {
+class Muon: public MuonGenerated<MuonCollection> {
 public:
   Muon() {}
   Muon(MuonCollection* coll, size_t index): MuonGenerated(coll, index) {}

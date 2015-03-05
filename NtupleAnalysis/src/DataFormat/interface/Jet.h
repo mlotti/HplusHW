@@ -21,13 +21,13 @@ public:
   std::vector<Jet> toVector();
 
   friend class Jet;
-  friend class JetGenerated;
+  friend class JetGenerated<JetCollection>;
   friend class Particle<JetCollection>;
 
 protected:
 };
 
-class Jet: public JetGenerated {
+class Jet: public JetGenerated<JetCollection> {
 public:
   Jet() {}
   Jet(JetCollection* coll, size_t index): JetGenerated(coll, index) {}

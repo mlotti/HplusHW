@@ -4,19 +4,12 @@
 
 #include "DataFormat/interface/Particle.h"
 
-class JetGenerated;
-
 class JetGeneratedCollection: public ParticleCollection<double> {
 public:
   explicit JetGeneratedCollection(const std::string& prefix="Jets"): ParticleCollection(prefix) {}
   ~JetGeneratedCollection() {}
 
   void setupBranches(BranchManager& mgr);
-
-  JetGenerated operator[](size_t i);
-
-  friend class JetGenerated;
-  friend class Particle<JetGeneratedCollection>;
 
 protected:
   Branch<std::vector<float>> *fSecondaryVertex;
@@ -26,21 +19,17 @@ protected:
 };
 
 
-class JetGenerated: public Particle<JetGeneratedCollection> {
+template <typename Coll>
+class JetGenerated: public Particle<Coll> {
 public:
   JetGenerated() {}
-  JetGenerated(JetGeneratedCollection* coll, size_t index): Particle<JetGeneratedCollection>(coll, index) {}
+  JetGenerated(Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~JetGenerated() {}
 
-  float secondaryVertex() { return fCollection->fSecondaryVertex->value()[index()]; }
-  float trackCountingHighEffBJetTags() { return fCollection->fTrackCountingHighEffBJetTags->value()[index()]; }
-  float trackCountingHighPurBJetTags() { return fCollection->fTrackCountingHighPurBJetTags->value()[index()]; }
-  short pdgId() { return fCollection->fPdgId->value()[index()]; }
+  float secondaryVertex() { return this->fCollection->fSecondaryVertex->value()[this->index()]; }
+  float trackCountingHighEffBJetTags() { return this->fCollection->fTrackCountingHighEffBJetTags->value()[this->index()]; }
+  float trackCountingHighPurBJetTags() { return this->fCollection->fTrackCountingHighPurBJetTags->value()[this->index()]; }
+  short pdgId() { return this->fCollection->fPdgId->value()[this->index()]; }
 };
-
-inline
-JetGenerated JetGeneratedCollection::operator[](size_t i) {
-  return JetGenerated(this, i);
-}
 
 #endif

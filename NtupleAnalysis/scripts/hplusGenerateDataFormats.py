@@ -35,7 +35,7 @@ def generateParticle(types, particle):
                 raise Exception("Mismatch in 4-vector branch types: all of them must be of the same type, and now {branch} has {type} while others have {otype}".format(branch=branch, type=realtype, otype=particleFloatType))
         else:
             branchObjects.append("  Branch<std::{vectype}> *f{vecname};".format(vectype=vectype, vecname=capname))
-            branchAccessors.append("  {type} {name}() {{ return fCollection->f{capname}->value()[index()]; }}".format(type=realtype, name=name, capname=capname))
+            branchAccessors.append("  {type} {name}() {{ return this->fCollection->f{capname}->value()[this->index()]; }}".format(type=realtype, name=name, capname=capname))
             branchBooks.append("  mgr.book(prefix()+\"_{name}\", &f{capname});".format(name=name, capname=capname))
 
 
@@ -48,8 +48,6 @@ def generateParticle(types, particle):
 
 #include "DataFormat/interface/Particle.h"
 
-class {type};
-
 class {type}Collection: public ParticleCollection<{particleFloatType}> {{
 public:
   explicit {type}Collection(const std::string& prefix="{particle}s"): ParticleCollection(prefix) {{}}
@@ -57,29 +55,20 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  {type} operator[](size_t i);
-
-  friend class {type};
-  friend class Particle<{type}Collection>;
-
 protected:
 {branchObjects}
 }};
 
 
-class {type}: public Particle<{type}Collection> {{
+template <typename Coll>
+class {type}: public Particle<Coll> {{
 public:
   {type}() {{}}
-  {type}({type}Collection* coll, size_t index): Particle<{type}Collection>(coll, index) {{}}
+  {type}(Coll* coll, size_t index): Particle<Coll>(coll, index) {{}}
   ~{type}() {{}}
 
 {branchAccessors}
 }};
-
-inline
-{type} {type}Collection::operator[](size_t i) {{
-  return {type}(this, i);
-}}
 
 #endif
 """.format(type=particle+"Generated", particle=particle, particleFloatType=particleFloatType, branchObjects="\n".join(branchObjects), branchAccessors="\n".join(branchAccessors))
