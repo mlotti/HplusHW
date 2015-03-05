@@ -9,4 +9,7 @@ void JetGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_trackCountingHighEffBJetTags", &fTrackCountingHighEffBJetTags);
   mgr.book(prefix()+"_trackCountingHighPurBJetTags", &fTrackCountingHighPurBJetTags);
   mgr.book(prefix()+"_pdgId", &fPdgId);
+  mgr.book(prefix()+"_PUIDloose", &fPUIDloose);
+  mgr.book(prefix()+"_PUIDmedium", &fPUIDmedium);
+  mgr.book(prefix()+"_PUIDtight", &fPUIDtight);
 }

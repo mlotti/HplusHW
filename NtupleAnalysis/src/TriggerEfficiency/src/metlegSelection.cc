@@ -1,7 +1,7 @@
 #include "DataFormat/interface/Event.h"
 #include "Math/VectorUtil.h"
 
-bool metlegSelection(Event fEvent){
+bool metlegSelection(Event& fEvent){
 
   std::vector<Tau> selectedTaus;
   for(Tau tau: fEvent.taus()) {

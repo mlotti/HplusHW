@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/JetDumper.h"
+#include "DataFormats/JetReco/interface/PileupJetIdentifier.h"
 
 JetDumper::JetDumper(std::vector<edm::ParameterSet> psets){
     inputCollections = psets;
@@ -20,7 +21,12 @@ JetDumper::JetDumper(std::vector<edm::ParameterSet> psets){
 	bool param = inputCollections[i].getUntrackedParameter<bool>("filter",false);
         if(param) useFilter = true;
     }
+
+    jetPUIDloose = new std::vector<bool>[inputCollections.size()];
+    jetPUIDmedium = new std::vector<bool>[inputCollections.size()];
+    jetPUIDtight = new std::vector<bool>[inputCollections.size()];
 }
+
 JetDumper::~JetDumper(){}
 
 void JetDumper::book(TTree* tree){
@@ -39,6 +45,10 @@ void JetDumper::book(TTree* tree){
     for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
       tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
     }
+
+    tree->Branch((name+"_PUIDloose").c_str(),&jetPUIDloose[i]);
+    tree->Branch((name+"_PUIDmedium").c_str(),&jetPUIDmedium[i]);
+    tree->Branch((name+"_PUIDtight").c_str(),&jetPUIDtight[i]);
   }
 }
 
@@ -49,6 +59,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
 	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
 	iEvent.getByLabel(inputtag, handle[ic]);
+
 	if(handle[ic].isValid()){
 
 	    for(size_t i=0; i<handle[ic]->size(); ++i) {
@@ -70,6 +81,22 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		  genParton = obj.genParton()->pdgId();
 		}
 		pdgId[ic].push_back(genParton);
+
+		// Jet PU ID
+		bool puidLoose  = true;
+		bool puidMedium = true;
+		bool puidTight  = true;
+
+		if(obj.hasUserData("pileupJetId:fullDiscriminant")){
+		  double PUID = obj.userFloat("pileupJetId:fullDiscriminant");
+		  puidLoose  = PUID > 0.1; //FIXME 0.1 hatusta
+		  puidMedium = PUID > 0.2; //FIXME 0.2 hatusta
+		  puidTight  = PUID > 0.3; //FIXME 0.3 hatusta
+		}
+
+		jetPUIDloose[ic].push_back(puidLoose);
+		jetPUIDmedium[ic].push_back(puidMedium);
+		jetPUIDtight[ic].push_back(puidTight);
             }
         }
     }
@@ -84,6 +111,10 @@ void JetDumper::reset(){
 	e[ic].clear();
 //        p4[ic].clear();
         pdgId[ic].clear();
+
+	jetPUIDloose[ic].clear();
+	jetPUIDmedium[ic].clear();
+	jetPUIDtight[ic].clear();
     }
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
         discriminators[ic].clear();

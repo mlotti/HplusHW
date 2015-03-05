@@ -23,6 +23,9 @@ protected:
   Branch<std::vector<float>> *fTrackCountingHighEffBJetTags;
   Branch<std::vector<float>> *fTrackCountingHighPurBJetTags;
   Branch<std::vector<short>> *fPdgId;
+  Branch<std::vector<bool>> *fPUIDloose;
+  Branch<std::vector<bool>> *fPUIDmedium;
+  Branch<std::vector<bool>> *fPUIDtight;
 };
 
 
@@ -36,6 +39,9 @@ public:
   float trackCountingHighEffBJetTags() { return fCollection->fTrackCountingHighEffBJetTags->value()[index()]; }
   float trackCountingHighPurBJetTags() { return fCollection->fTrackCountingHighPurBJetTags->value()[index()]; }
   short pdgId() { return fCollection->fPdgId->value()[index()]; }
+  bool PUIDloose() { return fCollection->fPUIDloose->value()[index()]; }
+  bool PUIDmedium() { return fCollection->fPUIDmedium->value()[index()]; }
+  bool PUIDtight() { return fCollection->fPUIDtight->value()[index()]; }
 };
 
 inline

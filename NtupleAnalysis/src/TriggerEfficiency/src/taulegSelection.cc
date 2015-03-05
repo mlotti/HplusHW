@@ -1,6 +1,6 @@
 #include "DataFormat/interface/Event.h"
 
-bool taulegSelection(Event fEvent){
+bool taulegSelection(Event& fEvent){
   std::cout << "check taulegSelection 1" << std::endl;
   Tau selectedTau;
   size_t ntaus = 0;
