@@ -16,9 +16,9 @@ public:
     return (*fColl)[fIndex];
   }
 
-  value_type operator++() {
+  ParticleIterator<Coll>& operator++() {
     ++fIndex;
-    return (*fColl)[fIndex];
+    return *this;
   }
 
   bool operator==(const ParticleIterator<Coll>& other) {
