@@ -5,6 +5,8 @@
 #include "Framework/interface/BranchManager.h"
 #include "DataFormat/interface/Tau.h"
 
+#include <algorithm>
+
 TEST_CASE("Tau", "[DataFormat]") {
   SECTION("Default prefix") {
     std::unique_ptr<TTree> tree = createRealisticTree();
@@ -52,6 +54,8 @@ TEST_CASE("Tau", "[DataFormat]") {
     }
 
     SECTION("Iterators") {
+      mgr.setEntry(0);
+
       auto iter = coll.begin();
       REQUIRE( iter != coll.end() );
       REQUIRE( iter == coll.begin() );
@@ -74,11 +78,69 @@ TEST_CASE("Tau", "[DataFormat]") {
     }
 
     SECTION("Range-for") {
+      mgr.setEntry(0);
+
       size_t i=0;
       for(Tau tau: coll) {
         CHECK( tau.pt() == coll[i].pt() );
         ++i;
       }
+    }
+
+    SECTION("Iterators for a selection") {
+      mgr.setEntry(0);
+
+      TauCollection::iterator found = coll.end();
+      for(auto iTau = coll.begin(); iTau != coll.end(); ++iTau) {
+        if((*iTau).pt() > 40) {
+          if(found == coll.end()) {
+            found = iTau;
+          }
+          else if((*iTau).pt() > (*found).pt()) {
+            found = iTau;
+          }
+        }
+      }
+
+      REQUIRE( found != coll.end() );
+      CHECK( (*found).index() == 0 );
+    }
+
+    SECTION("Iterators for a selection, nothing selected") {
+      mgr.setEntry(0);
+
+      TauCollection::iterator found = coll.end();
+      for(auto iTau = coll.begin(); iTau != coll.end(); ++iTau) {
+        if((*iTau).pt() > 80) {
+          if(found == coll.end()) {
+            found = iTau;
+          }
+          else if((*iTau).pt() > (*found).pt()) {
+            found = iTau;
+          }
+        }
+      }
+
+      CHECK( found == coll.end() );
+    }
+
+    SECTION("Standard algorithms on iterators") {
+      mgr.setEntry(0);
+
+      std::vector<Tau> dst;
+      std::copy_if(coll.begin(), coll.end(), std::back_inserter(dst),
+                   [](Tau tau) {
+                     return tau.decayModeFinding();
+                   });
+      REQUIRE( dst.size() == 2 );
+      CHECK( dst[0].index() == 0 );
+      CHECK( dst[1].index() == 2 );
+
+      auto max = std::max_element(coll.begin(), coll.end(), [](Tau a, Tau b) {
+          return a.pt() < b.pt();
+        });
+      REQUIRE( max != coll.end() );
+      CHECK( (*max).index() == 0 );
     }
   }
 
