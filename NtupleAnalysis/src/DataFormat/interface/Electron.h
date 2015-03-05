@@ -41,7 +41,7 @@ Electron ElectronCollection::operator[](size_t i) {
 
 inline
 std::vector<Electron> ElectronCollection::toVector() {
-  return ParticleCollection::toVector(*this);
+  return ParticleCollectionBase::toVector(*this);
 }
 
 #endif

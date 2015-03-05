@@ -119,6 +119,18 @@ protected:
   const std::string& prefix() const { return fPrefix; }
   const std::string& energySystematicsVariation() const { return fEnergySystematicsVariation; }
 
+  template <typename Coll>
+  static
+  std::vector<typename Coll::value_type> toVector(Coll& coll) {
+    using ValueType = typename Coll::value_type;
+    std::vector<ValueType> ret;
+    ret.reserve(coll.size());
+    for(ValueType item: coll) {
+      ret.push_back(item);
+    }
+    return ret;
+  }
+
 private:
   std::string fPrefix;
   std::string fEnergySystematicsVariation;
@@ -154,18 +166,6 @@ public:
   friend class Particle<ParticleCollection>;
 
 protected:
-  template <typename Coll>
-  static
-  std::vector<typename Coll::value_type> toVector(Coll& coll) {
-    using ValueType = typename Coll::value_type;
-    std::vector<ValueType> ret;
-    ret.reserve(coll.size());
-    for(ValueType item: coll) {
-      ret.push_back(item);
-    }
-    return ret;
-  }
-
   Branch<std::vector<float_type>> *fPt;
   Branch<std::vector<float_type>> *fEta;
   Branch<std::vector<float_type>> *fPhi;

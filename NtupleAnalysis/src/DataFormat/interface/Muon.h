@@ -41,7 +41,7 @@ Muon MuonCollection::operator[](size_t i) {
 
 inline
 std::vector<Muon> MuonCollection::toVector() {
-  return ParticleCollection::toVector(*this);
+  return ParticleCollectionBase::toVector(*this);
 }
 
 #endif

@@ -59,7 +59,7 @@ Tau TauCollection::operator[](size_t i) {
 
 inline
 std::vector<Tau> TauCollection::toVector() {
-  return ParticleCollection::toVector(*this);
+  return ParticleCollectionBase::toVector(*this);
 }
 
 #endif
