@@ -39,4 +39,8 @@ inline bool taulegSelection(Event& fEvent){
   return selected;
 }
 
+inline bool taulegOnlineSelection(Event& fEvent){
+  return true;
+}
+
 #endif

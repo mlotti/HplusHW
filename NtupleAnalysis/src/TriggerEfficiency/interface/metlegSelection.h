@@ -49,4 +49,8 @@ inline bool metlegSelection(Event& fEvent){
   return selected;
 }
 
+inline bool metlegOnlineSelection(Event& fEvent){
+  return true;
+}
+
 #endif

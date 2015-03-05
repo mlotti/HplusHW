@@ -16,7 +16,10 @@ process.addDatasetsFromMulticrab(sys.argv[1])
 
 # Example of adding an analyzer
 process.addAnalyzer("test", Analyzer("TriggerEfficiency",
-    offlineSelection = "taulegSelection",
+    offlineSelection = "metlegSelection",
+    binning = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200],
+    xLabel = "Type1 MET (GeV)",
+    yLabel = "Level-1 + HLT MET efficiency" 
 ))
 
 # Run the analysis
