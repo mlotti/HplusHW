@@ -40,7 +40,7 @@ else
 endif
 
 # Link flags
-LDFLAGS := $(ROOTLIBS) -lProof -Llib
+LDFLAGS := $(ROOTLIBS) -lProof -lGenVector -Llib 
 
 # Debugging
 ifeq "$(DEBUG)" "yes"
