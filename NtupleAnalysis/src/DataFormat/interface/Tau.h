@@ -23,8 +23,8 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  Tau operator[](size_t i);
-  std::vector<Tau> toVector();
+  Tau operator[](size_t i) const;
+  std::vector<Tau> toVector() const;
 
   friend class Tau;
   friend class TauGenerated<TauCollection>;
@@ -40,10 +40,10 @@ private:
 class Tau: public TauGenerated<TauCollection> {
 public:
   Tau() {}
-  Tau(TauCollection* coll, size_t index): TauGenerated(coll, index) {}
+  Tau(const TauCollection* coll, size_t index): TauGenerated(coll, index) {}
   ~Tau() {}
 
-  bool configurableDiscriminators() {
+  bool configurableDiscriminators() const {
     for(auto& disc: fCollection->fConfigurableDiscriminators) {
       if(!disc->value()[index()])
         return false;
@@ -53,12 +53,12 @@ public:
 };
 
 inline
-Tau TauCollection::operator[](size_t i) {
+Tau TauCollection::operator[](size_t i) const {
   return Tau(this, i);
 }
 
 inline
-std::vector<Tau> TauCollection::toVector() {
+std::vector<Tau> TauCollection::toVector() const {
   return ParticleCollectionBase::toVector(*this);
 }
 

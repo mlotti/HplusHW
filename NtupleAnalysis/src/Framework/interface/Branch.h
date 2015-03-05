@@ -26,7 +26,7 @@ public:
       tree->SetBranchAddress(this->name.c_str(), &data, &this->branch);
     }
   }
-  typename BranchTraits<T>::ReturnType value() {
+  typename BranchTraits<T>::ReturnType value() const {
     if(!cached) {
       assertValid();
       branch->GetEntry(this->entry);

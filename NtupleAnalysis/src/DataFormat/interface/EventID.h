@@ -20,9 +20,9 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  unsigned long long event() { return fEvent->value(); }
-  unsigned int       lumi()  { return fLumi->value(); }
-  unsigned int       run()   { return fRun->value(); }
+  unsigned long long event() const { return fEvent->value(); }
+  unsigned int       lumi()  const { return fLumi->value(); }
+  unsigned int       run()   const { return fRun->value(); }
 
 private:
   Branch<unsigned long long> *fEvent;

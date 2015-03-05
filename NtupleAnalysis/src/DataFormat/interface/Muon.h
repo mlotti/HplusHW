@@ -17,8 +17,8 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  Muon operator[](size_t i);
-  std::vector<Muon> toVector();
+  Muon operator[](size_t i) const;
+  std::vector<Muon> toVector() const;
 
   friend class Muon;
   friend class MuonGenerated<MuonCollection>;
@@ -30,17 +30,17 @@ protected:
 class Muon: public MuonGenerated<MuonCollection> {
 public:
   Muon() {}
-  Muon(MuonCollection* coll, size_t index): MuonGenerated(coll, index) {}
+  Muon(const MuonCollection* coll, size_t index): MuonGenerated(coll, index) {}
   ~Muon() {}
 };
 
 inline
-Muon MuonCollection::operator[](size_t i) {
+Muon MuonCollection::operator[](size_t i) const {
   return Muon(this, i);
 }
 
 inline
-std::vector<Muon> MuonCollection::toVector() {
+std::vector<Muon> MuonCollection::toVector() const {
   return ParticleCollectionBase::toVector(*this);
 }
 

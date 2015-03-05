@@ -23,13 +23,13 @@ template <typename Coll>
 class JetGenerated: public Particle<Coll> {
 public:
   JetGenerated() {}
-  JetGenerated(Coll* coll, size_t index): Particle<Coll>(coll, index) {}
+  JetGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~JetGenerated() {}
 
-  float secondaryVertex() { return this->fCollection->fSecondaryVertex->value()[this->index()]; }
-  float trackCountingHighEffBJetTags() { return this->fCollection->fTrackCountingHighEffBJetTags->value()[this->index()]; }
-  float trackCountingHighPurBJetTags() { return this->fCollection->fTrackCountingHighPurBJetTags->value()[this->index()]; }
-  short pdgId() { return this->fCollection->fPdgId->value()[this->index()]; }
+  float secondaryVertex() const { return this->fCollection->fSecondaryVertex->value()[this->index()]; }
+  float trackCountingHighEffBJetTags() const { return this->fCollection->fTrackCountingHighEffBJetTags->value()[this->index()]; }
+  float trackCountingHighPurBJetTags() const { return this->fCollection->fTrackCountingHighPurBJetTags->value()[this->index()]; }
+  short pdgId() const { return this->fCollection->fPdgId->value()[this->index()]; }
 };
 
 #endif

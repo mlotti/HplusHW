@@ -90,7 +90,7 @@ TEST_CASE("Tau", "[DataFormat]") {
     SECTION("Iterators for a selection") {
       mgr.setEntry(0);
 
-      TauCollection::iterator found = coll.end();
+      TauCollection::const_iterator found = coll.end();
       for(auto iTau = coll.begin(); iTau != coll.end(); ++iTau) {
         if((*iTau).pt() > 40) {
           if(found == coll.end()) {
@@ -109,7 +109,7 @@ TEST_CASE("Tau", "[DataFormat]") {
     SECTION("Iterators for a selection, nothing selected") {
       mgr.setEntry(0);
 
-      TauCollection::iterator found = coll.end();
+      TauCollection::const_iterator found = coll.end();
       for(auto iTau = coll.begin(); iTau != coll.end(); ++iTau) {
         if((*iTau).pt() > 80) {
           if(found == coll.end()) {

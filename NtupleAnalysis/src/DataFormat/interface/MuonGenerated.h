@@ -20,10 +20,10 @@ template <typename Coll>
 class MuonGenerated: public Particle<Coll> {
 public:
   MuonGenerated() {}
-  MuonGenerated(Coll* coll, size_t index): Particle<Coll>(coll, index) {}
+  MuonGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~MuonGenerated() {}
 
-  bool isGlobalMuon() { return this->fCollection->fIsGlobalMuon->value()[this->index()]; }
+  bool isGlobalMuon() const { return this->fCollection->fIsGlobalMuon->value()[this->index()]; }
 
 };
 

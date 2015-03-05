@@ -67,18 +67,18 @@ public:
     mgr.book(prefix()+"_phi"+energySystematicsVariation(), &fPhi);
   }
 
-  float_type et() { return fEt->value(); }
-  float_type phi() { return fPhi->value(); }
+  float_type et() const { return fEt->value(); }
+  float_type phi() const { return fPhi->value(); }
 
   // Note: asking for polarP2 is more expensive than asking et/phi
   // separately, so call only when necessary
-  Polar2DVector polarP2() {
+  Polar2DVector polarP2() const {
     return Polar2DVector(et(), phi());
   }
 
   // Note: asking for cartesian p2 is even more expensive because of
   // the coordinate change
-  XYVector p2() {
+  XYVector p2() const {
     return XYVector(polarP2());
   }
 

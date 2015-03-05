@@ -20,7 +20,7 @@ template <typename Coll>
 class ElectronGenerated: public Particle<Coll> {
 public:
   ElectronGenerated() {}
-  ElectronGenerated(Coll* coll, size_t index): Particle<Coll>(coll, index) {}
+  ElectronGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~ElectronGenerated() {}
 
 
