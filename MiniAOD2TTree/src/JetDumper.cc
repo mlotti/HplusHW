@@ -14,6 +14,8 @@ JetDumper::JetDumper(std::vector<edm::ParameterSet> psets){
 
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<float>[inputCollections.size()*nDiscriminators];
+    nUserfloats = inputCollections[0].getParameter<std::vector<std::string> >("userFloats").size();
+    userfloats = new std::vector<double>[inputCollections.size()*nUserfloats];
     handle = new edm::Handle<edm::View<pat::Jet> >[inputCollections.size()];
 
     useFilter = false;
@@ -45,7 +47,13 @@ void JetDumper::book(TTree* tree){
     for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
       tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
     }
-
+    std::vector<std::string> userfloatNames = inputCollections[i].getParameter<std::vector<std::string> >("userFloats");
+    for(size_t iDiscr = 0; iDiscr < userfloatNames.size(); ++iDiscr) {
+      std::string branch_name = userfloatNames[iDiscr];
+      size_t pos_semicolon = branch_name.find(":");
+      branch_name = branch_name.erase(pos_semicolon,1);
+      tree->Branch((name+"_"+branch_name).c_str(),&userfloats[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
+    }
     tree->Branch((name+"_PUIDloose").c_str(),&jetPUIDloose[i]);
     tree->Branch((name+"_PUIDmedium").c_str(),&jetPUIDmedium[i]);
     tree->Branch((name+"_PUIDtight").c_str(),&jetPUIDtight[i]);
@@ -58,6 +66,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
 	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
 	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
+	std::vector<std::string> userfloatNames = inputCollections[ic].getParameter<std::vector<std::string> >("userFloats");
 	iEvent.getByLabel(inputtag, handle[ic]);
 
 	if(handle[ic].isValid()){
@@ -75,7 +84,9 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
 		    discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(obj.bDiscriminator(discriminatorNames[iDiscr]));
 		}
-
+                for(size_t iDiscr = 0; iDiscr < userfloatNames.size(); ++iDiscr) {
+                    userfloats[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(obj.userFloat(userfloatNames[iDiscr]));
+                }
 		int genParton = 0;
 		if(obj.genParton()){
 		  genParton = obj.genParton()->pdgId();
@@ -118,5 +129,8 @@ void JetDumper::reset(){
     }
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
         discriminators[ic].clear();
+    }
+    for(size_t ic = 0; ic < inputCollections.size()*nUserfloats; ++ic){
+        userfloats[ic].clear();
     }
 }

@@ -32,6 +32,8 @@ class JetDumper : public BaseDumper {
     private:
 	edm::Handle<edm::View<pat::Jet> > *handle;
         std::vector<float> *discriminators;
+        std::vector<double> *userfloats;
+	int nUserfloats;
 
 	std::vector<bool> *jetPUIDloose;
 	std::vector<bool> *jetPUIDmedium;
