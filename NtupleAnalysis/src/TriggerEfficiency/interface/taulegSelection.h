@@ -1,8 +1,12 @@
+#ifndef __taulegSelection__
+#define __taulegSelection__
+
 #include "DataFormat/interface/Event.h"
+#include "Math/GenVector/LorentzVector.h"
 
 bool taulegSelection(Event& fEvent){
-  std::cout << "check taulegSelection 1" << std::endl;
-  Tau selectedTau;
+
+  boost::optional<Tau> selectedTau;
   size_t ntaus = 0;
   for(Tau tau: fEvent.taus()) {
     if(!(tau.pt() > 20)) continue;
@@ -12,24 +16,27 @@ bool taulegSelection(Event& fEvent){
     if(!tau.decayModeFinding()) continue;
 
     ntaus++;
-    if(tau.pt() > selectedTau.pt()) selectedTau = tau;
+    if(!selectedTau || (tau.pt() > selectedTau->pt()) ) selectedTau = tau;
   }
+  if(!selectedTau) return false;
 
-  Muon selectedMuon;
+  boost::optional<Muon> selectedMuon;
   size_t nmuons = 0;
   for(Muon muon: fEvent.muons()) {
     if(!(muon.pt() > 15)) continue;
     if(!(muon.isGlobalMuon())) continue;
 
     nmuons++;
-    if(muon.pt() > selectedMuon.pt()) selectedMuon = muon;
+    if(!selectedMuon || (muon.pt() > selectedMuon->pt()) ) selectedMuon = muon;
   }
+  if(!selectedMuon) return false;
 
-  double muTauInvMass = (selectedMuon.p4() + selectedTau.p4()).M();
-  double muMetMt = sqrt( 2 * selectedMuon.pt() * fEvent.met().et() * (1-cos(selectedMuon.phi()-fEvent.met().phi())) );
+  double muTauInvMass = (selectedMuon->p4() + selectedTau->p4()).M();
+  double muMetMt = sqrt( 2 * selectedMuon->pt() * fEvent.met_Type1().et() * (1-cos(selectedMuon->phi()-fEvent.met_Type1().phi())) );
 
   bool selected = false;
-  std::cout << "check " << ntaus << " " << nmuons << " " << muTauInvMass  << " " << muMetMt << std::endl; 
   if(ntaus > 0 && nmuons > 0 && muTauInvMass < 80 && muMetMt < 40) selected = true;
   return selected;
 }
+
+#endif

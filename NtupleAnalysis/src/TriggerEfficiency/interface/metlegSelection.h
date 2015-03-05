@@ -1,3 +1,6 @@
+#ifndef __metlegSelection__
+#define __metlegSelection__
+
 #include "DataFormat/interface/Event.h"
 #include "Math/VectorUtil.h"
 
@@ -45,3 +48,5 @@ bool metlegSelection(Event& fEvent){
   if(ntaus > 0 && njets > 2 && nmuons == 0 && nelectrons == 0) selected = true;
   return selected;
 }
+
+#endif

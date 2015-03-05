@@ -6,8 +6,10 @@
 #include "TH1F.h"
 #include "TDirectory.h"
 
-extern bool taulegSelection(Event&);
-extern bool metlegSelection(Event&);
+#include "TriggerEfficiency/interface/taulegSelection.h"
+#include "TriggerEfficiency/interface/metlegSelection.h"
+//extern bool taulegSelection(Event&);
+//extern bool metlegSelection(Event&);
 
 
 class TriggerEfficiency: public BaseSelector {
