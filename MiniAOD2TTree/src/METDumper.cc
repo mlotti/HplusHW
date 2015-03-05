@@ -23,11 +23,11 @@ void METDumper::book(TTree* tree){
 	std::string name = inputCollections[i].getUntrackedParameter<std::string>("branchname","");
 	if(name.length() == 0) name = inputCollections[i].getParameter<edm::InputTag>("src").label();
 	  //tree->Branch((name+"_p4").c_str(),&MET_p4[i]);
-        tree->Branch(name.c_str(),&MET[i]);
+        tree->Branch((name+"_et").c_str(),&MET[i]);
         tree->Branch((name+"_phi").c_str(),&MET_phi[i]);  
     }
 //    tree->Branch("GenMET_p4",&GenMET_p4);
-    tree->Branch("GenMET",&GenMET);
+    tree->Branch("GenMET_et",&GenMET);
     tree->Branch("GenMET_phi",&GenMET_phi);
 }
 
