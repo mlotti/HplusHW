@@ -6,8 +6,8 @@
 #include "TH1F.h"
 #include "TDirectory.h"
 
-#include "TriggerEfficiency/interface/taulegSelection.h"
-#include "TriggerEfficiency/interface/metlegSelection.h"
+#include "TriggerEfficiency/interface/TauLegSelection.h"
+#include "TriggerEfficiency/interface/METLegSelection.h"
 
 
 class TriggerEfficiency: public BaseSelector {
@@ -20,15 +20,14 @@ public:
   virtual void process(Long64_t entry) override;
 
 private:
-  bool offlineSelection(std::string);
-  bool onlineSelection(std::string);
-
   Event fEvent;
 
   const std::string fOfflineSelection;
   std::vector<int> fbinning;
   std::string fxLabel;
   std::string fyLabel;
+
+  BaseSelection* selection;
 
   Count cAllEvents;
   Count cSelection;
@@ -51,6 +50,9 @@ TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   cSelection(fEventCounter.addCounter("Selection"))
 {
   std::cout << "Offline selection " << fOfflineSelection << std::endl;
+  //  if(fOfflineSelection == "taulegSelection") selection = new TauLegSelection;
+selection = new METLegSelection;
+  //  if(fOfflineSelection == "metlegSelection") selection = new METLegSelection;
 }
 
 void TriggerEfficiency::book(TDirectory *dir) {
@@ -76,22 +78,12 @@ void TriggerEfficiency::setupBranches(BranchManager& branchManager) {
 void TriggerEfficiency::process(Long64_t entry) {
   cAllEvents.increment();
 
-  if(!offlineSelection(fOfflineSelection)) return;
+  if(!selection->offlineSelection(fEvent)) return;
   cSelection.increment();
 
-  if(!onlineSelection(fOfflineSelection)){
+  double xvariable = selection->xVariable();
+  hDen->Fill(xvariable);
+  if(!selection->onlineSelection(fEvent)) hNum->Fill(xvariable);
 
-  }
 }
 
-bool TriggerEfficiency::offlineSelection(std::string selection){
-  if(selection == "taulegSelection") return taulegSelection(fEvent);
-  if(selection == "metlegSelection") return metlegSelection(fEvent);
-  return false;
-}
-
-bool TriggerEfficiency::onlineSelection(std::string selection){
-  if(selection == "taulegSelection") return taulegOnlineSelection(fEvent);
-  if(selection == "metlegSelection") return metlegOnlineSelection(fEvent);
-  return false;
-}

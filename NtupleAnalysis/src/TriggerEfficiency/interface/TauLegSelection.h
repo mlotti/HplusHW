@@ -1,10 +1,25 @@
-#ifndef TriggerEfficiency_taulegEfficiency_h
-#define TriggerEfficiency_taulegEfficiency_h
+#ifndef TriggerEfficiency_TauLegSelection_h
+#define TriggerEfficiency_TauLegSelection_h
 
-#include "DataFormat/interface/Event.h"
-#include "Math/GenVector/LorentzVector.h"
+#include "TriggerEfficiency/interface/BaseSelection.h"
 
-inline bool taulegSelection(Event& fEvent){
+class TauLegSelection : public BaseSelection {
+ public:
+  TauLegSelection();
+  ~TauLegSelection();
+
+  bool offlineSelection(Event&);
+  bool onlineSelection(Event&);
+
+ private:
+
+};
+TauLegSelection::TauLegSelection(){}
+TauLegSelection::~TauLegSelection(){}
+
+bool TauLegSelection::offlineSelection(Event& fEvent){
+
+  if(!this->passedCtrlTtrigger(fEvent)) return false;
 
   boost::optional<Tau> selectedTau;
   size_t ntaus = 0;
@@ -19,6 +34,7 @@ inline bool taulegSelection(Event& fEvent){
     if(!selectedTau || (tau.pt() > selectedTau->pt()) ) selectedTau = tau;
   }
   if(!selectedTau) return false;
+  xvariable = selectedTau->pt();
 
   boost::optional<Muon> selectedMuon;
   size_t nmuons = 0;
@@ -38,8 +54,7 @@ inline bool taulegSelection(Event& fEvent){
   if(ntaus > 0 && nmuons > 0 && muTauInvMass < 80 && muMetMt < 40) selected = true;
   return selected;
 }
-
-inline bool taulegOnlineSelection(Event& fEvent){
+bool TauLegSelection::onlineSelection(Event& fEvent){
   return true;
 }
 
