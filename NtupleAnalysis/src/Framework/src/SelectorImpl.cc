@@ -197,6 +197,7 @@ Bool_t SelectorImpl::Process(Long64_t entry) {
   printStatus();
   ++fProcessed;
 
+  fChain->LoadTree(entry); // set the entry number within the tree, needed for TTreeFormula, does not read anything
   fEventSaver->beginEvent();
   fBranchManager->setEntry(entry);
   for(BaseSelector *selector: fSelectors) {
