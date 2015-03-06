@@ -19,7 +19,7 @@ binning = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
 xLabel  = "#tau-jet p_{T} (GeV/c)"
 yLabel  = "HLT tau efficiency"
 
-process.addAnalyzer("Efficiency2012D", Analyzer("TriggerEfficiency",
+process.addAnalyzer("TauLegEfficiency2012D", Analyzer("TriggerEfficiency",
     offlineSelection = leg,
     binning = binning,
     xLabel  = xLabel,
@@ -44,7 +44,7 @@ process.addAnalyzer("Efficiency2012D", Analyzer("TriggerEfficiency",
     ],
 ))
 
-process.addAnalyzer("Efficiency2012ABCD", Analyzer("TriggerEfficiency",
+process.addAnalyzer("TauLegEfficiency2012ABCD", Analyzer("TriggerEfficiency",
     offlineSelection = leg,
     binning = binning,
     xLabel  = xLabel,

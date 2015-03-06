@@ -26,6 +26,16 @@ private:
   std::vector<int> fbinning;
   std::string fxLabel;
   std::string fyLabel;
+  std::string fdataera;
+  float flumi;
+  int frunMin;
+  int frunMax;
+  std::string fsample1;
+  std::string fsample2;
+  std::vector<std::string> fcontrolTriggers1;
+  std::vector<std::string> fcontrolTriggers2;
+  std::vector<std::string> fsignalTriggers1;
+  std::vector<std::string> fsignalTriggers2;
 
   BaseSelection* selection;
 
@@ -46,6 +56,16 @@ TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   fbinning(config.getParameter<std::vector<int>>("binning")),
   fxLabel(config.getParameter<std::string>("xLabel")),
   fyLabel(config.getParameter<std::string>("yLabel")),          
+  fdataera(config.getParameter<std::string>("dataera")),
+  flumi(config.getParameter<float>("lumi")),
+  frunMin(config.getParameter<int>("runMin")),
+  frunMax(config.getParameter<int>("runMax")),
+  fsample1(config.getParameter<std::string>("sample1")),
+  fsample2(config.getParameter<std::string>("sample2")),
+  fcontrolTriggers1(config.getParameter<std::vector<std::string>>("controlTriggers1")),
+  fcontrolTriggers2(config.getParameter<std::vector<std::string>>("controlTriggers2")),
+  fsignalTriggers1(config.getParameter<std::vector<std::string>>("signalTriggers1")),
+  fsignalTriggers2(config.getParameter<std::vector<std::string>>("signalTriggers2")),
   cAllEvents(fEventCounter.addCounter("All events")),
   cSelection(fEventCounter.addCounter("Selection"))
 {
