@@ -8,8 +8,8 @@ class TauLegSelection : public BaseSelection {
   TauLegSelection();
   ~TauLegSelection();
 
-  bool offlineSelection(Event&);
-  bool onlineSelection(Event&);
+  bool offlineSelection(const Event&);
+  bool onlineSelection(const Event&);
 
  private:
 
@@ -17,7 +17,7 @@ class TauLegSelection : public BaseSelection {
 TauLegSelection::TauLegSelection(){}
 TauLegSelection::~TauLegSelection(){}
 
-bool TauLegSelection::offlineSelection(Event& fEvent){
+bool TauLegSelection::offlineSelection(const Event& fEvent){
 
   if(!this->passedCtrlTtrigger(fEvent)) return false;
 
@@ -54,7 +54,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent){
   if(ntaus > 0 && nmuons > 0 && muTauInvMass < 80 && muMetMt < 40) selected = true;
   return selected;
 }
-bool TauLegSelection::onlineSelection(Event& fEvent){
+bool TauLegSelection::onlineSelection(const Event& fEvent){
   return true;
 }
 

@@ -8,19 +8,19 @@ class BaseSelection {
   BaseSelection(){}
   ~BaseSelection(){}
 
-  virtual bool offlineSelection(Event&) = 0;
-  virtual bool onlineSelection(Event&) = 0;
+  virtual bool offlineSelection(const Event&) = 0;
+  virtual bool onlineSelection(const Event&) = 0;
 
   double xVariable() { return xvariable;}
 
  protected:
 
-  bool passedCtrlTtrigger(Event&);
+  bool passedCtrlTtrigger(const Event&);
 
   double xvariable;
 };
 
-bool BaseSelection::passedCtrlTtrigger(Event& fEvent){
+bool BaseSelection::passedCtrlTtrigger(const Event& fEvent){
   return true;
 }
 #endif
