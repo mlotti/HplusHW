@@ -206,6 +206,7 @@ class Process:
         print
         print "Results are in", outputDir
 
+        return outputDir
 
 if __name__ == "__main__":
     import unittest
