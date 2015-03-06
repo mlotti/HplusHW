@@ -33,9 +33,9 @@ protected:
   void assertValid() const;
 
   const std::string name;
-  TBranch *branch;
+  mutable TBranch *branch;
   Long64_t entry;
-  bool cached;
+  mutable bool cached;
 };
 
 #endif

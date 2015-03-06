@@ -4,8 +4,6 @@
 
 #include "DataFormat/interface/Particle.h"
 
-class MuonGenerated;
-
 class MuonGeneratedCollection: public ParticleCollection<double> {
 public:
   explicit MuonGeneratedCollection(const std::string& prefix="Muons"): ParticleCollection(prefix) {}
@@ -13,29 +11,20 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  MuonGenerated operator[](size_t i);
-
-  friend class MuonGenerated;
-  friend class Particle<MuonGeneratedCollection>;
-
 protected:
   Branch<std::vector<bool>> *fIsGlobalMuon;
 };
 
 
-class MuonGenerated: public Particle<MuonGeneratedCollection> {
+template <typename Coll>
+class MuonGenerated: public Particle<Coll> {
 public:
   MuonGenerated() {}
-  MuonGenerated(MuonGeneratedCollection* coll, size_t index): Particle<MuonGeneratedCollection>(coll, index) {}
+  MuonGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~MuonGenerated() {}
 
-  bool isGlobalMuon() { return fCollection->fIsGlobalMuon->value()[index()]; }
+  bool isGlobalMuon() const { return this->fCollection->fIsGlobalMuon->value()[this->index()]; }
 
 };
-
-inline
-MuonGenerated MuonGeneratedCollection::operator[](size_t i) {
-  return MuonGenerated(this, i);
-}
 
 #endif

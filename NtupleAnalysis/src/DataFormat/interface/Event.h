@@ -21,16 +21,16 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  EventID& eventID() { return fEventID; }
-  TauCollection& taus() { return fTauCollection; }
-  JetCollection& jets() { return fJetCollection; }
-  ElectronCollection& electrons() { return fElectronCollection; }
-  MuonCollection& muons() { return fMuonCollection; }
+  const EventID& eventID() const { return fEventID; }
+  const TauCollection& taus() const { return fTauCollection; }
+  const JetCollection& jets() const { return fJetCollection; }
+  const ElectronCollection& electrons() const { return fElectronCollection; }
+  const MuonCollection& muons() const { return fMuonCollection; }
 
-  MET& genMET() { return fGenMET; }
+  const MET& genMET() const { return fGenMET; }
 
-  MET& met() { return met_Type1(); }
-  MET& met_Type1() { return fMET_Type1; }
+  const MET& met() const { return met_Type1(); }
+  const MET& met_Type1() const { return fMET_Type1; }
 
 private:
   EventID fEventID;

@@ -17,31 +17,31 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  Electron operator[](size_t i);
-  std::vector<Electron> toVector();
+  Electron operator[](size_t i) const;
+  std::vector<Electron> toVector() const;
 
   friend class Electron;
-  friend class ElectronGenerated;
+  friend class ElectronGenerated<ElectronCollection>;
   friend class Particle<ElectronCollection>;
 
 protected:
 };
 
-class Electron: public ElectronGenerated {
+class Electron: public ElectronGenerated<ElectronCollection> {
 public:
   Electron() {}
-  Electron(ElectronCollection* coll, size_t index): ElectronGenerated(coll, index) {}
+  Electron(const ElectronCollection* coll, size_t index): ElectronGenerated(coll, index) {}
   ~Electron() {}
 };
 
 inline
-Electron ElectronCollection::operator[](size_t i) {
+Electron ElectronCollection::operator[](size_t i) const {
   return Electron(this, i);
 }
 
 inline
-std::vector<Electron> ElectronCollection::toVector() {
-  return ParticleCollection::toVector(*this);
+std::vector<Electron> ElectronCollection::toVector() const {
+  return ParticleCollectionBase::toVector(*this);
 }
 
 #endif

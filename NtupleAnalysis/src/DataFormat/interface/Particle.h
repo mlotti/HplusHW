@@ -74,29 +74,29 @@ public:
   using LorentzVector = typename math::LorentzVectorT<float_type>;
 
   Particle(): ParticleBase(), fCollection(nullptr) {}
-  Particle(Coll *coll, size_t index): ParticleBase(index), fCollection(coll) {}
+  Particle(const Coll *coll, size_t index): ParticleBase(index), fCollection(coll) {}
   ~Particle() {}
 
   bool isValid() const { return fCollection != nullptr; }
 
-  float_type pt()  { return fCollection->fPt->value()[index()]; }
-  float_type eta() { return fCollection->fEta->value()[index()]; }
-  float_type phi() { return fCollection->fPhi->value()[index()]; }
-  float_type e()   { return fCollection->fE->value()[index()]; }
+  float_type pt()  const { return fCollection->fPt->value()[index()]; }
+  float_type eta() const { return fCollection->fEta->value()[index()]; }
+  float_type phi() const { return fCollection->fPhi->value()[index()]; }
+  float_type e()   const { return fCollection->fE->value()[index()]; }
 
   // Note: asking for polarP4 is more expensive than asking any of
   // pt/eta/phi/e, so call this only when necessary
-  PolarLorentzVector polarP4() {
+  PolarLorentzVector polarP4() const {
     return PolarLorentzVector(pt(), eta(), phi(), e());
   }
   // Note: asking for cartesian p4 is even more expensive because of
   // the coordinate change
-  LorentzVector p4() {
+  LorentzVector p4() const {
     return LorentzVector(polarP4());
   }
 
 protected:
-  Coll *fCollection;
+  const Coll *fCollection;
 };
 
 ////////////////////////////////////////
@@ -118,6 +118,18 @@ public:
 protected:
   const std::string& prefix() const { return fPrefix; }
   const std::string& energySystematicsVariation() const { return fEnergySystematicsVariation; }
+
+  template <typename Coll>
+  static
+  std::vector<typename Coll::value_type> toVector(Coll& coll) {
+    using ValueType = typename Coll::value_type;
+    std::vector<ValueType> ret;
+    ret.reserve(coll.size());
+    for(ValueType item: coll) {
+      ret.push_back(item);
+    }
+    return ret;
+  }
 
 private:
   std::string fPrefix;
@@ -145,27 +157,15 @@ public:
     mgr.book(prefix()+"_e"   +energySystematicsVariation(), &fE);
   }
 
-  size_t size() { return fPt->value().size(); }
+  size_t size() const { return fPt->value().size(); }
 
-  Particle<ParticleCollection> operator[](size_t i) {
+  Particle<ParticleCollection> operator[](size_t i) const {
     return Particle<ParticleCollection>(this, i);
   }
 
   friend class Particle<ParticleCollection>;
 
 protected:
-  template <typename Coll>
-  static
-  std::vector<typename Coll::value_type> toVector(Coll& coll) {
-    using ValueType = typename Coll::value_type;
-    std::vector<ValueType> ret;
-    ret.reserve(coll.size());
-    for(ValueType item: coll) {
-      ret.push_back(item);
-    }
-    return ret;
-  }
-
   Branch<std::vector<float_type>> *fPt;
   Branch<std::vector<float_type>> *fEta;
   Branch<std::vector<float_type>> *fPhi;
