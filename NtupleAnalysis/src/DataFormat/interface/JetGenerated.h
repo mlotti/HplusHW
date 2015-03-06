@@ -33,9 +33,9 @@ public:
   float trackCountingHighEffBJetTags() const { return this->fCollection->fTrackCountingHighEffBJetTags->value()[this->index()]; }
   float trackCountingHighPurBJetTags() const { return this->fCollection->fTrackCountingHighPurBJetTags->value()[this->index()]; }
   short pdgId() const { return this->fCollection->fPdgId->value()[this->index()]; }
-  bool PUIDloose() { return fCollection->fPUIDloose->value()[index()]; }
-  bool PUIDmedium() { return fCollection->fPUIDmedium->value()[index()]; }
-  bool PUIDtight() { return fCollection->fPUIDtight->value()[index()]; }
+  bool PUIDloose() const { return this->fCollection->fPUIDloose->value()[this->index()]; }
+  bool PUIDmedium() const { return this->fCollection->fPUIDmedium->value()[this->index()]; }
+  bool PUIDtight() const { return this->fCollection->fPUIDtight->value()[this->index()]; }
 };
 
 #endif
