@@ -12,9 +12,6 @@ FormulaManager::~FormulaManager() {}
 void FormulaManager::setupBranch(TTree *tree) {
   for(FormulaImpl& impl: fFormulas) {
     impl.fFormula.reset(new TTreeFormula(impl.fExpression.c_str(), impl.fExpression.c_str(), tree));
-    if(impl.fFormula->GetNcodes() == 0) {
-      throw std::runtime_error("The formula "+impl.fExpression+" does not depend on any branch in TTree "+std::string(tree->GetName()));
-    }
     // we don't modify the formula after the construction, so we can benefit from quick load
     //impl.fFormula->SetQuickLoad(kTRUE);
   }
@@ -35,4 +32,9 @@ Formula FormulaManager::book(const std::string& expression) {
   }
   fFormulas.emplace_back(expression);
   return Formula(this, fFormulas.size()-1);
+}
+
+void FormulaManager::assertValid(size_t index) const {
+  if(!isValid(index))
+    throw std::runtime_error("The formula "+fFormulas[index].fExpression+" does not depend on any branch in the TTree");
 }

@@ -40,9 +40,16 @@ private:
     std::unique_ptr<TTreeFormula> fFormula;
   };
 
+  bool isValid(size_t index) const {
+    return fFormulas[index].fFormula->GetNcodes() > 0;
+  }
+
   double value(size_t index) const {
+    assertValid(index);
     return fFormulas[index].fFormula->EvalInstance();
   };
+
+  void assertValid(size_t index) const;
 
   friend Formula;
 

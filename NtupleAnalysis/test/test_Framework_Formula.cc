@@ -85,6 +85,17 @@ TEST_CASE("Formula", "[Framework]") {
     CHECK( static_cast<int>(formula.value()) == 4 );
   }
 
+  SECTION("Formula to non-existent branch") {
+    Formula formula = mgr.book("foobar");
+    mgr.setupBranch(tree.get());
+
+    REQUIRE( formula.isValid() == false );
+
+    tree->LoadTree(0);
+    REQUIRE_THROWS_AS( formula.value(), std::runtime_error );
+  }
+
+
   SECTION("Formula and a branch to the same") {
     Formula formula = mgr.book("event");
     mgr.setupBranch(tree.get());
@@ -144,4 +155,5 @@ TEST_CASE("Formula", "[Framework]") {
     CHECK( event.eventID().event() == 3);
     CHECK( event.taus().size() == 2 );
   }
+
 }
