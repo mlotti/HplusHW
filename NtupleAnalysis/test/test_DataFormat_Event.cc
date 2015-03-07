@@ -157,4 +157,24 @@ TEST_CASE("Event", "[DataFormat]") {
       CHECK( event.taus()[0].configurableDiscriminators() == false );
     }
   }
+
+  SECTION("Trigger OR") {
+    std::unique_ptr<TTree> tree = createRealisticTree();
+
+    BranchManager mgr;
+    mgr.setTree(tree.get());
+
+    ParameterSet config("{\"Trigger\": {\"triggerOR\": [\"HLT_Trig1\", \"HLT_Trig2\"]}}");
+    Event event(config);
+    event.setupBranches(mgr);
+
+    mgr.setEntry(0);
+    CHECK( event.configurableTriggerDecision() == true );
+
+    mgr.setEntry(1);
+    CHECK( event.configurableTriggerDecision() == true );
+
+    mgr.setEntry(2);
+    CHECK( event.configurableTriggerDecision() == false );
+  }
 }

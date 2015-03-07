@@ -16,7 +16,7 @@ public:
     fBranchNames = names;
   }
 
-  void setupBranch(BranchManager& mgr);
+  void setupBranches(BranchManager& mgr);
 
   bool value() const {
     if(fBranches.empty())

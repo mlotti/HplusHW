@@ -3,6 +3,7 @@
 #define DataFormat_Event_h
 
 #include "Framework/interface/ParameterSet.h"
+#include "Tools/interface/BooleanOr.h"
 
 #include "DataFormat/interface/EventID.h"
 #include "DataFormat/interface/Tau.h"
@@ -21,6 +22,10 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
+  bool configurableTriggerDecision() const {
+    return fTriggerOr.value();
+  }
+
   const EventID& eventID() const { return fEventID; }
   const TauCollection& taus() const { return fTauCollection; }
   const JetCollection& jets() const { return fJetCollection; }
@@ -34,6 +39,9 @@ public:
 
 private:
   EventID fEventID;
+
+  BooleanOr fTriggerOr;
+
   TauCollection fTauCollection;
   JetCollection fJetCollection;
   ElectronCollection fElectronCollection;

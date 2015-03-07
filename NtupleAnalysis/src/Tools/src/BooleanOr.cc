@@ -3,7 +3,7 @@
 BooleanOr::BooleanOr() {}
 BooleanOr::~BooleanOr() {}
 
-void BooleanOr::setupBranch(BranchManager& mgr) {
+void BooleanOr::setupBranches(BranchManager& mgr) {
   for(auto& name: fBranchNames) {
     Branch<bool> *branch = nullptr;
     mgr.book(name, &branch);

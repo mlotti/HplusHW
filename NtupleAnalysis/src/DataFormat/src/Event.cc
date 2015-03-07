@@ -9,6 +9,12 @@ Event::Event():
   fMET_Type1("MET_Type1")
 {}
 Event::Event(const ParameterSet& config): Event() {
+  boost::optional<std::vector<std::string>> triggerOR = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR");
+  if(triggerOR) {
+    fTriggerOr.setBranchNames(*triggerOR);
+  }
+
+
   bool variationAssigned = false;
 
   boost::optional<std::string> jetSyst = config.getParameterOptional<std::string>("JetSelection.systematicVariation");
@@ -37,6 +43,9 @@ Event::~Event() {}
 
 void Event::setupBranches(BranchManager& mgr) {
   fEventID.setupBranches(mgr);
+
+  fTriggerOr.setupBranches(mgr);
+
   fTauCollection.setupBranches(mgr);
   fJetCollection.setupBranches(mgr);
   fMuonCollection.setupBranches(mgr);
