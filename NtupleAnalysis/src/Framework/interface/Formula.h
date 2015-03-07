@@ -10,10 +10,6 @@ class Formula {
 public:
   Formula() {}
 
-  bool isValid() const {
-    return fManager->isValid(fIndex);
-  }
-
   double value() const {
     return fManager->value(fIndex);
   }

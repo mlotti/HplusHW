@@ -35,6 +35,6 @@ Formula FormulaManager::book(const std::string& expression) {
 }
 
 void FormulaManager::assertValid(size_t index) const {
-  if(!isValid(index))
+  if(fFormulas[index].fFormula->GetNcodes() == 0)
     throw std::runtime_error("The formula "+fFormulas[index].fExpression+" does not depend on any branch in the TTree");
 }
