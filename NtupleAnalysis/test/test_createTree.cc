@@ -9,27 +9,32 @@ std::unique_ptr<TTree> createSimpleTree() {
   int b_event;
   unsigned int b_lumi;
   unsigned long long b_run;
+  bool b_trigger;
   std::vector<int> b_num1;
   std::vector<float> b_num2;
   tree->Branch("event", &b_event);
   tree->Branch("lumi", &b_lumi);
   tree->Branch("run", &b_run);
+  tree->Branch("trigger", &b_trigger);
   tree->Branch("num1", &b_num1);
   tree->Branch("num2", &b_num2);
 
   b_event = 1;
   b_lumi = 2;
   b_run = 3;
+  b_trigger = true;
   b_num1 = std::vector<int>{1,2,3};
   b_num2 = std::vector<float>{0.1f, 0.2f, 0.3f};
   tree->Fill();
 
   b_event = 2;
+  b_trigger = false;
   b_num1 = std::vector<int>{4};
   b_num2 = std::vector<float>{10.f, 20.f, 30.f, 40.f, 50.f};
   tree->Fill();
 
   b_event = 3;
+  b_trigger = true;
   b_num1 = std::vector<int>{-10, 0, 10, 100, 1000};
   b_num2 = std::vector<float>{-1e10f, -5e5f, 1.f};
   tree->Fill();

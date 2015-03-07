@@ -6,8 +6,6 @@
 #include "Framework/interface/BranchManager.h"
 #include "DataFormat/interface/Event.h"
 
-#include <iostream>
-
 TEST_CASE("Formula", "[Framework]") {
   std::unique_ptr<TTree> tree = createRealisticTree();
 

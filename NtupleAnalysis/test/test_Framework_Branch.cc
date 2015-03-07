@@ -28,6 +28,20 @@ TEST_CASE("Branch works", "[Framework]") {
     b_event.setEntry(1);
     CHECK( b_event.value() == 2 );
   }
+  SECTION("Boolean branch") {
+    Branch<bool> b_trigger("trigger");
+    b_trigger.setupBranch(tree.get());
+    REQUIRE(b_trigger.isValid());
+
+    b_trigger.setEntry(0);
+    CHECK( b_trigger.value() == true );
+
+    b_trigger.setEntry(1);
+    CHECK( b_trigger.value() == false );
+
+    b_trigger.setEntry(2);
+    CHECK( b_trigger.value() == true );
+  }
   SECTION("Complex branches") {
     Branch<std::vector<int> > b_num1("num1");
     Branch<std::vector<float> > b_num2("num2");
