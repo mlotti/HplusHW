@@ -55,6 +55,9 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   unsigned int run;           tree->Branch("run",   &run);
   unsigned int lumi;          tree->Branch("lumi",  &lumi);
   unsigned long long event;   tree->Branch("event", &event);
+  bool trig1;                 tree->Branch("HLT_Trig1", &trig1);
+  bool trig2;                 tree->Branch("HLT_Trig2", &trig2);
+  bool trig3;                 tree->Branch("HLT_Trig3", &trig3);
   std::vector<float> tau_pt;  tree->Branch((tauPrefix+"_pt").c_str(),  &tau_pt);
   std::vector<float> tau_eta; tree->Branch((tauPrefix+"_eta").c_str(), &tau_eta);
   std::vector<float> tau_phi; tree->Branch((tauPrefix+"_phi").c_str(), &tau_phi);
@@ -80,6 +83,7 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   run = 1;
   lumi = 1;
   event = 1;
+  trig1 = true; trig2 = true; trig3 = true;
   tau_pt = std::vector<float>{50.f, 20.f, 10.f, 25.f};
   tau_eta = std::vector<float>{0.1f, -2.3f, 1.7f, 0.3f};
   tau_phi = std::vector<float>{-2.9f, -0.5f, 1.f, 0.3f};
@@ -97,6 +101,7 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   tree->Fill();
 
   event = 2;
+  trig1 = true; trig2 = false; trig3 = true;
   tau_pt = std::vector<float>{20.f};
   tau_eta = std::vector<float>{0.9f,};
   tau_phi = std::vector<float>{3.1f};
@@ -115,6 +120,7 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
 
   lumi = 2;
   event = 3;
+  trig1 = false; trig2 = false; trig3 = false;
   tau_pt = std::vector<float>{15.f, 17.f};
   tau_eta = std::vector<float>{-2.0f, 1.5f};
   tau_phi = std::vector<float>{1.3f, -1.2f};

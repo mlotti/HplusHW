@@ -95,6 +95,37 @@ TEST_CASE("Formula", "[Framework]") {
     REQUIRE_THROWS_AS( formula.value(), std::runtime_error );
   }
 
+  SECTION("Trigger OR formula") {
+    Formula trg = mgr.book("HLT_Trig1 || HLT_Trig2 || HLT_Trig3");
+    mgr.setupBranch(tree.get());
+
+    tree->LoadTree(0);
+    CHECK( trg.value() > 0 );
+    CHECK( trg.value() > 0 );
+
+    tree->LoadTree(1);
+    CHECK( trg.value() > 0 );
+
+    tree->LoadTree(2);
+    CHECK( trg.value() <= 0 );
+  }
+
+  SECTION("Trigger OR of non-existent branch") {
+    Formula trg = mgr.book("HLT_Trig1 || HLT_Trig_Nonexistent");
+    mgr.setupBranch(tree.get());
+
+    tree->LoadTree(0);
+    CHECK( trg.value() > 0 );
+    CHECK( trg.value() > 0 );
+
+    tree->LoadTree(1);
+    CHECK( trg.value() > 0 );
+
+    // This is what we would like to have
+    tree->LoadTree(2);
+    CHECK( trg.value() <= 0 );
+  }
+
 
   SECTION("Formula and a branch to the same") {
     Formula formula = mgr.book("event");
