@@ -25,9 +25,9 @@ public:
   unsigned int       run()   const { return fRun->value(); }
 
 private:
-  Branch<unsigned long long> *fEvent;
-  Branch<unsigned int> *fLumi;
-  Branch<unsigned int> *fRun;
+  const Branch<unsigned long long> *fEvent;
+  const Branch<unsigned int> *fLumi;
+  const Branch<unsigned int> *fRun;
 };
 
 #endif

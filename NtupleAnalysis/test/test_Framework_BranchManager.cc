@@ -10,10 +10,10 @@ TEST_CASE("BranchManager works", "[Framework]") {
   mgr.setTree(tree.get());
 
   SECTION("Single branches") {
-    Branch<int> *b_event = nullptr;
-    Branch<unsigned int> *b_lumi = nullptr;
-    Branch<unsigned long long> *b_run = nullptr;
-    Branch<std::vector<int> > *b_num1 = nullptr;
+    const Branch<int> *b_event = nullptr;
+    const Branch<unsigned int> *b_lumi = nullptr;
+    const Branch<unsigned long long> *b_run = nullptr;
+    const Branch<std::vector<int> > *b_num1 = nullptr;
 
     mgr.book("event", &b_event);
     REQUIRE( b_event != nullptr );
@@ -48,8 +48,8 @@ TEST_CASE("BranchManager works", "[Framework]") {
     CHECK( b_num1->value()[4] == 1000 );
   }
   SECTION("Multiple branches") {
-    Branch<int> *b_event1 = nullptr;
-    Branch<int> *b_event2 = nullptr;
+    const Branch<int> *b_event1 = nullptr;
+    const Branch<int> *b_event2 = nullptr;
 
     mgr.book("event", &b_event1);
     REQUIRE( b_event1 != nullptr );
@@ -70,8 +70,8 @@ TEST_CASE("BranchManager works", "[Framework]") {
   }
 
   SECTION("Incorrect type throws exception") {
-    Branch<int> *event1 = nullptr;
-    Branch<unsigned long long> *event2 = nullptr;
+    const Branch<int> *event1 = nullptr;
+    const Branch<unsigned long long> *event2 = nullptr;
 
     mgr.book("event", &event1);
     REQUIRE( event1 != nullptr );

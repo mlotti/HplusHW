@@ -5,7 +5,7 @@ BooleanOr::~BooleanOr() {}
 
 void BooleanOr::setupBranches(BranchManager& mgr) {
   for(auto& name: fBranchNames) {
-    Branch<bool> *branch = nullptr;
+    const Branch<bool> *branch = nullptr;
     mgr.book(name, &branch);
     if(branch->isValid())
       fBranches.push_back(branch);

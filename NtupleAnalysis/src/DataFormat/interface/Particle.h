@@ -166,10 +166,10 @@ public:
   friend class Particle<ParticleCollection>;
 
 protected:
-  Branch<std::vector<float_type>> *fPt;
-  Branch<std::vector<float_type>> *fEta;
-  Branch<std::vector<float_type>> *fPhi;
-  Branch<std::vector<float_type>> *fE;
+  const Branch<std::vector<float_type>> *fPt;
+  const Branch<std::vector<float_type>> *fEta;
+  const Branch<std::vector<float_type>> *fPhi;
+  const Branch<std::vector<float_type>> *fE;
 };
 
 #endif

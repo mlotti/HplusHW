@@ -12,7 +12,7 @@ public:
   void setupBranches(BranchManager& mgr);
 
 protected:
-  Branch<std::vector<bool>> *fIsGlobalMuon;
+  const Branch<std::vector<bool>> *fIsGlobalMuon;
 };
 
 

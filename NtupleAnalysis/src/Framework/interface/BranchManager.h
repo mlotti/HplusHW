@@ -21,8 +21,9 @@ public:
 
   void setTree(TTree *tree) { fTree = tree; }
 
+  // pointer to pointer to const Branch<T>
   template <typename T>
-  void book(const std::string& branchName, Branch<T> **returnValue) {
+  void book(const std::string& branchName, const Branch<T> **returnValue) {
     auto found = std::lower_bound(fBranches.begin(), fBranches.end(), branchName, [](const std::unique_ptr<BranchBase>& a, const std::string& b) {
         return a->getName() < b;
       });

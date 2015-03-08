@@ -12,13 +12,13 @@ public:
   void setupBranches(BranchManager& mgr);
 
 protected:
-  Branch<std::vector<float>> *fSecondaryVertex;
-  Branch<std::vector<float>> *fTrackCountingHighEffBJetTags;
-  Branch<std::vector<float>> *fTrackCountingHighPurBJetTags;
-  Branch<std::vector<short>> *fPdgId;
-  Branch<std::vector<bool>> *fPUIDloose;
-  Branch<std::vector<bool>> *fPUIDmedium;
-  Branch<std::vector<bool>> *fPUIDtight;
+  const Branch<std::vector<float>> *fSecondaryVertex;
+  const Branch<std::vector<float>> *fTrackCountingHighEffBJetTags;
+  const Branch<std::vector<float>> *fTrackCountingHighPurBJetTags;
+  const Branch<std::vector<short>> *fPdgId;
+  const Branch<std::vector<bool>> *fPUIDloose;
+  const Branch<std::vector<bool>> *fPUIDmedium;
+  const Branch<std::vector<bool>> *fPUIDtight;
 };
 
 

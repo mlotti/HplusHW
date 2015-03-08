@@ -31,7 +31,7 @@ public:
   friend class Particle<TauCollection>;
 
 protected:
-  std::vector<Branch<std::vector<bool>> *> fConfigurableDiscriminators;
+  std::vector<const Branch<std::vector<bool>> *> fConfigurableDiscriminators;
 
 private:
   std::vector<std::string> fConfigurableDiscriminatorNames;

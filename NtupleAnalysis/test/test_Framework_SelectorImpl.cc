@@ -65,8 +65,8 @@ namespace {
 
     const int mode;
 
-    Branch<int> *b_event;
-    Branch<std::vector<int> > *b_num1;
+    const Branch<int> *b_event;
+    const Branch<std::vector<int> > *b_num1;
 
     Count c1;
     Count c2;

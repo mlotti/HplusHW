@@ -83,8 +83,8 @@ public:
   }
 
 private:
-  Branch<float_type> *fEt;
-  Branch<float_type> *fPhi;
+  const Branch<float_type> *fEt;
+  const Branch<float_type> *fPhi;
 };
 
 using MET = MET_T<double>;
