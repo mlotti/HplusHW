@@ -106,6 +106,8 @@ TEST_CASE("Formula", "[Framework]") {
     CHECK( trg.value() <= 0 );
   }
 
+  // Ok, I don't know if it makes sense to test this case at all...
+  /*
   SECTION("Trigger OR of non-existent branch") {
     Formula trg = mgr.book("HLT_Trig1 || HLT_Trig_Nonexistent");
     mgr.setupBranch(tree.get());
@@ -122,6 +124,7 @@ TEST_CASE("Formula", "[Framework]") {
     //tree->LoadTree(2);
     //CHECK( trg.value() <= 0 );
   }
+  */
 
 
   SECTION("Formula and a branch to the same") {
