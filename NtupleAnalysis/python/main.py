@@ -85,9 +85,9 @@ class Process:
         for name in names:
             self.addDataset(name)
 
-    def addDatasetsFromMulticrab(self, directory):
+    def addDatasetsFromMulticrab(self, directory, *args, **kwargs):
         dataset._optionDefaults["input"] = "miniaod2tree_*.root"
-        dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory)
+        dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
         dsets = dsetMgrCreator.getDatasetPrecursors()
 
         for dset in dsets:
@@ -179,8 +179,7 @@ class Process:
             timeStart = time.time()
             clockStart = time.clock()
             if self._maxEvents > 0:
-                if useCache:
-                    tchain.SetCacheEntryRange(0, self._maxEvents)
+                tchain.SetCacheEntryRange(0, self._maxEvents)
                 tchain.Process(tselector, "", self._maxEvents)
             else:
                 tchain.Process(tselector)
