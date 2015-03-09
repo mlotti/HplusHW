@@ -13,7 +13,10 @@ Event::Event(const ParameterSet& config): Event() {
   if(triggerOR) {
     fTriggerOr.setBranchNames(*triggerOR);
   }
-
+  boost::optional<std::vector<std::string>> triggerOR2 = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR2");
+  if(triggerOR2) {
+    fTriggerOr2.setBranchNames(*triggerOR2);
+  }
 
   bool variationAssigned = false;
 
@@ -45,6 +48,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fEventID.setupBranches(mgr);
 
   fTriggerOr.setupBranches(mgr);
+  fTriggerOr2.setupBranches(mgr);
 
   fTauCollection.setupBranches(mgr);
   fJetCollection.setupBranches(mgr);

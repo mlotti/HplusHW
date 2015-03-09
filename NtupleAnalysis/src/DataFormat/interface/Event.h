@@ -25,7 +25,9 @@ public:
   bool configurableTriggerDecision() const {
     return fTriggerOr.value();
   }
-
+  bool configurableTriggerDecision2() const {
+    return fTriggerOr2.value();
+  }
   const EventID& eventID() const { return fEventID; }
   const TauCollection& taus() const { return fTauCollection; }
   const JetCollection& jets() const { return fJetCollection; }
@@ -41,6 +43,7 @@ private:
   EventID fEventID;
 
   BooleanOr fTriggerOr;
+  BooleanOr fTriggerOr2;
 
   TauCollection fTauCollection;
   JetCollection fJetCollection;
