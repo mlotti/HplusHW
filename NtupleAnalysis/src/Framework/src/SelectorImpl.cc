@@ -197,7 +197,12 @@ Bool_t SelectorImpl::Process(Long64_t entry) {
   printStatus();
   ++fProcessed;
 
-  fChain->LoadTree(entry); // set the entry number within the tree, needed for TTreeFormula, does not read anything
+  // For TChain, the following line actually does something. Is it
+  // called by the TTreePlayer (or whoever is calling
+  // TSelector::Process())? Let's see when somebody actually uses
+  // (TTree)Formula and see what happens.
+  //fChain->LoadTree(entry); // set the entry number within the tree, needed for TTreeFormula, does not read anything
+
   fEventSaver->beginEvent();
   fBranchManager->setEntry(entry);
   for(BaseSelector *selector: fSelectors) {
