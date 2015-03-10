@@ -3792,7 +3792,7 @@ class DatasetPrecursor:
             self._filenames = filenames
 
         self._rootFiles = []
-        dataVersion = None
+        self._dataVersion = None
         for name in self._filenames:
             rf = ROOT.TFile.Open(name)
             # Below is important to use '==' instead of 'is' to check for
@@ -3806,19 +3806,19 @@ class DatasetPrecursor:
                 print "Unable to find 'configInfo/dataVersion' from ROOT file '%s', I have no idea if this file is data, MC, or pseudo" % name
                 continue
                 
-            if dataVersion is None:
-                dataVersion = dv.GetTitle()
+            if self._dataVersion is None:
+                self._dataVersion = dv.GetTitle()
             else:
-                if dataVersion != dv.GetTitle():
+                if self._dataVersion != dv.GetTitle():
                     raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
 
-        if dataVersion is None:
+        if self._dataVersion is None:
             self._isData = False
             self._isPseudo = False
             self._isMC = False
         else:
-            self._isData = "data" in dataVersion
-            self._isPseudo = "pseudo" in dataVersion
+            self._isData = "data" in self._dataVersion
+            self._isPseudo = "pseudo" in self._dataVersion
             self._isMC = not (self._isData or self._isPseudo)
 
     def getName(self):
@@ -3838,6 +3838,9 @@ class DatasetPrecursor:
 
     def isMC(self):
         return self._isMC
+
+    def getDataVersion(self):
+        return self._dataVersion
 
     ## Close the ROOT files
     def close(self):

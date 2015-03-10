@@ -79,6 +79,42 @@ class Analyzer:
         tasks = aux.includeExcludeTasks([datasetName], **(self.__dict__["_includeExclude"]))
         return len(tasks) == 1
 
+class DataVersion:
+    def __init__(self, dataVersion):
+        self._version = dataVersion
+
+        self._isData = "data" in self._version
+        self._isMC = "mc" in self._version
+
+    def isData(self):
+        return self._isData
+
+    def isMC(self):
+        return self._isMC
+
+    def is53X(self):
+        return "53X" in self._version
+
+    def is74X(self):
+        return "74X" in self._version
+
+    def isS10(self):
+        return self._isMC() and "S10" in self._version
+
+class Dataset:
+    def __init__(self, name, files, dataVersion):
+        self._name = name
+        self._files = files
+        self._dataVersion = DataVersion(dataVersion)
+
+    def getName(self):
+        return self._name
+
+    def getFileNames(self):
+        return self._files
+
+    def getDataVersion(self):
+        return self._dataVersion
 
 class Process:
     def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents=-1):
@@ -92,11 +128,15 @@ class Process:
         self._maxEvents = maxEvents
         self._options = PSet()
 
-    def addDataset(self, name, files=None):
+    def addDataset(self, name, files=None, dataVersion=None):
         if files is None:
             files = datasetsTest.getFiles(name)
 
-        self._datasets.append( (name, files) )
+        if dataVersion is None:
+            prec = dataset.DatasetPrecursor(name, files)
+            dataVersion = prec.getDataVersion()
+            prec.close()
+        self._datasets.append( Dataset(name, files, dataVersion) )
 
     def addDatasets(self, names): # no explicit files possible here
         for name in names:
@@ -106,11 +146,11 @@ class Process:
         dataset._optionDefaults["input"] = "miniaod2tree_*.root"
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
         dsets = dsetMgrCreator.getDatasetPrecursors()
+        dsetMgrCreator.close()
 
         for dset in dsets:
-            self.addDataset(dset.getName(), dset.getFileNames())
+            self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion())
 
-        dsetMgrCreator.close()
 
     # kwargs for 'includeOnlyTasks' or 'excludeTasks' to set the datasets over which this analyzer is processed, default is all datasets
     def addAnalyzer(self, name, analyzer, **kwargs):
@@ -145,8 +185,8 @@ class Process:
         os.mkdir(outputDir)
         multicrabCfg = os.path.join(outputDir, "multicrab.cfg")
         f = open(multicrabCfg, "w")
-        for dsetName, x in self._datasets:
-            f.write("[%s]\n\n"%dsetName)
+        for dset in self._datasets:
+            f.write("[%s]\n\n" % dset.getName())
         f.close()
 
         _proof = None
@@ -157,26 +197,26 @@ class Process:
             _proof = ROOT.TProof.Open(opt)
             _proof.Exec("gSystem->Load(\"libHPlusAnalysis.so\");")
 
-        for dsetName, dsetFiles in self._datasets:
+        for dset in self._datasets:
             inputList = ROOT.TList()
             nanalyzers = 0
             for aname, analyzer in self._analyzers.iteritems():
-                if analyzer.runForDataset_(dsetName):
+                if analyzer.runForDataset_(dset.getName()):
                     nanalyzers += 1
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
             if nanalyzers == 0:
-                print "Skipping %s, no analyzers" % dsetName
+                print "Skipping %s, no analyzers" % dset.getName()
                 continue
 
 
-            print "Processing dataset", dsetName
+            print "Processing dataset", dset.getName()
 
-            resDir = os.path.join(outputDir, dsetName, "res")
-            resFileName = os.path.join(resDir, "histograms-%s.root"%dsetName)
+            resDir = os.path.join(outputDir, dset.getName(), "res")
+            resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())
             os.makedirs(resDir)
 
             tchain = ROOT.TChain("Events")
-            for f in dsetFiles:
+            for f in dset.getFileNames():
                 tchain.Add(f)
             tchain.SetCacheLearnEntries(100);
 
