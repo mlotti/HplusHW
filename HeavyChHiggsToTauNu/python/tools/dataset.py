@@ -127,39 +127,7 @@ def readFromMulticrabCfg(**kwargs):
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
 
-    if "excludeTasks" in kwargs and "includeOnlyTasks" in kwargs:
-        raise Exception("Only one of 'excludeTasks' or 'includeOnlyTasks' is allowed for getDatasetsFromMulticrabCfg")
-
-    def getRe(arg):
-        if isinstance(arg, basestring):
-            arg = [arg]
-        return [re.compile(a) for a in arg]
-    
-    if "excludeTasks" in kwargs:
-        exclude = getRe(kwargs["excludeTasks"])
-        tmp = []
-        for task in taskDirs:
-            found = False
-            for e_re in exclude:
-                if e_re.search(os.path.basename(task)):
-                    found = True
-                    break
-            if found:
-                continue
-            tmp.append(task)
-        taskDirs = tmp
-    if "includeOnlyTasks" in kwargs:
-        include = getRe(kwargs["includeOnlyTasks"])
-        tmp = []
-        for task in taskDirs:
-            found = False
-            for i_re in include:
-                if i_re.search(os.path.basename(task)):
-                    found = True
-                    break
-            if found:
-                tmp.append(task)
-        taskDirs = tmp
+    taskDirs = aux.includeExcludeTasks(taskDirs, **kwargs)
 
     managerCreator = readFromCrabDirs(taskDirs, baseDirectory=dirname, **kwargs)
     return managerCreator

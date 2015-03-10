@@ -387,3 +387,106 @@ def getProperAdditivesForVariationUncertainties(diffPlus, diffMinus):
     elif diffPlus == 0 and diffMinus == 0:
         return (0.0, 0.0)
     raise Exception("Error: Unknown situation diffPlus=%f, diffMinus=%f!"%(diffPlus, diffMinus))
+
+
+## Helper function to choose tasks with includeOnlyTasks/excludeTasks
+#
+# \param tasks  List of strings for task names
+# \param kwargs Keyword arguments (see below)
+#
+# <b>Keyword arguments</b>
+# \li \a excludeTasks      String, or list of strings, to specify regexps.
+#                          If a dataset name matches to any of the
+#                          regexps, Dataset object is not constructed for
+#                          that. Conflicts with \a includeOnlyTasks
+# \li \a includeOnlyTasks  String, or list of strings, to specify
+#                          regexps. Only datasets whose name matches
+#                          to any of the regexps are kept. Conflicts
+#                          with \a excludeTasks.
+#
+# \return List of selected tasks (all tasks if neither excludeTasks or includeOnlyTasks is given)
+def includeExcludeTasks(tasks, **kwargs):
+    if "excludeTasks" in kwargs and "includeOnlyTasks" in kwargs:
+        raise Exception("Only one of 'excludeTasks' or 'includeOnlyTasks' is allowed")
+
+    def getRe(arg):
+        if isinstance(arg, basestring):
+            arg = [arg]
+        return [re.compile(a) for a in arg]
+
+    if "excludeTasks" in kwargs:
+        exclude = getRe(kwargs["excludeTasks"])
+        tmp = []
+        for task in tasks:
+            found = False
+            for e_re in exclude:
+                if e_re.search(os.path.basename(task)):
+                    found = True
+                    break
+            if found:
+                continue
+            tmp.append(task)
+        return tmp
+
+    if "includeOnlyTasks" in kwargs:
+        include = getRe(kwargs["includeOnlyTasks"])
+        tmp = []
+        for task in tasks:
+            found = False
+            for i_re in include:
+                if i_re.search(os.path.basename(task)):
+                    found = True
+                    break
+            if found:
+                tmp.append(task)
+        return tmp
+
+    return tasks
+
+if __name__ == "__main__":
+    import unittest
+
+
+    class TestIncludeExcludeTasks(unittest.TestCase):
+        def testNothing(self):
+            tasks = ["Foo", "Bar", "Foobar"]
+            selected = includeExcludeTasks(tasks)
+            self.assertEqual(selected, tasks)
+
+        def testInclude(self):
+            tasks = ["Foo", "Bar", "Foobar"]
+            selected = includeExcludeTasks(tasks, includeOnlyTasks="Foo")
+            self.assertEqual(len(selected), 2)
+            self.assertEqual(selected[0], "Foo")
+            self.assertEqual(selected[1], "Foobar")
+
+            selected = includeExcludeTasks(tasks, includeOnlyTasks="Foo$")
+            self.assertEqual(len(selected), 1)
+            self.assertEqual(selected[0], "Foo")
+
+            selected = includeExcludeTasks(tasks, includeOnlyTasks=["Foo$", "^B"])
+            self.assertEqual(len(selected), 2)
+            self.assertEqual(selected[0], "Foo")
+            self.assertEqual(selected[1], "Bar")
+
+        def testExclude(self):
+            tasks = ["Foo", "Bar", "Foobar"]
+            selected = includeExcludeTasks(tasks, excludeTasks="Foo")
+            self.assertEqual(len(selected), 1)
+            self.assertEqual(selected[0], "Bar")
+
+            selected = includeExcludeTasks(tasks, excludeTasks="Foo$")
+            self.assertEqual(len(selected), 2)
+            self.assertEqual(selected[0], "Bar")
+            self.assertEqual(selected[1], "Foobar")
+
+            selected = includeExcludeTasks(tasks, excludeTasks=["Foo$", "^B"])
+            self.assertEqual(len(selected), 1)
+            self.assertEqual(selected[0], "Foobar")
+
+        def testIncludeExclude(self):
+            tasks = ["Foo", "Bar", "Foobar"]
+            self.assertRaises(Exception, includeExcludeTasks, tasks, excludeTasks="Foo", includeOnlyTasks="Bar")
+
+    unittest.main()
+
