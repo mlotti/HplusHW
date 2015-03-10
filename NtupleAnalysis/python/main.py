@@ -10,6 +10,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 import datasets as datasetsTest
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 
 class PSet:
     def __init__(self, **kwargs):
@@ -85,6 +86,9 @@ class DataVersion:
 
         self._isData = "data" in self._version
         self._isMC = "mc" in self._version
+
+    def __str__(self):
+        return self._version
 
     def isData(self):
         return self._isData
@@ -253,6 +257,18 @@ class Process:
             clockStop = time.clock()
             readCallsStop = ROOT.TFile.GetFileReadCalls()
             readBytesStop = ROOT.TFile.GetFileBytesRead()
+
+            # Write configInfo
+            tf = ROOT.TFile.Open(resFileName, "UPDATE")
+            configInfo = tf.Get("configInfo")
+            if configInfo == None:
+                configInfo = tf.mkdir("configInfo")
+            configInfo.cd()
+            dv = ROOT.TNamed("dataVersion", str(dset.getDataVersion()))
+            dv.Write()
+            cv = ROOT.TNamed("codeVersion", git.getCommitId())
+            cv.Write()
+            tf.Close()
 
             calls = ""
             if _proof is not None:
