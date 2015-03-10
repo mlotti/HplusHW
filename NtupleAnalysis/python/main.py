@@ -64,21 +64,23 @@ class Analyzer:
     def config_(self):
         return self.__dict__["_pset"].serialize_()
 
-    def setIncludeExclude_(self, **kwargs):
-        if len(kwargs) == 0:
-            return
-        if len(kwargs) != 1 or not ("includeOnlyTasks" in kwargs or "excludeTasks" in kwargs):
-            raise Exception("setIncludeExclude expects exactly 1 keyword argument, which is 'includeOnlyTasks' or 'excludeTasks'")
-        tmp = {}
-        tmp.update(kwargs)
-        self.__dict__["_includeExclude"] = tmp
+class AnalyzerWithIncludeExclude:
+    def __init__(self, analyzer, **kwargs):
+        self._analyzer = analyzer
+        if len(kwargs) > 0 and (len(kwargs) != 1 or not ("includeOnlyTasks" in kwargs or "excludeTasks" in kwargs)):
+            raise Exception("AnalyzerWithIncludeExclude expects exactly 1 keyword argument, which is 'includeOnlyTasks' or 'excludeTasks'")
+        self._includeExclude = {}
+        self._includeExclude.update(kwargs)
+
+    def getAnalyzer(self):
+        return self._analyzer
 
     def runForDataset_(self, datasetName):
-        if not "_includeExclude" in self.__dict__:
+        if len(self._includeExclude) == 0:
             return True
-
-        tasks = aux.includeExcludeTasks([datasetName], **(self.__dict__["_includeExclude"]))
+        tasks = aux.includeExcludeTasks([datasetName], **(self._includeExclude))
         return len(tasks) == 1
+
 
 class DataVersion:
     def __init__(self, dataVersion):
@@ -160,14 +162,13 @@ class Process:
     def addAnalyzer(self, name, analyzer, **kwargs):
         if self.hasAnalyzer(name):
             raise Exception("Analyzer '%s' already exists" % name)
-        self._analyzers[name] = analyzer
-        analyzer.setIncludeExclude_(**kwargs)
+        self._analyzers[name] = AnalyzerWithIncludeExclude(analyzer, **kwargs)
 
     # FIXME: not sure if these two actually make sense
     def getAnalyzer(self, name):
         if not self.hasAnalyzer(name):
             raise Exception("Analyzer '%s' does not exist" % name)
-        return self._analyzers[name]
+        return self._analyzers[name].getAnalyzer()
 
     def removeAnalyzer(self, name):
         if not self.hasAnalyzer(name):
@@ -204,9 +205,10 @@ class Process:
         for dset in self._datasets:
             inputList = ROOT.TList()
             nanalyzers = 0
-            for aname, analyzer in self._analyzers.iteritems():
-                if analyzer.runForDataset_(dset.getName()):
+            for aname, analyzerIE in self._analyzers.iteritems():
+                if analyzerIE.runForDataset_(dset.getName()):
                     nanalyzers += 1
+                    analyzer = analyzerIE.getAnalyzer()
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
             if nanalyzers == 0:
                 print "Skipping %s, no analyzers" % dset.getName()
@@ -383,15 +385,14 @@ if __name__ == "__main__":
             setattr(a, "xyzzy", 50.0)
             self.assertEqual(a.xyzzy, 50.0)
 
+    class TestAnalyzerWithIncludeExclude(unittest.TestCase):
         def testIncludeExclude(self):
-            a = Analyzer("Foo")
-
-            a.setIncludeExclude_(includeOnlyTasks="Foo")
+            a = AnalyzerWithIncludeExclude(None, includeOnlyTasks="Foo")
             self.assertEqual(a.runForDataset_("Foo"), True)
             self.assertEqual(a.runForDataset_("Bar"), False)
             self.assertEqual(a.runForDataset_("Foobar"), True)
 
-            a.setIncludeExclude_(excludeTasks="Foo")
+            a = AnalyzerWithIncludeExclude(None, excludeTasks="Foo")
             self.assertEqual(a.runForDataset_("Foo"), False)
             self.assertEqual(a.runForDataset_("Bar"), True)
             self.assertEqual(a.runForDataset_("Foobar"), False)
