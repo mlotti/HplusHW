@@ -9,6 +9,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import datasets as datasetsTest
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 class PSet:
     def __init__(self, **kwargs):
@@ -62,6 +63,22 @@ class Analyzer:
     def config_(self):
         return self.__dict__["_pset"].serialize_()
 
+    def setIncludeExclude_(self, **kwargs):
+        if len(kwargs) == 0:
+            return
+        if len(kwargs) != 1 or not ("includeOnlyTasks" in kwargs or "excludeTasks" in kwargs):
+            raise Exception("setIncludeExclude expects exactly 1 keyword argument, which is 'includeOnlyTasks' or 'excludeTasks'")
+        tmp = {}
+        tmp.update(kwargs)
+        self.__dict__["_includeExclude"] = tmp
+
+    def runForDataset_(self, datasetName):
+        if not "_includeExclude" in self.__dict__:
+            return True
+
+        tasks = aux.includeExcludeTasks([datasetName], **(self.__dict__["_includeExclude"]))
+        return len(tasks) == 1
+
 
 class Process:
     def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents=-1):
@@ -95,10 +112,12 @@ class Process:
 
         dsetMgrCreator.close()
 
-    def addAnalyzer(self, name, analyzer):
+    # kwargs for 'includeOnlyTasks' or 'excludeTasks' to set the datasets over which this analyzer is processed, default is all datasets
+    def addAnalyzer(self, name, analyzer, **kwargs):
         if self.hasAnalyzer(name):
             raise Exception("Analyzer '%s' already exists" % name)
         self._analyzers[name] = analyzer
+        analyzer.setIncludeExclude_(**kwargs)
 
     # FIXME: not sure if these two actually make sense
     def getAnalyzer(self, name):
@@ -139,6 +158,17 @@ class Process:
             _proof.Exec("gSystem->Load(\"libHPlusAnalysis.so\");")
 
         for dsetName, dsetFiles in self._datasets:
+            inputList = ROOT.TList()
+            nanalyzers = 0
+            for aname, analyzer in self._analyzers.iteritems():
+                if analyzer.runForDataset_(dsetName):
+                    nanalyzers += 1
+                    inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
+            if nanalyzers == 0:
+                print "Skipping %s, no analyzers" % dsetName
+                continue
+
+
             print "Processing dataset", dsetName
 
             resDir = os.path.join(outputDir, dsetName, "res")
@@ -151,7 +181,6 @@ class Process:
             tchain.SetCacheLearnEntries(100);
 
             tselector = ROOT.SelectorImpl()
-            inputList = ROOT.TList()
 
             # FIXME: TChain.GetEntries() is needed only to give a time
             # estimate for the analysis. If this turns out to be slow,
@@ -168,11 +197,7 @@ class Process:
             else:
                 inputList.Add(ROOT.TNamed("OUTPUTFILE_LOCATION", resFileName))
 
-            for aname, analyzer in self._analyzers.iteritems():
-                inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
-
             tselector.SetInputList(inputList)
-
 
             readBytesStart = ROOT.TFile.GetFileBytesRead()
             readCallsStart = ROOT.TFile.GetFileReadCalls()
@@ -301,6 +326,19 @@ if __name__ == "__main__":
 
             setattr(a, "xyzzy", 50.0)
             self.assertEqual(a.xyzzy, 50.0)
+
+        def testIncludeExclude(self):
+            a = Analyzer("Foo")
+
+            a.setIncludeExclude_(includeOnlyTasks="Foo")
+            self.assertEqual(a.runForDataset_("Foo"), True)
+            self.assertEqual(a.runForDataset_("Bar"), False)
+            self.assertEqual(a.runForDataset_("Foobar"), True)
+
+            a.setIncludeExclude_(excludeTasks="Foo")
+            self.assertEqual(a.runForDataset_("Foo"), False)
+            self.assertEqual(a.runForDataset_("Bar"), True)
+            self.assertEqual(a.runForDataset_("Foobar"), False)
 
     class TestProcess(unittest.TestCase):
         def testDataset(self):
