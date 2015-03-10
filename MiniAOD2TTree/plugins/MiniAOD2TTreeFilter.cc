@@ -6,13 +6,8 @@
 MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     outputFileName(iConfig.getParameter<std::string>("OutputFileName")),
     codeVersion(iConfig.getParameter<std::string>("CodeVersion")),
+    dataVersion(iConfig.getParameter<std::string>("DataVersion")),
     eventInfoCollections(iConfig.getParameter<edm::ParameterSet>("EventInfo"))
-//    trigger(iConfig.getParameter<edm::ParameterSet>("Trigger")),
-//    tauCollections(iConfig.getParameter<std::vector<edm::ParameterSet>>("Taus")),
-//    electronCollections(iConfig.getParameter<std::vector<edm::ParameterSet>>("Electrons")),
-//    muonCollections(iConfig.getParameter<std::vector<edm::ParameterSet>>("Muons")),
-//    jetCollections(iConfig.getParameter<std::vector<edm::ParameterSet>>("Jets")),
-//    metCollections(iConfig.getParameter<std::vector<edm::ParameterSet>>("METs"))
 {
     fOUT = TFile::Open(outputFileName.c_str(),"RECREATE");	
     Events = new TTree("Events","");
@@ -117,6 +112,15 @@ void MiniAOD2TTreeFilter::endJob(){
     TString versionName = "Commit "+codeVersion;
     TNamed* versionString = new TNamed("","");
     versionString->Write(versionName);
+
+// write config info
+    TDirectory* infodir = fOUT->mkdir("configInfo");
+    infodir->cd();
+
+    TNamed* dv = new TNamed("dataVersion",dataVersion);
+    dv->Write();
+
+    fOUT->cd();
 
 // write TTree
     Events->Write();
