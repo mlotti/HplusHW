@@ -20,6 +20,7 @@ process.source = cms.Source("PoolSource",
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
+    DataVersion = cms.string("74Xmc"),
     EventInfo = cms.PSet(
 	PileupSummaryInfoSrc = cms.InputTag("addPileupInfo"),
 #	LHESrc = cms.InputTag(""),
