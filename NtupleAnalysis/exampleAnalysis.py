@@ -19,6 +19,16 @@ process.addAnalyzer("test", Analyzer("ExampleAnalysis",
                                      tauPtCut = 10
 ))
 
+# Example of adding an analyzer whose configuration depends on dataVersion
+def createAnalyzer(dataVersion):
+    a = Analyzer("ExampleAnalysis")
+    if dataVersion.isMC():
+        a.tauPtCut = 10
+    else:
+        a.tauPtCut = 20
+    return a
+process.addAnalyzer("test2", createAnalyzer)
+
 # Run the analysis
 process.run()
 

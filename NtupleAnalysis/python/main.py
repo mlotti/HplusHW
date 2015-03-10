@@ -209,6 +209,13 @@ class Process:
                 if analyzerIE.runForDataset_(dset.getName()):
                     nanalyzers += 1
                     analyzer = analyzerIE.getAnalyzer()
+                    if hasattr(analyzer, "__call__"):
+                        analyzer = analyzer(dset.getDataVersion())
+                        if analyzer is None:
+                            raise Exception("Analyzer %s was specified as a function, but returned None" % aname)
+                        if not isinstance(analyzer, Analyzer):
+                            raise Exception("Analyzer %s was specified as a function, but returned object of %s instead of Analyzer" % (aname, analyzer.__class__.__name__))
+
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
             if nanalyzers == 0:
                 print "Skipping %s, no analyzers" % dset.getName()
