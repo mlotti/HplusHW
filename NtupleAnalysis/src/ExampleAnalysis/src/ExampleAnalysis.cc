@@ -90,11 +90,11 @@ void ExampleAnalysis::process(Long64_t entry) {
       continue;
     if(!(tau.lTrkPt() > 10))
       continue;
-    if(!tau.againstElectronTightMVA5())
+    if(!tau.againstElectronTightMVA3())
       continue;
-    if(!tau.againstMuonTightMVA())
+    if(!tau.againstMuonTight())
       continue;
-    if(!tau.byMediumIsolationMVA3newDMwoLT())
+    if(!tau.byMediumIsolationMVA2())
       continue;
     if(!(tau.nProngs() == 1))
       continue;

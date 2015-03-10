@@ -19,6 +19,7 @@ protected:
   const Branch<std::vector<bool>> *fAgainstElectronMedium;
   const Branch<std::vector<bool>> *fAgainstElectronMediumMVA5;
   const Branch<std::vector<bool>> *fAgainstElectronTight;
+  const Branch<std::vector<bool>> *fAgainstElectronTightMVA3;
   const Branch<std::vector<bool>> *fAgainstElectronTightMVA5;
   const Branch<std::vector<bool>> *fAgainstElectronVLooseMVA5;
   const Branch<std::vector<bool>> *fAgainstElectronVTightMVA5;
@@ -45,6 +46,7 @@ protected:
   const Branch<std::vector<bool>> *fByLooseIsolationMVA3oldDMwLT;
   const Branch<std::vector<bool>> *fByLooseIsolationMVA3oldDMwoLT;
   const Branch<std::vector<bool>> *fByMediumCombinedIsolationDeltaBetaCorr3Hits;
+  const Branch<std::vector<bool>> *fByMediumIsolationMVA2;
   const Branch<std::vector<bool>> *fByMediumIsolationMVA3newDMwLT;
   const Branch<std::vector<bool>> *fByMediumIsolationMVA3newDMwoLT;
   const Branch<std::vector<bool>> *fByMediumIsolationMVA3oldDMwLT;
@@ -90,6 +92,7 @@ public:
   bool againstElectronMedium() const { return this->fCollection->fAgainstElectronMedium->value()[this->index()]; }
   bool againstElectronMediumMVA5() const { return this->fCollection->fAgainstElectronMediumMVA5->value()[this->index()]; }
   bool againstElectronTight() const { return this->fCollection->fAgainstElectronTight->value()[this->index()]; }
+  bool againstElectronTightMVA3() const { return this->fCollection->fAgainstElectronTightMVA3->value()[this->index()]; }
   bool againstElectronTightMVA5() const { return this->fCollection->fAgainstElectronTightMVA5->value()[this->index()]; }
   bool againstElectronVLooseMVA5() const { return this->fCollection->fAgainstElectronVLooseMVA5->value()[this->index()]; }
   bool againstElectronVTightMVA5() const { return this->fCollection->fAgainstElectronVTightMVA5->value()[this->index()]; }
@@ -116,6 +119,7 @@ public:
   bool byLooseIsolationMVA3oldDMwLT() const { return this->fCollection->fByLooseIsolationMVA3oldDMwLT->value()[this->index()]; }
   bool byLooseIsolationMVA3oldDMwoLT() const { return this->fCollection->fByLooseIsolationMVA3oldDMwoLT->value()[this->index()]; }
   bool byMediumCombinedIsolationDeltaBetaCorr3Hits() const { return this->fCollection->fByMediumCombinedIsolationDeltaBetaCorr3Hits->value()[this->index()]; }
+  bool byMediumIsolationMVA2() const { return this->fCollection->fByMediumIsolationMVA2->value()[this->index()]; }
   bool byMediumIsolationMVA3newDMwLT() const { return this->fCollection->fByMediumIsolationMVA3newDMwLT->value()[this->index()]; }
   bool byMediumIsolationMVA3newDMwoLT() const { return this->fCollection->fByMediumIsolationMVA3newDMwoLT->value()[this->index()]; }
   bool byMediumIsolationMVA3oldDMwLT() const { return this->fCollection->fByMediumIsolationMVA3oldDMwLT->value()[this->index()]; }
