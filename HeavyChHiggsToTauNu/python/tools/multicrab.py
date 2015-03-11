@@ -220,6 +220,7 @@ def getTaskDirectories(opts, filename="multicrab.cfg", directory=""):
         fname = os.path.join(directory, filename)
         if os.path.exists(fname):
             taskNames = _getTaskDirectories_crab2(fname)
+            dirname = os.path.dirname(fname)
             taskNames = [os.path.join(dirname, task) for task in taskNames]
         else:
             taskNames = _getTaskDirectories_crab3(directory)
@@ -241,11 +242,9 @@ def _getTaskDirectories_crab2(filename):
     if not os.path.exists(filename):
         raise Exception("Multicrab configuration file '%s' does not exist" % filename)
 
-    dirname = os.path.dirname(filename)
-
     mc_ignore = ["MULTICRAB", "COMMON"]
     mc_parser = ConfigParser.ConfigParser(dict_type=OrderedDict.OrderedDict)
-    mc_parser.read(fname)
+    mc_parser.read(filename)
 
     sections = mc_parser.sections()
 
