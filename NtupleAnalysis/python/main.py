@@ -108,10 +108,11 @@ class DataVersion:
         return self._isMC() and "S10" in self._version
 
 class Dataset:
-    def __init__(self, name, files, dataVersion):
+    def __init__(self, name, files, dataVersion, lumiFile):
         self._name = name
         self._files = files
         self._dataVersion = DataVersion(dataVersion)
+        self._lumiFile = lumiFile
 
     def getName(self):
         return self._name
@@ -121,6 +122,9 @@ class Dataset:
 
     def getDataVersion(self):
         return self._dataVersion
+
+    def getLumiFile(self):
+        return self._lumiFile
 
 class Process:
     def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents=-1):
@@ -134,7 +138,7 @@ class Process:
         self._maxEvents = maxEvents
         self._options = PSet()
 
-    def addDataset(self, name, files=None, dataVersion=None):
+    def addDataset(self, name, files=None, dataVersion=None, lumiFile=None):
         if files is None:
             files = datasetsTest.getFiles(name)
 
@@ -142,7 +146,7 @@ class Process:
             prec = dataset.DatasetPrecursor(name, files)
             dataVersion = prec.getDataVersion()
             prec.close()
-        self._datasets.append( Dataset(name, files, dataVersion) )
+        self._datasets.append( Dataset(name, files, dataVersion, lumiFile) )
 
     def addDatasets(self, names): # no explicit files possible here
         for name in names:
@@ -155,7 +159,7 @@ class Process:
         dsetMgrCreator.close()
 
         for dset in dsets:
-            self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion())
+            self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion(), lumiFile=dsetMgrCreator.getLumiFile())
 
 
     # kwargs for 'includeOnlyTasks' or 'excludeTasks' to set the datasets over which this analyzer is processed, default is all datasets
@@ -187,6 +191,7 @@ class Process:
         if self._outputPostfix != "":
             outputDir += "_"+self._outputPostfix
 
+        # Create output directory
         os.mkdir(outputDir)
         multicrabCfg = os.path.join(outputDir, "multicrab.cfg")
         f = open(multicrabCfg, "w")
@@ -194,6 +199,25 @@ class Process:
             f.write("[%s]\n\n" % dset.getName())
         f.close()
 
+        # Copy/merge lumi files
+        lumifiles = set([d.getLumiFile() for d in self._datasets])
+        lumidata = {}
+        for fname in lumifiles:
+            if not os.path.exists(fname):
+                continue
+            f = open(fname)
+            data = json.load(f)
+            f.close()
+            for k in data.keys():
+                if k in lumidata:
+                    raise Exception("Luminosity JSON file %s has a dataset for which the luminosity has already been loaded; please check the luminosity JSON files\n%s" % (fname, k, "\n".join(lumifiles)))
+            lumidata.update(data)
+        if len(lumidata) > 0:
+            f = open(os.path.join(outputDir, "lumi.json"), "w")
+            json.dump(lumidata, f, sort_keys=True, indent=2)
+            f.close()
+
+        # Setup proof if asked
         _proof = None
         if proof:
             opt = ""
@@ -202,6 +226,7 @@ class Process:
             _proof = ROOT.TProof.Open(opt)
             _proof.Exec("gSystem->Load(\"libHPlusAnalysis.so\");")
 
+        # Process over datasets
         for dset in self._datasets:
             inputList = ROOT.TList()
             nanalyzers = 0

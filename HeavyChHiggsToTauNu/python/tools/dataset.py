@@ -3982,6 +3982,9 @@ class DatasetManagerCreator:
     def getBaseDirectory(self):
         return self._baseDirectory
 
+    def getLumiFile(self):
+        return os.path.join(self._baseDirectory, "lumi.json")
+
     ## Create DatasetManager
     #
     # \param kwargs   Keyword arguments (see below)
@@ -4089,7 +4092,7 @@ class DatasetManagerCreator:
             manager._setBaseDirectory(self._baseDirectory)
 
         # Load luminosity automatically if the file exists
-        lumiPath = os.path.join(self._baseDirectory, "lumi.json")
+        lumiPath = self.getLumiFile()
         if os.path.exists(lumiPath):
             print "Loading data luminosities from %s" % lumiPath
             manager.loadLuminosities()
