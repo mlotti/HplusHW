@@ -2453,10 +2453,14 @@ class Dataset:
             if configInfo == None:
                 raise Exception("configInfo directory is missing from file %s" % f.GetName())
 
-            info = _rescaleInfo(_histoToDict(aux.Get(configInfo, "configinfo")))
-            if "energy" in info:
-                info["energy"] = str(int(round(info["energy"])))
-            addDirContentsToDict(configInfo, info)
+            info = aux.Get(configInfo, "configinfo")
+            if info != None:
+                info = _rescaleInfo(_histoToDict(info))
+                if "energy" in info:
+                    info["energy"] = str(int(round(info["energy"])))
+                addDirContentsToDict(configInfo, info)
+            else:
+                info = {}
             if self.info is None:
                 self.info = info
             else:
