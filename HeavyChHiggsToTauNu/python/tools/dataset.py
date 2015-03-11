@@ -4088,6 +4088,12 @@ class DatasetManagerCreator:
         if len(self._baseDirectory) > 0:
             manager._setBaseDirectory(self._baseDirectory)
 
+        # Load luminosity automatically if the file exists
+        lumiPath = os.path.join(self._baseDirectory, "lumi.json")
+        if os.path.exists(lumiPath):
+            print "Loading data luminosities from %s" % lumiPath
+            manager.loadLuminosities()
+
         return manager
 
     def getDatasetPrecursors(self):
