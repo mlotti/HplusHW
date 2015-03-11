@@ -8,211 +8,31 @@
 import glob, os, sys, re
 import math
 import copy
+import time
 import StringIO
 import hashlib
+import array
 
 import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
 
-## "Enumeration" of pile-up weight type
-class PileupWeightType:
-    NOMINAL = 0
-    UP = 1
-    DOWN = 2
 
-## Utility class for handling the weighted number of all MC events
-#
-# Represents values for one dataset
-class WeightedAllEvents:
-    ## Constructor
-    #
-    # \param unweighted   Number of unweighted MC events
-    # \param weighted     Weighted number of all MC events (nominal)
-    # \param up           Weighted number of all MC events, varied upwards (for systematics)
-    # \param down         Weighted number of all MC events, varied downwards (for systematics)
-    def __init__(self, unweighted, weighted, up, down):
-        self.unweighted = unweighted
-        self.weighted = {
-            PileupWeightType.NOMINAL: weighted,
-            PileupWeightType.UP: up,
-            PileupWeightType.DOWN: down
-            }
-
-    ## Get the weighted number of all MC events
-    #
-    # \param name        Name of the dataset (used only in a warning message)
-    # \param unweighted  Unweighted number of all events (used for a cross check)
-    # \param weightType  Type of weight (nominal, up/down varied), one of PileupWeightType members
-    def getWeighted(self, name, unweighted, weightType=PileupWeightType.NOMINAL):
-        try:
-            nweighted = self.weighted[weightType]
-        except KeyError:
-            raise Exception("Invalid weight type %d, see dataset.PileupWeightType" % weightType)
-        if int(unweighted) != int(self.unweighted):
-            nweighted = unweighted * nweighted/self.unweighted
-            print "%s: Unweighted all events from analysis %d, unweighted all events from _weightedAllEvents %d, using their ratio for setting the weighted all events (weight=%f)" % (name, int(unweighted), int(self.unweighted), nweighted)
-        #print "Using weighted event count for "+name+":",nweighted
-        return nweighted
-
-    ## \var unweighted
-    # Number of unweighted all MC events
-    ## \var weighted
-    # Dictionary holding the weighted number of all MC events for nominal case, and for up/down variations (for systematics)
-
-## Number of PU-reweighted all events for skimmed datasets
-#
-# These are obtained with following tools:
-# 1) pileupNtuple_cfg.py (produces tree of true number of vertices in MC)
-# 2) pileupCalc.py (produces histogram of true interactions for data in given run range)
-# 3) test/PUtools/generatePUweights.py (produces histogram of MC interactions)
-# 4) test/PUtools/calculateWeightedTotalEventCount.py (uses output of 1-3 as input and produces the following code fragment
-
-_weightedAllEvents = {
-    "Run2011A": {
-        "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=222212.037137, up=221902.723480, down=222062.117878),
-        "TTToHplusBWB_M90_Fall11": WeightedAllEvents(unweighted=218050, weighted=222329.037037, up=222279.317313, down=221972.416812),
-        "TTToHplusBWB_M100_Fall11": WeightedAllEvents(unweighted=218200, weighted=222212.037137, up=221902.723480, down=222062.117878),
-        "TTToHplusBWB_M120_Fall11": WeightedAllEvents(unweighted=218400, weighted=222440.768255, up=222128.289383, down=222293.443724),
-        "TTToHplusBWB_M140_Fall11": WeightedAllEvents(unweighted=218400, weighted=222440.768255, up=222128.289383, down=222293.443724),
-        "TTToHplusBWB_M150_Fall11": WeightedAllEvents(unweighted=219000, weighted=223111.838288, up=222797.371623, down=222965.554287),
-        "TTToHplusBWB_M155_Fall11": WeightedAllEvents(unweighted=219000, weighted=223111.838288, up=222797.371623, down=222965.554287),
-        "TTToHplusBWB_M160_Fall11": WeightedAllEvents(unweighted=218400, weighted=222712.375684, up=222661.426845, down=222356.837539),
-        "TTToHplusBHminusB_M80_Fall11": WeightedAllEvents(unweighted=218400, weighted=222712.375684, up=222661.426845, down=222356.837539),
-        "TTToHplusBHminusB_M90_Fall11": WeightedAllEvents(unweighted=219000, weighted=223381.100608, up=223151.800306, down=223188.617539),
-        "TTToHplusBHminusB_M100_Fall11": WeightedAllEvents(unweighted=217600, weighted=225984.226087, up=225590.815111, down=225943.497197),
-        "TTToHplusBHminusB_M120_Fall11": WeightedAllEvents(unweighted=218800, weighted=227181.902417, up=226791.315198, down=227135.151346),
-        "TTToHplusBHminusB_M140_Fall11": WeightedAllEvents(unweighted=218800, weighted=227184.956817, up=226793.804900, down=227138.794531),
-        "TTToHplusBHminusB_M150_Fall11": WeightedAllEvents(unweighted=218800, weighted=227181.902417, up=226791.315198, down=227135.151346),
-        "TTToHplusBHminusB_M155_Fall11": WeightedAllEvents(unweighted=217400, weighted=224622.885922, up=224178.880421, down=224636.065563),
-        "TTToHplusBHminusB_M160_Fall11": WeightedAllEvents(unweighted=220000, weighted=228152.034711, up=227725.646117, down=228213.572648),
-        "HplusTB_M180_Fall11": WeightedAllEvents(unweighted=210823, weighted=215080.692951, up=214985.140001, down=214797.010366),
-        "HplusTB_M190_Fall11": WeightedAllEvents(unweighted=209075, weighted=212878.780873, up=212824.595123, down=212547.329155),
-        "HplusTB_M200_Fall11": WeightedAllEvents(unweighted=214140, weighted=218729.296340, up=218489.020677, down=218535.610169),
-        "HplusTB_M220_Fall11": WeightedAllEvents(unweighted=204040, weighted=207525.122919, up=207385.995097, down=207274.662719),
-        "HplusTB_M250_Fall11": WeightedAllEvents(unweighted=202450, weighted=204070.910060, up=204125.717761, down=203593.971870),
-        "HplusTB_M300_Fall11": WeightedAllEvents(unweighted=201457, weighted=202116.437670, up=202356.380887, down=201437.047268),
-        "TTJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=59444088, weighted=60325852.933433, up=60322253.558011, down=60231186.347115),
-        "WJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=81345381, weighted=82377568.126906, up=82349060.998291, down=82313862.591121),
-        "W2Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=25400546, weighted=25071227.079162, up=25154522.001505, down=24950382.486547),
-        "W3Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=7685944, weighted=7317449.306018, up=7341688.317943, down=7278364.468218),
-        "W4Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=13133738, weighted=13062301.621954, up=13055893.988491, down=13048100.263525),
-        "DYJetsToLL_M10to50_TuneZ2_Fall11": WeightedAllEvents(unweighted=31480628, weighted=30998553.038641, up=31063192.638656, down=30901298.958760),
-        "DYJetsToLL_M50_TuneZ2_Fall11": WeightedAllEvents(unweighted=36264432, weighted=36784308.329060, up=36782129.609356, down=36718648.659880),
-        "T_t-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=3900171, weighted=4050330.241432, up=4041225.448775, down=4051357.109157),
-        "Tbar_t-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=1944826, weighted=2020509.925110, up=2015928.430863, down=2021038.792512),
-        "T_tW-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=814390, weighted=829409.258989, up=828376.221702, down=828732.889419),
-        "Tbar_tW-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=809984, weighted=824128.618323, up=823807.971595, down=822971.688741),
-        "T_s-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=259971, weighted=266159.892291, up=266020.508502, down=265848.527590),
-        "Tbar_s-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=137980, weighted=143304.004260, up=143054.135023, down=143277.899169),
-        "WW_TuneZ2_Fall11": WeightedAllEvents(unweighted=4225916, weighted=4257746.373670, up=4256437.413790, down=4252953.634985),
-        "WZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4265243, weighted=4406721.928127, up=4401780.867118, down=4403806.738003),
-        "ZZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4191045, weighted=4344331.840620, up=4335210.895426, down=4344886.886857),
-        "QCD_Pt20_MuEnriched_TuneZ2_Fall11": WeightedAllEvents(unweighted=25080241, weighted=25063106.092206, up=25105540.088830, down=24980532.692696),
-        "QCD_Pt30to50_TuneZ2_Fall11": WeightedAllEvents(unweighted=6583068, weighted=6828964.415819, up=6818908.354848, down=6827256.290380),
-        "QCD_Pt50to80_TuneZ2_Fall11": WeightedAllEvents(unweighted=6600000, weighted=6832512.936987, up=6819965.347566, down=6831831.879193),
-        "QCD_Pt80to120_TuneZ2_Fall11": WeightedAllEvents(unweighted=6581772, weighted=6715674.668516, up=6715172.795926, down=6703671.535201),
-        "QCD_Pt120to170_TuneZ2_Fall11": WeightedAllEvents(unweighted=6127528, weighted=6221598.645593, up=6218900.049906, down=6212658.706050),
-        "QCD_Pt170to300_TuneZ2_Fall11": WeightedAllEvents(unweighted=6220160, weighted=6267144.446872, up=6268077.975866, down=6252959.749113),
-        "QCD_Pt300to470_TuneZ2_Fall11": WeightedAllEvents(unweighted=6432669, weighted=6508237.455281, up=6506327.251603, down=6497639.996005),
-    },
-    "Run2011B": {
-        "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=216325.066231, up=217254.616614, down=215493.146064),
-        "TTToHplusBWB_M90_Fall11": WeightedAllEvents(unweighted=218050, weighted=216859.944595, up=217180.292362, down=216556.317936),
-        "TTToHplusBWB_M100_Fall11": WeightedAllEvents(unweighted=218200, weighted=216325.066231, up=217254.616614, down=215493.146064),
-        "TTToHplusBWB_M120_Fall11": WeightedAllEvents(unweighted=218400, weighted=216524.347428, up=217455.340840, down=215690.106370),
-        "TTToHplusBWB_M140_Fall11": WeightedAllEvents(unweighted=218400, weighted=216524.347428, up=217455.340840, down=215690.106370),
-        "TTToHplusBWB_M150_Fall11": WeightedAllEvents(unweighted=219000, weighted=217109.397096, up=218029.521207, down=216287.997096),
-        "TTToHplusBWB_M155_Fall11": WeightedAllEvents(unweighted=219000, weighted=217109.397096, up=218029.521207, down=216287.997096),
-        "TTToHplusBWB_M160_Fall11": WeightedAllEvents(unweighted=218400, weighted=217199.576237, up=217514.164630, down=216901.320571),
-        "TTToHplusBHminusB_M80_Fall11": WeightedAllEvents(unweighted=218400, weighted=217199.576237, up=217514.164630, down=216901.320571),
-        "TTToHplusBHminusB_M90_Fall11": WeightedAllEvents(unweighted=219000, weighted=217073.026776, up=217778.431885, down=216434.807809),
-        "TTToHplusBHminusB_M100_Fall11": WeightedAllEvents(unweighted=217600, weighted=215031.262959, up=214978.393602, down=215302.959444),
-        "TTToHplusBHminusB_M120_Fall11": WeightedAllEvents(unweighted=218800, weighted=216219.097087, up=216173.510679, down=216484.635746),
-        "TTToHplusBHminusB_M140_Fall11": WeightedAllEvents(unweighted=218800, weighted=216219.090151, up=216173.481971, down=216484.635946),
-        "TTToHplusBHminusB_M150_Fall11": WeightedAllEvents(unweighted=218800, weighted=216219.097087, up=216173.510679, down=216484.635746),
-        "TTToHplusBHminusB_M155_Fall11": WeightedAllEvents(unweighted=217400, weighted=214084.219074, up=214266.075952, down=214126.078536),
-        "TTToHplusBHminusB_M160_Fall11": WeightedAllEvents(unweighted=220000, weighted=218747.551196, up=218669.481239, down=218888.810312),
-        "HplusTB_M180_Fall11": WeightedAllEvents(unweighted=210823, weighted=209675.165216, up=209964.628187, down=209409.359243),
-        "HplusTB_M190_Fall11": WeightedAllEvents(unweighted=209075, weighted=207916.798292, up=208265.237141, down=207609.804017),
-        "HplusTB_M200_Fall11": WeightedAllEvents(unweighted=214140, weighted=212259.966393, up=212959.494690, down=211648.087179),
-        "HplusTB_M220_Fall11": WeightedAllEvents(unweighted=204040, weighted=202835.223906, up=203486.164125, down=202216.528988),
-        "HplusTB_M250_Fall11": WeightedAllEvents(unweighted=202450, weighted=202079.322576, up=202933.498424, down=201279.034487),
-        "HplusTB_M300_Fall11": WeightedAllEvents(unweighted=201457, weighted=200195.422594, up=200967.096588, down=199592.613978),
-        "TTJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=59444088, weighted=59233566.400571, up=59337704.411034, down=59147168.792957),
-        "WJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=81345381, weighted=81541165.831106, up=81615917.662211, down=81430140.570515),
-        "W2Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=25400546, weighted=25596891.612887, up=25715435.973731, down=25461089.267917),
-        "W3Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=7685944, weighted=7543101.017547, up=7667914.058201, down=7428410.947998),
-        "W4Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=13133738, weighted=12919750.711232, up=13004194.638553, down=12844014.406319),
-        "DYJetsToLL_M10to50_TuneZ2_Fall11": WeightedAllEvents(unweighted=31480628, weighted=31788206.010619, up=31946855.170268, down=31614247.507630),
-        "DYJetsToLL_M50_TuneZ2_Fall11": WeightedAllEvents(unweighted=36264432, weighted=36063683.838480, up=36150961.119609, down=35988475.218389),
-        "T_t-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=3900171, weighted=3828410.447194, up=3831367.711587, down=3830175.824693),
-        "Tbar_t-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=1944826, weighted=1908779.793916, up=1910193.238839, down=1909741.525521),
-        "T_tW-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=814390, weighted=808735.788971, up=811899.643085, down=805867.527582),
-        "Tbar_tW-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=809984, weighted=806305.718518, up=807730.689485, down=804934.759558),
-        "T_s-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=259971, weighted=258318.871836, up=258441.583483, down=258343.357276),
-        "Tbar_s-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=137980, weighted=136359.429157, up=136330.371583, down=136527.779738),
-        "WW_TuneZ2_Fall11": WeightedAllEvents(unweighted=4225916, weighted=4189325.647057, up=4201960.423124, down=4178839.405548),
-        "WZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4265243, weighted=4236720.798188, up=4236658.208119, down=4238992.390341),
-        "ZZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4191045, weighted=4115225.896538, up=4118948.772735, down=4116500.010809),
-        "QCD_Pt20_MuEnriched_TuneZ2_Fall11": WeightedAllEvents(unweighted=25080241, weighted=25141194.478285, up=25217057.175022, down=25058921.790455),
-        "QCD_Pt30to50_TuneZ2_Fall11": WeightedAllEvents(unweighted=6583068, weighted=6540519.679274, up=6536435.713132, down=6547124.981665),
-        "QCD_Pt50to80_TuneZ2_Fall11": WeightedAllEvents(unweighted=6600000, weighted=6485525.157505, up=6490583.270396, down=6488112.330529),
-        "QCD_Pt80to120_TuneZ2_Fall11": WeightedAllEvents(unweighted=6581772, weighted=6543851.805321, up=6552109.358305, down=6536295.560018),
-        "QCD_Pt120to170_TuneZ2_Fall11": WeightedAllEvents(unweighted=6127528, weighted=6096655.446293, up=6114847.606844, down=6078872.005553),
-        "QCD_Pt170to300_TuneZ2_Fall11": WeightedAllEvents(unweighted=6220160, weighted=6194092.620957, up=6222731.577817, down=6167568.648234),
-        "QCD_Pt300to470_TuneZ2_Fall11": WeightedAllEvents(unweighted=6432669, weighted=6360307.883080, up=6380161.481108, down=6344053.485342),
-    },
-    "Run2011AB": {
-        "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=219013.870316, up=219377.625194, down=218493.470983),
-        "TTToHplusBWB_M90_Fall11": WeightedAllEvents(unweighted=218050, weighted=219357.887652, up=219509.256396, down=219030.077434),
-        "TTToHplusBWB_M100_Fall11": WeightedAllEvents(unweighted=218200, weighted=219013.870316, up=219377.625194, down=218493.470983),
-        "TTToHplusBWB_M120_Fall11": WeightedAllEvents(unweighted=218400, weighted=219226.602415, up=219589.695779, down=218706.127472),
-        "TTToHplusBWB_M140_Fall11": WeightedAllEvents(unweighted=218400, weighted=219226.602415, up=219589.695779, down=218706.127472),
-        "TTToHplusBWB_M150_Fall11": WeightedAllEvents(unweighted=219000, weighted=219850.940864, up=220207.222286, down=219337.917510),
-        "TTToHplusBWB_M155_Fall11": WeightedAllEvents(unweighted=219000, weighted=219850.940864, up=220207.222286, down=219337.917510),
-        "TTToHplusBWB_M160_Fall11": WeightedAllEvents(unweighted=218400, weighted=219717.481950, up=219865.160887, down=219393.083965),
-        "TTToHplusBHminusB_M80_Fall11": WeightedAllEvents(unweighted=218400, weighted=219717.481950, up=219865.160887, down=219393.083965),
-        "TTToHplusBHminusB_M90_Fall11": WeightedAllEvents(unweighted=219000, weighted=219954.164625, up=220232.701459, down=219519.555956),
-        "TTToHplusBHminusB_M100_Fall11": WeightedAllEvents(unweighted=217600, weighted=220033.898861, up=219825.584633, down=220162.939281),
-        "TTToHplusBHminusB_M120_Fall11": WeightedAllEvents(unweighted=218800, weighted=221226.228298, up=221023.160383, down=221349.172885),
-        "TTToHplusBHminusB_M140_Fall11": WeightedAllEvents(unweighted=218800, weighted=221227.619591, up=221024.281952, down=221350.836988),
-        "TTToHplusBHminusB_M150_Fall11": WeightedAllEvents(unweighted=218800, weighted=221226.228298, up=221023.160383, down=221349.172885),
-        "TTToHplusBHminusB_M155_Fall11": WeightedAllEvents(unweighted=217400, weighted=218897.630068, up=218793.719042, down=218926.430381),
-        "TTToHplusBHminusB_M160_Fall11": WeightedAllEvents(unweighted=220000, weighted=223042.937415, up=222805.856818, down=223147.820335),
-        "HplusTB_M180_Fall11": WeightedAllEvents(unweighted=210823, weighted=212144.075847, up=212257.731586, down=211870.125460),
-        "HplusTB_M190_Fall11": WeightedAllEvents(unweighted=209075, weighted=210183.124939, up=210347.709939, down=209864.978819),
-        "HplusTB_M200_Fall11": WeightedAllEvents(unweighted=214140, weighted=215214.756058, up=215485.088754, down=214793.907779),
-        "HplusTB_M220_Fall11": WeightedAllEvents(unweighted=204040, weighted=204977.279613, up=205267.399981, down=204526.790792),
-        "HplusTB_M250_Fall11": WeightedAllEvents(unweighted=202450, weighted=202988.956520, up=203478.040956, down=202336.363474),
-        "HplusTB_M300_Fall11": WeightedAllEvents(unweighted=201457, weighted=201072.823428, up=201601.647938, down=200435.044014),
-        "TTJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=59444088, weighted=59732455.311131, up=59787394.224508, down=59642285.070652),
-        "WJets_TuneZ2_Fall11": WeightedAllEvents(unweighted=81345381, weighted=81923182.650655, up=81950778.642015, down=81833773.478359),
-        "W2Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=25400546, weighted=25356800.576871, up=25459240.234189, down=25227828.062063),
-        "W3Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=7685944, weighted=7440037.276690, up=7518911.450093, down=7359878.427958),
-        "W4Jets_TuneZ2_Fall11": WeightedAllEvents(unweighted=13133738, weighted=12984859.147391, up=13027808.158229, down=12937228.976309),
-        "DYJetsToLL_M10to50_TuneZ2_Fall11": WeightedAllEvents(unweighted=31480628, weighted=31427541.389412, up=31543245.014197, down=31288614.004514),
-        "DYJetsToLL_M50_TuneZ2_Fall11": WeightedAllEvents(unweighted=36264432, weighted=36392820.522162, up=36439245.395375, down=36321976.051131),
-        "T_t-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=3900171, weighted=3929769.679131, up=3927219.590481, down=3931198.593261),
-        "Tbar_t-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=1944826, weighted=1959811.205155, up=1958487.464056, down=1960575.654961),
-        "T_tW-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=814390, weighted=818178.151018, up=819425.269922, down=816311.097266),
-        "Tbar_tW-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=809984, weighted=814446.116456, up=815073.938865, down=813172.981553),
-        "T_s-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=259971, weighted=261900.164859, up=261903.234280, down=261771.283312),
-        "Tbar_s-channel_TuneZ2_Fall11": WeightedAllEvents(unweighted=137980, weighted=139531.281406, up=139401.429947, down=139610.842371),
-        "WW_TuneZ2_Fall11": WeightedAllEvents(unweighted=4225916, weighted=4220576.001822, up=4226842.621789, down=4212690.482360),
-        "WZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4265243, weighted=4314366.796459, up=4312077.477019, down=4314270.014944),
-        "ZZ_TuneZ2_Fall11": WeightedAllEvents(unweighted=4191045, weighted=4219867.317119, up=4217725.835095, down=4220813.875245),
-        "QCD_Pt20_MuEnriched_TuneZ2_Fall11": WeightedAllEvents(unweighted=25080241, weighted=25105528.535085, up=25166122.087209, down=25023118.201654),
-        "TTToHplusBWB_M90_Fall11_HighPU": WeightedAllEvents(unweighted=218050, weighted=1.477673, up=0.861639, down=2.872045), #ave32
-        "TTToHplusBWB_M160_Fall11_HighPU": WeightedAllEvents(unweighted=218400, weighted=1.480045, up=0.863022, down=2.876655), #ave32
-        "TTJets_TuneZ2_Fall11_HighPU": WeightedAllEvents(unweighted=1033841, weighted=7.006093, up=4.085293, down=13.617234), #ave32
-        "QCD_Pt30to50_TuneZ2_Fall11": WeightedAllEvents(unweighted=6583068, weighted=6672263.388985, up=6665454.227340, down=6675072.698602),
-        "QCD_Pt50to80_TuneZ2_Fall11": WeightedAllEvents(unweighted=6600000, weighted=6644007.707199, up=6641027.525614, down=6645103.463428),
-        "QCD_Pt80to120_TuneZ2_Fall11": WeightedAllEvents(unweighted=6581772, weighted=6622329.858643, up=6626588.084143, down=6612743.187378),
-        "QCD_Pt120to170_TuneZ2_Fall11": WeightedAllEvents(unweighted=6127528, weighted=6153721.769562, up=6162373.241593, down=6139978.002476),
-        "QCD_Pt170to300_TuneZ2_Fall11": WeightedAllEvents(unweighted=6220160, weighted=6227458.175356, up=6243443.406265, down=6206570.345192),
-        "QCD_Pt300to470_TuneZ2_Fall11": WeightedAllEvents(unweighted=6432669, weighted=6427872.959324, up=6437787.310456, down=6414202.885941),
-    },
+# era name -> list of era parts in data dataset names
+_dataEras = {
+    "Run2011A": ["_2011A_"],
+    "Run2011B": ["_2011B_"],
+    "Run2011AB": ["_2011A_", "_2011B_"],
+    "Run2012A": ["_2012A_"],
+    "Run2012B": ["_2012B_"],
+    "Run2012C": ["_2012C_"],
+    "Run2012D": ["_2012D_"],
+    "Run2012AB": ["_2012A_", "_2012B_"],
+    "Run2012ABC": ["_2012A_", "_2012B_", "_2012C_"],
+    "Run2012ABCD": ["_2012A_", "_2012B_", "_2012C_", "_2012D_"],
 }
 
 ## Construct DatasetManager from a list of MultiCRAB directory names.
@@ -231,111 +51,155 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
     if "namePostfix" in kwargs:
         raise Exception("'namePostfix' keyword argument not allowed")
 
-    nameList = []
+    datasets = DatasetManager()
     for d in multiDirs:
         if isinstance(d, str):
-            nameList.append( (os.path.join(d, "multicrab.cfg"), "") )
+            dset = getDatasetsFromMulticrabCfg(directory=d, **kwargs)
         else:
-            nameList.append( (os.path.join(d[0], "multicrab.cfg"), d[1]) )
+            dset = getDatasetsFromMulticrabCfg(directory=d[0], namePostfix=d[1], **kwargs)
+        datasets.extend(dset)
 
-    datasets = DatasetManager()
-    for cfg, postfix in nameList:
-        d = getDatasetsFromMulticrabCfg(cfgfile=cfg, namePostfix=postfix, **kwargs)
-        datasets.extend(d)
     return datasets
 
 ## Construct DatasetManager from a multicrab.cfg.
 #
 # \param kwargs   Keyword arguments (see below) 
 #
-# <b>Keyword arguments</b>
-# \li \a opts       Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
-# \li \a cfgfile    Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
-# \li \a dataEra    Optional data era string. If given, keeps data
-#                   datasets only from this era, and sets the
-#                   TDirectory path replacement scheme for MC
-#                   datasets. Forwarded to getDatasetsFromCrabDirs()
-#                   and eventually to dataset.Dataset.__init__()
-# \li Rest are forwarded to getDatasetsFromCrabDirs()
+# All keyword arguments are forwarded to readFromMulticrabCfg.
+#
+# All keyword arguments <b>except</b> the ones below are forwarded to
+# DatasetManagerCreator.createDatasetManager()
+# \li \a directory
+# \li \a cfgfile
+# \li \a excludeTasks
+# \li \a includeOnlyTasks
+# \li \a namePostfix
 #
 # \return DatasetManager object
 # 
-# The section names in multicrab.cfg are taken as the dataset names
-# in the DatasetManager object.
+# \see dataset.readFromMulticrabCfg
 def getDatasetsFromMulticrabCfg(**kwargs):
     _args = copy.copy(kwargs)
+    for argName in ["directory", "cfgfile", "excludeTasks", "includeOnlyTasks", "namePostfix"]:
+        try:
+            del _args[argName]
+        except KeyError:
+            pass
+
+    managerCreator = readFromMulticrabCfg(**kwargs)
+    return managerCreator.createDatasetManager(**_args)
+
+## Construct DatasetManagerConstructor from a multicrab.cfg.
+#
+# \param kwargs   Keyword arguments (see below) 
+#
+# <b>Keyword arguments</b>
+# \li \a opts              Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
+# \li \a directory         Directory where to look for \a cfgfile.
+# \li \a cfgfile           Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
+# \li \a excludeTasks      String, or list of strings, to specify regexps.
+#                          If a dataset name matches to any of the
+#                          regexps, Dataset object is not constructed for
+#                          that. Conflicts with \a includeOnlyTasks
+# \li \a includeOnlyTasks  String, or list of strings, to specify
+#                          regexps. Only datasets whose name matches
+#                          to any of the regexps are kept. Conflicts
+#                          with \a excludeTasks.
+# \li Rest are forwarded to readFromCrabDirs()
+#
+# \return DatasetManagerCreator object
+# 
+# The section names in multicrab.cfg are taken as the dataset names
+# in the DatasetManager object.
+def readFromMulticrabCfg(**kwargs):
     opts = kwargs.get("opts", None)
     taskDirs = []
     dirname = ""
-    if "cfgfile" in kwargs:
-        taskDirs = multicrab.getTaskDirectories(opts, kwargs["cfgfile"])
-        dirname = os.path.dirname(kwargs["cfgfile"])
-        del _args["cfgfile"]
+    if "directory" in kwargs or "cfgfile" in kwargs:
+        _args = {}
+        if "directory" in kwargs:
+            dirname = kwargs["directory"]
+            _args["directory"] = dirname
+        if "cfgfile" in kwargs:
+            _args["filename"] = kwargs["cfgfile"]
+            dirname = os.path.dirname(os.path.join(dirname, kwargs["cfgfile"]))
+        taskDirs = multicrab.getTaskDirectories(opts, **_args)
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
 
-    dataEra = kwargs.get("dataEra", None)
+    taskDirs = aux.includeExcludeTasks(taskDirs, **kwargs)
 
-    datasetMgr = getDatasetsFromCrabDirs(taskDirs, **_args)
-    if len(dirname) > 0:
-        datasetMgr._setBaseDirectory(dirname)
-
-    if dataEra != None:
-        if dataEra == "Run2011A":
-            datasetMgr.remove(filter(lambda name: not "2011A_" in name, datasetMgr.getDataDatasetNames()))
-        elif dataEra == "Run2011B":
-            datasetMgr.remove(filter(lambda name: not "2011B_" in name, datasetMgr.getDataDatasetNames()))
-        elif dataEra == "Run2011AB":
-            pass
-        else:
-            raise Exception("Unknown data era '%s', known are Run2011A, Run2011B, Run2011AB" % dataEra)
-
-    return datasetMgr
+    managerCreator = readFromCrabDirs(taskDirs, baseDirectory=dirname, **kwargs)
+    return managerCreator
 
 ## Construct DatasetManager from a list of CRAB task directory names.
 # 
 # \param taskdirs     List of strings for the CRAB task directories (relative
-#                     to the working directory)
-# \param kwargs       Keyword arguments (see below) 
-# 
-# <b>Keyword arguments</b>
-# \li \a opts         Optional OptionParser object. Should have options added with addOptions().
-# \li \a namePostfix  Postfix for the dataset names (default: '')
-# \li Rest are forwarded to getDatasetsFromRootFiles()
+#                     to the working directory), forwarded to readFromCrabDirs()
+# \param kwargs       Keyword arguments (see below)
 #
-# \return DatasetManager object
-# 
-# The basename of the task directories are taken as the dataset
-# names in the DatasetManager object (e.g. for directory '../Foo',
-# 'Foo' will be the dataset name)
+# All keyword arguments are forwarded to readFromCrabDirs().
+#
+# All keyword arguments <b>except</b> the ones below are forwarded to
+# DatasetManagerCreator.createDatasetManager()
+# \li \a namePostfix
+#
+# \see readFromCrabDirs()
 def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     _args = copy.copy(kwargs)
+    for argName in ["namePostfix"]:
+        try:
+            del _args[argName]
+        except KeyError:
+            pass
+    
+    managerCreator = readFromCrabDirs(taskdirs, **kwargs)
+    return managerCreator.createDatasetManager(**_args)
+
+
+## Construct DatasetManagerCreator from a list of CRAB task directory names.
+# 
+# \param taskdirs     List of strings for the CRAB task directories (relative
+#                     to the working directory)
+# \param emptyDatasetsAsNone  If true, in case of no datasets return None instead of raising an Exception (default False)
+# \param kwargs       Keyword arguments (see below) 
+# 
+# <b>Keyword arguments</b>, all are also forwarded to readFromRootFiles()
+# \li \a opts         Optional OptionParser object. Should have options added with addOptions().
+# \li \a namePostfix  Postfix for the dataset names (default: '')
+#
+# \return DatasetManagerCreator object
+# 
+# The basename of the task directories are taken as the dataset names
+# in the DatasetManagerCreator object (e.g. for directory '../Foo',
+# 'Foo' will be the dataset name)
+def readFromCrabDirs(taskdirs, emptyDatasetsAsNone=False, **kwargs):
     inputFile = None
     if "opts" in kwargs:
         opts = kwargs["opts"]
-        del _args["opts"]
         inputFile = opts.input
     else:
         inputFile = _optionDefaults["input"]
     postfix = kwargs.get("namePostfix", "")
-    try:
-        del _args["namePostfix"]
-    except KeyError:
-        pass
 
     dlist = []
     noFiles = False
     for d in taskdirs:
-        files = glob.glob(os.path.join(d, "res", inputFile))
-        if len(files) > 1:
-            raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
-            return 1
-        elif len(files) == 0:
+        # crab2
+        resdir = os.path.join(d, "res")
+        name = os.path.basename(d)
+        if os.path.exists(resdir):
+            files = glob.glob(os.path.join(resdir, inputFile))
+        else:
+            # crab3
+            files = glob.glob(os.path.join(d, "results", inputFile))
+            name = name.replace("crab_", "")
+        if len(files) == 0:
             print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, inputFile, os.path.join(d, "res"))
             noFiles = True
             continue
 
-        dlist.append( (os.path.basename(d)+postfix, files[0]) )
+        dlist.append( (name+postfix, files) )
 
     if noFiles:
         print >> sys.stderr, ""
@@ -345,65 +209,121 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
             raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
 
     if len(dlist) == 0:
+        if emptyDatasetsAsNone:
+            return None
         raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
 
-    return getDatasetsFromRootFiles(dlist, **_args)
+    return readFromRootFiles(dlist, **kwargs)
 
 ## Construct DatasetManager from a list of CRAB task directory names.
 # 
-# \param rootFileList  List of (name, filename) pairs (both should be strings).
-#                     'name' is taken as the dataset name, and 'filename' as
-#                      the path to the ROOT file.
-# \param kwargs        Keyword arguments (see below) 
-# 
-# <b>Keyword arguments</b>
-# \li \a counters      String for a directory name inside the ROOT files for the event counter histograms (default: 'signalAnalysis/counters').
-# \li Rest are forwarded to dataset.Dataset.__init__()
+# \param rootFileList  List of (\a name, \a filenames) pairs (\a name
+#                      should be string, \a filenames can be string or
+#                      list of strings). \a name is taken as the
+#                      dataset name, and \a filenames as the path(s)
+#                      to the ROOT file(s).
+# \param kwargs        Keyword arguments, forwarded to readFromRootFiles() and dataset.Dataset.__init__()
 #
 # \return DatasetManager object
 def getDatasetsFromRootFiles(rootFileList, **kwargs):
-    counters = kwargs.get("counters", _optionDefaults["counterdir"])
-    # Pass the rest of the keyword arguments, except 'counters', to Dataset constructor
-    _args = copy.copy(kwargs)
-    try:
-        del _args["counters"]
-    except KeyError:
-        pass
+    managerCreator = readFromRootFiles(rootFileList, **kwargs)
+    return managerCreator.createDatasetManager(**kwargs)
 
-    datasets = DatasetManager()
-    for name, f in rootFileList:
-        dset = Dataset(name, f, counters, **_args)
-        datasets.append(dset)
-    return datasets
+## Construct DatasetManagerCreator from a list of CRAB task directory names.
+# 
+# \param rootFileList  List of (\a name, \a filenames) pairs (\a name
+#                      should be string, \a filenames can be string or
+#                      list of strings). \a name is taken as the
+#                      dataset name, and \a filenames as the path(s)
+#                      to the ROOT file(s). Forwarded to DatasetManagerCreator.__init__()
+# \param kwargs        Keyword arguments (see below), all forwarded to DatasetManagerCreator.__init__()
+#
+# <b>Keyword arguments</b>
+# \li \a opts          Optional OptionParser object. Should have options added with addOptions().
+#
+# \return DatasetManagerCreator object
+#
+# If \a opts exists, and the \a opts.listAnalyses is set to True, list
+# all available analyses (with DatasetManagerCreator.printAnalyses()),
+# and exit.
+def readFromRootFiles(rootFileList, **kwargs):
+    creator = DatasetManagerCreator(rootFileList, **kwargs)
+    if "opts" in kwargs and kwargs["opts"].listAnalyses:
+        creator.printAnalyses()
+        sys.exit(0)
+    return creator
+        
 
 ## Default command line options
 _optionDefaults = {
     "input": "histograms-*.root",
-    "counterdir": "signalAnalysis/counters",
-    "analysisBaseName": "signalAnalysis",
 }
 
 ## Add common dataset options to OptionParser object.
 #
 # \param parser   OptionParser object
-def addOptions(parser):
+def addOptions(parser, analysisName=None, searchMode=None, dataEra=None, optimizationMode=None, systematicVariation=None):
     parser.add_option("-i", dest="input", type="string", default=_optionDefaults["input"],
                       help="Pattern for input root files (note: remember to escape * and ? !) (default: '%s')" % _optionDefaults["input"])
     parser.add_option("-f", dest="files", type="string", action="append", default=[],
                       help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
-    parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default=_optionDefaults["counterdir"],
-                      help="TDirectory name containing the counters (default: %s" % _optionDefaults["counterdir"])
+    parser.add_option("--analysisName", dest="analysisName", type="string", default=analysisName,
+                      help="Override default analysisName (%s, plot script specific)" % analysisName)
+    parser.add_option("--searchMode", dest="searchMode", type="string", default=searchMode,
+                      help="Override default searchMode (%s, plot script specific)" % searchMode)
+    parser.add_option("--dataEra", dest="dataEra", type="string", default=dataEra,
+                      help="Override default dataEra (%s, plot script specific)" % dataEra)
+    parser.add_option("--optimizationMode", dest="optimizationMode", type="string", default=optimizationMode,
+                      help="Override default optimizationMode (%s, plot script specific)" % optimizationMode)
+    parser.add_option("--systematicVariation", dest="systematicVariation", type="string", default=systematicVariation,
+                      help="Override default systematicVariation (%s, plot script specific)" % systematicVariation)
+    parser.add_option("--list", dest="listAnalyses", action="store_true", default=False,
+                      help="List available analysis name information, and quit.")
+    parser.add_option("--counterDir", "-c", dest="counterDir", type="string", default=None,
+                      help="TDirectory name containing the counters, relative to the analysis directory (default: analysisDirectory+'/counters')")
 
+## Generic settings class
+class Settings:
+    def __init__(self, **defaults):
+        self.data = copy.deepcopy(defaults)
+
+    def set(self, **kwargs):
+        for key, value in kwargs.iteritems():
+            if not key in self.data:
+                raise Exception("Not allowed to insert '%s', available settings: %s" % (key, ", ".join(self.data.keys())))
+            self.data[key] = value
+
+    def append(self, **kwargs):
+        for key, value in kwargs.iteritems():
+            if not key in self.data:
+                raise Exception("Not allowed to insert '%s', available settings: %s" % (key, ", ".join(self.data.keys())))
+            try:
+                self.data[key].append(value)
+            except AttributeError:
+                try:
+                    self.data[key].update(value)
+                except AttributeError:
+                    raise Exception("Trying to append to '%s', but it does not have 'append' method (assuming list) nor 'update' method (assuming dictionary). Its type is %s." % (key, type(self.data[key]).__name__))
+
+    def get(self, key, args=None):
+        if args is None:
+            return self.data[key]
+        else:
+            return args.get(key, self.data[key])
+
+    def clone(self, **kwargs):
+        return copy.deepcopy(self)
 
 ## Represents counter count value with uncertainty.
 class Count:
     ## Constructor
-    def __init__(self, value, uncertainty=0.0):
+    def __init__(self, value, uncertainty=0.0, systUncertainty=0.0):
         self._value = value
         self._uncertainty = uncertainty
+        self._systUncertainty = systUncertainty
 
     def copy(self):
-        return Count(self._value, self._uncertainty)
+        return Count(self._value, self._uncertainty, self._systUncertainty)
 
     def clone(self):
         return self.copy()
@@ -420,23 +340,31 @@ class Count:
     def uncertaintyHigh(self):
         return self.uncertainty()
 
+    def systUncertainty(self):
+        return self._systUncertainty
+
     ## self = self + count
     def add(self, count):
         self._value += count._value
         self._uncertainty = math.sqrt(self._uncertainty**2 + count._uncertainty**2)
+        self._systUncertainty = math.sqrt(self._systUncertainty**2 + count._systUncertainty**2)
 
     ## self = self - count
     def subtract(self, count):
-        self.add(Count(-count._value, count._uncertainty))
+        self.add(Count(-count._value, count._uncertainty, count._systUncertainty))
 
     ## self = self * count
     def multiply(self, count):
+        self._systUncertainty = math.sqrt( (count._value * self._systUncertainty)**2 +
+                                       (self._value  * count._systUncertainty)**2 )
         self._uncertainty = math.sqrt( (count._value * self._uncertainty)**2 +
                                        (self._value  * count._uncertainty)**2 )
         self._value = self._value * count._value
 
     ## self = self / count
     def divide(self, count):
+        self._systUncertainty = math.sqrt( (self._systUncertainty / count._value)**2 +
+                                       (self._value*count._systUncertainty / (count._value**2) )**2 )
         self._uncertainty = math.sqrt( (self._uncertainty / count._value)**2 +
                                        (self._value*count._uncertainty / (count._value**2) )**2 )
         self._value = self._value / count._value
@@ -444,7 +372,9 @@ class Count:
     ## \var _value
     # Value of the count
     ## \var _uncertainty
-    # Uncertainty of the count
+    # Statistical uncertainty of the count
+    ## \var _systUncertainty
+    # Systematic uncertainty of the count
 
 ## Represents counter count value with asymmetric uncertainties.
 class CountAsymmetric:
@@ -486,7 +416,7 @@ class CountAsymmetric:
 def divideBinomial(countPassed, countTotal):
     p = countPassed.value()
     t = countTotal.value()
-    value = p / t
+    value = p / float(t)
     p = int(p)
     t = int(t)
     errUp = ROOT.TEfficiency.ClopperPearson(t, p, 0.683, True)
@@ -541,6 +471,9 @@ def _histoToDict(histo):
 ## Integrate TH1 to a Count
 def histoIntegrateToCount(histo):
     count = Count(0, 0)
+    if histo is None:
+        return count
+
     for bin in xrange(0, histo.GetNbinsX()+2):
         count.add(Count(histo.GetBinContent(bin), histo.GetBinError(bin)))
     return count
@@ -569,13 +502,20 @@ def _rescaleInfo(d):
     return ret
 
 
-## Normalize TH1 to unit area.
+## Normalize TH1/TH2/TH3 to unit area.
 # 
-# \param h   TH1 histogram
+# \param h   RootHistoWithUncertainties object, or TH1/TH2/TH3 histogram
 # 
 # \return Normalized histogram (same as the argument object, i.e. no copy is made).
 def _normalizeToOne(h):
-    integral = h.Integral(0, h.GetNbinsX()+1)
+    if isinstance(h, RootHistoWithUncertainties):
+        integral = h.integral()
+    elif isinstance(h, ROOT.TH3):
+        integral = h.Integral(0, h.GetNbinsX()+1, 0, h.GetNbinsY()+1, 0, h.GetNbinsZ()+1)
+    elif isinstance(h, ROOT.TH2):
+        integral = h.Integral(0, h.GetNbinsX()+1, 0, h.GetNbinsY()+1)
+    else:
+        integral = h.Integral(0, h.GetNbinsX()+1)
     if integral == 0:
         return h
     else:
@@ -602,6 +542,7 @@ def _normalizeToFactor(h, f):
 # \param datasetList  List of all Dataset objects to consider
 # \param nameList     List of the names of Dataset objects to merge/stack
 # \param task         String to identify merge/stack task (can be 'stack' or 'merge')
+# \param allowMissingDatasets  If True, ignore error from missing dataset (warning is nevertheless printed)
 # 
 # \return a triple of:
 # - list of selected Dataset objects
@@ -613,7 +554,7 @@ def _normalizeToFactor(h, f):
 # Datasets, and it is checked that all of them are either data or MC
 # (i.e. merging/stacking of data and MC datasets is forbidden).
 # """
-def _mergeStackHelper(datasetList, nameList, task):
+def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
     if not task in ["stack", "merge"]:
         raise Exception("Task can be either 'stack' or 'merge', was '%s'" % task)
 
@@ -622,6 +563,7 @@ def _mergeStackHelper(datasetList, nameList, task):
     firstIndex = None
     dataCount = 0
     mcCount = 0
+    pseudoCount = 0
 
     for i, d in enumerate(datasetList):
         if d.getName() in nameList:
@@ -632,6 +574,8 @@ def _mergeStackHelper(datasetList, nameList, task):
                 dataCount += 1
             elif d.isMC():
                 mcCount += 1
+            elif hasattr(d, "isPseudo") and d.isPseudo():
+                pseudoCount += 1
             else:
                 raise Exception("Internal error!")
         else:
@@ -639,19 +583,25 @@ def _mergeStackHelper(datasetList, nameList, task):
 
     if dataCount > 0 and mcCount > 0:
         raise Exception("Can not %s data and MC datasets!" % task)
+    if dataCount > 0 and pseudoCount > 0:
+        raise Exception("Can not %s data and pseudo datasets!" % task)
+    if pseudoCount > 0 and mcCount > 0:
+        raise Exception("Can not %s pseudo and MC datasets!" % task)
 
     if len(selected) != len(nameList):
         dlist = nameList[:]
         for d in selected:
             ind = dlist.index(d.getName())
             del dlist[ind]
-        print >> sys.stderr, "WARNING: Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
+        message = "Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
+        if allowMissingDatasets:
+            print >> sys.stderr, "WARNING: "+message
+        else:
+            raise Exception(message)
 
     return (selected, notSelected, firstIndex)
 
 
-_th1_re = re.compile(">>\s*(?P<name>\S+)\s*\((?P<nbins>\S+)\s*,\s*(?P<min>\S+)\s*,\s*(?P<max>\S+)\s*\)")
-_th1name_re = re.compile(">>\s*(?P<name>\S+)")
 ## Helper class for obtaining histograms from TTree
 #
 # This class provides an easy way to get a histogram from a TTree. It
@@ -674,16 +624,23 @@ class TreeDraw:
     # \param varexp     Expression for the variable, if given it should also include the histogram name and binning explicitly.
     # \param selection  Draw only those entries passing this selection
     # \param weight     Weight the entries with this weight
+    # \param binLabelsX X-axis bin labels (optional)
+    # \param binLabelsY Y-axis bin labels (optional)
+    # \param binLabelsZ Z-axis bin labels (optional)
     #
     # If varexp is not given, the number of entries passing selection
     # is counted (ignoring weight). In this case the returned TH1 has
     # 1 bin, which contains the event count and the uncertainty of the
     # event count (calculated as sqrt(N)).
-    def __init__(self, tree, varexp="", selection="", weight=""):
+    def __init__(self, tree, varexp="", selection="", weight="", binLabelsX=None, binLabelsY=None, binLabelsZ=None):
         self.tree = tree
         self.varexp = varexp
         self.selection = selection
         self.weight = weight
+
+        self.binLabelsX = binLabelsX
+        self.binLabelsY = binLabelsY
+        self.binLabelsZ = binLabelsZ
 
     ## Clone a TreeDraw
     #
@@ -697,7 +654,11 @@ class TreeDraw:
         args = {"tree": self.tree,
                 "varexp": self.varexp,
                 "selection": self.selection,
-                "weight": self.weight}
+                "weight": self.weight,
+                "binLabelsX": self.binLabelsX,
+                "binLabelsY": self.binLabelsY,
+                "binLabelsZ": self.binLabelsZ,
+                }
         args.update(kwargs)
 
         # Allow modification functions
@@ -723,10 +684,9 @@ class TreeDraw:
             else:
                 selection = self.weight
 
-        rootFile = dataset.getRootFile()
-        tree = rootFile.Get(self.tree)
+        (tree, treeName) = dataset.createRootChain(self.tree)
         if tree == None:
-            raise Exception("No TTree '%s' in file %s" % (self.tree, rootFile.GetName()))
+            raise Exception("No TTree '%s' in file %s" % (treeName, dataset.getRootFile().GetName()))
 
         if self.varexp == "":
             nentries = tree.GetEntries(selection)
@@ -739,11 +699,6 @@ class TreeDraw:
             return h
 
         varexp = self.varexp
-        m = _th1_re.search(varexp)
-        h = None
-        #if m:
-        #    varexp = _th1_re.sub(">>"+m.group("name"), varexp)
-        #    h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
         
         # e to have TH1.Sumw2() to be called before filling the histogram
         # goff to not to draw anything on the screen
@@ -753,29 +708,27 @@ class TreeDraw:
         option = opt+"goff"
         nentries = tree.Draw(varexp, selection, option)
         if nentries < 0:
-            raise Exception("Error when calling TTree.Draw with\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (self.tree, varexp, selection, option))
+            raise Exception("Error when calling TTree.Draw with the following parameters for dataset %s, nentries=%d\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (dataset.getName(), nentries, treeName, varexp, selection, option))
         h = tree.GetHistogram()
-        if h != None:
-            h = h.Clone(h.GetName()+"_cloned")
-        else:
-            m = _th1_re.search(varexp)
-            if m:
-                h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
-            else:
-                m = _th1name_re.search(varexp)
-                if m:
-                    h = ROOT.gDirectory.Get(m.group("name"))
-                    h = h.Clone(h.GetName()+"_cloned")
-                    if nentries == 0:
-                        h.Scale(0)
-
-                    if h == None:
-                        raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', unable to infer the histogram limits,  and did not find objectr from gDirectory, from the varexp %s" % (rootFile.GetName(), selection, varexp))
-                else:
-                    raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', and unable to infer the histogram limits or name from the varexp %s" % (rootFile.GetName(), selection, varexp))
+        if h == None: # need '==' to compare null TH1
+            print >>sys.stderr, "WARNING: TTree.Draw with the following parameters returned null histogram for dataset %s (%d entries)\ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" % (dataset.getName(), nentries, treeName, varexp, selection, option)
+            return None
 
         h.SetName(dataset.getName()+"_"+h.GetName())
         h.SetDirectory(0)
+
+        for axis in ["X", "Y", "Z"]:
+            if getattr(self, "binLabels"+axis) is not None:
+                labels = getattr(self, "binLabels"+axis)
+                nlabels = len(labels)
+                nbins = getattr(h, "GetNbins"+axis)()
+                if nlabels != nbins:
+                    raise Exception("Trying to set %s bin labels, bot %d labels, histogram has %d bins. \ntree:       %s\nvarexp:     %s\nselection:  %s\noption:     %s" %
+                                    (axis, nlabels, nbins, self.tree, varexp, selection, option))
+                axisObj = getattr(h, "Get"+axis+"axis")()
+                for i, label in enumerate(labels):
+                    axisObj.SetBinLabel(i+1, label)
+
         return h
 
 
@@ -915,6 +868,872 @@ def treeDrawToNumEntries(treeDraw):
     else:
         return _treeDrawToNumEntriesSingle(treeDraw)
 
+
+## Class to encapsulate shape/normalization systematics for plot creation
+class Systematics:
+    class OnlyForMC:
+        pass
+    class OnlyForPseudo:
+        pass
+    class OnlyForPseudoAndMC:
+        pass
+    class All:
+        pass
+
+    ## Constructor
+    #
+    # \param kwargs   Keyword arguments, see below
+    #
+    # <b>Keyword arguments</b>
+    # \li\a allShapes                 If True, use all available shape variation uncertainties
+    # \li\a shapes                    List of strings for explicit list of shape
+    #                                 variations (e.g. ['SystVarJES',
+    #                                 'SystVarJER'])
+    # \li\a normalizationSelections   List of strings for the selections
+    #                                 used up to this point for
+    #                                 normalization uncertainties (not
+    #                                 used yet)
+    # \li\a additionalNormalizations  Dictionary (name (string) ->
+    #                                 value (float)) for addititional
+    #                                 normalization uncertainties. The
+    #                                 uncertainties are supposed to be
+    #                                 relative.
+    # \li\a additionalDatasetNormalizations Dictionary (name (string)
+    #                                 -> function (string -> float)) for
+    #                                 additional dataset-specific
+    #                                 uncertainties. The uncertainties are
+    #                                 supposed to be relative.
+    # \li\a additionalShapes          Dictionary (name (string) -> (th1up,
+    #                                 th1down)) for additional shape
+    #                                 variation uncertainties.
+    #                                 th1up/th1down can be either
+    #                                 TH1s, or strings for paths of
+    #                                 histograms in the analysis
+    #                                 directory (or ROOT file)
+    # \li\a additionalShapesRelative  Dictionary (name (string) -> th1)
+    #                                 for additional bin-wise relative
+    #                                 uncertainties. Each bin of TH1
+    #                                 should have the relative
+    #                                 uncertainty of that bin.
+    # \li\a applyToDatasets           Datasets to which the systematic uncertainties are applied (one of the tag classes OnlyForMC, OnlyForPseudo, OnlyForPseudoAndMC, All)
+    # \li\a verbose                   If True, print the applied uncertainties
+    def __init__(self, **kwargs):
+        self.settings = Settings(allShapes=False,
+                                 shapes=[],
+                                 normalizationSelections=[],
+                                 additionalNormalizations={},
+                                 additionalDatasetNormalizations={},
+                                 additionalShapes={},
+                                 additionalShapesRelative={},
+                                 applyToDatasets=Systematics.OnlyForPseudoAndMC,
+                                 verbose=False,
+                                 )
+        self.settings.set(**kwargs)
+
+    ## Set systematics parameters
+    #
+    # \param kwargs  Keyword arguments, see __init__()
+    def set(self, **kwargs):
+        self.settings.set(**kwargs)
+
+    ## Append to systematic parameters
+    #
+    # \param kwargs   Keyword arguments, see __init__()
+    #
+    # Appending works only for those parameters, whose type is list or
+    # dictionary.
+    def append(self, **kwargs):
+        self.settings.append(**kwargs)
+
+    ## Clone Systematics recipe
+    #
+    # \param kwargs  Keyword arguments for overriding parameters, see __init__()
+    def clone(self, **kwargs):
+        cl = copy.deepcopy(self)
+        cl.set(**kwargs)
+        return cl
+
+    ## Create SystematicsHelper for Dataset.getDatasetRootHisto()
+    #
+    # \param name    Path to the histogram in the analysis TDirectory
+    # \param kwargs  Keyword arguments for overriding parameters, see __init__()
+    def histogram(self, name, **kwargs):
+        settings = self.settings
+        if len(kwargs) > 0:
+            settings = settings.clone(**kwargs)
+        return SystematicsHelper(name, settings)
+
+## Helper class to do the work for obtaining uncertainties from their sources for a requested histogram
+#
+# The object should be created with Systematics.histogram(), i.e. not
+# directly.
+class SystematicsHelper:
+    ## Constructor
+    #
+    # \param histoName   Name of the histogram to read
+    # \param settings    Settings object for systematic recipe
+    def __init__(self, histoName, settings):
+        self._histoName = histoName
+        self._settings = settings
+
+    ## Read the histogram for a dataset
+    #
+    # \param dset  Dataset object
+    def draw(self, dset):
+        (th1, realName) = dset.getRootHisto(self._histoName)
+        return th1
+
+    ## Add uncertainties to RootHistoWithUncertainties object
+    #
+    # \param dset                         Dataset object
+    # \param rootHistoWithUncertainties   RootHistoWithUncertainties object
+    # \param modify                       Optional modification function, see Dataset.getDatasetRootHisto()
+    def addUncertainties(self, dset, rootHistoWithUncertainties, modify=None):
+        verbose = self._settings.get("verbose")
+        if verbose:
+            print "Adding uncertainties to histogram '%s' of dataset '%s'" % (self._histoName, dset.getName())
+
+        onlyFor = self._settings.get("applyToDatasets")
+        if dset.isMC():
+            if onlyFor is Systematics.OnlyForPseudo:
+                if verbose:
+                    print "  Dataset is MC, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
+                return
+        elif dset.isPseudo():
+            if onlyFor is Systematics.OnlyForMC:
+                if verbose:
+                    print "  Dataset is pseudo, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
+                return
+        elif dset.isData():
+            if onlyFor is not Systematics.All:
+                if verbose:
+                    print "  Dataset is data, no systematics considered (Systematics(..., onlyForMC=%s))" % onlyFor.__name__
+                return
+        else:
+            raise Exception("Internal error (unknown dataset type)")
+
+        # Read the shape variations from the Dataset
+        shapes = []
+        allShapes = dset.getAvailableSystematicVariationSources()
+        if self._settings.get("allShapes"):
+            shapes = allShapes
+            if verbose:
+                print "  Using all available shape variations (%s)" % ",".join(shapes)
+        else:
+            shapes = self._settings.get("shapes")
+            #for s in self._settings.get("shapes"):
+            #    if s in allShapes:
+            #        shapes.append(s)
+            if verbose:
+                print "  Using explicitly specified shape variations (%s)" % ",".join(shapes)
+
+        for source in shapes:
+            plus = None
+            minus = None
+            # Need to do the check, because of QCD shape uncertainty
+            if dset.hasRootHisto(self._histoName, analysisPostfix=source+"Plus"):
+                (plus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Plus")
+                (minus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Minus")
+                if modify is not None:
+                    modify(plus)
+                    modify(minus)
+                rootHistoWithUncertainties.addShapeUncertaintyFromVariation(source, plus, minus)
+
+        # Add any additional shape variation histograms supplied by the user
+        additShapes = self._settings.get("additionalShapes")
+        if len(additShapes) > 0:
+            if verbose:
+                print "  Adding additional shape variations %s" % ",".join(additShapes.keys())
+            for source, (th1plus, th1minus) in additShapes.iteritems():
+                hp = th1plus
+                hm = th1minus
+                if not isinstance(th1plus, ROOT.TH1):
+                    (hp, realName) = dset.getRootHisto(th1plus)
+                    if modify is not None:
+                        modify(hp)
+                if not isinstance(th1minus, ROOT.TH1):
+                    (hm, realName) = dset.getRootHisto(th1minus)
+                    if modify is not None:
+                        modify(hm)
+                rootHistoWithUncertainties.addShapeUncertaintyFromVariation(source, hp, hm)
+
+        # Add any bin-wise relative uncertainties supplied by the user
+        relShapes = self._settings.get("additionalShapesRelative")
+        if len(relShapes) > 0:
+            if verbose:
+                print "  Adding additional bin-wise relative uncertainties %s" % ",".join(relShapes.keys())
+            for source, th1 in relShapes.iteritems():
+                rootHistoWithUncertainties.addShapeUncertaintyFromVariationRelative(source, th1)
+
+        # Add normalization uncertainties given the selection step
+        normSel = self._settings.get("normalizationSelections")
+        if len(normSel) > 0:
+            if verbose:
+                print "  Adding normalization uncertainties after selections %s" % ",".join(normSel)
+            raise Exception("Normalization uncertainties given the set of selections is not supported yet")
+
+        # Add any user-supplied normalization uncertainties
+        additNorm = self._settings.get("additionalNormalizations")
+        if len(additNorm) > 0:
+            if verbose:
+                print "  Adding additional relative normalization uncertainties %s" % ",".join(additNorm.keys())
+            for source, value in additNorm.iteritems():
+                rootHistoWithUncertainties.addNormalizationUncertaintyRelative(source, value)
+
+        # Add any user-supplied dataset-specific normalization uncertainties
+        additNorm = self._settings.get("additionalDatasetNormalizations")
+        if len(additNorm) > 0:
+            if verbose:
+                print "  Adding additional dataset-specific (for %s) relative normalization uncertainties %s" % (dset.getName(), ",".join(additNorm.keys()))
+            for source, func in additNorm.iteritems():
+                value = func(dset.getName())
+                rootHistoWithUncertainties.addNormalizationUncertaintyRelative(source, value)
+
+        if verbose:
+            print "  Below is the final set of uncertainties for this histogram"
+            rootHistoWithUncertainties.printUncertainties()
+
+        
+
+## Class to encapsulate a ROOT histogram with a bunch of uncertainties
+#
+# Looks almost as TH1, except holds bunch of uncertainties; the histograms contained are clones and therefore owned by the class
+class RootHistoWithUncertainties:
+    def __init__(self, rootHisto):
+        self._rootHisto = None
+        
+        # dictionary of name -> (th1Plus, th1Minus)
+        # This dictionary contains the variation uncertainties
+        # Laterally (i.e. for combining same uncertainty between bins or samples, i.e. relative uncertainty is constant), linear sum is used
+        # Vertically (i.e. for different source of uncertainties), quadratic sum is used
+        # The numbers are stored into the bin content as absolute uncertainties
+        self._shapeUncertainties = {}
+
+        self.setRootHisto(rootHisto)
+
+        # Treat these shape uncertainties as statistical uncertainties in getSystematicUncertaintyGraph()
+        self._treatShapesAsStat = set() # use set to avoid duplicates
+
+        # Boolean to save the status if the under- and overflow bins have been made visible (i.e. summed to the first and last bin)
+        self._flowBinsVisibleStatus = False
+
+    def _checkConsistency(self, name, th1):
+        # I can't use this since it's private/protected :(
+        #if not ROOT.TH1.CheckConsistency(self._rootHisto, th1):
+        #    raise Exception("Adding uncertainty %s, histogram consistency check fails (ROOT.TH1.CheckConsistency())" % name)
+        if self._rootHisto.GetDimension() != th1.GetDimension():
+            raise Exception("Adding uncertainty %s, histograms have different dimension (%d != %d)" % (name, self._rootHisto.GetDimension(), th1.GetDimension()))
+        if self._rootHisto.GetNbinsX() != th1.GetNbinsX():
+            raise Exception("Adding uncertainty %s, histograms have different number of X bins (%d != %d)" % (name, self._rootHisto.GetNbinsX(), th1.GetNbinsX()))
+
+    def delete(self):
+        if self._rootHisto != None:
+            self._rootHisto.Delete()
+            self._rootHisto = None
+        for k in self._shapeUncertainties.keys():
+            (u,d) = self._shapeUncertainties[k]
+            u.Delete()
+            d.Delete()
+        self._shapeUncertainties = {}
+
+    ## Set the ROOT histogram object
+    #
+    # \param newRootHisto   ROOT histogram object
+    #
+    # This method can be called only in absence of shape variation uncertainties
+    def setRootHisto(self, newRootHisto):
+        if len(self._shapeUncertainties.keys()) != 0 or self._rootHisto != None:
+            raise Exception("There are shape uncertanties, you should not set the original histogram (call delete() before)!")
+        self._rootHisto = aux.Clone(newRootHisto)
+
+    ## Get the ROOT histogram object
+    def getRootHisto(self):
+        return self._rootHisto
+
+    ## Get the event rate, i.e. integral of the root histo object (usually at this point the under and overflow bins are already merged to actual bins)
+    def getRate(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        myRate = self._rootHisto.Integral()
+        myRateIncludingOverflow = self.integral()
+        if abs(myRate - myRateIncludingOverflow) > 0.00001:
+            raise Exception("getRate(): Weird, the under/overflow should be empty at this point, but apparantly they are not?!")
+        return myRate
+
+    ## Get the stat. uncertainty of the root histo object
+    def getRateStatUncertainty(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        if len(self._treatShapesAsStat) > 0:
+            print "WARNING: some shapes are treated as statistical uncertainty, but they have not been implemented yet to getRateStatUncertainty()!"
+        mySum = 0.0
+        if isinstance(self._rootHisto, ROOT.TH2):
+            raise Exception("getRateStatUncertainty() supported currently only for TH1!")
+        for i in range(1, self._rootHisto.GetNbinsX()+1):
+            mySum += self._rootHisto.GetBinError(i)**2
+        return math.sqrt(mySum)
+
+    ## Get the syst. uncertainty of the root histo object
+    def getRateSystUncertainty(self):
+        if not self._flowBinsVisibleStatus:
+            raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        if isinstance(self._rootHisto, ROOT.TH2):
+            raise Exception("getRateSystUncertainty() supported currently only for TH1!")
+        # Integrate first over distribution, then sum
+        myClone = self.Clone()
+        myClone.Rebin(self._rootHisto.GetNbinsX())
+        g = myClone.getSystematicUncertaintyGraph()
+        myClone.Delete()
+        myResult = (g.GetErrorYhigh(0),g.GetErrorYlow(0))
+        g.Delete()
+        return myResult
+
+    ## Adds the underflow and overflow bins to the first and last bins, respectively
+    def makeFlowBinsVisible(self):
+        #if self._flowBinsVisibleStatus:
+        #    return
+        self._flowBinsVisibleStatus = True
+        # Update systematics histograms first
+        for key, (hPlus, hMinus) in self._shapeUncertainties.iteritems():
+            histogramsExtras.makeFlowBinsVisible(hPlus)
+            histogramsExtras.makeFlowBinsVisible(hMinus)
+        # Update nominal histogram
+        histogramsExtras.makeFlowBinsVisible(self._rootHisto)
+
+    ## Add shape variation uncertainty (Note that the nominal value is subtracted from the variations to obtain absolute uncert.)
+    #
+    # \param name     Name of the uncertainty
+    # \param th1Plus  TH1 for the 'plus' variation
+    # \param th1Minus TH1 for the 'minus' variation
+    def addShapeUncertaintyFromVariation(self, name, th1Plus, th1Minus):
+        if self._flowBinsVisibleStatus:
+            # Check if flow bins have entries
+            myStatus = abs(th1Plus.GetBinContent(th1Plus.GetNbinsX()+1)) < 0.00001
+            myStatus &= abs(th1Minus.GetBinContent(th1Minus.GetNbinsX()+1)) < 0.00001
+            myStatus &= abs(th1Plus.GetBinContent(0)) < 0.00001
+            myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
+            if not myStatus:
+                raise Exception("addShapeUncertaintyFromVariation(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
+
+        self._checkConsistency(name, th1Plus)
+        self._checkConsistency(name, th1Minus)
+        # Subtract nominal to get absolute uncertainty (except for source histograms)
+        if name in self._shapeUncertainties.keys():
+            raise Exception("Uncertainty '%s' has already been added!"%name)
+        th1Plus.Add(self._rootHisto, -1.0)
+        th1Minus.Add(self._rootHisto, -1.0)
+        # Store
+        self._shapeUncertainties[name] = (aux.Clone(th1Plus), aux.Clone(th1Minus))
+
+    ## Remove superfluous shape variation uncertainties
+    #
+    # \param keepList  List of variation names to keep
+    #
+    # The normalization relative uncertainties are summed quadratically
+    def keepOnlySpecifiedShapeUncertainties(self, keepList):
+        dropList = []
+        for key in self._shapeUncertainties.keys():
+            if not key in keepList:
+                dropList.append(key)
+        for key in dropList:
+            (hplus,hminus) = self._shapeUncertainties[key]
+            hplus.Delete()
+            hminus.Delete()
+            del self._shapeUncertainties[key]
+
+    ## Remove shape variation uncertainties for a key
+    #
+    # \param name   String of key to be removed
+    #
+    # The normalization relative uncertainties are summed quadratically
+    def removeShapeUncertainty(self, name):
+        myKey = None
+        if name in self._shapeUncertainties.keys():
+            myKey = name
+        elif "SystVar"+name in self._shapeUncertainties.keys():
+            myKey = "SystVar"+name
+        else:
+            raise Exception("Could not find key '%s' in syst. var.! (list = %s)"%(name,", ".join(map(str,self._shapeUncertainties.keys()))))
+        (hplus,hminus) = self._shapeUncertainties[myKey]
+        hplus.Delete()
+        hminus.Delete()
+        del self._shapeUncertainties[myKey]
+
+    ## Add bin-wise relative uncertainty
+    #
+    # \param name     Name of the uncertainty
+    # \param th1Plus  TH1 holding the relative uncertainties (e.g. 0.2 for 20 %)
+    # \param th1Minus TH1 holding the relative uncertainties (e.g. 0.2 for 20 %); if None, then th1Plus values are used
+    def addShapeUncertaintyRelative(self, name, th1Plus, th1Minus=None):
+        if name in self._shapeUncertainties.keys():
+            raise Exception("addShapeUncertaintyRelative(): Uncertainty '%s' already exists (did you add it twice?)!"%name)
+        if self._flowBinsVisibleStatus:
+            raise Exception("addShapeUncertaintyRelative(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
+        if isinstance(th1Plus, ROOT.TH2) or isinstance(th1Minus, ROOT.TH2):
+            raise Exception("So far only TH1's are supported (and not TH2/TH3).")
+
+        self._checkConsistency(name, th1Plus)
+        hplus = aux.Clone(th1Plus)
+
+        hminus = None
+        if th1Minus != None:
+            self._checkConsistency(name, th1Minus)
+            hminus = aux.Clone(th1Minus)
+        else:
+            hminus = aux.Clone(th1Plus)
+            hminus.Scale(-1)
+
+        for bin in xrange(1, self._rootHisto.GetNbinsX()+1):
+            myRate = self._rootHisto.GetBinContent(bin)
+            hplus.SetBinContent(bin, myRate * hplus.GetBinContent(bin))
+            hminus.SetBinContent(bin, myRate * hminus.GetBinContent(bin))
+
+        self._shapeUncertainties[name] = (hplus, hminus)
+
+
+    ## Add normalization relative uncertainty
+    #
+    # \param name             Name of the uncertainty
+    # \param uncertaintyPlus  Float for the value (e.g. 0.2 for 20 %)
+    # \param uncertaintyMinus  Float for the value (e.g. 0.2 for 20 %); if None, then uncertaintyPlus value is used
+    #
+    # The normalization relative uncertainties are summed quadratically
+    def addNormalizationUncertaintyRelative(self, name, uncertaintyPlus, uncertaintyMinus=None):
+        if name in self._shapeUncertainties.keys():
+            raise Exception("addShapeUncertaintyRelative(): Uncertainty '%s' already exists (did you add it twice?)!"%name)
+
+        hplus = aux.Clone(self._rootHisto)
+        hplus.Reset()
+        hminus = aux.Clone(hplus)
+        for bin in xrange(1, self._rootHisto.GetNbinsX()+1):
+            myRate = self._rootHisto.GetBinContent(bin)
+            hplus.SetBinContent(bin, myRate * uncertaintyPlus)
+            if uncertaintyMinus == None:
+                hminus.SetBinContent(bin, -myRate * uncertaintyPlus)
+            else:
+                hminus.SetBinContent(bin, -abs(myRate * uncertaintyMinus))
+
+        self._shapeUncertainties[name] = (hplus, hminus)
+
+    ## Get the dictionary of shape variation uncertainties
+    def getShapeUncertainties(self):
+        return self._shapeUncertainties
+
+    def getShapeUncertaintyNames(self):
+        return self._shapeUncertainties.keys()
+
+    ## Return True if this histogram has any systematic uncertainties associated to it
+    def hasSystematicUncertainties(self):
+        return len(self._shapeUncertainties) > 0
+
+    ## Set the list of shape uncertainty names that should be treated as statistical uncertainties
+    def setShapeUncertaintiesAsStatistical(self, names):
+        self._treatShapesAsStat = set(names)
+
+    ## Add a shape uncertainty name to the list of that should be treated as statistical uncertainties
+    def addShapeUncertaintiesAsStatistical(self, name):
+        self._treatShapesAsStat.add(name)
+
+    ## Get the set of shape uncertainty names that should be treated as statistical uncertainties
+    def getShapeUncertaintiesAsStatistical(self):
+        return self._treatShapesAsStat
+
+    ## Create TGraphAsymmErrors for the sum of uncertainties
+    #
+    # \param addStatistical   If true, also statistical uncertainties are added
+    # \param addSystematic    If False, don't include systematic uncertainties
+    #
+    # Statistical uncertainties are taken via _rootHisto.GetBinError().
+    #
+    # All uncertainties are summed in quadrature for each bin.
+    #
+    # For asymmetric uncertainties the sum is done separately for both
+    # sides (this is a rather crude approximation, since in these
+    # cases the uncertainties are probably not Gaussian).
+    #
+    # With shape variation uncertainties it can happen that both
+    # variations yield value larger or smaller than the nominal. If
+    # this happens, only the variation with larger absolute difference
+    # from the nominal value is considered, and only in the difference
+    # direction (i.e. asymmetrically). Again, a rather crude
+    # approximation.
+    def getSystematicUncertaintyGraph(self, addStatistical=False, addSystematic=True):
+        xvalues = []
+        xerrhigh = []
+        xerrlow = []
+        yvalues = []
+        yerrhigh = []
+        yerrlow = []
+
+        class WrapTH1:
+            def __init__(self, th1):
+                self._th1 = th1
+            def begin(self):
+                return 1
+            def end(self):
+                return self._th1.GetNbinsX()+1
+            def xvalues(self, i):
+                xval = self._th1.GetBinCenter(i)
+                xlow = xval-self._th1.GetXaxis().GetBinLowEdge(i)
+                xhigh = self._th1.GetXaxis().GetBinUpEdge(i)-xval
+                return (xval, xlow, xhigh)
+            def y(self, i):
+                return self._th1.GetBinContent(i)
+            def statErrors(self, i):
+                stat = self._th1.GetBinError(i)
+                return (stat, stat)
+        class WrapTGraph:
+            def __init__(self, gr):
+                self._gr = gr
+            def begin(self):
+                return 0
+            def end(self):
+                return self._gr.GetN()
+            def xvalues(self, i):
+                return (self._gr.GetX()[i], self._gr.GetErrorXlow(i), self._gr.GetErrorXhigh(i))
+            def y(self, i):
+                return self._gr.GetY()[i]
+            def statErrors(self, i):
+                return (self._gr.GetErrorYlow(i), self._gr.GetErrorYhigh(i))
+
+        if isinstance(self._rootHisto, ROOT.TGraph):
+            wrapper = WrapTGraph(self._rootHisto)
+        else:
+            wrapper = WrapTH1(self._rootHisto)
+
+        # Set shapes to stat, syst, or stat+syst according to what was
+        # requested
+        shapes = []
+        if addStatistical and len(self._treatShapesAsStat) > 0:
+            if addSystematic:
+                # stat+syst, so we can just add all shape uncertainties
+                shapes = self._shapeUncertainties.values()
+            else:
+                # only stat, so get only them
+                for name in self._treatShapesAsStat:
+                    shapes.append(self._shapeUncertainties[name])
+        elif addSystematic:
+            # in this case all shapes are syst
+            shapes = self._shapeUncertainties.values()
+
+        #shapes.sort()
+        #print addStatistical, addSystematic, "\n  ".join([x[0].GetName() for x in shapes])
+
+        for i in xrange(wrapper.begin(), wrapper.end()):
+            (xval, xlow, xhigh) = wrapper.xvalues(i)
+
+            yval = wrapper.y(i)
+            yhighSquareSum = 0.0
+            ylowSquareSum = 0.0
+
+            if addStatistical:
+                (statLow, statHigh) = wrapper.statErrors(i)
+                yhighSquareSum += statHigh**2
+                ylowSquareSum += statLow**2
+
+            if len(shapes) > 0:
+                for shapePlus, shapeMinus in shapes:
+                    diffPlus = shapePlus.GetBinContent(i) # Note that this could have + or - sign
+                    diffMinus = shapeMinus.GetBinContent(i) # Note that this could have + or - sign
+                    (addPlus, addMinus) = aux.getProperAdditivesForVariationUncertainties(diffPlus, diffMinus)
+                    yhighSquareSum += addPlus
+                    ylowSquareSum += addMinus
+
+            xvalues.append(xval)
+            xerrhigh.append(xhigh)
+            xerrlow.append(xlow)
+            yvalues.append(yval)
+            yerrhigh.append(math.sqrt(yhighSquareSum))
+            yerrlow.append(math.sqrt(ylowSquareSum))
+
+        return ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues), array.array("d", yvalues),
+                                      array.array("d", xerrlow), array.array("d", xerrhigh),
+                                      array.array("d", yerrlow), array.array("d", yerrhigh))
+
+    ## Print associated systematic uncertainties
+    def printUncertainties(self):
+        print "Shape uncertainties (%d):" % len(self._shapeUncertainties)
+        keys = self._shapeUncertainties.keys()
+        keys.sort()
+        for key in keys:
+            print "  %s" % key
+
+    #### Below are methods for "better" implementation for some ROOT TH1 methods
+
+    ## Calculate integral including under/overflow bins
+    def integral(self):
+        if isinstance(self._rootHisto, ROOT.TH3):
+            return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+2, 0, self._rootHisto.GetNbinsY()+2, 0, self._rootHisto.GetNbinsZ()+2)
+        elif isinstance(self._rootHisto, ROOT.TH2):
+            return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+2, 0, self._rootHisto.GetNbinsY()+2)
+        else:
+            return self._rootHisto.Integral(0, self._rootHisto.GetNbinsX()+2)
+
+    ## Get minimum of X axis
+    def getXmin(self):
+        return aux.th1Xmin(self._rootHisto)
+
+    ## Get maximum of X axis
+    def getXmax(self):
+        return aux.th1Xmax(self._rootHisto)
+
+    ## Get minimum if Y axis
+    def getYmin(self):
+        if self._rootHisto is None:
+            return None
+        if isinstance(self._rootHisto, ROOT.TH2):
+            return aux.th2Ymin(self._rootHisto)
+        else:
+            return self._rootHisto.GetMinimum()
+
+    ## Get maximum of Y axis
+    def getYmax(self):
+        if self._rootHisto is None:
+            return None
+        if isinstance(self._rootHisto, ROOT.TH2):
+            return aux.th2Ymax(self._rootHisto)
+        else:
+            return self._rootHisto.GetMaximum()
+
+    ## Get X axis title
+    def getXtitle(self):
+        if self._rootHisto is None:
+            return None
+        return self._rootHisto.GetXaxis().GetTitle()
+
+    ## Get Y axis title
+    def getYtitle(self):
+        if self._rootHisto is None:
+            return None
+        return self._rootHisto.GetYaxis().GetTitle()
+
+    ## Get the width of a bin
+    #
+    # \param bin  Bin number
+    def getBinWidth(self, bin):
+        if self._rootHisto is None:
+            return None
+        return self._rootHisto.GetBinWidth(bin)
+
+    ## Get list of bin widths
+    def getBinWidths(self):
+        if self._rootHisto is None:
+            return None
+        return [self._rootHisto.GetBinWidth(i) for i in xrange(1, self._rootHisto.GetNbinsX()+1)]
+
+    #### Below are methods for ROOT TH1 compatibility (only selected methods are implemented)
+
+    ## Get the number of X axis bins
+    def GetNbinsX(self):
+        return self._rootHisto.GetNbinsX()
+
+    ## Get the name
+    def GetName(self):
+        return self._rootHisto.GetName()
+
+    ## Set the name
+    #
+    # \param args   Positional arguments, forwarded to TH1.SetName()
+    def SetName(self, *args):
+        self._rootHisto.SetName(*args)
+
+    ## Sumw2
+    #
+    # It is enough to propagate the call rot self._rootHisto, because
+    # from the uncertainty histograms we are only interested of the values
+    def Sumw2(self):
+        self._rootHisto.Sumw2()
+
+    ## Rebin histogram
+    #
+    # \param args  Positional arguments, forwarded to TH1.Rebin()
+    def Rebin(self, *args):
+        if self._rootHisto == None:
+            raise Exception("Tried to call Rebin for a histogram which has been deleted")
+        htmp = self._rootHisto.Rebin(*args)
+        if htmp.GetBinContent(htmp.GetNbinsX()) == float('Inf'):
+            raise Exception("Check the rebin range, it produces infinity!")
+        if len(args) > 1: # If more than 1 argument is given, ROOT creates a clone of the histogram
+            self._rootHisto.Delete()
+        ROOT.SetOwnership(htmp, True)
+        htmp.SetDirectory(0)
+        self._rootHisto = htmp
+        keys = self._shapeUncertainties.keys()
+        for key in keys:
+            (plus, minus) = self._shapeUncertainties[key]
+            plustmp = plus.Rebin(*args)
+            minustmp = minus.Rebin(*args)
+            if plustmp.GetBinContent(htmp.GetNbinsX()) == float('Inf') or minustmp.GetBinContent(htmp.GetNbinsX()) == float('Inf'):
+                raise Exception("Check the rebin range, it produces infinity!")
+            if len(args) > 1: # If more than 1 argument is given, ROOT creates a clone of the histogram
+                plus.Delete()
+                minus.Delete()
+            ROOT.SetOwnership(plustmp, True)
+            ROOT.SetOwnership(minustmp, True)
+            plustmp.SetDirectory(0)
+            minustmp.SetDirectory(0)
+            self._shapeUncertainties[key] = (plustmp, minustmp)
+        self.makeFlowBinsVisible()
+
+    ## Rebin histogram
+    #
+    # \param args  Positional arguments, forwarded to TH1.Rebin()
+    def Rebin2D(self, *args):
+        htmp = self._rootHisto.Rebin2D(*args)
+        if len(args) > 2: # If more than 2 arguments are given, ROOT creates a clone of the histogram
+            self._rootHisto.Delete()
+        ROOT.SetOwnership(htmp, True)
+        htmp.SetDirectory(0)
+        self._rootHisto = htmp
+        keys = self._shapeUncertainties.keys()
+        for key in keys:
+            (plus, minus) = self._shapeUncertainties[key]
+            plustmp = plus.Rebin2D(*args)
+            minustmp = minus.Rebin2D(*args)
+            if len(args) > 2: # If more than 2 arguments are given, ROOT creates a clone of the histogram
+                plus.Delete()
+                minus.Delete()
+            ROOT.SetOwnership(plustmp, True)
+            ROOT.SetOwnership(minustmp, True)
+            plustmp.SetDirectory(0)
+            minustmp.SetDirectory(0)
+            self._shapeUncertainties[key] = (plustmp, minustmp)
+        self.makeFlowBinsVisible()
+
+    ## Add another RootHistoWithUncertainties object
+    #
+    # \param other   RootHistoWithUncertainties object
+    # \param args  Positional arguments, forwarded to TH1.Add()
+    def Add(self, other, *args):
+        # Make sure the flow bins are handled in the same way before adding
+        if self._flowBinsVisibleStatus and not other._flowBinsVisibleStatus:
+            other.makeFlowBinsVisible()
+        if not self._flowBinsVisibleStatus and other._flowBinsVisibleStatus:
+            self.makeFlowBinsVisible()
+
+        keys1 = self._shapeUncertainties.keys()
+        keys2 = other._shapeUncertainties.keys()
+        #keys1.sort()
+        #keys2.sort()
+        for key in keys1:
+            if key in keys2:
+                (plus, minus) = self._shapeUncertainties[key]
+                (otherPlus, otherMinus) = other._shapeUncertainties[key]
+                plus.Add(otherPlus, *args)
+                minus.Add(otherMinus, *args)
+            #else:
+                # key is not in other, keep it like it is
+        for key in keys2:
+            if not key in keys1:
+                # Add those histograms, which so far did not exist
+                (plus, minus) = other._shapeUncertainties[key]
+                newPlus = aux.Clone(plus)
+                newMinus = aux.Clone(minus)
+                if len(args) > 0:
+                    newPlus.Scale(args[0])
+                    newMinus.Scale(args[0])
+                self._shapeUncertainties[key] = (newPlus, newMinus)
+
+        # Add histo
+        self._rootHisto.Add(other._rootHisto, *args)
+
+        # Add shape uncertainties treated as stat
+        self._treatShapesAsStat.update(other._treatShapesAsStat)
+
+    ## Scale the histogram
+    #
+    # It is enough to forward the call to self._rootHisto and
+    # self._shapeUncertainties, because it does not affect the
+    # relative uncertainties.
+    def Scale(self, *args):
+        self._rootHisto.Scale(*args)
+        i = 0
+        for (plus, minus) in self._shapeUncertainties.itervalues():
+            plus.Scale(*args)
+            minus.Scale(*args)
+            i += 1
+
+    ## Scale a variation uncertainty
+    #
+    # It is enough to forward the call to self._rootHisto and
+    # self._shapeUncertainties, because it does not affect the
+    # relative uncertainties.
+    def ScaleVariationUncertainty(self, name, value):
+        if name not in self._shapeUncertainties.keys():
+            raise Exception("Error: Cannot find '%s' in list of variation uncertainties (%s)!"%(name, ", ".join(map(str, self._shapeUncertainties.keys()))))
+        (plus, minus) = self._shapeUncertainties[name]
+        plus.Scale(value)
+        minus.Scale(value)
+        #for i in xrange(0, self._rootHisto.GetNbinsX()+2):
+            #if abs(self._rootHisto.GetBinContent(i)) > 0.0:
+                #oldValue = (plus.GetBinContent(i),self._rootHisto.GetBinContent(i))
+                #plus.SetBinContent(i, plus.GetBinContent(i)*value)
+                #minus.SetBinContent(i, minus.GetBinContent(i)*value)
+                #print oldValue, plus.GetBinContent(i)
+        self._shapeUncertainties[name] = (plus, minus)
+
+    ## Clone the histogram
+    #
+    # All contained histograms are also cloned. For all cloned
+    # histograms, th1.SetDirectory(0) is called.
+    def Clone(self):
+        clone = RootHistoWithUncertainties(aux.Clone(self._rootHisto))
+        for key, value in self._shapeUncertainties.iteritems():
+            (plus, minus) = (aux.Clone(value[0]), aux.Clone(value[1]))
+            clone._shapeUncertainties[key] = (plus, minus)
+        clone._treatShapesAsStat = set(self._treatShapesAsStat)
+        clone._flowBinsVisibleStatus = self._flowBinsVisibleStatus
+        return clone
+
+    ## Delete all contained histograms
+    def Delete(self):
+        if self._rootHisto != None:
+            self._rootHisto.Delete()
+        if self._shapeUncertainties != None:
+            for (plus, minus) in self._shapeUncertainties.itervalues():
+                plus.Delete()
+                minus.Delete()
+        self._rootHisto = None
+        self._shapeUncertainties = None
+
+    ## "Eats" SetDirectory() call for interface compatibility, i.e. do nothing
+    def SetDirectory(self, *args):
+        pass
+
+    ## Print a lot of comma separated info for debugging
+    def Debug(self):
+        def histoContentsHelper(h):
+            s = ""
+            for i in range(0, h.GetNbinsX()+2):
+                s += ", %f"%h.GetBinContent(i)
+            return s
+        def histoErrorHelper(h):
+            s = ""
+            for i in range(0, h.GetNbinsX()+2):
+                s += ", %f"%h.GetBinError(i)
+            return s
+
+        print "*** Debug info for RootHistoWithUncertainties:"
+        print "histogram %s"%(self.GetName())
+        print "nominal%s"%histoContentsHelper(self._rootHisto)
+        print "nominal_error%s"%histoErrorHelper(self._rootHisto)
+        keys = self._shapeUncertainties.keys()
+        for key in keys:
+            (hPlus, hMinus) = self._shapeUncertainties[key]
+            print "uncert_%s_up%s"%(key,histoContentsHelper(hPlus))
+            print "uncert_%s_down%s"%(key,histoContentsHelper(hMinus))
+        print "rate, %f"%self.getRate()
+        print "rate_stat_uncert, %f"%self.getRateStatUncertainty()
+        print "rate_syst_uncert, +%f, -%f"%self.getRateSystUncertainty()
+        g = self.getSystematicUncertaintyGraph()
+        sUp = ""
+        sDown = ""
+        for i in range(0, g.GetN()):
+            sUp += ", %f"%g.GetErrorYhigh(i)
+            sDown += ", %f"%g.GetErrorYlow(i)
+        print "rate_syst_uncert_up,%s"%sUp
+        print "rate_syst_uncert_down,%s\n"%sDown
+
 ## Base class for DatasetRootHisto classes (wrapper for TH1 histogram and the originating Dataset)
 # 
 # The derived class must implement
@@ -933,7 +1752,7 @@ def treeDrawToNumEntries(treeDraw):
 # normalized to the cross section.
 #
 # The histogram wrapper classes also abstract the signel histogram, and
-# merged data and MC histograms behind a common interface.
+# mergeddata and MC histograms behind a common interface.
 class DatasetRootHistoBase:
     def __init__(self, dataset):
         self.dataset = dataset
@@ -955,12 +1774,23 @@ class DatasetRootHistoBase:
     def isMC(self):
         return self.dataset.isMC()
 
-    ## Get a clone of the wrapped histogram normalized as requested.
+    def isPseudo(self):
+        return self.dataset.isPseudo()
+
+    ## Get a clone of the wrapped histogram (TH1) normalized as requested.
     def getHistogram(self):
+        h = self.getHistogramWithUncertainties()
+        return h.getRootHisto()
+
+    ## Get a clone of the wrapped histogram (RootHistoWithUncertainties) normalized as requested.
+    def getHistogramWithUncertainties(self):
         h = self._normalizedHistogram()
+        if h is None:
+            return h
 
         if self.multiplication != None:
             h = _normalizeToFactor(h, self.multiplication)
+
         return h
 
     ## Scale the histogram bin values with a value.
@@ -985,7 +1815,7 @@ class DatasetRootHistoBase:
 class DatasetRootHisto(DatasetRootHistoBase):
     ## Constructor.
     # 
-    # \param histo    TH1 histogram
+    # \param histo    RootHistoWithUncertainty wrapper object
     # \param dataset  Corresponding Dataset object
     # 
     # Sets the initial normalization to 'none'
@@ -996,7 +1826,9 @@ class DatasetRootHisto(DatasetRootHistoBase):
 
     ## Get list of the bin labels of the histogram.
     def getBinLabels(self):
-        return [x[0] for x in _histoToCounter(self.histo)]
+        if self.histo is None:
+            return None
+        return [x[0] for x in _histoToCounter(self.histo.getRootHisto())]
 
     def forEach(self, function, datasetRootHisto1=None):
         if datasetRootHisto1 != None:
@@ -1016,15 +1848,18 @@ class DatasetRootHisto(DatasetRootHistoBase):
         if newDatasetRootHisto != None:
             if not isinstance(newDatasetRootHisto, DatasetRootHisto):
                 raise Exception("newDatasetRootHisto must be of the type DatasetRootHisto")
-            self.histo = function(self.histo, newDatasetRootHisto.histo)
+            self.histo.setRootHisto(function(self.histo.getRootHisto(), newDatasetRootHisto.histo.getRootHisto()))
         else:
-            self.histo = function(self.histo)
+            self.histo.setRootHisto(function(self.histo.getRootHisto()))
 
     ## Return normalized clone of the original TH1
     def _normalizedHistogram(self):
+        if self.histo is None:
+            return None
+
         # Always return a clone of the original
         h = self.histo.Clone()
-        h.SetDirectory(0)
+        #h.SetDirectory(0) # not needed anymore for RootHistoWithUncertainties
         h.SetName(h.GetName()+"_cloned")
         if self.normalization == "none":
             return h
@@ -1052,8 +1887,8 @@ class DatasetRootHisto(DatasetRootHistoBase):
     # corresponding dataset. The normalization can be applied only
     # to MC histograms.
     def normalizeByCrossSection(self):
-        if self.dataset.isData():
-            raise Exception("Can't normalize data histogram by cross section")
+        if not self.dataset.isMC():
+            raise Exception("Can't normalize non-MC histogram by cross section")
         self.normalization = "byCrossSection"
 
     ## Set the current normalization scheme to 'to luminosity'.
@@ -1065,8 +1900,8 @@ class DatasetRootHisto(DatasetRootHistoBase):
     # luminosity. The normalization can be applied only to MC
     # histograms.
     def normalizeToLuminosity(self, lumi):
-        if self.dataset.isData():
-            raise Exception("Can't normalize data histogram to luminosity")
+        if not self.dataset.isMC():
+            raise Exception("Can't normalize non-MC histogram to luminosity")
 
         self.normalization = "toLuminosity"
         self.luminosity = lumi
@@ -1077,12 +1912,69 @@ class DatasetRootHisto(DatasetRootHistoBase):
     # String representing the current normalization scheme
 
 
+## Base class for merged data/Mc histograms and the corresponding datasets
+class DatasetRootHistoCompoundBase(DatasetRootHistoBase):
+    ## Constructor.
+    # 
+    # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
+    # \param mergedDataset   The corresponding dataset.DatasetMerged object
+    def __init__(self, histoWrappers, mergedDataset):
+        DatasetRootHistoBase.__init__(self, mergedDataset)
+        self.histoWrappers = histoWrappers
+        self.normalization = "none"
+
+    ## Get list of the bin labels of the first of the merged histogram.
+    def getBinLabels(self):
+        for drh in self.histoWrappers:
+            ret = drh.getBinLabels()
+            if ret is not None:
+                return ret
+        return None
+
+   ## Calculate the sum of the histograms (i.e. merge).
+   # 
+   # Intended to be called from the deriving classes
+    def _getSumHistogram(self):
+        # Loop until we have a real RootHistoWithUncertainties (not None)
+        hsum = None
+        for i, drh in enumerate(self.histoWrappers):
+            hsum = drh.getHistogramWithUncertainties() # we get a clone
+            if hsum is not None:
+                break
+
+        for h in self.histoWrappers[i+1:]:
+            histo = h.getHistogramWithUncertainties()
+            if histo.GetNbinsX() != hsum.GetNbinsX():
+                hh = nSuccess = 0
+                if len(hsum.getRootHisto().GetXaxis().GetBinLabel(1)) > 0:
+                    # Try to recover for histograms with bin labels, i.e. counters
+                    for i in range(1,hsum.getRootHisto().GetNbinsX()+1):
+                        for j in range(1,histo.getRootHisto().GetNbinsX()+1):
+                            if len(hsum.getRootHisto().GetXaxis().GetBinLabel(i)) > 0:
+                                if hsum.getRootHisto().GetXaxis().GetBinLabel(i) == histo.getRootHisto().GetXaxis().GetBinLabel(j):
+                                    nSuccess += 1
+                                    hsum.getRootHisto().SetBinContent(i, hsum.getRootHisto().GetBinContent(i) + histo.getRootHisto().GetBinContent(j));
+                                    hsum.getRootHisto().SetBinError(i, math.sqrt(hsum.getRootHisto().GetBinError(i)**2 + histo.getRootHisto().GetBinError(j)**2));
+                                    # Ignore uncertainties
+                if nSuccess == 0:
+                    raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[i].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
+            else:
+                hsum.Add(histo)
+            histo.Delete()
+        return hsum
+
+    ## \var histoWrappers
+    # List of underlying dataset.DatasetRootHisto objects
+    ## \var normalization
+    # String representing the current normalization scheme
+
+
 ## Wrapper for a merged TH1 histograms from data and the corresponding Datasets.
 #
 # The merged data histograms can only be normalized 'to one'.
 #
 # \see dataset.DatasetRootHisto class.
-class DatasetRootHistoMergedData(DatasetRootHistoBase):
+class DatasetRootHistoMergedData(DatasetRootHistoCompoundBase):
     ## Constructor.
     # 
     # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
@@ -1091,10 +1983,7 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
     # The constructor checks that all histoWrappers are data, and
     # are not yet normalized.
     def __init__(self, histoWrappers, mergedDataset):
-        DatasetRootHistoBase.__init__(self, mergedDataset)
-
-        self.histoWrappers = histoWrappers
-        self.normalization = "none"
+        DatasetRootHistoCompoundBase.__init__(self, histoWrappers, mergedDataset)
         for h in self.histoWrappers:
             if not h.isData():
                 raise Exception("Histograms to be merged must come from data (%s is not data)" % h.getDataset().getName())
@@ -1102,12 +1991,6 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
                 raise Exception("Histograms to be merged must not be normalized at this stage")
             if h.multiplication != None:
                 raise Exception("Histograms to be merged must not be multiplied at this stage")
-
-    def isData(self):
-        return True
-
-    def isMC(self):
-        return False
 
     def forEach(self, function, datasetRootHisto1=None):
         ret = []
@@ -1144,29 +2027,11 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
             for i, drh in enumerate(self.histoWrappers):
                 drh.modifyRootHisto(function)
 
-    ## Get list of the bin labels of the first of the merged histogram.
-    def getBinLabels(self):
-        return self.histoWrappers[0].getBinLabels()
-
     ## Set the current normalization scheme to 'to one'.
     #
     # The histogram is normalized to unit area.
     def normalizeToOne(self):
         self.normalization = "toOne"
-
-   ## Calculate the sum of the histograms (i.e. merge).
-   # 
-   # Intended for internal use only.
-    def _getSumHistogram(self):
-        hsum = self.histoWrappers[0].getHistogram() # we get a clone
-        for h in self.histoWrappers[1:]:
-            histo = h.getHistogram()
-            if histo.GetNbinsX() != hsum.GetNbinsX():
-                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
-
-            hsum.Add(histo)
-            histo.Delete()
-        return hsum
 
     ## Merge the histograms and apply the current normalization.
     # 
@@ -1174,21 +2039,44 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
     # anything it wishes with it.
     def _normalizedHistogram(self):
         hsum = self._getSumHistogram()
+        if hsum is None:
+            return None
+
         if self.normalization == "toOne":
             return _normalizeToOne(hsum)
         else:
             return hsum
 
-    ## \var histoWrappers
-    # List of underlying dataset.DatasetRootHisto objects
-    ## \var normalization
-    # String representing the current normalization scheme
-
+## Wrapper for a merged TH1 histograms from pseudo and the corresponding Datasets.
+#
+# The merged pseudo histogramgs can only be normalized 'to one'.
+#
+# Works as DatasetRootHistoMergedData, except can be constructed only
+# from pseudo datasets.
+#
+# \see dataset.DatasetRootHisto class.
+class DatasetRootHistoMergedPseudo(DatasetRootHistoMergedData):
+    ## Constructor.
+    #
+    # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
+    # \param mergedDataset   The corresponding dataset.DatasetMerged object
+    #
+    # The constructor checks that all histoWrappers are data, and
+    # are not yet normalized.
+    def __init__(self, histoWrappers, mergedDataset):
+        DatasetRootHistoCompoundBase.__init__(self, histoWrappers, mergedDataset)
+        for h in self.histoWrappers:
+            if not h.isPseudo():
+                raise Exception("Histograms to be merged must come from pseudo (%s is not pseudo)" % h.getDataset().getName())
+            if h.normalization != "none":
+                raise Exception("Histograms to be merged must not be normalized at this stage")
+            if h.multiplication != None:
+                raise Exception("Histograms to be merged must not be multiplied at this stage")
 
 ## Wrapper for a merged TH1 histograms from MC and the corresponding Datasets.
 # 
 # See also the documentation of DatasetRootHisto class.
-class DatasetRootHistoMergedMC(DatasetRootHistoBase):
+class DatasetRootHistoMergedMC(DatasetRootHistoCompoundBase):
     ## Constructor.
     # 
     # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
@@ -1197,9 +2085,7 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
     # The constructor checks that all histoWrappers are MC, and are
     # not yet normalized.
     def __init__(self, histoWrappers, mergedDataset):
-        DatasetRootHistoBase.__init__(self, mergedDataset)
-        self.histoWrappers = histoWrappers
-        self.normalization = "none"
+        DatasetRootHistoCompoundBase.__init__(self, histoWrappers, mergedDataset)
         for h in self.histoWrappers:
             if not h.isMC():
                 raise Exception("Histograms to be merged must come from MC")
@@ -1207,12 +2093,6 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
                 raise Exception("Histograms to be merged must not be normalized at this stage")
             if h.multiplication != None:
                 raise Exception("Histograms to be merged must not be multiplied at this stage")
-
-    def isData(self):
-        return False
-
-    def isMC(self):
-        return True
 
     def forEach(self, function, datasetRootHisto1=None):
         ret = []
@@ -1247,10 +2127,6 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
         else:
             for i, drh in enumerate(self.histoWrappers):
                 drh.modifyRootHisto(function)
-
-    ## Get list of the bin labels of the first of the merged histogram.
-    def getBinLabels(self):
-        return self.histoWrappers[0].getBinLabels()
 
     ## Set the current normalization scheme to 'to one'.
     # 
@@ -1312,14 +2188,9 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
         if self.normalization == "none":
             raise Exception("Merged MC histograms must be normalized to something!")
 
-        hsum = self.histoWrappers[0].getHistogram() # we get a clone
-        for h in self.histoWrappers[1:]:
-            histo = h.getHistogram()
-            if histo.GetNbinsX() != hsum.GetNbinsX():
-                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
-
-            hsum.Add(histo)
-            histo.Delete()
+        hsum = self._getSumHistogram()
+        if hsum is None:
+            return hsum
 
         if self.normalization == "toOne":
             return _normalizeToOne(hsum)
@@ -1331,6 +2202,155 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
     ## \var normalization
     # String representing the current normalization scheme
 
+
+## Wrapper for a added TH1 histograms from MC and the corresponding Datasets.
+#
+# Here "Adding" is like merging, but for datasets which have the same
+# cross section, and are split to two datasets just for increased
+# statistics. Use case is inclusive W+jets in Summer12, which is split
+# into two datasets.
+# 
+# See also the documentation of DatasetRootHisto class.
+class DatasetRootHistoAddedMC(DatasetRootHistoCompoundBase):
+    ## Constructor.
+    # 
+    # \param histoWrappers   List of dataset.DatasetRootHisto objects to merge
+    # \param addedDataset   The corresponding dataset.DatasetMerged object
+    # 
+    # The constructor checks that all histoWrappers are MC, and are
+    # not yet normalized.
+    def __init__(self, histoWrappers, addedDataset):
+        DatasetRootHistoBase.__init__(self, addedDataset)
+        self.histoWrappers = histoWrappers
+        self.normalization = "none"
+        for h in self.histoWrappers:
+            if not h.isMC():
+                raise Exception("Histograms to be added must come from MC")
+            if h.normalization != "none":
+                raise Exception("Histograms to be added must not be normalized at this stage")
+            if h.multiplication != None:
+                raise Exception("Histograms to be added must not be multiplied at this stage")
+
+    def isData(self):
+        return False
+
+    def isMC(self):
+        return True
+
+    def forEach(self, function, datasetRootHisto1=None):
+        ret = []
+        if datasetRootHisto1 != None:
+            if not isinstance(datasetRootHisto1, DatasetRootHistoAddedMC):
+                raise Exception("datasetRootHisto1 must be of the type DatasetRootHistoAddedMC")
+            if not len(self.histoWrappers) == len(datasetRootHisto1.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(datasetrootHisto1.histoWrappers), %d != %d" % len(self.histoWrappers), len(datasetRootHisto1.histoWrappers))
+            
+            for i, drh in enumerate(self.histoWrappers):
+                ret.extend(drh.forEach(function, datasetRootHisto1.histoWrappers[i]))
+        else:
+            for drh in self.histoWrappers:
+                ret.extend(drh.forEach(function))
+        return ret
+
+    ## Modify the TH1 with a function
+    #
+    # \param function             Function taking the original TH1, and returning a new TH1. If newDatasetRootHisto is specified, function must take some other DatasetRootHisto object as an input too
+    # \param newDatasetRootHisto  Optional, the other DatasetRootHisto object, must be the same type and contain same number of DatasetRootHisto objects
+    #
+    # Needed for appending rows to counters from TTree, and for embedding normalization
+    def modifyRootHisto(self, function, newDatasetRootHisto=None):
+        if newDatasetRootHisto != None:
+            if not isinstance(newDatasetRootHisto, DatasetRootHistoAddedMC):
+                raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoAddedMC")
+            if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
+                raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
+            
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+        else:
+            for i, drh in enumerate(self.histoWrappers):
+                drh.modifyRootHisto(function)
+
+    ## Set the current normalization scheme to 'to one'.
+    # 
+    # The histogram is normalized to unit area.
+    # 
+    # Sets the normalization of the underlying
+    # dataset.DatasetRootHisto objects to 'by cross section' in order
+    # to be able to sum them. The normalization 'to one' is then done
+    # for the summed histogram.
+    def normalizeToOne(self):
+        self.normalization = "toOne"
+
+    ## Set the current normalization scheme to 'by cross section'.
+    # 
+    # The histogram is normalized to the cross section of the
+    # corresponding dataset.
+    # 
+    # Sets the normalization of the underlying
+    # dataset.DatasetRootHisto objects to 'by cross section'. Then
+    # they can be summed directly, and the summed histogram is
+    # automatically correctly normalized to the total cross section of
+    # the merged dataset.Dataset objects.
+    def normalizeByCrossSection(self):
+        self.normalization = "byCrossSection"
+
+    ## Set the current normalization scheme to 'to luminosity'.
+    # 
+    # \param lumi   Integrated luminosity in pb^-1 to normalize to
+    # 
+    # The histogram is normalized first normalized to the cross
+    # section of the corresponding dataset, and then to a given
+    # luminosity.
+    # 
+    # Sets the normalization of the underlying
+    # dataset.DatasetRootHisto objects to 'to luminosity'. Then they
+    # can be summed directly, and the summed histogram is
+    # automatically correctly normalized to the given integrated
+    # luminosity. """
+    def normalizeToLuminosity(self, lumi):
+        self.normalization = "toLuminosity"
+        self.luminosity = lumi
+
+    ## Merge the histograms and apply the current normalization.
+    # 
+    # The returned histogram is a clone, so client code can do
+    # anything it wishes with it.
+    # 
+    # The merged MC histograms must be normalized in some way,
+    # otherwise they can not be summed (or they can be, but the
+    # contents of the summed histogram doesn't make any sense as it
+    # is just the sum of the MC events of the separate datasets
+    # which in general have different cross sections).
+    def _normalizedHistogram(self):
+        hsum = self._getSumHistogram()
+
+        if self.normalization == "none":
+            return hsum
+        elif self.normalization == "toOne":
+            return _normalizeToOne(hsum)
+
+        # We have to normalize to cross section in any case
+        hsum = _normalizeToFactor(hsum, self.dataset.getNormFactor())
+        if self.normalization == "byCrossSection":
+            return hsum
+        elif self.normalization == "toLuminosity":
+            return _normalizeToFactor(hsum, self.luminosity)
+        else:
+            raise Exception("Internal error, got normalization %s" % self.normalization)
+
+    ## \var histoWrappers
+    # List of underlying dataset.DatasetRootHisto objects
+    ## \var normalization
+    # String representing the current normalization scheme
+
+class AnalysisNotFoundException(Exception):
+    def __init__(self, message):
+        Exception.__init__(self, message)
+
+class HistogramNotFoundException(Exception):
+    def __init__(self, message):
+        Exception.__init__(self, message)
 
 ## Dataset class for histogram access from one ROOT file.
 # 
@@ -1348,9 +2368,15 @@ class Dataset:
     ## Constructor.
     # 
     # \param name              Name of the dataset (can be anything)
-    # \param fname             Path to the ROOT file of the dataset
+    # \param tfiles            List of ROOT.TFile objects for the dataset
+    # \param analysisName      Base part of the analysis directory name
+    # \param searchMode        String for search mode
+    # \param dataEra           String for data era
+    # \param optimizationMode  String for optimization mode (optional)
+    # \param systematicVariation String for systematic variation (optional)
+    # \param weightedCounters  If True, pick the counters from the 'weighted' subdirectory
     # \param counterDir        Name of the directory in the ROOT file for
-    #                          event counter histograms. If None is given, it
+    #                          event counter histograms. If None is given,
     #                          is assumed that the dataset has no counters.
     #                          This also means that the histograms from this
     #                          dataset can not be normalized unless the
@@ -1361,10 +2387,12 @@ class Dataset:
     #                          directory. The weighted counters are taken
     #                          into account with \a useWeightedCounters
     #                          argument
-    # \param weightedCounters  If True, pick the counters from the 'weighted' subdirectory
-    # \param analysisBaseName  Base part of the analysis directory name (None for default, specified in _optionDefaults, only applicable for MC)
-    # \param dataEra           String for data era (None for not to do the replacement, only applicable for MC)
-    # \param doEraReplace      Boolean flag to indicate if the era replacement should really be done
+    # \param useAnalysisNameOnly Should the analysis directory be
+    #                            inferred only from analysisName?
+    # \param availableSystematicVariationSources List of strings of the systematic variations
+    #                                      available on the ROOT file (without the "Plus"/"Minus" postfix)
+    # \param enableSystematicVariationForData Add \a systematicVariation to directory name also for data (needed for embedding)
+    #
     # 
     # Opens the ROOT file, reads 'configInfo/configInfo' histogram
     # (if it exists), and reads the main event counter
@@ -1375,120 +2403,364 @@ class Dataset:
     # workflow such that for MC we run analyzers for all data eras.
     # This means that the TDirectory names will be different for data
     # and MC, such that in MC the era name is appended to the
-    # directory name. In order to easily pick the data eras from plot
-    # scripts, Dataset supports simple replacement scheme in the
-    # TDirectory names for all histogram accesses (so this deals with
-    # histograms for both plots and counters). The information must be
-    # given in the constructor, because the counters are read in the
-    # construction time.
-    def __init__(self, name, fname, counterDir, weightedCounters=True, analysisBaseName=None, dataEra=None, doEraReplace=True):
+    # directory name. 
+    #
+    # The final directory name is (if \a useAnalysisNameOnly is False)
+    # data: analysisName+searchMode+optimizationMode(+systematicVariation)
+    # MC:   analysisName+searchMode+dataEra+optimizationMode+systematicVariation
+    # For data, \a systematicVariation is added only if \a enableSystematicVariationForData is True
+    #
+    # The \a useAnalysisNameOnly parameter is needed e.g. for ntuples
+    # which store the era-specific weights to the tree itself, and
+    # therefore the 
+    def __init__(self, name, tfiles, analysisName,
+                 searchMode=None, dataEra=None, optimizationMode=None, systematicVariation=None,
+                 weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False, availableSystematicVariationSources=[], enableSystematicVariationForData=False):
+        self.rawName = name
         self.name = name
-        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(fname)))))
-        self.file = ROOT.TFile.Open(fname)
-        if self.file == None:
-            raise Exception("Unable to open ROOT file '%s'"%fname)
+        self.files = tfiles
+        if len(self.files) == 0:
+            raise Exception("Expecting at least one TFile, jot 0")
 
-        configInfo = self.file.Get("configInfo")
-        if configInfo == None:
-            raise Exception("configInfo directory is missing from file %s" % fname)
+        # Now this is really an uhly hack
+        self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(self.files[0].GetName())))))
 
-        self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
+        # Extract configInfo and dataVersion, check for consistency
+        # that all files have the same values
+        self.info = None
+        self.dataVersion = None
+        def assertInfo(refInfo, newInfo, refFile, newFile, name):
+            for key, value in refInfo.iteritems():
+                valnew = info[key]
+                if isinstance(value, basestring):
+                    if value == valnew:
+                        continue
+                    raise Exception("Mismatched values in %s, label %s, got %s from file %s, and %s from file %s" % (name, key, value, refFile.GetName(), valnew, newFile.GetName()))
+                if valnew == 0 and value == 0:
+                    return
+                if abs(value-valnew)/max(value, valnew) > 0.001:
+                    raise Exception("Mismatched values in %s, label %s, got %f from file %s, and %f from file %s" % (name, key, value, refFile.GetName(), valnew, newFile.GetName()))
+        def addDirContentsToDict(tdirectory, dictionary):
+            content = aux.listDirectoryContent(tdirectory, lambda key: key.GetClassName() == "TNamed" and key.GetName() not in ["dataVersion", "parameterSet"])
+            for name in content:
+                if name not in dictionary:
+                    dictionary[name] = aux.Get(tdirectory, name).GetTitle()
 
-        dataVersion = configInfo.Get("dataVersion")
-        if dataVersion == None:
-            raise Exception("Unable to determine dataVersion for dataset %s from file %s" % (name, fname))
-        self.dataVersion = dataVersion.GetTitle()
+        for f in self.files:
+            if not f.IsOpen():
+                raise Exception("File %s of dataset %s has been closed! Maybe this Dataset has been removed without 'close=False'?" % (f.GetName(), self.name))
+            configInfo = aux.Get(f, "configInfo")
+            if configInfo == None:
+                raise Exception("configInfo directory is missing from file %s" % f.GetName())
+
+            info = _rescaleInfo(_histoToDict(aux.Get(configInfo, "configinfo")))
+            if "energy" in info:
+                info["energy"] = str(int(round(info["energy"])))
+            addDirContentsToDict(configInfo, info)
+            if self.info is None:
+                self.info = info
+            else:
+                assertInfo(self.info, info, self.files[0], f, "configInfo/configinfo")
+
+            dataVersion = aux.Get(configInfo, "dataVersion")
+            if dataVersion == None:
+                raise Exception("Unable to determine dataVersion for dataset %s from file %s" % (name, f.GetName()))
+            if self.dataVersion is None:
+                self.dataVersion = dataVersion.GetTitle()
+            else:
+                if self.dataVersion != dataVersion.GetTitle():
+                    raise Exception("Mismatched values in configInfo/dataVersion, got %s from file %s, and %s from file %s" % (self.dataVersion, self.files[0].GetName(), dataVersion.GetTitle(), f.GetName()))
 
         self._isData = "data" in self.dataVersion
+        self._isPseudo = "pseudo" in self.dataVersion
+        self._isMC = not (self._isData or self._isPseudo)
         self._weightedCounters = weightedCounters
-        if analysisBaseName == None:
-            self._analysisBaseName = _optionDefaults["analysisBaseName"]
-        else:
-            self._analysisBaseName = analysisBaseName
-        self._dataEra = dataEra
-        self._doEraReplace = doEraReplace
-        if counterDir != None:
-            self._unweightedCounterDir = counterDir
-            self._weightedCounterDir = counterDir+"/weighted"
 
+        self._analysisName = analysisName
+        self._searchMode = searchMode
+        self._dataEra = dataEra
+        self._optimizationMode = optimizationMode
+        self._systematicVariation = systematicVariation
+        self._useAnalysisNameOnly = useAnalysisNameOnly
+        self._availableSystematicVariationSources = availableSystematicVariationSources
+
+        self._analysisDirectoryName = self._analysisName
+        if not self._useAnalysisNameOnly:
+            if self._searchMode is not None:
+                self._analysisDirectoryName += self._searchMode
+            if (self.isMC() or self.isPseudo()) and self._dataEra is not None:
+                self._analysisDirectoryName += self._dataEra
+            if self._optimizationMode is not None:
+                self._analysisDirectoryName += self._optimizationMode
+            if (((self.isMC() or self.isPseudo()) or (self.isData() and enableSystematicVariationForData)) and
+                self._systematicVariation is not None):
+                self._analysisDirectoryName += self._systematicVariation
+
+        # Check that analysis directory exists
+        for f in self.files:
+            if aux.Get(f, self._analysisDirectoryName) == None:
+                raise AnalysisNotFoundException("Analysis directory '%s' does not exist in file '%s'" % (self._analysisDirectoryName, f.GetName()))
+        self._analysisDirectoryName += "/"
+
+        # Update info from analysis directory specific histogram, if one exists
+        realDirName = self._translateName("configInfo")
+        if aux.Get(self.files[0], realDirName) != None: # important to use !=
+            updateInfo = None
+            for f in self.files:
+                d = aux.Get(f, realDirName)
+                if d == None:
+                    raise Exception("%s directory is missing from file %s, it was in %s" % (realDirName, f.GetName(), self.files[0].GetName()))
+                info = {}
+                h = aux.Get(d, "configinfo")
+                if h != None:
+                    info = _rescaleInfo(_histoToDict(aux.Get(d, "configinfo")))
+                addDirContentsToDict(aux.Get(f, realDirName), info)
+                if updateInfo == None:
+                    updateInfo = info
+                else:
+                    assertInfo(updateInfo, info, self.files[0], f, realDirName+"/configinfo")
+            if "energy" in updateInfo:
+                #raise Exception("You may not set 'energy' in analysis directory specific configinfo histogram. Please fix %s." % realName)
+                print "WARNING: 'energy' has been set in analysis directory specific configinfo histogram (%s), it will be ignored. Please fix your pseudomulticrab code." % (realName+"/configinfo")
+                del updateInfo["energy"]
+            self.info.update(updateInfo)
+
+        self._unweightedCounterDir = counterDir
+        if counterDir is not None:
+            self._weightedCounterDir = counterDir + "/weighted"
             self._readCounters()
 
-    ## Close the file
+        # Update Nallevents to weighted one
+        if "isPileupReweighted" in self.info and self.info["isPileupReweighted"]:
+            #print "%s: is pileup-reweighted, calling updateNAllEventsToPUWeighted()" % self.name
+            self.updateNAllEventsToPUWeighted()
+
+        # For some reason clearing the in-memory representations of
+        # the files increases the reading (object lookup?) performance
+        # when reading from many analysis directories in a single
+        # script.
+        for f in self.files:
+            f.Clear()
+
+    ## Close the files
     #
     # Can be useful when opening very many files in order to reduce
     # the memory footprint and not hit the limit of number of open
     # files
     def close(self):
-        if self.file != None:
-            self.file.Close("R")
-            self.file.Delete()
-            del self.file
-            self.file = None
+        for f in self.files:
+            f.Close("R")
+            f.Delete()
+        self.files = []
 
     ## Clone the Dataset object
     # 
-    # Nothing is shared between the returned copy and this object.
+    # Nothing is shared between the returned copy and this object,
+    # except the ROOT file object
     #
     # Use case is creative dataset manipulations, e.g. copying ttbar
     # to another name and scaling the cross section by the BR(t->H+)
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.name, self.file.GetName(), self._unweightedCounterDir, self._weightedCounters, self._analysisBaseName, self._dataEra, self._doEraReplace)
+        d = Dataset(self.rawName, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._systematicVariation, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly, self._availableSystematicVariationSources)
         d.info.update(self.info)
+        d.nAllEvents = self.nAllEvents
+        d.name = self.name
         return d
 
-    ## Get ROOT histogram (or actually any object from the analysis directory)
+    def getAnalysisName(self):
+        return self._analysisName
+
+    def getSearchMode(self):
+        if self._searchMode is None:
+            return ""
+        return self._searchMode
+
+    def getDataEra(self):
+        if self._dataEra is None:
+            return ""
+        return self._dataEra
+
+    def getOptimizationMode(self):
+        if self._optimizationMode is None:
+            return ""
+        return self._optimizationMode
+
+    def getSystematicVariation(self):
+        if self._systematicVariation is None:
+            return ""
+        return self._systematicVariation
+
+    ## Translate a logical name to a physical name in the file
     #
-    # \param name   Full path to the ROOT object within the ROOT file
+    # \param name            Name to translate
+    # \param analysisPostfix Postfix to the current analysis directory
+    #                        name to read the objects from. You better
+    #                        know what you're doing.
     #
-    # If dataset is MC, and the data era has been set, replaces the
-    # analysis base name part in \a name with one containing the data
-    # era.
-    def _getRootHisto(self, name):
-        if self.isMC() and self._dataEra != None and self._doEraReplace:
-            name = name.replace(self._analysisBaseName, self._analysisBaseName+self._dataEra, 1) # replace only the first occurrance
-        return (self.file.Get(name), name)
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    def _translateName(self, name, analysisPostfix=""):
+        if len(name) > 0 and name[0] == '/':
+            return name[1:]
+        else:
+            ret = self._analysisDirectoryName
+            if analysisPostfix != "":
+                ret = ret.replace("/", analysisPostfix+"/")
+            ret += name
+            if ret[-1] == "/":
+                return ret[0:-1]
+            return ret
+
+    ## Get the ParameterSet stored in the ROOT file
+    def getParameterSet(self):
+        (objs, realNames) = self.getRootObjects("configInfo/parameterSet")
+        return objs[0].GetTitle()        
+
+    def getDataVersion(self):
+        return self.dataVersion
+
+    def getAvailableSystematicVariationSources(self):
+        return self._availableSystematicVariationSources
+
+    ## Get ROOT histogram
+    #
+    # \param name    Path of the ROOT histogram relative to the analysis
+    #                root directory
+    # \param kwargs  Keyword arguments, forwarded to getRootObjects()
+    #
+    # \return pair (\a histogram, \a realName)
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    #
+    # If dataset consists of multiple files, the histograms are added
+    # with the ROOT.TH1.Add() method.
+    # 
+    # If dataset.TreeDraw object is given (or actually anything with
+    # draw() method), the draw() method is called by giving the
+    # Dataset object as parameters. The draw() method is expected to
+    # return a TH1 which is then returned.
+    def getRootHisto(self, name, **kwargs):
+        if hasattr(name, "draw"):
+            if len(kwargs) > 0:
+                print >>sys.stderr, "WARNING: You gave keyword arguments to getDatasetRootHisto() together with object with draw() method. The keyword arguments are not passed to the draw() call. This may or may not be what you want."
+            h = name.draw(self)
+            realName = None
+        else:
+            (histos, realName) = self.getRootObjects(name, **kwargs)
+            if len(histos) == 1:
+                # Check if object is indeed a histogram or a directory (usecase: splitted phase space histograms)
+                if isinstance(histos[0], ROOT.TDirectoryFile):
+                    (path, filename) = os.path.split(name)
+                    newName = ""
+                    if len(path) > 0:
+                        newName = "%s/"%path
+                    newName += "%s/%sInclusive"%(filename,filename)
+                    (histos, realName) = self.getRootObjects(newName, **kwargs)
+                h = histos[0]
+            else:
+                h = histos[0]
+                h = aux.Clone(h, h.GetName()+"_cloned")
+                for h2 in histos[1:]:
+                    h.Add(h2)
+    
+        return (h, realName)
+
+    ## Create ROOT TChain
+    # 
+    # \param name    Path of the ROOT TTree relative to the analysis
+    #                root directory
+    # \param kwargs  Keyword arguments, forwarded to _translateName()
+    #
+    # \return pair (ROOT.TChain, \a realName)
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    def createRootChain(self, treeName, **kwargs):
+        realName = self._translateName(treeName, **kwargs)
+        chain = ROOT.TChain(realName)
+        for f in self.files:
+            chain.Add(f.GetName())
+        return (chain, realName)
+
+    ## Get arbitrary ROOT object from the file
+    #
+    # \param name    Path of the ROOT object relative to the analysis
+    #                root directory
+    # \param kwargs  Keyword arguments, forwarded to getRootObjects()
+    #
+    # \return pair (\a object, \a realName)
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    #
+    # If the dataset consists of multiple files, raise an Exception.
+    # User should use getRootObjects() method instead.
+    def getRootObject(self, name, **kwargs):
+        if len(self.files) > 1:
+            raise Exception("You asked for a single ROOT object, but the Dataset %s consists of multiple ROOT files. You should call getRootObjects() instead, and deal with the multiple objects by yourself.")
+        (lst, realName) = self.getRootObjects(name, **kwargs)
+        return (lst[0], realName)
+
+    ## Get list of arbitrary ROOT objects from the file
+    #
+    # \param name    Path of the ROOT object relative to the analysis
+    #                root directory
+    # \param kwargs  Keyword arguments, forwarded to _translateName()
+    #
+    # \return pair (\a list, \a realName), where \a list is the list
+    #         of ROOT objects, one per file, and \a realName is the
+    #         physical name of the objects
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    def getRootObjects(self, name, **kwargs):
+        realName = self._translateName(name, **kwargs)
+        ret = []
+        if len(self.files) == 0:
+            raise Exception("Trying to read object %s from dataset %s, but the file is already closed!" % (name, self.name))
+
+        for f in self.files:
+            o = aux.Get(f, realName)
+            # below it is important to use '==' instead of 'is',
+            # because null TObject == None, but is not None
+            if o == None:
+                raise HistogramNotFoundException("Unable to find object '%s' (requested '%s') from file '%s'" % (realName, name, self.files[0].GetName()))
+
+            ret.append(o)
+        return (ret, realName)
 
     ## Read counters
     def _readCounters(self):
         self.counterDir = self._unweightedCounterDir
-        (d, realDir) = self._getRootHisto(self.counterDir)
-        if d == None:
-            msg = "Could not find counter directory %s from file %s." % (realDir, self.file.GetName())
-            if realDir != self.counterDir:
-                msg += "\nThe requested counter directory was %s, and the path was modified because of dataEra." % self.counterDir
-            raise Exception(msg)
-        if d.Get("counter") != None:
-            ctr = _histoToCounter(d.Get("counter"))
-            self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
-        else:
-            if not self._weightedCounters:
-                raise Exception("Could not find counter histogram in directory %s from file %s" % (self.counterDir, self.file.GetName()))
-            self.nAllEventsUnweighted = -1
-        self.nAllEventsWeighted = None
 
+        # Read unweighted counters
+        # The unweighted counters are allowed to not exist unless
+        # weightedCounters are also enabled
+        try:
+            (counter, realName) = self.getRootHisto(self.counterDir+"/counter")
+            ctr = _histoToCounter(counter)
+            self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
+        except HistogramNotFoundException, e:
+            if not self._weightedCounters:
+                raise Exception("Could not find counter histogram, message: %s" % str(e))
+            self.nAllEventsUnweighted = -1
+
+        self.nAllEventsWeighted = None
         self.nAllEvents = self.nAllEventsUnweighted
 
+        # Read weighted counters
         if self._weightedCounters:
             self.counterDir = self._weightedCounterDir
-            (d, realDir) = self._getRootHisto(self.counterDir)
-            if d == None:
-                msg = "Could not find counter directory %s from file %s" % (realDir, self.file.GetName())
-                if realDir != self.counterDir:
-                    msg += "\nThe requested counter directory was %s, and the path was modified because of dataEra." % self.counterDir
-                raise Exception(msg)
-            h = d.Get("counter")
-            if h == None:
-                msg = "No TH1 'counter' in directory '%s' of ROOT file '%s'" % (realDir, self.file.GetName())
-                if realDir != self.counterDir:
-                    msg += "\nThe requested directory was %s, and it was replaced because of dataEra." % self.counterDir
-                raise Exception(msg)
-            ctr = _histoToCounter(h)
-            h.Delete()
-            self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple
-
-            self.nAllEvents = self.nAllEventsWeighted
+            try:
+                (counter, realName) = self.getRootHisto(self.counterDir+"/counter")
+                ctr = _histoToCounter(counter)
+                self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple
+                self.nAllEvents = self.nAllEventsWeighted
+            except HistogramNotFoundException, e:
+                raise Exception("Could not find counter histogram, message: %s" % str(e))
 
     def getName(self):
         return self.name
@@ -1496,19 +2768,29 @@ class Dataset:
     def setName(self, name):
         self.name = name
 
+    def forEach(self, function):
+        return [function(self)]
+
+    ## Set the centre-of-mass energy (in TeV) as string
+    def setEnergy(self, energy):
+        if not isinstance(energy, basestring):
+            raise Exception("The energy must be set as string")
+        self.info["energy"] = energy
+
+    ## Get the centre-of-mass energy (in TeV) as string
     def getEnergy(self):
-        return self.info.get("energy", 0)
+        return self.info.get("energy", "0")
 
     ## Set cross section of MC dataset (in pb).
     def setCrossSection(self, value):
         if not self.isMC():
-            raise Exception("Should not set cross section for data dataset %s" % self.name)
+            raise Exception("Should not set cross section for non-MC dataset %s" % self.name)
         self.info["crossSection"] = value
 
     ## Get cross section of MC dataset (in pb).
     def getCrossSection(self):
         if not self.isMC():
-            raise Exception("Dataset %s is data, no cross section available" % self.name)
+            raise Exception("Dataset %s is not MC, no cross section available" % self.name)
         try:
             return self.info["crossSection"]
         except KeyError:
@@ -1522,24 +2804,47 @@ class Dataset:
 
     ## Get the integrated luminosity of data dataset (in pb^-1).
     def getLuminosity(self):
-        if not self.isData():
-            raise Exception("Dataset %s is MC, no luminosity available" % self.name)
+        if not (self.isData() or self.isPseudo()):
+            raise Exception("Dataset %s is not data nor pseudo, no luminosity available" % self.name)
         try:
             return self.info["luminosity"]
         except KeyError:
-            raise Exception("Dataset %s is data, but luminosity has not been set yet. You have to explicitly set the luminosity with setLuminosity() method." % self.name)
+            raise Exception("Dataset %s is %s, but luminosity has not been set yet. You have to explicitly set the luminosity with setLuminosity() method." % (self.name, self.getDataType()))
+
+    def setProperty(self, key, value):
+        self.info[key] = value
+
+    def getProperty(self, key):
+        return self.info[key]
 
     def isData(self):
         return self._isData
 
+    def isPseudo(self):
+        return self._isPseudo
+
     def isMC(self):
-        return not self._isData
+        return self._isMC
+
+    def getDataType(self):
+        if self.isData():
+            return "data"
+        if self.isMC():
+            return "MC"
+        if self.isPseudo:
+            return "pseudo"
+        raise Exception("I don't know what I am, sorry.")
 
     def getCounterDirectory(self):
         return self.counterDir
 
     def getRootFile(self):
-        return self.file
+        if len(self.files) > 1:
+            raise Exception("Dataset %s consists of %d files, you should use getRootFiles() method instead." % (self.getName(), len(self.files)))
+        return self.files[0]
+
+    def getRootFiles(self):
+        return self.files
 
     ## Set the number of all events (for normalization).
     #
@@ -1553,32 +2858,49 @@ class Dataset:
     # \param era     Data era to use to pick the pile-up-reweighted all
     #                event number (optional, if not given a default
     #                value read from the configinfo is used)
-    # \param kwargs  Keyword arguments (forwarded to WeightedAllEvents.getWeighted())
+    # \param kwargs  Keyword arguments (forwarded to pileupReweightedAllEvents.WeightedAllEvents.getWeighted())
+    #
+    # If \a topPtWeightType is not given in \a kwargs, read the value
+    # from analysis directory -specific configInfo
     def updateNAllEventsToPUWeighted(self, era=None, **kwargs):
-        # Ignore if data
-        if self.isData():
+        # Ignore if not MC
+        if not self.isMC():
             return
 
         if era == None:
             era = self._dataEra
         if era == None:
-            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.getName())
-
-        try:
-            data = _weightedAllEvents[era]
-        except KeyError:
-            raise Exception("No weighted numbers of all events specified for data era '%s', see dataset._weightedAllEvents dictionary" % era)
+            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.rawName)
 
         if self.nAllEventsUnweighted < 0:
             raise Exception("Number of all unweighted events is %d < 0, this is a symptom of missing unweighted counter" % self.nAllEventsUnweighted)
 
-        try:
-            self.nAllEvents = data[self.getName()].getWeighted(self.getName(), self.nAllEventsUnweighted, **kwargs)
-        except KeyError:
-            # Just ignore if no weights found for this dataset
-            pass
+        args = {}
+        args.update(kwargs)
+        if "pileupReweightType" not in kwargs and "pileupReweightType" in self.info:
+            args["weightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["pileupReweightType"]]
+
+        if "topPtReweightScheme" in self.info:
+            if "topPtWeightType" not in kwargs:
+                args["topPtWeightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["topPtReweightType"]]
+            try:
+                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, self.info["topPtReweightScheme"], **args)
+            except KeyError:
+                # Just ignore if no weights found for this dataset
+                pass
+            print "Using top-pt reweighted Nallevents for sample %s" % self.name
+        else:
+            if "topPtWeightType" in args:
+                del args["topPtWeightType"]
+            try:
+                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, **args)
+            except KeyError:
+                # Just ignore if no weights found for this dataset
+                pass
 
     def getNAllEvents(self):
+        if not hasattr(self, "nAllEvents"):
+            raise Exception("Number of all events is not set for dataset %s! The counter directory was not given, and setNallEvents() was not called." % self.name)
         return self.nAllEvents
 
     ## Get the cross section normalization factor.
@@ -1587,12 +2909,11 @@ class Dataset:
     # events), so by multiplying the number of MC events with the
     # factor one gets the corresponding cross section.
     def getNormFactor(self):
-        if not hasattr(self, "nAllEvents"):
-            raise Exception("Number of all events is not set for dataset %s! The counter directory was not given, and setNallEvents() was not called." % self.name)
-        if self.nAllEvents == 0:
-            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
+        nAllEvents = self.getNAllEvents()
+        if nAllEvents == 0:
+            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateNAllEventsToPUWeighted() has not been called." % self.name)
 
-        return self.getCrossSection() / self.nAllEvents
+        return self.getCrossSection() / nAllEvents
 
     ## Check if a ROOT histogram exists in this dataset
     #
@@ -1600,70 +2921,74 @@ class Dataset:
     #
     # If dataset.TreeDraw object is given, it is considered to always
     # exist.
-    def hasRootHisto(self, name):
-        if hasattr(name, "draw"):
+    def hasRootHisto(self, name, **kwargs):
+        realName = self._translateName(name, **kwargs)
+        if hasattr(realName, "draw"):
             return True
-        pname = name
-        return self._getRootHisto(pname)[0] != None
+
+        for f in self.files:
+            o = aux.Get(f, realName)
+            if o != None:
+                o.Delete()
+                return True
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
     # 
     # \param name   Path of the histogram in the ROOT file
+    # \param modify Function to modify the histogram (use case is e.g. obtaining a slice of TH2 as TH1)
+    # \param kwargs Keyword arguments, forwarded to getRootHisto()
     #
     # \return dataset.DatasetRootHisto object containing the (unnormalized) TH1 and this Dataset
     # 
     # If dataset.TreeDraw object is given (or actually anything with
-    # draw() method), the draw() method is called by giving the TFile
-    # and the dataset name as parameters. The draw() method is
-    # expected to return a TH1 which is then returned.
-    def getDatasetRootHisto(self, name):
-        h = None
-        if hasattr(name, "draw"):
-            h = name.draw(self)
-        else:
-            pname = name
-            (h, realName) = self._getRootHisto(pname)
-            if h == None:
-                msg = "Unable to find histogram '%s' from file '%s'" % (realName, self.file.GetName())
-                if realName != pname:
-                    msg += "\nThe requested histogram was %s, and the path was modified because of dataEra." % self.counterDir
-                raise Exception(msg)
-            name = h.GetName()+"_"+self.name
-            h.SetName(name.translate(None, "-+.:;"))
-        return DatasetRootHisto(h, self)
+    # draw() method), the draw() method is called by giving the
+    # Dataset object as parameters. The draw() method is expected to
+    # return a TH1 which is then returned.
+    #
+    # If dataset.SystematicsHelper object is given (or actually
+    # anything with addUncertainties() method), the addUncertainties()
+    # method of it is called with the Dataset and
+    # RootHistoWithUncertainties objects, and the modify function.
+    def getDatasetRootHisto(self, name, modify=None, **kwargs):
+        #h = None
+        # if hasattr(name, "draw"):
+        #     if len(kwargs) > 0:
+        #         print >>sys.stderr, "WARNING: You gave keyword arguments to getDatasetRootHisto() together with object with draw() method. The keyword arguments are not passed to the draw() call. This may or may not be what you want."
+        #     h = name.draw(self)
+        # else:
+        (h, realName) = self.getRootHisto(name, **kwargs)
+        name2 = h.GetName()+"_"+self.name
+        h.SetName(name2.translate(None, "-+.:;"))
+
+        if modify is not None:
+            h = modify(h)
+
+        wrapper = RootHistoWithUncertainties(h)
+        if hasattr(name, "addUncertainties"):
+            name.addUncertainties(self, wrapper, modify)
+        return DatasetRootHisto(wrapper, self) 
 
     ## Get the directory content of a given directory in the ROOT file.
     # 
     # \param directory   Path of the directory in the ROOT file
     # \param predicate   Append the directory name to the return list only if
     #                    predicate returns true for the name. Predicate
-    #                    should be a function taking a string as an
+    #                    should be a function taking an object in the directory as an
     #                    argument and returning a boolean.
     # 
     # \return List of names in the directory.
-    def getDirectoryContent(self, directory, predicate=lambda x: True):
-        (d, realDir) = self._getRootHisto(directory)
-        if d == None:
-            msg = "No object %s in file %s" % (realDir, self.file.GetName())
-            if realDir != d:
-                msg += "\nThe requested directory was %s, and the path was modified because of dataEra." % self.counterDir
-            raise Exception(msg)
-        dirlist = d.GetListOfKeys()
+    #
+    # If the dataset consists of multiple files, the listing of the
+    # first file is given.
+    def getDirectoryContent(self, directory, predicate=None):
+        (dirs, realDir) = self.getRootObjects(directory)
 
-        # Suppress the warning message of missing dictionary for some iterator
-        backup = ROOT.gErrorIgnoreLevel
-        ROOT.gErrorIgnoreLevel = ROOT.kError
-        diriter = dirlist.MakeIterator()
-        ROOT.gErrorIgnoreLevel = backup
+        # wrap the predicate
+        wrapped = None
+        if predicate is not None:
+            wrapped = lambda key: predicate(key.ReadObj())
 
-        key = diriter.Next()
-
-        ret = []
-        while key:
-            if predicate(key.ReadObj()):
-                ret.append(key.GetName())
-            key = diriter.Next()
-        return ret
+        return aux.listDirectoryContent(dirs[0], wrapped)
 
     def _setBaseDirectory(self,base):
         self.basedir = base
@@ -1671,11 +2996,14 @@ class Dataset:
     ## Get the path of the multicrab directory where this dataset originates
     def getBaseDirectory(self):
         return self.basedir
+
+    def formatDatasetTree(self, indent):
+        return '%sDataset("%s", %s, ...),\n' % (indent, self.getName(), ", ".join(['"%s"' % f.GetName() for f in self.files]))
         
     ## \var name
     # Name of the dataset
-    ## \var file
-    # TFile object of the dataset
+    ## \var files
+    # List of TFile objects of the dataset
     ## \var info
     # Dictionary containing the configInfo histogram
     ## \var dataVersion
@@ -1704,14 +3032,14 @@ class Dataset:
 
 ## Dataset class for histogram access for a dataset merged from Dataset objects.
 # 
-# The merged datasets are required to be either MC or data.
+# The merged datasets are required to be either MC, data, or pseudo
 class DatasetMerged:
     ## Constructor.
     # 
     # \param name      Name of the merged dataset
     # \param datasets  List of dataset.Dataset objects to merge
     # 
-    # Calculates the total cross section (luminosity) for MC (data)
+    # Calculates the total cross section (luminosity) for MC (data or pseudo)
     # datasets.
     def __init__(self, name, datasets):
         self.name = name
@@ -1725,17 +3053,23 @@ class DatasetMerged:
         energy = self.datasets[0].getEnergy()
         for d in self.datasets[1:]:
             if energy != d.getEnergy():
-                raise Exception("Can't merge datasets with different centre-of-mass energies (%s: %d TeV, %s: %d TeV)" % self.datasets[0].getName(), energy, d.getName(), d.getEnergy())
+                raise Exception("Can't merge datasets with different centre-of-mass energies (%s: %d TeV, %s: %d TeV)" % (self.datasets[0].getName(), energy, d.getName(), d.getEnergy()))
 
         if self.datasets[0].isMC():
             crossSum = 0.0
             for d in self.datasets:
+                if not d.isMC():
+                    raise Exception("Can't merge non-MC dataset %s with MC datasets, it is %s" % (d.getName(), d.getDataType()))
                 crossSum += d.getCrossSection()
             self.info["crossSection"] = crossSum
         else:
+            reft = self.datasets[0].getDataType()
             lumiSum = 0.0
             for d in self.datasets:
                 lumiSum += d.getLuminosity()
+                t = d.getDataType()
+                if reft != t:
+                    raise Exception("Can't merge non-%s datasets %s with %s datasets, it is %s" % (reft, d.getName(), t))
             self.info["luminosity"] = lumiSum
 
     ## Close TFiles in the contained dataset.Dataset objects
@@ -1763,15 +3097,28 @@ class DatasetMerged:
     def setName(self, name):
         self.name = name
 
+    def forEach(self, function):
+        ret = []
+        for d in self.datasets:
+            ret.extend(d.forEach(function))
+        return ret
+
+    def setEnergy(self, energy):
+        for d in self.datasets:
+            d.setEnergy(energy)
+
+    def getEnergy(self):
+        return self.datasets[0].getEnergy()
+
     def setCrossSection(self, value):
-        if self.isData():
-            raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
+        if not self.isMC():
+            raise Exception("Should not set cross section for non-MC dataset %s (has luminosity)" % self.name)
         raise Exception("Setting cross section for merged dataset is meaningless (it has no real effect, and hence is misleading")
 
     ## Get cross section of MC dataset (in pb).
     def getCrossSection(self):
-        if self.isData():
-            raise Exception("Dataset %s is data, no cross section available" % self.name)
+        if not self.isMC():
+            raise Exception("Dataset %s is not MC, no cross section available" % self.name)
         return self.info["crossSection"]
 
     def setLuminosity(self, value):
@@ -1785,8 +3132,17 @@ class DatasetMerged:
             raise Exception("Dataset %s is MC, no luminosity available" % self.name)
         return self.info["luminosity"]
 
+    def setProperty(self, key, value):
+        self.info[key] = value
+
+    def getProperty(self, key):
+        return self.info[key]
+
     def isData(self):
         return self.datasets[0].isData()
+
+    def isPseudo(self):
+        return self.datasets[0].isPseudo()
 
     def isMC(self):
         return self.datasets[0].isMC()
@@ -1816,14 +3172,44 @@ class DatasetMerged:
     ## Get the DatasetRootHistoMergedMC/DatasetRootHistoMergedData object for a named histogram.
     #
     # \param name   Path of the histogram in the ROOT file
-    def getDatasetRootHisto(self, name):
-        wrappers = [d.getDatasetRootHisto(name) for d in self.datasets]
+    # \param kwargs Keyword arguments, forwarder to get
+    #               getDatasetRootHisto() of the contained
+    #               Dataset objects
+    #
+    # DatasetRootHistoMergedData works also for pseudo
+    def getDatasetRootHisto(self, name, **kwargs):
+        wrappers = [d.getDatasetRootHisto(name, **kwargs) for d in self.datasets]
         if self.isMC():
             return DatasetRootHistoMergedMC(wrappers, self)
-        else:
+        elif self.isData():
             return DatasetRootHistoMergedData(wrappers, self)
+        elif self.isPseudo():
+            return DatasetRootHistoMergedPseudo(wrappers, self)
+        else:
+            raise Exception("Internal error (unknown dataset type)")
 
-        
+    ## Get ROOT histogram
+    #
+    # \param name    Path of the ROOT histogram relative to the analysis
+    #                root directory
+    # \param kwargs  Keyword arguments, forwarded to getRootObjects()
+    #
+    # \return pair (\a first histogram, \a realName)
+    #
+    # If name starts with slash ('/'), it is interpreted as a absolute
+    # path within the ROOT file.
+    #
+    # If dataset.TreeDraw object is given (or actually anything with
+    # draw() method), the draw() method is called by giving the
+    # Dataset object as parameters. The draw() method is expected to
+    # return a TH1 which is then returned.
+    def getFirstRootHisto(self, name, **kwargs):
+        if hasattr(self.datasets[0], "getFirstRootHisto"):
+            content = self.datasets[0].getFirstRootHisto(name, **kwargs)
+        else:
+            content = self.datasets[0].getRootHisto(name, **kwargs)
+        return content
+
     ## Get the directory content of a given directory in the ROOT file.
     # 
     # \param directory   Path of the directory in the ROOT file
@@ -1841,12 +3227,107 @@ class DatasetMerged:
                 raise Exception("Error: merged datasets have different contents in directory '%s'" % directory)
         return content
 
+    def formatDatasetTree(self, indent):
+        ret = '%sDatasetMerged("%s", [\n' % (indent, self.getName())
+        for dataset in self.datasets:
+            ret += dataset.formatDatasetTree(indent+"  ")
+        ret += "%s]),\n" % indent
+        return ret
+
     ## \var name
     # Name of the merged dataset
     ## \var datasets
     # List of merged dataset.Dataset objects
     ## \var info
     # Dictionary containing total cross section (MC) or integrated luminosity (data)
+
+## Dataset class for histogram access for a dataset added from Dataset objects.
+# 
+# The added datasets are required to be MC
+class DatasetAddedMC(DatasetMerged):
+    ## Constructor.
+    # 
+    # \param name      Name of the merged dataset
+    # \param datasets  List of dataset.Dataset objects to add
+    #
+    # The cross section of the added datasets must be the same
+    def __init__(self, name, datasets):
+        self.name = name
+        #self.stacked = stacked
+        self.datasets = datasets
+        if len(datasets) == 0:
+            raise Exception("Can't create a DatasetAddedMC from 0 datasets")
+
+        self.info = {}
+
+        energy = self.datasets[0].getEnergy()
+        for d in self.datasets[1:]:
+            if energy != d.getEnergy():
+                raise Exception("Can't merge datasets with different centre-of-mass energies (%s: %d TeV, %s: %d TeV)" % self.datasets[0].getName(), energy, d.getName(), d.getEnergy())
+
+        crossSection = self.datasets[0].getCrossSection()
+        for d in self.datasets:
+            if not d.isMC():
+                raise Exception("Datasets must be MC, got %s which is data" % d.getName())
+            xs2 = d.getCrossSection()
+            if abs((xs2-crossSection)/crossSection) > 1e-6:
+                raise Exception("Datasets must have the same cross section, got %f from %s and %f from %s" % (crossSection, self.datasets[0].getName(), xs2, d.getName()))
+
+        self.info["crossSection"] = crossSection
+
+    ## Make a deep copy of a DatasetMerged object.
+    #
+    # Nothing is shared between the returned copy and this object.
+    #
+    # \see dataset.Dataset.deepCopy()
+    def deepCopy(self):
+        dm = DatasetAddedMC(self.name, [d.deepCopy() for d in self.datasets])
+        dm.info.update(self.info)
+        return dm
+
+    ## Set cross section of MC dataset (in pb).
+    def setCrossSection(self, value):
+        if not self.isMC():
+            raise Exception("Should not set cross section for data dataset %s" % self.name)
+        self.info["crossSection"] = value
+        for d in self.datasets:
+            d.setCrossSection(value)
+
+    def setProperty(self, key, value):
+        for d in self.datasets:
+            d.setProperty(key, value)
+
+    ## Get the DatasetRootHistoMergedMC/DatasetRootHistoMergedData object for a named histogram.
+    #
+    # \param name   Path of the histogram in the ROOT file
+    # \param kwargs Keyword arguments, forwarder to get
+    #               getDatasetRootHisto() of the contained
+    #               Dataset objects
+    def getDatasetRootHisto(self, name, **kwargs):
+        wrappers = [d.getDatasetRootHisto(name, **kwargs) for d in self.datasets]
+        return DatasetRootHistoAddedMC(wrappers, self)
+
+
+    ## Get the cross section normalization factor.
+    #
+    # The normalization factor is defined as crossSection/N(all
+    # events), so by multiplying the number of MC events with the
+    # factor one gets the corresponding cross section.
+    #
+    # Implementation is close to dataset.Dataset.getNormFactor()
+    def getNormFactor(self):
+        nAllEvents = sum([d.getNAllEvents() for d in self.datasets])
+        if nAllEvents == 0:
+            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
+
+        return self.getCrossSection() / nAllEvents
+
+    def formatDatasetTree(self, indent):
+        ret = '%sDatasetAddedMC("%s", [\n' % (indent, self.getName())
+        for dataset in self.datasets:
+            ret += dataset.formatDatasetTree(indent+"  ")
+        ret += "%s]),\n" % indent
+        return ret
 
 ## Collection of Dataset objects which are managed together.
 # 
@@ -1955,6 +3436,11 @@ class DatasetManager:
             copy.append(d.deepCopy())
         return copy
 
+    ## Set the centre-of-mass energy for all datasets
+    def setEnergy(self, energy):
+        for d in self.datasets:
+            d.setEnergy(energy)
+
     ## Get a list of centre-of-mass energies of the datasets
     def getEnergies(self):
         tmp = {}
@@ -1973,10 +3459,13 @@ class DatasetManager:
     ## Get a list of dataset.DatasetRootHisto objects for a given name.
     # 
     # \param histoName   Path to the histogram in each ROOT file.
+    # \param kwargs      Keyword arguments, forwarder to get
+    #                    getDatasetRootHisto() of the contained
+    #                    Dataset objects
     #
     # \see dataset.Dataset.getDatasetRootHisto()
-    def getDatasetRootHistos(self, histoName):
-        return [d.getDatasetRootHisto(histoName) for d in self.datasets]
+    def getDatasetRootHistos(self, histoName, **kwargs):
+        return [d.getDatasetRootHisto(histoName, **kwargs) for d in self.datasets]
 
     ## Get a list of all dataset.Dataset objects.
     def getAllDatasets(self):
@@ -2002,6 +3491,10 @@ class DatasetManager:
                 ret.append(d)
         return ret
 
+    ## Get a list of pseudo dataset.Dataset objects.
+    def getPseudoDatasets(self):
+        return filter(lambda d: d.isPseudo(), self.datasets)
+
     ## Get a list of names of all dataset.Dataset objects.
     def getAllDatasetNames(self):
         return [x.getName() for x in self.getAllDatasets()]
@@ -2013,6 +3506,10 @@ class DatasetManager:
     ## Get a list of names of data dataset.Dataset objects.
     def getDataDatasetNames(self):
         return [x.getName() for x in self.getDataDatasets()]
+
+    ## Get a list of names of pseudo dataset.Dataset objects.
+    def getPseudoDatasetNames(self):
+        return [x.getName() for x in self.getPseudoDatasets()]
 
     ## Select and reorder Datasets.
     # 
@@ -2043,7 +3540,7 @@ class DatasetManager:
         for d in self.datasets:
             if not d.getName() in nameList:
                 selected.append(d)
-            else:
+            elif close:
                 d.close()
         self.datasets = selected
         self._populateMap()
@@ -2123,23 +3620,36 @@ class DatasetManager:
     #                     objects in the list of datasets. Otherwise
     #                     they are removed, as they are now contained
     #                     in the dataset.DatasetMerged object
+    # \param addition     Creates DatasetAddedMC instead of DatasetMerged
+    # \param allowMissingDatasets  If True, ignore error from missing dataset (warning is nevertheless printed)
     #
     # If nameList translates to only one dataset.Dataset, the
     # dataset.Daataset object is renamed (i.e. dataset.DatasetMerged
     # object is not created)
-    def merge(self, newName, nameList, keepSources=False):
-        (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge")
+    def merge(self, newName, nameList, keepSources=False, addition=False, silent=False, allowMissingDatasets=False):
+        (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge", allowMissingDatasets)
         if len(selected) == 0:
-            print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
+            message = "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
+            if allowMissingDatasets:
+                if not silent:
+                    print >> sys.stderr, message
+            else:
+                raise Exception(message)
             return
-        elif len(selected) == 1:
-            print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
+        elif len(selected) == 1 and not keepSources:
+            if not silent:
+                print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
             self.rename(selected[0].getName(), newName)
             return
 
         if not keepSources:
             self.datasets = notSelected
-        self.datasets.insert(firstIndex, DatasetMerged(newName, selected))
+        if addition:
+            newDataset = DatasetAddedMC(newName, selected)
+        else:
+            newDataset = DatasetMerged(newName, selected)
+
+        self.datasets.insert(firstIndex, newDataset)
         self._populateMap()
 
     ## Load integrated luminosities from a JSON file.
@@ -2166,7 +3676,7 @@ class DatasetManager:
         for d in self.datasets:
             jsonname = os.path.join(d.basedir, fname)
             if not os.path.exists(jsonname):
-                print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist (using luminosity=1 for data)!" % jsonname
+                raise Exception("Luminosity JSON file '%s' does not exist. Have you run 'hplusLumiCalc.py' in your multicrab directory?" % jsonname)
                 for name in self.getDataDatasetNames():
                     self.getDataset(name).setLuminosity(1)
             else:
@@ -2190,7 +3700,7 @@ class DatasetManager:
     #
     # \param kwargs     Keyword arguments (forwarded to dataset.Dataset.updateAllEventsToWeighted)
     #
-    # Uses the table dataset._weightedAllEvents
+    # Uses the table pileupReweightedAllEvents._weightedAllEvents
     def updateNAllEventsToPUWeighted(self, **kwargs):
         for dataset in self.datasets:
             dataset.updateNAllEventsToPUWeighted(**kwargs)
@@ -2236,6 +3746,30 @@ class DatasetManager:
     def printInfo(self):
         print self.formatInfo()
 
+    def formatDatasetTree(self):
+        ret = "DatasetManager.datasets = [\n"
+        for dataset in self.datasets:
+            ret += dataset.formatDatasetTree(indent="  ")
+        ret += "]"
+        return ret
+
+    def printDatasetTree(self):
+        print self.formatDatasetTree()
+
+    ## Prints the parameterSet of some Dataset
+    #
+    # Absolutely no guarantees of which Dataset the parameterSet is
+    # from will not be given.
+    def printSelections(self):
+        namePSets = self.datasets[0].forEach(lambda d: (d.getName(), d.getParameterSet()))
+        print "ParameterSet for dataset", namePSets[0][0]
+        print namePSets[0][1]
+
+    def getSelections(self):
+        namePSets = self.datasets[0].forEach(lambda d: (d.getName(), d.getParameterSet()))
+        #print "ParameterSet for dataset", namePSets[0][0]
+        return namePSets[0][1]
+
     ## \var datasets
     # List of dataset.Dataset (or dataset.DatasetMerged) objects to manage
     ## \var datasetMap
@@ -2246,6 +3780,400 @@ class DatasetManager:
     # Directory (absolute/relative to current working directory) where
     # the luminosity JSON file is located (see loadLuminosities())
 
+## Precursor dataset, helper class for DatasetManagerCreator
+#
+# This holds the name, ROOT file, and data/MC status of a dataset.
+class DatasetPrecursor:
+    def __init__(self, name, filenames):
+        self._name = name
+        if isinstance(filenames, basestring):
+            self._filenames = [filenames]
+        else:
+            self._filenames = filenames
+
+        self._rootFiles = []
+        self._dataVersion = None
+        for name in self._filenames:
+            rf = ROOT.TFile.Open(name)
+            # Below is important to use '==' instead of 'is' to check for
+            # null file
+            if rf == None:
+                raise Exception("Unable to open ROOT file '%s' for dataset '%s'" % (name, self._name))
+            self._rootFiles.append(rf)
+
+            dv = aux.Get(rf, "configInfo/dataVersion")
+            if dv == None:
+                print "Unable to find 'configInfo/dataVersion' from ROOT file '%s', I have no idea if this file is data, MC, or pseudo" % name
+                continue
+                
+            if self._dataVersion is None:
+                self._dataVersion = dv.GetTitle()
+            else:
+                if self._dataVersion != dv.GetTitle():
+                    raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
+
+        if self._dataVersion is None:
+            self._isData = False
+            self._isPseudo = False
+            self._isMC = False
+        else:
+            self._isData = "data" in self._dataVersion
+            self._isPseudo = "pseudo" in self._dataVersion
+            self._isMC = not (self._isData or self._isPseudo)
+
+    def getName(self):
+        return self._name
+
+    def getFiles(self):
+        return self._rootFiles
+
+    def getFileNames(self):
+        return self._filenames
+
+    def isData(self):
+        return self._isData
+
+    def isPseudo(self):
+        return self._isPseudo
+
+    def isMC(self):
+        return self._isMC
+
+    def getDataVersion(self):
+        return self._dataVersion
+
+    ## Close the ROOT files
+    def close(self):
+        for f in self._rootFiles:
+            f.Close("R")
+            f.Delete()
+        self._rootFiles = []
+
+_analysisNameSkipList = [re.compile("^SystVar"), re.compile("configInfo"), re.compile("PUWeightProducer")]
+_analysisSearchModes = ["Light", "Heavy"]
+_dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
+
+## Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
+#
+# The mai is to first create an object of this class to represent a
+# multicrab directory, and then create one or many DatasetManagers,
+# which then correspond to a single analysis directory within the ROOT
+# files.
+class DatasetManagerCreator:
+    ## Constructor
+    #
+    # \param rootFileList  List of (\a name, \a filenames) pairs (\a
+    #                      name should be string, \a filenames can be
+    #                      string or list of strings). \a name is taken
+    #                      as the dataset name, and \a filenames as the
+    #                      path(s) to the ROOT file(s).
+    # \param kwargs        Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li \a baseDirectory    Base directory of the datasets (delivered later to DatasetManager._setBaseDirectory())
+    #
+    # Creates DatasetPrecursor objects for each ROOT file, reads the
+    # contents of first MC file to get list of available analyses.
+    def __init__(self, rootFileList, **kwargs):
+        self._precursors = [DatasetPrecursor(name, filenames) for name, filenames in rootFileList]
+        self._baseDirectory = kwargs.get("baseDirectory", "")
+
+        mcRead = False
+        for d in self._precursors:
+            if d.isMC() or d.isPseudo():
+                self._readAnalysisContent(d)
+                mcRead = True
+                break
+
+        if not mcRead:
+            for d in self._precursors:
+                if d.isData():
+                    self._readAnalysisContent(d)
+                    break
+
+        dataEras = {}
+        for d in self._precursors:
+            if d.isData():
+                m = _dataDataEra_re.search(d.getName())
+                if m:
+                    dataEras["Run"+m.group("era")] = 1
+
+        self._dataDataEras = dataEras.keys()
+        self._dataDataEras.sort()                
+
+    def _readAnalysisContent(self, precursor):
+        contents = aux.listDirectoryContent(precursor.getFiles()[0], lambda key: key.IsFolder())
+
+        def skipItem(name):
+            for skip_re in _analysisNameSkipList:
+                if skip_re.search(name):
+                    return False
+            return True
+        contents = filter(skipItem, contents)
+        if len(contents) == 0:
+            raise Exception("No analysis TDirectories found")
+
+        analyses = {}
+        searchModes = {}
+        dataEras = {}
+        optimizationModes = {}
+        systematicVariations = {}
+
+        for d in contents:
+            directoryName = d
+
+            # Look for systematic variation
+            start = directoryName.find("SystVar")
+            if start >= 0:
+                if "SelectedTauForVariation" in directoryName[start:]:
+                    continue
+                systematicVariations[directoryName[start:]] = 1
+                directoryName = directoryName[:start]
+
+            # Look for optimization mode
+            start = directoryName.find("Opt")
+            if start >= 0:
+                optimizationModes[directoryName[start:]] = 1
+                directoryName = directoryName[:start]
+
+            # Look for data era
+            if precursor.isMC() or precursor.isPseudo():
+                start = directoryName.find("Run")
+                if start >= 0:
+                    dataEras[directoryName[start:]] = 1
+                    directoryName = directoryName[:start]
+            
+            # Look for search mode
+            for sm in _analysisSearchModes:
+                start = directoryName.find(sm)
+                if start >= 0:
+                    searchModes[sm] = 1
+                    directoryName = directoryName[:start]
+                    break
+
+            # Whatever is left in directoryName, is our analysis name
+            analyses[directoryName] = 1
+
+        self._analyses =  analyses.keys()
+        self._searchModes = searchModes.keys()
+        self._mcDataEras = dataEras.keys()
+        self._optimizationModes = optimizationModes.keys()
+        self._systematicVariations = systematicVariations.keys()
+
+        self._analyses.sort()
+        self._searchModes.sort()
+        self._mcDataEras.sort()
+        self._optimizationModes.sort()
+        self._systematicVariations.sort()
+
+        # Obtain the "base" names of systematic variations (i.e.
+        # without the "Plus"/"Minus" postfix)
+        systTmp = {}
+        for sv in self._systematicVariations:
+#            systTmp[sv.replace("Plus", "").replace("Minus", "")] = 1
+            systTmp[sv.replace("Plus", "").replace("Minus", "").replace("Up", "").replace("Down", "")] = 1
+        self._systematicVariationSources = systTmp.keys()
+        self._systematicVariationSources.sort()
+
+    def getBaseDirectory(self):
+        return self._baseDirectory
+
+    ## Create DatasetManager
+    #
+    # \param kwargs   Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li \a analysisName      Base part of the analysis directory name
+    # \li \a searchMode        String for search mode
+    # \li \a dataEra           String for data era
+    # \li \a optimizationMode  String for optimization mode (optional)
+    # \li \a systematicVariation String for systematic variation (optional)
+    # \li \a opts              Optional OptionParser object. Should have options added with addOptions().
+    #
+    # The values of \a analysisName, \a searchMode, \a dataEra, and \a
+    # optimizationMode are overridden from \a opts, if they are set
+    # (i.e. are non-None). Also, if any of these is not specified
+    # either explicitly or via \a opts, the value is inferred from the
+    # contents, if there exists only one of it.
+    def createDatasetManager(self, **kwargs):
+        _args = {}
+        _args.update(kwargs)
+
+
+        # First check that if some of these is not given, if there is
+        # exactly one it available, use that.
+        # As optimizationMode and systematicVariation are optional, they are not considered here
+        for arg, attr in [("analysisName", "getAnalyses"),
+                          ("searchMode", "getSearchModes"),
+                          ("dataEra", "getMCDataEras")]:
+            lst = getattr(self, attr)()
+            if (arg not in _args or _args[arg] is None) and len(lst) == 1:
+                _args[arg] = lst[0]
+
+        # Then override from command line options
+        opts = kwargs.get("opts", None)
+        if opts is not None:
+            for arg in ["analysisName", "searchMode", "dataEra", "optimizationMode", "systematicVariation", "counterDir"]:
+                o = getattr(opts, arg)
+                if o is not None:
+                    _args[arg] = o
+            del _args["opts"]
+
+        if not "analysisName" in _args:
+            raise Exception("You did not specify AnalysisName, and it was not automatically detected from ROOT file")
+
+        # Print the configuration
+        parameters = []
+        for name in ["analysisName", "searchMode", "dataEra", "optimizationMode", "systematicVariation"]:
+            if name in _args:
+                value = _args[name]
+                if value is not None:
+                    parameters.append("%s='%s'" % (name, value))
+        print "Creating DatasetManager with", ", ".join(parameters)
+
+        # Create manager and datasets
+        dataEra = _args.get("dataEra", None)
+        precursors = self._precursors[:]
+        if dataEra is not None:
+            def isInEra(eras, precursor):
+                if precursor.isMC() or precursor.isPseudo():
+                    return True
+                if isinstance(eras, basestring):
+                    eras = [eras]
+                for e in eras:
+                    if e in precursor.getName():
+                        return True
+                return False
+
+            try:
+                lst = _dataEras[dataEra]
+            except KeyError:
+                eras = _dataEras.keys()
+                eras.sort()
+                raise Exception("Unknown data era '%s', known are %s" % (dataEra, ", ".join(eras)))
+
+            precursors = filter(lambda p: isInEra(lst, p), precursors)
+        manager = DatasetManager()
+        for precursor in precursors:
+            try:
+                if precursor.isData():
+                    dset = Dataset(precursor.getName(), precursor.getFiles(), **_args)
+                else:
+                    dset = Dataset(precursor.getName(), precursor.getFiles(), availableSystematicVariationSources=self._systematicVariationSources, **_args)
+            except AnalysisNotFoundException, e:
+                msg = str(e)+"\n"
+                helpFound = False
+                for arg, attr in [("analysisName", "getAnalyses"),
+                                  ("searchMode", "getSearchModes"),
+                                  ("dataEra", "getMCDataEras"),
+                                  ("optimizationMode", "getOptimizationModes"),
+                                  ("systematicVariation", "getSystematicVariations")]:
+                    lst = getattr(self, attr)()
+                    if (arg not in _args or _args[arg] is None) and len(lst) > 1:
+                        msg += "You did not specify %s, while ROOT file contains %s\n" % (arg, ", ".join(lst))
+                        helpFound = True
+                    if arg in _args and _args[arg] is not None and len(lst) == 0:
+                        msg += "You specified %s, while ROOT file apparently has none of them\n" % arg
+                        helpFound = True
+                if not helpFound:
+                    raise e
+                raise Exception(msg)
+
+            manager.append(dset)
+
+        if len(self._baseDirectory) > 0:
+            manager._setBaseDirectory(self._baseDirectory)
+
+        return manager
+
+    def getDatasetPrecursors(self):
+        return self._precursors
+
+    def getDatasetNames(self):
+        return [d.getName() for d in self._precursors]
+
+    def getAnalyses(self):
+        return self._analyses
+
+    def getSearchModes(self):
+        return self._searchModes
+
+    def getMCDataEras(self):
+        return self._mcDataEras
+
+    def getDataDataEras(self):
+        return self._dataDataEras
+
+    ## Return MC data eras, or data data eras if MC data era list is empty
+    #
+    # This is probably the typical use case when user wants "just the
+    # list of available data eras".
+    def getDataEras(self):
+        if len(self._mcDataEras) > 0:
+            return self._mcDataEras
+        else:
+            return self._dataDataEras
+
+    def getOptimizationModes(self):
+        return self._optimizationModes
+
+    def getSystematicVariations(self):
+        return self._systematicVariations
+
+    def getSystematicVariationSources(self):
+        return self._systematicVariationSources
+
+    def printAnalyses(self):
+        print "Analyses (analysisName):"
+        for a in self._analyses:
+            print "  "+a
+        print
+
+        if len(self._searchModes) == 0:
+            print "No search modes"
+        else:
+            print "Search modes (searchMode):"
+            for s in self._searchModes:
+                print "  "+s
+        print
+        
+        if len(self._mcDataEras) == 0:
+            print "No data eras in MC"
+        else:
+            print "Data eras (in MC) (dataEra):"
+            for d in self._mcDataEras:
+                print "  "+d
+        print
+
+        if len(self._dataDataEras) == 0:
+            print "No data eras in data"
+        else:
+            print "Data eras (in data, the letters can be combined in almost any way) (dataEra):"
+            for d in self._dataDataEras:
+                print "  "+d
+        print
+
+        if len(self._optimizationModes) == 0:
+            print "No optimization modes"
+        else:
+            print "Optimization modes (optimizationMode):"
+            for o in self._optimizationModes:
+                print "  "+o
+        print
+
+        if len(self._systematicVariations) == 0:
+            print "No systematic variations"
+        else:
+            print "Systematic variations (systematicVariation):"
+            for s in self._systematicVariations:
+                print "  "+s
+        print
+
+    ## Close the ROOT files
+    def close(self):
+        for precursor in self._precursors:
+            precursor.close()
+
 ## Helper class to plug NtupleCache to the existing framework
 #
 # User should not construct an object by herself, but use
@@ -2255,9 +4183,11 @@ class NtupleCacheDrawer:
     #
     # \param ntupleCache   NtupleCache object
     # \param histoName     Name of the histogram to obtain
-    def __init__(self, ntupleCache, histoName):
+    # \param selectorName  Name of the selector
+    def __init__(self, ntupleCache, histoName, selectorName):
         self.ntupleCache = ntupleCache
         self.histoName = histoName
+        self.selectorName = selectorName
 
     ## "Draw"
     #
@@ -2266,7 +4196,7 @@ class NtupleCacheDrawer:
     # This method exploits the infrastucture we have for TreeDraw.
     def draw(self, dataset):
         self.ntupleCache.process(dataset)
-        return self.ntupleCache.getRootHisto(dataset, self.histoName)
+        return self.ntupleCache.getRootHisto(dataset, self.histoName, self.selectorName)
 
 ## Ntuple processing with C macro and caching the result histograms
 #
@@ -2276,15 +4206,19 @@ class NtupleCache:
     #
     # \param treeName       Path to the TTree inside a ROOT file
     # \param selector       Name of the selector class, should also correspond a .C file in \a test/ntuple
-    # \param selectorArgs   Optional arguments to the selector constructor
+    # \param selectorArgs   Optional arguments to the selector
+    #                       constructor, can be a list of arguments,
+    #                       or a function returning a list of
+    #                       arguments
     # \param process        Should the ntuple be processed? (if False, results are read from the cache file)
     # \param cacheFileName  Path to the cache file
     # \param maxEvents      Maximum number of events to process (-1 for all events)
     # \param printStatus    Print processing status information
+    # \param macros         Additional macro files to compile and load
     #
     # I would like to make \a process redundant, but so far I haven't
     # figured out a bullet-proof method for that.
-    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root", maxEvents=-1, printStatus=True):
+    def __init__(self, treeName, selector, selectorArgs=[], process=True, cacheFileName="histogramCache.root", maxEvents=-1, printStatus=True, macros=[]):
         self.treeName = treeName
         self.cacheFileName = cacheFileName
         self.selectorName = selector
@@ -2293,24 +4227,40 @@ class NtupleCache:
         self.maxEvents = maxEvents
         self.printStatus = printStatus
 
+        self.additionalSelectors = {}
+        self.datasetSelectorArgs = {}
+
         self.macrosLoaded = False
         self.processedDatasets = {}
 
-        base = os.path.join(os.environ["CMSSW_BASE"], "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "test", "ntuple")
         self.macros = [
-            os.path.join(base, "BaseSelector.C"),
-            os.path.join(base, "Branches.C"),
-            os.path.join(base, self.selectorName+".C")
+            "BaseSelector.C",
+            "Branches.C"
+            ] + macros + [
+            self.selectorName+".C"
             ]
-
         self.cacheFile = None
 
     ## Compile and load the macros
     def _loadMacros(self):
-        for m in self.macros:
-            ret = ROOT.gROOT.LoadMacro(m+"+")
+        base = os.path.join(aux.higgsAnalysisPath(), "HeavyChHiggsToTauNu", "test", "ntuple")
+        macros = [os.path.join(base, x) for x in self.macros]
+
+        for m in macros:
+            ret = ROOT.gROOT.LoadMacro(m+"+g")
             if ret != 0:
                 raise Exception("Failed to load "+m)
+
+    def addSelector(self, name, selector, selectorArgs):
+        self.additionalSelectors[name] = (selector, selectorArgs)
+        macro = selector+".C"
+        if not macro in self.macros:
+            self.macros.append(macro)
+
+    def setDatasetSelectorArgs(self, dictionary, selectorName=None):
+        if not selectorName in self.datasetSelectorArgs:
+            self.datasetSelectorArgs[selectorName] = {}
+        self.datasetSelectorArgs[selectorName].update(dictionary)
 
     # def _isMacroNewerThanCacheFile(self):
     #     latestMacroTime = max([os.path.getmtime(m) for m in self.macros])
@@ -2322,15 +4272,12 @@ class NtupleCache:
     ## Process selector for a dataset
     #
     # \param dataset  Dataset object
-    #
-    # Processes the self.treeName TTree from the rootFile.
     def process(self, dataset):
         #if not self.forceProcess and not self._isMacroNewerThanCacheFile():
         #    return
         if not self.doProcess:
             return
 
-        rootFile = dataset.getRootFile()
         datasetName = dataset.getName()
 
         pathDigest = hashlib.sha1(dataset.getBaseDirectory()).hexdigest() # I hope this is good-enough
@@ -2346,51 +4293,107 @@ class NtupleCache:
         if self.cacheFile == None:
             self.cacheFile = ROOT.TFile.Open(self.cacheFileName, "RECREATE")
             self.cacheFile.cd()
-            argsNamed = ROOT.TNamed("selectorArgs", str(self.selectorArgs))
-            argsNamed.Write()
 
-        directory = self.cacheFile.Get(pathDigest)
-        if directory == None:
-            directory = self.cacheFile.mkdir(pathDigest)
-            directory.cd()
+        rootDirectory = self.cacheFile.Get(pathDigest)
+        if rootDirectory == None:
+            rootDirectory = self.cacheFile.mkdir(pathDigest)
+            rootDirectory.cd()
             tmp = ROOT.TNamed("originalPath", dataset.getBaseDirectory())
             tmp.Write()
 
-        directory = directory.mkdir(datasetName)
+        # Create selector args
+        def getSelectorArgs(selectorName, selectorArgsObj):
+            ret = []
+            d = self.datasetSelectorArgs.get(selectorName, None)
+            if isinstance(selectorArgsObj, list):
+                ret = selectorArgsObj[:]
+                if d is not None and dataset.getName() in d:
+                    ret.extend(d[dataset.getName()])
+            else:
+                # assume we have an object making a keyword->positional mapping
+                sa = selectorArgsObj.clone()
+                if d is not None and dataset.getName() in d:
+                    sa.update(d[dataset.getName()])
+                ret = sa.createArgs()
+            return ret
 
-        tree = rootFile.Get(self.treeName)
-        if not tree:
-            raise Exception("TTree '%s' not found from file %s" % (self.treeName, rootFile.GetName()))
+        selectorArgs = getSelectorArgs(None, self.selectorArgs)
+        (tree, realTreeName) = dataset.createRootChain(self.treeName)
 
         N = tree.GetEntries()
         useMaxEvents = False
         if self.maxEvents >= 0 and N > self.maxEvents:
             useMaxEvents = True
             N = self.maxEvents
-        selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*self.selectorArgs))
-        selector.setOutput(directory)
+
+        def getSelectorDir(name_):
+            d = rootDirectory.Get(name_)
+            if d == None:
+                d = rootDirectory.mkdir(name_)
+            return d
+            
+        directory = getSelectorDir("mainSelector").mkdir(datasetName)
+        directory.cd()
+        argsNamed = ROOT.TNamed("selectorArgs", str(selectorArgs))
+        argsNamed.Write()
+
+        selector = ROOT.SelectorImp(N, dataset.isMC(), getattr(ROOT, self.selectorName)(*selectorArgs), directory)
         selector.setPrintStatus(self.printStatus)
+        directories = [directory]
+
+        for name, (selecName, selecArgs) in self.additionalSelectors.iteritems():
+            directory = getSelectorDir(name).mkdir(datasetName)
+            directory.cd()
+            argsNamed = ROOT.TNamed("selectorArgs", str(selectorArgs))
+            argsNamed.Write()
+            selectorArgs = getSelectorArgs(name, selecArgs)
+            selector.addSelector(name, getattr(ROOT, selecName)(*selectorArgs), directory)
+            directories.append(directory)
 
         print "Processing dataset", datasetName
         
+        # Setup cache
+        useCache = True
+        if useCache:
+            tree.SetCacheSize(1024*1024) # 10 MB
+            tree.SetCacheLearnEntries(100);
+
+        readBytesStart = ROOT.TFile.GetFileBytesRead()
+        readCallsStart = ROOT.TFile.GetFileReadCalls()
+        timeStart = time.time()
+        clockStart = time.clock()
         if useMaxEvents:
+            if useCache:
+                tree.SetCacheEntryRange(0, N)
             tree.Process(selector, "", N)
         else:
             tree.Process(selector)
-        directory.Write()
+        timeStop = time.time()
+        clockStop = time.clock()
+        readCallsStop = ROOT.TFile.GetFileReadCalls()
+        readBytesStop = ROOT.TFile.GetFileBytesRead()
+        cpuTime = clockStop-clockStart
+        realTime = timeStop-timeStart
+        readMbytes = float(readBytesStop-readBytesStart)/1024/1024
+        print "Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB (%d calls), read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, readCallsStop-readCallsStart, readMbytes/realTime)
+        for d in directories:
+            d.Write()
 
     ## Get a histogram from the cache file
     #
     # \param Datase        Dataset object for which histogram is to be obtained
-    # \apram histoName     Histogram name
-    def getRootHisto(self, dataset, histoName):
+    # \param histoName     Histogram name
+    # \param selectorName  Selector name
+    def getRootHisto(self, dataset, histoName, selectorName):
         if self.cacheFile == None:
             if not os.path.exists(self.cacheFileName):
-                raise Exception("Assert: for some reason the cache file %s does not exist yet..." % self.cacheFileName)
+                raise Exception("Assert: for some reason the cache file %s does not exist yet. Did you set 'process=True' in the constructor of NtupleCache?" % self.cacheFileName)
             self.cacheFile = ROOT.TFile.Open(self.cacheFileName)
 
-        rootFile = dataset.getRootFile()
-        path = "%s/%s/%s" % (hashlib.sha1(dataset.getBaseDirectory()).hexdigest(), dataset.getName(), histoName)
+        if selectorName is None:
+            selectorName = "mainSelector"
+
+        path = "%s/%s/%s/%s" % (hashlib.sha1(dataset.getBaseDirectory()).hexdigest(), selectorName, dataset.getName(), histoName)
         h = self.cacheFile.Get(path)
         if not h:
             raise Exception("Histogram '%s' not found from %s" % (path, self.cacheFile.GetName()))
@@ -2399,5 +4402,50 @@ class NtupleCache:
     ## Create NtupleCacheDrawer for Dataset.getDatasetRootHisto()
     #
     # \param histoName   Histogram name to obtain
-    def histogram(self, histoName):
-        return NtupleCacheDrawer(self, histoName)
+    # \param selectorName  Name of selector from which to read the histogram (None for the main selector)
+    def histogram(self, histoName, selectorName=None):
+        return NtupleCacheDrawer(self, histoName, selectorName)
+
+
+class SelectorArgs:
+    def __init__(self, optionsDefaultValues, **kwargs):
+        self.optionsDefaultValues = optionsDefaultValues
+
+        args = {}
+        args.update(kwargs)
+        for option, defaultValue in self.optionsDefaultValues:
+            value = None
+            if option in args:
+                value = args[option]
+                del args[option]
+            setattr(self, option, value)
+
+        # Any remaining argument is an error
+        if len(args) >= 1:
+            raise Exception("Incorrect arguments for SelectorArgs.__init__(): %s" % ", ".join(args.keys()))
+
+    def clone(self, **kwargs):
+        c = copy.deepcopy(self)
+        c.set(**kwargs)
+        return c
+
+    def set(self, **kwargs):
+        for key, value in kwargs.iteritems():
+            if not hasattr(self, key):
+                raise Exception("This SelectorArgs does not have property %s" % key)
+            setattr(self, key, value)
+
+    def update(self, selectorArgs):
+        for a, dv in self.optionsDefaultValues:
+            val = getattr(selectorArgs, a)
+            if val is not None:
+                setattr(self, a, val)
+
+    def createArgs(self):
+        args = []
+        for option, defaultValue in self.optionsDefaultValues:
+            value = getattr(self, option)
+            if value is None:
+                value = defaultValue
+            args.append(value)
+        return args

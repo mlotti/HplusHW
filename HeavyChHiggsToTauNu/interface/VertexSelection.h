@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_VertexSelection_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_VertexSelection_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
+
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -16,35 +18,48 @@ namespace HPlus {
   class EventCounter;
   class HistoWrapper;
 
-  class VertexSelection {
+  class VertexSelection: public BaseSelection {
   public:
     class Data {
     public:
-      Data(const VertexSelection *vertexSelection, bool passedEvent);
+      Data();
       ~Data();
 
-      bool passedEvent() const { return fPassedEvent; }
-      const edm::Ptr<reco::Vertex>& getSelectedVertex() const { return fVertexSelection->fSelectedVertex; }
+      const bool passedEvent() const { return fPassedEvent; }
+      const edm::Ptr<reco::Vertex>& getSelectedVertex() const { return fSelectedVertex; }
+      size_t getNumberOfAllVertices() const { return fNumberOfAllVertices; }
+      double getTrackSumPt() const { return fSumPt; }
+
+      friend class VertexSelection;
 
     private:
-      const VertexSelection *fVertexSelection;
-      const bool fPassedEvent;
+      bool fPassedEvent;
+      edm::Ptr<reco::Vertex> fSelectedVertex;
+      double fSumPt;
+      size_t fNumberOfAllVertices;
     };
 
     VertexSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~VertexSelection();
 
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
-    const edm::InputTag getSrc() const {
-      return fSrc;
+    const edm::InputTag getSelectedSrc() const {
+      return fSelectedSrc;
+    }
+    const edm::InputTag getAllSrc() const {
+      return fAllSrc;
     }
 
   private:
-    edm::InputTag fSrc;
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    
+    edm::InputTag fSelectedSrc;
+    edm::InputTag fAllSrc;
+    edm::InputTag fSumPtSrc;
     bool fEnabled;
-
-    edm::Ptr<reco::Vertex> fSelectedVertex;
   };
 }
 

@@ -23,23 +23,24 @@ class HPlusMETPtrSelectorFilter: public edm::EDFilter {
 
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
-  HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
   HPlus::HistoWrapper histoWrapper;
+  HPlus::EventCounter eventCounter;
   HPlus::METSelection fMETSelection;
+  edm::InputTag fVertexSrc;
   edm::InputTag fTauSrc;
   edm::InputTag fJetSrc;
 };
 
 HPlusMETPtrSelectorFilter::HPlusMETPtrSelectorFilter(const edm::ParameterSet& iConfig):
-  eventCounter(iConfig),
   eventWeight(iConfig),
-  histoWrapper(eventWeight, "Debug"),
-  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, histoWrapper, "MET"),
+  histoWrapper(eventWeight, iConfig.getUntrackedParameter<std::string>("histogramAmbientLevel")),
+  eventCounter(iConfig, eventWeight, histoWrapper),
+  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, histoWrapper, "MET", iConfig.getUntrackedParameter<std::string>("tauIsolationDiscriminator")),
+  fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
   fJetSrc(iConfig.getUntrackedParameter<edm::InputTag>("jetSrc"))
 {
-  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusMETPtrSelectorFilter::~HPlusMETPtrSelectorFilter() {}
 void HPlusMETPtrSelectorFilter::beginJob() {}
@@ -50,6 +51,11 @@ bool HPlusMETPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock,
 }
 
 bool HPlusMETPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  edm::Handle<edm::View<reco::Vertex> > hvert;
+  iEvent.getByLabel(fVertexSrc, hvert);
+  if(hvert->empty())
+    throw cms::Exception("LogicError") << "Vertex collection " << fVertexSrc.encode() << " is empty!" << std::endl;
+
   edm::Handle<edm::View<pat::Tau> > htaus;
   iEvent.getByLabel(fTauSrc, htaus);
   if(htaus->size() == 0)
@@ -58,7 +64,7 @@ bool HPlusMETPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
   edm::Handle<edm::View<pat::Jet> > hjets;
   iEvent.getByLabel(fJetSrc, hjets);
 
-  HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, htaus->ptrAt(0), hjets->ptrVector());
+  HPlus::METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup, static_cast<int>(hvert->ptrVector().size()), htaus->ptrAt(0), hjets->ptrVector());
   if(!metData.passedEvent()) return false;
   return true;
 }

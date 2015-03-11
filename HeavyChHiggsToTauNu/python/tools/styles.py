@@ -20,6 +20,13 @@ class StyleBase:
     def __call__(self, h):
         self.apply(h.getRootHisto())
 
+        gr = h.getSystematicUncertaintyGraph()
+        if gr is not None:
+            self.applyUncertainty(gr)
+
+    def applyUncertainty(self, gr):
+        pass
+
 ## Basic style (marker style, marker and line color)
 class Style(StyleBase):
     ## Constructor
@@ -41,6 +48,9 @@ class Style(StyleBase):
         h.SetMarkerSize(1.2)
 	h.SetFillColor(0)
 
+    def clone(self):
+        return Style(self.marker, self.color)
+
 ## Compound style
 #
 # Applies are contained styles
@@ -55,12 +65,20 @@ class StyleCompound(StyleBase):
     def append(self, style):
         self.styles.append(style)
 
+    ## Extend style objects
+    def extend(self, styles):
+        self.styles.extend(styles)
+
     ## Apply the style
     #
     # \param h ROOT object
     def apply(self, h):
         for s in self.styles:
             s.apply(h)
+
+    def applyUncertainty(self, gr):
+        for s in self.styles:
+            s.applyUncertainty(gr)
 
     # Clone the compound style
     def clone(self):
@@ -152,10 +170,11 @@ class StyleError(StyleBase):
     # \param color      Fill color
     # \param style      Fill style
     # \param linecolor  Line color
-    def __init__(self, color, style=3004, linecolor=None):
+    def __init__(self, color, style=3004, linecolor=None, styleSyst=3005):
         self.color = color
         self.style = style
         self.linecolor = linecolor
+        self.styleSyst = styleSyst
 
     ## Apply the style
     #
@@ -171,17 +190,27 @@ class StyleError(StyleBase):
             h.SetLineWidth(0)
             h.SetLineColor(ROOT.kWhite)
 
+    def applyUncertainty(self, gr):
+        self.apply(gr)
+        gr.SetFillStyle(self.styleSyst)
+        
+
 dataStyle = StyleCompound([Style(ROOT.kFullCircle, ROOT.kBlack)])
 dataMcStyle = dataStyle.clone()
-errorStyle = StyleCompound([StyleError(ROOT.kBlack, 3354)])
+errorStyle = StyleCompound([StyleError(ROOT.kBlack, 3345, styleSyst=3354)])
 errorStyle2 = StyleCompound([StyleError(ROOT.kGray+2, 3354)])
 errorStyle3 = StyleCompound([StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)])
+errorRatioStatStyle = StyleCompound([StyleError(ROOT.kGray, 1001, linecolor=ROOT.kGray)])
+errorRatioSystStyle = StyleCompound([StyleError(ROOT.kGray+1, 1001, linecolor=ROOT.kGray+1)])
+
+ratioStyle = dataStyle.clone()
+ratioLineStyle = StyleCompound([StyleLine(lineColor=ROOT.kRed, lineWidth=2, lineStyle=3)])
 
 #mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
 mcStyle = StyleCompound([Style(ROOT.kFullSquare, ROOT.kRed+1)])
 mcStyle2 = StyleCompound([Style(33, ROOT.kBlue-4)])
-signalStyle = StyleCompound([Style(34, ROOT.kPink-9), 
-                             StyleLine(lineStyle=ROOT.kDashed, lineWidth=6)
+signalStyle = StyleCompound([Style(34, ROOT.kAzure+9), 
+                             StyleLine(lineStyle=ROOT.kSolid, lineWidth=4)
                              ])
 signalHHStyle = StyleCompound([Style(34, ROOT.kRed-8), 
                              StyleLine(lineStyle=8, lineWidth=6)
@@ -210,6 +239,9 @@ signal200Style = signalStyle.clone()
 signal220Style = signalStyle.clone()
 signal250Style = signalStyle.clone()
 signal300Style = signalStyle.clone()
+signal400Style = signalStyle.clone()
+signal500Style = signalStyle.clone()
+signal600Style = signalStyle.clone()
 
 qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
 ewkStyle = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)
@@ -267,9 +299,6 @@ def getQCDStyle():
 
 def getSignalStyle():
     return signalStyle
-
-def getErrorStyle():
-    return errorStyle
 
 def getErrorStyle():
     return errorStyle

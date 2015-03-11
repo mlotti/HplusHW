@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/Utilities/interface/Exception.h"
@@ -15,10 +16,6 @@
 #include<algorithm>
 #include<functional>
 #include<memory>
-
-namespace {
-  static const double defaultWeight = 1.0;
-}
 
 namespace HPlus {
   EventCounter::Counter::Counter(const std::string& n): name(n) {}
@@ -37,10 +34,12 @@ namespace HPlus {
     return index;
   }
 
-  EventCounter::EventCounter(const edm::ParameterSet& iConfig):
+  EventCounter::EventCounter(const edm::ParameterSet& iConfig, const EventWeight& eventWeight, HistoWrapper& histoWrapper, HistoWrapper::HistoLevel subCounterLevel):
+    fEventWeight(eventWeight),
+    fHistoWrapper(histoWrapper),
     label(iConfig.getParameter<std::string>("@module_label")),
-    eventWeightPointer(&defaultWeight),
-    finalized(false)
+    fSubCounterLevel(subCounterLevel),
+    fIsEnabled(true)
   {
     allCounters_.push_back(Counter("counter")); // ensure main counter has always index 0
 
@@ -51,15 +50,13 @@ namespace HPlus {
       allCounters_[0].insert(inputCountTags_[i].encode());
     }
 
+    fIsEnabled = pset.getUntrackedParameter<bool>("enabled", fIsEnabled);
     printMainCounter = pset.getUntrackedParameter<bool>("printMainCounter", false);
     printSubCounters = pset.getUntrackedParameter<bool>("printSubCounters", false);
   }
   EventCounter::~EventCounter() {}
 
   Count EventCounter::addCounter(const std::string& name) {
-    if(finalized)
-      throw cms::Exception("LogicError") << "Tried to add counter '" << name << "', but EventCounter::produces has already been called!" << std::endl;
-
     size_t counterIndex = findOrInsertCounter("counter");
     if(allCounters_[counterIndex].contains(name))
       throw cms::Exception("LogicError") << "Tried to add count '" << name << "' to main counter, but it already exists!" << std::endl;
@@ -70,9 +67,6 @@ namespace HPlus {
   }
 
   Count EventCounter::addSubCounter(const std::string& base, const std::string& name) {
-    if(finalized)
-      throw cms::Exception("LogicError") << "Tried to add subcounter '" << name << "' under '" << base << "', but EventCounter::produces has already been called!" << std::endl;
-
     if(base == "counter")
       throw cms::Exception("LogicError") << "Tried to add subcounter '" << name << "' under '" << base << "', but 'counter' is a reserved main counter name";
 
@@ -87,9 +81,12 @@ namespace HPlus {
   }
 
   void EventCounter::incrementCount(size_t counterIndex, size_t countIndex, int value) {
+    if(!fIsEnabled)
+      return;
+
     Counter& counter = allCounters_.at(counterIndex);
     counter.values.at(countIndex) += value;
-    double dval = value * (*eventWeightPointer);
+    double dval = value * fEventWeight.getWeight();
     counter.weights.at(countIndex) += dval;
     counter.weightsSquared.at(countIndex) += dval*dval;
   }
@@ -104,6 +101,9 @@ namespace HPlus {
   }
 
   void EventCounter::endJob() {
+    if(!fIsEnabled)
+      return;
+
     edm::Service<TFileService> fs;
     if(!fs.isAvailable())
       return;
@@ -114,9 +114,18 @@ namespace HPlus {
     // Write contents to histograms
     std::string cat("EventCounts");
     for(std::vector<Counter>::const_iterator iCounter = allCounters_.begin(); iCounter != allCounters_.end(); ++iCounter) {
+      // Main counter has highest level, others are informative (i.e. are not needed for datacards)
+      HistoWrapper::HistoLevel level = fSubCounterLevel;
+      if(iCounter == allCounters_.begin())
+        level = HistoWrapper::kSystematics;
+
       size_t ncounts = iCounter->labels.size();
-      TH1F *counts = counterDir.make<TH1F>(iCounter->name.c_str(), iCounter->name.c_str(), ncounts, 0, ncounts);
-      counts->Sumw2();
+      WrappedTH1* counts = fHistoWrapper.makeTH<TH1F>(level, counterDir, iCounter->name.c_str(), iCounter->name.c_str(), ncounts, 0, ncounts);
+      // TH1 is null if histogram is below the current threshold
+      // First counter has the highest threshold, therefore break
+      if(!counts->getHisto())
+        break;
+
       for(size_t i=0; i<ncounts; ++i) {
         size_t bin = i+1;
         counts->SetBinContent(bin, iCounter->values[i]);
@@ -135,8 +144,7 @@ namespace HPlus {
         }
       }
 
-      counts = weightedDir.make<TH1F>(iCounter->name.c_str(), iCounter->name.c_str(), ncounts, 0, ncounts);
-      counts->Sumw2();
+      counts = fHistoWrapper.makeTH<TH1F>(level, weightedDir, iCounter->name.c_str(), iCounter->name.c_str(), ncounts, 0, ncounts);
       for(size_t i=0; i<ncounts; ++i) {
         size_t bin = i+1;
         counts->SetBinContent(bin, iCounter->weights[i]);

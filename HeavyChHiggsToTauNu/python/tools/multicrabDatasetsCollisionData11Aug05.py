@@ -25,11 +25,22 @@ datasets = {
                 "luminosity": 370.826000,
                 "number_of_jobs": 1,
             },
+            "pattuple_v18_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_05Aug2011_v1_AOD_170722_pattuple_v18_2b-b181b3cffb39e031e0e03a7bce397555/USER",
+                "number_of_jobs": 2,
+            },
+            "pattuple_v18_3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_05Aug2011_v1_AOD_170722_pattuple_v18_3-79f359e64890a90caf2b7abf9c65a694/USER",
+                "number_of_jobs": 2,
+                "args": {"doTauHLTMatchingInAnalysis": "1"},
+            },
             "pattuple_v19": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_05Aug2011_v1_AOD_170722_pattuple_v19-4c1de2b1b331a58336df02ae39c0b25d/USER",
                 "number_of_jobs": 1,
-            },
+            }
         }
     },
 

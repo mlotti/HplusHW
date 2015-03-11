@@ -2,13 +2,14 @@
 
 import subprocess
 import shutil
+import StringIO
 import time
 import sys
 import os
 import re
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabWorkflowsTools as multicrabWorkflowsTools
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 order_done = ["Retrieved", "Done"]
 order_run = ["Running", "Scheduled", "Ready", "Submitted", "Created"]
@@ -45,13 +46,22 @@ def main(opts):
         global status_format
         status_format = status_format.replace("18s", "40s")
 
+    if opts.save:
+        out = open(opts.saveFile, "w")
+
     for task in taskDirs:
         if not os.path.exists(task):
             if opts.showMissing:
-                print "%s: Task directory missing" % task
+                print >>sys.stderr, "%s: Task directory missing" % task
             continue
-        
-        jobs = multicrab.crabStatusToJobs(task)
+
+        try:
+            jobs = multicrab.crabStatusToJobs(task, opts.printCrab)
+        except Exception:
+            if not opts.allowFails:
+                raise
+            print "%s: crab -status failed" % task
+            continue
 
         jobSummaries = {}
         njobs = 0
@@ -59,7 +69,7 @@ def main(opts):
             hosts = {}
             for job in item:
                 if job.host != None:
-                    multicrabWorkflowsTools._addToDictList(hosts, job.host, job)
+                    aux.addToDictList(hosts, job.host, job)
             if opts.byHost:
                 for host, joblist in hosts.iteritems():
                     jobSummaries[key+" "+host] = JobSummary(joblist, [host])
@@ -95,7 +105,10 @@ def main(opts):
         line += line_end
         if line[-1] == ",":
             line = line[0:-1]
-        
+
+        if opts.save:
+            out.write(line)
+            out.write("\n")
         print line
 
         # Infer the jobs to be resubmitted
@@ -109,13 +122,16 @@ def main(opts):
             pretty = multicrab.prettyJobnums([x[0] for x in failed])
             resubmitJobs[task] = pretty
             for jobId, jobCode in failed:
-                multicrabWorkflowsTools._addToDictList(failedJobs, jobCode, "%s/res/CMSSW_%d.stdout" % (task, jobId))
+                aux.addToDictList(failedJobs, jobCode, "%s/res/CMSSW_%d.stdout" % (task, jobId))
+
+    summary = StringIO.StringIO()
     
-    print "----------------------------------------"
+    summary.write("----------------------------------------\n")
     print "Summary for %d task(s), total %d job(s):" % (len(taskDirs), allJobs)
     for s in order_done:
         if s in stats:
-            print status_format % (s+":", stats[s])
+            summary.write(status_format % (s+":", stats[s]))
+            summary.write("\n")
             del stats[s]
     b = []
     for s in order_run:
@@ -125,31 +141,37 @@ def main(opts):
     keys = stats.keys()
     keys.sort()
     for key in keys:
-        print status_format % (key+":", stats[key])
+        summary.write(status_format % (key+":", stats[key]))
+        summary.write("\n")
     for line in b:
-        print line
+        summary.write(line)
+        summary.write("\n")
 
 
-    print "----------------------------------------"
+    summary.write("----------------------------------------\n")
     if len(resubmitJobs) == 0:
-        print "No failed/aborted jobs to resubmit"
+        summary.write("No failed/aborted jobs to resubmit\n")
     else:
-        print "Following jobs failed/aborted, and can be resubmitted"
-        print
+        summary.write("Following jobs failed/aborted, and can be resubmitted\n\n")
         for task in taskDirs:
             if task in resubmitJobs:
-                print "crab -c %s -resubmit %s" % (task, resubmitJobs[task])
-        print
+                summary.write("crab -c %s -resubmit %s\n" % (task, resubmitJobs[task]))
+        summary.write("\n")
 
     if opts.failedLogs:
-        print "----------------------------------------"
-        print "Log files of failed jobs"
+        summary.write("----------------------------------------\n")
+        summary.write("Log files of failed jobs\n")
         keys = failedJobs.keys()
         keys.sort()
         for code in keys:
-            print
-            print "Job exit code %d:" % code
-            print "\n".join(failedJobs[code])
+            summary.write("\nJob exit code %d:\n" % code)
+            summary.write("\n".join(failedJobs[code]))
+            summary.write("\n")
+
+    if opts.save:
+        out.write(summary.getvalue())
+        out.close()
+    print summary.getvalue()
 
     return 0
 
@@ -170,6 +192,14 @@ if __name__ == "__main__":
                       help="Shorthand for '--showJobs --showHosts")
     parser.add_option("--byHost", dest="byHost", action="store_true", default=False,
                       help="With --showHosts/-l, categorize jobs by host also")
+    parser.add_option("--save", dest="save", action="store_true", default=False,
+                      help="Save the output to a file, specified by --saveFile") 
+    parser.add_option("--saveFile", dest="saveFile", default="status.txt",
+                      help="File where the output is saved with --save (default: 'status.txt')")
+    parser.add_option("--printCrab", dest="printCrab", action="store_true", default=False,
+                      help="Print CRAB output")
+    parser.add_option("--allowFails", dest="allowFails", default=False, action="store_true",
+                      help="Continue submissions even if crab -status fails for any reason")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
 

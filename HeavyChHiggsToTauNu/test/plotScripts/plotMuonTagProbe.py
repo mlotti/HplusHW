@@ -162,10 +162,9 @@ def getEfficiency(postfix, style, lumi=None):
         plot.draw()
         if updatePaletteStyle:
             histograms.updatePaletteStyle(p.histoMgr.getHistos()[0].getRootHisto())
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
         if lumi != None:
-            histograms.addLuminosityText(None, None, lumi)
+            plot.setLuminosity(lumi)
+        plot.addStandardTexts()
         if addText:
             l.DrawLatex(0.2, 0.4, trig)
             l.DrawLatex(0.2, 0.35, runs)

@@ -14,13 +14,17 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace HPlus {
-  TriggerSelection::Data::Data(const TriggerSelection *triggerSelection, const TriggerPath *triggerPath, bool passedEvent):
-    fTriggerSelection(triggerSelection), fTriggerPath(triggerPath), fPassedEvent(passedEvent) {}
+  TriggerSelection::Data::Data():
+    fHasTriggerPath(false),
+    fPassedEvent(false) {}
   TriggerSelection::Data::~Data() {}
   
   TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper):
+    BaseSelection(eventCounter, histoWrapper),
     fTriggerSrc(iConfig.getUntrackedParameter<edm::InputTag>("triggerSrc")),
     fPatSrc(iConfig.getUntrackedParameter<edm::InputTag>("patSrc")),
+    fL1MetCollection(iConfig.getUntrackedParameter<std::string>("l1MetCollection")),
+    fL1MetCut(iConfig.getUntrackedParameter<double>("l1MetCut")),
     fMetCut(iConfig.getUntrackedParameter<double>("hltMetCut")),
     fTriggerCaloMet(iConfig.getUntrackedParameter<edm::ParameterSet>("caloMetSelection"), eventCounter, histoWrapper),
     fTriggerAllCount(eventCounter.addSubCounter("Trigger", "All events")),
@@ -28,6 +32,8 @@ namespace HPlus {
     fTriggerBitCount(eventCounter.addSubCounter("Trigger","Bit passed")), 
     fTriggerCaloMetCount(eventCounter.addSubCounter("Trigger","CaloMET cut passed")), 
     fTriggerCount(eventCounter.addSubCounter("Trigger","Passed")),
+    fTriggerDebugAllCount(eventCounter.addSubCounter("Trigger debug", "All events")),
+    fTriggerL1MetPassedCount(eventCounter.addSubCounter("Trigger debug", "L1 MET passed")),
     fTriggerHltMetExistsCount(eventCounter.addSubCounter("Trigger debug", "HLT MET object exists")),
     fTriggerHltMetPassedCount(eventCounter.addSubCounter("Trigger debug", "HLT MET passed")),
     fThrowIfNoMet(iConfig.getUntrackedParameter<bool>("throwIfNoMet", true))
@@ -66,36 +72,59 @@ namespace HPlus {
     for(std::vector<TriggerPath* >::const_iterator i = triggerPaths.begin(); i != triggerPaths.end(); ++i) delete *i;
   }
 
+  TriggerSelection::Data TriggerSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    ensureSilentAnalyzeAllowed(iEvent);
+
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup);
+  }
+
   TriggerSelection::Data TriggerSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    bool passEvent = true;
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup);
+  }
+
+  TriggerSelection::Data TriggerSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    Data output;
     TriggerPath* returnPath = NULL;
     increment(fTriggerAllCount);
 
     hControlSelectionType->Fill(fTriggerSelectionType);
     if (fTriggerSelectionType == kTriggerSelectionByTriggerBit) {
-      passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
+      output.fPassedEvent = passedTriggerBit(iEvent, iSetup, returnPath, output);
+    }
+    if(returnPath) {
+      output.fHasTriggerPath = true;
+      output.fHltTaus = returnPath->getTauObjects();
     }
 
     // Possible caloMET cut should not be controlled by "disabled" bit
-    if(fTriggerSelectionType == kTriggerSelectionDisabled)
-      passEvent = true;
-    
-    // Calo MET cut; needed for non QCD1, disabled for others
-    if(passEvent) {
-      increment(fTriggerBitCount);
-      TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
-      passEvent = ret.passedEvent();
+    if(fTriggerSelectionType == kTriggerSelectionDisabled) {
+      output.fPassedEvent = true;
     }
 
-    if(passEvent) {
+    // Calo MET cut; needed for non QCD1, disabled for others
+    if(output.fPassedEvent) {
+      increment(fTriggerBitCount);
+      TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
+      output.fPassedEvent = ret.passedEvent();
+    }
+
+    if(output.fPassedEvent) {
       increment(fTriggerCaloMetCount);
     }
-    
-    if(passEvent) increment(fTriggerCount);
-    return Data(this, returnPath, passEvent);
+
+    if(output.fPassedEvent) 
+      increment(fTriggerCount);
+
+    return output;
   }
   
-  bool TriggerSelection::passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath) {
+  bool TriggerSelection::passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath, TriggerSelection::Data& output) {
     bool passEvent = false;
     /*
     edm::Handle<edm::TriggerResults> htrigger;
@@ -126,7 +155,7 @@ namespace HPlus {
     if(passEvent)
       increment(fTriggerPathCount);
 
-    // Get HLT MET object
+    // Get L1/HLT MET object
     // but only if the trigger has been passed (otherwise it makes no sense to emulate MET)
     if(passEvent) {
       // Print all trigger object types of all triggers
@@ -143,9 +172,50 @@ namespace HPlus {
         std::cout << std::endl;
       }
       */
+
+      increment(fTriggerDebugAllCount);
+      // L1 MET
+      if(fL1MetCut >= 0) {
+        pat::TriggerObjectRefVector l1Mets = trigger->objects(trigger::TriggerL1ETM);
+        bool found = false;
+        for(size_t i=0 ;i<l1Mets.size(); ++i) {
+          if(l1Mets[i]->collection() == fL1MetCollection) {
+            found = true;
+            output.fL1Met = l1Mets[i];
+            break;
+          }
+        }
+        if(!found) {
+          std::stringstream ss;
+          for(size_t i=0; i<l1Mets.size(); ++i) {
+            if(i != 0)
+              ss << ", ";
+            ss << l1Mets[i]->collection();
+          }
+          throw cms::Exception("LogicError") << "TriggerSelection: did not find L1_ETM object with collection name " << fL1MetCollection << ". Available objects " << ss.str();
+        }
+        if(output.fL1Met->et() < fL1MetCut)
+          passEvent = false;
+      }
+      if(!passEvent) return passEvent;
+      increment(fTriggerL1MetPassedCount);
+
+
+      // HLT MET
+      if(fMetCut < 0) return passEvent;
+
       pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);
+      /*
+      for(size_t i=0; i<hltMets.size(); ++i) {
+        std::cout << "HLT MET " << i
+                  << " et " << hltMets[i]->et()
+                  << " collection " << hltMets[i]->collection()
+                  << std::endl;
+      }
+      */
       if(hltMets.size() == 0) {
-        fHltMet = pat::TriggerObjectRef();
+        //std::cout << "HLT MET size is 0!" << std::endl;
+        output.fHltMet = pat::TriggerObjectRef();
         if(fMetCut >= 0)
           passEvent = false;
       }
@@ -153,7 +223,7 @@ namespace HPlus {
         if(hltMets.size() > 1) {
           pat::TriggerObjectRefVector selectedHltMet;
           for(size_t i=0; i<hltMets.size(); ++i) {
-            if(trigger->objectInPath(hltMets[i],  returnPath->getPathName())) {
+            if(trigger->objectInPath(hltMets[i],  returnPath->getPathName(), false)) { // for MET we don't require that the object was used in the last filter
               /*
               std::cout << "HLT MET " << i
                         << " et " << hltMets[i]->et()
@@ -164,6 +234,16 @@ namespace HPlus {
               break;
             }
           }
+          ///// HACK HACK HACK
+          if(selectedHltMet.size() == 0) {
+            for(size_t i=0; i<hltMets.size(); ++i) {
+              if(hltMets[i]->collection() == "hltMet::HLT") {
+                selectedHltMet.push_back(hltMets[i]);
+                break;
+              }
+            }
+          }
+          ////// end of hack
           if(selectedHltMet.size() == 0) {
             if(fThrowIfNoMet) {
               std::stringstream ss;
@@ -183,16 +263,16 @@ namespace HPlus {
         }
         
         increment(fTriggerHltMetExistsCount);
-        fHltMet = hltMets[0];
-        hHltMetBeforeTrigger->Fill(fHltMet->et());
+        output.fHltMet = hltMets[0];
+        hHltMetBeforeTrigger->Fill(output.fHltMet->et());
         if (passEvent)
-          hHltMetAfterTrigger->Fill(fHltMet->et());
+          hHltMetAfterTrigger->Fill(output.fHltMet->et());
 
         // Cut on HLT MET
-        if(fHltMet->et() <= fMetCut) {
+        if(output.fHltMet->et() <= fMetCut) {
           passEvent = false;
         } else if (passEvent) {
-          hHltMetSelected->Fill(fHltMet->et());
+          hHltMetSelected->Fill(output.fHltMet->et());
         }
         if(passEvent)
           increment(fTriggerHltMetPassedCount);
@@ -203,7 +283,8 @@ namespace HPlus {
   
   TriggerSelection::TriggerPath::TriggerPath(const std::string& path, EventCounter& eventCounter):
     fPath(path),
-    fTriggerCount(eventCounter.addSubCounter("Trigger paths","Triggered ("+fPath+")"))
+    fTriggerPathFoundCount(eventCounter.addSubCounter("Trigger paths","Path found ("+fPath+")")),
+    fTriggerPathAcceptedCount(eventCounter.addSubCounter("Trigger paths","Path accepted ("+fPath+")"))
   {}
 
   TriggerSelection::TriggerPath::~TriggerPath() {}
@@ -213,8 +294,11 @@ namespace HPlus {
     fMets.clear();
 
     const pat::TriggerPath *path = trigger.path(fPath);
-    if(!path || !path->wasAccept())
-      return false;
+    if(!path) return false;
+    increment(fTriggerPathFoundCount);
+
+    if(!path->wasAccept()) return false;
+    increment(fTriggerPathAcceptedCount);
 
     pat::TriggerFilterRefVector filters = trigger.pathFilters(fPath, false);
     if(filters.size() == 0)
@@ -227,7 +311,78 @@ namespace HPlus {
         fMets.push_back(*iObj);
     }
 
+    /*
+    objs = trigger.objectRefs();
+    for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+      std::cout << "Object " << (iObj-objs.begin()) << " " << (*iObj)->collection() << std::endl;
+    }
+    for(pat::TriggerFilterRefVector::const_iterator iFilter = filters.begin(); iFilter != filters.end(); ++iFilter) {
+      std::cout << "Filter " << (*iFilter)->label() << " object keys ";
+      std::vector<unsigned> objectKeys = (*iFilter)->objectKeys();
+      for(size_t i=0; i<objectKeys.size(); ++i) {
+        std::cout << objectKeys[i] << " ";
+      }
+      std::cout << std::endl;
+
+      pat::TriggerObjectRefVector objs = trigger.filterObjects((*iFilter)->label());
+      for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+        std::cout << "  object " << (*iObj)->collection() << std::endl;
+      }
+    }
+    */
+
+    //std::cout << "============================================================" << std::endl;
+    /*
+    objs = trigger.objectRefs();
+    for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+      std::cout << "Object " << (iObj-objs.begin()) << " " << (*iObj)->collection() << std::endl;
+    }
+    */
+    /*
+    for(pat::TriggerFilterRefVector::const_iterator iFilter = filters.begin(); iFilter != filters.end(); ++iFilter) {
+      std::cout << "Filter " << (*iFilter)->label() << " object keys ";
+      std::vector<unsigned> objectKeys = (*iFilter)->objectKeys();
+      for(size_t i=0; i<objectKeys.size(); ++i) {
+        std::cout << objectKeys[i] << " ";
+      }
+      std::cout << std::endl;
+
+      pat::TriggerObjectRefVector objs = trigger.filterObjects((*iFilter)->label());
+      for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+        std::cout << "  object " << (*iObj)->collection() << std::endl;
+      }
+    }
+    std::cout << "------------------------------------------------------------" << std::endl;
+    */
+
     return true;
+
+    // Debugging
+    /*
+    pat::TriggerPathRefVector accepted = trigger.acceptedPaths();
+    for(pat::TriggerPathRefVector::const_iterator iter = accepted.begin(); iter != accepted.end(); ++iter) {
+      pat::TriggerFilterRefVector filters = trigger.pathFilters((*iter)->name(), false);
+      pat::TriggerObjectRefVector objects = trigger.pathObjects((*iter)->name());
+      std::vector<unsigned> filterIndices = (*iter)->filterIndices();
+      std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
+      std::cout << "    path pointer " << trigger.path((*iter)->name()) << std::endl;
+      std::cout << "    filter indices ";
+      for(size_t i=0; i<filterIndices.size(); ++i) {
+        std::cout << filterIndices[i] << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "    filters (" << filters.size() << ") ";
+      for(pat::TriggerFilterRefVector::const_iterator i2 = filters.begin(); i2 != filters.end(); ++i2) {
+        std::cout << (*i2)->label() << " ";
+      }
+      std::cout << std::endl
+                << "    objects (" << objects.size() << ") ";
+      for(pat::TriggerObjectRefVector::const_iterator i2 = objects.begin(); i2 != objects.end(); ++i2) {
+        std::cout << (*i2)->collection() << " ";
+      }
+      std::cout << std::endl;
+    }
+    */
 
     // Below is legacy code, which might be helpful for debugging
     /*
@@ -266,31 +421,6 @@ namespace HPlus {
     /*
     pat::TriggerPathRefVector accepted = trigger.acceptedPaths();
     for(pat::TriggerPathRefVector::const_iterator iter = accepted.begin(); iter != accepted.end(); ++iter) {
-    */
-      /*
-      pat::TriggerFilterRefVector filters = trigger.pathFilters((*iter)->name(), false);
-      pat::TriggerObjectRefVector objects = trigger.pathObjects((*iter)->name());
-      std::vector<unsigned> filterIndices = (*iter)->filterIndices();
-      std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
-      std::cout << "    path pointer " << trigger.path((*iter)->name()) << std::endl;
-      std::cout << "    filter indices ";
-      for(size_t i=0; i<filterIndices.size(); ++i) {
-        std::cout << filterIndices[i] << " ";
-      }
-      std::cout << std::endl;
-      std::cout << "    filters (" << filters.size() << ") ";
-      for(pat::TriggerFilterRefVector::const_iterator i2 = filters.begin(); i2 != filters.end(); ++i2) {
-        std::cout << (*i2)->label() << " ";
-      }
-      std::cout << std::endl
-                << "    objects (" << objects.size() << ") ";
-      for(pat::TriggerObjectRefVector::const_iterator i2 = objects.begin(); i2 != objects.end(); ++i2) {
-        std::cout << (*i2)->collection() << " ";
-      }
-      std::cout << std::endl;
-      */
-
-    /*
       if((*iter)->name() == fPath && (*iter)->wasAccept()) {
 	//std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
         pat::TriggerFilterRefVector filters = trigger.pathFilters(fPath, false);

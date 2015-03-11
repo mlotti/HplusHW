@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
-dataVersion="44XmcS6"
-#dataVersion="44Xdata"
+dataVersion="53XmcS10"
+dataVersion="53Xdata24Aug2012" # Now we have multiple dataVersions for data too, see HChDataVersion for them
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
@@ -42,11 +42,8 @@ del process.TFileService
 ################################################################################
 # In case of data, add trigger
 myTrigger = options.trigger
-
-doTauHLTMatching = options.doTauHLTMatching != 0
-if doTauHLTMatching:
-    if len(myTrigger) == 0:
-        myTrigger = dataVersion.getDefaultSignalTrigger()
+if len(myTrigger) == 0:
+    myTrigger = dataVersion.getDefaultSignalTrigger()
 
 ################################################################################
 # Output module
@@ -70,7 +67,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
-                                   patArgs={"doTauHLTMatching": doTauHLTMatching,
+                                   patArgs={"doTauHLTMatching": False,
                                             "matchingTauTrigger": myTrigger},
                                    doHBHENoiseFilter=False, # Only save the HBHE result to event, don't filter
                                    calculateEventCleaning=True, # This requires the tags from test/pattuple/checkoutTags.sh
@@ -170,7 +167,7 @@ if dataVersion.isData() and len(options.trigger) > 1 and options.triggerThrow !=
         setattr(process, "CounterScraping"+name, mc2)
 
         path = cms.Path(
-            process.hltPhysicsDeclared *
+#            process.hltPhysicsDeclared *
             mt * 
             mc1 *
             process.scrapingVeto *
@@ -198,6 +195,12 @@ if len(options.skimConfig) > 0:
 
 # Output module in EndPath
 process.outpath = cms.EndPath(process.out)
+
+if len(options.customizeConfig) > 0:
+    print "Customizing with configurations ", ", ".join(options.customizeConfig)
+    for config in options.customizeConfig:
+        module = __import__("HiggsAnalysis.HeavyChHiggsToTauNu."+config, fromlist=[config])
+        module.customize(process)
 
 #f = open("configDump.py", "w")
 #f.write(process.dumpPython())

@@ -1,103 +1,94 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ConstantEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BinnedEfficiencyScaleFactor.h"
+
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
+#include <limits>
+#include <cmath>
+
 namespace HPlus {
-  EmbeddingMuonEfficiency::Data::Data(): fEme(0) {}
-  EmbeddingMuonEfficiency::Data::Data(const EmbeddingMuonEfficiency *eme): fEme(eme) {}
+  EmbeddingMuonEfficiency::Data::Data() {
+    fWeight = std::numeric_limits<double>::quiet_NaN();
+    fWeightAbsUncPlus = 0.0;
+    fWeightAbsUncMinus = 0.0;
+    fEfficiency = fWeight;
+    fEfficiencyAbsUncPlus = fWeightAbsUncPlus;
+    fEfficiencyAbsUncMinus = fWeightAbsUncMinus;
+  }
   EmbeddingMuonEfficiency::Data::~Data() {}
   void EmbeddingMuonEfficiency::Data::check() const {
-    if(!fEme)
-      throw cms::Exception("Assert") << "EmbeddingMuonEfficiency::Data: This Data object was constructed with the default constructor, not with EmbeddingMuonEfficiency::applyEventWeight(). There is something wrong in your code." << std::endl;
+    if(isnan(fWeight))
+      throw cms::Exception("Assert") << "EmbeddingMuonEfficiency::Data: This Data object was constructed with the default constructor, not with EmbeddingMuonEfficiency::getEventWeight(). There is something wrong in your code." << std::endl;
   }
-
-  EmbeddingMuonEfficiency::EmbeddingMuonEfficiency(const edm::ParameterSet& iConfig, HistoWrapper& histoWrapper)
-    //fMuonSrc(iConfig.getParameter<edm::InputTag>("muonSrc"))
+  
+  EmbeddingMuonEfficiency::EmbeddingMuonEfficiency(const edm::ParameterSet& iConfig):
+    fMuonSrc(iConfig.getParameter<edm::InputTag>("muonSrc"))
   {
-
-    std::string mode = iConfig.getParameter<std::string>("mode");
-    if     (mode == "efficiency") fMode = kEfficiency;
-    else if(mode == "disabled")   fMode = kDisabled;
-    else throw cms::Exception("Configuration") << "EmbeddingMuonEfficiency: Unsupported value for parameter 'mode' " << mode << ", should be 'efficiency', or 'disabled'" << std::endl;
-
-    if(fMode == kDisabled)
-      return;
-
-    edm::ParameterSet dataParameters = iConfig.getParameter<edm::ParameterSet>("dataParameters");
-    edm::ParameterSet mcParameters = iConfig.getParameter<edm::ParameterSet>("mcParameters");
-
-    // Data Pset names are not relevant, just to have the same syntax as with TriggerEfficiencyScaleFactor
-    std::vector<std::string> dataNames = dataParameters.getParameterNames();
-    for(std::vector<std::string>::const_iterator iName = dataNames.begin(); iName != dataNames.end(); ++iName) {
-      edm::ParameterSet pset = dataParameters.getParameter<edm::ParameterSet>(*iName);
-
-      EffValue ev;
-      ev.firstRun = pset.getParameter<unsigned>("firstRun");
-      ev.lastRun = pset.getParameter<unsigned>("lastRun");
-      ev.value = pset.getParameter<double>("efficiency");
-      ev.uncertainty = pset.getParameter<double>("uncertainty");
-      fDataValues.push_back(ev);
-    }
-
-    // MC values
-    fMCValue = mcParameters.getParameter<double>("efficiency");
-    fMCUncertainty = mcParameters.getParameter<double>("uncertainty");
+    std::string type = iConfig.getUntrackedParameter<std::string>("type");
+    if(type == "constant")
+      fEfficiencyScaleFactor.reset(new ConstantEfficiencyScaleFactor(iConfig));
+    else if(type == "binned")
+      fEfficiencyScaleFactor.reset(new BinnedEfficiencyScaleFactor(iConfig, "eta"));
+    else
+      throw cms::Exception("Configuration") << "EmbeddingMuonEfficiency: got invalid value for 'type' " << type 
+                                            << ", valid values are 'constant' and 'binned'";
   }
   EmbeddingMuonEfficiency::~EmbeddingMuonEfficiency() {}
 
-  EmbeddingMuonEfficiency::Data EmbeddingMuonEfficiency::applyEventWeight(const edm::Event& iEvent, EventWeight& eventWeight) {
-    fWeight = 1.0;
-    fWeightAbsUnc = 1.0;
+  EmbeddingMuonEfficiency::Data EmbeddingMuonEfficiency::getEventWeight(const edm::Event& iEvent) {
+    if(fEfficiencyScaleFactor->getMode() == EfficiencyScaleFactorBase::kDisabled) {
+      Data output;
+      output.fWeight = 1.0;
+      output.fEfficiency = 1.0;
+      return output;
+    }
 
-    if(fMode == kDisabled)
-      return Data(this);
-
-    /* Not needed yet
-    // Obtain original muon
-    edm::Handle<edm::View<pat::Muon> > hmuon;
-    iEvent.getByLabel(fMuonSrc, hmuon);
-
-    if(hmuon->size() != 1)
-      throw cms::Exception("Assert") << "Read " << hmuon->size() << " muons for the original muon, expected exactly 1. Muon src was " << fMuonSrc.encode() << std::endl;
-
-    const pat::Muon& originalMuon = hmuon->at(0);
-    */
-    
-
-    if(iEvent.isRealData()) {
-      unsigned run = iEvent.id().run();
-      bool found = false;
-      size_t foundIndex = 0;
-      for(size_t i=0; i<fDataValues.size(); ++i) {
-        if(fDataValues[i].firstRun <= run && run <= fDataValues[i].lastRun) {
-          found = true;
-          foundIndex = i;
-          //std::cout << "Index " << i << " firstRun " << fDataValues[i].firstRun << " lastRun " << fDataValues[i].lastRun << " run " << run << " found " << found << std::endl;
-          break;
-        }
-      }
-      if(!found)
-        throw cms::Exception("Assert") << "EmbeddingMuonEfficiency: encountered run " << run << " which is not included in the configuration" << std::endl;
-
-      fWeight = fDataValues[foundIndex].value;
-      fWeightAbsUnc = fDataValues[foundIndex].uncertainty;
+    if(dynamic_cast<const ConstantEfficiencyScaleFactor *>(fEfficiencyScaleFactor.get())) {
+      return getEventWeight(edm::Ptr<pat::Muon>(), iEvent.isRealData());
     }
     else {
-      fWeight = fMCValue;
-      fWeightAbsUnc = fMCUncertainty;
+      // Obtain original muon
+      edm::Handle<edm::View<pat::Muon> > hmuon;
+      iEvent.getByLabel(fMuonSrc, hmuon);
+
+      if(hmuon->size() != 1)
+        throw cms::Exception("Assert") << "Read " << hmuon->size() << " muons for the original muon, expected exactly 1. Muon src was " << fMuonSrc.encode() << std::endl;
+
+      if(iEvent.isRealData())
+         setRun(iEvent.id().run());
+      return getEventWeight(hmuon->ptrAt(0), iEvent.isRealData());
+    }
+  }
+
+  EmbeddingMuonEfficiency::Data EmbeddingMuonEfficiency::getEventWeight(const edm::Ptr<pat::Muon>& muon, bool isData) const {
+    Data output;
+    if(const ConstantEfficiencyScaleFactor *ceff = dynamic_cast<const ConstantEfficiencyScaleFactor *>(fEfficiencyScaleFactor.get())) {
+      output = Data(ceff->getEventWeight(isData));
+    }
+    else if(const BinnedEfficiencyScaleFactor *beff = dynamic_cast<const BinnedEfficiencyScaleFactor *>(fEfficiencyScaleFactor.get())) {
+      if(muon.isNull() || muon.get() == 0) {
+        throw cms::Exception("Assert") << "EmbeddingMuonEfficiency::getEventWeight() got nullptr for muon while using BinnedEfficiencyScaleFactor";
+      }
+      output = Data(beff->getEventWeight(muon->eta(), isData));
     }
 
-    // Weight is actually the inverse of the efficiency
-    fWeightAbsUnc = fWeightAbsUnc / (fWeight*fWeight);
-    fWeight = 1.0/fWeight;
-
-    eventWeight.multiplyWeight(fWeight);
-    return Data(this);
+    // Weight is actually the inverse of the efficiency, but do this
+    // only if the mode is one of the efficiencies
+    EfficiencyScaleFactorBase::Mode mode = fEfficiencyScaleFactor->getMode();
+    if(mode == EfficiencyScaleFactorBase::kDataEfficiency || mode == EfficiencyScaleFactorBase::kMCEfficiency) {
+      if(output.fWeight != 0.0) {
+        output.fWeightAbsUncPlus = output.fWeightAbsUncPlus / (output.fWeight*output.fWeight);
+        output.fWeightAbsUncMinus = output.fWeightAbsUncMinus / (output.fWeight*output.fWeight);
+        output.fWeight = 1.0/output.fWeight;
+      }
+    }
+    return output;
   }
 }
