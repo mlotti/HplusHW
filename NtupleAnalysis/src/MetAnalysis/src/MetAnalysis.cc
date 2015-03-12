@@ -46,6 +46,8 @@ private:
   WrappedTH1 *hMetPhi;
   WrappedTH1 *hMetJetInHole;
   WrappedTH1 *hMetNoJetInHole;
+  WrappedTH1 *hMetJetInHole02;
+  WrappedTH1 *hMetNoJetInHole02;
 
   std::vector<double> fECALDeadCellEtaTable;
   std::vector<double> fECALDeadCellPhiTable;
@@ -214,6 +216,8 @@ void MetAnalysis::book(TDirectory *dir) {
   hMetPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetPhi", "Met phi", 90, 0., 180.);
   hMetJetInHole= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetJetInHole", "MetJetInHole", 200, 0., 600.);
   hMetNoJetInHole= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetNoJetInHole", "MetNoJetInHole", 200, 0., 600.);
+  hMetJetInHole02= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetJetInHole02", "MetJetInHoleDR02", 200, 0., 600.);
+  hMetNoJetInHole02= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetNoJetInHole02", "MetNoJetInHoleDR02", 200, 0., 600.);
 }
 
 void MetAnalysis::setupBranches(BranchManager& branchManager) {
@@ -287,7 +291,7 @@ void MetAnalysis::process(Long64_t entry) {
 
 
   bool jetInEcalHole = false;
-
+  bool jetInEcalHole02 = false;  
 
   std::vector<Jet> selectedJets;
   for(Jet jet: fEvent.jets()) {
@@ -298,7 +302,7 @@ void MetAnalysis::process(Long64_t entry) {
     if(jet.pt() > 30 && std::abs(jet.eta()) < 2.4) {
       selectedJets.push_back(jet);
     }
-    if(jet.pt() > 30 ) {
+    if(jet.pt() > 50 ) {
       size_t myTableSize = fECALDeadCellEtaTable.size();
       for (size_t i = 0; i < myTableSize; ++i) {
 	double myDeltaEta = jet.eta() - fECALDeadCellEtaTable[i];
@@ -306,13 +310,15 @@ void MetAnalysis::process(Long64_t entry) {
 	//if (myDeltaEta <= myHalfCellSize || myDeltaPhi <= myHalfCellSize) return false;                                                                                                                                    
 	double myDeltaR = std::sqrt(myDeltaEta*myDeltaEta + myDeltaPhi*myDeltaPhi);
 	if (myDeltaR < deltaR) jetInEcalHole = true;
+	if (myDeltaR < deltaR+0.1) jetInEcalHole02 = true;
       }
     }
   }
 
   if ( jetInEcalHole ) hMetJetInHole->Fill(myMet); 
   if ( !jetInEcalHole ) hMetNoJetInHole->Fill(myMet);
-
+  if ( jetInEcalHole02 ) hMetJetInHole02->Fill(myMet); 
+  if ( !jetInEcalHole02 ) hMetNoJetInHole02->Fill(myMet);
 
   if(selectedJets.size() < 3)
     return;
