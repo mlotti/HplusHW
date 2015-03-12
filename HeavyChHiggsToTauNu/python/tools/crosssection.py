@@ -194,26 +194,29 @@ backgroundCrossSections = CrossSectionList(
 # \param doWNJetsWeighting   Set W+Njets cross sections according to the weighting scheme
 def setBackgroundCrossSections(datasets, doWNJetsWeighting=True):
     for dset in datasets.getMCDatasets():
-        value = backgroundCrossSections.crossSection(dset.getName(), dset.getEnergy())
-        if value is None:
-            for wnJets in ["W1Jets", "W2Jets", "W3Jets", "W4Jets"]:
-                if wnJets in dset.getName():
-                    inclusiveCrossSection = backgroundCrossSections.crossSection("WJets", dset.getEnergy())
-                    if doWNJetsWeighting:
-                        # W+Njets, with the assumption that they are weighted (see
-                        # src/WJetsWeight.cc)
-                        value = inclusiveCrossSection
-                    else:
-                        inclusiveLO = backgroundCrossSections.crossSection("PREP_WJets", dset.getEnergy())
-                        wnJetsLO = backgroundCrossSections.crossSection("PREP_"+wnJets, dset.getEnergy())
-                        value = inclusiveCrossSection * wnJetsLO/inclusiveLO
-                    break
+        setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting)
 
-        if value is not None:
-            dset.setCrossSection(value)
-            print "Setting %s cross section to %f pb" % (dset.getName(), value)
-#        else:
-#            print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dset.getName(), dset.getEnergy())
+def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True):
+    value = backgroundCrossSections.crossSection(dataset.getName(), dataset.getEnergy())
+    if value is None:
+        for wnJets in ["W1Jets", "W2Jets", "W3Jets", "W4Jets"]:
+            if wnJets in dataset.getName():
+                inclusiveCrossSection = backgroundCrossSections.crossSection("WJets", dataset.getEnergy())
+                if doWNJetsWeighting:
+                    # W+Njets, with the assumption that they are weighted (see
+                    # src/WJetsWeight.cc)
+                    value = inclusiveCrossSection
+                else:
+                    inclusiveLO = backgroundCrossSections.crossSection("PREP_WJets", dataset.getEnergy())
+                    wnJetsLO = backgroundCrossSections.crossSection("PREP_"+wnJets, dataset.getEnergy())
+                    value = inclusiveCrossSection * wnJetsLO/inclusiveLO
+                break
+
+    if value is not None:
+        dataset.setCrossSection(value)
+        print "Setting %s cross section to %f pb" % (dataset.getName(), value)
+#    else:
+#        print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy())
 
 
 ########################################
