@@ -39,6 +39,8 @@ public:
 
   void processInternal(Long64_t entry) {
     fEventWeight.beginEvent();
+    if(pileUpWeightPath && pileUpWeightData && pileUpWeightMC)
+      fPileupWeight.set(*pileUpWeightPath,*pileUpWeightData,*pileUpWeightMC,this->isData());
     process(entry);
   }
 
@@ -59,6 +61,10 @@ protected:
 
 private:
   bool fIsMC;
+
+  boost::optional<std::string> pileUpWeightPath;
+  boost::optional<std::string> pileUpWeightData;
+  boost::optional<std::string> pileUpWeightMC;
 };
 
 #endif

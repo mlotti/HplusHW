@@ -69,6 +69,25 @@ process.addAnalyzer("TauLeg_2012D_mc",
     ),
     excludeTasks="TauPlusX_"
 )
+
+process.addAnalyzer("TauLeg_2012D_mc_NOPU",
+    Analyzer("TriggerEfficiency",
+        Trigger = PSet(
+            triggerOR  = ["HLT_IsoMu15_eta2p1_L1ETM20_v5"],
+            triggerOR2 = ["HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v6"]
+        ),
+        offlineSelection = leg,
+        TauSelection = PSet(
+            discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
+                             "againstMuonTight2",
+                             "againstElectronMediumMVA3"],
+        ),
+        binning = binning,
+        xLabel  = xLabel,
+        yLabel  = yLabel,
+    ),
+    excludeTasks="TauPlusX_"
+)
 """
 process.addAnalyzer("TauLeg_2012ABCD_data",
     Analyzer("TriggerEfficiency",

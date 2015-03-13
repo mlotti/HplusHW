@@ -35,11 +35,9 @@ void PileupWeight::set(std::string path, std::string dataSrc, std::string mcSrc,
 }
 
 double PileupWeight::getWeight(Event& fEvent){
-  std::cout << "check PileupWeight::getWeight " << fSet << " " << isdata << std::endl;
   if(!fSet || isdata) return 1;
-  std::cout << "check PileupWeight::getWeight1 " << std::endl;
+
   int NPU = fEvent.NPU().value();
-  std::cout << "check PileupWeight::getWeight NPU " << NPU << std::endl;
   int bin = h_weight->GetXaxis()->FindBin( NPU );
   return h_weight->GetBinContent( bin );
 }
