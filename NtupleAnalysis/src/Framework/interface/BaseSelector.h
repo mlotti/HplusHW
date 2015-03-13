@@ -7,6 +7,7 @@
 #include "Framework/interface/EventCounter.h"
 #include "Framework/interface/HistoWrapper.h"
 #include "Framework/interface/EventSaver.h"
+#include "Tools/interface/PileupWeight.h"
 
 #include "Rtypes.h"
 #include "TBranch.h"
@@ -54,6 +55,7 @@ protected:
   EventCounter fEventCounter;
   HistoWrapper fHistoWrapper;
   EventSaverClient fEventSaver;
+  PileupWeight fPileupWeight;
 
 private:
   bool fIsMC;

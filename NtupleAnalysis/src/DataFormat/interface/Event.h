@@ -6,6 +6,7 @@
 #include "Tools/interface/BooleanOr.h"
 
 #include "DataFormat/interface/EventID.h"
+#include "DataFormat/interface/EventNPU.h"
 #include "DataFormat/interface/Tau.h"
 #include "DataFormat/interface/Jet.h"
 #include "DataFormat/interface/Electron.h"
@@ -29,6 +30,7 @@ public:
     return fTriggerOr2.value();
   }
   const EventID& eventID() const { return fEventID; }
+  const EventNPU& NPU() const { return fNPU; }
   const TauCollection& taus() const { return fTauCollection; }
   const JetCollection& jets() const { return fJetCollection; }
   const ElectronCollection& electrons() const { return fElectronCollection; }
@@ -41,6 +43,8 @@ public:
 
 private:
   EventID fEventID;
+
+  EventNPU fNPU;
 
   BooleanOr fTriggerOr;
   BooleanOr fTriggerOr2;

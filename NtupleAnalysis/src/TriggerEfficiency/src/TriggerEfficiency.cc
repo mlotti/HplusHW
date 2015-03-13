@@ -26,6 +26,7 @@ private:
   std::vector<int> fbinning;
   std::string fxLabel;
   std::string fyLabel;
+  /*
   std::string fdataera;
   float flumi;
   int frunMin;
@@ -36,11 +37,13 @@ private:
   std::vector<std::string> fcontrolTriggers2;
   std::vector<std::string> fsignalTriggers1;
   std::vector<std::string> fsignalTriggers2;
-
+  */
   BaseSelection* selection;
 
   Count cAllEvents;
   Count cSelection;
+  Count cCtrlTrigger;
+  Count cSignalTrigger;
 
   WrappedTH1 *hNum;
   WrappedTH1 *hDen;
@@ -56,6 +59,7 @@ TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   fbinning(config.getParameter<std::vector<int>>("binning")),
   fxLabel(config.getParameter<std::string>("xLabel")),
   fyLabel(config.getParameter<std::string>("yLabel")),          
+  /*
   fdataera(config.getParameter<std::string>("dataera")),
   flumi(config.getParameter<float>("lumi")),
   frunMin(config.getParameter<int>("runMin")),
@@ -66,13 +70,15 @@ TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   fcontrolTriggers2(config.getParameter<std::vector<std::string>>("controlTriggers2")),
   fsignalTriggers1(config.getParameter<std::vector<std::string>>("signalTriggers1")),
   fsignalTriggers2(config.getParameter<std::vector<std::string>>("signalTriggers2")),
+  */
   cAllEvents(fEventCounter.addCounter("All events")),
-  cSelection(fEventCounter.addCounter("Selection"))
+  cSelection(fEventCounter.addCounter("OfflineSelection")),
+  cCtrlTrigger(fEventCounter.addCounter("CtrlTrigger")),
+  cSignalTrigger(fEventCounter.addCounter("SignalTrigger"))
 {
   std::cout << "Offline selection " << fOfflineSelection << std::endl;
-  //  if(fOfflineSelection == "taulegSelection") selection = new TauLegSelection;
-selection = new METLegSelection;
-  //  if(fOfflineSelection == "metlegSelection") selection = new METLegSelection;
+  if(fOfflineSelection == "taulegSelection") selection = new TauLegSelection(config);
+  if(fOfflineSelection == "metlegSelection") selection = new METLegSelection(config);
 }
 
 void TriggerEfficiency::book(TDirectory *dir) {
@@ -96,14 +102,21 @@ void TriggerEfficiency::setupBranches(BranchManager& branchManager) {
 }
 
 void TriggerEfficiency::process(Long64_t entry) {
+
+  fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
+
   cAllEvents.increment();
 
   if(!selection->offlineSelection(fEvent)) return;
   cSelection.increment();
 
+  if(!selection->passedCtrlTtrigger(fEvent)) return;
+  cCtrlTrigger.increment();
+
   double xvariable = selection->xVariable();
   hDen->Fill(xvariable);
-  if(!selection->onlineSelection(fEvent)) hNum->Fill(xvariable);
-
+  if(selection->onlineSelection(fEvent)) {
+    hNum->Fill(xvariable);
+    cSignalTrigger.increment();
+  }
 }
-

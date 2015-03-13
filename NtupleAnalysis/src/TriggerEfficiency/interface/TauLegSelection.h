@@ -5,21 +5,19 @@
 
 class TauLegSelection : public BaseSelection {
  public:
-  TauLegSelection();
+  explicit TauLegSelection(const ParameterSet&);
   ~TauLegSelection();
 
-  bool offlineSelection(const Event&);
-  bool onlineSelection(const Event&);
+  bool offlineSelection(Event&);
 
  private:
-
 };
-TauLegSelection::TauLegSelection(){}
+TauLegSelection::TauLegSelection(const ParameterSet& setup){
+  init(setup);
+}
 TauLegSelection::~TauLegSelection(){}
 
-bool TauLegSelection::offlineSelection(const Event& fEvent){
-
-  if(!this->passedCtrlTtrigger(fEvent)) return false;
+bool TauLegSelection::offlineSelection(Event& fEvent){
 
   boost::optional<Tau> selectedTau;
   size_t ntaus = 0;
@@ -29,6 +27,7 @@ bool TauLegSelection::offlineSelection(const Event& fEvent){
     if(!(tau.lTrkPt() > 20)) continue;
     if(!(tau.nProngs() == 1)) continue;
     if(!tau.decayModeFinding()) continue;
+    if(!tau.configurableDiscriminators()) continue;
 
     ntaus++;
     if(!selectedTau || (tau.pt() > selectedTau->pt()) ) selectedTau = tau;
@@ -53,9 +52,6 @@ bool TauLegSelection::offlineSelection(const Event& fEvent){
   bool selected = false;
   if(ntaus > 0 && nmuons > 0 && muTauInvMass < 80 && muMetMt < 40) selected = true;
   return selected;
-}
-bool TauLegSelection::onlineSelection(const Event& fEvent){
-  return true;
 }
 
 #endif
