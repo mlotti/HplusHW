@@ -194,7 +194,7 @@ backgroundCrossSections = CrossSectionList(
 # \param doWNJetsWeighting   Set W+Njets cross sections according to the weighting scheme
 def setBackgroundCrossSections(datasets, doWNJetsWeighting=True):
     for dset in datasets.getMCDatasets():
-        setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting)
+        setBackgroundCrossSectionForDataset(dset, doWNJetsWeighting)
 
 def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True):
     value = backgroundCrossSections.crossSection(dataset.getName(), dataset.getEnergy())
