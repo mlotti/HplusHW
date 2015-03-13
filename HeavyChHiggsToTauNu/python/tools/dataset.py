@@ -19,6 +19,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as crosssection
 
 
 # era name -> list of era parts in data dataset names
@@ -2539,6 +2540,14 @@ class Dataset:
             #print "%s: is pileup-reweighted, calling updateNAllEventsToPUWeighted()" % self.name
             self.updateNAllEventsToPUWeighted()
 
+
+        # Set cross section, if MC and we know the energy
+        if self.isMC():
+            if "energy" in self.info:
+                crosssection.setBackgroundCrossSectionForDataset(self)
+            else:
+                print "%s is MC but has no energy set in configInfo/configinfo, not setting its cross section automatically" % self.name
+
         # For some reason clearing the in-memory representations of
         # the files increases the reading (object lookup?) performance
         # when reading from many analysis directories in a single
@@ -2798,7 +2807,7 @@ class Dataset:
         try:
             return self.info["crossSection"]
         except KeyError:
-            raise Exception("Dataset %s is MC, but 'crossSection' is missing from configInfo/configInfo histogram. You have to explicitly set the cross section with setCrossSection() method." % self.name)
+            raise Exception("Dataset %s is MC, but cross section has not been set. You have to either add the cross section for this dataset and energy of %s TeV to HeavyChHiggsToTauNu/python/tools/crosssection.py, or set it for this Dataset object with setCrossSection() method." % (self.name, self.getEnergy()))
 
     ## Set the integrated luminosity of data dataset (in pb^-1).
     def setLuminosity(self, value):
@@ -3982,6 +3991,9 @@ class DatasetManagerCreator:
     def getBaseDirectory(self):
         return self._baseDirectory
 
+    def getLumiFile(self):
+        return os.path.join(self._baseDirectory, "lumi.json")
+
     ## Create DatasetManager
     #
     # \param kwargs   Keyword arguments (see below)
@@ -4087,6 +4099,12 @@ class DatasetManagerCreator:
 
         if len(self._baseDirectory) > 0:
             manager._setBaseDirectory(self._baseDirectory)
+
+        # Load luminosity automatically if the file exists
+        lumiPath = self.getLumiFile()
+        if os.path.exists(lumiPath):
+            print "Loading data luminosities from %s" % lumiPath
+            manager.loadLuminosities()
 
         return manager
 

@@ -51,7 +51,7 @@ def main():
     for dset in datasets.getMCDatasets():
         dset.setEnergy("8")
 
-    # At the moment the cross sections must be set by hand
+    # At the moment the cross sections must be set by hand because the energy must be set by hand
     xsect.setBackgroundCrossSections(datasets)
 
     # Default merging and ordering of data and MC datasets
