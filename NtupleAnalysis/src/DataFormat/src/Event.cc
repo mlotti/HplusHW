@@ -47,6 +47,8 @@ Event::~Event() {}
 void Event::setupBranches(BranchManager& mgr) {
   fEventID.setupBranches(mgr);
 
+  fNPU.setupBranches(mgr);
+
   fTriggerOr.setupBranches(mgr);
   fTriggerOr2.setupBranches(mgr);
 

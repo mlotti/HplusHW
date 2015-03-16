@@ -6,20 +6,22 @@
 
 class METLegSelection : public BaseSelection {
  public:
-  METLegSelection();
+  explicit METLegSelection(const ParameterSet&);
   ~METLegSelection();
 
-  bool offlineSelection(const Event&);
-  bool onlineSelection(const Event&);
+  bool offlineSelection(Event&);
+  bool onlineSelection(Event&);
 
  private:
 
 };
 
-METLegSelection::METLegSelection(){}
+METLegSelection::METLegSelection(const ParameterSet& setup){
+  init(setup);
+}
 METLegSelection::~METLegSelection(){}
 
-bool METLegSelection::offlineSelection(const Event& fEvent){
+bool METLegSelection::offlineSelection(Event& fEvent){
 
   xvariable = fEvent.met_Type1().et();
 
@@ -66,7 +68,7 @@ bool METLegSelection::offlineSelection(const Event& fEvent){
   if(ntaus > 0 && njets > 2 && nmuons == 0 && nelectrons == 0) selected = true;
   return selected;
 }
-bool METLegSelection::onlineSelection(const Event& fEvent){
+bool METLegSelection::onlineSelection(Event& fEvent){
   return true;
 }
 

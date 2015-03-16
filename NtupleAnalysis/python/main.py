@@ -267,7 +267,7 @@ class Process:
             #
             # FIXME: How do we know here if a dataset is MC or Data?
             # Add also this along the other dataset metadata?
-            inputList.Add(ROOT.SelectorImplParams(tchain.GetEntries(), False, self._options.serialize_(), True))
+            inputList.Add(ROOT.SelectorImplParams(tchain.GetEntries(), dset.getDataVersion().isMC(), self._options.serialize_(), True))
 
             if _proof is not None:
                 tchain.SetProof(True)
