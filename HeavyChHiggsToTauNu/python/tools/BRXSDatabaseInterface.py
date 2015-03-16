@@ -155,7 +155,55 @@ class BRXSDatabaseInterface:
     # \param linearSummation  sum uncertainties linearly if true, otherwise squared sum
     # \param silentStatus  skip printing messages if true
     # \return Returns a dictionary of label/relative uncert. value pairs
-    def brUncert(self,xaxisName,yaxisName,v,x,y,linearSummation=True,silentStatus=True):
+    def brUncertLight(self,xaxisName,yaxisName,v,x,y,linearSummation=True,silentStatus=True):
+        # Obtain uncertainty for t->bH+ branching and value for the branching
+        myTBHBrUncert = _calcBrUncert(xaxisName,yaxisName,["BR_tHpb"],x,y,linearSummation,silentStatus)
+        tmpgraph = self.getGraph(yaxisName,"BR_tHpb","%s == %s"%(xaxisName,x))
+        br_TBH = tmpgraph.Eval(y)
+        tmpgraph.Delete()
+        # Obtain uncertainty for H+ branching and values for branching fractions
+        myHplusBrUncert = _calcBrUncert(xaxisName,yaxisName,v,x,y,linearSummation,silentStatus)
+        br_Hp_i = {}
+        for v in myVertices:
+            tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
+            br_Hp_i[v] = tmpgraph.Eval(y)
+            tmpgraph.Delete()
+        # Initialize uncertainty list
+        myUncertainties = {}
+        # Calculate uncertainty for TBH i.e. multiply the obtained Delta_TBH by sqrt(sum(br_Hp_i^2))
+        myFactor = 0.0
+        for v in myVertices:
+            myFactor += br_Hp_i[v]**2
+        for k in myTBHBrUncert.keys():
+            myUncertainties[k] = sqrt(myFactor)*myTBHBrUncert[k]
+        # Calculate uncertainty for H+ branchings i.e. multiply the obtained Delta_Hp_i by Br_TBH)
+        for k in myHplusBrUncert.keys():
+            myUncertainties[k] = br_TBH*myHplusBrUncert[k]
+        # Return result
+        return myUncertainties
+
+    ## Returns a dictionary of the relative uncertainties on the theoretical branching fraction v
+    # \param xaxisName  name of the x-axis (e.g. "mHp")
+    # \param yaxisName  name of the y-axis (e.g. "tanb")
+    # \param v          list of branchings (e.g. ["BR_Hp_taunu"])
+    # \param x          value for x variable (e.g. "200")
+    # \param y          value for y variable (e.g. "20")
+    # \param linearSummation  sum uncertainties linearly if true, otherwise squared sum
+    # \param silentStatus  skip printing messages if true
+    # \return Returns a dictionary of label/relative uncert. value pairs
+    def brUncertHeavy(self,xaxisName,yaxisName,v,x,y,linearSummation=True,silentStatus=True):
+        return _calcBrUncert(xaxisName,yaxisName,v,x,y,linearSummation,silentStatus)
+
+    ## Returns a dictionary of the relative uncertainties on the theoretical branching fraction v
+    # \param xaxisName  name of the x-axis (e.g. "mHp")
+    # \param yaxisName  name of the y-axis (e.g. "tanb")
+    # \param v          list of branchings (e.g. ["BR_Hp_taunu"])
+    # \param x          value for x variable (e.g. "200")
+    # \param y          value for y variable (e.g. "20")
+    # \param linearSummation  sum uncertainties linearly if true, otherwise squared sum
+    # \param silentStatus  skip printing messages if true
+    # \return Returns a dictionary of label/relative uncert. value pairs
+    def _calcBrUncert(self,xaxisName,yaxisName,v,x,y,linearSummation=True,silentStatus=True):
         myVertices = []
         if not isinstance(v, list):
             myVertices.append(v)
@@ -238,6 +286,7 @@ class BRXSDatabaseInterface:
                 print "       ** Br uncert [%s] = %f"%(k, myResult[k])
         # Return dictionary with results
         return myResult
+
 
     #def brUncert2(self,xaxisName,yaxisName,v,w,x,y,pm):
         ## usage: uncert = self.brUncert2("mHp","tanb","BR_Hp_taunu","BR_Hp_tb",Hp_mass,tanb,"+")
