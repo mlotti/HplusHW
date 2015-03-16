@@ -148,6 +148,13 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             src = cms.InputTag("genParticles"),
             filter = cms.untracked.bool(False)
         )       
+    ),
+    GenJets = cms.VPSet(
+        cms.PSet(
+            branchname = cms.untracked.string("GenJets"),
+            src = cms.InputTag("slimmedGenJets"),
+            filter = cms.untracked.bool(False)
+        )
     )
 )
 

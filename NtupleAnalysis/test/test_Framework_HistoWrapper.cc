@@ -72,6 +72,17 @@ TEST_CASE("HistoWrapper works", "[Framework]") {
     dir.GetObject("name", tmp);
     CHECK( tmp );
     CHECK( tmp == th2->getHisto() );
+
+    th2->Fill(50, 2);
+    CHECK( th2->getHisto()->GetBinContent(50, 14) == 0 );
+    CHECK( th2->getHisto()->GetBinContent(50, 15) == 0 );
+    CHECK( th2->getHisto()->GetBinContent(50, 16) == 0 );
+    CHECK( th2->getHisto()->GetBinContent(51, 14) == 0 );
+    CHECK( th2->getHisto()->GetBinContent(51, 15) == 1 );
+    CHECK( th2->getHisto()->GetBinContent(51, 16) == 0 );
+    CHECK( th2->getHisto()->GetBinContent(52, 14) == 0 );
+    CHECK( th2->getHisto()->GetBinContent(52, 15) == 0 );
+    CHECK( th2->getHisto()->GetBinContent(52, 16) == 0 );
   }
 
   SECTION("3D histograms") {
@@ -102,6 +113,17 @@ TEST_CASE("HistoWrapper works", "[Framework]") {
     dir.GetObject("name", tmp);
     CHECK( tmp );
     CHECK( tmp == th3->getHisto() );
+
+    th3->Fill(50, 1.2, -75);
+    CHECK( th3->getHisto()->GetBinContent(51, 12, 25) == 0 );
+    CHECK( th3->getHisto()->GetBinContent(51, 12, 26) == 0 );
+    CHECK( th3->getHisto()->GetBinContent(51, 12, 27) == 0 );
+    CHECK( th3->getHisto()->GetBinContent(51, 13, 25) == 0 );
+    CHECK( th3->getHisto()->GetBinContent(51, 13, 26) == 1 );
+    CHECK( th3->getHisto()->GetBinContent(51, 13, 27) == 0 );
+    CHECK( th3->getHisto()->GetBinContent(51, 14, 25) == 0 );
+    CHECK( th3->getHisto()->GetBinContent(51, 14, 26) == 0 );
+    CHECK( th3->getHisto()->GetBinContent(51, 14, 27) == 0 );
   }
 
   SECTION("UnfoldedFactorisationHisto") {

@@ -63,6 +63,12 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
         genParticleDumper = new GenParticleDumper(genParticleCollections);
         genParticleDumper->book(Events);
     }
+    genJetDumper = 0;
+    if (iConfig.exists("GenJets")) {
+        genJetCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenJets");
+        genJetDumper = new GenJetDumper(genJetCollections);
+        genJetDumper->book(Events);
+    }
 }
 
 MiniAOD2TTreeFilter::~MiniAOD2TTreeFilter() {
@@ -84,6 +90,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
     if (jetDumper) accept = accept && jetDumper->fill(iEvent,iSetup);
     if (metDumper) accept = accept && metDumper->fill(iEvent,iSetup);
     if (genParticleDumper) accept = accept && genParticleDumper->fill(iEvent,iSetup);
+    if (genJetDumper) accept = accept && genJetDumper->fill(iEvent,iSetup);
     if(accept) Events->Fill();
 
     return accept;
@@ -96,6 +103,7 @@ void MiniAOD2TTreeFilter::reset(){
     if (jetDumper) jetDumper->reset();
     if (metDumper) metDumper->reset();
     if (genParticleDumper) genParticleDumper->reset();
+    if (genJetDumper) genJetDumper->reset();
 }
 
 #include <time.h>
