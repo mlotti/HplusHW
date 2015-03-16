@@ -2066,6 +2066,8 @@ class BRXSDatabaseInterface:
         graph = ROOT.TGraph()
         self.tree.Draw(yVariable+":"+xVariable,self.floatSelection(selection))
         graph = ROOT.gPad.GetPrimitive("Graph")
+        if graph == None:
+            raise Exception("Error: could not find graph!")
         graph.Sort()
         return graph
         
