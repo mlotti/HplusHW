@@ -264,7 +264,7 @@ class BrContainer:
             return
         # Obtain branching and sigma from MSSM model database
         self._readFromDatabase(mHp, tanbeta)
-        if self.getFailedStatus(tanbeta):
+        if self._results["%04.1f"%(float(tanbeta))]["sigmaTheory"] == None:
             return
         
         #print "    Scaled '%s/%s' signal in datacards by branching %f (mHp=%s, tanbeta=%.1f)"%(mySignalScaleFactor, mHp, tanbeta)
@@ -322,7 +322,7 @@ class BrContainer:
                 myDecayModeKeys[i] = "BR_%s"%myDecayModeKeys[i]
             myBrUncert = None
             if float(mHp) < 179:
-                myBrUncert = db.brUncertLight("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)
+                myBrUncert = db.brUncertLight("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)               
             else:
                 myBrUncert = db.brUncertHeavy("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)
             for i in range(len(myDecayModeKeys)):
