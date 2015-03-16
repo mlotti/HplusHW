@@ -111,12 +111,12 @@ public:
   /// Returns true if the histogram exists
   bool isActive() const { return fHistoWrapper.isActive(fLevel); }
   /// Returns pointer to the histogram (Note: it can be a zero pointer if the histogram is not active)
-  TH1* getHisto() { return h; }
+  T* getHisto() { return h; }
   /// Returns the x axis of the histogram for bin label modification
   TAxis* GetXaxis() { return h->GetXaxis(); }
 
 protected:
-  TH1* h;
+  T* h;
 
   double getWeight() const { return fHistoWrapper.getWeight(); }
 
