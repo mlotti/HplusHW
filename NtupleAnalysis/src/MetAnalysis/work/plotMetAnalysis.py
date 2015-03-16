@@ -96,7 +96,8 @@ def dataMCExample(datasets):
     plots.drawPlot( plots.DataMCPlot(datasets, "jetPt", normalizeToLumi=20000), "jetPt", xlabel="p_{T}^{jet} (GeV/c)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
     plots.drawPlot( plots.DataMCPlot(datasets, "jetEta", normalizeToLumi=20000), "jetEta", xlabel="", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
     plots.drawPlot( plots.DataMCPlot(datasets, "jetPhi", normalizeToLumi=20000), "jetPhi", xlabel="#Phi^{jet}", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
-
+#    plots.drawPlot( plots.DataMCPlot(datasets, "Pt3Jets", normalizeToLumi=20000), "Pt3Jets", xlabel="p_{T}^{3jets} (GeV/c)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
+    plots.drawPlot( plots.DataMCPlot(datasets, "DeltaPhiTauMet", normalizeToLumi=20000), "DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 def getHistos(datasets,name1, name2):
      drh1 = datasets.getDataset("TTJets").getDatasetRootHisto("MetNoJetInHole")
      drh2 = datasets.getDataset("TTJets").getDatasetRootHisto("MetJetInHole")
