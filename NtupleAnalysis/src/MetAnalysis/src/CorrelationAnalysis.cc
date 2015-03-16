@@ -106,7 +106,7 @@ void CorrelationAnalysis::book(TDirectory *dir) {
   hM3jets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "M3Jets", "M3Jets", 200, 0., 600.);
   hDeltaPhiTauMet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DeltaPhiTauMet", "DeltaPhiTauMet", 90, 0., 180);
   hDPhiTauMetVsPt3jets = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsPt3jets", "Pt3jets;#Delta#phi(#tau jet,MET) (^{o});p_{T}^{3 jets}(GeV)", 180, 0., 180, 100, 0., 400.);
-  hDPhiTauMetVsDphiJet1Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet1Met", ";#Delta#phi(#tau jet1)", 90, 0., 180, 90, 0., 180.);
+  hDPhiTauMetVsDphiJet1Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet1Met", "DPhiTauMetVsDphiJet1Met", 90, 0., 180, 90, 0., 180.);
   hDPhiTauMetVsDphiJet2Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet2Met", ";#Delta#phi(#tau jet2)", 90, 0., 180, 90, 0., 180.);
   hDPhiTauMetVsDphiJet2Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet3Met", ";#Delta#phi(#tau jet3)", 90, 0., 180, 90, 0., 180.);
 }
@@ -194,6 +194,7 @@ void CorrelationAnalysis::process(Long64_t entry) {
       for(std::vector<Tau>::iterator i = selectedTaus.begin(); i!=
 	    selectedTaus.end(); ++i){
 	double deltaR = ROOT::Math::VectorUtil::DeltaR(jet.p4(),i->p4());
+	double deltaPhi = ROOT::Math::VectorUtil::DeltaPhi(jet.p4(),i->p4());
 	if(deltaR < 0.5) skipJet = true;
       }
       
@@ -227,13 +228,13 @@ void CorrelationAnalysis::process(Long64_t entry) {
   //  std::cout << "jet2 pt "<< jet2.pt() << std::endl;
   // std::cout << "jet3 pt "<< jet3.pt() << std::endl;
 
-
+  //  double deltaPhi = ROOT::Math::VectorUtil::DeltaPhi(jet1.p4(),jet2->p4());
   double DeltaPhiJet1MET  = (jet1.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
   double DeltaPhiJet2MET  = (jet2.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
   double DeltaPhiJet3MET  = (jet3.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
   double DeltaPhiTauMET  = (tau.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
   
-  //  hDPhiTauMetVsDphiJet1Met->Fill( std::abs(DeltaPhiTauMET),std::abs(DeltaPhiJet1MET));
+  //  hDPhiTauMetVsDphiJet1Met->Fill( DeltaPhiTauMET,DeltaPhiJet1MET);
   //  hDPhiTauMetVsDphiJet2Met->Fill( std::abs(DeltaPhiTauMET), std::abs(DeltaPhiJet2MET));
   //  hDPhiTauMetVsDphiJet3Met->Fill( std::abs(DeltaPhiTauMET), std::abs(DeltaPhiJet3MET));
   hDeltaPhiTauMet->Fill(std::abs(DeltaPhiTauMET));
@@ -243,7 +244,7 @@ void CorrelationAnalysis::process(Long64_t entry) {
   threeJets = jet1.p4() + jet2.p4() + jet3.p4();
 
   hPt3Jets->Fill(threeJets.pt());
-  //  hPt3Jets->Fill(threeJets.M());
+  hPt3Jets->Fill(threeJets.M());
   //  hDPhiTauMetVsPt3jets->Fill(std::abs(DeltaPhiTauMET),threeJets.pt());
  
   size_t njets = 0;
