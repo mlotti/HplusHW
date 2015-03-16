@@ -77,7 +77,7 @@ class DataCardDirectoryManager:
         for m in self._massPoints:
             self._datacards[m] = DataCardReader(directory, m, datacardFilePattern, rootFilePattern, rootFileDirectory=rootFileDirectory, readOnly=readOnly, outSuffix=outSuffix)
         # check integrity
-        self.checkIntegrity()
+        #self.checkIntegrity()
 
     def close(self):
         for key in self._datacards.keys():
@@ -515,6 +515,12 @@ class DataCardReader:
         for item in self._hCache:
             if item.GetName() == name:
                 return item # no clone should be returned
+        # Not found, strip directory
+        s = name.split("/")
+        shortName = s[len(s)-1]
+        for item in self._hCache:
+            if item.GetName() == shortName:
+                return item # no clone should be returned
         if exceptionOnFail:
             raise Exception("Could not find histogram '%s'!"%name)
         return None
@@ -552,6 +558,16 @@ class DataCardReader:
                 up = item
             elif item.GetName == name+"Down":
                 down = item
+        if up == None and down == None:
+            # Not found, strip directory
+            s = name.split("/")
+            shortName = s[len(s)-1]
+            for item in self._hCache:
+                if item.GetName() == shortName:
+                    if item.GetName == shortName+"Up":
+                        up = item
+                    elif item.GetName == shortName+"Down":
+                        down = item    
         if up == None:
             if exceptionOnFail:
                 raise Exception("Could not find histogram '%s'!"%name+"Up")
@@ -691,13 +707,17 @@ class DataCardReader:
                 else:
                     # Shape nuisances (no stat)
                     for i in range(0,len(self._datasetNuisances)):
-                        if objectName.startswith(self.getHistoNameForNuisance(item, self._datasetNuisances[i]["name"])):
-                            name = objectName.replace(self.getHistoNameForNuisance(item, self._datasetNuisances[i]["name"]),self.getHistoNameForNuisance(replaceDictionary[item], self._datasetNuisances[i]["name"]))
-                            o.SetName(name)
+                        name = self.getHistoNameForNuisance(item, self._datasetNuisances[i]["name"])
+                        if objectName.startswith(item):
+                            newName = replaceDictionary[item]+objectName[len(item):]
+                            #new2 = objectName.replace(self.getHistoNameForNuisance(item, self._datasetNuisances[i]["name"]),self.getHistoNameForNuisance(replaceDictionary[item], self._datasetNuisances[i]["name"]))
+                            #if item == "ttbb":
+                            #    print "***",objectName, "***", newName, "***", new2
+                            o.SetName(newName)
                     # stat nuisance FIXME: it seems that this does not work in all cases
-                    if "%s_%s"%(item,item) in objectName:
-                        name = objectName.replace(self.getHistoNameForNuisance(item, item),self.getHistoNameForNuisance(replaceDictionary[item], replaceDictionary[item]))
-                        o.SetName(name)
+                    #if "%s_%s"%(item,item) in objectName:
+                        #name = objectName.replace(self.getHistoNameForNuisance(item, item),self.getHistoNameForNuisance(replaceDictionary[item], replaceDictionary[item]))
+                        #o.SetName(name)
                             
                 #if objectName.startswith(self.getHistoNameForNuisance(item,"")):
                     #s = item+"_"+item+"_"
@@ -712,7 +732,9 @@ class DataCardReader:
                 if item == key:
                     self._rateValues[replaceDictionary[item]] = self._rateValues[key]
                     del self._rateValues[key]
-        
+            #for histoItem in self._hCache:
+                #if histoItem.GetName().startswith(item):
+                    #histoItem.SetName(replaceDictionary[item]+histoItem.GetName()[len(item):])
     
     def removeStatUncert(self, signalOnly=False):
         # Remove previous entries from datacard
@@ -767,8 +789,10 @@ class DataCardReader:
                         # Add histograms
                         hUp = Clone(hRate)
                         hDown = Clone(hRate)
-                        hUp.SetName(self.getHistoNameForNuisance(c, "%s_statBin%dUp"%(c, nbin)))
-                        hDown.SetName(self.getHistoNameForNuisance(c, "%s_statBin%dDown"%(c, nbin)))
+                        s = self.getHistoNameForNuisance(c, "%s_statBin%dUp"%(c, nbin)).split("/")
+                        hUp.SetName(s[len(s)-1])
+                        s = self.getHistoNameForNuisance(c, "%s_statBin%dDown"%(c, nbin)).split("/")
+                        hDown.SetName(s[len(s)-1])
                         hUp.SetBinContent(nbin, hUp.GetBinContent(nbin)+hUp.GetBinError(nbin))
                         myMinValue = max(hDown.GetBinContent(nbin)-hDown.GetBinError(nbin), 0.0)
                         hDown.SetBinContent(nbin, myMinValue)
@@ -863,20 +887,31 @@ class DataCardReader:
         ROOT.gErrorIgnoreLevel = backup
         if f == None:
             raise Exception("Error opening file '%s'!"%self._rootFilename)
-        f.Cd(self._rootFileDirectory)
+        #f.Cd(self._rootFileDirectory)
         # Read histograms to cache
         myHistoNames = []
         for c in self._datacardColumnNames:
+            #s = self.getHistoNameForColumn(c).split("/")
+            #myHistoNames.append(s[len(s)-1])
             myHistoNames.append(self.getHistoNameForColumn(c))
             for n in self._datasetNuisances:
-                myTemplate = self.getHistoNameForNuisance(c, n["name"])
+                s = self.getHistoNameForNuisance(c, n["name"]).split("/")
+                myTemplate = s[len(s)-1]
+                #myTemplate = self.getHistoNameForNuisance(c, n["name"])
                 if n["distribution"] == "shape" and n[c] == "1":
                     myHistoNames.append(myTemplate+"Up")
                     myHistoNames.append(myTemplate+"Down")
         myDir = f.GetDirectory(self._rootFileDirectory)
         klist = myDir.GetListOfKeys()
+        #for k in klist:
+            #print k.GetName()
+        #print "***"
+        #print myHistoNames
+        #print self._rootFileDirectory
         for name in myHistoNames:
-            k = klist.FindObject(name)
+            s = name.split("/")
+            realName = s[len(s)-1]
+            k = klist.FindObject(realName)
             if k == None:
                 raise Exception("Error: cannot find histo '%s' in root file '%s'!"%(name, self._rootFilename))
             o = k.ReadObj()
@@ -947,6 +982,9 @@ class DataCardReader:
         for item in self._hCache:
             if item.GetName() == objectName:
                 return item
+        for item in self._hCache:
+            print item.GetName()
+        print self._datacardColumnNames
         raise Exception("Error: Cannot find root object '%s' in root file '%s'!"%(objectName, self._rootFilename))
 
     def _readDatacardContents(self, directory, mass):
