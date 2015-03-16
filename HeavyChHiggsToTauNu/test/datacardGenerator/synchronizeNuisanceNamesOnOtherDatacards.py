@@ -9,6 +9,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as Datacar
 # Common naming, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG/HiggsCombinationConventions
 _CommonNuisanceReplaces = {}
 _CommonNuisanceReplaces["lumi"] = "lumi_8TeV"
+_CommonNuisanceReplaces["pileup"] = "CMS_pileup"
 _CommonNuisanceReplaces["ES_taus"] = "CMS_scale_t"
 _CommonNuisanceReplaces["ES_jets"] = "CMS_scale_j"
 _CommonNuisanceReplaces["ES_METunclustered"] = "CMS_scale_met"
@@ -23,6 +24,16 @@ _CommonNuisanceReplaces["trg_tau_MCeff"] = "CMS_trg_taumet_tauMCEff"
 _CommonNuisanceReplaces["trg_L1ETM_dataeff"] = "CMS_trg_taumet_L1ETMDataEff"
 _CommonNuisanceReplaces["trg_L1ETM_MCeff"] = "CMS_trg_taumet_L1ETMMCEff"
 _CommonNuisanceReplaces["trg_muon_dataeff"] = "CMS_trg_mu_dataEff"
+_CommonNuisanceReplaces["ttbarPDFVariation"] = "pdfvariation_ttbar"
+_CommonNuisanceReplaces["ttbbmeps"] = "CMS_meps_ttbb"
+_CommonNuisanceReplaces["dilemeps"] = "CMS_meps_dile"
+_CommonNuisanceReplaces["othemeps"] = "CMS_meps_other"
+_CommonNuisanceReplaces["ttbbq2"] = "CMS_q2_ttbb"
+_CommonNuisanceReplaces["dileq2"] = "CMS_q2_dile"
+_CommonNuisanceReplaces["otheq2"] = "CMS_q2_other"
+for i in [0,1,2]:
+    for k in ["ee","emu","mumu","mutau"]:
+    _CommonNuisanceReplaces["ttbb_b%d_ttbb_%s_additional"%(i,k)] = "CMS_ttbb_%s_normalization_b%d"%(k,i)
 
 _MinimumStatUncertByBkg = {}
 _MinimumStatUncertByBkg["st"] = 0.45
@@ -165,6 +176,7 @@ def hplusTauNuToTauMu(myDir, doCorrelation, nobtagcorr):
     myColumnReplaces["tau_fake"] = "CMS_Hptnmt_taufake"
     myColumnReplaces["tt_ltau"] = "CMS_Hptnmt_ttltau"
     myColumnReplaces["tt_ll"] = "CMS_Hptnmt_ttll"
+    myColumnReplaces["ttbb"] = "CMS_Hptnmt_ttbb"
     myColumnReplaces["singleTop"] = "CMS_Hptnmt_singleTop"
     myColumnReplaces["di_boson"] = "CMS_Hptnmt_vv"
     myColumnReplaces["Z_tautau"] = "CMS_Hptnmt_Ztt"
@@ -210,7 +222,28 @@ def hplusTauNuToDilepton(myDir, doCorrelation, nobtagcorr):
         rootFilePattern = "CrossSectionShapes_taunu_m%s.root"
         rootFileDirectory = suffix
         myMgr = DatacardReader.DataCardDirectoryManager(myDir, datacardPattern, rootFilePattern, rootFileDirectory=rootFileDirectory, readOnly=False)
-
+        
+        # Replace nuisance names
+        myNuisanceReplaces = {}
+        myNuisanceReplaces["tauId"] = "tau_ID_shape"
+        myNuisanceReplaces["jetTauMisId"] = "tau_ID_eToTauBarrel_shape"
+        myNuisanceReplaces["tes"] = "ES_taus"
+        myNuisanceReplaces["topptunc%s"%suffix] = "CMS_Hptn%s_topPtReweighting"%suffix
+        myNuisanceReplaces["jes"] = "ES_jets"
+        myNuisanceReplaces["jer"] = "JER"
+        myNuisanceReplaces["umet"] = "ES_METunclustered"
+        myNuisanceReplaces["dy_additional_8TeV"] = "dyAdditional_8TeV"
+        myNuisanceReplaces["btag"] = "CMS_btag_CSVL"
+        myNuisanceReplaces["unbtag"] = "CMS_unbtag_CSVL"
+        myNuisanceReplaces["lumi_8TeV"] = "lumi"
+        myNuisanceReplaces["pu"] = "pileup"
+        myNuisanceReplaces["pdf"] = "ttbarPDFVariation"
+        myNuisanceReplaces["q2scale"] = "ttbarQ2Scale"
+        myNuisanceReplaces["matching"] = "ttbarMatchingVariation"
+        myNuisanceReplaces["seleff_8TeV"] = "CMS_eff_dilepton"
+        myMgr.replaceNuisanceNames(myNuisanceReplaces)
+        myMgr.replaceNuisanceNames(_CommonNuisanceReplaces)
+        
         myMgr.removeNuisance("theoryUncXS_vv")
         myMgr.removeNuisance("theoryUncXS_wjets")
         myMgr.removeNuisance("theoryUncXS_otherttbar")
@@ -237,29 +270,9 @@ def hplusTauNuToDilepton(myDir, doCorrelation, nobtagcorr):
         myColumnReplaces["st"] = "CMS_Hptn%s_st"%suffix
         myColumnReplaces["dy"] = "CMS_Hptn%s_dy"%suffix
         myColumnReplaces["ttbar"] = "CMS_Hptn%s_ttbar"%suffix
+        myColumnReplaces["ttbb"] = "CMS_Hptn%s_ttbb"%suffix
         myMgr.replaceColumnNames(myColumnReplaces)
         myNonTTColumns = ["CMS_Hptn%s_Hp%s"%(suffix,suffix), "CMS_Hptn%s_vv"%suffix, "CMS_Hptn%s_wjets"%suffix, "CMS_Hptn%s_otherttbar"%suffix, "CMS_Hptn%s_st"%suffix, "CMS_Hptn%s_dy"%suffix]
-        
-        # Replace nuisance names
-        myNuisanceReplaces = {}
-        myNuisanceReplaces["tauId"] = "tau_ID_shape"
-        myNuisanceReplaces["jetTauMisId"] = "tau_ID_eToTauBarrel_shape"
-        myNuisanceReplaces["tes"] = "ES_taus"
-        myNuisanceReplaces["topptunc"] = "CMS_Hptn%s_topPtReweighting"%suffix
-        myNuisanceReplaces["jes"] = "ES_jets"
-        myNuisanceReplaces["jer"] = "JER"
-        myNuisanceReplaces["umet"] = "ES_METunclustered"
-        myNuisanceReplaces["dy_additional_8TeV"] = "dyAdditional_8TeV"
-        myNuisanceReplaces["btag"] = "CMS_btag_CSVL"
-        myNuisanceReplaces["unbtag"] = "CMS_unbtag_CSVL"
-        myNuisanceReplaces["lumi_8TeV"] = "lumi"
-        myNuisanceReplaces["pu"] = "pileup"
-        myNuisanceReplaces["pdf"] = "ttbarPDFVariation"
-        myNuisanceReplaces["q2scale"] = "ttbarQ2Scale"
-        myNuisanceReplaces["matching"] = "ttbarMatchingVariation"
-        myNuisanceReplaces["seleff_8TeV"] = "CMS_eff_dilepton"
-        myMgr.replaceNuisanceNames(myNuisanceReplaces)
-        myMgr.replaceNuisanceNames(_CommonNuisanceReplaces)
         
         myMgr.replaceNuisanceValue("ttbarQ2Scale","-","CMS_Hptn%s_Hp%s"%(suffix,suffix))
         myMgr.replaceNuisanceValue("ttbarMatchingVariation","-","CMS_Hptn%s_Hp%s"%(suffix,suffix))
@@ -300,7 +313,6 @@ def hplusTbToTauMu(myDir, doCorrelation, nobtagcorr):
     rootFilePattern = "shapes_tb_m%s_btagmultiplicity_j.root"
     
     myMgr = DatacardReader.DataCardDirectoryManager(myDir, datacardPattern, rootFilePattern, readOnly=False)
-
     myMgr.removeNuisance("theoryUncXS_vv")
     myMgr.removeNuisance("theoryUncXS_diboson")
     myMgr.removeNuisance("theoryUncXS_wjets")
@@ -311,6 +323,20 @@ def hplusTbToTauMu(myDir, doCorrelation, nobtagcorr):
     myMgr.removeNuisance("theoryUncXS_singletop")
     myMgr.removeNuisance("theoryUncXS_dy")
     myMgr.removeNuisance("theoryUncXS_ttbar")
+    
+    # Replace column names
+    myColumnReplaces = {}
+    myColumnReplaces["HTB"] = "CMS_Hptbmt_Hptb"
+    myColumnReplaces["tau_fake"] = "CMS_Hptbmt_taufake"
+    myColumnReplaces["tt_ltau"] = "CMS_Hptbmt_ttltau"
+    myColumnReplaces["tt_ll"] = "CMS_Hptbmt_ttll"
+    myColumnReplaces["tt_bb"] = "CMS_Hptbmt_ttbb"
+    myColumnReplaces["singleTop"] = "CMS_Hptbmt_singleTop"
+    myColumnReplaces["di_boson"] = "CMS_Hptbmt_vv"
+    myColumnReplaces["Z_tautau"] = "CMS_Hptbmt_Ztt"
+    myColumnReplaces["Z_eemumu"] = "CMS_Hptbmt_Zeemm"
+    myMgr.replaceColumnNames(myColumnReplaces)
+    myMgr.replaceNuisanceNames(_CommonNuisanceReplaces)
 
     # Replace nuisance names
     myNuisanceReplaces = {}
@@ -335,18 +361,7 @@ def hplusTbToTauMu(myDir, doCorrelation, nobtagcorr):
     myNuisanceReplaces["q2scale"] = "ttbarQ2Scale"
     myNuisanceReplaces["leptEff"] = "CMS_eff_m"
     myMgr.replaceNuisanceNames(myNuisanceReplaces)
-    myMgr.replaceNuisanceNames(_CommonNuisanceReplaces)
-    # Replace column names
-    myColumnReplaces = {}
-    myColumnReplaces["HTB"] = "CMS_Hptbmt_Hptb"
-    myColumnReplaces["tau_fake"] = "CMS_Hptbmt_taufake"
-    myColumnReplaces["tt_ltau"] = "CMS_Hptbmt_ttltau"
-    myColumnReplaces["tt_ll"] = "CMS_Hptbmt_ttll"
-    myColumnReplaces["singleTop"] = "CMS_Hptbmt_singleTop"
-    myColumnReplaces["di_boson"] = "CMS_Hptbmt_vv"
-    myColumnReplaces["Z_tautau"] = "CMS_Hptbmt_Ztt"
-    myColumnReplaces["Z_eemumu"] = "CMS_Hptbmt_Zeemm"
-    myMgr.replaceColumnNames(myColumnReplaces)
+    
     
     myMgr.addNuisance("xsect_tt_8TeV", distribution="lnN", columns=["CMS_Hptbmt_ttltau","CMS_Hptbmt_ttll"], value="0.940/1.052")
     myMgr.addNuisance("xsect_singleTop", distribution="lnN", columns=["CMS_Hptbmt_singleTop"], value="1.091")
@@ -394,28 +409,6 @@ def hplusTbToDilepton(myDir, doCorrelation, nobtagcorr):
         myMgr.removeNuisance("theoryUncXS_st")
         myMgr.removeNuisance("theoryUncXS_dy")
         myMgr.removeNuisance("theoryUncXS_ttbar")
-
-        myMgr.addNuisance("xsect_tt_8TeV", distribution="lnN", columns=["ttbar","otherttbar"], value="0.940/1.052")
-        myMgr.addNuisance("xsect_singleTop", distribution="lnN", columns=["st"], value="1.091")
-        myMgr.addNuisance("xsect_DYtoll", distribution="lnN", columns=["dy"], value="1.040")
-        myMgr.addNuisance("xsect_VV", distribution="lnN", columns=["vv"], value="1.040")
-        if suffix in ["ee","emu"]:
-            myMgr.addNuisance("xsect_Wjets", distribution="lnN", columns=["wjets"], value="0.963/1.040")
-        #myMgr.removeColumn("wjets")
-        #myMgr.removeColumn("vv")
-        #myMgr.removeColumn("otherttbar")
-
-        # Replace column names
-        myColumnReplaces = {}
-        myColumnReplaces["HTB"] = "CMS_Hptb%s_Hp%s"%(suffix,suffix)
-        myColumnReplaces["vv"] = "CMS_Hptb%s_vv"%suffix
-        myColumnReplaces["wjets"] = "CMS_Hptb%s_wjets"%suffix
-        myColumnReplaces["otherttbar"] = "CMS_Hptb%s_otherttbar"%suffix
-        myColumnReplaces["st"] = "CMS_Hptb%s_st"%suffix
-        myColumnReplaces["dy"] = "CMS_Hptb%s_dy"%suffix
-        myColumnReplaces["ttbar"] = "CMS_Hptb%s_ttbar"%suffix
-        myMgr.replaceColumnNames(myColumnReplaces)
-        myNonTTColumns = ["CMS_Hptb%s_Hp%s"%(suffix,suffix), "CMS_Hptb%s_vv"%suffix, "CMS_Hptb%s_wjets"%suffix, "CMS_Hptb%s_otherttbar"%suffix, "CMS_Hptb%s_st"%suffix, "CMS_Hptb%s_dy"%suffix]
         
         # Replace nuisance names
         myNuisanceReplaces = {}
@@ -437,6 +430,29 @@ def hplusTbToDilepton(myDir, doCorrelation, nobtagcorr):
         myNuisanceReplaces["seleff_8TeV"] = "CMS_eff_dilepton"
         myMgr.replaceNuisanceNames(myNuisanceReplaces)
         myMgr.replaceNuisanceNames(_CommonNuisanceReplaces)
+
+        myMgr.addNuisance("xsect_tt_8TeV", distribution="lnN", columns=["ttbar","otherttbar"], value="0.940/1.052")
+        myMgr.addNuisance("xsect_singleTop", distribution="lnN", columns=["st"], value="1.091")
+        myMgr.addNuisance("xsect_DYtoll", distribution="lnN", columns=["dy"], value="1.040")
+        myMgr.addNuisance("xsect_VV", distribution="lnN", columns=["vv"], value="1.040")
+        if suffix in ["ee","emu"]:
+            myMgr.addNuisance("xsect_Wjets", distribution="lnN", columns=["wjets"], value="0.963/1.040")
+        #myMgr.removeColumn("wjets")
+        #myMgr.removeColumn("vv")
+        #myMgr.removeColumn("otherttbar")
+
+        # Replace column names
+        myColumnReplaces = {}
+        myColumnReplaces["HTB"] = "CMS_Hptb%s_Hp%s"%(suffix,suffix)
+        myColumnReplaces["vv"] = "CMS_Hptb%s_vv"%suffix
+        myColumnReplaces["wjets"] = "CMS_Hptb%s_wjets"%suffix
+        myColumnReplaces["otherttbar"] = "CMS_Hptb%s_otherttbar"%suffix
+        myColumnReplaces["st"] = "CMS_Hptb%s_st"%suffix
+        myColumnReplaces["dy"] = "CMS_Hptb%s_dy"%suffix
+        myColumnReplaces["ttbar"] = "CMS_Hptb%s_ttbar"%suffix
+        myColumnReplaces["ttbb"] = "CMS_Hptb%s_ttbb"%suffix
+        myMgr.replaceColumnNames(myColumnReplaces)
+        myNonTTColumns = ["CMS_Hptb%s_Hp%s"%(suffix,suffix), "CMS_Hptb%s_vv"%suffix, "CMS_Hptb%s_wjets"%suffix, "CMS_Hptb%s_otherttbar"%suffix, "CMS_Hptb%s_st"%suffix, "CMS_Hptb%s_dy"%suffix]
         
         myMgr.replaceNuisanceValue("ttbarQ2Scale","-","CMS_Hptb%s_Hp%s"%(suffix,suffix))
         myMgr.replaceNuisanceValue("ttbarMatchingVariation","-","CMS_Hptb%s_Hp%s"%(suffix,suffix))
@@ -477,7 +493,7 @@ def hplusTBToSingleLepton(myDir, label, lepton):
     rootFilePattern = "HT_whf_limits_M%s_rebin_combine_stat2_shape.root"
     rootFileDirectory = ""
     myMgr = DatacardReader.DataCardDirectoryManager(myDir, datacardPattern, rootFilePattern, rootFileDirectory=rootFileDirectory, readOnly=False, outSuffix="%s_%s"%(lepton,label))
-
+    myMgr.replaceNuisanceNames(_CommonNuisanceReplaces)
     #myMgr.addNuisance("xsect_tt_8TeV", distribution="lnN", columns=["ttbar","otherttbar"], value="0.940/1.052")
     #myMgr.addNuisance("xsect_singleTop", distribution="lnN", columns=["st"], value="1.091")
     #myMgr.addNuisance("xsect_DYtoll", distribution="lnN", columns=["dy"], value="1.040")
@@ -522,7 +538,7 @@ def hplusTBToSingleLepton(myDir, label, lepton):
     myNuisanceReplaces["btag"] = "CMS_btaguntag_CSVM"
     myNuisanceReplaces["btag"] = "CMS_btaguntag_CSVM"
     myMgr.replaceNuisanceNames(myNuisanceReplaces)
-    myMgr.replaceNuisanceNames(_CommonNuisanceReplaces)
+    
     
     #myMgr.addNuisance("btagshapePDF", distribution="lnN", columns=["ttbar","otherttbar"], value="1.050")
 

@@ -658,18 +658,19 @@ def purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints):
                         if not os.path.exists(myDecayModeMatrix[fskey][dmkey][1]%mass):
                             raise Exception("Error: the datacard for mass %s exists, but the root file '%s' does not!"%(mass, myDecayModeMatrix[fskey][dmkey][1]%mass))
             if not myFoundStatus:
-                #print "Warning: removing decay mode %s / %s"%(myDecayModeMatrix.keys()[i], myDecayModeMatrix[i].keys()[j])
+                print "Warning: no datacards found for decay mode %s / %s, removing it ..."%(fskey,dmkey)
                 del myDecayModeMatrix[fskey][dmkey]
-            # Purge non-common mass points
-            if len(myCommonMassPoints) == 0:
-                myCommonMassPoints.extend(myDecayModeMassPoints)
             else:
-                i = 0
-                while i < len(myCommonMassPoints):
-                    if not myCommonMassPoints[i] in myDecayModeMassPoints:
-                        del myCommonMassPoints[i]
-                    else:
-                        i += 1
+                # Purge non-common mass points
+                if len(myCommonMassPoints) == 0:
+                    myCommonMassPoints.extend(myDecayModeMassPoints)
+                else:
+                    i = 0
+                    while i < len(myCommonMassPoints):
+                        if not myCommonMassPoints[i] in myDecayModeMassPoints:
+                            del myCommonMassPoints[i]
+                        else:
+                          i += 1
         if len(myDecayModeMatrix[fskey].keys()) == 0:
             del myDecayModeMatrix[fskey]
     # Print combination details
@@ -825,13 +826,13 @@ if __name__ == "__main__":
         myDecayModeMatrix["mumu"] = myMuMuDecayMode
         
         # Purge matrix
-        purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints)
-
+        if len(myMassPoints) == 0:
+            purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints)
         # reject mass points between 160-200 GeV
         i = 0
         while i < len(myMassPoints):
             m = float(myMassPoints[i])
-            if m > 160.1 and m < 199.9:
+            if (m > 160.1 and m < 199.9) or m < 89.9:
                 myMassPoints.remove(myMassPoints[i])
             else:
                 i += 1
