@@ -333,7 +333,7 @@ class BrContainer:
                         if _separateTheoreticalXsectionAndBrUncertainties:
                             myNuisanceName = "%s%s"%(myTheorUncertPrefix,k)
                             myUncertValueString = "%.3f"%(1.0+myUncertValue)
-                            if float(mHp) < 179 and ("HH" in mySignalColumnName or "ttHpHp" in mySignalColumnName:
+                            if float(mHp) < 179 and ("HH" in mySignalColumnName or "ttHpHp" in mySignalColumnName):
                                 # Add for HH
                                 myUncertValueStringHH = "%.3f"%(1.0+myUncertValue*2.0)
                                 myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueStringHH)
