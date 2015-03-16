@@ -151,7 +151,10 @@ class TanBetaResultContainer:
         myFinalStateLabel.append("  ^{}#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu")
         myFinalStateLabel.append("^{}H^{+}#rightarrowt#bar{b} final states:")
         myFinalStateLabel.append("  ^{}#mu#tau_{h}, ee, e#mu, #mu#mu")
-        limit.doTanBetaPlotGeneric("limitsTanbCombination_heavy_"+self._mssmModel, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="combination")
+        if float(self._massPoints[0]) < 179:
+            limit.doTanBetaPlotGeneric("limitsTanb_light_"+self._mssmModel, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="light")
+        else:
+            limit.doTanBetaPlotGeneric("limitsTanbCombination_heavy_"+self._mssmModel, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="combination")
                                                                            
 class BrContainer:
     def __init__(self, decayModeMatrix, mssmModel, massPoints):
@@ -203,9 +206,11 @@ class BrContainer:
         mHpInTree = array.array('d',[0])
         tanbInTree = array.array('d',[0])
         sigmaInTree = array.array('d',[0])
+        brTBHInTree = array.array('d',[0])
         myTree.SetBranchAddress("mHp", mHpInTree)
         myTree.SetBranchAddress("tanb", tanbInTree)
         myTree.SetBranchAddress("tHp_xsec", sigmaInTree)
+        myTree.SetBranchAddress("BR_tHpb", brTBHInTree)
         # Set branch adresses for branching keys
         for brkey in self._brkeys.keys():
             myBrLabel = "BR_%s"%brkey
@@ -239,7 +244,10 @@ class BrContainer:
         else:
             for brkey in self._brkeys.keys():
                 self._results[tblabel]["%sTheory"%brkey] = self._brkeys[brkey][0]
-            self._results[tblabel]["sigmaTheory"] = sigmaInTree[0]*2.0*0.001 # fb->pb; xsec is in database for only H+, factor 2 gives xsec for Hpm
+            if float(mHp) > 179:
+                self._results[tblabel]["sigmaTheory"] = sigmaInTree[0]*2.0*0.001 # fb->pb; xsec is in database for only H+, factor 2 gives xsec for Hpm
+            else:
+                self._results[tblabel]["sigmaTheory"] = brTBHInTree[0] # Br(t->bH+) for light H+
         self._results[tblabel]["combineResult"] = None
         
         s = "  - m=%s, tanbeta=%.1f: "%(mHp, tanbeta)
@@ -312,7 +320,11 @@ class BrContainer:
             myDecayModeKeys = self._decayModeMatrix[fskey].keys()
             for i in range(len(myDecayModeKeys)):
                 myDecayModeKeys[i] = "BR_%s"%myDecayModeKeys[i]
-            myBrUncert = db.brUncert("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)
+            myBrUncert = None
+            if float(mHp) < 179:
+                myBrUncert = db.brUncertLight("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)
+            else:
+                myBrUncert = db.brUncertHeavy("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)
             for i in range(len(myDecayModeKeys)):
                 for k in myBrUncert.keys():
                     if myDecayModeKeys[i] in k:
@@ -551,7 +563,7 @@ def readResults(opts, brContainer, m, myKey, scen):
                 for i in range(myBlockStart+1, myBlockEnd-1):
                     s = lines[i].replace("  tan beta=","").replace(" xsecTheor=","").replace(" pb, limit(%s)="%myKey,",").replace(" pb, passed=",",")
                     mySplit = s.split(",")
-                    if len(mySplit) > 1 and s[0] != "#" and mySplit[2] != "failed":
+                    if len(mySplit) > 1 and s[0] != "#" and mySplit[2] != "failed" and mySplit[1] != "None":
                         tanbetakey = "%04.1f"%(float(mySplit[0]))
                         if not brContainer.resultExists(tanbetakey):
                             brContainer._results[tanbetakey] = {}
