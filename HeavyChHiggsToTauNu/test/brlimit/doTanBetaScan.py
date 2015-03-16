@@ -569,6 +569,8 @@ def linearCrossOverOfTanBeta(container, tblow, tbhigh, resultKey):
     theoryLow = container.getResult(tblow)["sigmaTheory"]
     theoryHigh = container.getResult(tbhigh)["sigmaTheory"]
     # subtract the theory from the limit (assume linear behavior)
+    if theoryLow == None or theoryHigh == None:
+        return -1.0
     subLow = limitLow - theoryLow
     subHigh = limitHigh - theoryHigh
     tbLowValue = float(tblow)
