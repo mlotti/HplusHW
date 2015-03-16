@@ -226,20 +226,29 @@ class BrContainer:
             i += 1
         f.Close()
         if not myTanBetaValueFoundStatus:
-            raise Exception("Error: Could not find tan beta value %f in '%s'!"%(tanbeta, myRootFilename))
+            print "Warning: Could not find tan beta value %f in '%s'!"%(tanbeta, myRootFilename)
         if not myFoundMassStatus:
-            raise Exception("Error: Could not find mass value %s in '%s'!"%(mHp, myRootFilename))
+            print "Warning: Could not find mass value %s in '%s'!"%(mHp, myRootFilename)
         # Found branching and sigma, store them
         tblabel = "%04.1f"%tanbeta
         self._results[tblabel] = {}
-        for brkey in self._brkeys.keys():
-            self._results[tblabel]["%sTheory"%brkey] = self._brkeys[brkey][0]
-        self._results[tblabel]["sigmaTheory"] = sigmaInTree[0]*2.0*0.001 # fb->pb; xsec is in database for only H+, factor 2 gives xsec for Hpm
+        if not myTanBetaValueFoundStatus or not myFoundMassStatus:
+            for brkey in self._brkeys.keys():
+                self._results[tblabel]["%sTheory"%brkey] = None
+            self._results[tblabel]["sigmaTheory"] = None
+        else:
+            for brkey in self._brkeys.keys():
+                self._results[tblabel]["%sTheory"%brkey] = self._brkeys[brkey][0]
+            self._results[tblabel]["sigmaTheory"] = sigmaInTree[0]*2.0*0.001 # fb->pb; xsec is in database for only H+, factor 2 gives xsec for Hpm
         self._results[tblabel]["combineResult"] = None
         
-        s = "  - m=%s, tanbeta=%.1f: sigma_theor=%f pb"%(mHp, tanbeta, self._results[tblabel]["sigmaTheory"])
-        for brkey in self._brkeys.keys():
-            s += ", Br(%s)=%f"%(brkey, self._brkeys[brkey][0])
+        s = "  - m=%s, tanbeta=%.1f: "%(mHp, tanbeta)
+        if not myTanBetaValueFoundStatus or not myFoundMassStatus:
+            s += "Failed to found theor. input!"
+        else:
+            s += "sigma_theor=%f pb"%(self._results[tblabel]["sigmaTheory"])
+            for brkey in self._brkeys.keys():
+                s += ", Br(%s)=%f"%(brkey, self._brkeys[brkey][0])
         print s
 
     def produceScaledCards(self, mHp, tanbeta):
@@ -247,6 +256,9 @@ class BrContainer:
             return
         # Obtain branching and sigma from MSSM model database
         self._readFromDatabase(mHp, tanbeta)
+        if self.getFailedStatus(tanbeta):
+            return
+        
         #print "    Scaled '%s/%s' signal in datacards by branching %f (mHp=%s, tanbeta=%.1f)"%(mySignalScaleFactor, mHp, tanbeta)
         # Obtain theoretical uncertinties from MSSM model database
         myDbInputName = "%s-LHCHXSWG.root"%self._mssmModel
@@ -285,14 +297,17 @@ class BrContainer:
             myTheorUncertPrefix = "theory_"
             # Add theoretical cross section uncertainties to datacard 
             db = BRXSDB.BRXSDatabaseInterface(myDbInputName, silentStatus=True)
-            myXsecUncert = [db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "-"),
-                            db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "+")]
-            
-            if _separateTheoreticalXsectionAndBrUncertainties:
-                myNuisanceName = "%sxsectionHp"%myTheorUncertPrefix
-                myUncertValueString = "%.3f/%.3f"%(1.0-myXsecUncert[0], 1.0+myXsecUncert[1])
-                myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
-                print "      . H+ xsec uncert: %s"%myUncertValueString
+            myXsecUncert = [0.0, 0.0]
+            if float(mHp) > 179:
+                myXsecUncert = [db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "-"),
+                                db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "+")]
+                if _separateTheoreticalXsectionAndBrUncertainties:
+                    myNuisanceName = "%sxsectionHp"%myTheorUncertPrefix
+                    myUncertValueString = "%.3f/%.3f"%(1.0-myXsecUncert[0], 1.0+myXsecUncert[1])
+                    myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
+                    print "      . H+ xsec uncert: %s"%myUncertValueString
+            else:
+                _separateTheoreticalXsectionAndBrUncertainties = True
             # Add theoretical branching ratio uncertainties to datacard (depends on how many decay modes are combined)
             myDecayModeKeys = self._decayModeMatrix[fskey].keys()
             for i in range(len(myDecayModeKeys)):
@@ -306,8 +321,17 @@ class BrContainer:
                         if _separateTheoreticalXsectionAndBrUncertainties:
                             myNuisanceName = "%s%s"%(myTheorUncertPrefix,k)
                             myUncertValueString = "%.3f"%(1.0+myUncertValue)
-                            myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
-                            print "      . H+ Br uncert(%s): %s"%(k, myUncertValueString)
+                            if float(mHp) < 179 and "HH" in mySignalColumnName:
+                                # Add for HH
+                                myUncertValueStringHH = "%.3f"%(1.0+myUncertValue*2.0)
+                                myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueStringHH)
+                                # Add for HW
+                                myPrimaryReader.addNuisance(myNuisanceName, "lnN", myPrimaryReader.getDatasetNames()[1], myUncertValueString)
+                                print "      . H+ HH Br uncert(%s): %s"%(k, myUncertValueStringHH)
+                                print "      . H+ HW Br uncert(%s): %s"%(k, myUncertValueString)
+                            else:
+                                myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
+                                print "      . H+ Br uncert(%s): %s"%(k, myUncertValueString)
                         else:
                             if _linearSummingForTheoryUncertainties:
                                 myXsecUncert[0] += myUncertValue
@@ -442,7 +466,11 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
         #raise Exception("No datacards present")
     
     # Print output
-    s = "- mHp=%s, tanbeta=%.1f, sigmaTheory=%.3f"%(mHp, tanbeta, brContainer.getResult(tanbeta)["sigmaTheory"])
+    s = "- mHp=%s, tanbeta=%.1f, sigmaTheory="%(mHp, tanbeta)
+    if brContainer.getResult(tanbeta)["sigmaTheory"] == None:
+        s += "None"
+    else:
+        s += "%.3f"%brContainer.getResult(tanbeta)["sigmaTheory"]
     if brContainer.getFailedStatus(tanbeta):
         s += " sigmaCombine (%s)=failed"%resultKey
     else:
@@ -566,11 +594,12 @@ def main(opts, brContainer, m, scen, plotContainers):
                 for tb in opts.tanbeta:
                     getCombineResultPassedStatus(opts, brContainer, m, float(tb), myKey, scen)
             else:
-                getCombineResultPassedStatus(opts, brContainer, m, 1.1, myKey, scen)
-                getCombineResultPassedStatus(opts, brContainer, m, 1.2, myKey, scen)
-                getCombineResultPassedStatus(opts, brContainer, m, 1.3, myKey, scen)
-                getCombineResultPassedStatus(opts, brContainer, m, 1.4, myKey, scen)
-                scanRanges(opts, brContainer, m, 1.1, 8.0, myKey, scen)
+                if float(m) > 179:
+                    getCombineResultPassedStatus(opts, brContainer, m, 1.1, myKey, scen)
+                    getCombineResultPassedStatus(opts, brContainer, m, 1.2, myKey, scen)
+                    getCombineResultPassedStatus(opts, brContainer, m, 1.3, myKey, scen)
+                    getCombineResultPassedStatus(opts, brContainer, m, 1.4, myKey, scen)
+                scanRanges(opts, brContainer, m, 1.1, 7.9, myKey, scen)
                 scanRanges(opts, brContainer, m, 8.0, _maxTanBeta, myKey, scen)
     
     outtxt = ""
@@ -596,7 +625,10 @@ def main(opts, brContainer, m, scen, plotContainers):
                     else:
                         combineResult = "n.a."
                         passedStatus = "n.a."
-            outtxt += "  tan beta=%s, xsecTheor=%f pb, limit(%s)=%s, passed=%s\n"%(k, theory, myResultKey, combineResult, passedStatus)
+            if theory == None:
+                outtxt += "  tan beta=%s, xsecTheor=None, limit(%s)=%s, passed=%s\n"%(k, myResultKey, combineResult, passedStatus)
+            else:
+                outtxt += "  tan beta=%s, xsecTheor=%f pb, limit(%s)=%s, passed=%s\n"%(k, theory, myResultKey, combineResult, passedStatus)
     
     # Find limits
     outtxt += "\nAllowed tan beta ranges (%s) for m=%s (linear interpolation used)\n"%(scen, m)
@@ -826,8 +858,7 @@ if __name__ == "__main__":
         myDecayModeMatrix["mumu"] = myMuMuDecayMode
         
         # Purge matrix
-        if len(myMassPoints) == 0:
-            purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints)
+        purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints)
         # reject mass points between 160-200 GeV
         i = 0
         while i < len(myMassPoints):
