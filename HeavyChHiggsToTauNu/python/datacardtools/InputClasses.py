@@ -8,7 +8,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
 # data structures for the config file information
 
 class ObservationInput:
-    def __init__(self, datasetDefinition, shapeHisto, additionalNormalisation):
+    def __init__(self, datasetDefinition, shapeHisto, additionalNormalisation=1.0):
         self.datasetDefinition = datasetDefinition
         self.shapeHisto = shapeHisto
         self.additionalNormalisation = additionalNormalisation
