@@ -26,6 +26,7 @@ import math
 
 _resultFilename = "results.txt"
 _maxTanBeta = 69.0
+_minBrTanBeta = 8.0
 _linearSummingForTheoryUncertainties = True # LHCHXSWG recommendation True
 _separateTheoreticalXsectionAndBrUncertainties = False # LHCHXSWG recommendation False (because of correlations)
 
@@ -71,44 +72,86 @@ class TanBetaResultContainer:
         g = ROOT.TGraph(lenm*4+2)
         # Low limit, bottom pass left to right
         for i in range(0, lenm):
-            g.SetPoint(i, float(self._massPoints[i]), self._resultsLow[firstKey][self._massPoints[i]])
+	    a = self._resultsLow[firstKey][self._massPoints[i]]
+	    if a < 0:
+		g.SetPoint(i, float(self._massPoints[i]), _minBrTanBeta)
+	    else:
+		g.SetPoint(i, float(self._massPoints[i]), a)
         # Low limit, top pass right to left
         for i in range(0, lenm):
             j = lenm - i - 1
-            g.SetPoint(i+lenm, float(self._massPoints[j]), self._resultsLow[secondKey][self._massPoints[j]])
+            a = self._resultsLow[secondKey][self._massPoints[j]]
+            if a < 0:
+		g.SetPoint(i+lenm, float(self._massPoints[j]), _minBrTanBeta)
+	    else:
+		g.SetPoint(i+lenm, float(self._massPoints[j]), a)
         # intermediate points
         g.SetPoint(lenm*2, -1.0, self._resultsLow[secondKey][self._massPoints[lenm-1]])
         g.SetPoint(lenm*2+1, -1.0, self._resultsHigh[firstKey][self._massPoints[0]])
         # Upper limit, bottom pass left to right
         for i in range(0, lenm):
-            g.SetPoint(i+lenm*2+2, float(self._massPoints[i]), self._resultsHigh[firstKey][self._massPoints[i]])
+	    a = self._resultsHigh[firstKey][self._massPoints[i]]
+	    if a == _maxTanBeta:
+		g.SetPoint(i+lenm*2+2, float(self._massPoints[i]), _minBrTanBeta)
+	    else:
+		g.SetPoint(i+lenm*2+2, float(self._massPoints[i]), a)
         # Upper limit, top pass right to left
         for i in range(0, lenm):
             j = lenm - i - 1
-            g.SetPoint(i+lenm*3+2, float(self._massPoints[j]), self._resultsHigh[secondKey][self._massPoints[j]])
+            a = self._resultsHigh[secondKey][self._massPoints[j]]
+            if a == _maxTanBeta:
+		g.SetPoint(i+lenm*3+2, float(self._massPoints[j]), _minBrTanBeta)
+	    else:
+		g.SetPoint(i+lenm*3+2, float(self._massPoints[j]), a)
         return g
 
     def _getResultGraphForOneKey(self, resultKey):
         if not resultKey in self._resultsLow.keys():
             return None
         lenm = len(self._massPoints)
-        g = ROOT.TGraph(lenm*2+5)
+        g = ROOT.TGraph(lenm*2+4)
         # Upper limit, top part left to right
-        g.SetPoint(0, -1.0, 100.0)
-        g.SetPoint(1, 1000.0, 100.0)
+        g.SetPoint(0, -1.0, 90.0)
+        g.SetPoint(1, 1000.0, 90.0)
         # Upper limit, pass right to left
+        offset = 0
+        previousPointExcludedStatus = False
         for i in range(0, lenm):
             j = lenm - i - 1
-            g.SetPoint(i+2, float(self._massPoints[j]), self._resultsHigh[resultKey][self._massPoints[j]])
+            a = self._resultsHigh[resultKey][self._massPoints[j]]
+            if a == _maxTanBeta:
+		if not previousPointExcludedStatus:
+		    g.SetPoint(i+2+offset, float(self._massPoints[j]), _minBrTanBeta)
+		    offset += 1
+		else:
+		    offset -= 1
+		previousPointExcludedStatus = True
+	    else:
+		g.SetPoint(i+2+offset, float(self._massPoints[j]), a)
         # intermediate points
-        g.SetPoint(lenm+2, -1.0, self._resultsLow[resultKey][self._massPoints[lenm-1]])
-        g.SetPoint(lenm+3, -1.0, self._resultsHigh[resultKey][self._massPoints[0]])
+        if previousPointExcludedStatus:
+	    #g.SetPoint(lenm+2+offset, -1.0, _minBrTanBeta)
+	    #g.SetPoint(lenm+3+offset, -1.0, _minBrTanBeta)
+	    offset -= 2
+	else:
+	    g.SetPoint(lenm+2+offset, -1.0, self._resultsLow[resultKey][self._massPoints[lenm-1]])
+	    g.SetPoint(lenm+3+offset, -1.0, self._resultsHigh[resultKey][self._massPoints[0]])
         # Low limit, pass left to right
+        previousPointExcludedStatus = False
         for i in range(0, lenm):
-            g.SetPoint(i+lenm+3, float(self._massPoints[i]), self._resultsLow[resultKey][self._massPoints[i]])
+	    a = self._resultsLow[resultKey][self._massPoints[i]]
+	    if a < 0:
+		offset -= 1
+		previousPointExcludedStatus = True
+	    else:
+		if previousPointExcludedStatus:
+		    previousPointExcludedStatus = False
+		    #g.SetPoint(i+lenm+3+offset, float(self._massPoints[j-1]), _minBrTanBeta)
+		    #offset += 1
+		g.SetPoint(i+lenm+3+offset, float(self._massPoints[i]), a)
         # Low limit, bottom part right to left
-        g.SetPoint(lenm*2+4, 1000.0, 0.0)
-        g.SetPoint(lenm*2+5, -1.0, 0.0)
+        g.SetPoint(lenm*2+3+offset, 1000.0, 0.0)
+        g.SetPoint(lenm*2+4+offset, -1.0, 0.0)
         return g
 
     def doPlot(self):
@@ -147,12 +190,15 @@ class TanBetaResultContainer:
             graphs["Allowed"].SetPoint(n-2, 500, 4.77)
             graphs["Allowed"].SetPoint(n-1, 600, 4.71)
         myFinalStateLabel = []
-        myFinalStateLabel.append("^{}H^{+}#rightarrow#tau^{+}#nu_{#tau} final states:")
-        myFinalStateLabel.append("  ^{}#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu")
-        myFinalStateLabel.append("^{}H^{+}#rightarrowt#bar{b} final states:")
-        myFinalStateLabel.append("  ^{}#mu#tau_{h}, ee, e#mu, #mu#mu")
         if float(self._massPoints[0]) < 179:
-            limit.doTanBetaPlotGeneric("limitsTanb_light_"+self._mssmModel, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="light")
+	    myFinalStateLabel.append("^{}H^{+}#rightarrow#tau^{+}#nu_{#tau}, ^{}#tau_{h}+jets final state")
+	else:
+	    myFinalStateLabel.append("^{}H^{+}#rightarrow#tau^{+}#nu_{#tau} final states:")
+	    myFinalStateLabel.append("  ^{}#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu")
+	    myFinalStateLabel.append("^{}H^{+}#rightarrowt#bar{b} final states:")
+	    myFinalStateLabel.append("  ^{}#mu#tau_{h}, ee, e#mu, #mu#mu")
+        if float(self._massPoints[0]) < 179:
+            limit.doTanBetaPlotGeneric("tanbeta_%s_light"%self._mssmModel, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="light")
         else:
             limit.doTanBetaPlotGeneric("limitsTanbCombination_heavy_"+self._mssmModel, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="combination")
                                                                            
@@ -567,7 +613,10 @@ def readResults(opts, brContainer, m, myKey, scen):
                         tanbetakey = "%04.1f"%(float(mySplit[0]))
                         if not brContainer.resultExists(tanbetakey):
                             brContainer._results[tanbetakey] = {}
-                            brContainer._results[tanbetakey]["sigmaTheory"] = float(mySplit[1])
+                            if mySplit[1] == "None":
+				brContainer._results[tanbetakey]["sigmaTheory"] = None
+			    else:
+				brContainer._results[tanbetakey]["sigmaTheory"] = float(mySplit[1])
                             result = commonLimitTools.Result(0)
                             setattr(result, myKey, float(mySplit[2]))
                             brContainer.setCombineResult(tanbetakey, result)
@@ -872,7 +921,8 @@ if __name__ == "__main__":
         myDecayModeMatrix["mumu"] = myMuMuDecayMode
         
         # Purge matrix
-        purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints)
+        if not opts.analyseOutput:
+	    purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints)
         # reject mass points between 160-200 GeV
         i = 0
         while i < len(myMassPoints):
