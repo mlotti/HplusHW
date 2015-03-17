@@ -196,7 +196,7 @@ for mass in LightMassPoints:
     hhx.setLabel("HH"+str(mass)+"_a")
     hhx.setLandSProcess(-1)
     hhx.setValidMassPoints(myMassList)
-    hhx.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_tt_8TeV","lumi"])
+    hhx.setNuisances(myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_tt_8TeV","lumi"])
     hhx.setDatasetDefinition("TTToHplusBHminusB_M"+str(mass))
     DataGroups.append(hhx)
 
@@ -204,7 +204,7 @@ for mass in LightMassPoints:
     hwx.setLabel("HW"+str(mass)+"_a")
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
-    hwx.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_tt_8TeV","lumi"])
+    hwx.setNuisances(myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_tt_8TeV","lumi"])
     hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass))
     DataGroups.append(hwx)
     
@@ -218,7 +218,7 @@ for mass in LightMassPoints:
             hst.setLabel(label)
             hst.setLandSProcess(-2)
             hst.setValidMassPoints(myMassList)
-            hst.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_singleTop","lumi"])
+            hst.setNuisances(myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_singleTop","lumi"])
             hst.setDatasetDefinition("Hplus_taunu_%s-channel_M%d"%(mySuffix[i],mass))
             DataGroups.append(hst)
         mergeColumnsByLabel.append({"label": label.replace("_%s"%mySuffix[i],""), "mergeList": myLabelList[:]})
@@ -229,7 +229,7 @@ for mass in HeavyMassPoints:
     hx.setLabel("Hp"+str(mass)+"_a")
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
-    hx.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","lumi"])
+    hx.setNuisances(myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","lumi"])
     if not OptionDoTBbarForHeavy:
         hx.setDatasetDefinition("HplusTB_M"+str(mass))
     else:
@@ -300,7 +300,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_8TeV","lumi"],
+        nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_8TeV","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
@@ -309,7 +309,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_Wjets","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_Wjets","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
@@ -318,7 +318,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "DY_EWK_faketau",
@@ -327,7 +327,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_DYtoll","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_DYtoll","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
@@ -336,7 +336,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_VV","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_VV","lumi","probBtag"],
     ))
 elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
@@ -361,7 +361,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         myEmbeddingShapeSystematics.extend(["Emb_QCDcontam","Emb_hybridCaloMET","Emb_rest"])
     elif OptionGenuineTauBackgroundSource == "MC_FullSystematics":
         # Use full MC systematics; approximate xsect uncertainty with ttbar xsect unsertainty
-        myEmbeddingShapeSystematics = myShapeSystematics[:]+["top_pt","e_mu_veto","b_tag","xsect_tt_8TeV","lumi"]
+        myEmbeddingShapeSystematics = myShapeSystematics[:]+["top_pt","e_veto", "mu_veto","b_tag","xsect_tt_8TeV","lumi"]
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_TTJets_MC",
         landsProcess = 1,
@@ -415,7 +415,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_8TeV","lumi"],
+        nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","top_pt","xsect_tt_8TeV","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
@@ -424,7 +424,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_Wjets","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_Wjets","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
@@ -433,7 +433,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_singleTop","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "DY_EWK_faketau",
@@ -442,7 +442,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition   = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_DYtoll","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_DYtoll","lumi","probBtag"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_EWK_faketau",
@@ -451,7 +451,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         datasetType  = "EWKfake",
         datasetDefinition   = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_mu_veto_fakes","b_tag_fakes","xsect_VV","lumi","probBtag"],
+        nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_VV","lumi","probBtag"],
     ))
 elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
     # Replace embedding and fakes with MC
@@ -469,7 +469,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","top_pt","xsect_tt_8TeV","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","top_pt","xsect_tt_8TeV","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "Wjets_MC",
@@ -478,7 +478,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "WJets",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_Wjets","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_Wjets","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "sngltop_MC",
@@ -487,7 +487,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_singleTop","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_singleTop","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "DY_MC",
@@ -496,7 +496,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "DYJetsToLL",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_DYtoll","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_DYtoll","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "VV_MC",
@@ -505,7 +505,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         datasetType  = "Embedding",
         datasetDefinition = "Diboson",
         validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_VV","lumi"],
+        nuisances    = myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_VV","lumi"],
     ))
 else:
     raise Exception("Error: unknown value for flag OptionGenuineTauBackgroundSource!")
@@ -815,23 +815,43 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     ))
 
 Nuisances.append(Nuisance(
-    id            = "e_mu_veto",
-    label         = "lepton veto",
+    id            = "e_veto",
+    label         = "e veto",
     distr         = "lnN",
     function      = "Ratio",
-    numerator     = "muon veto", # main counter name after electron and muon veto
+    numerator     = "electron veto", # main counter name after electron and muon veto
     denominator   = "tau trigger scale factor", # main counter name before electron and muon veto
     scaling       = 0.02
 ))
 
 Nuisances.append(Nuisance(
-    id            = "e_mu_veto_fakes",
-    label         = "lepton veto",
+    id            = "e_veto_fakes",
+    label         = "e veto",
+    distr         = "lnN",
+    function      = "Ratio",
+    numerator     = "EWKfaketaus:electron veto", # main counter name after electron and muon veto
+    denominator   = "EWKfaketaus:taus == 1", # main counter name before electron and muon veto # the name is misleading, it is actually after tau trg scale factor
+    scaling       = 0.02
+))
+
+Nuisances.append(Nuisance(
+    id            = "mu_veto",
+    label         = "mu veto",
+    distr         = "lnN",
+    function      = "Ratio",
+    numerator     = "muon veto", # main counter name after electron and muon veto
+    denominator   = "electron veto", # main counter name before electron and muon veto
+    scaling       = 0.01
+))
+
+Nuisances.append(Nuisance(
+    id            = "mu_veto_fakes",
+    label         = "mu veto",
     distr         = "lnN",
     function      = "Ratio",
     numerator     = "EWKfaketaus:muon veto", # main counter name after electron and muon veto
-    denominator   = "EWKfaketaus:taus == 1", # main counter name before electron and muon veto # the name is misleading, it is actually after tau trg scale factor
-    scaling       = 0.02
+    denominator   = "EWKfaketaus:electron veto", # main counter name before electron and muon veto # the name is misleading, it is actually after tau trg scale factor
+    scaling       = 0.01
 ))
 
 Nuisances.append(Nuisance(
@@ -1027,7 +1047,7 @@ if "tau_ID_constShape" in myEmbeddingShapeSystematics:
 #MergeNuisances.append(["ES_jets","ES_jets_fakes"])
 #MergeNuisances.append(["JER","JER_fakes"])
 #MergeNuisances.append(["ES_METunclustered","ES_METunclustered_fakes"])
-MergeNuisances.append(["e_mu_veto","e_mu_veto_fakes"])
+MergeNuisances.append(["e_veto", "mu_veto","e_veto_fakes", "mu_veto_fakes"])
 MergeNuisances.append(["b_tag","b_tag_fakes"])
 #MergeNuisances.append(["b_tag","b_tag_fakes"])
 MergeNuisances.append(["pileup","pileup_fakes"])
