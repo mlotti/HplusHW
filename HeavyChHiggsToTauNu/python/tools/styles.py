@@ -209,8 +209,8 @@ ratioLineStyle = StyleCompound([StyleLine(lineColor=ROOT.kRed, lineWidth=2, line
 #mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
 mcStyle = StyleCompound([Style(ROOT.kFullSquare, ROOT.kRed+1)])
 mcStyle2 = StyleCompound([Style(33, ROOT.kBlue-4)])
-signalStyle = StyleCompound([Style(34, ROOT.kPink-9), 
-                             StyleLine(lineStyle=ROOT.kDashed, lineWidth=6)
+signalStyle = StyleCompound([Style(34, ROOT.kAzure+9), 
+                             StyleLine(lineStyle=ROOT.kSolid, lineWidth=4)
                              ])
 signalHHStyle = StyleCompound([Style(34, ROOT.kRed-8), 
                              StyleLine(lineStyle=8, lineWidth=6)

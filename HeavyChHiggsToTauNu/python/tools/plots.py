@@ -767,38 +767,155 @@ def _createRatioBinomial(histo1, histo2, ytitle):
 # Scales the histo1 values+uncertainties, and histo2 uncertainties by
 # histo2 values. Creates separate entries for histo2 statistical and
 # stat+syst uncertainties, if systematic uncertainties exist.
-def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True, denominatorStatSyst=True):
+def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True, denominatorStatSyst=True, numeratorOriginatesFromTH1=False):
     addAlsoHatchedUncertaintyHisto = False
     #addAlsoHatchedUncertaintyHisto = True
 
     ret = []
-    if isinstance(histo1, ROOT.TH1) and isinstance(histo2, ROOT.TH1):
-        ratio = histo1.Clone()
-        ratio.SetDirectory(0)
 
+    if (isinstance(histo1, ROOT.TH1) or isinstance(histo1, ROOT.TGraph)) and \
+       (isinstance(histo2, ROOT.TH1) or isinstance(histo2, ROOT.TGraph)):
+        
+        class WrapTH1:
+            def __init__(self, th1):
+                self._th1 = th1
+                self._ratio = False
+            def ratioDrawStyle(self):
+                return "EP"
+            def begin(self):
+                return 1
+            def end(self):
+                return self._th1.GetNbinsX()+1
+            def xvalues(self, bin):
+                xval = self._th1.GetBinCenter(bin)
+                xlow = xval-self._th1.GetXaxis().GetBinLowEdge(bin)
+                xhigh = self._th1.GetXaxis().GetBinUpEdge(bin)-xval
+                return (xval, xlow, xhigh)
+            def yvalues(self, bin):
+                yval = self._th1.GetBinContent(bin)
+                yerr = self._th1.GetBinError(bin)
+                return (yval, yerr, yerr)
+            def y(self, bin):
+                return self._th1.GetBinContent(bin)
+            def asRatio(self):
+                self._th1 = self._th1.Clone()
+                self._th1.SetDirectory(0)
+                self._ratio = True
+            def _ensureRatio(self):
+                if not self._ratio:
+                    raise Exception("I'm not a ratio TH1!")
+            def divide(self, bin, scale, xcenter):
+                self._ensureRatio()
+                self._th1.SetBinContent(bin, _divideOrZero(self._th1.GetBinContent(bin), scale))
+                self._th1.SetBinError(bin, _divideOrZero(self._th1.GetBinError(bin), scale))
+            def getRatio(self):
+                self._ensureRatio()
+                return self._th1
+            
+        class WrapTGraph:
+            def __init__(self, gr):
+                self._gr = gr
+                self._ratio = False
+            def ratioDrawStyle(self):
+                return "PZ"
+            def begin(self):
+                return 0
+            def end(self):
+                return self._gr.GetN()
+            def xvalues(self, bin):
+                return (self._gr.GetX()[bin], self._gr.GetErrorXlow(bin), self._gr.GetErrorXhigh(bin))
+            def yvalues(self, bin):
+                return (self._gr.GetY()[bin], self._gr.GetErrorYlow(bin), self._gr.GetErrorYhigh(bin))
+            def y(self, bin):
+                return self._gr.GetY()[bin]
+            def asRatio(self):
+                self.xvalues = []
+                self.xerrslow = []
+                self.xerrshigh = []
+                self.yvalues = []
+                self.yerrshigh = []
+                self.yerrslow = []
+                self.binOffset = 0
+                self._ratio = True
+            def _ensureRatio(self):
+                if not self._ratio:
+                    raise Exception("I'm not a ratio TGraph!")
+            def divide(self, bin, scale, xcenter):
+                # Ignore bin if denominator is zero
+                if scale == 0:
+                    return
+                # No more items in the numerator
+                if bin >= self._gr.GetN():
+                    return
+                # denominator is missing an item
+                trueBin = bin + self.binOffset
+                xval = self._gr.GetX()[trueBin]
+                epsilon = 1e-3 * xval # to allow floating-point difference between TGraph and TH1
+                if xval+epsilon < xcenter:
+                    self.binOffset -= 1
+                    return
+                # numerator is missing an item
+                elif xval-epsilon > xcenter:
+                    self.binOffset += 1
+                    return
+
+                if numeratorOriginatesFromTH1 and self._gr.GetY()[trueBin] == 0 and self._gr.GetErrorYlow(trueBin) == 0 and self._gr.GetErrorYhigh(trueBin) == 0:
+                    return
+
+                self.xvalues.append(xval)
+                if numeratorOriginatesFromTH1 and ROOT.gStyle.GetErrorX() < 0.1:
+                    self.xerrslow.append(0.0)
+                    self.xerrshigh.append(0.0)
+                else:
+                    self.xerrslow.append(self._gr.GetErrorXlow(trueBin))
+                    self.xerrshigh.append(self._gr.GetErrorXhigh(trueBin))
+                self.yvalues.append(self._gr.GetY()[trueBin] / scale)
+                self.yerrslow.append(self._gr.GetErrorYlow(trueBin) / scale)
+                self.yerrshigh.append(self._gr.GetErrorYhigh(trueBin) / scale)
+            def getRatio(self):
+                self._ensureRatio()
+                if len(self.xvalues) == 0:
+                    return ROOT.TGraphAsymmErrors()
+                return ROOT.TGraphAsymmErrors(len(self.xvalues), array.array("d", self.xvalues), array.array("d", self.yvalues),
+                                              array.array("d", self.xerrslow), array.array("d", self.xerrshigh), 
+                                              array.array("d", self.yerrslow), array.array("d", self.yerrshigh))
+
+        if isinstance(histo1, ROOT.TH1):
+            h1 = WrapTH1(histo1)
+            ratioWrapped = WrapTH1(histo1)
+        elif isinstance(histo1, ROOT.TGraph):
+            h1 = WrapTGraph(histo1)
+            ratioWrapped = WrapTGraph(histo1)
+        if isinstance(histo2, ROOT.TH1):
+            h2 = WrapTH1(histo2)
+        elif isinstance(histo2, ROOT.TGraph):
+            h2 = WrapTGraph(histo2)
+
+        # For numerator (foreground)
+        ratioWrapped.asRatio()
+        # For denominator (background)
         xvalues = []
         xerrhigh = []
         xerrlow = []
         yvalues = []
-        yerrs = []
-        for i in xrange(1, ratio.GetNbinsX()+1):
-            scale = histo2.GetBinContent(i)
-            ratio.SetBinContent(i, _divideOrZero(histo1.GetBinContent(i), scale))
-            ratio.SetBinError(i, _divideOrZero(histo1.GetBinError(i), scale))
+        yerrhigh = []
+        yerrlow = []
+        for bin in xrange(h2.begin(), h2.end()): # important to use h2 because of TGraph logic
+            (scale, ylow, yhigh) = h2.yvalues(bin)
+            (xval, xlow, xhigh) = h2.xvalues(bin)
+            ratioWrapped.divide(bin, scale, xval)
 
-            xval = histo2.GetXaxis().GetBinCenter(i)
-            xlow = xval-histo2.GetXaxis().GetBinLowEdge(i)
-            xhigh = histo2.GetXaxis().GetBinUpEdge(i)-xval
-            yerr = _divideOrZero(histo2.GetBinError(i), scale)
             xvalues.append(xval)
-            xerrhigh.append(xhigh)
             xerrlow.append(xlow)
+            xerrhigh.append(xhigh)
             yvalues.append(1.0)
-            yerrs.append(yerr)
+            yerrlow.append(_divideOrZero(ylow, scale))
+            yerrhigh.append(_divideOrZero(yhigh, scale))
 
+        ratio = ratioWrapped.getRatio()
         ratioErr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues), array.array("d", yvalues),
                                           array.array("d", xerrlow), array.array("d", xerrhigh),
-                                          array.array("d", yerrs), array.array("d", yerrs))
+                                          array.array("d", yerrlow), array.array("d", yerrhigh))
 
         ratio.GetYaxis().SetTitle(ytitle)
         ratioErr.GetYaxis().SetTitle(ytitle)
@@ -806,8 +923,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True,
         _plotStyles["Ratio"].apply(ratio)
         _plotStyles[ratioErr.GetName()].apply(ratioErr)
 
-
-        ret.append(_createHisto(ratio, drawStyle="EP", legendLabel=None))
+        ret.append(_createHisto(ratio, drawStyle=ratioWrapped.ratioDrawStyle(), legendLabel=None))
         if histograms.uncertaintyMode.showStatOnly():
             ret.append(_createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"))
             if addAlsoHatchedUncertaintyHisto:
@@ -817,90 +933,16 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True,
                 ratioErr2.SetFillStyle(3344)
                 ret.append(_createHisto(ratioErr2, drawStyle="E2", legendLabel=None))
         return ret
-    elif isinstance(histo1, ROOT.TGraph) and isinstance(histo2, ROOT.TGraph):
-        xvalues1 = []
-        yvalues1 = []
-        xvalues2 = []
-        yerrs1high = []
-        yerrs1low = []
-        yerrs2high = []
-        yerrs2low = []
 
-        i1 = 0
-        i2 = 0
-        while i2 < histo2.GetN():
-            if i1 < histo1.GetN():
-                xval1 = histo1.GetX()[i1]
-            else:
-                xval1 = None
-            xval2 = histo2.GetX()[i2]
-            yval2 = histo2.GetY()[i2]
-            # histo2 is zero
-            if yval2 == 0:
-                i1 += 1
-                i2 += 1
-                continue
-
-            # histo2 is missing an item
-            if xval1 is not None and xval1 < xval2:
-                i1 += 1
-                continue
-
-            xvalues2.append(xval2)
-            yerrs2high.append(histo2.GetErrorYhigh(i2) / yval2)
-            yerrs2low.append(histo2.GetErrorYlow(i2) / yval2)
-
-            # Usual case
-            if xval1 == xval2:
-                xvalues1.append(xval1)
-                yvalues1.append(histo1.GetY()[i1] / yval2)
-                yerrs1high.append(histo1.GetErrorYhigh(i1) / yval2)
-                yerrs1low.append(histo1.GetErrorYlow(i1) / yval2)
-                i1 += 1
-                i2 += 1
-                continue
-            # No more items in histo1, or histo1 is missing an item
-            if xval1 is None or xval1 > xval2:
-                i2 += 1
-                continue
-
-            raise Exception("This should not happen")
-
-
-        if len(xvalues1) > 0:
-            ratio = ROOT.TGraphAsymmErrors(len(xvalues1), array.array("d", xvalues1), array.array("d", yvalues1),
-                                         histo1.GetEXlow(), histo1.GetEXhigh(),
-                                         array.array("d", yerrs1low), array.array("d", yerrs1high))
-        else:
-            ratio = ROOT.TGraphAsymmErrors()
-        if len(xvalues2) > 0:
-            ratioErr = ROOT.TGraphAsymmErrors(len(xvalues2), array.array("d", xvalues2), array.array("d", [1]*len(xvalues2)),
-                                         histo1.GetEXlow(), histo1.GetEXhigh(),
-                                         array.array("d", yerrs2low), array.array("d", yerrs2high))
-        else:
-            ratioErr = ROOT.TGraphAsymmErrors()
-
-        ratio.GetYaxis().SetTitle(ytitle)
-        ratioErr.GetYaxis().SetTitle(ytitle)
-        ratioErr.SetName("BackgroundStatError")
-        _plotStyles["Ratio"].apply(ratio)
-        _plotStyles[ratioErr.GetName()].apply(ratioErr)
-
-        ret.append(_createHisto(ratio, drawStyle="EP", legendLabel=None))
-        if histograms.uncertaintyMode.showStatOnly():
-            ret.append(_createHisto(ratioErr, drawStyle="E2", legendLabel=_legendLabels[ratioErr.GetName()], legendStyle="F"))
-            if addAlsoHatchedUncertaintyHisto:
-                ratioErr2 = ratioErr.Clone("BackgroundStatError2")
-                styles.errorStyle.apply(ratioErr2)
-                ratioErr2.SetFillStyle(3344)
-                ret.append(_createHisto(ratioErr2, drawStyle="E2", legendLabel=None))
-        return ret
     elif isinstance(histo1, dataset.RootHistoWithUncertainties) and isinstance(histo2, dataset.RootHistoWithUncertainties):
-        h1 = histo1.getRootHisto()
-        h2 = histo2.getRootHisto()
+        #h1 = histo1.getRootHisto()
+        #h2 = histo2.getRootHisto()
+        gr1 = histo1.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
+        gr2 = histo2.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
 
         # Add scaled stat uncertainty
-        ret.extend(_createRatioHistosErrorScale(h1, h2, ytitle))
+        #ret.extend(_createRatioHistosErrorScale(h1, h2, ytitle))
+        ret.extend(_createRatioHistosErrorScale(gr1, gr2, ytitle, numeratorOriginatesFromTH1 = isinstance(histo1.getRootHisto(), ROOT.TH1)))
         if histograms.uncertaintyMode.equal(histograms.Uncertainty.StatOnly):
             return ret
 
@@ -2256,6 +2298,7 @@ class PlotDrawer:
     # \param xlabel              Default X axis title (None for pick from first TH1)
     # \param ylabel              Default Y axis title (None for pick from first TH1)
     # \param zlabel              Default Z axis title (None for not to show)
+    # \param zhisto              Histo name for the Z information (for updating palette etc) (None for first histogram)
     # \param log                 Should Y axis be in log scale by default?
     # \param ratio               Should the ratio pad be drawn?
     # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
@@ -2294,6 +2337,7 @@ class PlotDrawer:
                  xlabel=None,
                  ylabel="Occurrances / %.0f",
                  zlabel=None,
+                 zhisto=None,
                  log=False,
                  ratio=False,
                  ratioYlabel=None,
@@ -2333,6 +2377,7 @@ class PlotDrawer:
         self.xlabelDefault = xlabel
         self.ylabelDefault = ylabel
         self.zlabelDefault = zlabel
+        self.zhistoDefault = zhisto
         self.logDefault = log
         self.ratioDefault = ratio
         self.ratioYlabelDefault = ratioYlabel
@@ -2651,10 +2696,20 @@ class PlotDrawer:
         if canvasOpts is not None:
             args["canvasOpts"] = canvasOpts
 
+        # Set X-style error bars if wanted for possible use of ratioErrorScale and numerator being TH1
+        errorBarsX = self._getValue("errorBarsX", p, kwargs, useIfNone="divideByBinWidth")
+        if errorBarsX:
+            # enable vertical error bar in the global TStyle
+            errorXbackup = ROOT.gStyle.GetErrorX()
+            ROOT.gStyle.SetErrorX(0.5)
+
         # Create frame
         p.createFrame(name, **args)
         if log:
             p.getPad().SetLogy(log)
+
+        if errorBarsX:
+            ROOT.gStyle.SetErrorX(errorXbackup)
 
         # Override ratio ytitletd
         ratioYlabel = self._getValue("ratioYlabel", p, kwargs)
@@ -2763,6 +2818,7 @@ class PlotDrawer:
     # \li\a xlabel  X axis title (None for pick from first histogram)
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
+    # \li\a zhisto              Histo name for the Z information (for updating palette etc) (None for first histogram)
     # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?  None for True if divideByBinWidth is True
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
     # \li\a customizeBeforeDraw Function to customize the plot object before drawing the plot
@@ -2819,7 +2875,12 @@ class PlotDrawer:
         # Updates the possible Z axis label styles
         # Does nothing if the Z axis does not exist
         zlabel = self._getValue("zlabel", p, kwargs)
-        paletteAxis = histograms.updatePaletteStyle(p.histoMgr.getHistos()[0].getRootHisto())
+        zhisto = self._getValue("zhisto", p, kwargs)
+        if zhisto is None:
+            zrh = p.histoMgr.getHistos()[0].getRootHisto()
+        else:
+            zrh = p.histoMgr.getHisto(zhisto).getRootHisto()
+        paletteAxis = histograms.updatePaletteStyle(zrh)
         if zlabel is not None and paletteAxis != None:
             paletteAxis.GetAxis().SetTitle(zlabel)
 

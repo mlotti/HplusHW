@@ -94,7 +94,7 @@ class ControlPlotMaker:
                                 else:
                                     hSignal.Add(h)
                             elif c.typeIsQCD():
-                                #print "QCD:",c.getLabel()
+                                #print "QCD:",c.getLabel(),h.getRootHisto().Integral(0,h.GetNbinsX()+2)
                                 if hQCD == None:
                                     hQCD = h.Clone()
                                 else:
@@ -466,8 +466,9 @@ class SelectionFlowPlotMaker:
         myParams["cmsTextPosition"] = "right"
         myParams["opts"] = {"ymin": 0.9}
         myParams["opts2"] = {"ymin": 0.5, "ymax":1.5}
-        #myParams["moveLegend"] = {"dx": -0.05, "dy": 0.00}
-        myParams["moveLegend"] = {"dx": -0.53, "dy": -0.45}
+        #myParams["moveLegend"] = {"dx": -0.08, "dy": -0.12, "dh": 0.1} # for MC EWK+tt
+        #myParams["moveLegend"] = {"dx": -0.15, "dy": -0.12, "dh":0.05} # for data-driven
+        myParams["moveLegend"] = {"dx": -0.53, "dy": -0.52, "dh":0.05} # for data-driven
         myParams["ratioMoveLegend"] = {"dx": -0.51, "dy": 0.03}
         drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_SelectionFlow"%(dirname,m,index), **myParams)
 

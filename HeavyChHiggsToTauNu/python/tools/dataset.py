@@ -1121,17 +1121,22 @@ class SystematicsHelper:
 
 ## Class to encapsulate a ROOT histogram with a bunch of uncertainties
 #
-# Looks almost as TH1, except holds bunch of uncertainties
+# Looks almost as TH1, except holds bunch of uncertainties; the histograms contained are clones and therefore owned by the class
 class RootHistoWithUncertainties:
     def __init__(self, rootHisto):
-        self._rootHisto = rootHisto
-
+        self._rootHisto = None
+        
         # dictionary of name -> (th1Plus, th1Minus)
         # This dictionary contains the variation uncertainties
         # Laterally (i.e. for combining same uncertainty between bins or samples, i.e. relative uncertainty is constant), linear sum is used
         # Vertically (i.e. for different source of uncertainties), quadratic sum is used
         # The numbers are stored into the bin content as absolute uncertainties
         self._shapeUncertainties = {}
+
+        self.setRootHisto(rootHisto)
+
+        # Treat these shape uncertainties as statistical uncertainties in getSystematicUncertaintyGraph()
+        self._treatShapesAsStat = set() # use set to avoid duplicates
 
         # Boolean to save the status if the under- and overflow bins have been made visible (i.e. summed to the first and last bin)
         self._flowBinsVisibleStatus = False
@@ -1148,9 +1153,12 @@ class RootHistoWithUncertainties:
     def delete(self):
         if self._rootHisto != None:
             self._rootHisto.Delete()
-            for k in self._shapeUncertainties:
-              (u,d) = self._shapeUncertainties[k]
-        self._shapeUncertainties = None
+            self._rootHisto = None
+        for k in self._shapeUncertainties.keys():
+            (u,d) = self._shapeUncertainties[k]
+            u.Delete()
+            d.Delete()
+        self._shapeUncertainties = {}
 
     ## Set the ROOT histogram object
     #
@@ -1158,9 +1166,9 @@ class RootHistoWithUncertainties:
     #
     # This method can be called only in absence of shape variation uncertainties
     def setRootHisto(self, newRootHisto):
-        if len(self._shapeUncertainties) != 0:
-            raise Exception("There are shape uncertanties, you should not set the original histogram!")
-        self._rootHisto = newRootHisto
+        if len(self._shapeUncertainties.keys()) != 0 or self._rootHisto != None:
+            raise Exception("There are shape uncertanties, you should not set the original histogram (call delete() before)!")
+        self._rootHisto = aux.Clone(newRootHisto)
 
     ## Get the ROOT histogram object
     def getRootHisto(self):
@@ -1180,6 +1188,8 @@ class RootHistoWithUncertainties:
     def getRateStatUncertainty(self):
         if not self._flowBinsVisibleStatus:
             raise Exception("getRate(): The under/overflow bins might not be not empty! Did you forget to call makeFlowBinsVisible() before getRate()?")
+        if len(self._treatShapesAsStat) > 0:
+            print "WARNING: some shapes are treated as statistical uncertainty, but they have not been implemented yet to getRateStatUncertainty()!"
         mySum = 0.0
         if isinstance(self._rootHisto, ROOT.TH2):
             raise Exception("getRateStatUncertainty() supported currently only for TH1!")
@@ -1228,16 +1238,17 @@ class RootHistoWithUncertainties:
             myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
             if not myStatus:
                 raise Exception("addShapeUncertaintyFromVariation(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
-
-        self._checkConsistency(name, th1Plus)
-        self._checkConsistency(name, th1Minus)
+        plusClone = aux.Clone(th1Plus)
+        minusClone = aux.Clone(th1Minus)
+        self._checkConsistency(name, plusClone)
+        self._checkConsistency(name, minusClone)
         # Subtract nominal to get absolute uncertainty (except for source histograms)
         if name in self._shapeUncertainties.keys():
             raise Exception("Uncertainty '%s' has already been added!"%name)
-        th1Plus.Add(self._rootHisto, -1.0)
-        th1Minus.Add(self._rootHisto, -1.0)
+        plusClone.Add(self._rootHisto, -1.0)
+        minusClone.Add(self._rootHisto, -1.0)
         # Store
-        self._shapeUncertainties[name] = (aux.Clone(th1Plus), aux.Clone(th1Minus))
+        self._shapeUncertainties[name] = (plusClone, minusClone)
 
     ## Remove superfluous shape variation uncertainties
     #
@@ -1333,9 +1344,24 @@ class RootHistoWithUncertainties:
     def getShapeUncertainties(self):
         return self._shapeUncertainties
 
+    def getShapeUncertaintyNames(self):
+        return self._shapeUncertainties.keys()
+
     ## Return True if this histogram has any systematic uncertainties associated to it
     def hasSystematicUncertainties(self):
         return len(self._shapeUncertainties) > 0
+
+    ## Set the list of shape uncertainty names that should be treated as statistical uncertainties
+    def setShapeUncertaintiesAsStatistical(self, names):
+        self._treatShapesAsStat = set(names)
+
+    ## Add a shape uncertainty name to the list of that should be treated as statistical uncertainties
+    def addShapeUncertaintiesAsStatistical(self, name):
+        self._treatShapesAsStat.add(name)
+
+    ## Get the set of shape uncertainty names that should be treated as statistical uncertainties
+    def getShapeUncertaintiesAsStatistical(self):
+        return self._treatShapesAsStat
 
     ## Create TGraphAsymmErrors for the sum of uncertainties
     #
@@ -1400,6 +1426,24 @@ class RootHistoWithUncertainties:
         else:
             wrapper = WrapTH1(self._rootHisto)
 
+        # Set shapes to stat, syst, or stat+syst according to what was
+        # requested
+        shapes = []
+        if addStatistical and len(self._treatShapesAsStat) > 0:
+            if addSystematic:
+                # stat+syst, so we can just add all shape uncertainties
+                shapes = self._shapeUncertainties.values()
+            else:
+                # only stat, so get only them
+                for name in self._treatShapesAsStat:
+                    shapes.append(self._shapeUncertainties[name])
+        elif addSystematic:
+            # in this case all shapes are syst
+            shapes = self._shapeUncertainties.values()
+
+        #shapes.sort()
+        #print addStatistical, addSystematic, "\n  ".join([x[0].GetName() for x in shapes])
+
         for i in xrange(wrapper.begin(), wrapper.end()):
             (xval, xlow, xhigh) = wrapper.xvalues(i)
 
@@ -1412,8 +1456,8 @@ class RootHistoWithUncertainties:
                 yhighSquareSum += statHigh**2
                 ylowSquareSum += statLow**2
 
-            if addSystematic:
-                for shapePlus, shapeMinus in self._shapeUncertainties.itervalues():
+            if len(shapes) > 0:
+                for shapePlus, shapeMinus in shapes:
                     diffPlus = shapePlus.GetBinContent(i) # Note that this could have + or - sign
                     diffMinus = shapeMinus.GetBinContent(i) # Note that this could have + or - sign
                     (addPlus, addMinus) = aux.getProperAdditivesForVariationUncertainties(diffPlus, diffMinus)
@@ -1618,6 +1662,9 @@ class RootHistoWithUncertainties:
         # Add histo
         self._rootHisto.Add(other._rootHisto, *args)
 
+        # Add shape uncertainties treated as stat
+        self._treatShapesAsStat.update(other._treatShapesAsStat)
+
     ## Scale the histogram
     #
     # It is enough to forward the call to self._rootHisto and
@@ -1659,6 +1706,7 @@ class RootHistoWithUncertainties:
         for key, value in self._shapeUncertainties.iteritems():
             (plus, minus) = (aux.Clone(value[0]), aux.Clone(value[1]))
             clone._shapeUncertainties[key] = (plus, minus)
+        clone._treatShapesAsStat = set(self._treatShapesAsStat)
         clone._flowBinsVisibleStatus = self._flowBinsVisibleStatus
         return clone
 
@@ -2628,6 +2676,14 @@ class Dataset:
         else:
             (histos, realName) = self.getRootObjects(name, **kwargs)
             if len(histos) == 1:
+                # Check if object is indeed a histogram or a directory (usecase: splitted phase space histograms)
+                if isinstance(histos[0], ROOT.TDirectoryFile):
+                    (path, filename) = os.path.split(name)
+                    newName = ""
+                    if len(path) > 0:
+                        newName = "%s/"%path
+                    newName += "%s/%sInclusive"%(filename,filename)
+                    (histos, realName) = self.getRootObjects(newName, **kwargs)
                 h = histos[0]
             else:
                 h = histos[0]
@@ -3959,11 +4015,10 @@ class DatasetManagerCreator:
 
         # First check that if some of these is not given, if there is
         # exactly one it available, use that.
+        # As optimizationMode and systematicVariation are optional, they are not considered here
         for arg, attr in [("analysisName", "getAnalyses"),
                           ("searchMode", "getSearchModes"),
-                          ("dataEra", "getMCDataEras"),
-                          ("optimizationMode", "getOptimizationModes"),
-                          ("systematicVariation", "getSystematicVariations")]:
+                          ("dataEra", "getMCDataEras")]:
             lst = getattr(self, attr)()
             if (arg not in _args or _args[arg] is None) and len(lst) == 1:
                 _args[arg] = lst[0]

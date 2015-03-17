@@ -40,8 +40,10 @@ def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
         histogramsExtras.makeFlowBinsVisible(h)
         return h
 
-    hbase.SetLineColor(ROOT.kBlack)
-    hinv.SetLineColor(ROOT.kRed)
+    #hbase.SetFillColor(ROOT.kGray)
+    hbase.SetLineColor(ROOT.kGray)
+    hbase.SetFillColor(hbase.GetLineColor())
+    hinv.SetLineColor(ROOT.kBlue)
     # Rebin
     hbase = rebin(hbase, histoName)
     hinv = rebin(hinv, histoName)
@@ -52,9 +54,9 @@ def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
         hbase.Scale(1.0 / hbase.Integral())
         hinv.Scale(1.0 / hinv.Integral())
     # Plot
-    baseHisto = histograms.Histo(hbase, "Isolated", drawStyle="HIST", legendStyle="l")
-    invHisto = histograms.Histo(hinv, "Anti-isolated", drawStyle="HIST", legendStyle="l")
-    plot = plots.ComparisonPlot(baseHisto, invHisto)
+    baseHisto = histograms.Histo(hbase, "Isolated", drawStyle="HIST", legendStyle="F")
+    invHisto = histograms.Histo(hinv, "Anti-isolated", drawStyle="HIST E", legendStyle="l")
+    plot = plots.ComparisonPlot(invHisto, baseHisto)
     plot.setLuminosity(luminosity)
     plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(3))
     if toUnitArea:
@@ -71,13 +73,13 @@ def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
     myParams["opts"] = {"ymin": 0.0}
     myParams["ratio"] = True
     myParams["ratioType"] = "errorScale"
-    myParams["ratioYlabel"] = "Isol./Anti-isol."
+    myParams["ratioYlabel"] = "Anti-isol./Isol."
     myParams["ratioCreateLegend"] = True
     myParams["ratioMoveLegend"] = {"dx": -0.05, "dy": -0.4, "dh": -0.1}
     myParams["cmsTextPosition"] = "right"
     myParams["addLuminosityText"] = True
     myParams["divideByBinWidth"] = True
-    plots._legendLabels["BackgroundStatError"] = "Anti-isol. stat. unc."
+    plots._legendLabels["BackgroundStatError"] = "Isol. stat. unc."
     plots.drawPlot(plot, myPlotName, **myParams)
 
 def doClosureTestPlots(opts, dsetMgr, moduleInfoString, myDir, luminosity, normFactors):

@@ -18,6 +18,7 @@ class MulticrabDirectoryDataType:
     QCDFACTORISED = 5
     QCDINVERTED = 6
     DUMMY = 7
+    DATACARDONLY = 8
 
 class MulticrabPathFinder:
     def __init__(self, path):

@@ -8,7 +8,9 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-04-14_nominal_norm5GeVLRB"
 #Path = "/home/wendland/data/xnortau"
 #Path = "/home/wendland/data/test_nominal_dphi"
-Path = "/home/wendland/data/xnominal"
+#Path = "/home/wendland/data/xnominal"
+Path = "/home/wendland/data/test_2014-09-05"
+Path = "/home/wendland/data/nortau"
 #Path = "/home/wendland/data/test_matti_met60_paramweight"
 #Path = "/home/wendland/data/v533/2014-03-20_optTau60Met80_mt20gev"
 #Path = "/home/wendland/data/v533/2014-03-20_METprecut30"
@@ -20,28 +22,12 @@ LightMassPoints      = [80,90,100,120,140,150,155,160]
 #LightMassPoints      = [80,120,160]
 LightMassPoints      = [120]
 #LightMassPoints      = []
+
 HeavyMassPoints      = [180,190,200,220,250,300,400,500,600] # mass points 400-600 are not available for 2011 branch
 #HeavyMassPoints      = [180,220,300,600]
-HeavyMassPoints      = [300]
-HeavyMassPoints      = []
+#HeavyMassPoints      = [300]
+#HeavyMassPoints      = []
 
-selectionReg = None
-if selectionReg == "A":
-    LightMassPoints = [80,90,100]
-    HeavyMassPoints = []
-    Path = "/home/wendland/data/xmet70"
-elif selectionReg == "B":
-    LightMassPoints = [120,140,150,155,160]
-    HeavyMassPoints = []
-    Path = "/home/wendland/data/xmet70"
-elif selectionReg == "C":
-    LightMassPoints = []
-    HeavyMassPoints = [180,190,200,220,250]
-    Path = "/home/wendland/data/xmet80"
-elif selectionReg == "D":
-    LightMassPoints = []
-    HeavyMassPoints = [300,400,500,600]
-    Path = "/home/wendland/data/xnominal"
 MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 
 BlindAnalysis   = False
@@ -68,6 +54,7 @@ OptionGenuineTauBackgroundSource = "DataDriven"                          # State
 #OptionGenuineTauBackgroundSource = "MC_FullSystematics"               # MC used, fake and genuine taus separated (use for embedding closure test)
 #OptionGenuineTauBackgroundSource = "MC_RealisticProjection"            # MC used, fake and genuine taus separated (can be used for optimization)
 
+OptionSeparateFakeTtbarFromFakeBackground = False # NOTE: this flag should be put true for light H+ and to false for heavy H+
 
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionTreatTriggerUncertaintiesAsAsymmetric = True # Set to true, if you produced multicrabs with doAsymmetricTriggerUncertainties=True
@@ -77,13 +64,35 @@ OptionIncludeSystematics = True # Set to true if you produced multicrabs with do
 OptionPurgeReservedLines = True # Makes limit running faster, but cannot combine leptonic datacards
 OptionDoControlPlots = True
 OptionDoMergeFakeTauColumns = True # Merges the fake tau columns into one
-OptionCombineSingleColumnUncertainties = True # Makes limit running faster
+OptionCombineSingleColumnUncertainties = not True # Makes limit running faster
 OptionCtrlPlotsAtMt = True # Produce control plots after all selections (all selections for transverse mass)
 OptionDisplayEventYieldSummary = True
 OptionNumberOfDecimalsInSummaries = 1
 OptionRemoveHHDataGroup = False
 OptionLimitOnSigmaBr = False # Is automatically set to true for heavy H+
 OptionDoTBbarForHeavy = False # NOTE: usable only for 2012
+OptionAddSingleTopDependencyForMuParameter = False # Affects only light H+
+OptionAddSingleTopSignal = False # Affects only light H+
+
+# Convert the following nuisances from shape to constant
+OptionConvertFromShapeToConstantList = ["trg_tau","trg_tau_dataeff","trg_tau_MCeff","trg_L1ETM_dataeff","trg_L1ETM_MCeff","trg_L1ETM","trg_muon_dataeff", # triggers
+                                        #"tau_ID_shape", # tau ID
+                                        "tau_ID_eToTauEndcap_shape", # tau mis-ID
+                                        #"tau_ID_eToTauBarrel_shape", "tau_ID_muToTau_shape", "tau_ID_jetToTau_shape", # other tau mis-ID
+                                        "ES_jets","JER","ES_METunclustered", # jet, MET
+                                        #"ES_taus", # tau ES
+                                        #"b_tag", "b_tag_fakes", # btag
+                                        "Emb_mu_ID", "Emb_WtauTomu", # embedding-specific
+                                        #"Emb_reweighting", # other embedding-specific
+                                        #"QCD_metshape", # multijets specific
+                                        #"top_pt", # top pt reweighting
+                                        "pileup", "pileup_fakes", # pileup
+                                        ]
+
+# Separate in the following shape nuisances the shape and normalization components
+OptionSeparateShapeAndNormalizationFromSystVariationList = [
+                                                            #"ES_taus"
+                                                           ]
 
 # For projections
 trg_MET_dataeffScaleFactor = None # Default is None, i.e. 1.0
@@ -95,7 +104,7 @@ OptionSqrtS = 8 # sqrt(s)
 # Tolerance for throwing error on luminosity difference (0.01 = 1 percent agreement is required)
 ToleranceForLuminosityDifference = 0.05
 # Tolerance for almost zero rate (columns with smaller rate are suppressed)
-ToleranceForMinimumRate = 1.5
+ToleranceForMinimumRate = 0.0 # 1.5
 # Minimum stat. uncertainty to set to bins with zero events
 MinimumStatUncertainty = 0.5
 
@@ -179,6 +188,8 @@ EWKFakeIdList = []
 signalTemplate = DataGroup(datasetType="Signal",
                            shapeHisto=SignalShapeHisto)
 
+mergeColumnsByLabel = []
+
 for mass in LightMassPoints:
     myMassList = [mass]
     hhx = signalTemplate.clone()
@@ -196,6 +207,21 @@ for mass in LightMassPoints:
     hwx.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_tt_8TeV","lumi"])
     hwx.setDatasetDefinition("TTToHplusBWB_M"+str(mass))
     DataGroups.append(hwx)
+    
+    if OptionAddSingleTopSignal:
+        mySuffix = ["s","t","tW"]
+        myLabelList = []
+        for i in range(0,len(mySuffix)):
+            hst = signalTemplate.clone()
+            label = "HST%d_%s"%(mass, mySuffix[i])
+            myLabelList.append(label)
+            hst.setLabel(label)
+            hst.setLandSProcess(-2)
+            hst.setValidMassPoints(myMassList)
+            hst.setNuisances(myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_singleTop","lumi"])
+            hst.setDatasetDefinition("Hplus_taunu_%s-channel_M%d"%(mySuffix[i],mass))
+            DataGroups.append(hst)
+        mergeColumnsByLabel.append({"label": label.replace("_%s"%mySuffix[i],""), "mergeList": myLabelList[:]})
 
 for mass in HeavyMassPoints:
     myMassList = [mass]
@@ -251,7 +277,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     EmbeddingIdList = [3]
     DataGroups.append(DataGroup(
         label        = "EWK_Tau",
-        landsProcess = 4,
+        landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
         #datasetDefinition   = ["SingleMu"],
@@ -263,10 +289,13 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     ))
 
     # EWK + ttbar with fake taus
-    EWKFakeIdList = [1,5,6,7,8]
+    if not OptionSeparateFakeTtbarFromFakeBackground:
+        mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
+    else:
+        mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
-        landsProcess = 1,
+        landsProcess = 4,
         shapeHisto   = FakeShapeTTbarHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
@@ -311,8 +340,9 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
     ))
 elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
     # Mimic embedding with MC analysis (introduces double counting of EWK fakes, but that should be small effect)
-    EmbeddingIdList = [4]
     myEmbeddingShapeSystematics = []
+    mergeColumnsByLabel.append({"label": "MC_EWKTau", "mergeList": ["pseudo_emb_TTJets_MC","pseudo_emb_Wjets_MC","pseudo_emb_t_MC","pseudo_emb_DY_MC","pseudo_emb_VV_MC"], 
+                                "subtractList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     if OptionGenuineTauBackgroundSource == "MC_RealisticProjection":
         # Mimic with uncertainties the outcome of data-driven embedding
         if OptionTreatTriggerUncertaintiesAsAsymmetric:
@@ -334,7 +364,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         myEmbeddingShapeSystematics = myShapeSystematics[:]+["top_pt","e_mu_veto","b_tag","xsect_tt_8TeV","lumi"]
     DataGroups.append(DataGroup(
         label        = "pseudo_emb_TTJets_MC",
-        landsProcess = 4,
+        landsProcess = 1,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
@@ -377,10 +407,10 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         validMassPoints = MassPoints,
         nuisances    = myEmbeddingShapeSystematics,
     ))
-    EWKFakeIdList = [1,5,6,7,8]
+    mergeColumnsByLabel.append({"label": "MC_EWKFakeTau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     DataGroups.append(DataGroup(
         label        = "tt_EWK_faketau",
-        landsProcess = 1,
+        landsProcess = 4,
         shapeHisto   = FakeShapeTTbarHisto,
         datasetType  = "EWKfake",
         datasetDefinition = "TTJets",
@@ -425,7 +455,13 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
     ))
 elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
     # Replace embedding and fakes with MC
-    EmbeddingIdList = [1,4,5,6,7]
+    myList = ["Wjets_MC","DY_MC","VV_MC"]
+    if OptionDoMergeFakeTauColumns:
+        if not OptionAddSingleTopDependencyForMuParameter:
+            myList.append("sngltop_MC")
+            mergeColumnsByLabel.append({"label": "EWKnontop_MC", "mergeList": myList[:]})
+        else:
+            mergeColumnsByLabel.append({"label": "EWKnontt_MC", "mergeList": myList[:]})
     DataGroups.append(DataGroup(
         label        = "ttbar_MC",
         landsProcess = 1,
@@ -445,7 +481,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         nuisances    = myShapeSystematics[:]+["e_mu_veto","b_tag","xsect_Wjets","lumi"],
     ))
     DataGroups.append(DataGroup(
-        label        = "t_MC",
+        label        = "sngltop_MC",
         landsProcess = 5,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
@@ -475,12 +511,13 @@ else:
     raise Exception("Error: unknown value for flag OptionGenuineTauBackgroundSource!")
 
 # Reserve column 2
-DataGroups.append(DataGroup(
-    label        = "res.",
-    landsProcess = 2,
-    datasetType  = "None",
-    validMassPoints = MassPoints,
-))
+if not OptionAddSingleTopSignal:
+    DataGroups.append(DataGroup(
+        label        = "res.",
+        landsProcess = 2,
+        datasetType  = "None",
+        validMassPoints = MassPoints,
+    ))
 
 
 ##############################################################################
@@ -586,13 +623,13 @@ if not "tau_ID_shape" in myShapeSystematics:
         value         = 0.15, # FIXME
     ))
 
-Nuisances.append(Nuisance(
-    id            = "tau_ID_constShape",
-    label         = "tau-jet ID (no Rtau)",
-    distr         = "shapeQ",
-    function      = "ConstantToShape",
-    value         = systematics.getTauIDUncertainty(isGenuineTau=True)
-))
+#Nuisances.append(Nuisance(
+    #id            = "tau_ID_constShape",
+    #label         = "tau-jet ID (no Rtau)",
+    #distr         = "shapeQ",
+    #function      = "ConstantToShape",
+    #value         = systematics.getTauIDUncertainty(isGenuineTau=True)
+#))
 
 if "tau_ID_shape" in myShapeSystematics:
     Nuisances.append(Nuisance(
@@ -996,6 +1033,12 @@ MergeNuisances.append(["b_tag","b_tag_fakes"])
 MergeNuisances.append(["pileup","pileup_fakes"])
 MergeNuisances.append(["xsect_tt_8TeV", "xsect_tt_8TeV_forQCD"])
 MergeNuisances.append(["lumi", "lumi_forQCD"])
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import convertFromSystVariationToConstant
+convertFromSystVariationToConstant(Nuisances, OptionConvertFromShapeToConstantList)
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import separateShapeAndNormalizationFromSystVariation
+separateShapeAndNormalizationFromSystVariation(Nuisances, OptionSeparateShapeAndNormalizationFromSystVariationList)
 
 # Control plots
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
@@ -1584,7 +1627,7 @@ if OptionMassShape == "TransverseMass":
                             #"unit": "GeV",
                             "xlabel": "m_{T} (GeV)",
                             "ylabel": "< Events / bin >", "ylabelBinInfo": False,
-                            "moveLegend": {"dx": -0.22, "dy": -0.1},
+                            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
                             "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
                             "divideByBinWidth": True,
                             "log": False,
@@ -1607,11 +1650,11 @@ if OptionMassShape == "TransverseMass":
                             #"unit": "GeV",
                             "xlabel": "m_{T} (GeV)",
                             "ylabel": "< Events / bin >", "ylabelBinInfo": False,
-                            "moveLegend": {"dx": -0.22, "dy": -0.1},
+                            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
                             "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
                             "divideByBinWidth": True,
                             "log": True,
-                            "opts": {"ymin": 1e-5},
+                            "opts": {"ymin": 1e-3},
                             "opts2": {"ymin": 0.0, "ymax": 2.0}
                            },
         blindedRange     = [-1, 1000], # specify range min,max if blinding applies to this control plot
@@ -1757,6 +1800,25 @@ if OptionCtrlPlotsAtMt:
                              "unit": "",
                              "log": True,
                              "legendPosition": "SE",
+                             "opts": {"ymin": 0.009} },
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+        flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+
+    ControlPlots.append(ControlPlotInput(
+        title            = "SelectedTau_Rtau_FullRange_AfterMtSelections",
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "SelectedTau_Rtau_AfterMtSelections",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "SelectedTau_Rtau_AfterMtSelections",
+        details          = { "xlabel": "Selected #tau R_{#tau}",
+                             "ylabel": "Events",
+                             "divideByBinWidth": False,
+                             "unit": "",
+                             "log": True,
+                             "legendPosition": "SW",
+                             "opts2": {"ymin": 0.2, "ymax": 1.8},
                              "opts": {"ymin": 0.009} },
         blindedRange     = [], # specify range min,max if blinding applies to this control plot
         evaluationRange  = [], # specify range to be evaluated and saved into a file

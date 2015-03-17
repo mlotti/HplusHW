@@ -7,7 +7,7 @@ import sys
 import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,QCDShapeVariationExtractor,ConstantExtractor,ShapeVariationFromJsonExtractor
+from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,QCDShapeVariationExtractor,ConstantExtractor,ShapeVariationFromJsonExtractor,ShapeVariationToConstantExtractor
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
@@ -16,14 +16,17 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDiffere
 from math import sqrt,pow
 from array import array
 
+_fineBinningSuffix = "_fineBinning"
+
 ## ExtractorResult
 # Helper class to cache the result for each extractor in each datacard column
 class ExtractorResult():
     ## Constructor(
-    def __init__(self, exId = "-1", masterId = "-1", result=None, histograms=None, resultIsStat=False):
+    def __init__(self, exId = "-1", masterId = "-1", result=None, histograms=None, resultIsStat=False, additionalResult=None):
         self._exId = exId
         self._masterId = masterId
         self._result = result
+        self._additionalResult = additionalResult
         self._resultIsStat = resultIsStat
         self._purityHistogram = None # Only used for QCD
 
@@ -43,6 +46,9 @@ class ExtractorResult():
 
     def getResult(self):
         return self._result
+
+    def getAdditionalResult(self):
+        return self._additionalResult
 
     def setPurityHistogram(self, h):
         self._purityHistogram = h
@@ -65,6 +71,39 @@ class ExtractorResult():
 
     def getHistograms(self):
         return self._histograms
+
+    def getFinalBinningHistograms(self, blackList=[]):
+        myMinBins = 999
+        for h in self._histograms:
+            if h.GetNbinsX() < myMinBins:
+                myMinBins = h.GetNbinsX()
+        myList = []
+        for h in self._histograms:
+            if h.GetNbinsX() == myMinBins:
+                myStatus = True
+                for item in blackList:
+                    if item in h.GetName():
+                        myStatus = False
+                if myStatus:
+                    myList.append(h)
+        return myList
+
+    def getFineBinnedHistograms(self, blackList=[]):
+        myMinBins = 999
+        for h in self._histograms:
+            if h.GetNbinsX() < myMinBins:
+                myMinBins = h.GetNbinsX()
+        myList = []
+        for h in self._histograms:
+            if h.GetNbinsX() > myMinBins:
+                myStatus = True
+                for item in blackList:
+                    if item in h.GetName():
+                        myStatus = False
+                if myStatus:
+                    myList.append(h)
+
+        return myList
 
     def linkHistogramsToRootFile(self,rootfile):
         # Note: Do not call destructor for the tempHistos.
@@ -331,12 +370,9 @@ class DatacardColumn():
         myShapeVariationList = []
         for nid in self._nuisanceIds:
             for e in extractors:
-                if e.getId() == nid and e.getDistribution() == "shapeQ" and not isinstance(e, ConstantExtractor):
-                    myShapeVariationList.append(e._systVariation)
-        # Check status for HH
-        if self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr):
-            print ShellStyles.WarningLabel()+"Skipping ..."
-            return
+                if e.getId() == nid:
+                    if (e.getDistribution() == "shapeQ" and not isinstance(e, ConstantExtractor)) or isinstance(e, ShapeVariationToConstantExtractor):
+                        myShapeVariationList.append(e._systVariation)
         # Obtain root histogram with uncertainties for shape and cache it
         hRateWithFineBinning = None
         if not (self.typeIsEmptyColumn() or dsetMgr == None):
@@ -445,8 +481,10 @@ class DatacardColumn():
                     myFoundStatus = True
                     # Obtain result
                     myResult = 0.0
+                    myAdditionalResult = None
                     if dsetMgr != None:
                         myResult = e.extractResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
+                        myAdditionalResult = e.extractAdditionalResult(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
                     # Obtain histograms
                     myHistograms = []
                     if e.isShapeNuisance():
@@ -490,12 +528,14 @@ class DatacardColumn():
                                                                  e.getMasterId(),
                                                                  myResult,
                                                                  myHistograms,
-                                                                 "Stat." in e.getDescription() or "stat." in e.getDescription() or e.getDistribution()=="shapeStat"))
+                                                                 "Stat." in e.getDescription() or "stat." in e.getDescription() or e.getDistribution()=="shapeStat",
+                                                                 additionalResult=myAdditionalResult))
             if not myFoundStatus:
                 raise Exception("\n"+ShellStyles.ErrorLabel()+"(data group ='"+self._label+"'): Cannot find nuisance with id '"+nid+"'!")
         # Print list of uncertainties
         if self._opts.verbose and dsetMgr != None and not self.typeIsEmptyColumn():
             print "  - Has shape variation syst. uncertainties: %s"%(", ".join(map(str,self._cachedShapeRootHistogramWithUncertainties.getShapeUncertainties().keys())))
+        #self._cachedShapeRootHistogramWithUncertainties.Debug()
 
         # Obtain results for control plots
         if config.OptionDoControlPlots:
@@ -523,7 +563,7 @@ class DatacardColumn():
                         h.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
                         # Rebin and move under/overflow bins to visible bins
                         if not isinstance(h.getRootHisto(), ROOT.TH2):
-                            myArray = array("d",getBinningForPlot(c._histoName))
+                            myArray = array("d",getBinningForPlot(c._histoTitle))
                             h.Rebin(len(myArray)-1,"",myArray)
                             h.makeFlowBinsVisible()
                         # Apply any further scaling (only necessary for the unceratainties from variation)
@@ -588,7 +628,7 @@ class DatacardColumn():
         myArray = array("d",config.ShapeHistogramsDimensions)
         for i in range(0,len(self._rateResult._histograms)):
             myTitle = self._rateResult._histograms[i].GetTitle()
-            self._rateResult._histograms[i].SetTitle(myTitle+"_fineBinning")
+            self._rateResult._histograms[i].SetTitle(myTitle+_fineBinningSuffix)
             # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
             if self._rateResult._histograms[i].GetNbinsX() > 1:
                 # Note that Rebin() does a clone operation in this case
@@ -620,7 +660,7 @@ class DatacardColumn():
             myNewHistograms = []
             for i in range(0,len(self._nuisanceResults[j]._histograms)):
                 myTitle = self._nuisanceResults[j]._histograms[i].GetTitle()
-                self._nuisanceResults[j]._histograms[i].SetTitle(myTitle+"_fineBinning")
+                self._nuisanceResults[j]._histograms[i].SetTitle(myTitle+_fineBinningSuffix)
                 # move under/overflow bins to visible bins, store fine binned histogram, and do rebinning
                 h = self._nuisanceResults[j]._histograms[i].Rebin(len(config.ShapeHistogramsDimensions)-1,myTitle,myArray)
                 h.SetTitle(myTitle)
@@ -628,14 +668,16 @@ class DatacardColumn():
                 myNewHistograms.append(h)
             self._nuisanceResults[j]._histograms.extend(myNewHistograms)
 	# Treat QCD MET shape nuisance
+	myQCDMetshapeFoundStatus = False
 	for j in range(0,len(self._nuisanceResults)):
 	    if self._nuisanceResults[j].getId() == "QCD_metshape":
+                myQCDMetshapeFoundStatus = True
 		hDenominator = None
 		hNumerator = None
 		hUp = None
 		hDown = None
 		for i in range(0,len(self._nuisanceResults[j]._histograms)):
-		    if not "fineBinning" in self._nuisanceResults[j]._histograms[i].GetTitle():
+		    if not _fineBinningSuffix in self._nuisanceResults[j]._histograms[i].GetTitle():
 			if "Numerator" in self._nuisanceResults[j]._histograms[i].GetTitle():
 			    hNumerator = self._nuisanceResults[j]._histograms[i]
 			if "Denominator" in self._nuisanceResults[j]._histograms[i].GetTitle():
@@ -646,10 +688,36 @@ class DatacardColumn():
 			    hDown = self._nuisanceResults[j]._histograms[i]
 		if hDenominator == None or hNumerator == None or hUp == None or hDown == None:
 		    raise Exception()
-		systematicsForMetShapeDifference.createSystHistograms(self._rateResult._histograms[0], hUp, hDown, hNumerator, hDenominator)
-		# Add rate histogram to make the histograms compatible with LandS/Combine
-		#hUp.Add(self._rateResult._histograms[0])
-		#hDown.Add(self._rateResult._histograms[0])  
+                if hDenominator.GetNbinsX() != hUp.GetNbinsX():
+                    raise Exception()
+                if hDenominator.GetNbinsX() != self._rateResult._histograms[0].GetNbinsX():
+                    raise Exception()
+		systematicsForMetShapeDifference.createSystHistograms(self._rateResult._histograms[0], hUp, hDown, hNumerator, hDenominator, quietMode=False)
+        if not myQCDMetshapeFoundStatus and self.typeIsQCD():
+            print ShellStyles.WarningLabel()+"QCD metshape uncertainty has not been rebinned, please check that it has the name 'QCD_metshape'!"
+        # Update root histo with uncertainties to contain the binned version
+        if self._cachedShapeRootHistogramWithUncertainties != None:
+            #self._cachedShapeRootHistogramWithUncertainties.Debug()
+            self._cachedShapeRootHistogramWithUncertainties.delete()
+            self._cachedShapeRootHistogramWithUncertainties.setRootHisto(self._rateResult._histograms[0])
+            for j in range(0,len(self._nuisanceResults)):
+                # shape nuisance
+                hUp = None
+                hDown = None
+                for i in range(0,len(self._nuisanceResults[j]._histograms)):
+                    myTitle = self._nuisanceResults[j]._histograms[i].GetTitle()
+                    if not _fineBinningSuffix in myTitle:
+                        if myTitle.endswith("Up"):
+                            hUp = self._nuisanceResults[j]._histograms[i]
+                        if myTitle.endswith("Down"):
+                            hDown = self._nuisanceResults[j]._histograms[i]
+                if hUp == None or hDown == None:
+                    # constant nuisance
+                    myResult = self._nuisanceResults[j].getResult()
+                    self._cachedShapeRootHistogramWithUncertainties.addNormalizationUncertaintyRelative(self._nuisanceResults[j].getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                else:
+                    self._cachedShapeRootHistogramWithUncertainties.addShapeUncertaintyFromVariation(self._nuisanceResults[j].getId(), hUp, hDown)
+            #self._cachedShapeRootHistogramWithUncertainties.Debug()
 
     ## Returns rate for column
     def getRateResult(self):
@@ -722,6 +790,23 @@ class DatacardColumn():
             print "  nuisances:", self._nuisanceIds
         print "  shape histogram:", self._shapeHisto
 
+    def doSeparateAdditionalResults(self):
+        myNewNuisancesList = []
+        myNewNuisanceIdsList = []
+        for n in self.getNuisanceResults():
+            if n.getAdditionalResult() != None:
+                # Create new cached result
+                myId = n._exId+"_normOnly"
+                myMasterId = n._masterId
+                if myMasterId != "-1":
+                    myMasterId += "_normOnly"
+                myNewResult = ExtractorResult(myId, myMasterId, n.getAdditionalResult(), [])
+                myNewNuisancesList.append(myNewResult)
+                myNewNuisanceIdsList.append(myId)
+                n._exId += "_shapeOnly"
+        self._nuisanceResults.extend(myNewNuisancesList)
+        self._nuisanceIds.extend(myNewNuisanceIdsList)
+        return myNewNuisanceIdsList
 
     ## \var _additionalNormalisationFactor
     # Normalisation factor is multiplied by this factor (needed for EWK)

@@ -19,11 +19,14 @@ import aux
 
 ## Enumeration class for CMS text mode
 class CMSMode:
-    NONE = 0
-    PRELIMINARY = 1
-    PAPER = 2
-    SIMULATION = 3
-    SIMULATION_PRELIMINARY = 4
+    class NONE: pass
+    class PRELIMINARY: pass
+    class PAPER: pass
+    class UNPUBLISHED: pass
+    class SIMULATION: pass
+    class SIMULATION_PRELIMINARY: pass
+    class SIMULATION_UNPUBLISHED: pass
+
 
 ## Global variable to hold CMS text mode
 cmsTextMode = CMSMode.PRELIMINARY
@@ -32,8 +35,10 @@ cmsText = {
     CMSMode.NONE: None,
     CMSMode.PRELIMINARY: "Preliminary",
     CMSMode.PAPER: "",
+    CMSMode.UNPUBLISHED: "Unpublished",
     CMSMode.SIMULATION : "Simulation",
-    CMSMode.SIMULATION_PRELIMINARY : "Preliminary simulation"
+    CMSMode.SIMULATION_PRELIMINARY : "Preliminary simulation",
+    CMSMode.SIMULATION_UNPUBLISHED: "Simulation unpublished",
     }
 
 ## Global uncertainty mode
@@ -331,8 +336,11 @@ def addEnergyText(x=None, y=None, s=None):
 # \param lumi  Luminosity in pb^-1
 def formatLuminosityInFb(lumi):
     lumiInFb = lumi/1000.
-    log = math.log10(lumiInFb)
-    ndigis = int(log)
+    log = 0
+    ndigis = 0
+    if lumi > 0:
+        log = math.log10(lumiInFb)
+        ndigis = int(log)
     format = "%.1f" # ndigis >= 1, 10 <= lumiInFb
     if ndigis == 0: 
         if log >= 0: # 1 <= lumiInFb < 10

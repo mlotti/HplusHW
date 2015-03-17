@@ -15,7 +15,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 
-def main():
+def main(opts):
     style = tdrstyle.TDRStyle()
 
     mlfit = limit.MLFitData()
@@ -26,10 +26,14 @@ def main():
         f.close()
         lumi = float(data["luminosity"])
 
-    doBkgFitPlots(mlfit, lumi)
+    doBkgFitPlots(mlfit, lumi, opts)
 
-def doBkgFitPlots(mlfit, lumi):
+def doBkgFitPlots(mlfit, lumi, options):
     firstMass = mlfit.massPoints()[0]
+    if opts.mass != None:
+        firstMass = opts.mass
+    else:
+        print "Doing plot for mass point %s, to change use -m parameter"%firstMass
 
     def createDrawPlot(gr, labels, fname):
         plot = plots.PlotBase([histograms.HistoGraph(gr, "Fitted", drawStyle="P")])
@@ -38,8 +42,9 @@ def doBkgFitPlots(mlfit, lumi):
         canvasOpts = {}
         if len(labels) > 15:
             canvasOpts["addHeight"] = 0.03*(len(labels)-15)
+            canvasOpts["addWidth"] = 0.2
 
-        plot.createFrame(fname, opts={"ymin": 0, "xmin": -3.2, "xmax": 2.5}, canvasOpts=canvasOpts)
+        plot.createFrame(fname, opts={"ymin": 0, "xmin": -4.2, "xmax": 2.5}, canvasOpts=canvasOpts)
         plot.getFrame().GetXaxis().SetTitle("Fitted value")
 
         scale = 1
@@ -48,6 +53,11 @@ def doBkgFitPlots(mlfit, lumi):
             plot.getFrame().GetXaxis().SetTickLength(plot.getFrame().GetXaxis().GetTickLength()*scale)
             plot.getPad().SetBottomMargin(plot.getPad().GetBottomMargin()*scale)
             plot.getPad().SetTopMargin(plot.getPad().GetTopMargin()*scale)
+        if "addWidth" in canvasOpts:
+            scale = 1/(1+canvasOpts["addWidth"])
+            #plot.getFrame().GetXaxis().SetTickLength(plot.getFrame().GetXaxis().GetTickLength()*scale)
+            plot.getPad().SetRightMargin(0.04)
+            plot.getPad().SetLeftMargin(0.04)
 
         plot.getPad().SetLeftMargin(plot.getPad().GetRightMargin())
         plot.getPad().Update()
@@ -72,7 +82,7 @@ def doBkgFitPlots(mlfit, lumi):
         l.SetTextFont(l.GetTextFont()-20) # bold->normal
         l.SetTextSize(17)
 
-        x_nuis = -3.0
+        x_nuis = -4.0
         x_value = 1.5
 
         l.DrawLatex(x_nuis, ymax*0.93, "Nuisance parameter")
@@ -81,18 +91,27 @@ def doBkgFitPlots(mlfit, lumi):
         for i, label in enumerate(labels):
             y = gr.GetY()[i]-0.3
     
-            l.DrawLatex(x_nuis, y, label[:20])
+            l.DrawLatex(x_nuis, y, label[:40])
             l.DrawLatex(x_value, y, "%.2f #pm %.2f" % (gr.GetX()[i], gr.GetErrorX(i)))
         
         plot.save()
     
 
-    (gr, labels) = mlfit.fittedGraph(firstMass, backgroundOnly=True)
-    createDrawPlot(gr, labels, "mlfit_backgroundOnly")
+    (gr, labels) = mlfit.fittedGraph(firstMass, backgroundOnly=options.bkgonlyfit, signalPlusBackground=options.sbfit, heavyHplusMode=options.heavyhplus)
+    myPlotName = "mlfit_m%s"%firstMass
+    if options.bkgonlyfit:
+        myPlotName += "_bkgonlyfit"
+    if options.sbfit:
+        myPlotName += "_sbfit"
+    if options.heavyhplus:
+        myPlotName += "_heavyHpMode"
+    
+    createDrawPlot(gr, labels, myPlotName)
 
+    (gr, labels, shapeStatNuisance) = mlfit.fittedGraphShapeStat(firstMass, backgroundOnly=options.bkgonlyfit, signalPlusBackground=options.sbfit)
     try:
-        (gr, labels, shapeStatNuisance) = mlfit.fittedGraphShapeStat(firstMass, backgroundOnly=True)
-        createDrawPlot(gr, labels, "mlfit_backgroundOnlyShapeStat")
+        (gr, labels, shapeStatNuisance) = mlfit.fittedGraphShapeStat(firstMass, backgroundOnly=options.bkgonlyfit, signalPlusBackground=options.sbfit)
+        createDrawPlot(gr, labels, myPlotName+"_ShapeStat")
     except Exception, e:
         print "Warning: %s" % str(e)
 
@@ -101,8 +120,15 @@ _limitTaskDirPrefix = "CombineMultiCrab"
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-r", dest="recursive", action="store_true", default=False, help="Print more information")
+    parser.add_option("--bkgonlyfit", dest="bkgonlyfit", action="store_true", default=False, help="Background-only fit (default)")
+    parser.add_option("--sbfit", dest="sbfit", action="store_true", default=False, help="Signal+background fit")
+    parser.add_option("-m", dest="mass", action="store", default=None, help="mass point")
+    parser.add_option("-r", dest="recursive", action="store_true", default=False, help="Find datacard directories recursively")
+    parser.add_option("--heavy", dest="heavyhplus", action="store_true", default=False, help="Plotting for heavy H+")
+    
     (opts, args) = parser.parse_args()
+    if not opts.sbfit:
+        opts.bkgonlyfit = True
 
     if opts.recursive:
         # Build list of directories
@@ -124,9 +150,9 @@ if __name__ == "__main__":
             print "Running ML fit on directory: %s"%l
             prevDir = os.getcwd()
             os.chdir(l)
-            main()
+            main(opts)
             os.chdir(prevDir)
 
     else:
         # Assume the script is being run in the working directory 
-        main()
+        main(opts)

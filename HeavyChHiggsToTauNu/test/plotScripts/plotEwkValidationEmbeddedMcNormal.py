@@ -92,6 +92,9 @@ def main():
     styles.styles[1] = styles.StyleCompound([styles.styles[1], styles.StyleMarker(markerStyle=25)])
 
     histograms.cmsTextMode = histograms.CMSMode.SIMULATION_PRELIMINARY
+#    histograms.cmsTextMode = histograms.CMSMode.SIMULATION
+#    histograms.cmsTextMode = histograms.CMSMode.SIMULATION_UNPUBLISHED
+#    histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED
     #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
     histograms.createLegend.setDefaults(textSize=0.04)
     histograms.createLegend.moveDefaults(dx=-0.25, dh=-0.2, dy=-0.12)
@@ -230,10 +233,21 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, plotter, outputDir, addData, 
                 "Embedded": legEmb,
                 "Normal": legSig,
                 })
-        p.histoMgr.forEachHisto(styles.generator())
+        #p.histoMgr.forEachHisto(styles.generator())
         hemb = p.histoMgr.getHisto("Embedded")
-        hemb.setDrawStyle("EP")
-        hemb.setLegendStyle("EPL")
+        hemb.setDrawStyle("HIST E")
+        hemb.setLegendStyle("L")
+        themb = hemb.getRootHisto()
+        #styles.ttStyle.apply(themb)
+        themb.SetLineColor(ROOT.kBlue)
+        themb.SetLineWidth(2)
+        themb.SetMarkerColor(themb.GetLineColor())
+        themb.SetMarkerSize(0)
+        hsig = p.histoMgr.getHisto("Normal")
+        hsig.setLegendStyle("F")
+        thsig = hsig.getRootHisto()
+        thsig.SetFillColor(ROOT.kGray)
+        thsig.SetLineColor(thsig.GetFillColor())
         histoOrder = ["Embedded", "Normal"]
         if addData:
             legData = "Embedded data"
