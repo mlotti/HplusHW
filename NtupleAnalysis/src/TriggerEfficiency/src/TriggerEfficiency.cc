@@ -106,8 +106,8 @@ void TriggerEfficiency::setupBranches(BranchManager& branchManager) {
 }
 
 void TriggerEfficiency::process(Long64_t entry) {
-
-  fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
+  if(fEvent.isMC())
+    fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
 
   cAllEvents.increment();
 
