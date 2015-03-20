@@ -47,6 +47,12 @@ class PSet:
         return json.dumps(self._asDict(), sort_keys=True, indent=2)
 
 
+def File(fname):
+    fullpath = os.path.join(aux.higgsAnalysisPath(), fname)
+    if not os.path.exists(fullpath):
+        raise Exception("The file %s does not exist" % self._fullpath)
+    return fullpath
+
 class Analyzer:
     def __init__(self, className, **kwargs):
         self.__dict__["_className"] = className
@@ -264,9 +270,6 @@ class Process:
             # estimate for the analysis. If this turns out to be slow,
             # we could store the number of events along the file names
             # (whatever is the method for that)
-            #
-            # FIXME: How do we know here if a dataset is MC or Data?
-            # Add also this along the other dataset metadata?
             inputList.Add(ROOT.SelectorImplParams(tchain.GetEntries(), dset.getDataVersion().isMC(), self._options.serialize_(), True))
 
             if _proof is not None:
@@ -377,6 +380,18 @@ if __name__ == "__main__":
   "fred": 56, 
   "xyzzy": 42
 }""")
+
+    class TestFile(unittest.TestCase):
+        def testConstruct(self):
+            f = File("NtupleAnalysis/python/main.py")
+            self.assertEqual(f, os.path.join(aux.higgsAnalysisPath(), "NtupleAnalysis/python/main.py"))
+            self.assertRaises(Exception, File, "NtupleFoo")
+
+        def testSerialize(self):
+            a = PSet(foo=File("NtupleAnalysis/python/main.py"))
+            self.assertEqual(a.serialize_(), """{
+  "foo": "%s/NtupleAnalysis/python/main.py"
+}""" % aux.higgsAnalysisPath())
 
     class TestAnalyzer(unittest.TestCase):
         def testConstruct(self):
