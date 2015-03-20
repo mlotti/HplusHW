@@ -54,6 +54,7 @@ public:
   using float_type = NUMBER;
   using Polar2DVector = math::Polar2DVectorT<float_type>;
   using XYVector = math::XYVectorT<float_type>;
+  using Scalar = float_type;
 
   explicit MET_T(const std::string& prefix):
     METBase(prefix),
@@ -69,6 +70,7 @@ public:
 
   float_type et() const { return fEt->value(); }
   float_type phi() const { return fPhi->value(); }
+  float_type Phi() const { return phi(); }
 
   // Note: asking for polarP2 is more expensive than asking et/phi
   // separately, so call only when necessary
@@ -81,6 +83,9 @@ public:
   XYVector p2() const {
     return XYVector(polarP2());
   }
+
+  float_type ex() const { return p2()->Px(); }
+  float_type ey() const { return p2()->Py(); }
 
 private:
   const Branch<float_type> *fEt;
