@@ -2,6 +2,7 @@
 #include "Framework/interface/makeTH.h"
 #include "DataFormat/interface/Event.h"
 //#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "TLorentzVector.h"
 #include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
 #include "TH2F.h"
@@ -15,7 +16,8 @@ public:
   virtual void book(TDirectory *dir) override;
   virtual void setupBranches(BranchManager& branchManager) override;
   virtual void process(Long64_t entry) override;
-
+  //  double DeltaPhi(const Tau& tau, const Jet& jet);
+  //  double DeltaPhiTauMet(const Tau&  tau, const double met_et, const double met_phi); 
 private:
   Event fEvent;
 
@@ -115,6 +117,8 @@ void CorrelationAnalysis::setupBranches(BranchManager& branchManager) {
   fEvent.setupBranches(branchManager);
 }
 
+
+
 void CorrelationAnalysis::process(Long64_t entry) {
   cAllEvents.increment();
 
@@ -141,7 +145,7 @@ void CorrelationAnalysis::process(Long64_t entry) {
 */
     if(!(tau.nProngs() == 1))
       continue;
-
+  
     hTauPt->Fill(tau.pt());
     hTauEta->Fill(tau.eta());
     //    hTauPhi->Fill(tau.phi()* 180/3.14159265);
@@ -227,14 +231,18 @@ void CorrelationAnalysis::process(Long64_t entry) {
   //  std::cout << "jet1 pt "<< jet1.pt() << std::endl;
   //  std::cout << "jet2 pt "<< jet2.pt() << std::endl;
   // std::cout << "jet3 pt "<< jet3.pt() << std::endl;
+  //  math::Polar2DVector  myMet2D= fEvent.met_Type1().polarP2();
 
-  //  double deltaPhi = ROOT::Math::VectorUtil::DeltaPhi(jet1.p4(),jet2->p4());
+
+  //  double deltaphi = DeltaPhi(tau,jet1);
+  //  std::cout << "deltaPhi "<< deltaphi << std::endl;
+  //  std::cout << " deltaphi_taumet   "<<  deltaphi_taumet    << std::endl;
   double DeltaPhiJet1MET  = (jet1.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
   double DeltaPhiJet2MET  = (jet2.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
   double DeltaPhiJet3MET  = (jet3.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
   double DeltaPhiTauMET  = (tau.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
   
-  //  hDPhiTauMetVsDphiJet1Met->Fill( DeltaPhiTauMET,DeltaPhiJet1MET);
+  hDPhiTauMetVsDphiJet1Met->Fill( DeltaPhiTauMET,DeltaPhiJet1MET);
   //  hDPhiTauMetVsDphiJet2Met->Fill( std::abs(DeltaPhiTauMET), std::abs(DeltaPhiJet2MET));
   //  hDPhiTauMetVsDphiJet3Met->Fill( std::abs(DeltaPhiTauMET), std::abs(DeltaPhiJet3MET));
   hDeltaPhiTauMet->Fill(std::abs(DeltaPhiTauMET));
@@ -254,8 +262,6 @@ void CorrelationAnalysis::process(Long64_t entry) {
     }
 
 
-
-
 /*
   for(Jet& jet: selectedJets) {
     if(jet.secondaryVertex() > 0.898)
@@ -264,3 +270,44 @@ void CorrelationAnalysis::process(Long64_t entry) {
 */
   fEventSaver.save();
 }
+
+
+/*
+  double DeltaPhi(const Tau& tau, const Jet& jet) {
+    // Construct tau vector, mtau = 1.777 GeV/c2
+    //   TLorentzVector myTau;
+    math::XYZTLorentzVector myTau;
+    myTau = tau.p4();
+    math::XYZTLorentzVector myJet;
+    myJet = tau.p4();
+    //    myTau.SetXYZM(tau.px(), tau.py(), tau.pz(), 1.777); 
+    // Calculate cosine of angle between jet and met direction
+          //    double myEtMiss = TMath::Sqrt(met.px()*met.px() + met.py()*met.py());
+    double myJetPt = jet.pt();
+    double myCosPhi = 100;
+    if (myJetPt > 0 && myTau.Pt() > 0)
+      myCosPhi = (myTau.X()*myJet.X() + myTau.Y()*myJet.Y()) / (myTau.Pt()*myJetPt);
+    double myDeltaPhi = -999;
+    if ( myCosPhi < 1) myDeltaPhi =   acos(myCosPhi);
+    return myDeltaPhi; 
+  }
+
+
+  double DeltaPhiTauMet(const Tau&  tau, const double met_et, const double met_phi) {
+    // Construct tau vector, mtau = 1.777 GeV/c2
+    math::XYZTLorentzVector myTau;
+    myTau = tau.p4();
+
+    // Calculate cosine of angle between jet and met direction
+	  //    double myEtMiss = TMath::Sqrt(met.px()*met.px() + met.py()*met.py());
+    double met_px = met_et*cos(met_phi);
+    double met_py = met_et*sin(met_phi);
+    double myCosPhi = 100;
+    if (met_et > 0 && myTau.Pt() > 0)
+      myCosPhi = (myTau.X()*met_px + myTau.Y()*met_py) / (myTau.Pt()*met_et);
+    double myDeltaPhi = -999;
+    if ( myCosPhi < 1) myDeltaPhi =   acos(myCosPhi);
+    return myDeltaPhi; 
+  }
+
+*/
