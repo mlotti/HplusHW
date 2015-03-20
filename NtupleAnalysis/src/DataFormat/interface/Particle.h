@@ -72,6 +72,7 @@ public:
   using float_type = typename Coll::float_type;
   using PolarLorentzVector = typename math::PolarLorentzVectorT<float_type>;
   using LorentzVector = typename math::LorentzVectorT<float_type>;
+  using Scalar = float_type;
 
   Particle(): ParticleBase(), fCollection(nullptr) {}
   Particle(const Coll *coll, size_t index): ParticleBase(index), fCollection(coll) {}
@@ -83,6 +84,8 @@ public:
   float_type eta() const { return fCollection->fEta->value()[index()]; }
   float_type phi() const { return fCollection->fPhi->value()[index()]; }
   float_type e()   const { return fCollection->fE->value()[index()]; }
+
+  float_type Phi() const { return phi(); }
 
   // Note: asking for polarP4 is more expensive than asking any of
   // pt/eta/phi/e, so call this only when necessary

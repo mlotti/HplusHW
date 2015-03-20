@@ -97,6 +97,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 }
 
 void MiniAOD2TTreeFilter::reset(){
+    if (trgDumper) trgDumper->reset();
     if (tauDumper) tauDumper->reset();
     if (electronDumper) electronDumper->reset();
     if (muonDumper) muonDumper->reset();
