@@ -16,7 +16,7 @@ public:
   virtual void book(TDirectory *dir) override;
   virtual void setupBranches(BranchManager& branchManager) override;
   virtual void process(Long64_t entry) override;
-  //  double DeltaPhi(const Tau& tau, const Jet& jet);
+  //  double DeltaPhi(const Tau& tau, const fEvent.met_Type1());
   //  double DeltaPhiTauMet(const Tau&  tau, const double met_et, const double met_phi); 
 private:
   Event fEvent;
@@ -110,7 +110,7 @@ void CorrelationAnalysis::book(TDirectory *dir) {
   hDPhiTauMetVsPt3jets = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsPt3jets", "Pt3jets;#Delta#phi(#tau jet,MET) (^{o});p_{T}^{3 jets}(GeV)", 180, 0., 180, 100, 0., 400.);
   hDPhiTauMetVsDphiJet1Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet1Met", "DPhiTauMetVsDphiJet1Met", 90, 0., 180, 90, 0., 180.);
   hDPhiTauMetVsDphiJet2Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet2Met", ";#Delta#phi(#tau jet2)", 90, 0., 180, 90, 0., 180.);
-  hDPhiTauMetVsDphiJet2Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet3Met", ";#Delta#phi(#tau jet3)", 90, 0., 180, 90, 0., 180.);
+  hDPhiTauMetVsDphiJet3Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet3Met", ";#Delta#phi(#tau jet3)", 90, 0., 180, 90, 0., 180.);
 }
 
 void CorrelationAnalysis::setupBranches(BranchManager& branchManager) {
@@ -230,22 +230,21 @@ void CorrelationAnalysis::process(Long64_t entry) {
   Tau tau = selectedTaus[0];
   //  std::cout << "jet1 pt "<< jet1.pt() << std::endl;
   //  std::cout << "jet2 pt "<< jet2.pt() << std::endl;
-  // std::cout << "jet3 pt "<< jet3.pt() << std::endl;
-  //  math::Polar2DVector  myMet2D= fEvent.met_Type1().polarP2();
+  //std::cout << "jet3 pt "<< jet3.pt() << std::endl;
 
 
-  //  double deltaphi = DeltaPhi(tau,jet1);
-  //  std::cout << "deltaPhi "<< deltaphi << std::endl;
-  //  std::cout << " deltaphi_taumet   "<<  deltaphi_taumet    << std::endl;
-  double DeltaPhiJet1MET  = (jet1.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
-  double DeltaPhiJet2MET  = (jet2.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
-  double DeltaPhiJet3MET  = (jet3.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
-  double DeltaPhiTauMET  = (tau.phi() - fEvent.met_Type1().phi())* 180/3.14159265;
+  double DeltaPhiTauMET  =   ROOT::Math::VectorUtil::DeltaPhi(tau,fEvent.met_Type1()) * 180/3.14159265;
+  //std::cout << "deltaPhi "<< deltaphi << std::endl;
+  //std::cout << " deltaphi_taumet   "<<  DeltaPhiTauMET    << std::endl;
+  double DeltaPhiJet1MET  =  ROOT::Math::VectorUtil::DeltaPhi(jet1,fEvent.met_Type1()) * 180/3.14159265; 
+  double DeltaPhiJet2MET  = ROOT::Math::VectorUtil::DeltaPhi(jet2,fEvent.met_Type1()) * 180/3.14159265;
+  double DeltaPhiJet3MET  = ROOT::Math::VectorUtil::DeltaPhi(jet3,fEvent.met_Type1()) * 180/3.14159265;
+  double DeltaPhiTaujet1  =  ROOT::Math::VectorUtil::DeltaPhi(tau,jet1) * 180/3.14159265;
   
   hDPhiTauMetVsDphiJet1Met->Fill( DeltaPhiTauMET,DeltaPhiJet1MET);
-  //  hDPhiTauMetVsDphiJet2Met->Fill( std::abs(DeltaPhiTauMET), std::abs(DeltaPhiJet2MET));
-  //  hDPhiTauMetVsDphiJet3Met->Fill( std::abs(DeltaPhiTauMET), std::abs(DeltaPhiJet3MET));
-  hDeltaPhiTauMet->Fill(std::abs(DeltaPhiTauMET));
+  hDPhiTauMetVsDphiJet2Met->Fill( DeltaPhiTauMET, DeltaPhiJet2MET);
+  hDPhiTauMetVsDphiJet3Met->Fill( DeltaPhiTauMET, DeltaPhiJet3MET);
+  hDeltaPhiTauMet->Fill(DeltaPhiTauMET);
  
 
   math::XYZTLorentzVector threeJets;
