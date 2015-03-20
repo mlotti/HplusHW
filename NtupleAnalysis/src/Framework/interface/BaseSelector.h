@@ -29,7 +29,6 @@ public:
   explicit BaseSelector(const ParameterSet& config);
   virtual ~BaseSelector();
 
-  void setMCStatus(bool isMC_) { fIsMC = isMC_; }
   void setEventSaver(EventSaver *saver) { fEventSaver.setSaver(saver); }
 
   void setOutput(TDirectory *dir) {
@@ -60,7 +59,7 @@ protected:
   PileupWeight fPileupWeight;
 
 private:
-  bool fIsMC;
+  const bool fIsMC;
 
   boost::optional<std::string> pileUpWeightPath;
   boost::optional<std::string> pileUpWeightData;

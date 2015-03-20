@@ -3,7 +3,7 @@
 BaseSelector::BaseSelector(const ParameterSet& config):
   fEventCounter(fEventWeight),
   fHistoWrapper(fEventWeight, config.getParameter<std::string>("histogramAmbientLevel", "Vital")),
-  fIsMC(false)
+  fIsMC(config.isMC())
 {
   pileUpWeightPath = config.getParameterOptional<std::string>("PileUpWeight.path");
   pileUpWeightData = config.getParameterOptional<std::string>("PileUpWeight.data");

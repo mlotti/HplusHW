@@ -10,7 +10,7 @@
 class BaseSelector;
 
 namespace SelectorFactory {
-  std::unique_ptr<BaseSelector> create(const std::string& className, const std::string& config);
+  std::unique_ptr<BaseSelector> create(const std::string& className, const std::string& config, bool isMC);
 }
 
 #define REGISTER_SELECTOR(name) static SelectorFactory::impl::Registrar<name> reg_##name(#name);

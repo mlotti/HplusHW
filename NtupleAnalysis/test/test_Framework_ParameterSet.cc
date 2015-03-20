@@ -182,5 +182,15 @@ TEST_CASE("ParameterSet", "[Framework]") {
     CHECK( pset.getParameter<std::string>("TauSelection.systematicVariation") == "systVarTESUp" );
   }
 
+  SECTION("Deliver isMC bit") {
+    ParameterSet pset("{}");
+    REQUIRE_THROWS_AS( pset.isMC(), std::runtime_error );
+
+    pset = ParameterSet("{}", true);
+    CHECK( pset.isMC() == true);
+
+    pset = ParameterSet("{}", false);
+    CHECK( pset.isMC() == false);
+  }
 }
 
