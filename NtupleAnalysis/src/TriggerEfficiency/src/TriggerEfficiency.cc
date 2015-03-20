@@ -41,6 +41,7 @@ private:
   BaseSelection* selection;
 
   Count cAllEvents;
+  Count cRunRange;
   Count cSelection;
   Count cCtrlTrigger;
   Count cSignalTrigger;
@@ -72,6 +73,7 @@ TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   fsignalTriggers2(config.getParameter<std::vector<std::string>>("signalTriggers2")),
   */
   cAllEvents(fEventCounter.addCounter("All events")),
+  cRunRange(fEventCounter.addCounter("RunRange")),
   cSelection(fEventCounter.addCounter("OfflineSelection")),
   cCtrlTrigger(fEventCounter.addCounter("CtrlTrigger")),
   cSignalTrigger(fEventCounter.addCounter("SignalTrigger"))
@@ -106,6 +108,9 @@ void TriggerEfficiency::process(Long64_t entry) {
   fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
 
   cAllEvents.increment();
+
+  if(!selection->passedRunRange(fEvent,this->isData())) return;
+  cRunRange.increment();
 
   if(!selection->offlineSelection(fEvent)) return;
   cSelection.increment();
