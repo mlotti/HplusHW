@@ -4,11 +4,11 @@
 
 #include <stdexcept>
 
-Event::Event():
+Event::Event(const ParameterSet& config): 
   fGenMET("GenMET"),
-  fMET_Type1("MET_Type1")
-{}
-Event::Event(const ParameterSet& config): Event() {
+  fMET_Type1("MET_Type1"),
+  fIsMC(config.isMC())
+{
   boost::optional<std::vector<std::string>> triggerOR = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR");
   if(triggerOR) {
     fTriggerOr.setBranchNames(*triggerOR);
