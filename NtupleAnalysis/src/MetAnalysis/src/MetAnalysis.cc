@@ -1,7 +1,7 @@
 #include "Framework/interface/BaseSelector.h"
 #include "Framework/interface/makeTH.h"
 #include "DataFormat/interface/Event.h"
-
+#include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
 #include "TDirectory.h"
 
@@ -48,7 +48,10 @@ private:
   WrappedTH1 *hMetNoJetInHole;
   WrappedTH1 *hMetJetInHole02;
   WrappedTH1 *hMetNoJetInHole02;
-
+  WrappedTH1 *hMetJetInHole_bjet;
+  WrappedTH1 *hMetJetInHole_gjet;
+  WrappedTH1 *hDeltaPhiMetNoJetInHole; 
+  WrappedTH1 *hDeltaPhiMetJetInHole; 
   std::vector<double> fECALDeadCellEtaTable;
   std::vector<double> fECALDeadCellPhiTable;
 
@@ -218,6 +221,12 @@ void MetAnalysis::book(TDirectory *dir) {
   hMetNoJetInHole= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetNoJetInHole", "MetNoJetInHole", 200, 0., 1000.);
   hMetJetInHole02= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetJetInHole02", "MetJetInHoleDR02", 200, 0., 1000.);
   hMetNoJetInHole02= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetNoJetInHole02", "MetNoJetInHoleDR02", 200, 0., 1000.);
+  hMetJetInHole_bjet= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetJetInHole_bjet", "MetJetInHole_bjet", 200, 0., 1000.);
+  hMetJetInHole_gjet= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetJetInHole_gjet", "MetJetInHole_gjet", 200, 0., 1000.);
+  //hMetJetInHole= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetJetInHole", "MetJetInHole", 200, 0., 1000.);
+  // hMetNoJetInHole= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetNoJetInHole", "MetNoJetInHole", 200, 0., 1000.);
+  hDeltaPhiMetNoJetInHole = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DeltaPhiMetNoJetInHole", "DeltaPhiMetNoJetInHole", 90, 0., 180);
+  hDeltaPhiMetJetInHole = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DeltaPhiMetJetInHole", "DeltaPhiMetJetInHole", 90, 0., 180);
 }
 
 void MetAnalysis::setupBranches(BranchManager& branchManager) {
@@ -293,6 +302,8 @@ void MetAnalysis::process(Long64_t entry) {
 
   bool jetInEcalHole = false;
   bool jetInEcalHole02 = false;  
+  bool jetInEcalHole_bjet = false;
+  bool jetInEcalHole_gjet = false;
 
   std::vector<Jet> selectedJets;
   for(Jet jet: fEvent.jets()) {
@@ -304,15 +315,28 @@ void MetAnalysis::process(Long64_t entry) {
       selectedJets.push_back(jet);
     }
     if(jet.pt() > 50 ) {
+
       size_t myTableSize = fECALDeadCellEtaTable.size();
       for (size_t i = 0; i < myTableSize; ++i) {
 	double myDeltaEta = jet.eta() - fECALDeadCellEtaTable[i];
 	double myDeltaPhi = jet.phi() - fECALDeadCellPhiTable[i];
 	//if (myDeltaEta <= myHalfCellSize || myDeltaPhi <= myHalfCellSize) return false;                                                                                                                                    
 	double myDeltaR = std::sqrt(myDeltaEta*myDeltaEta + myDeltaPhi*myDeltaPhi);
-	if (myDeltaR < deltaR) jetInEcalHole = true;
+	if (myDeltaR < deltaR) {
+	  jetInEcalHole = true;
+	  if (jet.pdgId() == 5) jetInEcalHole_bjet = true;
+	  if (jet.pdgId() == 0) jetInEcalHole_gjet = true;
+	}
 	if (myDeltaR < deltaR+0.1) jetInEcalHole02 = true;
       }
+      double DeltaPhiJetMET  =   ROOT::Math::VectorUtil::DeltaPhi(jet,fEvent.met_Type1()) * 180/3.14159265;
+    
+     if (jetInEcalHole) {
+       hDeltaPhiMetJetInHole->Fill(DeltaPhiJetMET);
+     }
+     if (!jetInEcalHole) {
+       hDeltaPhiMetNoJetInHole->Fill(DeltaPhiJetMET);
+     }
     }
   }
 
@@ -320,7 +344,8 @@ void MetAnalysis::process(Long64_t entry) {
   if ( !jetInEcalHole ) hMetNoJetInHole->Fill(myMet);
   if ( jetInEcalHole02 ) hMetJetInHole02->Fill(myMet); 
   if ( !jetInEcalHole02 ) hMetNoJetInHole02->Fill(myMet);
-
+  if ( jetInEcalHole_bjet ) hMetJetInHole_bjet->Fill(myMet); 
+  if ( jetInEcalHole_gjet ) hMetJetInHole_gjet->Fill(myMet); 
   if(selectedJets.size() < 3)
     return;
   cJetSelection.increment();

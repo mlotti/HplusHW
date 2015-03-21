@@ -31,8 +31,12 @@ def main():
     # We don't have yet the lumi information handled in NtupleAnalysis, so remove data for now
     datasets.remove(datasets.getDataDatasetNames())
 
+
+ #   datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb  
+
     # For this we don't have cross section
     datasets.remove(["DYJetsToLL_M10to50_TuneZ2star_Summer12"])
+  #  datasets.remove(["TBHp_HToTauNu_M_200_13TeV_pythia6"])
 
     # These have 0 events after skim in multicrab_TEST5, and the code crashes because of that
     datasets.remove([
@@ -97,7 +101,10 @@ def dataMCExample(datasets):
     plots.drawPlot( plots.DataMCPlot(datasets, "jetEta", normalizeToLumi=20000), "jetEta", xlabel="", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
     plots.drawPlot( plots.DataMCPlot(datasets, "jetPhi", normalizeToLumi=20000), "jetPhi", xlabel="#Phi^{jet}", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 #    plots.drawPlot( plots.DataMCPlot(datasets, "Pt3Jets", normalizeToLumi=20000), "Pt3Jets", xlabel="p_{T}^{3jets} (GeV/c)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
-    plots.drawPlot( plots.DataMCPlot(datasets, "DeltaPhiTauMet", normalizeToLumi=20000), "DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
+#    plots.drawPlot( plots.DataMCPlot(datasets, "DeltaPhiTauMet", normalizeToLumi=20000), "DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
+
+
+
 def getHistos(datasets,name1, name2):
      drh1 = datasets.getDataset("TTJets").getDatasetRootHisto("MetNoJetInHole")
      drh2 = datasets.getDataset("TTJets").getDatasetRootHisto("MetJetInHole")
@@ -178,8 +185,10 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
     plots._legendLabels["MetNoJetInHole"] = "Jets outside dead cells"
     plots._legendLabels["MetJetInHole"] = "Jets within dead cells"
     histograms.addText(300, 300, "p_{T}^{jet} > 50 GeV/c", 20)
-
-
+    kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
+    kwargs["createRatio"] = True
+#    if ratio:
+#        h.createFrameFraction(name, opts=opts, opts2=opts2)
 #    h.setLegend(leg)
 
     common(h, xlabel, ylabel)
