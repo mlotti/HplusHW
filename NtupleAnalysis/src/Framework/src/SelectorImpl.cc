@@ -156,8 +156,7 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
       std::string className = title.substr(0, pos);
       std::string config = title.substr(pos+1);
 
-      auto selector = SelectorFactory::create(className, config);
-      selector->setMCStatus(params->isMC());
+      auto selector = SelectorFactory::create(className, config, params->isMC());
       selector->setEventSaver(fEventSaver);
       TDirectory *subdir = nullptr;
       if(fOutputFile) {

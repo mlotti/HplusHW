@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
+from HiggsAnalysis.NtupleAnalysis.pileupWeight import pileupWeight
 
 import os
 
@@ -104,6 +105,7 @@ process.addAnalyzer("TauLeg_2012D_data",
             triggerOR  = ["HLT_IsoMu15_eta2p1_L1ETM20_v7"],
             triggerOR2 = ["HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v10"]
         ),
+        PileupWeight = pileupWeight(enabled=False),
         offlineSelection = leg,
         TauSelection = PSet(
             discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
@@ -126,8 +128,7 @@ process.addAnalyzer("TauLeg_2012D_mc",
             triggerOR  = ["HLT_IsoMu15_eta2p1_L1ETM20_v5"],
             triggerOR2 = ["HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v6"]
         ),
-        PileUpWeight = PSet(
-            path = PileupHistogramPath,
+        PileupWeight = pileupWeight(
             data = "2012D",
             mc   = "Summer12_S10"
         ),
@@ -150,6 +151,7 @@ process.addAnalyzer("TauLeg_2012D_mc_NOPU",
             triggerOR  = ["HLT_IsoMu15_eta2p1_L1ETM20_v5"],
             triggerOR2 = ["HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v6"]
         ),
+        PileupWeight = pileupWeight(enabled=False),
         offlineSelection = leg,
         TauSelection = PSet(
             discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",

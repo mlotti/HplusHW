@@ -29,7 +29,7 @@ namespace {
 REGISTER_SELECTOR(SelectorTestSelectorFactory);
 
 TEST_CASE("Selector factory and semi-automatic registration", "[Framework]") {
-  auto selector = SelectorFactory::create("SelectorTestSelectorFactory", "{\"name\":\"foo\", \"intvalue\":42, \"floatvalue\":2.71, \"nested\":{\"intvalue\":-100}}");
+  auto selector = SelectorFactory::create("SelectorTestSelectorFactory", "{\"name\":\"foo\", \"intvalue\":42, \"floatvalue\":2.71, \"nested\":{\"intvalue\":-100}}", true);
   REQUIRE( selector.get() != nullptr );
   const SelectorTestSelectorFactory *s = dynamic_cast<SelectorTestSelectorFactory *>(selector.get());
   REQUIRE( s != nullptr );

@@ -29,7 +29,10 @@ namespace ParameterSetImpl {
 class ParameterSet {
 public:
   explicit ParameterSet(const std::string& config);
+  ParameterSet(const std::string& config, bool isMC);
+
   explicit ParameterSet(const boost::property_tree::ptree& config);
+  ParameterSet(const boost::property_tree::ptree& config, bool isMC);
 
   template <typename T, typename ...Args>
   T getParameter(const std::string& name, Args&&... args) const {
@@ -40,6 +43,8 @@ public:
   boost::optional<T> getParameterOptional(const std::string& name) const {
     return ParameterSetImpl::ParameterGetter<T>::getOptional(fConfig, name);
   }
+
+  bool isMC() const;
 
 private:
   template <typename T, typename PChild>
@@ -52,6 +57,8 @@ private:
   }
 
   boost::property_tree::ptree fConfig;
+  bool fIsMC;
+  bool fIsMCSet;
 };
 
 
