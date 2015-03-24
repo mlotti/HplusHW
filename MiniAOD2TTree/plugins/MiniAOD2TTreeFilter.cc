@@ -7,6 +7,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     outputFileName(iConfig.getParameter<std::string>("OutputFileName")),
     codeVersion(iConfig.getParameter<std::string>("CodeVersion")),
     dataVersion(iConfig.getParameter<std::string>("DataVersion")),
+    cmEnergy(iConfig.getParameter<int>("CMEnergy")),
     eventInfoCollections(iConfig.getParameter<edm::ParameterSet>("EventInfo"))
 {
     fOUT = TFile::Open(outputFileName.c_str(),"RECREATE");	
@@ -117,6 +118,7 @@ void MiniAOD2TTreeFilter::reset(){
 }
 
 #include <time.h>
+#include "TH1F.h"
 void MiniAOD2TTreeFilter::endJob(){
 
 // write date
@@ -137,6 +139,14 @@ void MiniAOD2TTreeFilter::endJob(){
 
     TNamed* dv = new TNamed("dataVersion",dataVersion);
     dv->Write();
+
+    int nbins = 2;
+    TH1F* cfgInfo = new TH1F("configinfo","",nbins,0,nbins);
+    cfgInfo->SetBinContent(1,1.0);
+    cfgInfo->GetXaxis()->SetBinLabel(1,"control");
+    cfgInfo->SetBinContent(2,cmEnergy);
+    cfgInfo->GetXaxis()->SetBinLabel(2,"energy");
+    cfgInfo->Write();
 
     fOUT->cd();
 

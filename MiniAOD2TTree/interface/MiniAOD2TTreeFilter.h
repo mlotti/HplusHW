@@ -47,6 +47,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	std::string outputFileName;
 	std::string codeVersion;
         std::string dataVersion;
+	int cmEnergy;
 	edm::ParameterSet eventInfoCollections;
 	edm::ParameterSet trigger;
         std::vector<edm::ParameterSet> tauCollections;

@@ -19,6 +19,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
     EventInfo = cms.PSet(),
+    CMEnergy = cms.int32(13),
     GenParticles = cms.VPSet(
         cms.PSet(
             branchname = cms.untracked.string("GenParticles"),
