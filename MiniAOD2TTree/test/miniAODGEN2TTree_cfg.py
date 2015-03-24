@@ -142,6 +142,12 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 #            src = cms.InputTag("patMETCalo")
 #        )
     ),
+    Tracks = cms.VPSet(
+        cms.PSet(
+            branchname = cms.untracked.string("PFCands"),
+            src = cms.InputTag("packedPFCandidates")   
+        ),
+    ),
     GenParticles = cms.VPSet(
         cms.PSet(
             branchname = cms.untracked.string("GenParticles"),
