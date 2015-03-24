@@ -32,11 +32,15 @@ def main():
     datasets.remove(datasets.getDataDatasetNames())
 
 
- #   datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb  
+    datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb  
+    datasets.getDataset("TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb   
+    datasets.getDataset("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola").setCrossSection(0.336902*2*0.955592) # pb   
+    datasets.getDataset("QCD_Pt_50to80_Tune4C_13TeV_pythia8").setCrossSection(0.336902*2*0.955592) # pb   
 
     # For this we don't have cross section
     datasets.remove(["DYJetsToLL_M10to50_TuneZ2star_Summer12"])
   #  datasets.remove(["TBHp_HToTauNu_M_200_13TeV_pythia6"])
+    datasets.remove(["QCD_Pt_50to80_TuneZ2star_13TeV_pythia6"])
 
     # These have 0 events after skim in multicrab_TEST5, and the code crashes because of that
     datasets.remove([
@@ -64,6 +68,7 @@ def main():
     # All single top datasets to "SingleTop"
     # WW, WZ, ZZ to "Diboson"
     plots.mergeRenameReorderForDataMC(datasets)
+    datasets.rename("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola", "TTJets")
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -94,12 +99,19 @@ def dataMCExample(datasets):
     plots.drawPlot(plot, "taupt", xlabel="Tau p_{T} (GeV/c)", ylabel="Number of events",
                    rebin=10, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True,
                    opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
-    plots.drawPlot( plots.DataMCPlot(datasets, "tauEta", normalizeToLumi=20000), "tauEta", xlabel="", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 10}, log=False)
-    plots.drawPlot( plots.DataMCPlot(datasets, "Met", normalizeToLumi=20000), "Met", xlabel="E_{T}^{miss} (GeV)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
-    plots.drawPlot( plots.DataMCPlot(datasets, "MetPhi", normalizeToLumi=20000), "MetPhi", xlabel="#Phi^{miss} ", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
-    plots.drawPlot( plots.DataMCPlot(datasets, "jetPt", normalizeToLumi=20000), "jetPt", xlabel="p_{T}^{jet} (GeV/c)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
-    plots.drawPlot( plots.DataMCPlot(datasets, "jetEta", normalizeToLumi=20000), "jetEta", xlabel="", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
-    plots.drawPlot( plots.DataMCPlot(datasets, "jetPhi", normalizeToLumi=20000), "jetPhi", xlabel="#Phi^{jet}", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
+
+
+    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 10})
+
+    def createDrawPlot(name, **kwargs):
+        drawPlot( plots.DataMCPlot(datasets, name, normalizeToLumi=20000), name, **kwargs)
+
+    createDrawPlot("tauEta", xlabel="", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("Met", xlabel="E_{T}^{miss} (GeV)", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("MetPhi", xlabel="#Phi^{miss} ", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("jetPt", xlabel="p_{T}^{jet} (GeV/c)", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("jetEta", xlabel="", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("jetPhi", xlabel="#Phi^{jet}", ylabel="Number of events", rebin=1, log=False)
 #    plots.drawPlot( plots.DataMCPlot(datasets, "Pt3Jets", normalizeToLumi=20000), "Pt3Jets", xlabel="p_{T}^{3jets} (GeV/c)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 #    plots.drawPlot( plots.DataMCPlot(datasets, "DeltaPhiTauMet", normalizeToLumi=20000), "DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 
@@ -118,16 +130,26 @@ def MetComparison(datasets):
     mt = plots.PlotBase(getHistos(datasets,"MetNoJetInHole", "MetJetInHole"))
  #   mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
-    mt._setLegendLabels()
     st1 = styles.StyleCompound([styles.styles[2]])
     st2 = styles.StyleCompound([styles.styles[1]])
     st1.append(styles.StyleLine(lineWidth=3))
     st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
     mt.histoMgr.forHisto("MetNoJetInHole", st1)
     mt.histoMgr.forHisto("MetJetInHole", st2)
+    mt.histoMgr.setHistoLegendLabelMany({
+            "MetNoJetInHole": "Jets outside dead cells",
+            "MetJetInHole": "Jets within dead cells"
+            })
 #    mt.histoMgr.setHistoDrawStyleAll("P")
 
-    rtauGen(mt, "MetComparison", rebin=1, ratio=True, defaultStyles=False)
+    mt.appendPlotObject(histograms.PlotText(300, 300, "p_{T}^{jet} > 50 GeV/c", size=20))
+    xlabel = "PF E_{T}^{miss} (GeV)"
+    ylabel = "Events / %.2f"
+    plots.drawPlot(mt, "MetComparison", xlabel=xlabel, ylabel=ylabel, rebinX=2, log=True,
+                   createLegend={"x1": 0.6, "y1": 0.75, "x2": 0.8, "y2": 0.9},
+                   ratio=False, opts2={"ymin": 0.5, "ymax": 1.5})
+                   
+#    rtauGen(mt, "MetComparison", rebin=1, ratio=True, defaultStyles=False)
 
 def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
     if defaultStyles:
@@ -138,7 +160,6 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
 
 
     xlabel = "PF E_{T}^{miss} (GeV)"
-#    xlabel = "#beta^{jet}"
     ylabel = "Events / %.2f" % h.binWidth()
     if "LeptonsInMt" in name:
         xlabel = "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})"
@@ -152,8 +173,6 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
 
         
     kwargs = {"ymin": 0.1, "ymax": 1000}
-#    h.getPad().SetLogy(True)
-
     if "LeptonsInMt" in name: 
         kwargs = {"ymin": 0., "xmax": 300}
     if "NoLeptonsRealTau" in name: 

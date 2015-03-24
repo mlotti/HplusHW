@@ -105,6 +105,21 @@ backgroundCrossSections = CrossSectionList(
             "7": 172.0, # [10]
             "8": 245.8, # [10]
             }),
+####################################
+#   CrossSection("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola", {
+#            "7": 165.0, # [3,4], approx. NNLO                                                                                                                                                                                                                    
+#            "7": 172.0, # [10]                                                                                                                                                                                                                                   # 
+#            "8": 245.8, # [10]                                                                                                                                                                                                                                    
+#            }),
+
+#   CrossSection("TBHp_HToTauNu_M_200_13TeV_pythia6", {
+#            "7": 165.0, # [3,4], approx. NNLO                                                                                                                                                                                                                    
+#            "7": 172.0, # [10]                                                                                                                                                                                                                                    
+#            "8": 245.8, # [10]                                                                                                                                                                                                                                    
+#            }),
+
+##################################################3
+
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO
             "8": 36703.2, # [9], NNLO
