@@ -23,7 +23,6 @@ xLabel  = "#tau-jet p_{T} (GeV/c)"
 yLabel  = "HLT tau efficiency"
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
-PileupHistogramPath = os.path.join(aux.higgsAnalysisPath(), "NtupleAnalysis", "data", "PUWeights")
 
 def runRange(era):
     lumi   = 0
@@ -51,6 +50,7 @@ def createAnalyzer(dataVersion,era):
             triggerOR  = [],
             triggerOR2 = []
         ),
+        PileupWeight = pileupWeight(enabled=False),
         offlineSelection = leg,
         TauSelection = PSet(
             discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
@@ -81,8 +81,7 @@ def createAnalyzer(dataVersion,era):
     else:
         a.Trigger.triggerOR = ["HLT_IsoMu15_eta2p1_L1ETM20_v5"]
         a.Trigger.triggerOR2 = ["HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v6"]
-        a.PileUpWeight = PSet(
-            path = PileupHistogramPath,
+        a.PileupWeight = pileupWeight(
             data = era,
             mc   = "Summer12_S10"
         )
