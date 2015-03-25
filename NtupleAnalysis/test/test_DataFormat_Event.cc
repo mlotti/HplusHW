@@ -12,10 +12,13 @@ TEST_CASE("Event", "[DataFormat]") {
     BranchManager mgr;
     mgr.setTree(tree.get());
 
-    Event event;
+    Event event(ParameterSet("{}", true));
     event.setupBranches(mgr);
 
     SECTION("Event") {
+      CHECK( event.isMC() == true );
+      CHECK( event.isData() == false );
+
       mgr.setEntry(0);
       CHECK( event.eventID().event() == 1u );
       CHECK( event.eventID().lumi() == 1 );
@@ -57,7 +60,7 @@ TEST_CASE("Event", "[DataFormat]") {
 
     boost::property_tree::ptree tmp;
     tmp.put("TauSelection.systematicVariation", "systVarTESUp");
-    ParameterSet config(tmp);
+    ParameterSet config(tmp, true);
 
     Event event(config);
     event.setupBranches(mgr);
@@ -95,7 +98,7 @@ TEST_CASE("Event", "[DataFormat]") {
     boost::property_tree::ptree tmp;
     tmp.put("TauSelection.systematicVariation", "systVarTESUp");
     tmp.put("JetSelection.systematicVariation", "systVarJESUp");
-    ParameterSet config(tmp);
+    ParameterSet config(tmp, true);
 
     REQUIRE_THROWS_AS( Event event(config), std::runtime_error );
   }
@@ -116,7 +119,7 @@ TEST_CASE("Event", "[DataFormat]") {
 
       tmp.add_child("TauSelection.discriminators", discrs);
 
-      ParameterSet config(tmp);
+      ParameterSet config(tmp, true);
       Event event(config);
       event.setupBranches(mgr);
 
@@ -142,7 +145,7 @@ TEST_CASE("Event", "[DataFormat]") {
 
       tmp.add_child("TauSelection.discriminators", discrs);
 
-      ParameterSet config(tmp);
+      ParameterSet config(tmp, true);
       Event event(config);
       event.setupBranches(mgr);
 
@@ -164,7 +167,7 @@ TEST_CASE("Event", "[DataFormat]") {
     BranchManager mgr;
     mgr.setTree(tree.get());
 
-    ParameterSet config("{\"Trigger\": {\"triggerOR\": [\"HLT_Trig1\", \"HLT_Trig2\"]}}");
+    ParameterSet config("{\"Trigger\": {\"triggerOR\": [\"HLT_Trig1\", \"HLT_Trig2\"]}}", true);
     Event event(config);
     event.setupBranches(mgr);
 

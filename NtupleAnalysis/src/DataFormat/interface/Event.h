@@ -19,11 +19,13 @@ class BranchManager;
 
 class Event {
 public:
-  Event();
   explicit Event(const ParameterSet& config);
   ~Event();
 
   void setupBranches(BranchManager& mgr);
+
+  bool isMC() const { return fIsMC; }
+  bool isData() const { return !fIsMC; }
 
   bool configurableTriggerDecision() const {
     return fTriggerOr.value();
@@ -61,6 +63,8 @@ private:
   MET fGenMET;
   MET fMET_Type1;
   GenParticleCollection fGenParticleCollection;
+
+  const bool fIsMC;
 };
 
 #endif

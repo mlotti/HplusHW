@@ -7,7 +7,6 @@
 #include "Framework/interface/EventCounter.h"
 #include "Framework/interface/HistoWrapper.h"
 #include "Framework/interface/EventSaver.h"
-#include "Tools/interface/PileupWeight.h"
 
 #include "Rtypes.h"
 #include "TBranch.h"
@@ -29,7 +28,6 @@ public:
   explicit BaseSelector(const ParameterSet& config);
   virtual ~BaseSelector();
 
-  void setMCStatus(bool isMC_) { fIsMC = isMC_; }
   void setEventSaver(EventSaver *saver) { fEventSaver.setSaver(saver); }
 
   void setOutput(TDirectory *dir) {
@@ -39,8 +37,6 @@ public:
 
   void processInternal(Long64_t entry) {
     fEventWeight.beginEvent();
-    if(pileUpWeightPath && pileUpWeightData && pileUpWeightMC)
-      fPileupWeight.set(*pileUpWeightPath,*pileUpWeightData,*pileUpWeightMC,this->isData());
     process(entry);
   }
 
@@ -57,14 +53,9 @@ protected:
   EventCounter fEventCounter;
   HistoWrapper fHistoWrapper;
   EventSaverClient fEventSaver;
-  PileupWeight fPileupWeight;
 
 private:
-  bool fIsMC;
-
-  boost::optional<std::string> pileUpWeightPath;
-  boost::optional<std::string> pileUpWeightData;
-  boost::optional<std::string> pileUpWeightMC;
+  const bool fIsMC;
 };
 
 #endif
