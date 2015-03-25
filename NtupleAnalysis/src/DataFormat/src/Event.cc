@@ -54,8 +54,10 @@ void Event::setupBranches(BranchManager& mgr) {
 
   fTauCollection.setupBranches(mgr);
   fJetCollection.setupBranches(mgr);
+  fGenJetCollection.setupBranches(mgr);
   fMuonCollection.setupBranches(mgr);
   fElectronCollection.setupBranches(mgr);
+  fGenParticleCollection.setupBranches(mgr);
   fGenMET.setupBranches(mgr);
   fMET_Type1.setupBranches(mgr);
 }

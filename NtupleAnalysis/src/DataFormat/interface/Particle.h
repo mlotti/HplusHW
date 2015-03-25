@@ -83,6 +83,7 @@ public:
   float_type eta() const { return fCollection->fEta->value()[index()]; }
   float_type phi() const { return fCollection->fPhi->value()[index()]; }
   float_type e()   const { return fCollection->fE->value()[index()]; }
+  float_type id()  const { return fCollection->fID->value()[index()]; }
 
   // Note: asking for polarP4 is more expensive than asking any of
   // pt/eta/phi/e, so call this only when necessary
@@ -146,7 +147,8 @@ public:
     fPt(nullptr),
     fEta(nullptr),
     fPhi(nullptr),
-    fE(nullptr)
+    fE(nullptr),
+    fID(nullptr)
   {}
   ~ParticleCollection() {}
 
@@ -155,6 +157,7 @@ public:
     mgr.book(prefix()+"_eta",                               &fEta);
     mgr.book(prefix()+"_phi",                               &fPhi);
     mgr.book(prefix()+"_e"   +energySystematicsVariation(), &fE);
+    mgr.book(prefix()+"_pdgId"                            , &fID);
   }
 
   size_t size() const { return fPt->value().size(); }
@@ -170,6 +173,7 @@ protected:
   const Branch<std::vector<float_type>> *fEta;
   const Branch<std::vector<float_type>> *fPhi;
   const Branch<std::vector<float_type>> *fE;
+  const Branch<std::vector<short>> *fID; 
 };
 
 #endif
