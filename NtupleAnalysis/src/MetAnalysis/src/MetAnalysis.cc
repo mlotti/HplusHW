@@ -242,24 +242,26 @@ void MetAnalysis::process(Long64_t entry) {
   std::vector<Tau> selectedTaus;
   for(Tau tau: fEvent.taus()) {
     if(!tau.decayModeFinding())
-      continue;
+       continue;
     if(!(tau.pt() > fTauPtCut))
       continue;
     if(!(std::abs(tau.eta()) < 2.4))
       continue;
+    
     if(!(tau.lTrkPt() > 10))
       continue;
-/*
+
     if(!tau.againstElectronTightMVA5())
       continue;
+    /*
     if(!tau.againstMuonTightMVA())
       continue;
     if(!tau.byMediumIsolationMVA3newDMwoLT())
       continue;
-*/
+    */
     if(!(tau.nProngs() == 1))
       continue;
-
+    
     hTauPt->Fill(tau.pt());
     hTauEta->Fill(tau.eta());
     //    hTauPhi->Fill(tau.phi()* 180/3.14159265);

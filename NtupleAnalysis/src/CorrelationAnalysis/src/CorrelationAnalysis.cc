@@ -40,13 +40,16 @@ private:
   WrappedTH1 *hMuonEta;
 
   WrappedTH1 *hElectronPt;
+  WrappedTH1 *hElectronEta;
 
   WrappedTH1 *hJetPt;
   WrappedTH1 *hJetEta;
   WrappedTH1 *hJetPhi;
+  WrappedTH1 *hNjets;
 
   WrappedTH1 *hBJetPt;
-
+  WrappedTH1 *hjetSecondaryVertex;
+ 
   WrappedTH1 *hMet;
   WrappedTH1 *hMetPhi;
   WrappedTH1 *hMetJetInHole;
@@ -60,6 +63,8 @@ private:
   WrappedTH2 *hDPhiTauMetVsDphiJet3Met;
   WrappedTH1 *hM3jets;
   WrappedTH1 *hDeltaPhiTauMet;
+  WrappedTH1 *htransverseMass;
+  WrappedTH1 *htransverseMassTriangleCut; 
  
   std::vector<double> fECALDeadCellEtaTable;
   std::vector<double> fECALDeadCellPhiTable;
@@ -92,12 +97,15 @@ void CorrelationAnalysis::book(TDirectory *dir) {
   hMuonEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "muonEta", "Muon eta", 60, -3, 3);
 
   hElectronPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "electronPt", "Electron pT", 100, 0, 500);
+  hElectronEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "electronEta", "Electron pT", 100, -3, 3);
 
   hJetPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "jetPt", "Jet pT", 200, 0, 1000);
   hJetEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "jetEta", "Jet eta", 100, -5, 5);
   hJetPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "jetPhi", "Jet phi", 90, 0, 180);
+  hNjets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Njets", "Njets", 90, 0, 180);
 
   hBJetPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "bJetPt", "B jet pT", 200, 0, 1000);
+  hjetSecondaryVertex = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "jetSecondaryVertex", "jetSecondaryVertex", 200, 0, 2);
 
   hMet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met", "Met", 200, 0., 1000.);
   hMetPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetPhi", "Met phi", 90, 0., 180.);
@@ -112,6 +120,9 @@ void CorrelationAnalysis::book(TDirectory *dir) {
   hDPhiTauMetVsDphiJet1Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet1Met", "DPhiTauMetVsDphiJet1Met", 90, 0., 180, 90, 0., 180.);
   hDPhiTauMetVsDphiJet2Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet2Met", ";#Delta#phi(#tau jet2)", 90, 0., 180, 90, 0., 180.);
   hDPhiTauMetVsDphiJet3Met = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsDphiJet3Met", ";#Delta#phi(#tau jet3)", 90, 0., 180, 90, 0., 180.);
+  htransverseMass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "transverseMass", "transverseMass", 200, 0., 800);
+  htransverseMassTriangleCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "transverseMassTriangleCut", "transverseMassTriangleCut", 200, 0., 800);
+
 }
 
 void CorrelationAnalysis::setupBranches(BranchManager& branchManager) {
@@ -172,9 +183,12 @@ void CorrelationAnalysis::process(Long64_t entry) {
   size_t nelectrons = 0;
   for(Electron electron: fEvent.electrons()) {
     hElectronPt->Fill(electron.pt());
-    if(electron.pt() > 15 && std::abs(electron.eta()) < 2.4)
+    hElectronEta->Fill(electron.eta());
+ 
+   if(electron.pt() > 15 && std::abs(electron.eta()) < 2.4)
       ++nelectrons;
   }
+  //  std::cout  << " electrons  "<< nelectrons << std::endl; 
   if(nelectrons > 0)
     return;
   cElectronVeto.increment();
@@ -251,44 +265,47 @@ void CorrelationAnalysis::process(Long64_t entry) {
       for(Jet& jet: selectedJets) {
       //  if ((*jet)->eta() > myMaxEta)
       //      std::cout << "jet eta  " << (*jet)->eta() << " jet pt  " << (*jet)->pt() << std::endl;
-        allJets += (*jet)->p4();
-        ptAllJets +=(*jet)->pt();
-    }
+      allJets += (*jet)->p4();
+      ptAllJets +=(*jet)->pt();
+      }
   */
-
+  
   math::XYZTLorentzVector myTau;
   myTau = jet1.p4(); 
-  /*
+  double myCosPhi = 999;
+  double  transverseMass=-999;
 
-    if (myMet > 0 && tau.pt() > 0)
-      myCosPhi = (myTau.X()*fEvent.met_Type1().px() + myTau.Y()*fEvent.met_Type1().py()) / (tau.pt()*myMet);
-    // Calculate transverse mass                                                                                                                                                                     
-    double myTransverseMass = -999;
-    double myTransverseMassSquared = 0;
-    if (myCosPhi < 10)
-      myTransverseMassSquared = 2 * tau.pt() * myMet * (1.0-myCosPhi);
-    if (myTransverseMassSquared >= 0)
-      myTransverseMass = TMath::Sqrt(myTransverseMassSquared);
+  if (myMet > 0 && tau.pt() > 0)
+    myCosPhi = (myTau.X() * std::cos(fEvent.met_Type1().phi()) + myTau.Y() * std::sin(fEvent.met_Type1().phi())) / tau.pt();
+  // Calculate transverse mass                                                                                                                                                                     
+  double myTransverseMass = -999;
+  double myTransverseMassSquared = 0;
+  if (std::abs(myCosPhi) < 1)
+    myTransverseMassSquared = 2 * tau.pt() * myMet * (1.0-myCosPhi);
+  if (myTransverseMassSquared >= 0)
+    transverseMass = TMath::Sqrt(myTransverseMassSquared);
+  htransverseMass->Fill(transverseMass);
+  
+  // with triangle cut
+  
+  if (!(threeJets.pt() < ptcut && DeltaPhiTauMET > 60)) {
+    //increment(fTriangleCutCounter);
+    htransverseMassTriangleCut->Fill(transverseMass);
+  }
 
- 
-
-    // with triangle cut
-
-    if (!(pt3jets < ptcut && deltaPhi > 60)) {
-      //increment(fTriangleCutCounter);
-      htransverseMassTriangleCut->Fill(transverseMass);
-    }
-
-  */
+  
 
   size_t njets = 0;
     for(Jet& jet: selectedJets) {
       //      if (njets == 0)  jet1 = jet.p4();
       ++njets;
     }
+  hNjets->Fill(njets);
 
 
   for(Jet& jet: selectedJets) {
+    hjetSecondaryVertex->Fill(jet.secondaryVertex());
+    //    std::cout << "jet eta  " << jet.eta() << " jet.secondaryVertex()  " << jet.secondaryVertex() << std::endl;   
     if(jet.secondaryVertex() > 0.898)
       hBJetPt->Fill(jet.pt());
   }

@@ -31,16 +31,16 @@ def main():
     # We don't have yet the lumi information handled in NtupleAnalysis, so remove data for now
     datasets.remove(datasets.getDataDatasetNames())
 
-
     datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb  
     datasets.getDataset("TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb   
-    datasets.getDataset("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola").setCrossSection(0.336902*2*0.955592) # pb   
-    datasets.getDataset("QCD_Pt_50to80_Tune4C_13TeV_pythia8").setCrossSection(0.336902*2*0.955592) # pb   
+    datasets.getDataset("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola").setCrossSection(245.8) # pb   
+    datasets.getDataset("QCD_Pt_50to80_Tune4C_13TeV_pythia8").setCrossSection(8148778.0) # pb   
 
     # For this we don't have cross section
     datasets.remove(["DYJetsToLL_M10to50_TuneZ2star_Summer12"])
-  #  datasets.remove(["TBHp_HToTauNu_M_200_13TeV_pythia6"])
+###    datasets.remove(["TBHp_HToTauNu_M_200_13TeV_pythia6"])
     datasets.remove(["QCD_Pt_50to80_TuneZ2star_13TeV_pythia6"])
+    datasets.remove(["DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12"])
 
     # These have 0 events after skim in multicrab_TEST5, and the code crashes because of that
     datasets.remove([
@@ -69,6 +69,7 @@ def main():
     # WW, WZ, ZZ to "Diboson"
     plots.mergeRenameReorderForDataMC(datasets)
     datasets.rename("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola", "TTJets")
+    datasets.rename("QCD_Pt_50to80_Tune4C_13TeV_pythia8", "QCD")
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -118,8 +119,8 @@ def dataMCExample(datasets):
 
 
 def getHistos(datasets,name1, name2):
-     drh1 = datasets.getDataset("TTJets").getDatasetRootHisto("MetNoJetInHole")
-     drh2 = datasets.getDataset("TTJets").getDatasetRootHisto("MetJetInHole")
+     drh1 = datasets.getDataset("QCD").getDatasetRootHisto("MetNoJetInHole")
+     drh2 = datasets.getDataset("QCD").getDatasetRootHisto("MetJetInHole")
      drh1.setName("MetNoJetInHole")
      drh2.setName("MetJetInHole")
      return [drh1, drh2]
@@ -128,7 +129,7 @@ def getHistos(datasets,name1, name2):
 
 def MetComparison(datasets):
     mt = plots.PlotBase(getHistos(datasets,"MetNoJetInHole", "MetJetInHole"))
- #   mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+#    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
     st1 = styles.StyleCompound([styles.styles[2]])
     st2 = styles.StyleCompound([styles.styles[1]])

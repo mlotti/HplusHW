@@ -75,7 +75,7 @@ def main():
     style = tdrstyle.TDRStyle()
 
     dataMCExample(datasets)
-    MetComparison(datasets)
+#    MetComparison(datasets)
 
     # Script execution can be paused like this, it will continue after
     # user has given some input (which must include enter)
@@ -102,7 +102,7 @@ def dataMCExample(datasets):
                    opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
 
 
-    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 10})
+    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01})
 
     def createDrawPlot(name, **kwargs):
         drawPlot( plots.DataMCPlot(datasets, name, normalizeToLumi=20000), name, **kwargs)
@@ -111,8 +111,18 @@ def dataMCExample(datasets):
     createDrawPlot("Met", xlabel="E_{T}^{miss} (GeV)", ylabel="Number of events", rebin=1, log=True)
     createDrawPlot("MetPhi", xlabel="#Phi^{miss} ", ylabel="Number of events", rebin=1, log=False)
     createDrawPlot("jetPt", xlabel="p_{T}^{jet} (GeV/c)", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("electronPt", xlabel="p_{T}^{jet} (GeV/c)", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("electronEta", xlabel="", ylabel="Number of events", rebin=1, log=False)
+
     createDrawPlot("jetEta", xlabel="", ylabel="Number of events", rebin=1, log=False)
     createDrawPlot("jetPhi", xlabel="#Phi^{jet}", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("Njets", xlabel="Number of Jets", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("jetSecondaryVertex", xlabel="Significance", ylabel="Number of events", rebin=1, log=False)
+
+    createDrawPlot("transverseMass", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=1, log=False, opts={"ymin": 0, "xmin":5, "ymaxfactor": 0.01})
+    createDrawPlot("transverseMassTriangleCut", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=1, log=False, opts={"ymin": 0, "xmin":5, "ymaxfactor": 0.01})
+
 #    plots.drawPlot( plots.DataMCPlot(datasets, "Pt3Jets", normalizeToLumi=20000), "Pt3Jets", xlabel="p_{T}^{3jets} (GeV/c)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 #    plots.drawPlot( plots.DataMCPlot(datasets, "DeltaPhiTauMet", normalizeToLumi=20000), "DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 
