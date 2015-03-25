@@ -21,6 +21,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
     DataVersion = cms.string("74Xmc"),
+    CMEnergy = cms.int32(13),
     EventInfo = cms.PSet(
 	PileupSummaryInfoSrc = cms.InputTag("addPileupInfo"),
 #	LHESrc = cms.InputTag(""),
@@ -141,6 +142,12 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 #            branchname = cms.untracked.string("CaloMET"),
 #            src = cms.InputTag("patMETCalo")
 #        )
+    ),
+    Tracks = cms.VPSet(
+        cms.PSet(
+            branchname = cms.untracked.string("PFCands"),
+            src = cms.InputTag("packedPFCandidates")   
+        ),
     ),
     GenParticles = cms.VPSet(
         cms.PSet(

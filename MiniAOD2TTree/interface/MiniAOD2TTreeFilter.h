@@ -22,6 +22,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/MuonDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/JetDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/METDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/TrackDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenJetDumper.h"
 
@@ -46,6 +47,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	std::string outputFileName;
 	std::string codeVersion;
         std::string dataVersion;
+	int cmEnergy;
 	edm::ParameterSet eventInfoCollections;
 	edm::ParameterSet trigger;
         std::vector<edm::ParameterSet> tauCollections;
@@ -53,6 +55,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	std::vector<edm::ParameterSet> muonCollections;
 	std::vector<edm::ParameterSet> jetCollections;
 	std::vector<edm::ParameterSet> metCollections;
+        std::vector<edm::ParameterSet> trackCollections;
         std::vector<edm::ParameterSet> genParticleCollections;
         std::vector<edm::ParameterSet> genJetCollections;
 
@@ -67,6 +70,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	MuonDumper* muonDumper;
 	JetDumper* jetDumper;
 	METDumper* metDumper;
+        TrackDumper* trackDumper;
 	GenParticleDumper* genParticleDumper;
         GenJetDumper* genJetDumper;
 };

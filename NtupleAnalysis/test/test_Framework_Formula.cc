@@ -158,7 +158,7 @@ TEST_CASE("Formula", "[Framework]") {
     BranchManager bmgr;
     bmgr.setTree(tree.get());
 
-    Event event;
+    Event event(ParameterSet("{}", true));
     event.setupBranches(bmgr);
 
     Formula formula = mgr.book("event");

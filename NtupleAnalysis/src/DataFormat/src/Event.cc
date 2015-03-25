@@ -4,11 +4,11 @@
 
 #include <stdexcept>
 
-Event::Event():
+Event::Event(const ParameterSet& config): 
   fGenMET("GenMET"),
-  fMET_Type1("MET_Type1")
-{}
-Event::Event(const ParameterSet& config): Event() {
+  fMET_Type1("MET_Type1"),
+  fIsMC(config.isMC())
+{
   boost::optional<std::vector<std::string>> triggerOR = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR");
   if(triggerOR) {
     fTriggerOr.setBranchNames(*triggerOR);
@@ -54,8 +54,10 @@ void Event::setupBranches(BranchManager& mgr) {
 
   fTauCollection.setupBranches(mgr);
   fJetCollection.setupBranches(mgr);
+  fGenJetCollection.setupBranches(mgr);
   fMuonCollection.setupBranches(mgr);
   fElectronCollection.setupBranches(mgr);
+  fGenParticleCollection.setupBranches(mgr);
   fGenMET.setupBranches(mgr);
   fMET_Type1.setupBranches(mgr);
 }
