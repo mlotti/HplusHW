@@ -23,8 +23,6 @@ public:
   friend class GenParticle;
   friend class GenParticleGenerated<GenParticleCollection>;
   friend class Particle<GenParticleCollection>;
-
-protected:
 };
 
 class GenParticle: public GenParticleGenerated<GenParticleCollection> {

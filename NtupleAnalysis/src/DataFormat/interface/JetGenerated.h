@@ -15,7 +15,6 @@ protected:
   const Branch<std::vector<float>> *fSecondaryVertex;
   const Branch<std::vector<float>> *fTrackCountingHighEffBJetTags;
   const Branch<std::vector<float>> *fTrackCountingHighPurBJetTags;
-  const Branch<std::vector<short>> *fPdgId;
   const Branch<std::vector<bool>> *fPUIDloose;
   const Branch<std::vector<bool>> *fPUIDmedium;
   const Branch<std::vector<bool>> *fPUIDtight;
@@ -32,7 +31,7 @@ public:
   float secondaryVertex() const { return this->fCollection->fSecondaryVertex->value()[this->index()]; }
   float trackCountingHighEffBJetTags() const { return this->fCollection->fTrackCountingHighEffBJetTags->value()[this->index()]; }
   float trackCountingHighPurBJetTags() const { return this->fCollection->fTrackCountingHighPurBJetTags->value()[this->index()]; }
-  short pdgId() const { return this->fCollection->fPdgId->value()[this->index()]; }
+
   bool PUIDloose() const { return this->fCollection->fPUIDloose->value()[this->index()]; }
   bool PUIDmedium() const { return this->fCollection->fPUIDmedium->value()[this->index()]; }
   bool PUIDtight() const { return this->fCollection->fPUIDtight->value()[this->index()]; }
