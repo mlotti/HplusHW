@@ -34,6 +34,7 @@ class TauDumper : public BaseDumper {
 	edm::Handle<edm::View<pat::Tau> > *handle;
 
         std::vector<double> *ltrackPt;
+        std::vector<double> *ltrackEta;
 
 	std::vector<int> *nProngs;
 };
