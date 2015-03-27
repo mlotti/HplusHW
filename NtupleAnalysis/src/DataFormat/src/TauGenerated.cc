@@ -68,5 +68,4 @@ void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_puCorrPtSum", &fPuCorrPtSum);
   mgr.book(prefix()+"_lTrkPt", &fLTrkPt);
   mgr.book(prefix()+"_nProngs", &fNProngs);
-  mgr.book(prefix()+"_pdgId", &fPdgId);
 }

@@ -75,7 +75,6 @@ protected:
   const Branch<std::vector<bool>> *fPuCorrPtSum;
   const Branch<std::vector<double>> *fLTrkPt;
   const Branch<std::vector<int>> *fNProngs;
-  const Branch<std::vector<short>> *fPdgId;
 };
 
 template <typename Coll>
@@ -148,7 +147,6 @@ public:
   bool puCorrPtSum() const { return this->fCollection->fPuCorrPtSum->value()[this->index()]; }
   double lTrkPt() const { return this->fCollection->fLTrkPt->value()[this->index()]; }
   int nProngs() const { return this->fCollection->fNProngs->value()[this->index()]; }
-  short pdgId() const { return this->fCollection->fPdgId->value()[this->index()]; }
 };
 
 #endif

@@ -84,7 +84,7 @@ public:
   float_type eta() const { return fCollection->fEta->value()[index()]; }
   float_type phi() const { return fCollection->fPhi->value()[index()]; }
   float_type e()   const { return fCollection->fE->value()[index()]; }
-  float_type id()  const { return fCollection->fID->value()[index()]; }
+  short pdgId()  const { return fCollection->fPdgId->value()[index()]; }
 
   float_type Phi() const { return phi(); }
 
@@ -151,7 +151,7 @@ public:
     fEta(nullptr),
     fPhi(nullptr),
     fE(nullptr),
-    fID(nullptr)
+    fPdgId(nullptr)
   {}
   ~ParticleCollection() {}
 
@@ -160,7 +160,7 @@ public:
     mgr.book(prefix()+"_eta",                               &fEta);
     mgr.book(prefix()+"_phi",                               &fPhi);
     mgr.book(prefix()+"_e"   +energySystematicsVariation(), &fE);
-    mgr.book(prefix()+"_pdgId"                            , &fID);
+    mgr.book(prefix()+"_pdgId"                            , &fPdgId);
   }
 
   size_t size() const { return fPt->value().size(); }
@@ -176,7 +176,7 @@ protected:
   const Branch<std::vector<float_type>> *fEta;
   const Branch<std::vector<float_type>> *fPhi;
   const Branch<std::vector<float_type>> *fE;
-  const Branch<std::vector<short>> *fID; 
+  const Branch<std::vector<short>> *fPdgId; 
 };
 
 #endif
