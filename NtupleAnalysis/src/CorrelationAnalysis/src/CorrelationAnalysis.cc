@@ -35,12 +35,15 @@ private:
   WrappedTH1 *hTauPt;
   WrappedTH1 *hTauEta;
   WrappedTH1 *hTauPhi;
-
+  WrappedTH1 *hRtau;
+ 
   WrappedTH1 *hMuonPt;
   WrappedTH1 *hMuonEta;
+  WrappedTH1 *hNmuons;
 
   WrappedTH1 *hElectronPt;
   WrappedTH1 *hElectronEta;
+  WrappedTH1 *hNelectrons;
 
   WrappedTH1 *hJetPt;
   WrappedTH1 *hJetEta;
@@ -92,17 +95,21 @@ void CorrelationAnalysis::book(TDirectory *dir) {
   hTauPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tauPt", "Tau pT", 200, 0, 1000);
   hTauEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tauEta", "Tau eta", 50, -2.5, 2.5);
   hTauPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tauPhi", "Tau phi", 100, -3.1416, 3.1416);
+  hRtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Rtau", "Tau Rtau", 200, 0, 1);
+
 
   hMuonPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "muonPt", "Muon pT", 100, 0, 500);
   hMuonEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "muonEta", "Muon eta", 60, -3, 3);
+  hNmuons = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Nmuons", "Nmuons", 20, 0, 20);
 
   hElectronPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "electronPt", "Electron pT", 100, 0, 500);
   hElectronEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "electronEta", "Electron pT", 100, -3, 3);
+  hNelectrons = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Nelectrons", "Nelectrons", 20, 0, 20);
 
   hJetPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "jetPt", "Jet pT", 200, 0, 1000);
   hJetEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "jetEta", "Jet eta", 100, -5, 5);
   hJetPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "jetPhi", "Jet phi", 90, 0, 180);
-  hNjets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Njets", "Njets", 90, 0, 180);
+  hNjets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Njets", "Njets", 50, 0, 50);
 
   hBJetPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "bJetPt", "B jet pT", 200, 0, 1000);
   hjetSecondaryVertex = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "jetSecondaryVertex", "jetSecondaryVertex", 200, 0, 2);
@@ -155,6 +162,14 @@ void CorrelationAnalysis::process(Long64_t entry) {
     if(!tau.byMediumIsolationMVA3newDMwoLT())
       continue;
 */
+    //    double pTau = tau.pt() * std::cosh(tau.eta());
+    //   double pLeadingTrack = tau.lTrkPt() * std::cosh(tau.lTrkEta());
+
+    double rTau = -999;
+    //  if (pTau > 0 ) rTau = pLeadingTrack/ pTau; 
+   if (tau.pt() > 0 ) rTau = tau.lTrkPt()/ tau.pt();   
+   hRtau->Fill(rTau);
+
     if(!(tau.nProngs() == 1))
       continue;
   
@@ -173,12 +188,17 @@ void CorrelationAnalysis::process(Long64_t entry) {
   size_t nmuons = 0;
   for(Muon muon: fEvent.muons()) {
     hMuonPt->Fill(muon.pt());
+    hMuonEta->Fill(muon.eta());
     if(muon.pt() > 15 && std::abs(muon.eta()) < 2.1)
       ++nmuons;
   }
+
+  hNmuons->Fill(nmuons);
   if(nmuons > 0)
      return;
   cMuonVeto.increment();
+
+
 
   size_t nelectrons = 0;
   for(Electron electron: fEvent.electrons()) {
@@ -189,7 +209,10 @@ void CorrelationAnalysis::process(Long64_t entry) {
       ++nelectrons;
   }
   //  std::cout  << " electrons  "<< nelectrons << std::endl; 
-  if(nelectrons > 0)
+  hNelectrons->Fill(nelectrons);
+ 
+
+ if(nelectrons > 0)
     return;
   cElectronVeto.increment();
 
@@ -306,7 +329,7 @@ void CorrelationAnalysis::process(Long64_t entry) {
   for(Jet& jet: selectedJets) {
     hjetSecondaryVertex->Fill(jet.secondaryVertex());
     //    std::cout << "jet eta  " << jet.eta() << " jet.secondaryVertex()  " << jet.secondaryVertex() << std::endl;   
-    if(jet.secondaryVertex() > 0.898)
+               if(jet.secondaryVertex() > 0.898)
       hBJetPt->Fill(jet.pt());
   }
 

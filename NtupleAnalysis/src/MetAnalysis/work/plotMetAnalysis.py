@@ -102,7 +102,7 @@ def dataMCExample(datasets):
                    opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
 
 
-    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 10})
+    drawPlot = plots.PlotDrawer(stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 5})
 
     def createDrawPlot(name, **kwargs):
         drawPlot( plots.DataMCPlot(datasets, name, normalizeToLumi=20000), name, **kwargs)
@@ -128,7 +128,7 @@ def getHistos(datasets,name1, name2):
 #mt = plots.PlotBase(getHistos("MetNoJetInHole", "MetJetInHole"))
 
 def MetComparison(datasets):
-    mt = plots.PlotBase(getHistos(datasets,"MetNoJetInHole", "MetJetInHole"))
+    mt = plots.ComparisonPlot(*getHistos(datasets,"MetJetInHole","MetNoJetInHole"))
 #    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
     st1 = styles.StyleCompound([styles.styles[2]])
@@ -141,14 +141,15 @@ def MetComparison(datasets):
             "MetNoJetInHole": "Jets outside dead cells",
             "MetJetInHole": "Jets within dead cells"
             })
-#    mt.histoMgr.setHistoDrawStyleAll("P")
+    mt.histoMgr.setHistoDrawStyleAll("PE")
 
     mt.appendPlotObject(histograms.PlotText(300, 300, "p_{T}^{jet} > 50 GeV/c", size=20))
     xlabel = "PF E_{T}^{miss} (GeV)"
     ylabel = "Events / %.2f"
-    plots.drawPlot(mt, "MetComparison", xlabel=xlabel, ylabel=ylabel, rebinX=2, log=True,
+    plots.drawPlot(mt, "MetComparison", xlabel=xlabel, ylabel=ylabel, rebinX=1, log=True,
                    createLegend={"x1": 0.6, "y1": 0.75, "x2": 0.8, "y2": 0.9},
-                   ratio=False, opts2={"ymin": 0.5, "ymax": 1.5})
+                   ratio=True, opts2={"ymin": 0.5, "ymax": 50}, opts={"xmax": 200})
+
                    
 #    rtauGen(mt, "MetComparison", rebin=1, ratio=True, defaultStyles=False)
 
