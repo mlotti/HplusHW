@@ -12,7 +12,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 re_vector = re.compile("vector<(?P<type>.*)>")
 
 def generateParticle(types, particle):
-    particleBranches = [particle+"s_"+x for x in ["pt", "eta", "phi", "e"]] # these are handled by Particle class
+    particleBranches = [particle+"s_"+x for x in ["pt", "eta", "phi", "e", "pdgId"]] # these are handled by Particle class
     branchNames = filter(lambda n: n[0:len(particle)+2] == particle+"s_", types.keys())
     branchNames.sort(key=lambda n: types[n]+n)
 
