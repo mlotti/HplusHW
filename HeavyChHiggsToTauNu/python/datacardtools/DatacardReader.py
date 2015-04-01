@@ -663,8 +663,11 @@ class DataCardReader:
                         if self._datasetNuisances[i][c] == "1":
                             if c in myAffectedColumns:
                                 # Find histograms
-                                hup = self.getRootFileObject("%s_%sUp"%(c, self._datasetNuisances[i]["name"]))
-                                hdown = self.getRootFileObject("%s_%sDown"%(c, self._datasetNuisances[i]["name"]))
+                                nameUp = self.getHistoNameForNuisance(c, self._datasetNuisances[i]["name"])+"Up"
+                                #s = nameUp.split("/")
+                                #nameUp = s[len(s)-1]
+                                hup = self.getRootFileObject(nameUp)
+                                hdown = self.getRootFileObject(nameUp.replace("Up", "Down"))
                                 hRate = self.getRateHisto(c)
                                 # Calculate nuisance value by integrating
                                 myNominalRate = hRate.Integral()
@@ -713,7 +716,9 @@ class DataCardReader:
         # Do replace in root file
         if self._rootFilePattern != None:
             for item in replaceDictionary.keys():
-                myList = self.getRootFileObjectsWithPattern(item)
+                myList = self.getRootFileObjectsWithPattern(self.getHistoNameForColumn(item))
+                #print self.getHistoNameForColumn(item)
+                #print myList, item, self.getHistoNameForColumn(item)
                 # Loop over root objects
                 for objectName in myList:
                     o = self.getRootFileObject(objectName)
@@ -724,8 +729,13 @@ class DataCardReader:
                         # Shape nuisances (no stat)
                         for i in range(0,len(self._datasetNuisances)):
                             name = self.getHistoNameForNuisance(item, self._datasetNuisances[i]["name"])
-                            if objectName.startswith(item):
-                                newName = replaceDictionary[item]+objectName[len(item):]
+                            if objectName == name+"Up" or objectName == name+"Down":
+                                newName = self.getHistoNameForNuisance(replaceDictionary[item], self._datasetNuisances[i]["name"])
+                                if objectName.endswith("Up"):
+                                    newName += "Up"
+                                if objectName.endswith("Down"):
+                                    newName += "Down"
+                                #print newName, self._datasetNuisances[i]["name"], o.GetName(), objectName == o.GetName()
                                 #new2 = objectName.replace(self.getHistoNameForNuisance(item, self._datasetNuisances[i]["name"]),self.getHistoNameForNuisance(replaceDictionary[item], self._datasetNuisances[i]["name"]))
                                 #if item == "ttbb":
                                 #    print "***",objectName, "***", newName, "***", new2
@@ -805,7 +815,7 @@ class DataCardReader:
                         if myStatus:
                             # Add entries to datacard
                             myDict = {}
-                            myDict["name"] = "%s_statBin%d"%(c, nbin)
+                            myDict["name"] = self.getHistoNameForNuisance(c, "statBin%d"%(nbin))
                             myDict["distribution"] = "shape"
                             for cc in self.getDatasetNames():
                                 if cc == c:
@@ -816,9 +826,9 @@ class DataCardReader:
                             # Add histograms
                             hUp = Clone(hRate)
                             hDown = Clone(hRate)
-                            s = self.getHistoNameForNuisance(c, "%s_statBin%dUp"%(c, nbin)).split("/")
+                            s = self.getHistoNameForNuisance(c, "%sUp"%(myDict["name"])).split("/")
                             hUp.SetName(s[len(s)-1])
-                            s = self.getHistoNameForNuisance(c, "%s_statBin%dDown"%(c, nbin)).split("/")
+                            s = self.getHistoNameForNuisance(c, "%sDown"%(myDict["name"])).split("/")
                             hDown.SetName(s[len(s)-1])
                             hUp.SetBinContent(nbin, hUp.GetBinContent(nbin)+hUp.GetBinError(nbin))
                             myMinValue = max(hDown.GetBinContent(nbin)-hDown.GetBinError(nbin), 0.0)
@@ -927,10 +937,10 @@ class DataCardReader:
             #myHistoNames.append(s[len(s)-1])
             myHistoNames.append(self.getHistoNameForColumn(c))
             for n in self._datasetNuisances:
-                s = self.getHistoNameForNuisance(c, n["name"]).split("/")
-                myTemplate = s[len(s)-1]
-                #myTemplate = self.getHistoNameForNuisance(c, n["name"])
                 if n["distribution"] == "shape" and n[c] == "1":
+                    s = self.getHistoNameForNuisance(c, n["name"]).split("/")
+                    myTemplate = s[len(s)-1]
+                    #myTemplate = self.getHistoNameForNuisance(c, n["name"])
                     myHistoNames.append(myTemplate+"Up")
                     myHistoNames.append(myTemplate+"Down")
         myDir = f.GetDirectory(self._rootFileDirectory)
@@ -975,15 +985,25 @@ class DataCardReader:
     def getHistoNameForData(self):
         return self._datacardShapeDataTemplate.replace("$CHANNEL",self._datacardBinName)
 
-    def getHistoNameForColumn(self, columnName):
+    def getHistoNameForColumn(self, columnName, removeDirectoryPrefix=True):
         if self._datacardShapeColumnTemplate == None:
             raise Exception()
-        return self._datacardShapeColumnTemplate.replace("$PROCESS",columnName).replace("$CHANNEL",self._datacardBinName)
+        name = self._datacardShapeColumnTemplate.replace("$PROCESS",columnName).replace("$CHANNEL",self._datacardBinName)
+        if removeDirectoryPrefix:
+            s = name.split("/")
+            return s[len(s)-1]
+        else:
+            return name
     
-    def getHistoNameForNuisance(self, columnName, nuisanceName):
+    def getHistoNameForNuisance(self, columnName, nuisanceName, removeDirectoryPrefix=True):
         if self._datacardShapeNuisanceTemplate == None:
             raise Exception()
-        return self._datacardShapeNuisanceTemplate.replace("$PROCESS",columnName).replace("$CHANNEL",self._datacardBinName).replace("$SYSTEMATIC",nuisanceName)
+        name = self._datacardShapeNuisanceTemplate.replace("$PROCESS",columnName).replace("$CHANNEL",self._datacardBinName).replace("$SYSTEMATIC",nuisanceName)
+        if removeDirectoryPrefix:
+            s = name.split("/")
+            return s[len(s)-1]
+        else:
+            return name
     
     def _writeRootFileContents(self):
         if self._readOnly:
@@ -1155,6 +1175,8 @@ class DataCardReader:
                 if len(mySplit) == 5:
                     if mySplit[1] == "data_obs":
                         self._datacardShapeDataTemplate = mySplit[4]
+                    else:
+                        self._datacardShapeColumnTemplate = mySplit[4]
                 if len(mySplit) == 6:
                     self._datacardShapeColumnTemplate = mySplit[4]
                     self._datacardShapeNuisanceTemplate = mySplit[5]

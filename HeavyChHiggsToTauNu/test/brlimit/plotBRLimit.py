@@ -48,6 +48,8 @@ def main(opts):
     limits.saveAsLatexTable(opts.unblinded)
 
 def doBRlimit(limits, unblindedStatus, opts, log=False):
+    leptonicFS = False
+    
     graphs = []
     if unblindedStatus:
         gr = limits.observedGraph()
@@ -85,11 +87,17 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
             })
     
     dy = -0.1
+    
+    limit.BRassumption = "Assuming B(H^{+}#rightarrow#tau^{+}#nu_{#tau}) = 1"
+    #limit.BRassumption = "Assuming B(H^{+}#rightarrowt#bar{b}) = 1"
     if limit.BRassumption != "":
         dy -= 0.05
-    if len(limits.getFinalstates()) > 1:
-        dy -= 0.1
-    legend = histograms.createLegend(0.5, 0.78+dy, 0.92, 0.92+dy)
+    #if len(limits.getFinalstates()) > 1:
+    #    dy -= 0.1
+    
+    x = 0.51
+    x = 0.4
+    legend = histograms.createLegend(x-0.01, 0.78+dy, 0.92, 0.92+dy)
     legend.SetMargin(0.17)
     # make room for the final state text
     if opts.excludedArea:
@@ -98,19 +106,28 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
 
     name = "limitsBr"
     ymin = 0
+    ymax = limits.getFinalstateYmaxBR()
     if log:
         name += "_log"
         if limits.isHeavyStatus:
             ymin = 1e-2
+            if limit.BRassumption != "":
+                ymax = 1.5
         else:
             ymin = 1e-3
+            ymax = 4e-2
+    if leptonicFS:
+        ymax = 10
     if len(limits.mass) == 1:
-        plot.createFrame(name, opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": ymin, "ymax": limits.getFinalstateYmaxBR()})
+        plot.createFrame(name, opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": ymin, "ymax": ymax})
     else:
-        plot.createFrame(name, opts={"ymin": ymin, "ymax": limits.getFinalstateYmaxBR()})
+        plot.createFrame(name, opts={"ymin": ymin, "ymax": ymax})
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
     if limits.isHeavyStatus:
-        plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
+        if limit.BRassumption != "":
+            plot.frame.GetYaxis().SetTitle("95% CL limit for #sigma_{H^{+}} (pb)")
+        else:
+            plot.frame.GetYaxis().SetTitle(limit.sigmaBRlimit)
     else:
         plot.frame.GetYaxis().SetTitle(limit.BRlimit)
 
@@ -122,11 +139,17 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
 
     size = 20
     x = 0.51
+    x = 0.4
     process = limit.process
     if limits.isHeavyStatus:
         process = limit.processHeavy
     histograms.addText(x, 0.88, process, size=size)
-    histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
+    #histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
+    #histograms.addText(x, 0.84, "#tau_{h}+jets final state", size=size)
+    histograms.addText(x, 0.84, "#tau_{h}+jets and #mu#tau_{h} final states", size=size)
+    #histograms.addText(x, 0.84, "#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu final states", size=size)
+    if leptonicFS:
+        histograms.addText(x, 0.84, "#mu#tau_{h}, ee, e#mu, #mu#mu final states", size=size)
     if limit.BRassumption != "":
         histograms.addText(x, 0.79, limit.BRassumption, size=size)
 
