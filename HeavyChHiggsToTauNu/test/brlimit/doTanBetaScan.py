@@ -29,7 +29,6 @@ _maxTanBeta = 69.0
 _linearSummingForTheoryUncertainties = True # LHCHXSWG recommendation True
 _separateTheoreticalXsectionAndBrUncertainties = False # LHCHXSWG recommendation False (because of correlations)
 
-
 class TanBetaResultContainer:
     def __init__(self, mssmModel, massPoints):
         self._mssmModel = mssmModel
@@ -161,6 +160,7 @@ class BrContainer:
         self._decayModeMatrix = decayModeMatrix
         self._mssmModel = mssmModel
         self._massPoints = massPoints
+        self._separateTheoreticalXsectionAndBrUncertainties = _separateTheoreticalXsectionAndBrUncertainties
         self._results = {} # dictionary, where key is tan beta
         # Make dictionary of key labels
         self._brkeys = {}
@@ -281,87 +281,91 @@ class BrContainer:
             for dmkey in self._decayModeMatrix[fskey].keys():
                 myDatacardPattern = self._decayModeMatrix[fskey][dmkey][0]
                 myRootFilePattern = self._decayModeMatrix[fskey][dmkey][1]
-                mySignalScaleFactor = myResult["%sTheory"%dmkey]
-                # Leave reader for first key open
-                if dmkey == self._decayModeMatrix[fskey].keys()[0]:
-                    myPrimaryReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
-                    myPrimaryReader.scaleSignal(mySignalScaleFactor)
-                    myOriginalRates.append(float(myPrimaryReader.getRateValue(myPrimaryReader.getDatasetNames()[0])))
-                    #print fskey,dmkey,myOriginalRates[len(myOriginalRates)-1]
+                if myRootFilePattern != None:
+                    mySignalScaleFactor = myResult["%sTheory"%dmkey]
+                    # Leave reader for first key open
+                    if dmkey == self._decayModeMatrix[fskey].keys()[0]:
+                        myPrimaryReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
+                        myPrimaryReader.scaleSignal(mySignalScaleFactor)
+                        myOriginalRates.append(float(myPrimaryReader.getRateValue(myPrimaryReader.getDatasetNames()[0])))
+                        #print fskey,dmkey,myOriginalRates[len(myOriginalRates)-1]
+                    else:
+                        # Scale according to br and add signal to primary (i.e. only one datacard for the decay modes)
+                        myReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
+                        myReader.scaleSignal(mySignalScaleFactor)
+                        myOriginalRates.append(float(myReader.getRateValue(myReader.getDatasetNames()[0])))
+                        #print fskey,dmkey,myOriginalRates[len(myOriginalRates)-1]
+                        myPrimaryReader.addSignal(myReader)
+                        myReader.close()
+                        # Remove datacard from current directory so that it is not used for limit calculation (a copy of them is at originalDatacards directory)
+                        if os.path.exists(myDatacardPattern%mHp):
+                            os.system("rm %s"%(myDatacardPattern%mHp))
+                            os.system("rm %s"%(myRootFilePattern%mHp))
+            if myPrimaryReader != None:
+                mySignalColumnName = myPrimaryReader.getDatasetNames()[0]
+                myUpdatedRate = float(myPrimaryReader.getRateValue(myPrimaryReader.getDatasetNames()[0]))
+                myTheorUncertPrefix = "theory_"
+                # Add theoretical cross section uncertainties to datacard 
+                db = BRXSDB.BRXSDatabaseInterface(myDbInputName, silentStatus=True)
+                myXsecUncert = [0.0, 0.0]
+                if float(mHp) > 179:
+                    myXsecUncert = [db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "-"),
+                                    db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "+")]
+                    if self._separateTheoreticalXsectionAndBrUncertainties:
+                        myNuisanceName = "%sxsectionHp"%myTheorUncertPrefix
+                        myUncertValueString = "%.3f/%.3f"%(1.0-myXsecUncert[0], 1.0+myXsecUncert[1])
+                        myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
+                        print "      . H+ xsec uncert: %s"%myUncertValueString
                 else:
-                    # Scale according to br and add signal to primary (i.e. only one datacard for the decay modes)
-                    myReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
-                    myReader.scaleSignal(mySignalScaleFactor)
-                    myOriginalRates.append(float(myReader.getRateValue(myReader.getDatasetNames()[0])))
-                    #print fskey,dmkey,myOriginalRates[len(myOriginalRates)-1]
-                    myPrimaryReader.addSignal(myReader)
-                    myReader.close()
-                    # Remove datacard from current directory so that it is not used for limit calculation (a copy of them is at originalDatacards directory)
-                    if os.path.exists(myDatacardPattern%mHp):
-                        os.system("rm %s"%(myDatacardPattern%mHp))
-                        os.system("rm %s"%(myRootFilePattern%mHp))
-            mySignalColumnName = myPrimaryReader.getDatasetNames()[0]
-            myUpdatedRate = float(myPrimaryReader.getRateValue(myPrimaryReader.getDatasetNames()[0]))
-            myTheorUncertPrefix = "theory_"
-            # Add theoretical cross section uncertainties to datacard 
-            db = BRXSDB.BRXSDatabaseInterface(myDbInputName, silentStatus=True)
-            myXsecUncert = [0.0, 0.0]
-            if float(mHp) > 179:
-                myXsecUncert = [db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "-"),
-                                db.xsecUncertOrig("mHp", "tanb", "", mHp, tanbeta, "+")]
-                if _separateTheoreticalXsectionAndBrUncertainties:
-                    myNuisanceName = "%sxsectionHp"%myTheorUncertPrefix
+                    self._separateTheoreticalXsectionAndBrUncertainties = True
+                # Add theoretical branching ratio uncertainties to datacard (depends on how many decay modes are combined)
+                myDecayModeKeys = self._decayModeMatrix[fskey].keys()
+                for i in range(len(myDecayModeKeys)):
+                    myDecayModeKeys[i] = "BR_%s"%myDecayModeKeys[i]
+                myBrUncert = None
+                if float(mHp) < 179:
+                    myBrUncert = db.brUncertLight("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)               
+                else:
+                    myBrUncert = db.brUncertHeavy("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)
+                for i in range(len(myDecayModeKeys)):
+                    for k in myBrUncert.keys():
+                        if myDecayModeKeys[i] in k:
+                            # Scale uncertainty according to amount of signal from that decay mode
+                            myUncertValue = myBrUncert[k] * myOriginalRates[i] / myUpdatedRate
+                            if self._separateTheoreticalXsectionAndBrUncertainties:
+                                myNuisanceName = "%s%s"%(myTheorUncertPrefix,k)
+                                myUncertValueString = "%.3f"%(1.0+myUncertValue)
+                                if float(mHp) < 179 and ("HH" in mySignalColumnName or "ttHpHp" in mySignalColumnName):
+                                    # Add for HH
+                                    myUncertValueStringHH = "%.3f"%(1.0+myUncertValue*2.0)
+                                    myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueStringHH)
+                                    # Add for HW
+                                    myPrimaryReader.addNuisance(myNuisanceName, "lnN", myPrimaryReader.getDatasetNames()[1], myUncertValueString)
+                                    print "      . H+ HH Br uncert(%s): %s"%(k, myUncertValueStringHH)
+                                    print "      . H+ HW Br uncert(%s): %s"%(k, myUncertValueString)
+                                else:
+                                    myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
+                                    print "      . H+ Br uncert(%s): %s"%(k, myUncertValueString)
+                            else:
+                                if _linearSummingForTheoryUncertainties:
+                                    myXsecUncert[0] += myUncertValue
+                                    myXsecUncert[1] += myUncertValue
+                                else:
+                                    myXsecUncert[0] = math.sqrt(myXsecUncert[0]**2 + myUncertValue**2)
+                                    myXsecUncert[1] = math.sqrt(myXsecUncert[1]**2 + myUncertValue**2)
+                if not self._separateTheoreticalXsectionAndBrUncertainties:
+                    myNuisanceName = "%sxsectionHp_and_Br"%myTheorUncertPrefix
                     myUncertValueString = "%.3f/%.3f"%(1.0-myXsecUncert[0], 1.0+myXsecUncert[1])
                     myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
-                    print "      . H+ xsec uncert: %s"%myUncertValueString
+                    print "      . %s: %s"%(myNuisanceName, myUncertValueString)
+                # Write changes to datacard
+                myPrimaryReader.close()
+                # Something in memory management leaks - the following helps dramatically to recude the leak
+                ROOT.gROOT.CloseFiles()
+                ROOT.gROOT.GetListOfCanvases().Delete()
+                ROOT.gDirectory.GetList().Delete()
             else:
-                _separateTheoreticalXsectionAndBrUncertainties = True
-            # Add theoretical branching ratio uncertainties to datacard (depends on how many decay modes are combined)
-            myDecayModeKeys = self._decayModeMatrix[fskey].keys()
-            for i in range(len(myDecayModeKeys)):
-                myDecayModeKeys[i] = "BR_%s"%myDecayModeKeys[i]
-            myBrUncert = None
-            if float(mHp) < 179:
-                myBrUncert = db.brUncertLight("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)               
-            else:
-                myBrUncert = db.brUncertHeavy("mHp", "tanb", myDecayModeKeys, mHp, tanbeta, linearSummation=_linearSummingForTheoryUncertainties, silentStatus=True)
-            for i in range(len(myDecayModeKeys)):
-                for k in myBrUncert.keys():
-                    if myDecayModeKeys[i] in k:
-                        # Scale uncertainty according to amount of signal from that decay mode
-                        myUncertValue = myBrUncert[k] * myOriginalRates[i] / myUpdatedRate
-                        if _separateTheoreticalXsectionAndBrUncertainties:
-                            myNuisanceName = "%s%s"%(myTheorUncertPrefix,k)
-                            myUncertValueString = "%.3f"%(1.0+myUncertValue)
-                            if float(mHp) < 179 and ("HH" in mySignalColumnName or "ttHpHp" in mySignalColumnName):
-                                # Add for HH
-                                myUncertValueStringHH = "%.3f"%(1.0+myUncertValue*2.0)
-                                myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueStringHH)
-                                # Add for HW
-                                myPrimaryReader.addNuisance(myNuisanceName, "lnN", myPrimaryReader.getDatasetNames()[1], myUncertValueString)
-                                print "      . H+ HH Br uncert(%s): %s"%(k, myUncertValueStringHH)
-                                print "      . H+ HW Br uncert(%s): %s"%(k, myUncertValueString)
-                            else:
-                                myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
-                                print "      . H+ Br uncert(%s): %s"%(k, myUncertValueString)
-                        else:
-                            if _linearSummingForTheoryUncertainties:
-                                myXsecUncert[0] += myUncertValue
-                                myXsecUncert[1] += myUncertValue
-                            else:
-                                myXsecUncert[0] = math.sqrt(myXsecUncert[0]**2 + myUncertValue**2)
-                                myXsecUncert[1] = math.sqrt(myXsecUncert[1]**2 + myUncertValue**2)
-            if not _separateTheoreticalXsectionAndBrUncertainties:
-                myNuisanceName = "%sxsectionHp_and_Br"%myTheorUncertPrefix
-                myUncertValueString = "%.3f/%.3f"%(1.0-myXsecUncert[0], 1.0+myXsecUncert[1])
-                myPrimaryReader.addNuisance(myNuisanceName, "lnN", mySignalColumnName, myUncertValueString)
-                print "      . %s: %s"%(myNuisanceName, myUncertValueString)
-            # Write changes to datacard
-            myPrimaryReader.close()
-            # Something in memory management leaks - the following helps dramatically to recude the leak
-            ROOT.gROOT.CloseFiles()
-            ROOT.gROOT.GetListOfCanvases().Delete()
-            ROOT.gDirectory.GetList().Delete()
+                print "      . no changes to datacard needed"
 
     def resultExists(self, tanbeta):
         a = ""
@@ -694,37 +698,50 @@ def purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints):
             myFoundStatus = False
             # Look for datacards
             s = myDecayModeMatrix[fskey][dmkey][0].split("%s")
-            for item in myDirList:
-                if item.startswith(s[0]) and item.endswith(s[1]):
-                    myFoundStatus = True
-                    mass = item.replace(s[0],"").replace(s[1],"")
-                    myDecayModeMassPoints.append(mass)
-                    # Check if root file exists
-                    if len(myDecayModeMatrix[fskey][dmkey]) > 1:
-                        if not os.path.exists(myDecayModeMatrix[fskey][dmkey][1]%mass):
-                            raise Exception("Error: the datacard for mass %s exists, but the root file '%s' does not!"%(mass, myDecayModeMatrix[fskey][dmkey][1]%mass))
-            if not myFoundStatus:
-                print "Warning: no datacards found for decay mode %s / %s, removing it ..."%(fskey,dmkey)
-                del myDecayModeMatrix[fskey][dmkey]
-            else:
-                # Purge non-common mass points
-                if len(myCommonMassPoints) == 0:
-                    myCommonMassPoints.extend(myDecayModeMassPoints)
+            if len(s) > 1:
+                for item in myDirList:
+                    if item.startswith(s[0]) and item.endswith(s[1]):
+                        myFoundStatus = True
+                        mass = item.replace(s[0],"").replace(s[1],"")
+                        myDecayModeMassPoints.append(mass)
+                        # Check if root file exists
+                        if len(myDecayModeMatrix[fskey][dmkey]) > 1:
+                            if not os.path.exists(myDecayModeMatrix[fskey][dmkey][1]%mass):
+                                raise Exception("Error: the datacard for mass %s exists, but the root file '%s' does not!"%(mass, myDecayModeMatrix[fskey][dmkey][1]%mass))
+                if not myFoundStatus:
+                    print "Warning: no datacards found for decay mode %s / %s, removing it ..."%(fskey,dmkey)
+                    del myDecayModeMatrix[fskey][dmkey]
                 else:
-                    i = 0
-                    while i < len(myCommonMassPoints):
-                        if not myCommonMassPoints[i] in myDecayModeMassPoints:
-                            del myCommonMassPoints[i]
-                        else:
-                          i += 1
+                    # Purge non-common mass points
+                    if len(myCommonMassPoints) == 0:
+                        myCommonMassPoints.extend(myDecayModeMassPoints)
+                    else:
+                        i = 0
+                        while i < len(myCommonMassPoints):
+                            if not myCommonMassPoints[i] in myDecayModeMassPoints:
+                                del myCommonMassPoints[i]
+                            else:
+                                i += 1
         if len(myDecayModeMatrix[fskey].keys()) == 0:
             del myDecayModeMatrix[fskey]
     # Print combination details
     print "Input for combination:"
+    myDecayModes = []
     for fskey in myDecayModeMatrix.keys():
-        print "- final state:", fskey
         for dmkey in myDecayModeMatrix[fskey].keys():
-            print "  - decay mode:", dmkey
+            if dmkey not in myDecayModes:
+                myDecayModes.append(dmkey)
+    myDecayModes.sort()
+    for dm in myDecayModes:
+        print "  - decay mode:", dm
+        myList = []
+        for fskey in myDecayModeMatrix.keys():
+            for dmkey in myDecayModeMatrix[fskey].keys():
+                if dm == dmkey:
+                    myList.append(fskey)
+        myList.sort()
+        for l in myList:
+            print "    - final state or category:", l
     # Solve common mass points
     if len(myMassPoints) > 0:
         i = 0
@@ -802,6 +819,7 @@ def evaluateUncertainties(myScenarios):
   
 
 if __name__ == "__main__":
+
     def addToDatacards(myDir, massPoints, dataCardList, rootFileList, dataCardPattern, rootFilePattern):
         m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern)
         if len(m) > 0:
@@ -870,6 +888,15 @@ if __name__ == "__main__":
         myDecayModeMatrix["ee"] = myEEDecayMode
         myDecayModeMatrix["emu"] = myEMuDecayMode
         myDecayModeMatrix["mumu"] = myMuMuDecayMode
+        # Single lepton
+        myLabels = ["nB1_mu", "nB2p_mu", "nB1_el", "nB2p_el"]
+        for l in myLabels:
+            myCategory = {"Hp_tb": ["HpToSingleLepton_datacard_"+l+"_%s.txt", "HT_M%s_binnedStat_p10_"+l+".root"]}
+            myDecayModeMatrix["ljets_%s"%l] = myCategory
+        myLabels = ["Control_nB0_mu", "Control_nB1_mu", "Control_nB2p_mu", "Control_nB0_el", "Control_nB1_el", "Control_nB2p_el"]
+        for l in myLabels:
+            myCategory = {"Hp_tb": ["HpToSingleLepton_datacard_"+l+".txt", None]}
+            myDecayModeMatrix["ljets_%s"%l] = myCategory
         
         # Purge matrix
         purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints)
