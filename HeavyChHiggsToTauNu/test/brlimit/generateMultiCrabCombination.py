@@ -5,6 +5,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CombineTools as combine
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as DatacardReader
 
+import os
+
 lepType = False
 lhcType = False
 lhcTypeAsymptotic = False
@@ -46,13 +48,18 @@ def main(opts, myDir, datacardPatterns, rootFilePatterns, myMassPoints):
 
 if __name__ == "__main__":
     def addToDatacards(myDir, massPoints, dataCardList, rootFileList, dataCardPattern, rootFilePattern):
-        m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern)
-        if len(m) > 0:
-            m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern, massPoints)
-            del massPoints[:]
-            massPoints.extend(m)
-            dataCardList.append(dataCardPattern)
-            rootFileList.append(rootFilePattern)
+        if rootFilePattern != None and "%s" in dataCardPattern:
+            m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern)
+            if len(m) > 0:
+                m = DatacardReader.getMassPointsForDatacardPattern(myDir, dataCardPattern, massPoints)
+                del massPoints[:]
+                massPoints.extend(m)
+                dataCardList.append(dataCardPattern)
+                rootFileList.append(rootFilePattern)
+        else:
+            if os.path.exists(dataCardPattern):
+                dataCardList.append(dataCardPattern)
+                rootFileList.append(rootFilePattern)
 
     parser = commonLimitTools.createOptionParser(lepType, lhcType, lhcTypeAsymptotic)
     opts = commonLimitTools.parseOptionParser(parser)
@@ -85,10 +92,12 @@ if __name__ == "__main__":
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_emu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_emu.root")
         addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "DataCard_mumu_tb_m%s.txt", "CrossSectionShapes_tb_m%s_mumu.root")
         # tb, single lepton final states
-        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "ChargedHiggs_datacard_nB1_mu_%s_shape.txt", "HT_whf_limits_M%s_rebin_combine_stat2_shape_mu_nB1.root")
-        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "ChargedHiggs_datacard_nB2p_mu_%s_shape.txt", "HT_whf_limits_M%s_rebin_combine_stat2_shape_mu_nB2p.root")
-        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "ChargedHiggs_datacard_nB1_el_%s_shape.txt", "HT_whf_limits_M%s_rebin_combine_stat2_shape_el_nB1.root")
-        addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "ChargedHiggs_datacard_nB2p_el_%s_shape.txt", "HT_whf_limits_M%s_rebin_combine_stat2_shape_el_nB2p.root")
+        myLabels = ["nB1_mu", "nB2p_mu", "nB1_el", "nB2p_el"]
+        for l in myLabels:
+            addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "HpToSingleLepton_datacard_"+l+"_%s.txt", "HT_M%s_binnedStat_p10_"+l+".root")
+        myLabels = ["Control_nB0_mu", "Control_nB1_mu", "Control_nB2p_mu", "Control_nB0_el", "Control_nB1_el", "Control_nB2p_el"]
+        for l in myLabels:
+            addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "HpToSingleLepton_datacard_"+l+".txt", "HT_CR_"+l+".root")
 
         print "The following masses are considered:",", ".join(map(str, myMassPoints))
         if len(myMassPoints) > 0:

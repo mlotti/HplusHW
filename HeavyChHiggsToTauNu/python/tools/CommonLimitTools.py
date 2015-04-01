@@ -513,18 +513,27 @@ class LimitMultiCrabBase:
 
         for mass in self.massPoints:
             for dc in datacardPatterns:
-                fname = os.path.join(self.datacardDirectory, dc % mass)
+                fname = None
+                if "%s" in dc:
+                    fname = os.path.join(self.datacardDirectory, dc % mass)
+                else:
+                    fname = os.path.join(self.datacardDirectory, dc)
                 if not os.path.isfile(fname):
                     raise Exception("Datacard file '%s' does not exist!" % fname)
 
                 aux.addToDictList(self.datacards, mass, fname)
 
             for rf in rootfilePatterns:
-                fname = os.path.join(self.datacardDirectory, rf % mass)
-                if not os.path.isfile(fname):
-                    raise Exception("ROOT file (for shapes) '%s' does not exist!" % fname)
+                if rf != None:
+                    rfname = None
+                    if "%s" in rf:
+                        rfname = os.path.join(self.datacardDirectory, rf % mass)
+                    else:
+                        rfname = os.path.join(self.datacardDirectory, rf)
+                    if not os.path.isfile(rfname):
+                        raise Exception("ROOT file (for shapes) '%s' does not exist!" % rfname)
 
-                aux.addToDictList(self.rootfiles, mass, fname)
+                    aux.addToDictList(self.rootfiles, mass, rfname)
 
     ## Create the multicrab task directory
     #
