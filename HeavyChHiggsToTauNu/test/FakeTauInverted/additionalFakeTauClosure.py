@@ -27,7 +27,8 @@ def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
     def rebin(h, name):
         myBinning = []
         if name.startswith("MT"):
-            myBinning = systematics.getBinningForPlot("shapeTransverseMass")
+            #myBinning = systematics.getBinningForPlot("shapeTransverseMass")
+            myBinning = [0,20,40,60,80,100,120,140,160,200,400]
         elif name.startswith("INVMASS"):
             myBinning = systematics.getBinningForPlot("shapeInvariantMass")
         else:
@@ -47,6 +48,8 @@ def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
 
     hbase.SetLineColor(ROOT.kBlack)
     hinv.SetLineColor(ROOT.kRed)
+    hinv.SetLineStyle(2)
+
     # Rebin
     hbase = rebin(hbase, histoName)
     hinv = rebin(hinv, histoName)
@@ -58,21 +61,23 @@ def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
     baseHisto = histograms.Histo(hbase, "Isolated", drawStyle="HIST", legendStyle="l")
     invHisto = histograms.Histo(hinv, "Anti-isolated", drawStyle="HIST", legendStyle="l")
     plot = plots.ComparisonPlot(baseHisto, invHisto)
-    plot.setLuminosity(luminosity)
-    plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(3))
+    #plot.setLuminosity(luminosity)
+    #plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(3))
+    plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineWidth(2))
     myPlotName = "%s/QCDInv_ClosureTest_%s"%(myDir, histoName)
     myParams = {}
-    myParams["ylabel"] = "Events/#Deltam_{T}, normalized to 1"
+    #myParams["ylabel"] = "Events/#Deltam_{T}, normalized to 1"
+    myParams["ylabel"] = "#LT Events / bin #GT, normalized to 1"
     myParams["xlabel"] = "m_{T}(tau,MET), GeV"
     myParams["log"] = False
-    myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
-    #myParams["opts2"] = {"ymin": 0.8, "ymax":1.2}
+    #myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
+    myParams["opts2"] = {"ymin": 0.3, "ymax":1.7}
     myParams["opts"] = {"ymin": 0.0}
     myParams["ratio"] = True
     myParams["ratioType"] = "errorScale"
-    myParams["ratioYlabel"] = "Var./Nom."
+    myParams["ratioYlabel"] = "Ratio"#"Var./Nom."
     myParams["cmsText"] = myCMSText
-    myParams["addLuminosityText"] = True
+    #myParams["addLuminosityText"] = False
     myParams["divideByBinWidth"] = True
     plots.drawPlot(plot, myPlotName, **myParams)
 
