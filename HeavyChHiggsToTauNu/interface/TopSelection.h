@@ -23,7 +23,7 @@ namespace HPlus {
     ~TopSelection();
   
   private:
-    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<pat::Jet> iJetb);
     void init();
 
     // Input parameters
@@ -39,6 +39,7 @@ namespace HPlus {
     WrappedTH1* htopPt;
     WrappedTH1* htopMass;
     WrappedTH1* htopEta;
+    WrappedTH1* htopMassAfterCut;
     WrappedTH1* htopMassRejected;
     WrappedTH1* hWPt;
     WrappedTH1* hWMass;

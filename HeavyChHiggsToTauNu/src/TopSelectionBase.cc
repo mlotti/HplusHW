@@ -21,51 +21,16 @@ namespace HPlus {
     fPassedEvent(false) {}
   TopSelectionBase::Data::~Data() {}
   
-  //silentAnalyze
-  Data TopSelectionBase::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
-    ensureSilentAnalyzeAllowed(iEvent);
-
-    // Disable histogram filling and counter incrementinguntil the return call
-    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
-    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
-    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-
-    return privateAnalyze(iEvent, iSetup, jets, bjets);
-  }
-
   //analyze
-  Data TopSelectionBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
-    ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, jets, bjets);
+  Data TopSelectionBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<pat::Jet> iJetb) {
+    return privateAnalyze(iEvent, iSetup, jets, bjets, iJetb);
   }
+ 
 
-  //silentAnalyze (for BSelection)
-  Data TopSelectionBase::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
-    ensureSilentAnalyzeAllowed(iEvent);
-
-    // Disable histogram filling and counter incrementinguntil the return call
-    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
-    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
-    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
-
-    return privateAnalyze(iEvent, iSetup, jets, iJetb);
-  }
-
-  //analyze (for BSelection)
-  Data TopSelectionBase::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) {
-    ensureAnalyzeAllowed(iEvent);
-    return privateAnalyze(iEvent, iSetup, jets, iJetb);
-  }
-
-  //privateAnalyze
-  Data TopSelectionBase::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+  //privateAnalyze (dummy)
+  Data TopSelectionBase::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets, const edm::Ptr<pat::Jet> iJetb) {
     Data output;
     return output;
   }
 
-  //privateAnalyze (for BSelection)
-  Data TopSelectionBase::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<pat::Jet> iJetb) { 
-    Data output;
-    return output;
-  }
-}  
+}
