@@ -225,10 +225,14 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMETBaselineTauIdAfterMetSFPlusBveto;
     std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCuts;
     std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCuts;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCutsOnlyEWKFakeTaus;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCutsPlusFilteredEWKFakeTaus;
     std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusBtag;
     std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusBveto;
     std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus;
     std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusBtagPlusFilteredEWKFakeTaus;
+    std::vector<WrappedTH1*> hMETBaselineTauIdAfterCollinearCutsPlusBtagOnlyEWKFakeTaus;
     // baseline MT histos
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterMetSF;
     std::vector<WrappedTH1*> hMTBaselineTauIdAfterCollinearCuts; // <-- used for closure test
@@ -266,11 +270,15 @@ namespace HPlus {
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterMetSFPlusBveto;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCuts;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCuts;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCutsOnlyEWKFakeTaus;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCutsPlusFilteredEWKFakeTaus;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusBtag;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusBveto;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterBackToBackCuts;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus;
     std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsOnlyEWKFakeTaus;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusBtagPlusFilteredEWKFakeTaus;
+    std::vector<WrappedTH1*> hMETInvertedTauIdAfterCollinearCutsPlusBtagOnlyEWKFakeTaus;
     // inverted MT histos
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterMetSF;
     std::vector<WrappedTH1*> hMTInvertedTauIdAfterCollinearCuts; // <-- used for closure test
