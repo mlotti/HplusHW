@@ -1,5 +1,5 @@
 # Description: 
-#
+# Module for calculating final Fake tau fake rates (doing the wighting of QCD and EWK+tt fake tau fake rates)
 # Authors: EP
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
@@ -17,8 +17,10 @@ class FakeRateCalculator:
     def __init__(self, dsetMgr, shapeString, myNormfactors, luminosity, EWKUncertaintyFactor=1.0, UncertAffectsTT = True, dataDrivenFakeTaus = True):
         self.sortedFactors = {}
         self.sortedFactors = self.sortFactors(myNormfactors)
+        # get shapes
         self.qcdShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", shapeString, luminosity, EWKUncertaintyFactor=EWKUncertaintyFactor, dataDrivenFakeTaus=False,  UncertAffectsTT = UncertAffectsTT)
         self.faketauShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", shapeString, luminosity, EWKUncertaintyFactor=EWKUncertaintyFactor, dataDrivenFakeTaus=True, UncertAffectsTT = UncertAffectsTT)
+        
         self.weights = []
         self.weightErrors = []
         self.weightsSystVarUp = []
@@ -45,10 +47,12 @@ class FakeRateCalculator:
             nEWKgenuine = self.faketauShape.getEwkHistoForSplittedBin(i).Integral() 
             nQCD = nData - nEWKincl
             nFakeTau = nData - nEWKgenuine
+            # calculate fake rate weights
             if self.dataDrivenFakeTaus:
                 w = nQCD/nFakeTau
             else:
                 w = 1.0
+            # error of weighting is binomial
             wError = math.sqrt(nQCD*(1-w))/nFakeTau
             #print "Bin", i, "w = ", w
             self.weights.append(w)
@@ -63,6 +67,7 @@ class FakeRateCalculator:
         self.averageWeight = averageNum/averageDenom
 
     def setFakeRateProbabilities(self, i):
+        # store final fake rates
         wQCD = self.sortedFactors[str(i)+"QCD"]
         wEWK = self.sortedFactors[str(i)+"EWK_FakeTaus"]
         
@@ -75,6 +80,7 @@ class FakeRateCalculator:
         self.fakeratesSystVarDown[self.faketauShape.getPhaseSpaceBinFileFriendlyTitle(i)] = fakeRateSystVarDown
 
     def sortFactors(self, normdict):
+        # sort fake rates to ascending order
         eq_re = re.compile("taup_Teq(?P<value1>\d+)to(?P<value2>\d+)(?P<name>\D+)") 
         lt_re = re.compile("taup_Tlt(?P<value1>\d+)(?P<name>\D+)")
         gt_re = re.compile("taup_Tgt(?P<value1>\d+)(?P<name>\D+)")
@@ -168,7 +174,6 @@ class FakeRateCalculator:
         return self.weightsSystVarDown[i]
 
     def getAverageWeight(self):
-        #print "Average", self.averageWeight
         return self.averageWeight
 
     def getQCDShape(self):

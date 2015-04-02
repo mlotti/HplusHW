@@ -35,12 +35,13 @@ drawPlot1 = plots.PlotDrawer(
 drawPlot2 = plots.PlotDrawer(
     ylabel="Fake rate probability",
     cmsTextPosition="left",
-    moveLegend={"dx": -0.07,"dy": 0.0},
+    moveLegend={"dx": -0.05,"dy": 0.02},
     opts={"ymin": 0.0, "ymax": 0.2},
 )
 
 try:
     import QCDInvertedNormalizationFactors
+    #import QCDInvertedNormalizationFactorsPlusBtag as QCDInvertedNormalizationFactors
 except ImportError:
     print
     print "    WARNING, QCDInvertedNormalizationFactors.py not found!"
@@ -48,7 +49,7 @@ except ImportError:
     print
 
 # refine the datasets given in the multicrab directories
-def refinedDataSets(dirs, dataEra, searchMode, analysis, optMode, removeTT):
+def refinedDataSets(dirs, dataEra, searchMode, analysis, optMode, removeTTJets):
     datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis, optimizationMode=optMode)
 
     datasets.updateNAllEventsToPUWeighted()
@@ -58,7 +59,7 @@ def refinedDataSets(dirs, dataEra, searchMode, analysis, optMode, removeTT):
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "Hplus_taunu_t-channel" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "Hplus_taunu_tW-channel" in name, datasets.getAllDatasetNames()))
-    if removeTT:
+    if removeTTJets:
         datasets.remove(filter(lambda name: "TTJets_SemiLept" in name, datasets.getAllDatasetNames()))
         datasets.remove(filter(lambda name: "TTJets_FullLept" in name, datasets.getAllDatasetNames()))
         datasets.remove(filter(lambda name: "TTJets_Hadronic" in name, datasets.getAllDatasetNames()))
@@ -94,7 +95,8 @@ def getNormalization(bin, w, normalization):
 def plotClosure(mt_nom, mt_var, name, optMode):
     style = tdrstyle.TDRStyle() 
     plot = plots.ComparisonPlot(mt_var, mt_nom)
-    plot.createFrame(optMode.replace("Opt","mT_Closure_"+ name +"_"), createRatio=True, opts2={"ymin": 0.73, "ymax": 1.27})
+    plot.createFrame(optMode.replace("Opt","mT_Closure_"+ name +"_"), createRatio=True, opts2={"ymin": 0.7, "ymax": 1.3})#0.73,1.27
+    #plot.createFrame(optMode.replace("Opt","mT_Closure_"+ name +"_"), createRatio=True, opts2={"ymin": 0.73, "ymax": 1.27}, ratio = True, ratioType = "errorScale")
     plot.frame.GetXaxis().SetTitle("m_{T}(tau,MET), GeV")
     plot.frame.GetYaxis().SetTitle("#LT Events / bin #GT")
     moveLegend={"dx": -0.3,"dy": 0.04}
@@ -118,8 +120,11 @@ def main():
 
     defaultBinning = [0,20,40,60,80,100,120,140,160,200,400]
     myBaselineMulticrabDir = "/mnt/flustre/epekkari/signal_2014-07-01_nominal"
-    myInvertedMulticrabDir = "/mnt/flustre/epekkari/FixedBugsQCDPlusEWKFakeTau_140919_164308"
-    
+    #myInvertedMulticrabDir = "/mnt/flustre/epekkari/FixedBugsQCDPlusEWKFakeTau_140919_164308"
+    myInvertedMulticrabDir = "/mnt/flustre/epekkari/FinalInvertedFakeTau_150218_132905_150218_133121"
+    #myInvertedMulticrabDir = "/mnt/flustre/epekkari/InvertedFakeTau-12-2_150212_170900"
+    #myInvertedMulticrabDir = "/home/epekkari/Analysis-4-12/CMSSW_5_3_9_patch3/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/InvertedFakeTau-12-2_150212_170900"
+
     # Inverted datasets
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=myInvertedMulticrabDir)
     dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
@@ -171,9 +176,7 @@ def main():
     # Plot results
     plotClosure(qcd_mt, fakeTau_mt, "Inclusive", optimizationMode)
     plotFakeRateProbabilities(myFakeRateWeightCalculator.getWeights(), myFakeRateWeightCalculator.getWeightErrors(), myFakeRateWeightCalculator.getSortedFactors(), optimizationMode)
-    writeNormalizationToFile(myFakeRateWeightCalculator.getSortedTotalFakeRateProbabilities(), "fakenorm.py")
-
-
+    #writeNormalizationToFile(myFakeRateWeightCalculator.getSortedTotalFakeRateProbabilities(), "FakeTauNormalization.py")
 
 def plotFakeRateProbabilities(w_list, w_err_list, normalization, optMode):
     weights = ROOT.TH1F("weights", "weights", len(w_list), 0, len(w_list))
@@ -297,6 +300,7 @@ def foo(p):
              xlabel="#tau_{h} ^{}p_{T} (GeV)",
              errorBarsX=True)
 
+# for testing purposes only
 def writeNormalizationToFile(normFactors,filename):
     fOUT = open(filename,"w")
     now = datetime.datetime.now()

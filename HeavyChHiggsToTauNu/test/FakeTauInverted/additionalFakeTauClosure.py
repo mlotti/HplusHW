@@ -27,8 +27,8 @@ def doSinglePlot(hbase, hinv, myDir, histoName, luminosity):
     def rebin(h, name):
         myBinning = []
         if name.startswith("MT"):
-            #myBinning = systematics.getBinningForPlot("shapeTransverseMass")
-            myBinning = [0,20,40,60,80,100,120,140,160,200,400]
+            myBinning = systematics.getBinningForPlot("shapeTransverseMass")
+            #myBinning = [0,20,40,60,80,100,120,140,160,200,400]
         elif name.startswith("INVMASS"):
             myBinning = systematics.getBinningForPlot("shapeInvariantMass")
         else:
@@ -188,7 +188,6 @@ def main(argv):
 
     # Obtain normalization factors
     myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
-    #myNormalizationFactorSource = "QCDPlusEWKFakeTauNormalizationFactors.py"
     myNormFactors = None
     myNormFactorsSafetyCheck = None
     if os.path.exists(myNormalizationFactorSource):

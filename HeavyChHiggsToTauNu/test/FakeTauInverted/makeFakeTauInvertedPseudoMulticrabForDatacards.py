@@ -20,13 +20,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.fakeRate as fakeRate
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
 myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
-#myNormalizationFactorSource = "QCDPlusEWKFakeTauNormalizationFactors.py" 
-#myNormalizationFactorSource = "QCDInvertedCombinedNormalizationFactors.py"
 
 myScalarUncertainties = {"xsect_tt_8TeV_forQCD" : systematics.getCrossSectionUncertainty("TTJets"), "lumi_forQCD" : systematics.getLuminosityUncertainty(), "probBtag" : systematics.getProbabilisticBtagUncertainty(), "lepton_veto" : systematics.getLeptonVetoUncertainty()}
-
-#"MTInvertedTauIdAfterCollinearCuts"
-#"MTInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus"/baseline
 
 def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreator,myShapeString,myNormFactors,myDisplayStatus,dataDrivenFakeTaus):
     # Construct info string of module
@@ -54,12 +49,6 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     myLuminosity = dsetMgr.getDataset("Data").getLuminosity()
 
     myFakeRateCalculator = fakeRate.FakeRateCalculator(dsetMgr, myShapeString, myNormFactors, myLuminosity, dataDrivenFakeTaus = dataDrivenFakeTaus)
-    #myFakeRateWeightCalculatorAtNorm = fakeRateWeighting.FakeRateWeightCalculator(dsetMgr, "Inverted/MTInvertedTauIdAfterCollinearCuts", myNormFactors, myLuminosity)
-    #print "AT NORM:"
-    #myFakeRateWeightCalculatorAtNorm.printWeights()
-
-    #print "Normalization:"
-    #print myFakeRateWeightCalculator.getTotalFakeRateProbabilities()
 
     # Print info so that user can check that merge went correct
     if myDisplayStatus:
@@ -120,9 +109,7 @@ def doNominalModule(myMulticrabDir,era,searchMode,optimizationMode,myOutputCreat
     myFakeWeightingSystResultsMinus.addDataDrivenControlPlots(myResult_FakeWeightingMinus.getControlPlots(),myResult.getControlPlotLabels())
     myOutputCreator.addModule(myFakeWeightingSystResultsMinus)
 
-
     # Scalar uncertainties as shapes for MC EWK
-    # does lepton veto affect ewk genuine tau events?
     for scalarName in myScalarUncertainties.keys():
         if scalarName == "probBtag":
             myScalarDsetMgr = dsetMgrSeparatedTT
@@ -243,14 +230,6 @@ if __name__ == "__main__":
         mySystematicsNames.append("%sMinus"%item)
     if opts.test:
         mySystematicsNames = []
-        #mySystematicsNames = [mySystematicsNames[0]]
-
-    # Obtain systematics names
-    # myScalarSystematics = systematics.getScalarUncertainties("pseudo", False)
-    # myScalarSystematicsDict = {}
-    # for item in myScalarSystematics:
-    #     myScalarSystematicsDict["signalAnalysis%s%s%sSystVar%sPlus"%searchMode,era,optimizationMode,item.getName()] = item.getUncertaintyUp()
-    #     myScalarSystematicsDict["signalAnalysis%s%s%sSystVar%sMinus"%searchMode,era,optimizationMode,item.getName()] = item.getUncertaintyDown()#ei tanne era:aa yms vaan oma metodi luomiselle
 
     myModuleSelector.setPrimarySource("analysis", dsetMgrCreator)
     # Select modules
@@ -276,13 +255,13 @@ if __name__ == "__main__":
         print ShellStyles.HighlightStyle()+"Creating dataset for shape: %s%s"%(massType,ShellStyles.NormalStyle())
         for era in myModuleSelector.getSelectedEras():
             # Check if normalization coefficients are suitable for era
-            #myNormFactorsSafetyCheck(era) #TODO
+            #myNormFactorsSafetyCheck(era) #FIXME
             for searchMode in myModuleSelector.getSelectedSearchModes():
                 for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
                     if os.path.exists(myNormalizationFactorSource):
                         myNormFactorsImport = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalization")
                         myNormFactorsSafetyCheck = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalizationSafetyCheck")
-                        #QCDInvertedNormalizationSafetyCheck(era)
+                        #QCDInvertedNormalizationSafetyCheck(era) #FIXME
                         myNormFactorsSafetyCheck(era)
                         myNormFactors = myNormFactorsImport.copy()
                     else:
