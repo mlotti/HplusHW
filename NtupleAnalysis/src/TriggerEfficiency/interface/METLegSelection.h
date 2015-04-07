@@ -57,7 +57,7 @@ bool METLegSelection::offlineSelection(Event& fEvent){
       ++nmuons;
   }
 
-  size_t nelectrons = 1;//0;                                                                                                                           
+  size_t nelectrons = 0;                                                                                                                           
   /*                                                                                                                                                     
   for(Electron electron: fEvent.electrons()) {                                                                                                         
     if(electron.pt() > 15 && std::abs(electron.eta()) < 2.4)                                                                                           
@@ -66,6 +66,7 @@ bool METLegSelection::offlineSelection(Event& fEvent){
   */
   bool selected = false;
   if(ntaus > 0 && njets > 2 && nmuons == 0 && nelectrons == 0) selected = true;
+  //  std::cout << "check METLegSelection " << ntaus << " " << njets << " " << nmuons << " "<< nelectrons << std::endl;
   return selected;
 }
 bool METLegSelection::onlineSelection(Event& fEvent){
