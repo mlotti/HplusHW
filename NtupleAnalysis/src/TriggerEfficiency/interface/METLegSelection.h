@@ -13,7 +13,7 @@ class METLegSelection : public BaseSelection {
   bool onlineSelection(Event&);
 
  private:
-
+  bool caloMETSelection(Event&);
 };
 
 METLegSelection::METLegSelection(const ParameterSet& setup){
@@ -70,7 +70,19 @@ bool METLegSelection::offlineSelection(Event& fEvent){
   return selected;
 }
 bool METLegSelection::onlineSelection(Event& fEvent){
-  return true;
+  if(fsignalTriggers.size() == 0) return caloMETSelection(fEvent);
+  bool hltdecision = fEvent.configurableTriggerDecision2();
+  double L1METcut  = 40;
+  double l1MET = fEvent.L1met().et();
+  return l1MET > L1METcut && hltdecision;
+}
+
+bool METLegSelection::caloMETSelection(Event& fEvent){
+  double L1METcut  = 40;
+  double HLTMETcut = 70;
+  double l1MET = fEvent.L1met().et();
+  double caloMET = fEvent.calomet().et();
+  return l1MET > L1METcut && caloMET > HLTMETcut;
 }
 
 #endif
