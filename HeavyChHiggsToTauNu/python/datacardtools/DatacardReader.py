@@ -1124,7 +1124,7 @@ class DataCardReader:
                 myStatTable.append(myRow)
             else:
                 myNuisanceTable.append(myRow)
-        
+       
         # Create stat.uncert. table
         
         # Do formatting
@@ -1152,6 +1152,7 @@ class DataCardReader:
         myOriginalCardFile = open(self._datacardFilename, "w")
         myOriginalCardFile.write(myOutput)
         myOriginalCardFile.close()
+        #print "Wrote card (m=%s): N(columns)=%d, N(nuisances)=%d"%(self._mass, len(self._datacardColumnNames), len(myNuisanceTable)+len(myStatTable))
 
     ## Parse header from datacard file
     def _parseDatacardHeader(self, lines):

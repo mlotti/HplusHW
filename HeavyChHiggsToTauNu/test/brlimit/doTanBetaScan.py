@@ -883,11 +883,22 @@ if __name__ == "__main__":
     parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
     parser.add_option("--tanbeta", dest="tanbeta", action="append", default=[], help="tanbeta values (will scan only these)")
     parser.add_option("--evalUuncert", dest="evaluateUncertainties", action="store_true", default=False, help="Make plots of theoretical uncertainties")
+    parser.add_option("--gridJobId", dest="gridJobId", action="append", default=[], help="gridJobId")
     opts = commonLimitTools.parseOptionParser(parser)
     if opts.rmin == None:
         opts.rmin = "0"
     if opts.rmax == None:
-        opts.rmax = "10" # To facilitate the search for different tan beta values
+        opts.rmax = "4" # To facilitate the search for different tan beta values
+    
+    if len(opts.gridJobId) == 1:
+        # Translate grid job ID to tan beta value
+        jobID = int(opts.gridJobId[0])
+        if jobID < 10:
+            value = 0.1*(jobID+1)+1.0
+            opts.tanbeta = ["%0.1f"%(value)]
+        else:
+            value = 69 - (jobID-10)
+            opts.tanbeta = ["%0.1f"%(value)]
     
     # MSSM scenario settings
     myScenarios = ["mhmaxup", "mhmodm", "mhmodp", "lightstau", "lightstop", "tauphobic"]
@@ -959,6 +970,8 @@ if __name__ == "__main__":
             else:
                 i += 1
         if len(myMassPoints) == 0:
+            if len(opts.masspoints) > 0:
+                raise Exception("Check that the mass point parameters are correct!")
             print "Automatic mass identification failed, trying default range (this could of course fail)"
             myMassPoints.extend(["200", "220", "250", "300", "400", "500", "600"])
         print "The following masses are considered:",", ".join(map(str, myMassPoints))
@@ -973,7 +986,8 @@ if __name__ == "__main__":
     print "\nTan beta scan is done, results have been saved to %s"%_resultFilename
     
     # Apply TDR style
-    style = tdrstyle.TDRStyle()
+    if len(opts.gridJobId) == 0:
+        style = tdrstyle.TDRStyle()
 
-    for scen in myScenarios:
-        myPlots[scen].doPlot()
+        for scen in myScenarios:
+            myPlots[scen].doPlot()
