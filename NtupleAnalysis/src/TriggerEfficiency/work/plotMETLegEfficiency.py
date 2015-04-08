@@ -75,5 +75,55 @@ def main():
         os.mkdir(plotDir)
     p.save()
 
+
+
+    # CaloMET
+
+    analysisc = "METLeg_2012ABCD_CaloMET"
+    datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc)
+
+    style = tdrstyle.TDRStyle()
+
+    dataset1c = datasetsc.getDataDatasets()
+    dataset2c = datasetsc.getMCDatasets()
+
+    eff1c = getEfficiency(dataset1c)
+    eff2c = getEfficiency(dataset2c)
+
+    styles.dataStyle.apply(eff1c)
+    styles.mcStyle.apply(eff1c)
+    eff1c.SetMarkerSize(1)
+    eff2c.SetMarkerSize(1.5)
+
+    p = plots.ComparisonPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
+                             histograms.HistoGraph(eff1c, "eff1c", "p", "P"))
+
+    opts = {"ymin": 0, "ymax": 1.1}
+    opts2 = {"ymin": 0.5, "ymax": 1.5}
+    moveLegend = {"dx": -0.55}
+    namec = "Data_TrgBinVsCaloMET_L1HLTMET_PFMET"
+
+    legend1c = "Data, trigger bin"
+    legend2c = "Data, CaloMET > 70"
+    p.histoMgr.setHistoLegendLabelMany({"eff1": legend1c, "eff1c": legend2c})
+
+    p.createFrame(os.path.join(plotDir, namec), createRatio=True, opts=opts, opts2=opts2)
+    p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+
+    p.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
+    p.getFrame().GetXaxis().SetTitle("MET Type 1 (GeV)")
+    p.getFrame2().GetYaxis().SetTitle("Ratio")
+    p.getFrame2().GetYaxis().SetTitleOffset(1.6)
+
+    p.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText(s="%s TeV"%dataset2[0].info["energy"])
+    lumi = 0
+    histograms.addLuminosityText(None, None, lumi)
+
+    if not os.path.exists(plotDir):
+        os.mkdir(plotDir)
+    p.save()
+
 if __name__ == "__main__":
     main()

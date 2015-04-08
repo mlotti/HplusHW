@@ -70,7 +70,7 @@ bool METLegSelection::offlineSelection(Event& fEvent){
   return selected;
 }
 bool METLegSelection::onlineSelection(Event& fEvent){
-  if(fsignalTriggers.size() == 0) return caloMETSelection(fEvent);
+  if(fEvent.configurableTrigger2IsEmpty()) return caloMETSelection(fEvent);
   bool hltdecision = fEvent.configurableTriggerDecision2();
   double L1METcut  = 40;
   double l1MET = fEvent.L1met().et();

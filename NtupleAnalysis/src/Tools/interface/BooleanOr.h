@@ -28,6 +28,10 @@ public:
     return false;
   }
 
+  bool isEmpty() const {
+    return fBranches.empty();
+  }
+
 private:
   void throwEmpty() const;
 

@@ -33,6 +33,9 @@ public:
   bool configurableTriggerDecision2() const {
     return fTriggerOr2.value();
   }
+  bool configurableTrigger2IsEmpty() const {
+    return fTriggerOr2.isEmpty();
+  }
   const EventID& eventID() const { return fEventID; }
   const EventNPU& NPU() const { return fNPU; }
   const TauCollection& taus() const { return fTauCollection; }
