@@ -773,6 +773,10 @@ def purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints):
                                 del myCommonMassPoints[i]
                             else:
                                 i += 1
+            else:
+                if not os.path.exists(myDecayModeMatrix[fskey][dmkey][0]):
+                    print "Warning: no datacard found for decay mode %s / %s, removing it ..."%(fskey,dmkey)
+                    del myDecayModeMatrix[fskey][dmkey]
         if len(myDecayModeMatrix[fskey].keys()) == 0:
             del myDecayModeMatrix[fskey]
     # Print combination details
@@ -883,7 +887,7 @@ if __name__ == "__main__":
     parser = commonLimitTools.createOptionParser(False, False, True)
     parser.add_option("--analyseOutput", dest="analyseOutput", action="store_true", default=False, help="Read only output and print summary")
     parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
-    parser.add_option("--tanbeta", dest="tanbeta", action="append", default=[], help="tanbeta values (will scan only these)")
+    parser.add_option("-t", "--tanbeta", dest="tanbeta", action="append", default=[], help="tanbeta values (will scan only these)")
     parser.add_option("--evalUuncert", dest="evaluateUncertainties", action="store_true", default=False, help="Make plots of theoretical uncertainties")
     parser.add_option("--creategridjobs", dest="creategridjobs", action="store_true", default=False, help="Create crab task dirs for multicrab and running on grid")
     opts = commonLimitTools.parseOptionParser(parser)
