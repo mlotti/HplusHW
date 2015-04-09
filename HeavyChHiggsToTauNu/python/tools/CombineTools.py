@@ -130,12 +130,50 @@ def produceLHCAsymptotic(opts, directory,
     mcc = MultiCrabCombine(opts, directory, massPoints, datacardPatterns, rootfilePatterns, cls)
     mcc.createMultiCrabDir(postfix)
     mcc.copyInputFiles()
-    mcc.writeScripts()
+    myScripts = mcc.writeScripts()
     if opts.injectSignal:
         mcc.writeCrabCfg("arc", [], ["dummy"])
         mcc.writeMultiCrabCfg(aux.ValuePerMass(opts.injectNumberJobs))
         if opts.multicrabCreate:
             mcc.createMultiCrab()
+    elif opts.creategridjobs:
+        # Create crab task directory and append entry to multicrab.cfg (the n masspoints will be run in the same job; one job / crab dir)
+        mcc.writeCrabCfg("remoteglidein", {"CMSSW": ["output_file = output.tgz", "number_of_jobs=10"],
+                                            "GRID": ["SE_white_list = T2_FI_HIP", "maxtarballsize = 50", "virtual_organization = cms"],
+                                            "USER": ["script_exe = runGridJob.sh"]},
+                         ["dummy"])
+        os.system("cp %s/crab.cfg ./crab_gridjob.cfg"%mcc.dirname)
+        # Create script for running the grid job
+        command = ["#!/bin/sh", "", "# Run combine"]
+        for m in massPoints:
+            command.append("./%s"%myScripts[m])
+        command.append("")
+        command.append("# Collect output")
+        command.append("tar cfz output.tgz higgsCombine*.root combine_output*txt")
+        aux.writeScript(os.path.join(mcc.dirname, "runGridJob.sh"), "\n".join(command)+"\n")
+        # Create list of input files (they could be combined to a combine workspace)
+        myInputFiles = []
+        for item in datacardPatterns+rootfilePatterns:
+            if item != None:
+                if "%s" in item:
+                    for m in massPoints:
+                        name = item%m
+                        if not name in myInputFiles:
+                            myInputFiles.append(name)
+                else:
+                    if not item in myInputFiles:
+                        myInputFiles.append(name)
+        if hasattr(opts, "scenarios"):
+            for scen in opts.scenarios:
+                myInputFiles.append("%s-LHCHXSWG.root"%scen)
+        # Does combine binary need to be included ?
+        #myInputFiles.append("combine")
+        # Write entry for master multicrab
+        f = open("multicrab.cfg","a")
+        s = mcc.dirname.split("/")
+        f.write("\n[%s]\n"%s[len(s)-1])
+        f.write("USER.additional_input_files = %s\n"%(", ".join(map(str,myInputFiles))))
+        f.close()
     else:
         mcc.runCombineForAsymptotic(quietStatus=quietStatus)
         return mcc.getResults()
@@ -339,7 +377,7 @@ class LHCTypeAsymptotic:
         # Combine cards and prepare workspace for physics model, if necessary
         myInputDatacardName = _addCombinePreparationCommands(self.brlimit, datacardFiles, mass, command)
         # Add command for running combine
-        command.append("combine %s -d %s" % (opts, myInputDatacardName))
+        command.append("combine %s -d %s >& combine_output_m%s.txt" % (opts, myInputDatacardName, mass))
         aux.writeScript(os.path.join(self.dirname, fileName), "\n".join(command)+"\n")
         self.obsAndExpScripts[mass] = fileName
         self._createMLFit(mass, fileName, myInputDatacardName, blindedMode=False)

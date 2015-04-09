@@ -18,11 +18,13 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as Datacar
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.BRXSDatabaseInterface as BRXSDB
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 import os
 import sys
 import array
 import math
+
 
 _resultFilename = "results.txt"
 _maxTanBeta = 69.0
@@ -507,14 +509,14 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
             # Result does not exist, let's calculate it
             brContainer.produceScaledCards(mHp, tanbeta)
             # Run Combine
-            if "CMSSW_BASE" in os.environ:
+            if "CMSSW_BASE" in os.environ or opts.creategridjobs:
                 resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=[mHp],
                     datacardPatterns = brContainer.getDatacardPatterns(),
                     rootfilePatterns = brContainer.getRootfilePatterns(),
                     clsType = combine.LHCTypeAsymptotic(opts),
                     postfix = myPostFix,
                     quietStatus = True)
-                if len(resultContainer.results) > 0:
+                if resultContainer != None and len(resultContainer.results) > 0:
                     result = resultContainer.results[0]
                     # Store result
                     brContainer.setCombineResult(tanbeta, result)
@@ -883,27 +885,26 @@ if __name__ == "__main__":
     parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
     parser.add_option("--tanbeta", dest="tanbeta", action="append", default=[], help="tanbeta values (will scan only these)")
     parser.add_option("--evalUuncert", dest="evaluateUncertainties", action="store_true", default=False, help="Make plots of theoretical uncertainties")
-    parser.add_option("--gridJobId", dest="gridJobId", action="append", default=[], help="gridJobId")
+    parser.add_option("--creategridjobs", dest="creategridjobs", action="store_true", default=False, help="Create crab task dirs for multicrab and running on grid")
     opts = commonLimitTools.parseOptionParser(parser)
     if opts.rmin == None:
         opts.rmin = "0"
     if opts.rmax == None:
         opts.rmax = "4" # To facilitate the search for different tan beta values
     
-    if len(opts.gridJobId) == 1:
-        # Translate grid job ID to tan beta value
-        jobID = int(opts.gridJobId[0])
-        if jobID < 10:
-            value = 0.1*(jobID+1)+1.0
-            opts.tanbeta = ["%0.1f"%(value)]
-        else:
-            value = 69 - (jobID-10)
-            opts.tanbeta = ["%0.1f"%(value)]
-    
+    if opts.creategridjobs:
+        # Initialize multicrab
+        f = open("multicrab.cfg","w")
+        f.write("[MULTICRAB]\ncfg = crab_gridjob.cfg\n")
+        f.close()
+        print "*** Start creating individual crab job directories for grid submission ... ***"
+
     # MSSM scenario settings
     myScenarios = ["mhmaxup", "mhmodm", "mhmodp", "lightstau", "lightstop", "tauphobic"]
     if len(opts.scenarios) > 0:
         myScenarios = opts.scenarios[:]
+    else:
+        opts.scenarios = myScenarios[:]
     
     if opts.evaluateUncertainties:
         evaluateUncertainties(myScenarios)
@@ -985,8 +986,26 @@ if __name__ == "__main__":
                 main(opts, brContainer, m, scen, myPlots)
     print "\nTan beta scan is done, results have been saved to %s"%_resultFilename
     
-    # Apply TDR style
-    if len(opts.gridJobId) == 0:
+    if opts.creategridjobs:
+        # Create task dir
+        dirname = multicrab.createTaskDir(prefix="multicrab_tanBetaScan", path=".")
+        f = open("multicrab.cfg")
+        myLines = f.readlines()
+        f.close()
+        for line in myLines:
+            if line.startswith("[") and line.endswith("]\n"):
+                jobname = line.replace("[","").replace("]\n","")
+                if jobname not in ["MULTICRAB", "COMMON"]:
+                    os.system("mv %s %s/."%(jobname, dirname))
+        os.system("mv multicrab.cfg %s/."%dirname)
+        os.system("mv crab_gridjob.cfg %s/."%dirname)
+        # Print instructions
+        print "*** Created crab task dirs for multicrab to %s ***"%dirname
+        print "*** To submit, do the following ***"
+        print "cd %s"%dirname
+        print "multicrab -create -submit all"
+    else:
+        # Apply TDR style
         style = tdrstyle.TDRStyle()
 
         for scen in myScenarios:

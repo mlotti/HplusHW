@@ -558,6 +558,10 @@ class LimitMultiCrabBase:
     def writeScripts(self):
         for mass, datacardFiles in self.datacards.iteritems():
             self.clsType.createScripts(mass, datacardFiles)
+        if self.opts.unblinded:
+            return self.clsType.obsAndExpScripts
+        else:
+            return self.clsType.blindedScripts
 
     ## Write crab.cfg to the multicrab directory
     # \param crabScheduler      CRAB scheduler to use
@@ -623,7 +627,10 @@ class LimitMultiCrabBase:
             inputFiles = [exe]+self.datacards[mass]
             if len(self.rootfiles) > 0:
                 inputFiles += self.rootfiles[mass]
-            self.clsType.writeMultiCrabConfig(self.opts, fOUT, mass, inputFiles, numberOfJobs.getValue(mass))
+            if numberOfJobs != None:
+                self.clsType.writeMultiCrabConfig(self.opts, fOUT, mass, inputFiles, numberOfJobs.getValue(mass))
+            else:
+                self.clsType.writeMultiCrabConfig(self.opts, fOUT, mass, inputFiles, 1)
             fOUT.write("\n\n")
 
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")
