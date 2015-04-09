@@ -114,10 +114,13 @@ def getCrossSectionUncertainty(datasetName):
     print ShellStyles.WarningLabel()+"Could not find cross section uncertainty for dataset label: %s!%s"%(datasetName,ShellStyles.NormalStyle())
     return _crossSectionUncertainty["default"]
 
-def getLeptonVetoUncertainty(datasetName):
-    if "pseudo" in datasetName:
-        return ScalarUncertaintyItem("LeptonVeto", 0.00)
-    return ScalarUncertaintyItem("LeptonVeto", 0.002)
+# def getLeptonVetoUncertainty(datasetName):
+#     if "pseudo" in datasetName:
+#         return ScalarUncertaintyItem("LeptonVeto", 0.00)
+#     return ScalarUncertaintyItem("LeptonVeto", 0.002)
+
+def getLeptonVetoUncertainty():
+     return ScalarUncertaintyItem("LeptonVeto", 0.01)
 
 def getTauIDUncertainty(isGenuineTau=True):
     if isGenuineTau:
@@ -127,6 +130,9 @@ def getTauIDUncertainty(isGenuineTau=True):
 
 def getLuminosityUncertainty():
     return ScalarUncertaintyItem("lumi", 0.026)
+
+def getProbabilisticBtagUncertainty():
+    return ScalarUncertaintyItem("probBtag", 0.5)
 
 # Note: if majority of sample is genuine taus, set isGenuineTau=true
 def getScalarUncertainties(datasetName, isGenuineTau):

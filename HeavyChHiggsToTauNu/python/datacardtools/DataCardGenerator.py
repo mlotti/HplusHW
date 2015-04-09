@@ -767,7 +767,8 @@ class DataCardGenerator:
                             myFirstValue = c.getLandsProcess()
                         else:
                             if myFirstValue + i != c.getLandsProcess():
-                                print ShellStyles.ShellStyles.ErrorLabel()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
+                                #print ShellStyles.ShellStyles.ErrorLabel()+" cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
+                                print " cannot find LandS process '"+str(myFirstValue+i)+"' in data groups for mass = %d! (need to have consecutive numbers; add group with such landsProcess or check input file)"%m
                                 raise Exception()
                         i += 1
                 else:
