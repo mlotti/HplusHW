@@ -12,7 +12,7 @@ class BaseSelection {
   ~BaseSelection(){}
 
   virtual bool offlineSelection(Event&) = 0;
-  bool onlineSelection(Event&);
+  virtual bool onlineSelection(Event&) = 0;
   bool passedRunRange(Event&, bool);
   double xVariable() { return xvariable;}
   bool passedCtrlTtrigger(Event&);
@@ -24,12 +24,12 @@ class BaseSelection {
   double xvariable;
 
   std::string fdataera;
-  float flumi;
+  //  float flumi;
   int frunMin;
   int frunMax;
-  std::string fsample;
-  std::vector<std::string> fcontrolTriggers;
-  std::vector<std::string> fsignalTriggers;
+  //  std::string fsample;
+  //  std::vector<std::string> fcontrolTriggers;
+  //  std::vector<std::string> fsignalTriggers;
 
   //  std::vector<std::string> tauDiscrs;
 };
@@ -51,9 +51,9 @@ bool BaseSelection::passedCtrlTtrigger(Event& fEvent){
   return fEvent.configurableTriggerDecision();
 }
 
-bool BaseSelection::onlineSelection(Event& fEvent){
-  return fEvent.configurableTriggerDecision2();
-}
+//bool BaseSelection::onlineSelection(Event& fEvent){
+//  return fEvent.configurableTriggerDecision2();
+//}
 
 bool BaseSelection::passedRunRange(Event& fEvent, bool isData){
 

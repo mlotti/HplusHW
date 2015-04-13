@@ -122,8 +122,7 @@ def createSystHistograms(hRate, hSystUp, hSystDown, hNumerator, hDenominator, qu
         if abs(hNumerator.GetBinContent(i)) > 0.00001 and abs(hDenominator.GetBinContent(i)) > 0.00001:
             # Allow ratio to fluctuate also to negative side (it may happen for small numbers of the final shape)
             myRatio = hNumerator.GetBinContent(i) / hDenominator.GetBinContent(i)
-            myRatioSigma = errorPropagationForDivision(hNumerator.GetBinContent(i), hNumerator.GetBinError(i),
-                                                        hDenominator.GetBinContent(i), hDenominator.GetBinError(i))
+            myRatioSigma = errorPropagationForDivision(hNumerator.GetBinContent(i), hNumerator.GetBinError(i), hDenominator.GetBinContent(i), hDenominator.GetBinError(i))
             if myRatioSigma > 1.0:
                 myRatioSigma = 1.0
             #if myRatio < 0.0:

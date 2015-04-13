@@ -13,7 +13,7 @@ class METLegSelection : public BaseSelection {
   bool onlineSelection(Event&);
 
  private:
-
+  bool caloMETSelection(Event&);
 };
 
 METLegSelection::METLegSelection(const ParameterSet& setup){
@@ -57,7 +57,7 @@ bool METLegSelection::offlineSelection(Event& fEvent){
       ++nmuons;
   }
 
-  size_t nelectrons = 1;//0;                                                                                                                           
+  size_t nelectrons = 0;                                                                                                                           
   /*                                                                                                                                                     
   for(Electron electron: fEvent.electrons()) {                                                                                                         
     if(electron.pt() > 15 && std::abs(electron.eta()) < 2.4)                                                                                           
@@ -66,10 +66,23 @@ bool METLegSelection::offlineSelection(Event& fEvent){
   */
   bool selected = false;
   if(ntaus > 0 && njets > 2 && nmuons == 0 && nelectrons == 0) selected = true;
+  //  std::cout << "check METLegSelection " << ntaus << " " << njets << " " << nmuons << " "<< nelectrons << std::endl;
   return selected;
 }
 bool METLegSelection::onlineSelection(Event& fEvent){
-  return true;
+  if(fEvent.configurableTrigger2IsEmpty()) return caloMETSelection(fEvent);
+  bool hltdecision = fEvent.configurableTriggerDecision2();
+  double L1METcut  = 40;
+  double l1MET = fEvent.L1met().et();
+  return l1MET > L1METcut && hltdecision;
+}
+
+bool METLegSelection::caloMETSelection(Event& fEvent){
+  double L1METcut  = 40;
+  double HLTMETcut = 70;
+  double l1MET = fEvent.L1met().et();
+  double caloMET = fEvent.calomet().et();
+  return l1MET > L1METcut && caloMET > HLTMETcut;
 }
 
 #endif

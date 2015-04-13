@@ -1215,16 +1215,17 @@ class RootHistoWithUncertainties:
             myStatus &= abs(th1Minus.GetBinContent(0)) < 0.00001
             if not myStatus:
                 raise Exception("addShapeUncertaintyFromVariation(): result could be ambiguous, because under/overflow bins have already been moved to visible bins")
-
-        self._checkConsistency(name, th1Plus)
-        self._checkConsistency(name, th1Minus)
+        plusClone = aux.Clone(th1Plus)
+        minusClone = aux.Clone(th1Minus)
+        self._checkConsistency(name, plusClone)
+        self._checkConsistency(name, minusClone)
         # Subtract nominal to get absolute uncertainty (except for source histograms)
         if name in self._shapeUncertainties.keys():
             raise Exception("Uncertainty '%s' has already been added!"%name)
-        th1Plus.Add(self._rootHisto, -1.0)
-        th1Minus.Add(self._rootHisto, -1.0)
+        plusClone.Add(self._rootHisto, -1.0)
+        minusClone.Add(self._rootHisto, -1.0)
         # Store
-        self._shapeUncertainties[name] = (aux.Clone(th1Plus), aux.Clone(th1Minus))
+        self._shapeUncertainties[name] = (plusClone, minusClone)
 
     ## Remove superfluous shape variation uncertainties
     #
@@ -2664,14 +2665,6 @@ class Dataset:
         else:
             (histos, realName) = self.getRootObjects(name, **kwargs)
             if len(histos) == 1:
-                # Check if object is indeed a histogram or a directory (usecase: splitted phase space histograms)
-                if isinstance(histos[0], ROOT.TDirectoryFile):
-                    (path, filename) = os.path.split(name)
-                    newName = ""
-                    if len(path) > 0:
-                        newName = "%s/"%path
-                    newName += "%s/%sInclusive"%(filename,filename)
-                    (histos, realName) = self.getRootObjects(newName, **kwargs)
                 h = histos[0]
             else:
                 h = histos[0]
@@ -4018,10 +4011,11 @@ class DatasetManagerCreator:
 
         # First check that if some of these is not given, if there is
         # exactly one it available, use that.
-        # As optimizationMode and systematicVariation are optional, they are not considered here
         for arg, attr in [("analysisName", "getAnalyses"),
                           ("searchMode", "getSearchModes"),
-                          ("dataEra", "getMCDataEras")]:
+                          ("dataEra", "getMCDataEras"),
+                          ("optimizationMode", "getOptimizationModes"),
+                          ("systematicVariation", "getSystematicVariations")]:
             lst = getattr(self, attr)()
             if (arg not in _args or _args[arg] is None) and len(lst) == 1:
                 _args[arg] = lst[0]
