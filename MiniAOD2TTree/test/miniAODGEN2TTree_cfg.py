@@ -10,10 +10,11 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #        'file:miniAOD-prod_PAT_TT_RECO_721_11112014.root'
-	'file:miniAOD-prod_PAT_TT_RECO_740p1_02122014.root'
+#	'file:miniAOD-prod_PAT_TT_RECO_740p1_02122014.root'
 #	'file:miniAOD-prod_PAT_Hp200_RECO_740p1_09122014.root'
 #	'file:miniAOD-prod_PAT_SingleMu_Run2012D_v1_RECO.root'
 #	'file:PYTHIA6_Tauola_TTbar_H160_taunu_13TeV_cff_py_GEN.root'
+       '/store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00D3EAF1-3174-E411-A5B2-0025904B144E.root'
     )
 )
 
@@ -124,9 +125,15 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("Jets"),       
             src = cms.InputTag("slimmedJets"),      
             discriminators = cms.vstring(
-		"secondaryVertex",
-		"trackCountingHighPurBJetTags",
-		"trackCountingHighEffBJetTags"
+		"jetBProbabilityBJetTags",
+		"jetProbabilityBJetTags", 
+		"trackCountingHighPurBJetTags", 
+		"trackCountingHighEffBJetTags", 
+		"simpleSecondaryVertexHighEffBJetTags",
+		"simpleSecondaryVertexHighPurBJetTags", 
+		"combinedSecondaryVertexBJetTags",
+		"combinedInclusiveSecondaryVertexBJetTags",
+		"combinedInclusiveSecondaryVertexV2BJetTags",
             ),
 	    userFloats = cms.vstring(
 		"pileupJetId:fullDiscriminant"
