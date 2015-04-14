@@ -1,5 +1,5 @@
-#ifndef BaseDumper_h
-#define BaseDumper_h
+#ifndef GenMETDumper_h
+#define GenMETDumper_h
 
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -9,41 +9,33 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Common/interface/Ptr.h"
+#include "DataFormats/METReco/interface/GenMET.h"
 
 #include <string>
 #include <vector>
 
 #include "TTree.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
-class BaseDumper {
+class GenMETDumper {
     public:
-	BaseDumper();
-	BaseDumper(std::vector<edm::ParameterSet>);
-	~BaseDumper();
+	GenMETDumper(std::vector<edm::ParameterSet>);
+	~GenMETDumper();
 
 	void book(TTree*);
 	bool fill(edm::Event&, const edm::EventSetup&);
 	void reset();
 
-    protected:
+    private:
 	bool filter();
         bool useFilter;
 	bool booked;
 
 	std::vector<edm::ParameterSet> inputCollections;
+	edm::Handle<edm::View<reco::GenMET>> *handle;
 
-        std::vector<double> *pt;
-        std::vector<double> *eta;            
-        std::vector<double> *phi;
-        std::vector<double> *e;
-	std::vector<double> *et;
+        double GenMET;
+        double GenMET_phi;
 
-//	std::vector<reco::Candidate::LorentzVector> *p4;
-	std::vector<short> *pdgId;
-
-	int nDiscriminators;
-	std::vector<bool> *discriminators;
 };
 #endif

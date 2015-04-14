@@ -117,7 +117,7 @@ class Dataset:
     def __init__(self, name, files, dataVersion, lumiFile):
         self._name = name
         self._files = files
-        self._dataVersion = DataVersion(dataVersion)
+        self._dataVersion = DataVersion("MC")#dataVersion)
         self._lumiFile = lumiFile
 
     def getName(self):
@@ -159,7 +159,7 @@ class Process:
             self.addDataset(name)
 
     def addDatasetsFromMulticrab(self, directory, *args, **kwargs):
-        dataset._optionDefaults["input"] = "miniaod2tree_*.root"
+        dataset._optionDefaults["input"] = "miniaod2tree*.root"
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
         dsets = dsetMgrCreator.getDatasetPrecursors()
         dsetMgrCreator.close()
@@ -257,9 +257,11 @@ class Process:
 
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())
+
             os.makedirs(resDir)
 
             tchain = ROOT.TChain("Events")
+
             for f in dset.getFileNames():
                 tchain.Add(f)
             tchain.SetCacheLearnEntries(100);
@@ -284,6 +286,7 @@ class Process:
             readCallsStart = ROOT.TFile.GetFileReadCalls()
             timeStart = time.time()
             clockStart = time.clock()
+
             if self._maxEvents > 0:
                 tchain.SetCacheEntryRange(0, self._maxEvents)
                 tchain.Process(tselector, "", self._maxEvents)

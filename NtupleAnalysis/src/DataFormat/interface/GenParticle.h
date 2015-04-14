@@ -27,9 +27,17 @@ public:
 
 class GenParticle: public GenParticleGenerated<GenParticleCollection> {
 public:
-  GenParticle() {}
+ GenParticle() {}
   GenParticle(const GenParticleCollection* coll, size_t index): GenParticleGenerated(coll, index) {}
   ~GenParticle() {}
+
+  short mother() const { return fCollection->fMother->value()[index()]; }
+  short status() const { return fCollection->fStatus->value()[index()]; }
+  short tauProng() const { return fCollection->fTauProng->value()[index()]; }
+  short genIndex() const { return fCollection->fGenIndex->value()[index()]; }
+  double tauSpinEffectsW() const { return fCollection->fTauSpinEffectsW->value()[index()]; }
+  double tauSpinEffectsHpm() const { return fCollection->fTauSpinEffectsHpm->value()[index()]; }
+  short associatedWithHpm() const { return fCollection->fAssociatedWithHpm->value()[index()]; }
 };
 
 inline

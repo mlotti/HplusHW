@@ -257,7 +257,8 @@ def _getTaskDirectories_crab2(filename):
     return sections
 
 def _getTaskDirectories_crab3(directory):
-    dirs = glob.glob(os.path.join(directory, "crab_*"))
+#    dirs = glob.glob(os.path.join(directory, "crab_*"))
+    dirs = glob.glob(os.path.join(directory, "*")) #fixme
     dirs = filter(lambda d: os.path.isdir(d), dirs)
     return dirs
 
