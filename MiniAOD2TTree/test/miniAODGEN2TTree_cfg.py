@@ -32,11 +32,12 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerResults = cms.InputTag("TriggerResults::HLT"),
 	TriggerBits = cms.vstring(
 	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v1",
+	    "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v11",
 #	    "HLT_IsoMu24_IterTrk02_v1"
         ),
 	L1Extra = cms.InputTag("l1extraParticles::MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
-	filter = cms.untracked.bool(False)
+	filter = cms.untracked.bool(True)
     ),
     Taus = cms.VPSet(
         cms.PSet(
