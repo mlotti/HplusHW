@@ -43,7 +43,7 @@ validCMSSWversions = ["CMSSW_6_1_1"]
 ## Command line options for creating Combine workspace
 workspacePattern = "combineWorkspaceM%s.root"
 workspaceOptionsBrLimitTemplate = "text2workspace.py %s -P HiggsAnalysis.CombinedLimit.ChargedHiggs:brChargedHiggs -o %s"%("%s",workspacePattern)
-workspaceOptionsSigmaBrLimit    = "text2workspace.py %s -o combineWorkspaceM%s.root"%(workspacePattern, "%s")
+workspaceOptionsSigmaBrLimit    = "text2workspace.py %s -o %s"%("%s",workspacePattern%"%s")
 
 ## Command line options for running Combine
 #asymptoticLimit = "combine -M Asymptotic --picky"

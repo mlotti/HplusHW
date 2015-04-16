@@ -515,7 +515,11 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
                 massInput = opts.masspoints[:]
                 postFixInput = myPostFixAllMasses
             # Result does not exist, let's calculate it
-            brContainer.produceScaledCards(mHp, tanbeta)
+            if opts.gridRunAllMassesInOneJob:
+                for m in opts.masspoints:
+                    brContainer.produceScaledCards(m, tanbeta)
+            else:
+                brContainer.produceScaledCards(mHp, tanbeta)
             # Run Combine
             if "CMSSW_BASE" in os.environ or opts.creategridjobs:
                 resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=massInput,
