@@ -283,7 +283,7 @@ class BrContainer:
         if not myFoundMassStatus:
             print "Warning: Could not find mass value %s in '%s'!"%(mHp, myRootFilename)
         # Found branching and sigma, store them
-        tblabel = "%04.1f"%tanbeta
+        tblabel = "%s_%04.1f"%(mHp, tanbeta)
         self._results[tblabel] = {}
         if not myTanBetaValueFoundStatus or not myFoundMassStatus:
             for brkey in self._brkeys.keys():
@@ -308,11 +308,11 @@ class BrContainer:
         print s
 
     def produceScaledCards(self, mHp, tanbeta):
-        if self.resultExists(tanbeta):
+        if self.resultExists(mHp, tanbeta):
             return
         # Obtain branching and sigma from MSSM model database
         self._readFromDatabase(mHp, tanbeta)
-        if self._results["%04.1f"%(float(tanbeta))]["sigmaTheory"] == None:
+        if self._results["%s_%04.1f"%(mHp,float(tanbeta))]["sigmaTheory"] == None:
             return
         
         #print "    Scaled '%s/%s' signal in datacards by branching %f (mHp=%s, tanbeta=%.1f)"%(mySignalScaleFactor, mHp, tanbeta)
@@ -321,7 +321,7 @@ class BrContainer:
         if not os.path.exists(myDbInputName):
             raise Exception("Error: Cannot find file '%s'!"%myDbInputName)
         # Scale datacards
-        myResult = self.getResult(tanbeta)
+        myResult = self.getResult(mHp, tanbeta)
         for fskey in self._decayModeMatrix.keys():
             print "    . final state %10s:"%fskey
             myOriginalRates = []
@@ -415,54 +415,54 @@ class BrContainer:
             else:
                 print "      . no changes to datacard needed"
 
-    def resultExists(self, tanbeta):
+    def resultExists(self, mHp, tanbeta):
         a = ""
         if isinstance(tanbeta, str):
-            a = "%04.1f"%(float(tanbeta))
+            a = "%s_%04.1f"%(mHp,float(tanbeta))
         else:
-            a = "%04.1f"%tanbeta
+            a = "%s_%04.1f"%(mHp,tanbeta)
         if len(self._results) == 0:
             return False
         return a in self._results.keys()
     
-    def setCombineResult(self, tanbeta, result):
+    def setCombineResult(self, mHp, tanbeta, result):
         a = ""
         if isinstance(tanbeta, str):
-            a = "%04.1f"%(float(tanbeta))
+            a = "%s_%04.1f"%(mHp,float(tanbeta))
         else:
-            a = "%04.1f"%tanbeta
+            a = "%s_%04.1f"%(mHp,tanbeta)
         if len(self._results) == 0:
             return None
         self._results[a]["combineResult"] = result
     
-    def getResult(self, tanbeta):
+    def getResult(self, mHp, tanbeta):
         a = ""
         if isinstance(tanbeta, str):
-            a = "%04.1f"%(float(tanbeta))
+            a = "%s_%04.1f"%(mHp,float(tanbeta))
         else:
-            a = "%04.1f"%tanbeta
+            a = "%s_%04.1f"%(mHp,tanbeta)
         return self._results[a]
 
-    def getCombineResultByKey(self, tanbeta, resultKey):
-        result = self.getResult(tanbeta)
+    def getCombineResultByKey(self, mHp, tanbeta, resultKey):
+        result = self.getResult(mHp, tanbeta)
         return getattr(result["combineResult"], resultKey)
       
-    def getPassedStatus(self, tanbeta, resultKey):
-        if self.getFailedStatus(tanbeta):
+    def getPassedStatus(self, mHp, tanbeta, resultKey):
+        if self.getFailedStatus(mHp, tanbeta):
             return True
-        a = self.getResult(tanbeta)["sigmaTheory"]
-        b = self.getCombineResultByKey(tanbeta, resultKey)
+        a = self.getResult(mHp, tanbeta)["sigmaTheory"]
+        b = self.getCombineResultByKey(mHp, tanbeta, resultKey)
         return b > a
       
     ## Combine failed or not
-    def getFailedStatus(self, tanbeta):
-        result = self.getResult(tanbeta)
+    def getFailedStatus(self, mHp, tanbeta):
+        result = self.getResult(mHp, tanbeta)
         return result["combineResult"] == None
 
 
 def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, scen):
     reuseStatus = False
-    if not brContainer.resultExists(tanbeta):
+    if not brContainer.resultExists(mHp, tanbeta):
         # Produce cards
         myPostFix = "lhcasy_%s_mHp%s_tanbetascan%.1f"%(scen,mHp,tanbeta)
         myPostFixAllMasses = "lhcasy_%s_mHpAll_tanbetascan%.1f"%(scen,tanbeta)
@@ -504,7 +504,7 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
                             i += 1
                         myResultFound = True
                         brContainer._readFromDatabase(mHp, tanbeta)
-                        brContainer.setCombineResult(tanbeta, myResult)
+                        brContainer.setCombineResult(mHp, tanbeta, myResult)
                     f.Close()
         if not myResultFound:
             massInput = [mHp]
@@ -531,32 +531,32 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
                 if resultContainer != None and len(resultContainer.results) > 0:
                     result = resultContainer.results[0]
                     # Store result
-                    brContainer.setCombineResult(tanbeta, result)
+                    brContainer.setCombineResult(mHp, tanbeta, result)
             else:
                 print "... Skipping combine (assuming debug is intended; to run combine, do first cmsenv) ..."
     else:
         reuseStatus = True
-    #if brContainer.resultExists(tanbeta):
+    #if brContainer.resultExists(mHp, tanbeta):
         #myContainer = brContainer
     #else:
         #raise Exception("No datacards present")
     
     # Print output
     s = "- mHp=%s, tanbeta=%.1f, sigmaTheory="%(mHp, tanbeta)
-    if brContainer.getResult(tanbeta)["sigmaTheory"] == None:
+    if brContainer.getResult(mHp, tanbeta)["sigmaTheory"] == None:
         s += "None"
     else:
-        s += "%.3f"%brContainer.getResult(tanbeta)["sigmaTheory"]
-    if brContainer.getFailedStatus(tanbeta):
+        s += "%.3f"%brContainer.getResult(mHp, tanbeta)["sigmaTheory"]
+    if brContainer.getFailedStatus(mHp, tanbeta):
         s += " sigmaCombine (%s)=failed"%resultKey
     else:
-        s += " sigmaCombine (%s)=%.3f, passed=%d"%(resultKey, brContainer.getCombineResultByKey(tanbeta, resultKey), brContainer.getPassedStatus(tanbeta, resultKey))
+        s += " sigmaCombine (%s)=%.3f, passed=%d"%(resultKey, brContainer.getCombineResultByKey(mHp, tanbeta, resultKey), brContainer.getPassedStatus(mHp, tanbeta, resultKey))
     if not reuseStatus:
         print s
     # return limit from combine
-    if brContainer.getFailedStatus(tanbeta):
+    if brContainer.getFailedStatus(mHp, tanbeta):
         return None
-    return brContainer.getPassedStatus(tanbeta, resultKey)
+    return brContainer.getPassedStatus(mHp, tanbeta, resultKey)
 
 def findMiddlePoint(tanbetaMin, tanbetaMax):
     a = (tanbetaMax + tanbetaMin) / 2.0
@@ -628,8 +628,9 @@ def readResults(opts, brContainer, m, myKey, scen):
                     s = lines[i].replace("  tan beta=","").replace(" xsecTheor=","").replace(" pb, limit(%s)="%myKey,",").replace(" pb, passed=",",")
                     mySplit = s.split(",")
                     if len(mySplit) > 1 and s[0] != "#" and mySplit[2] != "failed" and mySplit[1] != "None":
-                        tanbetakey = "%04.1f"%(float(mySplit[0]))
-                        if not brContainer.resultExists(tanbetakey):
+                        myTanBeta = mySplit[0]
+                        tanbetakey = "%s_%04.1f"%(float(myTanBeta))
+                        if not brContainer.resultExists(m, myTanBeta):
                             brContainer._results[tanbetakey] = {}
                             if mySplit[1] == "None":
 				brContainer._results[tanbetakey]["sigmaTheory"] = None
@@ -637,16 +638,16 @@ def readResults(opts, brContainer, m, myKey, scen):
 				brContainer._results[tanbetakey]["sigmaTheory"] = float(mySplit[1])
                             result = commonLimitTools.Result(0)
                             setattr(result, myKey, float(mySplit[2]))
-                            brContainer.setCombineResult(tanbetakey, result)
+                            brContainer.setCombineResult(mHp, myTanBeta, result)
                         else:
                             # Add result key
                             setattr(brContainer._results[tanbetakey]["combineResult"], myKey, float(mySplit[2]))
 
-def linearCrossOverOfTanBeta(container, tblow, tbhigh, resultKey):
-    limitLow = getattr(container.getResult(tblow)["combineResult"], resultKey)
-    limitHigh = getattr(container.getResult(tbhigh)["combineResult"], resultKey)
-    theoryLow = container.getResult(tblow)["sigmaTheory"]
-    theoryHigh = container.getResult(tbhigh)["sigmaTheory"]
+def linearCrossOverOfTanBeta(mHp, container, tblow, tbhigh, resultKey):
+    limitLow = getattr(container.getResult(mHp, tblow)["combineResult"], resultKey)
+    limitHigh = getattr(container.getResult(mHp, tbhigh)["combineResult"], resultKey)
+    theoryLow = container.getResult(mHp, tblow)["sigmaTheory"]
+    theoryHigh = container.getResult(mHp, tbhigh)["sigmaTheory"]
     # subtract the theory from the limit (assume linear behavior)
     if theoryLow == None or theoryHigh == None:
         return -1.0
@@ -694,26 +695,29 @@ def main(opts, brContainer, m, scen, plotContainers):
     for myResultKey in resultKeys:
         outtxt += "\nTan beta limit scan (%s) for m=%s and key: %s\n"%(scen, m,myResultKey)
         for k in myTanBetaKeys:
-            theory = brContainer.getResult(k)["sigmaTheory"]
-            combineResult = ""
-            passedStatus = ""
-            if brContainer.getFailedStatus(k):
-                combineResult = "failed"
-                passedStatus = "n.a."
-            else:
-                #print brContainer.getResult(k), myResultKey
-                if hasattr(brContainer.getResult(k)["combineResult"], myResultKey):
-                    myValue = getattr(brContainer.getResult(k)["combineResult"], myResultKey)
-                    if myValue != None:
-                        combineResult = "%f pb"%myValue
-                        passedStatus = "%d"%brContainer.getPassedStatus(k, myResultKey)
-                    else:
-                        combineResult = "n.a."
-                        passedStatus = "n.a."
-            if theory == None:
-                outtxt += "  tan beta=%s, xsecTheor=None, limit(%s)=%s, passed=%s\n"%(k, myResultKey, combineResult, passedStatus)
-            else:
-                outtxt += "  tan beta=%s, xsecTheor=%f pb, limit(%s)=%s, passed=%s\n"%(k, theory, myResultKey, combineResult, passedStatus)
+            mySplit = k.split("_")
+            if m == mySplit[0]:
+                myTanBeta = mySplit[1]
+                theory = brContainer.getResult(m, myTanBeta)["sigmaTheory"]
+                combineResult = ""
+                passedStatus = ""
+                if brContainer.getFailedStatus(m, myTanBeta):
+                    combineResult = "failed"
+                    passedStatus = "n.a."
+                else:
+                    #print brContainer.getResult(m, myTanBeta), myResultKey
+                    if hasattr(brContainer.getResult(m, myTanBeta)["combineResult"], myResultKey):
+                        myValue = getattr(brContainer.getResult(m, myTanBeta)["combineResult"], myResultKey)
+                        if myValue != None:
+                            combineResult = "%f pb"%myValue
+                            passedStatus = "%d"%brContainer.getPassedStatus(m, myTanBeta, myResultKey)
+                        else:
+                            combineResult = "n.a."
+                            passedStatus = "n.a."
+                if theory == None:
+                    outtxt += "  tan beta=%s, xsecTheor=None, limit(%s)=%s, passed=%s\n"%(myTanBeta, myResultKey, combineResult, passedStatus)
+                else:
+                    outtxt += "  tan beta=%s, xsecTheor=%f pb, limit(%s)=%s, passed=%s\n"%(myTanBeta, theory, myResultKey, combineResult, passedStatus)
     
     # Find limits
     outtxt += "\nAllowed tan beta ranges (%s) for m=%s (linear interpolation used)\n"%(scen, m)
@@ -725,25 +729,28 @@ def main(opts, brContainer, m, scen, plotContainers):
         myPreviousStatus = None
         myPreviousValidTanBetaKey = None
         for i in range(0, len(myTanBetaKeys)):
-            if not brContainer.getFailedStatus(myTanBetaKeys[i]):
-                if hasattr(brContainer.getResult(myTanBetaKeys[i])["combineResult"], myResultKey) and getattr(brContainer.getResult(myTanBetaKeys[i])["combineResult"], myResultKey) != None:
-                    myCurrentStatus = brContainer.getPassedStatus(myTanBetaKeys[i], myResultKey)
-                    if myPreviousStatus != None:
-                        if myPreviousStatus != myCurrentStatus:
-                            # Cross-over point, check direction
-                            myTbvalue = linearCrossOverOfTanBeta(brContainer, myTanBetaKeys[myPreviousValidTanBetaKey], myTanBetaKeys[i], myResultKey)
-                            combineValue = getattr(brContainer.getResult(myTanBetaKeys[i])["combineResult"], myResultKey)
-                            if combineValue < 2.0:
-                                if not myPreviousStatus:
-                                    myLowTanBetaLimit = myTbvalue
-                                    plotContainers[scen].addLowResult(m, myResultKey, myTbvalue)
-                                    lowFound = True
-                                else:
-                                    myHighTanBetaLimit = myTbvalue
-                                    plotContainers[scen].addHighResult(m, myResultKey, myTbvalue)
-                                    highFound = True
-                    myPreviousStatus = myCurrentStatus
-                    myPreviousValidTanBetaKey = i
+            mySplit = myTanBetaKeys[i].split("_")
+            if m == mySplit[0]:
+                myTanBeta = mySplit[1]
+                if not brContainer.getFailedStatus(m, myTanBeta):
+                    if hasattr(brContainer.getResult(m, myTanBeta)["combineResult"], myResultKey) and getattr(brContainer.getResult(m, myTanBeta)["combineResult"], myResultKey) != None:
+                        myCurrentStatus = brContainer.getPassedStatus(m, myTanBeta, myResultKey)
+                        if myPreviousStatus != None:
+                            if myPreviousStatus != myCurrentStatus:
+                                # Cross-over point, check direction
+                                myTbvalue = linearCrossOverOfTanBeta(m, brContainer, myTanBetaKeys[myPreviousValidTanBetaKey], myTanBeta, myResultKey)
+                                combineValue = getattr(brContainer.getResult(m, myTanBeta)["combineResult"], myResultKey)
+                                if combineValue < 2.0:
+                                    if not myPreviousStatus:
+                                        myLowTanBetaLimit = myTbvalue
+                                        plotContainers[scen].addLowResult(m, myResultKey, myTbvalue)
+                                        lowFound = True
+                                    else:
+                                        myHighTanBetaLimit = myTbvalue
+                                        plotContainers[scen].addHighResult(m, myResultKey, myTbvalue)
+                                        highFound = True
+                        myPreviousStatus = myCurrentStatus
+                        myPreviousValidTanBetaKey = i
         outtxt +=  "  key='%s' allowed range: %.2f - %.2f\n"%(myResultKey, myLowTanBetaLimit, myHighTanBetaLimit)
         if not lowFound:
             plotContainers[scen].addLowResult(m, myResultKey, None)
