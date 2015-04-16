@@ -889,7 +889,8 @@ if __name__ == "__main__":
     parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
     parser.add_option("-t", "--tanbeta", dest="tanbeta", action="append", default=[], help="tanbeta values (will scan only these)")
     parser.add_option("--evalUuncert", dest="evaluateUncertainties", action="store_true", default=False, help="Make plots of theoretical uncertainties")
-    parser.add_option("--creategridjobs", dest="creategridjobs", action="store_true", default=False, help="Create crab task dirs for multicrab and running on grid")
+    parser.add_option("--creategridjobs", dest="creategridjobs", action="store_true", default=False, help="Create crab task dirs for running on grid")
+    parser.add_option("--gridmassive", dest="gridRunAllMassesInOneJob", action="store_true", default=False, help="Crab jobs run all masses in one job (default=1 job / mass)")
     opts = commonLimitTools.parseOptionParser(parser)
     if opts.rmin == None:
         opts.rmin = "0"
@@ -897,10 +898,6 @@ if __name__ == "__main__":
         opts.rmax = "4" # To facilitate the search for different tan beta values
     
     if opts.creategridjobs:
-        # Initialize multicrab
-        f = open("multicrab.cfg","w")
-        f.write("[MULTICRAB]\ncfg = crab_gridjob.cfg\n")
-        f.close()
         print "*** Start creating individual crab job directories for grid submission ... ***"
 
     # MSSM scenario settings
