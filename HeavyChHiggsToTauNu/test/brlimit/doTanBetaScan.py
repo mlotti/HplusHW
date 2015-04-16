@@ -510,9 +510,9 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
             massInput = [mHp]
             postFixInput = myPostFix
             if opts.gridRunAllMassesInOneJob:
-                if mHp != opts.massPoints[0]:
+                if mHp != opts.masspoints[0]:
                     return None
-                massInput = opts.massPoints[:]
+                massInput = opts.masspoints[:]
                 postFixInput = myPostFixAllMasses
             # Result does not exist, let's calculate it
             brContainer.produceScaledCards(mHp, tanbeta)
