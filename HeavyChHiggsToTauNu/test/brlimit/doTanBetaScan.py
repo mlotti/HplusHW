@@ -676,9 +676,23 @@ def main(opts, brContainer, m, scen, plotContainers):
             readResults(opts, brContainer, m, myKey, scen)
         else:
             # Force calculation of few first points
+            myTanBetaValues = []
             if len(opts.tanbeta) > 0:
                 for tb in opts.tanbeta:
-                    getCombineResultPassedStatus(opts, brContainer, m, float(tb), myKey, scen)
+                    if not float(tb) in myTanBetaValues:
+                        myTanBetaValues.append(float(tb))
+            if len(opts.tanbetarangemin) > 0 and len(opts.tanbetarangemax) > 0:
+                tb = float(opts.tanbetarangemin[0])
+                while tb < float(opts.tanbetarangemax[0]) and tb <= _maxTanBeta:
+                    myTanBetaValues.append(tb)
+                    if tb < 10:
+                        tb += 0.1
+                    else:
+                        tb += 1
+            if len(myTanBetaValues) > 0:
+                print "Considering tan beta values:", myTanBetaValues
+                for tb in myTanBetaValues:
+                    getCombineResultPassedStatus(opts, brContainer, m, tb, myKey, scen)
             else:
                 if float(m) > 179:
                     getCombineResultPassedStatus(opts, brContainer, m, 1.1, myKey, scen)
@@ -913,6 +927,8 @@ if __name__ == "__main__":
     parser.add_option("--analyseOutput", dest="analyseOutput", action="store_true", default=False, help="Read only output and print summary")
     parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
     parser.add_option("-t", "--tanbeta", dest="tanbeta", action="append", default=[], help="tanbeta values (will scan only these)")
+    parser.add_option("--tanbetarangemin", dest="tanbetarangemin", action="append", default=[], help="tanbeta values minimum range")
+    parser.add_option("--tanbetarangemax", dest="tanbetarangemax", action="append", default=[], help="tanbeta values maximum range")
     parser.add_option("--evalUuncert", dest="evaluateUncertainties", action="store_true", default=False, help="Make plots of theoretical uncertainties")
     parser.add_option("--creategridjobs", dest="creategridjobs", action="store_true", default=False, help="Create crab task dirs for running on grid")
     parser.add_option("--gridmassive", dest="gridRunAllMassesInOneJob", action="store_true", default=False, help="Crab jobs run all masses in one job (default=1 job / mass)")
@@ -1006,7 +1022,8 @@ if __name__ == "__main__":
         for m in myMassPoints:
             for scen in myScenarios:
                 if opts.gridRunAllMassesInOneJob:
-                    print scen
+                    if m == massPoints[0]:
+                        print scen
                 else:
                     print scen,m
                 if not scen in myPlots.keys():

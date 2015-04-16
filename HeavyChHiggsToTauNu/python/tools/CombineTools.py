@@ -172,9 +172,10 @@ def produceLHCAsymptotic(opts, directory,
                 f.close()
                 for line in myLines:
                     if line.startswith("combine "):
-                        command.append("./%s"%line)
+                        command.append("./%s"%line.replace("\n",""))
             command.append("")
             command.append("# Collect output")
+            command.append("ls -la")
             command.append("tar cfz output.tgz higgsCombine*.root")
             command.append("")
             command.append("# Do job report does not work")
@@ -195,10 +196,11 @@ def produceLHCAsymptotic(opts, directory,
                 f.close()
                 for line in myLines:
                     if line.startswith("combine "):
-                        command.append("./%s"%line)
+                        command.append("./%s"%line.replace("\n",""))
                 command.append("")
                 command.append("# Collect output")
                 command.append("tar cfz output.tgz higgsCombine*.root")
+                command.append("ls -la")
                 command.append("")
                 command.append("# Do job report does not work")
                 command.append("#cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml -p pset.py")
