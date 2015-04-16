@@ -1022,7 +1022,7 @@ if __name__ == "__main__":
         for m in myMassPoints:
             for scen in myScenarios:
                 if opts.gridRunAllMassesInOneJob:
-                    if m == mymassPoints[0]:
+                    if m == myMassPoints[0]:
                         print scen
                 else:
                     print scen,m
