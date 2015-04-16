@@ -167,7 +167,7 @@ def produceLHCAsymptotic(opts, directory,
             # Create script for running the grid job
             command = ["#!/bin/sh", "", "# Run combine"]
             for m in massPoints:
-                f = open(myScripts[m])
+                f = open(os.path.join(mcc.dirname, myScripts[m]))
                 myLines = f.readlines()
                 f.close()
                 for line in myLines:
@@ -190,7 +190,7 @@ def produceLHCAsymptotic(opts, directory,
                 os.system("mv %s %s/."%(workspacePattern%m, mcc.dirname))
                 # Create script for running the grid job
                 command = ["#!/bin/sh", "", "# Run combine"]
-                f = open(myScripts[m])
+                f = open(os.path.join(mcc.dirname, myScripts[m]))
                 myLines = f.readlines()
                 f.close()
                 for line in myLines:
