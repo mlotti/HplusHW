@@ -540,6 +540,8 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
         #myContainer = brContainer
     #else:
         #raise Exception("No datacards present")
+    if opts.creategridjobs:
+        return None
     
     # Print output
     s = "- mHp=%s, tanbeta=%.1f, sigmaTheory="%(mHp, tanbeta)
@@ -1003,7 +1005,10 @@ if __name__ == "__main__":
         opts.masspoints = myMassPoints[:]
         for m in myMassPoints:
             for scen in myScenarios:
-                print scen,m
+                if opts.gridRunAllMassesInOneJob:
+                    print scen
+                else:
+                    print scen,m
                 if not scen in myPlots.keys():
                     myPlots[scen] = TanBetaResultContainer(scen, myMassPoints)
                 brContainer = BrContainer(myDecayModeMatrix, scen, myMassPoints)

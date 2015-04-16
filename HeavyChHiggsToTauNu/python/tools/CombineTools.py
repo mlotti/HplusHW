@@ -163,11 +163,13 @@ def produceLHCAsymptotic(opts, directory,
             mcc.writeCrabCfg("remoteglidein", {"GRID": ["SE_white_list = T2_FI_HIP", "maxtarballsize = 50", "virtual_organization = cms"],
                                                 "USER": ["script_exe = runGridJob", "additional_input_files = %s, combine"%(", ".join(map(str, myWorkspaces)))]},
                             ["output.tgz"])
-            os.system("cp %s/crab.cfg ./crab_gridjob.cfg"%(mcc.dirname))
+            os.system("mv %s %s/."%(" ".join(map(str,myWorkspaces)), mcc.dirname))
             # Create script for running the grid job
             command = ["#!/bin/sh", "", "# Run combine"]
             for m in massPoints:
-                myLines = myScripts[m].split("\n")
+                f = open(myScripts[m])
+                myLines = f.readlines()
+                f.close()
                 for line in myLines:
                     if line.startswith("combine "):
                         command.append("./%s"%line)
@@ -178,16 +180,20 @@ def produceLHCAsymptotic(opts, directory,
             command.append("# Do job report does not work")
             command.append("#cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml -p pset.py")
             aux.writeScript(os.path.join(mcc.dirname, "runGridJob"), "\n".join(command)+"\n")
+            
         else:
             for m in massPoints:
                 # Create crab task config
                 mcc.writeCrabCfg("remoteglidein", {"GRID": ["SE_white_list = T2_FI_HIP", "maxtarballsize = 50", "virtual_organization = cms"],
                                                     "USER": ["script_exe = runGridJobM%s"%m, "additional_input_files = %s, combine"%(workspacePattern%m)]},
                                 ["output.tgz"])
-                os.system("cp %s/crab.cfg ./crab_gridjob_m%s.cfg"%(mcc.dirname, m))
+                os.system("mv %s %s/."%(workspacePattern%m, mcc.dirname))
                 # Create script for running the grid job
                 command = ["#!/bin/sh", "", "# Run combine"]
-                for line in myScripts[m]:
+                f = open(myScripts[m])
+                myLines = f.readlines()
+                f.close()
+                for line in myLines:
                     if line.startswith("combine "):
                         command.append("./%s"%line)
                 command.append("")
