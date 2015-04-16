@@ -994,11 +994,11 @@ if __name__ == "__main__":
         # Single lepton
         myLabels = ["nB1_mu", "nB2p_mu", "nB1_el", "nB2p_el"]
         for l in myLabels:
-            myCategory = {"Hp_tb": ["HpToSingleLepton_datacard_"+l+"_%s.txt", "HT_M%s_binnedStat_p10_"+l+".root"]}
+            myCategory = {"Hp_tb": ["HpToSingleLepton_datacard_"+l+"_%s.txt", "HpToSingleLepton_HT_M%s_"+l+".root"]}
             myDecayModeMatrix["ljets_%s"%l] = myCategory
         myLabels = ["Control_nB0_mu", "Control_nB1_mu", "Control_nB2p_mu", "Control_nB0_el", "Control_nB1_el", "Control_nB2p_el"]
         for l in myLabels:
-            myCategory = {"Hp_tb": ["HpToSingleLepton_datacard_"+l+".txt", None]}
+            myCategory = {"Hp_tb": ["HpToSingleLepton_datacard_"+l+".txt", "HpToSingleLepton_HT_CR_"+l+".root"]}
             myDecayModeMatrix["ljets_%s"%l] = myCategory
         
         # Purge matrix
