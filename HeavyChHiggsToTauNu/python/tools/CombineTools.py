@@ -43,7 +43,7 @@ validCMSSWversions = ["CMSSW_6_1_1"]
 ## Command line options for creating Combine workspace
 workspacePattern = "combineWorkspaceM%s.root"
 workspaceOptionsBrLimitTemplate = "text2workspace.py %s -P HiggsAnalysis.CombinedLimit.ChargedHiggs:brChargedHiggs -o %s"%("%s",workspacePattern)
-workspaceOptionsSigmaBrLimit    = "text2workspace.py %s -o combineWorkspaceM%s.root"%("%s",workspacePattern)
+workspaceOptionsSigmaBrLimit    = "text2workspace.py %s -o combineWorkspaceM%s.root"%(workspacePattern, "%s")
 
 ## Command line options for running Combine
 #asymptoticLimit = "combine -M Asymptotic --picky"
@@ -157,7 +157,7 @@ def produceLHCAsymptotic(opts, directory,
             print "Creating combine workspace for m=%s"%m
             print workspaceCommand
             os.system(workspaceCommand)
-            myWorkspaces.append("combineWorkspaceM%s.root"%m)
+            myWorkspaces.append(workspacePattern%m)
         if opts.gridRunAllMassesInOneJob:
             # Create crab task config
             mcc.writeCrabCfg("remoteglidein", {"GRID": ["SE_white_list = T2_FI_HIP", "maxtarballsize = 50", "virtual_organization = cms"],
@@ -182,7 +182,7 @@ def produceLHCAsymptotic(opts, directory,
             for m in massPoints:
                 # Create crab task config
                 mcc.writeCrabCfg("remoteglidein", {"GRID": ["SE_white_list = T2_FI_HIP", "maxtarballsize = 50", "virtual_organization = cms"],
-                                                    "USER": ["script_exe = runGridJobM%s"%m, "additional_input_files = combineWorkspaceM%s.root, combine"%(m)]},
+                                                    "USER": ["script_exe = runGridJobM%s"%m, "additional_input_files = %s, combine"%(workspacePattern%m)]},
                                 ["output.tgz"])
                 os.system("cp %s/crab.cfg ./crab_gridjob_m%s.cfg"%(mcc.dirname, m))
                 # Create script for running the grid job

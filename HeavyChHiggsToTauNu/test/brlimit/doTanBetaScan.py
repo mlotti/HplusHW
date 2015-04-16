@@ -662,6 +662,8 @@ def linearCrossOverOfTanBeta(container, tblow, tbhigh, resultKey):
 def main(opts, brContainer, m, scen, plotContainers):
     resultKeys = ["observed",  "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]
     #resultKeys = ["observed","expected"]
+    if opts.gridRunAllMassesInOneJob:
+        resultKeys = ["observed"]
     for myKey in resultKeys:
         if opts.analyseOutput:
             readResults(opts, brContainer, m, myKey, scen)
@@ -669,7 +671,6 @@ def main(opts, brContainer, m, scen, plotContainers):
             # Force calculation of few first points
             if len(opts.tanbeta) > 0:
                 for tb in opts.tanbeta:
-                    print "***"
                     getCombineResultPassedStatus(opts, brContainer, m, float(tb), myKey, scen)
             else:
                 if float(m) > 179:
