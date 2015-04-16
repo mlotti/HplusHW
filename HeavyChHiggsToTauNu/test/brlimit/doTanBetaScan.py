@@ -465,7 +465,7 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
     if not brContainer.resultExists(tanbeta):
         # Produce cards
         myPostFix = "lhcasy_%s_mHp%s_tanbetascan%.1f"%(scen,mHp,tanbeta)
-        myPostFixAllMasses = "lhcasy_%s_mHpAll_tanbetascan%.1f"%(scen,mHp,tanbeta)
+        myPostFixAllMasses = "lhcasy_%s_mHpAll_tanbetascan%.1f"%(scen,tanbeta)
         myList = os.listdir(".")
         myList.sort()
         myResultDir = None
