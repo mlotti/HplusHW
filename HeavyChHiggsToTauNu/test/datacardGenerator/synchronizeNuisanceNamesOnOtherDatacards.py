@@ -371,6 +371,7 @@ def hplusTbToTauMu(myDir, doCorrelation, nobtagcorr):
     myMgr.removeNuisance("theoryUncXS_singletop")
     myMgr.removeNuisance("theoryUncXS_dy")
     myMgr.removeNuisance("theoryUncXS_ttbar")
+
     
     # Replace column names
     myColumnReplaces = {}
@@ -382,6 +383,7 @@ def hplusTbToTauMu(myDir, doCorrelation, nobtagcorr):
     myColumnReplaces["singleTop"] = "CMS_Hptbmt_singleTop"
     myColumnReplaces["di_boson"] = "CMS_Hptbmt_vv"
     myColumnReplaces["Z_tautau"] = "CMS_Hptbmt_Ztt"
+    myColumnReplaces["Z_eemumu"] = "CMS_Hptbmt_Zeemm"
     myColumnReplaces["Z_eemumu"] = "CMS_Hptbmt_Zeemm"
     myMgr.replaceColumnNames(myColumnReplaces)
     myMgr.replaceNuisanceNames(_CommonNuisanceReplaces)
@@ -404,6 +406,10 @@ def hplusTbToTauMu(myDir, doCorrelation, nobtagcorr):
     myNuisanceReplaces["pdf"] = "CMS_ttbar_pdfShape"
     myNuisanceReplaces["match"] = "CMS_ttbar_matchingVariation"
     myNuisanceReplaces["scale"] = "CMS_ttbar_q2" #%suffix
+    myNuisanceReplaces["ttbbmeps"] = "CMS_ttbb_matchingVariation"
+    myNuisanceReplaces["meps"] = "CMS_ttbar_matchingVariation"
+    myNuisanceReplaces["ttbbq2"] = "CMS_ttbb_q2"
+    myNuisanceReplaces["q2"] = "CMS_ttbar_q2"
 
     myMgr.replaceNuisanceNames(myNuisanceReplaces)
 
@@ -488,6 +494,11 @@ def hplusTbToDilepton(myDir, doCorrelation, nobtagcorr):
         myMgr.replaceNuisanceNames(myNuisanceReplaces)
         myMgr.replaceNuisanceNames(_CommonNuisanceReplaces)
 
+        if suffix == "ee":
+            myMgr.removeNuisance("CMS_eff_m")
+        if suffix == "mumu":
+            myMgr.removeNuisance("CMS_eff_e")
+
         myMgr.addNuisance("xsect_tt_8TeV_scale", distribution="lnN", columns=["ttbar","otherttbar"], value="0.9659/1.0253")
         myMgr.addNuisance("xsect_tt_8TeV_pdf_alphaS", distribution="lnN", columns=["ttbar","otherttbar"], value="1.0463")
         myMgr.addNuisance("xsect_singleTop", distribution="lnN", columns=["st"], value="1.069")
@@ -519,10 +530,10 @@ def hplusTbToDilepton(myDir, doCorrelation, nobtagcorr):
 
         #myMgr.addNuisance("btagshapePDF", distribution="lnN", columns=["ttbar","otherttbar"], value="1.050")
 
-        myColumnReplaces = {}
-        for c in myMgr.getColumnNames():
-            myColumnReplaces["%s_%s"%(c,c)] = c
-        myMgr.replaceColumnNames(myColumnReplaces)
+        #myColumnReplaces = {}
+        #for c in myMgr.getColumnNames():
+            #myColumnReplaces["%s_%s"%(c,c)] = c
+        #myMgr.replaceColumnNames(myColumnReplaces)
         
         myNuisanceReplaces = {}
         myNuisanceReplaces["st%s_%s_st%sat"%(suffix,suffix,suffix)] = "st_%s_stat"%suffix
@@ -550,7 +561,7 @@ def hplusTbToDilepton(myDir, doCorrelation, nobtagcorr):
         #myMgr.replaceNuisanceValue("lumi_8TeV", "1.026")
                 
         # Redo stat. uncert. shape histograms
-        myMgr.recreateShapeStatUncert(threshold=0.01)
+        myMgr.recreateShapeStatUncert()
         
 
         myMgr.removeManyNuisances(_removeUncertainties)
@@ -562,10 +573,10 @@ def hplusTBToSingleLepton(myDir, label):
     rootFilePattern = None
     datacardPattern = None
     if label.startswith("Control_"):
-        rootFilePattern = None
+        rootFilePattern = "HpToSingleLepton_HT_CR.root"
         datacardPattern = "HpToSingleLepton_datacard_"+label+".txt"
     else:
-        rootFilePattern = "HT_M%s_binnedStat_p10.root"
+        rootFilePattern = "HpToSingleLepton_HT_M%s.root"
         datacardPattern = "HpToSingleLepton_datacard_"+label+"_%s.txt"
     rootFileDirectory = ""
     myMgr = DatacardReader.DataCardDirectoryManager(myDir, datacardPattern, rootFilePattern, rootFileDirectory=rootFileDirectory, readOnly=False, outSuffix=label)
@@ -580,20 +591,24 @@ def hplusTBToSingleLepton(myDir, label):
     #myMgr.removeColumn("vv")
     #myMgr.removeColumn("otherttbar")
 
+    # Merge columns
+    #myMgr.mergeColumns("OtherTop",["Wlight","Wheavy","ZDMerge","qcd"])
+    #myMgr.removeNuisance("wheavy_SF_mu")
+    #myMgr.removeNuisance("wheavy_SF_el")
+
     # Replace column names
     myColumnReplaces = {}
     if myMgr._massPoints != None:
         for m in myMgr._massPoints:
             myColumnReplaces["Hplus%s"%m] = "CMS_Hptbsl_%s"%(label)
-    myColumnReplaces["TTbar"] = "CMS_Hptbsl_%s_vv"%(label)
     myColumnReplaces["Wlight"] = "CMS_Hptbsl_%s_Wlight"%(label)
     myColumnReplaces["Wheavy"] = "CMS_Hptbsl_%s_Wheavy"%(label)
     myColumnReplaces["qcd"] = "CMS_Hptbsl_%s_qcd"%(label)
-    myColumnReplaces["ZJets_M50"] = "CMS_Hptbsl_%s_ZJets_M50"%(label)
+    myColumnReplaces["ZDMerge"] = "CMS_Hptbsl_%s_DY_VV"%(label)
     myColumnReplaces["OtherTop"] = "CMS_Hptbsl_%s_OtherTop"%(label)
     myColumnReplaces["OtherEwk"] = "CMS_Hptbsl_%s_OtherEwk"%(label)
     myColumnReplaces["TTbar"] = "CMS_Hptbsl_%s_ttbar"%(label)
-    #myMgr.replaceColumnNames(myColumnReplaces)
+    myMgr.replaceColumnNames(myColumnReplaces)
     
     # Replace nuisance names
     myNuisanceReplaces = {}
@@ -623,6 +638,12 @@ def hplusTBToSingleLepton(myDir, label):
     myNuisanceReplaces["pdf"] = "CMS_ttbar_pdfShape"
     myNuisanceReplaces["matching_ljets"] = "CMS_ttbar_matchingVariation"
     myNuisanceReplaces["scale_ljets"] = "CMS_ttbar_q2"
+    if label.startswith("Control_"):
+        for l in ["el","mu"]:
+            myNuisanceReplaces["xsec_TTbar_%s"%l] = "CMS_Hptbsl_%s_ttbarNormUncert"%l
+            myNuisanceReplaces["xsec_Wlight_%s"%l] = "CMS_Hptbsl_%s_wlightNormUncert"%l
+            myNuisanceReplaces["xsec_Wheavy_%s"%l] = "CMS_Hptbsl_%s_wheavyNormUncert"%l
+    
     myMgr.replaceNuisanceNames(myNuisanceReplaces)
 
     myMgr.replaceNuisanceValue("xsect_singleTop", "1.069", ["OtherTop"])
@@ -634,14 +655,31 @@ def hplusTBToSingleLepton(myDir, label):
     #myMgr.convertShapeToNormalizationNuisance(["CMS_Hptb%s_topPtReweighting"%suffix],columnList=myNonTTColumns)
     #myMgr.convertShapeToNormalizationNuisance(["btag","unbtag","top_pt","b_tag"]) # TMP
     
+    #myMgr.convertShapeToNormalizationNuisance(["CMS_scale_j","CMS_res_j"])
+    
     # Rebin
     if False:
-        rebinList = []
-        if label == "nB1":
-            rebinList = [0,195,235,275,315,355,395,435,475,515,555,595,635,675,715,755,795,835,875,915,955,995,1095,1195,1305,1425,1545,1690,1800,1910,2500]
-        elif label == "nB2p":
-            rebinList = [0,190,230,270,310,350,390,430,470,510,550,590,630,670,710,750,790,830,870,910,950,990,1090,1190,1290,1390,1490,1590,1670,1830,2500]
-        myMgr.rebinShapes(rebinList)
+        myCard = myMgr._datacards[myMgr._datacards.keys()[0]]
+        hCache = myCard._hCache
+        if len(hCache) > 0:
+            h = hCache[0]
+            s = []
+            for i in range(1,h.GetNbinsX()+1):
+                s.append(h.GetXaxis().GetBinLowEdge(i))
+            rebinList = [0]
+            for i in range(1,len(s)):
+                if i % 2 == 1:
+                    rebinList.append(s[i])
+            rebinList.append(h.GetXaxis().GetXmax())
+            #if label == "nB1":
+                #rebinList = [0,195,235,275,315,355,395,435,475,515,555,595,635,675,715,755,795,835,875,915,955,995,1095,1195,1305,1425,1545,1690,1800,1910,2500]
+            #elif label == "nB2p":
+                #rebinList = [0,190,230,270,310,350,390,430,470,510,550,590,630,670,710,750,790,830,870,910,950,990,1090,1190,1290,1390,1490,1590,1670,1830,2500]
+            if len(rebinList) > 2:
+                print "Rebinning:"
+                print "  original: %s"%", ".join(map(str,s))
+                print "  new: %s"%", ".join(map(str,rebinList))
+                myMgr.rebinShapes(rebinList)
 
     # Smoothen QCD background
     #myMgr.smoothBackgroundByLinearExtrapolation("CMS_HptbmuX_%s_qcd"%label)
@@ -678,8 +716,11 @@ def hplusTBToSingleLepton(myDir, label):
     
     myMgr.removeManyNuisances(_removeUncertainties)
     myMgr.keepManyNuisances(_keepUncertainties)
-    
-    #myMgr.recreateShapeStatUncert(threshold=0.30)
+      
+    if not label.startswith("Control_"):
+        myMgr.recreateShapeStatUncert(recreateShapeStatUncertForLargestBkgOnly=True)
+        #myMgr.recreateShapeStatUncert(threshold=0.10)
+        #myMgr.recreateShapeStatUncert()
     
     myMgr.close()
 
@@ -710,6 +751,7 @@ if __name__ == "__main__":
     sl = []
     sl.extend(["nB1_mu", "nB2p_mu", "nB1_el", "nB2p_el"])
     sl.extend(["Control_nB0_mu", "Control_nB1_mu", "Control_nB2p_mu", "Control_nB0_el", "Control_nB1_el", "Control_nB2p_el"])
+    #sl = ["nB1_mu"]
     for item in sl:
         hplusTBToSingleLepton(myDir, item)
     
