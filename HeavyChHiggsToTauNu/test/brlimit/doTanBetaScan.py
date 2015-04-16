@@ -476,7 +476,7 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
         if myResultDir != None:
             myList = os.listdir("./%s"%myResultDir)
             for item in myList:
-                if item.startswith("higgsCombineobs_m%s"mHp):
+                if item.startswith("higgsCombineobs_m%s"%mHp):
                     f = ROOT.TFile.Open(os.path.join(myResultDir, item))
                     myTree = f.Get("limit")
                     myValue = array.array('d',[0])
