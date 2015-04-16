@@ -465,17 +465,18 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
     if not brContainer.resultExists(tanbeta):
         # Produce cards
         myPostFix = "lhcasy_%s_mHp%s_tanbetascan%.1f"%(scen,mHp,tanbeta)
+        myPostFixAllMasses = "lhcasy_%s_mHpAll_tanbetascan%.1f"%(scen,mHp,tanbeta)
         myList = os.listdir(".")
         myList.sort()
         myResultDir = None
         myResultFound = False
         for item in myList:
-            if myPostFix in item:
+            if myPostFix in item or myPostFixAllMasses in item:
                 myResultDir = item
         if myResultDir != None:
             myList = os.listdir("./%s"%myResultDir)
             for item in myList:
-                if item.startswith("higgsCombineobs"):
+                if item.startswith("higgsCombineobs_m%s"mHp):
                     f = ROOT.TFile.Open(os.path.join(myResultDir, item))
                     myTree = f.Get("limit")
                     myValue = array.array('d',[0])
@@ -506,15 +507,22 @@ def getCombineResultPassedStatus(opts, brContainer, mHp, tanbeta, resultKey, sce
                         brContainer.setCombineResult(tanbeta, myResult)
                     f.Close()
         if not myResultFound:
+            massInput = [mHp]
+            postFixInput = myPostFix
+            if opts.gridRunAllMassesInOneJob:
+                if mHp != opts.massPoints[0]:
+                    return None
+                massInput = opts.massPoints[:]
+                postFixInput = myPostFixAllMasses
             # Result does not exist, let's calculate it
             brContainer.produceScaledCards(mHp, tanbeta)
             # Run Combine
             if "CMSSW_BASE" in os.environ or opts.creategridjobs:
-                resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=[mHp],
+                resultContainer = combine.produceLHCAsymptotic(opts, ".", massPoints=massInput,
                     datacardPatterns = brContainer.getDatacardPatterns(),
                     rootfilePatterns = brContainer.getRootfilePatterns(),
                     clsType = combine.LHCTypeAsymptotic(opts),
-                    postfix = myPostFix,
+                    postfix = postFixInput,
                     quietStatus = True)
                 if resultContainer != None and len(resultContainer.results) > 0:
                     result = resultContainer.results[0]
@@ -661,6 +669,7 @@ def main(opts, brContainer, m, scen, plotContainers):
             # Force calculation of few first points
             if len(opts.tanbeta) > 0:
                 for tb in opts.tanbeta:
+                    print "***"
                     getCombineResultPassedStatus(opts, brContainer, m, float(tb), myKey, scen)
             else:
                 if float(m) > 179:
@@ -672,6 +681,8 @@ def main(opts, brContainer, m, scen, plotContainers):
                 scanRanges(opts, brContainer, m, 8.0, _maxTanBeta, myKey, scen)
     
     outtxt = ""
+    if opts.creategridjobs:
+        return
     # Print results
     myTanBetaKeys = brContainer._results.keys()
     myTanBetaKeys.sort()
@@ -977,6 +988,7 @@ if __name__ == "__main__":
             print "Automatic mass identification failed, trying default range (this could of course fail)"
             myMassPoints.extend(["200", "220", "250", "300", "400", "500", "600"])
         print "The following masses are considered:",", ".join(map(str, myMassPoints))
+        opts.masspoints = myMassPoints[:]
         for m in myMassPoints:
             for scen in myScenarios:
                 print scen,m
@@ -988,23 +1000,11 @@ if __name__ == "__main__":
     print "\nTan beta scan is done, results have been saved to %s"%_resultFilename
     
     if opts.creategridjobs:
-        # Create task dir
-        dirname = multicrab.createTaskDir(prefix="multicrab_tanBetaScan", path=".")
-        f = open("multicrab.cfg")
-        myLines = f.readlines()
-        f.close()
-        for line in myLines:
-            if line.startswith("[") and line.endswith("]\n"):
-                jobname = line.replace("[","").replace("]\n","")
-                if jobname not in ["MULTICRAB", "COMMON"]:
-                    os.system("mv %s %s/."%(jobname, dirname))
-        os.system("mv multicrab.cfg %s/."%dirname)
-        os.system("mv crab_gridjob.cfg %s/."%dirname)
         # Print instructions
-        print "*** Created crab task dirs for multicrab to %s ***"%dirname
-        print "*** To submit, do the following ***"
-        print "cd %s"%dirname
-        print "multicrab -create -submit all"
+        print "*** Created crab task dirs for multicrab ***"
+        #print "*** To submit, do the following ***"
+        #print "cd %s"%dirname
+        #print "multicrab -create -submit all"
     else:
         # Apply TDR style
         style = tdrstyle.TDRStyle()
