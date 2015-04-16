@@ -1076,7 +1076,7 @@ class DataCardReader:
                         hRate.SetBinError(k, minValue)
     
     def _readRootFileContents(self, directory, mass):
-        if mass != None:
+        if mass != None and not "%s" in self._rootFilePattern:
             self._rootFilename = os.path.join(directory, self._rootFilePattern%mass)
         else:
             self._rootFilename = os.path.join(directory, self._rootFilePattern)
