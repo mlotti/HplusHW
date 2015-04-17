@@ -157,7 +157,10 @@ def produceLHCAsymptotic(opts, directory,
             print "Creating combine workspace for m=%s"%m
             print workspaceCommand
             os.system(workspaceCommand)
+            os.system("rm %s"%" ".join(map(str, myInputFiles)))
             myWorkspaces.append(workspacePattern%m)
+            # Copy combine binary here
+            os.system("cp %s/bin/%s/combine %s/."%(os.environ["CMSSW_BASE"], os.environ["SCRAM_ARCH"], mcc.dirname))
         if opts.gridRunAllMassesInOneJob:
             # Create crab task config
             mcc.writeCrabCfg("remoteglidein", {"GRID": ["SE_white_list = T2_FI_HIP", "maxtarballsize = 50", "virtual_organization = cms"],
@@ -172,7 +175,7 @@ def produceLHCAsymptotic(opts, directory,
                 f.close()
                 for line in myLines:
                     if line.startswith("combine "):
-                        command.append("./%s"%line.replace("\n",""))
+                        command.append("./%s"%line.replace("\n","").replace("combinedCardsM%s.txt"%m,workspacePattern%m))
             command.append("")
             command.append("# Collect output")
             command.append("ls -la")
@@ -196,7 +199,7 @@ def produceLHCAsymptotic(opts, directory,
                 f.close()
                 for line in myLines:
                     if line.startswith("combine "):
-                        command.append("./%s"%line.replace("\n",""))
+                        command.append("./%s"%line.replace("\n","").replace("combinedCardsM%s.txt"%m,workspacePattern%m))
                 command.append("")
                 command.append("# Collect output")
                 command.append("tar cfz output.tgz higgsCombine*.root")
