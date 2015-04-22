@@ -31,7 +31,8 @@ def main():
     # We don't have yet the lumi information handled in NtupleAnalysis, so remove data for now
     datasets.remove(datasets.getDataDatasetNames())
 
-    datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb  
+#    datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb  
+    datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(100) # pb ##  test 
     datasets.getDataset("TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb   
     datasets.getDataset("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola").setCrossSection(245.8) # pb   
  #   datasets.getDataset("QCD_Pt_50to80_Tune4C_13TeV_pythia8").setCrossSection(8148778.0) # pb   
@@ -42,10 +43,10 @@ def main():
 ###    datasets.remove(["TBHp_HToTauNu_M_200_13TeV_pythia6"])
     datasets.remove(["QCD_Pt_50to80_TuneZ2star_13TeV_pythia6"])
 #    datasets.remove(["QCD_Pt_50to80_Tune4C_13TeV_pythia8"])
-    datasets.remove(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia"])
+    datasets.remove(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6"])
 
     datasets.remove(["DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12"])
-
+    datasets.remove(["DYJetsToLL_M_50_13TeV_madgraph_pythia8_tauola_v2"])
     # These have 0 events after skim in multicrab_TEST5, and the code crashes because of that
     datasets.remove([
         "QCD_Pt30to50_TuneZ2star_Summer12",
@@ -79,7 +80,7 @@ def main():
     style = tdrstyle.TDRStyle()
 
     dataMCExample(datasets)
-#    MetComparison(datasets)
+    MtComparison(datasets)
 
    # Print counters                                                                                                                                                                                                                                               
     doCounters(datasets)
@@ -116,64 +117,91 @@ def dataMCExample(datasets):
     def createDrawPlot(name, **kwargs):
         drawPlot( plots.DataMCPlot(datasets, name, normalizeToLumi=20000), name, **kwargs)
 
-    createDrawPlot("tauEta", xlabel="", ylabel="Number of events", rebin=1, log=False)
-    createDrawPlot("Rtau", xlabel="p_{T}^{leading track}/p_{T}^{#tau jet}", ylabel="Number of events", rebin=1, log=False)
-    createDrawPlot("Met", xlabel="E_{T}^{miss} (GeV)", ylabel="Number of events", rebin=1, log=True)
-    createDrawPlot("MetPhi", xlabel="#Phi^{miss} ", ylabel="Number of events", rebin=1, log=False)
-    createDrawPlot("jetPt", xlabel="p_{T}^{jet} (GeV/c)", ylabel="Number of events", rebin=1, log=True)
-    createDrawPlot("electronPt", xlabel="p_{T}^{jet} (GeV/c)", ylabel="Number of events", rebin=1, log=True)
-    createDrawPlot("electronEta", xlabel="", ylabel="Number of events", rebin=1, log=False)
-    createDrawPlot("muonPt", xlabel="p_{T}^{jet} (GeV/c)", ylabel="Number of events", rebin=1, log=True)
-    createDrawPlot("muonEta", xlabel="", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("tauEta", xlabel="#eta^{#tau jet}", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("tauPhi", xlabel="#phi^{#tau jet}", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("Rtau", xlabel="p_{T}^{leading track}/p_{T}^{#tau jet}", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("Met", xlabel="E_{T}^{miss} (GeV)", ylabel="Number of events", rebin=5, log=True,opts={"ymin": 1e-1, "ymaxfactor": 10})
+    createDrawPlot("MetPhi", xlabel="#phi^{ETmiss} ", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("jetPt", xlabel="p_{T}^{jet} (GeV/c)", ylabel="Number of events", rebin=2, log=True)
+    createDrawPlot("electronPt", xlabel="p_{T}^{electron} (GeV/c)", ylabel="Number of events", rebin=2, log=True)
+    createDrawPlot("electronEta", xlabel="#eta^{electron}", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("muonPt", xlabel="p_{T}^{muon} (GeV/c)", ylabel="Number of events", rebin=2, log=True)
+    createDrawPlot("muonEta", xlabel="#eta^{muon}", ylabel="Number of events", rebin=2, log=False)
     createDrawPlot("Nelectrons", xlabel="N_{electrons}", ylabel="Number of events", rebin=1, log=False)
     createDrawPlot("Nmuons", xlabel="N_{muons}", ylabel="Number of events", rebin=1, log=False)
-
-    createDrawPlot("jetEta", xlabel="", ylabel="Number of events", rebin=1, log=False)
-    createDrawPlot("jetPhi", xlabel="#Phi^{jet}", ylabel="Number of events", rebin=1, log=False)
-    createDrawPlot("DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("bJetPt", xlabel="p_{T}^{b-jet} (GeV/c)", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("bjetEta", xlabel="#eta^{b-jet}", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("realBJetPt", xlabel="p_{T}^{b-jet} (GeV/c)", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("realBJetEta", xlabel="#eta^{b-jet}", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("realMaxBJetPt", xlabel="p_{T}^{b-jet} (GeV/c)", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("realMaxBJetEta", xlabel="#eta^{b-jet}", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("jetEta", xlabel="#eta^{jet}", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("jetPhi", xlabel="#phi^{jet}", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, log=False, opts={"ymin": 0, "xmin":0})
     createDrawPlot("Njets", xlabel="Number of Jets", ylabel="Number of events", rebin=1, log=False)
-    createDrawPlot("jetSecondaryVertex", xlabel="Significance", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("NBjets", xlabel="Number of B-jets", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("NtrueBjets", xlabel="Number of B-jets", ylabel="Number of events", rebin=1, log=False)
 
-    createDrawPlot("transverseMass", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=1, log=False, opts={"ymin": 0, "xmin":5, "ymaxfactor": 0.02})
-    createDrawPlot("transverseMassTriangleCut", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=1, log=False, opts={"ymin": 0, "xmin":5, "ymaxfactor": 0.02})
+    createDrawPlot("jetBProbabilityBJetTags", xlabel="Discriminator", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("jetProbabilityBJetTags", xlabel="Discriminator", ylabel="Number of events", rebin=1, log=True, opts={"xmax":4, "xmin":0})
+    createDrawPlot("trackCountingHighEffBJetTags", xlabel="Discriminator", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("trackCountingHighPurBJetTags", xlabel="Discriminator", ylabel="Number of events", rebin=1, log=True)
+    createDrawPlot("Pt3Jets", xlabel="p_{T}^{3jets} (GeV/c)", ylabel="Number of events", rebin=1, log=False)
+    createDrawPlot("TheeJetPtcut", xlabel="ThreeJetPtcut (GeV/c)", ylabel="Number of events", rebin=2, log=False, opts={"xmax":450, "xmin":0})
+    createDrawPlot("DPhi3JetsMet", xlabel="#Delta#phi(3 jets, MET)", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("JetTauEtSum", xlabel="#Sigma(Jets,#tau jet) (GeV)", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("JetTauMetEtSum", xlabel="#Sigma(Jets,#tau jet, MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
+#    createDrawPlot("TauMetEtSum", xlabel="#Sigma(#tau jet, MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
+
+#    createDrawPlot("transverseMass", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=1, log=False, opts={"ymin": 0, "xmin":5, "ymaxfactor": 0.1})
+    createDrawPlot("transverseMass", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("transverseMassTriangleCut", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("transverseMass3JetCut", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
 
 #    plots.drawPlot( plots.DataMCPlot(datasets, "Pt3Jets", normalizeToLumi=20000), "Pt3Jets", xlabel="p_{T}^{3jets} (GeV/c)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 #    plots.drawPlot( plots.DataMCPlot(datasets, "DeltaPhiTauMet", normalizeToLumi=20000), "DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 
 
 
-def getHistos(datasets,name1, name2):
-     drh1 = datasets.getDataset("QCD").getDatasetRootHisto("MetNoJetInHole")
-     drh2 = datasets.getDataset("QCD").getDatasetRootHisto("MetJetInHole")
-     drh1.setName("MetNoJetInHole")
-     drh2.setName("MetJetInHole")
-     return [drh1, drh2]
+def getHistos(datasets,name1, name2, name3):
+     drh1 = datasets.getDataset("TTJets").getDatasetRootHisto("transverseMass")
+     drh2 = datasets.getDataset("TTJets").getDatasetRootHisto("transverseMassTriangleCut")
+     drh3 = datasets.getDataset("TTJets").getDatasetRootHisto("transverseMass3JetCut")
+     drh1.setName("transverseMass")
+     drh2.setName("transverseMassTriangleCut")
+     drh3.setName("transverseMass3JetCut")
+     return [drh1, drh2, drh3]
 
 #mt = plots.PlotBase(getHistos("MetNoJetInHole", "MetJetInHole"))
 
-def MetComparison(datasets):
-    mt = plots.PlotBase(getHistos(datasets,"MetNoJetInHole", "MetJetInHole"))
+def MtComparison(datasets):
+    mt = plots.PlotBase(getHistos(datasets,"transverseMass", "transverseMassTriangleCut", "transverseMass3JetCut"))
 #    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
     st1 = styles.StyleCompound([styles.styles[2]])
     st2 = styles.StyleCompound([styles.styles[1]])
+    st3 = styles.StyleCompound([styles.styles[3]])
     st1.append(styles.StyleLine(lineWidth=3))
     st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
-    mt.histoMgr.forHisto("MetNoJetInHole", st1)
-    mt.histoMgr.forHisto("MetJetInHole", st2)
+    st2.append(styles.StyleLine(lineStyle=3, lineWidth=3))
+    mt.histoMgr.forHisto("transverseMass", st1)
+    mt.histoMgr.forHisto("transverseMassTriangleCut", st2)
+    mt.histoMgr.forHisto("transverseMass3JetCut", st3)
+
     mt.histoMgr.setHistoLegendLabelMany({
-            "MetNoJetInHole": "Jets outside dead cells",
-            "MetJetInHole": "Jets within dead cells"
+            "transverseMass": "m_{T}(#tau jet, E_{T}^{miss})",
+            "transverseMassTriangleCut": "m_{T}(#tau jet, E_{T}^{miss}) with Triangle Cut",
+            "transverseMass3JetCut": "m_{T}(#tau jet, E_{T}^{miss}) with 3-jet Cut"
             })
 #    mt.histoMgr.setHistoDrawStyleAll("P")
 
-    mt.appendPlotObject(histograms.PlotText(300, 300, "p_{T}^{jet} > 50 GeV/c", size=20))
-    xlabel = "PF E_{T}^{miss} (GeV)"
+    mt.appendPlotObject(histograms.PlotText(300, 50, "p_{T}^{jet} > 50 GeV/c", size=20))
+    xlabel = "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})"
     ylabel = "Events / %.2f"
-    plots.drawPlot(mt, "MetComparison", xlabel=xlabel, ylabel=ylabel, rebinX=2, log=True,
-                   createLegend={"x1": 0.6, "y1": 0.75, "x2": 0.8, "y2": 0.9},
+    plots.drawPlot(mt, "MtComparison", xlabel=xlabel, ylabel=ylabel, rebinX=2, log=False,
+                   createLegend={"x1": 0.4, "y1": 0.75, "x2": 0.8, "y2": 0.9},
                    ratio=False, opts2={"ymin": 0.5, "ymax": 1.5})
-                   
+          
 #    rtauGen(mt, "MetComparison", rebin=1, ratio=True, defaultStyles=False)
 
 def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
@@ -254,10 +282,10 @@ def doCounters(datasets):
 
 #    print eventCounter.getSubCounterTable("MCinfo for selected events").format(cellFormat)
 
-#    print eventCounter.getSubCounterTable("tauSelection").format()                                                                                                                                                                                                
+    print eventCounter.getSubCounterTable("Tau-jet selection").format()                                                                                                                                                                                                
 #    print eventCounter.getSubCounterTable("TauIDPassedEvt::TauSelection_HPS").format(cellFormat)                                                                                                                                                                  
 #    print eventCounter.getSubCounterTable("TauIDPassedJets::TauSelection_HPS").format(cellFormat)                                                                                                                                                                 
-#    print eventCounter.getSubCounterTable("b-tagging").format(cellFormat)                                                                                                                                                                                         
+    print eventCounter.getSubCounterTable("B-jet selection").format(cellFormat)                                                                                                                                                                                         
 #    print eventCounter.getSubCounterTable("Jet selection").format(cellFormat)                                                                                                                                                                                     
 #    print eventCounter.getSubCounterTable("Jet main").format(cellFormat)                                                                                                                                                                                          
 #    print eventCounter.getSubCounterTable("VetoTauSelection").format(cellFormat)                                                                                                                                                                                  

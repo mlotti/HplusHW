@@ -16,7 +16,8 @@ process.addDatasetsFromMulticrab(sys.argv[1])
 
 # Example of adding an analyzer
 process.addAnalyzer("test", Analyzer("CorrelationAnalysis",
-                                     tauPtCut = 10
+                                     tauPtCut = 50
+#                                     metCut = 60 
 ))
 
 # Example of adding an analyzer whose configuration depends on dataVersion

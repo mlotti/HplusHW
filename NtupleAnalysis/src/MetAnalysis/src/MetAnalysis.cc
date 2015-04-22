@@ -39,7 +39,9 @@ private:
   WrappedTH1 *hJetPt;
   WrappedTH1 *hJetEta;
   WrappedTH1 *hJetPhi;
-
+  WrappedTH1 *hgenJetPt;
+  WrappedTH1 *hgenJetEta;
+  WrappedTH1 *hgenJetPhi;
   WrappedTH1 *hBJetPt;
 
   WrappedTH1 *hMet;
@@ -52,6 +54,16 @@ private:
   WrappedTH1 *hMetJetInHole_gjet;
   WrappedTH1 *hDeltaPhiMetNoJetInHole; 
   WrappedTH1 *hDeltaPhiMetJetInHole; 
+
+  WrappedTH2 *hgenjetEtaVsDeltaPtInHole; 
+  WrappedTH2 *hgenjetPhiVsDeltaPtInHole; 
+  WrappedTH2 *hgenjetPtVsDeltaPtInHole; 
+  WrappedTH2 *hgenjetEtaVsDeltaPt; 
+  WrappedTH2 *hgenjetPhiVsDeltaPt; 
+  WrappedTH2 *hgenjetPtVsDeltaPt; 
+  WrappedTH1 *hDeltaRJetGenJet; 
+  WrappedTH1 *hDeltaPt;
+  WrappedTH1 *hDeltaPtInHole;
   std::vector<double> fECALDeadCellEtaTable;
   std::vector<double> fECALDeadCellPhiTable;
 
@@ -213,6 +225,10 @@ void MetAnalysis::book(TDirectory *dir) {
   hJetEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "jetEta", "Jet eta", 100, -5, 5);
   hJetPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "jetPhi", "Jet phi", 90, 0, 180);
 
+  hgenJetPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "genjetPt", "genJet pT", 200, 0, 1000);
+  hgenJetEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "genjetEta", "genJet eta", 100, -5, 5);
+  hgenJetPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "genjetPhi", "genJet phi", 90, 0, 180);
+
   hBJetPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "bJetPt", "B jet pT", 200, 0, 1000);
 
   hMet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met", "Met", 200, 0., 1000.);
@@ -225,8 +241,19 @@ void MetAnalysis::book(TDirectory *dir) {
   hMetJetInHole_gjet= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetJetInHole_gjet", "MetJetInHole_gjet", 200, 0., 1000.);
   //hMetJetInHole= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetJetInHole", "MetJetInHole", 200, 0., 1000.);
   // hMetNoJetInHole= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetNoJetInHole", "MetNoJetInHole", 200, 0., 1000.);
+  hDeltaPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DeltaPt", "DeltaPt", 100, -1.5, 1.5);
+  hDeltaPtInHole = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DeltaPtInHole", "DeltaPtInHole", 100, -1.5, 1.5);
   hDeltaPhiMetNoJetInHole = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DeltaPhiMetNoJetInHole", "DeltaPhiMetNoJetInHole", 90, 0., 180);
   hDeltaPhiMetJetInHole = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DeltaPhiMetJetInHole", "DeltaPhiMetJetInHole", 90, 0., 180);
+  hgenjetEtaVsDeltaPtInHole = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "genjetEtaVsDeltaPtInHole", "genjetEtaVsDeltaPtInHole", 250, -2.5, 2.5,100,-1.5,1.5);
+  hgenjetPhiVsDeltaPtInHole = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "genjetPhiVsDeltaPtInHole", "genjetPhiVsDeltaPtInHole", 90, 0., 180,100,-1.5,1.5);
+  hgenjetPtVsDeltaPtInHole = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "genjetPtVsDeltaPtInHole", "genjetPtVsDeltaPtInHole", 200, 0., 1000,100,-1.5,1.5);
+  hgenjetEtaVsDeltaPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "genjetEtaVsDeltaPt", "genjetEtaVsDeltaPt", 250, -2.5, 2.5,100,-1.5,1.5);
+  hgenjetPhiVsDeltaPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "genjetPhiVsDeltaPt", "genjetPhiVsDeltaPt", 90, 0., 180,100,-1.5,1.5);
+  hgenjetPtVsDeltaPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "genjetPtVsDeltaPt", "genjetPtVsDeltaPt", 200, 0., 1000,100,-1.5,1.5);
+  hDeltaRJetGenJet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "deltaRJetGenJet", "deltaRJetGenJet", 100, 0.,5);  
+
+
 }
 
 void MetAnalysis::setupBranches(BranchManager& branchManager) {
@@ -239,8 +266,11 @@ void MetAnalysis::process(Long64_t entry) {
   fEventWeight.multiplyWeight(0.5);
   cWeighted.increment();
 
+  //   std::cout  << "  muons  "<<Muon muon: fEvent.muons()  << std::endl;            
+
   std::vector<Tau> selectedTaus;
   for(Tau tau: fEvent.taus()) {
+    hTauPt->Fill(tau.pt());
     if(!tau.decayModeFinding())
        continue;
     if(!(tau.pt() > fTauPtCut))
@@ -262,7 +292,7 @@ void MetAnalysis::process(Long64_t entry) {
     if(!(tau.nProngs() == 1))
       continue;
     
-    hTauPt->Fill(tau.pt());
+    //hTauPt->Fill(tau.pt());
     hTauEta->Fill(tau.eta());
     //    hTauPhi->Fill(tau.phi()* 180/3.14159265);
     hTauPhi->Fill(tau.phi());
@@ -339,20 +369,61 @@ void MetAnalysis::process(Long64_t entry) {
      if (!jetInEcalHole) {
        hDeltaPhiMetNoJetInHole->Fill(DeltaPhiJetMET);
      }
+     // matching genjet
+     for(GenJet genjet: fEvent.genjets()) {
+       double myDeltaEta = jet.eta() - genjet.eta();
+       double myDeltaPhi = (jet.phi() - genjet.phi())* 180/3.14159265;
+       double myDeltaR = std::sqrt(myDeltaEta*myDeltaEta + myDeltaPhi*myDeltaPhi);
+       hDeltaRJetGenJet->Fill(myDeltaR);
+       //  hDeltaPt->Fill(deltaPt);
+      if ( myDeltaR < 0.4) {
+	double deltaPt = (genjet.pt() - jet.pt())/genjet.pt();
+	if (!jetInEcalHole) {
+	  hDeltaPt->Fill(deltaPt);
+	  hgenjetEtaVsDeltaPt->Fill(genjet.eta(),deltaPt);
+	  hgenjetPhiVsDeltaPt->Fill(genjet.phi()* 180/3.14159265,deltaPt);
+	  hgenjetPtVsDeltaPt->Fill(genjet.pt(),deltaPt);
+	}	 	 
+	if (jetInEcalHole) {
+	  hDeltaPtInHole->Fill(deltaPt);
+	  hgenjetEtaVsDeltaPtInHole->Fill(genjet.eta(),deltaPt);
+	  hgenjetPhiVsDeltaPtInHole->Fill(genjet.phi()* 180/3.14159265,deltaPt);
+	  hgenjetPtVsDeltaPtInHole->Fill(genjet.pt(),deltaPt);	 	 
+	}
+      }
+     }
     }
   }
-
   if ( jetInEcalHole ) hMetJetInHole->Fill(myMet); 
   if ( !jetInEcalHole ) hMetNoJetInHole->Fill(myMet);
   if ( jetInEcalHole02 ) hMetJetInHole02->Fill(myMet); 
   if ( !jetInEcalHole02 ) hMetNoJetInHole02->Fill(myMet);
   if ( jetInEcalHole_bjet ) hMetJetInHole_bjet->Fill(myMet); 
   if ( jetInEcalHole_gjet ) hMetJetInHole_gjet->Fill(myMet); 
+
+  //  for(GenParticleGenerated genparticle: fEvent.genparticles()) {
+  //  } 
+  //  double mypt = fEvent.met_Type1().et();
+
+  std::vector<GenJet> genJets;
+  for(GenJet genjet: fEvent.genjets()) {
+    hgenJetPt->Fill(genjet.pt());
+    hgenJetEta->Fill(genjet.eta());
+    hgenJetPhi->Fill(genjet.phi()* 180/3.14159265);
+    if(genjet.pt() > 30 && std::abs(genjet.eta()) < 2.4) {
+      genJets.push_back(genjet);
+    }
+
+  }
+
+
+
   if(selectedJets.size() < 3)
     return;
   cJetSelection.increment();
-/*
-  for(Jet& jet: selectedJets) {
+
+
+  /*  for(Jet& jet: selectedJets) {
     if(jet.secondaryVertex() > 0.898)
       hBJetPt->Fill(jet.pt());
   }
