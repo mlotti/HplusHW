@@ -128,7 +128,7 @@ def produceLHCAsymptotic(opts, directory,
     print "Computing limits with Combine version %s" % Combine_tag
 
     mcc = MultiCrabCombine(opts, directory, massPoints, datacardPatterns, rootfilePatterns, cls)
-    mcc.createMultiCrabDir
+    mcc.createMultiCrabDir(postfix)
     myStatus = True
     if hasattr(opts, "creategridjobs") and opts.creategridjobs:
         myStatus = False
