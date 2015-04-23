@@ -94,10 +94,10 @@ if __name__ == "__main__":
         # tb, single lepton final states
         myLabels = ["nB1_mu", "nB2p_mu", "nB1_el", "nB2p_el"]
         for l in myLabels:
-            addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "HpToSingleLepton_datacard_"+l+"_%s.txt", "HT_M%s_binnedStat_p10_"+l+".root")
+            addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "HpToSingleLepton_datacard_"+l+"_%s.txt", "HpToSingleLepton_HT_M%s_"+l+".root")
         myLabels = ["Control_nB0_mu", "Control_nB1_mu", "Control_nB2p_mu", "Control_nB0_el", "Control_nB1_el", "Control_nB2p_el"]
         for l in myLabels:
-            addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "HpToSingleLepton_datacard_"+l+".txt", "HT_CR_"+l+".root")
+            addToDatacards(myDir, myMassPoints, datacardPatterns, rootFilePatterns, "HpToSingleLepton_datacard_"+l+".txt", "HpToSingleLepton_HT_CR_"+l+".root")
 
         print "The following masses are considered:",", ".join(map(str, myMassPoints))
         if len(myMassPoints) > 0:
