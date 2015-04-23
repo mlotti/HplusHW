@@ -166,7 +166,7 @@ def produceLHCAsymptotic(opts, directory,
             os.system("mv %s %s/."%(workspacePattern%m, mcc.dirname))
             for i in range(len(myInputFiles)):
                 myInputFiles[i] = "%s/%s"%(mcc.dirname, myInputFiles[i])
-            os.system("rm %s %s"%(" ".join(map(str, myInputFiles)),os.join.path(mcc.dirname, combinedCardName)))
+            os.system("rm %s %s"%(" ".join(map(str, myInputFiles)),os.path.join(mcc.dirname, combinedCardName)))
             myWorkspaces.append(workspacePattern%m)
             # Copy combine binary here
             os.system("cp %s/bin/%s/combine %s/."%(os.environ["CMSSW_BASE"], os.environ["SCRAM_ARCH"], mcc.dirname))
