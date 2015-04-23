@@ -7,6 +7,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CombineTools as CombineTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tanbetaTools as tbtools
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 
 import os
 import sys
@@ -74,30 +75,109 @@ def produceOutputFromTaskDirs(massWhiteList, scenario):
     for myKey in myScenarioData.keys():
         myKeyComponents = tbtools.disentangleResultKey(myKey)
         brContainer._readFromDatabase(myKeyComponents["m"], myKeyComponents["tb"])
-    # Write
+    # Analyze and write
     myPlotContainer = tbtools.TanBetaResultContainer(scenario, myMassPoints)
-    tbtools.saveTanbetaResults(brContainer, myPlotContainer, scenario, myMassPoints, myResultKeys)
-    # Do a plot
+    tbtools.analyzeTanbetaResults(brContainer, myPlotContainer, scenario, myMassPoints, myResultKeys, saveToDisk=True)
+    # Create plot
     myPlotContainer.doPlot()
-    
+
+def parseTextResultsFromFile(brContainer, massWhiteList, scen, resultKeys):
+    # Read 
+    name = tbtools._resultsPattern%scen
+    print "Opening file '%s' for input"%(name)
+    f = open(name)
+    if f == None:
+        raise Exception("Error: Could not open result file '%s' for input!"%name)
+    lines = f.readlines()
+    f.close()
+    # Obtain mass points
+    myMassPoints = []
+    if len(massWhiteList) > 0:
+        myMassPoints = massWhiteList[:]
+    else:
+        myLine = 0
+        while myLine < len(lines):
+            if lines[myLine].startswith("Tan beta limit scan ("):
+                s = lines[myLine].replace("Tan beta limit scan (","").replace(") for m=",",").replace(" and key: ",",").replace("\n","")
+                mySplit = s.split(",")
+                m = mySplit[1]
+                if not m in myMassPoints:
+                    myMassPoints.append(m)
+            myLine += 1
+    myMassPoints.sort()
+    # Analyse lines
+    for m in myMassPoints:
+        for myKey in resultKeys:
+            myBlockStart = None
+            myBlockEnd = None
+            myLine = 0
+            while myLine < len(lines) and myBlockEnd == None:
+                if lines[myLine].startswith("Tan beta limit scan (") or lines[myLine].startswith("Allowed tan beta"):
+                    if myBlockStart == None:
+                        s = lines[myLine].replace("Tan beta limit scan (","").replace(") for m=",",").replace(" and key: ",",").replace("\n","")
+                        mySplit = s.split(",")
+                        if scen == mySplit[0] and m == mySplit[1] and myKey == mySplit[2]:
+                            # Entry found, store beginning
+                            myBlockStart = myLine
+                    else:
+                        myBlockEnd = myLine
+                myLine += 1
+            if myBlockStart == None or myLine - myBlockStart > 100:
+                print "... could not find results"
+            else:
+                myBlockEnd = myLine
+            if myBlockEnd != None:
+                for i in range(myBlockStart+1, myBlockEnd-1):
+                    s = lines[i].replace("  tan beta=","").replace(" xsecTheor=","").replace(" pb, limit(%s)="%myKey,",").replace(" pb, passed=",",")
+                    mySplit = s.split(",")
+                    if len(mySplit) > 1 and s[0] != "#" and mySplit[2] != "failed" and mySplit[1] != "None":
+                        myTanBeta = mySplit[0]
+                        tanbetakey = tbtools.constructResultKey(m, myTanBeta)
+                        if not brContainer.resultExists(m, myTanBeta):
+                            brContainer._results[tanbetakey] = {}
+                            if mySplit[1] == "None":
+                                brContainer._results[tanbetakey]["sigmaTheory"] = None
+                            else:
+                                brContainer._results[tanbetakey]["sigmaTheory"] = float(mySplit[1])
+                            result = commonLimitTools.Result(0)
+                            setattr(result, myKey, float(mySplit[2]))
+                            brContainer.setCombineResult(m, myTanBeta, result)
+                        else:
+                            # Add result key
+                            setattr(brContainer._results[tanbetakey]["combineResult"], myKey, float(mySplit[2]))
+    return myMassPoints
+
+def readTextResults(massWhiteList, scen):
+    myResultKeys = tbtools._resultKeys[:]
+    # Create BrContainer
+    brContainer = tbtools.BrContainer(decayModeMatrix=None, mssmModel=scen)
+    # Parse input text file
+    myMassPoints = parseTextResultsFromFile(brContainer, massWhiteList, scen, myResultKeys)
+    # Analyze
+    myPlotContainer = tbtools.TanBetaResultContainer(scen, myMassPoints)
+    tbtools.analyzeTanbetaResults(brContainer, myPlotContainer, scen, myMassPoints, myResultKeys, saveToDisk=False)
+    # Create plot
+    myPlotContainer.doPlot()
+
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
     parser.add_option("-m", "--mass", dest="massPoints", action="append", default=[], help="mass values (will scan only these)")
     (opts, args) = parser.parse_args()
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
     # Parse selected models
     myModelNames = tbtools.findModelNames(".")
     mySelectedModels = opts.scenarios
     if len(opts.scenarios) == 0:
         mySelectedModels = myModelNames[:]
     # Loop over scenario models
-    resultKeys = ["observed",  "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]
     for m in myModelNames:
         print "Considering model: %s"%m
         # result structure: dictionary(key=m_tb, value=Result))
         if os.path.exists(tbtools._resultsPattern%m):
             # Results text file exists, read them
-            print "..."
+            readTextResults(opts.massPoints, m)
         else:
             # Convert root files from crab jobs to text files for inspection
             produceOutputFromTaskDirs(opts.massPoints, m)

@@ -16,7 +16,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTo
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tanbetaTools as tbtools
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as DatacardReader
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.BRXSDatabaseInterface as BRXSDB
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 
 import os
 import sys
@@ -161,111 +160,38 @@ def scanRanges(opts, brContainer, mHp, tanbetaMin, tanbetaMax, resultKey, scen):
     for l in myRanges:
         scanRanges(opts, brContainer, mHp, l[0], l[1], resultKey, scen)
 
-def readResults(opts, brContainer, m, myKey, scen):
-    myList = os.listdir(".")
-    for name in myList:
-        if name.startswith("results_") and name.endswith(".txt"):
-            print "Opening file '%s', key %s"%(name, myKey)
-            f = open(name)
-            if f == None:
-                raise Exception("Error: Could not open result file '%s' for input!"%name)
-            lines = f.readlines()
-            f.close()
-            # Analyse lines
-            myBlockStart = None
-            myBlockEnd = None
-            myLine = 0
-            while myLine < len(lines) and myBlockEnd == None:
-                if lines[myLine].startswith("Tan beta limit scan (") or lines[myLine].startswith("Allowed tan beta"):
-                    if myBlockStart == None:
-                        s = lines[myLine].replace("Tan beta limit scan (","").replace(") for m=",",").replace(" and key: ",",").replace("\n","")
-                        mySplit = s.split(",")
-                        if scen == mySplit[0] and m == mySplit[1] and myKey == mySplit[2]:
-                            # Entry found, store beginning
-                            myBlockStart = myLine
-                    else:
-                        myBlockEnd = myLine
-                myLine += 1
-            if myBlockStart == None or myLine - myBlockStart > 100:
-                print "... could not find results"
-            else:
-                myBlockEnd = myLine
-            if myBlockEnd != None:
-                for i in range(myBlockStart+1, myBlockEnd-1):
-                    s = lines[i].replace("  tan beta=","").replace(" xsecTheor=","").replace(" pb, limit(%s)="%myKey,",").replace(" pb, passed=",",")
-                    mySplit = s.split(",")
-                    if len(mySplit) > 1 and s[0] != "#" and mySplit[2] != "failed" and mySplit[1] != "None":
-                        myTanBeta = mySplit[0]
-                        tanbetakey = "%s_%04.1f"%(float(myTanBeta))
-                        if not brContainer.resultExists(m, myTanBeta):
-                            brContainer._results[tanbetakey] = {}
-                            if mySplit[1] == "None":
-				brContainer._results[tanbetakey]["sigmaTheory"] = None
-			    else:
-				brContainer._results[tanbetakey]["sigmaTheory"] = float(mySplit[1])
-                            result = commonLimitTools.Result(0)
-                            setattr(result, myKey, float(mySplit[2]))
-                            brContainer.setCombineResult(mHp, myTanBeta, result)
-                        else:
-                            # Add result key
-                            setattr(brContainer._results[tanbetakey]["combineResult"], myKey, float(mySplit[2]))
-
-def linearCrossOverOfTanBeta(mHp, container, tblow, tbhigh, resultKey):
-    limitLow = getattr(container.getResult(mHp, tblow)["combineResult"], resultKey)
-    limitHigh = getattr(container.getResult(mHp, tbhigh)["combineResult"], resultKey)
-    theoryLow = container.getResult(mHp, tblow)["sigmaTheory"]
-    theoryHigh = container.getResult(mHp, tbhigh)["sigmaTheory"]
-    # subtract the theory from the limit (assume linear behavior)
-    if theoryLow == None or theoryHigh == None:
-        return -1.0
-    subLow = limitLow - theoryLow
-    subHigh = limitHigh - theoryHigh
-    tbLowValue = float(tblow)
-    tbHighValue = float(tbhigh)
-    dydx = (subHigh-subLow) / (tbHighValue-tbLowValue)
-    b = subLow - tbLowValue*dydx
-    tbinterpolation = -b / dydx
-    if tbinterpolation < tbLowValue:
-        tbinterpolation = tbLowValue
-    if tbinterpolation > tbHighValue:
-        tbinterpolation = tbHighValue
-    return tbinterpolation
-
 def main(opts, brContainer, m, scen, plotContainers):
     resultKeys = tbtools._resultKeys[:]
     #resultKeys = ["observed","expected"]
     if opts.gridRunAllMassesInOneJob:
         resultKeys = ["observed"]
     for myKey in resultKeys:
-        if opts.analyseOutput:
-            readResults(opts, brContainer, m, myKey, scen)
+        # Force calculation of few first points
+        myTanBetaValues = []
+        if len(opts.tanbeta) > 0:
+            for tb in opts.tanbeta:
+                if not float(tb) in myTanBetaValues:
+                    myTanBetaValues.append(float(tb))
+        if len(opts.tanbetarangemin) > 0 and len(opts.tanbetarangemax) > 0:
+            tb = float(opts.tanbetarangemin[0])
+            while tb < float(opts.tanbetarangemax[0]) and tb <= tbtools._maxTanBeta:
+                myTanBetaValues.append(tb)
+                if tb < 10:
+                    tb += 0.1
+                else:
+                    tb += 1
+        if len(myTanBetaValues) > 0:
+            print "Considering tan beta values:", myTanBetaValues
+            for tb in myTanBetaValues:
+                getCombineResultPassedStatus(opts, brContainer, m, tb, myKey, scen)
         else:
-            # Force calculation of few first points
-            myTanBetaValues = []
-            if len(opts.tanbeta) > 0:
-                for tb in opts.tanbeta:
-                    if not float(tb) in myTanBetaValues:
-                        myTanBetaValues.append(float(tb))
-            if len(opts.tanbetarangemin) > 0 and len(opts.tanbetarangemax) > 0:
-                tb = float(opts.tanbetarangemin[0])
-                while tb < float(opts.tanbetarangemax[0]) and tb <= tbtools._maxTanBeta:
-                    myTanBetaValues.append(tb)
-                    if tb < 10:
-                        tb += 0.1
-                    else:
-                        tb += 1
-            if len(myTanBetaValues) > 0:
-                print "Considering tan beta values:", myTanBetaValues
-                for tb in myTanBetaValues:
-                    getCombineResultPassedStatus(opts, brContainer, m, tb, myKey, scen)
-            else:
-                if float(m) > 179:
-                    getCombineResultPassedStatus(opts, brContainer, m, 1.1, myKey, scen)
-                    getCombineResultPassedStatus(opts, brContainer, m, 1.2, myKey, scen)
-                    getCombineResultPassedStatus(opts, brContainer, m, 1.3, myKey, scen)
-                    getCombineResultPassedStatus(opts, brContainer, m, 1.4, myKey, scen)
-                scanRanges(opts, brContainer, m, tbtools_minTanBeta, 7.9, myKey, scen)
-                scanRanges(opts, brContainer, m, 8.0, tbtools._maxTanBeta, myKey, scen)
+            if float(m) > 179:
+                getCombineResultPassedStatus(opts, brContainer, m, 1.1, myKey, scen)
+                getCombineResultPassedStatus(opts, brContainer, m, 1.2, myKey, scen)
+                getCombineResultPassedStatus(opts, brContainer, m, 1.3, myKey, scen)
+                getCombineResultPassedStatus(opts, brContainer, m, 1.4, myKey, scen)
+            scanRanges(opts, brContainer, m, tbtools_minTanBeta, 7.9, myKey, scen)
+            scanRanges(opts, brContainer, m, 8.0, tbtools._maxTanBeta, myKey, scen)
     
     if opts.creategridjobs:
         return
@@ -417,7 +343,6 @@ if __name__ == "__main__":
             rootFileList.append(rootFilePattern)
 
     parser = commonLimitTools.createOptionParser(False, False, True)
-    parser.add_option("--analyseOutput", dest="analyseOutput", action="store_true", default=False, help="Read only output and print summary")
     parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
     parser.add_option("-t", "--tanbeta", dest="tanbeta", action="append", default=[], help="tanbeta values (will scan only these)")
     parser.add_option("--tanbetarangemin", dest="tanbetarangemin", action="append", default=[], help="tanbeta values minimum range")
@@ -495,8 +420,7 @@ if __name__ == "__main__":
             myDecayModeMatrix["ljets_%s"%l] = myCategory
         
         # Purge matrix
-        if not opts.analyseOutput:
-	    purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints)
+        purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints)
         # reject mass points between 160-200 GeV
         i = 0
         while i < len(myMassPoints):
@@ -531,9 +455,9 @@ if __name__ == "__main__":
         #print "*** To submit, do the following ***"
         #print "cd %s"%dirname
         #print "multicrab -create -submit all"
-    else:
-        # Apply TDR style
-        style = tdrstyle.TDRStyle()
+    #else:
+        ## Apply TDR style
+        #style = tdrstyle.TDRStyle()
 
-        for scen in myScenarios:
-            myPlots[scen].doPlot()
+        #for scen in myScenarios:
+            #myPlots[scen].doPlot()
