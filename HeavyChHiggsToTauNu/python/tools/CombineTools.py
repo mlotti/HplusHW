@@ -128,15 +128,19 @@ def produceLHCAsymptotic(opts, directory,
     print "Computing limits with Combine version %s" % Combine_tag
 
     mcc = MultiCrabCombine(opts, directory, massPoints, datacardPatterns, rootfilePatterns, cls)
-    mcc.createMultiCrabDir(postfix)
-    mcc.copyInputFiles()
+    mcc.createMultiCrabDir
+    myStatus = True
+    if hasattr(opts, "creategridjobs") and opts.creategridjobs:
+        myStatus = False
+    if myStatus:
+        mcc.copyInputFiles()
     myScripts = mcc.writeScripts()
     if opts.injectSignal:
         mcc.writeCrabCfg("arc", [], ["dummy"])
         mcc.writeMultiCrabCfg(aux.ValuePerMass(opts.injectNumberJobs))
         if opts.multicrabCreate:
             mcc.createMultiCrab()
-    elif hasattr(opts, "creategridjobs") and  opts.creategridjobs:
+    elif hasattr(opts, "creategridjobs") and opts.creategridjobs:
         # Works only on CRAB2 and intented for tan beta scans
         # Produce running script for each mass point
         myWorkspaces = []
@@ -164,9 +168,9 @@ def produceLHCAsymptotic(opts, directory,
             workspaceCommand = workspaceOptionsSigmaBrLimit%(combinedCardName,m)
             os.system(workspaceCommand)
             os.system("mv %s %s/."%(workspacePattern%m, mcc.dirname))
-            for i in range(len(myInputFiles)):
-                myInputFiles[i] = "%s/%s"%(mcc.dirname, myInputFiles[i])
-            os.system("rm %s %s"%(" ".join(map(str, myInputFiles)),os.path.join(mcc.dirname, combinedCardName)))
+            #for i in range(len(myInputFiles)):
+                #myInputFiles[i] = "%s/%s"%(mcc.dirname, myInputFiles[i])
+            #os.system("rm %s %s"%(" ".join(map(str, myInputFiles)),os.path.join(mcc.dirname, combinedCardName)))
             myWorkspaces.append(workspacePattern%m)
             # Copy combine binary here
             os.system("cp %s/bin/%s/combine %s/."%(os.environ["CMSSW_BASE"], os.environ["SCRAM_ARCH"], mcc.dirname))
