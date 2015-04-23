@@ -463,7 +463,28 @@ def findModelNames(dirname = "."):
                 myModelNames.append(myMatch.group("name"))
     return myModelNames
 
-def saveTanbetaResults(brContainer, plotContainer, scen, massPoints, resultKeys):
+def linearCrossOverOfTanBeta(mHp, container, tblow, tbhigh, resultKey):
+    limitLow = getattr(container.getResult(mHp, tblow)["combineResult"], resultKey)
+    limitHigh = getattr(container.getResult(mHp, tbhigh)["combineResult"], resultKey)
+    theoryLow = container.getResult(mHp, tblow)["sigmaTheory"]
+    theoryHigh = container.getResult(mHp, tbhigh)["sigmaTheory"]
+    # subtract the theory from the limit (assume linear behavior)
+    if theoryLow == None or theoryHigh == None:
+        return -1.0
+    subLow = limitLow - theoryLow
+    subHigh = limitHigh - theoryHigh
+    tbLowValue = float(tblow)
+    tbHighValue = float(tbhigh)
+    dydx = (subHigh-subLow) / (tbHighValue-tbLowValue)
+    b = subLow - tbLowValue*dydx
+    tbinterpolation = -b / dydx
+    if tbinterpolation < tbLowValue:
+        tbinterpolation = tbLowValue
+    if tbinterpolation > tbHighValue:
+        tbinterpolation = tbHighValue
+    return tbinterpolation
+
+def analyzeTanbetaResults(brContainer, plotContainer, scen, massPoints, resultKeys, saveToDisk=True):
     myMassPoints = None
     if isinstance(massPoints, list):
         myMassPoints = massPoints[:]
@@ -539,9 +560,10 @@ def saveTanbetaResults(brContainer, plotContainer, scen, massPoints, resultKeys)
                 plotContainer.addLowResult(m, myResultKey, None)
             if not highFound:
                 plotContainer.addHighResult(m, myResultKey, None)
-
+    
     #print outtxt
-    f = open(_resultsPattern%scen, "w")
-    f.write(outtxt)
-    f.close()
-    print "Written results to",_resultsPattern%scen
+    if saveToDisk:
+        f = open(_resultsPattern%scen, "w")
+        f.write(outtxt)
+        f.close()
+        print "Written results to",_resultsPattern%scen

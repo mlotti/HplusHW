@@ -704,8 +704,8 @@ class BRXSDatabaseInterface:
 	    x.append(0)
             y.append(100)
 
-        for i in range(0,len(x)):
-            print "mhlimit:  m,tanb",x[i],y[i]
+        #for i in range(0,len(x)):
+            #print "mhlimit:  m,tanb",x[i],y[i]
         retGraph = ROOT.TGraph(len(x),array('d',x,),array('d',y))
         retGraph.SetName("mhLimit")
         retGraph.SetLineWidth(1)
