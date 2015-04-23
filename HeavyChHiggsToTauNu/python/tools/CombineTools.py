@@ -44,7 +44,7 @@ validCMSSWversions = ["CMSSW_6_1_1"]
 workspacePattern = "combineWorkspaceM%s.root"
 workspaceOptionsBrLimitTemplate = "text2workspace.py %s -P HiggsAnalysis.CombinedLimit.ChargedHiggs:brChargedHiggs -o %s"%("%s",workspacePattern)
 workspaceOptionsSigmaBrLimit    = "text2workspace.py %s -o %s"%("%s",workspacePattern%"%s")
-
+taskDirprefix = "CombineMultiCrab"
 ## Command line options for running Combine
 #asymptoticLimit = "combine -M Asymptotic --picky"
 #asymptoticLimitOptionExpectedOnly = " --run expected"
@@ -143,7 +143,7 @@ def produceLHCAsymptotic(opts, directory,
         for m in massPoints:
             # Create list of input files
             myInputFiles = []
-            for item in datacardPatterns+rootfilePatterns:
+            for item in datacardPatterns:
                 if item != None:
                     if "%s" in item:
                         name = item%m
@@ -153,11 +153,20 @@ def produceLHCAsymptotic(opts, directory,
                         if not item in myInputFiles:
                             myInputFiles.append(name)
             # Create input workspace for combine
-            workspaceCommand = workspaceOptionsSigmaBrLimit%(" ".join(map(str, myInputFiles)), m)
+            print "Merging datacards for m=%s"%m
+            combinedCardName = "combinedCardsM%s.txt"%m
+            if os.path.exists(combinedCardName):
+                os.system("rm %s"%combinedCardName)
+            combineCardsCommand = "combineCards.py %s > %s"%(" ".join(map(str, myInputFiles)), combinedCardName)
+            os.system(combineCardsCommand)
             print "Creating combine workspace for m=%s"%m
-            print workspaceCommand
+            #print workspaceCommand
+            workspaceCommand = workspaceOptionsSigmaBrLimit%(combinedCardName,m)
             os.system(workspaceCommand)
-            os.system("rm %s"%" ".join(map(str, myInputFiles)))
+            os.system("mv %s %s/."%(workspacePattern%m, mcc.dirname)
+            for i in range(len(myInputFiles)):
+                myInputFiles[i] = "%s/%s"%(mcc.dirname, myInputFiles[i])
+            os.system("rm %s %s"%(" ".join(map(str, myInputFiles)),os.join.path(mcc.dirname, combinedCardName)))
             myWorkspaces.append(workspacePattern%m)
             # Copy combine binary here
             os.system("cp %s/bin/%s/combine %s/."%(os.environ["CMSSW_BASE"], os.environ["SCRAM_ARCH"], mcc.dirname))
@@ -184,7 +193,6 @@ def produceLHCAsymptotic(opts, directory,
             command.append("# Do job report does not work")
             command.append("#cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml -p pset.py")
             aux.writeScript(os.path.join(mcc.dirname, "runGridJob"), "\n".join(command)+"\n")
-            
         else:
             for m in massPoints:
                 # Create crab task config
@@ -238,7 +246,7 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
     #
     # \param postfix   Additional string to be included in the directory name
     def createMultiCrabDir(self, postfix):
-        prefix = "CombineMultiCrab"
+        prefix = taskDirprefix
         self._createMultiCrabDir(prefix, postfix)
 
     ## Run Combine for the asymptotic limit
@@ -664,41 +672,7 @@ hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.As
     # \param mass    Mass
     # \return number of matches found
     def _parseResultFromCombineOutput(self, result, mass):
-        # Find combine output root file
-        possibleNames = ["higgsCombineobs_m%s.Asymptotic.mH%s.root"%(mass,mass),
-                         "higgsCombineblinded_m%s.Asymptotic.mH%s.root"%(mass,mass),
-                        ]
-        name = None
-        for n in possibleNames:
-            if os.path.exists(os.path.join(self.dirname,n)):
-                name = os.path.join(self.dirname,n)
-        if name == None:
-            raise Exception("Error: Could not find combine output root file! (checked: %s)"%", ".join(map(str, possibleNames)))
-        # Open root file
-        f = ROOT.TFile.Open(name)
-        myTree = f.Get("limit")
-        x = array.array('d', [0])
-        myTree.SetBranchAddress("limit",x)
-        myResultList = []
-        if myTree == None:
-            raise Exception("Error: Cannot open TTree in file '%s'!"%name)
-        for i in range(0, myTree.GetEntries()):
-            myTree.GetEvent(i)
-            myResultList.append(x[0])
-        f.Close()
-        # Store results
-        if len(myResultList) < 5:
-            print "Combine failed to produce results, perhaps rmin-rmax range is not wide enough"
-            result.failed = True
-            return -1
-        result.expectedMinus2Sigma = myResultList[0]
-        result.expectedMinus1Sigma = myResultList[1]
-        result.expected = myResultList[2]
-        result.expectedPlus1Sigma = myResultList[3]
-        result.expectedPlus2Sigma = myResultList[4]
-        if len(myResultList) == 6:
-            result.observed = myResultList[5]
-        return len(myResultList)
+        return parseResultFromCombineOutput(self.dirname, result, mass)
 
     ## Run LandS for the observed limit
     #
@@ -917,3 +891,46 @@ def parseSignificanceOutput(mass, outputFileName=None, outputString=None):
                            "pvalue": pvalue_obs}
 
     return ret
+
+
+## Extracts the result from combine output
+#
+# \param result  Result object to modify
+# \param mass    Mass
+# \return number of matches found
+def parseResultFromCombineOutput(dirname, result, mass):
+    # Find combine output root file
+    possibleNames = ["higgsCombineobs_m%s.Asymptotic.mH%s.root"%(mass,mass),
+                      "higgsCombineblinded_m%s.Asymptotic.mH%s.root"%(mass,mass),
+                    ]
+    name = None
+    for n in possibleNames:
+        if os.path.exists(os.path.join(dirname,n)):
+            name = os.path.join(dirname,n)
+    if name == None:
+        raise Exception("Error: Could not find combine output root file! (checked: %s)"%", ".join(map(str, possibleNames)))
+    # Open root file
+    f = ROOT.TFile.Open(name)
+    myTree = f.Get("limit")
+    x = array.array('d', [0])
+    myTree.SetBranchAddress("limit",x)
+    myResultList = []
+    if myTree == None:
+        raise Exception("Error: Cannot open TTree in file '%s'!"%name)
+    for i in range(0, myTree.GetEntries()):
+        myTree.GetEvent(i)
+        myResultList.append(x[0])
+    f.Close()
+    # Store results
+    if len(myResultList) < 5:
+        print "Combine failed to produce results, perhaps rmin-rmax range is not wide enough"
+        result.failed = True
+        return -1
+    result.expectedMinus2Sigma = myResultList[0]
+    result.expectedMinus1Sigma = myResultList[1]
+    result.expected = myResultList[2]
+    result.expectedPlus1Sigma = myResultList[3]
+    result.expectedPlus2Sigma = myResultList[4]
+    if len(myResultList) == 6:
+        result.observed = myResultList[5]
+    return len(myResultList)
