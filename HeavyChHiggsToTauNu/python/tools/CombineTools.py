@@ -163,7 +163,7 @@ def produceLHCAsymptotic(opts, directory,
             #print workspaceCommand
             workspaceCommand = workspaceOptionsSigmaBrLimit%(combinedCardName,m)
             os.system(workspaceCommand)
-            os.system("mv %s %s/."%(workspacePattern%m, mcc.dirname)
+            os.system("mv %s %s/."%(workspacePattern%m, mcc.dirname))
             for i in range(len(myInputFiles)):
                 myInputFiles[i] = "%s/%s"%(mcc.dirname, myInputFiles[i])
             os.system("rm %s %s"%(" ".join(map(str, myInputFiles)),os.join.path(mcc.dirname, combinedCardName)))
