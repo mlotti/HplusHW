@@ -11,7 +11,7 @@ datasets.append('/TTbar_HBWB_HToTauNu_M-160_13TeV_pythia6/Spring14miniaod-PU20bx
 datasets.append('/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM')
 datasets.append('/QCD_Pt-50to80_TuneZ2star_13TeV_pythia6/Spring14miniaod-PU20bx25_POSTLS170_V5-v2/MINIAODSIM')
 datasets.append('/QCD_Pt-50to80_Tune4C_13TeV_pythia8/Spring14miniaod-castor_PU20bx25_POSTLS170_V5-v1/MINIAODSIM')
-
+datasets.append('/TT_Tune4C_13TeV-pythia8-tauola/Spring14miniaod-PU20bx25_POSTLS170_V5-v1/MINIAODSIM')
 
 
 dataset_re = re.compile("^/(?P<name>\S+?)/")

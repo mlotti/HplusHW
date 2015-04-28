@@ -33,9 +33,15 @@ private:
   Count cJetSelection;
   Count cBJetSelection;
   Count cMetCut;  
+  Count cBackToBackCut;
+  Count cCollinearCut;
   Count cSelectedJets;
-  Count cSelectedBJets;
+  //  Count cSelectedBJets;
   Count cSelectedTrueBJets;
+  Count cSelectedBtaggedJets;
+  Count cSelectedTrueBtaggedJets;
+  Count cSelectedNonBJets;
+  Count cSelectedFakeBtaggedJets;
   Count cTauCandidates;
   Count cTauDecayMode;
   Count cTauPtCut;
@@ -97,6 +103,8 @@ private:
   WrappedTH1 *htransverseMass;
   WrappedTH1 *htransverseMassTriangleCut; 
   WrappedTH1 *htransverseMass3JetCut;
+  WrappedTH1 *htransverseMass_bbAndColCut;
+  WrappedTH1 *htransverseMass_bbCut;
   WrappedTH2 *hgenjetEtaVsDeltaPt; 
   WrappedTH2 *hgenjetPhiVsDeltaPt; 
   WrappedTH2 *hgenjetPtVsDeltaPt; 
@@ -108,6 +116,11 @@ private:
   WrappedTH1 *hJetTauEtSum;
   WrappedTH1 *hJetEtSum;
   WrappedTH1 *hDPhi3JetsMet;
+  WrappedTH1 *hRadiusbb;
+  WrappedTH1 *hRadiusCol;
+  WrappedTH1 *hconstantEtSum; 
+  WrappedTH1 *hslopeEtSum; 
+
   std::vector<double> fECALDeadCellEtaTable;
   std::vector<double> fECALDeadCellPhiTable;
 
@@ -130,9 +143,14 @@ CorrelationAnalysis::CorrelationAnalysis(const ParameterSet& config):
   cJetSelection(fEventCounter.addCounter("Jet selection")),
   cBJetSelection(fEventCounter.addCounter("B-jet selection")),
   cMetCut(fEventCounter.addCounter("Met cut")),
+  cBackToBackCut(fEventCounter.addCounter("BackToBack cut")),
+  cCollinearCut(fEventCounter.addCounter("Collinear cut")),
   cSelectedJets(fEventCounter.addSubCounter("B-jet selection","Selected jets")),
-  cSelectedBJets(fEventCounter.addSubCounter("B-jet selection","Selected b-jets")),
-  cSelectedTrueBJets(fEventCounter.addSubCounter("B-jet selection","Selected true b-jets")),
+  cSelectedBtaggedJets(fEventCounter.addSubCounter("B-jet selection","Selected b-jets")),
+  cSelectedTrueBJets(fEventCounter.addSubCounter("B-jet selection","True b-jets")),
+  cSelectedTrueBtaggedJets(fEventCounter.addSubCounter("B-jet selection","b-tagged true b-jets")),
+  cSelectedNonBJets(fEventCounter.addSubCounter("B-jet selection","Non b-jets")),
+  cSelectedFakeBtaggedJets(fEventCounter.addSubCounter("B-jet selection","b-tagged non b-jets")),
   cTauCandidates(fEventCounter.addSubCounter("Tau-jet selection","tau candidates")),
   cTauDecayMode(fEventCounter.addSubCounter("Tau-jet selection","tau decay mode")),
   cTauPtCut(fEventCounter.addSubCounter("Tau-jet selection","tau pt cut")),
@@ -144,7 +162,9 @@ CorrelationAnalysis::CorrelationAnalysis(const ParameterSet& config):
   cTauRtauCut(fEventCounter.addSubCounter("Tau-jet selection","tau Rtau cut")),
   cTauNprongCut(fEventCounter.addSubCounter("Tau-jet selection","tau Nprong cut")),
   cTauTrueTau(fEventCounter.addSubCounter("Tau-jet selection","true tau selected"))
-{ }
+{ } 
+
+
 
 void CorrelationAnalysis::book(TDirectory *dir) {
 
@@ -183,7 +203,7 @@ void CorrelationAnalysis::book(TDirectory *dir) {
   hMetJetInHole02= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetJetInHole02", "MetJetInHoleDR02", 200, 0., 1000.);
   hMetNoJetInHole02= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MetNoJetInHole02", "MetNoJetInHoleDR02", 200, 0., 1000.);
   hPt3Jets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Pt3Jets", "Pt3Jets", 200, 0., 1000.);
-  h3jetPtcut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TheeJetPtcut", "TheeJetPtcut", 200, 0., 1000.);
+  h3jetPtcut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TheeJetPtcut", "TheeJetPtcut", 200, 0., 400.);
   hM3jets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "M3Jets", "M3Jets", 200, 0., 600.);
   hDeltaPhiTauMet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DeltaPhiTauMet", "DeltaPhiTauMet", 90, 0., 180);
   hDPhiTauMetVsPt3jets = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "DPhiTauMetVsPt3jets", "Pt3jets;#Delta#phi(#tau jet,MET) (^{o});p_{T}^{3 jets}(GeV)", 180, 0., 180, 100, 0., 400.);
@@ -199,6 +219,13 @@ void CorrelationAnalysis::book(TDirectory *dir) {
   htransverseMass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "transverseMass", "transverseMass", 200, 0., 800);
   htransverseMassTriangleCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "transverseMassTriangleCut", "transverseMassTriangleCut", 200, 0., 800);  
   htransverseMass3JetCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "transverseMass3JetCut", "transverseMass3JetCut", 200, 0., 800); 
+  htransverseMass_bbCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "transverseMass_bbCut", "transverseMass_bbCut", 200, 0., 800);
+  htransverseMass_bbAndColCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "transverseMass_bbAndColCut", "transverseMass_bbAndColCut", 200, 0., 800);
+  hRadiusbb = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Radiusbb", "Radiusbb", 90, 0., 180);
+  hRadiusCol = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "RadiusCol", "RadiusCol", 90, 0., 180);
+  hconstantEtSum = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "constantEtSum", "constantEtSum", 100, 0., 400);
+  hslopeEtSum = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "slopeEtSum", "slopeEtSum", 100, 0., 2);
+
   hNtrueBjets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NtrueBjets", "NtrueBjets", 20, 0, 20);
   hgenJetPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "genjetPt", "genJet pT", 200, 0, 1000);
   hgenJetEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "genjetEta", "genJet eta", 100, -5, 5);
@@ -332,11 +359,16 @@ void CorrelationAnalysis::process(Long64_t entry) {
   
   double myMet = fEvent.met_Type1().et();
   hMet->Fill(myMet); 
-  hMetPhi->Fill(fEvent.met_Type1().phi()* 180/3.14159265); 
+  hMetPhi->Fill(fEvent.met_Type1().phi()* 180/3.14159265);
+ 
+  //  double myGenMet = fEvent.GenMET.et();
 
   // if(myMet <  fMetCut)
   //    return;
   //  cMetCut.increment();
+
+
+
 
   std::vector<Jet> selectedJets;
   for(Jet jet: fEvent.jets()) {
@@ -407,18 +439,15 @@ void CorrelationAnalysis::process(Long64_t entry) {
   if(selectedJets.size() < 3)
     return;
   cJetSelection.increment();
- 
 
 
-  Jet jet1 = selectedJets[0];
-  Jet jet2 = selectedJets[1];
-  Jet jet3 = selectedJets[2];
+  //  for(PFCand pfcand: fEvent.PFCands()) {
+  //  }
+
+
+
+ // Calculate transverse mass 
   Tau tau = selectedTaus[0];
-  //  std::cout << "jet1 pt "<< jet1.pt() << "jet1 id "<< jet1.pdgId() << std::endl;
-  //  std::cout << "jet2 pt "<< jet2.pt() << std::endl;
-  //std::cout << "jet3 pt "<< jet3.pt() << std::endl;
-
-
   math::XYZTLorentzVector myTau;
   myTau = tau.p4(); 
   double myCosPhi = 999;
@@ -428,18 +457,13 @@ void CorrelationAnalysis::process(Long64_t entry) {
   double myDeltaPhi=-999;
   if ( myCosPhi < 1) myDeltaPhi =   std::acos(myCosPhi)* 180/3.14159265;
 
-  // double DeltaPhiTauMET  = myDeltaPhi;
-
-
-
- // Calculate transverse mass                                                                                                                                                                     
   double transverseMass = -999;
   double myTransverseMassSquared = 0;
   if (std::abs(myCosPhi) < 1)
     myTransverseMassSquared = 2 * tau.pt() * myMet * (1.0-myCosPhi);
   if (myTransverseMassSquared >= 0)
     transverseMass = TMath::Sqrt(myTransverseMassSquared);
-  htransverseMass->Fill(transverseMass);
+  //  htransverseMass->Fill(transverseMass);
 
  
 
@@ -451,29 +475,45 @@ void CorrelationAnalysis::process(Long64_t entry) {
     }
   hNjets->Fill(njets);
 
-  std::vector<Jet> selectedBJets;
+
+  // B tagging
+  std::vector<Jet> selectedBtaggedJets;
 
   size_t nbjets = 0;  
   for(Jet& jet: selectedJets) {
     cSelectedJets.increment();
+    if (std::abs(jet.pdgId()) == 5) {
+      cSelectedTrueBJets.increment();
+    }
+    if (std::abs(jet.pdgId()) != 5) {
+      cSelectedNonBJets.increment();
+    }
     hjetProbabilityBJetTags->Fill(jet.jetProbabilityBJetTags());
     hjetBProbabilityBJetTags->Fill(jet.jetBProbabilityBJetTags());
     htrackCountingHighEffBJetTags->Fill(jet.trackCountingHighEffBJetTags());
     htrackCountingHighPurBJetTags->Fill(jet.trackCountingHighPurBJetTags());
-    //   std::cout << "jet eta  " << jet.eta() << " jet.jetBProbabilityBJetTags()" << jet.jetBProbabilityBJetTags()<< " jet.jetProbabilityBJetTags()" << jet.jetProbabilityBJetTags() << std::endl;   
+    //    std::cout << "  combinedInclusiveSecondaryVertexV2BjetTags() " <<  jet.combinedInclusiveSecondaryVertexV2BjetTags() << "  simpleSecondaryVertexHighEffBjetTags() " <<  jet.simpleSecondaryVertexHighEffBjetTags() << "  pileupJetIdfullDiscriminant()  " <<  jet.pileupJetIdfullDiscriminant() << std::endl;   
     //  if(jet.jetProbabilityBJetTags() > 0.898)
-    if(jet.jetProbabilityBJetTags() > 0.898){
-      cSelectedBJets.increment();
+    if(jet.jetProbabilityBJetTags() > 0.9){   
+    //    if(jet.trackCountingHighEffBJetTags() > 0.9){
+    //    if(jet.trackCountingHighPurBJetTags() > 0.3){
+      cSelectedBtaggedJets.increment();
       hBJetPt->Fill(jet.pt());
       hBJetEta->Fill(jet.eta());
-      selectedBJets.push_back(jet);      
+      selectedBtaggedJets.push_back(jet);      
       ++nbjets;
+      if (std::abs(jet.pdgId()) == 5) {
+	cSelectedTrueBtaggedJets.increment();
+      }
+      if (std::abs(jet.pdgId()) != 5) {
+	cSelectedFakeBtaggedJets.increment();
+      }
     }
   }
   hNBjets->Fill(nbjets);
 
 
-  if(selectedBJets.size() < 1)
+  if(selectedBtaggedJets.size() < 1)
     return;
   cBJetSelection.increment();
 
@@ -485,9 +525,9 @@ void CorrelationAnalysis::process(Long64_t entry) {
 
   double ptmax = 0;
   size_t ntrueBjets = 0;
-  for(Jet& jet: selectedBJets) {
+  for(Jet& jet: selectedBtaggedJets) {
     if (std::abs(jet.pdgId()) == 5) {
-      cSelectedTrueBJets.increment();
+      //      cSelectedTrueBJets.increment();
       hrealBJetPt->Fill(jet.pt());
       hrealBJetEta->Fill(jet.eta());
       if (jet.pt() > ptmax) {
@@ -504,12 +544,21 @@ void CorrelationAnalysis::process(Long64_t entry) {
     hrealMaxBJetEta->Fill(trueBjetMax->eta()); 
   }
 
-
+  //  MET cut
   //if(myMet <  fMetCut)
   if(myMet <  60)
     return;
   cMetCut.increment();
 
+  htransverseMass->Fill(transverseMass);
+
+
+
+  // Tail suppression
+
+  Jet jet1 = selectedJets[0];
+  Jet jet2 = selectedJets[1];
+  Jet jet3 = selectedJets[2];
 
   double DeltaPhiTauMET  =  std::abs(ROOT::Math::VectorUtil::DeltaPhi(tau,fEvent.met_Type1())) * 180/3.14159265; 
   double DeltaPhiJet1MET  =  std::abs(ROOT::Math::VectorUtil::DeltaPhi(jet1,fEvent.met_Type1())) * 180/3.14159265; 
@@ -521,7 +570,30 @@ void CorrelationAnalysis::process(Long64_t entry) {
   hDPhiTauMetVsDphiJet2Met->Fill( DeltaPhiTauMET, DeltaPhiJet2MET);
   hDPhiTauMetVsDphiJet3Met->Fill( DeltaPhiTauMET, DeltaPhiJet3MET);
   hDeltaPhiTauMet->Fill((DeltaPhiTauMET));
-  
+
+
+  // QCD tail killer cuts
+  // back-to-back and collinear cuts with jet1
+  double radius_bb = 60; 
+  double radius_col = 30;  
+  double bb_cut = std::sqrt(radius_bb*radius_bb - (180 - DeltaPhiTauMET)*(180 - DeltaPhiTauMET)); 
+  double col_cut = std::sqrt(radius_col*radius_col - (180 - DeltaPhiJet1MET)* (180 - DeltaPhiJet1MET));
+  double Rbb = std::sqrt(DeltaPhiJet1MET*DeltaPhiJet1MET + (180 - DeltaPhiTauMET)*(180 - DeltaPhiTauMET)); 
+  double Rcol = std::sqrt(DeltaPhiTauMET*DeltaPhiTauMET - (180 - DeltaPhiJet1MET)* (180 - DeltaPhiJet1MET));
+  hRadiusbb->Fill(Rbb);
+  hRadiusCol->Fill(Rcol);
+
+  if (DeltaPhiJet1MET < bb_cut) return;
+  cBackToBackCut.increment();   
+  htransverseMass_bbCut->Fill(transverseMass);
+
+  if (DeltaPhiTauMET  < col_cut) return;
+  cCollinearCut.increment();   
+  htransverseMass_bbAndColCut->Fill(transverseMass);
+
+ 
+
+ // Correlation cuts
   math::XYZTLorentzVector threeJets;
   threeJets = jet1.p4() + jet2.p4() + jet3.p4();
 
@@ -531,16 +603,15 @@ void CorrelationAnalysis::process(Long64_t entry) {
 
   hDPhiTauMetVsPt3jets->Fill(std::abs(DeltaPhiTauMET),threeJets.pt());
  
- 
-
   double ptcut = 400.0 * (1.0 - DeltaPhiTauMET/180.0);
-  h3jetPtcut->Fill(ptcut);
+  double ptConstant =  threeJets.pt() /(1.0 - DeltaPhiTauMET/180.0);
+  h3jetPtcut->Fill(ptConstant);
 
   double drTau3Jets = ROOT::Math::VectorUtil::DeltaR(tau.p4(),threeJets);
   hDrTau3Jets->Fill(drTau3Jets); 
 
 
- // mt with triangle cut
+ // mt with 3jet and  triangle cut
   if (threeJets.pt()  > ptcut )    htransverseMass3JetCut->Fill(transverseMass);
 
   if (!(threeJets.pt()  < ptcut && DeltaPhiTauMET  > 60)) { 
@@ -554,6 +625,12 @@ void CorrelationAnalysis::process(Long64_t entry) {
   double JetTauEtSum = jet1.pt() + jet2.pt() + jet3.pt()+ tau.pt();
   double JetTauMetEtSum = jet1.pt() + jet2.pt() + jet3.pt()+ tau.pt() + myMet;
   double TauMetEtSum = tau.pt() + myMet;
+  // assume known slope
+  double constantEtSum = JetTauMetEtSum - 1.4 *  JetEtSum;
+  // assume known constant term
+  double slopeEtSum = (JetTauMetEtSum - 100)/JetEtSum;
+  hconstantEtSum->Fill(constantEtSum);
+  hslopeEtSum->Fill(slopeEtSum);
 
   
   hJetEtSum->Fill(JetEtSum);

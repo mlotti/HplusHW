@@ -32,7 +32,7 @@ def main():
     datasets.remove(datasets.getDataDatasetNames())
 
 #    datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb  
-    datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(100) # pb ##  test 
+    datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(10) # pb ##  test 
     datasets.getDataset("TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb   
     datasets.getDataset("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola").setCrossSection(245.8) # pb   
  #   datasets.getDataset("QCD_Pt_50to80_Tune4C_13TeV_pythia8").setCrossSection(8148778.0) # pb   
@@ -147,7 +147,7 @@ def dataMCExample(datasets):
     createDrawPlot("trackCountingHighEffBJetTags", xlabel="Discriminator", ylabel="Number of events", rebin=1, log=True)
     createDrawPlot("trackCountingHighPurBJetTags", xlabel="Discriminator", ylabel="Number of events", rebin=1, log=True)
     createDrawPlot("Pt3Jets", xlabel="p_{T}^{3jets} (GeV/c)", ylabel="Number of events", rebin=1, log=False)
-    createDrawPlot("TheeJetPtcut", xlabel="ThreeJetPtcut (GeV/c)", ylabel="Number of events", rebin=2, log=False, opts={"xmax":450, "xmin":0})
+    createDrawPlot("TheeJetPtcut", xlabel="ThreeJetPtcut (GeV/c)", ylabel="Number of events", rebin=4, log=True, opts={"xmax":450, "xmin":0})
     createDrawPlot("DPhi3JetsMet", xlabel="#Delta#phi(3 jets, MET)", ylabel="Number of events", rebin=2, log=False)
     createDrawPlot("JetTauEtSum", xlabel="#Sigma(Jets,#tau jet) (GeV)", ylabel="Number of events", rebin=2, log=False)
     createDrawPlot("JetTauMetEtSum", xlabel="#Sigma(Jets,#tau jet, MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
@@ -157,7 +157,12 @@ def dataMCExample(datasets):
     createDrawPlot("transverseMass", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
     createDrawPlot("transverseMassTriangleCut", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
     createDrawPlot("transverseMass3JetCut", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
-
+    createDrawPlot("transverseMass_bbCut", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("transverseMass_bbAndColCut", xlabel="m_{T}(#tau,MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("Radiusbb",  xlabel="Back-to-Back radius (^{o})", ylabel="Number of events", rebin=2, log=True)
+    createDrawPlot("RadiusCol", xlabel="Collinear radius (^{o})", ylabel="Number of events", rebin=2, log=True)
+    createDrawPlot("constantEtSum", xlabel="Constant term (GeV)", ylabel="Number of events", rebin=2, log=True)
+    createDrawPlot("slopeEtSum", xlabel="Slope", ylabel="Number of events", rebin=2, log=True)
 #    plots.drawPlot( plots.DataMCPlot(datasets, "Pt3Jets", normalizeToLumi=20000), "Pt3Jets", xlabel="p_{T}^{3jets} (GeV/c)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 #    plots.drawPlot( plots.DataMCPlot(datasets, "DeltaPhiTauMet", normalizeToLumi=20000), "DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 
