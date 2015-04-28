@@ -480,7 +480,19 @@ class TableProducer:
                 if self._opts.lands:
                     myRow.append(n.getDistribution())
                 elif self._opts.combine:
-                    myRow.append(n.getDistribution().replace("shapeQ","shape").replace("shapeStat","shape"))
+                    # Check if there are shapes and scalars on the same row
+                    shapeAndScalarStatus = False
+                    for subN in self._extractors:
+                        if n != subN:
+                            if subN.getMasterId() == n.getId():
+                                nIsShape = n.getDistribution().startswith("shape")
+                                subnIsShape = subN.getDistribution().startswith("shape")
+                                if (nIsShape and not subnIsShape) or (not nIsShape and subnIsShape):
+                                    shapeAndScalarStatus = True
+                    if shapeAndScalarStatus:
+                        myRow.append("shape?")
+                    else:
+                        myRow.append(n.getDistribution().replace("shapeQ","shape").replace("shapeStat","shape"))
                 # Loop over columns
                 for c in sorted(self._datasetGroups, key=lambda x: x.getLandsProcess()):
                     if c.isActiveForMass(mass,self._config):
@@ -492,8 +504,16 @@ class TableProducer:
                             if n.getId() in myVirtualMergeInformation.keys():
                                 myValue = myVirtualMergeInformation[n.getId()] # Overwrite virtually merged value
                             myValueString = ""
+                            # Check if the slave is a shape nuisance
+                            isShapeStatus = False
+                            for columnNuisanceId in c._nuisanceIds:
+                                for tmpNuisance in self._extractors:
+                                   if tmpNuisance.getId() == columnNuisanceId:
+                                       if n.getId() == tmpNuisance.getId() or n.getId() == tmpNuisance.getMasterId():
+                                           isShapeStatus = tmpNuisance.isShapeNuisance()
+
                             # Check output format
-                            if myValue == None or n.isShapeNuisance():
+                            if isShapeStatus:
                                 myValueString = "1"
                             else:
                                 if isinstance(myValue, ScalarUncertaintyItem):
@@ -772,6 +792,7 @@ class TableProducer:
             if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 if EWKFakes != None:
                     TotalExpected.Add(EWKFakes)
+
             # Construct table
             myOutput = "*** Event yield summary ***\n"
             myOutput += self._generateHeader(m)

@@ -9,6 +9,7 @@ class TauLegSelection : public BaseSelection {
   ~TauLegSelection();
 
   bool offlineSelection(Event&);
+  bool onlineSelection(Event&);
 
  private:
 };
@@ -54,4 +55,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent){
   return selected;
 }
 
+bool TauLegSelection::onlineSelection(Event& fEvent){
+  return fEvent.configurableTriggerDecision2();
+}
 #endif
