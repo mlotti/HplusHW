@@ -26,7 +26,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 def main():
     # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabCfg(analysisName="test")
+    datasets = dataset.getDatasetsFromMulticrabCfg(analysisName="test", setCrossSectionAutomatically=False)
 
     # We don't have yet the lumi information handled in NtupleAnalysis, so remove data for now
     datasets.remove(datasets.getDataDatasetNames())
@@ -35,18 +35,21 @@ def main():
     datasets.getDataset("TBHp_HToTauNu_M_200_13TeV_pythia6").setCrossSection(10) # pb ##  test 
     datasets.getDataset("TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6").setCrossSection(0.336902*2*0.955592) # pb   
     datasets.getDataset("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola").setCrossSection(245.8) # pb   
- #   datasets.getDataset("QCD_Pt_50to80_Tune4C_13TeV_pythia8").setCrossSection(8148778.0) # pb   
+    datasets.getDataset("TT_Tune4C_13TeV_pythia8_tauola").setCrossSection(245.8) # pb 
+    datasets.getDataset("QCD_Pt_50to80_TuneZ2star_13TeV_pythia6").setCrossSection(8148778.0) # pb   
     datasets.getDataset("QCD_Pt_50to80_Tune4C_13TeV_pythia8").setCrossSection(8.1487780) # pb test  
+   # datasets.getDataset("DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12").setCrossSection(8.1487780) # pb test    
+    datasets.getDataset("DYJetsToLL_M_50_13TeV_madgraph_pythia8_tauola_v2").setCrossSection(8.1487780) # pb test  
 
     # For this we don't have cross section
     datasets.remove(["DYJetsToLL_M10to50_TuneZ2star_Summer12"])
-###    datasets.remove(["TBHp_HToTauNu_M_200_13TeV_pythia6"])
+#    datasets.remove(["TBHp_HToTauNu_M_200_13TeV_pythia6"])
     datasets.remove(["QCD_Pt_50to80_TuneZ2star_13TeV_pythia6"])
 #    datasets.remove(["QCD_Pt_50to80_Tune4C_13TeV_pythia8"])
     datasets.remove(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6"])
-
+    datasets.remove(["TT_Tune4C_13TeV_pythia8_tauola"])
     datasets.remove(["DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12"])
-    datasets.remove(["DYJetsToLL_M_50_13TeV_madgraph_pythia8_tauola_v2"])
+#    datasets.remove(["DYJetsToLL_M_50_13TeV_madgraph_pythia8_tauola_v2"])
     # These have 0 events after skim in multicrab_TEST5, and the code crashes because of that
     datasets.remove([
         "QCD_Pt30to50_TuneZ2star_Summer12",
@@ -62,10 +65,10 @@ def main():
 
     # At the moment the collision energy must be set by hand
     for dset in datasets.getMCDatasets():
-        dset.setEnergy("8")
+        dset.setEnergy("13")
 
     # At the moment the cross sections must be set by hand
-    xsect.setBackgroundCrossSections(datasets)
+    #xsect.setBackgroundCrossSections(datasets)
 
     # Default merging and ordering of data and MC datasets
     # All data datasets to "Data"
@@ -76,6 +79,7 @@ def main():
     datasets.rename("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola", "TTJets")
     datasets.rename("QCD_Pt_50to80_Tune4C_13TeV_pythia8", "QCD")
 
+ 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 

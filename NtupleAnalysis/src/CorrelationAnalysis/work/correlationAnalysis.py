@@ -14,6 +14,7 @@ if len(sys.argv) != 2:
     sys.exit(0)
 process.addDatasetsFromMulticrab(sys.argv[1])
 
+
 # Example of adding an analyzer
 process.addAnalyzer("test", Analyzer("CorrelationAnalysis",
                                      tauPtCut = 50
