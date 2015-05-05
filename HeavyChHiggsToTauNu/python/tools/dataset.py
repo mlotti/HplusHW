@@ -2394,6 +2394,7 @@ class Dataset:
     # \param availableSystematicVariationSources List of strings of the systematic variations
     #                                      available on the ROOT file (without the "Plus"/"Minus" postfix)
     # \param enableSystematicVariationForData Add \a systematicVariation to directory name also for data (needed for embedding)
+    # \param setCrossSectionAutomatically Try to set cross section automatically if the dataset is MC (default True)
     #
     # 
     # Opens the ROOT file, reads 'configInfo/configInfo' histogram
@@ -2417,7 +2418,7 @@ class Dataset:
     # therefore the 
     def __init__(self, name, tfiles, analysisName,
                  searchMode=None, dataEra=None, optimizationMode=None, systematicVariation=None,
-                 weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False, availableSystematicVariationSources=[], enableSystematicVariationForData=False):
+                 weightedCounters=True, counterDir="counters", useAnalysisNameOnly=False, availableSystematicVariationSources=[], enableSystematicVariationForData=False, setCrossSectionAutomatically=True):
         self.rawName = name
         self.name = name
         self.files = tfiles
@@ -2489,6 +2490,8 @@ class Dataset:
         self._systematicVariation = systematicVariation
         self._useAnalysisNameOnly = useAnalysisNameOnly
         self._availableSystematicVariationSources = availableSystematicVariationSources
+        self._enableSystematicVariationForData = enableSystematicVariationForData
+        self._setCrossSectionAutomatically = setCrossSectionAutomatically
 
         self._analysisDirectoryName = self._analysisName
         if not self._useAnalysisNameOnly:
@@ -2543,7 +2546,7 @@ class Dataset:
 
 
         # Set cross section, if MC and we know the energy
-        if self.isMC():
+        if self.isMC() and setCrossSectionAutomatically:
             if "energy" in self.info:
                 crosssection.setBackgroundCrossSectionForDataset(self)
             else:
@@ -2577,7 +2580,7 @@ class Dataset:
     # while also keeping the original ttbar with the original SM cross
     # section.
     def deepCopy(self):
-        d = Dataset(self.rawName, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._systematicVariation, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly, self._availableSystematicVariationSources)
+        d = Dataset(self.rawName, self.files, self._analysisName, self._searchMode, self._dataEra, self._optimizationMode, self._systematicVariation, self._weightedCounters, self._unweightedCounterDir, self._useAnalysisNameOnly, self._availableSystematicVariationSources, self._enableSystematicVariationForData, self._setCrossSectionAutomatically)
         d.info.update(self.info)
         d.nAllEvents = self.nAllEvents
         d.name = self.name
