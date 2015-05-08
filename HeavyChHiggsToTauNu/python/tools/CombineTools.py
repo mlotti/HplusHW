@@ -56,7 +56,7 @@ defaultNumberOfJobs = 20
 
 
 ## Default command line options for LHC-CLs (asymptotic, observed limit)
-lhcAsymptoticOptionsObserved = "-M Asymptotic --picky -v 2 --rAbsAcc 0.00001"
+lhcAsymptoticOptionsObserved = '-M Asymptotic --picky -v 2 --rRelAcc 0.001 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerTolerance=0.001 --cminFallbackAlgo "Minuit,0:0.001"'
 ## Default command line options for LHC-CLs (asymptotic, expected limit)
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
@@ -155,17 +155,18 @@ def produceLHCAsymptotic(opts, directory,
                             myInputFiles.append(name)
                     else:
                         if not item in myInputFiles:
-                            myInputFiles.append(name)
+                            myInputFiles.append(item)
             # Create input workspace for combine
             print "Merging datacards for m=%s"%m
             combinedCardName = "combinedCardsM%s.txt"%m
             if os.path.exists(combinedCardName):
                 os.system("rm %s"%combinedCardName)
             combineCardsCommand = "combineCards.py %s > %s"%(" ".join(map(str, myInputFiles)), combinedCardName)
+            print combineCardsCommand
             os.system(combineCardsCommand)
             print "Creating combine workspace for m=%s"%m
-            #print workspaceCommand
             workspaceCommand = workspaceOptionsSigmaBrLimit%(combinedCardName,m)
+            print workspaceCommand
             os.system(workspaceCommand)
             os.system("mv %s %s/."%(workspacePattern%m, mcc.dirname))
             #for i in range(len(myInputFiles)):
