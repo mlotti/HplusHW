@@ -351,10 +351,11 @@ class BrContainer:
                     mySignalScaleFactor = myResult["%sTheory"%dmkey]
                     # Leave reader for first key open
                     if dmkey == self._decayModeMatrix[fskey].keys()[0]:
-                        myPrimaryReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
-                        myPrimaryReader.scaleSignal(mySignalScaleFactor)
-                        myOriginalRates.append(float(myPrimaryReader.getRateValue(myPrimaryReader.getDatasetNames()[0])))
-                        #print fskey,dmkey,myOriginalRates[len(myOriginalRates)-1]
+                        if not "_Control_" in myDatacardPattern: # Skip control cards (they have no signal)
+                            myPrimaryReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
+                            myPrimaryReader.scaleSignal(mySignalScaleFactor)
+                            myOriginalRates.append(float(myPrimaryReader.getRateValue(myPrimaryReader.getDatasetNames()[0])))
+                            #print fskey,dmkey,myOriginalRates[len(myOriginalRates)-1]
                     else:
                         # Scale according to br and add signal to primary (i.e. only one datacard for the decay modes)
                         myReader = DatacardReader.DataCardReader(".", mHp, myDatacardPattern, myRootFilePattern, rootFileDirectory="", readOnly=False)
