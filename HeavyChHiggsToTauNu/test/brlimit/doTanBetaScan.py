@@ -196,7 +196,7 @@ def main(opts, brContainer, m, scen, plotContainers):
     if opts.creategridjobs:
         return
       
-    tbtools.saveTanbetaResults(brContainer, plotContainers[scen], scen, m, resultKeys)
+    #tbtools.saveTanbetaResults(brContainer, plotContainers[scen], scen, m, resultKeys)
 
 def purgeDecayModeMatrix(myDecayModeMatrix, myMassPoints):
     myCommonMassPoints = []
@@ -447,17 +447,12 @@ if __name__ == "__main__":
                     myPlots[scen] = tbtools.TanBetaResultContainer(scen, myMassPoints)
                 brContainer = tbtools.BrContainer(myDecayModeMatrix, scen, myMassPoints)
                 main(opts, brContainer, m, scen, myPlots)
-    print "\nTan beta scan is done, results have been saved to %s"%_resultFilename
     
     if opts.creategridjobs:
         # Print instructions
         print "*** Created crab task dirs for multicrab ***"
-        #print "*** To submit, do the following ***"
-        #print "cd %s"%dirname
-        #print "multicrab -create -submit all"
-    #else:
-        ## Apply TDR style
-        #style = tdrstyle.TDRStyle()
-
-        #for scen in myScenarios:
-            #myPlots[scen].doPlot()
+        print "*** To submit, retrieve and obtain results run tanbetaOmatic.py ***"
+    else:
+        # interactive running
+        print "*** Tan beta scan is done ***"
+        print "*** To do plots, run brlimit/tanbetaReadResults.py ***"

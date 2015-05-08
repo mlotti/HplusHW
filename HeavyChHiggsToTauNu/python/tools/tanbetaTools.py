@@ -23,10 +23,22 @@ _resultKeys = ["observed",  "expected", "expectedPlus1Sigma", "expectedPlus2Sigm
 class TanBetaResultContainer:
     def __init__(self, mssmModel, massPoints):
         self._mssmModel = mssmModel
-        self._massPoints = massPoints[:]
+        self._massPoints = []
+        myTmpMasses = []
+        for m in massPoints:
+            myTmpMasses.append(float(m))
+        myTmpMasses.sort()
+        for m in myTmpMasses:
+            self._massPoints.append("%.0f"%m)
         self._resultKeys = []
         self._resultsLow = {} # dictionary, where key is resultKey and values are dictionaries of tan beta limits for masses
         self._resultsHigh = {} # dictionary, where key is resultKey and values are dictionaries of tan beta limits for masses
+
+    def isLightHp(self):
+        for m in self._massPoints:
+            if float(m) < 175:
+                return True
+        return False
 
     def addLowResult(self, mass, resultKey, tanbetalimit):
         if not resultKey in self._resultKeys:
@@ -58,103 +70,110 @@ class TanBetaResultContainer:
         if not firstKey in self._resultsLow.keys() or not secondKey in self._resultsLow.keys():
             return None
         lenm = len(self._massPoints)
-        g = ROOT.TGraph(lenm*4+2)
-        # Low limit, bottom pass left to right
+        g = ROOT.TGraph(lenm*4+4)
+        g.SetPoint(0, -1, 0.999)
+        # Lowerlimit, bottom pass left to right
         for i in range(0, lenm):
 	    a = self._resultsLow[firstKey][self._massPoints[i]]
-	    if a < 0:
-		g.SetPoint(i, float(self._massPoints[i]), _minBrTanBeta)
+	    if a < 0: 
+		if float(self._massPoints[i]) < 179.0:
+                    g.SetPoint(i+1, float(self._massPoints[i]), _minBrTanBeta)
+                else:
+                    g.SetPoint(i+1, float(self._massPoints[i]), 0.999)
 	    else:
-		g.SetPoint(i, float(self._massPoints[i]), a)
-        # Low limit, top pass right to left
+		g.SetPoint(i+1, float(self._massPoints[i]), a)
+        # Lower limit, top pass right to left
         for i in range(0, lenm):
             j = lenm - i - 1
             a = self._resultsLow[secondKey][self._massPoints[j]]
             if a < 0:
-		g.SetPoint(i+lenm, float(self._massPoints[j]), _minBrTanBeta)
+		if float(self._massPoints[j]) < 179.0:
+                    g.SetPoint(i+1+lenm, float(self._massPoints[j]), _minBrTanBeta)
+                else:
+                    g.SetPoint(i+1+lenm, float(self._massPoints[j]), 0.999)
 	    else:
-		g.SetPoint(i+lenm, float(self._massPoints[j]), a)
+		g.SetPoint(i+1+lenm, float(self._massPoints[j]), a)
         # intermediate points
-        g.SetPoint(lenm*2, -1.0, self._resultsLow[secondKey][self._massPoints[lenm-1]])
-        g.SetPoint(lenm*2+1, -1.0, self._resultsHigh[firstKey][self._massPoints[0]])
+        g.SetPoint(lenm*2+1, -1.0, g.GetY()[lenm*2])
+        g.SetPoint(lenm*2+2, -1.0, self._resultsHigh[firstKey][self._massPoints[0]])
         # Upper limit, bottom pass left to right
         for i in range(0, lenm):
 	    a = self._resultsHigh[firstKey][self._massPoints[i]]
-	    if a == _maxTanBeta:
-		g.SetPoint(i+lenm*2+2, float(self._massPoints[i]), _minBrTanBeta)
+	    if a == _maxTanBeta and float(self._massPoints[i]) < 179.0:
+		g.SetPoint(i+lenm*2+3, float(self._massPoints[i]), _minBrTanBeta)
 	    else:
-		g.SetPoint(i+lenm*2+2, float(self._massPoints[i]), a)
+		g.SetPoint(i+lenm*2+3, float(self._massPoints[i]), a)
         # Upper limit, top pass right to left
         for i in range(0, lenm):
             j = lenm - i - 1
             a = self._resultsHigh[secondKey][self._massPoints[j]]
-            if a == _maxTanBeta:
-		g.SetPoint(i+lenm*3+2, float(self._massPoints[j]), _minBrTanBeta)
+            if a == _maxTanBeta and float(self._massPoints[j]) < 179.0:
+		g.SetPoint(i+lenm*3+3, float(self._massPoints[j]), _minBrTanBeta)
 	    else:
-		g.SetPoint(i+lenm*3+2, float(self._massPoints[j]), a)
+		g.SetPoint(i+lenm*3+3, float(self._massPoints[j]), a)
+        g.SetPoint(lenm*4+3, -1.0, g.GetY()[lenm*4+2])
         return g
 
     def _getResultGraphForOneKey(self, resultKey):
         if not resultKey in self._resultsLow.keys():
             return None
         lenm = len(self._massPoints)
-        g = ROOT.TGraph(lenm*2+4)
-        # Upper limit, top part left to right
-        g.SetPoint(0, -1.0, 90.0)
-        g.SetPoint(1, 1000.0, 90.0)
+        gUp = ROOT.TGraph()
         # Upper limit, pass right to left
-        offset = 0
         previousPointExcludedStatus = False
         for i in range(0, lenm):
             j = lenm - i - 1
             a = self._resultsHigh[resultKey][self._massPoints[j]]
-            if a == _maxTanBeta:
+            if a == _maxTanBeta and float(self._massPoints[j]) < 179.0:
 		if not previousPointExcludedStatus:
-		    g.SetPoint(i+2+offset, float(self._massPoints[j]), _minBrTanBeta)
-		    offset += 1
-		else:
-		    offset -= 1
+                    gUp.SetPoint(gUp.GetN(), float(self._massPoints[j]), _minBrTanBeta)
 		previousPointExcludedStatus = True
 	    else:
-		g.SetPoint(i+2+offset, float(self._massPoints[j]), a)
-        # intermediate points
-        if previousPointExcludedStatus:
-	    #g.SetPoint(lenm+2+offset, -1.0, _minBrTanBeta)
-	    #g.SetPoint(lenm+3+offset, -1.0, _minBrTanBeta)
-	    offset -= 2
-	else:
-	    g.SetPoint(lenm+2+offset, -1.0, self._resultsLow[resultKey][self._massPoints[lenm-1]])
-	    g.SetPoint(lenm+3+offset, -1.0, self._resultsHigh[resultKey][self._massPoints[0]])
-        # Low limit, pass left to right
-        previousPointExcludedStatus = False
+		gUp.SetPoint(gUp.GetN(), float(self._massPoints[j]), a)
+        # Lower limit, pass left to right
+        gDown = ROOT.TGraph()
+        #previousPointExcludedStatus = False
         for i in range(0, lenm):
 	    a = self._resultsLow[resultKey][self._massPoints[i]]
 	    if a < 0:
-		offset -= 1
+		if not previousPointExcludedStatus:
+                    gDown.SetPoint(gDown.GetN(), float(self._massPoints[i]), 0.999)
 		previousPointExcludedStatus = True
 	    else:
 		if previousPointExcludedStatus:
 		    previousPointExcludedStatus = False
-		    #g.SetPoint(i+lenm+3+offset, float(self._massPoints[j-1]), _minBrTanBeta)
-		    #offset += 1
-		g.SetPoint(i+lenm+3+offset, float(self._massPoints[i]), a)
-        # Low limit, bottom part right to left
-        g.SetPoint(lenm*2+3+offset, 1000.0, 0.0)
-        g.SetPoint(lenm*2+4+offset, -1.0, 0.0)
-        return g
+		gDown.SetPoint(gDown.GetN(), float(self._massPoints[i]), a)
+        return [gUp, gDown]
 
-    def doPlot(self):
+    def doPlot(self, mAtanbeta=False):
         graphs = {}
         #["observed", "observedPlusTheorUncert", "observedMinusTheorUncert", "expected", "expectedPlus1Sigma", "expectedPlus2Sigma", "expectedMinus1Sigma", "expectedMinus2Sigma"]
-        graphs["exp"] = self._getResultGraphForOneKey("expected")
+        result = self._getResultGraphForOneKey("expected")
+        graphs["exp"] = result[0]
+        graphs["expDown"] = result[1]
         graphs["exp1"] = self._getResultGraphForTwoKeys("expectedPlus1Sigma", "expectedMinus1Sigma")
         graphs["exp2"] = self._getResultGraphForTwoKeys("expectedPlus2Sigma", "expectedMinus2Sigma")
-        graphs["obs"] = self._getResultGraphForOneKey("observed")
+        result = self._getResultGraphForOneKey("observed")
+        graphs["obs"] = result[0]
+        graphs["obsDown"] = result[1]
         myName = _modelPattern%self._mssmModel
         if not os.path.exists(myName):
             raise Exception("Error: Cannot find file '%s'!"%myName)
         db = BRXSDB.BRXSDatabaseInterface(myName)
         graphs["Allowed"] = db.mhLimit("mh","mHp","mHp > 0","125.0+-3.0")
+        graphs["AllowedCentral"] = db.mhLimit("mh","mHp","mHp > 0","125.0+-0.0")
+        if mAtanbeta:
+            for k in graphs.keys():
+                print k
+                db.graphToMa(graphs[k])
+        if mAtanbeta:
+            if self.isLightHp():
+                graphs["isomass"] = db.getIsoMass(160)
+            else:
+                graphs["isomass"] = db.getIsoMass(200)
+        #graphName = "obsDown"
+        #for i in range(0, graphs[graphName].GetN()):
+            #print graphs[graphName].GetX()[i], graphs[graphName].GetY()[i]
         db.close()
         if self._mssmModel == "tauphobic":
             ## Fix a buggy second upper limit (the order of points is left to right, then right to left; remove further passes to fix the bug)
@@ -183,13 +202,22 @@ class TanBetaResultContainer:
 	    myFinalStateLabel.append("^{}H^{+}#rightarrow#tau^{+}#nu_{#tau}, ^{}#tau_{h}+jets final state")
 	else:
 	    myFinalStateLabel.append("^{}H^{+}#rightarrow#tau^{+}#nu_{#tau} final states:")
-	    myFinalStateLabel.append("  ^{}#tau_{h}+jets, #mu#tau_{h}, ll")
+	    myFinalStateLabel.append("  ^{}#tau_{h}+jets")
+	    #myFinalStateLabel.append("  ^{}#tau_{h}+jets, #mu#tau_{h}, #it{ll}")
 	    myFinalStateLabel.append("^{}H^{+}#rightarrowt#bar{b} final states:")
-	    myFinalStateLabel.append("  ^{}l+jets, #mu#tau_{h}, ll")
+	    myFinalStateLabel.append("  ^{}#it{l}+jets, #mu#tau_{h}, #it{ll}")
         if float(self._massPoints[0]) < 179:
-            limit.doTanBetaPlotGeneric("tanbeta_%s_light"%self._mssmModel, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="light")
+            myName = "tanbeta_%s_light"%self._mssmModel
+            if mAtanbeta:
+                limit.doTanBetaPlotGeneric(myName+"_mA", graphs, 19700, myFinalStateLabel, limit.mA(), self._mssmModel, regime="light")
+            else:
+                limit.doTanBetaPlotGeneric(myName, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="light")
         else:
-            limit.doTanBetaPlotGeneric("limitsTanbCombination_heavy_"+self._mssmModel, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="combination")
+            myName = "limitsTanbCombination_heavy_"+self._mssmModel
+            if mAtanbeta:
+                limit.doTanBetaPlotGeneric(myName+"_mA", graphs, 19700, myFinalStateLabel, limit.mA(), self._mssmModel, regime="combination")
+            else:
+                limit.doTanBetaPlotGeneric(myName, graphs, 19700, myFinalStateLabel, limit.mHplus(), self._mssmModel, regime="combination")
                                                                            
 class BrContainer:
     def __init__(self, decayModeMatrix, mssmModel, massPoints=None):
@@ -542,7 +570,8 @@ def analyzeTanbetaResults(brContainer, plotContainer, scen, massPoints, resultKe
                             if myPreviousStatus != None:
                                 if myPreviousStatus != myCurrentStatus:
                                     # Cross-over point, check direction
-                                    myTbvalue = linearCrossOverOfTanBeta(m, brContainer, myTanBetaKeys[myPreviousValidTanBetaKey], myTanBeta, myResultKey)
+                                    s = myTanBetaKeys[myPreviousValidTanBetaKey].split("_")
+                                    myTbvalue = linearCrossOverOfTanBeta(m, brContainer, s[1], myTanBeta, myResultKey)
                                     combineValue = getattr(brContainer.getResult(m, myTanBeta)["combineResult"], myResultKey)
                                     if combineValue < 2.0:
                                         if not myPreviousStatus:

@@ -457,9 +457,12 @@ def hplusTbToDilepton(myDir, doCorrelation, nobtagcorr):
     for suffix in ["ee","emu","mumu"]:
         print "*** H+ -> tb, %s final state ***"%suffix
         datacardPattern = "DataCard_"+suffix+"_tb_m%s.txt"
-        rootFilePattern = "CrossSectionShapes_tb_m%s.root"
-        rootFileDirectory = suffix
-        myMgr = DatacardReader.DataCardDirectoryManager(myDir, datacardPattern, rootFilePattern, rootFileDirectory=rootFileDirectory, readOnly=False)
+        #rootFilePattern = "CrossSectionShapes_tb_m%s.root"
+        #rootFileDirectory = suffix
+        #myMgr = DatacardReader.DataCardDirectoryManager(myDir, datacardPattern, rootFilePattern, rootFileDirectory=rootFileDirectory, readOnly=False)
+        rootFilePattern = "CrossSectionShapes_tb_m%s_"+suffix+".root"
+        myMgr = DatacardReader.DataCardDirectoryManager(myDir, datacardPattern, rootFilePattern, readOnly=False)
+
         myMgr.fixTooSmallStatUncertProblem(signalMinimumAbsStatValue=0.2, bkgMinimumAbsStatValue=_MinimumStatUncertByBkg)
 
         myMgr.removeNuisance("theoryUncXS_vv")
@@ -633,7 +636,9 @@ def hplusTBToSingleLepton(myDir, label):
     myNuisanceReplaces["jes"] = "CMS_scale_j"
     myNuisanceReplaces["jer"] = "CMS_res_j"
     #myNuisanceReplaces["pdf"] = "ttbarPDFVariation"
-    myNuisanceReplaces["top_ljets"] = "CMS_Hptbsl_%s_topPtReweighting"%label
+    #myNuisanceReplaces["top_ljets"] = "CMS_Hptbsl_%s_topPtReweighting"%label #FIXME
+    #myNuisanceReplaces["top_ljets"] = "CMS_Hptbsl_topPtReweighting"
+    myNuisanceReplaces["top_ljets"] = "CMS_Hptbsl_%s_topPtReweighting"%label.replace("nB1_","").replace("nB2p_","")
     myNuisanceReplaces["btag"] = "CMS_btaguntag_CSVM"
     myNuisanceReplaces["pdf"] = "CMS_ttbar_pdfShape"
     myNuisanceReplaces["matching_ljets"] = "CMS_ttbar_matchingVariation"
@@ -743,8 +748,8 @@ if __name__ == "__main__":
     # tb decay mode
     #hplusTbToTauMu(myDir, doCorrelation=doCorrelation, nobtagcorr=nobtagcorr)
     #sys.exit()
-    #hplusTbToDilepton(myDir, doCorrelation=doCorrelation, nobtagcorr=nobtagcorr)
-    #sys.exit()
+    hplusTbToDilepton(myDir, doCorrelation=doCorrelation, nobtagcorr=nobtagcorr)
+    sys.exit()
     
     
     # tb to single mu
@@ -765,4 +770,3 @@ if __name__ == "__main__":
     #hplusTBToSingleLepton(myDir, "nB1_mu")
     #hplusTBToSingleLepton(myDir, "nB2p_el")
     #hplusTBToSingleLepton(myDir, "nB1_el")
-

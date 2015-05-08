@@ -56,7 +56,8 @@ def analyseTaskDir(taskDir, scenarioData, scenario, massWhiteList, massPoints):
             scenarioData[myKey]["combineResult"] = myResult
             print "Result found for scenario=%s mass=%s tanbeta=%s"%(myScenario, myMass, myTanbeta)
 
-def produceOutputFromTaskDirs(massWhiteList, scenario):
+def produceOutputFromTaskDirs(massWhiteList, scenario, mAtanbetaStatus):
+    print "Reading input from task directories"
     myScenarioData = {}
     myResultKeys = tbtools._resultKeys[:]
     # Get list of task directories
@@ -67,7 +68,7 @@ def produceOutputFromTaskDirs(massWhiteList, scenario):
         analyseTaskDir(d, myScenarioData, scenario, massWhiteList, myMassPoints)
     myMassPoints.sort()
     if len(myScenarioData.keys()) == 0:
-        return
+        return False
     # Construct objects
     brContainer = tbtools.BrContainer(decayModeMatrix=None, mssmModel=scenario)
     brContainer._results = myScenarioData
@@ -79,7 +80,8 @@ def produceOutputFromTaskDirs(massWhiteList, scenario):
     myPlotContainer = tbtools.TanBetaResultContainer(scenario, myMassPoints)
     tbtools.analyzeTanbetaResults(brContainer, myPlotContainer, scenario, myMassPoints, myResultKeys, saveToDisk=True)
     # Create plot
-    myPlotContainer.doPlot()
+    myPlotContainer.doPlot(mAtanbetaStatus)
+    return True 
 
 def parseTextResultsFromFile(brContainer, massWhiteList, scen, resultKeys):
     # Read 
@@ -130,7 +132,7 @@ def parseTextResultsFromFile(brContainer, massWhiteList, scen, resultKeys):
                 for i in range(myBlockStart+1, myBlockEnd-1):
                     s = lines[i].replace("  tan beta=","").replace(" xsecTheor=","").replace(" pb, limit(%s)="%myKey,",").replace(" pb, passed=",",")
                     mySplit = s.split(",")
-                    if len(mySplit) > 1 and s[0] != "#" and mySplit[2] != "failed" and mySplit[1] != "None":
+                    if len(mySplit) > 1 and s[0] != "#" and not mySplit[2] in ["failed","n.a.",""] and mySplit[1] != "None":
                         myTanBeta = mySplit[0]
                         tanbetakey = tbtools.constructResultKey(m, myTanBeta)
                         if not brContainer.resultExists(m, myTanBeta):
@@ -147,7 +149,7 @@ def parseTextResultsFromFile(brContainer, massWhiteList, scen, resultKeys):
                             setattr(brContainer._results[tanbetakey]["combineResult"], myKey, float(mySplit[2]))
     return myMassPoints
 
-def readTextResults(massWhiteList, scen):
+def readTextResults(massWhiteList, scen, mAtanbetaStatus):
     myResultKeys = tbtools._resultKeys[:]
     # Create BrContainer
     brContainer = tbtools.BrContainer(decayModeMatrix=None, mssmModel=scen)
@@ -157,27 +159,34 @@ def readTextResults(massWhiteList, scen):
     myPlotContainer = tbtools.TanBetaResultContainer(scen, myMassPoints)
     tbtools.analyzeTanbetaResults(brContainer, myPlotContainer, scen, myMassPoints, myResultKeys, saveToDisk=False)
     # Create plot
-    myPlotContainer.doPlot()
+    myPlotContainer.doPlot(mAtanbetaStatus)
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("--scen", dest="scenarios", action="append", default=[], help="MSSM scenarios")
     parser.add_option("-m", "--mass", dest="massPoints", action="append", default=[], help="mass values (will scan only these)")
+    parser.add_option("--mAtanbeta", dest="mAtanbeta", action="store_true", default=False, help="do mA,tanbeta plot (default=mHp,tanbeta)")
     (opts, args) = parser.parse_args()
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     # Parse selected models
     myModelNames = tbtools.findModelNames(".")
-    mySelectedModels = opts.scenarios
-    if len(opts.scenarios) == 0:
-        mySelectedModels = myModelNames[:]
+    mySelectedModels = myModelNames[:]
+    if len(opts.scenarios) > 0:
+        mySelectedModels = opts.scenarios[:]
     # Loop over scenario models
-    for m in myModelNames:
+    myPrintReminderStatus = False
+    for m in mySelectedModels:
         print "Considering model: %s"%m
         # result structure: dictionary(key=m_tb, value=Result))
+        print tbtools._resultsPattern%m
         if os.path.exists(tbtools._resultsPattern%m):
             # Results text file exists, read them
-            readTextResults(opts.massPoints, m)
+            readTextResults(opts.massPoints, m, opts.mAtanbeta)
         else:
             # Convert root files from crab jobs to text files for inspection
-            produceOutputFromTaskDirs(opts.massPoints, m)
+            myStatus = produceOutputFromTaskDirs(opts.massPoints, m, opts.mAtanbeta)
+            myPrintReminderStatus = myPrintReminderStatus or myStatus
+    if myPrintReminderStatus:
+        print "\nImportant: please edit now the txt files to fix any bad converging of combine results (can happen for observed)"
+        print "When done, execute the same command (tanbetaReadResults.py) to produce the plots with the txt files as input"
