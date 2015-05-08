@@ -56,7 +56,7 @@ defaultNumberOfJobs = 20
 
 
 ## Default command line options for LHC-CLs (asymptotic, observed limit)
-lhcAsymptoticOptionsObserved = '-M Asymptotic --picky -v 2 --rRelAcc 0.001 --X-rtd FITTER_NEW_CROSSING_ALGO --minimizerAlgoForMinos=Minuit2 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerTolerance=0.001 --cminFallbackAlgo "Minuit,0:0.001"'
+lhcAsymptoticOptionsObserved = '-M Asymptotic --picky -v 2 --rRelAcc 0.001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerTolerance=0.001 --cminFallbackAlgo "Minuit,0:0.001"'
 ## Default command line options for LHC-CLs (asymptotic, expected limit)
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
