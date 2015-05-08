@@ -354,7 +354,7 @@ if __name__ == "__main__":
     if opts.rmin == None:
         opts.rmin = "0"
     if opts.rmax == None:
-        opts.rmax = "4" # To facilitate the search for different tan beta values
+        opts.rmax = "1" # To facilitate the search for different tan beta values
     
     if opts.creategridjobs:
         print "*** Start creating individual crab job directories for grid submission ... ***"
