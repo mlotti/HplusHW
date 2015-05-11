@@ -15,7 +15,7 @@
 class TriggerEfficiency: public BaseSelector {
 public:
   explicit TriggerEfficiency(const ParameterSet& config);
-  virtual ~TriggerEfficiency() {}
+  virtual ~TriggerEfficiency();
 
   virtual void book(TDirectory *dir) override;
   virtual void setupBranches(BranchManager& branchManager) override;
@@ -24,6 +24,8 @@ public:
 private:
   Event fEvent;
   PileupWeight fPileupWeight;
+
+  std::string fName;
 
   const std::string fOfflineSelection;
   std::vector<int> fbinning;
@@ -60,6 +62,7 @@ TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   BaseSelector(config),
   fEvent(config),
   fPileupWeight(config),
+  fName(config.getParameter<std::string>("name")),
   fOfflineSelection(config.getParameter<std::string>("offlineSelection")),
   fbinning(config.getParameter<std::vector<int>>("binning")),
   fxLabel(config.getParameter<std::string>("xLabel")),
@@ -82,9 +85,19 @@ TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   cCtrlTrigger(fEventCounter.addCounter("CtrlTrigger")),
   cSignalTrigger(fEventCounter.addCounter("SignalTrigger"))
 {
-  std::cout << "Offline selection " << fOfflineSelection << std::endl;
+  std::cout << "Analyzer " << fName << ", offline selection " << fOfflineSelection << std::endl;
   if(fOfflineSelection == "taulegSelection") selection = new TauLegSelection(config);
   if(fOfflineSelection == "metlegSelection") selection = new METLegSelection(config);
+}
+
+TriggerEfficiency::~TriggerEfficiency(){
+  std::cout << std::endl;
+  std::cout << "Analyzer " << fName << std::endl;
+  std::cout << "All events    " << cAllEvents.value() << std::endl;
+  std::cout << "Run range     " << cRunRange.value() << std::endl;
+  std::cout << "OfflSelection " << cSelection.value() << std::endl;
+  std::cout << "CtrlTrigger   " << cCtrlTrigger.value() << std::endl;
+  std::cout << "SignalTrigger " << cSignalTrigger.value() << std::endl;
 }
 
 void TriggerEfficiency::book(TDirectory *dir) {
