@@ -27,12 +27,12 @@ bool METLegSelection::offlineSelection(Event& fEvent){
 
   std::vector<Tau> selectedTaus;
   for(Tau tau: fEvent.taus()) {
-    if(!(tau.pt() > 20)) continue;
+    if(!(tau.pt() > 41)) continue;
     if(!(std::abs(tau.eta()) < 2.1)) continue;
     if(!(tau.lTrkPt() > 20)) continue;
     if(!(tau.nProngs() == 1)) continue;
     if(!tau.decayModeFinding()) continue;
-
+    
     selectedTaus.push_back(tau);
   }
   size_t ntaus = selectedTaus.size();
@@ -57,16 +57,16 @@ bool METLegSelection::offlineSelection(Event& fEvent){
       ++nmuons;
   }
 
-  size_t nelectrons = 0;                                                                                                                           
-  /*                                                                                                                                                     
-  for(Electron electron: fEvent.electrons()) {                                                                                                         
-    if(electron.pt() > 15 && std::abs(electron.eta()) < 2.4)                                                                                           
-      ++nelectrons;                                                                                                                                    
-  }                                                                                                                                                    
+  size_t nelectrons = 0;
+  /*
+  for(Electron electron: fEvent.electrons()) {
+    if(electron.pt() > 15 && std::abs(electron.eta()) < 2.4)
+      ++nelectrons;
+  }
   */
+
   bool selected = false;
   if(ntaus > 0 && njets > 2 && nmuons == 0 && nelectrons == 0) selected = true;
-  //  std::cout << "check METLegSelection " << ntaus << " " << njets << " " << nmuons << " "<< nelectrons << std::endl;
   return selected;
 }
 bool METLegSelection::onlineSelection(Event& fEvent){
