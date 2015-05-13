@@ -29,7 +29,8 @@ public:
   }
 
   bool isEmpty() const {
-    return fBranches.empty();
+    return fBranchNames.size() == 0;
+    //    return fBranches.empty();
   }
 
 private:
