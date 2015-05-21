@@ -49,31 +49,38 @@ class CrossSectionList:
 # [9] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV
 # [10] http://arxiv.org/abs/1303.6254
 # [11] https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauWorkingSummer2013
+# [12] https://twiki.cern.ch/twiki/bin/view/CMS/TmdRecipes
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt30to50", {
             "7": 5.312e+07, # [2]
             "8": 6.6285328e7, # [1]
+            "13": 161500000., # [12]
             }),
     CrossSection("QCD_Pt50to80", {
             "7": 6.359e+06, # [2]
             "8": 8148778.0, # [1]
+            "13": 22110000., # [12]
             }),
     CrossSection("QCD_Pt80to120", {
             "7": 7.843e+05, # [2]
             "8": 1033680.0, # [1]
+            "13": 3000114.3, # [12]
             }),
     CrossSection("QCD_Pt120to170", {
             "7": 1.151e+05, # [2]
             "8": 156293.3, # [1]
+            "13": 493200., # [12]
             }),
     CrossSection("QCD_Pt170to300", {
             "7": 2.426e+04, # [2]
             "8": 34138.15, # [1]
+            "13": 120300., # [12]
             }),
     CrossSection("QCD_Pt300to470", {
             "7": 1.168e+03, # [2]
             "8": 1759.549, # [1]
+            "13": 7475. , # [12]
             }),
     CrossSection("QCD_Pt20_MuEnriched", {
             "7": 296600000.*0.0002855, # [2]
