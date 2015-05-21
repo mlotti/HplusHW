@@ -18,9 +18,19 @@ PSET = "miniAODGEN2TTree_cfg.py"
 
 dataset_re = re.compile("^/(?P<name>\S+?)/")
 
+version = ""
+pwd = os.getcwd()
+cmssw_re = re.compile("/CMSSW_(?P<version>\S+?)/")
+match = cmssw_re.search(pwd)
+if match:
+    version = match.group("version")
+    version = version.replace("_","")
+    version = version.replace("pre","p")
+    version = version.replace("patch","p")
+
 dirName = "multicrab"
 dirName+= "_signalAnalysis"
-dirName+= "_v740p9"
+dirName+= "_v"+version
 
 time = datetime.datetime.now().strftime("%Y%m%dT%H%M")
 dirName+= "_" + time
