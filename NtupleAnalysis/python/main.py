@@ -299,6 +299,8 @@ class Process:
             readBytesStop = ROOT.TFile.GetFileBytesRead()
 
             # Write configInfo
+            fIN = ROOT.TFile.Open(dset.getFileNames()[0])
+            cinfo = fIN.Get("configInfo/configinfo")
             tf = ROOT.TFile.Open(resFileName, "UPDATE")
             configInfo = tf.Get("configInfo")
             if configInfo == None:
@@ -306,8 +308,11 @@ class Process:
             configInfo.cd()
             dv = ROOT.TNamed("dataVersion", str(dset.getDataVersion()))
             dv.Write()
-            cv = ROOT.TNamed("codeVersion", git.getCommitId())
+            cv = ROOT.TNamed("codeVersionAnalysis", git.getCommitId())
             cv.Write()
+            if not cinfo == None:
+                cinfo.Write()
+                fIN.Close()
             tf.Close()
 
             calls = ""

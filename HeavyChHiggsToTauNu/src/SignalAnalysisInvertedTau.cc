@@ -212,12 +212,24 @@ namespace HPlus {
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSFPlusBtag, "METBaselineTauIdAfterMetSFPlusBtag", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterMetSFPlusBveto, "METBaselineTauIdAfterMetSFPlusBveto", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMETBaselineTauIdAfterCollinearCuts, "METBaselineTauIdAfterCollinearCuts", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, "METBaselineTauIdAfterCollinearCutsPlusBackToBackCuts", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, "METBaselineTauIdAfterCollinearCutsPlusBackToBackCuts", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCutsPlusFilteredEWKFakeTaus, "METBaselineTauIdAfterCollinearCutsPlusBackToBackCutsPlusFilteredEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCutsOnlyEWKFakeTaus, "METBaselineTauIdAfterCollinearCutsPlusBackToBackCutsOnlyEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBtag, "METBaselineTauIdAfterCollinearCutsPlusBtag", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBveto, "METBaselineTauIdAfterCollinearCutsPlusBveto", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+    
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus, "METBaselineTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus, "METBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBtagPlusFilteredEWKFakeTaus, "METBaselineTauIdAfterCollinearCutsPlusBtagPlusFilteredEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMETBaselineTauIdAfterCollinearCutsPlusBtagOnlyEWKFakeTaus, "METBaselineTauIdAfterCollinearCutsPlusBtagOnlyEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+
     // baseline MT histos
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterMetSF, "MTBaselineTauIdAfterMetSF", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMTBaselineTauIdAfterCollinearCuts, "MTBaselineTauIdAfterCollinearCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMTBaselineTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus, "MTBaselineTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, "MTBaselineTauIdAfterCollinearCutsPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearCutsPlusBtag, "MTBaselineTauIdAfterCollinearCutsPlusBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hMTBaselineTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts, "MTBaselineTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
@@ -234,6 +246,8 @@ namespace HPlus {
     // baseline MT histos for closure test in control region
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMTBaselineTauIdFinalReversedBtag, "MTBaselineTauIdFinalReversedBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMTBaselineTauIdFinalReversedBacktoBackDeltaPhi, "MTBaselineTauIdFinalReversedBacktoBackDeltaPhi", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMTBaselineTauIdFinalReversedBtagPlusFilteredEWKFakeTaus, "MTBaselineTauIdFinalReversedBtagPlusFilteredEWKFakeTaus", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hMTBaselineTauIdFinalReversedBacktoBackDeltaPhiPlusFilteredEWKFakeTaus, "MTBaselineTauIdFinalReversedBacktoBackDeltaPhiPlusFilteredEWKFakeTaus", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     // baseline invariant mass histos
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myBaselineDir, hInvMassBaselineTauIdAfterCollinearCuts, "INVMASSBaselineTauIdAfterCollinearCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myBaselineDir, hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, "INVMASSBaselineTauIdAfterCollinearCutsPlusBackToBackCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
@@ -246,14 +260,26 @@ namespace HPlus {
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterMetSFPlusBtag, "METInvertedTauIdAfterMetSFPlusBtag", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterMetSFPlusBveto, "METInvertedTauIdAfterMetSFPlusBveto", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMETInvertedTauIdAfterCollinearCuts, "METInvertedTauIdAfterCollinearCuts", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
-    myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, "METInvertedTauIdAfterCollinearCutsPlusBackToBackCuts", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, "METInvertedTauIdAfterCollinearCutsPlusBackToBackCuts", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCutsPlusFilteredEWKFakeTaus, "METInvertedTauIdAfterCollinearCutsPlusBackToBackCutsPlusFilteredEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCutsOnlyEWKFakeTaus, "METInvertedTauIdAfterCollinearCutsPlusBackToBackCutsOnlyEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBtag, "METInvertedTauIdAfterCollinearCutsPlusBtag", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBveto, "METInvertedTauIdAfterCollinearCutsPlusBveto", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMETInvertedTauIdAfterBackToBackCuts, "METInvertedTauIdAfterBackToBackCuts", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus, "METInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsOnlyEWKFakeTaus, "METInvertedTauIdAfterCollinearCutsOnlyEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBtagPlusFilteredEWKFakeTaus, "METInvertedTauIdAfterCollinearCutsPlusBtagPlusFilteredEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMETInvertedTauIdAfterCollinearCutsPlusBtagOnlyEWKFakeTaus, "METInvertedTauIdAfterCollinearCutsPlusBtagOnlyEWKFakeTaus", "E_{T}^{miss}, GeV", myMetMax-myMetMin, myMetMin, myMetMax);
+
     // inverted MT histos
 
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterMetSF, "MTInvertedTauIdAfterMetSF", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdAfterCollinearCuts, "MTInvertedTauIdAfterCollinearCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus, "MTInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, "MTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearCutsPlusBtag, "MTInvertedTauIdAfterCollinearCutsPlusBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hMTInvertedTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts, "MTInvertedTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
@@ -270,6 +296,8 @@ namespace HPlus {
     // inverted MT histos for closure test in control region
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdFinalReversedBtag, "MTInvertedTauIdFinalReversedBtag", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdFinalReversedBacktoBackDeltaPhi, "MTInvertedTauIdFinalReversedBacktoBackDeltaPhi", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdFinalReversedBtagPlusFilteredEWKFakeTaus, "MTInvertedTauIdFinalReversedBtagPlusFilteredEWKFakeTaus", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
+    myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hMTInvertedTauIdFinalReversedBacktoBackDeltaPhiPlusFilteredEWKFakeTaus, "MTInvertedTauIdFinalReversedBacktoBackDeltaPhiPlusFilteredEWKFakeTaus", "Transverse mass, GeV/c^{2}", myMtBins, myMtMin, myMtMax);
     // inverted invariant mass histos
     myHandler.createShapeHistogram(HistoWrapper::kSystematics, myInvertedDir, hInvMassInvertedTauIdAfterCollinearCuts, "INVMASSInvertedTauIdAfterCollinearCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
     myHandler.createShapeHistogram(HistoWrapper::kInformative, myInvertedDir, hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, "INVMASSInvertedTauIdAfterCollinearCutsPlusBackToBackCuts", "Invariant mass, GeV/c^{2}", myMassBins, myMassMin, myMassMax);
@@ -482,7 +510,7 @@ namespace HPlus {
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForBaseline.getSelectedTau()));
       // Require that genuine tau has been selected
       if (bSelectOnlyGenuineTausForMC && !iEvent.isRealData()) {
-        if (!tauMatchData.isGenuineTau()) return false;
+	  if (!tauMatchData.isGenuineTau() && tauMatchData.isEWKFakeTauLike()) return false;
       }
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
       fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForBaseline, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
@@ -519,7 +547,7 @@ namespace HPlus {
       FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauDataForInverted.getSelectedTau()));
       // Require that genuine tau has been selected
       if (bSelectOnlyGenuineTausForMC && !iEvent.isRealData()) {
-        if (!tauMatchData.isGenuineTau()) return false;
+	  if (!tauMatchData.isGenuineTau() && tauMatchData.isEWKFakeTauLike()) return false;
       }
       // Now re-initialize common plots with the correct selection for tau (affects jet selection, b-tagging, type I MET, delta phi cuts)
       fCommonPlots.initialize(iEvent, iSetup, pvData, tauDataForInverted, fFakeTauIdentifier, fElectronSelection, fMuonSelection, fJetSelection, fMETTriggerEfficiencyScaleFactor, fMETSelection, fBTagging, fQCDTailKiller, fBjetSelection, fTopSelectionManager, fEvtTopology, fFullHiggsMassCalculator);
@@ -628,11 +656,24 @@ namespace HPlus {
 
     // At this point, let's fill histograms for closure test and for normalisation
     myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCuts, metDataTmp.getSelectedMET()->et()); // no btag scale factor needed
+    if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
+	myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+    } else {
+	myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+    }
+
     myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCuts, transverseMass); // no btag scale factor needed
+    if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) 
+	myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus, transverseMass);
     if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearCuts, invariantMass);
     fCommonPlotsBaselineAfterCollinearCuts->fill();
     if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
       myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, metDataTmp.getSelectedMET()->et());
+      if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
+	myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCutsPlusFilteredEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+      } else {
+	myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCutsOnlyEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+      }
       myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, transverseMass);
       if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
       fCommonPlotsBaselineAfterCollinearCutsPlusBackToBackCuts->fill();
@@ -679,6 +720,8 @@ namespace HPlus {
       // Inverted btag control region
       if (qcdTailKillerDataCollinear.passedBackToBackCuts() && metDataTmp.passedEvent() && topSelectionData.passedEvent()) {
         myHandler.fillShapeHistogram(hMTBaselineTauIdFinalReversedBtag, transverseMass);
+	if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike()))
+	  myHandler.fillShapeHistogram(hMTBaselineTauIdFinalReversedBtagPlusFilteredEWKFakeTaus, transverseMass);
         if (fullHiggsMassDataTmp.passedEvent()) {
           myHandler.fillShapeHistogram(hInvMassBaselineTauIdFinalReversedBtag, fullHiggsMassDataTmp.getHiggsMass());
         }
@@ -689,6 +732,11 @@ namespace HPlus {
     myHandler.fillShapeHistogram(hMTBaselineTauIdAfterBtag, transverseMass);
     fCommonPlotsBaselineAfterMETAndBtagWithSF->fill();
     myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBtag, metDataTmp.getSelectedMET()->et());
+    if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
+	myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBtagPlusFilteredEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+    } else {
+	myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBtagOnlyEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+    }
 
 //------ MET cut
     METSelection::Data metData = fMETSelection.silentAnalyze(iEvent, iSetup, pvData.getNumberOfAllVertices(), selectedTau, jetData.getAllJets());
@@ -728,6 +776,8 @@ namespace HPlus {
       // Inverted back-to-back delta phi control region
       if (topSelectionData.passedEvent()) {
         myHandler.fillShapeHistogram(hMTBaselineTauIdFinalReversedBacktoBackDeltaPhi, transverseMass);
+	if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike()))
+	  myHandler.fillShapeHistogram(hMTBaselineTauIdFinalReversedBacktoBackDeltaPhiPlusFilteredEWKFakeTaus, transverseMass);
         if (fullHiggsMassDataTmp.passedEvent()) {
           myHandler.fillShapeHistogram(hInvMassBaselineTauIdFinalReversedBacktoBackDeltaPhi, fullHiggsMassDataTmp.getHiggsMass());
         }
@@ -843,10 +893,24 @@ namespace HPlus {
 
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterCollinearCuts, selectedTau->pt());
     myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCuts, metDataTmp.getSelectedMET()->et());
+    
+    if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
+	myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+    } else {
+	myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsOnlyEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+    }
+
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCuts, transverseMass);
+    if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike()))
+	myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus, transverseMass);
     if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearCuts, invariantMass);
-    if (qcdTailKillerDataCollinear.passedBackToBackCuts() && metDataTmp.passedEvent() && topSelectionDataTmp.passedEvent()) { // Pass also back-to-back cuts and MET cut
+    if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {// && metDataTmp.passedEvent() && topSelectionDataTmp.passedEvent()) { // Pass also back-to-back cuts and MET cut
       myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, metDataTmp.getSelectedMET()->et());
+      if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
+	myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCutsPlusFilteredEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+      } else {
+	myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBackToBackCutsOnlyEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+      }
       myHandler.fillShapeHistogram(hMTInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, transverseMass);
       if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassInvertedTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
       fCommonPlotsInvertedAfterCollinearCutsPlusBackToBackCuts->fill();
@@ -895,6 +959,8 @@ namespace HPlus {
       // Inverted btag control region
       if (metDataTmp.passedEvent() && qcdTailKillerDataCollinear.passedBackToBackCuts() && topSelectionDataTmp.passedEvent()) {
         myHandler.fillShapeHistogram(hMTInvertedTauIdFinalReversedBtag, transverseMass);
+	if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike()))
+	  myHandler.fillShapeHistogram(hMTInvertedTauIdFinalReversedBtagPlusFilteredEWKFakeTaus, transverseMass);
         if (fullHiggsMassDataTmp.passedEvent()) {
           myHandler.fillShapeHistogram(hInvMassInvertedTauIdFinalReversedBtag, fullHiggsMassDataTmp.getHiggsMass());
         }
@@ -906,6 +972,11 @@ namespace HPlus {
     myHandler.fillShapeHistogram(hInvertedTauIdSelectedTauEtAfterBtagging, selectedTau->pt());
     fCommonPlotsInvertedAfterMETAndBtagWithSF->fill();
     myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBtag, metDataTmp.getSelectedMET()->et());
+    if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
+	myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBtagPlusFilteredEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+    } else {
+	myHandler.fillShapeHistogram(hMETInvertedTauIdAfterCollinearCutsPlusBtagOnlyEWKFakeTaus, metDataTmp.getSelectedMET()->et());
+    }
 
     // mt for inverted tau with b tagging
     myHandler.fillShapeHistogram(hMTInvertedTauIdAfterBtag, transverseMass);
@@ -975,6 +1046,8 @@ namespace HPlus {
       // Inverted back-to-back delta phi control region
       if (topSelectionDataTmp.passedEvent()) {
         myHandler.fillShapeHistogram(hMTInvertedTauIdFinalReversedBacktoBackDeltaPhi, transverseMass);
+	if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike()))
+	  myHandler.fillShapeHistogram(hMTInvertedTauIdFinalReversedBacktoBackDeltaPhiPlusFilteredEWKFakeTaus, transverseMass);
         if (fullHiggsMassDataTmp.passedEvent()) {
           myHandler.fillShapeHistogram(hInvMassInvertedTauIdFinalReversedBacktoBackDeltaPhi, fullHiggsMassDataTmp.getHiggsMass());
         }
@@ -1010,6 +1083,8 @@ namespace HPlus {
 
     // top mass with possible event cuts
 
+
+    // here CommonPlots ww
     // All selections passed
     fCommonPlots.fillControlPlotsAfterAllSelections(iEvent, transverseMass);
     increment(fInvertedSelectedEventsCounter);

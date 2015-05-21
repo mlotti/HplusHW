@@ -7,12 +7,12 @@ dataVersion="53XmcS10"
  
 dataEras = [
     "Run2012ABCD", # This is the one for pickEvents, and for counter printout in CMSSW job
-    "Run2012ABC", 
-    "Run2012AB",
+#    "Run2012ABC", 
+#    "Run2012AB",
 #    "Run2012A",
 #    "Run2012B",
-    "Run2012C",
-    "Run2012D",
+#    "Run2012C",
+#    "Run2012D",
 ]
 
 
@@ -42,24 +42,23 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.AnalysisConfiguration import ConfigBuilde
 builder = ConfigBuilder(dataVersion, dataEras,
                         maxEvents=-1, # default is -1
                         customizeLightAnalysis=customize,
-                        #doHeavyAnalysis=True,
-                        #customizeHeavyAnalysis=customize,
-                        #applyTauTriggerScaleFactor=False,
+                        doQCDTailKillerScenarios=True,
+                        applyTauTriggerScaleFactor=True,
                         #applyTauTriggerLowPurityScaleFactor=True,
-                        #applyMETTriggerScaleFactor=True,
-                        #doTriggerMatching=False,
-                        #useCHSJets=True,
-                        #doQCDTailKillerScenarios=True,
+                        applyMETTriggerScaleFactor=False,
+                        applyL1ETMScaleFactor=True,
                         #doAgainstElectronScan=True,
-                        #doTauIsolationAndJetPUScan=True,
-                        #doBTagScan=True,
-                        #doSystematics=True,
-                        #histogramAmbientLevel = "Vital",
+                        doTauIDandMisIDSystematicsAsShapes=True,
+                        doSystematics=True,
+                        doAsymmetricTriggerUncertainties=True,
+                        histogramAmbientLevel = "Vital",
+                        allowTooManyAnalyzers=True,
                         #doOptimisation=True, optimisationScheme="metScenarios",
                         #doOptimisation=True, optimisationScheme="jetScenarios",
                         #doOptimisation=True, optimisationScheme="btagSymmetricScenarios",
-                        #doOptimisation=True, optimisationScheme="myOptimisation",
+                        #doOptimisation=True, optimisationScheme="myOptimisation"
                         )
+
 
 process = builder.buildSignalAnalysis()
 

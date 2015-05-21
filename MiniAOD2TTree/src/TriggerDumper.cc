@@ -19,10 +19,10 @@ TriggerDumper::~TriggerDumper(){}
 
 void TriggerDumper::book(TTree* tree){
     booked = true;
-    tree->Branch("L1_ETM",&L1MET);
-    tree->Branch("L1_ETMphi",&L1METphi);
-    tree->Branch("HLT_MET",&HLTMET);
-    tree->Branch("HLT_METphi",&HLTMETphi);
+    tree->Branch("L1MET_et",&L1MET);
+    tree->Branch("L1MET_phi",&L1METphi);
+    tree->Branch("HLTMET_et",&HLTMET);
+    tree->Branch("HLTMET_phi",&HLTMETphi);
 
     tree->Branch("HLTTau_pt",&HLTTau_pt);
     tree->Branch("HLTTau_eta",&HLTTau_eta);

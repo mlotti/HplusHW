@@ -37,6 +37,9 @@ void EventCounter::Counter::incrementCount(size_t countIndex, double weight) {
   weights[countIndex] += weight;
   weightsSquared[countIndex] += (weight*weight);
 }
+int EventCounter::Counter::value(size_t countIndex) {
+  return values[countIndex];
+}
 void EventCounter::Counter::book(TDirectory *dir) {
   if(labels.empty())
     return;
@@ -85,6 +88,9 @@ Count EventCounter::addSubCounter(const std::string& subcounterName, const std::
 
 void EventCounter::incrementCount(size_t counterIndex, size_t countIndex) {
   fCounters[counterIndex].incrementCount(countIndex, fWeight.getWeight());
+}
+int EventCounter::value(size_t counterIndex, size_t countIndex) {
+  return fCounters[counterIndex].value(countIndex);
 }
 
 void EventCounter::setOutput(TDirectory *dir) {

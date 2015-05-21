@@ -6,7 +6,8 @@ import sys
 import inspect
 from optparse import OptionParser
 import array
-from collections import OrderedDict
+#from collections import OrderedDict
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.OrderedDict import *
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -23,6 +24,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDiffere
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
+
+import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.gROOT.SetBatch(True) # no flashing canvases
 
 _myOriginalDir = "originalDatacards"
 
@@ -392,7 +397,7 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             addOrReplace(myDict, "Hp", myRHWU)
         elif c.startswith("Hp"):
             addOrReplace(myDict, "Hp", myRHWU)
-        elif c == "EWK_Tau" or c == "MC_EWKTau":
+        elif c == "EWK_Tau":
             addOrReplace(myDict, "EWKtau", myRHWU)
             myAddToTotalStatus = True
         elif c.endswith("faketau"):
@@ -444,8 +449,8 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             myHisto = histograms.Histo(setTailFitUncToStat(myDict["EWKtau"].Clone()),"Embedding",legendLabel=ControlPlotMaker._legendLabelEmbedding)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
-        if "EWKfakes" in myDict.keys():
-            myHisto = histograms.Histo(setTailFitUncToStat(myDict["EWKfakes"].Clone()),"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
+        if "EWKfakes" in myDict.keys() and myDict["EWKfakes"] != None:
+            myHisto = histograms.Histo(myDict["EWKfakes"].Clone(),"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
         myBlindedStatus = False

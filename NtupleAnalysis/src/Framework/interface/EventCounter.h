@@ -18,6 +18,7 @@ public:
   ~Count();
 
   void increment();
+  int value();
 
   friend class EventCounter;
 
@@ -50,6 +51,7 @@ private:
     size_t insert(const std::string& label);
 
     void incrementCount(size_t countIndex, double weight);
+    int value(size_t countIndex);
 
     void book(TDirectory *dir);
     void bookWeighted(TDirectory *dir);
@@ -85,6 +87,7 @@ public:
 private:
   friend class Count;
   void incrementCount(size_t counterIndex, size_t countIndex);
+  int value(size_t counterIndex, size_t countIndex);
 
   size_t findOrInsertCounter(const std::string& name);
 
@@ -97,4 +100,8 @@ void Count::increment() {
   fEventCounter->incrementCount(fCounterIndex, fCountIndex);
 }
 
+inline
+int Count::value() {
+  return fEventCounter->value(fCounterIndex, fCountIndex);
+}
 #endif

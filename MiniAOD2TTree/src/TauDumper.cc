@@ -13,6 +13,7 @@ TauDumper::TauDumper(std::vector<edm::ParameterSet> psets){
     pdgId = new std::vector<short>[inputCollections.size()];
 
     ltrackPt = new std::vector<double>[inputCollections.size()];
+    ltrackEta = new std::vector<double>[inputCollections.size()];
 //    ltrack_p4 = new std::vector<reco::Candidate::LorentzVector>[inputCollections.size()];
 
     nProngs = new std::vector<int>[inputCollections.size()];
@@ -44,6 +45,7 @@ void TauDumper::book(TTree* tree){
         tree->Branch((name+"_pdgId").c_str(),&pdgId[i]);
 
         tree->Branch((name+"_lTrkPt").c_str(),&ltrackPt[i]);
+        tree->Branch((name+"_lTrkEta").c_str(),&ltrackEta[i]);
 	//tree->Branch((name+"_lTrk_p4").c_str(),&ltrack_p4[i]);
         tree->Branch((name+"_nProngs").c_str(),&nProngs[i]);
 
@@ -87,6 +89,7 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		if(tau.leadChargedHadrCand().isNonnull()){
 		    //ltrack_p4[ic].push_back(tau.leadChargedHadrCand()->p4());
 		    ltrackPt[ic].push_back(tau.leadChargedHadrCand()->p4().Pt());
+                    ltrackEta[ic].push_back(tau.leadChargedHadrCand()->p4().Eta());
 		    nProngs[ic].push_back(tau.signalCands().size());  
 		}
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
@@ -169,6 +172,7 @@ void TauDumper::reset(){
 
 	//p4[ic].clear();
 	ltrackPt[ic].clear();
+        ltrackEta[ic].clear();  
 	//ltrack_p4[ic].clear();
 	nProngs[ic].clear();
 	pdgId[ic].clear();

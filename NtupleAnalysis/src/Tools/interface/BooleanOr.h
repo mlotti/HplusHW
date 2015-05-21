@@ -20,11 +20,17 @@ public:
 
   bool value() const {
     if(fBranches.empty())
-      throwEmpty();
+      return true;
+    //      throwEmpty();
     for(const Branch<bool> *branch: fBranches) {
       if(branch->value()) return true;
     }
     return false;
+  }
+
+  bool isEmpty() const {
+    return fBranchNames.size() == 0;
+    //    return fBranches.empty();
   }
 
 private:

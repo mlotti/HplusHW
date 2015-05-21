@@ -124,9 +124,15 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("Jets"),       
             src = cms.InputTag("slimmedJets"),      
             discriminators = cms.vstring(
-		"secondaryVertex",
-		"trackCountingHighPurBJetTags",
-		"trackCountingHighEffBJetTags"
+                "jetBProbabilityBJetTags",
+                "jetProbabilityBJetTags",
+                "trackCountingHighPurBJetTags", 
+                "trackCountingHighEffBJetTags",
+                "simpleSecondaryVertexHighEffBJetTags",
+                "simpleSecondaryVertexHighPurBJetTags",
+                "combinedSecondaryVertexBJetTags",
+                "combinedInclusiveSecondaryVertexBJetTags",
+                "combinedInclusiveSecondaryVertexV2BJetTags",
             ),
 	    userFloats = cms.vstring(
 		"pileupJetId:fullDiscriminant"
