@@ -70,49 +70,87 @@ class TanBetaResultContainer:
         if not firstKey in self._resultsLow.keys() or not secondKey in self._resultsLow.keys():
             return None
         lenm = len(self._massPoints)
-        g = ROOT.TGraph(lenm*4+4)
-        g.SetPoint(0, -1, 0.999)
-        # Lowerlimit, bottom pass left to right
-        for i in range(0, lenm):
-	    a = self._resultsLow[firstKey][self._massPoints[i]]
-	    if a < 0: 
-		if float(self._massPoints[i]) < 179.0:
-                    g.SetPoint(i+1, float(self._massPoints[i]), _minBrTanBeta)
-                else:
-                    g.SetPoint(i+1, float(self._massPoints[i]), 0.999)
-	    else:
-		g.SetPoint(i+1, float(self._massPoints[i]), a)
-        # Lower limit, top pass right to left
-        for i in range(0, lenm):
-            j = lenm - i - 1
-            a = self._resultsLow[secondKey][self._massPoints[j]]
-            if a < 0:
-		if float(self._massPoints[j]) < 179.0:
-                    g.SetPoint(i+1+lenm, float(self._massPoints[j]), _minBrTanBeta)
-                else:
-                    g.SetPoint(i+1+lenm, float(self._massPoints[j]), 0.999)
-	    else:
-		g.SetPoint(i+1+lenm, float(self._massPoints[j]), a)
-        # intermediate points
-        g.SetPoint(lenm*2+1, -1.0, g.GetY()[lenm*2])
-        g.SetPoint(lenm*2+2, -1.0, self._resultsHigh[firstKey][self._massPoints[0]])
-        # Upper limit, bottom pass left to right
-        for i in range(0, lenm):
-	    a = self._resultsHigh[firstKey][self._massPoints[i]]
-	    if a == _maxTanBeta and float(self._massPoints[i]) < 179.0:
-		g.SetPoint(i+lenm*2+3, float(self._massPoints[i]), _minBrTanBeta)
-	    else:
-		g.SetPoint(i+lenm*2+3, float(self._massPoints[i]), a)
-        # Upper limit, top pass right to left
-        for i in range(0, lenm):
-            j = lenm - i - 1
-            a = self._resultsHigh[secondKey][self._massPoints[j]]
-            if a == _maxTanBeta and float(self._massPoints[j]) < 179.0:
-		g.SetPoint(i+lenm*3+3, float(self._massPoints[j]), _minBrTanBeta)
-	    else:
-		g.SetPoint(i+lenm*3+3, float(self._massPoints[j]), a)
-        g.SetPoint(lenm*4+3, -1.0, g.GetY()[lenm*4+2])
-        return g
+        # Lower limit
+        gDown = ROOT.TGraph()
+        if self.isLightHp():
+            # bottom pass left to right
+            for i in range(0, lenm):
+                a = self._resultsLow[secondKey][self._massPoints[i]]
+                if a < 0:
+                    a = _minBrTanBeta
+                pos = gDown.GetN()
+                if pos > 0 and gDown.GetY()[pos-1] == _minBrTanBeta and a == _minBrTanBeta:
+                    pos -= 1
+                gDown.SetPoint(pos, float(self._massPoints[i]), a)
+            # intermediate points
+            gDown.SetPoint(gDown.GetN(), 1000.0, gDown.GetY()[gDown.GetN()-1])
+            gDown.SetPoint(gDown.GetN(), 1000.0, self._resultsLow[firstKey][self._massPoints[lenm-1]])
+            # bottom pass right to left
+            for i in range(0, lenm):
+                j = lenm - i - 1            
+                a = self._resultsLow[firstKey][self._massPoints[j]]
+                if a < 0: 
+                    a = _minBrTanBeta
+                if not gDown.GetY()[gDown.GetN()-1] == _minBrTanBeta:
+                    gDown.SetPoint(gDown.GetN(), float(self._massPoints[j]), a)
+        else:
+            # bottom pass right to left
+            for i in range(0, lenm):
+                j = lenm - i - 1            
+                a = self._resultsLow[firstKey][self._massPoints[j]]
+                if a < 0: 
+                    a = 0.999
+                gDown.SetPoint(gDown.GetN(), float(self._massPoints[j]), a)
+            # intermediate points
+            gDown.SetPoint(gDown.GetN(), -1.0, gDown.GetY()[gDown.GetN()-1])
+            a = self._resultsLow[secondKey][self._massPoints[0]]
+            if a < 0: 
+                a = 0.999
+            gDown.SetPoint(gDown.GetN(), -1.0, a)
+            # bottom pass left to right
+            for i in range(0, lenm):
+                a = self._resultsLow[secondKey][self._massPoints[i]]
+                if a < 0:
+                    a = 0.999
+                gDown.SetPoint(gDown.GetN(), float(self._massPoints[i]), a)
+        # Upper limit, different order for light and heavy H+ to make the isomass border treatment easier
+        gUp = ROOT.TGraph()
+        if self.isLightHp():
+            # top pass left to right
+            for i in range(0, lenm):
+                a = self._resultsHigh[firstKey][self._massPoints[i]]
+                if a == _maxTanBeta:
+                    a = _minBrTanBeta
+                pos = gUp.GetN()
+                if pos > 0 and gUp.GetY()[pos-1] == _minBrTanBeta and a == _minBrTanBeta:
+                    pos -= 1
+                gUp.SetPoint(pos, float(self._massPoints[i]), a)
+            # intermediate points
+            gUp.SetPoint(gUp.GetN(), 1000.0, gUp.GetY()[gUp.GetN()-1])
+            a = self._resultsHigh[secondKey][self._massPoints[lenm-1]]
+            if a == _maxTanBeta:
+                a = _minBrTanBeta
+            gUp.SetPoint(gUp.GetN(), 1000.0, a)
+            # bottom pass right to left
+            for i in range(0, lenm):
+                j = lenm - i - 1
+                a = self._resultsHigh[secondKey][self._massPoints[j]]
+                if a == _maxTanBeta:
+                    a = _minBrTanBeta
+                if not gUp.GetY()[gUp.GetN()-1] == _minBrTanBeta:
+                    gUp.SetPoint(gUp.GetN(), float(self._massPoints[j]), a)
+        else:
+            # bottom pass right to left
+            for i in range(0, lenm):
+                j = lenm - i - 1
+                gUp.SetPoint(gUp.GetN(), float(self._massPoints[j]), self._resultsHigh[secondKey][self._massPoints[j]])
+            # intermediate points
+            gUp.SetPoint(gUp.GetN(), -1.0, gUp.GetY()[gUp.GetN()-1])
+            gUp.SetPoint(gUp.GetN(), -1.0, self._resultsHigh[firstKey][self._massPoints[0]])
+            # top pass left to right
+            for i in range(0, lenm):
+                gUp.SetPoint(gUp.GetN(), float(self._massPoints[i]), self._resultsHigh[firstKey][self._massPoints[i]])
+        return [gUp,gDown]
 
     def _getResultGraphForOneKey(self, resultKey):
         if not resultKey in self._resultsLow.keys():
@@ -130,19 +168,22 @@ class TanBetaResultContainer:
 		previousPointExcludedStatus = True
 	    else:
 		gUp.SetPoint(gUp.GetN(), float(self._massPoints[j]), a)
-        # Lower limit, pass left to right
+        # Lower limit, pass right to left
         gDown = ROOT.TGraph()
-        #previousPointExcludedStatus = False
+        previousPointExcludedStatus = False
         for i in range(0, lenm):
-	    a = self._resultsLow[resultKey][self._massPoints[i]]
-	    if a < 0:
+            j = lenm - i - 1
+	    a = self._resultsLow[resultKey][self._massPoints[j]]
+	    if a < 0 and float(self._massPoints[j]) < 179.0:
 		if not previousPointExcludedStatus:
-                    gDown.SetPoint(gDown.GetN(), float(self._massPoints[i]), 0.999)
+                    gDown.SetPoint(gDown.GetN(), float(self._massPoints[j]), _minBrTanBeta)
 		previousPointExcludedStatus = True
 	    else:
+		if a < 0:
+                    a = 0.999
 		if previousPointExcludedStatus:
 		    previousPointExcludedStatus = False
-		gDown.SetPoint(gDown.GetN(), float(self._massPoints[i]), a)
+		gDown.SetPoint(gDown.GetN(), float(self._massPoints[j]), a)
         return [gUp, gDown]
 
     def doPlot(self, mAtanbeta=False):
@@ -151,8 +192,12 @@ class TanBetaResultContainer:
         result = self._getResultGraphForOneKey("expected")
         graphs["exp"] = result[0]
         graphs["expDown"] = result[1]
-        graphs["exp1"] = self._getResultGraphForTwoKeys("expectedPlus1Sigma", "expectedMinus1Sigma")
-        graphs["exp2"] = self._getResultGraphForTwoKeys("expectedPlus2Sigma", "expectedMinus2Sigma")
+        result = self._getResultGraphForTwoKeys("expectedPlus1Sigma", "expectedMinus1Sigma")
+        graphs["exp1"] = result[0]
+        graphs["exp1Down"] = result[1]
+        result = self._getResultGraphForTwoKeys("expectedPlus2Sigma", "expectedMinus2Sigma")
+        graphs["exp2"] = result[0]
+        graphs["exp2Down"] = result[1]
         result = self._getResultGraphForOneKey("observed")
         graphs["obs"] = result[0]
         graphs["obsDown"] = result[1]

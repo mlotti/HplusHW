@@ -876,9 +876,13 @@ def getTypesetScenarioName(scenario):
 ## Remove graph points in the isomass region
 # \param gIsomass   TGraph containing isomass curve
 # \param g          TGraph to be checked for points in isomass region
-def truncateBeyondIsomass(gIsomass, g):
+def truncateBeyondIsomass(gIsomass, g, debugStatus=False):
+    crossingData = []
     gCrossingIndices = []
     isomassCrossingIndices = []
+    if debugStatus:
+        for i in range(g.GetN()):
+            print "Before treatment: %d, %f, %f"%(i, g.GetX()[i], g.GetY()[i])
     # Loop over isomass points
     for i in range(gIsomass.GetN()-1):
         isomassIndex = i
@@ -919,60 +923,84 @@ def truncateBeyondIsomass(gIsomass, g):
             else:
                 crossingY = (isomassK*gB + gK*isomassB) / (isomassK+gK)
             # check if crossing occurs in this fragment
-            gWithinRangeUpM = g.GetX()[gIndex+1] > crossingM and g.GetX()[gIndex] < crossingM
-            gWithinRangeDownM = (g.GetX()[gIndex+1] < crossingM and g.GetX()[gIndex] > crossingM) or abs(g.GetX()[gIndex]-crossingM) < 0.00001
+            gWithinRangeUpM = g.GetX()[gIndex+1] > crossingM and g.GetX()[gIndex] < crossingM or abs(g.GetX()[gIndex+1]-crossingM) < 0.001
+            gWithinRangeDownM = (g.GetX()[gIndex+1] < crossingM and g.GetX()[gIndex] > crossingM) or abs(g.GetX()[gIndex]-crossingM) < 0.001
             gIsomassWithinRangeUpM = gIsomass.GetX()[isomassIndex+1] > crossingM and gIsomass.GetX()[isomassIndex] < crossingM
-            gIsomassWithinRangeDownM = (gIsomass.GetX()[isomassIndex+1] < crossingM and gIsomass.GetX()[isomassIndex] > crossingM) or abs(gIsomass.GetX()[isomassIndex]-crossingM) < 0.00001
-            gWithinRangeUpY = g.GetY()[gIndex+1] > crossingY and g.GetY()[gIndex] < crossingY
-            gWithinRangeDownY = (g.GetY()[gIndex+1] < crossingY and g.GetY()[gIndex] > crossingY) or abs(g.GetY()[gIndex]-crossingY) < 0.00001
+            gIsomassWithinRangeDownM = (gIsomass.GetX()[isomassIndex+1] < crossingM and gIsomass.GetX()[isomassIndex] > crossingM) or abs(gIsomass.GetX()[isomassIndex]-crossingM) < 0.001
+            gWithinRangeUpY = g.GetY()[gIndex+1] > crossingY and g.GetY()[gIndex] < crossingY or abs(g.GetY()[gIndex+1]-crossingY) < 0.001
+            gWithinRangeDownY = (g.GetY()[gIndex+1] < crossingY and g.GetY()[gIndex] > crossingY) or abs(g.GetY()[gIndex]-crossingY) < 0.001
             gIsomassWithinRangeUpY = gIsomass.GetY()[isomassIndex+1] > crossingY and gIsomass.GetY()[isomassIndex] < crossingY
-            gIsomassWithinRangeDownY = (gIsomass.GetY()[isomassIndex+1] < crossingY and gIsomass.GetY()[isomassIndex] > crossingY) or abs(gIsomass.GetY()[isomassIndex]-crossingY) < 0.00001
-            print "test at m=%f tb=%f"%(crossingM, crossingY)
-            print "0: isomass %d (%f,%f), g %d (%f,%f)"%(isomassIndex, gIsomass.GetX()[isomassIndex], gIsomass.GetY()[isomassIndex], gIndex, g.GetX()[gIndex], g.GetY()[gIndex])
-            print "1: isomass %d (%f,%f), g %d (%f,%f)"%(isomassIndex+1, gIsomass.GetX()[isomassIndex+1], gIsomass.GetY()[isomassIndex+1], gIndex+1, g.GetX()[gIndex+1], g.GetY()[gIndex+1])
-            if not ((gWithinRangeUpM or gWithinRangeDownM) and (gIsomassWithinRangeUpM or gIsomassWithinRangeDownM) and crossingY > 100.00001):
+            gIsomassWithinRangeDownY = (gIsomass.GetY()[isomassIndex+1] < crossingY and gIsomass.GetY()[isomassIndex] > crossingY) or abs(gIsomass.GetY()[isomassIndex]-crossingY) < 0.001
+            #if debugStatus:
+                #print "test at gIndex=%d, isomassIndex=%d, isomassTb=%f, m=%f tb=%f"%(gIndex, isomassIndex, gIsomass.GetY()[isomassIndex], crossingM, crossingY)
+                #print "0: isomass %d (%f,%f), g %d (%f,%f)"%(isomassIndex, gIsomass.GetX()[isomassIndex], gIsomass.GetY()[isomassIndex], gIndex, g.GetX()[gIndex], g.GetY()[gIndex])
+                #print "1: isomass %d (%f,%f), g %d (%f,%f)"%(isomassIndex+1, gIsomass.GetX()[isomassIndex+1], gIsomass.GetY()[isomassIndex+1], gIndex+1, g.GetX()[gIndex+1], g.GetY()[gIndex+1])
+                #print gWithinRangeUpM,gWithinRangeDownM,gIsomassWithinRangeUpM,gIsomassWithinRangeDownM,abs(g.GetX()[gIndex]-crossingM) < 0.001
+            if not ((gWithinRangeUpM or gWithinRangeDownM) and (gIsomassWithinRangeUpM or gIsomassWithinRangeDownM)) or crossingM < 100.01:
                 continue
-            print "*** passed m"
+            #print "**1"
             if not ((gWithinRangeUpY or gWithinRangeDownY) and (gIsomassWithinRangeUpY or gIsomassWithinRangeDownY)):
                 continue
+            #print "**2"
+            if gIsomass.GetX()[isomassIndex] < 100.01 or gIsomass.GetY()[isomassIndex] < 0.91 or gIsomass.GetY()[isomassIndex+1] < 0.91:
+                continue
+            #print "**3"
+            if len(gCrossingIndices) > 0:
+                if abs(crossingM - crossingData[len(crossingData)-1][1]) < 0.001 or abs(crossingY - crossingData[len(crossingData)-1][2]) < 0.001:
+                    continue
             # Crossing found, tune crossing point value with linear extrapolation of m
-            print "** crossing at m=%f tb=%f, gIndex=%d"%(crossingM, crossingY, gIndex)
-            print "0: isomass %d (%f,%f), g %d (%f,%f)"%(isomassIndex, gIsomass.GetX()[isomassIndex], gIsomass.GetY()[isomassIndex], gIndex, g.GetX()[gIndex], g.GetY()[gIndex])
-            print "1: isomass %d (%f,%f), g %d (%f,%f)"%(isomassIndex+1, gIsomass.GetX()[isomassIndex+1], gIsomass.GetY()[isomassIndex+1], gIndex+1, g.GetX()[gIndex+1], g.GetY()[gIndex+1])
+            if debugStatus:
+                print "** crossing at m=%f tb=%f, gIndex=%d"%(crossingM, crossingY, gIndex)
+                print "0: isomass %d (%f,%f), g %d (%f,%f)"%(isomassIndex, gIsomass.GetX()[isomassIndex], gIsomass.GetY()[isomassIndex], gIndex, g.GetX()[gIndex], g.GetY()[gIndex])
+                print "1: isomass %d (%f,%f), g %d (%f,%f)"%(isomassIndex+1, gIsomass.GetX()[isomassIndex+1], gIsomass.GetY()[isomassIndex+1], gIndex+1, g.GetX()[gIndex+1], g.GetY()[gIndex+1])
             if len(gCrossingIndices) == 2:
                 raise Exception("This should not happen")
-            if (len(gCrossingIndices) == 0 and gDirection > -0.00001) or (len(gCrossingIndices) == 1 and gDirection < 0):
-                g.SetPoint(gIndex, crossingM, crossingY)
-                gCrossingIndices.append(gIndex+1)
-            else:
-                g.SetPoint(gIndex+1, crossingM, crossingY)
-                gCrossingIndices.append(gIndex)
-            if (len(gCrossingIndices) == 0 and isomassDirection > -0.00001) or (len(gCrossingIndices) == 1 and isomassDirection < 0):
-                isomassCrossingIndices.append(isomassIndex+1)
-            else:
-                isomassCrossingIndices.append(isomassIndex)
-    # Remove points in the isomas region from graph
-    if len(gCrossingIndices) > 0:
-        myEndIndex = g.GetN()
-        if len(gCrossingIndices) == 2:
-            myEndIndex = gCrossingIndices[1]+1
-        for i in range(gCrossingIndices[0], myEndIndex):
-            g.RemovePoint(i)
-    # Add isomass boundary points to graph
-    if len(gCrossingIndices) == 2:
-        # Construct temporary lists
-        x = []
-        y = []
-        for i in range(isomassCrossingIndices[0],isomassCrossingIndices[1]+1):
+            index = gIndex
+            if len(gCrossingIndices) == 0:
+                index += 1
+            crossingData.append([index, crossingM, crossingY])
+            gCrossingIndices.append(index)
+            isomassCrossingIndices.append(isomassIndex)
+    if debugStatus:
+        print crossingData
+    # Construct temporary lists
+    x = []
+    y = []
+    if len(isomassCrossingIndices) == 2:
+        for i in range(isomassCrossingIndices[0], isomassCrossingIndices[1]+1):
             x.append(gIsomass.GetX()[i])
             y.append(gIsomass.GetY()[i])
-        for i in range(gCrossingIndices[1]+1, g.GetN()):
+        if gCrossingIndices[1] < gCrossingIndices[0]:
+            x = list(reversed(x))[:]
+            y = list(reversed(y))[:]
+        if gCrossingIndices[1] < gCrossingIndices[0]:
+            # Fix offsets
+            crossingData[0][0] -= 1
+            crossingData[1][0] += 1
+            gCrossingIndices[0] -= 1
+            gCrossingIndices[1] += 1
+    # Modify graph at crossing
+    for item in crossingData:
+        g.SetPoint(item[0], item[1], item[2])
+    # Remove points in the isomass region from graph
+    if len(gCrossingIndices) == 2:
+        for i in range(min(gCrossingIndices), max(gCrossingIndices)):
+            g.RemovePoint(i)
+            if debugStatus:
+                print "*** removing",i
+    if len(isomassCrossingIndices) == 2:
+        for i in range(min(gCrossingIndices)+1, g.GetN()):
             x.append(g.GetX()[i])
             y.append(g.GetY()[i])
-        for i in range(x):
-            g.SetPoint(i+gCrossingIndices[1]+1, x[i], y[i])
-    for i in range(g.GetN()):
-        print "After treatment: %f, %f"%(g.GetX()[i], g.GetY()[i])
+            if debugStatus:
+                print i, g.GetX()[i], g.GetY()[i]        
+    # Add isomass boundary points to graph
+    if len(gCrossingIndices) == 2:
+        for i in range(len(x)):
+            g.SetPoint(i+min(gCrossingIndices), x[i], y[i])
+    if debugStatus:
+        for i in range(g.GetN()):
+            print "After treatment: %d, %f, %f"%(i, g.GetX()[i], g.GetY()[i])
         
 ## Plots tan beta plot
 #
@@ -1010,10 +1038,15 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
     
     isHeavy = regime != "light"
-    tanbMax = 65
+    tanbMax = 60
 
     if forPaper:
-        histograms.cmsTextMode = histograms.CMSMode.PAPER
+        if scenario in ["mhmaxup", "mhmodm"] and not "_mA" in name:
+            histograms.cmsTextMode = histograms.CMSMode.PAPER
+        else:
+            histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED
+    else:
+        histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
 
     blinded = True
     if "obs" in graphs.keys():
@@ -1028,23 +1061,11 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         obs = graphs["obs"]
         excluded = aux.Clone(ROOT.TGraph(obs))
         excluded.SetName("ExcludedArea")
-        if isHeavy:
-            excluded.SetPoint(excluded.GetN(), -1.0, obs.GetY()[excluded.GetN()-1])
-            excluded.SetPoint(excluded.GetN(), -1.0, 69.0)
-            excluded.SetPoint(excluded.GetN(), 1000.0, 69.0)
-            excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
-        else:
-            if "_mA" in name:
-                rightX = obs.GetX()[obs.GetN()-1]+100
-                rightY = obs.GetY()[obs.GetN()-1]
-                excluded.SetPoint(excluded.GetN(), rightX, rightY)
-                excluded.SetPoint(excluded.GetN(), rightX, 1)
-            else:
-                excluded.SetPoint(excluded.GetN(), obs.GetX()[obs.GetN()-1], 1)
-            excluded.SetPoint(excluded.GetN(), 0, 1)
-            excluded.SetPoint(excluded.GetN(), 0, tanbMax)
-            excluded.SetPoint(excluded.GetN(), obs.GetX()[0], tanbMax)
-            excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
+        excluded.SetPoint(excluded.GetN(), -1.0, obs.GetY()[excluded.GetN()-1])
+        excluded.SetPoint(excluded.GetN(), -1.0, 69.0)
+        excluded.SetPoint(excluded.GetN(), 1000.0, 69.0)
+        excluded.SetPoint(excluded.GetN(), 1000.0, obs.GetY()[0])
+        excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
         setExcludedStyle(excluded)
         graphs["excluded"] = excluded
         if "isomass" in graphs.keys() and "_mA" in name:
@@ -1055,16 +1076,24 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
                 excludedDown.SetPoint(excludedDown.GetN(),1000.0, 0.999)
                 excludedDown.SetPoint(excludedDown.GetN(),-1.0,0.999)
                 excludedDown.SetPoint(excludedDown.GetN(),excludedDown.GetX()[0],excludedDown.GetY()[0])
+            else:
+                excludedDown.SetPoint(excludedDown.GetN(),-1.0, excludedDown.GetY()[excludedDown.GetN()-1])
+                excludedDown.SetPoint(excludedDown.GetN(),-1.0,0.999)
+                excludedDown.SetPoint(excludedDown.GetN(),180,0.999)
+                excludedDown.SetPoint(excludedDown.GetN(),180,excludedDown.GetY()[0])
+                excludedDown.SetPoint(excludedDown.GetN(),excludedDown.GetX()[0],excludedDown.GetY()[0])
             setExcludedStyle(excludedDown)
             graphs["excludedDown"] = excludedDown
-            for i in range(excluded.GetN()):
-                print excluded.GetX()[i],excluded.GetY()[i]
+        if "isomass" in graphs.keys() and "_mA" in name:
+            truncateBeyondIsomass(graphs["isomass"], excludedDown)
 
     # Set styles
     expected = graphs["exp"]
     setExpectedStyle(expected)
     if "expDown" in graphs.keys():
         setExpectedStyle(graphs["expDown"])
+        setExpectedGreenBandStyle(graphs["exp1Down"])
+        setExpectedYellowBandStyle(graphs["exp2Down"])
     expected1 = graphs["exp1"]
     setExpectedGreenBandStyle(expected1)
     expected2 = graphs["exp2"]
@@ -1091,8 +1120,7 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         graphs["isomass"].SetFillStyle(1)
         graphs["isomass"].SetLineStyle(2)
         plotsList.extend([histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L", legendStyle=None)])
-        #plotsList.extend([histograms.HistoGraph(graphs["isomass"], "IsoMass", drawStyle="L", legendStyle=None),
-                          #histograms.HistoGraph(graphs["isomass"], "IsoMassCopy", drawStyle="F", legendStyle=None)])
+
     # Observed and excluded
     if not blinded:
         if "obs_th_plus" in graphs.keys():
@@ -1122,12 +1150,24 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         plotsList.extend([histograms.HistoGraph(graphs["Allowed"], "Allowed", drawStyle="L", legendStyle="lf")])
     
     # Expected and expected bands
-    plotsList.append(histograms.HistoGraph(expected, "Expected", drawStyle="L"))
+    if "isomass" in graphs.keys():
+        truncateBeyondIsomass(graphs["isomass"], expected1)
+        truncateBeyondIsomass(graphs["isomass"], expected2)
+    plotsList.append(histograms.HistoGraph(expected, "Expected", drawStyle="L", legendStyle=None))
     if "expDown" in graphs.keys():
-        plotsList.append(histograms.HistoGraph(expected, "Expected", drawStyle="L", legendStyle=None))
+        plotsList.append(histograms.HistoGraph(graphs["expDown"], "Expected", drawStyle="L", legendStyle=None))
     plotsList.append(histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"))
+    if "exp1Down" in graphs.keys():
+        if "isomass" in graphs.keys():
+            truncateBeyondIsomass(graphs["isomass"], graphs["exp1Down"])
+        plotsList.append(histograms.HistoGraph(graphs["exp1Down"], "Expected median #pm 1#sigma", drawStyle="F", legendStyle=None))
+    
     plotsList.append(histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl"))
-
+    if "exp2Down" in graphs.keys():
+        if "isomass" in graphs.keys():
+            truncateBeyondIsomass(graphs["isomass"], graphs["exp2Down"])
+        plotsList.append(histograms.HistoGraph(graphs["exp2Down"], "Expected median #pm2 #sigma", drawStyle="F", legendStyle=None))
+        
     plot = plots.PlotBase(plotsList, saveFormats=[".png", ".pdf", ".C"])
 
     plot.histoMgr.setHistoLegendLabelMany(myLegendDictionary)
@@ -1166,9 +1206,11 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": 600})
     else:
         frameXmax = 160
+        frameXmin = 90
         if "_mA" in name:
             frameXmax = 145
-        plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": 90, "xmax": frameXmax})
+            frameXmin = 50
+        plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
 
     plot.frame.GetXaxis().SetTitle(xlabel)
     plot.frame.GetYaxis().SetTitle(tanblimit)
