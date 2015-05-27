@@ -141,9 +141,7 @@ def transverseMass(h, name="transverseMass", rebin=2, log=True):
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-#    h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 

@@ -11,22 +11,26 @@ muonFunctions = cms.PSet(
     photonIso = cms.string("photonIso()"),
     puChargedHadronIso = cms.string("puChargedHadronIso()"),
         
-    chargedHadronIsoEmb = cms.string("userFloat('embeddingStep_pfChargedHadrons')"),
-    neutralHadronIsoEmb = cms.string("userFloat('embeddingStep_pfNeutralHadrons')"),
-    photonIsoEmb = cms.string("userFloat('embeddingStep_pfPhotons')"),
-    puChargedHadronIsoEmb = cms.string("userFloat('embeddingStep_pfPUChargedHadrons')"),
+    chargedHadronIso_01to04 = cms.string("userFloat('embeddingStep_pfChargedHadrons')"),
+    neutralHadronIso_01to04 = cms.string("userFloat('embeddingStep_pfNeutralHadrons')"),
+    photonIso_01to04 = cms.string("userFloat('embeddingStep_pfPhotons')"),
+    puChargedHadronIso_01to04 = cms.string("userFloat('embeddingStep_pfPUChargedHadrons')"),
 
-    chargedHadronIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfChargedHadrons')"),
-    neutralHadronIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfNeutralHadrons')"),
-    photonIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfPhotons')"),
-    puChargedHadronIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfPUChargedHadrons')"),
+#     chargedHadronIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfChargedHadrons')"),
+#     neutralHadronIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfNeutralHadrons')"),
+#     photonIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfPhotons')"),
+#     puChargedHadronIsoEmb_01to04 = cms.string("userFloat('iso01to04_pfPUChargedHadrons')"),
 
-    chargedHadronIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfChargedHadrons')"),
-    neutralHadronIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfNeutralHadrons')"),
-    photonIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfPhotons')"),
-    puChargedHadronIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfPUChargedHadrons')"),
+#     chargedHadronIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfChargedHadrons')"),
+#     neutralHadronIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfNeutralHadrons')"),
+#     photonIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfPhotons')"),
+#     puChargedHadronIsoEmb_01to03 = cms.string("userFloat('iso01to03_pfPUChargedHadrons')"),
 
-    tauTightIc04Iso = cms.string("userInt('byTightIc04ChargedOccupancy')+userInt('by%TightIc04GammaOccupancy')"),
+#     tauTightIc04Iso = cms.string("userInt('byTightIc04ChargedOccupancy')+userInt('by%TightIc04GammaOccupancy')"),
+)
+
+electronFunctions = cms.PSet(
+    superClusterEta = cms.string("? superCluster().isNonnull() ? superCluster().eta() : -1e20")
 )
 
 jetFunctions = cms.PSet(
@@ -38,13 +42,26 @@ jetFunctions = cms.PSet(
     betaStar = cms.string("userFloat('BetaStar')"),
 )
 
+def puID(name):
+    return cms.PSet(
+        mvaSrc = cms.InputTag("puJetMva", "%sDiscriminant" % name),
+        flagSrc = cms.InputTag("puJetMva", "%sId" % name),
+    )
+jetPileupIDs = cms.PSet(
+    fullId = puID("full"),
+    cutbased = puID("cutbased"),
+    simpleId = puID("simple"),
+    philv1 = puID("philv1"),
+)
+
 tauFunctions = cms.PSet()
 _tauIds = [
     "decayModeFinding",
-    "againstMuonLoose", "againstMuonTight",
-    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA",
-    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
+    "againstMuonLoose", "againstMuonTight", "againstMuonTight2",
+    "againstElectronLoose", "againstElectronMedium", "againstElectronTight", "againstElectronMVA", "againstElectronTightMVA3", "againstElectronVTightMVA3",
+#    "byVLooseIsolation", "byLooseIsolation", "byMediumIsolation", "byTightIsolation",
     "byLooseCombinedIsolationDeltaBetaCorr", "byMediumCombinedIsolationDeltaBetaCorr", "byTightCombinedIsolationDeltaBetaCorr",
+    "byLooseCombinedIsolationDeltaBetaCorr3Hits", "byMediumCombinedIsolationDeltaBetaCorr3Hits", "byTightCombinedIsolationDeltaBetaCorr3Hits",
     ]
 for name in _tauIds:
     setattr(tauFunctions, name, cms.string("tauID('%s')"%name))

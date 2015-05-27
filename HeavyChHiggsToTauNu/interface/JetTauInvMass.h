@@ -2,11 +2,11 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_JetTauInvMass_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_JetTauInvMass_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BaseSelection.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 namespace edm {
   class ParameterSet;
@@ -16,19 +16,17 @@ namespace HPlus {
   class HistoWrapper;
   class WrappedTH1;
 
-  class JetTauInvMass {
+  class JetTauInvMass: public BaseSelection {
   public:
     /**
-     * Class to encapsulate the access to the data members of
-     * TauSelection. If you want to add a new accessor, add it here
-     * and keep all the data of TauSelection private.
+     * Class to encapsulate the access to the data members.
      */
     class Data {
     public:
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const JetTauInvMass *jetTauInvMass, bool passedEvent);
+      Data();
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
@@ -36,20 +34,22 @@ namespace HPlus {
       //      const edm::PtrVector<pat::Jet>& getSelectedTaus() const { return fJetTauInvMass->fSelectedTaus; }
       //      const int getBJetCount() const { return fBTagging->iNBtags; }
 
+      friend class JetTauInvMass;
+
     private:
-      const JetTauInvMass *fJetTauInvMass;
-      const bool fPassedEvent;
+      bool fPassedEvent;
     };
-    
+
     JetTauInvMass(const edm::ParameterSet& iConfig, EventCounter& eventCounter, HistoWrapper& histoWrapper);
     ~JetTauInvMass();
 
-    //    Data analyze(const edm::PtrVector<pat::Jet>& taus, const edm::PtrVector<pat::Jet>& jets);
-    Data analyze(const edm::PtrVector<reco::Candidate>& taus, const edm::PtrVector<reco::Candidate>& jets);
-
-
+    // Use silentAnalyze if you do not want to fill histograms or increment counters
+    Data silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus, const edm::PtrVector<reco::Candidate>& jets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus, const edm::PtrVector<reco::Candidate>& jets);
 
   private:
+    Data privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus, const edm::PtrVector<reco::Candidate>& jets);
+
     // Input parameters
     const double fMassResolution;
 

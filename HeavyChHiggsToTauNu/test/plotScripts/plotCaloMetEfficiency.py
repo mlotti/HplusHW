@@ -550,10 +550,7 @@ def common(h, xlabel, ylabel, addLuminosityText=True, afterDraw=None):
     h.draw()
     if afterDraw != None:
         afterDraw()
-#    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    if addLuminosityText:
-        h.addLuminosityText()
+    h.addStandardTexts(addCmsText=False)
     h.save()
 
 # Call the main function if the script is executed (i.e. not imported)

@@ -1,0 +1,3 @@
+# This file exists only for unit tests, the following ROOT files do not exist
+testfile1.root
+testfile2.root

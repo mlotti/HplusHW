@@ -104,7 +104,7 @@ def main():
 
     style = tdrstyle.TDRStyle()
 
-    plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD"
+    plots._legendLabels["QCD_Pt20_MuEnriched"] = "QCD multi-jet"
     histograms.createLegend.moveDefaults(dx=-0.04)
 
     doPlots(datasets)
@@ -128,14 +128,14 @@ def doPlots(datasets):
 
         histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
         td = tdMuon.clone(varexp="muons_p4.Pt() >>tmp(40,0,400)")
-        drawPlot(createPlot(td), name+"muon_pt_log", "Muon p_{T} (GeV/c)", ylabel="Events / %.0f GeV/c", cutBox={"cutValue":40, "greaterThan":True})
+        drawPlot(createPlot(td), name+"muon_pt_log", "Muon ^{}p_{T} (GeV/c)", ylabel="Events / %.0f GeV/c", cutBox={"cutValue":40, "greaterThan":True})
 
         histograms.cmsTextMode = histograms.CMSMode.NONE
         td = tdMuon.clone(varexp="pfMet_p4.Pt() >>tmp(40,0,400)")
-        drawPlot(createPlot(td), name+"met_log", "Uncorrected PF E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV")
+        drawPlot(createPlot(td), name+"met_log", "Uncorrected PF ^{}E_{T}^{miss} (GeV)", ylabel="Events / %.0f GeV")
 
         td = tdMuon.clone(varexp="sqrt(2 * muons_p4.Pt() * pfMet_p4.Et() * (1-cos(muons_p4.Phi()-pfMet_p4.Phi()))) >>tmp(40,0,400)")
-        drawPlot(createPlot(td), name+"mt_log", "m_{T}(#mu, E_{T}^{miss}) (GeV/c^{2})", ylabel="Events / %.0f GeV/c^{2}")
+        drawPlot(createPlot(td), name+"mt_log", "m_{T}(#mu, ^{}E_{T}^{miss}) (GeV/^{}c^{2})", ylabel="Events / %.0f GeV/^{}c^{2}")
 
 def printCounters(datasets):
     print "============================================================"

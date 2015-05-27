@@ -36,11 +36,19 @@ namespace HPlus {
     virtual ~TauIDBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
+
     void incrementAllCandidates();
     virtual bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) = 0;
+    bool passVertexZCut(const edm::Ptr<pat::Tau> tau, double vertexZ);
     bool passKinematicSelection(const edm::Ptr<pat::Tau> tau);
+    bool passKinematicSelectionPt(const edm::Ptr<pat::Tau>& tau);
+    bool passKinematicSelectionEta(const edm::Ptr<pat::Tau>& tau);
+
     virtual bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau) = 0;
     bool passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau);
+    bool passTauCandidateEVetoCuts(const edm::Ptr<pat::Tau>& tau);
+    bool passTauCandidateMuVetoCuts(const edm::Ptr<pat::Tau>& tau);
+
     bool passVetoAgainstDeadECALCells(const edm::Ptr<pat::Tau> tau);
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
     bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
@@ -55,10 +63,13 @@ namespace HPlus {
     /// Call at the end of event (after looping over all tau-jet candidates)
     void updatePassedCounters();
 
+    std::string getIsolationDiscriminator() const { return fIsolationDiscriminator; }
+
   protected:
     TFileDirectory fMyDir;
     
     // Input parameters
+    const double fVertexZCut;
     const double fPtCut;
     const double fEtaCut;
     const double fLeadTrkPtCut;
@@ -76,6 +87,7 @@ namespace HPlus {
     // Tau-jet candidate selections (same for all tau ID algorithms)
     size_t fIDAllTauCandidates;
     size_t fIDDecayModeFinding;
+    size_t fIDVertexZCut;
     size_t fIDJetPtCut;
     size_t fIDJetEtaCut;
     size_t fIDLdgTrackExistsCut;

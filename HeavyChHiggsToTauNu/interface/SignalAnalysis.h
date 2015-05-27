@@ -1,4 +1,3 @@
-// -*- c++ -*-
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
 
@@ -8,11 +7,13 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTaggingEfficiencyInMC.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronSelection.h"
+//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetTauInvMass.h"
@@ -20,19 +21,25 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEmulationEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BjetSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopChiSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithBSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopWithWSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeightReader.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MCAnalysisOfSelectedEvents.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelectionManager.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/WeightReader.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METTriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMuonEfficiency.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EmbeddingMTWeightFit.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventClassification.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexAssignmentAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FullHiggsMassCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingMuonIsolationQuantifier.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CommonPlots.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METFilters.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDTailKiller.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METPhiOscillationCorrection.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HistoWrapper.h"
 
@@ -60,48 +67,50 @@ namespace HPlus {
       void incrementOneTauCounter() { increment(fOneTauCounter); }
       void incrementElectronVetoCounter() { increment(fElectronVetoCounter); }
       void incrementMuonVetoCounter() { increment(fMuonVetoCounter); }
-      void incrementMETCounter() { increment(fMETCounter); }
       void incrementNJetsCounter() { increment(fNJetsCounter); }
+      void incrementDeltaPhiCollinearCounter() { increment(fDeltaPhiCollinearCounter); }
+      void incrementMETCounter() { increment(fMETCounter); }
       void incrementBTaggingCounter() { increment(fBTaggingCounter); }
-      void incrementDeltaPhiCounter() { increment(fDeltaPhiCounter); }
+      void incrementDeltaPhiBackToBackCounter() { increment(fDeltaPhiBackToBackCounter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
-      void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
-      void incrementTopChiSelectionCounter() { increment(fTopChiSelectionCounter); }
       void incrementSelectedEventsCounter() { increment(fSelectedEventsCounter); }
+      void incrementSelectedEventsFullMassCounter() { increment(fSelectedEventsFullMassCounter);}
+
+
+
     private:
       Count fOneTauCounter;
       Count fElectronVetoCounter;
       Count fMuonVetoCounter;
-      Count fMETCounter;
       Count fNJetsCounter;
+      Count fDeltaPhiCollinearCounter;
+      Count fMETCounter;
       Count fBTaggingCounter;
-      Count fDeltaPhiCounter;
-      Count fFakeMETVetoCounter;
-      Count fTopSelectionCounter;
-      Count fTopChiSelectionCounter;
-      //      Count fTopChiSelectionNarrowCounter;
-      Count fTopWithBSelectionCounter;
-      Count fTopWithWSelectionCounter;
+      Count fDeltaPhiBackToBackCounter;
       Count fSelectedEventsCounter;
+      Count fSelectedEventsFullMassCounter;
+      Count fFakeMETVetoCounter;
+
     };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
-    //kSignalOrderVertexSelection,
+    kSignalOrderVertexSelection,
     kSignalOrderTauID,
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
     kSignalOrderJetSelection,
+    kSignalOrderDeltaPhiCollinearSelection,
     kSignalOrderMETSelection,
     kSignalOrderBTagSelection,
-    //kSignalOrderDeltaPhiSelection,
-    kSignalOrderDeltaPhiSelection,
-    kSignalOrderFakeMETVeto,
-    kSignalOrderBjetSelection,
+    kSignalOrderDeltaPhiBackToBackSelection,
     kSignalOrderTopSelection,
-    kSignalOrderSelectedEvents
+    kSignalOrderSelectedEvents,
+    kSignalOrderSelectedEventsFullMass,
+    kSignalOrderFakeMETVeto,
+    kSignalOrderBjetSelection
   };
   public:
-    explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+  explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, HistoWrapper& histoWrapper);
     ~SignalAnalysis();
 
     void produces(edm::EDFilter *producer) const;
@@ -110,97 +119,103 @@ namespace HPlus {
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
+    /// Fill TTree (after delta phi collinear cuts)
+    void doTreeFilling(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData, const edm::Ptr<pat::Tau>& selectedTau, const ElectronSelection::Data& electronVetoData, const MuonSelection::Data& muonVetoData, const JetSelection::Data& jetData);
+    void fillSelectionFlowAndCounterGroups(int nVertices, FakeTauIdentifier::Data& tauMatchData, bool selectedToEWKFakeTauBackgroundStatus, SignalSelectionOrder selection, const TauSelection::Data& tauData);
     CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
-    void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
-    void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData);
+    void fillEWKFakeTausCounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, bool selectedToEWKFakeTauBackgroundStatus, SignalSelectionOrder selection, const TauSelection::Data& tauData);
+    void doMCAnalysisOfSelectedEvents(edm::Event& iEvent, const TauSelection::Data& tauData, const VetoTauSelection::Data& vetoTauData, const METSelection::Data& metData, const GenParticleAnalysis::Data& genData);
+    bool selectTailEvents(edm::Event& iEvent, const edm::EventSetup& iSetup, const VertexSelection::Data& pvData);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
     HistoWrapper fHistoWrapper;
-    const bool bBlindAnalysisStatus;
+    const bool bBlindAnalysisStatus; // FIXME: obsolete
     const bool bTauEmbeddingStatus;
     const double fDeltaPhiCutValue;
     const std::string fTopRecoName; // Name of selected top reconstruction algorithm
-    //    const double ftransverseMassCut;
 
+    edm::InputTag fOneProngTauSrc;
+    edm::InputTag fOneAndThreeProngTauSrc;
+    edm::InputTag fThreeProngTauSrc;
+
+    // Main counters
     Count fAllCounter;
+    Count fTopPtWeightCounter;
+    Count fWJetsWeightCounter;
+    Count fEmbeddingGeneratorWeightCounter;
+    Count fEmbeddingWTauMuWeightCounter;
+    Count fMETFiltersCounter;
+    Count fEmbeddingMuonTriggerEfficiencyCounter;
+    Count fEmbeddingMuonIdEfficiencyCounter;
     Count fTriggerCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
+    Count fTauFakeScaleFactorCounter;
     Count fOneTauCounter;
-    Count fTriggerScaleFactorCounter;
+    Count fTauTriggerScaleFactorCounter;
     Count fGenuineTauCounter;
     Count fVetoTauCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
+    Count fPreMETCutCounter;
+    Count fMETTriggerScaleFactorCounter;
+    Count fQCDTailKillerCollinearCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fBTaggingScaleFactorCounter;
-    Count fDeltaPhiTauMETCounter;
-    Count fHiggsMassCutCounter;
+    Count fEmbeddingMTWeightCounter;
+    Count fQCDTailKillerBackToBackCounter;
+    Count fTopReconstructionCounter;
+    Count fSelectedEventsCounter;
+    Count fHiggsMassSelectionCounter;
+    Count fFakeMETVetoCounter;
+
     Count fTauVetoAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiCounter;
     Count fRealTauAfterDeltaPhiTauVetoCounter;
 
-    Count fTauIsHadronFromHplusCounter;
-    Count fTauIsElectronFromHplusCounter;
-    Count fTauIsMuonFromHplusCounter;
-    Count fTauIsQuarkFromWCounter;
-    Count fTauIsElectronFromWCounter;
-    Count fTauIsMuonFromWCounter;
-    Count fTauIsHadronFromWTauCounter;
-    Count fTauIsElectronFromWTauCounter;
-    Count fTauIsMuonFromWTauCounter;
-    Count fTauIsElectronFromBottomCounter;
-    Count fTauIsMuonFromBottomCounter;
-    Count fTauIsHadronFromBottomCounter;
-    Count fTauIsElectronFromJetCounter;
-    Count fTauIsMuonFromJetCounter;
-    Count fTauIsHadronFromJetCounter;
 
-    Count fTopSelectionCounter;
-    Count fTopChiSelectionCounter;
-    Count fTopChiSelection250Counter;
-    Count fTopChiSelection220Counter;
-    Count fTopWithBSelectionCounter;
-    Count fTopWithBSelection250Counter;
-    Count fTopWithBSelection220Counter;
-    Count fTopWithWSelectionCounter;
-    Count fTopWithWSelection250Counter;
-    Count fTopWithWSelection220Counter;
-    Count fTopChiSelectionNarrowCounter;
-    Count fFakeMETVetoCounter;
-    Count fSelectedEventsCounter;
     Count fSelectedEventsCounterWithGenuineBjets;
 
     TriggerSelection fTriggerSelection;
     VertexSelection fPrimaryVertexSelection;
-    GlobalElectronVeto fGlobalElectronVeto;
-    GlobalMuonVeto fGlobalMuonVeto;
+    ElectronSelection fElectronSelection;
+    MuonSelection fMuonSelection;
     TauSelection fTauSelection;
     VetoTauSelection fVetoTauSelection;
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
+    BTaggingEfficiencyInMC fBTaggingEfficiencyInMC;
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
-    TopSelection fTopSelection;
-    TopChiSelection fTopChiSelection;
-    TopWithBSelection fTopWithBSelection;
-    TopWithWSelection fTopWithWSelection;
     BjetSelection fBjetSelection;
+    MCAnalysisOfSelectedEvents fMCAnalysisOfSelectedEvents;
     //    BjetWithPtSelection fBjetWithPtSelection;
+    TopSelectionManager fTopSelectionManager;
     FullHiggsMassCalculator fFullHiggsMassCalculator;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
-    TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
-    VertexWeightReader fVertexWeightReader;
+    TauTriggerEfficiencyScaleFactor fTauTriggerEfficiencyScaleFactor;
+    METTriggerEfficiencyScaleFactor fMETTriggerEfficiencyScaleFactor;
+    EmbeddingMuonEfficiency fEmbeddingMuonTriggerEfficiency;
+    EmbeddingMuonEfficiency fEmbeddingMuonIdEfficiency;
+    EmbeddingMTWeightFit fEmbeddingMTWeight;
+    WeightReader fPrescaleWeightReader;
+    WeightReader fPileupWeightReader;
+    WeightReader fWJetsWeightReader;
+    WeightReader fTopPtWeightReader;
+    WeightReader fEmbeddingGeneratorWeightReader;
+    WeightReader fEmbeddingWTauMuWeightReader;
     VertexAssignmentAnalysis fVertexAssignmentAnalysis;
     FakeTauIdentifier fFakeTauIdentifier;
+    METFilters fMETFilters;
+    QCDTailKiller fQCDTailKiller;
     TauEmbeddingMuonIsolationQuantifier fTauEmbeddingMuonIsolationQuantifier;
 
     SignalAnalysisTree fTree;
@@ -209,46 +224,33 @@ namespace HPlus {
     ScaleFactorUncertaintyManager fSFUncertaintiesAfterSelection;
     ScaleFactorUncertaintyManager fEWKFakeTausSFUncertaintiesAfterSelection;
 
+
+
     // Histograms
     
     // Vertex histograms
     WrappedTH1 *hVerticesBeforeWeight;
     WrappedTH1 *hVerticesAfterWeight;
-    WrappedTH1 *hVerticesTriggeredBeforeWeight;
-    WrappedTH1 *hVerticesTriggeredAfterWeight;
-    
-    // Transverse mass histograms
-    WrappedTH1 *hTransverseMass;
+
+    // Transverse mass for top algorithms
     WrappedTH1 *hTransverseMassTopSelection;
     WrappedTH1 *hTransverseMassTopChiSelection;
     WrappedTH1 *hTransverseMassTopBjetSelection;
     WrappedTH1 *hTransverseMassTopWithWSelection;
-    WrappedTH1 *hTransverseMassMET70;
     WrappedTH1 *hTransverseMassTauVeto;
-    WrappedTH1 *hTransverseMassAfterDeltaPhi;
-    WrappedTH1 *hEWKFakeTausTransverseMass;
     WrappedTH1 *hTransverseMassFakeMetVeto;
-    WrappedTH1 *hTransverseMassAfterDeltaPhi160;
-    WrappedTH1 *hTransverseMassAfterDeltaPhi130;
-    WrappedTH1 *hTransverseMassAfterDeltaPhi90;
+
     WrappedTH2 *hTransverseMassVsNjets;
     WrappedTH2 *hEWKFakeTausTransverseMassVsNjets;
 
     // Full mass histograms
-    WrappedTH1 *hFullMass;
-    WrappedTH1 *hEWKFakeTausFullMass;
-
-
     WrappedTH1 *hDeltaPhi;
     WrappedTH1 *hEWKFakeTausDeltaPhi;
-    WrappedTH1 *hDeltaPhiJetMet;
-    WrappedTH1 *hMaxDeltaPhiJetMet;
     WrappedTH1 *hAlphaT;
     WrappedTH1 *hAlphaTInvMass;
     WrappedTH2 *hAlphaTVsRtau;
     // Histograms for validation at every Selection Cut step
     WrappedTH1 *hSelectedTauEt;
-    WrappedTH1 *hMet;
     WrappedTH1 *hSelectedTauEta;
     WrappedTH1 *hSelectedTauPhi;
     WrappedTH1 *hSelectedTauRtau;
@@ -256,52 +258,61 @@ namespace HPlus {
     WrappedTH1 *hSelectedTauRtauAfterCuts;
     WrappedTH1 *hSelectedTauEtAfterCuts;
     WrappedTH1 *hSelectedTauEtaAfterCuts;
-    WrappedTH1 *hMetAfterCuts;
     WrappedTH1 *hEWKFakeTausSelectedTauEtAfterCuts;
     WrappedTH1 *hEWKFakeTausSelectedTauEtaAfterCuts;
     WrappedTH1 *hTransverseMassDeltaPhiUpperCutFakeMet;
 
     WrappedTH1 *hSelectionFlow;
     WrappedTH2 *hSelectionFlowVsVertices;
-    WrappedTH2 *hSelectionFlowVsVerticesFakeTaus;
+    WrappedTH2 *hSelectionFlowVsVerticesEWKFakeTausBkg;
 
-    // Control plots
-    WrappedTH1* hCtrlIdentifiedElectronPt;
-    WrappedTH1* hCtrlIdentifiedMuonPt;
-    WrappedTH1* hCtrlNjets;
-    WrappedTH1* hCtrlNjetsAfterMET;
-    WrappedTH1* hCtrlSelectedTauPtAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauEtaAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauPhiAfterStandardSelections;
-    WrappedTH2* hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauRtauAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauPAfterStandardSelections;
-    WrappedTH1* hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
-    WrappedTH1* hCtrlIdentifiedElectronPtAfterStandardSelections;
-    WrappedTH1* hCtrlIdentifiedMuonPtAfterStandardSelections;
-    WrappedTH1* hCtrlNjetsAfterStandardSelections;
-    WrappedTH1* hCtrlMET;
-    WrappedTH1* hCtrlNbjets;
+    // Histograms for jet flavour tagging efficiency calculation in MC
+    // Pseudorapidity (eta)
+    WrappedTH1 *hGenuineBJetEta;   
+    WrappedTH1 *hGenuineBJetWithBTagEta;
+    WrappedTH1 *hGenuineGJetEta;
+    WrappedTH1 *hGenuineGJetWithBTagEta;
+    WrappedTH1 *hGenuineUDSJetEta;
+    WrappedTH1 *hGenuineUDSJetWithBTagEta;
+    WrappedTH1 *hGenuineCJetEta;
+    WrappedTH1 *hGenuineCJetWithBTagEta;
+    WrappedTH1 *hGenuineLJetEta;
+    WrappedTH1 *hGenuineLJetWithBTagEta;
+    // Transverse momentum (pT)
+    WrappedTH1 *hGenuineBJetPt;   
+    WrappedTH1 *hGenuineBJetWithBTagPt;
+    WrappedTH1 *hGenuineGJetPt;
+    WrappedTH1 *hGenuineGJetWithBTagPt;
+    WrappedTH1 *hGenuineUDSJetPt;
+    WrappedTH1 *hGenuineUDSJetWithBTagPt;
+    WrappedTH1 *hGenuineCJetPt;
+    WrappedTH1 *hGenuineCJetWithBTagPt;
+    WrappedTH1 *hGenuineLJetPt;
+    WrappedTH1 *hGenuineLJetWithBTagPt;
+    // Two-dimensional histograms of pT vs. eta to investigate possible correlations
+    WrappedTH2 *hGenuineBJetPtAndEta;
+    WrappedTH2 *hGenuineBJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineGJetPtAndEta;
+    WrappedTH2 *hGenuineGJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineUDSJetPtAndEta;
+    WrappedTH2 *hGenuineUDSJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineCJetPtAndEta;
+    WrappedTH2 *hGenuineCJetWithBTagPtAndEta;
+    WrappedTH2 *hGenuineLJetPtAndEta;
+    WrappedTH2 *hGenuineLJetWithBTagPtAndEta;
+
+
     // Control plots for fakes
-    WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPt;
-    WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPt;
-    WrappedTH1* hCtrlEWKFakeTausNjets;
-    WrappedTH1* hCtrlEWKFakeTausNjetsAfterMET;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauPtAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauEtaAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauPhiAfterStandardSelections;
-    WrappedTH2* hCtrlEWKFakeTausSelectedTauEtaVsPhiAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauLeadingTrkPtAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauRtauAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauPAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausSelectedTauLeadingTrkPAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausIdentifiedElectronPtAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausIdentifiedMuonPtAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausNjetsAfterStandardSelections;
-    WrappedTH1* hCtrlEWKFakeTausMET;
-    WrappedTH1* hCtrlEWKFakeTausNbjets;
 
+    // TTBar decay mode
+    WrappedTH1 *hTTBarDecayModeAfterVertexSelection;
+    WrappedTH1 *hTTBarDecayModeAfterVertexSelectionUnweighted;
+    WrappedTH1 *hTTBarDecayModeAfterStandardSelections;
+    WrappedTH1 *hTTBarDecayModeAfterStandardSelectionsUnweighted;
+    WrappedTH1 *hTTBarDecayModeAfterMtSelections;
+    WrappedTH1 *hTTBarDecayModeAfterMtSelectionsUnweighted;
+
+    // FIXME move these to common plots
     WrappedTH2* hCtrlJetMatrixAfterJetSelection;
     WrappedTH2* hCtrlJetMatrixAfterMET;
     WrappedTH2* hCtrlJetMatrixAfterMET100;
@@ -314,14 +325,16 @@ namespace HPlus {
     CounterGroup fMuonToTausCounterGroup;
     CounterGroup fMuonFromTauDecayToTausCounterGroup;
     CounterGroup fGenuineToTausCounterGroup;
+    CounterGroup fGenuineOneProngToTausCounterGroup;
     CounterGroup fJetToTausCounterGroup;
-    CounterGroup fAllTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fElectronToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fElectronFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fMuonToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fMuonFromTauDecayToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
-    CounterGroup fJetToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fAllTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fElectronToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fElectronFromTauDecayToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fMuonToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fMuonFromTauDecayToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fGenuineToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fGenuineOneProngToTausAndTauJetInsideAcceptanceCounterGroup;
+    CounterGroup fJetToTausAndTauJetInsideAcceptanceCounterGroup;
 
     WrappedTH1 *hEMFractionAll;
     WrappedTH1 *hEMFractionElectrons;
@@ -329,7 +342,54 @@ namespace HPlus {
     std::string fModuleLabel;
 
     bool fProduce;
-    bool fOnlyGenuineTaus;
+    bool fOnlyEmbeddingGenuineTaus;
+    
+    // FIXME move these to common plots
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode0;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode1;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode2;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode0NoNeutralHadrons;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode1NoNeutralHadrons;
+    WrappedTH1 *hReferenceJetToTauDeltaPtDecayMode2NoNeutralHadrons;
+
+    // Common plots
+    CommonPlots fCommonPlots;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterVertexSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeight;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVeto;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelection;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMET;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETWithPhiOscillationCorrection; // temporary
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTagging;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBackToBackDeltaPhi;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelected;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTail;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMass;
+    // Probabilistic b tag as event weight (note: for invariant mass, b tag is needed!)
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagAfterBTagging;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhi;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagSelected;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagSelectedMtTail;
+
+    // EWK fake taus background
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauSelectionEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterTauWeightEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterElectronVetoEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMuonVetoEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterJetSelectionEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterMETEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBTaggingEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsAfterBackToBackDeltaPhiEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedMtTailEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsSelectedFullMassEWKFakeTausBkg;
+    // Probabilistic b tag as event weight (note: for invariant mass, b tag is needed!)
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagAfterBTaggingEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagAfterBackToBackDeltaPhiEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagSelectedEWKFakeTausBkg;
+    CommonPlotsFilledAtEveryStep* fCommonPlotsProbabilisticBTagSelectedMtTailEWKFakeTausBkg;
   };
 }
 

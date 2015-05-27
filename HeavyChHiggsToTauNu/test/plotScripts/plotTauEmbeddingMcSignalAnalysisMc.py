@@ -273,9 +273,7 @@ def common(h, xlabel, ylabel):
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 if __name__ == "__main__":

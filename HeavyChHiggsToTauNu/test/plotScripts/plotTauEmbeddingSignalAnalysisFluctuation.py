@@ -265,10 +265,9 @@ def doPlots(table):
 
         p.appendPlotObject(histograms.PlotText(0.5, 0.2, label, size=20))
         p.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
         if name == "Data":
-            histograms.addLuminosityText(None, None, lumi)
+            p.setLuminosity(lumi)
+        p.addStandardTexts()
         p.save()
 
         ###############
@@ -321,8 +320,7 @@ def doPlots(table):
 
         p.draw()
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
+        p.addStandardTexts()
         p.save()
 
 

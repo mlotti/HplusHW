@@ -6,7 +6,10 @@ from FWCore.ParameterSet.Modules import _Module
 
 import FWCore.ParameterSet.VarParsing as VarParsing
 
+import PhysicsTools.PatAlgos.tools.helpers as helpers
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 
 # Note: This file is adapted from TauAnalysis/MCEmbeddingTools/python/pf_01_customizeAll.py
 # Check that file in CVS for changes
@@ -93,12 +96,29 @@ def customise(process):
                       VarParsing.VarParsing.multiplicity.singleton,
                       VarParsing.VarParsing.varType.int,
                       "should I override beamspot in globaltag?")
+    options.register("tauDecayMode", 0, # Default is all decays
+                     VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int,
+                     "Tau decay mode (0=all, 230=hadronic)")
+    options.register("tauMinVisPt", -1, # Disabled
+                     VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int,
+                     "Minimum visible pt of tau decay (-1 disabled, >= 0 cut value in GeV)")
 
-    options, dataVersion = getOptionsDataVersion("44XmcS6", options)
+    options, dataVersion = getOptionsDataVersion("53XmcS10", options)
 
     hltProcessName = dataVersion.getTriggerProcess()
     recoProcessName = dataVersion.getRecoProcess()
     processName = process.name_()
+
+    # Setup trigger matching
+    if not (dataVersion.isMC() and options.triggerMC == 0 and options.triggerMCInAnalysis == 0):
+        HChTriggerMatching.setMuonTriggerMatchingInAnalysis(process.tightenedMuonsMatched, options.trigger)
+
+    # Setup MuScleFit
+    if dataVersion.isMC():
+        process.muscleCorrectedMuons.identifier = "Summer12_DR53X_smearReReco"
+        process.muscleCorrectedMuons.applySmearing = True
+    else:
+        process.muscleCorrectedMuons.identifier = "Data2012_53X_ReReco"
 
     # Setup output
     outputModule = None
@@ -162,12 +182,17 @@ def customise(process):
         src = cms.InputTag("generator")
     )
 
+    # Set up tau decay options
+    process.generator.ZTauTau.TauolaOptions.InputCards.mdtau = options.tauDecayMode
+    if options.tauMinVisPt >= 0:
+        process.generator.ZTauTau.minVisibleTransverseMomentum = "%d"%options.tauMinVisPt
 
     print "TAUOLA mdtau =", process.generator.ZTauTau.TauolaOptions.InputCards.mdtau
 
     # Do we have to override the beam spot for data?
     if options.overrideBeamSpot !=  0:
-        bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v21_offline") # 42x data gt
+        bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v25_offline") # 44x data gt
+        #bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v21_offline") # 42x data gt
         process.GlobalTag.toGet = cms.VPSet(
             cms.PSet(record = cms.string("BeamSpotObjectsRcd"),
                      tag = bs,
@@ -181,7 +206,7 @@ def customise(process):
 
     # Merge tracks
     process.tmfTracks = cms.EDProducer("RecoTracksMixer",
-        trackCol1 = cms.InputTag("dimuonsGlobal"),
+        trackCol1 = cms.InputTag("dimuonsGlobal", "tracks"),
         trackCol2 = cms.InputTag("generalTracks", "", processName)
     )
     process.offlinePrimaryVerticesWithBS.TrackLabel = cms.InputTag("tmfTracks")
@@ -229,7 +254,7 @@ def customise(process):
     # order to get PF-based isolation right.
     if hasattr(process, 'particleFlowTmp'):
         process.particleFlowTmpMixed = cms.EDProducer('PFCandidateMixer',
-            col1 = cms.untracked.InputTag("dimuonsGlobal","forMixing"),
+            col1 = cms.untracked.InputTag("dimuonsGlobal", "pfCands"),
             col2 = cms.untracked.InputTag("particleFlowTmp", ""),
             trackCol = cms.untracked.InputTag("tmfTracks"),
             # Don't produce value maps:
@@ -239,6 +264,7 @@ def customise(process):
         process.muons.PFCandidates = cms.InputTag("particleFlowTmpMixed")
 
         for p in process.paths:
+            pth = getattr(process, p)
             if "particleFlow" in pth.moduleNames():
                 pth.replace(process.particleFlow, process.particleFlowORG*process.particleFlow)
             if "muons" in pth.moduleNames():
@@ -267,8 +293,7 @@ def customise(process):
         process.pfSelectedPhotons.src   = cms.InputTag("particleFlowORG")
 
     process.particleFlow =  cms.EDProducer('PFCandidateMixer',
-        #col1 = cms.untracked.InputTag("removedInputMuons","pfCands"), # this is ok in 5_2
-        col1 = cms.untracked.InputTag("dimuonsGlobal","forMixing"), # this works for 4_2 and 4_4
+        col1 = cms.untracked.InputTag("dimuonsGlobal", "pfCands"),
         col2 = cms.untracked.InputTag("particleFlowORG", ""),
         trackCol = cms.untracked.InputTag("tmfTracks"),
         muons = cms.untracked.InputTag("muons"),
@@ -360,13 +385,124 @@ def customise(process):
 
     return process
 
+def replaceInAllPathsAndSequences(process, old, new, exceptions=[]):
+    for pthName, pth in process.paths_().iteritems():
+        if pthName not in exceptions:
+            pth.replace(old, new)
+    for seqName, seq in process.sequences_().iteritems():
+        if seqName not in exceptions:
+            seq.replace(old, new)
+
+def replaceInputTagInAllSequences(process, oldName, newName, exceptions=[], pathExceptions=[], verbose=False):
+    if verbose:
+        print "Replacing %s -> %s" % (oldName, newName)
+    for seqName, seq in process.sequences_().iteritems():
+        if seqName not in exceptions:
+            if verbose:
+                print "  in sequence %s" % seqName
+            helpers.massSearchReplaceAnyInputTag(seq, cms.InputTag(oldName), cms.InputTag(newName), verbose=verbose)
+    for pathName, path in process.paths_().iteritems():
+        if pathName not in pathExceptions:
+            if verbose:
+                print "  in path %s" % pathName
+            helpers.massSearchReplaceAnyInputTag(path, cms.InputTag(oldName), cms.InputTag(newName), verbose=verbose)
 
 def addPAT(process, options, dataVersion):
     options.doPat = 1
     options.tauEmbeddingInput = 1
 
+    f = open("configDumpEmbedDebug.py", "w")
+    f.write(process.dumpPython())
+    f.close()
+
+    #process.options.wantSummary = cms.untracked.bool(True)
+
     # Hacks to get PAT to work in a process with RECO
     process.recoPFJets.remove(process.kt6PFJets)
+    process.recoAllPFJets.remove(process.kt6PFJets)
+
+    origPostfix = "Orig"
+    clashingSequences = [
+        "muonPFIsolationSequence",
+#        "pfPhotonIsolationSequence",
+#        "pfElectronIsolationSequence",
+#        "muonPFIsolationDepositsSequence",
+#        "photonPFIsolationDepositsSequence",
+#        "electronPFIsolationDepositsSequence",
+        "pfElectronTranslatorSequence",
+        "pfPhotonTranslatorSequence",
+        ]
+    sequencesNoReplaceInputTag = clashingSequences+[
+        "photonPFIsolationDepositsSequence",
+        "electronPFIsolationDepositsSequence",
+        "pfBasedElectronPhotonIsoSequence",
+        ]
+
+    modulesInClashingSequences = [
+        "pfElectronTranslator",
+        "pfElectronTranslator:pf",
+        "pfPhotonTranslator",
+        "pfPhotonTranslator:pfphot",
+        "pfElectronInterestingEcalDetIdEB",
+        "pfElectronInterestingEcalDetIdEE",
+        "pfPhotonInterestingEcalDetIdEE",
+        "pfPhotonInterestingEcalDetIdEB",
+    ]
+    for name in ["Charged", "ChargedAll", "Gamma", "Neutral", "PU"]:
+        modulesInClashingSequences.extend([
+                "muPFIsoDeposit"+name,
+                "muPFIsoValue%s03"%name,
+                "muPFIsoValue%s04"%name,
+                "phPFIsoDeposit"+name,
+                "phPFIsoValue%s03PFId"%name,
+                "phPFIsoValue%s04PFId"%name,
+                "elPFIsoDeposit"+name,
+                "elPFIsoValue%s03PFId"%name,
+                "elPFIsoValue%s04PFId"%name,
+                ])
+    for name in ["Gamma", "neutral"]:
+        modulesInClashingSequences.extend([
+                "muPFIsoValue%sHighThreshold03"%name,
+                "muPFIsoValue%sHighThreshold04"%name,
+                ])
+    for name in ["Charged", "Neutral", "Photons"]:
+        modulesInClashingSequences.extend([
+                "isoDepPhotonWith"+name,
+                "isoValPhotonWith"+name,
+                "isoDepElectronWith"+name,
+                "isoValElectronWith"+name, 
+               ])
+        
+
+    clashingModules = ["pfSelectedElectrons", "pfSelectedPhotons"]
+
+    process.pfPhotonTranslatorSequence.remove(process.pfBasedElectronPhotonIsoSequence)
+    for name in clashingSequences:
+        oldSeq = getattr(process, name)
+        helpers.cloneProcessingSnippet(process, getattr(process, name), origPostfix)
+        newSeq = getattr(process, name+origPostfix)
+
+        replaceInAllPathsAndSequences(process, oldSeq, newSeq)
+    process.pfPhotonTranslatorSequence.insert(0, process.pfBasedElectronPhotonIsoSequenceOrig)
+
+    for name in modulesInClashingSequences:
+        if ":" in name:
+            newName = name.replace(":", origPostfix+":", 1)
+        else:
+            newName = name+origPostfix
+        replaceInputTagInAllSequences(process, name, newName, exceptions=sequencesNoReplaceInputTag)
+
+    for name in clashingModules:
+        newName = name+origPostfix
+        mod = getattr(process, name)
+        newMod = mod.clone()
+        setattr(process, newName, newMod)
+        replaceInAllPathsAndSequences(process, mod, newMod, exceptions=sequencesNoReplaceInputTag)
+        replaceInputTagInAllSequences(process, name, newName, exceptions=sequencesNoReplaceInputTag)
+
+    f = open("configDumpEmbedDebug2.py", "w")
+    f.write(process.dumpPython())
+    f.close()
 
     # Set the output module name
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple as patConf
@@ -390,6 +526,13 @@ def addPAT(process, options, dataVersion):
 
     # Add PAT
     process.commonPatSequence, additionalCounters = patConf.addPatOnTheFly(process, options, dataVersion)
+
+    # More hacks to get PAT to work in this process
+    if dataVersion.isMC():
+        process.patJetPartonMatch.matched.setProcessName("SIM")
+        process.patJetPartonMatchChs.matched.setProcessName("SIM")
+        process.patJetPartons.src.setProcessName("SIM")
+        process.patJetPartonsChs.src.setProcessName("SIM")
 
     # Select the tau matching to the muon already here
     # Also remove the embedding muon from the selected muons
@@ -425,6 +568,10 @@ def addPAT(process, options, dataVersion):
             "drop *_selectedPatPhotons_*_"+skimProcessName,
             "drop *_generalTracks20eta2p5_*_"+skimProcessName,
             "drop *_goodJets*_*_"+skimProcessName,
+            "keep *_selectedPatTaus*_*_"+skimProcessName,
+            "keep *_patPFMet*_*_"+skimProcessName,
+            "keep *_patType1CorrectedPFMet*_*_"+skimProcessName,
+            "keep *_patType1p2CorrectedPFMet*_*_"+skimProcessName,
 
             "drop *_dimuonsGlobal_*_"+processName,
             "drop *_tmfTracks_*_"+processName,

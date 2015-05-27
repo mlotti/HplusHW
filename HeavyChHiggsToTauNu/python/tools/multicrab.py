@@ -5,6 +5,8 @@
 # \li creating (multi)crab tasks (also multicrabDataset package)
 # \li querying the status of crab jobs (via hplusMultiCrabStatus.py)
 #
+# <b>The documentation below is now outdated, update is still to be written.</b>
+#
 # The motivation for having all this trouble with creating the crab
 # tasks is that managing hundreds of datasets/crab tasks (one crab
 # task per dataset with an entry in DBS) with plain multicrab.cfg
@@ -145,45 +147,52 @@
 # additional documentation.
 
 import os, re
+import sys
 import subprocess, errno
 import time
+import math
+import glob
 import shutil
+import select
 import ConfigParser
 import OrderedDict
 
-import multicrabDatasets
+import multicrabWorkflows
 import certifiedLumi
 import git
+import aux
 
-## Default Storage Element (SE) black list
-defaultSeBlacklist = [
-    # blacklist before v13
-    #"T2_UK_London_Brunel", # I don't anymore remember why this is here
-    #"T2_BE_IIHE", # All jobs failed with stageout timeout
-    #"T2_IN_TIFR", # All jobs failed file open errors
-    #"T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout
-
-    # blacklist after v13
-    "colorado.edu", # Ultraslow bandwidth, no chance to get even the smaller pattuples through
-    "T3_*", # Don't submit to T3's  
-    "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors
-#    "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors
-#    "iihe.ac.be", # Problematic site with server, long queue
-    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times
-    "unl.edu", # Jobs can wait in queues for a looong time
-#    "wisc.edu", # Stageout failures,
-#    "ingrid.pt", # Stageout failures
-    "ucsd.edu", # Stageout failures
-    "pi.infn.it", # Stageout failures
-    "lnl.infn.it", # Stageout failures
-#    "mit.edu", # MIT has some problems?
-    "sprace.org.br", # Stageout failures
-    "knu.ac.kr", # Stageout failures
-#    "T2_US_*", # disable US because of low bandwidth
-    "kbfi.ee", # Files are not found
-    "cscs.ch", # Files are not found
+## Default Storage Element (SE) black list for non-stageout jobs
+defaultSeBlacklist_noStageout = [
+#    "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors, added 2011-09-02, commented 2012-09-28
+#    "iihe.ac.be", # Problematic site with server, long queue, added, 2011-09-26, commented 2012-09-28
+#    "unl.edu", # Jobs can wait in queues for a looong time, added 2011-10-24, commented 2012-10-26
+#    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
+    "kbfi.ee", # Files are not found, added 2012-09-28
+    "cscs.ch", # Files are not found, added 2012-09-28
+#    "roma1.infn.it", # Jobs don't finish, added 2012-10-26, commented 2013-02-25
+    "kiae.ru", # Jobs fail by some missing grid libraries, added 2013-02-20
     ]
 
+## Default Storage Element (SE) black list for stageout jobs
+defaultSeBlacklist_stageout = [
+    "colorado.edu", # Ultraslow bandwidth, no chance to get even the smaller pattuples through, added 2011-06-16
+    "T3_*", # Don't submit to T3's, added 2011-10-24
+    "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors, added 2011-09-02
+#    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times, added 2011-09-02, commented 2012-11-06 (long queues still apply, but remoteGlidein helps)
+#    "wisc.edu", # Stageout failures, added 2011-10-24, commented 2012-09-28 
+#    "ingrid.pt", # Stageout failures, added 2011-10-26, commented 2011-12-02
+#    "ucsd.edu", # Stageout failures, added 2011-10-26, commented 2012-11-19
+#    "pi.infn.it", # Stageout failures, added 2011-10-26, commented 2012-11-19
+#    "lnl.infn.it", # Stageout failures, added 2011-12-02, commented 2013-02-25
+#    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
+    "sprace.org.br", # Stageout failures. added 2011-12-02
+    "knu.ac.kr", # Stageout failures, added 2011-12-02
+#    "T2_US_*", # disable US because of low bandwidth, added 2012-04-04, commented 2012-09-28
+    ]
+
+## Default Storage Element (SE) black list for backward compatibility
+defaultSeBlacklist = defaultSeBlacklist_noStageout + defaultSeBlacklist_stageout
 
 ## Returns the list of CRAB task directories from a MultiCRAB configuration.
 # 
@@ -193,10 +202,12 @@ defaultSeBlacklist = [
 #                  optional, to override the default behaviour of reading
 #                  the configuration file.
 # \param filename  Path to the multicrab.cfg file (default: 'multicrab.cfg')
+# \param directory Path to \a filename, allows specifying only the
+#                  directory of the default \a filename (default: '')
 # 
 # The order of the task names is the same as they are in the
 # configuration file.
-def getTaskDirectories(opts, filename="multicrab.cfg"):
+def getTaskDirectories(opts, filename="multicrab.cfg", directory=""):
     if hasattr(opts, "dirs") and len(opts.dirs) > 0:
         ret = []
         for d in opts.dirs:
@@ -206,34 +217,50 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
                 ret.append(d)
         return ret
     else:
-        if not os.path.exists(filename):
-            raise Exception("Multicrab configuration file '%s' does not exist" % filename)
-
-        directory = os.path.dirname(filename)
-
-        mc_ignore = ["MULTICRAB", "COMMON"]
-        mc_parser = ConfigParser.ConfigParser(dict_type=OrderedDict.OrderedDict)
-        mc_parser.read(filename)
-
-        sections = mc_parser.sections()
-
-        for i in mc_ignore:
-            try:
-                sections.remove(i)
-            except ValueError:
-                pass
-
-#        sections.sort()
+        fname = os.path.join(directory, filename)
+        if os.path.exists(fname):
+            taskNames = _getTaskDirectories_crab2(fname)
+            dirname = os.path.dirname(fname)
+            taskNames = [os.path.join(dirname, task) for task in taskNames]
+        else:
+            taskNames = _getTaskDirectories_crab3(directory)
 
         def filt(dir):
             if opts.filter in dir:
                 return True
             return False
-        fi = lambda x: True
-        if opts != None and opts.filter != "":
-            fi = filt
+        if opts != None:
+            if opts.filter != "":
+                taskNames = filter(filt, taskNames)
+            if len(opts.skip) > 0:
+                for skip in opts.skip:
+                    taskNames = filter(lambda n: skip not in n, taskNames)
 
-        return filter(fi, [os.path.join(directory, sec) for sec in sections])
+        return taskNames
+
+def _getTaskDirectories_crab2(filename):
+    if not os.path.exists(filename):
+        raise Exception("Multicrab configuration file '%s' does not exist" % filename)
+
+    mc_ignore = ["MULTICRAB", "COMMON"]
+    mc_parser = ConfigParser.ConfigParser(dict_type=OrderedDict.OrderedDict)
+    mc_parser.read(filename)
+
+    sections = mc_parser.sections()
+
+    for i in mc_ignore:
+        try:
+            sections.remove(i)
+        except ValueError:
+            pass
+
+    return sections
+
+def _getTaskDirectories_crab3(directory):
+#    dirs = glob.glob(os.path.join(directory, "crab_*"))
+    dirs = glob.glob(os.path.join(directory, "*")) #fixme
+    dirs = filter(lambda d: os.path.isdir(d), dirs)
+    return dirs
 
 ## Add common MultiCRAB options to OptionParser object.
 #
@@ -243,6 +270,8 @@ def addOptions(parser):
                       help="CRAB task directory to have the files to merge (default: read multicrab.cfg and use the sections in it)")
     parser.add_option("--filter", dest="filter", type="string", default="",
                       help="When reading CRAB tasks from multicrab.cfg, take only tasks whose names contain this string")
+    parser.add_option("--skip", dest="skip", type="string", action="append", default=[],
+                      help="When reading CRAB tasks from multicrab.cfg, skip tasks containing this string (can be given multiple times)")
 
 ## Raise OSError if 'crab' command is not found in $PATH.
 def checkCrabInPath():
@@ -261,19 +290,83 @@ def checkCrabInPath():
 # \param path     Path to a directory where to create the multicrab
 #                 directory (if None, crete to working directory)
 def createTaskDir(prefix="multicrab", postfix="", path=None):
-    dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
-    if len(postfix) > 0:
-        dirname += "_" + postfix
-    if path != None:
-        dirname = os.path.join(path, dirname)
-    os.makedirs(dirname)
+    while True:
+        dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
+        if len(postfix) > 0:
+            dirname += "_" + postfix
+        if path != None:
+            dirname = os.path.join(path, dirname)
+        if os.path.exists(dirname):
+            time.sleep(1)
+            continue
+
+        os.makedirs(dirname)
+        break
     return dirname
+
+def crabCfgTemplate(scheduler="arc", return_data=None, copy_data=None, crabLines=[], cmsswLines=[], userLines=[], gridLines=[]):
+    if return_data is None and copy_data is None:
+        raise Exception("You must give either return_data or copy_data, you gave neither")
+    if return_data is not None and copy_data is not None:
+        raise Exception("You must give either return_data or copy_data, you gave both")
+    if copy_data is not None:
+        return_data = not copy_data
+    if return_data:
+        r = 1
+        c = 0
+    else:
+        r = 0
+        c = 1
+
+    lines = [
+        "[CRAB]",
+        "jobtype = cmssw",
+        "scheduler = %s" % scheduler,
+        ]
+    lines.extend(crabLines)
+    if len(cmsswLines) > 0:
+        lines.extend(["",
+                      "[CMSSW]",
+                      "use_dbs3 = 1"
+                      ])
+        lines.extend(cmsswLines)
+    lines.extend([
+        "",
+        "[USER]",
+        "return_data = %d" % r,
+        "copy_data = %d" % c,
+        ])
+    lines.extend(userLines)
+    lines.extend([
+        "",
+        "[GRID]",
+        "virtual_organization = cms"
+        ])
+    lines.extend(gridLines)
+
+    return "\n".join(lines)
+
+## Write git version information to a directory
+#
+# \param dirname  Path to multicrab directory
+def writeGitVersion(dirname):
+    version = git.getCommitId()
+    if version != None:
+        f = open(os.path.join(dirname, "codeVersion.txt"), "w")
+        f.write(version+"\n")
+        f.close()
+        f = open(os.path.join(dirname, "codeStatus.txt"), "w")
+        f.write(git.getStatus()+"\n")
+        f.close()
+        f = open(os.path.join(dirname, "codeDiff.txt"), "w")
+        f.write(git.getDiff()+"\n")
+        f.close()
 
 ## Print all multicrab datasets
 #
-# \param details   Forwarded to multicrabDatasets.printAllDatasets()
+# \param details   Forwarded to multicrabWorkflows.printAllDatasets()
 def printAllDatasets(details=False):
-    multicrabDatasets.printAllDatasets(details)
+    multicrabWorkflows.printAllDatasets(details)
 
 ## Select runs [runMin, runMax] from lumiList.
 # 
@@ -304,9 +397,10 @@ class ExitCodeException(Exception):
 ## Given crab job stdout file, ensure that the job succeeded
 #
 # \param stdoutFile   Path to crab job stdout file
+# \param allowJobExitCodes  Consider jobs with these non-zero exit codes to be succeeded
 #
 # If any of the checks fail, raises multicrab.ExitCodeException
-def assertJobSucceeded(stdoutFile):
+def assertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
     re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
     re_job = re.compile("JobExitCode=(?P<code>\d+)")
 
@@ -329,7 +423,7 @@ def assertJobSucceeded(stdoutFile):
         raise ExitCodeException("No jobExitCode")
     if exeExitCode != 0:
         raise ExitCodeException("Executable exit code is %d" % exeExitCode)
-    if jobExitCode != 0:
+    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
         raise ExitCodeException("Job exit code is %d" % jobExitCode)
 
 ## Compact job number list
@@ -396,31 +490,71 @@ def prettyToJobList(prettyString):
 
 ## Get output of 'crab -status' of one CRAB task
 #
-# \param task   CRAB task directory name
+# \param task      CRAB task directory name
+# \param printCrab Print CRAB output
 #
 # \return Output (stdout+stderr) as a string
-def crabStatusOutput(task):
+def crabStatusOutput(task, printCrab):
+    if False: # debugging
+        out = open("crabOutput-%s.txt" % time.strftime("%y%m%d_%H%M%S"), "w")
+    else:
+        out = None
+
     command = ["crab", "-status", "-c", task]
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output = p.communicate()[0]
+    #p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) # doesn't solve
+    #p = subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=100*1024) # doesn't solve
+    p = subprocess.Popen(command, stdout=subprocess.PIPE)
+    output = ""
+    # The process may finish between p.poll() and p.stdout.readline()
+    # http://stackoverflow.com/questions/10756383/timeout-on-subprocess-readline-in-python
+    # Try first just using select for polling if p.stdout has anything
+    # If that doesn't work out, add the timeout (currently in comments)
+    poll_obj = select.poll()
+    poll_obj.register(p.stdout, select.POLLIN)
+        #last_print_time = time.time()
+        #timeout = 600 # 10 min timeout initially, -status can take long
+#        while p.poll() == None:# and (time.time() - last_print_time) < timeout:
+#                    if "Log file is" in line:
+#                        # The last line in the output starts with this, shorten the timeout to 10 s
+#                        timeout = 10
+#                        print "Last line encountered, shortening timeout to 10 s"
+#                last_print_time = time.time()
+
+    while True:
+        exit_result = p.poll()
+        while True:
+            poll_result = poll_obj.poll(0) # poll timeout is 0 ms
+            if poll_result:
+                line = p.stdout.readline()
+                if line:
+                    if printCrab:
+                        print line.strip("\n")
+                    if out is not None:
+                        out.write(line)
+                    output += line
+                else:
+                    break
+            else: # if nothing to read, continue to check if the process has finished
+                break
+        if exit_result is None:
+            time.sleep(1)
+        else:
+            break
+
+    if out is not None:
+        out.close()
+#    print "Out of poll loop, return code", p.returncode
     if p.returncode != 0:
-        raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
+        if printCrab:
+            raise Exception("Command '%s' failed with exit code %d" % (" ".join(command), p.returncode))
+        else:
+            raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
     return output
 
-## Helper for adding a list to a dictionary
-#
-# \param d     Dictionary
-# \param name  Key to dictionary
-# \param item  Item to add to the list
-#
-# For dictionaries which have lists as items, this function creates
-# the list with the \a item if \a name doesn't exist yet, or appends
-# if already exists.
-def _addToDictList(d, name, item):
-    if name in d:
-        d[name].append(item)
-    else:
-        d[name] = [item]
+## Exception for something being wrong in the crab output
+class CrabOutputException(Exception):
+    def __init__(self, message):
+        Exception.__init__(self, message)
 
 ## Transform 'crab -status' output to list of multicrab.CrabJob objects
 #
@@ -430,12 +564,25 @@ def _addToDictList(d, name, item):
 # \return List of multicrab.CrabJob objects
 def crabOutputToJobs(task, output):
     status_re = re.compile("(?P<id>\d+)\s+(?P<end>\S)\s+(?P<status>\S+)(\s+\(.*?\))?\s+(?P<action>\S+)\s+(?P<execode>\S+)?\s+(?P<jobcode>\S+)?\s+(?P<host>\S+)?")
+    total_re = re.compile("crab:\s+(?P<njobs>\d+)\s+Total\s+Jobs")
     jobs = {}
+    njobs = 0
+    total = None
     for line in output.split("\n"):
         m = status_re.search(line)
         if m:
             job = CrabJob(task, m)
-            _addToDictList(jobs, job.status, job)
+            aux.addToDictList(jobs, job.status, job)
+            njobs += 1
+            continue
+        m = total_re.search(line)
+        if m:
+            total = int(m.group("njobs"))
+
+    if total is None:
+        raise CrabOutputException("Did not find total number of jobs from the crab output")
+    if total != njobs:
+        raise CrabOutputException("Crab says total number of jobs is %d, but only %d was found from the input" % (total, njobs))
     return jobs
 
 ## Convert argument to int if it is not None
@@ -447,11 +594,27 @@ def _intIfNotNone(n):
 ## Run 'crab -status' and create multicrab.CrabJob objects
 #
 # \param task  CRAB task directory
+# \param printCrab Print CRAB output
 #
 # \return List of multicrab.CrabJob objects
-def crabStatusToJobs(task):
-    output = crabStatusOutput(task)
-    return crabOutputToJobs(task, output)
+def crabStatusToJobs(task, printCrab):
+    # For some reason in lxplus sometimes the crab output is
+    # garbled. In case of value errors try 4 times.
+    maxTrials = 4
+    for i in xrange(0, maxTrials):
+        try:
+            output = crabStatusOutput(task, printCrab)
+            return crabOutputToJobs(task, output)
+        except ValueError, e:
+            if i == maxTrials-1:
+                raise e
+            print >>sys.stderr, "%s: Got garbled output from 'crab -status' (parse error), trying again" % task
+        except CrabOutputException, e:
+            if i == maxTrials-1:
+                raise e
+            print >>sys.stderr, "%s: Got garbled output from 'crab -status' (mismatch in number of jobs), trying again" % task
+
+    raise Exception("Assetion, this line should never be reached")
 
 ## Class for containing the information of finished CRAB job
 class CrabJob:
@@ -524,84 +687,41 @@ class CrabJob:
 
 ## Abstraction of a dataset for multicrab.cfg generation
 #
-# Dataset definitions are taken from multicrabDatasets.datasets dictionary.
+# Dataset definitions are taken from multicrabWorkflows.datasets list.
 class MulticrabDataset:
     ## Constructor.
     # 
     # \param name         Name of the dataset (i.e. dataset goes to [name] section
     #                     in multicrab.cfg.
-    # \param dataInput    String of data input type (e.g. 'RECO', 'AOD', 'pattuple_v6'),
-    #                     technically the key to the 'data' dictionary in multicrab dataset
-    #                     configuration.
+    # \param workflow     String for workflow name, technically a key to a
+    #                     Workflow object in the datasets list.
     # \param lumiMaskDir  Directory where lumi mask (aka JSON) files are
     #                     (can be absolute or relative to the working directory)
     # 
     # The constructor fetches the dataset configuration from
-    # multicrabDatasets module. It makes some sanity checks for the
+    # multicrabWorkflows module. It makes some sanity checks for the
     # configuration, and also filters the runs of the lumi mask if
     # a run range is explicitly given.
-    def __init__(self, name, dataInput, lumiMaskDir):
-
-        self.name = name
-        self.args = []
+    def __init__(self, name, workflow, lumiMaskDir):
+        self.args = ["runOnCrab=1"]
         self.lines = []
         self.generatedFiles = []
         self.filesToCopy = []
-        self.data = {}
+        self.data = {} # dictionary for those options for which it didn't make sense to change (at least yet)
 
         self.blackWhiteListParams = ["ce_white_list", "se_white_list", "ce_black_list", "se_black_list"]
 
-        try:
-            config = multicrabDatasets.datasets[name]
-        except KeyError:
-            raise Exception("Invalid dataset name '%s'" % name)
+        self.dataset = multicrabWorkflows.datasets.getDataset(name)
 
-        for key, value in config.iteritems():
-            if key != "data":
-                self.data[key] = value
-
-        if "data" in config:
-            dataConf = None
-            try:
-                dataConf = config["data"][dataInput]
-            except KeyError:
-                raise Exception("No dataInput '%s' for datasets '%s'." % (dataInput, name))
-            if "fallback" in dataConf:
-                try:
-                    dataConf = config["data"][dataConf["fallback"]]
-                except KeyError:
-                    raise Exception("No dataInput '%s' (via '%s') for datasets '%s'."% (dataConf["fallback"], dataInput, name))
-
-            for key, value in dataConf.iteritems():
-                self.data[key] = value
-
-        # Sanity checks
-        if not "dataVersion" in self.data:
-            raise Exception("'dataVersion' missing for dataset '%s'" % name)
-        if not "datasetpath" in self.data:
-            raise Exception("'datasetpath' missing for dataset '%s'" % name)
-        if not ("lumis_per_job" in self.data or "number_of_jobs" in self.data):
-            raise Exception("'lumis_per_job' or 'number_of_jobs' missing for dataset '%s'" % name)
-        if "lumis_per_job" in self.data and "number_of_jobs" in self.data:
-            raise Exception("Only one of 'lumis_per_job' and 'number_of_jobs' is allowed for dataset '%s'" % name)
-        if "lumi_mask" in self.data:
-            raise Exception("Setting lumi_mask in multicrabDatasets.py is not supported. The lumi mask files are set in HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi, and they are assigned to datasets with lumiMask parameter.")
-
-        self._isData = False
-        if "data" in self.data["dataVersion"]:
-            self._isData = True
-        
-        try:
-            lumiKey = self.data["lumiMask"]
-            if not self.isData():
-                raise Exception("Lumi mask specified for datasets '%s' which is MC" % self.name)
-            lumiMaskFile = os.path.join(lumiMaskDir, certifiedLumi.getFile(lumiKey))
-
+        self.workflow = self.dataset.getWorkflow(workflow)
+        self.inputData = self.workflow.source.getData()
+        if self.inputData.hasLumiMask():
+            lumiMaskFile = os.path.join(lumiMaskDir, self.inputData.getLumiMaskFile())
             print "Using lumi file", lumiMaskFile
-            if "runs" in self.data:
+            if self.dataset.hasRuns():
                 from FWCore.PythonUtilities.LumiList import LumiList
 
-                (runMin, runMax) = self.data["runs"]
+                (runMin, runMax) = self.dataset.getRuns()
                 lumiList = filterRuns(LumiList(filename=lumiMaskFile), runMin, runMax)
 
                 info = "_runs_%s_%s" % (str(runMin), str(runMax))
@@ -609,38 +729,35 @@ class MulticrabDataset:
                 ext_re = re.compile("(\.[^.]+)$")
                 lumiMaskFile = ext_re.sub(info+"\g<1>", os.path.basename(lumiMaskFile))
                 self.generatedFiles.append( (lumiMaskFile, str(lumiList)) )
+                self.inputData.setLumiMaskFile(lumiMaskFile)
             else:
                 self.filesToCopy.append(lumiMaskFile)
 
-            self.data["lumi_mask"] = os.path.basename(lumiMaskFile)
-
-            del self.data["lumiMask"]
-        except KeyError:
-            pass
-
     ## Is the dataset data?
     def isData(self):
-        return self._isData
+        return self.dataset.isData()
 
     ## Is the dataset MC?
     def isMC(self):
-        return not self._isData
+        return not self.dataset.isMC()
 
     ## Get the dataset name
     def getName(self):
-        return self.name
+        return self.dataset.getName()
 
-    ## Get the dataset DBS path
+    ## Get the dataset DBS path of the source
     def getDatasetPath(self):
-        return self.data["datasetpath"]
+        return self.inputData.getDatasetPath()
 
     ## Set the number of CRAB jobs for this dataset
     #
     # \param njobs   Number of jobs
     def setNumberOfJobs(self, njobs):
-        if "lumis_per_job" in self.data:
-            raise Exception("Unable to modify number_of_jobs, lumis_per_job already set!")
-        self.data["number_of_jobs"] = int(njobs)
+        self.inputData.number_of_jobs = int(njobs)
+        self.inputData._ensureConsistency()
+
+    def getNumberOfJobs(self):
+        return self.inputData.number_of_jobs
 
     ## Modify number of jobs with a function.
     # 
@@ -655,15 +772,13 @@ class MulticrabDataset:
     # obj.modifyNumberOfJobs(lambda n: 2*n)
     # \endcode
     def modifyNumberOfJobs(self, func):
-        if"lumis_per_job" in self.data:
-            raise Exception("Unable to modify number_of_jobs, lumis_per_job already set!")
-        self.data["number_of_jobs"] = int(func(self.data["number_of_jobs"]))
+        self.inputData.number_of_jobs = int(func(self.inputData.number_of_jobs))
+        self.inputData._ensureConsistency()
 
     ## Set number lumi sections per CRAB job
     def setLumisPerJob(self, nlumis):
-        if "number_of_jobs" in self.data:
-            raise Exception("Unable modify number_of_jobs, lumis_per_job already set")
-        self.data["lumis_per_job"] = int(nlumis)
+        self.inputData.lumis_per_job = int(nlumis)
+        self.inputData._ensureConsistency()
 
     ## Modify number of lumis per job with a function.
     # 
@@ -678,9 +793,8 @@ class MulticrabDataset:
     # obj.modifyLumisPerJob(lambda n: 2*n)
     # \endcode
     def modifyLumisPerJob(self, func):
-        if "number_of_jobs" in self.data:
-            raise Exception("Unable modify number_of_jobs, lumis_per_job already set")
-        self.data["lumis_per_job"] = int(func(self.data["lumis_per_job"]))
+        self.inputData.lumis_per_job = int(func(self.inputData.lumis_per_job))
+        self.inputData._ensureConsistency()
 
     ## Set the use_server flag.
     # 
@@ -688,7 +802,7 @@ class MulticrabDataset:
     # 
     # The use of CRAB server can be controlled at dataset level
     # granularity. This method can be used to override the default
-    # behaviour taken from the configuration in multicrabDatasets module.
+    # behaviour taken from the configuration in multicrabWorkflows module.
     def useServer(self, use):
         value=0
         if use: value=1
@@ -723,30 +837,6 @@ class MulticrabDataset:
         else:
             self.data[blackWhiteList] = sites[:]
 
-    ## Set the trigger for the dataset
-    #
-    # \param name     'trigger' or 'triggerOR'
-    # \param content  string for 'trigger', list of strings for 'triggerOR'
-    def setTrigger(self, name, content):
-        if name != "trigger" and name != "triggerOR":
-            raise Exception("name can be either 'trigger' or 'triggerOR', was '%s'" % name)
-        try:
-            del self.data["trigger"]
-        except KeyError:
-            pass
-        try:
-            del self.data["triggerOR"]
-        except KeyError:
-            pass
-
-        self.data[name] = content
-
-    ## Set the skim configuration(s)
-    #
-    # \param content  String or list of strings for the skim configuration files (without the .py; these are looked from python directory)
-    def setSkimConfig(self, content):
-        self.data["skimConfig"] = content
-
     ## Write generated files to a directory.
     #
     # \param directory   Directory where to write the generated files
@@ -763,77 +853,28 @@ class MulticrabDataset:
     # 
     # The method was intended to be called from Multicrab class.
     def _getCopyFiles(self):
-
         return self.filesToCopy
 
     ## Generate the multicrab.cfg configuration fragment.
     # 
     # The method was intended to be called from Multicrab class.
     def _getConfig(self):
-        if "trigger" in self.data and "triggerOR" in self.data:
-            raise Exception("May not have both 'trigger' and 'triggerOR', in task %s" % self.name)
+        (ret, args) = self.dataset.constructMulticrabFragment(self.workflow.getName())
+        args.extend(self.args)
+        if len(args) > 0:
+            ret += "CMSSW.pycfg_params = %s\n" % ":".join(args)
 
-        dataKeys = self.data.keys()
-
-        args = ["dataVersion=%s" % self.data["dataVersion"]]
-        del dataKeys[dataKeys.index("dataVersion")]
-        for argName in ["trigger", "crossSection", "luminosity"]:
-            try:
-                args.append("%s=%s" % (argName, self.data[argName]))
-                del dataKeys[dataKeys.index(argName)]
-            except KeyError:
-                pass
-        try:
-            args.extend(["trigger=%s" % trigger for trigger in self.data["triggerOR"]])
-            del dataKeys[dataKeys.index("triggerOR")]
-        except KeyError:
-            pass
-        try:
-            lst = self.data["skimConfig"]
-            if isinstance(lst, basestring):
-                lst = [lst]
-            args.extend(["skimConfig=%s" % conf for conf in lst])
-            del dataKeys[dataKeys.index("skimConfig")]
-        except KeyError:
-            pass
-
-        if "args" in self.data:
-            for key, value in self.data["args"].iteritems():
-                args.append("%s=%s" % (key, str(value)))
-            del dataKeys[dataKeys.index("args")]
-        args += self.args
-
-        ret = "[%s]\n" % self.name
-        ret += "CMSSW.datasetpath = %s\n" % self.data["datasetpath"]
-        ret += "CMSSW.pycfg_params = %s\n" % ":".join(args)
-        del dataKeys[dataKeys.index("datasetpath")]
-
-        for key in ["dbs_url", "lumis_per_job", "number_of_jobs", "lumi_mask"]:
-            try:
-                ret += "CMSSW.%s = %s\n" % (key, self.data[key])
-                del dataKeys[dataKeys.index(key)]
-            except KeyError:
-                pass
-        for key in ["ce_white_list", "se_white_list", "ce_black_list", "se_black_list"]:
+        for key in self.blackWhiteListParams:
             try:
                 ret += "GRID.%s = %s\n" % (key, ",".join(self.data[key]))
-                del dataKeys[dataKeys.index(key)]
             except KeyError:
                 pass
 
         for key in ["use_server"]:
             try:
                 ret += "CRAB.%s = %s\n" % (key, self.data[key])
-                del dataKeys[dataKeys.index(key)]
             except KeyError:
                 pass
-
-        if "runs" in self.data:
-            del dataKeys[dataKeys.index("runs")]
-
-        if len(dataKeys) > 0:
-            print "WARNING: Dataset '%s' has the following settings in multicrabDatasets.py which have *not* been used!" % self.name
-            print "  "+"\n  ".join(dataKeys)
 
         for line in self.lines:
             ret += line + "\n"
@@ -842,6 +883,11 @@ class MulticrabDataset:
 
 ## Abstraction of the entire multicrab configuration for the configuration generation (intended for users)
 class Multicrab:
+    # "Enumeration" for task splitting mode for tasks with >= 500 jobs
+    NONE = 1
+    SPLIT = 2
+    SERVER = 3
+
     ## Constructor.
     # 
     # \param crabConfig   String for crab configuration file
@@ -849,15 +895,19 @@ class Multicrab:
     #                     of crabConfig
     # \param lumiMaskDir  The directory for lumi mask (aka JSON) files, can
     #                     be absolute or relative path
+    # \param crabConfigTemplate  String containing the crab.cfg. Either this ir crabConfig must be given
+    # \param ignoreMissingDatasets  If true, missing datasets in a workflow are ignored in _createDatasets()
     # 
     # Parses the crabConfig file for CMSSW.pset and CMSSW.lumi_mask.
     # Ensures that the CMSSW configuration file exists.
-    def __init__(self, crabConfig, pyConfig=None, lumiMaskDir=""):
-        if not os.path.exists(crabConfig):
-            raise Exception("CRAB configuration file '%s' doesn't exist!" % crabConfig)
+    def __init__(self, crabConfig=None, pyConfig=None, lumiMaskDir="", crabConfigTemplate=None, ignoreMissingDatasets=False):
+        if crabConfig is None and crabConfigTemplate is None:
+            raise Exception("You must specify either crabConfig or crabConfigTemplate, you gave neither")
+        if crabConfig is not None and crabConfigTemplate is not None:
+            raise Exception("You must specify either crabConfig or crabConfigTemplate, you gave both")
 
-        self.crabConfig = os.path.basename(crabConfig)
-        self.filesToCopy = [crabConfig]
+        self.generatedFiles = []
+        self.filesToCopy = []
 
         self.commonLines = []
         self.lumiMaskDir = lumiMaskDir
@@ -866,19 +916,33 @@ class Multicrab:
 
         self.datasets = None
 
+        self.ignoreMissingDatasets = ignoreMissingDatasets
+
         # Read crab.cfg for lumi_mask and optionally pset
-        crab_parser = ConfigParser.ConfigParser()
-        crab_parser.read(crabConfig)
+        if crabConfig is not None:
+            if not os.path.exists(crabConfig):
+                raise Exception("CRAB configuration file '%s' doesn't exist!" % crabConfig)
 
-        optlist = ["lumi_mask"]
-        if pyConfig == None:
-            optlist.append("pset")
-        for opt in optlist:
-            try:
-                self.filesToCopy.append(crab_parser.get("CMSSW", opt))
-            except ConfigParser.NoOptionError:
-                pass
+            self.crabConfig = os.path.basename(crabConfig)
+            self.filesToCopy.append(crabConfig)            
 
+            crab_parser = ConfigParser.ConfigParser()
+            crab_parser.read(crabConfig)
+
+            optlist = ["lumi_mask"]
+            if pyConfig is None:
+                optlist.append("pset")
+            for opt in optlist:
+                try:
+                    self.filesToCopy.append(crab_parser.get("CMSSW", opt))
+                except ConfigParser.NoOptionError:
+                    pass
+                except ConfigParser.NoSectionError:
+                    pass
+        else:
+            self.crabConfig = "crab.cfg"
+            self.generatedFiles.append( ("crab.cfg", crabConfigTemplate) )
+    
         # If pyConfig is given, use it
         if pyConfig != None:
             if not os.path.exists(pyConfig):
@@ -889,15 +953,13 @@ class Multicrab:
 
     ## Extend the list of datasets for which the multicrab configuration is generated.
     #
-    # \param dataInput     String of data input type (e.g. 'RECO', 'AOD', 'pattuple_v6'),
-    #                      technically the key to the 'data' dictionary in multicrab dataset
-    #                      configuration.
+    # \param workflow      String for workflow
     # \param datasetNames  List of strings of the dataset names.
-    def extendDatasets(self, dataInput, datasetNames):
+    def extendDatasets(self, workflow, datasetNames):
         if self.datasets != None:
             raise Exception("Unable to add more datasets, the dataset objects are already created")
 
-        self.datasetNames.extend([(name, dataInput) for name in datasetNames])
+        self.datasetNames.extend([(name, workflow) for name in datasetNames])
 
     ## Create the MulticrabDataset objects.
     # 
@@ -910,10 +972,15 @@ class Multicrab:
         self.datasets = []
         self.datasetMap = {}
 
-        for dname, dinput in self.datasetNames:
-            dset = MulticrabDataset(dname, dinput, self.lumiMaskDir)
-            self.datasets.append(dset)
-            self.datasetMap[dname] = dset
+        for dname, workflow in self.datasetNames:
+            try:
+                dset = MulticrabDataset(dname, workflow, self.lumiMaskDir)
+                self.datasets.append(dset)
+                self.datasetMap[dname] = dset
+            except Exception, e:
+                if not self.ignoreMissingDatasets:
+                    raise
+                print "Warning: dataset %s ignored for workflow %s, reason: %s" % (dname, workflow, str(e))
 
     ## Get MulticrabDataset object for name.
     def getDataset(self, name):
@@ -921,6 +988,12 @@ class Multicrab:
             self._createDatasets()
 
         return self.datasetMap[name]
+
+    def getNumberOfDatasets(self):
+        if self.datasets == None:
+            self._createDatasets()
+
+        return len(self.datasets)
 
     ## Apply a function for each MulticrabDataset.
     #
@@ -1019,8 +1092,10 @@ class Multicrab:
 
     ## Generate the multicrab configration as a string.
     # 
+    # \param datasetNames  List of dataset names for which to write the configuration
+    #
     # This method was intended to be called internally.
-    def _getConfig(self):
+    def _getConfig(self, datasetNames):
         if self.datasets == None:
             self._createDatasets()
 
@@ -1031,27 +1106,40 @@ class Multicrab:
         for line in self.commonLines:
             ret += line + "\n"
 
-        for d in self.datasets:
-            ret += "\n" + d._getConfig()
+        for name in datasetNames:
+            ret += "\n" + self.getDataset(name)._getConfig()
 
         return ret
 
+    ## Write generated files to a directory.
+    #
+    # \param directory   Directory where to write the generated files
+    #
+    # This method was intended to be called internally.
+    def _writeGeneratedFiles(self, directory):
+        for fname, content in self.generatedFiles:
+            f = open(os.path.join(directory, fname), "wb")
+            f.write(content)
+            f.close()
+
     ## Write the multicrab configuration to a given file name.
     #
-    # \param filename  Write the configuration to this file
+    # \param filename      Write the configuration to this file
+    # \param datasetNames  List of dataset names for which to write the configuration
     # 
     # This method was intended to be called internally.
-    def _writeConfig(self, filename):
+    def _writeConfig(self, filename, datasetNames):
         f = open(filename, "wb")
-        f.write(self._getConfig())
+        f.write(self._getConfig(datasetNames))
         f.close()
 
         directory = os.path.dirname(filename)
-        for d in self.datasets:
-            d._writeGeneratedFiles(directory)
+        self._writeGeneratedFiles(directory)
+
+        for name in datasetNames:
+            self.getDataset(name)._writeGeneratedFiles(directory)
 
         print "Wrote multicrab configuration to %s" % filename
-        
 
     ## Create the multicrab task.
     # 
@@ -1065,29 +1153,90 @@ class Multicrab:
     # multicrab.cfg in there, copies and generates the necessary
     # files to the directory and optionally run 'multicrab -create'
     # in the directory.
-    def createTasks(self, configOnly=False, **kwargs):
+    def createTasks(self, configOnly=False, codeRepo='git', over500JobsMode=NONE, **kwargs):
+        if self.datasets == None:
+            self._createDatasets()
+
+        # If mode is NONE, create tasks for all datasets
+        if over500JobsMode == Multicrab.NONE:
+            return self._createTasks(configOnly, codeRepo, **kwargs)
+
+        datasetsOver500Jobs = OrderedDict.OrderedDict()
+        datasetsUnder500Jobs = OrderedDict.OrderedDict()
+        def checkAnyOver500Jobs(dataset):
+            njobs = dataset.getNumberOfJobs()
+            if njobs > 500:
+                datasetsOver500Jobs[dataset.getName()] = njobs
+            else:
+                datasetsUnder500Jobs[dataset.getName()] = njobs
+        self.forEachDataset(checkAnyOver500Jobs)
+        # If all tasks have < 500 jobs, create all tasks
+        if len(datasetsOver500Jobs) == 0:
+            return self._createTasks(configOnly, codeRepo, **kwargs)
+
+        # If mode is SERVER, set server=1 for tasks with >= 500 jobs
+        if over500JobsMode == Multicrab.SERVER:
+            for dname in datasetsOver500Jobs.iterkeys():
+                self.getDataset(dname).useServer(True)
+            return self._createTasks(configOnly, codeRepo, **kwargs)
+
+        # If mode is SPLIT, first create < 500 job tasks in one
+        # multicrab directory, then for each tasks with >= 500 jobs
+        # create one multicrab directory per 500 jobs
+        if over500JobsMode == Multicrab.SPLIT:
+            ret = self._createTasks(configOnly, codeRepo, datasetNames=datasetsUnder500Jobs.keys(), **kwargs)
+
+            args = {}
+            args.update(kwargs)
+            prefix = kwargs.get("prefix", "multicrab")
+            
+            for datasetName, njobs in datasetsOver500Jobs.iteritems():
+                dname = datasetName.split("_")[0]
+                nMulticrabTasks = int(math.ceil(njobs/500.0))
+                for i in xrange(nMulticrabTasks):
+                    firstJob = i*500+1
+                    lastJob = (i+1)*500
+                    args["prefix"] = "%s_%s_%d-%d" % (prefix, dname, firstJob, lastJob)
+                    ret.extend(self._createTasks(configOnly, codeRepo, datasetNames=[datasetName], **args))
+
+            return ret
+
+        raise Exception("Incorrect value for over500JobsMode: %d" % over500JobsMode)
+                                                    
+
+    ## Create the multicrab task.
+    # 
+    # \param configOnly   If true, generate the configuration only (default: False).
+    # \param codeRepo     If something else than 'git', don't produce codeVersion/Status/Diff files
+    # \param datasetNames If not None, should be list of dataset names for which to create tasks
+    # \param kwargs       Keyword arguments (forwarded to multicrab.createTaskDir, see also below)
+    #
+    # <b>Keyword arguments</b>
+    # \li\a prefix       Prefix of the multicrab task directory (default: 'multicrab')
+    # 
+    # Creates a new directory for the CRAB tasks, generates the
+    # multicrab.cfg in there, copies and generates the necessary
+    # files to the directory and optionally run 'multicrab -create'
+    # in the directory.
+    def _createTasks(self, configOnly=False, codeRepo='git', datasetNames=None, **kwargs):
         if not configOnly:
             checkCrabInPath()
         dirname = createTaskDir(**kwargs)
 
-        self._writeConfig(os.path.join(dirname, "multicrab.cfg"))
+        if datasetNames != None:
+            dsetNames = datasetNames[:]
+        else:
+            dsetNames = [d.getName() for d in self.datasets]
+
+        self._writeConfig(os.path.join(dirname, "multicrab.cfg"), dsetNames)
 
         # Create code versions
-        version = git.getCommitId()
-        if version != None:
-            f = open(os.path.join(dirname, "codeVersion.txt"), "w")
-            f.write(version+"\n")
-            f.close()
-            f = open(os.path.join(dirname, "codeStatus.txt"), "w")
-            f.write(git.getStatus()+"\n")
-            f.close()
-            f = open(os.path.join(dirname, "codeDiff.txt"), "w")
-            f.write(git.getDiff()+"\n")
-            f.close()
+	if codeRepo == 'git':
+            writeGitVersion(dirname)
 
         files = self.filesToCopy[:]
-        for d in self.datasets:
-            files.extend(d._getCopyFiles())
+        for name in dsetNames:
+            files.extend(self.getDataset(name)._getCopyFiles())
         
         # Unique list of files
         keys = {}
@@ -1104,6 +1253,7 @@ class Multicrab:
             print "############################################################"
             print
 
+            prevdir = os.getcwd()
             os.chdir(dirname)
             subprocess.call(["multicrab", "-create"])
             print
@@ -1112,6 +1262,6 @@ class Multicrab:
             print "Created multicrab task to subdirectory "+dirname
             print
 
-            os.chdir("..")
+            os.chdir(prevdir)
 
-        return dirname
+        return [(dirname, dsetNames)]

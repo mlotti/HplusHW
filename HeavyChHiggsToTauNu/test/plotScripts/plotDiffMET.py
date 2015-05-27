@@ -206,9 +206,7 @@ def plotDataEwkDiff(mT, name):
     plot.getPad().SetLogy(True)
     plot.draw()
     # Add the various texts to 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-#    plot.addLuminosityText()
+    plot.addStandardTexts()
     plot.save()
 
 def transverseMass(plot,name):
@@ -222,9 +220,7 @@ def transverseMass(plot,name):
     plot.frame.GetYaxis().SetTitle("Events / %.0f GeV" % plot.binWidth())
     plot.draw()
     # Add the various texts to 
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    plot.addLuminosityText()
+    plot.addStandardTexts()
     plot.save()
     
 

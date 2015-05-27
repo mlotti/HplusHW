@@ -1,6 +1,8 @@
 ## \package tauEmbedding
 # Tau embedding (EWK+ttbar tau background measurement) related plotting utilities
 
+import os
+import re
 import math
 import array
 
@@ -13,6 +15,8 @@ import plots
 import counter
 import styles
 import cutstring
+import aux
+import systematics
 
 ## Apply embedding normalization (muon efficiency, W->tau->mu factor
 normalize = True
@@ -37,21 +41,49 @@ dirSig = "multicrab_signalAnalysisGenTau_systematics_120912_084953" # for 120911
 
 
 ## Tau analysis multicrab directories for embedding trials
-tauDirEmbs_120912 = [
-    "multicrab_analysis_systematics_v44_3_seed0_Run2011AB_120912_164347",
-    "multicrab_analysis_systematics_v44_3_seed1_Run2011AB_120912_172300",
-#    "multicrab_analysis_systematics_v44_3_seed2_Run2011AB_120912_180734",
-]
-tauDirEmbs_120913 = [ # TTJets only
-    "multicrab_analysis_v44_3_seed0_Run2011AB_120913_212539",
-#    "multicrab_analysis_v44_3_seed1_Run2011AB_120913_220249"
+tauDirEmbs = [ # TTJets only
+#    "multicrab_analysis_v44_4_2_seed0_Muon40_121016_092812"
+    "multicrab_analysis_v44_4_2_seed0_Muon40_121023_104038"
+#    "multicrab_analysis_v44_4_2_seed0_allGenuineTaus_121114_152418"
+
+#    "multicrab_analysis_v44_4_2_seed0_Run2011AB_121011_085855",
 ]
 ## Tau analysis multicrab directories for embedding trials
 #
 # This variable is used to select from possibly multiple sets of embedding directories
-tauDirEmbs = tauDirEmbs_120913
+#tauDirEmbs = tauDirEmbs_121011
 ## Tau analysis multicrab directory for normal MC
-tauDirSig = "multicrab_analysisTau_120822_200753"
+#tauDirSig = "multicrab_analysisTau_121009_112529" # 121011 # this is the one with "MostLikelySelected"
+tauDirSig = "multicrab_analysisTau_firstGenTau_121011_112052"
+#tauDirSig = "multicrab_analysisTau_firstGenTau40_121016_133933"
+#tauDirSig = "multicrab_analysisTau_121009_112529"
+
+
+class MuonAnalysisSelectorArgs(dataset.SelectorArgs):
+    def __init__(self, **kwargs):
+        dataset.SelectorArgs.__init__(self,
+                                      [("era", ""),
+                                       ("puVariation", ""),
+                                       ("isolationMode", "standard"),
+                                       ("bquarkMode", "disabled"),
+                                       ("topPtReweighting", True),
+                                       ("topPtReweightingScheme", ""),
+                                       ],
+                                      **kwargs)
+
+class TauAnalysisSelectorArgs(dataset.SelectorArgs):
+    def __init__(self, **kwargs):
+        dataset.SelectorArgs.__init__(self,
+                                      [("puWeight", ""),
+                                       ("isEmbedded", False),
+                                       ("embeddingWTauMuFile", ""),
+                                       ("embeddingWTauMuPath", ""),
+                                       ("mcTauMultiplicity", ""),
+                                       ("mcTauMode", ""),
+                                       ("embeddingNormalizationMode", ""),
+                                       ("embeddingMuonWeights", None),
+                                       ],
+                                      **kwargs)
 
 class Selections:
     def __init__(self, **kwargs):
@@ -104,6 +136,7 @@ tauNtuple.caloMet = "tecalomet_p4.Pt() > 60"
 tauNtuple.weight = {
 #    "EPS": "weightPileup_Run2011A",
 #    "Run2011A-EPS": "pileupWeight_Run2011AnoEPS",
+    "": "",
     "Run2011A": "weightPileup_Run2011A",
     "Run2011B": "weightPileup_Run2011B",
     "Run2011AB": "weightPileup_Run2011AB",
@@ -116,7 +149,7 @@ def decayModeCheckCustomize(h):
     n = 16
     if hasattr(h, "getFrame1"):
         h.getFrame1().GetXaxis().SetNdivisions(n)
-        h.getFrame1().GetXaxis().SetNdivisions(n)
+        h.getFrame2().GetXaxis().SetNdivisions(n)
     else:
         h.getFrame().GetXaxis().SetNdivisions(n)
 
@@ -157,6 +190,33 @@ def decayModeCustomize(h):
     xaxis.SetBinLabel(4, "#pi^{+}#pi^{-}#pi^{#pm}")
     xaxis.SetBinLabel(5, "Other")
 
+def decayModeLabels(h, ndiv):
+    if hasattr(h, "hasFrame2") and h.hasFrame2():
+        h.getFrame1().GetXaxis().SetNdivisions(ndiv)
+        xaxis = h.getFrame2().GetXaxis()
+    else:
+        xaxis = h.getFrame().GetXaxis()
+    xaxis.SetNdivisions(ndiv)
+
+    labels = ["#pi^{#pm}",
+              "#pi^{#pm}#pi^{0}",
+              "#pi^{#pm}#pi^{0}#pi^{0}",
+              "#pi^{#pm}#pi^{0}#pi^{0}#pi^{0}",
+              "#pi^{#pm} N#pi^{0}",
+              "#pi^{+}#pi^{-}",
+              "#pi^{+}#pi^{-}#pi^{0}",
+              "#pi^{+}#pi^{-}#pi^{0}#pi^{0}",
+              "#pi^{+}#pi^{-}#pi^{0}#pi^{0}#pi^{0}",
+              "#pi^{+}#pi^{-} N#pi^{0}",
+              "#pi^{+}#pi^{-}#pi^{#pm}",
+              "#pi^{+}#pi^{-}#pi^{#pm}#pi^{0}",
+              "#pi^{+}#pi^{-}#pi^{#pm}#pi^{0}#pi^{0}",
+              "#pi^{+}#pi^{-}#pi^{#pm}#pi^{0}#pi^{0}#pi^{0}",
+              "#pi^{+}#pi^{-}#pi^{#pm} N#pi^{0}",
+              ]
+    for i in xrange(0, min(ndiv, len(labels))):
+        xaxis.SetBinLabel(i+1, labels[i])
+
 
 ## Selections for signal analysis tree
 signalNtuple = Selections(
@@ -171,6 +231,13 @@ signalNtuple.weight = "weightPileup*weightTrigger"
 signalNtuple.weightBTagging = signalNtuple.weight+"*weightBTagging"
 
 
+# http://pdg.lbl.gov/2013/reviews/rpp2012-rev-tau-branching-fractions.pdf
+#                 e        mu
+BR_tau_hadr = 1 - 0.1783 - 0.1741
+def scaleTauBRNormalization(h):
+    # All other normalization is within the job
+    h.Scale(BR_tau_hadr)
+
 
 ## Apply embedding normalization
 #
@@ -182,8 +249,8 @@ def scaleNormalization(obj):
         return
 
     #scaleMCfromWmunu(obj) # data/MC trigger correction
-    scaleMuTriggerIdEff(obj)
-    scaleWmuFraction(obj)
+#    scaleMuTriggerIdEff(obj)
+#    scaleWmuFraction(obj)
 
 ## Apply muon trigger and ID efficiency normalization
 #
@@ -196,22 +263,63 @@ def scaleMuTriggerIdEff(obj):
     #data = 0.891379
     #mc = 0.931707
     # 1fb in 42X
-    data = None
-    if era == "EPS":
-        data = 0.884462
-    elif era == "Run2011A-EPS":
-        data = 0.879
-    elif era == "Run2011A":
-        data = 0.881705 
-    elif era == "Run2011AB":
-        print "WARNING: using Run2011A mu trigger+ID efficiency. This should be updated!"
-        data = 0.881705
-    else:
-        raise Exception("No mu trigger+ID efficiency available for era %s" % era)
-    mc = 0.919829
+    # data = None
+    # if era == "EPS":
+    #     data = 0.884462
+    # elif era == "Run2011A-EPS":
+    #     data = 0.879
+    # elif era == "Run2011A":
+    #     data = 0.881705 
+    # elif era == "Run2011AB":
+    #     print "WARNING: using Run2011A mu trigger+ID efficiency. This should be updated!"
+    #     data = 0.881705
+    # else:
+    #     raise Exception("No mu trigger+ID efficiency available for era %s" % era)
+    # mc = 0.919829
 
-    scaleHistosCounters(obj, scaleDataHisto, "scaleData", 1/data)
-    scaleHistosCounters(obj, scaleMCHisto, "scaleMC", 1/mc)
+    # From Sami for 44X, muon pT > 41
+    # 20120902-160154
+    scaleMap41 = {
+        # HLT_Mu20
+        "160431-163261": 0.882968,
+        # HLT_Mu24
+        "163270-163869": 0.891375,
+        # HLT_Mu30
+        "165088-166150": 0.904915,
+        # HLT_Mu40
+        "166161-166164": 0.877395,
+        "166346-166346": 0.877395,
+        "166374-167043": 0.877395,
+        "167078-167913": 0.877395,
+        "170722-172619": 0.877395,
+        "172620-173198": 0.877395,
+        # HLT_Mu40_eta2p1 A
+        "173236-173692": 0.867646,
+        "173693-177452": 0.867646,
+        # HLT_Mu40_eta2p1 B
+        "177453-178380": 0.957712,
+        "178411-179889": 0.957712,
+        "179942-180371": 0.957712,
+        # MC
+        "MC": 0.888241,
+        }
+    scaleMap40 = {"MC": 0.878604}
+    scaleMapOld = {"MC": 0.919829}
+
+    scaleMap = scaleMap41
+#    scaleMap = scaleMap40
+#    scaleMap = scaleMapOld
+
+    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffs
+    # This is only ID efficiency
+    scaleMap = {"MC": (0.955+0.9519)/2}
+
+    # Transform to inverse
+    for key in scaleMap.keys():
+        scaleMap[key] = 1/scaleMap[key]
+
+    scaleHistosCounters(obj, scaleDataHisto, "scaleData", scaleMap)
+    scaleHistosCounters(obj, scaleMCHisto, "scaleMC", scaleMap)
 
 ## Apply W->tau->mu normalization
 #
@@ -229,9 +337,11 @@ def scaleWmuFraction(obj):
 # \param scale        Multiplication factor
 def scaleHistosCounters(obj, plotFunc, counterFunc, scale):
     if isinstance(obj, plots.PlotBase):
-        scaleHistos(obj, plotFunc, scale)
+        scalePlot(obj, plotFunc, scale)
     elif isinstance(obj, counter.EventCounter):
         scaleCounters(obj, counterFunc, scale)
+    elif isinstance(obj, dataset.DatasetRootHistoBase):
+        scaleDatasetRootHisto(obj, plotFunc, scale)
     else:
         plotFunc(obj, scale)
 
@@ -240,7 +350,7 @@ def scaleHistosCounters(obj, plotFunc, counterFunc, scale):
 # \param plot       plots.PlotBase object
 # \param function   Function to apply
 # \param scale      Multiplication factor
-def scaleHistos(plot, function, scale):
+def scalePlot(plot, function, scale):
     plot.histoMgr.forEachHisto(lambda histo: function(histo, scale))
 
 ## Helper function to scale counter.EventCounter
@@ -249,7 +359,30 @@ def scaleHistos(plot, function, scale):
 # \param methodName    Name of the counter.EventCounter method to apply
 # \param scale         Multiplication factor
 def scaleCounters(eventCounter, methodName, scale):
-    getattr(eventCounter, methodName)(scale)
+    s = scale
+    if isinstance(scale, dict):
+        s = scale["MC"]
+    getattr(eventCounter, methodName)(s)
+
+## Helper function to scale dataset.DatasetRootHisto
+#
+# \param drh       dataset.DatasetRootHisto object
+# \param function  Function to apply
+# \param scaleMap     ??? FIXME
+def scaleDatasetRootHisto(drh, function, scaleMap):
+    if not isinstance(scaleMap, dict):
+        drh.modifyRootHisto(lambda histo: function(histo, scaleMap))
+        return
+
+    if drh.isMC():
+        drh.modifyRootHisto(lambda histo: function(histo, scaleMap["MC"]))
+    else:
+        runrange_re = re.compile("_(?P<range>(\d+)-(\d+))_")
+        m = runrange_re.search(drh.getDataset().getName())
+        if not m:
+            raise Exception("Data dataset %s does not have run range in its name?" % drh.getDataset().getName())
+        drh.modifyRootHisto(lambda histo: function(histo, scaleMap[m.group("range")]))
+
 
 ## Helper function to scale only MC histograms.Histo objects
 #
@@ -272,8 +405,12 @@ def scaleDataHisto(histo, scale):
 # \param histo   histograms.Histo object
 # \param scale   Multiplication factor
 def scaleHisto(histo, scale):
-    th1 = histo.getRootHisto()
+    if isinstance(histo, histograms.Histo):
+        th1 = histo.getRootHisto()
+    else:
+        th1 = histo
     th1.Scale(scale)
+    return th1
 
 
 ## Calculate square sum of TH1 bins
@@ -291,17 +428,17 @@ class DatasetsMany:
     ## Constructor
     #
     # \param dirs                      List of paths multicrab directories, either absolute or relative to working directory
-    # \param counters                  Directory in dataset TFiles containing the event counters
     # \param normalizeMCByCrossSection Normalize MC to cross section
     # \param normalizeMCByLuminosity   Normalize MC to data luminosity?
+    # \param kwargs                    Keyword arguments, forwarded to dataset.getDatasetsFromMulticrabCfg()
     #
     # Construct a dataset.DatasetManager object from each multicrab directory
-    def __init__(self, dirs, counters, normalizeMCByCrossSection=False, normalizeMCByLuminosity=False):
+    def __init__(self, dirs, normalizeMCByCrossSection=False, normalizeMCByLuminosity=False, **kwargs):
         self.datasetManagers = []
         for d in dirs:
-            datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=d+"/multicrab.cfg", counters=counters)
+            datasets = dataset.getDatasetsFromMulticrabCfg(directory=d, **kwargs)
             datasets.updateNAllEventsToPUWeighted()
-            datasets.loadLuminosities()
+#            datasets.loadLuminosities()
             self.datasetManagers.append(datasets)
 
         self.normalizeMCByCrossSection = normalizeMCByCrossSection
@@ -471,9 +608,8 @@ class DatasetsMany:
                     h.normalizeByCrossSection()
                 if self.normalizeMCByLuminosity:
                     h.normalizeToLuminosity(self.lumi)
-            h = histograms.HistoWithDataset(ds, h.getHistogram(), "dummy") # only needed for scaleNormalization()
             scaleNormalization(h)
-            h = h.getRootHisto()
+            h = h.getHistogram()
             h.SetName("Trial %d"%(i+1))
             histos.append(h)
 
@@ -743,6 +879,14 @@ class EventCounterMany:
     def getSubCounterTableFit(self, name):
         return counter.meanTableFit([ec.getSubCounterTable(name) for ec in self.eventCounters])
 
+    def constructMainTableTEfficiencies(self, function):
+        effs = self.eventCounters[0].getMainCounter().constructTEfficiencies(function)
+        for ec in self.eventCounters[1:]:
+            tmp = ec.getMainCounter().constructTEfficiencies(function)
+            for i, eff in enumerate(effs):
+                eff.Add(tmp[i])
+        return effs
+
     ## Get current normalization scheme string
     def getNormalizationString(self):
         return self.eventCounters[0].getNormalizationString()
@@ -852,8 +996,8 @@ class PlotDrawerTauEmbedding(plots.PlotDrawer):
         if kwargs.get("normalize", self.normalizeDefault):
             scaleNormalization(p)
 
-    def __call__(self, p, name, xlabel, **kwargs):
-        self.rebin(p, **kwargs)
+    def __call__(self, p, name, **kwargs):
+        self.rebin(p, name, **kwargs)
 
         self.tauEmbeddingNormalization(p, **kwargs)
 
@@ -862,7 +1006,7 @@ class PlotDrawerTauEmbedding(plots.PlotDrawer):
         self.setLegend(p, **kwargs)
         self.addCutLineBox(p, **kwargs)
         self.customise(p, **kwargs)
-        self.finish(p, xlabel, **kwargs)
+        self.finish(p, **kwargs)
 
 ## Default plot drawer object for tau embedding (embedded data vs. embedded MC) plots
 drawPlot = PlotDrawerTauEmbedding(ylabel="Events / %.0f GeV/c", log=True, stackMCHistograms=True, addMCUncertainty=True)
@@ -878,20 +1022,22 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
     def __init__(self, **kwargs):
         PlotDrawerTauEmbedding.__init__(self, normalize=False, **kwargs)
 
-    def __call__(self, p, name, xlabel, **kwargs):
-        self.rebin(p, **kwargs)
+    def __call__(self, p, name, **kwargs):
+        self.rebin(p, name, **kwargs)
 
         self.tauEmbeddingNormalization(p, **kwargs)
 
         sigErr = p.histoMgr.getHisto("Normal").getRootHisto().Clone("Normal_err")
         sigErr.SetFillColor(ROOT.kRed-7)
         sigErr.SetMarkerSize(0)
-        sigErr.SetFillStyle(3005)
+#        sigErr.SetFillStyle(3005)
+        sigErr.SetFillStyle(3545)
         p.prependPlotObject(sigErr, "E2")
         if p.histoMgr.hasHisto("Embedded"):
             embErr = p.histoMgr.getHisto("Embedded").getRootHisto().Clone("Embedded_err")
             embErr.SetFillColor(ROOT.kBlue-7)
-            embErr.SetFillStyle(3004)
+#            embErr.SetFillStyle(3004)
+            embErr.SetFillStyle(3554)
             embErr.SetMarkerSize(0)
             p.prependPlotObject(embErr, "E2")
 
@@ -907,19 +1053,25 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
         if kwargs.get("ratio", self.ratioDefault):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             # Very, very ugly hack
+
+            for r in p.ratioHistoMgr.getHistos():
+                r.getRootHisto().SetLineStyle(1)
+
             if p.histoMgr.hasHisto("EmbeddedData"):
                 if p.ratios[1].getName() != "Embedded":
                     raise Exception("Assumption that [1] is from embedded MC failed")
                 p.ratios[1].setDrawStyle("PE2")
                 rh = p.ratios[1].getRootHisto()
                 rh.SetFillColor(ROOT.kBlue-7)
-                rh.SetFillStyle(3004)
+#                rh.SetFillStyle(3004)
+                rh.SetFillStyle(3554)
 
         self.setLegend(p, **kwargs)
         # Add the legend box for stat uncertainty band
         tmp = sigErr.Clone("tmp")
         tmp.SetFillColor(ROOT.kBlack)
-        tmp.SetFillStyle(3013)
+#        tmp.SetFillStyle(3013)
+        tmp.SetFillStyle(3444)
         tmp.SetLineColor(ROOT.kWhite)
         if not p.histoMgr.hasHisto("Embedded"):
             tmp.SetFillStyle(sigErr.GetFillStyle())
@@ -939,7 +1091,7 @@ class PlotDrawerTauEmbeddingEmbeddedNormal(PlotDrawerTauEmbedding):
 
         self.addCutLineBox(p, **kwargs)
         self.customise(p, **kwargs)
-        self.finish(p, xlabel, **kwargs)
+        self.finish(p, **kwargs)
 
 ## Plot creator for embedded vs. normal plots
 class PlotCreatorMany:
@@ -1037,12 +1189,251 @@ class PlotCreatorMany:
         if self.addVariation:
             if self.addData:
                 if embDataVar != None:
-                    plots.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
+                    aux.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
                     embDataVar.SetMarkerStyle(2)
                     p.embeddingDataVariation = embDataVar
             if embVar != None:
-                plots.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
+                aux.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
                 embVar.SetMarkerStyle(2)
                 p.embeddingVariation = embVar
     
         return p
+
+
+def strIntegral(th1):
+    return "%.1f" % aux.th1Integral(th1)
+
+def writeToFile(optMode, fname, content):
+    d = optMode
+    if d is None:
+        d = "."
+    if not os.path.exists(d):
+        os.makedirs(d)
+
+    f = open(os.path.join(d, fname), "w")
+    f.write(content)
+    f.write("\n")
+    f.close()
+
+class CommonPlotter:
+    def __init__(self, optimizationMode, midfix, plotDrawer):
+        self._ind = 0
+        self._optMode = optimizationMode
+        self._midfix = midfix
+        self._plotDrawer = plotDrawer
+
+        if self._optMode is not None and not os.path.exists(self._optMode):
+            os.mkdir(self._optMode)
+
+    def getOutputDirectory(self):
+        if self._optMode is None:
+            return "."
+        return self._optMode
+
+    def _createPlot(self, name):
+        p = self._plotCreator(name)
+        return p
+
+    def _drawPlotCommon(self, plot, name, *args, **kwargs):
+        kargs = {}
+        kargs.update(kwargs)
+        if name in self._plotOptions:
+            kargs.update(self._plotOptions[name])
+        if not "rebin" in kwargs and not "rebinToWidthX" in kwargs:
+            name2 = name
+            if name2[-4:] == "_log":
+                name2 = name[:-4]
+            kargs["rebin"] = systematics.getBinningForPlot(name2)
+        if not "cmsTextPosition" in kargs:
+            kargs["cmsTextPosition"] = "outframe"
+
+        self._plotDrawer(plot, *args, **kargs)
+
+    def _drawPlot(self, plot, name, *args, **kwargs):
+        if plot is None:
+            return
+        self._ind += 1
+        if self._datasetName is None:
+            path = "%03d_%s_%s" % (self._ind, self._midfix, name)
+        else:
+            path = "%03d_%s_%s_%s" % (self._ind, self._midfix, self._datasetName, name)
+        if self._optMode is not None:
+            path = "%s/%s" % (self._optMode, path)
+        self._drawPlotCommon(plot, name, path, *args, **kwargs)
+
+    def plot(self, datasetName, plotCreator, plotOptions={}):
+        self._datasetName = datasetName
+        self._plotCreator = plotCreator
+        self._plotOptions = plotOptions
+
+#        opts2def = {"ymin": 0.8, "ymax": 1.2}
+#        opts2def = {"ymin": 0.5, "ymax": 1.5}
+        opts2def = {"ymin": 0, "ymax": 2}
+
+        def drawControlPlot(path, *args, **kwargs):
+            self._drawPlot(self._createPlot("ForDataDrivenCtrlPlots/"+path), path, *args, **kwargs)
+
+        def update(d1, d2):
+            tmp = {}
+            tmp.update(d1)
+            tmp.update(d2)
+            return tmp
+
+        # Control plots
+        optsdef = {}
+        opts = optsdef
+
+        # After Njets
+        tauPtBins = [0]+range(40, 160, 10)+[160, 200, 300, 400, 500]
+        tauEtaBins = [-2.1, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.1]
+        drawControlPlot("SelectedTau_pT_AfterStandardSelections", xlabel="Selected #tau p_{T} (GeV/c)",
+                        #ylabel="Events / #Delta p_{T} / %.0f-%.0f GeV/c",
+                        ylabel="< Events / GeV/c >",
+                        divideByBinWidth=True, opts={"ymin": 1e-3})
+        drawControlPlot("SelectedTau_eta_AfterStandardSelections", opts={"xmin": -2.1, "xmax": 2.1}, moveLegend={"dy": -0.4})
+        drawControlPlot("SelectedTau_phi_AfterStandardSelections", moveLegend={"dy": -0.4})
+        drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", opts={"xmin": 0.7, "xmax":1 }, moveLegend={"dy": -0.4, "dx": -0.3}, ylabel="Events / %.2f")
+        drawControlPlot("Njets_AfterStandardSelections", ylabel="Events", opts={"xmin": 3, "xmax": 10, "ymin": 1})
+        drawControlPlot("JetPt_AfterStandardSelections", divideByBinWidth=True)
+        drawControlPlot("JetEta_AfterStandardSelections", moveLegend={"dy": -0.4})
+
+#        drawControlPlot("NjetsAfterJetSelectionAndMETSF", opts={"xmin": 0, "xmax": 16}, ylabel="Events", cutLine=3)
+#        drawControlPlot("ImprovedDeltaPhiCutsJet1Collinear", rebinToWidthX=10)
+#        drawControlPlot("ImprovedDeltaPhiCutsJet2Collinear", rebinToWidthX=10, moveLegend={"dy": -0.4, "dx": -0.2})<
+#        drawControlPlot("ImprovedDeltaPhiCutsJet3Collinear", rebinToWidthX=10, moveLegend={"dy": -0.4, "dx": -0.2})
+        drawControlPlot("ImprovedDeltaPhiCutsCollinearMinimum", rebinToWidthX=10)
+
+        moveLegend = {"DYJetsToLL": {"dx": -0.02}}.get(datasetName, {})
+        drawControlPlot("MET",
+                        #"Uncorrected PF E_{T}^{miss} (GeV)",
+                        "Type I PF E_{T}^{miss} (GeV)",
+                        #ylabel="Events / #Delta E_{T}^{miss} / %.0f-%.0f GeV",
+                        ylabel="< Events / GeV >",
+                        divideByBinWidth=True,
+                        opts=update(opts, {"xmax": 500, "ymin": 1e-3}),
+                        #cutLine=50,
+                        moveLegend=moveLegend)
+
+        drawControlPlot("METPhi", rebin=2, moveLegend={"dy": -0.4})
+
+
+        # after MET
+        moveLegend = {"dx": -0.5, "dy": -0.45}
+        moveLegend = {
+            "WJets": {},
+            "DYJetsToLL": {"dx": -0.02},
+            "SingleTop": {},
+            "Diboson": {}
+            }.get(datasetName, moveLegend)
+        drawControlPlot("NBjets", "Number of selected b jets", opts=update(opts, {"xmax": 6, "ymin": 1e-1}), ylabel="Events", moveLegend=moveLegend,
+                        #cutLine=1
+        )
+
+        drawControlPlot("BtagDiscriminator", opts={"xmin": -1, "xmax": 1.5}, ylabel="Events / %.1f")
+        bjetPtBins = [0]+range(30, 100, 10)+range(100, 200, 20)+[200, 250, 300, 400, 500]
+        drawControlPlot("BJetPt", rebin=bjetPtBins, divideByBinWidth=True)
+        drawControlPlot("BJetEta", rebin=2, opts={"xmin": -2.4, "xmax": 2.4}, moveLegend={"dy": -0.4})
+
+        # DeltapPhi
+        opts = {
+#            "WJets": {"ymax": 35},
+#            "DYJetsToLL": {"ymax": 12},
+#            "Diboson": {"ymax": 1},
+            }.get(datasetName, {"ymaxfactor": 1.2})
+        opts2=opts2def
+        moveLegend = {
+            "DYJetsToLL": {"dx": -0.24},
+            }.get(datasetName, {"dx":-0.22})
+#        drawControlPlot("ImprovedDeltaPhiCutsJet1BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
+#        drawControlPlot("ImprovedDeltaPhiCutsJet2BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
+#        drawControlPlot("ImprovedDeltaPhiCutsJet3BackToBack", rebinToWidthX=10, moveLegend={"dy": -0.4})
+        drawControlPlot("ImprovedDeltaPhiCutsBackToBackMinimum", "R^{min}_{bb}, {}^{o}", ylabel="Events / %.0f^{o}", rebinToWidthX=20, moveLegend={"dx": -0.4, "dy": -0.45})
+
+        # Remaining control plots
+        #drawControlPlot("TopMass")
+        #drawControlPlot("TopPt")
+        #drawControlPlot("WMass")
+        #drawControlPlot("WPt")
+
+        # Transverse mass
+        drawControlPlot("SelectedTau_pT_AfterMtSelections", xlabel="Selected #tau p_{T} (GeV/c)",
+                        #ylabel="Events / #Delta p_{T} / %.0f-%.0f GeV/c",
+                        ylabel="< Events / GeV/c >",
+                        divideByBinWidth=True, opts={"ymin": 1e-3})
+        drawControlPlot("SelectedTau_eta_AfterMtSelections", xlabel="Selected #tau #eta", 
+                        #ylabel="Events / %.1f-%.1f",
+                        ylabel="Events",
+                        opts={"xmin": -2.5, "xmax": 2.5}, moveLegend={"dx": -0.3, "dy": -0.4})
+        drawControlPlot("SelectedTau_phi_AfterMtSelections", xlabel="Selected #tau #phi",
+                        #ylabel="Events / %.2f-%.2f",
+                        ylabel="Events",
+                        moveLegend={"dy": -0.4})
+        drawControlPlot("SelectedTau_LeadingTrackPt_AfterMtSelections", rebin=range(0, 100, 10)+[150,200,300,400,500], divideByBinWidth=True, opts={"ymin": 1e-3})
+
+        maxModes = 5
+        drawControlPlot("SelectedTau_DecayMode_AfterMtSelections", xlabel="Selected #tau decay mode", ylabel="Events", opts={"xmax": maxModes, "nbinsx": maxModes, "ymin": 1}, customizeBeforeDraw=lambda p: decayModeLabels(p, maxModes))
+        drawControlPlot("SelectedTau_Rtau_AfterMtSelections", xlabel="Selected #tau R_{#tau}", ylabel="Events / %.2f", opts={"xmin": 0.7, "xmax":1 }, moveLegend={"dy": -0.4, "dx": -0.3})
+        drawControlPlot("Njets_AfterMtSelections", ylabel="Events")
+        drawControlPlot("JetPt_AfterMtSelections",
+                        #ylabel="Events / #Delta p_{T} / %.0f-%.0f GeV/c",
+                        ylabel="< Events / GeV/c >",
+                        divideByBinWidth=True)
+        drawControlPlot("JetEta_AfterMtSelections", ylabel="Events / %.1f", opts={"ymin": 1e-1}, moveLegend={"dy": -0.4})
+        drawControlPlot("METAfterMtSelections", "Type I PF E_{T}^{miss} (GeV)",
+                        #ylabel="Events / #Delta E_{T}^{miss} / %.0f-%.0f GeV",
+                        ylabel="< Events / GeV >",
+                        divideByBinWidth=True, opts={"ymin": 1e-3}, moveLegend={"dx": -0.05, "dy":-0.2})
+        drawControlPlot("METPhiAfterMtSelections", "E_{T}^{miss} #phi",
+                        #ylabel="Events / %.2f-%.2f",
+                        ylabel="Events",
+                        moveLegend={"dy": -0.4}, opts={"ymaxfactor": 10})
+        drawControlPlot("NBjetsAfterMtSelections", ylabel="Events", opts={"ymin": 1e-1})
+        drawControlPlot("BJetPtAfterMtSelections",
+                        #ylabel="Events / #Delta p_{T} / %.0f-%.0f GeV/c",
+                        ylabel="< Events / GeV/c >",
+                        divideByBinWidth=True)
+        drawControlPlot("BJetEtaAfterMtSelections", ylabel="Events / %.1f", opts={"xmin": -2.5, "xmax": 2.5}, moveLegend={"dy": -0.4})
+        drawControlPlot("BtagDiscriminatorAfterMtSelections", opts={"xmin": -1, "xmax": 1, "ymin": 1},
+                        ylabel="Events",
+                        #ylabel="Events / %.2f-%.2f",
+                        moveLegend={"dy": -0.4})
+        drawControlPlot("ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections", "R_{coll}^{min} (^{o})", ylabel="Events / %.0f^{o}", opts={"ymin": 1e-1}, moveLegend={"dy": -0.43, "dx": -0.3})
+        drawControlPlot("ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections", "R_{bb}^{min} (^{o})", ylabel="Events / %.0f^{o}", opts={"ymin": 1e-1}, moveLegend={"dy": -0.43, "dx": -0.2})
+
+        opts = {
+#            "TTJets": {"ymax": 28},
+#            "SingleTop": {"ymax": 4.5},
+#            "DYJetsToLL": {"ymax": 18},
+#            "Diboson": {"ymax": 1.2},
+#            "WJets": {"ymax": 50},
+            }.get(datasetName, {})
+        #opts["xmax"] = 400
+        #opts2 = {"ymin": 0, "ymax": 2}
+        moveLegend = {"DYJetsToLL": {"dx": -0.02}}.get(datasetName, {})
+        p = self._createPlot("shapeTransverseMass")
+        #p.appendPlotObject(histograms.PlotText(0.6, 0.7, "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", size=20))
+        self._drawPlot(p, "shapeTransverseMass", "m_{T} (GeV)", # (^{}#tau_{h}, ^{}E_{T}^{miss}) (GeV)",
+                       #ylabel="Events / #Delta m_{T} %.0f-%.0f GeV",
+                       ylabel="< Events / GeV >",
+                       log=False, moveLegend=moveLegend,
+                       opts=opts,
+                       #opts2=opts2,
+                       divideByBinWidth=True,
+                       cmsTextPosition="right"
+                 )
+        p = self._createPlot("shapeTransverseMass")
+        self._drawPlot(p, "shapeTransverseMass_log", "m_{T} (GeV)", #"m_{T}(^{}#tau_{h}, ^{}E_{T}^{miss}) (GeV)",
+                       #ylabel="Events / #Delta m_{T} %.0f-%.0f GeV",
+                       ylabel="< Events / GeV >",
+                       log=True, moveLegend=moveLegend,
+                       opts={"ymin": 1e-3},
+                       #opts2=opts2,
+                       divideByBinWidth=True,
+                       cmsTextPosition="right"
+                 )
+
+        self._drawPlot(self._createPlot("shapeInvariantMass"), "shapeInvariantMass", 
+                       xlabel="m_{H^{+}} (GeV/c^{2})",
+                       ylabel="< Events / GeV/c^{2} >",
+                       log=False, divideByBinWidth=True)
+

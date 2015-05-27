@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VetoTauSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/genParticleMotherTools.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -16,29 +17,14 @@
 #include "TMath.h"
 #include "TLorentzVector.h"
 
-
-
-std::vector<const reco::GenParticle*>   getImmediateMothers(const reco::Candidate&);
-std::vector<const reco::GenParticle*>   getMothers(const reco::Candidate& p);
-bool  hasImmediateMother(const reco::Candidate& p, int id);
-bool  hasMother(const reco::Candidate& p, int id);
-void  printImmediateMothers(const reco::Candidate& p);
-void  printMothers(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>  getImmediateDaughters(const reco::Candidate& p);
-std::vector<const reco::GenParticle*>   getDaughters(const reco::Candidate& p);
-bool  hasImmediateDaughter(const reco::Candidate& p, int id);
-bool  hasDaughter(const reco::Candidate& p, int id);
-void  printImmediateDaughters(const reco::Candidate& p);
-void printDaughters(const reco::Candidate& p);
-
-
 namespace HPlus {
-  VetoTauSelection::Data::Data(const VetoTauSelection *vetoTauSelection, bool passedEvent) :
-  fVetoTauSelection(vetoTauSelection), fPassedEvent(passedEvent) { }
+  VetoTauSelection::Data::Data() :
+  fPassedEvent(false) { }
 
   VetoTauSelection::Data::~Data() { }
   
   VetoTauSelection::VetoTauSelection(const edm::ParameterSet& iConfig, const edm::ParameterSet& fakeTauSFandSystematicsConfig, HPlus::EventCounter& eventCounter, HPlus::HistoWrapper& histoWrapper) :
+    BaseSelection(eventCounter, histoWrapper),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
     fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
@@ -47,7 +33,7 @@ namespace HPlus {
     fZMassWindow(iConfig.getUntrackedParameter<double>("ZmassWindow")),
     fTauSource(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection").getUntrackedParameter<edm::InputTag>("src")),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, histoWrapper, "TauVeto"),
-    fFakeTauIdentifier(fakeTauSFandSystematicsConfig, histoWrapper, "VetoTauSelection"),
+    fFakeTauIdentifier(fakeTauSFandSystematicsConfig, iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), histoWrapper, "VetoTauSelection"),
     fAllEventsCounter(eventCounter.addSubCounter("VetoTauSelection","All events")),
     //    fVetoTauCandidatesCounter(eventCounter.addSubCounter("VetoTauSelection","Veto tau candidates"));
     fVetoTausSelectedCounter(eventCounter.addSubCounter("VetoTauSelection","Veto taus found")),
@@ -69,24 +55,41 @@ namespace HPlus {
       for (int i = 1; i <= hCandidateTauNumber->getHisto()->GetNbinsX(); ++i)
         hSelectedTauNumber->GetXaxis()->SetBinLabel(i, hCandidateTauNumber->GetXaxis()->GetBinLabel(i));
     }
-    hTauCandFromWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hTauCandAllPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hSelectedGenuineTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hSelectedGenuineTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByEta", "SelectedGenuineTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hSelectedGenuineTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauByPhi", "SelectedGenuineTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hSelectedFakeTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByPt", "SelectedFakeTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
-    hSelectedFakeTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByEta", "SelectedFakeTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
-    hSelectedFakeTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauByPhi", "SelectedFakeTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
-    hSelectedGenuineTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedGenuineTauDitauMass", "SelectedGenuineTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
-    hSelectedFakeTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kDebug, myDir, "SelectedFakeTauDitauMass", "SelectedFakeTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
+    hTauCandFromWPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauCandFromWPt", "TauCandFromWPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hTauCandAllPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "TauCandAllPt", "TauCandAllPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedGenuineTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedGenuineTauByPt", "SelectedGenuineTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedGenuineTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedGenuineTauByEta", "SelectedGenuineTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hSelectedGenuineTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedGenuineTauByPhi", "SelectedGenuineTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hSelectedFakeTauByPt = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedFakeTauByPt", "SelectedFakeTauByPt;#tau p_{T}, GeV/c;Events / 10 GeV/c", 40, 0, 400);
+    hSelectedFakeTauByEta = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedFakeTauByEta", "SelectedFakeTauByEta;#tau #eta;Events / 0.1", 50, -2.5, 2.5);
+    hSelectedFakeTauByPhi = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedFakeTauByPhi", "SelectedFakeTauByEta;#tau #eta;Events / 5^{o}", 72, -3.14159265, 3.14159265);
+    hSelectedGenuineTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedGenuineTauDitauMass", "SelectedGenuineTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
+    hSelectedFakeTauDiTauMass = histoWrapper.makeTH<TH1F>(HistoWrapper::kInformative, myDir, "SelectedFakeTauDitauMass", "SelectedFakeTauDitauMass;M_{#tau#tau}, GeV/c^{2};Events / 5 GeV/c^{2}", 50, 0, 250);
     hSelectedTaus = histoWrapper.makeTH<TH1F>(HistoWrapper::kVital, myDir, "SelectedTausPerEvent", "SelectedTausPerEvent", 10, 0, 10);
   }
 
   VetoTauSelection::~VetoTauSelection() {}
 
-  VetoTauSelection::Data VetoTauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau) {
-    increment(fAllEventsCounter);
+  VetoTauSelection::Data VetoTauSelection::silentAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ) {
+    ensureSilentAnalyzeAllowed(iEvent);
 
+    // Disable histogram filling and counter incrementinguntil the return call
+    // The destructor of HistoWrapper::TemporaryDisabler will re-enable filling and incrementing
+    HistoWrapper::TemporaryDisabler histoTmpDisabled = fHistoWrapper.disableTemporarily();
+    EventCounter::TemporaryDisabler counterTmpDisabled = fEventCounter.disableTemporarily();
+
+    return privateAnalyze(iEvent, iSetup, selectedTau, vertexZ);
+  }
+
+  VetoTauSelection::Data VetoTauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ) {
+    ensureAnalyzeAllowed(iEvent);
+    return privateAnalyze(iEvent, iSetup, selectedTau, vertexZ);
+  }
+
+  VetoTauSelection::Data VetoTauSelection::privateAnalyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Ptr<reco::Candidate> selectedTau, double vertexZ) {
+    Data output;
+
+    increment(fAllEventsCounter);
 
     // Obtain tau collection as the veto tau candidates and take out selected tauSelection
     edm::Handle<edm::View<pat::Tau> > myTaus;
@@ -193,18 +196,18 @@ namespace HPlus {
     
      
      
-      FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
-      if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
+      FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
+      if (tauMatchData.isGenuineTau())
         hCandidateTauNumber->Fill(0.);
-      else if (myMatch == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isElectronToTau())
         hCandidateTauNumber->Fill(1);
-      else if (myMatch == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isMuonToTau())
         hCandidateTauNumber->Fill(2);
-      else if (myMatch == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isJetToTau())
         hCandidateTauNumber->Fill(3);
     }
     // Do tau selection on the veto tau candidates
-    TauSelection::Data myTauData = fTauSelection.analyze(iEvent, iSetup, myVetoTauCandidates);
+    TauSelection::Data myTauData = fTauSelection.analyze(iEvent, iSetup, myVetoTauCandidates, vertexZ);
     //    std::cout << " myVetoTauCandidates   " << myVetoTauCandidates.size() << std::endl;
     if (myTauData.passedEvent())
       increment(fVetoTausSelectedCounter);
@@ -218,19 +221,19 @@ namespace HPlus {
     for (edm::PtrVector<pat::Tau>::iterator it = myTauData.getSelectedTaus().begin(); it != myTauData.getSelectedTaus().end(); ++it) {
       // Store to result vector
 
-      fSelectedVetoTaus.push_back(*it);
+      output.fSelectedVetoTaus.push_back(*it);
       // Count how many selected veto taus are genuine taus
-      FakeTauIdentifier::MCSelectedTauMatchType myMatch = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
-      if (myMatch == FakeTauIdentifier::kkTauToTau || FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance)
+      FakeTauIdentifier::Data tauMatchData = fFakeTauIdentifier.matchTauToMC(iEvent, **it);
+      if (tauMatchData.isGenuineTau())
         hSelectedTauNumber->Fill(0.);
-      else if (myMatch == FakeTauIdentifier::kkElectronToTau || FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isElectronToTau())
         hSelectedTauNumber->Fill(1);
-      else if (myMatch == FakeTauIdentifier::kkMuonToTau || FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isMuonToTau())
         hSelectedTauNumber->Fill(2);
-      else if (myMatch == FakeTauIdentifier::kkJetToTau || FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance)
+      else if (tauMatchData.isJetToTau())
         hSelectedTauNumber->Fill(3);
 
-      bool isGenuineTau = !(fFakeTauIdentifier.isFakeTau(myMatch));
+      bool isGenuineTau = !(fFakeTauIdentifier.isFakeTau(tauMatchData.getTauMatchType()));
       if (isGenuineTau) {
         // Genuine tau
         hSelectedGenuineTauByPt->Fill((*it)->pt());
@@ -248,7 +251,7 @@ namespace HPlus {
       myVetoTauMomentum += mySelectedTauMomentum;
       double myDitauMass = myVetoTauMomentum.M();
       // Check if ditau mass is compatible with Z mass
-      if (myDitauMass <  1000 ) 	{
+      if (myDitauMass <  1000 ) {
 	myVetoStatus = true;
 	numberOfTaus++;
       }
@@ -271,6 +274,7 @@ namespace HPlus {
       increment(fEventsCompatibleWithZMassCounter);
     else
       increment(fSelectedEventsCounter);
-    return Data(this, myVetoStatus);
+    output.fPassedEvent = !myVetoStatus;
+    return output;
   }
 }

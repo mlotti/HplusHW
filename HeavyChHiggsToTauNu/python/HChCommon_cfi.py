@@ -6,11 +6,14 @@ MessageLogger.categories.append("HPlusRootFileDumper")
 MessageLogger.categories.append("hltPrescaleTable")
 MessageLogger.categories.append("EventCounts")  # HPlusEventCountAnalyzer
 MessageLogger.categories.append("HLTTableInfo") # HPlusHLTTableAnalyzer
+MessageLogger.categories.append("EcalLaserDbService") # To suppress messages (53X)
 
 # Do NOT lower this number (or the logs will eat all your quota)
 MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 MessageLogger.cerr.hltPrescaleTable = cms.untracked.PSet(reportEvery = MessageLogger.cerr.FwkReport.reportEvery)
+# Suppress messages "The interpolated laser correction is <= zero! (0). Using 1. as correction factor." in 53X
+MessageLogger.cerr.EcalLaserDbService = cms.untracked.PSet(limit = cms.untracked.int32(2))
 
 #MessageLogger.cerr = cms.untracked.PSet(
 #  placeholder = cms.untracked.bool(True)
@@ -32,7 +35,7 @@ options = cms.untracked.PSet(
 #process.load("Configuration/StandardSequences/MagneticField_cff")
 from Configuration.StandardSequences.MagneticField_38T_cff import *
 from Configuration.StandardSequences.Services_cff import *
-from Configuration.StandardSequences.Geometry_cff import *
+from Configuration.Geometry.GeometryIdeal_cff import *
 
 # Calo geometry service model
 from Geometry.CaloEventSetup.CaloGeometry_cfi import *

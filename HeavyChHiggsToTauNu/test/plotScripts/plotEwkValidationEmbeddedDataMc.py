@@ -9,8 +9,6 @@
 # * signalAnalysis_cfg.py
 # for embedding+signal analysis and signal analysis, respectively
 #
-# The development script is plotTauEmbeddingSignalAnalysisMany
-#
 # Authors: Matti Kortelainen
 #
 ######################################################################
@@ -31,195 +29,225 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
-analysisEmbAll = "signalAnalysis"
-analysisEmbNoTauEff = "signalAnalysisCaloMet60"
-analysisEmb = "signalAnalysisCaloMet60TEff"
+dataEra = "Run2012ABCD"
 
-counters = "/counters/weighted"
+class SystematicsSigMC:
+    def __init__(self):
+        self._systematics = dataset.Systematics(shapes=[
+            "SystVarJES",
+            "SystVarJER",
+            "SystVarMET",
+            "SystVarBTagSF",
+            "SystVarPUWeight",
+            "SystVarTopPtWeight",
+        ], additionalNormalizations = {
+            "LeptonVeto": systematics.getLeptonVetoUncertainty("Dummy").getUncertaintyMax(),
+            "Luminosity": systematics.getLuminosityUncertainty().getUncertaintyMax()
+        }, applyToDatasets = dataset.Systematics.OnlyForMC
+        )
+        self._cache = {}
+
+    def histogram(self, dsetName, name):
+        if not dsetName in self._cache:
+            cl = self._systematics.clone()
+            cl.append(additionalNormalizations = {"CrossSection": systematics.getCrossSectionUncertainty(dsetName).getUncertaintyMax()})
+            self._cache[dsetName] = cl
+
+        return self._cache[dsetName].histogram(name)
+systematicsEmbMC = SystematicsSigMC()
 
 def main():
-    # Adjust paths such that this script can be run inside the first embedding trial directory
-    dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
-
-    # Create the dataset objects
-    datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"/counters", normalizeMCByLuminosity=True)
-
-    # Remove signal and W+3jets datasets
-    datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
-    datasetsEmb.remove(filter(lambda name: "TTToHplus" in name, datasetsEmb.getAllDatasetNames()))
-    datasetsEmb.remove(filter(lambda name: "W3Jets" in name, datasetsEmb.getAllDatasetNames()))
-
-    datasetsEmb.forEach(plots.mergeRenameReorderForDataMC)
-    datasetsEmb.setLumiFromData()
-
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    histograms.cmsTextMode = histograms.CMSMode.NONE
-    tauEmbedding.normalize=True
-    tauEmbedding.era = "Run2011AB"
+    #    histograms.cmsTextMode = histograms.CMSMode.NONE
+    #histograms.uncertaintyMode.set(histograms.Uncertainty.StatOnly)
+    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
+    #histograms.createLegend.moveDefaults(dx=-0.15, dh=0.05)#, dh=-0.05) # QCD removed
+    histograms.createLegend.setDefaults(textSize=0.04)
+    histograms.createLegend.moveDefaults(dx=-0.25, dh=0.1)#, dh=-0.05) # QCD removed
 
-    doCounters(datasetsEmb)
+    histograms.createLegendRatio.setDefaults(ncolumns=2, textSize=0.08, columnSeparation=0.3)
+    histograms.createLegendRatio.moveDefaults(dx=-0.35, dh=-0.1, dw=0.25)
+    plots._legendLabels["BackgroundStatError"] = "Sim. stat. unc."
+    plots._legendLabels["BackgroundStatSystError"] = "Sim. stat.#oplussyst. unc."
 
-    # Remove QCD for plots
-    datasetsEmb.remove(["QCD_Pt20_MuEnriched"])
-    histograms.createLegend.moveDefaults(dx=-0.04, dh=-0.05)
-    doPlots(datasetsEmb)
+    legendLabelsSet = False
 
-def doPlots(datasetsEmb):
-    datasetNames = datasetsEmb.getAllDatasetNames()
+    for optMode in [
+#        "OptQCDTailKillerNoCuts",
+        "OptQCDTailKillerLoosePlus",
+#        "OptQCDTailKillerMediumPlus",
+#        "OptQCDTailKillerTightPlus",
+#            None
+    ]:
+        # Create the dataset objects
+        datasetsEmb = dataset.getDatasetsFromMulticrabCfg(dataEra=dataEra, optimizationMode=optMode)
 
-    def createPlot(name, rebin=1):
-        name2 = name
-        if isinstance(name, basestring):
-            name2 = analysisEmb+"/"+name
+        # Remove signal and W+3jets datasets
+        datasetsEmb.remove(filter(lambda name: "HplusTB" in name, datasetsEmb.getAllDatasetNames()))
+        datasetsEmb.remove(filter(lambda name: "TTToHplus" in name, datasetsEmb.getAllDatasetNames()))
 
-        rootHistos = []
-        for datasetName in datasetNames:
-            (histo, tmp) = datasetsEmb.getHistogram(datasetName, name2)
-            histo.SetName(datasetName)
-            if rebin != 1:
-                histo.Rebin(rebin)
-            rootHistos.append(histo)
+        datasetsEmb.updateNAllEventsToPUWeighted()
+        plots.mergeRenameReorderForDataMC(datasetsEmb)
 
-        p = plots.DataMCPlot2(rootHistos)
-        histos = p.histoMgr.getHistos()
-        for h in histos:
-            if h.getName() == "Data":
-                h.setIsDataMC(True, False)
-            else:
-                h.setIsDataMC(False, True)
-        p.setLuminosity(datasetsEmb.getLuminosity())
+        doCounters(datasetsEmb, optMode)
+
+        if not legendLabelsSet:
+            def trans(n):
+                if n[0:2] in ["W+", "Z/"]:
+                    return n
+                else:
+                    return n[0].lower()+n[1:]
+
+            for d in datasetsEmb.getAllDatasetNames():
+                oldName = plots._legendLabels.get(d, d)
+                plots._legendLabels[d] = "Embedded "+trans(oldName)
+
+            legendLabelsSet = True
+
+        # Remove QCD for plots
+        datasetsEmb.remove(["QCD_Pt20_MuEnriched"])
+        outputDir = optMode
+        if outputDir is not None:
+            outputDir += "_embdatamc"
+        doPlots(datasetsEmb, outputDir)
+
+        tauEmbedding.writeToFile(outputDir, "input.txt", "Embedded: %s\n" % os.getcwd())
+
+drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=True, log=True, addMCUncertainty=True,
+                                  opts2={"ymin": 0, "ymax": 2},
+                                  ratio=True, ratioType="errorScale", ratioCreateLegend=True, ratioYlabel="Data/Sim.", ratioErrorOptions={"numeratorStatSyst": False},
+                                  addLuminosityText=True)
+
+def doPlots(datasetsEmb, outputDir):
+    lumi = datasetsEmb.getDataset("Data").getLuminosity()
+
+    def createPlot(name):
+#        p = plots.DataMCPlot(datasetsEmb, systematicsEmbMC.histogram(name), normalizeToLumi=lumi)
+        drhData = datasetsEmb.getDataset("Data").getDatasetRootHisto(name)
+        drhMCs = [d.getDatasetRootHisto(systematicsEmbMC.histogram(d.getName(), name)) for d in datasetsEmb.getMCDatasets()]
+
+        p = plots.DataMCPlot2([drhData]+drhMCs)
+        p.histoMgr.normalizeMCToLuminosity(lumi)
+        # by default pseudo-datasets lead to MC histograms, for these
+        # plots we want to treat Data as data
+        p.histoMgr.getHisto("Data").setIsDataMC(True, False)
         p.setDefaultStyles()
         return p
 
-    drawPlot = tauEmbedding.drawPlot
-    drawPlot.setDefaults(ratio=True, addLuminosityText=True
-                         #normalize=False,
-                         )
-
-    prefix = "embdatamc_"
-    opts2 = {"ymin": 0, "ymax": 2}
-    def drawControlPlot(path, xlabel, **kwargs):
-        postfix = ""
-        if kwargs.get("log", True):
-            postfix = "_log"
-        drawPlot(createPlot("ControlPlots/"+path), prefix+path+postfix, xlabel, opts2=opts2, **kwargs)
-
-    # After tau ID
-    drawControlPlot("SelectedTau_pT_AfterStandardSelections", "#tau-jet p_{T} (GeV/c)", opts={"xmax": 250}, rebin=2, cutBox={"cutValue": 40, "greaterThan": True})
-    drawControlPlot("SelectedTau_eta_AfterStandardSelections", "#tau-jet #eta", opts={"xmin": -2.2, "xmax": 2.2}, ylabel="Events / %.1f", rebin=4, moveLegend={"dy":-0.52, "dx":-0.2})
-    drawControlPlot("SelectedTau_LeadingTrackPt_AfterStandardSelections", "#tau-jet ldg. charged particle p_{T} (GeV/c)", opts={"xmax": 250}, rebin=2, cutBox={"cutValue": 20, "greaterThan": True})
-    drawControlPlot("SelectedTau_Rtau_AfterStandardSelections", "R_{#tau} = p^{ldg. charged particle}/p^{#tau jet}", opts={"xmin": 0.65, "xmax": 1.05, "ymin": 1e-1, "ymaxfactor": 10}, rebin=5, ylabel="Events / %.2f", moveLegend={"dx":-0.4, "dy": 0.01, "dh": -0.03}, cutBox={"cutValue":0.7, "greaterThan":True})
-
-    drawControlPlot("MET", "Uncorrected PF E_{T}^{miss} (GeV)", rebin=5, opts={"xmax": 400}, cutLine=50)
-
-    # After MET cut
-    drawControlPlot("NBjets", "Number of selected b jets", opts={"xmax": 6}, ylabel="Events", cutLine=1)
-
-    # After b tagging
-    # DeltaPhi
-    def customDeltaPhi(h):
-        yaxis = h.getFrame().GetYaxis()
-        yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
-    drawPlot(createPlot("deltaPhi", rebin=10), prefix+"deltaPhi_3AfterBTagging", "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})", log=False, opts={}, opts2=opts2, ylabel="Events / %.0f^{o}", function=customDeltaPhi, moveLegend={"dx": -0.22}, cutLine=[130, 160])
-
-    # Transverse mass
-    drawPlot(createPlot("transverseMass", rebin=10), prefix+"transverseMass_4AfterDeltaPhi160", "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts={}, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
+    plotter = tauEmbedding.CommonPlotter(outputDir, "embdatamc", drawPlotCommon)
+    plotter.plot(None, createPlot, {
+#        "NBjets": {"moveLegend": {"dx": -0.4, "dy": -0.45}}
+#        "ImprovedDeltaPhiCutsBackToBackMinimumAfterMtSelections": {"moveLegend": 
+        "shapeTransverseMass": {"moveLegend": {"dy": -0.12}},
+                                #{"dx": -0.3}}, 
+        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}}#, "ratioMoveLegend": {"dx": -0.3}}
+    })
     return
-
-    # After b tagging
-    treeDraw = dataset.TreeDraw(analysisEmb+"/tree", weight=tauEmbedding.signalNtuple.weightBTagging)
-    tdMt = treeDraw.clone(varexp="%s >>tmp(15,0,300)" % tauEmbedding.signalNtuple.mtExpression)
-    tdDeltaPhi = treeDraw.clone(varexp="%s >>tmp(18, 0, 180)" % tauEmbedding.signalNtuple.deltaPhiExpression)
-
-    # DeltaPhi
-    def customDeltaPhi(h):
-        yaxis = h.getFrame().GetYaxis()
-        yaxis.SetTitleOffset(0.8*yaxis.GetTitleOffset())
-    drawPlot(createPlot(tdDeltaPhi.clone(selection=And(tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut))), prefix+"deltaPhi_3AfterBTagging", "#Delta#phi(#tau jet, E_{T}^{miss}) (^{o})", log=False, opts={"ymax": 30}, opts2=opts2, ylabel="Events / %.0f^{o}", function=customDeltaPhi, moveLegend={"dx": -0.22}, cutLine=[160])
-
-    # Transverse mass
-    for name, label, selection in [
-        ("3AfterBTagging", "Without #Delta#phi(#tau jet, E_{T}^{miss}) selection", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut]),
-        ("4AfterDeltaPhi160", "#Delta#phi(#tau jet, E_{T}^{miss}) < 160^{o}", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut, tauEmbedding.signalNtuple.deltaPhi160Cut]),
-        ("5AfterDeltaPhi130", "#Delta#phi(#tau jet, E_{T}^{miss}) < 130^{o}", [tauEmbedding.signalNtuple.metCut, tauEmbedding.signalNtuple.bTaggingCut, tauEmbedding.signalNtuple.deltaPhi130Cut])]:
-
-        p = createPlot(tdMt.clone(selection=And(*selection)))
-        p.appendPlotObject(histograms.PlotText(0.42, 0.62, label, size=20))
-        if "DeltaPhi160":
-            histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
-        else:
-            histograms.cmsTextMode = histograms.CMSMode.NONE
-        drawPlot(p, prefix+"transverseMass_"+name, "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})", opts={"ymax": 35}, opts2=opts2, ylabel="Events / %.0f GeV/c^{2}", log=False)
-
 
 
 def addMcSum(t):
     allDatasets = ["QCD_Pt20_MuEnriched", "WJets", "TTJets", "DYJetsToLL", "SingleTop", "Diboson"]
     t.insertColumn(1, counter.sumColumn("MCSum", [t.getColumn(name=name) for name in allDatasets]))
 
-def doCounters(datasetsEmb):
-
-    # All embedded events
-    eventCounterAll = counter.EventCounter(datasetsEmb.getFirstDatasetManager(), counters=analysisEmbAll+counters)
-    eventCounterAll.normalizeMCByLuminosity()
-    tableAll = eventCounterAll.getMainCounterTable()
-    tableAll.keepOnlyRows([
-            "All events",
-            ])
-    tableAll.renameRows({"All events": "All embedded events"})
-
-    # Mu eff + Wtau mu
-    eventCounterMuEff = counter.EventCounter(datasetsEmb.getFirstDatasetManager(), counters=analysisEmbNoTauEff+counters)
-    eventCounterMuEff.normalizeMCByLuminosity()
-    tauEmbedding.scaleNormalization(eventCounterMuEff)
-    tableMuEff = eventCounterMuEff.getMainCounterTable()
-    tableMuEff.keepOnlyRows([
-            "All events"
-            ])
-    tableMuEff.renameRows({"All events": "mu eff + Wtaumu"})
-
-    # Event counts after embedding normalization, before tau trigger eff,
-    # switch to calculate uncertainties of the mean of 10 trials
-    eventCounterNoTauEff = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmbNoTauEff+counters)
-    tableNoTauEff = eventCounterNoTauEff.getMainCounterTable()
-    tableNoTauEff.keepOnlyRows([
-            "Trigger and HLT_MET cut",
-            "njets",
-            ])
-    tableNoTauEff.renameRows({"Trigger and HLT_MET cut": "caloMET > 60",
-                              "njets": "tau ID"
-                              })
-
-    # Event counts after tau trigger eff
-    eventCounter = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+counters)
+def doCounters(datasetsEmb, outputDir):
+    eventCounter = counter.EventCounter(datasetsEmb)
+    eventCounter.normalizeMCToLuminosity(datasetsEmb.getDataset("Data").getLuminosity())
     table = eventCounter.getMainCounterTable()
     table.keepOnlyRows([
-            "njets",
-            "MET",
-            "btagging scale factor",
-            "DeltaPhi(Tau,MET) upper limit",
-            ])
-    table.renameRows({"njets": "Tau trigger efficiency",
-                      "btagging scale factor": "b tagging"
-                      })
+        "Trigger and HLT_MET cut",
+        "taus > 0",
+        "tau trigger scale factor",
+        "electron veto",
+        "muon veto",
+        "njets",
+        "MET trigger scale factor",
+        "QCD tail killer collinear",
+        "MET",
+        "btagging",
+        "btagging scale factor",
+        "Embedding: mT weight",
+        "QCD tail killer back-to-back",
+        "Selected events"
+    ])
+    addMcSum(table)
 
-    # Combine the rows to one table
-    result = counter.CounterTable()
-    for tbl in [
-        tableAll,
-        tableMuEff,
-        tableNoTauEff,
-        table
-        ]:
-        for iRow in xrange(tbl.getNrows()):
-            result.appendRow(tbl.getRow(index=iRow))
-
-    addMcSum(result)
     cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f', withPrecision=2))
+    txt = table.format(cellFormat)
+    print txt
+    d = outputDir
+    if d is None:
+        d = "."
+    if not os.path.exists(d):
+        os.makedirs(d)
 
-    print result.format(cellFormat)
+    f = open(os.path.join(d, "counters.txt"), "w")
+    f.write(txt)
+    f.write("\n")
+    
+
+
+##    # All embedded events
+##    eventCounterAll = counter.EventCounter(datasetsEmb.getFirstDatasetManager(), counters=analysisEmbAll+counters)
+##    eventCounterAll.normalizeMCByLuminosity()
+##    tableAll = eventCounterAll.getMainCounterTable()
+##    tableAll.keepOnlyRows([
+##            "All events",
+##            ])
+##    tableAll.renameRows({"All events": "All embedded events"})
+##
+##    # Mu eff + Wtau mu
+##    eventCounterMuEff = counter.EventCounter(datasetsEmb.getFirstDatasetManager(), counters=analysisEmbNoTauEff+counters)
+##    eventCounterMuEff.normalizeMCByLuminosity()
+##    tauEmbedding.scaleNormalization(eventCounterMuEff)
+##    tableMuEff = eventCounterMuEff.getMainCounterTable()
+##    tableMuEff.keepOnlyRows([
+##            "All events"
+##            ])
+##    tableMuEff.renameRows({"All events": "mu eff + Wtaumu"})
+##
+##    # Event counts after embedding normalization, before tau trigger eff,
+##    # switch to calculate uncertainties of the mean of 10 trials
+##    eventCounterNoTauEff = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmbNoTauEff+counters)
+##    tableNoTauEff = eventCounterNoTauEff.getMainCounterTable()
+##    tableNoTauEff.keepOnlyRows([
+##            "Trigger and HLT_MET cut",
+##            "njets",
+##            ])
+##    tableNoTauEff.renameRows({"Trigger and HLT_MET cut": "caloMET > 60",
+##                              "njets": "tau ID"
+##                              })
+##
+##    # Event counts after tau trigger eff
+##    eventCounter = tauEmbedding.EventCounterMany(datasetsEmb, counters=analysisEmb+counters)
+##    table = eventCounter.getMainCounterTable()
+##    table.keepOnlyRows([
+##            "njets",
+##            "MET",
+##            "btagging scale factor",
+##            "DeltaPhi(Tau,MET) upper limit",
+##            ])
+##    table.renameRows({"njets": "Tau trigger efficiency",
+##                      "btagging scale factor": "b tagging"
+##                      })
+##
+##    # Combine the rows to one table
+##    result = counter.CounterTable()
+##    for tbl in [
+##        tableAll,
+##        tableMuEff,
+##        tableNoTauEff,
+##        table
+##        ]:
+##        for iRow in xrange(tbl.getNrows()):
+##            result.appendRow(tbl.getRow(index=iRow))
+##
+##    addMcSum(result)
+##    cellFormat = counter.TableFormatText(counter.CellFormatTeX(valueFormat='%.4f', withPrecision=2))
+##
+##    print result.format(cellFormat)
 
 if __name__ == "__main__":
     main()

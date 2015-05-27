@@ -25,6 +25,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
 import produceTauEmbeddingResult as result
@@ -178,11 +179,11 @@ def doPlots(datasetsEmb, datasetsSig, datasetName, addData=False, postfix=""):
         if addVariation:
             if addData:
                 if embDataVar != None:
-                    plots.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
+                    aux.copyStyle(p.histoMgr.getHisto("EmbeddedData").getRootHisto(), embDataVar)
                     embDataVar.SetMarkerStyle(2)
                     p.embeddingDataVariation = embDataVar
             if embVar != None:
-                plots.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
+                aux.copyStyle(p.histoMgr.getHisto("Embedded").getRootHisto(), embVar)
                 embVar.SetMarkerStyle(2)
                 p.embeddingVariation = embVar
     
@@ -611,9 +612,7 @@ def common(h, xlabel, ylabel, cutLine=None, cutBox=None, function=None):
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 

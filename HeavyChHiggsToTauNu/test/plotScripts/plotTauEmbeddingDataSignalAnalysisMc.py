@@ -137,9 +137,7 @@ def met(h, step="", rebin=5):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 
@@ -167,9 +165,7 @@ def tauPt(h, step="", rebin=5):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 def tauEta(h, step="", rebin=5):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -195,9 +191,7 @@ def tauEta(h, step="", rebin=5):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 def tauPhi(h, step="", rebin=5):
@@ -224,9 +218,7 @@ def tauPhi(h, step="", rebin=5):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 def tauCandPt(h, step="", rebin=1):
@@ -253,9 +245,7 @@ def tauCandPt(h, step="", rebin=1):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 def tauCandEta(h, step="", rebin=1):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -281,9 +271,7 @@ def tauCandEta(h, step="", rebin=1):
     h.setLegend(histograms.createLegend(0.5, 0.3, 0.7, 0.6))
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 def tauCandPhi(h, step="", rebin=1):
@@ -310,9 +298,7 @@ def tauCandPhi(h, step="", rebin=1):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
     
 def jetPt(h, step="", rebin=1):
@@ -339,9 +325,7 @@ def jetPt(h, step="", rebin=1):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
     
 def jetEta(h, step="", rebin=1):
@@ -368,9 +352,7 @@ def jetEta(h, step="", rebin=1):
     h.setLegend(histograms.createLegend(0.5, 0.3, 0.7, 0.6))
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 def jetPhi(h, step="", rebin=1):
@@ -397,9 +379,7 @@ def jetPhi(h, step="", rebin=1):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
     
 def numberOfJets(h, step="", rebin=1):
@@ -426,9 +406,7 @@ def numberOfJets(h, step="", rebin=1):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
     
 def leadingTrack(h, step="", rebin=5):
@@ -455,9 +433,7 @@ def leadingTrack(h, step="", rebin=5):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 def rtau(h, step="", rebin=5):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -483,9 +459,7 @@ def rtau(h, step="", rebin=5):
     h.setLegend(histograms.createLegend(0.5, 0.3, 0.7, 0.6))
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 def deltaPhi(h, step="", rebin=5):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -511,9 +485,7 @@ def deltaPhi(h, step="", rebin=5):
     h.setLegend(histograms.createLegend(0.5, 0.3, 0.7, 0.6))
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 def transverseMass(h, step="", rebin=5, particle="#tau"):
@@ -540,9 +512,7 @@ def transverseMass(h, step="", rebin=5, particle="#tau"):
     h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
     name = "transverseMassSimulateEmbedded_%s" % step
@@ -552,9 +522,7 @@ def transverseMass(h, step="", rebin=5, particle="#tau"):
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend())
     h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    #h.addLuminosityText()
+    h.addStandardTexts()
     h.save()
 
 

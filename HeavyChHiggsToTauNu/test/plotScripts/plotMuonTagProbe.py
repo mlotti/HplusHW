@@ -26,11 +26,11 @@ def main():
         #("Run2011A_Mu24", 77.851037, 145.599256231),
         #("Run2011A_Mu30", 53.748971+0.000176, 172.02642060600002),
         #("Run2011A_Mu40", 3.381858+4.153168+424.330775+109.639076+105.026041, 3.3818575699999998+4.153168108+424.33077485900003+83.549892354000008+95.750128408000009),
-	("Run2011A_Mu20", getLumi(["SingleMu_160431-163261_2011A_Nov08"]), 20),
-	("Run2011A_Mu24", getLumi(["SingleMu_163270-163869_2011A_Nov08"]), 20),
-	("Run2011A_Mu30", getLumi(["SingleMu_165088-165633_2011A_Nov08","SingleMu_165970-166150_2011A_Nov08"]), 20),
-	("Run2011A_Mu40", getLumi(["SingleMu_166161-166164_2011A_Nov08","SingleMu_166346-166346_2011A_Nov08","SingleMu_166374-166967_2011A_Nov08","SingleMu_167039-167043_2011A_Nov08","SingleMu_167078-167913_2011A_Nov08","SingleMu_170722-172619_2011A_Nov08","SingleMu_172620-173198_2011A_Nov08"]), 20),
-	("Run2011A_Mu40eta2p1", getLumi(["SingleMu_173236-173692_2011A_Nov08"]), 20),
+#	("Run2011A_Mu20", getLumi(["SingleMu_160431-163261_2011A_Nov08"]), 20),
+#	("Run2011A_Mu24", getLumi(["SingleMu_163270-163869_2011A_Nov08"]), 20),
+#	("Run2011A_Mu30", getLumi(["SingleMu_165088-165633_2011A_Nov08","SingleMu_165970-166150_2011A_Nov08"]), 20),
+#	("Run2011A_Mu40", getLumi(["SingleMu_166161-166164_2011A_Nov08","SingleMu_166346-166346_2011A_Nov08","SingleMu_166374-166967_2011A_Nov08","SingleMu_167039-167043_2011A_Nov08","SingleMu_167078-167913_2011A_Nov08","SingleMu_170722-172619_2011A_Nov08","SingleMu_172620-173198_2011A_Nov08"]), 20),
+#	("Run2011A_Mu40eta2p1", getLumi(["SingleMu_173236-173692_2011A_Nov08"]), 20),
 	("Run2011B_Mu40eta2p1", getLumi(["SingleMu_175860-176469_2011B_Nov19","SingleMu_176545-177053_2011B_Nov19","SingleMu_177074-177452_2011B_Nov19","SingleMu_177718-178380_2011B_Nov19","SingleMu_178420-178866_2011B_Nov19","SingleMu_178871-179889_2011B_Nov19","SingleMu_179959-180252_2011B_Nov19"]), 20),
 #        ("Run2011A_Mu20", getLumi(["SingleMu_160431-163261_May10"]), 20),
 #        ("Run2011A_Mu24", getLumi(["SingleMu_163270-163869_May10"]), 20),
@@ -38,8 +38,8 @@ def main():
 #        ("Run2011A_Mu40", getLumi(["SingleMu_166161-166164_Prompt", "SingleMu_166346-166346_Prompt", "SingleMu_166374-166967_Prompt", "SingleMu_167039-167043_Prompt", "SingleMu_167078-167913_Prompt", "SingleMu_172620-173198_Prompt"]), 20),
 #        ("Run2011A_Mu40eta2p1", getLumi(["SingleMu_173236-173692_Prompt"]), 20),
         ]
-    mc = "DY_Mu20"
-    doMC = False
+    mc = "DY_Mu40eta2p1"
+    doMC = True
 
     totalLumi = 0
     totalEff = 0
@@ -49,7 +49,7 @@ def main():
         print " lumi: %f %f" % (ownLumi, targetLumi)
         err = max(eff_plus, eff_minus)
 
-	targetLumi = ownLumi
+        targetLumi = ownLumi
         totalLumi += targetLumi
         totalEff += targetLumi * eff_value
         totalErr += targetLumi * err*err
@@ -81,7 +81,7 @@ def getEfficiency(postfix, style, lumi=None):
         "Run2011A_Mu40": ("HLT_Mu40", "166161-167913, 172620-173198"),
         "Run2011A_Mu40eta2p1": ("HLT_Mu40eta2p1", "173236-173692"),
 	"Run2011B_Mu40eta2p1": ("HLT_Mu40eta2p1", "175860-180252"),
-        "DY_Mu20": ("HLT_Mu20", "DY+jets MC"),
+        "DY_Mu40eta2p1": ("HLT_Mu40eta2p1", "DY+jets MC"),
         }[postfix]
 
     l = ROOT.TLatex()
@@ -116,11 +116,24 @@ def getEfficiency(postfix, style, lumi=None):
     graphPtEta = plotPtEta
 
     ## Overall value
+#    print "check",path+"/"+plot,graph
     canv = f.Get(path+"/"+plot)
     gr = canv.FindObject(graph)
     eff_value = gr.GetY()[0]
     eff_plus = gr.GetErrorYhigh(0)
     eff_minus = gr.GetErrorYlow(0)
+
+    eff_av = 0
+    weight = 1
+    sumweight = 0
+    for i in range(gr.GetN()):
+        if(gr.GetX()[i] < 40):
+	    continue
+	sumweight += weight
+        eff_av += gr.GetY()[i]
+    eff_av = eff_av/sumweight
+#    print "check eff_av",eff_av
+#    eff_value = eff_av
 
     opts = {"xmin": 0, "ymin": 0, "ymax": 1.1}
     name = "TagProbe_%s_All_%s_%s" % (postfix, plot, graph)
@@ -149,10 +162,9 @@ def getEfficiency(postfix, style, lumi=None):
         plot.draw()
         if updatePaletteStyle:
             histograms.updatePaletteStyle(p.histoMgr.getHistos()[0].getRootHisto())
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
         if lumi != None:
-            histograms.addLuminosityText(None, None, lumi)
+            plot.setLuminosity(lumi)
+        plot.addStandardTexts()
         if addText:
             l.DrawLatex(0.2, 0.4, trig)
             l.DrawLatex(0.2, 0.35, runs)

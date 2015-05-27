@@ -11,11 +11,11 @@
 <use name="DataFormats/METReco"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="DataFormats/WrappedStdDictionaries"/>
+<use name="AnalysisDataFormats/TopObjects"/>
 <use name="SimDataFormats/PileupSummaryInfo"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="PhysicsTools/Utilities"/>
 <use name="RecoTauTag/TauTagTools"/>
-<use name="RecoBTag/PerformanceDB"/>
 <use name="CondFormats/PhysicsToolsObjects"/>
 <use name="RecoBTag/Records"/>
 <use name="EGamma/EGammaAnalysisTools"/>

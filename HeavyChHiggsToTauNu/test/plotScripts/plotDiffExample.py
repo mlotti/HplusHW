@@ -21,11 +21,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
 
 def main():
     # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets = dataset.getDatasetsFromMulticrabCfg(analysisName=analysis)
 
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
@@ -67,10 +66,10 @@ def main():
 
     # Create the normalized plot of transverse mass
     # Read the histogram from the file
-    #mT = plots.DataMCPlot(datasets, analysis+"/transverseMass")
+    #mT = plots.DataMCPlot(datasets, "transverseMass")
 
     # Create the histogram from the tree (and see the selections explicitly)
-    td = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale",
+    td = dataset.TreeDraw("tree", weight="weightPileup*weightTrigger*weightPrescale",
                              selection="met_p4.Et() > 70 && Max$(jets_btag) > 1.7")
     mT = plots.DataMCPlot(datasets, td.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))>>dist(400, 0, 400)"))
 

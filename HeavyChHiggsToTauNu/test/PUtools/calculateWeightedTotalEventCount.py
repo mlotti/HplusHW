@@ -8,17 +8,33 @@ import os
 from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.HeavyChHiggsToTauNu.TopPtWeightSchemes as topPtWeightSchemes
 
+# We don't need (or actaually can not create) full dataset.Dataset object
+class DatasetWrapper:
+    def __init__(self, name, rootFile, baseDirectory):
+        self.name = name
+        self.rootFile = rootFile
+        self.baseDirectory = baseDirectory
 
-def getEventWeight(hmc, hdata, nvtx):
-    # Get bin index
-    mybin = hmc.GetXaxis().FindBin(nvtx)
-    mydatabin = hdata.GetXaxis().FindBin(nvtx)
-    if mybin != mydatabin:
-        print "Error: data and mc pileup histograms have different binning!"
-        sys.exit()
-    # Calculate data/MC
-    return hdata.GetBinContent(mybin) / hmc.GetBinContent(mybin)
+    def getRootFile(self):
+        return self.rootFile
+
+    def getTree(self, treeName):
+        return self.rootFile.Get(treeName)
+
+    def createRootChain(self, treeName):
+        return (self.getTree(treeName), treeName)
+
+    def getName(self):
+        return self.name
+
+    def getBaseDirectory(self):
+        return self.baseDirectory
+
+    def isMC(self):
+        return True
 
 def main(opts):
     # open PU histograms
@@ -47,6 +63,36 @@ def main(opts):
     hdatadown = hdatadownoriginal.Clone("hdatadown")
     hdatadown.Scale(1.0 / hdatadown.Integral())
 
+    hweight = hdata.Clone()
+    hweight.Divide(hmc)
+
+    hweightUp = hdataup.Clone()
+    hweightUp.Divide(hmc)
+
+    hweightDown = hdatadown.Clone()
+    hweightDown.Divide(hmc)
+
+    ntupleCache = dataset.NtupleCache("pileupNtuple/tree", "PileupWeightSelector",
+                                      selectorArgs=[hweight, hweightUp, hweightDown],
+                                      )
+
+    topPtNames = ROOT.std.vector("string")()
+    topPtFormulasAllHadr = ROOT.std.vector("string")()
+    topPtFormulasSemiLep = ROOT.std.vector("string")()
+    topPtFormulasDiLep = ROOT.std.vector("string")()
+    print topPtNames
+    for name, scheme in topPtWeightSchemes.schemes.iteritems():
+        topPtNames.push_back(name)
+        topPtFormulasAllHadr.push_back(scheme.allhadronic)
+        topPtFormulasSemiLep.push_back(scheme.leptonjets)
+        topPtFormulasDiLep.push_back(scheme.dilepton)
+
+    ntupleCacheTTJets = dataset.NtupleCache("pileupNtuple/tree", "PileupWeightSelector",
+                                            selectorArgs=[hweight, hweightUp, hweightDown, topPtNames, topPtFormulasAllHadr, topPtFormulasSemiLep, topPtFormulasDiLep],
+                                            cacheFileName="histogramCacheTTJets.root"
+                                            )
+
+
     # loop over datasets
     myoutput = ""
     for multicrabDir in opts.multicrabdir:
@@ -56,39 +102,53 @@ def main(opts):
             rootFile = ROOT.TFile.Open(os.path.join(crabDir, "res", "histograms-%s.root"%taskName))
             if rootFile.IsZombie():
                 sys.exit()
-            # Get tree
-            mytree = rootFile.Get("pileupNtuple/tree")
+
+            # Create Dataset wrapper
+            dset = DatasetWrapper(taskName, rootFile, multicrabDir)
+
+            # Get tree for non-weighted number of events
+            mytree = dset.getTree("pileupNtuple/tree")
             if mytree == 0:
-                sys.exit()
+                raise Exception("Did not find 'pileupNtuple/tree' from %s" % rootFile.GetName())
             nevents = mytree.GetEntries()
-            print "Processing", taskName, "nevents =",nevents,"..."
-            # Set branch adress in tree
-            myleaf = mytree.GetLeaf("TrueNumInteractions")
-            if myleaf == 0:
-                sys.exit()
-            # Loop over tree
-            nevt = 0.0
-            nevtup = 0.0
-            nevtdown = 0.0
-            for i in range(1,nevents+1):
-                if i % 200 == 0:
-                    mybar = "\r["
-                    for j in range(0, int(float(i) / float(nevents) * 40.0)):
-                        mybar += "."
-                    for j in range(int(float(i) / float(nevents) * 40.0),40):
-                        mybar += " "
-                    sys.stdout.write(mybar+"]")
-                mytree.GetEntry(i)
-                nevt += getEventWeight(hmc, hdata, myleaf.GetValue())
-                nevtup += getEventWeight(hmc, hdataup, myleaf.GetValue())
-                nevtdown += getEventWeight(hmc, hdatadown, myleaf.GetValue())
-                #print nevt, nevtup, nevtdown
+
+            nc = ntupleCache
+            topPtWeighting = opts.doTopPt and "TTJets" in taskName
+            if topPtWeighting:
+                nc = ntupleCacheTTJets
+
+            # Process tree
+            nc.process(dset)
+
+            # Get results
+            def getResult(histo):
+                return nc.getRootHisto(dset, histo, None).GetBinContent(1)
+            nevt = getResult("events")
+            nevtup = getResult("eventsUp")
+            nevtdown = getResult("eventsDown")
+
             rootFile.Close()
-            sys.stdout.write(" Done\n")
             # Write output line
-            myline = "        "+'"'+taskName+'"'+": WeightedAllEvents(unweighted=%d, "%nevents+"weighted=%f, "%nevt+"up=%f, "%nevtup+"down=%f),\n"%nevtdown
+            if topPtWeighting:
+                taskPrefix = "        "+'"'+taskName+'"'+": WeightedAllEventsTopPt("
+                myline = taskPrefix+"unweighted = WeightedAllEvents(unweighted=%d, "%nevents+"weighted=%f, "%nevt+"up=%f, "%nevtup+"down=%f),\n"%nevtdown
+                for name in topPtWeightSchemes.schemes.iterkeys():
+                    def construct(prefix, histoPostfix, postfix):
+                        top_nevt = getResult("events_topPt%s_%s"%(histoPostfix, name))
+                        top_nevtup = getResult("eventsUp_topPt%s_%s"%(histoPostfix, name))
+                        top_nevtdown = getResult("eventsDown_topPt%s_%s"%(histoPostfix, name))
+                        return prefix + "=WeightedAllEvents(unweighted=%d, weighted=%f, up=%f, down=%f)" % (nevents, top_nevt, top_nevtup, top_nevtdown) + postfix + "\n"
+
+                    firstPrefix = " "*len(taskPrefix) + name + " = WeightedAllEventsTopPt.Weighted("
+                    myline += construct(firstPrefix+"weighted", "", ",")
+                    myline += construct(" "*len(firstPrefix)+"up", "Up", ",")
+                    myline += construct(" "*len(firstPrefix)+"down", "Down", "),")
+                myline += " "*len(taskPrefix)+"),\n"
+            else:
+                myline = "        "+'"'+taskName+'"'+": WeightedAllEvents(unweighted=%d, "%nevents+"weighted=%f, "%nevt+"up=%f, "%nevtup+"down=%f),\n"%nevtdown
             #print "\n"+myline
             myoutput += myline
+
     myresult = "_weightedAllEvents = {\n"
     myresult += "    "+'"'+"myera"+'"'+": {\n"
     myresult += myoutput
@@ -96,7 +156,7 @@ def main(opts):
     myresult += "}\n\n"
     print ""
     print myresult
-    print "Copy the above fragment to python/tools/dataset.py and replace 'myera' with appropriate label, e.g. 2011A\n"
+    print "Copy the above fragment to python/tools/pileupReweightedAllEvents.py and replace 'myera' with appropriate label, e.g. 2011A\n"
     print "Result was obtained with PU histograms:"
     print "  data:",opts.dataPU
     print "  dataup:",opts.dataPU.replace(".root","up.root")
@@ -117,6 +177,8 @@ if __name__ == "__main__":
     parser.add_option("--mcPU", dest="mcPU", action="store", type="string", help="root file containing PU spectrum for MC")
     parser.add_option("-o", "--output", dest="outname", action="store", type="string", default="outPU_cfi.py", help="name for output cfi.py fragment")
     parser.add_option("--mdir", dest="multicrabdir", action="append", help="name of multicrab dir (multiple directories can be specified with multiple --mdir arguments)")
+    parser.add_option("--noTopPt", dest="doTopPt", action="store_false", default=True,
+                      help="Do not do top pT reweighting for TTJets")
     (opts, args) = parser.parse_args()
     
     # Check that proper arguments were given

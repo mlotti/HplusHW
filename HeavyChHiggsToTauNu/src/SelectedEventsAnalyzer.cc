@@ -51,23 +51,26 @@ namespace HPlus {
 
   void SelectedEventsAnalyzer::fill(edm::PtrVector<pat::Tau>& selectedTau,
 				    const TauSelection::Data& tauData,
-				    const GlobalElectronVeto::Data& eVetoData,
-				    const GlobalMuonVeto::Data& muVetoData,
+				    const ElectronSelection::Data& eVetoData,
+				    const MuonSelection::Data& muVetoData,
 				    const JetSelection::Data& jetData,
 				    const BTagging::Data& btagData,
 				    const METSelection::Data& METData,
 				    const FakeMETVeto::Data& fakeMETVetoData,
 				    const ForwardJetVeto::Data& forwardVetoData,
 				    const double weight) {
+    // FIXME this method and class becomes obsolete with common plots
+
     // Tau related
-    hTauPtAfterAllSelections->Fill(selectedTau[0]->pt(), weight);
-    hTauEtaAfterAllSelections->Fill(selectedTau[0]->eta(), weight);
-    hTauPhiAfterAllSelections->Fill(selectedTau[0]->phi(), weight);
+    if (!tauData.passedEvent()) return;
+    hTauPtAfterAllSelections->Fill(tauData.getSelectedTau()->pt(), weight);
+    hTauEtaAfterAllSelections->Fill(tauData.getSelectedTau()->eta(), weight);
+    hTauPhiAfterAllSelections->Fill(tauData.getSelectedTau()->phi(), weight);
     if (tauData.getSelectedTaus().size()) {
-      hRTauAfterAllSelections->Fill(tauData.getRtauOfSelectedTau(), weight);
+      hRTauAfterAllSelections->Fill(tauData.getSelectedTauRtauValue(), weight);
     } else {
       // This should happen only when TauSelection is run with tau candidate selection only (or anti-isolation)
-      hRTauAfterAllSelections->Fill(tauData.getRtauOfSelectedTau(), weight);
+      hRTauAfterAllSelections->Fill(tauData.getSelectedTauRtauValue(), weight);
     }
     // Global e/mu veto
 
@@ -82,8 +85,8 @@ namespace HPlus {
     // Forward jets veto
 
     // Transverse mass
-    hDeltaPhiAfterAllSelections->Fill(fDeltaPhi.reconstruct(*(selectedTau[0]), *(METData.getSelectedMET()))*180.0/3.14159, weight);
-    hTransverseMassAfterAllSelections->Fill(fTransverseMass.reconstruct(*(selectedTau[0]), *(METData.getSelectedMET())), weight);
+    hDeltaPhiAfterAllSelections->Fill(fDeltaPhi.reconstruct(*(tauData.getSelectedTau()), *(METData.getSelectedMET()))*180.0/3.14159, weight);
+    hTransverseMassAfterAllSelections->Fill(fTransverseMass.reconstruct(*(tauData.getSelectedTau()), *(METData.getSelectedMET())), weight);
   }
 
 }

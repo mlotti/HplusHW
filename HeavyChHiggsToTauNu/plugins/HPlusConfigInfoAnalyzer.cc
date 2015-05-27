@@ -32,7 +32,10 @@ private:
   std::string dataVersion;
   std::string codeVersion;
   std::string era;
+  std::string topPtReweightScheme;
+  unsigned energy;
   double crossSection;
+  const bool isPileupReweighted;
   bool isData;
   bool hasCrossSection;
   bool hasIsData;
@@ -42,7 +45,10 @@ HPlusConfigInfoAnalyzer::HPlusConfigInfoAnalyzer(const edm::ParameterSet& pset):
   dataVersion(pset.getUntrackedParameter<std::string>("dataVersion", "")),
   codeVersion(pset.getUntrackedParameter<std::string>("codeVersion", "")),
   era(pset.getUntrackedParameter<std::string>("era", "")),
+  topPtReweightScheme(pset.getUntrackedParameter<std::string>("topPtReweightScheme", "")),
+  energy(pset.getUntrackedParameter<unsigned>("energy", 0)),
   crossSection(std::numeric_limits<double>::quiet_NaN()),
+  isPileupReweighted(pset.getUntrackedParameter<bool>("isPileupReweighted", false)),
   isData(false),
   hasCrossSection(false), hasIsData(false)
 {
@@ -67,12 +73,16 @@ void HPlusConfigInfoAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
 void HPlusConfigInfoAnalyzer::endJob() {
   edm::Service<TFileService> fs;
 
-  int nbins = 1+hasCrossSection+hasIsData;
+  int nbins = 3+hasCrossSection+hasIsData;
   TH1F *info = fs->make<TH1F>("configinfo", "configinfo", nbins, 0, nbins);
 
   int bin = 1;
   info->GetXaxis()->SetBinLabel(bin, "control");
   info->AddBinContent(bin, 1);
+  ++bin;
+
+  info->GetXaxis()->SetBinLabel(bin, "energy");
+  info->AddBinContent(bin, energy);
   ++bin;
 
   if(hasCrossSection) {
@@ -85,11 +95,16 @@ void HPlusConfigInfoAnalyzer::endJob() {
     info->AddBinContent(bin, isData);
     ++bin;
   }
+  info->GetXaxis()->SetBinLabel(bin, "isPileupReweighted");
+  info->AddBinContent(bin, isPileupReweighted);
+  ++bin;
 
-  TNamed *dv = fs->make<TNamed>("dataVersion", dataVersion.c_str());
-  TNamed *cv = fs->make<TNamed>("codeVersion", codeVersion.c_str());
+  fs->make<TNamed>("dataVersion", dataVersion.c_str());
+  fs->make<TNamed>("codeVersion", codeVersion.c_str());
   if(era.length() > 0)
-    TNamed *e = fs->make<TNamed>("era", era.c_str());
+    fs->make<TNamed>("era", era.c_str());
+  if(topPtReweightScheme.length() > 0)
+    fs->make<TNamed>("topPtReweightScheme", topPtReweightScheme.c_str());
 }
 
 //define this as a plug-in

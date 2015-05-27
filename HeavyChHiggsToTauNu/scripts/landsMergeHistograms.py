@@ -8,6 +8,7 @@ from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 
 def main(opts, args):
     # Merge the LandS root files
@@ -45,11 +46,7 @@ def main(opts, args):
     limitArgs = ""
     if opts.unblinded:
         limitArgs += " --unblinded"
-    try:
-        cmsswBase = os.environ["CMSSW_BASE"]
-    except KeyError:
-        raise Exception("Did you 'cmsenv'? I can't find $CMSSW_BASE environment variable")
-    script = os.path.join(cmsswBase, "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "test", "brlimit", "plotBRLimit.py")
+    script = os.path.join(aux.higgsAnalysisPath(), "HeavyChHiggsToTauNu", "test", "brlimit", "plotBRLimit.py")
     ret = subprocess.call([script,limitArgs])
     if ret != 0:
         raise Exception("plotBRLimit.py failed with exit code %d, command was\n%s" % (ret, script))

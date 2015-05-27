@@ -6,22 +6,48 @@ import imp
 from optparse import OptionParser
 import gc
 import cPickle
+import time
 import ROOT
+ROOT.gROOT.SetBatch(True) # no flashing canvases
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+import tarfile
+import cProfile
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector as analysisModuleSelector
 import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ShapeHistoModifier import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-def main(opts):
+def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
+    if enabledStatus:
+        if mcrabPath == "":
+            mcrabInfoOutput.append("- %s: not present"%(label))
+            print "- %s: not present"%(label)
+        else:
+            mcrabInfoOutput.append("- %s: multicrab dir found (%s)"%(label,mcrabPath))
+            print "- %s%s: multicrab dir found%s (%s)"%(HighlightStyle(),label,NormalStyle(),mcrabPath)
+            return dataset.readFromMulticrabCfg(directory=mcrabPath)
+    else:
+        mcrabInfoOutput.append("- %s: not considered"%(label))
+        print "- %s: not considered"%(label)
+    return None
+
+def main(opts, moduleSelector, multipleDirs):
+    print CaptionStyle()+"*** Datacard generator ***"+NormalStyle()+"\n"
     #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
     #gc.set_debug(gc.DEBUG_STATS)
     #ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
     #gc.set_debug(gc.DEBUG_STATS)
-    print "Loading datacard:", opts.datacard
+    print "Loading datacard:",opts.datacard
+    os.system("python %s"%opts.datacard) # Catch any errors in the input datacard
     config = load_module(opts.datacard)
+    # Replace source directory if necessary
+    if multipleDirs != None:
+        config.Path = multipleDirs
+    print "Input directory:",config.Path
 
     # If user insisted on certain QCD method on command line, produce datacards only for that QCD method
     # Otherwise produce cards for all QCD methods
@@ -31,113 +57,155 @@ def main(opts):
     elif opts.useQCDinverted:
         myQCDMethods = [DataCard.DatacardQCDMethod.INVERTED]
 
-    # Find list of optimisation jobs, if they exist
+    # Obtain dataset creators (also check multicrab directory existence)
+    print "\nChecking input multicrab directory presence:"
     multicrabPaths = PathFinder.MulticrabPathFinder(config.Path)
-    myModules = []
-    if config.SignalAnalysis != None:
-        myModules = obtainOptimisationVariationList(multicrabPaths.getSignalPath())
-    if config.QCDFactorisedAnalysis != None:
-        myQCDFactList = obtainOptimisationVariationList(multicrabPaths.getQCDFactorisedPath())
-        if len(myModules) == 0:
-            myModules.extend(myQCDFactList)
-    if config.QCDInvertedAnalysis != None:
-        myQCDInvList = obtainOptimisationVariationList(multicrabPaths.getQCDInvertedPath())
-        if len(myModules) == 0:
-            myModules.extend(myQCDInvList)
-    # Print module list, if asked
-    if opts.listVariations == True:
-        print "Available modules found (use -v to add by index number)"
-        for i in range(0,len(myModules)):
-            if myModules[i] == None:
-                print "  %d: (default module)"%i
-            else:
-                print "  %d: %s"%(i,myModules[i])
-        sys.exit()
+    mcrabInfoOutput = []
+    mcrabInfoOutput.append("Input directories:")
 
-    # Select variations from modules
-    myVariations = []
-    if opts.variationId != None:
-        for varid in opts.variationId:
-            if varid < len(myModules):
-                myVariations.append(myModules[varid])
-            else:
-                print "List of available variations:"
-                for i in range(0,len(myModules)):
-                    if myModules[i] == None:
-                        print "  %d: (default module)"%i
-                    else:
-                        print "  %d: %s"%(i,myModules[i])
-                    raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" you asked for variation %d, which is not available (see above list)!")
+    signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
+    embeddingDsetCreator = None
+    if not config.OptionGenuineTauBackgroundSource == "DataDriven":
+        mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
+        print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
     else:
-        myVariations.extend(myModules)
-    # Print info about selected variations
-    print CaptionStyle()+"*** Datacard generator ***"+NormalStyle()+"\n"
-    print "Cards will be generaged for following variations (use -v to add a variation by its index number)"
-    for v in myVariations:
-        if v == None:
-            print "  (default module)"
-        else:
-            print "  "+v
-    print "Altogether %d variations\n"%len(myVariations)
-    # Produce cards
-    myCounter = 0
-    for method in myQCDMethods:
-        for module in myVariations:
-            myCounter += 1
-            print "\n"+HighlightStyle()+"Variation %d/%d ..."%(myCounter,len(myVariations))+NormalStyle()+"\n"
-            if method == DataCard.DatacardQCDMethod.FACTORISED:
-                if module != None:
-                    if module not in myQCDFactList:
-                        print "Module '"+module+"' exists in signal analysis but not in QCD factorised, skipping ..."
-                        print myQCDFactList
-                    else:
-                        DataCard.DataCardGenerator(config,opts,method,module)
-                else:
-                    DataCard.DataCardGenerator(config,opts,method,None)
-            if method == DataCard.DatacardQCDMethod.INVERTED:
-                if module != None:
-                    if module not in myQCDInvList:
-                        print "Module '"+module+"' exists in signal analysis but not in QCD inverted, skipping ..."
-                    else:
-                        DataCard.DataCardGenerator(config,opts,method,module)
-                else:
-                    DataCard.DataCardGenerator(config,opts,method,None)
-    print "\nDatacard generator is done."
+        multicrabPaths.getEWKPath()
+        if multicrabPaths.getEWKPath() == "":
+            raise Exception(ErrorLabel()+"You asked for data driven EWK+tt with taus, but no corresponding multicrab was found!")
+        embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput)
+    qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
+    if qcdFactorisedDsetCreator == None and not opts.useQCDinverted:
+        myQCDMethods.remove(DataCard.DatacardQCDMethod.FACTORISED)
+    qcdInvertedDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
+    if qcdInvertedDsetCreator == None and not opts.useQCDfactorised:
+        myQCDMethods.remove(DataCard.DatacardQCDMethod.INVERTED)
 
+    # Require existence of signal analysis and one QCD measurement
+    if signalDsetCreator == None:
+        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Signal analysis multicrab directory not found!")
+    if len(myQCDMethods) == 0:
+        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" QCD measurement (factorised and/or inverted) not found!")
+
+    # Check options that are affecting the validity of the results
+    if not config.OptionIncludeSystematics:
+        print "\n%sWarning%s: skipping of shape systematics has been forced (flag OptionIncludeSystematics in the datacard file)"%(WarningStyle(),NormalStyle())
+    if not config.OptionDoControlPlots:
+        print "\n%sWarning%s: skipping of data driven control plot generation been forced (flag OptionDoControlPlots in the datacard file)"%(WarningStyle(),NormalStyle())
+
+    # Find list of available eras, search modes, and optimization modes common for all multicrab directories
+    moduleSelector.setPrimarySource("Signal analysis", signalDsetCreator)
+    if embeddingDsetCreator != None:
+        moduleSelector.addOtherSource("Embedding", embeddingDsetCreator)
+    if qcdFactorisedDsetCreator != None:
+        moduleSelector.addOtherSource("QCD factorised", qcdFactorisedDsetCreator)
+    if qcdInvertedDsetCreator != None:
+        moduleSelector.addOtherSource("QCD inverted", qcdInvertedDsetCreator)
+    moduleSelector.doSelect(opts)
+    moduleSelector.closeFiles()
+
+    # Separate light and heavy masses if they are not separated
+    mySearchModeList = moduleSelector.getSelectedSearchModes()
+    if ("Light" not in mySearchModeList and len(config.LightMassPoints) > 0 and len(config.HeavyMassPoints) > 0) or \
+       ("Heavy" not in mySearchModeList and len(config.HeavyMassPoints) > 0 and len(config.LightMassPoints) > 0):
+        mySearchModeList.append(mySearchModeList[0])
+
+    # Summarise the consequences of the user choises
+    myDatacardCount = len(moduleSelector.getSelectedEras())*len(moduleSelector.getSelectedSearchModes())*len(moduleSelector.getSelectedOptimizationModes())*len(myQCDMethods)
+    print "\nProducing %s%d sets of datacards%s (%d era(s) x %d search mode(s) x %d optimization mode(s) x %d QCD measurement(s))\n"%(HighlightStyle(),myDatacardCount,NormalStyle(),len(moduleSelector.getSelectedEras()),len(moduleSelector.getSelectedSearchModes()),len(moduleSelector.getSelectedOptimizationModes()),len(myQCDMethods))
+    # Produce datacards
+    myCounter = 0
+    myStartTime = time.time()
+    myOriginalName = config.DataCardName
+    myOutputDirectories = []
+    for qcdMethod in myQCDMethods:
+        for era in moduleSelector.getSelectedEras():
+            mySearchModeCounter = 0
+            for searchMode in mySearchModeList:
+                # Separate light and heavy mass points into their own subdirectories
+                if len(mySearchModeList) > 1:
+                    if mySearchModeList[0] == mySearchModeList[1]:
+                        if mySearchModeCounter == 0:
+                            config.MassPoints = config.LightMassPoints
+                            config.DataCardName = myOriginalName + "_LightHplus"
+                        elif mySearchModeCounter == 1:
+                            config.MassPoints = config.HeavyMassPoints
+                            config.DataCardName = myOriginalName + "_HeavyHplus"
+                mySearchModeCounter += 1
+                for optimizationMode in moduleSelector.getSelectedOptimizationModes():
+                    if hasattr(ROOT.gROOT, "CloseFiles"):
+                        ROOT.gROOT.CloseFiles()
+                    ROOT.gROOT.GetListOfCanvases().Delete()
+                    # After these, three histograms are still left in memory
+                    # Worst memory leak seems to come from storing and not freeing the main counters
+                    # Create the dataset creator managers separately for each module
+                    signalDsetCreator = getDsetCreator("Signal analysis", multicrabPaths.getSignalPath(), mcrabInfoOutput)
+                    embeddingDsetCreator = None
+                    if not config.OptionGenuineTauBackgroundSource == "DataDriven":
+                        mcrabInfoOutput.append("- Embedding: estimated from signal analysis MC")
+                        print "- %sWarning:%s Embedding: estimated from signal analysis MC"%(WarningStyle(),NormalStyle())
+                    else:
+                        embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput)
+                    myQCDDsetCreator = None
+                    if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
+                        myQCDDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
+                        if myQCDDsetCreator == None:
+                            raise Exception(ErrorLabel()+"Could not find factorised QCD pseudomulticrab!"+NormalStyle())
+                    elif qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
+                        myQCDDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
+                        if myQCDDsetCreator == None:
+                            raise Exception(ErrorLabel()+"Could not find inverted QCD pseudomulticrab!"+NormalStyle())
+                    # Print progress info
+                    myCounter += 1
+                    print "%sProducing datacard %d/%d ...%s\n"%(CaptionStyle(),myCounter,myDatacardCount,NormalStyle())
+                    # Create the generator, check config file contents
+                    dcgen = DataCard.DataCardGenerator(opts, config, qcdMethod)
+                    # Tweak to provide the correct datasetMgrCreator to the generator
+                    if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
+                        print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sfactorised%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
+                    elif qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
+                        print "era=%s%s%s, searchMode=%s%s%s, optimizationMode=%s%s%s, QCD method=%sinverted%s\n"%(HighlightStyle(),era,NormalStyle(),HighlightStyle(),searchMode,NormalStyle(),HighlightStyle(),optimizationMode,NormalStyle(),HighlightStyle(),NormalStyle())
+                    dcgen.setDsetMgrCreators(signalDsetCreator,embeddingDsetCreator,myQCDDsetCreator)
+                    # Do the heavy stuff
+                    myDir = dcgen.doDatacard(era,searchMode,optimizationMode,mcrabInfoOutput)
+                    myOutputDirectories.append(myDir)
+                    # Do tail fit for heavy H+ if asked
+                    if opts.dotailfit:
+                        myHeavyStatus = True
+                        for m in config.MassPoints:
+                            if m < 175:
+                                myHeavyStatus = False
+                        if myHeavyStatus:
+                            print "Doing tail fit ..."
+                            os.chdir(myDir)
+                            os.system("../tailFitter.py -x ../tailFitSettings.py")
+                            os.chdir("..")
+    print "\nDatacard generator is done."
+    myEndTime = time.time()
+    print "Running took on average %.1f s / datacard (total elapsed time: %.1f s)"%((myEndTime-myStartTime)/float(myDatacardCount), (myEndTime-myStartTime))
+    # Generate plots for systematics
+    if opts.systAnalysis:
+        for d in myOutputDirectories:
+            print "\nGenerating systematics plots for",d
+            os.chdir(d)
+            os.system("../../brlimit/plotShapes.py")
+            os.chdir("..")
+
+    # Make tar file
+    myTimestamp = time.strftime("%y%m%d_%H%M%S", time.gmtime(time.time()))
+    myLimitCode = None
+    if opts.lands:
+        myLimitCode = "lands"
+    elif opts.combine:
+        myLimitCode = "combine"
+    myFilename = "datacards_%s_archive_%s.tgz"%(myLimitCode,myTimestamp)
+    fTar = tarfile.open(myFilename, mode="w:gz")
+    for d in myOutputDirectories:
+        fTar.add(d)
+    fTar.close()
+    print "Created archive of results directories to: %s%s%s"%(HighlightStyle(),myFilename,NormalStyle())
     #gc.collect()
     #ROOT.SetMemoryPolicy( ROOT.kMemoryHeuristics)
     #memoryDump()
-
-def obtainOptimisationVariationList(taskPath):
-    if not os.path.exists(taskPath):
-        return []
-    taskDirs = multicrab.getTaskDirectories(None, taskPath+"/multicrab.cfg")
-    # take first task and obtain its result histogram
-    myRootFile = None
-    for task in taskDirs:
-        myFilename = task+"/res/histograms-"+os.path.basename(task)+".root"
-        if os.path.exists(myFilename):
-            myRootFile = ROOT.TFile.Open(myFilename)
-            # root file is opened, loop over keys to find directories
-            myModules = []
-            for i in range(0, myRootFile.GetNkeys()):
-                myKey = myRootFile.GetListOfKeys().At(i)
-                if myKey.IsFolder():
-                    # Ignore systematics directories
-                    myTitle = myKey.GetTitle()
-                    if not "Plus" in myTitle and not "Minus" in myTitle and not "configInfo" in myTitle:
-                        myName = myTitle
-                        if myTitle.find("Opt") > 0:
-                            # Remove prefix
-                            myName = myTitle[myTitle.find("Opt"):len(myTitle)]
-                        else:
-                            # Fall back to default
-                            myName = None
-                        myModules.append(myName)
-            myRootFile.Close()
-            return myModules
-    # No root file has been found
-    return []
 
 def memoryDump():
     dump = open("memory_pickle.txt", 'w')
@@ -150,51 +218,30 @@ def memoryDump():
             cls = str(obj.__class__)
             cPickle.dump({'id': i, 'class': cls, 'size': size, 'referents': referents}, dump)
 
-def testShapeHistogram():
-    print "Testing shape histogram modifying algorithm:"
-    # Create specification
-    ShapeHistogramsDimensions = { "bins": 6,
-                              "rangeMin": 0.0,
-                              "rangeMax": 400.0,
-                              "variableBinSizeLowEdges": [0.0,20.0,40.0,60.0,80.0,120.0], # if an empty list is given, then uniform bin width is used
-                              "xtitle": "Transverse mass / GeV",
-                              "ytitle": "Events" }
-    # Create source histogram
-    hSrc = ROOT.TH1F("hsrc","hsrc",40, 0.0, 400.0)
-    hSrc.Sumw2()
-    for i in range(0,45):
-        hSrc.Fill(i*10-.5,i)
-    print "Source:"
-    for k in range(0,hSrc.GetNbinsX()+2):
-        print "  src bin %d = %f +- %f"%(k,hSrc.GetBinContent(k),hSrc.GetBinError(k))
-    # Invoke shape histo class
-    myShapeHistoModifier = ShapeHistoModifier(histoSpecs=ShapeHistogramsDimensions,debugMode=True)
-    # Obtain empty histogram
-    h = myShapeHistoModifier.createEmptyShapeHistogram("hello")
-    # Add source
-    myShapeHistoModifier.addShape(source=hSrc,dest=h)
-    print "After adding source:"
-    for k in range(0,h.GetNbinsX()+2):
-        print "  dest bin %d = %f +- %f"%(k,h.GetBinContent(k),h.GetBinError(k))
-    myShapeHistoModifier.subtractShape(source=hSrc,dest=h)
-    myShapeHistoModifier.finaliseShape(dest=h)
-    print "After subtracting and finalising:"
-    for k in range(0,h.GetNbinsX()+2):
-        print "  dest bin %d = %f +- %f"%(k,h.GetBinContent(k),h.GetBinError(k))
-    sys.exit()
-
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]")
+    myModuleSelector = analysisModuleSelector.AnalysisModuleSelector() # Object for selecting data eras, search modes, and optimization modes
+
+    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
+    parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
-    parser.add_option("-l", "--listVariations", dest="listVariations", action="store_true", default=False, help="Print a list of available variations")
+    myModuleSelector.addParserOptions(parser)
+    parser.add_option("--lands", dest="lands", action="store_true", default=False, help="Generate datacards for LandS")
+    parser.add_option("--combine", dest="combine", action="store_true", default=False, help="Generate datacards for Combine")
+    parser.add_option("--multipleDirs", dest="multipleDirs", action="store", help="Name of base dir for creating datacards for multiple directories (wildcard is added at the end)")
+    parser.add_option("--systAnalysis", dest="systAnalysis", action="store_true", default=False, help="Runs the macro for generating systematic uncertainties plots")
+    parser.add_option("--testShapeSensitivity", dest="testShapeSensitivity", action="store_true", default=False, help="Creates datacards for varying each shape nuisance up and down by 1 sigma")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
+    parser.add_option("--tailfit", dest="dotailfit", action="store_true", default=False, help="Runs the tail fitter for heavy H+ after the cards are done")
     parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
     parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
+    parser.add_option("--debugDatasets", dest="debugDatasets", action="store_true", default=False, help="Enable debugging print for datasetMgr contents")
     parser.add_option("--debugConfig", dest="debugConfig", action="store_true", default=False, help="Enable debugging print for config parsing")
     parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
     parser.add_option("--debugQCD", dest="debugQCD", action="store_true", default=False, help="Enable debugging print for QCD measurement")
     parser.add_option("--debugShapeHistogram", dest="debugShapeHistogram", action="store_true", default=False, help="Debug shape histogram modifying algorithm")
-    parser.add_option("-v", "--variation", dest="variationId", type="int", action="append", help="Evaluates specified variations")
+    parser.add_option("--debugControlPlots", dest="debugControlPlots", action="store_true", default=False, help="Enable debugging print for data-driven control plots")
+    parser.add_option("--debugProfiler", dest="debugProfiler", action="store_true", default=False, help="Enable profiler")
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
     (opts, args) = parser.parse_args()
 
     myStatus = True
@@ -206,9 +253,29 @@ if __name__ == "__main__":
     if opts.useQCDfactorised and opts.useQCDinverted:
         print ErrorStyle()+"Error: use either '--QCDfactorised' or '--QCDinverted' (only one can exist in the datacard)"+NormalStyle()
         myStatus = False
-    if not myStatus:
+    if not opts.lands and not opts.combine:
+        print ErrorStyle()+"Error: use either '--lands' or '--combine' to indicate which type of cards to generate!"+NormalStyle()
+        myStatus = False
+    if opts.lands and opts.combine:
+        print ErrorStyle()+"Error: use either '--lands' or '--combine' to indicate which type of cards to generate (not both)!"+NormalStyle()
+        myStatus = False
+    if not myStatus or opts.helpStatus:
         parser.print_help()
         sys.exit()
     # Run main program
-    ROOT.gROOT.SetBatch() # no flashing canvases
-    main(opts)
+    if opts.multipleDirs == None:
+        if opts.debugProfiler:
+            cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
+        else:
+            main(opts, myModuleSelector, multipleDirs=None)
+        #cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
+    else:
+        # Find matching directories
+        (head, tail) = os.path.split(opts.multipleDirs)
+        myDirList = os.listdir(head)
+        for myDir in myDirList:
+            if myDir.startswith(tail):
+                if opts.debugProfiler:
+                    cProfile.run("main(opts, myModuleSelector, multipleDirs=os.path.join(head,myDir))")
+                else:
+                    main(opts, myModuleSelector, multipleDirs=os.path.join(head,myDir))

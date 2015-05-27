@@ -14,6 +14,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 # lumiCalc.py usage taken from
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
 
+dataVersion_re = re.compile("dataVersion=(?P<dataVersion>[^: ]+)")
 def isMCTask(taskdir):
     path = os.path.join(taskdir, "share", "crab.cfg")
     if not os.path.exists(path):
@@ -21,14 +22,18 @@ def isMCTask(taskdir):
         return True
 
     f = open(path)
-    mc = False
+    isData = False
     for line in f:
         if "pycfg_params" in line:
-            if "crossSection" in line:
-                mc = True
+            m = dataVersion_re.search(line)
+            if not m:
+                print "Unable to find dataVersion, assuming task %s is MC" % taskdir
+                return True
+            if "data" in m.group("dataVersion"):
+                isData = True
             break
     f.close()
-    return mc
+    return not isData
 
 def isEmpty(taskdir):
     path = os.path.join(taskdir, "res")
@@ -95,14 +100,16 @@ def main(opts, args):
     
     data = {}
     for task, jsonfile in files:
+        lumicalc = opts.lumicalc
+
         #print
         #print "================================================================================"
         #print "Dataset %s:" % d
-        if opts.lumicalc == "lumiCalc1":
+        if lumicalc == "lumiCalc1":
             cmd = ["lumiCalc.py", "-i", jsonfile, "--with-correction", "--nowarning", "overview", "-b", "stable"]
-        if opts.lumicalc == "lumiCalc2":
+        if lumicalc == "lumiCalc2":
             cmd = ["lumiCalc2.py", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
-        if opts.lumicalc == "pixelLumiCalc":
+        if lumicalc == "pixelLumiCalc":
             cmd = ["pixelLumiCalc.py", "-i", jsonfile, "--nowarning", "overview"]
         #cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-r", "132440", "--nowarning", "overview"]
         #ret = subprocess.call(cmd)
@@ -160,7 +167,7 @@ def main(opts, args):
     return 0
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]")
+    parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
     multicrab.addOptions(parser)
     parser.add_option("-f", dest="files", type="string", action="append", default=[],
                       help="JSON files to calculate the luminosity for (this or -d is required)")
@@ -173,13 +180,14 @@ if __name__ == "__main__":
     parser.add_option("--verbose", dest="verbose", action="store_true", default=False,
                       help="Print outputs of the commands which are executed")
     parser.add_option("--lumiCalc1", dest="lumicalc", action="store_const", const="lumiCalc1",
-                      help="Use lumiCalc.py instead of lumiCalc2.py (default is to use pixelLumiCalc.py")
+                      help="Use lumiCalc.py instead of lumiCalc2.py")
     parser.add_option("--lumiCalc2", dest="lumicalc", action="store_const", const="lumiCalc2",
                       help="Use lumiCalc2.py (default is to use pixelLumiCalc.py)")
     parser.add_option("--pixelLumiCalc", dest="lumicalc", action="store_const", const="pixelLumiCalc",
                       help="Use pixelLumiCalc.py instead of lumiCalc2.py (default)")
-    
     (opts, args) = parser.parse_args()
+    opts.dirs.extend(args)
+    
     if opts.lumicalc == None:
         opts.lumicalc = "pixelLumiCalc"
     print "Calculating luminosity with %s" % opts.lumicalc

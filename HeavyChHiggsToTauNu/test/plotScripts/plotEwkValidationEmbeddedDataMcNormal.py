@@ -21,9 +21,12 @@
 import os
 import array
 import math
+import copy
+from optparse import OptionParser
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -34,18 +37,162 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.cutstring import * # And, Not, Or
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tauEmbedding as tauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 
-analysisEmb = "signalAnalysisCaloMet60TEff"
-analysisSig = "signalAnalysisGenuineTau" # require that the selected tau is genuine, valid comparison after njets
+analysisEmb = "signalAnalysis"
+analysisSig = "signalAnalysisGenuineTauTriggered" # require that the selected tau is genuine, valid comparison after njets
+
+dataEra = "Run2012ABCD"
+
+class SystematicsSigMC:
+    def __init__(self):
+        self._systematics = dataset.Systematics(shapes=[
+            "SystVarL1ETMMC",
+            "SystVarTauTrgMC",
+            "SystVarJES",
+            "SystVarJER",
+            "SystVarMET",
+            "SystVarBTagSF",
+            "SystVarPUWeight",
+            "SystVarTopPtWeight",
+        ], additionalNormalizations = {
+            "LeptonVeto": systematics.getLeptonVetoUncertainty("Dummy").getUncertaintyMax(),
+            "Luminosity": systematics.getLuminosityUncertainty().getUncertaintyMax()
+        })
+        self._cache = {}
+
+    def histogram(self, dsetName, name):
+        if not dsetName in self._cache:
+            cl = self._systematics.clone()
+            cl.append(additionalNormalizations = {"CrossSection": systematics.getCrossSectionUncertainty(dsetName).getUncertaintyMax()})
+            self._cache[dsetName] = cl
+
+        return self._cache[dsetName].histogram(name)
+systematicsSigMC = SystematicsSigMC()
+
+systematicsEmbData = dataset.Systematics(shapes=[
+    "SystVarMuonIdDataEff",
+    "SystVarMuonTrgDataEff",
+    "SystVarWTauMu",
+    "SystVarEmbMTWeight",
+], additionalNormalizations = {
+    "CaloMETApproximation": 0.12,
+    "QCDContamination": 0.02,
+})
+
 
 plotStyles = styles.styles[0:2]
 plotStyles[0] = styles.StyleCompound([plotStyles[0], styles.StyleMarker(markerStyle=21, markerSize=1.2)])
 
 def main():
-    # Adjust paths such that this script can be run inside the first embedding trial directory
-    dirEmbs = ["."] + [os.path.join("..", d) for d in tauEmbedding.dirEmbs[1:]]
-    dirSig = "../"+tauEmbedding.dirSig
+    parser = OptionParser(usage="Usage: %prog [options]")
+    parser.add_option("--dirSig", dest="dirSig", default=None,
+                      help="Path to signalAnalysisGenTau multicrab directory")
 
+    (opts, args) = parser.parse_args()
+    if opts.dirSig is None:
+        parser.error("--dirSig missing")
+
+    dirEmb = "."
+    dirSig = opts.dirSig
+
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
+    #histograms.createLegend.setDefaults(y1=0.93, y2=0.75, x1=0.52, x2=0.93)
+#    histograms.createLegend.moveDefaults(dx=-0.1, dh=-0.2)
+#    histograms.createLegend.moveDefaults(dx=-0.15, dy=-0.01, dh=+0.05)
+#    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatOnly)
+    histograms.uncertaintyMode.set(histograms.uncertaintyMode.StatAndSyst)
+#    histograms.createLegendRatio.moveDefaults(dh=-0.1, dx=-0.53)
+#    histograms.createLegendRatio.moveDefaults(dx=-0.08)
+    histograms.createLegend.setDefaults(textSize=0.04)
+    histograms.createLegend.moveDefaults(dx=-0.25, dh=0.1)#, dh=-0.05) # QCD removed
+
+    histograms.createLegendRatio.setDefaults(ncolumns=2, textSize=0.08, columnSeparation=0.3)
+    histograms.createLegendRatio.moveDefaults(dx=-0.35, dh=-0.1, dw=0.25)
+
+#    plots._legendLabels["BackgroundStatError"] = "Norm. stat. unc."
+    plots._legendLabels["BackgroundStatError"] = "Sim. stat. unc" #"Norm. stat. unc."
+    plots._legendLabels["BackgroundStatSystError"] = "Sim. stat.#oplussyst. unc." # "Norm. stat.#oplussyst. unc."
+
+    plots._legendLabels["Data"] = "Embedded data"
+
+    for optMode in [
+#        "OptQCDTailKillerNoCuts",
+        "OptQCDTailKillerLoosePlus",
+#        "OptQCDTailKillerMediumPlus",
+#        "OptQCDTailKillerTightPlus",
+#            None
+    ]:
+        datasetsEmb = dataset.getDatasetsFromMulticrabCfg(directory=dirEmb, dataEra=dataEra, analysisName=analysisEmb, optimizationMode=optMode)
+        datasetsSig = dataset.getDatasetsFromMulticrabCfg(directory=dirSig, dataEra=dataEra, analysisName=analysisSig, optimizationMode=optMode)
+        doDataset(datasetsEmb, datasetsSig, optMode)
+        datasetsEmb.close()
+        datasetsSig.close()
+
+        tauEmbedding.writeToFile(optMode+"_embdatasigmc", "input.txt", "Embedded: %s\nSignal analysis (GenTau): %s\n" % (os.getcwd(), dirSig))
+
+
+def doDataset(datasetsEmb, datasetsSig, optMode):
+    datasetsSig.updateNAllEventsToPUWeighted()
+    datasetsEmb.updateNAllEventsToPUWeighted()
+
+    plots.mergeRenameReorderForDataMC(datasetsEmb)
+    plots.mergeRenameReorderForDataMC(datasetsSig)
+
+    plotter = tauEmbedding.CommonPlotter(optMode+"_embdatasigmc", "embdatasigmc", drawPlotCommon)
+    doPlots(datasetsEmb, datasetsSig, plotter, optMode)
+
+drawPlotCommon = plots.PlotDrawer(ylabel="Events / %.0f", stackMCHistograms=True, log=True, addMCUncertainty=True,
+                                  opts2={"ymin": 0, "ymax": 2},
+                                  ratio=True, ratioType="errorScale", ratioCreateLegend=True, ratioYlabel="Data/Sim.",
+                                  addLuminosityText=True)
+
+def doPlots(datasetsEmb, datasetsSig, plotter, optMode):
+    lumi = datasetsEmb.getDataset("Data").getLuminosity()
+
+    def createPlot(name):
+        drhData = datasetsEmb.getDataset("Data").getDatasetRootHisto(systematicsEmbData.histogram(name))
+        drhMCs = [d.getDatasetRootHisto(systematicsSigMC.histogram(d.getName(), name)) for d in datasetsSig.getMCDatasets()]
+
+        p = plots.DataMCPlot2([drhData]+drhMCs)
+        p.histoMgr.normalizeMCToLuminosity(lumi)
+        # by default pseudo-datasets lead to MC histograms, for these
+        # plots we want to treat Data as data
+        p.histoMgr.getHisto("Data").setIsDataMC(True, False)
+        p.setDefaultStyles()
+        return p
+
+    def addDataStatSyst(p):
+        dataStatSyst = p.histoMgr.getHisto("Data").getRootHistoWithUncertainties().getSystematicUncertaintyGraph(addStatistical=True)
+        for i in xrange(0, dataStatSyst.GetN()):
+            dataStatSyst.SetPointEXhigh(i, 0)
+            dataStatSyst.SetPointEXlow(i, 0)
+        p.appendPlotObject(histograms.HistoGraph(dataStatSyst, "DataStatSyst", legendStyle=None, drawStyle="[]"))
+    drawPlotCommon.setDefaults(customizeBeforeDraw=addDataStatSyst)
+
+    custom = {
+        "Njets_AfterStandardSelections": {"moveLegend": {"dx": 0.1, "dy": 0}},
+        "NBjets": {"moveLegend": {"dx": 0.1, "dy": 0}},
+        "MET": {"moveLegend": {"dx": 0.1, "dy": 0}},
+        "ImprovedDeltaPhiCutsBackToBackMinimum": {"moveLegend": {"dx": -0.3, "dy": -0.4}},
+        "Njets_AfterMtSelections": {"moveLegend": {"dx": -0.3, "dy": -0.3}},
+        "METAfterMtSelections": {"moveLegend": {"dx": 0.15, "dy": 0}},
+        "NBJetsAfterMtSelections": {"moveLegend": {"dx": 0.1}},
+        "BJetPtAfterMtSelections": {"moveLegend": {"dx": 0.1}},
+        "BtagDiscriminatorAfterMtSelections": {"moveLegend": {"dx": -0.3, "dy": 0}},
+        "ImprovedDeltaPhiCutsCollinearMinimumAfterMtSelections": {"moveLegend": {"dx": 0, "dy": 0}},
+        "shapeTransverseMass": {"moveLegend": {"dy": -0.12}},
+        "shapeTransverseMass_log": {"moveLegend": {"dy": -0.12}},
+    }
+
+    plotter.plot(None, createPlot, custom)
+
+
+######################################## OLD STUFF
+
+def oldstuff():
     # Create the dataset objects
     datasetsEmb = tauEmbedding.DatasetsMany(dirEmbs, analysisEmb+"Counters", normalizeMCByLuminosity=True)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=dirSig+"/multicrab.cfg", counters=analysisSig+"Counters")
@@ -88,7 +235,7 @@ def main():
     doPlots(datasetsEmbCorrected, datasetsSig, "EWKMC")
     doCounters(datasetsEmbCorrected, datasetsSig)
 
-def doPlots(datasetsEmb, datasetsSig, datasetName):
+def doPlotsOld(datasetsEmb, datasetsSig, datasetName):
     lumi = datasetsEmb.getLuminosity()
     isCorrected = isinstance(datasetsEmb, tauEmbedding.DatasetsResidual)
     postfix = "_residual"

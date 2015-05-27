@@ -46,15 +46,24 @@ namespace HPlus {
 
     void setPrescaleWeight(double w) { fPrescaleWeight = w; }
     void setPileupWeight(double w)   { fPileupWeight = w; }
-    void setTriggerWeight(double w, double au)  { fTriggerWeight = w; fTriggerWeightAbsUnc = au; }
+    void setWjetsWeight(double w)   { fWjetsWeight = w; }
+    void setTopPtWeight(double w)   { fTopPtWeight = w; }
+    void setEmbeddingGeneratorWeight(double w) { fEmbeddingGeneratorWeight = w; }
+    void setEmbeddingWTauMuWeight(double w) { fEmbeddingWTauMuWeight = w; }
+    void setTauFakeWeight(double w, double au)  { fTauFakeWeight = w; fTauFakeWeightAbsUnc = au; }
+    void setTauTriggerWeight(double w, double au)  { fTauTriggerWeight = w; fTauTriggerWeightAbsUnc = au; }
+    void setMETTriggerWeight(double w, double au)  { fMETTriggerWeight = w; fMETTriggerWeightAbsUnc = au; }
     void setFillWeight(double w)  { fFillWeight = w; }
-    void enableNonIsoLeptons(bool enableNonIsoLeptons)  { fillNonIsoLeptonVars = enableNonIsoLeptons; }
+    void enableNonIsoLeptons(bool enableNonIsoLeptons)  { fFillNonIsoLeptonVars = enableNonIsoLeptons; }
     void setNvertices(unsigned int n) { fNVertices = n; }
     void setBTagging(bool passed, double scaleFactor, double scaleFactorUnc) {
       fPassedBTagging = passed;
       fBTaggingWeight = scaleFactor;
       fBTaggingWeightAbsUnc = scaleFactorUnc;
     }
+    void setPassedTailKillerCollinear (bool passed) {bPassedTailKillerCollinearCuts  = passed;}
+    void setPassedTailKillerBackToBack(bool passed) {bPassedTailKillerBackToBackCuts = passed;}
+
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
     void setRawMET(const edm::Ptr<reco::MET>& met) {
@@ -62,6 +71,7 @@ namespace HPlus {
       fRawMetSumEt = met->sumEt();
       fRawMetSignificance = met->significance();
     }
+    void setSelectedMet(const edm::Ptr<reco::MET>& met) { fSelectedMet = met->p4(); }
     void setType1MET(const edm::Ptr<reco::MET>& met) { fType1Met = met->p4(); }
     void setType2MET(const edm::Ptr<reco::MET>& met) { fType2Met = met->p4(); }
     void setGenMET(const edm::Ptr<reco::GenMET>& met) { fGenMet = met->p4(); }
@@ -69,12 +79,51 @@ namespace HPlus {
     void setTcMET(const edm::Ptr<reco::MET>& met) { fTcMet = met->p4(); }
 
     void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
+    void setRadiusFromBackToBackCornerJet(double RadiusFromBackToBackCorner);
+    void setRadiusFromCollinearCornerJet(double RadiusFromCollinearCorner);
+    void setTailKillerYaxisIntercept(double TailKillerYaxisIntercept);
+
     void setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
-
+    
+    void setDiJetMassesNoTau(std::vector<float> DiJetMassesNoTau){     
+      // vDiJetMassesNoTau.clear();
+      vDiJetMassesNoTau = DiJetMassesNoTau;
+    }
     void setAlphaT(double alphaT) { fAlphaT = alphaT; }
-    void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
+    void setTauIsFake(bool tauIsFake) { bTauIsFake = tauIsFake; }
+    void setMomentumTensorEigenvalues(double QOne, double QTwo, double QThree) { 
+      fMomentumTensor_QOne   = QOne; 
+      fMomentumTensor_QTwo   = QTwo; 
+      fMomentumTensor_QThree = QThree; 
+    }
+    void setSpherocityTensorEigenvalues(double QOne, double QTwo, double QThree) { 
+      fSpherocityTensor_QOne   = QOne; 
+      fSpherocityTensor_QTwo   = QTwo; 
+      fSpherocityTensor_QThree = QThree; 
+    }
+    void setSphericity(double sphericity) { fSphericity = sphericity; }
+    void setAplanarity(double aplanarity) { fAplanarity = aplanarity; }
+    void setPlanarity(double planarity) { fPlanarity = planarity; }
+    void setCircularity(double circularity) { fCircularity = circularity; }
+    void setCparameter(double Cparameter) { fCparameter = Cparameter; }
+    void setDparameter(double Dparameter) { fDparameter = Dparameter; }
+    void setJetThrust(double jetThrust) { fJetThrust = jetThrust; }
+    void setDeltaPhi(double deltaPhi) { fFakeMETClosestDeltaPhi = deltaPhi; }
+    void setAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
+    void setSelJets(const edm::PtrVector<pat::Jet>& selJets);
+    void setSelJetsInclTau(const edm::PtrVector<pat::Jet>& selJetsInclTau);
+    void setMHT(const XYZTLorentzVector& MHT) { fMHT = MHT; }
+    void setMHTAllJets(const edm::PtrVector<pat::Jet>& allIdentifiedJets);
+    void setMHTSelJets(const edm::PtrVector<pat::Jet>& jets);
+    // Full H+ mass
+    void setHplusMassDiscriminant(double hplusMassDiscriminant) { fHplusMassDiscriminant = hplusMassDiscriminant; }
+    void setHplusMassHiggsMass(double higgsMassSolution) { fHplusMassSolution = higgsMassSolution; }
+    void setHplusMassTopMass(double hplusMassTopMassSolution) { fHplusMassTopMassSolution = hplusMassTopMassSolution; }
+    void setHplusMassSelectedNeutrinoPzSolution(double hplusMassSelectedNeutrinoPzSolution) { fHplusMassSelectedNeutrinoPzSolution = hplusMassSelectedNeutrinoPzSolution; }
+    void setHplusMassNeutrinoPtSolution(double hplusMassSelectedNeutrinoPtSolution) { fHplusMassSelectedNeutrinoPtSolution =  hplusMassSelectedNeutrinoPtSolution; }
+    void setHplusMassMCNeutrinoPz(double hplusMassMCNeutrinoPz) {  fHplusMassMCNeutrinoPz = hplusMassMCNeutrinoPz; }
 
-    void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
+    void fill(const edm::Event& iEvent, const edm::Ptr<pat::Tau>& tau,
               const edm::PtrVector<pat::Jet>& jets);
 
   private:
@@ -91,6 +140,7 @@ namespace HPlus {
     const bool fDoFill;
     const bool fTauEmbeddingInput;
     const bool fFillJetEnergyFractions;
+    bool fFillNonIsoLeptonVars;
 
     edm::InputTag fGenParticleSource;
     edm::InputTag fTauEmbeddingGenParticleOriginalSource;
@@ -100,13 +150,20 @@ namespace HPlus {
 
     TTree *fTree;
 
-    bool fillNonIsoLeptonVars;
     TreeEventBranches fEventBranches;
 
     double fPrescaleWeight;
     double fPileupWeight;
-    double fTriggerWeight;
-    double fTriggerWeightAbsUnc;
+    double fWjetsWeight;
+    double fTopPtWeight;
+    double fEmbeddingGeneratorWeight;
+    double fEmbeddingWTauMuWeight;
+    double fTauFakeWeight;
+    double fTauFakeWeightAbsUnc; // These are the relative uncertainties
+    double fTauTriggerWeight;
+    double fTauTriggerWeightAbsUnc;
+    double fMETTriggerWeight;
+    double fMETTriggerWeightAbsUnc;
     double fBTaggingWeight;
     double fBTaggingWeightAbsUnc;
     double fFillWeight;
@@ -127,6 +184,9 @@ namespace HPlus {
     int fTauDaughterPdgId;
 
     std::vector<XYZTLorentzVector> fJets;
+    std::vector<XYZTLorentzVector> fAllIdentifiedJets;
+    std::vector<XYZTLorentzVector> fSelJets;
+    std::vector<XYZTLorentzVector> fSelJetsInclTau;
     std::vector<double> fJetsBtags;
     std::vector<double> fJetsChf;
     std::vector<double> fJetsNhf;
@@ -206,8 +266,12 @@ namespace HPlus {
     
     // MET is really 2-vector, but let's just use this for consistency
     XYZTLorentzVector fRawMet;
+    XYZTLorentzVector fMHT;
+    XYZTLorentzVector fMHTSelJets;
+    XYZTLorentzVector fMHTAllJets;
     double fRawMetSumEt;
     double fRawMetSignificance;
+    XYZTLorentzVector fSelectedMet;
     XYZTLorentzVector fType1Met;
     XYZTLorentzVector fType2Met;
     XYZTLorentzVector fCaloMet;
@@ -216,13 +280,42 @@ namespace HPlus {
     XYZTLorentzVector fTop;
 
     double fAlphaT;
-
-    double fDeltaPhi;
+    double fMomentumTensor_QOne;
+    double fMomentumTensor_QTwo;
+    double fMomentumTensor_QThree;
+    double fSphericity;
+    double fAplanarity;
+    double fPlanarity;
+    double fCircularity;
+    double fSpherocityTensor_QOne;
+    double fSpherocityTensor_QTwo;
+    double fSpherocityTensor_QThree;
+    double fCparameter;
+    double fDparameter;
+    double fJetThrust;
+    bool bTauIsFake;
+    std::vector<float> vDiJetMassesNoTau;
+    double fFakeMETClosestDeltaPhi;
 
     bool fPassedBTagging;
 
+    // Tail Killer
+    bool bPassedTailKillerCollinearCuts;
+    bool bPassedTailKillerBackToBackCuts;
+    std::vector<double> fRadiusFromBackToBackCorner;
+    std::vector<double> fRadiusFromCollinearCorner;
+    std::vector<double> fTailKillerYaxisIntercept;
+
     // Gen level stuff
     XYZTLorentzVector fGenMet;
+
+    // Full H+ mass
+    double fHplusMassDiscriminant;
+    double fHplusMassSolution;
+    double fHplusMassTopMassSolution;
+    double fHplusMassSelectedNeutrinoPzSolution;
+    double fHplusMassSelectedNeutrinoPtSolution;
+    double fHplusMassMCNeutrinoPz;
 
     // Tau embedding stuff
     std::auto_ptr<TreeMuonBranches> fTauEmbeddingMuon;

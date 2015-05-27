@@ -2,21 +2,27 @@ import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
+import HiggsAnalysis.HeavyChHiggsToTauNu.Ntuple as Ntuple
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauLegTriggerEfficiency2012_cff as tauTriggerEfficiency
+import HiggsAnalysis.HeavyChHiggsToTauNu.metLegTriggerEfficiency2012_cff as metTriggerEfficiency
 
 PF2PATVersion = "" # empty for standard PAT
 #PF2PATVersion = "PFlow"
 #PF2PATVersion = "PFlowChs"
 
+skimProcessName = "MUONSKIM"
+
 def getAllPatMuons():
     if PF2PATVersion == "":
-        return "selectedPatMuons::MUONSKIM"
+        return "selectedPatMuons::"+skimProcessName
     else:
-        return "selectedPatMuons"+PF2PATVersion+"All::MUONSKIM" # We have to pick the ones of the original event
+        return "selectedPatMuons"+PF2PATVersion+"All::"+skimProcessName # We have to pick the ones of the original event
 tauEmbeddingMuons = "tauEmbeddingMuons"
 
 def getAllPatTaus():
     if PF2PATVersion == "":
-        return "patTausHpsPFTau"
+        return "patTaus"
     else:
         return "patTaus"+PF2PATVersion
 
@@ -26,7 +32,23 @@ jetSelection += "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFract
 jetSelection += "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
 jetSelection += "&& userFloat('Beta') > 0.2"
 
-def customiseParamForTauEmbedding(param, options, dataVersion):
+generatorTauPt = 40
+#generatorTauPt = 41
+generatorTauSelection = "abs(pdgId()) == 15 && pt() > %d && abs(eta()) < 2.1 && abs(mother().pdgId()) != 15"
+
+def customiseParamForTauEmbedding(process, param, options, dataVersion):
+    # Enable generator weight
+    param.embeddingGeneratorWeightReader.enabled = True
+
+    # Override TriggerResults process name for MET noise filters
+    param.metFilters.triggerResultsSrc.setProcessName(skimProcessName)
+
+    # Fix top-pt weighting
+    if hasattr(process, "initSubset"):
+        process.initSubset.src.setProcessName(dataVersion.getSimProcess())
+        process.decaySubset.src.setProcessName(dataVersion.getSimProcess())
+
+
     # Change the triggers to muon
     param.trigger.triggers = [
         "HLT_Mu9",
@@ -43,37 +65,52 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
         tauTrigger = "HLT_IsoPFTau35_Trk20_EPS"
 
     param.trigger.selectionType = "disabled"
-    param.triggerEfficiencyScaleFactor.mode = "disabled"
+    param.tauTriggerEfficiencyScaleFactor.mode = "disabled"
+    param.metTriggerEfficiencyScaleFactor.mode = "disabled"
+    # For data, we have "select" all run periods for tau+MET trigger efficiency
+    if dataVersion.isData():
+        param.tauTriggerEfficiencyScaleFactor.dataSelect = tauTriggerEfficiency.getRunsForEra("Run2012ABCD")
+        param.tauTriggerEfficiencyScaleFactor.mcSelect = "Summer12_PU_2012ABCD"
+        param.metTriggerEfficiencyScaleFactor.dataSelect = metTriggerEfficiency.getRunsForEra("Run2012ABCD")
+        param.metTriggerEfficiencyScaleFactor.mcSelect = "Summer12_PU_2012ABCD"
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets"+PF2PATVersion) # these are really AK5PF
+    param.MET.caloSrc = options.tauEmbeddingCaloMet
     #param.MET.rawSrc = "pfMet" # no PAT object at the moment
 
     # Use the muons where the original muon is removed in global muon veto
-    param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
-    param.GlobalElectronVeto.ElectronCollectionName.setProcessName("MUONSKIM")
+    param.MuonSelection.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
+    param.ElectronSelection.ElectronCollectionName.setProcessName(skimProcessName)
+    param.ElectronSelection.beamspotSrc.setProcessName(dataVersion.getRecoProcess())
+    param.ElectronSelection.conversionSrc.setProcessName(dataVersion.getRecoProcess())
 
     # Use the taus matched to the original muon in tau selections
     # Notice that only the version corresponding to PF2PATVersion is produced
     replacePostfix = "TauEmbeddingMuonMatched"
     def replaceTauSrc(mod):
-        mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TriggerMatched"+PF2PATVersion, replacePostfix))
+        #mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TriggerMatched"+PF2PATVersion, replacePostfix))
+        #mod.src.setModuleLabel(mod.src.getModuleLabel()+replacePostfix) # "TriggerMatched" postfix is no longer there for embedding input
+        mod.src.setModuleLabel("tauEmbeddingGenTauVisibleMatchTauMatched")
     param.forEachTauSelection(replaceTauSrc)
 
     # Set the analyzer
     param.tree.tauEmbeddingInput = cms.untracked.bool(True)
     param.tree.tauEmbedding = cms.untracked.PSet(
-        muonSrc = cms.InputTag(tauEmbeddingMuons),
-        muonFunctions = cms.PSet(),
+        muons = Ntuple.muons.clone(
+            src = tauEmbeddingMuons,
+        ),
         genParticleOriginalSrc = cms.InputTag("genParticles", "", dataVersion.getTriggerProcess()),
         metSrc = cms.InputTag("pfMet", "", dataVersion.getRecoProcess()),
         caloMetNoHFSrc = cms.InputTag("caloMetNoHFSum"),
         caloMetSrc = cms.InputTag("caloMetSum"),
     )
+    if dataVersion.isMC():
+        param.tree.tauEmbedding.genParticleOriginalSrc.setProcessName(dataVersion.getSimProcess())
     import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
     muonIsolations = ["trackIso", "caloIso", "pfChargedIso", "pfNeutralIso", "pfGammaIso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]
     for name in muonIsolations:
-        setattr(param.tree.tauEmbedding.muonFunctions, name, cms.string(muonAnalysis.isolations[name]))
+        setattr(param.tree.tauEmbedding.muons.functions, name, cms.string(muonAnalysis.isolations[name]))
     
 
 def setCaloMetSum(process, sequence, options, dataVersion):
@@ -364,7 +401,7 @@ def constructMuonIsolationOnTheFly(inputMuons, embedPrefix="ontheflyiso_"):
     )
     return module
 
-def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonFinalSelection"):
+def addFinalMuonSelection(process, sequence, param, enableIsolation=True, tightenMuonPt=True, prefix="muonFinalSelection"):
     counters = []
 
     cname = prefix+"AllEvents"
@@ -397,11 +434,37 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
 #        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
         import muonAnalysis
         counters.extend(addMuonIsolation(process, sequence, prefix+"Isolation", isoExpr))
+    if tightenMuonPt:
+        counters.extend(addMuonPt(process, sequence, prefix+"MuonPtTighten"))
     counters.extend(addMuonVeto(process, sequence, param, prefix+"MuonVeto"))
     counters.extend(addElectronVeto(process, sequence, param, prefix+"ElectronVeto"))
     counters.extend(addMuonJetSelection(process, sequence, prefix+"JetSelection"))
 
     return counters
+
+def addMuonPt(process, sequence, prefix):
+    selector = prefix+"Muons"
+    filter = prefix+"Filter"
+    counter = prefix
+
+    global tauEmbeddingMuons
+    m1 = cms.EDFilter("PATMuonSelector",
+        src = cms.InputTag(tauEmbeddingMuons),
+        cut = cms.string("pt() > 41"),
+    )
+    m2 = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag(selector),
+        minNumber = cms.uint32(1),
+    )
+    m3 = cms.EDProducer("EventCountProducer")
+    tauEmbeddingMuons = selector
+
+    setattr(process, selector, m1)
+    setattr(process, filter, m2)
+    setattr(process, counter, m3)
+    sequence *= (m1 * m2 * m3)
+
+    return [counter]
 
 def addMuonRelativeIsolation(process, sequence, prefix="muonSelectionIsolation", cut=0.1):
     return addMuonIsolation(process, sequence, prefix, "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < %f" % cut)
@@ -411,33 +474,44 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
     filter = prefix+"Filter"
     counter = prefix
 
-    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
-    m1 = cleanPatJets.clone(
-        src = "selectedPatJets"+PF2PATVersion, # FIXME: should use the smeared collection for MC
-        preselection = cms.string(jetSelection),
-        checkOverlaps = cms.PSet(
-            muons = cms.PSet(
-                src                 = cms.InputTag(tauEmbeddingMuons),
-                algorithm           = cms.string("byDeltaR"),
-                preselection        = cms.string(""),
-                deltaR              = cms.double(0.1),
-                checkRecoComponents = cms.bool(False),
-                pairCut             = cms.string(""),
-                requireNoOverlaps   = cms.bool(True),
-            )
-        )
+    # from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
+    # m1 = cleanPatJets.clone(
+    #     src = "selectedPatJets"+PF2PATVersion, # FIXME: should use the smeared collection for MC
+    #     preselection = cms.string(jetSelection),
+    #     checkOverlaps = cms.PSet(
+    #         muons = cms.PSet(
+    #             src                 = cms.InputTag(tauEmbeddingMuons),
+    #             algorithm           = cms.string("byDeltaR"),
+    #             preselection        = cms.string(""),
+    #             deltaR              = cms.double(0.1),
+    #             checkRecoComponents = cms.bool(False),
+    #             pairCut             = cms.string(""),
+    #             requireNoOverlaps   = cms.bool(True),
+    #         )
+    #     )
+    # )
+    # m1.src.setProcessName(skimProcessName)
+    # m2 = cms.EDFilter("CandViewCountFilter",
+    #     src = cms.InputTag(selector),
+    #     minNumber = cms.uint32(3)
+    # )
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChJetFilter_cfi as jetFilter_cfi
+    m2 = jetFilter_cfi.hPlusJetPtrSelectorFilter.clone(
+        tauSrc = tauEmbeddingMuons,
+        histogramAmbientLevel = "Systematics",
     )
-    m2 = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag(selector),
-        minNumber = cms.uint32(3)
-    )
+    m2.eventCounter.enabled = cms.untracked.bool(False)
+    m2.jetSelection.src.setProcessName(skimProcessName) # FIXME: use smeared collection for MC
+    m2.jetSelection.jetPileUpMVAValues.setProcessName(skimProcessName)
+    m2.jetSelection.jetPileUpIdFlag.setProcessName(skimProcessName)
     m3 = cms.EDProducer("EventCountProducer")
 
-    setattr(process, selector, m1)
+    #setattr(process, selector, m1)
     setattr(process, filter, m2)
     setattr(process, counter, m3)
 
-    sequence *= (m1 * m2 * m3)
+    #sequence *= (m1 * m2 * m3)
+    sequence *= (m2 * m3)
 
     return [counter]
 
@@ -448,9 +522,11 @@ def addMuonVeto(process, sequence, param, prefix="muonSelectionMuonVeto"):
 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as muonVetoFilter_cfi
     m1 = muonVetoFilter_cfi.hPlusGlobalMuonVetoFilter.clone(
-        vertexSrc = "firstPrimaryVertex"
+        vertexSrc = "firstPrimaryVertex",
+        histogramAmbientLevel = "Systematics"
     )
-    m1.GlobalMuonVeto.MuonCollectionName = "selectedPatMuonsEmbeddingMuonCleaned"
+    m1.eventCounter.enabled = cms.untracked.bool(False)
+    m1.MuonSelection.MuonCollectionName = "selectedPatMuonsEmbeddingMuonCleaned"
     m2 = cms.EDProducer("EventCountProducer")
 
     setattr(process, filter, m1)
@@ -465,7 +541,11 @@ def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"
     counter = prefix
 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as electronVetoFilter_cfi
-    m1 = electronVetoFilter_cfi.hPlusGlobalElectronVetoFilter.clone()
+    m1 = electronVetoFilter_cfi.hPlusGlobalElectronVetoFilter.clone(
+        histogramAmbientLevel = "Systematics"
+    )
+    m1.eventCounter.enabled = cms.untracked.bool(False)
+    m1.vertexSrc = m1.vertexSrc.value()+"Original"
     m2 = cms.EDProducer("EventCountProducer")
 
     setattr(process, filter, m1)
@@ -520,7 +600,7 @@ def addMuonTauIsolation(process, postfix="", discriminator="byTightIsolation"):
 
     muons = cms.EDProducer("HPlusTauIsolationPATMuonRefSelector",
         candSrc = cms.InputTag(tauEmbeddingMuons),
-        tauSrc = cms.InputTag("patTausHpsPFTau", "", "MUONSKIM"),
+        tauSrc = cms.InputTag("patTausHpsPFTau", "", skimProcessName),
         isolationDiscriminator = cms.string(discriminator),
         againstMuonDiscriminator = cms.string("againstMuonLoose"),
         deltaR = cms.double(0.15),
@@ -719,6 +799,35 @@ def addTauEmbeddingMuonTaus(process):
 
     return seq
 
+def addTauEmbeddingMuonTausUsingVisible(process, prefix = "tauEmbeddingGenTauVisibleMatch"):
+    seq = cms.Sequence()
+
+    m = cms.EDFilter("GenParticleSelector",
+        src = cms.InputTag("genParticles", "", "EMBEDDING"),
+        cut = cms.string(generatorTauSelection % generatorTauPt)
+    )
+    genTausName = prefix+"GenTaus"
+    setattr(process, genTausName, m)
+    seq *= m
+
+    m = cms.EDProducer("HPlusGenVisibleTauComputer",
+        src = cms.InputTag(genTausName)
+    )
+    visibleName = prefix+"GenTausVisible"
+    setattr(process, visibleName, m)
+    seq *= m
+
+    m = cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
+#        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
+#        src = cms.InputTag("selectedPatTausHpsPFTau", "", "EMBEDDING"), # 2011
+        src = cms.InputTag("selectedPatTaus", "", "EMBEDDING"),
+        refSrc = cms.InputTag(visibleName),
+        maxDeltaR = cms.double(0.5),
+    )
+    setattr(process, prefix+"TauMatched", m)
+    seq *= m
+
+    return seq
 
 def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="generatorTaus"):
     counters = []
@@ -755,7 +864,7 @@ def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="g
     if filterInaccessible:
         genTausAccessible =  cms.EDFilter("GenParticleSelector",
             src = cms.InputTag("genParticles"),
-            cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
+            cut = cms.string(generatorTauSelection % generatorTauPt)
         )
         name = prefix+"Accessible"
         setattr(process, genTausAccessible, name)
@@ -782,7 +891,7 @@ def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="g
 
     return counters
 
-def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPreselection", pileupWeight=None):
+def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPreselection", pileupWeight=None, maxGenTaus=None):
     counters = []
 
     genTauSequence = cms.Sequence()
@@ -790,6 +899,7 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
     if pileupWeight == None:
         puModule = cms.EDProducer("HPlusVertexWeightProducer",
             alias = cms.string("pileupWeight"),
+            histogramAmbientLevel = cms.untracked.string("Systematics")
         )
         HChTools.insertPSetContentsTo(param.vertexWeight.clone(), puModule)
         pileupWeight = prefix+"PileupWeight"
@@ -807,15 +917,22 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
     # Generator taus (if you modify this, remember to modify similar in below)
     genTaus = cms.EDFilter("GenParticleSelector",
         src = cms.InputTag("genParticles"),
-        cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
+        cut = cms.string(generatorTauSelection % generatorTauPt)
     )
     genTausName = prefix+"GenTau"
     setattr(process, genTausName, genTaus)
 
-    genTausFilter = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag(genTausName),
-        minNumber = cms.uint32(1),
-    )
+    if maxGenTaus is not None:
+        genTausFilter = cms.EDFilter("PATCandViewCountFilter",
+            src = cms.InputTag(genTausName),
+            minNumber = cms.uint32(1),
+            maxNumber = cms.uint32(maxGenTaus),
+        )
+    else:
+        genTausFilter = cms.EDFilter("CandViewCountFilter",
+            src = cms.InputTag(genTausName),
+            minNumber = cms.uint32(1),
+        )
     setattr(process, prefix+"GenTauFilter", genTausFilter)
 
     genTausCount = counterPrototype.clone()
@@ -831,7 +948,7 @@ def addGenuineTauPreselection(process, sequence, param, prefix="genuineTauPresel
 
     return counters
 
-def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection", disableTrigger=True, pileupWeight=None):
+def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection", disableTrigger=True, pileupWeight=None, selectOnlyFirstGenTau=False, maxGenTaus=None):
     counters = []
 
     genTauSequence = cms.Sequence()
@@ -839,6 +956,7 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     if pileupWeight == None:
         puModule = cms.EDProducer("HPlusVertexWeightProducer",
             alias = cms.string("pileupWeight"),
+            histogramAmbientLevel = cms.untracked.string("Systematics")
         )
         HChTools.insertPSetContentsTo(param.vertexWeight.clone(), puModule)
         pileupWeight = prefix+"PileupWeight"
@@ -852,10 +970,12 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     # Disable trigger
     if disableTrigger:
         param.trigger.selectionType = "disabled"
-        param.triggerEfficiencyScaleFactor.mode = "disabled"
+        param.tauTriggerEfficiencyScaleFactor.mode = "disabled"
+        param.metTriggerEfficiencyScaleFactor.mode = "disabled"
 
     allCount = counterPrototype.clone()
     setattr(process, prefix+"AllCount", allCount)
+    genTauSequence *= allCount
     counters.append(prefix+"AllCount")
 
     # Primary vertex
@@ -867,47 +987,108 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     pvFilterCount = counterPrototype.clone()
     setattr(process, prefix+"PrimaryVertex", pvFilter)
     setattr(process, prefix+"PrimaryVertexCount", pvFilterCount)
+    genTauSequence *= (pvFilter * pvFilterCount)
     counters.append(prefix+"PrimaryVertexCount")
 
     # Generator taus (if you modify this, remember to modify similar in above)
     genTaus = cms.EDFilter("GenParticleSelector",
         src = cms.InputTag("genParticles"),
-        cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
+        cut = cms.string(generatorTauSelection % generatorTauPt)
     )
     genTausName = prefix+"GenTau"
     setattr(process, genTausName, genTaus)
+    genTauSequence *= genTaus
 
-    genTausFilter = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag(genTausName),
-        minNumber = cms.uint32(1),
-    )
+    if maxGenTaus is not None:
+        genTausFilter = cms.EDFilter("PATCandViewCountFilter",
+            src = cms.InputTag(genTausName),
+            minNumber = cms.uint32(1),
+            maxNumber = cms.uint32(maxGenTaus),
+        )
+    else:
+        genTausFilter = cms.EDFilter("CandViewCountFilter",
+            src = cms.InputTag(genTausName),
+            minNumber = cms.uint32(1),
+        )
     setattr(process, prefix+"GenTauFilter", genTausFilter)
+    genTauSequence *= genTausFilter
 
     genTausCount = counterPrototype.clone()
     setattr(process, prefix+"GenTauCount", genTausCount)
+    genTauSequence *= genTausCount
     counters.append(prefix+"GenTauCount")
 
-    # Select first generator tau for the jet cleaning and tau selection
-    genTauFirst = cms.EDProducer("HPlusFirstCandidateSelector",
+    # Select first generator tau for e/mu veto, and if the flag is
+    # true, also for the jet cleaning and tau selection
+    genTauFirst = cms.EDProducer("HPlusFirstGenParticleSelector",
         src = cms.InputTag(genTausName)
     )
-    genTauFirstName = prefix+"First"
+    genTauFirstName = prefix+"GenTauFirst"
     setattr(process, genTauFirstName, genTauFirst)
+    genTauSequence *= genTauFirst
+    if selectOnlyFirstGenTau:
+         genTausName = genTauFirstName
 
-    # Tau selection
-    genTauReco = cms.EDProducer("HPlusPATTauCandViewDeltaRSelector",
-        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
-        refSrc = cms.InputTag(genTauFirstName),
-        deltaR = cms.double(0.5),
+    genTausVisible = cms.EDProducer("HPlusGenVisibleTauComputer",
+        src = cms.InputTag(genTausName)
     )
+    genTausVisibleName = prefix+"GenTauVisible"
+    setattr(process, genTausVisibleName, genTausVisible)
+    genTauSequence *= genTausVisible
+
+    genTauFirstVisible = cms.EDProducer("HPlusGenVisibleTauComputer",
+        src = cms.InputTag(genTauFirstName)
+    )
+    genTauFirstVisibleName = prefix+"GenTauFirstVisible"
+    setattr(process, genTauFirstVisibleName, genTauFirstVisible)
+    genTauSequence *= genTauFirstVisible
+    
+    # Tau selection
+    # genTauReco = cms.EDProducer("HPlusPATTauCandViewClosestDeltaRSelector",
+    #     src = cms.InputTag("selectedPatTausHpsPFTau"),
+    #     refSrc = cms.InputTag(genTausName),
+    #     maxDeltaR = cms.double(0.5),
+    # )
+    genTauReco = cms.EDProducer("HPlusPATTauLorentzVectorViewClosestDeltaRSelector",
+#        src = cms.InputTag("selectedPatTaus"+PF2PATVersion), # not trigger matched
+#        src = cms.InputTag("selectedPatTausHpsPFTau"), # 2011
+        src = cms.InputTag("selectedPatTaus"),
+        refSrc = cms.InputTag(genTausVisibleName),
+        maxDeltaR = cms.double(0.5),
+    )
+
+#     if PF2PATVersion != "":
+#         raise Exception("I don't support PF2PAT at the moment")
     if not disableTrigger:
         genTauReco.src = param.tauSelection.src.value()
-    genTauRecoName = prefix+"Reco"
+    genTauRecoName = prefix+"TauMCMatched"
     setattr(process, genTauRecoName, genTauReco)
+    genTauSequence *= genTauReco
     param.tauSelection.src = genTauRecoName
 
+    genTauFirstReco = genTauReco.clone(
+        refSrc = genTauFirstVisibleName
+    )
+    genTauFirstRecoName = prefix+"FirstTauMCMatched"
+    setattr(process, genTauFirstRecoName, genTauFirstReco)
+    genTauSequence *= genTauFirstReco
+
+    if not selectOnlyFirstGenTau:
+        # Select the tau candidate which is most likely going to pass the identification
+        genTauSelected = cms.EDProducer("HPlusPATTauMostLikelyIdentifiedSelector",
+            eventCounter = param.eventCounter.clone(enabled = cms.untracked.bool(False)),
+            tauSelection = param.tauSelection.clone(),
+            vertexSrc = cms.InputTag(param.primaryVertexSelection.selectedSrc.value()),
+            histogramAmbientLevel = cms.untracked.string("Systematics"),
+        )
+        genTauSelectedName = prefix+"TauSelected"
+        setattr(process, genTauSelectedName, genTauSelected)
+        genTauSequence *= genTauSelected
+        param.tauSelection.src = genTauSelectedName
+    
     genTauCleanPSet = cms.PSet(
-        src                 = cms.InputTag(genTauFirstName),
+#        src                 = cms.InputTag(param.tauSelection.src.value()),
+        src                 = cms.InputTag(genTauFirstRecoName),
         algorithm           = cms.string("byDeltaR"),
         preselection        = cms.string(""),
         deltaR              = cms.double(0.5),
@@ -922,67 +1103,82 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     from PhysicsTools.PatAlgos.cleaningLayer1.electronCleaner_cfi import cleanPatElectrons
     from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
     cleanedElectrons = cleanPatElectrons.clone(
-        src = cms.InputTag(param.GlobalElectronVeto.ElectronCollectionName.value()),
+        src = cms.InputTag(param.ElectronSelection.ElectronCollectionName.value()),
         checkOverlaps = cms.PSet(
             genTaus = genTauCleanPSet.clone()
         )
     )
     cleanedElectronsName = prefix+"CleanedElectrons"
-    param.GlobalElectronVeto.ElectronCollectionName = cleanedElectronsName
+    param.ElectronSelection.ElectronCollectionName = cleanedElectronsName
     setattr(process, cleanedElectronsName, cleanedElectrons)
     cleanedMuons = cleanPatMuons.clone(
-        src = cms.InputTag(param.GlobalMuonVeto.MuonCollectionName.value()),
+        src = cms.InputTag(param.MuonSelection.MuonCollectionName.value()),
         checkOverlaps = cms.PSet(
             genTaus = genTauCleanPSet.clone()
         )
     )
     cleanedMuonsName = prefix+"CleanedMuons"
-    param.GlobalMuonVeto.MuonCollectionName = cleanedMuonsName
+    param.MuonSelection.MuonCollectionName = cleanedMuonsName
     setattr(process, cleanedMuonsName, cleanedMuons)
+    genTauSequence *= (cleanedElectrons * cleanedMuons)
 
     # Electron and muon veto
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as ElectronVeto
-    eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone()
+    eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone(
+        histogramAmbientLevel = "Systematics"
+    )
+    eveto.eventCounter.enabled = cms.untracked.bool(False)
     evetoCount = counterPrototype.clone()
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as MuonVeto
-    muveto = MuonVeto.hPlusGlobalMuonVetoFilter.clone() 
+    muveto = MuonVeto.hPlusGlobalMuonVetoFilter.clone(
+        histogramAmbientLevel = "Systematics"
+    )
+    muveto.eventCounter.enabled = cms.untracked.bool(False)
     muvetoCount = counterPrototype.clone()
     setattr(process, prefix+"ElectronVeto", eveto)
     setattr(process, prefix+"ElectronVetoCount", evetoCount)
     setattr(process, prefix+"MuonVeto", muveto)
     setattr(process, prefix+"MuonVetoCount", muvetoCount)
     counters.extend([prefix+"ElectronVetoCount", prefix+"MuonVetoCount"])
+    genTauSequence *= (
+        eveto * evetoCount *
+        muveto * muvetoCount
+    )
 
     # 3 jets
-    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
-    cleanedJets = cleanPatJets.clone(
-        src = cms.InputTag(param.jetSelection.src.value()),
-        preselection = cms.string(jetSelection),
-        checkOverlaps = cms.PSet(
-            genTaus = genTauCleanPSet.clone()
-        )
+    # from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
+    # cleanedJets = cleanPatJets.clone(
+    #     src = cms.InputTag(param.jetSelection.src.value()),
+    #     preselection = cms.string(jetSelection),
+    #     checkOverlaps = cms.PSet(
+    #         genTaus = genTauCleanPSet.clone()
+    #     )
+    # )
+    # cleanedJetsName = prefix+"CleanedJets"
+    # setattr(process, cleanedJetsName, cleanedJets)
+
+    # cleanedJetsFilter = cms.EDFilter("CandViewCountFilter",
+    #     src = cms.InputTag(cleanedJetsName),
+    #     minNumber = cms.uint32(3)
+    # )
+    # setattr(process, cleanedJetsName+"Filter", cleanedJetsFilter)
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChJetFilter_cfi as jetFilter_cfi
+    cleanedJets = jetFilter_cfi.hPlusJetPtrSelectorFilter.clone(
+        tauSrc = param.tauSelection.src.value(),
+        allowEmptyTau = True,
+        histogramAmbientLevel = "Systematics",
     )
+    cleanedJets.eventCounter.enabled = cms.untracked.bool(False)
     cleanedJetsName = prefix+"CleanedJets"
     setattr(process, cleanedJetsName, cleanedJets)
-
-    cleanedJetsFilter = cms.EDFilter("CandViewCountFilter",
-        src = cms.InputTag(cleanedJetsName),
-        minNumber = cms.uint32(3)
-    )
-    setattr(process, cleanedJetsName+"Filter", cleanedJetsFilter)
 
     cleanedJetsCount = counterPrototype.clone()
     setattr(process, cleanedJetsName+"Count", cleanedJetsCount)
     counters.append(cleanedJetsName+"Count")
 
     genTauSequence *= (
-        allCount *
-        pvFilter * pvFilterCount *
-        genTaus * genTausFilter * genTausCount * genTauFirst * genTauReco *
-        cleanedElectrons * cleanedMuons *
-        eveto * evetoCount *
-        muveto * muvetoCount *
-        cleanedJets * cleanedJetsFilter * cleanedJetsCount 
+        cleanedJets * #cleanedJetsFilter *
+        cleanedJetsCount 
     )
     setattr(process, prefix+"Sequence", genTauSequence)
     sequence *= genTauSequence

@@ -7,32 +7,83 @@ import os, sys
 import glob
 import array
 import math
+import copy
+import inspect
 
 from optparse import OptionParser
 
 import ROOT
 
 import dataset
+import aux
 
 ## Enumeration class for CMS text mode
 class CMSMode:
-    NONE = 0
-    PRELIMINARY = 1
-    PAPER = 2
-    SIMULATION = 3
+    class NONE: pass
+    class PRELIMINARY: pass
+    class PAPER: pass
+    class UNPUBLISHED: pass
+    class SIMULATION: pass
+    class SIMULATION_PRELIMINARY: pass
+    class SIMULATION_UNPUBLISHED: pass
+
 
 ## Global variable to hold CMS text mode
 cmsTextMode = CMSMode.PRELIMINARY
 ## Global dictionary to hold the CMS text labels
 cmsText = {
-    CMSMode.NONE: "",
-    CMSMode.PRELIMINARY: "CMS Preliminary",
-    CMSMode.PAPER: "CMS",
-    CMSMode.SIMULATION : "CMS Simulation"
+    CMSMode.NONE: None,
+    CMSMode.PRELIMINARY: "Preliminary",
+    CMSMode.PAPER: "",
+    CMSMode.UNPUBLISHED: "Unpublished",
+    CMSMode.SIMULATION : "Simulation",
+    CMSMode.SIMULATION_PRELIMINARY : "Preliminary simulation",
+    CMSMode.SIMULATION_UNPUBLISHED: "Simulation unpublished",
     }
 
+## Global uncertainty mode
+#
+# Python treats classes as singletons, slitghly more safe than
+# hand-made enumeration
+class Uncertainty:
+    ## Statistical uncertainties only
+    class StatOnly:
+        pass
+    ## Systematic uncertainties only
+    class SystOnly:
+        pass
+    ## Stat+syst uncertainty only
+    class StatPlusSyst:
+        pass
+    # Stat and stat+syst uncertainties
+    class StatAndSyst:
+        pass
+
+    def __init__(self, mode=StatAndSyst):
+        self._mode = mode
+
+    def set(self, mode):
+        self._mode = mode
+
+    def get(self):
+        return self._mode
+
+    def getName(self):
+        return self._mode.__name__
+
+    def equal(self, mode):
+        return self._mode == mode
+
+    def showStatOnly(self):
+        return not (self.equal(self.SystOnly) or self.equal(self.StatPlusSyst))
+
+    def addStatToSyst(self):
+        return not self.equal(self.SystOnly)
+## Global uncertainty mode
+uncertaintyMode = Uncertainty()
+
 ## Default energy text
-energyText = "7 TeV"
+energyText = "8 TeV"
 
 ## Class to provide default positions of the various texts.
 #
@@ -43,7 +94,7 @@ energyText = "7 TeV"
 class TextDefaults:
     def __init__(self):
         self._setDefaults("cmsPreliminary", x=0.62, y=0.96)
-        self._setDefaults("energy", x=0.2, y=0.96)
+        self._setDefaults("energy", x=0.19, y=0.96)
         self._setDefaults("lumi", x=0.43, y=0.96)
 
     ## Modify the default values
@@ -119,6 +170,7 @@ def addText(x, y, text, *args, **kwargs):
     t = PlotText(x, y, text, *args, **kwargs)
     t.Draw()
 
+
 ## Class for drawing text to current TPad with TLaTeX
 #
 # Text can be added to plots in object-oriented way. Mainly intended
@@ -131,8 +183,10 @@ class PlotText:
     # \param text    String to draw
     # \param size    Size of text (None for the default value, taken from gStyle)
     # \param bold    Should the text be bold?
+    # \param align   Alignment of text (left, center, right)
     # \param color   Color of the text
-    def __init__(self, x, y, text, size=None, bold=True, color=ROOT.kBlack):
+    # \param font    Specify font explicitly
+    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack, font=None):
         self.x = x
         self.y = y
         self.text = text
@@ -141,8 +195,21 @@ class PlotText:
         self.l.SetNDC()
         if not bold:
             self.l.SetTextFont(self.l.GetTextFont()-20) # bold -> normal
-        if size != None:
+        if font is not None:
+            self.l.SetTextFont(font)
+        if size is not None:
             self.l.SetTextSize(size)
+        if isinstance(align, basestring):
+            if align.lower() == "left":
+                self.l.SetTextAlign(11)
+            elif align.lower() == "center":
+                self.l.SetTextAlign(21)
+            elif align.lower() == "right":
+                self.l.SetTextAlign(31)
+            else:
+                raise Exception("Error: Invalid option '%s' for text alignment! Options are: 'left', 'center', 'right'."%align)
+        else:
+            self.l.SetTextAlign(align)
         self.l.SetTextColor(color)
 
     ## Draw the text to the current TPad
@@ -152,13 +219,98 @@ class PlotText:
     # Provides interface compatible with ROOT's drawable objects.
     def Draw(self, options=None):
         self.l.DrawLatex(self.x, self.y, self.text)        
-        
+
+
+## Class for drawing text and a background box
+class PlotTextBox:
+    ## Constructor
+    #
+    # \param xmin       X min coordinate of the box (NDC)
+    # \param ymin       Y min coordinate of the box (NDC) (if None, deduced automatically)
+    # \param xmax       X max coordinate of the box (NDC)
+    # \param ymax       Y max coordinate of the box (NDC)
+    # \param lineheight Line height
+    # \param fillColor  Fill color of the box
+    # \param transparent  Should the box be transparent? (in practive the TPave is not created)
+    # \param kwargs       Forwarded to histograms.PlotText.__init__()
+    def __init__(self, xmin, ymin, xmax, ymax, lineheight=0.04, fillColor=ROOT.kWhite, transparent=True, **kwargs):
+        # ROOT.TPave Set/GetX1NDC() etc don't seem to work as expected.
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+        self.lineheight = lineheight
+        self.fillColor = fillColor
+        self.transparent = transparent
+        self.texts = []
+        self.textArgs = {}
+        self.textArgs.update(kwargs)
+
+        self.currenty = ymax
+
+    ## Add text to current position
+    def addText(self, text):
+        self.currenty -= self.lineheight
+        self.addPlotObject(PlotText(self.xmin+0.01, self.currenty, text, **self.textArgs))
+
+    ## Add PlotText object
+    def addPlotObject(self, obj):
+        self.texts.append(obj)
+
+    ## Move the box and the contained text objects
+    #
+    # \param dx  Movement in x (positive is to right)
+    # \param dy  Movement in y (positive is to up)
+    # \param dw  Increment of width (negative to decrease width)
+    # \param dh  Increment of height (negative to decrease height)
+    #
+    # \a dx and \a dy affect to both box and text objects, \a dw and
+    # \dh affect the box only.
+    def move(self, dx=0, dy=0, dw=0, dh=0):
+        self.xmin += dx
+        self.xmax += dx
+        if self.ymin is not None:
+            self.ymin += dy
+        self.ymax += dy
+
+        self.xmax += dw
+        if self.ymin is not None:
+            self.ymin -= dh
+
+        for t in self.texts:
+            t.x += dx
+            t.y += dy
+
+    ## Draw the box and the text to the current TPad
+    #
+    # \param options  Forwarded to ROOT.TPave.Draw(), and the Draw() of the contained objects
+    def Draw(self, options=""):
+        if not self.transparent:
+            ymin = self.ymin
+            if ymin is None:
+                ymin = self.currenty - 0.01
+            self.pave = ROOT.TPave(self.xmin, self.ymin, self.xmax, self.ymax, 0, "NDC")
+            self.pave.SetFillColor(self.fillColor)
+            self.pave.Draw(options)
+        for t in self.texts:
+            t.Draw(options)
+
+def _printTextDeprecationWarning(oldFunctionName, newFunctionName="histograms.addStandardTexts()"):
+    import traceback
+    print "#################### WARNING ####################"
+    print
+    print "%s is deprecated, please use %s instead" % (oldFunctionName, newFunctionName)
+    print "Traceback (most recent call last):"
+    stack = traceback.extract_stack()[:-2] # take out calls to this and the caller
+    print "".join(traceback.format_list(stack))
+    print "#################################################"
 
 ## Draw the "CMS Preliminary" text to the current TPad
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
 def addCmsPreliminaryText(x=None, y=None, text=None):
+    _printTextDeprecationWarning("histograms.addCmsPreliminaryText()")
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
     if text == None:
         txt  = cmsText[cmsTextMode]
@@ -172,24 +324,24 @@ def addCmsPreliminaryText(x=None, y=None, text=None):
 # \param y   Y coordinate of the text (None for default value)
 # \param s   Center-of-mass energy text with the unit (None for the default value, dataset.energyText
 def addEnergyText(x=None, y=None, s=None):
+    _printTextDeprecationWarning("histograms.addEnergyText()")
     (x, y) = textDefaults.getValues("energy", x, y)
     text = energyText
     if s != None:
         text = s
     addText(x, y, "#sqrt{s} = "+text, textDefaults.getSize("energy"), bold=False)
 
-## Draw the integrated luminosity text to the current TPad
+## Format luminosity number to fb
 #
-# \param x     X coordinate of the text (None for default value)
-# \param y     Y coordinate of the text (None for default value)
-# \param lumi  Value of the integrated luminosity in pb^-1
-# \param unit  Unit of the integrated luminosity value (should be fb^-1)
-def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
-    (x, y) = textDefaults.getValues("lumi", x, y)
+# \param lumi  Luminosity in pb^-1
+def formatLuminosityInFb(lumi):
     lumiInFb = lumi/1000.
-    log = math.log10(lumiInFb)
-    ndigis = int(log)
-    format = "%.0f" # ndigis >= 1, 10 <= lumiInFb
+    log = 0
+    ndigis = 0
+    if lumi > 0:
+        log = math.log10(lumiInFb)
+        ndigis = int(log)
+    format = "%.1f" # ndigis >= 1, 10 <= lumiInFb
     if ndigis == 0: 
         if log >= 0: # 1 <= lumiInFb < 10
             format = "%.1f"
@@ -198,12 +350,178 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     elif ndigis <= -1:
         format = ".%df" % (abs(ndigis)+1)
         format = "%"+format
-    format += " %s"
-    format = "L="+format
+    return format % lumiInFb
 
-    addText(x, y, format % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
+## Draw the integrated luminosity text to the current TPad
+#
+# \param x     X coordinate of the text (None for default value)
+# \param y     Y coordinate of the text (None for default value)
+# \param lumi  Value of the integrated luminosity in pb^-1
+# \param unit  Unit of the integrated luminosity value (should be fb^-1)
+def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
+    _printTextDeprecationWarning("histograms.addLuminosityText()")
+    (x, y) = textDefaults.getValues("lumi", x, y)
+    lumiStr = "L="
+    if isinstance(lumi, basestring):
+        lumiStr += lumi
+    else:
+        lumiStr += formatLuminosityInFb(lumi)
+
+    lumiStr += " "+unit
+
+    addText(x, y, lumiStr, textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
+
+## Draw the CMS standard texts
+#
+# Updated version of addCmsPreliminaryText(), addEnergyText() and
+# addLuminosityText() following the new guidelines at
+# https://ghm.web.cern.ch/ghm/plots/
+#
+# \param lumi        Luminosity as float in pb^-1 (or as string in fb^1), None to ignore completely
+# \param sqrts       Centre-of-mass energy text with the unit
+# \param addCmsText  If True, add the CMS text
+# \param cmsTextPosition Position of CMS text ("left", "right", "outframe", pair of (x, y) in NDC
+# \param cmsExtraTextPosition Position of CMS extra text (None for default, pair of (x, y) for explicit)
+# \param cmsText         If not None, override the "CMS" text
+# \param cmsExtraText    If not None, override the CMS extra text (e.g. "Preliminary")
+def addStandardTexts(lumi=None, sqrts=None, addCmsText=True, cmsTextPosition=None, cmsExtraTextPosition=None, cmsText=None, cmsExtraText=None):
+    if cmsTextPosition is None:
+        cmsTextPosition = "left"
+
+    lumiTextSize = 40*0.6
+    cmsTextFrac = 0.75
+    cmsTextSize = 40*cmsTextFrac
+    cmsExtraTextSize = cmsTextSize * 0.76
+
+    # Lumi + energy text
+    lumiText = ""
+    if lumi is not None:
+        if isinstance(lumi, basestring):
+            lumiText = lumi
+        else:
+            lumiText = formatLuminosityInFb(lumi)
+        lumiText += " fb^{-1} ("
+    if sqrts is not None:
+        lumiText += sqrts
+    else:
+        lumiText += energyText
+    if lumi is not None:
+        lumiText += ")"
+
+    lumiTextOffset = 0.2
+    l = ROOT.gPad.GetLeftMargin()
+    t = ROOT.gPad.GetTopMargin()
+    r = ROOT.gPad.GetRightMargin()
+    b = ROOT.gPad.GetBottomMargin()
+
+    addText(1-r, 1-t+lumiTextOffset*t, lumiText, size=lumiTextSize, bold=False, align="right")
+
+    if not addCmsText:
+        return
+
+    cmsExtraTextDefault = globals()["cmsText"][cmsTextMode]
+    if cmsExtraTextDefault is None:
+        return
+
+    # CMS + extratext
+    relPosX = 0.045
+    relPosY = 0.035
+    relExtraDY = 1.2
+
+    posY = 1-t - relPosY*(1-t-b)
+    if isinstance(cmsTextPosition, basestring):
+        p = cmsTextPosition.lower()
+        if p == "left":
+            posX = l + relPosX*(1-l-r)
+            align = 13 # left, top
+            posXe = posX
+            posYe = posY - relExtraDY*cmsTextFrac*t
+        elif p == "right":
+            posX = 1-r - relPosX*(1-l-r)
+            align = 33 # right, top
+            posXe = posX
+            posYe = posY - relExtraDY*cmsTextFrac*t
+        elif cmsTextPosition.lower() == "outframe":
+            posX = l
+            posY = 1-t+lumiTextOffset*t
+            align = 11 # left, bottom
+            posXe = l + 0.14*(1-l-r)
+            posYe = posY
+        else:
+            raise Exception("Invalid value for cmsTextPosition '%s', valid are left, right, outframe" % (cmsTextPosition))
+    else:
+        posX = cmsTextPosition[0]
+        posY = cmsTextPosition[1]
+        align = 13 # left, top
+        posXe = posX
+        posYe = posY - relExtraDY*cmsTextFrac*t
+
+    cms = "CMS"
+    if cmsText is not None:
+        cms = cmsText
+
+    if cms != "":
+        addText(posX, posY, cms, size=cmsTextSize, font=63, align=align)
+
+    extraText = cmsExtraText
+    if extraText is None:
+        extraText = cmsExtraTextDefault
+    if extraText is not None and extraText != "":
+        if cmsExtraTextPosition is not None:
+            posXe = cmsExtraTextPosition[0]
+            posYe = cmsExtraTextPosition[1]
+        addText(posXe, posYe, extraText, size=cmsExtraTextSize, font=53, align=align)
+
+## Class to create signal information box on plots
+class SignalTextCreator:
+    ## Constructor
+    #
+    # \param xmin       xmin coordinate of the box (NDC)
+    # \param ymax       ymax coordinate of the box (NDC)
+    # \param size       Text size
+    # \param lineheight Height of one line
+    # \param width      Width of the box
+    # \param kwargs     Keyword arguments, forwarded to histograms.PlotTextBox.__init__()
+    def __init__(self, xmin=0.6, ymax=0.9, size=20, lineheight=0.04, width=0.3, **kwargs):
+        self.settings = dataset.Settings(xmin=xmin, ymax=ymax, size=size, lineheight=lineheight, width=width,
+                                 mass=None, tanbeta=None, mu=None,
+                                 br_tH=None,
+                                 sigma_H=None, br_Htaunu=None)
+        self.boxArgs = {}
+        self.boxArgs.update(kwargs)
+
+    ## Set the signal information
+    def set(self, **kwargs):
+        self.settings.set(**kwargs)
+
+    ## Function call syntax to create histograms.PlotTextBox
+    def __call__(self, **kwargs):
+        xmin = self.settings.get("xmin", kwargs)
+        ymax = self.settings.get("ymax", kwargs)
+        size = self.settings.get("size", kwargs)
+        lineheight = self.settings.get("lineheight", kwargs)
+        width = self.settings.get("width", kwargs)
+
+        box = PlotTextBox(xmin, None, xmin+width, ymax, lineheight=lineheight, size=size, **self.boxArgs)
+
+        for attr, text in [
+            ("mass", "m_{H^{+}}=%d GeV/c^{2}"),
+            ("br_tH", "#it{B}(t #rightarrow bH^{+})=%.2f"),
+            ("sigma_H", "#sigma(H^{+})=%.1f pb"),
+            ("br_Htaunu", "#it{B}(H^{+} #rightarrow #tau#nu_{#tau})=%.2f"),
+            ("tanbeta", "tan#beta=%d"),
+            ("mu", "#mu=%d")]:
+
+            value = self.settings.get(attr, kwargs)
+            if value is not None:
+                box.addText(text % value)
+
+        return box
+
+createSignalText = SignalTextCreator()
+
 
 ## Class for generating legend creation functions with default positions.
 #
@@ -227,7 +545,7 @@ class LegendCreator:
     # \param borderSize  Default border size
     # \param fillStyle   Default fill style
     # \param fillColor   Default fill color
-    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.03, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
+    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.035, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite, ncolumns=1, columnSeparation=None):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
@@ -236,6 +554,8 @@ class LegendCreator:
         self.borderSize = borderSize
         self.fillStyle = fillStyle
         self.fillColor = fillColor
+        self.ncolumns = ncolumns
+        self.columnSeparation = columnSeparation
         self._keys = ["x1", "y1", "x2", "y2"]
 
     ## Create a copy of the object
@@ -313,6 +633,12 @@ class LegendCreator:
             legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
         legend.SetTextSize(self.textSize)
         #legend.SetMargin(0.1)
+
+        if self.ncolumns > 1:
+            legend.SetNColumns(self.ncolumns)
+            if self.columnSeparation is not None:
+                legend.SetColumnSeparation(self.columnSeparation)
+
         return legend
 
     ## \var x1
@@ -338,6 +664,9 @@ class LegendCreator:
 ## Default legend creator object
 createLegend = LegendCreator()
 
+## Default legend creator object for ratio plots
+createLegendRatio = LegendCreator(x1=0.7, y1=0.7, x2=0.93, y2=0.95, textSize=0.07)
+
 ## Move TLegend
 # 
 # \param legend   TLegend object to modify
@@ -357,7 +686,7 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
     legend.SetY1(legend.GetY1() + dy)
     legend.SetY2(legend.GetY2() + dy)
 
-    legend.SetX1(legend.GetX1() + dw)
+    legend.SetX2(legend.GetX2() + dw)
     legend.SetY1(legend.GetY1() - dh) # negative dh should shrink the legend
     
     return legend
@@ -365,18 +694,32 @@ def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
 
 ## Update the style of palette Z axis according to ROOT.gStyle.
 #
+# \return TPalatteAxis object, or None if it doesn't exist
+#
 # This function is needed because the style is not propageted to the Z
 # axis automatically. It is recommended to call this every time
 # something is drawn with an option "Z"
 def updatePaletteStyle(histo):
+    if not hasattr(histo, "GetListOfFunctions"):
+        # Applies at least to THStack, which is not applicable for Z axis
+        return None
+
     ROOT.gPad.Update()
     paletteAxis = histo.GetListOfFunctions().FindObject("palette")
     if paletteAxis == None:
-        return
-    paletteAxis.SetLabelColor(ROOT.gStyle.GetLabelColor())
-    paletteAxis.SetLabelFont(ROOT.gStyle.GetLabelFont())
-    paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset())
-    paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
+        return None
+    paletteAxis.SetLabelColor(ROOT.gStyle.GetLabelColor("Z"))
+    paletteAxis.SetLabelFont(ROOT.gStyle.GetLabelFont("Z"))
+    paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset("Z"))
+    paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize("Z"))
+
+    axis = paletteAxis.GetAxis()
+    axis.SetTitleColor(ROOT.gStyle.GetTitleColor("Z"))
+    axis.SetTitleFont(ROOT.gStyle.GetTitleFont("Z"))
+    axis.SetTitleOffset(ROOT.gStyle.GetTitleOffset("Z"))
+    axis.SetTitleSize(ROOT.gStyle.GetTitleSize("Z"))
+
+    return paletteAxis
 
 ## Sum TH1 histograms
 #
@@ -389,6 +732,45 @@ def sumRootHistos(rootHistos, postfix="_sum"):
     for a in rootHistos[1:]:
         h.Add(a)
     return h
+
+def drawNonVisibleErrorsTH1(th1):
+    if isinstance(th1, ROOT.TH2):
+        raise Exception("This function supports only 1D TH1, got %s" % th1.__class__.__name__)
+
+    # Get the Y-axis min/max from pad
+    pad_ymin = ROOT.gPad.GetUymin()
+    pad_ymax = ROOT.gPad.GetUymax()
+
+    ret = []
+    for i in xrange(1, th1.GetNbinsX()+1):
+        x = th1.GetBinCenter(i)
+        y = th1.GetBinContent(i)
+        ymin = y - th1.GetBinError(i)
+        ymax = y + th1.GetBinError(i)
+
+        line = None
+        if y < pad_ymin and ymax > pad_ymin:
+            line = ROOT.TLine(x, pad_ymin, x, min(pad_ymax, ymax))
+            aux.copyStyle(th1, line)
+            line.Draw("same")
+            ret.append(line)
+        elif y > pad_ymax and ymin < pad_ymax:
+            line = ROOT.TLine(x, max(pad_ymin, ymin), x, pad_ymax)
+            aux.copyStyle(th1, line)
+            line.Draw("same")
+            ret.append(line)
+    return ret
+
+def drawNonVisibleErrorsTGraph(tgraph):
+    # Get the Y-axis min/max from pad
+    pad_ymin = ROOT.gPad.GetYmin()
+    pad_ymax = ROOT.gPad.GetYmax()
+#    print "FOO", ROOT.gPad.GetUxmin(), ROOT.gPad.GetUxmax(),ROOT.gPad.GetUymin(), ROOT.gPad.GetUymax()
+    for i in xrange(0, tgraph.GetN()):
+        ymin = tgraph.GetY()[i]-tgraph.GetErrorYhigh(i)
+        ymax = tgraph.GetErrorYhigh(i)+tgraph.GetY()[i]
+        print ymin, tgraph.GetY()[i], ymax
+    raise Exception("This function is not finished because of lack of need")
 
 ## Helper function for lessThan/greaterThan argument handling
 #
@@ -483,6 +865,10 @@ def th1ApplyBin(th1, function):
     for bin in xrange(0, th1.GetNbinsX()+2):
         th1.SetBinContent(bin, function(th1.GetBinContent(bin)))
 
+def th1ApplyBinError(th1, function):
+    for bin in xrange(0, th1.GetNbinsX()+2):
+        th1.SetBinError(bin, function(th1.GetBinError(bin)))
+                
 ## Convert TH1 distribution to TH1 of efficiency as a function of cut value
 #
 # \param hdist  TH1 distribution
@@ -491,6 +877,7 @@ def dist2eff(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
     th1ApplyBin(hpass, lambda value: value/total)
+    th1ApplyBinError(hpass, lambda value: math.sqrt(value)/total)
     return hpass
 
 ## Convert TH1 distribution to TH1 of 1-efficiency as a function of cut value
@@ -560,23 +947,36 @@ def _boundsArgs(histos, kwargs):
 # \param xmax  Maximum X axis value
 # \param ymax  Maximum Y axis value
 # \param nbins Number of x axis bins
+# \param nbinsx Number of x axis bins
+# \param nbinsy Number of y axis bins
 #
 # If nbins is None, TPad.DrawFrame is used. Otherwise a custom TH1 is
 # created for the frame with nbins bins in x axis.
 #
 # Use case: selection flow histogram (or whatever having custom x axis
 # lables).
-def _drawFrame(pad, xmin, ymin, xmax, ymax, nbins=None):
-    if nbins == None:
+def _drawFrame(pad, xmin, ymin, xmax, ymax, nbins=None, nbinsx=None, nbinsy=None):
+    if nbins is not None and nbinsx is not None:
+        raise Exception("Both 'nbins' and 'nbinsx' should not be set, please use the latter only")
+    if nbins is None:
+        nbins = nbinsx
+
+    if nbinsx is None and nbinsy is None:
         return pad.DrawFrame(xmin, ymin, xmax, ymax)
     else:
         pad.cd()
         # From TPad.cc
         frame = pad.FindObject("hframe")
-        if frame != None:
-            frame.Delete()
+        if frame is not None:
+#            frame.Delete()
             frame = None
-        frame = ROOT.TH1F("hframe", "hframe", nbins, xmin, xmax)
+        if nbinsx is not None and nbinsy is None:
+            frame = ROOT.TH1F("hframe", "hframe", nbinsx, xmin, xmax)
+        elif nbinsx is None and nbinsy is not None:
+            frame = ROOT.TH2F("hframe", "hframe", 100,xmin,xmax, nbinsy,ymin,ymax)
+        else: # neither is None
+            frame = ROOT.TH2F("hframe", "hframe", nbinsx,xmin,xmax, nbinsy,ymin,ymax)
+
         frame.SetBit(ROOT.TH1.kNoStats)
         frame.SetBit(ROOT.kCanDelete)
         frame.SetMinimum(ymin)
@@ -595,12 +995,21 @@ class CanvasFrame:
     #
     # \param histoManager  histograms.HistoManager object to take the histograms for automatic axis ranges
     # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
+    # \param canvasOpts    Dictionary for modifying the canvas/pad properties (see below)
     # \param kwargs        Keyword arguments for frame bounds (forwarded to histograms._boundsArgs())
     #
     # <b>Keyword arguments</b>
     # \li\a opts   If given, give \a opts to histograms._boundsArgs() instead of kwargs. No other keyword arguments are allowed (except opts2, see below).
     # \li\a opts2  Ignored, existence allowed only for compatibility with histograms.CanvasFrameTwo
-    def __init__(self, histoManager, name, **kwargs):
+    #
+    # <b>Canvas modification parameters</b>
+    # \li\a addWidth   Add this to the width of the canvas (e.g. for
+    #                  COLZ). If COLZ exists in any the drawing
+    #                  options of any input histogram, a default value
+    #                  of 0.13 is used (this can be disabled with
+    #                  explicit value None).
+    # \li\a addHeight  Add this to the height of the canvas
+    def __init__(self, histoManager, name, canvasOpts={}, **kwargs):
         histos = []
         if isinstance(histoManager, list):
             histos = histoManager[:]
@@ -609,8 +1018,34 @@ class CanvasFrame:
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
 
+        # Infer the default based on the existence of COLZ drawing option
+        canvasAddWidth = None
+        for h in histos:
+            drawStyle = h.getDrawStyle()
+            if drawStyle is not None and "colz" in drawStyle.lower():
+                canvasAddWidth = 0.13
+
+        canvasAddWidth = canvasOpts.get("addWidth", canvasAddWidth)
+        canvasAddHeight = canvasOpts.get("addHeight", None)
+
+        if canvasAddWidth is not None:
+            cw = ROOT.gStyle.GetCanvasDefW()
+            prm = ROOT.gStyle.GetPadRightMargin()
+
+            ROOT.gStyle.SetCanvasDefW(int((1+canvasAddWidth)*cw))
+            ROOT.gStyle.SetPadRightMargin(canvasAddWidth+prm)
+        if canvasAddHeight is not None:
+            ch = ROOT.gStyle.GetCanvasDefH()
+            ROOT.gStyle.SetCanvasDefH(int((1+canvasAddHeight)*ch))
+
         self.canvas = ROOT.TCanvas(name)
         self.pad = self.canvas.GetPad(0)
+
+        if canvasAddWidth is not None:
+            ROOT.gStyle.SetCanvasDefW(cw)
+            ROOT.gStyle.SetPadRightMargin(prm)
+        if canvasAddHeight is not None:
+            ROOT.gStyle.SetCanvasDefH(ch)
 
         opts = kwargs
         if "opts" in kwargs:
@@ -619,7 +1054,7 @@ class CanvasFrame:
             if "opts2" in tmp:
                 del tmp["opts2"]
             if len(tmp) != 1:
-                raise Exception("If giving 'opts' as keyword argument, no other keyword arguments can be given (except opts2, which is ignored)")
+                raise Exception("If giving 'opts' as keyword argument, no other keyword arguments can be given (except opts2, which is ignored), got %s" % ",".join(tmp.keys()))
             opts = kwargs["opts"]
         tmp = opts
         opts = {}
@@ -632,9 +1067,22 @@ class CanvasFrame:
 
         _boundsArgs(histos, opts)
 
-        self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None))
-        self.frame.GetXaxis().SetTitle(histos[0].getRootHisto().GetXaxis().GetTitle())
-        self.frame.GetYaxis().SetTitle(histos[0].getRootHisto().GetYaxis().GetTitle())
+        # Check if the first histogram has x axis bin labels
+        rootHisto = histos[0].getRootHisto()
+        hasBinLabels = isinstance(rootHisto, ROOT.TH1) and len(rootHisto.GetXaxis().GetBinLabel(1)) > 0
+        if hasBinLabels:
+            binWidth = histos[0].getBinWidth(1)
+            opts["nbinsx"] = int((opts["xmax"]-opts["xmin"])/binWidth +0.5)
+
+        self.frame = _drawFrame(self.canvas, opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"], opts.get("nbins", None), opts.get("nbinsx", None), opts.get("nbinsy", None))
+        self.frame.GetXaxis().SetTitle(histos[0].getXtitle())
+        self.frame.GetYaxis().SetTitle(histos[0].getYtitle())
+
+        # Copy the bin labels
+        if hasBinLabels:
+            firstBin = rootHisto.FindFixBin(opts["xmin"])
+            for i in xrange(0, opts["nbinsx"]):
+                self.frame.GetXaxis().SetBinLabel(i+1, rootHisto.GetXaxis().GetBinLabel(firstBin+i))
 
     ## \var canvas
     # TCanvas for the canvas
@@ -648,7 +1096,7 @@ class CanvasFrameTwo:
     ## Create TCanvas and TH1 for the frame.
     #
     # \param histoManager1 HistoManager object to take the histograms for automatic axis ranges for upper pad
-    # \param histos2       List of Histo objects to take the histograms for automatic axis ranges for lower pad
+    # \param histoManager2 HistoManager object to take the histograms for automatic axis ranges for lower pad
     # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
     # \param kwargs        Keyword arguments (see below)
     #
@@ -656,14 +1104,16 @@ class CanvasFrameTwo:
     # \li\a opts   Dictionary for frame bounds (forwarded to histograms._boundsArgs())
     # \li\a opts1  Same as \a opts (can not coexist with \a opts, only either one can be given)
     # \li\a opts2  Dictionary for ratio pad bounds (forwarded to histograms._boundsArgs()) Only Y axis values are allowed, for X axis values are taken from \a opts/\a opts1
-    def __init__(self, histoManager1, histos2, name, **kwargs):
+    def __init__(self, histoManager1, histoManager2, name, **kwargs):
         ## Wrapper to provide the CanvasFrameTwo.frame member.
         #
         # The GetXaxis() is forwarded to the frame of the lower pad,
         # and the GetYaxis() is forwared to the frame of the upper pad.
         class FrameWrapper:
-            def __init__(self, frame1, frame2):
+            def __init__(self, pad1, frame1, pad2, frame2):
+                self.pad1 = pad1
                 self.frame1 = frame1
+                self.pad2 = pad2
                 self.frame2 = frame2
 
             def GetXaxis(self):
@@ -672,12 +1122,18 @@ class CanvasFrameTwo:
             def GetYaxis(self):
                 return self.frame1.GetYaxis()
 
-
             def getXmin(self):
-                return self.frame2.GetXaxis().GetBinLowEdge(self.frame2.GetXaxis().GetFirst())
+                return aux.th1Xmin(self.frame2)
 
             def getXmax(self):
-                return self.frame2.GetXaxis().GetBinUpEdge(self.frame2.GetXaxis().GetLast())
+                return aux.th1Xmax(self.frame2)
+
+            def Draw(self, *args):
+                self.pad1.cd()
+                self.frame1.Draw(*args)
+                self.pad2.cd()
+                self.frame2.Draw(*args)
+                self.pad1.cd()
 
         ## Wrapper to provide the getXmin/getXmax functions for _boundsArgs function.
         class HistoWrapper:
@@ -688,10 +1144,10 @@ class CanvasFrameTwo:
                 return self.histo
 
             def getXmin(self):
-                return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
+                return aux.th1Xmin(self.histo)
 
             def getXmax(self):
-                return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
+                return aux.th1Xmax(self.histo)
 
             def getYmin(self):
                 return self.histo.GetMinimum()
@@ -706,11 +1162,15 @@ class CanvasFrameTwo:
             histos1 = histoManager1.getHistos()
         if len(histos1) == 0:
             raise Exception("Empty set of histograms for first pad!")
+        histos2 = []
+        if isinstance(histoManager2, list):
+            histos2 = histoManager2[:]
+        else:
+            histos2 = histoManager2.getHistos()
         if len(histos2) == 0:
             raise Exception("Empty set of histograms for second pad!")
 
         canvasFactor = kwargs.get("canvasFactor", 1.25)
-        canvasHeightCorrection = kwargs.get("canvasHeightCorrection", 0.022)
         divisionPoint = 1-1/canvasFactor
 
         # Do it like this (create empty, update from kwargs) in order
@@ -724,45 +1184,63 @@ class CanvasFrameTwo:
         opts2 = {}
         opts2.update(kwargs.get("opts2", {}))
 
-        if "xmin" in opts2 or "xmax" in opts2 or "nbins" in opts2:
-            raise Exception("No 'xmin', 'xmax', or 'nbins' allowed in opts2, values are taken from opts/opts1")
+        if "xmin" in opts2 or "xmax" in opts2 or "nbins" in opts2 or "nbinsx" in opts2:
+            raise Exception("No 'xmin', 'xmax', 'nbins', or 'nbinsy' allowed in opts2, values are taken from opts/opts1")
 
         _boundsArgs(histos1, opts1)
         opts2["xmin"] = opts1["xmin"]
         opts2["xmax"] = opts1["xmax"]
         opts2["nbins"] = opts1.get("nbins", None)
-        _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
+        opts2["nbinsx"] = opts1.get("nbinsx", None)
+#        _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
+        _boundsArgs(histos2, opts2) # HistoWrapper not needed anymore? Ratio is Histo
 
         # Create the canvas, divide it to two
         self.canvas = ROOT.TCanvas(name, name, ROOT.gStyle.GetCanvasDefW(), int(ROOT.gStyle.GetCanvasDefH()*canvasFactor))
         self.canvas.Divide(1, 2)
-        
+
+        topMargin = ROOT.gStyle.GetPadTopMargin()
+        bottomMargin = ROOT.gStyle.GetPadBottomMargin()
+        divisionPoint += (1-divisionPoint)*bottomMargin # correct for (almost-)zeroing bottom margin of pad1
+        divisionPointForPad1 = 1-( (1-divisionPoint) / (1-0.02) ) # then correct for the non-zero bottom margin, but for pad1 only
+
         # Set the lower point of the upper pad to divisionPoint
         self.pad1 = self.canvas.cd(1)
-        (xlow, ylow, xup, yup) = [ROOT.Double(x) for x in [0.0]*4]
-        self.pad1.GetPadPar(xlow, ylow, xup, yup)
-        self.pad1.SetPad(xlow, divisionPoint, xup, yup)
+        yup = 1.0
+        ylow = divisionPointForPad1
+        xup = 1.0
+        xlow = 0.0
+        self.pad1.SetPad(xlow, ylow, xup, yup)
         self.pad1.SetFillStyle(4000) # transparent
+        self.pad1.SetBottomMargin(0.02) # need some bottom margin here for eps/pdf output (at least in ROOT 5.34)
 
         # Set the upper point of the lower pad to divisionPoint
         self.pad2 = self.canvas.cd(2)
-        self.pad2.GetPadPar(xlow, ylow, xup, yup)
-        self.pad2.SetPad(xlow, ylow, xup,
-                         divisionPoint+ROOT.gStyle.GetPadBottomMargin()-ROOT.gStyle.GetPadTopMargin()+canvasHeightCorrection)
+        yup = divisionPoint
+        ylow = 0.0
+        self.pad2.SetPad(xlow, ylow, xup, yup)
         self.pad2.SetFillStyle(4000) # transparent
         self.pad2.SetTopMargin(0.0)
-        #self.pad2.SetBottomMargin(self.pad2.GetBottomMargin()+0.06)
-        self.pad2.SetBottomMargin(self.pad2.GetBottomMargin()+0.16)
+        self.pad2.SetBottomMargin(bottomMargin/(canvasFactor*divisionPoint))
 
         self.canvas.cd(1)
 
-        yoffsetFactor = canvasFactor*1.15
+        yoffsetFactor = canvasFactor#*1.15
         #xoffsetFactor = canvasFactor*1.6
         #xoffsetFactor = canvasFactor*2
-        xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
+        #xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
+        #xoffsetFactor = 1/(canvasFactor*divisionPoint)
+        xoffsetFactor = 1/divisionPoint
 
+        # Check if the first histogram has x axis bin labels
+        rootHisto = histos1[0].getRootHisto()
+        hasBinLabels = isinstance(rootHisto, ROOT.TH1) and len(rootHisto.GetXaxis().GetBinLabel(1)) > 0
+        if hasBinLabels:
+            binWidth = histos1[0].getBinWidth(1)
+            opts1["nbinsx"] = int((opts1["xmax"]-opts1["xmin"])/binWidth +0.5)
+            opts2["nbinsx"] = opts1["nbinsx"]
 
-        self.frame1 = _drawFrame(self.pad1, opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"], opts1.get("nbins", None))
+        self.frame1 = _drawFrame(self.pad1, opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"], opts1.get("nbins", None), opts1.get("nbinsx", None), opts1.get("nbinsy", None))
         (labelSize, titleSize) = (self.frame1.GetXaxis().GetLabelSize(), self.frame1.GetXaxis().GetTitleSize())
         self.frame1.GetXaxis().SetLabelSize(0)
         self.frame1.GetXaxis().SetTitleSize(0)
@@ -770,16 +1248,22 @@ class CanvasFrameTwo:
         self.frame1.GetYaxis().SetTitleOffset(self.frame1.GetYaxis().GetTitleOffset()*yoffsetFactor)
 
         self.canvas.cd(2)
-        self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None))
-        self.frame2.GetXaxis().SetTitle(histos1[0].getRootHisto().GetXaxis().GetTitle())
-        self.frame2.GetYaxis().SetTitle(histos2[0].getRootHisto().GetYaxis().GetTitle())
+        self.frame2 = _drawFrame(self.pad2, opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"], opts2.get("nbins", None), opts2.get("nbinsx", None))
+        self.frame2.GetXaxis().SetTitle(histos1[0].getXtitle())
+        self.frame2.GetYaxis().SetTitle(histos2[0].getYtitle())
         self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
         self.frame2.GetXaxis().SetTitleOffset(self.frame2.GetXaxis().GetTitleOffset()*xoffsetFactor)
         self.frame2.GetYaxis().SetLabelSize(int(self.frame2.GetYaxis().GetLabelSize()*0.8))
 
         self.canvas.cd(1)
-        self.frame = FrameWrapper(self.frame1, self.frame2)
+        self.frame = FrameWrapper(self.pad1, self.frame1, self.pad2, self.frame2)
         self.pad = self.pad1
+
+        # Copy the bin labels
+        if hasBinLabels:
+            firstBin = rootHisto.FindFixBin(opts1["xmin"])
+            for i in xrange(0, opts1["nbinsx"]):
+                self.frame.GetXaxis().SetBinLabel(i+1, rootHisto.GetXaxis().GetBinLabel(firstBin+i))
 
     ## \var frame1
     # TH1 for the upper frame
@@ -812,20 +1296,96 @@ class Histo:
     #
     # \todo test draw style "9"
     #
-    # \param rootHisto    ROOT histogram object (TH1)
+    # \param rootHisto    ROOT histogram object (TH1) or dataset.RootHistoWithUncertainties
     # \param name         Name of the histogram
     # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
-    # \param drawStyle    Style string for Draw (string parameter for TH1.Draw())
-    def __init__(self, rootHisto, name, legendStyle="l", drawStyle="HIST"):
-        self.rootHisto = rootHisto
+    # \param drawStyle    Style string for Draw (string parameter for
+    #                     TH1.Draw()). None to not to draw the histogram.
+    # \param uncertaintyLegendStyle Style string for TLegend of the
+    #                               uncertainty graph (if None, use \a legendStyle)
+    # \param uncertaintyDrawStyle   Style string for Draw of the
+    #                               uncertainty graph
+    #                               (TGraphAsymmErrors.Draw()). None
+    #                               to not to draw the systematic
+    #                               uncertainty graph
+    # \param uncertaintyLegendLabel Legend label of the uncertainty
+    #                               graph (if None, graph is not added to legend)
+    # \param kwargs       Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li\a legendLabel  Legend label (if None, histo is ignored for legend; if doesn't exist, use name)
+    def __init__(self, rootHisto, name, legendStyle="l", drawStyle="HIST",
+                 uncertaintyLegendStyle=None, uncertaintyDrawStyle=None, uncertaintyLegendLabel=None,
+                 **kwargs):
+        if isinstance(rootHisto, dataset.RootHistoWithUncertainties):
+            self._histo = rootHisto
+        else:
+            self._histo = dataset.RootHistoWithUncertainties(rootHisto)
         self.name = name
         self.legendLabel = name
+        if "legendLabel" in kwargs:
+            self.legendLabel = kwargs["legendLabel"]
         self.legendStyle = legendStyle
         self.drawStyle = drawStyle
 
+        self._uncertaintyLegendStyle = uncertaintyLegendStyle
+        if self._uncertaintyLegendStyle is None:
+            self._uncertaintyLegendStyle = self.legendStyle
+        self._uncertaintyDrawStyle = uncertaintyDrawStyle
+        self._uncertaintyLegendLabel = uncertaintyLegendLabel
+        self._uncertaintyGraph = None
+        self._uncertaintyGraphValid = False
+
     ## Get the ROOT histogram object (TH1)
     def getRootHisto(self):
-        return self.rootHisto
+        return self._histo.getRootHisto()
+
+    ## (Re)set the ROOT histogram object (TH1)
+    def setRootHisto(self, rootHisto):
+        self._histo.setRootHisto(rootHisto)
+
+    ## Get RootHistoWithUncertainties object
+    def getRootHistoWithUncertainties(self):
+        return self._histo
+
+    ## Construct the systematic uncertainty graph
+    #
+    # \return TGraphAsymmErrors, or None if there are no systematic
+    # uncertainties associated to the histogram.
+    def getSystematicUncertaintyGraph(self):
+        if not self._uncertaintyGraphValid and self._histo.hasSystematicUncertainties() and not uncertaintyMode.equal(Uncertainty.StatOnly):
+            update = self.getRootHistoWithUncertainties().getSystematicUncertaintyGraph(uncertaintyMode.addStatToSyst())
+            if self._uncertaintyGraph is not None:
+                aux.copyStyle(self._uncertaintyGraph, update)
+            self._uncertaintyGraph = update
+
+            self._uncertaintyGraphValid = True
+        return self._uncertaintyGraph
+
+    ## Add shape systematics variations
+    #
+    # \param name     Name of the uncertainty
+    # \param th1plus  TH1 for plus variation
+    # \param th1minus TH1 for minus variation
+    def addShapeUncertaintyFromVariation(self, name, th1Plus, th1Minus):
+        self._uncertaintyGraphValid = False
+        self._histo.addShapeUncertaintyFromVariation(name, th1Plus, th1Minus)
+
+    ## Add shape systematics as bin-wise relative uncertainties
+    #
+    # \param name  Name of the uncertainty
+    # \param th1   TH1 containing the bin-wise relative uncertainties
+    def addShapeUncertaintyRelative(self, name, th1):
+        self._uncertaintyGraphValid = False
+        self._histo.addShapeUncertaintyRelative(name, th1)
+
+    ## Add normalization systematic uncertainty
+    #
+    # \param name         Name of the uncertainty
+    # \param uncertainty  Uncertainty (e.g. 0.2 for 20 %)
+    def addNormalizationUncertaintyRelative(self, name, uncertainty):
+        self._uncertaintyGraphValid = False
+        self._histo.addNormalizationUncertaintyRelative(name, uncertainty)
 
     ## Get the histogram name
     def getName(self):
@@ -866,6 +1426,20 @@ class Histo:
     def setDrawStyle(self, drawStyle):
         self.drawStyle = drawStyle
 
+    ## Get the histogram draw style
+    def getDrawStyle(self):
+        return self.drawStyle
+
+    ## Set the draw style for the uncertainty graph
+    #
+    # \param drawStyle  new draw style
+    def setUncertaintyDrawStyle(self, drawStyle):
+        self._uncertaintyDrawStyle = drawStyle
+
+    ## Get the drawstyle of the uncertainty graph
+    def getUncertaintyDrawStyle(self):
+        return self._uncertaintyDrawStyle
+
     ## Set the legend label
     #
     # If the legend label is set to None, this Histo is not added to
@@ -875,37 +1449,68 @@ class Histo:
     def setLegendLabel(self, label):
         self.legendLabel = label
 
+    ## Set the legend label for the uncertainty graph
+    #
+    # If the legend label is set to None, the uncertainty graph is not
+    # added to TLegend in addToLegend()
+    #
+    # \param label  New histogram label for TLegend
+    def setUncertaintyLegendLabel(self, label):
+        self._uncertaintyLegendLabel = label
+
+    def getLegendStyle(self):
+        return self.legendStyle
+
     ## Set the legend style
     #
     # \param style  New histogram style for TLegend
     def setLegendStyle(self, style):
         self.legendStyle = style
 
+    ## Set the legend style for uncertainty graph
+    #
+    # \param style  New histogram style for TLegend
+    def setUncertaintyLegendStyle(self, style):
+        self._uncertaintyLegendStyle = style
+
+    def _addToLegendHisto(self, legend):
+        if self.legendLabel is None or self.legendStyle is None:
+            return
+        h = self.getRootHisto()
+        if h is None:
+            print >>sys.stderr, "WARNING: Trying to add Histo %s to the legend, but rootHisto is None" % self.getName()
+            return
+
+        cloned = False
+        gr = self.getSystematicUncertaintyGraph()
+        if gr is not None and self._uncertaintyLegendLabel is not None and \
+                self.legendStyle.lower() == "f" and self._uncertaintyLegendStyle.lower() == "f":
+            h = h.Clone("_forLegend")
+            cloned = True
+            fillStyles = [h.GetFillStyle(), self._uncertaintyGraph.GetFillStyle()]
+            if 3345 in fillStyles and 3354 in fillStyles:
+                h.SetFillStyle(3344)
+            else:
+                info = inspect.getframeinfo(inspect.currentframe())
+                print >>sys.stderr, 'WARNING: encountered fill styles %d and %d for stat and syst uncertainties, and there is no support yet for "combining" them for stat. Consider adding your case to %s near line %d' % (fillStyles[0], fillStyles[1], info.filename, info.lineno)
+
+        # Keep reference to avoid segfault
+        self.rootHistoForLegend = aux.addToLegend(legend, h, self.legendLabel, self.legendStyle, canModify=cloned)
+
+    def _addToLegendUncertainty(self, legend):
+        gr = self.getSystematicUncertaintyGraph()
+        if gr is None or self._uncertaintyLegendLabel is None:
+            return
+        self._rootHistoForLegendUncertainty = aux.addToLegend(legend, gr, self._uncertaintyLegendLabel, self._uncertaintyLegendStyle)
+
     ## Add the histogram to a TLegend
     #
-    # If the legend label is None, do not add this Histo to TLegend
+    # If the legend label or draw style is None, do not add this Histo to TLegend
     #
     # \param legend   TLegend object
     def addToLegend(self, legend):
-        if self.legendLabel == None:
-            return
-
-        # Hack to get the black border to the legend, only if the legend style is fill
-        if "f" == self.legendStyle.lower():
-            h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
-            if hasattr(h, "SetDirectory"):
-                h.SetDirectory(0)
-            h.SetLineWidth(1)
-            if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
-                h.SetLineColor(ROOT.kBlack)
-
-            legend.AddEntry(h, self.legendLabel, self.legendStyle)
-            self.rootHistoForLegend = h # keep the reference in order to avoid segfault
-        else:
-            labels = self.legendLabel.split("\n")
-            legend.AddEntry(self.rootHisto, labels[0], self.legendStyle)
-            for lab in labels[1:]:
-                legend.AddEntry(None, lab, "")
+        self._addToLegendHisto(legend)
+        self._addToLegendUncertainty(legend)
 
     ## Call a function with self as an argument.
     #
@@ -920,32 +1525,63 @@ class Histo:
     #
     # \param opt  Drawing options (in addition to the draw style)
     def draw(self, opt):
-        self.rootHisto.Draw(self.drawStyle+" "+opt)
+        h = self.getRootHisto()
+        if h is None:
+            print >>sys.stderr, "WARNING: Trying to draw Histo %s, but rootHisto is None" % self.getName()
+            return
+        if self._uncertaintyDrawStyle is not None:
+            unc = self.getSystematicUncertaintyGraph()
+            if unc is not None:
+                unc.Draw(self._uncertaintyDrawStyle+" "+opt)
+        if self.drawStyle is not None:
+            drawStyle = self.drawStyle+" "+opt
+            h.Draw(drawStyle)
+            tmp = drawStyle.lower()
+            if "e" in tmp and "p" in tmp:
+                if isinstance(h, ROOT.TH1):
+                    self._nonVisibleErrorLinesTH1 = drawNonVisibleErrorsTH1(h)
+#                elif isinstance(h, ROOT.TGraphErrors):
+#                    drawNonVisibleErrorsTGraph(h)
+
+    def Draw(self, *args):
+        self.draw(*args)
 
     ## Get the minimum value of the X axis
     def getXmin(self):
-        return self.rootHisto.GetXaxis().GetBinLowEdge(self.rootHisto.GetXaxis().GetFirst())
+        return self._histo.getXmin()
 
     ## Get the maximum value of the X axis
     def getXmax(self):
-        return self.rootHisto.GetXaxis().GetBinUpEdge(self.rootHisto.GetXaxis().GetLast())
+        return self._histo.getXmax()
 
     ## Get the minimum value of the Y axis
     def getYmin(self):
-        return self.rootHisto.GetMinimum()
+        return self._histo.getYmin()
 
     ## Get the maximum value of the Y axis
     def getYmax(self):
-        return self.rootHisto.GetMaximum()
+        return self._histo.getYmax()
+
+    ## Get the X axis title
+    def getXtitle(self):
+        return self._histo.getXtitle()
+
+    ## Get the Y axis title
+    def getYtitle(self):
+        return self._histo.getYtitle()
 
     ## Get the width of a bin
     #
     # \param bin  Bin number
     def getBinWidth(self, bin):
-        return self.rootHisto.GetBinWidth(bin)
+        return self._histo.getBinWidth(bin)
 
-    ## \var rootHisto
-    # ROOT histogram object (TH1)
+    ## Get list of bin widths
+    def getBinWidths(self):
+        return self._histo.getBinWidths()
+
+    ## \var _histo
+    # dataset.RootHistoWithUncertainties object
     ## \var name
     # Histogram name
     ## \var legendLabel
@@ -954,24 +1590,57 @@ class Histo:
     # Style string for TLegend
     ## \var drawStyle
     # Style string for Draw()
+    ## \var _uncertaintyLegendStyle
+    # Legend style for the uncertainty graph
+    ## \var _uncertaintyDrawStyle
+    # Draw style for the uncertainty graph
+    ## \var _uncertaintyLegendLabel
+    # Legend label for the uncertainty graph
+    ## \var _uncertaintyGraph
+    # Cached uncertainty graph
+    ## \var _uncertaintyGraphValid
+    # True, if _uncertaintyGraph cache is still valid (i.e. systematic uncertainties have not been modified)
     ## \var _isData
     # Is the histogram from data?
     ## \var _isMC
     # Is the histogram from MC?
 
 ## Represents one (TH1/TH2) histogram associated with a dataset.Dataset object
+#
+# Treats pseudo-datasets as MC-datasets.
 class HistoWithDataset(Histo):
     ## Constructor
     #
-    # \param dataset    dataset.Dataset object
-    # \param rootHisto  TH1 object
-    # \param name       Name of the Histo
+    # \param args    Position arguments (see below)
+    # \param kwargs  Keyword arguments (see below)
     #
-    #    The default legend label is the dataset name
-    def __init__(self, dataset, rootHisto, name):
-        Histo.__init__(self, rootHisto, name)
-        self.dataset = dataset
-        self.setIsDataMC(self.dataset.isData(), self.dataset.isMC())
+    # Either positional or keyword arguments are allowed
+    #
+    # <b>Positional arguments</b>
+    # \li\a dataset    dataset.Dataset object
+    # \li\a rootHisto  TH1 or RootHistoWithUncertainties object
+    # \li\a name       Name of the Histo
+    #
+    # <b>Keyword arguments</b>
+    # \li\a datasetRootHisto  dataset.DatasetRootHisto object
+    #
+    # The default legend label is the dataset name
+    def __init__(self, *args, **kwargs):
+        if len(kwargs) == 0 and len(args) != 3:
+            raise Exception("In absence of keyword arguments, I expect 3 positional arguments (dataset, rootHisto, name). Now I got %d." % len(args))
+        if len(args) == 0 and len(kwargs) != 1 and not "datasetRootHisto" in kwargs:
+            raise Exception("In absence of positional arguments, I expect 1 keyword argument 'datasetRootHisto. Now I got %s" % ",".join(kwargs.keys()))
+
+
+        if len(args) > 0:
+            Histo.__init__(self, args[1], args[2])
+            self.dataset = args[0]
+        else:
+            drh = kwargs["datasetRootHisto"]
+            Histo.__init__(self, drh.getHistogramWithUncertainties(), drh.getName())
+            self.dataset = drh.getDataset()
+
+        self.setIsDataMC(self.dataset.isData(), self.dataset.isMC() or self.dataset.isPseudo())
 
     ## Get the dataset.Dataset object
     def getDataset(self):
@@ -981,36 +1650,9 @@ class HistoWithDataset(Histo):
     # The histogram is from this dataset.Dataset object
 
 class HistoWithDatasetFakeMC(HistoWithDataset):
-    def __init__(self, dataset, rootHisto, name):
-        HistoWithDataset.__init__(self, dataset, rootHisto, name)
+    def __init__(self, dataset, rootHisto, name, **kwargs):
+        HistoWithDataset.__init__(self, dataset, rootHisto, name, **kwargs)
         self.setIsDataMC(False, True)
-
-## Represents combined (statistical) uncertainties of multiple histograms.
-class HistoTotalUncertainty(Histo):
-    ## Constructor
-    #
-    # \param histos  List of histograms.Histo objects
-    # \param name    Name of the uncertainty histogram
-    def __init__(self, histos, name):
-        rootHistos = []
-        for h in histos:
-            if hasattr(h, "getSumRootHisto"):
-                rootHistos.append(h.getSumRootHisto())
-            else:
-                rootHistos.append(h.getRootHisto())
-
-        tmp = rootHistos[0].Clone()
-        tmp.SetDirectory(0)
-        Histo.__init__(self, tmp, name, "F", "E2")
-        self.rootHisto.SetName(self.rootHisto.GetName()+"_errors")
-        self.histos = histos
-
-        for h in rootHistos[1:]:
-            self.rootHisto.Add(h)
-        self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
-
-    ## \var histos
-    # List of histograms.Histo objects from which the total uncertaincy is calculated
 
 ## Represents stacked TH1 histograms
 #
@@ -1020,16 +1662,24 @@ class HistoStacked(Histo):
     #
     # \param histos  List of Histo objects to stack
     # \param name    Name of the stacked histogram
-    def __init__(self, histos, name):
-        Histo.__init__(self, ROOT.THStack(name+"stackHist", name+"stackHist"), name, None, "HIST")
+    # \param kwargs  Keyword arguments (forwarded to Histo.__init__())
+    def __init__(self, histos, name, **kwargs):
+        Histo.__init__(self, ROOT.THStack(name+"stackHist", name+"stackHist"), name, None, "HIST", **kwargs)
         self.histos = histos
 
-        rootHistos = [d.getRootHisto() for d in self.histos]
-        rootHistos.reverse()
-        for h in rootHistos:
-            self.rootHisto.Add(h)
+        histos = filter(lambda h: h.getRootHisto() is not None, [d.getRootHistoWithUncertainties() for d in self.histos])
+        if len(histos) == 0:
+            raise Exception("Got 0 histograms, or all input histograms are None")
+        histos.reverse()
+        thStack = self.getRootHisto()
+        for h in histos:
+            # Addition of uncertainties is done on the fly in getSumRootHistoWithUncertainties()
+            thStack.Add(h.getRootHisto())
 
         self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
+
+    def setRootHisto(self, rootHisto):
+        raise NotImplementedError("HistoStacked.setRootHisto() would be ill-defined")
 
     ## Get the list of original TH1 histograms.
     def getAllRootHistos(self):
@@ -1038,6 +1688,24 @@ class HistoStacked(Histo):
     ## Get the sum of the original histograms.
     def getSumRootHisto(self):
         return sumRootHistos([d.getRootHisto() for d in self.histos])
+
+    def getAllRootHistoWithUncertainties(self):
+        return [x.getRootHistoWithUncertainties() for x in self.histos]
+
+    def getSumRootHistoWithUncertainties(self):
+        return sumRootHistos(self.getAllRootHistoWithUncertainties())
+
+    def getSumSystematicUncertaintyGraph(self):
+        if not self._uncertaintyGraphValid and self._histo.hasSystematicUncertainties() and not uncertaintyMode.equal(Uncertainty.StatOnly):
+            update = self.getSumRootHistoWithUncertainties().getSystematicUncertaintyGraph(uncertaintyMode.addStatToSyst())
+            if self._uncertaintyGraph is not None:
+                aux.copyStyle(self._uncertaintyGraph, update)
+            self._uncertaintyGraph = update
+            self._uncertaintyGraphValid = True
+        return self._uncertaintyGraph
+
+    def getSystematicUncertaintyGraph(self):
+        return None
 
     def setLegendLabel(self, label):
         for h in self.histos:
@@ -1062,13 +1730,17 @@ class HistoStacked(Histo):
             h.call(function)
 
     def getXmin(self):
-        return min([h.getXmin() for h in self.histos])
+        return min(filter(lambda x: x is not None, [h.getXmin() for h in self.histos]))
 
     def getXmax(self):
-        return max([h.getXmax() for h in self.histos])
+        return max(filter(lambda x: x is not None, [h.getXmax() for h in self.histos]))
 
     def getBinWidth(self, bin):
-        return self.histos[0].getBinWidth(bin)
+        for h in self.histos:
+            w = h.getBinWidth(bin)
+            if w is not None:
+                return w
+        return None
 
     ## \var histos
     # List of histograms.Histo objects which are stacked
@@ -1079,15 +1751,19 @@ class HistoStacked(Histo):
 class HistoGraph(Histo):
     ## Constructor
     #
-    # \param  rootGraph   TGraph object
+    # \param rootGraph    TGraph object
     # \param name         Name of the histogram
     # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
     # \param drawStyle    Style string for Draw (string parameter for TH1.Draw())
-    def __init__(self, rootGraph, name, legendStyle="l", drawStyle="L"):
-        Histo.__init__(self, rootGraph, name, legendStyle, drawStyle)
+    # \param kwargs       Keyword arguments (forwarded for Histo.__init__())
+    def __init__(self, rootGraph, name, legendStyle="l", drawStyle="L", **kwargs):
+        Histo.__init__(self, rootGraph, name, legendStyle, drawStyle, **kwargs)
 
     def getRootGraph(self):
         return self.getRootHisto()
+
+    def setRootGraph(self, rootGraph):
+        self.setRootHisto(rootGraph)
 
     def _values(self, values, func):
         return [func(values[i], i) for i in xrange(0, self.getRootGraph().GetN())]
@@ -1141,6 +1817,100 @@ class HistoGraphWithDataset(HistoGraph):
 
     def getDataset(self):
         return self.dataset
+
+## Represents combined (statistical) uncertainties of multiple histograms.
+class HistoTotalUncertainty(HistoGraph):
+    ## Constructor
+    #
+    # \param histos  List of histograms.Histo objects
+    # \param name    Name of the uncertainty histogram
+    def __init__(self, histos, name):
+        rootHistosWithUnc = []
+        for h in histos:
+            if hasattr(h, "getSumRootHistoWithUncertainties"):
+                ret = h.getSumRootHistoWithUncertainties()
+            else:
+                ret = h.getRootHistoWithUncertainties()
+            if ret is not None:
+                rootHistosWithUnc.append(ret)
+        if len(rootHistosWithUnc) == 0:
+            raise Exception("Got 0 histograms, or all input histograms are None")
+
+        tmp = rootHistosWithUnc[0].Clone()
+        tmp.SetDirectory(0)
+        for h in rootHistosWithUnc[1:]:
+            tmp.Add(h)
+        tmpgr = tmp.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
+        HistoGraph.__init__(self, dataset.RootHistoWithUncertainties(tmpgr), name, "F", "E2")
+        self._histo.SetName(rootHistosWithUnc[0].GetName()+"_errors")
+        self.histos = histos
+        self.setIsDataMC(self.histos[0].isData(), self.histos[0].isMC())
+
+        if tmp.hasSystematicUncertainties() and not uncertaintyMode.equal(Uncertainty.StatOnly):
+            self._uncertaintyGraph = tmp.getSystematicUncertaintyGraph(uncertaintyMode.addStatToSyst())
+            self._uncertaintyGraphValid = True
+            self.setUncertaintyDrawStyle("E2")
+
+        if not uncertaintyMode.showStatOnly():
+            self.setDrawStyle(None)
+
+    ## \var histos
+    # List of histograms.Histo objects from which the total uncertaincy is calculated
+
+## Represents TEfficiency objects
+class HistoEfficiency(Histo):
+    ## Constructor
+    #
+    # \param rootEfficiency TEfficiency object
+    # \param name         Name of the histogram
+    # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
+    # \param drawStyle    Style string for Draw (string parameter for TH1.Draw())
+    # \param kwargs       Keyword arguments (forwarded to Histo.__init__())
+    def __init__(self, rootEfficiency, name, legendStyle="l", drawStyle="L", **kwargs):
+        Histo.__init__(self, rootEfficiency, name, legendStyle, drawStyle, **kwargs)
+
+    def _values(self, function):
+        ret = []
+        for bin in xrange(1, self.getRootPassedHisto().GetNbinsX()+1):
+            ret.append(function(self.getRootEfficiency(), bin))
+        return ret
+
+    def getRootEfficiency(self):
+        return self.getRootHisto()
+
+    def setRootEfficiency(self, rootEfficiency):
+        self.setRootEfficiency(rootEfficiency)
+
+    def getRootPassedHisto(self):
+        return self.getRootEfficiency().GetPassedHistogram()
+
+    def getXmin(self):
+        return aux.th1Xmin(self.getRootPassedHisto())
+
+    def getXmax(self):
+        return aux.th1Xmax(self.getRootPassedHisto())
+
+    def getYmin(self):
+        return min(self._values(lambda eff, bin: eff.GetEfficiency(bin)-eff.GetEfficiencyErrorLow(bin)))
+
+    def getYmax(self):
+        return max(self._values(lambda eff, bin: eff.GetEfficiency(bin)+eff.GetEfficiencyErrorUp(bin)))
+
+    def getYmin(self):
+        return self.getRootPassedHisto().GetMinimum()
+
+    def getYmax(self):
+        return 1.0
+
+    def getXtitle(self):
+        return self.getRootPassedHisto().GetXaxis().GetTitle()
+
+    def getYtitle(self):
+        return "Efficiency"
+
+    def getBinWidth(self, bin):
+        return self.getRootPassedHisto().GetBinWidth(bin)
+
 
 ## Implementation of HistoManager.
 #
@@ -1230,6 +2000,11 @@ class HistoManagerImpl:
                 del self.legendList[i]
                 break
 
+    def removeAllHistos(self):
+        self.drawList = []
+        self.legendList = []
+        self._populateMap()
+
     ## Replace histograms.Histo object
     #
     # \param name   Name of the histograms.Histo object to be replaced
@@ -1246,6 +2021,18 @@ class HistoManagerImpl:
             if h.getName() == name:
                 self.legendList[i] = histo
                 break
+
+    ## Reverse draw and legend lists
+    def reverse(self):
+        self.drawList.reverse()
+        self.legendList.reverse()
+
+    ## Reorder both draw and legend lists
+    #
+    # \param histogNames   List of histogram names
+    def reorder(self, histoNames):
+        self.reorderDraw(histoNames)
+        self.reorderLegend(histoNames)
 
     ## Reorder the legend
     #
@@ -1393,14 +2180,29 @@ class HistoManagerImpl:
             d.addToLegend(legend)
 
     ## Draw histograms.
-    def draw(self):
+    #
+    # \param untilName  If not None, untilName is the last histogram to
+    #                   be drawn. In this case, the current index is
+    #                   returned.
+    # \param fromIndex  If not None, fromIndex is the index of the
+    #                   first histogram to be drawn.
+    #
+    # Use case for the two above ones is to draw stat and syst+stat
+    # ratios on the "background" of the ratio pad, then draw the ratio
+    # line, and finally continue with the rest of the ratio histograms.
+    def draw(self, untilName=None, fromIndex=None):
         # Reverse the order of histograms so that the last histogram
         # is drawn first, i.e. on the bottom
         histos = self.drawList[:]
         histos.reverse()
 
-        for h in histos:
+        for i, h in enumerate(histos):
+            if fromIndex is not None and i < fromIndex:
+                continue
             h.draw("same")
+            if untilName is not None and h.getName() == untilName:
+                return i
+        return None
 
     ## Stack histograms.
     #
@@ -1416,7 +2218,7 @@ class HistoManagerImpl:
         self.drawList = notSelected
 
         self.legendList = filter(lambda x: x in notSelected, self.legendList)
-        self.legendList.insert(firstIndex+1, stacked)
+        self.legendList.insert(firstIndex, stacked)
 
         self._populateMap()
 
@@ -1425,8 +2227,9 @@ class HistoManagerImpl:
     # \param style        Style function for the uncertainty histogram
     # \param name         Name of the unceratinty histogram
     # \param legendLabel  Legend label for the uncertainty histogram
+    # \param uncertaintyLegendLabel  Legend label for the (stat+)syst uncertainty histogram
     # \param nameList     List of histogram names to include to the uncertainty band (\a None corresponds all MC)
-    def addMCUncertainty(self, style, name="MCuncertainty", legendLabel="Sim. stat. unc.", nameList=None):
+    def addMCUncertainty(self, style, name="MCuncertainty", legendLabel="Sim. stat. unc.", uncertaintyLegendLabel=None, nameList=None):
         mcHistos = filter(lambda x: x.isMC(), self.drawList)
         if len(mcHistos) == 0:
             print >> sys.stderr, "WARNING: Tried to create MC uncertainty histogram, but there are not MC histograms!"
@@ -1440,6 +2243,7 @@ class HistoManagerImpl:
 
         hse = HistoTotalUncertainty(mcHistos, name)
         hse.setLegendLabel(legendLabel)
+        hse.setUncertaintyLegendLabel(uncertaintyLegendLabel)
         hse.call(style)
 
         firstMcIndex = len(self.drawList)
@@ -1615,6 +2419,9 @@ class HistoManager:
 #        for h in self.datasetRootHistos:
 #            h.scale(value)
 
+    def hasLuminosity(self):
+        return self.luminosity is not None
+
     ## Get the integrated luminosity to which the MC datasets have been normalized to.
     def getLuminosity(self):
         if self.luminosity == None:
@@ -1626,11 +2433,12 @@ class HistoManager:
     # \param x   X coordinate of the text (\a None for default)
     # \param y   Y coordinate of the text (\a None for default)
     def addLuminosityText(self, x=None, y=None):
+        _printTextDeprecationWarning("histograms.HistoManager.addLuminosityText()", "histograms.addStandardTexts() with histograms.HistoManager.getLuminosity()")
         addLuminosityText(x, y, self.getLuminosity())
 
     ## Create the HistoManagerImpl object.
     def _createImplementation(self):
-        self.impl = HistoManagerImpl([HistoWithDataset(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
+        self.impl = HistoManagerImpl([HistoWithDataset(datasetRootHisto=drh) for drh in self.datasetRootHistos])
 
     ## Stack all MC histograms to one named <i>StackedMC</i>.
     def stackMCHistograms(self):
@@ -1644,3 +2452,15 @@ class HistoManager:
     # histograms.HistoManagerImpl object for the implementation
     ## \var luminosity
     # Total integrated luminosity ofthe managed collision data (None if not set)
+
+
+def addSysError(histogram,syserror):
+    # error in decimals
+    for i in range(1,histogram.GetNbinsX()+1):
+        error  = histogram.GetBinError(i)
+        value  = histogram.GetBinContent(i)
+        syserr = value*syserror    
+
+        newError = math.sqrt(error*error + syserr*syserr)
+        histogram.SetBinError(i,newError)
+    return histogram

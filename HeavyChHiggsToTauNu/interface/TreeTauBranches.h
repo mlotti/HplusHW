@@ -9,6 +9,7 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeFunctionBranch.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeGenTauBranches.h"
 
 #include<vector>
 
@@ -47,10 +48,7 @@ namespace HPlus {
     std::vector<double> fTausEmFraction;
     std::vector<int> fTausDecayMode;
     std::vector<TauFunctionBranch> fTausFunctions;
-    std::vector<int> fTausPdgId;
-    std::vector<int> fTausMotherPdgId;
-    std::vector<int> fTausGrandMotherPdgId;
-    std::vector<int> fTausDaughterPdgId;
+    TreeGenTauBranches fTausGenMatch;
   };
 }
 

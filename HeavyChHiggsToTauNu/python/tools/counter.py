@@ -146,10 +146,14 @@ class CellFormatBase:
     #                             valueFormat, uncertaintyFormat, and
     #                             uncertaintyPrecision
     # \li\a valueOnly             Boolean, format the value only? (default: False)
+    # \li\a beginCell             String to be inserted before the content of the cell (default: "")
+    # \li\a endCell               String to be inserted after the content of the cell (default: "")
     def __init__(self, **kwargs):
         self._valueFormat = kwargs.get("valueFormat", "%.6g")
         self._uncertaintyFormat = kwargs.get("uncertaintyFormat", self._valueFormat)
         self._valueOnly = kwargs.get("valueOnly", False)
+        self._beginCell = kwargs.get("beginCell", "")
+        self._endCell = kwargs.get("endCell", "")
 
         uncertaintyPrecision = kwargs.get("uncertaintyPrecision", 4)
         self._withPrecision = kwargs.get("withPrecision", None)
@@ -174,11 +178,11 @@ class CellFormatBase:
         val = count.value()
         uUp = count.uncertaintyHigh()
         uDown = count.uncertaintyLow()
-        hasUncertainty = (uUp != None  and uDown != None)
+        hasUncertainty = (uUp is not None  and uDown is not None)
         if hasUncertainty:
             uncertaintiesSame = (uUp == 0 or abs(uUp-uDown)/uUp < self._uncertaintyEpsilon)
 
-        if self._withPrecision == None or not hasUncertainty:
+        if self._withPrecision is None or not hasUncertainty:
             value = self._valueFormat % val
             if hasUncertainty:
                 uUpf = self._uncertaintyFormat % uUp
@@ -186,18 +190,29 @@ class CellFormatBase:
         else:
             valDig = _numToDig(val)
             uncDig = min(_numToDig(uUp), _numToDig(uDown))
-            
+
+            position = uncDig - self._withPrecision
+            # See if number of uncertainty digits changes because of rounding of uncertainty
+            if position >= 0:
+                valDig = _numToDig(round(val, -position))
+                uncDig = min(_numToDig(round(uUp, -position)), _numToDig(round(uDown, -position)))
+                position = uncDig - self._withPrecision
+
             if self._valueType == "f":
-                if uncDig - self._withPrecision < 0:
-                    precision = abs(uncDig - self._withPrecision)
+                if position < 0:
+                    precision = abs(position)
                     if uncDig < 0:
                         precision -= 1
                 else:
+                    # This case is handled more below, need additional precision for the numbers
                     precision = 0
+                    val = round(val, -position)
+                    uUp = round(uUp, -position)
+                    uDown = round(uDown, -position)
                 valFmt = "%%.%df" % precision
                 uncFmt = valFmt
             elif self._valueType == "e":
-                precisionVal = valDig - uncDig + self._withPrecision - 1
+                precisionVal = valDig - position - 1
                 precisionUnc = self._withPrecision - 1
                 valFmt = "%%.%de" % precisionVal
                 uncFmt = "%%.%de" % precisionUnc
@@ -206,15 +221,18 @@ class CellFormatBase:
             uUpf = uncFmt % uUp
             uDownf = uncFmt % uDown
 
+        ret = self._beginCell
 
         if self._valueOnly or not hasUncertainty:
-            return self._formatValue(value)
-
-        if (uDown == 0.0 and uUp == 0.0) or uncertaintiesSame:
-            return self._formatValuePlusMinus(value, uUpf)
+            ret += self._formatValue(value)
         else:
-            return self._formatValuePlusHighMinusDown(value, uUpf, uDownf)
+            if (uDown == 0.0 and uUp == 0.0) or uncertaintiesSame:
+                ret += self._formatValuePlusMinus(value, uUpf)
+            else:
+                ret += self._formatValuePlusHighMinusLow(value, uUpf, uDownf)
 
+        ret += self._endCell
+        return ret
 
     ## \var _valueFormat
     # Format string for count value
@@ -679,7 +697,33 @@ def efficiencyColumnNormalApproximation(name, column):
             rows.append(value)
             rowNames.append(origRownames[irow])
     return CounterColumn(name, rowNames, rows)
-    
+
+## Calculate efficiencies for a column with the Clopper-Pearson method for uncertainties
+#
+# \param name    Name of the new column
+# \param column  counter.CounterColumn object of counts
+#
+# Note that the counts in the column must be unweighted counts
+# (i.e. for MC they should not be normalized or anything)
+def efficiencyColumnClopperPearson(name, column):
+    origRowNames = column.getRowNames()
+    rows = []
+    rowNames = []
+
+    prev = None
+    for irow in xrange(0, column.getNrows()):
+        count = column.getCount(irow)
+        value = None
+        if count != None and prev != None:
+            try:
+                value = dataset.divideBinomial(count, prev)
+            except ZeroDivisionError:
+                pass
+        prev = count
+        if value != None:
+            rows.append(value)
+            rowNames.append(origRownames[irow])
+    return CounterColumn(name, rowNames, rows)
 
 ## Calculate efficiencies for a column with the normal approximation for uncertainties
 #
@@ -694,9 +738,25 @@ def efficiencyColumnNormalApproximation(name, column):
 def efficiencyColumn(name, column, method="normalApproximation"):
     return {
         "normalApproximation": efficiencyColumnNormalApproximation,
-        "errorPropagation": efficiencyColumnErrorPropagation
+        "errorPropagation": efficiencyColumnErrorPropagation,
+        "clopperPearson": efficiencyColumnClopperPearson,
     }[method](name, column)
 
+def efficiencyColumnFromTEfficiency(name, teff, rowNames):
+    rows = []
+    nbins = teff.GetTotalHistogram().GetNbinsX()
+    if nbins != len(rowNames):
+        raise Exception("Got %d bins from TEfficiency, but %d rowNames" % (nbins, len(rowNames)))
+    for i in xrange(0, nbins):
+        bin = i+1
+        rows.append(dataset.CountAsymmetric(teff.GetEfficiency(bin), teff.GetEfficiencyErrorLow(bin), teff.GetEfficiencyErrorUp(bin)))
+    return CounterColumn(name, rowNames, rows)
+
+def efficiencyTableFromTEfficiencies(teffs, columnNames, rowNames):
+    table = CounterTable()
+    for teff, name in zip(teffs, columnNames):
+        table.appendColumn(efficiencyColumnFromTEfficiency(name, teff, rowNames))
+    return table
 
 ## Create a new counter.CounterColumn as the sum of the columns.
 #
@@ -1330,6 +1390,12 @@ class CounterTable:
         self.rowNames = rowNames
         self.columnNames = colNames
 
+    def multiply(self, value, uncertainty=0):
+        count = dataset.Count(value, uncertainty)
+        for irow in xrange(len(self.table)):
+            for icol in xrange(len(self.table[0])):
+                self.table[irow][icol].multiply(count)
+
     ## Get the number of rows
     def getNrows(self):
         return len(self.table)
@@ -1915,6 +1981,10 @@ class SimpleCounter:
                 return self.counter[i]
         raise Exception("No count '%s' in counter '%s'" % (name, self.getName()))
 
+    def constructTEfficiency(self, function):
+        (passed, total) = function(self)
+        return ROOT.TEfficiency(passed, total)
+
     ## \var datasetRootHisto
     # dataset.DatasetRootHisto object containing the dataset.Dataset
     # and ROOT histogram of the counter
@@ -1936,8 +2006,7 @@ class Counter:
 
     ## Loop through datasets calling the given function
     def forEachDataset(self, func):
-        for c in self.counters:
-            func(c)
+        return [func(c) for c in self.counters]
 
     def getColumnNames(self):
         return [c.getName() for c in self.counters]
@@ -2018,6 +2087,9 @@ class Counter:
             table.appendColumn(h)
         return table
 
+    def constructTEfficiencies(self, function):
+        return self.forEachDataset(lambda x: x.constructTEfficiency(function))
+
     ## \var counters
     # List of counter.SimpleCounter objects, one per dataset
 
@@ -2028,28 +2100,38 @@ class Counter:
 class EventCounter:
     ## Constructor
     #
-    # \param datasets            dataset.DatasetManager object
+    # \param datasets            dataset.DatasetManager, or (single or list) dataset.Dataset (or similar) object
     # \param countNameFunction   Function for mapping the X axis bin labels to count names (optional)
     # \param counters            Counter directory within the dataset.Dataset TFiles (if not given, use the counter from dataset.DatasetManager object)
+    # \param mainCounterOnly     If True, read only the main counter (default: False)
+    # \param kwargs              Keyword arguments, passed to Dataset.getDatasetRootHisto() when reading the counter histograms
     #
     # Creates counter.Counter for the main counter and each subcounter
-    def __init__(self, datasets, countNameFunction=None, counters=None, mainCounterOnly=False):
+    def __init__(self, datasets, countNameFunction=None, counters=None, mainCounterOnly=False, **kwargs):
         counterNames = {}
 
-        if len(datasets.getAllDatasets()) == 0:
+        allDatasets = []
+        if hasattr(datasets, "getAllDatasets"):
+            allDatasets = datasets.getAllDatasets()
+        elif isinstance(datasets, list):
+            allDatasets = datasets[:]
+        else:
+            allDatasets = [datasets]
+
+        if len(allDatasets) == 0:
             raise Exception("No datasets")
 
         # Take the default counter directory if none is explicitly given
         counterDir = counters
         if counterDir == None:
-            for dataset in datasets.getAllDatasets():
+            for dataset in allDatasets:
                 if counterDir == None:
                     counterDir = dataset.getCounterDirectory()
                 else:
                     if counterDir != dataset.getCounterDirectory():
                         raise Exception("Sanity check failed, datasets have different counter directories!")
         # Pick all possible names of counters
-        for dataset in datasets.getAllDatasets():
+        for dataset in allDatasets:
             for name in dataset.getDirectoryContent(counterDir, lambda obj: isinstance(obj, ROOT.TH1)):
                 counterNames[name] = 1
 
@@ -2058,12 +2140,15 @@ class EventCounter:
         except KeyError:
             raise Exception("Error: no 'counter' histogram in the '%s' directories" % counterDir)
 
-        self.mainCounter = Counter(datasets.getDatasetRootHistos(counterDir+"/counter"), countNameFunction)
+        def getDatasetRootHistos(path):
+            return [d.getDatasetRootHisto(path, **kwargs) for d in allDatasets]
+
+        self.mainCounter = Counter(getDatasetRootHistos(counterDir+"/counter"), countNameFunction)
         self.subCounters = {}
         if not mainCounterOnly:
             for subname in counterNames.keys():
                 try:
-                    self.subCounters[subname] = Counter(datasets.getDatasetRootHistos(counterDir+"/"+subname), countNameFunction)
+                    self.subCounters[subname] = Counter(getDatasetRootHistos(counterDir+"/"+subname), countNameFunction)
                 except:
                     pass
 

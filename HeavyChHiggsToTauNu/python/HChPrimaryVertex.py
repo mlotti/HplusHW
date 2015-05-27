@@ -1,25 +1,45 @@
 import FWCore.ParameterSet.Config as cms
 
 
-def addPrimaryVertexSelection(process, sequence):
-    process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
-        src = cms.InputTag("offlinePrimaryVertices")
+def addPrimaryVertexSelection(process, sequence, srcProcess="", postfix="", filter=False):
+    m = cms.EDProducer("HPlusFirstVertexSelector",
+        src = cms.InputTag("offlinePrimaryVertices", "", srcProcess)
     )
-    sequence *= process.firstPrimaryVertex
+    setattr(process, "firstPrimaryVertex"+postfix, m)
+    sequence *= m
 
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi as pv
-    process.selectedPrimaryVertex = pv.goodPrimaryVertices.clone(
-        src = cms.InputTag("firstPrimaryVertex")
+    m = pv.goodPrimaryVertices.clone(
+        src = cms.InputTag("firstPrimaryVertex"+postfix)
     )
-    sequence *= process.selectedPrimaryVertex
+    setattr(process, "selectedPrimaryVertex"+postfix, m)
+    sequence *= m
 
-    process.goodPrimaryVertices = pv.goodPrimaryVertices.clone()
-    sequence *= process.goodPrimaryVertices
+    m = pv.goodPrimaryVertices.clone()
+    setattr(process, "goodPrimaryVertices"+postfix, m)
+    sequence *= m
 
-#    process.selectedPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
-#                                                       src = cms.InputTag("selectedPrimaryVertex"),
-#                                                       minNumber = cms.uint32(1),
-#                                                       maxNumber = cms.uint32(999)
-#                                                       )
-#    sequence *= process.selectedPrimaryVertexFilter
-    
+    ret = []
+    if filter:
+        m = cms.EDProducer("EventCountProducer")
+        name = "primaryVertexAllEvents"+postfix
+        setattr(process, name, m)
+        sequence *= m
+        ret.append(name)
+
+        m = cms.EDFilter("VertexCountFilter",
+            src = cms.InputTag("selectedPrimaryVertex"+postfix),
+            minNumber = cms.uint32(1),
+            maxNumber = cms.uint32(999)
+        )
+        setattr(process, "selectedPrimaryVertexFilter"+postfix, m)
+        sequence *= m
+
+        m = cms.EDProducer("EventCountProducer")
+        name = "primaryVertexSelected"+postfix
+        setattr(process, name, m)
+        sequence *= m
+        ret.append(name)
+
+    return ret
+

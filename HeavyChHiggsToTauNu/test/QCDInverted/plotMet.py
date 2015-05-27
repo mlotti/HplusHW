@@ -37,7 +37,7 @@ def main():
     plot.frame.GetYaxis().SetTitle("Number of events")
 
     plot.draw()
-    plot.addLuminosityText()
+    plot.addStandardTexts()
 
     plot.save()
 
