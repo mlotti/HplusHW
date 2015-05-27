@@ -34,12 +34,11 @@ class METDumper {
 	std::vector<edm::ParameterSet> inputCollections;
 	edm::Handle<edm::View<pat::MET> > *handle;
 
-//	reco::Candidate::LorentzVector *MET_p4;
-//	reco::Candidate::LorentzVector GenMET_p4;
-
 	double *MET;
 	double *MET_phi;
-        double GenMET;
+        double caloMET_et;
+        double caloMET_phi;
+        double GenMET_et;
         double GenMET_phi;
 
 };

@@ -9,8 +9,9 @@ process.maxEvents = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
+	'/store/mc/RunIISpring15DR74/QCD_Pt-80to120_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/2A98D4CF-F9FE-E411-AB1A-047D7BD6DD44.root',
 #        'file:miniAOD-prod_PAT_TT_RECO_721_11112014.root'
-	'file:miniAOD-prod_PAT_TT_RECO_740p1_02122014.root'
+#	'file:miniAOD-prod_PAT_TT_RECO_740p1_02122014.root'
 #	'file:miniAOD-prod_PAT_Hp200_RECO_740p1_09122014.root'
 #	'file:miniAOD-prod_PAT_SingleMu_Run2012D_v1_RECO.root'
 #	'file:PYTHIA6_Tauola_TTbar_H160_taunu_13TeV_cff_py_GEN.root'
@@ -144,10 +145,6 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("MET_Type1"),
             src = cms.InputTag("slimmedMETs")
         ),
-#        cms.PSet(
-#            branchname = cms.untracked.string("CaloMET"),
-#            src = cms.InputTag("patMETCalo")
-#        )
     )
 )
 
