@@ -6,6 +6,8 @@
 #include "boost/optional.hpp"
 
 #include <type_traits>
+#include <iostream>
+#include <boost/property_tree/json_parser.hpp>
 
 // Partial specializations at the end
 namespace ParameterSetImpl {
@@ -44,6 +46,11 @@ public:
     return ParameterSetImpl::ParameterGetter<T>::getOptional(fConfig, name);
   }
 
+  /// For debugging, print contents of ParameterSet
+  void debug() const {
+    write_json(std::cout, fConfig);
+  }
+  
   bool isMC() const;
 
 private:
