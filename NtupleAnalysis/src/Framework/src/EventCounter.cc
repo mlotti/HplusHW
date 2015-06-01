@@ -69,6 +69,7 @@ void EventCounter::Counter::serialize() {
 
 // EventCounter
 EventCounter::EventCounter(const EventWeight& weight):
+  fIsEnabled(true),
   fWeight(weight)
 {
   fCounters.emplace_back("counter");

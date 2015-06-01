@@ -125,6 +125,9 @@ endif
 
 setenv PATH "${HIGGSANALYSIS_BASE}/HeavyChHiggsToTauNu/scripts:${HIGGSANALYSIS_BASE}/NtupleAnalysis/scripts:${PATH}"
 
+# Install externals if necessary
+sh +x installexternals.sh
+
 # echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 # echo "!" 
 # echo "! This file needs to be updated, please see setup.sh for an example"
