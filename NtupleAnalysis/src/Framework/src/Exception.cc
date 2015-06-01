@@ -29,7 +29,7 @@ namespace hplus {
   const char* Exception::what() const throw() {
     unsigned int max_frames = 63;
     std::stringstream s;
-    s << "Exception of category '" << _category << "' occurred:" << std::endl;
+    s << "Exception of category '" << _category << "' occurred with message:" << std::endl;
     s << ">>> " << _msg.str() << std::endl;
     s << std::endl;
     s << "Backtrace:" << std::endl;
@@ -100,29 +100,4 @@ namespace hplus {
     free(symbollist);
     return s.str().c_str();
   }
-/*
-  
-  template <typename E, typename T> E& Exception::operator <<(E& e, const T& data) {
-    e._msg << data;
-    return e;
-  }*/
-
-
-  
-  
-/*  
-  Exception& Exception::operator << (const char* msg) {
-    _msg << msg;
-    return *this;
-  }
-
-  Exception& Exception::operator << (std::string& msg) {
-    _msg << msg;
-    return *this;
-  }
-
-  Exception& Exception::operator << (Exception& e) {
-    _msg << e.getMsg();
-    return *this;
-  }*/
 }

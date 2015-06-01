@@ -15,37 +15,19 @@ namespace hplus {
     Exception(const Exception& e);
     virtual ~Exception();
 
+    /// Enable streaming of the message (utilizes copy constructor)
     template <typename T> Exception& operator <<(const T& data) {
       _msg << data;
       return *this;
     }
-    //template <typename T> std::ostream operator <<(std::ostream& s, const T& data);
-    //template <typename E, typename T> E& operator <<(E& e, const T& data);
 
-//     template <typename E, typename T> Exception& operator<<(const E& e, const T& data) {
-//       E& ref = const_cast<E&>(e);
-//       ref._msg << data;
-//       return e;
-//     }
-
-    /*Exception& operator << (const char* msg);
-    Exception& operator << (std::string& msg);
-    Exception& operator << (Exception& e);*/
     virtual const char* what() const throw();
     std::string getMsg() const { return _msg.str(); }
+    std::string getCategory() const { return _category; }
 
   private:
     std::string _category;
     std::stringstream _msg;
   };
-  
-
-//   template <typename E, typename T> E& operator <<(E& e, const T& data) {
-//     e._msg << data;
-//     return e;
-//   }
-
-  
-  
 }
 #endif
