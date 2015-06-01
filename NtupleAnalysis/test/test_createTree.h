@@ -6,6 +6,8 @@
 #include <memory>
 #include <string>
 
+std::unique_ptr<TTree> createEmptyTree();
+
 std::unique_ptr<TTree> createSimpleTree();
 
 std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix="Taus");

@@ -3,6 +3,16 @@
 #include <vector>
 #include <algorithm>
 
+
+std::unique_ptr<TTree> createEmptyTree() {
+  auto tree = std::unique_ptr<TTree>(new TTree("Events", "Events"));
+  unsigned int run;           tree->Branch("run",   &run);
+  unsigned int lumi;          tree->Branch("lumi",  &lumi);
+  unsigned long long event;   tree->Branch("event", &event);
+  
+  return tree;
+}
+
 std::unique_ptr<TTree> createSimpleTree() {
   auto tree = std::unique_ptr<TTree>(new TTree("Events", "Events"));
 
@@ -53,6 +63,8 @@ namespace {
     return ret;
   }
 }
+
+
 
 std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   auto tree = std::unique_ptr<TTree>(new TTree("Events", "Events"));
