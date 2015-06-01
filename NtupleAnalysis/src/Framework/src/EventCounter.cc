@@ -1,5 +1,6 @@
 #include "Framework/interface/EventCounter.h"
 #include "Framework/interface/EventWeight.h"
+#include <boost_1_57_0/boost/concept_check.hpp>
 
 #include <TDirectory.h>
 #include <TH1F.h>
@@ -21,6 +22,13 @@ EventCounter::Counter::Counter(const std::string& n):
 bool EventCounter::Counter::contains(const std::string& l) const {
   return std::find(labels.begin(), labels.end(), l) != labels.end();
 }
+size_t EventCounter::Counter::getLabelIndex(const std::string& l) const {
+  for (size_t i = 0; i < labels.size(); ++i) {
+    if (l == labels[i])
+      return i;
+  }
+  return -1;
+}
 size_t EventCounter::Counter::insert(const std::string& label) {
   if(counter)
     throw std::logic_error("May not addCounter() after setOutput()");
@@ -37,7 +45,7 @@ void EventCounter::Counter::incrementCount(size_t countIndex, double weight) {
   weights[countIndex] += weight;
   weightsSquared[countIndex] += (weight*weight);
 }
-int EventCounter::Counter::value(size_t countIndex) {
+long int EventCounter::Counter::value(size_t countIndex) {
   return values[countIndex];
 }
 void EventCounter::Counter::book(TDirectory *dir) {
@@ -108,7 +116,22 @@ void EventCounter::serialize() {
   for(auto& counter: fCounters)
     counter.serialize();
 }
-
+long int EventCounter::getValueByName(const std::string& name) {
+  for (auto it = fCounters.begin(); it != fCounters.end(); ++it) {
+    if (it->contains(name)) {
+      size_t i = it->getLabelIndex(name);
+      return it->value(i);
+    }
+  }
+  return -1;
+}
+bool EventCounter::contains(const std::string& name) {
+  for (auto it = fCounters.begin(); it != fCounters.end(); ++it) {
+    if (it->contains(name))
+      return true;
+  }
+  return false;
+}
 size_t EventCounter::findOrInsertCounter(const std::string& name) {
   auto found = std::find_if(fCounters.begin(), fCounters.end(), [&](const Counter& c) {
       return c.getName() == name;
