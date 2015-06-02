@@ -22,6 +22,8 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& e
   cPassedElectronSelection(eventCounter.addCounter("passed e selection ("+postfix+")")),
   // Sub counters
   cSubAll(eventCounter.addSubCounter("e selection ("+postfix+")", "All events")),
+  cSubPassedID(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed ID")),
+  cSubPassedIsolation(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed isolation")),
   cSubPassedEta(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed eta cut")),
   cSubPassedPt(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed pt cut"))
 { }
@@ -53,12 +55,19 @@ ElectronSelection::Data ElectronSelection::analyze(const Event& event) {
 ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
   Data output;
   cSubAll.increment();
+  bool passedID = false;
+  bool passedIsol = false;
   bool passedEta = false;
   bool passedPt = false;
   // Loop over electrons
   for(Electron electron: event.electrons()) {
     hElectronPtAll->Fill(electron.pt());
     hElectronEtaAll->Fill(electron.eta());
+    // Apply cut on electron ID FIXME to be added
+    
+    passedID = true;
+    // Apply cut on electron isolation FIXME to be added
+    
     // Apply cut on eta
     if (std::fabs(electron.eta()) > fElectronEtaCut)
       continue;
@@ -79,6 +88,10 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
     output.fSelectedElectrons.push_back(electron);
   }
   // Fill counters
+  if (passedID)
+    cSubPassedID.increment();
+  if (passedIsol)
+    cSubPassedIsolation.increment();
   if (passedEta)
     cSubPassedEta.increment();
   if (passedPt)

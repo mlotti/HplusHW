@@ -19,11 +19,13 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
   fMuonPtCut(config.getParameter<float>("muonPtCut")),
   fMuonEtaCut(config.getParameter<float>("muonEtaCut")),
   // Event counter for passing selection
-  cPassedMuonSelection(eventCounter.addCounter("passed e selection ("+postfix+")")),
+  cPassedMuonSelection(eventCounter.addCounter("passed mu selection ("+postfix+")")),
   // Sub counters
-  cSubAll(eventCounter.addSubCounter("e selection ("+postfix+")", "All events")),
-  cSubPassedEta(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed eta cut")),
-  cSubPassedPt(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed pt cut"))
+  cSubAll(eventCounter.addSubCounter("mu selection ("+postfix+")", "All events")),
+  cSubPassedID(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed ID")),
+  cSubPassedIsolation(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed isolation")),
+  cSubPassedEta(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed eta cut")),
+  cSubPassedPt(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed pt cut"))
 { }
 
 MuonSelection::~MuonSelection() { }
@@ -53,12 +55,20 @@ MuonSelection::Data MuonSelection::analyze(const Event& event) {
 MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
   Data output;
   cSubAll.increment();
+  bool passedID = false;
+  bool passedIsol = false;
   bool passedEta = false;
   bool passedPt = false;
   // Loop over muons
   for(Muon muon: event.muons()) {
     hMuonPtAll->Fill(muon.pt());
     hMuonEtaAll->Fill(muon.eta());
+    // Apply cut on muon ID FIXME to be added
+    
+    passedID = true;
+    // Apply cut on muon isolation FIXME to be added
+    
+    passedIsol = true;
     // Apply cut on eta
     if (std::fabs(muon.eta()) > fMuonEtaCut)
       continue;
@@ -79,6 +89,10 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
     output.fSelectedMuons.push_back(muon);
   }
   // Fill counters
+  if (passedID)
+    cSubPassedID.increment();
+  if (passedIsol)
+    cSubPassedIsolation.increment();
   if (passedEta)
     cSubPassedEta.increment();
   if (passedPt)

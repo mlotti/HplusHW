@@ -78,8 +78,8 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
   event.setupBranches(mgr);
   
   SECTION("Selection") {
-    CHECK( ec.contains("passed e selection (test)"));
-    CHECK( ec.contains("passed e selection (Veto)"));
+    CHECK( ec.contains("passed mu selection (test)"));
+    CHECK( ec.contains("passed mu selection (Veto)"));
     // Checks on event 1
     mgr.setEntry(0);
     MuonSelection::Data data = esel1.analyze(event);
@@ -87,7 +87,7 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
     CHECK( data.getHighestSelectedMuonPt() == 50.f );
     CHECK( data.getHighestSelectedMuonEta() == 1.1f );
     CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 50.f );
-    CHECK( ec.getValueByName("passed e selection (test)") == 1);
+    CHECK( ec.getValueByName("passed mu selection (test)") == 1);
     // Check protection for analyzing event only once
     REQUIRE_THROWS_AS(esel1.analyze(event), hplus::Exception);
     REQUIRE_THROWS_AS(esel1.silentAnalyze(event), hplus::Exception);
@@ -97,7 +97,7 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
     CHECK( data.getHighestSelectedMuonPt() == 11.f );
     CHECK( data.getHighestSelectedMuonEta() == 0.7f );
     CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 11.f );
-    CHECK( ec.getValueByName("passed e selection (Veto)") == 0);
+    CHECK( ec.getValueByName("passed mu selection (Veto)") == 0);
     // Checks on event 2
     mgr.setEntry(1);
     data = esel1.analyze(event);
@@ -105,13 +105,13 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
     CHECK( data.getHighestSelectedMuonPt() < 1.f );
     CHECK( data.getHighestSelectedMuonEta() < 1.f );
     CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 9.f );
-    CHECK( ec.getValueByName("passed e selection (test)") == 1);
+    CHECK( ec.getValueByName("passed mu selection (test)") == 1);
     data = esel2.analyze(event);
     CHECK( data.getSelectedMuons().size() == 0 );
     CHECK( data.getHighestSelectedMuonPt() < 1.f );
     CHECK( data.getHighestSelectedMuonEta() < 1.f );
     CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 9.f );
-    CHECK( ec.getValueByName("passed e selection (Veto)") == 1);
+    CHECK( ec.getValueByName("passed mu selection (Veto)") == 1);
     // Make sure that silent analysis works
     mgr.setEntry(0);
     data = esel1.silentAnalyze(event);
@@ -121,10 +121,10 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
     CHECK( data.getHighestSelectedMuonPt() == 50.f );
     CHECK( data.getHighestSelectedMuonEta() == 1.1f );
     CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 50.f );
-    CHECK( ec.getValueByName("passed e selection (test)") == 1);
+    CHECK( ec.getValueByName("passed mu selection (test)") == 1);
     CHECK( h->Integral() == 1.0f );
     data = esel1.analyze(event);
-    CHECK( ec.getValueByName("passed e selection (test)") == 2);
+    CHECK( ec.getValueByName("passed mu selection (test)") == 2);
     CHECK( h->Integral() == 2.0f );
   }
   f->Write();

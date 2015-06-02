@@ -78,6 +78,8 @@ private:
   Count cPassedMuonSelection;
   // Sub counters
   Count cSubAll;
+  Count cSubPassedID;
+  Count cSubPassedIsolation;
   Count cSubPassedEta;
   Count cSubPassedPt;
   // Histograms
