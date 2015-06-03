@@ -16,6 +16,7 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 
 #include "HiggsAnalysis/MiniAOD2TTree/interface/EventInfoDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/SkimDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TriggerDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TauDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/ElectronDumper.h"
@@ -44,12 +45,14 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
     private:
 	void fill(edm::Event&, const edm::EventSetup&);
 	void reset();
+        void endLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);                                   
 
 	std::string outputFileName;
 	std::string codeVersion;
         std::string dataVersion;
 	int cmEnergy;
 	edm::ParameterSet eventInfoCollections;
+	edm::ParameterSet skim;
 	edm::ParameterSet trigger;
         std::vector<edm::ParameterSet> tauCollections;
 	std::vector<edm::ParameterSet> electronCollections;
@@ -66,6 +69,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	TTree* Events;
 
 	EventInfoDumper *eventInfo;
+	SkimDumper* skimDumper;
 	TriggerDumper* trgDumper;
 	TauDumper* tauDumper;
 	ElectronDumper* electronDumper;
