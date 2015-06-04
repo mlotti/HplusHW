@@ -15,6 +15,7 @@
 #include "DataFormat/interface/Muon.h"
 #include "DataFormat/interface/MET.h"
 #include "DataFormat/interface/GenParticle.h"
+#include "DataFormat/interface/PFCands.h"
 
 class BranchManager;
 
@@ -46,7 +47,7 @@ public:
   const ElectronCollection& electrons() const { return fElectronCollection; }
   const MuonCollection& muons() const { return fMuonCollection; }
   const GenParticleCollection& genparticles() const { return fGenParticleCollection; }
-  const ParticleCollection<double>& pfCandidates() const { return fPFCandidates; }
+  const PFCandsCollection& pfCandidates() const { return fPFCandidates; }
 
   const MET& genMET() const { return fGenMET; }
 
@@ -71,7 +72,7 @@ private:
   ElectronCollection fElectronCollection;
   MuonCollection fMuonCollection;
   GenParticleCollection fGenParticleCollection;
-  ParticleCollection<double> fPFCandidates;
+  PFCandsCollection fPFCandidates;
   MET fGenMET;
   MET fMET_Type1;
   MET fCaloMET;

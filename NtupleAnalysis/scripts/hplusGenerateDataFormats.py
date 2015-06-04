@@ -165,6 +165,7 @@ def main(opts, args):
     #generateParticle(types, "GenParticle", {}) # data fields in the root file are missing at the moment
     generateParticle(types, "GenJet", {})
     generateParticle(types, "HLTTau", {})
+    generateParticle(types, "PFCands", {})
     # HLTTau and PFCands contain only generic momentum and pdgId information, no generation needed
 
     return 0
