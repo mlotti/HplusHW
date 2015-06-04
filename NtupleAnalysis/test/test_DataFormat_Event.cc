@@ -5,14 +5,17 @@
 #include "Framework/interface/BranchManager.h"
 #include "DataFormat/interface/Event.h"
 
+#include <string>
+
 TEST_CASE("Event", "[DataFormat]") {
   SECTION("Default case") {
     std::unique_ptr<TTree> tree = createRealisticTree();
 
     BranchManager mgr;
     mgr.setTree(tree.get());
-
-    Event event(ParameterSet("{}", true));
+    
+    ParameterSet pset(getMinimalConfig(), true);
+    Event event(pset);
     event.setupBranches(mgr);
 
     SECTION("Event") {
@@ -58,7 +61,7 @@ TEST_CASE("Event", "[DataFormat]") {
     BranchManager mgr;
     mgr.setTree(tree.get());
 
-    boost::property_tree::ptree tmp;
+    boost::property_tree::ptree tmp = getMinimalConfig();
     tmp.put("TauSelection.systematicVariation", "systVarTESUp");
     ParameterSet config(tmp, true);
 
@@ -95,7 +98,7 @@ TEST_CASE("Event", "[DataFormat]") {
   }
 
   SECTION("Multiple systematic variations") {
-    boost::property_tree::ptree tmp;
+    boost::property_tree::ptree tmp = getMinimalConfig();
     tmp.put("TauSelection.systematicVariation", "systVarTESUp");
     tmp.put("JetSelection.systematicVariation", "systVarJESUp");
     ParameterSet config(tmp, true);
@@ -109,7 +112,7 @@ TEST_CASE("Event", "[DataFormat]") {
     BranchManager mgr;
     mgr.setTree(tree.get());
 
-    boost::property_tree::ptree tmp;
+    boost::property_tree::ptree tmp = getMinimalConfig();
 
     SECTION("One discriminator") {
       boost::property_tree::ptree discrs;
@@ -167,7 +170,17 @@ TEST_CASE("Event", "[DataFormat]") {
     BranchManager mgr;
     mgr.setTree(tree.get());
 
-    ParameterSet config("{\"Trigger\": {\"triggerOR\": [\"HLT_Trig1\", \"HLT_Trig2\"]}}", true);
+    boost::property_tree::ptree tmp = getMinimalConfig();
+    boost::property_tree::ptree trgchild;
+    boost::property_tree::ptree child;
+    child.put("", "HLT_Trig1");
+    trgchild.push_back(std::make_pair("", child));
+    child.put("", "HLT_Trig2");
+    trgchild.push_back(std::make_pair("", child));
+    boost::property_tree::ptree trgOr;
+    trgOr.add_child("triggerOR", trgchild);
+    tmp.add_child("Trigger",trgOr);
+    ParameterSet config(tmp, true);
     Event event(config);
     event.setupBranches(mgr);
 

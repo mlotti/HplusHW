@@ -156,3 +156,11 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
 
   return tree;
 }
+
+boost::property_tree::ptree getMinimalConfig() {
+  boost::property_tree::ptree tmp;
+  tmp.put("TauSelection.againstElectronDiscr", "");
+  tmp.put("TauSelection.againstMuonDiscr", "");
+  tmp.put("TauSelection.isolation", "");
+  return tmp;
+}

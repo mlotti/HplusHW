@@ -9,30 +9,21 @@
 #include "Framework/interface/BranchManager.h"
 #include "DataFormat/interface/Event.h"
 
+#include "test_createTree.h"
+
 #include <string>
-#include <sstream>
 #include <iostream>
 #include "TFile.h"
 #include "TTree.h"
 
 TEST_CASE("ElectronSelection", "[EventSelection]") {
   // Create config for testing
-  std::stringstream config;
-  config << "{" << std::endl;
-  config << "  \"ElectronSelection1\": {" << std::endl;
-  config << "    \"electronPtCut\": 30.0," << std::endl;
-  config << "    \"electronEtaCut\": 2.0" << std::endl;
-  config << "  }" << std::endl;
-  config << "}" << std::endl;
-  ParameterSet pset1(config.str());
-  config.str("");
-  config << "{" << std::endl;
-  config << "  \"ElectronSelection2\": {" << std::endl;
-  config << "    \"electronPtCut\": 10.0," << std::endl;
-  config << "    \"electronEtaCut\": 1.0" << std::endl;
-  config << "  }" << std::endl;
-  config << "}" << std::endl;
-  ParameterSet pset2(config.str());
+  boost::property_tree::ptree tmp = getMinimalConfig();
+  tmp.put("ElectronSelection1.electronPtCut", 30.0);
+  tmp.put("ElectronSelection1.electronEtaCut", 2.0);
+  tmp.put("ElectronSelection2.electronPtCut", 10.0);
+  tmp.put("ElectronSelection2.electronEtaCut", 1.0);
+  ParameterSet pset(tmp, true);
   // Create necessary objects for testing
   TFile* f = new TFile("test_ElectronSelection.root", "recreate");
   CommonPlots* commonPlotsPointer = 0;
@@ -40,10 +31,10 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
   HistoWrapper histoWrapper(weight, "Debug");
   EventCounter ec(weight);
   ec.setOutput(f);
-  ElectronSelection esel1(pset1.getParameter<ParameterSet>("ElectronSelection1"),
+  ElectronSelection esel1(pset.getParameter<ParameterSet>("ElectronSelection1"),
                           ec, histoWrapper, commonPlotsPointer, "test");
   esel1.bookHistograms(f);
-  ElectronSelection esel2(pset2.getParameter<ParameterSet>("ElectronSelection2"),
+  ElectronSelection esel2(pset.getParameter<ParameterSet>("ElectronSelection2"),
                           ec, histoWrapper, commonPlotsPointer, "Veto");
   esel2.bookHistograms(f);
   // Setup events for testing
@@ -74,7 +65,7 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
   tree->Fill();  
   BranchManager mgr;
   mgr.setTree(tree);
-  Event event(ParameterSet("{}", true));
+  Event event(pset);
   event.setupBranches(mgr);
   
   SECTION("Selection") {
