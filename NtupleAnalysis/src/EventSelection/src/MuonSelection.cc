@@ -31,7 +31,7 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
 MuonSelection::~MuonSelection() { }
 
 void MuonSelection::bookHistograms(TDirectory* dir) {
-  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "eSelection_"+sPostfix);
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "muSelection_"+sPostfix);
   hMuonPtAll = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtAll", "Muon pT, all", 40, 0, 400);
   hMuonEtaAll = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonEtaAll", "Muon eta, all", 50, -2.5, 2.5);
   hMuonPtPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtPassed", "Muon pT, passed", 40, 0, 400);
