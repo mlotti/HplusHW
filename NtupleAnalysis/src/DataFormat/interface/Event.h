@@ -38,12 +38,14 @@ public:
   }
   const EventID& eventID() const { return fEventID; }
   const EventNPU& NPU() const { return fNPU; }
+  const ParticleCollection<double>& triggerTaus() const { return fTriggerTauCollection; }
   const TauCollection& taus() const { return fTauCollection; }
   const JetCollection& jets() const { return fJetCollection; }
   const GenJetCollection& genjets() const { return fGenJetCollection; }
   const ElectronCollection& electrons() const { return fElectronCollection; }
   const MuonCollection& muons() const { return fMuonCollection; }
   const GenParticleCollection& genparticles() const { return fGenParticleCollection; }
+  const ParticleCollection<double>& pfCandidates() const { return fPFCandidates; }
 
   const MET& genMET() const { return fGenMET; }
 
@@ -61,16 +63,18 @@ private:
   BooleanOr fTriggerOr;
   BooleanOr fTriggerOr2;
 
+  ParticleCollection<double> fTriggerTauCollection;
   TauCollection fTauCollection;
   JetCollection fJetCollection;
   GenJetCollection fGenJetCollection;
   ElectronCollection fElectronCollection;
   MuonCollection fMuonCollection;
+  GenParticleCollection fGenParticleCollection;
+  ParticleCollection<double> fPFCandidates;
   MET fGenMET;
   MET fMET_Type1;
   MET fCaloMET;
   MET fL1MET;
-  GenParticleCollection fGenParticleCollection;
 
   const bool fIsMC;
 };
