@@ -7,6 +7,7 @@
 
 #include "DataFormat/interface/EventID.h"
 #include "DataFormat/interface/EventNPU.h"
+#include "DataFormat/interface/HLTTau.h"
 #include "DataFormat/interface/Tau.h"
 #include "DataFormat/interface/Jet.h"
 #include "DataFormat/interface/GenJet.h"
@@ -38,7 +39,7 @@ public:
   }
   const EventID& eventID() const { return fEventID; }
   const EventNPU& NPU() const { return fNPU; }
-  const ParticleCollection<double>& triggerTaus() const { return fTriggerTauCollection; }
+  const HLTTauCollection& triggerTaus() const { return fTriggerTauCollection; }
   const TauCollection& taus() const { return fTauCollection; }
   const JetCollection& jets() const { return fJetCollection; }
   const GenJetCollection& genjets() const { return fGenJetCollection; }
@@ -63,7 +64,7 @@ private:
   BooleanOr fTriggerOr;
   BooleanOr fTriggerOr2;
 
-  ParticleCollection<double> fTriggerTauCollection;
+  HLTTauCollection fTriggerTauCollection;
   TauCollection fTauCollection;
   JetCollection fJetCollection;
   GenJetCollection fGenJetCollection;

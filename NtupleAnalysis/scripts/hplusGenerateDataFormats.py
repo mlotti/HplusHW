@@ -48,7 +48,10 @@ def generateParticle(types, particle, discriminatorCaptions):
                 if branch.startswith(particle) and k in branch:
                     discriminatorList[k].append(name)
     if particleFloatType is None:
-        raise Exception("Unable to infer the floating point type for {particle}".format(particle=particle))
+        if len(branchObjects):
+            raise Exception("Unable to infer the floating point type for {particle}".format(particle=particle))
+        else:
+            particleFloatType = "double" # default value
 
     # Getter for discriminator method names
     discriminatorGetters = ""
@@ -161,6 +164,7 @@ def main(opts, args):
     generateParticle(types, "Electron", {"ID": "ID"})
     #generateParticle(types, "GenParticle", {}) # data fields in the root file are missing at the moment
     generateParticle(types, "GenJet", {})
+    generateParticle(types, "HLTTau", {})
     # HLTTau and PFCands contain only generic momentum and pdgId information, no generation needed
 
     return 0

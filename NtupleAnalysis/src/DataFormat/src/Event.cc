@@ -5,7 +5,6 @@
 #include <stdexcept>
 
 Event::Event(const ParameterSet& config): 
-  fTriggerTauCollection("HLTTau"),
   fPFCandidates("PFCands"),
   fGenMET("GenMET"),
   fMET_Type1("MET_Type1"),
