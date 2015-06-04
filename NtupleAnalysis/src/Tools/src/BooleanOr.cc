@@ -1,4 +1,5 @@
 #include "Tools/interface/BooleanOr.h"
+#include "Framework/interface/Exception.h"
 
 BooleanOr::BooleanOr() {}
 BooleanOr::~BooleanOr() {}
@@ -16,5 +17,5 @@ void BooleanOr::throwEmpty() const {
   std::string names;
   for(auto& name: fBranchNames)
     names += name+ " ";
-  throw std::runtime_error("BooleanOr: None of the requested brances '"+names+ "' exist in the TTree");
+  throw hplus::Exception("DataFormat") << "BooleanOr: None of the requested brances '" << names << "' exist in the TTree";
 }

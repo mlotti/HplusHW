@@ -20,8 +20,7 @@ public:
 
   bool value() const {
     if(fBranches.empty())
-      return true;
-    //      throwEmpty();
+      throwEmpty();
     for(const Branch<bool> *branch: fBranches) {
       if(branch->value()) return true;
     }
