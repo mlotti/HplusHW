@@ -77,28 +77,28 @@ void GeneratorComparison::book(TDirectory *dir) {
   TDirectory *tauDir = dir->mkdir("Taus");
   TDirectory *hplusDir = dir->mkdir("Hplus");
 
-  hTauPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, tauDir, "tauPt", "Tau pT", 40, 0, 400);
-  hTauEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, tauDir, "tauEta", "Tau eta", 50, -2.5, 2.5);
-  hTauPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, tauDir, "tauPhi", "Tau phi", 100, -3.1416, 3.1416);
+  hTauPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, tauDir, "tauPt", "Tau pT", 40, 0, 400);
+  hTauEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, tauDir, "tauEta", "Tau eta", 50, -2.5, 2.5);
+  hTauPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, tauDir, "tauPhi", "Tau phi", 100, -3.1416, 3.1416);
 
-  hAssociatedTauPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "associatedTauPt", "Hplus tau pT", 40, 0, 400);
-  hAssociatedTauEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "associatedTauEta", "Hplus Tau eta", 50, -2.5, 2.5);
-  hAssociatedTauPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "associatedTauPhi", "Hplus Tau phi", 100, -3.1416, 3.1416);
+  hAssociatedTauPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "associatedTauPt", "Hplus tau pT", 40, 0, 400);
+  hAssociatedTauEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "associatedTauEta", "Hplus Tau eta", 50, -2.5, 2.5);
+  hAssociatedTauPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "associatedTauPhi", "Hplus Tau phi", 100, -3.1416, 3.1416);
 
-  hHplusPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "hplusPt", "Hplus pT", 40, 0, 400);
-  hHplusEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "hplusEta", "Hplus eta", 50, -2.5, 2.5);
-  hHplusPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "hplusPhi", "Hplus phi", 100, -3.1416, 3.1416);
+  hHplusPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "hplusPt", "Hplus pT", 40, 0, 400);
+  hHplusEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "hplusEta", "Hplus eta", 50, -2.5, 2.5);
+  hHplusPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "hplusPhi", "Hplus phi", 100, -3.1416, 3.1416);
 
-  hAssociatedBPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "associatedBPt", "Associated b pT", 40, 0, 400);
-  hAssociatedBEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "associatedBEta", "Associated b eta", 50, -2.5, 2.5);
-  hAssociatedBPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "associatedBPhi", "Associated b phi", 100, -3.1416, 3.1416);
+  hAssociatedBPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "associatedBPt", "Associated b pT", 40, 0, 400);
+  hAssociatedBEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "associatedBEta", "Associated b eta", 50, -2.5, 2.5);
+  hAssociatedBPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "associatedBPhi", "Associated b phi", 100, -3.1416, 3.1416);
 
-  hAssociatedTPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "associatedTPt", "Associated t pT", 40, 0, 400);
-  hAssociatedTEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "associatedTEta", "Associated t eta", 50, -2.5, 2.5);
-  hAssociatedTPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, hplusDir, "associatedTPhi", "Associated t phi", 100, -3.1416, 3.1416);
+  hAssociatedTPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "associatedTPt", "Associated t pT", 40, 0, 400);
+  hAssociatedTEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "associatedTEta", "Associated t eta", 50, -2.5, 2.5);
+  hAssociatedTPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, hplusDir, "associatedTPhi", "Associated t phi", 100, -3.1416, 3.1416);
 
-  hMetEt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "metEt", "Gen MET", 40, 0, 400);
-  hMetPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "metPhi", "Gen MET phi", 100, -3.1416, 3.1416);
+  hMetEt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "metEt", "Gen MET", 40, 0, 400);
+  hMetPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "metPhi", "Gen MET phi", 100, -3.1416, 3.1416);
 }
 
 void GeneratorComparison::setupBranches(BranchManager& branchManager) {
@@ -149,7 +149,7 @@ void GeneratorComparison::process(Long64_t entry) {
           hAssociatedBPt->Fill(genp.pt());
 	  hAssociatedBEta->Fill(genp.eta());
 	  hAssociatedBPhi->Fill(genp.phi());
-	  if (genp.et() > bet_th) {bpt = true;} 
+	  if (genp.pt() > bet_th) {bpt = true;} 
 	  if (genp.eta() < beta_th) {beta = true;}
       }
 
