@@ -1,8 +1,13 @@
 // -*- c++ -*-
+// This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
+
 #ifndef DataFormat_TauGenerated_h
 #define DataFormat_TauGenerated_h
 
 #include "DataFormat/interface/Particle.h"
+#include <string>
+#include <vector>
+#include <functional>
 
 class TauGeneratedCollection: public ParticleCollection<double> {
 public:
@@ -19,7 +24,6 @@ protected:
   const Branch<std::vector<bool>> *fAgainstElectronMedium;
   const Branch<std::vector<bool>> *fAgainstElectronMediumMVA5;
   const Branch<std::vector<bool>> *fAgainstElectronTight;
-  const Branch<std::vector<bool>> *fAgainstElectronTightMVA3;
   const Branch<std::vector<bool>> *fAgainstElectronTightMVA5;
   const Branch<std::vector<bool>> *fAgainstElectronVLooseMVA5;
   const Branch<std::vector<bool>> *fAgainstElectronVTightMVA5;
@@ -46,7 +50,6 @@ protected:
   const Branch<std::vector<bool>> *fByLooseIsolationMVA3oldDMwLT;
   const Branch<std::vector<bool>> *fByLooseIsolationMVA3oldDMwoLT;
   const Branch<std::vector<bool>> *fByMediumCombinedIsolationDeltaBetaCorr3Hits;
-  const Branch<std::vector<bool>> *fByMediumIsolationMVA2;
   const Branch<std::vector<bool>> *fByMediumIsolationMVA3newDMwLT;
   const Branch<std::vector<bool>> *fByMediumIsolationMVA3newDMwoLT;
   const Branch<std::vector<bool>> *fByMediumIsolationMVA3oldDMwLT;
@@ -73,9 +76,11 @@ protected:
   const Branch<std::vector<bool>> *fDecayModeFindingNewDMs;
   const Branch<std::vector<bool>> *fNeutralIsoPtSum;
   const Branch<std::vector<bool>> *fPuCorrPtSum;
+  const Branch<std::vector<double>> *fLTrkEta;
   const Branch<std::vector<double>> *fLTrkPt;
   const Branch<std::vector<int>> *fNProngs;
 };
+
 
 template <typename Coll>
 class TauGenerated: public Particle<Coll> {
@@ -84,6 +89,88 @@ public:
   TauGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~TauGenerated() {}
 
+  std::vector<std::string> getIsolationDiscriminatorNames() {
+    static std::vector<std::string> n[32] = {byCombinedIsolationDeltaBetaCorrRaw3Hits, byIsolationMVA3newDMwLTraw, byIsolationMVA3newDMwoLTraw, byIsolationMVA3oldDMwLTraw, byIsolationMVA3oldDMwoLTraw, byLooseCombinedIsolationDeltaBetaCorr3Hits, byLooseIsolationMVA3newDMwLT, byLooseIsolationMVA3newDMwoLT, byLooseIsolationMVA3oldDMwLT, byLooseIsolationMVA3oldDMwoLT, byMediumCombinedIsolationDeltaBetaCorr3Hits, byMediumIsolationMVA3newDMwLT, byMediumIsolationMVA3newDMwoLT, byMediumIsolationMVA3oldDMwLT, byMediumIsolationMVA3oldDMwoLT, byTightCombinedIsolationDeltaBetaCorr3Hits, byTightIsolationMVA3newDMwLT, byTightIsolationMVA3newDMwoLT, byTightIsolationMVA3oldDMwLT, byTightIsolationMVA3oldDMwoLT, byVLooseIsolationMVA3newDMwLT, byVLooseIsolationMVA3newDMwoLT, byVLooseIsolationMVA3oldDMwLT, byVLooseIsolationMVA3oldDMwoLT, byVTightIsolationMVA3newDMwLT, byVTightIsolationMVA3newDMwoLT, byVTightIsolationMVA3oldDMwLT, byVTightIsolationMVA3oldDMwoLT, byVVTightIsolationMVA3newDMwLT, byVVTightIsolationMVA3newDMwoLT, byVVTightIsolationMVA3oldDMwLT, byVVTightIsolationMVA3oldDMwoLT};
+    return n;
+  }
+  std::vector<std::string> getAgainstMuonDiscriminatorNames() {
+    static std::vector<std::string> n[12] = {againstMuonLoose, againstMuonLoose2, againstMuonLoose3, againstMuonLooseMVA, againstMuonMVAraw, againstMuonMedium, againstMuonMedium2, againstMuonMediumMVA, againstMuonTight, againstMuonTight2, againstMuonTight3, againstMuonTightMVA};
+    return n;
+  }
+  std::vector<std::string> getAgainstElectronDiscriminatorNames() {
+    static std::vector<std::string> n[10] = {againstElectronLoose, againstElectronLooseMVA5, againstElectronMVA5category, againstElectronMVA5raw, againstElectronMedium, againstElectronMediumMVA5, againstElectronTight, againstElectronTightMVA5, againstElectronVLooseMVA5, againstElectronVTightMVA5};
+    return n;
+  }
+  std::vector<std::function<bool()>> getIsolationDiscriminatorValues() {
+    static std::vector<std::function<bool()>> values = {
+      [&](){ return this->byCombinedIsolationDeltaBetaCorrRaw3Hits(); },
+      [&](){ return this->byIsolationMVA3newDMwLTraw(); },
+      [&](){ return this->byIsolationMVA3newDMwoLTraw(); },
+      [&](){ return this->byIsolationMVA3oldDMwLTraw(); },
+      [&](){ return this->byIsolationMVA3oldDMwoLTraw(); },
+      [&](){ return this->byLooseCombinedIsolationDeltaBetaCorr3Hits(); },
+      [&](){ return this->byLooseIsolationMVA3newDMwLT(); },
+      [&](){ return this->byLooseIsolationMVA3newDMwoLT(); },
+      [&](){ return this->byLooseIsolationMVA3oldDMwLT(); },
+      [&](){ return this->byLooseIsolationMVA3oldDMwoLT(); },
+      [&](){ return this->byMediumCombinedIsolationDeltaBetaCorr3Hits(); },
+      [&](){ return this->byMediumIsolationMVA3newDMwLT(); },
+      [&](){ return this->byMediumIsolationMVA3newDMwoLT(); },
+      [&](){ return this->byMediumIsolationMVA3oldDMwLT(); },
+      [&](){ return this->byMediumIsolationMVA3oldDMwoLT(); },
+      [&](){ return this->byTightCombinedIsolationDeltaBetaCorr3Hits(); },
+      [&](){ return this->byTightIsolationMVA3newDMwLT(); },
+      [&](){ return this->byTightIsolationMVA3newDMwoLT(); },
+      [&](){ return this->byTightIsolationMVA3oldDMwLT(); },
+      [&](){ return this->byTightIsolationMVA3oldDMwoLT(); },
+      [&](){ return this->byVLooseIsolationMVA3newDMwLT(); },
+      [&](){ return this->byVLooseIsolationMVA3newDMwoLT(); },
+      [&](){ return this->byVLooseIsolationMVA3oldDMwLT(); },
+      [&](){ return this->byVLooseIsolationMVA3oldDMwoLT(); },
+      [&](){ return this->byVTightIsolationMVA3newDMwLT(); },
+      [&](){ return this->byVTightIsolationMVA3newDMwoLT(); },
+      [&](){ return this->byVTightIsolationMVA3oldDMwLT(); },
+      [&](){ return this->byVTightIsolationMVA3oldDMwoLT(); },
+      [&](){ return this->byVVTightIsolationMVA3newDMwLT(); },
+      [&](){ return this->byVVTightIsolationMVA3newDMwoLT(); },
+      [&](){ return this->byVVTightIsolationMVA3oldDMwLT(); },
+      [&](){ return this->byVVTightIsolationMVA3oldDMwoLT(); }
+    };
+    return values;
+  }
+  std::vector<std::function<bool()>> getAgainstMuonDiscriminatorValues() {
+    static std::vector<std::function<bool()>> values = {
+      [&](){ return this->againstMuonLoose(); },
+      [&](){ return this->againstMuonLoose2(); },
+      [&](){ return this->againstMuonLoose3(); },
+      [&](){ return this->againstMuonLooseMVA(); },
+      [&](){ return this->againstMuonMVAraw(); },
+      [&](){ return this->againstMuonMedium(); },
+      [&](){ return this->againstMuonMedium2(); },
+      [&](){ return this->againstMuonMediumMVA(); },
+      [&](){ return this->againstMuonTight(); },
+      [&](){ return this->againstMuonTight2(); },
+      [&](){ return this->againstMuonTight3(); },
+      [&](){ return this->againstMuonTightMVA(); }
+    };
+    return values;
+  }
+  std::vector<std::function<bool()>> getAgainstElectronDiscriminatorValues() {
+    static std::vector<std::function<bool()>> values = {
+      [&](){ return this->againstElectronLoose(); },
+      [&](){ return this->againstElectronLooseMVA5(); },
+      [&](){ return this->againstElectronMVA5category(); },
+      [&](){ return this->againstElectronMVA5raw(); },
+      [&](){ return this->againstElectronMedium(); },
+      [&](){ return this->againstElectronMediumMVA5(); },
+      [&](){ return this->againstElectronTight(); },
+      [&](){ return this->againstElectronTightMVA5(); },
+      [&](){ return this->againstElectronVLooseMVA5(); },
+      [&](){ return this->againstElectronVTightMVA5(); }
+    };
+    return values;
+  }
+
   bool againstElectronLoose() const { return this->fCollection->fAgainstElectronLoose->value()[this->index()]; }
   bool againstElectronLooseMVA5() const { return this->fCollection->fAgainstElectronLooseMVA5->value()[this->index()]; }
   bool againstElectronMVA5category() const { return this->fCollection->fAgainstElectronMVA5category->value()[this->index()]; }
@@ -91,7 +178,6 @@ public:
   bool againstElectronMedium() const { return this->fCollection->fAgainstElectronMedium->value()[this->index()]; }
   bool againstElectronMediumMVA5() const { return this->fCollection->fAgainstElectronMediumMVA5->value()[this->index()]; }
   bool againstElectronTight() const { return this->fCollection->fAgainstElectronTight->value()[this->index()]; }
-  bool againstElectronTightMVA3() const { return this->fCollection->fAgainstElectronTightMVA3->value()[this->index()]; }
   bool againstElectronTightMVA5() const { return this->fCollection->fAgainstElectronTightMVA5->value()[this->index()]; }
   bool againstElectronVLooseMVA5() const { return this->fCollection->fAgainstElectronVLooseMVA5->value()[this->index()]; }
   bool againstElectronVTightMVA5() const { return this->fCollection->fAgainstElectronVTightMVA5->value()[this->index()]; }
@@ -118,7 +204,6 @@ public:
   bool byLooseIsolationMVA3oldDMwLT() const { return this->fCollection->fByLooseIsolationMVA3oldDMwLT->value()[this->index()]; }
   bool byLooseIsolationMVA3oldDMwoLT() const { return this->fCollection->fByLooseIsolationMVA3oldDMwoLT->value()[this->index()]; }
   bool byMediumCombinedIsolationDeltaBetaCorr3Hits() const { return this->fCollection->fByMediumCombinedIsolationDeltaBetaCorr3Hits->value()[this->index()]; }
-  bool byMediumIsolationMVA2() const { return this->fCollection->fByMediumIsolationMVA2->value()[this->index()]; }
   bool byMediumIsolationMVA3newDMwLT() const { return this->fCollection->fByMediumIsolationMVA3newDMwLT->value()[this->index()]; }
   bool byMediumIsolationMVA3newDMwoLT() const { return this->fCollection->fByMediumIsolationMVA3newDMwoLT->value()[this->index()]; }
   bool byMediumIsolationMVA3oldDMwLT() const { return this->fCollection->fByMediumIsolationMVA3oldDMwLT->value()[this->index()]; }
@@ -145,8 +230,10 @@ public:
   bool decayModeFindingNewDMs() const { return this->fCollection->fDecayModeFindingNewDMs->value()[this->index()]; }
   bool neutralIsoPtSum() const { return this->fCollection->fNeutralIsoPtSum->value()[this->index()]; }
   bool puCorrPtSum() const { return this->fCollection->fPuCorrPtSum->value()[this->index()]; }
+  double lTrkEta() const { return this->fCollection->fLTrkEta->value()[this->index()]; }
   double lTrkPt() const { return this->fCollection->fLTrkPt->value()[this->index()]; }
   int nProngs() const { return this->fCollection->fNProngs->value()[this->index()]; }
+
 };
 
 #endif

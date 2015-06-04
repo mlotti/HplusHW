@@ -11,7 +11,11 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 re_vector = re.compile("vector<(?P<type>.*)>")
 
-def generateParticle(types, particle):
+def generateParticle(types, particle, discriminatorCaptions):
+    discriminatorList = {}
+    for k in discriminatorCaptions.keys():
+        discriminatorList[k] = []
+  
     particleBranches = [particle+"s_"+x for x in ["pt", "eta", "phi", "e", "pdgId"]] # these are handled by Particle class
     branchNames = filter(lambda n: n[0:len(particle)+2] == particle+"s_", types.keys())
     branchNames.sort(key=lambda n: types[n]+n)
@@ -29,25 +33,57 @@ def generateParticle(types, particle):
             raise Exception("Could not interpret type %s as vector" % vectype)
         realtype = m.group("type")
         if branch in particleBranches:
-            if particleFloatType is None:
+            if particleFloatType == None:
                 particleFloatType = realtype
             elif particleFloatType != realtype:
-                raise Exception("Mismatch in 4-vector branch types: all of them must be of the same type, and now {branch} has {type} while others have {otype}".format(branch=branch, type=realtype, otype=particleFloatType))
+                if realtype in ["float", "double"]:
+                    raise Exception("Mismatch in 4-vector branch types: all of them must be of the same type, and now {branch} has {type} while others have {otype}".format(branch=branch, type=realtype, otype=particleFloatType))
         else:
-            branchObjects.append("  Branch<std::{vectype}> *f{vecname};".format(vectype=vectype, vecname=capname))
-            branchAccessors.append("  {type} {name}() {{ return this->fCollection->f{capname}->value()[this->index()]; }}".format(type=realtype, name=name, capname=capname))
+            # Collect branches
+            branchObjects.append("  const Branch<std::{vectype}> *f{vecname};".format(vectype=vectype, vecname=capname))
+            branchAccessors.append("  {type} {name}() const {{ return this->fCollection->f{capname}->value()[this->index()]; }}".format(type=realtype, name=name, capname=capname))
             branchBooks.append("  mgr.book(prefix()+\"_{name}\", &f{capname});".format(name=name, capname=capname))
-
-
+            # Collect discriminators
+            for k in discriminatorCaptions.keys():
+                if branch.startswith(particle) and k in branch:
+                    discriminatorList[k].append(name)
     if particleFloatType is None:
         raise Exception("Unable to infer the floating point type for {particle}".format(particle=particle))
 
+    # Getter for discriminator method names
+    discriminatorGetters = ""
+    for k in discriminatorCaptions.keys():
+        #print k, discriminatorList[k]
+        discriminatorGetters += "  std::vector<std::string> get%sDiscriminatorNames() {\n"%discriminatorCaptions[k]
+        discriminatorGetters += "    static std::vector<std::string> n[%d] = {%s};\n"%(len(discriminatorList[k]), ", ".join(map(str, discriminatorList[k])))
+        discriminatorGetters += "    return n;\n"
+        discriminatorGetters += "  }\n"
+    # Getter for discriminator method values
+    for k in discriminatorCaptions.keys():
+        discriminatorGetters += "  std::vector<std::function<bool()>> get%sDiscriminatorValues() {\n"%discriminatorCaptions[k]
+        discriminatorGetters += "    static std::vector<std::function<bool()>> values = {\n"
+        for i in range(len(discriminatorList[k])):
+            if i < len(discriminatorList[k])-1:
+                discriminatorGetters += "      [&](){ return this->%s(); },\n"%discriminatorList[k][i]
+            else:
+                discriminatorGetters += "      [&](){ return this->%s(); }\n"%discriminatorList[k][i]
+        discriminatorGetters += "    };\n"
+        discriminatorGetters += "    return values;\n"
+        discriminatorGetters += "  }\n"
+
+    includes = "#include \"DataFormat/interface/Particle.h\"\n"
+    if len(discriminatorCaptions.keys()):
+        includes += "#include <string>\n"
+        includes += "#include <vector>\n"
+        includes += "#include <functional>\n"
+
     header = """// -*- c++ -*-
+// This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
+
 #ifndef DataFormat_{type}_h
 #define DataFormat_{type}_h
 
-#include "DataFormat/interface/Particle.h"
-
+{includes}
 class {type}Collection: public ParticleCollection<{particleFloatType}> {{
 public:
   explicit {type}Collection(const std::string& prefix="{particle}s"): ParticleCollection(prefix) {{}}
@@ -64,16 +100,21 @@ template <typename Coll>
 class {type}: public Particle<Coll> {{
 public:
   {type}() {{}}
-  {type}(Coll* coll, size_t index): Particle<Coll>(coll, index) {{}}
+  {type}(const Coll* coll, size_t index): Particle<Coll>(coll, index) {{}}
   ~{type}() {{}}
 
+{discrGetters}
 {branchAccessors}
+
 }};
 
 #endif
-""".format(type=particle+"Generated", particle=particle, particleFloatType=particleFloatType, branchObjects="\n".join(branchObjects), branchAccessors="\n".join(branchAccessors))
+""".format(type=particle+"Generated", includes=includes, particle=particle, particleFloatType=particleFloatType, branchObjects="\n".join(branchObjects), discrGetters=discriminatorGetters, branchAccessors="\n".join(branchAccessors))
 
     source = """
+// -*- c++ -*-
+// This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
+
 #include "DataFormat/interface/{type}.h"
 
 #include "Framework/interface/BranchManager.h"
@@ -84,7 +125,7 @@ void {type}Collection::setupBranches(BranchManager& mgr) {{
 }}
 """.format(type=particle+"Generated", branchBooks="\n".join(branchBooks))
 
-    basedir = os.path.join(os.environ["HPLUSANALYSIS_BASE"], "src", "DataFormat")
+    basedir = os.path.join(os.environ["HIGGSANALYSIS_BASE"], "NtupleAnalysis", "src", "DataFormat")
     hfile = os.path.join(basedir, "interface", particle+"Generated.h")
     ccfile = os.path.join(basedir, "src", particle+"Generated.cc")
     f = open(hfile, "w")
@@ -99,8 +140,8 @@ void {type}Collection::setupBranches(BranchManager& mgr) {{
 
 
 def main(opts, args):
-    if not "HPLUSANALYSIS_BASE" in os.environ:
-        print "Environment variable $HPLUSANALYSIS_BASE not set, please source setup.sh"
+    if not "HIGGSANALYSIS_BASE" in os.environ:
+        print "Environment variable $HIGGSANALYSIS_BASE not set, please source setup.sh"
         return 1
 
     f = ROOT.TFile.Open(args[0])
@@ -113,10 +154,14 @@ def main(opts, args):
         types[branch.GetName()] = t
     f.Close()
 
-    generateParticle(types, "Tau")
-    generateParticle(types, "Jet")
-    generateParticle(types, "Muon")
-    generateParticle(types, "Electron")
+    # The provided dictionaries are for grouping discriminators
+    generateParticle(types, "Tau", {"Isolation": "Isolation", "againstElectron": "AgainstElectron", "againstMuon": "AgainstMuon"})
+    generateParticle(types, "Jet", {"BJetTags": "BJetTags", "PUID": "PUID"})
+    generateParticle(types, "Muon", {"ID": "ID"})
+    generateParticle(types, "Electron", {"ID": "ID"})
+    #generateParticle(types, "GenParticle", {}) # data fields in the root file are missing at the moment
+    generateParticle(types, "GenJet", {})
+    # HLTTau and PFCands contain only generic momentum and pdgId information, no generation needed
 
     return 0
 
