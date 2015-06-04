@@ -11,5 +11,9 @@ void TauCollection::setupBranches(BranchManager& mgr) {
     mgr.book(prefix()+"_"+name, &(fConfigurableDiscriminators[i]));
     ++i;
   }
+  mgr.book(prefix()+"_tauAgainstElectronDiscriminator", &fAgainstElectronDiscriminator);
+  mgr.book(prefix()+"_tauAgainstMuonDiscriminator", &fAgainstMuonDiscriminator);
+  mgr.book(prefix()+"_tauIsolationDiscriminator", &fIsolationDiscriminator);
+  
 }
 
