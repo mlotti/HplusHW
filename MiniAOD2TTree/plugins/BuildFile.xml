@@ -4,6 +4,6 @@
 <use   name="DataFormats/PatCandidates"/>
 <use   name="root"/> 
 <use   name="HiggsAnalysis/MiniAOD2TTree"/>
-<library name="HiggsAnalysisMiniAOD2TTreePlugins" file="MiniAOD2TTreeFilter.cc">
+<library name="HiggsAnalysisMiniAOD2TTreePlugins" file="*.cc">
 </library>
 
