@@ -21,6 +21,11 @@ Other missing items:
 
 
 Need to add to data format:
+- tau:
+are the taus in the collection trigger matched?
+lTrkPCharged
+lTrkPNeutral
+
 - muon ID variables
 (https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId)
 pat::Muon::isLooseMuon vector<bool> Muons_byLooseID  
