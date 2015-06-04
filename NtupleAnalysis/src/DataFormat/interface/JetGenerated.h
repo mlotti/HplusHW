@@ -16,6 +16,15 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
+  std::vector<std::string> getBJetTagsDiscriminatorNames() {
+    static std::vector<std::string> n = { std::string("combinedInclusiveSecondaryVertexBJetTags"), std::string("combinedInclusiveSecondaryVertexV2BJetTags"), std::string("combinedSecondaryVertexBJetTags"), std::string("jetBProbabilityBJetTags"), std::string("jetProbabilityBJetTags"), std::string("simpleSecondaryVertexHighEffBJetTags"), std::string("simpleSecondaryVertexHighPurBJetTags"), std::string("trackCountingHighEffBJetTags"), std::string("trackCountingHighPurBJetTags")};
+    return n;
+  }
+  std::vector<std::string> getPUIDDiscriminatorNames() {
+    static std::vector<std::string> n = { std::string("PUIDloose"), std::string("PUIDmedium"), std::string("PUIDtight")};
+    return n;
+  }
+
 protected:
   const Branch<std::vector<bool>> *fPUIDloose;
   const Branch<std::vector<bool>> *fPUIDmedium;
@@ -40,14 +49,6 @@ public:
   JetGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~JetGenerated() {}
 
-  std::vector<std::string> getBJetTagsDiscriminatorNames() {
-    static std::vector<std::string> n[9] = {combinedInclusiveSecondaryVertexBJetTags, combinedInclusiveSecondaryVertexV2BJetTags, combinedSecondaryVertexBJetTags, jetBProbabilityBJetTags, jetProbabilityBJetTags, simpleSecondaryVertexHighEffBJetTags, simpleSecondaryVertexHighPurBJetTags, trackCountingHighEffBJetTags, trackCountingHighPurBJetTags};
-    return n;
-  }
-  std::vector<std::string> getPUIDDiscriminatorNames() {
-    static std::vector<std::string> n[3] = {PUIDloose, PUIDmedium, PUIDtight};
-    return n;
-  }
   std::vector<std::function<bool()>> getBJetTagsDiscriminatorValues() {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->combinedInclusiveSecondaryVertexBJetTags(); },

@@ -16,6 +16,11 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
+  std::vector<std::string> getIDDiscriminatorNames() {
+    static std::vector<std::string> n = { std::string("")};
+    return n;
+  }
+
 protected:
   const Branch<std::vector<bool>> *fIsGlobalMuon;
 };
@@ -28,10 +33,6 @@ public:
   MuonGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~MuonGenerated() {}
 
-  std::vector<std::string> getIDDiscriminatorNames() {
-    static std::vector<std::string> n[0] = {};
-    return n;
-  }
   std::vector<std::function<bool()>> getIDDiscriminatorValues() {
     static std::vector<std::function<bool()>> values = {
     };

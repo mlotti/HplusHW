@@ -54,25 +54,26 @@ def generateParticle(types, particle, discriminatorCaptions):
             particleFloatType = "double" # default value
 
     # Getter for discriminator method names
-    discriminatorGetters = ""
+    discriminatorCaptionGetters = ""
     for k in discriminatorCaptions.keys():
         #print k, discriminatorList[k]
-        discriminatorGetters += "  std::vector<std::string> get%sDiscriminatorNames() {\n"%discriminatorCaptions[k]
-        discriminatorGetters += "    static std::vector<std::string> n[%d] = {%s};\n"%(len(discriminatorList[k]), ", ".join(map(str, discriminatorList[k])))
-        discriminatorGetters += "    return n;\n"
-        discriminatorGetters += "  }\n"
+        discriminatorCaptionGetters += "  std::vector<std::string> get%sDiscriminatorNames() {\n"%discriminatorCaptions[k]
+        discriminatorCaptionGetters += "    static std::vector<std::string> n = { std::string(\"%s\")};\n"%("\"), std::string(\"".join(map(str, discriminatorList[k])))
+        discriminatorCaptionGetters += "    return n;\n"
+        discriminatorCaptionGetters += "  }\n"
     # Getter for discriminator method values
+    discriminatorMethodGetters = ""
     for k in discriminatorCaptions.keys():
-        discriminatorGetters += "  std::vector<std::function<bool()>> get%sDiscriminatorValues() {\n"%discriminatorCaptions[k]
-        discriminatorGetters += "    static std::vector<std::function<bool()>> values = {\n"
+        discriminatorMethodGetters += "  std::vector<std::function<bool()>> get%sDiscriminatorValues() {\n"%discriminatorCaptions[k]
+        discriminatorMethodGetters += "    static std::vector<std::function<bool()>> values = {\n"
         for i in range(len(discriminatorList[k])):
             if i < len(discriminatorList[k])-1:
-                discriminatorGetters += "      [&](){ return this->%s(); },\n"%discriminatorList[k][i]
+                discriminatorMethodGetters += "      [&](){ return this->%s(); },\n"%discriminatorList[k][i]
             else:
-                discriminatorGetters += "      [&](){ return this->%s(); }\n"%discriminatorList[k][i]
-        discriminatorGetters += "    };\n"
-        discriminatorGetters += "    return values;\n"
-        discriminatorGetters += "  }\n"
+                discriminatorMethodGetters += "      [&](){ return this->%s(); }\n"%discriminatorList[k][i]
+        discriminatorMethodGetters += "    };\n"
+        discriminatorMethodGetters += "    return values;\n"
+        discriminatorMethodGetters += "  }\n"
 
     includes = "#include \"DataFormat/interface/Particle.h\"\n"
     if len(discriminatorCaptions.keys()):
@@ -94,6 +95,7 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
+{discrCaptionGetters}
 protected:
 {branchObjects}
 }};
@@ -106,13 +108,13 @@ public:
   {type}(const Coll* coll, size_t index): Particle<Coll>(coll, index) {{}}
   ~{type}() {{}}
 
-{discrGetters}
+{discrMethodGetters}
 {branchAccessors}
 
 }};
 
 #endif
-""".format(type=particle+"Generated", includes=includes, particle=particle, particleFloatType=particleFloatType, branchObjects="\n".join(branchObjects), discrGetters=discriminatorGetters, branchAccessors="\n".join(branchAccessors))
+""".format(type=particle+"Generated", includes=includes, particle=particle, particleFloatType=particleFloatType, branchObjects="\n".join(branchObjects), discrCaptionGetters=discriminatorCaptionGetters, discrMethodGetters=discriminatorMethodGetters, branchAccessors="\n".join(branchAccessors))
 
     source = """
 // -*- c++ -*-

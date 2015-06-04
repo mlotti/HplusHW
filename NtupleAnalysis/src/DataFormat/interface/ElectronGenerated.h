@@ -16,6 +16,11 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
+  std::vector<std::string> getIDDiscriminatorNames() {
+    static std::vector<std::string> n = { std::string("")};
+    return n;
+  }
+
 protected:
 
 };
@@ -28,10 +33,6 @@ public:
   ElectronGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~ElectronGenerated() {}
 
-  std::vector<std::string> getIDDiscriminatorNames() {
-    static std::vector<std::string> n[0] = {};
-    return n;
-  }
   std::vector<std::function<bool()>> getIDDiscriminatorValues() {
     static std::vector<std::function<bool()>> values = {
     };

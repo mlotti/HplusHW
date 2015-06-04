@@ -45,9 +45,15 @@ Event::Event(const ParameterSet& config):
   if(tauDiscr) {
     fTauCollection.setConfigurableDiscriminators(*tauDiscr);
   }
-  fTauCollection.setAgainstElectronDiscriminator(config.getParameter<std::string>("TauSelection.againstElectronDiscr"));
-  fTauCollection.setAgainstMuonDiscriminator(config.getParameter<std::string>("TauSelection.againstMuonDiscr"));
-  fTauCollection.setIsolationDiscriminator(config.getParameter<std::string>("TauSelection.isolation"));
+  boost::optional<std::string> tauAgainstElectronDiscr = config.getParameter<std::string>("TauSelection.againstElectronDiscr");
+  if (tauAgainstElectronDiscr)
+    fTauCollection.setAgainstElectronDiscriminator(*tauAgainstElectronDiscr);
+  boost::optional<std::string> tauAgainstMuonDiscr = config.getParameter<std::string>("TauSelection.againstMuonDiscr");
+  if (tauAgainstMuonDiscr)
+    fTauCollection.setAgainstMuonDiscriminator(*tauAgainstMuonDiscr);
+  boost::optional<std::string> tauIsolationDiscr = config.getParameter<std::string>("TauSelection.isolation");
+  if (tauIsolationDiscr)
+    fTauCollection.setIsolationDiscriminator(*tauIsolationDiscr);
   
   // Muon discriminators
   // FIXME

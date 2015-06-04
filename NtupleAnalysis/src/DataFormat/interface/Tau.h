@@ -13,22 +13,19 @@ class TauCollection: public TauGeneratedCollection, public ParticleIteratorAdapt
 public:
   using value_type = Tau;
 
-  TauCollection() {}
-  explicit TauCollection(const std::string& prefix): TauGeneratedCollection(prefix) {}
+  TauCollection() { initialize(); }
+  explicit TauCollection(const std::string& prefix): TauGeneratedCollection(prefix) { initialize(); }
   ~TauCollection() {}
 
   void setConfigurableDiscriminators(const std::vector<std::string>& names) {
     fConfigurableDiscriminatorNames = names;
   }
-  void setAgainstElectronDiscriminator(const std::string& name) {
-    fAgainstElectronDiscriminatorName = name;
-  }
-  void setAgainstMuonDiscriminator(const std::string& name) {
-    fAgainstMuonDiscriminatorName = name;
-  }
-  void setIsolationDiscriminator(const std::string& name) {
-    fIsolationDiscriminatorName = name;
-  }
+  void setAgainstElectronDiscriminator(const std::string& name);
+  void setAgainstMuonDiscriminator(const std::string& name);
+  void setIsolationDiscriminator(const std::string& name);
+  bool againstElectronDiscriminatorIsValid() const;
+  bool againstMuonDiscriminatorIsValid() const;
+  bool isolationDiscriminatorIsValid() const;
 
   void setupBranches(BranchManager& mgr);
 
@@ -46,10 +43,17 @@ protected:
   const Branch<std::vector<bool>>* fIsolationDiscriminator;
 
 private:
+  /// Initialize data members
+  void initialize();
+  void checkDiscrNameValidity(const std::string& name, const std::vector<std::string>& list) const;
+  
   std::vector<std::string> fConfigurableDiscriminatorNames;
   std::string fAgainstElectronDiscriminatorName;
   std::string fAgainstMuonDiscriminatorName;
   std::string fIsolationDiscriminatorName;
+  bool bValidityOfAgainstElectronDiscr;
+  bool bValidityOfAgainstMuonDiscr;
+  bool bValidityOfIsolationDiscr;
 };
 
 class Tau: public TauGenerated<TauCollection> {
@@ -79,7 +83,6 @@ public:
     // Descending order by tau pT
     return (this->pt() > tau.pt());
   }
-  
 };
 
 inline

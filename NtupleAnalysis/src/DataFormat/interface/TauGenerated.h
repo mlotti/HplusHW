@@ -16,6 +16,19 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
+  std::vector<std::string> getIsolationDiscriminatorNames() {
+    static std::vector<std::string> n = { std::string("byCombinedIsolationDeltaBetaCorrRaw3Hits"), std::string("byIsolationMVA3newDMwLTraw"), std::string("byIsolationMVA3newDMwoLTraw"), std::string("byIsolationMVA3oldDMwLTraw"), std::string("byIsolationMVA3oldDMwoLTraw"), std::string("byLooseCombinedIsolationDeltaBetaCorr3Hits"), std::string("byLooseIsolationMVA3newDMwLT"), std::string("byLooseIsolationMVA3newDMwoLT"), std::string("byLooseIsolationMVA3oldDMwLT"), std::string("byLooseIsolationMVA3oldDMwoLT"), std::string("byMediumCombinedIsolationDeltaBetaCorr3Hits"), std::string("byMediumIsolationMVA3newDMwLT"), std::string("byMediumIsolationMVA3newDMwoLT"), std::string("byMediumIsolationMVA3oldDMwLT"), std::string("byMediumIsolationMVA3oldDMwoLT"), std::string("byTightCombinedIsolationDeltaBetaCorr3Hits"), std::string("byTightIsolationMVA3newDMwLT"), std::string("byTightIsolationMVA3newDMwoLT"), std::string("byTightIsolationMVA3oldDMwLT"), std::string("byTightIsolationMVA3oldDMwoLT"), std::string("byVLooseIsolationMVA3newDMwLT"), std::string("byVLooseIsolationMVA3newDMwoLT"), std::string("byVLooseIsolationMVA3oldDMwLT"), std::string("byVLooseIsolationMVA3oldDMwoLT"), std::string("byVTightIsolationMVA3newDMwLT"), std::string("byVTightIsolationMVA3newDMwoLT"), std::string("byVTightIsolationMVA3oldDMwLT"), std::string("byVTightIsolationMVA3oldDMwoLT"), std::string("byVVTightIsolationMVA3newDMwLT"), std::string("byVVTightIsolationMVA3newDMwoLT"), std::string("byVVTightIsolationMVA3oldDMwLT"), std::string("byVVTightIsolationMVA3oldDMwoLT")};
+    return n;
+  }
+  std::vector<std::string> getAgainstMuonDiscriminatorNames() {
+    static std::vector<std::string> n = { std::string("againstMuonLoose"), std::string("againstMuonLoose2"), std::string("againstMuonLoose3"), std::string("againstMuonLooseMVA"), std::string("againstMuonMVAraw"), std::string("againstMuonMedium"), std::string("againstMuonMedium2"), std::string("againstMuonMediumMVA"), std::string("againstMuonTight"), std::string("againstMuonTight2"), std::string("againstMuonTight3"), std::string("againstMuonTightMVA")};
+    return n;
+  }
+  std::vector<std::string> getAgainstElectronDiscriminatorNames() {
+    static std::vector<std::string> n = { std::string("againstElectronLoose"), std::string("againstElectronLooseMVA5"), std::string("againstElectronMVA5category"), std::string("againstElectronMVA5raw"), std::string("againstElectronMedium"), std::string("againstElectronMediumMVA5"), std::string("againstElectronTight"), std::string("againstElectronTightMVA5"), std::string("againstElectronVLooseMVA5"), std::string("againstElectronVTightMVA5")};
+    return n;
+  }
+
 protected:
   const Branch<std::vector<bool>> *fAgainstElectronLoose;
   const Branch<std::vector<bool>> *fAgainstElectronLooseMVA5;
@@ -89,18 +102,6 @@ public:
   TauGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~TauGenerated() {}
 
-  std::vector<std::string> getIsolationDiscriminatorNames() {
-    static std::vector<std::string> n[32] = {byCombinedIsolationDeltaBetaCorrRaw3Hits, byIsolationMVA3newDMwLTraw, byIsolationMVA3newDMwoLTraw, byIsolationMVA3oldDMwLTraw, byIsolationMVA3oldDMwoLTraw, byLooseCombinedIsolationDeltaBetaCorr3Hits, byLooseIsolationMVA3newDMwLT, byLooseIsolationMVA3newDMwoLT, byLooseIsolationMVA3oldDMwLT, byLooseIsolationMVA3oldDMwoLT, byMediumCombinedIsolationDeltaBetaCorr3Hits, byMediumIsolationMVA3newDMwLT, byMediumIsolationMVA3newDMwoLT, byMediumIsolationMVA3oldDMwLT, byMediumIsolationMVA3oldDMwoLT, byTightCombinedIsolationDeltaBetaCorr3Hits, byTightIsolationMVA3newDMwLT, byTightIsolationMVA3newDMwoLT, byTightIsolationMVA3oldDMwLT, byTightIsolationMVA3oldDMwoLT, byVLooseIsolationMVA3newDMwLT, byVLooseIsolationMVA3newDMwoLT, byVLooseIsolationMVA3oldDMwLT, byVLooseIsolationMVA3oldDMwoLT, byVTightIsolationMVA3newDMwLT, byVTightIsolationMVA3newDMwoLT, byVTightIsolationMVA3oldDMwLT, byVTightIsolationMVA3oldDMwoLT, byVVTightIsolationMVA3newDMwLT, byVVTightIsolationMVA3newDMwoLT, byVVTightIsolationMVA3oldDMwLT, byVVTightIsolationMVA3oldDMwoLT};
-    return n;
-  }
-  std::vector<std::string> getAgainstMuonDiscriminatorNames() {
-    static std::vector<std::string> n[12] = {againstMuonLoose, againstMuonLoose2, againstMuonLoose3, againstMuonLooseMVA, againstMuonMVAraw, againstMuonMedium, againstMuonMedium2, againstMuonMediumMVA, againstMuonTight, againstMuonTight2, againstMuonTight3, againstMuonTightMVA};
-    return n;
-  }
-  std::vector<std::string> getAgainstElectronDiscriminatorNames() {
-    static std::vector<std::string> n[10] = {againstElectronLoose, againstElectronLooseMVA5, againstElectronMVA5category, againstElectronMVA5raw, againstElectronMedium, againstElectronMediumMVA5, againstElectronTight, againstElectronTightMVA5, againstElectronVLooseMVA5, againstElectronVTightMVA5};
-    return n;
-  }
   std::vector<std::function<bool()>> getIsolationDiscriminatorValues() {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->byCombinedIsolationDeltaBetaCorrRaw3Hits(); },
