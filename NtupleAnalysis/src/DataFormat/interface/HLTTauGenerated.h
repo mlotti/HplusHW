@@ -8,7 +8,7 @@
 
 class HLTTauGeneratedCollection: public ParticleCollection<double> {
 public:
-  explicit HLTTauGeneratedCollection(const std::string& prefix="HLTTaus"): ParticleCollection(prefix) {}
+  explicit HLTTauGeneratedCollection(const std::string& prefix="HLTTau"): ParticleCollection(prefix) {}
   ~HLTTauGeneratedCollection() {}
 
   void setupBranches(BranchManager& mgr);

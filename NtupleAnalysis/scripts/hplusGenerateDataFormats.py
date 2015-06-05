@@ -81,6 +81,10 @@ def generateParticle(types, particle, discriminatorCaptions):
         includes += "#include <vector>\n"
         includes += "#include <functional>\n"
 
+    prefix = particle
+    if particle != "HLTTau":
+        prefix += "s"
+
     header = """// -*- c++ -*-
 // This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
 
@@ -90,7 +94,7 @@ def generateParticle(types, particle, discriminatorCaptions):
 {includes}
 class {type}Collection: public ParticleCollection<{particleFloatType}> {{
 public:
-  explicit {type}Collection(const std::string& prefix="{particle}s"): ParticleCollection(prefix) {{}}
+  explicit {type}Collection(const std::string& prefix="{prefix}"): ParticleCollection(prefix) {{}}
   ~{type}Collection() {{}}
 
   void setupBranches(BranchManager& mgr);
@@ -114,7 +118,7 @@ public:
 }};
 
 #endif
-""".format(type=particle+"Generated", includes=includes, particle=particle, particleFloatType=particleFloatType, branchObjects="\n".join(branchObjects), discrCaptionGetters=discriminatorCaptionGetters, discrMethodGetters=discriminatorMethodGetters, branchAccessors="\n".join(branchAccessors))
+""".format(type=particle+"Generated", includes=includes, prefix=prefix, particle=particle, particleFloatType=particleFloatType, branchObjects="\n".join(branchObjects), discrCaptionGetters=discriminatorCaptionGetters, discrMethodGetters=discriminatorMethodGetters, branchAccessors="\n".join(branchAccessors))
 
     source = """
 // -*- c++ -*-
