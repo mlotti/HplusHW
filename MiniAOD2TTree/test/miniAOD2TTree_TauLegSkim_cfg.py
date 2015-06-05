@@ -42,8 +42,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::HLT"),
 	TriggerBits = cms.vstring(
-	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v1",
-#	    "HLT_IsoMu24_IterTrk02_v1"
+	    "HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v",
+	    "HLT_IsoMu16_eta2p1_CaloMET30_v",
         ),
 	L1Extra = cms.InputTag("l1extraParticles::MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
