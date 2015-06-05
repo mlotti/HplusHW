@@ -1,0 +1,116 @@
+/** \class METLegSkim
+ *
+ *  
+ *  Filter to select events for 
+ *  tau+MET trigger MET-leg efficiency study
+ *
+ *  \author Sami Lehti  -  HIP Helsinki
+ *
+ */
+
+// user include files
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/EDFilter.h"
+
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "DataFormats/Common/interface/View.h"
+#include "DataFormats/Common/interface/Ptr.h"
+
+#include "FWCore/Framework/interface/TriggerNamesService.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+
+#include "DataFormats/PatCandidates/interface/Tau.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+
+#include "FWCore/Framework/interface/LuminosityBlock.h"
+
+#include <iostream>
+#include <regex>
+
+class METLegSkim : public edm::EDFilter {
+
+    public:
+        explicit METLegSkim(const edm::ParameterSet&);
+        ~METLegSkim();
+
+  	virtual bool filter(edm::Event&, const edm::EventSetup& );
+
+   private:
+	edm::InputTag triggerResults;
+	std::vector<std::string> triggerBits;
+
+        edm::InputTag	jetCollection;
+
+        std::vector<std::string> jetUserFloats;
+
+	double jetEtCut,jetEtaCut;
+	int nJets;
+
+        int nEvents, nSelectedEvents;
+};
+
+METLegSkim::METLegSkim(const edm::ParameterSet& iConfig) {
+    triggerResults     = iConfig.getParameter<edm::InputTag>("TriggerResults");
+    triggerBits        = iConfig.getParameter<std::vector<std::string> >("HLTPaths");
+
+    jetCollection      = iConfig.getParameter<edm::InputTag>("JetCollection");
+    jetUserFloats      = iConfig.getParameter<std::vector<std::string> >("JetUserFloats");
+
+    jetEtCut           = iConfig.getParameter<double>("JetEtCut");
+    jetEtaCut          = iConfig.getParameter<double>("JetEtaCut");                            
+    nJets              = iConfig.getParameter<int>("NJets");
+
+    nEvents         = 0;
+    nSelectedEvents = 0;
+}
+
+
+METLegSkim::~METLegSkim(){
+    std::cout << "METLegSkim: " //  	edm::LogVerbatim("METLegSkim") 
+              << " Number_events_read " << nEvents
+              << " Number_events_kept " << nSelectedEvents
+              << " Efficiency         " << ((double)nSelectedEvents)/((double) nEvents) << std::endl;
+}
+
+
+bool METLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
+
+    nEvents++;
+
+    // Trigger bits
+    edm::Handle<edm::TriggerResults> trghandle;
+    iEvent.getByLabel(triggerResults,trghandle);
+    if(trghandle.isValid()){
+        edm::TriggerResults tr = *trghandle;
+        bool fromPSetRegistry;
+        edm::Service<edm::service::TriggerNamesService> tns;
+        std::vector<std::string> hlNames; 
+        tns->getTrigPaths(tr, hlNames, fromPSetRegistry);
+
+	bool passed = false;
+        for(size_t i = 0; i < triggerBits.size(); ++i){
+	    std::regex hlt_re(triggerBits[i]);
+	    int n = 0;
+            for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
+		if (std::regex_search(*j, hlt_re)) {
+		    if(trghandle->accept(n)) {
+			passed = true;
+                        break;
+		    }
+                }
+		n++;
+            }
+        }
+	if(!passed) return false; 
+    }
+
+    nSelectedEvents++;
+    return true;
+}
+
+DEFINE_FWK_MODULE(METLegSkim);   
+
