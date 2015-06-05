@@ -8,17 +8,17 @@
 #include <cxxabi.h>
 
 namespace hplus {
-  Exception::Exception(std::string& category)
+  Exception::Exception(std::string& category) noexcept
   : std::exception(),
     _category(category)
   { }
 
-  Exception::Exception(const char* category)
+  Exception::Exception(const char* category) noexcept
   : std::exception(),
     _category(category)
   { }
   
-  Exception::Exception(const Exception& e)
+  Exception::Exception(const Exception& e) noexcept
   : std::exception(),
     _category(e._category),
     _msg(e._msg.str())
@@ -26,12 +26,15 @@ namespace hplus {
   
   Exception::~Exception() {}
 
-  const char* Exception::what() const throw() {
+  const char* Exception::what() const noexcept {
     unsigned int max_frames = 63;
     std::stringstream s;
+    bool calledInsideUnitTest = false;
     s << "Exception of category '" << _category << "' occurred with message:" << std::endl;
     s << ">>> " << _msg.str() << std::endl;
-    s << std::endl;
+    //s << std::endl;
+    //std::cout << s.str() << std::endl;
+    //s.str("");
     s << "Backtrace:" << std::endl;
 
     // storage array for stack trace address data
@@ -84,11 +87,14 @@ namespace hplus {
         char* ret = abi::__cxa_demangle(begin_name, funcname, &funcnamesize, &status);
         if (status == 0) {
           funcname = ret; // use possibly realloc()-ed string
-          s << "  " << symbollist[i] << ": " << funcname << ":" << begin_offset << std::endl;
+          s << "  " << symbollist[i] << ": " << funcname << ":" << std::stoul(begin_offset, nullptr, 16) << std::endl;
+          if (std::string(symbollist[i]).find("HiggsAnalysis/NtupleAnalysis/test/main") != std::string::npos) {
+            calledInsideUnitTest = true;
+          }
         } else {
           // demangling failed. Output function name as a C function with
           // no arguments.
-          s << "  " << symbollist[i] << ": " << begin_name << ":" << begin_offset << std::endl;
+          s << "  " << symbollist[i] << ": " << begin_name << ":" << std::stoul(begin_offset, nullptr, 16) << std::endl;
         }
       }
       else {
@@ -98,6 +104,9 @@ namespace hplus {
     }
     free(funcname);
     free(symbollist);
+    if (calledInsideUnitTest)
+      return _msg.str().c_str();
+    
     return s.str().c_str();
   }
 }
