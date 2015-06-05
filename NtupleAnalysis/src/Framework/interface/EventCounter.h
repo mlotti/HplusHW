@@ -93,6 +93,7 @@ private:
 
   const EventWeight& fWeight;
   std::vector<Counter> fCounters; // main counter has index 0
+  bool fOutputHasBeenSet;
 };
 
 inline
