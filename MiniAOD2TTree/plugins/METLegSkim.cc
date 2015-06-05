@@ -23,8 +23,7 @@
 #include "FWCore/Framework/interface/TriggerNamesService.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 
-#include "DataFormats/PatCandidates/interface/Tau.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 
@@ -107,6 +106,30 @@ bool METLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
         }
 	if(!passed) return false; 
     }
+
+    edm::Handle<edm::View<pat::Jet> > jethandle;
+    iEvent.getByLabel(jetCollection, jethandle);
+    int njets = 0;
+    if(jethandle.isValid()){
+        for(size_t i=0; i<jethandle->size(); ++i) {
+            const pat::Jet& obj = jethandle->at(i);
+
+	    if(obj.p4().pt() < jetEtCut) continue;
+	    if(fabs(obj.p4().eta()) > jetEtaCut) continue;
+/*
+	    bool passed = true;
+	    for(size_t j = 0; j < jetUserFloats.size(); ++j){
+		if(obj.userFloat(jetUserFloats[j]) < 0) {
+		    passed = false;
+		    break;
+		}
+	    }
+	    if(!passed) continue;
+*/
+	    njets++;
+	}
+    }
+    if(njets == 0) return false;
 
     nSelectedEvents++;
     return true;
