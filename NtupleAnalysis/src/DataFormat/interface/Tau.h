@@ -70,12 +70,18 @@ public:
     return true;
   }
   bool againstElectronDiscriminator() const {
+    if (!fCollection->againstElectronDiscriminatorIsValid())
+      return true;
     return fCollection->fAgainstElectronDiscriminator->value()[index()];
   }
   bool againstMuonDiscriminator() const {
+    if (!fCollection->againstMuonDiscriminatorIsValid())
+      return true;
     return fCollection->fAgainstMuonDiscriminator->value()[index()];
   }
   bool isolationDiscriminator() const {
+    if (!fCollection->isolationDiscriminatorIsValid())
+      return true;
     return fCollection->fIsolationDiscriminator->value()[index()];
   }
   /// Operator defined for using std::sort on vector<Tau>

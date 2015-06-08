@@ -18,7 +18,7 @@ TauSelection::Data::~Data() { }
 
 const Tau& TauSelection::Data::getSelectedTau() const { 
   if (!hasIdentifiedTaus())
-    throw hplus::Exception("Assert") << "You forgot to check if taus exist (hasIdentifiedTaus())!";
+    throw hplus::Exception("Assert") << "You forgot to check if taus exist (hasIdentifiedTaus()), this message occurs when none exist!";
   return fSelectedTaus[0];
 }
 
@@ -52,7 +52,8 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
 TauSelection::~TauSelection() { }
 
 void TauSelection::bookHistograms(TDirectory* dir) {
-  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "eSelection_"+sPostfix);
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "tauSelection_"+sPostfix);
+  hTriggerMatchDeltaR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR", "Trigger match #DeltaR", 60, 0, 3.);
   hTauPtTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauPtAll", "Tau pT, all", 40, 0, 400);
   hTauEtaTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauEtaAll", "Tau eta, all", 50, -2.5, 2.5);
   hNPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauNpassed", "Tau eta, all", 20, 0, 20);
@@ -94,71 +95,63 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   // Loop over taus
   for (Tau tau: event.taus()) {
     // Apply trigger matching
-    double myMinDeltaR = 9999.0;
-    for (auto& p: myTriggerTauMomenta) {
-      double myDeltaR = ROOT::Math::VectorUtil::DeltaR(p, tau.p4());
-      myMinDeltaR = std::min(myMinDeltaR, myDeltaR);
-    }
-    if (myMinDeltaR > fTriggerTauMatchingCone)
+    if (!this->passTrgMatching(tau, myTriggerTauMomenta))
       continue;
     passedTriggerMatching = true;
     // Apply cut on decay mode
-    if (!tau.decayModeFinding())
+    if (!this->passDecayModeFinding(tau))
       continue;
     passedDecayMode = true;
     hTauPtTriggerMatched->Fill(tau.pt());
     hTauEtaTriggerMatched->Fill(tau.eta());
     // Electron discrimator
-    if (!tau.againstElectronDiscriminator())
+    if (!this->passElectronDiscriminator(tau))
       continue;
     passedEdiscr = true;
     // Muon discriminator
-    if (!tau.againstMuonDiscriminator())
+    if (!this->passMuonDiscriminator(tau))
       continue;
     passedMuDiscr = true;
     // Pt cut on tau
-    if (tau.pt() < fTauPtCut)
+    if (!this->passPtCut(tau))
       continue;
     passedPt = true;
     // Eta cut on tau
-    if (tau.eta() < fTauEtaCut)
+    if (!this->passEtaCut(tau))
       continue;
     passedEta = true;
     // Ldg. track pt cut
-    if (tau.lTrkPt() < fTauLdgTrkPtCut)
+    if (!this->passLdgTrkPtCut(tau))
       continue;
     passedLdgTrkPt = true;
     // Number of prongs
-    if (fTauNprongs == 13) {
-      if (tau.nProngs() != 1 && tau.nProngs() != 3)
-        continue;
-    } else {
-      if (tau.nProngs() != fTauNprongs)
-        continue;
-    }
+    if (!this->passNprongsCut(tau))
+      continue;
     passedNprongs = true;
     // Apply tau isolation
     if (bInvertTauIsolation) {
-      if (tau.isolationDiscriminator()) {
+      if (this->passIsolationDiscriminator(tau))
         passedIsol = true;
+      if (passedIsol)
         continue;
-      }
     } else {
-      if (!tau.isolationDiscriminator())  
+      if (!this->passIsolationDiscriminator(tau))
         continue;
       passedIsol = true;
     }
     // Apply cut on Rtau
-    if (getRtau(tau) < fTauRtauCut)
+    if (!this->passRtauCut(tau))
       continue;
     passedRtau = true;
+    
     output.fSelectedTaus.push_back(tau);
   }
   // If there are multiple taus, choose the one with highest pT
   std::sort(output.fSelectedTaus.begin(), output.fSelectedTaus.end());
   
   // Fill data object
-  output.fRtau = getRtau(output.getSelectedTau());
+  if (output.fSelectedTaus.size())
+    output.fRtau = getRtau(output.getSelectedTau());
 
   // Fill counters
   if (passedTriggerMatching)
@@ -193,8 +186,31 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   return output;
 }
 
+bool TauSelection::passTrgMatching(const Tau& tau, std::vector<math::LorentzVectorT<double>>& trgTaus) const {
+  if (!bApplyTriggerMatching)
+    return true;
+  double myMinDeltaR = 9999.0;
+  for (auto& p: trgTaus) {
+    double myDeltaR = ROOT::Math::VectorUtil::DeltaR(p, tau.p4());
+    myMinDeltaR = std::min(myMinDeltaR, myDeltaR);
+  }
+  hTriggerMatchDeltaR->Fill(myMinDeltaR);
+  return (myMinDeltaR < fTriggerTauMatchingCone);
+}
+
+bool TauSelection::passNprongsCut(const Tau& tau) const {
+  if (fTauNprongs > 0) {
+    if (fTauNprongs == 13) {
+      return (tau.nProngs() == 1 || tau.nProngs() == 3);
+    } else {
+      return (tau.nProngs() == fTauNprongs);
+    }
+  }
+  return true;
+}
+
 double TauSelection::getRtau(const Tau& tau) const {
-  double myRtau = -1.0;
+  double myRtau = -0.01;
   //FIXME rtau calculation
   //double myTauMomentum = tau.p4().P();
   //if (myTauMomentum > 0.0)

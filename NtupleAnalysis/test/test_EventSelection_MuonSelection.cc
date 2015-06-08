@@ -32,7 +32,6 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
   EventCounter ec(weight);
-  ec.setOutput(f);
   MuonSelection musel1(pset.getParameter<ParameterSet>("MuonSelection1"),
                           ec, histoWrapper, commonPlotsPointer, "test");
   musel1.bookHistograms(f);
@@ -120,6 +119,8 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
     CHECK( ec.getValueByName("passed mu selection (test)") == 2);
     CHECK( h->Integral() == 2.0f );
   }
+  ec.setOutput(f);
+  ec.serialize();
   f->Write();
   f->Close();
 }

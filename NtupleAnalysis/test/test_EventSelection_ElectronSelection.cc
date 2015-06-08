@@ -30,7 +30,6 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
   EventCounter ec(weight);
-  ec.setOutput(f);
   ElectronSelection esel1(pset.getParameter<ParameterSet>("ElectronSelection1"),
                           ec, histoWrapper, commonPlotsPointer, "test");
   esel1.bookHistograms(f);
@@ -118,6 +117,8 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
     CHECK( ec.getValueByName("passed e selection (test)") == 2);
     CHECK( h->Integral() == 2.0f );
   }
+  ec.setOutput(f);
+  ec.serialize();
   f->Write();
   f->Close();
 }

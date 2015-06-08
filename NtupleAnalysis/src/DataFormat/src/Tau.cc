@@ -7,33 +7,33 @@ void TauCollection::initialize() {
   fAgainstElectronDiscriminatorName = "";
   fAgainstMuonDiscriminatorName = "";
   fIsolationDiscriminatorName = "";
-  bValidityOfAgainstElectronDiscr = true;
-  bValidityOfAgainstMuonDiscr = true;
-  bValidityOfIsolationDiscr = true;
+  bValidityOfAgainstElectronDiscr = false;
+  bValidityOfAgainstMuonDiscr = false;
+  bValidityOfIsolationDiscr = false;
 }
 
 void TauCollection::setAgainstElectronDiscriminator(const std::string& name) {
-  if (name == "") {
-    bValidityOfAgainstElectronDiscr = false;
+  if (name == "")
     return;
-  }
+  bValidityOfAgainstElectronDiscr = true;
   checkDiscrNameValidity(name, this->getAgainstElectronDiscriminatorNames());
+  fAgainstElectronDiscriminatorName = name;
 }
 
 void TauCollection::setAgainstMuonDiscriminator(const std::string& name) {
-  if (name == "") {
-    bValidityOfAgainstMuonDiscr = false;
+  if (name == "")
     return;
-  }
+  bValidityOfAgainstMuonDiscr = true;
   checkDiscrNameValidity(name, this->getAgainstMuonDiscriminatorNames());
+  fAgainstMuonDiscriminatorName = name;
 }
 
 void TauCollection::setIsolationDiscriminator(const std::string& name) {
-  if (name == "") {
-    bValidityOfIsolationDiscr = false;
+  if (name == "")
     return;
-  }
+  bValidityOfIsolationDiscr = true;
   checkDiscrNameValidity(name, this->getIsolationDiscriminatorNames());
+  fIsolationDiscriminatorName = name;
 }
 
 void TauCollection::checkDiscrNameValidity(const std::string& name, const std::vector<std::string>& list) const {

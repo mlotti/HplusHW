@@ -63,6 +63,16 @@ public:
 
 private:
   Data privateAnalyze(const Event& iEvent);
+  bool passTrgMatching(const Tau& tau, std::vector<math::LorentzVectorT<double>>& trgTaus) const;
+  bool passDecayModeFinding(const Tau& tau) const { return tau.decayModeFinding(); }
+  bool passPtCut(const Tau& tau) const { return tau.pt() > fTauPtCut; }
+  bool passEtaCut(const Tau& tau) const { return std::fabs(tau.eta()) < fTauEtaCut; }
+  bool passLdgTrkPtCut(const Tau& tau) const { return tau.lTrkPt() > fTauLdgTrkPtCut; }
+  bool passElectronDiscriminator(const Tau& tau) const { return tau.againstElectronDiscriminator(); }
+  bool passMuonDiscriminator(const Tau& tau) const { return tau.againstMuonDiscriminator(); }
+  bool passNprongsCut(const Tau& tau) const;
+  bool passIsolationDiscriminator(const Tau& tau) const { return tau.isolationDiscriminator(); }
+  bool passRtauCut(const Tau& tau) const { return this->getRtau(tau) > fTauRtauCut; }
   double getRtau(const Tau& tau) const;
 
   // Input parameters (discriminators handled in Dataformat/src/Event.cc)
@@ -91,6 +101,7 @@ private:
   Count cSubPassedIsolation;
   Count cSubPassedRtau;
   // Histograms
+  WrappedTH1 *hTriggerMatchDeltaR;
   WrappedTH1 *hTauPtTriggerMatched;
   WrappedTH1 *hTauEtaTriggerMatched;
   WrappedTH1 *hNPassed;
