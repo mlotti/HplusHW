@@ -4,7 +4,7 @@ import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsT
 process = cms.Process("TTreeDump")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(10000)
 )
 
 process.load("FWCore/MessageService/MessageLogger_cfi")
@@ -39,8 +39,6 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerBits = cms.vstring(
 	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
-            "HLT_LooseIsoPFTau50_Trk30_eta2p1_v",
-#	    "HLT_IsoMu24_IterTrk02_v1"
         ),
 	L1Extra = cms.InputTag("l1extraParticles::MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
@@ -156,7 +154,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     )
 )
 
-process.load("HiggsAnalysis.MiniAOD2TTree.METLegSkim_cfi")
+process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
 
 process.skimCounterAll    = cms.EDProducer("HPlusEventCountProducer")
 process.skimCounterPassed = cms.EDProducer("HPlusEventCountProducer")

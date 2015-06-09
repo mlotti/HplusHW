@@ -1,4 +1,4 @@
-/** \class METLegSkim
+/** \class SignalAnalysisSkim
  *
  *  
  *  Filter to select events for 
@@ -30,11 +30,11 @@
 #include <iostream>
 #include <regex>
 
-class METLegSkim : public edm::EDFilter {
+class SignalAnalysisSkim : public edm::EDFilter {
 
     public:
-        explicit METLegSkim(const edm::ParameterSet&);
-        ~METLegSkim();
+        explicit SignalAnalysisSkim(const edm::ParameterSet&);
+        ~SignalAnalysisSkim();
 
   	virtual bool filter(edm::Event&, const edm::EventSetup& );
 
@@ -52,7 +52,7 @@ class METLegSkim : public edm::EDFilter {
         int nEvents, nSelectedEvents;
 };
 
-METLegSkim::METLegSkim(const edm::ParameterSet& iConfig) {
+SignalAnalysisSkim::SignalAnalysisSkim(const edm::ParameterSet& iConfig) {
     triggerResults     = iConfig.getParameter<edm::InputTag>("TriggerResults");
     triggerBits        = iConfig.getParameter<std::vector<std::string> >("HLTPaths");
 
@@ -68,15 +68,15 @@ METLegSkim::METLegSkim(const edm::ParameterSet& iConfig) {
 }
 
 
-METLegSkim::~METLegSkim(){
-    std::cout << "METLegSkim: " //  	edm::LogVerbatim("METLegSkim") 
+SignalAnalysisSkim::~SignalAnalysisSkim(){
+    std::cout << "SignalAnalysisSkim: " //  	edm::LogVerbatim("SignalAnalysisSkim") 
               << " Number_events_read " << nEvents
               << " Number_events_kept " << nSelectedEvents
               << " Efficiency         " << ((double)nSelectedEvents)/((double) nEvents) << std::endl;
 }
 
 
-bool METLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
+bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
 
     nEvents++;
 
@@ -144,5 +144,5 @@ bool METLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
     return true;
 }
 
-DEFINE_FWK_MODULE(METLegSkim);   
+DEFINE_FWK_MODULE(SignalAnalysisSkim);   
 
