@@ -4,7 +4,7 @@ import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsT
 process = cms.Process("TTreeDump")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(10000)
 )
 
 process.load("FWCore/MessageService/MessageLogger_cfi")
@@ -14,12 +14,7 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-	'/store/mc/RunIISpring15DR74/QCD_Pt-80to120_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/2A98D4CF-F9FE-E411-AB1A-047D7BD6DD44.root',
-#        'file:miniAOD-prod_PAT_TT_RECO_721_11112014.root'
-#	'file:miniAOD-prod_PAT_TT_RECO_740p1_02122014.root'
-#	'file:miniAOD-prod_PAT_Hp200_RECO_740p1_09122014.root'
-#	'file:miniAOD-prod_PAT_SingleMu_Run2012D_v1_RECO.root'
-#	'file:PYTHIA6_Tauola_TTbar_H160_taunu_13TeV_cff_py_GEN.root'
+       '/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/022B08C4-C702-E511-9995-D4856459AC30.root',
     )
 )
 
@@ -44,8 +39,6 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerBits = cms.vstring(
 	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
-            "HLT_LooseIsoPFTau50_Trk30_eta2p1_v",
-#	    "HLT_IsoMu24_IterTrk02_v1"
         ),
 	L1Extra = cms.InputTag("l1extraParticles::MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
