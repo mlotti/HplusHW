@@ -11,13 +11,17 @@ GenParticleDumper::GenParticleDumper(std::vector<edm::ParameterSet> psets){
     et  = new std::vector<double>[inputCollections.size()];
 
     pdgId = new std::vector<short>[inputCollections.size()];
-    status = new std::vector<short>[inputCollections.size()];
+    //status = new std::vector<short>[inputCollections.size()];
 
     mother = new std::vector<short>[inputCollections.size()];
-    tauprong = new std::vector<short>[inputCollections.size()];
+    tauProng = new std::vector<short>[inputCollections.size()];
 
     massHpm = new std::vector<double>[inputCollections.size()];
     
+    tauVisiblePt = new std::vector<double>[inputCollections.size()];
+    tauVisiblePhi = new std::vector<double>[inputCollections.size()];
+    tauVisibleEta = new std::vector<double>[inputCollections.size()];
+
     tauPi0RtauW = new std::vector<double>[inputCollections.size()];
     tauPi0RtauHpm = new std::vector<double>[inputCollections.size()];
     tauPi1pi0RtauW = new std::vector<double>[inputCollections.size()];
@@ -54,12 +58,16 @@ void GenParticleDumper::book(TTree* tree){
 	tree->Branch((name+"_et").c_str(),&et[i]);
 
         tree->Branch((name+"_pdgId").c_str(),&pdgId[i]);
-        tree->Branch((name+"_status").c_str(),&status[i]);
+        //tree->Branch((name+"_status").c_str(),&status[i]);
 	
 	tree->Branch((name+"_mother").c_str(),&mother[i]);
-	tree->Branch((name+"_tauprong").c_str(),&tauprong[i]);
+	tree->Branch((name+"_tauProng").c_str(),&tauProng[i]);
 	
 	tree->Branch((name+"_massHpm").c_str(),&massHpm[i]);
+
+	tree->Branch((name+"_tauVisiblePt").c_str(),&tauVisiblePt[i]);
+	tree->Branch((name+"_tauVisiblePhi").c_str(),&tauVisiblePhi[i]);
+	tree->Branch((name+"_tauVisibleEta").c_str(),&tauVisibleEta[i]);
 
 	tree->Branch((name+"_tauPi0RtauW").c_str(),&tauPi0RtauW[i]);
 	tree->Branch((name+"_tauPi0RtauHpm").c_str(),&tauPi0RtauHpm[i]);
@@ -82,6 +90,12 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
         iEvent.getByLabel(inputtag, handle[ic]);
         if(handle[ic].isValid()){
+	  // dummy values for particles not concerned (FIXME somehow?)
+	    int mom = -1;
+	    int tauPr = -1;
+	    double tauVisPt = -100.0;
+	    double tauVisPhi = -100.0;
+	    double tauVisEta = -100.0;
             for(size_t i=0; i<handle[ic]->size(); ++i) {
                 const reco::Candidate & gp = handle[ic]->at(i);
                 pt[ic].push_back(gp.pt());
@@ -90,21 +104,49 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 e[ic].push_back(gp.energy());	
 		et[ic].push_back(gp.et());	
 		pdgId[ic].push_back(gp.pdgId());
-		status[ic].push_back(gp.status());
+		//status[ic].push_back(gp.status());
 		
 		if(abs(gp.pdgId()) == 37) {
 		  massHpm[ic].push_back(gp.mass());
 		}
-		
+
 		if(abs(gp.pdgId()) == 5 || abs(gp.pdgId()) == 6) {
-		  associatedWithHpm[ic].push_back(associatedWithHpmProduction(&gp));
-		} else {associatedWithHpm[ic].push_back(0);}
+		  size_t associated = associatedWithHpmProduction(&gp);
+		  if(associated) {
+		    associatedWithHpm[ic].push_back(1); // 1 (0) denotes being associated (not-associated)
+		  } else if (abs(gp.pdgId()) == 5 && bFromAssociatedT(&gp)) {
+		    // b-jets from associated t marked as secondary associated particles (denoted with 2)
+	            associatedWithHpm[ic].push_back(2);
+		  } else if (abs(gp.pdgId()) == 6 && abs(gp.mother()->pdgId()) == 21) {
+		    // t-quarks that are produced with associated t in ttbar marked as secondary associated particles (denoted with 2)
+		    bool t_ttbar = false;
+		    for(reco::Candidate::const_iterator des = gp.mother()->begin(); des != gp.mother()->end(); ++des) {
+		      if (&(*des) == &gp) {continue;}
+		      if (abs(des->pdgId()) == 6 && topToHp(&(*des))) { 
+		      //last condition: dirty hack to skip particles decaying to themselves in MadGraph, if this was not the case associatedWithHpmProduction(&(*des)) could be used
+		          t_ttbar = true;
+		      }
+		    }
+		    if (t_ttbar) {associatedWithHpm[ic].push_back(2);} 
+		    else {associatedWithHpm[ic].push_back(0);} 
+		  } else {
+	            associatedWithHpm[ic].push_back(0);
+	          }
+                } else {
+                  associatedWithHpm[ic].push_back(0);
+	        }
 
 		if(abs(gp.pdgId()) == 15) {
 		    int decaychannel = tauDecayChannel(&gp);
 		    double rTau = rtau(&gp);
-		    tauprong[ic].push_back(tauProngs(&gp));
-
+		    tauPr = tauProngs(&gp);
+		    if(abs(gp.mother()->pdgId()) == 37 && tauPr == 1) { 
+		      //calculating visible quantities is expensive - do it only for H+ 1-prong taus
+		      tauVisPt = visibleTauP4(&gp).Pt();
+		      tauVisPhi = visibleTauP4(&gp).Phi();
+		      tauVisEta = visibleTauP4(&gp).Eta();
+		    }
+		    
 		    if(decaychannel == pi1pi0) { // polarization only for 1-prong hadronic taus with one neutral pion to make a clean case 
 		      if(abs(gp.mother()->pdgId()) == 24) tauPi1pi0RtauW[ic].push_back(rTau);
 		      if(abs(gp.mother()->pdgId()) == 37) tauPi1pi0RtauHpm[ic].push_back(rTau);
@@ -114,21 +156,25 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		      if(abs(gp.mother()->pdgId()) == 37) tauPinpi0RtauHpm[ic].push_back(rTau);
 		    }
 		    if(decaychannel == pi) { // polarization only for 1-prong hadronic taus with no neutral pions
-		      double energy = spinEffects(&gp);
+		      double efraction = spinEffects(&gp);
 		      if(abs(gp.mother()->pdgId()) == 24) {
 			tauPi0RtauW[ic].push_back(rTau);
-			tauSpinEffectsW[ic].push_back(energy);
+			tauSpinEffectsW[ic].push_back(efraction);
 		      }
 		      if(abs(gp.mother()->pdgId()) == 37) {
 			tauPi0RtauHpm[ic].push_back(rTau);
-			tauSpinEffectsHpm[ic].push_back(energy);
+			tauSpinEffectsHpm[ic].push_back(efraction);
 		      }
 		    }
-		} else {tauprong[ic].push_back(-1);}
+		}
 		
-		if(abs(gp.pdgId()) != 2212) {
-		    mother[ic].push_back(gp.mother()->pdgId());
-		} else {mother[ic].push_back(-1);}
+		if(abs(gp.pdgId()) != 2212) mom = gp.mother()->pdgId(); // proton (2212) has no mother
+		
+		mother[ic].push_back(mom);
+		tauProng[ic].push_back(tauPr);
+		tauVisiblePt[ic].push_back(tauVisPt);
+		tauVisiblePhi[ic].push_back(tauVisPhi);
+		tauVisibleEta[ic].push_back(tauVisEta);
 	    }
 	}
     }
@@ -150,9 +196,12 @@ void GenParticleDumper::reset(){
         e[ic].clear();
 	et[ic].clear();
 	pdgId[ic].clear();
-	status[ic].clear();
+	//status[ic].clear();
 	mother[ic].clear();
-	tauprong[ic].clear();
+	tauProng[ic].clear();
+	tauVisiblePt[ic].clear();
+	tauVisiblePhi[ic].clear();
+	tauVisibleEta[ic].clear();
 	tauPi0RtauW[ic].clear();
 	tauPi0RtauHpm[ic].clear();
 	tauPi1pi0RtauW[ic].clear();
@@ -202,30 +251,31 @@ int GenParticleDumper::tauProngs(const reco::Candidate* tau){
     int nProngs = 0;
     for(reco::Candidate::const_iterator des = tau->begin(); des != tau->end(); ++des) {
     	if(abs((*des).pdgId()) == 15) return tauProngs(&(*des)); 
-    	if((*des).status() != 1) continue; // unstable particle
-    	if((*des).charge() == 0) continue; //neutral particle
-    	//std::cout << (*des).pdgId() << std::endl;
-    	nProngs++;
+    	if(abs((*des).pdgId()) == 213 || abs((*des).pdgId()) == 20213) {nProngs += tauProngs(&(*des));}
+	else if((*des).status() != 1) {continue;} // unstable particle
+	else {
+	  if((*des).charge() == 0) continue; //neutral particle
+	  nProngs++;
+	}
     }
     return nProngs;
 }
 
 double GenParticleDumper::spinEffects(const reco::Candidate* tau){
-    //if(decay != pi) return; // polarization only for 1-prong hadronic taus with no neutral pions              
+    // polarization only for 1-prong hadronic taus with no neutral pions              
     TLorentzVector pionP4 = leadingPionP4(tau);
     TLorentzVector momP4 = motherP4(tau);
     pionP4.Boost(-1*momP4.BoostVector());
     double energy = pionP4.E()/(tau->mother()->p4().M()/2);
     return energy;
-    //std::cout << tau->mother()->pdgId() << std::endl;
 }
 
 double GenParticleDumper::rtau(const reco::Candidate* tau){                
   // polarization only for 1-prong hadronic taus with one neutral pion to make a clean case 
-  //if(tau->momentum().perp() < tauEtCut) return; // rtau visible only for boosted taus                               
+  // if(tau->momentum().perp() < tauEtCut) return; // rtau visible only for boosted taus                               
   double rTau = 0;
   double ltrack = leadingPionP4(tau).P();
-  double visibleTauE = visibleTauEnergy(tau);
+  double visibleTauE = visibleTauP4(tau).E();
   if(visibleTauE != 0) rTau = ltrack/visibleTauE;
   return rTau;
 }
@@ -253,11 +303,11 @@ TLorentzVector GenParticleDumper::leadingPionP4(const reco::Candidate* tau){
     return p4;
 }
 
-double GenParticleDumper::visibleTauEnergy(const reco::Candidate* tau){
+TLorentzVector GenParticleDumper::visibleTauP4(const reco::Candidate* tau){
   TLorentzVector p4(tau->px(),tau->py(),tau->pz(),tau->energy());
   for(reco::Candidate::const_iterator des = tau->begin(); des != tau->end(); ++des) {
       int pid = (*des).pdgId();
-      if(abs(pid) == 15) return visibleTauEnergy(&(*des));
+      if(abs(pid) == 15) return visibleTauP4(&(*des));
       if(abs(pid) == 12 || abs(pid) == 14 || abs(pid) == 16) {
           p4 -= TLorentzVector((*des).px(),
 			     (*des).py(),
@@ -265,30 +315,61 @@ double GenParticleDumper::visibleTauEnergy(const reco::Candidate* tau){
 			     (*des).energy());
       }
     }
-  return p4.E();
+  return p4;
 }
 
-int GenParticleDumper::associatedWithHpmProduction(const reco::Candidate* particle) {
+bool GenParticleDumper::associatedWithHpmProduction(const reco::Candidate* particle) {
   for(reco::Candidate::const_iterator des = particle->begin(); des != particle->end(); ++des) {
-    if (abs((*des).pdgId()) == 37) return 1; // associated top (bottom) quarks decaying to Hpm in light case (5FS heavy case)
+    if (abs((*des).pdgId()) == 37) return true; // associated top (bottom) quarks decaying to Hpm in light case (5FS heavy case)
   }
 
-  //bool associated = false;
-  size_t nGenMothers = particle->numberOfMothers(); //associated bottom and top (only bottom) quarks in heavy (light) case in 4FS or associated top quarks in 5FS heavy case
-  //std::cout << particle->pdgId() << " has "<< nGenMothers << " mothers -> ";
+  size_t nGenMothers = particle->numberOfMothers(); //associated bottom (top and bottom) quarks in light (heavy 4FS) case and associated top quarks in heavy 5FS case
   for (size_t iGenMother = 0; iGenMother < nGenMothers; ++iGenMother) { 
     const reco::Candidate* mom = particle->mother(iGenMother);
-    //std::cout << "This is mom " << iGenMother << " : " << mom->pdgId() << " with children ";
     for(reco::Candidate::const_iterator des = mom->begin(); des != mom->end(); ++des) {
-      //std::cout << des->pdgId() << " "; 
-      if (abs((*des).pdgId()) == 37) return 1;//associated = true;
+      if (abs((*des).pdgId()) == 37) return true;
     }
   } 
-  //if (associated) {std::cout << "associated with Hpm";} else {std::cout << "NOT associated with Hpm";}
-  //std::cout << std::endl;
-  return 0;
+  return false;
 }
 
+bool GenParticleDumper::topToHp(const reco::Candidate* particle) {
+  int pid = particle->pdgId();
+  const reco::Candidate* newp;
+  bool notitself = true;
+  bool haschildren = false;
+  for(reco::Candidate::const_iterator des = particle->begin(); des != particle->end(); ++des) {
+    if (des->pdgId() == pid) {
+      notitself = false;
+      newp = &(*des);
+    }
+    haschildren = true;
+  }
+  if (haschildren == false) {
+    return false;
+  }
+  if (notitself == false) { // MadGraph produces particles decaying to themselves, skip them
+    return topToHp(newp);
+  }
+  for(reco::Candidate::const_iterator des = particle->begin(); des != particle->end(); ++des) {
+    if (abs(des->pdgId()) == 37) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+bool GenParticleDumper::bFromAssociatedT(const reco::Candidate* particle) {
+  if (particle->mother()->pdgId() == particle->pdgId()) { // MadGraph produces particles decaying to themselves, skip them
+    return bFromAssociatedT(particle->mother());
+  } else if (abs(particle->mother()->pdgId()) == 6 && associatedWithHpmProduction(particle->mother())) {
+    return true;
+  } else {
+    return false;
+  }
+}
+  
 void GenParticleDumper::printDescendants(const reco::Candidate* particle){
   for(reco::Candidate::const_iterator des = particle->begin(); des != particle->end(); ++des) {
       int pid = (*des).pdgId();

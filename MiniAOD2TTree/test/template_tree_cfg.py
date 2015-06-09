@@ -32,6 +32,13 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             src = cms.InputTag("genMetTrue"),
             filter = cms.untracked.bool(False)
         )
+    ),
+    GenWeights = cms.VPSet(
+        cms.PSet(
+            branchname = cms.untracked.string("GenWeight"),
+            src = cms.InputTag("generator"),
+            filter = cms.untracked.bool(False)
+        )
     )
 )
 
