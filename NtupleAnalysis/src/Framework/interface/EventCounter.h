@@ -98,9 +98,10 @@ private:
 
   size_t findOrInsertCounter(const std::string& name);
 
-  bool fIsEnabled;
   const EventWeight& fWeight;
+  bool fIsEnabled;
   std::vector<Counter> fCounters; // main counter has index 0
+  bool fOutputHasBeenSet;
 };
 
 inline

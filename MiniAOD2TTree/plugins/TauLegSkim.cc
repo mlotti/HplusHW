@@ -97,21 +97,21 @@ bool TauLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
         std::vector<std::string> hlNames; 
         tns->getTrigPaths(tr, hlNames, fromPSetRegistry);
 
-//	bool passed = false;
+	bool passed = false;
         for(size_t i = 0; i < triggerBits.size(); ++i){
 	    std::regex hlt_re(triggerBits[i]);
 	    int n = 0;
             for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
 		if (std::regex_search(*j, hlt_re)) {
 		    if(trghandle->accept(n)) {
-//			passed = true;
+			passed = true;
                         break;
 		    }
                 }
 		n++;
             }
         }
-//	if(!passed) return false; 
+	if(!passed) return false; 
     }
 
     // Tau
@@ -131,7 +131,7 @@ bool TauLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
 	    selectedTaus.push_back(tau);
 	}
     }
-    if(selectedTaus.size() != 1) return false;
+    if(selectedTaus.size() == 0) return false;
 
     // Muon
     std::vector<pat::Muon> selectedMuons;
@@ -145,7 +145,7 @@ bool TauLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
 	    selectedMuons.push_back(muon);
         }
     }
-    if(selectedMuons.size() != 1) return false;
+    if(selectedMuons.size() == 0) return false;
 /*
     double muTauInvMass = (selectedMuons[0].p4() + selectedTaus[0].p4()).M();
 std::cout << "check muTauInvMass " << muTauInvMass << std::endl;

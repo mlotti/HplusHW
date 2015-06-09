@@ -34,9 +34,13 @@ class TriggerDumper {
 	void reset();
 
     private:
+        void book(edm::Event&);
+
         bool filter();
 	bool useFilter;
 	bool booked;
+
+	TTree* theTree;
 
 	edm::InputTag triggerResults;
         edm::InputTag triggerObjects;

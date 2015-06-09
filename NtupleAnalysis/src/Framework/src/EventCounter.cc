@@ -31,7 +31,7 @@ size_t EventCounter::Counter::getLabelIndex(const std::string& l) const {
 }
 size_t EventCounter::Counter::insert(const std::string& label) {
   if(counter)
-    throw std::logic_error("May not addCounter() after setOutput()");
+    throw std::logic_error("May not call addCounter() after setOutput()");
 
   size_t index = labels.size();
   labels.push_back(label);
@@ -77,8 +77,9 @@ void EventCounter::Counter::serialize() {
 
 // EventCounter
 EventCounter::EventCounter(const EventWeight& weight):
+  fWeight(weight),
   fIsEnabled(true),
-  fWeight(weight)
+  fOutputHasBeenSet(false)
 {
   fCounters.emplace_back("counter");
 }
@@ -86,10 +87,16 @@ EventCounter::EventCounter(const EventWeight& weight):
 EventCounter::~EventCounter() {}
 
 Count EventCounter::addCounter(const std::string& name) {
+  if(fOutputHasBeenSet)
+    throw std::logic_error("May not call addCounter() after setOutput()");
+
   size_t index = fCounters[0].insert(name);
   return Count(this, 0, index);
 }
 Count EventCounter::addSubCounter(const std::string& subcounterName, const std::string& countName) {
+  if(fOutputHasBeenSet)
+    throw std::logic_error("May not call addSubCounter() after setOutput()");
+
   size_t counterIndex = findOrInsertCounter(subcounterName);
   size_t countIndex = fCounters[counterIndex].insert(countName);
   return Count(this, counterIndex, countIndex);
@@ -103,6 +110,7 @@ int EventCounter::value(size_t counterIndex, size_t countIndex) {
 }
 
 void EventCounter::setOutput(TDirectory *dir) {
+  fOutputHasBeenSet = true;
   TDirectory *subdir = dir->mkdir("counters");
   for(auto& counter: fCounters)
     counter.book(subdir);

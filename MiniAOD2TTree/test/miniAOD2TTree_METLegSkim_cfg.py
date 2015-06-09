@@ -14,7 +14,7 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-       '/store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/AsymptFlat10to50bx25Raw_MCRUN2_74_V9-v1/10000/1AEFBE02-4C02-E511-B796-0025905A60BE.root',
+       '/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/022B08C4-C702-E511-9995-D4856459AC30.root',
     )
 )
 
@@ -37,8 +37,10 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::HLT"),
 	TriggerBits = cms.vstring(
-	    "HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v",
-	    "HLT_IsoMu16_eta2p1_CaloMET30_v",
+	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_v",
+#	    "HLT_IsoMu24_IterTrk02_v1"
         ),
 	L1Extra = cms.InputTag("l1extraParticles::MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
@@ -154,7 +156,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     )
 )
 
-process.load("HiggsAnalysis.MiniAOD2TTree.TauLegSkim_cfi")
+process.load("HiggsAnalysis.MiniAOD2TTree.METLegSkim_cfi")
 
 process.skimCounterAll    = cms.EDProducer("HPlusEventCountProducer")
 process.skimCounterPassed = cms.EDProducer("HPlusEventCountProducer")

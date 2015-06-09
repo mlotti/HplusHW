@@ -4,6 +4,8 @@
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 
+#include <regex>
+
 TriggerDumper::TriggerDumper(edm::ParameterSet& pset){
     inputCollection = pset;
     booked = false;
@@ -13,11 +15,13 @@ TriggerDumper::TriggerDumper(edm::ParameterSet& pset){
     triggerObjects = inputCollection.getParameter<edm::InputTag>("TriggerObjects");
     l1extra = inputCollection.getParameter<edm::InputTag>("L1Extra");
     useFilter = inputCollection.getUntrackedParameter<bool>("filter",false);
-    iBit = new bool[triggerBits.size()];
+//    iBit = new bool[triggerBits.size()];
 }
 TriggerDumper::~TriggerDumper(){}
 
 void TriggerDumper::book(TTree* tree){
+    theTree = tree;
+/*
     booked = true;
     tree->Branch("L1MET_et",&L1MET);
     tree->Branch("L1MET_phi",&L1METphi);
@@ -32,10 +36,50 @@ void TriggerDumper::book(TTree* tree){
     for(size_t i = 0; i < triggerBits.size(); ++i){
 	tree->Branch(triggerBits[i].c_str(),&iBit[i]);
     }
+*/
+}
+
+void TriggerDumper::book(edm::Event& iEvent){
+    booked = true;
+    theTree->Branch("L1MET_et",&L1MET);
+    theTree->Branch("L1MET_phi",&L1METphi);
+    theTree->Branch("HLTMET_et",&HLTMET);
+    theTree->Branch("HLTMET_phi",&HLTMETphi);
+    
+    theTree->Branch("HLTTau_pt",&HLTTau_pt);  
+    theTree->Branch("HLTTau_eta",&HLTTau_eta);
+    theTree->Branch("HLTTau_phi",&HLTTau_phi);
+    theTree->Branch("HLTTau_e",&HLTTau_e);
+
+    iEvent.getByLabel(triggerResults,handle);
+    if(handle.isValid()){
+
+	std::vector<std::string> selectedTriggers;
+
+        edm::TriggerResults tr = *handle;
+        bool fromPSetRegistry;
+        edm::Service<edm::service::TriggerNamesService> tns;
+        std::vector<std::string> hlNames;
+        tns->getTrigPaths(tr, hlNames, fromPSetRegistry);
+    
+        for(size_t i = 0; i < triggerBits.size(); ++i){
+            std::regex hlt_re(triggerBits[i]);
+            for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
+                if (std::regex_search(*j, hlt_re)) {
+		    selectedTriggers.push_back(*j);
+                }
+            }
+        }
+
+	iBit = new bool[selectedTriggers.size()];    
+        for(size_t i = 0; i < selectedTriggers.size(); ++i){
+            theTree->Branch(selectedTriggers[i].c_str(),&iBit[i]);
+	}
+    }
 }
 
 bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
-    if (!booked) return true;
+    if (!booked) book(iEvent);
 
     edm::Handle<std::vector<l1extra::L1EtMissParticle> > l1etmhandle;
     iEvent.getByLabel(l1extra, l1etmhandle);
@@ -53,9 +97,10 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         tns->getTrigPaths(tr, hlNames, fromPSetRegistry);
 
 	for(size_t i = 0; i < triggerBits.size(); ++i){
+	    std::regex hlt_re(triggerBits[i]);
 	    int n = 0;
 	    for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
-		if(triggerBits[i] == *j) {
+		if (std::regex_search(*j, hlt_re)) {
 		    iBit[i] = handle->accept(n);
 		    continue;
 		}

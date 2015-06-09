@@ -21,13 +21,13 @@ bool SkimDumper::fill(const edm::LuminosityBlock& iLumi, const edm::EventSetup& 
     if (!booked) return true;
 
     for(size_t i = 0; i < tags.size(); ++i){
-      std::cout << "check counters " << tags[i].label() << std::endl;
+//      std::cout << "check counters " << tags[i].label() << std::endl;
       edm::Handle<edm::MergeableCounter> count;
       iLumi.getByLabel(tags[i], count);
 
       if(count.isValid()){
         hCounter->Fill(i,count->value);
-	std::cout << "check count " << count->value << std::endl;
+//	std::cout << "check count " << count->value << std::endl;
       }
     }
     return true;
