@@ -89,13 +89,14 @@ bool METLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
         edm::Service<edm::service::TriggerNamesService> tns;
         std::vector<std::string> hlNames; 
         tns->getTrigPaths(tr, hlNames, fromPSetRegistry);
-
 	bool passed = false;
         for(size_t i = 0; i < triggerBits.size(); ++i){
 	    std::regex hlt_re(triggerBits[i]);
 	    int n = 0;
+	    bool trgBitFound = false;
             for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
 		if (std::regex_search(*j, hlt_re)) {
+		    trgBitFound = true;
 		    if(trghandle->accept(n)) {
 			passed = true;
                         break;
@@ -103,7 +104,15 @@ bool METLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
                 }
 		n++;
             }
+	    if(!trgBitFound) {
+		std::cout << "Skimming with " << triggerBits[i] << ", but trigger not found" << std::endl;
+		for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
+		    std::cout << "    " << *j << std::endl;
+		}
+		exit(1);
+	    }
         }
+
 	if(!passed) return false; 
     }
 
@@ -129,7 +138,7 @@ bool METLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
 	    njets++;
 	}
     }
-    if(njets == 0) return false;
+    if(njets < nJets) return false;
 
     nSelectedEvents++;
     return true;
