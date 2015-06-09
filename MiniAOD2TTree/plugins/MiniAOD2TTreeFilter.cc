@@ -16,6 +16,13 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     eventInfo = new EventInfoDumper(eventInfoCollections);
     eventInfo->book(Events);
 
+    skimDumper = 0;
+    if (iConfig.exists("Skim")) {
+	skim = iConfig.getParameter<edm::ParameterSet>("Skim");
+        skimDumper = new SkimDumper(skim);
+        skimDumper->book();
+    }
+
     trgDumper = 0;
     if (iConfig.exists("Trigger")) {
 	trigger = iConfig.getParameter<edm::ParameterSet>("Trigger");
@@ -122,6 +129,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 }
 
 void MiniAOD2TTreeFilter::reset(){
+    if (skimDumper) skimDumper->reset();
     if (trgDumper) trgDumper->reset();
     if (tauDumper) tauDumper->reset();
     if (electronDumper) electronDumper->reset();
@@ -166,6 +174,11 @@ void MiniAOD2TTreeFilter::endJob(){
     cfgInfo->GetXaxis()->SetBinLabel(2,"energy");
     cfgInfo->Write();
 
+    if(skimDumper){
+      TH1F* skimCounter = skimDumper->getCounter();
+      skimCounter->Write();
+    }
+
     fOUT->cd();
 
 // write TTree
@@ -180,6 +193,10 @@ void MiniAOD2TTreeFilter::endJob(){
 
 
     fOUT->Close();
+}
+
+void MiniAOD2TTreeFilter::endLuminosityBlock(const edm::LuminosityBlock & iLumi, const edm::EventSetup & iSetup) {
+    if(skimDumper) skimDumper->fill(iLumi,iSetup);
 }
           
 DEFINE_FWK_MODULE(MiniAOD2TTreeFilter);

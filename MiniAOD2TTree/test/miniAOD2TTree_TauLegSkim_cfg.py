@@ -4,8 +4,13 @@ import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsT
 process = cms.Process("TTreeDump")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(1000)
 )
+
+process.load("FWCore/MessageService/MessageLogger_cfi")
+process.MessageLogger.categories.append("TriggerBitCounter")
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000 # print the event number for every 100th event
+process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.untracked.int32(10)) # print max 100 warnings
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
@@ -23,6 +28,12 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     CodeVersion = cms.string(git.getCommitId()),
     DataVersion = cms.string("74Xmc"),
     CMEnergy = cms.int32(13),
+    Skim = cms.PSet(
+	Counters = cms.VInputTag(
+	    "skimCounterAll",
+            "skimCounterPassed"
+        ),
+    ),
     EventInfo = cms.PSet(
 	PileupSummaryInfoSrc = cms.InputTag("addPileupInfo"),
 #	LHESrc = cms.InputTag(""),
@@ -31,8 +42,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::HLT"),
 	TriggerBits = cms.vstring(
-	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v1",
-#	    "HLT_IsoMu24_IterTrk02_v1"
+	    "HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v",
+	    "HLT_IsoMu16_eta2p1_CaloMET30_v",
         ),
 	L1Extra = cms.InputTag("l1extraParticles::MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
@@ -148,6 +159,19 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     )
 )
 
-# module execution
-process.runEDFilter = cms.Path(process.dump)
+process.load("HiggsAnalysis.MiniAOD2TTree.TauLegSkim_cfi")
 
+process.skimCounterAll    = cms.EDProducer("HPlusEventCountProducer")
+process.skimCounterPassed = cms.EDProducer("HPlusEventCountProducer")
+
+
+# module execution
+process.runEDFilter = cms.Path(process.skimCounterAll*process.skim*process.skimCounterPassed*process.dump)
+
+#process.output = cms.OutputModule("PoolOutputModule",
+#    outputCommands = cms.untracked.vstring(
+#        "keep *",
+#    ),
+#    fileName = cms.untracked.string("CMSSW.root")
+#)
+#process.out_step = cms.EndPath(process.output)

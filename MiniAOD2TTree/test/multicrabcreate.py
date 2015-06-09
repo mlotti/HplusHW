@@ -6,15 +6,16 @@ import sys
 import datetime
 
 datasets = []
-datasets.append('/TBHp_HToTauNu_M-200_13TeV_pythia6/Spring14miniaod-PU20bx25_POSTLS170_V5-v1/MINIAODSIM')
+#datasets.append('/TBHp_HToTauNu_M-200_13TeV_pythia6/Spring14miniaod-PU20bx25_POSTLS170_V5-v1/MINIAODSIM')
 #datasets.append('/TTbar_HBWB_HToTauNu_M-160_13TeV_pythia6/Spring14miniaod-PU20bx25_POSTLS170_V5-v1/MINIAODSIM')
 #datasets.append('/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/MINIAODSIM')
 ##datasets.append('/QCD_Pt-50to80_TuneZ2star_13TeV_pythia6/Spring14miniaod-PU20bx25_POSTLS170_V5-v2/MINIAODSIM')
 #datasets.append('/QCD_Pt-50to80_Tune4C_13TeV_pythia8/Spring14miniaod-castor_PU20bx25_POSTLS170_V5-v1/MINIAODSIM')
 #datasets.append('/DYJetsToLL_M-50_13TeV-madgraph-pythia8-tauola_v2/Spring14miniaod-PU20bx25_POSTLS170_V5-v1/MINIAODSIM')
+datasets.append('/ZprimeToTauTau_M-1000_Tune4C_13TeV-pythia8/bluj-ZprimeToTauTau_MiniAOD_GRunV47_v2-6b3acb073896b48a28b982ccc80b3330/USER')
 
-PSET = "miniAODGEN2TTree_cfg.py"
-
+#PSET = "miniAODGEN2TTree_cfg.py"
+PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
 
 dataset_re = re.compile("^/(?P<name>\S+?)/")
 
@@ -28,8 +29,14 @@ if match:
     version = version.replace("pre","p")
     version = version.replace("patch","p")
 
+analysis = "signalAnalysis"
+leg_re = re.compile("miniAOD2TTree_(?P<leg>\S+Leg)Skim_cfg.py")
+match = leg_re.search(PSET)
+if match:
+    analysis = match.group("leg")
+
 dirName = "multicrab"
-dirName+= "_signalAnalysis"
+dirName+= "_"+analysis
 dirName+= "_v"+version
 
 time = datetime.datetime.now().strftime("%Y%m%dT%H%M")
