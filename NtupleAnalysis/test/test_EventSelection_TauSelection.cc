@@ -48,13 +48,13 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   }
   SECTION("isolationDiscr validity") {
     boost::property_tree::ptree tmp = getMinimalConfig();
-    tmp.put("TauSelection.isolation", "");
+    tmp.put("TauSelection.isolationDiscr", "");
     ParameterSet pset1(tmp, true);
     REQUIRE_NOTHROW(Event event1(pset1));
-    tmp.put("TauSelection.isolation", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
+    tmp.put("TauSelection.isolationDiscr", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
     ParameterSet pset2(tmp, true);
     REQUIRE_NOTHROW(Event event2(pset2));
-    tmp.put("TauSelection.isolation", "dummy");
+    tmp.put("TauSelection.isolationDiscr", "dummy");
     ParameterSet pset3(tmp, true);
     REQUIRE_THROWS_AS(Event event3(pset3), hplus::Exception);
   }
@@ -71,7 +71,7 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   tmp.put("TauSelection.invertTauIsolation", false);
   tmp.put("TauSelection.againstElectronDiscr", "againstElectronTight");
   tmp.put("TauSelection.againstMuonDiscr", "againstMuonMedium");
-  tmp.put("TauSelection.isolation", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
+  tmp.put("TauSelection.isolationDiscr", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
   ParameterSet psetDefault(tmp, true);
   // Create necessary objects for testing
   TFile* f = new TFile("test_TauSelection.root", "recreate");

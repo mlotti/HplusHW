@@ -3,7 +3,7 @@
 #include "boost/property_tree/json_parser.hpp"
 
 #include <sstream>
-#include <stdexcept>
+#include "Framework/interface/Exception.h"
 
 ParameterSet::ParameterSet(const std::string& config):
   fIsMC(false),
@@ -35,7 +35,7 @@ ParameterSet::ParameterSet(const boost::property_tree::ptree& config, bool isMC)
 
 bool ParameterSet::isMC() const {
   if(!fIsMCSet) {
-    throw std::runtime_error("MC status has not been set for this ParameterSet");
+    throw hplus::Exception("Runtime") << "MC status has not been set for this ParameterSet";
   }
   return fIsMC;
 }

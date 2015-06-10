@@ -161,6 +161,9 @@ boost::property_tree::ptree getMinimalConfig() {
   boost::property_tree::ptree tmp;
   tmp.put("TauSelection.againstElectronDiscr", "");
   tmp.put("TauSelection.againstMuonDiscr", "");
-  tmp.put("TauSelection.isolation", "");
+  tmp.put("TauSelection.isolationDiscr", "");
+  tmp.put("JetSelection.jetIDDiscr", "");
+  tmp.put("JetSelection.jetPUIDDiscr", "");
+  tmp.put("BJetSelection.bjetDiscr", "");
   return tmp;
 }

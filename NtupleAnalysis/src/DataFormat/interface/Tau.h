@@ -16,7 +16,8 @@ public:
   TauCollection() { initialize(); }
   explicit TauCollection(const std::string& prefix): TauGeneratedCollection(prefix) { initialize(); }
   ~TauCollection() {}
-
+  
+  // Discriminators
   void setConfigurableDiscriminators(const std::vector<std::string>& names) {
     fConfigurableDiscriminatorNames = names;
   }
@@ -45,7 +46,6 @@ protected:
 private:
   /// Initialize data members
   void initialize();
-  void checkDiscrNameValidity(const std::string& name, const std::vector<std::string>& list) const;
   
   std::vector<std::string> fConfigurableDiscriminatorNames;
   std::string fAgainstElectronDiscriminatorName;

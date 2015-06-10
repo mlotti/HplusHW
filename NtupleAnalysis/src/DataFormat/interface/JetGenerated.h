@@ -24,6 +24,10 @@ public:
     static std::vector<std::string> n = { std::string("PUIDloose"), std::string("PUIDmedium"), std::string("PUIDtight")};
     return n;
   }
+  std::vector<std::string> getJetIDDiscriminatorNames() {
+    static std::vector<std::string> n = { std::string("")};
+    return n;
+  }
 
 protected:
   const Branch<std::vector<bool>> *fPUIDloose;
@@ -68,6 +72,11 @@ public:
       [&](){ return this->PUIDloose(); },
       [&](){ return this->PUIDmedium(); },
       [&](){ return this->PUIDtight(); }
+    };
+    return values;
+  }
+  std::vector<std::function<bool()>> getJetIDDiscriminatorValues() {
+    static std::vector<std::function<bool()>> values = {
     };
     return values;
   }
