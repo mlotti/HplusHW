@@ -32,7 +32,7 @@ public:
       fCutDirection = kGEQ;
     else if (direction == "LT" || direction == "<")
       fCutDirection = kLT;
-    else if (direction == "LEQ" || direction == ">=")
+    else if (direction == "LEQ" || direction == "<=")
       fCutDirection = kLEQ;
     else {
       throw hplus::Exception("config") << "DirectionalCut: invalid cut direction (" << direction << ")! Options are: ==, !=, >, >=, <, <=";
