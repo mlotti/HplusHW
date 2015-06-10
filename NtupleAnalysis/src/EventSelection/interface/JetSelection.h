@@ -43,8 +43,10 @@ public:
     const std::vector<Jet>& getSelectedJets() const { return fSelectedJets; }
     // Obtain collection of all jets
     const std::vector<Jet>& getAllJets() const { return fAllJets; }
+    // Check if jet matching to selected tau was a success
+    bool jetMatchedToTauFound() const { return (fJetMatchedToTau.size() > 0); }
     // Obtain jet matching to selected tau
-    const Jet& getJetMatchedToTau() const { return *fJetMatchedToTau; }
+    const Jet& getJetMatchedToTau() const;
     // Obtain HT
     const double HT() const { return fHT; }
 
@@ -57,7 +59,7 @@ public:
     /// Jet collection after all selections
     std::vector<Jet> fSelectedJets;
     /// Jet matched to tau
-    Jet* fJetMatchedToTau;
+    std::vector<Jet> fJetMatchedToTau;
     /// HT (scalar sum of jets)
     double fHT;
   };
@@ -75,7 +77,7 @@ public:
 
 private:
   Data privateAnalyze(const Event& event, const Tau& selectedTau);
-  Jet* getJetMatchingToTau(const Event& event, const math::LorentzVectorT< double >& tauP);
+  void findJetMatchingToTau(std::vector<Jet>& collection, const Event& event, const math::LorentzVectorT<double>& tauP);
   
   
   // Input parameters

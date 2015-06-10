@@ -23,7 +23,10 @@ void ParticleCollectionBase::checkDiscriminatorNameValidity(const std::string& n
   if (!myStatus) {
     std::string msg = "";
     for (auto& p: list) {
-      msg += "  "+p+"\n";
+      if (msg == "")
+        msg += "  "+p;
+      else
+        msg += "\n  "+p;
     }
     throw hplus::Exception("ConfigError") << "Asked for discriminator name '" << name << "' but it does not exist. Available options:\n" << msg;
   }

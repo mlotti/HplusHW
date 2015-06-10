@@ -5,6 +5,7 @@
 #include "EventSelection/interface/CommonPlots.h"
 #include "DataFormat/interface/Event.h"
 #include "Framework/interface/HistoWrapper.h"
+#include "Framework/interface/Exception.h"
 //#include "Framework/interface/makeTH.h"
 
 #include "Math/VectorUtil.h"
@@ -16,6 +17,12 @@ JetSelection::Data::Data()
 { }
 
 JetSelection::Data::~Data() { }
+
+const Jet& JetSelection::Data::getJetMatchedToTau() const { 
+  if (!jetMatchedToTauFound())
+    throw hplus::Exception("Assert") << "You forgot to check if the jet matched to tau exists (jetMatchedToTauFound()), this message occurs when none exists!";
+  return fJetMatchedToTau[0];
+}
 
 JetSelection::JetSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
@@ -95,7 +102,7 @@ JetSelection::Data JetSelection::privateAnalyze(const Event& event, const Tau& s
     //=== Apply cut on tau radius
     double myDeltaR = ROOT::Math::VectorUtil::DeltaR(tauP, jet.p4());
     hJetMatchingToTauDeltaR->Fill(myDeltaR);
-    if (myDeltaR > fTauMatchingDeltaR)
+    if (myDeltaR < fTauMatchingDeltaR)
       continue;
     passedDeltaRMatchWithTau = true;
     //=== Apply cut on eta
@@ -133,11 +140,12 @@ JetSelection::Data JetSelection::privateAnalyze(const Event& event, const Tau& s
   std::sort(output.fSelectedJets.begin(), output.fSelectedJets.end());
   cPassedJetSelection.increment();
   // Find jet matched to tau
-  output.fJetMatchedToTau = getJetMatchingToTau(event, tauP);
-  if (output.fJetMatchedToTau) {
-    hJetMatchingToTauPtRatio->Fill(selectedTau.pt() / output.fJetMatchedToTau->pt());
+  findJetMatchingToTau(output.fJetMatchedToTau, event, tauP);
+  if (output.jetMatchedToTauFound()) {
+    hJetMatchingToTauPtRatio->Fill(selectedTau.pt() / output.getJetMatchedToTau().pt());
   }
   // Calculate HT
+  output.fHT = 0.0;
   for(Jet jet: output.getSelectedJets()) {
     output.fHT += jet.pt();
   }
@@ -155,19 +163,18 @@ JetSelection::Data JetSelection::privateAnalyze(const Event& event, const Tau& s
   return output;
 }
 
-Jet* JetSelection::getJetMatchingToTau(const Event& event, const math::LorentzVectorT< double >& tauP) {
+void JetSelection::findJetMatchingToTau(std::vector<Jet>& collection, const Event& event, const math::LorentzVectorT<double>& tauP) {
   double myMinDeltaR = 9999;
-  Jet* mySelectedJet = 0;
+  size_t mySelectedIndex = 9999;
+  size_t i = 0;
   for(Jet jet: event.jets()) {
     double myDeltaR = ROOT::Math::VectorUtil::DeltaR(tauP, jet.p4());
     if (myDeltaR < myMinDeltaR) {
       myMinDeltaR = myDeltaR;
-      mySelectedJet = &jet;
+      mySelectedIndex = i;
     }
+    i += 1;
   }
-  if (myMinDeltaR < 0.1) {
-    return mySelectedJet;
-  }
-  Jet* nullPointer = 0;
-  return nullPointer;
+  if (myMinDeltaR < 0.1)
+    collection.push_back(event.jets()[mySelectedIndex]);
 }
