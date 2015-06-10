@@ -15,6 +15,7 @@ config.JobType.outputFiles = ['miniaod2tree.root']
 config.section_("Data")
 config.Data.inputDataset = dataset
 config.Data.inputDBS = 'global'
+#config.Data.inputDBS = 'phys03'
 config.Data.splitting = 'FileBased'
 #config.Data.totalUnits  = 10
 config.Data.unitsPerJob = 1
