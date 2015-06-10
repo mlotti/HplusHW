@@ -27,6 +27,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TrackDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenJetDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/GenWeightDumper.h"
 
 /**
 	Class for making a tree from MiniAOD
@@ -60,6 +61,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	std::vector<edm::ParameterSet> jetCollections;
 	std::vector<edm::ParameterSet> metCollections;
 	std::vector<edm::ParameterSet> genMetCollections;
+	std::vector<edm::ParameterSet> genWeightCollections;
         std::vector<edm::ParameterSet> trackCollections;
         std::vector<edm::ParameterSet> genParticleCollections;
         std::vector<edm::ParameterSet> genJetCollections;
@@ -77,7 +79,8 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	JetDumper* jetDumper;
 	METDumper* metDumper;
 	GenMETDumper* genMetDumper;
-        TrackDumper* trackDumper;
+        GenWeightDumper* genWeightDumper;
+	TrackDumper* trackDumper;
 	GenParticleDumper* genParticleDumper;
         GenJetDumper* genJetDumper;
 };

@@ -72,6 +72,13 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
         genMetDumper->book(Events);
     }
 
+    genWeightDumper = 0;
+    if (iConfig.exists("GenWeights")) {
+	genWeightCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenWeights");
+        genWeightDumper = new GenWeightDumper(genWeightCollections);
+        genWeightDumper->book(Events);
+    }
+
     trackDumper = 0;
     if (iConfig.exists("Tracks")) {
         trackCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("Tracks");
@@ -113,6 +120,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
     if (jetDumper) accept = accept && jetDumper->fill(iEvent,iSetup);
     if (metDumper) accept = accept && metDumper->fill(iEvent,iSetup);
     if (genMetDumper) accept = accept && genMetDumper->fill(iEvent,iSetup);
+    if (genWeightDumper) accept = accept && genWeightDumper->fill(iEvent,iSetup);
     if (trackDumper) accept = accept && trackDumper->fill(iEvent,iSetup);
     if (genParticleDumper) accept = accept && genParticleDumper->fill(iEvent,iSetup);
     if (genJetDumper) accept = accept && genJetDumper->fill(iEvent,iSetup);
@@ -130,6 +138,7 @@ void MiniAOD2TTreeFilter::reset(){
     if (jetDumper) jetDumper->reset();
     if (metDumper) metDumper->reset();
     if (genMetDumper) genMetDumper->reset();
+    if (genWeightDumper) genWeightDumper->reset();
     if (trackDumper) trackDumper->reset();
     if (genParticleDumper) genParticleDumper->reset();
     if (genJetDumper) genJetDumper->reset();

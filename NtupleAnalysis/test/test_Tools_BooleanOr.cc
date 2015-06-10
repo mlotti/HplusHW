@@ -4,6 +4,7 @@
 
 #include "Framework/interface/BranchManager.h"
 #include "Tools/interface/BooleanOr.h"
+#include "Framework/interface/Exception.h"
 
 TEST_CASE("BooleanOr", "[Tools]") {
   std::unique_ptr<TTree> tree = createRealisticTree();
@@ -15,7 +16,8 @@ TEST_CASE("BooleanOr", "[Tools]") {
 
   SECTION("Empty") {
     mgr.setEntry(0);
-    REQUIRE_THROWS_AS( test.value(), std::runtime_error );
+    REQUIRE_THROWS_AS( test.value(), hplus::Exception);
+    //REQUIRE_THROWS_AS( test.value(), std::runtime_error );
   }
 
   SECTION("One branch") {
@@ -51,7 +53,7 @@ TEST_CASE("BooleanOr", "[Tools]") {
     test.setupBranches(mgr);
 
     mgr.setEntry(0);
-    REQUIRE_THROWS_AS( test.value(), std::runtime_error );
+    REQUIRE_THROWS_AS( test.value(), hplus::Exception );
   }
 
   SECTION("Non-existent branch among existing branches") {

@@ -158,7 +158,10 @@ TEST_CASE("Formula", "[Framework]") {
     BranchManager bmgr;
     bmgr.setTree(tree.get());
 
-    Event event(ParameterSet("{}", true));
+    
+    boost::property_tree::ptree tmp = getMinimalConfig();
+    ParameterSet pset(tmp, true);
+    Event event(pset);
     event.setupBranches(bmgr);
 
     Formula formula = mgr.book("event");

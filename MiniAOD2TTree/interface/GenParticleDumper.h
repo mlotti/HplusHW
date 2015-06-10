@@ -56,22 +56,28 @@ class GenParticleDumper : public BaseDumper {
 	double rtau(const reco::Candidate*);
 	TLorentzVector leadingPionP4(const reco::Candidate*);
 	TLorentzVector motherP4(const reco::Candidate*);
-	double visibleTauEnergy(const reco::Candidate*);
+	TLorentzVector visibleTauP4(const reco::Candidate*);
 	void printDescendants(const reco::Candidate*);
-	int associatedWithHpmProduction(const reco::Candidate*);
-
+	bool bFromAssociatedT(const reco::Candidate*);
+	bool associatedWithHpmProduction(const reco::Candidate*);
+	bool topToHp(const reco::Candidate*);
+	
     private:
 	bool filter();
 
 	edm::Handle<reco::GenParticleCollection> *handle;
 
-        std::vector<short> *status;
+        //std::vector<short> *status;
 	std::vector<short> *mother;
-	std::vector<short> *tauprong;
+	std::vector<short> *tauProng;
 	std::vector<short> *associatedWithHpm;
 
 	std::vector<double> *massHpm;
 
+	std::vector<double> *tauVisiblePt;
+	std::vector<double> *tauVisiblePhi;
+	std::vector<double> *tauVisibleEta;
+	
 	std::vector<double> *tauPi0RtauW;
 	std::vector<double> *tauPi0RtauHpm;
 	std::vector<double> *tauPi1pi0RtauW;
