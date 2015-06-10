@@ -53,6 +53,7 @@ public:
     friend class JetSelection;
 
   private:
+    /// Boolean for passing selection
     bool bPassedSelection;
     /// All jets (needed for MET)
     std::vector<Jet> fAllJets;

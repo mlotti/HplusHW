@@ -18,13 +18,16 @@ public:
   //Discriminators
   void setJetIDDiscriminator(const std::string& name);
   void setJetPUIDDiscriminator(const std::string& name);
+  void setBJetDiscriminator(const std::string& name);
   bool jetIDDiscriminatorIsValid() const { return bValidityOfJetIDDiscr; }
   bool jetPUIDDiscriminatorIsValid() const { return bValidityOfJetPUIDDiscr; }
+  bool bjetDiscriminatorIsValid() const { return bValidityOfBJetDiscr; }
   
   void setupBranches(BranchManager& mgr);
 
   Jet operator[](size_t i) const;
   std::vector<Jet> toVector() const;
+    
 
   friend class Jet;
   friend class JetGenerated<JetCollection>;
@@ -33,7 +36,7 @@ public:
 protected:
   const Branch<std::vector<bool>>* fJetIDDiscriminator;
   const Branch<std::vector<bool>>* fJetPUIDDiscriminator;
-
+  const Branch<std::vector<bool>>* fBJetDiscriminator;
   
 private:
   /// Initialize data members
@@ -41,8 +44,10 @@ private:
   
   std::string fJetIDDiscriminatorName;
   std::string fJetPUIDDiscriminatorName;
+  std::string fBJetDiscriminatorName;
   bool bValidityOfJetIDDiscr;
   bool bValidityOfJetPUIDDiscr;
+  bool bValidityOfBJetDiscr;
 };
 
 class Jet: public JetGenerated<JetCollection> {
@@ -60,6 +65,11 @@ public:
     if (!fCollection->jetPUIDDiscriminatorIsValid())
       return true;
     return fCollection->fJetPUIDDiscriminator->value()[index()];
+  }
+  bool bjetDiscriminator() const {
+    if (!fCollection->bjetDiscriminatorIsValid())
+      return true;
+    return fCollection->fBJetDiscriminator->value()[index()];
   }
   
   /// Operator defined for using std::sort on vector<Jet>
