@@ -164,5 +164,6 @@ boost::property_tree::ptree getMinimalConfig() {
   tmp.put("TauSelection.isolationDiscr", "");
   tmp.put("JetSelection.jetIDDiscr", "");
   tmp.put("JetSelection.jetPUIDDiscr", "");
+  tmp.put("BJetSelection.bjetDiscr", "");
   return tmp;
 }

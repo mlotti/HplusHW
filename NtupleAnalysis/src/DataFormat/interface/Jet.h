@@ -36,7 +36,7 @@ public:
 protected:
   const Branch<std::vector<bool>>* fJetIDDiscriminator;
   const Branch<std::vector<bool>>* fJetPUIDDiscriminator;
-  const Branch<std::vector<bool>>* fBJetDiscriminator;
+  const Branch<std::vector<float>>* fBJetDiscriminator;
   
 private:
   /// Initialize data members
@@ -66,7 +66,7 @@ public:
       return true;
     return fCollection->fJetPUIDDiscriminator->value()[index()];
   }
-  bool bjetDiscriminator() const {
+  float bjetDiscriminator() const {
     if (!fCollection->bjetDiscriminatorIsValid())
       return true;
     return fCollection->fBJetDiscriminator->value()[index()];

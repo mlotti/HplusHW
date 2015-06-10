@@ -35,7 +35,7 @@ public:
     // Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }
     // Obtain number of selected jets
-    int getNumberOfSelectedJets() const { return fSelectedBJets.size(); }
+    int getNumberOfSelectedBJets() const { return fSelectedBJets.size(); }
     // Obtain collection of selected jets
     const std::vector<Jet>& getSelectedBJets() const { return fSelectedBJets; }
     /// Obtain the b-tagging event weight

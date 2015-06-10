@@ -70,7 +70,7 @@ Event::Event(const ParameterSet& config):
     fJetCollection.setJetPUIDDiscriminator(*jetPUIDDiscr);
 
   // B jet discriminators
-  boost::optional<std::string> bjetDiscr = config.getParameter<std::string>("JetSelection.bjetDiscr");
+  boost::optional<std::string> bjetDiscr = config.getParameter<std::string>("BJetSelection.bjetDiscr");
   if (bjetDiscr)
     fJetCollection.setBJetDiscriminator(*bjetDiscr);
   

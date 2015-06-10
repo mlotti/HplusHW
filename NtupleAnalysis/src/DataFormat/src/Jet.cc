@@ -38,7 +38,10 @@ void JetCollection::setBJetDiscriminator(const std::string& name) {
 void JetCollection::setupBranches(BranchManager& mgr) {
   JetGeneratedCollection::setupBranches(mgr);
   
-  mgr.book(prefix()+"_"+fJetIDDiscriminatorName, &fJetIDDiscriminator);
-  mgr.book(prefix()+"_"+fJetPUIDDiscriminatorName, &fJetPUIDDiscriminator);
-  mgr.book(prefix()+"_"+fBJetDiscriminatorName, &fBJetDiscriminator);
+  if (jetIDDiscriminatorIsValid())
+    mgr.book(prefix()+"_"+fJetIDDiscriminatorName, &fJetIDDiscriminator);
+  if (jetPUIDDiscriminatorIsValid())
+    mgr.book(prefix()+"_"+fJetPUIDDiscriminatorName, &fJetPUIDDiscriminator);
+  if (bjetDiscriminatorIsValid())
+    mgr.book(prefix()+"_"+fBJetDiscriminatorName, &fBJetDiscriminator);
 }

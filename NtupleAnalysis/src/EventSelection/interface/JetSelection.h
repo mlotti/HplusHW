@@ -4,7 +4,7 @@
 
 #include "EventSelection/interface/BaseSelection.h"
 #include "DataFormat/interface/Jet.h"
-#include "DataFormat/interface/Tau.h"
+#include "EventSelection//interface/TauSelection.h"
 #include "Framework/interface/EventCounter.h"
 #include "Tools/interface/DirectionalCut.h"
 #include <../external/boost_1_57_0/boost/concept_check.hpp>
@@ -72,12 +72,12 @@ public:
   virtual void bookHistograms(TDirectory* dir);
   
   /// Use silentAnalyze if you do not want to fill histograms or increment counters
-  Data silentAnalyze(const Event& event, const Tau& selectedTau);
+  Data silentAnalyze(const Event& event, const TauSelection::Data& tauData);
   /// analyze does fill histograms and incrementes counters
-  Data analyze(const Event& event, const Tau& selectedTau);
+  Data analyze(const Event& event, const TauSelection::Data& tauData);
 
 private:
-  Data privateAnalyze(const Event& event, const Tau& selectedTau);
+  Data privateAnalyze(const Event& event, const TauSelection::Data& tauData);
   void findJetMatchingToTau(std::vector<Jet>& collection, const Event& event, const math::LorentzVectorT<double>& tauP);
   
   

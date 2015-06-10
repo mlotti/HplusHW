@@ -22,9 +22,9 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
   // Event counter for passing selection
   cPassedBJetSelection(eventCounter.addCounter("passed mu selection ("+postfix+")")),
   // Sub counters
-  cSubAll(eventCounter.addSubCounter("mu selection ("+postfix+")", "All events")),
-  cSubPassedDiscriminator(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed discriminator")),
-  cSubPassedNBjets(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed Nbjets"))
+  cSubAll(eventCounter.addSubCounter("bjet selection ("+postfix+")", "All events")),
+  cSubPassedDiscriminator(eventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed discriminator")),
+  cSubPassedNBjets(eventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed Nbjets"))
 {
   // Obtain algorithm and working point
   std::string sAlgorithm = config.getParameter<std::string>("bjetDiscr");
@@ -33,7 +33,7 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
   if (sWorkingPoint != "Loose" && sWorkingPoint != "Medium" && sWorkingPoint != "Tight")
     throw hplus::Exception("config") << "b-tagging algorithm working point '" << sWorkingPoint
                                      << "' is not valid!\nValid values are: Loose, Medium, Tight";
-  if (sAlgorithm == "combinedSecondaryVertexV2BJetTags") {
+  if (sAlgorithm == "combinedInclusiveSecondaryVertexV2BJetTags") {
     // Preliminary values 10.6.2015 from https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagging
     if (sWorkingPoint == "Loose")
       fDisriminatorValue = 0.423;
@@ -89,7 +89,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   if (passedDisr)
     cSubPassedDiscriminator.increment();
   //=== Apply cut on number of selected b jets
-  if (!fNumberOfJetsCut.passedCut(output.getNumberOfSelectedJets()))
+  if (!fNumberOfJetsCut.passedCut(output.getNumberOfSelectedBJets()))
     return output;
   //=== Passed b-jet selection
   output.bPassedSelection = true;

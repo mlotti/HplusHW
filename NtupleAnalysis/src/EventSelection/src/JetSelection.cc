@@ -62,21 +62,21 @@ void JetSelection::bookHistograms(TDirectory* dir) {
   hJetMatchingToTauPtRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetMatchingToTauPtRatio", "jet pT / #tau pT", 40, 0, 2);
 }
 
-JetSelection::Data JetSelection::silentAnalyze(const Event& event, const Tau& selectedTau) {
+JetSelection::Data JetSelection::silentAnalyze(const Event& event, const TauSelection::Data& tauData) {
   ensureSilentAnalyzeAllowed(event.eventID());
   // Disable histogram filling and counter
   disableHistogramsAndCounters();
-  Data myData = privateAnalyze(event, selectedTau);
+  Data myData = privateAnalyze(event, tauData);
   enableHistogramsAndCounters();
   return myData;
 }
 
-JetSelection::Data JetSelection::analyze(const Event& event, const Tau& selectedTau) {
+JetSelection::Data JetSelection::analyze(const Event& event, const TauSelection::Data& tauData) {
   ensureAnalyzeAllowed(event.eventID());
-  return privateAnalyze(event, selectedTau);
+  return privateAnalyze(event, tauData);
 }
 
-JetSelection::Data JetSelection::privateAnalyze(const Event& event, const Tau& selectedTau) {
+JetSelection::Data JetSelection::privateAnalyze(const Event& event, const TauSelection::Data& tauData) {
   Data output;
   cSubAll.increment();
   bool passedJetID = false;
@@ -85,7 +85,9 @@ JetSelection::Data JetSelection::privateAnalyze(const Event& event, const Tau& s
   bool passedEta = false;
   bool passedPt = false;
   
-  math::LorentzVectorT<double> tauP = selectedTau.p4();
+  math::LorentzVectorT<double> tauP(0.,0.,999.,0.);
+  if (tauData.hasIdentifiedTaus())
+    tauP = tauData.getSelectedTau().p4();
   // Loop over jets
   for(Jet jet: event.jets()) {
     //=== Apply cut on jet ID
@@ -142,14 +144,15 @@ JetSelection::Data JetSelection::privateAnalyze(const Event& event, const Tau& s
   // Find jet matched to tau
   findJetMatchingToTau(output.fJetMatchedToTau, event, tauP);
   if (output.jetMatchedToTauFound()) {
-    hJetMatchingToTauPtRatio->Fill(selectedTau.pt() / output.getJetMatchedToTau().pt());
+    hJetMatchingToTauPtRatio->Fill(tauData.getSelectedTau().pt() / output.getJetMatchedToTau().pt());
   }
   // Calculate HT
   output.fHT = 0.0;
   for(Jet jet: output.getSelectedJets()) {
     output.fHT += jet.pt();
   }
-  output.fHT += selectedTau.pt();
+  if (tauData.hasIdentifiedTaus())
+    output.fHT += tauData.getSelectedTau().pt();
   // Fill pt and eta of jets
   size_t i = 0;
   for (Jet jet: output.fSelectedJets) {
