@@ -165,7 +165,7 @@ def main(opts, args):
 
     # The provided dictionaries are for grouping discriminators
     generateParticle(types, "Tau", {"Isolation": "Isolation", "againstElectron": "AgainstElectron", "againstMuon": "AgainstMuon"})
-    generateParticle(types, "Jet", {"BJetTags": "BJetTags", "PUID": "PUID"})
+    generateParticle(types, "Jet", {"BJetTags": "BJetTags", "PUID": "PUID", "JetID" : "JetID"})
     generateParticle(types, "Muon", {"ID": "ID"})
     generateParticle(types, "Electron", {"ID": "ID"})
     #generateParticle(types, "GenParticle", {}) # data fields in the root file are missing at the moment

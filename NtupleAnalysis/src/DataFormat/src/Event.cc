@@ -51,16 +51,24 @@ Event::Event(const ParameterSet& config):
   boost::optional<std::string> tauAgainstMuonDiscr = config.getParameter<std::string>("TauSelection.againstMuonDiscr");
   if (tauAgainstMuonDiscr)
     fTauCollection.setAgainstMuonDiscriminator(*tauAgainstMuonDiscr);
-  boost::optional<std::string> tauIsolationDiscr = config.getParameter<std::string>("TauSelection.isolation");
+  boost::optional<std::string> tauIsolationDiscr = config.getParameter<std::string>("TauSelection.isolationDiscr");
   if (tauIsolationDiscr)
     fTauCollection.setIsolationDiscriminator(*tauIsolationDiscr);
   
   // Muon discriminators
   // FIXME
+  
   // Electron discriminators
   // FIXME
+  
   // Jet discriminators
-  // FIXME
+  boost::optional<std::string> jetIDDiscr = config.getParameter<std::string>("JetSelection.jetIDDiscr");
+  if (jetIDDiscr)
+    fJetCollection.setJetIDDiscriminator(*jetIDDiscr);
+  boost::optional<std::string> jetPUIDDiscr = config.getParameter<std::string>("JetSelection.jetPUIDDiscr");
+  if (jetPUIDDiscr)
+    fJetCollection.setJetPUIDDiscriminator(*jetPUIDDiscr);
+
 }
 
 Event::~Event() {}

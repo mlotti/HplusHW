@@ -11,10 +11,16 @@ class JetCollection: public JetGeneratedCollection, public ParticleIteratorAdapt
 public:
   using value_type = Jet;
 
-  JetCollection() {}
-  JetCollection(const std::string& prefix): JetGeneratedCollection(prefix) {}
+  JetCollection() { initialize(); }
+  JetCollection(const std::string& prefix): JetGeneratedCollection(prefix) { initialize(); }
   ~JetCollection() {}
 
+  //Discriminators
+  void setJetIDDiscriminator(const std::string& name);
+  void setJetPUIDDiscriminator(const std::string& name);
+  bool jetIDDiscriminatorIsValid() const { return bValidityOfJetIDDiscr; }
+  bool jetPUIDDiscriminatorIsValid() const { return bValidityOfJetPUIDDiscr; }
+  
   void setupBranches(BranchManager& mgr);
 
   Jet operator[](size_t i) const;
@@ -25,6 +31,18 @@ public:
   friend class Particle<JetCollection>;
 
 protected:
+  const Branch<std::vector<bool>>* fJetIDDiscriminator;
+  const Branch<std::vector<bool>>* fJetPUIDDiscriminator;
+
+  
+private:
+  /// Initialize data members
+  void initialize();
+  
+  std::string fJetIDDiscriminatorName;
+  std::string fJetPUIDDiscriminatorName;
+  bool bValidityOfJetIDDiscr;
+  bool bValidityOfJetPUIDDiscr;
 };
 
 class Jet: public JetGenerated<JetCollection> {
@@ -32,6 +50,23 @@ public:
   Jet() {}
   Jet(const JetCollection* coll, size_t index): JetGenerated(coll, index) {}
   ~Jet() {}
+  
+  bool jetIDDiscriminator() const {
+    if (!fCollection->jetIDDiscriminatorIsValid())
+      return true;
+    return fCollection->fJetIDDiscriminator->value()[index()];
+  }
+  bool jetPUIDDiscriminator() const {
+    if (!fCollection->jetPUIDDiscriminatorIsValid())
+      return true;
+    return fCollection->fJetPUIDDiscriminator->value()[index()];
+  }
+  
+  /// Operator defined for using std::sort on vector<Jet>
+  bool operator<(const Jet& jet) const {
+    // Descending order by tau pT
+    return (this->pt() > jet.pt());
+  }
 };
 
 inline
