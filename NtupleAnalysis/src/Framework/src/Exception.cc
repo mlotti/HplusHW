@@ -107,6 +107,7 @@ namespace hplus {
     if (calledInsideUnitTest)
       return _msg.str().c_str();
     
-    return s.str().c_str();
+    std::cout << s.str().c_str() << std::endl;
+    return _msg.str().c_str();
   }
 }

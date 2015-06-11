@@ -2,6 +2,8 @@
 #ifndef Framework_ParameterSet_h
 #define Framework_ParameterSet_h
 
+#include "Framework/interface/Exception.h"
+
 #include "boost/property_tree/ptree.hpp"
 #include "boost/optional.hpp"
 
@@ -36,11 +38,28 @@ public:
   explicit ParameterSet(const boost::property_tree::ptree& config);
   ParameterSet(const boost::property_tree::ptree& config, bool isMC);
 
-  template <typename T, typename ...Args>
-  T getParameter(const std::string& name, Args&&... args) const {
-    return ParameterSetImpl::ParameterGetter<T>::get(fConfig, name, std::forward<Args>(args)...);
+  template <typename T>
+  T getParameter(const std::string& name) const {
+    boost::optional<const boost::property_tree::ptree&> child = fConfig.get_child_optional(name);
+    // Catch situation where requested parameter does not exist and no default value has been provided
+    if (!child) {
+      boost::property_tree::write_json(std::cout, fConfig);
+      throw hplus::Exception("config") << "Config element '" << name << "' not found in the PSet above!";
+    }
+    return ParameterSetImpl::ParameterGetter<T>::get(fConfig, name);
   }
 
+  template <typename T, typename ...Args>
+  T getParameter(const std::string& name, Args&&... args) const {
+    T res = ParameterSetImpl::ParameterGetter<T>::get(fConfig, name, std::forward<Args>(args)...);
+    //Catch situation where requested parameter does not exist and default value has been provided
+    if (!fConfig.get_child_optional(name)) {
+      std::cout << "Config: Config element '" << name << "' not found in the parameter set, using default value '"
+                << res << "'!" << std::endl;
+    }
+    return res;
+  }
+  
   template <typename T>
   boost::optional<T> getParameterOptional(const std::string& name) const {
     return ParameterSetImpl::ParameterGetter<T>::getOptional(fConfig, name);
@@ -48,7 +67,7 @@ public:
 
   /// For debugging, print contents of ParameterSet
   void debug() const {
-    write_json(std::cout, fConfig);
+    boost::property_tree::write_json(std::cout, fConfig);
   }
   
   bool isMC() const;
@@ -97,8 +116,7 @@ namespace ParameterSetImpl {
       boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
       if(child)
         return to_vector(*child);
-
-      return defaultValue;
+      return defaultValue;      
     }
 
     static
@@ -106,10 +124,12 @@ namespace ParameterSetImpl {
       boost::optional<std::vector<T>> res;
       boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
       if(child) {
-        res = to_vector(*child);
+        return to_vector(*child);
       }
+      std::cout << "Config: Config element '" << name << "' not found in the parameter set, using empty value!" << std::endl;
       return res;
     }
+    
   };
 
   //Partial specialization for ParameterSet
@@ -126,21 +146,33 @@ namespace ParameterSetImpl {
       boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
       if(child)
         return ParameterSet(*child);
-      return defaultValue;
+      return defaultValue;      
     };
 
     static
     boost::optional<ParameterSet> getOptional(const boost::property_tree::ptree& config, const std::string& name) {
       boost::optional<ParameterSet> res;
-
       boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
-      if(child) {
-        res = ParameterSet(*child);
-      }
-
+      if(child)
+        return ParameterSet(*child);
+std::cout << "Config: Config element '" << name << "' not found in the parameter set, using empty value!" << std::endl;
       return res;
     }
   };
+  
+//   template<typename T>
+//   struct ParameterGetter<T> {
+//     static
+//     T get(const boost::property_tree::ptree& config, const std::string& name) {
+//       boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
+//       std::cout << "**1" << name << std::endl;
+//       if (!child) {
+//         boost::property_tree::write_json(std::cout, config);
+//         throw hplus::Exception("config") << "Config element '" << name << "' not found in the PSet above!";
+//       }
+//       return config.get_child(name);
+//     }
+//   };
 }
 
 #endif
