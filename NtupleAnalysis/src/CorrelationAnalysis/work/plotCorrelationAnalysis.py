@@ -47,9 +47,9 @@ def main():
     datasets.remove(["QCD_Pt_50to80_TuneZ2star_13TeV_pythia6"])
 #    datasets.remove(["QCD_Pt_50to80_Tune4C_13TeV_pythia8"])
     datasets.remove(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6"])
-    datasets.remove(["TT_Tune4C_13TeV_pythia8_tauola"])
-    datasets.remove(["DYToTauTau_M_20_CT10_TuneZ2star_v2_powheg_tauola_Summer12"])
-#    datasets.remove(["DYJetsToLL_M_50_13TeV_madgraph_pythia8_tauola_v2"])
+#    datasets.remove(["TT_Tune4C_13TeV_pythia8_tauola"])
+    datasets.remove(["TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola"])
+    datasets.remove(["DYJetsToLL_M_50_13TeV_madgraph_pythia8_tauola_v2"])
     # These have 0 events after skim in multicrab_TEST5, and the code crashes because of that
     datasets.remove([
         "QCD_Pt30to50_TuneZ2star_Summer12",
@@ -76,8 +76,10 @@ def main():
     # All single top datasets to "SingleTop"
     # WW, WZ, ZZ to "Diboson"
     plots.mergeRenameReorderForDataMC(datasets)
-    datasets.rename("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola", "TTJets")
+#    datasets.rename("TTJets_MSDecaysCKM_central_Tune4C_13TeV_madgraph_tauola", "TTJets")
     datasets.rename("QCD_Pt_50to80_Tune4C_13TeV_pythia8", "QCD")
+#    datasets.rename("TT_Tune4C_13TeV_pythia8_tauola", "TT_pythia8")
+    datasets.rename("TT_Tune4C_13TeV_pythia8_tauola", "TTJets")
 
  
     # Apply TDR style
@@ -85,6 +87,8 @@ def main():
 
     dataMCExample(datasets)
     MtComparison(datasets)
+    MetComparison(datasets)
+    TauPtComparison(datasets)
 
    # Print counters                                                                                                                                                                                                                                               
     doCounters(datasets)
@@ -153,6 +157,8 @@ def dataMCExample(datasets):
     createDrawPlot("Pt3Jets", xlabel="p_{T}^{3jets} (GeV/c)", ylabel="Number of events", rebin=1, log=False)
     createDrawPlot("TheeJetPtcut", xlabel="ThreeJetPtcut (GeV/c)", ylabel="Number of events", rebin=4, log=True, opts={"xmax":450, "xmin":0})
     createDrawPlot("DPhi3JetsMet", xlabel="#Delta#phi(3 jets, MET)", ylabel="Number of events", rebin=2, log=False)
+    createDrawPlot("DrTau3Jets", xlabel="#DeltaR(3 jets, #tau jet)", ylabel="Number of events", rebin=2, log=False)
+
     createDrawPlot("JetTauEtSum", xlabel="#Sigma(Jets,#tau jet) (GeV)", ylabel="Number of events", rebin=2, log=False)
     createDrawPlot("JetTauMetEtSum", xlabel="#Sigma(Jets,#tau jet, MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
 #    createDrawPlot("TauMetEtSum", xlabel="#Sigma(#tau jet, MET) (GeV)", ylabel="Number of events", rebin=2, log=False)
@@ -173,9 +179,9 @@ def dataMCExample(datasets):
 
 
 def getHistos(datasets,name1, name2, name3):
-     drh1 = datasets.getDataset("TTJets").getDatasetRootHisto("transverseMass")
-     drh2 = datasets.getDataset("TTJets").getDatasetRootHisto("transverseMassTriangleCut")
-     drh3 = datasets.getDataset("TTJets").getDatasetRootHisto("transverseMass3JetCut")
+     drh1 = datasets.getDataset("TTJets").getDatasetRootHisto(name1)
+     drh2 = datasets.getDataset("TTJets").getDatasetRootHisto(name2)
+     drh3 = datasets.getDataset("TTJets").getDatasetRootHisto(name3)
      drh1.setName("transverseMass")
      drh2.setName("transverseMassTriangleCut")
      drh3.setName("transverseMass3JetCut")
@@ -212,6 +218,80 @@ def MtComparison(datasets):
                    ratio=False, opts2={"ymin": 0.5, "ymax": 1.5})
           
 #    rtauGen(mt, "MetComparison", rebin=1, ratio=True, defaultStyles=False)
+
+
+def getHistos2(datasets,name1, name2):
+     drh1 = datasets.getDataset("TTJets").getDatasetRootHisto("Met")
+     #drh2 = datasets.getDataset("TT_pythia8").getDatasetRootHisto("Met")
+     drh2 = datasets.getDataset("TTJets").getDatasetRootHisto("Met")
+
+     drh1.setName("Met_madgraph")
+     drh2.setName("Met_pythia8")
+     return [drh1, drh2]
+
+#mt = plots.PlotBase(getHistos("MetNoJetInHole", "MetJetInHole"))                                                                                                                                                                                                      
+
+def MetComparison(datasets):
+    mt = plots.ComparisonPlot(*getHistos2(datasets,"Met","Met"))
+#    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())                                                                                                                                                                                  
+    mt._setLegendStyles()
+    st1 = styles.StyleCompound([styles.styles[2]])
+    st2 = styles.StyleCompound([styles.styles[1]])
+    st1.append(styles.StyleLine(lineWidth=3))
+    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
+    mt.histoMgr.forHisto("Met_madgraph", st1)
+    mt.histoMgr.forHisto("Met_pythia8", st2)
+    mt.histoMgr.setHistoLegendLabelMany({
+            "Met_madgraph": "Met from Madgraph",
+            "Met_pythia8": "Met from Pythia8"
+            })
+    mt.histoMgr.setHistoDrawStyleAll("PE")
+
+
+    mt.appendPlotObject(histograms.PlotText(100, 0.01, "tt events", size=20))
+    xlabel = "PF E_{T}^{miss} (GeV)"
+    ylabel = "Events / %.2f"
+    plots.drawPlot(mt, "MetComparison", xlabel=xlabel, ylabel=ylabel, rebinX=2, log=True,
+                   createLegend={"x1": 0.6, "y1": 0.75, "x2": 0.8, "y2": 0.9},
+                   ratio=False, opts2={"ymin": 0.5, "ymax": 50}, opts={"xmax": 500})
+
+
+def getHistos3(datasets,name1, name2):
+     drh1 = datasets.getDataset("TTJets").getDatasetRootHisto("tauPt")
+    # drh2 = datasets.getDataset("TT_pythia8").getDatasetRootHisto("tauPt")
+     drh2 = datasets.getDataset("TTJets").getDatasetRootHisto("tauPt")
+
+     drh1.setName("Taupt_madgraph")
+     drh2.setName("Taupt_pythia8")
+     return [drh1, drh2]
+
+def TauPtComparison(datasets):
+    mt = plots.ComparisonPlot(*getHistos3(datasets,"tauPt","tauPt"))
+                                                                                                                                                                                                                                                                       
+    mt._setLegendStyles()
+    st1 = styles.StyleCompound([styles.styles[2]])
+    st2 = styles.StyleCompound([styles.styles[1]])
+    st1.append(styles.StyleLine(lineWidth=3))
+    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
+    mt.histoMgr.forHisto("Taupt_madgraph", st1)
+    mt.histoMgr.forHisto("Taupt_pythia8", st2)
+    mt.histoMgr.setHistoLegendLabelMany({
+            "Taupt_madgraph": "Tau pt from Madgraph",
+            "Taupt_pythia8": "Tau pt from Pythia8"
+            })
+    mt.histoMgr.setHistoDrawStyleAll("PE")
+
+    mt.appendPlotObject(histograms.PlotText(100, 0.01, "tt events", size=20))
+    xlabel = "p_{T}^{#tau jet} (GeV)"
+    ylabel = "Events / %.2f"
+    plots.drawPlot(mt, "TauPtComparison", xlabel=xlabel, ylabel=ylabel, rebinX=2, log=True,
+                   createLegend={"x1": 0.6, "y1": 0.75, "x2": 0.8, "y2": 0.9},
+                   ratio=False, opts2={"ymin": 0.5, "ymax": 50}, opts={"xmax": 800, "ymin":1, "ymax":1000000})
+
+
+
+
+
 
 def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
     if defaultStyles:

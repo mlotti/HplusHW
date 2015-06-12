@@ -32,6 +32,7 @@ private:
   Count cElectronVeto;
   Count cJetSelection;
   Count cBJetSelection;
+  Count cBVetoSelection;
   Count cMetCut;  
   Count cBackToBackCut;
   Count cCollinearCut;
@@ -39,6 +40,7 @@ private:
   //  Count cSelectedBJets;
   Count cSelectedTrueBJets;
   Count cSelectedBtaggedJets;
+  Count cSelectedBVetoJets;
   Count cSelectedTrueBtaggedJets;
   Count cSelectedNonBJets;
   Count cSelectedFakeBtaggedJets;
@@ -142,11 +144,13 @@ CorrelationAnalysis::CorrelationAnalysis(const ParameterSet& config):
   cElectronVeto(fEventCounter.addCounter("Electron veto")),
   cJetSelection(fEventCounter.addCounter("Jet selection")),
   cBJetSelection(fEventCounter.addCounter("B-jet selection")),
+  cBVetoSelection(fEventCounter.addCounter("B-jet veto")),
   cMetCut(fEventCounter.addCounter("Met cut")),
   cBackToBackCut(fEventCounter.addCounter("BackToBack cut")),
   cCollinearCut(fEventCounter.addCounter("Collinear cut")),
   cSelectedJets(fEventCounter.addSubCounter("B-jet selection","Selected jets")),
   cSelectedBtaggedJets(fEventCounter.addSubCounter("B-jet selection","Selected b-jets")),
+  cSelectedBVetoJets(fEventCounter.addSubCounter("B-jet selection","Selected veto b-jets")),
   cSelectedTrueBJets(fEventCounter.addSubCounter("B-jet selection","True b-jets")),
   cSelectedTrueBtaggedJets(fEventCounter.addSubCounter("B-jet selection","b-tagged true b-jets")),
   cSelectedNonBJets(fEventCounter.addSubCounter("B-jet selection","Non b-jets")),
@@ -236,6 +240,7 @@ void CorrelationAnalysis::book(TDirectory *dir) {
   hrealMaxBJetEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "realMaxBJetEta", "trueMaxBJet eta", 100, -5, 5);
   hgenjetEtaVsDeltaPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "genjetEtaVsDeltaPt", "genjetEtaVsDeltaPt", 250, -2.5, 2.5,100,-1.5,1.5);
   hgenjetPhiVsDeltaPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "genjetPhiVsDeltaPt", "genjetPhiVsDeltaPt", 90, 0., 180,100,-1.5,1.5);
+
   hgenjetPtVsDeltaPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "genjetPtVsDeltaPt", "genjetPtVsDeltaPt", 200, 0., 1000,100,-1.5,1.5);
   hDeltaRJetGenJet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "deltaRJetGenJet", "deltaRJetGenJet", 100, 0.,5);  
   hDeltaPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DeltaPt", "DeltaPt", 100, -1.5, 1.5);
@@ -478,6 +483,7 @@ void CorrelationAnalysis::process(Long64_t entry) {
 
   // B tagging
   std::vector<Jet> selectedBtaggedJets;
+  std::vector<Jet> selectedVetoBJets;
 
   size_t nbjets = 0;  
   for(Jet& jet: selectedJets) {
@@ -494,6 +500,13 @@ void CorrelationAnalysis::process(Long64_t entry) {
     htrackCountingHighPurBJetTags->Fill(jet.trackCountingHighPurBJetTags());
     //    std::cout << "  combinedInclusiveSecondaryVertexV2BjetTags() " <<  jet.combinedInclusiveSecondaryVertexV2BjetTags() << "  simpleSecondaryVertexHighEffBjetTags() " <<  jet.simpleSecondaryVertexHighEffBjetTags() << "  pileupJetIdfullDiscriminant()  " <<  jet.pileupJetIdfullDiscriminant() << std::endl;   
     //  if(jet.jetProbabilityBJetTags() > 0.898)
+    // Veto b jets
+    if(jet.jetProbabilityBJetTags() > 0.3){   
+    //    if(jet.trackCountingHighEffBJetTags() > 0.9){
+    //    if(jet.trackCountingHighPurBJetTags() > 0.3){
+      cSelectedBVetoJets.increment();
+      selectedVetoBJets.push_back(jet); 
+    }
     if(jet.jetProbabilityBJetTags() > 0.9){   
     //    if(jet.trackCountingHighEffBJetTags() > 0.9){
     //    if(jet.trackCountingHighPurBJetTags() > 0.3){
@@ -517,6 +530,9 @@ void CorrelationAnalysis::process(Long64_t entry) {
     return;
   cBJetSelection.increment();
 
+  if(selectedVetoBJets.size() > 1)
+    return;
+  cBVetoSelection.increment();
 
   
   
