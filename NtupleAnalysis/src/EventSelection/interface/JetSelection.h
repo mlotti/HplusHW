@@ -7,7 +7,7 @@
 #include "EventSelection//interface/TauSelection.h"
 #include "Framework/interface/EventCounter.h"
 #include "Tools/interface/DirectionalCut.h"
-#include <../external/boost_1_57_0/boost/concept_check.hpp>
+#include <boost/concept_check.hpp>
 
 #include <string>
 #include <vector>

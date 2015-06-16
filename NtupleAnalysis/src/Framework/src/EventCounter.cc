@@ -1,6 +1,6 @@
 #include "Framework/interface/EventCounter.h"
 #include "Framework/interface/EventWeight.h"
-#include <boost_1_57_0/boost/concept_check.hpp>
+#include <boost/concept_check.hpp>
 
 #include <TDirectory.h>
 #include <TH1F.h>
