@@ -6,6 +6,7 @@ import glob
 import shutil
 import subprocess
 from optparse import OptionParser
+import tarfile
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -21,16 +22,37 @@ replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://m
 def getHistogramFile(stdoutFile, opts):
     multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
-    f = open(stdoutFile)
-    for line in f:
-        for r in re_histos:
-            m = r.search(line)
-            if m:
-                histoFile = m.group("file")
-                break
-        if histoFile is not None:
-            break
-    f.close()
+
+    if tarfile.is_tarfile(stdoutFile):
+        fIN = tarfile.open(stdoutFile)
+        log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+        for member in fIN.getmembers():
+            f = fIN.extractfile(member)
+            match = log_re.search(f.name)
+            if match:
+                histoFile = "miniaod2tree_%s.root"%match.group("job")
+                """
+                for line in f:
+	            for r in re_histos:   
+            		m = r.search(line)
+            		if m:
+                	    histoFile = m.group("file")
+                	    break
+        	    if histoFile is not None:
+            		break
+                """
+        fIN.close()
+    else:
+        f = open(stdoutFile)
+        for line in f:
+            for r in re_histos:
+                m = r.search(line)
+                if m:
+                    histoFile = m.group("file")
+                    break
+            if histoFile is not None:
+                 break
+        f.close()
     return histoFile
 
 def getHistogramFileSE(stdoutFile, opts):
@@ -152,6 +174,37 @@ def sanityCheck(mergedFile, inputFiles):
         if int(info["control"]) != len(inputFiles):
             raise SanityCheckException("configInfo/configinfo:control = %d, len(inputFiles) = %d" % (int(info["control"]), len(inputFiles)))
 
+def delete(fname,regexp):
+
+    fIN = ROOT.TFile.Open(fname,"UPDATE")
+    fIN.cd()
+    keys = fIN.GetListOfKeys()
+    for i in range(len(keys)):
+        if keys.At(i):
+            keyName = keys.At(i).GetName()
+            dir = fIN.GetDirectory(keyName)
+            if dir:
+                fIN.cd(keyName)
+                delFolder(regexp)
+                fIN.cd()
+    delFolder(regexp)
+    fIN.Close()
+
+def delFolder(regexp):
+    keys = ROOT.gDirectory.GetListOfKeys()
+    del_re = re.compile(regexp)
+    deleted = False
+    for i in reversed(range(len(keys))):
+        if keys.At(i):
+            keyName = keys.At(i).GetName()
+            match = del_re.search(keyName)
+            if match:
+                if not deleted:
+                    deleted = True
+                else:
+                    cycle = keys.At(i).GetCycle()
+                    ROOT.gDirectory.Delete(keyName+";%i"%cycle)
+
 def main(opts, args):
     crabdirs = multicrab.getTaskDirectories(opts)
 
@@ -162,7 +215,7 @@ def main(opts, args):
     mergedFiles = []
     for d in crabdirs:
         d = d.replace("/", "")
-        stdoutFiles = glob.glob(os.path.join(d, "res", "CMSSW_*.stdout"))
+        stdoutFiles = glob.glob(os.path.join(d, "results", "cmsRun_*.log.tar.gz"))
 
         files = []
         for f in stdoutFiles:
@@ -203,7 +256,7 @@ def main(opts, args):
             tmp = d
             if len(filesSplit) > 1:
                 tmp += "-%d" % index
-            mergeName = os.path.join(d, "res", opts.output % tmp)
+            mergeName = os.path.join(d, "results", opts.output % tmp)
             if os.path.exists(mergeName) and not opts.test:
                 if opts.verbose:
                     print "mv %s %s" % (mergeName, mergeName+".backup")
@@ -255,6 +308,9 @@ def main(opts, args):
     print "Merged histogram files%s:" % deleteMessage
     for f, sourceFiles in mergedFiles:
         print "  %s (from %d file(s))" % (f, len(sourceFiles))
+        delete(f,"Generated")
+        delete(f,"Commit")
+        delete(f,"dataVersion")
         if opts.delete and not opts.deleteImmediately:
             for srcFile in sourceFiles:
                 if opts.verbose:
