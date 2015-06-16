@@ -81,7 +81,6 @@ private:
   MET fL1MET;
 
   GenWeight fGenWeight;
-  GenParticleCollection fGenParticleCollection;
 
   const bool fIsMC;
 };
