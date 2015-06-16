@@ -201,7 +201,7 @@ void GeneratorComparison::process(Long64_t entry) {
 	  if (genp.pt() > bet_th) {bpt = true;} 
 	  if (genp.eta() < beta_th) {beta = true;}
 */
-	if (genp.et() > fBjetEtCut) {bjetEtPassed = true;} 
+	if (genp.pt() > fBjetEtCut) {bjetEtPassed = true;} 
       	if (genp.eta() < fBjetEtaCut) {bjetEtaPassed = true;}
 	hAssociatedBPt->Fill(genp.pt(),weight_sign);
 	hAssociatedBEta->Fill(genp.eta(),weight_sign);
@@ -209,7 +209,7 @@ void GeneratorComparison::process(Long64_t entry) {
       }
 
       if (abs(genp.pdgId()) == 5 && genp.associatedWithHpm() == 2) {
-      	if (genp.et() > fBjetEtCut) {bjetEtPassed = true;} 
+      	if (genp.pt() > fBjetEtCut) {bjetEtPassed = true;} 
       	if (genp.eta() < fBjetEtaCut) {bjetEtaPassed = true;}
       	hAssociatedSecondaryBPt->Fill(genp.pt(),weight_sign);
       	hAssociatedSecondaryBEta->Fill(genp.eta(),weight_sign);
