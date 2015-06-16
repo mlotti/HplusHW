@@ -181,7 +181,9 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     cSubPassedRtau.increment();
   if (output.fSelectedTaus.size() > 0)
     cPassedTauSelection.increment();
-
+  if (output.fSelectedTaus.size() > 1)
+    cPassedTauSelectionMultipleTaus.increment();
+  
   // Return data object
   return output;
 }

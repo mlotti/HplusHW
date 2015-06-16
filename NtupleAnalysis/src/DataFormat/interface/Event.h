@@ -38,6 +38,12 @@ public:
   bool configurableTrigger2IsEmpty() const {
     return fTriggerOr2.isEmpty();
   }
+  bool passTriggerDecision() const {
+    if (configurableTrigger2IsEmpty())
+      return configurableTriggerDecision();
+    return configurableTriggerDecision() || configurableTriggerDecision2();
+  }
+  
   const EventID& eventID() const { return fEventID; }
   const EventNPU& NPU() const { return fNPU; }
   const HLTTauCollection& triggerTaus() const { return fTriggerTauCollection; }

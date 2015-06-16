@@ -320,4 +320,5 @@ TEST_CASE("EventCounter works", "[Framework]") {
     ec.setOutput(&dir);
     REQUIRE_THROWS_AS( ec.addSubCounter("subcounter1", "count1"), std::logic_error );
   }
+  
 }

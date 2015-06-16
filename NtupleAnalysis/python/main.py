@@ -56,7 +56,15 @@ def File(fname):
 class Analyzer:
     def __init__(self, className, **kwargs):
         self.__dict__["_className"] = className
-        self.__dict__["_pset"] = PSet(**kwargs)
+        if "config" in kwargs:
+            if isinstance(kwargs["config"], PSet):
+                self.__dict__["_pset"] = kwargs["config"]
+            else:
+                raise Exception("The keyword config should be used only for providing the parameters as a PSet!")
+        else:
+            self.__dict__["_pset"] = PSet(**kwargs)
+        print "Configuration parameters:"
+        print self.__dict__["_pset"]
 
     def __getattr__(self, name):
         return getattr(self._pset, name)

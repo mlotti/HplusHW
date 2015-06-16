@@ -20,7 +20,7 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
   fNumberOfJetsCut(config, "numberOfBJetsCut"),
   fDisriminatorValue(-1.0),
   // Event counter for passing selection
-  cPassedBJetSelection(eventCounter.addCounter("passed mu selection ("+postfix+")")),
+  cPassedBJetSelection(eventCounter.addCounter("passed b-jet selection ("+postfix+")")),
   // Sub counters
   cSubAll(eventCounter.addSubCounter("bjet selection ("+postfix+")", "All events")),
   cSubPassedDiscriminator(eventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed discriminator")),

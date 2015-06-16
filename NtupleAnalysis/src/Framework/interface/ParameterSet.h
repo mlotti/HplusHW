@@ -9,8 +9,12 @@
 
 #include <type_traits>
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 #include <boost/property_tree/json_parser.hpp>
 
+extern std::vector< float > e;
 // Partial specializations at the end
 namespace ParameterSetImpl {
   template <typename T>
@@ -25,6 +29,31 @@ namespace ParameterSetImpl {
     static
     boost::optional<T> getOptional(const boost::property_tree::ptree& config, const std::string& name) {
       return config.get_optional<T>(name);
+    }
+  };
+  
+  struct ParameterToString {
+  public:
+    template <typename T>
+    static
+    std::string get(std::vector<T> v) {
+      std::stringstream s;
+      s <<"[";
+      size_t i = 0;
+      for (T item: v) {
+        s << item;
+        if (i > 0)
+          s << ", ";
+      }
+      s << "]";
+      return s.str();
+    }
+    template <typename T>
+    static
+    std::string get(T v) {
+      std::stringstream s;
+      s << v;
+      return s.str();
     }
   };
 }
@@ -54,8 +83,8 @@ public:
     T res = ParameterSetImpl::ParameterGetter<T>::get(fConfig, name, std::forward<Args>(args)...);
     //Catch situation where requested parameter does not exist and default value has been provided
     if (!fConfig.get_child_optional(name)) {
-      std::cout << "Config: Config element '" << name << "' not found in the parameter set, using default value '"
-                << res << "'!" << std::endl;
+      std::cout << "Config: Config element '" << name << "' not found in the parameter set, using default value:"
+                << ParameterSetImpl::ParameterToString::get(res) << "'!" << std::endl;
     }
     return res;
   }
@@ -86,7 +115,6 @@ private:
   bool fIsMC;
   bool fIsMCSet;
 };
-
 
 // Partial specializations
 namespace ParameterSetImpl {
@@ -129,9 +157,9 @@ namespace ParameterSetImpl {
       std::cout << "Config: Config element '" << name << "' not found in the parameter set, using empty value!" << std::endl;
       return res;
     }
-    
-  };
 
+  };
+    
   //Partial specialization for ParameterSet
   template <>
   struct ParameterGetter<ParameterSet> {
@@ -155,22 +183,26 @@ namespace ParameterSetImpl {
       boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
       if(child)
         return ParameterSet(*child);
-std::cout << "Config: Config element '" << name << "' not found in the parameter set, using empty value!" << std::endl;
+      std::cout << "Config: Config element '" << name << "' not found in the parameter set, using empty value!" << std::endl;
       return res;
     }
   };
   
-//   template<typename T>
-//   struct ParameterGetter<T> {
+//   template <typename T>
+//   struct ParameterToString<std::vector<T> > {
+//   public:
 //     static
-//     T get(const boost::property_tree::ptree& config, const std::string& name) {
-//       boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
-//       std::cout << "**1" << name << std::endl;
-//       if (!child) {
-//         boost::property_tree::write_json(std::cout, config);
-//         throw hplus::Exception("config") << "Config element '" << name << "' not found in the PSet above!";
+//     std::string get(std::vector<T> v) {
+//       std::stringstream s;
+//       s <<"[";
+//       size_t i = 0;
+//       for (T item: v) {
+//         s << item;
+//         if (i > 0)
+//           s << ", ";
 //       }
-//       return config.get_child(name);
+//       s << "]";
+//       return s.str();
 //     }
 //   };
 }
