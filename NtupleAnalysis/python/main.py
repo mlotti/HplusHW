@@ -159,7 +159,8 @@ class Process:
             self.addDataset(name)
 
     def addDatasetsFromMulticrab(self, directory, *args, **kwargs):
-        dataset._optionDefaults["input"] = "miniaod2tree*.root"
+#        dataset._optionDefaults["input"] = "miniaod2tree*.root"
+        dataset._optionDefaults["input"] = "histograms-*.root"
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
         dsets = dsetMgrCreator.getDatasetPrecursors()
         dsetMgrCreator.close()
