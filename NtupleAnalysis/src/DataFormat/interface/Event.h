@@ -14,6 +14,7 @@
 #include "DataFormat/interface/Electron.h"
 #include "DataFormat/interface/Muon.h"
 #include "DataFormat/interface/MET.h"
+#include "DataFormat/interface/GenWeight.h"
 #include "DataFormat/interface/GenParticle.h"
 #include "DataFormat/interface/PFCands.h"
 
@@ -62,6 +63,7 @@ public:
   const MET& calomet() const { return fCaloMET; }
   const MET& L1met() const { return fL1MET; }
 
+  const GenWeight& genWeight() const { return fGenWeight; }
 
 private:
   EventID fEventID;
@@ -83,6 +85,8 @@ private:
   MET fMET_Type1;
   MET fCaloMET;
   MET fL1MET;
+
+  GenWeight fGenWeight;
 
   const bool fIsMC;
 };
