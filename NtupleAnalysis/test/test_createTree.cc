@@ -74,7 +74,7 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   unsigned long long event;   tree->Branch("event", &event);
   bool trig1;                 tree->Branch("HLT_Trig1", &trig1);
   bool trig2;                 tree->Branch("HLT_Trig2", &trig2);
-  bool trig3;                 tree->Branch("HLT_Trig3", &trig3);
+  bool trig3;                 tree->Branch("HLT_Trig3_v5", &trig3);
   std::vector<float> tau_pt;  tree->Branch((tauPrefix+"_pt").c_str(),  &tau_pt);
   std::vector<float> tau_eta; tree->Branch((tauPrefix+"_eta").c_str(), &tau_eta);
   std::vector<float> tau_phi; tree->Branch((tauPrefix+"_phi").c_str(), &tau_phi);

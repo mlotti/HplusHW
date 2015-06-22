@@ -36,10 +36,15 @@ public:
   bool configurableTriggerDecision2() const {
     return fTriggerOr2.value();
   }
+  bool configurableTriggerIsEmpty() const {
+    return fTriggerOr.isEmpty();
+  }
   bool configurableTrigger2IsEmpty() const {
     return fTriggerOr2.isEmpty();
   }
   bool passTriggerDecision() const {
+    if (configurableTriggerIsEmpty() && configurableTrigger2IsEmpty())
+      return true;
     if (configurableTrigger2IsEmpty())
       return configurableTriggerDecision();
     return configurableTriggerDecision() || configurableTriggerDecision2();

@@ -13,13 +13,15 @@ Event::Event(const ParameterSet& config):
   fIsMC(config.isMC())
 {
   // Trigger
-  boost::optional<std::vector<std::string>> triggerOR = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR");
+  boost::optional<std::vector<std::string>> triggerOR = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR", std::vector<std::string>{});
   if(triggerOR) {
-    fTriggerOr.setBranchNames(*triggerOR);
+    if (triggerOR->size())
+      fTriggerOr.setBranchNames(*triggerOR);
   }
-  boost::optional<std::vector<std::string>> triggerOR2 = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR2");
+  boost::optional<std::vector<std::string>> triggerOR2 = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR2", std::vector<std::string>{});
   if(triggerOR2) {
-    fTriggerOr2.setBranchNames(*triggerOR2);
+    if (triggerOR2->size())
+      fTriggerOr2.setBranchNames(*triggerOR2);
   }
 
   bool variationAssigned = false;
@@ -42,7 +44,7 @@ Event::Event(const ParameterSet& config):
   }
 
   // Tau discriminators
-  boost::optional<std::vector<std::string> > tauDiscr = config.getParameterOptional<std::vector<std::string> >("TauSelection.discriminators");
+  boost::optional<std::vector<std::string> > tauDiscr = config.getParameterOptional<std::vector<std::string> >("TauSelection.discriminators", std::vector<std::string>{});
   if(tauDiscr) {
     fTauCollection.setConfigurableDiscriminators(*tauDiscr);
   }
@@ -84,8 +86,8 @@ void Event::setupBranches(BranchManager& mgr) {
 
   fNPU.setupBranches(mgr);
 
-  fTriggerOr.setupBranches(mgr);
-  fTriggerOr2.setupBranches(mgr);
+  fTriggerOr.setupBranchesAutoScanVersion(mgr);
+  fTriggerOr2.setupBranchesAutoScanVersion(mgr);
 
   fTriggerTauCollection.setupBranches(mgr);
   fTauCollection.setupBranches(mgr);
