@@ -156,6 +156,7 @@ void SignalAnalysis::process(Long64_t entry) {
 //====== Back-to-back angular cuts // FIXME missing code  
 
 //====== All cuts passed
+  cSelected.increment();
   // Fill final plots // FIXME missing code
 
 //====== Experimental selection code
