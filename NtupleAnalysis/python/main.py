@@ -56,6 +56,10 @@ def File(fname):
 class Analyzer:
     def __init__(self, className, **kwargs):
         self.__dict__["_className"] = className
+        silentStatus = True
+        if "silent" in kwargs:
+            silentStatus = kwargs["silent"]
+            del kwargs["silent"]
         if "config" in kwargs:
             if isinstance(kwargs["config"], PSet):
                 self.__dict__["_pset"] = kwargs["config"]
@@ -63,8 +67,9 @@ class Analyzer:
                 raise Exception("The keyword config should be used only for providing the parameters as a PSet!")
         else:
             self.__dict__["_pset"] = PSet(**kwargs)
-        print "Configuration parameters:"
-        print self.__dict__["_pset"]
+        if not silentStatus:
+            print "Configuration parameters:"
+            print self.__dict__["_pset"]
 
     def __getattr__(self, name):
         return getattr(self._pset, name)
