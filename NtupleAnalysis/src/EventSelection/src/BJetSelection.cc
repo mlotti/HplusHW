@@ -93,6 +93,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     return output;
   //=== Passed b-jet selection
   output.bPassedSelection = true;
+  cPassedBJetSelection.increment();
   std::sort(output.fSelectedBJets.begin(), output.fSelectedBJets.end());
   cSubPassedNBjets.increment();
   // Fill pt and eta of jets
@@ -104,6 +105,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     }
     ++i;
   }
+  
   // Calculate and store b-jet weight and it's uncertainty
   // FIXME to be implemented
   
