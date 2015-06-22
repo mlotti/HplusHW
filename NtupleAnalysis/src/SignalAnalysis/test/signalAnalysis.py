@@ -16,7 +16,7 @@ process.addDatasetsFromMulticrab(sys.argv[1])
 
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
-process.addAnalyzer("SignalAnalysis", Analyzer("SignalAnalysis", config=allSelections))
+process.addAnalyzer("SignalAnalysis", Analyzer("SignalAnalysis", config=allSelections, silent=False))
 
 # Example of adding an analyzer whose configuration depends on dataVersion
 #def createAnalyzer(dataVersion):

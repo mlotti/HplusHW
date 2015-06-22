@@ -96,8 +96,8 @@ void SignalAnalysis::process(Long64_t entry) {
   cAllEvents.increment();
 
 //====== Apply trigger // FIXME to be debugged
-//   if (!(fEvent.passTriggerDecision()))
-//     return;
+  if (!(fEvent.passTriggerDecision()))
+    return;
   cTrigger.increment();
   
 //====== Set prescale // FIXME missing code
