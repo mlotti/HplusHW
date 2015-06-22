@@ -35,7 +35,7 @@ public:
     const bool hasIdentifiedTaus() const { return (fSelectedTaus.size() > 0); }
     const Tau& getSelectedTau() const;
     const std::vector<Tau>& getSelectedTaus() const { return fSelectedTaus; }
-    const float getRtau() const { return fRtau; }
+    const float getRtauOfSelectedTau() const { return fRtau; }
     
     // FIXME: Add MC information if deemed necessary
 //     const bool eventContainsTauFromCJet() const { return fHasTauFromCjetStatus; }

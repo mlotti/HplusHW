@@ -95,6 +95,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
   std::vector<float> phi;  tree->Branch("Taus_phi", &phi);
   std::vector<float> e;    tree->Branch("Taus_e", &e);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lTrkPt", &lTrkPt);
+  std::vector<float> lTrkEta;   tree->Branch("Taus_lTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
   std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronTight", &eDiscr);
   std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonMedium", &muDiscr);
@@ -121,10 +122,11 @@ TEST_CASE("JetSelection", "[EventSelection]") {
   muDiscr = std::vector<bool>{true, true};
   isolDiscr = std::vector<bool>{true, true};
   pt  = std::vector<float>{50.f,  70.f};
-  eta = std::vector<float>{-1.3f, 0.3f,};
+  eta = std::vector<float>{-1.3f, 0.3f};
   phi = std::vector<float>{-2.9f, -0.5f};
   e   = std::vector<float>{50.f,  70.f};
   lTrkPt = std::vector<float>{50.f,  60.f};
+  lTrkEta = std::vector<float>{-1.3f, 0.3f};
   nProngs = std::vector<int>{1, 1};
   tree->Fill();
   nevent = 3; // jet ID

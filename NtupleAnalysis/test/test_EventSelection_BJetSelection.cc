@@ -89,6 +89,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
   std::vector<float> phi;  tree->Branch("Taus_phi", &phi);
   std::vector<float> e;    tree->Branch("Taus_e", &e);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lTrkPt", &lTrkPt);
+  std::vector<float> lTrkEta;   tree->Branch("Taus_lTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
   std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronTight", &eDiscr);
   std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonMedium", &muDiscr);

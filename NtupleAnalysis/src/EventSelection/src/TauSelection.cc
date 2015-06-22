@@ -11,6 +11,8 @@
 
 #include "Math/VectorUtil.h"
 
+#include <cmath>
+
 TauSelection::Data::Data() 
 : fRtau(-1.0) { }
 
@@ -212,10 +214,16 @@ bool TauSelection::passNprongsCut(const Tau& tau) const {
 }
 
 double TauSelection::getRtau(const Tau& tau) const {
-  double myRtau = -0.01;
-  //FIXME rtau calculation
-  //double myTauMomentum = tau.p4().P();
-  //if (myTauMomentum > 0.0)
-    //  myRtau = static_cast<double>(tau.l) / myTauMomentum;
-  return myRtau;
+  // Calculate p_z of leading track
+  double pz = std::sinh(static_cast<double>(tau.lTrkEta()))*static_cast<double>(tau.lTrkPt());
+  // Calcualte p of leading track
+  double p = std::sqrt(pz*pz + static_cast<double>(tau.lTrkPt()*tau.lTrkPt()));
+  // Calculate Rtau
+  double rtau = -1.0;
+  double taup = tau.p4().P();
+  if (taup > 0.0)
+    rtau = p / taup;
+  return rtau;
+  
+  
 }

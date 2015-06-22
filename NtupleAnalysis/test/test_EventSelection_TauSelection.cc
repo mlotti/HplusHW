@@ -93,6 +93,7 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   std::vector<float> phi;  tree->Branch("Taus_phi", &phi);
   std::vector<float> e;    tree->Branch("Taus_e", &e);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lTrkPt", &lTrkPt);
+  std::vector<float> lTrkEta;  tree->Branch("Taus_lTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
   std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronTight", &eDiscr);
   std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonMedium", &muDiscr);
@@ -114,7 +115,8 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   eta = std::vector<float>{-2.3f, -2.3f, -1.1f, -1.4f,  0.2f,  0.7f, 3.3f,  3.3f};
   phi = std::vector<float>{-2.9f, -0.5f,  1.f,  -2.3f, -1.7f,  0.3f, 0.8f,  1.1f};
   e   = std::vector<float>{50.f,  20.f,  11.f,  50.f,  75.f,  11.f,  13.f, 90.f};
-  lTrkPt = std::vector<float>{5.f,  20.f,  11.f,  5.f,  75.f,  11.f,  13.f, 90.f};
+  lTrkPt = std::vector<float>{5.f,  20.f,  11.f,  5.f,  70.f,  11.f,  13.f, 90.f};
+  lTrkEta = std::vector<float>{-2.3f, -2.3f, -1.1f, -1.4f, 0.23f, 0.7f, 3.3f, 3.3f};
   nProngs = std::vector<int>{1, 2, 3, 3, 2, 1, 1, 3};
   tree->Fill();
   nevent = 2; // with trigger taus
@@ -394,7 +396,11 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data data = tausel.silentAnalyze(event2);
-    CHECK( data.getSelectedTaus().size() == 0 ); // FIXME: Fix when rtau calculation works
+    CHECK( data.getSelectedTaus().size() == 2 ); 
+    CHECK( std::fabs(data.getRtauOfSelectedTau() - 0.93928) < 0.0001 ); 
+    
+    
+    
   } 
   SECTION("getSelectedTau() behavior") {
     tmp.put("TauSelection.applyTriggerMatching", true);
