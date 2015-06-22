@@ -21,19 +21,19 @@
 TEST_CASE("BJetSelection", "[EventSelection]") {
   SECTION("Default (empty) discriminators") {
     boost::property_tree::ptree tmp = getMinimalConfig();
-    ParameterSet pset1(tmp, true);
+    ParameterSet pset1(tmp, true, false);
     REQUIRE_NOTHROW(Event event1(pset1));
   }
   SECTION("bjet discriminator validity") {
     boost::property_tree::ptree tmp = getMinimalConfig();
     tmp.put("BJetSelection.bjetDiscr", "");
-    ParameterSet pset1(tmp, true);
+    ParameterSet pset1(tmp, true, false);
     REQUIRE_NOTHROW(Event event1(pset1));
     tmp.put("BJetSelection.bjetDiscr", "combinedInclusiveSecondaryVertexV2BJetTags");
-    ParameterSet pset2(tmp, true);
+    ParameterSet pset2(tmp, true, false);
     REQUIRE_NOTHROW(Event event2(pset2));
     tmp.put("BJetSelection.bjetDiscr", "dummy");
-    ParameterSet pset3(tmp, true);
+    ParameterSet pset3(tmp, true, false);
     REQUIRE_THROWS_AS(Event event3(pset3), hplus::Exception);
   }
 
@@ -61,7 +61,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
   tmp.put("BJetSelection.bjetDiscrWorkingPoint", "Loose");
   tmp.put("BJetSelection.numberOfBJetsCutValue", 1);
   tmp.put("BJetSelection.numberOfBJetsCutDirection", ">=");
-  ParameterSet psetDefault(tmp, true);
+  ParameterSet psetDefault(tmp, true, false);
   // Create necessary objects for testing
   TFile* f = new TFile("test_JetSelection.root", "recreate");
   CommonPlots* commonPlotsPointer = 0;
@@ -143,7 +143,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     tmp.put("BJetSelection5.bjetDiscrWorkingPoint", "Loose");
     tmp.put("BJetSelection5.numberOfBJetsCutValue", 1);
     tmp.put("BJetSelection5.numberOfBJetsCutDirection", ">=");
-    ParameterSet newPset(tmp,true);
+    ParameterSet newPset(tmp,true, false);
     // Test loose, medium, tight working points for an implemented algorithm
     REQUIRE_NOTHROW(BJetSelection(newPset.getParameter<ParameterSet>("BJetSelection"),
                           ec, histoWrapper, commonPlotsPointer, "1"));
@@ -163,7 +163,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     tmp.put("BJetSelection.bjetDiscrWorkingPoint", "Tight");
     tmp.put("BJetSelection.numberOfBJetsCutValue", 0);
     tmp.put("BJetSelection.numberOfBJetsCutDirection", ">=");
-    ParameterSet newPset(tmp,true);
+    ParameterSet newPset(tmp,true, false);
     TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
                         ec, histoWrapper, commonPlotsPointer, "");
     JetSelection jetsel(newPset.getParameter<ParameterSet>("JetSelection"),
@@ -193,7 +193,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     tmp.put("BJetSelection.bjetDiscrWorkingPoint", "Tight");
     tmp.put("BJetSelection.numberOfBJetsCutValue", 2);
     tmp.put("BJetSelection.numberOfBJetsCutDirection", ">=");
-    ParameterSet newPset(tmp,true);
+    ParameterSet newPset(tmp,true, false);
     TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
                         ec, histoWrapper, commonPlotsPointer, "");
     JetSelection jetsel(newPset.getParameter<ParameterSet>("JetSelection"),

@@ -48,13 +48,13 @@ TEST_CASE("DirectionalCut", "[Tools]") {
   tmp.put("type3Direction", "EQ");
   tmp.put("type4Value", true);
   tmp.put("type4Direction", "EQ");
-  ParameterSet pset(tmp, true);
+  ParameterSet pset(tmp, true, true);
 
   SECTION("initialization") {
     REQUIRE_NOTHROW( DirectionalCut<int> d1(pset, "testgeq1") );
     REQUIRE_THROWS_AS( DirectionalCut<int> d1(pset, "unknown"), hplus::Exception);
-    REQUIRE_THROWS_AS( DirectionalCut<int> d1(pset, "incomplete1"), std::runtime_error);
-    REQUIRE_THROWS_AS( DirectionalCut<int> d1(pset, "incomplete2"), std::runtime_error);
+    REQUIRE_THROWS_AS( DirectionalCut<int> d1(pset, "incomplete1"), hplus::Exception);
+    REQUIRE_THROWS_AS( DirectionalCut<int> d1(pset, "incomplete2"), hplus::Exception);
   }
   SECTION("template") {
     DirectionalCut<int> d1(pset, "type1");
