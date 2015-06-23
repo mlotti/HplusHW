@@ -440,7 +440,7 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     CHECK ( data.getSelectedTaus()[2].pt() == 50. ); 
     CHECK ( data.getSelectedTaus()[3].pt() == 11. ); 
   }
-  SECTION("histogramming") {
+  SECTION("protection for double counting of events") {
     tmp.put("TauSelection.applyTriggerMatching", true);
     tmp.put("TauSelection.tauPtCut", -41.0);
     tmp.put("TauSelection.tauEtaCut", 12.1);
@@ -448,12 +448,16 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     tmp.put("TauSelection.prongs", -1);
     ParameterSet newPset(tmp,true);
     TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
-                        ec, histoWrapper, commonPlotsPointer, "noTrgMatch");
+                        ec, histoWrapper, commonPlotsPointer, "dblcount");
     tausel.bookHistograms(f);
     Event event2(newPset);
     event2.setupBranches(mgr);
     mgr.setEntry(1);
+    CHECK( ec.getValueByName("passed tau selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( tausel.silentAnalyze(event2) );
+    CHECK( ec.getValueByName("passed tau selection (dblcount)") == 0);
     REQUIRE_NOTHROW( tausel.analyze(event2) );
+    CHECK( ec.getValueByName("passed tau selection (dblcount)") == 1);
     REQUIRE_THROWS_AS( tausel.analyze(event2), hplus::Exception );
     REQUIRE_THROWS_AS( tausel.silentAnalyze(event2), hplus::Exception );
   }

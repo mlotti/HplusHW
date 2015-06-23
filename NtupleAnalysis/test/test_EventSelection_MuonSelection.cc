@@ -104,20 +104,19 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
     CHECK( data.getHighestSelectedMuonEta() < 1.f );
     CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 9.f );
     CHECK( ec.getValueByName("passed mu selection (Veto)") == 1);
-    // Make sure that silent analysis works
+  }
+  SECTION("protection for double counting of events") {
     mgr.setEntry(0);
-    data = musel1.silentAnalyze(event);
-    TH1* h = dynamic_cast<TH1*>(f->Get("muSelection_test/muonPtPassed"));
-    CHECK( h != 0 );
-    CHECK( data.getSelectedMuons().size() == 1 );
-    CHECK( data.getHighestSelectedMuonPt() == 50.f );
-    CHECK( data.getHighestSelectedMuonEta() == 1.1f );
-    CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 50.f );
-    CHECK( ec.getValueByName("passed mu selection (test)") == 1);
-    CHECK( h->Integral() == 1.0f );
-    data = musel1.analyze(event);
-    CHECK( ec.getValueByName("passed mu selection (test)") == 2);
-    CHECK( h->Integral() == 2.0f );
+    MuonSelection museldbl(pset.getParameter<ParameterSet>("MuonSelection2"),
+                           ec, histoWrapper, commonPlotsPointer, "dblcount");
+    museldbl.bookHistograms(f);
+    CHECK( ec.getValueByName("passed mu selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( museldbl.silentAnalyze(event) );
+    CHECK( ec.getValueByName("passed mu selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( museldbl.analyze(event) );
+    CHECK( ec.getValueByName("passed mu selection (dblcount)") == 1);
+    REQUIRE_THROWS_AS( museldbl.analyze(event), hplus::Exception );
+    REQUIRE_THROWS_AS( museldbl.silentAnalyze(event), hplus::Exception );
   }
   ec.setOutput(f);
   ec.serialize();

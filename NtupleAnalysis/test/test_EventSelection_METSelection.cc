@@ -95,8 +95,18 @@ TEST_CASE("METSelection", "[EventSelection]") {
     CHECK( data.passedSelection() == false );
     CHECK( floatcmp(data.getMET().R(), 40.0) );
     CHECK( floatcmp(data.getMET().Phi(), -2.6) );
-    // Check analyzing same event twice
-    REQUIRE_THROWS_AS( metsel.analyze(event, event.NPU().value()), hplus::Exception );
+  }
+  SECTION("protection for double counting of events") {
+    mgr.setEntry(0);
+    METSelection metsel2(pset.getParameter<ParameterSet>("METSelection"),
+                    ec, histoWrapper, commonPlotsPointer, "dblcount");
+    metsel2.bookHistograms(f);
+    CHECK( ec.getValueByName("passed MET selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( metsel2.silentAnalyze(event, event.NPU().value()));
+    CHECK( ec.getValueByName("passed MET selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( metsel2.analyze(event, event.NPU().value()) );
+    CHECK( ec.getValueByName("passed MET selection (dblcount)") == 1);
+    REQUIRE_THROWS_AS( metsel2.analyze(event, event.NPU().value()), hplus::Exception );
   }
   ec.setOutput(f);
   ec.serialize();

@@ -221,7 +221,31 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     jetData = jetsel.silentAnalyze(event2, tauData);
     bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == false );
-  }    
+  }
+  SECTION("protection for double counting of events") {
+    mgr.setEntry(0); 
+    Event event2(psetDefault);
+    event2.setupBranches(mgr);
+    TauSelection tausel(psetDefault.getParameter<ParameterSet>("TauSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "dblcount");
+    JetSelection jetsel(psetDefault.getParameter<ParameterSet>("JetSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "dblcount");
+    BJetSelection bjetsel(psetDefault.getParameter<ParameterSet>("BJetSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "dblcount");
+    tausel.bookHistograms(f);
+    jetsel.bookHistograms(f);
+    bjetsel.bookHistograms(f);
+    TauSelection::Data tauData = tausel.silentAnalyze(event2);
+    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    CHECK( ec.getValueByName("passed b-jet selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( bjetsel.silentAnalyze(event2, jetData) );
+    CHECK( ec.getValueByName("passed b-jet selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( bjetsel.analyze(event2, jetData) );
+    CHECK( ec.getValueByName("passed b-jet selection (dblcount)") == 1);
+    REQUIRE_THROWS_AS( bjetsel.analyze(event2, jetData), hplus::Exception );
+    REQUIRE_THROWS_AS( bjetsel.silentAnalyze(event2, jetData), hplus::Exception );
+  }
+  
   ec.setOutput(f);
   ec.serialize();
   f->Write();
