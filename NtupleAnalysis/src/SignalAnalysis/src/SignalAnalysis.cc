@@ -41,6 +41,7 @@ private:
   MuonSelection fMuonSelection;
   JetSelection fJetSelection;
   BJetSelection fBJetSelection;
+  METSelection fMETSelection;
   Count cSelected;
     
   // Non-common histograms
@@ -72,6 +73,8 @@ SignalAnalysis::SignalAnalysis(const ParameterSet& config)
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  fMETSelection(config.getParameter<ParameterSet>("METSelection"),
+                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   cSelected(fEventCounter.addCounter("Selected events"))
 { }
 
@@ -84,6 +87,7 @@ void SignalAnalysis::book(TDirectory *dir) {
   fMuonSelection.bookHistograms(dir);
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
+  fMETSelection.bookHistograms(dir);
   // Book non-common histograms
   //hExample =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "example pT", "example pT", 40, 0, 400);
 }
@@ -121,6 +125,7 @@ void SignalAnalysis::process(Long64_t entry) {
   
 //====== Check that primary vertex exists // FIXME missing code
   cVertexSelection.increment();
+  int nVertices = fEvent.NPU().value();
   
 //====== Setup common events // FIXME missing code
     
@@ -151,7 +156,10 @@ void SignalAnalysis::process(Long64_t entry) {
   if (!bjetData.passedSelection())
     return;
 
-//====== MET selection // FIXME missing code
+//====== MET selection
+  const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
+  if (!METData.passedSelection())
+    return;
   
 //====== Back-to-back angular cuts // FIXME missing code  
 

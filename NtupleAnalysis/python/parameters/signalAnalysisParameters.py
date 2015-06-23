@@ -61,6 +61,16 @@ bjetSelection = PSet(
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
 
+#====== MET selection
+metSelection = PSet(
+           METCutValue = 80.0,
+       METCutDirection = ">", # options: ==, !=, <, <=, >, >=
+               METType = "type1MET", # options: GenMET, L1MET, CaloMET, type1MET
+   applyPhiCorrections = False  # FIXME: no effect yet
+)
+
+
+
 #allSelections = (TauSelection=TauSelection,
                  #ElectronSelection,
                  #MuonSelection,
@@ -75,4 +85,5 @@ allSelections = PSet(
          MuonSelection = muVeto,
           JetSelection = jetSelection,
          BJetSelection = bjetSelection,
+          METSelection = metSelection,
 )
