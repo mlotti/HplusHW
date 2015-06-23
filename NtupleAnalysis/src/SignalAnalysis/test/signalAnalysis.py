@@ -9,7 +9,7 @@ process = Process()
 
 # Example of adding datasets from a multicrab directory
 import sys
-if len(sys.argv) != 2:
+if len(sys.argv) < 2:
     print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory>"
     sys.exit(0)
 process.addDatasetsFromMulticrab(sys.argv[1])
@@ -29,7 +29,10 @@ process.addAnalyzer("SignalAnalysis", Analyzer("SignalAnalysis", config=allSelec
 #process.addAnalyzer("test2", createAnalyzer)
 
 # Run the analysis
-process.run()
+if "proof" in sys.argv:
+    process.run(proof=True)
+else:
+    process.run()
 
 # Run the analysis with PROOF
 # By default it uses all cores, but you can give proofWorkers=<N> as a parameter

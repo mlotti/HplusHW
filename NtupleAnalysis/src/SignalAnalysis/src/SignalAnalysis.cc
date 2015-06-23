@@ -40,8 +40,10 @@ private:
   ElectronSelection fElectronSelection;
   MuonSelection fMuonSelection;
   JetSelection fJetSelection;
+  AngularCutsCollinear fAngularCutsCollinear;
   BJetSelection fBJetSelection;
   METSelection fMETSelection;
+  AngularCutsBackToBack fAngularCutsBackToBack;
   Count cSelected;
     
   // Non-common histograms
@@ -71,9 +73,13 @@ SignalAnalysis::SignalAnalysis(const ParameterSet& config)
                 fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
   fJetSelection(config.getParameter<ParameterSet>("JetSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  fAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"),
+                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   fMETSelection(config.getParameter<ParameterSet>("METSelection"),
+                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  fAngularCutsBackToBack(config.getParameter<ParameterSet>("AngularCutsBackToBack"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   cSelected(fEventCounter.addCounter("Selected events"))
 { }
@@ -86,8 +92,10 @@ void SignalAnalysis::book(TDirectory *dir) {
   fElectronSelection.bookHistograms(dir);
   fMuonSelection.bookHistograms(dir);
   fJetSelection.bookHistograms(dir);
+  fAngularCutsCollinear.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
+  fAngularCutsBackToBack.bookHistograms(dir);
   // Book non-common histograms
   //hExample =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "example pT", "example pT", 40, 0, 400);
 }
@@ -123,9 +131,11 @@ void SignalAnalysis::process(Long64_t entry) {
 //====== GenParticle analysis
   // if needed
   
-//====== Check that primary vertex exists // FIXME missing code
-  cVertexSelection.increment();
+//====== Check that primary vertex exists
   int nVertices = fEvent.NPU().value();
+  if (nVertices < 1)
+    return;
+  cVertexSelection.increment();
   
 //====== Setup common events // FIXME missing code
     
@@ -149,7 +159,11 @@ void SignalAnalysis::process(Long64_t entry) {
   if (!jetData.passedSelection())
     return;
 
-//====== Collinear angular cuts // FIXME missing code  
+//====== Collinear angular cuts
+  const METSelection::Data tmpMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
+  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData, jetData, tmpMETData);
+  if (!collinearData.passedSelection())
+    return;
 
 //====== b-jet selection
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
@@ -161,7 +175,10 @@ void SignalAnalysis::process(Long64_t entry) {
   if (!METData.passedSelection())
     return;
   
-//====== Back-to-back angular cuts // FIXME missing code  
+//====== Back-to-back angular cuts
+  const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(fEvent, tauData, jetData, METData);
+  if (!backToBackData.passedSelection())
+    return;
 
 //====== All cuts passed
   cSelected.increment();

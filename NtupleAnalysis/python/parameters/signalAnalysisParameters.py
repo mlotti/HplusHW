@@ -50,14 +50,24 @@ jetSelection = PSet(
   numberOfJetsCutValue = 3,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
             jetIDDiscr = "",       # FIXME: does not work -> ttree content
-           jetPUIDDiscr = "PUIDloose",
+          jetPUIDDiscr = "PUIDloose",
 )
-            
+ 
+#====== Angular cuts / collinear
+angularCutsCollinear = PSet(
+       nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
+enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
+        cutValueJet1 = 40.0,   # Cut value in degrees (circular cut)
+        cutValueJet2 = 40.0,   # Cut value in degrees (circular cut)
+        cutValueJet3 = 40.0,   # Cut value in degrees (circular cut)
+        cutValueJet4 = 40.0,   # Cut value in degrees (circular cut)
+)
+ 
 #====== B-jet selection
 bjetSelection = PSet(
              bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
  bjetDiscrWorkingPoint = "Tight",
- numberOfBJetsCutValue = 3,
+ numberOfBJetsCutValue = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
 
@@ -69,13 +79,15 @@ metSelection = PSet(
    applyPhiCorrections = False  # FIXME: no effect yet
 )
 
-
-
-#allSelections = (TauSelection=TauSelection,
-                 #ElectronSelection,
-                 #MuonSelection,
-                 #JetSelection,
-                 #BJetSelection]
+#====== Angular cuts / back-to-back
+angularCutsBackToBack = PSet(
+       nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
+enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
+        cutValueJet1 = 60.0,   # Cut value in degrees (circular cut)
+        cutValueJet2 = 60.0,   # Cut value in degrees (circular cut)
+        cutValueJet3 = 60.0,   # Cut value in degrees (circular cut)
+        cutValueJet4 = 60.0,   # Cut value in degrees (circular cut)
+)
 
 allSelections = PSet(
  histogramAmbientLevel = histoLevel,
@@ -84,6 +96,8 @@ allSelections = PSet(
      ElectronSelection = eVeto,
          MuonSelection = muVeto,
           JetSelection = jetSelection,
+  AngularCutsCollinear = angularCutsCollinear,
          BJetSelection = bjetSelection,
           METSelection = metSelection,
+ AngularCutsBackToBack = angularCutsBackToBack,
 )
