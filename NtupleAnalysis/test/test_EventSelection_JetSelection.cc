@@ -363,7 +363,27 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     CHECK( jetData.getSelectedJets()[2].pt() == 50.0 );
     CHECK( jetData.getSelectedJets()[3].pt() == 40.0 );
   }
-   ec.setOutput(f);
+  SECTION("protection for double counting of events") {
+    mgr.setEntry(0); 
+    Event event2(psetDefault);
+    event2.setupBranches(mgr);
+    TauSelection tausel(psetDefault.getParameter<ParameterSet>("TauSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "dblcount");
+    JetSelection jetsel(psetDefault.getParameter<ParameterSet>("JetSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "dblcount");
+    tausel.bookHistograms(f);
+    jetsel.bookHistograms(f);
+    TauSelection::Data tauData = tausel.silentAnalyze(event2);
+    CHECK( ec.getValueByName("passed jet selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( jetsel.silentAnalyze(event2, tauData) );
+    CHECK( ec.getValueByName("passed jet selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( jetsel.analyze(event2, tauData) );
+    CHECK( ec.getValueByName("passed jet selection (dblcount)") == 1);
+    REQUIRE_THROWS_AS( jetsel.analyze(event2, tauData), hplus::Exception );
+    REQUIRE_THROWS_AS( jetsel.silentAnalyze(event2, tauData), hplus::Exception );
+  }
+  
+  ec.setOutput(f);
   ec.serialize();
   f->Write();
   f->Close();

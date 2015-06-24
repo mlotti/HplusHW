@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include <cmath>
 
 
 std::unique_ptr<TTree> createEmptyTree();

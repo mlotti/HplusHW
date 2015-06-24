@@ -1,6 +1,8 @@
 // -*- c++ -*-
 #include "Framework/interface/Exception.h"
+#include <boost_1_57_0/boost/concept_check.hpp>
 
+#include <stdio.h>
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
@@ -85,16 +87,17 @@ namespace hplus {
 
         int status;
         char* ret = abi::__cxa_demangle(begin_name, funcname, &funcnamesize, &status);
+        
         if (status == 0) {
           funcname = ret; // use possibly realloc()-ed string
-          s << "  " << symbollist[i] << ": " << funcname << ":" << std::stoul(begin_offset, nullptr, 16) << std::endl;
+          s << "  " << symbollist[i] << ": " << funcname << ": (symbol offset) " << begin_offset << std::endl;
           if (std::string(symbollist[i]).find("HiggsAnalysis/NtupleAnalysis/test/main") != std::string::npos) {
             calledInsideUnitTest = true;
           }
         } else {
           // demangling failed. Output function name as a C function with
           // no arguments.
-          s << "  " << symbollist[i] << ": " << begin_name << ":" << std::stoul(begin_offset, nullptr, 16) << std::endl;
+          s << "  " << symbollist[i] << ": " << begin_name << ": (symbol offset) " << begin_offset << std::endl;
         }
       }
       else {

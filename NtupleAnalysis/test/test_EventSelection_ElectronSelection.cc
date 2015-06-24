@@ -102,21 +102,22 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
     CHECK( data.getHighestSelectedElectronEta() < 1.f );
     CHECK( data.getHighestSelectedElectronPtBeforePtCut() == 9.f );
     CHECK( ec.getValueByName("passed e selection (Veto)") == 1);
-    // Make sure that silent analysis works
-    mgr.setEntry(0);
-    data = esel1.silentAnalyze(event);
-    TH1* h = dynamic_cast<TH1*>(f->Get("eSelection_test/electronPtPassed"));
-    CHECK( h != 0 );
-    CHECK( data.getSelectedElectrons().size() == 1 );
-    CHECK( data.getHighestSelectedElectronPt() == 50.f );
-    CHECK( data.getHighestSelectedElectronEta() == 1.1f );
-    CHECK( data.getHighestSelectedElectronPtBeforePtCut() == 50.f );
-    CHECK( ec.getValueByName("passed e selection (test)") == 1);
-    CHECK( h->Integral() == 1.0f );
-    data = esel1.analyze(event);
-    CHECK( ec.getValueByName("passed e selection (test)") == 2);
-    CHECK( h->Integral() == 2.0f );
   }
+
+  SECTION("protection for double counting of events") {
+    mgr.setEntry(0);
+    ElectronSelection eseldbl(pset.getParameter<ParameterSet>("ElectronSelection2"),
+                           ec, histoWrapper, commonPlotsPointer, "dblcount");
+    eseldbl.bookHistograms(f);
+    CHECK( ec.getValueByName("passed e selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( eseldbl.silentAnalyze(event) );
+    CHECK( ec.getValueByName("passed e selection (dblcount)") == 0);
+    REQUIRE_NOTHROW( eseldbl.analyze(event) );
+    CHECK( ec.getValueByName("passed e selection (dblcount)") == 1);
+    REQUIRE_THROWS_AS( eseldbl.analyze(event), hplus::Exception );
+    REQUIRE_THROWS_AS( eseldbl.silentAnalyze(event), hplus::Exception );
+  }
+  
   ec.setOutput(f);
   ec.serialize();
   f->Write();

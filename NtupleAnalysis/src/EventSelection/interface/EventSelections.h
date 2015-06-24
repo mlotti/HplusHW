@@ -6,3 +6,5 @@
 #include "EventSelection/interface/MuonSelection.h"
 #include "EventSelection/interface/JetSelection.h"
 #include "EventSelection/interface/BJetSelection.h"
+#include "EventSelection/interface/METSelection.h"
+#include "EventSelection/interface/AngularCuts.h"

@@ -20,9 +20,13 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  int value()   const { return fNPU->value(); }
+  /// Return the number of primary vertices in the event
+  int value() const { return fNPU->value(); }
+  /// Return the simulated number of primary vertices in the event
+  int simulatedValue() const { return fSimulatedNPU->value(); }
 
 private:
   const Branch<int> *fNPU;
+  const Branch<int> *fSimulatedNPU;
 };
 #endif
