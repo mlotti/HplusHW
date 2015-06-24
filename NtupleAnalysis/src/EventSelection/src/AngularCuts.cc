@@ -75,7 +75,7 @@ AngularCutsBase::AngularCutsBase(const ParameterSet& config, EventCounter& event
 AngularCutsBase::~AngularCutsBase() { }
 
 void AngularCutsBase::bookHistograms(TDirectory* dir) {
-  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "AngularCuts_"+sPrefix+"_"+sPostfix);
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "AngularCuts_"+sPostfix);
   if (bEnableOptimizationPlots) {
     std::stringstream sName;
     std::stringstream sLabel;
