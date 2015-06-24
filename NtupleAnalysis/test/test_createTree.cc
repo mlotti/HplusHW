@@ -167,11 +167,3 @@ boost::property_tree::ptree getMinimalConfig() {
   tmp.put("BJetSelection.bjetDiscr", "");
   return tmp;
 }
-
-bool floatcmp(float a, float b) { 
-  return std::fabs(a-b) < 0.00001; 
-}
-
-bool floatcmp(double a, double b) { 
-  return std::fabs(a-b) < 0.00001; 
-}

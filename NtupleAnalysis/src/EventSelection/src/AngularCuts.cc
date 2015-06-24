@@ -18,25 +18,25 @@ AngularCutsBase::Data::Data()
 AngularCutsBase::Data::~Data() { }
 
 bool AngularCutsBase::Data::passedSelectionOnJet(size_t n) const {
-  if (n > nMaxJets)
+  if (n >= nMaxJets)
     throw hplus::Exception("assert") << "AngularCuts::Data: Requested passedSelectionOnJet on jet " << n << ", but maximum is " << nMaxJets;
-  if (n > fPassedCutStatus.size())
-    return false;
+  if (n >= fPassedCutStatus.size())
+    return bPassedSelection;
   return fPassedCutStatus[n];
 }
 
 double AngularCutsBase::Data::getDeltaPhiJetMET(size_t n) const {
-  if (n > nMaxJets)
+  if (n >= nMaxJets)
     throw hplus::Exception("assert") << "AngularCuts::Data: Requested DeltaPhi(Jet,MET) on jet " << n << ", but maximum is " << nMaxJets;
-  if (n > fDeltaPhiJetMET.size())
+  if (n >= fDeltaPhiJetMET.size())
     return -1.0;
   return fDeltaPhiJetMET[n];
 }
 
 double AngularCutsBase::Data::get1DCutVariable(size_t n) const {
-  if (n > nMaxJets)
+  if (n >= nMaxJets)
     throw hplus::Exception("assert") << "AngularCuts::Data: Requested get1DCutVariable on jet " << n << ", but maximum is " << nMaxJets;
-  if (n > f1DCutVariables.size())
+  if (n >= f1DCutVariables.size())
     return -1.0;
   return f1DCutVariables[n];
 }
@@ -117,13 +117,14 @@ AngularCutsBase::Data AngularCutsBase::privateAnalyze(const TauSelection::Data& 
     output.fDeltaPhiJetMET.push_back(dphi);
     if (bEnableOptimizationPlots)
       hOptimizationPlots[i]->Fill(output.fDeltaPhiTauMET, dphi);
-    // Make cut
+    // Obtain cut value and status (i.e. calculate cut variable for all existing jets)
+    bool passedStatus = true;
+    if (fType == kCollinear)
+      passedStatus = doCollinearCuts(output.fDeltaPhiTauMET, dphi, fCutValue[i], output.f1DCutVariables);
+    else if (fType == kBackToBack)
+      passedStatus = doBackToBackCuts(output.fDeltaPhiTauMET, dphi, fCutValue[i], output.f1DCutVariables);
+    // Make cut by updating passed status
     if (i < nConsideredJets) {
-      bool passedStatus = true;
-      if (fType == kCollinear)
-        passedStatus = doCollinearCuts(output.fDeltaPhiTauMET, dphi, fCutValue[i], output.f1DCutVariables);
-      else if (fType == kBackToBack)
-        passedStatus = doBackToBackCuts(output.fDeltaPhiTauMET, dphi, fCutValue[i], output.f1DCutVariables);
       output.bPassedSelection = output.bPassedSelection && passedStatus;
       if (output.bPassedSelection)
         cSubPassedCuts[i].increment();
@@ -137,14 +138,14 @@ AngularCutsBase::Data AngularCutsBase::privateAnalyze(const TauSelection::Data& 
   return output;
 }
 
-bool AngularCutsBase::doCollinearCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector< double > results) {
+bool AngularCutsBase::doCollinearCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector< double >& results) {
   double x = deltaPhiJetMET - 180.0;
   double value = std::sqrt(x*x + deltaPhiTauMET*deltaPhiTauMET);
   results.push_back(value);
   return value > cutValue;
 }
 
-bool AngularCutsBase::doBackToBackCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector< double > results) {
+bool AngularCutsBase::doBackToBackCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector< double >& results) {
   double x = deltaPhiTauMET - 180.0;
   double value = std::sqrt(x*x + deltaPhiJetMET*deltaPhiJetMET);
   results.push_back(value);

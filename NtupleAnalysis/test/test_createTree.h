@@ -18,8 +18,4 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix="Taus");
 
 boost::property_tree::ptree getMinimalConfig();
 
-bool floatcmp(float a, float b);
-
-bool floatcmp(double a, double b);
-
 #endif

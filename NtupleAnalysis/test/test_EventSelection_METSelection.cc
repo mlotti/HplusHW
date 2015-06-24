@@ -83,18 +83,18 @@ TEST_CASE("METSelection", "[EventSelection]") {
     mgr.setEntry(0);
     METSelection::Data data = metsel.analyze(event, event.NPU().value());
     CHECK( data.passedSelection() == true );
-    CHECK( floatcmp(data.getMET().R(), 90.0) );
-    CHECK( floatcmp(data.getMET().Phi(), 1.2) );
+    CHECK( data.getMET().R() == Approx(90.0) );
+    CHECK( data.getMET().Phi() == Approx(1.2) );
     mgr.setEntry(1);
     data = metsel.analyze(event, event.NPU().value());
     CHECK( data.passedSelection() == true );
-    CHECK( floatcmp(data.getMET().R(), 90.0) );
-    CHECK( floatcmp(data.getMET().Phi(), 2.6) );
+    CHECK( data.getMET().R() == Approx(90.0) );
+    CHECK( data.getMET().Phi() == Approx(2.6) );
     mgr.setEntry(2);
     data = metsel.analyze(event, event.NPU().value());
     CHECK( data.passedSelection() == false );
-    CHECK( floatcmp(data.getMET().R(), 40.0) );
-    CHECK( floatcmp(data.getMET().Phi(), -2.6) );
+    CHECK( data.getMET().R() == Approx(40.0) );
+    CHECK( data.getMET().Phi() == Approx(-2.6) );
   }
   SECTION("protection for double counting of events") {
     mgr.setEntry(0);

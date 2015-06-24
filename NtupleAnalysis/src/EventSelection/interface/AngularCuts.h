@@ -81,8 +81,8 @@ public:
 private:
   Data privateAnalyze(const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
 
-  bool doCollinearCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector<double> results);
-  bool doBackToBackCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector<double> results);
+  bool doCollinearCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector<double>& results);
+  bool doBackToBackCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector<double>& results);
   
   // Input parameters
   static const size_t nMaxJets = 4;
