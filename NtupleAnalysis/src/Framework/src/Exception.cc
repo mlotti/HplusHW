@@ -10,34 +10,20 @@
 #include <cxxabi.h>
 
 namespace hplus {
-  Exception::Exception(std::string& category) noexcept
-  : std::exception(),
-    _category(category)
-  { }
-
-  Exception::Exception(const char* category) noexcept
-  : std::exception(),
-    _category(category)
-  { }
-  
-  Exception::Exception(const Exception& e) noexcept
-  : std::exception(),
-    _category(e._category),
-    _msg(e._msg.str())
-  { }
-  
-  Exception::~Exception() {}
-
-  const char* Exception::what() const noexcept {
-    unsigned int max_frames = 63;
+  Exception::Exception(const char* category)
+  : std::exception()
+  { 
+    // Construct beginning of message
     std::stringstream s;
+    s << "Exception of category '" << category << "' occurred with message:" << std::endl;
+    s << ">>> ";
+    _msgPrefix = s.str();
+    s.str("");
+    
+    // Construct backtrace
+    unsigned int max_frames = 63;
     bool calledInsideUnitTest = false;
-    s << "Exception of category '" << _category << "' occurred with message:" << std::endl;
-    s << ">>> " << _msg.str() << std::endl;
-    //s << std::endl;
-    //std::cout << s.str() << std::endl;
-    //s.str("");
-    s << "Backtrace:" << std::endl;
+    s << std::endl << "Backtrace:" << std::endl;
 
     // storage array for stack trace address data
     void* addrlist[max_frames+1];
@@ -47,7 +33,8 @@ namespace hplus {
 
     if (addrlen == 0) {
       s << "  <empty, possibly corrupt>" << std::endl;
-      return s.str().c_str();
+      _backtrace = s.str();
+      return;
     }
 
     // resolve addresses into strings containing "filename(function+address)",
@@ -91,9 +78,6 @@ namespace hplus {
         if (status == 0) {
           funcname = ret; // use possibly realloc()-ed string
           s << "  " << symbollist[i] << ": " << funcname << ": (symbol offset) " << begin_offset << std::endl;
-          if (std::string(symbollist[i]).find("HiggsAnalysis/NtupleAnalysis/test/main") != std::string::npos) {
-            calledInsideUnitTest = true;
-          }
         } else {
           // demangling failed. Output function name as a C function with
           // no arguments.
@@ -107,10 +91,15 @@ namespace hplus {
     }
     free(funcname);
     free(symbollist);
-    if (calledInsideUnitTest)
-      return _msg.str().c_str();
-    
-    std::cout << s.str().c_str() << std::endl;
-    return _msg.str().c_str();
+    _backtrace = s.str();
   }
+ 
+  Exception::Exception(const Exception& e) noexcept
+  : std::exception(),
+    _msgPrefix(e._msgPrefix),
+    _msg(e._msg),
+    _backtrace(e._backtrace)
+  { }
+  
+  Exception::~Exception() { }
 }

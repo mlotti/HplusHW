@@ -18,24 +18,24 @@ AngularCutsBase::Data::Data()
 AngularCutsBase::Data::~Data() { }
 
 bool AngularCutsBase::Data::passedSelectionOnJet(size_t n) const {
-  if (n >= nMaxJets)
-    throw hplus::Exception("assert") << "AngularCuts::Data: Requested passedSelectionOnJet on jet " << n << ", but maximum is " << nMaxJets;
+//   if (n >= nMaxJets)
+//     throw hplus::Exception("assert") << "AngularCuts::Data: Requested passedSelectionOnJet on jet " << n << ", but maximum is " << nMaxJets;
   if (n >= fPassedCutStatus.size())
     return bPassedSelection;
   return fPassedCutStatus[n];
 }
 
 double AngularCutsBase::Data::getDeltaPhiJetMET(size_t n) const {
-  if (n >= nMaxJets)
-    throw hplus::Exception("assert") << "AngularCuts::Data: Requested DeltaPhi(Jet,MET) on jet " << n << ", but maximum is " << nMaxJets;
+//   if (n >= nMaxJets)
+//     throw hplus::Exception("assert") << "AngularCuts::Data: Requested DeltaPhi(Jet,MET) on jet " << n << ", but maximum is " << nMaxJets;
   if (n >= fDeltaPhiJetMET.size())
     return -1.0;
   return fDeltaPhiJetMET[n];
 }
 
 double AngularCutsBase::Data::get1DCutVariable(size_t n) const {
-  if (n >= nMaxJets)
-    throw hplus::Exception("assert") << "AngularCuts::Data: Requested get1DCutVariable on jet " << n << ", but maximum is " << nMaxJets;
+//   if (n >= nMaxJets)
+//     throw hplus::Exception("assert") << "AngularCuts::Data: Requested get1DCutVariable on jet " << n << ", but maximum is " << nMaxJets;
   if (n >= f1DCutVariables.size())
     return -1.0;
   return f1DCutVariables[n];
@@ -44,6 +44,7 @@ double AngularCutsBase::Data::get1DCutVariable(size_t n) const {
 AngularCutsBase::AngularCutsBase(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string prefix, const AngularCutsBase::AngularCutsType type, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, prefix+postfix),
   // Input parameters
+  nMaxJets(4),
   nConsideredJets(static_cast<size_t>(config.getParameter<int>("nConsideredJets"))),
   bEnableOptimizationPlots(config.getParameter<bool>("enableOptimizationPlots")),
   sPrefix(prefix),
@@ -75,7 +76,7 @@ AngularCutsBase::AngularCutsBase(const ParameterSet& config, EventCounter& event
 AngularCutsBase::~AngularCutsBase() { }
 
 void AngularCutsBase::bookHistograms(TDirectory* dir) {
-  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "AngularCuts_"+sPrefix+"_"+sPostfix);
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "AngularCuts_"+sPostfix);
   if (bEnableOptimizationPlots) {
     std::stringstream sName;
     std::stringstream sLabel;
