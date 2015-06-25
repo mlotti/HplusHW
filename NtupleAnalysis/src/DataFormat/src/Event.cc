@@ -48,13 +48,13 @@ Event::Event(const ParameterSet& config):
   if(tauDiscr) {
     fTauCollection.setConfigurableDiscriminators(*tauDiscr);
   }
-  boost::optional<std::string> tauAgainstElectronDiscr = config.getParameter<std::string>("TauSelection.againstElectronDiscr");
+  boost::optional<std::string> tauAgainstElectronDiscr = config.getParameterOptional<std::string>("TauSelection.againstElectronDiscr");
   if (tauAgainstElectronDiscr)
     fTauCollection.setAgainstElectronDiscriminator(*tauAgainstElectronDiscr);
-  boost::optional<std::string> tauAgainstMuonDiscr = config.getParameter<std::string>("TauSelection.againstMuonDiscr");
+  boost::optional<std::string> tauAgainstMuonDiscr = config.getParameterOptional<std::string>("TauSelection.againstMuonDiscr");
   if (tauAgainstMuonDiscr)
     fTauCollection.setAgainstMuonDiscriminator(*tauAgainstMuonDiscr);
-  boost::optional<std::string> tauIsolationDiscr = config.getParameter<std::string>("TauSelection.isolationDiscr");
+  boost::optional<std::string> tauIsolationDiscr = config.getParameterOptional<std::string>("TauSelection.isolationDiscr");
   if (tauIsolationDiscr)
     fTauCollection.setIsolationDiscriminator(*tauIsolationDiscr);
   
@@ -65,15 +65,15 @@ Event::Event(const ParameterSet& config):
   // FIXME
   
   // Jet discriminators
-  boost::optional<std::string> jetIDDiscr = config.getParameter<std::string>("JetSelection.jetIDDiscr");
+  boost::optional<std::string> jetIDDiscr = config.getParameterOptional<std::string>("JetSelection.jetIDDiscr");
   if (jetIDDiscr)
     fJetCollection.setJetIDDiscriminator(*jetIDDiscr);
-  boost::optional<std::string> jetPUIDDiscr = config.getParameter<std::string>("JetSelection.jetPUIDDiscr");
+  boost::optional<std::string> jetPUIDDiscr = config.getParameterOptional<std::string>("JetSelection.jetPUIDDiscr");
   if (jetPUIDDiscr)
     fJetCollection.setJetPUIDDiscriminator(*jetPUIDDiscr);
 
   // B jet discriminators
-  boost::optional<std::string> bjetDiscr = config.getParameter<std::string>("BJetSelection.bjetDiscr");
+  boost::optional<std::string> bjetDiscr = config.getParameterOptional<std::string>("BJetSelection.bjetDiscr");
   if (bjetDiscr)
     fJetCollection.setBJetDiscriminator(*bjetDiscr);
   
