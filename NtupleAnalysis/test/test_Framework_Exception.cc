@@ -10,7 +10,6 @@ TEST_CASE("Exception", "[Framework]") {
     try {
       throw hplus::Exception("LogicError") << "Test " << "exception" << 3;
     } catch (const hplus::Exception& ex) {
-      CHECK( ex.getCategory() == "LogicError" );
       CHECK( ex.getMsg() == "Test exception3" );
     }
   }
