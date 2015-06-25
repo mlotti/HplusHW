@@ -22,10 +22,11 @@ namespace hplus {
       return *this;
     }
 
-    virtual const char* what() const noexcept { return (_msgPrefix+_msg+_backtrace).c_str(); }
+    virtual const char* what() const noexcept { return _fullString.c_str(); }
     std::string getMsg() const { return _msg; }
 
   private:
+    std::string _fullString;
     std::string _msgPrefix;
     std::string _msg;
     std::string _backtrace;

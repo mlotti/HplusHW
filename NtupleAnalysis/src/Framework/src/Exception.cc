@@ -22,7 +22,6 @@ namespace hplus {
     
     // Construct backtrace
     unsigned int max_frames = 63;
-    bool calledInsideUnitTest = false;
     s << std::endl << "Backtrace:" << std::endl;
 
     // storage array for stack trace address data
@@ -96,6 +95,7 @@ namespace hplus {
  
   Exception::Exception(const Exception& e) noexcept
   : std::exception(),
+    _fullString(e._msgPrefix+e._msg+e._backtrace),
     _msgPrefix(e._msgPrefix),
     _msg(e._msg),
     _backtrace(e._backtrace)
