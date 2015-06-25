@@ -96,6 +96,8 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   std::vector<float> lTrkEta;  tree->Branch("Taus_lTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
   std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronTight", &eDiscr);
+  std::vector<bool> e2Discr;    tree->Branch("Taus_againstElectronLoose", &e2Discr);
+  std::vector<bool> e3Discr;    tree->Branch("Taus_againstElectronMedium", &e3Discr);
   std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonMedium", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
   std::vector<bool> dm;        tree->Branch("Taus_decayModeFinding", &dm);
@@ -109,6 +111,8 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   nevent = 1; // no trigger taus
   dm  = std::vector<bool>{true, true, true, true, true, true, true, true};
   eDiscr = std::vector<bool>{true, true, true, true, true, true, true, true};
+  e2Discr = std::vector<bool>{true, true, true, true, true, true, true, true};
+  e3Discr = std::vector<bool>{true, true, true, false, false, false, false, false};
   muDiscr = std::vector<bool>{true, true, true, true, true, true, true, true};
   isolDiscr = std::vector<bool>{true, true, true, true, true, true, true, true};
   pt  = std::vector<float>{50.f,  20.f,  11.f,  51.f,  75.f,  11.f,  13.f, 90.f};
@@ -205,6 +209,34 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     data = tausel.silentAnalyze(event2);
     CHECK( data.getSelectedTaus().size() == 2 );
   }
+  SECTION("generic discriminators") {
+    tmp.put("TauSelection.applyTriggerMatching", true);
+    tmp.put("TauSelection.tauPtCut", -41.0);
+    tmp.put("TauSelection.tauEtaCut", 12.1);
+    tmp.put("TauSelection.tauLdgTrkPtCut", 0.0);
+    tmp.put("TauSelection.prongs", -1);
+    boost::property_tree::ptree discrs;
+    boost::property_tree::ptree child;
+    child.put("", "againstElectronTight");
+    discrs.push_back(std::make_pair("", child));
+    child.put("", "againstElectronMedium");
+    discrs.push_back(std::make_pair("", child));
+    child.put("", "againstElectronLoose");
+    discrs.push_back(std::make_pair("", child));
+    tmp.add_child("TauSelection.discriminators", discrs);
+    ParameterSet newPset(tmp, true);
+    Event event2(newPset);
+    event2.setupBranches(mgr);
+    TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "noTrgMatch");
+    tausel.bookHistograms(f);
+    mgr.setEntry(1);
+    TauSelection::Data data = tausel.silentAnalyze(event2);
+    CHECK( data.getSelectedTaus().size() == 2 );
+    mgr.setEntry(3);
+    data = tausel.silentAnalyze(event2);
+    CHECK( data.getSelectedTaus().size() == 1 );
+  }
   SECTION("against e discriminator") {
     tmp.put("TauSelection.applyTriggerMatching", true);
     tmp.put("TauSelection.tauPtCut", -41.0);
@@ -212,11 +244,11 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     tmp.put("TauSelection.tauLdgTrkPtCut", 0.0);
     tmp.put("TauSelection.prongs", -1);
     ParameterSet newPset(tmp,true);
+    Event event2(newPset);
+    event2.setupBranches(mgr);
     TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
                         ec, histoWrapper, commonPlotsPointer, "noTrgMatch");
     tausel.bookHistograms(f);
-    Event event2(newPset);
-    event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data data = tausel.silentAnalyze(event2);
     CHECK( data.getSelectedTaus().size() == 4 );
@@ -398,9 +430,6 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     TauSelection::Data data = tausel.silentAnalyze(event2);
     CHECK( data.getSelectedTaus().size() == 2 ); 
     CHECK( std::fabs(data.getRtauOfSelectedTau() - 0.93928) < 0.0001 ); 
-    
-    
-    
   } 
   SECTION("getSelectedTau() behavior") {
     tmp.put("TauSelection.applyTriggerMatching", true);

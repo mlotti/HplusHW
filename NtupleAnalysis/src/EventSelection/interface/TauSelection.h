@@ -65,8 +65,9 @@ private:
   Data privateAnalyze(const Event& iEvent);
   bool passTrgMatching(const Tau& tau, std::vector<math::LorentzVectorT<double>>& trgTaus) const;
   bool passDecayModeFinding(const Tau& tau) const { return tau.decayModeFinding(); }
+  bool passGenericDiscriminators(const Tau& tau) const { return tau.configurableDiscriminators(); }
   bool passPtCut(const Tau& tau) const { return tau.pt() > fTauPtCut; }
-  bool passEtaCut(const Tau& tau) const { return std::fabs(tau.eta()) < fTauEtaCut; }
+  bool passEtaCut(const Tau& tau) const { return std::abs(tau.eta()) < fTauEtaCut; }
   bool passLdgTrkPtCut(const Tau& tau) const { return tau.lTrkPt() > fTauLdgTrkPtCut; }
   bool passElectronDiscriminator(const Tau& tau) const { return tau.againstElectronDiscriminator(); }
   bool passMuonDiscriminator(const Tau& tau) const { return tau.againstMuonDiscriminator(); }
@@ -92,6 +93,7 @@ private:
   Count cSubAll;
   Count cSubPassedTriggerMatching;
   Count cSubPassedDecayMode;
+  Count cSubPassedGenericDiscriminators;
   Count cSubPassedElectronDiscr;
   Count cSubPassedMuonDiscr;
   Count cSubPassedPt;

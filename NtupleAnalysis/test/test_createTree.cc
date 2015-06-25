@@ -1,8 +1,9 @@
 #include "test_createTree.h"
 
+#include "DataFormat/interface/Tau.h"
+
 #include <vector>
 #include <algorithm>
-
 
 std::unique_ptr<TTree> createEmptyTree() {
   auto tree = std::unique_ptr<TTree>(new TTree("Events", "Events"));
@@ -67,6 +68,7 @@ namespace {
 
 
 std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
+  TauCollection fTauCollection;
   auto tree = std::unique_ptr<TTree>(new TTree("Events", "Events"));
 
   unsigned int run;           tree->Branch("run",   &run);
@@ -81,9 +83,9 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   std::vector<float> tau_e;   tree->Branch((tauPrefix+"_e").c_str(),   &tau_e);
   std::vector<bool> tau_decayModeFinding;
   tree->Branch((tauPrefix+"_decayModeFinding").c_str(), &tau_decayModeFinding);
-  std::vector<bool> tau_discriminator1; tree->Branch((tauPrefix+"_discriminator1").c_str(), &tau_discriminator1);
-  std::vector<bool> tau_discriminator2; tree->Branch((tauPrefix+"_discriminator2").c_str(), &tau_discriminator2);
-  std::vector<bool> tau_discriminator3; tree->Branch((tauPrefix+"_discriminator3").c_str(), &tau_discriminator3);
+  std::vector<bool> tau_discriminator1; tree->Branch((tauPrefix+"_"+fTauCollection.getIsolationDiscriminatorNames()[0]).c_str(), &tau_discriminator1);
+  std::vector<bool> tau_discriminator2; tree->Branch((tauPrefix+"_"+fTauCollection.getAgainstMuonDiscriminatorNames()[0]).c_str(), &tau_discriminator2);
+  std::vector<bool> tau_discriminator3; tree->Branch((tauPrefix+"_"+fTauCollection.getAgainstElectronDiscriminatorNames()[0]).c_str(), &tau_discriminator3);
 
   std::vector<float> tau_pt_esup; tree->Branch((tauPrefix+"_pt_systVarTESUp").c_str(),  &tau_pt_esup);
   std::vector<float> tau_e_esup;  tree->Branch((tauPrefix+"_e_systVarTESUp").c_str(),   &tau_e_esup);
