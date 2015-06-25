@@ -85,7 +85,7 @@ private:
   bool doBackToBackCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector<double>& results);
   
   // Input parameters
-  static const size_t nMaxJets = 4;
+  const size_t nMaxJets;
   const size_t nConsideredJets;
   const bool bEnableOptimizationPlots;
   std::vector<double> fCutValue;

@@ -204,9 +204,9 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
       CHECK( collData.get1DCutVariable(i) == -1.0 );
     }
     // Access items outside vector
-    REQUIRE_THROWS_AS ( collData.passedSelectionOnJet(4), hplus::Exception );
-    REQUIRE_THROWS_AS ( collData.getDeltaPhiJetMET(4), hplus::Exception );
-    REQUIRE_THROWS_AS ( collData.get1DCutVariable(4), hplus::Exception );
+    REQUIRE_NOTHROW ( collData.passedSelectionOnJet(4) );
+    REQUIRE_NOTHROW ( collData.getDeltaPhiJetMET(4) );
+    REQUIRE_NOTHROW ( collData.get1DCutVariable(4) );
     // 4 jets MET not collinear with tau or jet
     mgr.setEntry(1);
     tauData = tausel.silentAnalyze(event);
@@ -298,9 +298,9 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
       CHECK( backtobackData.get1DCutVariable(i) == -1.0 );
     }
     // Access items outside vector
-    REQUIRE_THROWS_AS ( backtobackData.passedSelectionOnJet(4), hplus::Exception );
-    REQUIRE_THROWS_AS ( backtobackData.getDeltaPhiJetMET(4), hplus::Exception );
-    REQUIRE_THROWS_AS ( backtobackData.get1DCutVariable(4), hplus::Exception );
+    REQUIRE_NOTHROW ( backtobackData.passedSelectionOnJet(4) );
+    REQUIRE_NOTHROW ( backtobackData.getDeltaPhiJetMET(4) );
+    REQUIRE_NOTHROW ( backtobackData.get1DCutVariable(4) );
     // 4 jets MET not collinear with tau or jet
     mgr.setEntry(1);
     tauData = tausel.silentAnalyze(event);
