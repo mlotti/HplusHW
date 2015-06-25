@@ -49,8 +49,16 @@ void TauCollection::setupBranches(BranchManager& mgr) {
   TauGeneratedCollection::setupBranches(mgr);
 
   fConfigurableDiscriminators.resize(fConfigurableDiscriminatorNames.size());
+  std::vector<std::string> allDiscrs;
+  for (const auto& name: this->getAgainstElectronDiscriminatorNames())
+    allDiscrs.push_back(name);
+  for (const auto& name: this->getAgainstMuonDiscriminatorNames())
+    allDiscrs.push_back(name);
+  for (const auto& name: this->getIsolationDiscriminatorNames())
+    allDiscrs.push_back(name);
   size_t i=0;
-  for(const auto& name: fConfigurableDiscriminatorNames) {
+  for (const auto& name: fConfigurableDiscriminatorNames) {
+    checkDiscriminatorNameValidity(name, allDiscrs);
     mgr.book(prefix()+"_"+name, &(fConfigurableDiscriminators[i]));
     ++i;
   }

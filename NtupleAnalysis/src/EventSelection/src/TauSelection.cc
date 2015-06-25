@@ -41,6 +41,7 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   cSubAll(eventCounter.addSubCounter("tau selection ("+postfix+")", "All events")),
   cSubPassedTriggerMatching(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed trigger matching")),
   cSubPassedDecayMode(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed decay mode")),
+  cSubPassedGenericDiscriminators(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed generic discriminators")),
   cSubPassedElectronDiscr(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed e discr")),
   cSubPassedMuonDiscr(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed mu discr")),
   cSubPassedPt(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed pt cut")),
@@ -80,6 +81,7 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   cSubAll.increment();
   bool passedTriggerMatching = false;
   bool passedDecayMode = false;
+  bool passedGenericDiscr = false;
   bool passedEdiscr = false;
   bool passedMuDiscr = false;
   bool passedPt = false;
@@ -106,6 +108,10 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     passedDecayMode = true;
     hTauPtTriggerMatched->Fill(tau.pt());
     hTauEtaTriggerMatched->Fill(tau.eta());
+    // Generic discriminators
+    if (!this->passGenericDiscriminators(tau))
+      continue;
+    passedGenericDiscr = true;
     // Electron discrimator
     if (!this->passElectronDiscriminator(tau))
       continue;
@@ -160,6 +166,8 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     cSubPassedTriggerMatching.increment();
   if (passedDecayMode)
     cSubPassedDecayMode.increment();
+  if (passedGenericDiscr)
+    cSubPassedGenericDiscriminators.increment();
   if (passedEdiscr)
     cSubPassedElectronDiscr.increment();
   if (passedMuDiscr)

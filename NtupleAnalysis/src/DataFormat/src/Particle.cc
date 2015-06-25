@@ -15,14 +15,14 @@ void ParticleCollectionBase::setEnergySystematicsVariation(const std::string& sc
 
 void ParticleCollectionBase::checkDiscriminatorNameValidity(const std::string& name, const std::vector<std::string>& list) const {
   bool myStatus = false;
-  for (auto& p: list) {
+  for (const auto& p: list) {
     if (p == name) {
       myStatus = true;
     }
   }
   if (!myStatus) {
     std::string msg = "";
-    for (auto& p: list) {
+    for (const auto& p: list) {
       if (msg == "")
         msg += "  "+p;
       else
@@ -33,3 +33,5 @@ void ParticleCollectionBase::checkDiscriminatorNameValidity(const std::string& n
 }
 
 ParticleBase::~ParticleBase() {}
+
+
