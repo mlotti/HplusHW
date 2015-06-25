@@ -109,3 +109,5 @@ else
 fi
 export PATH=$HIGGSANALYSIS_BASE/HeavyChHiggsToTauNu/scripts:$HIGGSANALYSIS_BASE/NtupleAnalysis/scripts:$PATH
 
+# Install externals if necessary
+sh +x installexternals.sh
