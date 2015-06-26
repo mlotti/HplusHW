@@ -19,7 +19,7 @@
 class WrappedTH1;
 class WrappedTH2;
 class WrappedTH3;
-class WrappedUnfoldedFactorisationHisto; // x-axis containts values, y-axis contains unfolded bins of a multi-dimensional factorisation (used in QCD factorisation)
+class WrappedUnfoldedFactorisationHisto; // x-axis containts values, y-axis contains unfolded bins of a multi-dimensional factorisation
 
 enum class HistoLevel {
   kSystematics = 0,
