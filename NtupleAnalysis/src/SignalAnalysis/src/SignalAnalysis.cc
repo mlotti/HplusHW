@@ -56,7 +56,7 @@ REGISTER_SELECTOR(SignalAnalysis);
 SignalAnalysis::SignalAnalysis(const ParameterSet& config)
 : BaseSelector(config),
   fEvent(config),
-  fCommonPlots(),
+  fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kSignalAnalysis, fHistoWrapper),
   cAllEvents(fEventCounter.addCounter("All events")),
   cTrigger(fEventCounter.addCounter("Passed trigger")),
   cPrescaled(fEventCounter.addCounter("Prescaled")),
