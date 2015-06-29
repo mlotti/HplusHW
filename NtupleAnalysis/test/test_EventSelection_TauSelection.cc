@@ -13,7 +13,6 @@
 
 #include <string>
 #include <iostream>
-#include "TFile.h"
 #include "TTree.h"
 
 TEST_CASE("TauSelection", "[EventSelection]") {
@@ -74,7 +73,7 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   tmp.put("TauSelection.isolationDiscr", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
   ParameterSet psetDefault(tmp, true);
   // Create necessary objects for testing
-  TFile* f = new TFile("test_TauSelection.root", "recreate");
+  TDirectory* f = getDirectory("test_TauSelection");
   CommonPlots* commonPlotsPointer = 0;
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
@@ -492,6 +491,5 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   }
   ec.setOutput(f);
   ec.serialize();
-  f->Write();
-  f->Close();
+  closeDirectory(f);
 }

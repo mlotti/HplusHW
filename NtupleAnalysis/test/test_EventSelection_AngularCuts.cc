@@ -54,7 +54,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   tmp.put("AngularCutsBackToBack.enableOptimizationPlots", true);
   
   // Create necessary objects for testing
-  TFile* f = new TFile("test_AngularCuts.root", "recreate");
+  TDirectory* f = getDirectory("test_AngularCuts");
   CommonPlots* commonPlotsPointer = 0;
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
@@ -407,6 +407,5 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     REQUIRE_THROWS_AS( AngularCutsBackToBack::Data bbData = backtobacksel.silentAnalyze(event, tauData, jetData, metData), hplus::Exception );  }
   ec.setOutput(f);
   ec.serialize();
-  f->Write();
-  f->Close();
+  closeDirectory(f);
 }

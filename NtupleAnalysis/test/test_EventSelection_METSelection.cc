@@ -27,7 +27,7 @@ TEST_CASE("METSelection", "[EventSelection]") {
   ParameterSet pset(tmp, true, true);
 
   // Create necessary objects for testing
-  TFile* f = new TFile("test_METSelection.root", "recreate");
+  TDirectory* f = getDirectory("test_METSelection");
   CommonPlots* commonPlotsPointer = 0;
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
@@ -110,6 +110,5 @@ TEST_CASE("METSelection", "[EventSelection]") {
   }
   ec.setOutput(f);
   ec.serialize();
-  f->Write();
-  f->Close();
+  closeDirectory(f);
 }

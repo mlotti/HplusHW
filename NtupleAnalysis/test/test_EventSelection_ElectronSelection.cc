@@ -25,7 +25,7 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
   tmp.put("ElectronSelection2.electronEtaCut", 1.0);
   ParameterSet pset(tmp, true);
   // Create necessary objects for testing
-  TFile* f = new TFile("test_ElectronSelection.root", "recreate");
+  TDirectory* f = getDirectory("test_ElectronSelection");
   CommonPlots* commonPlotsPointer = 0;
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
@@ -120,6 +120,5 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
   
   ec.setOutput(f);
   ec.serialize();
-  f->Write();
-  f->Close();
+  closeDirectory(f);
 }

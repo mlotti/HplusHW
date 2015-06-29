@@ -14,7 +14,6 @@
 
 #include <string>
 #include <iostream>
-#include "TFile.h"
 #include "TTree.h"
 
 TEST_CASE("JetSelection", "[EventSelection]") {
@@ -70,7 +69,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
   tmp.put("JetSelection.jetPUIDDiscr", "PUIDloose");
   ParameterSet psetDefault(tmp, true);
   // Create necessary objects for testing
-  TFile* f = new TFile("test_JetSelection.root", "recreate");
+  TDirectory* f = getDirectory("test_JetSelection");
   CommonPlots* commonPlotsPointer = 0;
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
@@ -385,6 +384,5 @@ TEST_CASE("JetSelection", "[EventSelection]") {
   
   ec.setOutput(f);
   ec.serialize();
-  f->Write();
-  f->Close();
+  closeDirectory(f);
 }

@@ -25,3 +25,8 @@ Useful information for writing unit tests:
   least empty strings as input and therefore do not throw exception).
 - A practical way is to use the boost property tree 
   (see one of the test_EventSelection_* files for examples)
+
+5) Allowing the creation of root files for further debugging
+- set the environmental variable DEBUGUNITTEST to "yes" to allow the test routines
+  to create root files (not all of them will create them). This could be helpful
+  in some debugging cases.

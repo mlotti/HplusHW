@@ -169,3 +169,31 @@ boost::property_tree::ptree getMinimalConfig() {
   tmp.put("BJetSelection.bjetDiscr", "");
   return tmp;
 }
+
+TDirectory* getDirectory(std::string name) {
+  char* str = getenv("DEBUGUNITTEST");
+  if (str != NULL) {
+    std::string s(getenv("DEBUGUNITTEST"));
+    if (s == "yes") {
+      std::string fullname = name+".root";
+      TFile* f = new TFile(fullname.c_str(), "recreate");
+      return f;
+    }
+  }
+  return new TDirectory(name.c_str(), name.c_str());
+}
+
+void closeDirectory(TDirectory* d) {
+  char* str = getenv("DEBUGUNITTEST");
+  if (str != NULL) {
+    std::string s(getenv("DEBUGUNITTEST"));
+    if (s == "yes") {
+      d->Write();
+      d->Close();
+      delete d;
+      return;
+    }
+  }
+  d->Close();
+  delete d;
+}
