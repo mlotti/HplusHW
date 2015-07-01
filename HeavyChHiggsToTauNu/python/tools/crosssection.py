@@ -51,6 +51,7 @@ class CrossSectionList:
 # [11] https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauWorkingSummer2013
 # [12] https://twiki.cern.ch/twiki/bin/view/CMS/TmdRecipes
 # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
+# [14] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV / GenXSecAnalyzer
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt30to50", {
@@ -120,7 +121,19 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO
             "8": 36703.2, # [9], NNLO
-            "13": 0, # []
+            "13": 6.082e+04, # [14]
+            }),
+    CrossSection("WJetsToLNu_HT-100To200", {
+            "13": 1.313e+03, # [14]
+            }),
+    CrossSection("WJetsToLNu_HT-200To400", {
+            "13": 3.575e+02, # [14]
+            }),
+    CrossSection("WJetsToLNu_HT-400To600", {
+            "13": 4.888e+01, # [14]
+            }),
+    CrossSection("WJetsToLNu_HT-600ToInf", {
+            "13": 1.872e+01, # [14]
             }),
     # PREP (LO) cross sections, for W+NJets weighting
     CrossSection("PREP_WJets", {
@@ -150,12 +163,12 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("DYJetsToLL_M50", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
-            "13": 2008.4 / 0.03366 # [13] divided by Z->mumu
+            "13": 5.940e+03 # [14]
             }),
     CrossSection("DYJetsToLL_M10to50", {
             "7": 9611.0, # [1]
             "8": 11050.0, # [1]
-            "13": 0, # []
+            "13": 1.870e+04, # [14]
             }),
     CrossSection("DYToTauTau_M_20_", {
             "7": 4998, # [4], NNLO
