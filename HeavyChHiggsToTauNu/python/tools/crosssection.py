@@ -50,6 +50,7 @@ class CrossSectionList:
 # [10] http://arxiv.org/abs/1303.6254
 # [11] https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauWorkingSummer2013
 # [12] https://twiki.cern.ch/twiki/bin/view/CMS/TmdRecipes
+# [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt30to50", {
@@ -89,14 +90,17 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WW", {
             "7": 43.0, # [3]
             "8": 54.838, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
+            "13": 118.7, # [13] NNLO QCD
             }),
     CrossSection("WZ", {
             "7": 18.2, # [3]
             "8": 33.21, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
+            "13": 29.8 + 18.6, # [13] W+ Z/a* + W- Z/a*, MCFM 6.6 m(l+l-) > 40 GeV
             }),
     CrossSection("ZZ", {
             "7": 5.9, # [3]
             "8": 17.654, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation, this is slightly questionmark, since the computed value is for m(ll) > 12
+            "13": 15.4, # [13]
             }),
     CrossSection("TTJets_FullLept", {
             "8": 245.8* 26.1975/249.50, # [10], BR from [11]
@@ -111,10 +115,12 @@ backgroundCrossSections = CrossSectionList(
 #            "7": 165.0, # [3,4], approx. NNLO
             "7": 172.0, # [10]
             "8": 245.8, # [10]
+            "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
             }),
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO
             "8": 36703.2, # [9], NNLO
+            "13": 0, # []
             }),
     # PREP (LO) cross sections, for W+NJets weighting
     CrossSection("PREP_WJets", {
@@ -144,10 +150,12 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("DYJetsToLL_M50", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
+            "13": 2008.4 / 0.03366 # [13] divided by Z->mumu
             }),
     CrossSection("DYJetsToLL_M10to50", {
             "7": 9611.0, # [1]
             "8": 11050.0, # [1]
+            "13": 0, # []
             }),
     CrossSection("DYToTauTau_M_20_", {
             "7": 4998, # [4], NNLO
@@ -172,26 +180,32 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("T_t-channel", {
             "7": 41.92, # [5,6]
             "8": 56.4, # [8]
+            "13": 136.02, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("Tbar_t-channel", {
             "7": 22.65, # [5,6]
             "8": 30.7, # [8]
+            "13": 80.95, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("T_tW-channel", {
             "7": 7.87, # [5,6]
             "8": 11.1, # [8]
+            "13": 35.6, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("Tbar_tW-channel", {
             "7": 7.87, # [5,6]
             "8": 11.1, # [8]
+            "13": 35.6, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("T_s-channel", {
             "7": 3.19, # [5,6]
             "8": 3.79, # [8]
+            "13": 7.20, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("Tbar_s-channel", {
             "7": 1.44, # [5,6]
             "8": 1.76, # [8]
+            "13": 4.16, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma 
             }),
 )
 

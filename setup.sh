@@ -30,7 +30,8 @@ if [ "x$LOCATION" = "xlxplus" ]; then
     source /afs/cern.ch/sw/lcg/contrib/gcc/4.8/x86_64-slc6-gcc48-opt/setup.sh
 
 #    pushd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.23/x86_64-slc6-gcc48-opt/root >/dev/null 
-    pushd /afs/cern.ch/sw/lcg/app/releases/ROOT/6.02.52/x86_64-slc6-gcc48-opt/root >/dev/null 
+#    pushd /afs/cern.ch/sw/lcg/app/releases/ROOT/6.02.52/x86_64-slc6-gcc48-opt/root >/dev/null 
+    pushd /afs/cern.ch/sw/lcg/app/releases/ROOT/6.04.00/x86_64-slc6-gcc48-opt/root >/dev/null
     source bin/thisroot.sh
     popd >/dev/null
 fi

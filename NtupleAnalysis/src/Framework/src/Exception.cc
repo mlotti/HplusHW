@@ -1,6 +1,6 @@
 // -*- c++ -*-
 #include "Framework/interface/Exception.h"
-#include <boost_1_57_0/boost/concept_check.hpp>
+#include <boost/concept_check.hpp>
 
 #include <stdio.h>
 #include <iostream>
