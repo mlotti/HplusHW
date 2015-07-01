@@ -54,9 +54,9 @@ public:
 
   /// Wraps the making of a triplet histogram; histogram is created only if the ambient level is low enough
   template <typename T, typename ...Args>
-  typename HistoWrapperTripletTraits<T>::type *makeTH(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args) {
+  typename HistoWrapperTripletTraits<T>::type *makeTHTriplet(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args) {
     using WrappedTriplet = typename HistoWrapperTripletTraits<T>::type;
-    return makeTH_<WrappedTriplet, T>(enableTrueHistogram, level, dirs, std::forward<Args>(args)...);
+    return makeTHTriplet_<WrappedTriplet, T>(enableTrueHistogram, level, dirs, std::forward<Args>(args)...);
   } 
   
   // Create directory if level is high enough
@@ -83,7 +83,7 @@ private:
   Wrapped *makeTH_(const HistoLevel level, TDirectory *dir, Args&&... args);
 
   template <typename WrappedTriplet, typename T, typename ...Args>
-  WrappedTriplet *makeTH_(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args);
+  WrappedTriplet *makeTHTriplet_(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args);
   
   WrappedTH1 *pushWrapper(WrappedTH1 *wrapper) {
     fAllTH1Histos.emplace_back(wrapper);
@@ -320,7 +320,7 @@ Wrapped *HistoWrapper::makeTH_(const HistoLevel level, TDirectory *dir, Args&&..
 }
 
 template <typename WrappedTriplet, typename T, typename ...Args>
-WrappedTriplet *HistoWrapper::makeTH_(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args) {
+WrappedTriplet *HistoWrapper::makeTHTriplet_(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args) {
   if (enableTrueHistogram) {
     if (dirs.size() != 3)
       throw hplus::Exception("Logic") << "Expecting three directories when true histogram is enabled!";
@@ -332,7 +332,7 @@ WrappedTriplet *HistoWrapper::makeTH_(bool enableTrueHistogram, const HistoLevel
   for (const auto& p: dirs) {
     T *h = nullptr;
     if(level <= fAmbientLevel) {
-      histos.push_back(::makeTH<T>(p, std::forward<Args>(args)...));
+      histos.push_back(makeTH<T>(level, p, std::forward<Args>(args)...));
     }
   }
   fHistoLevelStats[static_cast<int>(level)] += static_cast<int>(dirs.size());

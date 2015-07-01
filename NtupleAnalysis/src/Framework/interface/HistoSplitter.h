@@ -129,7 +129,7 @@ void HistoSplitter::createShapeHistogram(const HistoLevel level, TDirectory* dir
     std::stringstream s;
     s << title.c_str() << i;
     std::string myHistoTitle = getFullBinDescriptionStringByBinIndex(obtainIndicesFromUnfoldedIndex(i)) + ";" + label;
-    histoContainer.push_back(fHistoWrapper.makeTH<T>(level, myDir, std::forward<Args>(s.str().c_str(), myHistoTitle.c_str(), args)...));
+    histoContainer.push_back(fHistoWrapper.makeTH<T>(level, myDir, s.str().c_str(), myHistoTitle.c_str(), std::forward<Args>(args)...));
   }
   // Create inclusive histogram
   std::string myTitle = title+"Inclusive";
@@ -139,7 +139,7 @@ void HistoSplitter::createShapeHistogram(const HistoLevel level, TDirectory* dir
 template<typename T, typename ...Args> 
 void HistoSplitter::createShapeHistogram(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dir, std::vector<T*>& histoContainer, const std::string& title, const std::string& label, Args&&... args) {
   if (fNUnfoldedBins == 1) { // Create just one histogram
-    histoContainer.push_back(fHistoWrapper.makeTH<T>(enableTrueHistogram, level, dir, title.c_str(), label.c_str(), std::forward<Args>(args)...));
+    histoContainer.push_back(fHistoWrapper.makeTHTriplet<T>(enableTrueHistogram, level, dir, title.c_str(), label.c_str(), std::forward<Args>(args)...));
     return;
   }
   // Create separate directories for the N x THx histograms, where N is the number of unfolded bins
@@ -152,12 +152,12 @@ void HistoSplitter::createShapeHistogram(bool enableTrueHistogram, const HistoLe
     std::stringstream s;
     s << title.c_str() << i;
     std::string myHistoTitle = getFullBinDescriptionStringByBinIndex(obtainIndicesFromUnfoldedIndex(i)) + ";" + label;
-    histoContainer.push_back(fHistoWrapper.makeTH<T>(enableTrueHistogram, level, splittedDirs, s.str().c_str(), myHistoTitle.c_str(), std::forward<Args>(args)...));
+    histoContainer.push_back(fHistoWrapper.makeTHTriplet<T>(enableTrueHistogram, level, splittedDirs, s.str().c_str(), myHistoTitle.c_str(), std::forward<Args>(args)...));
   }
   // Create inclusive histogram
   std::string myTitle = title+"Inclusive";
   for (size_t i = 0; i < fNUnfoldedBins; ++i) {
-    histoContainer.push_back(fHistoWrapper.makeTH<T>(enableTrueHistogram, level, splittedDirs, myTitle.c_str(), myTitle.c_str(), std::forward<Args>(args)...));
+    histoContainer.push_back(fHistoWrapper.makeTHTriplet<T>(enableTrueHistogram, level, splittedDirs, myTitle.c_str(), myTitle.c_str(), std::forward<Args>(args)...));
   }
 }
 
