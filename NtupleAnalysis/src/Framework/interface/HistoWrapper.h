@@ -41,7 +41,7 @@ public:
   ~HistoWrapper();
 
   template <typename T, typename ...Args>
-  typename HistoWrapperTraits<T>::type *makeTH(HistoLevel level, TDirectory *dir, Args&&... args) {
+  typename HistoWrapperTraits<T>::type *makeTH(const HistoLevel level, TDirectory *dir, Args&&... args) {
     using Wrapped = typename HistoWrapperTraits<T>::type;
     return makeTH_<Wrapped, T>(level, dir, std::forward<Args>(args)...);
   }
@@ -49,18 +49,18 @@ public:
   /// Wraps the making of an unfolded histogram; histogram is created only if the ambient level is low enough
   template<typename T, typename Arg1, typename Arg2, typename Arg3, typename Arg4,
            typename Arg5>
-  WrappedUnfoldedFactorisationHisto* makeTH(const int unfoldedBinCount, HistoLevel level, TDirectory *fd, const Arg1& a1, const Arg2& a2, const Arg3& a3,
+  WrappedUnfoldedFactorisationHisto* makeTH(const int unfoldedBinCount, const HistoLevel level, TDirectory *fd, const Arg1& a1, const Arg2& a2, const Arg3& a3,
                                             const Arg4& a4, const Arg5& a5);
 
   /// Wraps the making of a triplet histogram; histogram is created only if the ambient level is low enough
   template <typename T, typename ...Args>
-  typename HistoWrapperTripletTraits<T>::type *makeTH(bool enableTrueHistogram, HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args) {
+  typename HistoWrapperTripletTraits<T>::type *makeTH(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args) {
     using WrappedTriplet = typename HistoWrapperTripletTraits<T>::type;
     return makeTH_<WrappedTriplet, T>(enableTrueHistogram, level, dirs, std::forward<Args>(args)...);
   } 
   
   // Create directory if level is high enough
-  TDirectory *mkdir(HistoLevel level, TDirectory *parent, const std::string& name) {
+  TDirectory *mkdir(const HistoLevel level, TDirectory *parent, const std::string& name) {
     if(isActive(level))
       return parent->mkdir(name.c_str());
     return parent;
@@ -80,10 +80,10 @@ public:
 
 private:
   template <typename Wrapped, typename T, typename ...Args>
-  Wrapped *makeTH_(HistoLevel level, TDirectory *dir, Args&&... args);
+  Wrapped *makeTH_(const HistoLevel level, TDirectory *dir, Args&&... args);
 
   template <typename WrappedTriplet, typename T, typename ...Args>
-  WrappedTriplet *makeTH_(bool enableTrueHistogram, HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args);
+  WrappedTriplet *makeTH_(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args);
   
   WrappedTH1 *pushWrapper(WrappedTH1 *wrapper) {
     fAllTH1Histos.emplace_back(wrapper);
@@ -214,7 +214,7 @@ class WrappedTHxTripletBase {
 public:
   WrappedTHxTripletBase(std::vector<T*>& h, bool enableTrueHistogram)
   : bEnableTrueHistogram(enableTrueHistogram) {
-    if (h.size >= 2) {
+    if (h.size() >= 2) {
       hInclusive = h[0];
       hFalse = h[1];
     } else
@@ -302,13 +302,13 @@ public:
 
 template<typename T, typename Arg1, typename Arg2, typename Arg3, typename Arg4,
          typename Arg5>
-WrappedUnfoldedFactorisationHisto* HistoWrapper::makeTH(const int unfoldedBinCount, HistoLevel level, TDirectory *fd, const Arg1& a1, const Arg2& a2, const Arg3& a3,
+WrappedUnfoldedFactorisationHisto* HistoWrapper::makeTH(const int unfoldedBinCount, const HistoLevel level, TDirectory *fd, const Arg1& a1, const Arg2& a2, const Arg3& a3,
                                                         const Arg4& a4, const Arg5& a5) {
   return makeTH_<WrappedUnfoldedFactorisationHisto, T>(level, fd, a1, a2, a3, a4, a5, unfoldedBinCount, 0, unfoldedBinCount);
 }
 
 template <typename Wrapped, typename T, typename ...Args>
-Wrapped *HistoWrapper::makeTH_(HistoLevel level, TDirectory *dir, Args&&... args) {
+Wrapped *HistoWrapper::makeTH_(const HistoLevel level, TDirectory *dir, Args&&... args) {
   T *histo = nullptr;
   if(level <= fAmbientLevel) {
     // making a separate directory for debug histograms is not that easy here;
@@ -320,7 +320,7 @@ Wrapped *HistoWrapper::makeTH_(HistoLevel level, TDirectory *dir, Args&&... args
 }
 
 template <typename WrappedTriplet, typename T, typename ...Args>
-WrappedTriplet *HistoWrapper::makeTH_(bool enableTrueHistogram, HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args) {
+WrappedTriplet *HistoWrapper::makeTH_(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args) {
   if (enableTrueHistogram) {
     if (dirs.size() != 3)
       throw hplus::Exception("Logic") << "Expecting three directories when true histogram is enabled!";
@@ -332,9 +332,8 @@ WrappedTriplet *HistoWrapper::makeTH_(bool enableTrueHistogram, HistoLevel level
   for (const auto& p: dirs) {
     T *h = nullptr;
     if(level <= fAmbientLevel) {
-      // making a separate directory for debug histograms is not that easy here;
-      // it should be done at the level of code which is calling this command
-      h = ::makeTH<T>(p, std::forward<Args>(args)...);
+      histos.push_back(::makeTH<T>(p, std::forward<Args>(args)...));
+    }
   }
   fHistoLevelStats[static_cast<int>(level)] += static_cast<int>(dirs.size());
   return pushWrapper(new WrappedTriplet(histos, enableTrueHistogram));
