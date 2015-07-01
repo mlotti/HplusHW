@@ -22,7 +22,7 @@ public:
   bool jetIDDiscriminatorIsValid() const { return bValidityOfJetIDDiscr; }
   bool jetPUIDDiscriminatorIsValid() const { return bValidityOfJetPUIDDiscr; }
   bool bjetDiscriminatorIsValid() const { return bValidityOfBJetDiscr; }
-  
+
   void setupBranches(BranchManager& mgr);
 
   Jet operator[](size_t i) const;
@@ -37,6 +37,7 @@ protected:
   const Branch<std::vector<bool>>* fJetIDDiscriminator;
   const Branch<std::vector<bool>>* fJetPUIDDiscriminator;
   const Branch<std::vector<float>>* fBJetDiscriminator;
+  const Branch<std::vector<short>>* fJetPDGId;
   
 private:
   /// Initialize data members
@@ -71,10 +72,11 @@ public:
       return true;
     return fCollection->fBJetDiscriminator->value()[index()];
   }
+  int pdgId() const { return static_cast<int>(fCollection->fJetPDGId->value()[index()]); }
   
   /// Operator defined for using std::sort on vector<Jet>
   bool operator<(const Jet& jet) const {
-    // Descending order by tau pT
+    // Descending order by jet pT
     return (this->pt() > jet.pt());
   }
 };
