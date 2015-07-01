@@ -26,6 +26,10 @@ class WrappedTH1;
 class WrappedTH2;
 class WrappedTH3;
 
+class WrappedTH1Triplet;
+class WrappedTH2Triplet;
+class WrappedTH3Triplet;
+
 template <typename T> struct HistoWrapperTraits;
 
 template <> struct HistoWrapperTraits<TH1C> { using type = WrappedTH1; };
@@ -45,5 +49,11 @@ template <> struct HistoWrapperTraits<TH3S> { using type = WrappedTH3; };
 template <> struct HistoWrapperTraits<TH3I> { using type = WrappedTH3; };
 template <> struct HistoWrapperTraits<TH3F> { using type = WrappedTH3; };
 template <> struct HistoWrapperTraits<TH3D> { using type = WrappedTH3; };
+
+template <typename T> struct HistoWrapperTripletTraits;
+
+template <> struct HistoWrapperTripletTraits<WrappedTH1> { using type = WrappedTH1; };
+template <> struct HistoWrapperTripletTraits<WrappedTH2> { using type = WrappedTH2; };
+template <> struct HistoWrapperTripletTraits<WrappedTH3> { using type = WrappedTH3; };
 
 #endif
