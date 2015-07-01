@@ -7,8 +7,8 @@ import datetime
 
 #PSET = "miniAODGEN2TTree_cfg.py"
 #PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
-PSET = "miniAOD2TTree_METLegSkim_cfg.py"
-#PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
+#PSET = "miniAOD2TTree_METLegSkim_cfg.py"
+PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
 
 
 
@@ -29,6 +29,11 @@ datasets25ns.append(Dataset('/WJetsToLNu_HT-600ToInf_TuneCUETP8M1_13TeV-madgraph
 datasets25ns.append(Dataset('/WW_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25ns.append(Dataset('/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25ns.append(Dataset('/ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM'))
+datasets25ns.append(Dataset('/QCD_Pt_30to50_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM'))
+datasets25ns.append(Dataset('/QCD_Pt_50to80_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM'))
+datasets25ns.append(Dataset('/QCD_Pt_80to120_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
+datasets25ns.append(Dataset('/QCD_Pt_120to170_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
+datasets25ns.append(Dataset('/QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM'))
 
 datasets50ns = []
 datasets50ns.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/MINIAODSIM'))
@@ -51,7 +56,7 @@ metLegDatasets         = []
 metLegDatasets = datasets50ns
 
 signalAnalysisDatasets = []
-signalAnalysisDatasets = datasets50ns
+signalAnalysisDatasets = datasets25ns
 
 
 dataset_re = re.compile("^/(?P<name>\S+?)/")
