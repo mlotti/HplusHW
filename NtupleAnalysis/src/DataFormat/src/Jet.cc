@@ -44,6 +44,4 @@ void JetCollection::setupBranches(BranchManager& mgr) {
     mgr.book(prefix()+"_"+fJetPUIDDiscriminatorName, &fJetPUIDDiscriminator);
   if (bjetDiscriminatorIsValid())
     mgr.book(prefix()+"_"+fBJetDiscriminatorName, &fBJetDiscriminator);
-
-  mgr.book(prefix()+"_pdgId", &fJetPDGId);
 }
