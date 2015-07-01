@@ -160,7 +160,7 @@ TEST_CASE("HistoSplitter", "[Framework]") {
     CHECK( v.size() == 0 );
     // Check 1D histogram
     HistoSplitter::SplittedTH1s h1;
-    test.createShapeHistogram(HistoLevel::kDebug, f, h1, "0_test1D", "0_test1D", 10, 0., 400.);
+    test.createShapeHistogram<WrappedTH1>(HistoLevel::kDebug, f, h1, "0_test1D", "0_test1D", 10, 0., 400.);
     CHECK( h1.size() == 1 );
     test.fillShapeHistogram(h1, 205.0);
     test.fillShapeHistogram(h1, 105.0, 2.34);
