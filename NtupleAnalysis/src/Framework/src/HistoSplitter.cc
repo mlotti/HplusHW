@@ -129,7 +129,7 @@ void HistoSplitter::setFactorisationBinForEvent(const std::vector<float>& values
   fCurrentUnfoldedBinIndex = getShapeBinIndex();
 }
 
-void HistoSplitter::createShapeHistogram(const HistoLevel level, TDirectory* dir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, const std::string& title, const std::string& label, int nbins, double min, double max) {
+void HistoSplitter::createShapeHistogram(HistoLevel level, TDirectory* dir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, const std::string& title, const std::string& label, int nbins, double min, double max) {
   // x-axis contains distribution, y-axis contains unfolded splitted bins (including under- and overflows)
   // Create histo
   std::string s = fBinningString+title+";"+label;
@@ -138,7 +138,7 @@ void HistoSplitter::createShapeHistogram(const HistoLevel level, TDirectory* dir
   setAxisLabelsForUnfoldedHisto(unfoldedHisto);
 }
 
-/*void HistoSplitter::createShapeHistogram(const HistoLevel level, TDirectory* dir, HistoSplitter::SplittedTH1s& histoContainer, const std::string& title, const std::string& label, int nbins, double min, double max) {
+/*void HistoSplitter::createShapeHistogram(HistoLevel level, TDirectory* dir, HistoSplitter::SplittedTH1s& histoContainer, const std::string& title, const std::string& label, int nbins, double min, double max) {
   if (fNUnfoldedBins == 1) {
     // Create just one histogram
     histoContainer.push_back(fHistoWrapper.makeTH<TH1F>(level, dir, title.c_str(), label.c_str(), nbins, min, max));
@@ -158,7 +158,7 @@ void HistoSplitter::createShapeHistogram(const HistoLevel level, TDirectory* dir
   histoContainer.push_back(fHistoWrapper.makeTH<TH1F>(level, myDir, myTitle.c_str(), myTitle.c_str(), nbins, min, max));
 }
 
-void HistoSplitter::createShapeHistogram(const HistoLevel level, TDirectory* dir, HistoSplitter::SplittedTH2s& histoContainer, const std::string& title, const std::string& label, int nbinsX, double minX, double maxX, int nbinsY, double minY, double maxY) {
+void HistoSplitter::createShapeHistogram(HistoLevel level, TDirectory* dir, HistoSplitter::SplittedTH2s& histoContainer, const std::string& title, const std::string& label, int nbinsX, double minX, double maxX, int nbinsY, double minY, double maxY) {
   if (fNUnfoldedBins == 1) {
     // Create just one histogram
     histoContainer.push_back(fHistoWrapper.makeTH<TH2F>(level, dir, title.c_str(), label.c_str(), nbinsX, minX, maxX, nbinsY, minY, maxY));

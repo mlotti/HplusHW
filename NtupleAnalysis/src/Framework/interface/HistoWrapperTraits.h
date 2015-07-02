@@ -52,8 +52,22 @@ template <> struct HistoWrapperTraits<TH3D> { using type = WrappedTH3; };
 
 template <typename T> struct HistoWrapperTripletTraits;
 
-template <> struct HistoWrapperTripletTraits<WrappedTH1> { using type = WrappedTH1Triplet; };
-template <> struct HistoWrapperTripletTraits<WrappedTH2> { using type = WrappedTH2Triplet; };
-template <> struct HistoWrapperTripletTraits<WrappedTH3> { using type = WrappedTH3Triplet; };
+template <> struct HistoWrapperTripletTraits<TH1C> { using type = WrappedTH1Triplet; };
+template <> struct HistoWrapperTripletTraits<TH1S> { using type = WrappedTH1Triplet; };
+template <> struct HistoWrapperTripletTraits<TH1I> { using type = WrappedTH1Triplet; };
+template <> struct HistoWrapperTripletTraits<TH1F> { using type = WrappedTH1Triplet; };
+template <> struct HistoWrapperTripletTraits<TH1D> { using type = WrappedTH1Triplet; };
+
+template <> struct HistoWrapperTripletTraits<TH2C> { using type = WrappedTH2Triplet; };
+template <> struct HistoWrapperTripletTraits<TH2S> { using type = WrappedTH2Triplet; };
+template <> struct HistoWrapperTripletTraits<TH2I> { using type = WrappedTH2Triplet; };
+template <> struct HistoWrapperTripletTraits<TH2F> { using type = WrappedTH2Triplet; };
+template <> struct HistoWrapperTripletTraits<TH2D> { using type = WrappedTH2Triplet; };
+
+template <> struct HistoWrapperTripletTraits<TH3C> { using type = WrappedTH3Triplet; };
+template <> struct HistoWrapperTripletTraits<TH3S> { using type = WrappedTH3Triplet; };
+template <> struct HistoWrapperTripletTraits<TH3I> { using type = WrappedTH3Triplet; };
+template <> struct HistoWrapperTripletTraits<TH3F> { using type = WrappedTH3Triplet; };
+template <> struct HistoWrapperTripletTraits<TH3D> { using type = WrappedTH3Triplet; };
 
 #endif

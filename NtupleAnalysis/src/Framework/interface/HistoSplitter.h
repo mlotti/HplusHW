@@ -62,24 +62,27 @@ public:
   void setFactorisationBinForEvent(const std::vector<float>& values=std::vector<float>{});
 
   //===== Creating histograms
+  /// Create a histogram for a shape in factorisation bins using unfolding of splitted bins to y-axis
+  void createShapeHistogram(HistoLevel level, TDirectory* dir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, const std::string& title, const std::string& label, int nbins, double min, double max);
   /// Create a histogram for a 1D shape in factorisation bins
   template<typename T, typename ...Args> 
-  void createShapeHistogram(const HistoLevel level, TDirectory* dir, std::vector<T*>& histoContainer, const std::string& title, const std::string& label, Args&&... args);
+  void createShapeHistogram(HistoLevel level, TDirectory* dir, std::vector<typename HistoWrapperTraits<T>::type *>& histoContainer, const std::string& title, const std::string& label, Args&&... args);
   /// Create a histogram for a triplet shape in factorisation bins
   template<typename T, typename ...Args> 
-  void createShapeHistogram(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dir, std::vector<T*>& histoContainer, const std::string& title, const std::string& label, Args&&... args);
-  /// Create a histogram for a shape in factorisation bins using unfolding of splitted bins to y-axis
-  void createShapeHistogram(const HistoLevel level, TDirectory* dir, WrappedUnfoldedFactorisationHisto*& unfoldedHisto, const std::string& title, const std::string& label, int nbins, double min, double max);
+  void createShapeHistogramTriplet(bool enableTrueHistogram, HistoLevel level, std::vector<TDirectory*>&, std::vector<typename HistoWrapperTripletTraits<T>::type *>& histoContainer, const std::string& title, const std::string& label, Args&&... args);
   
   //===== Filling histograms
-  /// Fill method for a factorisation histogram containting a shape or shape triplet
-  template<typename T, typename ...Args>
-  void fillShapeHistogram(std::vector<T*>& histoContainer, Args&&... args);
   /// Fill method for a factorisation histogram containting a shape
   void fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value);
   /// Fill method for a factorisation histogram containting a shape, with unconventional weight
   void fillShapeHistogram(WrappedUnfoldedFactorisationHisto* h, double value, double weight);
-
+  /// Fill method for a factorisation histogram containting a shape
+  template<typename T, typename ...Args>
+  void fillShapeHistogram(std::vector<T*>& histoContainer, Args&&... args);
+  /// Fill method for a factorisation histogram containting a shape triplet
+  template<typename T, typename ...Args>
+  void fillShapeHistogramTriplet(std::vector<T*>& histoContainer, bool status, Args&&... args);
+  
 protected: // Protected for easier unit testing
   /// Returns index to unfolded bin index
   const size_t getShapeBinIndex() const;
@@ -117,7 +120,7 @@ private:
 //===== Implementation of templates
 
 template<typename T, typename ...Args> 
-void HistoSplitter::createShapeHistogram(const HistoLevel level, TDirectory* dir, std::vector<T*>& histoContainer, const std::string& title, const std::string& label, Args&&... args) {
+void HistoSplitter::createShapeHistogram(HistoLevel level, TDirectory* dir, std::vector<typename HistoWrapperTraits<T>::type *>& histoContainer, const std::string& title, const std::string& label, Args&&... args) {
   if (fNUnfoldedBins == 1) { // Create just one histogram
     histoContainer.push_back(fHistoWrapper.makeTH<T>(level, dir, title.c_str(), label.c_str(), std::forward<Args>(args)...));
     return;
@@ -137,7 +140,7 @@ void HistoSplitter::createShapeHistogram(const HistoLevel level, TDirectory* dir
 }
 /// Create a histogram for a triplet shape in factorisation bins
 template<typename T, typename ...Args> 
-void HistoSplitter::createShapeHistogram(bool enableTrueHistogram, const HistoLevel level, std::vector<TDirectory*>& dir, std::vector<T*>& histoContainer, const std::string& title, const std::string& label, Args&&... args) {
+void HistoSplitter::createShapeHistogramTriplet(bool enableTrueHistogram, HistoLevel level, std::vector<TDirectory*>& dir, std::vector<typename HistoWrapperTripletTraits<T>::type *>& histoContainer, const std::string& title, const std::string& label, Args&&... args) {
   if (fNUnfoldedBins == 1) { // Create just one histogram
     histoContainer.push_back(fHistoWrapper.makeTHTriplet<T>(enableTrueHistogram, level, dir, title.c_str(), label.c_str(), std::forward<Args>(args)...));
     return;
@@ -168,6 +171,15 @@ void HistoSplitter::fillShapeHistogram(std::vector<T*>& histoContainer, Args&&..
   // Fill inclusive histogram
   if (fNUnfoldedBins > 1)
     histoContainer[histoContainer.size()-1]->Fill(std::forward<Args>(args)...);
+}
+
+template<typename T, typename ...Args>
+void HistoSplitter::fillShapeHistogramTriplet(std::vector<T*>& histoContainer, bool status, Args&&... args) {
+  checkIndexValidity();
+  histoContainer[fCurrentUnfoldedBinIndex]->Fill(status, std::forward<Args>(args)...);
+  // Fill inclusive histogram
+  if (fNUnfoldedBins > 1)
+    histoContainer[histoContainer.size()-1]->Fill(status, std::forward<Args>(args)...);
 }
 
 #endif

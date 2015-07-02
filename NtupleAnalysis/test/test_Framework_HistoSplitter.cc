@@ -132,6 +132,10 @@ TEST_CASE("HistoSplitter", "[Framework]") {
   }
 
   TDirectory* f = getDirectory("test_HistoSplitter");
+  TDirectory* fTrue = f->mkdir("trueHistograms");
+  TDirectory* fFalse = f->mkdir("falseHistograms");
+  std::vector<TDirectory*> fTripletDirs = {f,fFalse,fTrue};
+  
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
 
@@ -160,7 +164,7 @@ TEST_CASE("HistoSplitter", "[Framework]") {
     CHECK( v.size() == 0 );
     // Check 1D histogram
     HistoSplitter::SplittedTH1s h1;
-    test.createShapeHistogram<WrappedTH1>(HistoLevel::kDebug, f, h1, "0_test1D", "0_test1D", 10, 0., 400.);
+    test.createShapeHistogram<TH1F>(HistoLevel::kDebug, f, h1, "0_test1D", "0_test1D", 10, 0., 400.);
     CHECK( h1.size() == 1 );
     test.fillShapeHistogram(h1, 205.0);
     test.fillShapeHistogram(h1, 105.0, 2.34);
@@ -168,7 +172,7 @@ TEST_CASE("HistoSplitter", "[Framework]") {
     CHECK( h1[0]->getHisto()->GetBinContent(3) == Approx(2.34));
     // Check 2D histogram
     HistoSplitter::SplittedTH2s h2;
-    test.createShapeHistogram(HistoLevel::kDebug, f, h2, "0_test2D", "0_test2D", 10, 0., 400., 20, 0., 40.);
+    test.createShapeHistogram<TH2F>(HistoLevel::kDebug, f, h2, "0_test2D", "0_test2D", 10, 0., 400., 20, 0., 40.);
     CHECK( h2.size() == 1 );
     test.fillShapeHistogram(h2, 205.0, 3.0);
     test.fillShapeHistogram(h2, 105.0, 15.0, 2.34);
@@ -183,6 +187,20 @@ TEST_CASE("HistoSplitter", "[Framework]") {
     test.fillShapeHistogram(hf, 105.0, 2.34);
     CHECK( hf->getHisto()->GetBinContent(6,1) == Approx(1.000));
     CHECK( hf->getHisto()->GetBinContent(3,1) == Approx(2.34));
+    // Check 1D triplet histogram
+    /*
+    HistoSplitter::SplittedTripletTH1s h1t;
+    test.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kDebug, fTripletDirs, h1t, "0_test1Dtriplet", "0_test1Dtriplet", 10, 0., 400.);
+    CHECK( h1t.size() == 1 );
+    //test.fillShapeHistogramTriplet(h1t, false, 205.0);
+    //test.fillShapeHistogramTriplet(h1t, true, 105.0, 2.34);
+    CHECK( h1t[0]->getInclusiveHisto()->GetBinContent(6) == Approx(1.000));
+    CHECK( h1t[0]->getInclusiveHisto()->GetBinContent(3) == Approx(2.34));
+    CHECK( h1t[0]->getFalseHisto()->GetBinContent(6) == Approx(1.000));
+    CHECK( h1t[0]->getFalseHisto()->GetBinContent(3) == Approx(0.0));
+    CHECK( h1t[0]->getTrueHisto()->GetBinContent(6) == Approx(0.0));
+    CHECK( h1t[0]->getTrueHisto()->GetBinContent(3) == Approx(2.34));
+    */
   }
 
   SECTION("HistoSplitter / splitting as function of 1 variable") {
@@ -220,7 +238,7 @@ TEST_CASE("HistoSplitter", "[Framework]") {
     CHECK( v[0] == 2 );
     // Check 1D histogram
     HistoSplitter::SplittedTH1s h1;
-    test.createShapeHistogram(HistoLevel::kDebug, f, h1, "1_test1D", "1_test1D", 10, 0., 400.);
+    test.createShapeHistogram<TH1F>(HistoLevel::kDebug, f, h1, "1_test1D", "1_test1D", 10, 0., 400.);
     CHECK( h1.size() == 6 );
     test.fillShapeHistogram(h1, 205.0);
     test.fillShapeHistogram(h1, 105.0, 2.34);
@@ -230,7 +248,7 @@ TEST_CASE("HistoSplitter", "[Framework]") {
     CHECK( h1[5]->getHisto()->GetBinContent(3) == Approx(2.34));
     // Check 2D histogram
     HistoSplitter::SplittedTH2s h2;
-    test.createShapeHistogram(HistoLevel::kDebug, f, h2, "1_test2D", "1_test2D", 10, 0., 400., 20, 0., 40.);
+    test.createShapeHistogram<TH2F>(HistoLevel::kDebug, f, h2, "1_test2D", "1_test2D", 10, 0., 400., 20, 0., 40.);
     CHECK( h2.size() == 6 );
     test.fillShapeHistogram(h2, 205.0, 3.0);
     test.fillShapeHistogram(h2, 105.0, 15.0, 2.34);
@@ -291,7 +309,7 @@ TEST_CASE("HistoSplitter", "[Framework]") {
     CHECK( v[1] == 1 );
     // Check 1D histogram
     HistoSplitter::SplittedTH1s h1;
-    test.createShapeHistogram(HistoLevel::kDebug, f, h1, "2_test1D", "2_test1D", 10, 0., 400.);
+    test.createShapeHistogram<TH1F>(HistoLevel::kDebug, f, h1, "2_test1D", "2_test1D", 10, 0., 400.);
     CHECK( h1.size() == 11 );
     test.fillShapeHistogram(h1, 205.0);
     test.fillShapeHistogram(h1, 105.0, 2.34);
@@ -301,7 +319,7 @@ TEST_CASE("HistoSplitter", "[Framework]") {
     CHECK( h1[10]->getHisto()->GetBinContent(3) == Approx(2.34));
     // Check 2D histogram
     HistoSplitter::SplittedTH2s h2;
-    test.createShapeHistogram(HistoLevel::kDebug, f, h2, "2_test2D", "2_test2D", 10, 0., 400., 20, 0., 40.);
+    test.createShapeHistogram<TH2F>(HistoLevel::kDebug, f, h2, "2_test2D", "2_test2D", 10, 0., 400., 20, 0., 40.);
     CHECK( h2.size() == 11 );
     test.fillShapeHistogram(h2, 205.0, 3.0);
     test.fillShapeHistogram(h2, 105.0, 15.0, 2.34);

@@ -173,4 +173,61 @@ TEST_CASE("HistoWrapper works", "[Framework]") {
     CHECK( th1->isActive() );
     CHECK( th1->getHisto() );
   }
+
+  SECTION("1D triplet histograms") {
+    TDirectory dir("rootdir", "rootdir");
+    TDirectory fakedir("fakedir", "fakedir");
+    TDirectory truedir("truedir", "truedir");
+    std::vector<TDirectory*> dirs = { &dir, &fakedir, &truedir };
+
+    WrappedTH1Triplet *th1 = wrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, dirs, "name", "title", 100, 0, 100);
+    REQUIRE( th1 );
+    REQUIRE( th1->isActive() );
+    REQUIRE( th1->getInclusiveHisto() );
+    REQUIRE( th1->getTrueHisto() );
+    REQUIRE( th1->getFalseHisto() );
+    CHECK( std::string(th1->getInclusiveHisto()->GetName()) == "name" );
+    CHECK( std::string(th1->getInclusiveHisto()->GetTitle()) == "title" );
+    CHECK( th1->getInclusiveHisto()->GetNbinsX() == 100 );
+    CHECK( std::string(th1->getTrueHisto()->GetName()) == "name" );
+    CHECK( std::string(th1->getTrueHisto()->GetTitle()) == "title" );
+    CHECK( th1->getTrueHisto()->GetNbinsX() == 100 );
+    CHECK( std::string(th1->getFalseHisto()->GetName()) == "name" );
+    CHECK( std::string(th1->getFalseHisto()->GetTitle()) == "title" );
+    CHECK( th1->getFalseHisto()->GetNbinsX() == 100 );
+
+    th1->Fill(true, 11);
+    th1->Fill(false, 12, 0.5);
+    CHECK( th1->getInclusiveHisto()->GetBinContent(10) == 0 );
+    CHECK( th1->getInclusiveHisto()->GetBinContent(11) == 1 );
+    CHECK( th1->getInclusiveHisto()->GetBinContent(12) == Approx(0.5) );
+    CHECK( th1->getInclusiveHisto()->GetBinContent(13) == 0 );
+    CHECK( th1->getTrueHisto()->GetBinContent(10) == 0 );
+    CHECK( th1->getTrueHisto()->GetBinContent(11) == 1 );
+    CHECK( th1->getTrueHisto()->GetBinContent(12) == 0 );
+    CHECK( th1->getTrueHisto()->GetBinContent(13) == 0 );
+    CHECK( th1->getFalseHisto()->GetBinContent(10) == 0 );
+    CHECK( th1->getFalseHisto()->GetBinContent(11) == 0 );
+    CHECK( th1->getFalseHisto()->GetBinContent(12) == Approx(0.5) );
+    CHECK( th1->getFalseHisto()->GetBinContent(13) == 0 );
+
+    WrappedTH1Triplet *th1prime = wrapper.makeTHTriplet<TH1F>(false, HistoLevel::kVital, dirs, "name", "title", 100, 0, 100);
+    REQUIRE( th1prime );
+    REQUIRE( th1prime->isActive() );
+    REQUIRE( th1prime->getInclusiveHisto() );
+    REQUIRE( th1prime->getTrueHisto() == nullptr );
+    REQUIRE( th1prime->getFalseHisto() );
+    th1->Fill(true, 11);
+    th1->Fill(false, 12, 0.5);
+    CHECK( th1prime->getInclusiveHisto()->GetBinContent(10) == 0 );
+    CHECK( th1prime->getInclusiveHisto()->GetBinContent(11) == 1 );
+    CHECK( th1prime->getInclusiveHisto()->GetBinContent(12) == Approx(0.5) );
+    CHECK( th1prime->getInclusiveHisto()->GetBinContent(13) == 0 );
+    CHECK( th1prime->getFalseHisto()->GetBinContent(10) == 0 );
+    CHECK( th1prime->getFalseHisto()->GetBinContent(11) == 0 );
+    CHECK( th1prime->getFalseHisto()->GetBinContent(12) == Approx(0.5) );
+    CHECK( th1prime->getFalseHisto()->GetBinContent(13) == 0 );
+    
+  }
+  
 }
