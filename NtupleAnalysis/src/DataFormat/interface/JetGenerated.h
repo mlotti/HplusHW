@@ -39,8 +39,6 @@ protected:
   const Branch<std::vector<float>> *fCombinedInclusiveSecondaryVertexBJetTags;
   const Branch<std::vector<float>> *fCombinedInclusiveSecondaryVertexV2BJetTags;
   const Branch<std::vector<float>> *fCombinedSecondaryVertexBJetTags;
-  const Branch<std::vector<float>> *fJetBProbabilityBJetTags;
-  const Branch<std::vector<float>> *fJetProbabilityBJetTags;
   const Branch<std::vector<float>> *fSimpleSecondaryVertexHighEffBJetTags;
   const Branch<std::vector<float>> *fSimpleSecondaryVertexHighPurBJetTags;
   const Branch<std::vector<float>> *fTrackCountingHighEffBJetTags;
