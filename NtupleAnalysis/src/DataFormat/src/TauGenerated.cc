@@ -1,4 +1,7 @@
 
+// -*- c++ -*-
+// This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
+
 #include "DataFormat/interface/TauGenerated.h"
 
 #include "Framework/interface/BranchManager.h"
@@ -12,7 +15,6 @@ void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_againstElectronMedium", &fAgainstElectronMedium);
   mgr.book(prefix()+"_againstElectronMediumMVA5", &fAgainstElectronMediumMVA5);
   mgr.book(prefix()+"_againstElectronTight", &fAgainstElectronTight);
-  mgr.book(prefix()+"_againstElectronTightMVA3", &fAgainstElectronTightMVA3);
   mgr.book(prefix()+"_againstElectronTightMVA5", &fAgainstElectronTightMVA5);
   mgr.book(prefix()+"_againstElectronVLooseMVA5", &fAgainstElectronVLooseMVA5);
   mgr.book(prefix()+"_againstElectronVTightMVA5", &fAgainstElectronVTightMVA5);
@@ -39,7 +41,6 @@ void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_byLooseIsolationMVA3oldDMwLT", &fByLooseIsolationMVA3oldDMwLT);
   mgr.book(prefix()+"_byLooseIsolationMVA3oldDMwoLT", &fByLooseIsolationMVA3oldDMwoLT);
   mgr.book(prefix()+"_byMediumCombinedIsolationDeltaBetaCorr3Hits", &fByMediumCombinedIsolationDeltaBetaCorr3Hits);
-  mgr.book(prefix()+"_byMediumIsolationMVA2", &fByMediumIsolationMVA2);
   mgr.book(prefix()+"_byMediumIsolationMVA3newDMwLT", &fByMediumIsolationMVA3newDMwLT);
   mgr.book(prefix()+"_byMediumIsolationMVA3newDMwoLT", &fByMediumIsolationMVA3newDMwoLT);
   mgr.book(prefix()+"_byMediumIsolationMVA3oldDMwLT", &fByMediumIsolationMVA3oldDMwLT);
@@ -66,6 +67,7 @@ void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_decayModeFindingNewDMs", &fDecayModeFindingNewDMs);
   mgr.book(prefix()+"_neutralIsoPtSum", &fNeutralIsoPtSum);
   mgr.book(prefix()+"_puCorrPtSum", &fPuCorrPtSum);
+  mgr.book(prefix()+"_lTrkEta", &fLTrkEta);
   mgr.book(prefix()+"_lTrkPt", &fLTrkPt);
   mgr.book(prefix()+"_nProngs", &fNProngs);
 }

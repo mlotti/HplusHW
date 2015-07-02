@@ -16,6 +16,13 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     eventInfo = new EventInfoDumper(eventInfoCollections);
     eventInfo->book(Events);
 
+    skimDumper = 0;
+    if (iConfig.exists("Skim")) {
+	skim = iConfig.getParameter<edm::ParameterSet>("Skim");
+        skimDumper = new SkimDumper(skim);
+        skimDumper->book();
+    }
+
     trgDumper = 0;
     if (iConfig.exists("Trigger")) {
 	trigger = iConfig.getParameter<edm::ParameterSet>("Trigger");
@@ -58,6 +65,20 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
         metDumper->book(Events);
     }
 
+    genMetDumper = 0;
+    if (iConfig.exists("GenMETs")) {
+	genMetCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenMETs");
+        genMetDumper = new GenMETDumper(genMetCollections);
+        genMetDumper->book(Events);
+    }
+
+    genWeightDumper = 0;
+    if (iConfig.exists("GenWeights")) {
+	genWeightCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenWeights");
+        genWeightDumper = new GenWeightDumper(genWeightCollections);
+        genWeightDumper->book(Events);
+    }
+
     trackDumper = 0;
     if (iConfig.exists("Tracks")) {
         trackCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("Tracks");
@@ -80,6 +101,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 }
 
 MiniAOD2TTreeFilter::~MiniAOD2TTreeFilter() {
+    system("ls -l");
 }
 
 void MiniAOD2TTreeFilter::beginJob(){
@@ -97,6 +119,8 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
     if (muonDumper) accept = accept && muonDumper->fill(iEvent,iSetup);
     if (jetDumper) accept = accept && jetDumper->fill(iEvent,iSetup);
     if (metDumper) accept = accept && metDumper->fill(iEvent,iSetup);
+    if (genMetDumper) accept = accept && genMetDumper->fill(iEvent,iSetup);
+    if (genWeightDumper) accept = accept && genWeightDumper->fill(iEvent,iSetup);
     if (trackDumper) accept = accept && trackDumper->fill(iEvent,iSetup);
     if (genParticleDumper) accept = accept && genParticleDumper->fill(iEvent,iSetup);
     if (genJetDumper) accept = accept && genJetDumper->fill(iEvent,iSetup);
@@ -106,12 +130,15 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 }
 
 void MiniAOD2TTreeFilter::reset(){
+    if (skimDumper) skimDumper->reset();
     if (trgDumper) trgDumper->reset();
     if (tauDumper) tauDumper->reset();
     if (electronDumper) electronDumper->reset();
     if (muonDumper) muonDumper->reset();
     if (jetDumper) jetDumper->reset();
     if (metDumper) metDumper->reset();
+    if (genMetDumper) genMetDumper->reset();
+    if (genWeightDumper) genWeightDumper->reset();
     if (trackDumper) trackDumper->reset();
     if (genParticleDumper) genParticleDumper->reset();
     if (genJetDumper) genJetDumper->reset();
@@ -148,6 +175,11 @@ void MiniAOD2TTreeFilter::endJob(){
     cfgInfo->GetXaxis()->SetBinLabel(2,"energy");
     cfgInfo->Write();
 
+    if(skimDumper){
+      TH1F* skimCounter = skimDumper->getCounter();
+      skimCounter->Write();
+    }
+
     fOUT->cd();
 
 // write TTree
@@ -162,6 +194,10 @@ void MiniAOD2TTreeFilter::endJob(){
 
 
     fOUT->Close();
+}
+
+void MiniAOD2TTreeFilter::endLuminosityBlock(const edm::LuminosityBlock & iLumi, const edm::EventSetup & iSetup) {
+    if(skimDumper) skimDumper->fill(iLumi,iSetup);
 }
           
 DEFINE_FWK_MODULE(MiniAOD2TTreeFilter);

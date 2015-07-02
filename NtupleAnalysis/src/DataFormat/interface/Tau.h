@@ -13,13 +13,20 @@ class TauCollection: public TauGeneratedCollection, public ParticleIteratorAdapt
 public:
   using value_type = Tau;
 
-  TauCollection() {}
-  explicit TauCollection(const std::string& prefix): TauGeneratedCollection(prefix) {}
+  TauCollection() { initialize(); }
+  explicit TauCollection(const std::string& prefix): TauGeneratedCollection(prefix) { initialize(); }
   ~TauCollection() {}
-
+  
+  // Discriminators
   void setConfigurableDiscriminators(const std::vector<std::string>& names) {
     fConfigurableDiscriminatorNames = names;
   }
+  void setAgainstElectronDiscriminator(const std::string& name);
+  void setAgainstMuonDiscriminator(const std::string& name);
+  void setIsolationDiscriminator(const std::string& name);
+  bool againstElectronDiscriminatorIsValid() const;
+  bool againstMuonDiscriminatorIsValid() const;
+  bool isolationDiscriminatorIsValid() const;
 
   void setupBranches(BranchManager& mgr);
 
@@ -32,9 +39,21 @@ public:
 
 protected:
   std::vector<const Branch<std::vector<bool>> *> fConfigurableDiscriminators;
+  const Branch<std::vector<bool>>* fAgainstElectronDiscriminator;
+  const Branch<std::vector<bool>>* fAgainstMuonDiscriminator;
+  const Branch<std::vector<bool>>* fIsolationDiscriminator;
 
 private:
+  /// Initialize data members
+  void initialize();
+  
   std::vector<std::string> fConfigurableDiscriminatorNames;
+  std::string fAgainstElectronDiscriminatorName;
+  std::string fAgainstMuonDiscriminatorName;
+  std::string fIsolationDiscriminatorName;
+  bool bValidityOfAgainstElectronDiscr;
+  bool bValidityOfAgainstMuonDiscr;
+  bool bValidityOfIsolationDiscr;
 };
 
 class Tau: public TauGenerated<TauCollection> {
@@ -49,6 +68,26 @@ public:
         return false;
     }
     return true;
+  }
+  bool againstElectronDiscriminator() const {
+    if (!fCollection->againstElectronDiscriminatorIsValid())
+      return true;
+    return fCollection->fAgainstElectronDiscriminator->value()[index()];
+  }
+  bool againstMuonDiscriminator() const {
+    if (!fCollection->againstMuonDiscriminatorIsValid())
+      return true;
+    return fCollection->fAgainstMuonDiscriminator->value()[index()];
+  }
+  bool isolationDiscriminator() const {
+    if (!fCollection->isolationDiscriminatorIsValid())
+      return true;
+    return fCollection->fIsolationDiscriminator->value()[index()];
+  }
+  /// Operator defined for using std::sort on vector<Tau>
+  bool operator<(const Tau& tau) const {
+    // Descending order by tau pT
+    return (this->pt() > tau.pt());
   }
 };
 

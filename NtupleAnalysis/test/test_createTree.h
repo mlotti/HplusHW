@@ -3,11 +3,19 @@
 
 #include "TTree.h"
 
+#include "boost/property_tree/ptree.hpp"
+
 #include <memory>
 #include <string>
+#include <cmath>
+
+
+std::unique_ptr<TTree> createEmptyTree();
 
 std::unique_ptr<TTree> createSimpleTree();
 
 std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix="Taus");
+
+boost::property_tree::ptree getMinimalConfig();
 
 #endif

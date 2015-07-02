@@ -29,9 +29,11 @@ def main():
 
     paths = [sys.argv[1]]
 
+#    analysis = "METLeg_2012D"
     analysis = "METLeg_2012ABCD"
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
-
+    for d in datasets.getAllDatasets():
+        print d.getName()
     style = tdrstyle.TDRStyle()
 
     dataset1 = datasets.getDataDatasets()
@@ -50,7 +52,8 @@ def main():
 
     opts = {"ymin": 0, "ymax": 1.1}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
-    moveLegend = {"dx": -0.55}
+    moveLegend = {"dx": -0.55, "dy": -0.15}
+
     name = "DataVsMC_L1HLTMET_PFMET"
 
     legend1 = "Data"
@@ -58,7 +61,7 @@ def main():
     p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
 
     p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
-    p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+    p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.8), **moveLegend))
 
     p.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
     p.getFrame().GetXaxis().SetTitle("MET Type 1 (GeV)")
@@ -66,10 +69,8 @@ def main():
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     p.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText(s="%s TeV"%dataset2[0].info["energy"])
-    lumi = 0
-    histograms.addLuminosityText(None, None, lumi)
+    lumi = 19769.954
+    histograms.addStandardTexts(lumi=lumi)
 
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
@@ -98,9 +99,9 @@ def main():
     p = plots.ComparisonPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
                              histograms.HistoGraph(eff1c, "eff1c", "p", "P"))
 
-    opts = {"ymin": 0, "ymax": 1.1}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-    moveLegend = {"dx": -0.55}
+    #opts = {"ymin": 0, "ymax": 1.1}
+    #opts2 = {"ymin": 0.5, "ymax": 1.5}
+    #moveLegend = {"dx": -0.55, "dy": -0.1}
     namec = "Data_TrgBinVsCaloMET_L1HLTMET_PFMET"
 
     legend1c = "Data, trigger bin"
@@ -108,7 +109,7 @@ def main():
     p.histoMgr.setHistoLegendLabelMany({"eff1": legend1c, "eff1c": legend2c})
 
     p.createFrame(os.path.join(plotDir, namec), createRatio=True, opts=opts, opts2=opts2)
-    p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+    p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.8), **moveLegend))
 
     p.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
     p.getFrame().GetXaxis().SetTitle("MET Type 1 (GeV)")
@@ -116,10 +117,11 @@ def main():
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     p.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText(s="%s TeV"%dataset2[0].info["energy"])
-    lumi = 0
-    histograms.addLuminosityText(None, None, lumi)
+    lumi = 19769.954
+    histograms.addStandardTexts(lumi=lumi)
+    #histograms.addCmsPreliminaryText()
+    #histograms.addEnergyText(s="%s TeV"%dataset2[0].info["energy"])
+    #histograms.addLuminosityText(None, None, lumi)
 
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)

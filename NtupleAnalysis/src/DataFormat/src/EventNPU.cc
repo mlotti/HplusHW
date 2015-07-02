@@ -7,6 +7,8 @@ EventNPU::EventNPU():
 EventNPU::~EventNPU() {}
 
 void EventNPU::setupBranches(BranchManager& mgr) {
-  mgr.book("nPU", &fNPU);
+  //mgr.book("nPU", &fNPU); // The MC number of PU vertices is not available for data
+  mgr.book("nGoodOfflinePV", &fNPU);
+  mgr.book("nPU", &fSimulatedNPU);
 }
 

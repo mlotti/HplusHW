@@ -37,7 +37,8 @@ class BaseDumper {
         std::vector<double> *pt;
         std::vector<double> *eta;            
         std::vector<double> *phi;
-        std::vector<double> *e;                      
+        std::vector<double> *e;
+	std::vector<double> *et;
 
 //	std::vector<reco::Candidate::LorentzVector> *p4;
 	std::vector<short> *pdgId;

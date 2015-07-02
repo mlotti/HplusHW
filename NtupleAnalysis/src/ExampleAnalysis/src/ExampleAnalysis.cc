@@ -90,12 +90,12 @@ void ExampleAnalysis::process(Long64_t entry) {
       continue;
     if(!(tau.lTrkPt() > 10))
       continue;
-    if(!tau.againstElectronTightMVA3())
+    /*if(!tau.againstElectronTightMVA3())
       continue;
     if(!tau.againstMuonTight())
       continue;
     if(!tau.byMediumIsolationMVA2())
-      continue;
+      continue;*/
     if(!(tau.nProngs() == 1))
       continue;
 
@@ -140,10 +140,10 @@ void ExampleAnalysis::process(Long64_t entry) {
     return;
   cJetSelection.increment();
 
-  for(Jet& jet: selectedJets) {
-    if(jet.secondaryVertex() > 0.898)
-      hBJetPt->Fill(jet.pt());
-  }
+//   for(Jet& jet: selectedJets) {
+//     if(jet.secondaryVertex() > 0.898)
+//       hBJetPt->Fill(jet.pt());
+//   }
 
   fEventSaver.save();
 }

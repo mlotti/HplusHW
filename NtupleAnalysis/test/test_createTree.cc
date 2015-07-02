@@ -1,7 +1,18 @@
 #include "test_createTree.h"
 
+#include "DataFormat/interface/Tau.h"
+
 #include <vector>
 #include <algorithm>
+
+std::unique_ptr<TTree> createEmptyTree() {
+  auto tree = std::unique_ptr<TTree>(new TTree("Events", "Events"));
+  unsigned int run;           tree->Branch("run",   &run);
+  unsigned int lumi;          tree->Branch("lumi",  &lumi);
+  unsigned long long event;   tree->Branch("event", &event);
+  
+  return tree;
+}
 
 std::unique_ptr<TTree> createSimpleTree() {
   auto tree = std::unique_ptr<TTree>(new TTree("Events", "Events"));
@@ -54,7 +65,10 @@ namespace {
   }
 }
 
+
+
 std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
+  TauCollection fTauCollection;
   auto tree = std::unique_ptr<TTree>(new TTree("Events", "Events"));
 
   unsigned int run;           tree->Branch("run",   &run);
@@ -62,16 +76,16 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   unsigned long long event;   tree->Branch("event", &event);
   bool trig1;                 tree->Branch("HLT_Trig1", &trig1);
   bool trig2;                 tree->Branch("HLT_Trig2", &trig2);
-  bool trig3;                 tree->Branch("HLT_Trig3", &trig3);
+  bool trig3;                 tree->Branch("HLT_Trig3_v5", &trig3);
   std::vector<float> tau_pt;  tree->Branch((tauPrefix+"_pt").c_str(),  &tau_pt);
   std::vector<float> tau_eta; tree->Branch((tauPrefix+"_eta").c_str(), &tau_eta);
   std::vector<float> tau_phi; tree->Branch((tauPrefix+"_phi").c_str(), &tau_phi);
   std::vector<float> tau_e;   tree->Branch((tauPrefix+"_e").c_str(),   &tau_e);
   std::vector<bool> tau_decayModeFinding;
   tree->Branch((tauPrefix+"_decayModeFinding").c_str(), &tau_decayModeFinding);
-  std::vector<bool> tau_discriminator1; tree->Branch((tauPrefix+"_discriminator1").c_str(), &tau_discriminator1);
-  std::vector<bool> tau_discriminator2; tree->Branch((tauPrefix+"_discriminator2").c_str(), &tau_discriminator2);
-  std::vector<bool> tau_discriminator3; tree->Branch((tauPrefix+"_discriminator3").c_str(), &tau_discriminator3);
+  std::vector<bool> tau_discriminator1; tree->Branch((tauPrefix+"_"+fTauCollection.getIsolationDiscriminatorNames()[0]).c_str(), &tau_discriminator1);
+  std::vector<bool> tau_discriminator2; tree->Branch((tauPrefix+"_"+fTauCollection.getAgainstMuonDiscriminatorNames()[0]).c_str(), &tau_discriminator2);
+  std::vector<bool> tau_discriminator3; tree->Branch((tauPrefix+"_"+fTauCollection.getAgainstElectronDiscriminatorNames()[0]).c_str(), &tau_discriminator3);
 
   std::vector<float> tau_pt_esup; tree->Branch((tauPrefix+"_pt_systVarTESUp").c_str(),  &tau_pt_esup);
   std::vector<float> tau_e_esup;  tree->Branch((tauPrefix+"_e_systVarTESUp").c_str(),   &tau_e_esup);
@@ -143,4 +157,15 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   tree->Fill();
 
   return tree;
+}
+
+boost::property_tree::ptree getMinimalConfig() {
+  boost::property_tree::ptree tmp;
+  tmp.put("TauSelection.againstElectronDiscr", "");
+  tmp.put("TauSelection.againstMuonDiscr", "");
+  tmp.put("TauSelection.isolationDiscr", "");
+  tmp.put("JetSelection.jetIDDiscr", "");
+  tmp.put("JetSelection.jetPUIDDiscr", "");
+  tmp.put("BJetSelection.bjetDiscr", "");
+  return tmp;
 }

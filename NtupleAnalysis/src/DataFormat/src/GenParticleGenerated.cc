@@ -1,4 +1,3 @@
-
 #include "DataFormat/interface/GenParticleGenerated.h"
 
 #include "Framework/interface/BranchManager.h"

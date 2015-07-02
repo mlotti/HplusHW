@@ -11,6 +11,7 @@
 #include "Math/DisplacementVector3D.h"
 
 #include <vector>
+#include <string>
 #include <limits>
 
 class BranchManager;
@@ -122,7 +123,8 @@ public:
 protected:
   const std::string& prefix() const { return fPrefix; }
   const std::string& energySystematicsVariation() const { return fEnergySystematicsVariation; }
-
+  void checkDiscriminatorNameValidity(const std::string& name, const std::vector<std::string>& list) const;
+  
   template <typename Coll>
   static
   std::vector<typename Coll::value_type> toVector(Coll& coll) {

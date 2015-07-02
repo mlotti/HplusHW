@@ -6,7 +6,6 @@ METDumper::METDumper(std::vector<edm::ParameterSet> psets){
 
     MET     = new double[inputCollections.size()];
     MET_phi = new double[inputCollections.size()];                                
-    //MET_p4 = new reco::Candidate::LorentzVector[inputCollections.size()];
 
     handle = new edm::Handle<edm::View<pat::MET> >[inputCollections.size()];
 
@@ -26,8 +25,9 @@ void METDumper::book(TTree* tree){
         tree->Branch((name+"_et").c_str(),&MET[i]);
         tree->Branch((name+"_phi").c_str(),&MET_phi[i]);  
     }
-//    tree->Branch("GenMET_p4",&GenMET_p4);
-    tree->Branch("GenMET_et",&GenMET);
+    tree->Branch("CaloMET_et",&caloMET_et);
+    tree->Branch("CaloMET_phi",&caloMET_phi);
+    tree->Branch("GenMET_et",&GenMET_et);
     tree->Branch("GenMET_phi",&GenMET_phi);
 }
 
@@ -42,11 +42,13 @@ bool METDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    MET[i]     = handle[i]->ptrAt(0)->p4().Pt();
 	    MET_phi[i] = handle[i]->ptrAt(0)->p4().Phi();
 	    if(handle[i]->ptrAt(0)->genMET()){
-              GenMET     = handle[i]->ptrAt(0)->genMET()->pt();
+              GenMET_et  = handle[i]->ptrAt(0)->genMET()->pt();
               GenMET_phi = handle[i]->ptrAt(0)->genMET()->phi();
 	    }
-	    //MET_p4[i] = handle[i]->ptrAt(0)->p4();
-	    //GenMET_p4 = handle[i]->ptrAt(0)->genMET()->p4();
+	    if(handle[i]->ptrAt(0)->caloMETPt()){
+              caloMET_et = handle[i]->ptrAt(0)->caloMETPt();
+              caloMET_phi= handle[i]->ptrAt(0)->caloMETPhi();
+            }
 	}else{
 	  std::cout << "Collection " << inputtag.label() << " not found, exiting.." << std::endl;
 	  exit(8006);
@@ -66,10 +68,10 @@ void METDumper::reset(){
       for(size_t i = 0; i < inputCollections.size(); ++i){
 	MET[i]        = 0;
 	MET_phi[i]    = 0;
-//	MET_p4[i].SetXYZT(0,0,0,0);
       }
-      GenMET = 0;
-      GenMET_phi = 0;
-//    GenMET_p4.SetXYZT(0,0,0,0);
+      caloMET_et  = 0;
+      caloMET_phi = 0;
+      GenMET_et   = 0;
+      GenMET_phi  = 0;
     }
 }

@@ -27,6 +27,7 @@ def getEfficiency(datasets):
     first = True
     isData = False
 
+    teff = ROOT.TEfficiency()
     for dataset in datasets:
         n = dataset.getDatasetRootHisto("Numerator").getHistogram()                                               
         d = dataset.getDatasetRootHisto("Denominator").getHistogram()

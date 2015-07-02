@@ -1,8 +1,13 @@
 // -*- c++ -*-
+// This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
+
 #ifndef DataFormat_MuonGenerated_h
 #define DataFormat_MuonGenerated_h
 
 #include "DataFormat/interface/Particle.h"
+#include <string>
+#include <vector>
+#include <functional>
 
 class MuonGeneratedCollection: public ParticleCollection<double> {
 public:
@@ -10,6 +15,11 @@ public:
   ~MuonGeneratedCollection() {}
 
   void setupBranches(BranchManager& mgr);
+
+  std::vector<std::string> getIDDiscriminatorNames() {
+    static std::vector<std::string> n = { std::string("")};
+    return n;
+  }
 
 protected:
   const Branch<std::vector<bool>> *fIsGlobalMuon;
@@ -22,6 +32,12 @@ public:
   MuonGenerated() {}
   MuonGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~MuonGenerated() {}
+
+  std::vector<std::function<bool()>> getIDDiscriminatorValues() {
+    static std::vector<std::function<bool()>> values = {
+    };
+    return values;
+  }
 
   bool isGlobalMuon() const { return this->fCollection->fIsGlobalMuon->value()[this->index()]; }
 

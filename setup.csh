@@ -35,7 +35,9 @@ if ( $LOCATION == "lxplus" ) then
     source /afs/cern.ch/sw/lcg/contrib/gcc/4.8/x86_64-slc6-gcc48-opt/setup.csh
 
 #    setenv ROOTSYS /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.23/x86_64-slc6-gcc48-opt/root
-    setenv ROOTSYS /afs/cern.ch/sw/lcg/app/releases/ROOT/6.02.05/x86_64-slc6-gcc48-opt/root
+#    setenv ROOTSYS /afs/cern.ch/sw/lcg/app/releases/ROOT/6.02.05/x86_64-slc6-gcc48-opt/root
+    setenv ROOTSYS /afs/cern.ch/sw/lcg/app/releases/ROOT/6.04.00/x86_64-slc6-gcc48-opt/root
+
     setenv LD_LIBRARY_PATH "${ROOTSYS}/lib:${LD_LIBRARY_PATH}"
     setenv PATH "${ROOTSYS}/bin:${PATH}"
 
@@ -124,6 +126,9 @@ else
 endif
 
 setenv PATH "${HIGGSANALYSIS_BASE}/HeavyChHiggsToTauNu/scripts:${HIGGSANALYSIS_BASE}/NtupleAnalysis/scripts:${PATH}"
+
+# Install externals if necessary
+sh +x installexternals.sh
 
 # echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 # echo "!" 

@@ -11,6 +11,8 @@ JetDumper::JetDumper(std::vector<edm::ParameterSet> psets){
 
     //p4 = new std::vector<reco::Candidate::LorentzVector>[inputCollections.size()];
     pdgId = new std::vector<short>[inputCollections.size()];
+    hadronFlavour = new std::vector<int>[inputCollections.size()];
+    partonFlavour = new std::vector<int>[inputCollections.size()];
 
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<float>[inputCollections.size()*nDiscriminators];
@@ -42,6 +44,8 @@ void JetDumper::book(TTree* tree){
     tree->Branch((name+"_e").c_str(),&e[i]);    
     //tree->Branch((name+"_p4").c_str(),&p4[i]);
     tree->Branch((name+"_pdgId").c_str(),&pdgId[i]);
+    tree->Branch((name+"_hadronFlavour").c_str(),&hadronFlavour[i]);
+    tree->Branch((name+"_partonFlavour").c_str(),&partonFlavour[i]);
 
     std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
     for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
@@ -92,6 +96,8 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		  genParton = obj.genParton()->pdgId();
 		}
 		pdgId[ic].push_back(genParton);
+		hadronFlavour[ic].push_back(obj.hadronFlavour());
+		partonFlavour[ic].push_back(obj.partonFlavour());
 
 		// Jet PU ID
 		bool puidLoose  = true;
@@ -122,6 +128,8 @@ void JetDumper::reset(){
 	e[ic].clear();
 //        p4[ic].clear();
         pdgId[ic].clear();
+	hadronFlavour[ic].clear();
+	partonFlavour[ic].clear();
 
 	jetPUIDloose[ic].clear();
 	jetPUIDmedium[ic].clear();

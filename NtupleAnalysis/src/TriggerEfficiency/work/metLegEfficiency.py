@@ -51,12 +51,14 @@ def runRange(era):
     return lumi,runmin,runmax
 
 def createAnalyzer(dataVersion,era):
+    name = era
     useCaloMET = False
     if "CaloMET" in era:
         useCaloMET = True
         era = era[:-8]
 
     a = Analyzer("TriggerEfficiency",
+        name = name,
         Trigger = PSet(
             triggerOR  = [],
             triggerOR2 = []
@@ -109,9 +111,9 @@ def addAnalyzer(era):
     dv = ["53Xdata22Jan2013","53mcS10"]
     process.addAnalyzer("METLeg_"+era, lambda dv: createAnalyzer(dv, era))
 
-addAnalyzer("2012ABCD")
-#addAnalyzer("2012D")
-addAnalyzer("2012ABCD_CaloMET")
+#addAnalyzer("2012ABCD")
+addAnalyzer("2012D")
+#addAnalyzer("2012ABCD_CaloMET")
 
 
 # Run the analysis
