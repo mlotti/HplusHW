@@ -3807,16 +3807,16 @@ class DatasetPrecursor:
                 raise Exception("Unable to open ROOT file '%s' for dataset '%s'" % (name, self._name))
             self._rootFiles.append(rf)
 
-            #dv = aux.Get(rf, "configInfo/dataVersion")
-            #if dv == None:
-            #    print "Unable to find 'configInfo/dataVersion' from ROOT file '%s', I have no idea if this file is data, MC, or pseudo" % name
-            #    continue
+            dv = aux.Get(rf, "configInfo/dataVersion")
+            if dv == None:
+                print "Unable to find 'configInfo/dataVersion' from ROOT file '%s', I have no idea if this file is data, MC, or pseudo" % name
+                continue
                 
-            #if self._dataVersion is None:
-            #    self._dataVersion = dv.GetTitle()
-            #else:
-            #    if self._dataVersion != dv.GetTitle():
-            #        raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
+            if self._dataVersion is None:
+                self._dataVersion = dv.GetTitle()
+            else:
+                if self._dataVersion != dv.GetTitle():
+                    raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
 
         if self._dataVersion is None:
             self._isData = False
