@@ -576,10 +576,10 @@ def hplusTBToSingleLepton(myDir, label):
     rootFilePattern = None
     datacardPattern = None
     if label.startswith("Control_"):
-        rootFilePattern = "HpToSingleLepton_HT_CR.root"
+        rootFilePattern = "HpToSingleLepton_HT_CR_"+label+".root"
         datacardPattern = "HpToSingleLepton_datacard_"+label+".txt"
     else:
-        rootFilePattern = "HpToSingleLepton_HT_M%s.root"
+        rootFilePattern = "HpToSingleLepton_HT_M%s_"+label+".root"
         datacardPattern = "HpToSingleLepton_datacard_"+label+"_%s.txt"
     rootFileDirectory = ""
     myMgr = DatacardReader.DataCardDirectoryManager(myDir, datacardPattern, rootFilePattern, rootFileDirectory=rootFileDirectory, readOnly=False, outSuffix=label)
@@ -605,7 +605,9 @@ def hplusTBToSingleLepton(myDir, label):
         for m in myMgr._massPoints:
             myColumnReplaces["Hplus%s"%m] = "CMS_Hptbsl_%s"%(label)
     myColumnReplaces["Wlight"] = "CMS_Hptbsl_%s_Wlight"%(label)
-    myColumnReplaces["Wheavy"] = "CMS_Hptbsl_%s_Wheavy"%(label)
+    #myColumnReplaces["Wheavy"] = "CMS_Hptbsl_%s_Wheavy"%(label)
+    myColumnReplaces["Wc"] = "CMS_Hptbsl_%s_Wc"%(label)
+    myColumnReplaces["Wb"] = "CMS_Hptbsl_%s_Wb"%(label)
     myColumnReplaces["qcd"] = "CMS_Hptbsl_%s_qcd"%(label)
     myColumnReplaces["ZDMerge"] = "CMS_Hptbsl_%s_DY_VV"%(label)
     myColumnReplaces["OtherTop"] = "CMS_Hptbsl_%s_OtherTop"%(label)
@@ -629,26 +631,33 @@ def hplusTBToSingleLepton(myDir, label):
     myNuisanceReplaces["xsec_ZDMerge"] = "xsect_ZDMerge"
     myNuisanceReplaces["ttbar_SF_mu"] = "CMS_Hptbsl_muX_ttbarNorm"
     myNuisanceReplaces["wlight_SF_mu"] = "CMS_Hptbsl_muX_wlightNorm"
-    myNuisanceReplaces["wheavy_SF_mu"] = "CMS_Hptbsl_muX_wheavyNorm"
+    #myNuisanceReplaces["wheavy_SF_mu"] = "CMS_Hptbsl_muX_wheavyNorm"
+    myNuisanceReplaces["wc_SF_mu"] = "CMS_Hptbsl_muX_wcNorm"
+    myNuisanceReplaces["wb_SF_mu"] = "CMS_Hptbsl_muX_wbNorm"
     myNuisanceReplaces["ttbar_SF_el"] = "CMS_Hptbsl_eX_ttbarNorm"
     myNuisanceReplaces["wlight_SF_el"] = "CMS_Hptbsl_eX_wlightNorm"
-    myNuisanceReplaces["wheavy_SF_el"] = "CMS_Hptbsl_eX_wheavyNorm"
+    #myNuisanceReplaces["wheavy_SF_el"] = "CMS_Hptbsl_eX_wheavyNorm"
+    myNuisanceReplaces["wc_SF_el"] = "CMS_Hptbsl_eX_wcNorm"
+    myNuisanceReplaces["wb_SF_el"] = "CMS_Hptbsl_eX_wbNorm"
     myNuisanceReplaces["jes"] = "CMS_scale_j"
     myNuisanceReplaces["jer"] = "CMS_res_j"
     #myNuisanceReplaces["pdf"] = "ttbarPDFVariation"
     #myNuisanceReplaces["top_ljets"] = "CMS_Hptbsl_%s_topPtReweighting"%label #FIXME
     #myNuisanceReplaces["top_ljets"] = "CMS_Hptbsl_topPtReweighting"
     myNuisanceReplaces["top_ljets"] = "CMS_Hptbsl_%s_topPtReweighting"%label.replace("nB1_","").replace("nB2p_","")
+    myNuisanceReplaces["top_ljets_el"] = "CMS_Hptbsl_el_topPtReweighting"
+    myNuisanceReplaces["top_ljets_mu"] = "CMS_Hptbsl_mu_topPtReweighting"
     myNuisanceReplaces["btag"] = "CMS_btaguntag_CSVM"
     myNuisanceReplaces["pdf"] = "CMS_ttbar_pdfShape"
     myNuisanceReplaces["matching_ljets"] = "CMS_ttbar_matchingVariation"
     myNuisanceReplaces["scale_ljets"] = "CMS_ttbar_q2"
     if label.startswith("Control_"):
         for l in ["el","mu"]:
-            myNuisanceReplaces["xsec_TTbar_%s"%l] = "CMS_Hptbsl_%s_ttbarNormUncert"%l
-            myNuisanceReplaces["xsec_Wlight_%s"%l] = "CMS_Hptbsl_%s_wlightNormUncert"%l
-            myNuisanceReplaces["xsec_Wheavy_%s"%l] = "CMS_Hptbsl_%s_wheavyNormUncert"%l
-    
+            myNuisanceReplaces["xsec_TTbar__%s"%l] = "CMS_Hptbsl_%s_ttbarNormUncert"%l
+            myNuisanceReplaces["xsec_Wlight__%s"%l] = "CMS_Hptbsl_%s_wlightNormUncert"%l
+            myNuisanceReplaces["xsec_Wc__%s"%l] = "CMS_Hptbsl_%s_wcNormUncert"%l
+            myNuisanceReplaces["xsec_Wb__%s"%l] = "CMS_Hptbsl_%s_wbNormUncert"%l
+
     myMgr.replaceNuisanceNames(myNuisanceReplaces)
 
     myMgr.replaceNuisanceValue("xsect_singleTop", "1.069", ["OtherTop"])
@@ -726,7 +735,9 @@ def hplusTBToSingleLepton(myDir, label):
         myMgr.recreateShapeStatUncert(recreateShapeStatUncertForLargestBkgOnly=True)
         #myMgr.recreateShapeStatUncert(threshold=0.10)
         #myMgr.recreateShapeStatUncert()
-    
+    else:
+        myMgr.recreateShapeStatUncert()
+
     myMgr.close()
 
 if __name__ == "__main__":
@@ -748,8 +759,8 @@ if __name__ == "__main__":
     # tb decay mode
     #hplusTbToTauMu(myDir, doCorrelation=doCorrelation, nobtagcorr=nobtagcorr)
     #sys.exit()
-    hplusTbToDilepton(myDir, doCorrelation=doCorrelation, nobtagcorr=nobtagcorr)
-    sys.exit()
+    #hplusTbToDilepton(myDir, doCorrelation=doCorrelation, nobtagcorr=nobtagcorr)
+    #sys.exit()
     
     
     # tb to single mu

@@ -4,6 +4,7 @@ import os
 import glob
 import sys
 import inspect
+import math
 from optparse import OptionParser
 import array
 from collections import OrderedDict
@@ -190,12 +191,13 @@ def getAndRebinQCDShapeNuisanceHistos(columnName, rootFile, hRate, nuisanceInfo,
 
 ## Calculates the shape nuisance histogram for the new binning
 ## Basic principle: keep relative uncertainty constant between unfitted and fitted distributions
-def updateNuisanceTail(hOriginalShape, hFittedShape, rootFile, histoName, skipNotFoundTest=False):
+def updateNuisanceTail(opts, hOriginalShape, hFittedShape, rootFile, histoName, skipNotFoundTest=False):
     myList = []
     myPostfixes = ["Up","Down"]
     for postfix in myPostfixes:
         # Obtain original nuisance histogram
         hOriginalNuisance = rootFile.Get(histoName+postfix)
+        hOriginalNuisance.Scale(opts.lumiProjection*opts.bkgxsecProjection)
         if hOriginalNuisance == None:
             if skipNotFoundTest:
                 return []
@@ -616,13 +618,26 @@ def main(opts):
                 print "... skipping fit (signal or blacklist)"
                 # Obtain and rebin rate histo
                 hRate = getAndRebinRateHisto(c, myRootFile, config.finalBinning["shape"])
-                myHistogramCache.append(hRate)
+                if _isSignal(c):
+                    hRate.Scale(opts.lumiProjection)
+                else:
+                    hRate.Scale(opts.lumiProjection*opts.bkgxsecProjection)
+                myHistogramCache.append(hRate.Clone())
+                # Update rate
+                for n in myNuisanceInfo:
+                    if n["name"] == "rate":
+                        n[c] = "%f"%hRate.Integral()
                 # Obtain and rebin nuisance histos
                 hNuisances = getAndRebinNuisanceHistos(c, myRootFile, myNuisanceInfo, config.finalBinning["shape"])
+                for h in hNuisances:
+                    if _isSignal(c):
+                        h.Scale(opts.lumiProjection)
+                    else:
+                        h.Scale(opts.lumiProjection*opts.bkgxsecProjection)
                 myHistogramCache.extend(hNuisances)
                 # Treat QCD shape uncertainty separately (for testing only; one should use the tail fit for QCD)
-                hNuisances = getAndRebinQCDShapeNuisanceHistos(c, myRootFile, hRate, myNuisanceInfo, config.finalBinning["shape"])
-                myHistogramCache.extend(hNuisances)
+                #hNuisances = getAndRebinQCDShapeNuisanceHistos(c, myRootFile, hRate, myNuisanceInfo, config.finalBinning["shape"])
+                #myHistogramCache.extend(hNuisances)
                 # Create bin-by-bin stat. histograms for fitted distribution and update the nuisance table
                 myStatHistograms = addBinByBinStatUncert(config, c, hRate, myColumnNames, myNuisanceInfo, isSignal=True)
                 myHistogramCache.extend(myStatHistograms)
@@ -636,8 +651,10 @@ def main(opts):
             else:
                 # Not signal or blacklist, do fit
                 hFineBinning = myRootFile.Get(c+"_fineBinning")
+                hFineBinning.Scale(opts.lumiProjection*opts.bkgxsecProjection)
                 hOriginalShape = myRootFile.Get(c)
                 hOriginalShape.SetName(hOriginalShape.GetName()+"Original")
+                hOriginalShape.Scale(opts.lumiProjection*opts.bkgxsecProjection)
                 if hFineBinning == None:
                     raise Exception(ErrorLabel()+"Cannot find histogram '%s'!"%(c+"_fineBinning"))
                 if hOriginalShape == None:
@@ -663,12 +680,12 @@ def main(opts):
                 for n in myNuisanceInfo:
                     if n["name"] != "observation" and n["distribution"] == "shape" and n[c] == "1":
                         #print "... Updating shape nuisance '%s' tail"%n["name"]
-                        myUpdatedNuisanceHistograms = updateNuisanceTail(hOriginalShape, myFittedRateHistograms[0], myRootFile, "%s_%s"%(c,n["name"]))
+                        myUpdatedNuisanceHistograms = updateNuisanceTail(opts, hOriginalShape, myFittedRateHistograms[0], myRootFile, "%s_%s"%(c,n["name"]))
                         myHistogramCache.extend(myUpdatedNuisanceHistograms)
                 if myShapeSensitivityTestStatus:
                     # Check if the nuisance histograms exist for this column
                     myHistoName = "%s_%s"%(c,myShapeSensitivityTestLabel.replace("Up","").replace("Down",""))
-                    myList = updateNuisanceTail(hOriginalShape, myFittedRateHistograms[0], myRootFile, myHistoName, skipNotFoundTest=True)
+                    myList = updateNuisanceTail(opts, hOriginalShape, myFittedRateHistograms[0], myRootFile, myHistoName, skipNotFoundTest=True)
                     #print "DEBUG",myHistoName,len(myList)
                     if len(myList) > 0:
                         # Add the nuisance with proper binning
@@ -719,6 +736,23 @@ def main(opts):
                 else:
                     # Add fit uncertainty as nuisances parameters
                     if not opts.noFitUncert:
+                        # Scale naively the stat.uncert. by 1/sqrt(factor)
+                        for h in huplist:
+                            if h.GetNbinsX() != myFittedRateHistograms[0].GetNbinsX():
+                                raise Exception("logic error")
+                            for i in range(1, myFittedRateHistograms[0].GetNbinsX()+1):
+                                if myFittedRateHistograms[0].GetBinContent(i) > 0.0:
+                                    value = h.GetBinContent(i) / myFittedRateHistograms[0].GetBinContent(i) - 1.0
+                                    value = value / math.sqrt(opts.lumiProjection*opts.bkgxsecProjection)
+                                    h.SetBinContent(i, (value+1.0)*myFittedRateHistograms[0].GetBinContent(i))
+                        for h in hdownlist:
+                            if h.GetNbinsX() != myFittedRateHistograms[0].GetNbinsX():
+                                raise Exception("logic error")
+                            for i in range(1, myFittedRateHistograms[0].GetNbinsX()+1):
+                                if myFittedRateHistograms[0].GetBinContent(i) > 0.0:
+                                    value = h.GetBinContent(i) / myFittedRateHistograms[0].GetBinContent(i) - 1.0
+                                    value = value / math.sqrt(opts.lumiProjection*opts.bkgxsecProjection)
+                                    h.SetBinContent(i, (value+1.0)*myFittedRateHistograms[0].GetBinContent(i))
                         myHistogramCache.extend(huplist)
                         myHistogramCache.extend(hdownlist)
                         # Add fit parameter nuisances to nuisance table
@@ -730,6 +764,9 @@ def main(opts):
                 # Clear memory
                 hFineBinning.Delete()
                 hOriginalShape.Delete()
+        for h in myHistogramCache:
+            h.SetDirectory(None)
+        myRootFile.Close()
         myDrawPlotsStatus = False
         myObsIntegral = hObs.Integral()
         # Print summary info
@@ -760,6 +797,8 @@ if __name__ == "__main__":
     parser.add_option("--noFitUncert", dest="noFitUncert", action="store_true", default=False, help="No fit uncertainty")
     parser.add_option("--doubleFitUncert", dest="doubleFitUncert", action="store_true", default=False, help="Double the fit uncertainty")
     parser.add_option("--noSystUncert", dest="noSystUncert", action="store_true", default=False, help="Remove all syst. uncertainties")
+    parser.add_option("--lumiprojection", dest="lumiProjection", action="store", type="float", default=1.0, help="Projection on luminosity")
+    parser.add_option("--bkgxsecprojection", dest="bkgxsecProjection", action="store", type="float", default=1.0, help="Projection on background xsection")
     (opts, args) = parser.parse_args()
 
     myStyle = tdrstyle.TDRStyle()

@@ -137,6 +137,14 @@ class DataCardDirectoryManager:
         for m in self._datacards.keys():
             self._datacards[m].smoothBackgroundByLinearExtrapolation(column)
 
+    def scaleSignal(self, value):
+        for m in self._datacards.keys():
+            self._datacards[m].scaleSignal(value)
+
+    def scaleBackgrounds(self, value):
+        for m in self._datacards.keys():
+            self._datacards[m].scaleBackgrounds(value)
+
     def removeColumn(self, name):
         for m in self._datacards.keys():
             self._datacards[m].removeColumn(name)
@@ -734,20 +742,33 @@ class DataCardReader:
         if self._datacardColumnStartIndex >= 1:
             # No signal column
             return
-        signalColumn = self._datacardColumnNames[0]
+        for i in range(0, 1-self._datacardColumnStartIndex):
+            self.scaleColumn(value, self._datacardColumnNames[i])
+
+    def scaleBackgrounds(self, value):
+        for i in range(1-self._datacardColumnStartIndex, len(self._datacardColumnNames)):
+            self.scaleColumn(value, self._datacardColumnNames[i])
+    
+    def scaleColumn(self, value, columnName):
+        print "Scaling column '%s' with value %f"%(columnName, value)
         # Update rate
-        a = float(self._rateValues[signalColumn])*value
-        self._rateValues[signalColumn] = "%.6f"%a
+        a = float(self._rateValues[columnName])*value
+        self._rateValues[columnName] = "%.6f"%a
         # Update rate and nuisance histograms
         # Note: both need to be scaled 
         if self._rootFilePattern == None:
             return
-        olist = self.getRootFileObjectsWithPattern(signalColumn)
-        hRate = self.getRateHisto(signalColumn)
+        olist = self.getRootFileObjectsWithPattern(columnName)
+        hRate = self.getRateHisto(columnName)
         hOriginalRate = Clone(hRate)
         hRate.Scale(value)
+        # fine binned version
+        hRateFine = self.getRootFileObject(columnName+_fineBinningSuffix)
+        hOriginalRateFine = Clone(hRateFine)
+        if hRateFine != None:
+            hRateFine.Scale(value)
         for oname in olist:
-            if oname.startswith(signalColumn+"_"): # Do not apply twice to rate histogram
+            if oname.startswith(columnName+"_"): # Do not apply twice to rate histogram
                 h = self.getRootFileObject(oname)
                 deltaOriginal = None
                 deltaOriginal = h.Integral() / hOriginalRate.Integral()
@@ -760,7 +781,7 @@ class DataCardReader:
                 deltaNew = h.Integral() / hRate.Integral()
                 if abs(deltaOriginal-deltaNew) > 0.0001:
                     print "Something is wrong, the rel. uncertainty is not concerved: %f->%f!"%(deltaOriginal, deltaNew)
-
+                    
     def addHistogram(self, h):
         self._hCache.append(Clone(h))
 
