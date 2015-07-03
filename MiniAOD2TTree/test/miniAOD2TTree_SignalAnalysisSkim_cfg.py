@@ -151,7 +151,14 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("MET_Type1"),
             src = cms.InputTag("slimmedMETs")
         ),
-    )
+    ),
+    GenWeights = cms.VPSet(
+        cms.PSet(
+            branchname = cms.untracked.string("GenWeights"),
+            src = cms.InputTag("generator"),
+            filter = cms.untracked.bool(False)
+        )
+    ),
 )
 
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
