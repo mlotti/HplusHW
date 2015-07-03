@@ -44,6 +44,11 @@ def runRange(era):
         runmin = 203777
         runmax = 208686
 
+    if era == "2015A":
+        lumi = 100
+        runmin = 0
+        runmax = 999999
+
     if lumi == 0:
         print "Unknown era",era,"exiting.."
         sys.exit()
@@ -51,14 +56,13 @@ def runRange(era):
     return lumi,runmin,runmax
 
 def createAnalyzer(dataVersion,era):
-    name = era
     useCaloMET = False
     if "CaloMET" in era:
         useCaloMET = True
         era = era[:-8]
 
     a = Analyzer("TriggerEfficiency",
-        name = name,
+        name = era,
         Trigger = PSet(
             triggerOR  = [],
             triggerOR2 = []
@@ -68,7 +72,7 @@ def createAnalyzer(dataVersion,era):
         TauSelection = PSet(
             discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
                              "againstMuonTight2",
-                             "againstElectronMediumMVA3"],
+                             "againstElectronMediumMVA5"],
         ),
         binning = binning,
         xLabel  = xLabel,
@@ -90,6 +94,10 @@ def createAnalyzer(dataVersion,era):
                                 "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",
                                 "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9",
                                 "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]
+        if era == "2015A":
+            a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1"]
+            a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v1"]
+
         lumi,runmin,runmax = runRange(era)
         a.lumi    = lumi
         a.runMin  = runmin
@@ -97,9 +105,14 @@ def createAnalyzer(dataVersion,era):
     else:
         a.Trigger.triggerOR = ["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"]
         a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]
+        if era == "2015A":
+            a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1"]
+            a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v1"]
+
         a.PileupWeight = pileupWeight(
-            data = era,
-            mc   = "Summer12_S10"
+#            data = era,
+            data = "2012ABCD", # FIXME
+            mc   = "Summer12_S10" # FIXME
         )
 
     if useCaloMET:
@@ -109,12 +122,14 @@ def createAnalyzer(dataVersion,era):
 
 def addAnalyzer(era):
     dv = ["53Xdata22Jan2013","53mcS10"]
+    if era == "2015A":
+        dv = ["74Xdata","74Xmc"]
     process.addAnalyzer("METLeg_"+era, lambda dv: createAnalyzer(dv, era))
 
 #addAnalyzer("2012ABCD")
-addAnalyzer("2012D")
+#addAnalyzer("2012D")
 #addAnalyzer("2012ABCD_CaloMET")
-
+addAnalyzer("2015A")
 
 # Run the analysis
 process.run()

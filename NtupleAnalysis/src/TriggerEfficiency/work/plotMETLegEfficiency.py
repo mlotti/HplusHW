@@ -14,7 +14,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 from plotTauLegEfficiency import getEfficiency,convert2TGraph
 
 ROOT.gROOT.SetBatch(True)
-plotDir = "METLeg2012"
+plotDir = "METLeg2015"
 
 def usage():
     print "\n"
@@ -29,8 +29,7 @@ def main():
 
     paths = [sys.argv[1]]
 
-#    analysis = "METLeg_2012D"
-    analysis = "METLeg_2012ABCD"
+    analysis = "METLeg_2015A"
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
     for d in datasets.getAllDatasets():
         print d.getName()
@@ -69,7 +68,7 @@ def main():
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     p.draw()
-    lumi = 19769.954
+    lumi = 0.0
     histograms.addStandardTexts(lumi=lumi)
 
     if not os.path.exists(plotDir):
@@ -99,9 +98,6 @@ def main():
     p = plots.ComparisonPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
                              histograms.HistoGraph(eff1c, "eff1c", "p", "P"))
 
-    #opts = {"ymin": 0, "ymax": 1.1}
-    #opts2 = {"ymin": 0.5, "ymax": 1.5}
-    #moveLegend = {"dx": -0.55, "dy": -0.1}
     namec = "Data_TrgBinVsCaloMET_L1HLTMET_PFMET"
 
     legend1c = "Data, trigger bin"
@@ -117,11 +113,8 @@ def main():
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     p.draw()
-    lumi = 19769.954
+    lumi = 0.0
     histograms.addStandardTexts(lumi=lumi)
-    #histograms.addCmsPreliminaryText()
-    #histograms.addEnergyText(s="%s TeV"%dataset2[0].info["energy"])
-    #histograms.addLuminosityText(None, None, lumi)
 
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
