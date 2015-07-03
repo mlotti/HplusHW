@@ -651,12 +651,16 @@ def main(opts):
             else:
                 # Not signal or blacklist, do fit
                 hFineBinning = myRootFile.Get(c+"_fineBinning")
-                hFineBinning.Scale(opts.lumiProjection*opts.bkgxsecProjection)
-                hOriginalShape = myRootFile.Get(c)
-                hOriginalShape.SetName(hOriginalShape.GetName()+"Original")
-                hOriginalShape.Scale(opts.lumiProjection*opts.bkgxsecProjection)
+                for i in range(1, hFineBinning.GetNbinsX()+1):
+                    hFineBinning.SetBinContent(i, hFineBinning.GetBinContent(i)*opts.lumiProjection*opts.bkgxsecProjection)
+                    hFineBinning.SetBinError(i, hFineBinning.GetBinError(i)/math.sqrt(opts.lumiProjection*opts.bkgxsecProjection))
                 if hFineBinning == None:
                     raise Exception(ErrorLabel()+"Cannot find histogram '%s'!"%(c+"_fineBinning"))
+                hOriginalShape = myRootFile.Get(c)
+                hOriginalShape.SetName(hOriginalShape.GetName()+"Original")
+                for i in range(1, hOriginalShape.GetNbinsX()+1):
+                    hOriginalShape.SetBinContent(i, hOriginalShape.GetBinContent(i)*opts.lumiProjection*opts.bkgxsecProjection)
+                    hOriginalShape.SetBinError(i, hOriginalShape.GetBinError(i)/math.sqrt(opts.lumiProjection*opts.bkgxsecProjection))
                 if hOriginalShape == None:
                     raise Exception(ErrorLabel()+"Cannot find histogram '%s'!"%(c))
                 # Proceed
@@ -736,23 +740,6 @@ def main(opts):
                 else:
                     # Add fit uncertainty as nuisances parameters
                     if not opts.noFitUncert:
-                        # Scale naively the stat.uncert. by 1/sqrt(factor)
-                        for h in huplist:
-                            if h.GetNbinsX() != myFittedRateHistograms[0].GetNbinsX():
-                                raise Exception("logic error")
-                            for i in range(1, myFittedRateHistograms[0].GetNbinsX()+1):
-                                if myFittedRateHistograms[0].GetBinContent(i) > 0.0:
-                                    value = h.GetBinContent(i) / myFittedRateHistograms[0].GetBinContent(i) - 1.0
-                                    value = value / math.sqrt(opts.lumiProjection*opts.bkgxsecProjection)
-                                    h.SetBinContent(i, (value+1.0)*myFittedRateHistograms[0].GetBinContent(i))
-                        for h in hdownlist:
-                            if h.GetNbinsX() != myFittedRateHistograms[0].GetNbinsX():
-                                raise Exception("logic error")
-                            for i in range(1, myFittedRateHistograms[0].GetNbinsX()+1):
-                                if myFittedRateHistograms[0].GetBinContent(i) > 0.0:
-                                    value = h.GetBinContent(i) / myFittedRateHistograms[0].GetBinContent(i) - 1.0
-                                    value = value / math.sqrt(opts.lumiProjection*opts.bkgxsecProjection)
-                                    h.SetBinContent(i, (value+1.0)*myFittedRateHistograms[0].GetBinContent(i))
                         myHistogramCache.extend(huplist)
                         myHistogramCache.extend(hdownlist)
                         # Add fit parameter nuisances to nuisance table
