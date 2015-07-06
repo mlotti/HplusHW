@@ -177,10 +177,21 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("DYToTauTau_M_100to200", {
             "7": 0, # []
             "8": 34.92, # [1]
+	    "13": 2.307e+02, # [14]
             }),
     CrossSection("DYToTauTau_M_200to400", {
             "7": 0, # []      
             "8": 1.181, # [1]
+            "13": 7.839e+00, # [14]
+            }),
+   CrossSection("DYToTauTau_M_400to500", {
+            "13": 3.957e-01, # [14]
+            }),
+   CrossSection("DYToTauTau_M_500to700", {
+            "13": 2.352e-01, # [14]
+            }),
+   CrossSection("DYToTauTau_M_700to800", {
+            "13": 3.957e-02, # [14]
             }),
     CrossSection("DYToTauTau_M_400to800", {
             "7": 0, # []      
