@@ -14,6 +14,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
 #include "HiggsAnalysis/MiniAOD2TTree/interface/EventInfoDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/SkimDumper.h"
@@ -39,6 +40,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
         MiniAOD2TTreeFilter(const edm::ParameterSet&);
         ~MiniAOD2TTreeFilter();
 
+        void beginRun(edm::Run const&, edm::EventSetup const&);
         void beginJob();
         bool filter(edm::Event&, const edm::EventSetup&);
         void endJob();
@@ -47,6 +49,9 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	void fill(edm::Event&, const edm::EventSetup&);
 	void reset();
         void endLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);                                   
+
+	std::string hltProcessName;
+        HLTConfigProvider hltConfig;
 
 	std::string outputFileName;
 	std::string codeVersion;

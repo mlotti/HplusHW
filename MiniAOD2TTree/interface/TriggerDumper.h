@@ -15,6 +15,8 @@
 
 #include "TTree.h"
 
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 
@@ -30,11 +32,11 @@ class TriggerDumper {
 	~TriggerDumper();
 
 	void book(TTree*);
+        void book(const edm::Run&,HLTConfigProvider);
 	bool fill(edm::Event&, const edm::EventSetup&);
 	void reset();
 
     private:
-        void book(edm::Event&);
 
         bool filter();
 	bool useFilter;

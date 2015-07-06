@@ -28,6 +28,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 	trigger = iConfig.getParameter<edm::ParameterSet>("Trigger");
         trgDumper = new TriggerDumper(trigger);
         trgDumper->book(Events);
+        hltProcessName = trigger.getParameter<edm::InputTag>("TriggerResults").process();
     }
 
     tauDumper = 0;
@@ -101,7 +102,13 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 }
 
 MiniAOD2TTreeFilter::~MiniAOD2TTreeFilter() {
-    system("ls -l");
+//    system("ls -l");
+}
+
+void MiniAOD2TTreeFilter::beginRun(edm::Run const & iRun, edm::EventSetup const& iSetup) {
+    bool changed = true;
+    hltConfig.init(iRun,iSetup,hltProcessName,changed);
+    if(trgDumper != 0) trgDumper->book(iRun,hltConfig);
 }
 
 void MiniAOD2TTreeFilter::beginJob(){
