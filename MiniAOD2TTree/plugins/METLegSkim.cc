@@ -69,10 +69,12 @@ METLegSkim::METLegSkim(const edm::ParameterSet& iConfig) {
 
 
 METLegSkim::~METLegSkim(){
+    double eff = 0;
+    if(nEvents > 0) eff = ((double)nSelectedEvents)/((double) nEvents);
     std::cout << "METLegSkim: " //  	edm::LogVerbatim("METLegSkim") 
               << " Number_events_read " << nEvents
               << " Number_events_kept " << nSelectedEvents
-              << " Efficiency         " << ((double)nSelectedEvents)/((double) nEvents) << std::endl;
+              << " Efficiency         " << eff << std::endl;
 }
 
 

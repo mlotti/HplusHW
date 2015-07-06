@@ -76,10 +76,12 @@ TauLegSkim::TauLegSkim(const edm::ParameterSet& iConfig) {
 
 
 TauLegSkim::~TauLegSkim(){
+    double eff = 0;
+    if(nEvents > 0) eff = ((double)nSelectedEvents)/((double) nEvents);
     std::cout << "TauLegSkim: " //  	edm::LogVerbatim("TauLegSkim") 
               << " Number_events_read " << nEvents
               << " Number_events_kept " << nSelectedEvents
-              << " Efficiency         " << ((double)nSelectedEvents)/((double) nEvents) << std::endl;
+              << " Efficiency         " << eff << std::endl;
 }
 
 
