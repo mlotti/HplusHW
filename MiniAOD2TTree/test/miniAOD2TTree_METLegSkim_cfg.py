@@ -46,7 +46,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_v",
 #	    "HLT_IsoMu24_IterTrk02_v1"
         ),
-	L1Extra = cms.InputTag("l1extraParticles::MET"),
+	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	filter = cms.untracked.bool(False)
     ),
