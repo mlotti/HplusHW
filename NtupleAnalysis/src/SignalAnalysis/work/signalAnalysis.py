@@ -28,6 +28,9 @@ process.addAnalyzer("SignalAnalysis", Analyzer("SignalAnalysis", config=allSelec
     #return a
 #process.addAnalyzer("test2", createAnalyzer)
 
+# Pick events
+#process.addOptions(EventSaver = PSet(enabled = True,pickEvents = True))
+
 # Run the analysis
 if "proof" in sys.argv:
     process.run(proof=True)

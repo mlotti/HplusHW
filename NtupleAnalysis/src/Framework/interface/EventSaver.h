@@ -9,13 +9,14 @@ class TDirectory;
 class TEntryList;
 class TTree;
 class TList;
+class TTree;
 
 class EventSaver {
 public:
   EventSaver(const ParameterSet& config, TList *outputList);
   ~EventSaver();
 
-  void beginTree(const TTree *tree);
+  void beginTree(TTree *tree);
   void beginEvent() { fSave = false; }
   void endEvent(Long64_t entry);
 
@@ -26,8 +27,12 @@ public:
 private:
   const bool fEnabled;
   bool fSave;
+  bool fPickEvents;
+  std::string fPickEventsFile;
 
   TEntryList *fEntryList;
+
+  TTree* fTree;
 };
 
 class EventSaverClient {

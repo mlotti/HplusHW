@@ -135,6 +135,8 @@ addAnalyzer("2015A","MET120")
 addAnalyzer("2015A_CaloMET","MET80")
 addAnalyzer("2015A_CaloMET","MET120")
 
+# Pick events
+#process.addOptions(EventSaver = PSet(enabled = True, pickEvents = True))
 
 # Run the analysis
 process.run()
