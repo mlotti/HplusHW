@@ -231,6 +231,21 @@ backgroundCrossSections = CrossSectionList(
             "8": 1.76, # [8]
             "13": 4.16, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma 
             }),
+    CrossSection("ST_tW_antitop_5f_inclusiveDecays", {
+            "13": 3.806e+01, # [14]
+            }),
+    CrossSection("ST_tW_top_5f_inclusiveDecays", {
+            "13": 3.809e+01, # [14]
+            }),
+    CrossSection("ST_tchannel_antitop_4f_leptonDecays", {
+            "13": 2.530e+01, # [14]
+            }),
+    CrossSection("ST_tchannel_top_4f_leptonDecays", {
+            "13": 4.190e+01, # [14]
+            }),
+    CrossSection("ST_schannel_4f_leptonDecays", {
+            "13": 3.365e+00, # [14]
+            }),
 )
 
 ## Set background process cross sections
