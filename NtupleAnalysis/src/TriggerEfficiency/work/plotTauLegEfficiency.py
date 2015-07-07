@@ -86,6 +86,14 @@ def convert2TGraph(tefficiency):
                                     array.array("d",yerrl),
                                     array.array("d",yerrh))
 
+def Print(graph):
+    N = graph.GetN()
+    for i in range(N):
+        x = ROOT.Double()
+        y = ROOT.Double()
+        graph.GetPoint(i,x,y)
+        print "x,y",x,y
+
 def main():
 
     if len(sys.argv) < 2:
