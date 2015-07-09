@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+# Usage: multicrabcreate.py [multicrab-dir-to-be-resubmitted]
+# is resubmitting some crab tasks within the multicrab dir, 
+# first remove the crab-dir, then run multicrabcreate.py again 
+# with the multicrab as an argument.
+
 import os
 import re
 import sys
@@ -22,8 +27,8 @@ data = []
 datasets25ns = []
 datasets25ns.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25ns.append(Dataset('/ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
-datasets25ns.append(Dataset('/ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM '))
-datasets25ns.append(Dataset('/ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM '))
+datasets25ns.append(Dataset('/ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
+datasets25ns.append(Dataset('/ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25ns.append(Dataset('/ST_t-channel_antitop_4f_leptonDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25ns.append(Dataset('/ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25ns.append(Dataset('/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
@@ -111,8 +116,12 @@ if match:
 time = datetime.datetime.now().strftime("%Y%m%dT%H%M")
 dirName+= "_" + time
 
+if len(sys.argv) == 2 and os.path.exists(sys.argv[1]) and os.path.isdir(sys.argv[1]):
+    dirName = sys.argv[1]
+
 if not os.path.exists(dirName):
     os.mkdir(dirName)
+    os.system("cp %s %s"%(PSET,dirName))
 
 crab_dataset_re = re.compile("config.Data.inputDataset")
 crab_requestName_re = re.compile("config.General.requestName")
@@ -135,35 +144,39 @@ for dataset in datasets:
             rName = tev_match.group("name")
 	#print rName
 
-        fIN = open("crabConfig.py","r")
-	outfilepath = os.path.join(dirName,"crabConfig_"+rName+".py")
-        fOUT = open(outfilepath,"w")
-        for line in fIN:
-	    if line[0] == "#":
-		continue
-	    match = crab_dataset_re.search(line)
-	    if match:
-		line = "config.Data.inputDataset = '"+dataset.URL+"'\n"
-	    match = crab_requestName_re.search(line)
-	    if match:
-		line = "config.General.requestName = '"+rName+"'\n"
-            match = crab_workArea_re.search(line)
-	    if match:
-		line = "config.General.workArea = '"+dirName+"'\n"
-	    match = crab_pset_re.search(line)
-            if match:
-                line = "config.JobType.psetName = '"+PSET+"'\n"
-	    match = crab_dbs_re.search(line)
-            if match:
-                line = "config.Data.inputDBS = '"+dataset.DBS+"'\n"
+        outfilepath = os.path.join(dirName,"crabConfig_"+rName+".py")
 
-            fOUT.write(line)
-        fOUT.close()
-        fIN.close()
+	if not os.path.exists(os.path.join(dirName,rName)):
 
-	cmd = "crab submit -c "+outfilepath
-	print cmd
-	os.system("crab submit "+outfilepath)
-	mv = "mv "+os.path.join(dirName,"crab_"+rName)+" "+os.path.join(dirName,rName)
-	print mv
-	os.system(mv)
+            if not os.path.exists(outfilepath):
+                fIN = open("crabConfig.py","r")
+                fOUT = open(outfilepath,"w")
+                for line in fIN:
+                    if line[0] == "#":
+                        continue
+	            match = crab_dataset_re.search(line)
+                    if match:
+                        line = "config.Data.inputDataset = '"+dataset.URL+"'\n"
+	            match = crab_requestName_re.search(line)
+                    if match:
+                        line = "config.General.requestName = '"+rName+"'\n"
+                    match = crab_workArea_re.search(line)
+                    if match:
+                        line = "config.General.workArea = '"+dirName+"'\n"
+	            match = crab_pset_re.search(line)
+                    if match:
+                        line = "config.JobType.psetName = '"+PSET+"'\n"
+	            match = crab_dbs_re.search(line)
+                    if match:
+                        line = "config.Data.inputDBS = '"+dataset.DBS+"'\n"
+
+                    fOUT.write(line)
+                fOUT.close()
+                fIN.close()
+
+            cmd = "crab submit -c "+outfilepath
+            print cmd
+            os.system("crab submit "+outfilepath)
+            mv = "mv "+os.path.join(dirName,"crab_"+rName)+" "+os.path.join(dirName,rName)
+            print mv
+            os.system(mv)
