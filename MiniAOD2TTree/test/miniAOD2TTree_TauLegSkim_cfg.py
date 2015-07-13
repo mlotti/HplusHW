@@ -26,13 +26,13 @@ process.source = cms.Source("PoolSource",
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion), '')
+process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag()), '')
 print "GlobalTag="+dataVersion.getGlobalTag()
 
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
-    DataVersion = cms.string(str(dataVersion)),
+    DataVersion = cms.string(str(dataVersion.version)),
     CMEnergy = cms.int32(13),
     Skim = cms.PSet(
 	Counters = cms.VInputTag(
