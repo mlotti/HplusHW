@@ -21,7 +21,7 @@ process.source = cms.Source("PoolSource",
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
-    DataVersion = cms.string('MC'),#remove?
+    DataVersion = cms.string('74Xmc'),
     EventInfo = cms.PSet(),
     CMEnergy = cms.int32(13),
     GenParticles = cms.VPSet(
@@ -31,9 +31,16 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             filter = cms.untracked.bool(False)
         )
     ),
+    GenMETs = cms.VPSet(
+        cms.PSet(
+            branchname = cms.untracked.string("GenMET"),
+            src = cms.InputTag("genMetTrue"),
+            filter = cms.untracked.bool(False)
+        )
+    ),
     GenWeights = cms.VPSet(
         cms.PSet(
-            branchname = cms.untracked.string("GenWeights"),
+            branchname = cms.untracked.string("GenWeight"),
             src = cms.InputTag("generator"),
             filter = cms.untracked.bool(False)
         )
