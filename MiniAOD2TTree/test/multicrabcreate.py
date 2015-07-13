@@ -15,14 +15,21 @@ import datetime
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
 PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
 
-
+lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-250902_13TeV_PromptReco_Collisions15_ZeroTesla_JSON.txt"
 
 class Dataset :
-    def __init__(self,url,dbs="global"):
+    def __init__(self,url,dbs="global",dataVersion="74Xmc"):
         self.URL = url
         self.DBS = dbs
+	self.dataVersion = dataVersion
 
-data = []
+    def isData(self):
+	if "data" in self.dataVersion:
+	    return True
+	return False
+
+datasetsData = []
+datasetsData.append(Dataset('/Tau/Run2015B-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
 
 datasets25ns = []
 datasets25ns.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
@@ -76,6 +83,7 @@ metLegDatasets         = []
 metLegDatasets.extend(datasets25ns)
 
 signalAnalysisDatasets = []
+signalAnalysisDatasets.extend(datasetsData)
 signalAnalysisDatasets.extend(datasets25ns)
 
 
@@ -108,10 +116,13 @@ dirName = "multicrab"
 dirName+= "_"+analysis
 dirName+= "_v"+version
 
+bx = ""
 bx_re = re.compile("\S+(?P<bx>\d\dns)_\S+")
-match = bx_re.search(datasets[0].URL)
-if match:
-    dirName+= "_"+match.group("bx")
+for d in datasets:
+    match = bx_re.search(d.URL)
+    if match:
+        dirName+= "_"+match.group("bx")
+	break
 
 time = datetime.datetime.now().strftime("%Y%m%dT%H%M")
 dirName+= "_" + time
@@ -127,6 +138,8 @@ crab_dataset_re = re.compile("config.Data.inputDataset")
 crab_requestName_re = re.compile("config.General.requestName")
 crab_workArea_re = re.compile("config.General.workArea")
 crab_pset_re = re.compile("config.JobType.psetName")
+crab_psetParams_re = re.compile("config.JobType.pyCfgParams")
+crab_split_re = re.compile("config.Data.splitting")# = 'FileBased'
 crab_dbs_re = re.compile("config.Data.inputDBS")
 tune_re = re.compile("(?P<name>\S+)_Tune")
 tev_re = re.compile("(?P<name>\S+)_13TeV")
@@ -166,9 +179,17 @@ for dataset in datasets:
 	            match = crab_pset_re.search(line)
                     if match:
                         line = "config.JobType.psetName = '"+PSET+"'\n"
+		    match = crab_psetParams_re.search(line)
+                    if match:
+                        line = "config.JobType.pyCfgParams = ['dataVersion="+dataset.dataVersion+"']\n"
 	            match = crab_dbs_re.search(line)
                     if match:
                         line = "config.Data.inputDBS = '"+dataset.DBS+"'\n"
+		    if dataset.isData():
+			match = crab_split_re.search(line)
+			if match:
+			    line = "config.Data.splitting = 'LumiBased'\n"
+			    line+= "#config.Data.lumiMask = '"+lumiMask+"'\n"
 
                     fOUT.write(line)
                 fOUT.close()

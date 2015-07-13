@@ -1,7 +1,14 @@
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
+
+dataVersion = "74Xmc"
+ 
+options, dataVersion = getOptionsDataVersion(dataVersion)
+print dataVersion
+
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1000)
@@ -20,12 +27,13 @@ process.source = cms.Source("PoolSource",
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion), '')
+print "GlobalTag="+dataVersion.getGlobalTag()
 
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
-    DataVersion = cms.string("74Xmc"),
+    DataVersion = cms.string(str(dataVersion)),
     CMEnergy = cms.int32(13),
     Skim = cms.PSet(
 	Counters = cms.VInputTag(
