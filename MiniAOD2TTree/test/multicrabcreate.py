@@ -116,13 +116,10 @@ dirName = "multicrab"
 dirName+= "_"+analysis
 dirName+= "_v"+version
 
-bx = ""
 bx_re = re.compile("\S+(?P<bx>\d\dns)_\S+")
-for d in datasets:
-    match = bx_re.search(d.URL)
-    if match:
-        dirName+= "_"+match.group("bx")
-	break
+match = bx_re.search(datasets[0].URL)
+if match:
+    dirName+= "_"+match.group("bx")
 
 time = datetime.datetime.now().strftime("%Y%m%dT%H%M")
 dirName+= "_" + time
@@ -140,6 +137,8 @@ crab_workArea_re = re.compile("config.General.workArea")
 crab_pset_re = re.compile("config.JobType.psetName")
 crab_psetParams_re = re.compile("config.JobType.pyCfgParams")
 crab_split_re = re.compile("config.Data.splitting")# = 'FileBased'
+crab_splitunits_re = re.compile("config.Data.unitsPerJob")
+
 crab_dbs_re = re.compile("config.Data.inputDBS")
 tune_re = re.compile("(?P<name>\S+)_Tune")
 tev_re = re.compile("(?P<name>\S+)_13TeV")
@@ -190,6 +189,9 @@ for dataset in datasets:
 			if match:
 			    line = "config.Data.splitting = 'LumiBased'\n"
 			    line+= "#config.Data.lumiMask = '"+lumiMask+"'\n"
+			match = crab_splitunits_re.search(line)	
+			if match:
+			    line = "config.Data.unitsPerJob = 100\n"
 
                     fOUT.write(line)
                 fOUT.close()
