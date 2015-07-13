@@ -50,6 +50,8 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	void reset();
         void endLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);                                   
 
+	bool isMC();
+
 	std::string hltProcessName;
         HLTConfigProvider hltConfig;
 
