@@ -161,6 +161,8 @@ void MiniAOD2TTreeFilter::reset(){
 #include "TH1F.h"
 void MiniAOD2TTreeFilter::endJob(){
 
+    fOUT->cd();
+
 // write date
     time_t rawtime;
     time (&rawtime);
