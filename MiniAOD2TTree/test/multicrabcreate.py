@@ -15,7 +15,7 @@ import datetime
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
 PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
 
-lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-250902_13TeV_PromptReco_Collisions15_ZeroTesla_JSON.txt"
+lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-251252_13TeV_PromptReco_Collisions15_JSON.txt"
 
 class Dataset :
     def __init__(self,url,dbs="global",dataVersion="74Xmc"):
@@ -28,8 +28,13 @@ class Dataset :
 	    return True
 	return False
 
-datasetsData = []
-datasetsData.append(Dataset('/Tau/Run2015B-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
+
+datasetsTauData = []
+datasetsTauData.append(Dataset('/Tau/Run2015B-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
+
+datasetsMuonData = []
+#datasetsMuonData.append(Dataset('/SingleMu/Run2015B-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
+datasetsMuonData.append(Dataset('/SingleMuon/Run2015B-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
 
 datasets25ns = []
 datasets25ns.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
@@ -75,15 +80,17 @@ datasets = []
 
 tauLegDatasets         = []
 #tauLegDatasets.append(Dataset('/ZprimeToTauTau_M-1000_Tune4C_13TeV-pythia8/bluj-ZprimeToTauTau_MiniAOD_GRunV47_v2-6b3acb073896b48a28b982ccc80b3330/USER','phys03'))
-tauLegDatasets.extend(datasets25ns)
-tauLegDatasets.extend(datasets25nsDY)
+tauLegDatasets.extend(datasetsMuonData)
+#tauLegDatasets.extend(datasets25ns)
+#tauLegDatasets.extend(datasets25nsDY)
+#tauLegDatasets.extend(datasets50ns)
 
 metLegDatasets         = []
 #metLegDatasets.append(Dataset('/TT_Tune4C_13TeV-pythia8-tauola/bluj-TTbar_MiniAOD_GRunV47_v2-6b3acb073896b48a28b982ccc80b3330/USER','phys03'))
 metLegDatasets.extend(datasets25ns)
 
 signalAnalysisDatasets = []
-signalAnalysisDatasets.extend(datasetsData)
+signalAnalysisDatasets.extend(datasetsTauData)
 signalAnalysisDatasets.extend(datasets25ns)
 
 
@@ -188,7 +195,7 @@ for dataset in datasets:
 			match = crab_split_re.search(line)
 			if match:
 			    line = "config.Data.splitting = 'LumiBased'\n"
-			    line+= "#config.Data.lumiMask = '"+lumiMask+"'\n"
+			    line+= "config.Data.lumiMask = '"+lumiMask+"'\n"
 			match = crab_splitunits_re.search(line)	
 			if match:
 			    line = "config.Data.unitsPerJob = 100\n"
