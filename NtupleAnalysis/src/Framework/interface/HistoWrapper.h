@@ -86,31 +86,31 @@ private:
   WrappedTriplet *makeTHTriplet_(bool enableTrueHistogram, HistoLevel level, std::vector<TDirectory*>& dirs, Args&&... args);
   
   WrappedTH1 *pushWrapper(WrappedTH1 *wrapper) {
-    fAllTH1Histos.emplace_back(wrapper);
+    //fAllTH1Histos.emplace_back(wrapper);
     return wrapper;
   }
   WrappedTH2 *pushWrapper(WrappedTH2 *wrapper) {
-    fAllTH2Histos.emplace_back(wrapper);
+    //fAllTH2Histos.emplace_back(wrapper);
     return wrapper;
   }
   WrappedTH3 *pushWrapper(WrappedTH3 *wrapper) {
-    fAllTH3Histos.emplace_back(wrapper);
+    //fAllTH3Histos.emplace_back(wrapper);
     return wrapper;
   }
   WrappedUnfoldedFactorisationHisto *pushWrapper(WrappedUnfoldedFactorisationHisto *wrapper) {
-    fAllUnfoldedFactorisationHistos.emplace_back(wrapper);
+    //fAllUnfoldedFactorisationHistos.emplace_back(wrapper);
     return wrapper;
   }
   WrappedTH1Triplet *pushWrapper(WrappedTH1Triplet *wrapper) {
-    fWrappedTH1TripletHistos.emplace_back(wrapper);
+    //fWrappedTH1TripletHistos.emplace_back(wrapper);
     return wrapper;
   }    
   WrappedTH2Triplet *pushWrapper(WrappedTH2Triplet *wrapper) {
-    fWrappedTH2TripletHistos.emplace_back(wrapper);
+    //fWrappedTH2TripletHistos.emplace_back(wrapper);
     return wrapper;
   }    
   WrappedTH3Triplet *pushWrapper(WrappedTH3Triplet *wrapper) {
-    fWrappedTH3TripletHistos.emplace_back(wrapper);
+    //fWrappedTH3TripletHistos.emplace_back(wrapper);
     return wrapper;
   }    
 
@@ -120,14 +120,14 @@ private:
   HistoLevel fAmbientLevel;
   int fHistoLevelStats[static_cast<int>(HistoLevel::kNumberOfLevels)];
 
-  std::vector<std::unique_ptr<WrappedTH1>> fAllTH1Histos;
+  /*std::vector<std::unique_ptr<WrappedTH1>> fAllTH1Histos;
   std::vector<std::unique_ptr<WrappedTH2>> fAllTH2Histos;
   std::vector<std::unique_ptr<WrappedTH3>> fAllTH3Histos;
   std::vector<std::unique_ptr<WrappedUnfoldedFactorisationHisto>> fAllUnfoldedFactorisationHistos;
   std::vector<std::unique_ptr<WrappedTH1Triplet>> fWrappedTH1TripletHistos;
   std::vector<std::unique_ptr<WrappedTH2Triplet>> fWrappedTH2TripletHistos;
   std::vector<std::unique_ptr<WrappedTH3Triplet>> fWrappedTH3TripletHistos;
-  
+  */
   bool fIsEnabled;
 };
 
@@ -226,9 +226,9 @@ public:
   }
   ~WrappedTHxTripletBase() { }
   
-  /// Returns true if the histogram exists
+  /// Returns true if the histograms exist
   bool isActive() const { return fHistoWrapper.isActive(fLevel); }
-
+  
   /// Returns pointer to the histogram (Note: it can be a zero pointer if the histogram is not active)
   T* getInclusiveHisto() { return hInclusive; }
   /// Returns pointer to the histogram (Note: it can be a zero pointer if the histogram is not active)
@@ -336,9 +336,11 @@ WrappedTriplet *HistoWrapper::makeTHTriplet_(bool enableTrueHistogram, HistoLeve
   using THType = typename HistoWrapperTHTraits<T>::type;
   std::vector<THType*> histos;
   for (const auto& p: dirs) {
-    T *h = nullptr;
     if(level <= fAmbientLevel) {
       histos.push_back(::makeTH<T>(p, std::forward<Args>(args)...));
+    } else {
+      T *histo = nullptr;
+      histos.push_back(histo);
     }
   }
   fHistoLevelStats[static_cast<int>(level)] += static_cast<int>(dirs.size());
