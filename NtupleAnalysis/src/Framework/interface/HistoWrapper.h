@@ -219,8 +219,10 @@ public:
       hFalse = h[1];
     } else
       throw hplus::Exception("assert") << "Expect at least 2 histograms for WrappedTHxTriplet (" << h.size() << ") given!";
-    if (h.size() > 2);
+    if (h.size() > 2)
       hTrue = h[2];
+    else
+      hTrue = nullptr;
   }
   ~WrappedTHxTripletBase() { }
   
@@ -238,8 +240,8 @@ protected:
   double getWeight() const { return fHistoWrapper.getWeight(); }
   
   /// Fills histogram (if it exists) with value
-  template<typename ...Args> void _Fill(bool status, const Args&&... args) {
-    if (this->isActive()) return;
+  template<typename ...Args> void _Fill(bool status, Args&&... args) {
+    if (!this->isActive()) return;
     if (status) {
       if (this->bEnableTrueHistogram) this->hTrue->Fill(std::forward<Args>(args)...);
     } else {
@@ -330,7 +332,9 @@ WrappedTriplet *HistoWrapper::makeTHTriplet_(bool enableTrueHistogram, HistoLeve
     if (dirs.size() != 2)
       throw hplus::Exception("Logic") << "Expecting two directories when true histogram is enabled!";
   }
-  std::vector<T*> histos;
+  
+  using THType = typename HistoWrapperTHTraits<T>::type;
+  std::vector<THType*> histos;
   for (const auto& p: dirs) {
     T *h = nullptr;
     if(level <= fAmbientLevel) {

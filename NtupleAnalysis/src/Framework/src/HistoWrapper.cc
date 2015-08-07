@@ -1,7 +1,6 @@
 #include "Framework/interface/HistoWrapper.h"
 
 #include <iostream>
-#include <stdexcept>
 
 namespace {
   std::string histoLevelNames[static_cast<int>(HistoLevel::kNumberOfLevels)] = {
