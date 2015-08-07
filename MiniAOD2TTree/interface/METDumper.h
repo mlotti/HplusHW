@@ -19,7 +19,7 @@
 
 class METDumper {
     public:
-	METDumper(std::vector<edm::ParameterSet>);
+	METDumper(std::vector<edm::ParameterSet>, bool isMC);
 	~METDumper();
 
 	void book(TTree*);
@@ -33,6 +33,8 @@ class METDumper {
 
 	std::vector<edm::ParameterSet> inputCollections;
 	edm::Handle<edm::View<pat::MET> > *handle;
+
+	bool ismc;
 
 	double *MET;
 	double *MET_phi;

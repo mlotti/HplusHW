@@ -38,6 +38,11 @@ def runRange(era):
         runmin = 202807
         runmax = 208686
 
+    if era == "2015A":
+        lumi = 100
+        runmin = 0
+        runmax = 999999
+
     if lumi == 0:
         print "Unknown era",era,"exiting.."
         sys.exit()
@@ -46,6 +51,7 @@ def runRange(era):
 
 def createAnalyzer(dataVersion,era):
     a = Analyzer("TriggerEfficiency",
+        name = era,
         Trigger = PSet(
             triggerOR  = [],
             triggerOR2 = []
@@ -55,7 +61,7 @@ def createAnalyzer(dataVersion,era):
         TauSelection = PSet(
             discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
                              "againstMuonTight2",
-                             "againstElectronMediumMVA3"],
+                             "againstElectronMediumMVA5"],
         ),
         binning = binning,
         xLabel  = xLabel,
@@ -74,6 +80,10 @@ def createAnalyzer(dataVersion,era):
                                 "HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v7",
                                 "HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v9",
                                 "HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v10"]
+        if era == "2015A":
+            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_CaloMET30_v1"]
+            a.Trigger.triggerOR2 = ["HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v1"]
+
         lumi,runmin,runmax = runRange(era)
         a.lumi    = lumi
         a.runMin  = runmin
@@ -81,21 +91,28 @@ def createAnalyzer(dataVersion,era):
     else:
         a.Trigger.triggerOR = ["HLT_IsoMu15_eta2p1_L1ETM20_v5"]
         a.Trigger.triggerOR2 = ["HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v6"]
+        if era == "2015A":
+            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_CaloMET30_v1"]
+            a.Trigger.triggerOR2 = ["HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v1"]
         a.PileupWeight = pileupWeight(
-            data = era,
-            mc   = "Summer12_S10"
+#            data = era,
+            data = "2012ABCD", # FIXME
+            mc   = "Summer12_S10" # FIXME
         )
 
     return a
 
 def addAnalyzer(era):
     dv = ["53Xdata22Jan2013","53mcS10"]
+    if era == "2015A":
+        dv = ["74Xdata","74Xmc"]
     process.addAnalyzer("TauLeg_"+era, lambda dv: createAnalyzer(dv, era))
 
 #dv = ["53Xdata22Jan2013","53mcS10"]
 #process.addAnalyzer("TauLeg_2012D", lambda dv: createAnalyzer(dv,"2012D"), excludeTasks=["2012A","2012B", "2012C"])
-addAnalyzer("2012ABC")
-addAnalyzer("2012D")
+#addAnalyzer("2012ABC")
+#addAnalyzer("2012D")
+addAnalyzer("2015A")
 
 """
 process.addAnalyzer("TauLeg_2012D_data", 

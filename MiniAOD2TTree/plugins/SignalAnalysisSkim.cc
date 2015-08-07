@@ -69,10 +69,12 @@ SignalAnalysisSkim::SignalAnalysisSkim(const edm::ParameterSet& iConfig) {
 
 
 SignalAnalysisSkim::~SignalAnalysisSkim(){
+    double eff = 0;
+    if(nEvents > 0) eff = ((double)nSelectedEvents)/((double) nEvents);
     std::cout << "SignalAnalysisSkim: " //  	edm::LogVerbatim("SignalAnalysisSkim") 
               << " Number_events_read " << nEvents
               << " Number_events_kept " << nSelectedEvents
-              << " Efficiency         " << ((double)nSelectedEvents)/((double) nEvents) << std::endl;
+              << " Efficiency         " << eff << std::endl;
 }
 
 

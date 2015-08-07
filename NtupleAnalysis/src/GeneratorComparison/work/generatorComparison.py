@@ -24,6 +24,7 @@ PileupHistogramPath = os.path.join(aux.higgsAnalysisPath(), "NtupleAnalysis", "d
 
 process.addAnalyzer("generatorComparison", 
     Analyzer("GeneratorComparison",
+        histogramAmbientLevel = "Informative",
         tauPtCut = 41.0,
         tauEtaCut = 2.1,
         bjetEtCut = 30.0,

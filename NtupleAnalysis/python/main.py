@@ -130,7 +130,7 @@ class Dataset:
     def __init__(self, name, files, dataVersion, lumiFile):
         self._name = name
         self._files = files
-        self._dataVersion = DataVersion("MC")#dataVersion)
+        self._dataVersion = DataVersion(dataVersion)
         self._lumiFile = lumiFile
 
     def getName(self):

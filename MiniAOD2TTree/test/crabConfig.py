@@ -10,6 +10,7 @@ config.General.transferLogs = True
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'miniAOD2TTree_cfg.py'
+config.JobType.pyCfgParams = ''
 config.JobType.outputFiles = ['miniaod2tree.root']
 
 config.section_("Data")

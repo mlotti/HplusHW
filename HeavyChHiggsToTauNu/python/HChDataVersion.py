@@ -168,6 +168,18 @@ config = {
         "recoProcess": "RECO",
         "globalTag": "START53_V19PR::All",
         "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
+    },
+    "74Xdata": {
+	"triggerProcess": "HLT", 
+	"recoProcess": "RECO",
+        "globalTag": "GR_R_71_V1",
+    },
+    "74Xmc": {
+        "simProcess": "SIM",
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+        "globalTag": "MCRUN2_74_V9",
+        "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
     }
 }
 

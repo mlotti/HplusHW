@@ -161,6 +161,7 @@ import multicrabWorkflows
 import certifiedLumi
 import git
 import aux
+import tarfile
 
 ## Default Storage Element (SE) black list for non-stageout jobs
 defaultSeBlacklist_noStageout = [
@@ -401,22 +402,30 @@ class ExitCodeException(Exception):
 #
 # If any of the checks fail, raises multicrab.ExitCodeException
 def assertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
-    re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
+#    re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
+    re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
     re_job = re.compile("JobExitCode=(?P<code>\d+)")
 
     exeExitCode = None
     jobExitCode = None
-    f = open(stdoutFile)
-    for line in f:
-        m = re_exe.search(line)
-        if m:
-            exeExitCode = int(m.group("code"))
-            continue
-        m = re_job.search(line)
-        if m:
-            jobExitCode = int(m.group("code"))
-            continue
-    f.close()
+    if tarfile.is_tarfile(stdoutFile):
+        fIN = tarfile.open(stdoutFile)
+        log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+        for member in fIN.getmembers():
+            f = fIN.extractfile(member)
+            match = log_re.search(f.name)
+            if match:
+    		for line in f:
+        	    m = re_exe.search(line)
+                    if m:
+            		exeExitCode = int(m.group("code"))
+            		continue
+        	    m = re_job.search(line)
+        	    if m:
+            		jobExitCode = int(m.group("code"))
+            		continue
+    	fIN.close()
+    jobExitCode = exeExitCode
     if exeExitCode == None:
         raise ExitCodeException("No exeExitCode")
     if jobExitCode == None:

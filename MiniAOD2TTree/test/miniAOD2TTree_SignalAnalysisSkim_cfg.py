@@ -1,7 +1,13 @@
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
+
+dataVersion = "74Xmc"
+
+options, dataVersion = getOptionsDataVersion(dataVersion)
+print dataVersion
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(10000)
@@ -18,10 +24,16 @@ process.source = cms.Source("PoolSource",
     )
 )
 
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+#process.GlobalTag = GlobalTag(process.GlobalTag, cms.string(dataVersion.getGlobalTag()), '')
+process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag()), '')
+print "GlobalTag="+dataVersion.getGlobalTag()
+
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
-    DataVersion = cms.string("74Xmc"),
+    DataVersion = cms.string(str(dataVersion.version)),
     CMEnergy = cms.int32(13),
     Skim = cms.PSet(
 	Counters = cms.VInputTag(
@@ -40,7 +52,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
         ),
-	L1Extra = cms.InputTag("l1extraParticles::MET"),
+	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	filter = cms.untracked.bool(False)
     ),
@@ -151,7 +163,14 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("MET_Type1"),
             src = cms.InputTag("slimmedMETs")
         ),
-    )
+    ),
+    GenWeights = cms.VPSet(
+        cms.PSet(
+            branchname = cms.untracked.string("GenWeights"),
+            src = cms.InputTag("generator"),
+            filter = cms.untracked.bool(False)
+        )
+    ),
 )
 
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")

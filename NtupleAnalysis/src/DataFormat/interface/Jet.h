@@ -22,7 +22,7 @@ public:
   bool jetIDDiscriminatorIsValid() const { return bValidityOfJetIDDiscr; }
   bool jetPUIDDiscriminatorIsValid() const { return bValidityOfJetPUIDDiscr; }
   bool bjetDiscriminatorIsValid() const { return bValidityOfBJetDiscr; }
-  
+
   void setupBranches(BranchManager& mgr);
 
   Jet operator[](size_t i) const;
@@ -74,7 +74,7 @@ public:
   
   /// Operator defined for using std::sort on vector<Jet>
   bool operator<(const Jet& jet) const {
-    // Descending order by tau pT
+    // Descending order by jet pT
     return (this->pt() > jet.pt());
   }
 };
