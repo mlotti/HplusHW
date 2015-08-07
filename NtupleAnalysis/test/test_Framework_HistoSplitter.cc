@@ -188,19 +188,31 @@ TEST_CASE("HistoSplitter", "[Framework]") {
     CHECK( hf->getHisto()->GetBinContent(6,1) == Approx(1.000));
     CHECK( hf->getHisto()->GetBinContent(3,1) == Approx(2.34));
     // Check 1D triplet histogram
-    /*
+    
     HistoSplitter::SplittedTripletTH1s h1t;
     test.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kDebug, fTripletDirs, h1t, "0_test1Dtriplet", "0_test1Dtriplet", 10, 0., 400.);
     CHECK( h1t.size() == 1 );
-    //test.fillShapeHistogramTriplet(h1t, false, 205.0);
-    //test.fillShapeHistogramTriplet(h1t, true, 105.0, 2.34);
+    test.fillShapeHistogramTriplet(h1t, false, 205.0);
+    test.fillShapeHistogramTriplet(h1t, true, 105.0, 2.34);
     CHECK( h1t[0]->getInclusiveHisto()->GetBinContent(6) == Approx(1.000));
     CHECK( h1t[0]->getInclusiveHisto()->GetBinContent(3) == Approx(2.34));
     CHECK( h1t[0]->getFalseHisto()->GetBinContent(6) == Approx(1.000));
     CHECK( h1t[0]->getFalseHisto()->GetBinContent(3) == Approx(0.0));
     CHECK( h1t[0]->getTrueHisto()->GetBinContent(6) == Approx(0.0));
     CHECK( h1t[0]->getTrueHisto()->GetBinContent(3) == Approx(2.34));
-    */
+
+    HistoSplitter::SplittedTripletTH2s h2t;
+    test.createShapeHistogramTriplet<TH2F>(true, HistoLevel::kDebug, fTripletDirs, h2t, "0_test2Dtriplet", "0_test2Dtriplet", 10, 0., 400., 10, 0., 100.);
+    CHECK( h2t.size() == 1 );
+    test.fillShapeHistogramTriplet(h2t, false, 205.0, 4.0);
+    test.fillShapeHistogramTriplet(h2t, false, 205.0, 4.0, 2.34);
+
+    HistoSplitter::SplittedTripletTH3s h3t;
+    test.createShapeHistogramTriplet<TH3F>(true, HistoLevel::kDebug, fTripletDirs, h3t, "0_test3Dtriplet", "0_test3Dtriplet", 10, 0., 400., 10, 0., 100., 10, 0., 100.);
+    CHECK( h3t.size() == 1 );
+    test.fillShapeHistogramTriplet(h3t, false, 205.0, 4.0, 2.0);
+    test.fillShapeHistogramTriplet(h3t, false, 205.0, 4.0, 2.0, 2.34);
+    
   }
 
   SECTION("HistoSplitter / splitting as function of 1 variable") {
