@@ -51,6 +51,8 @@ public:
     double getDeltaPhiJetMET(size_t n) const;
     /// Get 1D cut variable on jet_n
     double get1DCutVariable(size_t n) const;
+    /// Minimum value of cut variables (ignoring negative values)
+    double getMinimumCutValue() const { return fMinimumCutValue; }
     
     friend class AngularCutsBase;
 
@@ -65,6 +67,8 @@ public:
     std::vector<double> fDeltaPhiJetMET;
     /// 1D cut variables
     std::vector<double> f1DCutVariables;
+    /// Minimum value of cut variables (ignoring negative values)
+    double fMinimumCutValue;
   };
     
   // Main class

@@ -132,6 +132,13 @@ AngularCutsBase::Data AngularCutsBase::privateAnalyze(const TauSelection::Data& 
     }
     output.fPassedCutStatus.push_back(output.bPassedSelection);
   }
+  // Obtain minimum value
+  output.fMinimumCutValue = 999.0;
+  for (size_t i = 0; i < maxIndex; ++i) {
+    if (output.f1DCutVariables[i] >= 0.0 && output.f1DCutVariables[i] < output.fMinimumCutValue) {
+      output.fMinimumCutValue = output.f1DCutVariables[i];
+    }
+  }
   // Fill main counter if passed
   if (output.bPassedSelection)
     cPassedAngularCuts.increment();
