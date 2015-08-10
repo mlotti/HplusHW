@@ -12,14 +12,14 @@
 
 #include <vector>
 
-class TauSelection::Data;
-class ElectronSelection::Data;
-class MuonSelection::Data;
-class JetSelection::Data;
-class AngularCutsCollinear::Data;
-class BJetSelection::Data;
-class METSelection::Data;
-class AngularCutsBackToBack::Data;
+class TauSelection;
+class ElectronSelection;
+class MuonSelection;
+class JetSelection;
+class AngularCutsCollinear;
+class BJetSelection;
+class METSelection;
+class AngularCutsBackToBack;
 
 class CommonPlots {
 public:
@@ -105,7 +105,6 @@ private:
   // muon veto
  
   // jet selection
-
   HistoSplitter::SplittedTripletTH1s hCtrlNjets;
   
   // MET trigger SF

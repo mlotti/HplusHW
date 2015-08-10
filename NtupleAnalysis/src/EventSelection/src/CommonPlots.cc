@@ -261,24 +261,41 @@ void CommonPlots::fillControlPlotsAtMuonSelection(const Event& event, const Muon
 
 void CommonPlots::fillControlPlotsAtJetSelection(const Event& event, const JetSelection::Data& data) {
   fJetData = data;
-  //fHistoSplitter.fillShapeHistogramTriplet(hCtrlNjets, );
-  
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNjets, bIsFakeTau, fJetData.getNumberOfSelectedJets());
 }
 
 void CommonPlots::fillControlPlotsAtAngularCutsCollinear(const Event& event, const AngularCutsCollinear::Data& data) {
   fCollinearAngularCutsData = data;
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlCollinearAngularCutsMinimum, bIsFakeTau, fCollinearAngularCutsData.getMinimumCutValue()); 
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlCollinearAngularCutsJet1, bIsFakeTau, fCollinearAngularCutsData.get1DCutVariable(0));
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlCollinearAngularCutsJet2, bIsFakeTau, fCollinearAngularCutsData.get1DCutVariable(1));
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlCollinearAngularCutsJet3, bIsFakeTau, fCollinearAngularCutsData.get1DCutVariable(2));
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlCollinearAngularCutsJet4, bIsFakeTau, fCollinearAngularCutsData.get1DCutVariable(3));
 }
 
 void CommonPlots::fillControlPlotsAtBtagging(const Event& event, const BJetSelection::Data& data) {
   fBJetData = data;
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNBJets, bIsFakeTau, fBJetData.getNumberOfSelectedBJets());
+  for (auto& p: fBJetData.getSelectedBJets()) {
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlBJetPt, bIsFakeTau, p.pt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlBJetEta, bIsFakeTau, p.eta());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlBDiscriminator, bIsFakeTau, p.bjetDiscriminator());
+  }
 }
 
 void CommonPlots::fillControlPlotsAtMETSelection(const Event& event, const METSelection::Data& data) {
   fMETData = data;
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlMET, bIsFakeTau, fMETData.getMET().R());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlMETPhi, bIsFakeTau, fMETData.getMET().phi());
 }
 
 void CommonPlots::fillControlPlotsAtAngularCutsBackToBack(const Event& event, const AngularCutsBackToBack::Data& data) {
   fBackToBackAngularCutsData = data;
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlBackToBackAngularCutsMinimum, bIsFakeTau, fBackToBackAngularCutsData.getMinimumCutValue());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlBackToBackAngularCutsJet1, bIsFakeTau, fBackToBackAngularCutsData.get1DCutVariable(0));
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlBackToBackAngularCutsJet2, bIsFakeTau, fBackToBackAngularCutsData.get1DCutVariable(1));
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlBackToBackAngularCutsJet3, bIsFakeTau, fBackToBackAngularCutsData.get1DCutVariable(2));
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlBackToBackAngularCutsJet4, bIsFakeTau, fBackToBackAngularCutsData.get1DCutVariable(3));
 }
 
 //===== unique filling methods (to be called AFTER return statement from analysis routine)
@@ -288,17 +305,66 @@ void CommonPlots::fillControlPlotsAfterTauTriggerScaleFactor(const Event& event,
 }
 
 void CommonPlots::fillControlPlotsAfterMETTriggerScaleFactor(const Event& event) {
-  
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNjetsAfterJetSelectionAndMETSF, bIsFakeTau, fJetData.getNumberOfSelectedJets());
 }
 
 void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event) {
+  // I.e. plots after standard selections
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterStdSelections, bIsFakeTau, iVertices);
   
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().pt());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().eta());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().phi());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaPhiAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().eta(), fTauData.getSelectedTau().phi());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().lTrkPt());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().decayModeFinding());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterStdSelections, bIsFakeTau, fTauData.getRtauOfSelectedTau());
+  
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNJetsAfterStdSelections, bIsFakeTau, fJetData.getNumberOfSelectedJets());
+  for (auto& p: fJetData.getSelectedJets()) {
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetPtAfterStdSelections, bIsFakeTau, p.pt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetEtaAfterStdSelections, bIsFakeTau, p.eta());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetEtaPhiAfterStdSelections, bIsFakeTau, p.eta(), p.phi());
+  }
 }
+
 void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event, double transverseMass) {
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterAllSelections, bIsFakeTau, iVertices);
   
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().pt());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().eta());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().phi());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaPhiAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().eta(), fTauData.getSelectedTau().phi());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().lTrkPt());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().decayModeFinding());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterAllSelections, bIsFakeTau, fTauData.getRtauOfSelectedTau());
+  
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNJetsAfterAllSelections, bIsFakeTau, fJetData.getNumberOfSelectedJets());
+  for (auto& p: fJetData.getSelectedJets()) {
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetPtAfterAllSelections, bIsFakeTau, p.pt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetEtaAfterAllSelections, bIsFakeTau, p.eta());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetEtaPhiAfterAllSelections, bIsFakeTau, p.eta(), p.phi());
+  }
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlCollinearAngularCutsMinimumAfterAllSelections, bIsFakeTau, fCollinearAngularCutsData.getMinimumCutValue());
+
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlMETAfterAllSelections, bIsFakeTau, fMETData.getMET().R());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlMETPhiAfterAllSelections, bIsFakeTau, fMETData.getMET().phi());
+  
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlNBJetsAfterAllSelections, bIsFakeTau, fBJetData.getNumberOfSelectedBJets());
+  for (auto& p: fBJetData.getSelectedBJets()) {
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlBJetPtAfterAllSelections, bIsFakeTau, p.pt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlBJetEtaAfterAllSelections, bIsFakeTau, p.eta());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlBDiscriminatorAfterAllSelections, bIsFakeTau, p.bjetDiscriminator());
+  }
+  
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlBackToBackAngularCutsMinimumAfterAllSelections, bIsFakeTau, fBackToBackAngularCutsData.getMinimumCutValue());
+
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlDeltaPhiTauMetAfterAllSelections, bIsFakeTau, fBackToBackAngularCutsData.getDeltaPhiTauMET());
+  
+  fHistoSplitter.fillShapeHistogramTriplet(hShapeTransverseMass, bIsFakeTau, transverseMass);
 }
 
 void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, double transverseMass) {
-  
+  fHistoSplitter.fillShapeHistogramTriplet(hShapeProbabilisticBtagTransverseMass, bIsFakeTau, transverseMass);
 }
 

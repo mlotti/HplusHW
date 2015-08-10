@@ -94,6 +94,8 @@ commonPlotsOptions = PSet(
   # Splitting of histograms as function of one or more parameters
   # Example: histogramSplitting = [PSet(label="tauPt", binLowEdges=[60, 70, 80, 100, 120], useAbsoluteValues=False)],
   histogramSplitting = [],
+  # By default, inclusive (i.e. fake tau+genuine tau) and fake tau histograms are produced. Set to true to also produce genuine tau histograms (Note: will slow down running and enlarge resulting files).
+  enableGenuineTauHistograms = False, 
   # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
               ptBins = PSet(nBins=50, axisMin=0., axisMax=500.),
              etaBins = PSet(nBins=60, axisMin=-3.0, axisMax=3.0),
