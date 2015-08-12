@@ -56,7 +56,7 @@ private:
     void book(TDirectory *dir);
     void bookWeighted(TDirectory *dir);
     void serialize();
-
+    
     const std::string& getName() const { return name; }
 
   private:
@@ -67,7 +67,7 @@ private:
     std::vector<double> weightsSquared;
 
     TH1 *counter;
-    TH1 *weightedCounter;
+    TH1 *weightedCounter;    
   };
 
 public:
@@ -83,6 +83,9 @@ public:
 
   void setOutput(TDirectory *dir);
   void serialize();
+  
+  void enable(bool enabled) { fIsEnabled = enabled; }
+  bool isEnabled() const { return fIsEnabled; }
 
 private:
   friend class Count;
@@ -91,13 +94,15 @@ private:
 
   size_t findOrInsertCounter(const std::string& name);
 
+  bool fIsEnabled;
   const EventWeight& fWeight;
   std::vector<Counter> fCounters; // main counter has index 0
 };
 
 inline
 void Count::increment() {
-  fEventCounter->incrementCount(fCounterIndex, fCountIndex);
+  if (fEventCounter->isEnabled())
+    fEventCounter->incrementCount(fCounterIndex, fCountIndex);
 }
 
 inline
