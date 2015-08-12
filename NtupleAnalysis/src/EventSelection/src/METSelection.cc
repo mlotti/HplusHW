@@ -58,7 +58,12 @@ METSelection::Data METSelection::silentAnalyze(const Event& event, int nVertices
 
 METSelection::Data METSelection::analyze(const Event& event, int nVertices) {
   ensureAnalyzeAllowed(event.eventID());
-  return privateAnalyze(event, nVertices);
+  METSelection::Data data = privateAnalyze(event, nVertices);
+  // Send data to CommonPlots
+  if (fCommonPlots != nullptr)
+    fCommonPlots->fillControlPlotsAtMETSelection(event, data);
+  // Return data
+  return data;
 }
 
 METSelection::Data METSelection::privateAnalyze(const Event& iEvent, int nVertices) {

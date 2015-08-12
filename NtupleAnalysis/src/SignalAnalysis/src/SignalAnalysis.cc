@@ -105,6 +105,11 @@ void SignalAnalysis::setupBranches(BranchManager& branchManager) {
 }
 
 void SignalAnalysis::process(Long64_t entry) {
+
+//====== Initialize
+  fCommonPlots.initialize();
+  fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
+
   cAllEvents.increment();
 
 //====== Apply trigger // FIXME to be debugged
@@ -136,6 +141,7 @@ void SignalAnalysis::process(Long64_t entry) {
   if (nVertices < 1)
     return;
   cVertexSelection.increment();
+  fCommonPlots.setNvertices(nVertices);
   
 //====== Setup common events // FIXME missing code
     
@@ -160,13 +166,26 @@ void SignalAnalysis::process(Long64_t entry) {
     return;
 
 //====== Collinear angular cuts
-  const METSelection::Data tmpMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
-  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData, jetData, tmpMETData);
+  const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
+  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData, jetData, silentMETData);
   if (!collinearData.passedSelection())
     return;
 
+//====== Point of standard selections
+  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
+  fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
+
 //====== b-jet selection
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
+  // Apply b tag scale factor
+  // FIXME missing code
+  // Fill final shape plots with b tag efficiency applied as an event weight
+  if (silentMETData.passedSelection()) {
+    const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData, jetData, silentMETData);
+    if (silentBackToBackData.passedSelection()) {
+      fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(fEvent, silentMETData, bjetData.getBTaggingPassProbability());
+    }
+  }
   if (!bjetData.passedSelection())
     return;
 
@@ -182,7 +201,9 @@ void SignalAnalysis::process(Long64_t entry) {
 
 //====== All cuts passed
   cSelected.increment();
-  // Fill final plots // FIXME missing code
+  // Fill final plots
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
+  
 
 //====== Experimental selection code
   // if necessary

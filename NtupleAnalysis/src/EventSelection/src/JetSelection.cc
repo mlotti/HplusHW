@@ -73,7 +73,12 @@ JetSelection::Data JetSelection::silentAnalyze(const Event& event, const TauSele
 
 JetSelection::Data JetSelection::analyze(const Event& event, const TauSelection::Data& tauData) {
   ensureAnalyzeAllowed(event.eventID());
-  return privateAnalyze(event, tauData);
+  JetSelection::Data data = privateAnalyze(event, tauData);
+  // Send data to CommonPlots
+  if (fCommonPlots != nullptr)
+    fCommonPlots->fillControlPlotsAtJetSelection(event, data);
+  // Return data
+  return data;
 }
 
 JetSelection::Data JetSelection::privateAnalyze(const Event& event, const TauSelection::Data& tauData) {

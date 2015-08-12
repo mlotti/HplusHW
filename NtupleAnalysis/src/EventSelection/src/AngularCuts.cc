@@ -102,7 +102,16 @@ AngularCutsBase::Data AngularCutsBase::silentAnalyze(const Event& event, const T
 
 AngularCutsBase::Data AngularCutsBase::analyze(const Event& event, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
   ensureAnalyzeAllowed(event.eventID());
-  return privateAnalyze(tauData, jetData, metData);
+  AngularCutsBase::Data data = privateAnalyze(tauData, jetData, metData);
+  // Send data to CommonPlots
+  if (fCommonPlots != nullptr) {
+    if (fType == kCollinear)
+      fCommonPlots->fillControlPlotsAtAngularCutsCollinear(event, data);
+    else if (fType == kBackToBack)
+      fCommonPlots->fillControlPlotsAtAngularCutsBackToBack(event, data);
+  }
+  // Return data
+  return data;
 }
 
 AngularCutsBase::Data AngularCutsBase::privateAnalyze(const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData) {

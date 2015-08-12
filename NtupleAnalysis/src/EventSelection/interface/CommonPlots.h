@@ -35,6 +35,11 @@ public:
   ~CommonPlots();
   
   void book(TDirectory *dir);
+  
+  /// Initialize (call this at the beginning of each event; prevents double-counting of events)
+  void initialize();
+  /// Sets factorisation bin (call this for each event before filling the first histogram!)
+  void setFactorisationBinForEvent(const std::vector<float>& values=std::vector<float>{}) { fHistoSplitter.setFactorisationBinForEvent(values); }
 
   //===== unique filling methods (to be called inside the event selection routine only, i.e. (before a passing decision is done))
   //void fillControlPlotsAtVetoTauSelection(const Event& event, const VetoTauSelection::Data& tauVetoData);
@@ -50,11 +55,11 @@ public:
   
   //===== unique filling methods (to be called AFTER return statement from analysis routine)
   void setNvertices(int vtx) { iVertices = vtx; }
-  void fillControlPlotsAfterTauTriggerScaleFactor(const Event& event, const TauSelection::Data& data, bool isFakeTau);
+  void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data, bool isFakeTau);
   void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
   void fillControlPlotsAfterTopologicalSelections(const Event& event);
-  void fillControlPlotsAfterAllSelections(const Event& event, double transverseMass);
-  void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, double transverseMass);
+  void fillControlPlotsAfterAllSelections(const Event& event);
+  void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight);
   //void fillControlPlotsAfterAllSelectionsWithFullMass(const Event& event, FullHiggsMassCalculator::Data& data);
 
 private:
