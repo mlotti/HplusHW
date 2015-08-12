@@ -4,26 +4,9 @@
 
 #include "Framework/interface/Branch.h"
 #include "Framework/interface/BranchManager.h"
-
-#include "Math/Vector2D.h"
+#include "DataFormat/interface/Particle.h"
 
 class BranchManager;
-
-namespace math {
-  template <typename T>
-  using XYVectorT = ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<T>>;
-
-  using XYVectorF = XYVectorT<float>;
-  using XYVectorD = XYVectorT<double>;
-  using XYVector  = XYVectorF;
-
-  template <typename T>
-  using Polar2DVectorT = ROOT::Math::DisplacementVector2D<ROOT::Math::Polar2D<T>>;
-
-  using Polar2DVectorF = Polar2DVectorT<float>;
-  using Polar2DVectorD = Polar2DVectorT<double>;
-  using Polar2DVector  = Polar2DVectorF;
-}
 
 class METBase {
 public:

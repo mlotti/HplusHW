@@ -5,10 +5,11 @@
 #include "Framework/interface/Branch.h"
 #include "Framework/interface/BranchManager.h"
 
-
 #include "Math/LorentzVector.h"
 #include "Math/PtEtaPhiE4D.h"
 #include "Math/DisplacementVector3D.h"
+#include "Math/DisplacementVector2D.h"
+#include "Math/Vector2D.h"
 
 #include <vector>
 #include <string>
@@ -41,13 +42,26 @@ namespace math {
   using LorentzVector = XYZTLorentzVector;
   using PolarLorentzVector = PtEtaPhiELorentzVector;
 
-
   template <typename T>
   using XYZVectorT = ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<T>>;
 
   using XYZVectorF = XYZVectorT<float>;
   using XYZVectorD = XYZVectorT<double>;
   using XYZVector = XYZVectorF;
+
+  template <typename T>
+  using XYVectorT = ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<T>>;
+
+  using XYVectorF = XYVectorT<float>;
+  using XYVectorD = XYVectorT<double>;
+  using XYVector  = XYVectorF;
+
+  template <typename T>
+  using Polar2DVectorT = ROOT::Math::DisplacementVector2D<ROOT::Math::Polar2D<T>>;
+
+  using Polar2DVectorF = Polar2DVectorT<float>;
+  using Polar2DVectorD = Polar2DVectorT<double>;
+  using Polar2DVector  = Polar2DVectorF;
 }
 
 // The intention of ParticleCollection and Particle is not to be
@@ -98,6 +112,18 @@ public:
   // the coordinate change
   LorentzVector p4() const {
     return LorentzVector(polarP4());
+  }
+
+  // Note: asking for polarP4 is more expensive than asking any of
+  // pt/phi, so call this only when necessary
+  math::Polar2DVector polarP2() const {
+    return math::Polar2DVector(pt(), phi());
+  }
+
+  // Note: asking for cartesian p2 is even more expensive because of
+  // the coordinate change
+  math::XYVector p2() const {
+    return math::XYVector(polarP2());
   }
 
 protected:
@@ -159,8 +185,8 @@ public:
 
   void setupBranches(BranchManager& mgr) {
     mgr.book(prefix()+"_pt"  +energySystematicsVariation(), &fPt);
-    mgr.book(prefix()+"_eta",                               &fEta);
-    mgr.book(prefix()+"_phi",                               &fPhi);
+    mgr.book(prefix()+"_eta" +energySystematicsVariation(), &fEta);
+    mgr.book(prefix()+"_phi" +energySystematicsVariation(), &fPhi);
     mgr.book(prefix()+"_e"   +energySystematicsVariation(), &fE);
     mgr.book(prefix()+"_pdgId"                            , &fPdgId);
   }
