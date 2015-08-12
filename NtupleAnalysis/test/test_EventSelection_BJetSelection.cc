@@ -139,7 +139,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     tmp.put("BJetSelection4.bjetDiscrWorkingPoint", "dummy");
     tmp.put("BJetSelection4.numberOfBJetsCutValue", 1);
     tmp.put("BJetSelection4.numberOfBJetsCutDirection", ">=");
-    tmp.put("BJetSelection5.bjetDiscr", "combinedSecondaryVertexBJetTags");
+    tmp.put("BJetSelection5.bjetDiscr", "exoticJetTags");
     tmp.put("BJetSelection5.bjetDiscrWorkingPoint", "Loose");
     tmp.put("BJetSelection5.numberOfBJetsCutValue", 1);
     tmp.put("BJetSelection5.numberOfBJetsCutDirection", ">=");
