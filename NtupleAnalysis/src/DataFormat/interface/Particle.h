@@ -5,12 +5,14 @@
 #include "Framework/interface/Branch.h"
 #include "Framework/interface/BranchManager.h"
 
-
 #include "Math/LorentzVector.h"
 #include "Math/PtEtaPhiE4D.h"
 #include "Math/DisplacementVector3D.h"
+#include "Math/DisplacementVector2D.h"
+#include "Math/Vector2D.h"
 
 #include <vector>
+#include <string>
 #include <limits>
 
 class BranchManager;
@@ -40,13 +42,26 @@ namespace math {
   using LorentzVector = XYZTLorentzVector;
   using PolarLorentzVector = PtEtaPhiELorentzVector;
 
-
   template <typename T>
   using XYZVectorT = ROOT::Math::DisplacementVector3D<ROOT::Math::Cartesian3D<T>>;
 
   using XYZVectorF = XYZVectorT<float>;
   using XYZVectorD = XYZVectorT<double>;
   using XYZVector = XYZVectorF;
+
+  template <typename T>
+  using XYVectorT = ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<T>>;
+
+  using XYVectorF = XYVectorT<float>;
+  using XYVectorD = XYVectorT<double>;
+  using XYVector  = XYVectorF;
+
+  template <typename T>
+  using Polar2DVectorT = ROOT::Math::DisplacementVector2D<ROOT::Math::Polar2D<T>>;
+
+  using Polar2DVectorF = Polar2DVectorT<float>;
+  using Polar2DVectorD = Polar2DVectorT<double>;
+  using Polar2DVector  = Polar2DVectorF;
 }
 
 // The intention of ParticleCollection and Particle is not to be
@@ -84,7 +99,6 @@ public:
   float_type eta() const { return fCollection->fEta->value()[index()]; }
   float_type phi() const { return fCollection->fPhi->value()[index()]; }
   float_type e()   const { return fCollection->fE->value()[index()]; }
-  float_type et()   const { return fCollection->fEt->value()[index()]; }
   short pdgId()  const { return fCollection->fPdgId->value()[index()]; }
 
   float_type Phi() const { return phi(); }
@@ -98,6 +112,18 @@ public:
   // the coordinate change
   LorentzVector p4() const {
     return LorentzVector(polarP4());
+  }
+
+  // Note: asking for polarP4 is more expensive than asking any of
+  // pt/phi, so call this only when necessary
+  math::Polar2DVector polarP2() const {
+    return math::Polar2DVector(pt(), phi());
+  }
+
+  // Note: asking for cartesian p2 is even more expensive because of
+  // the coordinate change
+  math::XYVector p2() const {
+    return math::XYVector(polarP2());
   }
 
 protected:
@@ -123,7 +149,8 @@ public:
 protected:
   const std::string& prefix() const { return fPrefix; }
   const std::string& energySystematicsVariation() const { return fEnergySystematicsVariation; }
-
+  void checkDiscriminatorNameValidity(const std::string& name, const std::vector<std::string>& list) const;
+  
   template <typename Coll>
   static
   std::vector<typename Coll::value_type> toVector(Coll& coll) {
@@ -152,17 +179,15 @@ public:
     fEta(nullptr),
     fPhi(nullptr),
     fE(nullptr),
-    fEt(nullptr),
     fPdgId(nullptr)
   {}
   ~ParticleCollection() {}
 
   void setupBranches(BranchManager& mgr) {
     mgr.book(prefix()+"_pt"  +energySystematicsVariation(), &fPt);
-    mgr.book(prefix()+"_eta",                               &fEta);
-    mgr.book(prefix()+"_phi",                               &fPhi);
+    mgr.book(prefix()+"_eta" +energySystematicsVariation(), &fEta);
+    mgr.book(prefix()+"_phi" +energySystematicsVariation(), &fPhi);
     mgr.book(prefix()+"_e"   +energySystematicsVariation(), &fE);
-    mgr.book(prefix()+"_et"  +energySystematicsVariation(), &fEt);
     mgr.book(prefix()+"_pdgId"                            , &fPdgId);
   }
 
@@ -179,7 +204,6 @@ protected:
   const Branch<std::vector<float_type>> *fEta;
   const Branch<std::vector<float_type>> *fPhi;
   const Branch<std::vector<float_type>> *fE;
-  const Branch<std::vector<float_type>> *fEt;
   const Branch<std::vector<short>> *fPdgId; 
 };
 

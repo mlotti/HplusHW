@@ -4,6 +4,7 @@
 
 #include "Framework/interface/BranchManager.h"
 #include "DataFormat/interface/Event.h"
+#include <string>
 
 TEST_CASE("Event", "[DataFormat]") {
   SECTION("Default case") {
@@ -11,8 +12,9 @@ TEST_CASE("Event", "[DataFormat]") {
 
     BranchManager mgr;
     mgr.setTree(tree.get());
-
-    Event event(ParameterSet("{}", true));
+    
+    ParameterSet pset(getMinimalConfig(), true);
+    Event event(pset);
     event.setupBranches(mgr);
 
     SECTION("Event") {
@@ -58,7 +60,7 @@ TEST_CASE("Event", "[DataFormat]") {
     BranchManager mgr;
     mgr.setTree(tree.get());
 
-    boost::property_tree::ptree tmp;
+    boost::property_tree::ptree tmp = getMinimalConfig();
     tmp.put("TauSelection.systematicVariation", "systVarTESUp");
     ParameterSet config(tmp, true);
 
@@ -95,7 +97,7 @@ TEST_CASE("Event", "[DataFormat]") {
   }
 
   SECTION("Multiple systematic variations") {
-    boost::property_tree::ptree tmp;
+    boost::property_tree::ptree tmp = getMinimalConfig();
     tmp.put("TauSelection.systematicVariation", "systVarTESUp");
     tmp.put("JetSelection.systematicVariation", "systVarJESUp");
     ParameterSet config(tmp, true);
@@ -109,12 +111,13 @@ TEST_CASE("Event", "[DataFormat]") {
     BranchManager mgr;
     mgr.setTree(tree.get());
 
-    boost::property_tree::ptree tmp;
+    boost::property_tree::ptree tmp = getMinimalConfig();
 
     SECTION("One discriminator") {
+      TauCollection fTauCollection;
       boost::property_tree::ptree discrs;
       boost::property_tree::ptree child;
-      child.put("", "discriminator3");
+      child.put("", fTauCollection.getIsolationDiscriminatorNames()[0]);
       discrs.push_back(std::make_pair("", child));
 
       tmp.add_child("TauSelection.discriminators", discrs);
@@ -134,13 +137,14 @@ TEST_CASE("Event", "[DataFormat]") {
     }
 
     SECTION("Three discriminators") {
+      TauCollection fTauCollection;
       boost::property_tree::ptree discrs;
       boost::property_tree::ptree child;
-      child.put("", "discriminator1");
+      child.put("", fTauCollection.getIsolationDiscriminatorNames()[0]);
       discrs.push_back(std::make_pair("", child));
-      child.put("", "discriminator2");
+      child.put("", fTauCollection.getAgainstMuonDiscriminatorNames()[0]);
       discrs.push_back(std::make_pair("", child));
-      child.put("", "discriminator3");
+      child.put("", fTauCollection.getAgainstElectronDiscriminatorNames()[0]);
       discrs.push_back(std::make_pair("", child));
 
       tmp.add_child("TauSelection.discriminators", discrs);
@@ -167,7 +171,17 @@ TEST_CASE("Event", "[DataFormat]") {
     BranchManager mgr;
     mgr.setTree(tree.get());
 
-    ParameterSet config("{\"Trigger\": {\"triggerOR\": [\"HLT_Trig1\", \"HLT_Trig2\"]}}", true);
+    boost::property_tree::ptree tmp = getMinimalConfig();
+    boost::property_tree::ptree trgchild;
+    boost::property_tree::ptree child;
+    child.put("", "HLT_Trig1");
+    trgchild.push_back(std::make_pair("", child));
+    child.put("", "HLT_Trig2");
+    trgchild.push_back(std::make_pair("", child));
+    boost::property_tree::ptree trgOr;
+    trgOr.add_child("triggerOR", trgchild);
+    tmp.add_child("Trigger",trgOr);
+    ParameterSet config(tmp, true);
     Event event(config);
     event.setupBranches(mgr);
 
@@ -180,4 +194,80 @@ TEST_CASE("Event", "[DataFormat]") {
     mgr.setEntry(2);
     CHECK( event.configurableTriggerDecision() == false );
   }
+    SECTION("Trigger decision") {
+    auto tree = new TTree("Events", "Events");
+    unsigned int run;           tree->Branch("run",   &run);
+    unsigned int lumi;          tree->Branch("lumi",  &lumi);
+    unsigned long long nevent;  tree->Branch("event", &nevent);
+    bool trg1;   tree->Branch("HLT_trg1", &trg1);
+    bool trg2;   tree->Branch("HLT_trg2_v5", &trg2);
+    run = 1;
+    lumi = 1;    
+    nevent = 1;
+    trg1 = false;
+    trg2 = false;
+    tree->Fill();
+    nevent = 2;
+    trg1 = true;
+    trg2 = true;
+    tree->Fill();
+    nevent = 3;
+    trg1 = false;
+    trg2 = true;
+    tree->Fill();
+    nevent = 4;
+    trg1 = true;
+    trg2 = false;
+    tree->Fill();
+    BranchManager mgr;
+    mgr.setTree(tree);
+    boost::property_tree::ptree tmp = getMinimalConfig();
+    Event event(ParameterSet(tmp, true, false));
+    event.setupBranches(mgr);
+    boost::property_tree::ptree trgs;
+    boost::property_tree::ptree child;
+    child.put("", "HLT_trg1");
+    trgs.push_back(std::make_pair("", child));
+    child.put("", "HLT_trg2");
+    trgs.push_back(std::make_pair("", child));
+    tmp.add_child("Trigger.triggerOR", trgs);
+    Event event2(ParameterSet(tmp, true, false));
+    event2.setupBranches(mgr);
+    
+    mgr.setEntry(0);
+    REQUIRE_THROWS_AS ( event.configurableTriggerDecision(), hplus::Exception);
+    REQUIRE_THROWS_AS ( event.configurableTriggerDecision2(), hplus::Exception);
+    CHECK ( event.configurableTriggerIsEmpty() == true );
+    CHECK ( event.configurableTrigger2IsEmpty() == true );
+    CHECK ( event.passTriggerDecision() == true );
+    CHECK ( event2.configurableTriggerIsEmpty() == false );
+    CHECK ( event2.configurableTrigger2IsEmpty() == true );
+    CHECK ( event2.configurableTriggerDecision() == false );
+    REQUIRE_THROWS_AS ( event2.configurableTriggerDecision2(), hplus::Exception);
+    CHECK ( event2.passTriggerDecision() == false );
+    mgr.setEntry(1);
+    REQUIRE_THROWS_AS ( event.configurableTriggerDecision(), hplus::Exception);
+    REQUIRE_THROWS_AS ( event.configurableTriggerDecision2(), hplus::Exception);
+    CHECK ( event.configurableTriggerIsEmpty() == true );
+    CHECK ( event.configurableTrigger2IsEmpty() == true );
+    CHECK ( event.passTriggerDecision() == true );
+    CHECK ( event2.configurableTriggerDecision() == true );
+    REQUIRE_THROWS_AS ( event2.configurableTriggerDecision2(), hplus::Exception);
+    CHECK ( event2.configurableTrigger2IsEmpty() == true );
+    CHECK ( event2.configurableTriggerIsEmpty() == false );
+    CHECK ( event2.passTriggerDecision() == true );
+    mgr.setEntry(2);
+    CHECK ( event2.configurableTriggerDecision() == true );
+    REQUIRE_THROWS_AS ( event2.configurableTriggerDecision2(), hplus::Exception);
+    CHECK ( event2.configurableTriggerIsEmpty() == false );
+    CHECK ( event2.configurableTrigger2IsEmpty() == true );
+    CHECK ( event2.passTriggerDecision() == true );
+    mgr.setEntry(3);
+    CHECK ( event2.configurableTriggerDecision() == true );
+    REQUIRE_THROWS_AS ( event2.configurableTriggerDecision2(), hplus::Exception);
+    CHECK ( event2.configurableTriggerIsEmpty() == false );
+    CHECK ( event2.configurableTrigger2IsEmpty() == true );
+    CHECK ( event2.passTriggerDecision() == true );
+  }
+ 
 }

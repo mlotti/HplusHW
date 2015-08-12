@@ -15,16 +15,16 @@ uncert_deltab          = 0.03
 uncert_missing_HO_tt   = 0.03
 
 class BRXSDatabaseInterface:
-    def __init__(self,rootfile, silentStatus=False):
+    def __init__(self,rootfile, program="FeynHiggs", BRvariable= "BR_tHpb*BR_Hp_taunu", silentStatus=False):
         self.silentStatus = silentStatus
         if not self.silentStatus:
             print "BRXSDatabaseInterface: reading file",rootfile
         self.rootfile  = rootfile
         self.fIN       = ROOT.TFile.Open(rootfile)
-	self.program   = "FeynHiggs"
+	self.program   = program
 	self.selection = ""
 
-        self.BRvariable= "BR_tHpb*BR_Hp_taunu"
+        self.BRvariable= BRvariable
 
 	self.expLimit  = {}
 
@@ -2134,6 +2134,7 @@ class BRXSDatabaseInterface:
         
     def getGraph(self,xVariable,yVariable,selection):
         graph = ROOT.TGraph()
+        #print "check",xVariable,yVariable,selection
         self.tree.Draw(yVariable+":"+xVariable,self.floatSelection(selection))
         graph = ROOT.gPad.GetPrimitive("Graph")
         if graph == None:
@@ -2631,13 +2632,13 @@ def test():
     match = root_re.search(sys.argv[1])
     if match:
 
-	db = BRXSDatabaseInterface(match.group(0))
+	db = BRXSDatabaseInterface(match.group(0),program="2HDMC")
 #        db.Print(variable="mH",selection="mA==110 && mu==3300")
 #        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mA==110 && mu==3300")
 #        db.Print(variable="mHp",selection="mA==110 && mu==3300")
-
+        db.Print(variable="mHp")
 #        db.Print(variable="0.001*2*tHp_xsec*BR_Hp_taunu",selection="mHp==200")
-        db.Print(variable="tHp_xsec",selection="mHp==200 && tanb== 40")
+#        db.Print(variable="tHp_xsec",selection="mHp==200 && tanb== 40")
 
 #        db.getExpLimitInterpolated(120,"")
 

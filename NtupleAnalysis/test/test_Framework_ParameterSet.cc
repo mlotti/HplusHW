@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include "Framework/interface/ParameterSet.h"
+#include "Framework/interface/Exception.h"
 
 TEST_CASE("ParameterSet", "[Framework]") {
   SECTION("string argument") {
@@ -38,7 +39,7 @@ TEST_CASE("ParameterSet", "[Framework]") {
     }
 
     SECTION("Non-existing parameters") {
-      REQUIRE_THROWS_AS( pset.getParameter<int>("foo"), std::runtime_error);
+      REQUIRE_THROWS_AS( pset.getParameter<int>("foo"), hplus::Exception);
     }
 
     SECTION("Type conversions") {
@@ -184,7 +185,7 @@ TEST_CASE("ParameterSet", "[Framework]") {
 
   SECTION("Deliver isMC bit") {
     ParameterSet pset("{}");
-    REQUIRE_THROWS_AS( pset.isMC(), std::runtime_error );
+    REQUIRE_THROWS_AS( pset.isMC(), hplus::Exception );
 
     pset = ParameterSet("{}", true);
     CHECK( pset.isMC() == true);

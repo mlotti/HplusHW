@@ -30,7 +30,7 @@ ROOTINC := $(shell root-config --cflags)
 ROOTLIBS := $(shell root-config --glibs)
 
 # Compile flags
-CXXFLAGS := -O2 -Wall -fPIC -D_REENTRANT $(ROOTINC) $(INC)
+CXXFLAGS := -O2 -Wall -Wno-unused-local-typedefs -fPIC -D_REENTRANT $(ROOTINC) $(INC)
 
 GCC_NEED_ZX := $(shell expr `gcc -dumpversion | cut -f2 -d.` \<= 6)
 ifeq "$(GCC_NEED_ZX)" "1"

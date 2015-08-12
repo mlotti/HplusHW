@@ -1438,7 +1438,7 @@ class PlotBase:
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
 
         for f in formats:
-            self.cf.canvas.SaveAs(f)
+            self.cf.canvas.SaveAs(self.cf.canvas.GetName()+f)
 
         ROOT.gErrorIgnoreLevel = backup
 

@@ -14,8 +14,10 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
 #include "HiggsAnalysis/MiniAOD2TTree/interface/EventInfoDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/SkimDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TriggerDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TauDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/ElectronDumper.h"
@@ -26,6 +28,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TrackDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenJetDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/GenWeightDumper.h"
 
 /**
 	Class for making a tree from MiniAOD
@@ -37,6 +40,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
         MiniAOD2TTreeFilter(const edm::ParameterSet&);
         ~MiniAOD2TTreeFilter();
 
+        void beginRun(edm::Run const&, edm::EventSetup const&);
         void beginJob();
         bool filter(edm::Event&, const edm::EventSetup&);
         void endJob();
@@ -44,12 +48,19 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
     private:
 	void fill(edm::Event&, const edm::EventSetup&);
 	void reset();
+        void endLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);                                   
+
+	bool isMC();
+
+	std::string hltProcessName;
+        HLTConfigProvider hltConfig;
 
 	std::string outputFileName;
 	std::string codeVersion;
         std::string dataVersion;
 	int cmEnergy;
 	edm::ParameterSet eventInfoCollections;
+	edm::ParameterSet skim;
 	edm::ParameterSet trigger;
         std::vector<edm::ParameterSet> tauCollections;
 	std::vector<edm::ParameterSet> electronCollections;
@@ -57,6 +68,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	std::vector<edm::ParameterSet> jetCollections;
 	std::vector<edm::ParameterSet> metCollections;
 	std::vector<edm::ParameterSet> genMetCollections;
+	std::vector<edm::ParameterSet> genWeightCollections;
         std::vector<edm::ParameterSet> trackCollections;
         std::vector<edm::ParameterSet> genParticleCollections;
         std::vector<edm::ParameterSet> genJetCollections;
@@ -66,6 +78,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	TTree* Events;
 
 	EventInfoDumper *eventInfo;
+	SkimDumper* skimDumper;
 	TriggerDumper* trgDumper;
 	TauDumper* tauDumper;
 	ElectronDumper* electronDumper;
@@ -73,7 +86,8 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	JetDumper* jetDumper;
 	METDumper* metDumper;
 	GenMETDumper* genMetDumper;
-        TrackDumper* trackDumper;
+        GenWeightDumper* genWeightDumper;
+	TrackDumper* trackDumper;
 	GenParticleDumper* genParticleDumper;
         GenJetDumper* genJetDumper;
 };

@@ -4,24 +4,28 @@
 
 #include <stdexcept>
 
-Event::Event(const ParameterSet& config): 
+Event::Event(const ParameterSet& config):
   fGenMET("GenMET"),
   fMET_Type1("MET_Type1"),
   fCaloMET("CaloMET"),
   fL1MET("L1MET"),
+  fGenWeight("GenWeight"),
   fIsMC(config.isMC())
 {
-  boost::optional<std::vector<std::string>> triggerOR = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR");
+  // Trigger
+  boost::optional<std::vector<std::string>> triggerOR = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR", std::vector<std::string>{});
   if(triggerOR) {
-    fTriggerOr.setBranchNames(*triggerOR);
+    if (triggerOR->size())
+      fTriggerOr.setBranchNames(*triggerOR);
   }
-  boost::optional<std::vector<std::string>> triggerOR2 = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR2");
+  boost::optional<std::vector<std::string>> triggerOR2 = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR2", std::vector<std::string>{});
   if(triggerOR2) {
-    fTriggerOr2.setBranchNames(*triggerOR2);
+    if (triggerOR2->size())
+      fTriggerOr2.setBranchNames(*triggerOR2);
   }
 
   bool variationAssigned = false;
-
+  // Systematics
   boost::optional<std::string> jetSyst = config.getParameterOptional<std::string>("JetSelection.systematicVariation");
   if(jetSyst) {
     fJetCollection.setEnergySystematicsVariation(*jetSyst);
@@ -39,11 +43,42 @@ Event::Event(const ParameterSet& config):
     variationAssigned = true;
   }
 
-  boost::optional<std::vector<std::string> > tauDiscr = config.getParameterOptional<std::vector<std::string> >("TauSelection.discriminators");
+  // Tau discriminators
+  boost::optional<std::vector<std::string> > tauDiscr = config.getParameterOptional<std::vector<std::string> >("TauSelection.discriminators", std::vector<std::string>{});
   if(tauDiscr) {
     fTauCollection.setConfigurableDiscriminators(*tauDiscr);
   }
+  boost::optional<std::string> tauAgainstElectronDiscr = config.getParameterOptional<std::string>("TauSelection.againstElectronDiscr");
+  if (tauAgainstElectronDiscr)
+    fTauCollection.setAgainstElectronDiscriminator(*tauAgainstElectronDiscr);
+  boost::optional<std::string> tauAgainstMuonDiscr = config.getParameterOptional<std::string>("TauSelection.againstMuonDiscr");
+  if (tauAgainstMuonDiscr)
+    fTauCollection.setAgainstMuonDiscriminator(*tauAgainstMuonDiscr);
+  boost::optional<std::string> tauIsolationDiscr = config.getParameterOptional<std::string>("TauSelection.isolationDiscr");
+  if (tauIsolationDiscr)
+    fTauCollection.setIsolationDiscriminator(*tauIsolationDiscr);
+  
+  // Muon discriminators
+  // FIXME
+  
+  // Electron discriminators
+  // FIXME
+  
+  // Jet discriminators
+  boost::optional<std::string> jetIDDiscr = config.getParameterOptional<std::string>("JetSelection.jetIDDiscr");
+  if (jetIDDiscr)
+    fJetCollection.setJetIDDiscriminator(*jetIDDiscr);
+  boost::optional<std::string> jetPUIDDiscr = config.getParameterOptional<std::string>("JetSelection.jetPUIDDiscr");
+  if (jetPUIDDiscr)
+    fJetCollection.setJetPUIDDiscriminator(*jetPUIDDiscr);
+
+  // B jet discriminators
+  boost::optional<std::string> bjetDiscr = config.getParameterOptional<std::string>("BJetSelection.bjetDiscr");
+  if (bjetDiscr)
+    fJetCollection.setBJetDiscriminator(*bjetDiscr);
+  
 }
+
 Event::~Event() {}
 
 void Event::setupBranches(BranchManager& mgr) {
@@ -51,9 +86,10 @@ void Event::setupBranches(BranchManager& mgr) {
 
   fNPU.setupBranches(mgr);
 
-  fTriggerOr.setupBranches(mgr);
-  fTriggerOr2.setupBranches(mgr);
+  fTriggerOr.setupBranchesAutoScanVersion(mgr);
+  fTriggerOr2.setupBranchesAutoScanVersion(mgr);
 
+  fTriggerTauCollection.setupBranches(mgr);
   fTauCollection.setupBranches(mgr);
   fJetCollection.setupBranches(mgr);
   fGenJetCollection.setupBranches(mgr);
@@ -61,7 +97,9 @@ void Event::setupBranches(BranchManager& mgr) {
   fElectronCollection.setupBranches(mgr);
   fGenParticleCollection.setupBranches(mgr);
   fGenMET.setupBranches(mgr);
+  fGenWeight.setupBranches(mgr);
   fMET_Type1.setupBranches(mgr);
   fCaloMET.setupBranches(mgr);
   fL1MET.setupBranches(mgr);
+  fPFCandidates.setupBranches(mgr);
 }

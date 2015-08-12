@@ -18,7 +18,7 @@ public:
   ~Count();
 
   void increment();
-  int value();
+  long int value();
 
   friend class EventCounter;
 
@@ -47,11 +47,12 @@ private:
     Counter& operator=(Counter&&) = default;
 
     bool contains(const std::string& l) const;
+    size_t getLabelIndex(const std::string& l) const;
 
     size_t insert(const std::string& label);
 
     void incrementCount(size_t countIndex, double weight);
-    int value(size_t countIndex);
+    long int value(size_t countIndex);
 
     void book(TDirectory *dir);
     void bookWeighted(TDirectory *dir);
@@ -86,6 +87,9 @@ public:
   
   void enable(bool enabled) { fIsEnabled = enabled; }
   bool isEnabled() const { return fIsEnabled; }
+  
+  long int getValueByName(const std::string& name);
+  bool contains(const std::string& name);
 
 private:
   friend class Count;
@@ -94,9 +98,10 @@ private:
 
   size_t findOrInsertCounter(const std::string& name);
 
-  bool fIsEnabled;
   const EventWeight& fWeight;
+  bool fIsEnabled;
   std::vector<Counter> fCounters; // main counter has index 0
+  bool fOutputHasBeenSet;
 };
 
 inline
@@ -106,7 +111,7 @@ void Count::increment() {
 }
 
 inline
-int Count::value() {
+long int Count::value() {
   return fEventCounter->value(fCounterIndex, fCountIndex);
 }
 #endif

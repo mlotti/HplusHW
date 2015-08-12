@@ -1,8 +1,13 @@
 // -*- c++ -*-
+// This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
+
 #ifndef DataFormat_ElectronGenerated_h
 #define DataFormat_ElectronGenerated_h
 
 #include "DataFormat/interface/Particle.h"
+#include <string>
+#include <vector>
+#include <functional>
 
 class ElectronGeneratedCollection: public ParticleCollection<double> {
 public:
@@ -10,6 +15,11 @@ public:
   ~ElectronGeneratedCollection() {}
 
   void setupBranches(BranchManager& mgr);
+
+  std::vector<std::string> getIDDiscriminatorNames() {
+    static std::vector<std::string> n = { std::string("")};
+    return n;
+  }
 
 protected:
 
@@ -22,6 +32,13 @@ public:
   ElectronGenerated() {}
   ElectronGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~ElectronGenerated() {}
+
+  std::vector<std::function<bool()>> getIDDiscriminatorValues() {
+    static std::vector<std::function<bool()>> values = {
+    };
+    return values;
+  }
+
 
 
 };

@@ -883,6 +883,10 @@ def getTypesetScenarioName(scenario):
         return "MSSM ^{}m_{h}^{mod+}"
     if myTruncatedScenario == "tauphobic":
         return "MSSM #tau-phobic"
+    if myTruncatedScenario == "haber_type1":
+        return "2HDM Type 1"
+    if myTruncatedScenario == "haber_type2":
+        return "2HDM Type 2"
     raise Exception("The typeset name for scenario '%s' is not defined in tools/limit.py::getTypesetScenarioName()! Please add it."%scenario)
 
 ## Remove graph points in the isomass region

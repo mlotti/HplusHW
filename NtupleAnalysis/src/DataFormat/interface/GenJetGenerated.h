@@ -1,4 +1,6 @@
 // -*- c++ -*-
+// This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
+
 #ifndef DataFormat_GenJetGenerated_h
 #define DataFormat_GenJetGenerated_h
 
@@ -10,6 +12,10 @@ public:
   ~GenJetGeneratedCollection() {}
 
   void setupBranches(BranchManager& mgr);
+
+
+protected:
+
 };
 
 
@@ -19,6 +25,9 @@ public:
   GenJetGenerated() {}
   GenJetGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
   ~GenJetGenerated() {}
+
+
+
 
 };
 

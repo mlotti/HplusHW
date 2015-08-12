@@ -225,7 +225,8 @@ TEST_CASE("Tau", "[DataFormat]") {
     TauCollection coll;
 
     SECTION("One discriminator") {
-      coll.setConfigurableDiscriminators(std::vector<std::string>{"discriminator1"});
+      TauCollection fTauCollection;
+      coll.setConfigurableDiscriminators(std::vector<std::string>{fTauCollection.getIsolationDiscriminatorNames()[0]});
       coll.setupBranches(mgr);
 
       mgr.setEntry(0);
@@ -246,7 +247,8 @@ TEST_CASE("Tau", "[DataFormat]") {
     }
 
     SECTION("Other discriminator") {
-      coll.setConfigurableDiscriminators(std::vector<std::string>{"discriminator2"});
+      TauCollection fTauCollection;
+      coll.setConfigurableDiscriminators(std::vector<std::string>{fTauCollection.getAgainstMuonDiscriminatorNames()[0]});
       coll.setupBranches(mgr);
 
       mgr.setEntry(0);
@@ -267,7 +269,9 @@ TEST_CASE("Tau", "[DataFormat]") {
     }
 
     SECTION("Two discriminators") {
-      coll.setConfigurableDiscriminators(std::vector<std::string>{"discriminator1", "discriminator2"});
+      TauCollection fTauCollection;
+      coll.setConfigurableDiscriminators(std::vector<std::string>{fTauCollection.getIsolationDiscriminatorNames()[0],
+        fTauCollection.getAgainstMuonDiscriminatorNames()[0]});
       coll.setupBranches(mgr);
 
       mgr.setEntry(0);
@@ -288,7 +292,9 @@ TEST_CASE("Tau", "[DataFormat]") {
     }
 
     SECTION("Two discriminators, other way around") {
-      coll.setConfigurableDiscriminators(std::vector<std::string>{"discriminator2", "discriminator1"});
+      TauCollection fTauCollection;
+      coll.setConfigurableDiscriminators(std::vector<std::string>{fTauCollection.getAgainstMuonDiscriminatorNames()[0],
+        fTauCollection.getIsolationDiscriminatorNames()[0]});
       coll.setupBranches(mgr);
 
       mgr.setEntry(0);
@@ -309,7 +315,9 @@ TEST_CASE("Tau", "[DataFormat]") {
     }
 
     SECTION("Three discriminators") {
-      coll.setConfigurableDiscriminators(std::vector<std::string>{"discriminator1", "discriminator2", "discriminator3"});
+      TauCollection fTauCollection;
+      coll.setConfigurableDiscriminators(std::vector<std::string>{fTauCollection.getIsolationDiscriminatorNames()[0],
+        fTauCollection.getAgainstMuonDiscriminatorNames()[0], fTauCollection.getAgainstElectronDiscriminatorNames()[0]});
       coll.setupBranches(mgr);
 
       mgr.setEntry(0);

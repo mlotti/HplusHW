@@ -15,13 +15,14 @@ public:
   void setBranchNames(const std::vector<std::string>& names) {
     fBranchNames = names;
   }
-
+  /// Generic method for setting branches; branch name needs to be exact
   void setupBranches(BranchManager& mgr);
-
+  /// Method for setting branches; a version postfix is automatically guessed
+  void setupBranchesAutoScanVersion(BranchManager& mgr);
+  
   bool value() const {
     if(fBranches.empty())
-      return true;
-    //      throwEmpty();
+      throwEmpty();
     for(const Branch<bool> *branch: fBranches) {
       if(branch->value()) return true;
     }

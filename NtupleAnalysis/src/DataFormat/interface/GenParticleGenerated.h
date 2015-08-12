@@ -9,9 +9,11 @@ public:
   explicit GenParticleGeneratedCollection(const std::string& prefix="GenParticles"): 
       ParticleCollection(prefix),
       fMother(nullptr),
-      fStatus(nullptr),
+      //fStatus(nullptr),
       fTauProng(nullptr),
-      fGenIndex(nullptr),
+      fTauVisiblePt(nullptr),
+      fTauVisiblePhi(nullptr),
+      fTauVisibleEta(nullptr),
       fTauSpinEffectsW(nullptr),
       fTauSpinEffectsHpm(nullptr),
       fAssociatedWithHpm(nullptr)
@@ -22,9 +24,11 @@ public:
 
 protected:
   const Branch<std::vector<short>> *fMother;
-  const Branch<std::vector<short>> *fStatus;
+  // const Branch<std::vector<short>> *fStatus;
   const Branch<std::vector<short>> *fTauProng;
-  const Branch<std::vector<short>> *fGenIndex;
+  const Branch<std::vector<double>> *fTauVisiblePt;
+  const Branch<std::vector<double>> *fTauVisiblePhi;
+  const Branch<std::vector<double>> *fTauVisibleEta;
   const Branch<std::vector<double>> *fTauSpinEffectsW;
   const Branch<std::vector<double>> *fTauSpinEffectsHpm;
   const Branch<std::vector<short>> *fAssociatedWithHpm;

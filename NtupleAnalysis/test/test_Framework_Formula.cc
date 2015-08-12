@@ -6,6 +6,8 @@
 #include "Framework/interface/BranchManager.h"
 #include "DataFormat/interface/Event.h"
 
+#include "TError.h"
+
 TEST_CASE("Formula", "[Framework]") {
   std::unique_ptr<TTree> tree = createRealisticTree();
 
@@ -84,15 +86,18 @@ TEST_CASE("Formula", "[Framework]") {
   }
 
   SECTION("Formula to non-existent branch") {
+    int myErrorLevel = gErrorIgnoreLevel;
+    gErrorIgnoreLevel = kFatal;
     Formula formula = mgr.book("foobar");
     mgr.setupBranch(tree.get());
 
     tree->LoadTree(0);
     REQUIRE_THROWS_AS( formula.value(), std::runtime_error );
+    gErrorIgnoreLevel = myErrorLevel;
   }
 
   SECTION("Trigger OR formula") {
-    Formula trg = mgr.book("HLT_Trig1 || HLT_Trig2 || HLT_Trig3");
+    Formula trg = mgr.book("HLT_Trig1 || HLT_Trig2 || HLT_Trig3_v5");
     mgr.setupBranch(tree.get());
 
     tree->LoadTree(0);
@@ -158,7 +163,10 @@ TEST_CASE("Formula", "[Framework]") {
     BranchManager bmgr;
     bmgr.setTree(tree.get());
 
-    Event event(ParameterSet("{}", true));
+    
+    boost::property_tree::ptree tmp = getMinimalConfig();
+    ParameterSet pset(tmp, true);
+    Event event(pset);
     event.setupBranches(bmgr);
 
     Formula formula = mgr.book("event");

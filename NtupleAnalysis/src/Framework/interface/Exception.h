@@ -10,42 +10,26 @@ namespace hplus {
   class Exception : public std::exception {
   public:
     /// Print a demangled stack backtrace of the caller function
-    Exception(std::string& category);
     Exception(const char* category);
     Exception(const Exception& e);
     virtual ~Exception();
 
+    /// Enable streaming of the message (utilizes copy constructor)
     template <typename T> Exception& operator <<(const T& data) {
-      _msg << data;
+      std::stringstream s;
+      s << _msg << data;
+      _msg = s.str();
       return *this;
     }
-    //template <typename T> std::ostream operator <<(std::ostream& s, const T& data);
-    //template <typename E, typename T> E& operator <<(E& e, const T& data);
 
-//     template <typename E, typename T> Exception& operator<<(const E& e, const T& data) {
-//       E& ref = const_cast<E&>(e);
-//       ref._msg << data;
-//       return e;
-//     }
-
-    /*Exception& operator << (const char* msg);
-    Exception& operator << (std::string& msg);
-    Exception& operator << (Exception& e);*/
-    virtual const char* what() const throw();
-    std::string getMsg() const { return _msg.str(); }
+    virtual const char* what() const noexcept { return _fullString.c_str(); }
+    const std::string& getMsg() const { return _msg; }
 
   private:
-    std::string _category;
-    std::stringstream _msg;
+    std::string _fullString;
+    std::string _msgPrefix;
+    std::string _msg;
+    std::string _backtrace;
   };
-  
-
-//   template <typename E, typename T> E& operator <<(E& e, const T& data) {
-//     e._msg << data;
-//     return e;
-//   }
-
-  
-  
 }
 #endif

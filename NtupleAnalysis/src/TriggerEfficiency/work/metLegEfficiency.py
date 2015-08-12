@@ -44,31 +44,36 @@ def runRange(era):
         runmin = 203777
         runmax = 208686
 
+    if era == "2015A":
+        lumi = 100
+        runmin = 0
+        runmax = 999999
+
     if lumi == 0:
         print "Unknown era",era,"exiting.."
         sys.exit()
 
     return lumi,runmin,runmax
 
-def createAnalyzer(dataVersion,era):
-    name = era
+def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
     useCaloMET = False
     if "CaloMET" in era:
         useCaloMET = True
         era = era[:-8]
 
     a = Analyzer("TriggerEfficiency",
-        name = name,
+        name = era,
         Trigger = PSet(
             triggerOR  = [],
             triggerOR2 = []
         ),
         PileupWeight = pileupWeight(enabled=False),
+        onlineSelection = onlineSelection,
         offlineSelection = leg,
         TauSelection = PSet(
             discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
                              "againstMuonTight2",
-                             "againstElectronMediumMVA3"],
+                             "againstElectronMediumMVA5"],
         ),
         binning = binning,
         xLabel  = xLabel,
@@ -90,6 +95,10 @@ def createAnalyzer(dataVersion,era):
                                 "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",
                                 "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9",
                                 "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]
+        if era == "2015A":
+            a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1"]
+            a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1"]
+
         lumi,runmin,runmax = runRange(era)
         a.lumi    = lumi
         a.runMin  = runmin
@@ -97,9 +106,14 @@ def createAnalyzer(dataVersion,era):
     else:
         a.Trigger.triggerOR = ["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"]
         a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]
+        if era == "2015A":
+            a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1"]
+            a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1"]
+
         a.PileupWeight = pileupWeight(
-            data = era,
-            mc   = "Summer12_S10"
+#            data = era,
+            data = "2012ABCD", # FIXME
+            mc   = "Summer12_S10" # FIXME
         )
 
     if useCaloMET:
@@ -107,14 +121,22 @@ def createAnalyzer(dataVersion,era):
 
     return a
 
-def addAnalyzer(era):
+def addAnalyzer(era,onlineSelection):
     dv = ["53Xdata22Jan2013","53mcS10"]
-    process.addAnalyzer("METLeg_"+era, lambda dv: createAnalyzer(dv, era))
+    if era == "2015A":
+        dv = ["74Xdata","74Xmc"]
+    process.addAnalyzer("METLeg_"+era+"_"+onlineSelection, lambda dv: createAnalyzer(dv, era, onlineSelection))
 
 #addAnalyzer("2012ABCD")
-addAnalyzer("2012D")
+#addAnalyzer("2012D")
 #addAnalyzer("2012ABCD_CaloMET")
+addAnalyzer("2015A","MET80")
+addAnalyzer("2015A","MET120")
+addAnalyzer("2015A_CaloMET","MET80")
+addAnalyzer("2015A_CaloMET","MET120")
 
+# Pick events
+#process.addOptions(EventSaver = PSet(enabled = True, pickEvents = True))
 
 # Run the analysis
 process.run()

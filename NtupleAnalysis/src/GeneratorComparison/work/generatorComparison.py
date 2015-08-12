@@ -19,23 +19,17 @@ if len(sys.argv) != 2:
 
 process.addDatasetsFromMulticrab(sys.argv[1])
 
-leg     = "taulegSelection"
-binning = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
-xLabel  = "#tau-jet p_{T} (GeV/c)"
-yLabel  = "HLT tau efficiency"
-
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 PileupHistogramPath = os.path.join(aux.higgsAnalysisPath(), "NtupleAnalysis", "data", "PUWeights")
 
 process.addAnalyzer("generatorComparison", 
     Analyzer("GeneratorComparison",
-        
-        #particle = "b",
-        tauPtCut = 30.0,
+        histogramAmbientLevel = "Informative",
+        tauPtCut = 41.0,
+        tauEtaCut = 2.1,
+        bjetEtCut = 30.0,
+        bjetEtaCut = 2.4,
 
-        binning = binning,
-        xLabel  = xLabel,
-        yLabel  = yLabel,
         lumi    = 7274,
         runMin  = 202807,
         runMax  = 208686,
