@@ -513,18 +513,27 @@ class LimitMultiCrabBase:
 
         for mass in self.massPoints:
             for dc in datacardPatterns:
-                fname = os.path.join(self.datacardDirectory, dc % mass)
+                fname = None
+                if "%s" in dc:
+                    fname = os.path.join(self.datacardDirectory, dc % mass)
+                else:
+                    fname = os.path.join(self.datacardDirectory, dc)
                 if not os.path.isfile(fname):
                     raise Exception("Datacard file '%s' does not exist!" % fname)
 
                 aux.addToDictList(self.datacards, mass, fname)
 
             for rf in rootfilePatterns:
-                fname = os.path.join(self.datacardDirectory, rf % mass)
-                if not os.path.isfile(fname):
-                    raise Exception("ROOT file (for shapes) '%s' does not exist!" % fname)
+                if rf != None:
+                    rfname = None
+                    if "%s" in rf:
+                        rfname = os.path.join(self.datacardDirectory, rf % mass)
+                    else:
+                        rfname = os.path.join(self.datacardDirectory, rf)
+                    if not os.path.isfile(rfname):
+                        raise Exception("ROOT file (for shapes) '%s' does not exist!" % rfname)
 
-                aux.addToDictList(self.rootfiles, mass, fname)
+                    aux.addToDictList(self.rootfiles, mass, rfname)
 
     ## Create the multicrab task directory
     #
@@ -549,6 +558,10 @@ class LimitMultiCrabBase:
     def writeScripts(self):
         for mass, datacardFiles in self.datacards.iteritems():
             self.clsType.createScripts(mass, datacardFiles)
+        if self.opts.unblinded:
+            return self.clsType.obsAndExpScripts
+        else:
+            return self.clsType.blindedScripts
 
     ## Write crab.cfg to the multicrab directory
     # \param crabScheduler      CRAB scheduler to use
@@ -614,7 +627,10 @@ class LimitMultiCrabBase:
             inputFiles = [exe]+self.datacards[mass]
             if len(self.rootfiles) > 0:
                 inputFiles += self.rootfiles[mass]
-            self.clsType.writeMultiCrabConfig(self.opts, fOUT, mass, inputFiles, numberOfJobs.getValue(mass))
+            if numberOfJobs != None:
+                self.clsType.writeMultiCrabConfig(self.opts, fOUT, mass, inputFiles, numberOfJobs.getValue(mass))
+            else:
+                self.clsType.writeMultiCrabConfig(self.opts, fOUT, mass, inputFiles, 1)
             fOUT.write("\n\n")
 
         f = open(os.path.join(self.dirname, "configuration.json"), "wb")

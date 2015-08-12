@@ -512,7 +512,8 @@ class DataCardGenerator:
                                                enabledForMassPoints = self._config.MassPoints,
                                                datasetType = "Observation",
                                                datasetMgrColumn = self._config.Observation.datasetDefinition,
-                                               shapeHisto = self._config.Observation.shapeHisto)
+                                               shapeHisto = self._config.Observation.shapeHisto,
+                                               additionalNormalisationFactor = self._config.Observation.additionalNormalisation)
             if self._opts.debugConfig:
                 self._observation.printDebug()
         else:
