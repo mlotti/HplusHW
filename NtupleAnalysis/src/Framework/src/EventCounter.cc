@@ -67,6 +67,7 @@ void EventCounter::Counter::bookWeighted(TDirectory *dir) {
     weightedCounter->GetXaxis()->SetBinLabel(i+1, labels[i].c_str());
 }
 void EventCounter::Counter::serialize() {
+  if (counter == nullptr) return;
   for(size_t i=0; i<labels.size(); ++i) {
     size_t bin = i+1;
     counter->SetBinContent(bin, values[i]);
