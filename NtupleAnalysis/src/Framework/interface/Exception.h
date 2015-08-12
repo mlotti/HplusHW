@@ -11,11 +11,11 @@ namespace hplus {
   public:
     /// Print a demangled stack backtrace of the caller function
     Exception(const char* category);
-    Exception(const Exception& e) noexcept;
+    Exception(const Exception& e);
     virtual ~Exception();
 
     /// Enable streaming of the message (utilizes copy constructor)
-    template <typename T> Exception& operator <<(const T& data) noexcept {
+    template <typename T> Exception& operator <<(const T& data) {
       std::stringstream s;
       s << _msg << data;
       _msg = s.str();
@@ -23,7 +23,7 @@ namespace hplus {
     }
 
     virtual const char* what() const noexcept { return _fullString.c_str(); }
-    std::string getMsg() const { return _msg; }
+    const std::string& getMsg() const { return _msg; }
 
   private:
     std::string _fullString;
