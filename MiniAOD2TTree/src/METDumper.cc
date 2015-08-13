@@ -3,7 +3,6 @@
 METDumper::METDumper(std::vector<edm::ParameterSet> psets, bool isMC = true){
     inputCollections = psets;
     booked           = false;
-
     ismc             = isMC;
 
     MET     = new double[inputCollections.size()];
@@ -24,14 +23,14 @@ void METDumper::book(TTree* tree){
 	std::string name = inputCollections[i].getUntrackedParameter<std::string>("branchname","");
 	if(name.length() == 0) name = inputCollections[i].getParameter<edm::InputTag>("src").label();
 	  //tree->Branch((name+"_p4").c_str(),&MET_p4[i]);
-        tree->Branch((name+"_et").c_str(),&MET[i]);
-        tree->Branch((name+"_phi").c_str(),&MET_phi[i]);  
+        tree->Branch((name+"_x").c_str(),&MET_x[i]);
+        tree->Branch((name+"_y").c_str(),&MET_y[i]);  
     }
-    tree->Branch("CaloMET_et",&caloMET_et);
-    tree->Branch("CaloMET_phi",&caloMET_phi);
+    tree->Branch("CaloMET_x",&caloMET_x);
+    tree->Branch("CaloMET_y",&caloMET_y);
     if(ismc){
-        tree->Branch("GenMET_et",&GenMET_et);
-        tree->Branch("GenMET_phi",&GenMET_phi);
+        tree->Branch("GenMET_x",&GenMET_x);
+        tree->Branch("GenMET_y",&GenMET_y);
     }
 }
 
@@ -43,15 +42,15 @@ bool METDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	iEvent.getByLabel(inputtag, handle[i]);
 	if(handle[i].isValid()){
 
-	    MET[i]     = handle[i]->ptrAt(0)->p4().Pt();
-	    MET_phi[i] = handle[i]->ptrAt(0)->p4().Phi();
+	    MET_x[i] = handle[i]->ptrAt(0)->p4().px();
+	    MET_y[i] = handle[i]->ptrAt(0)->p4().py();
 	    if(handle[i]->ptrAt(0)->genMET()){
-              GenMET_et  = handle[i]->ptrAt(0)->genMET()->pt();
-              GenMET_phi = handle[i]->ptrAt(0)->genMET()->phi();
+              GenMET_x = handle[i]->ptrAt(0)->genMET()->px();
+              GenMET_y = handle[i]->ptrAt(0)->genMET()->py();
 	    }
 	    if(handle[i]->ptrAt(0)->caloMETPt()){
-              caloMET_et = handle[i]->ptrAt(0)->caloMETPt();
-              caloMET_phi= handle[i]->ptrAt(0)->caloMETPhi();
+              caloMET_x = handle[i]->ptrAt(0)->caloMETPx();
+              caloMET_y = handle[i]->ptrAt(0)->caloMETPy();
             }
 	}else{
 	  std::cout << "Collection " << inputtag.label() << " not found, exiting.." << std::endl;
@@ -70,12 +69,12 @@ bool METDumper::filter(){
 void METDumper::reset(){
     if(booked){
       for(size_t i = 0; i < inputCollections.size(); ++i){
-	MET[i]        = 0;
-	MET_phi[i]    = 0;
+	MET_x[i] = 0;
+	MET_y[i] = 0;
       }
-      caloMET_et  = 0;
-      caloMET_phi = 0;
-      GenMET_et   = 0;
-      GenMET_phi  = 0;
+      caloMET_x = 0;
+      caloMET_y = 0;
+      GenMET_x = 0;
+      GenMET_y = 0;
     }
 }

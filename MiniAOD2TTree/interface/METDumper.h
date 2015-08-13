@@ -36,12 +36,12 @@ class METDumper {
 
 	bool ismc;
 
-	double *MET;
-	double *MET_phi;
-        double caloMET_et;
-        double caloMET_phi;
-        double GenMET_et;
-        double GenMET_phi;
+	double *MET_x;
+	double *MET_y;
+        double caloMET_x;
+        double caloMET_y;
+        double GenMET_x;
+        double GenMET_y;
 
 };
 #endif
