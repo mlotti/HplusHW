@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/JetDumper.h"
 #include "DataFormats/JetReco/interface/PileupJetIdentifier.h"
+#include "DataFormat/interface/Jet.h"
 
 JetDumper::JetDumper(std::vector<edm::ParameterSet> psets){
     inputCollections = psets;
@@ -19,16 +20,26 @@ JetDumper::JetDumper(std::vector<edm::ParameterSet> psets){
     nUserfloats = inputCollections[0].getParameter<std::vector<std::string> >("userFloats").size();
     userfloats = new std::vector<double>[inputCollections.size()*nUserfloats];
     handle = new edm::Handle<edm::View<pat::Jet> >[inputCollections.size()];
-
+    
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
 	bool param = inputCollections[i].getUntrackedParameter<bool>("filter",false);
         if(param) useFilter = true;
     }
 
+    jetIDloose = new std::vector<bool>[inputCollections.size()];
+    jetIDtight = new std::vector<bool>[inputCollections.size()];
+    jetIDtightLeptonVeto = new std::vector<bool>[inputCollections.size()];
+
     jetPUIDloose = new std::vector<bool>[inputCollections.size()];
     jetPUIDmedium = new std::vector<bool>[inputCollections.size()];
     jetPUIDtight = new std::vector<bool>[inputCollections.size()];
+    
+    systJESup = new FourVectorDumper[inputCollections.size()];
+    systJESdown = new FourVectorDumper[inputCollections.size()];
+    systJERup = new FourVectorDumper[inputCollections.size()];
+    systJERdown = new FourVectorDumper[inputCollections.size()];
+
 }
 
 JetDumper::~JetDumper(){}
@@ -58,9 +69,18 @@ void JetDumper::book(TTree* tree){
       branch_name = branch_name.erase(pos_semicolon,1);
       tree->Branch((name+"_"+branch_name).c_str(),&userfloats[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
     }
+    tree->Branch((name+"_IDloose").c_str(),&jetIDloose[i]);
+    tree->Branch((name+"_IDtight").c_str(),&jetIDtight[i]);
+    tree->Branch((name+"_IDtightLeptonVeto").c_str(),&jetIDtightLeptonVeto[i]);
+
     tree->Branch((name+"_PUIDloose").c_str(),&jetPUIDloose[i]);
     tree->Branch((name+"_PUIDmedium").c_str(),&jetPUIDmedium[i]);
     tree->Branch((name+"_PUIDtight").c_str(),&jetPUIDtight[i]);
+    
+    systJESup[i].book(tree, name, "JESup");
+    systJESdown[i].book(tree, name, "JESdown");
+    systJESup[i].book(tree, name, "JERup");
+    systJESdown[i].book(tree, name, "JERdown");
   }
 }
 
@@ -69,7 +89,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
 	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
-	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
+        std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
 	std::vector<std::string> userfloatNames = inputCollections[ic].getParameter<std::vector<std::string> >("userFloats");
 	iEvent.getByLabel(inputtag, handle[ic]);
 
@@ -99,21 +119,31 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		hadronFlavour[ic].push_back(obj.hadronFlavour());
 		partonFlavour[ic].push_back(obj.partonFlavour());
 
+                // Jet ID
+                jetIDloose[ic].push_back(passJetID(kJetIDLoose, obj));
+                jetIDtight[ic].push_back(passJetID(kJetIDTight, obj));
+                jetIDtightLeptonVeto[ic].push_back(passJetID(kJetIDTightLepVeto, obj));
+
 		// Jet PU ID
-		bool puidLoose  = true;
-		bool puidMedium = true;
-		bool puidTight  = true;
-
-		if(obj.hasUserData("pileupJetId:fullDiscriminant")){
-		  double PUID = obj.userFloat("pileupJetId:fullDiscriminant");
-		  puidLoose  = PUID > 0.1; //FIXME 0.1 hatusta
-		  puidMedium = PUID > 0.2; //FIXME 0.2 hatusta
-		  puidTight  = PUID > 0.3; //FIXME 0.3 hatusta
-		}
-
-		jetPUIDloose[ic].push_back(puidLoose);
-		jetPUIDmedium[ic].push_back(puidMedium);
-		jetPUIDtight[ic].push_back(puidTight);
+                // https://twiki.cern.ch/twiki/bin/view/CMS/PileupJetID
+               
+ 		double PUID = 0;
+                if(obj.hasUserData("pileupJetId:fullDiscriminant")){
+ 		  PUID = obj.userFloat("pileupJetId:fullDiscriminant");
+ 		}
+                int puIDflag = static_cast<int>(PUID);
+		jetPUIDloose[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kLoose));
+		jetPUIDmedium[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kMedium);
+		jetPUIDtight[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kTight));
+                
+                // Systematics
+                // FIXME
+//                 systJESup[ic].add(tau.p4().pt()*(1.0+TESvariation[ic]),
+//                                   tau.p4().eta(),
+//                                   tau.p4().phi(),
+//                                   tau.p4().energy()*(1.0+TESvariation[ic]));
+                
+                
             }
         }
     }
@@ -131,9 +161,18 @@ void JetDumper::reset(){
 	hadronFlavour[ic].clear();
 	partonFlavour[ic].clear();
 
-	jetPUIDloose[ic].clear();
+        jetIDloose[ic].clear();
+        jetIDtight[ic].clear();
+        jetIDtightLeptonVeto[ic].clear();
+
+        jetPUIDloose[ic].clear();
 	jetPUIDmedium[ic].clear();
 	jetPUIDtight[ic].clear();
+        // Systematics
+        systJESup[ic].reset();
+        systJESdown[ic].reset();
+        systJERup[ic].reset();
+        systJERdown[ic].reset();
     }
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
         discriminators[ic].clear();
@@ -142,3 +181,62 @@ void JetDumper::reset(){
         userfloats[ic].clear();
     }
 }
+
+bool JetDumper::passJetID(int id, const pat::Jet& jet) {
+  // Recipy taken from https://twiki.cern.ch/twiki/bin/view/CMS/JetID (read on 14.08.2015)
+  double eta = fabs(jet.eta);
+  if (eta < 3.0) {
+    // PF Jet ID       Loose   Tight   TightLepVeto
+    // Neutral Hadron Fraction < 0.99  < 0.90  < 0.90
+    // Neutral EM Fraction     < 0.99  < 0.90  < 0.90
+    // Number of Constituents  > 1     > 1     > 1
+    // Muon Fraction           -       -       < 0.8
+    if (id == kJetIDLoose) {
+      if (!(jet.neutralHadronEnergyFraction() < 0.99)) return false;
+      if (!(jet.neutralEmEnergyFraction()     < 0.99)) return false;
+      if (!(jet.getPFConstituents().size()    > 1   )) return false;
+    } else if (id == kJetIDTight) {
+      if (!(jet.neutralHadronEnergyFraction() < 0.90)) return false;
+      if (!(jet.neutralEmEnergyFraction()     < 0.90)) return false;
+      if (!(jet.getPFConstituents().size()    > 1   )) return false;      
+    } else if (id == kJetIDTightLepVeto) {
+      if (!(jet.neutralHadronEnergyFraction() < 0.90)) return false;
+      if (!(jet.neutralEmEnergyFraction()     < 0.90)) return false;
+      if (!(jet.getPFConstituents().size()    > 1   )) return false;      
+      if (!(jet.muonEnergyFraction()          < 0.80)) return false;
+    }
+    if (eta < 2.4) {
+      // And for -2.4 <= eta <= 2.4 in addition apply
+      // Charged Hadron Fraction > 0     > 0     > 0
+      // Charged Multiplicity    > 0     > 0     > 0
+      // Charged EM Fraction     < 0.99  < 0.99  < 0.90
+      if (id == kJetIDLoose) {
+        if (!(jet.chargedHadronEnergyFraction() > 0.0 )) return false;
+        if (!(jet.chargedHadronMultiplicity()   > 0   )) return false;
+        if (!(jet.chargedEmEnergyFraction()     < 0.99)) return false;
+      } else if (id == kJetIDTight) {
+        if (!(jet.chargedHadronEnergyFraction() > 0.0 )) return false;
+        if (!(jet.chargedHadronMultiplicity()   > 0   )) return false;
+        if (!(jet.chargedEmEnergyFraction()     < 0.99)) return false;        
+      } else if (id == kJetIDTightLepVeto) {
+        if (!(jet.chargedHadronEnergyFraction() > 0.0 )) return false;
+        if (!(jet.chargedHadronMultiplicity()   > 0   )) return false;
+        if (!(jet.chargedEmEnergyFraction()     < 0.90)) return false;
+      }
+    }
+  } else {
+    //     PF Jet ID                   Loose   Tight
+    //     Neutral EM Fraction         < 0.90  < 0.90
+    //     Number of Neutral Particles > 10    >10 
+    if (id == kJetIDLoose) {
+      if (!(jet.neutralEmEnergyFraction() < 0.90)) return false;
+      if (!(jet.neutralMultiplicity()     > 10  )) return false;    
+    } else if (id == kJetIDTight) {
+      if (!(jet.neutralEmEnergyFraction() < 0.90)) return false;
+      if (!(jet.neutralMultiplicity()     > 10  )) return false;    
+    }
+  }
+  return true;
+}
+
+
