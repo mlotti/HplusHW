@@ -1,3 +1,5 @@
+# For miniAOD instructions see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2015 
+
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
@@ -145,17 +147,19 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Jets = cms.VPSet(      
         cms.PSet(
             branchname = cms.untracked.string("Jets"),       
-            src = cms.InputTag("slimmedJets"),      
+            src = cms.InputTag("slimmedJets"), # made from ak4PFJetsCHS
             discriminators = cms.vstring(
-                "jetBProbabilityBJetTags",
-                "jetProbabilityBJetTags",
-                "trackCountingHighPurBJetTags", 
-                "trackCountingHighEffBJetTags",
-                "simpleSecondaryVertexHighEffBJetTags",
-                "simpleSecondaryVertexHighPurBJetTags",
-                "combinedSecondaryVertexBJetTags",
-                "combinedInclusiveSecondaryVertexBJetTags",
-                "combinedInclusiveSecondaryVertexV2BJetTags",
+                "pfJetBProbabilityBJetTags",
+                "pfJetProbabilityBJetTags",
+                #"trackCountingHighPurBJetTags", 
+                #"trackCountingHighEffBJetTags",
+                #"simpleSecondaryVertexHighEffBJetTags",
+                #"simpleSecondaryVertexHighPurBJetTags",
+                "pfCombinedSecondaryVertexBJetTags",
+                "pfCombinedInclusiveSecondaryVertexBJetTags",
+                #"combinedInclusiveSecondaryVertexV2BJetTags", # for 72x
+                "pfCombinedInclusiveSecondaryVertexV2BJetTags", # for 74x
+                "pfCombinedMVABJetTag",
             ),
 	    userFloats = cms.vstring(
 		"pileupJetId:fullDiscriminant"
