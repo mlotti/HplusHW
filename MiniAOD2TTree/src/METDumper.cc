@@ -5,8 +5,8 @@ METDumper::METDumper(std::vector<edm::ParameterSet> psets, bool isMC = true){
     booked           = false;
     ismc             = isMC;
 
-    MET     = new double[inputCollections.size()];
-    MET_phi = new double[inputCollections.size()];                                
+    MET_x = new double[inputCollections.size()];
+    MET_y = new double[inputCollections.size()];                                
 
     handle = new edm::Handle<edm::View<pat::MET> >[inputCollections.size()];
 
