@@ -17,6 +17,7 @@ MuonDumper::MuonDumper(std::vector<edm::ParameterSet> psets, const edm::InputTag
     isLooseMuon = new std::vector<bool>[inputCollections.size()];
     isMediumMuon = new std::vector<bool>[inputCollections.size()];
     isTightMuon = new std::vector<bool>[inputCollections.size()];
+    relIsoDeltaBetaCorrected = new std::vector<float>[inputCollections.size()];
 
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<bool>[inputCollections.size()*nDiscriminators];
@@ -46,7 +47,8 @@ void MuonDumper::book(TTree* tree){
         tree->Branch((name+"_muIDLoose").c_str(),&isLooseMuon[i]);
         tree->Branch((name+"_muIDMedium").c_str(),&isMediumMuon[i]);
         tree->Branch((name+"_muIDTight").c_str(),&isTightMuon[i]);
-                
+        tree->Branch((name+"_relIso").c_str(),&relIsoDeltaBetaCorrected[i]);
+
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
             tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
@@ -83,6 +85,13 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 } else {
                   isTightMuon[ic].push_back(obj.isTightMuon(hoffvertex[0]));
                 }
+                // Calculate relative isolation in cone of DeltaR=0.3
+                double isolation = (obj.pfIsolationR03().sumChargedHadronPt()
+                  + std::max(obj.pfIsolationR03().sumNeutralHadronEt()
+                        + obj.pfIsolationR03().sumPhotonEt()
+                        - 0.5 * obj.pfIsolationR03().sumPUPt(), 0.0));
+                double relIso = isolation / obj.pt();
+                relIsoDeltaBetaCorrected[ic].push_back(relIso);
 
 		//p4[ic].push_back(obj.p4());
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
@@ -107,6 +116,7 @@ void MuonDumper::reset(){
         isLooseMuon[ic].clear();
         isMediumMuon[ic].clear();
         isTightMuon[ic].clear();
+        relIsoDeltaBetaCorrected[ic].clear();
       }                                                                                                                                                             
       for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){                                                                                       
         discriminators[ic].clear();                                                                                                                                 

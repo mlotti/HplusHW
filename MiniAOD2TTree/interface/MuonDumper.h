@@ -38,6 +38,7 @@ class MuonDumper : public BaseDumper {
         std::vector<bool> *isLooseMuon;
         std::vector<bool> *isMediumMuon;
         std::vector<bool> *isTightMuon;
+        std::vector<float> *relIsoDeltaBetaCorrected;
         
 };
 #endif
