@@ -50,7 +50,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     muonDumper = 0;
     if (iConfig.exists("Muons")) {
 	muonCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("Muons");
-        muonDumper = new MuonDumper(muonCollections);
+        muonDumper = new MuonDumper(muonCollections, eventInfoCollections.getParameter<edm::InputTag>("OfflinePrimaryVertexSrc"));
         muonDumper->book(Events);
     }
 

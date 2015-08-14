@@ -22,7 +22,7 @@
 
 class MuonDumper : public BaseDumper {
     public:
-	MuonDumper(std::vector<edm::ParameterSet>);
+	MuonDumper(std::vector<edm::ParameterSet>, const edm::InputTag& recoVertexTag);
 	~MuonDumper();
 
         void book(TTree*);
@@ -30,8 +30,14 @@ class MuonDumper : public BaseDumper {
         void reset();
 
     private:
-	edm::Handle<edm::View<pat::Muon> > *handle;
+	const edm::InputTag offlinePrimaryVertexSrc;
+        edm::Handle<edm::View<pat::Muon> > *handle;
 
         std::vector<bool> *isGlobalMuon;
+        // Note that isSoftMuon and isHighPtMuon are at the moment not PF compatible
+        std::vector<bool> *isLooseMuon;
+        std::vector<bool> *isMediumMuon;
+        std::vector<bool> *isTightMuon;
+        
 };
 #endif

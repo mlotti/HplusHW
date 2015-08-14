@@ -1,6 +1,8 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/MuonDumper.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 
-MuonDumper::MuonDumper(std::vector<edm::ParameterSet> psets){
+MuonDumper::MuonDumper(std::vector<edm::ParameterSet> psets, const edm::InputTag& recoVertexTag)
+: offlinePrimaryVertexSrc(recoVertexTag) {
     inputCollections = psets;
     booked           = false;
 
@@ -12,10 +14,14 @@ MuonDumper::MuonDumper(std::vector<edm::ParameterSet> psets){
     //p4  = new std::vector<reco::Candidate::LorentzVector>[inputCollections.size()];
     pdgId = new std::vector<short>[inputCollections.size()];
     isGlobalMuon = new std::vector<bool>[inputCollections.size()];
+    isLooseMuon = new std::vector<bool>[inputCollections.size()];
+    isMediumMuon = new std::vector<bool>[inputCollections.size()];
+    isTightMuon = new std::vector<bool>[inputCollections.size()];
 
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<bool>[inputCollections.size()*nDiscriminators];
     handle = new edm::Handle<edm::View<pat::Muon> >[inputCollections.size()];
+    
 
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
@@ -37,6 +43,9 @@ void MuonDumper::book(TTree* tree){
         tree->Branch((name+"_e").c_str(),&e[i]);
 
         tree->Branch((name+"_isGlobalMuon").c_str(),&isGlobalMuon[i]);
+        tree->Branch((name+"_muIDLoose").c_str(),&isLooseMuon[i]);
+        tree->Branch((name+"_muIDMedium").c_str(),&isMediumMuon[i]);
+        tree->Branch((name+"_muIDTight").c_str(),&isTightMuon[i]);
                 
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
@@ -47,7 +56,8 @@ void MuonDumper::book(TTree* tree){
 
 bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;
-
+    
+    edm::Handle<edm::View<reco::Vertex> > hoffvertex;
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
 	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
 	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
@@ -61,8 +71,18 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 eta[ic].push_back(obj.p4().eta());
                 phi[ic].push_back(obj.p4().phi());
                 e[ic].push_back(obj.p4().energy());
-
+                
 		isGlobalMuon[ic].push_back(obj.isGlobalMuon());
+
+                // For the discriminators see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
+                iEvent.getByLabel(offlinePrimaryVertexSrc, hoffvertex);
+                isLooseMuon[ic].push_back(obj.isLooseMuon());
+                isMediumMuon[ic].push_back(obj.isMediumMuon());
+                if (hoffvertex.size() == 0) {
+                  isTightMuon[ic].push_back(false);
+                } else {
+                  isTightMuon[ic].push_back(obj.isTightMuon(hoffvertex[0]));
+                }
 
 		//p4[ic].push_back(obj.p4());
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
@@ -84,6 +104,9 @@ void MuonDumper::reset(){
         e[ic].clear();                                                                                                                                              
                                                                                                                                                                     
         isGlobalMuon[ic].clear();
+        isLooseMuon[ic].clear();
+        isMediumMuon[ic].clear();
+        isTightMuon[ic].clear();
       }                                                                                                                                                             
       for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){                                                                                       
         discriminators[ic].clear();                                                                                                                                 
