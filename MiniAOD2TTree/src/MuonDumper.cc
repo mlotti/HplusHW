@@ -12,7 +12,7 @@ MuonDumper::MuonDumper(std::vector<edm::ParameterSet> psets, const edm::InputTag
     e   = new std::vector<double>[inputCollections.size()];    
 
     //p4  = new std::vector<reco::Candidate::LorentzVector>[inputCollections.size()];
-    pdgId = new std::vector<short>[inputCollections.size()];
+    //pdgId = new std::vector<short>[inputCollections.size()];
     isGlobalMuon = new std::vector<bool>[inputCollections.size()];
     isLooseMuon = new std::vector<bool>[inputCollections.size()];
     isMediumMuon = new std::vector<bool>[inputCollections.size()];
@@ -47,7 +47,7 @@ void MuonDumper::book(TTree* tree){
         tree->Branch((name+"_muIDLoose").c_str(),&isLooseMuon[i]);
         tree->Branch((name+"_muIDMedium").c_str(),&isMediumMuon[i]);
         tree->Branch((name+"_muIDTight").c_str(),&isTightMuon[i]);
-        tree->Branch((name+"_relIso").c_str(),&relIsoDeltaBetaCorrected[i]);
+        tree->Branch((name+"_relIsoDeltaBeta").c_str(),&relIsoDeltaBetaCorrected[i]);
 
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {

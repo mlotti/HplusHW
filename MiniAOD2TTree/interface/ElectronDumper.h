@@ -25,9 +25,13 @@ class ElectronDumper : public BaseDumper {
 	ElectronDumper(std::vector<edm::ParameterSet>);
 	~ElectronDumper();
 
+        void book(TTree*);
 	bool fill(edm::Event&, const edm::EventSetup&);
+        void reset();
 
     private:
 	edm::Handle<edm::View<pat::Electron> > *handle;
+        
+        std::vector<float> *relIsoDeltaBetaCorrected;
 };
 #endif
