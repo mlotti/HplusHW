@@ -1,7 +1,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TauDumper.h"
 #include "DataFormat/interface/Tau.h"
 
-TauDumper::TauDumper(std::vector<edm::ParameterSet> psets){
+TauDumper::TauDumper(std::vector<edm::ParameterSet> psets) {
     inputCollections = psets;
     booked           = false;
 
@@ -23,6 +23,16 @@ TauDumper::TauDumper(std::vector<edm::ParameterSet> psets){
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<bool>[inputCollections.size()*nDiscriminators];
 
+    // Systematics
+    for (auto p: inputCollections) {
+      TESvariation.push_back(p.getParameter<double>("TESvariation"));
+      TESvariationExtreme.push_back(p.getParameter<double>("TESvariationExtreme"));
+    }
+    systTESup = new FourVectorDumper[inputCollections.size()];
+    systTESdown = new FourVectorDumper[inputCollections.size()];
+    systExtremeTESup = new FourVectorDumper[inputCollections.size()];
+    systExtremeTESdown = new FourVectorDumper[inputCollections.size()];
+    
     handle = new edm::Handle<edm::View<pat::Tau> >[inputCollections.size()];
 
     useFilter = false;
@@ -59,6 +69,11 @@ void TauDumper::book(TTree* tree){
 	for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(src/DataFormat/src/Event.cc:62:); ++iDiscr) {
 	    tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
 	}
+	
+	systTESup[i].book(tree, name, "TESup");
+        systTESdown[i].book(tree, name, "TESdown");
+        systExtremeTESup[i].book(tree, name, "TESextremeUp");
+        systExtremeTESdown[i].book(tree, name, "TESextremeDown");
     }
 }
 
@@ -104,6 +119,24 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		    //std::cout << "check tau " << tau.p4().Pt() << " " << tau.p4().Eta() << " " << tau.p4().Phi() << " " << discriminatorNames[iDiscr] << " " << tau.tauID(discriminatorNames[iDiscr]) << std::endl;
 		    discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(tau.tauID(discriminatorNames[iDiscr]));
 		}
+		// Systematics variations
+		systTESup[ic].add(tau.p4().pt()*(1.0+TESvariation[ic]),
+                                  tau.p4().eta(),
+                                  tau.p4().phi(),
+                                  tau.p4().energy()*(1.0+TESvariation[ic]));
+                systTESdown[ic].add(tau.p4().pt()*(1.0-TESvariation[ic]),
+                                  tau.p4().eta(),
+                                  tau.p4().phi(),
+                                  tau.p4().energy()*(1.0-TESvariation[ic]));
+                systExtremeTESup[ic].add(tau.p4().pt()*(1.0+TESvariationExtreme[ic]),
+                                         tau.p4().eta(),
+                                         tau.p4().phi(),
+                                         tau.p4().energy()*(1.0+TESvariationExtreme[ic]));
+                systExtremeTESdown[ic].add(tau.p4().pt()*(1.0-TESvariationExtreme[ic]),
+                                         tau.p4().eta(),
+                                         tau.p4().phi(),
+                                         tau.p4().energy()*(1.0-TESvariationExtreme[ic]));
+		
 		/*
 		std::cout << "check tau " << tau.pdgId() << std::endl;
 		std::vector<reco::GenParticleRef> associatedGenParticles = tau.genParticleRefs();
@@ -247,6 +280,11 @@ void TauDumper::reset(){
 	nProngs[ic].clear();
 	pdgId[ic].clear();
         pdgTauOrigin[ic].clear();
+        // Systematics
+        systTESup[ic].reset();
+        systTESdown[ic].reset();
+        systExtremeTESup[ic].reset();
+        systExtremeTESdown[ic].reset();
       }
       for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
 	discriminators[ic].clear();

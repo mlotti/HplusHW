@@ -16,8 +16,8 @@
 #include "TTree.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
-
 #include "HiggsAnalysis/MiniAOD2TTree/interface/BaseDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/FourVectorDumper.h"
 
 class TauDumper : public BaseDumper {
     public:
@@ -30,8 +30,8 @@ class TauDumper : public BaseDumper {
 
     private:
 	bool filter();
-
-	edm::Handle<edm::View<pat::Tau> > *handle;
+        
+        edm::Handle<edm::View<pat::Tau> > *handle;
 
         std::vector<double> *lChTrackPt;
         std::vector<double> *lChTrackEta;
@@ -40,5 +40,15 @@ class TauDumper : public BaseDumper {
 
 	std::vector<short> *nProngs;
         std::vector<short> *pdgTauOrigin;
+        
+        // Systematics settings (do not reset)
+        std::vector<const double> TESvariation;
+        std::vector<const double> TESvariationExtreme;
+        // Systematics variations for tau 4-vector
+        FourVectorDumper *systTESup;
+        FourVectorDumper *systTESdown;
+        FourVectorDumper *systExtremeTESup;
+        FourVectorDumper *systExtremeTESdown;
+        
 };
 #endif
