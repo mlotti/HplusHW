@@ -42,8 +42,8 @@ class TauDumper : public BaseDumper {
         std::vector<short> *pdgTauOrigin;
         
         // Systematics settings (do not reset)
-        std::vector<const double> TESvariation;
-        std::vector<const double> TESvariationExtreme;
+        std::vector<double> TESvariation;
+        std::vector<double> TESvariationExtreme;
         // Systematics variations for tau 4-vector
         FourVectorDumper *systTESup;
         FourVectorDumper *systTESdown;

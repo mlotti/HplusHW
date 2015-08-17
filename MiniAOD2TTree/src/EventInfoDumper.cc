@@ -49,16 +49,16 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     edm::Handle<edm::View<reco::Vertex> > hoffvertex;
     if(iEvent.getByLabel(offlinePrimaryVertexSrc, hoffvertex)){
         nGoodOfflinePV = hoffvertex->size();
-        pvZ = hoffvertex[0].z();
+        pvZ = hoffvertex->at(0).z();
         ptSumRatio = -1.0;
         if (nGoodOfflinePV > 1) {
           double ptSum0 = 0.0;
-          for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex[0].tracks_begin(); iter != hoffvertex[0].tracks_end(); iter++) {
-            ptSum0 += hoffvertex[0].trackWeight(*iter) * (*iter).pt()*(*iter).pt();
+          for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex->at(0).tracks_begin(); iter != hoffvertex->at(0).tracks_end(); iter++) {
+            ptSum0 += hoffvertex->at(0).trackWeight(*iter) * (*iter)->pt()*(*iter)->pt();
           }
           double ptSum1 = 0.0;
-          for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex[1].tracks_begin(); iter != hoffvertex[1].tracks_end(); iter++) {
-            ptSum1 += hoffvertex[1].trackWeight(*iter) * (*iter).pt()*(*iter).pt();
+          for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex->at(1).tracks_begin(); iter != hoffvertex->at(1).tracks_end(); iter++) {
+            ptSum1 += hoffvertex->at(1).trackWeight(*iter) * (*iter)->pt()*(*iter)->pt();
           }
           ptSumRatio = ptSum1 / ptSum0;
         }
