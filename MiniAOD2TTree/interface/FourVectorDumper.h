@@ -12,7 +12,7 @@
 /// Class for storing generic 4-vectors (use case: systematic variations for taus and jets)
 class FourVectorDumper {
 public:
-  virtual FourVectorDumper();
+  FourVectorDumper();
   ~FourVectorDumper();
 
   virtual void book(TTree* tree, const std::string& name, const std::string& postfix);

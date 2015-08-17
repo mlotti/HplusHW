@@ -63,10 +63,10 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		//p4[ic].push_back(obj.p4());
 
                 // Calculate relative isolation for the electron
-                double isolation = obj.pfIsolationVariables().sumChargedHadronPt() 
-                  + std::max(obj.pfIsolationVariables().sumNeutralHadronEt() 
-                             + obj.pfIsolationVariables().sumPhotonEt()
-                             - 0.5 * obj.pfIsolationVariables().sumPUPt(), 0.0);
+                double isolation = obj.pfIsolationVariables().sumChargedHadronPt 
+                  + std::max(obj.pfIsolationVariables().sumNeutralHadronEt 
+                             + obj.pfIsolationVariables().sumPhotonEt
+                             - 0.5 * obj.pfIsolationVariables().sumPUPt, 0.0);
                 double relIso = isolation / obj.pt();
                 relIsoDeltaBetaCorrected[ic].push_back(relIso);
                 
