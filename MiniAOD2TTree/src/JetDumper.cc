@@ -133,7 +133,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
  		}
                 int puIDflag = static_cast<int>(PUID);
 		jetPUIDloose[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kLoose));
-		jetPUIDmedium[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kMedium);
+		jetPUIDmedium[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kMedium));
 		jetPUIDtight[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kTight));
                 
                 // Systematics

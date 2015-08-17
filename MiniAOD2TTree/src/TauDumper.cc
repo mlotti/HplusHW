@@ -193,11 +193,11 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                       if (deltaR(p4,tau.p4()) < 0.1) {
                         matchesToTau = true;
                         // Find out which particle produces the tau
-                        const reco::Candidate* mother1 = (*genParticles)[gp.mother()][0];
+                        const reco::Candidate* mother1 = (*genParticles)[gp.mother()[0]];
                         if (mother1 != nullptr) {
                           if (abs(mother1->pdgId()) == 15) {
                             // Tau radiation (tau->tau+gamma), navigate to its mother
-                            mother1 = (*genParticles)[mother1->mother()][0];
+                            mother1 = (*genParticles)[mother1->mother()[0]];
                           }
                         }
                         if (mother1 != nullptr) {
@@ -231,7 +231,7 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 } else {
 //                   // Look for reference jet
                   if (tau.pfJetRef().isNonnull()) {
-                    tauPid = abs(tau.pfJetRef()->partonFlavour());
+                    tauPid = abs(tau.pfJetRef()[0]->partonFlavour());
                   }
                 }
 		pdgId[ic].push_back(tauPid);
