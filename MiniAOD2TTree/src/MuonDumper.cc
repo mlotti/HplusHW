@@ -80,16 +80,16 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 iEvent.getByLabel(offlinePrimaryVertexSrc, hoffvertex);
                 isLooseMuon[ic].push_back(obj.isLooseMuon());
                 isMediumMuon[ic].push_back(obj.isMediumMuon());
-                if (hoffvertex.size() == 0) {
+                if (hoffvertex->size() == 0) {
                   isTightMuon[ic].push_back(false);
                 } else {
-                  isTightMuon[ic].push_back(obj.isTightMuon(hoffvertex[0]));
+                  isTightMuon[ic].push_back(obj.isTightMuon(hoffvertex->at(0)));
                 }
                 // Calculate relative isolation in cone of DeltaR=0.3
-                double isolation = (obj.pfIsolationR03().sumChargedHadronPt()
-                  + std::max(obj.pfIsolationR03().sumNeutralHadronEt()
-                        + obj.pfIsolationR03().sumPhotonEt()
-                        - 0.5 * obj.pfIsolationR03().sumPUPt(), 0.0));
+                double isolation = (obj.pfIsolationR03().sumChargedHadronPt
+                  + std::max(obj.pfIsolationR03().sumNeutralHadronEt
+                        + obj.pfIsolationR03().sumPhotonEt
+                        - 0.5 * obj.pfIsolationR03().sumPUPt, 0.0));
                 double relIso = isolation / obj.pt();
                 relIsoDeltaBetaCorrected[ic].push_back(relIso);
 

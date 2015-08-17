@@ -184,7 +184,7 @@ void JetDumper::reset(){
 
 bool JetDumper::passJetID(int id, const pat::Jet& jet) {
   // Recipy taken from https://twiki.cern.ch/twiki/bin/view/CMS/JetID (read on 14.08.2015)
-  double eta = fabs(jet.eta);
+  double eta = fabs(jet.eta());
   if (eta < 3.0) {
     // PF Jet ID       Loose   Tight   TightLepVeto
     // Neutral Hadron Fraction < 0.99  < 0.90  < 0.90

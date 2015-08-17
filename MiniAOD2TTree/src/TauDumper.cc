@@ -66,7 +66,7 @@ void TauDumper::book(TTree* tree){
         tree->Branch((name+"_nProngs").c_str(),&nProngs[i]);
 
 	std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
-	for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(src/DataFormat/src/Event.cc:62:); ++iDiscr) {
+	for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
 	    tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
 	}
 	
@@ -193,23 +193,23 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                       if (deltaR(p4,tau.p4()) < 0.1) {
                         matchesToTau = true;
                         // Find out which particle produces the tau
-                        const reco::Candidate* mother1 = (*genParticles)[gp.mother()];
+                        const reco::Candidate* mother1 = (*genParticles)[gp.mother()][0];
                         if (mother1 != nullptr) {
                           if (abs(mother1->pdgId()) == 15) {
                             // Tau radiation (tau->tau+gamma), navigate to its mother
-                            mother1 = (*genParticles)[mother1->mother()];
+                            mother1 = (*genParticles)[mother1->mother()][0];
                           }
                         }
                         if (mother1 != nullptr) {
                           int moID = abs(mother1->pdgId());
                           if (moID == kFromW) {
-                            tauOrigin == kFromW;
+                            tauOrigin = kFromW;
                           } else if (moID == kFromZ) {
-                            tauOrigin == kFromZ;
+                            tauOrigin = kFromZ;
                           } else if (moID == kFromHplus) {
-                            tauOrigin == kFromHplus;
+                            tauOrigin = kFromHplus;
                           } else {
-                            tauOrigin == kFromOtherSource;
+                            tauOrigin = kFromOtherSource;
                           }
                         }
                       }
@@ -229,9 +229,9 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 } else if (matchesToTau) {
                   tauPid = 15;
                 } else {
-                  // Look for reference jet
-                  if (tau.PFJetRef().isNonnull()) {
-                    tauPid = abs(tau.PFJetRef()->partonFlavour());
+//                   // Look for reference jet
+                  if (tau.pfJetRef().isNonnull()) {
+                    tauPid = abs(tau.pfJetRef()->partonFlavour());
                   }
                 }
 		pdgId[ic].push_back(tauPid);

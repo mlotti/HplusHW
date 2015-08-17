@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/METDumper.h"
+#include "TMath.h"
 
 METDumper::METDumper(std::vector<edm::ParameterSet> psets, bool isMC = true){
     inputCollections = psets;
@@ -49,8 +50,8 @@ bool METDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
               GenMET_y = handle[i]->ptrAt(0)->genMET()->py();
 	    }
 	    if(handle[i]->ptrAt(0)->caloMETPt()){
-              caloMET_x = handle[i]->ptrAt(0)->caloMETPx();
-              caloMET_y = handle[i]->ptrAt(0)->caloMETPy();
+              caloMET_x = handle[i]->ptrAt(0)->caloMETPt() * TMath::Cos(handle[i]->ptrAt(0)->caloMETPhi());
+              caloMET_y = handle[i]->ptrAt(0)->caloMETPt() * TMath::Sin(handle[i]->ptrAt(0)->caloMETPhi());
             }
 	}else{
 	  std::cout << "Collection " << inputtag.label() << " not found, exiting.." << std::endl;
