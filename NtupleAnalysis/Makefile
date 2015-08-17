@@ -48,6 +48,12 @@ CXXFLAGS += -g
 LDFLAGS += -g
 endif
 
+# Platform dependent flags
+HOST=$(shell hostname)
+ifeq "$(findstring $(HOST),lxplus)" "lxplus"
+CXXFLAGS += -D HOST_LXPLUS
+endif
+
 #GIT_COMMIT_ID := $(shell git rev-parse HEAD)
 
 ##########################

@@ -43,10 +43,10 @@ namespace hplus {
       return;
     // Use gdb to obtain backtrace
     int pid = getpid();
-    if (std::string(getenv("HOST")).find("lxplus") == std::string::npos) {
-      // Do not apply on lxplus
-      prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0); // needed to disable temporarily ptracer
-    }
+#ifndef HOST_LXPLUS
+    // Do not apply on lxplus
+    prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0); // needed to disable temporarily ptracer
+#endif
     int child_pid = fork(); // needed to disable temporarily ptracer
     if (!child_pid) {           
       std::stringstream cmd;
