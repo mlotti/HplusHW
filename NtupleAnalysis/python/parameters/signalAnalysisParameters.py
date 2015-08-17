@@ -88,6 +88,11 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
         cutValueJet3 = 60.0,   # Cut value in degrees (circular cut)
         cutValueJet4 = 60.0,   # Cut value in degrees (circular cut)
 )
+#====== Experimental
+jetCorrelations = PSet (
+
+)
+
 
 allSelections = PSet(
  histogramAmbientLevel = histoLevel,
@@ -100,4 +105,5 @@ allSelections = PSet(
          BJetSelection = bjetSelection,
           METSelection = metSelection,
  AngularCutsBackToBack = angularCutsBackToBack,
+       JetCorrelations = jetCorrelations,
 )
