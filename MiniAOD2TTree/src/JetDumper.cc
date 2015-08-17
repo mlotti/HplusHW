@@ -1,6 +1,6 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/JetDumper.h"
 #include "DataFormats/JetReco/interface/PileupJetIdentifier.h"
-#include "HiggsAnalysis/NtupleAnalysis/src/DataFormat/interface/Jet.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
 
 JetDumper::JetDumper(std::vector<edm::ParameterSet> psets){
     inputCollections = psets;

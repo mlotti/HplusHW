@@ -1,5 +1,5 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TauDumper.h"
-#include "HiggsAnalysis/NtupleAnalysis/src/DataFormat/interface/Tau.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
 
 TauDumper::TauDumper(std::vector<edm::ParameterSet> psets) {
     inputCollections = psets;

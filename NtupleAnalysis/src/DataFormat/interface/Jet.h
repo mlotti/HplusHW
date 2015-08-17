@@ -5,12 +5,6 @@
 #include "DataFormat/interface/JetGenerated.h"
 #include "DataFormat/interface/ParticleIterator.h"
 
-enum JetIDType {
-  kJetIDLoose = 0,
-  kJetIDTight,
-  kJetIDTightLepVeto
-};
-
 class Jet;
 
 class JetCollection: public JetGeneratedCollection, public ParticleIteratorAdaptor<JetCollection> {
