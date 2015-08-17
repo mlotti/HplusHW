@@ -19,7 +19,7 @@ public:
   
 private:
   /// Helper function for finding appropriate bin
-  size_t findBin(const float value);
+  size_t findBin(const float value) const;
   
 private:
   /// Container for left edges of binned quantity

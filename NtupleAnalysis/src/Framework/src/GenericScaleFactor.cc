@@ -27,15 +27,16 @@ float GenericScaleFactor::getScaleFactorValue(const float value) const {
 }
 
 void GenericScaleFactor::setVariation(std::string name) {
-  if (name.find("Up") == std::string::npos-2 || name.find("up") == std::string::npos-2)
+  size_t len = name.size();
+  if (name.find("Up") == len-2 || name.find("up") == len-2)
     fActualSF = &fScaleFactorsUpVariation;
-  else if (name.find("Down") == std::string::npos-4 || name.find("Down") == std::string::npos-4)
+  else if (name.find("Down") == len-4 || name.find("down") == len-4)
     fActualSF = &fScaleFactorsDownVariation;
   else
     throw hplus::Exception("logic") << "Could not deduce from variation name '" << name << "' wheather it is up or down variation (needs to end with up/down)!";
 }
 
-size_t GenericScaleFactor::findBin(const float value) {
+size_t GenericScaleFactor::findBin(const float value) const {
   // Simple approach, scan bin edges from left to right
   size_t maxValue = fBinLeftEdges.size();
   for (size_t i = 0; i < maxValue; ++i) {
