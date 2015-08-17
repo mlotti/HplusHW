@@ -1,8 +1,10 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/METDumper.h"
 
-METDumper::METDumper(std::vector<edm::ParameterSet> psets){
+METDumper::METDumper(std::vector<edm::ParameterSet> psets, bool isMC = true){
     inputCollections = psets;
     booked           = false;
+
+    ismc             = isMC;
 
     MET     = new double[inputCollections.size()];
     MET_phi = new double[inputCollections.size()];                                
@@ -27,8 +29,10 @@ void METDumper::book(TTree* tree){
     }
     tree->Branch("CaloMET_et",&caloMET_et);
     tree->Branch("CaloMET_phi",&caloMET_phi);
-    tree->Branch("GenMET_et",&GenMET_et);
-    tree->Branch("GenMET_phi",&GenMET_phi);
+    if(ismc){
+        tree->Branch("GenMET_et",&GenMET_et);
+        tree->Branch("GenMET_phi",&GenMET_phi);
+    }
 }
 
 bool METDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){

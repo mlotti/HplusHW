@@ -12,7 +12,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 
 ROOT.gROOT.SetBatch(True)
-plotDir = "TauLeg2012"
+plotDir = "TauLeg2015"
 
 def usage():
     print "\n"
@@ -86,6 +86,14 @@ def convert2TGraph(tefficiency):
                                     array.array("d",yerrl),
                                     array.array("d",yerrh))
 
+def Print(graph):
+    N = graph.GetN()
+    for i in range(N):
+        x = ROOT.Double()
+        y = ROOT.Double()
+        graph.GetPoint(i,x,y)
+        print "x,y",x,y
+
 def main():
 
     if len(sys.argv) < 2:
@@ -93,7 +101,7 @@ def main():
 
     paths = [sys.argv[1]]
 
-    analysis = "TauLeg_2012D"
+    analysis = "TauLeg_2015A"
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
 
     style = tdrstyle.TDRStyle()
@@ -103,18 +111,7 @@ def main():
 
     eff1 = getEfficiency(dataset1)
     eff2 = getEfficiency(dataset2)
-    """
-    for i in range(0,eff1.GetN()):
-        x = array.array('d',[0])
-        y = array.array('d',[0])
-        eff1.GetPoint(i,x,y)
-        print "graph1",i,x,y
-    for i in range(0,eff2.GetN()):
-        x = array.array('d',[0])
-        y = array.array('d',[0])
-        eff2.GetPoint(i,x,y)
-        print "graph2",i,x,y
-    """
+
     styles.dataStyle.apply(eff1)
     styles.mcStyle.apply(eff2)
     eff1.SetMarkerSize(1)
@@ -125,7 +122,7 @@ def main():
 
     opts = {"ymin": 0, "ymax": 1.1}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
-    moveLegend = {"dx": -0.55}
+    moveLegend = {"dx": -0.55, "dy": -0.15, "dh": -0.1}
     name = "DataVsMC_HLTTau_PFTauPt"
 
     legend1 = "Data"
@@ -135,19 +132,14 @@ def main():
     p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
     p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 
-#    legend1 = "Data"
-#    legend2 = "MC"
-#    p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
     p.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
     p.getFrame().GetXaxis().SetTitle("#tau-jet p_{T} (GeV/c)")
     p.getFrame2().GetYaxis().SetTitle("Ratio")
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     p.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText(s="%s TeV"%dataset2[0].info["energy"])
-    lumi = 0
-    histograms.addLuminosityText(None, None, lumi)
+    lumi = 0.0
+    histograms.addStandardTexts(lumi=lumi)
 
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)

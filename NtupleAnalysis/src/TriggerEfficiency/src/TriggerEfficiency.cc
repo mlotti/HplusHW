@@ -141,4 +141,6 @@ void TriggerEfficiency::process(Long64_t entry) {
     hNum->Fill(xvariable);
     cSignalTrigger.increment();
   }
+
+  fEventSaver.save();
 }

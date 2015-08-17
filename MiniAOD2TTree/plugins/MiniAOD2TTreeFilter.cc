@@ -3,6 +3,8 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
+#include <regex>
+
 MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     outputFileName(iConfig.getParameter<std::string>("OutputFileName")),
     codeVersion(iConfig.getParameter<std::string>("CodeVersion")),
@@ -28,6 +30,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 	trigger = iConfig.getParameter<edm::ParameterSet>("Trigger");
         trgDumper = new TriggerDumper(trigger);
         trgDumper->book(Events);
+        hltProcessName = trigger.getParameter<edm::InputTag>("TriggerResults").process();
     }
 
     tauDumper = 0;
@@ -61,22 +64,8 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     metDumper = 0;
     if (iConfig.exists("METs")) {
 	metCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("METs");
-        metDumper = new METDumper(metCollections);
+        metDumper = new METDumper(metCollections,this->isMC());
         metDumper->book(Events);
-    }
-
-    genMetDumper = 0;
-    if (iConfig.exists("GenMETs")) {
-	genMetCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenMETs");
-        genMetDumper = new GenMETDumper(genMetCollections);
-        genMetDumper->book(Events);
-    }
-
-    genWeightDumper = 0;
-    if (iConfig.exists("GenWeights")) {
-	genWeightCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenWeights");
-        genWeightDumper = new GenWeightDumper(genWeightCollections);
-        genWeightDumper->book(Events);
     }
 
     trackDumper = 0;
@@ -86,22 +75,46 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
         trackDumper->book(Events);
     }
 
+    genMetDumper = 0;
+    genWeightDumper = 0;
     genParticleDumper = 0;
-    if (iConfig.exists("GenParticles")) {
+    genJetDumper = 0;
+
+    if(this->isMC()){
+      if (iConfig.exists("GenMETs")) {
+	genMetCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenMETs");
+        genMetDumper = new GenMETDumper(genMetCollections);
+        genMetDumper->book(Events);
+      }
+
+      if (iConfig.exists("GenWeights")) {
+	genWeightCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenWeights");
+        genWeightDumper = new GenWeightDumper(genWeightCollections);
+        genWeightDumper->book(Events);
+      }
+
+      if (iConfig.exists("GenParticles")) {
         genParticleCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenParticles");
         genParticleDumper = new GenParticleDumper(genParticleCollections);
         genParticleDumper->book(Events);
-    }
-    genJetDumper = 0;
-    if (iConfig.exists("GenJets")) {
+      }
+
+      if (iConfig.exists("GenJets")) {
         genJetCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenJets");
         genJetDumper = new GenJetDumper(genJetCollections);
         genJetDumper->book(Events);
+      }
     }
 }
 
 MiniAOD2TTreeFilter::~MiniAOD2TTreeFilter() {
-    system("ls -l");
+//    system("ls -l");
+}
+
+void MiniAOD2TTreeFilter::beginRun(edm::Run const & iRun, edm::EventSetup const& iSetup) {
+    bool changed = true;
+    hltConfig.init(iRun,iSetup,hltProcessName,changed);
+    if(trgDumper != 0) trgDumper->book(iRun,hltConfig);
 }
 
 void MiniAOD2TTreeFilter::beginJob(){
@@ -147,6 +160,8 @@ void MiniAOD2TTreeFilter::reset(){
 #include <time.h>
 #include "TH1F.h"
 void MiniAOD2TTreeFilter::endJob(){
+
+    fOUT->cd();
 
 // write date
     time_t rawtime;
@@ -199,5 +214,10 @@ void MiniAOD2TTreeFilter::endJob(){
 void MiniAOD2TTreeFilter::endLuminosityBlock(const edm::LuminosityBlock & iLumi, const edm::EventSetup & iSetup) {
     if(skimDumper) skimDumper->fill(iLumi,iSetup);
 }
-          
+
+bool MiniAOD2TTreeFilter::isMC(){
+    std::regex data_re("data");
+    if(std::regex_search(dataVersion, data_re)) return false;
+    return true;
+}          
 DEFINE_FWK_MODULE(MiniAOD2TTreeFilter);

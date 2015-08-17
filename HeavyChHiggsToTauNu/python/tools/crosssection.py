@@ -192,10 +192,21 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("DYToTauTau_M_100to200", {
             "7": 0, # []
             "8": 34.92, # [1]
+	    "13": 2.307e+02, # [14]
             }),
     CrossSection("DYToTauTau_M_200to400", {
             "7": 0, # []      
             "8": 1.181, # [1]
+            "13": 7.839e+00, # [14]
+            }),
+   CrossSection("DYToTauTau_M_400to500", {
+            "13": 3.957e-01, # [14]
+            }),
+   CrossSection("DYToTauTau_M_500to700", {
+            "13": 2.352e-01, # [14]
+            }),
+   CrossSection("DYToTauTau_M_700to800", {
+            "13": 3.957e-02, # [14]
             }),
     CrossSection("DYToTauTau_M_400to800", {
             "7": 0, # []      
@@ -234,6 +245,21 @@ backgroundCrossSections = CrossSectionList(
             "7": 1.44, # [5,6]
             "8": 1.76, # [8]
             "13": 4.16, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma 
+            }),
+    CrossSection("ST_tW_antitop_5f_inclusiveDecays", {
+            "13": 3.806e+01, # [14]
+            }),
+    CrossSection("ST_tW_top_5f_inclusiveDecays", {
+            "13": 3.809e+01, # [14]
+            }),
+    CrossSection("ST_tchannel_antitop_4f_leptonDecays", {
+            "13": 2.530e+01, # [14]
+            }),
+    CrossSection("ST_tchannel_top_4f_leptonDecays", {
+            "13": 4.190e+01, # [14]
+            }),
+    CrossSection("ST_schannel_4f_leptonDecays", {
+            "13": 3.365e+00, # [14]
             }),
 )
 
