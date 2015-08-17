@@ -50,7 +50,7 @@ endif
 
 # Platform dependent flags
 HOST=$(shell hostname)
-ifeq "$(findstring $(HOST),lxplus)" "lxplus"
+ifeq "$(findstring lxplus,$(HOST))" "lxplus"
 CXXFLAGS += -D HOST_LXPLUS
 endif
 
