@@ -22,7 +22,7 @@
 
 class ElectronDumper : public BaseDumper {
     public:
-	ElectronDumper(std::vector<edm::ParameterSet>);
+	ElectronDumper(std::vector<edm::ParameterSet>, edm::InputTag& _rhoSource);
 	~ElectronDumper();
 
         void book(TTree*);
@@ -30,6 +30,7 @@ class ElectronDumper : public BaseDumper {
         void reset();
 
     private:
+        edm::InputTag rhoSource;
 	edm::Handle<edm::View<pat::Electron> > *handle;
         
         std::vector<float> *relIsoDeltaBetaCorrected;

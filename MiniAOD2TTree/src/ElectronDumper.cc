@@ -1,7 +1,8 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/ElectronDumper.h"
 
-ElectronDumper::ElectronDumper(std::vector<edm::ParameterSet> psets){
-    inputCollections = psets;
+ElectronDumper::ElectronDumper(std::vector<edm::ParameterSet>, edm::InputTag& _rhoSource)
+: rhoSource(_rhoSource) {
+    inputCollections = ;
 
     pt  = new std::vector<double>[inputCollections.size()];
     eta = new std::vector<double>[inputCollections.size()];    
@@ -46,6 +47,9 @@ void ElectronDumper::book(TTree* tree){
 }
 
 bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
+    edm::Handle<double>* rhoHandle;
+    iEvent.getByLabel(rhoSource, rhoHandle);
+    
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
 	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
 	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
@@ -62,13 +66,16 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 		//p4[ic].push_back(obj.p4());
 
-                // Calculate relative isolation for the electron
+                // Calculate relative isolation for the electron (delta beta)
                 double isolation = obj.pfIsolationVariables().sumChargedHadronPt 
                   + std::max(obj.pfIsolationVariables().sumNeutralHadronEt 
                              + obj.pfIsolationVariables().sumPhotonEt
                              - 0.5 * obj.pfIsolationVariables().sumPUPt, 0.0);
                 double relIso = isolation / obj.pt();
                 relIsoDeltaBetaCorrected[ic].push_back(relIso);
+                
+                // Calculate relative isolation with effective area
+                // FIXME: recipy for effective area is missing
                 
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
 		    discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(obj.electronID(discriminatorNames[iDiscr]));

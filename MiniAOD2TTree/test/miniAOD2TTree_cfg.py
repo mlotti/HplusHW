@@ -110,6 +110,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         cms.PSet(
             branchname = cms.untracked.string("Electrons"),
             src = cms.InputTag("slimmedElectrons"),
+            rhoSource = cms.InputTag("fixedGridRhoFastjetAll"), # for PU mitigation in isolation
             discriminators = cms.vstring()
         )
     ),
