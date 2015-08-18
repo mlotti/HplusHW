@@ -47,9 +47,6 @@ class TauDumper : public BaseDumper {
         // 4-vector for generator tau
         FourVectorDumper *MCtau;
         
-        // Systematics settings (do not reset)
-        std::vector<double> TESvariation;
-        std::vector<double> TESvariationExtreme;
         // Systematics variations for tau 4-vector
         FourVectorDumper *systTESup;
         FourVectorDumper *systTESdown;

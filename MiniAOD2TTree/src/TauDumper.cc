@@ -27,11 +27,6 @@ TauDumper::TauDumper(std::vector<edm::ParameterSet> psets) {
     refJet = new FourVectorDumper[inputCollections.size()];
     MCtau = new FourVectorDumper[inputCollections.size()];
     
-    // Systematics
-    for (auto p: inputCollections) {
-      TESvariation.push_back(p.getParameter<double>("TESvariation"));
-      TESvariationExtreme.push_back(p.getParameter<double>("TESvariationExtreme"));
-    }
     systTESup = new FourVectorDumper[inputCollections.size()];
     systTESdown = new FourVectorDumper[inputCollections.size()];
     systExtremeTESup = new FourVectorDumper[inputCollections.size()];
@@ -101,6 +96,9 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
     std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
     iEvent.getByLabel(inputtag, handle[ic]);
+    double TESvariation = inputCollections[ic].getParameter<double>("TESvariation");
+    double TESvariationExtreme = inputCollections[ic].getParameter<double>("TESvariationExtreme");
+    
     if(handle[ic].isValid()){
       for(size_t i=0; i<handle[ic]->size(); ++i) {
         const pat::Tau& tau = handle[ic]->at(i);
