@@ -29,6 +29,8 @@ class TauDumper : public BaseDumper {
 	void reset();
 
     private:
+        void fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Tau& tau);
+        
 	bool filter();
         
         edm::Handle<edm::View<pat::Tau> > *handle;
@@ -40,6 +42,10 @@ class TauDumper : public BaseDumper {
 
 	std::vector<short> *nProngs;
         std::vector<short> *pdgTauOrigin;
+        // 4-vector for reference jet
+        FourVectorDumper *refJet;
+        // 4-vector for generator tau
+        FourVectorDumper *MCtau;
         
         // Systematics settings (do not reset)
         std::vector<double> TESvariation;
