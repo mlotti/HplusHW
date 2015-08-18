@@ -36,7 +36,7 @@ class ElectronDumper : public BaseDumper {
         
         std::vector<float> *relIsoDeltaBetaCorrected;
         
-        // 4-vector for generator tau
-        FourVectorDumper *MCElectron;
+        // 4-vector for generator electron
+        FourVectorDumper *MCelectron;
 };
 #endif

@@ -13,6 +13,8 @@ ElectronDumper::ElectronDumper(std::vector<edm::ParameterSet> psets) {
 
     relIsoDeltaBetaCorrected = new std::vector<float>[inputCollections.size()];
     
+    MCelectron = new FourVectorDumper[inputCollections.size()];
+    
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<bool>[inputCollections.size()*nDiscriminators];
     handle = new edm::Handle<edm::View<pat::Electron> >[inputCollections.size()];
@@ -38,6 +40,8 @@ void ElectronDumper::book(TTree* tree){
 
         tree->Branch((name+"_relIsoDeltaBeta").c_str(),&relIsoDeltaBetaCorrected[i]);
 
+        MCelectron[i].book(tree, name, "MCelectron");
+        
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
             tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
@@ -46,6 +50,8 @@ void ElectronDumper::book(TTree* tree){
 }
 
 bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
+    if (!booked) return true;  
+  
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("prunedGenParticles", genParticles);
     
@@ -106,7 +112,7 @@ void ElectronDumper::fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCol
       }
     }
   }
-  MCElectron[ic].add(p4BestMatch.pt(), p4BestMatch.eta(), p4BestMatch.phi(), p4BestMatch.energy());
+  MCelectron[ic].add(p4BestMatch.pt(), p4BestMatch.eta(), p4BestMatch.phi(), p4BestMatch.energy());
 }
 
 void ElectronDumper::reset(){                                                                                                                                           
@@ -120,7 +126,7 @@ void ElectronDumper::reset(){
                                                                                                                                                                   
       relIsoDeltaBetaCorrected[ic].clear();
       
-      MCElectron[ic].reset();
+      MCelectron[ic].reset();
     }                                                                                                                                                             
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){                                                                                       
       discriminators[ic].clear();                                                                                                                                 

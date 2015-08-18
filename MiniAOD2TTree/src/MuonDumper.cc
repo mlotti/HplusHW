@@ -19,10 +19,11 @@ MuonDumper::MuonDumper(std::vector<edm::ParameterSet> psets, const edm::InputTag
     isTightMuon = new std::vector<bool>[inputCollections.size()];
     relIsoDeltaBetaCorrected = new std::vector<float>[inputCollections.size()];
 
+    MCmuon = new FourVectorDumper[inputCollections.size()];
+    
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<bool>[inputCollections.size()*nDiscriminators];
     handle = new edm::Handle<edm::View<pat::Muon> >[inputCollections.size()];
-    
 
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
@@ -49,6 +50,8 @@ void MuonDumper::book(TTree* tree){
         tree->Branch((name+"_muIDTight").c_str(),&isTightMuon[i]);
         tree->Branch((name+"_relIsoDeltaBeta").c_str(),&relIsoDeltaBetaCorrected[i]);
 
+        MCmuon[i].book(tree, name, "MCmuon");
+        
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
             tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
@@ -58,6 +61,9 @@ void MuonDumper::book(TTree* tree){
 
 bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;
+    
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("prunedGenParticles", genParticles);
     
     edm::Handle<edm::View<reco::Vertex> > hoffvertex;
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
@@ -97,11 +103,33 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
 		    discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(obj.muonID(discriminatorNames[iDiscr]));
 		}
+		
+                // MC match info
+                fillMCMatchInfo(ic, genParticles, obj);
             }
         }
     }
     return filter();
 }
+
+void MuonDumper::fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Muon& ele) {
+  double deltaRBestMatch = 9999.0;
+  reco::Candidate::LorentzVector p4BestMatch(0,0,0,0);
+  if(genParticles.isValid()){
+    for (size_t iMC=0; iMC < genParticles->size(); ++iMC) {
+      const reco::Candidate & gp = (*genParticles)[iMC];
+      if (abs(gp.pdgId()) != 13) continue;
+      reco::Candidate::LorentzVector p4 = gp.p4();
+      double DR = deltaR(p4,ele.p4());
+      if (DR < 0.1 && DR < deltaRBestMatch) {
+        deltaRBestMatch = DR;
+        p4BestMatch = p4;
+      }
+    }
+  }
+  MCmuon[ic].add(p4BestMatch.pt(), p4BestMatch.eta(), p4BestMatch.phi(), p4BestMatch.energy());
+}
+
 
 void MuonDumper::reset(){                                                                                                                                           
     if(booked){                                                                                                                                                     
@@ -117,6 +145,8 @@ void MuonDumper::reset(){
         isMediumMuon[ic].clear();
         isTightMuon[ic].clear();
         relIsoDeltaBetaCorrected[ic].clear();
+        
+        MCmuon[ic].reset();
       }                                                                                                                                                             
       for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){                                                                                       
         discriminators[ic].clear();                                                                                                                                 
