@@ -119,6 +119,8 @@ void ElectronDumper::reset(){
       e[ic].clear();                                                                                                                                              
                                                                                                                                                                   
       relIsoDeltaBetaCorrected[ic].clear();
+      
+      MCElectron[ic].reset();
     }                                                                                                                                                             
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){                                                                                       
       discriminators[ic].clear();                                                                                                                                 
