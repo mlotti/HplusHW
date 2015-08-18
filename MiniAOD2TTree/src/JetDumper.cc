@@ -142,9 +142,9 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 
                 // GenJet
                 if (obj.genJet() == nullptr) {
-                  MCjet.add(obj.genJet()->pt(), obj.genJet()->eta(), obj.genJet()->phi(), obj.genJet()->energy());
+                  MCjet[ic].add(obj.genJet()->pt(), obj.genJet()->eta(), obj.genJet()->phi(), obj.genJet()->energy());
                 } else {
-                  MCjet.add(0.0, 0.0, 0.0, 0.0);
+                  MCjet[ic].add(0.0, 0.0, 0.0, 0.0);
                 }
                 
                 // Systematics
