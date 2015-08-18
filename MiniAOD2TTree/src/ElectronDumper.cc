@@ -99,6 +99,7 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 // FIXME: recipy for effective area is missing
                 
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
+                  // https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
                   discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back((*(IDhandles[iDiscr]))[gsfHandle->ptrAt(i)]);
 		}
 
