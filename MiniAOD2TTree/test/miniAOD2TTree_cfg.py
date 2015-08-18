@@ -27,10 +27,6 @@ switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
 for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PHYS14_PU20bx25_nonTrig_V1_cff']:
     setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
 
-process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string("myoutput.root")
-                                   )
-
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
@@ -124,7 +120,9 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("Electrons"),
             src = cms.InputTag("slimmedElectrons"),
             rhoSource = cms.InputTag("fixedGridRhoFastjetAll"), # for PU mitigation in isolation
-            discriminators = cms.vstring()
+            IDprefix = cms.vstring("egmGsfElectronIDs"),
+            discriminators = cms.vstring("mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp80",
+                                         "mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp90")
         )
     ),
     Muons = cms.VPSet(   
@@ -164,4 +162,3 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 
 # module execution
 process.runEDFilter = cms.Path(process.egmGsfElectronIDSequence*process.dump)
-
