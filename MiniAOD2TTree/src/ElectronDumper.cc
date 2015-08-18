@@ -60,7 +60,7 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
 	iEvent.getByLabel(inputtag, handle[ic]);
         edm::InputTag rhoSource = inputCollections[ic].getParameter<edm::InputTag>("rhoSource");
-        edm::Handle<double>* rhoHandle;
+        edm::Handle<double> rhoHandle;
         iEvent.getByLabel(rhoSource, rhoHandle);
 	if(handle[ic].isValid()){
 
