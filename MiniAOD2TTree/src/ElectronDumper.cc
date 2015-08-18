@@ -59,9 +59,14 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
 	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
 	iEvent.getByLabel(inputtag, handle[ic]);
+        // Setup also handle for GsfElectrons (needed for ID)
+        edm::Handle<edm::View<reco::GsfElectron>> gsfHandle;
+        iEvent.getByLabel(inputtag, gsfHandle);
+        // Setup handles for rho
         edm::InputTag rhoSource = inputCollections[ic].getParameter<edm::InputTag>("rhoSource");
         edm::Handle<double> rhoHandle;
         iEvent.getByLabel(rhoSource, rhoHandle);
+        // Setup handles for ID
         std::string IDprefix = inputCollections[ic].getParameter<std::string>("IDprefix");
         std::vector<edm::Handle<edm::ValueMap<bool>>> IDhandles;
         for (auto p: discriminatorNames) {
@@ -71,7 +76,7 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           IDhandles.push_back(IDhandle);
         }
 	if(handle[ic].isValid()){
-
+          
 	    for(size_t i=0; i<handle[ic]->size(); ++i) {
     		const pat::Electron& obj = handle[ic]->at(i);
 
@@ -94,9 +99,7 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 // FIXME: recipy for effective area is missing
                 
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
-		  reco::GsfElectronRef eref(reco::GsfElectronRef(handle[ic], i));  
-                  discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back((*IDhandles[iDiscr])[eref]);
-                    //obj.electronID(discriminatorNames[iDiscr]));
+                  discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back((*(IDhandles[iDiscr]))[gsfHandle->ptrAt(i)]);
 		}
 
 		// MC match info
