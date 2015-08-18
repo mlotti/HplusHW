@@ -50,6 +50,9 @@ class JetDumper : public BaseDumper {
         std::vector<bool> *jetPUIDloose;
 	std::vector<bool> *jetPUIDmedium;
 	std::vector<bool> *jetPUIDtight;
+
+        // 4-vector for generator jet
+        FourVectorDumper *MCjet;
         
         // Systematics variations for tau 4-vector
         FourVectorDumper *systJESup;

@@ -35,6 +35,8 @@ JetDumper::JetDumper(std::vector<edm::ParameterSet> psets){
     jetPUIDmedium = new std::vector<bool>[inputCollections.size()];
     jetPUIDtight = new std::vector<bool>[inputCollections.size()];
     
+    MCjet = new FourVectorDumper[inputCollections.size()];
+    
     systJESup = new FourVectorDumper[inputCollections.size()];
     systJESdown = new FourVectorDumper[inputCollections.size()];
     systJERup = new FourVectorDumper[inputCollections.size()];
@@ -77,10 +79,12 @@ void JetDumper::book(TTree* tree){
     tree->Branch((name+"_PUIDmedium").c_str(),&jetPUIDmedium[i]);
     tree->Branch((name+"_PUIDtight").c_str(),&jetPUIDtight[i]);
     
+    MCjet[i].book(tree, name, "MCjet");
+    
     systJESup[i].book(tree, name, "JESup");
     systJESdown[i].book(tree, name, "JESdown");
-    systJESup[i].book(tree, name, "JERup");
-    systJESdown[i].book(tree, name, "JERdown");
+    systJERup[i].book(tree, name, "JERup");
+    systJERdown[i].book(tree, name, "JERdown");
   }
 }
 
@@ -136,6 +140,13 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		jetPUIDmedium[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kMedium));
 		jetPUIDtight[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kTight));
                 
+                // GenJet
+                if (obj.GenJet() == nullptr) {
+                  MCjet.add(obj.GenJet()->pt(), obj.GenJet()->eta(), obj.GenJet()->phi(), obj.GenJet()->energy());
+                } else {
+                  MCjet.add(0.0, 0.0, 0.0, 0.0);
+                }
+                
                 // Systematics
                 // FIXME
 //                 systJESup[ic].add(tau.p4().pt()*(1.0+TESvariation[ic]),
@@ -168,6 +179,8 @@ void JetDumper::reset(){
         jetPUIDloose[ic].clear();
 	jetPUIDmedium[ic].clear();
 	jetPUIDtight[ic].clear();
+        
+        MCjet[ic].reset();
         // Systematics
         systJESup[ic].reset();
         systJESdown[ic].reset();

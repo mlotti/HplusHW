@@ -248,6 +248,8 @@ void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle< reco::GenParticleCollect
       const reco::PFJet *jet = dynamic_cast<const reco::PFJet*>(tau.pfJetRef().get());
       tauPid = 1;
       refJet->add(jet->pt(), jet->eta(), jet->phi(), jet->energy());
+    } else {
+      refJet->add(0.0, 0.0, 0.0, 0.0);
     }
   }
   pdgId[ic].push_back(tauPid);
