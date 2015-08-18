@@ -162,3 +162,11 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 
 # module execution
 process.runEDFilter = cms.Path(process.egmGsfElectronIDSequence*process.dump)
+
+#process.output = cms.OutputModule("PoolOutputModule",
+    #outputCommands = cms.untracked.vstring(
+        #"keep *",
+    #),
+    #fileName = cms.untracked.string("tmp.root")
+#)
+#process.out_step = cms.EndPath(process.output)

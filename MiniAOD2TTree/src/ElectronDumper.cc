@@ -67,7 +67,7 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         for (auto p: discriminatorNames) {
           edm::InputTag discrTag(IDprefix, p);
           edm::Handle<edm::ValueMap<bool>> IDhandle;
-          iEvent.getByLabel(disrTag, IDhandle);
+          iEvent.getByLabel(discrTag, IDhandle);
           IDhandles.push_back(IDhandle);
         }
 	if(handle[ic].isValid()){
@@ -94,7 +94,7 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 // FIXME: recipy for effective area is missing
                 
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
-		  reco::ElectronRef eref(reco::ElectronRef(handle[ic], i));  
+		  reco::GsfElectronRef eref(reco::GsfElectronRef(handle[ic], i));  
                   discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back((*IDhandles[iDiscr])[eref]);
                     //obj.electronID(discriminatorNames[iDiscr]));
 		}
