@@ -32,6 +32,14 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag()), '')
 print "GlobalTag="+dataVersion.getGlobalTag()
 
+# Set up electron ID (VID framework)
+# https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+# define which IDs we want to produce and add them to the VID producer
+for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PHYS14_PU20bx25_nonTrig_V1_cff']:
+    setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
+
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
@@ -63,28 +71,28 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("Taus"),
             src = cms.InputTag("slimmedTaus"),
             discriminators = cms.vstring(
-                "againstElectronLoose",
+                #"againstElectronLoose",
                 "againstElectronLooseMVA5",
                 "againstElectronMVA5category",
-                "againstElectronMVA5raw",
-                "againstElectronMedium",
+                #"againstElectronMVA5raw",
+                #"againstElectronMedium",
                 "againstElectronMediumMVA5",
-                "againstElectronTight",
+                #"againstElectronTight",
                 "againstElectronTightMVA5",
                 "againstElectronVLooseMVA5",
                 "againstElectronVTightMVA5",
-                "againstMuonLoose",
-                "againstMuonLoose2",
+                #"againstMuonLoose",
+                #"againstMuonLoose2",
                 "againstMuonLoose3",
-                "againstMuonLooseMVA",
-                "againstMuonMVAraw",
-                "againstMuonMedium",
-                "againstMuonMedium2",
-                "againstMuonMediumMVA",
-                "againstMuonTight",
-                "againstMuonTight2",
+                #"againstMuonLooseMVA",
+                #"againstMuonMVAraw",
+                #"againstMuonMedium",
+                #"againstMuonMedium2",
+                #"againstMuonMediumMVA",
+                #"againstMuonTight",
+                #"againstMuonTight2",
                 "againstMuonTight3",
-                "againstMuonTightMVA",
+                #"againstMuonTightMVA",
                 "byCombinedIsolationDeltaBetaCorrRaw3Hits",
                 "byIsolationMVA3newDMwLTraw",
                 "byIsolationMVA3newDMwoLTraw",
@@ -93,30 +101,30 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
                 "byLooseCombinedIsolationDeltaBetaCorr3Hits",
                 "byLooseIsolationMVA3newDMwLT",
                 "byLooseIsolationMVA3newDMwoLT",
-                #"byLooseIsolationMVA3oldDMwLT",
-                #"byLooseIsolationMVA3oldDMwoLT",
+                "byLooseIsolationMVA3oldDMwLT",
+                "byLooseIsolationMVA3oldDMwoLT",
                 "byMediumCombinedIsolationDeltaBetaCorr3Hits",
                 "byMediumIsolationMVA3newDMwLT",
                 "byMediumIsolationMVA3newDMwoLT",
-                #"byMediumIsolationMVA3oldDMwLT",
-                #"byMediumIsolationMVA3oldDMwoLT",
+                "byMediumIsolationMVA3oldDMwLT",
+                "byMediumIsolationMVA3oldDMwoLT",
                 "byTightCombinedIsolationDeltaBetaCorr3Hits",
                 "byTightIsolationMVA3newDMwLT",
                 "byTightIsolationMVA3newDMwoLT",
-                #"byTightIsolationMVA3oldDMwLT",
-                #"byTightIsolationMVA3oldDMwoLT",
+                "byTightIsolationMVA3oldDMwLT",
+                "byTightIsolationMVA3oldDMwoLT",
                 "byVLooseIsolationMVA3newDMwLT",
                 "byVLooseIsolationMVA3newDMwoLT",
-                #"byVLooseIsolationMVA3oldDMwLT",
-                #"byVLooseIsolationMVA3oldDMwoLT",
+                "byVLooseIsolationMVA3oldDMwLT",
+                "byVLooseIsolationMVA3oldDMwoLT",
                 "byVTightIsolationMVA3newDMwLT",
                 "byVTightIsolationMVA3newDMwoLT",
-                #"byVTightIsolationMVA3oldDMwLT",
-                #"byVTightIsolationMVA3oldDMwoLT",
+                "byVTightIsolationMVA3oldDMwLT",
+                "byVTightIsolationMVA3oldDMwoLT",
                 "byVVTightIsolationMVA3newDMwLT",
                 "byVVTightIsolationMVA3newDMwoLT",
-                #"byVVTightIsolationMVA3oldDMwLT",
-                #"byVVTightIsolationMVA3oldDMwoLT",
+                "byVVTightIsolationMVA3oldDMwLT",
+                "byVVTightIsolationMVA3oldDMwoLT",
                 "chargedIsoPtSum",
                 "decayModeFinding",
                 "decayModeFindingNewDMs",
@@ -124,17 +132,18 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
                 "puCorrPtSum"
 	    ),
             filter = cms.untracked.bool(False),
-            systematics = cms.PSet(
-                TESvariation = cms.untracked.double(0.03),
-                TESvariationExtreme = cms.untracked.double(0.10)
-            )
+            TESvariation = cms.untracked.double(0.03),
+            TESvariationExtreme = cms.untracked.double(0.10)
         )
     ),
     Electrons = cms.VPSet(
         cms.PSet(
             branchname = cms.untracked.string("Electrons"),
             src = cms.InputTag("slimmedElectrons"),
-            discriminators = cms.vstring()
+            rhoSource = cms.InputTag("fixedGridRhoFastjetAll"), # for PU mitigation in isolation
+            IDprefix = cms.vstring("egmGsfElectronIDs"),
+            discriminators = cms.vstring("mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp80",
+                                         "mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp90")
         )
     ),
     Muons = cms.VPSet(   
@@ -188,7 +197,7 @@ process.skimCounterPassed = cms.EDProducer("HPlusEventCountProducer")
 
 
 # module execution
-process.runEDFilter = cms.Path(process.skimCounterAll*process.skim*process.skimCounterPassed*process.dump)
+process.runEDFilter = cms.Path(process.egmGsfElectronIDSequence*process.skimCounterAll*process.skim*process.skimCounterPassed*process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
 #    outputCommands = cms.untracked.vstring(
