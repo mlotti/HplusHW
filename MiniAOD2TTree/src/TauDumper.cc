@@ -245,14 +245,14 @@ void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle< reco::GenParticleCollect
   } else {
     // Store four vector for reference jet
     if (tau.pfJetRef().isNonnull()) {
-      const reco::PFJet *jet = dynamic_cast<const reco::PFJet*>(tau->pfjetRef().get());
+      const reco::PFJet *jet = dynamic_cast<const reco::PFJet*>(tau.pfJetRef().get());
       tauPid = 1;
-      refJet->add(jet->pt(), jet->eta(), jet->phi(), jet->E());
+      refJet->add(jet->pt(), jet->eta(), jet->phi(), jet->energy());
     }
   }
   pdgId[ic].push_back(tauPid);
   pdgTauOrigin[ic].push_back(tauOrigin);
-  MCtau[ic].add(p4BestTau.pt(), p4BestTau.eta(), p4BestTau.phi(), p4BestTau.E());
+  MCtau[ic].add(p4BestTau.pt(), p4BestTau.eta(), p4BestTau.phi(), p4BestTau.energy());
 }
 
 bool TauDumper::filter(){
