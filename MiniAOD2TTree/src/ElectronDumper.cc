@@ -1,8 +1,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/ElectronDumper.h"
 
-ElectronDumper::ElectronDumper(std::vector<edm::ParameterSet>, edm::InputTag& _rhoSource)
-: rhoSource(_rhoSource) {
-    inputCollections = ;
+ElectronDumper::ElectronDumper(std::vector<edm::ParameterSet> psets) {
+    inputCollections = psets;
 
     pt  = new std::vector<double>[inputCollections.size()];
     eta = new std::vector<double>[inputCollections.size()];    
@@ -47,13 +46,16 @@ void ElectronDumper::book(TTree* tree){
 }
 
 bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
-    edm::Handle<double>* rhoHandle;
-    iEvent.getByLabel(rhoSource, rhoHandle);
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("prunedGenParticles", genParticles);
     
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
 	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
 	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
 	iEvent.getByLabel(inputtag, handle[ic]);
+        edm::InputTag rhoSource = inputCollections[ic].getParameter<edm::InputTag>("rhoSource");
+        edm::Handle<double>* rhoHandle;
+        iEvent.getByLabel(rhoSource, rhoHandle);
 	if(handle[ic].isValid()){
 
 	    for(size_t i=0; i<handle[ic]->size(); ++i) {
@@ -80,10 +82,31 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
 		    discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(obj.electronID(discriminatorNames[iDiscr]));
 		}
+
+		// MC match info
+                fillMCMatchInfo(ic, genParticles, obj);
             }
         }
     }
     return filter();
+}
+
+void ElectronDumper::fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Electron& ele) {
+  double deltaRBestMatch = 9999.0;
+  reco::Candidate::LorentzVector p4BestMatch(0,0,0,0);
+  if(genParticles.isValid()){
+    for (size_t iMC=0; iMC < genParticles->size(); ++iMC) {
+      const reco::Candidate & gp = (*genParticles)[iMC];
+      if (abs(gp.pdgId()) != 11) continue;
+      reco::Candidate::LorentzVector p4 = gp.p4();
+      double DR = deltaR(p4,ele.p4());
+      if (DR < 0.1 && DR < deltaRBestMatch) {
+        deltaRBestMatch = DR;
+        p4BestMatch = p4;
+      }
+    }
+  }
+  MCElectron[ic].add(p4BestMatch.pt(), p4BestMatch.eta(), p4BestMatch.phi(), p4BestMatch.energy());
 }
 
 void ElectronDumper::reset(){                                                                                                                                           
