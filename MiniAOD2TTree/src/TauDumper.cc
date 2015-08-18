@@ -123,22 +123,22 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(tau.tauID(discriminatorNames[iDiscr]));
         }
         // Systematics variations
-        systTESup[ic].add(tau.p4().pt()*(1.0+TESvariation[ic]),
+        systTESup[ic].add(tau.p4().pt()*(1.0+TESvariation),
                           tau.p4().eta(),
                           tau.p4().phi(),
-                          tau.p4().energy()*(1.0+TESvariation[ic]));
-        systTESdown[ic].add(tau.p4().pt()*(1.0-TESvariation[ic]),
+                          tau.p4().energy()*(1.0+TESvariation));
+        systTESdown[ic].add(tau.p4().pt()*(1.0-TESvariation),
                           tau.p4().eta(),
                           tau.p4().phi(),
-                          tau.p4().energy()*(1.0-TESvariation[ic]));
-        systExtremeTESup[ic].add(tau.p4().pt()*(1.0+TESvariationExtreme[ic]),
+                          tau.p4().energy()*(1.0-TESvariation));
+        systExtremeTESup[ic].add(tau.p4().pt()*(1.0+TESvariationExtreme),
                                   tau.p4().eta(),
                                   tau.p4().phi(),
-                                  tau.p4().energy()*(1.0+TESvariationExtreme[ic]));
-        systExtremeTESdown[ic].add(tau.p4().pt()*(1.0-TESvariationExtreme[ic]),
+                                  tau.p4().energy()*(1.0+TESvariationExtreme));
+        systExtremeTESdown[ic].add(tau.p4().pt()*(1.0-TESvariationExtreme),
                                   tau.p4().eta(),
                                   tau.p4().phi(),
-                                  tau.p4().energy()*(1.0-TESvariationExtreme[ic]));
+                                  tau.p4().energy()*(1.0-TESvariationExtreme));
         
         // Find MC particle matching to the tau. Logic is done in the following order:
         // - e is true if DeltaR(reco_tau, MC_e) < 0.1
