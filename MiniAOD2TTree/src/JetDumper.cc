@@ -204,18 +204,20 @@ bool JetDumper::passJetID(int id, const pat::Jet& jet) {
     // Neutral EM Fraction     < 0.99  < 0.90  < 0.90
     // Number of Constituents  > 1     > 1     > 1
     // Muon Fraction           -       -       < 0.8
+    int nConstituents = jet.chargedMultiplicity() + jet.electronMultiplicity()
+      + jet.muonMultiplicity() + jet.neutralMultiplicity();
     if (id == kJetIDLoose) {
       if (!(jet.neutralHadronEnergyFraction() < 0.99)) return false;
       if (!(jet.neutralEmEnergyFraction()     < 0.99)) return false;
-      if (!(jet.getPFConstituents().size()    > 1   )) return false;
+      if (!(nConstituents                     > 1   )) return false;
     } else if (id == kJetIDTight) {
       if (!(jet.neutralHadronEnergyFraction() < 0.90)) return false;
       if (!(jet.neutralEmEnergyFraction()     < 0.90)) return false;
-      if (!(jet.getPFConstituents().size()    > 1   )) return false;      
+      if (!(nConstituents                     > 1   )) return false;      
     } else if (id == kJetIDTightLepVeto) {
       if (!(jet.neutralHadronEnergyFraction() < 0.90)) return false;
       if (!(jet.neutralEmEnergyFraction()     < 0.90)) return false;
-      if (!(jet.getPFConstituents().size()    > 1   )) return false;      
+      if (!(nConstituents                     > 1   )) return false;      
       if (!(jet.muonEnergyFraction()          < 0.80)) return false;
     }
     if (eta < 2.4) {
