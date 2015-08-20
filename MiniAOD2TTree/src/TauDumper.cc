@@ -110,14 +110,24 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
         //p4[ic].push_back(tau.p4());
         
+        // Leading charged particle
         if(tau.leadChargedHadrCand().isNonnull()){
           //ltrack_p4[ic].push_back(tau.leadChargedHadrCand()->p4());
           lChTrackPt[ic].push_back(tau.leadChargedHadrCand()->p4().Pt());
           lChTrackEta[ic].push_back(tau.leadChargedHadrCand()->p4().Eta());
+        } else {
+          lChTrackPt[ic].push_back(-1.0);
+          lChTrackEta[ic].push_back(-10.0);
+        }
+        // Leading neutral particle
+        if (tau.leadNeutralCand().isNonnull()) {
           lNeutrTrackPt[ic].push_back(tau.leadNeutralCand()->p4().Pt());
           lNeutrTrackEta[ic].push_back(tau.leadNeutralCand()->p4().Eta());
-          nProngs[ic].push_back(tau.signalCands().size());  
+        } else {
+          lNeutrTrackPt[ic].push_back(-1.0);
+          lNeutrTrackEta[ic].push_back(-10.0);
         }
+        nProngs[ic].push_back(tau.signalCands().size());  
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
           //std::cout << "check tau " << tau.p4().Pt() << " " << tau.p4().Eta() << " " << tau.p4().Phi() << " " << discriminatorNames[iDiscr] << " " << tau.tauID(discriminatorNames[iDiscr]) << std::endl;
           discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(tau.tauID(discriminatorNames[iDiscr]));
