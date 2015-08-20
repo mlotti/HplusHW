@@ -42,8 +42,6 @@ class TauDumper : public BaseDumper {
 
 	std::vector<short> *nProngs;
         std::vector<short> *pdgTauOrigin;
-        // 4-vector for reference jet
-        FourVectorDumper *refJet;
         // 4-vector for generator tau
         FourVectorDumper *MCtau;
         

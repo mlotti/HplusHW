@@ -24,7 +24,6 @@ TauDumper::TauDumper(std::vector<edm::ParameterSet> psets) {
 
     nProngs = new std::vector<short>[inputCollections.size()];
     pdgTauOrigin = new std::vector<short>[inputCollections.size()];
-    refJet = new FourVectorDumper[inputCollections.size()];
     MCtau = new FourVectorDumper[inputCollections.size()];
     
     systTESup = new FourVectorDumper[inputCollections.size()];
@@ -63,7 +62,6 @@ void TauDumper::book(TTree* tree){
         tree->Branch((name+"_lNeutrTrkEta").c_str(),&lNeutrTrackEta[i]);
 	//tree->Branch((name+"_lTrk_p4").c_str(),&ltrack_p4[i]);
         tree->Branch((name+"_nProngs").c_str(),&nProngs[i]);
-        refJet[i].book(tree, name, "refJet");
         MCtau[i].book(tree, name, "MCTau");
 
 	std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
@@ -251,14 +249,9 @@ void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle< reco::GenParticleCollect
   } else if (matchesToTau) {
     tauPid = 15;
   } else {
-    // Store four vector for reference jet
-    if (tau.pfJetRef().isNonnull()) {
-      const reco::PFJet *jet = dynamic_cast<const reco::PFJet*>(tau.pfJetRef().get());
-      tauPid = 1;
-      refJet->add(jet->pt(), jet->eta(), jet->phi(), jet->energy());
-    } else {
-      refJet->add(0.0, 0.0, 0.0, 0.0);
-    }
+    // Reference jet is a reco::PFJet and therefore not included into miniAOD
+    // Need to do actual matching in ntuple reader
+    tauPid = 1;
   }
   pdgId[ic].push_back(tauPid);
   pdgTauOrigin[ic].push_back(tauOrigin);
@@ -303,7 +296,6 @@ void TauDumper::reset(){
 	nProngs[ic].clear();
 	pdgId[ic].clear();
         pdgTauOrigin[ic].clear();
-        refJet[ic].reset();
         MCtau[ic].reset();
         // Systematics
         systTESup[ic].reset();
