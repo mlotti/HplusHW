@@ -112,9 +112,9 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
                 "neutralIsoPtSum",
                 "puCorrPtSum"
 	    ),
-            TESvariation = cms.untracked.double(1.03),
-            TESvariationExtreme = cms.untracked.double(1.10),
-            filter = cms.untracked.bool(False)
+            filter = cms.untracked.bool(False),
+            TESvariation = cms.untracked.double(0.03),
+            TESvariationExtreme = cms.untracked.double(0.10)
         )
     ),
     Electrons = cms.VPSet(

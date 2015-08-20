@@ -96,8 +96,8 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
     std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
     iEvent.getByLabel(inputtag, handle[ic]);
-    double TESvariation = inputCollections[ic].getParameter<double>("TESvariation");
-    double TESvariationExtreme = inputCollections[ic].getParameter<double>("TESvariationExtreme");
+    double TESvariation = inputCollections[ic].getUntrackedParameter<double>("TESvariation");
+    double TESvariationExtreme = inputCollections[ic].getUntrackedParameter<double>("TESvariationExtreme");
     
     if(handle[ic].isValid()){
       for(size_t i=0; i<handle[ic]->size(); ++i) {
