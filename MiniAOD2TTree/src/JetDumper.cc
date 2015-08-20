@@ -141,7 +141,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		jetPUIDtight[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kTight));
                 
                 // GenJet
-                if (obj.genJet() == nullptr) {
+                if (obj.genJet() != nullptr) {
                   MCjet[ic].add(obj.genJet()->pt(), obj.genJet()->eta(), obj.genJet()->phi(), obj.genJet()->energy());
                 } else {
                   MCjet[ic].add(0.0, 0.0, 0.0, 0.0);
