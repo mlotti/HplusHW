@@ -40,6 +40,16 @@ switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
 for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PHYS14_PU20bx25_nonTrig_V1_cff']:
     setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
 
+# Set up HBHE noise filter
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
+process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
+
+process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
+   inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+   reverseDecision = cms.bool(False)
+)
+
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
@@ -65,6 +75,9 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	filter = cms.untracked.bool(False)
+    ),
+    METFilters = cms.PSet(
+      
     ),
     Taus = cms.VPSet(
         cms.PSet(
@@ -192,12 +205,19 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
 
-process.skimCounterAll    = cms.EDProducer("HPlusEventCountProducer")
-process.skimCounterPassed = cms.EDProducer("HPlusEventCountProducer")
-
+process.skimCounterAll        = cms.EDProducer("HPlusEventCountProducer")
+process.skimCounterMETFilters = cms.EDProducer("HPlusEventCountProducer")
+process.skimCounterPassed     = cms.EDProducer("HPlusEventCountProducer")
 
 # module execution
-process.runEDFilter = cms.Path(process.egmGsfElectronIDSequence*process.skimCounterAll*process.skim*process.skimCounterPassed*process.dump)
+process.runEDFilter = cms.Path(process.egmGsfElectronIDSequence*
+                               process.HBHENoiseFilterResultProducer* #Produces HBHE bools
+                               process.skimCounterAll*
+                               process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
+                               process.skimCounterMETFilters*
+                               process.skim*
+                               process.skimCounterPassed*
+                               process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
 #    outputCommands = cms.untracked.vstring(
