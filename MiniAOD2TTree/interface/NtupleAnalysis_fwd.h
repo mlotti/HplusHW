@@ -21,7 +21,7 @@ enum TauOriginType {
   kFromZ = 23,
   kFromW = 24,
   kFromHplus = 37,
-  kFromOtherSource = 999
+  kFromOtherSource = 99
 };
 
 enum JetIDType {

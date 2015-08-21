@@ -60,7 +60,9 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex->at(1).tracks_begin(); iter != hoffvertex->at(1).tracks_end(); iter++) {
             ptSum1 += hoffvertex->at(1).trackWeight(*iter) * (*iter)->pt()*(*iter)->pt();
           }
-          ptSumRatio = ptSum1 / ptSum0;
+          if (ptSum0 > 0.0) {
+            ptSumRatio = ptSum1 / ptSum0;
+          }
         }
     }
 

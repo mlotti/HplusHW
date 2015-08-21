@@ -240,18 +240,18 @@ void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle< reco::GenParticleCollect
     if (matchesToTau)
       tauPid = kTauDecaysToElectron;
     else
-      tauPid = 11;
+      tauPid = kElectronToTau;
   } else if (matchesToMu) {
     if (matchesToTau)
       tauPid = kTauDecaysToMuon;
     else
-      tauPid = 13;
+      tauPid = kMuonToTau;
   } else if (matchesToTau) {
-    tauPid = 15;
+    tauPid = kTauDecaysToHadrons;
   } else {
     // Reference jet is a reco::PFJet and therefore not included into miniAOD
     // Need to do actual matching in ntuple reader
-    tauPid = 1;
+    tauPid = -1;
   }
   pdgId[ic].push_back(tauPid);
   pdgTauOrigin[ic].push_back(tauOrigin);
