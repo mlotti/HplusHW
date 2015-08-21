@@ -46,10 +46,8 @@ void ElectronDumper::book(TTree* tree){
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
             // Convert dashes into underscores
-            std::string rootFriendlyName = std::replace(discriminatorNames[iDiscr].begin(),
-                                                        discriminatorNames[iDiscr].end(),
-                                                        "-","_");
-            tree->Branch((name+"_"+rootFriendlyName).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
+            std::replace(discriminatorNames[iDiscr].begin(),discriminatorNames[iDiscr].end(),"-","_");
+            tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
         }
     }
 }
