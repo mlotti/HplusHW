@@ -47,6 +47,6 @@ private:
   // Note: HBHENoiseFilter is run separately as a python fragment
   
   // Data objects for ttree
-  std::vector<bool> bFilters;
+  std::vector<bool> *bFilters;
 };
 #endif

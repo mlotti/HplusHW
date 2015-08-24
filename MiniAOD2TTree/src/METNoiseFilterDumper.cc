@@ -21,6 +21,9 @@ METNoiseFilterDumper::~METNoiseFilterDumper() { }
 void METNoiseFilterDumper::book(TTree* tree){
   theTree = tree;
   booked = true;
+  
+  bFilters = new std::vector<bool>[fFilters.size()];
+  
   for (size_t i = 0; i < fFilters.size(); ++i) {
     theTree->Branch(("METFilter_"+fFilters[i]).c_str(), &bFilters[i]);
   }
@@ -42,7 +45,7 @@ bool METNoiseFilterDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetu
     for (size_t j = 0; j < trgResults->size(); ++j) {
       if (fFilters[i] == trgResults[j]) {
         found = true;
-        bFilters.push_back(trgResults->accept(j));
+        bFilters->push_back(trgResults->accept(j));
       }
     }
     if (!found) {
@@ -68,6 +71,6 @@ bool METNoiseFilterDumper::filter(){
 
 void METNoiseFilterDumper::reset(){
   if(booked){
-    bFilters.clear();
+    bFilters->clear();
   }
 }
