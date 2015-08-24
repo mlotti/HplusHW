@@ -27,10 +27,17 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 
     trgDumper = 0;
     if (iConfig.exists("Trigger")) {
-	trigger = iConfig.getParameter<edm::ParameterSet>("Trigger");
+        trigger = iConfig.getParameter<edm::ParameterSet>("Trigger");
         trgDumper = new TriggerDumper(trigger);
         trgDumper->book(Events);
         hltProcessName = trigger.getParameter<edm::InputTag>("TriggerResults").process();
+    }
+    
+    metNoiseFilterDumper = 0;
+    if (iConfig.exists("METNoiseFilter")) {
+        metNoiseFilter = iConfig.getParameter<edm::ParameterSet>("METNoiseFilter");
+        metNoiseFilterDumper = new METNoiseFilterDumper(metNoiseFilter);
+        metNoiseFilterDumper->book(Events);
     }
 
     tauDumper = 0;
@@ -127,6 +134,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 
     bool accept = true;
     if (trgDumper) accept = accept && trgDumper->fill(iEvent,iSetup);
+    if (metNoiseFilterDumper) accept = accept && metNoiseFilterDumper->fill(iEvent,iSetup);
     if (tauDumper) accept = accept && tauDumper->fill(iEvent,iSetup);
     if (electronDumper) accept = accept && electronDumper->fill(iEvent,iSetup);
     if (muonDumper) accept = accept && muonDumper->fill(iEvent,iSetup);
@@ -145,6 +153,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 void MiniAOD2TTreeFilter::reset(){
     if (skimDumper) skimDumper->reset();
     if (trgDumper) trgDumper->reset();
+    if (metNoiseFilterDumper) metNoiseFilterDumper->reset();
     if (tauDumper) tauDumper->reset();
     if (electronDumper) electronDumper->reset();
     if (muonDumper) muonDumper->reset();

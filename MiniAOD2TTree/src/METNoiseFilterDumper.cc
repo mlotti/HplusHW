@@ -7,14 +7,17 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/Common/interface/Handle.h"
 
+#include <iostream>
+
 METNoiseFilterDumper::METNoiseFilterDumper(edm::ParameterSet& pset)
-: fTriggerResults(pset.getParameter<edm::InputTag>("triggerResults")),
+: booked(false),
+  fTriggerResults(pset.getParameter<edm::InputTag>("triggerResults")),
   fPrintTriggerResultsList(pset.getUntrackedParameter<bool>("printTriggerResultsList")),
   fTriggerResultsListPrintedStatus(false),
   fCSCTightHaloFilter(pset.getParameter<std::string>("CSCTightHaloFilter")),
   fGoodVerticesFilter(pset.getParameter<std::string>("goodVerticesFilter")),
-  fEEBadScFilter(pset.getParameter<std::string>("EEBadScFilter")),
-  booked(false) { }
+  fEEBadScFilter(pset.getParameter<std::string>("EEBadScFilter"))
+  { }
 
 METNoiseFilterDumper::~METNoiseFilterDumper() { }
 
@@ -40,6 +43,7 @@ bool METNoiseFilterDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetu
     }
     fTriggerResultsListPrintedStatus = true;
   }
+  return filter();
 }
 
 bool METNoiseFilterDumper::filter(){
