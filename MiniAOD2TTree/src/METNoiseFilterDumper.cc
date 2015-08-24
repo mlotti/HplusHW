@@ -12,8 +12,8 @@
 METNoiseFilterDumper::METNoiseFilterDumper(edm::ParameterSet& pset)
 : booked(false),
   fTriggerResults(pset.getParameter<edm::InputTag>("triggerResults")),
-  fPrintTriggerResultsList(pset.getUntrackedParameter<bool>("printTriggerResultsList")),
-  fTriggerResultsListPrintedStatus(false),
+  bPrintTriggerResultsList(pset.getUntrackedParameter<bool>("printTriggerResultsList")),
+  bTriggerResultsListPrintedStatus(false),
   fCSCTightHaloFilter(pset.getParameter<std::string>("CSCTightHaloFilter")),
   fGoodVerticesFilter(pset.getParameter<std::string>("goodVerticesFilter")),
   fEEBadScFilter(pset.getParameter<std::string>("EEBadScFilter"))
@@ -36,12 +36,12 @@ bool METNoiseFilterDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetu
   if (!trgResults.isValid())
     throw cms::Exception("Assert") << "METFilters: edm::TriggerResults object is not valid!";
   const edm::TriggerNames& triggerNames = iEvent.triggerNames(*trgResults);
-  if (!fTriggerResultsListPrintedStatus && fPrintTriggerResultsList) {
+  if (!bTriggerResultsListPrintedStatus && bPrintTriggerResultsList) {
     std::cout << "TriggerResults list including METFilters (for information):" << std::endl;
     for (size_t i = 0; i < trgResults->size(); ++i) {
       std::cout << "  " <<  triggerNames.triggerName(i) << " status=" << trgResults->accept(i) << std::endl;
     }
-    fTriggerResultsListPrintedStatus = true;
+    bTriggerResultsListPrintedStatus = true;
   }
   return filter();
 }

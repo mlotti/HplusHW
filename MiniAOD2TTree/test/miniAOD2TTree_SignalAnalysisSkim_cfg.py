@@ -76,8 +76,12 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	filter = cms.untracked.bool(False)
     ),
-    METFilters = cms.PSet(
-      
+    METNoiseFilter = cms.PSet(
+        triggerResults = cms.InputTag("TriggerResults::PAT"),
+        printTriggerResultsList = cms.untracked.bool(False),
+        CSCTightHaloFilter = cms.string(""),
+        goodVerticesFilter = cms.string(""),
+        EEBadScFilter = cms.string("")
     ),
     Taus = cms.VPSet(
         cms.PSet(
