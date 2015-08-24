@@ -207,6 +207,24 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             filter = cms.untracked.bool(False)
         )
     ),
+    GenJets = cms.VPSet(      
+        cms.PSet(
+            branchname = cms.untracked.string("GenJets"),
+            src = cms.InputTag("slimmedGenJets"), # ak4
+        )
+    ),
+    GenParticles = cms.VPSet(      
+        cms.PSet(
+            branchname = cms.untracked.string("genParticles"),
+            src = cms.InputTag("prunedGenParticles"),
+        )
+    ),
+    Tracks =  cms.VPSet(      
+        cms.PSet(
+            branchname = cms.untracked.string("PFcandidates"),
+            src = cms.InputTag("packedPFCandidates"),
+        )
+    ),
 )
 
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
