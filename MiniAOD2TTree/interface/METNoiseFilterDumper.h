@@ -10,7 +10,13 @@
 
 #include "TTree.h"
 
+#include <vector>
 #include <string>
+
+namespace edm {
+  class Handle;
+  class TriggerResults;
+}
 
 class METNoiseFilterDumper {
 public:
@@ -22,7 +28,8 @@ public:
   void reset();
 
 private:
-
+  void printAvailableFilters(edm::Handle<edm::TriggerResults>& trgResults);
+  
   bool filter();
   bool useFilter;
   bool booked;
@@ -36,14 +43,10 @@ private:
   bool bTriggerResultsListPrintedStatus;
   
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
-  const std::string fCSCTightHaloFilter;
-  const std::string fGoodVerticesFilter;
-  const std::string fEEBadScFilter;
+  const std::vector<std::string> fFilters;
   // Note: HBHENoiseFilter is run separately as a python fragment
   
   // Data objects for ttree
-  bool bPassCSCTightHaloFilter;
-  bool bPassGoodVerticesFilter;
-  bool bPassEEBadScFilter;
+  std::vector<bool> bFilters;
 };
 #endif
