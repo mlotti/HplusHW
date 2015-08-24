@@ -1,6 +1,6 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TrackDumper.h"
 
-TrackDumper::TrackDumper(std::vector<edm::ParameterSet> psets){
+TrackDumper::TrackDumper(std::vector<edm::ParameterSet> psets) {
     inputCollections = psets;
     booked           = false;
 
@@ -39,17 +39,21 @@ bool TrackDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
         edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
-
+        double ptCut = inputCollections[ic].getUntrackedParameter<double>("ptCut");
+        double etaCut = inputCollections[ic].getUntrackedParameter<double>("etaCut");
 	iEvent.getByLabel(inputtag, handle[ic]);
 	if(handle[ic].isValid()){
 	    for(size_t i=0; i<handle[ic]->size(); ++i) {  
                 const pat::PackedCandidate& cand = handle[ic]->at(i);
-
+                // Place cuts
+                if (cand.p4().pt() > ptCut) continue;
+                if (std::fabs(cand.p4().eta()) > etaCut) continue;
+                // Save candidates which have passed the cuts
                 pt[ic].push_back(cand.p4().pt());
                 eta[ic].push_back(cand.p4().eta());
                 phi[ic].push_back(cand.p4().phi());
                 e[ic].push_back(cand.p4().energy());
-                pdgId[ic].push_back(cand.p4().pdgId());
+                pdgId[ic].push_back(cand.pdgId());
 	    }
 	}
     }

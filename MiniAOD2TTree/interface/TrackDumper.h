@@ -30,7 +30,7 @@ class TrackDumper : public BaseDumper {
 
     private:
 	bool filter();
-
+        
 	edm::Handle<edm::View<pat::PackedCandidate> > *handle;
 };
 #endif

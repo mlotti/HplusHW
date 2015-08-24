@@ -223,6 +223,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         cms.PSet(
             branchname = cms.untracked.string("PFcandidates"),
             src = cms.InputTag("packedPFCandidates"),
+            ptCut = cms.untracked.double(0.0), # pt < value
+            etaCut = cms.untracked.double(2.5), # abs(eta) < value
         )
     ),
 )

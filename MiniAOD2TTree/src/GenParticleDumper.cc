@@ -8,7 +8,7 @@ GenParticleDumper::GenParticleDumper(std::vector<edm::ParameterSet> psets){
     eta = new std::vector<double>[inputCollections.size()];    
     phi = new std::vector<double>[inputCollections.size()];    
     e   = new std::vector<double>[inputCollections.size()];    
-    et  = new std::vector<double>[inputCollections.size()];
+    et  = new std::vector<short>[inputCollections.size()];
 
     pdgId = new std::vector<short>[inputCollections.size()];
     //status = new std::vector<short>[inputCollections.size()];

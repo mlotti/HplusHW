@@ -72,6 +72,7 @@ class GenParticleDumper : public BaseDumper {
 	std::vector<short> *tauProng;
 	std::vector<short> *associatedWithHpm;
 
+        
 	std::vector<double> *massHpm;
 
 	std::vector<double> *tauVisiblePt;
