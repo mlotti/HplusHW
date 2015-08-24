@@ -7,6 +7,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "DataFormats/Common/interface/Handle.h"
 
 #include "TTree.h"
 
@@ -14,7 +15,6 @@
 #include <string>
 
 namespace edm {
-  class Handle;
   class TriggerResults;
 }
 

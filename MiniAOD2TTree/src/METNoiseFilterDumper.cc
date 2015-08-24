@@ -5,7 +5,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 //#include "DataFormats/METReco/interface/BeamHaloSummary.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
-#include "DataFormats/Common/interface/Handle.h"
 
 #include <iostream>
 
@@ -14,7 +13,7 @@ METNoiseFilterDumper::METNoiseFilterDumper(edm::ParameterSet& pset)
   fTriggerResults(pset.getParameter<edm::InputTag>("triggerResults")),
   bPrintTriggerResultsList(pset.getUntrackedParameter<bool>("printTriggerResultsList")),
   bTriggerResultsListPrintedStatus(false),
-  fFilters(pset.getParameter<std::vector<std::string>>("filtersFromTriggerResults")
+  fFilters(pset.getParameter<std::vector<std::string>>("filtersFromTriggerResults"))
   { }
 
 METNoiseFilterDumper::~METNoiseFilterDumper() { }
