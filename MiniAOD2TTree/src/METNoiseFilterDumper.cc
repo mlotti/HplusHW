@@ -33,30 +33,31 @@ bool METNoiseFilterDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetu
   // Obtain trigger results object (some filters have been stored as paths there)
   edm::Handle<edm::TriggerResults> trgResults;
   iEvent.getByLabel(fTriggerResults, trgResults);
+  const edm::TriggerNames& triggerNames = iEvent.triggerNames(*trgResults);
   if (!trgResults.isValid())
     throw cms::Exception("Assert") << "METFilters: edm::TriggerResults object is not valid!";
   // Print info if requested
   if (!bTriggerResultsListPrintedStatus && bPrintTriggerResultsList) {
-    printAvailableFilters(trgResults);
+    printAvailableFilters(iEvent, trgResults);
   }
   // Store results
   for (size_t i = 0; i < fFilters.size(); ++i) {
     bool found = false;
     for (size_t j = 0; j < trgResults->size(); ++j) {
-      if (fFilters[i] == trgResults[j]) {
+      if (fFilters[i].compare(triggerNames.triggerName(j)) == 0) {
         found = true;
         bFilters->push_back(trgResults->accept(j));
       }
     }
     if (!found) {
-      printAvailableFilters(trgResults);
-      throw cms::Exception("Assert") << "METFilters: key '" << fFilters[i] "' not found in TriggerResults (see above list for available filters)!";
+      printAvailableFilters(iEvent, trgResults);
+      throw cms::Exception("Assert") << "METFilters: key '" << fFilters[i] << "' not found in TriggerResults (see above list for available filters)!";
     }
   }
   return filter();
 }
 
-void METNoiseFilterDumper::printAvailableFilters(edm::Handle<edm::TriggerResults>& trgResults) {
+void METNoiseFilterDumper::printAvailableFilters(edm::Event& iEvent, edm::Handle<edm::TriggerResults>& trgResults) {
   const edm::TriggerNames& triggerNames = iEvent.triggerNames(*trgResults);
   std::cout << "TriggerResults list including METFilters (for information):" << std::endl;
   for (size_t i = 0; i < trgResults->size(); ++i) {

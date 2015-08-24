@@ -28,7 +28,7 @@ public:
   void reset();
 
 private:
-  void printAvailableFilters(edm::Handle<edm::TriggerResults>& trgResults);
+  void printAvailableFilters(edm::Event& iEvent, edm::Handle<edm::TriggerResults>& trgResults);
   
   bool filter();
   bool useFilter;
