@@ -32,8 +32,8 @@ private:
   const edm::InputTag fTriggerResults;
   //const edm::InputTag edm::InputTag triggerObjects;
   //const edm::InputTag edm::InputTag l1extra;
-  const bool fPrintTriggerResultsList;
-  bool fTriggerResultsListPrintedStatus;
+  const bool bPrintTriggerResultsList;
+  bool bTriggerResultsListPrintedStatus;
   
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
   const std::string fCSCTightHaloFilter;
