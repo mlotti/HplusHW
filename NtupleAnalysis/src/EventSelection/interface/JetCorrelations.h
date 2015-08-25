@@ -63,9 +63,14 @@ private:
   //  Count cSubAll;
   //  const size_t nMaxJets;
   //  const size_t nConsideredJets;
-  // const bool bEnableOptimizationPlots;
+   const bool bEnableOptimizationPlots;
   //  std::vector<double> fCutValue;
-  //  const std::string sPrefix;
+    const std::string sPrefix;
+  // Event counter for passing selection                                                                                                                                                                                                                               
+  //  Count cPassedAngularCuts;
+  Count cSubAllEvents;
+  std::vector<Count> cSubPassedCuts;
+
 
   // Histograms   
   WrappedTH1 *hPt3Jets;

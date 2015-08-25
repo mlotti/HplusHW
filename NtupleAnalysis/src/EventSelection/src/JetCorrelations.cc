@@ -19,11 +19,11 @@ JetCorrelations::JetCorrelations(const ParameterSet& config, EventCounter& event
   : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix)
     //  nMaxJets(4),
     //    nConsideredJets(static_cast<size_t>(config.getParameter<int>("nConsideredJets"))),
-    //bEnableOptimizationPlots(config.getParameter<bool>("enableOptimizationPlots"))
-    //  sPrefix(prefix),
-    //  fType(type)
+    bEnableOptimizationPlots(config.getParameter<bool>("enableOptimizationPlots")),
+    sPrefix(prefix),
+    fType(type)
     //  cPassedAngularCuts(eventCounter.addCounter("passed angular cuts / "+prefix+" ("+postfix+")")),
-    //cSubAllEvents(eventCounter.addSubCounter("jet correlations", "All events"))
+    cSubAllEvents(eventCounter.addSubCounter("jet correlations", "All events"))
 
 {
   // Obtain algorithm and working point
