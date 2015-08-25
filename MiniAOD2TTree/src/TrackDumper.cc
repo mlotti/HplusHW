@@ -8,7 +8,7 @@ TrackDumper::TrackDumper(std::vector<edm::ParameterSet> psets) {
     eta = new std::vector<double>[inputCollections.size()];    
     phi = new std::vector<double>[inputCollections.size()];    
     e   = new std::vector<double>[inputCollections.size()];    
-    pdgId = new std::vector<double>[inputCollections.size()];    
+    pdgId = new std::vector<short>[inputCollections.size()];    
 
     handle = new edm::Handle<edm::View<pat::PackedCandidate> >[inputCollections.size()];
 
@@ -46,7 +46,7 @@ bool TrackDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    for(size_t i=0; i<handle[ic]->size(); ++i) {  
                 const pat::PackedCandidate& cand = handle[ic]->at(i);
                 // Place cuts
-                if (cand.p4().pt() > ptCut) continue;
+                if (cand.p4().pt() < ptCut) continue;
                 if (std::fabs(cand.p4().eta()) > etaCut) continue;
                 // Save candidates which have passed the cuts
                 pt[ic].push_back(cand.p4().pt());
