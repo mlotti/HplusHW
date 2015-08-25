@@ -217,6 +217,14 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         cms.PSet(
             branchname = cms.untracked.string("genParticles"),
             src = cms.InputTag("prunedGenParticles"),
+            saveAllGenParticles = cms.untracked.bool(False),
+            saveGenElectrons = cms.untracked.bool(True),
+            saveGenMuons = cms.untracked.bool(True),
+            saveGenTaus = cms.untracked.bool(True),
+            saveGenNeutrinos = cms.untracked.bool(True),
+            saveTopInfo = cms.untracked.bool(True),
+            saveWInfo = cms.untracked.bool(True),
+            saveHplusInfo = cms.untracked.bool(True),
         )
     ),
     Tracks =  cms.VPSet(      
