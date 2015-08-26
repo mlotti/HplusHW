@@ -16,8 +16,8 @@
 #include "TTree.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
-
 #include "HiggsAnalysis/MiniAOD2TTree/interface/BaseDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/FourVectorDumper.h"
 
 class TauDumper : public BaseDumper {
     public:
@@ -29,13 +29,27 @@ class TauDumper : public BaseDumper {
 	void reset();
 
     private:
+        void fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Tau& tau);
+        
 	bool filter();
+        
+        edm::Handle<edm::View<pat::Tau> > *handle;
 
-	edm::Handle<edm::View<pat::Tau> > *handle;
+        std::vector<double> *lChTrackPt;
+        std::vector<double> *lChTrackEta;
+        std::vector<double> *lNeutrTrackPt;
+        std::vector<double> *lNeutrTrackEta;
 
-        std::vector<double> *ltrackPt;
-        std::vector<double> *ltrackEta;
-
-	std::vector<int> *nProngs;
+	std::vector<short> *nProngs;
+        std::vector<short> *pdgTauOrigin;
+        // 4-vector for generator tau
+        FourVectorDumper *MCtau;
+        
+        // Systematics variations for tau 4-vector
+        FourVectorDumper *systTESup;
+        FourVectorDumper *systTESdown;
+        FourVectorDumper *systExtremeTESup;
+        FourVectorDumper *systExtremeTESdown;
+        
 };
 #endif

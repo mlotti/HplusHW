@@ -32,6 +32,8 @@ class EventInfoDumper {
 	int nPU;
 	int NUP;
 	int nGoodOfflinePV;
+        float pvZ;
+        float ptSumRatio; // Ratio of track pt sum of first and second vertex
 
         edm::InputTag pileupSummaryInfoSrc;
 //	edm::InputTag lheSrc;

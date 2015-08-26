@@ -23,14 +23,27 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 	skim = iConfig.getParameter<edm::ParameterSet>("Skim");
         skimDumper = new SkimDumper(skim);
         skimDumper->book();
+    } else {
+      std::cout << "Config: SkimDumper ignored, because 'Skim' is missing from config" << std::endl;
     }
 
     trgDumper = 0;
     if (iConfig.exists("Trigger")) {
-	trigger = iConfig.getParameter<edm::ParameterSet>("Trigger");
+        trigger = iConfig.getParameter<edm::ParameterSet>("Trigger");
         trgDumper = new TriggerDumper(trigger);
         trgDumper->book(Events);
         hltProcessName = trigger.getParameter<edm::InputTag>("TriggerResults").process();
+    } else {
+      std::cout << "Config: TriggerDumper ignored, because 'Trigger' is missing from config" << std::endl;
+    }
+    
+    metNoiseFilterDumper = 0;
+    if (iConfig.exists("METNoiseFilter")) {
+        metNoiseFilter = iConfig.getParameter<edm::ParameterSet>("METNoiseFilter");
+        metNoiseFilterDumper = new METNoiseFilterDumper(metNoiseFilter);
+        metNoiseFilterDumper->book(Events);
+    } else {
+      std::cout << "Config: METNoiseFilter ignored, because 'METNoiseFilter' is missing from config" << std::endl;
     }
 
     tauDumper = 0;
@@ -38,6 +51,8 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 	tauCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("Taus");
         tauDumper = new TauDumper(tauCollections);
         tauDumper->book(Events);
+    } else {
+      std::cout << "Config: skimDumper ignored, because 'Skim' is missing from config" << std::endl;
     }
 
     electronDumper = 0;
@@ -45,12 +60,14 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 	electronCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("Electrons");
         electronDumper = new ElectronDumper(electronCollections);
         electronDumper->book(Events);
+    } else {
+      std::cout << "Config: ElectronDumper ignored, because 'Electrons' is missing from config" << std::endl;
     }
 
     muonDumper = 0;
     if (iConfig.exists("Muons")) {
 	muonCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("Muons");
-        muonDumper = new MuonDumper(muonCollections);
+        muonDumper = new MuonDumper(muonCollections, eventInfoCollections.getParameter<edm::InputTag>("OfflinePrimaryVertexSrc"));
         muonDumper->book(Events);
     }
 
@@ -59,6 +76,8 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 	jetCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("Jets");
         jetDumper = new JetDumper(jetCollections);
         jetDumper->book(Events);
+    } else {
+      std::cout << "Config: JetDumper ignored, because 'Jets' is missing from config" << std::endl;
     }
 
     metDumper = 0;
@@ -66,6 +85,8 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 	metCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("METs");
         metDumper = new METDumper(metCollections,this->isMC());
         metDumper->book(Events);
+    } else {
+      std::cout << "Config: METDumper ignored, because 'METs' is missing from config" << std::endl;
     }
 
     trackDumper = 0;
@@ -73,6 +94,8 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
         trackCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("Tracks");
         trackDumper = new TrackDumper(trackCollections);
         trackDumper->book(Events);
+    } else {
+      std::cout << "Config: TrackDumper ignored, because 'Tracks' is missing from config" << std::endl;       
     }
 
     genMetDumper = 0;
@@ -85,24 +108,32 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 	genMetCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenMETs");
         genMetDumper = new GenMETDumper(genMetCollections);
         genMetDumper->book(Events);
+      } else {
+        std::cout << "Config: GenMETDumper ignored, because 'GenMETs' is missing from config" << std::endl;
       }
 
       if (iConfig.exists("GenWeights")) {
 	genWeightCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenWeights");
         genWeightDumper = new GenWeightDumper(genWeightCollections);
         genWeightDumper->book(Events);
+      } else {
+        std::cout << "Config: GenWeightDumper ignored, because 'GenWeights' is missing from config" << std::endl;
       }
 
       if (iConfig.exists("GenParticles")) {
         genParticleCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenParticles");
         genParticleDumper = new GenParticleDumper(genParticleCollections);
         genParticleDumper->book(Events);
+      } else {
+        std::cout << "Config: GenParticleDumper ignored, because 'GenParticles' is missing from config" << std::endl;
       }
 
       if (iConfig.exists("GenJets")) {
         genJetCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("GenJets");
         genJetDumper = new GenJetDumper(genJetCollections);
         genJetDumper->book(Events);
+      } else {
+        std::cout << "Config: GenJetDumper ignored, because 'GenJets' is missing from config" << std::endl;
       }
     }
 }
@@ -127,6 +158,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 
     bool accept = true;
     if (trgDumper) accept = accept && trgDumper->fill(iEvent,iSetup);
+    if (metNoiseFilterDumper) accept = accept && metNoiseFilterDumper->fill(iEvent,iSetup);
     if (tauDumper) accept = accept && tauDumper->fill(iEvent,iSetup);
     if (electronDumper) accept = accept && electronDumper->fill(iEvent,iSetup);
     if (muonDumper) accept = accept && muonDumper->fill(iEvent,iSetup);
@@ -145,6 +177,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 void MiniAOD2TTreeFilter::reset(){
     if (skimDumper) skimDumper->reset();
     if (trgDumper) trgDumper->reset();
+    if (metNoiseFilterDumper) metNoiseFilterDumper->reset();
     if (tauDumper) tauDumper->reset();
     if (electronDumper) electronDumper->reset();
     if (muonDumper) muonDumper->reset();

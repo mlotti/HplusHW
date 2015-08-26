@@ -1,6 +1,9 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TauDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
 
-TauDumper::TauDumper(std::vector<edm::ParameterSet> psets){
+#include "DataFormats/JetReco/interface/Jet.h"
+
+TauDumper::TauDumper(std::vector<edm::ParameterSet> psets) {
     inputCollections = psets;
     booked           = false;
 
@@ -8,18 +11,26 @@ TauDumper::TauDumper(std::vector<edm::ParameterSet> psets){
     eta = new std::vector<double>[inputCollections.size()];    
     phi = new std::vector<double>[inputCollections.size()];    
     e   = new std::vector<double>[inputCollections.size()];    
-
-//    p4 = new std::vector<reco::Candidate::LorentzVector>[inputCollections.size()];
     pdgId = new std::vector<short>[inputCollections.size()];
 
-    ltrackPt = new std::vector<double>[inputCollections.size()];
-    ltrackEta = new std::vector<double>[inputCollections.size()];
-//    ltrack_p4 = new std::vector<reco::Candidate::LorentzVector>[inputCollections.size()];
-
-    nProngs = new std::vector<int>[inputCollections.size()];
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<bool>[inputCollections.size()*nDiscriminators];
 
+//    p4 = new std::vector<reco::Candidate::LorentzVector>[inputCollections.size()];
+    lChTrackPt = new std::vector<double>[inputCollections.size()];
+    lChTrackEta = new std::vector<double>[inputCollections.size()];
+    lNeutrTrackPt = new std::vector<double>[inputCollections.size()];
+    lNeutrTrackEta = new std::vector<double>[inputCollections.size()];
+
+    nProngs = new std::vector<short>[inputCollections.size()];
+    pdgTauOrigin = new std::vector<short>[inputCollections.size()];
+    MCtau = new FourVectorDumper[inputCollections.size()];
+    
+    systTESup = new FourVectorDumper[inputCollections.size()];
+    systTESdown = new FourVectorDumper[inputCollections.size()];
+    systExtremeTESup = new FourVectorDumper[inputCollections.size()];
+    systExtremeTESdown = new FourVectorDumper[inputCollections.size()];
+    
     handle = new edm::Handle<edm::View<pat::Tau> >[inputCollections.size()];
 
     useFilter = false;
@@ -43,102 +54,208 @@ void TauDumper::book(TTree* tree){
 
 	//tree->Branch((name+"_p4").c_str(),&p4[i]);
         tree->Branch((name+"_pdgId").c_str(),&pdgId[i]);
+        tree->Branch((name+"_pdgOrigin").c_str(),&pdgTauOrigin[i]);
 
-        tree->Branch((name+"_lTrkPt").c_str(),&ltrackPt[i]);
-        tree->Branch((name+"_lTrkEta").c_str(),&ltrackEta[i]);
+        tree->Branch((name+"_lChTrkPt").c_str(),&lChTrackPt[i]);
+        tree->Branch((name+"_lChTrkEta").c_str(),&lChTrackEta[i]);
+        tree->Branch((name+"_lNeutrTrkPt").c_str(),&lNeutrTrackPt[i]);
+        tree->Branch((name+"_lNeutrTrkEta").c_str(),&lNeutrTrackEta[i]);
 	//tree->Branch((name+"_lTrk_p4").c_str(),&ltrack_p4[i]);
         tree->Branch((name+"_nProngs").c_str(),&nProngs[i]);
+        MCtau[i].book(tree, name, "MCTau");
 
 	std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
 	for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
 	    tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
 	}
+	
+	systTESup[i].book(tree, name, "TESup");
+        systTESdown[i].book(tree, name, "TESdown");
+        systExtremeTESup[i].book(tree, name, "TESextremeUp");
+        systExtremeTESdown[i].book(tree, name, "TESextremeDown");
     }
 }
 
 bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
-    if (!booked) return true;
+  if (!booked) return true;
 
-    edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("prunedGenParticles", genParticles);
-    /*
-    for (size_t iMC=0; iMC < genParticles->size(); ++iMC) { 
-      const reco::Candidate & gp = (*genParticles)[iMC];
-      std::cout << " GENPartile ID " << gp.pdgId() << std::endl;
-      //      if( abs(gp.pdgId()) == 15){
-      //	std::cout << " TAU FOUND" << std::endl;
-      //      }
-    }
-    */
-    for(size_t ic = 0; ic < inputCollections.size(); ++ic){
-	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
-	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
-	iEvent.getByLabel(inputtag, handle[ic]);
-	if(handle[ic].isValid()){
+  edm::Handle <reco::GenParticleCollection> genParticles;
+  iEvent.getByLabel("prunedGenParticles", genParticles);
+  /*
+  for (size_t iMC=0; iMC < genParticles->size(); ++iMC) { 
+  const reco::Candidate & gp = (*genParticles)[iMC];
+  std::cout << " GENPartile ID " << gp.pdgId() << std::endl;
+  //      if( abs(gp.pdgId()) == 15){
+  //	std::cout << " TAU FOUND" << std::endl;
+  //      }
+  }
+  */
+  for(size_t ic = 0; ic < inputCollections.size(); ++ic){
+    edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
+    std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
+    iEvent.getByLabel(inputtag, handle[ic]);
+    double TESvariation = inputCollections[ic].getUntrackedParameter<double>("TESvariation");
+    double TESvariationExtreme = inputCollections[ic].getUntrackedParameter<double>("TESvariationExtreme");
+    
+    if(handle[ic].isValid()){
+      for(size_t i=0; i<handle[ic]->size(); ++i) {
+        const pat::Tau& tau = handle[ic]->at(i);
 
-	    for(size_t i=0; i<handle[ic]->size(); ++i) {
-    		const pat::Tau& tau = handle[ic]->at(i);
+        pt[ic].push_back(tau.p4().pt());
+        eta[ic].push_back(tau.p4().eta());
+        phi[ic].push_back(tau.p4().phi());
+        e[ic].push_back(tau.p4().energy());
 
-		pt[ic].push_back(tau.p4().pt());
-                eta[ic].push_back(tau.p4().eta());
-                phi[ic].push_back(tau.p4().phi());
-                e[ic].push_back(tau.p4().energy());
-
-		//p4[ic].push_back(tau.p4());
-		
-		if(tau.leadChargedHadrCand().isNonnull()){
-		    //ltrack_p4[ic].push_back(tau.leadChargedHadrCand()->p4());
-		    ltrackPt[ic].push_back(tau.leadChargedHadrCand()->p4().Pt());
-                    ltrackEta[ic].push_back(tau.leadChargedHadrCand()->p4().Eta());
-		    nProngs[ic].push_back(tau.signalCands().size());  
-		}
-		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
-		    //std::cout << "check tau " << tau.p4().Pt() << " " << tau.p4().Eta() << " " << tau.p4().Phi() << " " << discriminatorNames[iDiscr] << " " << tau.tauID(discriminatorNames[iDiscr]) << std::endl;
-		    discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(tau.tauID(discriminatorNames[iDiscr]));
-		}
-		/*
-		std::cout << "check tau " << tau.pdgId() << std::endl;
-		std::vector<reco::GenParticleRef> associatedGenParticles = tau.genParticleRefs();
-		for ( std::vector<reco::GenParticleRef>::const_iterator it = associatedGenParticles.begin();
-		      it != associatedGenParticles.end(); ++it ) {
-		  if ( it->isAvailable() ) {
-		    const reco::GenParticleRef& genParticle = (*it);
-		    std::cout << "    GenParticleRef " << genParticle->pdgId() << std::endl;
-		  }
-		}
-		*/
-		int tauPid = 1;
-		if(genParticles.isValid()){
-		for (size_t iMC=0; iMC < genParticles->size(); ++iMC) {
-		  const reco::Candidate & gp = (*genParticles)[iMC];
-		  //std::cout << " GENPartile ID " << gp.pdgId() << std::endl;
-		  if( abs(gp.pdgId()) != 11 && abs(gp.pdgId()) != 13 && abs(gp.pdgId()) != 15) continue;
-		  reco::Candidate::LorentzVector p4 = gp.p4();
-		  if( abs(gp.pdgId()) == 15){
-		    p4 = reco::Candidate::LorentzVector(0,0,0,0);
-		    //std::cout << " TAU FOUND" << std::endl;
-		    //std::cout << " Number of daughters " << gp.numberOfDaughters() << std::endl;
-		      for (size_t iDaughter =  0; iDaughter < gp.numberOfDaughters(); ++iDaughter){
-			//std::cout << "     id " << gp.daughter(iDaughter)->pdgId() << std::endl;
-			int id = gp.daughter(iDaughter)->pdgId(); 
-			if (abs(id) != 12 && abs(id) != 14 && abs(id) != 16){
-			  p4 += gp.daughter(iDaughter)->p4();
-			}
-		      }
-		  
-		  }
-		  //std::cout << " deltaR " << deltaR(p4,tau.p4()) << std::endl;
-		  if( deltaR(p4,tau.p4()) < 0.2){
-		    tauPid = gp.pdgId();
-		    //std::cout << " Matching " << gp.pdgId() << std::endl;
-		  }
-		}
-		}
-		pdgId[ic].push_back(tauPid);
-            }
+        //p4[ic].push_back(tau.p4());
+        
+        // Leading charged particle
+        if(tau.leadChargedHadrCand().isNonnull()){
+          //ltrack_p4[ic].push_back(tau.leadChargedHadrCand()->p4());
+          lChTrackPt[ic].push_back(tau.leadChargedHadrCand()->p4().Pt());
+          lChTrackEta[ic].push_back(tau.leadChargedHadrCand()->p4().Eta());
+        } else {
+          lChTrackPt[ic].push_back(-1.0);
+          lChTrackEta[ic].push_back(-10.0);
         }
+        // Leading neutral particle
+        if (tau.leadNeutralCand().isNonnull()) {
+          lNeutrTrackPt[ic].push_back(tau.leadNeutralCand()->p4().Pt());
+          lNeutrTrackEta[ic].push_back(tau.leadNeutralCand()->p4().Eta());
+        } else {
+          lNeutrTrackPt[ic].push_back(-1.0);
+          lNeutrTrackEta[ic].push_back(-10.0);
+        }
+        nProngs[ic].push_back(tau.signalCands().size());  
+        for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
+          //std::cout << "check tau " << tau.p4().Pt() << " " << tau.p4().Eta() << " " << tau.p4().Phi() << " " << discriminatorNames[iDiscr] << " " << tau.tauID(discriminatorNames[iDiscr]) << std::endl;
+          discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(tau.tauID(discriminatorNames[iDiscr]));
+        }
+        // Systematics variations
+        systTESup[ic].add(tau.p4().pt()*(1.0+TESvariation),
+                          tau.p4().eta(),
+                          tau.p4().phi(),
+                          tau.p4().energy()*(1.0+TESvariation));
+        systTESdown[ic].add(tau.p4().pt()*(1.0-TESvariation),
+                          tau.p4().eta(),
+                          tau.p4().phi(),
+                          tau.p4().energy()*(1.0-TESvariation));
+        systExtremeTESup[ic].add(tau.p4().pt()*(1.0+TESvariationExtreme),
+                                  tau.p4().eta(),
+                                  tau.p4().phi(),
+                                  tau.p4().energy()*(1.0+TESvariationExtreme));
+        systExtremeTESdown[ic].add(tau.p4().pt()*(1.0-TESvariationExtreme),
+                                  tau.p4().eta(),
+                                  tau.p4().phi(),
+                                  tau.p4().energy()*(1.0-TESvariationExtreme));
+        
+        // Find MC particle matching to the tau. Logic is done in the following order:
+        // - e is true if DeltaR(reco_tau, MC_e) < 0.1
+        // - mu is true if DeltaR(reco_tau, MC_mu) < 0.1
+        // - tau is true if DeltaR(reco_tau, MC_mu) < 0.1
+        // - jet flavour should be taken from the flavour of the jet matching to the tau
+        // The assignment is done in the following order:
+        // - If e is true and tau is true   -> pdgId = +-1511
+        // - If e is true and tau is false  -> pdgId = +-11
+        // - If mu is true and tau is true  -> pdgId = +-1513
+        // - If mu is true and tau is false -> pdgId = +-13
+        // - If tau is true                 -> pdgId = +-15
+        // - else                           -> pdgId = 0
+
+        // MC match info
+        fillMCMatchInfo(ic, genParticles, tau);
+      }
     }
-    return filter();
+  }
+  return filter();
+}
+
+void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle< reco::GenParticleCollection >& genParticles, const pat::Tau& tau) {
+  int tauPid = 0;
+  int tauOrigin = 0;
+  bool matchesToTau = false;
+  bool matchesToE = false;
+  bool matchesToMu = false;
+  double deltaRBestTau = 9999.0;
+  reco::Candidate::LorentzVector p4BestTau(0,0,0,0);
+  
+  if(genParticles.isValid()){
+    for (size_t iMC=0; iMC < genParticles->size(); ++iMC) {
+      const reco::Candidate & gp = (*genParticles)[iMC];
+      //std::cout << " GENPartile ID " << gp.pdgId() << std::endl;
+      if( abs(gp.pdgId()) != 11 && abs(gp.pdgId()) != 13 && abs(gp.pdgId()) != 15) continue;
+      reco::Candidate::LorentzVector p4 = gp.p4();
+      if (abs(gp.pdgId()) == 11) {
+        if (deltaR(p4,tau.p4()) < 0.1)
+          matchesToE = true;
+      } else if (abs(gp.pdgId()) == 13) {
+        if (deltaR(p4,tau.p4()) < 0.1)
+          matchesToMu = true;
+      } else if (abs(gp.pdgId()) == 15) {
+        // Calculate visible tau pt
+        p4 = reco::Candidate::LorentzVector(0,0,0,0);
+        //std::cout << " TAU FOUND" << std::endl;
+        //std::cout << " Number of daughters " << gp.numberOfDaughters() << std::endl;
+        for (size_t iDaughter =  0; iDaughter < gp.numberOfDaughters(); ++iDaughter){
+          //std::cout << "     id " << gp.daughter(iDaughter)->pdgId() << std::endl;
+          int id = abs(gp.daughter(iDaughter)->pdgId());
+          if (id != 12 && id != 14 && id != 16){
+            p4 += gp.daughter(iDaughter)->p4();
+          }
+        }
+        double DR = deltaR(p4,tau.p4());
+        if (DR < 0.1 && DR < deltaRBestTau) {
+          deltaRBestTau = DR;
+          p4BestTau = p4;
+          matchesToTau = true;
+          // Find out which particle produces the tau
+            //const GenParticle* gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
+          const reco::Candidate* mother1 = gp.mother();
+          int moID = -1;
+          if (mother1 != nullptr) {
+            moID = abs(mother1->pdgId());
+            if (moID == 15) {
+              // Tau radiation (tau->tau+gamma), navigate to its mother
+              const reco::Candidate* mother2 = gp.mother();
+              if (mother2 != nullptr) {
+                moID = abs(mother2->pdgId());
+              }
+            }
+          }
+          if (moID > 0) {
+            if (moID == kFromW) {
+              tauOrigin = kFromW;
+            } else if (moID == kFromZ) {
+              tauOrigin = kFromZ;
+            } else if (moID == kFromHplus) {
+              tauOrigin = kFromHplus;
+            } else {
+              tauOrigin = kFromOtherSource;
+            }
+          }
+        }
+      }
+    }
+  }
+  if (matchesToE) {
+    if (matchesToTau)
+      tauPid = kTauDecaysToElectron;
+    else
+      tauPid = kElectronToTau;
+  } else if (matchesToMu) {
+    if (matchesToTau)
+      tauPid = kTauDecaysToMuon;
+    else
+      tauPid = kMuonToTau;
+  } else if (matchesToTau) {
+    tauPid = kTauDecaysToHadrons;
+  } else {
+    // Reference jet is a reco::PFJet and therefore not included into miniAOD
+    // Need to do actual matching in ntuple reader
+    tauPid = -1;
+  }
+  pdgId[ic].push_back(tauPid);
+  pdgTauOrigin[ic].push_back(tauOrigin);
+  MCtau[ic].add(p4BestTau.pt(), p4BestTau.eta(), p4BestTau.phi(), p4BestTau.energy());
 }
 
 bool TauDumper::filter(){
@@ -171,11 +288,20 @@ void TauDumper::reset(){
         e[ic].clear();
 
 	//p4[ic].clear();
-	ltrackPt[ic].clear();
-        ltrackEta[ic].clear();  
+	lChTrackPt[ic].clear();
+        lChTrackEta[ic].clear();  
+        lNeutrTrackPt[ic].clear();
+        lNeutrTrackEta[ic].clear();  
 	//ltrack_p4[ic].clear();
 	nProngs[ic].clear();
 	pdgId[ic].clear();
+        pdgTauOrigin[ic].clear();
+        MCtau[ic].reset();
+        // Systematics
+        systTESup[ic].reset();
+        systTESdown[ic].reset();
+        systExtremeTESup[ic].reset();
+        systExtremeTESdown[ic].reset();
       }
       for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
 	discriminators[ic].clear();

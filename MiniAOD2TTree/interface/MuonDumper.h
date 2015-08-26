@@ -18,11 +18,11 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/BaseDumper.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
-
+#include "HiggsAnalysis/MiniAOD2TTree/interface/FourVectorDumper.h"
 
 class MuonDumper : public BaseDumper {
     public:
-	MuonDumper(std::vector<edm::ParameterSet>);
+	MuonDumper(std::vector<edm::ParameterSet>, const edm::InputTag& recoVertexTag);
 	~MuonDumper();
 
         void book(TTree*);
@@ -30,8 +30,20 @@ class MuonDumper : public BaseDumper {
         void reset();
 
     private:
-	edm::Handle<edm::View<pat::Muon> > *handle;
+	void fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Muon& muon);
+      
+        const edm::InputTag offlinePrimaryVertexSrc;
+        edm::Handle<edm::View<pat::Muon> > *handle;
 
         std::vector<bool> *isGlobalMuon;
+        // Note that isSoftMuon and isHighPtMuon are at the moment not PF compatible
+        std::vector<bool> *isLooseMuon;
+        std::vector<bool> *isMediumMuon;
+        std::vector<bool> *isTightMuon;
+        std::vector<float> *relIsoDeltaBetaCorrected;
+        
+        // 4-vector for generator muon
+        FourVectorDumper *MCmuon;
+
 };
 #endif

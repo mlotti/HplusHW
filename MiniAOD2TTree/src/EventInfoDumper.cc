@@ -13,9 +13,11 @@ void EventInfoDumper::book(TTree* tree){
     tree->Branch("event",&event);
     tree->Branch("run",&run);     
     tree->Branch("lumi",&lumi);
-    tree->Branch("nPU",&nPU);
+    tree->Branch("nPUvertices",&nPU);
 //    tree->Branch("NUP",&NUP);
-    tree->Branch("nGoodOfflinePV",&nGoodOfflinePV);
+    tree->Branch("nGoodOfflineVertices",&nGoodOfflinePV);
+    tree->Branch("pvZ",&pvZ);
+    tree->Branch("pvPtSumRatioToNext",&ptSumRatio);
 }
 
 bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -46,7 +48,22 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     nGoodOfflinePV = 0;
     edm::Handle<edm::View<reco::Vertex> > hoffvertex;
     if(iEvent.getByLabel(offlinePrimaryVertexSrc, hoffvertex)){
-        nGoodOfflinePV = hoffvertex->size();  
+        nGoodOfflinePV = hoffvertex->size();
+        pvZ = hoffvertex->at(0).z();
+        ptSumRatio = -1.0;
+        if (nGoodOfflinePV > 1) {
+          double ptSum0 = 0.0;
+          for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex->at(0).tracks_begin(); iter != hoffvertex->at(0).tracks_end(); iter++) {
+            ptSum0 += hoffvertex->at(0).trackWeight(*iter) * (*iter)->pt()*(*iter)->pt();
+          }
+          double ptSum1 = 0.0;
+          for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex->at(1).tracks_begin(); iter != hoffvertex->at(1).tracks_end(); iter++) {
+            ptSum1 += hoffvertex->at(1).trackWeight(*iter) * (*iter)->pt()*(*iter)->pt();
+          }
+          if (ptSum0 > 0.0) {
+            ptSumRatio = ptSum1 / ptSum0;
+          }
+        }
     }
 
     return filter();

@@ -18,16 +18,25 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/BaseDumper.h"
 
 #include "DataFormats/PatCandidates/interface/Electron.h"
-
+#include "HiggsAnalysis/MiniAOD2TTree/interface/FourVectorDumper.h"
 
 class ElectronDumper : public BaseDumper {
     public:
-	ElectronDumper(std::vector<edm::ParameterSet>);
+	ElectronDumper(std::vector<edm::ParameterSet> psets);
 	~ElectronDumper();
 
+        void book(TTree*);
 	bool fill(edm::Event&, const edm::EventSetup&);
+        void reset();
 
     private:
-	edm::Handle<edm::View<pat::Electron> > *handle;
+	void fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Electron& ele);
+        
+        edm::Handle<edm::View<pat::Electron> > *handle;
+        
+        std::vector<float> *relIsoDeltaBetaCorrected;
+        
+        // 4-vector for generator electron
+        FourVectorDumper *MCelectron;
 };
 #endif
