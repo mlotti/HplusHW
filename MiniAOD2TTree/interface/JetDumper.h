@@ -23,7 +23,7 @@
 
 class JetDumper : public BaseDumper {
     public:
-	JetDumper(std::vector<edm::ParameterSet>);
+	JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets);
 	~JetDumper();
 
         void book(TTree*);
@@ -35,7 +35,7 @@ class JetDumper : public BaseDumper {
         bool passJetID(int id, const pat::Jet& jet);
         
     private:
-	edm::Handle<edm::View<pat::Jet> > *handle;
+	edm::EDGetTokenT<edm::View<pat::Jet>> *jetToken;
         std::vector<float> *discriminators;
         std::vector<double> *userfloats;
 	int nUserfloats;

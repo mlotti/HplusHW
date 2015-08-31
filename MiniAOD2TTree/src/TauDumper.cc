@@ -1,9 +1,11 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TauDumper.h"
+
 #include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
 
 #include "DataFormats/JetReco/interface/Jet.h"
 
-TauDumper::TauDumper(std::vector<edm::ParameterSet> psets) {
+TauDumper::TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets)
+: genParticleToken(iConsumesCollector.consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"))) {
     inputCollections = psets;
     booked           = false;
 
@@ -31,8 +33,12 @@ TauDumper::TauDumper(std::vector<edm::ParameterSet> psets) {
     systExtremeTESup = new FourVectorDumper[inputCollections.size()];
     systExtremeTESdown = new FourVectorDumper[inputCollections.size()];
     
-    handle = new edm::Handle<edm::View<pat::Tau> >[inputCollections.size()];
-
+    tauToken = new edm::EDGetTokenT<edm::View<pat::Tau> >[inputCollections.size()];
+    for(size_t i = 0; i < inputCollections.size(); ++i){
+        edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
+        tauToken[i] = iConsumesCollector.consumes<edm::View<pat::Tau>>(inputtag);
+    }
+    
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
 	bool param = inputCollections[i].getUntrackedParameter<bool>("filter",false);
@@ -78,28 +84,20 @@ void TauDumper::book(TTree* tree){
 
 bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
   if (!booked) return true;
+  
+  edm::Handle <reco::GenParticleCollection> genParticlesHandle;
+  iEvent.getByToken(genParticleToken, genParticlesHandle);
 
-  edm::Handle <reco::GenParticleCollection> genParticles;
-  iEvent.getByLabel("prunedGenParticles", genParticles);
-  /*
-  for (size_t iMC=0; iMC < genParticles->size(); ++iMC) { 
-  const reco::Candidate & gp = (*genParticles)[iMC];
-  std::cout << " GENPartile ID " << gp.pdgId() << std::endl;
-  //      if( abs(gp.pdgId()) == 15){
-  //	std::cout << " TAU FOUND" << std::endl;
-  //      }
-  }
-  */
   for(size_t ic = 0; ic < inputCollections.size(); ++ic){
-    edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
-    std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
-    iEvent.getByLabel(inputtag, handle[ic]);
-    double TESvariation = inputCollections[ic].getUntrackedParameter<double>("TESvariation");
-    double TESvariationExtreme = inputCollections[ic].getUntrackedParameter<double>("TESvariationExtreme");
-    
-    if(handle[ic].isValid()){
-      for(size_t i=0; i<handle[ic]->size(); ++i) {
-        const pat::Tau& tau = handle[ic]->at(i);
+    edm::Handle<edm::View<pat::Tau>> tauHandle;
+    iEvent.getByToken(tauToken[ic], tauHandle);
+    if(tauHandle.isValid()){
+      std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
+      double TESvariation = inputCollections[ic].getUntrackedParameter<double>("TESvariation");
+      double TESvariationExtreme = inputCollections[ic].getUntrackedParameter<double>("TESvariationExtreme");
+      
+      for(size_t i=0; i<tauHandle->size(); ++i) {
+        const pat::Tau& tau = tauHandle->at(i);
 
         pt[ic].push_back(tau.p4().pt());
         eta[ic].push_back(tau.p4().eta());
@@ -162,7 +160,7 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         // - else                           -> pdgId = 0
 
         // MC match info
-        fillMCMatchInfo(ic, genParticles, tau);
+        fillMCMatchInfo(ic, genParticlesHandle, tau);
       }
     }
   }

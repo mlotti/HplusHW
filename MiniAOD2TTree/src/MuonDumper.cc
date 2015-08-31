@@ -1,8 +1,10 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/MuonDumper.h"
+
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
-MuonDumper::MuonDumper(std::vector<edm::ParameterSet> psets, const edm::InputTag& recoVertexTag)
-: offlinePrimaryVertexSrc(recoVertexTag) {
+MuonDumper::MuonDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets, const edm::InputTag& recoVertexTag)
+: genParticleToken(iConsumesCollector.consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"))),
+  vertexToken(iConsumesCollector.consumes<edm::View<reco::Vertex>>(recoVertexTag)) {
     inputCollections = psets;
     booked           = false;
 
@@ -23,8 +25,14 @@ MuonDumper::MuonDumper(std::vector<edm::ParameterSet> psets, const edm::InputTag
     
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<bool>[inputCollections.size()*nDiscriminators];
-    handle = new edm::Handle<edm::View<pat::Muon> >[inputCollections.size()];
+    
+    muonToken = new edm::EDGetTokenT<edm::View<pat::Muon>>[inputCollections.size()];
 
+    for(size_t i = 0; i < inputCollections.size(); ++i){
+      edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
+      muonToken[i] = iConsumesCollector.consumes<edm::View<pat::Muon>>(inputtag);
+    }
+    
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
 	bool param = inputCollections[i].getUntrackedParameter<bool>("filter",false);
@@ -62,18 +70,22 @@ void MuonDumper::book(TTree* tree){
 bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;
     
-    edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("prunedGenParticles", genParticles);
+    // Get genParticles
+    edm::Handle <reco::GenParticleCollection> genParticlesHandle;
+    iEvent.getByToken(genParticleToken, genParticlesHandle);
+    // Get vertex
+    edm::Handle<edm::View<reco::Vertex> > vertexHandle;
+    iEvent.getByToken(vertexToken, vertexHandle);
     
-    edm::Handle<edm::View<reco::Vertex> > hoffvertex;
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
 	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
 	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
-	iEvent.getByLabel(inputtag, handle[ic]);
-	if(handle[ic].isValid()){
+	edm::Handle<edm::View<pat::Muon>> muonHandle;
+        iEvent.getByToken(muonToken[ic], muonHandle);
+	if(muonHandle.isValid()){
 
-	    for(size_t i=0; i<handle[ic]->size(); ++i) {
-    		const pat::Muon& obj = handle[ic]->at(i);
+	    for(size_t i=0; i<muonHandle->size(); ++i) {
+    		const pat::Muon& obj = muonHandle->at(i);
 
 		pt[ic].push_back(obj.p4().pt());
                 eta[ic].push_back(obj.p4().eta());
@@ -83,13 +95,13 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		isGlobalMuon[ic].push_back(obj.isGlobalMuon());
 
                 // For the discriminators see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
-                iEvent.getByLabel(offlinePrimaryVertexSrc, hoffvertex);
+
                 isLooseMuon[ic].push_back(obj.isLooseMuon());
                 isMediumMuon[ic].push_back(obj.isMediumMuon());
-                if (hoffvertex->size() == 0) {
+                if (vertexHandle->size() == 0) {
                   isTightMuon[ic].push_back(false);
                 } else {
-                  isTightMuon[ic].push_back(obj.isTightMuon(hoffvertex->at(0)));
+                  isTightMuon[ic].push_back(obj.isTightMuon(vertexHandle->at(0)));
                 }
                 // Calculate relative isolation in cone of DeltaR=0.3
                 double isolation = (obj.pfIsolationR03().sumChargedHadronPt
@@ -105,7 +117,7 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		}
 		
                 // MC match info
-                fillMCMatchInfo(ic, genParticles, obj);
+                fillMCMatchInfo(ic, genParticlesHandle, obj);
             }
         }
     }

@@ -21,7 +21,7 @@
 
 class TauDumper : public BaseDumper {
     public:
-	TauDumper(std::vector<edm::ParameterSet>);
+	TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets);
 	~TauDumper();
 
 	void book(TTree*);
@@ -33,7 +33,8 @@ class TauDumper : public BaseDumper {
         
 	bool filter();
         
-        edm::Handle<edm::View<pat::Tau> > *handle;
+        edm::EDGetTokenT<edm::View<pat::Tau>> *tauToken;
+        edm::EDGetTokenT<reco::GenParticleCollection> genParticleToken;
 
         std::vector<double> *lChTrackPt;
         std::vector<double> *lChTrackEta;

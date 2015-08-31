@@ -16,11 +16,12 @@
 #include "TTree.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 
 class BaseDumper {
     public:
 	BaseDumper();
-	BaseDumper(std::vector<edm::ParameterSet>);
+	BaseDumper(std::vector<edm::ParameterSet>& psets);
 	~BaseDumper();
 
 	void book(TTree*);

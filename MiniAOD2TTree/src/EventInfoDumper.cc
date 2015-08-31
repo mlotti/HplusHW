@@ -1,12 +1,15 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/EventInfoDumper.h"
+
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 
-EventInfoDumper::EventInfoDumper(edm::ParameterSet& pset){
-    if (pset.exists("PileupSummaryInfoSrc")) pileupSummaryInfoSrc = pset.getParameter<edm::InputTag>("PileupSummaryInfoSrc");
-//    lheSrc = pset.getParameter<edm::InputTag>("LHESrc");
-    if (pset.exists("OfflinePrimaryVertexSrc")) offlinePrimaryVertexSrc = pset.getParameter<edm::InputTag>("OfflinePrimaryVertexSrc");
+EventInfoDumper::EventInfoDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
+: puSummaryToken(iConsumesCollector.consumes<std::vector<PileupSummaryInfo>>(pset.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
+  vertexToken(iConsumesCollector.consumes<edm::View<reco::Vertex>>(pset.getParameter<edm::InputTag>("OfflinePrimaryVertexSrc"))) {
+
 }
+
 EventInfoDumper::~EventInfoDumper(){}
 
 void EventInfoDumper::book(TTree* tree){
@@ -21,14 +24,13 @@ void EventInfoDumper::book(TTree* tree){
 }
 
 bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
-
     event = iEvent.id().event();
     run   = iEvent.run();
     lumi  = iEvent.luminosityBlock();
 
     // Amount of PU
     edm::Handle<std::vector<PileupSummaryInfo> > hpileup;
-    iEvent.getByLabel(pileupSummaryInfoSrc, hpileup);
+    iEvent.getByToken(puSummaryToken, hpileup);
     if(hpileup.isValid()) { // protection for data
         for(std::vector<PileupSummaryInfo>::const_iterator iPV = hpileup->begin(); iPV != hpileup->end(); ++iPV) {
             if(iPV->getBunchCrossing() == 0) {
@@ -47,7 +49,7 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     // PV
     nGoodOfflinePV = 0;
     edm::Handle<edm::View<reco::Vertex> > hoffvertex;
-    if(iEvent.getByLabel(offlinePrimaryVertexSrc, hoffvertex)){
+    if(iEvent.getByToken(vertexToken, hoffvertex)){
         nGoodOfflinePV = hoffvertex->size();
         pvZ = hoffvertex->at(0).z();
         ptSumRatio = -1.0;

@@ -1,9 +1,10 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
 
+
 #include "TLorentzVector.h"
 
-GenParticleDumper::GenParticleDumper(std::vector<edm::ParameterSet> psets){
+GenParticleDumper::GenParticleDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets){
   inputCollections = psets;
   booked           = false;
 
@@ -54,8 +55,13 @@ GenParticleDumper::GenParticleDumper(std::vector<edm::ParameterSet> psets){
   Hplus = new FourVectorDumper[inputCollections.size()];
   HplusNeutrinos = new FourVectorDumper[inputCollections.size()];
 
-  handle = new edm::Handle<reco::GenParticleCollection>[inputCollections.size()];
-
+  //handle = new edm::Handle<reco::GenParticleCollection>[inputCollections.size()];
+  token = new edm::EDGetTokenT<reco::GenParticleCollection>[inputCollections.size()];
+  for(size_t i = 0; i < inputCollections.size(); ++i){
+    edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
+    token[i] = iConsumesCollector.consumes<reco::GenParticleCollection>(inputtag);
+  }
+  
   useFilter = false;
   for(size_t i = 0; i < inputCollections.size(); ++i){
       bool param = inputCollections[i].getUntrackedParameter<bool>("filter",false);
@@ -124,13 +130,14 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
   if (!booked) return true;
 
   for(size_t ic = 0; ic < inputCollections.size(); ++ic){
-    edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
-    iEvent.getByLabel(inputtag, handle[ic]);
-    if(handle[ic].isValid()){
+    //iEvent.getByLabel(inputtag, handle);
+    edm::Handle<reco::GenParticleCollection> handle;
+    iEvent.getByToken(token[ic], handle);
+    if(handle.isValid()){
       // General particle list
       if (inputCollections[ic].getUntrackedParameter<bool>("saveAllGenParticles", false)) {
-        for(size_t i = 0; i < handle[ic]->size(); ++i) {
-          const reco::Candidate & gp = handle[ic]->at(i);
+        for(size_t i = 0; i < handle->size(); ++i) {
+          const reco::Candidate & gp = handle->at(i);
           pt[ic].push_back(gp.pt());
           eta[ic].push_back(gp.eta());
           phi[ic].push_back(gp.phi());
@@ -139,8 +146,8 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           // Find mother index
           short index = -1;
           if (gp.mother() != nullptr) {
-            for(size_t j = 0; j < handle[ic]->size(); ++j) {
-              if (gp.mother() == &(handle[ic]->at(j)))
+            for(size_t j = 0; j < handle->size(); ++j) {
+              if (gp.mother() == &(handle->at(j)))
                 index = j;
             }
           }
@@ -149,22 +156,22 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
       // MC electrons
       if (inputCollections[ic].getUntrackedParameter<bool>("saveGenElectrons", false)) {
-        saveLeptons(handle[ic], electrons[ic], 11);
+        saveLeptons(handle, electrons[ic], 11);
       }
       // MC muons
       if (inputCollections[ic].getUntrackedParameter<bool>("saveGenMuons", false)) {
-        saveLeptons(handle[ic], muons[ic], 13);
+        saveLeptons(handle, muons[ic], 13);
       }
       // MC taus
       if (inputCollections[ic].getUntrackedParameter<bool>("saveGenTaus", false)) {
         tauAssociatedWithHpm[ic] = -1;
-        std::vector<const reco::Candidate*> tauLeptons = findParticles(handle[ic], 15);
+        std::vector<const reco::Candidate*> tauLeptons = findParticles(handle, 15);
         size_t tauIndex = 0;
         for (auto& p: tauLeptons) {
           // 4-momentum of tau lepton
           taus[ic].add(p->pt(), p->eta(), p->phi(), p->energy());
           // tau offspring information
-          std::vector<const reco::Candidate*> offspring = findOffspring(handle[ic], p);
+          std::vector<const reco::Candidate*> offspring = findOffspring(handle, p);
           short nCharged = 0;
           short nPi0 = 0;
           bool decaysToElectron = false;
@@ -198,7 +205,7 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           // rtau and spineffects
           saveHelicityInformation(visibleTau, offspring, ic);
           // tau ancestry information
-          std::vector<const reco::Candidate*> ancestry = findAncestry(handle[ic], p);
+          std::vector<const reco::Candidate*> ancestry = findAncestry(handle, p);
           int tauOriginCode = kTauOriginUnknown;
           for (auto& p: ancestry) {
             int absPid = std::abs(p->pdgId());
@@ -218,25 +225,25 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
       // Neutrinos
       if (inputCollections[ic].getUntrackedParameter<bool>("saveGenNeutrinos", false)) {
-        saveLeptons(handle[ic], neutrinos[ic], 12);
-        saveLeptons(handle[ic], neutrinos[ic], 14);
-        saveLeptons(handle[ic], neutrinos[ic], 16);
+        saveLeptons(handle, neutrinos[ic], 12);
+        saveLeptons(handle, neutrinos[ic], 14);
+        saveLeptons(handle, neutrinos[ic], 16);
       }
       // Top info
       if (inputCollections[ic].getUntrackedParameter<bool>("saveTopInfo", false)) {
-        std::vector<const reco::Candidate*> tops = findParticles(handle[ic], 6);
+        std::vector<const reco::Candidate*> tops = findParticles(handle, 6);
         for (auto& p: tops) {
           short topDecay = kTopDecayUnknown;
           bool bToLeptons = false;
           math::XYZTLorentzVector bquark;
           math::XYZTLorentzVector bNeutrinos;
-          std::vector<const reco::Candidate*> offspring = findOffspring(handle[ic], p);
+          std::vector<const reco::Candidate*> offspring = findOffspring(handle, p);
           for (auto& po: offspring) {
             short absPid = std::abs(po->pdgId());
             if (absPid == 5) {
               // b quark from top decay
               bquark = po->p4();
-              std::vector<const reco::Candidate*> boffspring = findOffspring(handle[ic], po);
+              std::vector<const reco::Candidate*> boffspring = findOffspring(handle, po);
               for (auto& pob: boffspring) {
                 short bPid = std::abs(pob->pdgId());
                 if (bPid == 11 || bPid == 13 || bPid == 15) {
@@ -246,7 +253,7 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 }
               }
             } else if (absPid == 11 || absPid == 13 || absPid == 15) {
-              std::vector<const reco::Candidate*> ancestry = findAncestry(handle[ic], po);
+              std::vector<const reco::Candidate*> ancestry = findAncestry(handle, po);
               bool ancestryContainsBQuark = false;
               for (auto& pa: ancestry) {
                 if (std::abs(pa->pdgId()) == 5)
@@ -268,11 +275,11 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
       // W info
       if (inputCollections[ic].getUntrackedParameter<bool>("saveWInfo", false)) {
-        std::vector<const reco::Candidate*> Ws = findParticles(handle[ic], 24);
+        std::vector<const reco::Candidate*> Ws = findParticles(handle, 24);
         for (auto& p: Ws) {
           short WDecay = kWDecayUnknown;
           math::XYZTLorentzVector neutrinos;
-          std::vector<const reco::Candidate*> offspring = findOffspring(handle[ic], p);
+          std::vector<const reco::Candidate*> offspring = findOffspring(handle, p);
           for (auto& po: offspring) {
             short absPid = std::abs(po->pdgId());
             if (absPid == 11 || absPid == 13 || absPid == 15) {
@@ -290,10 +297,10 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
       // H+ info
       if (inputCollections[ic].getUntrackedParameter<bool>("saveHplusInfo", false)) {
-        std::vector<const reco::Candidate*> higgses = findParticles(handle[ic], 37);
+        std::vector<const reco::Candidate*> higgses = findParticles(handle, 37);
         for (auto& p: higgses) {
           math::XYZTLorentzVector neutrinos;
-          std::vector<const reco::Candidate*> offspring = findOffspring(handle[ic], p);
+          std::vector<const reco::Candidate*> offspring = findOffspring(handle, p);
           for (auto& po: offspring) {
             short absPid = std::abs(po->pdgId());
             if (absPid == 12 || absPid == 14 || absPid == 16) {

@@ -22,7 +22,7 @@
 
 class GenParticleDumper : public BaseDumper {
 public:
-  GenParticleDumper(std::vector<edm::ParameterSet>);
+  GenParticleDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets);
   ~GenParticleDumper();
 
   void book(TTree*);
@@ -45,8 +45,9 @@ private:
   void printDescendants(edm::Handle<reco::GenParticleCollection>& handle, const reco::Candidate* p);
   
 private:  
-  edm::Handle<reco::GenParticleCollection> *handle;
-
+  //edm::Handle<reco::GenParticleCollection> *handle;
+  edm::EDGetTokenT<reco::GenParticleCollection> *token;
+  
   // General particle list
   std::vector<short> *mother;
   
