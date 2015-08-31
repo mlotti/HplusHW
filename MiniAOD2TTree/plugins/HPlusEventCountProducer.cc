@@ -5,6 +5,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "DataFormats/Common/interface/MergeableCounter.h"
 #include "DataFormats/Common/interface/Handle.h"
 
@@ -21,7 +22,7 @@ private:
       
   // ----------member data ---------------------------
 
-  edm::InputTag weightSrc_;
+  edm::EDGetTokenT<double>* weightToken;
   double eventsProcessedInLumiWeight_;
   double eventsProcessedInLumiWeightSquared_;
   unsigned int eventsProcessedInLumi_;
@@ -30,7 +31,6 @@ private:
 
 
 HPlusEventCountProducer::HPlusEventCountProducer(const edm::ParameterSet& iConfig):
-  weightSrc_(""),
   eventsProcessedInLumiWeight_(0),
   eventsProcessedInLumiWeightSquared_(0),
   eventsProcessedInLumi_(0),
@@ -38,7 +38,7 @@ HPlusEventCountProducer::HPlusEventCountProducer(const edm::ParameterSet& iConfi
 
   if(iConfig.exists("weightSrc")) {
     hasWeight_ = true;
-    weightSrc_ = iConfig.getParameter<edm::InputTag>("weightSrc");
+    weightToken = new edm::EDGetTokenT<double>(consumes<double, edm::InLumi>(iConfig.getParameter<edm::InputTag>("weightSrc")));
   }
 
   produces<edm::MergeableCounter, edm::InLumi>();
@@ -58,7 +58,7 @@ void HPlusEventCountProducer::produce(edm::Event& iEvent, const edm::EventSetup&
 
   if(hasWeight_) {
     edm::Handle<double> hweight;
-    iEvent.getByLabel(weightSrc_, hweight);
+    iEvent.getByToken(*weightToken, hweight);
     weight = *hweight;
   }
 

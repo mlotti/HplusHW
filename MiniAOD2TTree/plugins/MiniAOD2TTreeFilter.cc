@@ -53,7 +53,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
         tauDumper = new TauDumper(consumesCollector(), tauCollections);
         tauDumper->book(Events);
     } else {
-      std::cout << "Config: skimDumper ignored, because 'Skim' is missing from config" << std::endl;
+      std::cout << "Config: TauDumper ignored, because 'Skim' is missing from config" << std::endl;
     }
 
     electronDumper = 0;
