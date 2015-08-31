@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleTools.h"
 
 
 #include "TLorentzVector.h"
@@ -165,13 +166,13 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       // MC taus
       if (inputCollections[ic].getUntrackedParameter<bool>("saveGenTaus", false)) {
         tauAssociatedWithHpm[ic] = -1;
-        std::vector<const reco::Candidate*> tauLeptons = findParticles(handle, 15);
+        std::vector<const reco::Candidate*> tauLeptons = GenParticleTools::findParticles(handle, 15);
         size_t tauIndex = 0;
         for (auto& p: tauLeptons) {
           // 4-momentum of tau lepton
           taus[ic].add(p->pt(), p->eta(), p->phi(), p->energy());
           // tau offspring information
-          std::vector<const reco::Candidate*> offspring = findOffspring(handle, p);
+          std::vector<const reco::Candidate*> offspring = GenParticleTools::findOffspring(handle, p);
           short nCharged = 0;
           short nPi0 = 0;
           bool decaysToElectron = false;
@@ -205,7 +206,7 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           // rtau and spineffects
           saveHelicityInformation(visibleTau, offspring, ic);
           // tau ancestry information
-          std::vector<const reco::Candidate*> ancestry = findAncestry(handle, p);
+          std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(handle, p);
           int tauOriginCode = kTauOriginUnknown;
           for (auto& p: ancestry) {
             int absPid = std::abs(p->pdgId());
@@ -231,19 +232,19 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
       // Top info
       if (inputCollections[ic].getUntrackedParameter<bool>("saveTopInfo", false)) {
-        std::vector<const reco::Candidate*> tops = findParticles(handle, 6);
+        std::vector<const reco::Candidate*> tops = GenParticleTools::findParticles(handle, 6);
         for (auto& p: tops) {
           short topDecay = kTopDecayUnknown;
           bool bToLeptons = false;
           math::XYZTLorentzVector bquark;
           math::XYZTLorentzVector bNeutrinos;
-          std::vector<const reco::Candidate*> offspring = findOffspring(handle, p);
+          std::vector<const reco::Candidate*> offspring = GenParticleTools::findOffspring(handle, p);
           for (auto& po: offspring) {
             short absPid = std::abs(po->pdgId());
             if (absPid == 5) {
               // b quark from top decay
               bquark = po->p4();
-              std::vector<const reco::Candidate*> boffspring = findOffspring(handle, po);
+              std::vector<const reco::Candidate*> boffspring = GenParticleTools::findOffspring(handle, po);
               for (auto& pob: boffspring) {
                 short bPid = std::abs(pob->pdgId());
                 if (bPid == 11 || bPid == 13 || bPid == 15) {
@@ -253,7 +254,7 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 }
               }
             } else if (absPid == 11 || absPid == 13 || absPid == 15) {
-              std::vector<const reco::Candidate*> ancestry = findAncestry(handle, po);
+              std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(handle, po);
               bool ancestryContainsBQuark = false;
               for (auto& pa: ancestry) {
                 if (std::abs(pa->pdgId()) == 5)
@@ -275,11 +276,11 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
       // W info
       if (inputCollections[ic].getUntrackedParameter<bool>("saveWInfo", false)) {
-        std::vector<const reco::Candidate*> Ws = findParticles(handle, 24);
+        std::vector<const reco::Candidate*> Ws = GenParticleTools::findParticles(handle, 24);
         for (auto& p: Ws) {
           short WDecay = kWDecayUnknown;
           math::XYZTLorentzVector neutrinos;
-          std::vector<const reco::Candidate*> offspring = findOffspring(handle, p);
+          std::vector<const reco::Candidate*> offspring = GenParticleTools::findOffspring(handle, p);
           for (auto& po: offspring) {
             short absPid = std::abs(po->pdgId());
             if (absPid == 11 || absPid == 13 || absPid == 15) {
@@ -297,10 +298,10 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
       // H+ info
       if (inputCollections[ic].getUntrackedParameter<bool>("saveHplusInfo", false)) {
-        std::vector<const reco::Candidate*> higgses = findParticles(handle, 37);
+        std::vector<const reco::Candidate*> higgses = GenParticleTools::findParticles(handle, 37);
         for (auto& p: higgses) {
           math::XYZTLorentzVector neutrinos;
-          std::vector<const reco::Candidate*> offspring = findOffspring(handle, p);
+          std::vector<const reco::Candidate*> offspring = GenParticleTools::findOffspring(handle, p);
           for (auto& po: offspring) {
             short absPid = std::abs(po->pdgId());
             if (absPid == 12 || absPid == 14 || absPid == 16) {
@@ -376,61 +377,10 @@ void GenParticleDumper::reset(){
 }
 
 void GenParticleDumper::saveLeptons(edm::Handle<reco::GenParticleCollection>& handle, FourVectorDumper& dumper, int pID) {
-  std::vector<const reco::Candidate*> matches = findParticles(handle, pID);
+  std::vector<const reco::Candidate*> matches = GenParticleTools::findParticles(handle, pID);
   for (auto& p: matches) {
     dumper.add(p->pt(), p->eta(), p->phi(), p->energy());
   }
-}
-
-std::vector<const reco::Candidate*> GenParticleDumper::findParticles(edm::Handle<reco::GenParticleCollection>& handle, int pID) {
-  std::vector<const reco::Candidate*> matches;
-  for(size_t i = 0; i < handle->size(); ++i) {
-    const reco::Candidate & gp = handle->at(i);
-    if (abs(gp.pdgId()) == pID) {
-      // Check for radiation; save only the lepton after the radiation
-      bool myStatus = true;
-      for (size_t k = 0; k < gp.numberOfDaughters(); ++k) {
-        if (abs(gp.daughter(k)->pdgId()) == pID)
-          myStatus = false;
-      }
-      if (myStatus) {
-        matches.push_back(&(handle->at(i)));
-      }
-    }
-  }
-  return matches;
-}
-
-std::vector<const reco::Candidate*> GenParticleDumper::findOffspring(edm::Handle<reco::GenParticleCollection>& handle, const reco::Candidate* mother) {
-  std::vector<const reco::Candidate*> offspring;
-  for (size_t k = 0; k < mother->numberOfDaughters(); ++k) {
-    // Save only particles after radiation
-    if (mother->daughter(k)->pdgId() != mother->pdgId()) {
-      offspring.push_back(mother->daughter(k));
-    }
-    // Save offspring of the daughter
-    std::vector<const reco::Candidate*> newOffspring = findOffspring(handle, mother->daughter(k));
-    for (auto p: newOffspring) {
-      // Save only particles after radiation
-      if (mother->daughter(k)->pdgId() != p->pdgId()) {
-        offspring.push_back(p);
-      }
-    }
-  }
-  return offspring;
-}
-
-std::vector<const reco::Candidate*> GenParticleDumper::findAncestry(edm::Handle<reco::GenParticleCollection>& handle, const reco::Candidate* particle) {
-  std::vector<const reco::Candidate*> ancestry;
-  if (particle->mother() != nullptr) {
-    if (particle->pdgId() != particle->mother()->pdgId())
-      ancestry.push_back(particle->mother());
-    std::vector<const reco::Candidate*> newAncestry = findAncestry(handle, particle->mother());
-    for (auto p: newAncestry) {
-      ancestry.push_back(p);
-    }
-  }
-  return ancestry;
 }
 
 void GenParticleDumper::saveHelicityInformation(math::XYZTLorentzVector& visibleTau, const std::vector<const reco::Candidate*>& offspring, const size_t index) {
@@ -455,7 +405,7 @@ void GenParticleDumper::saveHelicityInformation(math::XYZTLorentzVector& visible
 }
  
 void GenParticleDumper::printDescendants(edm::Handle<reco::GenParticleCollection>& handle, const reco::Candidate* p) {
-  std::vector<const reco::Candidate*> offspring = findOffspring(handle, p);
+  std::vector<const reco::Candidate*> offspring = GenParticleTools::findOffspring(handle, p);
   std::cout << "Offspring for pid=" << p->pdgId() << std::endl;
   for (auto& p: offspring) {
     std::cout << "  " << p->pdgId() << std::endl;
