@@ -1,6 +1,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TauDumper.h"
 
 #include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleTools.h"
 
 #include "DataFormats/JetReco/interface/Jet.h"
 
@@ -27,6 +28,7 @@ TauDumper::TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     nProngs = new std::vector<short>[inputCollections.size()];
     pdgTauOrigin = new std::vector<short>[inputCollections.size()];
     MCtau = new FourVectorDumper[inputCollections.size()];
+    matchingJet = new FourVectorDumper[inputCollections.size()];
     
     systTESup = new FourVectorDumper[inputCollections.size()];
     systTESdown = new FourVectorDumper[inputCollections.size()];
@@ -34,11 +36,14 @@ TauDumper::TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     systExtremeTESdown = new FourVectorDumper[inputCollections.size()];
     
     tauToken = new edm::EDGetTokenT<edm::View<pat::Tau> >[inputCollections.size()];
+    jetToken = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
     for(size_t i = 0; i < inputCollections.size(); ++i){
         edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
         tauToken[i] = iConsumesCollector.consumes<edm::View<pat::Tau>>(inputtag);
+        edm::InputTag jettag = inputCollections[i].getParameter<edm::InputTag>("jetSrc");
+        jetToken[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(jettag);
     }
-    
+
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
 	bool param = inputCollections[i].getUntrackedParameter<bool>("filter",false);
@@ -68,7 +73,8 @@ void TauDumper::book(TTree* tree){
         tree->Branch((name+"_lNeutrTrkEta").c_str(),&lNeutrTrackEta[i]);
 	//tree->Branch((name+"_lTrk_p4").c_str(),&ltrack_p4[i]);
         tree->Branch((name+"_nProngs").c_str(),&nProngs[i]);
-        MCtau[i].book(tree, name, "MCTau");
+        MCtau[i].book(tree, name, "MCVisibleTau");
+        matchingJet[i].book(tree, name, "matchingJet");
 
 	std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
 	for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
@@ -91,6 +97,8 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
   for(size_t ic = 0; ic < inputCollections.size(); ++ic){
     edm::Handle<edm::View<pat::Tau>> tauHandle;
     iEvent.getByToken(tauToken[ic], tauHandle);
+    edm::Handle<edm::View<pat::Jet>> jetHandle;
+    iEvent.getByToken(jetToken[ic], jetHandle);
     if(tauHandle.isValid()){
       std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
       double TESvariation = inputCollections[ic].getUntrackedParameter<double>("TESvariation");
@@ -161,13 +169,31 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
         // MC match info
         fillMCMatchInfo(ic, genParticlesHandle, tau);
-      }
-    }
-  }
+        // Find matching jet
+        reco::Candidate::LorentzVector p4BestJet(0,0,0,0);
+        double myMinDeltaR = 999.0;
+        int jetPdgId = 0;
+        for(size_t iJet = 0; iJet < jetHandle->size(); ++iJet) {
+          const pat::Jet& jet = jetHandle->at(iJet);
+          double DR = deltaR(tau.p4(), jet.p4());
+          if (DR < 0.2 && DR < myMinDeltaR) {
+            p4BestJet = jet.p4();
+            myMinDeltaR = DR;
+            jetPdgId = abs(jet.partonFlavour());
+          }
+        }
+        matchingJet[ic].add(p4BestJet.pt(), p4BestJet.eta(), p4BestJet.phi(), p4BestJet.energy());
+        // If tau does not match to e/mu/tau; then store as tau pdgId the partonFlavour of the matching jet
+        if (pdgId[ic][pdgId[ic].size()-1] == kFromOtherSource) {
+          pdgId[ic][pdgId[ic].size()-1] = jetPdgId;
+        }
+      } // tau loop
+    } 
+  } // input collections
   return filter();
 }
 
-void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle< reco::GenParticleCollection >& genParticles, const pat::Tau& tau) {
+void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Tau& tau) {
   int tauPid = 0;
   int tauOrigin = 0;
   bool matchesToTau = false;
@@ -185,50 +211,39 @@ void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle< reco::GenParticleCollect
       if (abs(gp.pdgId()) == 11) {
         if (deltaR(p4,tau.p4()) < 0.1)
           matchesToE = true;
+          p4BestTau = p4;
       } else if (abs(gp.pdgId()) == 13) {
         if (deltaR(p4,tau.p4()) < 0.1)
           matchesToMu = true;
+          p4BestTau = p4;
       } else if (abs(gp.pdgId()) == 15) {
+        std::vector<const reco::Candidate*> offspring = GenParticleTools::findOffspring(genParticles, &(genParticles->at(iMC)));
         // Calculate visible tau pt
-        p4 = reco::Candidate::LorentzVector(0,0,0,0);
-        //std::cout << " TAU FOUND" << std::endl;
-        //std::cout << " Number of daughters " << gp.numberOfDaughters() << std::endl;
-        for (size_t iDaughter =  0; iDaughter < gp.numberOfDaughters(); ++iDaughter){
-          //std::cout << "     id " << gp.daughter(iDaughter)->pdgId() << std::endl;
-          int id = abs(gp.daughter(iDaughter)->pdgId());
-          if (id != 12 && id != 14 && id != 16){
-            p4 += gp.daughter(iDaughter)->p4();
+        reco::Candidate::LorentzVector neutrinoMomentum(0., 0., 0., 0.);
+        for (auto& po: offspring) {
+          int absPid = std::abs(po->pdgId());
+          if (absPid == 12 || absPid == 14 || absPid == 16) { // neutrino
+            neutrinoMomentum += po->p4();
           }
         }
+        p4 -= neutrinoMomentum;
+        // Do matching
         double DR = deltaR(p4,tau.p4());
         if (DR < 0.1 && DR < deltaRBestTau) {
+          // Matches to visible tau
           deltaRBestTau = DR;
           p4BestTau = p4;
           matchesToTau = true;
           // Find out which particle produces the tau
-            //const GenParticle* gen_mom = static_cast<const GenParticle*> (gen_lept->mother());
-          const reco::Candidate* mother1 = gp.mother();
-          int moID = -1;
-          if (mother1 != nullptr) {
-            moID = abs(mother1->pdgId());
-            if (moID == 15) {
-              // Tau radiation (tau->tau+gamma), navigate to its mother
-              const reco::Candidate* mother2 = gp.mother();
-              if (mother2 != nullptr) {
-                moID = abs(mother2->pdgId());
-              }
+          std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(genParticles, &(genParticles->at(iMC)));
+          for (auto& pa: ancestry) {
+            int absPid = std::abs(pa->pdgId());
+            if (absPid == kFromZ || absPid == kFromW || absPid == kFromHplus) {
+              tauOrigin = absPid;
             }
           }
-          if (moID > 0) {
-            if (moID == kFromW) {
-              tauOrigin = kFromW;
-            } else if (moID == kFromZ) {
-              tauOrigin = kFromZ;
-            } else if (moID == kFromHplus) {
-              tauOrigin = kFromHplus;
-            } else {
-              tauOrigin = kFromOtherSource;
-            }
+          if (tauOrigin == 0 && ancestry.size() > 0) {
+            tauOrigin = kFromOtherSource;
           }
         }
       }
@@ -295,6 +310,7 @@ void TauDumper::reset(){
 	pdgId[ic].clear();
         pdgTauOrigin[ic].clear();
         MCtau[ic].reset();
+        matchingJet[ic].reset();
         // Systematics
         systTESup[ic].reset();
         systTESdown[ic].reset();

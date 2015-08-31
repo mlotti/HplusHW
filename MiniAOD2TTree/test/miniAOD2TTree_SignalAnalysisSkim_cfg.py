@@ -151,6 +151,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
                 "puCorrPtSum"
 	    ),
             filter = cms.untracked.bool(False),
+            jetSrc = cms.InputTag("slimmedJets"), # made from ak4PFJetsCHS
             TESvariation = cms.untracked.double(0.03),
             TESvariationExtreme = cms.untracked.double(0.10)
         )
