@@ -184,7 +184,7 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         }
         matchingJet[ic].add(p4BestJet.pt(), p4BestJet.eta(), p4BestJet.phi(), p4BestJet.energy());
         // If tau does not match to e/mu/tau; then store as tau pdgId the partonFlavour of the matching jet
-        if (pdgId[ic][pdgId[ic].size()-1] == kFromOtherSource) {
+        if (pdgId[ic][pdgId[ic].size()-1] == -1) {
           pdgId[ic][pdgId[ic].size()-1] = jetPdgId;
         }
       } // tau loop
