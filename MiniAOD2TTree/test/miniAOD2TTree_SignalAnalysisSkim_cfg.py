@@ -12,7 +12,7 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(100)
 )
 
 process.load("FWCore/MessageService/MessageLogger_cfi")
@@ -50,6 +50,25 @@ process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
    reverseDecision = cms.bool(False)
 )
 
+# Set up MET uncertainties - FIXME: does not work at the moment
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATTools#MET_Systematics_Tools
+#import PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties as metUncertaintyTools
+#metUncertaintyTools.runMETCorrectionsAndUncertainties(process=process, 
+                                                      #metType="PF",
+                                                      #correctionLevel=["T0","T1","Txy"], # additional options: Smear 
+                                                      #computeUncertainties=True,
+                                                      #produceIntermediateCorrections=False,
+                                                      #addToPatDefaultSequence=True,
+                                                      #jetCollection=cms.InputTag("slimmedJets"),
+                                                      #jetCollectionUnskimmed=cms.InputTag("slimmedJets"),
+                                                      #electronCollection="",
+                                                      #muonCollection="",
+                                                      #tauCollection="",
+                                                      #pfCandCollection=cms.InputTag("packedPFCandidates"),
+                                                      #onMiniAOD=True,
+                                                      #postfix="Type01xy")
+
+# Set up tree dumper
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
@@ -63,7 +82,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     ),
     EventInfo = cms.PSet(
 	PileupSummaryInfoSrc = cms.InputTag("addPileupInfo"),
-#	LHESrc = cms.InputTag(""),
+	LHESrc = cms.InputTag("externalLHEProducer"),
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
     ),
     Trigger = cms.PSet(
@@ -255,9 +274,9 @@ process.runEDFilter = cms.Path(process.egmGsfElectronIDSequence*
                                process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
-#    outputCommands = cms.untracked.vstring(
-#        "keep *",
-#    ),
-#    fileName = cms.untracked.string("CMSSW.root")
+   #outputCommands = cms.untracked.vstring(
+       #"keep *",
+   #),
+   #fileName = cms.untracked.string("CMSSW.root")
 #)
 #process.out_step = cms.EndPath(process.output)

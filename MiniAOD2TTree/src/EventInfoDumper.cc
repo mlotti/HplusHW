@@ -6,6 +6,7 @@
 
 EventInfoDumper::EventInfoDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
 : puSummaryToken(iConsumesCollector.consumes<std::vector<PileupSummaryInfo>>(pset.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
+  lheToken(iConsumesCollector.consumes<LHEEventProduct>(pset.getParameter<edm::InputTag>("LHESrc"))),
   vertexToken(iConsumesCollector.consumes<edm::View<reco::Vertex>>(pset.getParameter<edm::InputTag>("OfflinePrimaryVertexSrc"))) {
 
 }
@@ -17,7 +18,7 @@ void EventInfoDumper::book(TTree* tree){
     tree->Branch("run",&run);     
     tree->Branch("lumi",&lumi);
     tree->Branch("nPUvertices",&nPU);
-//    tree->Branch("NUP",&NUP);
+    tree->Branch("NUP",&NUP);
     tree->Branch("nGoodOfflineVertices",&nGoodOfflinePV);
     tree->Branch("pvZ",&pvZ);
     tree->Branch("pvPtSumRatioToNext",&ptSumRatio);
@@ -39,13 +40,14 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
             }
         }
     }
-/*
-    // number of jets for combining WJets inclusive with exclusive
-    edm::Handle<LHEEventProduct> hlhe;
-    if(iEvent.getByLabel(lheSrc, hlhe)){
-        NUP = hlhe->hepeup().NUP;
+
+    // number of jets for combining W+Jets/Z+jets inclusive with exclusive
+    edm::Handle<LHEEventProduct> lheHandle;
+    iEvent.getByToken(lheToken, lheHandle);
+    if (lheHandle.isValid()) {
+        NUP = lheHandle->hepeup().NUP;
     }
-*/
+
     // PV
     nGoodOfflinePV = 0;
     edm::Handle<edm::View<reco::Vertex> > hoffvertex;

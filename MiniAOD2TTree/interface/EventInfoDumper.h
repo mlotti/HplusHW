@@ -10,7 +10,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Common/interface/Ptr.h"
-
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 
 #include <string>
 #include <vector>
@@ -36,6 +36,7 @@ class EventInfoDumper {
         bool filter();
 
         edm::EDGetTokenT<std::vector<PileupSummaryInfo> > puSummaryToken;
+        edm::EDGetTokenT<LHEEventProduct> lheToken;
         edm::EDGetTokenT<edm::View<reco::Vertex> > vertexToken;
         
 	unsigned long long event;
