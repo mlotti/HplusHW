@@ -45,6 +45,7 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     edm::Handle<LHEEventProduct> lheHandle;
     iEvent.getByToken(lheToken, lheHandle);
     if (lheHandle.isValid()) {
+        // Store NUP = number of partons
         NUP = lheHandle->hepeup().NUP;
     }
 

@@ -12,7 +12,7 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(10000)
 )
 
 process.load("FWCore/MessageService/MessageLogger_cfi")
