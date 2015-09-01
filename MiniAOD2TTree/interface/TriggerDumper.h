@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -25,10 +26,12 @@
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Framework/interface/TriggerNamesService.h"
+#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
+
 
 class TriggerDumper {
     public:
-	TriggerDumper(edm::ParameterSet&);
+	TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset);
 	~TriggerDumper();
 
 	void book(TTree*);
@@ -44,13 +47,11 @@ class TriggerDumper {
 
 	TTree* theTree;
 
-	edm::InputTag triggerResults;
-        edm::InputTag triggerObjects;
-	edm::InputTag l1extra;
-
 	bool *iBit; 
 	edm::ParameterSet inputCollection;
-	edm::Handle<edm::TriggerResults> handle;
+	edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
+        edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trgObjectsToken;
+        edm::EDGetTokenT<std::vector<l1extra::L1EtMissParticle>> trgL1ETMToken;
 	std::vector<std::string> triggerBits;
 
 	double L1MET;

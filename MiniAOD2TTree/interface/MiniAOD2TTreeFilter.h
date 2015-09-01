@@ -19,6 +19,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/EventInfoDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/SkimDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TriggerDumper.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/METNoiseFilterDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TauDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/ElectronDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/MuonDumper.h"
@@ -62,6 +63,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	edm::ParameterSet eventInfoCollections;
 	edm::ParameterSet skim;
 	edm::ParameterSet trigger;
+        edm::ParameterSet metNoiseFilter;
         std::vector<edm::ParameterSet> tauCollections;
 	std::vector<edm::ParameterSet> electronCollections;
 	std::vector<edm::ParameterSet> muonCollections;
@@ -80,6 +82,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 	EventInfoDumper *eventInfo;
 	SkimDumper* skimDumper;
 	TriggerDumper* trgDumper;
+        METNoiseFilterDumper* metNoiseFilterDumper;
 	TauDumper* tauDumper;
 	ElectronDumper* electronDumper;
 	MuonDumper* muonDumper;

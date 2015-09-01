@@ -4,12 +4,16 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Common/interface/Ptr.h"
-#include "DataFormats/METReco/interface/GenMET.h"
+
+namespace reco {
+  class GenMET;
+}
 
 #include <string>
 #include <vector>
@@ -19,7 +23,7 @@
 
 class GenMETDumper {
     public:
-	GenMETDumper(std::vector<edm::ParameterSet>);
+	GenMETDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets);
 	~GenMETDumper();
 
 	void book(TTree*);
@@ -32,7 +36,7 @@ class GenMETDumper {
 	bool booked;
 
 	std::vector<edm::ParameterSet> inputCollections;
-	edm::Handle<edm::View<reco::GenMET>> *handle;
+	edm::EDGetTokenT<edm::View<reco::GenMET>> *token;
 
         double GenMET;
         double GenMET_phi;

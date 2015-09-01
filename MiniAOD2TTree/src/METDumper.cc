@@ -1,16 +1,22 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/METDumper.h"
 
-METDumper::METDumper(std::vector<edm::ParameterSet> psets, bool isMC = true){
+#include "TMath.h"
+
+METDumper::METDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets, bool isMC = true){
     inputCollections = psets;
     booked           = false;
-
     ismc             = isMC;
 
-    MET     = new double[inputCollections.size()];
-    MET_phi = new double[inputCollections.size()];                                
+    MET_x = new double[inputCollections.size()];
+    MET_y = new double[inputCollections.size()];                                
 
-    handle = new edm::Handle<edm::View<pat::MET> >[inputCollections.size()];
+    token = new edm::EDGetTokenT<edm::View<pat::MET>>[inputCollections.size()];
 
+    for(size_t i = 0; i < inputCollections.size(); ++i){
+        edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
+        token[i] = iConsumesCollector.consumes<edm::View<pat::MET>>(inputtag);
+    }
+    
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
         if(inputCollections[i].getUntrackedParameter<bool>("filter",false)) useFilter = true;
@@ -24,14 +30,14 @@ void METDumper::book(TTree* tree){
 	std::string name = inputCollections[i].getUntrackedParameter<std::string>("branchname","");
 	if(name.length() == 0) name = inputCollections[i].getParameter<edm::InputTag>("src").label();
 	  //tree->Branch((name+"_p4").c_str(),&MET_p4[i]);
-        tree->Branch((name+"_et").c_str(),&MET[i]);
-        tree->Branch((name+"_phi").c_str(),&MET_phi[i]);  
+        tree->Branch((name+"_x").c_str(),&MET_x[i]);
+        tree->Branch((name+"_y").c_str(),&MET_y[i]);  
     }
-    tree->Branch("CaloMET_et",&caloMET_et);
-    tree->Branch("CaloMET_phi",&caloMET_phi);
+    tree->Branch("CaloMET_x",&caloMET_x);
+    tree->Branch("CaloMET_y",&caloMET_y);
     if(ismc){
-        tree->Branch("GenMET_et",&GenMET_et);
-        tree->Branch("GenMET_phi",&GenMET_phi);
+        tree->Branch("GenMET_x",&GenMET_x);
+        tree->Branch("GenMET_y",&GenMET_y);
     }
 }
 
@@ -39,23 +45,23 @@ bool METDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;
 
     for(size_t i = 0; i < inputCollections.size(); ++i){
-	edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
-	iEvent.getByLabel(inputtag, handle[i]);
-	if(handle[i].isValid()){
+	
+	edm::Handle<edm::View<pat::MET>> handle;
+        iEvent.getByToken(token[i], handle);
+	if(handle.isValid()){
 
-	    MET[i]     = handle[i]->ptrAt(0)->p4().Pt();
-	    MET_phi[i] = handle[i]->ptrAt(0)->p4().Phi();
-	    if(handle[i]->ptrAt(0)->genMET()){
-              GenMET_et  = handle[i]->ptrAt(0)->genMET()->pt();
-              GenMET_phi = handle[i]->ptrAt(0)->genMET()->phi();
+	    MET_x[i] = handle->ptrAt(0)->p4().px();
+	    MET_y[i] = handle->ptrAt(0)->p4().py();
+	    if(handle->ptrAt(0)->genMET()){
+              GenMET_x = handle->ptrAt(0)->genMET()->px();
+              GenMET_y = handle->ptrAt(0)->genMET()->py();
 	    }
-	    if(handle[i]->ptrAt(0)->caloMETPt()){
-              caloMET_et = handle[i]->ptrAt(0)->caloMETPt();
-              caloMET_phi= handle[i]->ptrAt(0)->caloMETPhi();
+	    if(handle->ptrAt(0)->caloMETPt()){
+              caloMET_x = handle->ptrAt(0)->caloMETPt() * TMath::Cos(handle->ptrAt(0)->caloMETPhi());
+              caloMET_y = handle->ptrAt(0)->caloMETPt() * TMath::Sin(handle->ptrAt(0)->caloMETPhi());
             }
 	}else{
-	  std::cout << "Collection " << inputtag.label() << " not found, exiting.." << std::endl;
-	  exit(8006);
+	  throw cms::Exception("config") << "Cannot find MET collection!";
 	}
     }
     return filter();
@@ -70,12 +76,12 @@ bool METDumper::filter(){
 void METDumper::reset(){
     if(booked){
       for(size_t i = 0; i < inputCollections.size(); ++i){
-	MET[i]        = 0;
-	MET_phi[i]    = 0;
+	MET_x[i] = 0;
+	MET_y[i] = 0;
       }
-      caloMET_et  = 0;
-      caloMET_phi = 0;
-      GenMET_et   = 0;
-      GenMET_phi  = 0;
+      caloMET_x = 0;
+      caloMET_y = 0;
+      GenMET_x = 0;
+      GenMET_y = 0;
     }
 }

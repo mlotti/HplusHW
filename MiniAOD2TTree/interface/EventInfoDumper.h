@@ -4,20 +4,28 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Common/interface/Ptr.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 
 #include <string>
 #include <vector>
 
 #include "TTree.h"
 
+namespace reco {
+  class Vertex;
+}
+
+class PileupSummaryInfo;
+
 class EventInfoDumper {
     public:
-	EventInfoDumper(edm::ParameterSet&);
+	EventInfoDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset);
 	~EventInfoDumper();
 
 	void book(TTree*);
@@ -27,14 +35,17 @@ class EventInfoDumper {
     private:
         bool filter();
 
+        edm::EDGetTokenT<std::vector<PileupSummaryInfo> > puSummaryToken;
+        edm::EDGetTokenT<LHEEventProduct> lheToken;
+        edm::EDGetTokenT<edm::View<reco::Vertex> > vertexToken;
+        
 	unsigned long long event;
 	unsigned int run,lumi;
 	int nPU;
 	int NUP;
 	int nGoodOfflinePV;
+        float pvZ;
+        float ptSumRatio; // Ratio of track pt sum of first and second vertex
 
-        edm::InputTag pileupSummaryInfoSrc;
-//	edm::InputTag lheSrc;
-	edm::InputTag offlinePrimaryVertexSrc;
 };
 #endif
