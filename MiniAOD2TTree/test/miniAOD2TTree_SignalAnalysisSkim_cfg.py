@@ -50,6 +50,25 @@ process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
    reverseDecision = cms.bool(False)
 )
 
+# Set up MET uncertainties - FIXME: does not work at the moment
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATTools#MET_Systematics_Tools
+#import PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties as metUncertaintyTools
+#metUncertaintyTools.runMETCorrectionsAndUncertainties(process=process, 
+                                                      #metType="PF",
+                                                      #correctionLevel=["T0","T1","Txy"], # additional options: Smear 
+                                                      #computeUncertainties=True,
+                                                      #produceIntermediateCorrections=False,
+                                                      #addToPatDefaultSequence=True,
+                                                      #jetCollection=cms.InputTag("slimmedJets"),
+                                                      #jetCollectionUnskimmed=cms.InputTag("slimmedJets"),
+                                                      #electronCollection="",
+                                                      #muonCollection="",
+                                                      #tauCollection="",
+                                                      #pfCandCollection=cms.InputTag("packedPFCandidates"),
+                                                      #onMiniAOD=True,
+                                                      #postfix="Type01xy")
+
+# Set up tree dumper
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
@@ -58,12 +77,13 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Skim = cms.PSet(
 	Counters = cms.VInputTag(
 	    "skimCounterAll",
+	    "skimCounterMETFilters",
             "skimCounterPassed"
         ),
     ),
     EventInfo = cms.PSet(
 	PileupSummaryInfoSrc = cms.InputTag("addPileupInfo"),
-#	LHESrc = cms.InputTag(""),
+	LHESrc = cms.InputTag("externalLHEProducer"),
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
     ),
     Trigger = cms.PSet(
@@ -151,6 +171,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
                 "puCorrPtSum"
 	    ),
             filter = cms.untracked.bool(False),
+            jetSrc = cms.InputTag("slimmedJets"), # made from ak4PFJetsCHS
             TESvariation = cms.untracked.double(0.03),
             TESvariationExtreme = cms.untracked.double(0.10)
         )
@@ -239,24 +260,24 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
 
-process.skimCounterAll        = cms.EDProducer("HPlusEventCountProducer")
-process.skimCounterMETFilters = cms.EDProducer("HPlusEventCountProducer")
-process.skimCounterPassed     = cms.EDProducer("HPlusEventCountProducer")
+process.skimCounterAll        = cms.EDProducer("EventCountProducer")
+process.skimCounterMETFilters = cms.EDProducer("EventCountProducer")
+process.skimCounterPassed     = cms.EDProducer("EventCountProducer")
 
 # module execution
-process.runEDFilter = cms.Path(process.egmGsfElectronIDSequence*
+process.runEDFilter = cms.Path(process.skimCounterAll*
                                process.HBHENoiseFilterResultProducer* #Produces HBHE bools
-                               process.skimCounterAll*
                                process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
                                process.skimCounterMETFilters*
                                process.skim*
                                process.skimCounterPassed*
+                               process.egmGsfElectronIDSequence*
                                process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
-#    outputCommands = cms.untracked.vstring(
-#        "keep *",
-#    ),
-#    fileName = cms.untracked.string("CMSSW.root")
+   #outputCommands = cms.untracked.vstring(
+       #"keep *",
+   #),
+   #fileName = cms.untracked.string("CMSSW.root")
 #)
 #process.out_step = cms.EndPath(process.output)

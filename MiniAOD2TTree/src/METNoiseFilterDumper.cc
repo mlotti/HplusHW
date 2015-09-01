@@ -8,9 +8,10 @@
 
 #include <iostream>
 
-METNoiseFilterDumper::METNoiseFilterDumper(edm::ParameterSet& pset)
-: booked(false),
-  fTriggerResults(pset.getParameter<edm::InputTag>("triggerResults")),
+METNoiseFilterDumper::METNoiseFilterDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
+: useFilter(false),
+  booked(false),
+  trgResultsToken(iConsumesCollector.consumes<edm::TriggerResults>(pset.getParameter<edm::InputTag>("triggerResults"))),
   bPrintTriggerResultsList(pset.getUntrackedParameter<bool>("printTriggerResultsList")),
   bTriggerResultsListPrintedStatus(false),
   fFilters(pset.getParameter<std::vector<std::string>>("filtersFromTriggerResults"))
@@ -32,7 +33,7 @@ void METNoiseFilterDumper::book(TTree* tree){
 bool METNoiseFilterDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
   // Obtain trigger results object (some filters have been stored as paths there)
   edm::Handle<edm::TriggerResults> trgResults;
-  iEvent.getByLabel(fTriggerResults, trgResults);
+  iEvent.getByToken(trgResultsToken, trgResults);
   const edm::TriggerNames& triggerNames = iEvent.triggerNames(*trgResults);
   if (!trgResults.isValid())
     throw cms::Exception("Assert") << "METFilters: edm::TriggerResults object is not valid!";

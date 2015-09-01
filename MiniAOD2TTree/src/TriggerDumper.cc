@@ -1,19 +1,15 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TriggerDumper.h"
 
-#include "DataFormats/PatCandidates/interface/TriggerEvent.h"
-#include "DataFormats/PatCandidates/interface/TriggerObject.h"
-#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
-
 #include <regex>
 
-TriggerDumper::TriggerDumper(edm::ParameterSet& pset){
+TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
+: trgResultsToken(iConsumesCollector.consumes<edm::TriggerResults>(pset.getParameter<edm::InputTag>("TriggerResults"))),
+  trgObjectsToken(iConsumesCollector.consumes<pat::TriggerObjectStandAloneCollection>(pset.getParameter<edm::InputTag>("TriggerObjects"))),
+  trgL1ETMToken(iConsumesCollector.consumes<std::vector<l1extra::L1EtMissParticle>>(pset.getParameter<edm::InputTag>("L1Extra"))) {
     inputCollection = pset;
     booked = false;
 
-    triggerResults = inputCollection.getParameter<edm::InputTag>("TriggerResults");
     triggerBits = inputCollection.getParameter<std::vector<std::string> >("TriggerBits");
-    triggerObjects = inputCollection.getParameter<edm::InputTag>("TriggerObjects");
-    l1extra = inputCollection.getParameter<edm::InputTag>("L1Extra");
     useFilter = inputCollection.getUntrackedParameter<bool>("filter",false);
 //    iBit = new bool[triggerBits.size()];
 }
@@ -54,28 +50,31 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
 }
 
 bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
-
     edm::Handle<std::vector<l1extra::L1EtMissParticle> > l1etmhandle;
-    iEvent.getByLabel(l1extra, l1etmhandle);
-    if(l1etmhandle.isValid()){
+    iEvent.getByToken(trgL1ETMToken, l1etmhandle);
+    L1MET = 0.0;
+    L1METphi = 0.0;
+    if(l1etmhandle.isValid() && l1etmhandle->size() > 0){
 	L1MET    = l1etmhandle.product()->begin()->et();
 	L1METphi = l1etmhandle.product()->begin()->phi();
     }
 
-    iEvent.getByLabel(triggerResults,handle);
-    if(handle.isValid()){
-        edm::TriggerResults tr = *handle;
+    edm::Handle<edm::TriggerResults> trgResultsHandle;
+    iEvent.getByToken(trgResultsToken, trgResultsHandle);
+    if(trgResultsHandle.isValid()){
+        edm::TriggerResults tr = *trgResultsHandle;
 	bool fromPSetRegistry;
         edm::Service<edm::service::TriggerNamesService> tns;
 	std::vector<std::string> hlNames;
         tns->getTrigPaths(tr, hlNames, fromPSetRegistry);
 
 	for(size_t i = 0; i < triggerBits.size(); ++i){
-	    std::regex hlt_re(triggerBits[i]);
+            iBit[i] = false;
+            std::regex hlt_re(triggerBits[i]);
 	    int n = 0;
 	    for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
 		if (std::regex_search(*j, hlt_re)) {
-		    iBit[i] = handle->accept(n);
+		    iBit[i] = trgResultsHandle->accept(n);
 		    continue;
 		}
 		n++;
@@ -86,7 +85,7 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     HLTMET    = 0;
     HLTMETphi = 0;
     edm::Handle<pat::TriggerObjectStandAloneCollection> patTriggerObjects;
-    iEvent.getByLabel(triggerObjects,patTriggerObjects);
+    iEvent.getByToken(trgObjectsToken,patTriggerObjects);
     if(patTriggerObjects.isValid()){
 	for(pat::TriggerObjectStandAloneCollection::const_iterator patTriggerObject = patTriggerObjects->begin();
             patTriggerObject != patTriggerObjects->end(); ++patTriggerObject ) {

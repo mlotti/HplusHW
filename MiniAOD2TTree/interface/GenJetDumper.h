@@ -21,7 +21,7 @@
 
 class GenJetDumper : public BaseDumper {
     public:
-	GenJetDumper(std::vector<edm::ParameterSet>);
+	GenJetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets);
 	~GenJetDumper();
 
 	void book(TTree*);
@@ -30,8 +30,7 @@ class GenJetDumper : public BaseDumper {
 
     private:
 	bool filter();
-
-	edm::Handle<reco::GenJetCollection> *handle;
+        edm::EDGetTokenT<reco::GenJetCollection> *genJetToken;
 
         std::vector<short> *status;
 };

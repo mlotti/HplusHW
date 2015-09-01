@@ -1,7 +1,8 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/METDumper.h"
+
 #include "TMath.h"
 
-METDumper::METDumper(std::vector<edm::ParameterSet> psets, bool isMC = true){
+METDumper::METDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets, bool isMC = true){
     inputCollections = psets;
     booked           = false;
     ismc             = isMC;
@@ -9,8 +10,13 @@ METDumper::METDumper(std::vector<edm::ParameterSet> psets, bool isMC = true){
     MET_x = new double[inputCollections.size()];
     MET_y = new double[inputCollections.size()];                                
 
-    handle = new edm::Handle<edm::View<pat::MET> >[inputCollections.size()];
+    token = new edm::EDGetTokenT<edm::View<pat::MET>>[inputCollections.size()];
 
+    for(size_t i = 0; i < inputCollections.size(); ++i){
+        edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
+        token[i] = iConsumesCollector.consumes<edm::View<pat::MET>>(inputtag);
+    }
+    
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
         if(inputCollections[i].getUntrackedParameter<bool>("filter",false)) useFilter = true;
@@ -39,23 +45,23 @@ bool METDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;
 
     for(size_t i = 0; i < inputCollections.size(); ++i){
-	edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
-	iEvent.getByLabel(inputtag, handle[i]);
-	if(handle[i].isValid()){
+	
+	edm::Handle<edm::View<pat::MET>> handle;
+        iEvent.getByToken(token[i], handle);
+	if(handle.isValid()){
 
-	    MET_x[i] = handle[i]->ptrAt(0)->p4().px();
-	    MET_y[i] = handle[i]->ptrAt(0)->p4().py();
-	    if(handle[i]->ptrAt(0)->genMET()){
-              GenMET_x = handle[i]->ptrAt(0)->genMET()->px();
-              GenMET_y = handle[i]->ptrAt(0)->genMET()->py();
+	    MET_x[i] = handle->ptrAt(0)->p4().px();
+	    MET_y[i] = handle->ptrAt(0)->p4().py();
+	    if(handle->ptrAt(0)->genMET()){
+              GenMET_x = handle->ptrAt(0)->genMET()->px();
+              GenMET_y = handle->ptrAt(0)->genMET()->py();
 	    }
-	    if(handle[i]->ptrAt(0)->caloMETPt()){
-              caloMET_x = handle[i]->ptrAt(0)->caloMETPt() * TMath::Cos(handle[i]->ptrAt(0)->caloMETPhi());
-              caloMET_y = handle[i]->ptrAt(0)->caloMETPt() * TMath::Sin(handle[i]->ptrAt(0)->caloMETPhi());
+	    if(handle->ptrAt(0)->caloMETPt()){
+              caloMET_x = handle->ptrAt(0)->caloMETPt() * TMath::Cos(handle->ptrAt(0)->caloMETPhi());
+              caloMET_y = handle->ptrAt(0)->caloMETPt() * TMath::Sin(handle->ptrAt(0)->caloMETPhi());
             }
 	}else{
-	  std::cout << "Collection " << inputtag.label() << " not found, exiting.." << std::endl;
-	  exit(8006);
+	  throw cms::Exception("config") << "Cannot find MET collection!";
 	}
     }
     return filter();

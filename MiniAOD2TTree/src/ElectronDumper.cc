@@ -1,7 +1,9 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/ElectronDumper.h"
+
 #include <algorithm>
 
-ElectronDumper::ElectronDumper(std::vector<edm::ParameterSet> psets) {
+ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets)
+: genParticleToken(iConsumesCollector.consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"))) {
     inputCollections = psets;
 
     pt  = new std::vector<double>[inputCollections.size()];
@@ -18,8 +20,25 @@ ElectronDumper::ElectronDumper(std::vector<edm::ParameterSet> psets) {
     
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<bool>[inputCollections.size()*nDiscriminators];
-    handle = new edm::Handle<edm::View<pat::Electron> >[inputCollections.size()];
-
+    electronToken = new edm::EDGetTokenT<edm::View<pat::Electron>>[inputCollections.size()];
+    gsfElectronToken = new edm::EDGetTokenT<edm::View<reco::GsfElectron>>[inputCollections.size()];
+    rhoToken = new edm::EDGetTokenT<double>[inputCollections.size()];
+    electronIDToken = new edm::EDGetTokenT<edm::ValueMap<bool>>[inputCollections.size()*nDiscriminators];
+    
+    for(size_t i = 0; i < inputCollections.size(); ++i){
+        edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
+        electronToken[i] = iConsumesCollector.consumes<edm::View<pat::Electron>>(inputtag);
+        gsfElectronToken[i] = iConsumesCollector.consumes<edm::View<reco::GsfElectron>>(inputtag);
+        edm::InputTag rhoSource = inputCollections[i].getParameter<edm::InputTag>("rhoSource");
+        rhoToken[i] = iConsumesCollector.consumes<double>(rhoSource);
+        std::string IDprefix = inputCollections[i].getParameter<std::string>("IDprefix");
+        std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
+        for (size_t j = 0; j < discriminatorNames.size(); ++j) {
+            edm::InputTag discrTag(IDprefix, discriminatorNames[j]);
+            electronIDToken[i*discriminatorNames.size()+j] = iConsumesCollector.consumes<edm::ValueMap<bool>>(discrTag);
+        }
+    }
+    
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
 	bool param = inputCollections[i].getUntrackedParameter<bool>("filter",false);
@@ -55,33 +74,29 @@ void ElectronDumper::book(TTree* tree){
 bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;  
   
-    edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("prunedGenParticles", genParticles);
+    edm::Handle <reco::GenParticleCollection> genParticlesHandle;
+    iEvent.getByToken(genParticleToken, genParticlesHandle);
     
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
-	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
-	std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
-	iEvent.getByLabel(inputtag, handle[ic]);
-        // Setup also handle for GsfElectrons (needed for ID)
-        edm::Handle<edm::View<reco::GsfElectron>> gsfHandle;
-        iEvent.getByLabel(inputtag, gsfHandle);
-        // Setup handles for rho
-        edm::InputTag rhoSource = inputCollections[ic].getParameter<edm::InputTag>("rhoSource");
-        edm::Handle<double> rhoHandle;
-        iEvent.getByLabel(rhoSource, rhoHandle);
-        // Setup handles for ID
-        std::string IDprefix = inputCollections[ic].getParameter<std::string>("IDprefix");
-        std::vector<edm::Handle<edm::ValueMap<bool>>> IDhandles;
-        for (auto p: discriminatorNames) {
-          edm::InputTag discrTag(IDprefix, p);
-          edm::Handle<edm::ValueMap<bool>> IDhandle;
-          iEvent.getByLabel(discrTag, IDhandle);
-          IDhandles.push_back(IDhandle);
-        }
-	if(handle[ic].isValid()){
-          
-	    for(size_t i=0; i<handle[ic]->size(); ++i) {
-    		const pat::Electron& obj = handle[ic]->at(i);
+	edm::Handle<edm::View<pat::Electron>> electronHandle;
+	iEvent.getByToken(electronToken[ic], electronHandle);
+	if(electronHandle.isValid()){
+            // Setup also handle for GsfElectrons (needed for ID)
+            edm::Handle<edm::View<reco::GsfElectron>> gsfHandle;
+            iEvent.getByToken(gsfElectronToken[ic], gsfHandle);
+            // Setup handles for rho
+            edm::Handle<double> rhoHandle;
+            iEvent.getByToken(rhoToken[ic], rhoHandle);
+            // Setup handles for ID
+            std::vector<edm::Handle<edm::ValueMap<bool>>> IDhandles;
+            std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
+            for (size_t j = 0; j < discriminatorNames.size(); ++j) {
+              edm::Handle<edm::ValueMap<bool>> IDhandle;
+              iEvent.getByToken(electronIDToken[ic*inputCollections.size()+j], IDhandle);
+              IDhandles.push_back(IDhandle);
+            }
+	    for(size_t i=0; i<electronHandle->size(); ++i) {
+    		const pat::Electron& obj = electronHandle->at(i);
 
 		pt[ic].push_back(obj.p4().pt());
                 eta[ic].push_back(obj.p4().eta());
@@ -107,7 +122,7 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		}
 
 		// MC match info
-                fillMCMatchInfo(ic, genParticles, obj);
+                fillMCMatchInfo(ic, genParticlesHandle, obj);
             }
         }
     }

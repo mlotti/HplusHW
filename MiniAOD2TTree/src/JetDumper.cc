@@ -1,8 +1,9 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/JetDumper.h"
+
 #include "DataFormats/JetReco/interface/PileupJetIdentifier.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
 
-JetDumper::JetDumper(std::vector<edm::ParameterSet> psets){
+JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets){
     inputCollections = psets;
     booked           = false;
     pt  = new std::vector<double>[inputCollections.size()];
@@ -19,7 +20,11 @@ JetDumper::JetDumper(std::vector<edm::ParameterSet> psets){
     discriminators = new std::vector<float>[inputCollections.size()*nDiscriminators];
     nUserfloats = inputCollections[0].getParameter<std::vector<std::string> >("userFloats").size();
     userfloats = new std::vector<double>[inputCollections.size()*nUserfloats];
-    handle = new edm::Handle<edm::View<pat::Jet> >[inputCollections.size()];
+    jetToken = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
+    for(size_t i = 0; i < inputCollections.size(); ++i){
+        edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
+        jetToken[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtag);
+    }
     
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
@@ -92,15 +97,16 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;
 
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
-	edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
         std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
 	std::vector<std::string> userfloatNames = inputCollections[ic].getParameter<std::vector<std::string> >("userFloats");
-	iEvent.getByLabel(inputtag, handle[ic]);
+	
+        edm::Handle<edm::View<pat::Jet>> jetHandle;
+        iEvent.getByToken(jetToken[ic], jetHandle);
 
-	if(handle[ic].isValid()){
+	if(jetHandle.isValid()){
 
-	    for(size_t i=0; i<handle[ic]->size(); ++i) {
-    		const pat::Jet& obj = handle[ic]->at(i);
+	    for(size_t i=0; i<jetHandle->size(); ++i) {
+    		const pat::Jet& obj = jetHandle->at(i);
 
 		pt[ic].push_back(obj.p4().pt());
                 eta[ic].push_back(obj.p4().eta());

@@ -21,7 +21,7 @@
 
 class TrackDumper : public BaseDumper {
     public:
-	TrackDumper(std::vector<edm::ParameterSet>);
+	TrackDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& );
 	~TrackDumper();
 
 	void book(TTree*);
@@ -30,7 +30,6 @@ class TrackDumper : public BaseDumper {
 
     private:
 	bool filter();
-        
-	edm::Handle<edm::View<pat::PackedCandidate> > *handle;
+	edm::EDGetTokenT<edm::View<pat::PackedCandidate>> *token;
 };
 #endif

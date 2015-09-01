@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -20,7 +21,7 @@ namespace edm {
 
 class METNoiseFilterDumper {
 public:
-  METNoiseFilterDumper(edm::ParameterSet&);
+  METNoiseFilterDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset);
   ~METNoiseFilterDumper();
 
   void book(TTree*);
@@ -36,7 +37,8 @@ private:
 
   TTree* theTree;
 
-  const edm::InputTag fTriggerResults;
+  edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
+  
   //const edm::InputTag edm::InputTag triggerObjects;
   //const edm::InputTag edm::InputTag l1extra;
   const bool bPrintTriggerResultsList;

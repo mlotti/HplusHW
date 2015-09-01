@@ -22,7 +22,7 @@
 
 class GenParticleDumper : public BaseDumper {
 public:
-  GenParticleDumper(std::vector<edm::ParameterSet>);
+  GenParticleDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets);
   ~GenParticleDumper();
 
   void book(TTree*);
@@ -33,20 +33,15 @@ private:
   bool filter();
   /// Saves lepton four-momenta
   void saveLeptons(edm::Handle<reco::GenParticleCollection>& handle, FourVectorDumper& dumper, int pID);
-  /// Finds particles by ID; returns a vector of pointers to the particles
-  std::vector<const reco::Candidate*> findParticles(edm::Handle<reco::GenParticleCollection>& handle, int pID);
-  /// Returns offspring particles for a mother particle
-  std::vector<const reco::Candidate*> findOffspring(edm::Handle<reco::GenParticleCollection>& handle, const reco::Candidate* mother);
-  /// Returns ancestry particles for a particle
-  std::vector<const reco::Candidate*> findAncestry(edm::Handle<reco::GenParticleCollection>& handle, const reco::Candidate* particle);
   /// Saves tau helicity related information
   void saveHelicityInformation(math::XYZTLorentzVector& visibleTau, const std::vector<const reco::Candidate*>& offspring, const size_t index);
   /// Prints the descendants
   void printDescendants(edm::Handle<reco::GenParticleCollection>& handle, const reco::Candidate* p);
   
 private:  
-  edm::Handle<reco::GenParticleCollection> *handle;
-
+  //edm::Handle<reco::GenParticleCollection> *handle;
+  edm::EDGetTokenT<reco::GenParticleCollection> *token;
+  
   // General particle list
   std::vector<short> *mother;
   

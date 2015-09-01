@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -19,9 +20,10 @@
 #include "TTree.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
+
 class GenWeightDumper {
     public:
-	GenWeightDumper(std::vector<edm::ParameterSet>);
+	GenWeightDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet> psets);
 	~GenWeightDumper();
 
 	void book(TTree*);
@@ -34,9 +36,8 @@ class GenWeightDumper {
 	bool booked;
 
 	std::vector<edm::ParameterSet> inputCollections;
-	edm::Handle<GenEventInfoProduct> *handle;
+	edm::EDGetTokenT<GenEventInfoProduct> *token;
 
         double GenWeight;
-
 };
 #endif

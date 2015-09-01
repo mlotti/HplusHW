@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -19,7 +20,7 @@
 
 class METDumper {
     public:
-	METDumper(std::vector<edm::ParameterSet>, bool isMC);
+	METDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets, bool isMC);
 	~METDumper();
 
 	void book(TTree*);
@@ -32,7 +33,7 @@ class METDumper {
 	bool booked;
 
 	std::vector<edm::ParameterSet> inputCollections;
-	edm::Handle<edm::View<pat::MET> > *handle;
+	edm::EDGetTokenT<edm::View<pat::MET>> *token;
 
 	bool ismc;
 

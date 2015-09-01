@@ -16,12 +16,13 @@
 #include "TTree.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/BaseDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/FourVectorDumper.h"
 
 class TauDumper : public BaseDumper {
     public:
-	TauDumper(std::vector<edm::ParameterSet>);
+	TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets);
 	~TauDumper();
 
 	void book(TTree*);
@@ -33,7 +34,9 @@ class TauDumper : public BaseDumper {
         
 	bool filter();
         
-        edm::Handle<edm::View<pat::Tau> > *handle;
+        edm::EDGetTokenT<edm::View<pat::Tau>> *tauToken;
+        edm::EDGetTokenT<edm::View<pat::Jet>> *jetToken;
+        edm::EDGetTokenT<reco::GenParticleCollection> genParticleToken;
 
         std::vector<double> *lChTrackPt;
         std::vector<double> *lChTrackEta;
@@ -42,8 +45,10 @@ class TauDumper : public BaseDumper {
 
 	std::vector<short> *nProngs;
         std::vector<short> *pdgTauOrigin;
-        // 4-vector for generator tau
+        // 4-vector for generator visible tau
         FourVectorDumper *MCtau;
+        // 4-vector for matching jet
+        FourVectorDumper *matchingJet;
         
         // Systematics variations for tau 4-vector
         FourVectorDumper *systTESup;

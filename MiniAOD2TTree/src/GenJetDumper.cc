@@ -1,6 +1,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenJetDumper.h"
 
-GenJetDumper::GenJetDumper(std::vector<edm::ParameterSet> psets){
+
+GenJetDumper::GenJetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets){
     inputCollections = psets;
     booked           = false;
 
@@ -11,8 +12,13 @@ GenJetDumper::GenJetDumper(std::vector<edm::ParameterSet> psets){
 
     pdgId = new std::vector<short>[inputCollections.size()];
 
-    handle = new edm::Handle<reco::GenJetCollection>[inputCollections.size()];
+    genJetToken = new edm::EDGetTokenT<reco::GenJetCollection>[inputCollections.size()];
 
+    for(size_t i = 0; i < inputCollections.size(); ++i){
+        edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
+        genJetToken[i] = iConsumesCollector.consumes<reco::GenJetCollection>(inputtag);
+    }
+        
     useFilter = false;
     for(size_t i = 0; i < inputCollections.size(); ++i){
         bool param = inputCollections[i].getUntrackedParameter<bool>("filter",false);
@@ -40,12 +46,13 @@ bool GenJetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;
 
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
-        edm::InputTag inputtag = inputCollections[ic].getParameter<edm::InputTag>("src");
-        iEvent.getByLabel(inputtag, handle[ic]);
-        if(handle[ic].isValid()){
+        
+        edm::Handle<reco::GenJetCollection> handle;
+        iEvent.getByToken(genJetToken[ic], handle);
+        if(handle.isValid()){
 
-            for(size_t i=0; i<handle[ic]->size(); ++i) {
-                const reco::Candidate & gp = handle[ic]->at(i);
+            for(size_t i=0; i<handle->size(); ++i) {
+                const reco::Candidate & gp = handle->at(i);
     
                 pt[ic].push_back(gp.pt());
                 eta[ic].push_back(gp.eta());

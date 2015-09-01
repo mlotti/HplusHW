@@ -22,7 +22,7 @@
 
 class ElectronDumper : public BaseDumper {
     public:
-	ElectronDumper(std::vector<edm::ParameterSet> psets);
+	ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets);
 	~ElectronDumper();
 
         void book(TTree*);
@@ -32,7 +32,11 @@ class ElectronDumper : public BaseDumper {
     private:
 	void fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollection>& genParticles, const pat::Electron& ele);
         
-        edm::Handle<edm::View<pat::Electron> > *handle;
+        edm::EDGetTokenT<edm::View<pat::Electron>> *electronToken;
+        edm::EDGetTokenT<edm::View<reco::GsfElectron>> *gsfElectronToken;
+        edm::EDGetTokenT<double> *rhoToken;
+        edm::EDGetTokenT<reco::GenParticleCollection> genParticleToken;
+        edm::EDGetTokenT<edm::ValueMap<bool>> *electronIDToken;
         
         std::vector<float> *relIsoDeltaBetaCorrected;
         
