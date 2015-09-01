@@ -77,6 +77,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Skim = cms.PSet(
 	Counters = cms.VInputTag(
 	    "skimCounterAll",
+	    "skimCounterMETFilters",
             "skimCounterPassed"
         ),
     ),
@@ -259,18 +260,18 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
 
-process.skimCounterAll        = cms.EDProducer("HPlusEventCountProducer")
-process.skimCounterMETFilters = cms.EDProducer("HPlusEventCountProducer")
-process.skimCounterPassed     = cms.EDProducer("HPlusEventCountProducer")
+process.skimCounterAll        = cms.EDProducer("EventCountProducer")
+process.skimCounterMETFilters = cms.EDProducer("EventCountProducer")
+process.skimCounterPassed     = cms.EDProducer("EventCountProducer")
 
 # module execution
-process.runEDFilter = cms.Path(process.egmGsfElectronIDSequence*
+process.runEDFilter = cms.Path(process.skimCounterAll*
                                process.HBHENoiseFilterResultProducer* #Produces HBHE bools
-                               process.skimCounterAll*
                                process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
                                process.skimCounterMETFilters*
                                process.skim*
                                process.skimCounterPassed*
+                               process.egmGsfElectronIDSequence*
                                process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
