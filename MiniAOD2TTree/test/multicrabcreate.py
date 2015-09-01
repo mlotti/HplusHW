@@ -181,6 +181,9 @@ for dataset in datasets:
         tev_match = tev_re.search(rName)
         if tev_match:
             rName = tev_match.group("name")
+	if dataset.isData():
+            s = (dataset.URL).split("/")
+            rName = s[1]+"_"+(s[2].split("-")[0].split("_")[0])
 	#print rName
 
         outfilepath = os.path.join(dirName,"crabConfig_"+rName+".py")
