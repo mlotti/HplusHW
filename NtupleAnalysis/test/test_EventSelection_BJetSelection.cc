@@ -15,7 +15,6 @@
 
 #include <string>
 #include <iostream>
-#include "TFile.h"
 #include "TTree.h"
 
 TEST_CASE("BJetSelection", "[EventSelection]") {
@@ -63,7 +62,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
   tmp.put("BJetSelection.numberOfBJetsCutDirection", ">=");
   ParameterSet psetDefault(tmp, true, false);
   // Create necessary objects for testing
-  TFile* f = new TFile("test_JetSelection.root", "recreate");
+  TDirectory* f = getDirectory("test_BJetSelection");
   CommonPlots* commonPlotsPointer = 0;
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
@@ -140,7 +139,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     tmp.put("BJetSelection4.bjetDiscrWorkingPoint", "dummy");
     tmp.put("BJetSelection4.numberOfBJetsCutValue", 1);
     tmp.put("BJetSelection4.numberOfBJetsCutDirection", ">=");
-    tmp.put("BJetSelection5.bjetDiscr", "combinedSecondaryVertexBJetTags");
+    tmp.put("BJetSelection5.bjetDiscr", "exoticJetTags");
     tmp.put("BJetSelection5.bjetDiscrWorkingPoint", "Loose");
     tmp.put("BJetSelection5.numberOfBJetsCutValue", 1);
     tmp.put("BJetSelection5.numberOfBJetsCutDirection", ">=");
@@ -248,6 +247,5 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
   
   ec.setOutput(f);
   ec.serialize();
-  f->Write();
-  f->Close();
+  closeDirectory(f);
 }

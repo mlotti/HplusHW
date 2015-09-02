@@ -58,7 +58,7 @@ REGISTER_SELECTOR(SignalAnalysis);
 SignalAnalysis::SignalAnalysis(const ParameterSet& config)
 : BaseSelector(config),
   fEvent(config),
-  fCommonPlots(),
+  fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kSignalAnalysis, fHistoWrapper),
   cAllEvents(fEventCounter.addCounter("All events")),
   cTrigger(fEventCounter.addCounter("Passed trigger")),
   cPrescaled(fEventCounter.addCounter("Prescaled")),
@@ -112,6 +112,11 @@ void SignalAnalysis::setupBranches(BranchManager& branchManager) {
 }
 
 void SignalAnalysis::process(Long64_t entry) {
+
+//====== Initialize
+  fCommonPlots.initialize();
+  fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
+
   cAllEvents.increment();
 
 //====== Apply trigger // FIXME to be debugged
@@ -143,6 +148,7 @@ void SignalAnalysis::process(Long64_t entry) {
   if (nVertices < 1)
     return;
   cVertexSelection.increment();
+  fCommonPlots.setNvertices(nVertices);
   
 //====== Setup common events // FIXME missing code
     
@@ -167,15 +173,30 @@ void SignalAnalysis::process(Long64_t entry) {
     return;
 
 //====== Collinear angular cuts
-  const METSelection::Data tmpMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
-  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData, jetData, tmpMETData);
+  const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
+  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData, jetData, silentMETData);
   if (!collinearData.passedSelection())
     return;
 
+//====== Point of standard selections
+  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
+  fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
+
 //====== b-jet selection
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
-  //  if (!bjetData.passedSelection())
-  //    return;
+
+  // Apply b tag scale factor
+  // FIXME missing code
+  // Fill final shape plots with b tag efficiency applied as an event weight
+  if (silentMETData.passedSelection()) {
+    const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData, jetData, silentMETData);
+    if (silentBackToBackData.passedSelection()) {
+      fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(fEvent, silentMETData, bjetData.getBTaggingPassProbability());
+    }
+  }
+  if (!bjetData.passedSelection())
+    return;
+
 
 //====== MET selection
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
@@ -192,7 +213,9 @@ void SignalAnalysis::process(Long64_t entry) {
 
 //====== All cuts passed
   cSelected.increment();
-  // Fill final plots // FIXME missing code
+  // Fill final plots
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
+  
 
 //====== Experimental selection code
   const JetCorrelations::Data jetCorrelationsData = fJetCorrelations.analyze(fEvent, jetData,tauData, METData);

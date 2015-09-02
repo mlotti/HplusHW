@@ -10,7 +10,8 @@
 
 BJetSelection::Data::Data() 
 : bPassedSelection(false),
-  fBTaggingEventWeight(1.0)
+  fBTaggingScaleFactorEventWeight(1.0),
+  fBTaggingPassProbability((1.0))
 { }
 
 BJetSelection::Data::~Data() { }
@@ -41,10 +42,20 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
       fDisriminatorValue = 0.814;
     else if (sWorkingPoint == "Tight")
       fDisriminatorValue = 0.941;
+  } else if (sAlgorithm == "combinedSecondaryVertexBJetTags") {
+    // Run 1 legacy values
+    if (sWorkingPoint == "Loose")
+      fDisriminatorValue = 0.244;
+    else if (sWorkingPoint == "Medium")
+      fDisriminatorValue = 0.679;
+    else if (sWorkingPoint == "Tight")
+      fDisriminatorValue = 0.898;
   }
-  if (fDisriminatorValue < 0.0)
-    throw hplus::Exception("config") << "No discriminator value implemented in BJetSelection.cc constructor for algorithm '"
+  
+  if (fDisriminatorValue < 0.0) {
+    throw hplus::Exception("config") << "No discriminator value implemented in BJetSelection.cc constructor for algorithm '" << sAlgorithm
                                      << "' and working point '" << sWorkingPoint << "'!";
+  }
 }
 
 BJetSelection::~BJetSelection() { }
@@ -68,7 +79,12 @@ BJetSelection::Data BJetSelection::silentAnalyze(const Event& event, const JetSe
 
 BJetSelection::Data BJetSelection::analyze(const Event& event, const JetSelection::Data& jetData) {
   ensureAnalyzeAllowed(event.eventID());
-  return privateAnalyze(event, jetData);
+  BJetSelection::Data data = privateAnalyze(event, jetData);
+  // Send data to CommonPlots
+  if (fCommonPlots != nullptr)
+    fCommonPlots->fillControlPlotsAtBtagging(event, data);
+  // Return data
+  return data;
 }
 
 BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData) {
@@ -106,9 +122,17 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     ++i;
   }
   
-  // Calculate and store b-jet weight and it's uncertainty
+  // Calculate and store b-jet scale factor weight and it's uncertainty
   // FIXME to be implemented
+  
+  // Calculate probability for passing b tag cut without actually applying the cut
+  output.fBTaggingPassProbability = calculateBTagPassingProbability(iEvent, jetData);
   
   // Return data object
   return output;
+}
+
+double BJetSelection::calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData) {
+  // FIXME to be implemented
+  return 1.0;
 }

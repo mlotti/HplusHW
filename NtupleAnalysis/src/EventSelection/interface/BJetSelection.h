@@ -39,17 +39,22 @@ public:
     // Obtain collection of selected jets
     const std::vector<Jet>& getSelectedBJets() const { return fSelectedBJets; }
     /// Obtain the b-tagging event weight
-    const double getBTaggingEventWeight() const { return fBTaggingEventWeight; }
-   
+    const double getBTaggingScaleFactorEventWeight() const { return fBTaggingScaleFactorEventWeight; }
+    /// Obtain the probability for passing b tagging without applying the selection
+    const double getBTaggingPassProbability() const { return fBTaggingPassProbability; }
+
     friend class BJetSelection;
 
   private:
     /// Boolean for passing selection
     bool bPassedSelection;
-    /// B-jet tagging event weight
-    double fBTaggingEventWeight;
+    /// b tagging scale factor event weight
+    double fBTaggingScaleFactorEventWeight;
+    /// Probability for passing b tagging 
+    double fBTaggingPassProbability;
     /// BJet collection after all selections
     std::vector<Jet> fSelectedBJets;
+
   };
   
   // Main class
@@ -65,6 +70,8 @@ public:
 
 private:
   Data privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData);
+  /// Calculate probability to pass b tagging
+  double calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData);
   // Input parameters
   const DirectionalCut<int> fNumberOfJetsCut;
   float fDisriminatorValue; // not a const because constructor sets it based on input string

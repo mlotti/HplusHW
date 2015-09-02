@@ -51,6 +51,8 @@ public:
     double getDeltaPhiJetMET(size_t n) const;
     /// Get 1D cut variable on jet_n
     double get1DCutVariable(size_t n) const;
+    /// Minimum value of cut variables (ignoring negative values)
+    double getMinimumCutValue() const { return fMinimumCutValue; }
     
     friend class AngularCutsBase;
 
@@ -65,21 +67,23 @@ public:
     std::vector<double> fDeltaPhiJetMET;
     /// 1D cut variables
     std::vector<double> f1DCutVariables;
+    /// Minimum value of cut variables (ignoring negative values)
+    double fMinimumCutValue;
   };
     
   // Main class
   explicit AngularCutsBase(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string prefix, const AngularCutsType type, const std::string& postfix = "");
   virtual ~AngularCutsBase();
 
-  void bookHistograms(TDirectory* dir);
+  virtual void bookHistograms(TDirectory* dir);
   
   /// Use silentAnalyze if you do not want to fill histograms or increment counters
-  Data silentAnalyze(const Event& event, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
+  virtual Data silentAnalyze(const Event& event, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
   /// analyze does fill histograms and incrementes counters
-  Data analyze(const Event& event, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
+  virtual Data analyze(const Event& event, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
 
 private:
-  Data privateAnalyze(const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
+  virtual Data privateAnalyze(const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
 
   bool doCollinearCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector<double>& results);
   bool doBackToBackCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector<double>& results);

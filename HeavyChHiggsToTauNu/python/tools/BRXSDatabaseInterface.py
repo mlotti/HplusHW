@@ -3,6 +3,7 @@
 import sys
 import re
 from array import array
+import math
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -31,6 +32,7 @@ class BRXSDatabaseInterface:
 
 	self.variables = []
 	self.names     = []
+	self.variableDict = {}
 
 	branches =  self.tree.GetListOfBranches()
 
@@ -40,6 +42,7 @@ class BRXSDatabaseInterface:
             branch.SetAddress(variable)
             self.variables.append(variable)
             self.names.append(branch.GetName())
+            self.variableDict[branch.GetName()] = variable
 
     def __delete__(self):
         self.close()
@@ -99,6 +102,7 @@ class BRXSDatabaseInterface:
         #self.PrintGraph(newGraph)                                                                                                                     
         return newGraph
 
+    ## Returns the relative uncertainty on the theoretical cross section
     def xsecUncert(self,xaxisName,yaxisName,v,x,y,pm):
 
         uncert = uncert_deltab
@@ -123,6 +127,8 @@ class BRXSDatabaseInterface:
 
         self.savecopy = self.tree
         self.tree = self.fIN.Get("LHCHXSWG_results")
+        if self.tree == None:
+            raise Exception("Cannot find tree for cross section uncertainties in root file!")
 
         uncert = uncert_deltab
         tmpgraph = self.getGraph(yaxisName,"tHp_xsec","%s == %s"%(xaxisName,x))
@@ -141,82 +147,204 @@ class BRXSDatabaseInterface:
 
         self.tree = self.savecopy
         return uncert
-
-    def brUncert(self,xaxisName,yaxisName,v,x,y,pm):
-
-        gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
-#        if v == "BR_tHpb":
-#            gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD
-
-        tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
-        br_i = tmpgraph.Eval(y)
+    
+    ## Returns a dictionary of the relative uncertainties on the theoretical branching fraction v
+    # \param xaxisName  name of the x-axis (e.g. "mHp")
+    # \param yaxisName  name of the y-axis (e.g. "tanb")
+    # \param v          list of branchings (e.g. ["BR_Hp_taunu"])
+    # \param x          value for x variable (e.g. "200")
+    # \param y          value for y variable (e.g. "20")
+    # \param linearSummation  sum uncertainties linearly if true, otherwise squared sum
+    # \param silentStatus  skip printing messages if true
+    # \return Returns a dictionary of label/relative uncert. value pairs
+    def brUncertLight(self,xaxisName,yaxisName,v,x,y,linearSummation=True,silentStatus=True):
+        myVertices = []
+        if not isinstance(v, list):
+            myVertices.append(v)
+        else:
+            myVertices = v[:]
+        # Obtain uncertainty for t->bH+ branching and value for the branching
+        myTBHBrUncert = self._calcBrUncert(xaxisName,yaxisName,["BR_tHpb"],x,y,linearSummation,silentStatus)
+        tmpgraph = self.getGraph(yaxisName,"BR_tHpb","%s == %s"%(xaxisName,x))
+        br_TBH = tmpgraph.Eval(y)
         tmpgraph.Delete()
+        # Obtain uncertainty for H+ branching and values for branching fractions
+        myHplusBrUncert = self._calcBrUncert(xaxisName,yaxisName,v,x,y,linearSummation,silentStatus)
+        br_Hp_i = {}
+        for vtx in myVertices:
+            tmpgraph = self.getGraph(yaxisName,vtx,"%s == %s"%(xaxisName,x))
+            br_Hp_i[vtx] = tmpgraph.Eval(y)
+            tmpgraph.Delete()
+        # Initialize uncertainty list
+        myUncertainties = {}
+        # Calculate uncertainty for TBH i.e. multiply the obtained Delta_TBH by sqrt(sum(br_Hp_i^2))
+        myFactor = 0.0
+        for vtx in myVertices:
+            myFactor += br_Hp_i[vtx]**2
+        myFactor = math.sqrt(myFactor)
+        myTBHUncert = myFactor*myTBHBrUncert[myTBHBrUncert.keys()[0]]
+        # Calculate uncertainty for H+ branchings i.e. multiply the obtained Delta_Hp_i by Br_TBH)
+        if len(v) > 1:
+            raise Exception("Multiple H+ branchings not supported at the moment for light H+")
+        for k in myHplusBrUncert.keys():
+            a = br_TBH*myHplusBrUncert[k]
+            if linearSummation:
+                myUncertainties[k] = a + myTBHUncert
+            else:
+                myUncertainties[k] = math.sqrt(a**2 + myTBHUncert**2)
+        # Return result
+        return myUncertainties
 
-        gamma_v = v.replace("BR","GAMMA")
-        tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
-        gamma_i = tmpgraph.Eval(y)
-        tmpgraph.Delete()
+    ## Returns a dictionary of the relative uncertainties on the theoretical branching fraction v
+    # \param xaxisName  name of the x-axis (e.g. "mHp")
+    # \param yaxisName  name of the y-axis (e.g. "tanb")
+    # \param v          list of branchings (e.g. ["BR_Hp_taunu"])
+    # \param x          value for x variable (e.g. "200")
+    # \param y          value for y variable (e.g. "20")
+    # \param linearSummation  sum uncertainties linearly if true, otherwise squared sum
+    # \param silentStatus  skip printing messages if true
+    # \return Returns a dictionary of label/relative uncert. value pairs
+    def brUncertHeavy(self,xaxisName,yaxisName,v,x,y,linearSummation=True,silentStatus=True):
+        return self._calcBrUncert(xaxisName,yaxisName,v,x,y,linearSummation,silentStatus)
 
-        gammatot = gamma_i/br_i
+    ## Returns a dictionary of the relative uncertainties on the theoretical branching fraction v
+    # \param xaxisName  name of the x-axis (e.g. "mHp")
+    # \param yaxisName  name of the y-axis (e.g. "tanb")
+    # \param v          list of branchings (e.g. ["BR_Hp_taunu"])
+    # \param x          value for x variable (e.g. "200")
+    # \param y          value for y variable (e.g. "20")
+    # \param linearSummation  sum uncertainties linearly if true, otherwise squared sum
+    # \param silentStatus  skip printing messages if true
+    # \return Returns a dictionary of label/relative uncert. value pairs
+    def _calcBrUncert(self,xaxisName,yaxisName,v,x,y,linearSummation=True,silentStatus=True):
+        myVertices = []
+        if not isinstance(v, list):
+            myVertices.append(v)
+        else:
+            myVertices = v[:]
+        
+        # Make list of branching fraction relative uncertainties
+        myBrUncertaintySources = {}
+        myBrUncertaintySources["MissingOneLoopEW"] = uncert_missing1loopEW
+        myBrUncertaintySources["MissingTwoLoopQCD"] = uncert_missing2loopQCD
+        myBrUncertaintySources["DeltaBCorrections"] = uncert_deltab
 
-        sign = 1
-        if pm == "-":
-            sign = -1
+        # Obtain theoretical branching fractions for vertices
+        br_i = {}
+        for vtx in myVertices:
+            tmpgraph = self.getGraph(yaxisName,vtx,"%s == %s"%(xaxisName,x))
+            br_i[vtx] = tmpgraph.Eval(y)
+            tmpgraph.Delete()
+        
+        # Obtain sum of Br of non-considered processes
+        br_other = 1.0
+        for vtx in myVertices:
+            br_other -= br_i[vtx]
 
-        br_prime1 = gamma_i*(1+sign*gamma_uncert) / (gamma_i*(1+sign*gamma_uncert) + gammatot-gamma_i)
-        br_uncert1 = abs(br_prime1 - br_i) / br_i
+        # Obtain decay width (Gamma) for label v
+        gamma_i = {}
+        for vtx in myVertices:
+            gamma_v = vtx.replace("BR","GAMMA")
+            tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
+            gamma_i[vtx] = tmpgraph.Eval(y)
+            tmpgraph.Delete()
+            # Calculate total width
+            gammatot = gamma_i[vtx]/br_i[vtx]
 
-        br_prime2 = gamma_i / (gamma_i + (gammatot-gamma_i)*(1+sign*gamma_uncert))
-        br_uncert2 = abs(br_prime2 - br_i) / br_i
+        # Use error propagation on Br_i = (Gamma_i) / (Gamma_i + Gamma_other)
+        # I.e. vary Gamma_i, ..., and Gamma_other
+        myResult = {}
+        for v in myVertices:
+            myTotalUncertainty = 0.0
+            # Obtain uncertainty for B_i's; B_other = 1-B_i's 
+            for k in myBrUncertaintySources.keys():
+                myUncertainties = []
+                # Add uncertainty from B_i's
+                for vsub in myVertices:
+                    myValue = myBrUncertaintySources[k]
+                    if vtx == vsub:
+                        myValue *= br_i[vtx] * (1.0 - br_i[vtx])
+                    else:
+                        myValue *= br_i[vtx] * br_i[vsub]
+                    myUncertainties.append(myValue)
+                    #print "***",vtx,vsub,myValue,k
+                # Add uncertainty from other Br's
+                myStatus = True
+                if vtx == "BR_tHpb" and k == "DeltaBCorrections":
+                    myStatus = False
+                if myStatus:
+                    # Do not add delta_b corrections for t->bW (== 1-Br(t->bH+))
+                    myValue = myBrUncertaintySources[k]
+                    myValue *= br_i[vtx] * br_other
+                    myUncertainties.append(myValue)
+                    #print "***",vtx,"other",myValue,k
+                # Calculate total uncertainty
+                myUncert = 0.0
+                for a in myUncertainties:
+                    if linearSummation:
+                        myUncert += a
+                    else:
+                        myUncert += a**2
+                if not linearSummation:
+                    myUncert = math.sqrt(myUncert)
+                    myResult["%s_%s"%(vtx,k)] = myUncert
+                else:
+                    myTotalUncertainty += myUncert
+            if linearSummation:
+                myResult["%s"%(vtx)] = myTotalUncertainty
+        # Print info
+        if not silentStatus:
+            print "         ** Br uncertainties for %s=%s, %s=%s, %s:"%(xaxisName,x,yaxisName,y, self.rootfile)
+            for k in myResult.keys():
+                print "       ** Br uncert [%s] = %f"%(k, myResult[k])
+        # Return dictionary with results
+        return myResult
 
-        br_uncert = br_uncert1 + br_uncert2
-        #print "BR uncertainty",v,br_uncert                                                                                                            
-        return br_uncert
 
-    def brUncert2(self,xaxisName,yaxisName,v,w,x,y,pm):
-        # usage: uncert = self.brUncert2("mHp","tanb","BR_Hp_taunu","BR_Hp_tb",Hp_mass,tanb,"+")
+    #def brUncert2(self,xaxisName,yaxisName,v,w,x,y,pm):
+        ## usage: uncert = self.brUncert2("mHp","tanb","BR_Hp_taunu","BR_Hp_tb",Hp_mass,tanb,"+")
 
-        gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
+        #gamma_uncert = uncert_missing1loopEW+uncert_missing2loopQCD+uncert_deltab
 
-        #### first Gamma
-        tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
-        br_i = tmpgraph.Eval(y)
-        tmpgraph.Delete()
+        ##### first Gamma
+        #tmpgraph = self.getGraph(yaxisName,v,"%s == %s"%(xaxisName,x))
+        #br_i = tmpgraph.Eval(y)
+        #tmpgraph.Delete()
 
-        gamma_v = v.replace("BR","GAMMA")
-        tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
-        gamma_i = tmpgraph.Eval(y)
-        tmpgraph.Delete()
+        #gamma_v = v.replace("BR","GAMMA")
+        #tmpgraph = self.getGraph(yaxisName,gamma_v,"%s == %s"%(xaxisName,x))
+        #gamma_i = tmpgraph.Eval(y)
+        #tmpgraph.Delete()
 
-        gammatot = gamma_i/br_i
+        #gammatot = gamma_i/br_i
 
-        #### second Gamma
-        tmpgraph = self.getGraph(yaxisName,w,"%s == %s"%(xaxisName,x))
-        br_j = tmpgraph.Eval(y)
-        tmpgraph.Delete()
+        ##### second Gamma
+        #tmpgraph = self.getGraph(yaxisName,w,"%s == %s"%(xaxisName,x))
+        #br_j = tmpgraph.Eval(y)
+        #tmpgraph.Delete()
 
-        gamma_w = w.replace("BR","GAMMA")
-        tmpgraph = self.getGraph(yaxisName,gamma_w,"%s == %s"%(xaxisName,x))
-        gamma_j = tmpgraph.Eval(y)
-        tmpgraph.Delete()
+        #gamma_w = w.replace("BR","GAMMA")
+        #tmpgraph = self.getGraph(yaxisName,gamma_w,"%s == %s"%(xaxisName,x))
+        #gamma_j = tmpgraph.Eval(y)
+        #tmpgraph.Delete()
 
-        ####
+        #####
 
-        sign = 1
-        if pm == "-":
-            sign = -1
+        #sign = 1
+        #if pm == "-":
+            #sign = -1
 
-        br_prime1 = (gamma_i*(1+sign*gamma_uncert) + gamma_j)/ (gamma_i*(1+sign*gamma_uncert) + gamma_j + gammatot-gamma_i-gamma_j)
-        br_uncert1 = abs(br_prime1 - br_i - br_j) / (br_i + br_j)
+        #br_prime1 = (gamma_i*(1+sign*gamma_uncert) + gamma_j)/ (gamma_i*(1+sign*gamma_uncert) + gamma_j + gammatot-gamma_i-gamma_j)
+        #br_uncert1 = abs(br_prime1 - br_i - br_j) / (br_i + br_j)
 
-        br_prime2 = (gamma_i + gamma_j*(1+sign*gamma_uncert))/ (gamma_i + gamma_j*(1+sign*gamma_uncert) + gammatot-gamma_i-gamma_j)
-        br_uncert2 = abs(br_prime2 - br_i - br_j) / (br_i + br_j)
+        #br_prime2 = (gamma_i + gamma_j*(1+sign*gamma_uncert))/ (gamma_i + gamma_j*(1+sign*gamma_uncert) + gammatot-gamma_i-gamma_j)
+        #br_uncert2 = abs(br_prime2 - br_i - br_j) / (br_i + br_j)
 
-        br_prime3 = (gamma_i + gamma_j)/ (gamma_i + gamma_j + (gammatot-gamma_i-gamma_j)*(1+sign*gamma_uncert))
-        br_uncert3 = abs(br_prime3 - br_i - br_j) / (br_i + br_j)
+        #br_prime3 = (gamma_i + gamma_j)/ (gamma_i + gamma_j + (gammatot-gamma_i-gamma_j)*(1+sign*gamma_uncert))
+        #br_uncert3 = abs(br_prime3 - br_i - br_j) / (br_i + br_j)
 
-        br_uncert = br_uncert1 + br_uncert2 + br_uncert3
-        return br_uncert
+        #br_uncert = br_uncert1 + br_uncert2 + br_uncert3
+        #return br_uncert
 
         
     def setSelection(self,selection):
@@ -272,9 +400,9 @@ class BRXSDatabaseInterface:
 	    #print "x,y",xval,ylimit
 	    y.append(ylimit)
 
-        print "Tanb limits for selection",selection
-        for i,xx in enumerate(x):
-            print xx,y[i]
+        #print "Tanb limits for selection",selection
+        #for i,xx in enumerate(x):
+            #print xx,y[i]
 	return x,y
 
     def graphToTanBeta(self,graph,xVariableName,selection,highTanbRegion=True,limitBRtoMin=True):
@@ -290,7 +418,7 @@ class BRXSDatabaseInterface:
             yval = graph.GetY()[i]
             ylimit = self.getTanbFromLightHpBR(yval,yselection,highTanbRegion)
             if highTanbRegion and ylimit <= 1:
-		print "    ",i, xval, yval, ylimit
+		#print "    ",i, xval, yval, ylimit
                 ylimit = 80
             graph.SetPoint(i, xval, ylimit)
             #print "    ",i, xval, yval, ylimit 
@@ -298,8 +426,8 @@ class BRXSDatabaseInterface:
         if limitBRtoMin:
             graph = self.graphToMinTanb(graph,xVariableName,selection,highTanbRegion)
 
-        for i in xrange(0, graph.GetN()):
-            print "    ",graph.GetX()[i],graph.GetY()[i]
+        #for i in xrange(0, graph.GetN()):
+            #print "    ",graph.GetX()[i],graph.GetY()[i]
         return graph
 
     def graphToTanBetaCombined(self,graph,xVariableName,selection):
@@ -492,7 +620,13 @@ class BRXSDatabaseInterface:
     
 
     def mhLimit(self,higgs,xVariableName,selection,mhMeasurement):
-
+        #print higgs,xVariableName,selection,mhMeasurement
+        
+        s = mhMeasurement.split("+-")
+        mySingleSidedMeasurementStatus = False
+        if len(s) == 2 and float(s[1]) < 0.000001:
+            mySingleSidedMeasurementStatus = True
+        
         x = []
         y = []
 
@@ -502,7 +636,6 @@ class BRXSDatabaseInterface:
         if higgs == "mh":
             lower_x00,lower_y00 = self.getLimitsLT(higgs,xVariableName,"tanb",selection+"&&tanb>=30&&"+xVariableName+">=%s"%mHpStart,self.lowerLimit(mhMeasurement))
             upper_x00,upper_y00 = self.getLimitsLT(higgs,xVariableName,"tanb",selection+"&&tanb>=30&&"+xVariableName+">=%s"%mHpStart,self.upperLimit(mhMeasurement))
-
             for i in range(0,len(lower_x00)):
                 j = len(lower_x00) -1 -i
                 x.append(lower_x00[j])
@@ -513,7 +646,7 @@ class BRXSDatabaseInterface:
             tanbStart = 1
         lower_y0,lower_x0 = self.getLimits(higgs,"tanb",xVariableName,selection+"&&tanb>=%s"%tanbStart,self.lowerLimit(mhMeasurement))
         upper_y0,upper_x0 = self.getLimits(higgs,"tanb",xVariableName,selection+"&&tanb>=%s"%tanbStart,self.upperLimit(mhMeasurement))
-
+        #print "check lower x0, y0",mhMeasurement,lower_x0,lower_y0,upper_x0,upper_y0
         for i in range(0,len(lower_x0)):
             j = len(lower_x0) -1 -i
             if lower_y0[j] < 30:
@@ -523,12 +656,9 @@ class BRXSDatabaseInterface:
                 if lower_x0[j] <= mHpStart:
                     x.append(lower_x0[j])
                     y.append(lower_y0[j])
-            #print "x,y(lower)",lower_x0[j],lower_y0[j]
 
-#        for i in range(0,len(upper_x0)):
-#            x.append(upper_x0[i])
-#            y.append(upper_y0[i])
-#            print "x,y(upper)",upper_x0[i],upper_y0[i]
+        #for i in range(len(x)):
+            #print x[i],y[i]
 
         if higgs == "mh":
             lower_x,lower_y = self.getLimits(higgs,xVariableName,"tanb",selection,self.lowerLimit(mhMeasurement))
@@ -544,44 +674,48 @@ class BRXSDatabaseInterface:
             if len(upper_x) > 0:
                 x.append(610)
                 y.append(y[-1])
+            
+            
+            if not mySingleSidedMeasurementStatus:
+                for i in range(0,len(upper_x)):
+                    j = len(upper_x) -1 -i
+                    if upper_x[j] > upper_x0[0]:
+                        x.append(upper_x[j])
+                        y.append(upper_y[j])
 
-            for i in range(0,len(upper_x)):
-                j = len(upper_x) -1 -i
-                if upper_x[j] > upper_x0[0]:
-                    x.append(upper_x[j])
-                    y.append(upper_y[j])
-
-        for i in range(0,len(upper_x0)):
-            if i == 0 and upper_y0[0] == y[len(y)-1]:
-                continue
-            if len(upper_x00) == 0:
-                x.append(upper_x0[i])
-                y.append(upper_y0[i])
-            else:
-                if upper_x0[i] <= mHpStart or upper_y0[i] < 30:
+        if not mySingleSidedMeasurementStatus:
+            for i in range(0,len(upper_x0)):
+                if i == 0 and upper_y0[0] == y[len(y)-1]:
+                    continue
+                if len(upper_x00) == 0:
                     x.append(upper_x0[i])
                     y.append(upper_y0[i])
+                else:
+                    if upper_x0[i] <= mHpStart or upper_y0[i] < 30:
+                        x.append(upper_x0[i])
+                        y.append(upper_y0[i])
 
-        if higgs == "mh":
+        if higgs == "mh" and not mySingleSidedMeasurementStatus:
             for i in range(0,len(upper_x00)):
                 x.append(upper_x00[i])
                 y.append(upper_y00[i])
 #            x.append(600)
 #            y.append(100)
-                                                
-        if len(x) == 0:
-            return None
 
-	if higgs == "mH":
+        if len(x) == 0:
+            print "Failed to generate curve for %s=%s (not visible)!"%(higgs,mhMeasurement)
+            x = [0]
+            y = [0]
+        elif higgs == "mH":
 	    x.append(180)
 	    y.append(100)
 	    x.append(0)
             y.append(100)
 
-        for i in range(0,len(x)):
-            print "mhlimit:  m,tanb",x[i],y[i]
+        #for i in range(0,len(x)):
+            #print "mhlimit:  m,tanb",x[i],y[i]
         retGraph = ROOT.TGraph(len(x),array('d',x,),array('d',y))
-        retGraph.SetName("mhLimit")
+        retGraph.SetName("mhLimit_%s%s"%(higgs,mhMeasurement))
         retGraph.SetLineWidth(1)
         retGraph.SetLineStyle(7)
 #        retGraph.SetFillColor(ROOT.TColor.GetColor("#ffffcc"))
@@ -590,7 +724,7 @@ class BRXSDatabaseInterface:
         return retGraph
 
     def mHLimit_mA(self,higgs,xVariableName,selection,mhMeasurement):
-        print "mHLimit_mA",higgs,xVariableName,selection
+        #print "mHLimit_mA",higgs,xVariableName,selection
 
         graph1_x = []
         graph1_y = []
@@ -602,7 +736,7 @@ class BRXSDatabaseInterface:
         graph3_y = []
 
         xvalues = self.getValues(xVariableName,selection)
-        print xvalues
+        #print xvalues
         limit = self.lowerLimit(mhMeasurement)
         for xv in xvalues:
 #            print "x=",xv
@@ -619,7 +753,7 @@ class BRXSDatabaseInterface:
                 y0 = yg[i-1]
                 x1 = xg[i]
                 y1 = yg[i]
-                print "mu,tanb,mH",xv,xg[i],yg[i]
+                #print "mu,tanb,mH",xv,xg[i],yg[i]
                 if y0 < limit and y1 > limit:
                     tanblimit = self.linearFunction(limit,y0,x0,y1,x1)
                     if ntimes == 0:
@@ -705,27 +839,27 @@ class BRXSDatabaseInterface:
 #                    y.append(lower_y0[j])
 
 
-        print            
-        for i in range(len(graph1_x)):
-            print "                    %s, %s,"%(graph1_x[i],graph1_y[i])
-        print
-        for i in reversed(range(len(graph3_x))):
-            print "                    %s, %s,"%(graph3_x[i],graph3_y[i])
-        print
-        for i in range(len(graph2_x)):
-            print "                    %s, %s,"%(graph2_x[i],graph2_y[i])
-        print
-#        for i in range(len(graph3_x)):
-#            print "                    %s, %s,"%(graph3_x[i],graph3_y[i])
-#        print
-        for i in reversed(range(len(graph5_x))):
-            print "                    %s, %s,"%(graph5_x[i],graph5_y[i])
-        print
-        for i in reversed(range(len(graph6_x))):
-            print "                    %s, %s,"%(graph6_x[i],graph6_y[i])
-        print
-        for i in range(len(graph7_x)):
-            print "                    %s, %s,"%(graph7_x[i],graph7_y[i])
+        #print            
+        #for i in range(len(graph1_x)):
+            #print "                    %s, %s,"%(graph1_x[i],graph1_y[i])
+        #print
+        #for i in reversed(range(len(graph3_x))):
+            #print "                    %s, %s,"%(graph3_x[i],graph3_y[i])
+        #print
+        #for i in range(len(graph2_x)):
+            #print "                    %s, %s,"%(graph2_x[i],graph2_y[i])
+        #print
+##        for i in range(len(graph3_x)):
+##            print "                    %s, %s,"%(graph3_x[i],graph3_y[i])
+##        print
+        #for i in reversed(range(len(graph5_x))):
+            #print "                    %s, %s,"%(graph5_x[i],graph5_y[i])
+        #print
+        #for i in reversed(range(len(graph6_x))):
+            #print "                    %s, %s,"%(graph6_x[i],graph6_y[i])
+        #print
+        #for i in range(len(graph7_x)):
+            #print "                    %s, %s,"%(graph7_x[i],graph7_y[i])
 
         x = []
         y = []
@@ -734,8 +868,8 @@ class BRXSDatabaseInterface:
 #        x.extend(reversed(xdec))
 #        y.extend(reversed(ydec))
 
-        for i in range(0,len(x)):
-            print "mhlimit:  m,tanb",x[i],y[i]
+        #for i in range(0,len(x)):
+            #print "mhlimit:  m,tanb",x[i],y[i]
         sys.exit()    
         retGraph = ROOT.TGraph(len(x),array('d',x,),array('d',y))
         retGraph.SetName("mhLimit")
@@ -1756,11 +1890,12 @@ class BRXSDatabaseInterface:
         return crossover0,crossover1,direction
 
     def getIsoMass(self,mHp,xaxis="mA"):
+        print "Calculating isomass line for mHp =",mHp
         x = []
         y = []
 
         sele = self.selection
-        print "selection",sele
+        #print "selection",sele
         tanbs = self.getValues("tanb",sele,roundValues=-1)
         for tanb in tanbs:
 #            if not tanb == 25:
@@ -1788,7 +1923,7 @@ class BRXSDatabaseInterface:
         xarea = 160
 	if mHp > 175:
             xarea = 100
-        """    
+        
 	x.append(xarea)
         y.append(75)
 
@@ -1797,9 +1932,9 @@ class BRXSDatabaseInterface:
 
         x.append(x[0])
         y.append(y[0])
-        """
-        for i in range(0,len(x)):
-            print "isomass:  m,tanb",x[i],y[i]
+        
+        #for i in range(0,len(x)):
+            #print "isomass:  m,tanb",x[i],y[i]
 
         retGraph = ROOT.TGraph(len(x),array('d',x,),array('d',y))
         retGraph.SetName("isomass")
@@ -1815,7 +1950,7 @@ class BRXSDatabaseInterface:
 
         limits_x = []
         limits_y = []
-
+        
         for x in xvalues:
             theSelection = selection+"&&"+self.floatSelection(xVariableName+"==%s"%x)
             ymin = self.getMinimum(higgs,theSelection)
@@ -1828,7 +1963,6 @@ class BRXSDatabaseInterface:
             y_vals = self.getValues(yVariableName,theSelection,-1,sort=False)
 
             ys,mh = self.sort(y_vals,mh_vals)
-            #print "check ys,mh",x,ys,mh
 
             y = 0
             for i in range(len(mh)):
@@ -1841,7 +1975,6 @@ class BRXSDatabaseInterface:
 
             limits_x.append(x)
             limits_y.append(y)
-
         return limits_x,limits_y
             
     def getLimits(self,higgs,xVariableName,yVariableName,selection,limit):
@@ -1941,6 +2074,7 @@ class BRXSDatabaseInterface:
     def graphToMa(self,graph):
         if graph == None:
             return
+        print "Converting graph mHp -> mA ..."
         
         #self.PrintGraph(graph)
         for i in xrange(0, graph.GetN()):
@@ -1980,6 +2114,8 @@ class BRXSDatabaseInterface:
 
                 if mHp == 600:
                     mA = mHp
+            elif mHp < 0.0001 or mHp == 1000:
+                mA = mHp
             else:
                 selection = "tanb==%s"%tanb
                 mHps = self.getValues("mHp",selection,roundValues=-1)
@@ -1993,7 +2129,7 @@ class BRXSDatabaseInterface:
                 mgraph = ROOT.TGraph(len(mHps),array("d",mHps),array("d",mAs))
                 mA = mgraph.Eval(mHp,None,"S")
                 
-            print "    mHp -> mA",mHp,"->",mA, tanb
+            #print "    mHp = %.2f -> mA = %.2f at tanbeta = %.1f"%(mHp, mA, tanb)
             graph.SetPoint(i, mA, tanb)
         
     def getGraph(self,xVariable,yVariable,selection):
@@ -2001,6 +2137,8 @@ class BRXSDatabaseInterface:
         #print "check",xVariable,yVariable,selection
         self.tree.Draw(yVariable+":"+xVariable,self.floatSelection(selection))
         graph = ROOT.gPad.GetPrimitive("Graph")
+        if graph == None:
+            raise Exception("Error: could not find graph!")
         graph.Sort()
         return graph
         

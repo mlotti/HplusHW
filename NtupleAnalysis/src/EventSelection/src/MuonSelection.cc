@@ -49,7 +49,12 @@ MuonSelection::Data MuonSelection::silentAnalyze(const Event& event) {
 
 MuonSelection::Data MuonSelection::analyze(const Event& event) {
   ensureAnalyzeAllowed(event.eventID());
-  return privateAnalyze(event);
+  MuonSelection::Data data = privateAnalyze(event);
+  // Send data to CommonPlots
+  if (fCommonPlots != nullptr)
+    fCommonPlots->fillControlPlotsAtMuonSelection(event, data);
+  // Return data
+  return data;
 }
 
 MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {

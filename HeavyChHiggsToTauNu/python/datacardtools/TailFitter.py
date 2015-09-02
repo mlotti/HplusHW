@@ -504,7 +504,6 @@ class TailFitter:
         hDownClone.SetLineWidth(2)
         plot.histoMgr.appendHisto(histograms.Histo(hDownClone,"Total down"))
 
-        # ugly hardcoding...
         fitStart = fitmin
         nominal = "Nominal"
         if "QCD" in self._label:
@@ -545,6 +544,8 @@ class TailFitter:
         hNominalClone = aux.Clone(hNominal)
         hNominalClone.SetLineColor(ROOT.kBlack)
         hNominalClone.SetLineWidth(2)
+        hNominalClone.SetMarkerStyle(22)
+        hNominalClone.SetMarkerSize(1.5)
         # Remove fit line before drawing
         myFunctions = hNominalClone.GetListOfFunctions()
         for i in range(0, myFunctions.GetEntries()):
@@ -575,14 +576,38 @@ class TailFitter:
             myColor += 1
             plot.histoMgr.appendHisto(histograms.Histo(hDownClone,"Par%d down"%(i)))
 
+        # ugly hardcoding...
+        fitStart = 180
+        nominal = "Nominal"
+        if "QCD" in self._label:
+            nominal += " multijets"
+        elif "EWK_Tau" in self._label:
+            nominal += " EWK+t#bar{t} with #tau_{h}"
+        elif "MC_faketau" in self._label:
+            nominal += " EWK+t#bar{t} no #tau_{h}"
+
+        plot.histoMgr.setHistoLegendLabelMany({
+            "nominal": nominal,
+            "fit": "With fit for m_{T} > %d GeV" % fitStart,
+            "Par0 up": "+1#sigma uncertainty on par.0",
+            "Par0 down": "-1#sigma uncertainty on par.0",
+            "Par1 up": "+1#sigma uncertainty on par.1",
+            "Par1 down": "-1#sigma uncertainty on par.1"
+        })
+        if self._luminosity is not None:
+            plot.setLuminosity(self._luminosity)
+
         myName = "tailfit_detailed_%s_%s"%(self._label,prefix)
         #plot.createFrame("tailfit_%s_%s"%(self._label,name), opts={"ymin": 1e-5, "ymaxfactor": 2.})
         #plot.getPad().SetLogy(True)
         #histograms.addStandardTexts(lumi=self.lumi)
         myParams = {}
-        myParams["ylabel"] = "Events/#Deltabin / %.0f-%.0f GeV"
+	myParams["ylabel"] = "Events / %.0f GeV"
         myParams["log"] = True
-        myParams["opts"] = {"ymin": 1e-5}
-        myParams["divideByBinWidth"] = True
+        myParams["opts"] = {"ymin": 20*1e-5} # compensate for the bin width
+        #myParams["divideByBinWidth"] = True
+	myParams["cmsTextPosition"] = "right"
+	myParams["moveLegend"] = {"dx": -0.215, "dy": -0.1, "dh": -0.1, "dw": -0.05}
+	myParams["xlabel"] = "m_{T} (GeV)"
         myDrawer = plots.PlotDrawer()
         myDrawer(plot, myName, **myParams)

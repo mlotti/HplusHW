@@ -73,7 +73,12 @@ TauSelection::Data TauSelection::silentAnalyze(const Event& event) {
 
 TauSelection::Data TauSelection::analyze(const Event& event) {
   ensureAnalyzeAllowed(event.eventID());
-  return privateAnalyze(event);
+  TauSelection::Data data = privateAnalyze(event);
+  // Send data to CommonPlots
+  if (fCommonPlots != nullptr)
+    fCommonPlots->fillControlPlotsAfterTauSelection(event, data, false); // FIXME: fix the boolean for the fake tau status
+  // Return data
+  return data;
 }
 
 TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
@@ -193,7 +198,6 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     cPassedTauSelection.increment();
   if (output.fSelectedTaus.size() > 1)
     cPassedTauSelectionMultipleTaus.increment();
-  
   // Return data object
   return output;
 }

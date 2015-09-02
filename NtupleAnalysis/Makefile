@@ -31,6 +31,7 @@ ROOTLIBS := $(shell root-config --glibs)
 
 # Compile flags
 CXXFLAGS := -O2 -Wall -Wno-unused-local-typedefs -fPIC -D_REENTRANT $(ROOTINC) $(INC)
+CXXEXTRAFLAGS := 
 
 GCC_NEED_ZX := $(shell expr `gcc -dumpversion | cut -f2 -d.` \<= 6)
 ifeq "$(GCC_NEED_ZX)" "1"
@@ -46,6 +47,12 @@ LDFLAGS := $(ROOTLIBS) -lProof -lGenVector -lTreePlayer -Llib
 ifeq "$(DEBUG)" "yes"
 CXXFLAGS += -g
 LDFLAGS += -g
+endif
+
+# Platform dependent flags
+HOST=$(shell hostname)
+ifeq "$(findstring lxplus,$(HOST))" "lxplus"
+CXXEXTRAFLAGS += -D HOST_LXPLUS
 endif
 
 #GIT_COMMIT_ID := $(shell git rev-parse HEAD)
@@ -148,7 +155,7 @@ cleanSubdirectory:
 define BUILD_template
 $(1)/%.o: $(2)/%.cc
 	@[ -d $$(@D) ] || mkdir -p $$(@D)
-	$(CXX) $(CXXFLAGS) -c $$< -o $$@ -MMD
+	$(CXX) $(CXXFLAGS) $(CXXEXTRAFLAGS) -c $$< -o $$@ -MMD
 	@cp $(1)/$$*.d $(1)/$$*.d.tmp; \
 	  sed 's#\($(1)/$$*\)\.o[ :]*#\1.o \1.d : #g' < $(1)/$$*.d.tmp > $(1)/$$*.d; \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$$$//' \

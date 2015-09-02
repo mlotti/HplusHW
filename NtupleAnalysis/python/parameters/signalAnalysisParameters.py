@@ -65,7 +65,8 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
  
 #====== B-jet selection
 bjetSelection = PSet(
-             bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
+             #bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
+             bjetDiscr = "combinedSecondaryVertexBJetTags",
  bjetDiscrWorkingPoint = "Tight",
  numberOfBJetsCutValue = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
@@ -94,6 +95,31 @@ jetCorrelations = PSet (
 )
 
 
+#====== Common plots options
+commonPlotsOptions = PSet(
+  # Splitting of histograms as function of one or more parameters
+  # Example: histogramSplitting = [PSet(label="tauPt", binLowEdges=[60, 70, 80, 100, 120], useAbsoluteValues=False)],
+  histogramSplitting = [],
+  # By default, inclusive (i.e. fake tau+genuine tau) and fake tau histograms are produced. Set to true to also produce genuine tau histograms (Note: will slow down running and enlarge resulting files).
+  enableGenuineTauHistograms = False, 
+  # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
+       nVerticesBins = PSet(nBins=100, axisMin=0., axisMax=100.),
+              ptBins = PSet(nBins=50, axisMin=0., axisMax=500.),
+             etaBins = PSet(nBins=60, axisMin=-3.0, axisMax=3.0),
+             phiBins = PSet(nBins=72, axisMin=-3.1415926, axisMax=3.1415926),
+        deltaPhiBins = PSet(nBins=18, axisMin=0., axisMax=180.), # used in 2D plots, i.e. putting high number of bins here will cause troubles
+            rtauBins = PSet(nBins=55, axisMin=0., axisMax=1.1),
+           njetsBins = PSet(nBins=20, axisMin=0., axisMax=20.),
+             metBins = PSet(nBins=80, axisMin=0., axisMax=800.),
+       bjetDiscrBins = PSet(nBins=20, axisMin=-1.0, axisMax=1.0),
+   angularCuts1DBins = PSet(nBins=52, axisMin=0., axisMax=260.),
+         topMassBins = PSet(nBins=60, axisMin=0., axisMax=600.),
+           WMassBins = PSet(nBins=60, axisMin=0., axisMax=300.),
+              mtBins = PSet(nBins=160, axisMin=0., axisMax=800.), # 5 GeV bin width for tail fitter
+         invmassBins = PSet(nBins=50, axisMin=0., axisMax=500.),
+)
+
+#====== Build all selections group
 allSelections = PSet(
  histogramAmbientLevel = histoLevel,
                Trigger = trg,
@@ -106,4 +132,6 @@ allSelections = PSet(
           METSelection = metSelection,
  AngularCutsBackToBack = angularCutsBackToBack,
        JetCorrelations = jetCorrelations,
+           CommonPlots = commonPlotsOptions,
 )
+

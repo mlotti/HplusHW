@@ -54,7 +54,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   tmp.put("AngularCutsBackToBack.enableOptimizationPlots", true);
   
   // Create necessary objects for testing
-  TFile* f = new TFile("test_AngularCuts.root", "recreate");
+  TDirectory* f = getDirectory("test_AngularCuts");
   CommonPlots* commonPlotsPointer = 0;
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
@@ -199,6 +199,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     }
     CHECK( collData.getDeltaPhiJetMET(0) == Approx(97.9757832536) );
     CHECK( collData.get1DCutVariable(0) == Approx(149.58210) );
+    CHECK( collData.getMinimumCutValue() == Approx(149.58210) );
     for (size_t i = 1; i < 4; ++i) {
       CHECK( collData.getDeltaPhiJetMET(i) == -1.0 );
       CHECK( collData.get1DCutVariable(i) == -1.0 );
@@ -229,6 +230,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     CHECK( collData.get1DCutVariable(1) == Approx(175.223) );
     CHECK( collData.get1DCutVariable(2) == Approx(188.089) );
     CHECK( collData.get1DCutVariable(3) == Approx(126.761) );
+    CHECK( collData.getMinimumCutValue() == Approx(126.761) );
     // 4 jets outside tau, MET collinear with jet 2
     mgr.setEntry(2);
     tauData = tausel.silentAnalyze(event);
@@ -293,6 +295,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     }
     CHECK( backtobackData.getDeltaPhiJetMET(0) == Approx(97.9757832536) );
     CHECK( backtobackData.get1DCutVariable(0) == Approx(112.315) );
+    CHECK( backtobackData.getMinimumCutValue() == Approx(112.315) );
     for (size_t i = 1; i < 4; ++i) {
       CHECK( backtobackData.getDeltaPhiJetMET(i) == -1.0 );
       CHECK( backtobackData.get1DCutVariable(i) == -1.0 );
@@ -323,6 +326,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     CHECK( backtobackData.get1DCutVariable(1) == Approx(79.362) );
     CHECK( backtobackData.get1DCutVariable(2) == Approx(67.664) );
     CHECK( backtobackData.get1DCutVariable(3) == Approx(168.655) );
+    CHECK( backtobackData.getMinimumCutValue() == Approx(54.913) );
     // 4 jets outside tau, MET collinear with jet 2
     mgr.setEntry(2);
     tauData = tausel.silentAnalyze(event);
@@ -407,6 +411,5 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     REQUIRE_THROWS_AS( AngularCutsBackToBack::Data bbData = backtobacksel.silentAnalyze(event, tauData, jetData, metData), hplus::Exception );  }
   ec.setOutput(f);
   ec.serialize();
-  f->Write();
-  f->Close();
+  closeDirectory(f);
 }

@@ -89,6 +89,8 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
 
   std::vector<float> tau_pt_esup; tree->Branch((tauPrefix+"_pt_systVarTESUp").c_str(),  &tau_pt_esup);
   std::vector<float> tau_e_esup;  tree->Branch((tauPrefix+"_e_systVarTESUp").c_str(),   &tau_e_esup);
+  std::vector<float> tau_eta_esup; tree->Branch((tauPrefix+"_eta_systVarTESUp").c_str(),  &tau_eta_esup);
+  std::vector<float> tau_phi_esup; tree->Branch((tauPrefix+"_phi_systVarTESUp").c_str(),  &tau_phi_esup);
 
 
   double MET_et;  tree->Branch("MET_Type1_et", &MET_et);
@@ -109,6 +111,8 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   tau_e = std::vector<float>{60.f, 25.f, 40.f, 30.f};
   tau_pt_esup = esScale(tau_pt, TAU_ESUP);
   tau_e_esup = esScale(tau_e, TAU_ESUP);
+  tau_eta_esup = tau_eta;
+  tau_phi_esup = tau_phi;
   tau_decayModeFinding = std::vector<bool>{true, false, true, false};
   tau_discriminator1 = std::vector<bool>{true, true,  true,  false};
   tau_discriminator2 = std::vector<bool>{true, true, false, true};
@@ -127,6 +131,8 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   tau_e = std::vector<float>{25.f};
   tau_pt_esup = esScale(tau_pt, TAU_ESUP);
   tau_e_esup = esScale(tau_e, TAU_ESUP);
+  tau_eta_esup = tau_eta;
+  tau_phi_esup = tau_phi;
   tau_decayModeFinding = std::vector<bool>{true};
   tau_discriminator1 = std::vector<bool>{true};
   tau_discriminator2 = std::vector<bool>{false};
@@ -146,6 +152,8 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   tau_e = std::vector<float>{17.f, 20.f};
   tau_pt_esup = esScale(tau_pt, TAU_ESUP);
   tau_e_esup = esScale(tau_e, TAU_ESUP);
+  tau_eta_esup = tau_eta;
+  tau_phi_esup = tau_phi;
   tau_decayModeFinding = std::vector<bool>{false, false};
   tau_discriminator1 = std::vector<bool>{true, true};
   tau_discriminator2 = std::vector<bool>{false, false};
@@ -168,4 +176,32 @@ boost::property_tree::ptree getMinimalConfig() {
   tmp.put("JetSelection.jetPUIDDiscr", "");
   tmp.put("BJetSelection.bjetDiscr", "");
   return tmp;
+}
+
+TDirectory* getDirectory(std::string name) {
+  char* str = getenv("DEBUGUNITTEST");
+  if (str != NULL) {
+    std::string s(getenv("DEBUGUNITTEST"));
+    if (s == "yes") {
+      std::string fullname = name+".root";
+      TFile* f = new TFile(fullname.c_str(), "recreate");
+      return f;
+    }
+  }
+  return new TDirectory(name.c_str(), name.c_str());
+}
+
+void closeDirectory(TDirectory* d) {
+  char* str = getenv("DEBUGUNITTEST");
+  if (str != NULL) {
+    std::string s(getenv("DEBUGUNITTEST"));
+    if (s == "yes") {
+      d->Write();
+      d->Close();
+      delete d;
+      return;
+    }
+  }
+  d->Close();
+  delete d;
 }

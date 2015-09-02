@@ -49,7 +49,12 @@ ElectronSelection::Data ElectronSelection::silentAnalyze(const Event& event) {
 
 ElectronSelection::Data ElectronSelection::analyze(const Event& event) {
   ensureAnalyzeAllowed(event.eventID());
-  return privateAnalyze(event);
+  ElectronSelection::Data data = privateAnalyze(event);
+  // Send data to CommonPlots
+  if (fCommonPlots != nullptr)
+    fCommonPlots->fillControlPlotsAtElectronSelection(event, data);
+  // Return data
+  return data;
 }
 
 ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
@@ -102,7 +107,7 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
   } else {
     if (output.fSelectedElectrons.size() > 0)
       cPassedElectronSelection.increment();
-  }
+  } 
   // Return data object
   return output;
 }

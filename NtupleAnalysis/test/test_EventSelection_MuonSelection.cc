@@ -27,7 +27,7 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
   ParameterSet pset(tmp, true);
 
   // Create necessary objects for testing
-  TFile* f = new TFile("test_MuonSelection.root", "recreate");
+  TDirectory* f = getDirectory("test_MuonSelection");
   CommonPlots* commonPlotsPointer = 0;
   EventWeight weight;
   HistoWrapper histoWrapper(weight, "Debug");
@@ -120,6 +120,5 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
   }
   ec.setOutput(f);
   ec.serialize();
-  f->Write();
-  f->Close();
+  closeDirectory(f);
 }
