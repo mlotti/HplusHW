@@ -12,5 +12,5 @@ skim = cms.EDFilter("SignalAnalysisSkim",
     ),
     JetEtCut       = cms.double(20),
     JetEtaCut      = cms.double(2.4),
-    NJets          = cms.int32(3),
+    NJets          = cms.int32(4),
 )

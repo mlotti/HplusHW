@@ -20,6 +20,7 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Common/interface/Ptr.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/TriggerNamesService.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 
@@ -39,11 +40,10 @@ class SignalAnalysisSkim : public edm::EDFilter {
   	virtual bool filter(edm::Event&, const edm::EventSetup& );
 
    private:
-	edm::InputTag triggerResults;
+	edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
 	std::vector<std::string> triggerBits;
 
-        edm::InputTag	jetCollection;
-
+        edm::EDGetTokenT<edm::View<pat::Jet>> jetToken;
         std::vector<std::string> jetUserFloats;
 
 	double jetEtCut,jetEtaCut;
@@ -52,11 +52,12 @@ class SignalAnalysisSkim : public edm::EDFilter {
         int nEvents, nSelectedEvents;
 };
 
-SignalAnalysisSkim::SignalAnalysisSkim(const edm::ParameterSet& iConfig) {
-    triggerResults     = iConfig.getParameter<edm::InputTag>("TriggerResults");
+SignalAnalysisSkim::SignalAnalysisSkim(const edm::ParameterSet& iConfig)
+: trgResultsToken(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"))),
+  jetToken(consumes<edm::View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("JetCollection")))
+{
     triggerBits        = iConfig.getParameter<std::vector<std::string> >("HLTPaths");
 
-    jetCollection      = iConfig.getParameter<edm::InputTag>("JetCollection");
     jetUserFloats      = iConfig.getParameter<std::vector<std::string> >("JetUserFloats");
 
     jetEtCut           = iConfig.getParameter<double>("JetEtCut");
@@ -84,7 +85,7 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
 
     // Trigger bits
     edm::Handle<edm::TriggerResults> trghandle;
-    iEvent.getByLabel(triggerResults,trghandle);
+    iEvent.getByToken(trgResultsToken,trghandle);
     if(trghandle.isValid()){
         edm::TriggerResults tr = *trghandle;
         bool fromPSetRegistry;
@@ -119,7 +120,7 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
     }
 
     edm::Handle<edm::View<pat::Jet> > jethandle;
-    iEvent.getByLabel(jetCollection, jethandle);
+    iEvent.getByToken(jetToken, jethandle);
     int njets = 0;
     if(jethandle.isValid()){
         for(size_t i=0; i<jethandle->size(); ++i) {

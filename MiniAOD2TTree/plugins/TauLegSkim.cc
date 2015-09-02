@@ -20,6 +20,7 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Common/interface/Ptr.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/TriggerNamesService.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 
@@ -40,11 +41,11 @@ class TauLegSkim : public edm::EDFilter {
   	virtual bool filter(edm::Event&, const edm::EventSetup& );
 
    private:
-	edm::InputTag triggerResults;
+	edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
 	std::vector<std::string> triggerBits;
 
-        edm::InputTag	tauCollection;
-        edm::InputTag	muonCollection;
+        edm::EDGetTokenT<edm::View<pat::Tau>> tauToken;
+        edm::EDGetTokenT<edm::View<pat::Muon>> muonToken;
 
         std::vector<std::string> tauDiscriminators;
         std::vector<std::string> muonDiscriminators;
@@ -55,13 +56,14 @@ class TauLegSkim : public edm::EDFilter {
         int nEvents, nSelectedEvents;
 };
 
-TauLegSkim::TauLegSkim(const edm::ParameterSet& iConfig) {
-    triggerResults     = iConfig.getParameter<edm::InputTag>("TriggerResults");
+TauLegSkim::TauLegSkim(const edm::ParameterSet& iConfig)
+: trgResultsToken(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"))),
+  tauToken(consumes<edm::View<pat::Tau>>(iConfig.getParameter<edm::InputTag>("TauCollection"))),
+  muonToken(consumes<edm::View<pat::Muon>>(iConfig.getParameter<edm::InputTag>("TauCollection")))
+{
     triggerBits        = iConfig.getParameter<std::vector<std::string> >("HLTPaths");
 
-    tauCollection      = iConfig.getParameter<edm::InputTag>("TauCollection");
     tauDiscriminators  = iConfig.getParameter<std::vector<std::string> >("TauDiscriminators");
-    muonCollection     = iConfig.getParameter<edm::InputTag>("MuonCollection");
     muonDiscriminators = iConfig.getParameter<std::vector<std::string> >("MuonDiscriminators");
 
     tauPtCut           = iConfig.getParameter<double>("TauPtCut");
@@ -91,7 +93,7 @@ bool TauLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
 
     // Trigger bits
     edm::Handle<edm::TriggerResults> trghandle;
-    iEvent.getByLabel(triggerResults,trghandle);
+    iEvent.getByToken(trgResultsToken,trghandle);
     if(trghandle.isValid()){
         edm::TriggerResults tr = *trghandle;
         bool fromPSetRegistry;
@@ -119,7 +121,7 @@ bool TauLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
     // Tau
     std::vector<pat::Tau> selectedTaus;
     edm::Handle<edm::View<pat::Tau> > tauhandle;
-    iEvent.getByLabel(tauCollection, tauhandle);
+    iEvent.getByToken(tauToken, tauhandle);
     if(tauhandle.isValid()){
         for(size_t i=0; i<tauhandle->size(); ++i) {
             const pat::Tau& tau = tauhandle->at(i);
@@ -138,7 +140,7 @@ bool TauLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
     // Muon
     std::vector<pat::Muon> selectedMuons;
     edm::Handle<edm::View<pat::Muon> > muonhandle;
-    iEvent.getByLabel(muonCollection, muonhandle);
+    iEvent.getByToken(muonToken, muonhandle);
     if(muonhandle.isValid()){
         for(size_t i=0; i<muonhandle->size(); ++i) {
             const pat::Muon& muon = muonhandle->at(i);

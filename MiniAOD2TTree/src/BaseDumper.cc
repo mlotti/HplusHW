@@ -2,10 +2,13 @@
 
 BaseDumper::BaseDumper(){}
 
-BaseDumper::BaseDumper(std::vector<edm::ParameterSet> psets){
+BaseDumper::BaseDumper(std::vector<edm::ParameterSet>& psets){
     inputCollections = psets;
+    useFilter        = false;
     booked           = false;
+    nDiscriminators  = 0;
 }
+
 BaseDumper::~BaseDumper(){}
 
 void BaseDumper::book(TTree* tree){

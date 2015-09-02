@@ -1,3 +1,5 @@
+# For miniAOD instructions see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2015 
+
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
@@ -30,6 +32,43 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag()), '')
 print "GlobalTag="+dataVersion.getGlobalTag()
 
+# Set up electron ID (VID framework)
+# https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+# define which IDs we want to produce and add them to the VID producer
+for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PHYS14_PU20bx25_nonTrig_V1_cff']:
+    setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
+
+# Set up HBHE noise filter
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
+process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
+
+process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
+   inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+   reverseDecision = cms.bool(False)
+)
+
+# Set up MET uncertainties - FIXME: does not work at the moment
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATTools#MET_Systematics_Tools
+#import PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties as metUncertaintyTools
+#metUncertaintyTools.runMETCorrectionsAndUncertainties(process=process, 
+                                                      #metType="PF",
+                                                      #correctionLevel=["T0","T1","Txy"], # additional options: Smear 
+                                                      #computeUncertainties=True,
+                                                      #produceIntermediateCorrections=False,
+                                                      #addToPatDefaultSequence=True,
+                                                      #jetCollection=cms.InputTag("slimmedJets"),
+                                                      #jetCollectionUnskimmed=cms.InputTag("slimmedJets"),
+                                                      #electronCollection="",
+                                                      #muonCollection="",
+                                                      #tauCollection="",
+                                                      #pfCandCollection=cms.InputTag("packedPFCandidates"),
+                                                      #onMiniAOD=True,
+                                                      #postfix="Type01xy")
+
+# Set up tree dumper
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
@@ -38,12 +77,13 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Skim = cms.PSet(
 	Counters = cms.VInputTag(
 	    "skimCounterAll",
+	    "skimCounterMETFilters",
             "skimCounterPassed"
         ),
     ),
     EventInfo = cms.PSet(
 	PileupSummaryInfoSrc = cms.InputTag("addPileupInfo"),
-#	LHESrc = cms.InputTag(""),
+	LHESrc = cms.InputTag("externalLHEProducer"),
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
     ),
     Trigger = cms.PSet(
@@ -56,33 +96,42 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	filter = cms.untracked.bool(False)
     ),
+    METNoiseFilter = cms.PSet(
+        triggerResults = cms.InputTag("TriggerResults::PAT"),
+        printTriggerResultsList = cms.untracked.bool(False),
+        filtersFromTriggerResults = cms.vstring(
+            "Flag_CSCTightHaloFilter",
+            "Flag_goodVertices",
+            "Flag_eeBadScFilter",
+        ),
+    ),
     Taus = cms.VPSet(
         cms.PSet(
             branchname = cms.untracked.string("Taus"),
             src = cms.InputTag("slimmedTaus"),
             discriminators = cms.vstring(
-                "againstElectronLoose",
+                #"againstElectronLoose",
                 "againstElectronLooseMVA5",
                 "againstElectronMVA5category",
-                "againstElectronMVA5raw",
-                "againstElectronMedium",
+                #"againstElectronMVA5raw",
+                #"againstElectronMedium",
                 "againstElectronMediumMVA5",
-                "againstElectronTight",
+                #"againstElectronTight",
                 "againstElectronTightMVA5",
                 "againstElectronVLooseMVA5",
                 "againstElectronVTightMVA5",
-                "againstMuonLoose",
-                "againstMuonLoose2",
+                #"againstMuonLoose",
+                #"againstMuonLoose2",
                 "againstMuonLoose3",
-                "againstMuonLooseMVA",
-                "againstMuonMVAraw",
-                "againstMuonMedium",
-                "againstMuonMedium2",
-                "againstMuonMediumMVA",
-                "againstMuonTight",
-                "againstMuonTight2",
+                #"againstMuonLooseMVA",
+                #"againstMuonMVAraw",
+                #"againstMuonMedium",
+                #"againstMuonMedium2",
+                #"againstMuonMediumMVA",
+                #"againstMuonTight",
+                #"againstMuonTight2",
                 "againstMuonTight3",
-                "againstMuonTightMVA",
+                #"againstMuonTightMVA",
                 "byCombinedIsolationDeltaBetaCorrRaw3Hits",
                 "byIsolationMVA3newDMwLTraw",
                 "byIsolationMVA3newDMwoLTraw",
@@ -121,14 +170,20 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
                 "neutralIsoPtSum",
                 "puCorrPtSum"
 	    ),
-            filter = cms.untracked.bool(False)
+            filter = cms.untracked.bool(False),
+            jetSrc = cms.InputTag("slimmedJets"), # made from ak4PFJetsCHS
+            TESvariation = cms.untracked.double(0.03),
+            TESvariationExtreme = cms.untracked.double(0.10)
         )
     ),
     Electrons = cms.VPSet(
         cms.PSet(
             branchname = cms.untracked.string("Electrons"),
             src = cms.InputTag("slimmedElectrons"),
-            discriminators = cms.vstring()
+            rhoSource = cms.InputTag("fixedGridRhoFastjetAll"), # for PU mitigation in isolation
+            IDprefix = cms.string("egmGsfElectronIDs"),
+            discriminators = cms.vstring("mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp80",
+                                         "mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp90")
         )
     ),
     Muons = cms.VPSet(   
@@ -141,17 +196,19 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Jets = cms.VPSet(      
         cms.PSet(
             branchname = cms.untracked.string("Jets"),       
-            src = cms.InputTag("slimmedJets"),      
+            src = cms.InputTag("slimmedJets"), # made from ak4PFJetsCHS
             discriminators = cms.vstring(
-                "jetBProbabilityBJetTags",
-                "jetProbabilityBJetTags",
-                "trackCountingHighPurBJetTags", 
-                "trackCountingHighEffBJetTags",
-                "simpleSecondaryVertexHighEffBJetTags",
-                "simpleSecondaryVertexHighPurBJetTags",
-                "combinedSecondaryVertexBJetTags",
-                "combinedInclusiveSecondaryVertexBJetTags",
-                "combinedInclusiveSecondaryVertexV2BJetTags",
+                "pfJetBProbabilityBJetTags",
+                "pfJetProbabilityBJetTags",
+                #"trackCountingHighPurBJetTags", 
+                #"trackCountingHighEffBJetTags",
+                #"simpleSecondaryVertexHighEffBJetTags",
+                #"simpleSecondaryVertexHighPurBJetTags",
+                "pfCombinedSecondaryVertexBJetTags",
+                "pfCombinedInclusiveSecondaryVertexBJetTags",
+                #"combinedInclusiveSecondaryVertexV2BJetTags", # for 72x
+                "pfCombinedInclusiveSecondaryVertexV2BJetTags", # for 74x
+                "pfCombinedMVABJetTag",
             ),
 	    userFloats = cms.vstring(
 		"pileupJetId:fullDiscriminant"
@@ -171,21 +228,56 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             filter = cms.untracked.bool(False)
         )
     ),
+    GenJets = cms.VPSet(      
+        cms.PSet(
+            branchname = cms.untracked.string("GenJets"),
+            src = cms.InputTag("slimmedGenJets"), # ak4
+        )
+    ),
+    GenParticles = cms.VPSet(      
+        cms.PSet(
+            branchname = cms.untracked.string("genParticles"),
+            src = cms.InputTag("prunedGenParticles"),
+            saveAllGenParticles = cms.untracked.bool(False),
+            saveGenElectrons = cms.untracked.bool(True),
+            saveGenMuons = cms.untracked.bool(True),
+            saveGenTaus = cms.untracked.bool(True),
+            saveGenNeutrinos = cms.untracked.bool(True),
+            saveTopInfo = cms.untracked.bool(True),
+            saveWInfo = cms.untracked.bool(True),
+            saveHplusInfo = cms.untracked.bool(True),
+        )
+    ),
+    Tracks =  cms.VPSet(      
+        cms.PSet(
+            branchname = cms.untracked.string("PFcandidates"),
+            src = cms.InputTag("packedPFCandidates"),
+            ptCut = cms.untracked.double(0.0), # pt < value
+            etaCut = cms.untracked.double(2.5), # abs(eta) < value
+        )
+    ),
 )
 
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
 
-process.skimCounterAll    = cms.EDProducer("HPlusEventCountProducer")
-process.skimCounterPassed = cms.EDProducer("HPlusEventCountProducer")
-
+process.skimCounterAll        = cms.EDProducer("EventCountProducer")
+process.skimCounterMETFilters = cms.EDProducer("EventCountProducer")
+process.skimCounterPassed     = cms.EDProducer("EventCountProducer")
 
 # module execution
-process.runEDFilter = cms.Path(process.skimCounterAll*process.skim*process.skimCounterPassed*process.dump)
+process.runEDFilter = cms.Path(process.skimCounterAll*
+                               process.HBHENoiseFilterResultProducer* #Produces HBHE bools
+                               process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
+                               process.skimCounterMETFilters*
+                               process.skim*
+                               process.skimCounterPassed*
+                               process.egmGsfElectronIDSequence*
+                               process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
-#    outputCommands = cms.untracked.vstring(
-#        "keep *",
-#    ),
-#    fileName = cms.untracked.string("CMSSW.root")
+   #outputCommands = cms.untracked.vstring(
+       #"keep *",
+   #),
+   #fileName = cms.untracked.string("CMSSW.root")
 #)
 #process.out_step = cms.EndPath(process.output)

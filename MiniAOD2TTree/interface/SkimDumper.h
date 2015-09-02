@@ -4,11 +4,13 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Common/interface/Ptr.h"
+#include "DataFormats/Common/interface/MergeableCounter.h"
 
 #include <string>
 #include <vector>
@@ -21,7 +23,7 @@
 
 class SkimDumper {
     public:
-	SkimDumper(edm::ParameterSet&);
+	SkimDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset);
 	~SkimDumper();
 
 	void book();
@@ -34,7 +36,8 @@ class SkimDumper {
 	bool booked;
 
 	edm::ParameterSet inputCollection;
-	std::vector<edm::InputTag> tags;
+        edm::EDGetTokenT<edm::MergeableCounter>* token;
+	//std::vector<edm::InputTag> tags;
 
 	TH1F* hCounter;
 };
