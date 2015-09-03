@@ -49,6 +49,9 @@ process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
    inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
    reverseDecision = cms.bool(False)
 )
+METNoiseFilterSource = "TriggerResults::RECO"
+if dataVersion.isMC():
+    METNoiseFilterSource = "TriggerResults::PAT"
 
 # Set up MET uncertainties - FIXME: does not work at the moment
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATTools#MET_Systematics_Tools
@@ -97,7 +100,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = cms.PSet(
-        triggerResults = cms.InputTag("TriggerResults::PAT"),
+        triggerResults = cms.InputTag(METNoiseFilterSource),
         printTriggerResultsList = cms.untracked.bool(False),
         filtersFromTriggerResults = cms.vstring(
             "Flag_CSCTightHaloFilter",

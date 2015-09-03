@@ -92,7 +92,8 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
   if (!booked) return true;
   
   edm::Handle <reco::GenParticleCollection> genParticlesHandle;
-  iEvent.getByToken(genParticleToken, genParticlesHandle);
+  if (!iEvent.isRealData())
+    iEvent.getByToken(genParticleToken, genParticlesHandle);
 
   for(size_t ic = 0; ic < inputCollections.size(); ++ic){
     edm::Handle<edm::View<pat::Tau>> tauHandle;
@@ -168,7 +169,8 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         // - else                           -> pdgId = 0
 
         // MC match info
-        fillMCMatchInfo(ic, genParticlesHandle, tau);
+        if (!iEvent.isRealData())
+          fillMCMatchInfo(ic, genParticlesHandle, tau);
         // Find matching jet
         reco::Candidate::LorentzVector p4BestJet(0,0,0,0);
         double myMinDeltaR = 999.0;
@@ -184,8 +186,10 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         }
         matchingJet[ic].add(p4BestJet.pt(), p4BestJet.eta(), p4BestJet.phi(), p4BestJet.energy());
         // If tau does not match to e/mu/tau; then store as tau pdgId the partonFlavour of the matching jet
-        if (pdgId[ic][pdgId[ic].size()-1] == -1) {
-          pdgId[ic][pdgId[ic].size()-1] = jetPdgId;
+        if (!iEvent.isRealData()) {
+          if (pdgId[ic][pdgId[ic].size()-1] == -1) {
+            pdgId[ic][pdgId[ic].size()-1] = jetPdgId;
+          }
         }
       } // tau loop
     } 
