@@ -6,6 +6,7 @@
 #include "EventSelection/interface/JetSelection.h"
 #include "EventSelection/interface/TauSelection.h"
 #include "EventSelection/interface/METSelection.h"
+#include "DataFormat/interface/GenJet.h"
 #include "Framework/interface/EventCounter.h"
 #include "Tools/interface/DirectionalCut.h"
 
