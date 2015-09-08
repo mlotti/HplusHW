@@ -120,10 +120,10 @@ bool TriggerDumper::filter(){
 void TriggerDumper::reset(){
     if(booked){
       for(size_t i = 0; i < triggerBits.size(); ++i) iBit[i] = 0;
-      L1MET = 0;
-      L1METphi = 0;
-      HLTMET = 0;
-      HLTMETphi = 0;
+      L1MET_x = 0;
+      L1MET_y = 0;
+      HLTMET_x = 0;
+      HLTMET_y = 0;
 
       HLTTau_pt.clear();
       HLTTau_eta.clear();
