@@ -54,10 +54,10 @@ class TriggerDumper {
         edm::EDGetTokenT<std::vector<l1extra::L1EtMissParticle>> trgL1ETMToken;
 	std::vector<std::string> triggerBits;
 
-	double L1MET;
-        double L1METphi;
-	double HLTMET;
-	double HLTMETphi;
+	double L1MET_x;
+        double L1MET_y;
+	double HLTMET_x;
+	double HLTMET_y;
 
         std::vector<double> HLTTau_pt;
         std::vector<double> HLTTau_eta;

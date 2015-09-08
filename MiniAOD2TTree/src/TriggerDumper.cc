@@ -21,10 +21,10 @@ void TriggerDumper::book(TTree* tree){
 
 void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
     booked = true;
-    theTree->Branch("L1MET_et",&L1MET);
-    theTree->Branch("L1MET_phi",&L1METphi);
-    theTree->Branch("HLTMET_et",&HLTMET);
-    theTree->Branch("HLTMET_phi",&HLTMETphi);
+    theTree->Branch("L1MET_x",&L1MET_x);
+    theTree->Branch("L1MET_y",&L1MET_y);
+    theTree->Branch("HLTMET_x",&HLTMET_x);
+    theTree->Branch("HLTMET_y",&HLTMET_y);
     
     theTree->Branch("HLTTau_pt",&HLTTau_pt);  
     theTree->Branch("HLTTau_eta",&HLTTau_eta);
@@ -52,11 +52,11 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
 bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     edm::Handle<std::vector<l1extra::L1EtMissParticle> > l1etmhandle;
     iEvent.getByToken(trgL1ETMToken, l1etmhandle);
-    L1MET = 0.0;
-    L1METphi = 0.0;
+    L1MET_x = 0.0;
+    L1MET_y = 0.0;
     if(l1etmhandle.isValid() && l1etmhandle->size() > 0){
-	L1MET    = l1etmhandle.product()->begin()->et();
-	L1METphi = l1etmhandle.product()->begin()->phi();
+	L1MET_x = l1etmhandle.product()->begin()->x();
+	L1MET_y = l1etmhandle.product()->begin()->y();
     }
 
     edm::Handle<edm::TriggerResults> trgResultsHandle;
@@ -82,16 +82,16 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	}
     }
 
-    HLTMET    = 0;
-    HLTMETphi = 0;
+    HLTMET_x = 0;
+    HLTMET_y = 0;
     edm::Handle<pat::TriggerObjectStandAloneCollection> patTriggerObjects;
     iEvent.getByToken(trgObjectsToken,patTriggerObjects);
     if(patTriggerObjects.isValid()){
 	for(pat::TriggerObjectStandAloneCollection::const_iterator patTriggerObject = patTriggerObjects->begin();
             patTriggerObject != patTriggerObjects->end(); ++patTriggerObject ) {
 	    if(patTriggerObject->id(trigger::TriggerMET)){
-                HLTMET    = patTriggerObject->p4().Pt();
-                HLTMETphi = patTriggerObject->p4().Phi();
+                HLTMET_x = patTriggerObject->p4().x();
+                HLTMET_y = patTriggerObject->p4().y();
 		//std::cout << "Trigger MET " << patTriggerObject->p4().Pt() << std::endl;
 	    }
 	    if(patTriggerObject->id(trigger::TriggerTau)){
