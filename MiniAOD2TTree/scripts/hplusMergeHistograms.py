@@ -72,17 +72,30 @@ def getHistogramFileSE(stdoutFile, opts):
     return histoFile
 
 def splitFiles(files, filesPerEntry):
-    if filesPerEntry < 0:
-        return [(0, files)]
     i = 0
     ret = []
-    def beg(ind):
-        return ind*filesPerEntry
-    def end(ind):
-        return (ind+1)*filesPerEntry
-    while beg(i) < len(files):
-        ret.append( (i, files[beg(i):end(i)]) )
-        i += 1
+    if filesPerEntry < 0:
+#        return [(0, files)]
+        maxsize = 2000000000
+        sumsize = 0
+        firstFile = 0
+        for ifile,f in enumerate(files):
+            sumsize+=os.stat(f).st_size
+            if sumsize > maxsize:
+                ret.append( (i, files[firstFile:ifile]) )
+                i += 1
+                sumsize = 0
+                firstFile = ifile
+            if ifile == len(files)-1:
+                ret.append( (i, files[firstFile:]) )
+    else:
+        def beg(ind):
+            return ind*filesPerEntry
+        def end(ind):
+            return (ind+1)*filesPerEntry
+        while beg(i) < len(files):
+            ret.append( (i, files[beg(i):end(i)]) )
+            i += 1
     return ret
 
 def hadd(opts, mergeName, inputFiles):
