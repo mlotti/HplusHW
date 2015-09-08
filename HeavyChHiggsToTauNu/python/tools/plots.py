@@ -1146,7 +1146,7 @@ class PlotBase:
     #
     # \param datasetRootHistos  List of dataset.DatasetRootHistoBase or histograms.Histo or TH1/TGraph objects to plot
     # \param saveFormats        List of suffixes for formats for which to save the plot
-    def __init__(self, datasetRootHistos=[], saveFormats=[".png", ".eps", ".C"]):
+    def __init__(self, datasetRootHistos=[], saveFormats=[".png", ".pdf", ".C"]):
         # Create the histogram manager
         if len(datasetRootHistos) > 0:
             if isinstance(datasetRootHistos[0], dataset.DatasetRootHistoBase):
@@ -1173,6 +1173,7 @@ class PlotBase:
                 self.histoMgr = histograms.HistoManager()
                 for histo in histoList:
                     self.histoMgr.appendHisto(histo)
+                
         else:
             self.histoMgr = histograms.HistoManager()
 

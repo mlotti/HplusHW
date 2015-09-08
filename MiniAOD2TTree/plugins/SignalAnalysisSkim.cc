@@ -93,10 +93,10 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
         std::vector<std::string> hlNames; 
         tns->getTrigPaths(tr, hlNames, fromPSetRegistry);
 	bool passed = false;
+        bool trgBitFound = false;
         for(size_t i = 0; i < triggerBits.size(); ++i){
 	    std::regex hlt_re(triggerBits[i]);
 	    int n = 0;
-	    bool trgBitFound = false;
             for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
 		if (std::regex_search(*j, hlt_re)) {
 		    trgBitFound = true;
@@ -107,13 +107,19 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
                 }
 		n++;
             }
-	    if(!trgBitFound) {
-		std::cout << "Skimming with " << triggerBits[i] << ", but trigger not found" << std::endl;
-		for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
-		    std::cout << "    " << *j << std::endl;
-		}
-		exit(1);
-	    }
+        }
+        if(!trgBitFound) {
+            std::cout << "Skimming with trigger bit, but none of the triggers was found!" << std::endl;
+            std::cout << "Looked for triggers:" << std::endl;
+            for (auto& p: triggerBits) {
+                std::cout << "    " << p << std::endl;
+            }
+            
+            std::cout << "Available triggers in dataset:" << std::endl;
+            for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
+                std::cout << "    " << *j << std::endl;
+            }
+            exit(1);
         }
 
 	if(!passed) return false; 

@@ -49,6 +49,9 @@ process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
    inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
    reverseDecision = cms.bool(False)
 )
+METNoiseFilterSource = "TriggerResults::RECO"
+if dataVersion.isMC():
+    METNoiseFilterSource = "TriggerResults::PAT"
 
 # Set up MET uncertainties - FIXME: does not work at the moment
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATTools#MET_Systematics_Tools
@@ -89,15 +92,17 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::HLT"),
 	TriggerBits = cms.vstring(
-	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_JetIdCleaned_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned_v",
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = cms.PSet(
-        triggerResults = cms.InputTag("TriggerResults::PAT"),
+        triggerResults = cms.InputTag(METNoiseFilterSource),
         printTriggerResultsList = cms.untracked.bool(False),
         filtersFromTriggerResults = cms.vstring(
             "Flag_CSCTightHaloFilter",
@@ -260,9 +265,9 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
 
-process.skimCounterAll        = cms.EDProducer("EventCountProducer")
-process.skimCounterMETFilters = cms.EDProducer("EventCountProducer")
-process.skimCounterPassed     = cms.EDProducer("EventCountProducer")
+process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
+process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
+process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
 # module execution
 process.runEDFilter = cms.Path(process.skimCounterAll*
