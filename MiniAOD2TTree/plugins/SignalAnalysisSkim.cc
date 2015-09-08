@@ -112,7 +112,7 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
             std::cout << "Skimming with trigger bit, but none of the triggers was found!" << std::endl;
             std::cout << "Looked for triggers:" << std::endl;
             for (auto& p: triggerBits) {
-                std::cout << "    " << *p << std::endl;
+                std::cout << "    " << p << std::endl;
             }
             
             std::cout << "Available triggers in dataset:" << std::endl;
