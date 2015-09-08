@@ -19,7 +19,7 @@ config.Data.inputDBS = 'global'
 #config.Data.inputDBS = 'phys03'
 config.Data.splitting = 'FileBased'
 #config.Data.totalUnits  = 10
-config.Data.unitsPerJob = 1
+config.Data.unitsPerJob = 5
 config.Data.publication = False
 
 config.section_("Site")
