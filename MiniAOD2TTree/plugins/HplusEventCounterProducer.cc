@@ -54,7 +54,7 @@ void HplusEventCountProducer::produce(edm::Event& iEvent, const edm::EventSetup&
   }
   // For MC, read gen weight
   edm::Handle<GenEventInfoProduct> handle;
-  iEvent.getByToken(token[i], handle);
+  iEvent.getByToken(eventInfoToken, handle);
   if (handle.isValid()) {
     if (handle->weight() < 0.0) {
       ++negativeEventsProcessedInLumi_;
@@ -75,7 +75,7 @@ void HplusEventCountProducer::endLuminosityBlock(LuminosityBlock const& theLumin
 }
 
 void HplusEventCountProducer::endLuminosityBlockProduce(LuminosityBlock & theLuminosityBlock, const EventSetup & theSetup) {
-  LogTrace("EventCounting") << "endLumi: adding +" << positiveEventsProcessedInLumi_ << 
+  LogTrace("EventCounting") << "endLumi: adding +" << positiveEventsProcessedInLumi_
                             << " -" << negativeEventsProcessedInLumi_ << " events" << endl;
 
   auto_ptr<edm::MergeableCounter> numEventsPtr(new edm::MergeableCounter);
