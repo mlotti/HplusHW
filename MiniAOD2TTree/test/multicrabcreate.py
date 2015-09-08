@@ -15,7 +15,7 @@ import datetime
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
 PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
 
-lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-251252_13TeV_PromptReco_Collisions15_JSON.txt"
+lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-254879_13TeV_PromptReco_Collisions15_JSON.txt"
 
 class Dataset :
     def __init__(self,url,dbs="global",dataVersion="74Xmc"):
@@ -31,10 +31,12 @@ class Dataset :
 
 datasetsTauData = []
 datasetsTauData.append(Dataset('/Tau/Run2015B-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
+datasetsTauData.append(Dataset('/Tau/Run2015C-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
 
 datasetsMuonData = []
 #datasetsMuonData.append(Dataset('/SingleMu/Run2015B-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
 datasetsMuonData.append(Dataset('/SingleMuon/Run2015B-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
+datasetsMuonData.append(Dataset('/SingleMuon/Run2015C-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
 
 datasets25ns = []
 datasets25ns.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
@@ -60,6 +62,8 @@ datasets25ns.append(Dataset('/QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8/RunIISp
 datasets25ns.append(Dataset('/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 
 datasets25nsDY = []
+datasets25nsDY.append(Dataset('/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))                 
+datasets25nsDY.append(Dataset('/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM'))
 datasets25nsDY.append(Dataset('/DYJetsToLL_M-100to200_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25nsDY.append(Dataset('/DYJetsToLL_M-200to400_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25nsDY.append(Dataset('/DYJetsToLL_M-400to500_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
@@ -82,7 +86,7 @@ tauLegDatasets         = []
 #tauLegDatasets.append(Dataset('/ZprimeToTauTau_M-1000_Tune4C_13TeV-pythia8/bluj-ZprimeToTauTau_MiniAOD_GRunV47_v2-6b3acb073896b48a28b982ccc80b3330/USER','phys03'))
 tauLegDatasets.extend(datasetsMuonData)
 #tauLegDatasets.extend(datasets25ns)
-#tauLegDatasets.extend(datasets25nsDY)
+tauLegDatasets.extend(datasets25nsDY)
 #tauLegDatasets.extend(datasets50ns)
 
 metLegDatasets         = []
@@ -94,7 +98,7 @@ signalAnalysisDatasets.extend(datasetsTauData)
 signalAnalysisDatasets.extend(datasets25ns)
 
 
-dataset_re = re.compile("^/(?P<name>\S+?)/")
+dataset_re = re.compile("^/(?P<name>\S+?)/(?P<run>Run\S+?)-")
 
 version = ""
 pwd = os.getcwd()
@@ -154,6 +158,8 @@ for dataset in datasets:
     match = dataset_re.search(dataset.URL)
     if match:
         rName = match.group("name")
+	rName+= "_"
+	rName+= match.group("run")
 	rName = rName.replace("-","")
 	tune_match = tune_re.search(rName)
 	if tune_match:
@@ -161,7 +167,7 @@ for dataset in datasets:
         tev_match = tev_re.search(rName)
         if tev_match:
             rName = tev_match.group("name")
-	#print rName
+	print rName
 
         outfilepath = os.path.join(dirName,"crabConfig_"+rName+".py")
 
