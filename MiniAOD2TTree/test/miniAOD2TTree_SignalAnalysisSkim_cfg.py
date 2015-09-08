@@ -265,9 +265,9 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
 
-process.skimCounterAll        = cms.EDProducer("EventCountProducer")
-process.skimCounterMETFilters = cms.EDProducer("EventCountProducer")
-process.skimCounterPassed     = cms.EDProducer("EventCountProducer")
+process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
+process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
+process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
 # module execution
 process.runEDFilter = cms.Path(process.skimCounterAll*
