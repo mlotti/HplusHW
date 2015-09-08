@@ -84,4 +84,4 @@ void HplusEventCountProducer::endLuminosityBlockProduce(LuminosityBlock & theLum
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(HplusHplusEventCountProducer);
+DEFINE_FWK_MODULE(HplusEventCountProducer);
