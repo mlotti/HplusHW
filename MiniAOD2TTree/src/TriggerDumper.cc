@@ -55,8 +55,8 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     L1MET_x = 0.0;
     L1MET_y = 0.0;
     if(l1etmhandle.isValid() && l1etmhandle->size() > 0){
-	L1MET_x = l1etmhandle.product()->begin()->x();
-	L1MET_y = l1etmhandle.product()->begin()->y();
+	L1MET_x = l1etmhandle.product()->begin()->px();
+	L1MET_y = l1etmhandle.product()->begin()->py();
     }
 
     edm::Handle<edm::TriggerResults> trgResultsHandle;
