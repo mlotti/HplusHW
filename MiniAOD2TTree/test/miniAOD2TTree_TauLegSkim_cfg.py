@@ -29,6 +29,25 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag()), '')
 print "GlobalTag="+dataVersion.getGlobalTag()
 
+# Set up HBHE noise filter
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
+process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
+
+process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
+   inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+   reverseDecision = cms.bool(False)
+)
+METNoiseFilterSource = "TriggerResults::RECO"
+if dataVersion.isMC():
+    METNoiseFilterSource = "TriggerResults::PAT"
+
+process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")    
+process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")    
+
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     CodeVersion = cms.string(git.getCommitId()),
@@ -42,7 +61,6 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     ),
     EventInfo = cms.PSet(
 	PileupSummaryInfoSrc = cms.InputTag("addPileupInfo"),
-#	LHESrc = cms.InputTag(""),
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
     ),
     Trigger = cms.PSet(
@@ -55,124 +73,27 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	filter = cms.untracked.bool(False)
     ),
-    Taus = cms.VPSet(
-        cms.PSet(
-            branchname = cms.untracked.string("Taus"),
-            src = cms.InputTag("slimmedTaus"),
-            discriminators = cms.vstring(
-                "againstElectronLoose",
-                "againstElectronLooseMVA5",
-                "againstElectronMVA5category",
-                "againstElectronMVA5raw",
-                "againstElectronMedium",
-                "againstElectronMediumMVA5",
-                "againstElectronTight",
-                "againstElectronTightMVA5",
-                "againstElectronVLooseMVA5",
-                "againstElectronVTightMVA5",
-                "againstMuonLoose",
-                "againstMuonLoose2",
-                "againstMuonLoose3",
-                "againstMuonLooseMVA",
-                "againstMuonMVAraw",
-                "againstMuonMedium",
-                "againstMuonMedium2",
-                "againstMuonMediumMVA",
-                "againstMuonTight",
-                "againstMuonTight2",
-                "againstMuonTight3",
-                "againstMuonTightMVA",
-                "byCombinedIsolationDeltaBetaCorrRaw3Hits",
-                "byIsolationMVA3newDMwLTraw",
-                "byIsolationMVA3newDMwoLTraw",
-                "byIsolationMVA3oldDMwLTraw",
-                "byIsolationMVA3oldDMwoLTraw",
-                "byLooseCombinedIsolationDeltaBetaCorr3Hits",
-                "byLooseIsolationMVA3newDMwLT",
-                "byLooseIsolationMVA3newDMwoLT",
-                "byLooseIsolationMVA3oldDMwLT",
-                "byLooseIsolationMVA3oldDMwoLT",
-                "byMediumCombinedIsolationDeltaBetaCorr3Hits",
-                "byMediumIsolationMVA3newDMwLT",
-                "byMediumIsolationMVA3newDMwoLT",
-                "byMediumIsolationMVA3oldDMwLT",
-                "byMediumIsolationMVA3oldDMwoLT",
-                "byTightCombinedIsolationDeltaBetaCorr3Hits",
-                "byTightIsolationMVA3newDMwLT",
-                "byTightIsolationMVA3newDMwoLT",
-                "byTightIsolationMVA3oldDMwLT",
-                "byTightIsolationMVA3oldDMwoLT",
-                "byVLooseIsolationMVA3newDMwLT",
-                "byVLooseIsolationMVA3newDMwoLT",
-                "byVLooseIsolationMVA3oldDMwLT",
-                "byVLooseIsolationMVA3oldDMwoLT",
-                "byVTightIsolationMVA3newDMwLT",
-                "byVTightIsolationMVA3newDMwoLT",
-                "byVTightIsolationMVA3oldDMwLT",
-                "byVTightIsolationMVA3oldDMwoLT",
-                "byVVTightIsolationMVA3newDMwLT",
-                "byVVTightIsolationMVA3newDMwoLT",
-                "byVVTightIsolationMVA3oldDMwLT",
-                "byVVTightIsolationMVA3oldDMwoLT",
-                "chargedIsoPtSum",
-                "decayModeFinding",
-                "decayModeFindingNewDMs",
-                "neutralIsoPtSum",
-                "puCorrPtSum"
-	    ),
-            filter = cms.untracked.bool(False)
-        )
-    ),
-    Electrons = cms.VPSet(
-        cms.PSet(
-            branchname = cms.untracked.string("Electrons"),
-            src = cms.InputTag("slimmedElectrons"),
-            discriminators = cms.vstring()
-        )
-    ),
-    Muons = cms.VPSet(   
-        cms.PSet(
-            branchname = cms.untracked.string("Muons"),   
-            src = cms.InputTag("slimmedMuons"),    
-            discriminators = cms.vstring() 
-        )   
-    ),
-    Jets = cms.VPSet(      
-        cms.PSet(
-            branchname = cms.untracked.string("Jets"),       
-            src = cms.InputTag("slimmedJets"),      
-            discriminators = cms.vstring(
-                "jetBProbabilityBJetTags",
-                "jetProbabilityBJetTags",
-                "trackCountingHighPurBJetTags", 
-                "trackCountingHighEffBJetTags",
-                "simpleSecondaryVertexHighEffBJetTags",
-                "simpleSecondaryVertexHighPurBJetTags",
-                "combinedSecondaryVertexBJetTags",
-                "combinedInclusiveSecondaryVertexBJetTags",
-                "combinedInclusiveSecondaryVertexV2BJetTags",
-            ),
-	    userFloats = cms.vstring(
-		"pileupJetId:fullDiscriminant"
-	    ),
-        )
-    ),
-    METs = cms.VPSet(
-        cms.PSet(
-            branchname = cms.untracked.string("MET_Type1"),
-            src = cms.InputTag("slimmedMETs")
-        ),
-    )
+    Taus      = process.Taus,
+    Electrons = process.Electrons,
+    Muons     = process.Muons,
+    Jets      = process.Jets,
+    METs      = process.METs
 )
 
 process.load("HiggsAnalysis.MiniAOD2TTree.TauLegSkim_cfi")
 
-process.skimCounterAll    = cms.EDProducer("HPlusEventCountProducer")
-process.skimCounterPassed = cms.EDProducer("HPlusEventCountProducer")
-
+process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
+process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
+process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
 # module execution
-process.runEDFilter = cms.Path(process.skimCounterAll*process.skim*process.skimCounterPassed*process.dump)
+process.runEDFilter = cms.Path(process.skimCounterAll*
+                               process.HBHENoiseFilterResultProducer* #Produces HBHE bools
+                               process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
+                               process.skimCounterMETFilters*
+                               process.skim*
+                               process.skimCounterPassed*
+                               process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
 #    outputCommands = cms.untracked.vstring(
