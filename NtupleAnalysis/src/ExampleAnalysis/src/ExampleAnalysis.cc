@@ -88,7 +88,7 @@ void ExampleAnalysis::process(Long64_t entry) {
       continue;
     if(!(std::abs(tau.eta()) < 2.4))
       continue;
-    if(!(tau.lTrkPt() > 10))
+    if(!(tau.lChTrkPt() > 10))
       continue;
     /*if(!tau.againstElectronTightMVA3())
       continue;

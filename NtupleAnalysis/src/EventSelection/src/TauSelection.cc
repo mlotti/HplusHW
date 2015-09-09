@@ -227,9 +227,9 @@ bool TauSelection::passNprongsCut(const Tau& tau) const {
 
 double TauSelection::getRtau(const Tau& tau) const {
   // Calculate p_z of leading track
-  double pz = std::sinh(static_cast<double>(tau.lTrkEta()))*static_cast<double>(tau.lTrkPt());
+  double pz = std::sinh(static_cast<double>(tau.lChTrkEta()))*static_cast<double>(tau.lChTrkPt());
   // Calcualte p of leading track
-  double p = std::sqrt(pz*pz + static_cast<double>(tau.lTrkPt()*tau.lTrkPt()));
+  double p = std::sqrt(pz*pz + static_cast<double>(tau.lChTrkPt()*tau.lChTrkPt()));
   // Calculate Rtau
   double rtau = -1.0;
   double taup = tau.p4().P();

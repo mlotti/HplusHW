@@ -4,7 +4,8 @@
 EventID::EventID():
   fEvent(nullptr),
   fLumi(nullptr),
-  fRun(nullptr)
+  fRun(nullptr),
+  fNUP(nullptr)
 {}
 EventID::~EventID() {}
 
@@ -12,5 +13,6 @@ void EventID::setupBranches(BranchManager& mgr) {
   mgr.book("event", &fEvent);
   mgr.book("lumi", &fLumi);
   mgr.book("run", &fRun);
+  mgr.book("NUP", &fNUP);
 }
 

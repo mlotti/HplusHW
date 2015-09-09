@@ -8,5 +8,11 @@
 
 void ElectronGeneratedCollection::setupBranches(BranchManager& mgr) {
   ParticleCollection::setupBranches(mgr);
-
+  mgr.book(prefix()+"_mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80", &fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80);
+  mgr.book(prefix()+"_mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", &fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90);
+  mgr.book(prefix()+"_eMCelectron", &fEMCelectron);
+  mgr.book(prefix()+"_etaMCelectron", &fEtaMCelectron);
+  mgr.book(prefix()+"_phiMCelectron", &fPhiMCelectron);
+  mgr.book(prefix()+"_ptMCelectron", &fPtMCelectron);
+  mgr.book(prefix()+"_relIsoDeltaBeta", &fRelIsoDeltaBeta);
 }
