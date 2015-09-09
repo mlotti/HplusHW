@@ -23,8 +23,8 @@ tauSelection = PSet(
                 prongs = 13,    # options: 1, 3, 13 (both 1 and 3) or -1 (all)
                   rtau = 0.7,
     invertTauIsolation = False, # set to true to invert isolation (for QCD measurement)
-  againstElectronDiscr = "againstElectronTight",
-      againstMuonDiscr = "againstMuonMedium",
+  againstElectronDiscr = "againstElectronTightMVA5",
+      againstMuonDiscr = "againstMuonTight3",
         isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
 )
 
@@ -66,7 +66,7 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
 #====== B-jet selection
 bjetSelection = PSet(
              #bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
-             bjetDiscr = "combinedSecondaryVertexBJetTags",
+             bjetDiscr = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
  bjetDiscrWorkingPoint = "Tight",
  numberOfBJetsCutValue = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=

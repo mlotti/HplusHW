@@ -16,8 +16,6 @@ public:
   virtual void process(Long64_t entry) override;
 
 private:
-  Event fEvent;
-
   const float fTauPtCut;
 
   Count cAllEvents;
@@ -46,7 +44,6 @@ REGISTER_SELECTOR(ExampleAnalysis);
 
 ExampleAnalysis::ExampleAnalysis(const ParameterSet& config):
   BaseSelector(config),
-  fEvent(config),
   fTauPtCut(config.getParameter<float>("tauPtCut")),
   cAllEvents(fEventCounter.addCounter("All events")),
   cWeighted(fEventCounter.addCounter("Weighted")),

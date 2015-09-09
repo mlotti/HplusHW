@@ -25,7 +25,7 @@ public:
   unsigned int       run()   const { return fRun->value(); }
   /// Number of partons generated
   int NUP() const { return fNUP->value(); }
-
+  
 private:
   const Branch<unsigned long long> *fEvent;
   const Branch<unsigned int> *fLumi;

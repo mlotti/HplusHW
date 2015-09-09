@@ -33,8 +33,6 @@ private:
   const double fJetEtaCutMin;
   const double fJetEtaCutMax;
 
-  /// Event
-  Event fEvent;
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
   Count cTrigger;
@@ -73,7 +71,6 @@ BTagEfficiencyAnalysis::BTagEfficiencyAnalysis(const ParameterSet& config)
   fJetPtCutMax(config.getParameter<double>("jetPtCutMax")),
   fJetEtaCutMin(config.getParameter<double>("jetEtaCutMin")),
   fJetEtaCutMax(config.getParameter<double>("jetEtaCutMax")),
-  fEvent(config),
   cAllEvents(fEventCounter.addCounter("All events")),
   cTrigger(fEventCounter.addCounter("Passed trigger")),
   cPrescaled(fEventCounter.addCounter("Prescaled")),

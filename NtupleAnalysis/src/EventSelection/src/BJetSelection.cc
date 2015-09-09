@@ -34,7 +34,7 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
   if (sWorkingPoint != "Loose" && sWorkingPoint != "Medium" && sWorkingPoint != "Tight")
     throw hplus::Exception("config") << "b-tagging algorithm working point '" << sWorkingPoint
                                      << "' is not valid!\nValid values are: Loose, Medium, Tight";
-  if (sAlgorithm == "combinedInclusiveSecondaryVertexV2BJetTags") {
+  if (sAlgorithm == "pfCombinedInclusiveSecondaryVertexV2BJetTags") {
     // Preliminary values 10.6.2015 from https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagging
     if (sWorkingPoint == "Loose")
       fDisriminatorValue = 0.423;
@@ -42,7 +42,7 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
       fDisriminatorValue = 0.814;
     else if (sWorkingPoint == "Tight")
       fDisriminatorValue = 0.941;
-  } else if (sAlgorithm == "combinedSecondaryVertexBJetTags") {
+  } else if (sAlgorithm == "pfCombinedSecondaryVertexBJetTags") {
     // Run 1 legacy values
     if (sWorkingPoint == "Loose")
       fDisriminatorValue = 0.244;
