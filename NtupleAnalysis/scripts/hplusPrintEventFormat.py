@@ -107,6 +107,8 @@ def main(opts, args):
     
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options] root_file")
+    parser.add_option("--tree", dest="tree", default="Events",
+                      help="Decypher data format from this tree ")
     (opts, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("You should give exactly one root_file, got %d" % len(args))
