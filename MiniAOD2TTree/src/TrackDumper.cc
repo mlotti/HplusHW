@@ -89,8 +89,8 @@ bool TrackDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 
                 fIPTwrtPV[ic].push_back(cand.dxy());
                 fIPzwrtPV[ic].push_back(cand.dz());
-                fIPTSignif[ic].push_back(cand.dxyError());
-                fIPzSignif[ic].push_back(cand.dzError());
+                fIPTSignif[ic].push_back(IPTSignif);
+                fIPzSignif[ic].push_back(IPzSignif);
 	    }
 	}
     }
