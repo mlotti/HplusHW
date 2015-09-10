@@ -28,7 +28,7 @@ TauDumper::TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     nProngs = new std::vector<short>[inputCollections.size()];
     pdgTauOrigin = new std::vector<short>[inputCollections.size()];
     MCNProngs = new std::vector<short>[inputCollections.size()];
-    MCNgammas = new std::vector<short>[inputCollections.size()];
+    MCNPiZeros = new std::vector<short>[inputCollections.size()];
     MCtau = new FourVectorDumper[inputCollections.size()];
     matchingJet = new FourVectorDumper[inputCollections.size()];
     
@@ -69,7 +69,7 @@ void TauDumper::book(TTree* tree){
         tree->Branch((name+"_pdgId").c_str(),&pdgId[i]);
         tree->Branch((name+"_pdgOrigin").c_str(),&pdgTauOrigin[i]);
         tree->Branch((name+"_mcNProngs").c_str(),&MCNProngs[i]);
-        tree->Branch((name+"_mcNPizero").c_str(),&MCNgammas[i]);
+        tree->Branch((name+"_mcNPizero").c_str(),&MCNPiZeros[i]);
 
         tree->Branch((name+"_lChTrkPt").c_str(),&lChTrackPt[i]);
         tree->Branch((name+"_lChTrkEta").c_str(),&lChTrackEta[i]);
@@ -209,7 +209,7 @@ void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollecti
   bool matchesToMu = false;
   double deltaRBestTau = 9999.0;
   short simulatedNProngs = 0;
-  short simulatedNGammas = 0;
+  short simulatedNPizeros = 0;
   reco::Candidate::LorentzVector p4BestTau(0,0,0,0);
   
   if(genParticles.isValid()){
@@ -251,8 +251,8 @@ void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollecti
           // Calculate prongs and pizeros
           for (auto& po: offspring) {
             int absPid = std::abs(po->pdgId());
-            if (absPid == 22)
-              ++simulatedNGammas;
+            if (absPid == 111)
+              ++simulatedNPizeros;
             if (absPid == 211 || absPid == 321)
               ++simulatedNProngs;
           }
@@ -291,7 +291,7 @@ void TauDumper::fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollecti
   pdgId[ic].push_back(tauPid);
   pdgTauOrigin[ic].push_back(tauOrigin);
   MCNProngs[ic].push_back(simulatedNProngs);
-  MCNgammas[ic].push_back(simulatedNGammas);
+  MCNPiZeros[ic].push_back(simulatedNPizeros);
   MCtau[ic].add(p4BestTau.pt(), p4BestTau.eta(), p4BestTau.phi(), p4BestTau.energy());
 }
 
@@ -334,7 +334,7 @@ void TauDumper::reset(){
 	pdgId[ic].clear();
         pdgTauOrigin[ic].clear();
         MCNProngs[ic].clear();
-        MCNgammas[ic].clear();
+        MCNPiZeros[ic].clear();
         MCtau[ic].reset();
         matchingJet[ic].reset();
         // Systematics
