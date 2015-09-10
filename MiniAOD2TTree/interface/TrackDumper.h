@@ -31,5 +31,10 @@ class TrackDumper : public BaseDumper {
     private:
 	bool filter();
 	edm::EDGetTokenT<edm::View<pat::PackedCandidate>> *token;
+        
+        std::vector<float> *fIPTwrtPV;
+        std::vector<float> *fIPzwrtPV;
+        std::vector<float> *fIPTSignif;
+        std::vector<float> *fIPzSignif;
 };
 #endif
