@@ -20,7 +20,11 @@ void EventInfoDumper::book(TTree* tree){
     tree->Branch("nPUvertices",&nPU);
     tree->Branch("NUP",&NUP);
     tree->Branch("nGoodOfflineVertices",&nGoodOfflinePV);
+    tree->Branch("pvX",&pvX);
+    tree->Branch("pvY",&pvY);
     tree->Branch("pvZ",&pvZ);
+    tree->Branch("pvDistanceToNextVertex",&distanceToNextPV);
+    tree->Branch("pvDistanceToClosestVertex",&distanceToClosestPV);
     tree->Branch("pvPtSumRatioToNext",&ptSumRatio);
 }
 
@@ -54,9 +58,20 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     edm::Handle<edm::View<reco::Vertex> > hoffvertex;
     if(iEvent.getByToken(vertexToken, hoffvertex)){
         nGoodOfflinePV = hoffvertex->size();
+        pvX = hoffvertex->at(0).x();
+        pvY = hoffvertex->at(0).y();
         pvZ = hoffvertex->at(0).z();
         ptSumRatio = -1.0;
+        distanceToNextPV = -1.0;
+        distanceToClosestPV = -1.0;
         if (nGoodOfflinePV > 1) {
+          distanceToNextPV = std::fabs(hoffvertex->at(0).z() - hoffvertex->at(1).z());
+          for (size_t i = 1; i < hoffvertex->size(); ++i) {
+            float delta = std::fabs(hoffvertex->at(0).z() - hoffvertex->at(i).z());
+            if (delta < distanceToClosestPV || distanceToClosestPV < 0.0) {
+              distanceToClosestPV = delta;
+            }
+          }
           double ptSum0 = 0.0;
           for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex->at(0).tracks_begin(); iter != hoffvertex->at(0).tracks_end(); iter++) {
             ptSum0 += hoffvertex->at(0).trackWeight(*iter) * (*iter)->pt()*(*iter)->pt();
