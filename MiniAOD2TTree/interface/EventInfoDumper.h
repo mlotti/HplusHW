@@ -41,6 +41,7 @@ class EventInfoDumper {
         
 	unsigned long long event;
 	unsigned int run,lumi;
+        float prescale;
 	short nPU;
 	short NUP;
 	short nGoodOfflinePV;

@@ -19,6 +19,10 @@
 
 #include "HiggsAnalysis/MiniAOD2TTree/interface/BaseDumper.h"
 
+namespace reco {
+  class Vertex;
+}
+
 class TrackDumper : public BaseDumper {
     public:
 	TrackDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& );
@@ -31,6 +35,7 @@ class TrackDumper : public BaseDumper {
     private:
 	bool filter();
 	edm::EDGetTokenT<edm::View<pat::PackedCandidate>> *token;
+        edm::EDGetTokenT<edm::View<reco::Vertex>> *vertexToken;
         
         std::vector<float> *fIPTwrtPV;
         std::vector<float> *fIPzwrtPV;

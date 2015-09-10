@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TrackDumper.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 
 TrackDumper::TrackDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets) {
     inputCollections = psets;
@@ -16,10 +17,15 @@ TrackDumper::TrackDumper(edm::ConsumesCollector&& iConsumesCollector, std::vecto
     fIPzSignif  = new std::vector<float>[inputCollections.size()];
     
     token = new edm::EDGetTokenT<edm::View<pat::PackedCandidate>>[inputCollections.size()];
+    vertexToken = new edm::EDGetTokenT<edm::View<reco::Vertex>>[inputCollections.size()];
 
     for(size_t i = 0; i < inputCollections.size(); ++i){
       edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
       token[i] = iConsumesCollector.consumes<edm::View<pat::PackedCandidate>>(inputtag);
+    }
+    for(size_t i = 0; i < inputCollections.size(); ++i){
+      edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("OfflinePrimaryVertexSrc");
+      vertexToken[i] = iConsumesCollector.consumes<edm::View<reco::Vertex>>(inputtag);
     }
     
     useFilter = false;
@@ -60,6 +66,9 @@ bool TrackDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         edm::Handle<edm::View<pat::PackedCandidate> > handle;
         iEvent.getByToken(token[ic], handle);
         
+        edm::Handle<edm::View<reco::Vertex> > hoffvertex;
+        iEvent.getByToken(vertexToken[ic], hoffvertex);
+
 	if(handle.isValid()){
 	    for(size_t i=0; i<handle->size(); ++i) {  
                 const pat::PackedCandidate& cand = handle->at(i);
@@ -72,14 +81,19 @@ bool TrackDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                   if (!(absPid == 11 || absPid == 13 || absPid == 211)) continue;
                 }
                 // Save only those particles, which are within 5 mm
-                if (cand.dz() > IPvsPVzCut) continue;
+                if (!hoffvertex->size()) continue;
+                // Convert vertex dimensions into mm
+                math::XYZPoint pv(hoffvertex->at(0).x()*10.0, hoffvertex->at(0).y()*10.0, hoffvertex->at(0).z()*10.0);
+                float dxy = cand.dxy(pv);
+                float dz = cand.dz(pv);
+                if (std::fabs(dz) > IPvsPVzCut) continue;
                 // Calculate IP significances
                 float IPTSignif = 0.0;
-                if (cand.dxyError() > 0.0)
-                  IPTSignif = cand.dxy() / cand.dxyError();
+                if (dxy > 0.0)
+                  IPTSignif = dxy / cand.dxyError();
                 float IPzSignif = 0.0;
-                if (cand.dzError() > 0.0)
-                  IPzSignif = cand.dz() / cand.dzError();
+                if (dz > 0.0)
+                  IPzSignif = dz / cand.dzError();
                 // Save candidates which have passed the cuts
                 pt[ic].push_back(cand.p4().pt());
                 eta[ic].push_back(cand.p4().eta());
@@ -87,8 +101,8 @@ bool TrackDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 e[ic].push_back(cand.p4().energy());
                 pdgId[ic].push_back(cand.pdgId());
                 
-                fIPTwrtPV[ic].push_back(cand.dxy());
-                fIPzwrtPV[ic].push_back(cand.dz());
+                fIPTwrtPV[ic].push_back(dxy);
+                fIPzwrtPV[ic].push_back(dz);
                 fIPTSignif[ic].push_back(IPTSignif);
                 fIPzSignif[ic].push_back(IPzSignif);
 	    }
