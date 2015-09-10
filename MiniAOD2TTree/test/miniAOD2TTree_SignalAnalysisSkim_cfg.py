@@ -152,10 +152,11 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         cms.PSet(
             branchname = cms.untracked.string("PFcandidates"),
             src = cms.InputTag("packedPFCandidates"),
+            OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
             ptCut = cms.untracked.double(0.0), # pt < value
             etaCut = cms.untracked.double(2.5), # abs(eta) < value
             saveOnlyChargedParticles = cms.untracked.bool(True),
-            IPvsPVz = cms.untracked.double(0.5), # abs(IPz-PVz) < value
+            IPvsPVz = cms.untracked.double(5), # abs(IPz-PVz) < value
         )
     ),
 )
