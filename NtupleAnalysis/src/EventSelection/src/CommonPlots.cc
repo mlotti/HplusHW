@@ -348,7 +348,7 @@ void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event)
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().eta());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().phi());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaPhiAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().eta(), fTauData.getSelectedTau().phi());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().lTrkPt());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().lChTrkPt());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().decayModeFinding());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterStdSelections, bIsFakeTau, fTauData.getRtauOfSelectedTau());
   
@@ -367,7 +367,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().eta());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().phi());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaPhiAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().eta(), fTauData.getSelectedTau().phi());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().lTrkPt());
+  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().lChTrkPt());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().decayModeFinding());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterAllSelections, bIsFakeTau, fTauData.getRtauOfSelectedTau());
   

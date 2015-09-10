@@ -41,10 +41,14 @@ class EventInfoDumper {
         
 	unsigned long long event;
 	unsigned int run,lumi;
-	int nPU;
-	int NUP;
-	int nGoodOfflinePV;
+	short nPU;
+	short NUP;
+	short nGoodOfflinePV;
+        float pvX;
+        float pvY;
         float pvZ;
+        float distanceToNextPV;
+        float distanceToClosestPV;
         float ptSumRatio; // Ratio of track pt sum of first and second vertex
 
 };

@@ -2,7 +2,6 @@
 #include "Framework/interface/BaseSelector.h"
 #include "Framework/interface/makeTH.h"
 
-#include "DataFormat/interface/Event.h"
 #include "EventSelection/interface/CommonPlots.h"
 #include "EventSelection/interface/EventSelections.h"
 
@@ -23,8 +22,6 @@ public:
 private:
   // Input parameters
 
-  /// Event
-  Event fEvent;
   /// Common plots
   CommonPlots fCommonPlots;
   // Event selection classes and event counters (in same order like they are applied)
@@ -55,7 +52,6 @@ REGISTER_SELECTOR(SignalAnalysis);
 
 SignalAnalysis::SignalAnalysis(const ParameterSet& config)
 : BaseSelector(config),
-  fEvent(config),
   fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kSignalAnalysis, fHistoWrapper),
   cAllEvents(fEventCounter.addCounter("All events")),
   cTrigger(fEventCounter.addCounter("Passed trigger")),
@@ -116,16 +112,17 @@ void SignalAnalysis::process(Long64_t entry) {
   if (!(fEvent.passTriggerDecision()))
     return;
   cTrigger.increment();
-  
-//====== Set prescale // FIXME missing code
-  cPrescaled.increment();
-  
+ 
 //====== PU reweighting // FIXME missing code
-  //fEventWeight.multiplyWeight(0.5);
-  cPileupWeighted.increment();
+  if (fEvent.isMC()) {
+    //fEventWeight.multiplyWeight(0.5);
+    cPileupWeighted.increment();
+  }
 
 //====== Top pT weighting // FIXME missing code
-  cTopPtReweighted.increment();
+  if (fEvent.isMC()) {
+    cTopPtReweighted.increment();
+  }
   
 //====== Combining of W+jets and Z+jets inclusive and exclusive samples // FIXME missing code
   cExclusiveSamplesWeighted.increment();

@@ -172,13 +172,13 @@ config = {
     "74Xdata": {
 	"triggerProcess": "HLT", 
 	"recoProcess": "RECO",
-        "globalTag": "GR_R_71_V1",
+        "globalTag": "74X_dataRun2_v2",
     },
     "74Xmc": {
         "simProcess": "SIM",
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-        "globalTag": "MCRUN2_74_V9",
+        "globalTag": "74X_mcRun2_asymptotic_v2",
         "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
     }
 }

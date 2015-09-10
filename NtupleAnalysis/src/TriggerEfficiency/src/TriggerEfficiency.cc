@@ -22,7 +22,6 @@ public:
   virtual void process(Long64_t entry) override;
 
 private:
-  Event fEvent;
   PileupWeight fPileupWeight;
 
   std::string fName;
@@ -60,7 +59,6 @@ REGISTER_SELECTOR(TriggerEfficiency);
 
 TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   BaseSelector(config),
-  fEvent(config),
   fPileupWeight(config),
   fName(config.getParameter<std::string>("name")),
   fOfflineSelection(config.getParameter<std::string>("offlineSelection")),

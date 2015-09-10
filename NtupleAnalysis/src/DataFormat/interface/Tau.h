@@ -4,6 +4,7 @@
 
 #include "DataFormat/interface/TauGenerated.h"
 #include "DataFormat/interface/ParticleIterator.h"
+#include "MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
 
 #include <vector>
 
@@ -62,6 +63,24 @@ public:
   Tau(const TauCollection* coll, size_t index): TauGenerated(coll, index) {}
   ~Tau() {}
 
+  // Getters for MC tau identifier
+  bool isGenuineTau() const { return this->pdgId() == TauDecayMatchType::kTauDecaysToHadrons; }
+  bool isFakeTau() const { return !isGenuineTau(); }
+  bool isElectronToTau() const { return this->pdgId() == TauDecayMatchType::kElectronToTau || this->pdgId() == TauDecayMatchType::kTauDecaysToElectron; }
+  bool isMuonToTau() const { return this->pdgId() == TauDecayMatchType::kMuonToTau || this->pdgId() == TauDecayMatchType::kTauDecaysToMuon; }
+  bool isJetToTau() const { return (this->pdgId() >= TauDecayMatchType::kTauDecayUnknown && this->pdgId() >= TauDecayMatchType::kBToTau) || this->pdgId() >= TauDecayMatchType::kGluonToTau; }
+  bool isQuarkToTau(int quarkPid) const { return this->pdgId() == std::abs(quarkPid); }
+  bool isGluonToTau() const { return this->pdgId() >= TauDecayMatchType::kGluonToTau; }
+  bool isUnknownTauDecay() const { return this->pdgId() >= TauDecayMatchType::kTauDecayUnknown; /* NOTE: return this is assumed to be jet->tau */ }
+  
+  // Getters for MC tau origin
+  bool isFromZDecay() const { return this->pdgOrigin() == TauOriginType::kFromZ; }
+  bool isFromWDecay() const { return this->pdgOrigin() == TauOriginType::kFromW; }
+  bool isFromHplusDecay() const { return this->pdgOrigin() == TauOriginType::kFromHplus; }
+  bool isFromOtherSource() const { return this->pdgOrigin() == TauOriginType::kFromOtherSource; }
+  bool isFromUnknownSource() const { return this->pdgOrigin() == TauOriginType::kTauOriginUnknown; }
+
+  // Methods for discriminators
   bool configurableDiscriminators() const {
     for(auto& disc: fCollection->fConfigurableDiscriminators) {
       if(!disc->value()[index()])

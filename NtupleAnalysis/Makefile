@@ -13,7 +13,7 @@ BASEDIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 SRCDIR := $(BASEDIR)/src
 
 # Include files
-INC := -I$(SRCDIR) -I$(BASEDIR)/external
+INC := -I$(SRCDIR) -I$(BASEDIR)/external -I$(HIGGSANALYSIS_BASE)
 
 # Directory where to put objects and dependency files
 OBJDIR := $(BASEDIR)/obj

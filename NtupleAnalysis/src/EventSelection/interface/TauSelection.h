@@ -68,7 +68,7 @@ private:
   bool passGenericDiscriminators(const Tau& tau) const { return tau.configurableDiscriminators(); }
   bool passPtCut(const Tau& tau) const { return tau.pt() > fTauPtCut; }
   bool passEtaCut(const Tau& tau) const { return std::abs(tau.eta()) < fTauEtaCut; }
-  bool passLdgTrkPtCut(const Tau& tau) const { return tau.lTrkPt() > fTauLdgTrkPtCut; }
+  bool passLdgTrkPtCut(const Tau& tau) const { return tau.lChTrkPt() > fTauLdgTrkPtCut; }
   bool passElectronDiscriminator(const Tau& tau) const { return tau.againstElectronDiscriminator(); }
   bool passMuonDiscriminator(const Tau& tau) const { return tau.againstMuonDiscriminator(); }
   bool passNprongsCut(const Tau& tau) const;

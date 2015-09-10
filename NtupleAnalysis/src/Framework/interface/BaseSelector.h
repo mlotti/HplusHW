@@ -8,6 +8,8 @@
 #include "Framework/interface/HistoWrapper.h"
 #include "Framework/interface/EventSaver.h"
 
+#include "DataFormat/interface/Event.h"
+
 #include "Rtypes.h"
 #include "TBranch.h"
 #include "TTree.h"
@@ -37,6 +39,14 @@ public:
 
   void processInternal(Long64_t entry) {
     fEventWeight.beginEvent();
+    // Set event weight as negative is generator weight is negative
+    if (fEvent.isMC()) {
+      if (fEvent.genWeight().weight() < 0.0)
+        fEventWeight.multiplyWeight(-1.0);
+    }
+    // Set prescale event weight // FIXME missing code 
+    
+    
     process(entry);
   }
 
@@ -49,6 +59,7 @@ protected:
   bool isMC() const { return fIsMC; }
   bool isData() const { return !isMC(); }
 
+  Event fEvent;
   EventWeight fEventWeight;
   EventCounter fEventCounter;
   HistoWrapper fHistoWrapper;
