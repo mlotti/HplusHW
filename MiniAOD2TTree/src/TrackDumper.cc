@@ -1,6 +1,4 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TrackDumper.h"
-#include <../external/boost_1_57_0/boost/concept_check.hpp>
-
 
 TrackDumper::TrackDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets) {
     inputCollections = psets;
