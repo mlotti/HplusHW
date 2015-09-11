@@ -12,6 +12,6 @@ skim = cms.EDFilter("TauLegSkim",
     TauEtaCut      = cms.double(2.4),
     MuonCollection = cms.InputTag("slimmedMuons"),
     MuonDiscriminators = cms.vstring(""),
-    MuonPtCut      = cms.double(30),
+    MuonPtCut      = cms.double(15),
     MuonEtaCut     = cms.double(2.4),
 )
