@@ -11,9 +11,9 @@ import sys
 import datetime
 
 #PSET = "miniAODGEN2TTree_cfg.py"
-#PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
+PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
-PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
+#PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
 
 lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-254879_13TeV_PromptReco_Collisions15_JSON.txt"
 
