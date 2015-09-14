@@ -10,7 +10,7 @@ void ParticleCollectionBase::setEnergySystematicsVariation(const std::string& sc
   if(scenario.empty())
     fEnergySystematicsVariation = "";
   else
-    fEnergySystematicsVariation = "_"+scenario;
+    fEnergySystematicsVariation = ""+scenario;
 }
 
 void ParticleCollectionBase::checkDiscriminatorNameValidity(const std::string& name, const std::vector<std::string>& list) const {

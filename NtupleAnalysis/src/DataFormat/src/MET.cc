@@ -11,6 +11,6 @@ void METBase::setEnergySystematicsVariation(const std::string& scenario) {
   if(scenario.empty())
     fEnergySystematicsVariation = "";
   else
-    fEnergySystematicsVariation = "_"+scenario;
+    fEnergySystematicsVariation = ""+scenario;
 }
 
