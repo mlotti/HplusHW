@@ -6,6 +6,7 @@
 #include <regex>
 
 MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
+    prescaleWeight(iConfig.getParameter<edm::ParameterSet>("PrescaleProvider"), consumesCollector(), this),
     outputFileName(iConfig.getParameter<std::string>("OutputFileName")),
     codeVersion(iConfig.getParameter<std::string>("CodeVersion")),
     dataVersion(iConfig.getParameter<std::string>("DataVersion")),
