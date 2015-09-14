@@ -61,7 +61,7 @@ TEST_CASE("Event", "[DataFormat]") {
     mgr.setTree(tree.get());
 
     boost::property_tree::ptree tmp = getMinimalConfig();
-    tmp.put("TauSelection.systematicVariation", "systVarTESUp");
+    tmp.put("TauSelection.systematicVariation", "_systVarTESUp");
     ParameterSet config(tmp, true);
 
     Event event(config);
@@ -98,8 +98,8 @@ TEST_CASE("Event", "[DataFormat]") {
 
   SECTION("Multiple systematic variations") {
     boost::property_tree::ptree tmp = getMinimalConfig();
-    tmp.put("TauSelection.systematicVariation", "systVarTESUp");
-    tmp.put("JetSelection.systematicVariation", "systVarJESUp");
+    tmp.put("TauSelection.systematicVariation", "_systVarTESUp");
+    tmp.put("JetSelection.systematicVariation", "_systVarJESUp");
     ParameterSet config(tmp, true);
 
     REQUIRE_THROWS_AS( Event event(config), std::runtime_error );

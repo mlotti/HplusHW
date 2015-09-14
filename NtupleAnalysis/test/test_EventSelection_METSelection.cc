@@ -16,6 +16,7 @@
 #include <iostream>
 #include "TFile.h"
 #include "TTree.h"
+#include "TLeaf.h"
 
 TEST_CASE("METSelection", "[EventSelection]") {
   // Create config for testing
@@ -42,7 +43,8 @@ TEST_CASE("METSelection", "[EventSelection]") {
   unsigned long long nevent;  tree->Branch("event", &nevent);
   double type1METx;           tree->Branch("MET_Type1_x", &type1METx);
   double type1METy;           tree->Branch("MET_Type1_y", &type1METy);
-  int nPU;                    tree->Branch("nGoodOfflineVertices", &nPU);
+  short nPU;                  tree->Branch("nGoodOfflineVertices", &nPU);
+  
   run = 1;
   lumi = 1;
   nevent = 1;
@@ -64,6 +66,8 @@ TEST_CASE("METSelection", "[EventSelection]") {
   mgr.setTree(tree);
   Event event(pset);
   event.setupBranches(mgr);
+  TBranch* b = tree->GetBranch("nGoodOfflineVertices");
+  tree->GetEvent(0);
   
   SECTION("PV Selection") {
     mgr.setEntry(0);

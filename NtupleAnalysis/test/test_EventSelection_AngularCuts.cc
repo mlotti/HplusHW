@@ -91,7 +91,6 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   double type1METx;           tree->Branch("MET_Type1_x", &type1METx);
   double type1METy;           tree->Branch("MET_Type1_y", &type1METy);
   // Vertices
-  int nPU;                    tree->Branch("nGoodOfflineVertices", &nPU);
   run = 1;
   lumi = 1;
   nevent = 1; // 1 jet outside tau
@@ -118,7 +117,6 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   jetPUID = std::vector<bool>{true, true};
   type1METx = 32.61220;
   type1METy = 83.88352; // collinear with tau
-  nPU = 1;
   tree->Fill();
   nevent = 2; // 4 jets outside tau, MET not collinear with tau or jet
   jetpt  = std::vector<float>{40.f,  60.f,   130.f,  80.f,  34.f};
@@ -186,7 +184,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     mgr.setEntry(0);
     TauSelection::Data tauData = tausel.silentAnalyze(event);
     JetSelection::Data jetData = jetsel.silentAnalyze(event, tauData);
-    METSelection::Data metData = metsel.silentAnalyze(event, event.NPU().value());
+    METSelection::Data metData = metsel.silentAnalyze(event, 1);
     AngularCutsCollinear::Data collData = collsel.silentAnalyze(event, tauData, jetData, metData);
     // Delta phi (tau, MET)
     CHECK( collData.getDeltaPhiTauMET() == Approx(125.0873) );
@@ -212,7 +210,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     mgr.setEntry(1);
     tauData = tausel.silentAnalyze(event);
     jetData = jetsel.silentAnalyze(event, tauData);
-    metData = metsel.silentAnalyze(event, event.NPU().value());
+    metData = metsel.silentAnalyze(event, 1);
     collData = collsel.silentAnalyze(event, tauData, jetData, metData);
     REQUIRE( tauData.hasIdentifiedTaus() == 1 );
     REQUIRE( jetData.getNumberOfSelectedJets() == 4 );
@@ -235,7 +233,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     mgr.setEntry(2);
     tauData = tausel.silentAnalyze(event);
     jetData = jetsel.silentAnalyze(event, tauData);
-    metData = metsel.silentAnalyze(event, event.NPU().value());
+    metData = metsel.silentAnalyze(event, 1);
     collData = collsel.silentAnalyze(event, tauData, jetData, metData);
     REQUIRE( tauData.hasIdentifiedTaus() == 1 );
     REQUIRE( jetData.getNumberOfSelectedJets() == 4 );
@@ -253,7 +251,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     mgr.setEntry(3);
     tauData = tausel.silentAnalyze(event);
     jetData = jetsel.silentAnalyze(event, tauData);
-    metData = metsel.silentAnalyze(event, event.NPU().value());
+    metData = metsel.silentAnalyze(event, 1);
     collData = collsel.silentAnalyze(event, tauData, jetData, metData);
     REQUIRE( tauData.hasIdentifiedTaus() == 1 );
     REQUIRE( jetData.getNumberOfSelectedJets() == 4 );
@@ -282,7 +280,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     mgr.setEntry(0);
     TauSelection::Data tauData = tausel.silentAnalyze(event);
     JetSelection::Data jetData = jetsel.silentAnalyze(event, tauData);
-    METSelection::Data metData = metsel.silentAnalyze(event, event.NPU().value());
+    METSelection::Data metData = metsel.silentAnalyze(event, 1);
     AngularCutsBackToBack::Data backtobackData = backtobacksel.silentAnalyze(event, tauData, jetData, metData);
     // Delta phi (tau, MET)
     CHECK( backtobackData.getDeltaPhiTauMET() == Approx(125.0873) );
@@ -308,7 +306,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     mgr.setEntry(1);
     tauData = tausel.silentAnalyze(event);
     jetData = jetsel.silentAnalyze(event, tauData);
-    metData = metsel.silentAnalyze(event, event.NPU().value());
+    metData = metsel.silentAnalyze(event, 1);
     backtobackData = backtobacksel.silentAnalyze(event, tauData, jetData, metData);
     REQUIRE( tauData.hasIdentifiedTaus() == 1 );
     REQUIRE( jetData.getNumberOfSelectedJets() == 4 );
@@ -331,7 +329,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     mgr.setEntry(2);
     tauData = tausel.silentAnalyze(event);
     jetData = jetsel.silentAnalyze(event, tauData);
-    metData = metsel.silentAnalyze(event, event.NPU().value());
+    metData = metsel.silentAnalyze(event, 1);
     backtobackData = backtobacksel.silentAnalyze(event, tauData, jetData, metData);
     REQUIRE( tauData.hasIdentifiedTaus() == 1 );
     REQUIRE( jetData.getNumberOfSelectedJets() == 4 );
@@ -346,7 +344,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     mgr.setEntry(3);
     tauData = tausel.silentAnalyze(event);
     jetData = jetsel.silentAnalyze(event, tauData);
-    metData = metsel.silentAnalyze(event, event.NPU().value());
+    metData = metsel.silentAnalyze(event, 1);
     backtobackData = backtobacksel.silentAnalyze(event, tauData, jetData, metData);
     REQUIRE( tauData.hasIdentifiedTaus() == 1 );
     REQUIRE( jetData.getNumberOfSelectedJets() == 4 );
@@ -392,7 +390,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     mgr.setEntry(0);
     TauSelection::Data tauData = tausel.silentAnalyze(event);
     JetSelection::Data jetData = jetsel.silentAnalyze(event, tauData);
-    METSelection::Data metData = metsel.silentAnalyze(event, event.NPU().value());
+    METSelection::Data metData = metsel.silentAnalyze(event, 1);
     // Collinear
     CHECK( ec.getValueByName("passed angular cuts / Collinear (dblcount)") == 0);
     REQUIRE_NOTHROW( AngularCutsCollinear::Data collData = collsel.silentAnalyze(event, tauData, jetData, metData) );

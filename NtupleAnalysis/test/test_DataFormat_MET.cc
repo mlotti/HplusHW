@@ -45,7 +45,7 @@ TEST_CASE("MET", "[DataFormat]") {
     mgr.setTree(tree.get());
 
     MET met("MET_Type1");
-    met.setEnergySystematicsVariation("systVarTESUp");
+    met.setEnergySystematicsVariation("_systVarTESUp");
     met.setupBranches(mgr);
 
     SECTION("MET getters") {

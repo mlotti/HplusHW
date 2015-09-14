@@ -65,7 +65,7 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   std::vector<float> trge;    tree->Branch("HLTTau_e", &trge);
   double type1METx;          tree->Branch("MET_Type1_x", &type1METx);
   double type1METy;         tree->Branch("MET_Type1_y", &type1METy);
-  int nPU;                    tree->Branch("nGoodOfflineVertices", &nPU);
+  short nPU;                    tree->Branch("nGoodOfflineVertices", &nPU);
 
   run = 1;
   lumi = 1;
