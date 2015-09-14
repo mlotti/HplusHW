@@ -85,6 +85,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fEventID.setupBranches(mgr);
 
   fNPU.setupBranches(mgr);
+  fMETFilter.setupBranches(mgr);
 
   fTriggerOr.setupBranchesAutoScanVersion(mgr);
   fTriggerOr2.setupBranchesAutoScanVersion(mgr);
