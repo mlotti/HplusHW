@@ -28,8 +28,8 @@ public:
   float pvZ() const { return fPVz->value(); }
   
 private:
-  const Branch<int> *fNPU;
-  const Branch<int> *fSimulatedNPU;
+  const Branch<short> *fNPU;
+  const Branch<short> *fSimulatedNPU;
   const Branch<float> *fPVz;
   
 };

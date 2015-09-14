@@ -30,7 +30,7 @@ private:
   const Branch<unsigned long long> *fEvent;
   const Branch<unsigned int> *fLumi;
   const Branch<unsigned int> *fRun;
-  const Branch<int> *fNUP;
+  const Branch<short> *fNUP;
 };
 
 #endif
