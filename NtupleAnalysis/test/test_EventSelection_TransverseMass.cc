@@ -22,8 +22,8 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   tmp.put("TauSelection.prongs", 1);
   tmp.put("TauSelection.rtau", -10.0);
   tmp.put("TauSelection.invertTauIsolation", false);
-  tmp.put("TauSelection.againstElectronDiscr", "againstElectronTight");
-  tmp.put("TauSelection.againstMuonDiscr", "againstMuonMedium");
+  tmp.put("TauSelection.againstElectronDiscr", "againstElectronLooseMVA5");
+  tmp.put("TauSelection.againstMuonDiscr", "againstMuonTight3");
   tmp.put("TauSelection.isolationDiscr", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
   tmp.put("METSelection.METCutValue", 80.0);
   tmp.put("METSelection.METCutDirection", ">");
@@ -52,20 +52,20 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   std::vector<float> eta;  tree->Branch("Taus_eta", &eta);
   std::vector<float> phi;  tree->Branch("Taus_phi", &phi);
   std::vector<float> e;    tree->Branch("Taus_e", &e);
-  std::vector<float> lTrkPt;   tree->Branch("Taus_lTrkPt", &lTrkPt);
-  std::vector<float> lTrkEta;   tree->Branch("Taus_lTrkEta", &lTrkEta);
+  std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
+  std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
-  std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronTight", &eDiscr);
-  std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonMedium", &muDiscr);
+  std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
+  std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonTight3", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
   std::vector<bool> dm;        tree->Branch("Taus_decayModeFinding", &dm);
   std::vector<float> trgpt;   tree->Branch("HLTTau_pt", &trgpt);
   std::vector<float> trgeta;  tree->Branch("HLTTau_eta", &trgeta);
   std::vector<float> trgphi;  tree->Branch("HLTTau_phi", &trgphi);
   std::vector<float> trge;    tree->Branch("HLTTau_e", &trge);
-  double type1METet;          tree->Branch("MET_Type1_et", &type1METet);
-  double type1METphi;         tree->Branch("MET_Type1_phi", &type1METphi);
-  int nPU;                    tree->Branch("nGoodOfflinePV", &nPU);
+  double type1METx;          tree->Branch("MET_Type1_x", &type1METx);
+  double type1METy;         tree->Branch("MET_Type1_y", &type1METy);
+  int nPU;                    tree->Branch("nGoodOfflineVertices", &nPU);
 
   run = 1;
   lumi = 1;
@@ -81,13 +81,13 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   lTrkPt = std::vector<float>{5.f,  20.f,  11.f,  5.f,  70.f,  11.f,  13.f, 90.f};
   lTrkEta = std::vector<float>{-2.3f, -2.3f, -1.1f, -1.4f, 0.23f, 0.7f, 3.3f, 3.3f};
   nProngs = std::vector<int>{1, 1, 1, 1, 1, 1, 1, 1};
-  type1METet = 90.0;
-  type1METphi = 1.2;
+  type1METx = 32.61220;
+  type1METy = 83.883512;
   nPU = 1;
   tree->Fill();
   nevent = 2; // fail btag discriminator
-  type1METet = 120.0;
-  type1METphi = -0.7;
+  type1METx = 91.78106;
+  type1METy = -77.30612;
   tree->Fill();
   
   BranchManager mgr;

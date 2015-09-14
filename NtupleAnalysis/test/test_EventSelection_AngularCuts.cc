@@ -30,8 +30,8 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   tmp.put("TauSelection.prongs", 1);
   tmp.put("TauSelection.rtau", -10.0);
   tmp.put("TauSelection.invertTauIsolation", false);
-  tmp.put("TauSelection.againstElectronDiscr", "againstElectronTight");
-  tmp.put("TauSelection.againstMuonDiscr", "againstMuonMedium");
+  tmp.put("TauSelection.againstElectronDiscr", "againstElectronLooseMVA5");
+  tmp.put("TauSelection.againstMuonDiscr", "againstMuonTight3");
   tmp.put("TauSelection.isolationDiscr", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
   tmp.put("JetSelection.jetPtCut", 30.0);
   tmp.put("JetSelection.jetEtaCut", 2.5);
@@ -76,11 +76,11 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   std::vector<float> eta;  tree->Branch("Taus_eta", &eta);
   std::vector<float> phi;  tree->Branch("Taus_phi", &phi);
   std::vector<float> e;    tree->Branch("Taus_e", &e);
-  std::vector<float> lTrkPt;   tree->Branch("Taus_lTrkPt", &lTrkPt);
-  std::vector<float> lTrkEta;   tree->Branch("Taus_lTrkEta", &lTrkEta);
+  std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
+  std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
-  std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronTight", &eDiscr);
-  std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonMedium", &muDiscr);
+  std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
+  std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonTight3", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
   std::vector<bool> dm;        tree->Branch("Taus_decayModeFinding", &dm);
   std::vector<float> trgpt;   tree->Branch("HLTTau_pt", &trgpt);
@@ -88,10 +88,10 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   std::vector<float> trgphi;  tree->Branch("HLTTau_phi", &trgphi);
   std::vector<float> trge;    tree->Branch("HLTTau_e", &trge);
   // MET
-  double type1METet;          tree->Branch("MET_Type1_et", &type1METet);
-  double type1METphi;         tree->Branch("MET_Type1_phi", &type1METphi);
+  double type1METx;           tree->Branch("MET_Type1_x", &type1METx);
+  double type1METy;           tree->Branch("MET_Type1_y", &type1METy);
   // Vertices
-  int nPU;                    tree->Branch("nGoodOfflinePV", &nPU);
+  int nPU;                    tree->Branch("nGoodOfflineVertices", &nPU);
   run = 1;
   lumi = 1;
   nevent = 1; // 1 jet outside tau
@@ -116,8 +116,8 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   jete   = std::vector<float>{40.f,  60.f};
   jetID  = std::vector<bool>{true, true};
   jetPUID = std::vector<bool>{true, true};
-  type1METet = 90.0;
-  type1METphi = 1.2; // collinear with tau
+  type1METx = 32.61220;
+  type1METy = 83.88352; // collinear with tau
   nPU = 1;
   tree->Fill();
   nevent = 2; // 4 jets outside tau, MET not collinear with tau or jet
@@ -129,12 +129,12 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   jetPUID = std::vector<bool>{true, true, true, true, true};
   tree->Fill(); // 4 jets outside tau, MET collinear with jet 2
   nevent = 3;
-  type1METet = 90.0;
-  type1METphi = -2.9;
+  type1METx = -87.38623;
+  type1METy = -21.53244;
   tree->Fill();// 4 jets outside tau, MET collinear with tau
   nevent = 4;
-  type1METet = 40.0;
-  type1METphi = 0.1;
+  type1METx = 39.8002;
+  type1METy = 3.99334;
   tree->Fill();  
   BranchManager mgr;
   mgr.setTree(tree);

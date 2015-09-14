@@ -31,8 +31,8 @@ TEST_CASE("Event", "[DataFormat]") {
       CHECK( event.taus()[0].eta() == 0.1f );
       CHECK( event.taus()[0].phi() == -2.9f );
       CHECK( event.taus()[0].e() == 60.f );
-      CHECK( event.met_Type1().et() == 50.0 );
-      CHECK( event.met_Type1().phi() == 0.1 );
+      CHECK( event.met_Type1().et() == Approx(50.0) );
+      CHECK( event.met_Type1().phi() == Approx(0.1) );
 
 
       mgr.setEntry(1);
@@ -44,8 +44,8 @@ TEST_CASE("Event", "[DataFormat]") {
       CHECK( event.taus()[0].eta() == 0.9f );
       CHECK( event.taus()[0].phi() == 3.1f );
       CHECK( event.taus()[0].e() == 25.f );
-      CHECK( event.met_Type1().et() == 45 );
-      CHECK( event.met_Type1().phi() == 3.1 );
+      CHECK( event.met_Type1().et() == Approx(45.0) );
+      CHECK( event.met_Type1().phi() == Approx(3.1) );
     }
 
     SECTION("Non-existent object") {
@@ -78,8 +78,8 @@ TEST_CASE("Event", "[DataFormat]") {
       CHECK( event.taus()[0].eta() == 0.1f );
       CHECK( event.taus()[0].phi() == -2.9f );
       CHECK( event.taus()[0].e() == 60.f*1.03f );
-      CHECK( event.met_Type1().et() == 60.0 );
-      CHECK( event.met_Type1().phi() == 0.7 );
+      CHECK( event.met_Type1().et() == Approx(60.0) );
+      CHECK( event.met_Type1().phi() == Approx(0.7) );
 
 
       mgr.setEntry(1);
@@ -91,8 +91,8 @@ TEST_CASE("Event", "[DataFormat]") {
       CHECK( event.taus()[0].eta() == 0.9f );
       CHECK( event.taus()[0].phi() == 3.1f );
       CHECK( event.taus()[0].e() == 25.f*1.03f );
-      CHECK( event.met_Type1().et() == 30.0 );
-      CHECK( event.met_Type1().phi() == -2.6 );
+      CHECK( event.met_Type1().et() == Approx(30.0) );
+      CHECK( event.met_Type1().phi() == Approx(-2.6) );
     }
   }
 

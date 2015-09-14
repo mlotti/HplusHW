@@ -17,24 +17,20 @@ TEST_CASE("MET", "[DataFormat]") {
 
     SECTION("MET getters") {
       mgr.setEntry(0);
-      CHECK( met.et() == 50.0 );
-      CHECK( met.phi() == 0.1 );
+      CHECK( met.et() == Approx(50.0) );
+      CHECK( met.phi() == Approx(0.1) );
 
       mgr.setEntry(2);
-      CHECK( met.et() == 200.0 );
-      CHECK( met.phi() == -2.4 );
+      CHECK( met.et() == Approx(200.0) );
+      CHECK( met.phi() == Approx(-2.4) );
 
       mgr.setEntry(1);
-      CHECK( met.et() == 45.0 );
-      CHECK( met.phi() == 3.1 );
+      CHECK( met.et() == Approx(45.0) );
+      CHECK( met.phi() == Approx(3.1) );
     }
 
     SECTION("MET p2 conversions") {
       mgr.setEntry(0);
-
-      auto polarP2 = met.polarP2();
-      CHECK( polarP2.r() == 50.0 );
-      CHECK( polarP2.phi() == 0.1 );
 
       auto p2 = met.p2();
       CHECK( p2.x() == Approx(49.75021) );
@@ -54,16 +50,16 @@ TEST_CASE("MET", "[DataFormat]") {
 
     SECTION("MET getters") {
       mgr.setEntry(0);
-      CHECK( met.et() == 60.0 );
-      CHECK( met.phi() == 0.7 );
+      CHECK( met.et() == Approx(60.0) );
+      CHECK( met.phi() == Approx(0.7) );
 
       mgr.setEntry(2);
-      CHECK( met.et() == 150.0 );
-      CHECK( met.phi() == 1.5 );
+      CHECK( met.et() == Approx(150.0) );
+      CHECK( met.phi() == Approx(1.5) );
 
       mgr.setEntry(1);
-      CHECK( met.et() == 30.0 );
-      CHECK( met.phi() == -2.6 );
+      CHECK( met.et() == Approx(30.0) );
+      CHECK( met.phi() == Approx(-2.6) );
     }
   }
 }
