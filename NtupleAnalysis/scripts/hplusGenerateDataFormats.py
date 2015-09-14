@@ -24,6 +24,17 @@ def writeFiles(header, source, headerName, sourceName):
     print "Generated "+hfile
     print "Generated " +ccfile
 
+def getAdditionalFourVectorBranches(types, prefix):
+    result = []
+    for t in types.keys():
+        if t.startswith("%s_eta"%prefix):
+            suffix = t.replace("%s_eta"%prefix,"")
+            if len(suffix) > 0 and "%s_pt%s"%(prefix,suffix) in types.keys() and "%s_phi%s"%(prefix,suffix) in types.keys() and "%s_e%s"%(prefix,suffix) in types.keys():
+                if not (suffix.endswith("up") or suffix.endswith("Up") or suffix.endswith("down") or suffix.endswith("Down")):
+                    # Ignore syst. variations
+                    result.append(suffix)
+    return result
+
 def generateParticle(types, particle, discriminatorCaptions):
     discriminatorList = {}
     for k in discriminatorCaptions.keys():
@@ -32,6 +43,19 @@ def generateParticle(types, particle, discriminatorCaptions):
     particleBranches = [particle+"s_"+x for x in ["pt", "eta", "phi", "e", "pdgId"]] # these are handled by Particle class
     branchNames = filter(lambda n: n[0:len(particle)+2] == particle+"s_", types.keys())
     branchNames.sort(key=lambda n: types[n]+n)
+
+    # Obtain four-vector branches and remove them from the branch list
+    additionalFourVectorBranches = getAdditionalFourVectorBranches(types, particle+"s")
+    additionalFourVectorBranches.sort()
+    for item in additionalFourVectorBranches:
+        i = 0
+        while i < len(branchNames):
+            b = branchNames[i]
+            # Remove also syst. uncertainties since they are handled separately
+            if b.endswith(item) or b.endswith("up") or b.endswith("Up") or b.endswith("down") or b.endswith("Down"):
+                del branchNames[i]
+            else:
+                i += 1
 
     particleFloatType = None
     branchObjects = []
@@ -98,6 +122,37 @@ def generateParticle(types, particle, discriminatorCaptions):
     if particle != "HLTTau":
         prefix += "s"
 
+    # additional four-vectors for collection
+    preInit = ": ParticleCollection(prefix)"
+    for item in additionalFourVectorBranches:
+        preInit += ",\n    f%s(prefix)"%item
+    initList = []
+    for item in additionalFourVectorBranches:
+        initList.append('    f%s.setEnergySystematicsVariation("%s");'%(item, item))
+    inits = ""
+    inits += "\n".join(map(str,initList))
+    fvectorgetters = ""
+    for item in additionalFourVectorBranches:
+        fvectorgetters += "  const ParticleCollection<double>* get%sCollection() const { return &f%s; }\n"%(item, item)
+    if len(additionalFourVectorBranches) > 0:
+        fvectorgetters += "protected:\n"
+    for item in additionalFourVectorBranches:
+        fvectorgetters += "  ParticleCollection<double> f%s;\n"%item
+    # additional four-vectors for particle
+    preInitParticle = "  : Particle<Coll>(coll, index)"
+    for item in additionalFourVectorBranches:
+        preInitParticle += ",\n    f%s(coll->get%sCollection(), index)"%(item, item)
+    fvectorgettersParticle = ""
+    for item in additionalFourVectorBranches:
+        fvectorgettersParticle += "  const Particle<ParticleCollection<double>>* %s() const { return &f%s; }\n"%(item,item)
+    fvectorItemsParticle = ""
+    for item in additionalFourVectorBranches:
+        fvectorItemsParticle += "  Particle<ParticleCollection<double>> f%s;\n"%item
+    # additional four-vectors for source
+    fvectorBranches = ""
+    for item in additionalFourVectorBranches:
+        fvectorBranches += "  f%s.setupBranches(mgr);\n"%item
+    
     header = """// -*- c++ -*-
 // This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
 
@@ -107,12 +162,17 @@ def generateParticle(types, particle, discriminatorCaptions):
 {includes}
 class {type}Collection: public ParticleCollection<{particleFloatType}> {{
 public:
-  explicit {type}Collection(const std::string& prefix="{prefix}"): ParticleCollection(prefix) {{}}
+  explicit {type}Collection(const std::string& prefix="{prefix}")
+  {preinit}
+  {{
+{inits}
+  }}
   ~{type}Collection() {{}}
 
   void setupBranches(BranchManager& mgr);
 
 {discrCaptionGetters}
+{fvectorgetters}
 protected:
 {branchObjects}
 }};
@@ -122,16 +182,35 @@ template <typename Coll>
 class {type}: public Particle<Coll> {{
 public:
   {type}() {{}}
-  {type}(const Coll* coll, size_t index): Particle<Coll>(coll, index) {{}}
+  {type}(const Coll* coll, size_t index)
+{preInitParticle}
+  {{}}
   ~{type}() {{}}
 
 {discrMethodGetters}
+{fvectorgettersParticle}
 {branchAccessors}
 
+protected:
+{fvectorItemsParticle}
 }};
 
 #endif
-""".format(type=particle+"Generated", includes=includes, prefix=prefix, particle=particle, particleFloatType=particleFloatType, branchObjects="\n".join(branchObjects), discrCaptionGetters=discriminatorCaptionGetters, discrMethodGetters=discriminatorMethodGetters, branchAccessors="\n".join(branchAccessors))
+""".format(type=particle+"Generated", 
+           includes=includes,
+           prefix=prefix,
+           preinit=preInit,
+           inits=inits,
+           fvectorgetters=fvectorgetters,
+           preInitParticle=preInitParticle,
+           fvectorgettersParticle=fvectorgettersParticle,
+           fvectorItemsParticle=fvectorItemsParticle,
+           particle=particle,
+           particleFloatType=particleFloatType,
+           branchObjects="\n".join(branchObjects),
+           discrCaptionGetters=discriminatorCaptionGetters,
+           discrMethodGetters=discriminatorMethodGetters,
+           branchAccessors="\n".join(branchAccessors))
 
     source = """
 // -*- c++ -*-
@@ -143,10 +222,10 @@ public:
 
 void {type}Collection::setupBranches(BranchManager& mgr) {{
   ParticleCollection::setupBranches(mgr);
+{fvectorBranches}
 {branchBooks}
 }}
-""".format(type=particle+"Generated", branchBooks="\n".join(branchBooks))
-
+""".format(type=particle+"Generated", fvectorBranches=fvectorBranches, branchBooks="\n".join(branchBooks))
     writeFiles(header, source, particle+"Generated.h", particle+"Generated.cc")
 
 ## Method for creating a class for a simple discriminator

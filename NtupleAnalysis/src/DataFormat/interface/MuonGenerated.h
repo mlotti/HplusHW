@@ -11,7 +11,12 @@
 
 class MuonGeneratedCollection: public ParticleCollection<double> {
 public:
-  explicit MuonGeneratedCollection(const std::string& prefix="Muons"): ParticleCollection(prefix) {}
+  explicit MuonGeneratedCollection(const std::string& prefix="Muons")
+  : ParticleCollection(prefix),
+    fMCmuon(prefix)
+  {
+    fMCmuon.setEnergySystematicsVariation("MCmuon");
+  }
   ~MuonGeneratedCollection() {}
 
   void setupBranches(BranchManager& mgr);
@@ -21,15 +26,15 @@ public:
     return n;
   }
 
+  const ParticleCollection<double>* getMCmuonCollection() const { return &fMCmuon; }
+protected:
+  ParticleCollection<double> fMCmuon;
+
 protected:
   const Branch<std::vector<bool>> *fIsGlobalMuon;
   const Branch<std::vector<bool>> *fMuIDLoose;
   const Branch<std::vector<bool>> *fMuIDMedium;
   const Branch<std::vector<bool>> *fMuIDTight;
-  const Branch<std::vector<double>> *fEMCmuon;
-  const Branch<std::vector<double>> *fEtaMCmuon;
-  const Branch<std::vector<double>> *fPhiMCmuon;
-  const Branch<std::vector<double>> *fPtMCmuon;
   const Branch<std::vector<float>> *fRelIsoDeltaBeta;
 };
 
@@ -38,7 +43,10 @@ template <typename Coll>
 class MuonGenerated: public Particle<Coll> {
 public:
   MuonGenerated() {}
-  MuonGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
+  MuonGenerated(const Coll* coll, size_t index)
+  : Particle<Coll>(coll, index),
+    fMCmuon(coll->getMCmuonCollection(), index)
+  {}
   ~MuonGenerated() {}
 
   std::vector<std::function<bool()>> getIDDiscriminatorValues() {
@@ -50,15 +58,16 @@ public:
     return values;
   }
 
+  const Particle<ParticleCollection<double>>* MCmuon() const { return &fMCmuon; }
+
   bool isGlobalMuon() const { return this->fCollection->fIsGlobalMuon->value()[this->index()]; }
   bool muIDLoose() const { return this->fCollection->fMuIDLoose->value()[this->index()]; }
   bool muIDMedium() const { return this->fCollection->fMuIDMedium->value()[this->index()]; }
   bool muIDTight() const { return this->fCollection->fMuIDTight->value()[this->index()]; }
-  double eMCmuon() const { return this->fCollection->fEMCmuon->value()[this->index()]; }
-  double etaMCmuon() const { return this->fCollection->fEtaMCmuon->value()[this->index()]; }
-  double phiMCmuon() const { return this->fCollection->fPhiMCmuon->value()[this->index()]; }
-  double ptMCmuon() const { return this->fCollection->fPtMCmuon->value()[this->index()]; }
   float relIsoDeltaBeta() const { return this->fCollection->fRelIsoDeltaBeta->value()[this->index()]; }
+
+protected:
+  Particle<ParticleCollection<double>> fMCmuon;
 
 };
 
