@@ -6,7 +6,7 @@
 #include "Tools/interface/BooleanOr.h"
 
 #include "DataFormat/interface/EventID.h"
-#include "DataFormat/interface/EventNPU.h"
+#include "DataFormat/interface/VertexInfo.h"
 #include "DataFormat/interface/METFilter.h"
 #include "DataFormat/interface/HLTTau.h"
 #include "DataFormat/interface/Tau.h"
@@ -52,7 +52,7 @@ public:
   }
   
   const EventID& eventID() const { return fEventID; }
-  const EventNPU& NPU() const { return fNPU; }
+  const VertexInfo& NPU() const { return fNPU; }
   const METFilter& metFilter() const { return fMETFilter; }
   const HLTTauCollection& triggerTaus() const { return fTriggerTauCollection; }
   const TauCollection& taus() const { return fTauCollection; }
@@ -75,7 +75,7 @@ public:
 private:
   EventID fEventID;
 
-  EventNPU fNPU;
+  VertexInfo fNPU;
   METFilter fMETFilter;
 
   BooleanOr fTriggerOr;
