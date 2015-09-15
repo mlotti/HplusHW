@@ -35,7 +35,7 @@ def getAdditionalFourVectorBranches(types, prefix):
                     result.append(suffix)
     return result
 
-def generateParticle(types, particle, discriminatorCaptions):
+def generateParticle(types, particle, discriminatorCaptions, outname=""):
     discriminatorList = {}
     for k in discriminatorCaptions.keys():
         discriminatorList[k] = []
@@ -43,7 +43,6 @@ def generateParticle(types, particle, discriminatorCaptions):
     particleBranches = [particle+"s_"+x for x in ["pt", "eta", "phi", "e", "pdgId"]] # these are handled by Particle class
     branchNames = filter(lambda n: n[0:len(particle)+2] == particle+"s_", types.keys())
     branchNames.sort(key=lambda n: types[n]+n)
-
     # Obtain four-vector branches and remove them from the branch list
     additionalFourVectorBranches = getAdditionalFourVectorBranches(types, particle+"s")
     additionalFourVectorBranches.sort()
@@ -69,6 +68,7 @@ def generateParticle(types, particle, discriminatorCaptions):
         if not m:
             raise Exception("Could not interpret type %s as vector" % vectype)
         realtype = m.group("type")
+        
         if branch in particleBranches:
             if particleFloatType == None:
                 particleFloatType = realtype
@@ -226,7 +226,9 @@ void {type}Collection::setupBranches(BranchManager& mgr) {{
 {branchBooks}
 }}
 """.format(type=particle+"Generated", fvectorBranches=fvectorBranches, branchBooks="\n".join(branchBooks))
-    writeFiles(header, source, particle+"Generated.h", particle+"Generated.cc")
+    if outname == "":
+        outname = particle
+    writeFiles(header, source, outname+"Generated.h", outname+"Generated.cc")
 
 ## Method for creating a class for a simple discriminator
 def generateDiscriminator(types, name, discriminatorPrefix):
@@ -326,7 +328,6 @@ def main(opts, args):
         types[branch.GetName()] = t
     f.Close()
     
-
     # The provided dictionaries are for grouping discriminators
     generateParticle(types, "Tau", {"Isolation": "Isolation", "againstElectron": "AgainstElectron", "againstMuon": "AgainstMuon"})
     generateParticle(types, "Jet", {"BJetTags": "BJetTags", "PUID": "PUID", "JetID" : "JetID"})
@@ -335,8 +336,8 @@ def main(opts, args):
     #generateParticle(types, "GenParticle", {}) # data fields in the root file are missing at the moment
     generateParticle(types, "GenJet", {})
     #generateParticle(types, "HLTTau", {})
-    #generateParticle(types, "PFCands", {})
-    # HLTTau and PFCands contain only generic momentum and pdgId information, no generation needed
+    generateParticle(types, "PFcandidate", {}, outname="PFCands")
+    # HLTTau contains only generic momentum and pdgId information, no generation needed
     generateDiscriminator(types, "METFilter", "METFilter_Flag")
     
     return 0
