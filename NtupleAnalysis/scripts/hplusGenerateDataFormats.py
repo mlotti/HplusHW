@@ -228,6 +228,154 @@ void {type}Collection::setupBranches(BranchManager& mgr) {{
 """.format(type=particle+"Generated", fvectorBranches=fvectorBranches, branchBooks="\n".join(branchBooks))
     writeFiles(header, source, particle+"Generated.h", particle+"Generated.cc")
 
+## Auto-generates the contents of the genparticle collection (note: only collection, no single genparticles provided)
+def generateGenParticles(types, particle):
+    branchNames = filter(lambda n: n[0:len(particle)+2] == particle+"s_", types.keys())
+    branchNames.sort(key=lambda n: types[n]+n)
+    # Obtain four-vector branches and remove them from the branch list
+    additionalFourVectorBranches = getAdditionalFourVectorBranches(types, particle+"s")
+    additionalFourVectorBranches.sort()
+    for item in additionalFourVectorBranches:
+        i = 0
+        while i < len(branchNames):
+            b = branchNames[i]
+            # Remove also syst. uncertainties since they are handled separately
+            if b.endswith(item) or b.endswith("up") or b.endswith("Up") or b.endswith("down") or b.endswith("Down"):
+                del branchNames[i]
+            else:
+                i += 1
+    floattype = None
+    if len(additionalFourVectorBranches) > 0:
+        for t in types.keys():
+            if "%ss_pt%s"%(particle, additionalFourVectorBranches[0]) == t:
+                m = re_vector.search(types[t])
+                if not m:
+                    raise Exception("Error (%s): Additional four vector type is not a vector!"%particle)
+                floattype = m.group("type")
+        if floattype == None:
+            raise Exception("Error: this should not happen")
+
+    branchObjects = []
+    branchBooks = []
+    branchGetters = []
+    for branch in branchNames:
+        name = branch[len(particle)+2:]
+        capname = name[0].upper()+name[1:]
+        datatype = types[branch]
+        m = re_vector.search(datatype)
+        realtype = types[branch]
+        if not m:
+            datatype = types[branch]
+        else:
+            datatype = "std::%s"%datatype
+            realtype = m.group("type")
+        
+        # Collect branches
+        branchObjects.append("  const Branch<{datatype}> *f{vecname};".format(datatype=datatype, vecname=capname))
+        branchBooks.append("  mgr.book(\"{type}s_{name}\", &f{capname});".format(type=particle, name=name, capname=capname))
+        branchGetters.append("  const {datatype} get{capname}() const {{ return f{capname}->value(); }}".format(datatype=datatype, capname=capname))
+
+    includes = "#include \"DataFormat/interface/Particle.h\"\n"
+    includes += "#include <vector>\n"
+
+    prefix = particle
+    if particle != "HLTTau":
+        prefix += "s"
+
+    # additional four-vectors for collection
+    preInit = ""
+    for item in additionalFourVectorBranches:
+        if len(preInit) > 0:
+            preInit += ",\n    "
+        else:
+            preInit += ": "
+        preInit += "f%s(prefix)"%item
+    initList = []
+    for item in additionalFourVectorBranches:
+        initList.append('    f%s.setEnergySystematicsVariation("%s");'%(item, item))
+    inits = ""
+    inits += "\n".join(map(str,initList))
+    fvectorgetters = ""
+    fvectorgettersimpl = ""
+    for item in additionalFourVectorBranches:
+        fvectorgetters += "  const std::vector<Particle<ParticleCollection<float_type>>> get%sCollection() const;\n"%item
+        fvectorgettersimpl += "const std::vector<Particle<ParticleCollection<%s>>> %sGeneratedCollection::get%sCollection() const {\n"%(floattype, particle[0].upper()+particle[1:],item)
+        fvectorgettersimpl += "  std::vector<Particle<ParticleCollection<float_type>>> v;\n"
+        fvectorgettersimpl += "  for (size_t i = 0; i < f%s.size(); ++i)\n"%item
+        fvectorgettersimpl += "    v.push_back(Particle<ParticleCollection<float_type>>(&f%s, i));\n"%item
+        fvectorgettersimpl += "  return v;\n"
+        fvectorgettersimpl += "}\n"
+    if len(additionalFourVectorBranches) > 0:
+        fvectorgetters += "protected:\n"
+    for item in additionalFourVectorBranches:
+        fvectorgetters += "  ParticleCollection<float_type> f%s;\n"%item
+    # additional four-vectors for source
+    fvectorBranches = ""
+    for item in additionalFourVectorBranches:
+        fvectorBranches += "  f%s.setupBranches(mgr);\n"%item
+    
+    header = """// -*- c++ -*-
+// This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
+
+#ifndef DataFormat_{type}_h
+#define DataFormat_{type}_h
+
+{includes}
+class {type}Collection {{
+public:
+  using float_type = {floattype};
+  explicit {type}Collection(const std::string& prefix="{prefix}")
+  {preinit}
+  {{
+{inits}
+  }}
+  ~{type}Collection() {{}}
+
+  void setupBranches(BranchManager& mgr);
+
+{fvectorgetters}
+
+public:
+{branchgetters}
+
+protected:
+{branchObjects}
+}};
+
+#endif
+""".format(type=particle[0].upper()+particle[1:]+"Generated", 
+           includes=includes,
+           floattype=floattype,
+           prefix=prefix,
+           preinit=preInit,
+           inits=inits,
+           fvectorgetters=fvectorgetters,
+           branchgetters="\n".join(branchGetters),
+           particle=particle,
+           branchObjects="\n".join(branchObjects))
+
+    source = """
+// -*- c++ -*-
+// This file has been auto-generated with HiggsAnalysis/NtupleAnalysis/scripts/hplusGenerateDataFormats.py
+
+#include "DataFormat/interface/{type}.h"
+
+#include "Framework/interface/BranchManager.h"
+
+void {type}Collection::setupBranches(BranchManager& mgr) {{
+{fvectorBranches}
+{branchBooks}
+}}
+
+{fvectorgettersimpl}
+""".format(type=particle[0].upper()+particle[1:]+"Generated",
+           fvectorBranches=fvectorBranches,
+           branchBooks="\n".join(branchBooks),
+           fvectorgettersimpl=fvectorgettersimpl)
+    name = particle[0].upper()+particle[1:]
+    writeFiles(header, source, name+"Generated.h", name+"Generated.cc")
+
+
 ## Method for creating a class for a simple discriminator
 def generateDiscriminator(types, name, discriminatorPrefix):
     # Obtain list of discriminators
@@ -331,12 +479,12 @@ def main(opts, args):
     generateParticle(types, "Jet", {"BJetTags": "BJetTags", "PUID": "PUID", "JetID" : "JetID"})
     generateParticle(types, "Muon", {"ID": "ID"})
     generateParticle(types, "Electron", {"ID": "ID"})
-    #generateParticle(types, "GenParticle", {}) # data fields in the root file are missing at the moment
     generateParticle(types, "GenJet", {})
     #generateParticle(types, "HLTTau", {})
     generateParticle(types, "PFcandidate", {})
     # HLTTau contains only generic momentum and pdgId information, no generation needed
     generateDiscriminator(types, "METFilter", "METFilter_Flag")
+    generateGenParticles(types, "genParticle")
     
     return 0
 
