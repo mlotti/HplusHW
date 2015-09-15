@@ -35,7 +35,7 @@ def getAdditionalFourVectorBranches(types, prefix):
                     result.append(suffix)
     return result
 
-def generateParticle(types, particle, discriminatorCaptions, outname=""):
+def generateParticle(types, particle, discriminatorCaptions):
     discriminatorList = {}
     for k in discriminatorCaptions.keys():
         discriminatorList[k] = []
@@ -226,9 +226,7 @@ void {type}Collection::setupBranches(BranchManager& mgr) {{
 {branchBooks}
 }}
 """.format(type=particle+"Generated", fvectorBranches=fvectorBranches, branchBooks="\n".join(branchBooks))
-    if outname == "":
-        outname = particle
-    writeFiles(header, source, outname+"Generated.h", outname+"Generated.cc")
+    writeFiles(header, source, particle+"Generated.h", particle+"Generated.cc")
 
 ## Method for creating a class for a simple discriminator
 def generateDiscriminator(types, name, discriminatorPrefix):
@@ -336,7 +334,7 @@ def main(opts, args):
     #generateParticle(types, "GenParticle", {}) # data fields in the root file are missing at the moment
     generateParticle(types, "GenJet", {})
     #generateParticle(types, "HLTTau", {})
-    generateParticle(types, "PFcandidate", {}, outname="PFCands")
+    generateParticle(types, "PFcandidate", {})
     # HLTTau contains only generic momentum and pdgId information, no generation needed
     generateDiscriminator(types, "METFilter", "METFilter_Flag")
     
