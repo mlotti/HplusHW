@@ -1,0 +1,20 @@
+#!/bin/tcsh
+set i = 1
+foreach f ( `ls *.gz` )
+  echo "Unpacking log $i/"`find * |grep -c .tar.gz`
+  tar xfz $f
+  @ i++
+end
+
+echo .
+echo "Exit status:"
+grep "process id" *out*log
+
+echo .
+echo "Skim efficiency:"
+grep SignalAnalysisSkim *out*log
+
+echo .
+echo "Timing:"
+grep "Event Throughput" *out*log
+

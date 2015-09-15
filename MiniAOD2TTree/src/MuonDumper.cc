@@ -72,7 +72,8 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     
     // Get genParticles
     edm::Handle <reco::GenParticleCollection> genParticlesHandle;
-    iEvent.getByToken(genParticleToken, genParticlesHandle);
+    if (!iEvent.isRealData())
+      iEvent.getByToken(genParticleToken, genParticlesHandle);
     // Get vertex
     edm::Handle<edm::View<reco::Vertex> > vertexHandle;
     iEvent.getByToken(vertexToken, vertexHandle);
@@ -117,7 +118,8 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		}
 		
                 // MC match info
-                fillMCMatchInfo(ic, genParticlesHandle, obj);
+                if (!iEvent.isRealData())
+                  fillMCMatchInfo(ic, genParticlesHandle, obj);
             }
         }
     }

@@ -23,11 +23,14 @@ public:
   unsigned long long event() const { return fEvent->value(); }
   unsigned int       lumi()  const { return fLumi->value(); }
   unsigned int       run()   const { return fRun->value(); }
-
+  /// Number of partons generated
+  int NUP() const { return fNUP->value(); }
+  
 private:
   const Branch<unsigned long long> *fEvent;
   const Branch<unsigned int> *fLumi;
   const Branch<unsigned int> *fRun;
+  const Branch<int> *fNUP;
 };
 
 #endif

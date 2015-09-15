@@ -4,7 +4,9 @@ skim = cms.EDFilter("SignalAnalysisSkim",
     TriggerResults = cms.InputTag("TriggerResults::HLT"),
     HLTPaths       = cms.vstring(
 	"HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
-	"HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
+        "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_JetIdCleaned_v",
+        "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
+        "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned_v",
     ),
     JetCollection  = cms.InputTag("slimmedJets"),
     JetUserFloats  = cms.vstring(

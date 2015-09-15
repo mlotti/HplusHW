@@ -75,7 +75,8 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;  
   
     edm::Handle <reco::GenParticleCollection> genParticlesHandle;
-    iEvent.getByToken(genParticleToken, genParticlesHandle);
+    if (!iEvent.isRealData())
+      iEvent.getByToken(genParticleToken, genParticlesHandle);
     
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
 	edm::Handle<edm::View<pat::Electron>> electronHandle;
@@ -122,7 +123,8 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		}
 
 		// MC match info
-                fillMCMatchInfo(ic, genParticlesHandle, obj);
+		if (!iEvent.isRealData())
+                  fillMCMatchInfo(ic, genParticlesHandle, obj);
             }
         }
     }

@@ -35,44 +35,34 @@ template <typename NUMBER>
 class MET_T: public METBase {
 public:
   using float_type = NUMBER;
-  using Polar2DVector = math::Polar2DVectorT<float_type>;
   using XYVector = math::XYVectorT<float_type>;
   using Scalar = float_type;
 
   explicit MET_T(const std::string& prefix):
     METBase(prefix),
-    fEt(nullptr),
-    fPhi(nullptr)
+    fX(nullptr),
+    fY(nullptr)
   {}
   ~MET_T() {}
 
   void setupBranches(BranchManager& mgr) {
-    mgr.book(prefix()+"_et" +energySystematicsVariation(), &fEt);
-    mgr.book(prefix()+"_phi"+energySystematicsVariation(), &fPhi);
+    mgr.book(prefix()+"_x" +energySystematicsVariation(), &fX);
+    mgr.book(prefix()+"_y"+energySystematicsVariation(), &fY);
   }
 
-  float_type et() const { return fEt->value(); }
-  float_type phi() const { return fPhi->value(); }
-  float_type Phi() const { return phi(); }
+  float_type x() const { return fX->value(); }
+  float_type y() const { return fY->value(); }
+  float_type et() const { return p2().R(); }
+  float_type Phi() const { return p2().Phi(); }
+  float_type phi() const { return p2().Phi(); }
 
-  // Note: asking for polarP2 is more expensive than asking et/phi
-  // separately, so call only when necessary
-  Polar2DVector polarP2() const {
-    return Polar2DVector(et(), phi());
-  }
-
-  // Note: asking for cartesian p2 is even more expensive because of
-  // the coordinate change
   XYVector p2() const {
-    return XYVector(polarP2());
+    return XYVector(x(), y());
   }
-
-  float_type ex() const { return p2()->Px(); }
-  float_type ey() const { return p2()->Py(); }
 
 private:
-  const Branch<float_type> *fEt;
-  const Branch<float_type> *fPhi;
+  const Branch<float_type> *fX;
+  const Branch<float_type> *fY;
 };
 
 using MET = MET_T<double>;

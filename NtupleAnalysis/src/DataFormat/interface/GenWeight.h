@@ -9,22 +9,6 @@
 
 class BranchManager;
 
-namespace math {
-  template <typename T>
-  using XYVectorT = ROOT::Math::DisplacementVector2D<ROOT::Math::Cartesian2D<T>>;
-
-  using XYVectorF = XYVectorT<float>;
-  using XYVectorD = XYVectorT<double>;
-  using XYVector  = XYVectorF;
-
-  template <typename T>
-  using Polar2DVectorT = ROOT::Math::DisplacementVector2D<ROOT::Math::Polar2D<T>>;
-
-  using Polar2DVectorF = Polar2DVectorT<float>;
-  using Polar2DVectorD = Polar2DVectorT<double>;
-  using Polar2DVector  = Polar2DVectorF;
-}
-
 class GenWeightBase {
 public:
   explicit GenWeightBase(const std::string& prefix);
@@ -48,9 +32,6 @@ template <typename NUMBER>
 class GenWeight_T: public GenWeightBase {
 public:
   using float_type = NUMBER;
-  using Polar2DVector = math::Polar2DVectorT<float_type>;
-  using XYVector = math::XYVectorT<float_type>;
-  using Scalar = float_type;
 
   explicit GenWeight_T(const std::string& prefix):
     GenWeightBase(prefix),

@@ -16,8 +16,6 @@ public:
   virtual void process(Long64_t entry) override;
 
 private:
-  Event fEvent;
-
   const float fTauPtCut;
 
   Count cAllEvents;
@@ -46,7 +44,6 @@ REGISTER_SELECTOR(ExampleAnalysis);
 
 ExampleAnalysis::ExampleAnalysis(const ParameterSet& config):
   BaseSelector(config),
-  fEvent(config),
   fTauPtCut(config.getParameter<float>("tauPtCut")),
   cAllEvents(fEventCounter.addCounter("All events")),
   cWeighted(fEventCounter.addCounter("Weighted")),
@@ -88,7 +85,7 @@ void ExampleAnalysis::process(Long64_t entry) {
       continue;
     if(!(std::abs(tau.eta()) < 2.4))
       continue;
-    if(!(tau.lTrkPt() > 10))
+    if(!(tau.lChTrkPt() > 10))
       continue;
     /*if(!tau.againstElectronTightMVA3())
       continue;

@@ -25,7 +25,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent){
   for(Tau tau: fEvent.taus()) {
     if(!(tau.pt() > 20)) continue;
     if(!(std::abs(tau.eta()) < 2.1)) continue;
-    if(!(tau.lTrkPt() > 20)) continue;
+    if(!(tau.lChTrkPt() > 20)) continue;
     if(!(tau.nProngs() == 1)) continue;
     if(!tau.decayModeFinding()) continue;
     if(!tau.configurableDiscriminators()) continue;

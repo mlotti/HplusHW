@@ -24,9 +24,13 @@ public:
   int value() const { return fNPU->value(); }
   /// Return the simulated number of primary vertices in the event
   int simulatedValue() const { return fSimulatedNPU->value(); }
-
+  /// Return the z position of PV
+  float pvZ() const { return fPVz->value(); }
+  
 private:
   const Branch<int> *fNPU;
   const Branch<int> *fSimulatedNPU;
+  const Branch<float> *fPVz;
+  
 };
 #endif
