@@ -38,8 +38,8 @@ public:
 private:
   const Branch<short> *fNPU;
   const Branch<short> *fSimulatedNPU;
-  const Branch<short> *fPVDistanceToClosestVertex;
-  const Branch<short> *fPVDistanceToNextVertex;
+  const Branch<float> *fPVDistanceToClosestVertex;
+  const Branch<float> *fPVDistanceToNextVertex;
   const Branch<float> *fPVx;
   const Branch<float> *fPVy;
   const Branch<float> *fPVz;
