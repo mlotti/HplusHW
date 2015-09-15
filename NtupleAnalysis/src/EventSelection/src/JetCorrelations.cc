@@ -40,9 +40,9 @@ void JetCorrelations::bookHistograms(TDirectory* dir) {
   hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetEta", "First b-jet #eta", 50, -2.5, 2.5));
   hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetEta", "Second b-jet #eta", 50, -2.5, 2.5));
   */  
-  hPt3Jets  =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "pT_3jets", "pT_3jets", 100, 0, 600);
-  hM3Jets  =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "M_3jets", "M_3jets", 100, 0, 500);
-  hDrTau3Jets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "DrTau3Jets", "DrTau3Jets", 100, 0, 5);
+  //  hPt3Jets  =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "pT_3jets", "pT_3jets", 100, 0, 600);
+  //  hM3Jets  =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "M_3jets", "M_3jets", 100, 0, 500);
+  //  hDrTau3Jets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "DrTau3Jets", "DrTau3Jets", 100, 0, 5);
   hmaxDr3Jets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "maxDr3Jets", "maxDr3Jets", 100, 0, 5);
   hgenJetPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "genjetPt", "genJet pT", 200, 0, 1000);
   hgenJetEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "genjetEta", "genJet eta", 100, -5, 5);
@@ -51,7 +51,15 @@ void JetCorrelations::bookHistograms(TDirectory* dir) {
   hdrTauMaxBjet_gen =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "hdrTauMaxBjet_gen",  "drTauMaxBjet_gen", 100, 0, 5);
   hdrTauMinBjet_gen =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "hdrTauMinBjet_gen",  "drTauMinBjet_gen", 100, 0, 5);
 
-}
+  hPt3Jets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "pt3Jets",  "pt3Jets", 200, 0, 600);
+  hM3Jets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "M3Jets",  "M3Jets", 200, 0, 600);
+  h3jetPtcut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "3JetsPtCut",  "3JetsPtCut", 200, 0, 600);
+  hDrTau3Jets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "DrTau3Jets",  "DrTau3Jets", 200, 0, 5);
+  hDPhiTauMetVsPt3jets =  fHistoWrapper.makeTH<TH2F>(HistoLevel::kInformative, subdir, "DPhiTauMetVsPt3jets",  "DPhiTauMetVsPt3jets", 180, 0, 180,200,0,600);
+  htransverseMass3JetCut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "transverseMass3JetCut",  "transverseMass3JetCut", 200, 0, 600);
+  htransverseMassTriangleCut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "transverseMassTriangleCut",  "transverseMassTriangleCut", 200, 0, 600);
+}  
+
 
 JetCorrelations::Data JetCorrelations::silentAnalyze(const Event& event, const JetSelection::Data& jetData, const TauSelection::Data& tauData, const METSelection::Data& metData) {
   ensureSilentAnalyzeAllowed(event.eventID());
@@ -80,7 +88,7 @@ JetCorrelations::Data JetCorrelations::privateAnalyze(const Event& iEvent, const
   }
 
    
-
+  /*
 
   std::vector<GenJet> genJets;
   //  GenJet genBjetMax;
@@ -143,27 +151,31 @@ JetCorrelations::Data JetCorrelations::privateAnalyze(const Event& iEvent, const
   double drTau3Jets = ROOT::Math::VectorUtil::DeltaR(tauP,threeJets);
   hdrTauMaxBjet_gen->Fill(drTauMaxBjet_gen);
   hdrTauMinBjet_gen->Fill(drTauMinBjet_gen);
+  */ 
   hPt3Jets->Fill(threeJets.pt());
   hM3Jets->Fill(threeJets.mass());                                                                                                                                                                                                
-  std::cout << "   threeJets.pt()"<<   threeJets.pt()   << std::endl;                                                                                                                                                          
-  /*  
+  //  std::cout << "   threeJets.pt()"<<   threeJets.pt()   << std::endl;                                                                                                                                                          
+   
+ 
+  double DeltaPhiTauMET = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(tauData.getSelectedTau().p4(), metData.getMET())*57.29578);
   hDPhiTauMetVsPt3jets->Fill(std::abs(DeltaPhiTauMET),threeJets.pt());
 
   double ptcut = 400.0 * (1.0 - DeltaPhiTauMET/180.0);
   double ptConstant =  threeJets.pt() /(1.0 - DeltaPhiTauMET/180.0);
   h3jetPtcut->Fill(ptConstant);
 
-  double drTau3Jets = ROOT::Math::VectorUtil::DeltaR(tau.p4(),threeJets);
+  double drTau3Jets = ROOT::Math::VectorUtil::DeltaR(tauData.getSelectedTau().p4(),threeJets);
   hDrTau3Jets->Fill(drTau3Jets);
-
+  
 
  // mt with 3jet and  triangle cut                                                                                                                                                                                               
+  /*
   if (threeJets.pt()  > ptcut )    htransverseMass3JetCut->Fill(transverseMass);
 
   if (!(threeJets.pt()  < ptcut && DeltaPhiTauMET  > 60)) {
     htransverseMassTriangleCut->Fill(transverseMass);
   }
-
+ 
 
   double DeltaPhi3jetsMet = std::abs(ROOT::Math::VectorUtil::DeltaPhi(threeJets, fEvent.met_Type1())) * 57.3;
   hDPhi3JetsMet->Fill(DeltaPhi3jetsMet);

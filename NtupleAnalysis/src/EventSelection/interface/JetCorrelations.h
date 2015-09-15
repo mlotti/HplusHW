@@ -74,9 +74,9 @@ private:
 
 
   // Histograms   
-  WrappedTH1 *hPt3Jets;
-  WrappedTH1 *hM3Jets;
-  WrappedTH1 *hDrTau3Jets;
+  //  WrappedTH1 *hPt3Jets;
+  //  WrappedTH1 *hM3Jets;
+  //  WrappedTH1 *hDrTau3Jets;
   WrappedTH1 *hmaxDr3Jets;
   WrappedTH1 *hgenJetPt;
   WrappedTH1 *hgenJetEta;
@@ -85,7 +85,13 @@ private:
   WrappedTH1 *hgenBJetPt;
   WrappedTH1 *hdrTauMaxBjet_gen;
   WrappedTH1 *hdrTauMinBjet_gen;
- 
+  WrappedTH2* hDPhiTauMetVsPt3jets; 
+  WrappedTH1 *hPt3Jets;
+  WrappedTH1 *hM3Jets; 
+  WrappedTH1 *h3jetPtcut; 
+  WrappedTH1 *hDrTau3Jets;
+  WrappedTH1 *htransverseMass3JetCut;
+  WrappedTH1 *htransverseMassTriangleCut;
 
 };
 
