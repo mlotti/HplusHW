@@ -134,7 +134,7 @@ void SignalAnalysis::process(Long64_t entry) {
   // if needed
   
 //====== Check that primary vertex exists
-  int nVertices = fEvent.NPU().value();
+  int nVertices = fEvent.vertexInfo().value();
   if (nVertices < 1)
     return;
   cVertexSelection.increment();

@@ -52,7 +52,7 @@ public:
   }
   
   const EventID& eventID() const { return fEventID; }
-  const VertexInfo& NPU() const { return fNPU; }
+  const VertexInfo& vertexInfo() const { return fVertexInfo; }
   const METFilter& metFilter() const { return fMETFilter; }
   const HLTTauCollection& triggerTaus() const { return fTriggerTauCollection; }
   const TauCollection& taus() const { return fTauCollection; }
@@ -75,7 +75,7 @@ public:
 private:
   EventID fEventID;
 
-  VertexInfo fNPU;
+  VertexInfo fVertexInfo;
   METFilter fMETFilter;
 
   BooleanOr fTriggerOr;

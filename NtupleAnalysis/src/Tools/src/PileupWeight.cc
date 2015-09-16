@@ -42,7 +42,7 @@ PileupWeight::~PileupWeight() {}
 double PileupWeight::getWeight(const Event& fEvent){
   if(!fEnabled || fEvent.isData()) return 1;
 
-  int NPU = fEvent.NPU().value();
+  int NPU = fEvent.vertexInfo().value();
   int bin = h_weight->GetXaxis()->FindBin( NPU );
   return h_weight->GetBinContent( bin );
 }
