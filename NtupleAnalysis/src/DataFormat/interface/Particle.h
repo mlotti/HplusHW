@@ -74,6 +74,7 @@ public:
   ~ParticleBase();
 
   size_t index() const { return fIndex; }
+  void setIndex(size_t i ) { fIndex = i; }
 
 private:
   size_t fIndex;
@@ -151,6 +152,7 @@ protected:
   const std::string& energySystematicsVariation() const { return fEnergySystematicsVariation; }
   void checkDiscriminatorNameValidity(const std::string& name, const std::vector<std::string>& list) const;
   
+protected:  
   template <typename Coll>
   static
   std::vector<typename Coll::value_type> toVector(Coll& coll) {

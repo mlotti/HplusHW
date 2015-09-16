@@ -191,7 +191,7 @@ TEST_CASE("Tau", "[DataFormat]") {
     mgr.setTree(tree.get());
 
     TauCollection coll;
-    coll.setEnergySystematicsVariation("systVarTESUp");
+    coll.setEnergySystematicsVariation("_systVarTESUp");
     coll.setupBranches(mgr);
 
     SECTION("TauCollection") {

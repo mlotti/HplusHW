@@ -8,6 +8,9 @@
 
 void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   ParticleCollection::setupBranches(mgr);
+  fMCVisibleTau.setupBranches(mgr);
+  fmatchingJet.setupBranches(mgr);
+
   mgr.book(prefix()+"_againstElectronLooseMVA5", &fAgainstElectronLooseMVA5);
   mgr.book(prefix()+"_againstElectronMVA5category", &fAgainstElectronMVA5category);
   mgr.book(prefix()+"_againstElectronMediumMVA5", &fAgainstElectronMediumMVA5);
@@ -53,34 +56,12 @@ void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_decayModeFindingNewDMs", &fDecayModeFindingNewDMs);
   mgr.book(prefix()+"_neutralIsoPtSum", &fNeutralIsoPtSum);
   mgr.book(prefix()+"_puCorrPtSum", &fPuCorrPtSum);
-  mgr.book(prefix()+"_eMCVisibleTau", &fEMCVisibleTau);
-  mgr.book(prefix()+"_eTESdown", &fETESdown);
-  mgr.book(prefix()+"_eTESextremeDown", &fETESextremeDown);
-  mgr.book(prefix()+"_eTESextremeUp", &fETESextremeUp);
-  mgr.book(prefix()+"_eTESup", &fETESup);
-  mgr.book(prefix()+"_ematchingJet", &fEmatchingJet);
-  mgr.book(prefix()+"_etaMCVisibleTau", &fEtaMCVisibleTau);
-  mgr.book(prefix()+"_etaTESdown", &fEtaTESdown);
-  mgr.book(prefix()+"_etaTESextremeDown", &fEtaTESextremeDown);
-  mgr.book(prefix()+"_etaTESextremeUp", &fEtaTESextremeUp);
-  mgr.book(prefix()+"_etaTESup", &fEtaTESup);
-  mgr.book(prefix()+"_etamatchingJet", &fEtamatchingJet);
   mgr.book(prefix()+"_lChTrkEta", &fLChTrkEta);
   mgr.book(prefix()+"_lChTrkPt", &fLChTrkPt);
   mgr.book(prefix()+"_lNeutrTrkEta", &fLNeutrTrkEta);
   mgr.book(prefix()+"_lNeutrTrkPt", &fLNeutrTrkPt);
-  mgr.book(prefix()+"_phiMCVisibleTau", &fPhiMCVisibleTau);
-  mgr.book(prefix()+"_phiTESdown", &fPhiTESdown);
-  mgr.book(prefix()+"_phiTESextremeDown", &fPhiTESextremeDown);
-  mgr.book(prefix()+"_phiTESextremeUp", &fPhiTESextremeUp);
-  mgr.book(prefix()+"_phiTESup", &fPhiTESup);
-  mgr.book(prefix()+"_phimatchingJet", &fPhimatchingJet);
-  mgr.book(prefix()+"_ptMCVisibleTau", &fPtMCVisibleTau);
-  mgr.book(prefix()+"_ptTESdown", &fPtTESdown);
-  mgr.book(prefix()+"_ptTESextremeDown", &fPtTESextremeDown);
-  mgr.book(prefix()+"_ptTESextremeUp", &fPtTESextremeUp);
-  mgr.book(prefix()+"_ptTESup", &fPtTESup);
-  mgr.book(prefix()+"_ptmatchingJet", &fPtmatchingJet);
+  mgr.book(prefix()+"_mcNPizero", &fMcNPizero);
+  mgr.book(prefix()+"_mcNProngs", &fMcNProngs);
   mgr.book(prefix()+"_nProngs", &fNProngs);
   mgr.book(prefix()+"_pdgOrigin", &fPdgOrigin);
 }

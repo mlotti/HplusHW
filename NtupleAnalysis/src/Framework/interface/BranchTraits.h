@@ -15,6 +15,12 @@ struct BranchTraits<bool> {
   static ReturnType get(bool data) { return data; }
 };
 template <>
+struct BranchTraits<short> {
+  typedef short DataType;
+  typedef short ReturnType;
+  static ReturnType get(short data) { return data; }
+};
+template <>
 struct BranchTraits<int> {
   typedef int DataType;
   typedef int ReturnType;

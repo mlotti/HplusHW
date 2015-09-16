@@ -57,8 +57,8 @@ TEST_CASE("JetSelection", "[EventSelection]") {
   tmp.put("TauSelection.prongs", 1);
   tmp.put("TauSelection.rtau", -10.0);
   tmp.put("TauSelection.invertTauIsolation", false);
-  tmp.put("TauSelection.againstElectronDiscr", "againstElectronTight");
-  tmp.put("TauSelection.againstMuonDiscr", "againstMuonMedium");
+  tmp.put("TauSelection.againstElectronDiscr", "againstElectronLooseMVA5");
+  tmp.put("TauSelection.againstMuonDiscr", "againstMuonTight3");
   tmp.put("TauSelection.isolationDiscr", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
   tmp.put("JetSelection.jetPtCut", 30.0);
   tmp.put("JetSelection.jetEtaCut", 2.5);
@@ -93,11 +93,11 @@ TEST_CASE("JetSelection", "[EventSelection]") {
   std::vector<float> eta;  tree->Branch("Taus_eta", &eta);
   std::vector<float> phi;  tree->Branch("Taus_phi", &phi);
   std::vector<float> e;    tree->Branch("Taus_e", &e);
-  std::vector<float> lTrkPt;   tree->Branch("Taus_lTrkPt", &lTrkPt);
-  std::vector<float> lTrkEta;   tree->Branch("Taus_lTrkEta", &lTrkEta);
+  std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
+  std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
-  std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronTight", &eDiscr);
-  std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonMedium", &muDiscr);
+  std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
+  std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonTight3", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
   std::vector<bool> dm;        tree->Branch("Taus_decayModeFinding", &dm);
   std::vector<float> trgpt;   tree->Branch("HLTTau_pt", &trgpt);

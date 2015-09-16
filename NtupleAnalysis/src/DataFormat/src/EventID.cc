@@ -5,7 +5,8 @@ EventID::EventID():
   fEvent(nullptr),
   fLumi(nullptr),
   fRun(nullptr),
-  fNUP(nullptr)
+  fNUP(nullptr),
+  fPrescale(nullptr)
 {}
 EventID::~EventID() {}
 
@@ -14,5 +15,6 @@ void EventID::setupBranches(BranchManager& mgr) {
   mgr.book("lumi", &fLumi);
   mgr.book("run", &fRun);
   mgr.book("NUP", &fNUP);
+  mgr.book("prescale", &fPrescale);
 }
 
