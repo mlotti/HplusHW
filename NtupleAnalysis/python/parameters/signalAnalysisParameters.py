@@ -8,8 +8,13 @@ histoLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
 #====== Trigger
 trg = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100
-  triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120",
-               "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70"],
+  triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
+               "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_JetIdCleaned_v",
+               "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
+               "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned_v",
+               #"HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120",
+               #"HLT_LooseIsoPFTau35_Trk20_Prong1_MET70",
+               ],
   triggerOR2 = [],
 )
 
