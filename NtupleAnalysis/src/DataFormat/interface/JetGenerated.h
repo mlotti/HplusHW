@@ -21,15 +21,15 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  std::vector<std::string> getBJetTagsDiscriminatorNames() {
+  std::vector<std::string> getBJetTagsDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("pfCombinedInclusiveSecondaryVertexBJetTags"), std::string("pfCombinedInclusiveSecondaryVertexV2BJetTags"), std::string("pfCombinedSecondaryVertexBJetTags"), std::string("pfJetBProbabilityBJetTags"), std::string("pfJetProbabilityBJetTags")};
     return n;
   }
-  std::vector<std::string> getPUIDDiscriminatorNames() {
+  std::vector<std::string> getPUIDDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("PUIDloose"), std::string("PUIDmedium"), std::string("PUIDtight")};
     return n;
   }
-  std::vector<std::string> getJetIDDiscriminatorNames() {
+  std::vector<std::string> getJetIDDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("")};
     return n;
   }
@@ -67,7 +67,7 @@ public:
   {}
   ~JetGenerated() {}
 
-  std::vector<std::function<bool()>> getBJetTagsDiscriminatorValues() {
+  std::vector<std::function<bool()>> getBJetTagsDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->pfCombinedInclusiveSecondaryVertexBJetTags(); },
       [&](){ return this->pfCombinedInclusiveSecondaryVertexV2BJetTags(); },
@@ -77,7 +77,7 @@ public:
     };
     return values;
   }
-  std::vector<std::function<bool()>> getPUIDDiscriminatorValues() {
+  std::vector<std::function<bool()>> getPUIDDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->PUIDloose(); },
       [&](){ return this->PUIDmedium(); },
@@ -85,7 +85,7 @@ public:
     };
     return values;
   }
-  std::vector<std::function<bool()>> getJetIDDiscriminatorValues() {
+  std::vector<std::function<bool()>> getJetIDDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
     };
     return values;

@@ -23,15 +23,15 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  std::vector<std::string> getIsolationDiscriminatorNames() {
+  std::vector<std::string> getIsolationDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("byCombinedIsolationDeltaBetaCorrRaw3Hits"), std::string("byIsolationMVA3newDMwLTraw"), std::string("byIsolationMVA3newDMwoLTraw"), std::string("byIsolationMVA3oldDMwLTraw"), std::string("byIsolationMVA3oldDMwoLTraw"), std::string("byLooseCombinedIsolationDeltaBetaCorr3Hits"), std::string("byLooseIsolationMVA3newDMwLT"), std::string("byLooseIsolationMVA3newDMwoLT"), std::string("byLooseIsolationMVA3oldDMwLT"), std::string("byLooseIsolationMVA3oldDMwoLT"), std::string("byMediumCombinedIsolationDeltaBetaCorr3Hits"), std::string("byMediumIsolationMVA3newDMwLT"), std::string("byMediumIsolationMVA3newDMwoLT"), std::string("byMediumIsolationMVA3oldDMwLT"), std::string("byMediumIsolationMVA3oldDMwoLT"), std::string("byTightCombinedIsolationDeltaBetaCorr3Hits"), std::string("byTightIsolationMVA3newDMwLT"), std::string("byTightIsolationMVA3newDMwoLT"), std::string("byTightIsolationMVA3oldDMwLT"), std::string("byTightIsolationMVA3oldDMwoLT"), std::string("byVLooseIsolationMVA3newDMwLT"), std::string("byVLooseIsolationMVA3newDMwoLT"), std::string("byVLooseIsolationMVA3oldDMwLT"), std::string("byVLooseIsolationMVA3oldDMwoLT"), std::string("byVTightIsolationMVA3newDMwLT"), std::string("byVTightIsolationMVA3newDMwoLT"), std::string("byVTightIsolationMVA3oldDMwLT"), std::string("byVTightIsolationMVA3oldDMwoLT"), std::string("byVVTightIsolationMVA3newDMwLT"), std::string("byVVTightIsolationMVA3newDMwoLT"), std::string("byVVTightIsolationMVA3oldDMwLT"), std::string("byVVTightIsolationMVA3oldDMwoLT")};
     return n;
   }
-  std::vector<std::string> getAgainstMuonDiscriminatorNames() {
+  std::vector<std::string> getAgainstMuonDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("againstMuonLoose3"), std::string("againstMuonTight3")};
     return n;
   }
-  std::vector<std::string> getAgainstElectronDiscriminatorNames() {
+  std::vector<std::string> getAgainstElectronDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("againstElectronLooseMVA5"), std::string("againstElectronMVA5category"), std::string("againstElectronMediumMVA5"), std::string("againstElectronTightMVA5"), std::string("againstElectronVLooseMVA5"), std::string("againstElectronVTightMVA5")};
     return n;
   }
@@ -110,7 +110,7 @@ public:
   {}
   ~TauGenerated() {}
 
-  std::vector<std::function<bool()>> getIsolationDiscriminatorValues() {
+  std::vector<std::function<bool()>> getIsolationDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->byCombinedIsolationDeltaBetaCorrRaw3Hits(); },
       [&](){ return this->byIsolationMVA3newDMwLTraw(); },
@@ -147,14 +147,14 @@ public:
     };
     return values;
   }
-  std::vector<std::function<bool()>> getAgainstMuonDiscriminatorValues() {
+  std::vector<std::function<bool()>> getAgainstMuonDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->againstMuonLoose3(); },
       [&](){ return this->againstMuonTight3(); }
     };
     return values;
   }
-  std::vector<std::function<bool()>> getAgainstElectronDiscriminatorValues() {
+  std::vector<std::function<bool()>> getAgainstElectronDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->againstElectronLooseMVA5(); },
       [&](){ return this->againstElectronMVA5category(); },

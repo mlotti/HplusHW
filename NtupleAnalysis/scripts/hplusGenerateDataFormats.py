@@ -94,14 +94,14 @@ def generateParticle(types, particle, discriminatorCaptions):
     discriminatorCaptionGetters = ""
     for k in discriminatorCaptions.keys():
         #print k, discriminatorList[k]
-        discriminatorCaptionGetters += "  std::vector<std::string> get%sDiscriminatorNames() {\n"%discriminatorCaptions[k]
+        discriminatorCaptionGetters += "  std::vector<std::string> get%sDiscriminatorNames() const {\n"%discriminatorCaptions[k]
         discriminatorCaptionGetters += "    static std::vector<std::string> n = { std::string(\"%s\")};\n"%("\"), std::string(\"".join(map(str, discriminatorList[k])))
         discriminatorCaptionGetters += "    return n;\n"
         discriminatorCaptionGetters += "  }\n"
     # Getter for discriminator method values
     discriminatorMethodGetters = ""
     for k in discriminatorCaptions.keys():
-        discriminatorMethodGetters += "  std::vector<std::function<bool()>> get%sDiscriminatorValues() {\n"%discriminatorCaptions[k]
+        discriminatorMethodGetters += "  std::vector<std::function<bool()>> get%sDiscriminatorValues() const {\n"%discriminatorCaptions[k]
         discriminatorMethodGetters += "    static std::vector<std::function<bool()>> values = {\n"
         for i in range(len(discriminatorList[k])):
             if i < len(discriminatorList[k])-1:
@@ -421,12 +421,12 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  std::vector<std::string> getDiscriminatorNames() {{
+  std::vector<std::string> getDiscriminatorNames() const {{
     static std::vector<std::string> n = {{ {discrNames} }};
     return n;
   }}
 
-  std::vector<std::function<bool()>> getDiscriminatorValues() {{
+  std::vector<std::function<bool()>> getDiscriminatorValues() const {{
     static std::vector<std::function<bool()>> values = {{
 {discrMethodGetters}
     }};

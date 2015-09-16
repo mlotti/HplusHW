@@ -21,7 +21,7 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  std::vector<std::string> getIDDiscriminatorNames() {
+  std::vector<std::string> getIDDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("muIDLoose"), std::string("muIDMedium"), std::string("muIDTight")};
     return n;
   }
@@ -49,7 +49,7 @@ public:
   {}
   ~MuonGenerated() {}
 
-  std::vector<std::function<bool()>> getIDDiscriminatorValues() {
+  std::vector<std::function<bool()>> getIDDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->muIDLoose(); },
       [&](){ return this->muIDMedium(); },
