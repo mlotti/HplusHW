@@ -40,7 +40,7 @@ private:
   Count cPileupWeighted;
   Count cTopPtReweighted;
   Count cExclusiveSamplesWeighted;
-  Count cMETFilters;
+  METFilterSelection fMETFilterSelection;
   Count cVertexSelection;
   TauSelection fTauSelection;
   ElectronSelection fElectronSelection;
@@ -77,7 +77,8 @@ BTagEfficiencyAnalysis::BTagEfficiencyAnalysis(const ParameterSet& config)
   cPileupWeighted(fEventCounter.addCounter("Weighted events with PU")),
   cTopPtReweighted(fEventCounter.addCounter("Weighted events with top pT")),
   cExclusiveSamplesWeighted(fEventCounter.addCounter("Weighted events for exclusive samples")),
-  cMETFilters(fEventCounter.addCounter("MET filters")),
+  fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"),
+                fEventCounter, fHistoWrapper, nullptr, ""),
   cVertexSelection(fEventCounter.addCounter("Primary vertex selection")),
   fTauSelection(config.getParameter<ParameterSet>("TauSelection"),
                 fEventCounter, fHistoWrapper, nullptr, ""),
@@ -143,8 +144,10 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
 //====== Combining of W+jets and Z+jets inclusive and exclusive samples // FIXME missing code
   cExclusiveSamplesWeighted.increment();
   
-//====== MET filters to remove events with spurious sources of fake MET // FIXME missing code
-  cMETFilters.increment();
+//====== MET filters to remove events with spurious sources of fake MET
+  const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
+  if (!metFilterData.passedSelection())
+    return;
   
 //====== GenParticle analysis
   // if needed
