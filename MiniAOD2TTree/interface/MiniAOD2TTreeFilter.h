@@ -56,7 +56,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 
 	std::string hltProcessName;
         HLTConfigProvider hltConfig;
-        PrescaleWeightProvider prescaleWeight;
+        //PrescaleWeightProvider prescaleWeight;
 
 	std::string outputFileName;
 	std::string codeVersion;
