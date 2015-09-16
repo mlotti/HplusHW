@@ -98,7 +98,7 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   SECTION("Algorithm") {
     mgr.setEntry(0);
     TauSelection::Data tauData = tausel.analyze(event);
-    METSelection::Data metData = metsel.analyze(event, event.NPU().value());
+    METSelection::Data metData = metsel.analyze(event, event.vertexInfo().value());
     REQUIRE( tauData.getSelectedTaus().size() > 0 );
     REQUIRE( metData.passedSelection() == true );
     REQUIRE_NOTHROW( TransverseMass::reconstruct(tauData.getSelectedTau(), metData.getMET()) );
@@ -106,7 +106,7 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
     CHECK( m == Approx(163.119) );
     mgr.setEntry(1);
     tauData = tausel.analyze(event);
-    metData = metsel.analyze(event, event.NPU().value());
+    metData = metsel.analyze(event, event.vertexInfo().value());
     REQUIRE( tauData.getSelectedTaus().size() > 0 );
     REQUIRE( metData.passedSelection() == true );
     REQUIRE_NOTHROW( TransverseMass::reconstruct(tauData.getSelectedTau(), metData.getMET()) );

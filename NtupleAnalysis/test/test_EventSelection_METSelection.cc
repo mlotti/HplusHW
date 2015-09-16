@@ -71,9 +71,9 @@ TEST_CASE("METSelection", "[EventSelection]") {
   
   SECTION("PV Selection") {
     mgr.setEntry(0);
-    CHECK( event.NPU().value() == 1);
+    CHECK( event.vertexInfo().value() == 1);
     mgr.setEntry(1);
-    CHECK( event.NPU().value() == 30);
+    CHECK( event.vertexInfo().value() == 30);
   }
 
   SECTION("config") {
@@ -85,17 +85,17 @@ TEST_CASE("METSelection", "[EventSelection]") {
   
   SECTION("MET Selection") {
     mgr.setEntry(0);
-    METSelection::Data data = metsel.analyze(event, event.NPU().value());
+    METSelection::Data data = metsel.analyze(event, event.vertexInfo().value());
     CHECK( data.passedSelection() == true );
     CHECK( data.getMET().R() == Approx(90.0) );
     CHECK( data.getMET().Phi() == Approx(1.2) );
     mgr.setEntry(1);
-    data = metsel.analyze(event, event.NPU().value());
+    data = metsel.analyze(event, event.vertexInfo().value());
     CHECK( data.passedSelection() == true );
     CHECK( data.getMET().R() == Approx(90.0) );
     CHECK( data.getMET().Phi() == Approx(2.6) );
     mgr.setEntry(2);
-    data = metsel.analyze(event, event.NPU().value());
+    data = metsel.analyze(event, event.vertexInfo().value());
     CHECK( data.passedSelection() == false );
     CHECK( data.getMET().R() == Approx(40.0) );
     CHECK( data.getMET().Phi() == Approx(-2.6) );
@@ -106,11 +106,11 @@ TEST_CASE("METSelection", "[EventSelection]") {
                     ec, histoWrapper, commonPlotsPointer, "dblcount");
     metsel2.bookHistograms(f);
     CHECK( ec.getValueByName("passed MET selection (dblcount)") == 0);
-    REQUIRE_NOTHROW( metsel2.silentAnalyze(event, event.NPU().value()));
+    REQUIRE_NOTHROW( metsel2.silentAnalyze(event, event.vertexInfo().value()));
     CHECK( ec.getValueByName("passed MET selection (dblcount)") == 0);
-    REQUIRE_NOTHROW( metsel2.analyze(event, event.NPU().value()) );
+    REQUIRE_NOTHROW( metsel2.analyze(event, event.vertexInfo().value()) );
     CHECK( ec.getValueByName("passed MET selection (dblcount)") == 1);
-    REQUIRE_THROWS_AS( metsel2.analyze(event, event.NPU().value()), hplus::Exception );
+    REQUIRE_THROWS_AS( metsel2.analyze(event, event.vertexInfo().value()), hplus::Exception );
   }
   ec.setOutput(f);
   ec.serialize();
