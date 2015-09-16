@@ -23,7 +23,7 @@ Event::Event(const ParameterSet& config):
     if (triggerOR2->size())
       fTriggerOr2.setBranchNames(*triggerOR2);
   }
-
+  
   bool variationAssigned = false;
   // Systematics
   boost::optional<std::string> jetSyst = config.getParameterOptional<std::string>("JetSelection.systematicVariation");

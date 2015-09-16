@@ -10,6 +10,9 @@ public:
   ~METFilter() {}
 
   void setupBranches(BranchManager& mgr);
+  
+  void checkDiscriminatorValidity(const std::string& name) const;
+  void checkDiscriminatorValidity(const std::vector<std::string>& names) const;
 };
 
 #endif

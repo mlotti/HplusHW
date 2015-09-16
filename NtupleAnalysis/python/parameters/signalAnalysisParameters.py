@@ -18,6 +18,14 @@ trg = PSet(
   triggerOR2 = [],
 )
 
+#====== MET filter
+metFilter = PSet(
+  # Note: HBHE filter is applied at ttree generation level
+  discriminators = ["CSCTightHaloFilter",
+                    "EeBadScFilter",
+                    "GoodVertices"]
+)
+
 #====== Tau selection
 tauSelection = PSet(
   applyTriggerMatching = True,
@@ -123,6 +131,7 @@ commonPlotsOptions = PSet(
 allSelections = PSet(
  histogramAmbientLevel = histoLevel,
                Trigger = trg,
+             METFilter = metFilter,
           TauSelection = tauSelection,
      ElectronSelection = eVeto,
          MuonSelection = muVeto,
