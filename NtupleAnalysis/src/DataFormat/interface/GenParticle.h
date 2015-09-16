@@ -3,29 +3,27 @@
 #define DataFormat_GenParticle_h
 
 #include "DataFormat/interface/GenParticleGenerated.h"
-#include "DataFormat/interface/ParticleIterator.h"
+//#include "DataFormat/interface/ParticleIterator.h"
 
 class GenParticle;
 
-class GenParticleCollection: public GenParticleGeneratedCollection, public ParticleIteratorAdaptor<GenParticleCollection> {
+class GenParticleCollection: public GenParticleGeneratedCollection { //, public ParticleIteratorAdaptor<GenParticleCollection> {
 public:
-  using value_type = GenParticle;
-
   GenParticleCollection() {}
   GenParticleCollection(const std::string& prefix): GenParticleGeneratedCollection(prefix) {}
   ~GenParticleCollection() {}
 
   void setupBranches(BranchManager& mgr);
 
-  GenParticle operator[](size_t i) const;
-  std::vector<GenParticle> toVector() const;
+  //GenParticle operator[](size_t i) const;
+  //std::vector<GenParticle> toVector() const;
 
-  friend class GenParticle;
-  friend class GenParticleGenerated<GenParticleCollection>;
-  friend class Particle<GenParticleCollection>;
+  //friend class GenParticle;
+  //friend class GenParticleGenerated<GenParticleCollection>;
+  //friend class Particle<GenParticleCollection>;
 };
 
-class GenParticle: public GenParticleGenerated<GenParticleCollection> {
+/*class GenParticle: public GenParticleGenerated<GenParticleCollection> {
 public:
  GenParticle() {}
   GenParticle(const GenParticleCollection* coll, size_t index): GenParticleGenerated(coll, index) {}
@@ -50,6 +48,6 @@ GenParticle GenParticleCollection::operator[](size_t i) const {
 inline
 std::vector<GenParticle> GenParticleCollection::toVector() const {
   return ParticleCollectionBase::toVector(*this);
-}
+}*/
 
 #endif

@@ -28,6 +28,23 @@ TEST_CASE("Branch works", "[Framework]") {
     b_event.setEntry(1);
     CHECK( b_event.value() == 2 );
   }
+  SECTION("Short int branch") {
+    auto newtree = std::unique_ptr<TTree>(new TTree("Events", "Events"));
+    short test; newtree->Branch("short", &test);
+    test = 1;
+    newtree->Fill();
+    test = 123;
+    newtree->Fill();
+    Branch<short> b("short");
+    b.setupBranch(newtree.get());
+    REQUIRE( b.isValid() );
+    b.setEntry(0);
+    std::cout << b.value() << std::endl;
+    CHECK( static_cast<int>(b.value()) == 1 );
+    b.setEntry(1);
+    CHECK( b.value() == 123 );
+  }
+  
   SECTION("Boolean branch") {
     Branch<bool> b_trigger("trigger");
     b_trigger.setupBranch(tree.get());

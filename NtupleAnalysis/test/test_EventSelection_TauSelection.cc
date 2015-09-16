@@ -26,7 +26,7 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     tmp.put("TauSelection.againstElectronDiscr", "");
     ParameterSet pset1(tmp, true);
     REQUIRE_NOTHROW(Event event1(pset1));
-    tmp.put("TauSelection.againstElectronDiscr", "againstElectronTight");
+    tmp.put("TauSelection.againstElectronDiscr", "againstElectronLooseMVA5");
     ParameterSet pset2(tmp, true);
     REQUIRE_NOTHROW(Event event2(pset2));
     tmp.put("TauSelection.againstElectronDiscr", "dummy");
@@ -38,7 +38,7 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     tmp.put("TauSelection.againstMuonDiscr", "");
     ParameterSet pset1(tmp, true);
     REQUIRE_NOTHROW(Event event1(pset1));
-    tmp.put("TauSelection.againstMuonDiscr", "againstMuonMedium");
+    tmp.put("TauSelection.againstMuonDiscr", "againstMuonTight3");
     ParameterSet pset2(tmp, true);
     REQUIRE_NOTHROW(Event event2(pset2));
     tmp.put("TauSelection.againstMuonDiscr", "dummy");
@@ -68,8 +68,8 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   tmp.put("TauSelection.prongs", 1);
   tmp.put("TauSelection.rtau", -10.0);
   tmp.put("TauSelection.invertTauIsolation", false);
-  tmp.put("TauSelection.againstElectronDiscr", "againstElectronTight");
-  tmp.put("TauSelection.againstMuonDiscr", "againstMuonMedium");
+  tmp.put("TauSelection.againstElectronDiscr", "againstElectronLooseMVA5");
+  tmp.put("TauSelection.againstMuonDiscr", "againstMuonTight3");
   tmp.put("TauSelection.isolationDiscr", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
   ParameterSet psetDefault(tmp, true);
   // Create necessary objects for testing
@@ -91,13 +91,13 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   std::vector<float> eta;  tree->Branch("Taus_eta", &eta);
   std::vector<float> phi;  tree->Branch("Taus_phi", &phi);
   std::vector<float> e;    tree->Branch("Taus_e", &e);
-  std::vector<float> lTrkPt;   tree->Branch("Taus_lTrkPt", &lTrkPt);
-  std::vector<float> lTrkEta;  tree->Branch("Taus_lTrkEta", &lTrkEta);
+  std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
+  std::vector<float> lTrkEta;  tree->Branch("Taus_lChTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
-  std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronTight", &eDiscr);
-  std::vector<bool> e2Discr;    tree->Branch("Taus_againstElectronLoose", &e2Discr);
-  std::vector<bool> e3Discr;    tree->Branch("Taus_againstElectronMedium", &e3Discr);
-  std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonMedium", &muDiscr);
+  std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
+  std::vector<bool> e2Discr;    tree->Branch("Taus_againstElectronLooseMVA5", &e2Discr);
+  std::vector<bool> e3Discr;    tree->Branch("Taus_againstElectronMediumMVA5", &e3Discr);
+  std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonTight3", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
   std::vector<bool> dm;        tree->Branch("Taus_decayModeFinding", &dm);
   std::vector<float> trgpt;   tree->Branch("HLTTau_pt", &trgpt);
@@ -216,11 +216,11 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     tmp.put("TauSelection.prongs", -1);
     boost::property_tree::ptree discrs;
     boost::property_tree::ptree child;
-    child.put("", "againstElectronTight");
+    child.put("", "againstElectronLooseMVA5");
     discrs.push_back(std::make_pair("", child));
-    child.put("", "againstElectronMedium");
+    child.put("", "againstElectronMediumMVA5");
     discrs.push_back(std::make_pair("", child));
-    child.put("", "againstElectronLoose");
+    child.put("", "againstElectronLooseMVA5");
     discrs.push_back(std::make_pair("", child));
     tmp.add_child("TauSelection.discriminators", discrs);
     ParameterSet newPset(tmp, true);

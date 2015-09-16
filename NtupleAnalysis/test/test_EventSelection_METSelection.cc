@@ -16,6 +16,7 @@
 #include <iostream>
 #include "TFile.h"
 #include "TTree.h"
+#include "TLeaf.h"
 
 TEST_CASE("METSelection", "[EventSelection]") {
   // Create config for testing
@@ -40,30 +41,33 @@ TEST_CASE("METSelection", "[EventSelection]") {
   unsigned int run;           tree->Branch("run",   &run);
   unsigned int lumi;          tree->Branch("lumi",  &lumi);
   unsigned long long nevent;  tree->Branch("event", &nevent);
-  double type1METet;          tree->Branch("MET_Type1_et", &type1METet);
-  double type1METphi;         tree->Branch("MET_Type1_phi", &type1METphi);
-  int nPU;                    tree->Branch("nGoodOfflinePV", &nPU);
+  double type1METx;           tree->Branch("MET_Type1_x", &type1METx);
+  double type1METy;           tree->Branch("MET_Type1_y", &type1METy);
+  short nPU;                  tree->Branch("nGoodOfflineVertices", &nPU);
+  
   run = 1;
   lumi = 1;
   nevent = 1;
-  type1METet = 90.0;
-  type1METphi = 1.2;
+  type1METx = 32.61220;
+  type1METy = 83.88352;
   nPU = 1;
   tree->Fill();
   nevent = 2;
-  type1METet = 90.0;
-  type1METphi = 2.6;
+  type1METx = -77.11999;
+  type1METy = 46.395123;
   nPU = 30;
   tree->Fill();
   nevent = 3;
-  type1METet = 40.0;
-  type1METphi = -2.6;
+  type1METx = -34.27555;
+  type1METy = -20.620055;
   nPU = 30;
   tree->Fill();  
   BranchManager mgr;
   mgr.setTree(tree);
   Event event(pset);
   event.setupBranches(mgr);
+  TBranch* b = tree->GetBranch("nGoodOfflineVertices");
+  tree->GetEvent(0);
   
   SECTION("PV Selection") {
     mgr.setEntry(0);

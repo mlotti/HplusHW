@@ -11,10 +11,10 @@ void FourVectorDumper::book(TTree* tree, const std::string& name, const std::str
   if (!postfix.empty()) {
     modPostfix = postfix;
   }
-  tree->Branch((name+"_pt"+modPostfix).c_str(),&pt);
-  tree->Branch((name+"_eta"+modPostfix).c_str(),&eta);
-  tree->Branch((name+"_phi"+modPostfix).c_str(),&phi);
-  tree->Branch((name+"_e"+modPostfix).c_str(),&e);
+  tree->Branch((name+"_pt_"+modPostfix).c_str(),&pt);
+  tree->Branch((name+"_eta_"+modPostfix).c_str(),&eta);
+  tree->Branch((name+"_phi_"+modPostfix).c_str(),&phi);
+  tree->Branch((name+"_e_"+modPostfix).c_str(),&e);
 }
 
 bool FourVectorDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
