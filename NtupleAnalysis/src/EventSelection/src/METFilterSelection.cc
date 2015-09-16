@@ -15,15 +15,12 @@ METFilterSelection::Data::~Data() { }
 
 METFilterSelection::METFilterSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
-  sDiscriminators(config.getParameter<std::vector<std::string>>("discriminators")),
   // Event counter for passing selection
+  cSubAll(eventCounter.addSubCounter("METFilter selection ("+postfix+")", "All events")),
   cPassedMETFilterSelection(eventCounter.addCounter("passed METFilter selection ("+postfix+")"))
 {
-  // Check discriminator validity
-  METFilter dummy;
-  dummy.checkDiscriminatorValidity(sDiscriminators);
   // Create sub counters
-  for (auto p: sDiscriminators) {
+  for (auto p: config.getParameter<std::vector<std::string>>("discriminators")) {
     cSubPassedFilter.push_back(eventCounter.addSubCounter("METFilter selection ("+postfix+")", "Passed "+p) );
   }
 }
@@ -52,34 +49,13 @@ METFilterSelection::Data METFilterSelection::analyze(const Event& event) {
 
 METFilterSelection::Data METFilterSelection::privateAnalyze(const Event& iEvent) {
   Data output;
-  
-  //=== Populate lookup table
-  if (!iIndexLUT.size()) {
-    for (auto p: sDiscriminators) {
-      bool foundStatus = false;
-      for (size_t i = 0; i < iEvent.metFilter().getDiscriminatorNames().size(); ++i) {
-        if (p == iEvent.metFilter().getDiscriminatorNames()[i]) {
-          iIndexLUT.push_back(i);
-          foundStatus = true;
-        }
-      }
-      if (!foundStatus) {
-        enableHistogramsAndCounters(); // for unit tests
-        throw hplus::Exception("config") << "METFilters: could not find requested filter '" << p << "'!";
-      }
-    }
-    if (sDiscriminators.size() != iIndexLUT.size()) {
-      enableHistogramsAndCounters(); // for unit tests
-      throw hplus::Exception("assert") << "Lookup table size mismatch (size=" 
-        << iIndexLUT.size() << ", should be " << sDiscriminators.size() << ")!";
-    }
-  }
-  
+  cSubAll.increment();
+
   //=== Apply cuts
   output.bPassedSelection = true;
   size_t i = 0;
-  while (i < iIndexLUT.size() && output.bPassedSelection) {
-    if (iEvent.metFilter().getDiscriminatorValues()[iIndexLUT[i]]()) {
+  while (i < iEvent.metFilter().getConfigurableDiscriminatorValues().size() && output.bPassedSelection) {
+    if (iEvent.metFilter().getConfigurableDiscriminatorValues()[i]) {
       cSubPassedFilter[i].increment();
     } else {
       output.bPassedSelection = false;

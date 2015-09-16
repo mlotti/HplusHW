@@ -21,9 +21,9 @@ TEST_CASE("METFilterSelection", "[EventSelection]") {
   boost::property_tree::ptree child;
   child.put("", "CSCTightHaloFilter");
   discrs.push_back(std::make_pair("", child));
-  child.put("", "EeBadScFilter");
+  child.put("", "eeBadScFilter");
   discrs.push_back(std::make_pair("", child));
-  child.put("", "GoodVertices");
+  child.put("", "goodVertices");
   discrs.push_back(std::make_pair("", child));
   boost::property_tree::ptree allDiscrs;
   allDiscrs.add_child("METFilter.discriminators", discrs);
@@ -65,7 +65,7 @@ TEST_CASE("METFilterSelection", "[EventSelection]") {
   EventCounter ec(weight);
   BranchManager mgr;
   mgr.setTree(tree);
-  Event event(psetEmpty);
+  Event event(psetDefault);
   event.setupBranches(mgr);
 
   SECTION("No discriminators") {
@@ -77,10 +77,12 @@ TEST_CASE("METFilterSelection", "[EventSelection]") {
     boost::property_tree::ptree tmp;
     tmp.add_child("METFilter.discriminators", tmpchild);
     ParameterSet pset(tmp, true, true);
+    Event eventtmp(pset);
+    eventtmp.setupBranches(mgr);
     REQUIRE_NOTHROW( METFilterSelection(pset.getParameter<ParameterSet>("METFilter"), ec, histoWrapper, commonPlotsPointer, "test") );
     METFilterSelection m(pset.getParameter<ParameterSet>("METFilter"), ec, histoWrapper, commonPlotsPointer, "test");
     mgr.setEntry(0);
-    METFilterSelection::Data data = m.silentAnalyze(event);
+    METFilterSelection::Data data = m.silentAnalyze(eventtmp);
     CHECK( data.passedSelection() == true );
   }
 

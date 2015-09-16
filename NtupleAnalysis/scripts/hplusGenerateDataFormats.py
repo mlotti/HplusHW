@@ -389,9 +389,10 @@ def generateDiscriminator(types, name, discriminatorPrefix):
     branchBookings = ""
     for n in branchNames:
         shortName = n.replace(discriminatorPrefix+"_", "")
+        shortNameOriginal = shortName
         shortName = shortName[0].upper()+shortName[1:]
         # Create list of discriminator names
-        discriminatorNameList.append('std::string("%s")'%shortName)
+        discriminatorNameList.append('std::string("%s")'%shortNameOriginal)
         # Create list of branch accessors
         branchAccessors += "  bool pass%s() const { return f%s->value(); }\n"%(shortName, shortName)
         # Create list of branch objects

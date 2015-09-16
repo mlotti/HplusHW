@@ -17,7 +17,7 @@ public:
   void setupBranches(BranchManager& mgr);
 
   std::vector<std::string> getDiscriminatorNames() const {
-    static std::vector<std::string> n = { std::string("CSCTightHaloFilter"), std::string("EeBadScFilter"), std::string("GoodVertices") };
+    static std::vector<std::string> n = { std::string("CSCTightHaloFilter"), std::string("eeBadScFilter"), std::string("goodVertices") };
     return n;
   }
 

@@ -23,7 +23,7 @@ Event::Event(const ParameterSet& config):
     if (triggerOR2->size())
       fTriggerOr2.setBranchNames(*triggerOR2);
   }
-  
+ 
   bool variationAssigned = false;
   // Systematics
   boost::optional<std::string> jetSyst = config.getParameterOptional<std::string>("JetSelection.systematicVariation");
@@ -43,6 +43,12 @@ Event::Event(const ParameterSet& config):
     variationAssigned = true;
   }
 
+  // MET filter discriminators
+  boost::optional<std::vector<std::string> > metFilterDiscr = config.getParameterOptional<std::vector<std::string> >("METFilter.discriminators", std::vector<std::string>{});
+  if (metFilterDiscr) {
+    fMETFilter.setConfigurableDiscriminators(*metFilterDiscr);
+  }
+  
   // Tau discriminators
   boost::optional<std::vector<std::string> > tauDiscr = config.getParameterOptional<std::vector<std::string> >("TauSelection.discriminators", std::vector<std::string>{});
   if(tauDiscr) {

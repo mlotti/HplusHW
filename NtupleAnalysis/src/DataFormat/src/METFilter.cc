@@ -4,6 +4,13 @@
 
 void METFilter::setupBranches(BranchManager& mgr) {
   METFilterGenerated::setupBranches(mgr);
+  fConfigurableDiscriminators.resize(fConfigurableDiscriminatorNames.size());
+  size_t i=0;
+  for (const auto& name: fConfigurableDiscriminatorNames) {
+    checkDiscriminatorValidity(name);
+    mgr.book("METFilter_Flag_"+name, &(fConfigurableDiscriminators[i]));
+    ++i;
+  }
 }
 
 void METFilter::checkDiscriminatorValidity(const std::string& name) const {

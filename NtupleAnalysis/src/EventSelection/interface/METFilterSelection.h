@@ -58,10 +58,9 @@ private:
   Data privateAnalyze(const Event& iEvent);
 
   // Input parameters
-  std::vector<std::string> sDiscriminators;
-  std::vector<size_t> iIndexLUT;
   
   // Event counter for passing selection
+  Count cSubAll;
   std::vector<Count> cSubPassedFilter;
   Count cPassedMETFilterSelection;
   // Histograms
