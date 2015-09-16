@@ -387,7 +387,7 @@ void GenParticleDumper::saveHelicityInformation(math::XYZTLorentzVector& visible
   // Find leading ch. particle
   math::XYZTLorentzVector ldgPion;
   for (auto& p: offspring) {
-    if (std::abs(p.pdgId()) == 211) {
+    if (std::abs(p->pdgId()) == 211) {
       if (p->p4().P() > ldgPion.P()) {
         ldgPion = p->p4();
       }
