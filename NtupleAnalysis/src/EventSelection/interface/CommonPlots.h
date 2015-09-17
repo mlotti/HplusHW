@@ -62,6 +62,9 @@ public:
   void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight);
   //void fillControlPlotsAfterAllSelectionsWithFullMass(const Event& event, FullHiggsMassCalculator::Data& data);
 
+  /// Getter for all vertices
+  int nVertices() const { return iVertices; }
+
 private:
   ///===== Config params
   const bool fEnableGenuineTauHistograms;

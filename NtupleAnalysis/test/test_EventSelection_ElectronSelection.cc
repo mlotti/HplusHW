@@ -136,7 +136,6 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
     CHECK( data.getSelectedElectrons().size() == 1 );
     CHECK( data.getHighestSelectedElectronPt() == 50.f );
     CHECK( data.getHighestSelectedElectronEta() == 1.1f );
-    CHECK( data.getHighestSelectedElectronPtBeforePtCut() == 50.f );
     CHECK( ec.getValueByName("passed e selection (test)") == 1);
     // Check protection for analyzing event only once
     REQUIRE_THROWS_AS(esel1.analyze(event), hplus::Exception);
@@ -146,7 +145,6 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
     CHECK( data.getSelectedElectrons().size() == 1 );
     CHECK( data.getHighestSelectedElectronPt() == 11.f );
     CHECK( data.getHighestSelectedElectronEta() == 0.7f );
-    CHECK( data.getHighestSelectedElectronPtBeforePtCut() == 11.f );
     CHECK( ec.getValueByName("passed e selection (Veto)") == 0);
     // Checks on event 2
     mgr.setEntry(1);
@@ -154,13 +152,11 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
     CHECK( data.getSelectedElectrons().size() == 0 );
     CHECK( data.getHighestSelectedElectronPt() < 1.f );
     CHECK( data.getHighestSelectedElectronEta() < 1.f );
-    CHECK( data.getHighestSelectedElectronPtBeforePtCut() == 9.f );
     CHECK( ec.getValueByName("passed e selection (test)") == 1);
     data = esel2.analyze(event);
     CHECK( data.getSelectedElectrons().size() == 0 );
     CHECK( data.getHighestSelectedElectronPt() < 1.f );
     CHECK( data.getHighestSelectedElectronEta() < 1.f );
-    CHECK( data.getHighestSelectedElectronPtBeforePtCut() == 9.f );
     CHECK( ec.getValueByName("passed e selection (Veto)") == 1);
     // Checks on event 3
     mgr.setEntry(2);

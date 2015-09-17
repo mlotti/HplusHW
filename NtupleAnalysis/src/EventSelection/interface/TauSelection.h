@@ -107,6 +107,15 @@ private:
   WrappedTH1 *hTauPtTriggerMatched;
   WrappedTH1 *hTauEtaTriggerMatched;
   WrappedTH1 *hNPassed;
+  WrappedTH1 *hPtResolution;
+  WrappedTH1 *hEtaResolution;
+  WrappedTH1 *hPhiResolution;
+  WrappedTH1 *hIsolPtBefore;
+  WrappedTH1 *hIsolEtaBefore;
+  WrappedTH1 *hIsolVtxBefore;
+  WrappedTH1 *hIsolPtAfter;
+  WrappedTH1 *hIsolEtaAfter;
+  WrappedTH1 *hIsolVtxAfter;
 };
 
 #endif

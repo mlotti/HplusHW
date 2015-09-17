@@ -79,10 +79,11 @@ private:
   Count cPassedMuonSelection;
   // Sub counters
   Count cSubAll;
+  Count cSubPassedPt;
+  Count cSubPassedEta;
   Count cSubPassedID;
   Count cSubPassedIsolation;
-  Count cSubPassedEta;
-  Count cSubPassedPt;
+  
   // Histograms
   WrappedTH1 *hMuonPtAll;
   WrappedTH1 *hMuonEtaAll;
@@ -91,6 +92,12 @@ private:
   WrappedTH1 *hPtResolution;
   WrappedTH1 *hEtaResolution;
   WrappedTH1 *hPhiResolution;
+  WrappedTH1 *hIsolPtBefore;
+  WrappedTH1 *hIsolEtaBefore;
+  WrappedTH1 *hIsolVtxBefore;
+  WrappedTH1 *hIsolPtAfter;
+  WrappedTH1 *hIsolEtaAfter;
+  WrappedTH1 *hIsolVtxAfter;
 };
 
 #endif

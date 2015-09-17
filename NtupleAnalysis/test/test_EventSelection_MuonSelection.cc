@@ -140,7 +140,6 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
     CHECK( data.getSelectedMuons().size() == 1 );
     CHECK( data.getHighestSelectedMuonPt() == 50.f );
     CHECK( data.getHighestSelectedMuonEta() == 1.1f );
-    CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 50.f );
     CHECK( ec.getValueByName("passed mu selection (test)") == 1);
     // Check protection for analyzing event only once
     REQUIRE_THROWS_AS(musel1.analyze(event), hplus::Exception);
@@ -150,7 +149,6 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
     CHECK( data.getSelectedMuons().size() == 1 );
     CHECK( data.getHighestSelectedMuonPt() == 11.f );
     CHECK( data.getHighestSelectedMuonEta() == 0.7f );
-    CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 11.f );
     CHECK( ec.getValueByName("passed mu selection (Veto)") == 0);
     // Checks on event 2
     mgr.setEntry(1);
@@ -158,13 +156,11 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
     CHECK( data.getSelectedMuons().size() == 0 );
     CHECK( data.getHighestSelectedMuonPt() < 1.f );
     CHECK( data.getHighestSelectedMuonEta() < 1.f );
-    CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 9.f );
     CHECK( ec.getValueByName("passed mu selection (test)") == 1);
     data = musel2.analyze(event);
     CHECK( data.getSelectedMuons().size() == 0 );
     CHECK( data.getHighestSelectedMuonPt() < 1.f );
     CHECK( data.getHighestSelectedMuonEta() < 1.f );
-    CHECK( data.getHighestSelectedMuonPtBeforePtCut() == 9.f );
     CHECK( ec.getValueByName("passed mu selection (Veto)") == 1);
     // Checks on event 3
     mgr.setEntry(2);

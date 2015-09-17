@@ -57,9 +57,20 @@ TauSelection::~TauSelection() { }
 void TauSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "tauSelection_"+sPostfix);
   hTriggerMatchDeltaR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR", "Trigger match #DeltaR", 60, 0, 3.);
-  hTauPtTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauPtAll", "Tau pT, all", 40, 0, 400);
-  hTauEtaTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauEtaAll", "Tau eta, all", 50, -2.5, 2.5);
-  hNPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauNpassed", "Tau eta, all", 20, 0, 20);
+  hTauPtTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauPtTriggerMatched", "Tau pT, trigger matched", 40, 0, 400);
+  hTauEtaTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauEtaTriggerMatched", "Tau eta, trigger matched", 50, -2.5, 2.5);
+  hNPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauNpassed", "Number of passed taus", 20, 0, 20);
+  // Resolutions
+  hPtResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution", "(reco pT - gen pT) / reco pT", 200, -1.0, 1.0);
+  hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", "(reco eta - gen eta) / reco eta", 200, -1.0, 1.0);
+  hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", "(reco phi - gen phi) / reco phi", 200, -1.0, 1.0);
+  // Isolation efficiency
+  hIsolPtBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore", "Tau pT before isolation is applied", 40, 0, 400);
+  hIsolEtaBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaBefore", "Tau eta before isolation is applied", 50, -2.5, 2.5);
+  hIsolVtxBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxBefore", "Nvertices before isolation is applied", 60, 0, 60);
+  hIsolPtAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtAfter", "Tau pT before isolation is applied", 40, 0, 400);
+  hIsolEtaAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaAfter", "Tau eta before isolation is applied", 50, -2.5, 2.5);
+  hIsolVtxAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxAfter", "Nvertices before isolation is applied", 60, 0, 60);
 }
 
 TauSelection::Data TauSelection::silentAnalyze(const Event& event) {
@@ -142,6 +153,10 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
       continue;
     passedNprongs = true;
     // Apply tau isolation
+    hIsolPtBefore->Fill(tau.pt());
+    hIsolEtaBefore->Fill(tau.eta());
+    if (fCommonPlotsIsEnabled())
+      hIsolVtxBefore->Fill(fCommonPlots->nVertices());
     if (bInvertTauIsolation) {
       if (this->passIsolationDiscriminator(tau))
         passedIsol = true;
@@ -152,15 +167,26 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
         continue;
       passedIsol = true;
     }
+    hIsolPtAfter->Fill(tau.pt());
+    hIsolEtaAfter->Fill(tau.eta());
+    if (fCommonPlotsIsEnabled())
+      hIsolVtxAfter->Fill(fCommonPlots->nVertices());
     // Apply cut on Rtau
     if (!this->passRtauCut(tau))
       continue;
     passedRtau = true;
     
     output.fSelectedTaus.push_back(tau);
+    // Fill resolution histograms
+    if (event.isMC()) {
+      hPtResolution->Fill((tau.pt() - tau.MCVisibleTau()->pt()) / tau.pt());
+      hEtaResolution->Fill((tau.eta() - tau.MCVisibleTau()->eta()) / tau.eta());
+      hPhiResolution->Fill((tau.phi() - tau.MCVisibleTau()->phi()) / tau.phi());
+    }
   }
   // If there are multiple taus, choose the one with highest pT
   std::sort(output.fSelectedTaus.begin(), output.fSelectedTaus.end());
+  hNPassed->Fill(output.fSelectedTaus.size());
   
   // Fill data object
   if (output.fSelectedTaus.size())
