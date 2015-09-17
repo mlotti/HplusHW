@@ -80,6 +80,20 @@ public:
   bool isFromOtherSource() const { return this->pdgOrigin() == TauOriginType::kFromOtherSource; }
   bool isFromUnknownSource() const { return this->pdgOrigin() == TauOriginType::kTauOriginUnknown; }
 
+  // Getter for rtau
+  double rtau() const {
+    // Calculate p_z of leading track
+    double pz = std::sinh(static_cast<double>(this->lChTrkEta()))*static_cast<double>(this->lChTrkPt());
+    // Calcualte p of leading track
+    double p = std::sqrt(pz*pz + static_cast<double>(this->lChTrkPt()*this->lChTrkPt()));
+    // Calculate Rtau
+    double rtau = -1.0;
+    double taup = this->p4().P();
+    if (taup > 0.0)
+      rtau = p / taup;
+    return rtau; 
+  }
+  
   // Methods for discriminators
   bool configurableDiscriminators() const {
     for(auto& disc: fCollection->fConfigurableDiscriminators) {

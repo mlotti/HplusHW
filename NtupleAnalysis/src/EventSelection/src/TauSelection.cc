@@ -14,7 +14,9 @@
 #include <cmath>
 
 TauSelection::Data::Data() 
-: fRtau(-1.0) { }
+: fRtau(-1.0),
+  fRtauAntiIsolatedTau(-1.0)
+{ }
 
 TauSelection::Data::~Data() { }
 
@@ -22,6 +24,12 @@ const Tau& TauSelection::Data::getSelectedTau() const {
   if (!hasIdentifiedTaus())
     throw hplus::Exception("Assert") << "You forgot to check if taus exist (hasIdentifiedTaus()), this message occurs when none exist!";
   return fSelectedTaus[0];
+}
+
+const Tau& TauSelection::Data::getAntiIsolatedTau() const {
+  if (!hasAntiIsolatedTaus())
+    throw hplus::Exception("Assert") << "You forgot to check if taus exist (hasAntiIsolatedTaus()), this message occurs when none exist!";
+  return fAntiIsolatedTaus[0];
 }
 
 TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
@@ -33,10 +41,10 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
   fTauNprongs(config.getParameter<int>("prongs")),
   fTauRtauCut(config.getParameter<float>("rtau")),
-  bInvertTauIsolation(config.getParameter<bool>("invertTauIsolation")),
   // Event counter for passing selection
   cPassedTauSelection(eventCounter.addCounter("passed tau selection ("+postfix+")")),
   cPassedTauSelectionMultipleTaus(eventCounter.addCounter("multiple taus ("+postfix+")")),
+  cPassedAntiIsolatedTauSelection(eventCounter.addCounter("passed anti-isolated tau selection ("+postfix+")")),
   // Sub counters
   cSubAll(eventCounter.addSubCounter("tau selection ("+postfix+")", "All events")),
   cSubPassedTriggerMatching(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed trigger matching")),
@@ -49,7 +57,9 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   cSubPassedLdgTrk(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed ldg.trk pt cut")),
   cSubPassedNprongs(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed nprongs")),
   cSubPassedIsolation(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed isolation")),
-  cSubPassedRtau(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed Rtau"))
+  cSubPassedRtau(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed Rtau")),
+  cSubPassedAntiIsolation(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolation")),
+  cSubPassedAntiIsolationRtau(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated Rtau"))
 { }
 
 TauSelection::~TauSelection() { }
@@ -106,6 +116,8 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   bool passedNprongs = false;
   bool passedIsol = false;
   bool passedRtau = false;
+  bool passedAntiIsol = false;
+  bool passedAntiIsolRtau = false;
   
   // Cache vector of trigger tau 4-momenta
   std::vector<math::LorentzVectorT<double>> myTriggerTauMomenta;
@@ -157,40 +169,48 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     hIsolEtaBefore->Fill(tau.eta());
     if (fCommonPlotsIsEnabled())
       hIsolVtxBefore->Fill(fCommonPlots->nVertices());
-    if (bInvertTauIsolation) {
-      if (this->passIsolationDiscriminator(tau))
-        passedIsol = true;
-      if (passedIsol)
-        continue;
-    } else {
-      if (!this->passIsolationDiscriminator(tau))
-        continue;
+    if (this->passIsolationDiscriminator(tau)) {
+      // tau is isolated
       passedIsol = true;
-    }
-    hIsolPtAfter->Fill(tau.pt());
-    hIsolEtaAfter->Fill(tau.eta());
-    if (fCommonPlotsIsEnabled())
-      hIsolVtxAfter->Fill(fCommonPlots->nVertices());
-    // Apply cut on Rtau
-    if (!this->passRtauCut(tau))
-      continue;
-    passedRtau = true;
-    
-    output.fSelectedTaus.push_back(tau);
-    // Fill resolution histograms
-    if (event.isMC()) {
-      hPtResolution->Fill((tau.pt() - tau.MCVisibleTau()->pt()) / tau.pt());
-      hEtaResolution->Fill((tau.eta() - tau.MCVisibleTau()->eta()) / tau.eta());
-      hPhiResolution->Fill((tau.phi() - tau.MCVisibleTau()->phi()) / tau.phi());
+      hIsolPtAfter->Fill(tau.pt());
+      hIsolEtaAfter->Fill(tau.eta());
+      if (fCommonPlotsIsEnabled())
+        hIsolVtxAfter->Fill(fCommonPlots->nVertices());
+      // Apply cut on Rtau
+      if (!this->passRtauCut(tau))
+        continue;
+      passedRtau = true;
+      // Passed tau selection
+      output.fSelectedTaus.push_back(tau);
+      // Fill resolution histograms only for isolated taus
+      if (event.isMC()) {
+        hPtResolution->Fill((tau.pt() - tau.MCVisibleTau()->pt()) / tau.pt());
+        hEtaResolution->Fill((tau.eta() - tau.MCVisibleTau()->eta()) / tau.eta());
+        hPhiResolution->Fill((tau.phi() - tau.MCVisibleTau()->phi()) / tau.phi());
+      }
+    } else {
+      // tau is not isolated
+      passedAntiIsol = true;
+      // Apply cut on Rtau
+      if (!this->passRtauCut(tau))
+        continue;
+      passedAntiIsolRtau = true;
+      // Passed anti-isolated tau selection
+      output.fAntiIsolatedTaus.push_back(tau);
     }
   }
+  hNPassed->Fill(output.fSelectedTaus.size());
   // If there are multiple taus, choose the one with highest pT
   std::sort(output.fSelectedTaus.begin(), output.fSelectedTaus.end());
-  hNPassed->Fill(output.fSelectedTaus.size());
+  std::sort(output.fAntiIsolatedTaus.begin(), output.fAntiIsolatedTaus.end());
   
   // Fill data object
-  if (output.fSelectedTaus.size())
-    output.fRtau = getRtau(output.getSelectedTau());
+  if (output.fSelectedTaus.size()) {
+    output.fRtau = output.getSelectedTau().rtau();
+  }
+  if (output.fAntiIsolatedTaus.size()) {
+    output.fRtauAntiIsolatedTau = output.getAntiIsolatedTau().rtau();
+  }
 
   // Fill counters
   if (passedTriggerMatching)
@@ -211,19 +231,20 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     cSubPassedLdgTrk.increment();
   if (passedNprongs)
     cSubPassedNprongs.increment();
-  if (bInvertTauIsolation) {
-    if (!passedIsol)
-      cSubPassedIsolation.increment();
-  } else {
-    if (passedIsol)
-      cSubPassedIsolation.increment();
-  }  
+  if (passedIsol)
+    cSubPassedIsolation.increment();
   if (passedRtau)
     cSubPassedRtau.increment();
+  if (passedAntiIsol)
+    cSubPassedAntiIsolation.increment();
+  if (passedAntiIsolRtau)
+    cSubPassedAntiIsolationRtau.increment();
   if (output.fSelectedTaus.size() > 0)
     cPassedTauSelection.increment();
   if (output.fSelectedTaus.size() > 1)
     cPassedTauSelectionMultipleTaus.increment();
+  if (output.fAntiIsolatedTaus.size() > 0)
+    cPassedAntiIsolatedTauSelection.increment();
   // Return data object
   return output;
 }
@@ -249,19 +270,4 @@ bool TauSelection::passNprongsCut(const Tau& tau) const {
     }
   }
   return true;
-}
-
-double TauSelection::getRtau(const Tau& tau) const {
-  // Calculate p_z of leading track
-  double pz = std::sinh(static_cast<double>(tau.lChTrkEta()))*static_cast<double>(tau.lChTrkPt());
-  // Calcualte p of leading track
-  double p = std::sqrt(pz*pz + static_cast<double>(tau.lChTrkPt()*tau.lChTrkPt()));
-  // Calculate Rtau
-  double rtau = -1.0;
-  double taup = tau.p4().P();
-  if (taup > 0.0)
-    rtau = p / taup;
-  return rtau;
-  
-  
 }

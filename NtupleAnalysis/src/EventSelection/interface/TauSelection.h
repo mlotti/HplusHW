@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+extern Branch< short int > b;
 class ParameterSet;
 class CommonPlots;
 class Event;
@@ -32,22 +33,34 @@ public:
     Data();
     ~Data();
 
+    // Getters for selected taus (i.e. passed isolation amongst others)
     const bool hasIdentifiedTaus() const { return (fSelectedTaus.size() > 0); }
     const Tau& getSelectedTau() const;
     const std::vector<Tau>& getSelectedTaus() const { return fSelectedTaus; }
     const float getRtauOfSelectedTau() const { return fRtau; }
+    const bool isGenuineTau() const { return getSelectedTau().isGenuineTau(); }
+    const size_t getFakeTauID() const { return getSelectedTau().pdgId(); } // For codes see MiniAOD2TTree/interface/NtupleAnalysis_fwd.h
     
-    // FIXME: Add MC information if deemed necessary
-//     const bool eventContainsTauFromCJet() const { return fHasTauFromCjetStatus; }
-//     const bool eventContainsTauFromBJet() const { return fHasTauFromBjetStatus; }
-//     const bool eventContainsTauFromCorBJet() const { return eventContainsTauFromCJet() || eventContainsTauFromBJet(); }
+    // Getters for anti-isolated taus (i.e. passed other cuts but not isolation)
+    const bool isAntiIsolated() const { return !hasIdentifiedTaus(); }
+    const bool hasAntiIsolatedTaus() const { return (fAntiIsolatedTaus.size() > 0); }
+    const std::vector<Tau>& getAntiIsolatedTaus() const { return fAntiIsolatedTaus; }
+    const Tau& getAntiIsolatedTau() const;
+    const float getRtauOfAntiIsolatedTau() const { return fRtauAntiIsolatedTau; }
+    const bool getAntiIsolatedTauIsGenuineTau() const { return getAntiIsolatedTau().isGenuineTau(); }
+    const size_t getAntiIsolatedFakeTauID() const { return getAntiIsolatedTau().pdgId(); } // For codes see MiniAOD2TTree/interface/NtupleAnalysis_fwd.h
+    
     friend class TauSelection;
 
   private:
-    float fRtau;
-    // FIXME: add mechanism for finding out if the tau is genuine or not
     /// Tau collection after all selections
     std::vector<Tau> fSelectedTaus;
+    /// Cache Rtau value to save time
+    float fRtau;
+    /// Anti-isolated tau collection after pasisng all selections but not passing isolation
+    std::vector<Tau> fAntiIsolatedTaus;
+    /// Cache Rtau value to save time
+    float fRtauAntiIsolatedTau;
   };
   
   // Main class
@@ -73,8 +86,7 @@ private:
   bool passMuonDiscriminator(const Tau& tau) const { return tau.againstMuonDiscriminator(); }
   bool passNprongsCut(const Tau& tau) const;
   bool passIsolationDiscriminator(const Tau& tau) const { return tau.isolationDiscriminator(); }
-  bool passRtauCut(const Tau& tau) const { return this->getRtau(tau) > fTauRtauCut; }
-  double getRtau(const Tau& tau) const;
+  bool passRtauCut(const Tau& tau) const { return tau.rtau() > fTauRtauCut; }
 
   // Input parameters (discriminators handled in Dataformat/src/Event.cc)
   const bool bApplyTriggerMatching;
@@ -84,11 +96,11 @@ private:
   const float fTauLdgTrkPtCut;
   const int fTauNprongs;
   const float fTauRtauCut;
-  const bool bInvertTauIsolation;
   
   // Event counter for passing selection
   Count cPassedTauSelection;
   Count cPassedTauSelectionMultipleTaus;
+  Count cPassedAntiIsolatedTauSelection;
   // Sub counters
   Count cSubAll;
   Count cSubPassedTriggerMatching;
@@ -102,6 +114,8 @@ private:
   Count cSubPassedNprongs;
   Count cSubPassedIsolation;
   Count cSubPassedRtau;
+  Count cSubPassedAntiIsolation;
+  Count cSubPassedAntiIsolationRtau;
   // Histograms
   WrappedTH1 *hTriggerMatchDeltaR;
   WrappedTH1 *hTauPtTriggerMatched;

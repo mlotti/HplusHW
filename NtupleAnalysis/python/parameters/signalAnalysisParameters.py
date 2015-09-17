@@ -35,7 +35,6 @@ tauSelection = PSet(
         tauLdgTrkPtCut = 10.0,
                 prongs = 13,    # options: 1, 3, 13 (both 1 and 3) or -1 (all)
                   rtau = 0.7,
-    invertTauIsolation = False, # set to true to invert isolation (for QCD measurement)
   againstElectronDiscr = "againstElectronTightMVA5",
       againstMuonDiscr = "againstMuonTight3",
         isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
