@@ -68,7 +68,9 @@ Event::Event(const ParameterSet& config):
   // FIXME
   
   // Electron discriminators
-  // FIXME
+  boost::optional<std::string> eIDDiscr = config.getParameterOptional<std::string>("ElectronSelection.electronID");
+  if (eIDDiscr)
+    fElectronCollection.setElectronIDDiscriminator(*eIDDiscr);
   
   // Jet discriminators
   boost::optional<std::string> jetIDDiscr = config.getParameterOptional<std::string>("JetSelection.jetIDDiscr");

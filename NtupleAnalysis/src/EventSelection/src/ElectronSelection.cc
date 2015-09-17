@@ -18,6 +18,7 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& e
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
   fElectronPtCut(config.getParameter<float>("electronPtCut")),
   fElectronEtaCut(config.getParameter<float>("electronEtaCut")),
+  fRelIsoCut(-1.0),
   // Event counter for passing selection
   cPassedElectronSelection(eventCounter.addCounter("passed e selection ("+postfix+")")),
   // Sub counters
@@ -26,7 +27,16 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& e
   cSubPassedIsolation(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed isolation")),
   cSubPassedEta(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed eta cut")),
   cSubPassedPt(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed pt cut"))
-{ }
+{
+  std::string isolString = config.getParameter<std::string>("electronIsolation");
+  if (isolString == "veto" || isolString == "Veto") {
+    fRelIsoCut = 0.15; // Based on 2012 cut based isolation
+  } else if (isolString == "tight" || isolString == "Tight") {
+    fRelIsoCut = 0.10; // Based on 2012 cut based isolation
+  } else {
+    throw hplus::Exception("config") << "Invalid electronIsolation option '" << isolString << "'! Options: 'veto', 'tight'";
+  }
+}
 
 ElectronSelection::~ElectronSelection() { }
 
@@ -68,11 +78,12 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
   for(Electron electron: event.electrons()) {
     hElectronPtAll->Fill(electron.pt());
     hElectronEtaAll->Fill(electron.eta());
-    // Apply cut on electron ID FIXME to be added
-    
+    // Apply cut on electron ID
+    if (!electron.electronIDDiscriminator()) continue;
     passedID = true;
-    // Apply cut on electron isolation FIXME to be added
-    
+    // Apply cut on electron isolation
+    if (electron.relIsoDeltaBeta() > fRelIsoCut) continue;
+    passedIsol = true;
     // Apply cut on eta
     if (std::fabs(electron.eta()) > fElectronEtaCut)
       continue;

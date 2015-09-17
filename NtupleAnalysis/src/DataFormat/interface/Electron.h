@@ -11,12 +11,15 @@ class ElectronCollection: public ElectronGeneratedCollection, public ParticleIte
 public:
   using value_type = Electron;
 
-  ElectronCollection() {}
-  ElectronCollection(const std::string& prefix): ElectronGeneratedCollection(prefix) {}
+  ElectronCollection() { initialize(); }
+  ElectronCollection(const std::string& prefix): ElectronGeneratedCollection(prefix) { initialize(); }
   ~ElectronCollection() {}
 
   void setupBranches(BranchManager& mgr);
 
+  void setElectronIDDiscriminator(const std::string& name);
+  bool electronIDDiscriminatorIsValid() const;
+  
   Electron operator[](size_t i) const;
   std::vector<Electron> toVector() const;
 
@@ -25,6 +28,13 @@ public:
   friend class Particle<ElectronCollection>;
 
 protected:
+  const Branch<std::vector<bool>>* fElectronIDDiscriminator;
+  
+private:
+  void initialize();
+  
+  std::string fElectronIDDiscriminatorName;
+  bool bValidityOfElectronIDDiscr;
 };
 
 class Electron: public ElectronGenerated<ElectronCollection> {
@@ -32,6 +42,12 @@ public:
   Electron() {}
   Electron(const ElectronCollection* coll, size_t index): ElectronGenerated(coll, index) {}
   ~Electron() {}
+
+  bool electronIDDiscriminator() const {
+    if (!fCollection->electronIDDiscriminatorIsValid())
+      return true;
+    return fCollection->fElectronIDDiscriminator->value()[index()];
+  }
 };
 
 inline

@@ -45,7 +45,8 @@ tauSelection = PSet(
 eVeto = PSet(
          electronPtCut = 15.0,
         electronEtaCut = 2.5,
-        # FIXME: add electron ID and isolation
+            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
+     electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
 #====== Muon veto

@@ -73,6 +73,7 @@ private:
   // Input parameters
   const double fElectronPtCut;
   const double fElectronEtaCut;
+  float fRelIsoCut;
   
   // Event counter for passing selection
   Count cPassedElectronSelection;
