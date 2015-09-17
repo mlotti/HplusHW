@@ -109,7 +109,7 @@ void SignalAnalysis::process(Long64_t entry) {
 
   cAllEvents.increment();
 
-//====== Apply trigger // FIXME to be debugged
+//====== Apply trigger
   if (!(fEvent.passTriggerDecision()))
     return;
   cTrigger.increment();
@@ -143,8 +143,6 @@ void SignalAnalysis::process(Long64_t entry) {
   cVertexSelection.increment();
   fCommonPlots.setNvertices(nVertices);
   
-//====== Setup common events // FIXME missing code
-    
 //====== Tau selection
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
   if (!tauData.hasIdentifiedTaus())

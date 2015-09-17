@@ -30,7 +30,7 @@ public:
     return n;
   }
   std::vector<std::string> getJetIDDiscriminatorNames() const {
-    static std::vector<std::string> n = { std::string("")};
+    static std::vector<std::string> n = { std::string("IDloose"), std::string("IDtight"), std::string("IDtightLeptonVeto")};
     return n;
   }
 
@@ -87,6 +87,9 @@ public:
   }
   std::vector<std::function<bool()>> getJetIDDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
+      [&](){ return this->IDloose(); },
+      [&](){ return this->IDtight(); },
+      [&](){ return this->IDtightLeptonVeto(); }
     };
     return values;
   }

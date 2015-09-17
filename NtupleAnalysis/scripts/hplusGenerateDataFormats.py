@@ -83,7 +83,12 @@ def generateParticle(types, particle, discriminatorCaptions):
             # Collect discriminators
             for k in discriminatorCaptions.keys():
                 if branch.startswith(particle) and k in branch:
-                    discriminatorList[k].append(name)
+                    veto = False
+                    for kk in discriminatorCaptions.keys():
+                        if name in discriminatorList[kk]:
+                            veto = True
+                    if not veto:
+                        discriminatorList[k].append(name)
     if particleFloatType is None:
         if len(branchObjects):
             raise Exception("Unable to infer the floating point type for {particle}".format(particle=particle))
@@ -477,7 +482,7 @@ def main(opts, args):
     
     # The provided dictionaries are for grouping discriminators
     generateParticle(types, "Tau", {"Isolation": "Isolation", "againstElectron": "AgainstElectron", "againstMuon": "AgainstMuon"})
-    generateParticle(types, "Jet", {"BJetTags": "BJetTags", "PUID": "PUID", "JetID" : "JetID"})
+    generateParticle(types, "Jet", {"BJetTags": "BJetTags", "PUID": "PUID", "ID" : "JetID"})
     generateParticle(types, "Muon", {"ID": "ID"})
     generateParticle(types, "Electron", {"ID": "ID"})
     generateParticle(types, "GenJet", {})

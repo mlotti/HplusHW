@@ -64,8 +64,8 @@ jetSelection = PSet(
      tauMatchingDeltaR = 0.5,
   numberOfJetsCutValue = 3,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
-            jetIDDiscr = "",       # FIXME: does not work -> ttree content
-          jetPUIDDiscr = "PUIDloose",
+            jetIDDiscr = "IDtight", # options: IDloose, IDtight, IDtightLeptonVeto
+          jetPUIDDiscr = "", # does not work at the moment 
 )
  
 #====== Angular cuts / collinear
