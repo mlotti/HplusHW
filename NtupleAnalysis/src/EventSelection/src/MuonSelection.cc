@@ -18,6 +18,7 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
   fMuonPtCut(config.getParameter<float>("muonPtCut")),
   fMuonEtaCut(config.getParameter<float>("muonEtaCut")),
+  fRelIsoCut(-1.0),
   // Event counter for passing selection
   cPassedMuonSelection(eventCounter.addCounter("passed mu selection ("+postfix+")")),
   // Sub counters
@@ -26,7 +27,16 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
   cSubPassedIsolation(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed isolation")),
   cSubPassedEta(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed eta cut")),
   cSubPassedPt(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed pt cut"))
-{ }
+{
+  std::string isolString = config.getParameter<std::string>("muonIsolation");
+  if (isolString == "veto" || isolString == "Veto") {
+    fRelIsoCut = 0.20; // Based on 2012 isolation
+  } else if (isolString == "tight" || isolString == "Tight") {
+    fRelIsoCut = 0.12; // Based on 2012 isolation
+  } else {
+    throw hplus::Exception("config") << "Invalid muonIsolation option '" << isolString << "'! Options: 'veto', 'tight'";
+  }
+}
 
 MuonSelection::~MuonSelection() { }
 
@@ -36,6 +46,9 @@ void MuonSelection::bookHistograms(TDirectory* dir) {
   hMuonEtaAll = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonEtaAll", "Muon eta, all", 50, -2.5, 2.5);
   hMuonPtPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtPassed", "Muon pT, passed", 40, 0, 400);
   hMuonEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtPassed", "Muon pT, passed", 40, 0, 400);
+  hPtResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution", "(reco pT - gen pT) / reco pT", 200, -1.0, 1.0);
+  hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", "(reco eta - gen eta) / reco eta", 200, -1.0, 1.0);
+  hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", "(reco phi - gen phi) / reco phi", 200, -1.0, 1.0);
 }
 
 MuonSelection::Data MuonSelection::silentAnalyze(const Event& event) {
@@ -68,11 +81,11 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
   for(Muon muon: event.muons()) {
     hMuonPtAll->Fill(muon.pt());
     hMuonEtaAll->Fill(muon.eta());
-    // Apply cut on muon ID FIXME to be added
-    
+    // Apply cut on muon ID
+    if (!muon.muonIDDiscriminator()) continue;
     passedID = true;
-    // Apply cut on muon isolation FIXME to be added
-    
+    // Apply cut on muon isolation
+    if (muon.relIsoDeltaBeta() > fRelIsoCut) continue;
     passedIsol = true;
     // Apply cut on eta
     if (std::fabs(muon.eta()) > fMuonEtaCut)
@@ -92,6 +105,12 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
       output.fHighestSelectedMuonEta = muon.eta();
     }
     output.fSelectedMuons.push_back(muon);
+    // Fill resolution histograms
+    if (event.isMC()) {
+      hPtResolution->Fill((muon.pt() - muon.MCmuon()->pt()) / muon.pt());
+      hEtaResolution->Fill((muon.eta() - muon.MCmuon()->eta()) / muon.eta());
+      hPhiResolution->Fill((muon.phi() - muon.MCmuon()->phi()) / muon.phi());
+    }
   }
   // Fill counters
   if (passedID)

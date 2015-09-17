@@ -65,7 +65,9 @@ Event::Event(const ParameterSet& config):
     fTauCollection.setIsolationDiscriminator(*tauIsolationDiscr);
   
   // Muon discriminators
-  // FIXME
+  boost::optional<std::string> muIDDiscr = config.getParameterOptional<std::string>("MuonSelection.muonID");
+  if (muIDDiscr)
+    fMuonCollection.setMuonIDDiscriminator(*muIDDiscr);
   
   // Electron discriminators
   boost::optional<std::string> eIDDiscr = config.getParameterOptional<std::string>("ElectronSelection.electronID");

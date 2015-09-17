@@ -53,7 +53,8 @@ eVeto = PSet(
 muVeto = PSet(
              muonPtCut = 10.0,
             muonEtaCut = 2.5,
-        # FIXME: add muon ID and isolation
+                muonID = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
+         muonIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
 #====== Jet selection

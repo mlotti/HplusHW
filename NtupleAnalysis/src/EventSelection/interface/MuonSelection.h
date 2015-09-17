@@ -73,6 +73,7 @@ private:
   // Input parameters
   const double fMuonPtCut;
   const double fMuonEtaCut;
+  float fRelIsoCut;
   
   // Event counter for passing selection
   Count cPassedMuonSelection;
@@ -87,6 +88,9 @@ private:
   WrappedTH1 *hMuonEtaAll;
   WrappedTH1 *hMuonPtPassed;
   WrappedTH1 *hMuonEtaPassed;
+  WrappedTH1 *hPtResolution;
+  WrappedTH1 *hEtaResolution;
+  WrappedTH1 *hPhiResolution;
 };
 
 #endif

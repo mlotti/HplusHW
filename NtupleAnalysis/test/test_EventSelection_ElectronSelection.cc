@@ -50,6 +50,10 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
   std::vector<float> e_eta;  tree->Branch("Electrons_eta", &e_eta);
   std::vector<float> e_phi;  tree->Branch("Electrons_phi", &e_phi);
   std::vector<float> e_e;    tree->Branch("Electrons_e", &e_e);
+  std::vector<float> emc_pt;   tree->Branch("Electrons_ptMCelectron", &emc_pt);
+  std::vector<float> emc_eta;  tree->Branch("Electrons_etaMCelectron", &emc_eta);
+  std::vector<float> emc_phi;  tree->Branch("Electrons_phiMCelectron", &emc_phi);
+  std::vector<float> emc_e;    tree->Branch("Electrons_eMCelectron", &emc_e);
   std::vector<float> e_relIsoDeltaBeta; tree->Branch("Electrons_relIsoDeltaBeta", &e_relIsoDeltaBeta);
   std::vector<bool> e_id; tree->Branch("Electrons_mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", &e_id);
   run = 1;
@@ -59,6 +63,10 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
   e_eta = std::vector<float>{1.1f, -2.3f, 0.7f, 3.3f};
   e_phi = std::vector<float>{-2.9f, -0.5f, 1.f, 0.3f};
   e_e = std::vector<float>{60.f, 25.f, 40.f, 30.f};
+  emc_pt = std::vector<float>{50.f, 20.f, 11.f, 75.f};
+  emc_eta = std::vector<float>{1.1f, -2.3f, 0.7f, 3.3f};
+  emc_phi = std::vector<float>{-2.9f, -0.5f, 1.f, 0.3f};
+  emc_e = std::vector<float>{60.f, 25.f, 40.f, 30.f};
   e_relIsoDeltaBeta = std::vector<float>{0.1f, 0.1f, 0.1f, 0.1f};
   e_id = std::vector<bool>{true, true, true, true};
   tree->Fill();
