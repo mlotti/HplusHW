@@ -88,6 +88,9 @@ private:
   WrappedTH1 *hElectronEtaAll;
   WrappedTH1 *hElectronPtPassed;
   WrappedTH1 *hElectronEtaPassed;
+  WrappedTH1 *hPtResolution;
+  WrappedTH1 *hEtaResolution;
+  WrappedTH1 *hPhiResolution;
 };
 
 #endif

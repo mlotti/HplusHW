@@ -45,7 +45,10 @@ void ElectronSelection::bookHistograms(TDirectory* dir) {
   hElectronPtAll = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronPtAll", "Electron pT, all", 40, 0, 400);
   hElectronEtaAll = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronEtaAll", "Electron eta, all", 50, -2.5, 2.5);
   hElectronPtPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronPtPassed", "Electron pT, passed", 40, 0, 400);
-  hElectronEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronPtPassed", "Electron pT, passed", 40, 0, 400);
+  hElectronEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronEtaPassed", "Electron eta, passed", 50, -2.5, 2.5);
+  hPtResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution", "(reco pT - gen pT) / reco pT , passed", 200, -1.0, 1.0);
+  hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", "(reco eta - gen eta) / reco eta , passed", 200, -1.0, 1.0);
+  hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", "(reco phi - gen phi) / reco phi , passed", 200, -1.0, 1.0);
 }
 
 ElectronSelection::Data ElectronSelection::silentAnalyze(const Event& event) {
@@ -102,6 +105,12 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
       output.fHighestSelectedElectronEta = electron.eta();
     }
     output.fSelectedElectrons.push_back(electron);
+    // Fill resolution histograms
+    if (event.isMC()) {
+      hPtResolution->Fill((electron.pt() - electron.MCelectron()->pt()) / electron.pt());
+      hEtaResolution->Fill((electron.eta() - electron.MCelectron()->eta()) / electron.eta());
+      hPhiResolution->Fill((electron.phi() - electron.MCelectron()->phi()) / electron.phi());
+    }
   }
   // Fill counters
   if (passedID)
