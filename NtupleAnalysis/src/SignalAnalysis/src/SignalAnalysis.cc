@@ -85,6 +85,7 @@ void SignalAnalysis::book(TDirectory *dir) {
   // Book common plots histograms
   fCommonPlots.book(dir);
   // Book histograms in event selection classes
+  fMETFilterSelection.bookHistograms(dir);
   fTauSelection.bookHistograms(dir);
   fElectronSelection.bookHistograms(dir);
   fMuonSelection.bookHistograms(dir);
