@@ -411,14 +411,24 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     mgr.setEntry(1);
     TauSelection::Data data = tausel.silentAnalyze(event2);
     CHECK( data.getSelectedTaus().size() == 4 );
+    CHECK( data.getAntiIsolatedTaus().size() == 0 );
+    CHECK( data.isAntiIsolated() == false );
+    CHECK( data.hasIdentifiedTaus() == true );
+    CHECK( data.hasAntiIsolatedTaus() == false );
     mgr.setEntry(5);
     data = tausel.silentAnalyze(event2);
     CHECK( data.getSelectedTaus().size() == 2 );
+    CHECK( data.getAntiIsolatedTaus().size() == 2 );
+    CHECK( data.isAntiIsolated() == false );
+    CHECK( data.hasIdentifiedTaus() == true );
+    CHECK( data.hasAntiIsolatedTaus() == true );
     mgr.setEntry(6);
     data = tausel.silentAnalyze(event2);
     CHECK( data.getSelectedTaus().size() == 0 );
-    CHECK( data.isAntiIsolated() == true );
     CHECK( data.getAntiIsolatedTaus().size() == 4 );
+    CHECK( data.isAntiIsolated() == true );
+    CHECK( data.hasIdentifiedTaus() == false );
+    CHECK( data.hasAntiIsolatedTaus() == true );
   }
   SECTION("rtau") {
     tmp.put("TauSelection.applyTriggerMatching", true);
