@@ -5,6 +5,7 @@
 #include "DataFormat/interface/Event.h"
 #include "EventSelection/interface/CommonPlots.h"
 #include "EventSelection/interface/EventSelections.h"
+#include "EventSelection/interface/TransverseMass.h"
 
 #include "TDirectory.h"
 
@@ -64,12 +65,20 @@ private:
   AngularCutsBackToBack fInvertedTauAngularCutsBackToBack;
   Count cInvertedTauSelectedEvents;
   
-  void doInvertedAnalysis(const Event& event, const TauSelection::Data& tauData, const int nVertices);
-  void doBaselineAnalysis(const Event& event, const TauSelection::Data& tauData, const int nVertices);    
+  void doInvertedAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau);
+  void doBaselineAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau);    
  
-  // Non-common histograms
-  WrappedTH1 *hSelectedTaus;
-  WrappedTH1 *hAntiIsolatedTaus;
+  // Normalization histograms - baseline tau
+  HistoSplitter::SplittedTripletTH1s hNormalizationBaselineTauAfterStdSelections;
+
+  // Normalization histograms - inverted tau
+  HistoSplitter::SplittedTripletTH1s hNormalizationInvertedTauAfterStdSelections;
+
+  // Other histograms
+  HistoSplitter::SplittedTripletTH1s hBaselineTauTransverseMass; // the plot for inverted tau is in common plots
+  
+  //WrappedTH1 *hSelectedTaus;
+  //WrappedTH1 *hAntiIsolatedTaus;
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -97,9 +106,9 @@ QCDMeasurement::QCDMeasurement(const ParameterSet& config)
                 fEventCounter, fHistoWrapper, nullptr, "VetoBaselineTau"),
   fBaselineTauMuonSelection(config.getParameter<ParameterSet>("MuonSelection"),
                 fEventCounter, fHistoWrapper, nullptr, "VetoBaselineTau"),
-  cBaselineTauMetTriggerSFCounter(fEventCounter.addCounter("BaselineTau: met trigger SF")),
   fBaselineTauJetSelection(config.getParameter<ParameterSet>("JetSelection"),
                 fEventCounter, fHistoWrapper, nullptr, "BaselineTau"),
+  cBaselineTauMetTriggerSFCounter(fEventCounter.addCounter("BaselineTau: met trigger SF")),
   fBaselineTauAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"),
                 fEventCounter, fHistoWrapper, nullptr, "BaselineTau"),
   fBaselineTauBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
@@ -118,9 +127,9 @@ QCDMeasurement::QCDMeasurement(const ParameterSet& config)
                 fEventCounter, fHistoWrapper, &fCommonPlots, "VetoInvertedTau"),
   fInvertedTauMuonSelection(config.getParameter<ParameterSet>("MuonSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "VetoInvertedTau"),
-  cInvertedTauMetTriggerSFCounter(fEventCounter.addCounter("InvertedTau: met trigger SF")),
   fInvertedTauJetSelection(config.getParameter<ParameterSet>("JetSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "InvertedTau"),
+  cInvertedTauMetTriggerSFCounter(fEventCounter.addCounter("InvertedTau: met trigger SF")),
   fInvertedTauAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "InvertedTau"),
   fInvertedTauBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
@@ -157,10 +166,53 @@ void QCDMeasurement::book(TDirectory *dir) {
   fInvertedTauMETSelection.bookHistograms(dir);
   fInvertedTauAngularCutsBackToBack.bookHistograms(dir);
 
-  // Book histograms defined in this analysis module
-  // For normalization
+  // ====== Normalization histograms
+  HistoSplitter histoSplitter = fCommonPlots.getHistoSplitter();
+  // Create directories for normalization
+  std::string myInclusiveLabel = "ForQCDNormalization";
+  std::string myFakeLabel = myInclusiveLabel+"EWKFakeTaus";
+  std::string myGenuineLabel = myInclusiveLabel+"EWKGenuineTaus";
+  TDirectory* myNormDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myInclusiveLabel);
+  TDirectory* myNormEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
+  TDirectory* myNormGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
+  std::vector<TDirectory*> myNormalizationDirs = {myNormDir, myNormEWKFakeTausDir, myNormGenuineTausDir};
+
+  // Normalization bin settings
+  const int nMetBins = 100;
+  const float fMetMin = 0.0;
+  const float fMetMax = 500.0;
+  // Create normalization histograms for baseline tau (use kSystematics only for the primary normalization histogram, otherwise kInformative)
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myNormalizationDirs,
+    hNormalizationBaselineTauAfterStdSelections,
+    "NormalizationMETBaselineTauAfterStdSelections", ";MET (GeV);N_{events}",
+    nMetBins, fMetMin, fMetMax);
   
-  // For testing
+  // Create normalization histograms for inverted tau (use kSystematics only for the primary normalization histogram, otherwise kInformative)
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myNormalizationDirs,
+    hNormalizationInvertedTauAfterStdSelections,
+    "NormalizationMETInvertedTauAfterStdSelections", ";MET (GeV);N_{events}",
+    nMetBins, fMetMin, fMetMax);
+  
+  // ====== Other histograms
+  // Create directories for other plots
+  myInclusiveLabel = "ForQCDMeasurement";
+  myFakeLabel = myInclusiveLabel+"EWKFakeTaus";
+  myGenuineLabel = myInclusiveLabel+"EWKGenuineTaus";
+  TDirectory* myQCDDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myInclusiveLabel);
+  TDirectory* myQCDEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
+  TDirectory* myQCDGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
+  std::vector<TDirectory*> myQCDPlotDirs = {myQCDDir, myQCDEWKFakeTausDir, myQCDGenuineTausDir};
+  const int nMtBins = fCommonPlots.getMtBinSettings().bins();
+  const float fMtMin = fCommonPlots.getMtBinSettings().min();
+  const float fMtMax = fCommonPlots.getMtBinSettings().max();
+
+  // Create shape histograms for baseline tau (inverted tau histograms are in common plots)
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kInformative, myNormalizationDirs,
+    hBaselineTauTransverseMass,
+    "BaselineTauShapeTransverseMass", ";m_{T} (GeV);N_{events}",
+    nMtBins, fMtMin, fMtMax);
+  
+  // Other histograms (testing etc.)
   
 }
 
@@ -172,8 +224,6 @@ void QCDMeasurement::process(Long64_t entry) {
 
 //====== Initialize
   fCommonPlots.initialize();
-  fCommonPlots.setFactorisationBinForEvent(std::vector<float> {});
-
   cAllEvents.increment();
 
 //====== Apply trigger
@@ -215,310 +265,173 @@ void QCDMeasurement::process(Long64_t entry) {
 
 //====== Tau selection                                                                                                                                                                                                           
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
+  std::vector<float> myFactorisationInfo;
   if (tauData.isAntiIsolated()) {
     // There are only anti-isolated taus -> inverted
-    doInvertedAnalysis(fEvent, tauData, nVertices);
+    if (tauData.hasAntiIsolatedTaus()) {
+      // Sanity check passed: at least one anti-isolated tau exists
+      // Set factorisation bin
+      myFactorisationInfo.push_back(tauData.getAntiIsolatedTau().pt());
+      fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
+      // Apply fake tau SF
+      if (fEvent.isMC()) {
+        // FIXME: code for applying the SF is currently missing
+        cBaselineTauFakeTauSFCounter.increment();
+      }
+      // Apply tau trigger SF
+      // FIXME: code for applying the SF is currently missing
+      cBaselineTauTauTriggerSFCounter.increment();
+      // Do rest of event selection
+      doInvertedAnalysis(fEvent, tauData.getAntiIsolatedTau(), nVertices, tauData.getAntiIsolatedTauIsGenuineTau());
+    }
   } else {
     // There is an isolated tau -> baseline
-    doBaselineAnalysis(fEvent, tauData, nVertices);
+    if (tauData.hasIdentifiedTaus()) {
+      // Sanity check passed: at least one isolated tau exists
+      // Set factorisation bin
+      myFactorisationInfo.push_back(tauData.getSelectedTau().pt());
+      fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
+      // Apply fake tau SF
+      if (fEvent.isMC()) {
+        // FIXME: code for applying the SF is currently missing
+        cInvertedTauFakeTauSFCounter.increment();
+      }
+      // Apply tau trigger SF
+      // FIXME: code for applying the SF is currently missing
+      cInvertedTauTauTriggerSFCounter.increment();
+      // Do rest of event selection
+      doBaselineAnalysis(fEvent, tauData.getSelectedTau(), nVertices, tauData.isGenuineTau());
+    }
   }
   // If further tests or selections are needed, please include them in the doInvertedAnalysis/doBaselineAnalysis methods
 }
  
-  ////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
-void QCDMeasurement::doBaselineAnalysis( const Event& event, const TauSelection::Data& tauData, const int nVertices ) {
-  //====== Electron veto
-  const ElectronSelection::Data eData = fElectronSelection.analyze(event);
+void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau) {
+//====== Electron veto
+  const ElectronSelection::Data eData = fBaselineTauElectronSelection.analyze(event);
   if (eData.hasIdentifiedElectrons())
-    return false;
-  cBaselineEvetoCounter.increment();
-  //====== Muon veto
-  const MuonSelection::Data muData = fMuonSelection.analyze(event);
-  if (muData.hasIdentifiedMuons())
-    return false;
-  cBaselineMuvetoCounter.increment();
- 
-  //====== Jet selection
-  const JetSelection::Data jetData = fJetSelection.analyze(event, tauData);
-  if (!jetData.passedSelection())
-    return false;
-  cBaselineJetsCounter.increment();
-
-  const METSelection::Data silentMETData = fMETSelection.silentAnalyze(event, nVertices); 
-  //  myHandler.fillShapeHistogram(hMETBaselineTauIdAfterJets, silentMETData.getSelectedMET()->et());
-  //  myHandler.fillShapeHistogram(hMETBaselineTauIdAfterMetSF, silentMETdata.getSelectedMET()->et());
-  //  fCommonPlotsBaselineAfterMetSF->fill();
-  //double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(silentMETData.getSelectedMET()));
-  //  myHandler.fillShapeHistogram(hMTBaselineTauIdAfterMetSF, transverseMass);
-  const BJetSelection::Data silentBjetData = fBJetSelection.silentAnalyze(event, jetData);
-  //  if (silentBtagData.passedEvent()) {
-  //    myHandler.fillShapeHistogram(hMETBaselineTauIdAfterMetSFPlusBtag, silentMETData.getSelectedMET()->et(), myWeightWithBtagSF);
-  //  }
-  //  if (silentBtagData.getSelectedJets().size() < 1) {
-  //   myHandler.fillShapeHistogram(hMETBaselineTauIdAfterMetSFPlusBveto, silentMETData.getSelectedMET()->et(), myWeightWithBtagSF);
-  // }
-
-
-
-  //====== Collinear angular cuts
-   const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(event, tauData, jetData, silentMETData);
-  if (!collinearData.passedSelection())
-    return false;
-  cBaselineQCDTailKillerCollinearCounter.increment();
-
-  const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(event, tauData, jetData, METData);
-
-
-  /*
-  // At this point, let's fill histograms for closure test and for normalisation
-    myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCuts, silentMETData.getSelectedMET()->et()); // no btag scale factor needed
-    if (tauData.isGenuineTau() || iEvent.isRealData() || (!tauData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
-	myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusFilteredEWKFakeTaus, silentMETData.getSelectedMET()->et());
-    } else {
-	myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsOnlyEWKFakeTaus, silentMETData.getSelectedMET()->et());
-    }
-
-    myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCuts, transverseMass); // no btag scale factor needed
-    if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearCuts, invariantMass);
-    fCommonPlotsBaselineAfterCollinearCuts->fill();
-
- 
-    // Fill normalization systematics plots
-    fNormalizationSystematicsSignalRegion.fillAllControlPlots(iEvent, transverseMass);
-    // Use btag scale factor in histogram filling if btagging or btag veto is applied
-    // double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
-    hNBBaselineTauIdJet->Fill(silentBtagData.getSelectedJets().size(), myWeightWithBtagSF);
-    if (silentBtagData.passedEvent()) {
-      // mT with b veto in bins
-      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBtag, transverseMass, myWeightWithBtagSF);
-      fCommonPlotsBaselineAfterCollinearCutsPlusBtag->fill();
-      if ( silentBackToBackData.passedSelection() ) {
-        myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBtagPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
-        fCommonPlotsBaselineAfterCollinearCutsPlusBtagPlusBackToBackCuts->fill();
-      }
-    }
-    if (silentBtagData.getSelectedJets().size() < 1) {
-      // mT with b veto in bins
-      myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBveto, silentMetData.getSelectedMET()->et(), myWeightWithBtagSF);
-      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBveto, transverseMass, myWeightWithBtagSF);
-      fCommonPlotsBaselineAfterCollinearCutsPlusBveto->fill();
-      if ( silentBackToBackData.passedSelection()) {
-        myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBvetoPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
-        fCommonPlotsBaselineAfterCollinearCutsPlusBvetoPlusBackToBackCuts->fill();
-      }
-    }
-
-  */
-
-  // bool isGenuineTau() 
-  // getFakeTauID() const
-
-
-//====== Point of standard selections
-  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(event);
-  fCommonPlots.fillControlPlotsAfterTopologicalSelections(event);
-
-//====== b-jet selection
-  const BJetSelection::Data bjetData = fBJetSelection.analyze(event, jetData);
-
-  // Apply b tag scale factor
-  // FIXME missing code
-  // Fill final shape plots with b tag efficiency applied as an event weight
-  if (silentMETData.passedSelection()) {
-    const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(event, tauData, jetData, silentMETData);
-    if (silentBackToBackData.passedSelection()) {
-      fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(event, silentMETData, bjetData.getBTaggingPassProbability());
-    }
-  }
-  if (!bjetData.passedSelection())
-    return false;
-  cBaselineBtagCounter.increment();
-
-//====== MET selection
-  const METSelection::Data METData = fMETSelection.analyze(event, nVertices);
-  if (!METData.passedSelection())
-    return false;
-  cBaselineMetCounter.increment();
-
-
-//====== Back-to-back angular cuts
-  const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(event, tauData, jetData, METData);
-  if (!backToBackData.passedSelection())
-    return false;
-  cBaselineQCDTailKillerBackToBackCounter.increment();
-  /*
-  if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
-      myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, metDataTmp.getSelectedMET()->et());
-      if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
-	myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCutsPlusFilteredEWKFakeTaus, metDataTmp.getSelectedMET()->et());
-      } else {
-	myHandler.fillShapeHistogram(hMETBaselineTauIdAfterCollinearCutsPlusBackToBackCutsOnlyEWKFakeTaus, metDataTmp.getSelectedMET()->et());
-      }
-      myHandler.fillShapeHistogram(hMTBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, transverseMass);
-      if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassBaselineTauIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
-      fCommonPlotsBaselineAfterCollinearCutsPlusBackToBackCuts->fill();
-    }
-  */
-
-
-//====== All cuts passed
-//  cSelected.increment();
-  cBaselineSelectedEventsCounter.increment();
-  // Fill final plots
-  fCommonPlots.fillControlPlotsAfterAllSelections(event);
-  
-//====== Finalize
-  fEventSaver.save();
-  return true;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void QCDMeasurement::doInvertedAnalysis( const Event& event, const TauSelection::Data& tauData, const int nVertices ) {
-
-  myHandler.fillShapeHistogram(hQCDMeasurementIdSelectedTauEtAfterTauVeto, tauData.getSelectedTau()->pt());
-
-  //====== Electron veto
-  const ElectronSelection::Data eData = fElectronSelection.silentAnalyze(event);
-  if (eData.hasIdentifiedElectrons())
-    return false;
-  cInvertedElectronVetoCounter.increment();
+    return;
 
 //====== Muon veto
-  const MuonSelection::Data muData = fMuonSelection.silentAnalyze(event);
+  const MuonSelection::Data muData = fBaselineTauMuonSelection.analyze(event);
   if (muData.hasIdentifiedMuons())
-    return false;
-  cInvertedMuonVetoCounter.increment();
+    return;
 
 //====== Jet selection
-  const JetSelection::Data jetData = fJetSelection.silentAnalyze(event, tauData);
+  const JetSelection::Data jetData = fBaselineTauJetSelection.analyze(event, tau);
   if (!jetData.passedSelection())
-    return false;
-  cInvertedNJetsCounter.increment();
+    return;
+
+//====== MET trigger SF
+  // FIXME: code for applying the SF is currently missing
+  cBaselineTauMetTriggerSFCounter.increment();
 
 //====== Collinear angular cuts
-  const METSelection::Data silentMETData = fMETSelection.silentAnalyze(event, nVertices);
-  myHandler.fillShapeHistogram(hMETQCDMeasurementIdAfterJets, silentMETData.getSelectedMET()->et());
-
-  // Obtain transverse mass and invariant mass for plotting
-  double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTau()), *(silentMETData.getSelectedMET()));
-  double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTau()), *(silentMETData.getSelectedMET())) * 57.3; // converted to degrees
-  BTagging::Data silentBtagData = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
-
-  myHandler.fillShapeHistogram(hQCDMeasurementIdSelectedTauEtAfterJetCut, tauData.getSelectedTau()->pt());
-  myHandler.fillShapeHistogram(hMETQCDMeasurementIdAfterMetSF, silentMETData.getSelectedMET()->et());
-  myHandler.fillShapeHistogram(hMTQCDMeasurementIdAfterMetSF, transverseMass);
-
-
-
-
-  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.silentAnalyze(event, tauData, jetData, silentMETData);
-  fCommonPlots.fillControlPlotsAtCollinearDeltaPhiCuts(iEvent, CollinearData);
+  const METSelection::Data silentMETData = fBaselineTauMETSelection.silentAnalyze(fEvent, nVertices);
+  const double METvalue = silentMETData.getMET().R();
+  const AngularCutsCollinear::Data collinearData = fBaselineTauAngularCutsCollinear.analyze(fEvent, tau, jetData, silentMETData);
   if (!collinearData.passedSelection())
-    return false;
-  fCommonPlots.fillControlPlotsAtCollinearDeltaPhiCuts(iEvent, CollinearData);
-  fCommonPlotsInvertedAfterCollinearCuts->fill();
-
- 
-
-
-
-  myHandler.fillShapeHistogram(hQCDMeasurementIdSelectedTauEtAfterCollinearCuts, tauData.getSelectedTau()->pt());
-  myHandler.fillShapeHistogram(hMETQCDMeasurementIdAfterCollinearCuts, silentMETData.getSelectedMET()->et());
-    
-  if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
-    myHandler.fillShapeHistogram(hMETQCDMeasurementIdAfterCollinearCutsPlusFilteredEWKFakeTaus, metDataTmp.getSelectedMET()->et());
-  } else {
-    myHandler.fillShapeHistogram(hMETQCDMeasurementIdAfterCollinearCutsOnlyEWKFakeTaus, metDataTmp.getSelectedMET()->et());
-  }
-
-  myHandler.fillShapeHistogram(hMTQCDMeasurementIdAfterCollinearCuts, transverseMass);
-  if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike()))
-    myHandler.fillShapeHistogram(hMTQCDMeasurementIdAfterCollinearCutsPlusFilteredEWKFakeTaus, transverseMass);
-  if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassQCDMeasurementIdAfterCollinearCuts, invariantMass);
-  if (collinearData.passedBackToBackCuts()) {// && metDataTmp.passedEvent() && topSelectionDataTmp.passedEvent()) { // Pass also back-to-back cuts and MET cut
-    myHandler.fillShapeHistogram(hMETQCDMeasurementIdAfterCollinearCutsPlusBackToBackCuts, silentMETtData.getSelectedMET()->et());
-    if (tauMatchData.isGenuineTau() || iEvent.isRealData() || (!tauMatchData.isGenuineTau() && !tauMatchData.isEWKFakeTauLike())) {
-      myHandler.fillShapeHistogram(hMETQCDMeasurementIdAfterCollinearCutsPlusBackToBackCutsPlusFilteredEWKFakeTaus, silentMETData.getSelectedMET()->et());
-    } else {
-      myHandler.fillShapeHistogram(hMETQCDMeasurementIdAfterCollinearCutsPlusBackToBackCutsOnlyEWKFakeTaus, silentMETData.getSelectedMET()->et());
-    }
-    myHandler.fillShapeHistogram(hMTQCDMeasurementIdAfterCollinearCutsPlusBackToBackCuts, transverseMass);
-    if (invariantMass > 0.) myHandler.fillShapeHistogram(hInvMassQCDMeasurementIdAfterCollinearCutsPlusBackToBackCuts, invariantMass);
-    fCommonPlotsInvertedAfterCollinearCutsPlusBackToBackCuts->fill();
-  }
-  // Fill normalization systematics plots
-  fNormalizationSystematicsControlRegion.fillAllControlPlots(iEvent, transverseMass);
-
-  // Use btag scale factor in histogram filling if btagging or btag veto is applied
-  //    BTagging::Data btagDataTmp = fBTagging.silentAnalyze(iEvent, iSetup, jetData.getSelectedJets());
-  //    double myWeightWithBtagSF = fEventWeight.getWeight() * btagDataTmp.getScaleFactor();
-  // MT with b tagging
-  if(silentBtagData.passedEvent()) {
-    increment(fInvertedBTaggingBeforeMETCounter); // NOTE: Will not give correct value for MC because btag SF is not applied
-    myHandler.fillShapeHistogram(hMTQCDMeasurementIdAfterCollinearCutsPlusBtag, transverseMass, myWeightWithBtagSF);
-    fCommonPlotsInvertedAfterCollinearCutsPlusBtag->fill();
-    if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
-      myHandler.fillShapeHistogram(hMTQCDMeasurementIdAfterCollinearCutsPlusBtagPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
-      fCommonPlotsInvertedAfterCollinearCutsPlusBtag->fill();
-    }
-  }
-  // MT with b veto
-  if( btagDataTmp.getSelectedJets().size() < 1) {
-    increment(fInvertedBjetVetoCounter);// NOTE: Will not give correct value for MC because btag SF is not applied
-    myHandler.fillShapeHistogram(hMETQCDMeasurementIdAfterCollinearCutsPlusBveto, metDataTmp.getSelectedMET()->et(), myWeightWithBtagSF);
-    myHandler.fillShapeHistogram(hMTQCDMeasurementIdAfterCollinearCutsPlusBveto, transverseMass, myWeightWithBtagSF);
-    fCommonPlotsInvertedAfterCollinearCutsPlusBtag->fill();
-    if (qcdTailKillerDataCollinear.passedBackToBackCuts()) {
-      myHandler.fillShapeHistogram(hMTQCDMeasurementIdAfterCollinearCutsPlusBvetoPlusBackToBackCuts, transverseMass, myWeightWithBtagSF);
-      fCommonPlotsInvertedAfterCollinearCutsPlusBvetoPlusBackToBackCuts->fill();
-    }
-  }
-  
-
-
-
-
+    return;
 
 //====== Point of standard selections
-  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(event);
-  fCommonPlots.fillControlPlotsAfterTopologicalSelections(event);
-
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationBaselineTauAfterStdSelections, isFakeTau, METvalue);
+  
 //====== b-jet selection
-  const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(event, jetData);
-
-  // Apply b tag scale factor
-  // FIXME missing code
-  // Fill final shape plots with b tag efficiency applied as an event weight
-  if (silentMETData.passedSelection()) {
-    const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(event, tauData, jetData, silentMETData);
-    if (silentBackToBackData.passedSelection()) {
-      fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(event, silentMETData, bjetData.getBTaggingPassProbability());
-    }
-  }
+  const BJetSelection::Data bjetData = fBaselineTauBJetSelection.analyze(fEvent, jetData);
   if (!bjetData.passedSelection())
-    return false;
-  cInvertedBTaggingCounter.increment();
+    return;
+
+//====== b tag SF
+  if (fEvent.isMC()) {
+    // FIXME missing code
+    cBaselineTauBTaggingSFCounter.increment();
+  }
 
 //====== MET selection
-  const METSelection::Data METData = fMETSelection.silentAnalyze(event, nVertices);
+  const METSelection::Data METData = fBaselineTauMETSelection.analyze(fEvent, nVertices);
   if (!METData.passedSelection())
-    return false;
-  cInvertedMetCounter.increment();
-
+    return;
+  
 //====== Back-to-back angular cuts
-  const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.silentAnalyze(event, tauData, jetData, METData);
+  const AngularCutsBackToBack::Data backToBackData = fBaselineTauAngularCutsBackToBack.analyze(fEvent, tau, jetData, METData);
   if (!backToBackData.passedSelection())
-    return false;
-  cInvertedQCDTailKillerBackToBackCounter.increment();
+    return;
 
 //====== All cuts passed
-  cInvertedSelectedEventsCounter.increment();
-  //  cSelected.increment();
+  cBaselineTauSelectedEvents.increment();
   // Fill final plots
-  fCommonPlots.fillControlPlotsAfterAllSelections(event);
+  double myTransverseMass = TransverseMass::reconstruct(tau, METData.getMET());
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTauTransverseMass, isFakeTau, myTransverseMass);
+  
+//====== Experimental code
 
+//====== Save selected event ID for pick events
+  fEventSaver.save();
+}
 
-  return true;}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau) {
+//====== Electron veto
+  const ElectronSelection::Data eData = fInvertedTauElectronSelection.analyze(event);
+  if (eData.hasIdentifiedElectrons())
+    return;
+
+//====== Muon veto
+  const MuonSelection::Data muData = fInvertedTauMuonSelection.analyze(event);
+  if (muData.hasIdentifiedMuons())
+    return;
+
+//====== Jet selection
+  const JetSelection::Data jetData = fInvertedTauJetSelection.analyze(event, tau);
+  if (!jetData.passedSelection())
+    return;
+
+//====== MET trigger SF
+  // FIXME: code for applying the SF is currently missing
+  cInvertedTauMetTriggerSFCounter.increment();
+
+//====== Collinear angular cuts
+  const METSelection::Data silentMETData = fInvertedTauMETSelection.silentAnalyze(fEvent, nVertices);
+  const double METvalue = silentMETData.getMET().R();
+  const AngularCutsCollinear::Data collinearData = fInvertedTauAngularCutsCollinear.analyze(fEvent, tau, jetData, silentMETData);
+  if (!collinearData.passedSelection())
+    return;
+
+//====== Point of standard selections
+  fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationInvertedTauAfterStdSelections, isFakeTau, METvalue);
+  
+//====== b-jet selection
+  const BJetSelection::Data bjetData = fInvertedTauBJetSelection.analyze(fEvent, jetData);
+  if (!bjetData.passedSelection())
+    return;
+
+//====== b tag SF
+  if (fEvent.isMC()) {
+    // FIXME missing code
+    cInvertedTauBTaggingSFCounter.increment();
+  }
+
+//====== MET selection
+  const METSelection::Data METData = fInvertedTauMETSelection.analyze(fEvent, nVertices);
+  if (!METData.passedSelection())
+    return;
+  
+//====== Back-to-back angular cuts
+  const AngularCutsBackToBack::Data backToBackData = fInvertedTauAngularCutsBackToBack.analyze(fEvent, tau, jetData, METData);
+  if (!backToBackData.passedSelection())
+    return;
+
+//====== All cuts passed
+  cInvertedTauSelectedEvents.increment();
+  // Fill final plots
+  //double myTransverseMass = TransverseMass::reconstruct(tau, METData.getMET());
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
+  
+//====== Experimental code
+
+//====== Save selected event ID for pick events
+  fEventSaver.save();
+}
