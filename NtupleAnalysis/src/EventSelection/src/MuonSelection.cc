@@ -18,6 +18,7 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
   fMuonPtCut(config.getParameter<float>("muonPtCut")),
   fMuonEtaCut(config.getParameter<float>("muonEtaCut")),
   fRelIsoCut(-1.0),
+  fVetoMode(false),
   // Event counter for passing selection
   cPassedMuonSelection(eventCounter.addCounter("passed mu selection ("+postfix+")")),
   // Sub counters
@@ -27,6 +28,8 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
   cSubPassedID(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed ID")),
   cSubPassedIsolation(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed isolation"))
 {
+  if (postfix.find("veto") != std::string::npos || postfix.find("Veto") != std::string::npos)
+    fVetoMode = true;
   std::string isolString = config.getParameter<std::string>("muonIsolation");
   if (isolString == "veto" || isolString == "Veto") {
     fRelIsoCut = 0.20; // Based on 2012 isolation
@@ -134,7 +137,7 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
     cSubPassedID.increment();
   if (passedIsol)
     cSubPassedIsolation.increment();
-  if (sPostfix == "Veto") {
+  if (fVetoMode) {
     if (output.fSelectedMuons.size() == 0)
       cPassedMuonSelection.increment();
   } else {
