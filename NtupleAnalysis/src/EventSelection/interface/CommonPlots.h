@@ -40,7 +40,12 @@ public:
   void initialize();
   /// Sets factorisation bin (call this for each event before filling the first histogram!)
   void setFactorisationBinForEvent(const std::vector<float>& values=std::vector<float>{}) { fHistoSplitter.setFactorisationBinForEvent(values); }
-
+  
+  /// Returns the histogram splitter object (usecase: QCD measurement)
+  HistoSplitter& getHistoSplitter() { return fHistoSplitter; }
+  /// Returns the histogram settings for MtBins (usecase: QCD measurement)
+  const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
+  
   //===== unique filling methods (to be called inside the event selection routine only, i.e. (before a passing decision is done))
   //void fillControlPlotsAtVetoTauSelection(const Event& event, const VetoTauSelection::Data& tauVetoData);
   void fillControlPlotsAtElectronSelection(const Event& event, const ElectronSelection::Data& data);
