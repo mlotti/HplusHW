@@ -160,13 +160,13 @@ void SignalAnalysis::process(Long64_t entry) {
     return;
 
 //====== Jet selection
-  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData);
+  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
   if (!jetData.passedSelection())
     return;
 
 //====== Collinear angular cuts
   const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
-  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData, jetData, silentMETData);
+  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
   if (!collinearData.passedSelection())
     return;
 
@@ -180,7 +180,7 @@ void SignalAnalysis::process(Long64_t entry) {
   // FIXME missing code
   // Fill final shape plots with b tag efficiency applied as an event weight
   if (silentMETData.passedSelection()) {
-    const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData, jetData, silentMETData);
+    const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
     if (silentBackToBackData.passedSelection()) {
       fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(fEvent, silentMETData, bjetData.getBTaggingPassProbability());
     }
@@ -194,7 +194,7 @@ void SignalAnalysis::process(Long64_t entry) {
     return;
   
 //====== Back-to-back angular cuts
-  const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(fEvent, tauData, jetData, METData);
+  const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(fEvent, tauData.getSelectedTau(), jetData, METData);
   if (!backToBackData.passedSelection())
     return;
 

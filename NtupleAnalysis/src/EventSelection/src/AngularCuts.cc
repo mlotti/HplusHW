@@ -91,18 +91,18 @@ void AngularCutsBase::bookHistograms(TDirectory* dir) {
   }
 }
 
-AngularCutsBase::Data AngularCutsBase::silentAnalyze(const Event& event, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
+AngularCutsBase::Data AngularCutsBase::silentAnalyze(const Event& event, const Tau& tau, const JetSelection::Data& jetData, const METSelection::Data& metData) {
   ensureSilentAnalyzeAllowed(event.eventID());
   // Disable histogram filling and counter
   disableHistogramsAndCounters();
-  Data myData = privateAnalyze(tauData, jetData, metData);
+  Data myData = privateAnalyze(tau, jetData, metData);
   enableHistogramsAndCounters();
   return myData;
 }
 
-AngularCutsBase::Data AngularCutsBase::analyze(const Event& event, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
+AngularCutsBase::Data AngularCutsBase::analyze(const Event& event, const Tau& tau, const JetSelection::Data& jetData, const METSelection::Data& metData) {
   ensureAnalyzeAllowed(event.eventID());
-  AngularCutsBase::Data data = privateAnalyze(tauData, jetData, metData);
+  AngularCutsBase::Data data = privateAnalyze(tau, jetData, metData);
   // Send data to CommonPlots
   if (fCommonPlots != nullptr) {
     if (fType == kCollinear)
@@ -114,12 +114,12 @@ AngularCutsBase::Data AngularCutsBase::analyze(const Event& event, const TauSele
   return data;
 }
 
-AngularCutsBase::Data AngularCutsBase::privateAnalyze(const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData) {
+AngularCutsBase::Data AngularCutsBase::privateAnalyze(const Tau& tau, const JetSelection::Data& jetData, const METSelection::Data& metData) {
   Data output;
   cSubAllEvents.increment();
   output.bPassedSelection = true;
   // Calculate delta phi between MET and tau
-  output.fDeltaPhiTauMET = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(tauData.getSelectedTau().p4(), metData.getMET())*57.29578);
+  output.fDeltaPhiTauMET = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(tau.p4(), metData.getMET())*57.29578);
   size_t maxIndex = std::min(nMaxJets, jetData.getSelectedJets().size());
   for (size_t i = 0; i < maxIndex; ++i) {
     // Calculate delta phi between MET and jet
