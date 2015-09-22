@@ -185,6 +185,7 @@ void SignalAnalysis::process(Long64_t entry) {
 //====== MET trigger SF
   // FIXME: code for applying the SF is currently missing
   cMetTriggerSFCounter.increment();
+  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
   
 //====== Collinear angular cuts
   const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
@@ -193,13 +194,10 @@ void SignalAnalysis::process(Long64_t entry) {
     return;
 
 //====== Point of standard selections
-  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
   fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
 
 //====== b-jet selection
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
-  // Apply b tag scale factor
-  
   // Fill final shape plots with b tag efficiency applied as an event weight
   if (silentMETData.passedSelection()) {
     const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
