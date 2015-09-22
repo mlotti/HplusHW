@@ -166,13 +166,13 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.passedSelection() == true );
     CHECK( jetData.getAllJets().size() == 8 );
     CHECK( jetData.getNumberOfSelectedJets() == 8 );
     mgr.setEntry(2);
     tauData = tausel.silentAnalyze(event2);
-    jetData = jetsel.silentAnalyze(event2, tauData);
+    jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.passedSelection() == true );
     CHECK( jetData.getAllJets().size() == 8 );
     //CHECK( jetData.getNumberOfSelectedJets() == 3 ); // FIXME 
@@ -194,13 +194,13 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.passedSelection() == true );
     CHECK( jetData.getAllJets().size() == 8 );
     CHECK( jetData.getNumberOfSelectedJets() == 6 );
     mgr.setEntry(3);
     tauData = tausel.silentAnalyze(event2);
-    jetData = jetsel.silentAnalyze(event2, tauData);
+    jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.passedSelection() == true );
     CHECK( jetData.getAllJets().size() == 4 );
     CHECK( jetData.getNumberOfSelectedJets() == 3 );
@@ -222,7 +222,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.passedSelection() == true );
     CHECK( jetData.getAllJets().size() == 8 );
     CHECK( jetData.getNumberOfSelectedJets() == 7 );
@@ -231,7 +231,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     CHECK( jetData.getJetMatchedToTau().pt() == 60.0 );
     mgr.setEntry(0);
     tauData = tausel.silentAnalyze(event2);
-    jetData = jetsel.silentAnalyze(event2, tauData);
+    jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.getNumberOfSelectedJets() == 8 );
     CHECK( jetData.jetMatchedToTauFound() == false );
     REQUIRE_THROWS_AS( jetData.getJetMatchedToTau(), hplus::Exception );
@@ -253,7 +253,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.passedSelection() == true );
     CHECK( jetData.getAllJets().size() == 8 );
     CHECK( jetData.getNumberOfSelectedJets() == 7);
@@ -275,7 +275,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.passedSelection() == true );
     CHECK( jetData.getAllJets().size() == 8 );
     CHECK( jetData.getNumberOfSelectedJets() == 5);
@@ -297,12 +297,12 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1); // with tau
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.getNumberOfSelectedJets() == 3);
     CHECK( jetData.HT() == 250.f );
     mgr.setEntry(0); // no tau
     tauData = tausel.silentAnalyze(event2);
-    jetData = jetsel.silentAnalyze(event2, tauData);
+    jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.getNumberOfSelectedJets() == 4);
     CHECK( jetData.HT() == 240.f );
   }
@@ -323,7 +323,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.passedSelection() == true );
   }
   SECTION("jet count 2") {
@@ -343,7 +343,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.passedSelection() == false );
   }
  SECTION("jet sorting by pt") {
@@ -363,7 +363,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
     CHECK( jetData.getNumberOfSelectedJets() == 4 );
     CHECK( jetData.getSelectedJets()[0].pt() == 90.0 );
     CHECK( jetData.getSelectedJets()[1].pt() == 60.0 );
@@ -382,12 +382,12 @@ TEST_CASE("JetSelection", "[EventSelection]") {
     jetsel.bookHistograms(f);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
     CHECK( ec.getValueByName("passed jet selection (dblcount)") == 0);
-    REQUIRE_NOTHROW( jetsel.silentAnalyze(event2, tauData) );
+    REQUIRE_NOTHROW( jetsel.silentAnalyze(event2, tauData.getSelectedTau()) );
     CHECK( ec.getValueByName("passed jet selection (dblcount)") == 0);
-    REQUIRE_NOTHROW( jetsel.analyze(event2, tauData) );
+    REQUIRE_NOTHROW( jetsel.analyze(event2, tauData.getSelectedTau()) );
     CHECK( ec.getValueByName("passed jet selection (dblcount)") == 1);
-    REQUIRE_THROWS_AS( jetsel.analyze(event2, tauData), hplus::Exception );
-    REQUIRE_THROWS_AS( jetsel.silentAnalyze(event2, tauData), hplus::Exception );
+    REQUIRE_THROWS_AS( jetsel.analyze(event2, tauData.getSelectedTau()), hplus::Exception );
+    REQUIRE_THROWS_AS( jetsel.silentAnalyze(event2, tauData.getSelectedTau()), hplus::Exception );
   }
   
   ec.setOutput(f);
