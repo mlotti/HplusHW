@@ -17,7 +17,8 @@ process.addDatasetsFromMulticrab(sys.argv[1])
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
 # Enable genuine tau histograms for common plots (needed for calculating N_QCD)
-allSelections.enableGenuineTauHistograms = True
+print allSelections.CommonPlots.enableGenuineTauHistograms
+allSelections.CommonPlots.enableGenuineTauHistograms = True
 # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
 allSelections.CommonPlots.histogramSplitting = [
 #  PSet(label="tauPt", binLowEdges=[60, 70, 80, 100, 120], useAbsoluteValues=False),
