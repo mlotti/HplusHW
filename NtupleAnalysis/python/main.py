@@ -32,7 +32,17 @@ class PSet:
         data = {}
         for key, value in self._data.iteritems():
             if isinstance(value, PSet):
+                # Support for json dump of PSet
                 data[key] = value._asDict()
+            elif isinstance(value, list):
+                # Support for json dump of list of PSets
+                myList = []
+                for item in value:
+                    if isinstance(item, PSet):
+                        myList.append(item._asDict())
+                    else:
+                        myList.append(item)
+                data[key] = myList
             else:
                 data[key] = value
         return data
