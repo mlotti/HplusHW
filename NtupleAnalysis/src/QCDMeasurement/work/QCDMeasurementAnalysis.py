@@ -10,13 +10,20 @@ process = Process()
 # Example of adding datasets from a multicrab directory
 import sys
 if len(sys.argv) < 2:
-    print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory>"
+    print "Usage: ./QCDMeasurementAnalysis.py <path-to-multicrab-directory>"
     sys.exit(0)
 process.addDatasetsFromMulticrab(sys.argv[1])
 
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
-process.addAnalyzer("SignalAnalysis", Analyzer("SignalAnalysis", config=allSelections, silent=False))
+# Enable genuine tau histograms for common plots (needed for calculating N_QCD)
+allSelections.enableGenuineTauHistograms = True
+# Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
+allSelections.CommonPlots.histogramSplitting = [
+#  PSet(label="tauPt", binLowEdges=[60, 70, 80, 100, 120], useAbsoluteValues=False),
+]
+process.addAnalyzer("QCDMeasurement", Analyzer("QCDMeasurement", config=allSelections, silent=False))
+
 
 # Example of adding an analyzer whose configuration depends on dataVersion
 #def createAnalyzer(dataVersion):
