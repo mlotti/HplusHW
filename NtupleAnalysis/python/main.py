@@ -412,6 +412,19 @@ if __name__ == "__main__":
   "fred": 56, 
   "xyzzy": 42
 }""")
+        def testSerializeListOfPSet(self):
+            a = PSet(foo=1, bar=[PSet(a=0.5),PSet(a=0.7)])
+            self.assertEqual(a.serialize_(), """{
+  "bar": [
+    {
+      "a": 0.5
+    }, 
+    {
+      "a": 0.7
+    }
+  ], 
+  "foo": 1
+}""")
 
     class TestFile(unittest.TestCase):
         def testConstruct(self):

@@ -177,13 +177,13 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(0);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
+    JetSelection::Data jetData = jetsel.silentAnalyzeWithoutTau(event2);
     BJetSelection::Data bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == true );
     CHECK( bjetData.getNumberOfSelectedBJets() == 2 );
     mgr.setEntry(1);
     tauData = tausel.silentAnalyze(event2);
-    jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
+    jetData = jetsel.silentAnalyzeWithoutTau(event2);
     bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == true );
     CHECK( bjetData.getNumberOfSelectedBJets() == 4 );
@@ -207,17 +207,17 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(0);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
+    JetSelection::Data jetData = jetsel.silentAnalyzeWithoutTau(event2);
     BJetSelection::Data bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == true );
     mgr.setEntry(1);
     tauData = tausel.silentAnalyze(event2);
-    jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
+    jetData = jetsel.silentAnalyzeWithoutTau(event2);
     bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == true );
     mgr.setEntry(2);
     tauData = tausel.silentAnalyze(event2);
-    jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
+    jetData = jetsel.silentAnalyzeWithoutTau(event2);
     bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == false );
   }
@@ -235,7 +235,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     jetsel.bookHistograms(f);
     bjetsel.bookHistograms(f);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData.getSelectedTau());
+    JetSelection::Data jetData = jetsel.silentAnalyzeWithoutTau(event2);
     CHECK( ec.getValueByName("passed b-jet selection (dblcount)") == 0);
     REQUIRE_NOTHROW( bjetsel.silentAnalyze(event2, jetData) );
     CHECK( ec.getValueByName("passed b-jet selection (dblcount)") == 0);
