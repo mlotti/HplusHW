@@ -4,6 +4,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 
+
 EventInfoDumper::EventInfoDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
 : puSummaryToken(iConsumesCollector.consumes<std::vector<PileupSummaryInfo>>(pset.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
   lheToken(iConsumesCollector.consumes<LHEEventProduct>(pset.getUntrackedParameter<edm::InputTag>("LHESrc", edm::InputTag("")))),
@@ -17,10 +18,15 @@ void EventInfoDumper::book(TTree* tree){
     tree->Branch("event",&event);
     tree->Branch("run",&run);     
     tree->Branch("lumi",&lumi);
+    tree->Branch("prescale",&prescale);
     tree->Branch("nPUvertices",&nPU);
     tree->Branch("NUP",&NUP);
     tree->Branch("nGoodOfflineVertices",&nGoodOfflinePV);
+    tree->Branch("pvX",&pvX);
+    tree->Branch("pvY",&pvY);
     tree->Branch("pvZ",&pvZ);
+    tree->Branch("pvDistanceToNextVertex",&distanceToNextPV);
+    tree->Branch("pvDistanceToClosestVertex",&distanceToClosestPV);
     tree->Branch("pvPtSumRatioToNext",&ptSumRatio);
 }
 
@@ -28,7 +34,7 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     event = iEvent.id().event();
     run   = iEvent.run();
     lumi  = iEvent.luminosityBlock();
-
+    prescale = 1.0;
     // Amount of PU
     edm::Handle<std::vector<PileupSummaryInfo> > hpileup;
     iEvent.getByToken(puSummaryToken, hpileup);
@@ -51,26 +57,42 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     // PV
     nGoodOfflinePV = 0;
+    pvX = 0;
+    pvY = 0;
+    pvZ = 0;
+    ptSumRatio = -1.0;
+    distanceToNextPV = -1.0;
+    distanceToClosestPV = -1.0;
     edm::Handle<edm::View<reco::Vertex> > hoffvertex;
     if(iEvent.getByToken(vertexToken, hoffvertex)){
-        nGoodOfflinePV = hoffvertex->size();
-        pvZ = hoffvertex->at(0).z();
-        ptSumRatio = -1.0;
-        if (nGoodOfflinePV > 1) {
-          double ptSum0 = 0.0;
-          for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex->at(0).tracks_begin(); iter != hoffvertex->at(0).tracks_end(); iter++) {
-            ptSum0 += hoffvertex->at(0).trackWeight(*iter) * (*iter)->pt()*(*iter)->pt();
-          }
-          double ptSum1 = 0.0;
-          for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex->at(1).tracks_begin(); iter != hoffvertex->at(1).tracks_end(); iter++) {
-            ptSum1 += hoffvertex->at(1).trackWeight(*iter) * (*iter)->pt()*(*iter)->pt();
-          }
-          if (ptSum0 > 0.0) {
-            ptSumRatio = ptSum1 / ptSum0;
+      nGoodOfflinePV = hoffvertex->size();
+      // Multiply by 10 to get mm
+      pvX = hoffvertex->at(0).x()*10.0;
+      pvY = hoffvertex->at(0).y()*10.0;
+      pvZ = hoffvertex->at(0).z()*10.0;
+      if (nGoodOfflinePV > 1) {
+        distanceToNextPV = std::fabs(hoffvertex->at(0).z() - hoffvertex->at(1).z());
+        for (size_t i = 1; i < hoffvertex->size(); ++i) {
+          float delta = std::fabs(hoffvertex->at(0).z() - hoffvertex->at(i).z());
+          if (delta < distanceToClosestPV || distanceToClosestPV < 0.0) {
+            distanceToClosestPV = delta;
           }
         }
+        double ptSum0 = 0.0;
+        for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex->at(0).tracks_begin(); iter != hoffvertex->at(0).tracks_end(); iter++) {
+          ptSum0 += hoffvertex->at(0).trackWeight(*iter) * (*iter)->pt()*(*iter)->pt();
+        }
+        double ptSum1 = 0.0;
+        for (std::vector<reco::TrackBaseRef>::const_iterator iter = hoffvertex->at(1).tracks_begin(); iter != hoffvertex->at(1).tracks_end(); iter++) {
+          ptSum1 += hoffvertex->at(1).trackWeight(*iter) * (*iter)->pt()*(*iter)->pt();
+        }
+        if (ptSum0 > 0.0) {
+          ptSumRatio = ptSum1 / ptSum0;
+        }
+      }
+      distanceToNextPV *= 10.0;
+      distanceToClosestPV *= 10.0;
     }
-
     return filter();
 }
 

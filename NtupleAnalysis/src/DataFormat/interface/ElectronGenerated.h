@@ -11,23 +11,28 @@
 
 class ElectronGeneratedCollection: public ParticleCollection<double> {
 public:
-  explicit ElectronGeneratedCollection(const std::string& prefix="Electrons"): ParticleCollection(prefix) {}
+  explicit ElectronGeneratedCollection(const std::string& prefix="Electrons")
+  : ParticleCollection(prefix),
+    fMCelectron(prefix)
+  {
+    fMCelectron.setEnergySystematicsVariation("MCelectron");
+  }
   ~ElectronGeneratedCollection() {}
 
   void setupBranches(BranchManager& mgr);
 
-  std::vector<std::string> getIDDiscriminatorNames() {
+  std::vector<std::string> getIDDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80"), std::string("mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90")};
     return n;
   }
 
+  const ParticleCollection<double>* getMCelectronCollection() const { return &fMCelectron; }
+protected:
+  ParticleCollection<double> fMCelectron;
+
 protected:
   const Branch<std::vector<bool>> *fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80;
   const Branch<std::vector<bool>> *fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90;
-  const Branch<std::vector<double>> *fEMCelectron;
-  const Branch<std::vector<double>> *fEtaMCelectron;
-  const Branch<std::vector<double>> *fPhiMCelectron;
-  const Branch<std::vector<double>> *fPtMCelectron;
   const Branch<std::vector<float>> *fRelIsoDeltaBeta;
 };
 
@@ -36,10 +41,13 @@ template <typename Coll>
 class ElectronGenerated: public Particle<Coll> {
 public:
   ElectronGenerated() {}
-  ElectronGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
+  ElectronGenerated(const Coll* coll, size_t index)
+  : Particle<Coll>(coll, index),
+    fMCelectron(coll->getMCelectronCollection(), index)
+  {}
   ~ElectronGenerated() {}
 
-  std::vector<std::function<bool()>> getIDDiscriminatorValues() {
+  std::vector<std::function<bool()>> getIDDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80(); },
       [&](){ return this->mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90(); }
@@ -47,13 +55,14 @@ public:
     return values;
   }
 
+  const Particle<ParticleCollection<double>>* MCelectron() const { return &fMCelectron; }
+
   bool mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80() const { return this->fCollection->fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80->value()[this->index()]; }
   bool mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90() const { return this->fCollection->fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90->value()[this->index()]; }
-  double eMCelectron() const { return this->fCollection->fEMCelectron->value()[this->index()]; }
-  double etaMCelectron() const { return this->fCollection->fEtaMCelectron->value()[this->index()]; }
-  double phiMCelectron() const { return this->fCollection->fPhiMCelectron->value()[this->index()]; }
-  double ptMCelectron() const { return this->fCollection->fPtMCelectron->value()[this->index()]; }
   float relIsoDeltaBeta() const { return this->fCollection->fRelIsoDeltaBeta->value()[this->index()]; }
+
+protected:
+  Particle<ParticleCollection<double>> fMCelectron;
 
 };
 

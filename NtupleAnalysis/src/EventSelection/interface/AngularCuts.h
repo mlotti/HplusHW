@@ -78,12 +78,12 @@ public:
   virtual void bookHistograms(TDirectory* dir);
   
   /// Use silentAnalyze if you do not want to fill histograms or increment counters
-  virtual Data silentAnalyze(const Event& event, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
+  virtual Data silentAnalyze(const Event& event, const Tau& tau, const JetSelection::Data& jetData, const METSelection::Data& metData);
   /// analyze does fill histograms and incrementes counters
-  virtual Data analyze(const Event& event, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
+  virtual Data analyze(const Event& event, const Tau& tau, const JetSelection::Data& jetData, const METSelection::Data& metData);
 
 private:
-  virtual Data privateAnalyze(const TauSelection::Data& tauData, const JetSelection::Data& jetData, const METSelection::Data& metData);
+  virtual Data privateAnalyze(const Tau& tau, const JetSelection::Data& jetData, const METSelection::Data& metData);
 
   bool doCollinearCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector<double>& results);
   bool doBackToBackCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector<double>& results);

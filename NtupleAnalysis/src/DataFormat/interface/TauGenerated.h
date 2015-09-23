@@ -11,23 +11,36 @@
 
 class TauGeneratedCollection: public ParticleCollection<double> {
 public:
-  explicit TauGeneratedCollection(const std::string& prefix="Taus"): ParticleCollection(prefix) {}
+  explicit TauGeneratedCollection(const std::string& prefix="Taus")
+  : ParticleCollection(prefix),
+    fMCVisibleTau(prefix),
+    fmatchingJet(prefix)
+  {
+    fMCVisibleTau.setEnergySystematicsVariation("MCVisibleTau");
+    fmatchingJet.setEnergySystematicsVariation("matchingJet");
+  }
   ~TauGeneratedCollection() {}
 
   void setupBranches(BranchManager& mgr);
 
-  std::vector<std::string> getIsolationDiscriminatorNames() {
+  std::vector<std::string> getIsolationDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("byCombinedIsolationDeltaBetaCorrRaw3Hits"), std::string("byIsolationMVA3newDMwLTraw"), std::string("byIsolationMVA3newDMwoLTraw"), std::string("byIsolationMVA3oldDMwLTraw"), std::string("byIsolationMVA3oldDMwoLTraw"), std::string("byLooseCombinedIsolationDeltaBetaCorr3Hits"), std::string("byLooseIsolationMVA3newDMwLT"), std::string("byLooseIsolationMVA3newDMwoLT"), std::string("byLooseIsolationMVA3oldDMwLT"), std::string("byLooseIsolationMVA3oldDMwoLT"), std::string("byMediumCombinedIsolationDeltaBetaCorr3Hits"), std::string("byMediumIsolationMVA3newDMwLT"), std::string("byMediumIsolationMVA3newDMwoLT"), std::string("byMediumIsolationMVA3oldDMwLT"), std::string("byMediumIsolationMVA3oldDMwoLT"), std::string("byTightCombinedIsolationDeltaBetaCorr3Hits"), std::string("byTightIsolationMVA3newDMwLT"), std::string("byTightIsolationMVA3newDMwoLT"), std::string("byTightIsolationMVA3oldDMwLT"), std::string("byTightIsolationMVA3oldDMwoLT"), std::string("byVLooseIsolationMVA3newDMwLT"), std::string("byVLooseIsolationMVA3newDMwoLT"), std::string("byVLooseIsolationMVA3oldDMwLT"), std::string("byVLooseIsolationMVA3oldDMwoLT"), std::string("byVTightIsolationMVA3newDMwLT"), std::string("byVTightIsolationMVA3newDMwoLT"), std::string("byVTightIsolationMVA3oldDMwLT"), std::string("byVTightIsolationMVA3oldDMwoLT"), std::string("byVVTightIsolationMVA3newDMwLT"), std::string("byVVTightIsolationMVA3newDMwoLT"), std::string("byVVTightIsolationMVA3oldDMwLT"), std::string("byVVTightIsolationMVA3oldDMwoLT")};
     return n;
   }
-  std::vector<std::string> getAgainstMuonDiscriminatorNames() {
+  std::vector<std::string> getAgainstMuonDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("againstMuonLoose3"), std::string("againstMuonTight3")};
     return n;
   }
-  std::vector<std::string> getAgainstElectronDiscriminatorNames() {
+  std::vector<std::string> getAgainstElectronDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("againstElectronLooseMVA5"), std::string("againstElectronMVA5category"), std::string("againstElectronMediumMVA5"), std::string("againstElectronTightMVA5"), std::string("againstElectronVLooseMVA5"), std::string("againstElectronVTightMVA5")};
     return n;
   }
+
+  const ParticleCollection<double>* getMCVisibleTauCollection() const { return &fMCVisibleTau; }
+  const ParticleCollection<double>* getmatchingJetCollection() const { return &fmatchingJet; }
+protected:
+  ParticleCollection<double> fMCVisibleTau;
+  ParticleCollection<double> fmatchingJet;
 
 protected:
   const Branch<std::vector<bool>> *fAgainstElectronLooseMVA5;
@@ -75,34 +88,12 @@ protected:
   const Branch<std::vector<bool>> *fDecayModeFindingNewDMs;
   const Branch<std::vector<bool>> *fNeutralIsoPtSum;
   const Branch<std::vector<bool>> *fPuCorrPtSum;
-  const Branch<std::vector<double>> *fEMCVisibleTau;
-  const Branch<std::vector<double>> *fETESdown;
-  const Branch<std::vector<double>> *fETESextremeDown;
-  const Branch<std::vector<double>> *fETESextremeUp;
-  const Branch<std::vector<double>> *fETESup;
-  const Branch<std::vector<double>> *fEmatchingJet;
-  const Branch<std::vector<double>> *fEtaMCVisibleTau;
-  const Branch<std::vector<double>> *fEtaTESdown;
-  const Branch<std::vector<double>> *fEtaTESextremeDown;
-  const Branch<std::vector<double>> *fEtaTESextremeUp;
-  const Branch<std::vector<double>> *fEtaTESup;
-  const Branch<std::vector<double>> *fEtamatchingJet;
   const Branch<std::vector<double>> *fLChTrkEta;
   const Branch<std::vector<double>> *fLChTrkPt;
   const Branch<std::vector<double>> *fLNeutrTrkEta;
   const Branch<std::vector<double>> *fLNeutrTrkPt;
-  const Branch<std::vector<double>> *fPhiMCVisibleTau;
-  const Branch<std::vector<double>> *fPhiTESdown;
-  const Branch<std::vector<double>> *fPhiTESextremeDown;
-  const Branch<std::vector<double>> *fPhiTESextremeUp;
-  const Branch<std::vector<double>> *fPhiTESup;
-  const Branch<std::vector<double>> *fPhimatchingJet;
-  const Branch<std::vector<double>> *fPtMCVisibleTau;
-  const Branch<std::vector<double>> *fPtTESdown;
-  const Branch<std::vector<double>> *fPtTESextremeDown;
-  const Branch<std::vector<double>> *fPtTESextremeUp;
-  const Branch<std::vector<double>> *fPtTESup;
-  const Branch<std::vector<double>> *fPtmatchingJet;
+  const Branch<std::vector<short>> *fMcNPizero;
+  const Branch<std::vector<short>> *fMcNProngs;
   const Branch<std::vector<short>> *fNProngs;
   const Branch<std::vector<short>> *fPdgOrigin;
 };
@@ -112,10 +103,14 @@ template <typename Coll>
 class TauGenerated: public Particle<Coll> {
 public:
   TauGenerated() {}
-  TauGenerated(const Coll* coll, size_t index): Particle<Coll>(coll, index) {}
+  TauGenerated(const Coll* coll, size_t index)
+  : Particle<Coll>(coll, index),
+    fMCVisibleTau(coll->getMCVisibleTauCollection(), index),
+    fmatchingJet(coll->getmatchingJetCollection(), index)
+  {}
   ~TauGenerated() {}
 
-  std::vector<std::function<bool()>> getIsolationDiscriminatorValues() {
+  std::vector<std::function<bool()>> getIsolationDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->byCombinedIsolationDeltaBetaCorrRaw3Hits(); },
       [&](){ return this->byIsolationMVA3newDMwLTraw(); },
@@ -152,14 +147,14 @@ public:
     };
     return values;
   }
-  std::vector<std::function<bool()>> getAgainstMuonDiscriminatorValues() {
+  std::vector<std::function<bool()>> getAgainstMuonDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->againstMuonLoose3(); },
       [&](){ return this->againstMuonTight3(); }
     };
     return values;
   }
-  std::vector<std::function<bool()>> getAgainstElectronDiscriminatorValues() {
+  std::vector<std::function<bool()>> getAgainstElectronDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->againstElectronLooseMVA5(); },
       [&](){ return this->againstElectronMVA5category(); },
@@ -170,6 +165,9 @@ public:
     };
     return values;
   }
+
+  const Particle<ParticleCollection<double>>* MCVisibleTau() const { return &fMCVisibleTau; }
+  const Particle<ParticleCollection<double>>* matchingJet() const { return &fmatchingJet; }
 
   bool againstElectronLooseMVA5() const { return this->fCollection->fAgainstElectronLooseMVA5->value()[this->index()]; }
   bool againstElectronMVA5category() const { return this->fCollection->fAgainstElectronMVA5category->value()[this->index()]; }
@@ -216,36 +214,18 @@ public:
   bool decayModeFindingNewDMs() const { return this->fCollection->fDecayModeFindingNewDMs->value()[this->index()]; }
   bool neutralIsoPtSum() const { return this->fCollection->fNeutralIsoPtSum->value()[this->index()]; }
   bool puCorrPtSum() const { return this->fCollection->fPuCorrPtSum->value()[this->index()]; }
-  double eMCVisibleTau() const { return this->fCollection->fEMCVisibleTau->value()[this->index()]; }
-  double eTESdown() const { return this->fCollection->fETESdown->value()[this->index()]; }
-  double eTESextremeDown() const { return this->fCollection->fETESextremeDown->value()[this->index()]; }
-  double eTESextremeUp() const { return this->fCollection->fETESextremeUp->value()[this->index()]; }
-  double eTESup() const { return this->fCollection->fETESup->value()[this->index()]; }
-  double ematchingJet() const { return this->fCollection->fEmatchingJet->value()[this->index()]; }
-  double etaMCVisibleTau() const { return this->fCollection->fEtaMCVisibleTau->value()[this->index()]; }
-  double etaTESdown() const { return this->fCollection->fEtaTESdown->value()[this->index()]; }
-  double etaTESextremeDown() const { return this->fCollection->fEtaTESextremeDown->value()[this->index()]; }
-  double etaTESextremeUp() const { return this->fCollection->fEtaTESextremeUp->value()[this->index()]; }
-  double etaTESup() const { return this->fCollection->fEtaTESup->value()[this->index()]; }
-  double etamatchingJet() const { return this->fCollection->fEtamatchingJet->value()[this->index()]; }
   double lChTrkEta() const { return this->fCollection->fLChTrkEta->value()[this->index()]; }
   double lChTrkPt() const { return this->fCollection->fLChTrkPt->value()[this->index()]; }
   double lNeutrTrkEta() const { return this->fCollection->fLNeutrTrkEta->value()[this->index()]; }
   double lNeutrTrkPt() const { return this->fCollection->fLNeutrTrkPt->value()[this->index()]; }
-  double phiMCVisibleTau() const { return this->fCollection->fPhiMCVisibleTau->value()[this->index()]; }
-  double phiTESdown() const { return this->fCollection->fPhiTESdown->value()[this->index()]; }
-  double phiTESextremeDown() const { return this->fCollection->fPhiTESextremeDown->value()[this->index()]; }
-  double phiTESextremeUp() const { return this->fCollection->fPhiTESextremeUp->value()[this->index()]; }
-  double phiTESup() const { return this->fCollection->fPhiTESup->value()[this->index()]; }
-  double phimatchingJet() const { return this->fCollection->fPhimatchingJet->value()[this->index()]; }
-  double ptMCVisibleTau() const { return this->fCollection->fPtMCVisibleTau->value()[this->index()]; }
-  double ptTESdown() const { return this->fCollection->fPtTESdown->value()[this->index()]; }
-  double ptTESextremeDown() const { return this->fCollection->fPtTESextremeDown->value()[this->index()]; }
-  double ptTESextremeUp() const { return this->fCollection->fPtTESextremeUp->value()[this->index()]; }
-  double ptTESup() const { return this->fCollection->fPtTESup->value()[this->index()]; }
-  double ptmatchingJet() const { return this->fCollection->fPtmatchingJet->value()[this->index()]; }
+  short mcNPizero() const { return this->fCollection->fMcNPizero->value()[this->index()]; }
+  short mcNProngs() const { return this->fCollection->fMcNProngs->value()[this->index()]; }
   short nProngs() const { return this->fCollection->fNProngs->value()[this->index()]; }
   short pdgOrigin() const { return this->fCollection->fPdgOrigin->value()[this->index()]; }
+
+protected:
+  Particle<ParticleCollection<double>> fMCVisibleTau;
+  Particle<ParticleCollection<double>> fmatchingJet;
 
 };
 

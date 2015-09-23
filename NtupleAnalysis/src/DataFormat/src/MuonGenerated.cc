@@ -8,13 +8,11 @@
 
 void MuonGeneratedCollection::setupBranches(BranchManager& mgr) {
   ParticleCollection::setupBranches(mgr);
+  fMCmuon.setupBranches(mgr);
+
   mgr.book(prefix()+"_isGlobalMuon", &fIsGlobalMuon);
   mgr.book(prefix()+"_muIDLoose", &fMuIDLoose);
   mgr.book(prefix()+"_muIDMedium", &fMuIDMedium);
   mgr.book(prefix()+"_muIDTight", &fMuIDTight);
-  mgr.book(prefix()+"_eMCmuon", &fEMCmuon);
-  mgr.book(prefix()+"_etaMCmuon", &fEtaMCmuon);
-  mgr.book(prefix()+"_phiMCmuon", &fPhiMCmuon);
-  mgr.book(prefix()+"_ptMCmuon", &fPtMCmuon);
   mgr.book(prefix()+"_relIsoDeltaBeta", &fRelIsoDeltaBeta);
 }

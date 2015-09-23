@@ -16,6 +16,7 @@
 #include <iostream>
 #include "TFile.h"
 #include "TTree.h"
+#include "TLeaf.h"
 
 TEST_CASE("METSelection", "[EventSelection]") {
   // Create config for testing
@@ -40,36 +41,39 @@ TEST_CASE("METSelection", "[EventSelection]") {
   unsigned int run;           tree->Branch("run",   &run);
   unsigned int lumi;          tree->Branch("lumi",  &lumi);
   unsigned long long nevent;  tree->Branch("event", &nevent);
-  double type1METet;          tree->Branch("MET_Type1_et", &type1METet);
-  double type1METphi;         tree->Branch("MET_Type1_phi", &type1METphi);
-  int nPU;                    tree->Branch("nGoodOfflinePV", &nPU);
+  double type1METx;           tree->Branch("MET_Type1_x", &type1METx);
+  double type1METy;           tree->Branch("MET_Type1_y", &type1METy);
+  short nPU;                  tree->Branch("nGoodOfflineVertices", &nPU);
+  
   run = 1;
   lumi = 1;
   nevent = 1;
-  type1METet = 90.0;
-  type1METphi = 1.2;
+  type1METx = 32.61220;
+  type1METy = 83.88352;
   nPU = 1;
   tree->Fill();
   nevent = 2;
-  type1METet = 90.0;
-  type1METphi = 2.6;
+  type1METx = -77.11999;
+  type1METy = 46.395123;
   nPU = 30;
   tree->Fill();
   nevent = 3;
-  type1METet = 40.0;
-  type1METphi = -2.6;
+  type1METx = -34.27555;
+  type1METy = -20.620055;
   nPU = 30;
   tree->Fill();  
   BranchManager mgr;
   mgr.setTree(tree);
   Event event(pset);
   event.setupBranches(mgr);
+  TBranch* b = tree->GetBranch("nGoodOfflineVertices");
+  tree->GetEvent(0);
   
   SECTION("PV Selection") {
     mgr.setEntry(0);
-    CHECK( event.NPU().value() == 1);
+    CHECK( event.vertexInfo().value() == 1);
     mgr.setEntry(1);
-    CHECK( event.NPU().value() == 30);
+    CHECK( event.vertexInfo().value() == 30);
   }
 
   SECTION("config") {
@@ -81,17 +85,17 @@ TEST_CASE("METSelection", "[EventSelection]") {
   
   SECTION("MET Selection") {
     mgr.setEntry(0);
-    METSelection::Data data = metsel.analyze(event, event.NPU().value());
+    METSelection::Data data = metsel.analyze(event, event.vertexInfo().value());
     CHECK( data.passedSelection() == true );
     CHECK( data.getMET().R() == Approx(90.0) );
     CHECK( data.getMET().Phi() == Approx(1.2) );
     mgr.setEntry(1);
-    data = metsel.analyze(event, event.NPU().value());
+    data = metsel.analyze(event, event.vertexInfo().value());
     CHECK( data.passedSelection() == true );
     CHECK( data.getMET().R() == Approx(90.0) );
     CHECK( data.getMET().Phi() == Approx(2.6) );
     mgr.setEntry(2);
-    data = metsel.analyze(event, event.NPU().value());
+    data = metsel.analyze(event, event.vertexInfo().value());
     CHECK( data.passedSelection() == false );
     CHECK( data.getMET().R() == Approx(40.0) );
     CHECK( data.getMET().Phi() == Approx(-2.6) );
@@ -102,11 +106,11 @@ TEST_CASE("METSelection", "[EventSelection]") {
                     ec, histoWrapper, commonPlotsPointer, "dblcount");
     metsel2.bookHistograms(f);
     CHECK( ec.getValueByName("passed MET selection (dblcount)") == 0);
-    REQUIRE_NOTHROW( metsel2.silentAnalyze(event, event.NPU().value()));
+    REQUIRE_NOTHROW( metsel2.silentAnalyze(event, event.vertexInfo().value()));
     CHECK( ec.getValueByName("passed MET selection (dblcount)") == 0);
-    REQUIRE_NOTHROW( metsel2.analyze(event, event.NPU().value()) );
+    REQUIRE_NOTHROW( metsel2.analyze(event, event.vertexInfo().value()) );
     CHECK( ec.getValueByName("passed MET selection (dblcount)") == 1);
-    REQUIRE_THROWS_AS( metsel2.analyze(event, event.NPU().value()), hplus::Exception );
+    REQUIRE_THROWS_AS( metsel2.analyze(event, event.vertexInfo().value()), hplus::Exception );
   }
   ec.setOutput(f);
   ec.serialize();

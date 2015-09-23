@@ -23,7 +23,7 @@ Event::Event(const ParameterSet& config):
     if (triggerOR2->size())
       fTriggerOr2.setBranchNames(*triggerOR2);
   }
-
+ 
   bool variationAssigned = false;
   // Systematics
   boost::optional<std::string> jetSyst = config.getParameterOptional<std::string>("JetSelection.systematicVariation");
@@ -43,6 +43,12 @@ Event::Event(const ParameterSet& config):
     variationAssigned = true;
   }
 
+  // MET filter discriminators
+  boost::optional<std::vector<std::string> > metFilterDiscr = config.getParameterOptional<std::vector<std::string> >("METFilter.discriminators", std::vector<std::string>{});
+  if (metFilterDiscr) {
+    fMETFilter.setConfigurableDiscriminators(*metFilterDiscr);
+  }
+  
   // Tau discriminators
   boost::optional<std::vector<std::string> > tauDiscr = config.getParameterOptional<std::vector<std::string> >("TauSelection.discriminators", std::vector<std::string>{});
   if(tauDiscr) {
@@ -59,10 +65,14 @@ Event::Event(const ParameterSet& config):
     fTauCollection.setIsolationDiscriminator(*tauIsolationDiscr);
   
   // Muon discriminators
-  // FIXME
+  boost::optional<std::string> muIDDiscr = config.getParameterOptional<std::string>("MuonSelection.muonID");
+  if (muIDDiscr)
+    fMuonCollection.setMuonIDDiscriminator(*muIDDiscr);
   
   // Electron discriminators
-  // FIXME
+  boost::optional<std::string> eIDDiscr = config.getParameterOptional<std::string>("ElectronSelection.electronID");
+  if (eIDDiscr)
+    fElectronCollection.setElectronIDDiscriminator(*eIDDiscr);
   
   // Jet discriminators
   boost::optional<std::string> jetIDDiscr = config.getParameterOptional<std::string>("JetSelection.jetIDDiscr");
@@ -84,7 +94,8 @@ Event::~Event() {}
 void Event::setupBranches(BranchManager& mgr) {
   fEventID.setupBranches(mgr);
 
-  fNPU.setupBranches(mgr);
+  fVertexInfo.setupBranches(mgr);
+  fMETFilter.setupBranches(mgr);
 
   fTriggerOr.setupBranchesAutoScanVersion(mgr);
   fTriggerOr2.setupBranchesAutoScanVersion(mgr);

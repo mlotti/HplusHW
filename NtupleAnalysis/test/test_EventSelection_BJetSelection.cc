@@ -28,7 +28,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     tmp.put("BJetSelection.bjetDiscr", "");
     ParameterSet pset1(tmp, true, false);
     REQUIRE_NOTHROW(Event event1(pset1));
-    tmp.put("BJetSelection.bjetDiscr", "combinedInclusiveSecondaryVertexV2BJetTags");
+    tmp.put("BJetSelection.bjetDiscr", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
     ParameterSet pset2(tmp, true, false);
     REQUIRE_NOTHROW(Event event2(pset2));
     tmp.put("BJetSelection.bjetDiscr", "dummy");
@@ -46,8 +46,8 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
   tmp.put("TauSelection.prongs", 1);
   tmp.put("TauSelection.rtau", -10.0);
   tmp.put("TauSelection.invertTauIsolation", false);
-  tmp.put("TauSelection.againstElectronDiscr", "againstElectronTight");
-  tmp.put("TauSelection.againstMuonDiscr", "againstMuonMedium");
+  tmp.put("TauSelection.againstElectronDiscr", "againstElectronLooseMVA5");
+  tmp.put("TauSelection.againstMuonDiscr", "againstMuonTight3");
   tmp.put("TauSelection.isolationDiscr", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
   tmp.put("JetSelection.jetPtCut", 30.0);
   tmp.put("JetSelection.jetEtaCut", 2.5);
@@ -56,7 +56,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
   tmp.put("JetSelection.numberOfJetsCutDirection", "GEQ");
   //tmp.put("JetSelection.jetIDDiscr", "FIXME"); // FIXME
   tmp.put("JetSelection.jetPUIDDiscr", "PUIDloose");
-  tmp.put("BJetSelection.bjetDiscr", "combinedInclusiveSecondaryVertexV2BJetTags");
+  tmp.put("BJetSelection.bjetDiscr", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
   tmp.put("BJetSelection.bjetDiscrWorkingPoint", "Loose");
   tmp.put("BJetSelection.numberOfBJetsCutValue", 1);
   tmp.put("BJetSelection.numberOfBJetsCutDirection", ">=");
@@ -76,7 +76,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
   unsigned int run;           tree->Branch("run",   &run);
   unsigned int lumi;          tree->Branch("lumi",  &lumi);
   unsigned long long nevent;  tree->Branch("event", &nevent);
-  std::vector<float> btagCSVv2;tree->Branch("Jets_combinedInclusiveSecondaryVertexV2BJetTags", &btagCSVv2);
+  std::vector<float> btagCSVv2;tree->Branch("Jets_pfCombinedInclusiveSecondaryVertexV2BJetTags", &btagCSVv2);
   std::vector<float> jetpt;   tree->Branch("Jets_pt", &jetpt);
   std::vector<float> jeteta;  tree->Branch("Jets_eta", &jeteta);
   std::vector<float> jetphi;  tree->Branch("Jets_phi", &jetphi);
@@ -87,11 +87,11 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
   std::vector<float> eta;  tree->Branch("Taus_eta", &eta);
   std::vector<float> phi;  tree->Branch("Taus_phi", &phi);
   std::vector<float> e;    tree->Branch("Taus_e", &e);
-  std::vector<float> lTrkPt;   tree->Branch("Taus_lTrkPt", &lTrkPt);
-  std::vector<float> lTrkEta;   tree->Branch("Taus_lTrkEta", &lTrkEta);
+  std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
+  std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
-  std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronTight", &eDiscr);
-  std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonMedium", &muDiscr);
+  std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
+  std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonTight3", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
   std::vector<bool> dm;        tree->Branch("Taus_decayModeFinding", &dm);
   std::vector<float> trgpt;   tree->Branch("HLTTau_pt", &trgpt);
@@ -123,19 +123,19 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
   //event.setupBranches(mgr);
   
   SECTION("discriminator value") {
-    tmp.put("BJetSelection.bjetDiscr", "combinedInclusiveSecondaryVertexV2BJetTags");
+    tmp.put("BJetSelection.bjetDiscr", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
     tmp.put("BJetSelection.bjetDiscrWorkingPoint", "Loose");
     tmp.put("BJetSelection.numberOfBJetsCutValue", 1);
     tmp.put("BJetSelection.numberOfBJetsCutDirection", ">=");
-    tmp.put("BJetSelection2.bjetDiscr", "combinedInclusiveSecondaryVertexV2BJetTags");
+    tmp.put("BJetSelection2.bjetDiscr", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
     tmp.put("BJetSelection2.bjetDiscrWorkingPoint", "Medium");
     tmp.put("BJetSelection2.numberOfBJetsCutValue", 1);
     tmp.put("BJetSelection2.numberOfBJetsCutDirection", ">=");
-    tmp.put("BJetSelection3.bjetDiscr", "combinedInclusiveSecondaryVertexV2BJetTags");
+    tmp.put("BJetSelection3.bjetDiscr", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
     tmp.put("BJetSelection3.bjetDiscrWorkingPoint", "Tight");
     tmp.put("BJetSelection3.numberOfBJetsCutValue", 1);
     tmp.put("BJetSelection3.numberOfBJetsCutDirection", ">=");
-    tmp.put("BJetSelection4.bjetDiscr", "combinedInclusiveSecondaryVertexV2BJetTags");
+    tmp.put("BJetSelection4.bjetDiscr", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
     tmp.put("BJetSelection4.bjetDiscrWorkingPoint", "dummy");
     tmp.put("BJetSelection4.numberOfBJetsCutValue", 1);
     tmp.put("BJetSelection4.numberOfBJetsCutDirection", ">=");
@@ -159,7 +159,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
                           ec, histoWrapper, commonPlotsPointer, "5"), hplus::Exception);
   }
   SECTION("apply discriminator") {
-    tmp.put("BJetSelection.bjetDiscr", "combinedInclusiveSecondaryVertexV2BJetTags");
+    tmp.put("BJetSelection.bjetDiscr", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
     tmp.put("BJetSelection.bjetDiscrWorkingPoint", "Tight");
     tmp.put("BJetSelection.numberOfBJetsCutValue", 0);
     tmp.put("BJetSelection.numberOfBJetsCutDirection", ">=");
@@ -177,19 +177,19 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(0);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyzeWithoutTau(event2);
     BJetSelection::Data bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == true );
     CHECK( bjetData.getNumberOfSelectedBJets() == 2 );
     mgr.setEntry(1);
     tauData = tausel.silentAnalyze(event2);
-    jetData = jetsel.silentAnalyze(event2, tauData);
+    jetData = jetsel.silentAnalyzeWithoutTau(event2);
     bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == true );
     CHECK( bjetData.getNumberOfSelectedBJets() == 4 );
   }
   SECTION("apply Nbjets cut") {
-    tmp.put("BJetSelection.bjetDiscr", "combinedInclusiveSecondaryVertexV2BJetTags");
+    tmp.put("BJetSelection.bjetDiscr", "pfCombinedInclusiveSecondaryVertexV2BJetTags");
     tmp.put("BJetSelection.bjetDiscrWorkingPoint", "Tight");
     tmp.put("BJetSelection.numberOfBJetsCutValue", 2);
     tmp.put("BJetSelection.numberOfBJetsCutDirection", ">=");
@@ -207,17 +207,17 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(0);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyzeWithoutTau(event2);
     BJetSelection::Data bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == true );
     mgr.setEntry(1);
     tauData = tausel.silentAnalyze(event2);
-    jetData = jetsel.silentAnalyze(event2, tauData);
+    jetData = jetsel.silentAnalyzeWithoutTau(event2);
     bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == true );
     mgr.setEntry(2);
     tauData = tausel.silentAnalyze(event2);
-    jetData = jetsel.silentAnalyze(event2, tauData);
+    jetData = jetsel.silentAnalyzeWithoutTau(event2);
     bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == false );
   }
@@ -235,7 +235,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     jetsel.bookHistograms(f);
     bjetsel.bookHistograms(f);
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
-    JetSelection::Data jetData = jetsel.silentAnalyze(event2, tauData);
+    JetSelection::Data jetData = jetsel.silentAnalyzeWithoutTau(event2);
     CHECK( ec.getValueByName("passed b-jet selection (dblcount)") == 0);
     REQUIRE_NOTHROW( bjetsel.silentAnalyze(event2, jetData) );
     CHECK( ec.getValueByName("passed b-jet selection (dblcount)") == 0);

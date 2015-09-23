@@ -43,7 +43,7 @@ public:
     mgr.book(prefix(), &fGenWeight);
   }
 
-  float_type weight() const { return fGenWeight->value(); }
+  float_type weight() const { if (fGenWeight == nullptr) return 1.0; return fGenWeight->value(); }
 
 private:
   const Branch<float_type> *fGenWeight;

@@ -32,7 +32,17 @@ class PSet:
         data = {}
         for key, value in self._data.iteritems():
             if isinstance(value, PSet):
+                # Support for json dump of PSet
                 data[key] = value._asDict()
+            elif isinstance(value, list):
+                # Support for json dump of list of PSets
+                myList = []
+                for item in value:
+                    if isinstance(item, PSet):
+                        myList.append(item._asDict())
+                    else:
+                        myList.append(item)
+                data[key] = myList
             else:
                 data[key] = value
         return data
@@ -401,6 +411,19 @@ if __name__ == "__main__":
   "foo": 1, 
   "fred": 56, 
   "xyzzy": 42
+}""")
+        def testSerializeListOfPSet(self):
+            a = PSet(foo=1, bar=[PSet(a=0.5),PSet(a=0.7)])
+            self.assertEqual(a.serialize_(), """{
+  "bar": [
+    {
+      "a": 0.5
+    }, 
+    {
+      "a": 0.7
+    }
+  ], 
+  "foo": 1
 }""")
 
     class TestFile(unittest.TestCase):

@@ -35,7 +35,10 @@ void BooleanOr::setupBranchesAutoScanVersion(BranchManager& mgr) {
 
 void BooleanOr::throwEmpty() const {
   std::string names;
-  for(auto& name: fBranchNames)
-    names += name+ " ";
-  throw hplus::Exception("DataFormat") << "BooleanOr: None of the requested brances '" << names << "' exist in the TTree";
+  for(auto& name: fBranchNames) {
+    if (names.size() > 0)
+      names += ", ";
+    names += name;
+  }
+  throw hplus::Exception("DataFormat") << "BooleanOr: None of the requested branches '" << names << "' exist in the TTree";
 }

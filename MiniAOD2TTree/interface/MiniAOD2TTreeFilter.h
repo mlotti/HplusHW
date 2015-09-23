@@ -15,6 +15,7 @@
 #include "TTree.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+#include "CommonTools/TriggerUtils/interface/PrescaleWeightProvider.h"
 
 #include "HiggsAnalysis/MiniAOD2TTree/interface/EventInfoDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/SkimDumper.h"
@@ -55,6 +56,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
 
 	std::string hltProcessName;
         HLTConfigProvider hltConfig;
+        //PrescaleWeightProvider prescaleWeight;
 
 	std::string outputFileName;
 	std::string codeVersion;
