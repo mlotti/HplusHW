@@ -98,7 +98,7 @@ TauSelection::Data TauSelection::analyze(const Event& event) {
   TauSelection::Data data = privateAnalyze(event);
   // Send data to CommonPlots
   if (fCommonPlots != nullptr)
-    fCommonPlots->fillControlPlotsAfterTauSelection(event, data, false); // FIXME: fix the boolean for the fake tau status
+    fCommonPlots->fillControlPlotsAfterTauSelection(event, data);
   // Return data
   return data;
 }

@@ -60,7 +60,7 @@ public:
   
   //===== unique filling methods (to be called AFTER return statement from analysis routine)
   void setNvertices(int vtx) { iVertices = vtx; }
-  void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data, bool isFakeTau);
+  void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
   void fillControlPlotsAfterTopologicalSelections(const Event& event);
   void fillControlPlotsAfterAllSelections(const Event& event);
@@ -70,6 +70,12 @@ public:
   /// Getter for all vertices
   int nVertices() const { return iVertices; }
 
+private:
+  /// Returns true if common plots is created by QCD measurement
+  const bool isQCDMeasurement() const { return fAnalysisType == kQCDMeasurement ||
+    fAnalysisType == kQCDNormalizationSystematicsControlRegion || 
+    fAnalysisType == kQCDNormalizationSystematicsSignalRegion; }
+  
 private:
   ///===== Config params
   const bool fEnableGenuineTauHistograms;
