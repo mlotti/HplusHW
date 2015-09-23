@@ -207,7 +207,7 @@ void QCDMeasurement::book(TDirectory *dir) {
   const float fMtMax = fCommonPlots.getMtBinSettings().max();
 
   // Create shape histograms for baseline tau (inverted tau histograms are in common plots)
-  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kInformative, myNormalizationDirs,
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kInformative, myQCDPlotDirs,
     hBaselineTauTransverseMass,
     "BaselineTauShapeTransverseMass", ";m_{T} (GeV);N_{events}",
     nMtBins, fMtMin, fMtMax);
