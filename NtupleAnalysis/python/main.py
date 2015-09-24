@@ -260,6 +260,7 @@ class Process:
         for dset in self._datasets:
             inputList = ROOT.TList()
             nanalyzers = 0
+            anames = []
             for aname, analyzerIE in self._analyzers.iteritems():
                 if analyzerIE.runForDataset_(dset.getName()):
                     nanalyzers += 1
@@ -272,6 +273,7 @@ class Process:
                             raise Exception("Analyzer %s was specified as a function, but returned object of %s instead of Analyzer" % (aname, analyzer.__class__.__name__))
 
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
+                    anames.append(aname)
             if nanalyzers == 0:
                 print "Skipping %s, no analyzers" % dset.getName()
                 continue
@@ -337,6 +339,65 @@ class Process:
             if not cinfo == None:
                 cinfo.Write()
                 fIN.Close()
+
+            # Sum skim counters counters (from ttree)
+            hSkimCounterSum = None
+            fINs = None
+            for inname in dset.getFileNames():
+                fIN = ROOT.TFile.Open(inname)
+                hSkimCounters = fIN.Get("configInfo/SkimCounter")
+                if hSkimCounterSum == None:
+                    hSkimCounterSum = hSkimCounters.Clone()
+                else:
+                    hSkimCounterSum.Add(hSkimCounters)
+                if fINs == None:
+                    fINs = []
+                fINs.append(fIN)
+            if hSkimCounterSum != None:
+                # Find out directories in the output file
+                dirlist = []
+                for key in tf.GetListOfKeys():
+                    matchStatus = False
+                    for name in anames:
+                        if key.GetTitle().startswith(name):
+                            dirlist.append(key.GetTitle())
+                # Add skim counters to the counter histograms
+                for d in dirlist:
+                    hCounter = tf.Get("%s/counters/counter"%d).Clone()
+                    hCounterWeighted = tf.Get("%s/counters/weighted/counter"%d).Clone()
+                    # Resize axis
+                    nCounters = hCounter.GetNbinsX()
+                    nSkimCounters = hSkimCounterSum.GetNbinsX()
+                    hCounter.SetBins(nCounters+nSkimCounters, 0., nCounters+nSkimCounters)
+                    hCounterWeighted.SetBins(nCounters+nSkimCounters, 0., nCounters+nSkimCounters)
+                    # Move bin data to right
+                    for i in range(0, nCounters):
+                        j = nCounters-i
+                        hCounter.SetBinContent(j+nSkimCounters, hCounter.GetBinContent(j))
+                        hCounter.SetBinError(j+nSkimCounters, hCounter.GetBinError(j))
+                        hCounter.GetXaxis().SetBinLabel(j+nSkimCounters, hCounter.GetXaxis().GetBinLabel(j))
+                        hCounterWeighted.SetBinContent(j+nSkimCounters, hCounterWeighted.GetBinContent(j))
+                        hCounterWeighted.SetBinError(j+nSkimCounters, hCounterWeighted.GetBinError(j))
+                        hCounterWeighted.GetXaxis().SetBinLabel(j+nSkimCounters, hCounterWeighted.GetXaxis().GetBinLabel(j))
+                    # Add skim counters
+                    for i in range(1, nSkimCounters+1):
+                        hCounter.SetBinContent(i, hSkimCounterSum.GetBinContent(i))
+                        hCounter.SetBinError(i, hSkimCounterSum.GetBinError(i))
+                        hCounter.GetXaxis().SetBinLabel(i, "ttree: %s"%hSkimCounterSum.GetXaxis().GetBinLabel(i))
+                        hCounterWeighted.SetBinContent(i, hSkimCounterSum.GetBinContent(i))
+                        hCounterWeighted.SetBinError(i, hSkimCounterSum.GetBinError(i))
+                        hCounterWeighted.GetXaxis().SetBinLabel(i, "ttree: %s"%hSkimCounterSum.GetXaxis().GetBinLabel(i))
+                    hCounter.Sumw2(False)
+                    hCounter.Sumw2()
+                    hCounterWeighted.Sumw2(False)
+                    hCounterWeighted.Sumw2()
+                    tf.cd("%s/counters"%d)
+                    hCounter.Write("counter", ROOT.TObject.kOverwrite)
+                    tf.cd("%s/counters/weighted"%d)
+                    hCounterWeighted.Write("counter", ROOT.TObject.kOverwrite)
+            if fINs != None:
+                for f in fINs:
+                  f.Close()
             tf.Close()
 
             calls = ""
