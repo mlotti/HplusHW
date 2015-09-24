@@ -43,8 +43,9 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauRtauCut(config.getParameter<float>("rtau")),
   // Event counter for passing selection
   cPassedTauSelection(eventCounter.addCounter("passed tau selection ("+postfix+")")),
-  cPassedTauSelectionMultipleTaus(eventCounter.addCounter("multiple taus ("+postfix+")")),
+  cPassedTauSelectionMultipleTaus(eventCounter.addCounter("multiple selected taus ("+postfix+")")),
   cPassedAntiIsolatedTauSelection(eventCounter.addCounter("passed anti-isolated tau selection ("+postfix+")")),
+  cPassedAntiIsolatedTauSelectionMultipleTaus(eventCounter.addCounter("multiple anti-isolated taus ("+postfix+")")),
   // Sub counters
   cSubAll(eventCounter.addSubCounter("tau selection ("+postfix+")", "All events")),
   cSubPassedTriggerMatching(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed trigger matching")),
@@ -97,7 +98,7 @@ TauSelection::Data TauSelection::analyze(const Event& event) {
   TauSelection::Data data = privateAnalyze(event);
   // Send data to CommonPlots
   if (fCommonPlots != nullptr)
-    fCommonPlots->fillControlPlotsAfterTauSelection(event, data, false); // FIXME: fix the boolean for the fake tau status
+    fCommonPlots->fillControlPlotsAfterTauSelection(event, data);
   // Return data
   return data;
 }
@@ -245,6 +246,8 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     cPassedTauSelectionMultipleTaus.increment();
   if (output.fAntiIsolatedTaus.size() > 0)
     cPassedAntiIsolatedTauSelection.increment();
+  if (output.fAntiIsolatedTaus.size() > 1)
+    cPassedAntiIsolatedTauSelectionMultipleTaus.increment();
   // Return data object
   return output;
 }

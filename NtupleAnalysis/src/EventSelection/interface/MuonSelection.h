@@ -74,6 +74,7 @@ private:
   const double fMuonPtCut;
   const double fMuonEtaCut;
   float fRelIsoCut;
+  bool fVetoMode;
   
   // Event counter for passing selection
   Count cPassedMuonSelection;

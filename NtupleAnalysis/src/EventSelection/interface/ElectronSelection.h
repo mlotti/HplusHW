@@ -72,6 +72,7 @@ private:
   const double fElectronPtCut;
   const double fElectronEtaCut;
   float fRelIsoCut;
+  bool fVetoMode;
   
   // Event counter for passing selection
   Count cPassedElectronSelection;

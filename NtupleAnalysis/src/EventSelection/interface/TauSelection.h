@@ -101,6 +101,7 @@ private:
   Count cPassedTauSelection;
   Count cPassedTauSelectionMultipleTaus;
   Count cPassedAntiIsolatedTauSelection;
+  Count cPassedAntiIsolatedTauSelectionMultipleTaus;
   // Sub counters
   Count cSubAll;
   Count cSubPassedTriggerMatching;

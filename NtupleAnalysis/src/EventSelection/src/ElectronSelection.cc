@@ -18,6 +18,7 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& e
   fElectronPtCut(config.getParameter<float>("electronPtCut")),
   fElectronEtaCut(config.getParameter<float>("electronEtaCut")),
   fRelIsoCut(-1.0),
+  fVetoMode(false),
   // Event counter for passing selection
   cPassedElectronSelection(eventCounter.addCounter("passed e selection ("+postfix+")")),
   // Sub counters
@@ -27,6 +28,8 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& e
   cSubPassedID(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed ID")),
   cSubPassedIsolation(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed isolation"))
 {
+  if (postfix.find("veto") != std::string::npos || postfix.find("Veto") != std::string::npos)
+    fVetoMode = true;
   std::string isolString = config.getParameter<std::string>("electronIsolation");
   if (isolString == "veto" || isolString == "Veto") {
     fRelIsoCut = 0.15; // Based on 2012 cut based isolation
@@ -134,7 +137,7 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
     cSubPassedID.increment();
   if (passedIsol)
     cSubPassedIsolation.increment();
-  if (sPostfix == "Veto") {
+  if (fVetoMode) {
     if (output.fSelectedElectrons.size() == 0)
       cPassedElectronSelection.increment();
   } else {

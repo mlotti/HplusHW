@@ -72,12 +72,15 @@ public:
   virtual void bookHistograms(TDirectory* dir);
   
   /// Use silentAnalyze if you do not want to fill histograms or increment counters
-  Data silentAnalyze(const Event& event, const TauSelection::Data& tauData);
+  Data silentAnalyze(const Event& event, const Tau& tau);
+  Data silentAnalyzeWithoutTau(const Event& event);
   /// analyze does fill histograms and incrementes counters
-  Data analyze(const Event& event, const TauSelection::Data& tauData);
+  Data analyze(const Event& event, const Tau& tau);
+  Data analyzeWithoutTau(const Event& event);
 
 private:
-  Data privateAnalyze(const Event& event, const TauSelection::Data& tauData);
+  Data privateAnalyze(const Event& event, const math::LorentzVectorT<double>& tauP, const double tauPt);
+  
   void findJetMatchingToTau(std::vector<Jet>& collection, const Event& event, const math::LorentzVectorT<double>& tauP);
   
   
