@@ -42,6 +42,8 @@ private:
   std::vector<std::string> fsignalTriggers1;
   std::vector<std::string> fsignalTriggers2;
   */
+  ParameterSet fcontrolTriggers;
+
   BaseSelection* selection;
 
   Count cAllEvents;
@@ -52,6 +54,7 @@ private:
 
   WrappedTH1 *hNum;
   WrappedTH1 *hDen;
+  WrappedTH1 *hNeg;
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -77,25 +80,34 @@ TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   fsignalTriggers1(config.getParameter<std::vector<std::string>>("signalTriggers1")),
   fsignalTriggers2(config.getParameter<std::vector<std::string>>("signalTriggers2")),
   */
+
+  fcontrolTriggers(config.getParameter<ParameterSet>("Trigger")),                                                                       
+
   cAllEvents(fEventCounter.addCounter("All events")),
   cRunRange(fEventCounter.addCounter("RunRange")),
   cSelection(fEventCounter.addCounter("OfflineSelection")),
   cCtrlTrigger(fEventCounter.addCounter("CtrlTrigger")),
   cSignalTrigger(fEventCounter.addCounter("SignalTrigger"))
 {
-  std::cout << "Analyzer " << fName << ", offline selection " << fOfflineSelection << std::endl;
+  std::cout << "    Analyzer " << fName << ", offline selection " << fOfflineSelection << std::endl;
+  std::vector<std::string> ctrltriggers = fcontrolTriggers.getParameter<std::vector<std::string>>("triggerOR");
+  for(std::vector<std::string>::const_iterator i = ctrltriggers.begin(); i != ctrltriggers.end(); ++i)
+  std::cout << "        CtrlTrigger    " <<  *i << std::endl;
+  std::vector<std::string> signaltriggers = fcontrolTriggers.getParameter<std::vector<std::string>>("triggerOR2");
+  for(std::vector<std::string>::const_iterator i = signaltriggers.begin(); i != signaltriggers.end(); ++i)
+  std::cout << "        SignalTrigger  " <<  *i << std::endl;
   if(fOfflineSelection == "taulegSelection") selection = new TauLegSelection(config);
   if(fOfflineSelection == "metlegSelection") selection = new METLegSelection(config);
 }
 
 TriggerEfficiency::~TriggerEfficiency(){
   std::cout << std::endl;
-  std::cout << "Analyzer " << fName << std::endl;
-  std::cout << "All events    " << cAllEvents.value() << std::endl;
-  std::cout << "Run range     " << cRunRange.value() << std::endl;
-  std::cout << "OfflSelection " << cSelection.value() << std::endl;
-  std::cout << "CtrlTrigger   " << cCtrlTrigger.value() << std::endl;
-  std::cout << "SignalTrigger " << cSignalTrigger.value() << std::endl;
+  std::cout << "    Analyzer " << fName << std::endl;
+  std::cout << "    All events    " << cAllEvents.value() << std::endl;
+  std::cout << "    Run range     " << cRunRange.value() << std::endl;
+  std::cout << "    CtrlTrigger   " << cCtrlTrigger.value() << std::endl;
+  std::cout << "    OfflSelection " << cSelection.value() << std::endl;
+  std::cout << "    SignalTrigger " << cSignalTrigger.value() << std::endl;
 }
 
 void TriggerEfficiency::book(TDirectory *dir) {
@@ -112,6 +124,8 @@ void TriggerEfficiency::book(TDirectory *dir) {
   hDen = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Denominator", "Denominator", fbinning.size()-1, xbins);  
   hDen->GetXaxis()->SetTitle(fxLabel.c_str());
 
+  hNeg = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NegativeWeight", "NegativeWeight", fbinning.size()-1, xbins);
+  hNeg->GetXaxis()->SetTitle(fxLabel.c_str());
 }
 
 void TriggerEfficiency::setupBranches(BranchManager& branchManager) {
@@ -127,14 +141,15 @@ void TriggerEfficiency::process(Long64_t entry) {
   if(!selection->passedRunRange(fEvent,this->isData())) return;
   cRunRange.increment();
 
-  if(!selection->offlineSelection(fEvent)) return;
-  cSelection.increment();
-
   if(!selection->passedCtrlTtrigger(fEvent)) return;
   cCtrlTrigger.increment();
 
+  if(!selection->offlineSelection(fEvent)) return;
+  cSelection.increment();
+
   double xvariable = selection->xVariable();
   hDen->Fill(xvariable);
+  if(fEventWeight.getWeight() < 0) hNeg->Fill(xvariable,1);
   if(selection->onlineSelection(fEvent)) {
     hNum->Fill(xvariable);
     cSignalTrigger.increment();

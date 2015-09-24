@@ -31,7 +31,13 @@ def getEfficiency(datasets):
     for dataset in datasets:
         n = dataset.getDatasetRootHisto("Numerator").getHistogram()                                               
         d = dataset.getDatasetRootHisto("Denominator").getHistogram()
-        print "entries",n.GetEntries(),d.GetEntries()
+
+        checkNegatives(n,d)
+
+#        removeNegatives(n)
+#        removeNegatives(d)
+        print dataset.getName(),"entries",n.GetEntries(),d.GetEntries()
+        print "    bins",n.GetNbinsX(),d.GetNbinsX()
         eff = ROOT.TEfficiency(n,d)
         eff.SetStatisticOption(statOption)
 
@@ -58,6 +64,23 @@ def getEfficiency(datasets):
         teff.SetStatisticOption(self.statOption)
 
     return convert2TGraph(teff)
+
+def checkNegatives(n,d):
+    for i in range(1,n.GetNbinsX()):
+        nbin = n.GetBinContent(i)
+        dbin = d.GetBinContent(i)
+        print "Bin",i,"Numerator=",nbin,", denominator=",dbin
+        if nbin > dbin:
+            if nbin < dbin*1.005:
+                n.SetBinContent(i,dbin)
+            else:
+#                print "Bin",i,"Numerator=",nbin,", denominator=",dbin
+                print "REBIN!",n.GetBinLowEdge(i),"-",n.GetBinLowEdge(i)+n.GetBinWidth(i)
+#                sys.exit()
+def removeNegatives(histo):
+    for bin in range(histo.GetNbinsX()):
+        if histo.GetBinContent(bin) < 0:
+            histo.SetBinContent(bin,0.)
 
 def convert2TGraph(tefficiency):
     x     = []
@@ -101,7 +124,7 @@ def main():
 
     paths = [sys.argv[1]]
 
-    analysis = "TauLeg_2015A"
+    analysis = "TauLeg_2015C"
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
 
     style = tdrstyle.TDRStyle()
