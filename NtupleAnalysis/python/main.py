@@ -256,8 +256,16 @@ class Process:
             _proof = ROOT.TProof.Open(opt)
             _proof.Exec("gSystem->Load(\"libHPlusAnalysis.so\");")
 
+        # Init timing counters
+        realTimeTotal = 0
+        cpuTimeTotal = 0
+        readMbytesTotal = 0
+        callsTotal = 0
+
         # Process over datasets
+        ndset = 0
         for dset in self._datasets:
+            ndset += 1
             inputList = ROOT.TList()
             nanalyzers = 0
             anames = []
@@ -278,8 +286,7 @@ class Process:
                 print "Skipping %s, no analyzers" % dset.getName()
                 continue
 
-
-            print "Processing dataset", dset.getName()
+            print "\033[0;40m\033[1;37mProcessing dataset (%d/%d): %s\033[0;0m"%(ndset, len(self._datasets), dset.getName())
 
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())
@@ -411,9 +418,14 @@ class Process:
                 readMbytes = float(readBytesStop-readBytesStart)/1024/1024
                 calls = " (%d calls)" % (readCallsStop-readCallsStart)
             realTime = timeStop-timeStart
-            print "Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB%s, read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, calls, readMbytes/realTime)
+            print "\033[1;32mDone.\033[0;0m Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB%s, read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, calls, readMbytes/realTime)
+            realTimeTotal += realTime
+            cpuTimeTotal += cpuTime
+            readMbytesTotal += readMbytes
 
         print
+        if len(self._datasets > 1):
+            print "Total: Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB, read speed %.2f MB/s" % (realTimeTotal, cpuTimeTotal, cpuTimeTotal/realTimeTotal*100, readMbytesTotal, readMbytesTotal/realTimeTotal)
         print "Results are in", outputDir
 
         return outputDir
