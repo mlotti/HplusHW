@@ -36,8 +36,8 @@ public:
   float pvZ() const { return fPVz->value(); }
 
 private:
-  const Branch<short> *fNPU;
-  const Branch<short> *fSimulatedNPU;
+  const Branch<int>   *fNPU;
+  const Branch<int> *fSimulatedNPU;
   const Branch<float> *fPVDistanceToClosestVertex;
   const Branch<float> *fPVDistanceToNextVertex;
   const Branch<float> *fPVx;
