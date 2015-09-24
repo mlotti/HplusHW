@@ -340,7 +340,8 @@ class Process:
                 readMbytes = float(readBytesStop-readBytesStart)/1024/1024
                 calls = " (%d calls)" % (readCallsStop-readCallsStart)
             realTime = timeStop-timeStart
-            print "Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB%s, read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, calls, readMbytes/realTime)
+            print "    Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB%s, read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, calls, readMbytes/realTime)
+            print
 
         print
         print "Results are in", outputDir
