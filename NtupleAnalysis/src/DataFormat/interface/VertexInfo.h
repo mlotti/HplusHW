@@ -21,9 +21,9 @@ public:
   void setupBranches(BranchManager& mgr);
 
   /// Return the number of primary vertices in the event
-  int value() const { return fNPU->value(); }
+  short value() const { return fNPU->value(); }
   /// Return the simulated number of primary vertices in the event
-  int simulatedValue() const { return fSimulatedNPU->value(); }
+  short simulatedValue() const { return fSimulatedNPU->value(); }
   /// Return the distance (in mm) to the vertex closest in z to the PV
   float PVDistanceToClosestVertex() const { return fPVDistanceToClosestVertex->value(); }
   /// Return the distance (in mm) to the next vertex (by sum pt) compared to the selected PV
@@ -36,8 +36,8 @@ public:
   float pvZ() const { return fPVz->value(); }
 
 private:
-  const Branch<int>   *fNPU;
-  const Branch<int> *fSimulatedNPU;
+  const Branch<short>   *fNPU;
+  const Branch<short> *fSimulatedNPU;
   const Branch<float> *fPVDistanceToClosestVertex;
   const Branch<float> *fPVDistanceToNextVertex;
   const Branch<float> *fPVx;
