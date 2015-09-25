@@ -424,7 +424,7 @@ class Process:
             readMbytesTotal += readMbytes
 
         print
-        if len(self._datasets > 1):
+        if len(self._datasets) > 1:
             print "Total: Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB, read speed %.2f MB/s" % (realTimeTotal, cpuTimeTotal, cpuTimeTotal/realTimeTotal*100, readMbytesTotal, readMbytesTotal/realTimeTotal)
         print "Results are in", outputDir
 
