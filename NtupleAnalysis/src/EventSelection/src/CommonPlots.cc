@@ -432,9 +432,9 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
 void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight) {
   double myTransverseMass = -1.0;
   if (isQCDMeasurement()) {
-    myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), fMETData.getMET());
+    myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), metData.getMET());
   } else {
-    myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
+    myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), metData.getMET());
   }
   fHistoSplitter.fillShapeHistogramTriplet(hShapeProbabilisticBtagTransverseMass, bIsFakeTau, myTransverseMass, btagWeight);
 }
