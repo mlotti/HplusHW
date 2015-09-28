@@ -31,21 +31,27 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
     theTree->Branch("HLTTau_phi",&HLTTau_phi);
     theTree->Branch("HLTTau_e",&HLTTau_e);
 
-    std::vector<std::string> selectedTriggers;
+//    std::vector<std::string> selectedTriggers;
 
     for(size_t i = 0; i < triggerBits.size(); ++i){
         std::regex hlt_re(triggerBits[i]);
         std::vector<std::string> hltPaths = hltConfig.triggerNames();
-        for(size_t i = 0; i < hltPaths.size(); ++i){
-            if (std::regex_search(hltPaths[i], hlt_re)) {
-                selectedTriggers.push_back(hltPaths[i]);
+        for(size_t j = 0; j < hltPaths.size(); ++j){
+            if (std::regex_search(hltPaths[j], hlt_re)) {
+                selectedTriggers.push_back(hltPaths[j]);
+		std::cout << "check book triggerBits " << i << " " << hltPaths[j] << std::endl;
             }
         }
     }
 
-    iBit = new bool[selectedTriggers.size()];
+    iBit         = new bool[selectedTriggers.size()];
+    iCountAll    = new int[selectedTriggers.size()];
+    iCountPassed = new int[selectedTriggers.size()];
+
     for(size_t i = 0; i < selectedTriggers.size(); ++i){
         theTree->Branch(selectedTriggers[i].c_str(),&iBit[i]);
+        iCountAll[i]    = 0;
+        iCountPassed[i] = 0;
     }
 }
 
@@ -68,13 +74,15 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	std::vector<std::string> hlNames;
         tns->getTrigPaths(tr, hlNames, fromPSetRegistry);
 
-	for(size_t i = 0; i < triggerBits.size(); ++i){
+	for(size_t i = 0; i < selectedTriggers.size(); ++i){
             iBit[i] = false;
-            std::regex hlt_re(triggerBits[i]);
+            std::regex hlt_re(selectedTriggers[i]);
 	    int n = 0;
 	    for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
 		if (std::regex_search(*j, hlt_re)) {
 		    iBit[i] = trgResultsHandle->accept(n);
+		    iCountAll[i] += 1;
+		    if(trgResultsHandle->accept(n)) iCountPassed[i] += 1;
 		    continue;
 		}
 		n++;
@@ -120,6 +128,7 @@ bool TriggerDumper::filter(){
 void TriggerDumper::reset(){
     if(booked){
       for(size_t i = 0; i < triggerBits.size(); ++i) iBit[i] = 0;
+
       L1MET_x = 0;
       L1MET_y = 0;
       HLTMET_x = 0;
@@ -130,4 +139,18 @@ void TriggerDumper::reset(){
       HLTTau_phi.clear();
       HLTTau_e.clear();
     }
+}
+
+std::pair<int,int> TriggerDumper::counters(std::string path){
+
+  int index = -1;
+  for(size_t i = 0; i < selectedTriggers.size(); ++i){
+    if(path==selectedTriggers[i]){
+      index = i;
+      break;
+    }
+  }
+  if(index == -1) return std::pair<int,int>(0,0);
+
+  return std::pair<int,int>(iCountAll[index],iCountPassed[index]);
 }

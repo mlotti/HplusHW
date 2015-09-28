@@ -238,7 +238,23 @@ void MiniAOD2TTreeFilter::endJob(){
     std::cout << std::endl << "List of branches:" << std::endl;
     TObjArray* branches = Events->GetListOfBranches();
     for(int i = 0; i < branches->GetEntries(); ++i){
+      int hltCounterAll    = 0;
+      int hltCounterPassed = 0;
+      if (trgDumper) {
+	std::pair<int,int> hltCounters = trgDumper->counters(branches->At(i)->GetName());
+	if(hltCounters.first > 0) {
+	  hltCounterAll    = hltCounters.first;
+	  hltCounterPassed = hltCounters.second;
+	}
+      }
+      if(hltCounterAll > 0){
+	std::string name(branches->At(i)->GetName());
+	while(name.length() < 70) name += " ";
+	
+	std::cout << "    " << name << " " << hltCounterAll << " " << hltCounterPassed << std::endl;
+      }else{
 	std::cout << "    " << branches->At(i)->GetName() << std::endl;
+      }
     }
     std::cout << "Number of events saved " << Events->GetEntries() << std::endl << std::endl;
 

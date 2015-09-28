@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "TTree.h"
 
@@ -39,6 +40,8 @@ class TriggerDumper {
 	bool fill(edm::Event&, const edm::EventSetup&);
 	void reset();
 
+	std::pair<int,int> counters(std::string);
+
     private:
 
         bool filter();
@@ -48,11 +51,14 @@ class TriggerDumper {
 	TTree* theTree;
 
 	bool *iBit; 
+	int  *iCountAll;
+	int  *iCountPassed;
 	edm::ParameterSet inputCollection;
 	edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
         edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trgObjectsToken;
         edm::EDGetTokenT<std::vector<l1extra::L1EtMissParticle>> trgL1ETMToken;
 	std::vector<std::string> triggerBits;
+        std::vector<std::string> selectedTriggers;
 
 	double L1MET_x;
         double L1MET_y;

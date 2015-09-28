@@ -6,7 +6,8 @@ skim = cms.EDFilter("TauLegSkim",
                                  "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v",
                                  "HLT_IsoMu17_eta2p1_v",
                                  "HLT_IsoMu20_eta2p1_v",
-                                 "HLT_IsoMu24_eta2p1_v"),
+                                 "HLT_IsoMu24_eta2p1_v"
+    ),
     TauCollection  = cms.InputTag("slimmedTaus"),
     TauDiscriminators = cms.vstring(
 	"decayModeFinding",
