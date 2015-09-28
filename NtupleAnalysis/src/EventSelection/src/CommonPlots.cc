@@ -1,5 +1,6 @@
 #include "EventSelection/interface/CommonPlots.h"
 #include "EventSelection/interface/TransverseMass.h"
+#include "DataFormat/interface/Event.h"
 
 CommonPlots::CommonPlots(const ParameterSet& config, const AnalysisType type, HistoWrapper& histoWrapper)
 : fEnableGenuineTauHistograms(config.getParameter<bool>("enableGenuineTauHistograms")),
@@ -335,14 +336,17 @@ void CommonPlots::fillControlPlotsAfterTauSelection(const Event& event, const Ta
   // Code logic: if there is no identified tau (or anti-isolated tau for QCD), the code will for sure crash later
   // This piece of code is called from TauSelection, so there one cannot judge if things go right or not, 
   // that kind of check needs to be done in the analysis code (i.e. cut away event if tau selection is not passed)
+  fTauData = data;
+  if (event.isData()) {
+    bIsFakeTau = false;
+    return;
+  }
   if (isQCDMeasurement()) {
     if (data.hasAntiIsolatedTaus()) {
-      fTauData = data;
       bIsFakeTau = !(data.getAntiIsolatedTauIsGenuineTau());
     }
   } else {
     if (data.hasIdentifiedTaus()) {
-      fTauData = data;
       bIsFakeTau = !(data.isGenuineTau());
     }
   }
