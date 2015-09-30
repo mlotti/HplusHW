@@ -1,6 +1,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TriggerDumper.h"
 
 #include <regex>
+#include "Math/VectorUtil.h"
 
 TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
 : trgResultsToken(iConsumesCollector.consumes<edm::TriggerResults>(pset.getParameter<edm::InputTag>("TriggerResults"))),
@@ -12,6 +13,9 @@ TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const 
     triggerBits = inputCollection.getParameter<std::vector<std::string> >("TriggerBits");
     useFilter = inputCollection.getUntrackedParameter<bool>("filter",false);
 //    iBit = new bool[triggerBits.size()];
+
+    trgMatchStr = inputCollection.getUntrackedParameter<std::vector<std::string> >("TriggerMatch",std::vector<std::string>());
+    trgMatchDr = inputCollection.getUntrackedParameter<double>("TriggerMatchDR",0.1);
 }
 TriggerDumper::~TriggerDumper(){}
 
@@ -39,7 +43,6 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
         for(size_t j = 0; j < hltPaths.size(); ++j){
             if (std::regex_search(hltPaths[j], hlt_re)) {
                 selectedTriggers.push_back(hltPaths[j]);
-		std::cout << "check book triggerBits " << i << " " << hltPaths[j] << std::endl;
             }
         }
     }
@@ -52,6 +55,37 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
         theTree->Branch(selectedTriggers[i].c_str(),&iBit[i]);
         iCountAll[i]    = 0;
         iCountPassed[i] = 0;
+    }
+
+    // Trigger matching
+    std::regex obj_re("((Tau)|(Mu))");
+    for(size_t imatch = 0; imatch < trgMatchStr.size(); ++imatch){
+	std::string name = "";
+	std::smatch match;
+	if (std::regex_search(trgMatchStr[imatch], match, obj_re) && match.size() > 0) name = match.str(0); 
+	if(name=="Tau") name = "Taus"; // FIXME, these should come from the config
+        if(name=="Mu") name = "Muons"; // FIXME, these should come from the config
+	name+= "_TrgMatch_";
+
+	std::regex match_re(trgMatchStr[imatch]);
+	for(size_t i = 0; i < selectedTriggers.size(); ++i){		
+	    if (std::regex_search(selectedTriggers[i], match_re)) {
+		std::string branchName = name+trgMatchStr[imatch];
+		bool exists = false;
+		for(size_t j = 0; j < trgMatchBranches.size(); ++j){
+		    if(trgMatchBranches[j] == branchName){
+		        exists = true;
+		        break;
+		    }
+		}
+		if(!exists) trgMatchBranches.push_back(branchName);
+	    }
+	}
+    }
+    nTrgDiscriminators = trgMatchBranches.size();
+    trgdiscriminators = new std::vector<bool>[nTrgDiscriminators];
+    for(size_t i = 0; i < trgMatchBranches.size(); ++i){
+	theTree->Branch(trgMatchBranches[i].c_str(),&trgdiscriminators[i]);
     }
 }
 
@@ -68,47 +102,53 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     edm::Handle<edm::TriggerResults> trgResultsHandle;
     iEvent.getByToken(trgResultsToken, trgResultsHandle);
     if(trgResultsHandle.isValid()){
-        edm::TriggerResults tr = *trgResultsHandle;
-	bool fromPSetRegistry;
-        edm::Service<edm::service::TriggerNamesService> tns;
-	std::vector<std::string> hlNames;
-        tns->getTrigPaths(tr, hlNames, fromPSetRegistry);
+//        const edm::TriggerNames &names = iEvent.triggerNames(*trgResultsHandle);
+	names = iEvent.triggerNames(*trgResultsHandle);
 
-	for(size_t i = 0; i < selectedTriggers.size(); ++i){
+        for(size_t i = 0; i < selectedTriggers.size(); ++i){
             iBit[i] = false;
             std::regex hlt_re(selectedTriggers[i]);
-	    int n = 0;
-	    for(std::vector<std::string>::const_iterator j = hlNames.begin(); j!= hlNames.end(); ++j){
-		if (std::regex_search(*j, hlt_re)) {
-		    iBit[i] = trgResultsHandle->accept(n);
-		    iCountAll[i] += 1;
-		    if(trgResultsHandle->accept(n)) iCountPassed[i] += 1;
-		    continue;
-		}
-		n++;
-	    }  
-	}
-    }
+            int n = 0;
+            for(size_t j = 0; j < trgResultsHandle->size(); ++j){
+                if (std::regex_search(names.triggerName(j), hlt_re)) {
+                    iBit[i] = trgResultsHandle->accept(n);
+                    iCountAll[i] += 1;
+                    if(trgResultsHandle->accept(n)) iCountPassed[i] += 1;
+                    continue;
+                }
+                n++;
+            }
+        }
 
-    HLTMET_x = 0;
-    HLTMET_y = 0;
-    edm::Handle<pat::TriggerObjectStandAloneCollection> patTriggerObjects;
-    iEvent.getByToken(trgObjectsToken,patTriggerObjects);
-    if(patTriggerObjects.isValid()){
-	for(pat::TriggerObjectStandAloneCollection::const_iterator patTriggerObject = patTriggerObjects->begin();
-            patTriggerObject != patTriggerObjects->end(); ++patTriggerObject ) {
-	    if(patTriggerObject->id(trigger::TriggerMET)){
-                HLTMET_x = patTriggerObject->p4().x();
-                HLTMET_y = patTriggerObject->p4().y();
-		//std::cout << "Trigger MET " << patTriggerObject->p4().Pt() << std::endl;
-	    }
-	    if(patTriggerObject->id(trigger::TriggerTau)){
-                HLTTau_pt.push_back(patTriggerObject->p4().Pt());
-                HLTTau_eta.push_back(patTriggerObject->p4().Eta());
-                HLTTau_phi.push_back(patTriggerObject->p4().Phi());
-                HLTTau_e.push_back(patTriggerObject->p4().E());
-		//std::cout << "Trigger Tau " << patTriggerObject->p4().Pt() << std::endl;
-	    }
+
+        HLTMET_x = 0;
+        HLTMET_y = 0;
+//        edm::Handle<pat::TriggerObjectStandAloneCollection> patTriggerObjects;
+        iEvent.getByToken(trgObjectsToken,patTriggerObjects);
+        if(patTriggerObjects.isValid()){
+	    for (pat::TriggerObjectStandAlone patTriggerObject : *patTriggerObjects) {
+	        patTriggerObject.unpackPathNames(names);
+	        if(patTriggerObject.id(trigger::TriggerMET)){
+                    HLTMET_x = patTriggerObject.p4().x();
+                    HLTMET_y = patTriggerObject.p4().y();
+		//std::cout << "Trigger MET " << patTriggerObject.p4().Pt() << std::endl;
+	        }
+	        if(patTriggerObject.id(trigger::TriggerTau)){
+
+                    std::vector<std::string> pathNamesAll  = patTriggerObject.pathNames(false);
+		    bool fired = false;
+                    for(size_t i = 0; i < pathNamesAll.size(); ++i){
+		      if(patTriggerObject.hasPathName( pathNamesAll[i], false, true )) fired = true;
+                    }
+		    if(fired){
+                        HLTTau_pt.push_back(patTriggerObject.p4().Pt());
+                        HLTTau_eta.push_back(patTriggerObject.p4().Eta());
+                        HLTTau_phi.push_back(patTriggerObject.p4().Phi());
+                        HLTTau_e.push_back(patTriggerObject.p4().E());
+		    }
+		//std::cout << "Trigger Tau " << patTriggerObject.p4().Pt() << std::endl;
+	        }
+            }
 	}
     }
 
@@ -138,6 +178,8 @@ void TriggerDumper::reset(){
       HLTTau_eta.clear();
       HLTTau_phi.clear();
       HLTTau_e.clear();
+
+      for(int i = 0; i < nTrgDiscriminators; ++i) trgdiscriminators[i].clear();
     }
 }
 
@@ -153,4 +195,58 @@ std::pair<int,int> TriggerDumper::counters(std::string path){
   if(index == -1) return std::pair<int,int>(0,0);
 
   return std::pair<int,int>(iCountAll[index],iCountPassed[index]);
+}
+
+void TriggerDumper::triggerMatch(int id,std::vector<reco::Candidate::LorentzVector> objs){
+    for(size_t iobj = 0; iobj < objs.size(); ++iobj){
+      for(int i = 0; i < nTrgDiscriminators; ++i){
+        bool matchFound = false;
+
+	std::string matchedTrgObject = trgMatchBranches[i];
+	size_t len = matchedTrgObject.length();
+	size_t pos = matchedTrgObject.find("_TrgMatch_") + 10;
+	matchedTrgObject = matchedTrgObject.substr(pos,len-pos);
+
+	if(!isCorrectObject(id,matchedTrgObject)) continue;
+
+	if(patTriggerObjects.isValid()){
+	    for (pat::TriggerObjectStandAlone patTriggerObject : *patTriggerObjects) {
+		patTriggerObject.unpackPathNames(names);
+		if(patTriggerObject.id(id)){
+		    bool fired = false;
+		    std::vector<std::string> pathNamesAll  = patTriggerObject.pathNames(false);
+		    std::regex match_re(matchedTrgObject);
+		    for(size_t i = 0; i < pathNamesAll.size(); ++i){
+			if (std::regex_search(pathNamesAll[i], match_re)) {
+			    if(patTriggerObject.hasPathName( pathNamesAll[i], false, true )) fired = true;
+			}
+		    }
+		    if(!fired) continue;
+
+		    double dr = ROOT::Math::VectorUtil::DeltaR(objs[iobj],patTriggerObject.p4());
+		    if(dr < trgMatchDr) matchFound = true;
+		}
+	    }
+        }
+        trgdiscriminators[i].push_back(matchFound);
+      }
+    }
+}
+
+bool TriggerDumper::isCorrectObject(int id,std::string trgObject){
+    std::string sid = "";
+    switch (id) {
+	case trigger::TriggerTau:
+	    sid = "Tau";
+	    break;
+	case trigger::TriggerMuon:
+	    sid = "Mu";
+	    break;
+	default:
+	    std::cout << "Unknown trigger id " << id << " exiting.." << std::endl;
+	    exit(1);
+    }
+
+    if(trgObject.find(sid) < trgObject.length()) return true;
+    return false;
 }

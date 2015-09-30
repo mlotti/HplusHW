@@ -6,13 +6,14 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-dataVersion = "74Xmc"
+#dataVersion = "74Xmc"
+dataVersion = "74Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(-1)
 )
 
 process.load("FWCore/MessageService/MessageLogger_cfi")
@@ -22,7 +23,8 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-       '/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/022B08C4-C702-E511-9995-D4856459AC30.root',
+#        '/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/022B08C4-C702-E511-9995-D4856459AC30.root',
+        '/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
     )
 )
 
@@ -105,6 +107,9 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
+        TriggerMatch = cms.untracked.vstring(
+            "LooseIsoPFTau50_Trk30_eta2p1",
+        ),
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = cms.PSet(

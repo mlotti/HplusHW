@@ -161,9 +161,15 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
     bool accept = true;
     if (trgDumper) accept = accept && trgDumper->fill(iEvent,iSetup);
     if (metNoiseFilterDumper) accept = accept && metNoiseFilterDumper->fill(iEvent,iSetup);
-    if (tauDumper) accept = accept && tauDumper->fill(iEvent,iSetup);
+    if (tauDumper) {
+	accept = accept && tauDumper->fill(iEvent,iSetup);
+        if (trgDumper) trgDumper->triggerMatch(trigger::TriggerTau,tauDumper->selected());
+    }
     if (electronDumper) accept = accept && electronDumper->fill(iEvent,iSetup);
-    if (muonDumper) accept = accept && muonDumper->fill(iEvent,iSetup);
+    if (muonDumper) {
+	accept = accept && muonDumper->fill(iEvent,iSetup);
+	if (trgDumper) trgDumper->triggerMatch(trigger::TriggerMuon,muonDumper->selected());
+    }
     if (jetDumper) accept = accept && jetDumper->fill(iEvent,iSetup);
     if (metDumper) accept = accept && metDumper->fill(iEvent,iSetup);
     if (genMetDumper) accept = accept && genMetDumper->fill(iEvent,iSetup);
