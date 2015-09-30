@@ -307,7 +307,7 @@ void SelectorImpl::resetStatus() {
   if(!fPrintStatus) return;
 
   fStopwatch.Stop();
-  std::cout << "\rDataset processed (" << fProcessed << " entries). " << std::endl;
+  std::cout << "\r    Dataset processed (" << fProcessed << " entries). " << std::endl;
   //fStopwatch.Print();
   fPrintStep = 20000;
 }

@@ -31,14 +31,18 @@ private:
   Count cPileupWeighted;
   Count cTopPtReweighted;
   Count cExclusiveSamplesWeighted;
-  Count cMETFilters;
+  METFilterSelection fMETFilterSelection;
   Count cVertexSelection;
   TauSelection fTauSelection;
+  Count cFakeTauSFCounter;
+  Count cTauTriggerSFCounter;
   ElectronSelection fElectronSelection;
   MuonSelection fMuonSelection;
   JetSelection fJetSelection;
+  Count cMetTriggerSFCounter;
   AngularCutsCollinear fAngularCutsCollinear;
   BJetSelection fBJetSelection;
+  Count cBTaggingSFCounter;
   METSelection fMETSelection;
   AngularCutsBackToBack fAngularCutsBackToBack;
   Count cSelected;
@@ -59,20 +63,25 @@ SignalAnalysis::SignalAnalysis(const ParameterSet& config)
   cPileupWeighted(fEventCounter.addCounter("Weighted events with PU")),
   cTopPtReweighted(fEventCounter.addCounter("Weighted events with top pT")),
   cExclusiveSamplesWeighted(fEventCounter.addCounter("Weighted events for exclusive samples")),
-  cMETFilters(fEventCounter.addCounter("MET filters")),
+  fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"),
+                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   cVertexSelection(fEventCounter.addCounter("Primary vertex selection")),
   fTauSelection(config.getParameter<ParameterSet>("TauSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")),
+  cTauTriggerSFCounter(fEventCounter.addCounter("Tau trigger SF")),
   fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
   fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
   fJetSelection(config.getParameter<ParameterSet>("JetSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
   fAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
   fMETSelection(config.getParameter<ParameterSet>("METSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   fAngularCutsBackToBack(config.getParameter<ParameterSet>("AngularCutsBackToBack"),
@@ -84,6 +93,7 @@ void SignalAnalysis::book(TDirectory *dir) {
   // Book common plots histograms
   fCommonPlots.book(dir);
   // Book histograms in event selection classes
+  fMETFilterSelection.bookHistograms(dir);
   fTauSelection.bookHistograms(dir);
   fElectronSelection.bookHistograms(dir);
   fMuonSelection.bookHistograms(dir);
@@ -108,7 +118,7 @@ void SignalAnalysis::process(Long64_t entry) {
 
   cAllEvents.increment();
 
-//====== Apply trigger // FIXME to be debugged
+//====== Apply trigger
   if (!(fEvent.passTriggerDecision()))
     return;
   cTrigger.increment();
@@ -127,26 +137,36 @@ void SignalAnalysis::process(Long64_t entry) {
 //====== Combining of W+jets and Z+jets inclusive and exclusive samples // FIXME missing code
   cExclusiveSamplesWeighted.increment();
   
-//====== MET filters to remove events with spurious sources of fake MET // FIXME missing code
-  cMETFilters.increment();
+//====== MET filters to remove events with spurious sources of fake MET
+  const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
+  if (!metFilterData.passedSelection())
+    return;
   
 //====== GenParticle analysis
   // if needed
   
 //====== Check that primary vertex exists
-  int nVertices = fEvent.NPU().value();
+  int nVertices = fEvent.vertexInfo().value();
   if (nVertices < 1)
     return;
   cVertexSelection.increment();
   fCommonPlots.setNvertices(nVertices);
   
-//====== Setup common events // FIXME missing code
-    
 //====== Tau selection
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
   if (!tauData.hasIdentifiedTaus())
     return;
+  
+//====== Fake tau SF
+  if (fEvent.isMC()) {
+    // FIXME: code for applying the SF is currently missing
+    cFakeTauSFCounter.increment();
+  }
 
+//====== Tau trigger SF
+  // FIXME: code for applying the SF is currently missing
+  cTauTriggerSFCounter.increment();
+  
 //====== Electron veto
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
   if (eData.hasIdentifiedElectrons())
@@ -158,27 +178,29 @@ void SignalAnalysis::process(Long64_t entry) {
     return;
 
 //====== Jet selection
-  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData);
+  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
   if (!jetData.passedSelection())
     return;
 
+//====== MET trigger SF
+  // FIXME: code for applying the SF is currently missing
+  cMetTriggerSFCounter.increment();
+  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
+  
 //====== Collinear angular cuts
   const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
-  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData, jetData, silentMETData);
+  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
   if (!collinearData.passedSelection())
     return;
 
 //====== Point of standard selections
-  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
   fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
 
 //====== b-jet selection
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
-  // Apply b tag scale factor
-  // FIXME missing code
   // Fill final shape plots with b tag efficiency applied as an event weight
   if (silentMETData.passedSelection()) {
-    const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData, jetData, silentMETData);
+    const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
     if (silentBackToBackData.passedSelection()) {
       fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(fEvent, silentMETData, bjetData.getBTaggingPassProbability());
     }
@@ -186,13 +208,19 @@ void SignalAnalysis::process(Long64_t entry) {
   if (!bjetData.passedSelection())
     return;
 
+//====== b tag SF
+  if (fEvent.isMC()) {
+    // FIXME missing code
+    cBTaggingSFCounter.increment();
+  }
+
 //====== MET selection
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
   if (!METData.passedSelection())
     return;
   
 //====== Back-to-back angular cuts
-  const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(fEvent, tauData, jetData, METData);
+  const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(fEvent, tauData.getSelectedTau(), jetData, METData);
   if (!backToBackData.passedSelection())
     return;
 

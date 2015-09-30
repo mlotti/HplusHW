@@ -73,20 +73,32 @@ private:
   // Input parameters
   const double fMuonPtCut;
   const double fMuonEtaCut;
+  float fRelIsoCut;
+  bool fVetoMode;
   
   // Event counter for passing selection
   Count cPassedMuonSelection;
   // Sub counters
   Count cSubAll;
+  Count cSubPassedPt;
+  Count cSubPassedEta;
   Count cSubPassedID;
   Count cSubPassedIsolation;
-  Count cSubPassedEta;
-  Count cSubPassedPt;
+  
   // Histograms
   WrappedTH1 *hMuonPtAll;
   WrappedTH1 *hMuonEtaAll;
   WrappedTH1 *hMuonPtPassed;
   WrappedTH1 *hMuonEtaPassed;
+  WrappedTH1 *hPtResolution;
+  WrappedTH1 *hEtaResolution;
+  WrappedTH1 *hPhiResolution;
+  WrappedTH1 *hIsolPtBefore;
+  WrappedTH1 *hIsolEtaBefore;
+  WrappedTH1 *hIsolVtxBefore;
+  WrappedTH1 *hIsolPtAfter;
+  WrappedTH1 *hIsolEtaAfter;
+  WrappedTH1 *hIsolVtxAfter;
 };
 
 #endif

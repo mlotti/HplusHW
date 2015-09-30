@@ -36,7 +36,6 @@ public:
     const std::vector<Electron>& getSelectedElectrons() const { return fSelectedElectrons; }
     const float getHighestSelectedElectronPt() const { return fHighestSelectedElectronPt; }
     const float getHighestSelectedElectronEta() const { return fHighestSelectedElectronEta; }
-    const float getHighestSelectedElectronPtBeforePtCut() const { return fHighestSelectedElectronPtBeforePtCut; }
     // FIXME: Add MC information if deemed necessary
 //     const bool eventContainsElectronFromCJet() const { return fHasElectronFromCjetStatus; }
 //     const bool eventContainsElectronFromBJet() const { return fHasElectronFromBjetStatus; }
@@ -48,7 +47,6 @@ public:
     /// pt and eta of highest pt electron passing the selection
     float fHighestSelectedElectronPt;
     float fHighestSelectedElectronEta;
-    float fHighestSelectedElectronPtBeforePtCut;
     /// MC info about non-isolated electrons
     //bool fHasElectronFromCjetStatus;
     //bool fHasElectronFromBjetStatus;
@@ -73,20 +71,32 @@ private:
   // Input parameters
   const double fElectronPtCut;
   const double fElectronEtaCut;
+  float fRelIsoCut;
+  bool fVetoMode;
   
   // Event counter for passing selection
   Count cPassedElectronSelection;
   // Sub counters
   Count cSubAll;
+  Count cSubPassedPt;
+  Count cSubPassedEta;
   Count cSubPassedID;
   Count cSubPassedIsolation;
-  Count cSubPassedEta;
-  Count cSubPassedPt;
+  
   // Histograms
   WrappedTH1 *hElectronPtAll;
   WrappedTH1 *hElectronEtaAll;
   WrappedTH1 *hElectronPtPassed;
   WrappedTH1 *hElectronEtaPassed;
+  WrappedTH1 *hPtResolution;
+  WrappedTH1 *hEtaResolution;
+  WrappedTH1 *hPhiResolution;
+  WrappedTH1 *hIsolPtBefore;
+  WrappedTH1 *hIsolEtaBefore;
+  WrappedTH1 *hIsolVtxBefore;
+  WrappedTH1 *hIsolPtAfter;
+  WrappedTH1 *hIsolEtaAfter;
+  WrappedTH1 *hIsolVtxAfter;
 };
 
 #endif

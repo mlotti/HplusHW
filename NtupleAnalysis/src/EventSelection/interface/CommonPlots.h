@@ -40,7 +40,12 @@ public:
   void initialize();
   /// Sets factorisation bin (call this for each event before filling the first histogram!)
   void setFactorisationBinForEvent(const std::vector<float>& values=std::vector<float>{}) { fHistoSplitter.setFactorisationBinForEvent(values); }
-
+  
+  /// Returns the histogram splitter object (usecase: QCD measurement)
+  HistoSplitter& getHistoSplitter() { return fHistoSplitter; }
+  /// Returns the histogram settings for MtBins (usecase: QCD measurement)
+  const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
+  
   //===== unique filling methods (to be called inside the event selection routine only, i.e. (before a passing decision is done))
   //void fillControlPlotsAtVetoTauSelection(const Event& event, const VetoTauSelection::Data& tauVetoData);
   void fillControlPlotsAtElectronSelection(const Event& event, const ElectronSelection::Data& data);
@@ -55,13 +60,22 @@ public:
   
   //===== unique filling methods (to be called AFTER return statement from analysis routine)
   void setNvertices(int vtx) { iVertices = vtx; }
-  void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data, bool isFakeTau);
+  void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
   void fillControlPlotsAfterTopologicalSelections(const Event& event);
   void fillControlPlotsAfterAllSelections(const Event& event);
   void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight);
   //void fillControlPlotsAfterAllSelectionsWithFullMass(const Event& event, FullHiggsMassCalculator::Data& data);
 
+  /// Getter for all vertices
+  int nVertices() const { return iVertices; }
+
+private:
+  /// Returns true if common plots is created by QCD measurement
+  const bool isQCDMeasurement() const { return fAnalysisType == kQCDMeasurement ||
+    fAnalysisType == kQCDNormalizationSystematicsControlRegion || 
+    fAnalysisType == kQCDNormalizationSystematicsSignalRegion; }
+  
 private:
   ///===== Config params
   const bool fEnableGenuineTauHistograms;

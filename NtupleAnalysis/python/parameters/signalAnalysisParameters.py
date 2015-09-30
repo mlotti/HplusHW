@@ -7,10 +7,23 @@ histoLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
 
 #====== Trigger
 trg = PSet(
-  # No need to specify version numbers, they are automatically scanned in range 1--100
-  triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120",
-               "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70"],
+  # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
+  triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80",
+               "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_JetIdCleaned",
+               "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120",
+               "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned",
+               #"HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120",
+               #"HLT_LooseIsoPFTau35_Trk20_Prong1_MET70",HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v1
+               ],
   triggerOR2 = [],
+)
+
+#====== MET filter
+metFilter = PSet(
+  # Note: HBHE filter is applied at ttree generation level
+  discriminators = ["CSCTightHaloFilter",
+                    "eeBadScFilter",
+                    "goodVertices"]
 )
 
 #====== Tau selection
@@ -22,7 +35,6 @@ tauSelection = PSet(
         tauLdgTrkPtCut = 10.0,
                 prongs = 13,    # options: 1, 3, 13 (both 1 and 3) or -1 (all)
                   rtau = 0.7,
-    invertTauIsolation = False, # set to true to invert isolation (for QCD measurement)
   againstElectronDiscr = "againstElectronTightMVA5",
       againstMuonDiscr = "againstMuonTight3",
         isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
@@ -32,14 +44,16 @@ tauSelection = PSet(
 eVeto = PSet(
          electronPtCut = 15.0,
         electronEtaCut = 2.5,
-        # FIXME: add electron ID and isolation
+            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
+     electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
 #====== Muon veto
 muVeto = PSet(
              muonPtCut = 10.0,
             muonEtaCut = 2.5,
-        # FIXME: add muon ID and isolation
+                muonID = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
+         muonIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
 #====== Jet selection
@@ -49,8 +63,8 @@ jetSelection = PSet(
      tauMatchingDeltaR = 0.5,
   numberOfJetsCutValue = 3,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
-            jetIDDiscr = "",       # FIXME: does not work -> ttree content
-          jetPUIDDiscr = "PUIDloose",
+            jetIDDiscr = "IDtight", # options: IDloose, IDtight, IDtightLeptonVeto
+          jetPUIDDiscr = "", # does not work at the moment 
 )
  
 #====== Angular cuts / collinear
@@ -118,6 +132,7 @@ commonPlotsOptions = PSet(
 allSelections = PSet(
  histogramAmbientLevel = histoLevel,
                Trigger = trg,
+             METFilter = metFilter,
           TauSelection = tauSelection,
      ElectronSelection = eVeto,
          MuonSelection = muVeto,

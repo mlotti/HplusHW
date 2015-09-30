@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "TTree.h"
 
@@ -38,6 +39,9 @@ class TriggerDumper {
         void book(const edm::Run&,HLTConfigProvider);
 	bool fill(edm::Event&, const edm::EventSetup&);
 	void reset();
+	void triggerMatch(int,std::vector<reco::Candidate::LorentzVector>);
+
+	std::pair<int,int> counters(std::string);
 
     private:
 
@@ -45,14 +49,26 @@ class TriggerDumper {
 	bool useFilter;
 	bool booked;
 
+	bool isCorrectObject(int,std::string);
+
+
 	TTree* theTree;
 
 	bool *iBit; 
+	int  *iCountAll;
+	int  *iCountPassed;
 	edm::ParameterSet inputCollection;
 	edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
         edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trgObjectsToken;
         edm::EDGetTokenT<std::vector<l1extra::L1EtMissParticle>> trgL1ETMToken;
 	std::vector<std::string> triggerBits;
+        std::vector<std::string> selectedTriggers;
+	std::vector<std::string> trgMatchStr;
+    	std::vector<std::string> trgMatchBranches;
+	double trgMatchDr;
+
+	edm::TriggerNames names;
+	edm::Handle<pat::TriggerObjectStandAloneCollection> patTriggerObjects;
 
 	double L1MET_x;
         double L1MET_y;
@@ -63,5 +79,8 @@ class TriggerDumper {
         std::vector<double> HLTTau_eta;
         std::vector<double> HLTTau_phi;
         std::vector<double> HLTTau_e;
+
+        int nTrgDiscriminators;
+        std::vector<bool> *trgdiscriminators;
 };
 #endif

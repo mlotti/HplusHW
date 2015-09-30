@@ -52,6 +52,10 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   std::vector<float> eta;  tree->Branch("Taus_eta", &eta);
   std::vector<float> phi;  tree->Branch("Taus_phi", &phi);
   std::vector<float> e;    tree->Branch("Taus_e", &e);
+  std::vector<float> mcpt;   tree->Branch("Taus_ptMCVisibleTau", &mcpt);
+  std::vector<float> mceta;  tree->Branch("Taus_etaMCVisibleTau", &mceta);
+  std::vector<float> mcphi;  tree->Branch("Taus_phiMCVisibleTau", &mcphi);
+  std::vector<float> mce;    tree->Branch("Taus_eMCVisibleTau", &mce);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
   std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
@@ -78,6 +82,10 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   eta = std::vector<float>{-2.3f, -2.3f, -1.1f, -1.4f,  0.2f,  0.7f, 3.3f,  3.3f};
   phi = std::vector<float>{-2.9f, -0.5f,  1.f,  -2.3f, -1.7f,  0.3f, 0.8f,  1.1f};
   e   = std::vector<float>{50.f,  20.f,  11.f,  50.f,  75.f,  11.f,  13.f, 90.f};
+  mcpt  = std::vector<float>{50.f,  20.f,  11.f,  51.f,  75.f,  11.f,  13.f, 90.f};
+  mceta = std::vector<float>{-2.3f, -2.3f, -1.1f, -1.4f,  0.2f,  0.7f, 3.3f,  3.3f};
+  mcphi = std::vector<float>{-2.9f, -0.5f,  1.f,  -2.3f, -1.7f,  0.3f, 0.8f,  1.1f};
+  mce   = std::vector<float>{50.f,  20.f,  11.f,  50.f,  75.f,  11.f,  13.f, 90.f};
   lTrkPt = std::vector<float>{5.f,  20.f,  11.f,  5.f,  70.f,  11.f,  13.f, 90.f};
   lTrkEta = std::vector<float>{-2.3f, -2.3f, -1.1f, -1.4f, 0.23f, 0.7f, 3.3f, 3.3f};
   nProngs = std::vector<int>{1, 1, 1, 1, 1, 1, 1, 1};
@@ -98,7 +106,7 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   SECTION("Algorithm") {
     mgr.setEntry(0);
     TauSelection::Data tauData = tausel.analyze(event);
-    METSelection::Data metData = metsel.analyze(event, event.NPU().value());
+    METSelection::Data metData = metsel.analyze(event, event.vertexInfo().value());
     REQUIRE( tauData.getSelectedTaus().size() > 0 );
     REQUIRE( metData.passedSelection() == true );
     REQUIRE_NOTHROW( TransverseMass::reconstruct(tauData.getSelectedTau(), metData.getMET()) );
@@ -106,7 +114,7 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
     CHECK( m == Approx(163.119) );
     mgr.setEntry(1);
     tauData = tausel.analyze(event);
-    metData = metsel.analyze(event, event.NPU().value());
+    metData = metsel.analyze(event, event.vertexInfo().value());
     REQUIRE( tauData.getSelectedTaus().size() > 0 );
     REQUIRE( metData.passedSelection() == true );
     REQUIRE_NOTHROW( TransverseMass::reconstruct(tauData.getSelectedTau(), metData.getMET()) );

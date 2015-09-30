@@ -21,7 +21,7 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  std::vector<std::string> getIDDiscriminatorNames() {
+  std::vector<std::string> getIDDiscriminatorNames() const {
     static std::vector<std::string> n = { std::string("mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80"), std::string("mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90")};
     return n;
   }
@@ -47,7 +47,7 @@ public:
   {}
   ~ElectronGenerated() {}
 
-  std::vector<std::function<bool()>> getIDDiscriminatorValues() {
+  std::vector<std::function<bool()>> getIDDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80(); },
       [&](){ return this->mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90(); }

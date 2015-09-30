@@ -331,9 +331,21 @@ void CommonPlots::fillControlPlotsAtAngularCutsBackToBack(const Event& event, co
 }
 
 //===== unique filling methods (to be called AFTER return statement from analysis routine)
-void CommonPlots::fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data, bool isFakeTau) {
-  fTauData = data;
-  bIsFakeTau = isFakeTau;
+void CommonPlots::fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data) {
+  // Code logic: if there is no identified tau (or anti-isolated tau for QCD), the code will for sure crash later
+  // This piece of code is called from TauSelection, so there one cannot judge if things go right or not, 
+  // that kind of check needs to be done in the analysis code (i.e. cut away event if tau selection is not passed)
+  if (isQCDMeasurement()) {
+    if (data.hasAntiIsolatedTaus()) {
+      fTauData = data;
+      bIsFakeTau = !(data.getAntiIsolatedTauIsGenuineTau());
+    }
+  } else {
+    if (data.hasIdentifiedTaus()) {
+      fTauData = data;
+      bIsFakeTau = !(data.isGenuineTau());
+    }
+  }
 }
 
 void CommonPlots::fillControlPlotsAfterMETTriggerScaleFactor(const Event& event) {
@@ -343,15 +355,23 @@ void CommonPlots::fillControlPlotsAfterMETTriggerScaleFactor(const Event& event)
 void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event) {
   // I.e. plots after standard selections
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterStdSelections, bIsFakeTau, iVertices);
-  
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().pt());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().eta());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().phi());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaPhiAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().eta(), fTauData.getSelectedTau().phi());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().lChTrkPt());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().decayModeFinding());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterStdSelections, bIsFakeTau, fTauData.getRtauOfSelectedTau());
-  
+  if (isQCDMeasurement()) {
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterStdSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().pt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterStdSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().eta());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterStdSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().phi());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaPhiAfterStdSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().eta(), fTauData.getAntiIsolatedTau().phi());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterStdSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().lChTrkPt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterStdSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().decayModeFinding());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterStdSelections, bIsFakeTau, fTauData.getRtauOfAntiIsolatedTau());
+  } else {
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().pt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().eta());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().phi());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaPhiAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().eta(), fTauData.getSelectedTau().phi());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().lChTrkPt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().decayModeFinding());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterStdSelections, bIsFakeTau, fTauData.getRtauOfSelectedTau());
+  }
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNJetsAfterStdSelections, bIsFakeTau, fJetData.getNumberOfSelectedJets());
   for (auto& p: fJetData.getSelectedJets()) {
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetPtAfterStdSelections, bIsFakeTau, p.pt());
@@ -362,15 +382,23 @@ void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event)
 
 void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterAllSelections, bIsFakeTau, iVertices);
-  
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().pt());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().eta());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().phi());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaPhiAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().eta(), fTauData.getSelectedTau().phi());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().lChTrkPt());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().decayModeFinding());
-  fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterAllSelections, bIsFakeTau, fTauData.getRtauOfSelectedTau());
-  
+  if (isQCDMeasurement()) {
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterAllSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().pt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterAllSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().eta());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterAllSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().phi());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaPhiAfterAllSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().eta(), fTauData.getAntiIsolatedTau().phi());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterAllSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().lChTrkPt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterAllSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().decayModeFinding());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterAllSelections, bIsFakeTau, fTauData.getRtauOfAntiIsolatedTau());
+  } else {
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().pt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().eta());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().phi());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaPhiAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().eta(), fTauData.getSelectedTau().phi());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauLdgTrkPtAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().lChTrkPt());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().decayModeFinding());
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterAllSelections, bIsFakeTau, fTauData.getRtauOfSelectedTau());
+  }
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNJetsAfterAllSelections, bIsFakeTau, fJetData.getNumberOfSelectedJets());
   for (auto& p: fJetData.getSelectedJets()) {
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetPtAfterAllSelections, bIsFakeTau, p.pt());
@@ -392,13 +420,22 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlBackToBackAngularCutsMinimumAfterAllSelections, bIsFakeTau, fBackToBackAngularCutsData.getMinimumCutValue());
 
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlDeltaPhiTauMetAfterAllSelections, bIsFakeTau, fBackToBackAngularCutsData.getDeltaPhiTauMET());
-  
-  double myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
+  double myTransverseMass = -1.0;
+  if (isQCDMeasurement()) {
+    myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), fMETData.getMET());
+  } else {
+    myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
+  }
   fHistoSplitter.fillShapeHistogramTriplet(hShapeTransverseMass, bIsFakeTau, myTransverseMass);
 }
 
 void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight) {
-  double myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), metData.getMET());
+  double myTransverseMass = -1.0;
+  if (isQCDMeasurement()) {
+    myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), metData.getMET());
+  } else {
+    myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), metData.getMET());
+  }
   fHistoSplitter.fillShapeHistogramTriplet(hShapeProbabilisticBtagTransverseMass, bIsFakeTau, myTransverseMass, btagWeight);
 }
 

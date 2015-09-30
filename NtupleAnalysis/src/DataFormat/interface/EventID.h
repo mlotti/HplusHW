@@ -24,7 +24,7 @@ public:
   unsigned int       lumi()  const { return fLumi->value(); }
   unsigned int       run()   const { return fRun->value(); }
   /// Number of partons generated
-  int NUP() const { return fNUP->value(); }
+  short NUP() const { return fNUP->value(); }
   /// Trigger prescale
   float trgPrescale() const { return fPrescale->value(); }
   

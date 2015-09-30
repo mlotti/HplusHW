@@ -1,4 +1,6 @@
 from WMCore.Configuration import Configuration
+from CRABClient.UserUtilities import getUsernameFromSiteDB
+
 config = Configuration()
 
 config.section_("General")
@@ -21,6 +23,7 @@ config.Data.splitting = 'FileBased'
 #config.Data.totalUnits  = 10
 config.Data.unitsPerJob = 5
 config.Data.publication = False
+config.Data.outLFNDirBase = '/store/user/%s/CRAB3_TransferData' % (getUsernameFromSiteDB())
 
 config.section_("Site")
 config.Site.storageSite = 'T2_FI_HIP'

@@ -59,7 +59,7 @@ class TauLegSkim : public edm::EDFilter {
 TauLegSkim::TauLegSkim(const edm::ParameterSet& iConfig)
 : trgResultsToken(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"))),
   tauToken(consumes<edm::View<pat::Tau>>(iConfig.getParameter<edm::InputTag>("TauCollection"))),
-  muonToken(consumes<edm::View<pat::Muon>>(iConfig.getParameter<edm::InputTag>("TauCollection")))
+  muonToken(consumes<edm::View<pat::Muon>>(iConfig.getParameter<edm::InputTag>("MuonCollection")))
 {
     triggerBits        = iConfig.getParameter<std::vector<std::string> >("HLTPaths");
 

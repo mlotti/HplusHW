@@ -16,12 +16,12 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  std::vector<std::string> getDiscriminatorNames() {
-    static std::vector<std::string> n = { std::string("CSCTightHaloFilter"), std::string("EeBadScFilter"), std::string("GoodVertices") };
+  std::vector<std::string> getDiscriminatorNames() const {
+    static std::vector<std::string> n = { std::string("CSCTightHaloFilter"), std::string("eeBadScFilter"), std::string("goodVertices") };
     return n;
   }
 
-  std::vector<std::function<bool()>> getDiscriminatorValues() {
+  std::vector<std::function<bool()>> getDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->passCSCTightHaloFilter(); },
       [&](){ return this->passEeBadScFilter(); },

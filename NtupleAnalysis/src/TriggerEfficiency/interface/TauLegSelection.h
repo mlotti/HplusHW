@@ -20,6 +20,20 @@ TauLegSelection::~TauLegSelection(){}
 
 bool TauLegSelection::offlineSelection(Event& fEvent){
 
+  boost::optional<Muon> selectedMuon;
+  size_t nmuons = 0;
+  for(Muon muon: fEvent.muons()) {
+    if(!(muon.pt() > 21)) continue;
+    if(!(std::abs(muon.eta()) < 2.1)) continue;
+    //    if(!muon.configurableDiscriminators()) continue;
+
+    //    if(!(muon.isGlobalMuon())) continue;
+
+    nmuons++;
+    if(!selectedMuon || (muon.pt() > selectedMuon->pt()) ) selectedMuon = muon;
+  }
+  if(!selectedMuon) return false;
+
   boost::optional<Tau> selectedTau;
   size_t ntaus = 0;
   for(Tau tau: fEvent.taus()) {
@@ -35,17 +49,6 @@ bool TauLegSelection::offlineSelection(Event& fEvent){
   }
   if(!selectedTau) return false;
   xvariable = selectedTau->pt();
-
-  boost::optional<Muon> selectedMuon;
-  size_t nmuons = 0;
-  for(Muon muon: fEvent.muons()) {
-    if(!(muon.pt() > 15)) continue;
-    if(!(muon.isGlobalMuon())) continue;
-
-    nmuons++;
-    if(!selectedMuon || (muon.pt() > selectedMuon->pt()) ) selectedMuon = muon;
-  }
-  if(!selectedMuon) return false;
 
   double muTauInvMass = (selectedMuon->p4() + selectedTau->p4()).M();
   double muMetMt = sqrt( 2 * selectedMuon->pt() * fEvent.met_Type1().et() * (1-cos(selectedMuon->phi()-fEvent.met_Type1().phi())) );

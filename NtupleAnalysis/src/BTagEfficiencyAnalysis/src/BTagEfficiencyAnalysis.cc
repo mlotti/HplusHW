@@ -40,7 +40,7 @@ private:
   Count cPileupWeighted;
   Count cTopPtReweighted;
   Count cExclusiveSamplesWeighted;
-  Count cMETFilters;
+  METFilterSelection fMETFilterSelection;
   Count cVertexSelection;
   TauSelection fTauSelection;
   ElectronSelection fElectronSelection;
@@ -77,7 +77,8 @@ BTagEfficiencyAnalysis::BTagEfficiencyAnalysis(const ParameterSet& config)
   cPileupWeighted(fEventCounter.addCounter("Weighted events with PU")),
   cTopPtReweighted(fEventCounter.addCounter("Weighted events with top pT")),
   cExclusiveSamplesWeighted(fEventCounter.addCounter("Weighted events for exclusive samples")),
-  cMETFilters(fEventCounter.addCounter("MET filters")),
+  fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"),
+                fEventCounter, fHistoWrapper, nullptr, ""),
   cVertexSelection(fEventCounter.addCounter("Primary vertex selection")),
   fTauSelection(config.getParameter<ParameterSet>("TauSelection"),
                 fEventCounter, fHistoWrapper, nullptr, ""),
@@ -125,7 +126,7 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
 //====== Initialize
   cAllEvents.increment();
 
-//====== Apply trigger // FIXME to be debugged
+//====== Apply trigger
   if (!(fEvent.passTriggerDecision()))
     return;
   cTrigger.increment();
@@ -143,20 +144,20 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
 //====== Combining of W+jets and Z+jets inclusive and exclusive samples // FIXME missing code
   cExclusiveSamplesWeighted.increment();
   
-//====== MET filters to remove events with spurious sources of fake MET // FIXME missing code
-  cMETFilters.increment();
+//====== MET filters to remove events with spurious sources of fake MET
+  const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
+  if (!metFilterData.passedSelection())
+    return;
   
 //====== GenParticle analysis
   // if needed
   
 //====== Check that primary vertex exists
-  int nVertices = fEvent.NPU().value();
+  int nVertices = fEvent.vertexInfo().value();
   if (nVertices < 1)
     return;
   cVertexSelection.increment();
   
-//====== Setup common events // FIXME missing code
-    
 //====== Tau selection
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
   if (!tauData.hasIdentifiedTaus())
@@ -173,13 +174,13 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
     return;
 
 //====== Jet selection
-  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData);
+  const JetSelection::Data jetData = fJetSelection.analyze(fEvent, tauData.getSelectedTau());
   if (!jetData.passedSelection())
     return;
 
 //====== Collinear angular cuts
   /*const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
-  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData, jetData, silentMETData);
+  const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
   if (!collinearData.passedSelection())
     return;
   */
