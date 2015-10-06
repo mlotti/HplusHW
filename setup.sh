@@ -9,7 +9,7 @@
 
 if [ "x$HIGGSANALYSIS_BASE" != "x" ]; then
     echo "Standalone environment already loaded"
-    #return
+    return
 fi
 
 LOCATION=""
