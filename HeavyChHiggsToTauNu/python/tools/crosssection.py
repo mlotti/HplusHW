@@ -52,37 +52,62 @@ class CrossSectionList:
 # [12] https://twiki.cern.ch/twiki/bin/view/CMS/TmdRecipes
 # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
 # [14] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV / GenXSecAnalyzer
+# [15] McM, more precisely https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get/BTV-RunIIWinter15GS-00033
 
 backgroundCrossSections = CrossSectionList(
-    CrossSection("QCD_Pt30to50", {
+    CrossSection("QCD_Pt_30to50", {
             "7": 5.312e+07, # [2]
             "8": 6.6285328e7, # [1]
             "13": 161500000., # [12]
             }),
-    CrossSection("QCD_Pt50to80", {
+    CrossSection("QCD_Pt_50to80", {
             "7": 6.359e+06, # [2]
             "8": 8148778.0, # [1]
             "13": 22110000., # [12]
             }),
-    CrossSection("QCD_Pt80to120", {
+    CrossSection("QCD_Pt_80to120", {
             "7": 7.843e+05, # [2]
             "8": 1033680.0, # [1]
             "13": 3000114.3, # [12]
             }),
-    CrossSection("QCD_Pt120to170", {
+    CrossSection("QCD_Pt_120to170", {
             "7": 1.151e+05, # [2]
             "8": 156293.3, # [1]
-            "13": 493200., # [12]
+            "13": 493200., # [12] # McM: 471100
             }),
-    CrossSection("QCD_Pt170to300", {
+    CrossSection("QCD_Pt_170to300", {
             "7": 2.426e+04, # [2]
             "8": 34138.15, # [1]
             "13": 120300., # [12]
             }),
-    CrossSection("QCD_Pt300to470", {
+    CrossSection("QCD_Pt_300to470", {
             "7": 1.168e+03, # [2]
             "8": 1759.549, # [1]
-            "13": 7475. , # [12]
+            "13": 7475., # [12]
+            }),
+    CrossSection("QCD_Pt_470to600", {
+            "13": 587.1, # [12]
+            }),
+    CrossSection("QCD_Pt_600to800", {
+            "13": 167., # [12]
+            }),
+    CrossSection("QCD_Pt_800to1000", {
+            "13": 28.25, # [12]
+            }),
+    CrossSection("QCD_Pt_1000to1400", {
+            "13": 8.195, # [12]
+            }),
+    CrossSection("QCD_Pt_1400to1800", {
+            "13": 0.7346, # [12] # McM: 0.84265
+            }),
+    CrossSection("QCD_Pt_1800to2400", {
+            "13": 0.1091, # [12] # McM: 0.114943
+            }),
+    CrossSection("QCD_Pt_2400to3200", {
+            "13": 0.00682981, # [15]
+            }),
+    CrossSection("QCD_Pt_3200toInf", {
+            "13": 0.000165445 , # [15]
             }),
     CrossSection("QCD_Pt20_MuEnriched", {
             "7": 296600000.*0.0002855, # [2]
