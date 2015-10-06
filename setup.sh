@@ -9,7 +9,7 @@
 
 if [ "x$HIGGSANALYSIS_BASE" != "x" ]; then
     echo "Standalone environment already loaded"
-    return
+    #return
 fi
 
 LOCATION=""
@@ -92,6 +92,17 @@ else
     for DIR in NtupleAnalysis HeavyChHiggsToTauNu; do
         if [ ! -e .python/HiggsAnalysis/$DIR ]; then
             ln -s $HIGGSANALYSIS_BASE/$DIR/python .python/HiggsAnalysis/$DIR
+            touch .python/HiggsAnalysis/$DIR/__init__.py
+            for d in .python/HiggsAnalysis/$DIR/*; do
+                if [ -d $d ]; then
+                    touch $d/__init__.py
+                fi
+            done
+        fi
+    done
+    for DIR in `ls NtupleAnalysis/src` ; do
+        if [ ! -e .python/HiggsAnalysis/$DIR -a -e $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python ]; then
+            ln -s $HIGGSANALYSIS_BASE//NtupleAnalysis/src/$DIR/python .python/HiggsAnalysis/$DIR
             touch .python/HiggsAnalysis/$DIR/__init__.py
             for d in .python/HiggsAnalysis/$DIR/*; do
                 if [ -d $d ]; then
