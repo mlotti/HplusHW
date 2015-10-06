@@ -58,3 +58,14 @@ void BaseDumper::reset(){
       }
     }
 }
+
+std::vector<reco::Candidate::LorentzVector> BaseDumper::selected(){
+    std::vector<reco::Candidate::LorentzVector> dumpObjects;
+    for(size_t ic = 0; ic < inputCollections.size(); ++ic){
+      for(size_t i = 0; i < pt[ic].size(); ++i){
+	reco::Candidate::LorentzVector p4(reco::Candidate::PolarLorentzVector(pt[ic][i],eta[ic][i],phi[ic][i],e[ic][i]));
+	dumpObjects.push_back(p4);
+      }
+    }
+    return dumpObjects;
+}

@@ -38,7 +38,7 @@ public:
     const Tau& getSelectedTau() const;
     const std::vector<Tau>& getSelectedTaus() const { return fSelectedTaus; }
     const float getRtauOfSelectedTau() const { return fRtau; }
-    const bool isGenuineTau() const { return getSelectedTau().isGenuineTau(); }
+    const bool isGenuineTau() const { return fIsGenuineTau; }
     const size_t getFakeTauID() const { return getSelectedTau().pdgId(); } // For codes see MiniAOD2TTree/interface/NtupleAnalysis_fwd.h
     
     // Getters for anti-isolated taus (i.e. passed other cuts but not isolation)
@@ -47,7 +47,7 @@ public:
     const std::vector<Tau>& getAntiIsolatedTaus() const { return fAntiIsolatedTaus; }
     const Tau& getAntiIsolatedTau() const;
     const float getRtauOfAntiIsolatedTau() const { return fRtauAntiIsolatedTau; }
-    const bool getAntiIsolatedTauIsGenuineTau() const { return getAntiIsolatedTau().isGenuineTau(); }
+    const bool getAntiIsolatedTauIsGenuineTau() const { return fIsGenuineTauAntiIsolatedTau; }
     const size_t getAntiIsolatedFakeTauID() const { return getAntiIsolatedTau().pdgId(); } // For codes see MiniAOD2TTree/interface/NtupleAnalysis_fwd.h
     
     friend class TauSelection;
@@ -57,10 +57,14 @@ public:
     std::vector<Tau> fSelectedTaus;
     /// Cache Rtau value to save time
     float fRtau;
+    /// Cache genuine tau status for selected tau (to avoid crashes for data)
+    bool fIsGenuineTau;
     /// Anti-isolated tau collection after pasisng all selections but not passing isolation
     std::vector<Tau> fAntiIsolatedTaus;
     /// Cache Rtau value to save time
     float fRtauAntiIsolatedTau;
+    /// Cache anti-isolated tau genuine tau status for selected tau (to avoid crashes for data)
+    bool fIsGenuineTauAntiIsolatedTau;
   };
   
   // Main class

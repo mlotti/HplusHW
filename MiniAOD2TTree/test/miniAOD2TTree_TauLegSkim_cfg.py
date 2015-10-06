@@ -84,6 +84,14 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
+	TriggerMatch = cms.untracked.vstring(
+	    "LooseIsoPFTau50_Trk30_eta2p1",
+	    "LooseIsoPFTau20",
+            "MediumIsoPFTau40_Trk1_eta2p1_Reg",
+	    "IsoMu16_eta2p1",
+            "IsoMu17_eta2p1",
+            "IsoMu20_eta2p1"
+	),
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = cms.PSet(

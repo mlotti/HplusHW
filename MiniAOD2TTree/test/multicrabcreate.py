@@ -15,7 +15,7 @@ import datetime
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
 PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
 
-lumiMask25ns = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-255031_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt"
+lumiMask25ns = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns_JSON.txt"
 lumiMask50ns = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-255031_13TeV_PromptReco_Collisions15_50ns_JSON_v2.txt"
 
 class Dataset :
@@ -32,14 +32,15 @@ class Dataset :
 
 
 datasetsTauData = []
-#datasetsTauData.append(Dataset('/Tau/Run2015B-05Aug2015-v1/MINIAOD',dataVersion="74Xdata"))
-datasetsTauData.append(Dataset('/Tau/Run2015C-PromptReco-v1/MINIAOD',dataVersion="74Xdata"))
+#datasetsTauData.append(Dataset('/Tau/Run2015B-23Sep2015-v1/MINIAOD',dataVersion="74Xdata"))
+datasetsTauData.append(Dataset('/Tau/Run2015C-23Sep2015-v1/MINIAOD',dataVersion="74Xdata"))
+datasetsTauData.append(Dataset('/Tau/Run2015D-PromptReco-v3/MINIAOD',dataVersion="74Xdata"))
 
 datasetsMuonData = []
 #datasetsMuonData.append(Dataset('/SingleMuon/Run2015B-05Aug2015-v1/MINIAOD',dataVersion="74Xdata"))
 datasetsMuonData.append(Dataset('/SingleMuon/Run2015C-PromptReco-v1/MINIAOD',dataVersion="74Xdata",lumiMask=lumiMask50ns))
 datasetsMuonData.append(Dataset('/SingleMuon/Run2015C-PromptReco-v1/MINIAOD',dataVersion="74Xdata",lumiMask=lumiMask25ns))
-#datasetsMuonData.append(Dataset('/SingleMuon/Run2015D-PromptReco-v3/MINIAOD',dataVersion="74Xdata",lumiMask=lumiMask25ns))
+datasetsMuonData.append(Dataset('/SingleMuon/Run2015D-PromptReco-v3/MINIAOD',dataVersion="74Xdata",lumiMask=lumiMask25ns))
 
 datasets25ns = []
 datasets25ns.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
@@ -104,6 +105,7 @@ datasets25nsTau.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/R
 
 datasets25nsSignal = []
 datasets25nsSignal.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-500_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
+datasets25nsSignal.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-400_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25nsSignal.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-350_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25nsSignal.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-300_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25nsSignal.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-250_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
@@ -114,6 +116,7 @@ datasets25nsSignal.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-160
 datasets25nsSignal.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-155_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25nsSignal.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-150_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM')) 
 datasets25nsSignal.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-140_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
+datasets25nsSignal.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-120_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25nsSignal.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-100_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25nsSignal.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-90_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
 datasets25nsSignal.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-80_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
@@ -204,7 +207,8 @@ crab_splitunits_re = re.compile("config.Data.unitsPerJob")
 crab_dbs_re = re.compile("config.Data.inputDBS")
 tune_re = re.compile("(?P<name>\S+)_Tune")
 tev_re = re.compile("(?P<name>\S+)_13TeV")
-rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15_(?P<BunchSpacing>\d+ns)_JSON_v")
+rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON")
+#rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15_(?P<BunchSpacing>\d+ns)_JSON_v")
 
 for dataset in datasets:
     match = mcdataset_re.search(dataset.URL)
@@ -229,7 +233,7 @@ for dataset in datasets:
 		rr = runrangeMatch.group("RunRange")
 		rr = rr.replace("-","_")
 		bs = runrangeMatch.group("BunchSpacing")
-		rName += "_"+rr+"_"+bs
+		rName += "_"+rr+bs
 #            s = (dataset.URL).split("/")
 #            rName = s[1]+"_"+(s[2].split("-")[0].split("_")[0])
 

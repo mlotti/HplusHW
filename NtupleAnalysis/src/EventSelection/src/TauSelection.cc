@@ -15,7 +15,9 @@
 
 TauSelection::Data::Data() 
 : fRtau(-1.0),
-  fRtauAntiIsolatedTau(-1.0)
+  fIsGenuineTau(false),
+  fRtauAntiIsolatedTau(-1.0),
+  fIsGenuineTauAntiIsolatedTau(false)
 { }
 
 TauSelection::Data::~Data() { }
@@ -208,9 +210,15 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   // Fill data object
   if (output.fSelectedTaus.size()) {
     output.fRtau = output.getSelectedTau().rtau();
+    if (event.isMC()) {
+      output.fIsGenuineTau = output.getSelectedTau().isGenuineTau();
+    }
   }
   if (output.fAntiIsolatedTaus.size()) {
     output.fRtauAntiIsolatedTau = output.getAntiIsolatedTau().rtau();
+    if (event.isMC()) {
+      output.fIsGenuineTauAntiIsolatedTau = output.getAntiIsolatedTau().isGenuineTau();
+    }
   }
 
   // Fill counters
