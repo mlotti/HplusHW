@@ -28,6 +28,8 @@ class BaseDumper {
 	bool fill(edm::Event&, const edm::EventSetup&);
 	void reset();
 
+	std::vector<reco::Candidate::LorentzVector> selected();
+
     protected:
 	bool filter();
         bool useFilter;
