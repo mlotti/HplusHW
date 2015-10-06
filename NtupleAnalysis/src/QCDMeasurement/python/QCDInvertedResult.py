@@ -7,8 +7,8 @@
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount as extendedCount
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation as errorPropagation
-import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference as systematicsForMetShapeDifference
-import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount as dataDrivenQCDCount
+import QCDMeasurement.systematicsForMetShapeDifference as systematicsForMetShapeDifference
+import QCDMeasurement.dataDrivenQCDCount as dataDrivenQCDCount
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 import math

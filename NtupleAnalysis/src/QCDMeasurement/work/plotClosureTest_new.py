@@ -16,7 +16,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
+from QCDMeasurement.dataDrivenQCDCount import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult as qcdInvertedResult
 
 myCMSText = "CMS Preliminary"

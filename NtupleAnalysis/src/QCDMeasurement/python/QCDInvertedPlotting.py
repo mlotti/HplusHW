@@ -14,10 +14,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference import *
+from QCDMeasurement.systematicsForMetShapeDifference import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult import *
+from QCDMeasurement.dataDrivenQCDCount import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.QCDInvertedResult import *
 
 
 class QCDInvertedPlotBase:

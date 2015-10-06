@@ -30,7 +30,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.bayes import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.myArrays import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
+from QCDMeasurement.dataDrivenQCDCount import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *
 from InvertedTauID import *
 

@@ -4,7 +4,7 @@
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from math import sqrt
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.dataDrivenQCDCount import *
+from QCDMeasurement.dataDrivenQCDCount import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation import errorPropagationForDivision
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
