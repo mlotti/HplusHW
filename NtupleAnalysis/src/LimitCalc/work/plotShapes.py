@@ -10,14 +10,14 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolsdataset as dataset
 import LimitCalcDatacardReader as DatacardReader
 import LimitCalc.CommonLimitTools as limitTools
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import NtupleAnalysis.toolsaux as aux
+import NtupleAnalysis.toolsstyles as styles
 
 # Height settings for the all-in-one ratio plot
 _cHeaderHeight = 40

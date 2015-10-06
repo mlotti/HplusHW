@@ -4,7 +4,7 @@ import sys
 import os
 import re
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute
+from NtupleAnalysis.toolsaux import execute
 
 # class to identify multicrab dirs from a given directory. Identifies separately the signal, ewk
 # QCDfact and QCDinv dirs. If multiple directories are found, the latest is taken.

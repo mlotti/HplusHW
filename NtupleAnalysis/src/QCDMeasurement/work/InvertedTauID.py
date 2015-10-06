@@ -20,13 +20,13 @@ import datetime
 
 import array
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+import NtupleAnalysis.toolsdataset as dataset
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolscounter as counter
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsstyles as styles
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolscrosssection as xsect
 
 analysis = "signalAnalysisInvertedTau"
 #analysis = "signalAnalysis"

@@ -5,10 +5,10 @@ import sys
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsstyles as styles
+import NtupleAnalysis.toolsplots as plots
 import LimitCalc.limit as limit
 
 tanbMax = 60

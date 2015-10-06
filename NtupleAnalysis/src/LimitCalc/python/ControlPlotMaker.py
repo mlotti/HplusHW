@@ -2,15 +2,15 @@
 # Classes for making control plots (surprise, surprise ...)
 
 from LimitCalcDatacardColumn import DatacardColumn
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count,RootHistoWithUncertainties
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import NtupleAnalysis.toolsShellStyles as ShellStyles
+from NtupleAnalysis.toolsdataset import Count,RootHistoWithUncertainties
+import NtupleAnalysis.toolsaux as aux
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolscounter as counter
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsstyles as styles
 
 from math import pow,sqrt,log10
 import os

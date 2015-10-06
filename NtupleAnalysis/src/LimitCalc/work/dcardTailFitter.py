@@ -8,7 +8,7 @@ import math
 from optparse import OptionParser
 import array
 #from collections import OrderedDict
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.OrderedDict import *
+from NtupleAnalysis.toolsOrderedDict import *
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -18,13 +18,13 @@ import LimitCalcTailFitter as TailFitter
 import LimitCalcTableProducer as TableProducer
 import LimitCalcControlPlotMaker as ControlPlotMaker
 import LimitCalc.CommonLimitTools as limitTools
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import RootHistoWithUncertainties
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import NtupleAnalysis.toolsaux as aux
+from NtupleAnalysis.toolsdataset import RootHistoWithUncertainties
+from NtupleAnalysis.toolsShellStyles import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference as systematicsForMetShapeDifference
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolstdrstyle as tdrstyle
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True

@@ -5,7 +5,7 @@ import sys
 from optparse import OptionParser
 
 import LimitCalcDatacardReader as DatacardReader
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+from NtupleAnalysis.toolsShellStyles import *
 
 
 def findDirList(directory):

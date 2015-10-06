@@ -6,11 +6,11 @@ import sys
 import inspect
 import math
 import array
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import WarningLabel,HighlightStyle,NormalStyle
+import NtupleAnalysis.toolsaux as aux
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+from NtupleAnalysis.toolsShellStyles import WarningLabel,HighlightStyle,NormalStyle
 
 #_fitOptions = "RMS"
 _fitOptions = "WL R B S"

@@ -12,11 +12,11 @@ import array
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.statisticalFunctions as statisticalFunctions
+import NtupleAnalysis.toolsstatisticalFunctions as statisticalFunctions
 import LimitCalc.BRdataInterface as BRdataInterface
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolsaux as aux
 
 ## Flag for stating if the plots are for paper (True) or not (False)
 #forPaper = False

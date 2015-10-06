@@ -16,11 +16,11 @@ import re
 import ROOT
 import sys
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import NtupleAnalysis.toolsdataset as dataset
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsstyles as styles
 
 ROOT.gROOT.SetBatch(True)
 

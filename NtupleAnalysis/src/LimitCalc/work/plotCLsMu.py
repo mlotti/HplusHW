@@ -7,10 +7,10 @@ import glob
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolsstyles as styles
 import LimitCalc.limit as limit
 
 name_re = re.compile("plot_m(?P<mass>\d+)_(?P<name>[^.]+)\.root")

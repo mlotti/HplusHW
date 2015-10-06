@@ -5,11 +5,11 @@ import sys
 import array
 from optparse import OptionParser
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+import NtupleAnalysis.toolsdataset as dataset
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsstyles as styles
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolshistograms as histograms
 
 import ROOT
 ROOT.gROOT.SetBatch(True)

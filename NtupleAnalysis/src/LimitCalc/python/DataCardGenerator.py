@@ -5,21 +5,21 @@ import sys
 import cProfile
 import json
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import NtupleAnalysis.toolsdataset as dataset
+import NtupleAnalysis.toolscounter as counter
+import NtupleAnalysis.toolsplots as plots
 
 import LimitCalcDatacardColumn as DatacardColumn
 import LimitCalcExtractor as Extractor
 import LimitCalcTableProducer as TableProducer
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as consistencyCheck
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
+import NtupleAnalysis.toolsShellStyles as ShellStyles
+import NtupleAnalysis.toolsmulticrabConsistencyCheck as consistencyCheck
+from NtupleAnalysis.toolssystematics import ScalarUncertaintyItem
 
 import LimitCalcMulticrabPathFinder as PathFinder
 
 import ROOT
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import NtupleAnalysis.toolsaux as aux
 
 # main class for generating the datacards from a given cfg file
 

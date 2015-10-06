@@ -3,7 +3,7 @@
 import sys
 import os
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import sort
+from NtupleAnalysis.toolsaux import sort
 
 # data structures for the config file information
 

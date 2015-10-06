@@ -6,10 +6,10 @@
 from LimitCalcExtractor import ExtractorBase
 from LimitCalcDatacardColumn import DatacardColumn
 from LimitCalcControlPlotMaker import ControlPlotMaker
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
+from NtupleAnalysis.toolssystematics import ScalarUncertaintyItem
+import NtupleAnalysis.toolsShellStyles as ShellStyles
+import NtupleAnalysis.toolsaux as aux
+import NtupleAnalysis.toolsgit as git
 
 from math import pow,sqrt
 import os

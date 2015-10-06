@@ -1,4 +1,4 @@
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
+import NtupleAnalysis.toolssystematics as systematics
 
 DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-01-29-noMetSF-withL1ETMfix"#2014-01-29-noMetSF-withL1ETMfix"

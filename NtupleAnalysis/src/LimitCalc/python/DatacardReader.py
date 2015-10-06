@@ -1,7 +1,7 @@
-#import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
+#import NtupleAnalysis.toolstdrstyle as tdrstyle
 #import LimitCalc.CommonLimitTools as limitTools
-#import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
-#import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
+#import NtupleAnalysis.toolsaux as aux
+#import NtupleAnalysis.toolsShellStyles as ShellStyles
 
 import os
 import math

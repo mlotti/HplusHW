@@ -17,16 +17,16 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetPalette(1)
 from array import array
 from math import fabs
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.FindFirstBinAbove import * 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.bayes import * 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.myArrays import *
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+import NtupleAnalysis.toolsdataset as dataset
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolscounter as counter
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsstyles as styles
+from NtupleAnalysis.toolsFindFirstBinAbove import * 
+from NtupleAnalysis.toolsbayes import * 
+from NtupleAnalysis.toolsmyArrays import *
+import NtupleAnalysis.toolscrosssection as xsect
 from InvertedTauID import *
 
 

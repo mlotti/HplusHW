@@ -7,7 +7,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 import LimitCalc.CombineTools as CombineTools
 import LimitCalc.CommonLimitTools as commonLimitTools
 import LimitCalc.tanbetaTools as tbtools
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
+import NtupleAnalysis.toolstdrstyle as tdrstyle
 
 import os
 import sys

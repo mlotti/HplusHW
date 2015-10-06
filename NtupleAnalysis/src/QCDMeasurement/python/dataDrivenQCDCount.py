@@ -1,12 +1,12 @@
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.splittedHistoReader as splittedHistoReader
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier as ShapeHistoModifier
+import NtupleAnalysis.toolsShellStyles as ShellStyles
+import NtupleAnalysis.toolssplittedHistoReader as splittedHistoReader
+import NtupleAnalysis.toolsShapeHistoModifier as ShapeHistoModifier
 from math import sqrt
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation as errorPropagation
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount import ExtendedCount
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+from NtupleAnalysis.toolsdataset import Count
+import NtupleAnalysis.toolshistogramsExtras as histogramsExtras
+import NtupleAnalysis.toolserrorPropagation as errorPropagation
+from NtupleAnalysis.toolsextendedCount import ExtendedCount
+import NtupleAnalysis.toolsaux as aux
 import array
 
 import ROOT

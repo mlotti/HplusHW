@@ -14,12 +14,12 @@ import tarfile
 import cProfile
 
 import LimitCalcMulticrabPathFinder as PathFinder
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector as analysisModuleSelector
+import NtupleAnalysis.toolsanalysisModuleSelector as analysisModuleSelector
 import LimitCalcDataCardGenerator as DataCard
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import NtupleAnalysis.toolsdataset as dataset
+from NtupleAnalysis.toolsaux import load_module
+from NtupleAnalysis.toolsShellStyles import *
+import NtupleAnalysis.toolsmulticrab as multicrab
 
 def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
     if enabledStatus:

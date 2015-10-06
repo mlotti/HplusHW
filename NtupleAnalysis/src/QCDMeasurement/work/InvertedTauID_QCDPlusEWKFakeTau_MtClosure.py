@@ -12,15 +12,15 @@ import re
 import array
 import datetime
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
+import NtupleAnalysis.toolsdataset as dataset
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolscounter as counter
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsstyles as styles
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolscrosssection as xsect
+import NtupleAnalysis.toolssystematics as systematics
+from NtupleAnalysis.toolsShellStyles import *
 
 #dataEra = "Run2011AB"
 dataEra = "Run2012ABCD"

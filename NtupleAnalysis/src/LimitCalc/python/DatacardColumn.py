@@ -5,13 +5,13 @@
 import os
 import sys
 import ROOT
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import NtupleAnalysis.toolsdataset as dataset
 from LimitCalcMulticrabPathFinder import MulticrabDirectoryDataType
 from LimitCalcExtractor import ExtractorMode,CounterExtractor,ShapeExtractor,QCDShapeVariationExtractor,ConstantExtractor,ShapeVariationFromJsonExtractor,ShapeVariationToConstantExtractor
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramExtras
+from NtupleAnalysis.toolssystematics import ScalarUncertaintyItem,getBinningForPlot
+import NtupleAnalysis.toolsShellStyles as ShellStyles
+import NtupleAnalysis.toolsaux as aux
+import NtupleAnalysis.toolshistogramsExtras as histogramExtras
 import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference as systematicsForMetShapeDifference
 from math import sqrt,pow
 from array import array

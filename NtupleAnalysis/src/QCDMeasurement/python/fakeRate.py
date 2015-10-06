@@ -2,13 +2,13 @@
 # Module for calculating final Fake tau fake rates (doing the wighting of QCD and EWK+tt fake tau fake rates)
 # Authors: EP
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.extendedCount as extendedCount
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.errorPropagation as errorPropagation
+import NtupleAnalysis.toolsShellStyles as ShellStyles
+import NtupleAnalysis.toolsextendedCount as extendedCount
+import NtupleAnalysis.toolserrorPropagation as errorPropagation
 import QCDMeasurement.systematicsForMetShapeDifference as systematicsForMetShapeDifference
 import QCDMeasurement.dataDrivenQCDCount as dataDrivenQCDCount
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
+import NtupleAnalysis.toolsaux as aux
+import NtupleAnalysis.toolssystematics as systematics
 import math
 import ROOT
 import re

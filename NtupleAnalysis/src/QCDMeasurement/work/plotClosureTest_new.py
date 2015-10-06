@@ -9,13 +9,13 @@ import os
 import array
 from optparse import OptionParser
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector import *
+import NtupleAnalysis.toolsdataset as dataset
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsstyles as styles
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolssystematics as systematics
+from NtupleAnalysis.toolsanalysisModuleSelector import *
 from QCDMeasurement.dataDrivenQCDCount import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult as qcdInvertedResult
 

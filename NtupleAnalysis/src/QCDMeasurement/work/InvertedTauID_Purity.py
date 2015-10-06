@@ -55,10 +55,10 @@ HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackCuts/SelectedTau_pT_BackToB
 
 
 import ROOT
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import NtupleAnalysis.toolsdataset as dataset
+import NtupleAnalysis.toolshistograms as histograms
+import NtupleAnalysis.toolstdrstyle as tdrstyle
+import NtupleAnalysis.toolsplots as plots
 
 from QCDInvertedNormalizationFactors import *
 

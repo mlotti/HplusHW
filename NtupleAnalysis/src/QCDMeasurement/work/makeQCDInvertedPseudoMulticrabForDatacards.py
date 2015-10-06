@@ -10,12 +10,12 @@ import time
 from optparse import OptionParser
 import cProfile
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector as analysisModuleSelector
+import NtupleAnalysis.toolsdataset as dataset
+import NtupleAnalysis.toolsplots as plots
+import NtupleAnalysis.toolsanalysisModuleSelector as analysisModuleSelector
 import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult as qcdInvertedResult
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pseudoMultiCrabCreator as pseudoMultiCrabCreator
+import NtupleAnalysis.toolsShellStyles as ShellStyles
+import NtupleAnalysis.toolspseudoMultiCrabCreator as pseudoMultiCrabCreator
 
 #myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
 myNormalizationFactorSource = "QCDPlusEWKFakeTauNormalizationFactors.py" 
