@@ -13,7 +13,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.statisticalFunctions as statisticalFunctions
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.BRdataInterface as BRdataInterface
+import LimitCalc.BRdataInterface as BRdataInterface
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux

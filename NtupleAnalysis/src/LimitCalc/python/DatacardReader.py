@@ -1,5 +1,5 @@
 #import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-#import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
+#import LimitCalc.CommonLimitTools as limitTools
 #import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 #import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 

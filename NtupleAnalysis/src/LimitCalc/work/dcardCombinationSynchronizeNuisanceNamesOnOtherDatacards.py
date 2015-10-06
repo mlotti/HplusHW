@@ -8,7 +8,7 @@
 import os
 import sys
 
-#import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
+#import LimitCalc.CommonLimitTools as limitTools
 import LimitCalcDatacardReader as DatacardReader
 
 # Common naming, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG/HiggsCombinationConventions

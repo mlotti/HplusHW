@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
+import LimitCalc.LandSTools as lands
 
 def main(opts):
     massPoints = ["160"]

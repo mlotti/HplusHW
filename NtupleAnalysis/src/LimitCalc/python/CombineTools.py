@@ -13,7 +13,7 @@
 # easily. Since the amount of information in the result file is
 # relatively small, the performance penalty should be negligible.
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
+import LimitCalc.CommonLimitTools as commonLimitTools
 
 
 import os

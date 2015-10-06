@@ -17,7 +17,7 @@ ROOT.gROOT.SetBatch(True) # no flashing canvases
 import LimitCalcTailFitter as TailFitter
 import LimitCalcTableProducer as TableProducer
 import LimitCalcControlPlotMaker as ControlPlotMaker
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
+import LimitCalc.CommonLimitTools as limitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import RootHistoWithUncertainties
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *

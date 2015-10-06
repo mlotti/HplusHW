@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CombineTools as combine
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
+import LimitCalc.LandSTools as lands
+import LimitCalc.CombineTools as combine
+import LimitCalc.CommonLimitTools as commonLimitTools
 
 lepType = True
 lhcType = True

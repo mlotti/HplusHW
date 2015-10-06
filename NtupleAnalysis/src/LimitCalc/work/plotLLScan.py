@@ -12,7 +12,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.limit as limit
+import LimitCalc.limit as limit
 
 # Example combine command
 # combine -M MultiDimFit -n <name> -m <mass> -d workspaceM100.root  --algo=grid --points=10000
