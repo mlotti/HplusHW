@@ -25,8 +25,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent){
   for(Muon muon: fEvent.muons()) {
     if(!(muon.pt() > 21)) continue;
     if(!(std::abs(muon.eta()) < 2.1)) continue;
-    //    if(!muon.configurableDiscriminators()) continue;
-
+    if(!muon.configurableDiscriminators()) continue;
     //    if(!(muon.isGlobalMuon())) continue;
 
     nmuons++;
@@ -39,7 +38,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent){
   for(Tau tau: fEvent.taus()) {
     if(!(tau.pt() > 20)) continue;
     if(!(std::abs(tau.eta()) < 2.1)) continue;
-    if(!(tau.lChTrkPt() > 20)) continue;
+    //    if(!(tau.lChTrkPt() > 20)) continue;
     if(!(tau.nProngs() == 1)) continue;
     if(!tau.decayModeFinding()) continue;
     if(!tau.configurableDiscriminators()) continue;
