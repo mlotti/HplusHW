@@ -13,9 +13,9 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 import tarfile
 import cProfile
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
+import LimitCalcMulticrabPathFinder as PathFinder
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.analysisModuleSelector as analysisModuleSelector
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DataCardGenerator as DataCard
+import LimitCalcDataCardGenerator as DataCard
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import load_module
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
@@ -177,7 +177,7 @@ def main(opts, moduleSelector, multipleDirs):
                         if myHeavyStatus:
                             print "Doing tail fit ..."
                             os.chdir(myDir)
-                            os.system("../tailFitter.py -x ../tailFitSettings.py")
+                            os.system("../dcardTailFitter.py -x ../dcardTailFitSettings.py")
                             os.chdir("..")
     print "\nDatacard generator is done."
     myEndTime = time.time()

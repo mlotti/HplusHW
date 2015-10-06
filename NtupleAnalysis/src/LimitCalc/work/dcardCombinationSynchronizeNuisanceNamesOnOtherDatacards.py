@@ -9,7 +9,7 @@ import os
 import sys
 
 #import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as DatacardReader
+import LimitCalcDatacardReader as DatacardReader
 
 # Common naming, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG/HiggsCombinationConventions
 _CommonNuisanceReplaces = {}

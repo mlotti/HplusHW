@@ -3,9 +3,9 @@
 #
 #
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorBase
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker import ControlPlotMaker
+from LimitCalcExtractor import ExtractorBase
+from LimitCalcDatacardColumn import DatacardColumn
+from LimitCalcControlPlotMaker import ControlPlotMaker
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux

@@ -3,7 +3,7 @@
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CombineTools as combine
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as DatacardReader
+import LimitCalcDatacardReader as DatacardReader
 
 import os
 

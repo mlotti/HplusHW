@@ -14,7 +14,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as DatacardReader
+import LimitCalcDatacardReader as DatacardReader
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles

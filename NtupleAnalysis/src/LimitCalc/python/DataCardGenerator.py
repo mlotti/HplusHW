@@ -9,14 +9,14 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn as DatacardColumn
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor as Extractor
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer as TableProducer
+import LimitCalcDatacardColumn as DatacardColumn
+import LimitCalcExtractor as Extractor
+import LimitCalcTableProducer as TableProducer
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabConsistencyCheck as consistencyCheck
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics import ScalarUncertaintyItem
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder as PathFinder
+import LimitCalcMulticrabPathFinder as PathFinder
 
 import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux

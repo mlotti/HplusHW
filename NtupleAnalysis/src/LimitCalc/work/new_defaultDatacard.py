@@ -135,7 +135,7 @@ DataCardName += "_"+OptionMassShape.replace("TransverseMass","mT").replace("Full
 ##############################################################################
 # Observation definition (how to retrieve number of observed events)
 #
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ObservationInput
+from LimitCalcInputClasses import ObservationInput
 Observation = ObservationInput(datasetDefinition="Data",
                                shapeHisto=SignalShapeHisto)
 #Observation.setPaths(signalPath,signalDataPaths)
@@ -182,7 +182,7 @@ for item in myShapeSystematics:
 ##############################################################################
 # DataGroup (i.e. columns in datacard) definitions
 #
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import DataGroup
+from LimitCalcInputClasses import DataGroup
 DataGroups = []
 EmbeddingIdList = []
 EWKFakeIdList = []
@@ -527,7 +527,7 @@ if not OptionAddSingleTopSignal:
 #
 # Note: Remember to include 'stat.' into the label of nuistances of statistical nature
 #
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import Nuisance
+from LimitCalcInputClasses import Nuisance
 ReservedNuisances = []
 ReservedNuisances.append(["05", "reserved for leptonic"])
 ReservedNuisances.append(["06", "reserved for leptonic"])
@@ -1067,14 +1067,14 @@ MergeNuisances.append(["pileup","pileup_fakes"])
 MergeNuisances.append(["xsect_tt_8TeV", "xsect_tt_8TeV_forQCD"])
 MergeNuisances.append(["lumi", "lumi_forQCD"])
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import convertFromSystVariationToConstant
+from LimitCalcInputClasses import convertFromSystVariationToConstant
 convertFromSystVariationToConstant(Nuisances, OptionConvertFromShapeToConstantList)
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import separateShapeAndNormalizationFromSystVariation
+from LimitCalcInputClasses import separateShapeAndNormalizationFromSystVariation
 separateShapeAndNormalizationFromSystVariation(Nuisances, OptionSeparateShapeAndNormalizationFromSystVariationList)
 
 # Control plots
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.InputClasses import ControlPlotInput
+from LimitCalcInputClasses import ControlPlotInput
 ControlPlots = []
 
 

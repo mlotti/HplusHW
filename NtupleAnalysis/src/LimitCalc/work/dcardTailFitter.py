@@ -14,9 +14,9 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(True) # no flashing canvases
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TailFitter as TailFitter
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.TableProducer as TableProducer
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.ControlPlotMaker as ControlPlotMaker
+import LimitCalcTailFitter as TailFitter
+import LimitCalcTableProducer as TableProducer
+import LimitCalcControlPlotMaker as ControlPlotMaker
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as limitTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import RootHistoWithUncertainties

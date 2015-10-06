@@ -4,7 +4,7 @@ import os
 import sys
 from optparse import OptionParser
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardReader as DatacardReader
+import LimitCalcDatacardReader as DatacardReader
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles import *
 
 

@@ -1,9 +1,9 @@
 ## \package QCDfactorised
 # Classes for extracting and calculating multijet background with factorised approach
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.Extractor import ExtractorMode,ExtractorBase
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import ExtractorResult,DatacardColumn
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.MulticrabPathFinder import MulticrabDirectoryDataType
+from LimitCalcExtractor import ExtractorMode,ExtractorBase
+from LimitCalcDatacardColumn import ExtractorResult,DatacardColumn
+from LimitCalcMulticrabPathFinder import MulticrabDirectoryDataType
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShapeHistoModifier import *

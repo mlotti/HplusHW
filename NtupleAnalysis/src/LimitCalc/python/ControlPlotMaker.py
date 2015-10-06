@@ -1,7 +1,7 @@
 ## \package ControlPlotMaker
 # Classes for making control plots (surprise, surprise ...)
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.datacardtools.DatacardColumn import DatacardColumn
+from LimitCalcDatacardColumn import DatacardColumn
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count,RootHistoWithUncertainties
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
