@@ -1,7 +1,7 @@
 ## Code for doing tan beta limits
 import HiggsAnalysis.LimitCalc.DatacardReader as DatacardReader
-import HiggsAnalysis.LimitCalc..BRXSDatabaseInterface as BRXSDB
-import HiggsAnalysis.LimitCalc..limit as limit
+import HiggsAnalysis.LimitCalc.BRXSDatabaseInterface as BRXSDB
+import HiggsAnalysis.LimitCalc.limit as limit
 
 import array
 import re

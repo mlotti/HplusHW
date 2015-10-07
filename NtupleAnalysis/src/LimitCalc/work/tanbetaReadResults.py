@@ -4,9 +4,9 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-import HiggsAnalysis.LimitCalc..CombineTools as CombineTools
-import HiggsAnalysis.LimitCalc..CommonLimitTools as commonLimitTools
-import HiggsAnalysis.LimitCalc..tanbetaTools as tbtools
+import HiggsAnalysis.LimitCalc.CombineTools as CombineTools
+import HiggsAnalysis.LimitCalc.CommonLimitTools as commonLimitTools
+import HiggsAnalysis.LimitCalc.tanbetaTools as tbtools
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 
 import os

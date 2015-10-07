@@ -307,9 +307,9 @@ def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True):
 ########################################
 # Signal cross section table
 
-import BRdataInterface as br
+import HiggsAnalysis.LimitCalc.BRdataInterface as br
 
-## Default value of MSSM mu parameter
+# Default value of MSSM mu parameter
 defaultMu = 200
 
 ## Generic light H+ MSSM cross section
@@ -433,10 +433,10 @@ def setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=defaultMu):
         return lightCrossSectionMSSM(lambda br1, br2, en: hTauNuCrossSection(br1, br2, en, channel), mass, tanbeta, mu, energy)
 
     _setHplusCrossSections(datasets,
-                           lambda mass, energy: lightCrossSectionMSSM(whTauNuCrossSection, mass, tanbeta, mu, energy),
-                           lambda mass, energy: lightCrossSectionMSSM(hhTauNuCrossSection, mass, tanbeta, mu, energy),
-                           singleHhelper)
-#                           lambda mass, energy: heavyCrossSectionMSSM(mass, tanbeta, mu, energy)) # FIXME: uncomment when we get heavy H+ cross sections
+        lambda mass, energy: lightCrossSectionMSSM(whTauNuCrossSection, mass, tanbeta, mu, energy),
+        lambda mass, energy: lightCrossSectionMSSM(hhTauNuCrossSection, mass, tanbeta, mu, energy),
+        singleHhelper)
+#       lambda mass, energy: heavyCrossSectionMSSM(mass, tanbeta, mu, energy)) # FIXME: uncomment when we get heavy H+ cross sections
 
 ## Set signal dataset cross sections to cross section via BR
 #

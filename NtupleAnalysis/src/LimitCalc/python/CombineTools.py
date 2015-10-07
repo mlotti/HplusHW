@@ -13,7 +13,7 @@
 # easily. Since the amount of information in the result file is
 # relatively small, the performance penalty should be negligible.
 
-import HiggsAnalysis.LimitCalc..CommonLimitTools as commonLimitTools
+import HiggsAnalysis.LimitCalc.CommonLimitTools as commonLimitTools
 
 
 import os
@@ -27,10 +27,10 @@ import shutil
 import tarfile
 import subprocess
 
-import multicrab
-import multicrabWorkflows
-import git
-import aux
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab
+#import HiggsAnalysis.NtupleAnalysis.tools.multicrabWorkflows
+import HiggsAnalysis.NtupleAnalysis.tools.git
+import HiggsAnalysis.NtupleAnalysis.tools.aux
 import array
 
 import ROOT

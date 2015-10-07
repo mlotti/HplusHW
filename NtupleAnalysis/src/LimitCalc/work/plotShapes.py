@@ -15,7 +15,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.LimitCalc.DatacardReader as DatacardReader
-import HiggsAnalysis.LimitCalc..CommonLimitTools as limitTools
+import HiggsAnalysis.LimitCalc.CommonLimitTools as limitTools
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 

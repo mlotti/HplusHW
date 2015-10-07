@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import HiggsAnalysis.LimitCalc..LandSTools as lands
-import HiggsAnalysis.LimitCalc..CombineTools as combine
-import HiggsAnalysis.LimitCalc..CommonLimitTools as commonLimitTools
+import HiggsAnalysis.LimitCalc.LandSTools as lands
+import HiggsAnalysis.LimitCalc.CombineTools as combine
+import HiggsAnalysis.LimitCalc.CommonLimitTools as commonLimitTools
 import HiggsAnalysis.LimitCalc.DatacardReader as DatacardReader
 
 import os

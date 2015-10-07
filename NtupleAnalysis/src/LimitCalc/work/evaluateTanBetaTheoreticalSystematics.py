@@ -4,7 +4,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-import HiggsAnalysis.LimitCalc..BRXSDatabaseInterface as BRXSDB
+import HiggsAnalysis.LimitCalc.BRXSDatabaseInterface as BRXSDB
 
 import os
 import sys

@@ -2,8 +2,8 @@
 
 import os
 import sys
-import HiggsAnalysis.LimitCalc..limit as limit
-import HiggsAnalysis.LimitCalc..CommonLimitTools as limitTools
+import HiggsAnalysis.LimitCalc.limit as limit
+import HiggsAnalysis.LimitCalc.CommonLimitTools as limitTools
 
 import ROOT
 ROOT.gROOT.SetBatch(True)

@@ -11,7 +11,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
-import HiggsAnalysis.LimitCalc..limit as limit
+import HiggsAnalysis.LimitCalc.limit as limit
 
 def main(opts):
     # Assume by default that the observed limit should be blinded

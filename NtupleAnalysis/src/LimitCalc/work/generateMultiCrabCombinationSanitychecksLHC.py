@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import HiggsAnalysis.LimitCalc..LandSTools as lands
+import HiggsAnalysis.LimitCalc.LandSTools as lands
 
 
 def main(opts):

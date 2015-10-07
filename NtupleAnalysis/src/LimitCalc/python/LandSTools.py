@@ -13,7 +13,7 @@
 # easily. Since the amount of information in the result file is
 # relatively small, the performance penalty should be negligible.
 
-import HiggsAnalysis.LimitCalc..CommonLimitTools as commonLimitTools
+import HiggsAnalysis.LimitCalc.CommonLimitTools as commonLimitTools
 
 import os
 import re
@@ -26,10 +26,10 @@ import shutil
 import subprocess
 
 
-import multicrab
-import multicrabWorkflows
-import git
-import aux
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab
+#import multicrabWorkflows
+import HiggsAnalysis.NtupleAnalysis.tools.git
+import HiggsAnalysis.NtupleAnalysis.tools.aux
 
 ## The LandS CVS tag to be used
 LandS_tag = "HEAD" # 28.01.2014: this is the only available, where shape bug in H+ has been fixed

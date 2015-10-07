@@ -32,45 +32,45 @@ def signalXsecAtNsigma(nSignal,tanbRef,nSignalAtLimit,mHp,mu):
 #    print "check signalXsecAtNsigma xSec_atRef,xSec_atLimit,nSignalAtLimit,nSignal ",xSec_atRef,xSec_atLimit,nSignalAtLimit,nSignal
     return xSec_atLimit
 
-def tanbForXsec(xSecAtLimit,mHp,tanbRef,mu):
+#def tanbForXsec(xSecAtLimit,mHp,tanbRef,mu):
 
-    tanb = tanbRef
+    #tanb = tanbRef
 
-    accuracy = 0.001    
+    #accuracy = 0.001    
 
-    counter = 0
-    xSec = crosssection.whTauNuCrossSectionMSSM(mHp,tanb,mu)
-    while(abs(xSecAtLimit - xSec)/xSecAtLimit > accuracy and xSec > 0 and tanb < 99 ):
-        tanb = tanb + 0.1*(xSecAtLimit - xSec)/xSecAtLimit*tanb
-	xSec = crosssection.whTauNuCrossSectionMSSM(mHp,tanb,mu)
-	counter = counter+1
-	if counter > 10: # to prevent infinite loops
-	    counter = 0
-	    accuracy = accuracy*2
-#        print "       tanbForXsec loop, tanb, xsec ",tanb,xSec
-#    print "check tanbForXsec ",tanb
-    if tanb > 99 or xSec <= 0:
-	return -1
-    return tanb
+    #counter = 0
+    #xSec = crosssection.whTauNuCrossSection(mHp,tanb,mu)
+    #while(abs(xSecAtLimit - xSec)/xSecAtLimit > accuracy and xSec > 0 and tanb < 99 ):
+        #tanb = tanb + 0.1*(xSecAtLimit - xSec)/xSecAtLimit*tanb
+	#xSec = crosssection.whTauNuCrossSection(mHp,tanb,mu)
+	#counter = counter+1
+	#if counter > 10: # to prevent infinite loops
+	    #counter = 0
+	    #accuracy = accuracy*2
+##        print "       tanbForXsec loop, tanb, xsec ",tanb,xSec
+##    print "check tanbForXsec ",tanb
+    #if tanb > 99 or xSec <= 0:
+	#return -1
+    #return tanb
 
-def tanbForXsecLow(xSecAtLimit,mHp,tanbRef,mu):
+#def tanbForXsecLow(xSecAtLimit,mHp,tanbRef,mu):
 
-    tanb = tanbRef
+    #tanb = tanbRef
         
-    accuracy = 0.001
+    #accuracy = 0.001
     
-    counter = 0
-    xSec = crosssection.whTauNuCrossSectionMSSM(mHp,tanb,mu)
-    while(abs(xSecAtLimit - xSec)/xSecAtLimit > accuracy and xSec > 0 and tanb > 1.1 ):
-        tanb = tanb - 0.1*(xSecAtLimit - xSec)/xSecAtLimit*tanb
-        xSec = crosssection.whTauNuCrossSectionMSSM(mHp,tanb,mu)
-        counter = counter+1
-        if counter > 10: # to prevent infinite loops
-            counter = 0
-            accuracy = accuracy*2
-    if tanb < 1.1 or xSec <= 0:
-        return -1
-    return tanb
+    #counter = 0
+    #xSec = crosssection.whTauNuCrossSectionMSSM(mHp,tanb,mu)
+    #while(abs(xSecAtLimit - xSec)/xSecAtLimit > accuracy and xSec > 0 and tanb > 1.1 ):
+        #tanb = tanb - 0.1*(xSecAtLimit - xSec)/xSecAtLimit*tanb
+        #xSec = crosssection.whTauNuCrossSectionMSSM(mHp,tanb,mu)
+        #counter = counter+1
+        #if counter > 10: # to prevent infinite loops
+            #counter = 0
+            #accuracy = accuracy*2
+    #if tanb < 1.1 or xSec <= 0:
+        #return -1
+    #return tanb
 
 def tanbForBR(brAtLimit, mHp, tanbRef, mu):
     tanb = tanbRef
@@ -139,6 +139,6 @@ class MassPoint:
 
 
 # Testing
-if __name__ == "__main__":
-    print "tanbForXsec(10, 120, 20, 200) = %f" % tanbForXsec(10, 120, 20, 200)
-    print "tanbForBR(0.2, 120, 20, 200) = %f" % tanbForBR(0.2, 120, 20, 200)
+#if __name__ == "__main__":
+    #print "tanbForXsec(10, 120, 20, 200) = %f" % tanbForXsec(10, 120, 20, 200)
+    #print "tanbForBR(0.2, 120, 20, 200) = %f" % tanbForBR(0.2, 120, 20, 200)

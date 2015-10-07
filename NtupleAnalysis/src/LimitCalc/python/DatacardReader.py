@@ -1,5 +1,5 @@
 #import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
-#import HiggsAnalysis.LimitCalc..CommonLimitTools as limitTools
+#import HiggsAnalysis.LimitCalc.CommonLimitTools as limitTools
 #import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 #import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 

@@ -158,7 +158,7 @@ import ConfigParser
 import OrderedDict
 
 #import multicrabWorkflows
-import certifiedLumi
+#import certifiedLumi
 import git
 import aux
 import tarfile

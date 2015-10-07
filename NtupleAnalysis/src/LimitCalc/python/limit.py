@@ -13,7 +13,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 import HiggsAnalysis.NtupleAnalysis.tools.statisticalFunctions as statisticalFunctions
-import HiggsAnalysis.LimitCalc..BRdataInterface as BRdataInterface
+import HiggsAnalysis.LimitCalc.BRdataInterface as BRdataInterface
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux

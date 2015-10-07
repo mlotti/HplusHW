@@ -25,10 +25,10 @@ import shutil
 import subprocess
 
 from optparse import OptionParser
-import multicrab
-import multicrabWorkflows
-import git
-import aux
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab
+#import multicrabWorkflows
+import HiggsAnalysis.NtupleAnalysis.tools.git
+import HiggsAnalysis.NtupleAnalysis.tools.aux
 
 
 class GeneralSettings():
