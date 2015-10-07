@@ -5,14 +5,14 @@
 import os
 import sys
 import ROOT
-import NtupleAnalysis.toolsdataset as dataset
-from LimitCalcMulticrabPathFinder import MulticrabDirectoryDataType
-from LimitCalcExtractor import ExtractorMode,CounterExtractor,ShapeExtractor,QCDShapeVariationExtractor,ConstantExtractor,ShapeVariationFromJsonExtractor,ShapeVariationToConstantExtractor
-from NtupleAnalysis.toolssystematics import ScalarUncertaintyItem,getBinningForPlot
-import NtupleAnalysis.toolsShellStyles as ShellStyles
-import NtupleAnalysis.toolsaux as aux
-import NtupleAnalysis.toolshistogramsExtras as histogramExtras
-import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference as systematicsForMetShapeDifference
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+from HiggsAnalysis.LimitCalc.MulticrabPathFinder import MulticrabDirectoryDataType
+from HiggsAnalysis.LimitCalc.Extractor import ExtractorMode,CounterExtractor,ShapeExtractor,QCDShapeVariationExtractor,ConstantExtractor,ShapeVariationFromJsonExtractor,ShapeVariationToConstantExtractor
+from HiggsAnalysis.NtupleAnalysis.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.histogramsExtras as histogramExtras
+import HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference as systematicsForMetShapeDifference
 from math import sqrt,pow
 from array import array
 

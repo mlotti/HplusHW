@@ -3,13 +3,13 @@
 #
 #
 
-from NtupleAnalysis.toolscounter import EventCounter
-import NtupleAnalysis.toolsdataset as dataset
-from NtupleAnalysis.toolssystematics import ScalarUncertaintyItem,getBinningForPlot
-import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference as systematicsForMetShapeDifference
-import NtupleAnalysis.toolsShellStyles as ShellStyles
-import NtupleAnalysis.toolsaux as aux
-import NtupleAnalysis.toolshistogramsExtras as histogramsExtras
+from HiggsAnalysis.NtupleAnalysis.tools.counter import EventCounter
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+from HiggsAnalysis.NtupleAnalysis.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
+import HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference as systematicsForMetShapeDifference
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.histogramsExtras as histogramsExtras
 from math import pow,sqrt
 import sys
 import json

@@ -1,12 +1,12 @@
-import NtupleAnalysis.toolsShellStyles as ShellStyles
-import NtupleAnalysis.toolssplittedHistoReader as splittedHistoReader
-import NtupleAnalysis.toolsShapeHistoModifier as ShapeHistoModifier
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.splittedHistoReader as splittedHistoReader
+import HiggsAnalysis.NtupleAnalysis.tools.ShapeHistoModifier as ShapeHistoModifier
 from math import sqrt
-from NtupleAnalysis.toolsdataset import Count
-import NtupleAnalysis.toolshistogramsExtras as histogramsExtras
-import NtupleAnalysis.toolserrorPropagation as errorPropagation
-from NtupleAnalysis.toolsextendedCount import ExtendedCount
-import NtupleAnalysis.toolsaux as aux
+from HiggsAnalysis.NtupleAnalysis.tools.dataset import Count
+import HiggsAnalysis.NtupleAnalysis.tools.histogramsExtras as histogramsExtras
+import HiggsAnalysis.NtupleAnalysis.tools.errorPropagation as errorPropagation
+from HiggsAnalysis.NtupleAnalysis.tools.extendedCount import ExtendedCount
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import array
 
 import ROOT

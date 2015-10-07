@@ -5,11 +5,11 @@ import sys
 import array
 from optparse import OptionParser
 
-import NtupleAnalysis.toolsdataset as dataset
-import NtupleAnalysis.toolstdrstyle as tdrstyle
-import NtupleAnalysis.toolsstyles as styles
-import NtupleAnalysis.toolsplots as plots
-import NtupleAnalysis.toolshistograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 
 import ROOT
 ROOT.gROOT.SetBatch(True)

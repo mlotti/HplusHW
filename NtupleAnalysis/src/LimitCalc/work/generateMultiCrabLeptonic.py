@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import LimitCalc.LandSTools as lands
+import HiggsAnalysis.LimitCalc..LandSTools as lands
 
 lepType = False
 lhcType = False

@@ -13,13 +13,13 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 import tarfile
 import cProfile
 
-import LimitCalcMulticrabPathFinder as PathFinder
-import NtupleAnalysis.toolsanalysisModuleSelector as analysisModuleSelector
-import LimitCalcDataCardGenerator as DataCard
-import NtupleAnalysis.toolsdataset as dataset
-from NtupleAnalysis.toolsaux import load_module
-from NtupleAnalysis.toolsShellStyles import *
-import NtupleAnalysis.toolsmulticrab as multicrab
+import HiggsAnalysis.LimitCalc.MulticrabPathFinder as PathFinder
+import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
+import HiggsAnalysis.LimitCalc.DataCardGenerator as DataCard
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+from HiggsAnalysis.NtupleAnalysis.tools.aux import load_module
+from HiggsAnalysis.NtupleAnalysis.tools.ShellStyles import *
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 
 def getDsetCreator(label, mcrabPath, mcrabInfoOutput, enabledStatus=True):
     if enabledStatus:

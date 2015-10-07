@@ -18,16 +18,16 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetPalette(1)
 from array import array
 from math import fabs
-import NtupleAnalysis.toolsdataset as dataset
-import NtupleAnalysis.toolshistograms as histograms
-import NtupleAnalysis.toolsplots as plots
-import NtupleAnalysis.toolscounter as counter
-import NtupleAnalysis.toolstdrstyle as tdrstyle
-import NtupleAnalysis.toolsstyles as styles
-from NtupleAnalysis.toolsFindFirstBinAbove import * 
-from NtupleAnalysis.toolsbayes import * 
-from NtupleAnalysis.toolsmyArrays import *
-import NtupleAnalysis.toolscrosssection as xsect
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+from HiggsAnalysis.NtupleAnalysis.tools.FindFirstBinAbove import * 
+from HiggsAnalysis.NtupleAnalysis.tools.bayes import * 
+from HiggsAnalysis.NtupleAnalysis.tools.myArrays import *
+import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 from InvertedTauID import *
 
 

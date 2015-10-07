@@ -15,14 +15,14 @@ from ROOT import *
 import math
 import sys
 
-import NtupleAnalysis.toolsdataset as dataset
-import NtupleAnalysis.toolshistograms as histograms
-import NtupleAnalysis.toolscounter as counter
-import NtupleAnalysis.toolstdrstyle as tdrstyle
-import NtupleAnalysis.toolsstyles as styles
-import NtupleAnalysis.toolsplots as plots
-import NtupleAnalysis.toolscrosssection as xsect
-import NtupleAnalysis.toolsmulticrabConsistencyCheck as consistencyCheck
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
+import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 
 from InvertedTauID import *
 #dataEra = "Run2011A"

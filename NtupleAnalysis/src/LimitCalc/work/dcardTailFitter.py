@@ -8,23 +8,23 @@ import math
 from optparse import OptionParser
 import array
 #from collections import OrderedDict
-from NtupleAnalysis.toolsOrderedDict import *
+from HiggsAnalysis.NtupleAnalysis.tools.OrderedDict import *
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(True) # no flashing canvases
 
-import LimitCalcTailFitter as TailFitter
-import LimitCalcTableProducer as TableProducer
-import LimitCalcControlPlotMaker as ControlPlotMaker
-import LimitCalc.CommonLimitTools as limitTools
-import NtupleAnalysis.toolsaux as aux
-from NtupleAnalysis.toolsdataset import RootHistoWithUncertainties
-from NtupleAnalysis.toolsShellStyles import *
-import HiggsAnalysis.HeavyChHiggsToTauNu.qcdCommon.systematicsForMetShapeDifference as systematicsForMetShapeDifference
-import NtupleAnalysis.toolshistograms as histograms
-import NtupleAnalysis.toolsplots as plots
-import NtupleAnalysis.toolstdrstyle as tdrstyle
+import HiggsAnalysis.LimitCalc.TailFitter as TailFitter
+import HiggsAnalysis.LimitCalc.TableProducer as TableProducer
+import HiggsAnalysis.LimitCalc.ControlPlotMaker as ControlPlotMaker
+import HiggsAnalysis.LimitCalc..CommonLimitTools as limitTools
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+from HiggsAnalysis.NtupleAnalysis.tools.dataset import RootHistoWithUncertainties
+from HiggsAnalysis.NtupleAnalysis.tools.ShellStyles import *
+import HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference as systematicsForMetShapeDifference
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True

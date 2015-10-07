@@ -3,13 +3,13 @@
 #
 #
 
-from LimitCalcExtractor import ExtractorBase
-from LimitCalcDatacardColumn import DatacardColumn
-from LimitCalcControlPlotMaker import ControlPlotMaker
-from NtupleAnalysis.toolssystematics import ScalarUncertaintyItem
-import NtupleAnalysis.toolsShellStyles as ShellStyles
-import NtupleAnalysis.toolsaux as aux
-import NtupleAnalysis.toolsgit as git
+from HiggsAnalysis.LimitCalc.Extractor import ExtractorBase
+from HiggsAnalysis.LimitCalc.DatacardColumn import DatacardColumn
+from HiggsAnalysis.LimitCalc.ControlPlotMaker import ControlPlotMaker
+from HiggsAnalysis.NtupleAnalysis.tools.systematics import ScalarUncertaintyItem
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.git as git
 
 from math import pow,sqrt
 import os

@@ -28,7 +28,7 @@ yLabel  = "Level-1 + HLT MET efficiency"
 #    yLabel = "Level-1 + HLT MET efficiency" 
 #))
 
-import NtupleAnalysis.toolsaux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 def runRange(era):
     lumi   = 0

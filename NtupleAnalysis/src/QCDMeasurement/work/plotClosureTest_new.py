@@ -9,15 +9,15 @@ import os
 import array
 from optparse import OptionParser
 
-import NtupleAnalysis.toolsdataset as dataset
-import NtupleAnalysis.toolshistograms as histograms
-import NtupleAnalysis.toolstdrstyle as tdrstyle
-import NtupleAnalysis.toolsstyles as styles
-import NtupleAnalysis.toolsplots as plots
-import NtupleAnalysis.toolssystematics as systematics
-from NtupleAnalysis.toolsanalysisModuleSelector import *
-from QCDMeasurement.dataDrivenQCDCount import *
-import HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.qcdInvertedResult as qcdInvertedResult
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
+from HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector import *
+from HiggsAnalysis.QCDMeasurement.dataDrivenQCDCount import *
+import HiggsAnalysis.QCDMeasurement.QCDInvertedResult as qcdInvertedResult
 
 myCMSText = "CMS Preliminary"
 

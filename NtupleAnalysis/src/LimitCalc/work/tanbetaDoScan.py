@@ -11,11 +11,11 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-import LimitCalc.CombineTools as combine
-import LimitCalc.CommonLimitTools as commonLimitTools
-import LimitCalc.tanbetaTools as tbtools
-import LimitCalcDatacardReader as DatacardReader
-import LimitCalc.BRXSDatabaseInterface as BRXSDB
+import HiggsAnalysis.LimitCalc..CombineTools as combine
+import HiggsAnalysis.LimitCalc..CommonLimitTools as commonLimitTools
+import HiggsAnalysis.LimitCalc..tanbetaTools as tbtools
+import HiggsAnalysis.LimitCalc.DatacardReader as DatacardReader
+import HiggsAnalysis.LimitCalc..BRXSDatabaseInterface as BRXSDB
 
 import os
 import sys

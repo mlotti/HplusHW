@@ -4,13 +4,13 @@
 #
 # Authors: LAW
 
-import NtupleAnalysis.toolsShellStyles as ShellStyles
-import NtupleAnalysis.toolsextendedCount as extendedCount
-import NtupleAnalysis.toolserrorPropagation as errorPropagation
-import QCDMeasurement.systematicsForMetShapeDifference as systematicsForMetShapeDifference
-import QCDMeasurement.dataDrivenQCDCount as dataDrivenQCDCount
-import NtupleAnalysis.toolsaux as aux
-import NtupleAnalysis.toolssystematics as systematics
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.extendedCount as extendedCount
+import HiggsAnalysis.NtupleAnalysis.tools.errorPropagation as errorPropagation
+import HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference as systematicsForMetShapeDifference
+import HiggsAnalysis.QCDMeasurement.dataDrivenQCDCount as dataDrivenQCDCount
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import math
 import ROOT
 

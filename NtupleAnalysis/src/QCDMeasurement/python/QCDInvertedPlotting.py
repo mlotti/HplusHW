@@ -8,16 +8,16 @@ from time import sleep
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gStyle.SetPalette(1)
-import NtupleAnalysis.toolsdataset as dataset
-import NtupleAnalysis.toolshistograms as histograms
-import NtupleAnalysis.toolsplots as plots
-import NtupleAnalysis.toolscounter as counter
-import NtupleAnalysis.toolstdrstyle as tdrstyle
-import NtupleAnalysis.toolsstyles as styles
-from QCDMeasurement.systematicsForMetShapeDifference import *
-import NtupleAnalysis.toolsShellStyles as ShellStyles
-from QCDMeasurement.dataDrivenQCDCount import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.qcdInverted.QCDInvertedResult import *
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+from HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference import *
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
+from HiggsAnalysis.QCDMeasurement.dataDrivenQCDCount import *
+from HiggsAnalysis.QCDMeasurement.QCDInvertedResult import *
 
 
 class QCDInvertedPlotBase:

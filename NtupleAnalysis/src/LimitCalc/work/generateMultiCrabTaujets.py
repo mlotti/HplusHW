@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import LimitCalc.LandSTools as lands
-import LimitCalc.CombineTools as combine
-import LimitCalc.CommonLimitTools as commonLimitTools
+import HiggsAnalysis.LimitCalc..LandSTools as lands
+import HiggsAnalysis.LimitCalc..CombineTools as combine
+import HiggsAnalysis.LimitCalc..CommonLimitTools as commonLimitTools
 
 lepType = True
 lhcType = True

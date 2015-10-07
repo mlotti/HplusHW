@@ -19,7 +19,7 @@ if len(sys.argv) != 2:
 
 process.addDatasetsFromMulticrab(sys.argv[1])
 
-import NtupleAnalysis.toolsaux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 PileupHistogramPath = os.path.join(aux.higgsAnalysisPath(), "NtupleAnalysis", "data", "PUWeights")
 
 process.addAnalyzer("generatorComparison", 

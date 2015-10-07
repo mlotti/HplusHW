@@ -1,7 +1,7 @@
 import sys
 import os
 import ROOT
-from NtupleAnalysis.toolstdrstyle import TDRStyle
+from HiggsAnalysis.NtupleAnalysis.tools.tdrstyle import TDRStyle
 from math import pow,sqrt
 
 def main(myFile):

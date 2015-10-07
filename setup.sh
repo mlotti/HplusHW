@@ -101,7 +101,7 @@ else
         fi
     done
     for DIR in `ls NtupleAnalysis/src` ; do
-        if [ ! -e .python/HiggsAnalysis/$DIR -a -e $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python ]; then
+        if [[ ! -e .python/HiggsAnalysis/$DIR ]] && [[ -e $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python ]]; then
             ln -s $HIGGSANALYSIS_BASE//NtupleAnalysis/src/$DIR/python .python/HiggsAnalysis/$DIR
             touch .python/HiggsAnalysis/$DIR/__init__.py
             for d in .python/HiggsAnalysis/$DIR/*; do

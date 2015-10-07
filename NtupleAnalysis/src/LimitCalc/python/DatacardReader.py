@@ -1,7 +1,7 @@
-#import NtupleAnalysis.toolstdrstyle as tdrstyle
-#import LimitCalc.CommonLimitTools as limitTools
-#import NtupleAnalysis.toolsaux as aux
-#import NtupleAnalysis.toolsShellStyles as ShellStyles
+#import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+#import HiggsAnalysis.LimitCalc..CommonLimitTools as limitTools
+#import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+#import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 import os
 import math

@@ -1,16 +1,16 @@
 ## \package ControlPlotMaker
 # Classes for making control plots (surprise, surprise ...)
 
-from LimitCalcDatacardColumn import DatacardColumn
-import NtupleAnalysis.toolsShellStyles as ShellStyles
-from NtupleAnalysis.toolsdataset import Count,RootHistoWithUncertainties
-import NtupleAnalysis.toolsaux as aux
+from HiggsAnalysis.LimitCalc.DatacardColumn import DatacardColumn
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
+from HiggsAnalysis.NtupleAnalysis.tools.dataset import Count,RootHistoWithUncertainties
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
-import NtupleAnalysis.toolshistograms as histograms
-import NtupleAnalysis.toolsplots as plots
-import NtupleAnalysis.toolscounter as counter
-import NtupleAnalysis.toolstdrstyle as tdrstyle
-import NtupleAnalysis.toolsstyles as styles
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 
 from math import pow,sqrt,log10
 import os

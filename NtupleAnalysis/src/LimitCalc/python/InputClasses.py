@@ -3,7 +3,7 @@
 import sys
 import os
 
-from NtupleAnalysis.toolsaux import sort
+from HiggsAnalysis.NtupleAnalysis.tools.aux import sort
 
 # data structures for the config file information
 

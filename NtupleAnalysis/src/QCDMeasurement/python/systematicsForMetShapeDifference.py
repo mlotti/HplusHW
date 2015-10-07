@@ -2,13 +2,13 @@
 #
 # Authors: LAW
 
-import NtupleAnalysis.toolsShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 from math import sqrt
-from QCDMeasurement.dataDrivenQCDCount import *
-import NtupleAnalysis.toolshistogramsExtras as histogramsExtras
-from NtupleAnalysis.toolserrorPropagation import errorPropagationForDivision
-import NtupleAnalysis.toolsaux as aux
-#from NtupleAnalysis.toolsextendedCount import *
+from HiggsAnalysis.QCDMeasurement.dataDrivenQCDCount import *
+import HiggsAnalysis.NtupleAnalysis.tools.histogramsExtras as histogramsExtras
+from HiggsAnalysis.NtupleAnalysis.tools.errorPropagation import errorPropagationForDivision
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+#from HiggsAnalysis.NtupleAnalysis.tools.extendedCount import *
 import ROOT
 
 ## Calculates the systematics for the MET shape difference for data-driven QCD measurements

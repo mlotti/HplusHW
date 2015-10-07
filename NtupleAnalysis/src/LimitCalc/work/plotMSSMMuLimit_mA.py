@@ -8,12 +8,12 @@ import os
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-import NtupleAnalysis.toolshistograms as histograms
-import NtupleAnalysis.toolstdrstyle as tdrstyle
-import NtupleAnalysis.toolsstyles as styles
-import NtupleAnalysis.toolsplots as plots
-import LimitCalc.limit as limit
-import LimitCalc.BRXSDatabaseInterface as BRXSDB
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.LimitCalc..limit as limit
+import HiggsAnalysis.LimitCalc..BRXSDatabaseInterface as BRXSDB
 
 tanbMax = 65
 

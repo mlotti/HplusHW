@@ -8,8 +8,8 @@
 import os
 import sys
 
-#import LimitCalc.CommonLimitTools as limitTools
-import LimitCalcDatacardReader as DatacardReader
+#import HiggsAnalysis.LimitCalc..CommonLimitTools as limitTools
+import HiggsAnalysis.LimitCalc.DatacardReader as DatacardReader
 
 # Common naming, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG/HiggsCombinationConventions
 _CommonNuisanceReplaces = {}

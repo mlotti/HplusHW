@@ -1,4 +1,4 @@
-import NtupleAnalysis.toolssystematics as systematics
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 
 DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014-01-29-noMetSF-withL1ETMfix"#2014-01-29-noMetSF-withL1ETMfix"
@@ -99,7 +99,7 @@ DataCardName += "_"+OptionMassShape.replace("TransverseMass","mT").replace("Full
 ##############################################################################
 # Observation definition (how to retrieve number of observed events)
 #
-from LimitCalcInputClasses import ObservationInput
+from HiggsAnalysis.LimitCalc.InputClasses import ObservationInput
 Observation = ObservationInput(datasetDefinition="Data",
                                shapeHisto=SignalShapeHisto)
 #Observation.setPaths(signalPath,signalDataPaths)
@@ -146,7 +146,7 @@ for item in myShapeSystematics:
 ##############################################################################
 # DataGroup (i.e. columns in datacard) definitions
 #
-from LimitCalcInputClasses import DataGroup
+from HiggsAnalysis.LimitCalc.InputClasses import DataGroup
 DataGroups = []
 EmbeddingIdList = []
 EWKFakeIdList = []
@@ -417,7 +417,7 @@ DataGroups.append(DataGroup(
 #
 # Note: Remember to include 'stat.' into the label of nuistances of statistical nature
 #
-from LimitCalcInputClasses import Nuisance
+from HiggsAnalysis.LimitCalc.InputClasses import Nuisance
 ReservedNuisances = []
 ReservedNuisances.append(["05", "reserved for leptonic"])
 ReservedNuisances.append(["06", "reserved for leptonic"])
@@ -912,7 +912,7 @@ MergeNuisances.append(["xsect_tt_8TeV", "xsect_tt_8TeV_forQCD"])
 
 
 # Control plots
-from LimitCalcInputClasses import ControlPlotInput
+from HiggsAnalysis.LimitCalc.InputClasses import ControlPlotInput
 ControlPlots = []
 
 ControlPlots.append(ControlPlotInput(

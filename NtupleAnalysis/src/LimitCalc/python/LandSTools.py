@@ -13,7 +13,7 @@
 # easily. Since the amount of information in the result file is
 # relatively small, the performance penalty should be negligible.
 
-import LimitCalc.CommonLimitTools as commonLimitTools
+import HiggsAnalysis.LimitCalc..CommonLimitTools as commonLimitTools
 
 import os
 import re

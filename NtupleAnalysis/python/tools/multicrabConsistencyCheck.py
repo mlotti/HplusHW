@@ -64,6 +64,8 @@ def checkConsistency(myDict, myMergedDict, name=None, printStatus=True):
         raise Exception("Error: did not pass consistency check, see table above!")
 
 def checkConsistencyStandalone(multicrabDir, dsetMgr, name=None, printStatus=True):
+    print "*** multicrabConsistencyCheck.py: Skipping for now the check (code needs to be updated)" #TODO
+    return
     myDict = getNumberOfJobsFromMultiCrabCfg(multicrabDir)
     myMergedDict = {}
     getNumberOfJobsFromMergedHistogramsFromDsetMgr(dsetMgr, myMergedDict)

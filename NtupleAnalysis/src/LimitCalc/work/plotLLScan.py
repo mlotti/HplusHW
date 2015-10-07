@@ -8,11 +8,11 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-import NtupleAnalysis.toolshistograms as histograms
-import NtupleAnalysis.toolstdrstyle as tdrstyle
-import NtupleAnalysis.toolsplots as plots
-import NtupleAnalysis.toolsstyles as styles
-import LimitCalc.limit as limit
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+import HiggsAnalysis.LimitCalc..limit as limit
 
 # Example combine command
 # combine -M MultiDimFit -n <name> -m <mass> -d workspaceM100.root  --algo=grid --points=10000

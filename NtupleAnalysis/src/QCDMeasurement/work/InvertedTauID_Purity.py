@@ -55,10 +55,10 @@ HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackCuts/SelectedTau_pT_BackToB
 
 
 import ROOT
-import NtupleAnalysis.toolsdataset as dataset
-import NtupleAnalysis.toolshistograms as histograms
-import NtupleAnalysis.toolstdrstyle as tdrstyle
-import NtupleAnalysis.toolsplots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 
 from QCDInvertedNormalizationFactors import *
 

@@ -24,7 +24,7 @@ binning = [20, 30, 40, 50, 60, 80, 100, 140, 200]
 xLabel  = "#tau-jet p_{T} (GeV/c)"
 yLabel  = "HLT tau efficiency"
 
-import NtupleAnalysis.toolsaux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 def runRange(era):
     lumi   = 0

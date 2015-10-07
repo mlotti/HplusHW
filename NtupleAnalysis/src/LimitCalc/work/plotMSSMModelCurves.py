@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import NtupleAnalysis.toolshistograms as histograms
-import NtupleAnalysis.toolstdrstyle as tdrstyle
-#import NtupleAnalysis.toolsstyles as styles
-import NtupleAnalysis.toolsplots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+#import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 
 import os
 import array

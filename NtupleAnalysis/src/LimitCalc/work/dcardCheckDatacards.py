@@ -4,8 +4,8 @@ import os
 import sys
 from optparse import OptionParser
 
-import LimitCalcDatacardReader as DatacardReader
-from NtupleAnalysis.toolsShellStyles import *
+import HiggsAnalysis.LimitCalc.DatacardReader as DatacardReader
+from HiggsAnalysis.NtupleAnalysis.tools.ShellStyles import *
 
 
 def findDirList(directory):
