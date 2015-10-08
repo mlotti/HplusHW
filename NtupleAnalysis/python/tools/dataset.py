@@ -132,6 +132,7 @@ def readFromMulticrabCfg(**kwargs):
         taskDirs = multicrab.getTaskDirectories(opts)
 
     taskDirs = aux.includeExcludeTasks(taskDirs, **kwargs)
+    taskDirs.sort()
 
     managerCreator = readFromCrabDirs(taskDirs, baseDirectory=dirname, **kwargs)
     return managerCreator
@@ -2875,6 +2876,9 @@ class Dataset:
     # If \a topPtWeightType is not given in \a kwargs, read the value
     # from analysis directory -specific configInfo
     def updateNAllEventsToPUWeighted(self, era=None, **kwargs):
+        print "*** Cowardly refusing to update N(allEvents) to PU weighted (no longer necessary) ***"
+        return
+        
         # Ignore if not MC
         if not self.isMC():
             return
@@ -3714,8 +3718,9 @@ class DatasetManager:
     #
     # Uses the table pileupReweightedAllEvents._weightedAllEvents
     def updateNAllEventsToPUWeighted(self, **kwargs):
-        for dataset in self.datasets:
-            dataset.updateNAllEventsToPUWeighted(**kwargs)
+        print "*** Cowardly refusing to update N(allEvents) to PU weighted (no longer necessary) ***"
+        #for dataset in self.datasets:
+        #    dataset.updateNAllEventsToPUWeighted(**kwargs)
 
     ## Format dataset information
     def formatInfo(self):
