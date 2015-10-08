@@ -6,9 +6,9 @@ import os
 # ROOT modules
 import ROOT
 # HPlus modules
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 
 class HistoTemplate:
     '''

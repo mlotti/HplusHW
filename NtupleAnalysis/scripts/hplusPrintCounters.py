@@ -9,9 +9,9 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
 
 def main(opts):
     datasets = None
@@ -120,5 +120,4 @@ if __name__ == "__main__":
                       help="Merge all data datasets")
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
-
     sys.exit(main(opts))

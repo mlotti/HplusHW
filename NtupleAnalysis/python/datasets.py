@@ -1,6 +1,6 @@
 import os
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 _aliases = {
     "Test": "Test_v1",

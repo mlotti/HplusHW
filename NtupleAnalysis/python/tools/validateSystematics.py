@@ -2,8 +2,8 @@
 #
 # Authors: LAW
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.systematics as systematics
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 
 from math import sqrt
 import ROOT

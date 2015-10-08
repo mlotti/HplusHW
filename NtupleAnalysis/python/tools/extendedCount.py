@@ -3,7 +3,7 @@
 #
 # Authors: LAW
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 from math import sqrt
 
 ## Represents counter count value with multiple uncertainty fields.

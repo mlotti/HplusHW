@@ -131,6 +131,7 @@ def getWeightedAllEvents(datasetName, era):
 # 2) pileupCalc.py (produces histogram of true interactions for data in given run range)
 # 3) test/PUtools/generatePUweights.py (produces histogram of MC interactions)
 # 4) test/PUtools/calculateWeightedTotalEventCount.py (uses output of 1-3 as input and produces the following code fragment
+
 _weightedAllEvents = {
     "Run2011A": {
         "TTToHplusBWB_M80_Fall11": WeightedAllEvents(unweighted=218200, weighted=222212.037137, up=221902.723480, down=222062.117878),

@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_BaseSelection_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_BaseSelection_h
+#ifndef HiggsAnalysis_NtupleAnalysis_BaseSelection_h
+#define HiggsAnalysis_NtupleAnalysis_BaseSelection_h
 
 class TDirectory;
 class EventCounter;

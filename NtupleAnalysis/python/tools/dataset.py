@@ -14,26 +14,29 @@ import hashlib
 import array
 
 import ROOT
-
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histogramsExtras as histogramsExtras
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as crosssection
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
+import HiggsAnalysis.NtupleAnalysis.tools.histogramsExtras as histogramsExtras
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
+import HiggsAnalysis.NtupleAnalysis.tools.crosssection as crosssection
 
 
 # era name -> list of era parts in data dataset names
 _dataEras = {
-    "Run2011A": ["_2011A_"],
-    "Run2011B": ["_2011B_"],
-    "Run2011AB": ["_2011A_", "_2011B_"],
-    "Run2012A": ["_2012A_"],
-    "Run2012B": ["_2012B_"],
-    "Run2012C": ["_2012C_"],
-    "Run2012D": ["_2012D_"],
-    "Run2012AB": ["_2012A_", "_2012B_"],
-    "Run2012ABC": ["_2012A_", "_2012B_", "_2012C_"],
-    "Run2012ABCD": ["_2012A_", "_2012B_", "_2012C_", "_2012D_"],
+    #"Run2011A": ["_2011A_"],
+    #"Run2011B": ["_2011B_"],
+    #"Run2011AB": ["_2011A_", "_2011B_"],
+    #"Run2012A": ["_2012A_"],
+    #"Run2012B": ["_2012B_"],
+    #"Run2012C": ["_2012C_"],
+    #"Run2012D": ["_2012D_"],
+    #"Run2012AB": ["_2012A_", "_2012B_"],
+    #"Run2012ABC": ["_2012A_", "_2012B_", "_2012C_"],
+    #"Run2012ABCD": ["_2012A_", "_2012B_", "_2012C_", "_2012D_"],
+    "Run2015C": ["_2015C_"],
+    "Run2015D": ["_2015D_"],
+    "Run2015CD": ["_2015C_", "_2015D_"],
+    "Run2015": ["_2015C_", "_2015D_"],
 }
 
 ## Construct DatasetManager from a list of MultiCRAB directory names.
@@ -2803,7 +2806,7 @@ class Dataset:
         try:
             return self.info["crossSection"]
         except KeyError:
-            raise Exception("Dataset %s is MC, but cross section has not been set. You have to either add the cross section for this dataset and energy of %s TeV to HeavyChHiggsToTauNu/python/tools/crosssection.py, or set it for this Dataset object with setCrossSection() method." % (self.name, self.getEnergy()))
+            raise Exception("Dataset %s is MC, but cross section has not been set. You have to either add the cross section for this dataset and energy of %s TeV to NtupleAnalysis/python/tools/crosssection.py, or set it for this Dataset object with setCrossSection() method." % (self.name, self.getEnergy()))
 
     ## Set the integrated luminosity of data dataset (in pb^-1).
     def setLuminosity(self, value):
@@ -4262,7 +4265,7 @@ class NtupleCache:
 
     ## Compile and load the macros
     def _loadMacros(self):
-        base = os.path.join(aux.higgsAnalysisPath(), "HeavyChHiggsToTauNu", "test", "ntuple")
+        base = os.path.join(aux.higgsAnalysisPath(), "NtupleAnalysis", "test", "ntuple")
         macros = [os.path.join(base, x) for x in self.macros]
 
         for m in macros:

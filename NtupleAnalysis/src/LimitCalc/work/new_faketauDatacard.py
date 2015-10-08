@@ -11,7 +11,7 @@ DataCardName    = 'Default_8TeV'
 #Path = "/home/wendland/data/v533/2014_03_12_metphicorrected"
 #Path = "/home/wendland/data/v533/2014_02_14_v3_decaymode1"
 #Path            = '/home/wendland/data/v445/met50rtaunprongs'
-#Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/datacardGenerator/TESTDATA/'
+#Path            = '/mnt/flustre/slehti/hplusAnalysis/QCDInverted/CMSSW_4_4_5/src/HiggsAnalysis/NtupleAnalysis/test/datacardGenerator/TESTDATA/'
 Path = "/mnt/flustre/epekkari/FakeTauDatacard"
 #Path = "/mnt/flustre/epekkari/NominalDatacard"
 

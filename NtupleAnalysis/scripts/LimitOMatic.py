@@ -11,7 +11,7 @@ import subprocess
 import json
 from optparse import OptionParser
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CommonLimitTools as commonLimitTools
+import HiggsAnalysis.NtupleAnalysis.tools.CommonLimitTools as commonLimitTools
 
 class Result:
     def __init__(self, opts, basedir):

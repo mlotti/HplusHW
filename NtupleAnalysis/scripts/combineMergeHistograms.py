@@ -6,9 +6,9 @@ import json
 import subprocess
 from optparse import OptionParser
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.LandSTools as lands
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
+import HiggsAnalysis.NtupleAnalysis.tools.LandSTools as lands
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 def main(opts, args):
     # Merge the combine root files

@@ -2,7 +2,7 @@
 # Class for obtaining lists of available eras, search modes, and variations
 
 import sys
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 ## Container class for dataset manager creator and its label
 class AnalysisModuleSelectorSource:

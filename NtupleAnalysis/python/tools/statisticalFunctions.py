@@ -1,4 +1,4 @@
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.BRdataInterface import *
+from HiggsAnalysis.LimitCalc.BRdataInterface import *
 from math import sqrt,log
 import crosssection
 

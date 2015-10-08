@@ -18,8 +18,8 @@ import os
 import sys
 import ROOT
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Count
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
+from HiggsAnalysis.NtupleAnalysis.tools.dataset import Count
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 from math import sqrt
 
 class UnfoldedHistogramReader:

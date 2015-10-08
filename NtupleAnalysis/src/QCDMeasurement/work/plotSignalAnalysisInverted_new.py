@@ -62,7 +62,7 @@ def plotSignalAnalysisInverted(opts, dsetMgr, myModuleInfoString, myDir, luminos
     # Take QCD from data
     #datasetsQCD = None
     #if QCDfromData:
-        #datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111123_132128/multicrab.cfg", counters=counters)
+        #datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/NtupleAnalysis/test/multicrab_111123_132128/multicrab.cfg", counters=counters)
         #datasetsQCD.loadLuminosities()
         #print "QCDfromData", QCDfromData
         #datasetsQCD.mergeData()

@@ -104,7 +104,7 @@ if __name__ == "__main__":
     (opts, args) = parser.parse_args()
 
     if opts.createGridTasks:
-        myCommand = os.environ["CMSSW_BASE"]+"/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit/doTanBetaScan.py"
+        myCommand = os.environ["CMSSW_BASE"]+"/src/HiggsAnalysis/NtupleAnalysis/test/brlimit/doTanBetaScan.py"
         myCommand += " --lhcasy --final --sigmabrlimit"
         myCommand += " --creategridjobs --gridmassive"
         for s in opts.scenarios:

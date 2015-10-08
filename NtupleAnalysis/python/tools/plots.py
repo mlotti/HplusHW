@@ -46,7 +46,7 @@ import styles
 import aux
 
 _lightHplusMasses = [80, 90, 100, 120, 140, 150, 155, 160]
-_heavyHplusMasses = [180, 190, 200, 220, 250, 300, 400, 500, 600]
+_heavyHplusMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600]
 _heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 500, 600, 700]
 
 ## These MC datasets must be added together before any
@@ -54,30 +54,30 @@ _heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 50
 ## statistics. The mapping is used in the
 ## mergeRenameReorderForDataMC() function.
 _physicalMcAdd = {
-    "WJets_TuneZ2star_v1_Summer12": "WJets_TuneZ2star_Summer12",
-    "WJets_TuneZ2star_v2_Summer12": "WJets_TuneZ2star_Summer12",
+    #"WJets_TuneZ2star_v1_Summer12": "WJets_TuneZ2star_Summer12",
+    #"WJets_TuneZ2star_v2_Summer12": "WJets_TuneZ2star_Summer12",
 
-    "QCD_Pt170to300_TuneZ2star_Summer12":    "QCD_Pt170to300_TuneZ2star_Summer12",
-    "QCD_Pt170to300_TuneZ2star_v2_Summer12": "QCD_Pt170to300_TuneZ2star_Summer12",
+    #"QCD_Pt170to300_TuneZ2star_Summer12":    "QCD_Pt170to300_TuneZ2star_Summer12",
+    #"QCD_Pt170to300_TuneZ2star_v2_Summer12": "QCD_Pt170to300_TuneZ2star_Summer12",
 
-    "QCD_Pt300to470_TuneZ2star_Summer12":    "QCD_Pt300to470_TuneZ2star_Summer12",
-    "QCD_Pt300to470_TuneZ2star_v2_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
-    "QCD_Pt300to470_TuneZ2star_v3_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
+    #"QCD_Pt300to470_TuneZ2star_Summer12":    "QCD_Pt300to470_TuneZ2star_Summer12",
+    #"QCD_Pt300to470_TuneZ2star_v2_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
+    #"QCD_Pt300to470_TuneZ2star_v3_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
 }
-for mass in _lightHplusMasses:
-    _physicalMcAdd["TTToHplusBWB_M%d_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
-    _physicalMcAdd["TTToHplusBWB_M%d_ext_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
-    if mass != 90:
-        _physicalMcAdd["TTToHplusBHminusB_M%d_Summer12"%mass] = "TTToHplusBHminusB_M%d_Summer12"%mass
-        _physicalMcAdd["TTToHplusBHminusB_M%d_ext_Summer12"%mass] = "TTToHplusBHminusB_M%d_Summer12"%mass
-for mass in [180, 190, 200, 220, 250, 300]:
-    _physicalMcAdd["HplusTB_M%d_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
-    _physicalMcAdd["HplusTB_M%d_ext_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
-for bquark in [0, 1, 2, 3, 4]:
-    _physicalMcAdd["WJets_%dbquark_TuneZ2star_v1_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
-    _physicalMcAdd["WJets_%dbquark_TuneZ2star_v2_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
-for mass in _heavyHplusToTBbarMasses:
-    _physicalMcAdd["HplusToTBbar_M%d_Summer12"%mass] = "HplusToTBbar_M%d_Summer12"%mass
+#for mass in _lightHplusMasses:
+    #_physicalMcAdd["TTToHplusBWB_M%d_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
+    #_physicalMcAdd["TTToHplusBWB_M%d_ext_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
+    #if mass != 90:
+        #_physicalMcAdd["TTToHplusBHminusB_M%d_Summer12"%mass] = "TTToHplusBHminusB_M%d_Summer12"%mass
+        #_physicalMcAdd["TTToHplusBHminusB_M%d_ext_Summer12"%mass] = "TTToHplusBHminusB_M%d_Summer12"%mass
+#for mass in [180, 190, 200, 220, 250, 300]:
+    #_physicalMcAdd["HplusTB_M%d_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
+    #_physicalMcAdd["HplusTB_M%d_ext_Summer12"%mass] = "HplusTB_M%d_Summer12"%mass
+#for bquark in [0, 1, 2, 3, 4]:
+    #_physicalMcAdd["WJets_%dbquark_TuneZ2star_v1_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
+    #_physicalMcAdd["WJets_%dbquark_TuneZ2star_v2_Summer12"%bquark] = "WJets_%dbquark_TuneZ2star_Summer12"%bquark
+#for mass in _heavyHplusToTBbarMasses:
+    #_physicalMcAdd["HplusToTBbar_M%d_Summer12"%mass] = "HplusToTBbar_M%d_Summer12"%mass
 
 ## Map the physical dataset names to logical names
 #
@@ -85,85 +85,72 @@ for mass in _heavyHplusToTBbarMasses:
 # used in plots._legendLabels and plots._plotStyles. The mapping is
 # used in the mergeRenameReorderForDataMC() function.
 _physicalToLogical = {
-    "TT_TuneZ2_Summer11": "TT",
+    #"TT_TuneZ2_Summer11": "TT",
 
-    "WToTauNu_TuneZ2_Summer11": "WToTauNu",
+    #"WToTauNu_TuneZ2_Summer11": "WToTauNu",
 
-    "W3Jets_TuneZ2_Summer11": "W3Jets",
+    #"W3Jets_TuneZ2_Summer11": "W3Jets",
 
-    "W3Jets_TuneZ2_v2_Fall11": "W3Jets",
+    #"W3Jets_TuneZ2_v2_Fall11": "W3Jets",
 }
-for mcEra in ["Summer11", "Fall11", "Summer12"]:
-    for mass in _lightHplusMasses:
-        _physicalToLogical["TTToHplusBWB_M%d_%s"%(mass, mcEra)] = "TTToHplusBWB_M%d" % mass
-        _physicalToLogical["TTToHplusBHminusB_M%d_%s"%(mass, mcEra)] = "TTToHplusBHminusB_M%d" % mass
-        _physicalToLogical["Hplus_taunu_s-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_s-channel_M%d" % mass
-        _physicalToLogical["Hplus_taunu_t-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_t-channel_M%d" % mass
-        _physicalToLogical["Hplus_taunu_tW-channel_M%d_%s"%(mass, mcEra)] = "Hplus_taunu_tW-channel_M%d" % mass
+for mass in _lightHplusMasses:
+    _physicalToLogical["ChargedHiggs_TTToHplusBWB_HplusToTauNu_M%d"%(mass)] = "TTToHplusBWB_M%d"%mass
 
-    for mass in _heavyHplusMasses:
-        _physicalToLogical["HplusTB_M%d_%s"%(mass, mcEra)] = "HplusTB_M%d" % mass
+for mass in _heavyHplusMasses:
+    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M%d"%(mass)] = "HplusTB_M%d"%mass
 
-    for mass in _heavyHplusToTBbarMasses:
-        _physicalToLogical["HplusToTBbar_M%d_%s"%(mass, mcEra)] = "HplusToTBbar_M%d" % mass
+#for mass in _heavyHplusToTBbarMasses:
+    #_physicalToLogical["HplusToTBbar_M%d_%s"%(mass, mcEra)] = "HplusToTBbar_M%d" % mass
 
-for mcEra in ["TuneZ2_Summer11", "TuneZ2_Fall11", "TuneZ2star_Summer12"]:
-    _physicalToLogical.update({
-    "TTJets_%s"%mcEra: "TTJets",
-    "TTJets_FullLept_%s"%mcEra: "TTJets_FullLept",
-    "TTJets_SemiLept_%s"%mcEra: "TTJets_SemiLept",
-    "TTJets_Hadronic_%s"%mcEra.replace("_", "_ext_"): "TTJets_Hadronic",
-    "WJets_%s"%mcEra: "WJets",
-    "W1Jets_%s"%mcEra: "W1Jets",
-    "W2Jets_%s"%mcEra: "W2Jets",
-    "W3Jets_%s"%mcEra: "W3Jets",
-    "W4Jets_%s"%mcEra: "W4Jets",
-    "DYJetsToLL_M50_%s"%mcEra:      "DYJetsToLL_M50",
-    "DYJetsToLL_M10to50_%s"%mcEra:  "DYJetsToLL_M10to50",
+_physicalToLogical.update({
+    "TTJets": "TTJets",
+    "TTJets_FullLept": "TTJets_FullLept",
+    "TTJets_SemiLept": "TTJets_SemiLept",
+    "TTJets_Hadronic".replace("_", "_ext_"): "TTJets_Hadronic",
+    "WJetsToLNu": "WJetsToLNu",
+    #"W1Jets": "W1Jets",
+    #"W2Jets": "W2Jets",
+    #"W3Jets": "W3Jets",
+    #"W4Jets": "W4Jets",
+    "DYJetsToLL_M50":      "DYJetsToLL_M50",
+    "DYJetsToLL_M10to50":  "DYJetsToLL_M10to50",
 
-    "QCD_Pt30to50_%s"%mcEra:   "QCD_Pt30to50",
-    "QCD_Pt50to80_%s"%mcEra:   "QCD_Pt50to80",
-    "QCD_Pt80to120_%s"%mcEra:  "QCD_Pt80to120",
-    "QCD_Pt120to170_%s"%mcEra: "QCD_Pt120to170",
-    "QCD_Pt170to300_%s"%mcEra: "QCD_Pt170to300",
-    "QCD_Pt300to470_%s"%mcEra: "QCD_Pt300to470",
+    "QCD_Pt30to50":   "QCD_Pt30to50",
+    "QCD_Pt50to80":   "QCD_Pt50to80",
+    "QCD_Pt80to120":  "QCD_Pt80to120",
+    "QCD_Pt120to170": "QCD_Pt120to170",
+    "QCD_Pt170to300": "QCD_Pt170to300",
+    "QCD_Pt300to470": "QCD_Pt300to470",
+    "QCD_Pt470to600": "QCD_Pt470to600",
+    "QCD_Pt600to800": "QCD_Pt600to800",
+    "QCD_Pt800to1000": "QCD_Pt800to1000",
+    "QCD_Pt1000to1400": "QCD_Pt1000to1400",
+    "QCD_Pt1400to1800": "QCD_Pt1400to1800",
+    "QCD_Pt1800to2400": "QCD_Pt1800to2400",
+    "QCD_Pt2400to3200": "QCD_Pt2400to3200",
+    "QCD_Pt3200toInf": "QCD_Pt3200toInf",
 
-    "QCD_Pt20_MuEnriched_%s"%mcEra: "QCD_Pt20_MuEnriched",
+    "QCD_Pt20_MuEnriched": "QCD_Pt20_MuEnriched",
 
-    "T_t-channel_%s"%mcEra:     "T_t-channel",
-    "Tbar_t-channel_%s"%mcEra:  "Tbar_t-channel",
-    "T_tW-channel_%s"%mcEra:    "T_tW-channel",
-    "Tbar_tW-channel_%s"%mcEra: "Tbar_tW-channel",
-    "T_s-channel_%s"%mcEra:     "T_s-channel",
-    "Tbar_s-channel_%s"%mcEra:  "Tbar_s-channel",
+    "ST_schannel_4f_leptonDecays": "ST_schannel_4f_leptonDecays",
+    "ST_tchannel_antitop_4f_leptonDecays": "ST_tchannel_antitop_4f_leptonDecays",
+    "ST_tchannel_top_4f_leptonDecays": "ST_tchannel_top_4f_leptonDecays",
+    "ST_tW_antitop_5f_inclusiveDecays": "ST_tW_antitop_5f_inclusiveDecays",
+    "ST_tW_top_5f_inclusiveDecays": "ST_tW_top_5f_inclusiveDecays",
 
-    "WW_%s"%mcEra: "WW",
-    "WZ_%s"%mcEra: "WZ",
-    "ZZ_%s"%mcEra: "ZZ",
-    })
-    for bquark in [0, 1, 2, 3]:
-        _physicalToLogical.update({
-                "WJets_%dbquark_%s"%(bquark, mcEra): "WJets_%dbquark"%bquark,
-                "W1Jets_%dbquark_%s"%(bquark, mcEra): "W1Jets_%dbquark"%bquark,
-                "W2Jets_%dbquark_%s"%(bquark, mcEra): "W2Jets_%dbquark"%bquark,
-                "W3Jets_%dbquark_%s"%(bquark, mcEra): "W3Jets_%dbquark"%bquark,
-                "W4Jets_%dbquark_%s"%(bquark, mcEra): "W4Jets_%dbquark"%bquark,
-        })
+    "WW": "WW",
+    "WZ": "WZ",
+    "ZZ": "ZZ",
+})
 
 ## Map the datasets to be merged to the name of the merged dataset.
 _ttSignalMerge = {}
 _tSignalMerge = {}
 _lightSignalMerge = {}
-for mass in _lightHplusMasses:
-    _ttSignalMerge["TTToHplusBWB_M%d"%mass] = "TTToHplus_M%d"%mass
-    _ttSignalMerge["TTToHplusBHminusB_M%d"%mass] = "TTToHplus_M%d"%mass
+#for mass in _lightHplusMasses:
 
-    _tSignalMerge["Hplus_taunu_s-channel_M%d"%mass] = "Hplus_taunu_M%d" % mass
-    _tSignalMerge["Hplus_taunu_t-channel_M%d"%mass] = "Hplus_taunu_M%d" % mass
-    _tSignalMerge["Hplus_taunu_tW-channel_M%d"%mass] = "Hplus_taunu_M%d" % mass
-
-    _lightSignalMerge["TTToHplus_M%d"%mass] = "TTOrTToHplus_M%d"%mass
-    _lightSignalMerge["Hplus_taunu_M%d" % mass] = "TTOrTToHplus_M%d"%mass
+    #_lightSignalMerge["TTToHplus_M%d"%mass] = "TTOrTToHplus_M%d"%mass
+    #_lightSignalMerge["Hplus_taunu_M%d" % mass] = "TTOrTToHplus_M%d"%mass
 
 _datasetMerge = {
     "QCD_Pt30to50":   "QCD",
@@ -172,26 +159,31 @@ _datasetMerge = {
     "QCD_Pt120to170": "QCD",
     "QCD_Pt170to300": "QCD",
     "QCD_Pt300to470": "QCD",
+    "QCD_Pt470to600": "QCD",
+    "QCD_Pt600to800": "QCD",
+    "QCD_Pt800to1000": "QCD",
+    "QCD_Pt1000to1400": "QCD",
+    "QCD_Pt1400to1800": "QCD",
+    "QCD_Pt1800to2400": "QCD",
+    "QCD_Pt2400to3200": "QCD",
+    "QCD_Pt3200toInf": "QCD",
 
-    "TToBLNu_s-channel": "SingleTop",
-    "TToBLNu_t-channel": "SingleTop",
-    "TToBLNu_tW-channel": "SingleTop",
-    "T_t-channel":     "SingleTop",
-    "Tbar_t-channel":  "SingleTop",
-    "T_tW-channel":    "SingleTop",
-    "Tbar_tW-channel": "SingleTop",
-    "T_s-channel":     "SingleTop",
-    "Tbar_s-channel":  "SingleTop",
+    "ST_schannel_4f_leptonDecays": "SingleTop",
+    "ST_tchannel_antitop_4f_leptonDecays": "SingleTop",
+    "ST_tchannel_top_4f_leptonDecays": "SingleTop",
+    "ST_tW_antitop_5f_inclusiveDecays": "SingleTop",
+    "ST_tW_top_5f_inclusiveDecays": "SingleTop",
 
-    "TTJets_FullLept": "TTJets",
-    "TTJets_SemiLept": "TTJets",
-    "TTJets_Hadronic": "TTJets",
+    "TTJets": "TTJets",
+    #"TTJets_FullLept": "TTJets",
+    #"TTJets_SemiLept": "TTJets",
+    #"TTJets_Hadronic": "TTJets",
 
-    "WJets": "WJets",
-    "W1Jets": "WJets",
-    "W2Jets": "WJets",
-    "W3Jets": "WJets",
-    "W4Jets": "WJets",
+    "WJetsToLNu": "WJets",
+    #"W1Jets": "WJets",
+    #"W2Jets": "WJets",
+    #"W3Jets": "WJets",
+    #"W4Jets": "WJets",
 
     "DYJetsToLL_M10to50": "DYJetsToLL",
     "DYJetsToLL_M50": "DYJetsToLL",
@@ -200,13 +192,6 @@ _datasetMerge = {
     "WZ": "Diboson",
     "ZZ": "Diboson",
 }
-for bquark in [0, 1, 2, 3]:
-    _datasetMerge.update({
-            "WJets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
-            "W1Jets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
-            "W2Jets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
-            "W3Jets_%dbquark"%bquark: "WJets_%dbquark"%bquark,
-    })
 
 ## Default ordering of datasets
 _datasetOrder = ["Data"]
@@ -261,6 +246,14 @@ _legendLabels = {
     "QCD_Pt120to170":        "QCD, 120 < #hat{p}_{T} < 170",
     "QCD_Pt170to300":        "QCD, 170 < #hat{p}_{T} < 300",
     "QCD_Pt300to470":        "QCD, 300 < #hat{p}_{T} < 470",
+    "QCD_Pt470to600":        "QCD, 470 < #hat{p}_{T} < 600",
+    "QCD_Pt600to800":        "QCD, 600 < #hat{p}_{T} < 800",
+    "QCD_Pt800to1000":       "QCD, 800 < #hat{p}_{T} < 1000",
+    "QCD_Pt1000to1400":      "QCD, 1400 < #hat{p}_{T} < 1400",
+    "QCD_Pt1400to1800":      "QCD, 1800 < #hat{p}_{T} < 1800",
+    "QCD_Pt1800to2400":      "QCD, 2400 < #hat{p}_{T} < 2400",
+    "QCD_Pt2400to3200":      "QCD, 3200 < #hat{p}_{T} < 3200",
+    "QCD_Pt3200toInf":       "QCD, #hat{p}_{T} > 3200",
 
     "QCDdata": "QCD (data driven)",
 
@@ -292,9 +285,9 @@ for mass in _lightHplusMasses:
     _legendLabels["TTToHplusBHminusB_M%d"%mass] = "H^{+}H^{-} m_{H^{#pm}}=%d GeV" % mass
     _legendLabels["TTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 
-    _legendLabels["Hplus_taunu_s-channel_M%d"%mass] = "t#rightarrowH^{+} (s) m_{H^{+}}=%d GeV" % mass
-    _legendLabels["Hplus_taunu_t-channel_M%d"%mass] = "t#rightarrowH^{+} (t) m_{H^{+}}=%d GeV" % mass
-    _legendLabels["Hplus_taunu_tW-channel_M%d"%mass] = "t#rightarrowH^{+} (tW) m_{H^{+}}=%d GeV" % mass
+    #_legendLabels["Hplus_taunu_s-channel_M%d"%mass] = "t#rightarrowH^{+} (s) m_{H^{+}}=%d GeV" % mass
+    #_legendLabels["Hplus_taunu_t-channel_M%d"%mass] = "t#rightarrowH^{+} (t) m_{H^{+}}=%d GeV" % mass
+    #_legendLabels["Hplus_taunu_tW-channel_M%d"%mass] = "t#rightarrowH^{+} (tW) m_{H^{+}}=%d GeV" % mass
     _legendLabels["Hplus_taunu_M%d"%mass] = "t#rightarrowH^{+} m_{H^{+}}=%d" % mass
 
     _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass

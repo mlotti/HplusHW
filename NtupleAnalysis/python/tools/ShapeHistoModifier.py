@@ -1,4 +1,4 @@
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import ROOT
 from array import array
 from math import sqrt

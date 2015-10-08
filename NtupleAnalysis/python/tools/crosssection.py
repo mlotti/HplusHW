@@ -33,7 +33,8 @@ class CrossSectionList:
 
     def crossSection(self, name, energy):
         for obj in self.crossSections:
-            if name[:len(obj.name)] == obj.name:
+            #if name[:len(obj.name)] == obj.name:
+            if name == obj.name:
                 return obj.get(energy)
         return None
 
@@ -142,12 +143,12 @@ backgroundCrossSections = CrossSectionList(
             "8": 245.8, # [10]
             "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
             }),
-    CrossSection("WJets", {
-            "7": 31314.0, # [2], NNLO
-            "8": 36703.2, # [9], NNLO
-            }),
+    #CrossSection("WJets", {
+            #"7": 31314.0, # [2], NNLO
+            #"8": 36703.2, # [9], NNLO
+            #}),
     CrossSection("WJetsToLNu", {
-            "13": 6.082e+04, # [14]
+            "13": 20508.9*3, # [14]
     }),
     CrossSection("WJetsToLNu_HT-100To200", {
             "13": 1.313e+03, # [14]
@@ -161,6 +162,27 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WJetsToLNu_HT-600ToInf", {
             "13": 1.872e+01, # [14]
             }),
+    CrossSection("WJetsToLNu_HT100To200", {
+            "13": 0.0, #FIXME
+    }),
+    CrossSection("WJetsToLNu_HT200To400", {
+            "13": 0.0, #FIXME
+    }),
+    CrossSection("WJetsToLNu_HT400To600", {
+            "13": 0.0, #FIXME
+    }),
+    CrossSection("WJetsToLNu_HT600To800", {
+            "13": 0.0, #FIXME
+    }),
+    CrossSection("WJetsToLNu_HT800To1200", {
+            "13": 0.0, #FIXME
+    }),
+    CrossSection("WJetsToLNu_HT1200To2500", {
+            "13": 0.0, #FIXME
+    }),
+    CrossSection("WJetsToLNu_HT2500ToInf", {
+            "13": 0.0, #FIXME
+    }),
     # PREP (LO) cross sections, for W+NJets weighting
     CrossSection("PREP_WJets", {
             "7": 27770.0,
@@ -192,6 +214,33 @@ backgroundCrossSections = CrossSectionList(
             "7": 9611.0, # [1]
             "8": 11050.0, # [1]
             "13": 1.870e+04, # [14]
+            }),
+    CrossSection("DYJetsToLL_M100to200", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M200to400", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M400to500", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M500to700", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M700to800", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M800to1000", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M1000to1500", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M1500to2000", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M2000to3000", {
+            "13": 0.0, # FIXME
             }),
     CrossSection("DYToTauTau_M_20_", {
             "7": 4998, # [4], NNLO
@@ -276,22 +325,30 @@ def setBackgroundCrossSections(datasets, doWNJetsWeighting=True):
 def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True):
     value = backgroundCrossSections.crossSection(dataset.getName(), dataset.getEnergy())
     if value is None:
-        for wnJets in ["W1Jets", "W2Jets", "W3Jets", "W4Jets"]:
-            if wnJets in dataset.getName():
-                inclusiveCrossSection = backgroundCrossSections.crossSection("WJets", dataset.getEnergy())
-                if doWNJetsWeighting:
-                    # W+Njets, with the assumption that they are weighted (see
-                    # src/WJetsWeight.cc)
-                    value = inclusiveCrossSection
-                else:
-                    inclusiveLO = backgroundCrossSections.crossSection("PREP_WJets", dataset.getEnergy())
-                    wnJetsLO = backgroundCrossSections.crossSection("PREP_"+wnJets, dataset.getEnergy())
-                    value = inclusiveCrossSection * wnJetsLO/inclusiveLO
-                break
+        if "ChargedHiggs" in dataset.getName():
+            value = 1.0 # Force signal xsection to 1 pb
+        else:
+            for wnJets in ["W1Jets", "W2Jets", "W3Jets", "W4Jets"]:
+                if wnJets in dataset.getName():
+                    inclusiveCrossSection = backgroundCrossSections.crossSection("WJets", dataset.getEnergy())
+                    if doWNJetsWeighting:
+                        # W+Njets, with the assumption that they are weighted (see
+                        # src/WJetsWeight.cc)
+                        value = inclusiveCrossSection
+                    else:
+                        inclusiveLO = backgroundCrossSections.crossSection("PREP_WJets", dataset.getEnergy())
+                        wnJetsLO = backgroundCrossSections.crossSection("PREP_"+wnJets, dataset.getEnergy())
+                        value = inclusiveCrossSection * wnJetsLO/inclusiveLO
+                    break
 
     if value is not None:
         dataset.setCrossSection(value)
-        print "Setting %s cross section to %f pb" % (dataset.getName(), value)
+        msg = ""
+        if value == 0:
+            msg = "  *** Note: to set non-zero xsection; edit NtupleAnalysis/python/tools/crossection.py ***"
+        if "ChargedHiggs" in dataset.getName():
+            msg = "  *** Note: signal is forced at the moment to 1 pb in NtupleAnalysis/python/tools/crossection.py ***"
+        print "Setting %50s cross section to %10f pb %s" % (dataset.getName(), value, msg)
 #    else:
 #        print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy())
 

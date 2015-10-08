@@ -111,8 +111,8 @@ def main():
 
     if QCDfromData:
 
-        #datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111123_132128/multicrab.cfg", counters=counters)
-        datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/afs/cern.ch/work/e/epekkari/DataDrivenFakeTaus/CMSSW_5_3_9_patch3/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_140526_122821/multicrab.cfg")
+        #datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/NtupleAnalysis/test/multicrab_111123_132128/multicrab.cfg", counters=counters)
+        datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/afs/cern.ch/work/e/epekkari/DataDrivenFakeTaus/CMSSW_5_3_9_patch3/src/HiggsAnalysis/NtupleAnalysis/test/multicrab_140526_122821/multicrab.cfg")
         datasetsQCD.loadLuminosities()
         print "QCDfromData", QCDfromData
         datasetsQCD.mergeData()
@@ -199,7 +199,7 @@ def doPlots(datasets):
  
     #controlPlots(datasets)
 
-    datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/afs/cern.ch/work/e/epekkari/DataDrivenFakeTaus/CMSSW_5_3_9_patch3/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_140526_122821/multicrab.cfg")
+    datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/afs/cern.ch/work/e/epekkari/DataDrivenFakeTaus/CMSSW_5_3_9_patch3/src/HiggsAnalysis/NtupleAnalysis/test/multicrab_140526_122821/multicrab.cfg")
     datasetsQCD.loadLuminosities()
     print "QCDfromData", QCDfromData
     datasetsQCD.mergeData()

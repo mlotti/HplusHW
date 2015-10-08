@@ -8,7 +8,7 @@ import re
 import stat
 import ROOT
 import OrderedDict
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
+import HiggsAnalysis.NtupleAnalysis.tools.git as git
 
 def cmsswVersion():
     if "CMSSW_VERSION" in os.environ:

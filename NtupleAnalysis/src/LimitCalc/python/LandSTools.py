@@ -1201,7 +1201,7 @@ def parseLandsMLOutput(outputFileName):
 ## Class to contain LandS installation information
 #
 # Looks for LandS in
-# $CMSSW_BASE/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit. If
+# $CMSSW_BASE/src/HiggsAnalysis/NtupleAnalysis/test/brlimit. If
 # found, return the path. If not found, install LandS and return the
 # path. Installation consists of cvs checkout and compilation with make.
 class LandSInstaller:
@@ -1222,7 +1222,7 @@ class LandSInstaller:
         
     ## Get the path to the LandS directory
     def findDir(self):
-        brlimitBase = os.path.join(aux.higgsAnalysisPath(), "HeavyChHiggsToTauNu", "test", "brlimit")
+        brlimitBase = os.path.join(aux.higgsAnalysisPath(), "NtupleAnalysis", "test", "brlimit")
         landsDir = "LandS_"+self.tag
         landsDirAbs = os.path.join(brlimitBase, landsDir)
         if not os.path.exists(landsDirAbs):
@@ -1236,7 +1236,7 @@ class LandSInstaller:
             if not os.path.exists(landsDir):
                 raise Exception("cvs checkout failed to create directory '%s' under '%s'" % (brlimitBase, landsDir))
             # Patch - no patch needed
-            #os.system("patch -p0 < $CMSSW_BASE/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit/mypatch")
+            #os.system("patch -p0 < $CMSSW_BASE/src/HiggsAnalysis/NtupleAnalysis/test/brlimit/mypatch")
             # Compile
             if os.environ["HOST"] == "jade.hip.fi":
                 print "LandS has been downloaded and patched."

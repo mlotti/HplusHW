@@ -487,7 +487,7 @@ class LHCTypeAsymptotic:
             opts3 = " --sbfit"
         #if int(mass) > 173:
         #    opts3 += " --heavy"
-        command.append("python %s/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/brlimit/plotMLFits.py -m %s %s" % (os.environ["CMSSW_BASE"], mass, opts3))
+        command.append("python %s/src/HiggsAnalysis/NtupleAnalysis/test/brlimit/plotMLFits.py -m %s %s" % (os.environ["CMSSW_BASE"], mass, opts3))
         
         aux.writeScript(os.path.join(self.dirname, fname), "\n".join(command)+"\n")
 
@@ -556,7 +556,7 @@ class LHCTypeAsymptotic:
 
         shutil.copy(os.path.join(os.environ["CMSSW_BASE"], "bin", os.environ["SCRAM_ARCH"], "combine"), self.dirname)
         shutil.copy(os.path.join(os.environ["CMSSW_BASE"], "bin", os.environ["SCRAM_ARCH"], "text2workspace.py"), self.dirname)
-        shutil.copy(os.path.join(os.environ["CMSSW_BASE"], "src", "HiggsAnalysis", "HeavyChHiggsToTauNu", "scripts", "combineInjectSignalLight.py"), self.dirname)
+        shutil.copy(os.path.join(os.environ["CMSSW_BASE"], "src", "HiggsAnalysis", "NtupleAnalysis", "scripts", "combineInjectSignalLight.py"), self.dirname)
         tar = tarfile.open(os.path.join(self.dirname, "python.tar.gz"), mode="w:gz", dereference=True)
         tar.add(os.path.join(os.environ["CMSSW_BASE"], "python"), arcname="python")
         tar.close()

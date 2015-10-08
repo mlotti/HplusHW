@@ -6,7 +6,7 @@ import json
 from optparse import OptionParser
 
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.CombineTools as combine
+import HiggsAnalysis.NtupleAnalysis.tools.CombineTools as combine
 
 def main(opts):
     (bkg, sbkg, corr) = combine.parseDiffNuisancesOutput(opts.file, opts.configFile, opts.mass)

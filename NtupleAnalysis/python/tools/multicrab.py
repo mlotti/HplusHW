@@ -145,7 +145,6 @@
 # workflows with different skims (and numbers of jobs for same input
 # dataset, e.g. AOD) already in the dataset definitions would provide
 # additional documentation.
-
 import os, re
 import sys
 import subprocess, errno
@@ -159,41 +158,41 @@ import OrderedDict
 
 #import multicrabWorkflows
 #import certifiedLumi
-import git
-import aux
-import tarfile
+#import git
+#import aux
+#import tarfile
 
-## Default Storage Element (SE) black list for non-stageout jobs
-defaultSeBlacklist_noStageout = [
-#    "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors, added 2011-09-02, commented 2012-09-28
-#    "iihe.ac.be", # Problematic site with server, long queue, added, 2011-09-26, commented 2012-09-28
-#    "unl.edu", # Jobs can wait in queues for a looong time, added 2011-10-24, commented 2012-10-26
-#    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
-    "kbfi.ee", # Files are not found, added 2012-09-28
-    "cscs.ch", # Files are not found, added 2012-09-28
-#    "roma1.infn.it", # Jobs don't finish, added 2012-10-26, commented 2013-02-25
-    "kiae.ru", # Jobs fail by some missing grid libraries, added 2013-02-20
-    ]
+### Default Storage Element (SE) black list for non-stageout jobs
+#defaultSeBlacklist_noStageout = [
+##    "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors, added 2011-09-02, commented 2012-09-28
+##    "iihe.ac.be", # Problematic site with server, long queue, added, 2011-09-26, commented 2012-09-28
+##    "unl.edu", # Jobs can wait in queues for a looong time, added 2011-10-24, commented 2012-10-26
+##    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
+    #"kbfi.ee", # Files are not found, added 2012-09-28
+    #"cscs.ch", # Files are not found, added 2012-09-28
+##    "roma1.infn.it", # Jobs don't finish, added 2012-10-26, commented 2013-02-25
+    #"kiae.ru", # Jobs fail by some missing grid libraries, added 2013-02-20
+    #]
 
-## Default Storage Element (SE) black list for stageout jobs
-defaultSeBlacklist_stageout = [
-    "colorado.edu", # Ultraslow bandwidth, no chance to get even the smaller pattuples through, added 2011-06-16
-    "T3_*", # Don't submit to T3's, added 2011-10-24
-    "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors, added 2011-09-02
-#    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times, added 2011-09-02, commented 2012-11-06 (long queues still apply, but remoteGlidein helps)
-#    "wisc.edu", # Stageout failures, added 2011-10-24, commented 2012-09-28 
-#    "ingrid.pt", # Stageout failures, added 2011-10-26, commented 2011-12-02
-#    "ucsd.edu", # Stageout failures, added 2011-10-26, commented 2012-11-19
-#    "pi.infn.it", # Stageout failures, added 2011-10-26, commented 2012-11-19
-#    "lnl.infn.it", # Stageout failures, added 2011-12-02, commented 2013-02-25
-#    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
-    "sprace.org.br", # Stageout failures. added 2011-12-02
-    "knu.ac.kr", # Stageout failures, added 2011-12-02
-#    "T2_US_*", # disable US because of low bandwidth, added 2012-04-04, commented 2012-09-28
-    ]
+### Default Storage Element (SE) black list for stageout jobs
+#defaultSeBlacklist_stageout = [
+    #"colorado.edu", # Ultraslow bandwidth, no chance to get even the smaller pattuples through, added 2011-06-16
+    #"T3_*", # Don't submit to T3's, added 2011-10-24
+    #"T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors, added 2011-09-02
+##    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times, added 2011-09-02, commented 2012-11-06 (long queues still apply, but remoteGlidein helps)
+##    "wisc.edu", # Stageout failures, added 2011-10-24, commented 2012-09-28 
+##    "ingrid.pt", # Stageout failures, added 2011-10-26, commented 2011-12-02
+##    "ucsd.edu", # Stageout failures, added 2011-10-26, commented 2012-11-19
+##    "pi.infn.it", # Stageout failures, added 2011-10-26, commented 2012-11-19
+##    "lnl.infn.it", # Stageout failures, added 2011-12-02, commented 2013-02-25
+##    "mit.edu", # MIT has some problems? added 2011-12-02, commented 2012-09-28
+    #"sprace.org.br", # Stageout failures. added 2011-12-02
+    #"knu.ac.kr", # Stageout failures, added 2011-12-02
+##    "T2_US_*", # disable US because of low bandwidth, added 2012-04-04, commented 2012-09-28
+    #]
 
-## Default Storage Element (SE) black list for backward compatibility
-defaultSeBlacklist = defaultSeBlacklist_noStageout + defaultSeBlacklist_stageout
+### Default Storage Element (SE) black list for backward compatibility
+#defaultSeBlacklist = defaultSeBlacklist_noStageout + defaultSeBlacklist_stageout
 
 ## Returns the list of CRAB task directories from a MultiCRAB configuration.
 # 
@@ -284,26 +283,26 @@ def checkCrabInPath():
         else:
             raise e
 
-## Create 'standard' multicrab task directory and return the name of it.
-#
-# \param prefix   Prefix string to the directory (before timestamp)
-# \param postfix  Postfix string to the directory (after timestamp)
-# \param path     Path to a directory where to create the multicrab
-#                 directory (if None, crete to working directory)
-def createTaskDir(prefix="multicrab", postfix="", path=None):
-    while True:
-        dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
-        if len(postfix) > 0:
-            dirname += "_" + postfix
-        if path != None:
-            dirname = os.path.join(path, dirname)
-        if os.path.exists(dirname):
-            time.sleep(1)
-            continue
+### Create 'standard' multicrab task directory and return the name of it.
+##
+## \param prefix   Prefix string to the directory (before timestamp)
+## \param postfix  Postfix string to the directory (after timestamp)
+## \param path     Path to a directory where to create the multicrab
+##                 directory (if None, crete to working directory)
+#def createTaskDir(prefix="multicrab", postfix="", path=None):
+    #while True:
+        #dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
+        #if len(postfix) > 0:
+            #dirname += "_" + postfix
+        #if path != None:
+            #dirname = os.path.join(path, dirname)
+        #if os.path.exists(dirname):
+            #time.sleep(1)
+            #continue
 
-        os.makedirs(dirname)
-        break
-    return dirname
+        #os.makedirs(dirname)
+        #break
+    #return dirname
 
 def crabCfgTemplate(scheduler="arc", return_data=None, copy_data=None, crabLines=[], cmsswLines=[], userLines=[], gridLines=[]):
     if return_data is None and copy_data is None:
@@ -369,71 +368,71 @@ def writeGitVersion(dirname):
 #def printAllDatasets(details=False):
     #multicrabWorkflows.printAllDatasets(details)
 
-## Select runs [runMin, runMax] from lumiList.
-# 
-# lumiList is assumed to be FWCore.PythonUtilities.LumiList.LumiList
-# object.
-# 
-# \return the modified LumiList object.
-def filterRuns(lumiList, runMin, runMax):
-    # From FWCore/PythonUtilities/scripts/filterJSON.py
-    runsToRemove = []
-    allRuns = lumiList.getRuns()
-    for run in allRuns:
-        if runMin != None and int(run) < runMin:
-            runsToRemove.append (run)
-        if runMax != None and int(run) > runMax:
-            runsToRemove.append (run)
+### Select runs [runMin, runMax] from lumiList.
+## 
+## lumiList is assumed to be FWCore.PythonUtilities.LumiList.LumiList
+## object.
+## 
+## \return the modified LumiList object.
+#def filterRuns(lumiList, runMin, runMax):
+    ## From FWCore/PythonUtilities/scripts/filterJSON.py
+    #runsToRemove = []
+    #allRuns = lumiList.getRuns()
+    #for run in allRuns:
+        #if runMin != None and int(run) < runMin:
+            #runsToRemove.append (run)
+        #if runMax != None and int(run) > runMax:
+            #runsToRemove.append (run)
 
-    lumiList.removeRuns(runsToRemove)
-    return lumiList
+    #lumiList.removeRuns(runsToRemove)
+    #return lumiList
 
-## Exception for non-succesful crab job exit codes
-class ExitCodeException(Exception):
-    def __init__(self, message):
-        self.message = message
-    def __str__(self):
-        return self.message
+### Exception for non-succesful crab job exit codes
+#class ExitCodeException(Exception):
+    #def __init__(self, message):
+        #self.message = message
+    #def __str__(self):
+        #return self.message
 
-## Given crab job stdout file, ensure that the job succeeded
-#
-# \param stdoutFile   Path to crab job stdout file
-# \param allowJobExitCodes  Consider jobs with these non-zero exit codes to be succeeded
-#
-# If any of the checks fail, raises multicrab.ExitCodeException
-def assertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
-#    re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
-    re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
-    re_job = re.compile("JobExitCode=(?P<code>\d+)")
+### Given crab job stdout file, ensure that the job succeeded
+##
+## \param stdoutFile   Path to crab job stdout file
+## \param allowJobExitCodes  Consider jobs with these non-zero exit codes to be succeeded
+##
+## If any of the checks fail, raises multicrab.ExitCodeException
+#def assertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
+##    re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
+    #re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
+    #re_job = re.compile("JobExitCode=(?P<code>\d+)")
 
-    exeExitCode = None
-    jobExitCode = None
-    if tarfile.is_tarfile(stdoutFile):
-        fIN = tarfile.open(stdoutFile)
-        log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
-        for member in fIN.getmembers():
-            f = fIN.extractfile(member)
-            match = log_re.search(f.name)
-            if match:
-    		for line in f:
-        	    m = re_exe.search(line)
-                    if m:
-            		exeExitCode = int(m.group("code"))
-            		continue
-        	    m = re_job.search(line)
-        	    if m:
-            		jobExitCode = int(m.group("code"))
-            		continue
-    	fIN.close()
-    jobExitCode = exeExitCode
-    if exeExitCode == None:
-        raise ExitCodeException("No exeExitCode")
-    if jobExitCode == None:
-        raise ExitCodeException("No jobExitCode")
-    if exeExitCode != 0:
-        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
-    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
-        raise ExitCodeException("Job exit code is %d" % jobExitCode)
+    #exeExitCode = None
+    #jobExitCode = None
+    #if tarfile.is_tarfile(stdoutFile):
+        #fIN = tarfile.open(stdoutFile)
+        #log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+        #for member in fIN.getmembers():
+            #f = fIN.extractfile(member)
+            #match = log_re.search(f.name)
+            #if match:
+    		#for line in f:
+        	    #m = re_exe.search(line)
+                    #if m:
+            		#exeExitCode = int(m.group("code"))
+            		#continue
+        	    #m = re_job.search(line)
+        	    #if m:
+            		#jobExitCode = int(m.group("code"))
+            		#continue
+    	#fIN.close()
+    #jobExitCode = exeExitCode
+    #if exeExitCode == None:
+        #raise ExitCodeException("No exeExitCode")
+    #if jobExitCode == None:
+        #raise ExitCodeException("No jobExitCode")
+    #if exeExitCode != 0:
+        #raise ExitCodeException("Executable exit code is %d" % exeExitCode)
+    #if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
+        #raise ExitCodeException("Job exit code is %d" % jobExitCode)
 
 ## Compact job number list
 #
