@@ -138,7 +138,6 @@ backgroundCrossSections = CrossSectionList(
             "8": 245.8* 114.0215/249.50, # [10], BR from [11]
             }),
     CrossSection("TTJets", {
-#            "7": 165.0, # [3,4], approx. NNLO
             "7": 172.0, # [10]
             "8": 245.8, # [10]
             "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
@@ -146,8 +145,10 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WJets", {
             "7": 31314.0, # [2], NNLO
             "8": 36703.2, # [9], NNLO
-            "13": 6.082e+04, # [14]
             }),
+    CrossSection("WJetsToLNu", {
+            "13": 6.082e+04, # [14]
+    }),
     CrossSection("WJetsToLNu_HT-100To200", {
             "13": 1.313e+03, # [14]
             }),
@@ -182,9 +183,6 @@ backgroundCrossSections = CrossSectionList(
             "8": 214.0,
             }),
     # end W+Njets 
-    CrossSection("DYJetsToLL_TuneZ2_MPIoff_M50_7TeV_madgraph_tauola_GENRAW", {
-            "7": 1.0,#"7": 3048.0, # [4], NNLO
-            }),
     CrossSection("DYJetsToLL_M50", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
@@ -229,47 +227,41 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("T_t-channel", {
             "7": 41.92, # [5,6]
             "8": 56.4, # [8]
-            "13": 136.02, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("Tbar_t-channel", {
             "7": 22.65, # [5,6]
             "8": 30.7, # [8]
-            "13": 80.95, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("T_tW-channel", {
             "7": 7.87, # [5,6]
             "8": 11.1, # [8]
-            "13": 35.6, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("Tbar_tW-channel", {
             "7": 7.87, # [5,6]
             "8": 11.1, # [8]
-            "13": 35.6, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("T_s-channel", {
             "7": 3.19, # [5,6]
             "8": 3.79, # [8]
-            "13": 7.20, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("Tbar_s-channel", {
             "7": 1.44, # [5,6]
             "8": 1.76, # [8]
-            "13": 4.16, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma 
             }),
     CrossSection("ST_tW_antitop_5f_inclusiveDecays", {
-            "13": 3.806e+01, # [14]
+            "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_tW_top_5f_inclusiveDecays", {
-            "13": 3.809e+01, # [14]
+            "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_tchannel_antitop_4f_leptonDecays", {
-            "13": 2.530e+01, # [14]
+            "13": 80.95, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_tchannel_top_4f_leptonDecays", {
-            "13": 4.190e+01, # [14]
+            "13": 136.02, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_schannel_4f_leptonDecays", {
-            "13": 3.365e+00, # [14]
+            "13": 10.32, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
 )
 
@@ -397,7 +389,7 @@ def _setHplusCrossSectionsHelper(name, mass, datasets, function):
 #                       from mass and energy, and returning cross
 #                       section and BR(t->H+)
 def _setHplusCrossSections(datasets, whFunction, hhFunction, hFunction, heavyFunction=None):
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+    import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 
     for mass in plots._lightHplusMasses:
         _setHplusCrossSectionsHelper("TTToHplusBWB_M%d"%mass, mass, datasets, whFunction)
@@ -424,7 +416,7 @@ def setHplusCrossSectionsToTop(datasets):
 # \param tanbeta   tanbeta parameter
 # \param mu        mu parameter
 def setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=defaultMu):
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+    import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
     histograms.createSignalText.set(tanbeta=tanbeta)
     if mu != defaultMu:
         histograms.createSignalText.set(mu=mu)
@@ -444,7 +436,7 @@ def setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=defaultMu):
 # \param br_tH      BR(t -> b H+)
 # \param br_Htaunu  BR(H+ -> tau nu)
 def setHplusCrossSectionsToBR(datasets, br_tH, br_Htaunu):
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+    import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
     histograms.createSignalText.set(br_tH=br_tH)
     _setHplusCrossSections(datasets,
                            lambda mass, energy: whTauNuCrossSection(br_tH, br_Htaunu, energy),
