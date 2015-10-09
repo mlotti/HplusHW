@@ -15,7 +15,7 @@ import datetime
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
 PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
 
-lumiMask25ns = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns_JSON.txt"
+lumiMask25ns = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-257599_13TeV_PromptReco_Collisions15_25ns_JSON.txt"
 lumiMask50ns = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-255031_13TeV_PromptReco_Collisions15_50ns_JSON_v2.txt"
 
 class Dataset :
@@ -33,8 +33,9 @@ class Dataset :
 
 datasetsTauData = []
 #datasetsTauData.append(Dataset('/Tau/Run2015B-23Sep2015-v1/MINIAOD',dataVersion="74Xdata"))
-datasetsTauData.append(Dataset('/Tau/Run2015C-23Sep2015-v1/MINIAOD',dataVersion="74Xdata"))
-datasetsTauData.append(Dataset('/Tau/Run2015D-PromptReco-v3/MINIAOD',dataVersion="74Xdata"))
+datasetsTauData.append(Dataset('/Tau/Run2015C-23Sep2015-v1/MINIAOD',dataVersion="74Xdata",lumiMask=lumiMask50ns))
+datasetsTauData.append(Dataset('/Tau/Run2015C-23Sep2015-v1/MINIAOD',dataVersion="74Xdata",lumiMask=lumiMask25ns))
+datasetsTauData.append(Dataset('/Tau/Run2015D-PromptReco-v3/MINIAOD',dataVersion="74Xdata",lumiMask=lumiMask25ns))
 
 datasetsMuonData = []
 #datasetsMuonData.append(Dataset('/SingleMuon/Run2015B-05Aug2015-v1/MINIAOD',dataVersion="74Xdata"))
@@ -143,6 +144,7 @@ tauLegDatasets.extend(datasets25nsTau)
 
 metLegDatasets         = []
 #metLegDatasets.append(Dataset('/TT_Tune4C_13TeV-pythia8-tauola/bluj-TTbar_MiniAOD_GRunV47_v2-6b3acb073896b48a28b982ccc80b3330/USER','phys03'))
+metLegDatasets.extend(datasetsTauData)
 metLegDatasets.extend(datasets25ns)
 #metLegDatasets.extend(datasets25nsSignal)
 
