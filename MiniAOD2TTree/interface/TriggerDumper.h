@@ -70,6 +70,8 @@ class TriggerDumper {
 	edm::TriggerNames names;
 	edm::Handle<pat::TriggerObjectStandAloneCollection> patTriggerObjects;
 
+        double L1MET_l1extra_x;
+        double L1MET_l1extra_y;
 	double L1MET_x;
         double L1MET_y;
 	double HLTMET_x;
