@@ -4,8 +4,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-dataVersion = "74Xmc"
- 
+#dataVersion = "74Xmc"
+dataVersion = "74Xdata"
+
 options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion
 
@@ -21,7 +22,8 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-       '/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/022B08C4-C702-E511-9995-D4856459AC30.root',
+#       '/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/022B08C4-C702-E511-9995-D4856459AC30.root',
+       '/store/data/Run2015D/Tau/MINIAOD/PromptReco-v3/000/256/630/00000/1E7E1004-225F-E511-AC7D-02163E011F9B.root',
     )
 )
 
@@ -78,16 +80,34 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_JetIdCleaned_v",
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	filter = cms.untracked.bool(False)
     ),
+    METNoiseFilter = cms.PSet(
+        triggerResults = cms.InputTag(METNoiseFilterSource),
+        printTriggerResultsList = cms.untracked.bool(False),
+        filtersFromTriggerResults = cms.vstring(
+            "Flag_CSCTightHaloFilter",
+            "Flag_goodVertices",   
+            "Flag_eeBadScFilter",
+        ),
+    ),
     Taus      = process.Taus,
     Electrons = process.Electrons,
     Muons     = process.Muons,
     Jets      = process.Jets,
-    METs      = process.METs
+    METs      = process.METs,
+    GenWeights = cms.VPSet(
+        cms.PSet(
+            branchname = cms.untracked.string("GenWeights"),
+            src = cms.InputTag("generator"),
+            filter = cms.untracked.bool(False)
+        )
+    ),
 )
 
 process.load("HiggsAnalysis.MiniAOD2TTree.METLegSkim_cfi")
