@@ -33,10 +33,10 @@ _dataEras = {
     #"Run2012AB": ["_2012A_", "_2012B_"],
     #"Run2012ABC": ["_2012A_", "_2012B_", "_2012C_"],
     #"Run2012ABCD": ["_2012A_", "_2012B_", "_2012C_", "_2012D_"],
-    "Run2015C": ["_2015C_"],
-    "Run2015D": ["_2015D_"],
-    "Run2015CD": ["_2015C_", "_2015D_"],
-    "Run2015": ["_2015C_", "_2015D_"],
+    "Run2015C": ["_Run2015C_"],
+    "Run2015D": ["_Run2015D_"],
+    "Run2015CD": ["_Run2015C_", "_Run2015D_"],
+    "Run2015": ["_Run2015C_", "_Run2015D_"],
 }
 
 ## Construct DatasetManager from a list of MultiCRAB directory names.
@@ -2431,7 +2431,6 @@ class Dataset:
 
         # Now this is really an uhly hack
         self._setBaseDirectory(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(self.files[0].GetName())))))
-
         # Extract configInfo and dataVersion, check for consistency
         # that all files have the same values
         self.info = None
@@ -2500,15 +2499,15 @@ class Dataset:
         self._analysisDirectoryName = self._analysisName
         if not self._useAnalysisNameOnly:
             if self._searchMode is not None:
-                self._analysisDirectoryName += self._searchMode
-            if (self.isMC() or self.isPseudo()) and self._dataEra is not None:
-                self._analysisDirectoryName += self._dataEra
+                self._analysisDirectoryName += "_"+self._searchMode
+            #if (self.isMC() or self.isPseudo()) and self._dataEra is not None:
+            if self._dataEra is not None:
+                self._analysisDirectoryName += "_"+self._dataEra
             if self._optimizationMode is not None:
-                self._analysisDirectoryName += self._optimizationMode
+                self._analysisDirectoryName += "_"+self._optimizationMode
             if (((self.isMC() or self.isPseudo()) or (self.isData() and enableSystematicVariationForData)) and
                 self._systematicVariation is not None):
-                self._analysisDirectoryName += self._systematicVariation
-
+                self._analysisDirectoryName += "_"+self._systematicVariation
         # Check that analysis directory exists
         for f in self.files:
             if aux.Get(f, self._analysisDirectoryName) == None:
@@ -2876,7 +2875,7 @@ class Dataset:
     # If \a topPtWeightType is not given in \a kwargs, read the value
     # from analysis directory -specific configInfo
     def updateNAllEventsToPUWeighted(self, era=None, **kwargs):
-        print "*** Cowardly refusing to update N(allEvents) to PU weighted (no longer necessary) ***"
+        print "*** Cowardly refusing to update N(allEvents) to PU weighted (needs to be updated to the new system) ***"
         return
         
         # Ignore if not MC
@@ -3867,8 +3866,8 @@ class DatasetPrecursor:
         self._rootFiles = []
 
 _analysisNameSkipList = [re.compile("^SystVar"), re.compile("configInfo"), re.compile("PUWeightProducer")]
-_analysisSearchModes = ["Light", "Heavy"]
-_dataDataEra_re = re.compile("_(?P<era>201\d\S)_")
+_analysisSearchModes = re.compile("_\d+to\d+_")
+_dataDataEra_re = re.compile("_Run201\d\S_")
 
 ## Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
 #
@@ -3894,7 +3893,7 @@ class DatasetManagerCreator:
     def __init__(self, rootFileList, **kwargs):
         self._precursors = [DatasetPrecursor(name, filenames) for name, filenames in rootFileList]
         self._baseDirectory = kwargs.get("baseDirectory", "")
-
+        
         mcRead = False
         for d in self._precursors:
             #if d.isMC() or d.isPseudo():
@@ -3907,16 +3906,16 @@ class DatasetManagerCreator:
                 if d.isData():
                     self._readAnalysisContent(d)
                     break
-
         dataEras = {}
         for d in self._precursors:
             if d.isData():
                 m = _dataDataEra_re.search(d.getName())
                 if m:
-                    dataEras["Run"+m.group("era")] = 1
+                    dataEraName = d.getName()[m.span()[0]+1:m.span()[1]-1].split("_")
+                    dataEras[dataEraName[0]] = 1
 
         self._dataDataEras = dataEras.keys()
-        self._dataDataEras.sort()                
+        self._dataDataEras.sort()
 
     def _readAnalysisContent(self, precursor):
         contents = aux.listDirectoryContent(precursor.getFiles()[0], lambda key: key.IsFolder())
@@ -3961,13 +3960,16 @@ class DatasetManagerCreator:
                     directoryName = directoryName[:start]
             
             # Look for search mode
-            for sm in _analysisSearchModes:
-                start = directoryName.find(sm)
-                if start >= 0:
-                    searchModes[sm] = 1
-                    directoryName = directoryName[:start]
-                    break
-
+            m = None
+            if start >= 0:
+                m = _analysisSearchModes.search(directoryName[:start])
+            else:
+                m = _analysisSearchModes.search(directoryName)
+            if m:
+                smname = directoryName[m.span()[0]+1:m.span()[1]-1]
+                searchModes[smname] = 1
+                directoryName = directoryName[:m.span()[0]]
+                break
             # Whatever is left in directoryName, is our analysis name
             analyses[directoryName] = 1
 
@@ -4018,7 +4020,6 @@ class DatasetManagerCreator:
     def createDatasetManager(self, **kwargs):
         _args = {}
         _args.update(kwargs)
-
 
         # First check that if some of these is not given, if there is
         # exactly one it available, use that.
@@ -4110,7 +4111,7 @@ class DatasetManagerCreator:
         if os.path.exists(lumiPath):
             print "Loading data luminosities from %s" % lumiPath
             manager.loadLuminosities()
-
+        
         return manager
 
     def getDatasetPrecursors(self):
