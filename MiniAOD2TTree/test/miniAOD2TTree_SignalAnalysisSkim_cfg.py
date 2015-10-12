@@ -52,8 +52,6 @@ process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
    reverseDecision = cms.bool(False)
 )
 METNoiseFilterSource = "TriggerResults::RECO"
-if dataVersion.isMC():
-    METNoiseFilterSource = "TriggerResults::PAT"
 
 # Set up MET uncertainties - FIXME: does not work at the moment
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATTools#MET_Systematics_Tools
@@ -173,14 +171,22 @@ process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
 # module execution
-process.runEDFilter = cms.Path(process.skimCounterAll*
-                               process.HBHENoiseFilterResultProducer* #Produces HBHE bools
-                               process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
-                               process.skimCounterMETFilters*
-                               process.skim*
-                               process.skimCounterPassed*
-                               process.egmGsfElectronIDSequence*
-                               process.dump)
+if dataVersion.isData():
+    process.runEDFilter = cms.Path(process.skimCounterAll*
+                                   process.HBHENoiseFilterResultProducer* #Produces HBHE bools
+                                   process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
+                                   process.skimCounterMETFilters*
+                                   process.skim*
+                                   process.skimCounterPassed*
+                                   process.egmGsfElectronIDSequence*
+                                   process.dump)
+else:
+    process.runEDFilter = cms.Path(process.skimCounterAll*  
+                                   process.skimCounterMETFilters*
+                                   process.skim*
+                                   process.skimCounterPassed*
+                                   process.egmGsfElectronIDSequence*
+                                   process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
    #outputCommands = cms.untracked.vstring(
