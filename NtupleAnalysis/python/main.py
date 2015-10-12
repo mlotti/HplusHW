@@ -344,6 +344,19 @@ class Process:
             cv = ROOT.TNamed("codeVersionAnalysis", git.getCommitId())
             cv.Write()
             if not cinfo == None:
+                # Add more information to configInfo
+                n = cinfo.GetNbinsX()
+                cinfo.SetBins(n+2, 0, n+2)
+                cinfo.GetXaxis().SetBinLabel(n+1, "isData")
+                cinfo.GetXaxis().SetBinLabel(n+2, "isPileupReweighted")
+                # Add "isData" column
+                if not dset.getDataVersion().isMC():
+                    cinfo.SetBinContent(n+1, cinfo.GetBinContent(1))
+                # Add "isPileupReweighted" column
+                
+                # FIXME: add code
+                
+                # Write
                 cinfo.Write()
                 fIN.Close()
 
