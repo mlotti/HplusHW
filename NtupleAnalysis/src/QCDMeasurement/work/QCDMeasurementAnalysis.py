@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+dataEras = ["2015"]
+#dataEras = ["2015B","2015C"]
+searchModes = ["80to1000"]
+
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 process = Process()
 
@@ -18,7 +22,16 @@ allSelections.CommonPlots.histogramSplitting = [
     PSet(label="tauPt", binLowEdges=[60.0, 70.0, 80.0, 100.0, 120.0], useAbsoluteValues=False),
   ]
 
-process.addAnalyzer("QCDMeasurement", Analyzer("QCDMeasurement", config=allSelections, silent=False))
+# Build analysis modules
+from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
+builder = AnalysisBuilder("QCDMeasurement", 
+                          dataEras,
+                          searchModes,
+                          #### Options ####
+                          #doSystematicVariations=True,
+                          )
+#builder.addVariation()
+builder.build(process, allSelections)
 
 # Pick events
 #process.addOptions(EventSaver = PSet(enabled = True,pickEvents = True))
