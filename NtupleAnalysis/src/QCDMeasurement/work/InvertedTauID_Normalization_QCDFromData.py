@@ -25,44 +25,31 @@ import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 
 from InvertedTauID import *
-#dataEra = "Run2011A"
-#dataEra = "Run2011B"
-dataEra = "Run2012ABCD"
+#dataEra = "Run2015C"
+#dataEra = "Run2015D"
+#dataEra = "Run2015CD"
+dataEra = "Run2015"
 
-
-searchMode = "Light"
-#searchMode = "Heavy"
+searchMode = "80to1000"
 
 def usage():
     print "\n"
-    print "### Usage:   InvertedTauID_Normalization.py <multicrab dir>\n"
+    print "### Usage:   InvertedTauID_Normalization_QCDFromData.py <multicrab dir>\n"
     print "\n"
     sys.exit()
 
 def main(argv):
-
-#    HISTONAME = "TauIdJets"
-#    HISTONAME = "TauIdJetsCollinear"
-#    HISTONAME = "TauIdBtag"
-#    HISTONAME = "TauIdBvetoCollinear"
-#    HISTONAME = "TauIdBveto"
-    HISTONAME = "TauIdAfterCollinearCuts"
-#    HISTONAME = "GenuineTauIdAfterCollinearCuts"    
-   
     dirs = []
     if len(sys.argv) < 2:
 	usage()
 
     dirs.append(sys.argv[1])
-    #comparisonList = ["TauIdAfterCollinearCuts","TauIdAfterCollinearCutsPlusFilteredEWKFakeTaus"]
-    comparisonList = ["TauIdAfterCollinearCuts"]
 
+    comparisonList = ["AfterStdSelections"]
     
     # Create all datasets from a multicrab task
-    # datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
-    #datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra, analysisBaseName="signalAnalysisInvertedTau")
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
-#    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,counters=counters, dataEra=dataEra)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis)
+    #print datasets.getDatasetNames()
 
     #print datasets
     # Check multicrab consistency
@@ -115,12 +102,12 @@ def main(argv):
         invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
         invertedQCD.setInfo([dataEra,searchMode,HISTONAME])
 
-        histonames = datasets.getDataset("Data").getDirectoryContent("baseline/METBaseline"+HISTONAME)
+        histonames = datasets.getDataset("Data").getDirectoryContent("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME)
         bins = []
         binLabels = []
         for histoname in histonames:
-            bins.append(histoname.replace("METBaseline"+HISTONAME,""))
-            title = datasets.getDataset("Data").getDatasetRootHisto("baseline/METBaseline"+HISTONAME+"/"+histoname).getHistogram().GetTitle()
+            bins.append(histoname.replace("NormalizationMETBaselineTau"+HISTONAME,""))
+            title = datasets.getDataset("Data").getDatasetRootHisto("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/"+histoname).getHistogram().GetTitle()
             title = title.replace("METBaseline"+HISTONAME,"")
             title = title.replace("#tau p_{T}","taup_T")
             title = title.replace("#tau eta","taueta")
@@ -152,16 +139,17 @@ def main(argv):
 
             invertedQCD.setLabel(binLabels[i])
 
-            metBase = plots.DataMCPlot(datasets, "baseline/METBaseline"+HISTONAME+"/METBaseline"+HISTONAME+bin)
-            metInver = plots.DataMCPlot(datasets, "Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
+            metBase = plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
+            metInver = plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
             # Rebin before subtracting
-            metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10)) #5
-            metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10)) #5
+            RebinFactor = 10
+            metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
+            metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
 
-            metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
-            metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted/METInverted"+HISTONAME+"/METInverted"+HISTONAME+bin)
-            metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline/METBaseLine"+HISTONAME+"/METBaseline"+HISTONAME+bin)
-            metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline/METBaseLine"+HISTONAME+"/METBaseline"+HISTONAME+bin)
+            metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
+            metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
+            metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("ForQCDNormalization/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
+            metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("ForQCDNormalization/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
 
             metBase_QCD = metBase_data.Clone("QCD")
             metBase_QCD.Add(metBase_EWK,-1)
@@ -191,7 +179,7 @@ def main(argv):
             invertedQCD.getNormalization()
 
         invertedQCD.Summary()
-        normalizationFileName = HISTONAME.replace("TauIdAfterCollinearCuts","")
+        normalizationFileName = HISTONAME #.replace("TauIdAfterCollinearCuts","")
         if HISTONAME == "TauIdAfterCollinearCutsPlusFilteredEWKFakeTaus":
             normalizationFileName = normalizationFileName.replace("Plus","")
         invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactors" + normalizationFileName + ".py")

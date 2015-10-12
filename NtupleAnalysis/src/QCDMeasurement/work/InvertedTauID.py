@@ -28,8 +28,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 
-analysis = "signalAnalysisInvertedTau"
-#analysis = "signalAnalysis"
+analysis = "QCDMeasurement"
 counters = analysis+"/counters"
 
 def Linear(x,par):
@@ -1203,9 +1202,7 @@ class InvertedTauID:
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
         plot.createFrame(canvasName+self.label, opts={"ymin": 0.1, "ymaxfactor": 2.})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addStandardTexts()
 
         plot.getPad().SetLogy(True)
 
@@ -1274,7 +1271,7 @@ class InvertedTauID:
 
         par = theFit.GetParameters()
         self.parInvQCD = par
-        self.nFitInvData = theFit.Integral(0,1000,par)
+        self.nFitInvData = theFit.Integral(0,1000) #,par)
         self.nFitInvQCD = self.nFitInvData
         #print "check self.nFitInvData",self.nFitInvData
         """
@@ -1296,9 +1293,7 @@ class InvertedTauID:
         plot.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1378,9 +1373,7 @@ class InvertedTauID:
 	plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
 	plot.createFrame("qcdfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addStandardTexts()
 
 	self.normInvQCD = histo.Integral(0,histo.GetNbinsX())
 
@@ -1417,7 +1410,7 @@ class InvertedTauID:
             return
                     
         name = ""
-        name_re = re.compile("(?P<name>\S+?)/")
+        name_re = re.compile("/NormalizationMET(?P<name>\S+?)Tau")
         match = name_re.search(histo.GetName())
         if match:
             name = match.group("name")
@@ -1430,7 +1423,7 @@ class InvertedTauID:
         numberOfParameters = 4
 
         print "Fit range ",rangeMin, " - ",rangeMax
-
+        print name
         if name == "Baseline":
             class FitFunction:
                 def __call__( self, x, par ):
@@ -1548,9 +1541,7 @@ class InvertedTauID:
 
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1558,7 +1549,7 @@ class InvertedTauID:
         self.parMCEWK = theFit.GetParameters()
         
         print "EWK MC fit parameters",fitPars
-        self.nMCEWK = theFit.Integral(0,1000,self.parMCEWK)
+        self.nMCEWK = theFit.Integral(0,1000)#,self.parMCEWK)
         print "Integral ",self.normEWK*self.nMCEWK
 
     def fitData(self,histo,options="R"):
@@ -1628,9 +1619,7 @@ class InvertedTauID:
         
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1838,7 +1827,7 @@ class InvertedTauID:
 #	self.normalizationForInvertedEvents = nQCDbaseline*QCDfractionInBaseLineEvents/nQCDinverted
 #        self.normalizationForInvertedEWKEvents = nQCDbaseline*(1-QCDfractionInBaseLineEvents)/nQCDinverted
             ratio = float(nQCDbaseline)/nQCDinverted
-            normalizationForInvertedEventsError = sqrt(ratio*(1-ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio        
+            normalizationForInvertedEventsError = math.sqrt(ratio*(1-ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio        
             self.normFactors.append(self.normalizationForInvertedEvents)
             self.normFactorsEWK.append(self.normalizationForInvertedEWKEvents)
         else:

@@ -28,8 +28,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 
-analysis = "signalAnalysisInvertedTau"
-#analysis = "signalAnalysis"
+analysis = "QCDMeasurement"
 counters = analysis+"/counters"
 
 def Linear(x,par):
@@ -1224,9 +1223,7 @@ class InvertedTauID:
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
         plot.createFrame(canvasName+self.label, opts={"ymin": 0.1, "ymaxfactor": 2.})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addStandardTexts()
 
         plot.getPad().SetLogy(True)
 
@@ -1295,7 +1292,7 @@ class InvertedTauID:
 
         par = theFit.GetParameters()
         self.parInvQCD = par
-        self.nFitInvData = theFit.Integral(0,1000,par)
+        self.nFitInvData = theFit.Integral(0,1000)#,par)
         self.nFitInvQCD = self.nFitInvData
         #print "check self.nFitInvData",self.nFitInvData
         """
@@ -1317,10 +1314,8 @@ class InvertedTauID:
         plot.histoMgr.appendHisto(histograms.Histo(theFit,"Fit"))
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
-
+        histograms.addStandardTexts()
+        
         plot.draw()
         plot.save()
         """
@@ -1399,9 +1394,7 @@ class InvertedTauID:
 	plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
 	plot.createFrame("qcdfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addStandardTexts()
 
 	self.normInvQCD = histo.Integral(0,histo.GetNbinsX())
 
@@ -1438,7 +1431,7 @@ class InvertedTauID:
             return
                     
         name = ""
-        name_re = re.compile("(?P<name>\S+?)/")
+        name_re = re.compile("/NormalizationMET(?P<name>\S+?)Tau")
         match = name_re.search(histo.GetName())
         if match:
             name = match.group("name")
@@ -1454,7 +1447,8 @@ class InvertedTauID:
         boundaryInv = 150
 
         print "Fit range ",rangeMin, " - ",rangeMax
-        if name == "baseline":
+        print name
+        if name == "Baseline":
             class FitFunction:
                 def __call__( self, x, par ):
                     return EWKFunction(x,par,boundary,1,0)
@@ -1554,7 +1548,7 @@ class InvertedTauID:
 	self.normEWK_GenuineTaus = histo.Integral(0,histo.GetNbinsX())
         if name == "Inverted":
             self.nEWKinverted_GenuineTaus = self.normEWK_GenuineTaus
-        if name == "baseline":
+        if name == "Baseline":
             self.nEWKbaseline_GenuineTaus = self.normEWK_GenuineTaus
 
 	histo.Scale(1/self.normEWK_GenuineTaus)
@@ -1587,9 +1581,7 @@ class InvertedTauID:
         
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1597,7 +1589,7 @@ class InvertedTauID:
         self.parMCEWK_GenuineTaus = theFit.GetParameters()
         
         print "EWK MC Genuine Taus fit parameters",fitPars
-        self.nMCEWK_GenuineTaus = theFit.Integral(0,1000,self.parMCEWK_GenuineTaus)
+        self.nMCEWK_GenuineTaus = theFit.Integral(0,1000) #,self.parMCEWK_GenuineTaus)
         print "Integral ",self.normEWK_GenuineTaus*self.nMCEWK_GenuineTaus
 
     def fitEWK_FakeTaus(self,histo,options="LR"):
@@ -1605,7 +1597,7 @@ class InvertedTauID:
             return
                     
         name = ""
-        name_re = re.compile("(?P<name>\S+?)/")
+        name_re = re.compile("/NormalizationMET(?P<name>\S+?)Tau")
         match = name_re.search(histo.GetName())
         if match:
             name = match.group("name")
@@ -1621,8 +1613,8 @@ class InvertedTauID:
         boundaryInv = 100
 
         print "Fit range ",rangeMin, " - ",rangeMax
-
-        if name == "baseline":
+        print name
+        if name == "Baseline":
             class FitFunction:
                 def __call__( self, x, par ):
                     return EWKFunctionInv(x,par,boundaryInv,1,1) #not Inv?
@@ -1711,7 +1703,7 @@ class InvertedTauID:
 	self.normEWK_FakeTaus = histo.Integral(0,histo.GetNbinsX())
         if name == "Inverted":
             self.nEWKinverted_FakeTaus = self.normEWK_FakeTaus
-        if name == "baseline":
+        if name == "Baseline":
             self.nEWKbaseline_FakeTaus = self.normEWK_FakeTaus
 
 	histo.Scale(1/self.normEWK_FakeTaus)
@@ -1727,10 +1719,10 @@ class InvertedTauID:
 
         if name == "Inverted":
             self.parMCEWKinverted_FakeTaus = theFit.GetParameters()
-            self.nMCEWKinverted_FakeTaus = theFit.Integral(0,1000,self.parMCEWKinverted_FakeTaus)
-        if name == "baseline":
+            self.nMCEWKinverted_FakeTaus = theFit.Integral(0,1000)#,self.parMCEWKinverted_FakeTaus)
+        if name == "Baseline":
             self.parMCEWKbaseline_FakeTaus = theFit.GetParameters()
-            self.nMCEWKbaseline_FakeTaus = theFit.Integral(0,1000,self.parMCEWKbaseline_FakeTaus)
+            self.nMCEWKbaseline_FakeTaus = theFit.Integral(0,1000)#,self.parMCEWKbaseline_FakeTaus)
         
         fitPars = "fit parameters "
 
@@ -1747,9 +1739,7 @@ class InvertedTauID:
 
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1757,7 +1747,7 @@ class InvertedTauID:
         self.parMCEWK_FakeTaus = theFit.GetParameters()
         
         print "EWK MC Fake Taus fit parameters",fitPars
-        self.nMCEWK_FakeTaus = theFit.Integral(0,1000,self.parMCEWK_FakeTaus)
+        self.nMCEWK_FakeTaus = theFit.Integral(0,1000)#,self.parMCEWK_FakeTaus)
         print "Integral ",self.normEWK_FakeTaus*self.nMCEWK_FakeTaus
 
     def fitData(self,histo,options="R"):
@@ -1837,9 +1827,7 @@ class InvertedTauID:
         
         plot.getPad().SetLogy(True)
 
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        histograms.addStandardTexts()
 
         plot.draw()
         plot.save()
@@ -1899,7 +1887,9 @@ class InvertedTauID:
 #	self.normalizationForInvertedEvents = nQCDbaseline*QCDfractionInBaseLineEvents/nQCDinverted
 #        self.normalizationForInvertedEWKEvents = nQCDbaseline*(1-QCDfractionInBaseLineEvents)/nQCDinverted
             ratio = float(nQCDbaseline)/nQCDinverted
-            normalizationForInvertedEventsError = sqrt(ratio*(1-ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio        
+            normalizationForInvertedEventsError = 0.0
+            if ratio*(1-ratio/nQCDinverted) > 0:
+                normalizationForInvertedEventsError = math.sqrt(ratio*(1-ratio/nQCDinverted))*QCDfractionInBaseLineEvents +QCDfractionInBaseLineEventsError*ratio        
             self.normFactors.append(self.normalizationForInvertedEvents)
             self.normFactorsEWK_GenuineTaus.append(self.normalizationForInvertedEWKEvents_GenuineTaus)
             self.normFactorsEWK_FakeTaus.append(self.normalizationForInvertedEWKEvents_FakeTaus)
