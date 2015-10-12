@@ -16,7 +16,17 @@ process.addDatasetsFromMulticrab(sys.argv[1])
 
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
-process.addAnalyzer("SignalAnalysis", Analyzer("SignalAnalysis", config=allSelections, silent=False))
+
+# Build analysis modules
+from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
+builder = AnalysisBuilder("SignalAnalysis", 
+                          dataEras,
+                          searchModes,
+                          #### Options ####
+                          #doSystematicVariations=True,
+                          )
+#builder.addVariation()
+builder.build(process, allSelections)
 
 # Example of adding an analyzer whose configuration depends on dataVersion
 #def createAnalyzer(dataVersion):

@@ -28,7 +28,7 @@ yLabel  = "Level-1 + HLT MET efficiency"
 #    yLabel = "Level-1 + HLT MET efficiency" 
 #))
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 def runRange(era):
     lumi   = 0
@@ -44,10 +44,10 @@ def runRange(era):
         runmin = 203777
         runmax = 208686
 
-    if era == "2015A":
+    if era == "2015CD":
         lumi = 100
-        runmin = 0
-        runmax = 999999
+        runmin = 253888
+        runmax = 256869
 
     if lumi == 0:
         print "Unknown era",era,"exiting.."
@@ -72,7 +72,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
         offlineSelection = leg,
         TauSelection = PSet(
             discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
-                             "againstMuonTight2",
+                             "againstMuonTight3",
                              "againstElectronMediumMVA5"],
         ),
         binning = binning,
@@ -95,7 +95,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
                                 "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v7",
                                 "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v9",
                                 "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]
-        if era == "2015A":
+        if era == "2015CD":
             a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1"]
             a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1"]
 
@@ -106,7 +106,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
     else:
         a.Trigger.triggerOR = ["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"]
         a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]
-        if era == "2015A":
+        if era == "2015CD":
             a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1"]
             a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1"]
 
@@ -123,17 +123,17 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
 
 def addAnalyzer(era,onlineSelection):
     dv = ["53Xdata22Jan2013","53mcS10"]
-    if era == "2015A":
+    if era == "2015CD":
         dv = ["74Xdata","74Xmc"]
     process.addAnalyzer("METLeg_"+era+"_"+onlineSelection, lambda dv: createAnalyzer(dv, era, onlineSelection))
 
 #addAnalyzer("2012ABCD")
 #addAnalyzer("2012D")
 #addAnalyzer("2012ABCD_CaloMET")
-addAnalyzer("2015A","MET80")
-addAnalyzer("2015A","MET120")
-addAnalyzer("2015A_CaloMET","MET80")
-addAnalyzer("2015A_CaloMET","MET120")
+addAnalyzer("2015CD","MET80")
+#addAnalyzer("2015A","MET120")
+#addAnalyzer("2015A_CaloMET","MET80")
+#addAnalyzer("2015A_CaloMET","MET120")
 
 # Pick events
 #process.addOptions(EventSaver = PSet(enabled = True, pickEvents = True))

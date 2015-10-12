@@ -5,11 +5,11 @@ import sys
 import ROOT
 import array
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 
 ROOT.gROOT.SetBatch(True)
 plotDir = "TauLeg2015"
@@ -124,8 +124,9 @@ def main():
 
     paths = [sys.argv[1]]
 
-    analysis = "TauLeg_2015C"
+    analysis = "TauLeg_2015CD"
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
+    datasets.loadLuminosities()
 
     style = tdrstyle.TDRStyle()
 
@@ -160,8 +161,16 @@ def main():
     p.getFrame2().GetYaxis().SetTitle("Ratio")
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
+    histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
+    histograms.addText(0.5, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.5, 0.46, "Runs "+datasets.loadRunRange(), 17)
+
     p.draw()
     lumi = 0.0
+    for d in datasets.getDataDatasets():
+        print "luminosity",d.getName(),d.getLuminosity()
+        lumi += d.getLuminosity()
+    print "luminosity, sum",lumi
     histograms.addStandardTexts(lumi=lumi)
 
     if not os.path.exists(plotDir):

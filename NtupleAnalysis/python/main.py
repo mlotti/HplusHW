@@ -8,9 +8,9 @@ ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import datasets as datasetsTest
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.git as git
 
 class PSet:
     def __init__(self, **kwargs):
@@ -168,6 +168,7 @@ class Process:
         self._options = PSet()
 
     def addDataset(self, name, files=None, dataVersion=None, lumiFile=None):
+
         if files is None:
             files = datasetsTest.getFiles(name)
 
@@ -247,6 +248,22 @@ class Process:
             json.dump(lumidata, f, sort_keys=True, indent=2)
             f.close()
 
+            # Add run range in a json file, if runMin and runMax in pset
+            rrdata = {}
+            for aname, analyzerIE in self._analyzers.iteritems():
+                ana = analyzerIE.getAnalyzer()
+                if hasattr(ana, "__call__"):
+                    for dset in self._datasets:
+                        if dset.getDataVersion().isData():
+                            ana = ana(dset.getDataVersion())
+                            if ana.__getattr__("runMax") > 0:
+                                rrdata[aname] = "%s-%s"%(ana.__getattr__("runMin"),ana.__getattr__("runMax"))
+                                break
+            if len(rrdata) > 0:
+                f = open(os.path.join(outputDir, "runrange.json"), "w")
+                json.dump(rrdata, f, sort_keys=True, indent=2)
+                f.close()
+
         # Setup proof if asked
         _proof = None
         if proof:
@@ -287,6 +304,11 @@ class Process:
                 continue
 
             print "*** Processing dataset (%d/%d): %s"%(ndset, len(self._datasets), dset.getName())
+            if dset.getDataVersion().isData():
+                lumivalue = "--- not available in lumi.json (or lumi.json not available) ---"
+                if dset.getName() in lumidata.keys():
+                    lumivalue = lumidata[dset.getName()]
+                print "    Luminosity: %s fb-1"%lumivalue
 
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())
@@ -344,6 +366,19 @@ class Process:
             cv = ROOT.TNamed("codeVersionAnalysis", git.getCommitId())
             cv.Write()
             if not cinfo == None:
+                # Add more information to configInfo
+                n = cinfo.GetNbinsX()
+                cinfo.SetBins(n+2, 0, n+2)
+                cinfo.GetXaxis().SetBinLabel(n+1, "isData")
+                cinfo.GetXaxis().SetBinLabel(n+2, "isPileupReweighted")
+                # Add "isData" column
+                if not dset.getDataVersion().isMC():
+                    cinfo.SetBinContent(n+1, cinfo.GetBinContent(1))
+                # Add "isPileupReweighted" column
+                
+                # FIXME: add code
+                
+                # Write
                 cinfo.Write()
                 fIN.Close()
 

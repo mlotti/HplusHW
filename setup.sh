@@ -100,6 +100,17 @@ else
             done
         fi
     done
+    for DIR in `ls NtupleAnalysis/src` ; do
+        if [[ ! -e .python/HiggsAnalysis/$DIR ]] && [[ -e $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python ]]; then
+            ln -s $HIGGSANALYSIS_BASE//NtupleAnalysis/src/$DIR/python .python/HiggsAnalysis/$DIR
+            touch .python/HiggsAnalysis/$DIR/__init__.py
+            for d in .python/HiggsAnalysis/$DIR/*; do
+                if [ -d $d ]; then
+                    touch $d/__init__.py
+                fi
+            done
+        fi
+    done
 
     if [ "x$PYTHONPATH" = "x" ]; then
         export PYTHONPATH=$PWD/.python

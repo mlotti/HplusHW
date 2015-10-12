@@ -7,6 +7,7 @@ import glob
 import subprocess
 import json
 from optparse import OptionParser
+import ROOT
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
@@ -15,6 +16,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
 
 dataVersion_re = re.compile("dataVersion=(?P<dataVersion>[^: ]+)")
+pu_re = re.compile("\|\s+\S+\s+\|\s+\S+\s+\|\s+.*\s+\|\s+.*\s+\|\s+\S+\s+\|\s+\S+\s+\|\s+(?P<lumi>\d+(\.\d*)?|\.\d+)\s+\|\s+(?P<pu>\d+(\.\d*)?|\.\d+)\s+\|\s+\S+\s+\|")
+
 def isMCTask(taskdir):
     crabCfg = "crabConfig_"+taskdir+".py"
     if not os.path.exists(crabCfg):
@@ -130,7 +133,7 @@ def main(opts, args):
             print " http://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html"
             sys.exit()
 
-	cmd = [exe,"lumi","-u/pb","-i", jsonfile]
+	cmd = [exe,"lumi","--byls", "-u/pb","-i", jsonfile]
         if opts.verbose:
             print " ".join(cmd)
 
@@ -149,8 +152,10 @@ def main(opts, args):
 #        lines.reverse()
         lumi = -1.0
         unit = None
+        fOUT = ROOT.TFile.Open(os.path.join(task, "results", "PileUp.root"),"RECREATE")
+        hPU = ROOT.TH1F("PileUp","",50,0,50)
         for line in lines:
-	    print line
+#	    print line
             m = unit_re.search(line)
             if m:
                 unit = m.group("unit")
@@ -162,6 +167,15 @@ def main(opts, args):
 #                if opts.lumicalc1:
 #                    lumi = lumi/1e6 # ub^-1 -> pb^-1, lumiCalc.py returns ub^-1
 #                continue
+
+            # Fill PU distribution
+            m = pu_re.search(line)
+            if m:
+                lumi = float(m.group("lumi"))
+                pu   = float(m.group("pu"))
+                hPU.Fill(pu,lumi)                
+        hPU.Write()
+        fOUT.Close()
 
         if unit == None:
             raise Exception("Didn't find unit information from lumiCalc output, command was %s" % " ".join(cmd))

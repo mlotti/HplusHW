@@ -27,7 +27,7 @@ def pileupWeight(data=None, mc=None, enabled=None):
 
 if __name__ == "__main__":
     import unittest
-    import HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux as aux
+    import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
     class TestPileupWeight(unittest.TestCase):
         def testDefault(self):
             puweight = pileupWeight()

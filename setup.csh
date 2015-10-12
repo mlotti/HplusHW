@@ -116,6 +116,17 @@ else
             end
         endif
     end
+    foreach DIR ( `ls NtupleAnalysis/src` )
+        if ( ! -e .python/HiggsAnalysis/$DIR && -e $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python ) then
+            ln -s $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python .python/HiggsAnalysis/$DIR
+            touch .python/HiggsAnalysis/$DIR/__init__.py
+            foreach d ( .python/HiggsAnalysis/$DIR/* )
+                if ( -d $d ) then
+                    touch $d/__init__.py
+                endif
+            end
+        endif
+    end
 
     if ( -z PYTHONPATH ) then
         setenv PYTHONPATH "${PWD}/.python"
