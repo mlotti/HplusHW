@@ -12,8 +12,8 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 
 re_histos = []
 re_se = re.compile("newPfn =\s*(?P<url>\S+)")
