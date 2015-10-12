@@ -305,7 +305,10 @@ class Process:
 
             print "*** Processing dataset (%d/%d): %s"%(ndset, len(self._datasets), dset.getName())
             if dset.getDataVersion().isData():
-                print "    Lumi %s fb-1"%lumidata[dset.getName()]
+                lumivalue = "--- not available in lumi.json (or lumi.json not available) ---"
+                if dset.getName() in lumidata.keys():
+                    lumivalue = lumidata[dset.getName()]
+                print "    Luminosity: %s fb-1"%lumivalue
 
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())
