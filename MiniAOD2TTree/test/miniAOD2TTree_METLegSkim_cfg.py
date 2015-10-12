@@ -50,8 +50,6 @@ process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
    reverseDecision = cms.bool(False)
 )
 METNoiseFilterSource = "TriggerResults::RECO"
-if dataVersion.isMC():
-    METNoiseFilterSource = "TriggerResults::PAT"
 
 process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi") 
@@ -118,14 +116,22 @@ process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
 
 # module execution
-process.runEDFilter = cms.Path(process.skimCounterAll*
-                               process.HBHENoiseFilterResultProducer* #Produces HBHE bools
-                               process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
-                               process.skimCounterMETFilters*
-                               process.skim*
-                               process.skimCounterPassed*
-                               process.egmGsfElectronIDSequence*
-                               process.dump)
+if dataVersion.isData():
+    process.runEDFilter = cms.Path(process.skimCounterAll*
+                                   process.HBHENoiseFilterResultProducer* #Produces HBHE bools
+                                   process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
+                                   process.skimCounterMETFilters*
+                                   process.skim*
+                                   process.skimCounterPassed*
+                                   process.egmGsfElectronIDSequence*
+                                   process.dump)
+else:
+    process.runEDFilter = cms.Path(process.skimCounterAll*  
+                                   process.skimCounterMETFilters*
+                                   process.skim*
+                                   process.skimCounterPassed*
+                                   process.egmGsfElectronIDSequence*
+                                   process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
 #    outputCommands = cms.untracked.vstring(
