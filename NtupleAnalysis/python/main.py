@@ -168,6 +168,7 @@ class Process:
         self._options = PSet()
 
     def addDataset(self, name, files=None, dataVersion=None, lumiFile=None):
+
         if files is None:
             files = datasetsTest.getFiles(name)
 
@@ -247,6 +248,22 @@ class Process:
             json.dump(lumidata, f, sort_keys=True, indent=2)
             f.close()
 
+            # Add run range in a json file, if runMin and runMax in pset
+            rrdata = {}
+            for aname, analyzerIE in self._analyzers.iteritems():
+                ana = analyzerIE.getAnalyzer()
+                if hasattr(ana, "__call__"):
+                    for dset in self._datasets:
+                        if dset.getDataVersion().isData():
+                            ana = ana(dset.getDataVersion())
+                            if ana.__getattr__("runMax") > 0:
+                                rrdata[aname] = "%s-%s"%(ana.__getattr__("runMin"),ana.__getattr__("runMax"))
+                                break
+            if len(rrdata) > 0:
+                f = open(os.path.join(outputDir, "runrange.json"), "w")
+                json.dump(rrdata, f, sort_keys=True, indent=2)
+                f.close()
+
         # Setup proof if asked
         _proof = None
         if proof:
@@ -287,6 +304,8 @@ class Process:
                 continue
 
             print "*** Processing dataset (%d/%d): %s"%(ndset, len(self._datasets), dset.getName())
+            if dset.getDataVersion().isData():
+                print "    Lumi %s fb-1"%lumidata[dset.getName()]
 
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())

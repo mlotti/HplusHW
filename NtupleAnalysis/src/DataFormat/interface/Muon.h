@@ -17,6 +17,9 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
+  void setConfigurableDiscriminators(const std::vector<std::string>& names) {
+    fConfigurableDiscriminatorNames = names;
+  }
   void setMuonIDDiscriminator(const std::string& name);
   bool muonIDDiscriminatorIsValid() const;
 
@@ -28,10 +31,13 @@ public:
   friend class Particle<MuonCollection>;
 
 protected:
+  std::vector<const Branch<std::vector<bool>> *> fConfigurableDiscriminators;
   const Branch<std::vector<bool>>* fMuonIDDiscriminator;
 
 private:
   void initialize();
+
+  std::vector<std::string> fConfigurableDiscriminatorNames;
   
   std::string fMuonIDDiscriminatorName;
   bool bValidityOfMuonIDDiscr;
@@ -42,7 +48,15 @@ public:
   Muon() {}
   Muon(const MuonCollection* coll, size_t index): MuonGenerated(coll, index) {}
   ~Muon() {}
-  
+
+  // Methods for discriminators 
+  bool configurableDiscriminators() const {
+    for(auto& disc: fCollection->fConfigurableDiscriminators) {
+      if(!disc->value()[index()])
+        return false;
+    }
+    return true;
+  }  
   bool muonIDDiscriminator() const {
     if (!fCollection->muonIDDiscriminatorIsValid())
       return true;

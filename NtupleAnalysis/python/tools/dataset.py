@@ -3711,6 +3711,14 @@ class DatasetManager:
 ####            if self.hasDataset(name):
 ####                self.getDataset(name).setLuminosity(value)
 
+    def loadRunRange(self, fname="runrange.json"):
+        import json
+        jsonname = os.path.join(self.datasets[0].basedir, fname)
+        if not os.path.exists(jsonname):
+            raise Exception("RunRange JSON file '%s' does not exist. Have you set runMin/runMax in the analyzer?" % jsonname)
+        data = json.load(open(jsonname))
+        return data[self.datasets[0].getAnalysisName()]
+
     ## Update all event counts to the ones taking into account the pile-up reweighting
     #
     # \param kwargs     Keyword arguments (forwarded to dataset.Dataset.updateAllEventsToWeighted)
