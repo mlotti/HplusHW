@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
+dataEras = ["2015"]
+#dataEras = ["2015B","2015C"]
+searchModes = ["80to1000"]
+
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 
-process = Process()
+process = Process("SignalAnalysis")
 
 # Example of adding a dataset which has its files defined in data/<dataset_name>.txt file
 #process.addDatasets(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6"])

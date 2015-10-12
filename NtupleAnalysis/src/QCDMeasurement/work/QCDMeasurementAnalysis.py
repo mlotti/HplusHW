@@ -5,7 +5,7 @@ dataEras = ["2015"]
 searchModes = ["80to1000"]
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
-process = Process()
+process = Process("QCDMeasurement")
 
 import sys
 if len(sys.argv) < 2:
