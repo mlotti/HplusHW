@@ -33,16 +33,27 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag()), '')
 print "GlobalTag="+dataVersion.getGlobalTag()
 
+# Set up electron ID (VID framework)
+# https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+# define which IDs we want to produce and add them to the VID producer
+for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PHYS14_PU20bx25_nonTrig_V1_cff']:
+    setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
+
 # Set up HBHE noise filter
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
+print "Setting up HBHE noise filter"   
 process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
+process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False)
+process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
+# Do not apply EDfilters for HBHE noise, the discriminators for them are saved into the ttree
 
-process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
-   inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
-   reverseDecision = cms.bool(False)
-)
-METNoiseFilterSource = "TriggerResults::RECO"
+TrgResultsSource = "TriggerResults::PAT"
+if dataVersion.isData():
+    TrgResultsSource = "TriggerResults::RECO"
+print "Trigger source has been set to:",TrgResultsSource
 
 process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
@@ -93,13 +104,16 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = cms.PSet(
-        triggerResults = cms.InputTag(METNoiseFilterSource),
+        triggerResults = cms.InputTag(TrgResultsSource),
         printTriggerResultsList = cms.untracked.bool(False),
         filtersFromTriggerResults = cms.vstring(
             "Flag_CSCTightHaloFilter",
             "Flag_goodVertices",
             "Flag_eeBadScFilter",
         ),
+        hbheNoiseTokenRun2LooseSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Loose'),
+        hbheNoiseTokenRun2TightSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
+        hbheIsoNoiseTokenSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHEIsoNoiseFilterResult'),
     ),
     Taus      = process.Taus,
 #    Electrons = process.Electrons,
@@ -122,22 +136,12 @@ process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
 # module execution
-if dataVersion.isData():
-    process.runEDFilter = cms.Path(process.skimCounterAll*
-                                   process.HBHENoiseFilterResultProducer* #Produces HBHE bools
-                                   process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
-                                   process.skimCounterMETFilters*
-                                   process.skim*
-                                   process.skimCounterPassed*
-                                   process.egmGsfElectronIDSequence*
-                                   process.dump)
-else:
-    process.runEDFilter = cms.Path(process.skimCounterAll*  
-                                   process.skimCounterMETFilters*
-                                   process.skim*
-                                   process.skimCounterPassed*
-                                   process.egmGsfElectronIDSequence*
-                                   process.dump)
+process.runEDFilter = cms.Path(process.skimCounterAll*
+                               process.skim*
+                               process.skimCounterPassed*
+                               process.HBHENoiseFilterResultProducer* #Produces HBHE booleans
+                               process.egmGsfElectronIDSequence*
+                               process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
 #    outputCommands = cms.untracked.vstring(
