@@ -3817,6 +3817,8 @@ class DatasetPrecursor:
 
         self._rootFiles = []
         self._dataVersion = None
+        self._pileup = None
+
         for name in self._filenames:
             rf = ROOT.TFile.Open(name)
             # Below is important to use '==' instead of 'is' to check for
@@ -3835,6 +3837,16 @@ class DatasetPrecursor:
             else:
                 if self._dataVersion != dv.GetTitle():
                     raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
+
+            pileup = aux.Get(rf, "configInfo/PileUp")
+            if pileup == None:
+                print "Unable to find 'configInfo/PileUp' from ROOT file '%s'" % name
+                continue
+
+            if self._pileup is None:
+                self._pileup = pileup
+            else:
+                self._pileup.Add(pileup)
 
         if self._dataVersion is None:
             self._isData = False
@@ -3865,6 +3877,9 @@ class DatasetPrecursor:
 
     def getDataVersion(self):
         return self._dataVersion
+
+    def getPileUp(self):
+        return self._pileup
 
     ## Close the ROOT files
     def close(self):
