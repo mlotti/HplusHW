@@ -5,11 +5,11 @@ import sys
 import ROOT
 import array
 
-import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
-import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
-import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
-import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 
 from plotTauLegEfficiency import getEfficiency,convert2TGraph,Print
 
@@ -31,7 +31,7 @@ def main():
 
     paths = [sys.argv[1]]
 
-    analysis = "METLeg_2015A_MET80"
+    analysis = "METLeg_2015CD_MET80"
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
     for d in datasets.getAllDatasets():
         print d.getName()
@@ -69,18 +69,27 @@ def main():
     p.getFrame2().GetYaxis().SetTitle("Ratio")
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
+    histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
+#    histograms.addText(0.2, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.2, 0.53, analysis.split("_")[1], 17)
+    histograms.addText(0.2, 0.46, "Runs "+datasets.loadRunRange(), 17)
+
     p.draw()
     lumi = 0.0
+    for d in datasets.getDataDatasets():
+        print "luminosity",d.getName(),d.getLuminosity()
+        lumi += d.getLuminosity()
+    print "luminosity, sum",lumi
     histograms.addStandardTexts(lumi=lumi)
 
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
     p.save(formats)
 
-
+    """
     #### MET120
 
-    analysis = "METLeg_2015A_MET120"
+    analysis = "METLeg_2015CD_MET120"
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
     for d in datasets.getAllDatasets():
         print d.getName()
@@ -125,13 +134,13 @@ def main():
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
     p.save(formats)
-
+    """
 
     # CaloMET
 
     #### MET80
 
-    analysisc = "METLeg_2015A_CaloMET_MET80"
+    analysisc = "METLeg_2015CD_CaloMET_MET80"
     datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc)
 
     style = tdrstyle.TDRStyle()
@@ -166,13 +175,17 @@ def main():
 
     p.draw()
     lumi = 0.0
+    for d in datasets.getDataDatasets():
+        print "luminosity",d.getName(),d.getLuminosity()
+        lumi += d.getLuminosity()
+    print "luminosity, sum",lumi
     histograms.addStandardTexts(lumi=lumi)
 
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
     p.save(formats)
 
-
+    """
     #### MET120 
 
     analysisc = "METLeg_2015A_CaloMET_MET120"
@@ -215,6 +228,7 @@ def main():
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
     p.save(formats)
+    """
 
 if __name__ == "__main__":
     main()

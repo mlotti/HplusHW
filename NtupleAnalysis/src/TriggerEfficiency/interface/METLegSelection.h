@@ -31,7 +31,7 @@ bool METLegSelection::offlineSelection(Event& fEvent){
   for(Tau tau: fEvent.taus()) {
     if(!(tau.pt() > 41)) continue;
     if(!(std::abs(tau.eta()) < 2.1)) continue;
-    if(!(tau.lChTrkPt() > 20)) continue;
+    //    if(!(tau.lChTrkPt() > 20)) continue;
     if(!(tau.nProngs() == 1)) continue;
     if(!tau.decayModeFinding()) continue;
     if(!tau.configurableDiscriminators()) continue;
@@ -49,7 +49,7 @@ bool METLegSelection::offlineSelection(Event& fEvent){
     }
     if(skipJet) continue;
     if(!(jet.pt() > 30)) continue;
-    if(!jet.PUIDtight()) continue;
+    //    if(!jet.PUIDtight()) continue;
 
     ++njets;
   }
@@ -67,12 +67,16 @@ bool METLegSelection::offlineSelection(Event& fEvent){
   }
 
   bool selected = false;
-  if(ntaus > 0 && njets > 2 && nmuons == 0 && nelectrons == 0) selected = true;
+  //  if(ntaus > 0 && njets > 2 && nmuons == 0 && nelectrons == 0) selected = true;
+  //  if(ntaus > 0) selected = true;
+  if(ntaus > 0 && njets > 2) selected = true;
   return selected;
 }
 bool METLegSelection::onlineSelection(Event& fEvent){
   if(fEvent.configurableTrigger2IsEmpty()) return caloMETSelection(fEvent);
   bool hltdecision = fEvent.configurableTriggerDecision2();
+  //  std::cout << "check METLegSelection::onlineSelection " << hltdecision << " " << fEvent.L1met().et() << std::endl;
+return hltdecision;
   double L1METcut  = 50;
   if(onlineselectionstr == "MET120") L1METcut = 70;
   double l1MET = fEvent.L1met().et();
@@ -88,7 +92,8 @@ bool METLegSelection::caloMETSelection(Event& fEvent){
   }
   double l1MET = fEvent.L1met().et();
   double caloMET = fEvent.calomet().et();
-  return l1MET > L1METcut && caloMET > HLTMETcut;
+  //  return l1MET > L1METcut && caloMET > HLTMETcut;
+  return caloMET > HLTMETcut;
 }
 
 #endif
