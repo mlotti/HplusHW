@@ -48,15 +48,7 @@ process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
 process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
 process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
-process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
-    inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
-    reverseDecision = cms.bool(False)
-)
-process.ApplyBaselineHBHEIsoNoiseFilter = cms.EDFilter('BooleanFlagFilter',
-   inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHEIsoNoiseFilterResult'),
-   reverseDecision = cms.bool(False)
-)
-# Do not use HBHEIsoNoiseFilter for now (does not yet work properly)
+# Do not apply EDfilters for HBHE noise, the discriminators for them are saved into the ttree
 
 # Set up MET uncertainties - FIXME: does not work at the moment
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATTools#MET_Systematics_Tools
@@ -96,7 +88,6 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Skim = cms.PSet(
 	Counters = cms.VInputTag(
 	    "skimCounterAll",
-	    "skimCounterMETFilters",
             "skimCounterPassed"
         ),
     ),
@@ -128,6 +119,9 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             "Flag_goodVertices",
             "Flag_eeBadScFilter",
         ),
+        hbheNoiseTokenRun2LooseSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Loose'),
+        hbheNoiseTokenRun2TightSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
+        hbheIsoNoiseTokenSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHEIsoNoiseFilterResult'),
     ),
     Taus      = process.Taus,
     Electrons = process.Electrons,
@@ -177,17 +171,13 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
 
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
-process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
 # module execution
 process.runEDFilter = cms.Path(process.skimCounterAll*
-                               process.HBHENoiseFilterResultProducer* #Produces HBHE bools
-                               process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
-                               #process.ApplyBaselineHBHEIsoNoiseFilter* # Reject HBHE iso noise events (under scrutiny, do not use for now)
-                               process.skimCounterMETFilters*
                                process.skim*
                                process.skimCounterPassed*
+                               process.HBHENoiseFilterResultProducer* #Produces HBHE booleans
                                process.egmGsfElectronIDSequence*
                                process.dump)
 
