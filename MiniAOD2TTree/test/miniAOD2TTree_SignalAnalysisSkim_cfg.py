@@ -6,11 +6,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-#dataVersion = "74Xmc"
-dataVersion = "74Xdata"
+dataVersion = "74Xmc"
+#dataVersion = "74Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
-print dataVersion
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(-1)
@@ -23,8 +22,8 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#        '/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/022B08C4-C702-E511-9995-D4856459AC30.root',
-        '/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
+        '/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/022B08C4-C702-E511-9995-D4856459AC30.root',
+#        '/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
     )
 )
 
@@ -44,14 +43,20 @@ for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PH
 
 # Set up HBHE noise filter
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
+print "Setting up HBHE noise filter"
 process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
 process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
-
+process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
+process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
 process.ApplyBaselineHBHENoiseFilter = cms.EDFilter('BooleanFlagFilter',
-   inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+    inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResult'),
+    reverseDecision = cms.bool(False)
+)
+process.ApplyBaselineHBHEIsoNoiseFilter = cms.EDFilter('BooleanFlagFilter',
+   inputLabel = cms.InputTag('HBHENoiseFilterResultProducer','HBHEIsoNoiseFilterResult'),
    reverseDecision = cms.bool(False)
 )
-METNoiseFilterSource = "TriggerResults::RECO"
+# Do not use HBHEIsoNoiseFilter for now (does not yet work properly)
 
 # Set up MET uncertainties - FIXME: does not work at the moment
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATTools#MET_Systematics_Tools
@@ -70,6 +75,11 @@ METNoiseFilterSource = "TriggerResults::RECO"
                                                       #pfCandCollection=cms.InputTag("packedPFCandidates"),
                                                       #onMiniAOD=True,
                                                       #postfix="Type01xy")
+
+TrgResultsSource = "TriggerResults::PAT"
+if dataVersion.isData():
+    TrgResultsSource = "TriggerResults::RECO"
+print "Trigger source has been set to:",TrgResultsSource
 
 process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
@@ -111,7 +121,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = cms.PSet(
-        triggerResults = cms.InputTag(METNoiseFilterSource),
+        triggerResults = cms.InputTag(TrgResultsSource),
         printTriggerResultsList = cms.untracked.bool(False),
         filtersFromTriggerResults = cms.vstring(
             "Flag_CSCTightHaloFilter",
@@ -171,27 +181,20 @@ process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
 # module execution
-if dataVersion.isData():
-    process.runEDFilter = cms.Path(process.skimCounterAll*
-                                   process.HBHENoiseFilterResultProducer* #Produces HBHE bools
-                                   process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
-                                   process.skimCounterMETFilters*
-                                   process.skim*
-                                   process.skimCounterPassed*
-                                   process.egmGsfElectronIDSequence*
-                                   process.dump)
-else:
-    process.runEDFilter = cms.Path(process.skimCounterAll*  
-                                   process.skimCounterMETFilters*
-                                   process.skim*
-                                   process.skimCounterPassed*
-                                   process.egmGsfElectronIDSequence*
-                                   process.dump)
+process.runEDFilter = cms.Path(process.skimCounterAll*
+                               process.HBHENoiseFilterResultProducer* #Produces HBHE bools
+                               process.ApplyBaselineHBHENoiseFilter*  #Reject HBHE noise events
+                               #process.ApplyBaselineHBHEIsoNoiseFilter* # Reject HBHE iso noise events (under scrutiny, do not use for now)
+                               process.skimCounterMETFilters*
+                               process.skim*
+                               process.skimCounterPassed*
+                               process.egmGsfElectronIDSequence*
+                               process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",
-   #outputCommands = cms.untracked.vstring(
-       #"keep *",
-   #),
-   #fileName = cms.untracked.string("CMSSW.root")
+#   outputCommands = cms.untracked.vstring(
+#       "keep *",
+#   ),
+#   fileName = cms.untracked.string("CMSSW.root")
 #)
 #process.out_step = cms.EndPath(process.output)
