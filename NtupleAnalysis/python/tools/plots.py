@@ -1578,6 +1578,15 @@ class PlotRatioBase:
             ratioType = "binomial"
 
         ratioHistos = _createRatioHistos(num, denom, ytitle, ratioType=ratioType, ratioErrorOptions=ratioErrorOptions)
+        # Remove empty graphs (otherwise ROOT crashes when doing *.C version of graph)
+        i = 0
+        while i < len(ratioHistos):
+            if ratioHistos[i].getRootGraph().GetN() == 0:
+                ratioHistos[i].getRootGraph().Delete()
+                del ratioHistos[i]
+            else:
+                i += 1
+        
         self.setRatios(ratioHistos)
         reorder = []
         for n in ["BackgroundStatSystError", "BackgroundStatError"]:
