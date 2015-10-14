@@ -162,8 +162,8 @@ class DatacardColumn():
             self._datasetType = MulticrabDirectoryDataType.EWKTAUS
         elif datasetType == "EWKfake":
             self._datasetType = MulticrabDirectoryDataType.EWKFAKETAUS
-        elif datasetType == "QCD factorised":
-            self._datasetType = MulticrabDirectoryDataType.QCDFACTORISED
+        elif datasetType == "QCD MC":
+            self._datasetType = MulticrabDirectoryDataType.QCDMC
         elif datasetType == "QCD inverted":
             self._datasetType = MulticrabDirectoryDataType.QCDINVERTED
         elif datasetType == "None":
@@ -208,11 +208,11 @@ class DatacardColumn():
 
     ## Returns true if the column is QCD
     def typeIsQCD(self):
-        return self._datasetType == MulticrabDirectoryDataType.QCDFACTORISED or self._datasetType == MulticrabDirectoryDataType.QCDINVERTED
+        return self._datasetType == MulticrabDirectoryDataType.QCDMC or self._datasetType == MulticrabDirectoryDataType.QCDINVERTED
 
-    ## Returns true if the column is QCD factorised
-    def typeIsQCDfactorised(self):
-        return self._datasetType == MulticrabDirectoryDataType.QCDFACTORISED
+    ## Returns true if the column is QCD MC
+    def typeIsQCDMC(self):
+        return self._datasetType == MulticrabDirectoryDataType.QCDMC
 
     ## Returns true if the column is QCD inverted
     def typeIsQCDinverted(self):
@@ -233,7 +233,7 @@ class DatacardColumn():
         if len(self._enabledForMassPoints) == 0:
             myMsg += "Missing or empty field 'validMassPoints'! (list of integers) specifies for which mass points the column is enabled\n"
         if self._datasetType == MulticrabDirectoryDataType.UNKNOWN:
-            myMsg += "Wrong 'datasetType' specified! Valid options are 'Signal', 'Embedding', 'QCD factorised', 'QCD inverted', and 'None'\n"
+            myMsg += "Wrong 'datasetType' specified! Valid options are 'Signal', 'Embedding', 'QCD MC', 'QCD inverted', and 'None'\n"
         if self._datasetMgrColumn == "" and not self.typeIsEmptyColumn():
             myMsg += "No dataset names defined!\n"
         if self.typeIsSignal() or self.typeIsEWK() or self.typeIsObservation():
@@ -248,7 +248,7 @@ class DatacardColumn():
                 myMsg += "Missing or empty field 'nuisances'! (list of strings) Id's for nuisances to be used for column\n"
 
         if myMsg != "":
-            print ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+"\n"+myMsg
+            print ShellStyles.ErrorStyle()+"Error (data group ='"+self._label+"'):"+ShellStyles.NormalStyle()+"\n"+myMsg
             raise Exception()
 
     ## Returns true if column is enabled for given mass point
@@ -256,10 +256,8 @@ class DatacardColumn():
         myResult = (mass in self._enabledForMassPoints) and self._isPrintable
         # Ignore empty column for heavy H+
         myMassStatus = not (self.typeIsEmptyColumn() and (mass > 179 or config.OptionLimitOnSigmaBr))
-        # Ignore HH if chosen in options
-        myHHStatus = not (self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr))
-        #print self._label,myResult,myMassStatus,myHHStatus
-        return myResult and myMassStatus and myHHStatus and self.getLandsProcess != None
+        #print self._label,myResult,myMassStatus
+        return myResult and myMassStatus and self.getLandsProcess != None
 
     ## Disables the datacard column
     def disable(self):
@@ -293,7 +291,7 @@ class DatacardColumn():
     def getDatasetMgrColumn(self):
         return self._datasetMgrColumn
 
-    ## Returns dataset manager column for MC EWK in QCD factorised
+    ## Returns dataset manager column for MC EWK in QCD 
     def getDatasetMgrColumnForQCDMCEWK(self):
         return self._datasetMgrColumnForQCDMCEWK
 
@@ -388,12 +386,12 @@ class DatacardColumn():
                      dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                      myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 # Fix a bug in signal xsection
-                elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
-                     if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 245.8) > 0.0001:
-                         print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 245.8 pb according to arXiv:1303.6254"
-                         #myDatasetRootHisto.Delete()
-                         dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(245.8)
-                         myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+                #elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
+                     #if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 245.8) > 0.0001:
+                         #print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 245.8 pb according to arXiv:1303.6254"
+                         ##myDatasetRootHisto.Delete()
+                         #dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(245.8)
+                         #myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
                 # Normalize to luminosity
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties().Clone()
@@ -429,22 +427,6 @@ class DatacardColumn():
                 myShapeExtractor = ShapeExtractor(ExtractorMode.RATE)
             myShapeHistograms = myShapeExtractor.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor)
             myRateHistograms.extend(myShapeHistograms)
-            # Do signal injection
-            if self.typeIsObservation() and hasattr(config, "OptionSignalInjection"):
-                if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
-                    dsetMgr.getDataset(config.OptionSignalInjection["sample"]).setCrossSection(1)
-                elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
-                     if abs(dsetMgr.getDataset(config.OptionSignalInjection["sample"]).getCrossSection() - 245.8) > 0.0001:
-                         print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 245.8 pb according to arXiv:1303.6254"
-                         dsetMgr.getDataset(config.OptionSignalInjection["sample"]).setCrossSection(245.8)
-                myDatasetRootHistoForInjection = dsetMgr.getDataset(config.OptionSignalInjection["sample"]).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
-                myDatasetRootHistoForInjection.normalizeToLuminosity(luminosity)
-                hInjection = myDatasetRootHistoForInjection.getHistogram()
-                hInjection.Scale(config.OptionSignalInjection["normalization"])
-                myShapeHistograms[0].Add(hInjection)
-                myShapeHistograms[0].SetBinContent(myShapeHistograms[0].GetNbinsX(), myShapeHistograms[0].GetBinContent(myShapeHistograms[0].GetNbinsX()) + myShapeHistograms[0].GetBinContent(myShapeHistograms[0].GetNbinsX()+1))
-                myShapeHistograms[0].SetBinContent(myShapeHistograms[0].GetNbinsX()+1, 0.0)
-                print ShellStyles.WarningLabel()+"Injected to data signal %f events (normalization=%f), data integral is now %f"%(hInjection.Integral(),config.OptionSignalInjection["normalization"],myShapeHistograms[0].Integral())
         # Cache result
         self._rateResult = ExtractorResult("rate", "rate",
                                myRateHistograms[0].Integral(), # Take only visible part
@@ -464,7 +446,7 @@ class DatacardColumn():
         # Obtain overall purity for QCD
         self._purityForFinalShape = None
         myAveragePurity = None
-        if self.typeIsQCD():
+        if self.typeIsQCDinverted():
             myDsetRootHisto = myShapeExtractor.extractQCDPurityHistogram(self, dsetMgr, self._shapeHisto)
             self._rateResult.setPurityHistogram(myDsetRootHisto.getHistogram())
             myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self.getPurityHistogram())
@@ -506,7 +488,7 @@ class DatacardColumn():
                                 myHistograms.extend(self._getShapeNuisanceHistogramsFromRHWU(self._cachedShapeRootHistogramWithUncertainties, e._systVariation, e.getMasterId()))
                     else:
                         # For QCD, scale the QCD type constants by the purity
-                        if self.typeIsQCD() and e.isQCDNuisance():
+                        if self.typeIsQCDinverted() and e.isQCDNuisance():
                             if isinstance(myResult, ScalarUncertaintyItem):
                                 myResult.scale(1.0-myAveragePurity)
                             elif isinstance(myResult, list):
@@ -551,7 +533,7 @@ class DatacardColumn():
                         # Obtain overall purity for QCD
                         myAverageCtrlPlotPurity = None
                         hCtrlPlotPurity = None
-                        if self.typeIsQCD():
+                        if self.typeIsQCDinverted():
                             myDsetHisto = c.extractQCDPurityHistogram(self, dsetMgr)
                             hCtrlPlotPurity = aux.Clone(myDsetHisto.getHistogram())
                             myAverageCtrlPlotPurity = c.extractQCDPurityAsValue(myRateHistograms[0], hCtrlPlotPurity)
@@ -579,7 +561,7 @@ class DatacardColumn():
                                 if self._opts.verbose:
                                     print "    - Adding norm. uncertainty: %s"%n.getMasterId()
                                 myResult = n.getResult()
-                                if self.typeIsQCD():
+                                if self.typeIsQCDinverted():
                                     # Scale QCD nuisance by impurity (and unscale by shape impurity already applied to nuisance)
                                     for e in extractors:
                                         if e.getId() == n.getId():
@@ -589,15 +571,15 @@ class DatacardColumn():
                                                 #print n._exId, n.getResult().getUncertaintyUp(), myAverageCtrlPlotPurity, myResult.getUncertaintyUp()
                                 if not isinstance(h.getRootHisto(),ROOT.TH2):
                                     if isinstance(myResult, ScalarUncertaintyItem):
-                                        h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
+                                        h.addNormalizationUncertaintyRelative(n.getId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                                     elif isinstance(myResult, list):
-                                        h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult[1], myResult[0])
+                                        h.addNormalizationUncertaintyRelative(n.getId(), myResult[1], myResult[0])
                                     else:
-                                        h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult, myResult)
+                                        h.addNormalizationUncertaintyRelative(n.getId(), myResult, myResult)
                             elif not n.resultIsStatUncertainty() and len(n.getHistograms()) > 0:
                                 if isinstance(n.getResult(), ScalarUncertaintyItem): # constantToShape
                                     if self._opts.verbose:
-                                        print "    - Adding norm. uncertainty: %s"%n.getMasterId()
+                                        print "    - Adding norm. uncertainty: %s"%n.getId()
                                     if not isinstance(h.getRootHisto(),ROOT.TH2):
                                         h.addNormalizationUncertaintyRelative(n.getMasterId(), myResult.getUncertaintyUp(), myResult.getUncertaintyDown())
                                 for e in extractors:
@@ -625,8 +607,6 @@ class DatacardColumn():
 
     ## Rebin the cached histograms and save a copy of the fine binned version
     def doRebinningOfCachedResults(self, config):
-        if self._label[:2] == "HH" and (config.OptionRemoveHHDataGroup or config.OptionLimitOnSigmaBr):
-            return
         myArray = array("d",config.ShapeHistogramsDimensions)
         for i in range(0,len(self._rateResult._histograms)):
             myTitle = self._rateResult._histograms[i].GetTitle()
@@ -695,7 +675,7 @@ class DatacardColumn():
                 if hDenominator.GetNbinsX() != self._rateResult._histograms[0].GetNbinsX():
                     raise Exception()
 		systematicsForMetShapeDifference.createSystHistograms(self._rateResult._histograms[0], hUp, hDown, hNumerator, hDenominator, quietMode=False)
-        if not myQCDMetshapeFoundStatus and self.typeIsQCD():
+        if not myQCDMetshapeFoundStatus and self.typeIsQCDinverted():
             print ShellStyles.WarningLabel()+"QCD metshape uncertainty has not been rebinned, please check that it has the name 'QCD_metshape'!"
         # Update root histo with uncertainties to contain the binned version
         if self._cachedShapeRootHistogramWithUncertainties != None:

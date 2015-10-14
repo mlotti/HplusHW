@@ -51,11 +51,7 @@ def main(opts, moduleSelector, multipleDirs):
 
     # If user insisted on certain QCD method on command line, produce datacards only for that QCD method
     # Otherwise produce cards for all QCD methods
-    myQCDMethods = [DataCard.DatacardQCDMethod.FACTORISED, DataCard.DatacardQCDMethod.INVERTED]
-    if opts.useQCDfactorised:
-        myQCDMethods = [DataCard.DatacardQCDMethod.FACTORISED]
-    elif opts.useQCDinverted:
-        myQCDMethods = [DataCard.DatacardQCDMethod.INVERTED]
+    myQCDMethods = [DataCard.DatacardQCDMethod.INVERTED, DataCard.DatacardQCDMethod.MC]
 
     # Obtain dataset creators (also check multicrab directory existence)
     print "\nChecking input multicrab directory presence:"
@@ -73,18 +69,17 @@ def main(opts, moduleSelector, multipleDirs):
         if multicrabPaths.getEWKPath() == "":
             raise Exception(ErrorLabel()+"You asked for data driven EWK+tt with taus, but no corresponding multicrab was found!")
         embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput)
-    qcdFactorisedDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
-    if qcdFactorisedDsetCreator == None and not opts.useQCDinverted:
-        myQCDMethods.remove(DataCard.DatacardQCDMethod.FACTORISED)
     qcdInvertedDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
-    if qcdInvertedDsetCreator == None and not opts.useQCDfactorised:
+    if qcdInvertedDsetCreator == None:
         myQCDMethods.remove(DataCard.DatacardQCDMethod.INVERTED)
+    else:
+        myQCDMethods.remove(DataCard.DatacardQCDMethod.MC)
 
     # Require existence of signal analysis and one QCD measurement
     if signalDsetCreator == None:
         raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" Signal analysis multicrab directory not found!")
     if len(myQCDMethods) == 0:
-        raise Exception(ErrorStyle()+"Error:"+NormalStyle()+" QCD measurement (factorised and/or inverted) not found!")
+        print (WarningLabel()+" QCD measurement (factorised and/or inverted) not found!")
 
     # Check options that are affecting the validity of the results
     if not config.OptionIncludeSystematics:
@@ -96,8 +91,8 @@ def main(opts, moduleSelector, multipleDirs):
     moduleSelector.setPrimarySource("Signal analysis", signalDsetCreator)
     if embeddingDsetCreator != None:
         moduleSelector.addOtherSource("Embedding", embeddingDsetCreator)
-    if qcdFactorisedDsetCreator != None:
-        moduleSelector.addOtherSource("QCD factorised", qcdFactorisedDsetCreator)
+    #if qcdFactorisedDsetCreator != None:
+        #moduleSelector.addOtherSource("QCD factorised", qcdFactorisedDsetCreator)
     if qcdInvertedDsetCreator != None:
         moduleSelector.addOtherSource("QCD inverted", qcdInvertedDsetCreator)
     moduleSelector.doSelect(opts)
@@ -146,11 +141,11 @@ def main(opts, moduleSelector, multipleDirs):
                     else:
                         embeddingDsetCreator = getDsetCreator("Embedding", multicrabPaths.getEWKPath(), mcrabInfoOutput)
                     myQCDDsetCreator = None
-                    if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
-                        myQCDDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
-                        if myQCDDsetCreator == None:
-                            raise Exception(ErrorLabel()+"Could not find factorised QCD pseudomulticrab!"+NormalStyle())
-                    elif qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
+                    #if qcdMethod == DataCard.DatacardQCDMethod.FACTORISED:
+                        #myQCDDsetCreator = getDsetCreator("QCD factorised", multicrabPaths.getQCDFactorisedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.FACTORISED in myQCDMethods)
+                        #if myQCDDsetCreator == None:
+                            #raise Exception(ErrorLabel()+"Could not find factorised QCD pseudomulticrab!"+NormalStyle())
+                    if qcdMethod == DataCard.DatacardQCDMethod.INVERTED:
                         myQCDDsetCreator = getDsetCreator("QCD inverted", multicrabPaths.getQCDInvertedPath(), mcrabInfoOutput, DataCard.DatacardQCDMethod.INVERTED in myQCDMethods)
                         if myQCDDsetCreator == None:
                             raise Exception(ErrorLabel()+"Could not find inverted QCD pseudomulticrab!"+NormalStyle())
@@ -225,15 +220,15 @@ if __name__ == "__main__":
     parser.add_option("-h", "--help", dest="helpStatus", action="store_true", default=False, help="Show this help message and exit")
     parser.add_option("-x", "--datacard", dest="datacard", action="store", help="Name (incl. path) of the datacard to be used as an input")
     myModuleSelector.addParserOptions(parser)
-    parser.add_option("--lands", dest="lands", action="store_true", default=False, help="Generate datacards for LandS")
-    parser.add_option("--combine", dest="combine", action="store_true", default=False, help="Generate datacards for Combine")
+    parser.add_option("--lands", dest="lands", action="store_true", default=False, help="Generate datacards for LandS (not supported)")
+    parser.add_option("--combine", dest="combine", action="store_true", default=True, help="Generate datacards for Combine (default=True)")
     parser.add_option("--multipleDirs", dest="multipleDirs", action="store", help="Name of base dir for creating datacards for multiple directories (wildcard is added at the end)")
     parser.add_option("--systAnalysis", dest="systAnalysis", action="store_true", default=False, help="Runs the macro for generating systematic uncertainties plots")
     parser.add_option("--testShapeSensitivity", dest="testShapeSensitivity", action="store_true", default=False, help="Creates datacards for varying each shape nuisance up and down by 1 sigma")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
     parser.add_option("--tailfit", dest="dotailfit", action="store_true", default=False, help="Runs the tail fitter for heavy H+ after the cards are done")
-    parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
-    parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
+    #parser.add_option("--QCDfactorised", dest="useQCDfactorised", action="store_true", default=False, help="Use factorised method for QCD measurement")
+    #parser.add_option("--QCDinverted", dest="useQCDinverted", action="store_true", default=False, help="Use inverted method for QCD measurement")
     parser.add_option("--debugDatasets", dest="debugDatasets", action="store_true", default=False, help="Enable debugging print for datasetMgr contents")
     parser.add_option("--debugConfig", dest="debugConfig", action="store_true", default=False, help="Enable debugging print for config parsing")
     parser.add_option("--debugMining", dest="debugMining", action="store_true", default=False, help="Enable debugging print for data mining")
@@ -250,9 +245,9 @@ if __name__ == "__main__":
     if opts.datacard == None:
         print ErrorStyle()+"Error: Missing datacard!"+NormalStyle()+"\n"
         myStatus = False
-    if opts.useQCDfactorised and opts.useQCDinverted:
-        print ErrorStyle()+"Error: use either '--QCDfactorised' or '--QCDinverted' (only one can exist in the datacard)"+NormalStyle()
-        myStatus = False
+    #if opts.useQCDfactorised and opts.useQCDinverted:
+    #    print ErrorStyle()+"Error: use either '--QCDfactorised' or '--QCDinverted' (only one can exist in the datacard)"+NormalStyle()
+    #    myStatus = False
     if not opts.lands and not opts.combine:
         print ErrorStyle()+"Error: use either '--lands' or '--combine' to indicate which type of cards to generate!"+NormalStyle()
         myStatus = False

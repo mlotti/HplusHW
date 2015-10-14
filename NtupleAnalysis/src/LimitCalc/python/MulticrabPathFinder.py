@@ -15,7 +15,7 @@ class MulticrabDirectoryDataType:
     SIGNAL = 2
     EWKTAUS = 3
     EWKFAKETAUS = 4
-    QCDFACTORISED = 5
+    QCDMC = 5
     QCDINVERTED = 6
     DUMMY = 7
     DATACARDONLY = 8
@@ -89,7 +89,7 @@ class MulticrabPathFinder:
         #return self.selectLatest(self.grep(dirs,"mbedding",file="inputInfo.txt"))
 
     def signalfind(self,dirs):
-	return self.selectLatest(self.grep(dirs,"signalAnalysis_",file="multicrab.cfg"))
+	return self.selectLatest(self.grep(dirs,"SignalAnalysis_",file="multicrab.cfg"))
 
     def qcdfactfind(self,dirs):
         myList = []
@@ -114,6 +114,10 @@ class MulticrabPathFinder:
                 grep = execute(command + multicrabfile)
                 if grep != []:
                     founddirs.append(dir)
+                else:
+                    s = dir.split("/")
+                    if s[len(s)-1].startswith(word):
+                        founddirs.append(dir)
         if len(founddirs) == 0:
             return ""
         return founddirs

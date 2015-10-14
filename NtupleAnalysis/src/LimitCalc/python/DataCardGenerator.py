@@ -27,6 +27,7 @@ class DatacardQCDMethod:
     UNKNOWN = 0
     FACTORISED = 1
     INVERTED = 2
+    MC = 3
 
 class DatacardDatasetMgrSourceType:
     SIGNALANALYSIS = 0
@@ -527,11 +528,7 @@ class DataCardGenerator:
             for validMass in dg.validMassPoints:
                 if validMass in self._config.MassPoints:
                     myMassIsConsideredStatus = True
-            myRemoveHHStatus = False
-            if dg.label.startswith("HH") and (self._config.OptionRemoveHHDataGroup or self._config.OptionLimitOnSigmaBr):
-                print ShellStyles.WarningLabel()+"Skipping column: %s"%dg.label
-                myRemoveHHStatus = True
-            if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus and not myRemoveHHStatus:
+            if not myIngoreOtherQCDMeasurementStatus and myMassIsConsideredStatus:
                 print "Constructing datacard column for data group: "+ShellStyles.HighlightStyle()+""+dg.label+""+ShellStyles.NormalStyle()
                 # Construct datacard column object
                 myColumn = None
@@ -579,11 +576,11 @@ class DataCardGenerator:
             self._observation.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         for c in self._columns:
             myDsetMgrIndex = 0
-            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or (c.typeIsEWK() and not self._config.OptionGenuineTauBackgroundSource == "DataDriven"):
+            if c.typeIsObservation() or c.typeIsSignal() or c.typeIsEWKfake() or c.typeIsQCDMC() or (c.typeIsEWK() and not self._config.OptionGenuineTauBackgroundSource == "DataDriven"):
                 myDsetMgrIndex = 0
             elif c.typeIsEWK():
                 myDsetMgrIndex = 1
-            elif c.typeIsQCD():
+            elif c.typeIsQCDinverted():
                 myDsetMgrIndex = 2
             # Do mining for datacard columns (separately for EWK fake taus)
             myDsetMgr = self._dsetMgrManager.getDatasetMgr(myDsetMgrIndex)
