@@ -84,13 +84,13 @@ return hltdecision;
 }
 
 bool METLegSelection::caloMETSelection(Event& fEvent){
-  double L1METcut  = 50;
+  //  double L1METcut  = 50;
   double HLTMETcut = 80;
   if(onlineselectionstr == "MET120") {
-    L1METcut = 70;
+    //    L1METcut = 70;
     HLTMETcut = 120;
   }
-  double l1MET = fEvent.L1met().et();
+  //  double l1MET = fEvent.L1met().et();
   double caloMET = fEvent.calomet().et();
   //  return l1MET > L1METcut && caloMET > HLTMETcut;
   return caloMET > HLTMETcut;

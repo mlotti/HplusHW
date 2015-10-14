@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
-from HiggsAnalysis.NtupleAnalysis.pileupWeight import pileupWeight
 
 import os
 import re
@@ -79,7 +78,7 @@ def createAnalyzer(dataVersion,era):
             triggerOR  = [],
             triggerOR2 = []
         ),
-        PileupWeight = pileupWeight(enabled=False),
+        usePileupWeights = True,
         offlineSelection = leg,
         MuonSelection = PSet(
 #            discriminators = ["muIDMedium"],
@@ -144,11 +143,6 @@ def createAnalyzer(dataVersion,era):
 #            a.Trigger.triggerOR = ["HLT_IsoMu20_eta2p1_v1"]
 #            a.Trigger.triggerOR2 = ["HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v1"]
 
-        a.PileupWeight = pileupWeight(
-#            data = era,
-            data = "2012ABCD", # FIXME
-            mc   = "Summer12_S10" # FIXME
-        )
     #print "check triggerOR",a.Trigger.triggerOR
     return a
 

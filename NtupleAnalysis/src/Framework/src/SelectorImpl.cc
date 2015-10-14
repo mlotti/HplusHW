@@ -57,8 +57,10 @@ void SelectorImpl::Init(TTree *tree) {
 
   // Set up variable and cut branches for the new TTree
   fBranchManager->setTree(tree);
-  for(BaseSelector *selector: fSelectors)
+  for(BaseSelector *selector: fSelectors){
     selector->setupBranches(*fBranchManager);
+    if(hPUdata) selector->setPileUpWeights(hPUdata,hPUmc);
+  }
 }
 
 
@@ -172,6 +174,10 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
       fSelectors.push_back(selector.release());
     }
   }
+
+  // Pileup weights
+  hPUdata = (TH1F*)fInput->FindObject("PileUpData");
+  hPUmc   = (TH1F*)fInput->FindObject("PileUpMC");
 }
 
 Bool_t SelectorImpl::Process(Long64_t entry) {

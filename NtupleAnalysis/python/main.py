@@ -87,6 +87,9 @@ class Analyzer:
     def __setattr__(self, name, value):
         setattr(self.__dict__["_pset"], name, value)
 
+    def exists(self, name):
+        return name in self._pset._asDict()
+
     def className_(self):
         return self.__dict__["_className"]
 
@@ -137,11 +140,12 @@ class DataVersion:
         return self._isMC() and "S10" in self._version
 
 class Dataset:
-    def __init__(self, name, files, dataVersion, lumiFile):
+    def __init__(self, name, files, dataVersion, lumiFile, pileup):
         self._name = name
         self._files = files
         self._dataVersion = DataVersion(dataVersion)
         self._lumiFile = lumiFile
+        self._pileup = pileup
 
     def getName(self):
         return self._name
@@ -154,6 +158,9 @@ class Dataset:
 
     def getLumiFile(self):
         return self._lumiFile
+
+    def getPileUp(self):
+        return self._pileup
 
 class Process:
     def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents=-1):
@@ -172,11 +179,12 @@ class Process:
         if files is None:
             files = datasetsTest.getFiles(name)
 
+        prec = dataset.DatasetPrecursor(name, files)
         if dataVersion is None:
-            prec = dataset.DatasetPrecursor(name, files)
             dataVersion = prec.getDataVersion()
-            prec.close()
-        self._datasets.append( Dataset(name, files, dataVersion, lumiFile) )
+        pileUp = prec.getPileUp()
+        prec.close()
+        self._datasets.append( Dataset(name, files, dataVersion, lumiFile, pileUp) )
 
     def addDatasets(self, names): # no explicit files possible here
         for name in names:
@@ -279,6 +287,19 @@ class Process:
         readMbytesTotal = 0
         callsTotal = 0
 
+        # Sum data pu distributions
+        hPUs = {}
+        for aname, analyzerIE in self._analyzers.iteritems():
+            hPU = None
+            for dset in self._datasets:
+                if dset.getDataVersion().isData() and analyzerIE.runForDataset_(dset.getName()):
+                    if hPU is None:
+                        hPU = dset.getPileUp()
+                    else:
+                        hPU.Add(dset.getPileUp())
+            hPU.SetName("PileUpData")
+            hPUs[aname] = hPU
+
         # Process over datasets
         ndset = 0
         for dset in self._datasets:
@@ -286,6 +307,7 @@ class Process:
             inputList = ROOT.TList()
             nanalyzers = 0
             anames = []
+            usePUweights = False
             for aname, analyzerIE in self._analyzers.iteritems():
                 if analyzerIE.runForDataset_(dset.getName()):
                     nanalyzers += 1
@@ -298,6 +320,13 @@ class Process:
                             raise Exception("Analyzer %s was specified as a function, but returned object of %s instead of Analyzer" % (aname, analyzer.__class__.__name__))
 
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
+                    if dset.getDataVersion().isMC():
+                        inputList.Add(hPUs[aname])
+                        hPUMC = dset.getPileUp().Clone()
+                        hPUMC.SetName("PileUpMC")
+                        inputList.Add(hPUMC)
+                        if analyzer.exists("usePileupWeights"):
+                            usePUweights = analyzer.__getattr__("usePileupWeights")
                     anames.append(aname)
             if nanalyzers == 0:
                 print "Skipping %s, no analyzers" % dset.getName()
@@ -309,6 +338,8 @@ class Process:
                 if dset.getName() in lumidata.keys():
                     lumivalue = lumidata[dset.getName()]
                 print "    Luminosity: %s fb-1"%lumivalue
+            if usePUweights:
+                print "    Using pileup weights"
 
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())

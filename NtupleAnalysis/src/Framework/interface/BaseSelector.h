@@ -10,6 +10,8 @@
 
 #include "DataFormat/interface/Event.h"
 
+#include "Tools/interface/PileupWeight.h"
+
 #include "Rtypes.h"
 #include "TBranch.h"
 #include "TTree.h"
@@ -42,12 +44,17 @@ public:
     // Set event weight as negative is generator weight is negative
     if (fEvent.isMC()) {
       if (fEvent.genWeight().weight() < 0.0)
-        fEventWeight.multiplyWeight(-1.0);
+	fEventWeight.multiplyWeight(-1.0);
+      fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
     }
-    // Set prescale event weight // FIXME missing code 
-    
-    
+    // Set prescale event weight // FIXME missing code
+
+
     process(entry);
+  }
+
+  void setPileUpWeights(TH1* hPUdata, TH1* hPUmc){
+    fPileupWeight.calculateWeights(hPUdata,hPUmc);
   }
 
   // Implement these
@@ -64,6 +71,7 @@ protected:
   EventCounter fEventCounter;
   HistoWrapper fHistoWrapper;
   EventSaverClient fEventSaver;
+  PileupWeight fPileupWeight;
 
 private:
   const bool fIsMC;
