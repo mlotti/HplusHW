@@ -12,6 +12,9 @@ METNoiseFilterDumper::METNoiseFilterDumper(edm::ConsumesCollector&& iConsumesCol
 : useFilter(false),
   booked(false),
   trgResultsToken(iConsumesCollector.consumes<edm::TriggerResults>(pset.getParameter<edm::InputTag>("triggerResults"))),
+  hbheNoiseTokenRun2LooseToken(iConsumesCollector.consumes<bool>(pset.getParameter<edm::InputTag>("hbheNoiseTokenRun2LooseSource"))),
+  hbheNoiseTokenRun2TightToken(iConsumesCollector.consumes<bool>(pset.getParameter<edm::InputTag>("hbheNoiseTokenRun2TightSource"))),
+  hbheIsoNoiseToken(iConsumesCollector.consumes<bool>(pset.getParameter<edm::InputTag>("hbheIsoNoiseTokenSource"))),
   bPrintTriggerResultsList(pset.getUntrackedParameter<bool>("printTriggerResultsList")),
   bTriggerResultsListPrintedStatus(false),
   fFilters(pset.getParameter<std::vector<std::string>>("filtersFromTriggerResults"))
@@ -23,11 +26,14 @@ void METNoiseFilterDumper::book(TTree* tree){
   theTree = tree;
   booked = true;
   
-  bFilters = new bool[fFilters.size()];
+  bFilters = new bool[fFilters.size()+3];
   
   for (size_t i = 0; i < fFilters.size(); ++i) {
     theTree->Branch(("METFilter_"+fFilters[i]).c_str(), &bFilters[i]);
   }
+  theTree->Branch("METFilter_hbheNoiseTokenRun2Loose", &bFilters[fFilters.size()]);
+  theTree->Branch("METFilter_hbheNoiseTokenRun2Tight", &bFilters[fFilters.size()+1]);
+  theTree->Branch("METFilter_hbheIsoNoiseToken",       &bFilters[fFilters.size()+2]);
 }
 
 bool METNoiseFilterDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -55,6 +61,16 @@ bool METNoiseFilterDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetu
       throw cms::Exception("Assert") << "METFilters: key '" << fFilters[i] << "' not found in TriggerResults (see above list for available filters)!";
     }
   }
+  edm::Handle<bool> hbheNoiseLooseHandle;
+  iEvent.getByToken(hbheNoiseTokenRun2LooseToken, hbheNoiseLooseHandle);
+  bFilters[fFilters.size()] = *hbheNoiseLooseHandle;
+  edm::Handle<bool> hbheNoiseTightHandle;
+  iEvent.getByToken(hbheNoiseTokenRun2TightToken, hbheNoiseTightHandle);
+  bFilters[fFilters.size()+1] = *hbheNoiseTightHandle;
+  edm::Handle<bool> hbheIsoNoiseHandle;
+  iEvent.getByToken(hbheIsoNoiseToken, hbheIsoNoiseHandle);
+  bFilters[fFilters.size()+2] = *hbheIsoNoiseHandle;
+  
   return filter();
 }
 

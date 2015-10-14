@@ -38,6 +38,9 @@ private:
   TTree* theTree;
 
   edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
+  edm::EDGetTokenT<bool> hbheNoiseTokenRun2LooseToken;
+  edm::EDGetTokenT<bool> hbheNoiseTokenRun2TightToken;
+  edm::EDGetTokenT<bool> hbheIsoNoiseToken;
   
   //const edm::InputTag edm::InputTag triggerObjects;
   //const edm::InputTag edm::InputTag l1extra;
@@ -46,7 +49,7 @@ private:
   
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
   const std::vector<std::string> fFilters;
-  // Note: HBHENoiseFilter is run separately as a python fragment
+  // Note: HBHENoiseFilter is included
   
   // Data objects for ttree
   bool *bFilters;
