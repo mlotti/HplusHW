@@ -68,7 +68,11 @@ public:
   const MET& met() const { return met_Type1(); }
   const MET& met_Type1() const { return fMET_Type1; }
   const MET& calomet() const { return fCaloMET; }
-  const MET& L1met() const { return fL1MET; }
+  const MET& L1met() const { 
+    if(isMC()) return L1extramet();
+    return fL1MET; 
+  }
+  const MET& L1extramet() const { return fL1extraMET; }
 
   const GenWeight& genWeight() const { return fGenWeight; }
 
@@ -93,6 +97,7 @@ private:
   MET fMET_Type1;
   MET fCaloMET;
   MET fL1MET;
+  MET fL1extraMET;
 
   GenWeight fGenWeight;
 

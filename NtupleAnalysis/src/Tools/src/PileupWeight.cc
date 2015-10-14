@@ -39,11 +39,16 @@ PileupWeight::PileupWeight(const ParameterSet& pset):
 */
 PileupWeight::PileupWeight(const ParameterSet& pset):
   fEnabled(pset.getParameterOptional<bool>("usePileupWeights"))
-{}
+{
+  h_weight = 0;
+}
 PileupWeight::~PileupWeight() {}
 
 double PileupWeight::getWeight(const Event& fEvent){
   if(!fEnabled || fEvent.isData()) return 1;
+
+  if(h_weight == 0)
+    throw std::runtime_error("PileupWeight enabled, but no PileupWeights in multicrab!");
 
   int NPU = fEvent.vertexInfo().value();
   int bin = h_weight->GetXaxis()->FindBin( NPU );
@@ -51,7 +56,6 @@ double PileupWeight::getWeight(const Event& fEvent){
 }
 
 void PileupWeight::calculateWeights(TH1* h_data, TH1* h_mc){
-
   if(!h_data or !h_mc)
     throw std::runtime_error("Did not find pileup distributions");
 

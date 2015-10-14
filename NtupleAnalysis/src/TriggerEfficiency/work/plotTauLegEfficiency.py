@@ -177,5 +177,7 @@ def main():
         os.mkdir(plotDir)
     p.save()
 
+    print "Output written in",plotDir
+
 if __name__ == "__main__":
     main()

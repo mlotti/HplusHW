@@ -297,9 +297,10 @@ class Process:
                         hPU = dset.getPileUp()
                     else:
                         hPU.Add(dset.getPileUp())
-            hPU.SetName("PileUpData")
-            hPUs[aname] = hPU
-
+            if not hPU is None:
+                hPU.SetName("PileUpData")
+                hPUs[aname] = hPU
+ 
         # Process over datasets
         ndset = 0
         for dset in self._datasets:
@@ -321,12 +322,13 @@ class Process:
 
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
                     if dset.getDataVersion().isMC():
-                        inputList.Add(hPUs[aname])
-                        hPUMC = dset.getPileUp().Clone()
-                        hPUMC.SetName("PileUpMC")
-                        inputList.Add(hPUMC)
-                        if analyzer.exists("usePileupWeights"):
-                            usePUweights = analyzer.__getattr__("usePileupWeights")
+                        if len(hPUs) > 0:
+                            inputList.Add(hPUs[aname])
+                            hPUMC = dset.getPileUp().Clone()
+                            hPUMC.SetName("PileUpMC")
+                            inputList.Add(hPUMC)
+                            if analyzer.exists("usePileupWeights"):
+                                usePUweights = analyzer.__getattr__("usePileupWeights")
                     anames.append(aname)
             if nanalyzers == 0:
                 print "Skipping %s, no analyzers" % dset.getName()

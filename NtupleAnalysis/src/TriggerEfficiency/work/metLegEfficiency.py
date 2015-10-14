@@ -130,10 +130,10 @@ def addAnalyzer(era,onlineSelection):
 #addAnalyzer("2012ABCD")
 #addAnalyzer("2012D")
 #addAnalyzer("2012ABCD_CaloMET")
-#addAnalyzer("2015CD","MET80")
-addAnalyzer("2015D","MET80")
+#addAnalyzer("2015D","MET80")
+addAnalyzer("2015CD","MET80")
+addAnalyzer("2015CD_CaloMET","MET80")
 #addAnalyzer("2015A","MET120")
-#addAnalyzer("2015CD_CaloMET","MET80")
 #addAnalyzer("2015A_CaloMET","MET120")
 
 # Pick events
