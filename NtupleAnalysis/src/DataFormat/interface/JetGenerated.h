@@ -15,7 +15,7 @@ public:
   : ParticleCollection(prefix),
     fMCjet(prefix)
   {
-    fMCjet.setEnergySystematicsVariation("MCjet");
+    fMCjet.setEnergySystematicsVariation("_MCjet");
   }
   ~JetGeneratedCollection() {}
 
