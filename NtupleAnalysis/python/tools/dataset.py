@@ -1557,6 +1557,8 @@ class RootHistoWithUncertainties:
         if self._rootHisto == None:
             raise Exception("Tried to call Rebin for a histogram which has been deleted")
         htmp = self._rootHisto.Rebin(*args)
+        if htmp == None:
+            raise Exception("Something went wrong with the rebinning (%s)!"%self._rootHisto.GetName())
         if htmp.GetBinContent(htmp.GetNbinsX()) == float('Inf'):
             raise Exception("Check the rebin range, it produces infinity!")
         if len(args) > 1: # If more than 1 argument is given, ROOT creates a clone of the histogram
@@ -3977,7 +3979,7 @@ class DatasetManagerCreator:
                 smname = directoryName[m.span()[0]+1:m.span()[1]-1]
                 searchModes[smname] = 1
                 directoryName = directoryName[:m.span()[0]]
-                break
+                #break
             # Whatever is left in directoryName, is our analysis name
             analyses[directoryName] = 1
 
@@ -4085,6 +4087,9 @@ class DatasetManagerCreator:
             precursors = filter(lambda p: isInEra(lst, p), precursors)
         manager = DatasetManager()
         for precursor in precursors:
+            if "optimizationMode" in _args.keys() and _args["optimizationMode"] == "":
+                del _args["optimizationMode"]
+            
             try:
                 if precursor.isData():
                     dset = Dataset(precursor.getName(), precursor.getFiles(), **_args)
