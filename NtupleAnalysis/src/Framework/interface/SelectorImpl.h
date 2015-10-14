@@ -16,6 +16,8 @@ class BaseSelector;
 class BranchManager;
 class EventSaver;
 
+class TH1F;
+
 class SelectorImplParams: public TObject {
 public:
   SelectorImplParams(): fOptions("{}"), fEntries(-1), fIsMC(false), fPrintStatus(false) {}
@@ -84,6 +86,9 @@ private:
   double fPrintLastTime;
   int fPrintAdaptCount;
   bool fPrintStatus;
+
+  TH1F *hPUdata;
+  TH1F *hPUmc;
 };
 
 #endif

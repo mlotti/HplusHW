@@ -160,7 +160,7 @@ import OrderedDict
 #import certifiedLumi
 #import git
 #import aux
-#import tarfile
+import tarfile
 
 ### Default Storage Element (SE) black list for non-stageout jobs
 #defaultSeBlacklist_noStageout = [
@@ -388,11 +388,11 @@ def writeGitVersion(dirname):
     #return lumiList
 
 ### Exception for non-succesful crab job exit codes
-#class ExitCodeException(Exception):
-    #def __init__(self, message):
-        #self.message = message
-    #def __str__(self):
-        #return self.message
+class ExitCodeException(Exception):
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
 
 ### Given crab job stdout file, ensure that the job succeeded
 ##
@@ -400,39 +400,39 @@ def writeGitVersion(dirname):
 ## \param allowJobExitCodes  Consider jobs with these non-zero exit codes to be succeeded
 ##
 ## If any of the checks fail, raises multicrab.ExitCodeException
-#def assertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
+def assertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
 ##    re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
-    #re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
-    #re_job = re.compile("JobExitCode=(?P<code>\d+)")
+    re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
+    re_job = re.compile("JobExitCode=(?P<code>\d+)")
 
-    #exeExitCode = None
-    #jobExitCode = None
-    #if tarfile.is_tarfile(stdoutFile):
-        #fIN = tarfile.open(stdoutFile)
-        #log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
-        #for member in fIN.getmembers():
-            #f = fIN.extractfile(member)
-            #match = log_re.search(f.name)
-            #if match:
-    		#for line in f:
-        	    #m = re_exe.search(line)
-                    #if m:
-            		#exeExitCode = int(m.group("code"))
-            		#continue
-        	    #m = re_job.search(line)
-        	    #if m:
-            		#jobExitCode = int(m.group("code"))
-            		#continue
-    	#fIN.close()
-    #jobExitCode = exeExitCode
-    #if exeExitCode == None:
-        #raise ExitCodeException("No exeExitCode")
-    #if jobExitCode == None:
-        #raise ExitCodeException("No jobExitCode")
-    #if exeExitCode != 0:
-        #raise ExitCodeException("Executable exit code is %d" % exeExitCode)
-    #if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
-        #raise ExitCodeException("Job exit code is %d" % jobExitCode)
+    exeExitCode = None
+    jobExitCode = None
+    if tarfile.is_tarfile(stdoutFile):
+        fIN = tarfile.open(stdoutFile)
+        log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+        for member in fIN.getmembers():
+            f = fIN.extractfile(member)
+            match = log_re.search(f.name)
+            if match:
+                for line in f:
+                    m = re_exe.search(line)
+                    if m:
+                        exeExitCode = int(m.group("code"))
+                        continue
+                    m = re_job.search(line)
+                    if m:
+                        jobExitCode = int(m.group("code"))
+                        continue
+        fIN.close()
+    jobExitCode = exeExitCode
+    if exeExitCode == None:
+        raise ExitCodeException("No exeExitCode")
+    if jobExitCode == None:
+        raise ExitCodeException("No jobExitCode")
+    if exeExitCode != 0:
+        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
+    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
+        raise ExitCodeException("Job exit code is %d" % jobExitCode)
 
 ## Compact job number list
 #

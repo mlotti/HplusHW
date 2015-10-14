@@ -3,8 +3,6 @@
 
 #include "DataFormat/interface/Event.h"
 
-#include "Tools/interface/PileupWeight.h"
-
 #include "TH1F.h"
 #include "TDirectory.h"
 
@@ -22,8 +20,6 @@ public:
   virtual void process(Long64_t entry) override;
 
 private:
-  PileupWeight fPileupWeight;
-
   std::string fName;
 
   const std::string fOfflineSelection;
@@ -62,7 +58,6 @@ REGISTER_SELECTOR(TriggerEfficiency);
 
 TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   BaseSelector(config),
-  fPileupWeight(config),
   fName(config.getParameter<std::string>("name")),
   fOfflineSelection(config.getParameter<std::string>("offlineSelection")),
   fbinning(config.getParameter<std::vector<int>>("binning")),
@@ -133,8 +128,6 @@ void TriggerEfficiency::setupBranches(BranchManager& branchManager) {
 }
 
 void TriggerEfficiency::process(Long64_t entry) {
-  if(fEvent.isMC())
-    fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
 
   cAllEvents.increment();
 

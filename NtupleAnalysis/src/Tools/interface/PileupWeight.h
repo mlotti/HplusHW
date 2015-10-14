@@ -22,10 +22,11 @@ public:
   PileupWeight& operator=(PileupWeight&&) = delete;
 
   double getWeight(const Event& event);
+  void calculateWeights(TH1*, TH1*);
 
 private:
   const bool fEnabled;
 
-  const TH1 *h_weight;
+  TH1 *h_weight;
 };
 #endif
