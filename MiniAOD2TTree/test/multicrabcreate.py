@@ -103,6 +103,7 @@ datasets25nsTau.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/R
 #datasets25nsTau.append(Dataset('/QCD_Pt-120to170_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM'))
 #datasets25nsTau.append(Dataset('/QCD_Pt-170to300_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM'))
 #datasets25nsTau.append(Dataset('/QCD_Pt-300to470_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM'))
+datasets25nsTau.append(Dataset('/GluGluHToTauTau_M125_13TeV_powheg_pythia8/manzoni-RunIISpring15DR74-AsymptFlat10to50bx25Raw_MCRUN2_74_V9-v1_25ns14e33_HLT_v4p0_L1_v5_1oct15-9aee7f6aa9ee774a3ecb4dd6367feac8/USER',dbs='phys03'))
 
 datasets25nsSignal = []
 datasets25nsSignal.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-500_13TeV_amcatnlo_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'))
@@ -245,42 +246,41 @@ for dataset in datasets:
 
 	if not os.path.exists(os.path.join(dirName,rName)):
 
-            if not os.path.exists(outfilepath):
-                fIN = open("crabConfig.py","r")
-                fOUT = open(outfilepath,"w")
-                for line in fIN:
-                    if line[0] == "#":
-                        continue
-	            match = crab_dataset_re.search(line)
+            fIN = open("crabConfig.py","r")
+            fOUT = open(outfilepath,"w")
+            for line in fIN:
+                if line[0] == "#":
+                    continue
+                match = crab_dataset_re.search(line)
+                if match:
+                    line = "config.Data.inputDataset = '"+dataset.URL+"'\n"
+        	match = crab_requestName_re.search(line)
+                if match:
+                    line = "config.General.requestName = '"+rName+"'\n"
+                match = crab_workArea_re.search(line)
+                if match:
+                    line = "config.General.workArea = '"+dirName+"'\n"
+                match = crab_pset_re.search(line)
+                if match:
+                    line = "config.JobType.psetName = '"+PSET+"'\n"
+                match = crab_psetParams_re.search(line)
+                if match:
+                    line = "config.JobType.pyCfgParams = ['dataVersion="+dataset.dataVersion+"']\n"
+                match = crab_dbs_re.search(line)
+                if match:
+                    line = "config.Data.inputDBS = '"+dataset.DBS+"'\n"
+                if dataset.isData():
+                    match = crab_split_re.search(line)
                     if match:
-                        line = "config.Data.inputDataset = '"+dataset.URL+"'\n"
-	            match = crab_requestName_re.search(line)
+                        line = "config.Data.splitting = 'LumiBased'\n"
+                        line+= "config.Data.lumiMask = '"+dataset.lumiMask+"'\n"
+                    match = crab_splitunits_re.search(line)	
                     if match:
-                        line = "config.General.requestName = '"+rName+"'\n"
-                    match = crab_workArea_re.search(line)
-                    if match:
-                        line = "config.General.workArea = '"+dirName+"'\n"
-	            match = crab_pset_re.search(line)
-                    if match:
-                        line = "config.JobType.psetName = '"+PSET+"'\n"
-		    match = crab_psetParams_re.search(line)
-                    if match:
-                        line = "config.JobType.pyCfgParams = ['dataVersion="+dataset.dataVersion+"']\n"
-	            match = crab_dbs_re.search(line)
-                    if match:
-                        line = "config.Data.inputDBS = '"+dataset.DBS+"'\n"
-		    if dataset.isData():
-			match = crab_split_re.search(line)
-			if match:
-			    line = "config.Data.splitting = 'LumiBased'\n"
-			    line+= "config.Data.lumiMask = '"+dataset.lumiMask+"'\n"
-			match = crab_splitunits_re.search(line)	
-			if match:
-			    line = "config.Data.unitsPerJob = 100\n"
+                        line = "config.Data.unitsPerJob = 100\n"
 
-                    fOUT.write(line)
-                fOUT.close()
-                fIN.close()
+                fOUT.write(line)
+            fOUT.close()
+            fIN.close()
 
             cmd = "crab submit -c "+outfilepath
             print cmd

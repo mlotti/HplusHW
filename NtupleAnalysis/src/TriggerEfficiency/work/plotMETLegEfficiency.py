@@ -5,11 +5,11 @@ import sys
 import ROOT
 import array
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 
 from plotTauLegEfficiency import getEfficiency,convert2TGraph,Print
 
@@ -159,9 +159,9 @@ def main():
     p = plots.ComparisonPlot(histograms.HistoGraph(eff2_MET80, "eff2_MET80", "p", "P"),
                              histograms.HistoGraph(eff2c_MET80, "eff2c_MET80", "p", "P"))
 
-    namec = "MC_TrgBinVsCaloMET80_L1HLTMET_PFMET"
+    namec = "MC_TrgBitVsCaloMET80_L1HLTMET_PFMET"
 
-    legend1c = "MC, trigger bin"
+    legend1c = "MC, trigger bit"
     legend2c = "MC, CaloMET > 80"
     p.histoMgr.setHistoLegendLabelMany({"eff2_MET80": legend1c, "eff2c_MET80": legend2c})
 
@@ -207,9 +207,9 @@ def main():
     p = plots.ComparisonPlot(histograms.HistoGraph(eff2_MET120, "eff2_MET120", "p", "P"),
                              histograms.HistoGraph(eff2c_MET120, "eff2c_MET120", "p", "P"))
 
-    namec = "MC_TrgBinVsCaloMET120_L1HLTMET_PFMET"
+    namec = "MC_TrgBitVsCaloMET120_L1HLTMET_PFMET"
 
-    legend1c = "MC, trigger bin"
+    legend1c = "MC, trigger bit"
     legend2c = "MC, CaloMET > 120"
     p.histoMgr.setHistoLegendLabelMany({"eff2_MET120": legend1c, "eff2c_MET120": legend2c})
 
@@ -229,6 +229,8 @@ def main():
         os.mkdir(plotDir)
     p.save(formats)
     """
+
+    print "Output written in",plotDir
 
 if __name__ == "__main__":
     main()

@@ -273,6 +273,9 @@ backgroundCrossSections = CrossSectionList(
             "7": 0, # []      
             "8": 0.004527, # [1]
             }),
+    CrossSection("GluGluHToTauTau_M125", {
+            "13": 1, # dummy value, not really needed as this sample is not merged with anything else
+            }),
     CrossSection("T_t-channel", {
             "7": 41.92, # [5,6]
             "8": 56.4, # [8]

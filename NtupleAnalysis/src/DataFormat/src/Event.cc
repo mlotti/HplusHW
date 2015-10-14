@@ -9,6 +9,7 @@ Event::Event(const ParameterSet& config):
   fMET_Type1("MET_Type1"),
   fCaloMET("CaloMET"),
   fL1MET("L1MET"),
+  fL1extraMET("L1MET_l1extra"),
   fGenWeight("GenWeight"),
   fIsMC(config.isMC())
 {
@@ -112,5 +113,6 @@ void Event::setupBranches(BranchManager& mgr) {
   fMET_Type1.setupBranches(mgr);
   fCaloMET.setupBranches(mgr);
   fL1MET.setupBranches(mgr);
+  fL1extraMET.setupBranches(mgr);
   fPFCandidates.setupBranches(mgr);
 }
