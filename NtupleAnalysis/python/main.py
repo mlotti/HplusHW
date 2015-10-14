@@ -297,8 +297,11 @@ class Process:
                         hPU = dset.getPileUp()
                     else:
                         hPU.Add(dset.getPileUp())
-            hPU.SetName("PileUpData")
-            hPUs[aname] = hPU
+            if hPU != None:
+                hPU.SetName("PileUpData")
+                hPUs[aname] = hPU
+            #else:
+            #    raise Exception("Cannot determine PU spectrum for data!")
 
         # Process over datasets
         ndset = 0
@@ -321,7 +324,17 @@ class Process:
 
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
                     if dset.getDataVersion().isMC():
-                        inputList.Add(hPUs[aname])
+                        if aname in hPUs.keys():
+                            inputList.Add(hPUs[aname])
+                        else:
+                            n = 50
+                            hFlat = ROOT.TH1F("dummyPU","dummyPU",n,0,n)
+                            for k in range(n):
+                                hFlat.Fill(k+1, 1.0/n)
+                            inputList.Add(hFlat)
+                            print "Warning: Using a flat pileup spectrum for data (which is missing) -> MC PU spectrum is unchanged"
+                        if dset.getPileUp() == None:
+                            raise Exception("Error: pileup spectrum is missing from dataset! Please switch to using newest multicrab!")
                         hPUMC = dset.getPileUp().Clone()
                         hPUMC.SetName("PileUpMC")
                         inputList.Add(hPUMC)
