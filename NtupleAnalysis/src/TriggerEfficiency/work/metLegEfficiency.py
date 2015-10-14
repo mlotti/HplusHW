@@ -51,7 +51,7 @@ def runRange(era):
     if era == "2015CD":
         lumi = 1
         runmin = 253888
-        runmax = 256869
+        runmax = 258159
 
     if lumi == 0:
         print "Unknown era",era,"exiting.."

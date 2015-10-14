@@ -16,7 +16,8 @@ if len(sys.argv) != 2:
     print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory>"
     sys.exit(0)
 process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="SingleMuon_Run2015")
-process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="DYJetsToLL_M50")
+#process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="DYJetsToLL_M50")
+process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="GluGluHToTauTau_M125")
 
 leg     = "taulegSelection"
 #binning = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
@@ -53,7 +54,7 @@ def runRange(era):
     if era == "2015CD":
         lumi = 16.6937
         runmin = 253888
-        runmax = 256869
+        runmax = 258159
 
     if lumi == 0:
         print "Unknown era",era,"exiting.."
