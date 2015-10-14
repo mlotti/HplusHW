@@ -335,11 +335,11 @@ class Process:
                             print "Warning: Using a flat pileup spectrum for data (which is missing) -> MC PU spectrum is unchanged"
                         if dset.getPileUp() == None:
                             raise Exception("Error: pileup spectrum is missing from dataset! Please switch to using newest multicrab!")
-                            hPUMC = dset.getPileUp().Clone()
-                            hPUMC.SetName("PileUpMC")
-                            inputList.Add(hPUMC)
-                            if analyzer.exists("usePileupWeights"):
-                                usePUweights = analyzer.__getattr__("usePileupWeights")
+                        hPUMC = dset.getPileUp().Clone()
+                        hPUMC.SetName("PileUpMC")
+                        inputList.Add(hPUMC)
+                        if analyzer.exists("usePileupWeights"):
+                            usePUweights = analyzer.__getattr__("usePileupWeights")
                     anames.append(aname)
             if nanalyzers == 0:
                 print "Skipping %s, no analyzers" % dset.getName()
