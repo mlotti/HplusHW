@@ -8,7 +8,7 @@ void METFilter::setupBranches(BranchManager& mgr) {
   size_t i=0;
   for (const auto& name: fConfigurableDiscriminatorNames) {
     checkDiscriminatorValidity(name);
-    mgr.book("METFilter_Flag_"+name, &(fConfigurableDiscriminators[i]));
+    mgr.book("METFilter_"+name, &(fConfigurableDiscriminators[i]));
     ++i;
   }
 }

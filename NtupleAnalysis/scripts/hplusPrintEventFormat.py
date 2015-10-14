@@ -69,11 +69,11 @@ def findImplementation(files, name):
                 shortname = (name[0].upper()+name[1:]).replace("%ss_"%particle,"").replace("%s_"%particle,"")
                 suffix = None
                 if shortname.startswith("pt"):
-                    suffix = shortname[2:]
-                elif shortname.startswith("eta") or shortname.startswith("phi"):
                     suffix = shortname[3:]
+                elif shortname.startswith("eta") or shortname.startswith("phi"):
+                    suffix = shortname[4:]
                 elif shortname.startswith("e"):
-                    suffix = shortname[1:]
+                    suffix = shortname[2:]
                 if suffix != None:
                     if suffix.endswith("down") or suffix.endswith("Down") or suffix.endswith("up") or suffix.endswith("Up"):
                         return "\033[1;32m"+"Available as syst.variation '%s' (%s)"%(suffix,key)+"\033[0;0m"

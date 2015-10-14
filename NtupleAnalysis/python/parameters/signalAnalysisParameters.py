@@ -20,10 +20,11 @@ trg = PSet(
 
 #====== MET filter
 metFilter = PSet(
-  # Note: HBHE filter is applied at ttree generation level
-  discriminators = ["CSCTightHaloFilter",
-                    "eeBadScFilter",
-                    "goodVertices"]
+  discriminators = ["hbheNoiseTokenRun2Loose", # Loose is recommended
+                    "hbheIsoNoiseToken", # under scrutiny
+                    "Flag_CSCTightHaloFilter",
+                    "Flag_eeBadScFilter",
+                    "Flag_goodVertices"]
 )
 
 #====== Tau selection
