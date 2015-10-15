@@ -43,6 +43,8 @@ public:
   
   /// Returns the histogram splitter object (usecase: QCD measurement)
   HistoSplitter& getHistoSplitter() { return fHistoSplitter; }
+  /// Returns the histogram settings for pt histograms (usecase: QCD measurement)
+  const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
   /// Returns the histogram settings for MtBins (usecase: QCD measurement)
   const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
   

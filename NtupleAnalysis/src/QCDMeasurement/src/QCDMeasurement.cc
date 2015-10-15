@@ -74,8 +74,12 @@ private:
   // Normalization histograms - inverted tau
   HistoSplitter::SplittedTripletTH1s hNormalizationInvertedTauAfterStdSelections;
 
+  // Purity histograms (no need to split in bins of tau pt, therefore just a triplet)
+  // Add here more purity histograms at different point of event selections, if necessary
+  WrappedTH1Triplet* hInvertedTauTauPtAfterAllSelections;
+  
   // Other histograms
-  HistoSplitter::SplittedTripletTH1s hBaselineTauTransverseMass; // the plot for inverted tau is in common plots
+  HistoSplitter::SplittedTripletTH1s hBaselineTauTransverseMass; // the plot for baseline tau is in common plots
   
   //WrappedTH1 *hSelectedTaus;
   //WrappedTH1 *hAntiIsolatedTaus;
@@ -193,8 +197,26 @@ void QCDMeasurement::book(TDirectory *dir) {
     "NormalizationMETInvertedTauAfterStdSelections", ";MET (GeV);N_{events}",
     nMetBins, fMetMin, fMetMax);
   
+  // ====== Purity histograms
+  // Create directories and obtain binning
+  myInclusiveLabel = "QCDPurity";
+  myFakeLabel = myInclusiveLabel+"EWKFakeTaus";
+  myGenuineLabel = myInclusiveLabel+"EWKGenuineTaus";
+  TDirectory* myPurityDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myInclusiveLabel);
+  TDirectory* myPurityEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
+  TDirectory* myPurityGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
+  std::vector<TDirectory*> myPurityDirs = {myPurityDir, myPurityEWKFakeTausDir, myPurityGenuineTausDir};
+  const int nPtBins = fCommonPlots.getPtBinSettings().bins();
+  const float fPtMin = fCommonPlots.getPtBinSettings().min();
+  const float fPtMax = fCommonPlots.getPtBinSettings().max();
+  // Create purity histograms
+  hInvertedTauTauPtAfterAllSelections = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myPurityDirs,
+                                                                          "InvertedTauTauPtAfterAsllSelections",
+                                                                          "InvertedTauTauPtAfterAsllSelections:#tau p_{T} (GeV):N_{events}",
+                                                                          nPtBins, fPtMin, fPtMax);
+  
   // ====== Other histograms
-  // Create directories for other plots
+  // Create directories for other plots and obtain binning
   myInclusiveLabel = "ForQCDMeasurement";
   myFakeLabel = myInclusiveLabel+"EWKFakeTaus";
   myGenuineLabel = myInclusiveLabel+"EWKGenuineTaus";
@@ -211,7 +233,7 @@ void QCDMeasurement::book(TDirectory *dir) {
     hBaselineTauTransverseMass,
     "BaselineTauShapeTransverseMass", ";m_{T} (GeV);N_{events}",
     nMtBins, fMtMin, fMtMax);
-  
+   
   // Other histograms (testing etc.)
   
 }
@@ -429,6 +451,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   // Fill final plots
   //double myTransverseMass = TransverseMass::reconstruct(tau, METData.getMET());
   fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
+  hInvertedTauTauPtAfterAllSelections->Fill(isFakeTau, tau.pt());
   
 //====== Experimental code
 
