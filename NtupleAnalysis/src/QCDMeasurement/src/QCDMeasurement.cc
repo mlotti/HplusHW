@@ -211,10 +211,10 @@ void QCDMeasurement::book(TDirectory *dir) {
   const float fPtMax = fCommonPlots.getPtBinSettings().max();
   // Create purity histograms
   hInvertedTauTauPtAfterAllSelections = fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kInformative, myPurityDirs,
-                                                                          "InvertedTauTauPtAfterAsllSelections",
-                                                                          "InvertedTauTauPtAfterAsllSelections:#tau p_{T} (GeV):N_{events}",
+                                                                          "InvertedTauTauPtAfterAllSelections",
+                                                                          "InvertedTauTauPtAfterAllSelections:#tau p_{T} (GeV):N_{events}",
                                                                           nPtBins, fPtMin, fPtMax);
-  
+
   // ====== Other histograms
   // Create directories for other plots and obtain binning
   myInclusiveLabel = "ForQCDMeasurement";
