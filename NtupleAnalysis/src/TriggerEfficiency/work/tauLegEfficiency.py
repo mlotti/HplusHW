@@ -15,13 +15,15 @@ import sys
 if len(sys.argv) != 2:
     print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory>"
     sys.exit(0)
-process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="SingleMuon_Run2015")
+
+process.addDatasetsFromMulticrab(sys.argv[1])
+#process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="SingleMuon_Run2015")
 #process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="DYJetsToLL_M50")
-process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="GluGluHToTauTau_M125")
+#process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="GluGluHToTauTau_M125")
 
 leg     = "taulegSelection"
 #binning = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
-binning = [20, 30, 40, 50, 60, 90, 200]
+binning = [20, 30, 40, 50, 60, 80, 100, 200]
 xLabel  = "#tau-jet p_{T} (GeV/c)"
 yLabel  = "HLT tau efficiency"
 
