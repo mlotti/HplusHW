@@ -25,19 +25,19 @@ public:
     fGenW(prefix),
     fGenWNeutrinos(prefix)
   {
-    fGenElectron.setEnergySystematicsVariation("GenElectron");
-    fGenHplus.setEnergySystematicsVariation("GenHplus");
-    fGenHplusNeutrinos.setEnergySystematicsVariation("GenHplusNeutrinos");
-    fGenMuon.setEnergySystematicsVariation("GenMuon");
-    fGenNeutrinos.setEnergySystematicsVariation("GenNeutrinos");
-    fGenTau.setEnergySystematicsVariation("GenTau");
-    fGenTauNeutrinos.setEnergySystematicsVariation("GenTauNeutrinos");
-    fGenTop.setEnergySystematicsVariation("GenTop");
-    fGenTopBNeutrinos.setEnergySystematicsVariation("GenTopBNeutrinos");
-    fGenTopBQuark.setEnergySystematicsVariation("GenTopBQuark");
-    fGenVisibleTau.setEnergySystematicsVariation("GenVisibleTau");
-    fGenW.setEnergySystematicsVariation("GenW");
-    fGenWNeutrinos.setEnergySystematicsVariation("GenWNeutrinos");
+    fGenElectron.setEnergySystematicsVariation("_GenElectron");
+    fGenHplus.setEnergySystematicsVariation("_GenHplus");
+    fGenHplusNeutrinos.setEnergySystematicsVariation("_GenHplusNeutrinos");
+    fGenMuon.setEnergySystematicsVariation("_GenMuon");
+    fGenNeutrinos.setEnergySystematicsVariation("_GenNeutrinos");
+    fGenTau.setEnergySystematicsVariation("_GenTau");
+    fGenTauNeutrinos.setEnergySystematicsVariation("_GenTauNeutrinos");
+    fGenTop.setEnergySystematicsVariation("_GenTop");
+    fGenTopBNeutrinos.setEnergySystematicsVariation("_GenTopBNeutrinos");
+    fGenTopBQuark.setEnergySystematicsVariation("_GenTopBQuark");
+    fGenVisibleTau.setEnergySystematicsVariation("_GenVisibleTau");
+    fGenW.setEnergySystematicsVariation("_GenW");
+    fGenWNeutrinos.setEnergySystematicsVariation("_GenWNeutrinos");
   }
   ~GenParticleGeneratedCollection() {}
 

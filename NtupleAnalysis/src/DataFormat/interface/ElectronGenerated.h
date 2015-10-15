@@ -15,7 +15,7 @@ public:
   : ParticleCollection(prefix),
     fMCelectron(prefix)
   {
-    fMCelectron.setEnergySystematicsVariation("MCelectron");
+    fMCelectron.setEnergySystematicsVariation("_MCelectron");
   }
   ~ElectronGeneratedCollection() {}
 

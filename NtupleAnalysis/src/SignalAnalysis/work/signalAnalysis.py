@@ -21,6 +21,17 @@ process.addDatasetsFromMulticrab(sys.argv[1])
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
 
+allSelections.TauSelection.rtau = 0.0
+allSelections.AngularCutsCollinear.cutValueJet1 = 0.0
+allSelections.AngularCutsCollinear.cutValueJet2 = 0.0
+allSelections.AngularCutsCollinear.cutValueJet3 = 0.0
+allSelections.AngularCutsCollinear.cutValueJet4 = 0.0
+allSelections.BJetSelection.bjetDiscrWorkingPoint = "Loose"
+allSelections.AngularCutsBackToBack.cutValueJet1 = 0.0
+allSelections.AngularCutsBackToBack.cutValueJet2 = 0.0
+allSelections.AngularCutsBackToBack.cutValueJet3 = 0.0
+allSelections.AngularCutsBackToBack.cutValueJet4 = 0.0
+
 # Build analysis modules
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
 builder = AnalysisBuilder("SignalAnalysis", 

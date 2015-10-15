@@ -32,6 +32,8 @@ def getAdditionalFourVectorBranches(types, prefix):
             if len(suffix) > 0 and "%s_pt%s"%(prefix,suffix) in types.keys() and "%s_phi%s"%(prefix,suffix) in types.keys() and "%s_e%s"%(prefix,suffix) in types.keys():
                 if not (suffix.endswith("up") or suffix.endswith("Up") or suffix.endswith("down") or suffix.endswith("Down")):
                     # Ignore syst. variations
+                    if suffix.startswith("_") and len(suffix) > 1:
+                        suffix = suffix[1:]
                     result.append(suffix)
     return result
 
@@ -133,7 +135,7 @@ def generateParticle(types, particle, discriminatorCaptions):
         preInit += ",\n    f%s(prefix)"%item
     initList = []
     for item in additionalFourVectorBranches:
-        initList.append('    f%s.setEnergySystematicsVariation("%s");'%(item, item))
+        initList.append('    f%s.setEnergySystematicsVariation("_%s");'%(item, item))
     inits = ""
     inits += "\n".join(map(str,initList))
     fvectorgetters = ""
@@ -252,7 +254,7 @@ def generateGenParticles(types, particle):
     floattype = None
     if len(additionalFourVectorBranches) > 0:
         for t in types.keys():
-            if "%ss_pt%s"%(particle, additionalFourVectorBranches[0]) == t:
+            if "%ss_pt_%s"%(particle, additionalFourVectorBranches[0]) == t:
                 m = re_vector.search(types[t])
                 if not m:
                     raise Exception("Error (%s): Additional four vector type is not a vector!"%particle)
@@ -297,7 +299,7 @@ def generateGenParticles(types, particle):
         preInit += "f%s(prefix)"%item
     initList = []
     for item in additionalFourVectorBranches:
-        initList.append('    f%s.setEnergySystematicsVariation("%s");'%(item, item))
+        initList.append('    f%s.setEnergySystematicsVariation("_%s");'%(item, item))
     inits = ""
     inits += "\n".join(map(str,initList))
     fvectorgetters = ""
@@ -489,7 +491,7 @@ def main(opts, args):
     #generateParticle(types, "HLTTau", {})
     generateParticle(types, "PFcandidate", {})
     # HLTTau contains only generic momentum and pdgId information, no generation needed
-    generateDiscriminator(types, "METFilter", "METFilter_Flag")
+    generateDiscriminator(types, "METFilter", "METFilter")
     generateGenParticles(types, "genParticle")
     
     return 0

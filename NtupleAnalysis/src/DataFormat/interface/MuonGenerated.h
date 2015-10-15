@@ -15,7 +15,7 @@ public:
   : ParticleCollection(prefix),
     fMCmuon(prefix)
   {
-    fMCmuon.setEnergySystematicsVariation("MCmuon");
+    fMCmuon.setEnergySystematicsVariation("_MCmuon");
   }
   ~MuonGeneratedCollection() {}
 

@@ -1020,11 +1020,13 @@ class TableProducer:
         hQCD = None
         hQCDPurity = None
         for c in self._datasetGroups:
-            if c.typeIsQCD():
+            if c.typeIsQCD() and not c.typeIsQCDMC():
                 hQCD = c.getRateHistogram()
                 hQCDPurity = c.getPurityHistogram()
             elif not c.typeIsSignal() and not c.typeIsEmptyColumn():
                 h.Add(c.getRateHistogram())
+        if hQCD == None:
+            return
         s = "QCD purity by bins for shape histogram:\n"
         for i in range(1,hQCD.GetNbinsX()+1):
             # bin
