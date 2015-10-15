@@ -10,6 +10,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 ROOT.gROOT.SetBatch(True)
 plotDir = "TauLeg2015"
@@ -20,9 +21,19 @@ def usage():
     print "\n"
     sys.exit()
 
+def fit(name,plot,graph,min,max):
+    function = ROOT.TF1("fit"+name, "0.5*[0]*(1+TMath::Erf( (sqrt(x)-sqrt([1]))/(sqrt(2)*[2]) ))", min, max);
+    function.SetParameters(1., 50., 1.);
+    function.SetParLimits(0, 0.0, 1.0);
+    fitResult = graph.Fit(function, "NRSE+EX0");
+    aux.copyStyle(graph, function)
+    plot.appendPlotObject(function)
+
 def getEfficiency(datasets):
 
-    statOption = ROOT.TEfficiency.kFNormal
+#    statOption = ROOT.TEfficiency.kFNormal
+    statOption = ROOT.TEfficiency.kFCP # Clopper-Pearson
+#    statOption = ROOT.TEfficiency.kFFC # Feldman-Cousins
 
     first = True
     isData = False
@@ -125,7 +136,8 @@ def main():
     paths = [sys.argv[1]]
 
     analysis = "TauLeg_2015CD"
-    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
+    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="GluGluHToTauTau_M125|TTJets")
+    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125")
     datasets.loadLuminosities()
 
     style = tdrstyle.TDRStyle()
@@ -135,23 +147,39 @@ def main():
 
     eff1 = getEfficiency(dataset1)
     eff2 = getEfficiency(dataset2)
+    eff3 = getEfficiency(datasetsH125.getMCDatasets())
 
     styles.dataStyle.apply(eff1)
     styles.mcStyle.apply(eff2)
     eff1.SetMarkerSize(1)
     eff2.SetMarkerSize(1.5)
+    styles.mcStyle.apply(eff3)
+    eff3.SetMarkerSize(1.5)
+    eff3.SetMarkerColor(4)
+    eff3.SetLineColor(4)
 
-    p = plots.ComparisonPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
-                             histograms.HistoGraph(eff2, "eff2", "p", "P"))
+#    p = plots.ComparisonPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
+#                             histograms.HistoGraph(eff2, "eff2", "p", "P"))
+
+    p = plots.ComparisonManyPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
+                                 [histograms.HistoGraph(eff2, "eff2", "p", "P"),
+                                  histograms.HistoGraph(eff3, "eff3", "p", "P")])
+
+    fit("Data",p,eff1,20,200)
+    fit("MC",p,eff2,20,200)
+    fit("H125",p,eff3,20,200)
+
 
     opts = {"ymin": 0, "ymax": 1.1}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
-    moveLegend = {"dx": -0.55, "dy": -0.15, "dh": -0.1}
+#    moveLegend = {"dx": -0.55, "dy": -0.15, "dh": -0.1}
+    moveLegend = {"dx": -0.2, "dy": -0.5, "dh": -0.1}
     name = "DataVsMC_HLTTau_PFTauPt"
 
     legend1 = "Data"
     legend2 = "MC"
-    p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
+    legend3 = "H125 MC"
+    p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2, "eff3": legend3})
 
     p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
     p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
