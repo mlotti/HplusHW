@@ -50,8 +50,8 @@ def runRange(era):
 
     if era == "2015D":
         lumi = 001.2157
-        runmin = 257400
-        runmax = 257611
+        runmin = 256630
+        runmax = 258159
 
     if era == "2015CD":
         lumi = 16.6937
@@ -159,6 +159,8 @@ def addAnalyzer(era):
 #process.addAnalyzer("TauLeg_2012D", lambda dv: createAnalyzer(dv,"2012D"), excludeTasks=["2012A","2012B", "2012C"])
 #addAnalyzer("2012ABC")
 #addAnalyzer("2012D")
+addAnalyzer("2015C")
+addAnalyzer("2015D")
 addAnalyzer("2015CD")
 
 
