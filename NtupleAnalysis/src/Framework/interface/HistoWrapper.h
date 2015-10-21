@@ -269,7 +269,7 @@ public:
   ~WrappedTH1Triplet() { }
   
   /// Fills histogram (if it exists) with value
-  template<typename Arg1> void Fill(bool status, const Arg1& a1) { this->_Fill(status, a1); }
+  template<typename Arg1> void Fill(bool status, const Arg1& a1) { this->_Fill(status, a1, getWeight()); }
   /// Fills histogram (if it exists) with value and weight
   template<typename Arg1, typename Arg2> void Fill(bool status, const Arg1& a1, const Arg2& a2) { this->_Fill(status, a1, a2); }
 };
@@ -282,7 +282,7 @@ public:
   ~WrappedTH2Triplet() { }
   
   /// Fills histogram (if it exists) with value
-  template<typename Arg1, typename Arg2> void Fill(bool status, const Arg1& a1, const Arg2& a2) { this->_Fill(status, a1, a2); }
+  template<typename Arg1, typename Arg2> void Fill(bool status, const Arg1& a1, const Arg2& a2) { this->_Fill(status, a1, a2, getWeight()); }
   /// Fills histogram (if it exists) with value and weight
   template<typename Arg1, typename Arg2, typename Arg3> void Fill(bool status, const Arg1& a1, const Arg2& a2, const Arg3& a3) { this->_Fill(status, a1, a2, a3); }
 };
@@ -295,7 +295,7 @@ public:
   ~WrappedTH3Triplet() { }
   
   /// Fills histogram (if it exists) with value
-  template<typename Arg1, typename Arg2, typename Arg3> void Fill(bool status, const Arg1& a1, const Arg2& a2, const Arg3& a3) { this->_Fill(status, a1, a2, a3); }
+  template<typename Arg1, typename Arg2, typename Arg3> void Fill(bool status, const Arg1& a1, const Arg2& a2, const Arg3& a3) { this->_Fill(status, a1, a2, a3, getWeight()); }
   /// Fills histogram (if it exists) with value and weight
   template<typename Arg1, typename Arg2, typename Arg3, typename Arg4> void Fill(bool status, const Arg1& a1, const Arg2& a2, const Arg3& a3, const Arg4& a4) { this->_Fill(status, a1, a2, a3, a4); }
 };
