@@ -51,6 +51,9 @@ private:
   WrappedTH1 *hNum;
   WrappedTH1 *hDen;
   WrappedTH1 *hNeg;
+
+  WrappedTH1 *hNumPU;
+  WrappedTH1 *hDenPU;
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -91,8 +94,8 @@ TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
   std::vector<std::string> signaltriggers = fcontrolTriggers.getParameter<std::vector<std::string>>("triggerOR2");
   for(std::vector<std::string>::const_iterator i = signaltriggers.begin(); i != signaltriggers.end(); ++i)
   std::cout << "        SignalTrigger  " <<  *i << std::endl;
-  if(fOfflineSelection == "taulegSelection") selection = new TauLegSelection(config);
-  if(fOfflineSelection == "metlegSelection") selection = new METLegSelection(config);
+  if(fOfflineSelection == "taulegSelection") selection = new TauLegSelection(config,fEventCounter,fHistoWrapper);
+  if(fOfflineSelection == "metlegSelection") selection = new METLegSelection(config,fEventCounter,fHistoWrapper);
 }
 
 TriggerEfficiency::~TriggerEfficiency(){
@@ -101,6 +104,7 @@ TriggerEfficiency::~TriggerEfficiency(){
   std::cout << "    All events    " << cAllEvents.value() << std::endl;
   std::cout << "    Run range     " << cRunRange.value() << std::endl;
   std::cout << "    CtrlTrigger   " << cCtrlTrigger.value() << std::endl;
+  selection->print();
   std::cout << "    OfflSelection " << cSelection.value() << std::endl;
   std::cout << "    SignalTrigger " << cSignalTrigger.value() << std::endl;
 }
@@ -121,6 +125,15 @@ void TriggerEfficiency::book(TDirectory *dir) {
 
   hNeg = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NegativeWeight", "NegativeWeight", fbinning.size()-1, xbins);
   hNeg->GetXaxis()->SetTitle(fxLabel.c_str());
+
+
+  hNumPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorPU", "NumeratorPU", 20, 5, 25.);
+  hNumPU->GetXaxis()->SetTitle("nVtx");
+
+  hDenPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorPU", "DenominatorPU", 20, 5, 25.);
+  hDenPU->GetXaxis()->SetTitle("nVtx");
+
+  selection->bookHistograms(dir);
 }
 
 void TriggerEfficiency::setupBranches(BranchManager& branchManager) {
@@ -137,16 +150,25 @@ void TriggerEfficiency::process(Long64_t entry) {
   if(!selection->passedCtrlTtrigger(fEvent)) return;
   cCtrlTrigger.increment();
 
-  if(!selection->offlineSelection(fEvent)) return;
-  cSelection.increment();
+  if(selection->offlineSelection(fEvent)){
+    cSelection.increment();
 
-  double xvariable = selection->xVariable();
-  hDen->Fill(xvariable);
-  if(fEventWeight.getWeight() < 0) hNeg->Fill(xvariable,1);
-  if(selection->onlineSelection(fEvent)) {
-    hNum->Fill(xvariable);
-    cSignalTrigger.increment();
+    double xvariable = selection->xVariable();
+    hDen->Fill(xvariable);
+    if(fEventWeight.getWeight() < 0) hNeg->Fill(xvariable,1);
+    if(selection->onlineSelection(fEvent)) {
+      hNum->Fill(xvariable);
+      cSignalTrigger.increment();
+    }
+  }
+  if(selection->offlineSelection(fEvent,true)){ // eff vs nVtx
+    double xvariable = selection->xVariable();
+    hDenPU->Fill(xvariable);
+    if(fEventWeight.getWeight() < 0) hNeg->Fill(xvariable,1);
+    if(selection->onlineSelection(fEvent)) {
+      hNumPU->Fill(xvariable);
+    }
   }
 
-  fEventSaver.save();
+  //  fEventSaver.save();
 }

@@ -2,25 +2,32 @@
 #define TriggerEfficiency_BaseSelection_h
 
 #include "DataFormat/interface/Event.h"
+#include "Framework/interface/EventCounter.h"
+#include "Framework/interface/HistoWrapper.h"
 
 #include <string>
 #include <vector>
 
 class BaseSelection {
  public:
-  BaseSelection(){}
+ BaseSelection(HistoWrapper& histoWrapper):
+  fHistoWrapper(histoWrapper){}
   ~BaseSelection(){}
 
-  virtual bool offlineSelection(Event&) = 0;
+  virtual bool offlineSelection(Event&,bool pu = false) = 0;
   virtual bool onlineSelection(Event&) = 0;
   bool passedRunRange(Event&, bool);
   double xVariable() { return xvariable;}
   bool passedCtrlTtrigger(Event&);
 
+  virtual void bookHistograms(TDirectory*) = 0;
+  virtual void print() = 0;
+
  protected:
 
   void init(const ParameterSet&);
 
+  HistoWrapper& fHistoWrapper;
   double xvariable;
 
   std::string fdataera;

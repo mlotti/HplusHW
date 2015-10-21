@@ -6,24 +6,33 @@
 
 class METLegSelection : public BaseSelection {
  public:
-  explicit METLegSelection(const ParameterSet&);
+  explicit METLegSelection(const ParameterSet&, EventCounter&, HistoWrapper&);
   ~METLegSelection();
 
-  bool offlineSelection(Event&);
+  bool offlineSelection(Event&,bool pu = false);
   bool onlineSelection(Event&);
+
+  void bookHistograms(TDirectory* dir);
+  void print();
 
  private:
   bool caloMETSelection(Event&);
   std::string onlineselectionstr;
 };
 
-METLegSelection::METLegSelection(const ParameterSet& setup){
+METLegSelection::METLegSelection(const ParameterSet& setup, EventCounter& fEventCounter, HistoWrapper& histoWrapper) :
+  BaseSelection(histoWrapper)
+{
   init(setup);
   onlineselectionstr = *(setup.getParameterOptional<std::string>("onlineSelection"));
 }
 METLegSelection::~METLegSelection(){}
 
-bool METLegSelection::offlineSelection(Event& fEvent){
+void METLegSelection::bookHistograms(TDirectory* dir){}
+
+void METLegSelection::print(){}
+
+bool METLegSelection::offlineSelection(Event& fEvent, bool pu){
 
   xvariable = fEvent.met_Type1().et();
 

@@ -29,7 +29,7 @@ def fit(name,plot,graph,min,max):
     aux.copyStyle(graph, function)
     plot.appendPlotObject(function)
 
-def getEfficiency(datasets):
+def getEfficiency(datasets,numerator="Numerator",denominator="Denominator"):
 
 #    statOption = ROOT.TEfficiency.kFNormal
     statOption = ROOT.TEfficiency.kFCP # Clopper-Pearson
@@ -40,8 +40,8 @@ def getEfficiency(datasets):
 
     teff = ROOT.TEfficiency()
     for dataset in datasets:
-        n = dataset.getDatasetRootHisto("Numerator").getHistogram()                                               
-        d = dataset.getDatasetRootHisto("Denominator").getHistogram()
+        n = dataset.getDatasetRootHisto(numerator).getHistogram()                                               
+        d = dataset.getDatasetRootHisto(denominator).getHistogram()
 
         checkNegatives(n,d)
 
@@ -128,14 +128,11 @@ def Print(graph):
         graph.GetPoint(i,x,y)
         print "x,y",x,y
 
-def main():
 
-    if len(sys.argv) < 2:
-        usage()
+def analyze(analysis):
 
     paths = [sys.argv[1]]
 
-    analysis = "TauLeg_2015CD"
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="GluGluHToTauTau_M125|TTJets")
     datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125")
     datasets.loadLuminosities()
@@ -174,11 +171,11 @@ def main():
     opts2 = {"ymin": 0.5, "ymax": 1.5}
 #    moveLegend = {"dx": -0.55, "dy": -0.15, "dh": -0.1}
     moveLegend = {"dx": -0.2, "dy": -0.5, "dh": -0.1}
-    name = "DataVsMC_HLTTau_PFTauPt"
+    name = analysis+"_DataVsMC_HLTTau_PFTauPt"
 
     legend1 = "Data"
-    legend2 = "MC"
-    legend3 = "H125 MC"
+    legend2 = "MC (DY)"
+    legend3 = "MC (H125)"
     p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2, "eff3": legend3})
 
     p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
@@ -205,7 +202,52 @@ def main():
         os.mkdir(plotDir)
     p.save()
 
+
+    namePU = analysis+"_DataVsMC_HLTTau_nVtx"
+
+    eff1PU = getEfficiency(dataset1,"NumeratorPU","DenominatorPU")
+    eff2PU = getEfficiency(dataset2,"NumeratorPU","DenominatorPU")
+
+    styles.dataStyle.apply(eff1PU)
+    styles.mcStyle.apply(eff2PU)
+    eff1PU.SetMarkerSize(1)
+    eff2PU.SetMarkerSize(1.5)
+
+    pPU = plots.ComparisonManyPlot(histograms.HistoGraph(eff1PU, "eff1", "p", "P"),
+                                   [histograms.HistoGraph(eff2PU, "eff2", "p", "P")])
+
+
+    pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2, "eff3": legend3})
+
+    pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=opts, opts2=opts2)
+    pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+
+    pPU.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
+    pPU.getFrame().GetXaxis().SetTitle("Number of reco vertices")
+    pPU.getFrame2().GetYaxis().SetTitle("Ratio")
+    pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
+
+    histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
+    histograms.addText(0.5, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.5, 0.46, "Runs "+datasets.loadRunRange(), 17)
+
+    pPU.draw()
+    histograms.addStandardTexts(lumi=lumi)
+
+    pPU.save()
+
     print "Output written in",plotDir
+
+
+def main():
+
+    if len(sys.argv) < 2:
+        usage()
+
+    analyze("TauLeg_2015C")
+    analyze("TauLeg_2015D")
+    analyze("TauLeg_2015CD")
+
 
 if __name__ == "__main__":
     main()
