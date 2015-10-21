@@ -52,10 +52,10 @@ TEST_CASE("MuonSelection", "[EventSelection]") {
   std::vector<float> e_eta;  tree->Branch("Muons_eta", &e_eta);
   std::vector<float> e_phi;  tree->Branch("Muons_phi", &e_phi);
   std::vector<float> e_e;    tree->Branch("Muons_e", &e_e);
-  std::vector<float> emc_pt;   tree->Branch("Muons_ptMCmuon", &emc_pt);
-  std::vector<float> emc_eta;  tree->Branch("Muons_etaMCmuon", &emc_eta);
-  std::vector<float> emc_phi;  tree->Branch("Muons_phiMCmuon", &emc_phi);
-  std::vector<float> emc_e;    tree->Branch("Muons_eMCmuon", &emc_e);
+  std::vector<float> emc_pt;   tree->Branch("Muons_pt_MCmuon", &emc_pt);
+  std::vector<float> emc_eta;  tree->Branch("Muons_eta_MCmuon", &emc_eta);
+  std::vector<float> emc_phi;  tree->Branch("Muons_phi_MCmuon", &emc_phi);
+  std::vector<float> emc_e;    tree->Branch("Muons_e_MCmuon", &emc_e);
   std::vector<float> e_relIsoDeltaBeta; tree->Branch("Muons_relIsoDeltaBeta", &e_relIsoDeltaBeta);
   std::vector<bool> e_id; tree->Branch("Muons_muIDLoose", &e_id);
   run = 1;

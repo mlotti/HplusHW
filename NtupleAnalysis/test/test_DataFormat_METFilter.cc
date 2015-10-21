@@ -12,7 +12,7 @@
 
 TEST_CASE("METFilter", "[DataFormat]") {
   SECTION("Valid discriminators") {
-    std::vector<std::string> v = {"CSCTightHaloFilter", "eeBadScFilter", "goodVertices"};
+    std::vector<std::string> v = {"Flag_CSCTightHaloFilter", "Flag_eeBadScFilter", "Flag_goodVertices"};
     METFilter dummy;
     REQUIRE_NOTHROW( dummy.checkDiscriminatorValidity(v) );
     for (auto p: v) {

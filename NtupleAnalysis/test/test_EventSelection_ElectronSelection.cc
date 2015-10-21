@@ -50,10 +50,10 @@ TEST_CASE("ElectronSelection", "[EventSelection]") {
   std::vector<float> e_eta;  tree->Branch("Electrons_eta", &e_eta);
   std::vector<float> e_phi;  tree->Branch("Electrons_phi", &e_phi);
   std::vector<float> e_e;    tree->Branch("Electrons_e", &e_e);
-  std::vector<float> emc_pt;   tree->Branch("Electrons_ptMCelectron", &emc_pt);
-  std::vector<float> emc_eta;  tree->Branch("Electrons_etaMCelectron", &emc_eta);
-  std::vector<float> emc_phi;  tree->Branch("Electrons_phiMCelectron", &emc_phi);
-  std::vector<float> emc_e;    tree->Branch("Electrons_eMCelectron", &emc_e);
+  std::vector<float> emc_pt;   tree->Branch("Electrons_pt_MCelectron", &emc_pt);
+  std::vector<float> emc_eta;  tree->Branch("Electrons_eta_MCelectron", &emc_eta);
+  std::vector<float> emc_phi;  tree->Branch("Electrons_phi_MCelectron", &emc_phi);
+  std::vector<float> emc_e;    tree->Branch("Electrons_e_MCelectron", &emc_e);
   std::vector<float> e_relIsoDeltaBeta; tree->Branch("Electrons_relIsoDeltaBeta", &e_relIsoDeltaBeta);
   std::vector<bool> e_id; tree->Branch("Electrons_mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", &e_id);
   run = 1;

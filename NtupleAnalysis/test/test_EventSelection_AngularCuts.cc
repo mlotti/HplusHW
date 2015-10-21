@@ -76,10 +76,11 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   std::vector<float> eta;  tree->Branch("Taus_eta", &eta);
   std::vector<float> phi;  tree->Branch("Taus_phi", &phi);
   std::vector<float> e;    tree->Branch("Taus_e", &e);
-  std::vector<float> mcpt;   tree->Branch("Taus_ptMCVisibleTau", &mcpt);
-  std::vector<float> mceta;  tree->Branch("Taus_etaMCVisibleTau", &mceta);
-  std::vector<float> mcphi;  tree->Branch("Taus_phiMCVisibleTau", &mcphi);
-  std::vector<float> mce;    tree->Branch("Taus_eMCVisibleTau", &mce);
+  std::vector<float> mcpt;   tree->Branch("Taus_pt_MCVisibleTau", &mcpt);
+  std::vector<float> mceta;  tree->Branch("Taus_eta_MCVisibleTau", &mceta);
+  std::vector<float> mcphi;  tree->Branch("Taus_phi_MCVisibleTau", &mcphi);
+  std::vector<float> mce;    tree->Branch("Taus_e_MCVisibleTau", &mce);
+  std::vector<short> mcPdgId;    tree->Branch("Taus_pdgId", &mcPdgId);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
   std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
   std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
@@ -110,6 +111,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   mceta = std::vector<float>{-2.3f, -2.3f, -1.1f, -1.4f,  0.2f,  0.7f, 3.3f,  3.3f};
   mcphi = std::vector<float>{-2.9f, -0.5f,  1.f,  -2.3f, -1.7f,  0.3f, 0.8f,  1.1f};
   mce   = std::vector<float>{50.f,  20.f,  11.f,  50.f,  75.f,  11.f,  13.f, 90.f};
+  mcPdgId = std::vector<short>{15,    15,    15,    15,    15,    15,    15,   15};
   lTrkPt = std::vector<float>{50.f};
   lTrkEta = std::vector<float>{1.21f};
   nProngs = std::vector<int>{1};

@@ -19,11 +19,11 @@ TEST_CASE("METFilterSelection", "[EventSelection]") {
   // Setup events for testing
   boost::property_tree::ptree discrs;
   boost::property_tree::ptree child;
-  child.put("", "CSCTightHaloFilter");
+  child.put("", "Flag_CSCTightHaloFilter");
   discrs.push_back(std::make_pair("", child));
-  child.put("", "eeBadScFilter");
+  child.put("", "Flag_eeBadScFilter");
   discrs.push_back(std::make_pair("", child));
-  child.put("", "goodVertices");
+  child.put("", "Flag_goodVertices");
   discrs.push_back(std::make_pair("", child));
   boost::property_tree::ptree allDiscrs;
   allDiscrs.add_child("METFilter.discriminators", discrs);
