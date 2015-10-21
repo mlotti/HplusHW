@@ -39,19 +39,8 @@ public:
     book(dir);
   }
 
-  void processInternal(Long64_t entry) {
-    fEventWeight.beginEvent();
-    // Set event weight as negative is generator weight is negative
-    if (fEvent.isMC()) {
-      if (fEvent.genWeight().weight() < 0.0)
-	fEventWeight.multiplyWeight(-1.0);
-      fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
-    }
-    // Set prescale event weight // FIXME missing code
-
-
-    process(entry);
-  }
+  /// Processes internally event before process method is called
+  void processInternal(Long64_t entry);
 
   void setPileUpWeights(TH1* hPUdata, TH1* hPUmc){
     fPileupWeight.calculateWeights(hPUdata,hPUmc);
