@@ -351,5 +351,99 @@ TEST_CASE("HistoWrapper works", "[Framework]") {
     CHECK( th3prime->getFalseHisto()->GetBinContent(13,7,6) == 0 );
   }
 
+  SECTION("Event weight") {
+    weight.beginEvent();
+    CHECK( wrapper.getWeight() == 1.0 );
+    weight.multiplyWeight(0.5);
+    CHECK( wrapper.getWeight() == Approx(0.5) );
+    weight.multiplyWeight(0.3);
+    CHECK( wrapper.getWeight() == Approx(0.15) );
+    
+    TDirectory dir("rootdir", "rootdir");
+    // WrappedTH1
+    WrappedTH1 *th1 = wrapper.makeTH<TH1F>(HistoLevel::kVital, &dir, "name", "title", 100, 0, 100);
+    REQUIRE( th1 );
+    REQUIRE( th1->isActive() );
+    REQUIRE( th1->getHisto() );
+    th1->Fill(10);
+    CHECK( th1->getHisto()->GetBinContent(11) == Approx(0.15) );
+    
+    // WrappedTH2
+    WrappedTH2 *th2 = wrapper.makeTH<TH2F>(HistoLevel::kVital, &dir, "name", "title", 100,0,100, 20,-5,5);
+    REQUIRE( th2 );
+    REQUIRE( th2->isActive() );
+    REQUIRE( th2->getHisto() );
+    th2->Fill(50, 2);
+    CHECK( th2->getHisto()->GetBinContent(51, 15) == Approx(0.15) );
+    
+    // WrappedTH3
+    WrappedTH3 *th3 = wrapper.makeTH<TH3F>(HistoLevel::kVital, &dir, "name", "title", 100,0,100, 20,-5,5, 50,-100,-50);
+    REQUIRE( th3 );
+    REQUIRE( th3->isActive() );
+    REQUIRE( th3->getHisto() );
+    th3->Fill(50, 1.2, -75);
+    CHECK( th3->getHisto()->GetBinContent(51, 13, 26) == Approx(0.15) );
+
+    // WrappedUnfoldedFactorisationHisto
+    WrappedUnfoldedFactorisationHisto *tw2 = wrapper.makeTH<TH2F>(10, HistoLevel::kVital, &dir, "name", "title", 100,0,100);
+    REQUIRE( tw2 );
+    REQUIRE( tw2->isActive() );
+    REQUIRE( tw2->getHisto() );
+    // omit test
+    
+    // WrappedTH1Triplet
+    TDirectory fakedir("fakedir", "fakedir");
+    TDirectory truedir("truedir", "truedir");
+    std::vector<TDirectory*> dirs3 = { &dir, &fakedir, &truedir };
+
+    WrappedTH1Triplet *tt1 = wrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, dirs3, "nametr1", "title", 100, 0, 100);
+    REQUIRE( tt1 != nullptr );
+    REQUIRE( tt1->isActive() == true );
+    REQUIRE( tt1->getInclusiveHisto() != nullptr );
+    REQUIRE( tt1->getTrueHisto() != nullptr );
+    REQUIRE( tt1->getFalseHisto() != nullptr );
+    tt1->Fill(true, 10);
+    tt1->Fill(false, 11);
+    CHECK( tt1->getInclusiveHisto()->GetBinContent(11) == Approx(0.15) );
+    CHECK( tt1->getInclusiveHisto()->GetBinContent(12) == Approx(0.15) );
+    CHECK( tt1->getTrueHisto()->GetBinContent(11) == Approx(0.15) );
+    CHECK( tt1->getTrueHisto()->GetBinContent(12) == 0 );
+    CHECK( tt1->getFalseHisto()->GetBinContent(11) == 0 );
+    CHECK( tt1->getFalseHisto()->GetBinContent(12) == Approx(0.15) );
+
+    // WrappedTH2Triplet
+    WrappedTH2Triplet *tt2 = wrapper.makeTHTriplet<TH2F>(true, HistoLevel::kVital, dirs3, "nametr2", "title", 100, 0, 100, 20,-5,5);
+    REQUIRE( tt2 != nullptr );
+    REQUIRE( tt2->isActive() == true );
+    REQUIRE( tt2->getInclusiveHisto() != nullptr );
+    REQUIRE( tt2->getTrueHisto() != nullptr );
+    REQUIRE( tt2->getFalseHisto() != nullptr );
+    tt2->Fill(true, 10, 2);
+    tt2->Fill(false, 11, 2);
+    CHECK( tt2->getInclusiveHisto()->GetBinContent(11,15) == Approx(0.15) );
+    CHECK( tt2->getInclusiveHisto()->GetBinContent(12,15) == Approx(0.15) );
+    CHECK( tt2->getTrueHisto()->GetBinContent(11,15) == Approx(0.15) );
+    CHECK( tt2->getTrueHisto()->GetBinContent(12,15) == 0 );
+    CHECK( tt2->getFalseHisto()->GetBinContent(11,15) == 0 );
+    CHECK( tt2->getFalseHisto()->GetBinContent(12,15) == Approx(0.15) );    
+
+    // WrappedTH3Triplet
+    WrappedTH3Triplet *tt3 = wrapper.makeTHTriplet<TH3F>(true, HistoLevel::kVital, dirs3, "nametr3", "title", 100, 0, 100, 20,-5,5, 50,-100,-50);
+    REQUIRE( tt3 != nullptr );
+    REQUIRE( tt3->isActive() == true );
+    REQUIRE( tt3->getInclusiveHisto() != nullptr );
+    REQUIRE( tt3->getTrueHisto() != nullptr );
+    REQUIRE( tt3->getFalseHisto() != nullptr );
+    tt3->Fill(true, 10, 2, -75);
+    tt3->Fill(false, 11, 2, -75);
+    CHECK( tt3->getInclusiveHisto()->GetBinContent(11,15,26) == Approx(0.15) );
+    CHECK( tt3->getInclusiveHisto()->GetBinContent(12,15,26) == Approx(0.15) );
+    CHECK( tt3->getTrueHisto()->GetBinContent(11,15,26) == Approx(0.15) );
+    CHECK( tt3->getTrueHisto()->GetBinContent(12,15,26) == 0 );
+    CHECK( tt3->getFalseHisto()->GetBinContent(11,15,26) == 0 );
+    CHECK( tt3->getFalseHisto()->GetBinContent(12,15,26) == Approx(0.15) );    
+
+  }
+    
   
 }
