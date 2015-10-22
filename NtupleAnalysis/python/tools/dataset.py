@@ -2753,14 +2753,26 @@ class Dataset:
         # Read unweighted counters
         # The unweighted counters are allowed to not exist unless
         # weightedCounters are also enabled
+        normalizationCheckStatus = True
         try:
             (counter, realName) = self.getRootHisto(self.counterDir+"/counter")
             ctr = _histoToCounter(counter)
             self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
+            # Check normalization from weighted counters
+            (counter, realName) = self.getRootHisto(self.counterDir+"/weighted/counter")
+            allEventsBin = None
+            for i in range(counter.GetNbinsX()):
+                if counter.GetXaxis().GetBinLabel(i+1) == "All events":
+                    allEventsBin = i
+            if allEventsBin != None and allEventsBin > 0:
+                if counter.GetBinContent(allEventsBin) < counter.GetBinContent(allEventsBin+1):
+                    normalizationCheckStatus = False
         except HistogramNotFoundException, e:
             if not self._weightedCounters:
                 raise Exception("Could not find counter histogram, message: %s" % str(e))
             self.nAllEventsUnweighted = -1
+        if not normalizationCheckStatus:
+            raise Exception("Error: dset=%s: Unweighted skimcounter is smaller than all events counter of analysis! Please check (this is known to happen when running PROOF on samples with negative generator weights."%self.name)
 
         self.nAllEventsWeighted = None
         self.nAllEvents = self.nAllEventsUnweighted
@@ -3730,6 +3742,8 @@ class DatasetManager:
         print "*** Cowardly refusing to update N(allEvents) to PU weighted (no longer necessary) ***"
         #for dataset in self.datasets:
         #    dataset.updateNAllEventsToPUWeighted(**kwargs)
+        #self.printInfo()
+
 
     ## Format dataset information
     def formatInfo(self):
