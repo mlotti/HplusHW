@@ -171,7 +171,7 @@ for dataset in datasets:
 
             cmd = "crab submit -c "+outfilepath
             print cmd
-#            os.system("crab submit "+outfilepath)
+            os.system("crab submit "+outfilepath)
             mv = "mv "+os.path.join(dirName,"crab_"+rName)+" "+os.path.join(dirName,rName)
 #            print mv
-#            os.system(mv)
+            os.system(mv)
