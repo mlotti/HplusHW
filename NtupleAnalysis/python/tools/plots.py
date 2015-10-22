@@ -107,11 +107,20 @@ _physicalToLogical.update({
     "TTJets_FullLept": "TTJets_FullLept",
     "TTJets_SemiLept": "TTJets_SemiLept",
     "TTJets_Hadronic".replace("_", "_ext_"): "TTJets_Hadronic",
+    
     "WJetsToLNu": "WJetsToLNu",
     #"W1Jets": "W1Jets",
     #"W2Jets": "W2Jets",
     #"W3Jets": "W3Jets",
     #"W4Jets": "W4Jets",
+    "WJetsToLNu_HT100To200": "WJetsToLNu_HT100To200",
+    "WJetsToLNu_HT200To400": "WJetsToLNu_HT200To400",
+    "WJetsToLNu_HT400To600": "WJetsToLNu_HT400To600",
+    "WJetsToLNu_HT600To800": "WJetsToLNu_HT600To800",
+    "WJetsToLNu_HT800To1200": "WJetsToLNu_HT800To1200",
+    "WJetsToLNu_HT1200To2500": "WJetsToLNu_HT1200To2500",
+    "WJetsToLNu_HT2500ToInf": "WJetsToLNu_HT2500ToInf",
+    
     "DYJetsToLL_M50":      "DYJetsToLL_M50",
     "DYJetsToLL_M10to50":  "DYJetsToLL_M10to50",
 
@@ -184,6 +193,14 @@ _datasetMerge = {
     #"W2Jets": "WJets",
     #"W3Jets": "WJets",
     #"W4Jets": "WJets",
+    "WJetsToLNu_HT100To200": "WJetsHT",
+    "WJetsToLNu_HT200To400": "WJetsHT",
+    "WJetsToLNu_HT400To600": "WJetsHT",
+    "WJetsToLNu_HT600To800": "WJetsHT",
+    "WJetsToLNu_HT800To1200": "WJetsHT",
+    "WJetsToLNu_HT1200To2500": "WJetsHT",
+    "WJetsToLNu_HT2500ToInf": "WJetsHT",
+
 
     "DYJetsToLL_M10to50": "DYJetsToLL",
     "DYJetsToLL_M50": "DYJetsToLL",
@@ -214,6 +231,7 @@ _datasetOrder.extend([
     "WJets_2bquark",
     "WJets_3bquark",
     "WJets",
+    "WJetsHT",
     "WToTauNu",
     "TTJets",
     "TT",
@@ -230,6 +248,7 @@ _legendLabels = {
     "TT":                    "t#bar{t}",
 
     "WJets":                 "W+jets",
+    "WJetsHT":               "W+jets",
     "WToTauNu":              "W#to#tau#nu",
     "W1Jets":                "W+1 jets",
     "W2Jets":                "W+2 jets",
@@ -304,6 +323,7 @@ _plotStyles = {
     "TT":                    styles.ttStyle,
 
     "WJets":                 styles.wStyle,
+    "WJetsHT":               styles.wStyle,
     "WToTauNu":              styles.wStyle,
     "W3Jets":                styles.wStyle,
     "WJets_0bquark":         styles.Style(ROOT.kFullTriangleDown, ROOT.kRed+1),
@@ -2301,6 +2321,8 @@ class PlotDrawer:
     # \param xlabel              Default X axis title (None for pick from first TH1)
     # \param ylabel              Default Y axis title (None for pick from first TH1)
     # \param zlabel              Default Z axis title (None for not to show)
+    # \param xlabelsize          Default Y axis label size (None for default)
+    # \param ylabelsize          Default Y axis label size (None for default)
     # \param zhisto              Histo name for the Z information (for updating palette etc) (None for first histogram)
     # \param log                 Should Y axis be in log scale by default?
     # \param ratio               Should the ratio pad be drawn?
@@ -2340,6 +2362,8 @@ class PlotDrawer:
                  xlabel=None,
                  ylabel="Occurrances / %.0f",
                  zlabel=None,
+                 xlabelsize = None,
+                 ylabelsize = None,
                  zhisto=None,
                  log=False,
                  ratio=False,
@@ -2380,6 +2404,8 @@ class PlotDrawer:
         self.xlabelDefault = xlabel
         self.ylabelDefault = ylabel
         self.zlabelDefault = zlabel
+        self.xlabelsizeDefault = xlabelsize;
+        self.ylabelsizeDefault = ylabelsize;
         self.zhistoDefault = zhisto
         self.logDefault = log
         self.ratioDefault = ratio
@@ -2821,6 +2847,8 @@ class PlotDrawer:
     # \li\a xlabel  X axis title (None for pick from first histogram)
     # \li\a ylabel              Y axis title. If contains a '%', it is assumed to be a format string containing one double and the bin width of the plot is given to the format string. (default given in __init__()/setDefaults())
     # \li\a zlabel              Z axis title. Only drawn if not None and TPaletteAxis exists
+    # \li\a xlabelsize          X axis label size
+    # \li\a ylabelsize          X axis label size
     # \li\a zhisto              Histo name for the Z information (for updating palette etc) (None for first histogram)
     # \li\a errorBarsX          Add vertical error bars (for all TH1's in the plot)?  None for True if divideByBinWidth is True
     # \li\a addLuminosityText   Should luminosity text be drawn? (default given in __init__()/setDefaults())
@@ -2840,7 +2868,6 @@ class PlotDrawer:
         if xlab is None:
             xlab = p.histoMgr.getHistos()[0].getRootHisto().GetXaxis().GetTitle()
         p.frame.GetXaxis().SetTitle(xlab)
-
         ylabel = self._getValue("ylabel", p, kwargs)
         if ylabel is None:
             ylabel = p.histoMgr.getHistos()[0].getRootHisto().GetYaxis().GetTitle()
@@ -2856,6 +2883,16 @@ class PlotDrawer:
             else:
                 raise Exception("Got %d '%%' formats in y label ('%s'), only 0-2 are supported" % (nformats, ylabel))
         p.frame.GetYaxis().SetTitle(ylabel)
+        xlabsize = self._getValue("xlabelsize", p, kwargs)
+        if xlabsize is None:
+            xlabsize = p.histoMgr.getHistos()[0].getRootHisto().GetXaxis().GetLabelSize()
+        else:
+            p.frame.GetXaxis().SetLabelSize(xlabsize)
+        ylabsize = self._getValue("ylabelsize", p, kwargs)
+        if ylabsize is None:
+            ylabsize = p.histoMgr.getHistos()[0].getRootHisto().GetYaxis().GetLabelSize()
+        else:
+            p.frame.GetYaxis().SetLabelSize(ylabsize)
 
         customize = self._getValue("customizeBeforeDraw", p, kwargs)
         if customize != None:

@@ -53,7 +53,7 @@ class CrossSectionList:
 # [12] https://twiki.cern.ch/twiki/bin/view/CMS/TmdRecipes
 # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
 # [14] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV / GenXSecAnalyzer
-# [15] McM, more precisely https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get/BTV-RunIIWinter15GS-00033
+# [15] McM
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt_30to50", {
@@ -148,41 +148,32 @@ backgroundCrossSections = CrossSectionList(
             #"8": 36703.2, # [9], NNLO
             #}),
     CrossSection("WJetsToLNu", {
-            "13": 20508.9*3, # [14]
-    }),
-    CrossSection("WJetsToLNu_HT-100To200", {
-            "13": 1.313e+03, # [14]
-            }),
-    CrossSection("WJetsToLNu_HT-200To400", {
-            "13": 3.575e+02, # [14]
-            }),
-    CrossSection("WJetsToLNu_HT-400To600", {
-            "13": 4.888e+01, # [14]
-            }),
-    CrossSection("WJetsToLNu_HT-600ToInf", {
-            "13": 1.872e+01, # [14]
+            "13": 20508.9*3, # [13] 20508.9*3
             }),
     CrossSection("WJetsToLNu_HT100To200", {
-            "13": 0.0, #FIXME
-    }),
+            "13": 1.293e+03, # [15] Cross-section after matching
+            }),
     CrossSection("WJetsToLNu_HT200To400", {
-            "13": 0.0, #FIXME
-    }),
+            "13": 3.86e+02, # [15] Cross-section after matching
+            }),
     CrossSection("WJetsToLNu_HT400To600", {
-            "13": 0.0, #FIXME
-    }),
+            "13": 47.9, # [15] Cross-section after matching
+            }),
+    CrossSection("WJetsToLNu_HT600ToInf", {
+            "13": 0.0, # Forcing to zero to avoid overlap
+            }),
     CrossSection("WJetsToLNu_HT600To800", {
-            "13": 0.0, #FIXME
-    }),
+            "13": 12.8, # [15] Cross-section after matching
+            }),
     CrossSection("WJetsToLNu_HT800To1200", {
-            "13": 0.0, #FIXME
-    }),
+            "13": 5.26, # [15] Cross-section after matching
+            }),
     CrossSection("WJetsToLNu_HT1200To2500", {
-            "13": 0.0, #FIXME
-    }),
+            "13": 1.33, # [15] Cross-section after matching
+            }),
     CrossSection("WJetsToLNu_HT2500ToInf", {
-            "13": 0.0, #FIXME
-    }),
+            "13": 3.089e-02, # [15] Cross-section after matching
+            }),
     # PREP (LO) cross sections, for W+NJets weighting
     CrossSection("PREP_WJets", {
             "7": 27770.0,
