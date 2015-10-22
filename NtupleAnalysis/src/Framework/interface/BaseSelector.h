@@ -63,6 +63,7 @@ protected:
   PileupWeight fPileupWeight;
 
 private:
+  Count cBaseAllEvents;
   const bool fIsMC;
 };
 

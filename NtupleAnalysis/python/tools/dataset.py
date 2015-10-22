@@ -2762,7 +2762,7 @@ class Dataset:
             (counter, realName) = self.getRootHisto(self.counterDir+"/weighted/counter")
             allEventsBin = None
             for i in range(counter.GetNbinsX()):
-                if counter.GetXaxis().GetBinLabel(i+1) == "All events":
+                if counter.GetXaxis().GetBinLabel(i+1) == "Base::AllEvents":
                     allEventsBin = i
             if allEventsBin != None and allEventsBin > 0:
                 if counter.GetBinContent(allEventsBin) < counter.GetBinContent(allEventsBin+1):

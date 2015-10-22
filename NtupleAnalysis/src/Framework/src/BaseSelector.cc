@@ -5,6 +5,7 @@ BaseSelector::BaseSelector(const ParameterSet& config):
   fEventCounter(fEventWeight),
   fHistoWrapper(fEventWeight, config.getParameter<std::string>("histogramAmbientLevel", "Vital")),
   fPileupWeight(config),
+  cBaseAllEvents(fEventCounter.addCounter("Base::AllEvents")),
   fIsMC(config.isMC())
 {}
 BaseSelector::~BaseSelector() {
@@ -18,8 +19,13 @@ void BaseSelector::processInternal(Long64_t entry) {
       if (fEvent.genWeight().weight() < 0.0) {
         fEventWeight.multiplyWeight(-1.0);
       }
-      //fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent)); //FIXME: temporary disabled before MC pileup histograms is updated
     }
+    // NOTE: this counter needs to be right after the generator weight is applied (and no other weights)
+    cBaseAllEvents.increment(); 
+    
+    // PU reweighting
+    //fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent)); //FIXME: temporary disabled before MC pileup histograms is updated
+    
     // Set prescale event weight // FIXME missing code
     
     process(entry);
