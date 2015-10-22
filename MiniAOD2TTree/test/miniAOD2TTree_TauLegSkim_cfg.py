@@ -55,6 +55,8 @@ if dataVersion.isData():
     TrgResultsSource = "TriggerResults::RECO"
 print "Trigger source has been set to:",TrgResultsSource
 
+process.load("HiggsAnalysis/MiniAOD2TTree/PUInfo_cfi")
+
 process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
@@ -136,7 +138,8 @@ process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
 # module execution
-process.runEDFilter = cms.Path(process.skimCounterAll*
+process.runEDFilter = cms.Path(process.PUInfo*
+                               process.skimCounterAll*
                                process.skim*
                                process.skimCounterPassed*
                                process.HBHENoiseFilterResultProducer* #Produces HBHE booleans
