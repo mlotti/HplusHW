@@ -172,7 +172,7 @@ config = {
     "74Xdata": {
 	"triggerProcess": "HLT", 
 	"recoProcess": "RECO",
-        "globalTag": "74X_dataRun2_v2",
+        "globalTag": "74X_dataRun2_Prompt_v4", # recommendation from https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
     },
     "74Xmc": {
         "simProcess": "SIM",
