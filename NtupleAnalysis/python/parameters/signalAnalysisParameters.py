@@ -31,7 +31,7 @@ metFilter = PSet(
 tauSelection = PSet(
   applyTriggerMatching = True,
    triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
-              tauPtCut = 51.0,
+              tauPtCut = 50.0,
              tauEtaCut = 2.1,
         tauLdgTrkPtCut = 10.0,
                 prongs = 13,    # options: 1, 3, 13 (both 1 and 3) or -1 (all)
@@ -61,7 +61,7 @@ muVeto = PSet(
 jetSelection = PSet(
               jetPtCut = 30.0,
              jetEtaCut = 2.5,
-     tauMatchingDeltaR = 0.5,
+     tauMatchingDeltaR = 0.4,
   numberOfJetsCutValue = 3,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
             jetIDDiscr = "IDtight", # options: IDloose, IDtight, IDtightLeptonVeto
