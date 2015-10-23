@@ -138,7 +138,7 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           lNeutrTrackPt[ic].push_back(-1.0);
           lNeutrTrackEta[ic].push_back(-10.0);
         }
-        nProngs[ic].push_back(tau.decayMode());
+        decayMode[ic].push_back(tau.decayMode());
         nProngs[ic].push_back(tau.signalCands().size());  
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
           //std::cout << "check tau " << tau.p4().Pt() << " " << tau.p4().Eta() << " " << tau.p4().Phi() << " " << discriminatorNames[iDiscr] << " " << tau.tauID(discriminatorNames[iDiscr]) << std::endl;
