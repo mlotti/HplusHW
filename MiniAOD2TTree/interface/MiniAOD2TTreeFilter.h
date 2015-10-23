@@ -59,6 +59,7 @@ class MiniAOD2TTreeFilter : public edm::EDFilter {
         //PrescaleWeightProvider prescaleWeight;
 
 	std::string outputFileName;
+        std::string PUInfoInputFileName;
 	std::string codeVersion;
         std::string dataVersion;
 	int cmEnergy;

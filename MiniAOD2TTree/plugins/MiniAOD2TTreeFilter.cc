@@ -8,6 +8,7 @@
 MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     //prescaleWeight(iConfig.getParameter<edm::ParameterSet>("PrescaleProvider"), consumesCollector(), this),
     outputFileName(iConfig.getParameter<std::string>("OutputFileName")),
+    PUInfoInputFileName(iConfig.getParameter<std::string>("PUInfoInputFileName")),
     codeVersion(iConfig.getParameter<std::string>("CodeVersion")),
     dataVersion(iConfig.getParameter<std::string>("DataVersion")),
     cmEnergy(iConfig.getParameter<int>("CMEnergy")),
@@ -264,7 +265,23 @@ void MiniAOD2TTreeFilter::endJob(){
     }
     std::cout << "Number of events saved " << Events->GetEntries() << std::endl << std::endl;
 
-
+// copy PU histogram from separate file (makes merging of root files so much easier)
+    if (PUInfoInputFileName.size()) {
+      TFile* fPU = TFile.Open(PUInfoInputFileName.c_str());
+      if (fPU) {
+        // File open is successful
+        TH1F* hPU = dynamic_cast<TH1F*>(fPU->Get("PileUp"));
+        if (hPU) {
+          // Histogram exists
+          TH1F* hPUclone = hPU->Clone();
+          hPUclone->SetDirectory(fOUT);
+          hPUclone->Write();
+        }
+      }
+      fPU->Close();
+    }
+    
+// close output file
     fOUT->Close();
 }
 
