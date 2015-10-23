@@ -35,13 +35,13 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
     throw hplus::Exception("config") << "b-tagging algorithm working point '" << sWorkingPoint
                                      << "' is not valid!\nValid values are: Loose, Medium, Tight";
   if (sAlgorithm == "pfCombinedInclusiveSecondaryVertexV2BJetTags") {
-    // Preliminary values 10.6.2015 from https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagging
+    // Oct 2015 https://indico.cern.ch/event/455330/session/1/contribution/173/attachments/1175466/1699105/DMajumder_CMSWeek22Oct_BTVReport_v1.pdf
     if (sWorkingPoint == "Loose")
-      fDisriminatorValue = 0.423;
+      fDisriminatorValue = 0.605;
     else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.814;
+      fDisriminatorValue = 0.890;
     else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.941;
+      fDisriminatorValue = 0.970;
   } else if (sAlgorithm == "pfCombinedSecondaryVertexBJetTags") {
     // Run 1 legacy values
     if (sWorkingPoint == "Loose")
@@ -50,6 +50,14 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
       fDisriminatorValue = 0.679;
     else if (sWorkingPoint == "Tight")
       fDisriminatorValue = 0.898;
+  } else if (sAlgorithm == "pfJetProbabilityBJetTags") {
+    // Oct 2015 https://indico.cern.ch/event/455330/session/1/contribution/173/attachments/1175466/1699105/DMajumder_CMSWeek22Oct_BTVReport_v1.pdf
+    if (sWorkingPoint == "Loose")
+      fDisriminatorValue = 0.275;
+    else if (sWorkingPoint == "Medium")
+      fDisriminatorValue = 0.545;
+    else if (sWorkingPoint == "Tight")
+      fDisriminatorValue = 0.790;    
   }
   
   if (fDisriminatorValue < 0.0) {
