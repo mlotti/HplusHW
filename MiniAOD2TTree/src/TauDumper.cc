@@ -25,6 +25,7 @@ TauDumper::TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     lNeutrTrackPt = new std::vector<double>[inputCollections.size()];
     lNeutrTrackEta = new std::vector<double>[inputCollections.size()];
 
+    decayMode = new std::vector<short>[inputCollections.size()];
     nProngs = new std::vector<short>[inputCollections.size()];
     pdgTauOrigin = new std::vector<short>[inputCollections.size()];
     MCNProngs = new std::vector<short>[inputCollections.size()];
@@ -76,6 +77,7 @@ void TauDumper::book(TTree* tree){
         tree->Branch((name+"_lNeutrTrkPt").c_str(),&lNeutrTrackPt[i]);
         tree->Branch((name+"_lNeutrTrkEta").c_str(),&lNeutrTrackEta[i]);
 	//tree->Branch((name+"_lTrk_p4").c_str(),&ltrack_p4[i]);
+        tree->Branch((name+"_decayMode").c_str(),&decayMode[i]);
         tree->Branch((name+"_nProngs").c_str(),&nProngs[i]);
         MCtau[i].book(tree, name, "MCVisibleTau");
         matchingJet[i].book(tree, name, "matchingJet");
@@ -136,6 +138,7 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           lNeutrTrackPt[ic].push_back(-1.0);
           lNeutrTrackEta[ic].push_back(-10.0);
         }
+        nProngs[ic].push_back(tau.decayMode());
         nProngs[ic].push_back(tau.signalCands().size());  
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
           //std::cout << "check tau " << tau.p4().Pt() << " " << tau.p4().Eta() << " " << tau.p4().Phi() << " " << discriminatorNames[iDiscr] << " " << tau.tauID(discriminatorNames[iDiscr]) << std::endl;
@@ -330,7 +333,8 @@ void TauDumper::reset(){
         lNeutrTrackPt[ic].clear();
         lNeutrTrackEta[ic].clear();  
 	//ltrack_p4[ic].clear();
-	nProngs[ic].clear();
+	decayMode[ic].clear();
+        nProngs[ic].clear();
 	pdgId[ic].clear();
         pdgTauOrigin[ic].clear();
         MCNProngs[ic].clear();

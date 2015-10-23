@@ -43,6 +43,7 @@ class TauDumper : public BaseDumper {
         std::vector<double> *lNeutrTrackPt;
         std::vector<double> *lNeutrTrackEta;
 
+        std::vector<short> *decayMode;
 	std::vector<short> *nProngs;
         std::vector<short> *pdgTauOrigin;
         std::vector<short> *MCNProngs;
