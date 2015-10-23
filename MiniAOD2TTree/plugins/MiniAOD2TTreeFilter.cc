@@ -267,13 +267,13 @@ void MiniAOD2TTreeFilter::endJob(){
 
 // copy PU histogram from separate file (makes merging of root files so much easier)
     if (PUInfoInputFileName.size()) {
-      TFile* fPU = TFile.Open(PUInfoInputFileName.c_str());
+      TFile* fPU = TFile::Open(PUInfoInputFileName.c_str());
       if (fPU) {
         // File open is successful
         TH1F* hPU = dynamic_cast<TH1F*>(fPU->Get("PileUp"));
         if (hPU) {
           // Histogram exists
-          TH1F* hPUclone = hPU->Clone();
+          TH1F* hPUclone = dynamic_cast<TH1F*>(hPU->Clone());
           hPUclone->SetDirectory(fOUT);
           hPUclone->Write();
         }
