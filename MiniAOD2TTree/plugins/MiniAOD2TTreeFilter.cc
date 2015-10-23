@@ -275,6 +275,7 @@ void MiniAOD2TTreeFilter::endJob(){
           // Histogram exists
           TH1F* hPUclone = dynamic_cast<TH1F*>(hPU->Clone());
           hPUclone->SetDirectory(fOUT);
+          fOUT->cd();
           hPUclone->Write();
         }
       }
