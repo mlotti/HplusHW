@@ -21,7 +21,6 @@ datasets = []
 
 tauLegDatasets         = []
 tauLegDatasets.extend(datasetsMuonData)
-#tauLegDatasets.extend(datasets25nsTau)
 tauLegDatasets.extend(datasetsMiniAODv2_DY)
 tauLegDatasets.extend(datasetsMiniAODv2_Top)
 tauLegDatasets.extend(datasetsMiniAODv2_WJets)
@@ -38,8 +37,13 @@ metLegDatasets.extend(datasetsMiniAODv2_QCD)
 
 signalAnalysisDatasets = []
 signalAnalysisDatasets.extend(datasetsTauData)
-signalAnalysisDatasets.extend(datasets25ns)
-signalAnalysisDatasets.extend(datasets25nsSignal)
+signalAnalysisDatasets.extend(datasetsMiniAODv2_DY)
+signalAnalysisDatasets.extend(datasetsMiniAODv2_Top)
+signalAnalysisDatasets.extend(datasetsMiniAODv2_WJets)
+signalAnalysisDatasets.extend(datasetsMiniAODv2_QCD)
+signalAnalysisDatasets.extend(datasetsMiniAODv2_Signal)
+#signalAnalysisDatasets.extend(datasets25ns)
+#signalAnalysisDatasets.extend(datasets25nsSignal)
 
 datadataset_re = re.compile("^/(?P<name>\S+?)/(?P<run>Run\S+?)-")
 mcdataset_re = re.compile("^/(?P<name>\S+?)/")
