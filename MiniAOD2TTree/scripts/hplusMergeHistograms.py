@@ -205,32 +205,33 @@ def delete(fname,regexp):
 
 def pileup(fname):
 
-    fOUT = ROOT.TFile.Open(fname,"UPDATE")
-    fOUT.cd()
+    if os.path.exists(fname):
+        fOUT = ROOT.TFile.Open(fname,"UPDATE")
+        fOUT.cd()
 
-    hPU = None
+        hPU = None
 
-    dataVersion = fOUT.Get("configInfo/dataVersion")
-    dv_re = re.compile("data")  
-    match = dv_re.search(dataVersion.GetTitle())
-    if match:
-        puFile = os.path.join(os.path.dirname(fname),"PileUp.root")
-        if os.path.exists(puFile):
-            fIN = ROOT.TFile.Open(puFile)
-            hPU = fIN.Get("PileUp")
-        else:
-            print "PileUp not found in",os.path.dirname(fname),", did you run hplusLumiCalc?"
-    else:
+        dataVersion = fOUT.Get("configInfo/dataVersion")
+        dv_re = re.compile("data")  
+        match = dv_re.search(dataVersion.GetTitle())
+        if match:
+            puFile = os.path.join(os.path.dirname(fname),"PileUp.root")
+            if os.path.exists(puFile):
+                fIN = ROOT.TFile.Open(puFile)
+                hPU = fIN.Get("PileUp")
+            else:
+                print "PileUp not found in",os.path.dirname(fname),", did you run hplusLumiCalc?"
+#        else:
+#
+#            tree = fOUT.Get("Events")
+#            tree.Draw("nPUvertices>>PileUp(50,0,50)", "", "goff e")
+#            hPU = tree.GetHistogram().Clone()
 
-        tree = fOUT.Get("Events")
-        tree.Draw("nPUvertices>>PileUp(50,0,50)", "", "goff e")
-        hPU = tree.GetHistogram().Clone()
+        if not hPU == None:
+            fOUT.cd("configInfo")
+            hPU.Write("",ROOT.TObject.kOverwrite)
 
-    if not hPU == None:
-        fOUT.cd("configInfo")
-        hPU.Write("",ROOT.TObject.kOverwrite)
-
-    fOUT.Close()
+        fOUT.Close()
 
 def delFolder(regexp):
     keys = ROOT.gDirectory.GetListOfKeys()
