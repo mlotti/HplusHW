@@ -65,6 +65,7 @@ process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
 
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
+    PUInfoInputFileName = process.PUInfo.OutputFileName,
     CodeVersion = cms.string(git.getCommitId()),
     DataVersion = cms.string(str(dataVersion.version)),
     CMEnergy = cms.int32(13),
