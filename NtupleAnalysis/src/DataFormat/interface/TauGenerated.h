@@ -71,6 +71,7 @@ protected:
   const Branch<std::vector<bool>> *fByVVTightIsolationMVA3newDMwLT;
   const Branch<std::vector<bool>> *fByVVTightIsolationMVA3oldDMwLT;
   const Branch<std::vector<bool>> *fChargedIsoPtSum;
+  const Branch<std::vector<short>> *fDecayMode;
   const Branch<std::vector<bool>> *fDecayModeFinding;
   const Branch<std::vector<bool>> *fDecayModeFindingNewDMs;
   const Branch<std::vector<bool>> *fNeutralIsoPtSum;
@@ -170,6 +171,7 @@ public:
   bool byVVTightIsolationMVA3newDMwLT() const { return this->fCollection->fByVVTightIsolationMVA3newDMwLT->value()[this->index()]; }
   bool byVVTightIsolationMVA3oldDMwLT() const { return this->fCollection->fByVVTightIsolationMVA3oldDMwLT->value()[this->index()]; }
   bool chargedIsoPtSum() const { return this->fCollection->fChargedIsoPtSum->value()[this->index()]; }
+  short decayMode() const { return this->fCollection->fDecayMode->value()[this->index()]; }
   bool decayModeFinding() const { return this->fCollection->fDecayModeFinding->value()[this->index()]; }
   bool decayModeFindingNewDMs() const { return this->fCollection->fDecayModeFindingNewDMs->value()[this->index()]; }
   bool neutralIsoPtSum() const { return this->fCollection->fNeutralIsoPtSum->value()[this->index()]; }
