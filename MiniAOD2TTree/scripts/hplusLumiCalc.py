@@ -8,9 +8,9 @@ import subprocess
 import json
 from optparse import OptionParser
 import ROOT
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.aux import execute
+from HiggsAnalysis.NtupleAnalysis.tools.aux import execute
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 
 # lumiCalc.py usage taken from
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
