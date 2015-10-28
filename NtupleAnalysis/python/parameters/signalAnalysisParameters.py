@@ -72,17 +72,17 @@ jetSelection = PSet(
 angularCutsCollinear = PSet(
        nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
 enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
-        cutValueJet1 = 40.0,   # Cut value in degrees (circular cut)
-        cutValueJet2 = 40.0,   # Cut value in degrees (circular cut)
-        cutValueJet3 = 40.0,   # Cut value in degrees (circular cut)
-        cutValueJet4 = 40.0,   # Cut value in degrees (circular cut)
+        cutValueJet1 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet2 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet3 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet4 = 0.0,   # Cut value in degrees (circular cut)
 )
  
 #====== B-jet selection
 bjetSelection = PSet(
              #bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
              bjetDiscr = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
- bjetDiscrWorkingPoint = "Tight",
+ bjetDiscrWorkingPoint = "Loose",
  numberOfBJetsCutValue = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
@@ -99,10 +99,10 @@ metSelection = PSet(
 angularCutsBackToBack = PSet(
        nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
 enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
-        cutValueJet1 = 60.0,   # Cut value in degrees (circular cut)
-        cutValueJet2 = 60.0,   # Cut value in degrees (circular cut)
-        cutValueJet3 = 60.0,   # Cut value in degrees (circular cut)
-        cutValueJet4 = 60.0,   # Cut value in degrees (circular cut)
+        cutValueJet1 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet2 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet3 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet4 = 0.0,   # Cut value in degrees (circular cut)
 )
 
 #====== Common plots options
