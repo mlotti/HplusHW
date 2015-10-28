@@ -68,10 +68,10 @@ public:
   bool isFakeTau() const { return !isGenuineTau(); }
   bool isElectronToTau() const { return this->pdgId() == TauDecayMatchType::kElectronToTau || this->pdgId() == TauDecayMatchType::kTauDecaysToElectron; }
   bool isMuonToTau() const { return this->pdgId() == TauDecayMatchType::kMuonToTau || this->pdgId() == TauDecayMatchType::kTauDecaysToMuon; }
-  bool isJetToTau() const { return (this->pdgId() >= TauDecayMatchType::kTauDecayUnknown && this->pdgId() >= TauDecayMatchType::kBToTau) || this->pdgId() >= TauDecayMatchType::kGluonToTau; }
+  bool isJetToTau() const { return (this->pdgId() >= TauDecayMatchType::kUToTau && this->pdgId() <= TauDecayMatchType::kBToTau) || this->pdgId() == TauDecayMatchType::kGluonToTau; }
   bool isQuarkToTau(int quarkPid) const { return this->pdgId() == std::abs(quarkPid); }
   bool isGluonToTau() const { return this->pdgId() >= TauDecayMatchType::kGluonToTau; }
-  bool isUnknownTauDecay() const { return this->pdgId() >= TauDecayMatchType::kTauDecayUnknown; /* NOTE: return this is assumed to be jet->tau */ }
+  bool isUnknownTauDecay() const { return this->pdgId() == TauDecayMatchType::kTauDecayUnknown; /* NOTE: return this is assumed to be jet->tau */ }
   
   // Getters for MC tau origin
   bool isFromZDecay() const { return this->pdgOrigin() == TauOriginType::kFromZ; }
