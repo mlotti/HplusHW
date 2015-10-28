@@ -123,7 +123,7 @@ void CommonPlots::book(TDirectory *dir) {
     fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kVital, myDirs, hCtrlSelectedTauDecayModeAfterStdSelections, 
     "SelectedTau_DecayMode_AfterStandardSelections", ";#tau decay mode;N_{events}",
-    10, 0, 10);
+    20, 0, 20);
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kVital, myDirs, hCtrlSelectedTauNProngsAfterStdSelections, 
     "SelectedTau_Nprongs_AfterStandardSelections", ";N_{prongs};N_{events}",
     10, 0, 10);
@@ -213,7 +213,7 @@ void CommonPlots::book(TDirectory *dir) {
     fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kVital, myDirs, hCtrlSelectedTauDecayModeAfterAllSelections, 
     "SelectedTau_DecayMode_AfterAllSelections", ";#tau decay mode;N_{events}",
-    10, 0, 10);
+    20, 0, 20);
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kVital, myDirs, hCtrlSelectedTauNProngsAfterAllSelections, 
     "SelectedTau_Nprongs_AfterAllSelections", ";N_{prongs};N_{events}",
     10, 0, 10);
