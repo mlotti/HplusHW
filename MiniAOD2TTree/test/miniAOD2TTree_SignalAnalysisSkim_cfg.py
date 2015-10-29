@@ -6,13 +6,13 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-#dataVersion = "74Xmc"
-dataVersion = "74Xdata"
+dataVersion = "74Xmc"
+#dataVersion = "74Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(-1)
 )
 
 process.load("FWCore/MessageService/MessageLogger_cfi")
@@ -22,9 +22,9 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#        '/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v3/60000/00372E76-286A-E511-B90C-0025905A60D2.root',
+        '/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v3/60000/00372E76-286A-E511-B90C-0025905A60D2.root',
 #        '/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
-        '/store/data/Run2015D/Tau/MINIAOD/PromptReco-v3/000/256/587/00000/6E29A230-925D-E511-A2F2-02163E0140F1.root'
+#        '/store/data/Run2015D/Tau/MINIAOD/PromptReco-v3/000/256/587/00000/6E29A230-925D-E511-A2F2-02163E0140F1.root'
     )
 )
 
