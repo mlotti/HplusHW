@@ -142,7 +142,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 }
 
 MiniAOD2TTreeFilter::~MiniAOD2TTreeFilter() {
-//    system("ls -l");
+    system("ls -lt");
 }
 
 void MiniAOD2TTreeFilter::beginRun(edm::Run const & iRun, edm::EventSetup const& iSetup) {
@@ -275,7 +275,8 @@ void MiniAOD2TTreeFilter::endJob(){
           // Histogram exists
           TH1F* hPUclone = dynamic_cast<TH1F*>(hPU->Clone());
           hPUclone->SetDirectory(fOUT);
-          fOUT->cd();
+	  infodir->cd();
+//          fOUT->cd();
           hPUclone->Write();
         }
       }

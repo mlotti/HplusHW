@@ -83,6 +83,11 @@ public:
   template<typename T, typename ...Args>
   void fillShapeHistogramTriplet(std::vector<T*>& histoContainer, bool status, Args&&... args);
   
+  //===== Editing histograms
+  /// Set bin labels
+  template<typename T>
+  void SetBinLabel(std::vector<T*>& histoContainer, int i, std::string label);
+  
 protected: // Protected for easier unit testing
   /// Returns index to unfolded bin index
   const size_t getShapeBinIndex() const;
@@ -180,6 +185,13 @@ void HistoSplitter::fillShapeHistogramTriplet(std::vector<T*>& histoContainer, b
   // Fill inclusive histogram
   if (fNUnfoldedBins > 1)
     histoContainer[histoContainer.size()-1]->Fill(status, std::forward<Args>(args)...);
+}
+
+template<typename T>
+void HistoSplitter::SetBinLabel(std::vector<T*>& histoContainer, int i, std::string label) {
+  for (auto p: histoContainer) {
+    p->SetBinLabel(i, label);
+  }
 }
 
 #endif

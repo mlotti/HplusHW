@@ -84,7 +84,7 @@ void TauDumper::book(TTree* tree){
 
 	std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
 	for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
-	    tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
+	    tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+i]);
 	}
 	
 	systTESup[i].book(tree, name, "TESup");
@@ -142,7 +142,7 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         nProngs[ic].push_back(tau.signalCands().size());  
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
           //std::cout << "check tau " << tau.p4().Pt() << " " << tau.p4().Eta() << " " << tau.p4().Phi() << " " << discriminatorNames[iDiscr] << " " << tau.tauID(discriminatorNames[iDiscr]) << std::endl;
-          discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(tau.tauID(discriminatorNames[iDiscr]));
+          discriminators[inputCollections.size()*iDiscr+ic].push_back(tau.tauID(discriminatorNames[iDiscr]));
         }
         // Systematics variations
         systTESup[ic].add(tau.p4().pt()*(1.0+TESvariation),

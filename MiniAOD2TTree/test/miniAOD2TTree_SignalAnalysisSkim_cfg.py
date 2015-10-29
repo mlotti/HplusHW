@@ -22,8 +22,9 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        '/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/022B08C4-C702-E511-9995-D4856459AC30.root',
+        '/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v3/60000/00372E76-286A-E511-B90C-0025905A60D2.root',
 #        '/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
+#        '/store/data/Run2015D/Tau/MINIAOD/PromptReco-v3/000/256/587/00000/6E29A230-925D-E511-A2F2-02163E0140F1.root'
     )
 )
 
@@ -33,55 +34,19 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag()), '')
 print "GlobalTag="+dataVersion.getGlobalTag()
 
-# Set up electron ID (VID framework)
-# https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
-from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
-switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
-# define which IDs we want to produce and add them to the VID producer
-for idmod in ['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_PHYS14_PU20bx25_nonTrig_V1_cff']:
-    setupAllVIDIdsInModule(process, idmod, setupVIDElectronSelection)
-
-# Set up HBHE noise filter
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
-print "Setting up HBHE noise filter"
-process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
-process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
-process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
-process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
-# Do not apply EDfilters for HBHE noise, the discriminators for them are saved into the ttree
-
-# Set up MET uncertainties - FIXME: does not work at the moment
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATTools#MET_Systematics_Tools
-#import PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties as metUncertaintyTools
-#metUncertaintyTools.runMETCorrectionsAndUncertainties(process=process, 
-                                                      #metType="PF",
-                                                      #correctionLevel=["T0","T1","Txy"], # additional options: Smear 
-                                                      #computeUncertainties=True,
-                                                      #produceIntermediateCorrections=False,
-                                                      #addToPatDefaultSequence=True,
-                                                      #jetCollection=cms.InputTag("slimmedJets"),
-                                                      #jetCollectionUnskimmed=cms.InputTag("slimmedJets"),
-                                                      #electronCollection="",
-                                                      #muonCollection="",
-                                                      #tauCollection="",
-                                                      #pfCandCollection=cms.InputTag("packedPFCandidates"),
-                                                      #onMiniAOD=True,
-                                                      #postfix="Type01xy")
-
+# ===== Set up tree dumper =====
 TrgResultsSource = "TriggerResults::PAT"
 if dataVersion.isData():
     TrgResultsSource = "TriggerResults::RECO"
 print "Trigger source has been set to:",TrgResultsSource
 
 process.load("HiggsAnalysis/MiniAOD2TTree/PUInfo_cfi")
-
 process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
 
-# Set up tree dumper
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     PUInfoInputFileName = process.PUInfo.OutputFileName,
@@ -171,18 +136,21 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     ),
 )
 
+# === Setup skim counters
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
-
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
+
+# === Setup customizations
+from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
+produceCustomisations(process) # This produces process.CustomisationsSequence which needs to be included to path
 
 # module execution
 process.runEDFilter = cms.Path(process.PUInfo*
                                process.skimCounterAll*
                                process.skim*
                                process.skimCounterPassed*
-                               process.HBHENoiseFilterResultProducer* #Produces HBHE booleans
-                               process.egmGsfElectronIDSequence*
+                               process.CustomisationsSequence*
                                process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",

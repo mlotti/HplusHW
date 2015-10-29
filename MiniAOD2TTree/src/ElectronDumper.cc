@@ -66,7 +66,7 @@ void ElectronDumper::book(TTree* tree){
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
             // Convert dashes into underscores
             std::replace(discriminatorNames[iDiscr].begin(), discriminatorNames[iDiscr].end(),'-','_');
-            tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
+            tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+i]);
         }
     }
 }
@@ -119,7 +119,7 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
                   // https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
-                  discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back((*(IDhandles[iDiscr]))[gsfHandle->ptrAt(i)]);
+                  discriminators[inputCollections.size()*iDiscr+ic].push_back((*(IDhandles[iDiscr]))[gsfHandle->ptrAt(i)]);
 		}
 
 		// MC match info

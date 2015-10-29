@@ -13,11 +13,19 @@ ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
-import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+#import HiggsAnalysis.NtupleAnalysis.tools.dataset._histoToDict as histoToDict
 
 re_histos = []
 re_se = re.compile("newPfn =\s*(?P<url>\S+)")
 replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://madhatter.csc.fi:1094")
+
+def histoToDict(histo):
+    ret = {}
+    
+    for bin in xrange(1, histo.GetNbinsX()+1):
+        ret[histo.GetXaxis().GetBinLabel(bin)] = histo.GetBinContent(bin)
+    
+    return ret
 
 def getHistogramFile(stdoutFile, opts):
     multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
@@ -183,7 +191,8 @@ def sanityCheck(mergedFile, inputFiles):
     tfile = ROOT.TFile.Open(mergedFile)
     configinfo = tfile.Get("configInfo/configinfo")
     if configinfo:
-        info = dataset._histoToDict(configinfo)
+#        info = dataset._histoToDict(configinfo)
+	info = histoToDict(configinfo)
         if int(info["control"]) != len(inputFiles):
             raise SanityCheckException("configInfo/configinfo:control = %d, len(inputFiles) = %d" % (int(info["control"]), len(inputFiles)))
 

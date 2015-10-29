@@ -39,6 +39,7 @@ void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_byVVTightIsolationMVA3newDMwLT", &fByVVTightIsolationMVA3newDMwLT);
   mgr.book(prefix()+"_byVVTightIsolationMVA3oldDMwLT", &fByVVTightIsolationMVA3oldDMwLT);
   mgr.book(prefix()+"_chargedIsoPtSum", &fChargedIsoPtSum);
+  mgr.book(prefix()+"_decayMode", &fDecayMode);
   mgr.book(prefix()+"_decayModeFinding", &fDecayModeFinding);
   mgr.book(prefix()+"_decayModeFindingNewDMs", &fDecayModeFindingNewDMs);
   mgr.book(prefix()+"_neutralIsoPtSum", &fNeutralIsoPtSum);

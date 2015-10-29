@@ -62,7 +62,7 @@ void MuonDumper::book(TTree* tree){
         
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
-            tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
+            tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+i]);
         }
     }
 }
@@ -114,7 +114,7 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 		//p4[ic].push_back(obj.p4());
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
-		    discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(obj.muonID(discriminatorNames[iDiscr]));
+		    discriminators[inputCollections.size()*iDiscr+ic].push_back(obj.muonID(discriminatorNames[iDiscr]));
 		}
 		
                 // MC match info

@@ -3854,10 +3854,12 @@ class DatasetPrecursor:
                 if self._dataVersion != dv.GetTitle():
                     raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
 
-            pileup = aux.Get(rf, "configInfo/PileUp")
+            pileup = aux.Get(rf, "PileUp")
             if pileup == None:
-                print "Unable to find 'configInfo/PileUp' from ROOT file '%s'" % name
-                continue
+                pileup = aux.Get(rf, "configInfo/PileUp")
+                if pileup == None:
+                    print "Unable to find 'PileUp' or 'configInfo/PileUp' from ROOT file '%s'" % name
+                    continue
 
             if self._pileup is None:
                 self._pileup = pileup
