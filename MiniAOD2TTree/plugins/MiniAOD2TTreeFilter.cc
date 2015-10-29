@@ -142,7 +142,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
 }
 
 MiniAOD2TTreeFilter::~MiniAOD2TTreeFilter() {
-//    system("ls -l");
+    system("ls -lt");
 }
 
 void MiniAOD2TTreeFilter::beginRun(edm::Run const & iRun, edm::EventSetup const& iSetup) {

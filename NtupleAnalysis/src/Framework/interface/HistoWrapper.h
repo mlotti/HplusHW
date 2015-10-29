@@ -235,6 +235,15 @@ public:
   T* getFalseHisto() { return hFalse; }
   /// Returns pointer to the histogram (Note: it can be a zero pointer if the histogram is not active or not enabled)
   T* getTrueHisto() { return hTrue; }
+  /// Sets the bin label
+  void SetBinLabel(int i, std::string label) {
+    if (!this->isActive()) return;
+    hInclusive->GetXaxis()->SetBinLabel(i, label.c_str());
+    hFalse->GetXaxis()->SetBinLabel(i, label.c_str());
+    if (hTrue != nullptr) {
+      hTrue->GetXaxis()->SetBinLabel(i, label.c_str());
+    }
+  }
 
 protected: 
   double getWeight() const { return fHistoWrapper.getWeight(); }

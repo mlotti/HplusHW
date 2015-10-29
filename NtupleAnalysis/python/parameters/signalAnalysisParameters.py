@@ -34,8 +34,8 @@ tauSelection = PSet(
               tauPtCut = 50.0,
              tauEtaCut = 2.1,
         tauLdgTrkPtCut = 10.0,
-                prongs = 13,    # options: 1, 3, 13 (both 1 and 3) or -1 (all)
-                  rtau = 0.7,
+                prongs = 123,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
+                  rtau = 0.0,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronTightMVA5",
       againstMuonDiscr = "againstMuonTight3",
         isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
@@ -72,17 +72,17 @@ jetSelection = PSet(
 angularCutsCollinear = PSet(
        nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
 enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
-        cutValueJet1 = 40.0,   # Cut value in degrees (circular cut)
-        cutValueJet2 = 40.0,   # Cut value in degrees (circular cut)
-        cutValueJet3 = 40.0,   # Cut value in degrees (circular cut)
-        cutValueJet4 = 40.0,   # Cut value in degrees (circular cut)
+        cutValueJet1 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet2 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet3 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet4 = 0.0,   # Cut value in degrees (circular cut)
 )
  
 #====== B-jet selection
 bjetSelection = PSet(
              #bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
              bjetDiscr = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
- bjetDiscrWorkingPoint = "Tight",
+ bjetDiscrWorkingPoint = "Loose",
  numberOfBJetsCutValue = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
@@ -99,10 +99,10 @@ metSelection = PSet(
 angularCutsBackToBack = PSet(
        nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
 enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
-        cutValueJet1 = 60.0,   # Cut value in degrees (circular cut)
-        cutValueJet2 = 60.0,   # Cut value in degrees (circular cut)
-        cutValueJet3 = 60.0,   # Cut value in degrees (circular cut)
-        cutValueJet4 = 60.0,   # Cut value in degrees (circular cut)
+        cutValueJet1 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet2 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet3 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet4 = 0.0,   # Cut value in degrees (circular cut)
 )
 
 #====== Common plots options

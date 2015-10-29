@@ -274,8 +274,14 @@ bool TauSelection::passTrgMatching(const Tau& tau, std::vector<math::LorentzVect
 
 bool TauSelection::passNprongsCut(const Tau& tau) const {
   if (fTauNprongs > 0) {
-    if (fTauNprongs == 13) {
+    if (fTauNprongs == 12) {
+      return (tau.nProngs() == 1 || tau.nProngs() == 2);
+    } if (fTauNprongs == 13) {
       return (tau.nProngs() == 1 || tau.nProngs() == 3);
+    } if (fTauNprongs == 23) {
+      return (tau.nProngs() == 2 || tau.nProngs() == 3);
+    } if (fTauNprongs == 123) {
+      return (tau.nProngs() >= 1 && tau.nProngs() <= 3);
     } else {
       return (tau.nProngs() == fTauNprongs);
     }

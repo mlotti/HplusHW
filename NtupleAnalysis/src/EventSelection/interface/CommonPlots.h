@@ -3,6 +3,7 @@
 #define EventSelection_CommonPlots_h
 
 #include "EventSelection/interface/EventSelections.h"
+#include "EventSelection/interface/CommonPlotsHelper.h"
 #include "Framework/interface/ParameterSet.h"
 #include "Framework/interface/HistogramSettings.h"
 #include "Framework/interface/HistoSplitter.h"
@@ -147,7 +148,9 @@ private:
   HistoSplitter::SplittedTripletTH2s hCtrlSelectedTauEtaPhiAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauLdgTrkPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauDecayModeAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauNProngsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauRtauAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauSourceAfterStdSelections;
   
   HistoSplitter::SplittedTripletTH1s hCtrlNJetsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetPtAfterStdSelections;
@@ -180,8 +183,10 @@ private:
   HistoSplitter::SplittedTripletTH2s hCtrlSelectedTauEtaPhiAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauLdgTrkPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauDecayModeAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauNProngsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauRtauAfterAllSelections;
-  
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauSourceAfterAllSelections;
+
   HistoSplitter::SplittedTripletTH1s hCtrlNJetsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetEtaAfterAllSelections;
@@ -220,6 +225,8 @@ private:
   METSelection::Data fMETData;
   AngularCutsCollinear::Data fBackToBackAngularCutsData;
 
+  /// Helper
+  CommonPlotsHelper fHelper;
 };
 
 #endif
