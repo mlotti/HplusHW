@@ -26,6 +26,8 @@ TauDumper::TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     lNeutrTrackEta = new std::vector<double>[inputCollections.size()];
 
     decayMode = new std::vector<short>[inputCollections.size()];
+    ipxy = new std::vector<float>[inputCollections.size()];
+    ipxySignif = new std::vector<float>[inputCollections.size()];
     nProngs = new std::vector<short>[inputCollections.size()];
     pdgTauOrigin = new std::vector<short>[inputCollections.size()];
     MCNProngs = new std::vector<short>[inputCollections.size()];
@@ -78,6 +80,8 @@ void TauDumper::book(TTree* tree){
         tree->Branch((name+"_lNeutrTrkEta").c_str(),&lNeutrTrackEta[i]);
 	//tree->Branch((name+"_lTrk_p4").c_str(),&ltrack_p4[i]);
         tree->Branch((name+"_decayMode").c_str(),&decayMode[i]);
+        tree->Branch((name+"_IPxy").c_str(),&ipxy[i]);
+        tree->Branch((name+"_IPxySignif").c_str(),&ipxySignif[i]);
         tree->Branch((name+"_nProngs").c_str(),&nProngs[i]);
         MCtau[i].book(tree, name, "MCVisibleTau");
         matchingJet[i].book(tree, name, "matchingJet");
@@ -139,28 +143,32 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           lNeutrTrackEta[ic].push_back(-10.0);
         }
         decayMode[ic].push_back(tau.decayMode());
-        nProngs[ic].push_back(tau.signalCands().size());  
+        ipxy[ic].push_back(tau.dxy());
+        ipxySignif[ic].push_back(tau.dxy_Sig());
+        nProngs[ic].push_back(tau.signalChargedHadrCands().size());  
         for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
           //std::cout << "check tau " << tau.p4().Pt() << " " << tau.p4().Eta() << " " << tau.p4().Phi() << " " << discriminatorNames[iDiscr] << " " << tau.tauID(discriminatorNames[iDiscr]) << std::endl;
           discriminators[inputCollections.size()*iDiscr+ic].push_back(tau.tauID(discriminatorNames[iDiscr]));
         }
         // Systematics variations
-        systTESup[ic].add(tau.p4().pt()*(1.0+TESvariation),
-                          tau.p4().eta(),
-                          tau.p4().phi(),
-                          tau.p4().energy()*(1.0+TESvariation));
-        systTESdown[ic].add(tau.p4().pt()*(1.0-TESvariation),
-                          tau.p4().eta(),
-                          tau.p4().phi(),
-                          tau.p4().energy()*(1.0-TESvariation));
-        systExtremeTESup[ic].add(tau.p4().pt()*(1.0+TESvariationExtreme),
-                                  tau.p4().eta(),
-                                  tau.p4().phi(),
-                                  tau.p4().energy()*(1.0+TESvariationExtreme));
-        systExtremeTESdown[ic].add(tau.p4().pt()*(1.0-TESvariationExtreme),
-                                  tau.p4().eta(),
-                                  tau.p4().phi(),
-                                  tau.p4().energy()*(1.0-TESvariationExtreme));
+        if (!iEvent.isRealData()) {
+          systTESup[ic].add(tau.p4().pt()*(1.0+TESvariation),
+                            tau.p4().eta(),
+                            tau.p4().phi(),
+                            tau.p4().energy()*(1.0+TESvariation));
+          systTESdown[ic].add(tau.p4().pt()*(1.0-TESvariation),
+                            tau.p4().eta(),
+                            tau.p4().phi(),
+                            tau.p4().energy()*(1.0-TESvariation));
+          systExtremeTESup[ic].add(tau.p4().pt()*(1.0+TESvariationExtreme),
+                                    tau.p4().eta(),
+                                    tau.p4().phi(),
+                                    tau.p4().energy()*(1.0+TESvariationExtreme));
+          systExtremeTESdown[ic].add(tau.p4().pt()*(1.0-TESvariationExtreme),
+                                    tau.p4().eta(),
+                                    tau.p4().phi(),
+                                    tau.p4().energy()*(1.0-TESvariationExtreme));
+        }
         
         // Find MC particle matching to the tau. Logic is done in the following order:
         // - e is true if DeltaR(reco_tau, MC_e) < 0.1
@@ -334,6 +342,8 @@ void TauDumper::reset(){
         lNeutrTrackEta[ic].clear();  
 	//ltrack_p4[ic].clear();
 	decayMode[ic].clear();
+	ipxy[ic].clear();
+	ipxySignif[ic].clear();
         nProngs[ic].clear();
 	pdgId[ic].clear();
         pdgTauOrigin[ic].clear();
