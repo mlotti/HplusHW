@@ -17,6 +17,8 @@
 <use name="PhysicsTools/Utilities"/>
 <use name="RecoTauTag/TauTagTools"/>
 <use name="CondFormats/PhysicsToolsObjects"/>
+<use name="CondFormats/JetMETObjects"/>
+<use name="JetMETCorrections/Objects"/>
 <use name="RecoBTag/Records"/>
 <use name="HLTrigger/HLTcore"/>
 <export>

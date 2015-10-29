@@ -1,4 +1,8 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/JetDumper.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/Framework/interface/EventSetup.h"
 
 #include "DataFormats/JetReco/interface/PileupJetIdentifier.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
@@ -6,6 +10,7 @@
 JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets){
     inputCollections = psets;
     booked           = false;
+
     pt  = new std::vector<double>[inputCollections.size()];
     eta = new std::vector<double>[inputCollections.size()];    
     phi = new std::vector<double>[inputCollections.size()];    
@@ -67,14 +72,14 @@ void JetDumper::book(TTree* tree){
 
     std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
     for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
-      tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
+      tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+i]);
     }
     std::vector<std::string> userfloatNames = inputCollections[i].getParameter<std::vector<std::string> >("userFloats");
     for(size_t iDiscr = 0; iDiscr < userfloatNames.size(); ++iDiscr) {
       std::string branch_name = userfloatNames[iDiscr];
       size_t pos_semicolon = branch_name.find(":");
       branch_name = branch_name.erase(pos_semicolon,1);
-      tree->Branch((name+"_"+branch_name).c_str(),&userfloats[inputCollections.size()*iDiscr+(iDiscr+1)*i]);
+      tree->Branch((name+"_"+branch_name).c_str(),&userfloats[inputCollections.size()*iDiscr+i]);
     }
     tree->Branch((name+"_IDloose").c_str(),&jetIDloose[i]);
     tree->Branch((name+"_IDtight").c_str(),&jetIDtight[i]);
@@ -96,6 +101,26 @@ void JetDumper::book(TTree* tree){
 bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;
 
+    if (!fJECUncertainty.size()) {
+      for(size_t i = 0; i < inputCollections.size(); ++i) {
+        edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
+        iSetup.get<JetCorrectionsRecord>().get(inputCollections[i].getParameter<std::string>("jecPayload"),JetCorParColl);
+        bool found = true;
+        try {
+          JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
+        } catch(cms::Exception e) {
+          std::cout << "Warning: cannot find cell 'Uncertainty' in JEC uncertainty table; JEC uncertainty forced to 0" << std::endl;
+          found = false;
+        }
+        if (found) {
+          JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
+          fJECUncertainty.push_back(new JetCorrectionUncertainty(JetCorPar));
+        } else {
+          fJECUncertainty.push_back(nullptr);
+        }
+      }
+    }
+
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
         std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
 	std::vector<std::string> userfloatNames = inputCollections[ic].getParameter<std::vector<std::string> >("userFloats");
@@ -116,10 +141,12 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		//p4[ic].push_back(obj.p4());
 
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
-		    discriminators[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(obj.bDiscriminator(discriminatorNames[iDiscr]));
+                    //std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << discriminatorNames[iDiscr] << std::endl;
+		    discriminators[inputCollections.size()*iDiscr+ic].push_back(obj.bDiscriminator(discriminatorNames[iDiscr]));
 		}
                 for(size_t iDiscr = 0; iDiscr < userfloatNames.size(); ++iDiscr) {
-                    userfloats[inputCollections.size()*iDiscr+(iDiscr+1)*ic].push_back(obj.userFloat(userfloatNames[iDiscr]));
+                    //std::cout << inputCollections[ic].getUntrackedParameter<std::string>("branchname","") << " / " << userfloatNames[iDiscr] << std::endl;
+                    userfloats[inputCollections.size()*iDiscr+ic].push_back(obj.userFloat(userfloatNames[iDiscr]));
                 }
 		int genParton = 0;
 		if(obj.genParton()){
@@ -154,13 +181,32 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 }
                 
                 // Systematics
-                // FIXME
-//                 systJESup[ic].add(tau.p4().pt()*(1.0+TESvariation[ic]),
-//                                   tau.p4().eta(),
-//                                   tau.p4().phi(),
-//                                   tau.p4().energy()*(1.0+TESvariation[ic]));
-                
-                
+                if (!iEvent.isRealData()) {
+                  // JES
+                  double uncUp = 0.0;
+                  double uncDown = 0.0;
+                  if (fJECUncertainty[ic] != nullptr) {
+                    fJECUncertainty[ic]->setJetEta(obj.eta());
+                    fJECUncertainty[ic]->setJetPt(obj.pt()); // here you must use the CORRECTED jet pt
+                    uncUp = fJECUncertainty[ic]->getUncertainty(true);
+                  }
+                  systJESup[ic].add(obj.p4().pt()*(1.0+uncUp),
+                                    obj.p4().eta(),
+                                    obj.p4().phi(),
+                                    obj.p4().energy()*(1.0+uncUp));
+                  if (fJECUncertainty[ic] != nullptr) {
+                    // Yes, one needs to set pt and eta again
+                    fJECUncertainty[ic]->setJetEta(obj.eta());
+                    fJECUncertainty[ic]->setJetPt(obj.pt()); // here you must use the CORRECTED jet pt
+                    uncDown = fJECUncertainty[ic]->getUncertainty(false);
+                  }
+                  systJESdown[ic].add(obj.p4().pt()*(1.0-uncDown),
+                                      obj.p4().eta(),
+                                      obj.p4().phi(),
+                                      obj.p4().energy()*(1.0-uncDown));
+                  // JER
+                  
+                }
             }
         }
     }
