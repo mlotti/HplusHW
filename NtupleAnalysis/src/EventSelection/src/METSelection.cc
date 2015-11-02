@@ -75,15 +75,16 @@ METSelection::Data METSelection::analyze(const Event& event, int nVertices) {
 METSelection::Data METSelection::privateAnalyze(const Event& iEvent, int nVertices) {
   Data output;
   // Obtain MET p2 object
-  if (fMETType == kGenMET)
-    output.fSelectedMET.push_back(iEvent.genMET().p2());
-  else if (fMETType == kL1MET)
-    output.fSelectedMET.push_back(iEvent.L1met().p2());
-  else if (fMETType == kCaloMET)
-    output.fSelectedMET.push_back(iEvent.calomet().p2());
-  else if (fMETType == kType1MET)
-    output.fSelectedMET.push_back(iEvent.met_Type1().p2());
-  
+//   if (fMETType == kGenMET)
+//     output.fSelectedMET.push_back(iEvent.genMET().p2());
+//   else if (fMETType == kL1MET)
+//     output.fSelectedMET.push_back(iEvent.L1met().p2());
+//   else if (fMETType == kCaloMET)
+//     output.fSelectedMET.push_back(iEvent.calomet().p2());
+//   else if (fMETType == kType1MET)
+//     output.fSelectedMET.push_back(iEvent.met_Type1().p2());
+  output.fSelectedMET.push_back(iEvent.met().p2());
+
   //=== Apply phi corrections // FIXME: not implemented
   
   //=== Apply cut on MET

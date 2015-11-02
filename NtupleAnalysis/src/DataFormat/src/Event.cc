@@ -113,6 +113,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fGenMET.setupBranches(mgr);
   fGenWeight.setupBranches(mgr);
   fMET_Type1.setupBranches(mgr);
+  fMET.setupBranches(mgr);
   fCaloMET.setupBranches(mgr);
   fL1MET.setupBranches(mgr);
   fL1extraMET.setupBranches(mgr);

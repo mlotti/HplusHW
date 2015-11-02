@@ -64,7 +64,6 @@ public:
   const PFCandsCollection& pfCandidates() const { return fPFCandidates; }
 
   const MET& genMET() const { return fGenMET; }
-
   const MET& met() const { return fMET; }
   const MET& met_Type1() const { return fMET_Type1; }
   const MET& calomet() const { return fCaloMET; }
