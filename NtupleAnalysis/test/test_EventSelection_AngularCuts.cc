@@ -42,7 +42,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   tmp.put("JetSelection.jetPUIDDiscr", "PUIDloose");
   tmp.put("METSelection.METCutValue", 80.0);
   tmp.put("METSelection.METCutDirection", ">");
-  tmp.put("METSelection.METType", "type1MET");
+  tmp.put("METSelection.METType", "MET_Type1");
   tmp.put("METSelection.applyPhiCorrections", false);
   tmp.put("AngularCutsCollinear.nConsideredJets", 3);
   tmp.put("AngularCutsCollinear.cutValueJet1", 40.0);
@@ -83,7 +83,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   std::vector<short> mcPdgId;    tree->Branch("Taus_pdgId", &mcPdgId);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
   std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
-  std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
+  std::vector<int> decayMode;    tree->Branch("Taus_decayMode", &decayMode);
   std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
   std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonTight3", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
@@ -114,7 +114,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   mcPdgId = std::vector<short>{15,    15,    15,    15,    15,    15,    15,   15};
   lTrkPt = std::vector<float>{50.f};
   lTrkEta = std::vector<float>{1.21f};
-  nProngs = std::vector<int>{1};
+  decayMode = std::vector<int>{1};
   trgpt  = std::vector<float>{51.f};
   trgeta = std::vector<float>{1.2f};
   trgphi = std::vector<float>{-2.93f};

@@ -100,7 +100,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
   std::vector<short> mcPdgId;    tree->Branch("Taus_pdgId", &mcPdgId);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
   std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
-  std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
+  std::vector<int> decayMode;    tree->Branch("Taus_decayMode", &decayMode);
   std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
   std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonTight3", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
@@ -136,7 +136,7 @@ TEST_CASE("JetSelection", "[EventSelection]") {
   mcPdgId = std::vector<short>{15,    15,    15,    15,    15,    15,    15,   15};
   lTrkPt = std::vector<float>{50.f,  60.f};
   lTrkEta = std::vector<float>{-1.3f, 0.3f};
-  nProngs = std::vector<int>{1, 1};
+  decayMode = std::vector<int>{1, 1};
   tree->Fill();
   nevent = 3; // jet ID
   jetID  = std::vector<bool>{true, false, false, false, true, true, false, true};
