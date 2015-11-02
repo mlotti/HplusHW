@@ -32,12 +32,18 @@ METSelection::METSelection(const ParameterSet& config, EventCounter& eventCounte
     fMETType = kGenMET;
   else if (sType == "L1MET")
     fMETType = kL1MET;
+  else if (sType == "HLTMET")
+    fMETType = kHLTMET;
   else if (sType == "CaloMET")
     fMETType = kCaloMET;
-  else if (sType == "type1MET")
+  else if (sType == "MET_Type1")
     fMETType = kType1MET;
+  else if (sType == "MET_Type1_NoHF")
+    fMETType = kType1MET_noHF;
+  else if (sType == "MET_Puppi")
+    fMETType = kPuppiMET;
   else {
-    throw hplus::Exception("config") << "Invalide MET 'type' chosen in config! Options are: GenMET, L1MET, CaloMET, type1MET";
+    throw hplus::Exception("config") << "Invalid MET 'type' chosen in config! Options are: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET";
   }
 }
 
