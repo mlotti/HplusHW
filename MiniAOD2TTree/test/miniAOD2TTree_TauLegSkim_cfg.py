@@ -4,8 +4,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-#dataVersion = "74Xmc"
-dataVersion = "74Xdata"
+dataVersion = "74Xmc"
+#dataVersion = "74Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion
@@ -22,8 +22,9 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #       '/store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/AsymptFlat10to50bx25Raw_MCRUN2_74_V9-v1/10000/1AEFBE02-4C02-E511-B796-0025905A60BE.root',
+	'/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v3/60000/D61816B9-096A-E511-BEAD-001E4F1C5820.root'
 #       '/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/231/00000/3EA254BD-EA45-E511-B1DA-02163E0141FF.root'
-	'/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
+#	'/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
 #	'/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/879/00000/DA13C76D-9B4B-E511-822A-02163E013790.root'
     )
 )
@@ -138,13 +139,16 @@ process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
+# === Setup customizations
+from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
+produceCustomisations(process) # This produces process.CustomisationsSequence which needs to be included to path
+
 # module execution
 process.runEDFilter = cms.Path(process.PUInfo*
                                process.skimCounterAll*
                                process.skim*
                                process.skimCounterPassed*
-                               process.HBHENoiseFilterResultProducer* #Produces HBHE booleans
-                               process.egmGsfElectronIDSequence*
+                               process.CustomisationsSequence*
                                process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",

@@ -9,6 +9,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Common/interface/Ptr.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
 #include <string>
 #include <vector>
@@ -39,6 +40,7 @@ class JetDumper : public BaseDumper {
         std::vector<float> *discriminators;
         std::vector<double> *userfloats;
 	int nUserfloats;
+        std::vector<JetCorrectionUncertainty*> fJECUncertainty;
 
         std::vector<int> *hadronFlavour;
         std::vector<int> *partonFlavour;

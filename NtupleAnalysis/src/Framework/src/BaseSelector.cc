@@ -24,7 +24,7 @@ void BaseSelector::processInternal(Long64_t entry) {
     cBaseAllEvents.increment(); 
     
     // PU reweighting
-    //fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent)); //FIXME: temporary disabled before MC pileup histograms is updated
+    fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
     
     // Set prescale event weight // FIXME missing code
     
