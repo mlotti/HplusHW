@@ -134,9 +134,10 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
       continue;
     passedTriggerMatching = true;
     // Apply cut on decay mode
-    if (!this->passDecayModeFinding(tau))
-      continue;
-    passedDecayMode = true;
+//     if (!this->passDecayModeFinding(tau)) {
+//       continue;
+//     }
+//     passedDecayMode = true;
     hTauPtTriggerMatched->Fill(tau.pt());
     hTauEtaTriggerMatched->Fill(tau.eta());
     // Generic discriminators
@@ -191,6 +192,11 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
         hEtaResolution->Fill((tau.eta() - tau.MCVisibleTau()->eta()) / tau.eta());
         hPhiResolution->Fill((tau.phi() - tau.MCVisibleTau()->phi()) / tau.phi());
       }
+      if (!this->passDecayModeFinding(tau)) {
+        //std::cout << "***" << std::endl;
+        continue;
+      }
+      passedDecayMode = true;
     } else {
       // tau is not isolated
       passedAntiIsol = true;
@@ -275,15 +281,15 @@ bool TauSelection::passTrgMatching(const Tau& tau, std::vector<math::LorentzVect
 bool TauSelection::passNprongsCut(const Tau& tau) const {
   if (fTauNprongs > 0) {
     if (fTauNprongs == 12) {
-      return (tau.nProngs() == 1 || tau.nProngs() == 2);
+      return (tau.decayMode() >= 0 && tau.decayMode() <= 4);
     } if (fTauNprongs == 13) {
-      return (tau.nProngs() == 1 || tau.nProngs() == 3);
+      return ((tau.decayMode() >= 0 && tau.decayMode() <= 4) && (tau.decayMode() >= 10 && tau.decayMode() <= 14));
     } if (fTauNprongs == 23) {
-      return (tau.nProngs() == 2 || tau.nProngs() == 3);
+      return (tau.decayMode() >= 5 && tau.decayMode() <= 14);
     } if (fTauNprongs == 123) {
-      return (tau.nProngs() >= 1 && tau.nProngs() <= 3);
+      return (tau.decayMode() >= 0 && tau.decayMode() <= 14);
     } else {
-      return (tau.nProngs() == fTauNprongs);
+      return (tau.decayMode() >= (fTauNprongs-1)*5 && tau.decayMode() <= fTauNprongs*5-1);
     }
   }
   return true;
