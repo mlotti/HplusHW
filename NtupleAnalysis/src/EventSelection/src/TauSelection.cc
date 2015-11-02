@@ -282,11 +282,11 @@ bool TauSelection::passNprongsCut(const Tau& tau) const {
   if (fTauNprongs > 0) {
     if (fTauNprongs == 12) {
       return (tau.decayMode() >= 0 && tau.decayMode() <= 4);
-    } if (fTauNprongs == 13) {
+    } else if (fTauNprongs == 13) {
       return ((tau.decayMode() >= 0 && tau.decayMode() <= 4) && (tau.decayMode() >= 10 && tau.decayMode() <= 14));
-    } if (fTauNprongs == 23) {
+    } else if (fTauNprongs == 23) {
       return (tau.decayMode() >= 5 && tau.decayMode() <= 14);
-    } if (fTauNprongs == 123) {
+    } else if (fTauNprongs == 123) {
       return (tau.decayMode() >= 0 && tau.decayMode() <= 14);
     } else {
       return (tau.decayMode() >= (fTauNprongs-1)*5 && tau.decayMode() <= fTauNprongs*5-1);
