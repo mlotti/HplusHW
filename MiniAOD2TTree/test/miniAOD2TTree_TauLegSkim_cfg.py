@@ -139,13 +139,16 @@ process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
+# === Setup customizations
+from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
+produceCustomisations(process) # This produces process.CustomisationsSequence which needs to be included to path
+
 # module execution
 process.runEDFilter = cms.Path(process.PUInfo*
                                process.skimCounterAll*
                                process.skim*
                                process.skimCounterPassed*
-                               process.HBHENoiseFilterResultProducer* #Produces HBHE booleans
-                               process.egmGsfElectronIDSequence*
+                               process.CustomisationsSequence*
                                process.dump)
 
 #process.output = cms.OutputModule("PoolOutputModule",

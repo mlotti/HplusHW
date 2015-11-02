@@ -59,6 +59,7 @@ muVeto = PSet(
 
 #====== Jet selection
 jetSelection = PSet(
+               jetType = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
               jetPtCut = 30.0,
              jetEtaCut = 2.5,
      tauMatchingDeltaR = 0.4,
@@ -91,7 +92,7 @@ bjetSelection = PSet(
 metSelection = PSet(
            METCutValue = 80.0,
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
-               METType = "type1MET", # options: GenMET, L1MET, CaloMET, type1MET
+               METType = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
    applyPhiCorrections = False  # FIXME: no effect yet
 )
 

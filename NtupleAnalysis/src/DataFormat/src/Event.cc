@@ -5,8 +5,10 @@
 #include <stdexcept>
 
 Event::Event(const ParameterSet& config):
+  fJetCollection(config.getParameter<std::string>("JetSelection.jetType", "Jets")),
   fGenMET("GenMET"),
   fMET_Type1("MET_Type1"),
+  fMET(config.getParameter<std::string>("METSelection.METType", "MET_Type1")),
   fCaloMET("CaloMET"),
   fL1MET("L1MET"),
   fL1extraMET("L1MET_l1extra"),
@@ -111,6 +113,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fGenMET.setupBranches(mgr);
   fGenWeight.setupBranches(mgr);
   fMET_Type1.setupBranches(mgr);
+  fMET.setupBranches(mgr);
   fCaloMET.setupBranches(mgr);
   fL1MET.setupBranches(mgr);
   fL1extraMET.setupBranches(mgr);

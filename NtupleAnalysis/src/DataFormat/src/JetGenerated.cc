@@ -17,10 +17,8 @@ void JetGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_PUIDmedium", &fPUIDmedium);
   mgr.book(prefix()+"_PUIDtight", &fPUIDtight);
   mgr.book(prefix()+"_pileupJetIdfullDiscriminant", &fPileupJetIdfullDiscriminant);
-  mgr.book(prefix()+"_pfCombinedInclusiveSecondaryVertexBJetTags", &fPfCombinedInclusiveSecondaryVertexBJetTags);
   mgr.book(prefix()+"_pfCombinedInclusiveSecondaryVertexV2BJetTags", &fPfCombinedInclusiveSecondaryVertexV2BJetTags);
   mgr.book(prefix()+"_pfCombinedMVABJetTag", &fPfCombinedMVABJetTag);
-  mgr.book(prefix()+"_pfCombinedSecondaryVertexBJetTags", &fPfCombinedSecondaryVertexBJetTags);
   mgr.book(prefix()+"_pfJetBProbabilityBJetTags", &fPfJetBProbabilityBJetTags);
   mgr.book(prefix()+"_pfJetProbabilityBJetTags", &fPfJetProbabilityBJetTags);
   mgr.book(prefix()+"_hadronFlavour", &fHadronFlavour);

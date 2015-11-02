@@ -97,7 +97,7 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   std::vector<short> mcPdgId;    tree->Branch("Taus_pdgId", &mcPdgId);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
   std::vector<float> lTrkEta;  tree->Branch("Taus_lChTrkEta", &lTrkEta);
-  std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
+  std::vector<int> decayMode;    tree->Branch("Taus_decayMode", &decayMode);
   std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
   std::vector<bool> e2Discr;    tree->Branch("Taus_againstElectronLooseMVA5", &e2Discr);
   std::vector<bool> e3Discr;    tree->Branch("Taus_againstElectronMediumMVA5", &e3Discr);
@@ -129,7 +129,7 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   mcPdgId = std::vector<short>{15,    15,    15,    15,    15,    15,    15,   15};
   lTrkPt = std::vector<float>{5.f,  20.f,  11.f,  5.f,  70.f,  11.f,  13.f, 90.f};
   lTrkEta = std::vector<float>{-2.3f, -2.3f, -1.1f, -1.4f, 0.23f, 0.7f, 3.3f, 3.3f};
-  nProngs = std::vector<int>{1, 2, 3, 3, 2, 1, 1, 3};
+  decayMode = std::vector<int>{1, 5, 11, 11, 6, 0, 2, 10};
   tree->Fill();
   nevent = 2; // with trigger taus
   trgpt  = std::vector<float>{51.f,   11.1f,  75.3f,  50.4f};

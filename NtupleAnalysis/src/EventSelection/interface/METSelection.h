@@ -23,8 +23,11 @@ public:
   enum METType {
     kGenMET,
     kL1MET,
+    kHLTMET,
     kCaloMET,
-    kType1MET
+    kType1MET,
+    kType1MET_noHF,
+    kPuppiMET
   };
   
     /**
