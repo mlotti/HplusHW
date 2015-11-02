@@ -143,6 +143,18 @@ backgroundCrossSections = CrossSectionList(
             "8": 245.8, # [10]
             "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
             }),
+    CrossSection("TTJets_HT600to800", {
+            "13": 0.0, 
+            }),
+    CrossSection("TTJets_HT800to1200", {
+            "13": 0.0, 
+            }),
+    CrossSection("TTJets_HT1200to2500", {
+            "13": 0.0, 
+            }),
+    CrossSection("TTJets_HT2500toInf", {
+            "13": 0.0, 
+            }),
     #CrossSection("WJets", {
             #"7": 31314.0, # [2], NNLO
             #"8": 36703.2, # [9], NNLO
