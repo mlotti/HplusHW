@@ -36,6 +36,7 @@ public:
 
   void setOutput(TDirectory *dir) {
     fEventCounter.setOutput(dir);
+    bookInternal(dir);
     book(dir);
   }
 
@@ -46,6 +47,9 @@ public:
     fPileupWeight.calculateWeights(hPUdata,hPUmc);
   }
 
+  /// Book internal histograms
+  void bookInternal(TDirectory *dir);
+   
   // Implement these
   virtual void book(TDirectory *dir) = 0;
   virtual void setupBranches(BranchManager& branchManager) = 0;
@@ -64,7 +68,19 @@ protected:
 
 private:
   Count cBaseAllEvents;
+  Count cPileupWeighted;
+  Count cPrescaled;
+  Count cTopPtReweighted;
+  Count cExclusiveSamplesWeighted;
+
   const bool fIsMC;
+  
+  // Internal histograms
+  WrappedTH1* hNvtxBeforeVtxReweighting;
+  WrappedTH1* hNvtxAfterVtxReweighting;
+  
+  
+  
 };
 
 #endif

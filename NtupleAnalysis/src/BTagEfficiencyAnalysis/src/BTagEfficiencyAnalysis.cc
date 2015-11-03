@@ -36,10 +36,6 @@ private:
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
   Count cTrigger;
-  Count cPrescaled;
-  Count cPileupWeighted;
-  Count cTopPtReweighted;
-  Count cExclusiveSamplesWeighted;
   METFilterSelection fMETFilterSelection;
   Count cVertexSelection;
   TauSelection fTauSelection;
@@ -73,10 +69,6 @@ BTagEfficiencyAnalysis::BTagEfficiencyAnalysis(const ParameterSet& config)
   fJetEtaCutMax(config.getParameter<double>("jetEtaCutMax")),
   cAllEvents(fEventCounter.addCounter("All events")),
   cTrigger(fEventCounter.addCounter("Passed trigger")),
-  cPrescaled(fEventCounter.addCounter("Prescaled")),
-  cPileupWeighted(fEventCounter.addCounter("Weighted events with PU")),
-  cTopPtReweighted(fEventCounter.addCounter("Weighted events with top pT")),
-  cExclusiveSamplesWeighted(fEventCounter.addCounter("Weighted events for exclusive samples")),
   fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"),
                 fEventCounter, fHistoWrapper, nullptr, ""),
   cVertexSelection(fEventCounter.addCounter("Primary vertex selection")),
@@ -130,20 +122,7 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
   if (!(fEvent.passTriggerDecision()))
     return;
   cTrigger.increment();
-  
-//====== Set prescale // FIXME missing code
-  cPrescaled.increment();
-  
-//====== PU reweighting // FIXME missing code
-  //fEventWeight.multiplyWeight(0.5);
-  cPileupWeighted.increment();
 
-//====== Top pT weighting // FIXME missing code
-  cTopPtReweighted.increment();
-  
-//====== Combining of W+jets and Z+jets inclusive and exclusive samples // FIXME missing code
-  cExclusiveSamplesWeighted.increment();
-  
 //====== MET filters to remove events with spurious sources of fake MET
   const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
   if (!metFilterData.passedSelection())
