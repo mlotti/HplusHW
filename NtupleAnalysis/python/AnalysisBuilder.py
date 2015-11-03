@@ -25,7 +25,7 @@ class AnalysisBuilder:
                  dataEras=["2015"],        # Data era (see python/tools/dataset.py::_dataEras)
                  searchModes=["m80to160"], # Search mode (see python/parameters/signalAnalysisParameters.py)
                  # Optional options
-                 
+                 usePUreweighting=True, # enable/disable vertex reweighting
                  # Systematics options
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
                 ):
@@ -40,6 +40,8 @@ class AnalysisBuilder:
               self._searchModes = searchModes[:]
           else:
               self._searchModes.append(searchModes)
+          
+          self._usePUreweighting = usePUreweighting
           
           self._variations={}
           # Process systematic uncertainty variations
@@ -67,6 +69,9 @@ class AnalysisBuilder:
         self._variations[configItemString] = listOfValues
     
     def build(self, process, config):
+        # Add here options to the config
+        config.__setattr__("usePileupWeights", self._usePUreweighting)
+        # Create list of configs for the modules
         configs = []
         for searchMode in self._searchModes:
             for dataEra in self._dataEras:
