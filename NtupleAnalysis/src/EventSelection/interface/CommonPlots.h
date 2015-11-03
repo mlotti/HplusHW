@@ -35,7 +35,7 @@ public:
   CommonPlots(const ParameterSet& config, const CommonPlots::AnalysisType type, HistoWrapper& histoWrapper);
   ~CommonPlots();
   
-  void book(TDirectory *dir);
+  void book(TDirectory* dir, bool isData);
   
   /// Initialize (call this at the beginning of each event; prevents double-counting of events)
   void initialize();
@@ -186,6 +186,7 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauNProngsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauRtauAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauSourceAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauIPxyAfterAllSelections;
 
   HistoSplitter::SplittedTripletTH1s hCtrlNJetsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetPtAfterAllSelections;
@@ -210,6 +211,9 @@ private:
   HistoSplitter::SplittedTripletTH1s hShapeTransverseMass;
   HistoSplitter::SplittedTripletTH1s hShapeProbabilisticBtagTransverseMass;
 
+  // Other plots
+  WrappedTH1* hNSelectedVsRunNumber; // For data only
+  
   //====== Data cache
   /// Cached data objects from silent analyze
   //VertexSelection::Data fVertexData;
