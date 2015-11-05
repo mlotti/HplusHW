@@ -27,7 +27,7 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   tmp.put("TauSelection.isolationDiscr", "byLooseCombinedIsolationDeltaBetaCorr3Hits");
   tmp.put("METSelection.METCutValue", 80.0);
   tmp.put("METSelection.METCutDirection", ">");
-  tmp.put("METSelection.METType", "type1MET");
+  tmp.put("METSelection.METType", "MET_Type1");
   tmp.put("METSelection.applyPhiCorrections", false);
   ParameterSet pset(tmp, true, true);
   // Create necessary objects for testing
@@ -59,7 +59,7 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   std::vector<short> mcPdgId;    tree->Branch("Taus_pdgId", &mcPdgId);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
   std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
-  std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
+  std::vector<int> decayMode;    tree->Branch("Taus_decayMode", &decayMode);
   std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
   std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonTight3", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
@@ -90,7 +90,7 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   mcPdgId = std::vector<short>{15,    15,    15,    15,    15,    15,    15,   15};
   lTrkPt = std::vector<float>{5.f,  20.f,  11.f,  5.f,  70.f,  11.f,  13.f, 90.f};
   lTrkEta = std::vector<float>{-2.3f, -2.3f, -1.1f, -1.4f, 0.23f, 0.7f, 3.3f, 3.3f};
-  nProngs = std::vector<int>{1, 1, 1, 1, 1, 1, 1, 1};
+  decayMode = std::vector<int>{1, 1, 1, 1, 1, 1, 1, 1};
   type1METx = 32.61220;
   type1METy = 83.883512;
   nPU = 1;

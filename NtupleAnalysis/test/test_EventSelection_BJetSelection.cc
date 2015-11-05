@@ -89,7 +89,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
   std::vector<float> e;    tree->Branch("Taus_e", &e);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
   std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
-  std::vector<int> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
+  std::vector<int> decayMode;    tree->Branch("Taus_decayMode", &decayMode);
   std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
   std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonTight3", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
@@ -180,7 +180,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     JetSelection::Data jetData = jetsel.silentAnalyzeWithoutTau(event2);
     BJetSelection::Data bjetData = bjetsel.silentAnalyze(event2, jetData);
     CHECK( bjetData.passedSelection() == true );
-    CHECK( bjetData.getNumberOfSelectedBJets() == 2 );
+    CHECK( bjetData.getNumberOfSelectedBJets() == 1 );
     mgr.setEntry(1);
     tauData = tausel.silentAnalyze(event2);
     jetData = jetsel.silentAnalyzeWithoutTau(event2);
@@ -209,7 +209,7 @@ TEST_CASE("BJetSelection", "[EventSelection]") {
     TauSelection::Data tauData = tausel.silentAnalyze(event2);
     JetSelection::Data jetData = jetsel.silentAnalyzeWithoutTau(event2);
     BJetSelection::Data bjetData = bjetsel.silentAnalyze(event2, jetData);
-    CHECK( bjetData.passedSelection() == true );
+    CHECK( bjetData.passedSelection() == false );
     mgr.setEntry(1);
     tauData = tausel.silentAnalyze(event2);
     jetData = jetsel.silentAnalyzeWithoutTau(event2);

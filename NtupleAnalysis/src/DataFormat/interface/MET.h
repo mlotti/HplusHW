@@ -46,7 +46,7 @@ public:
   ~MET_T() {}
 
   void setupBranches(BranchManager& mgr) {
-    mgr.book(prefix()+"_x" +energySystematicsVariation(), &fX);
+    mgr.book(prefix()+"_x"+energySystematicsVariation(), &fX);
     mgr.book(prefix()+"_y"+energySystematicsVariation(), &fY);
   }
 

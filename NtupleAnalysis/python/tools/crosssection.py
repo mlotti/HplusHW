@@ -114,6 +114,21 @@ backgroundCrossSections = CrossSectionList(
             "7": 296600000.*0.0002855, # [2]
             "8": 3.64e8*3.7e-4, # [1]
             }),
+    CrossSection("QCD_Pt50to80_MuEnrichedPt5", {
+            "13": 4.487e+05, # 4.487e+05 +- 1.977e+02 pb [14]
+    }),
+    CrossSection("QCD_Pt80to120_MuEnrichedPt5", {
+            "13": 1.052e+05, # 1.052e+05 +- 5.262e+01 [14]
+    }),
+    CrossSection("QCD_Pt120to170_MuEnrichedPt5", {
+            "13": 2.549e+04, # 2.549e+04 +- 1.244e+01 [14]
+    }),
+    CrossSection("QCD_Pt170to300_MuEnrichedPt5", {
+            "13": 8.644e+03, # 8.644e+03 +- 4.226e+00 [14]
+    }),
+    CrossSection("QCD_Pt300to470_MuEnrichedPt5", {
+            "13": 7.967e+02, # 7.967e+02 +- 3.845e-0 [14]
+    }),
     CrossSection("WW", {
             "7": 43.0, # [3]
             "8": 54.838, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
@@ -142,6 +157,18 @@ backgroundCrossSections = CrossSectionList(
             "7": 172.0, # [10]
             "8": 245.8, # [10]
             "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
+            }),
+    CrossSection("TTJets_HT600to800", {
+            "13": 0.0, 
+            }),
+    CrossSection("TTJets_HT800to1200", {
+            "13": 0.0, 
+            }),
+    CrossSection("TTJets_HT1200to2500", {
+            "13": 0.0, 
+            }),
+    CrossSection("TTJets_HT2500toInf", {
+            "13": 0.0, 
             }),
     #CrossSection("WJets", {
             #"7": 31314.0, # [2], NNLO

@@ -64,8 +64,7 @@ public:
   const PFCandsCollection& pfCandidates() const { return fPFCandidates; }
 
   const MET& genMET() const { return fGenMET; }
-
-  const MET& met() const { return met_Type1(); }
+  const MET& met() const { return fMET; }
   const MET& met_Type1() const { return fMET_Type1; }
   const MET& calomet() const { return fCaloMET; }
   const MET& L1met() const { 
@@ -95,6 +94,7 @@ private:
   PFCandsCollection fPFCandidates;
   MET fGenMET;
   MET fMET_Type1;
+  MET fMET;
   MET fCaloMET;
   MET fL1MET;
   MET fL1extraMET;
