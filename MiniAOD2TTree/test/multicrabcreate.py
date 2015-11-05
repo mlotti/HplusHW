@@ -45,7 +45,7 @@ signalAnalysisDatasets.extend(datasetsMiniAODv2_Signal)
 #signalAnalysisDatasets.extend(datasets25ns)
 #signalAnalysisDatasets.extend(datasets25nsSignal)
 
-datadataset_re = re.compile("^/(?P<name>\S+?)/(?P<run>Run\S+?)-")
+datadataset_re = re.compile("^/(?P<name>\S+?)/(?P<run>Run\S+?)/")
 mcdataset_re = re.compile("^/(?P<name>\S+?)/")
 
 version = ""
@@ -133,7 +133,7 @@ for dataset in datasets:
                 if Ag == "_Silver":
                     rName += Ag
 #            s = (dataset.URL).split("/")
-#            rName = s[1]+"_"+(s[2].split("-")[0].split("_")[0])
+#            rName = s[1]+"_"+s[2]
 
         rName = rName.replace("-","")
 
