@@ -101,7 +101,8 @@ crab_splitunits_re = re.compile("config.Data.unitsPerJob")
 crab_dbs_re = re.compile("config.Data.inputDBS")
 tune_re = re.compile("(?P<name>\S+)_Tune")
 tev_re = re.compile("(?P<name>\S+)_13TeV")
-rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON")
+rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON(?P<Silver>(_\S+|))\.")
+#rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON")
 #rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15_(?P<BunchSpacing>\d+ns)_JSON_v")
 
 for dataset in datasets:
@@ -128,6 +129,9 @@ for dataset in datasets:
 		rr = rr.replace("-","_")
 		bs = runrangeMatch.group("BunchSpacing")
 		rName += "_"+rr+bs
+                Ag = runrangeMatch.group("Silver")
+                if Ag == "_Silver":
+                    rName += Ag
 #            s = (dataset.URL).split("/")
 #            rName = s[1]+"_"+s[2]
 
