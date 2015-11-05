@@ -12,6 +12,8 @@ import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.git as git
 
+_debugPUreweighting = False
+
 class PSet:
     def __init__(self, **kwargs):
         self.__dict__["_data"] = copy.deepcopy(kwargs)
@@ -325,6 +327,9 @@ class Process:
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
                     if dset.getDataVersion().isMC():
                         if aname in hPUs.keys():
+                            if _debugPUreweighting:
+                                for k in range(hPUs[aname].GetNbinsX()):
+                                    print "DEBUG(PUreweighting): dataPU:%d:%f"%(k+1, hPUs[aname].GetBinContent(k+1))
                             inputList.Add(hPUs[aname])
                         else:
                             n = 50
@@ -337,6 +342,9 @@ class Process:
                             raise Exception("Error: pileup spectrum is missing from dataset! Please switch to using newest multicrab!")
                         hPUMC = dset.getPileUp().Clone()
                         hPUMC.SetName("PileUpMC")
+                        if _debugPUreweighting:
+                            for k in range(hPUMC.GetNbinsX()):
+                                print "Debug(PUreweighting): MCPU:%d:%f"%(k+1, hPUMC.GetBinContent(k+1))
                         inputList.Add(hPUMC)
                         if analyzer.exists("usePileupWeights"):
                             usePUweights = analyzer.__getattr__("usePileupWeights")
@@ -351,8 +359,8 @@ class Process:
                 if dset.getName() in lumidata.keys():
                     lumivalue = lumidata[dset.getName()]
                 print "    Luminosity: %s fb-1"%lumivalue
-            if usePUweights:
-                print "    Using pileup weights"
+            print "    Using pileup weights:", usePUweights
+                
 
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())

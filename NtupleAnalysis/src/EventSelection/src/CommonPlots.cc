@@ -29,7 +29,7 @@ CommonPlots::CommonPlots(const ParameterSet& config, const AnalysisType type, Hi
 
 CommonPlots::~CommonPlots() { }
 
-void CommonPlots::book(TDirectory *dir) { 
+void CommonPlots::book(TDirectory *dir, bool isData) { 
   fHistoSplitter.bookHistograms(dir);
   // Create directories for data driven control plots
   std::string myLabel = "ForDataDrivenCtrlPlots";
@@ -226,7 +226,10 @@ void CommonPlots::book(TDirectory *dir) {
   for (int i = 0; i < fHelper.getTauSourceBinCount(); ++i) {
     fHistoSplitter.SetBinLabel(hCtrlSelectedTauSourceAfterAllSelections, i+1, fHelper.getTauSourceBinLabel(i));
   }
-  
+  fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kVital, myDirs, hCtrlSelectedTauIPxyAfterAllSelections, 
+    "SelectedTau_IPxy_AfterAllSelections", ";IP_{T} (cm);N_{events}",
+    100, 0, 0.2);
+
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kVital, myDirs, hCtrlNJetsAfterAllSelections, 
     "Njets_AfterAllSelections", ";Number of selected jets;N_{events}",
     fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
@@ -281,6 +284,10 @@ void CommonPlots::book(TDirectory *dir) {
     fHistoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myDirs3, hShapeProbabilisticBtagTransverseMass, 
       "shapeTransverseMassProbabilisticBTag", ";m_{T}(tau,MET), GeV/c^{2};N_{events}",
       fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+  }
+  if (isData) {
+    hNSelectedVsRunNumber = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, 
+      "NSelectedVsRunNumber", "NSelectedVsRunNumber;Run number;N_{events}", 14000, 246000, 260000);
   }
 }
 
@@ -424,6 +431,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
     for (auto p: fHelper.getTauSourceData(!event.isMC(), fTauData.getAntiIsolatedTau())) {
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauSourceAfterAllSelections, bIsFakeTau, p);
     }
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauIPxyAfterAllSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().IPxy());
   } else {
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().pt());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().eta());
@@ -436,7 +444,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
     for (auto p: fHelper.getTauSourceData(!event.isMC(), fTauData.getSelectedTau())) {
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauSourceAfterAllSelections, bIsFakeTau, p);
     }
-
+    fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauIPxyAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().IPxy());
   }
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNJetsAfterAllSelections, bIsFakeTau, fJetData.getNumberOfSelectedJets());
   for (auto& p: fJetData.getSelectedJets()) {
@@ -466,6 +474,10 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
     myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
   }
   fHistoSplitter.fillShapeHistogramTriplet(hShapeTransverseMass, bIsFakeTau, myTransverseMass);
+  
+  if (event.isData()) {
+    hNSelectedVsRunNumber->Fill(event.eventID().run());
+  }
 }
 
 void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight) {
