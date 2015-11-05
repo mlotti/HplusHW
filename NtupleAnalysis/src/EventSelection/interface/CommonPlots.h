@@ -4,6 +4,8 @@
 
 #include "EventSelection/interface/EventSelections.h"
 #include "EventSelection/interface/CommonPlotsHelper.h"
+#include "EventSelection/interface/CommonPlotsBase.h"
+#include "EventSelection/interface/PUDependencyPlots.h"
 #include "Framework/interface/ParameterSet.h"
 #include "Framework/interface/HistogramSettings.h"
 #include "Framework/interface/HistoSplitter.h"
@@ -12,15 +14,6 @@
 #include "TDirectory.h"
 
 #include <vector>
-
-class TauSelection;
-class ElectronSelection;
-class MuonSelection;
-class JetSelection;
-class AngularCutsCollinear;
-class BJetSelection;
-class METSelection;
-class AngularCutsBackToBack;
 
 class CommonPlots {
 public:
@@ -50,6 +43,7 @@ public:
   const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
   
   //===== unique filling methods (to be called inside the event selection routine only, i.e. (before a passing decision is done))
+  void fillControlPlotsAtVertexSelection(const Event& event);
   //void fillControlPlotsAtVetoTauSelection(const Event& event, const VetoTauSelection::Data& tauVetoData);
   void fillControlPlotsAtElectronSelection(const Event& event, const ElectronSelection::Data& data);
   void fillControlPlotsAtMuonSelection(const Event& event, const MuonSelection::Data& data);
@@ -62,8 +56,10 @@ public:
   //void fillControlPlotsAtEvtTopology(const Event& event, const EvtTopology::Data& data);
   
   //===== unique filling methods (to be called AFTER return statement from analysis routine)
-  void setNvertices(int vtx) { iVertices = vtx; }
+  void setNvertices(int vtx) { iVertices = vtx; fPUDependencyPlots->setNvtx(vtx); }
+  void fillControlPlotsAfterTrigger(const Event& event);
   void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data);
+  void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
   void fillControlPlotsAfterTopologicalSelections(const Event& event);
   void fillControlPlotsAfterAllSelections(const Event& event);
@@ -213,6 +209,10 @@ private:
 
   // Other plots
   WrappedTH1* hNSelectedVsRunNumber; // For data only
+  
+  //====== Plots from base class
+  std::vector<CommonPlotsBase*> fBaseObjects;
+  PUDependencyPlots* fPUDependencyPlots;
   
   //====== Data cache
   /// Cached data objects from silent analyze
