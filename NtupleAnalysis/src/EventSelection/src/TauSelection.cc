@@ -221,7 +221,14 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
       output.fIsGenuineTauAntiIsolatedTau = output.getAntiIsolatedTau().isGenuineTau();
     }
   }
-
+  if (fCommonPlots != nullptr) {
+    if (output.fSelectedTaus.size()) {
+      fCommonPlots->fillControlPlotsAfterTauSelection(event, output);
+    } else if (output.fAntiIsolatedTaus.size()) {
+      fCommonPlots->fillControlPlotsAfterAntiIsolatedTauSelection(event, output);
+    }
+  }
+  
   // Fill counters
   if (passedTriggerMatching)
     cSubPassedTriggerMatching.increment();
