@@ -227,7 +227,7 @@ def pileup(fname):
             puFile = os.path.join(os.path.dirname(fname),"PileUp.root")
             if os.path.exists(puFile):
                 fIN = ROOT.TFile.Open(puFile)
-                hPU = fIN.Get("PileUp")
+                hPU = fIN.Get("pileup")
             else:
                 print "PileUp not found in",os.path.dirname(fname),", did you run hplusLumiCalc?"
 #        else:

@@ -15,6 +15,9 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 # lumiCalc.py usage taken from
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
 
+# PileUp calc according to https://indico.cern.ch/event/459797/contribution/3/attachments/1181542/1711291/PPD_PileUp.pdf
+PileUpJSON = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt"
+
 dataVersion_re = re.compile("dataVersion=(?P<dataVersion>[^: ]+)")
 pu_re = re.compile("\|\s+\S+\s+\|\s+\S+\s+\|\s+.*\s+\|\s+.*\s+\|\s+\S+\s+\|\s+\S+\s+\|\s+(?P<lumi>\d+(\.\d*)?|\.\d+)\s+\|\s+(?P<pu>\d+(\.\d*)?|\.\d+)\s+\|\s+\S+\s+\|")
 
@@ -148,6 +151,13 @@ def main(opts, args):
         if opts.verbose:
             print output
 
+
+	# PileUp
+	fOUT = os.path.join(task, "results", "PileUp.root")
+	pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode true","--minBiasXsec 80000","--maxPileupBin 50","--numPileupBins 50",fOUT]
+	os.system(pucmd)
+
+	"""
         lines = output.split("\n")
 #        lines.reverse()
         lumi = -1.0
@@ -176,6 +186,7 @@ def main(opts, args):
                 hPU.Fill(pu,lumi)                
         hPU.Write()
         fOUT.Close()
+	"""
 
         if unit == None:
             raise Exception("Didn't find unit information from lumiCalc output, command was %s" % " ".join(cmd))

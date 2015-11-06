@@ -38,7 +38,7 @@ PUInfo::PUInfo(const edm::ParameterSet& iConfig) :
   puSummaryToken(consumesCollector().consumes<std::vector<PileupSummaryInfo>>(iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
   filename(iConfig.getParameter<std::string>("OutputFileName"))
 {
-	hPU = new TH1F("PileUp","PileUp",50,0,50);
+	hPU = new TH1F("pileup","pileup",50,0,50);
 }
 
 PUInfo::~PUInfo() {}

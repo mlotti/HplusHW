@@ -270,7 +270,7 @@ void MiniAOD2TTreeFilter::endJob(){
       TFile* fPU = TFile::Open(PUInfoInputFileName.c_str());
       if (fPU) {
         // File open is successful
-        TH1F* hPU = dynamic_cast<TH1F*>(fPU->Get("PileUp"));
+        TH1F* hPU = dynamic_cast<TH1F*>(fPU->Get("pileup"));
         if (hPU) {
           // Histogram exists
           TH1F* hPUclone = dynamic_cast<TH1F*>(hPU->Clone());
