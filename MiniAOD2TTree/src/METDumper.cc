@@ -67,7 +67,7 @@ bool METDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
               caloMET_y = handle->ptrAt(0)->caloMETPt() * TMath::Sin(handle->ptrAt(0)->caloMETPhi());
             }
 	}else{
-	  throw cms::Exception("config") << "Cannot find MET collection!";
+	  throw cms::Exception("config") << "Cannot find MET collection! " << inputCollections[i].getParameter<edm::InputTag>("src").label();
 	}
     }
     return filter();
