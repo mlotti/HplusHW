@@ -8,7 +8,8 @@ METDumper::METDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     ismc             = isMC;
 
     MET_x = new double[inputCollections.size()];
-    MET_y = new double[inputCollections.size()];                                
+    MET_y = new double[inputCollections.size()];
+    METsignificance = new double[inputCollections.size()];
 
     token = new edm::EDGetTokenT<edm::View<pat::MET>>[inputCollections.size()];
 
@@ -31,7 +32,8 @@ void METDumper::book(TTree* tree){
 	if(name.length() == 0) name = inputCollections[i].getParameter<edm::InputTag>("src").label();
 	  //tree->Branch((name+"_p4").c_str(),&MET_p4[i]);
         tree->Branch((name+"_x").c_str(),&MET_x[i]);
-        tree->Branch((name+"_y").c_str(),&MET_y[i]);  
+        tree->Branch((name+"_y").c_str(),&MET_y[i]);
+        tree->Branch((name+"_significance").c_str(),&METsignificance[i]);
     }
     tree->Branch("CaloMET_x",&caloMET_x);
     tree->Branch("CaloMET_y",&caloMET_y);
@@ -52,6 +54,7 @@ bool METDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	    MET_x[i] = handle->ptrAt(0)->p4().px();
 	    MET_y[i] = handle->ptrAt(0)->p4().py();
+            METsignificance[i] = handle->ptrAt(0)->metSignificance();
 	    if(handle->ptrAt(0)->genMET()){
               GenMET_x = handle->ptrAt(0)->genMET()->px();
               GenMET_y = handle->ptrAt(0)->genMET()->py();
@@ -78,6 +81,7 @@ void METDumper::reset(){
       for(size_t i = 0; i < inputCollections.size(); ++i){
 	MET_x[i] = 0;
 	MET_y[i] = 0;
+        METsignificance[i] = 0;
       }
       caloMET_x = 0;
       caloMET_y = 0;
