@@ -92,6 +92,8 @@ bjetSelection = PSet(
 metSelection = PSet(
            METCutValue = 80.0,
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
+  METSignificanceCutValue = -1000.0,
+  METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
                METType = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
    applyPhiCorrections = False  # FIXME: no effect yet
 )
@@ -128,6 +130,8 @@ commonPlotsOptions = PSet(
            WMassBins = PSet(nBins=60, axisMin=0., axisMax=300.),
               mtBins = PSet(nBins=160, axisMin=0., axisMax=800.), # 5 GeV bin width for tail fitter
          invmassBins = PSet(nBins=50, axisMin=0., axisMax=500.),
+  # Enable/Disable some debug-level plots
+       enablePUDependencyPlots = True,
 )
 
 #====== Build all selections group

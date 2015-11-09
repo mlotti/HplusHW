@@ -171,16 +171,15 @@ def main(opts, args):
 
         # PileUp
         fOUT = os.path.join(task, "results", "PileUp.root")
-        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode true","--minBiasXsec 80000","--maxPileupBin 50","--numPileupBins 50",fOUT]
-        pu = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","80000","--maxPileupBin","50","--numPileupBins","50",fOUT]
+        pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         puoutput = pu.communicate()[0]
         puret = pu.returncode
         if puret != 0:
             print "Call to",pucmd[0],"failed with return value %d with command" % puret
             print " ".join(pucmd)
-            print output
-            return 1
-
+            print puoutput
+            return puret
 
         if task == None:
             print "File %s recorded luminosity %f pb^-1" % (jsonfile, lumi)
@@ -226,5 +225,6 @@ if __name__ == "__main__":
     if opts.lumicalc == None:
         opts.lumicalc = "brilcalc"
     print "Calculating luminosity with %s" % opts.lumicalc
+    print "Calculating pileup with pileupCalc"
 
     sys.exit(main(opts, args))

@@ -51,7 +51,7 @@ double PileupWeight::getWeight(const Event& fEvent){
   if(h_weight == 0)
     throw hplus::Exception("runtime") << "PileupWeight enabled, but no PileupWeights in multicrab!";
 
-  int NPU = fEvent.vertexInfo().value();
+  int NPU = fEvent.vertexInfo().simulatedValue();
   int bin = h_weight->GetXaxis()->FindBin( NPU );
   //std::cout << NPU << ":" << bin << ":" << h_weight->GetBinContent( bin ) << std::endl;
   return h_weight->GetBinContent( bin );

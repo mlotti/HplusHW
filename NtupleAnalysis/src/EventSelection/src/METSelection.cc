@@ -23,6 +23,7 @@ const math::XYVectorD& METSelection::Data::getMET() const {
 METSelection::METSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
   fMETCut(config, "METCut"),
+  fMETSignificanceCut(config, "METSignificanceCut"),
   bApplyPhiCorrections(config.getParameter<bool>("applyPhiCorrections")),
   // Event counter for passing selection
   cPassedMETSelection(eventCounter.addCounter("passed MET selection ("+postfix+")"))
@@ -84,12 +85,17 @@ METSelection::Data METSelection::privateAnalyze(const Event& iEvent, int nVertic
 //   else if (fMETType == kType1MET)
 //     output.fSelectedMET.push_back(iEvent.met_Type1().p2());
   output.fSelectedMET.push_back(iEvent.met().p2());
-
+  //output.fMETSignificance = iEvent.met().significance(); // FIXME uncomment when significance exists
+  
   //=== Apply phi corrections // FIXME: not implemented
   
   //=== Apply cut on MET
   if (!fMETCut.passedCut(output.getMET().R()))
     return output;
+  
+  //=== Apply cut on MET significance
+  // (!fMETSignificanceCut.passedCut(iEvent.met().significance())) // FIXME uncomment when significance exists
+  //    return output;
   
   //=== Passed MET selection
   output.bPassedSelection = true;

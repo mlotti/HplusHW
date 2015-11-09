@@ -45,6 +45,7 @@ public:
 
     const bool passedSelection() const { return bPassedSelection; }
     const math::XYVectorD& getMET() const;
+    const float getMETSignificance() const { return fMETSignificance; }
 
     friend class METSelection;
 
@@ -53,6 +54,8 @@ public:
     bool bPassedSelection;
     /// MET collection for storing MET object (as p2, because one needs to be able to manipulate it)
     std::vector<math::XYVectorD> fSelectedMET;
+    /// MET significance
+    float fMETSignificance;
   };
   
   // Main class
@@ -71,6 +74,7 @@ private:
 
   // Input parameters
   const DirectionalCut<float> fMETCut;
+  const DirectionalCut<float> fMETSignificanceCut;
   const bool bApplyPhiCorrections;
   METType fMETType;
   
