@@ -37,12 +37,16 @@ class METDumper {
 
 	bool ismc;
 
+        // For each collection
 	double *MET_x;
 	double *MET_y;
+        double METsignificance;
+        // For single collection
         double caloMET_x;
         double caloMET_y;
         double GenMET_x;
         double GenMET_y;
+        
 
 };
 #endif

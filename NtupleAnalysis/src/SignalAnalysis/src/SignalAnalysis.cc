@@ -114,6 +114,9 @@ void SignalAnalysis::process(Long64_t entry) {
   if (!(fEvent.passTriggerDecision()))
     return;
   cTrigger.increment();
+  int nVertices = fEvent.vertexInfo().value();
+  fCommonPlots.setNvertices(nVertices);
+  fCommonPlots.fillControlPlotsAfterTrigger(fEvent);
 
 //====== MET filters to remove events with spurious sources of fake MET
   const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
@@ -124,11 +127,10 @@ void SignalAnalysis::process(Long64_t entry) {
   // if needed
   
 //====== Check that primary vertex exists
-  int nVertices = fEvent.vertexInfo().value();
   if (nVertices < 1)
     return;
   cVertexSelection.increment();
-  fCommonPlots.setNvertices(nVertices);
+  fCommonPlots.fillControlPlotsAtVertexSelection(fEvent);
   
 //====== Tau selection
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);

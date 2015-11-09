@@ -25,7 +25,7 @@ class AnalysisBuilder:
                  dataEras=["2015"],        # Data era (see python/tools/dataset.py::_dataEras)
                  searchModes=["m80to160"], # Search mode (see python/parameters/signalAnalysisParameters.py)
                  # Optional options
-                 usePUreweighting=True, # enable/disable vertex reweighting
+                 usePUreweighting=False, # enable/disable vertex reweighting
                  # Systematics options
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
                 ):

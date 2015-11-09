@@ -1,5 +1,6 @@
 #include "EventSelection/interface/CommonPlots.h"
 #include "EventSelection/interface/TransverseMass.h"
+#include "EventSelection/interface/PUDependencyPlots.h"
 #include "DataFormat/interface/Event.h"
 
 CommonPlots::CommonPlots(const ParameterSet& config, const AnalysisType type, HistoWrapper& histoWrapper)
@@ -25,7 +26,11 @@ CommonPlots::CommonPlots(const ParameterSet& config, const AnalysisType type, Hi
   //fWMassBinSettings(config.getParameter<ParameterSet>("WMassBins")),
   fMtBinSettings(config.getParameter<ParameterSet>("mtBins"))
   //fInvmassBinSettings(config.getParameter<ParameterSet>("invmassBins")),
-{ }
+{ 
+  // Create CommonPlotsBase objects
+  fPUDependencyPlots = new PUDependencyPlots(histoWrapper, config.getParameter<bool>("enablePUDependencyPlots"), fNVerticesBinSettings);
+  fBaseObjects.push_back(fPUDependencyPlots);
+}
 
 CommonPlots::~CommonPlots() { }
 
@@ -289,6 +294,10 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
     hNSelectedVsRunNumber = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, 
       "NSelectedVsRunNumber", "NSelectedVsRunNumber;Run number;N_{events}", 14000, 246000, 260000);
   }
+  
+  for (auto& p: fBaseObjects) {
+    p->book(dir, isData);
+  }
 }
 
 void CommonPlots::initialize() {
@@ -304,20 +313,39 @@ void CommonPlots::initialize() {
   fMETData = METSelection::Data();
   fBackToBackAngularCutsData = AngularCutsCollinear::Data();
   fHistoSplitter.initialize();
+  
+  for (auto& p: fBaseObjects) {
+    p->reset();
+  }
 }
 
 //===== unique filling methods (to be called inside the event selection routine only)
+void CommonPlots::fillControlPlotsAtVertexSelection(const Event& event) {
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAtVertexSelection(event);
+  } 
+}
+
 void CommonPlots::fillControlPlotsAtElectronSelection(const Event& event, const ElectronSelection::Data& data) {
   fElectronData = data;
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAtElectronSelection(event, data);
+  }
 }
 
 void CommonPlots::fillControlPlotsAtMuonSelection(const Event& event, const MuonSelection::Data& data) {
   fMuonData = data;
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAtMuonSelection(event, data);
+  }
 }
 
 void CommonPlots::fillControlPlotsAtJetSelection(const Event& event, const JetSelection::Data& data) {
   fJetData = data;
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNjets, bIsFakeTau, fJetData.getNumberOfSelectedJets());
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAtJetSelection(event, data);
+  }
 }
 
 void CommonPlots::fillControlPlotsAtAngularCutsCollinear(const Event& event, const AngularCutsCollinear::Data& data) {
@@ -327,6 +355,9 @@ void CommonPlots::fillControlPlotsAtAngularCutsCollinear(const Event& event, con
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlCollinearAngularCutsJet2, bIsFakeTau, fCollinearAngularCutsData.get1DCutVariable(1));
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlCollinearAngularCutsJet3, bIsFakeTau, fCollinearAngularCutsData.get1DCutVariable(2));
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlCollinearAngularCutsJet4, bIsFakeTau, fCollinearAngularCutsData.get1DCutVariable(3));
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAtAngularCutsCollinear(event, data);
+  }
 }
 
 void CommonPlots::fillControlPlotsAtBtagging(const Event& event, const BJetSelection::Data& data) {
@@ -339,12 +370,18 @@ void CommonPlots::fillControlPlotsAtBtagging(const Event& event, const BJetSelec
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlBJetPt, bIsFakeTau, p.pt());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlBJetEta, bIsFakeTau, p.eta());
   }
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAtBtagging(event, data);
+  }
 }
 
 void CommonPlots::fillControlPlotsAtMETSelection(const Event& event, const METSelection::Data& data) {
   fMETData = data;
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlMET, bIsFakeTau, fMETData.getMET().R());
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlMETPhi, bIsFakeTau, fMETData.getMET().phi());
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAtMETSelection(event, data);
+  }
 }
 
 void CommonPlots::fillControlPlotsAtAngularCutsBackToBack(const Event& event, const AngularCutsBackToBack::Data& data) {
@@ -354,13 +391,25 @@ void CommonPlots::fillControlPlotsAtAngularCutsBackToBack(const Event& event, co
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlBackToBackAngularCutsJet2, bIsFakeTau, fBackToBackAngularCutsData.get1DCutVariable(1));
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlBackToBackAngularCutsJet3, bIsFakeTau, fBackToBackAngularCutsData.get1DCutVariable(2));
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlBackToBackAngularCutsJet4, bIsFakeTau, fBackToBackAngularCutsData.get1DCutVariable(3));
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAtAngularCutsBackToBack(event, data);
+  }
 }
 
 //===== unique filling methods (to be called AFTER return statement from analysis routine)
+void CommonPlots::fillControlPlotsAfterTrigger(const Event& event) {
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAfterTrigger(event);
+  } 
+}
+
 void CommonPlots::fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data) {
   // Code logic: if there is no identified tau (or anti-isolated tau for QCD), the code will for sure crash later
   // This piece of code is called from TauSelection, so there one cannot judge if things go right or not, 
   // that kind of check needs to be done in the analysis code (i.e. cut away event if tau selection is not passed)
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAfterTauSelection(event, data);
+  }
   fTauData = data;
   if (event.isData()) {
     bIsFakeTau = false;
@@ -374,6 +423,12 @@ void CommonPlots::fillControlPlotsAfterTauSelection(const Event& event, const Ta
     if (data.hasIdentifiedTaus()) {
       bIsFakeTau = !(data.isGenuineTau());
     }
+  }
+}
+
+void CommonPlots::fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data) {
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAfterAntiIsolatedTauSelection(event, data);
   }
 }
 
@@ -393,7 +448,7 @@ void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event)
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterStdSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().decayMode());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauNProngsAfterStdSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().nProngs());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterStdSelections, bIsFakeTau, fTauData.getRtauOfAntiIsolatedTau());
-    for (auto p: fHelper.getTauSourceData(!event.isMC(), fTauData.getAntiIsolatedTau())) {
+    for (auto& p: fHelper.getTauSourceData(!event.isMC(), fTauData.getAntiIsolatedTau())) {
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauSourceAfterStdSelections, bIsFakeTau, p);
     }
   } else {
@@ -405,7 +460,7 @@ void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event)
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().decayMode());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauNProngsAfterStdSelections, bIsFakeTau, fTauData.getSelectedTau().nProngs());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterStdSelections, bIsFakeTau, fTauData.getRtauOfSelectedTau());
-    for (auto p: fHelper.getTauSourceData(!event.isMC(), fTauData.getSelectedTau())) {
+    for (auto& p: fHelper.getTauSourceData(!event.isMC(), fTauData.getSelectedTau())) {
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauSourceAfterStdSelections, bIsFakeTau, p);
     }
   }
@@ -428,7 +483,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterAllSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().decayMode());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauNProngsAfterAllSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().nProngs());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterAllSelections, bIsFakeTau, fTauData.getRtauOfAntiIsolatedTau());
-    for (auto p: fHelper.getTauSourceData(!event.isMC(), fTauData.getAntiIsolatedTau())) {
+    for (auto& p: fHelper.getTauSourceData(!event.isMC(), fTauData.getAntiIsolatedTau())) {
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauSourceAfterAllSelections, bIsFakeTau, p);
     }
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauIPxyAfterAllSelections, bIsFakeTau, fTauData.getAntiIsolatedTau().IPxy());
@@ -441,7 +496,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauDecayModeAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().decayMode());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauNProngsAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().nProngs());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauRtauAfterAllSelections, bIsFakeTau, fTauData.getRtauOfSelectedTau());
-    for (auto p: fHelper.getTauSourceData(!event.isMC(), fTauData.getSelectedTau())) {
+    for (auto& p: fHelper.getTauSourceData(!event.isMC(), fTauData.getSelectedTau())) {
       fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauSourceAfterAllSelections, bIsFakeTau, p);
     }
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauIPxyAfterAllSelections, bIsFakeTau, fTauData.getSelectedTau().IPxy());
@@ -478,6 +533,9 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
   if (event.isData()) {
     hNSelectedVsRunNumber->Fill(event.eventID().run());
   }
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAfterAllSelections(event);
+  }
 }
 
 void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight) {
@@ -488,4 +546,7 @@ void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const 
     myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), metData.getMET());
   }
   fHistoSplitter.fillShapeHistogramTriplet(hShapeProbabilisticBtagTransverseMass, bIsFakeTau, myTransverseMass, btagWeight);
+    for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(event, metData, btagWeight);
+  }
 }

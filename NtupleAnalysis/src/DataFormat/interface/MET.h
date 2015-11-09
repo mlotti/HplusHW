@@ -41,13 +41,15 @@ public:
   explicit MET_T(const std::string& prefix):
     METBase(prefix),
     fX(nullptr),
-    fY(nullptr)
+    fY(nullptr),
+    fSignificance(nullptr)
   {}
   ~MET_T() {}
 
   void setupBranches(BranchManager& mgr) {
     mgr.book(prefix()+"_x"+energySystematicsVariation(), &fX);
     mgr.book(prefix()+"_y"+energySystematicsVariation(), &fY);
+    mgr.book(prefix()+"_significance"+energySystematicsVariation(), &fSignificance);
   }
 
   float_type x() const { return fX->value(); }
@@ -55,6 +57,7 @@ public:
   float_type et() const { return p2().R(); }
   float_type Phi() const { return p2().Phi(); }
   float_type phi() const { return p2().Phi(); }
+  float_type significance() const { return fSignificance; }
 
   XYVector p2() const {
     return XYVector(x(), y());
@@ -63,6 +66,7 @@ public:
 private:
   const Branch<float_type> *fX;
   const Branch<float_type> *fY;
+  const Branch<float_type> *fSignificance;
 };
 
 using MET = MET_T<double>;
