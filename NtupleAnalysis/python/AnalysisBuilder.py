@@ -11,7 +11,36 @@ class AnalysisConfig:
         self._moduleName = moduleName
         self._config = config.clone()
         #self.__dict__.update(kwargs)
-        # Process all keyword arguments to make changes to thte config
+	#print kwargs
+        #===== Process all keyword arguments to make changes to the config
+        keys = kwargs.keys()
+        for key in keys:
+	    value = kwargs[key]
+	    if key == "systematics":
+		if value.startswith("tauES"):
+		    self._config.TauSelection.systematicVariation = value.replace("Plus","plus").replace("Minus","minus")
+		elif value.startswith("JES"):
+		    self._config.JetSelection.systematicVariation = value.replace("Plus","plus").replace("Minus","minus")
+		else:
+		    raise Exception("Error: unsupported variation item '%s'!"%value)
+	    else:
+		# Process optimization options
+		# First check that key is found in config
+		subkeys = key.split(".")
+		subconfig = [self._config]
+		suffix = ""
+		for i in range(len(subkeys)-1):
+		    if not hasattr(subconfig[len(subconfig)-1], subkeys[i]):
+			raise Exception("Error: Cannot find key %s.%s in the config!"%(suffix, subkeys[i]))
+		    subconfig.append(getattr(subconfig[len(subconfig)-1], subkeys[i]))
+		    if suffix == "":
+			suffix += "%s"%subkeys[i]
+		    else:
+			suffix += ".%s"%subkeys[i]
+		# Set value
+		if not hasattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1]):
+		    raise Exception("Error: Cannot find key %s.%s in the config!"%(suffix, subkeys[len(subkeys)-1]))
+		setattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1], value)
         
     ## Create and register the analysis after the changes have bene done to the config
     def registerAnalysis(self, process):
@@ -52,9 +81,9 @@ class AnalysisBuilder:
               #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
               #items.extend(["METTrgDataEff", "METTrgMCEff"])
               # Tau ID variation systematics
-              items.extend(["GenuineTau", "FakeTauBarrelElectron", "FakeTauEndcapElectron", "FakeTauMuon", "FakeTauJet"])
+              #items.extend(["GenuineTau", "FakeTauBarrelElectron", "FakeTauEndcapElectron", "FakeTauMuon", "FakeTauJet"])
               # Energy scales and JER systematics
-              #items.extend(["tauES", "JES", "JER", "UES"])
+              items.extend(["tauES", "JES"]), # "JER", "UES"])
               # b and top quarks systematics
               #items.extend("TopPt", "BTagSF", "BMistagSF")
               # PU weight systematics
@@ -64,6 +93,8 @@ class AnalysisBuilder:
               for item in items:
                   self._variations["systematics"].append("%sPlus"%item)
                   self._variations["systematics"].append("%sMinus"%item)
+	  #self.addVariation("TauSelection.tauPtCut", [50,60])
+	  #self.addVariation("TauSelection.tauEtaCut", [0.5,1.5])
     
     def addVariation(self, configItemString, listOfValues):
         self._variations[configItemString] = listOfValues
@@ -85,7 +116,11 @@ class AnalysisBuilder:
         for module in configs:
             module.registerAnalysis(process)
         print "\nAnalysisBuilder created %d modules\n"%len(configs)
-        
+    
+    ## Builds iteratively the variations
+    # Logic: Variation specs are put into kwargs as key,value pairs 
+    #        For systematics key=systematics, value=identifier; only a single systematics variation per module is allowed
+    #        For variations key=config entry, value=value; multiple simultaneous variations per module are allowed
     def _buildVariation(self, config, moduleName, optName="", systName="", level=0, **kwargs):
         configs = []
         keys = self._variations.keys()
@@ -101,18 +136,25 @@ class AnalysisBuilder:
                 else:
                     newSystName = item
             else:
-                newOptName += item # FIXME this does not work
+		split = keys[level].split(".")
+		name = split[len(split)-1]
+                newOptName += "%s%s"%(name[0].upper()+name[1:], str(item).replace("-","m").replace(".","p"))
             # Move to next level or build variation
             if level < len(keys)-1:
                 kwargs[keys[level]] = item
                 self._buildVariation(config, moduleName, newOptName, newSystName, level+1, **kwargs)
+                del kwargs[keys[level]]
             else:
                 modStr = moduleName
                 if newOptName != "":
                     modStr += "_Opt%s"%newOptName
                 if newSystName != "":
                     modStr += "_SystVar%s"%newSystName
+		kwargs[keys[level]]=item
                 configs.append(AnalysisConfig(self._name, modStr, config, **kwargs))
+                del kwargs[keys[level]]
                 print "Created variation module %s"%modStr
         return configs
-
+# TODO:
+# need to create non-variation module also for optimization
+# need to figure out how to set scale factors
