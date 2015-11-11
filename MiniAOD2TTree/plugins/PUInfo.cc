@@ -41,6 +41,7 @@ PUInfo::PUInfo(const edm::ParameterSet& iConfig) :
   eventInfoToken(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
   filename(iConfig.getParameter<std::string>("OutputFileName"))
 {
+
   hPU = new TH1F("PileUp","PileUp",50,0,50);
 }
 

@@ -21,12 +21,20 @@ process.addDatasetsFromMulticrab(sys.argv[1])
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
 
-allSelections.TauSelection.rtau = 0.0
+#allSelections.TauSelection.rtau = 0.0
+allSelections.TauSelection.prongs = 123
+allSelections.TauSelection.againstElectronDiscr = "againstElectronLooseMVA5"
+allSelections.TauSelection.againstMuonDiscr = "againstMuonLoose3"
 allSelections.AngularCutsCollinear.cutValueJet1 = 0.0
 allSelections.AngularCutsCollinear.cutValueJet2 = 0.0
 allSelections.AngularCutsCollinear.cutValueJet3 = 0.0
 allSelections.AngularCutsCollinear.cutValueJet4 = 0.0
+allSelections.JetSelection.jetType = "JetsPuppi"
+#allSelections.BJetSelection.numberOfBJetsCutValue = 0
+#allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 allSelections.BJetSelection.bjetDiscrWorkingPoint = "Loose"
+allSelections.METSelection.METCutValue = 120.0 #80
+allSelections.METSelection.METType = "MET_Puppi"
 allSelections.AngularCutsBackToBack.cutValueJet1 = 0.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 0.0
 allSelections.AngularCutsBackToBack.cutValueJet3 = 0.0
@@ -39,6 +47,7 @@ builder = AnalysisBuilder("SignalAnalysis",
                           searchModes,
                           #### Options ####
                           #doSystematicVariations=True,
+                          usePUreweighting=not False
                           )
 #builder.addVariation()
 builder.build(process, allSelections)

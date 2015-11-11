@@ -4,7 +4,7 @@
 #include "TFile.h"
 #include "TH1.h"
 
-namespace {
+/*namespace {
   TH1 *calculateWeights(const std::string& data, const std::string& mc) {
     TFile* fIN_data = TFile::Open(data.c_str(), "READ");
     TFile* fIN_mc   = TFile::Open(mc.c_str(), "READ");
@@ -19,6 +19,7 @@ namespace {
 
     h_data->Scale(1.0/h_data->Integral());
     h_mc->Scale(1.0/h_mc->Integral());
+    
 
     TH1 *weight = dynamic_cast<TH1 *>(h_data->Clone("lumiWeights"));
     weight->Divide(h_mc);
@@ -28,7 +29,7 @@ namespace {
 
     return weight;
   }
-}
+}*/
 /*
 PileupWeight::PileupWeight(const ParameterSet& pset):
   fEnabled(pset.getParameter<bool>("PileupWeight.enabled")),
@@ -53,7 +54,7 @@ double PileupWeight::getWeight(const Event& fEvent){
 
   int NPU = fEvent.vertexInfo().simulatedValue();
   int bin = h_weight->GetXaxis()->FindBin( NPU );
-  //std::cout << NPU << ":" << bin << ":" << h_weight->GetBinContent( bin ) << std::endl;
+  //std::cout << "***" << NPU << ":" << bin << ":" << h_weight->GetBinContent( bin ) << std::endl;
   return h_weight->GetBinContent( bin );
 }
 
@@ -63,6 +64,7 @@ void PileupWeight::calculateWeights(TH1* h_data, TH1* h_mc){
 
   h_data->Scale(1.0/h_data->Integral());
   h_mc->Scale(1.0/h_mc->Integral());
+  //std::cout << h_data->Integral() << ", " << h_mc->Integral() << std::endl;
 
   h_weight = (TH1*)h_data->Clone("lumiWeights");
   h_weight->Divide(h_mc);

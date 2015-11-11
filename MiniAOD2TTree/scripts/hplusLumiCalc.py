@@ -15,6 +15,9 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 # lumiCalc.py usage taken from
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
 
+# PileUp calc according to https://indico.cern.ch/event/459797/contribution/3/attachments/1181542/1711291/PPD_PileUp.pdf
+PileUpJSON = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt"
+
 dataVersion_re = re.compile("dataVersion=(?P<dataVersion>[^: ]+)")
 pu_re = re.compile("\|\s+\S+\s+\|\s+\S+\s+\|\s+.*\s+\|\s+.*\s+\|\s+\S+\s+\|\s+\S+\s+\|\s+(?P<lumi>\d+(\.\d*)?|\.\d+)\s+\|\s+(?P<pu>\d+(\.\d*)?|\.\d+)\s+\|\s+\S+\s+\|")
 
@@ -148,14 +151,11 @@ def main(opts, args):
         if opts.verbose:
             print output
 
+
         lines = output.split("\n")
-#        lines.reverse()
         lumi = -1.0
         unit = None
-        fOUT = ROOT.TFile.Open(os.path.join(task, "results", "PileUp.root"),"RECREATE")
-        hPU = ROOT.TH1F("PileUp","",50,0,50)
         for line in lines:
-#	    print line
             m = unit_re.search(line)
             if m:
                 unit = m.group("unit")
@@ -164,22 +164,22 @@ def main(opts, args):
             m = lumi_re.search(line)
             if m:
                 lumi = float(m.group("recorded")) # lumiCalc2.py returns pb^-1
-#                if opts.lumicalc1:
-#                    lumi = lumi/1e6 # ub^-1 -> pb^-1, lumiCalc.py returns ub^-1
-#                continue
-
-            # Fill PU distribution
-            m = pu_re.search(line)
-            if m:
-                lumi = float(m.group("lumi"))
-                pu   = float(m.group("pu"))
-                hPU.Fill(pu,lumi)                
-        hPU.Write()
-        fOUT.Close()
 
         if unit == None:
             raise Exception("Didn't find unit information from lumiCalc output, command was %s" % " ".join(cmd))
         lumi = convertLumi(lumi, unit)
+
+        # PileUp
+        fOUT = os.path.join(task, "results", "PileUp.root")
+        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","80000","--maxPileupBin","50","--numPileupBins","50",fOUT]
+        pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        puoutput = pu.communicate()[0]
+        puret = pu.returncode
+        if puret != 0:
+            print "Call to",pucmd[0],"failed with return value %d with command" % puret
+            print " ".join(pucmd)
+            print puoutput
+            return puret
 
         if task == None:
             print "File %s recorded luminosity %f pb^-1" % (jsonfile, lumi)
@@ -225,5 +225,6 @@ if __name__ == "__main__":
     if opts.lumicalc == None:
         opts.lumicalc = "brilcalc"
     print "Calculating luminosity with %s" % opts.lumicalc
+    print "Calculating pileup with pileupCalc"
 
     sys.exit(main(opts, args))

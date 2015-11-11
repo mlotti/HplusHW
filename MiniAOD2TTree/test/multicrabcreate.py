@@ -135,7 +135,7 @@ for dataset in datasets:
 #            s = (dataset.URL).split("/")
 #            rName = s[1]+"_"+s[2]
 
-        rName = rName.replace("-","")
+        rName = rName.replace("-","_")
 
         outfilepath = os.path.join(dirName,"crabConfig_"+rName+".py")
 

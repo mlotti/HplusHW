@@ -40,7 +40,7 @@ class METDumper {
         // For each collection
 	double *MET_x;
 	double *MET_y;
-        double METsignificance;
+        double *METsignificance;
         // For single collection
         double caloMET_x;
         double caloMET_y;

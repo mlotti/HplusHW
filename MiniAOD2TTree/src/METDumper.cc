@@ -59,12 +59,15 @@ bool METDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
               GenMET_x = handle->ptrAt(0)->genMET()->px();
               GenMET_y = handle->ptrAt(0)->genMET()->py();
 	    }
-	    if(handle->ptrAt(0)->caloMETPt()){
+	    // Member ftion caloMETPt() returns caloMET only for slimmedMETs, for MET_Type1_NoHF and Puppi it seems to return the PFMET.
+	    // Fixed by hard coding the caloMET to use slimmedMETs
+	    // 05112015/SL
+	    if(inputCollections[i].getParameter<edm::InputTag>("src").label() == "slimmedMETs" && handle->ptrAt(0)->caloMETPt()){
               caloMET_x = handle->ptrAt(0)->caloMETPt() * TMath::Cos(handle->ptrAt(0)->caloMETPhi());
               caloMET_y = handle->ptrAt(0)->caloMETPt() * TMath::Sin(handle->ptrAt(0)->caloMETPhi());
             }
 	}else{
-	  throw cms::Exception("config") << "Cannot find MET collection!";
+	  throw cms::Exception("config") << "Cannot find MET collection! " << inputCollections[i].getParameter<edm::InputTag>("src").label();
 	}
     }
     return filter();

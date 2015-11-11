@@ -1,9 +1,11 @@
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 
 DataCardName    = 'Default_13TeV'
-#Path            = 'test'
 Path            = 'test'
-#Path            = 'testHT'
+#Path            = 'test_1pr'
+#Path            = 'test_3pr'
+#Path            = 'test_123pr_puppimet'
+#Path            = 'testmet140_puppi_vtx'
 #Path            = 'testbtagtight'
 #Path            = 'testnorm'
 
@@ -450,15 +452,15 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         validMassPoints = MassPoints,
         nuisances    = myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_DYtoll","lumi"],
     ))
-    DataGroups.append(DataGroup(
-        label        = "VV_MC",
-        landsProcess = 7,
-        shapeHisto   = SignalShapeHisto,
-        datasetType  = "Embedding",
-        datasetDefinition = "Diboson",
-        validMassPoints = MassPoints,
-        nuisances    = myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_VV","lumi"],
-    ))
+    #DataGroups.append(DataGroup(
+        #label        = "VV_MC",
+        #landsProcess = 7,
+        #shapeHisto   = SignalShapeHisto,
+        #datasetType  = "Embedding",
+        #datasetDefinition = "Diboson",
+        #validMassPoints = MassPoints,
+        #nuisances    = myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_VV","lumi"],
+    #))
 else:
     raise Exception("Error: unknown value for flag OptionGenuineTauBackgroundSource!")
 
@@ -1268,6 +1270,23 @@ ControlPlots.append(ControlPlotInput(
     flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 
+#ControlPlots.append(ControlPlotInput(
+    #title            = "NVertices_AfterStandardSelections",
+    #signalHistoPath  = "ForDataDrivenCtrlPlots",
+    #signalHistoName  = "NVertices_AfterStandardSelections",
+    #EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+    #EWKfakeHistoName  = "NVertices_AfterStandardSelections",
+    #details          = { "xlabel": "N_{vertices}",
+                         #"ylabel": "Events",
+                         #"divideByBinWidth": False,
+                         #"unit": "",
+                         #"log": True,
+                         #"opts": {"ymin": 0.0009} },
+    #blindedRange     = [], # specify range min,max if blinding applies to this control plot
+    #evaluationRange  = [], # specify range to be evaluated and saved into a file
+    #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+#))
+
 ControlPlots.append(ControlPlotInput(
     title            = "SelectedTau_pT_AfterStandardSelections",
     signalHistoPath  = "ForDataDrivenCtrlPlots",
@@ -1943,6 +1962,23 @@ elif OptionMassShape == "FullMass":
     ))
 
 if OptionCtrlPlotsAtMt:
+    ControlPlots.append(ControlPlotInput(
+        title            = "NVertices_AfterAllSelections",
+        signalHistoPath  = "ForDataDrivenCtrlPlots",
+        signalHistoName  = "NVertices_AfterAllSelections",
+        EWKfakeHistoPath  = "ForDataDrivenCtrlPlotsEWKFakeTaus",
+        EWKfakeHistoName  = "NVertices_AfterAllSelections",
+        details          = { "xlabel": "N_{vertices}",
+                            "ylabel": "Events",
+                            "divideByBinWidth": False,
+                            "unit": "",
+                            "log": True,
+                            "opts": {"ymin": 0.0009} },
+        blindedRange     = [], # specify range min,max if blinding applies to this control plot
+        evaluationRange  = [], # specify range to be evaluated and saved into a file
+      flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
+    ))
+  
     ControlPlots.append(ControlPlotInput(
         title            = "SelectedTau_pT_AfterAllSelections",
         signalHistoPath  = "ForDataDrivenCtrlPlots",

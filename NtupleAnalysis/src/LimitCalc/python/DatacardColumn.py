@@ -545,8 +545,9 @@ class DatacardColumn():
                         h.keepOnlySpecifiedShapeUncertainties(myShapeVariationList)
                         # Rebin and move under/overflow bins to visible bins
                         if not isinstance(h.getRootHisto(), ROOT.TH2):
-                            myArray = array("d",getBinningForPlot(c._histoTitle))
-                            h.Rebin(len(myArray)-1,"",myArray)
+                            if getBinningForPlot(c._histoTitle) != None:
+                                myArray = array("d",getBinningForPlot(c._histoTitle))
+                                h.Rebin(len(myArray)-1,"",myArray)
                             h.makeFlowBinsVisible()
                         # Apply any further scaling (only necessary for the unceratainties from variation)
                         for nid in self._nuisanceIds:
