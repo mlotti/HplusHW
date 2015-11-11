@@ -48,6 +48,7 @@ void PUDependencyPlots::fillControlPlotsAtVertexSelection(const Event& event) {
 }
 
 void PUDependencyPlots::fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data)  {
+  if (!data.hasIdentifiedTaus()) return;
   hNvtxTau->Fill(fNvtx);
 }
 

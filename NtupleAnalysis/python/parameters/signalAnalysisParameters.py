@@ -116,7 +116,7 @@ commonPlotsOptions = PSet(
   # By default, inclusive (i.e. fake tau+genuine tau) and fake tau histograms are produced. Set to true to also produce genuine tau histograms (Note: will slow down running and enlarge resulting files).
   enableGenuineTauHistograms = False, 
   # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
-       nVerticesBins = PSet(nBins=100, axisMin=0., axisMax=100.),
+       nVerticesBins = PSet(nBins=60, axisMin=0., axisMax=60.),
               ptBins = PSet(nBins=50, axisMin=0., axisMax=500.),
              etaBins = PSet(nBins=60, axisMin=-3.0, axisMax=3.0),
              phiBins = PSet(nBins=72, axisMin=-3.1415926, axisMax=3.1415926),
