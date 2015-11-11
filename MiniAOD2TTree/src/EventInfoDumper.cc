@@ -35,6 +35,7 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     run   = iEvent.run();
     lumi  = iEvent.luminosityBlock();
     prescale = 1.0;
+    nPU = -1;
     // Amount of PU
     edm::Handle<std::vector<PileupSummaryInfo> > hpileup;
     iEvent.getByToken(puSummaryToken, hpileup);
@@ -56,7 +57,7 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     }
 
     // PV
-    nGoodOfflinePV = 0;
+    nGoodOfflinePV = -1;
     pvX = 0;
     pvY = 0;
     pvZ = 0;

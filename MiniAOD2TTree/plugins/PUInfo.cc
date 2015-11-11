@@ -7,6 +7,7 @@
 
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #include "TFile.h"
 #include "TH1F.h"
@@ -29,23 +30,37 @@ class PUInfo : public edm::EDAnalyzer {
 
     private:
         edm::EDGetTokenT<std::vector<PileupSummaryInfo> > puSummaryToken;
+        edm::EDGetTokenT<GenEventInfoProduct> eventInfoToken;
         std::string filename;
 
 	TH1F* hPU;
 };
 
 PUInfo::PUInfo(const edm::ParameterSet& iConfig) :
-  puSummaryToken(consumesCollector().consumes<std::vector<PileupSummaryInfo>>(iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
+  puSummaryToken(consumes<std::vector<PileupSummaryInfo>>(iConfig.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
+  eventInfoToken(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
   filename(iConfig.getParameter<std::string>("OutputFileName"))
 {
-	hPU = new TH1F("PileUp","PileUp",50,0,50);
+  hPU = new TH1F("PileUp","PileUp",50,0,50);
 }
 
 PUInfo::~PUInfo() {}
 
 void PUInfo::beginJob(){}
 void PUInfo::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
-    edm::Handle<std::vector<PileupSummaryInfo> > hpileup;
+  if (iEvent.isRealData())
+    return;
+  
+  edm::Handle<GenEventInfoProduct> genEventInfoHandle;
+  iEvent.getByToken(eventInfoToken, genEventInfoHandle);
+  double w = 1.0;
+  if (genEventInfoHandle.isValid()) {
+    if (genEventInfoHandle->weight() < 0.0) {
+      w = -1.0;
+    }
+  }
+  
+  edm::Handle<std::vector<PileupSummaryInfo> > hpileup;
     iEvent.getByToken(puSummaryToken, hpileup);
     if(hpileup.isValid()) {
 	short nPU = 0;
@@ -55,7 +70,7 @@ void PUInfo::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
                 break;
             }
         }
-	hPU->Fill(nPU);
+	hPU->Fill(nPU, w);
     }
 }
 
