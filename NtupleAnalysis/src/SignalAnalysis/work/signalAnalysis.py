@@ -33,7 +33,7 @@ allSelections.JetSelection.jetType = "JetsPuppi"
 #allSelections.BJetSelection.numberOfBJetsCutValue = 0
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 allSelections.BJetSelection.bjetDiscrWorkingPoint = "Loose"
-allSelections.METSelection.METCutValue = 120.0 #80
+allSelections.METSelection.METCutValue = 80.0
 allSelections.METSelection.METType = "MET_Puppi"
 allSelections.AngularCutsBackToBack.cutValueJet1 = 0.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 0.0
@@ -47,7 +47,7 @@ builder = AnalysisBuilder("SignalAnalysis",
                           searchModes,
                           #### Options ####
                           #doSystematicVariations=True,
-                          usePUreweighting=not False
+                          usePUreweighting=False
                           )
 #builder.addVariation()
 builder.build(process, allSelections)
