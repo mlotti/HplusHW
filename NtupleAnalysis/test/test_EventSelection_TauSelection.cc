@@ -488,6 +488,20 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     CHECK ( data.getSelectedTaus()[2].pt() == 50. ); 
     CHECK ( data.getSelectedTaus()[3].pt() == 11. ); 
   }
+  SECTION("tau mis-ID SF (non-configured)") {
+    ParameterSet newPset(tmp,true);
+    TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "misIDSF");
+    tausel.bookHistograms(f);
+    Event event2(newPset);
+    event2.setupBranches(mgr);
+    mgr.setEntry(1);
+    TauSelection::Data data = tausel.silentAnalyze(event2);
+    REQUIRE( data.getSelectedTaus() );
+    REQUIRE( data.getTauMisIDSF() == 1.0 );
+
+    
+  }
   SECTION("protection for double counting of events") {
     tmp.put("TauSelection.applyTriggerMatching", true);
     tmp.put("TauSelection.tauPtCut", -41.0);
@@ -509,6 +523,7 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     REQUIRE_THROWS_AS( tausel.analyze(event2), hplus::Exception );
     REQUIRE_THROWS_AS( tausel.silentAnalyze(event2), hplus::Exception );
   }
+  
   ec.setOutput(f);
   ec.serialize();
   closeDirectory(f);
