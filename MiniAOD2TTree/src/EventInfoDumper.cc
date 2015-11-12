@@ -36,6 +36,7 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     lumi  = iEvent.luminosityBlock();
     prescale = 1.0;
     nPU = -1;
+    NUP = -1;
     // Amount of PU
     edm::Handle<std::vector<PileupSummaryInfo> > hpileup;
     iEvent.getByToken(puSummaryToken, hpileup);
