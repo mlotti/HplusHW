@@ -22,7 +22,8 @@ class AnalysisConfig:
 		elif value.startswith("JES"):
 		    self._config.JetSelection.systematicVariation = value.replace("Plus","plus").replace("Minus","minus")
 		else:
-		    raise Exception("Error: unsupported variation item '%s'!"%value)
+		    if value != "nominal":
+                        raise Exception("Error: unsupported variation item '%s'!"%value)
 	    else:
 		# Process optimization options
 		# First check that key is found in config
@@ -102,14 +103,23 @@ class AnalysisBuilder:
     def build(self, process, config):
         # Add here options to the config
         config.__setattr__("usePileupWeights", self._usePUreweighting)
+        # Add nominal modules
+        if len(self._variations.keys()) > 1 and "systematics" in self._variations.keys():
+            self._variations["systematics"].insert(0, "nominal")
         # Create list of configs for the modules
         configs = []
         for searchMode in self._searchModes:
             for dataEra in self._dataEras:
                 modStr = "%s_%s_Run%s"%(self._name, searchMode, dataEra)
-                # Create nominal module
-                configs.append(AnalysisConfig(self._name, modStr, config))
-                print "Created module: %s"%modStr
+                # Create nominal module without any variation
+                if "systematics" in self._variations.keys():
+                    if len(self._variations.keys()) == 1:
+                        configs.append(AnalysisConfig(self._name, modStr, config))
+                        print "Created nominal module: %s"%modStr
+                else:
+                    if len(self._variations.keys()) == 0:
+                        configs.append(AnalysisConfig(self._name, modStr, config))
+                        print "Created nominal module: %s"%modStr
                 # Create modules for optimization and systematics variations
                 configs.extend(self._buildVariation(config, modStr))
         # Register the modules
@@ -126,7 +136,7 @@ class AnalysisBuilder:
         keys = self._variations.keys()
         if len(keys) == 0:
             return configs
-        
+
         for item in self._variations[keys[level]]:
             newSystName = systName
             newOptName = optName
@@ -142,13 +152,13 @@ class AnalysisBuilder:
             # Move to next level or build variation
             if level < len(keys)-1:
                 kwargs[keys[level]] = item
-                self._buildVariation(config, moduleName, newOptName, newSystName, level+1, **kwargs)
+                configs.extend(self._buildVariation(config, moduleName, newOptName, newSystName, level+1, **kwargs))
                 del kwargs[keys[level]]
             else:
                 modStr = moduleName
                 if newOptName != "":
                     modStr += "_Opt%s"%newOptName
-                if newSystName != "":
+                if newSystName != "" and newSystName != "nominal":
                     modStr += "_SystVar%s"%newSystName
 		kwargs[keys[level]]=item
                 configs.append(AnalysisConfig(self._name, modStr, config, **kwargs))
@@ -156,5 +166,4 @@ class AnalysisBuilder:
                 print "Created variation module %s"%modStr
         return configs
 # TODO:
-# need to create non-variation module also for optimization
 # need to figure out how to set scale factors
