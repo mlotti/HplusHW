@@ -97,7 +97,6 @@ TEST_CASE("ParameterSet", "[Framework]") {
       boost::optional<std::string> t2 = pset.getParameterOptional<std::string>("foo");
       CHECK( static_cast<bool>(t2) == false );
 
-
       boost::optional<std::vector<std::string> > t3 = pset.getParameterOptional<std::vector<std::string > >("TauSelection.discriminators");
       REQUIRE( static_cast<bool>(t3) == true);
       REQUIRE( t3->size() == 3 );
@@ -108,14 +107,12 @@ TEST_CASE("ParameterSet", "[Framework]") {
       boost::optional<std::vector<int> > t4 = pset.getParameterOptional<std::vector<int> >("foo");
       CHECK( static_cast<bool>(t4) == false );
 
-
       boost::optional<ParameterSet> t5 = pset.getParameterOptional<ParameterSet>("TauSelection");
       REQUIRE( static_cast<bool>(t5) == true );
       CHECK( t5->getParameter<int>("minProngs") == 3);
 
       boost::optional<ParameterSet> t6 = pset.getParameterOptional<ParameterSet>("foo");
       CHECK( static_cast<bool>(t6) == false );
-
 
       boost::optional<std::vector<ParameterSet> > t7 = pset.getParameterOptional<std::vector<ParameterSet> >("TauSelection.psetvector");
       REQUIRE( static_cast<bool>(t7) == true );

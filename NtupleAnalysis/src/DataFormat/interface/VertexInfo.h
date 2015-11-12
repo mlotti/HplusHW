@@ -20,6 +20,8 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
+  /// Returns true if branches exist in tree
+  bool branchesExist() const { return bBranchesExist; }
   /// Return the number of primary vertices in the event
   short value() const { return fNPU->value(); }
   /// Return the simulated number of primary vertices in the event
@@ -36,6 +38,7 @@ public:
   float pvZ() const { return fPVz->value(); }
 
 private:
+  bool bBranchesExist;
   const Branch<short>   *fNPU;
   const Branch<short> *fSimulatedNPU;
   const Branch<float> *fPVDistanceToClosestVertex;

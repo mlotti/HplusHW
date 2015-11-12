@@ -2,6 +2,7 @@
 #include "Framework/interface/BranchManager.h"
 
 VertexInfo::VertexInfo():
+  bBranchesExist(false),
   fNPU(nullptr),
   fSimulatedNPU(nullptr),
   fPVDistanceToClosestVertex(nullptr),
@@ -21,5 +22,6 @@ void VertexInfo::setupBranches(BranchManager& mgr) {
   mgr.book("pvX", &fPVx);
   mgr.book("pvY", &fPVy);
   mgr.book("pvZ", &fPVz);
+  bBranchesExist = true;
 }
 

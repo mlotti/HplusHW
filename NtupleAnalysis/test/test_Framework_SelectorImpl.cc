@@ -40,6 +40,7 @@ namespace {
       histo3 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "histo3", "histo3", 100, 0, 100);
     }
     virtual void setupBranches(BranchManager& branchManager) override {
+      fEvent.setupBranches(branchManager);
       branchManager.book("event", &b_event);
       branchManager.book("num1", &b_num1);
     }
@@ -62,10 +63,10 @@ namespace {
         histo3->Fill(value, fEventWeight.getWeight());
       }
     }
-
+    
     const int mode;
 
-    const Branch<int> *b_event;
+    const Branch<unsigned long long> *b_event;
     const Branch<std::vector<int> > *b_num1;
 
     Count c1;
@@ -102,8 +103,8 @@ TEST_CASE("SelectorImpl works", "[Framework]") {
     REQUIRE( dir );
     REQUIRE( dir->Get("counters") );
     REQUIRE( dir->Get("counters/weighted") );
-    CHECK( !dir->Get("counters/counter") );
-    CHECK( !dir->Get("counters/weighted/counter") );
+    CHECK( dir->Get("counters/counter") );
+    CHECK( dir->Get("counters/weighted/counter") );
     TNamed *config = nullptr;
     dir->GetObject("config", config);
     REQUIRE( config );
@@ -145,17 +146,17 @@ TEST_CASE("SelectorImpl works", "[Framework]") {
     TH1 *h = nullptr;
     dir->GetObject("counters/counter", h);
     REQUIRE( h );
-    REQUIRE( h->GetNbinsX() == 3 );
-    CHECK( h->GetBinContent(1) == 3 );
-    CHECK( h->GetBinContent(2) == 3 );
-    CHECK( h->GetBinContent(3) == 3 );
+    REQUIRE( h->GetNbinsX() == 8 );
+    CHECK( h->GetBinContent(6) == 3 );
+    CHECK( h->GetBinContent(7) == 3 );
+    CHECK( h->GetBinContent(8) == 3 );
 
     dir->GetObject("counters/weighted/counter", h);
     REQUIRE( h );
-    REQUIRE( h->GetNbinsX() == 3 );
-    CHECK( h->GetBinContent(1) == 3 );
-    CHECK( h->GetBinContent(2) == 3 );
-    CHECK( h->GetBinContent(3) == 1.5 );
+    REQUIRE( h->GetNbinsX() == 8 );
+    CHECK( h->GetBinContent(6) == 3 );
+    CHECK( h->GetBinContent(7) == 3 );
+    CHECK( h->GetBinContent(8) == 1.5 );
 
     dir->GetObject("histo1", h);
     REQUIRE( h );
@@ -203,17 +204,17 @@ TEST_CASE("SelectorImpl works", "[Framework]") {
 
     dir2->GetObject("counters/counter", h);
     REQUIRE( h );
-    REQUIRE( h->GetNbinsX() == 3 );
-    CHECK( h->GetBinContent(1) == 3 );
-    CHECK( h->GetBinContent(2) == 2 );
-    CHECK( h->GetBinContent(3) == 2 );
+    REQUIRE( h->GetNbinsX() == 8 );
+    CHECK( h->GetBinContent(6) == 3 );
+    CHECK( h->GetBinContent(7) == 2 );
+    CHECK( h->GetBinContent(8) == 2 );
 
     dir2->GetObject("counters/weighted/counter", h);
     REQUIRE( h );
-    REQUIRE( h->GetNbinsX() == 3 );
-    CHECK( h->GetBinContent(1) == 3 );
-    CHECK( h->GetBinContent(2) == 2 );
-    CHECK( h->GetBinContent(3) == 1 );
+    REQUIRE( h->GetNbinsX() == 8 );
+    CHECK( h->GetBinContent(6) == 3 );
+    CHECK( h->GetBinContent(7) == 2 );
+    CHECK( h->GetBinContent(8) == 1 );
 
     dir2->GetObject("histo1", h);
     REQUIRE( h );

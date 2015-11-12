@@ -17,15 +17,19 @@ std::unique_ptr<TTree> createEmptyTree() {
 std::unique_ptr<TTree> createSimpleTree() {
   auto tree = std::unique_ptr<TTree>(new TTree("Events", "Events"));
 
-  int b_event;
+  unsigned int b_run;
   unsigned int b_lumi;
-  unsigned long long b_run;
+  unsigned long long b_event;
+  short nvtx;
+  double genw;
   bool b_trigger;
   std::vector<int> b_num1;
   std::vector<float> b_num2;
   tree->Branch("event", &b_event);
   tree->Branch("lumi", &b_lumi);
   tree->Branch("run", &b_run);
+  tree->Branch("nGoodOfflineVertices", &nvtx);
+  tree->Branch("GenWeight", &genw);
   tree->Branch("trigger", &b_trigger);
   tree->Branch("num1", &b_num1);
   tree->Branch("num2", &b_num2);
@@ -33,6 +37,8 @@ std::unique_ptr<TTree> createSimpleTree() {
   b_event = 1;
   b_lumi = 2;
   b_run = 3;
+  nvtx = 1;
+  genw = 1;
   b_trigger = true;
   b_num1 = std::vector<int>{1,2,3};
   b_num2 = std::vector<float>{0.1f, 0.2f, 0.3f};
@@ -74,6 +80,8 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   unsigned int run;           tree->Branch("run",   &run);
   unsigned int lumi;          tree->Branch("lumi",  &lumi);
   unsigned long long event;   tree->Branch("event", &event);
+  short nvtx;                 tree->Branch("nGoodOfflineVertices", &nvtx);
+  double genw;                tree->Branch("GenWeight", &genw);
   bool trig1;                 tree->Branch("HLT_Trig1", &trig1);
   bool trig2;                 tree->Branch("HLT_Trig2", &trig2);
   bool trig3;                 tree->Branch("HLT_Trig3_v5", &trig3);
@@ -104,6 +112,8 @@ std::unique_ptr<TTree> createRealisticTree(const std::string& tauPrefix) {
   run = 1;
   lumi = 1;
   event = 1;
+  nvtx = 1;
+  genw = 1;
   trig1 = true; trig2 = true; trig3 = true;
   tau_pt = std::vector<float>{50.f, 20.f, 10.f, 25.f};
   tau_eta = std::vector<float>{0.1f, -2.3f, 1.7f, 0.3f};

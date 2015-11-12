@@ -23,6 +23,8 @@ TEST_CASE("METSelection", "[EventSelection]") {
   boost::property_tree::ptree tmp = getMinimalConfig();
   tmp.put("METSelection.METCutValue", 80.0);
   tmp.put("METSelection.METCutDirection", ">");
+  tmp.put("METSelection.METSignificanceCutValue", 0);
+  tmp.put("METSelection.METSignificanceCutDirection", ">");
   tmp.put("METSelection.METType", "MET_Type1");
   tmp.put("METSelection.applyPhiCorrections", false);
   ParameterSet pset(tmp, true, true);

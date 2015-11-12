@@ -317,8 +317,8 @@ std::vector<TauSelection::TauMisIDRegionType> TauSelection::assignTauMisIDSFRegi
     result.push_back(kEndcap);
   if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauSF"))
     result.push_back(kFullCoverage);
-  if (!result.size())
-    throw hplus::Exception("config") << "Could not found " << label << "->tau misID SF in config!";
+//   if (!result.size())
+//     throw hplus::Exception("config") << "Could not found " << label << "->tau misID SF in config!";
   return result;
 }
 
@@ -330,8 +330,8 @@ std::vector<float> TauSelection::assignTauMisIDSFValue(const ParameterSet& confi
     result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauEndcapSF"));
   if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauSF"))
     result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauSF"));
-  if (!result.size())
-    throw hplus::Exception("config") << "Could not found " << label << "->tau misID SF in config!";
+//   if (!result.size())
+//     throw hplus::Exception("config") << "Could not found " << label << "->tau misID SF in config!";
   return result;
 }
 

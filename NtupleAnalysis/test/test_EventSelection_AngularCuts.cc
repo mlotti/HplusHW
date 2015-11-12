@@ -44,6 +44,8 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   tmp.put("METSelection.METCutDirection", ">");
   tmp.put("METSelection.METType", "MET_Type1");
   tmp.put("METSelection.applyPhiCorrections", false);
+  tmp.put("METSelection.METSignificanceCutValue", 0);
+  tmp.put("METSelection.METSignificanceCutDirection", ">");
   tmp.put("AngularCutsCollinear.nConsideredJets", 3);
   tmp.put("AngularCutsCollinear.cutValueJet1", 40.0);
   tmp.put("AngularCutsCollinear.cutValueJet2", 40.0);

@@ -9,12 +9,12 @@ TEST_CASE("Branch works", "[Framework]") {
   std::unique_ptr<TTree> tree = createSimpleTree();
 
   SECTION("Construction") {
-    Branch<int> b_event("event");
+    Branch<unsigned long long> b_event("event");
     REQUIRE( b_event.isValid() == false );
     REQUIRE( b_event.getName() == "event" );
   }
   SECTION("Simple branch") {
-    Branch<int> b_event("event");
+    Branch<unsigned long long> b_event("event");
     b_event.setupBranch(tree.get());
     REQUIRE( b_event.isValid() );
 
@@ -39,7 +39,6 @@ TEST_CASE("Branch works", "[Framework]") {
     b.setupBranch(newtree.get());
     REQUIRE( b.isValid() );
     b.setEntry(0);
-    std::cout << b.value() << std::endl;
     CHECK( static_cast<int>(b.value()) == 1 );
     b.setEntry(1);
     CHECK( b.value() == 123 );
@@ -132,6 +131,7 @@ namespace {
 TEST_CASE("BranchBase type checking", "[Framework]") {
   CHECK(  branchOk<bool>              ("bool") );
   CHECK(  branchOk<int >              ("int") );
+  CHECK(  branchOk<short >              ("short") );
   CHECK(  branchOk<int >              ("unsigned int") );
   CHECK(  branchOk<float>             ("double") );
   CHECK(  branchOk<std::vector<int>>  ("vector<int>") );

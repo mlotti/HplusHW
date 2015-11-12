@@ -36,10 +36,12 @@ void BaseSelector::processInternal(Long64_t entry) {
   cBaseAllEvents.increment(); 
   
   //====== PU reweighting
-  hNvtxBeforeVtxReweighting->Fill(fEvent.vertexInfo().value());
-  fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
-  //std::cout << "vtx: " << fPileupWeight.getWeight(fEvent) << std::endl;;
-  hNvtxAfterVtxReweighting->Fill(fEvent.vertexInfo().value());
+  if (fEvent.isMC() && fEvent.vertexInfo().branchesExist()) {
+    hNvtxBeforeVtxReweighting->Fill(fEvent.vertexInfo().value());
+    fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
+    //std::cout << "vtx: " << fPileupWeight.getWeight(fEvent) << std::endl;;
+    hNvtxAfterVtxReweighting->Fill(fEvent.vertexInfo().value());
+  }
   
   //====== Set prescale event weight // FIXME missing code
   cPileupWeighted.increment();
