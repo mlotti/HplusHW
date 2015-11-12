@@ -82,6 +82,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     ),
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::HLT"),
+#        TriggerResults = cms.InputTag("TriggerResults::HLT25NSV4L1V5"),
 	TriggerBits = cms.vstring(
 	    "HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v",
 	    "HLT_IsoMu16_eta2p1_CaloMET30_v",
@@ -96,6 +97,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             "HLT_IsoMu24_eta2p1_LooseIsoPFTau20_v"
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
+#        L1Extra = cms.InputTag("l1extraParticles:MET:HLT25NSV4L1V5"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	TriggerMatch = cms.untracked.vstring(
 	    "LooseIsoPFTau50_Trk30_eta2p1",
