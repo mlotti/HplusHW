@@ -3,6 +3,7 @@
 # and the analyzers for the N systematic uncertainty variations and other variations based on the config
 
 from HiggsAnalysis.NtupleAnalysis.main import Analyzer
+import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 
 ## Container class for analysis configuration
 class AnalysisConfig:
@@ -21,6 +22,25 @@ class AnalysisConfig:
 		    self._config.TauSelection.systematicVariation = value.replace("Plus","plus").replace("Minus","minus")
 		elif value.startswith("JES"):
 		    self._config.JetSelection.systematicVariation = value.replace("Plus","plus").replace("Minus","minus")
+		elif value.startswith("FakeTau"):
+                    etaRegion = "full"
+                    if "Barrel" in value:
+                        etaRegion = "barrel"
+                    elif "Endcap" in value:
+                        etaRegion = "endcap"
+                    partonFakingTau = None
+                    if "Electron" in value:
+                        partonFakingTau = "eToTau"
+                    elif "Muon" in value:
+                        partonFakingTau = "muToTau"
+                    elif "Jet" in value:
+                        partonFakingTau = "jetToTau"
+                    direction = None
+                    if value.endswith("Plus"):
+                        direction = "up"
+                    elif value.endswith("Minus"):
+                        direction = "down"
+                    scaleFactors.assignTauMisidentificationSF(self._config.TauSelection, partonFakingTau, etaRegion, direction)
 		else:
 		    if value != "nominal":
                         raise Exception("Error: unsupported variation item '%s'!"%value)
@@ -82,7 +102,7 @@ class AnalysisBuilder:
               #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
               #items.extend(["METTrgDataEff", "METTrgMCEff"])
               # Tau ID variation systematics
-              #items.extend(["GenuineTau", "FakeTauBarrelElectron", "FakeTauEndcapElectron", "FakeTauMuon", "FakeTauJet"])
+              items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet"])
               # Energy scales and JER systematics
               items.extend(["tauES", "JES"]), # "JER", "UES"])
               # b and top quarks systematics

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 from HiggsAnalysis.NtupleAnalysis.main import PSet
+import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
+
 
 #====== General parameters
 histoLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
@@ -39,7 +41,13 @@ tauSelection = PSet(
   againstElectronDiscr = "againstElectronTightMVA5",
       againstMuonDiscr = "againstMuonTight3",
         isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+  
 )
+# tau misidentification scale factors
+scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
+print tauSelection
 
 #====== Electron veto
 eVeto = PSet(

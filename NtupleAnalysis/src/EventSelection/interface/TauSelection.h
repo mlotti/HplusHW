@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 
-extern Branch< short int > b;
 class ParameterSet;
 class CommonPlots;
 class Event;
@@ -20,6 +19,12 @@ class WrappedTH2;
 
 class TauSelection: public BaseSelection {
 public:
+    enum TauMisIDRegionType {
+      kBarrel,
+      kEndcap,
+      kFullCoverage
+    };
+  
     /**
     * Class to encapsulate the access to the data members of
     * TauSelection. If you want to add a new accessor, add it here
@@ -40,6 +45,7 @@ public:
     const float getRtauOfSelectedTau() const { return fRtau; }
     const bool isGenuineTau() const { return fIsGenuineTau; }
     const size_t getFakeTauID() const { return getSelectedTau().pdgId(); } // For codes see MiniAOD2TTree/interface/NtupleAnalysis_fwd.h
+    const float getTauMisIDSF() const { return fTauMisIDSF; }
     
     // Getters for anti-isolated taus (i.e. passed other cuts but not isolation)
     const bool isAntiIsolated() const { return !hasIdentifiedTaus(); }
@@ -49,6 +55,7 @@ public:
     const float getRtauOfAntiIsolatedTau() const { return fRtauAntiIsolatedTau; }
     const bool getAntiIsolatedTauIsGenuineTau() const { return fIsGenuineTauAntiIsolatedTau; }
     const size_t getAntiIsolatedFakeTauID() const { return getAntiIsolatedTau().pdgId(); } // For codes see MiniAOD2TTree/interface/NtupleAnalysis_fwd.h
+    const float getAntiIsolatedTauMisIDSF() const { return fAntiIsolatedTauMisIDSF; }
     
     friend class TauSelection;
 
@@ -59,12 +66,16 @@ public:
     float fRtau;
     /// Cache genuine tau status for selected tau (to avoid crashes for data)
     bool fIsGenuineTau;
+    /// Cache tau misidentification scale factor 
+    float fTauMisIDSF;
     /// Anti-isolated tau collection after pasisng all selections but not passing isolation
     std::vector<Tau> fAntiIsolatedTaus;
     /// Cache Rtau value to save time
     float fRtauAntiIsolatedTau;
     /// Cache anti-isolated tau genuine tau status for selected tau (to avoid crashes for data)
     bool fIsGenuineTauAntiIsolatedTau;
+    /// Cache anti-isolated tau misidentification scale factor 
+    float fAntiIsolatedTauMisIDSF;
   };
   
   // Main class
@@ -91,7 +102,12 @@ private:
   bool passNprongsCut(const Tau& tau) const;
   bool passIsolationDiscriminator(const Tau& tau) const { return tau.isolationDiscriminator(); }
   bool passRtauCut(const Tau& tau) const { return tau.rtau() > fTauRtauCut; }
-
+  std::vector<TauMisIDRegionType> assignTauMisIDSFRegion(const ParameterSet& config, const std::string& label) const;
+  std::vector<float> assignTauMisIDSFValue(const ParameterSet& config, const std::string& label) const;
+  void setTauMisIDSFValue(Data& data);
+  float setTauMisIDSFValueHelper(const Tau& tau);
+  bool tauMisIDSFBelongsToRegion(TauMisIDRegionType region, double eta);
+  
   // Input parameters (discriminators handled in Dataformat/src/Event.cc)
   const bool bApplyTriggerMatching;
   const float fTriggerTauMatchingCone;
@@ -100,6 +116,13 @@ private:
   const float fTauLdgTrkPtCut;
   const int fTauNprongs;
   const float fTauRtauCut;
+  // tau misidentification SF
+  std::vector<TauMisIDRegionType> fEToTauMisIDSFRegion;
+  std::vector<float> fEToTauMisIDSFValue;
+  std::vector<TauMisIDRegionType> fMuToTauMisIDSFRegion;
+  std::vector<float> fMuToTauMisIDSFValue;
+  std::vector<TauMisIDRegionType> fJetToTauMisIDSFRegion;
+  std::vector<float> fJetToTauMisIDSFValue;
   
   // Event counter for passing selection
   Count cPassedTauSelection;

@@ -16,8 +16,10 @@
 TauSelection::Data::Data() 
 : fRtau(-1.0),
   fIsGenuineTau(false),
+  fTauMisIDSF(1.0),
   fRtauAntiIsolatedTau(-1.0),
-  fIsGenuineTauAntiIsolatedTau(false)
+  fIsGenuineTauAntiIsolatedTau(false),
+  fAntiIsolatedTauMisIDSF(1.0)
 { }
 
 TauSelection::Data::~Data() { }
@@ -43,6 +45,13 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
   fTauNprongs(config.getParameter<int>("prongs")),
   fTauRtauCut(config.getParameter<float>("rtau")),
+  // tau misidentification SF
+  fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
+  fEToTauMisIDSFValue(assignTauMisIDSFValue(config, "E")),
+  fMuToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Mu")),
+  fMuToTauMisIDSFValue(assignTauMisIDSFValue(config, "Mu")),
+  fJetToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Jet")),
+  fJetToTauMisIDSFValue(assignTauMisIDSFValue(config, "Jet")),
   // Event counter for passing selection
   cPassedTauSelection(eventCounter.addCounter("passed tau selection ("+postfix+")")),
   cPassedTauSelectionMultipleTaus(eventCounter.addCounter("multiple selected taus ("+postfix+")")),
@@ -107,6 +116,7 @@ TauSelection::Data TauSelection::analyze(const Event& event) {
 
 TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   Data output;
+ 
   cSubAll.increment();
   bool passedTriggerMatching = false;
   bool passedDecayMode = false;
@@ -228,6 +238,8 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
       fCommonPlots->fillControlPlotsAfterAntiIsolatedTauSelection(event, output);
     }
   }
+  // Set tau misidentification SF value to data object
+  setTauMisIDSFValue(output);
   
   // Fill counters
   if (passedTriggerMatching)
@@ -295,4 +307,75 @@ bool TauSelection::passNprongsCut(const Tau& tau) const {
     }
   }
   return true;
+}
+
+std::vector<TauSelection::TauMisIDRegionType> TauSelection::assignTauMisIDSFRegion(const ParameterSet& config, const std::string& label) const{
+  std::vector<TauMisIDRegionType> result;
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrelSF"))
+    result.push_back(kBarrel);
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauEndcapSF"))
+    result.push_back(kEndcap);
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauSF"))
+    result.push_back(kFullCoverage);
+  if (!result.size())
+    throw hplus::Exception("config") << "Could not found " << label << "->tau misID SF in config!";
+  return result;
+}
+
+std::vector<float> TauSelection::assignTauMisIDSFValue(const ParameterSet& config, const std::string& label) const {
+  std::vector<float> result;
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauBarrelSF"))
+    result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauBarrelSF"));
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauEndcapSF"))
+    result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauEndcapSF"));
+  if (config.getParameterOptional<float>("tauMisidetification"+label+"ToTauSF"))
+    result.push_back(config.getParameter<float>("tauMisidetification"+label+"ToTauSF"));
+  if (!result.size())
+    throw hplus::Exception("config") << "Could not found " << label << "->tau misID SF in config!";
+  return result;
+}
+
+void TauSelection::setTauMisIDSFValue(Data& data) {
+  if (data.hasIdentifiedTaus()) {
+    if (!data.isGenuineTau()) {
+      data.fTauMisIDSF = setTauMisIDSFValueHelper(data.getSelectedTau());
+    }
+  }
+  if (data.hasAntiIsolatedTaus()) {
+    if (!data.getAntiIsolatedTauIsGenuineTau()) {
+      data.fAntiIsolatedTauMisIDSF = setTauMisIDSFValueHelper(data.getAntiIsolatedTau());
+    }
+  }
+}
+
+float TauSelection::setTauMisIDSFValueHelper(const Tau& tau) {
+  double eta = tau.eta();
+  if (tau.isElectronToTau()) {
+    for (size_t i = 0; i < fEToTauMisIDSFRegion.size(); ++i) {
+      if (tauMisIDSFBelongsToRegion(fEToTauMisIDSFRegion[i], eta))
+        return fEToTauMisIDSFValue[i];
+    }
+  } else if (tau.isMuonToTau()) {
+    for (size_t i = 0; i < fMuToTauMisIDSFRegion.size(); ++i) {
+      if (tauMisIDSFBelongsToRegion(fMuToTauMisIDSFRegion[i], eta))
+        return fMuToTauMisIDSFValue[i];
+    }
+  } else if (tau.isJetToTau()) {
+    for (size_t i = 0; i < fJetToTauMisIDSFRegion.size(); ++i) {
+      if (tauMisIDSFBelongsToRegion(fJetToTauMisIDSFRegion[i], eta))
+        return fJetToTauMisIDSFValue[i];
+    }
+  }
+  return 1.0;
+}
+
+bool TauSelection::tauMisIDSFBelongsToRegion(TauMisIDRegionType region, double eta) {
+  if (region == kFullCoverage)
+    return true;
+  else if (region == kBarrel)
+    return std::abs(eta) < 1.5;
+  else if (region == kEndcap)
+    return std::abs(eta) > 1.5;
+  // never reached
+  return false;
 }
