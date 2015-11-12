@@ -60,7 +60,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         ),
     ),
     EventInfo = cms.PSet(
-	PileupSummaryInfoSrc = cms.InputTag("addPileupInfo"),
+	PileupSummaryInfoSrc = cms.InputTag("slimmedAddPileupInfo"),
 	LHESrc = cms.untracked.InputTag("externalLHEProducer"),
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
     ),

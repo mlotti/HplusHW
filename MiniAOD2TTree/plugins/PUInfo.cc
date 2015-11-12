@@ -60,7 +60,6 @@ void PUInfo::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
       w = -1.0;
     }
   }
-  
   edm::Handle<std::vector<PileupSummaryInfo> > hpileup;
     iEvent.getByToken(puSummaryToken, hpileup);
     if(hpileup.isValid()) {
