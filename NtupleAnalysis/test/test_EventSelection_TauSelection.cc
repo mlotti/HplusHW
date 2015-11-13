@@ -155,6 +155,16 @@ TEST_CASE("TauSelection", "[EventSelection]") {
   nevent = 7; // anti-isolation
   muDiscr = std::vector<bool>{true, true, true, true, true, true, true, true};
   isolDiscr = std::vector<bool>{false, false, false, false, false, true, false, true};
+  tree->Fill(); 
+  nevent = 8; // e->tau
+  isolDiscr = std::vector<bool>{true, false, false, false, true, true, false, true};
+  mcPdgId = std::vector<short>{11,    11,    11,    11,    11,    11,    11,   11};
+  tree->Fill();
+  nevent = 9; // mu->tau
+  mcPdgId = std::vector<short>{13,    13,    13,    13,    13,    13,    13,   13};
+  tree->Fill();
+  nevent = 10; // jet->tau
+  mcPdgId = std::vector<short>{2,    2,    2,    2,    2,    2,    2,   2};
   tree->Fill();
   
   
@@ -489,6 +499,11 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     CHECK ( data.getSelectedTaus()[3].pt() == 11. ); 
   }
   SECTION("tau mis-ID SF (non-configured)") {
+    tmp.put("TauSelection.applyTriggerMatching", true);
+    tmp.put("TauSelection.tauPtCut", -41.0);
+    tmp.put("TauSelection.tauEtaCut", 12.1);
+    tmp.put("TauSelection.tauLdgTrkPtCut", 0.0);
+    tmp.put("TauSelection.prongs", -1);
     ParameterSet newPset(tmp,true);
     TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
                         ec, histoWrapper, commonPlotsPointer, "misIDSF");
@@ -497,10 +512,132 @@ TEST_CASE("TauSelection", "[EventSelection]") {
     event2.setupBranches(mgr);
     mgr.setEntry(1);
     TauSelection::Data data = tausel.silentAnalyze(event2);
-    REQUIRE( data.getSelectedTaus() );
-    REQUIRE( data.getTauMisIDSF() == 1.0 );
-
-    
+    REQUIRE( data.hasIdentifiedTaus() );
+    CHECK( data.getTauMisIDSF() == 1.0 );
+    CHECK( data.getAntiIsolatedTauMisIDSF() == 1.0 );
+  }
+  SECTION("tau mis-ID SF (etotau1)") {
+    tmp.put("TauSelection.applyTriggerMatching", true);
+    tmp.put("TauSelection.tauPtCut", -41.0);
+    tmp.put("TauSelection.tauEtaCut", 12.1);
+    tmp.put("TauSelection.tauLdgTrkPtCut", 0.0);
+    tmp.put("TauSelection.prongs", -1);
+    tmp.put("TauSelection.tauMisidetificationEToTauSF", 0.1);
+    ParameterSet newPset(tmp,true);
+    TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "misIDSF");
+    tausel.bookHistograms(f);
+    Event event2(newPset);
+    event2.setupBranches(mgr);
+    mgr.setEntry(7);
+    TauSelection::Data data = tausel.silentAnalyze(event2);
+    REQUIRE( data.hasIdentifiedTaus() );
+    CHECK( data.getSelectedTau().pdgId() == 11 );
+    CHECK( data.getTauMisIDSF() == Approx(0.1) );
+    CHECK( data.getAntiIsolatedTauMisIDSF() == Approx(0.1) );
+  }
+  SECTION("tau mis-ID SF (etotau2)") {
+    tmp.put("TauSelection.applyTriggerMatching", true);
+    tmp.put("TauSelection.tauPtCut", -41.0);
+    tmp.put("TauSelection.tauEtaCut", 12.1);
+    tmp.put("TauSelection.tauLdgTrkPtCut", 0.0);
+    tmp.put("TauSelection.prongs", -1);
+    tmp.put("TauSelection.tauMisidetificationEToTauBarrelSF", 0.1);
+    tmp.put("TauSelection.tauMisidetificationEToTauEndcapSF", 0.5);
+    ParameterSet newPset(tmp,true);
+    TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "misIDSF");
+    tausel.bookHistograms(f);
+    Event event2(newPset);
+    event2.setupBranches(mgr);
+    mgr.setEntry(7);
+    TauSelection::Data data = tausel.silentAnalyze(event2);
+    REQUIRE( data.hasIdentifiedTaus() );
+    CHECK( data.getSelectedTau().pdgId() == 11 );
+    CHECK( data.getTauMisIDSF() == Approx(0.1) );
+    CHECK( data.getAntiIsolatedTauMisIDSF() == Approx(0.1) );
+  }
+  SECTION("tau mis-ID SF (mutotau1)") {
+    tmp.put("TauSelection.applyTriggerMatching", true);
+    tmp.put("TauSelection.tauPtCut", -41.0);
+    tmp.put("TauSelection.tauEtaCut", 12.1);
+    tmp.put("TauSelection.tauLdgTrkPtCut", 0.0);
+    tmp.put("TauSelection.prongs", -1);
+    tmp.put("TauSelection.tauMisidetificationMuToTauSF", 0.1);
+    ParameterSet newPset(tmp,true);
+    TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "misIDSF");
+    tausel.bookHistograms(f);
+    Event event2(newPset);
+    event2.setupBranches(mgr);
+    mgr.setEntry(8);
+    TauSelection::Data data = tausel.silentAnalyze(event2);
+    REQUIRE( data.hasIdentifiedTaus() );
+    CHECK( data.getSelectedTau().pdgId() == 13 );
+    CHECK( data.getTauMisIDSF() == Approx(0.1) );
+    CHECK( data.getAntiIsolatedTauMisIDSF() == Approx(0.1) );
+  }
+  SECTION("tau mis-ID SF (mutotau2)") {
+    tmp.put("TauSelection.applyTriggerMatching", true);
+    tmp.put("TauSelection.tauPtCut", -41.0);
+    tmp.put("TauSelection.tauEtaCut", 12.1);
+    tmp.put("TauSelection.tauLdgTrkPtCut", 0.0);
+    tmp.put("TauSelection.prongs", -1);
+    tmp.put("TauSelection.tauMisidetificationMuToTauBarrelSF", 0.1);
+    tmp.put("TauSelection.tauMisidetificationMuToTauEndcapSF", 0.5);
+    ParameterSet newPset(tmp,true);
+    TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "misIDSF");
+    tausel.bookHistograms(f);
+    Event event2(newPset);
+    event2.setupBranches(mgr);
+    mgr.setEntry(8);
+    TauSelection::Data data = tausel.silentAnalyze(event2);
+    REQUIRE( data.hasIdentifiedTaus() );
+    CHECK( data.getSelectedTau().pdgId() == 13 );
+    CHECK( data.getTauMisIDSF() == Approx(0.1) );
+    CHECK( data.getAntiIsolatedTauMisIDSF() == Approx(0.1) );
+  }
+  SECTION("tau mis-ID SF (jettotau1)") {
+    tmp.put("TauSelection.applyTriggerMatching", true);
+    tmp.put("TauSelection.tauPtCut", -41.0);
+    tmp.put("TauSelection.tauEtaCut", 12.1);
+    tmp.put("TauSelection.tauLdgTrkPtCut", 0.0);
+    tmp.put("TauSelection.prongs", -1);
+    tmp.put("TauSelection.tauMisidetificationJetToTauSF", 0.1);
+    ParameterSet newPset(tmp,true);
+    TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "misIDSF");
+    tausel.bookHistograms(f);
+    Event event2(newPset);
+    event2.setupBranches(mgr);
+    mgr.setEntry(9);
+    TauSelection::Data data = tausel.silentAnalyze(event2);
+    REQUIRE( data.hasIdentifiedTaus() );
+    CHECK( data.getSelectedTau().pdgId() == 2 );
+    CHECK( data.getTauMisIDSF() == Approx(0.1) );
+    CHECK( data.getAntiIsolatedTauMisIDSF() == Approx(0.1) );
+  }
+  SECTION("tau mis-ID SF (jettotau2)") {
+    tmp.put("TauSelection.applyTriggerMatching", true);
+    tmp.put("TauSelection.tauPtCut", -41.0);
+    tmp.put("TauSelection.tauEtaCut", 12.1);
+    tmp.put("TauSelection.tauLdgTrkPtCut", 0.0);
+    tmp.put("TauSelection.prongs", -1);
+    tmp.put("TauSelection.tauMisidetificationJetToTauBarrelSF", 0.1);
+    tmp.put("TauSelection.tauMisidetificationJetToTauEndcapSF", 0.5);
+    ParameterSet newPset(tmp,true);
+    TauSelection tausel(newPset.getParameter<ParameterSet>("TauSelection"),
+                        ec, histoWrapper, commonPlotsPointer, "misIDSF");
+    tausel.bookHistograms(f);
+    Event event2(newPset);
+    event2.setupBranches(mgr);
+    mgr.setEntry(9);
+    TauSelection::Data data = tausel.silentAnalyze(event2);
+    REQUIRE( data.hasIdentifiedTaus() );
+    CHECK( data.getSelectedTau().pdgId() == 2 );
+    CHECK( data.getTauMisIDSF() == Approx(0.1) );
+    CHECK( data.getAntiIsolatedTauMisIDSF() == Approx(0.1) );
   }
   SECTION("protection for double counting of events") {
     tmp.put("TauSelection.applyTriggerMatching", true);
