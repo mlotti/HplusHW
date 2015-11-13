@@ -25,6 +25,7 @@ tauLegDatasets.extend(datasetsMiniAODv2_DY)
 tauLegDatasets.extend(datasetsMiniAODv2_Top)
 tauLegDatasets.extend(datasetsMiniAODv2_WJets)
 tauLegDatasets.extend(datasetsMiniAODv2_QCDMuEnriched)
+#tauLegDatasets.extend(datasetsMiniAODv1_H125)
                                                                                                                                                          
 metLegDatasets         = []
 #metLegDatasets.append(Dataset('/TT_Tune4C_13TeV-pythia8-tauola/bluj-TTbar_MiniAOD_GRunV47_v2-6b3acb073896b48a28b982ccc80b3330/USER','phys03'))

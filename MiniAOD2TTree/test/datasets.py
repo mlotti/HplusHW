@@ -54,6 +54,12 @@ datasetsMiniAODv2_DY.append(Dataset('/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_1
 datasetsMiniAODv2_DY.append(Dataset('/DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v2/MINIAODSIM'))
 datasetsMiniAODv2_DY.append(Dataset('/DYJetsToLL_M-50_HT-600toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'))
 
+datasetsMiniAODv1_H125 = []                                                                                                                                                                                                              
+datasetsMiniAODv1_H125.append(Dataset('/GluGluHToTauTau_M125_13TeV_powheg_pythia8/manzoni-RunIISpring15DR74-AsymptFlat10to50bx25Raw_MCRUN2_74_V9-v1_25ns14e33_HLT_v4p0_L1_v5_1oct15-9aee7f6aa9ee774a3ecb4dd6367feac8/USER',dbs='phys03'))
+
+datasetsMiniAODv2_H125 = []
+datasetsMiniAODv2_H125.append(Dataset('/GluGluHToTauTau_M125_13TeV_powheg_pythia8/bluj-crab_GGHToTauTau_HLTfrozen2015-25ns14e33-v4p4-v2_MiniAODv2_v1-096c4eb4d31e5f979893d55253665f08/USER',dbs='phys03'))
+
 datasetsMiniAODv2_Diboson = []
 datasetsMiniAODv2_Diboson.append(Dataset('/WW_TuneCUETP8M1_13TeV-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'))
 datasetsMiniAODv2_Diboson.append(Dataset('/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'))
