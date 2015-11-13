@@ -141,6 +141,9 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
   if (!tauData.hasIdentifiedTaus())
     return;
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
+  }
 
 //====== Electron veto
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);

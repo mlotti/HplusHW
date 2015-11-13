@@ -139,7 +139,7 @@ void SignalAnalysis::process(Long64_t entry) {
   
 //====== Fake tau SF
   if (fEvent.isMC()) {
-    // FIXME: code for applying the SF is currently missing
+    fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
     cFakeTauSFCounter.increment();
   }
 

@@ -239,8 +239,10 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     }
   }
   // Set tau misidentification SF value to data object
-  setTauMisIDSFValue(output);
-  
+  if (event.isMC()) {
+    setTauMisIDSFValue(output);
+  }
+
   // Fill counters
   if (passedTriggerMatching)
     cSubPassedTriggerMatching.increment();

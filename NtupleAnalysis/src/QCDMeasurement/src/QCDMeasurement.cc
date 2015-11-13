@@ -275,7 +275,7 @@ void QCDMeasurement::process(Long64_t entry) {
       fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
       // Apply fake tau SF
       if (fEvent.isMC()) {
-        // FIXME: code for applying the SF is currently missing
+        fEventWeight.multiplyWeight(tauData.getAntiIsolatedTauMisIDSF());
         cBaselineTauFakeTauSFCounter.increment();
       }
       // Apply tau trigger SF
@@ -293,7 +293,7 @@ void QCDMeasurement::process(Long64_t entry) {
       fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
       // Apply fake tau SF
       if (fEvent.isMC()) {
-        // FIXME: code for applying the SF is currently missing
+        fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
         cInvertedTauFakeTauSFCounter.increment();
       }
       // Apply tau trigger SF
