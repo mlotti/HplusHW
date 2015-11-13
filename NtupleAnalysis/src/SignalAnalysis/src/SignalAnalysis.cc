@@ -144,8 +144,10 @@ void SignalAnalysis::process(Long64_t entry) {
   }
 
 //====== Tau trigger SF
-  // FIXME: code for applying the SF is currently missing
-  cTauTriggerSFCounter.increment();
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
+    cTauTriggerSFCounter.increment();
+  }
   
 //====== Electron veto
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);

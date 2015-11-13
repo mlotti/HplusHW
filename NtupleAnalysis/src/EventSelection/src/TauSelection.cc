@@ -17,9 +17,11 @@ TauSelection::Data::Data()
 : fRtau(-1.0),
   fIsGenuineTau(false),
   fTauMisIDSF(1.0),
+  fTauTriggerSF(1.0),
   fRtauAntiIsolatedTau(-1.0),
   fIsGenuineTauAntiIsolatedTau(false),
-  fAntiIsolatedTauMisIDSF(1.0)
+  fAntiIsolatedTauMisIDSF(1.0),
+  fAntiIsolatedTauTriggerSF(1.0)
 { }
 
 TauSelection::Data::~Data() { }
@@ -52,6 +54,8 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fMuToTauMisIDSFValue(assignTauMisIDSFValue(config, "Mu")),
   fJetToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Jet")),
   fJetToTauMisIDSFValue(assignTauMisIDSFValue(config, "Jet")),
+  // tau trigger SF
+  fTauTriggerSFReader(config.getParameter<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
   cPassedTauSelection(eventCounter.addCounter("passed tau selection ("+postfix+")")),
   cPassedTauSelectionMultipleTaus(eventCounter.addCounter("multiple selected taus ("+postfix+")")),
@@ -241,6 +245,15 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
   // Set tau misidentification SF value to data object
   if (event.isMC()) {
     setTauMisIDSFValue(output);
+  }
+  // Set tau trigger SF value to data object
+  if (event.isMC()) {
+    if (output.hasIdentifiedTaus()) {
+      output.fTauTriggerSF = fTauTriggerSFReader.getScaleFactorValue(output.getSelectedTau().pt());
+    }
+    if (output.hasAntiIsolatedTaus()) {
+      output.fAntiIsolatedTauTriggerSF = fTauTriggerSFReader.getScaleFactorValue(output.getAntiIsolatedTau().pt());
+    }
   }
 
   // Fill counters

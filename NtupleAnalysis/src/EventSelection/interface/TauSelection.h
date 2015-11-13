@@ -5,6 +5,7 @@
 #include "EventSelection/interface/BaseSelection.h"
 #include "DataFormat/interface/Tau.h"
 #include "Framework/interface/EventCounter.h"
+#include "Framework/interface/GenericScaleFactor.h"
 
 #include <string>
 #include <vector>
@@ -46,6 +47,7 @@ public:
     const bool isGenuineTau() const { return fIsGenuineTau; }
     const size_t getFakeTauID() const { return getSelectedTau().pdgId(); } // For codes see MiniAOD2TTree/interface/NtupleAnalysis_fwd.h
     const float getTauMisIDSF() const { return fTauMisIDSF; }
+    const float getTauTriggerSF() const { return fTauTriggerSF; }
     
     // Getters for anti-isolated taus (i.e. passed other cuts but not isolation)
     const bool isAntiIsolated() const { return !hasIdentifiedTaus(); }
@@ -56,6 +58,7 @@ public:
     const bool getAntiIsolatedTauIsGenuineTau() const { return fIsGenuineTauAntiIsolatedTau; }
     const size_t getAntiIsolatedFakeTauID() const { return getAntiIsolatedTau().pdgId(); } // For codes see MiniAOD2TTree/interface/NtupleAnalysis_fwd.h
     const float getAntiIsolatedTauMisIDSF() const { return fAntiIsolatedTauMisIDSF; }
+    const float getAntiIsolatedTauTriggerSF() const { return fAntiIsolatedTauTriggerSF; }
     
     friend class TauSelection;
 
@@ -68,6 +71,8 @@ public:
     bool fIsGenuineTau;
     /// Cache tau misidentification scale factor 
     float fTauMisIDSF;
+    /// Cache for tau trigger SF
+    float fTauTriggerSF;
     /// Anti-isolated tau collection after pasisng all selections but not passing isolation
     std::vector<Tau> fAntiIsolatedTaus;
     /// Cache Rtau value to save time
@@ -76,6 +81,8 @@ public:
     bool fIsGenuineTauAntiIsolatedTau;
     /// Cache anti-isolated tau misidentification scale factor 
     float fAntiIsolatedTauMisIDSF;
+    /// Cache for anti-isolated tau trigger SF
+    float fAntiIsolatedTauTriggerSF;
   };
   
   // Main class
@@ -123,6 +130,8 @@ private:
   std::vector<float> fMuToTauMisIDSFValue;
   std::vector<TauMisIDRegionType> fJetToTauMisIDSFRegion;
   std::vector<float> fJetToTauMisIDSFValue;
+  // tau trigger SF
+  GenericScaleFactor fTauTriggerSFReader;
   
   // Event counter for passing selection
   Count cPassedTauSelection;
