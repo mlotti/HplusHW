@@ -75,7 +75,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         ),
     ),
     EventInfo = cms.PSet(
-	PileupSummaryInfoSrc = cms.InputTag("addPileupInfo"),
+        PileupSummaryInfoSrc = process.PUInfo.PileupSummaryInfoSrc, 
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
     ),
     Trigger = cms.PSet(
