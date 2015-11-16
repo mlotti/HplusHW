@@ -61,9 +61,9 @@ def _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber):
 # \param direction         "nominal, "up", "down"
 def assignTauTriggerSF(tauSelectionPset, direction):
     binLeftEdges = [50, 60, 70, 80, 100]
-    scaleFactors = [1.0, 1.0, 1.0, 1.0, 1.0]
-    scaleFactorsUp = [1.0, 1.0, 1.0, 1.0, 1.0]
-    scaleFactorsDown = [1.0, 1.0, 1.0, 1.0, 1.0]
+    scaleFactors = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    scaleFactorsUp = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    scaleFactorsDown = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
     _assingSF(binLeftEdges, scaleFactors, scaleFactorsUp, scaleFactorsDown, tauSelectionPset, direction)
 
 ##===== MET trigger SF
@@ -84,7 +84,7 @@ def _assingSF(binEdges, SF, SFup, SFdown, pset, direction):
         myScaleFactors = SFup[:]
     elif direction == "down":
         myScaleFactors = SFdown[:]
-    tauSelectionPset.tauTriggerSF = PSet(
+    pset.tauTriggerSF = PSet(
         binLeftEdges = binEdges[:],
         scaleFactors = myScaleFactors
     )
