@@ -3865,6 +3865,18 @@ class DatasetPrecursor:
                 self._pileup = pileup
             else:
                 self._pileup.Add(pileup)
+            
+            # Obtain nAllEvents
+            self._nAllEvents = 0.0
+            counters = aux.Get(rf, "configInfo/SkimCounter")
+            if counters != None:
+                if counters.GetNbinsX() > 0:
+                    if not "All" in counters.GetXaxis().GetBinLabel(1):
+                        raise Exception("Error: The first bin of the counters histogram should be the all events bin!")
+                    self._nAllEvents = counters.GetBinContent(1)
+            if self._nAllEvents == 0.0:
+                print "Warning (DatasetPrecursor): N(allEvents) = 0 !!!"
+                
 
         if self._dataVersion is None:
             self._isData = False
@@ -3898,6 +3910,9 @@ class DatasetPrecursor:
 
     def getPileUp(self):
         return self._pileup
+
+    def getNAllEvents(self):
+        return self._nAllEvents
 
     ## Close the ROOT files
     def close(self):

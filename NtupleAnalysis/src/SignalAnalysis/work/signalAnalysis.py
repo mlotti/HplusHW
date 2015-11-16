@@ -47,7 +47,7 @@ builder = AnalysisBuilder("SignalAnalysis",
                           searchModes,
                           #### Options ####
                           #doSystematicVariations=True,
-                          usePUreweighting=False
+                          usePUreweighting=True
                           )
 #builder.addVariation()
 builder.build(process, allSelections)

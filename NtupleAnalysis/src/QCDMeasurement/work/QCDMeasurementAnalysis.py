@@ -28,7 +28,7 @@ builder = AnalysisBuilder("QCDMeasurement",
                           dataEras,
                           searchModes,
                           #### Options ####
-                          #doSystematicVariations=True,
+                          doSystematicVariations=True,
                           )
 #builder.addVariation()
 builder.build(process, allSelections)
