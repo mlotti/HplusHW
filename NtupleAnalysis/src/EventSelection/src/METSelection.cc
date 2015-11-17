@@ -94,8 +94,8 @@ METSelection::Data METSelection::privateAnalyze(const Event& iEvent, int nVertic
     return output;
   
   //=== Apply cut on MET significance
-  // (!fMETSignificanceCut.passedCut(iEvent.met().significance())) // FIXME uncomment when significance exists
-  //    return output;
+  if (!fMETSignificanceCut.passedCut(iEvent.met().significance()))
+    return output;
   
   //=== Passed MET selection
   output.bPassedSelection = true;
