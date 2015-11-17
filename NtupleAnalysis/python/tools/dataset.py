@@ -3834,6 +3834,7 @@ class DatasetPrecursor:
         self._rootFiles = []
         self._dataVersion = None
         self._pileup = None
+        self._nAllEvents = 0.0
 
         for name in self._filenames:
             rf = ROOT.TFile.Open(name)
@@ -3854,29 +3855,29 @@ class DatasetPrecursor:
                 if self._dataVersion != dv.GetTitle():
                     raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
 
-            pileup = aux.Get(rf, "pileup")
-            if pileup == None:
-                pileup = aux.Get(rf, "configInfo/pileup")
+            isTree = aux.Get(rf, "Events") != None
+            if isTree:
+                pileup = aux.Get(rf, "pileup")
                 if pileup == None:
-                    print "Unable to find 'pileup' or 'configInfo/pileup' from ROOT file '%s'" % name
-                    continue
-
-            if self._pileup is None:
-                self._pileup = pileup
-            else:
-                self._pileup.Add(pileup)
+                    pileup = aux.Get(rf, "configInfo/pileup")
+                    if pileup == None:
+                        print "Unable to find 'pileup' or 'configInfo/pileup' from ROOT file '%s'" % name
+                if self._pileup is None:
+                    if pileup != None:
+                        self._pileup = pileup
+                else:
+                    self._pileup.Add(pileup)
             
             # Obtain nAllEvents
-            self._nAllEvents = 0.0
-            counters = aux.Get(rf, "configInfo/SkimCounter")
-            if counters != None:
-                if counters.GetNbinsX() > 0:
-                    if not "All" in counters.GetXaxis().GetBinLabel(1):
-                        raise Exception("Error: The first bin of the counters histogram should be the all events bin!")
-                    self._nAllEvents = counters.GetBinContent(1)
-            if self._nAllEvents == 0.0:
-                print "Warning (DatasetPrecursor): N(allEvents) = 0 !!!"
-                
+            if isTree:
+                counters = aux.Get(rf, "configInfo/SkimCounter")
+                if counters != None:
+                    if counters.GetNbinsX() > 0:
+                        if not "All" in counters.GetXaxis().GetBinLabel(1):
+                            raise Exception("Error: The first bin of the counters histogram should be the all events bin!")
+                        self._nAllEvents += counters.GetBinContent(1)
+                if self._nAllEvents == 0.0:
+                    print "Warning (DatasetPrecursor): N(allEvents) = 0 !!!"
 
         if self._dataVersion is None:
             self._isData = False
