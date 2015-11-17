@@ -20,6 +20,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as crosssection
 
+_debugNAllEvents = False
 
 # era name -> list of era parts in data dataset names
 _dataEras = {
@@ -502,7 +503,10 @@ def _rescaleInfo(d):
 
     ret = {}
     for k, v in d.iteritems():
-        ret[k] = v*factor
+        if k in ["isPileupReweighted"]:
+            ret[k] = v
+        else:
+            ret[k] = v*factor
 
     return ret
 
@@ -2453,7 +2457,7 @@ class Dataset:
             for name in content:
                 if name not in dictionary:
                     dictionary[name] = aux.Get(tdirectory, name).GetTitle()
-
+        
         for f in self.files:
             if not f.IsOpen():
                 raise Exception("File %s of dataset %s has been closed! Maybe this Dataset has been removed without 'close=False'?" % (f.GetName(), self.name))
@@ -2548,7 +2552,6 @@ class Dataset:
         if "isPileupReweighted" in self.info and self.info["isPileupReweighted"]:
             #print "%s: is pileup-reweighted, calling updateNAllEventsToPUWeighted()" % self.name
             self.updateNAllEventsToPUWeighted()
-
 
         # Set cross section, if MC and we know the energy
         if self.isMC() and setCrossSectionAutomatically:
@@ -2889,43 +2892,50 @@ class Dataset:
     # If \a topPtWeightType is not given in \a kwargs, read the value
     # from analysis directory -specific configInfo
     def updateNAllEventsToPUWeighted(self, era=None, **kwargs):
-        print "*** Cowardly refusing to update N(allEvents) to PU weighted (needs to be updated to the new system) ***"
-        return
-        
         # Ignore if not MC
         if not self.isMC():
             return
+        # Look at configInfo
+        if not "isPileupReweighted" in self.info.keys():
+            raise Exception("Key 'isPileupReweighted' missing in configinfo histogram!")
+        if self.info["isPileupReweighted"] > 0.0:
+            delta = (self.info["isPileupReweighted"] - self.nAllEvents) / self.nAllEvents
+            if _debugNAllEvents and abs(delta) > 0.00001:
+                print "dataset (%s): Updated NAllEvents to pileUpReweighted NAllEvents, change: %0.6f %%"%(self.getName(), delta*100.0)
+            self.nAllEvents = self.info["isPileupReweighted"]
+        # FIXME: Add here NAllEvents update for top pt reweighting 
+        
+        # old 2012 code:
+        #if era == None:
+            #era = self._dataEra
+        #if era == None:
+            #raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.rawName)
 
-        if era == None:
-            era = self._dataEra
-        if era == None:
-            raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.rawName)
+        #if self.nAllEventsUnweighted < 0:
+            
 
-        if self.nAllEventsUnweighted < 0:
-            raise Exception("Number of all unweighted events is %d < 0, this is a symptom of missing unweighted counter" % self.nAllEventsUnweighted)
+        #args = {}
+        #args.update(kwargs)
+        #if "pileupReweightType" not in kwargs and "pileupReweightType" in self.info:
+            #args["weightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["pileupReweightType"]]
 
-        args = {}
-        args.update(kwargs)
-        if "pileupReweightType" not in kwargs and "pileupReweightType" in self.info:
-            args["weightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["pileupReweightType"]]
-
-        if "topPtReweightScheme" in self.info:
-            if "topPtWeightType" not in kwargs:
-                args["topPtWeightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["topPtReweightType"]]
-            try:
-                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, self.info["topPtReweightScheme"], **args)
-            except KeyError:
-                # Just ignore if no weights found for this dataset
-                pass
-            print "Using top-pt reweighted Nallevents for sample %s" % self.name
-        else:
-            if "topPtWeightType" in args:
-                del args["topPtWeightType"]
-            try:
-                self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, **args)
-            except KeyError:
-                # Just ignore if no weights found for this dataset
-                pass
+        #if "topPtReweightScheme" in self.info:
+            #if "topPtWeightType" not in kwargs:
+                #args["topPtWeightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["topPtReweightType"]]
+            #try:
+                #self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, self.info["topPtReweightScheme"], **args)
+            #except KeyError:
+                ## Just ignore if no weights found for this dataset
+                #pass
+            #print "Using top-pt reweighted Nallevents for sample %s" % self.name
+        #else:
+            #if "topPtWeightType" in args:
+                #del args["topPtWeightType"]
+            #try:
+                #self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, **args)
+            #except KeyError:
+                ## Just ignore if no weights found for this dataset
+                #pass
 
     def getNAllEvents(self):
         if not hasattr(self, "nAllEvents"):
@@ -3739,9 +3749,8 @@ class DatasetManager:
     #
     # Uses the table pileupReweightedAllEvents._weightedAllEvents
     def updateNAllEventsToPUWeighted(self, **kwargs):
-        print "*** Cowardly refusing to update N(allEvents) to PU weighted (no longer necessary) ***"
-        #for dataset in self.datasets:
-        #    dataset.updateNAllEventsToPUWeighted(**kwargs)
+        for dataset in self.datasets:
+            dataset.updateNAllEventsToPUWeighted(**kwargs)
         #self.printInfo()
 
 
