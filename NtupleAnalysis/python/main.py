@@ -142,12 +142,13 @@ class DataVersion:
         return self._isMC() and "S10" in self._version
 
 class Dataset:
-    def __init__(self, name, files, dataVersion, lumiFile, pileup):
+    def __init__(self, name, files, dataVersion, lumiFile, pileup, nAllEvents):
         self._name = name
         self._files = files
         self._dataVersion = DataVersion(dataVersion)
         self._lumiFile = lumiFile
         self._pileup = pileup
+        self._nAllEvents = nAllEvents
 
     def getName(self):
         return self._name
@@ -163,6 +164,9 @@ class Dataset:
 
     def getPileUp(self):
         return self._pileup
+      
+    def getNAllEvents(self):
+        return self._nAllEvents
 
 class Process:
     def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents=-1):
@@ -185,8 +189,9 @@ class Process:
         if dataVersion is None:
             dataVersion = prec.getDataVersion()
         pileUp = prec.getPileUp()
+        nAllEvents = prec.getNAllEvents()
         prec.close()
-        self._datasets.append( Dataset(name, files, dataVersion, lumiFile, pileUp) )
+        self._datasets.append( Dataset(name, files, dataVersion, lumiFile, pileUp, nAllEvents) )
 
     def addDatasets(self, names): # no explicit files possible here
         for name in names:
@@ -313,6 +318,7 @@ class Process:
             nanalyzers = 0
             anames = []
             usePUweights = False
+            nAllEventsPUWeighted = 0.0
             for aname, analyzerIE in self._analyzers.iteritems():
                 if analyzerIE.runForDataset_(dset.getName()):
                     nanalyzers += 1
@@ -325,6 +331,7 @@ class Process:
                             raise Exception("Analyzer %s was specified as a function, but returned object of %s instead of Analyzer" % (aname, analyzer.__class__.__name__))
 
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
+                    # Pileup reweighting
                     if dset.getDataVersion().isMC():
                         if aname in hPUs.keys():
                             if _debugPUreweighting:
@@ -341,6 +348,8 @@ class Process:
                         if dset.getPileUp() == None:
                             raise Exception("Error: pileup spectrum is missing from dataset! Please switch to using newest multicrab!")
                         hPUMC = dset.getPileUp().Clone()
+                        if hPUMC.GetNbinsX() != hPUs[aname].GetNbinsX():
+                            raise Exception("Pileup histogram dimension mismatch! data nPU has %d bins and MC nPU has %d bins"%(hPUs[aname].GetNbinsX(), hPUMC.GetNbinsX()))
                         hPUMC.SetName("PileUpMC")
                         if _debugPUreweighting:
                             for k in range(hPUMC.GetNbinsX()):
@@ -348,6 +357,12 @@ class Process:
                         inputList.Add(hPUMC)
                         if analyzer.exists("usePileupWeights"):
                             usePUweights = analyzer.__getattr__("usePileupWeights")
+                            if hPUs[aname].Integral() > 0.0:
+                                factor = hPUMC.Integral() / hPUs[aname].Integral()
+                                for k in range(0, hPUMC.GetNbinsX()+2):
+                                    if hPUMC.GetBinContent(k) > 0.0:
+                                        w = hPUs[aname].GetBinContent(k) / hPUMC.GetBinContent(k) * factor
+                                        nAllEventsPUWeighted += w * hPUMC.GetBinContent(k)
                     anames.append(aname)
             if nanalyzers == 0:
                 print "Skipping %s, no analyzers" % dset.getName()
@@ -427,9 +442,8 @@ class Process:
                 if not dset.getDataVersion().isMC():
                     cinfo.SetBinContent(n+1, cinfo.GetBinContent(1))
                 # Add "isPileupReweighted" column
-                
-                # FIXME: add code
-                
+                if usePUweights:
+                    cinfo.SetBinContent(n+2, nAllEventsPUWeighted)
                 # Write
                 cinfo.Write()
                 fIN.Close()

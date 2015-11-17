@@ -43,13 +43,9 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
 //    std::vector<std::string> selectedTriggers;
 
     for(size_t i = 0; i < triggerBits.size(); ++i){
-        std::regex hlt_re(triggerBits[i]);
-        std::vector<std::string> hltPaths = hltConfig.triggerNames();
-        for(size_t j = 0; j < hltPaths.size(); ++j){
-            if (std::regex_search(hltPaths[j], hlt_re)) {
-                selectedTriggers.push_back(hltPaths[j]);
-            }
-        }
+        selectedTriggers.push_back(triggerBits[i]);
+        // Do not find the exact names or versions of HLT path names
+        // because they do change in the middle of the run causing buggy behavior
     }
 
     iBit         = new bool[selectedTriggers.size()];
@@ -57,7 +53,7 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
     iCountPassed = new int[selectedTriggers.size()];
 
     for(size_t i = 0; i < selectedTriggers.size(); ++i){
-        theTree->Branch(selectedTriggers[i].c_str(),&iBit[i]);
+        theTree->Branch(std::string(selectedTriggers[i]+"x").c_str(),&iBit[i]);
         iCountAll[i]    = 0;
         iCountPassed[i] = 0;
     }
@@ -107,21 +103,18 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     edm::Handle<edm::TriggerResults> trgResultsHandle;
     iEvent.getByToken(trgResultsToken, trgResultsHandle);
     if(trgResultsHandle.isValid()){
-//        const edm::TriggerNames &names = iEvent.triggerNames(*trgResultsHandle);
 	names = iEvent.triggerNames(*trgResultsHandle);
 
         for(size_t i = 0; i < selectedTriggers.size(); ++i){
             iBit[i] = false;
-            std::regex hlt_re(selectedTriggers[i]);
-            int n = 0;
             for(size_t j = 0; j < trgResultsHandle->size(); ++j){
-                if (std::regex_search(names.triggerName(j), hlt_re)) {
-                    iBit[i] = trgResultsHandle->accept(n);
+                size_t pos = names.triggerName(j).find(selectedTriggers[i]);
+                if (pos == 0 && names.triggerName(j).size() > 0) {
+                    iBit[i] = trgResultsHandle->accept(j);
                     iCountAll[i] += 1;
-                    if(trgResultsHandle->accept(n)) iCountPassed[i] += 1;
+                    if(trgResultsHandle->accept(j)) iCountPassed[i] += 1;
                     continue;
                 }
-                n++;
             }
         }
 

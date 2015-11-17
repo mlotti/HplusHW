@@ -279,8 +279,10 @@ void QCDMeasurement::process(Long64_t entry) {
         cBaselineTauFakeTauSFCounter.increment();
       }
       // Apply tau trigger SF
-      // FIXME: code for applying the SF is currently missing
-      cBaselineTauTauTriggerSFCounter.increment();
+      if (fEvent.isMC()) {
+        fEventWeight.multiplyWeight(tauData.getAntiIsolatedTauTriggerSF());
+        cBaselineTauTauTriggerSFCounter.increment();
+      }
       // Do rest of event selection
       doInvertedAnalysis(fEvent, tauData.getAntiIsolatedTau(), nVertices, tauData.getAntiIsolatedTauIsGenuineTau());
     }
@@ -297,8 +299,10 @@ void QCDMeasurement::process(Long64_t entry) {
         cInvertedTauFakeTauSFCounter.increment();
       }
       // Apply tau trigger SF
-      // FIXME: code for applying the SF is currently missing
-      cInvertedTauTauTriggerSFCounter.increment();
+      if (fEvent.isMC()) {
+        fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
+        cInvertedTauTauTriggerSFCounter.increment();
+      }
       // Do rest of event selection
       doBaselineAnalysis(fEvent, tauData.getSelectedTau(), nVertices, tauData.isGenuineTau());
     }

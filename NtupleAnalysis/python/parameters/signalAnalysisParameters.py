@@ -47,7 +47,8 @@ tauSelection = PSet(
 scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
-print tauSelection
+# tau trigger SF
+scaleFactors.assignTauTriggerSF(tauSelection, "nominal")
 
 #====== Electron veto
 eVeto = PSet(

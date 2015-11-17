@@ -57,7 +57,7 @@ public:
   float_type et() const { return p2().R(); }
   float_type Phi() const { return p2().Phi(); }
   float_type phi() const { return p2().Phi(); }
-  float_type significance() const { return fSignificance; }
+  float_type significance() const { return fSignificance->value(); }
 
   XYVector p2() const {
     return XYVector(x(), y());

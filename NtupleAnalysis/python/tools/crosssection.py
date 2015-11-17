@@ -177,28 +177,28 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WJetsToLNu", {
             "13": 20508.9*3, # [13] 20508.9*3
             }),
-    CrossSection("WJetsToLNu_HT100To200", {
+    CrossSection("WJetsToLNu_HT_100To200", {
             "13": 1.293e+03, # [15] Cross-section after matching
             }),
-    CrossSection("WJetsToLNu_HT200To400", {
+    CrossSection("WJetsToLNu_HT_200To400", {
             "13": 3.86e+02, # [15] Cross-section after matching
             }),
-    CrossSection("WJetsToLNu_HT400To600", {
+    CrossSection("WJetsToLNu_HT_400To600", {
             "13": 47.9, # [15] Cross-section after matching
             }),
-    CrossSection("WJetsToLNu_HT600ToInf", {
+    CrossSection("WJetsToLNu_HT_600ToInf", {
             "13": 0.0, # Forcing to zero to avoid overlap
             }),
-    CrossSection("WJetsToLNu_HT600To800", {
+    CrossSection("WJetsToLNu_HT_600To800", {
             "13": 12.8, # [15] Cross-section after matching
             }),
-    CrossSection("WJetsToLNu_HT800To1200", {
+    CrossSection("WJetsToLNu_HT_800To1200", {
             "13": 5.26, # [15] Cross-section after matching
             }),
-    CrossSection("WJetsToLNu_HT1200To2500", {
+    CrossSection("WJetsToLNu_HT_1200To2500", {
             "13": 1.33, # [15] Cross-section after matching
             }),
-    CrossSection("WJetsToLNu_HT2500ToInf", {
+    CrossSection("WJetsToLNu_HT_2500ToInf", {
             "13": 3.089e-02, # [15] Cross-section after matching
             }),
     # PREP (LO) cross sections, for W+NJets weighting
@@ -223,41 +223,53 @@ backgroundCrossSections = CrossSectionList(
             "8": 214.0,
             }),
     # end W+Njets 
-    CrossSection("DYJetsToLL_M50", {
+    CrossSection("DYJetsToLL_M_50", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
             "13": 5.940e+03 # [14]
             }),
-    CrossSection("DYJetsToLL_M10to50", {
+    CrossSection("DYJetsToLL_M_50_HT_100to200", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M_50_HT_200to400", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M_50_HT_400to600", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M_50_HT_600toInf", {
+            "13": 0.0, # FIXME
+            }),
+    CrossSection("DYJetsToLL_M_10to50", {
             "7": 9611.0, # [1]
             "8": 11050.0, # [1]
             "13": 1.870e+04, # [14]
             }),
-    CrossSection("DYJetsToLL_M100to200", {
+    CrossSection("DYJetsToLL_M_100to200", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M200to400", {
+    CrossSection("DYJetsToLL_M_200to400", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M400to500", {
+    CrossSection("DYJetsToLL_M_400to500", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M500to700", {
+    CrossSection("DYJetsToLL_M_500to700", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M700to800", {
+    CrossSection("DYJetsToLL_M_700to800", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M800to1000", {
+    CrossSection("DYJetsToLL_M_800to1000", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M1000to1500", {
+    CrossSection("DYJetsToLL_M_1000to1500", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M1500to2000", {
+    CrossSection("DYJetsToLL_M_1500to2000", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M2000to3000", {
+    CrossSection("DYJetsToLL_M_2000to3000", {
             "13": 0.0, # FIXME
             }),
     CrossSection("DYToTauTau_M_20_", {
@@ -324,13 +336,13 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("ST_tW_top_5f_inclusiveDecays", {
             "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
-    CrossSection("ST_tchannel_antitop_4f_leptonDecays", {
+    CrossSection("ST_t_channel_antitop_4f_leptonDecays", {
             "13": 80.95, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
-    CrossSection("ST_tchannel_top_4f_leptonDecays", {
+    CrossSection("ST_t_channel_top_4f_leptonDecays", {
             "13": 136.02, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
-    CrossSection("ST_schannel_4f_leptonDecays", {
+    CrossSection("ST_s_channel_4f_leptonDecays", {
             "13": 10.32, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
 )

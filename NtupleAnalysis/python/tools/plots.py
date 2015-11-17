@@ -94,10 +94,10 @@ _physicalToLogical = {
     #"W3Jets_TuneZ2_v2_Fall11": "W3Jets",
 }
 for mass in _lightHplusMasses:
-    _physicalToLogical["ChargedHiggs_TTToHplusBWB_HplusToTauNu_M%d"%(mass)] = "TTToHplusBWB_M%d"%mass
+    _physicalToLogical["ChargedHiggs_TTToHplusBWB_HplusToTauNu_M_%d"%(mass)] = "TTToHplusBWB_M%d"%mass
 
 for mass in _heavyHplusMasses:
-    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M%d"%(mass)] = "HplusTB_M%d"%mass
+    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M_%d"%(mass)] = "HplusTB_M%d"%mass
 
 #for mass in _heavyHplusToTBbarMasses:
     #_physicalToLogical["HplusToTBbar_M%d_%s"%(mass, mcEra)] = "HplusToTBbar_M%d" % mass
@@ -113,16 +113,16 @@ _physicalToLogical.update({
     #"W2Jets": "W2Jets",
     #"W3Jets": "W3Jets",
     #"W4Jets": "W4Jets",
-    "WJetsToLNu_HT100To200": "WJetsToLNu_HT100To200",
-    "WJetsToLNu_HT200To400": "WJetsToLNu_HT200To400",
-    "WJetsToLNu_HT400To600": "WJetsToLNu_HT400To600",
-    "WJetsToLNu_HT600To800": "WJetsToLNu_HT600To800",
-    "WJetsToLNu_HT800To1200": "WJetsToLNu_HT800To1200",
-    "WJetsToLNu_HT1200To2500": "WJetsToLNu_HT1200To2500",
-    "WJetsToLNu_HT2500ToInf": "WJetsToLNu_HT2500ToInf",
+    "WJetsToLNu_HT_100To200": "WJetsToLNu_HT_100To200",
+    "WJetsToLNu_HT_200To400": "WJetsToLNu_HT_200To400",
+    "WJetsToLNu_HT_400To600": "WJetsToLNu_HT_400To600",
+    "WJetsToLNu_HT_600To800": "WJetsToLNu_HT_600To800",
+    "WJetsToLNu_HT_800To1200": "WJetsToLNu_HT_800To1200",
+    "WJetsToLNu_HT_1200To2500": "WJetsToLNu_HT_1200To2500",
+    "WJetsToLNu_HT_2500ToInf": "WJetsToLNu_HT_2500ToInf",
     
-    "DYJetsToLL_M50":      "DYJetsToLL_M50",
-    "DYJetsToLL_M10to50":  "DYJetsToLL_M10to50",
+    "DYJetsToLL_M_50":      "DYJetsToLL_M_50",
+    "DYJetsToLL_M_10to50":  "DYJetsToLL_M_10to50",
 
     "QCD_Pt_30to50":   "QCD_Pt_30to50",
     "QCD_Pt_50to80":   "QCD_Pt_50to80",
@@ -177,9 +177,9 @@ _datasetMerge = {
     "QCD_Pt_2400to3200": "QCD",
     "QCD_Pt_3200toInf": "QCD",
 
-    "ST_schannel_4f_leptonDecays": "SingleTop",
-    "ST_tchannel_antitop_4f_leptonDecays": "SingleTop",
-    "ST_tchannel_top_4f_leptonDecays": "SingleTop",
+    "ST_s_channel_4f_leptonDecays": "SingleTop",
+    "ST_t_channel_antitop_4f_leptonDecays": "SingleTop",
+    "ST_t_channel_top_4f_leptonDecays": "SingleTop",
     "ST_tW_antitop_5f_inclusiveDecays": "SingleTop",
     "ST_tW_top_5f_inclusiveDecays": "SingleTop",
 
@@ -193,17 +193,17 @@ _datasetMerge = {
     #"W2Jets": "WJets",
     #"W3Jets": "WJets",
     #"W4Jets": "WJets",
-    "WJetsToLNu_HT100To200": "WJetsHT",
-    "WJetsToLNu_HT200To400": "WJetsHT",
-    "WJetsToLNu_HT400To600": "WJetsHT",
-    "WJetsToLNu_HT600To800": "WJetsHT",
-    "WJetsToLNu_HT800To1200": "WJetsHT",
-    "WJetsToLNu_HT1200To2500": "WJetsHT",
-    "WJetsToLNu_HT2500ToInf": "WJetsHT",
+    "WJetsToLNu_HT_100To200": "WJetsHT",
+    "WJetsToLNu_HT_200To400": "WJetsHT",
+    "WJetsToLNu_HT_400To600": "WJetsHT",
+    "WJetsToLNu_HT_600To800": "WJetsHT",
+    "WJetsToLNu_HT_800To1200": "WJetsHT",
+    "WJetsToLNu_HT_1200To2500": "WJetsHT",
+    "WJetsToLNu_HT_2500ToInf": "WJetsHT",
 
 
-    "DYJetsToLL_M10to50": "DYJetsToLL",
-    "DYJetsToLL_M50": "DYJetsToLL",
+    "DYJetsToLL_M_10to50": "DYJetsToLL",
+    "DYJetsToLL_M_50": "DYJetsToLL",
 
     "WW": "Diboson",
     "WZ": "Diboson",
