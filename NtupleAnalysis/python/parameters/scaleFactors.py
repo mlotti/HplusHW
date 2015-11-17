@@ -7,7 +7,8 @@ from HiggsAnalysis.NtupleAnalysis.main import PSet
 # Both are supplied as config parameters, but the type (2) SF's are accessed 
 # via GenericScaleFactor c++ class, which causes some naming scheme rules
 
-##===== Tau misidentification
+
+##===== Tau misidentification (simple SF)
 # \param tauSelectionPset  the tau config PSet
 # \param partonFakingTau   "eToTau", "muToTau", "jetToTau"
 # \param etaRegion         "barrel", "endcap"
@@ -16,7 +17,7 @@ def assignTauMisidentificationSF(tauSelectionPset, partonFakingTau, etaRegion, d
     if not etaRegion in ["barrel", "endcap", "full"]:
         raise Exception("Error: unknown option for eta region('%s')!"%etaRegion)
     if not direction in ["nominal", "up", "down"]:
-        raise Exception("Error: unknown option for direction('%s')!"%etaRegion)
+        raise Exception("Error: unknown option for direction('%s')!"%direction)
     dirNumber = 0
     if direction == "up":
         dirNumber = 1
@@ -54,4 +55,39 @@ def _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber):
         tauSelectionPset.tauMisidetificationJetToTauEndcapSF = 1.0 + dirNumber*0.20
     elif etaRegion == "full":
         tauSelectionPset.tauMisidetificationJetToTauSF = 1.0 + dirNumber*0.20
-  
+
+##===== tau trigger SF (SF as function of pT)
+# \param tauSelectionPset  the tau config PSet
+# \param direction         "nominal, "up", "down"
+def assignTauTriggerSF(tauSelectionPset, direction):
+    binLeftEdges = [50, 60, 70, 80, 100]
+    scaleFactors = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    scaleFactorsUp = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    scaleFactorsDown = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    _assingSF(binLeftEdges, scaleFactors, scaleFactorsUp, scaleFactorsDown, tauSelectionPset, direction)
+
+##===== MET trigger SF
+
+
+##===== Btag SF 
+
+
+##===== Top pT SF
+
+
+
+def _assingSF(binEdges, SF, SFup, SFdown, pset, direction):
+    if not direction in ["nominal", "up", "down"]:
+        raise Exception("Error: unknown option for SF direction('%s')!"%direction)
+    myScaleFactors = SF[:]
+    if direction == "up":
+        myScaleFactors = SFup[:]
+    elif direction == "down":
+        myScaleFactors = SFdown[:]
+    pset.tauTriggerSF = PSet(
+        binLeftEdges = binEdges[:],
+        scaleFactors = myScaleFactors
+    )
+
+
+

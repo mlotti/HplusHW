@@ -143,6 +143,7 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
     return;
   if (fEvent.isMC()) {
     fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
+    fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
   }
 
 //====== Electron veto

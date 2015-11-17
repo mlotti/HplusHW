@@ -245,31 +245,31 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("DYJetsToLL_M_50_HT_600toInf", {
             "13": 2.201e+00, # [14]
             }),
-    CrossSection("DYJetsToLL_M100to200", {
+    CrossSection("DYJetsToLL_M_100to200", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M200to400", {
+    CrossSection("DYJetsToLL_M_200to400", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M400to500", {
+    CrossSection("DYJetsToLL_M_400to500", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M500to700", {
+    CrossSection("DYJetsToLL_M_500to700", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M700to800", {
+    CrossSection("DYJetsToLL_M_700to800", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M800to1000", {
+    CrossSection("DYJetsToLL_M_800to1000", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M1000to1500", {
+    CrossSection("DYJetsToLL_M_1000to1500", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M1500to2000", {
+    CrossSection("DYJetsToLL_M_1500to2000", {
             "13": 0.0, # FIXME
             }),
-    CrossSection("DYJetsToLL_M2000to3000", {
+    CrossSection("DYJetsToLL_M_2000to3000", {
             "13": 0.0, # FIXME
             }),
     CrossSection("DYToTauTau_M_20_", {

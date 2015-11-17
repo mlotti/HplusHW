@@ -35,12 +35,11 @@ class AnalysisConfig:
                         partonFakingTau = "muToTau"
                     elif "Jet" in value:
                         partonFakingTau = "jetToTau"
-                    direction = None
-                    if value.endswith("Plus"):
-                        direction = "up"
-                    elif value.endswith("Minus"):
-                        direction = "down"
-                    scaleFactors.assignTauMisidentificationSF(self._config.TauSelection, partonFakingTau, etaRegion, direction)
+                    scaleFactors.assignTauMisidentificationSF(self._config.TauSelection, 
+                                                              partonFakingTau, etaRegion, 
+                                                              self._getDirectionString(value))
+		elif value.startswith("TauTrgEff"):
+                    scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value))
 		else:
 		    if value != "nominal":
                         raise Exception("Error: unsupported variation item '%s'!"%value)
@@ -66,6 +65,15 @@ class AnalysisConfig:
     ## Create and register the analysis after the changes have bene done to the config
     def registerAnalysis(self, process):
         process.addAnalyzer(self._moduleName, Analyzer(self._selectorName, config=self._config, silent=True))
+
+    ## Convert value string into direction string
+    def _getDirectionString(self, value):
+        direction = None
+        if value.endswith("Plus"):
+            direction = "up"
+        elif value.endswith("Minus"):
+            direction = "down"
+        return direction
     
 ## Class for building analyses
 class AnalysisBuilder:
@@ -98,7 +106,7 @@ class AnalysisBuilder:
           if doSystematicVariations:
               items = []
               # Trigger systematics
-              #items.extend(["TauTrgDataEff", "TauTrgMCEff"])
+              #items.extend(["TauTrgEff"]) # 2012 ["TauTrgDataEff", "TauTrgMCEff"]
               #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
               #items.extend(["METTrgDataEff", "METTrgMCEff"])
               # Tau ID variation systematics

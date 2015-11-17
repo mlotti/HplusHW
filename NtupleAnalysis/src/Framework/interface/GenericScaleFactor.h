@@ -12,10 +12,10 @@ public:
   GenericScaleFactor(const ParameterSet& config);
   ~GenericScaleFactor();
 
-  /// Returns scale factor value for an input value of a distribution
+  /// Returns scale factor value for an input value of a 1D-distribution
   float getScaleFactorValue(const float value) const;
-  /// Sets the up or down variation (name needs to end with Up or Down)
-  void setVariation(std::string name);
+  // Add support for 2D SF's if necessary
+  //float getScaleFactorValue(const float value, const float value) const;
   
 private:
   /// Helper function for finding appropriate bin
@@ -26,12 +26,6 @@ private:
   std::vector<float> fBinLeftEdges;
   /// Container for scale factor values
   std::vector<float> fScaleFactors;
-  /// Container for scale factor value for up variation
-  std::vector<float> fScaleFactorsUpVariation;
-  /// Container for scale factor value for down variation
-  std::vector<float> fScaleFactorsDownVariation;
-  /// Pointer to container to be used
-  std::vector<float>* fActualSF;
 };
 
 #endif
