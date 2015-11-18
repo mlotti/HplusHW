@@ -45,6 +45,7 @@ TEST_CASE("METSelection", "[EventSelection]") {
   unsigned long long nevent;  tree->Branch("event", &nevent);
   double type1METx;           tree->Branch("MET_Type1_x", &type1METx);
   double type1METy;           tree->Branch("MET_Type1_y", &type1METy);
+  double type1METsignif;      tree->Branch("MET_Type1_significance", &type1METsignif);
   short nPU;                  tree->Branch("nGoodOfflineVertices", &nPU);
   
   run = 1;
@@ -52,6 +53,7 @@ TEST_CASE("METSelection", "[EventSelection]") {
   nevent = 1;
   type1METx = 32.61220;
   type1METy = 83.88352;
+  type1METsignif = 10.0;
   nPU = 1;
   tree->Fill();
   nevent = 2;
@@ -64,6 +66,9 @@ TEST_CASE("METSelection", "[EventSelection]") {
   type1METy = -20.620055;
   nPU = 30;
   tree->Fill();  
+  nevent = 4;
+  type1METsignif = -10.0;
+  tree->Fill();
   BranchManager mgr;
   mgr.setTree(tree);
   Event event(pset);
@@ -102,6 +107,16 @@ TEST_CASE("METSelection", "[EventSelection]") {
     CHECK( data.getMET().R() == Approx(40.0) );
     CHECK( data.getMET().Phi() == Approx(-2.6) );
   }
+  
+  SECTION("MET significance") {
+    mgr.setEntry(0);
+    METSelection::Data data = metsel.analyze(event, event.vertexInfo().value());
+    CHECK( data.passedSelection() == true );
+    mgr.setEntry(3);
+    data = metsel.analyze(event, event.vertexInfo().value());
+    CHECK( data.passedSelection() == false );
+  }
+  
   SECTION("protection for double counting of events") {
     mgr.setEntry(0);
     METSelection metsel2(pset.getParameter<ParameterSet>("METSelection"),

@@ -72,6 +72,7 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   std::vector<float> trge;    tree->Branch("HLTTau_e", &trge);
   double type1METx;          tree->Branch("MET_Type1_x", &type1METx);
   double type1METy;         tree->Branch("MET_Type1_y", &type1METy);
+  double type1METsignif;      tree->Branch("MET_Type1_significance", &type1METsignif);
   short nPU;                    tree->Branch("nGoodOfflineVertices", &nPU);
 
   run = 1;
@@ -95,6 +96,7 @@ TEST_CASE("TransverseMass", "[EventSelection]") {
   decayMode = std::vector<int>{1, 1, 1, 1, 1, 1, 1, 1};
   type1METx = 32.61220;
   type1METy = 83.883512;
+  type1METsignif = 10.0;
   nPU = 1;
   tree->Fill();
   nevent = 2; // fail btag discriminator
