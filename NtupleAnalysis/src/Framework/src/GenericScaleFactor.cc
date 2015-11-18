@@ -2,17 +2,22 @@
 #include "Framework/interface/ParameterSet.h"
 #include "Framework/interface/Exception.h"
 
-GenericScaleFactor::GenericScaleFactor(const ParameterSet& config)
-: fBinLeftEdges(config.getParameter<std::vector<float>>("binLeftEdges")),
-  fScaleFactors(config.getParameter<std::vector<float>>("scaleFactors")) {
+GenericScaleFactor::GenericScaleFactor(boost::optional<ParameterSet> config) {
+  if (config) {
+    fBinLeftEdges = (*config).getParameter<std::vector<float>>("binLeftEdges");
+    fScaleFactors = (*config).getParameter<std::vector<float>>("scaleFactors");
+  }
   // Sanity checks
-  if (fBinLeftEdges.size()+1 != fScaleFactors.size())
+  if (fBinLeftEdges.size()+1 != fScaleFactors.size() && fScaleFactors.size())
     throw hplus::Exception("config") << "Bin left edges needs to have one less entry than the scale factor vector!";
 }
 
 GenericScaleFactor::~GenericScaleFactor() {}
 
 float GenericScaleFactor::getScaleFactorValue(const float value) const {
+  if (!fScaleFactors.size())
+    return 1.0;
+  
   // Find bin
   size_t bin = findBin(value);
   // Return scale factor value

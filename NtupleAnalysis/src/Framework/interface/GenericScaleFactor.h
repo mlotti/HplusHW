@@ -2,6 +2,8 @@
 #ifndef Framework_GenericScaleFactor_h
 #define Framework_GenericScaleFactor_h
 
+#include "boost/optional.hpp"
+
 #include <vector>
 #include <string>
 
@@ -9,7 +11,7 @@ class ParameterSet;
 
 class GenericScaleFactor {
 public:
-  GenericScaleFactor(const ParameterSet& config);
+  GenericScaleFactor(boost::optional<ParameterSet> config);
   ~GenericScaleFactor();
 
   /// Returns scale factor value for an input value of a 1D-distribution

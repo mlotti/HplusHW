@@ -55,7 +55,7 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fJetToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Jet")),
   fJetToTauMisIDSFValue(assignTauMisIDSFValue(config, "Jet")),
   // tau trigger SF
-  fTauTriggerSFReader(config.getParameter<ParameterSet>("tauTriggerSF")),
+  fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
   cPassedTauSelection(eventCounter.addCounter("passed tau selection ("+postfix+")")),
   cPassedTauSelectionMultipleTaus(eventCounter.addCounter("multiple selected taus ("+postfix+")")),
