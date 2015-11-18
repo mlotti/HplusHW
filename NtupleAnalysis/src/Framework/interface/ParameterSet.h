@@ -136,7 +136,7 @@ namespace ParameterSetImpl {
       if(child) {
         return to_vector(*child);
       }
-      std::cout << "Config: Config element '" << name << "' not found in the parameter set, using empty value!" << std::endl;
+      //std::cout << "Config: Config element '" << name << "' not found in the parameter set, using empty value!" << std::endl;
       return res;
     }
 
@@ -172,7 +172,7 @@ namespace ParameterSetImpl {
       boost::optional<const boost::property_tree::ptree&> child = config.get_child_optional(name);
       if(child)
         return ParameterSet(*child);
-      std::cout << "Config: Config element '" << name << "' not found in the parameter set, using empty value!" << std::endl;
+      //std::cout << "Config: Config element '" << name << "' not found in the parameter set, using empty value!" << std::endl;
       return res;
     }
 
