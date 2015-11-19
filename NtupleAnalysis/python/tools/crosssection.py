@@ -175,31 +175,31 @@ backgroundCrossSections = CrossSectionList(
             #"8": 36703.2, # [9], NNLO
             #}),
     CrossSection("WJetsToLNu", {
-            "13": 20508.9*3, # [13] 20508.9*3
+            "13": 20508.9*3, # [13] 20508.9*3, McM for the MLM dataset: 5.069e4
             }),
     CrossSection("WJetsToLNu_HT_100To200", {
-            "13": 1.293e+03, # [15] Cross-section after matching
+            "13": 1.293e+03*1.2138, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("WJetsToLNu_HT_200To400", {
-            "13": 3.86e+02, # [15] Cross-section after matching
+            "13": 3.86e+02*1.2138, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("WJetsToLNu_HT_400To600", {
-            "13": 47.9, # [15] Cross-section after matching
+            "13": 47.9*1.2138, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("WJetsToLNu_HT_600ToInf", {
             "13": 0.0, # Forcing to zero to avoid overlap
             }),
     CrossSection("WJetsToLNu_HT_600To800", {
-            "13": 12.8, # [15] Cross-section after matching
+            "13": 12.8*1.2138, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("WJetsToLNu_HT_800To1200", {
-            "13": 5.26, # [15] Cross-section after matching
+            "13": 5.26*1.2138, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("WJetsToLNu_HT_1200To2500", {
-            "13": 1.33, # [15] Cross-section after matching
+            "13": 1.33*1.2138, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("WJetsToLNu_HT_2500ToInf", {
-            "13": 3.089e-02, # [15] Cross-section after matching
+            "13": 3.089e-02*1.2138, # McM times NNLO/LO ratio of inclusive sample
             }),
     # PREP (LO) cross sections, for W+NJets weighting
     CrossSection("PREP_WJets", {
@@ -226,24 +226,24 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("DYJetsToLL_M_50", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
-            "13": 5.940e+03 # [14]
+            "13": 2008.4*3.0 # [14]
             }),
     CrossSection("DYJetsToLL_M_50_HT_100to200", {
-            "13": 0.0, # FIXME
+            "13": 139.4*1.231, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("DYJetsToLL_M_50_HT_200to400", {
-            "13": 0.0, # FIXME
+            "13": 42.75*1.231, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("DYJetsToLL_M_50_HT_400to600", {
-            "13": 0.0, # FIXME
+            "13": 5.497*1.231, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("DYJetsToLL_M_50_HT_600toInf", {
-            "13": 0.0, # FIXME
+            "13": 2.21*1.231, # McM times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("DYJetsToLL_M_10to50", {
             "7": 9611.0, # [1]
             "8": 11050.0, # [1]
-            "13": 1.870e+04, # [14]
+            "13": 3205.6*3.0, # [14]
             }),
     CrossSection("DYJetsToLL_M_100to200", {
             "13": 0.0, # FIXME

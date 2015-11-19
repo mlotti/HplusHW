@@ -123,7 +123,11 @@ _physicalToLogical.update({
     
     "DYJetsToLL_M_50":      "DYJetsToLL_M_50",
     "DYJetsToLL_M_10to50":  "DYJetsToLL_M_10to50",
-
+    "DYJetsToLL_M_50_HT_100to200": "DYJetsToLL_M_50_HT_100to200",
+    "DYJetsToLL_M_50_HT_200to400": "DYJetsToLL_M_50_HT_200to400",
+    "DYJetsToLL_M_50_HT_400to600": "DYJetsToLL_M_50_HT_400to600",
+    "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLL_M_50_HT_600toInf",
+    
     "QCD_Pt_30to50":   "QCD_Pt_30to50",
     "QCD_Pt_50to80":   "QCD_Pt_50to80",
     "QCD_Pt_80to120":  "QCD_Pt_80to120",
@@ -201,9 +205,12 @@ _datasetMerge = {
     "WJetsToLNu_HT_1200To2500": "WJetsHT",
     "WJetsToLNu_HT_2500ToInf": "WJetsHT",
 
-
     "DYJetsToLL_M_10to50": "DYJetsToLL",
     "DYJetsToLL_M_50": "DYJetsToLL",
+    "DYJetsToLL_M_50_HT_100to200": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_200to400": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_400to600": "DYJetsToLLHT",
+    "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLLHT",
 
     "WW": "Diboson",
     "WZ": "Diboson",
@@ -236,6 +243,7 @@ _datasetOrder.extend([
     "TTJets",
     "TT",
     "DYJetsToLL",
+    "DYJetsToLLHT",
     "SingleTop",
     "Diboson",
 ])
@@ -278,6 +286,7 @@ _legendLabels = {
 
 #    "DYJetsToLL":            "DY+jets",
     "DYJetsToLL":            "Z/#gamma*+jets",
+    "DYJetsToLLHT":            "Z/#gamma*+jets",
     "QCD_Pt20_MuEnriched":   "QCD (#mu enr.), #hat{p}_{T} > 20",
 
     "SingleTop":             "Single t",
@@ -335,6 +344,7 @@ _plotStyles = {
     "QCDdata":               styles.qcdStyle,
 
     "DYJetsToLL":            styles.dyStyle,
+    "DYJetsToLLHT":          styles.dyStyle,
     "QCD_Pt20_MuEnriched":   styles.qcdStyle,
     "SingleTop":             styles.stStyle,
     "Diboson":               styles.dibStyle,
