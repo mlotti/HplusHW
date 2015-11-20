@@ -295,7 +295,12 @@ def main(opts, args):
                 print "Task %s, skipping job %s: %s" % (d, f, str(e))
                 exit_match = exit_re.search(f)
                 if exit_match:
-                    exitCodes.append(exit_match.group("exitcode"))
+                    exitCodes.append(int(exit_match.group("exitcode")))
+
+        if opts.test:
+            if len(exitCodes) > 0:
+                print "        jobs with problems:",sorted(exitCodes)
+            continue
 
         if len(files) == 0:
             print "Task %s, skipping, no files to merge" % d
@@ -303,11 +308,6 @@ def main(opts, args):
         for f in files:
             if not os.path.isfile(f):
                 raise Exception("File %s is marked as output file in the  CMSSW_N.stdout, but does not exist" % f)
-
-        if opts.test:
-            if len(exitCodes) > 0:
-		print "        tasks with problems:",exitCodes
-            continue
 
         filesSplit = splitFiles(files, opts.filesPerMerge)
         if len(filesSplit) == 1:
