@@ -21,6 +21,7 @@ class TauLegSelection : public BaseSelection {
   WrappedTH1 *hTauPt;
   WrappedTH1 *hInvM;
   WrappedTH1 *hMt;
+  WrappedTH1 *hNjets;
 
   Count cTauLegAll;
   Count cTauLegMu;
@@ -47,6 +48,7 @@ void TauLegSelection::bookHistograms(TDirectory* dir){
   hTauPt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "taupt", "taupt", 200, 0, 200.0);
   hInvM  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "InvMass", "InvMass", 200, 0, 200.0);
   hMt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Mt", "Mt", 200, 0, 200.0);
+  hNjets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Njets", "Njets", 10, 0, 10);
 }
 
 void TauLegSelection::print(){
@@ -99,12 +101,15 @@ bool TauLegSelection::offlineSelection(Event& fEvent, bool pu){
   if(pu) xvariable = fEvent.vertexInfo().value();
   if(!pu) hTauPt->Fill(selectedTau->pt());
 
+  if(fEvent.isMC() && fabs(selectedTau->pdgId()) == 15) mcmatch = true;
+  //if(fEvent.isMC())  std::cout << "check tau mc match " << selectedTau->pdgId() << std::endl;
   cTauLegTau.increment();
 
   double muTauInvMass = (selectedMuon->p4() + selectedTau->p4()).M();
   if(!pu) hInvM->Fill(muTauInvMass);
   //  std::cout << "check muTauInvMass " << selectedMuon->pt() << " " << selectedTau->pt() << " " << muTauInvMass << std::endl;
-  if(!(muTauInvMass < 80)) return false;
+  //  if(!(muTauInvMass < 80)) return false;
+  //  if(!(muTauInvMass < 100)) return false; // 80 -> 100 because of H125 sample. 23112015/S.Lehti
   
   cTauLegInvMass.increment();
 
@@ -113,6 +118,18 @@ bool TauLegSelection::offlineSelection(Event& fEvent, bool pu){
   if(!(muMetMt < 40)) return false;
 
   cTauLegMt.increment();
+
+  size_t njets = 0;
+  for(Jet jet: fEvent.jets()) {
+    double deltaR = ROOT::Math::VectorUtil::DeltaR(jet.p4(),selectedTau->p4());
+    if(deltaR < 0.5) continue;
+    if(!(jet.pt() > 30)) continue;
+    //    if(!jet.PUIDtight()) continue;
+    ++njets;
+  }
+  //  std::cout << "check njets " << fEvent.jets().size() << " " << njets << std::endl;
+  hNjets->Fill(njets);
+  if(njets > 2) return false;
 
   //bool selected = false;
   //  if(ntaus > 0 && nmuons > 0 && muTauInvMass < 80 && muMetMt < 40) selected = true;
@@ -124,4 +141,5 @@ bool TauLegSelection::offlineSelection(Event& fEvent, bool pu){
 bool TauLegSelection::onlineSelection(Event& fEvent){
   return fEvent.configurableTriggerDecision2();
 }
+
 #endif
