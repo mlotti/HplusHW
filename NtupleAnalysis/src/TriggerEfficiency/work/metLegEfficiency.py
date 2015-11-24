@@ -45,13 +45,13 @@ def runRange(era):
 
     if era == "2015D":
         lumi = 1
-        runmin = 253888
-        runmax = 256869
+        runmin = 256629
+        runmax = 260627
 
     if era == "2015CD":
         lumi = 1
         runmin = 253888
-        runmax = 258159
+        runmax = 260627
 
     if lumi == 0:
         print "Unknown era",era,"exiting.."
@@ -101,9 +101,11 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
                                 "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v10"]
         if era == "2015C" or era == "2015D" or era == "2015CD":
             a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1",
-                                   "HLT_LooseIsoPFTau50_Trk30_eta2p1_v2"]
+                                   "HLT_LooseIsoPFTau50_Trk30_eta2p1_v2",
+                                   "HLT_LooseIsoPFTau50_Trk30_eta2p1_v3"]
             a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_JetIdCleaned_v1",
-                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_JetIdCleaned_v2"]
+                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_JetIdCleaned_v2",
+                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1"]
 
         lumi,runmin,runmax = runRange(era)
         a.lumi    = lumi
@@ -131,8 +133,8 @@ def addAnalyzer(era,onlineSelection):
 #addAnalyzer("2012D")
 #addAnalyzer("2012ABCD_CaloMET")
 #addAnalyzer("2015D","MET80")
-addAnalyzer("2015CD","MET80")
-addAnalyzer("2015CD_CaloMET","MET80")
+addAnalyzer("2015D","MET80")
+addAnalyzer("2015D_CaloMET","MET80")
 #addAnalyzer("2015A","MET120")
 #addAnalyzer("2015A_CaloMET","MET120")
 
