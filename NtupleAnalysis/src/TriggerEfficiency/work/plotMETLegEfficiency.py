@@ -16,7 +16,7 @@ from plotTauLegEfficiency import getEfficiency,convert2TGraph,Print
 ROOT.gROOT.SetBatch(True)
 plotDir = "METLeg2015"
 
-formats = [".png"]
+formats = [".pdf"]
 
 def usage():
     print "\n"
@@ -31,8 +31,12 @@ def main():
 
     paths = [sys.argv[1]]
 
-    analysis = "METLeg_2015CD_MET80"
-    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
+    analysis = "METLeg_2015D_MET80"
+#    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
+#    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau\S+25ns$|TTJets$")
+    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau\S+25ns_Silver$")
+#    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau_Run2015D_PromptReco_v4_246908_260426_25ns$|DYJetsToLL_M_50$")
+
     for d in datasets.getAllDatasets():
         print d.getName()
     style = tdrstyle.TDRStyle()
@@ -55,7 +59,7 @@ def main():
     opts2 = {"ymin": 0.5, "ymax": 1.5}
     moveLegend = {"dx": -0.55, "dy": -0.15}
 
-    name = "DataVsMC_L1HLTMET_PFMET_MET80"
+    name = "TauMET_DataVsMC_L1HLTMET80_PFMET"
 
     legend1 = "Data"
     legend2 = "MC"
@@ -140,26 +144,29 @@ def main():
 
     #### MET80
 
-    analysisc = "METLeg_2015CD_CaloMET_MET80"
+    analysisc = "METLeg_2015D_CaloMET_MET80"
     datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc)
+    datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc,excludeTasks="Tau\S+25ns_Silver$")
+#    datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc,includeOnlyTasks="Tau\S+25ns$|TTJets$")
 
     style = tdrstyle.TDRStyle()
 
     dataset1c = datasetsc.getDataDatasets()
     dataset2c = datasetsc.getMCDatasets()
 
-    eff1c_MET80 = getEfficiency(dataset1c)
+#    eff1c_MET80 = getEfficiency(dataset1c)
     eff2c_MET80 = getEfficiency(dataset2c)
 
-    styles.dataStyle.apply(eff1c_MET80)
-    styles.mcStyle.apply(eff1c_MET80)
-    eff1c_MET80.SetMarkerSize(1)
+#    styles.dataStyle.apply(eff1c_MET80)
+    styles.mcStyle.apply(eff2c_MET80)
+#    eff1c_MET80.SetMarkerSize(1)
     eff2c_MET80.SetMarkerSize(1.5)
+    eff2c_MET80.SetMarkerColor(4)
 
     p = plots.ComparisonPlot(histograms.HistoGraph(eff2_MET80, "eff2_MET80", "p", "P"),
                              histograms.HistoGraph(eff2c_MET80, "eff2c_MET80", "p", "P"))
 
-    namec = "MC_TrgBitVsCaloMET80_L1HLTMET_PFMET"
+    namec = "TauMET_MC_TrgBitVsCaloMET80_PFMET"
 
     legend1c = "MC, trigger bit"
     legend2c = "MC, CaloMET > 80"
@@ -180,6 +187,7 @@ def main():
         lumi += d.getLuminosity()
     print "luminosity, sum",lumi
     histograms.addStandardTexts(lumi=lumi)
+    histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
 
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)

@@ -15,6 +15,8 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 ROOT.gROOT.SetBatch(True)
 plotDir = "TauLeg2015"
 
+formats = [".pdf"]
+
 def usage():
     print "\n"
     print "### Usage:   "+sys.argv[0]+" <multicrab dir>\n"
@@ -43,12 +45,16 @@ def getEfficiency(datasets,numerator="Numerator",denominator="Denominator"):
         n = dataset.getDatasetRootHisto(numerator).getHistogram()                                               
         d = dataset.getDatasetRootHisto(denominator).getHistogram()
 
+        if d.GetEntries() == 0:
+            continue
+
         checkNegatives(n,d)
 
 #        removeNegatives(n)
 #        removeNegatives(d)
         print dataset.getName(),"entries",n.GetEntries(),d.GetEntries()
         print "    bins",n.GetNbinsX(),d.GetNbinsX()
+        print "    lowedge",n.GetBinLowEdge(1),d.GetBinLowEdge(1)
         eff = ROOT.TEfficiency(n,d)
         eff.SetStatisticOption(statOption)
 
@@ -73,11 +79,10 @@ def getEfficiency(datasets,numerator="Numerator",denominator="Denominator"):
     if isData:
         teff = ROOT.TEfficiency(tn, td)
         teff.SetStatisticOption(self.statOption)
-
     return convert2TGraph(teff)
 
 def checkNegatives(n,d):
-    for i in range(1,n.GetNbinsX()):
+    for i in range(1,n.GetNbinsX()+1):
         nbin = n.GetBinContent(i)
         dbin = d.GetBinContent(i)
         print "Bin",i,"Numerator=",nbin,", denominator=",dbin
@@ -88,6 +93,12 @@ def checkNegatives(n,d):
 #                print "Bin",i,"Numerator=",nbin,", denominator=",dbin
                 print "REBIN!",n.GetBinLowEdge(i),"-",n.GetBinLowEdge(i)+n.GetBinWidth(i)
 #                sys.exit()
+        if nbin < 0:
+            n.SetBinContent(i,0)
+        if dbin < 0:
+            n.SetBinContent(i,0)
+            d.SetBinContent(i,0)
+
 def removeNegatives(histo):
     for bin in range(histo.GetNbinsX()):
         if histo.GetBinContent(bin) < 0:
@@ -133,50 +144,64 @@ def analyze(analysis):
 
     paths = [sys.argv[1]]
 
-    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="GluGluHToTauTau_M125|TTJets")
+    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125")
+    datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL")
+#    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="GluGluHToTauTau_M125|TTJets")
+    datasetsH125 = None
+#    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125",emptyDatasetsAsNone=True)
     datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125")
+
     datasets.loadLuminosities()
 
     style = tdrstyle.TDRStyle()
 
     dataset1 = datasets.getDataDatasets()
-    dataset2 = datasets.getMCDatasets()
+#    dataset2 = datasets.getMCDatasets()
+    dataset2 = datasetsDY.getMCDatasets()
 
     eff1 = getEfficiency(dataset1)
     eff2 = getEfficiency(dataset2)
-    eff3 = getEfficiency(datasetsH125.getMCDatasets())
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        eff3 = getEfficiency(datasetsH125.getMCDatasets())
 
     styles.dataStyle.apply(eff1)
     styles.mcStyle.apply(eff2)
     eff1.SetMarkerSize(1)
-    eff2.SetMarkerSize(1.5)
-    styles.mcStyle.apply(eff3)
-    eff3.SetMarkerSize(1.5)
-    eff3.SetMarkerColor(4)
-    eff3.SetLineColor(4)
+#    eff2.SetMarkerSize(1.5)
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        styles.mcStyle.apply(eff3)
+        eff3.SetMarkerSize(1.5)
+        eff3.SetMarkerColor(4)
+        eff3.SetLineColor(4)
 
 #    p = plots.ComparisonPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
 #                             histograms.HistoGraph(eff2, "eff2", "p", "P"))
 
-    p = plots.ComparisonManyPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
-                                 [histograms.HistoGraph(eff2, "eff2", "p", "P"),
-                                  histograms.HistoGraph(eff3, "eff3", "p", "P")])
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        p = plots.ComparisonManyPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
+                                    [histograms.HistoGraph(eff2, "eff2", "p", "P"),
+                                     histograms.HistoGraph(eff3, "eff3", "p", "P")])
+    else:
+        p = plots.ComparisonPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
+                                 histograms.HistoGraph(eff2, "eff2", "p", "P"))
 
     fit("Data",p,eff1,20,200)
     fit("MC",p,eff2,20,200)
-    fit("H125",p,eff3,20,200)
-
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        fit("H125",p,eff3,20,200)
 
     opts = {"ymin": 0, "ymax": 1.1}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
 #    moveLegend = {"dx": -0.55, "dy": -0.15, "dh": -0.1}
     moveLegend = {"dx": -0.2, "dy": -0.5, "dh": -0.1}
-    name = analysis+"_DataVsMC_HLTTau_PFTauPt"
+    name = "TauMET_"+analysis+"_DataVsMC_HLTTau_PFTauPt"
 
     legend1 = "Data"
     legend2 = "MC (DY)"
     legend3 = "MC (H125)"
-    p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2, "eff3": legend3})
+    p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2, "eff3": legend3})
 
     p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
     p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
@@ -200,9 +225,9 @@ def analyze(analysis):
 
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
-    p.save()
+    p.save(formats)
 
-
+    """
     namePU = analysis+"_DataVsMC_HLTTau_nVtx"
 
     eff1PU = getEfficiency(dataset1,"NumeratorPU","DenominatorPU")
@@ -235,7 +260,7 @@ def analyze(analysis):
     histograms.addStandardTexts(lumi=lumi)
 
     pPU.save()
-
+    """
     print "Output written in",plotDir
 
 
@@ -244,9 +269,9 @@ def main():
     if len(sys.argv) < 2:
         usage()
 
-    analyze("TauLeg_2015C")
+#    analyze("TauLeg_2015C")
     analyze("TauLeg_2015D")
-    analyze("TauLeg_2015CD")
+#    analyze("TauLeg_2015CD")
 
 
 if __name__ == "__main__":
