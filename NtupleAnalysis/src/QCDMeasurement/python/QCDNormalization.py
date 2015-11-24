@@ -18,15 +18,37 @@ import os
 
 ## Container class for fit functions
 class FitFunction:
-    def __init__(self, functionName, nParam):
+    def __init__(self, functionName, **kwargs):
         self._functionName = functionName
-        self._nParam = nParam
+        self._args = kwargs
         
         if not hasattr(self, functionName):
             raise Exception("Error: FitFunction '%s' is unknown!"%functionName)
+        nParams = {
+            "Linear": 2,
+            "ErrorFunction": 2,
+            "ExpFunction": 2,
+            "Gaussian": 3,
+            "DoubleGaussian": 6,
+            "SumFunction": 5,
+            "RayleighFunction": 2,
+            "QCDFunction": 7,
+            "EWKFunction": 4,
+            "EWKFunctionInv": 4,
+            "QCDEWKFunction": 7,
+            "QCDFunctionFixed": 8,
+            "FitDataWithQCDAndFakesAndGenuineTaus": 3,
+            "FitDataWithQCDAndFakesAndGenuineTaus": 2,
+        }
+        self._nParam = nParams[functionName]
     
     def __call__(self, x, par, **kwargs):
-        return getattr(self, self._functionName)(x, par, **kwargs)
+        args = {}
+        for k in self._args.keys():
+            args[k] = self._args[k]
+        for k in kwargs:
+            args[k] = kwargs[k]
+        return getattr(self, self._functionName)(x, par, **args)
 
     def getNParam(self):
         return self._nParam
@@ -53,17 +75,14 @@ class FitFunction:
     def SumFunction(self,x,par):
         return par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1) + par[3]*ROOT.TMath.Exp(-x[0]*par[4])
 
-    def RayleighFunction(self,x,par0,par1,norm):
-        if par0+par1*x == 0.0:
+    def RayleighFunction(self,x,par,norm):
+        if par[0]+par[1]*x[0] == 0.0:
             return 0
-        return norm*(par1*x/((par0)*(par0))*ROOT.TMath.Exp(-x*x/(2*(par0)*(par0))))
+        return norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0]))))
                 
-    def Rayleigh(self,x,par,norm):
-        return RayleighFunction(x[0],par[0],par[1],norm)
-                       
-    #===== Composite functions
+    #===== Composite functions for template fits
     def QCDFunction(self,x,par,norm):
-        return norm*(RayleighFunction(x[0],par[0],par[1],1)+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
+        return norm*(RayleighFunction(x,par[0:1],1)+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
 
     def EWKFunction(self,x,par,boundary,norm=1,rejectPoints=0):
         if x[0] < boundary:
@@ -88,12 +107,47 @@ class FitFunction:
 
     def QCDFunctionFixed(self,x,par):
         return par[0]*(ROOT.TMath.Gaus(x[0],par[1],par[2],1)+par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1)+par[6]*ROOT.TMath.Exp(-par[7]*x[0]))
+    
+    #===== Composite functions for fitting data
+    ## QCD, fake taus, and genuine taus as separate templates
+    def FitDataWithQCDAndFakesAndGenuineTaus(self, x, par,
+            QCDFitFunction, parQCD, QCDnorm,
+            EWKFakeTausFitFunction, parEWKFakeTaus, EWKFakeTausNorm,
+            EWKGenuineTausFitFunction, parEWKGenuineTaus, EWKGenuineTausNorm):
+        nQCD =            QCDFitFunction(x, parQCD, norm=QCDnorm)
+        nEWKFakeTaus =    EWKFakeTausFitFunction(x, parEWKFakeTaus, norm=EWKFakeTausNorm)
+        nEWKGenuineTaus = EWKGenuineTausFitFunction(x, parEWKGenuineTaus, norm=EWKGenuineTausNorm) 
+        return par[0]*(par[1]*nQCD + par[2]*nEWKFakeTaus + (1 - par[1] - par[2])*nEWKGenuineTaus)
+
+    ## QCD and fake tau templates as one inclusive template
+    def FitDataWithFakesAndGenuineTaus(self, x, par,
+            QCDAndFakesFitFunction, parQCDAndFakes, QCDAndFakesnorm,
+            EWKGenuineTausFitFunction, parEWKGenuineTaus, EWKGenuineTausNorm):
+        nQCDAndFakes =    QCDAndFakesFitFunction(x, parQCDAndFakes, norm=QCDAndFakesnorm)
+        nEWKGenuineTaus = EWKGenuineTausFitFunction(x, parEWKGenuineTaus, norm=EWKGenuineTausNorm) 
+        return par[0]*(par[1]*nQCDAndFakes + (1 - par[1])*nEWKGenuineTaus)
+
+
+## Modify bin label string
+def getModifiedBinLabelString(binLabel):
+    label = binLabel
+    label = label.replace("#tau p_{T}","taupT")
+    label = label.replace("#tau eta","taueta")
+    label = label.replace("<","lt")
+    label = label.replace(">","gt")
+    label = label.replace("=","eq")
+    label = label.replace("..","to")
+    label = label.replace(".","p")
+    label = label.replace("/","_")
+    label = label.replace(" ","_")
+    return label
 
 ## Template holder for QCD measurement normalization
 class QCDNormalizationTemplate:
     def __init__(self, name, quietMode=False):
         self._name = name
         self._fitFunction = None
+        self._fitKwargs = None
         self._fitRangeMin = None
         self._fitRangeMax = None
         self._fitParamInitialValues = {}
@@ -119,6 +173,14 @@ class QCDNormalizationTemplate:
         self._nEventsErrorFromFit = None
         self._histo = None
         self._fitResults = None
+
+    ## Returns true if a histogram has been provided
+    def hasHisto(self):
+        return self._histo != None
+    
+    ## Returns true if a fit function has been provided
+    def isFittable(self):
+        return self._fitFunction != None
 
     ## Prints the parameter settings (for debugging or info)
     def printFitParamSettings(self):
@@ -215,22 +277,8 @@ class QCDNormalizationTemplate:
                 print "template '%s': In bin %d, converted negative value (%f) to zero."%(self._name(), k, self._histo.GetBinContent(k))
                 self._histo.SetBinContent(k, 0.0)
         # Format bin label string
-        self._binLabel = self._getModifiedBinLabelString(binLabel)
-    
-    ## Modify bin label string
-    def _getModifiedBinLabelString(self, binLabel):
-        label = binLabel
-        label = label.replace("#tau p_{T}","taupT")
-        label = label.replace("#tau eta","taueta")
-        label = label.replace("<","lt")
-        label = label.replace(">","gt")
-        label = label.replace("=","eq")
-        label = label.replace("..","to")
-        label = label.replace(".","p")
-        label = label.replace("/","_")
-        label = label.replace(" ","_")
-        return label
-    
+        self._binLabel = getModifiedBinLabelString(binLabel)
+        
     ## Make a plot of the histogram
     def plot(self):
         if self._histo == None:
@@ -273,7 +321,7 @@ class QCDNormalizationTemplate:
 
     ## Sets the fit parameters for a specific bin
     def setFitParamForBin(self, binLabel, initialValue=None, lowerLimit=None, upperLimit=None):
-        modifiedBinLabel = self._getModifiedBinLabelString(binLabel)
+        modifiedBinLabel = getModifiedBinLabelString(binLabel)
         if initialValue != None:
             if not isinstance(initialValue, list):
                 raise Exception("Error: Please provide a list for setting the fit parameter initial value!")
@@ -325,7 +373,9 @@ class QCDNormalizationTemplate:
             if not self._quietMode:
                 print "- using fit options:",fitOptions
             elif not "Q" in fitOptions:
-                fitOptions += " Q"
+                fitOptions += " Q" # To suppress output
+            if not "S" in fitOptions:
+                fitOptions += " S" # To return fit results
             canvas = ROOT.TCanvas() # Create explicitly canvas to get rid of warning message
             fitResultObject = h.Fit(fit, fitOptions)
             self._fitResults = fit.GetParameters()
@@ -357,7 +407,36 @@ class QCDNormalizationManager:
         if not isinstance(binLabels, list):
             raise Exception("Error: binLabels needs to be a list of strings")
 
+    ## Creates a QCDNormalizationTemplate and returns it
+    def createTemplate(self, name):
+        if name in self._templates.keys():
+            raise Exception("Error: A template with name '%s' has already been created!"%name)
+        q = QCDNormalizationTemplate(name)
+        self._templates[name] = q
+        return q
 
+    ## Fits templates
+    def fitTemplates(self, fitOptions):
+        for k in self._templates.keys():
+            if self._templates[k].hasHisto() and self._templates[k].isFittable():
+                self._templates[k].doFit(fitOptions=fitOptions, createPlot=True)
+    
+    ## Plots shapes of templates
+    def fitTemplates(self, fitOptions):
+        for k in self._templates.keys():
+            if self._templates[k].hasHisto():
+                self._templates[k].plot()
+
+    ## Do final fit, 
+    def fitDataWithQCDAndFakesAndGenuineTaus(self, dataHisto):
+        # Check that inputs have been provided
+        
+        # Do fit
+        
+        # Handle results
+        
+        
+        
 
 
 # Unit tests
@@ -369,7 +448,7 @@ if __name__ == "__main__":
                 FitFunction("dummy")
         
         def testGaussian(self):
-            f = FitFunction("Gaussian", 3)
+            f = FitFunction("Gaussian")
             self.assertEqual(f([0],[1,0,1]), 0.3989422804014327)
             
     class TestQCDNormalizationTemplate(unittest.TestCase):
@@ -477,9 +556,9 @@ if __name__ == "__main__":
             with self.assertRaises(Exception):
                 q.setFitter([], 0, 10)
             with self.assertRaises(Exception):
-                q.setFitter(FitFunction("Gaussian", 3), 10, 0)
+                q.setFitter(FitFunction("Gaussian"), 10, 0)
             # Do fit (it fails with default parameters)
-            q.setFitter(FitFunction("Gaussian", 3), 0, 10)
+            q.setFitter(FitFunction("Gaussian"), 0, 10)
             if _createPlots:
                 q.plot()
             q.doFit(fitOptions="S R L Q", createPlot=False)
