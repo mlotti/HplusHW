@@ -16,21 +16,32 @@ class FitParameterOrthogonalizer:
     # \param fitFunctionObject  a ROOT TF1 object describing the fit function
     # \param fitResult          the result object from calling TH1::Fit
     # \param printStatus        option to enable/disable printing of output
-    def __init__(self, fitFunctionObject, fitResult, printStatus=False):
+    def __init__(self, fitFunctionObject, fitResult, rangeMin, rangeMax, printStatus=False):
         self._myFitFuncObject = fitFunctionObject
         self._fitResult = fitResult
         self._eigenVectors = None
         self._eigenValues = None
         self._calculateEigenVectorsAndValues(printStatus)
+        self._downVariations = []
+        self._upVariations = []
+        self._downVariationTotal = None
+        self._upVariationTotal = None
+        self._calculateVariations(rangeMin, rangeMax)
     
     def getEigenValues(self):
         return self._eigenValues
     
     def getEigenVectors(self):
         return self._eigenVectors
-    
+
+    def getTotalFitParameterUncertaintyDown(self):
+        return self._downVariationTotal
+
+    def getTotalFitParameterUncertaintyUp(self):
+        return self._upVariationTotal
+
     ## Returns the absolute uncertainty from varying orthogonal fit parameters
-    def getTotalFitParameterUncertainty(self, rangeMin, rangeMax):
+    def _calculateVariations(self, rangeMin, rangeMax):
         nominalInt = self._myFitFuncObject.Integral(rangeMin, rangeMax)
         #print nominalInt, self._myFitFuncObject.IntegralError(float(rangeMin), float(rangeMax))
         centralParams = []
@@ -40,7 +51,7 @@ class FitParameterOrthogonalizer:
             raise Exception("This should not happen") # Protect against memory overflow
         function = self._myFitFuncObject
         # Up variations
-        upInt = []
+        self._upVariations = []
         for j in range(0, len(self._eigenValues)):
             myParams = list(centralParams)
             for i in range(0,len(centralParams)):
@@ -48,9 +59,9 @@ class FitParameterOrthogonalizer:
             #print "eigenvalue: %d, function params: (%s)"%(j, ", ".join(map(str,myParams)))
             for i in range(0,len(myParams)):
                 function.SetParameter(i, myParams[i])
-            upInt.append(function.Integral(rangeMin, rangeMax) - nominalInt)
+            self._upVariations.append(function.Integral(rangeMin, rangeMax) - nominalInt)
         # Down variations
-        downInt = []
+        self._downVariations = []
         for j in range(0, len(self._eigenValues)):
             myParams = list(centralParams)
             for i in range(0,len(centralParams)):
@@ -58,15 +69,16 @@ class FitParameterOrthogonalizer:
             #print "eigenvalue: %d, function params: (%s)"%(j, ", ".join(map(str,myParams)))
             for i in range(0,len(myParams)):
                 function.SetParameter(i, myParams[i])
-            downInt.append(function.Integral(rangeMin, rangeMax) - nominalInt)
+            self._downVariations.append(function.Integral(rangeMin, rangeMax) - nominalInt)
         # Calculate totals
         upSquared = 0.0
         downSquared = 0.0
-        for i in range(len(upInt)):
-            (upProperSquared, downProperSquared) = aux.getProperAdditivesForVariationUncertainties(upInt[i], downInt[i])
+        for i in range(len(self._upVariations)):
+            (upProperSquared, downProperSquared) = aux.getProperAdditivesForVariationUncertainties(self._upVariations[i], self._downVariations[i])
             upSquared += upProperSquared
-            downSquared = downProperSquared
-        return (math.sqrt(upSquared), math.sqrt(downSquared))
+            downSquared += downProperSquared
+        self._upVariationTotal = math.sqrt(upSquared)
+        self._downVariationTotal = math.sqrt(downSquared)
     
     def _calculateEigenVectorsAndValues(self, printStatus=True):
         def printEigenVectors(matrix):
@@ -144,15 +156,15 @@ if __name__ == "__main__":
             fit.SetParameter(2,1)
             fitResult = h.Fit(fit,"S R WL I Q")
             # Test eigenvalues
-            fpo = FitParameterOrthogonalizer(fit, fitResult, printStatus=False)
+            fpo = FitParameterOrthogonalizer(fit, fitResult, 0, 10, printStatus=False)
             eigenValues = fpo.getEigenValues()
             eigenVectors = fpo.getEigenVectors()
             self.assertLess(abs(eigenValues[0]-0.0378), 0.0001)
             self.assertLess(abs(eigenValues[1]-0.0105), 0.0001)
             self.assertLess(abs(eigenValues[2]-0.00893), 0.0001)
             # Test total uncertainties
-            (upUncert,downUncert) = fpo.getTotalFitParameterUncertainty(0, 10)
-            self.assertLess(abs(upUncert-3.16), 0.01)
-            self.assertLess(abs(downUncert-0.704), 0.01)
+            self.assertLess(abs(fpo.getTotalFitParameterUncertaintyUp()-3.16), 0.01)
+            self.assertLess(abs(fpo.getTotalFitParameterUncertaintyDown()-3.17), 0.01)
 
     unittest.main()
+    

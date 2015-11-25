@@ -15,10 +15,10 @@ import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 #import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
-#import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
-import HiggsAnalysis.NtupleAnalysis.QCDMeasurement.QCDNormalization as QCDNormalization
+import HiggsAnalysis.QCDMeasurement.QCDNormalization as QCDNormalization
 
 
 #==== Set analysis, data era, and search mode
@@ -32,7 +32,7 @@ dataEra = "Run2015"
 searchMode = "80to1000"
 print analysis, dataEra, searchMode
 
-
+selectOnlyBins = [] #["1"]
 
 def usage():
     print "\n"
@@ -115,16 +115,31 @@ def main(argv):
             binLabels = ["Inclusive"]
         else:
             for hname in histonames:
-                bins.append(hname.replace("NormalizationMETBaselineTau"+HISTONAME,""))
-                hDummy = dsetMgr.getDataset("Data").getDatasetRootHisto(COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+"/"+hname).getHistogram()
+                binIndex = hname.replace("NormalizationMETBaselineTau"+HISTONAME,"")
+                bins.append(binIndex)
+                hDummy = dsetMgr.getDataset("Data").getDatasetRootHisto(COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex).getHistogram()
                 title = hDummy.GetTitle()
                 title = title.replace("METBaseline"+HISTONAME,"")
-                binLabels.append(QCDNormalization.getModifiedBinLabelString(title))
+                if binIndex == "Inclusive":
+                    binLabels.append(binIndex)
+                else:
+                    binLabels.append(QCDNormalization.getModifiedBinLabelString(title))
                 if FITMIN == None:
                     FITMIN = hDummy.GetXaxis().GetXmin()
                     FITMAX = hDummy.GetXaxis().GetXmax()
                 hDummy.Delete()
         print "\nHistogram bins available",bins
+        # Select bins by filter
+        if len(selectOnlyBins) > 0:
+            oldBinLabels = binLabels[:]
+            oldBins = bins[:]
+            binLabels = []
+            bins = []
+            for k in selectOnlyBins:
+                for i in range(len(oldBinLabels)):
+                    if k == oldBinLabels[i] or k == oldBins[i]:
+                        binLabels.append(oldBinLabels[i])
+                        bins.append(oldBins[i])
         print "Using bins              ",bins
         print "\nBin labels"
         for i in range(len(binLabels)):
@@ -138,14 +153,14 @@ def main(argv):
         #===== Initialize normalization calculator
         manager = QCDNormalization.QCDNormalizationManager(binLabels)
         
-        #===== Create templates
+        #===== Create templates (EWK fakes, EWK genuine, QCD; data template is created by manager)
         template_EWKFakeTaus_Baseline = manager.createTemplate("EWKFakeTaus_Baseline")
         template_EWKFakeTaus_Inverted = manager.createTemplate("EWKFakeTaus_Inverted")
         template_EWKGenuineTaus_Baseline = manager.createTemplate("EWKGenuineTaus_Baseline")
         template_EWKGenuineTaus_Inverted = manager.createTemplate("EWKGenuineTaus_Inverted")
         template_QCD_Baseline = manager.createTemplate("QCD_Baseline")
         template_QCD_Inverted = manager.createTemplate("QCD_Inverted")
-        template_Data_Baseline = manager.createTemplate("Data_Baseline")
+        manager.setSources(ewkFakeTausSrc="EWKFakeTaus_Baseline", ewkGenuineTausSrc="EWKGenuineTaus_Baseline", qcdSrc="QCD_Inverted")
         
         #===== Define fit functions and fit parameters
         # The available functions are defined in the FitFunction class in the QCDMeasurement/python/QCDNormalization.py file
@@ -155,7 +170,7 @@ def main(argv):
         template_EWKFakeTaus_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90,  30, 0.0001],
                                                          defaultUpperLimit=[ 30, 200, 100,    1.0])
         boundary = 150
-        template_EWKGenuineTaus_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints),
+        template_EWKGenuineTaus_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),
                                                    FITMIN, FITMAX)
         template_EWKGenuineTaus_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
                                                             defaultUpperLimit=[ 20, 120, 50,    1.0])
@@ -164,91 +179,74 @@ def main(argv):
         template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[0.0001, 0.001, 0.1, 0.0,  10, 0.0001, 0.001],
                                                  defaultUpperLimit=[   200,    10,  10, 150, 100,      1, 0.05])
         
-
-
-        #invertedQCD = InvertedTauID()
-        #invertedQCD.setLumi(dsetMgr.getDataset("Data").getLuminosity())
-        #invertedQCD.setInfo([dataEra,searchMode,HISTONAME])
-        
         #===== Loop over tau pT bins
         for i,binStr in enumerate(bins):
             print "\n********************************"
             print "*** Fitting bin %s"%binLabels[i]
             print "********************************\n"
-            invertedQCD.resetBinResults()
-            invertedQCD.setLabel(binLabels[i])
+
+            #===== Reset bin results
+            manager.resetBinResults()
 
             #===== Obtain histograms for normalization
-            metBase = plots.DataMCPlot(dsetMgr, COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
-            metInver = plots.DataMCPlot(dsetMgr, COMBINEDHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
-            metBase_GenuineTaus = plots.DataMCPlot(dsetMgr, GENUINEHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
-            metInver_GenuineTaus = plots.DataMCPlot(dsetMgr, GENUINEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
-            metBase_FakeTaus = plots.DataMCPlot(dsetMgr, FAKEHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
-            metInver_FakeTaus = plots.DataMCPlot(dsetMgr, FAKEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
+            # Data
+            histoName = COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binStr
+            hmetBase_data = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("Data").getRootHisto().Clone(histoName)
+            histoName = COMBINEDHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr
+            hmetInverted_data = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("Data").getRootHisto().Clone(histoName)
 
-            #===== Rebin histograms before subtracting
-            RebinFactor = 2 # Aim for 10 GeV binning
-            metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
-            metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
-            metBase_GenuineTaus.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
-            metInver_GenuineTaus.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
-            metBase_FakeTaus.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
-            metInver_FakeTaus.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
-            
-            #===== Obtain templates for data and EWK
-            metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(COMBINEDHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
-            metInverted_EWK_GenuineTaus = metInver_GenuineTaus.histoMgr.getHisto("EWK").getRootHisto().Clone(GENUINEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
-            metInverted_EWK_FakeTaus = metInver_FakeTaus.histoMgr.getHisto("EWK").getRootHisto().Clone(FAKEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
-            
-            metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
-            metBase_EWK_GenuineTaus = metBase_GenuineTaus.histoMgr.getHisto("EWK").getRootHisto().Clone(GENUINEHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
-            metBase_EWK_FakeTaus = metBase_FakeTaus.histoMgr.getHisto("EWK").getRootHisto().Clone(FAKEHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
+            # EWK genuine taus
+            histoName = GENUINEHISTODIR+"/"+BASELINETAUHISTONAME+binStr
+            hmetBase_EWK_GenuineTaus = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("EWK").getRootHisto().Clone(histoName)
+            histoName = GENUINEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr
+            hmetInverted_EWK_GenuineTaus = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("EWK").getRootHisto().Clone(histoName)
 
-            #===== Obtain templates for QCD (subtract MC EWK events from data)
+            # EWK fake taus
+            histoName = FAKEHISTODIR+"/"+BASELINETAUHISTONAME+binStr
+            hmetBase_EWK_FakeTaus = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("EWK").getRootHisto().Clone(histoName)
+            histoName = FAKEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr
+            hmetInverted_EWK_FakeTaus = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("EWK").getRootHisto().Clone(histoName)
+
+            # Finalize histograms by rebinning
+            rebinFactor = 2 # Aim for 10 GeV binning
+            for histogram in [hmetBase_data, hmetInverted_data, hmetBase_EWK_GenuineTaus, hmetInverted_EWK_GenuineTaus, hmetBase_EWK_FakeTaus, hmetInverted_EWK_FakeTaus]:
+                 histogram.Rebin(rebinFactor)
+            
+            #===== Obtain histograms for QCD (subtract MC EWK events from data)
             # QCD from baseline is usable only as a cross check
-            #metBase_QCD = metBase_data.Clone("QCD")
-            #metBase_QCD.Add(metBase_EWK_GenuineTaus,-1)
-            #metBase_QCD.Add(metBase_EWK_FakeTaus,-1)
-            #addLabels(metBase_QCD, "QCD, baseline")
+            hmetBase_QCD = hmetBase_data.Clone("QCD")
+            hmetBase_QCD.Add(hmetBase_EWK_GenuineTaus,-1)
+            hmetBase_QCD.Add(hmetBase_EWK_FakeTaus,-1)
             
-            metInverted_QCD = metInverted_data.Clone("QCD")
-            metInverted_QCD.Add(metInverted_EWK_GenuineTaus,-1)
-            metInverted_QCD.Add(metInverted_EWK_FakeTaus,-1)
+            hmetInverted_QCD = hmetInverted_data.Clone("QCD")
+            hmetInverted_QCD.Add(hmetInverted_EWK_GenuineTaus,-1)
+            hmetInverted_QCD.Add(hmetInverted_EWK_FakeTaus,-1)
             
+            #===== Set histograms to the templates
+            template_EWKFakeTaus_Inverted.setHistogram(hmetInverted_EWK_FakeTaus, binLabels[i])
+            template_EWKGenuineTaus_Inverted.setHistogram(hmetInverted_EWK_GenuineTaus, binLabels[i])
+            template_QCD_Inverted.setHistogram(hmetInverted_QCD, binLabels[i])
             
-            
-            
+            template_EWKFakeTaus_Baseline.setHistogram(hmetBase_EWK_FakeTaus, binLabels[i])
+            template_EWKGenuineTaus_Baseline.setHistogram(hmetBase_EWK_GenuineTaus, binLabels[i])
+            template_QCD_Baseline.setHistogram(hmetBase_QCD, binLabels[i])
             
             #===== Make plots of templates
-            print "\n*** Integrals of plotted templates"
-            #invertedQCD.plotHisto(metInverted_data,"template_Data_Inverted")
-            #invertedQCD.plotHisto(metInverted_EWK_GenuineTaus,"template_EWKGenuineTaus_Inverted")
-            #invertedQCD.plotHisto(metInverted_EWK_FakeTaus,"template_EWKFakeTaus_Inverted")
-            invertedQCD.plotHisto(metInverted_QCD,"template_QCD_Inverted")
-            invertedQCD.plotHisto(metBase_data,"template_Data_Baseline")
-            invertedQCD.plotHisto(metBase_EWK_GenuineTaus,"template_EWKGenuineTaus_Baseline")
-            invertedQCD.plotHisto(metBase_EWK_FakeTaus,"template_EWKFakeTaus_Baseline")
-            #invertedQCD.plotHisto(metBase_QCD,"template_QCD_Baseline")
+            manager.plotTemplates()
             
-            #===== Fit individual templates and
-            # Fit first templates for QCD, EWK_genuine_taus, and EWK_fake_taus
-            # Then fit the shape of those parametrizations to baseline data to obtain normalization coefficients
+            #===== Fit individual templates to data
             fitOptions = "R B" # RBL
+            manager.fitDataWithQCDAndFakesAndGenuineTaus(hmetBase_data, fitOptions, FITMIN, FITMAX)
             
-            # Strategy: take EWK templates from baseline and QCD template from inverted; then fit to baseline data
-            invertedQCD.fitEWK_GenuineTaus(metInverted_EWK_GenuineTaus,fitOptions)
-            invertedQCD.fitEWK_GenuineTaus(metBase_EWK_GenuineTaus,fitOptions)
-            invertedQCD.fitEWK_FakeTaus(metInverted_EWK_FakeTaus,fitOptions)
-            invertedQCD.fitEWK_FakeTaus(metBase_EWK_FakeTaus,fitOptions)
-            invertedQCD.fitQCD(metInverted_QCD,fitOptions)
-            invertedQCD.fitData(metBase_data)
+            
 
             #===== Calculate normalization
-            invertedQCD.getNormalization()
-            
-        invertedQCD.Summary()
-        invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactorsFilteredEWKFakeTaus.py")
-        invertedQCD.WriteLatexOutput("fits.tex")
+            #invertedQCD.getNormalization()
+        
+        manager.writeScaleFactorFile("QCDInvertedNormalizationFactorsFilteredEWKFakeTaus.py", analysis, dataEra, searchMode)
+        #invertedQCD.Summary()
+        #invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactorsFilteredEWKFakeTaus.py")
+        #invertedQCD.WriteLatexOutput("fits.tex")
 
 
 if __name__ == "__main__":
