@@ -1,11 +1,11 @@
 #ifndef TriggerEfficiency_TauLegSelection_h
 #define TriggerEfficiency_TauLegSelection_h
 
-#include "TriggerEfficiency/interface/BaseSelection.h"
+#include "TriggerEfficiency/interface/TrgBaseSelection.h"
 
 #include "Math/VectorUtil.h"
 
-class TauLegSelection : public BaseSelection {
+class TauLegSelection : public TrgBaseSelection {
  public:
   explicit TauLegSelection(const ParameterSet&, EventCounter&, HistoWrapper&);
   ~TauLegSelection();
@@ -30,7 +30,7 @@ class TauLegSelection : public BaseSelection {
   Count cTauLegMt;
 };
 TauLegSelection::TauLegSelection(const ParameterSet& setup, EventCounter& fEventCounter, HistoWrapper& histoWrapper):
-  BaseSelection(histoWrapper),
+  TrgBaseSelection(histoWrapper),
   cTauLegAll(fEventCounter.addCounter("TauLeg:all")),
   cTauLegMu(fEventCounter.addCounter("TauLeg:mu")),
   cTauLegTau(fEventCounter.addCounter("TauLeg:tau")),

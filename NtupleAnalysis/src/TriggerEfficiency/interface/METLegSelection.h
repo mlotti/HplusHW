@@ -1,10 +1,10 @@
 #ifndef TriggerEfficiency_METLegSelection_h
 #define TriggerEfficiency_METLegSelection_h
 
-#include "TriggerEfficiency/interface/BaseSelection.h"
+#include "TriggerEfficiency/interface/TrgBaseSelection.h"
 #include "Math/VectorUtil.h"
 
-class METLegSelection : public BaseSelection {
+class METLegSelection : public TrgBaseSelection {
  public:
   explicit METLegSelection(const ParameterSet&, EventCounter&, HistoWrapper&);
   ~METLegSelection();
@@ -21,7 +21,7 @@ class METLegSelection : public BaseSelection {
 };
 
 METLegSelection::METLegSelection(const ParameterSet& setup, EventCounter& fEventCounter, HistoWrapper& histoWrapper) :
-  BaseSelection(histoWrapper)
+  TrgBaseSelection(histoWrapper)
 {
   init(setup);
   onlineselectionstr = *(setup.getParameterOptional<std::string>("onlineSelection"));

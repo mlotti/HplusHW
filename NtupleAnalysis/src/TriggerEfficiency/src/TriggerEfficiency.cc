@@ -40,7 +40,7 @@ private:
   */
   ParameterSet fcontrolTriggers;
 
-  BaseSelection* selection;
+  TrgBaseSelection* selection;
 
   Count cAllEvents;
   Count cRunRange;
