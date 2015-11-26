@@ -39,9 +39,21 @@ def usage():
     print "\n"
     sys.exit()
 
+def formatHistoTitle(title):
+    t = title.replace("#tau p_{T}","taup_T")
+    t = t.replace("#tau eta","taueta")
+    t = t.replace("<","lt")
+    t = t.replace(">","gt")
+    t = t.replace("=","eq")
+    t = t.replace("..","to")
+    t = t.replace(".","p")
+    t = t.replace("/","_")
+    return t
+
 def main(argv):
-    FAKEHISTODIR = "ForQCDMeasurementEWKFakeTaus"
-    GENUINEHISTO = "ForQCDMeasurementGenuineTaus"
+    COMBINEDHISTODIR = "ForQCDNormalization"
+    FAKEHISTODIR = "ForQCDNormalizationEWKFakeTaus"
+    GENUINEHISTODIR = "ForQCDNormalizationEWKGenuineTaus"
     comparisonList = ["AfterStdSelections"]
 
     dirs = []
@@ -50,49 +62,43 @@ def main(argv):
 
     dirs.append(sys.argv[1])
     
-    # Create all datasets from a multicrab task
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
+    # Create all dsetMgr from a multicrab task
+    dsetMgr = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
 
-    #print datasets
+    #print dsetMgr
     # Check multicrab consistency
-    consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="QCD inverted")
+    consistencyCheck.checkConsistencyStandalone(dirs[0],dsetMgr,name="QCD inverted")
    
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
     # the analysis job uses skimmed pattuple as an input
-    datasets.updateNAllEventsToPUWeighted()
+    dsetMgr.updateNAllEventsToPUWeighted()
 
-    # Read integrated luminosities of data datasets from lumi.json
-    datasets.loadLuminosities()
+    # Read integrated luminosities of data dsetMgr from lumi.json
+    dsetMgr.loadLuminosities()
 
-    # Include only 120 mass bin of HW and HH datasets
-    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
-    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
-    datasets.remove(filter(lambda name: "Hplus_taunu_t-channel" in name, datasets.getAllDatasetNames()))
-    datasets.remove(filter(lambda name: "Hplus_taunu_tW-channel" in name, datasets.getAllDatasetNames()))
-    #datasets.remove(filter(lambda name: "TTJets_SemiLept" in name, datasets.getAllDatasetNames()))
-    #datasets.remove(filter(lambda name: "TTJets_FullLept" in name, datasets.getAllDatasetNames()))
-    #datasets.remove(filter(lambda name: "TTJets_Hadronic" in name, datasets.getAllDatasetNames()))
-    # Default merging nad ordering of data and MC datasets
-    # All data datasets to "Data"
-    # All QCD datasets to "QCD"
-    # All single top datasets to "SingleTop"
+    # Include only 120 mass bin of HW and HH dsetMgr
+    dsetMgr.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, dsetMgr.getAllDatasetNames()))
+    dsetMgr.remove(filter(lambda name: "HplusTB" in name, dsetMgr.getAllDatasetNames()))
+    # Default merging nad ordering of data and MC dsetMgr
+    # All data dsetMgr to "Data"
+    # All QCD dsetMgr to "QCD"
+    # All single top dsetMgr to "SingleTop"
     # WW, WZ, ZZ to "Diboson"
-    plots.mergeRenameReorderForDataMC(datasets)
+    plots.mergeRenameReorderForDataMC(dsetMgr)
 
     # Set BR(t->H) to 0.05, keep BR(H->tau) in 1
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
+    xsect.setHplusCrossSectionsToBR(dsetMgr, br_tH=0.05, br_Htaunu=1)
 
-    # Merge WH and HH datasets to one (for each mass bin)
-    # TTToHplusBWB_MXXX and TTToHplusBHminusB_MXXX to "TTToHplus_MXXX"
-    plots.mergeWHandHH(datasets)
+    # Merge WH and HH dsetMgr to one (for each mass bin)
+    plots.mergeWHandHH(dsetMgr)
 
-    datasets.merge("EWK", [
+    dsetMgr.merge("EWK", [
 	    "TTJets",
-            "WJets",
+            "WJetsHT",
             "DYJetsToLL",
             "SingleTop",
-            "Diboson"
+            #"Diboson"
             ])
 
     # Apply TDR style
@@ -100,35 +106,32 @@ def main(argv):
     style.setOptStat(True)
 
     for HISTONAME in comparisonList:
-        invertedQCD = InvertedTauID()
-        invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
-        invertedQCD.setInfo([dataEra,searchMode,HISTONAME])
-        
-        histonames = datasets.getDataset("Data").getDirectoryContent("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME)
+        BASELINETAUHISTONAME = "NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME
+        INVERTEDTAUHISTONAME = "NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME
+      
+        #===== Infer binning information and labels
+        histonames = dsetMgr.getDataset("Data").getDirectoryContent(COMBINEDHISTODIR+"/NormalizationMETBaselineTau"+HISTONAME)
         bins = []
         binLabels = []
-        for histoname in histonames:
-            bins.append(histoname.replace("NormalizationMETBaselineTau"+HISTONAME,""))
-            title = datasets.getDataset("Data").getDatasetRootHisto("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/"+histoname).getHistogram().GetTitle()
-            title = title.replace("METBaseline"+HISTONAME,"")
-            title = title.replace("#tau p_{T}","taup_T")
-            title = title.replace("#tau eta","taueta")
-            title = title.replace("<","lt")
-            title = title.replace(">","gt")
-            title = title.replace("=","eq")
-            title = title.replace("..","to")
-            title = title.replace(".","p")
-            title = title.replace("/","_")
-            binLabels.append(title)
-        #binLabels = bins # for this data set
-        print
-        print "Histogram bins available",bins
+        if histonames == None:
+            # Assume that only inclusive bin exists
+            name = COMBINEDHISTODIR+"/NormalizationMETBaselineTau"+HISTONAME
+            if not dsetMgr.getDataset("Data").hasRootHisto(name):
+                raise Exception("Error: Cannot find histogram or directory of name '%s'!"%name)
+            BASELINETAUHISTONAME = "NormalizationMETBaselineTau"+HISTONAME
+            INVERTEDTAUHISTONAME = "NormalizationMETInvertedTau"+HISTONAME
+            bins = [""]
+            binLabels = ["Inclusive"]
+        else:
+            for hname in histonames:
+                bins.append(hname.replace("NormalizationMETBaselineTau"+HISTONAME,""))
+                title = dsetMgr.getDataset("Data").getDatasetRootHisto(COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+"/"+hname).getHistogram().GetTitle()
+                title = title.replace("METBaseline"+HISTONAME,"")
+                binLabels.append(formatHistoTitle(title))
         
-        #    bins = ["Inclusive"]
-        #    bins = ["taup_Tleq50","taup_Teq50to60"]
+        print "\nHistogram bins available",bins
         print "Using bins              ",bins
-        print
-        print "Bin labels"
+        print "\nBin labels"
         for i in range(len(binLabels)):
             line = bins[i]
             while len(line) < 10:
@@ -136,20 +139,30 @@ def main(argv):
             line += ": "+binLabels[i]
             print line
         print
-
-        for i,bin in enumerate(bins):
-
+        
+        #===== Initialize normalization calculator
+        invertedQCD = InvertedTauID()
+        invertedQCD.setLumi(dsetMgr.getDataset("Data").getLuminosity())
+        invertedQCD.setInfo([dataEra,searchMode,HISTONAME])
+        
+        #===== Loop over tau pT bins
+        for i,binStr in enumerate(bins):
+            print "\n********************************"
+            print "*** Fitting bin %s"%binLabels[i]
+            print "********************************\n"
+            invertedQCD.resetBinResults()
             invertedQCD.setLabel(binLabels[i])
 
-            metBase = plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
-            metInver = plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
-            metBase_GenuineTaus = plots.DataMCPlot(datasets, "ForQCDNormalizationEWKGenuineTaus/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
-            metInver_GenuineTaus = plots.DataMCPlot(datasets, "ForQCDNormalizationEWKGenuineTaus/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
-            metBase_FakeTaus = plots.DataMCPlot(datasets, "ForQCDNormalizationEWKFakeTaus/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
-            metInver_FakeTaus = plots.DataMCPlot(datasets, "ForQCDNormalizationEWKFakeTaus/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
+            #===== Obtain histograms for normalization
+            metBase = plots.DataMCPlot(dsetMgr, COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
+            metInver = plots.DataMCPlot(dsetMgr, COMBINEDHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
+            metBase_GenuineTaus = plots.DataMCPlot(dsetMgr, GENUINEHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
+            metInver_GenuineTaus = plots.DataMCPlot(dsetMgr, GENUINEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
+            metBase_FakeTaus = plots.DataMCPlot(dsetMgr, FAKEHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
+            metInver_FakeTaus = plots.DataMCPlot(dsetMgr, FAKEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
 
-            # Rebin before subtracting
-            RebinFactor = 10
+            #===== Rebin histograms before subtracting
+            RebinFactor = 2 # Aim for 10 GeV binning
             metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
             metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
             metBase_GenuineTaus.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
@@ -157,63 +170,76 @@ def main(argv):
             metBase_FakeTaus.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
             metInver_FakeTaus.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
             
-            metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("ForQCDNormalization/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
-            metInverted_EWK_GenuineTaus = metInver_GenuineTaus.histoMgr.getHisto("EWK").getRootHisto().Clone("ForQCDNormalizationEWKGenuineTaus/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
-            metInverted_EWK_FakeTaus = metInver_FakeTaus.histoMgr.getHisto("EWK").getRootHisto().Clone("ForQCDNormalizationEWKFakeTaus/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
+            #===== Obtain templates for data and EWK
+            metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(COMBINEDHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
+            treatHistogram(metInverted_data, "Data, inverted")
+            metInverted_EWK_GenuineTaus = metInver_GenuineTaus.histoMgr.getHisto("EWK").getRootHisto().Clone(GENUINEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
+            treatHistogram(metInverted_EWK_GenuineTaus, "EWK genuine taus, inverted")
+            metInverted_EWK_FakeTaus = metInver_FakeTaus.histoMgr.getHisto("EWK").getRootHisto().Clone(FAKEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr)
+            treatHistogram(metInverted_EWK_FakeTaus, "EWK fake taus, inverted")
             
-            metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
-            metBase_EWK_GenuineTaus = metBase_GenuineTaus.histoMgr.getHisto("EWK").getRootHisto().Clone("ForQCDNormalizationEWKGenuineTaus/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
-            metBase_EWK_FakeTaus = metBase_FakeTaus.histoMgr.getHisto("EWK").getRootHisto().Clone("ForQCDNormalizationEWKFakeTaus/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
+            metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
+            treatHistogram(metBase_data, "Data, baseline")
+            metBase_EWK_GenuineTaus = metBase_GenuineTaus.histoMgr.getHisto("EWK").getRootHisto().Clone(GENUINEHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
+            treatHistogram(metBase_EWK_GenuineTaus, "EWK genuine taus, baseline")
+            metBase_EWK_FakeTaus = metBase_FakeTaus.histoMgr.getHisto("EWK").getRootHisto().Clone(FAKEHISTODIR+"/"+BASELINETAUHISTONAME+binStr)
+            treatHistogram(metBase_EWK_FakeTaus, "EWK fake taus, baseline")
 
-            metBase_QCD = metBase_data.Clone("QCD")
-            metBase_QCD.Add(metBase_EWK_GenuineTaus,-1)
-            metBase_QCD.Add(metBase_EWK_FakeTaus,-1)
+            #===== Obtain templates for QCD (subtract MC EWK events from data)
+            # QCD from baseline is usable only as a cross check
+            #metBase_QCD = metBase_data.Clone("QCD")
+            #metBase_QCD.Add(metBase_EWK_GenuineTaus,-1)
+            #metBase_QCD.Add(metBase_EWK_FakeTaus,-1)
+            #addLabels(metBase_QCD, "QCD, baseline")
             
             metInverted_QCD = metInverted_data.Clone("QCD")
             metInverted_QCD.Add(metInverted_EWK_GenuineTaus,-1)
             metInverted_QCD.Add(metInverted_EWK_FakeTaus,-1)
+            treatHistogram(metInverted_QCD, "QCD, inverted")
             
-            metInverted_data = addlabels(metInverted_data)
-            metInverted_EWK_GenuineTaus  = addlabels(metInverted_EWK_GenuineTaus)
-            metInverted_EWK_FakeTaus  = addlabels(metInverted_EWK_FakeTaus)
+            #===== Make plots of templates
+            print "\n*** Integrals of plotted templates"
+            #invertedQCD.plotHisto(metInverted_data,"template_Data_Inverted")
+            #invertedQCD.plotHisto(metInverted_EWK_GenuineTaus,"template_EWKGenuineTaus_Inverted")
+            #invertedQCD.plotHisto(metInverted_EWK_FakeTaus,"template_EWKFakeTaus_Inverted")
+            invertedQCD.plotHisto(metInverted_QCD,"template_QCD_Inverted")
+            invertedQCD.plotHisto(metBase_data,"template_Data_Baseline")
+            invertedQCD.plotHisto(metBase_EWK_GenuineTaus,"template_EWKGenuineTaus_Baseline")
+            invertedQCD.plotHisto(metBase_EWK_FakeTaus,"template_EWKFakeTaus_Baseline")
+            #invertedQCD.plotHisto(metBase_QCD,"template_QCD_Baseline")
             
-            metBase_data     = addlabels(metBase_data)
-            metBase_EWK_GenuineTaus = addlabels(metBase_EWK_GenuineTaus)
-            metBase_EWK_FakeTaus = addlabels(metBase_EWK_FakeTaus)
-
-            metInverted_QCD  = addlabels(metInverted_QCD)
-            
-            invertedQCD.plotHisto(metInverted_data,"inverted")
-            invertedQCD.plotHisto(metInverted_EWK_GenuineTaus,"invertedEWKGenuineTaus")
-            invertedQCD.plotHisto(metInverted_EWK_FakeTaus,"invertedEWKFakeTaus")
-            
-            invertedQCD.plotHisto(metBase_data,"baseline")
-            invertedQCD.plotHisto(metBase_EWK_GenuineTaus,"baselineEWKGenuineTaus")
-            invertedQCD.plotHisto(metBase_EWK_FakeTaus,"baselineEWKFakeTaus")
-            
+            #===== Fit individual templates and
+            # Fit first templates for QCD, EWK_genuine_taus, and EWK_fake_taus
+            # Then fit the shape of those parametrizations to baseline data to obtain normalization coefficients
             fitOptions = "RB"
             
-            invertedQCD.fitEWK_GenuineTaus(metInverted_EWK_GenuineTaus,fitOptions) 
+            # Strategy: take EWK templates from baseline and QCD template from inverted; then fit to baseline data
+            invertedQCD.fitEWK_GenuineTaus(metInverted_EWK_GenuineTaus,fitOptions)
             invertedQCD.fitEWK_GenuineTaus(metBase_EWK_GenuineTaus,fitOptions)
-
             invertedQCD.fitEWK_FakeTaus(metInverted_EWK_FakeTaus,fitOptions)
             invertedQCD.fitEWK_FakeTaus(metBase_EWK_FakeTaus,fitOptions)
-
             invertedQCD.fitQCD(metInverted_QCD,fitOptions)
             invertedQCD.fitData(metBase_data)
-            
+
+            #===== Calculate normalization
             invertedQCD.getNormalization()
             
         invertedQCD.Summary()
         invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactorsFilteredEWKFakeTaus.py")
         invertedQCD.WriteLatexOutput("fits.tex")
 
-def addlabels(histo):
+def treatHistogram(histo, histoname):
+    histo.SetTitle(histoname)
     binwidth = int(histo.GetXaxis().GetBinWidth(1))
     histo.GetXaxis().SetTitle("Type1 PFMET (GeV)")
     histo.GetYaxis().SetTitle("Events / %i GeV"%binwidth)
     histo.GetYaxis().SetTitleOffset(1.5)
-    return histo
+    # Set negative bins to zero, but keep bin error like it is for fitting
+    for k in range(0, histo.GetNbinsX()+2):
+        if histo.GetBinContent(k) < 0.0:
+            print "Histogram '%s': Setting negative bin %d content to zero (was %f)"%(histoname, k, histo.GetBinContent(k))
+            histo.SetBinContent(k, 0.0)
+            
 
 if __name__ == "__main__":
     main(sys.argv)

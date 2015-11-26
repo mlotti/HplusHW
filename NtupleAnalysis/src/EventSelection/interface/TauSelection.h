@@ -86,7 +86,10 @@ public:
   };
   
   // Main class
+  /// Constructor with histogramming
   explicit TauSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix = "");
+  /// Constructor without histogramming
+  explicit TauSelection(const ParameterSet& config);
   virtual ~TauSelection();
 
   virtual void bookHistograms(TDirectory* dir);
@@ -97,6 +100,9 @@ public:
   Data analyze(const Event& event);
 
 private:
+  /// Initialisation called from constructor
+  void initialize(const ParameterSet& config);
+  /// The actual selection
   Data privateAnalyze(const Event& iEvent);
   bool passTrgMatching(const Tau& tau, std::vector<math::LorentzVectorT<double>>& trgTaus) const;
   bool passDecayModeFinding(const Tau& tau) const { return tau.decayModeFinding(); }

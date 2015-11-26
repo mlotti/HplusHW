@@ -265,7 +265,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         landsProcess = 5,
         shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
-        datasetDefinition = "WJets",
+        datasetDefinition = "WJetsHT",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_Wjets","lumi","probBtag"],
     ))
@@ -283,7 +283,7 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
         landsProcess = 7,
         shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
-        datasetDefinition   = "DYJetsToLL",
+        datasetDefinition   = "DYJetsToLLHT",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_DYtoll","lumi","probBtag"],
     ))
@@ -330,7 +330,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         landsProcess = None,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
-        datasetDefinition = "WJets",
+        datasetDefinition = "WJetsHT",
         validMassPoints = MassPoints,
         nuisances    = myEmbeddingShapeSystematics,
     ))
@@ -348,7 +348,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         landsProcess = None,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
-        datasetDefinition   = "DYJetsToLL",
+        datasetDefinition   = "DYJetsToLLHT",
         validMassPoints = MassPoints,
         nuisances    = myEmbeddingShapeSystematics,
     ))
@@ -376,7 +376,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         landsProcess = 5,
         shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
-        datasetDefinition = "WJets",
+        datasetDefinition = "WJetsHT",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_Wjets","lumi","probBtag"],
     ))
@@ -394,7 +394,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FullSystematics" or OptionGenuineTa
         landsProcess = 7,
         shapeHisto   = FakeShapeOtherHisto,
         datasetType  = "EWKfake",
-        datasetDefinition   = "DYJetsToLL",
+        datasetDefinition   = "DYJetsToLLHT",
         validMassPoints = MassPoints,
         nuisances    = myFakeShapeSystematics[:]+["e_veto_fakes", "mu_veto_fakes","b_tag_fakes","xsect_DYtoll","lumi","probBtag"],
     ))
@@ -448,7 +448,7 @@ elif OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
         landsProcess = 6,
         shapeHisto   = SignalShapeHisto,
         datasetType  = "Embedding",
-        datasetDefinition = "DYJetsToLL",
+        datasetDefinition = "DYJetsToLLHT",
         validMassPoints = MassPoints,
         nuisances    = myShapeSystematics[:]+["e_veto", "mu_veto","b_tag","xsect_DYtoll","lumi"],
     ))

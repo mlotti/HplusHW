@@ -164,9 +164,7 @@ void HistoSplitter::createShapeHistogramTriplet(bool enableTrueHistogram, HistoL
   }
   // Create inclusive histogram
   std::string myTitle = title+"Inclusive";
-  for (size_t i = 0; i < fNUnfoldedBins; ++i) {
-    histoContainer.push_back(fHistoWrapper.makeTHTriplet<T>(enableTrueHistogram, level, splittedDirs, myTitle.c_str(), myTitle.c_str(), std::forward<Args>(args)...));
-  }
+  histoContainer.push_back(fHistoWrapper.makeTHTriplet<T>(enableTrueHistogram, level, splittedDirs, myTitle.c_str(), myTitle.c_str(), std::forward<Args>(args)...));
 }
 
 template<typename T, typename ...Args>

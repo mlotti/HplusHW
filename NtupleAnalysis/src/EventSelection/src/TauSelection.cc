@@ -55,30 +55,78 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fJetToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Jet")),
   fJetToTauMisIDSFValue(assignTauMisIDSFValue(config, "Jet")),
   // tau trigger SF
-  fTauTriggerSFReader(config.getParameter<ParameterSet>("tauTriggerSF")),
+  fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
-  cPassedTauSelection(eventCounter.addCounter("passed tau selection ("+postfix+")")),
-  cPassedTauSelectionMultipleTaus(eventCounter.addCounter("multiple selected taus ("+postfix+")")),
-  cPassedAntiIsolatedTauSelection(eventCounter.addCounter("passed anti-isolated tau selection ("+postfix+")")),
-  cPassedAntiIsolatedTauSelectionMultipleTaus(eventCounter.addCounter("multiple anti-isolated taus ("+postfix+")")),
+  cPassedTauSelection(fEventCounter.addCounter("passed tau selection ("+postfix+")")),
+  cPassedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple selected taus ("+postfix+")")),
+  cPassedAntiIsolatedTauSelection(fEventCounter.addCounter("passed anti-isolated tau selection ("+postfix+")")),
+  cPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple anti-isolated taus ("+postfix+")")),
   // Sub counters
-  cSubAll(eventCounter.addSubCounter("tau selection ("+postfix+")", "All events")),
-  cSubPassedTriggerMatching(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed trigger matching")),
-  cSubPassedDecayMode(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed decay mode")),
-  cSubPassedGenericDiscriminators(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed generic discriminators")),
-  cSubPassedElectronDiscr(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed e discr")),
-  cSubPassedMuonDiscr(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed mu discr")),
-  cSubPassedPt(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed pt cut")),
-  cSubPassedEta(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed eta cut")),
-  cSubPassedLdgTrk(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed ldg.trk pt cut")),
-  cSubPassedNprongs(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed nprongs")),
-  cSubPassedIsolation(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed isolation")),
-  cSubPassedRtau(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed Rtau")),
-  cSubPassedAntiIsolation(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolation")),
-  cSubPassedAntiIsolationRtau(eventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated Rtau"))
-{ }
+  cSubAll(fEventCounter.addSubCounter("tau selection ("+postfix+")", "All events")),
+  cSubPassedTriggerMatching(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed trigger matching")),
+  cSubPassedDecayMode(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed decay mode")),
+  cSubPassedGenericDiscriminators(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed generic discriminators")),
+  cSubPassedElectronDiscr(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed e discr")),
+  cSubPassedMuonDiscr(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed mu discr")),
+  cSubPassedPt(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed pt cut")),
+  cSubPassedEta(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed eta cut")),
+  cSubPassedLdgTrk(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed ldg.trk pt cut")),
+  cSubPassedNprongs(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed nprongs")),
+  cSubPassedIsolation(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed isolation")),
+  cSubPassedRtau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed Rtau")),
+  cSubPassedAntiIsolation(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolation")),
+  cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated Rtau"))
+{ 
+  initialize(config);
+}
+
+TauSelection::TauSelection(const ParameterSet& config)
+: BaseSelection(),
+  bApplyTriggerMatching(config.getParameter<bool>("applyTriggerMatching")),
+  fTriggerTauMatchingCone(config.getParameter<float>("triggerMatchingCone")),
+  fTauPtCut(config.getParameter<float>("tauPtCut")),
+  fTauEtaCut(config.getParameter<float>("tauEtaCut")),
+  fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
+  fTauNprongs(config.getParameter<int>("prongs")),
+  fTauRtauCut(config.getParameter<float>("rtau")),
+  // tau misidentification SF
+  fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
+  fEToTauMisIDSFValue(assignTauMisIDSFValue(config, "E")),
+  fMuToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Mu")),
+  fMuToTauMisIDSFValue(assignTauMisIDSFValue(config, "Mu")),
+  fJetToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "Jet")),
+  fJetToTauMisIDSFValue(assignTauMisIDSFValue(config, "Jet")),
+  // tau trigger SF
+  fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
+  // Event counter for passing selection
+  cPassedTauSelection(fEventCounter.addCounter("passed tau selection")),
+  cPassedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple selected taus")),
+  cPassedAntiIsolatedTauSelection(fEventCounter.addCounter("passed anti-isolated tau selection")),
+  cPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple anti-isolated taus")),
+  // Sub counters
+  cSubAll(fEventCounter.addSubCounter("tau selection", "All events")),
+  cSubPassedTriggerMatching(fEventCounter.addSubCounter("tau selection", "Passed trigger matching")),
+  cSubPassedDecayMode(fEventCounter.addSubCounter("tau selection", "Passed decay mode")),
+  cSubPassedGenericDiscriminators(fEventCounter.addSubCounter("tau selection", "Passed generic discriminators")),
+  cSubPassedElectronDiscr(fEventCounter.addSubCounter("tau selection", "Passed e discr")),
+  cSubPassedMuonDiscr(fEventCounter.addSubCounter("tau selection", "Passed mu discr")),
+  cSubPassedPt(fEventCounter.addSubCounter("tau selection", "Passed pt cut")),
+  cSubPassedEta(fEventCounter.addSubCounter("tau selection", "Passed eta cut")),
+  cSubPassedLdgTrk(fEventCounter.addSubCounter("tau selection", "Passed ldg.trk pt cut")),
+  cSubPassedNprongs(fEventCounter.addSubCounter("tau selection", "Passed nprongs")),
+  cSubPassedIsolation(fEventCounter.addSubCounter("tau selection", "Passed isolation")),
+  cSubPassedRtau(fEventCounter.addSubCounter("tau selection", "Passed Rtau")),
+  cSubPassedAntiIsolation(fEventCounter.addSubCounter("tau selection", "Passed anti-isolation")),
+  cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated Rtau"))
+{ 
+  initialize(config);
+}
 
 TauSelection::~TauSelection() { }
+
+void TauSelection::initialize(const ParameterSet& config) {
+  
+}
 
 void TauSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "tauSelection_"+sPostfix);

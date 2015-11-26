@@ -41,7 +41,7 @@ double AngularCutsBase::Data::get1DCutVariable(size_t n) const {
   return f1DCutVariables[n];
 }
 
-AngularCutsBase::AngularCutsBase(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string prefix, const AngularCutsBase::AngularCutsType type, const std::string& postfix)
+AngularCutsBase::AngularCutsBase(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& prefix, const AngularCutsBase::AngularCutsType type, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, prefix+postfix),
   // Input parameters
   nMaxJets(4),
@@ -49,9 +49,29 @@ AngularCutsBase::AngularCutsBase(const ParameterSet& config, EventCounter& event
   bEnableOptimizationPlots(config.getParameter<bool>("enableOptimizationPlots")),
   sPrefix(prefix),
   fType(type),
-  cPassedAngularCuts(eventCounter.addCounter("passed angular cuts / "+prefix+" ("+postfix+")")),
-  cSubAllEvents(eventCounter.addSubCounter("angular cuts / "+prefix+" ("+postfix+")", "All events"))
+  cPassedAngularCuts(fEventCounter.addCounter("passed angular cuts / "+prefix+" ("+postfix+")")),
+  cSubAllEvents(fEventCounter.addSubCounter("angular cuts / "+prefix+" ("+postfix+")", "All events"))
 {
+  initialize(config, postfix);
+}
+
+AngularCutsBase::AngularCutsBase(const ParameterSet& config, const AngularCutsBase::AngularCutsType type)
+: BaseSelection(),
+  // Input parameters
+  nMaxJets(4),
+  nConsideredJets(static_cast<size_t>(config.getParameter<int>("nConsideredJets"))),
+  bEnableOptimizationPlots(config.getParameter<bool>("enableOptimizationPlots")),
+  sPrefix(""),
+  fType(type),
+  cPassedAngularCuts(fEventCounter.addCounter("passed angular cuts")),
+  cSubAllEvents(fEventCounter.addSubCounter("angular cuts", "All events"))
+{
+  initialize(config, "");
+}
+
+AngularCutsBase::~AngularCutsBase() { }
+
+void AngularCutsBase::initialize(const ParameterSet& config, const std::string& postfix) {
   // Check validity of parameters
   if (static_cast<size_t>(nConsideredJets) > nMaxJets)
     throw hplus::Exception("config") << "AngularCuts: Requested cuts on " << nConsideredJets << " jets, but maximum is " << nMaxJets;
@@ -69,11 +89,9 @@ AngularCutsBase::AngularCutsBase(const ParameterSet& config, EventCounter& event
   for (size_t i = 0; i < nMaxJets; ++i) {
     s.str("");
     s << "Passed cut on jet " << i+1;
-    cSubPassedCuts.push_back(eventCounter.addSubCounter("angular cuts / "+prefix+" ("+postfix+")", s.str()));
+    cSubPassedCuts.push_back(fEventCounter.addSubCounter("angular cuts / "+sPrefix+" ("+postfix+")", s.str()));
   }
 }
-
-AngularCutsBase::~AngularCutsBase() { }
 
 void AngularCutsBase::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "AngularCuts_"+sPostfix);

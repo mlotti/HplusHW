@@ -26,7 +26,8 @@ class WrappedTH2Triplet;
 class WrappedTH3Triplet;
 
 enum class HistoLevel {
-  kSystematics = 0,
+  kNever = 0,
+  kSystematics,
   kVital,
   kInformative,
   kDebug,

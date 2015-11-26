@@ -57,7 +57,10 @@ public:
   };
   
   // Main class
-  explicit MuonSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix = "");
+  /// Constructor with histogramming
+  explicit MuonSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix);
+  /// Constructor without histogramming
+  explicit MuonSelection(const ParameterSet& config, const std::string& postfix);
   virtual ~MuonSelection();
 
   virtual void bookHistograms(TDirectory* dir);
@@ -68,6 +71,9 @@ public:
   Data analyze(const Event& event);
 
 private:
+  /// Initialisation called from constructor
+  void initialize(const ParameterSet& config, const std::string& postfix);
+  /// The actual selection
   Data privateAnalyze(const Event& iEvent);
 
   // Input parameters

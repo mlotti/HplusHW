@@ -97,6 +97,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   // MET
   double type1METx;           tree->Branch("MET_Type1_x", &type1METx);
   double type1METy;           tree->Branch("MET_Type1_y", &type1METy);
+  double type1METsignif;      tree->Branch("MET_Type1_significance", &type1METsignif);
   // Vertices
   run = 1;
   lumi = 1;
@@ -145,6 +146,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
   nevent = 4;
   type1METx = 39.8002;
   type1METy = 3.99334;
+  type1METsignif = 10.0;
   tree->Fill();  
   BranchManager mgr;
   mgr.setTree(tree);

@@ -20,6 +20,15 @@ for dir in NtupleAnalysis HeavyChHiggsToTauNu; do
         fi
     done
 done
+# Unit tests under NtupleAnalysis/src
+for i in $(find $HIGGSANALYSIS_BASE/NtupleAnalysis/src/*/python -name "*.py" | xargs fgrep "import unittest" | cut -d : -f 1); do
+    echo $i
+    python $i
+    FOO=$?
+    if [ $RET = 0 -a $FOO != 0 ]; then
+        RET=$FOO
+    fi
+done
 
 echo
 echo

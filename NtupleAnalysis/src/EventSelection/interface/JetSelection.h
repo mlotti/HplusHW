@@ -66,7 +66,10 @@ public:
   };
   
   // Main class
+  /// Constructor with histogramming
   explicit JetSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix = "");
+  /// Constructor without histogramming
+  explicit JetSelection(const ParameterSet& config);
   virtual ~JetSelection();
 
   virtual void bookHistograms(TDirectory* dir);
@@ -79,6 +82,9 @@ public:
   Data analyzeWithoutTau(const Event& event);
 
 private:
+  /// Initialisation called from constructor
+  void initialize(const ParameterSet& config);
+  /// The actual selection
   Data privateAnalyze(const Event& event, const math::LorentzVectorT<double>& tauP, const double tauPt);
   
   void findJetMatchingToTau(std::vector<Jet>& collection, const Event& event, const math::LorentzVectorT<double>& tauP);

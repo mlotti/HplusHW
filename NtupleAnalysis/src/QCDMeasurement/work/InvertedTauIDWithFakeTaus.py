@@ -11,7 +11,6 @@
 
 import ROOT
 #ROOT.gROOT.SetBatch(True)
-from ROOT import *
 import math
 import sys
 import copy
@@ -35,43 +34,43 @@ def Linear(x,par):
     return par[0]*x[0] + par[1]
 
 def ErrorFunction(x,par):
-    return 0.5*(1 + TMath.Erf(par[0]*(x[0] - par[1])))
+    return 0.5*(1 + ROOT.TMath.Erf(par[0]*(x[0] - par[1])))
 
 def ExpFunction(x,par):
     if (x[0] > 280 and x[0] < 300) or x[0] > 360:
-        TF1.RejectPoint()
+        ROOT.TF1.RejectPoint()
         return 0
-    return par[0]*TMath.Exp(-x[0]*par[1])
+    return par[0]*ROOT.TMath.Exp(-x[0]*par[1])
 def Gaussian(x,par):
-    return par[0]*TMath.Gaus(x[0],par[1],par[2],1)
+    return par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)
 def DoubleGaussian(x,par):
-    return par[0]*TMath.Gaus(x[0],par[1],par[2],1) + par[3]*TMath.Gaus(x[0],par[4],par[5],1)
+    return par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1) + par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1)
 def SumFunction(x,par):
-    return par[0]*TMath.Gaus(x[0],par[1],par[2],1) + par[3]*TMath.Exp(-x[0]*par[4])
+    return par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1) + par[3]*ROOT.TMath.Exp(-x[0]*par[4])
 
 def QCDFunction(x,par,norm):
 #    return Rayleigh(x,par,norm)
-#    return norm*(par[1]*x[0]/((par[0])*(par[0]))*TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*TMath.Gaus(x[0],par[3],par[4],1)+par[5]*TMath.Exp(-par[6]*x[0]))
-     return norm*(RayleighFunction(x[0],par[0],par[1],1)+par[2]*TMath.Gaus(x[0],par[3],par[4],1)+par[5]*TMath.Exp(-par[6]*x[0]))
+#    return norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
+     return norm*(RayleighFunction(x[0],par[0],par[1],1)+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
 
 def RayleighFunction(x,par0,par1,norm):
     if par0+par1*x == 0.0:
         return 0
-    return norm*(par1*x/((par0)*(par0))*TMath.Exp(-x*x/(2*(par0)*(par0))))
+    return norm*(par1*x/((par0)*(par0))*ROOT.TMath.Exp(-x*x/(2*(par0)*(par0))))
             
 def Rayleigh(x,par,norm):
     return RayleighFunction(x[0],par[0],par[1],norm)
 #    if par[0]+par[1]*x[0] == 0.0:
 #	return 0
-##    return norm*(x[0]/((par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]))*TMath.Exp(-x[0]*x[0]/( 2*(par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]) )))
-##    return norm*(x[0]/((par[0])*(par[0]))*TMath.Exp(-x[0]*x[0]/( 2*(par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]))))
-#    return norm*(par[1]*x[0]/((par[0])*(par[0]))*TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0]))))
-##    return norm*(par[1]*x[0]/((par[0])*(par[0]))*TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*TMath.Gaus(x[0],par[3],par[4],1)+par[5]*TMath.Exp(-par[6]*x[0]))
+##    return norm*(x[0]/((par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]))*ROOT.TMath.Exp(-x[0]*x[0]/( 2*(par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]) )))
+##    return norm*(x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/( 2*(par[0]+par[1]*x[0])*(par[0]+par[1]*x[0]))))
+#    return norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0]))))
+##    return norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
                                                                                         
 def EWKFunction(x,par,boundary,norm = 1,rejectPoints = 0):
     #if not rejectPoints == 0:
     #    if (x[0] < 30):
-    #        TF1.RejectPoint()
+    #        ROOT.TF1.RejectPoint()
             #return 0
 #        if (x[0] > 280 and x[0] < 300):
 #	if (x[0] > 400):
@@ -84,55 +83,55 @@ def EWKFunction(x,par,boundary,norm = 1,rejectPoints = 0):
 
     #value = 160
     if x[0] < boundary:
-	return norm*par[0]*TMath.Gaus(x[0],par[1],par[2],1)
-    C = norm*par[0]*TMath.Gaus(boundary,par[1],par[2],1)*TMath.Exp(boundary*par[3])
-    return C*TMath.Exp(-x[0]*par[3])
+	return norm*par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)
+    C = norm*par[0]*ROOT.TMath.Gaus(boundary,par[1],par[2],1)*ROOT.TMath.Exp(boundary*par[3])
+    return C*ROOT.TMath.Exp(-x[0]*par[3])
 
 def EWKFunctionInv(x,par,boundary,norm = 1,rejectPoints = 0):
     #value = 150
     #value = 130
     if not rejectPoints == 0:
         if (x[0] > 230 and x[0] < 290):
-            TF1.RejectPoint()
+            ROOT.TF1.RejectPoint()
             #return 0
     if x[0] < boundary:
-        return norm*(par[0]*TMath.Landau(x[0],par[1],par[2]))
-    C = norm*(par[0]*TMath.Landau(boundary,par[1],par[2]))*TMath.Exp(boundary*par[3])
-    return C*TMath.Exp(-x[0]*par[3])
+        return norm*(par[0]*ROOT.TMath.Landau(x[0],par[1],par[2]))
+    C = norm*(par[0]*ROOT.TMath.Landau(boundary,par[1],par[2]))*ROOT.TMath.Exp(boundary*par[3])
+    return C*ROOT.TMath.Exp(-x[0]*par[3])
 #    value = 100
 #    if x[0] < value:
-##        return norm*par[0]*TMath.Gaus(x[0],par[1],par[2],1)
-#        return norm*(par[0]*TMath.Landau(x[0],par[1],par[2]))
-#    C = norm*par[0]*TMath.Gaus(value,par[1],par[2],1)*TMath.Exp(value*par[3])
-#    return C*TMath.Exp(-x[0]*par[3])
+##        return norm*par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)
+#        return norm*(par[0]*ROOT.TMath.Landau(x[0],par[1],par[2]))
+#    C = norm*par[0]*ROOT.TMath.Gaus(value,par[1],par[2],1)*ROOT.TMath.Exp(value*par[3])
+#    return C*ROOT.TMath.Exp(-x[0]*par[3])
 
 def QCDEWKFunction(x,par,norm):
     if par[0]+par[1]*x[0] == 0.0:
         return 0
-    return norm*(par[1]*x[0]/((par[0])*(par[0]))*TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*TMath.Gaus(x[0],par[3],par[4],1)+par[5]*TMath.Exp(-par[6]*x[0]))
+    return norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
 
 #def QCDFunction(x,par,norm):
-#    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)+par[3]*TMath.Gaus(x[0],par[4],par[5],1)+par[6]*TMath.Exp(-par[7]*x[0]))
-#    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1))
-#    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)+par[3]*TMath.Gaus(x[0],par[4],par[5],1))
-#    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)+par[3]*TMath.Exp(-par[4]*x[0]))
+#    return norm*(par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)+par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1)+par[6]*ROOT.TMath.Exp(-par[7]*x[0]))
+#    return norm*(par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1))
+#    return norm*(par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)+par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1))
+#    return norm*(par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)+par[3]*ROOT.TMath.Exp(-par[4]*x[0]))
 
 def QCDFunctionFixed(x,par):
-    return par[0]*(TMath.Gaus(x[0],par[1],par[2],1)+par[3]*TMath.Gaus(x[0],par[4],par[5],1)+par[6]*TMath.Exp(-par[7]*x[0]))
+    return par[0]*(ROOT.TMath.Gaus(x[0],par[1],par[2],1)+par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1)+par[6]*ROOT.TMath.Exp(-par[7]*x[0]))
 
 
 #def EWKFunction(x,par,norm):
 #    if (x[0] > 280 and x[0] < 300) or x[0] > 360:
-#	TF1.RejectPoint()
+#	ROOT.TF1.RejectPoint()
 #	return 0
-#    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)+par[3]*TMath.Gaus(x[0],par[4],par[5],1))
-#    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1))
-#    return norm*(par[0]*TMath.Exp(-x[0]*par[1]))
-#    return norm*(par[0]*TMath.Landau(x[0],par[1],par[2]))
-#    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)+par[3]*TMath.Landau(x[0],par[4],par[5]))
-#     return norm*(par[0]*TMath.Poisson(x[0],par[1]))
-#    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)*TMath.Exp(-x[0]*par[3]))
-#    return norm*(par[0]*TMath.Gaus(x[0],par[1],par[2],1)*TMath.Sqrt(x[0]))
+#    return norm*(par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)+par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1))
+#    return norm*(par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1))
+#    return norm*(par[0]*ROOT.TMath.Exp(-x[0]*par[1]))
+#    return norm*(par[0]*ROOT.TMath.Landau(x[0],par[1],par[2]))
+#    return norm*(par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)+par[3]*ROOT.TMath.Landau(x[0],par[4],par[5]))
+#     return norm*(par[0]*ROOT.TMath.Poisson(x[0],par[1]))
+#    return norm*(par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)*ROOT.TMath.Exp(-x[0]*par[3]))
+#    return norm*(par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)*ROOT.TMath.Sqrt(x[0]))
 
 class InvertedTauID:
 
@@ -146,22 +145,7 @@ class InvertedTauID:
         
 	self.parBaseQCD = []
 
-	self.nInvQCD    = 0
-        self.nFitInvQCD = 0
-	self.nMCEWK_GenuineTaus     = 0
-
-        self.nMCEWK_FakeTaus     = 0
-        self.nMCEWKinverted_FakeTaus     = 0
-        self.nMCEWKbaseline_FakeTaus     = 0
-
-	self.nBaseQCD   = 0
-
-	self.normInvQCD  = 1
-	self.normEWK_GenuineTaus     = 1
-        self.normEWK_FakeTaus     = 1
-
-	self.QCDfraction = 0
-        self.EWKFakeTaufraction = 0
+        self.resetBinResults()
 
 	self.label = ""
 	self.labels = []
@@ -171,6 +155,24 @@ class InvertedTauID:
 	self.lumi = 0
 
 	self.errorBars = False
+
+    def resetBinResults(self):
+        self.nInvQCD    = 0
+        self.nFitInvQCD = 0
+        self.nMCEWK_GenuineTaus     = 0
+
+        self.nMCEWK_FakeTaus     = 0
+        self.nMCEWKinverted_FakeTaus     = 0
+        self.nMCEWKbaseline_FakeTaus     = 0
+
+        self.nBaseQCD   = 0
+        self.normInvQCD  = -1
+
+        self.normEWK_GenuineTaus     = -1
+        self.normEWK_FakeTaus     = -1
+
+        self.QCDfraction = 0
+        self.EWKFakeTaufraction = 0
 
     def setLabel(self, label):
 	self.label = label
@@ -1078,13 +1080,13 @@ class InvertedTauID:
 	h2cut.SetLineColor(2)
 
         integralError = ROOT.Double(0.0)
-	integralValue = h1.IntegralAndError(1,h1cut.GetNbinsX(),integralError)
+	integralValue = h1.IntegralAndError(0,h1cut.GetNbinsX()+2,integralError)
 
-        h1_integral = h1.Integral(0,h1.GetNbinsX())
-	h2_integral = h2.Integral(0,h2.GetNbinsX())
+        h1_integral = h1.Integral(0,h1.GetNbinsX()+2)
+	h2_integral = h2.Integral(0,h2.GetNbinsX()+2)
 
-	iBin = 1
-	nBins = h1cut.GetNbinsX()
+	iBin = 0
+	nBins = h1cut.GetNbinsX()+2
 	while iBin < nBins:
 	    error = ROOT.Double(0.0)
 	    selected1 = h1.IntegralAndError(iBin,nBins,error)
@@ -1195,7 +1197,7 @@ class InvertedTauID:
 #                return Linear(x,par)
 		return ErrorFunction(x,par)
 
-        theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = ROOT.TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
         theFit.SetParLimits(0,0.01,0.05)
         theFit.SetParLimits(1,50,150)
 
@@ -1214,7 +1216,7 @@ class InvertedTauID:
         plot2.save()
 
     def plotHisto(self,histo,canvasName):
-        print histo.GetName(),"Integral",histo.Integral(0,histo.GetNbinsX())
+        print histo.GetTitle(),"Integral",histo.Integral(0,histo.GetNbinsX()+2)
         if histo.GetEntries() == 0:
             return
 
@@ -1227,7 +1229,7 @@ class InvertedTauID:
 
         plot.getPad().SetLogy(True)
 
-        integralValue = int(0.5 + histo.Integral(0,histo.GetNbinsX()))
+        integralValue = int(0.5 + histo.Integral(0,histo.GetNbinsX())+2)
         histograms.addText(0.4,0.7,"Integral = %s ev"% integralValue)
 
         match = re.search("/\S+baseline",histo.GetName(),re.IGNORECASE)
@@ -1240,6 +1242,7 @@ class InvertedTauID:
         self.plotIntegral(plot, histo.GetName())
     
     def fitQCD(self,histo,options="R"):
+        print "\n*** Fitting QCD"
         if histo.GetEntries() == 0:
             return
                     
@@ -1260,7 +1263,7 @@ class InvertedTauID:
 
         print "Fit range ",rangeMin, " - ",rangeMax
 
-        theFit = TF1("theFit",FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = ROOT.TF1("theFit",FitFunction(),rangeMin,rangeMax,numberOfParameters)
 
         theFit.SetParLimits(0,0.0001,200)
         theFit.SetParLimits(1,0.001,10)
@@ -1272,13 +1275,13 @@ class InvertedTauID:
         theFit.SetParLimits(5,0.0001,1)
         theFit.SetParLimits(6,0.001,0.05)
 
-        gStyle.SetOptFit(0)
+        ROOT.gStyle.SetOptFit(0)
 
         plot = plots.PlotBase()
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
-        plot.createFrame("qcdfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+        plot.createFrame("fit_QCD_"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
-        self.nInvData = histo.Integral(0,histo.GetNbinsX())
+        self.nInvData = histo.Integral(0,histo.GetNbinsX()+2)
         self.normInvQCD = self.nInvData
         print "check self.nInvData",self.nInvData
 
@@ -1297,7 +1300,7 @@ class InvertedTauID:
         #print "check self.nFitInvData",self.nFitInvData
         """
         numberOfQCDParameters = 2
-        qcdOnly = TF1("qcdOnly",QCDOnly(),rangeMin,rangeMax,numberOfQCDParameters)
+        qcdOnly = ROOT.TF1("qcdOnly",QCDOnly(),rangeMin,rangeMax,numberOfQCDParameters)
         qcdOnly.FixParameter(0,par[0])
         qcdOnly.FixParameter(1,par[1])
         qcdOnly.SetLineStyle(2)
@@ -1348,7 +1351,7 @@ class InvertedTauID:
 	    def __call__( self, x, par ):
                 return QCDFunction(x,par,1)
             
-        theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = ROOT.TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
         """
         theFit.SetParLimits(0,1,20)
         theFit.SetParLimits(1,20,40)
@@ -1388,15 +1391,15 @@ class InvertedTauID:
             theFit.SetParLimits(3,0.1,5)
 
 
-	gStyle.SetOptFit(0)
+	ROOT.gStyle.SetOptFit(0)
 
 	plot = plots.PlotBase()
 	plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
-	plot.createFrame("qcdfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+	plot.createFrame("fit_QCD_old_"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
         histograms.addStandardTexts()
 
-	self.normInvQCD = histo.Integral(0,histo.GetNbinsX())
+	self.normInvQCD = histo.Integral(0,histo.GetNbinsX()+2)
 
 	histo.Scale(1/self.normInvQCD)
         histo.Fit(theFit,"LR")         
@@ -1427,6 +1430,8 @@ class InvertedTauID:
         print "Integral ",self.normInvQCD*self.nFitInvQCD
 
     def fitEWK_GenuineTaus(self,histo,options="R"):
+        print "\n*** Fitting EWK_GenuineTaus"
+        
         if histo.GetEntries() == 0:
             return
                     
@@ -1465,8 +1470,8 @@ class InvertedTauID:
                 def __call__( self, x, par ):
                     return EWKFunction(x,par,boundary,0)
         
-        theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
-	thePlot = TF1('thePlot',PlotFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = ROOT.TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+	thePlot = ROOT.TF1('thePlot',PlotFunction(),rangeMin,rangeMax,numberOfParameters)
 
         #theFit.SetParLimits(0,0.5,30)
         #theFit.SetParLimits(1,90,200)
@@ -1538,14 +1543,14 @@ class InvertedTauID:
             theFit.SetParLimits(2,10,100)
             theFit.SetParLimits(3,0.01,10)
 
-	gStyle.SetOptFit(0)
-        gStyle.SetOptStat(0) #removes title and stat box
+	ROOT.gStyle.SetOptFit(0)
+        ROOT.gStyle.SetOptStat(0) #removes title and stat box
         
         plot = plots.PlotBase()
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
-        plot.createFrame("ewkgenuinetaufit"+name+"_"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+        plot.createFrame("fit_EWKGenuineTaus_"+name+"_"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
-	self.normEWK_GenuineTaus = histo.Integral(0,histo.GetNbinsX())
+	self.normEWK_GenuineTaus = histo.Integral(0,histo.GetNbinsX()+2)
         if name == "Inverted":
             self.nEWKinverted_GenuineTaus = self.normEWK_GenuineTaus
         if name == "Baseline":
@@ -1556,7 +1561,7 @@ class InvertedTauID:
 
         histo.Fit(theFit,options)
 
-        #gStyle.SetOptFit(0)
+        #ROOT.gStyle.SetOptFit(0)
         #plot.createFrame("ewkgenuinetaufit"+name+"_"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
        
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
@@ -1593,6 +1598,7 @@ class InvertedTauID:
         print "Integral ",self.normEWK_GenuineTaus*self.nMCEWK_GenuineTaus
 
     def fitEWK_FakeTaus(self,histo,options="LR"):
+        print "\n*** Fitting EWK_FakeTaus"
         if histo.GetEntries() == 0:
             return
                     
@@ -1631,8 +1637,8 @@ class InvertedTauID:
                 def __call__( self, x, par ):
                     return EWKFunctionInv(x,par,boundaryInv,0,1) #not Inv?
         
-        theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
-	thePlot = TF1('thePlot',PlotFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = ROOT.TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
+	thePlot = ROOT.TF1('thePlot',PlotFunction(),rangeMin,rangeMax,numberOfParameters)
 
         theFit.SetParLimits(0,0.5,30)
         theFit.SetParLimits(1,90,200)
@@ -1693,14 +1699,14 @@ class InvertedTauID:
             theFit.SetParLimits(2,10,100)
             theFit.SetParLimits(3,0.01,10)
 
-	gStyle.SetOptFit(0)
-        gStyle.SetOptStat(0)
+	ROOT.gStyle.SetOptFit(0)
+        ROOT.gStyle.SetOptStat(0)
 
         plot = plots.PlotBase()
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
-        plot.createFrame("ewkfaketaufit"+name+"_"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+        plot.createFrame("fit_EWKFakeTaus_"+name+"_"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
-	self.normEWK_FakeTaus = histo.Integral(0,histo.GetNbinsX())
+	self.normEWK_FakeTaus = histo.Integral(0,histo.GetNbinsX()+2)
         if name == "Inverted":
             self.nEWKinverted_FakeTaus = self.normEWK_FakeTaus
         if name == "Baseline":
@@ -1751,7 +1757,7 @@ class InvertedTauID:
         print "Integral ",self.normEWK_FakeTaus*self.nMCEWK_FakeTaus
 
     def fitData(self,histo,options="R"):
-
+        print "\n*** Fitting data"
         if histo.GetEntries() == 0:
             self.nBaseData = 0
             self.nInvData  = 0
@@ -1786,13 +1792,13 @@ class InvertedTauID:
         
         print "Fit range ",rangeMin, " - ",rangeMax
         
-        theFit = TF1("theFit",FitFunction(),rangeMin,rangeMax,numberOfParameters)
+        theFit = ROOT.TF1("theFit",FitFunction(),rangeMin,rangeMax,numberOfParameters)
 
-        gStyle.SetOptStat(0)
+        ROOT.gStyle.SetOptStat(0)
         
         plot = plots.PlotBase()
         plot.histoMgr.appendHisto(histograms.Histo(histo,histo.GetName()))
-        plot.createFrame("combinedfit"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+        plot.createFrame("fit_Combined_"+self.label, opts={"ymin": 1e-5, "ymaxfactor": 2.})
 
         self.nBaseData = histo.Integral(0,histo.GetNbinsX())
 	print "data events ",self.nBaseData
@@ -1807,7 +1813,7 @@ class InvertedTauID:
 
 	par = theFit.GetParameters()
 
-	qcdOnly = TF1("qcdOnly",QCDOnly(),rangeMin,rangeMax,numberOfParameters)
+	qcdOnly = ROOT.TF1("qcdOnly",QCDOnly(),rangeMin,rangeMax,numberOfParameters)
 	qcdOnly.FixParameter(0,par[0])
 	qcdOnly.FixParameter(1,par[1])
 	qcdOnly.SetLineStyle(2)
@@ -1852,6 +1858,7 @@ class InvertedTauID:
 
 
     def getNormalization(self):
+        print "\n*** Calculating normalization"
         nDataBaseline = self.nBaseData
         nDataInverted = self.nInvData
 
