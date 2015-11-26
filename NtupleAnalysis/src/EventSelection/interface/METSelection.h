@@ -59,7 +59,10 @@ public:
   };
   
   // Main class
+  /// Constructor with histogramming
   explicit METSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix = "");
+  /// Constructor without histogramming
+  explicit METSelection(const ParameterSet& config);
   virtual ~METSelection();
 
   virtual void bookHistograms(TDirectory* dir);
@@ -70,6 +73,9 @@ public:
   Data analyze(const Event& event, int nVertices);
 
 private:
+  /// Initialisation called from constructor
+  void initialize(const ParameterSet& config);
+  /// The actual selection
   Data privateAnalyze(const Event& iEvent, int nVertices);
 
   // Input parameters

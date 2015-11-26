@@ -58,7 +58,10 @@ public:
   };
   
   // Main class
+  /// Constructor with histogramming
   explicit BJetSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix = "");
+  /// Constructor without histogramming
+  explicit BJetSelection(const ParameterSet& config);
   virtual ~BJetSelection();
 
   virtual void bookHistograms(TDirectory* dir);
@@ -69,6 +72,9 @@ public:
   Data analyze(const Event& event, const JetSelection::Data& jetData);
 
 private:
+  /// Initialisation called from constructor
+  void initialize(const ParameterSet& config);
+  /// The actual event selection
   Data privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData);
   /// Calculate probability to pass b tagging
   double calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData);

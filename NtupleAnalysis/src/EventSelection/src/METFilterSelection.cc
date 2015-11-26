@@ -16,16 +16,29 @@ METFilterSelection::Data::~Data() { }
 METFilterSelection::METFilterSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
   // Event counter for passing selection
-  cSubAll(eventCounter.addSubCounter("METFilter selection ("+postfix+")", "All events")),
-  cPassedMETFilterSelection(eventCounter.addCounter("passed METFilter selection ("+postfix+")"))
+  cSubAll(fEventCounter.addSubCounter("METFilter selection ("+postfix+")", "All events")),
+  cPassedMETFilterSelection(fEventCounter.addCounter("passed METFilter selection ("+postfix+")"))
 {
-  // Create sub counters
-  for (auto p: config.getParameter<std::vector<std::string>>("discriminators")) {
-    cSubPassedFilter.push_back(eventCounter.addSubCounter("METFilter selection ("+postfix+")", "Passed "+p) );
-  }
+  initialize(config);
+}
+
+METFilterSelection::METFilterSelection(const ParameterSet& config)
+: BaseSelection(),
+  // Event counter for passing selection
+  cSubAll(fEventCounter.addSubCounter("METFilter selection", "All events")),
+  cPassedMETFilterSelection(fEventCounter.addCounter("passed METFilter selection"))
+{
+  initialize(config);
 }
 
 METFilterSelection::~METFilterSelection() { }
+
+void METFilterSelection::initialize(const ParameterSet& config) {
+  // Create sub counters
+  for (auto p: config.getParameter<std::vector<std::string>>("discriminators")) {
+    cSubPassedFilter.push_back(fEventCounter.addSubCounter("METFilter selection", "Passed "+p) );
+  }
+}
 
 void METFilterSelection::bookHistograms(TDirectory* dir) {
   

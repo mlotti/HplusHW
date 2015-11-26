@@ -27,18 +27,44 @@ TopSelection::TopSelection(const ParameterSet& config, EventCounter& eventCounte
 //   fTauMatchingDeltaR(config.getParameter<float>("tauMatchingDeltaR")),
 //   fNumberOfJetsCut(config, "numberOfJetsCut"),
   // Event counter for passing selection
-//  cPassedTopSelection(eventCounter.addCounter("passed jet selection ("+postfix+")")),
+//  cPassedTopSelection(fEventCounter.addCounter("passed jet selection ("+postfix+")")),
   // Sub counters
-  cSubAll(eventCounter.addSubCounter("jet selection ("+postfix+")", "All events"))
-//   cSubPassedJetID(eventCounter.addSubCounter("jet selection ("+postfix+")", "Passed jet ID")),
-//   cSubPassedJetPUID(eventCounter.addSubCounter("jet selection ("+postfix+")", "Passed PU ID")),
-//   cSubPassedDeltaRMatchWithTau(eventCounter.addSubCounter("jet selection ("+postfix+")", "Passed tau matching")),
-//   cSubPassedEta(eventCounter.addSubCounter("jet selection ("+postfix+")", "Passed eta cut")),
-//   cSubPassedPt(eventCounter.addSubCounter("jet selection ("+postfix+")", "Passed pt cut")),
-//   cSubPassedJetCount(eventCounter.addSubCounter("jet selection ("+postfix+")", "Passed jet number cut"))
-{ }
+  cSubAll(fEventCounter.addSubCounter("jet selection ("+postfix+")", "All events"))
+//   cSubPassedJetID(fEventCounter.addSubCounter("jet selection ("+postfix+")", "Passed jet ID")),
+//   cSubPassedJetPUID(fEventCounter.addSubCounter("jet selection ("+postfix+")", "Passed PU ID")),
+//   cSubPassedDeltaRMatchWithTau(fEventCounter.addSubCounter("jet selection ("+postfix+")", "Passed tau matching")),
+//   cSubPassedEta(fEventCounter.addSubCounter("jet selection ("+postfix+")", "Passed eta cut")),
+//   cSubPassedPt(fEventCounter.addSubCounter("jet selection ("+postfix+")", "Passed pt cut")),
+//   cSubPassedJetCount(fEventCounter.addSubCounter("jet selection ("+postfix+")", "Passed jet number cut"))
+{
+  initialize(config);
+}
+
+TopSelection::TopSelection(const ParameterSet& config)
+: BaseSelection(),
+//   fJetPtCut(config.getParameter<float>("jetPtCut")),
+//   fJetEtaCut(config.getParameter<float>("jetEtaCut")),
+//   fTauMatchingDeltaR(config.getParameter<float>("tauMatchingDeltaR")),
+//   fNumberOfJetsCut(config, "numberOfJetsCut"),
+  // Event counter for passing selection
+//  cPassedTopSelection(fEventCounter.addCounter("passed jet selection ("+postfix+")")),
+  // Sub counters
+  cSubAll(fEventCounter.addSubCounter("jet selection", "All events"))
+//   cSubPassedJetID(fEventCounter.addSubCounter("jet selection", "Passed jet ID")),
+//   cSubPassedJetPUID(fEventCounter.addSubCounter("jet selection", "Passed PU ID")),
+//   cSubPassedDeltaRMatchWithTau(fEventCounter.addSubCounter("jet selection", "Passed tau matching")),
+//   cSubPassedEta(fEventCounter.addSubCounter("jet selection", "Passed eta cut")),
+//   cSubPassedPt(fEventCounter.addSubCounter("jet selection", "Passed pt cut")),
+//   cSubPassedJetCount(fEventCounter.addSubCounter("jet selection", "Passed jet number cut"))
+{
+  initialize(config);
+}
 
 TopSelection::~TopSelection() { }
+
+void TopSelection::initialize(const ParameterSet& config) {
+  
+}
 
 void TopSelection::bookHistograms(TDirectory* dir) {
   //TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "topSelection_"+sPostfix);

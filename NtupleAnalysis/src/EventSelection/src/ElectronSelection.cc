@@ -20,14 +20,38 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& e
   fRelIsoCut(-1.0),
   fVetoMode(false),
   // Event counter for passing selection
-  cPassedElectronSelection(eventCounter.addCounter("passed e selection ("+postfix+")")),
+  cPassedElectronSelection(fEventCounter.addCounter("passed e selection ("+postfix+")")),
   // Sub counters
-  cSubAll(eventCounter.addSubCounter("e selection ("+postfix+")", "All events")),
-  cSubPassedPt(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed pt cut")),
-  cSubPassedEta(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed eta cut")),
-  cSubPassedID(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed ID")),
-  cSubPassedIsolation(eventCounter.addSubCounter("e selection ("+postfix+")", "Passed isolation"))
+  cSubAll(fEventCounter.addSubCounter("e selection ("+postfix+")", "All events")),
+  cSubPassedPt(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed pt cut")),
+  cSubPassedEta(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed eta cut")),
+  cSubPassedID(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed ID")),
+  cSubPassedIsolation(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed isolation"))
 {
+  initialize(config, postfix);
+}
+
+ElectronSelection::ElectronSelection(const ParameterSet& config, const std::string& postfix)
+: BaseSelection(),
+  fElectronPtCut(config.getParameter<float>("electronPtCut")),
+  fElectronEtaCut(config.getParameter<float>("electronEtaCut")),
+  fRelIsoCut(-1.0),
+  fVetoMode(false),
+  // Event counter for passing selection
+  cPassedElectronSelection(fEventCounter.addCounter("passed e selection ("+postfix+")")),
+  // Sub counters
+  cSubAll(fEventCounter.addSubCounter("e selection ("+postfix+")", "All events")),
+  cSubPassedPt(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed pt cut")),
+  cSubPassedEta(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed eta cut")),
+  cSubPassedID(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed ID")),
+  cSubPassedIsolation(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed isolation"))
+{
+  initialize(config, postfix);
+}
+
+ElectronSelection::~ElectronSelection() { }
+
+void ElectronSelection::initialize(const ParameterSet& config, const std::string& postfix) {
   if (postfix.find("veto") != std::string::npos || postfix.find("Veto") != std::string::npos)
     fVetoMode = true;
   std::string isolString = config.getParameter<std::string>("electronIsolation");
@@ -37,10 +61,8 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, EventCounter& e
     fRelIsoCut = 0.10; // Based on 2012 cut based isolation
   } else {
     throw hplus::Exception("config") << "Invalid electronIsolation option '" << isolString << "'! Options: 'veto', 'tight'";
-  }
+  } 
 }
-
-ElectronSelection::~ElectronSelection() { }
 
 void ElectronSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "eSelection_"+sPostfix);

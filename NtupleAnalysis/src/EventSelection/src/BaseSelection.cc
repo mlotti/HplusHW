@@ -6,10 +6,14 @@
 #include "EventSelection/interface/CommonPlots.h"
 #include "Framework/interface/type.h"
 #include "Framework/interface/Exception.h"
+#include "Framework/interface/EventWeight.h"
 #include "TDirectory.h"
 
 BaseSelection::BaseSelection(EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
-: fEventCounter(eventCounter),
+: fLocalDummyEventWeight(nullptr),
+  fLocalDummyEventCounter(nullptr),
+  fLocalDummyHistoWrapper(nullptr),
+  fEventCounter(eventCounter),
   fHistoWrapper(histoWrapper),
   fCommonPlots(commonPlots),
   sPostfix(postfix),
@@ -17,7 +21,28 @@ BaseSelection::BaseSelection(EventCounter& eventCounter, HistoWrapper& histoWrap
   fLumiNumber(0),
   fRunNumber(0)
 {}
-BaseSelection::~BaseSelection() {}
+
+BaseSelection::BaseSelection() 
+: fLocalDummyEventWeight(new EventWeight()),
+  fLocalDummyEventCounter(new EventCounter(*fLocalDummyEventWeight)),
+  fLocalDummyHistoWrapper(new HistoWrapper(*fLocalDummyEventWeight, "Never")),
+  fEventCounter(*fLocalDummyEventCounter), // Dummy EventCounter with dummy event weight
+  fHistoWrapper(*fLocalDummyHistoWrapper), // Dummy HistoWrapper with dummy event weight
+  fCommonPlots(nullptr),
+  sPostfix(""),
+  fEventNumber(0),
+  fLumiNumber(0),
+  fRunNumber(0)
+{}
+
+BaseSelection::~BaseSelection() {
+  if (fLocalDummyHistoWrapper != nullptr)
+    delete fLocalDummyHistoWrapper;
+  if (fLocalDummyEventCounter != nullptr)
+    delete fLocalDummyEventCounter;
+  if (fLocalDummyEventWeight != nullptr)
+    delete fLocalDummyEventWeight;
+}
 
 void BaseSelection::ensureAnalyzeAllowed(const EventID& iEventID) {
   if(fEventNumber == iEventID.event() &&

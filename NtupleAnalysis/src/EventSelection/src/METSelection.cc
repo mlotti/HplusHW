@@ -26,8 +26,25 @@ METSelection::METSelection(const ParameterSet& config, EventCounter& eventCounte
   fMETSignificanceCut(config, "METSignificanceCut"),
   bApplyPhiCorrections(config.getParameter<bool>("applyPhiCorrections")),
   // Event counter for passing selection
-  cPassedMETSelection(eventCounter.addCounter("passed MET selection ("+postfix+")"))
+  cPassedMETSelection(fEventCounter.addCounter("passed MET selection ("+postfix+")"))
 {
+  initialize(config);
+}
+
+METSelection::METSelection(const ParameterSet& config)
+: BaseSelection(),
+  fMETCut(config, "METCut"),
+  fMETSignificanceCut(config, "METSignificanceCut"),
+  bApplyPhiCorrections(config.getParameter<bool>("applyPhiCorrections")),
+  // Event counter for passing selection
+  cPassedMETSelection(fEventCounter.addCounter("passed MET selection"))
+{
+  initialize(config);
+}
+
+METSelection::~METSelection() { }
+
+void METSelection::initialize(const ParameterSet& config) {
   std::string sType = config.getParameter<std::string>("METType");
   if (sType == "GenMET")
     fMETType = kGenMET;
@@ -47,8 +64,6 @@ METSelection::METSelection(const ParameterSet& config, EventCounter& eventCounte
     throw hplus::Exception("config") << "Invalid MET 'type' chosen in config! Options are: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET";
   }
 }
-
-METSelection::~METSelection() { }
 
 void METSelection::bookHistograms(TDirectory* dir) {
   //TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "metSelection_"+sPostfix);

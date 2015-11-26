@@ -51,7 +51,10 @@ public:
   };
   
   // Main class
+  /// Constructor with histogramming
   explicit TopSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix = "");
+  /// Constructor without histogramming
+  explicit TopSelection(const ParameterSet& config);
   virtual ~TopSelection();
 
   virtual void bookHistograms(TDirectory* dir);
@@ -62,6 +65,9 @@ public:
   Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
 
 private:
+  /// Initialisation called from constructor
+  void initialize(const ParameterSet& config);
+  /// The actual selection
   Data privateAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   bool matchesToBJet(const Jet& jet, const BJetSelection::Data& bjetData) const;
   

@@ -21,12 +21,32 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
   fNumberOfJetsCut(config, "numberOfBJetsCut"),
   fDisriminatorValue(-1.0),
   // Event counter for passing selection
-  cPassedBJetSelection(eventCounter.addCounter("passed b-jet selection ("+postfix+")")),
+  cPassedBJetSelection(fEventCounter.addCounter("passed b-jet selection ("+postfix+")")),
   // Sub counters
-  cSubAll(eventCounter.addSubCounter("bjet selection ("+postfix+")", "All events")),
-  cSubPassedDiscriminator(eventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed discriminator")),
-  cSubPassedNBjets(eventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed Nbjets"))
+  cSubAll(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "All events")),
+  cSubPassedDiscriminator(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed discriminator")),
+  cSubPassedNBjets(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed Nbjets"))
 {
+  initialize(config);
+}
+
+BJetSelection::BJetSelection(const ParameterSet& config)
+: BaseSelection(),
+  fNumberOfJetsCut(config, "numberOfBJetsCut"),
+  fDisriminatorValue(-1.0),
+  // Event counter for passing selection
+  cPassedBJetSelection(fEventCounter.addCounter("passed b-jet selection")),
+  // Sub counters
+  cSubAll(fEventCounter.addSubCounter("bjet selection", "All events")),
+  cSubPassedDiscriminator(fEventCounter.addSubCounter("bjet selection", "Passed discriminator")),
+  cSubPassedNBjets(fEventCounter.addSubCounter("bjet selection", "Passed Nbjets"))
+{
+  initialize(config);
+}
+
+BJetSelection::~BJetSelection() { }
+
+void BJetSelection::initialize(const ParameterSet& config) {
   // Obtain algorithm and working point
   std::string sAlgorithm = config.getParameter<std::string>("bjetDiscr");
   std::string sWorkingPoint = config.getParameter<std::string>("bjetDiscrWorkingPoint");
@@ -65,8 +85,6 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
                                      << "' and working point '" << sWorkingPoint << "'!";
   }
 }
-
-BJetSelection::~BJetSelection() { }
 
 void BJetSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "bjetSelection_"+sPostfix);

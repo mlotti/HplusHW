@@ -72,7 +72,10 @@ public:
   };
     
   // Main class
-  explicit AngularCutsBase(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string prefix, const AngularCutsType type, const std::string& postfix = "");
+  /// Constructor with histogramming
+  explicit AngularCutsBase(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& prefix, const AngularCutsType type, const std::string& postfix = "");
+  /// Constructor without histogramming
+  explicit AngularCutsBase(const ParameterSet& config, const AngularCutsType type);
   virtual ~AngularCutsBase();
 
   virtual void bookHistograms(TDirectory* dir);
@@ -83,6 +86,9 @@ public:
   virtual Data analyze(const Event& event, const Tau& tau, const JetSelection::Data& jetData, const METSelection::Data& metData);
 
 private:
+  /// Initialisation called from constructor
+  void initialize(const ParameterSet& config, const std::string& postfix);
+  /// The actual selection
   virtual Data privateAnalyze(const Tau& tau, const JetSelection::Data& jetData, const METSelection::Data& metData);
 
   bool doCollinearCuts(const double deltaPhiTauMET, const double deltaPhiJetMET, double cutValue, std::vector<double>& results);

@@ -20,14 +20,38 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
   fRelIsoCut(-1.0),
   fVetoMode(false),
   // Event counter for passing selection
-  cPassedMuonSelection(eventCounter.addCounter("passed mu selection ("+postfix+")")),
+  cPassedMuonSelection(fEventCounter.addCounter("passed mu selection ("+postfix+")")),
   // Sub counters
-  cSubAll(eventCounter.addSubCounter("mu selection ("+postfix+")", "All events")),
-  cSubPassedPt(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed pt cut")),
-  cSubPassedEta(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed eta cut")),
-  cSubPassedID(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed ID")),
-  cSubPassedIsolation(eventCounter.addSubCounter("mu selection ("+postfix+")", "Passed isolation"))
+  cSubAll(fEventCounter.addSubCounter("mu selection ("+postfix+")", "All events")),
+  cSubPassedPt(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed pt cut")),
+  cSubPassedEta(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed eta cut")),
+  cSubPassedID(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed ID")),
+  cSubPassedIsolation(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed isolation"))
 {
+  initialize(config, postfix);
+}
+
+MuonSelection::MuonSelection(const ParameterSet& config, const std::string& postfix)
+: BaseSelection(),
+  fMuonPtCut(config.getParameter<float>("muonPtCut")),
+  fMuonEtaCut(config.getParameter<float>("muonEtaCut")),
+  fRelIsoCut(-1.0),
+  fVetoMode(false),
+  // Event counter for passing selection
+  cPassedMuonSelection(fEventCounter.addCounter("passed mu selection ("+postfix+")")),
+  // Sub counters
+  cSubAll(fEventCounter.addSubCounter("mu selection ("+postfix+")", "All events")),
+  cSubPassedPt(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed pt cut")),
+  cSubPassedEta(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed eta cut")),
+  cSubPassedID(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed ID")),
+  cSubPassedIsolation(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed isolation"))
+{
+  initialize(config, postfix);
+}
+
+MuonSelection::~MuonSelection() { }
+
+void MuonSelection::initialize(const ParameterSet& config, const std::string& postfix) {
   if (postfix.find("veto") != std::string::npos || postfix.find("Veto") != std::string::npos)
     fVetoMode = true;
   std::string isolString = config.getParameter<std::string>("muonIsolation");
@@ -37,10 +61,8 @@ MuonSelection::MuonSelection(const ParameterSet& config, EventCounter& eventCoun
     fRelIsoCut = 0.12; // Based on 2012 isolation
   } else {
     throw hplus::Exception("config") << "Invalid muonIsolation option '" << isolString << "'! Options: 'veto', 'tight'";
-  }
+  }  
 }
-
-MuonSelection::~MuonSelection() { }
 
 void MuonSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "muSelection_"+sPostfix);

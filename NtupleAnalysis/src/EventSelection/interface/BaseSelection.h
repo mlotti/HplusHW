@@ -7,12 +7,16 @@ class EventCounter;
 class HistoWrapper;
 class EventID;
 class CommonPlots;
+class EventWeight;
 
 #include <string>
 
 class BaseSelection {
   public:
+    /// Constructor for event selection with histogramming
     BaseSelection(EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots = 0, const std::string& postfix = "");
+    /// Constructor for filtering without histogramming
+    BaseSelection();
     virtual ~BaseSelection();
 
     virtual void bookHistograms(TDirectory* dir);
@@ -38,6 +42,11 @@ class BaseSelection {
     HistoWrapper* getHistoWrapperPointer() const { return &fHistoWrapper; }
     bool fCommonPlotsIsEnabled() const { return (fCommonPlots != 0); }
 
+  private:
+    EventWeight* fLocalDummyEventWeight; // Used only for constructor without histogramming (owner)
+    EventCounter* fLocalDummyEventCounter; // Used only for constructor without histogramming (owner)
+    HistoWrapper* fLocalDummyHistoWrapper; // Used only for constructor without histogramming (owner)
+  
   protected:
     EventCounter& fEventCounter;
     HistoWrapper& fHistoWrapper;
