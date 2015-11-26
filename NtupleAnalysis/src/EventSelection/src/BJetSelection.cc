@@ -42,6 +42,7 @@ BJetSelection::BJetSelection(const ParameterSet& config)
   cSubPassedNBjets(fEventCounter.addSubCounter("bjet selection", "Passed Nbjets"))
 {
   initialize(config);
+  bookHistograms(new TDirectory());
 }
 
 BJetSelection::~BJetSelection() { }

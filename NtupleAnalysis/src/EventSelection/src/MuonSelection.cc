@@ -47,6 +47,7 @@ MuonSelection::MuonSelection(const ParameterSet& config, const std::string& post
   cSubPassedIsolation(fEventCounter.addSubCounter("mu selection ("+postfix+")", "Passed isolation"))
 {
   initialize(config, postfix);
+  bookHistograms(new TDirectory());
 }
 
 MuonSelection::~MuonSelection() { }

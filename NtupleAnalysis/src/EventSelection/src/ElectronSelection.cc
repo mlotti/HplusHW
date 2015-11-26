@@ -47,6 +47,7 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, const std::stri
   cSubPassedIsolation(fEventCounter.addSubCounter("e selection ("+postfix+")", "Passed isolation"))
 {
   initialize(config, postfix);
+  bookHistograms(new TDirectory());
 }
 
 ElectronSelection::~ElectronSelection() { }

@@ -67,6 +67,7 @@ AngularCutsBase::AngularCutsBase(const ParameterSet& config, const AngularCutsBa
   cSubAllEvents(fEventCounter.addSubCounter("angular cuts", "All events"))
 {
   initialize(config, "");
+  bookHistograms(new TDirectory());
 }
 
 AngularCutsBase::~AngularCutsBase() { }

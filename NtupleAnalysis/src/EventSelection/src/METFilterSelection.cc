@@ -29,6 +29,7 @@ METFilterSelection::METFilterSelection(const ParameterSet& config)
   cPassedMETFilterSelection(fEventCounter.addCounter("passed METFilter selection"))
 {
   initialize(config);
+  bookHistograms(new TDirectory());
 }
 
 METFilterSelection::~METFilterSelection() { }
