@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
+import HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters as signalAnalysis
 
 process = Process(outputPrefix="metLegEfficiency")
 
@@ -74,15 +75,21 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
         usePileupWeights = True,
         onlineSelection = onlineSelection,
         offlineSelection = leg,
-        TauSelection = PSet(
-            discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
-                             "againstMuonTight3",
-                             "againstElectronMediumMVA5"],
-        ),
+        TauSelection      = signalAnalysis.tauSelection,
+#        TauSelection = PSet(
+#            discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
+#                             "againstMuonTight3",
+#                             "againstElectronMediumMVA5"],
+#        ),
+        ElectronSelection = signalAnalysis.eVeto,
+        MuonSelection     = signalAnalysis.muVeto,
+        JetSelection      = signalAnalysis.jetSelection,
+        BJetSelection     = signalAnalysis.bjetSelection,
         binning = binning,
         xLabel  = xLabel,
         yLabel  = yLabel,
     )
+    a.TauSelection.applyTriggerMatching = False
 
     if dataVersion.isData():
         a.Trigger.triggerOR = ["HLT_LooseIsoPFTau35_Trk20_Prong1_v2",

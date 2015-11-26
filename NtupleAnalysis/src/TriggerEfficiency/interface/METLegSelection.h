@@ -2,6 +2,7 @@
 #define TriggerEfficiency_METLegSelection_h
 
 #include "TriggerEfficiency/interface/TrgBaseSelection.h"
+#include "EventSelection/interface/EventSelections.h"
 #include "Math/VectorUtil.h"
 
 class METLegSelection : public TrgBaseSelection {
@@ -18,10 +19,21 @@ class METLegSelection : public TrgBaseSelection {
  private:
   bool caloMETSelection(Event&);
   std::string onlineselectionstr;
+
+  TauSelection fTauSelection;
+  ElectronSelection fElectronSelection;
+  MuonSelection fMuonSelection;
+  JetSelection fJetSelection;
+  BJetSelection fBJetSelection;
 };
 
 METLegSelection::METLegSelection(const ParameterSet& setup, EventCounter& fEventCounter, HistoWrapper& histoWrapper) :
-  TrgBaseSelection(histoWrapper)
+  TrgBaseSelection(histoWrapper),
+  fTauSelection(setup.getParameter<ParameterSet>("TauSelection")),
+  fElectronSelection(setup.getParameter<ParameterSet>("ElectronSelection"),"Veto"),
+  fMuonSelection(setup.getParameter<ParameterSet>("MuonSelection"),"Veto"),
+  fJetSelection(setup.getParameter<ParameterSet>("JetSelection")),
+  fBJetSelection(setup.getParameter<ParameterSet>("BJetSelection"))
 {
   init(setup);
   onlineselectionstr = *(setup.getParameterOptional<std::string>("onlineSelection"));
@@ -36,6 +48,23 @@ bool METLegSelection::offlineSelection(Event& fEvent, bool pu){
 
   xvariable = fEvent.met_Type1().et();
 
+  const TauSelection::Data tauData = fTauSelection.silentAnalyze(fEvent);
+  if (!tauData.hasIdentifiedTaus()) return false;
+
+  const ElectronSelection::Data eData = fElectronSelection.silentAnalyze(fEvent);
+  if (eData.hasIdentifiedElectrons()) return false;
+
+  const MuonSelection::Data muData = fMuonSelection.silentAnalyze(fEvent);
+  if (muData.hasIdentifiedMuons()) return false;
+  
+  const JetSelection::Data jetData = fJetSelection.silentAnalyze(fEvent, tauData.getSelectedTau());
+  if (!jetData.passedSelection()) return false;
+  
+  const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
+  if (!bjetData.passedSelection()) return false;
+
+  return true;
+  /*
   std::vector<Tau> selectedTaus;
   for(Tau tau: fEvent.taus()) {
     if(!(tau.pt() > 41)) continue;
@@ -80,6 +109,7 @@ bool METLegSelection::offlineSelection(Event& fEvent, bool pu){
   //  if(ntaus > 0) selected = true;
   if(ntaus > 0 && njets > 2) selected = true;
   return selected;
+  */
 }
 bool METLegSelection::onlineSelection(Event& fEvent){
   if(fEvent.configurableTrigger2IsEmpty()) return caloMETSelection(fEvent);
