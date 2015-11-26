@@ -205,7 +205,7 @@ _datasetMerge = {
     "WJetsToLNu_HT_1200To2500": "WJetsHT",
     "WJetsToLNu_HT_2500ToInf": "WJetsHT",
 
-    "DYJetsToLL_M_10to50": "DYJetsToLL",
+    "DYJetsToLL_M_10to50": "DYJetsToLLHT",
     "DYJetsToLL_M_50": "DYJetsToLL",
     "DYJetsToLL_M_50_HT_100to200": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_200to400": "DYJetsToLLHT",

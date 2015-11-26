@@ -21,8 +21,11 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
+       '/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/00759690-D16E-E511-B29E-00261894382D.root',
 #       '/store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/AsymptFlat10to50bx25Raw_MCRUN2_74_V9-v1/10000/1AEFBE02-4C02-E511-B796-0025905A60BE.root',
-	'/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v3/60000/D61816B9-096A-E511-BEAD-001E4F1C5820.root'
+#	'/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v3/60000/D61816B9-096A-E511-BEAD-001E4F1C5820.root'
+#       '/store/user/bluj/ReHLTMiniAODv2/v1/GluGluHToTauTau_M125_13TeV_powheg_pythia8/crab_GGHToTauTau_HLTfrozen2015-25ns14e33-v4p4-v2_MiniAODv2_v1/151109_121746/0000/miniAOD_1.root',
+#       '/store/user/bluj/ReHLTMiniAODv2/v1/GluGluHToTauTau_M125_13TeV_powheg_pythia8/crab_GGHToTauTau_HLTfrozen2015-25ns14e33-v4p4-v2_MiniAODv2_v1/151109_121746/0000/miniAOD_10.root',
 #       '/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/231/00000/3EA254BD-EA45-E511-B1DA-02163E0141FF.root'
 #	'/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
 #	'/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/879/00000/DA13C76D-9B4B-E511-822A-02163E013790.root'
@@ -77,17 +80,21 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         ),
     ),
     EventInfo = cms.PSet(
-	PileupSummaryInfoSrc = cms.InputTag("addPileupInfo"),
+	PileupSummaryInfoSrc = process.PUInfo.PileupSummaryInfoSrc,
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
     ),
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::HLT"),
 #        TriggerResults = cms.InputTag("TriggerResults::HLT25NSV4L1V5"),
+#        TriggerResults = cms.InputTag("TriggerResults::TauHLT"),
+
 	TriggerBits = cms.vstring(
 	    "HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v",
 	    "HLT_IsoMu16_eta2p1_CaloMET30_v",
             "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v",
             "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v",
+            "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_v",
+            "HLT_IsoMu16_eta2p1_MET30_v",
             "HLT_IsoMu17_eta2p1_v",
             "HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v",
             "HLT_IsoMu17_eta2p1_LooseIsoPFTau20_SingleL1_v",
@@ -98,6 +105,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 #        L1Extra = cms.InputTag("l1extraParticles:MET:HLT25NSV4L1V5"),
+#	L1Extra = cms.InputTag("l1extraParticles:MET:TauHLT"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	TriggerMatch = cms.untracked.vstring(
 	    "LooseIsoPFTau50_Trk30_eta2p1",

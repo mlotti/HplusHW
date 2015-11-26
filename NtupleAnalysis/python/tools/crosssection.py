@@ -114,19 +114,19 @@ backgroundCrossSections = CrossSectionList(
             "7": 296600000.*0.0002855, # [2]
             "8": 3.64e8*3.7e-4, # [1]
             }),
-    CrossSection("QCD_Pt50to80_MuEnrichedPt5", {
+    CrossSection("QCD_Pt_50to80_MuEnrichedPt5", {
             "13": 4.487e+05, # 4.487e+05 +- 1.977e+02 pb [14]
     }),
-    CrossSection("QCD_Pt80to120_MuEnrichedPt5", {
+    CrossSection("QCD_Pt_80to120_MuEnrichedPt5", {
             "13": 1.052e+05, # 1.052e+05 +- 5.262e+01 [14]
     }),
-    CrossSection("QCD_Pt120to170_MuEnrichedPt5", {
+    CrossSection("QCD_Pt_120to170_MuEnrichedPt5", {
             "13": 2.549e+04, # 2.549e+04 +- 1.244e+01 [14]
     }),
-    CrossSection("QCD_Pt170to300_MuEnrichedPt5", {
+    CrossSection("QCD_Pt_170to300_MuEnrichedPt5", {
             "13": 8.644e+03, # 8.644e+03 +- 4.226e+00 [14]
     }),
-    CrossSection("QCD_Pt300to470_MuEnrichedPt5", {
+    CrossSection("QCD_Pt_300to470_MuEnrichedPt5", {
             "13": 7.967e+02, # 7.967e+02 +- 3.845e-0 [14]
     }),
     CrossSection("WW", {
@@ -228,6 +228,11 @@ backgroundCrossSections = CrossSectionList(
             "8": 3531.9, # [9], NNLO
             "13": 2008.4*3.0 # [14]
             }),
+    CrossSection("DYJetsToLL_M_10to50", {
+            "7": 9611.0, # [1]
+            "8": 11050.0, # [1]
+            "13" :3205.6*3.0, # [14]
+            }),
     CrossSection("DYJetsToLL_M_50_HT_100to200", {
             "13": 139.4*1.231, # McM times NNLO/LO ratio of inclusive sample
             }),
@@ -239,11 +244,6 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("DYJetsToLL_M_50_HT_600toInf", {
             "13": 2.21*1.231, # McM times NNLO/LO ratio of inclusive sample
-            }),
-    CrossSection("DYJetsToLL_M_10to50", {
-            "7": 9611.0, # [1]
-            "8": 11050.0, # [1]
-            "13": 3205.6*3.0, # [14]
             }),
     CrossSection("DYJetsToLL_M_100to200", {
             "13": 0.0, # FIXME

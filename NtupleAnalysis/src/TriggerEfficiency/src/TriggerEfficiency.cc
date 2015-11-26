@@ -54,6 +54,9 @@ private:
 
   WrappedTH1 *hNumPU;
   WrappedTH1 *hDenPU;
+
+  WrappedTH1 *hNumMCMatch;
+  WrappedTH1 *hDenMCMatch;
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -133,6 +136,12 @@ void TriggerEfficiency::book(TDirectory *dir) {
   hDenPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorPU", "DenominatorPU", 20, 5, 25.);
   hDenPU->GetXaxis()->SetTitle("nVtx");
 
+  hNumMCMatch = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorMCMatch", "NumeratorMCMatch", fbinning.size()-1, xbins);
+  hNumMCMatch->GetXaxis()->SetTitle(fxLabel.c_str());
+
+  hDenMCMatch = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorMCMatch", "DenominatorMCMatch", fbinning.size()-1, xbins);
+  hDenMCMatch->GetXaxis()->SetTitle(fxLabel.c_str());
+
   selection->bookHistograms(dir);
 }
 
@@ -155,9 +164,11 @@ void TriggerEfficiency::process(Long64_t entry) {
 
     double xvariable = selection->xVariable();
     hDen->Fill(xvariable);
+    if(selection->mcMatch()) hDenMCMatch->Fill(xvariable);
     if(fEventWeight.getWeight() < 0) hNeg->Fill(xvariable,1);
     if(selection->onlineSelection(fEvent)) {
       hNum->Fill(xvariable);
+      if(selection->mcMatch()) hNumMCMatch->Fill(xvariable);
       cSignalTrigger.increment();
     }
   }
@@ -169,6 +180,4 @@ void TriggerEfficiency::process(Long64_t entry) {
       hNumPU->Fill(xvariable);
     }
   }
-
-  //  fEventSaver.save();
 }

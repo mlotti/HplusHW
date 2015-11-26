@@ -17,6 +17,7 @@ if len(sys.argv) != 2:
     sys.exit(0)
 
 process.addDatasetsFromMulticrab(sys.argv[1])
+#process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="SingleMuon_Run2015D_PromptReco_v3_246908_260426_25ns$")
 #process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="SingleMuon_Run2015")
 #process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="DYJetsToLL_M50")
 #process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="GluGluHToTauTau_M125")
@@ -50,13 +51,13 @@ def runRange(era):
 
     if era == "2015D":
         lumi = 001.2157
-        runmin = 256630
-        runmax = 258159
+        runmin = 256629
+        runmax = 260627
 
     if era == "2015CD":
         lumi = 16.6937
         runmin = 253888
-        runmax = 258159
+        runmax = 260627
 
     if lumi == 0:
         print "Unknown era",era,"exiting.."
@@ -121,16 +122,20 @@ def createAnalyzer(dataVersion,era):
 #            a.Trigger.triggerOR2 = ["HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v2"]
         if era == "2015D":
             a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v2",
-                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v3"]
+                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v3",
+                                   "HLT_IsoMu16_eta2p1_MET30_v1"]
             a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v2",
-                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v3"]
+                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v3",
+                                   "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_v1"]
         if era == "2015CD":
             a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v1",
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v2",
-                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v3"]
+                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v3",
+                                   "HLT_IsoMu16_eta2p1_MET30_v1"]
             a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v1",
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v2",
-                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v3"]
+                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v3",
+                                   "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_v1"]
 #            a.Trigger.triggerOR = ["HLT_IsoMu20_eta2p1_v1",
 #                                   "HLT_IsoMu20_eta2p1_v2",
 #                                   "HLT_IsoMu17_eta2p1_v2"]
@@ -145,8 +150,9 @@ def createAnalyzer(dataVersion,era):
         a.Trigger.triggerOR = ["HLT_IsoMu15_eta2p1_L1ETM20_v5"]
         a.Trigger.triggerOR2 = ["HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v6"]
         if era == "2015C" or era == "2015D" or era == "2015CD":
-            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_CaloMET30_v1"]
-            a.Trigger.triggerOR2 = ["HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v1"]
+            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_CaloMET30_v1","HLT_IsoMu16_eta2p1_MET30_vx"]
+            a.Trigger.triggerOR2 = ["HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v1",
+                                    "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_vx"]
 #            a.Trigger.triggerOR = ["HLT_IsoMu20_eta2p1_v1"]
 #            a.Trigger.triggerOR2 = ["HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v1"]
 
@@ -163,9 +169,9 @@ def addAnalyzer(era):
 #process.addAnalyzer("TauLeg_2012D", lambda dv: createAnalyzer(dv,"2012D"), excludeTasks=["2012A","2012B", "2012C"])
 #addAnalyzer("2012ABC")
 #addAnalyzer("2012D")
-addAnalyzer("2015C")
+#addAnalyzer("2015C")
 addAnalyzer("2015D")
-addAnalyzer("2015CD")
+#addAnalyzer("2015CD")
 
 
 

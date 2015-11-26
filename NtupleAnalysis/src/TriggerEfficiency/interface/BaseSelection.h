@@ -19,6 +19,7 @@ class BaseSelection {
   bool passedRunRange(Event&, bool);
   double xVariable() { return xvariable;}
   bool passedCtrlTtrigger(Event&);
+  bool mcMatch();
 
   virtual void bookHistograms(TDirectory*) = 0;
   virtual void print() = 0;
@@ -34,6 +35,9 @@ class BaseSelection {
   //  float flumi;
   int frunMin;
   int frunMax;
+
+  bool mcmatch;
+
   //  std::string fsample;
   //  std::vector<std::string> fcontrolTriggers;
   //  std::vector<std::string> fsignalTriggers;
@@ -52,6 +56,8 @@ void BaseSelection::init(const ParameterSet& config){
   //  tauDiscrs         = config.getParameter<std::vector<std::string>>("tauDiscriminators");
   //  fcontrolTriggers  = config.getParameter<std::vector<std::string>>("controlTriggers");
   //  fsignalTriggers   = config.getParameter<std::vector<std::string>>("signalTriggers");
+
+  mcmatch = false;
 }
 
 bool BaseSelection::passedCtrlTtrigger(Event& fEvent){
@@ -73,4 +79,9 @@ bool BaseSelection::passedRunRange(Event& fEvent, bool isData){
   }
   return passed;
 }
+
+bool BaseSelection::mcMatch(){
+  return mcmatch;
+}
+
 #endif

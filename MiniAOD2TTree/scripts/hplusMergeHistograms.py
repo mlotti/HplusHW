@@ -264,12 +264,15 @@ def main(opts, args):
     re_histos.append(re.compile("^output files:.*?(?P<file>%s)" % opts.input))
     re_histos.append(re.compile("^\s+file\s+=\s+(?P<file>%s)" % opts.input))
 
+    exit_re = re.compile("/results/cmsRun_(?P<exitcode>\d+)\.log\.tar\.gz")
+
     mergedFiles = []
     for d in crabdirs:
         d = d.replace("/", "")
         stdoutFiles = glob.glob(os.path.join(d, "results", "cmsRun_*.log.tar.gz"))
 
         files = []
+        exitCodes = []
         for f in stdoutFiles:
             try:
                 if opts.filesInSE:
@@ -290,6 +293,14 @@ def main(opts, args):
                         print "Task %s, skipping job %s: input root file not found from stdout" % (d, f)
             except multicrab.ExitCodeException, e:
                 print "Task %s, skipping job %s: %s" % (d, f, str(e))
+                exit_match = exit_re.search(f)
+                if exit_match:
+                    exitCodes.append(int(exit_match.group("exitcode")))
+
+        if opts.test:
+            if len(exitCodes) > 0:
+                print "        jobs with problems:",sorted(exitCodes)
+            continue
 
         if len(files) == 0:
             print "Task %s, skipping, no files to merge" % d
