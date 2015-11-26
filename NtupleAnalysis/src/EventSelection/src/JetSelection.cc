@@ -62,6 +62,7 @@ JetSelection::JetSelection(const ParameterSet& config)
   cSubPassedJetCount(fEventCounter.addSubCounter("jet selection", "Passed jet number cut"))
 { 
   initialize(config);
+  bookHistograms(new TDirectory());
 }
 
 JetSelection::~JetSelection() { }

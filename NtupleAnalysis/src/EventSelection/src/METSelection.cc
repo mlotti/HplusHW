@@ -40,6 +40,7 @@ METSelection::METSelection(const ParameterSet& config)
   cPassedMETSelection(fEventCounter.addCounter("passed MET selection"))
 {
   initialize(config);
+  bookHistograms(new TDirectory());
 }
 
 METSelection::~METSelection() { }

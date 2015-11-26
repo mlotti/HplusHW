@@ -120,6 +120,7 @@ TauSelection::TauSelection(const ParameterSet& config)
   cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated Rtau"))
 { 
   initialize(config);
+  bookHistograms(new TDirectory());
 }
 
 TauSelection::~TauSelection() { }
