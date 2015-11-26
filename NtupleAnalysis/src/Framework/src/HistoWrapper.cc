@@ -1,9 +1,11 @@
 #include "Framework/interface/HistoWrapper.h"
+#include "Framework/interface/Exception.h"
 
 #include <iostream>
 
 namespace {
   std::string histoLevelNames[static_cast<int>(HistoLevel::kNumberOfLevels)] = {
+    "Never",
     "Systematics",
     "Vital",
     "Informative",
@@ -19,7 +21,9 @@ HistoWrapper::HistoWrapper(const EventWeight& eventWeight, const std::string& le
     fHistoLevelStats[i] = 0;
 
   // Find level from string
-  if (level == "Systematics") {
+  if (level == "Never") {
+    fAmbientLevel = HistoLevel::kNever;
+  } else if (level == "Systematics") {
     fAmbientLevel = HistoLevel::kSystematics;
   } else if (level == "Vital") {
     fAmbientLevel = HistoLevel::kVital;
@@ -28,7 +32,7 @@ HistoWrapper::HistoWrapper(const EventWeight& eventWeight, const std::string& le
   } else if (level == "Debug") {
     fAmbientLevel = HistoLevel::kDebug;
   } else {
-    throw std::logic_error("HistoWrapper: Error in ambient histogram level! Valid options are: 'Systematics', 'Vital', 'Informative', 'Debug' (you specified: '"+level+"'");
+    throw hplus::Exception("Logic") << "HistoWrapper: Error in ambient histogram level! Valid options are: 'Never', 'Systematics', 'Vital', 'Informative', 'Debug' (you specified: '" << level << "'";
   }
 }
 HistoWrapper::~HistoWrapper() {
