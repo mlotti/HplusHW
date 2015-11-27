@@ -10,7 +10,7 @@ class METLegSelection : public TrgBaseSelection {
   explicit METLegSelection(const ParameterSet&, EventCounter&, HistoWrapper&);
   ~METLegSelection();
 
-  bool offlineSelection(Event&,bool pu = false);
+  bool offlineSelection(Event&,Xvar);
   bool onlineSelection(Event&);
 
   void bookHistograms(TDirectory* dir);
@@ -44,7 +44,7 @@ void METLegSelection::bookHistograms(TDirectory* dir){}
 
 void METLegSelection::print(){}
 
-bool METLegSelection::offlineSelection(Event& fEvent, bool pu){
+bool METLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
 
   xvariable = fEvent.met_Type1().et();
 

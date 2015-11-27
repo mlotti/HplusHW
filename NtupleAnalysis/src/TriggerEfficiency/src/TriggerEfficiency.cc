@@ -52,6 +52,9 @@ private:
   WrappedTH1 *hDen;
   WrappedTH1 *hNeg;
 
+  WrappedTH1 *hNumEta;
+  WrappedTH1 *hDenEta;
+
   WrappedTH1 *hNumPU;
   WrappedTH1 *hDenPU;
 
@@ -129,11 +132,17 @@ void TriggerEfficiency::book(TDirectory *dir) {
   hNeg = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NegativeWeight", "NegativeWeight", fbinning.size()-1, xbins);
   hNeg->GetXaxis()->SetTitle(fxLabel.c_str());
 
+  hNumEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorEta", "NumeratorEta", 7,-2.1, 2.1);
+  hNumEta->GetXaxis()->SetTitle(fxLabel.c_str());
 
-  hNumPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorPU", "NumeratorPU", 20, 5, 25.);
+  hDenEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorEta", "DenominatorEta", 7,-2.1, 2.1);
+  hDenEta->GetXaxis()->SetTitle(fxLabel.c_str());
+
+
+  hNumPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorPU", "NumeratorPU", 4, 5, 25.);
   hNumPU->GetXaxis()->SetTitle("nVtx");
 
-  hDenPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorPU", "DenominatorPU", 20, 5, 25.);
+  hDenPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorPU", "DenominatorPU", 4, 5, 25.);
   hDenPU->GetXaxis()->SetTitle("nVtx");
 
   hNumMCMatch = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorMCMatch", "NumeratorMCMatch", fbinning.size()-1, xbins);
@@ -172,10 +181,16 @@ void TriggerEfficiency::process(Long64_t entry) {
       cSignalTrigger.increment();
     }
   }
-  if(selection->offlineSelection(fEvent,true)){ // eff vs nVtx
+  if(selection->offlineSelection(fEvent,eta)){ // eff vs eta
+    double xvariable = selection->xVariable();
+    hDenEta->Fill(xvariable);
+    if(selection->onlineSelection(fEvent)) {
+      hNumEta->Fill(xvariable);
+    }
+  }
+  if(selection->offlineSelection(fEvent,pu)){ // eff vs nVtx
     double xvariable = selection->xVariable();
     hDenPU->Fill(xvariable);
-    if(fEventWeight.getWeight() < 0) hNeg->Fill(xvariable,1);
     if(selection->onlineSelection(fEvent)) {
       hNumPU->Fill(xvariable);
     }

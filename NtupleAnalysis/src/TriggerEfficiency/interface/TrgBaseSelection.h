@@ -8,13 +8,15 @@
 #include <string>
 #include <vector>
 
+enum Xvar {pt, eta, pu};
+
 class TrgBaseSelection {
  public:
  TrgBaseSelection(HistoWrapper& histoWrapper):
   fHistoWrapper(histoWrapper){}
   ~TrgBaseSelection(){}
 
-  virtual bool offlineSelection(Event&,bool pu = false) = 0;
+  virtual bool offlineSelection(Event&,Xvar xvar = pt) = 0;
   virtual bool onlineSelection(Event&) = 0;
   bool passedRunRange(Event&, bool);
   double xVariable() { return xvariable;}

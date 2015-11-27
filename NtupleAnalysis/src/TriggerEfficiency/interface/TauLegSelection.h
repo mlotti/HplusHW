@@ -5,12 +5,14 @@
 
 #include "Math/VectorUtil.h"
 
+//enum Xvar {pt, eta, pu};
+
 class TauLegSelection : public TrgBaseSelection {
  public:
   explicit TauLegSelection(const ParameterSet&, EventCounter&, HistoWrapper&);
   ~TauLegSelection();
 
-  bool offlineSelection(Event&,bool pu = false);
+  bool offlineSelection(Event&,Xvar xvar = pt);
   bool onlineSelection(Event&);
 
   void bookHistograms(TDirectory*);
@@ -59,7 +61,7 @@ void TauLegSelection::print(){
   std::cout << "        Tau leg: muMetMt       " << cTauLegMt.value() << std::endl;
 }
 
-bool TauLegSelection::offlineSelection(Event& fEvent, bool pu){
+bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
 
   cTauLegAll.increment();
 
@@ -75,7 +77,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent, bool pu){
     if(!selectedMuon || (muon.pt() > selectedMuon->pt()) ) selectedMuon = muon;
   }
   if(nmuons != 1) return false;
-  if(!pu) hMuPt->Fill(selectedMuon->pt());
+  if(xvar == pt) hMuPt->Fill(selectedMuon->pt());
 
   cTauLegMu.increment();
 
@@ -86,7 +88,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent, bool pu){
     if(drMuTau < 0.4) continue;
 
     if(!(tau.pt() > 20)) continue;
-    if(pu && !(tau.pt() > 50)) continue;
+    if(xvar != pt && !(tau.pt() > 50)) continue;
     if(!(std::abs(tau.eta()) < 2.1)) continue;
     if(!(tau.lChTrkPt() > 20)) continue;
     if(!(tau.nProngs() == 1)) continue;
@@ -97,16 +99,18 @@ bool TauLegSelection::offlineSelection(Event& fEvent, bool pu){
     if(!selectedTau || (tau.pt() > selectedTau->pt()) ) selectedTau = tau;
   }
   if(ntaus != 1) return false;
+
   xvariable = selectedTau->pt();
-  if(pu) xvariable = fEvent.vertexInfo().value();
-  if(!pu) hTauPt->Fill(selectedTau->pt());
+  if(xvar == eta) xvariable = selectedTau->eta();
+  if(xvar == pu) xvariable = fEvent.vertexInfo().value();
+  if(xvar == pt) hTauPt->Fill(selectedTau->pt());
 
   if(fEvent.isMC() && fabs(selectedTau->pdgId()) == 15) mcmatch = true;
   //if(fEvent.isMC())  std::cout << "check tau mc match " << selectedTau->pdgId() << std::endl;
   cTauLegTau.increment();
 
   double muTauInvMass = (selectedMuon->p4() + selectedTau->p4()).M();
-  if(!pu) hInvM->Fill(muTauInvMass);
+  if(xvar == pt) hInvM->Fill(muTauInvMass);
   //  std::cout << "check muTauInvMass " << selectedMuon->pt() << " " << selectedTau->pt() << " " << muTauInvMass << std::endl;
   //  if(!(muTauInvMass < 80)) return false;
   //  if(!(muTauInvMass < 100)) return false; // 80 -> 100 because of H125 sample. 23112015/S.Lehti
@@ -114,7 +118,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent, bool pu){
   cTauLegInvMass.increment();
 
   double muMetMt = sqrt( 2 * selectedMuon->pt() * fEvent.met_Type1().et() * (1-cos(selectedMuon->phi()-fEvent.met_Type1().phi())) );
-  if(!pu) hMt->Fill(muMetMt);
+  if(xvar == pt) hMt->Fill(muMetMt);
   if(!(muMetMt < 40)) return false;
 
   cTauLegMt.increment();

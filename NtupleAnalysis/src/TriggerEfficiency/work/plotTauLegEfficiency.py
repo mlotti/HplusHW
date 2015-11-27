@@ -87,12 +87,12 @@ def checkNegatives(n,d):
         dbin = d.GetBinContent(i)
         print "Bin",i,"Numerator=",nbin,", denominator=",dbin
         if nbin > dbin:
-            if nbin < dbin*1.005:
+#            if nbin < dbin*1.005:
                 n.SetBinContent(i,dbin)
-            else:
-#                print "Bin",i,"Numerator=",nbin,", denominator=",dbin
-                print "REBIN!",n.GetBinLowEdge(i),"-",n.GetBinLowEdge(i)+n.GetBinWidth(i)
-#                sys.exit()
+#            else:
+##                print "Bin",i,"Numerator=",nbin,", denominator=",dbin
+#                print "REBIN!",n.GetBinLowEdge(i),"-",n.GetBinLowEdge(i)+n.GetBinWidth(i)
+##                sys.exit()
         if nbin < 0:
             n.SetBinContent(i,0)
         if dbin < 0:
@@ -227,7 +227,53 @@ def analyze(analysis):
         os.mkdir(plotDir)
     p.save(formats)
 
-    """
+    #########################################################################                                                                                                                              
+
+    eff1eta = getEfficiency(dataset1,"NumeratorEta","DenominatorEta")
+    eff2eta = getEfficiency(dataset2,"NumeratorEta","DenominatorEta")
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        eff3eta = getEfficiency(datasetsH125.getMCDatasets(),"NumeratorEta","DenominatorEta")
+
+    styles.dataStyle.apply(eff1eta)
+    styles.mcStyle.apply(eff2eta)
+    eff1eta.SetMarkerSize(1)
+
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        styles.mcStyle.apply(eff3eta)
+        eff3eta.SetMarkerSize(1.5)
+        eff3eta.SetMarkerColor(4)
+        eff3eta.SetLineColor(4)
+
+
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        p_eta = plots.ComparisonManyPlot(histograms.HistoGraph(eff1eta, "eff1eta", "p", "P"),
+                                        [histograms.HistoGraph(eff2eta, "eff2eta", "p", "P"),
+                                         histograms.HistoGraph(eff3eta, "eff3eta", "p", "P")])
+    else:
+        p_eta = plots.ComparisonPlot(histograms.HistoGraph(eff1eta, "eff1eta", "p", "P"),
+                                     histograms.HistoGraph(eff2eta, "eff2eta", "p", "P"))
+
+    name = "TauMET_"+analysis+"_DataVsMC_HLTTau_PFTauEta"
+    p_eta.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
+    moveLegendEta = {"dx": -0.5, "dy": -0.65, "dh": -0.1}
+    p_eta.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegendEta))
+
+    p_eta.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
+    p_eta.getFrame().GetXaxis().SetTitle("#tau-jet #eta")
+    p_eta.getFrame2().GetYaxis().SetTitle("Ratio")
+    p_eta.getFrame2().GetYaxis().SetTitleOffset(1.6)
+
+    histograms.addText(0.2, 0.46, "LooseIsoPFTau50_Trk30_eta2p1", 17)
+    histograms.addText(0.2, 0.38, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.2, 0.31, "Runs "+datasets.loadRunRange(), 17)
+
+    p_eta.draw()
+    histograms.addStandardTexts(lumi=lumi)
+
+    p_eta.save(formats)
+
+    #########################################################################
+
     namePU = analysis+"_DataVsMC_HLTTau_nVtx"
 
     eff1PU = getEfficiency(dataset1,"NumeratorPU","DenominatorPU")
@@ -242,7 +288,7 @@ def analyze(analysis):
                                    [histograms.HistoGraph(eff2PU, "eff2", "p", "P")])
 
 
-    pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2, "eff3": legend3})
+    pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
 
     pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=opts, opts2=opts2)
     pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
@@ -260,7 +306,7 @@ def analyze(analysis):
     histograms.addStandardTexts(lumi=lumi)
 
     pPU.save()
-    """
+
     print "Output written in",plotDir
 
 
