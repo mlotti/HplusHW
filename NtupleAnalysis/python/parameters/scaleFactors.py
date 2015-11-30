@@ -59,12 +59,20 @@ def _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber):
 ##===== tau trigger SF (SF as function of pT)
 # \param tauSelectionPset  the tau config PSet
 # \param direction         "nominal, "up", "down"
-def assignTauTriggerSF(tauSelectionPset, direction):
+# \param variationType     "MC", "data"  (the uncertainty in MC and data are variated separately)
+def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
     binLeftEdges = [50, 60, 70, 80, 100]
     scaleFactors = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    scaleFactorsUp = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    scaleFactorsDown = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    _assingSF(binLeftEdges, scaleFactors, scaleFactorsUp, scaleFactorsDown, tauSelectionPset, direction)
+    scaleFactorsDataUp = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    scaleFactorsDataDown = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    scaleFactorsMCUp = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    scaleFactorsMCDown = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    if variationType == "MC":
+        _assingSF(binLeftEdges, scaleFactors, scaleFactorsMCUp, scaleFactorsMCDown, tauSelectionPset, direction)
+    elif variationType == "data":
+        _assingSF(binLeftEdges, scaleFactors, scaleFactorsDataUp, scaleFactorsDataDown, tauSelectionPset, direction)
+    else:
+        raise Exception("Error: Unsupported variation type '%s'! Valid options are: 'MC', 'data'"%variationType)
 
 ##===== MET trigger SF
 
