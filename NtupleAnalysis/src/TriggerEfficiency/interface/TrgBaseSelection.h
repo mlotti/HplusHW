@@ -20,8 +20,11 @@ class TrgBaseSelection {
   virtual bool onlineSelection(Event&) = 0;
   bool passedRunRange(Event&, bool);
   double xVariable() { return xvariable;}
+  double xHLTVariable() { return xhltvariable;}
   bool passedCtrlTtrigger(Event&);
   bool mcMatch();
+  double pull() { return sub()/xVariable();}
+  double sub() { return xHLTVariable() - xVariable();}
 
   virtual void bookHistograms(TDirectory*) = 0;
   virtual void print() = 0;
@@ -30,8 +33,10 @@ class TrgBaseSelection {
 
   void init(const ParameterSet&);
 
+
   HistoWrapper& fHistoWrapper;
   double xvariable;
+  double xhltvariable;
 
   std::string fdataera;
   //  float flumi;
@@ -60,6 +65,7 @@ void TrgBaseSelection::init(const ParameterSet& config){
   //  fsignalTriggers   = config.getParameter<std::vector<std::string>>("signalTriggers");
 
   mcmatch = false;
+  xhltvariable = 0;
 }
 
 bool TrgBaseSelection::passedCtrlTtrigger(Event& fEvent){
@@ -85,5 +91,6 @@ bool TrgBaseSelection::passedRunRange(Event& fEvent, bool isData){
 bool TrgBaseSelection::mcMatch(){
   return mcmatch;
 }
+
 
 #endif

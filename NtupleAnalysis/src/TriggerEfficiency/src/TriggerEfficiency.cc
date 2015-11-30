@@ -60,6 +60,9 @@ private:
 
   WrappedTH1 *hNumMCMatch;
   WrappedTH1 *hDenMCMatch;
+
+  WrappedTH1 *hPull;
+  WrappedTH1 *hSub;
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -151,6 +154,9 @@ void TriggerEfficiency::book(TDirectory *dir) {
   hDenMCMatch = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorMCMatch", "DenominatorMCMatch", fbinning.size()-1, xbins);
   hDenMCMatch->GetXaxis()->SetTitle(fxLabel.c_str());
 
+  hPull = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Pull", "Pull", 10, -1., 1.);
+  hSub  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Sub", "Sub", 10, -50, 50);
+
   selection->bookHistograms(dir);
 }
 
@@ -177,6 +183,8 @@ void TriggerEfficiency::process(Long64_t entry) {
     if(fEventWeight.getWeight() < 0) hNeg->Fill(xvariable,1);
     if(selection->onlineSelection(fEvent)) {
       hNum->Fill(xvariable);
+      hPull->Fill(selection->pull());
+      hSub->Fill(selection->sub());
       if(selection->mcMatch()) hNumMCMatch->Fill(xvariable);
       cSignalTrigger.increment();
     }

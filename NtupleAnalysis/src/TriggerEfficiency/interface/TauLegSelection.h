@@ -2,10 +2,9 @@
 #define TriggerEfficiency_TauLegSelection_h
 
 #include "TriggerEfficiency/interface/TrgBaseSelection.h"
+#include "DataFormat/interface/HLTTau.h"
 
 #include "Math/VectorUtil.h"
-
-//enum Xvar {pt, eta, pu};
 
 class TauLegSelection : public TrgBaseSelection {
  public:
@@ -100,10 +99,26 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
   }
   if(ntaus != 1) return false;
 
-  xvariable = selectedTau->pt();
+  //  boost::optional<HLTTau> selectedHltTau;
+  math::LorentzVectorT<double> selectedHltTau;
+  double drmin = 999;
+  for(HLTTau hlttau: fEvent.triggerTaus()) {
+    double drTauHlttau = ROOT::Math::VectorUtil::DeltaR(selectedTau->p4(),hlttau.p4());
+    if(drTauHlttau < 0.4 && drTauHlttau < drmin) {
+      //      selectedHltTau = hlttau;
+      selectedHltTau = hlttau.p4();
+      drmin = drTauHlttau;
+    }
+  }
+
+  if(xvar == pt) {
+    xvariable = selectedTau->pt();
+    hTauPt->Fill(selectedTau->pt());
+    xhltvariable = selectedHltTau.pt();
+  }
   if(xvar == eta) xvariable = selectedTau->eta();
   if(xvar == pu) xvariable = fEvent.vertexInfo().value();
-  if(xvar == pt) hTauPt->Fill(selectedTau->pt());
+
 
   if(fEvent.isMC() && fabs(selectedTau->pdgId()) == 15) mcmatch = true;
   //if(fEvent.isMC())  std::cout << "check tau mc match " << selectedTau->pdgId() << std::endl;

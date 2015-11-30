@@ -15,7 +15,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 ROOT.gROOT.SetBatch(True)
 plotDir = "TauLeg2015"
 
-formats = [".pdf"]
+formats = [".pdf",".png"]
 
 def usage():
     print "\n"
@@ -194,7 +194,7 @@ def analyze(analysis):
     opts2 = {"ymin": 0.5, "ymax": 1.5}
 #    moveLegend = {"dx": -0.55, "dy": -0.15, "dh": -0.1}
     moveLegend = {"dx": -0.2, "dy": -0.5, "dh": -0.1}
-    name = "TauMET_"+analysis+"_DataVsMC_HLTTau_PFTauPt"
+    name = "TauMET_"+analysis+"_DataVsMC_PFTauPt"
 
     legend1 = "Data"
     legend2 = "MC (DY)"
@@ -213,7 +213,8 @@ def analyze(analysis):
 
     histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
     histograms.addText(0.5, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
-    histograms.addText(0.5, 0.46, "Runs "+datasets.loadRunRange(), 17)
+    runRange = datasets.loadRunRange()
+    histograms.addText(0.5, 0.46, "Runs "+runRange, 17)
 
     p.draw()
     lumi = 0.0
@@ -253,7 +254,11 @@ def analyze(analysis):
         p_eta = plots.ComparisonPlot(histograms.HistoGraph(eff1eta, "eff1eta", "p", "P"),
                                      histograms.HistoGraph(eff2eta, "eff2eta", "p", "P"))
 
-    name = "TauMET_"+analysis+"_DataVsMC_HLTTau_PFTauEta"
+    p_eta.histoMgr.setHistoLegendLabelMany({"eff1eta": legend1, "eff2eta": legend2})
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        p_eta.histoMgr.setHistoLegendLabelMany({"eff1eta": legend1, "eff2eta": legend2, "eff3eta": legend3})
+
+    name = "TauMET_"+analysis+"_DataVsMC_PFTauEta"
     p_eta.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
     moveLegendEta = {"dx": -0.5, "dy": -0.65, "dh": -0.1}
     p_eta.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegendEta))
@@ -274,7 +279,7 @@ def analyze(analysis):
 
     #########################################################################
 
-    namePU = analysis+"_DataVsMC_HLTTau_nVtx"
+    namePU = "TauMET_"+analysis+"_DataVsMC_nVtx"
 
     eff1PU = getEfficiency(dataset1,"NumeratorPU","DenominatorPU")
     eff2PU = getEfficiency(dataset2,"NumeratorPU","DenominatorPU")
@@ -290,8 +295,10 @@ def analyze(analysis):
 
     pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
 
-    pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=opts, opts2=opts2)
+    optsPU = {"ymin": 0.001, "ymax": 0.1}
+    pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=optsPU, opts2=opts2)
     pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+    pPU.getPad1().SetLogy(True)
 
     pPU.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
     pPU.getFrame().GetXaxis().SetTitle("Number of reco vertices")
@@ -307,6 +314,70 @@ def analyze(analysis):
 
     pPU.save()
 
+    #########################################################################
+
+    hName = "Pull"
+#    hName = "Sub"
+    namePull = "TauMET_"+analysis+"_DataVsMC_"+hName+"s"
+
+    plots.mergeRenameReorderForDataMC(datasets)
+    datasets.merge("MC", ["TTJets","WJets","DYJetsToLL","SingleTop","QCD"], keepSources=True)
+
+    drh1 = datasets.getDataset("Data").getDatasetRootHisto(hName)
+    drh2 = datasets.getDataset("MC").getDatasetRootHisto(hName)
+    drh1.normalizeToOne()
+    drh2.normalizeToOne()
+    pull1 = drh1.getHistogram()
+    pull2 = drh2.getHistogram()
+
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        plots.mergeRenameReorderForDataMC(datasetsH125)
+        drh3 = datasetsH125.getMCDatasets()[0].getDatasetRootHisto(hName)
+        drh3.normalizeToOne()
+        pull3 = drh3.getHistogram()
+
+    styles.dataStyle.apply(pull1)
+    styles.mcStyle.apply(pull2)
+    pull1.SetMarkerSize(1)
+
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        styles.mcStyle.apply(pull3)
+        pull3.SetMarkerSize(1.5)
+        pull3.SetMarkerColor(4)
+        pull3.SetLineColor(4)
+
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        p_pull = plots.ComparisonManyPlot(histograms.Histo(pull1, "pull1", "p", "P"),
+                                         [histograms.Histo(pull2, "pull2", "p", "P"),
+                                          histograms.Histo(pull3, "pull3", "p", "P")])
+    else:
+        p_pull = plots.ComparisonPlot(histograms.Histo(pull1, "pull1", "p", "P"),
+                                      histograms.Histo(pull2, "pull2", "p", "P"))
+
+    p_pull.histoMgr.setHistoLegendLabelMany({"pull1": legend1, "pull2": legend2})
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        p_pull.histoMgr.setHistoLegendLabelMany({"pull1": legend1, "pull2": legend2, "pull3": legend3})
+
+    p_pull.createFrame(os.path.join(plotDir, namePull), createRatio=True, opts=opts, opts2=opts2)
+    moveLegendPull = {"dx": -0.5, "dy": -0.35, "dh": -0.1}
+    p_pull.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegendPull))
+
+    p_pull.getFrame().GetYaxis().SetTitle("Arbitrary units")
+#    p_pull.getFrame().GetXaxis().SetTitle("HLT #tau p_{T} - #tau-jet p_{T} (GeV/c)")
+    p_pull.getFrame().GetXaxis().SetTitle("HLT #tau p_{T}/ #tau-jet p_{T} - 1")                                                                                                                                     
+    p_pull.getFrame2().GetYaxis().SetTitle("Ratio")
+    p_pull.getFrame2().GetYaxis().SetTitleOffset(1.6)
+
+    histograms.addText(0.2, 0.75, "LooseIsoPFTau50_Trk30_eta2p1", 17)
+    histograms.addText(0.2, 0.68, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.2, 0.61, "Runs "+runRange, 17)
+
+    p_pull.draw()
+
+    histograms.addStandardTexts(lumi=lumi)
+    p_pull.save(formats)
+
+    #########################################################################                                                                                                                               
     print "Output written in",plotDir
 
 

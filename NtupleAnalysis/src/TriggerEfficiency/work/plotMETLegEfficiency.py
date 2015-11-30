@@ -16,7 +16,7 @@ from plotTauLegEfficiency import getEfficiency,convert2TGraph,Print
 ROOT.gROOT.SetBatch(True)
 plotDir = "METLeg2015"
 
-formats = [".pdf"]
+formats = [".pdf",".png"]
 
 def usage():
     print "\n"
@@ -34,7 +34,7 @@ def main():
     analysis = "METLeg_2015D_MET80"
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau\S+25ns$|TTJets$")
-    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau\S+25ns_Silver$")
+    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau_Run2015D_PromptReco_v4_246908_260426_25ns$|DYJetsToLL_M_50$")
 
     for d in datasets.getAllDatasets():
@@ -59,9 +59,10 @@ def main():
     opts2 = {"ymin": 0.5, "ymax": 1.5}
     moveLegend = {"dx": -0.55, "dy": -0.15}
 
-    name = "TauMET_DataVsMC_L1HLTMET80_PFMET"
+    name = "TauMET_"+analysis+"_DataVsMC_PFMET"
 
     legend1 = "Data"
+#    legend2 = "MC (TTJets)"
     legend2 = "MC"
     p.histoMgr.setHistoLegendLabelMany({"eff1_MET80": legend1, "eff2_MET80": legend2})
 
@@ -166,7 +167,7 @@ def main():
     p = plots.ComparisonPlot(histograms.HistoGraph(eff2_MET80, "eff2_MET80", "p", "P"),
                              histograms.HistoGraph(eff2c_MET80, "eff2c_MET80", "p", "P"))
 
-    namec = "TauMET_MC_TrgBitVsCaloMET80_PFMET"
+    namec = "TauMET_"+analysis+"_MC_TrgBitVsCaloMET80_PFMET"
 
     legend1c = "MC, trigger bit"
     legend2c = "MC, CaloMET > 80"
@@ -237,6 +238,43 @@ def main():
         os.mkdir(plotDir)
     p.save(formats)
     """
+
+    #########################################################################                                                                                                                             
+
+    namePU = "TauMET_"+analysis+"_DataVsMC_nVtx"
+
+    eff1PU = getEfficiency(dataset1,"NumeratorPU","DenominatorPU")
+    eff2PU = getEfficiency(dataset2,"NumeratorPU","DenominatorPU")
+
+    styles.dataStyle.apply(eff1PU)
+    styles.mcStyle.apply(eff2PU)
+    eff1PU.SetMarkerSize(1)
+    eff2PU.SetMarkerSize(1.5)
+
+    pPU = plots.ComparisonManyPlot(histograms.HistoGraph(eff1PU, "eff1", "p", "P"),
+                                   [histograms.HistoGraph(eff2PU, "eff2", "p", "P")])
+
+
+    pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
+
+    opts = {"ymin": 0.001, "ymax": 0.1}
+    pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=opts, opts2=opts2)
+    pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+    pPU.getPad1().SetLogy(True)
+
+    pPU.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
+    pPU.getFrame().GetXaxis().SetTitle("Number of reco vertices")
+    pPU.getFrame2().GetYaxis().SetTitle("Ratio")
+    pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
+
+    histograms.addText(0.4, 0.25, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
+    histograms.addText(0.4, 0.18, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.4, 0.11, "Runs "+datasets.loadRunRange(), 17)
+
+    pPU.draw()
+    histograms.addStandardTexts(lumi=lumi)
+
+    pPU.save()
 
     print "Output written in",plotDir
 

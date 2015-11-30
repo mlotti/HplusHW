@@ -89,7 +89,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
         xLabel  = xLabel,
         yLabel  = yLabel,
     )
-    a.TauSelection.applyTriggerMatching = False
+#    a.TauSelection.applyTriggerMatching = False
 
     if dataVersion.isData():
         a.Trigger.triggerOR = ["HLT_LooseIsoPFTau35_Trk20_Prong1_v2",
