@@ -39,7 +39,8 @@ class AnalysisConfig:
                                                               partonFakingTau, etaRegion, 
                                                               self._getDirectionString(value))
 		elif value.startswith("TauTrgEff"):
-                    scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value))
+                    variationType = value.replace("TauTrgEff","")
+                    scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value), variationType)
 		else:
 		    if value != "nominal":
                         raise Exception("Error: unsupported variation item '%s'!"%value)
@@ -106,7 +107,7 @@ class AnalysisBuilder:
           if doSystematicVariations:
               items = []
               # Trigger systematics
-              #items.extend(["TauTrgEff"]) # 2012 ["TauTrgDataEff", "TauTrgMCEff"]
+              items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
               #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
               #items.extend(["METTrgDataEff", "METTrgMCEff"])
               # Tau ID variation systematics
