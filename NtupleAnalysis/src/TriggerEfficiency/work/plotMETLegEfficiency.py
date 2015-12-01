@@ -12,6 +12,8 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 
 from plotTauLegEfficiency import getEfficiency,convert2TGraph,Print
+from PythonWriter import PythonWriter
+pythonWriter = PythonWriter()
 
 ROOT.gROOT.SetBatch(True)
 plotDir = "METLeg2015"
@@ -76,8 +78,10 @@ def main():
 
     histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
 #    histograms.addText(0.2, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
-    histograms.addText(0.2, 0.53, analysis.split("_")[1], 17)
-    histograms.addText(0.2, 0.46, "Runs "+datasets.loadRunRange(), 17)
+    label = analysis.split("_")[1]
+    histograms.addText(0.2, 0.53, label, 17)
+    runRange = datasets.loadRunRange()
+    histograms.addText(0.2, 0.46, "Runs "+runRange, 17)
 
     p.draw()
     lumi = 0.0
@@ -90,6 +94,11 @@ def main():
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
     p.save(formats)
+
+    pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
+    pythonWriter.addMCParameters(label,eff2_MET80)
+
+    pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency2015.json"))
 
     """
     #### MET120
@@ -274,7 +283,7 @@ def main():
     pPU.draw()
     histograms.addStandardTexts(lumi=lumi)
 
-    pPU.save()
+    pPU.save(formats)
 
     print "Output written in",plotDir
 

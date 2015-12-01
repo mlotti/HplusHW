@@ -12,6 +12,9 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
+from PythonWriter import PythonWriter
+pythonWriter = PythonWriter()
+
 ROOT.gROOT.SetBatch(True)
 plotDir = "TauLeg2015"
 
@@ -164,6 +167,7 @@ def analyze(analysis):
     if isinstance(datasetsH125,dataset.DatasetManager):
         eff3 = getEfficiency(datasetsH125.getMCDatasets())
 
+
     styles.dataStyle.apply(eff1)
     styles.mcStyle.apply(eff2)
     eff1.SetMarkerSize(1)
@@ -212,7 +216,8 @@ def analyze(analysis):
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
-    histograms.addText(0.5, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    label = analysis.split("_")[len(analysis.split("_")) -1]
+    histograms.addText(0.5, 0.53, label, 17)
     runRange = datasets.loadRunRange()
     histograms.addText(0.5, 0.46, "Runs "+runRange, 17)
 
@@ -227,6 +232,12 @@ def analyze(analysis):
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
     p.save(formats)
+
+
+    pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1)
+    pythonWriter.addMCParameters(label,eff2)
+
+    pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency2015.json"))
 
     #########################################################################                                                                                                                              
 
@@ -312,7 +323,7 @@ def analyze(analysis):
     pPU.draw()
     histograms.addStandardTexts(lumi=lumi)
 
-    pPU.save()
+    pPU.save(formats)
 
     #########################################################################
 
