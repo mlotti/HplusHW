@@ -28,7 +28,7 @@ class PseudoMultiCrabCreator:
         self._myBaseDir = None
         self._energy = None
         self._dataVersion = None
-        self._codeVersion = None
+        #self._codeVersion = None
 
     def addModule(self, module):
         if self._energy == None:
@@ -37,7 +37,7 @@ class PseudoMultiCrabCreator:
             self._codeVersion = module._codeVersion.Clone()
             self._writeRootFileToDisk(self._currentSubTitle)
             self._dataVersion = None # No need to delete from gDirectory, since they were saved to disk already
-            self._codeVersion = None
+            #self._codeVersion = None
 
         # Open root file
         myFilename = "%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1])
@@ -64,7 +64,7 @@ class PseudoMultiCrabCreator:
     def initialize(self, subTitle):
         self._energy = None
         self._dataVersion = None
-        self._codeVersion = None
+        #self._codeVersion = None
         self._createBaseDirectory()
         self._mySubTitles.append(subTitle)
         self._currentSubTitle = subTitle
@@ -102,7 +102,7 @@ class PseudoMultiCrabCreator:
         hConfigInfo.SetDirectory(myConfigInfoDir)
         # Write a copy of data version and code version
         myConfigInfoDir.Add(self._dataVersion)
-        myConfigInfoDir.Add(self._codeVersion)
+        #myConfigInfoDir.Add(self._codeVersion)
         # Write and close the root file
         myRootFile.Write()
         myRootFile.Close()
@@ -155,11 +155,11 @@ class PseudoMultiCrabModule:
         self._dataVersion = objs[0].Clone()
         self._dataVersion.SetTitle("pseudo")
         # Copy code version
-        if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
-            (objs, realNames) = dsetMgr.getDataset("Data").getRootObjects("../configInfo/codeVersion")
-        else:
-            (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/codeVersion")
-        self._codeVersion = objs[0].Clone()
+        #if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
+            #(objs, realNames) = dsetMgr.getDataset("Data").getRootObjects("../configInfo/codeVersion")
+        #else:
+            #(objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/codeVersion")
+        #self._codeVersion = objs[0].Clone()
 
     def delete(self):
         if False:
@@ -172,7 +172,7 @@ class PseudoMultiCrabModule:
             self._counterUncertainties = None
             self._hSplittedBinInfo.Delete()
             self._dataVersion.Delete()
-            self._codeVersion.Delete()
+            #self._codeVersion.Delete()
         ROOT.gDirectory.GetList().Delete()
 
     def addShape(self, shapeHisto, plotName):
@@ -233,7 +233,7 @@ class PseudoMultiCrabModule:
         self._hConfigInfo.SetBinContent(2, self._luminosity)
         self._hConfigInfo.SetDirectory(myConfigInfoDir)
         myConfigInfoDir.Add(self._dataVersion)
-        myConfigInfoDir.Add(self._codeVersion)
+        #myConfigInfoDir.Add(self._codeVersion)
         #.SetDirectory(rootfile)
         #self._codeVersion.SetDirectory(rootfile)
 

@@ -16,12 +16,15 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.errorPropagation as errorPropagation
 import os
+import sys
+import datetime
 
 ## Container class for fit functions
 class FitFunction:
     def __init__(self, functionName, **kwargs):
         self._functionName = functionName
         self._args = kwargs
+        self._additionalNormFactor = 1.0
         
         if not hasattr(self, functionName):
             raise Exception("Error: FitFunction '%s' is unknown!"%functionName)
@@ -42,6 +45,14 @@ class FitFunction:
             "FitDataWithFakesAndGenuineTaus": 2,
         }
         self._nParam = nParams[functionName]
+    
+    def clone(self):
+        f = FitFunction(self._functionName, **self._args)
+        f.setAdditionalNormalization(self._additionalNormFactor)
+        return f
+    
+    def setAdditionalNormalization(self, factor):
+        self._additionalNormFactor = factor
     
     def __call__(self, x, par, **kwargs):
         args = {}
@@ -83,31 +94,31 @@ class FitFunction:
                 
     #===== Composite functions for template fits
     def QCDFunction(self,x,par,norm):
-        return norm*(self.RayleighFunction(x,par,1)+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
+        return self._additionalNormFactor*norm*(self.RayleighFunction(x,par,1)+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
 
     def EWKFunction(self,x,par,boundary,norm=1,rejectPoints=0):
         if x[0] < boundary:
-            return norm*par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)
-        C = norm*par[0]*ROOT.TMath.Gaus(boundary,par[1],par[2],1)*ROOT.TMath.Exp(boundary*par[3])
+            return self._additionalNormFactor*norm*par[0]*ROOT.TMath.Gaus(x[0],par[1],par[2],1)
+        C = self._additionalNormFactor*norm*par[0]*ROOT.TMath.Gaus(boundary,par[1],par[2],1)*ROOT.TMath.Exp(boundary*par[3])
         return C*ROOT.TMath.Exp(-x[0]*par[3])
 
     def EWKFunctionInv(self,x,par,boundary,norm=1,rejectPoints=0):
-        if not rejectPoints == 0:
-            if (x[0] > 230 and x[0] < 290):
-                ROOT.TF1.RejectPoint()
+        #if not rejectPoints == 0:
+            #if (x[0] > 230 and x[0] < 290):
+                #ROOT.TF1.RejectPoint()
                 #return 0
         if x[0] < boundary:
-            return norm*(par[0]*ROOT.TMath.Landau(x[0],par[1],par[2]))
-        C = norm*(par[0]*ROOT.TMath.Landau(boundary,par[1],par[2]))*ROOT.TMath.Exp(boundary*par[3])
+            return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Landau(x[0],par[1],par[2]))
+        C = self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Landau(boundary,par[1],par[2]))*ROOT.TMath.Exp(boundary*par[3])
         return C*ROOT.TMath.Exp(-x[0]*par[3])
 
     def QCDEWKFunction(self,x,par,norm):
         if par[0]+par[1]*x[0] == 0.0:
             return 0
-        return norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
+        return self._additionalNormFactor*norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0])))+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
 
     def QCDFunctionFixed(self,x,par):
-        return par[0]*(ROOT.TMath.Gaus(x[0],par[1],par[2],1)+par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1)+par[6]*ROOT.TMath.Exp(-par[7]*x[0]))
+        return self._additionalNormFactor*par[0]*(ROOT.TMath.Gaus(x[0],par[1],par[2],1)+par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1)+par[6]*ROOT.TMath.Exp(-par[7]*x[0]))
     
     #===== Composite functions for fitting data
     ## QCD, fake taus, and genuine taus as separate templates
@@ -299,8 +310,24 @@ class QCDNormalizationTemplate:
                 raise Exception("Error: Please call the 'doFit(...)' method first!")
         return [self._nEventsTotalErrorFromFitUp, self._nEventsTotalErrorFromFitDown]
 
+    ## Returns the fit results
     def getFitResults(self):
         return self._fitParameters
+    
+    ## Returns a TF1 of the fitted function
+    def obtainFittedFunction(self, normalizationFactor, FITMIN, FITMAX):
+        if self._fitParameters == None:
+            raise Exception("Error: Call doFit() first!")
+        # Update normalization
+        f = self._fitFunction.clone()
+        f.setAdditionalNormalization(normalizationFactor)
+        # Obtain function  
+        func = ROOT.TF1(self._name+"_"+self._binLabel, f, FITMIN, FITMAX, self._fitFunction.getNParam())
+        for k in range(self._fitFunction.getNParam()):
+            func.SetParameter(k, self._fitParameters[k])
+        func.SetLineWidth(2)
+        func.SetLineStyle(2)
+        return func
     
     ## Call once for every bin
     def setHistogram(self, histogram, binLabel):
@@ -311,6 +338,7 @@ class QCDNormalizationTemplate:
             if self._histo.GetBinContent(k) < 0.0:
                 print "template '%s': converted in bin %d a negative value (%f) to zero."%(self._name, k, self._histo.GetBinContent(k))
                 self._histo.SetBinContent(k, 0.0)
+                self._histo.SetBinError(k, 1.0)
         # Format bin label string
         self._binLabel = getModifiedBinLabelString(binLabel)
         # Calculate normalization factor and store the histogram normalized as area = 1
@@ -332,7 +360,7 @@ class QCDNormalizationTemplate:
         h = self._histo.Clone(self._histo.GetName()+"clone")
         h.Scale(self._normalizationFactor)
         plot.histoMgr.appendHisto(histograms.Histo(h,self._histo.GetName()))
-        plot.createFrame("template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.1, "ymaxfactor": 2.})
+        plot.createFrame("template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.1, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
         histograms.addStandardTexts(cmsTextPosition="outframe")
         histograms.addText(0.36,0.89, "Integral = %d events"%int(self._histo.Integral()*self._normalizationFactor+0.5))
         histograms.addText(0.36,0.84, self._name)
@@ -444,7 +472,7 @@ class QCDNormalizationTemplate:
                 plot = plots.PlotBase()
                 plot.histoMgr.appendHisto(histograms.Histo(h,h.GetName()))
                 plot.histoMgr.appendHisto(histograms.Histo(fit, "fit"))
-                plot.createFrame("fit_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 1e-5, "ymaxfactor": 2.})
+                plot.createFrame("fit_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 1e-5, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
                 histograms.addText(0.36,0.84, self._name+", "+self._binLabel)
                 plot.getPad().SetLogy(True)
                 histograms.addStandardTexts(cmsTextPosition="outframe")
@@ -463,7 +491,11 @@ class QCDNormalizationManager:
         self._QCDSource = "QCD_Inverted"
         self._commentLines = []
         self._qcdNormalization = {}
+        self._qcdNormalizationError = {}
         self._ewkFakesNormalization = {}
+        self._ewkFakesNormalizationError = {}
+        self._combinedFakesNormalization = {}
+        self._combinedFakesNormalizationError = {}
         
         if not isinstance(binLabels, list):
             raise Exception("Error: binLabels needs to be a list of strings")
@@ -528,6 +560,13 @@ class QCDNormalizationManager:
     # \param FITMIN        float describing the minimum value for the fit range (valid only if "R" is included in fitOptions)
     # \param FITMAX        float describing the maximum value for the fit range (valid only if "R" is included in fitOptions)
     def fitDataWithQCDAndFakesAndGenuineTaus(self, dataHisto, fitOptions, FITMIN, FITMAX):
+        class FunctionSum:
+            def __init__(self, f1, f2):
+                self._f1 = f1.Clone()
+                self._f2 = f2.Clone()
+            def __call__(self, x):
+                return self._f1.Eval(x[0]) + self._f2.Eval(x[0])
+        
         #===== Check that inputs have been provided
         self._checkInputValidity()
         
@@ -555,8 +594,37 @@ class QCDNormalizationManager:
                                            parEWKGenuineTaus = self._templates[self._EWKGenuineTausSource].getFittedParameters(),
                                            EWKGenuineTausNorm = 1.0),
                                FITMIN, FITMAX)
-        dataTemplate.setDefaultFitParam(defaultLowerLimit=[0.0, 0.0, 0.0], defaultUpperLimit=[1.0, 1.0, 1.0])
+        # Do fit to data
+        dataTemplate.setDefaultFitParam(defaultInitialValue=[1.0, 0.90, 0.10], defaultLowerLimit=[0.0, 0.0, 0.0], defaultUpperLimit=[10.0, 1.0, 1.0])
         dataTemplate.doFit(fitOptions)
+        
+        #===== Do a plot of the fit
+        # Recreate the already fitted QCD and EWK fakes functions
+        funcData = dataTemplate.obtainFittedFunction(1.0, FITMIN, FITMAX)
+        funcData.SetLineColor(ROOT.kRed)
+        n = dataTemplate.getFittedParameters()[0] * dataTemplate.getFittedParameters()[1]
+        funcQCD = self._templates[self._QCDSource].obtainFittedFunction(n, FITMIN, FITMAX)
+        funcQCD.SetLineColor(ROOT.kBlue)
+        funcEWKfakes = self._templates[self._EWKFakeTausSource].obtainFittedFunction(dataTemplate.getFittedParameters()[0] * dataTemplate.getFittedParameters()[2], FITMIN, FITMAX)
+        funcSum = FunctionSum(funcQCD, funcEWKfakes)
+        funcQCDPlusEWKFakes = ROOT.TF1("QCDPlusEWKfakes"+binLabel, funcSum, FITMIN, FITMAX, 0)
+        funcQCDPlusEWKFakes.SetLineColor(ROOT.kMagenta+1)
+        funcQCDPlusEWKFakes.SetLineWidth(2)
+        funcQCDPlusEWKFakes.SetLineStyle(2)
+        # Make plot
+        ROOT.gStyle.SetOptFit(0)
+        ROOT.gStyle.SetOptStat(0)
+        plot = plots.PlotBase()
+        plot.histoMgr.appendHisto(histograms.Histo(dataHisto,dataHisto.GetName()))
+        plot.histoMgr.appendHisto(histograms.Histo(funcData, "fitted data"))
+        plot.histoMgr.appendHisto(histograms.Histo(funcQCD, "QCD template"))
+        plot.histoMgr.appendHisto(histograms.Histo(funcQCDPlusEWKFakes, "QCD+EWK fakes template"))
+        plot.createFrame("finalFit_"+"_"+binLabel, opts={"ymin": 1e-5, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
+        histograms.addText(0.36,0.84, "Fit to data, "+binLabel)
+        plot.getPad().SetLogy(True)
+        histograms.addStandardTexts(cmsTextPosition="outframe")
+        plot.draw()
+        plot.save()
         
         #===== Handle results
         print "\n- Results:"
@@ -577,14 +645,14 @@ class QCDNormalizationManager:
         lines.append("      Sanity check: EWK fake in baseline = %.1f vs. fitted = %.1f"%(self._templates["EWKFakeTaus_Baseline"].getNeventsFromHisto(False), nEWKFakeTausFitted))
         # should one divide the fractions with dataTemplate.getFittedParameters()[0] ??? (right now not because the correction is so small)
         
-        
         # Normalization factor for QCD
         qcdNormFactor = nQCDFitted / self._templates["QCD_Inverted"].getNeventsFromHisto(False)
-        self._qcdNormalization[binLabel] = qcdNormFactor
         nQCDBaselineError = errorPropagation.errorPropagationForProduct(dataTemplate.getFittedParameters()[1], dataTemplate.getFittedParameterErrors()[1],
                                                                         dataTemplate.getNeventsFromHisto(False), dataTemplate.getNeventsErrorFromHisto(False))
         qcdNormFactorError = errorPropagation.errorPropagationForDivision(nQCDFitted, nQCDBaselineError,
                                                                           self._templates["QCD_Inverted"].getNeventsFromHisto(False), self._templates["QCD_Inverted"].getNeventsErrorFromHisto(False))
+        self._qcdNormalization[binLabel] = qcdNormFactor
+        self._qcdNormalizationError[binLabel] = qcdNormFactorError
         # Normalization factor for EWK fake taus
         ewkFakesNormFactor = None
         ewkFakesNormFactorError = None
@@ -601,15 +669,68 @@ class QCDNormalizationManager:
                                                                                    self._templates["EWKFakeTaus_Inverted"].getNeventsFromHisto(False), self._templates["EWKFakeTaus_Inverted"].getNeventsErrorFromHisto(False))
         #ewkFakesNormFactor = self._templates["EWKFakeTaus_Baseline"].getNeventsFromHisto(False) / self._templates["EWKFakeTaus_Inverted"].getNeventsFromHisto(False)
         self._ewkFakesNormalization[binLabel] = ewkFakesNormFactor
+        self._ewkFakesNormalizationError[binLabel] = ewkFakesNormFactorError
         lines.append("   Normalization factor (QCD): %f +- %f"%(qcdNormFactor, qcdNormFactorError))
         lines.append("   Normalization factor (EWK fake taus): %f +- %f"%(ewkFakesNormFactor, ewkFakesNormFactorError))
-        
+        # Print output and store comments
         self._commentLines.extend(lines)
         for l in lines:
             print l
-            
+    
+    ## Calculates the combined normalization and if specified, varies it up or down by factor (1+variation)
+    def calculateCombinedNormalization(self, hQCD, hEWKfakes, variation=0.0):
+        lines = []
+        # Obtain counts for QCD and EWK fakes
+        nQCDerror = ROOT.Double(0.0)
+        nQCD = hQCD.IntegralAndError(1, hQCD.GetNbinsX()+1, nQCDerror)
+        nEWKfakesError = ROOT.Double(0.0)
+        nEWKfakes = hEWKfakes.IntegralAndError(1, hEWKfakes.GetNbinsX()+1, nEWKfakesError)
+        nTotal = nQCD + nEWKfakes
+        nTotalError = ROOT.TMath.Sqrt(nQCDerror**2 + nEWKfakesError**2)
+        # Calculate w = nQCD / nTotal
+        w = None
+        wError = None
+        if nTotal > 0.0:
+            w = nQCD / nTotal
+            wError = errorPropagation.errorPropagationForDivision(nQCD, nQCDerror, nTotal, nTotalError)
+        lines.append("   w = nQCD/(nQCD+nEWKfakes) = %f +- %f"%(w, wError))
+        if variation != 0.0:
+            w = w*(1.0+variation)
+            if w < 0.0:
+                w = 0.0
+            if w > 1.0:
+                w = 1.0
+            lines.append("   variation applied, using the value w = %f"%w)
+        # Calculate the combined normalization factor (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)
+        binLabel = self._templates[self._requiredTemplateList[0]].getBinLabel()
+        fakeRate = None
+        fakeRateError = None
+        if w != None:
+            fakeRate = w*self._qcdNormalization[binLabel] + (1.0-w)*self._ewkFakesNormalization[binLabel]
+            fakeRateErrorPart1 = errorPropagation.errorPropagationForProduct(w, wError, self._qcdNormalization[binLabel], self._qcdNormalizationError[binLabel])
+            fakeRateErrorPart2 = errorPropagation.errorPropagationForProduct(w, wError, self._ewkFakesNormalization[binLabel], self._ewkFakesNormalizationError[binLabel])
+            fakeRateError = ROOT.TMath.Sqrt(fakeRateErrorPart1**2 + fakeRateErrorPart2**2)
+        lines.append("   Combined normalization factor for (nQCD+nEWKfakes) = %s +- %s"%(str(fakeRate), str(fakeRateError)))
+        self._combinedFakesNormalization[binLabel] = fakeRate
+        self._combinedFakesNormalizationError[binLabel] = fakeRateError
+        # Print output and store comments
+        self._commentLines.extend(lines)
+        for l in lines:
+            print l
+
     def writeScaleFactorFile(self, filename, analysis, dataEra, searchMode):
         s = ""
+        s += "# Generated on %s\n"%datetime.datetime.now().ctime()
+        s += "# by %s\n"%os.path.basename(sys.argv[0])
+        s += "\n"
+        s += "import sys\n"
+        s += "\n"
+        s += "def QCDInvertedNormalizationSafetyCheck(era):\n"
+        s += "    validForEra = \""+dataEra+"\"\n"
+        s += "    if not era == validForEra:\n"
+        s += "        print \"Warning, inconsistent era, normalisation factors valid for\",validForEra,\"but trying to use with\",era\n"
+        s += "        sys.exit()\n"
+        s += "\n"
         s += "QCDNormalization = {\n"
         for k in self._qcdNormalization:
             s += '    "%s": %f,\n'%(k, self._qcdNormalization[k])
@@ -618,8 +739,28 @@ class QCDNormalizationManager:
         for k in self._ewkFakesNormalization:
             s += '    "%s": %f,\n'%(k, self._ewkFakesNormalization[k])
         s += "}\n"
-        print "\n"+s
-        # FIXME add code
+        s += "QCDPlusEWKFakeTausNormalization = {\n"
+        for k in self._combinedFakesNormalization:
+            s += '    "%s": %f,\n'%(k, self._combinedFakesNormalization[k])
+        s += "}\n"
+        s += "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown = {\n"
+        for k in self._combinedFakesNormalization:
+            s += '    "%s": %f,\n'%(k, self._combinedFakesNormalization[k])
+        s += "}\n"
+        s += "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarUp = {\n"
+        for k in self._combinedFakesNormalization:
+            s += '    "%s": %f,\n'%(k, self._combinedFakesNormalization[k])
+        s += "}\n"
+        s += "# Log of fake rate calculation:\n"
+        fOUT = open(filename,"w")
+        fOUT.write(s)
+        for l in self._commentLines:
+            if l.startswith("\n"):
+                fOUT.write("#\n#"+l[1:]+"\n")
+            else:
+                fOUT.write("#"+l+"\n")
+        fOUT.close()
+        print "Normalization factors written to '%s'"%filename
         
 # Unit tests
 if __name__ == "__main__":
