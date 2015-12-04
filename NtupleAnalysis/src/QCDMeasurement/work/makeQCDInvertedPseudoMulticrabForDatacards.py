@@ -23,7 +23,7 @@ _generalOptions = {
     "normalizationFactorSource": "QCDInvertedNormalizationFactors_AfterStdSelections.py",
     "normalizationPoint": "AfterStdSelections",
     "normalizationSourcePrefix": "ForQCDNormalization/Normalization",
-    "ewkSourceForQCDPlusFakeTaus": "ForDataDrivenCtrlPlotsGenuineTaus",
+    "ewkSourceForQCDPlusFakeTaus": "ForDataDrivenCtrlPlotsEWKGenuineTaus",
     "ewkSourceForQCDOnly": "ForDataDrivenCtrlPlots",
     "dataSource": "ForDataDrivenCtrlPlots",
 }
@@ -42,7 +42,7 @@ class ModuleBuilder:
         self._fakeWeightingMinusResult = None
         
     ## Clean up memory
-    def __del__(self):
+    def delete(self):
         if self._nominalResult != None:
             self._nominalResult.delete()
         if self._fakeWeightingPlusResult != None:
@@ -70,9 +70,9 @@ class ModuleBuilder:
         self._dsetMgr.updateNAllEventsToPUWeighted()
         self._dsetMgr.loadLuminosities()
         plots.mergeRenameReorderForDataMC(self._dsetMgr)
-        self._dsetMgr.merge("EWK", _ewkDatasetsForMerging)
+        self._dsetMgr.merge("EWK", _generalOptions["ewkDatasetsForMerging"])
         # Obtain luminosity
-        self._luminosity = dsetMgr.getDataset("Data").getLuminosity()
+        self._luminosity = self._dsetMgr.getDataset("Data").getLuminosity()
         
     def debug(self):
         self._dsetMgr.printDatasetTree()
@@ -81,7 +81,13 @@ class ModuleBuilder:
     def getModuleInfoString(self):
         return "%s_%s_%s"%(self._era, self._searchMode, self._optimizationMode)
 
-    def buildModule(self, dataPath, ewkPath, normFactors, norm, calculateQCDNormalizationSyst, normDataSrc=None, normEWKSrc=None):
+    def buildModule(self,
+                    dataPath,
+                    ewkPath, 
+                    normFactors,
+                    calculateQCDNormalizationSyst,
+                    normDataSrc=None,
+                    normEWKSrc=None):
         # Create containers for results
         myModule = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr,
                                                                 self._era,
@@ -96,7 +102,8 @@ class ModuleBuilder:
                                                                          normFactors,
                                                                          optionCalculateQCDNormalizationSyst=calculateQCDNormalizationSyst,
                                                                          normDataSrc=normDataSrc,
-                                                                         normEWKSrc=normEWKSrc)
+                                                                         normEWKSrc=normEWKSrc,
+                                                                         optionUseInclusiveNorm=self._opts.useInclusiveNorm)
         # Store results
         myModule.addPlots(self._nominalResult.getShapePlots(),
                           self._nominalResult.getShapePlotLabels())
@@ -129,7 +136,8 @@ class ModuleBuilder:
                                                                                    self._luminosity,
                                                                                    self.getModuleInfoString(),
                                                                                    normFactorsUp,
-                                                                                   optionCalculateQCDNormalizationSyst=False)
+                                                                                   optionCalculateQCDNormalizationSyst=False,
+                                                                                   optionUseInclusiveNorm=self._opts.useInclusiveNorm)
         myModule.addPlots(self._fakeWeightingPlusResult.getShapePlots(),
                           self._fakeWeightingPlusResult.getShapePlotLabels())
         self._outputCreator.addModule(mySystModulePlus)
@@ -141,7 +149,7 @@ class ModuleBuilder:
                                                                          "SystVarFakeWeightingMinus")
         self._fakeWeightingMinusResult = qcdInvertedResult.QCDInvertedResultManager(dataPath, 
                                                                                     ewkPath,
-                                                                                    self._dsetMgr
+                                                                                    self._dsetMgr,
                                                                                     self._myLuminosity,
                                                                                     self.getModuleInfoString(),
                                                                                     normFactorsDown,
@@ -161,7 +169,7 @@ def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
 
 
 def importNormFactors(era):
-    src = _generalOptions["myNormalizationFactorSource"]
+    src = _generalOptions["normalizationFactorSource"]
     if not os.path.exists(src):
         raise Exception(ShellStyles.ErrorLabel()+"Normalisation factors ('%s.py') not found!\nRun script InvertedTauID_Normalization.py to generate the normalization factors."%src)
     # Check if normalization coefficients are suitable for era
@@ -186,6 +194,7 @@ if __name__ == "__main__":
     parser.add_option("--mdir", dest="multicrabDir", action="store", help="Multicrab directory")
     parser.add_option("--shape", dest="shape", action="store", default=["MT"], help="shape identifiers")
     parser.add_option("--qcdonly", dest="qcdonly", action="store_true", default=False, help="Calculate QCD-only case instead of QCD+EWK fakes")
+    parser.add_option("--inclusiveonly", dest="useInclusiveNorm", action="store_true", default=False, help="Use only inclusive weight instead of binning")
     parser.add_option("--test", dest="test", action="store_true", default=False, help="Make short test by limiting number of syst. variations")
     # Add here parser options, if necessary, following line is an example
     #parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
@@ -225,7 +234,7 @@ if __name__ == "__main__":
     #dsetMgrCreator.close()
     # Loop over era/searchMode/optimizationMode combos
     myDisplayStatus = True
-    myTotalModules = myModuleSelector.getSelectedCombinationCount() * (len(mySystematicsNames)+1) * len(myShapes)
+    myTotalModules = myModuleSelector.getSelectedCombinationCount() * (len(mySystematicsNames)+1) * len(opts.shape)
     myModuleSelector.printSelectedCombinationCount()
     # Loop over era/searchMode/optimizationMode options
 
@@ -236,7 +245,7 @@ if __name__ == "__main__":
     for shapeType in opts.shape:
         # Determine normalization sources
         _generalOptions["normalizationDataSource"] = "%s%s%s"%(_generalOptions["normalizationSourcePrefix"], shapeType, _generalOptions["normalizationPoint"])
-        prefix = _generalOptions["ewkSource"].replace(_generalOptions["dataSource"])
+        prefix = _generalOptions["EWKsource"].replace(_generalOptions["dataSource"],"")
         _generalOptions["normalizationEWKSource"] = _generalOptions["normalizationSourcePrefix"].replace("/","%s/"%prefix)
         _generalOptions["normalizationEWKSource"] += "%s%s"%(shapeType, _generalOptions["normalizationPoint"])
         # Initialize
@@ -260,22 +269,24 @@ if __name__ == "__main__":
                                                 optimizationMode=optimizationMode)
                     if (n == 1):
                         nominalModule.debug()
-                    nominalModule.buildModule(_generalOptions["dataPath"],
-                                              _generalOptions["ewkPath"],
-                                              normFactors["nominal"],
-                                              calculateQCDNormalizationSyst=True,
+                    nominalModule.buildModule(_generalOptions["dataSource"],
+                                              _generalOptions["EWKsource"],
+                                              myNormFactors["nominal"],
+                                              calculateQCDNormalizationSyst=False, #FIXME: True
                                               normDataSrc=_generalOptions["normalizationDataSource"],
                                               normEWKSrc=_generalOptions["normalizationEWKSource"])
-                    #===== QCD normalization systematics
-                    nominalModule.buildQCDNormalizationSystModule(_generalOptions["dataPath"],
-                                                                  _generalOptions["ewkPath"])
-                    #===== Quark gluon weighting systematics
-                    nominalModule.buildQCDQuarkGluonWeightingSystModule(_generalOptions["dataPath"],
-                                                                        _generalOptions["ewkPath"],
-                                                                        normFactors["FakeWeightingUp"],
-                                                                        normFactors["FakeWeightingDown"],
-                                                                        _generalOptions["normalizationDataSource"],
-                                                                        _generalOptions["normalizationEWKSource"])
+                    if False: # FIXME
+                        #===== QCD normalization systematics
+                        nominalModule.buildQCDNormalizationSystModule(_generalOptions["dataSource"],
+                                                                      _generalOptions["EWKsource"])
+                        #===== Quark gluon weighting systematics
+                        nominalModule.buildQCDQuarkGluonWeightingSystModule(_generalOptions["dataSource"],
+                                                                            _generalOptions["EWKsource"],
+                                                                            myNormFactors["FakeWeightingUp"],
+                                                                            myNormFactors["FakeWeightingDown"],
+                                                                            _generalOptions["normalizationDataSource"],
+                                                                            _generalOptions["normalizationEWKSource"])
+                    nominalModule.delete()
                     #===== Time estimate
                     printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
                     #===== Now do the rest of systematics variations
@@ -295,6 +306,7 @@ if __name__ == "__main__":
                                                _generalOptions["normalizationEWKSource"],
                                                calculateQCDNormalizationSyst=False)
                         printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
+                        systModule.delete()
         print "\nPseudo-multicrab ready for mass %s...\n"%shapeType
     # Create rest of pseudo multicrab directory
     myOutputCreator.finalize()

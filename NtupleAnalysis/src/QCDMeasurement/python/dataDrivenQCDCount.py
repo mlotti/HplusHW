@@ -8,45 +8,31 @@ import HiggsAnalysis.NtupleAnalysis.tools.errorPropagation as errorPropagation
 from HiggsAnalysis.NtupleAnalysis.tools.extendedCount import ExtendedCount
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import array
+import os
 
 import ROOT
 ROOT.gROOT.SetBatch(True) # no flashing canvases
 
 ## Container class for information of data and MC EWK at certain point of selection
 class DataDrivenQCDShape:
-    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, luminosity, dataDrivenFakeTaus=False, EWKUncertaintyFactor=1.0, UncertAffectsTT = True):
+    def __init__(self, 
+                 dsetMgr, 
+                 dsetLabelData,
+                 dsetLabelEwk,
+                 histoName,
+                 dataPath,
+                 ewkPath,
+                 luminosity):
+                 #dataDrivenFakeTaus=False,
+                 #EWKUncertaintyFactor=1.0,
+                 #UncertAffectsTT = True):
         self._uniqueN = 0
         self._splittedHistoReader = splittedHistoReader.SplittedHistoReader(dsetMgr, dsetLabelData)
         self._histoName = histoName
-        self._dataList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, histoName, luminosity))
-        # filtered ewk fakes
-        if dataDrivenFakeTaus:
-            histoName = histoName.replace("TransverseMass","EWKGenuineTausTransverseMass")
-            histoName = histoName.replace("AfterCollinearCuts","AfterCollinearCutsPlusFilteredEWKFakeTaus")
-
-        if UncertAffectsTT:
-            self._ewkList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, histoName, luminosity))
-            #scale with scalar uncertainty
-            if EWKUncertaintyFactor != None and EWKUncertaintyFactor != 1.0:
-                for i in range(0,len(self._ewkList)):
-                    self._ewkList[i].Scale(EWKUncertaintyFactor)
-        else:#jos data-driven: ota vain genuinet ja feikkien ep.varm. ei vaikuta
-            if EWKUncertaintyFactor == None:
-                pass
-            self._ewkList = []
-            ewkFakeListNoTT = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk+"NoTT", "shapeEWKFakeTausTransverseMass", luminosity))
-            ewkFakeListTT = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk+"TT", "shapeEWKFakeTausTransverseMass", luminosity))
-            ewkListNoTT = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk+"NoTT", "shapeEWKGenuineTausTransverseMass", luminosity))
-            ewkListTT = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk+"TT", "shapeEWKGenuineTausTransverseMass", luminosity))
-            for i in range(0,len(ewkListNoTT)):
-                h = ewkListNoTT[i].Clone()
-                fakeEWKttscaled = ewkFakeListNoTT[i].Clone()
-                fakeEWKttscaled.Scale(EWKUncertaintyFactor)
-                h.Add(ewkListTT[i])
-                if not dataDrivenFakeTaus:
-                    h.Add(ewkFakeListTT[i])
-                    h.Add(fakeEWKttscaled)
-                self._ewkList.append(h)
+        dataFullName = os.path.join(dataPath, histoName)
+        self._dataList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, dataFullName, luminosity))
+        ewkFullName = os.path.join(ewkPath, histoName)
+        self._ewkList = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, ewkFullName, luminosity))
 
     ## Delete the histograms
     def delete(self):

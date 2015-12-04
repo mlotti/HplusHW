@@ -14,8 +14,8 @@ import os
 import shutil
 from math import sqrt
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 
 class PseudoMultiCrabCreator:
     ## Constructor
@@ -208,9 +208,8 @@ class PseudoMultiCrabModule:
                     myUncert += h.GetBinError(i)**2
                 self._counters[plotName] = myValue
                 self._counterUncertainties[plotName] = sqrt(myUncert)
-            h.SetName(plotNmae)
-            # Does one need to clone or not?
-            self._shapes.append(h)
+            h.SetName(plotName)
+            self._dataDrivenControlPlots.append(h)
 
     def writeModuleToRootFile(self, rootfile):
         # Create module directory
@@ -224,6 +223,7 @@ class PseudoMultiCrabModule:
         myDDPlotsDir = myModuleDir.mkdir(myDDPlotsDirName)
         for h in self._dataDrivenControlPlots:
             h.SetDirectory(myDDPlotsDir)
+        
         # Save counter histogram
         myCounterDir = myModuleDir.mkdir("counters")
         myWeightedCounterDir = myCounterDir.mkdir("weighted")
