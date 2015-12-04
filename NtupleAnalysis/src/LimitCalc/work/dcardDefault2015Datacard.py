@@ -221,9 +221,12 @@ myQCD = DataGroup(
     label        = "QCDinv",
     landsProcess = 3,
     validMassPoints = MassPoints,
-    datasetType  = "QCD MC",
-    datasetDefinition = "QCD",
-    nuisances    = myShapeSystematics[:]+["b_tag","xsect_QCD","lumi"],
+    datasetType  = "QCD inverted",
+    datasetDefinition = "QCDMeasurementMT",
+    nuisances    = myQCDShapeSystematics[:]+["QCDinvTemplateFit"],#+"xsect_tt_forQCD","QCDinvTemplateFit","lumi_forQCD"
+    #datasetType  = "QCD MC",
+    #datasetDefinition = "QCD",
+    #nuisances    = myShapeSystematics[:]+["b_tag","xsect_QCD","lumi"],
     shapeHisto   = SignalShapeHisto,
 )
 

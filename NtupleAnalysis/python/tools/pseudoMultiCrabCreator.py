@@ -111,7 +111,7 @@ class PseudoMultiCrabModule:
     ## Constructor
     def __init__(self, dsetMgr, era, searchMode, optimizationMode, systematicsVariation=None):
         # Note that 'signalAnalysis' only matters for dataset.py to find the proper module
-        self._moduleName = "signalAnalysis%s%s"%(searchMode, era)
+        self._moduleName = "signalAnalysis_%s_%s"%(searchMode, era)
         if optimizationMode != "" and optimizationMode != None:
             self._moduleName += "%s"%optimizationMode
         if systematicsVariation != None:

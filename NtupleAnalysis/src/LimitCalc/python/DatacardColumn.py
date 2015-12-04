@@ -446,7 +446,7 @@ class DatacardColumn():
         # Obtain overall purity for QCD
         self._purityForFinalShape = None
         myAveragePurity = None
-        if self.typeIsQCDinverted():
+        if self.typeIsQCDinverted() and False: # FIXME switch on when purity exists
             myDsetRootHisto = myShapeExtractor.extractQCDPurityHistogram(self, dsetMgr, self._shapeHisto)
             self._rateResult.setPurityHistogram(myDsetRootHisto.getHistogram())
             myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self.getPurityHistogram())
@@ -533,7 +533,7 @@ class DatacardColumn():
                         # Obtain overall purity for QCD
                         myAverageCtrlPlotPurity = None
                         hCtrlPlotPurity = None
-                        if self.typeIsQCDinverted():
+                        if self.typeIsQCDinverted() and False: #FIXME switch on when purity exists
                             myDsetHisto = c.extractQCDPurityHistogram(self, dsetMgr)
                             hCtrlPlotPurity = aux.Clone(myDsetHisto.getHistogram())
                             myAverageCtrlPlotPurity = c.extractQCDPurityAsValue(myRateHistograms[0], hCtrlPlotPurity)
