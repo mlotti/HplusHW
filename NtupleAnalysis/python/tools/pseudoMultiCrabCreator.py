@@ -34,7 +34,7 @@ class PseudoMultiCrabCreator:
         if self._energy == None:
             self._energy = module._energy
             self._dataVersion = module._dataVersion.Clone()
-            self._codeVersion = module._codeVersion.Clone()
+            #self._codeVersion = module._codeVersion.Clone()
             self._writeRootFileToDisk(self._currentSubTitle)
             self._dataVersion = None # No need to delete from gDirectory, since they were saved to disk already
             #self._codeVersion = None
@@ -194,6 +194,23 @@ class PseudoMultiCrabModule:
             h.SetTitle(labelList[i])
             h.SetName(labelList[i])
             self._dataDrivenControlPlots.append(h)
+
+    ## Adds all plots in one go from the QCDPlotContainer object
+    def addPlots(self, plots, labels):
+        for i in range(len(labels)):
+            h = plots[i]
+            plotName = labels[i]
+            if plotName.startswith("shape"):
+                myValue = 0.0
+                myUncert = 0.0
+                for i in range(1, h.GetNbinsX()+1):
+                    myValue += h.GetBinContent(i)
+                    myUncert += h.GetBinError(i)**2
+                self._counters[plotName] = myValue
+                self._counterUncertainties[plotName] = sqrt(myUncert)
+            h.SetName(plotNmae)
+            # Does one need to clone or not?
+            self._shapes.append(h)
 
     def writeModuleToRootFile(self, rootfile):
         # Create module directory
