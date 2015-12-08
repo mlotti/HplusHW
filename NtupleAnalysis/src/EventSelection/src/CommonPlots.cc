@@ -4,7 +4,8 @@
 #include "DataFormat/interface/Event.h"
 
 CommonPlots::CommonPlots(const ParameterSet& config, const AnalysisType type, HistoWrapper& histoWrapper)
-: fEnableGenuineTauHistograms(config.getParameter<bool>("enableGenuineTauHistograms")),
+: fEnableGenuineTauHistograms(true), // Needed always for limits
+  //fEnableGenuineTauHistograms(config.getParameter<bool>("enableGenuineTauHistograms")),
   // Analysis type
   fAnalysisType(type),
   // HistoWrapper
@@ -56,7 +57,7 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
   std::vector<TDirectory*> myDirs2 = {myCtrlDir, myCtrlEWKFakeTausDir};
   std::vector<TDirectory*> myDirs3 = {myCtrlDir, myCtrlEWKFakeTausDir, myCtrlGenuineTausDir};
   std::vector<TDirectory*> myDirs;
-  fEnableGenuineTauHistograms = true; // Needed always for limits
+  
   if (fEnableGenuineTauHistograms) {
     for (auto& p: myDirs3)
       myDirs.push_back(p);
@@ -413,16 +414,16 @@ void CommonPlots::fillControlPlotsAfterTauSelection(const Event& event, const Ta
   }
   fTauData = data;
   if (event.isData()) {
-    !bIsFakeTau = false;
+    bIsFakeTau = false;
     return;
   }
   if (isQCDMeasurement()) {
     if (data.hasAntiIsolatedTaus()) {
-      !bIsFakeTau = !(data.getAntiIsolatedTauIsGenuineTau());
+      bIsFakeTau = !(data.getAntiIsolatedTauIsGenuineTau());
     }
   } else {
     if (data.hasIdentifiedTaus()) {
-      !bIsFakeTau = !(data.isGenuineTau());
+      bIsFakeTau = !(data.isGenuineTau());
     }
   }
 }
