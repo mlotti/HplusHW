@@ -1,5 +1,5 @@
-#ifndef TriggerEfficiency_BaseSelection_h
-#define TriggerEfficiency_BaseSelection_h
+#ifndef TriggerEfficiency_TrgBaseSelection_h
+#define TriggerEfficiency_TrgBaseSelection_h
 
 #include "DataFormat/interface/Event.h"
 #include "Framework/interface/EventCounter.h"
@@ -8,18 +8,23 @@
 #include <string>
 #include <vector>
 
-class BaseSelection {
- public:
- BaseSelection(HistoWrapper& histoWrapper):
-  fHistoWrapper(histoWrapper){}
-  ~BaseSelection(){}
+enum Xvar {pt, eta, pu};
 
-  virtual bool offlineSelection(Event&,bool pu = false) = 0;
+class TrgBaseSelection {
+ public:
+ TrgBaseSelection(HistoWrapper& histoWrapper):
+  fHistoWrapper(histoWrapper){}
+  ~TrgBaseSelection(){}
+
+  virtual bool offlineSelection(Event&,Xvar xvar = pt) = 0;
   virtual bool onlineSelection(Event&) = 0;
   bool passedRunRange(Event&, bool);
   double xVariable() { return xvariable;}
+  double xHLTVariable() { return xhltvariable;}
   bool passedCtrlTtrigger(Event&);
   bool mcMatch();
+  double pull() { return sub()/xVariable();}
+  double sub() { return xHLTVariable() - xVariable();}
 
   virtual void bookHistograms(TDirectory*) = 0;
   virtual void print() = 0;
@@ -28,8 +33,10 @@ class BaseSelection {
 
   void init(const ParameterSet&);
 
+
   HistoWrapper& fHistoWrapper;
   double xvariable;
+  double xhltvariable;
 
   std::string fdataera;
   //  float flumi;
@@ -45,7 +52,7 @@ class BaseSelection {
   //  std::vector<std::string> tauDiscrs;
 };
 
-void BaseSelection::init(const ParameterSet& config){
+void TrgBaseSelection::init(const ParameterSet& config){
   //  fdataera          = config.getParameter<std::string>("dataera");
   //  flumi             = config.getParameter<float>("lumi");
   if(config.getParameterOptional<int>("runMin")){
@@ -58,17 +65,18 @@ void BaseSelection::init(const ParameterSet& config){
   //  fsignalTriggers   = config.getParameter<std::vector<std::string>>("signalTriggers");
 
   mcmatch = false;
+  xhltvariable = 0;
 }
 
-bool BaseSelection::passedCtrlTtrigger(Event& fEvent){
+bool TrgBaseSelection::passedCtrlTtrigger(Event& fEvent){
   return fEvent.configurableTriggerDecision();
 }
 
-//bool BaseSelection::onlineSelection(Event& fEvent){
+//bool TrgBaseSelection::onlineSelection(Event& fEvent){
 //  return fEvent.configurableTriggerDecision2();
 //}
 
-bool BaseSelection::passedRunRange(Event& fEvent, bool isData){
+bool TrgBaseSelection::passedRunRange(Event& fEvent, bool isData){
 
   if(!isData) return true;
 
@@ -80,8 +88,9 @@ bool BaseSelection::passedRunRange(Event& fEvent, bool isData){
   return passed;
 }
 
-bool BaseSelection::mcMatch(){
+bool TrgBaseSelection::mcMatch(){
   return mcmatch;
 }
+
 
 #endif

@@ -145,6 +145,12 @@ _physicalToLogical.update({
 
     "QCD_Pt20_MuEnriched": "QCD_Pt20_MuEnriched",
 
+    "QCD_Pt_50to80_MuEnrichedPt5": "QCD_Pt_50to80_MuEnrichedPt5",
+    "QCD_Pt_80to120_MuEnrichedPt5": "QCD_Pt_80to120_MuEnrichedPt5",
+    "QCD_Pt_120to170_MuEnrichedPt5": "QCD_Pt_120to170_MuEnrichedPt5",
+    "QCD_Pt_170to300_MuEnrichedPt5": "QCD_Pt_170to300_MuEnrichedPt5",
+    "QCD_Pt_300to470_MuEnrichedPt5": "QCD_Pt_300to470_MuEnrichedPt5",
+
     "ST_schannel_4f_leptonDecays": "ST_schannel_4f_leptonDecays",
     "ST_tchannel_antitop_4f_leptonDecays": "ST_tchannel_antitop_4f_leptonDecays",
     "ST_tchannel_top_4f_leptonDecays": "ST_tchannel_top_4f_leptonDecays",
@@ -180,6 +186,12 @@ _datasetMerge = {
     "QCD_Pt_1800to2400": "QCD",
     "QCD_Pt_2400to3200": "QCD",
     "QCD_Pt_3200toInf": "QCD",
+
+    "QCD_Pt_50to80_MuEnrichedPt5": "QCD",
+    "QCD_Pt_80to120_MuEnrichedPt5": "QCD",
+    "QCD_Pt_120to170_MuEnrichedPt5": "QCD",
+    "QCD_Pt_170to300_MuEnrichedPt5": "QCD",
+    "QCD_Pt_300to470_MuEnrichedPt5": "QCD",
 
     "ST_s_channel_4f_leptonDecays": "SingleTop",
     "ST_t_channel_antitop_4f_leptonDecays": "SingleTop",
