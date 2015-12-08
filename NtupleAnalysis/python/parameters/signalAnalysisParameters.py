@@ -33,9 +33,9 @@ metFilter = PSet(
 tauSelection = PSet(
   applyTriggerMatching = True,
    triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
-              tauPtCut = 50.0,
+              tauPtCut = 60.0,
              tauEtaCut = 2.1,
-        tauLdgTrkPtCut = 10.0,
+        tauLdgTrkPtCut = 30.0,
                 prongs = 123,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                   rtau = 0.0,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronTightMVA5",
@@ -99,7 +99,7 @@ bjetSelection = PSet(
 
 #====== MET selection
 metSelection = PSet(
-           METCutValue = 80.0,
+           METCutValue = 120.0,
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
   METSignificanceCutValue = -1000.0,
   METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
