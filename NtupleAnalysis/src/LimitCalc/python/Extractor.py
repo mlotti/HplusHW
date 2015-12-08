@@ -856,15 +856,11 @@ class QCDShapeVariationExtractor(ExtractorBase):
 # Extracts histograms for control plot
 class ControlPlotExtractor(ExtractorBase):
     ## Constructor, note that if multiplet directories and names are given, the second, third, etc. are substracted from the first one
-    def __init__(self, histoSpecs, histoTitle, histoDirs, histoNames, opts=None, scaleFactor=1.0):
+    def __init__(self, histoSpecs, histoTitle, histoName, opts=None, scaleFactor=1.0):
         ExtractorBase.__init__(self, mode=ExtractorMode.CONTROLPLOT, exid="-1", distribution="-", description="-", opts=opts, scaleFactor=scaleFactor)
         self._histoSpecs = histoSpecs
         self._histoTitle = histoTitle
-        self._histoName = histoNames
-        self._histoNameWithPath = ""
-        if histoDirs != None and histoDirs != "" and histoDirs != ".":
-            self._histoNameWithPath = "%s/"%histoDirs
-        self._histoNameWithPath += histoNames
+        self._histoName = histoName
 
     ## Method for extracking result
     def extractResult(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
@@ -874,24 +870,27 @@ class ControlPlotExtractor(ExtractorBase):
     def extractHistograms(self, datasetColumn, dsetMgr, mainCounterTable, luminosity, additionalNormalisation = 1.0):
         myLabel = datasetColumn.getLabel()+"_"+self._histoTitle
         mySystematics = dataset.Systematics(allShapes=True)
+        fullHistoName = datasetColumn.getFullHistoName(self._histoName)
         try:
-            myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._histoNameWithPath))
+            myDatasetRootHisto = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(fullHistoName))
             return myDatasetRootHisto
         except dataset.HistogramNotFoundException:
             return None
 
     ## QCD specific method for extracting purity histogram
     def extractQCDPurityHistogram(self, datasetColumn, dsetMgr):
+        fullHistoName = datasetColumn.getFullHistoName(self._histoName)
         # Do not apply here additional normalization, it is not needed
         if not datasetColumn.typeIsQCD:
             raise Exception(ShellStyles.ErrorLabel()+"extractQCDPurityHistogram() called for non-QCD datacolumn '%s'!"%datasetColumn.getLabel())
         # Obtain purity histogram
-        h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoNameWithPath+"_Purity")
+        h = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(fullHistoName+"_Purity")
         return h
 
     ## QCD specific method for extracting purity for a shape
     def extractQCDPurityAsValue(self, datasetColumn, dsetMgr, shapeHisto):
-        hPurity = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(self._histoNameWithPath+"_Purity")
+        fullHistoName = datasetColumn.getFullHistoName(self._histoName)
+        hPurity = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn()).getDatasetRootHisto(fullHistoName+"_Purity")
         if isinstance(hPurity, dataset.DatasetRootHisto):
             return _calculateAverageQCDPurity(shapeHisto, hPurity.getHistogram())
         elif isinstance(hPurity, ROOT.TH1):
@@ -913,8 +912,7 @@ class ControlPlotExtractor(ExtractorBase):
         print "ControlPlotExtractor"
         print "- title:",self._histoTitle
         print "- specs:",self._histoSpecs
-        print "- histoDirs:",self._histoDirs
-        print "- histoNames:",self._histoNames
+        print "- histoName:",self._histoName
         ExtractorBase.printDebugInfo(self)
 
 

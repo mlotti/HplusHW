@@ -8,13 +8,14 @@ from HiggsAnalysis.NtupleAnalysis.tools.aux import sort
 # data structures for the config file information
 
 class ObservationInput:
-    def __init__(self, datasetDefinition, shapeHisto, additionalNormalisation=1.0):
+    def __init__(self, datasetDefinition, shapeHistoName, histoPath, additionalNormalisation=1.0):
         self.datasetDefinition = datasetDefinition
-        self.shapeHisto = shapeHisto
+        self.histoPath = histoPath
+        self.shapeHistoName = shapeHistoName
         self.additionalNormalisation = additionalNormalisation
 
     def getShapeHisto(self):
-        return self.shapeHisto
+        return self.shapeHistoName
 
     def Print(self):
 	print "ObservationInput :"
@@ -26,7 +27,8 @@ class DataGroup:
                  validMassPoints = [],
                  label = "", 
                  nuisances = [], 
-                 shapeHisto = "", 
+                 shapeHistoName = "", 
+                 histoPath = "",
                  datasetType = "",
                  datasetDefinition = None,
                  QCDfactorisedInfo = None,
@@ -35,7 +37,8 @@ class DataGroup:
 	self.validMassPoints = validMassPoints
 	self.label         = label
 	self.nuisances     = nuisances
-	self.shapeHisto    = shapeHisto
+	self.shapeHistoName = shapeHistoName
+	self.histoPath = histoPath
         self.datasetType   = datasetType
         self.datasetDefinition = datasetDefinition
         self.QCDfactorisedInfo = QCDfactorisedInfo
@@ -49,7 +52,8 @@ class DataGroup:
                          validMassPoints = self.validMassPoints,
                          label        = self.label,
                          nuisances    = self.nuisances,
-                         shapeHisto   = self.shapeHisto,
+                         shapeHistoName   = self.shapeHistoName,
+                         histoPath = self.histoPath,
                          datasetType  = self.datasetType,
                          datasetDefinition = self.datasetDefinition,
                          QCDfactorisedInfo = self.QCDfactorisedInfo,
@@ -67,7 +71,8 @@ class DataGroup:
     def setNuisances(self,nuisances):
 	self.nuisances = nuisances[:]
 
-    def setShapeHisto(self,histo):
+    def setShapeHisto(self,path,histo):
+	self.histoPath = path
 	self.shapeHisto = histo
 
     def setDatasetType(self,datasetType):
@@ -257,19 +262,13 @@ class Nuisance:
 class ControlPlotInput:
     def __init__(self,
                  title,
-                 signalHistoPath,
-                 signalHistoName,
-                 EWKfakeHistoPath,
-                 EWKfakeHistoName,
-                 details,
-                 blindedRange,
-                 evaluationRange,
-                 flowPlotCaption):
+                 histoName,
+                 details = {},
+                 blindedRange = [],
+                 evaluationRange = [],
+                 flowPlotCaption = ""):
         self.title = title
-        self.signalHistoPath = signalHistoPath
-        self.signalHistoName = signalHistoName
-        self.EWKfakeHistoPath = EWKfakeHistoPath
-        self.EWKfakeHistoName = EWKfakeHistoName
+        self.histoName = histoName
         self.details = details
         self.blindedRange = blindedRange
         self.evaluationRange = evaluationRange
