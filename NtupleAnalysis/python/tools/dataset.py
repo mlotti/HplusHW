@@ -2556,7 +2556,7 @@ class Dataset:
         # Set cross section, if MC and we know the energy
         if self.isMC() and setCrossSectionAutomatically:
             if "energy" in self.info:
-                crosssection.setBackgroundCrossSectionForDataset(self)
+                crosssection.setBackgroundCrossSectionForDataset(self, quietMode=(self._systematicVariation != None or self._optimizationMode != None))
             else:
                 print "%s is MC but has no energy set in configInfo/configinfo, not setting its cross section automatically" % self.name
 
