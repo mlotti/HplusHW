@@ -405,7 +405,6 @@ class DatacardColumn():
                          #dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(245.8)
                          #myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
                 # Normalize to luminosity
-                print "***"
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties().Clone()
             # Remove any variations not active for the column
