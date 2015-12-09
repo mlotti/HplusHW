@@ -4005,17 +4005,17 @@ class DatasetManagerCreator:
             directoryName = d
 
             # Look for systematic variation
-            start = directoryName.find("SystVar")
+            start = directoryName.find("_SystVar")
             if start >= 0:
                 if "SelectedTauForVariation" in directoryName[start:]:
                     continue
-                systematicVariations[directoryName[start:]] = 1
+                systematicVariations[directoryName[start+1:]] = 1
                 directoryName = directoryName[:start]
 
             # Look for optimization mode
-            start = directoryName.find("Opt")
+            start = directoryName.find("_Opt")
             if start >= 0:
-                optimizationModes[directoryName[start:]] = 1
+                optimizationModes[directoryName[start+1:]] = 1
                 directoryName = directoryName[:start]
 
             # Look for data era
