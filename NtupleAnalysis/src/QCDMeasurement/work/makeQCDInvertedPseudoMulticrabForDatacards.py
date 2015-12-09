@@ -57,15 +57,16 @@ class ModuleBuilder:
         ROOT.gROOT.GetListOfCanvases().Delete()
         ROOT.gDirectory.GetList().Delete()
         
-    def createDsetMgr(self, multicrabDir, era, searchMode, optimizationMode):
+    def createDsetMgr(self, multicrabDir, era, searchMode, optimizationMode=None, systematicVariation=None):
         self._era = era
         self._searchMode = searchMode
         self._optimizationMode = optimizationMode
+        self._systematicVariation = systematicVariation
         # Construct info string of module
         self._moduleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
         # Obtain dataset manager
         self._dsetMgrCreator = dataset.readFromMulticrabCfg(directory=multicrabDir)
-        self._dsetMgr = self._dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+        self._dsetMgr = self._dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode,systematicVariation=systematicVariation)
         # Do the usual normalisation
         self._dsetMgr.updateNAllEventsToPUWeighted()
         self._dsetMgr.loadLuminosities()
@@ -92,7 +93,8 @@ class ModuleBuilder:
         myModule = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr,
                                                                 self._era,
                                                                 self._searchMode,
-                                                                self._optimizationMode)
+                                                                self._optimizationMode,
+                                                                self._systematicVariation)
         # Obtain results
         self._nominalResult = qcdInvertedResult.QCDInvertedResultManager(dataPath,
                                                                          ewkPath,
@@ -258,7 +260,9 @@ if __name__ == "__main__":
                     #=====  Obtain normalization factors
                     myNormFactors = importNormFactors(era)
                     #===== Nominal module
-                    myModuleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
+                    myModuleInfoString = "%s_%s"%(era, searchMode)
+                    if len(optimizationMode) > 0:
+                        myModuleInfoString += "_%s"%optimizationMode
                     n += 1
                     print ShellStyles.CaptionStyle()+"Module %d/%d: %s/%s%s"%(n,myTotalModules,myModuleInfoString,shapeType,ShellStyles.NormalStyle())
                     myStartTime = time.time()
@@ -284,8 +288,9 @@ if __name__ == "__main__":
                                                                             _generalOptions["EWKsource"],
                                                                             myNormFactors["FakeWeightingUp"],
                                                                             myNormFactors["FakeWeightingDown"],
-                                                                            _generalOptions["normalizationDataSource"],
-                                                                            _generalOptions["normalizationEWKSource"])
+                                                                            calculateQCDNormalizationSyst=False,
+                                                                            normDataSrc=_generalOptions["normalizationDataSource"],
+                                                                            normEWKSrc=_generalOptions["normalizationEWKSource"])
                     nominalModule.delete()
                     #===== Time estimate
                     printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
@@ -298,13 +303,14 @@ if __name__ == "__main__":
                         systModule.createDsetMgr(multicrabDir=myMulticrabDir,
                                                  era=era,
                                                  searchMode=searchMode,
-                                                 optimizationMode=optimizationMode)
-                        systModule.buildModule(_generalOptions["dataPath"],
-                                               _generalOptions["ewkPath"],
-                                               normFactors["nominal"],
-                                               _generalOptions["normalizationDataSource"],
-                                               _generalOptions["normalizationEWKSource"],
-                                               calculateQCDNormalizationSyst=False)
+                                                 optimizationMode=optimizationMode,
+                                                 systematicVariation=syst)
+                        systModule.buildModule(_generalOptions["dataSource"],
+                                               _generalOptions["EWKsource"],
+                                               myNormFactors["nominal"],
+                                               calculateQCDNormalizationSyst=False,
+                                               normDataSrc=_generalOptions["normalizationDataSource"],
+                                               normEWKSrc=_generalOptions["normalizationEWKSource"])
                         printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
                         systModule.delete()
         print "\nPseudo-multicrab ready for mass %s...\n"%shapeType
