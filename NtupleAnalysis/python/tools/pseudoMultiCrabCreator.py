@@ -113,9 +113,9 @@ class PseudoMultiCrabModule:
         # Note that 'signalAnalysis' only matters for dataset.py to find the proper module
         self._moduleName = "signalAnalysis_%s_%s"%(searchMode, era)
         if optimizationMode != "" and optimizationMode != None:
-            self._moduleName += "%s"%optimizationMode
+            self._moduleName += "_%s"%optimizationMode
         if systematicsVariation != None:
-            self._moduleName += "%s"%systematicsVariation
+            self._moduleName += "_%s"%systematicsVariation
         # Initialize containers
         self._shapes = [] # Shape histograms
         self._dataDrivenControlPlots = [] # Data driven control plot histograms
