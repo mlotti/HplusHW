@@ -1035,14 +1035,13 @@ class SystematicsHelper:
             #        shapes.append(s)
             if verbose:
                 print "  Using explicitly specified shape variations (%s)" % ",".join(shapes)
-
         for source in shapes:
             plus = None
             minus = None
             # Need to do the check, because of QCD shape uncertainty
-            if dset.hasRootHisto(self._histoName, analysisPostfix=source+"Plus"):
-                (plus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Plus")
-                (minus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Minus")
+            if dset.hasRootHisto(self._histoName, analysisPostfix="_"+source+"Plus"):
+                (plus, realName) = dset.getRootHisto(self._histoName, analysisPostfix="_"+source+"Plus")
+                (minus, realName) = dset.getRootHisto(self._histoName, analysisPostfix="_"+source+"Minus")
                 if modify is not None:
                     modify(plus)
                     modify(minus)
