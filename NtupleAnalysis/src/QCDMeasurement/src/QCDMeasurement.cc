@@ -367,7 +367,7 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   cBaselineTauSelectedEvents.increment();
   // Fill final plots
   double myTransverseMass = TransverseMass::reconstruct(tau, METData.getMET());
-  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTauTransverseMass, isFakeTau, myTransverseMass);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTauTransverseMass, !isFakeTau, myTransverseMass);
   
 //====== Experimental code
 
@@ -405,7 +405,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
 
 //====== Point of standard selections
   fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
-  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationInvertedTauAfterStdSelections, isFakeTau, METvalue);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationInvertedTauAfterStdSelections, !isFakeTau, METvalue);
   
 //====== b-jet selection
   const BJetSelection::Data bjetData = fInvertedTauBJetSelection.analyze(fEvent, jetData);
@@ -433,7 +433,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   // Fill final plots
   //double myTransverseMass = TransverseMass::reconstruct(tau, METData.getMET());
   fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
-  hInvertedTauTauPtAfterAllSelections->Fill(isFakeTau, tau.pt());
+  hInvertedTauTauPtAfterAllSelections->Fill(!isFakeTau, tau.pt());
   
 //====== Experimental code
 
