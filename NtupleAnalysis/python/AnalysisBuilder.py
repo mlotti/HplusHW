@@ -19,9 +19,9 @@ class AnalysisConfig:
 	    value = kwargs[key]
 	    if key == "systematics":
 		if value.startswith("tauES"):
-		    self._config.TauSelection.systematicVariation = value.replace("Plus","plus").replace("Minus","minus")
+		    self._config.TauSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up").replace("tauES","TES")
 		elif value.startswith("JES"):
-		    self._config.JetSelection.systematicVariation = value.replace("Plus","plus").replace("Minus","minus")
+		    self._config.JetSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up")
 		elif value.startswith("FakeTau"):
                     etaRegion = "full"
                     if "Barrel" in value:
@@ -107,7 +107,7 @@ class AnalysisBuilder:
           if doSystematicVariations:
               items = []
               # Trigger systematics
-              items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
+              #items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
               #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
               #items.extend(["METTrgDataEff", "METTrgMCEff"])
               # Tau ID variation systematics
