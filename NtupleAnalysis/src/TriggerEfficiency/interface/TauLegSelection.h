@@ -90,7 +90,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
     if(xvar != pt && !(tau.pt() > 50)) continue;
     if(!(std::abs(tau.eta()) < 2.1)) continue;
     if(!(tau.lChTrkPt() > 20)) continue;
-    if(!(tau.nProngs() == 1)) continue;
+    //    if(!(tau.nProngs() == 1)) continue;
     if(!tau.decayModeFinding()) continue;
     if(!tau.configurableDiscriminators()) continue;
 
