@@ -16,7 +16,7 @@ if len(sys.argv) != 2:
 process.addDatasetsFromMulticrab(sys.argv[1])
 
 leg     = "metlegSelection"
-binning = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
+binning = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
 xLabel  = "Type1 MET (GeV)"
 yLabel  = "Level-1 + HLT MET efficiency"
 
@@ -90,6 +90,9 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
         yLabel  = yLabel,
     )
 #    a.TauSelection.applyTriggerMatching = False
+    a.JetSelection.numberOfJetsCutValue = 3
+#    a.BJetSelection.bjetDiscrWorkingPoint = "Medium"
+    a.BJetSelection.numberOfBJetsCutValue = 1
 
     if dataVersion.isData():
         a.Trigger.triggerOR = ["HLT_LooseIsoPFTau35_Trk20_Prong1_v2",
@@ -109,10 +112,13 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
         if era == "2015C" or era == "2015D" or era == "2015CD":
             a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1",
                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_v2",
-                                   "HLT_LooseIsoPFTau50_Trk30_eta2p1_v3"]
+                                   "HLT_LooseIsoPFTau50_Trk30_eta2p1_v3",
+                                   "HLT_LooseIsoPFTau50_Trk30_eta2p1_vx"]
             a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_JetIdCleaned_v1",
                                     "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_JetIdCleaned_v2",
-                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1"]
+                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1",
+                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_JetIdCleaned_vx",
+                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_vx"]
 
         lumi,runmin,runmax = runRange(era)
         a.lumi    = lumi
@@ -122,8 +128,10 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
         a.Trigger.triggerOR = ["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"]
         a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]
         if era == "2015C" or era == "2015D" or era == "2015CD":
-            a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1"]
-            a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1"]
+            a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1",
+                                   "HLT_LooseIsoPFTau50_Trk30_eta2p1_vx"]
+            a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1",
+                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_vx"]
 
     if useCaloMET:
         a.Trigger.triggerOR2 = []

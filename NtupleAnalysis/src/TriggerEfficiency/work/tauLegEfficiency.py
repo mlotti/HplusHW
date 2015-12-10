@@ -116,17 +116,21 @@ def createAnalyzer(dataVersion,era):
 #                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v1"]
 #            a.Trigger.triggerOR2 = ["HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v1",
 #                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v1"]
-            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v1"]
-            a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v1"]
+            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v1","HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_vx"]
+            a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v1","HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_vx"]
 #            a.Trigger.triggerOR = ["HLT_IsoMu20_eta2p1_v2"]
 #            a.Trigger.triggerOR2 = ["HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v2"]
         if era == "2015D":
             a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v2",
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v3",
-                                   "HLT_IsoMu16_eta2p1_MET30_v1"]
+                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_vx",
+                                   "HLT_IsoMu16_eta2p1_MET30_v1",
+                                   "HLT_IsoMu16_eta2p1_MET30_vx"]
             a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v2",
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v3",
-                                   "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_v1"]
+                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_vx",
+                                   "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_v1",
+                                   "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_vx"]
         if era == "2015CD":
             a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v1",
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v2",
@@ -150,9 +154,12 @@ def createAnalyzer(dataVersion,era):
         a.Trigger.triggerOR = ["HLT_IsoMu15_eta2p1_L1ETM20_v5"]
         a.Trigger.triggerOR2 = ["HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v6"]
         if era == "2015C" or era == "2015D" or era == "2015CD":
-            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_CaloMET30_v1","HLT_IsoMu16_eta2p1_MET30_vx"]
+            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_CaloMET30_v1",
+                                   "HLT_IsoMu16_eta2p1_MET30_vx",
+                                   "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_vx"]
             a.Trigger.triggerOR2 = ["HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v1",
-                                    "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_vx"]
+                                    "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_vx",
+                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_vx"]
 #            a.Trigger.triggerOR = ["HLT_IsoMu20_eta2p1_v1"]
 #            a.Trigger.triggerOR2 = ["HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v1"]
 
