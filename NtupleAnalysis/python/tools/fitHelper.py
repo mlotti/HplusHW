@@ -73,10 +73,16 @@ class FitParameterOrthogonalizer:
         # Calculate totals
         upSquared = 0.0
         downSquared = 0.0
+        nanStatus = False
         for i in range(len(self._upVariations)):
-            (upProperSquared, downProperSquared) = aux.getProperAdditivesForVariationUncertainties(self._upVariations[i], self._downVariations[i])
-            upSquared += upProperSquared
-            downSquared += downProperSquared
+            if math.isnan(self._upVariations[i]) or math.isnan(self._downVariations[i]):
+                print "Oops, got a nan for the fit parameter %d!"%i
+                nanStatus = True
+        if not nanStatus:
+            for i in range(len(self._upVariations)):
+                (upProperSquared, downProperSquared) = aux.getProperAdditivesForVariationUncertainties(self._upVariations[i], self._downVariations[i])
+                upSquared += upProperSquared
+                downSquared += downProperSquared
         self._upVariationTotal = math.sqrt(upSquared)
         self._downVariationTotal = math.sqrt(downSquared)
     

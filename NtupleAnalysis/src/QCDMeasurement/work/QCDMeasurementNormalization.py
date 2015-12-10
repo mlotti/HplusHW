@@ -32,13 +32,20 @@ dataEra = "Run2015"
 searchMode = "80to1000"
 print analysis, dataEra, searchMode
 
-selectOnlyBins = [] #["1"]
+selectOnlyBins = []#["Inclusive"] #["1"]
 
 def usage():
     print "\n"
     print "### Usage:   InvertedTauID_Normalization.py_QCDandFakeTausFromData <multicrab dir>\n"
     print "\n"
     sys.exit()
+
+def treatNegativeBins(h, label):
+    # Convert negative bins to zero but leave errors intact
+    for k in range(0, h.GetNbinsX()+2):
+        if h.GetBinContent(k) < 0.0:
+            print "histogram '%s': converted in bin %d a negative value (%f) to zero."%(label, k, h.GetBinContent(k))
+            h.SetBinContent(k, 0.0)
 
 def main(argv):
     COMBINEDHISTODIR = "ForQCDNormalization"
@@ -167,13 +174,14 @@ def main(argv):
         boundary = 100
         template_EWKFakeTaus_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunctionInv", boundary=boundary, norm=1, rejectPoints=1),
                                                 FITMIN, FITMAX)
-        template_EWKFakeTaus_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90,  30, 0.0001],
-                                                         defaultUpperLimit=[ 30, 200, 100,    1.0])
+        template_EWKFakeTaus_Baseline.setDefaultFitParam(defaultInitialValue=[10.0, 100, 45,   0.02],
+                                                         defaultLowerLimit=  [ 0.1,  70,  10,  0.001],
+                                                         defaultUpperLimit=  [ 30, 300,  100,    0.1])
         boundary = 150
         template_EWKGenuineTaus_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),
                                                    FITMIN, FITMAX)
         template_EWKGenuineTaus_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
-                                                            defaultUpperLimit=[ 20, 120, 50,    1.0])
+                                                            defaultUpperLimit=[ 20, 150, 50,    1.0])
         # Note that the same function is used for QCD only and QCD+EWK fakes
         template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", norm=1), FITMIN, FITMAX)
         template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[0.0001, 0.001, 0.1, 0.0,  10, 0.0001, 0.001],
@@ -235,19 +243,29 @@ def main(argv):
             manager.plotTemplates()
             
             #===== Fit individual templates to data
-            fitOptions = "R B" # RBL
+            fitOptions = "R B" # RBLW
             manager.fitDataWithQCDAndFakesAndGenuineTaus(hmetBase_data, fitOptions, FITMIN, FITMAX)
             
-            
+            #===== Calculate combined normalisation coefficient (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)
+            # Obtain histograms
+            histoName = "ForDataDrivenCtrlPlots/shapeTransverseMass/shapeTransverseMass"+binStr
+            dataMt = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("Data").getRootHisto().Clone(histoName)
+            treatNegativeBins(dataMt, "Data_inverted mT")
+            histoName = "ForDataDrivenCtrlPlotsEWKFakeTaus/shapeTransverseMass/shapeTransverseMass"+binStr
+            ewkFakeTausMt = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("EWK").getRootHisto().Clone(histoName)
+            treatNegativeBins(ewkFakeTausMt, "ewkFakeTaus_inverted mT")
+            histoName = "ForDataDrivenCtrlPlotsEWKGenuineTaus/shapeTransverseMass/shapeTransverseMass"+binStr
+            ewkGenuineTausMt = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("EWK").getRootHisto().Clone(histoName)
+            treatNegativeBins(ewkGenuineTausMt, "ewkGenuineTaus_inverted mT")
+            qcdMt = dataMt.Clone("QCD")
+            qcdMt.Add(ewkFakeTausMt, -1)
+            qcdMt.Add(ewkGenuineTausMt, -1)
+            treatNegativeBins(qcdMt, "QCD_inverted mT")
+            # Do calculation
+            manager.calculateCombinedNormalization(qcdMt, ewkFakeTausMt, variation=0.0)
 
-            #===== Calculate normalization
-            #invertedQCD.getNormalization()
-        
-        manager.writeScaleFactorFile("QCDInvertedNormalizationFactorsFilteredEWKFakeTaus.py", analysis, dataEra, searchMode)
-        #invertedQCD.Summary()
-        #invertedQCD.WriteNormalizationToFile("QCDInvertedNormalizationFactorsFilteredEWKFakeTaus.py")
-        #invertedQCD.WriteLatexOutput("fits.tex")
-
+        #===== Save normalization
+        manager.writeScaleFactorFile("QCDInvertedNormalizationFactors_%s.py"%HISTONAME, analysis, dataEra, searchMode)
 
 if __name__ == "__main__":
     main(sys.argv)

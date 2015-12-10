@@ -231,7 +231,6 @@ class DataCardGenerator:
         self._extractors = []
         # Control plot extractors
         self._controlPlotExtractors = []
-        self._controlPlotExtractorsEWKfake = []
         # 
         #self._replaceEmbeddingWithMC = False
         #self._doSignalAnalysis = True
@@ -299,9 +298,6 @@ class DataCardGenerator:
         for e in self._controlPlotExtractors:
             del e
         self._controlPlotExtractors = None
-        for e in self._controlPlotExtractorsEWKfake:
-            del e
-        self._controlPlotExtractorsEWKfake
 
     #def overrideConfigOptionsFromCommandLine(self):
         # Obtain QCD measurement method
@@ -513,7 +509,8 @@ class DataCardGenerator:
                                                enabledForMassPoints = self._config.MassPoints,
                                                datasetType = "Observation",
                                                datasetMgrColumn = self._config.Observation.datasetDefinition,
-                                               shapeHisto = self._config.Observation.shapeHisto,
+                                               shapeHistoName = self._config.Observation.shapeHistoName,
+                                               histoPath = self._config.Observation.histoPath,
                                                additionalNormalisationFactor = self._config.Observation.additionalNormalisation)
             if self._opts.debugConfig:
                 self._observation.printDebug()
@@ -541,7 +538,8 @@ class DataCardGenerator:
                                               nuisanceIds = dg.nuisances[:],
                                               datasetMgrColumn = dg.datasetDefinition,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
-                                              shapeHisto = dg.shapeHisto)
+                                              shapeHistoName = dg.shapeHistoName,
+                                              histoPath = dg.histoPath)
                 else: # i.e. signal analysis and QCD factorised / inverted
                     myColumn = DatacardColumn.DatacardColumn(opts=self._opts,
                                               label=dg.label,
@@ -551,7 +549,8 @@ class DataCardGenerator:
                                               nuisanceIds = dg.nuisances[:],
                                               datasetMgrColumn = dg.datasetDefinition,
                                               additionalNormalisationFactor = dg.additionalNormalisation,
-                                              shapeHisto = dg.shapeHisto)
+                                              shapeHistoName = dg.shapeHistoName,
+                                              histoPath = dg.histoPath) 
                 # Store column
                 self._columns.append(myColumn)
                 # Provide debug print
@@ -586,12 +585,7 @@ class DataCardGenerator:
             myDsetMgr = self._dsetMgrManager.getDatasetMgr(myDsetMgrIndex)
             myLuminosity = self._dsetMgrManager.getLuminosity(myDsetMgrIndex)
             myMainCounterTable = self._dsetMgrManager.getMainCounterTable(myDsetMgrIndex)
-            if c.typeIsEWKfake():
-                #cProfile.runctx("c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractorsEWKfake)",globals(),locals())
-                c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractorsEWKfake)
-            else:
-                #cProfile.runctx("c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)",globals(),locals())
-                c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
+            c.doDataMining(self._config,myDsetMgr,myLuminosity,myMainCounterTable,self._extractors,self._controlPlotExtractors)
         print "\nData mining has been finished, results (and histograms) have been ingeniously cached"
 
     def separateMCEWKTausAndFakes(self, targetColumn, targetColumnNewName, addColumnList, subtractColumnList):
@@ -975,9 +969,4 @@ class DataCardGenerator:
                 print "Creating control plot extractor for",c.title
             self._controlPlotExtractors.append(Extractor.ControlPlotExtractor(histoSpecs = c.details,
                                                histoTitle = c.title,
-                                               histoDirs = c.signalHistoPath,
-                                               histoNames = c.signalHistoName))
-            self._controlPlotExtractorsEWKfake.append(Extractor.ControlPlotExtractor(histoSpecs = c.details,
-                                                      histoTitle = c.title,
-                                                      histoDirs = c.EWKfakeHistoPath,
-                                                      histoNames = c.EWKfakeHistoName))
+                                               histoName = c.histoName))

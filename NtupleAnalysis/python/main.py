@@ -443,7 +443,7 @@ class Process:
                     cinfo.SetBinContent(n+1, cinfo.GetBinContent(1))
                 # Add "isPileupReweighted" column
                 if usePUweights:
-                    cinfo.SetBinContent(n+2, nAllEventsPUWeighted)
+                    cinfo.SetBinContent(n+2, nAllEventsPUWeighted / nanalyzers)
                 # Write
                 cinfo.Write()
                 fIN.Close()

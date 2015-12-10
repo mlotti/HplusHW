@@ -351,11 +351,11 @@ backgroundCrossSections = CrossSectionList(
 #
 # \param datasets            dataset.DatasetManager object
 # \param doWNJetsWeighting   Set W+Njets cross sections according to the weighting scheme
-def setBackgroundCrossSections(datasets, doWNJetsWeighting=True):
+def setBackgroundCrossSections(datasets, doWNJetsWeighting=True, quietMode=False):
     for dset in datasets.getMCDatasets():
-        setBackgroundCrossSectionForDataset(dset, doWNJetsWeighting)
+        setBackgroundCrossSectionForDataset(dset, doWNJetsWeighting, quietMode)
 
-def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True):
+def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMode=False):
     value = backgroundCrossSections.crossSection(dataset.getName(), dataset.getEnergy())
     if value is None:
         if "ChargedHiggs" in dataset.getName():
@@ -381,7 +381,8 @@ def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True):
             msg = "  *** Note: to set non-zero xsection; edit NtupleAnalysis/python/tools/crossection.py ***"
         if "ChargedHiggs" in dataset.getName():
             msg = "  *** Note: signal is forced at the moment to 1 pb in NtupleAnalysis/python/tools/crossection.py ***"
-        print "Setting %50s cross section to %10f pb %s" % (dataset.getName(), value, msg)
+        if not quietMode:
+            print "Setting %50s cross section to %10f pb %s" % (dataset.getName(), value, msg)
 #    else:
 #        print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy())
 
