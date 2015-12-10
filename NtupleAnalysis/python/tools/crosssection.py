@@ -228,6 +228,11 @@ backgroundCrossSections = CrossSectionList(
             "8": 3531.9, # [9], NNLO
             "13": 2008.4*3.0 # [14]
             }),
+    CrossSection("DYJetsToLL_M_50_TauHLT", {
+            "7": 3048.0, # [4], NNLO
+            "8": 3531.9, # [9], NNLO
+            "13": 2008.4*3.0 # [14]
+            }),
     CrossSection("DYJetsToLL_M_10to50", {
             "7": 9611.0, # [1]
             "8": 11050.0, # [1]
@@ -304,6 +309,9 @@ backgroundCrossSections = CrossSectionList(
             "8": 0.004527, # [1]
             }),
     CrossSection("GluGluHToTauTau_M125", {
+            "13": 1, # dummy value, not really needed as this sample is not merged with anything else
+            }),
+    CrossSection("GluGluHToTauTau_M125_TauHLT", {
             "13": 1, # dummy value, not really needed as this sample is not merged with anything else
             }),
     CrossSection("T_t-channel", {
