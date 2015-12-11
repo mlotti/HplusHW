@@ -1,6 +1,5 @@
 {
-  "_timestamp":   "Generated on Fri Dec 11 14:26:59 2015,
-                   by HiggsAnalysis/NtupleAnalysis/src/TriggerEfficiency/work/PythonWriter.py",
+  "_timestamp":   "Generated on Fri Dec 11 14:26:59 2015,                   by HiggsAnalysis/NtupleAnalysis/src/TriggerEfficiency/work/PythonWriter.py",
   "_rootVersion": "6.04/00",
   "dataParameters": {
       "runs_256629_260627": {
