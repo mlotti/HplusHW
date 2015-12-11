@@ -11,6 +11,7 @@
 #include "DataFormat/interface/Event.h"
 
 #include "Tools/interface/PileupWeight.h"
+#include "Tools/interface/TopPtWeight.h"
 
 #include "Rtypes.h"
 #include "TBranch.h"
@@ -68,6 +69,7 @@ protected:
   HistoWrapper fHistoWrapper;
   EventSaverClient fEventSaver;
   PileupWeight fPileupWeight;
+  TopPtWeight fTopPtWeight;
 
 private:
   Count cBaseAllEvents;
