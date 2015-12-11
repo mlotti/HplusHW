@@ -11,6 +11,7 @@ TopPtWeight::TopPtWeight(boost::optional<const ParameterSet> pset):
   if (pset) {
     fParA = pset->getParameter<double>("parameterA");
     fParB = pset->getParameter<double>("parameterB");
+  }
 }
 
 TopPtWeight::~TopPtWeight() {}
