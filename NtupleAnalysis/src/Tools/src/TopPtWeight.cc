@@ -18,7 +18,9 @@ TopPtWeight::~TopPtWeight() {}
 
 double TopPtWeight::getWeight(const Event& fEvent){
   if(fEvent.isData()) return 1.0;
-
+  if (fParA < 0 || fParB < 0)
+    throw hplus::Exception("config") << "TopPtWeight is not configured properly!";
+    
   // Obtain top pt from gen particles
   double weight = 1.0;
   int n = 0;

@@ -134,7 +134,7 @@ class AnalysisBuilder:
     def build(self, process, config):
         # Add here options to the config
         config.__setattr__("usePileupWeights", self._usePUreweighting)
-        config.__setattr__("useTopPtReweighting", self._useTopPtReweighting)
+        config.__setattr__("useTopPtWeights", self._useTopPtReweighting)
         # Add nominal modules
         if len(self._variations.keys()) > 1 and "systematics" in self._variations.keys():
             self._variations["systematics"].insert(0, "nominal")
