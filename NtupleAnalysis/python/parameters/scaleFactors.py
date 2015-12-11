@@ -136,13 +136,13 @@ class TriggerSFJsonReader:
             if i > 0:
                 self.result["binEdges"].append(key)
             i += 1
-            self.result["SF"].append(datadict[key]["eff"] / mcdict[key]["eff"])
-            self.result["SFdataUp"].append(datadict[key]["effup"] / mcdict[key]["eff"])
-            self.result["SFdataDown"].append(datadict[key]["effdown"] / mcdict[key]["eff"])
-            self.result["SFmcUp"].append(datadict[key]["eff"] / mcdict[key]["effup"])
-            if abs(mcdict[key]["effdown"] - 0.00001):
+            self.result["SF"].append(datadict[key]["dataeff"] / mcdict[key]["mceff"])
+            self.result["SFdataUp"].append(datadict[key]["dataeffup"] / mcdict[key]["mceff"])
+            self.result["SFdataDown"].append(datadict[key]["dataeffdown"] / mcdict[key]["mceff"])
+            self.result["SFmcUp"].append(datadict[key]["dataeff"] / mcdict[key]["mceffup"])
+            if abs(mcdict[key]["mceffdown"]) < 0.00001:
                 raise Exception("Down variation in bin '%s' is zero in json '%s'"%(key, filename))
-            self.result["SFmcDown"].append(datadict[key]["eff"] / mcdict[key]["effdown"])
+            self.result["SFmcDown"].append(datadict[key]["dataeff"] / mcdict[key]["mceffdown"])
 
     def getResult(self):
         return self.result
