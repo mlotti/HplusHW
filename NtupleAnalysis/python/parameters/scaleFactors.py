@@ -68,9 +68,9 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
     reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "tauLegTriggerEfficiency2015.json")
     result = reader.getResult()
     if variationType == "MC":
-        _assignSF(result["binEdges"], result["SF"], result["mcup"], result["mcdown"], tauSelectionPset, direction)
+        _assignSF(result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], tauSelectionPset, direction)
     elif variationType == "data":
-        _assignSF(result["binEdges"], result["SF"], result["dataup"], result["datadown"], tauSelectionPset, direction)
+        _assignSF(result["binEdges"], result["SF"], result["SFdataUp"], result["SFdataDown"], tauSelectionPset, direction)
     else:
         raise Exception("Error: Unsupported variation type '%s'! Valid options are: 'MC', 'data'"%variationType)
 
