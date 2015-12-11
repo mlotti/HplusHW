@@ -182,7 +182,8 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   
   // ttbar status
   const TNamed* ttbarNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isttbar"));
-  bIsttbar = (ttbarNamed->GetTitle()[0] == '1');
+  if (ttbarNamed)
+    bIsttbar = (ttbarNamed->GetTitle()[0] == '1');
 }
 
 Bool_t SelectorImpl::Process(Long64_t entry) {
