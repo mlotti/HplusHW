@@ -125,7 +125,7 @@ class AnalysisBuilder:
               # b and top quarks systematics
               #items.extend("BTagSF", "BMistagSF")
               if self._useTopPtReweighting:
-                  items.extend("TopPt") 
+                  items.append("TopPt") 
               # PU weight systematics
               #items.extend(["PUWeight"])
               # Create configs
