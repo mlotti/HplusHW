@@ -11,7 +11,7 @@ class TH1;
 
 class TopPtWeight {
 public:
-  explicit TopPtWeight(boost::optional<const ParameterSet> pset);
+  explicit TopPtWeight(boost::optional<ParameterSet> pset);
   ~TopPtWeight();
 
   // Disable copying, assignment, and moving

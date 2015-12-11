@@ -5,7 +5,7 @@
 #include "TH1.h"
 #include "TMath.h"
 
-TopPtWeight::TopPtWeight(boost::optional<const ParameterSet> pset):
+TopPtWeight::TopPtWeight(boost::optional<ParameterSet> pset):
   fParA(-1.0),
   fParB(-1.0) {
   if (pset) {
