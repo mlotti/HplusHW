@@ -110,16 +110,16 @@ class TriggerSFJsonReader:
         if not param in contents.keys():
             raise Exception("Error: missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
         if not runrange in contents[param].keys():
-            raise Exception("Error: missing run range '%s' for data in json '%s'!"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+            raise Exception("Error: missing run range '%s' for data in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
         if not era in contents[param][runrange].keys():
-            raise Exception("Error: missing era '%s' for data in json '%s'!"(runrange,filename,", ".join(map(str,contents[param][runrange].keys()))))
+            raise Exception("Error: missing era '%s' for data in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param][runrange].keys()))))
         datadict = self._readValues(contents[param][runrange][era], "data")
         # Obtain MC efficiencies
         param = "mcParameters"
         if not param in contents.keys():
             raise Exception("Error: missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
         if not era in contents[param].keys():
-            raise Exception("Error: missing era '%s' for mc in json '%s'!"(runrange,filename,", ".join(map(str,contents[param].keys()))))
+            raise Exception("Error: missing era '%s' for mc in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
         mcdict = self._readValues(contents[param][runrange][era], "mc")
         # Calculate SF's
         keys = datadict.keys()
