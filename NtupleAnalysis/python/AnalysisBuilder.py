@@ -18,10 +18,12 @@ class AnalysisConfig:
         for key in keys:
 	    value = kwargs[key]
 	    if key == "systematics":
+                # Energy scales
 		if value.startswith("tauES"):
 		    self._config.TauSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up").replace("tauES","TES")
 		elif value.startswith("JES"):
 		    self._config.JetSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up")
+		# Fake tau 
 		elif value.startswith("FakeTau"):
                     etaRegion = "full"
                     if "Barrel" in value:
@@ -38,9 +40,13 @@ class AnalysisConfig:
                     scaleFactors.assignTauMisidentificationSF(self._config.TauSelection, 
                                                               partonFakingTau, etaRegion, 
                                                               self._getDirectionString(value))
+		# Trigger
 		elif value.startswith("TauTrgEff"):
                     variationType = value.replace("TauTrgEff","")
                     scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value), variationType)
+		# B and top quarks
+		elif value.startswith("TopPt"):
+                    self._config.TopPtReweighting.systematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
 		else:
 		    if value != "nominal":
                         raise Exception("Error: unsupported variation item '%s'!"%value)
@@ -117,7 +123,9 @@ class AnalysisBuilder:
               # Energy scales and JER systematics
               items.extend(["tauES", "JES"]), # "JER", "UES"])
               # b and top quarks systematics
-              #items.extend("TopPt", "BTagSF", "BMistagSF")
+              #items.extend("BTagSF", "BMistagSF")
+              if self._useTopPtReweighting:
+                  items.extend("TopPt") 
               # PU weight systematics
               #items.extend(["PUWeight"])
               # Create configs
@@ -127,6 +135,8 @@ class AnalysisBuilder:
                   self._variations["systematics"].append("%sMinus"%item)
 	  #self.addVariation("TauSelection.tauPtCut", [50,60])
 	  #self.addVariation("TauSelection.tauEtaCut", [0.5,1.5])
+	  
+              
     
     def addVariation(self, configItemString, listOfValues):
         self._variations[configItemString] = listOfValues
