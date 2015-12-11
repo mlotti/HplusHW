@@ -329,8 +329,12 @@ class Process:
                             raise Exception("Analyzer %s was specified as a function, but returned None" % aname)
                         if not isinstance(analyzer, Analyzer):
                             raise Exception("Analyzer %s was specified as a function, but returned object of %s instead of Analyzer" % (aname, analyzer.__class__.__name__))
-
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
+                    # ttbar status for top pt corrections
+                    ttbarStatus = "0"
+                    if dset.GetName().startswith("TTJets"):
+                        ttbarStatus = "1"
+                    inputList.Add(ROOT.TNamed("isttbar", ttbarStatus))
                     # Pileup reweighting
                     if dset.getDataVersion().isMC():
                         if aname in hPUs.keys():

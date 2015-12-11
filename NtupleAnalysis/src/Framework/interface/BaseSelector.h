@@ -46,6 +46,8 @@ public:
   void setPileUpWeights(TH1* hPUdata, TH1* hPUmc){
     fPileupWeight.calculateWeights(hPUdata,hPUmc);
   }
+  
+  void setIsttbar(bool status) { bIsttbar = status; }
 
   /// Book internal histograms
   void bookInternal(TDirectory *dir);
@@ -58,6 +60,7 @@ public:
 protected:
   bool isMC() const { return fIsMC; }
   bool isData() const { return !isMC(); }
+  bool isttbar() const { return bIsttbar; }
 
   Event fEvent;
   EventWeight fEventWeight;
@@ -74,6 +77,7 @@ private:
   Count cExclusiveSamplesWeighted;
 
   const bool fIsMC;
+  bool bIsttbar;
   
   // Internal histograms
   WrappedTH1* hNvtxBeforeVtxReweighting;
