@@ -89,6 +89,8 @@ private:
 
   TH1F *hPUdata;
   TH1F *hPUmc;
+  bool bIsttbar;
+  
 };
 
 #endif

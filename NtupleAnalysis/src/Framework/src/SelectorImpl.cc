@@ -31,7 +31,8 @@ SelectorImpl::SelectorImpl():
   fBranchManager(nullptr), fEventSaver(nullptr),
   fChain(nullptr),
   fProofFile(nullptr), fOutputFile(nullptr),
-  fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0), fPrintStatus(false)
+  fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0), fPrintStatus(false),
+  bIsttbar(false)
 {}
 
 SelectorImpl::~SelectorImpl() {
@@ -61,8 +62,8 @@ void SelectorImpl::Init(TTree *tree) {
     selector->setupBranches(*fBranchManager);
     if(hPUdata) selector->setPileUpWeights(hPUdata,hPUmc);
   }
+  selector->setIsttbar(bIsttbar);
 }
-
 
 Bool_t SelectorImpl::Notify() {
   // The Notify() function is called when a new file is opened. This
@@ -178,6 +179,10 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   // Pileup weights
   hPUdata = (TH1F*)fInput->FindObject("PileUpData");
   hPUmc   = (TH1F*)fInput->FindObject("PileUpMC");
+  
+  // ttbar status
+  TNamed* ttbarNamed = dynamic_cast<TNamed*>(fInput->FindObject("isttbar"));
+  bIsttbar = (ttbarNamed.GetTitle()[0] == '1');
 }
 
 Bool_t SelectorImpl::Process(Long64_t entry) {

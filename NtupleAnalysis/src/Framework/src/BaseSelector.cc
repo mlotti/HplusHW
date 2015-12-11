@@ -10,7 +10,8 @@ BaseSelector::BaseSelector(const ParameterSet& config):
   cPrescaled(fEventCounter.addCounter("Base::Prescale")),
   cTopPtReweighted(fEventCounter.addCounter("Base::Weighted events with top pT")),
   cExclusiveSamplesWeighted(fEventCounter.addCounter("Base::Weighted events for exclusive samples")),
-  fIsMC(config.isMC())
+  fIsMC(config.isMC()),
+  bIsttbar(false)
 {}
 BaseSelector::~BaseSelector() {
   fEventCounter.serialize();
