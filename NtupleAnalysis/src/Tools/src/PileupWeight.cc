@@ -39,10 +39,13 @@ PileupWeight::PileupWeight(const ParameterSet& pset):
                             pset.getParameter<std::string>("PileupWeight.mc")) :
            nullptr)
 */
-PileupWeight::PileupWeight(const ParameterSet& pset):
-  fEnabled(pset.getParameterOptional<bool>("usePileupWeights"))
-{
-  h_weight = 0;
+PileupWeight::PileupWeight(const ParameterSet& pset)
+: fEnabled(false),
+  h_weight(nullptr) {
+  boost::optional<bool> status = pset.getParameterOptional<bool>("usePileupWeights");
+  if (status) {
+    fEnabled = *status;
+  }
 }
 PileupWeight::~PileupWeight() {}
 

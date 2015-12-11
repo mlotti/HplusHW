@@ -5,10 +5,13 @@
 #include "TH1.h"
 #include "TMath.h"
 
-TopPtWeight::TopPtWeight(const ParameterSet& pset):
-  fParA(pset.getParameter<double>("parameterA")),
-  fParB(pset.getParameter<double>("parameterB"))
-{ }
+TopPtWeight::TopPtWeight(boost::optional<const ParameterSet> pset):
+  fParA(-1.0),
+  fParB(-1.0) {
+  if (pset) {
+    fParA = pset->getParameter<double>("parameterA");
+    fParB = pset->getParameter<double>("parameterB");
+}
 
 TopPtWeight::~TopPtWeight() {}
 
