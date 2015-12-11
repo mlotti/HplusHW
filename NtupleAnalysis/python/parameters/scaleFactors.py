@@ -118,7 +118,7 @@ class TriggerSFJsonReader:
             raise Exception("Error: missing key '%s' in json '%s'! Options: %s"%(param,filename,", ".join(map(str,contents.keys()))))
         if not era in contents[param].keys():
             raise Exception("Error: missing era '%s' for mc in json '%s'! Options: %s"(runrange,filename,", ".join(map(str,contents[param].keys()))))
-        mcdict = self._readValues(contents[param][runrange][era], "mc")
+        mcdict = self._readValues(contents[param][era], "mc")
         # Calculate SF's
         keys = datadict.keys()
         if len(keys) != len(mcdict.keys()):
