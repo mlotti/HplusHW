@@ -123,7 +123,9 @@ class AnalysisBuilder:
               # Energy scales and JER systematics
               items.extend(["tauES", "JES"]), # "JER", "UES"])
               # b and top quarks systematics
-              items.extend("TopPt") #, "BTagSF", "BMistagSF")
+              #items.extend("BTagSF", "BMistagSF")
+              if self._useTopPtReweighting:
+                  items.extend("TopPt") 
               # PU weight systematics
               #items.extend(["PUWeight"])
               # Create configs
@@ -133,6 +135,8 @@ class AnalysisBuilder:
                   self._variations["systematics"].append("%sMinus"%item)
 	  #self.addVariation("TauSelection.tauPtCut", [50,60])
 	  #self.addVariation("TauSelection.tauEtaCut", [0.5,1.5])
+	  
+              
     
     def addVariation(self, configItemString, listOfValues):
         self._variations[configItemString] = listOfValues
