@@ -153,12 +153,12 @@ class TriggerSFJsonReader:
             bindict = {}
             bindict[label+"eff"] = item["efficiency"]
             # FIXME: check if the uncertainties are relative or absolute uncertainties
-            value = item["efficiency"]+item["efficiencyPlus"]
+            value = item["efficiency"]+item["uncertaintyPlus"]
             if value > 1.0:
                 bindict[label+"effup"] = 1.0
             else:
                 bindict[label+"effup"] = value
-            value = item["efficiency"]+item["efficiencyMinus"]
+            value = item["efficiency"]+item["uncertaintyMinus"]
             if value < 0.0:
                 bindict[label+"effdown"] = 0.0
             else:
