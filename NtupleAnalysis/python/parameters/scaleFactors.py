@@ -147,7 +147,7 @@ class TriggerSFJsonReader:
     def getResult(self):
         return self.result
         
-    def _readValues(inputdict, label):
+    def _readValues(self, inputdict, label):
         outdict = {}
         for item in inputdict["bins"]:
             bindict = {}
