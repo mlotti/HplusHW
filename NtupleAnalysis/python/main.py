@@ -381,7 +381,8 @@ class Process:
                     lumivalue = lumidata[dset.getName()]
                 print "    Luminosity: %s fb-1"%lumivalue
             print "    Using pileup weights:", usePUweights
-                
+            if useTopPtCorrection:
+                print "    Using top pt weights: True"
 
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())

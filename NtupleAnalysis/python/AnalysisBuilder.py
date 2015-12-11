@@ -84,7 +84,8 @@ class AnalysisBuilder:
                  dataEras=["2015"],        # Data era (see python/tools/dataset.py::_dataEras)
                  searchModes=["m80to160"], # Search mode (see python/parameters/signalAnalysisParameters.py)
                  # Optional options
-                 usePUreweighting=False, # enable/disable vertex reweighting
+                 usePUreweighting=True,    # enable/disable vertex reweighting
+                 useTopPtReweighting=True, # enable/disable top pt reweighting for ttbar
                  # Systematics options
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
                 ):
@@ -101,6 +102,7 @@ class AnalysisBuilder:
               self._searchModes.append(searchModes)
           
           self._usePUreweighting = usePUreweighting
+          self._useTopPtReweighting = useTopPtReweighting
           
           self._variations={}
           # Process systematic uncertainty variations
@@ -132,6 +134,7 @@ class AnalysisBuilder:
     def build(self, process, config):
         # Add here options to the config
         config.__setattr__("usePileupWeights", self._usePUreweighting)
+        config.__setattr__("useTopPtReweighting", self._useTopPtReweighting)
         # Add nominal modules
         if len(self._variations.keys()) > 1 and "systematics" in self._variations.keys():
             self._variations["systematics"].insert(0, "nominal")
