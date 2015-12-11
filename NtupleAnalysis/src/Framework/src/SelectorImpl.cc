@@ -61,8 +61,8 @@ void SelectorImpl::Init(TTree *tree) {
   for(BaseSelector *selector: fSelectors){
     selector->setupBranches(*fBranchManager);
     if(hPUdata) selector->setPileUpWeights(hPUdata,hPUmc);
+    selector->setIsttbar(bIsttbar);
   }
-  selector->setIsttbar(bIsttbar);
 }
 
 Bool_t SelectorImpl::Notify() {
@@ -181,8 +181,8 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   hPUmc   = (TH1F*)fInput->FindObject("PileUpMC");
   
   // ttbar status
-  TNamed* ttbarNamed = dynamic_cast<TNamed*>(fInput->FindObject("isttbar"));
-  bIsttbar = (ttbarNamed.GetTitle()[0] == '1');
+  const TNamed* ttbarNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isttbar"));
+  bIsttbar = (ttbarNamed->GetTitle()[0] == '1');
 }
 
 Bool_t SelectorImpl::Process(Long64_t entry) {
