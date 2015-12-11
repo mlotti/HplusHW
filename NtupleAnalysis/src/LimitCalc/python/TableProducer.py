@@ -163,7 +163,7 @@ class TableProducer:
         # Print systematics summary table
         self.makeSystematicsSummary()
         # Prints QCD purity information
-        self.makeQCDPuritySummary()
+        #self.makeQCDPuritySummary() #FIXME missing
 
         # Make datacards
         self.makeDataCards()

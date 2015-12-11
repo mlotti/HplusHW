@@ -149,7 +149,8 @@ class DatacardColumn():
                  nuisanceIds = [],
                  datasetMgrColumn = "",
                  additionalNormalisationFactor = 1.0,
-                 shapeHisto = ""):
+                 histoPath = "",
+                 shapeHistoName = ""):
         self._opts = opts
         self._label = label
         self._landsProcess = landsProcess
@@ -177,7 +178,8 @@ class DatacardColumn():
         self._cachedShapeRootHistogramWithUncertainties = None
         self._datasetMgrColumn = datasetMgrColumn
         self._additionalNormalisationFactor = additionalNormalisationFactor
-        self._shapeHisto = shapeHisto
+        self._histoPath = histoPath
+        self._shapeHistoName = shapeHistoName
         self._isPrintable = True
         self.checkInputValidity()
 
@@ -237,8 +239,10 @@ class DatacardColumn():
         if self._datasetMgrColumn == "" and not self.typeIsEmptyColumn():
             myMsg += "No dataset names defined!\n"
         if self.typeIsSignal() or self.typeIsEWK() or self.typeIsObservation():
-            if self._shapeHisto == "":
-                myMsg += "Missing or empty field 'shapeHisto'! (string) Name of histogram for shape \n"
+            if self._shapeHistoName == "":
+                myMsg += "Missing or empty field 'shapeHistoName'! (string) Name of histogram for shape \n"
+            if self._histoPath == "":
+                myMsg += "Missing or empty field 'histoPath'! (string) Path to histogram(s) \n"
 #        elif self.typeIsQCDfactorised():
             # rate handled as spedial case, extra datasetMgrColumn are required for EWK MC
 ####        elif self._datasetType == MulticrabDirectoryDataType.QCDINVERTED:
@@ -266,6 +270,14 @@ class DatacardColumn():
     ## Returns label
     def getLabel(self):
         return self._label
+
+    ## Return shape histogram name with path
+    def getFullShapeHistoName(self):
+        return os.path.join(self._histoPath, self._shapeHistoName)
+
+    ## Return shape histogram name with path
+    def getFullHistoName(self, histoName):
+        return os.path.join(self._histoPath, histoName)
 
     ## Returns LandS process
     def getLandsProcess(self):
@@ -377,22 +389,23 @@ class DatacardColumn():
             mySystematics = dataset.Systematics(allShapes=True) #,verbose=True)
             if not dsetMgr.hasDataset(self.getDatasetMgrColumn()):
                 raise Exception(ShellStyles.ErrorLabel()+"Cannot find merged dataset by key '%s' in multicrab dir! Did you forget to merge the root files with hplusMergeHistograms.py?"%self.getDatasetMgrColumn())
-            myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+            myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
             if myDatasetRootHisto.isMC():
                 # Set signal xsection
                 if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
                      # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
                      #myDatasetRootHisto.Delete()
                      dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
-                     myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+                     myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
                 # Fix a bug in signal xsection
                 #elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
                      #if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 245.8) > 0.0001:
                          #print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 245.8 pb according to arXiv:1303.6254"
                          ##myDatasetRootHisto.Delete()
                          #dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(245.8)
-                         #myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self._shapeHisto))
+                         #myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
                 # Normalize to luminosity
+                print "***"
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties().Clone()
             # Remove any variations not active for the column
@@ -446,8 +459,8 @@ class DatacardColumn():
         # Obtain overall purity for QCD
         self._purityForFinalShape = None
         myAveragePurity = None
-        if self.typeIsQCDinverted():
-            myDsetRootHisto = myShapeExtractor.extractQCDPurityHistogram(self, dsetMgr, self._shapeHisto)
+        if self.typeIsQCDinverted() and False: # FIXME switch on when purity exists
+            myDsetRootHisto = myShapeExtractor.extractQCDPurityHistogram(self, dsetMgr, self.getFullShapeHistoName())
             self._rateResult.setPurityHistogram(myDsetRootHisto.getHistogram())
             myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self.getPurityHistogram())
             #print "*** Average QCD purity", myAveragePurity
@@ -533,12 +546,12 @@ class DatacardColumn():
                         # Obtain overall purity for QCD
                         myAverageCtrlPlotPurity = None
                         hCtrlPlotPurity = None
-                        if self.typeIsQCDinverted():
+                        if self.typeIsQCDinverted() and False: #FIXME switch on when purity exists
                             myDsetHisto = c.extractQCDPurityHistogram(self, dsetMgr)
                             hCtrlPlotPurity = aux.Clone(myDsetHisto.getHistogram())
                             myAverageCtrlPlotPurity = c.extractQCDPurityAsValue(myRateHistograms[0], hCtrlPlotPurity)
                         # Now normalize
-                        if myDatasetRootHisto.isMC():
+                        if myDatasetRootHisto.isMC():# and myCtrlDsetRootHisto.getHistogramWithUncertainties().getRootHisto().GetName() != self._cachedShapeRootHistogramWithUncertainties.getRootHisto().GetName():
                             myCtrlDsetRootHisto.normalizeToLuminosity(luminosity)
                         h = myCtrlDsetRootHisto.getHistogramWithUncertainties()
                         # Remove any variations not active for the column
@@ -771,7 +784,7 @@ class DatacardColumn():
         print "  enabled for mass points:", self._enabledForMassPoints
         if len(self._nuisanceIds) > 0:
             print "  nuisances:", self._nuisanceIds
-        print "  shape histogram:", self._shapeHisto
+        print "  shape histogram:", self.getFullShapeHistoName()
 
     def doSeparateAdditionalResults(self):
         myNewNuisancesList = []

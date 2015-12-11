@@ -7,22 +7,24 @@
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.extendedCount as extendedCount
 import HiggsAnalysis.NtupleAnalysis.tools.errorPropagation as errorPropagation
-import HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference as systematicsForMetShapeDifference
+import HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference as metSyst
 import HiggsAnalysis.QCDMeasurement.dataDrivenQCDCount as dataDrivenQCDCount
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import math
+import os
 import ROOT
 
 ## Class for calculating the QCD factorised results
 # Shape has to be a dataDrivenQCDCount object
 class QCDInvertedShape:
-    def __init__(self, shape, moduleInfoString, normFactors, optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False):
+    def __init__(self, shape, moduleInfoString, normFactors, optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False, optionUseInclusiveNorm=False):
         self._resultCountObject = None # ExtendedCount object which contains the result
         self._resultShape = None # TH1F which contains the final shape histogram for NQCD
         self._resultShapeEWK = None # TH1F which contains the final shape histogram for EWK MC
         self._resultShapePurity = None # TH1F which contains the final shape histogram for QCD purity
         self._histogramsList = [] # List of TH1F histograms
+        self._optionUseInclusiveNorm = optionUseInclusiveNorm
         self._doCalculate(shape, moduleInfoString, normFactors, optionPrintPurityByBins, optionDoNQCDByBinHistograms)
 
     def delete(self):
@@ -97,9 +99,12 @@ class QCDInvertedShape:
             hData = shape.getDataHistoForSplittedBin(i)
             hEwk = shape.getEwkHistoForSplittedBin(i)
             # Get normalization factor
-            if not shape.getPhaseSpaceBinFileFriendlyTitle(i) in normFactors.keys():
-                raise Exception(ShellStyles.ErrorLabel()+"No normalization factors available for bin '%s' when accessing histogram %s!"%(shape.getPhaseSpaceBinFileFriendlyTitle(i),shape.getHistoName()))
-            wQCD = normFactors[shape.getPhaseSpaceBinFileFriendlyTitle(i)]
+            wQCDLabel = shape.getPhaseSpaceBinFileFriendlyTitle(i)
+            if self._optionUseInclusiveNorm:
+                wQCDLabel = "Inclusive"
+            if not wQCDLabel in normFactors.keys():
+                raise Exception(ShellStyles.ErrorLabel()+"No normalization factors available for bin '%s' when accessing histogram %s!"%(wQCDLabel,shape.getHistoName()))
+            wQCD = normFactors[wQCDLabel]
             # Loop over bins in the shape histogram
             for j in range(1,h.GetNbinsX()+1):
                 myResult = 0.0
@@ -180,9 +185,12 @@ class QCDInvertedShape:
             hData = shape.getDataHistoForSplittedBin(i)
             hEwk = shape.getEwkHistoForSplittedBin(i)
             # Get normalization factor
-            if not shape.getPhaseSpaceBinFileFriendlyTitle(i) in normFactors.keys():
-                raise Exception(ShellStyles.ErrorLabel()+"No normalization factors available for bin '%s' when accessing histogram %s!"%(shape.getPhaseSpaceBinFileFriendlyTitle(i),shape.getHistoName()))
-            wQCD = normFactors[shape.getPhaseSpaceBinFileFriendlyTitle(i)]
+            wQCDLabel = shape.getPhaseSpaceBinFileFriendlyTitle(i)
+            if self._optionUseInclusiveNorm:
+                wQCDLabel = "Inclusive"
+            if not wQCDLabel in normFactors.keys():
+                raise Exception(ShellStyles.ErrorLabel()+"No normalization factors available for bin '%s' when accessing histogram %s!"%(wQCDLabel,shape.getHistoName()))
+            wQCD = normFactors[wQCDLabel]
             # Loop over bins in the shape histogram
             for j in range(1,h.GetNbinsX()+1):
                 for k in range(1,h.GetNbinsY()+1):
@@ -248,241 +256,225 @@ class QCDInvertedShape:
                     myString += " %.3f %.3f"%(myPurity, myPurityUncert)
                     print myString
 
-class QCDInvertedControlPlot: # OBSOLETE
-    def __init__(self, shape, moduleInfoString, normFactors, title=""):
-        self._resultShape = None # TH1F which contains the final shape histogram
-        self._normFactors = normFactors
-        self._title = title
-        if title == "":
-            title = "NQCDCtrl_Total_%s"%moduleInfoString
-        self._doCalculate(shape, moduleInfoString)
+#class QCDInvertedControlPlot: # OBSOLETE
+    #def __init__(self, shape, moduleInfoString, normFactors, title=""):
+        #self._resultShape = None # TH1F which contains the final shape histogram
+        #self._normFactors = normFactors
+        #self._title = title
+        #if title == "":
+            #title = "NQCDCtrl_Total_%s"%moduleInfoString
+        #self._doCalculate(shape, moduleInfoString)
 
-    def delete(self):
-        self._resultShape.Delete()
-        self._normFactors = None
+    #def delete(self):
+        #self._resultShape.Delete()
+        #self._normFactors = None
 
-    ## Returns the final shape histogram
-    def getResultShape(self):
-        return self._resultShape
+    ### Returns the final shape histogram
+    #def getResultShape(self):
+        #return self._resultShape
 
-    ## Calculates the result
-    def _doCalculate(self, shape, moduleInfoString):
-        # Calculate final shape in signal region (shape * w_QCD)
-        nSplitBins = shape.getNumberOfPhaseSpaceSplitBins()
-        # Initialize result containers
-        self._resultShape = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
-        self._resultShape.Reset()
-        self._resultShape.SetTitle(self._title+"tmp")
-        self._resultShape.SetName(self._title+"tmp")
-        ROOT.SetOwnership(self._resultShape, True)
-        myUncertaintyLabels = ["statData", "statEWK"]
-        self._resultCountObject = extendedCount.ExtendedCount(0.0, [0.0, 0.0], myUncertaintyLabels)
-        # Calculate results separately for each phase space bin and then combine
-        for i in range(0, nSplitBins):
-            # Get data-driven QCD, data, and MC EWK shape histogram for the phase space bin
-            h = shape.getDataDrivenQCDHistoForSplittedBin(i)
-            # Get normalization factor
-            if not shape.getPhaseSpaceBinFileFriendlyTitle(i) in self._normFactors.keys():
-                raise Exception(ShellStyles.ErrorLabel()+"No normalization factors available for bin '%s' when accessing histogram %s!"%(shape.getPhaseSpaceBinFileFriendlyTitle(i),shape.getHistoName()))
-            wQCD = self._normFactors[shape.getPhaseSpaceBinFileFriendlyTitle(i)]
-            # Loop over bins in the shape histogram
-            for j in range(1,h.GetNbinsX()+1):
-                myResult = 0.0
-                myResultStatUncert = 0.0
-                if abs(h.GetBinContent(j)) > 0.00001: # Ignore zero bins
-                    # Calculate result
-                    myResult = h.GetBinContent(j) * wQCD
-                    myResultStatUncert = h.GetBinError(j) * wQCD
-                    # Do not calculate here MC EWK syst.
-                self._resultShape.SetBinContent(j, self._resultShape.GetBinContent(j) + myResult)
-                self._resultShape.SetBinError(j, self._resultShape.GetBinError(j) + myResultStatUncert**2) # Sum squared
-            h.Delete()
-        # Take square root of uncertainties
-        for j in range(1,self._resultShape.GetNbinsX()+1):
-            self._resultShape.SetBinError(j, math.sqrt(self._resultShape.GetBinError(j)))
-        # Print result
-        print "Control plot integral(%s) = %s "%(self._title, self._resultShape.Integral())
+    ### Calculates the result
+    #def _doCalculate(self, shape, moduleInfoString):
+        ## Calculate final shape in signal region (shape * w_QCD)
+        #nSplitBins = shape.getNumberOfPhaseSpaceSplitBins()
+        ## Initialize result containers
+        #self._resultShape = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
+        #self._resultShape.Reset()
+        #self._resultShape.SetTitle(self._title+"tmp")
+        #self._resultShape.SetName(self._title+"tmp")
+        #ROOT.SetOwnership(self._resultShape, True)
+        #myUncertaintyLabels = ["statData", "statEWK"]
+        #self._resultCountObject = extendedCount.ExtendedCount(0.0, [0.0, 0.0], myUncertaintyLabels)
+        ## Calculate results separately for each phase space bin and then combine
+        #for i in range(0, nSplitBins):
+            ## Get data-driven QCD, data, and MC EWK shape histogram for the phase space bin
+            #h = shape.getDataDrivenQCDHistoForSplittedBin(i)
+            ## Get normalization factor
+            #if not shape.getPhaseSpaceBinFileFriendlyTitle(i) in self._normFactors.keys():
+                #raise Exception(ShellStyles.ErrorLabel()+"No normalization factors available for bin '%s' when accessing histogram %s!"%(shape.getPhaseSpaceBinFileFriendlyTitle(i),shape.getHistoName()))
+            #wQCD = self._normFactors[shape.getPhaseSpaceBinFileFriendlyTitle(i)]
+            ## Loop over bins in the shape histogram
+            #for j in range(1,h.GetNbinsX()+1):
+                #myResult = 0.0
+                #myResultStatUncert = 0.0
+                #if abs(h.GetBinContent(j)) > 0.00001: # Ignore zero bins
+                    ## Calculate result
+                    #myResult = h.GetBinContent(j) * wQCD
+                    #myResultStatUncert = h.GetBinError(j) * wQCD
+                    ## Do not calculate here MC EWK syst.
+                #self._resultShape.SetBinContent(j, self._resultShape.GetBinContent(j) + myResult)
+                #self._resultShape.SetBinError(j, self._resultShape.GetBinError(j) + myResultStatUncert**2) # Sum squared
+            #h.Delete()
+        ## Take square root of uncertainties
+        #for j in range(1,self._resultShape.GetNbinsX()+1):
+            #self._resultShape.SetBinError(j, math.sqrt(self._resultShape.GetBinError(j)))
+        ## Print result
+        #print "Control plot integral(%s) = %s "%(self._title, self._resultShape.Integral())
 
+## Manager class for obtaining all the required information to be saved to a pseudo-multicrab
 class QCDInvertedResultManager:
-    def __init__(self, shapeString, normalizationPoint, dsetMgr, luminosity, moduleInfoString, normFactors, dataDrivenFakeTaus=False, shapeOnly=False, displayPurityBreakdown=False, noRebin=False):
-        print ShellStyles.HighlightStyle()+"...Obtaining final shape"+ShellStyles.NormalStyle()
-        # Obtain QCD shapes
-        myRebinList = None
-        if not noRebin:
-            myRebinList = systematics.getBinningForPlot(shapeString)
+    def __init__(self,
+                 dataPath,
+                 ewkPath,
+                 dsetMgr,
+                 luminosity,
+                 moduleInfoString,
+                 normFactors,
+                 #dataDrivenFakeTaus=False,
+                 #shapeOnly=False,
+                 #displayPurityBreakdown=False,
+                 #optionUseInclusiveNorm=False,
+                 optionCalculateQCDNormalizationSyst=True,
+                 normDataSrc=None,
+                 normEWKSrc=None,
+                 optionUseInclusiveNorm=False):
+        self._shapePlots = []
+        self._shapePlotLabels = []
+        self._QCDNormalizationSystPlots = []
+        self._QCDNormalizationSystPlotLabels = []
+        self._moduleInfoString = moduleInfoString
 
-        myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", shapeString, luminosity, myRebinList,dataDrivenFakeTaus=dataDrivenFakeTaus)
-        # Calculate final shape in signal region (leg1 * leg2 / basic)
-        myResult = QCDInvertedShape(myShape, moduleInfoString, normFactors, optionPrintPurityByBins=displayPurityBreakdown)
-        myShape.delete()
-        self._hShape = aux.Clone(myResult.getResultShape())
-        self._hShape.SetName(self._hShape.GetName()+"finalShapeInManager")
-        self._hShapeMCEWK = aux.Clone(myResult.getResultMCEWK())
-        self._hShapeMCEWK.SetName(self._hShape.GetName()+"finalShapeInManager")
-        self._hShapePurity = aux.Clone(myResult.getResultPurity())
-        self._hShapePurity.SetName(self._hShape.GetName()+"finalShapeInManager")
-        myResult.delete()
-        if not shapeOnly:
-            print ShellStyles.HighlightStyle()+"...Obtaining region transition systematics"+ShellStyles.NormalStyle()
-            # Do systematics coming from met shape difference
-            histoNamePrefix = "MT"
-            if shapeString == "shapeInvariantMass":
-                histoNamePrefix = "INVMASS"
-            myCtrlRegionName = "Inverted/%sInvertedTauId%s"%(histoNamePrefix, normalizationPoint)
-            mySignalRegionName = "baseline/%sBaselineTauId%s"%(histoNamePrefix, normalizationPoint)
-            myCtrlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", myCtrlRegionName, luminosity, myRebinList) #dataDrivenFakeTaus=dataDrivenFakeTaus
-            mySignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", mySignalRegionName, luminosity, myRebinList) #dataDrivenFakeTaus=dataDrivenFakeTaus
-            myRegionTransitionSyst = systematicsForMetShapeDifference.SystematicsForMetShapeDifference(mySignalRegionShape, myCtrlRegionShape, self._hShape, moduleInfoString=moduleInfoString)
-            self._hRegionSystUp = aux.Clone(myRegionTransitionSyst.getUpHistogram(), "QCDinvMgrQCDSystUp")
-            self._hRegionSystDown = aux.Clone(myRegionTransitionSyst.getDownHistogram(), "QCDinvMgrQCDSystDown")
-            self._hRegionSystNumerator = aux.Clone(myRegionTransitionSyst.getCombinedSignalRegionHistogram(), "QCDinvMgrQCDSystNumerator")
-            self._hRegionSystDenominator = aux.Clone(myRegionTransitionSyst.getCombinedCtrlRegionHistogram(), "QCDinvMgrQCDSystDenominator")
-            myRegionTransitionSyst.delete()
-            # Obtain data-driven control plots
-            self._hCtrlPlotLabels = []
-            self._hCtrlPlotLabelsForQCDSyst = []
-            self._hCtrlPlots = []
-            self._hRegionSystUpCtrlPlots = []
-            self._hRegionSystDownCtrlPlots = []
-            self._hRegionSystNumenatorCtrlPlots = []
-            self._hRegionSystDenominatorCtrlPlots = []
-            myObjects = dsetMgr.getDataset("Data").getDirectoryContent("ForDataDrivenCtrlPlots")
-            i = 0
-            for item in myObjects:
-                myStatus = True
-                i += 1
-                print ShellStyles.HighlightStyle()+"...Obtaining ctrl plot %d/%d: %s%s"%(i,len(myObjects),item,ShellStyles.NormalStyle())
-                myEWKFoundStatus = True
-                for d in dsetMgr.getDataset("EWK").datasets:
-                    if not d.hasRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item)):
-                        myEWKFoundStatus = False
-                if not myEWKFoundStatus:
-                    myStatus = False
-                    if isinstance(self._hShape, ROOT.TH2):
-                        print ShellStyles.WarningLabel()+"Skipping uncertainties because histogram has more than 1 dimensions!"
-                    else:
-                        print ShellStyles.WarningLabel()+"Skipping '%s', because it does not exist for all EWK datasets (you probably forgot to set histo level to Vital when producing the multicrab)!"%(item)+ShellStyles.NormalStyle()
+        self._useInclusiveNorm = optionUseInclusiveNorm
+        if len(normFactors.keys()) == 1 and normFactors.keys()[0] == "Inclusive":
+            self._useInclusiveNorm = True
+
+        print ShellStyles.HighlightStyle()+"...Obtaining final shape"+ShellStyles.NormalStyle()
+        # Determine list of plots to consider
+        myObjects = dsetMgr.getDataset("Data").getDirectoryContent(dataPath)
+        # Loop over plots to consider
+        i = 0
+        for plotName in myObjects:
+            i += 1
+            print ShellStyles.HighlightStyle()+"...Obtaining ctrl plot %d/%d: %s%s"%(i,len(myObjects),plotName,ShellStyles.NormalStyle())
+            # Check that histograms exist
+            mySkipStatus = self._sanityChecks(dsetMgr, dataPath, plotName) and self._sanityChecks(dsetMgr, ewkPath, plotName)
+            if not mySkipStatus:
+                continue
+            # Obtain shape plots (the returned object is not owned)
+            myShapeHisto = self._obtainShapeHistograms(i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors)
+            # Obtain plots for systematics coming from met shape difference for control plots
+            if optionCalculateQCDNormalizationSyst:
+                if isinstance(myShapeHisto, ROOT.TH2):
+                    print ShellStyles.WarningLabel()+"Skipping met shape uncertainty because histogram has more than 1 dimensions!"
                 else:
-                    (myRootObject, myRootObjectName) = dsetMgr.getDataset("EWK").getFirstRootHisto("%s/%s"%("ForDataDrivenCtrlPlots",item))
-                    if isinstance(myRootObject, ROOT.TH2):
-                        print ShellStyles.WarningLabel()+"Skipping '%s', because it is not a TH1 object!"%(item)+ShellStyles.NormalStyle()
-                        myStatus = False
-                if myStatus:
-                    myRebinList = None # Do rebinning in datacard generator
-                    myCtrlShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "ForDataDrivenCtrlPlots/%s"%item, luminosity, rebinList=myRebinList,dataDrivenFakeTaus=dataDrivenFakeTaus)
-                    myCtrlPlot = QCDInvertedShape(myCtrlShape, moduleInfoString+"_"+item, normFactors)
-                    myCtrlShape.delete()
-                    self._hCtrlPlotLabels.append(item)
-                    myCtrlPlotHisto = aux.Clone(myCtrlPlot.getResultShape(), "ctrlPlotShapeInManager")
-                    myCtrlPlotHisto.SetName(item+"%d"%i)
-                    myCtrlPlotHisto.SetTitle(item)
-                    self._hCtrlPlots.append(myCtrlPlotHisto)
-                    # MC EWK and purity
-                    self._hCtrlPlotLabels.append(item+"_MCEWK")
-                    myCtrlPlotMCEWKHisto = aux.Clone(myCtrlPlot.getResultMCEWK(), "ctrlPlotMCEWKInManager")
-                    myCtrlPlotMCEWKHisto.SetName(item+"%d_MCEWK"%i)
-                    myCtrlPlotMCEWKHisto.SetTitle(item+"_MCEWK")
-                    self._hCtrlPlots.append(myCtrlPlotMCEWKHisto)
-                    self._hCtrlPlotLabels.append(item+"_Purity")
-                    myCtrlPlotPurityHisto = aux.Clone(myCtrlPlot.getResultPurity(), "ctrlPlotPurityInManager")
-                    myCtrlPlotPurityHisto.SetName(item+"%d_Purity"%i)
-                    myCtrlPlotPurityHisto.SetTitle(item+"_Purity")
-                    self._hCtrlPlots.append(myCtrlPlotPurityHisto)
-                    # Add labels
-                    if not isinstance(myCtrlPlotHisto, ROOT.TH2):
-                        self._hCtrlPlotLabelsForQCDSyst.append(item)
-                    myCtrlPlot.delete()
-                    # Do systematics coming from met shape difference for control plots
-                    if isinstance(myCtrlPlotHisto, ROOT.TH2):
-                        print ShellStyles.WarningLabel()+"Skipping met shape uncertainty because histogram has more than 1 dimensions!"
-                    else:
-                        myCtrlPlotSignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationSignal",item), luminosity, rebinList=myRebinList) #dataDrivenFakeTaus=dataDrivenFakeTaus
-                        myCtrlPlotControlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", "%s/%s"%("ForDataDrivenCtrlPlotsQCDNormalizationControl",item), luminosity, rebinList=myRebinList) #dataDrivenFakeTaus=dataDrivenFakeTaus
-                        myCtrlPlotRegionTransitionSyst = systematicsForMetShapeDifference.SystematicsForMetShapeDifference(myCtrlPlotSignalRegionShape, myCtrlPlotControlRegionShape, myCtrlPlotHisto, moduleInfoString=moduleInfoString, quietMode=True)
-                        myCtrlPlotSignalRegionShape.delete()
-                        myCtrlPlotControlRegionShape.delete()
-                        # Up variation
-                        hUp = aux.Clone(myCtrlPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)
-                        hUp.SetTitle(item+"systQCDUp")
-                        self._hRegionSystUpCtrlPlots.append(hUp)
-                        # Down variation
-                        hDown = aux.Clone(myCtrlPlotRegionTransitionSyst.getDownHistogram(), "QCDfactMgrSystQCDSystDown%d"%i)
-                        hDown.SetTitle(item+"systQCDDown")
-                        self._hRegionSystDownCtrlPlots.append(hDown)
-                        # Source histograms
-                        hNum = aux.Clone(myCtrlPlotRegionTransitionSyst.getCombinedSignalRegionHistogram(), "QCDfactMgrSystQCDSystNumerator%d"%i)
-                        hNum.SetTitle(item+"systQCDNumerator")
-                        self._hRegionSystNumenatorCtrlPlots.append(hNum)
-                        hDenom = aux.Clone(myCtrlPlotRegionTransitionSyst.getCombinedCtrlRegionHistogram(), "QCDfactMgrSystQCDSystDenominator%d"%i)
-                        hDenom.SetTitle(item+"systQCDDenominator")
-                        self._hRegionSystDenominatorCtrlPlots.append(hDenom)
-                        # Free memory
-                        myCtrlPlotRegionTransitionSyst.delete()
-                        #print "\n***** memdebug %d\n"%i
-                        #if i <= 2:
-                        #    ROOT.gDirectory.GetList().ls()
-                myRootObject.Delete()
-        myCtrlRegionShape.delete()
-        mySignalRegionShape.delete()
+                    self._obtainQCDNormalizationSystHistograms(myShapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc)
+
+    ## Check existence of histograms
+    def _sanityChecks(self, dsetMgr, dirName, plotName):
+        myStatus = True
+        myFoundStatus = True
+        for d in dsetMgr.getDataset("EWK").datasets:
+            if not d.hasRootHisto("%s/%s"%(dirName,plotName)):
+                myFoundStatus = False
+        if not myFoundStatus:
+            myStatus = False
+            print ShellStyles.WarningLabel()+"Skipping '%s', because it does not exist for all EWK datasets (you probably forgot to set histo level to Vital when producing the multicrab)!"%(plotName)+ShellStyles.NormalStyle()
+        else:
+            (myRootObject, myRootObjectName) = dsetMgr.getDataset("EWK").getFirstRootHisto("%s/%s"%(dirName,plotName))
+            if isinstance(myRootObject, ROOT.TH2):
+                print ShellStyles.WarningLabel()+"Skipping '%s', because it is not a TH1 object!"%(plotName)+ShellStyles.NormalStyle()
+                myStatus = False
+            myRootObject.Delete()
+        return myStatus
+    
+    def _obtainShapeHistograms(self, i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors):
+        myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr=dsetMgr,
+                                                        dsetLabelData="Data",
+                                                        dsetLabelEwk="EWK",
+                                                        histoName=plotName,
+                                                        dataPath=dataPath,
+                                                        ewkPath=ewkPath,
+                                                        luminosity=luminosity)
+        myPlot = QCDInvertedShape(myShape,
+                                  self._moduleInfoString+"_"+plotName,
+                                  normFactors,
+                                  optionUseInclusiveNorm=self._useInclusiveNorm)
+        myShape.delete()
+        myPlotHisto = aux.Clone(myPlot.getResultShape(), "ctrlPlotShapeInManager")
+        myPlot.delete()
+        myPlotHisto.SetName(plotName+"%d"%i)
+        myPlotHisto.SetTitle(plotName)
+        self._shapePlots.append(myPlotHisto)
+        self._shapePlotLabels.append(plotName)
+        # MC EWK and purity
+        #myPlotMCEWKHisto = aux.Clone(myPlot.getResultMCEWK(), "ctrlPlotMCEWKInManager")
+        #myPlotMCEWKHisto.SetName(plotName+"%d_MCEWK"%i)
+        #myPlotMCEWKHisto.SetTitle(plotName+"_MCEWK")
+        #self._shapePlots.append(myPlotMCEWKHisto)
+        #self._shapePlotLabels.append(myPlotMCEWKHisto.GetTitle())
+        #myPlotPurityHisto = aux.Clone(myPlot.getResultPurity(), "ctrlPlotPurityInManager")
+        #myPlotPurityHisto.SetName(plotName+"%d_Purity"%i)
+        #myPlotPurityHisto.SetTitle(plotName+"_Purity")
+        #self._shapePlots.append(myPlotPurityHisto)
+        #self._shapePlotLabels.append(myPlotPurityHisto.GetTitle())
+        return myPlotHisto
+
+    def _obtainQCDNormalizationSystHistograms(self, shapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc):
+        print ShellStyles.HighlightStyle()+"...Obtaining region transition systematics"+ShellStyles.NormalStyle()
+        myPlotSignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr=dsetMgr,
+                                                                        dsetLabelData="Data",
+                                                                        dsetLabelEwk="EWK",
+                                                                        histoName=plotName,
+                                                                        dataPath=normDataSrc+"QCDNormalizationSignal",
+                                                                        ewkPath=normEWKSrc+"QCDNormalizationSignal",
+                                                                        luminosity=luminosity)
+        myPlotControlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr=dsetMgr,
+                                                                         dsetLabelData="Data",
+                                                                         dsetLabelEwk="EWK",
+                                                                         histoName=plotName,
+                                                                         dataPath=normDataSrc+"QCDNormalizationControl",
+                                                                         ewkPath=normEWKSrc+"QCDNormalizationControl",
+                                                                         luminosity=luminosity)
+        myPlotRegionTransitionSyst = metSyst.SystematicsForMetShapeDifference(myPlotSignalRegionShape, 
+                                                                              myPlotControlRegionShape, 
+                                                                              shapeHisto, 
+                                                                              moduleInfoString=self._moduleInfoString,
+                                                                              quietMode=True)
+        myPlotSignalRegionShape.delete()
+        myPlotControlRegionShape.delete()
+        # Store up and down variations
+        #hUp = aux.Clone(myPlotRegionTransitionSyst.getUpHistogram(), "QCDfactMgrSystQCDSystUp%d"%i)
+        #hUp.SetTitle(plotName+"systQCDUp")
+        #self._QCDNormalizationSystPlots.append(hUp)
+        #self._QCDNormalizationSystPlotLabels.append(hUp.GetTitle())
+        #hDown = aux.Clone(myPlotRegionTransitionSyst.getDownHistogram(), "QCDfactMgrSystQCDSystDown%d"%i)
+        #hDown.SetTitle(plotName+"systQCDDown")
+        #self._QCDNormalizationSystPlots.append(hDown)
+        #self._QCDNormalizationSystPlotLabels.append(hDown.GetTitle())
+        # Store source histograms
+        hNum = aux.Clone(myPlotRegionTransitionSyst.getCombinedSignalRegionHistogram(), "QCDfactMgrSystQCDSystNumerator%d"%i)
+        hNum.SetTitle(plotName+"systQCDNumerator")
+        self._QCDNormalizationSystPlots.append(hNum)
+        self._QCDNormalizationSystPlotLabels.append(hNum.GetTitle())
+        hDenom = aux.Clone(myPlotRegionTransitionSyst.getCombinedCtrlRegionHistogram(), "QCDfactMgrSystQCDSystDenominator%d"%i)
+        hDenom.SetTitle(plotName+"systQCDDenominator")
+        self._QCDNormalizationSystPlots.append(hDenom)
+        self._QCDNormalizationSystPlotLabels.append(hDenom.GetTitle())
+        # Free memory
+        myPlotRegionTransitionSyst.delete()
 
     ## Delete the histograms
     def delete(self):
         def delList(l):
             for h in l:
-                h.Delete()
+                if h != None:
+                    h.Delete()
             l = None
-        self._hShape.Delete()
-        self._hShapeMCEWK.Delete()
-        self._hShapePurity.Delete()
-        self._hRegionSystUp.Delete()
-        self._hRegionSystDown.Delete()
-        self._hRegionSystDenominator.Delete()
-        self._hRegionSystNumerator.Delete()
-        self._hCtrlPlotLabels = None
-        delList(self._hCtrlPlots)
-        delList(self._hRegionSystUpCtrlPlots)
-        delList(self._hRegionSystDownCtrlPlots)
-        delList(self._hRegionSystNumenatorCtrlPlots)
-        delList(self._hRegionSystDenominatorCtrlPlots)
+        delList(self._shapePlots)
+        delList(self._QCDNormalizationSystPlots)
+        self._shapePlots = None
+        self._shapePlotLabels = None
+        self._QCDNormalizationSystPlots = None
+        self._QCDNormalizationSystPlotLabels = None
 
-    def getShape(self):
-        return self._hShape
-
-    def getShapeMCEWK(self):
-        return self._hShapeMCEWK
-
-    def getShapePurity(self):
-        return self._hShapePurity
-
-    def geRegionSystUp(self):
-        return self._hRegionSystUp
-
-    def geRegionSystDown(self):
-        return self._hRegionSystDown
-
-    def getRegionSystNumerator(self):
-        return self._hRegionSystNumerator
-
-    def getRegionSystDenominator(self):
-        return self._hRegionSystDenominator
-
-    def getControlPlotLabels(self):
-        return self._hCtrlPlotLabels
-
-    def getControlPlotLabelsForQCDSyst(self):
-        return self._hCtrlPlotLabelsForQCDSyst
-
-    def getControlPlots(self):
-        return self._hCtrlPlots
-
-    def getRegionSystUpCtrlPlots(self):
-        return self._hRegionSystUpCtrlPlots
-
-    def getRegionSystDownCtrlPlots(self):
-        return self._hRegionSystDownCtrlPlots
-
-    def getRegionSystNumeratorCtrlPlots(self):
-        return self._hRegionSystNumenatorCtrlPlots
-
-    def getRegionSystDenominatorCtrlPlots(self):
-        return self._hRegionSystDenominatorCtrlPlots
+    def getShapePlots(self):
+        return self._shapePlots
+    
+    def getShapePlotLabels(self):
+        return self._shapePlotLabels
+      
+    def getQCDNormalizationSystPlots(self):
+        return self._QCDNormalizationSystPlots
+    
+    def getQCDNormalizationSystPlotLabels(self):
+        return self._QCDNormalizationSystPlotLabels

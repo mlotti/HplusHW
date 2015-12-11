@@ -14,8 +14,8 @@ import os
 import shutil
 from math import sqrt
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.ShellStyles as ShellStyles
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 
 class PseudoMultiCrabCreator:
     ## Constructor
@@ -28,16 +28,16 @@ class PseudoMultiCrabCreator:
         self._myBaseDir = None
         self._energy = None
         self._dataVersion = None
-        self._codeVersion = None
+        #self._codeVersion = None
 
     def addModule(self, module):
         if self._energy == None:
             self._energy = module._energy
             self._dataVersion = module._dataVersion.Clone()
-            self._codeVersion = module._codeVersion.Clone()
+            #self._codeVersion = module._codeVersion.Clone()
             self._writeRootFileToDisk(self._currentSubTitle)
             self._dataVersion = None # No need to delete from gDirectory, since they were saved to disk already
-            self._codeVersion = None
+            #self._codeVersion = None
 
         # Open root file
         myFilename = "%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1])
@@ -64,7 +64,7 @@ class PseudoMultiCrabCreator:
     def initialize(self, subTitle):
         self._energy = None
         self._dataVersion = None
-        self._codeVersion = None
+        #self._codeVersion = None
         self._createBaseDirectory()
         self._mySubTitles.append(subTitle)
         self._currentSubTitle = subTitle
@@ -102,7 +102,7 @@ class PseudoMultiCrabCreator:
         hConfigInfo.SetDirectory(myConfigInfoDir)
         # Write a copy of data version and code version
         myConfigInfoDir.Add(self._dataVersion)
-        myConfigInfoDir.Add(self._codeVersion)
+        #myConfigInfoDir.Add(self._codeVersion)
         # Write and close the root file
         myRootFile.Write()
         myRootFile.Close()
@@ -111,7 +111,7 @@ class PseudoMultiCrabModule:
     ## Constructor
     def __init__(self, dsetMgr, era, searchMode, optimizationMode, systematicsVariation=None):
         # Note that 'signalAnalysis' only matters for dataset.py to find the proper module
-        self._moduleName = "signalAnalysis%s%s"%(searchMode, era)
+        self._moduleName = "signalAnalysis_%s_%s"%(searchMode, era)
         if optimizationMode != "" and optimizationMode != None:
             self._moduleName += "%s"%optimizationMode
         if systematicsVariation != None:
@@ -155,11 +155,11 @@ class PseudoMultiCrabModule:
         self._dataVersion = objs[0].Clone()
         self._dataVersion.SetTitle("pseudo")
         # Copy code version
-        if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
-            (objs, realNames) = dsetMgr.getDataset("Data").getRootObjects("../configInfo/codeVersion")
-        else:
-            (objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/codeVersion")
-        self._codeVersion = objs[0].Clone()
+        #if isinstance(dsetMgr.getDataset("Data"), dataset.Dataset):
+            #(objs, realNames) = dsetMgr.getDataset("Data").getRootObjects("../configInfo/codeVersion")
+        #else:
+            #(objs, realNames) = dsetMgr.getDataset("Data").datasets[0].getRootObjects("../configInfo/codeVersion")
+        #self._codeVersion = objs[0].Clone()
 
     def delete(self):
         if False:
@@ -172,7 +172,7 @@ class PseudoMultiCrabModule:
             self._counterUncertainties = None
             self._hSplittedBinInfo.Delete()
             self._dataVersion.Delete()
-            self._codeVersion.Delete()
+            #self._codeVersion.Delete()
         ROOT.gDirectory.GetList().Delete()
 
     def addShape(self, shapeHisto, plotName):
@@ -195,6 +195,22 @@ class PseudoMultiCrabModule:
             h.SetName(labelList[i])
             self._dataDrivenControlPlots.append(h)
 
+    ## Adds all plots in one go from the QCDPlotContainer object
+    def addPlots(self, plots, labels):
+        for i in range(len(labels)):
+            h = plots[i]
+            plotName = labels[i]
+            if plotName.startswith("shape"):
+                myValue = 0.0
+                myUncert = 0.0
+                for i in range(1, h.GetNbinsX()+1):
+                    myValue += h.GetBinContent(i)
+                    myUncert += h.GetBinError(i)**2
+                self._counters[plotName] = myValue
+                self._counterUncertainties[plotName] = sqrt(myUncert)
+            h.SetName(plotName)
+            self._dataDrivenControlPlots.append(h)
+
     def writeModuleToRootFile(self, rootfile):
         # Create module directory
         rootfile.cd("/")
@@ -207,6 +223,7 @@ class PseudoMultiCrabModule:
         myDDPlotsDir = myModuleDir.mkdir(myDDPlotsDirName)
         for h in self._dataDrivenControlPlots:
             h.SetDirectory(myDDPlotsDir)
+        
         # Save counter histogram
         myCounterDir = myModuleDir.mkdir("counters")
         myWeightedCounterDir = myCounterDir.mkdir("weighted")
@@ -233,7 +250,7 @@ class PseudoMultiCrabModule:
         self._hConfigInfo.SetBinContent(2, self._luminosity)
         self._hConfigInfo.SetDirectory(myConfigInfoDir)
         myConfigInfoDir.Add(self._dataVersion)
-        myConfigInfoDir.Add(self._codeVersion)
+        #myConfigInfoDir.Add(self._codeVersion)
         #.SetDirectory(rootfile)
         #self._codeVersion.SetDirectory(rootfile)
 
