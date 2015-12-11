@@ -1,5 +1,6 @@
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import json
+import os
 
 # This file contains all the scale factors and their uncertainties used in the analysis
 # There are two types of scale factors:
