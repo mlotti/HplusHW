@@ -5,7 +5,7 @@ BaseSelector::BaseSelector(const ParameterSet& config):
   fEventCounter(fEventWeight),
   fHistoWrapper(fEventWeight, config.getParameter<std::string>("histogramAmbientLevel", "Vital")),
   fPileupWeight(config),
-  fTopPtWeight(config.getParameter<ParameterSet>("TopPtReweighting")),
+  fTopPtWeight(config.getParameterOptional<ParameterSet>("TopPtReweighting")),
   cBaseAllEvents(fEventCounter.addCounter("Base::AllEvents")),
   cPileupWeighted(fEventCounter.addCounter("Base::PUReweighting")),
   cPrescaled(fEventCounter.addCounter("Base::Prescale")),
