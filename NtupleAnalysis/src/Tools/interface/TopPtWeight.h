@@ -11,7 +11,7 @@ class TH1;
 
 class TopPtWeight {
 public:
-  explicit TopPtWeight(const ParameterSet& pset);
+  explicit TopPtWeight(boost::optional<const ParameterSet> pset);
   ~TopPtWeight();
 
   // Disable copying, assignment, and moving
@@ -25,7 +25,7 @@ public:
   void calculateWeights(TH1*, TH1*);
 
 private:
-  const double fParA;
-  const double fParB;
+  double fParA;
+  double fParB;
 };
 #endif
