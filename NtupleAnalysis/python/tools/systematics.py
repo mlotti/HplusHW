@@ -120,7 +120,7 @@ def getCrossSectionUncertainty(datasetName):
 #     return ScalarUncertaintyItem("LeptonVeto", 0.002)
 
 def getLeptonVetoUncertainty():
-     return ScalarUncertaintyItem("LeptonVeto", 0.01)
+     return ScalarUncertaintyItem("LeptonVeto", 0.02)
 
 def getTauIDUncertainty(isGenuineTau=True):
     if isGenuineTau:
@@ -129,7 +129,7 @@ def getTauIDUncertainty(isGenuineTau=True):
         return ScalarUncertaintyItem("tauID", 0.00)
 
 def getLuminosityUncertainty():
-    return ScalarUncertaintyItem("lumi", 0.026)
+    return ScalarUncertaintyItem("lumi", 0.09) # 0.026 for 8 TeV
 
 def getProbabilisticBtagUncertainty():
     return ScalarUncertaintyItem("probBtag", 0.5)

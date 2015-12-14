@@ -5,12 +5,14 @@ BaseSelector::BaseSelector(const ParameterSet& config):
   fEventCounter(fEventWeight),
   fHistoWrapper(fEventWeight, config.getParameter<std::string>("histogramAmbientLevel", "Vital")),
   fPileupWeight(config),
+  fTopPtWeight(config.getParameterOptional<ParameterSet>("TopPtReweighting")),
   cBaseAllEvents(fEventCounter.addCounter("Base::AllEvents")),
   cPileupWeighted(fEventCounter.addCounter("Base::PUReweighting")),
   cPrescaled(fEventCounter.addCounter("Base::Prescale")),
   cTopPtReweighted(fEventCounter.addCounter("Base::Weighted events with top pT")),
   cExclusiveSamplesWeighted(fEventCounter.addCounter("Base::Weighted events for exclusive samples")),
-  fIsMC(config.isMC())
+  fIsMC(config.isMC()),
+  bIsttbar(false)
 {}
 BaseSelector::~BaseSelector() {
   fEventCounter.serialize();
@@ -42,16 +44,18 @@ void BaseSelector::processInternal(Long64_t entry) {
     //std::cout << "vtx: " << fPileupWeight.getWeight(fEvent) << std::endl;;
     hNvtxAfterVtxReweighting->Fill(fEvent.vertexInfo().value());
   }
-  
-  //====== Set prescale event weight // FIXME missing code
   cPileupWeighted.increment();
   
-  //====== Top pT weighting // FIXME missing code
-  if (fEvent.isMC()) {
-    cTopPtReweighted.increment();
-  }
+  //====== Set prescale event weight // not needed right now
+  cPrescaled.increment();
   
-  //====== Combining of W+jets and Z+jets inclusive and exclusive samples // FIXME missing code
+  //====== Top pT weighting
+  if (fEvent.isMC() && isttbar()) {
+    fEventWeight.multiplyWeight(fTopPtWeight.getWeight(fEvent));
+  }
+  cTopPtReweighted.increment();
+  
+  //====== Combining of W+jets and Z+jets inclusive and exclusive samples // not needed right now
   cExclusiveSamplesWeighted.increment();
 
   

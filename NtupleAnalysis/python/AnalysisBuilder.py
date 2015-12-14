@@ -18,10 +18,12 @@ class AnalysisConfig:
         for key in keys:
 	    value = kwargs[key]
 	    if key == "systematics":
+                # Energy scales
 		if value.startswith("tauES"):
-		    self._config.TauSelection.systematicVariation = value.replace("Plus","plus").replace("Minus","minus")
+		    self._config.TauSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up").replace("tauES","TES")
 		elif value.startswith("JES"):
-		    self._config.JetSelection.systematicVariation = value.replace("Plus","plus").replace("Minus","minus")
+		    self._config.JetSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up")
+		# Fake tau 
 		elif value.startswith("FakeTau"):
                     etaRegion = "full"
                     if "Barrel" in value:
@@ -38,9 +40,13 @@ class AnalysisConfig:
                     scaleFactors.assignTauMisidentificationSF(self._config.TauSelection, 
                                                               partonFakingTau, etaRegion, 
                                                               self._getDirectionString(value))
+		# Trigger
 		elif value.startswith("TauTrgEff"):
                     variationType = value.replace("TauTrgEff","")
                     scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value), variationType)
+		# B and top quarks
+		elif value.startswith("TopPt"):
+                    self._config.TopPtReweighting.systematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
 		else:
 		    if value != "nominal":
                         raise Exception("Error: unsupported variation item '%s'!"%value)
@@ -84,7 +90,8 @@ class AnalysisBuilder:
                  dataEras=["2015"],        # Data era (see python/tools/dataset.py::_dataEras)
                  searchModes=["m80to160"], # Search mode (see python/parameters/signalAnalysisParameters.py)
                  # Optional options
-                 usePUreweighting=False, # enable/disable vertex reweighting
+                 usePUreweighting=True,    # enable/disable vertex reweighting
+                 useTopPtReweighting=True, # enable/disable top pt reweighting for ttbar
                  # Systematics options
                  doSystematicVariations=False, # Enable/disable adding modules for systematic uncertainty variation
                 ):
@@ -101,13 +108,14 @@ class AnalysisBuilder:
               self._searchModes.append(searchModes)
           
           self._usePUreweighting = usePUreweighting
+          self._useTopPtReweighting = useTopPtReweighting
           
           self._variations={}
           # Process systematic uncertainty variations
           if doSystematicVariations:
               items = []
               # Trigger systematics
-              items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
+              #items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
               #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
               #items.extend(["METTrgDataEff", "METTrgMCEff"])
               # Tau ID variation systematics
@@ -115,7 +123,9 @@ class AnalysisBuilder:
               # Energy scales and JER systematics
               items.extend(["tauES", "JES"]), # "JER", "UES"])
               # b and top quarks systematics
-              #items.extend("TopPt", "BTagSF", "BMistagSF")
+              #items.extend("BTagSF", "BMistagSF")
+              if self._useTopPtReweighting:
+                  items.append("TopPt") 
               # PU weight systematics
               #items.extend(["PUWeight"])
               # Create configs
@@ -125,6 +135,8 @@ class AnalysisBuilder:
                   self._variations["systematics"].append("%sMinus"%item)
 	  #self.addVariation("TauSelection.tauPtCut", [50,60])
 	  #self.addVariation("TauSelection.tauEtaCut", [0.5,1.5])
+	  
+              
     
     def addVariation(self, configItemString, listOfValues):
         self._variations[configItemString] = listOfValues
@@ -132,6 +144,7 @@ class AnalysisBuilder:
     def build(self, process, config):
         # Add here options to the config
         config.__setattr__("usePileupWeights", self._usePUreweighting)
+        config.__setattr__("useTopPtWeights", self._useTopPtReweighting)
         # Add nominal modules
         if len(self._variations.keys()) > 1 and "systematics" in self._variations.keys():
             self._variations["systematics"].insert(0, "nominal")

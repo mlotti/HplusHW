@@ -32,7 +32,7 @@ dataEra = "Run2015"
 searchMode = "80to1000"
 print analysis, dataEra, searchMode
 
-selectOnlyBins = ["Inclusive"] #["1"]
+selectOnlyBins = []#["Inclusive"] #["1"]
 
 def usage():
     print "\n"

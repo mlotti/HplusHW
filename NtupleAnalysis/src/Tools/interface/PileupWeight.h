@@ -25,7 +25,7 @@ public:
   void calculateWeights(TH1*, TH1*);
 
 private:
-  const bool fEnabled;
+  bool fEnabled;
 
   TH1 *h_weight;
 };

@@ -1035,14 +1035,13 @@ class SystematicsHelper:
             #        shapes.append(s)
             if verbose:
                 print "  Using explicitly specified shape variations (%s)" % ",".join(shapes)
-
         for source in shapes:
             plus = None
             minus = None
             # Need to do the check, because of QCD shape uncertainty
-            if dset.hasRootHisto(self._histoName, analysisPostfix=source+"Plus"):
-                (plus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Plus")
-                (minus, realName) = dset.getRootHisto(self._histoName, analysisPostfix=source+"Minus")
+            if dset.hasRootHisto(self._histoName, analysisPostfix="_"+source+"Plus"):
+                (plus, realName) = dset.getRootHisto(self._histoName, analysisPostfix="_"+source+"Plus")
+                (minus, realName) = dset.getRootHisto(self._histoName, analysisPostfix="_"+source+"Minus")
                 if modify is not None:
                     modify(plus)
                     modify(minus)
@@ -2556,7 +2555,7 @@ class Dataset:
         # Set cross section, if MC and we know the energy
         if self.isMC() and setCrossSectionAutomatically:
             if "energy" in self.info:
-                crosssection.setBackgroundCrossSectionForDataset(self)
+                crosssection.setBackgroundCrossSectionForDataset(self, quietMode=(self._systematicVariation != None or self._optimizationMode != None))
             else:
                 print "%s is MC but has no energy set in configInfo/configinfo, not setting its cross section automatically" % self.name
 
@@ -4005,17 +4004,17 @@ class DatasetManagerCreator:
             directoryName = d
 
             # Look for systematic variation
-            start = directoryName.find("SystVar")
+            start = directoryName.find("_SystVar")
             if start >= 0:
                 if "SelectedTauForVariation" in directoryName[start:]:
                     continue
-                systematicVariations[directoryName[start:]] = 1
+                systematicVariations[directoryName[start+1:]] = 1
                 directoryName = directoryName[:start]
 
             # Look for optimization mode
-            start = directoryName.find("Opt")
+            start = directoryName.find("_Opt")
             if start >= 0:
-                optimizationModes[directoryName[start:]] = 1
+                optimizationModes[directoryName[start+1:]] = 1
                 directoryName = directoryName[:start]
 
             # Look for data era

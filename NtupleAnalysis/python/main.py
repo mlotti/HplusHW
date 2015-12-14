@@ -318,6 +318,7 @@ class Process:
             nanalyzers = 0
             anames = []
             usePUweights = False
+            useTopPtCorrection = False
             nAllEventsPUWeighted = 0.0
             for aname, analyzerIE in self._analyzers.iteritems():
                 if analyzerIE.runForDataset_(dset.getName()):
@@ -329,8 +330,14 @@ class Process:
                             raise Exception("Analyzer %s was specified as a function, but returned None" % aname)
                         if not isinstance(analyzer, Analyzer):
                             raise Exception("Analyzer %s was specified as a function, but returned object of %s instead of Analyzer" % (aname, analyzer.__class__.__name__))
-
                     inputList.Add(ROOT.TNamed("analyzer_"+aname, analyzer.className_()+":"+analyzer.config_()))
+                    # ttbar status for top pt corrections
+                    ttbarStatus = "0"
+                    useTopPtCorrection = analyzer.exists("useTopPtWeights") and analyzer.__getattr__("useTopPtWeights")
+                    useTopPtCorrection = useTopPtCorrection and dset.getName().startswith("TTJets")
+                    if useTopPtCorrection:
+                        ttbarStatus = "1"
+                    inputList.Add(ROOT.TNamed("isttbar", ttbarStatus))
                     # Pileup reweighting
                     if dset.getDataVersion().isMC():
                         if aname in hPUs.keys():
@@ -375,7 +382,8 @@ class Process:
                     lumivalue = lumidata[dset.getName()]
                 print "    Luminosity: %s fb-1"%lumivalue
             print "    Using pileup weights:", usePUweights
-                
+            if useTopPtCorrection:
+                print "    Using top pt weights: True"
 
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())
@@ -435,15 +443,19 @@ class Process:
             if not cinfo == None:
                 # Add more information to configInfo
                 n = cinfo.GetNbinsX()
-                cinfo.SetBins(n+2, 0, n+2)
+                cinfo.SetBins(n+3, 0, n+3)
                 cinfo.GetXaxis().SetBinLabel(n+1, "isData")
                 cinfo.GetXaxis().SetBinLabel(n+2, "isPileupReweighted")
+                cinfo.GetXaxis().SetBinLabel(n+3, "isTopPtReweighted")
                 # Add "isData" column
                 if not dset.getDataVersion().isMC():
                     cinfo.SetBinContent(n+1, cinfo.GetBinContent(1))
                 # Add "isPileupReweighted" column
                 if usePUweights:
-                    cinfo.SetBinContent(n+2, nAllEventsPUWeighted)
+                    cinfo.SetBinContent(n+2, nAllEventsPUWeighted / nanalyzers)
+                # Add "isTopPtReweighted" column
+                if useTopPtCorrection:
+                    cinfo.SetBinContent(n+3, 1) # The value needs to be read out from a counter and could be different for variations
                 # Write
                 cinfo.Write()
                 fIN.Close()

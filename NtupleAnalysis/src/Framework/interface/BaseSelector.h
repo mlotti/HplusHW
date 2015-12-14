@@ -11,6 +11,7 @@
 #include "DataFormat/interface/Event.h"
 
 #include "Tools/interface/PileupWeight.h"
+#include "Tools/interface/TopPtWeight.h"
 
 #include "Rtypes.h"
 #include "TBranch.h"
@@ -46,6 +47,8 @@ public:
   void setPileUpWeights(TH1* hPUdata, TH1* hPUmc){
     fPileupWeight.calculateWeights(hPUdata,hPUmc);
   }
+  
+  void setIsttbar(bool status) { bIsttbar = status; }
 
   /// Book internal histograms
   void bookInternal(TDirectory *dir);
@@ -58,6 +61,7 @@ public:
 protected:
   bool isMC() const { return fIsMC; }
   bool isData() const { return !isMC(); }
+  bool isttbar() const { return bIsttbar; }
 
   Event fEvent;
   EventWeight fEventWeight;
@@ -65,6 +69,7 @@ protected:
   HistoWrapper fHistoWrapper;
   EventSaverClient fEventSaver;
   PileupWeight fPileupWeight;
+  TopPtWeight fTopPtWeight;
 
 private:
   Count cBaseAllEvents;
@@ -74,6 +79,7 @@ private:
   Count cExclusiveSamplesWeighted;
 
   const bool fIsMC;
+  bool bIsttbar;
   
   // Internal histograms
   WrappedTH1* hNvtxBeforeVtxReweighting;

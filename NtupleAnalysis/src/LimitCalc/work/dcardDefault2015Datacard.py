@@ -24,12 +24,6 @@ MassPoints = LightMassPoints[:]+HeavyMassPoints[:]
 BlindAnalysis   = True
 OptionBlindThreshold = None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
 
-# Uncomment following line to inject signal with certain mass and normalization into the observation
-#OptionSignalInjection = {"sample": "TTToHplusBWB_M120", "normalization": 0.0035} # the normalization is relative to the normalization in the multicrab
-#OptionSignalInjection = {"sample": "TTToHplusBWB_M160", "normalization": 0.0022} # the normalization is relative to the normalization in the multicrab
-#OptionSignalInjection = {"sample": "HplusTB_M250", "normalization": 0.28} # the normalization is relative to the normalization in the multicrabs
-#OptionSignalInjection = {"sample": "HplusTB_M500", "normalization": 0.035} # the normalization is relative to the normalization in the multicrabs
-
 # Rate counter definitions
 SignalRateCounter = "Selected events"
 FakeRateCounter = "EWKfaketaus:SelectedEvents"
@@ -46,7 +40,6 @@ OptionGenuineTauBackgroundSource = "MC_FakeAndGenuineTauNotSeparated"   # EWK+tt
 OptionSeparateFakeTtbarFromFakeBackground = False # NOTE: this flag should be put true for light H+ and to false for heavy H+
 
 OptionRealisticEmbeddingWithMC = True # Only relevant for OptionReplaceEmbeddingByMC==True
-OptionTreatTauIDAndMisIDSystematicsAsShapes = True # Set to true, if you produced multicrabs with doTauIDandMisIDSystematicsAsShapes=True
 OptionIncludeSystematics = True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionDoControlPlots = True
@@ -130,36 +123,20 @@ Observation = ObservationInput(datasetDefinition="Data",
 ##############################################################################
 # Systematics lists
 myTrgShapeSystematics = []
-myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_L1ETM_dataeff","trg_L1ETM_MCeff"] # Variation done separately for data and MC efficiencies
-
-myTauIDShapeSystematics = []
-if OptionTreatTauIDAndMisIDSystematicsAsShapes:
-    myTauIDShapeSystematics = ["tau_ID_shape","tau_ID_eToTauBarrel_shape","tau_ID_eToTauEndcap_shape","tau_ID_muToTau_shape","tau_ID_jetToTau_shape"] # tau ID and mis-ID systematics done with shape variation
-else:
-    myTauIDShapeSystematics = ["tau_ID"] # tau ID and mis-ID systematics done with constants
+#myTrgShapeSystematics = ["trg_tau_dataeff","trg_tau_MCeff","trg_MET_dataeff","trg_MET_MCeff"] # Variation done separately for data and MC efficiencies
+myTauIDShapeSystematics = ["tau_ID_eToTauBarrel_shape","tau_ID_eToTauEndcap_shape","tau_ID_muToTau_shape","tau_ID_jetToTau_shape"] # tau ID and mis-ID systematics done with shape variation
 
 myShapeSystematics = []
 myShapeSystematics.extend(myTrgShapeSystematics)
-myShapeSystematics.extend(myTauIDShapeSystematics)
-myShapeSystematics.extend(["ES_taus","ES_jets","JER","ES_METunclustered","pileup"]) # btag is not added, because it has the tag and mistag categories
+myShapeSystematics.extend(["ES_taus","ES_jets","JER","ES_METunclustered"]) # btag is not added, because it has the tag and mistag categories
+
+myQCDShapeSystematics = myShapeSystematics[:]
 
 myEmbeddingShapeSystematics = ["trg_tau_dataeff","trg_L1ETM_dataeff","trg_muon_dataeff","ES_taus","Emb_mu_ID","Emb_WtauTomu"]
-# Add tau ID uncert. to embedding either as a shape or as a constant
-if "tau_ID_shape" in myTauIDShapeSystematics:
-    myEmbeddingShapeSystematics.append("tau_ID_shape")
-else:
-    myEmbeddingShapeSystematics.append("tau_ID")
 
-myFakeShapeSystematics = []
-for item in myShapeSystematics:
-    if item == "tau_ID":
-        myFakeShapeSystematics.append("tau_misID")
-    else:
-        if not item == "tau_ID_shape":
-            myFakeShapeSystematics.append(item)
-
-myShapeSystematics = [] # FIXME
-myFakeShapeSystematics = [] # FIXME
+#myShapeSystematics = [] # FIXME
+myQCDShapeSystematics = []
+myGenuineTauShapeSystematics = [] # FIXME
 
 ##############################################################################
 # DataGroup (i.e. columns in datacard) definitions
@@ -199,7 +176,7 @@ for mass in HeavyMassPoints:
         hx.setDatasetDefinition("HplusToTBbar_M"+str(mass))
     DataGroups.append(hx)
 
-myQCDShapeSystematics = myShapeSystematics[:]
+
 #for i in range(0,len(myQCDShapeSystematics)):
     #if myQCDShapeSystematics[i].startswith("trg_CaloMET") and not "forQCD" in myQCDShapeSystematics[i]:
     #    myQCDShapeSystematics[i] = myQCDShapeSystematics[i]+"_forQCD"
@@ -262,7 +239,7 @@ else:
         datasetType  = "Embedding",
         datasetDefinition = "TTJets",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_veto_genuinetau", "mu_veto_genuinetau","b_tag_genuinetau","top_pt","xsect_tt","lumi"],
+        nuisances    = myGenuineTauShapeSystematics[:]+["e_veto_genuinetau", "mu_veto_genuinetau","b_tag_genuinetau","top_pt","xsect_tt","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "W_EWK_faketau",
@@ -272,7 +249,7 @@ else:
         datasetType  = "Embedding",
         datasetDefinition = "WJetsHT",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_veto_genuinetau", "mu_veto_genuinetau","b_tag_genuinetau","xsect_Wjets","lumi","probBtag"],
+        nuisances    = myGenuineTauShapeSystematics[:]+["e_veto_genuinetau", "mu_veto_genuinetau","b_tag_genuinetau","xsect_Wjets","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "t_EWK_faketau",
@@ -282,7 +259,7 @@ else:
         datasetType  = "Embedding",
         datasetDefinition = "SingleTop",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_veto_genuinetau", "mu_veto_genuinetau","b_tag_genuinetau","xsect_singleTop","lumi","probBtag"],
+        nuisances    = myGenuineTauShapeSystematics[:]+["e_veto_genuinetau", "mu_veto_genuinetau","b_tag_genuinetau","xsect_singleTop","lumi"],
     ))
     DataGroups.append(DataGroup(
         label        = "DY_EWK_faketau",
@@ -292,7 +269,7 @@ else:
         datasetType  = "Embedding",
         datasetDefinition   = "DYJetsToLLHT",
         validMassPoints = MassPoints,
-        nuisances    = myFakeShapeSystematics[:]+["e_veto_genuinetau", "mu_veto_genuinetau","b_tag_genuinetau","xsect_DYtoll","lumi","probBtag"],
+        nuisances    = myGenuineTauShapeSystematics[:]+["e_veto_genuinetau", "mu_veto_genuinetau","b_tag_genuinetau","xsect_DYtoll","lumi"],
     ))
     #DataGroups.append(DataGroup(
         #label        = "VV_EWK_faketau",
@@ -302,7 +279,7 @@ else:
         #datasetType  = "Embedding",
         #datasetDefinition   = "Diboson",
         #validMassPoints = MassPoints,
-        #nuisances    = myFakeShapeSystematics[:]+["e_veto_genuinetau", "mu_veto_genuinetau","b_tag_genuinetau","xsect_VV","lumi","probBtag"],
+        #nuisances    = myGenuineTauShapeSystematics[:]+["e_veto_genuinetau", "mu_veto_genuinetau","b_tag_genuinetau","xsect_VV","lumi"],
     #))
   
     # Merge EWK as one column or not
@@ -435,68 +412,86 @@ if "tau_ID_jetToTau_shape" in myShapeSystematics:
         function      = "Constant",
         value         = 0.01,
     ))
-Nuisances.append(Nuisance(
-    id            = "ES_taus",
-    label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
-    distr         = "lnN",
-    function      = "Constant",
-    value         = 0.03,
-))
-Nuisances.append(Nuisance(
-    id            = "ES_jets",
-    label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
-    distr         = "lnN",
-    function      = "Constant",
-    value         = 0.03,
-))
+#===== energy scales
+if OptionIncludeSystematics:
+    Nuisances.append(Nuisance(
+        id            = "ES_taus",
+        label         = "TES bin-by-bin uncertainty",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "tauES",
+    ))
+    Nuisances.append(Nuisance(
+        id            = "ES_jets",
+        label         = "JES bin-by-bin uncertainty",
+        distr         = "shapeQ",
+        function      = "ShapeVariation",
+        systVariation = "JES",
+    ))
+else:
+    Nuisances.append(Nuisance(
+        id            = "ES_taus",
+        label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.03,
+    ))
+    Nuisances.append(Nuisance(
+        id            = "ES_jets",
+        label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
+        distr         = "lnN",
+        function      = "Constant",
+        value         = 0.03,
+    ))
 Nuisances.append(Nuisance(
     id            = "ES_METunclustered",
     label         = "NON-EXACT VALUE for JES/JER/MET/Rtau effect on mT shape",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.01,
+    value         = 0.03,
 ))
 Nuisances.append(Nuisance(
     id            = "JER",
     label         = "NON-EXACT VALUE for Jet energy resolution",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.015,
+    value         = 0.03,
 ))
+#===== b tag
 Nuisances.append(Nuisance(
     id            = "b_tag",
     label         = "NON-EXACT VALUE for btagging",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.04,
+    value         = 0.10,
 ))
 Nuisances.append(Nuisance(
     id            = "b_tag_genuinetau",
     label         = "NON-EXACT VALUE for btagging for EWK fake taus",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.04,
+    value         = 0.10,
 ))
 Nuisances.append(Nuisance(
     id            = "b_mistag",
     label         = "NON-EXACT VALUE for mistagging",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.04,
+    value         = 0.10,
 ))
 Nuisances.append(Nuisance(
     id            = "b_mistag_genuinetau",
     label         = "NON-EXACT VALUE for mistagging EWK fake taus",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.04,
+    value         = 0.10,
 ))
 Nuisances.append(Nuisance(
     id            = "top_pt",
     label         = "NON-EXACT VALUE for top pT reweighting",
     distr         = "lnN",
     function      = "Constant",
-    value         = 0.05,
+    value         = 0.10,
 ))
 Nuisances.append(Nuisance(
     id            = "pileup",
@@ -511,13 +506,6 @@ Nuisances.append(Nuisance(
     distr         = "lnN",
     function      = "Constant",
     value         = 0.05
-))
-Nuisances.append(Nuisance(
-    id            = "probBtag",
-    label         = "probabilistic btag", 
-    distr         = "lnN",
-    function      = "Constant", 
-    value         = 0.5
 ))
 Nuisances.append(Nuisance(
     id            = "QCDinvTemplateFit",
@@ -1570,29 +1558,24 @@ if OptionMassShape == "TransverseMass":
         blindedRange     = [81, 1000], # specify range min,max if blinding applies to this control plot
         flowPlotCaption  = "final", # Leave blank if you don't want to include the item to the selection flow plot
     ))
-    #ControlPlots.append(ControlPlotInput(
-        #title            = "TransverseMassLog",
-        #signalhistoPath  = "ForDataDrivenCtrlPlots",
-        #histoName        = "shapeTransverseMass",
-        #EWKfakehistoPath  = EWKPath,
-        #EWKfakeHistoName  = "shapeEWKFakeTausTransverseMass",
-        #details          = {"cmsTextPosition": "right",
-                            ##"xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss})",
-                            ##"ylabel": "Events/^{}#Deltam_{T}",
-                            ##"unit": "GeV",
-                            #"xlabel": "m_{T} (GeV)",
-                            #"ylabel": "< Events / bin >", "ylabelBinInfo": False,
-                            #"moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
-                            #"ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
-                            #"divideByBinWidth": True,
-                            #"log": True,
-                            #"opts": {"ymin": 1e-4},
-                            #"opts2": {"ymin": 0.0, "ymax": 2.0}
-                           #},
-        #blindedRange     = [81, 1000], # specify range min,max if blinding applies to this control plot
-        #evaluationRange  = [], # specify range to be evaluated and saved into a file
-        #flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
-    #))
+    ControlPlots.append(ControlPlotInput(
+        title            = "TransverseMassLog",
+        histoName        = "shapeTransverseMass",
+        details          = {"cmsTextPosition": "right",
+                            #"xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss})",
+                            #"ylabel": "Events/^{}#Deltam_{T}",
+                            #"unit": "GeV",
+                            "xlabel": "m_{T} (GeV)",
+                            "ylabel": "< Events / bin >", "ylabelBinInfo": False,
+                            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
+                            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
+                            "divideByBinWidth": True,
+                            "log": True,
+                            "opts": {"ymin": 1e-4},
+                            "opts2": {"ymin": 0.0, "ymax": 2.0}
+                           },
+        blindedRange     = [81, 1000], # specify range min,max if blinding applies to this control plot
+    ))
 elif OptionMassShape == "FullMass":
     ControlPlots.append(ControlPlotInput(
         title            = "FullMass",
