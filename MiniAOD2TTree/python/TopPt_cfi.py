@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-PUInfo = cms.EDAnalyzer('TopPt',
+TopPtProducer = cms.EDAnalyzer('TopPt',
     OutputFileName = cms.string("TopPt.root"),
 #    PileupSummaryInfoSrc = cms.InputTag("addPileupInfo")
     genParticleSrc = cms.InputTag("prunedGenParticles"),

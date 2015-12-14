@@ -26,8 +26,7 @@
 #include "TH1F.h"
 
 
-class HplusTopPtWeightProducer : public edm::one::EDProducer<edm::one::WatchLuminosityBlocks,
-                                                             edm::EndLuminosityBlockProducer> {
+class HplusTopPtWeightProducer : public edm::one::EDProducer<edm::one::SharedResources> {
 public:
   explicit HplusTopPtWeightProducer(const edm::ParameterSet&);
   ~HplusTopPtWeightProducer();
