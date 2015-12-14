@@ -103,7 +103,7 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     topPtWeight = 1.0;
     edm::Handle<double> topPtHandle;
     if (iEvent.getByToken(topPtToken, topPtHandle)) {
-      topPtWeight = *topPtHandle;
+      topPtWeight = *(topPtHandle.product());
     }
     
     return filter();
