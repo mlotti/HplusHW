@@ -8,7 +8,9 @@
 EventInfoDumper::EventInfoDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
 : puSummaryToken(iConsumesCollector.consumes<std::vector<PileupSummaryInfo>>(pset.getParameter<edm::InputTag>("PileupSummaryInfoSrc"))),
   lheToken(iConsumesCollector.consumes<LHEEventProduct>(pset.getUntrackedParameter<edm::InputTag>("LHESrc", edm::InputTag("")))),
-  vertexToken(iConsumesCollector.consumes<edm::View<reco::Vertex>>(pset.getParameter<edm::InputTag>("OfflinePrimaryVertexSrc"))) {
+  vertexToken(iConsumesCollector.consumes<edm::View<reco::Vertex>>(pset.getParameter<edm::InputTag>("OfflinePrimaryVertexSrc"))),
+  topPtToken(iConsumesCollector.consumes<double>(pset.getParameter<edm::InputTag>("TopPtProducer")))
+{
 
 }
 
@@ -28,6 +30,7 @@ void EventInfoDumper::book(TTree* tree){
     tree->Branch("pvDistanceToNextVertex",&distanceToNextPV);
     tree->Branch("pvDistanceToClosestVertex",&distanceToClosestPV);
     tree->Branch("pvPtSumRatioToNext",&ptSumRatio);
+    tree->Branch("topPtWeight", &topPtWeight);
 }
 
 bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -95,6 +98,14 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       distanceToNextPV *= 10.0;
       distanceToClosestPV *= 10.0;
     }
+    
+    // Top pt
+    topPtWeight = 1.0;
+    edm::Handle<double> topPtHandle;
+    if (iEvent.getByToken(topPtToken, topPtHandle)) {
+      topPtWeight = *topPtHandle;
+    }
+    
     return filter();
 }
 

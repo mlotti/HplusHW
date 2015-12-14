@@ -7,6 +7,6 @@ TopPtProducer = cms.EDProducer('HplusTopPtWeightProducer',
     # These are the 8 TeV combined coefficients, which seem to agree nicely with 13 TeV data, see https://indico.cern.ch/event/463929/session/2/contribution/61/attachments/1202097/1749947/Top_Report_151209.pdf
     # Recipy from: https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting
     # Formula: exp(A-Bx)
-    parameterA = cms.untracked.double(0.156),
-    parameterB = cms.untracked.double(0.00137),
+    parameterA = cms.double(0.156),
+    parameterB = cms.double(0.00137),
 )
