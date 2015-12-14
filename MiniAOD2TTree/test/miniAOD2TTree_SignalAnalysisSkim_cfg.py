@@ -41,6 +41,7 @@ if dataVersion.isData():
 print "Trigger source has been set to:",TrgResultsSource
 
 process.load("HiggsAnalysis/MiniAOD2TTree/PUInfo_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/TopPt_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
@@ -50,6 +51,7 @@ process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
     PUInfoInputFileName = process.PUInfo.OutputFileName,
+    TopPtInputFileName = process.TopPt.OutputFileName,
     CodeVersion = cms.string(git.getCommitId()),
     DataVersion = cms.string(str(dataVersion.version)),
     CMEnergy = cms.int32(13),
@@ -147,6 +149,7 @@ produceCustomisations(process) # This produces process.CustomisationsSequence wh
 
 # module execution
 process.runEDFilter = cms.Path(process.PUInfo*
+                               process.TopPtProducer*
                                process.skimCounterAll*
                                process.skim*
                                process.skimCounterPassed*
