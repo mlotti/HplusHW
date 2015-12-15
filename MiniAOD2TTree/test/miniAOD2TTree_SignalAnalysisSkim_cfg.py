@@ -65,6 +65,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         PileupSummaryInfoSrc = process.PUInfo.PileupSummaryInfoSrc, 
 	LHESrc = cms.untracked.InputTag("externalLHEProducer"),
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
+	TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::HLT"),
