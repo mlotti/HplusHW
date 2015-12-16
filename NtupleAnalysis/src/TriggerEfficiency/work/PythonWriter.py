@@ -17,6 +17,8 @@ class PythonWriter:
             self.eff      = eff
         def Print(self):
             print "Parameters",self.name,self.label,self.runrange,self.lumi
+            #for i in range(0,self.eff.GetN()):
+            #    print "    ",i,self.eff.GetX()[i],self.eff.GetY()[i]
 
     def __init__(self):#,title):
 #        self.title  = title
@@ -61,6 +63,8 @@ class PythonWriter:
                 labelFound = True
         if not labelFound:
             self.mcs.append(self.Parameters(name,label,"","",eff))
+        for mc in self.mcs:
+            mc.Print()
 
     def SaveOfflineSelection(self,selection):
         found = False
@@ -292,7 +296,7 @@ class PythonWriter:
 #        for mc in self.mcs:
 #            if mc.name == name:
 #                subranges.append(mc)
-        subranges = self.ranges
+        subranges = self.mcs
         for i,mc in enumerate(subranges):
             if i == len(subranges)-1:
                 comma = ""
