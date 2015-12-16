@@ -69,7 +69,7 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
     result = reader.getResult()
     if variationType == "MC":
         _assignTrgSF("tauTriggerSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], tauSelectionPset, direction)
-    elif variationType == "data":
+    elif variationType == "Data":
         _assignTrgSF("tauTriggerSF", result["binEdges"], result["SF"], result["SFdataUp"], result["SFdataDown"], tauSelectionPset, direction)
     else:
         raise Exception("Error: Unsupported variation type '%s'! Valid options are: 'MC', 'data'"%variationType)
@@ -85,7 +85,7 @@ def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, varia
     result = reader.getResult()
     if variationType == "MC":
         _assignTrgSF("metTriggerSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], METSelectionPset, direction)
-    elif variationType == "data":
+    elif variationType == "Data":
         _assignTrgSF("metTriggerSF", result["binEdges"], result["SF"], result["SFdataUp"], result["SFdataDown"], METSelectionPset, direction)
     else:
         raise Exception("Error: Unsupported variation type '%s'! Valid options are: 'MC', 'data'"%variationType)

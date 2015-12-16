@@ -42,10 +42,10 @@ class AnalysisConfig:
                                                               self._getDirectionString(value))
 		# Trigger
 		elif value.startswith("TauTrgEff"):
-                    variationType = value.replace("TauTrgEff","")
+                    variationType = value.replace("TauTrgEff","").replace("Minus","").replace("Plus","")
                     scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value), variationType)
                 elif value.startswith("METTrgEff"):
-                    variationType = value.replace("METTrgEff","")
+                    variationType = value.replace("METTrgEff","").replace("Minus","").replace("Plus","")
                     scaleFactors.assignMETTriggerSF(self._config.METSelection, self._config.BJetSelection.bjetDiscrWorkingPoint, self._getDirectionString(value), variationType)
 		# B and top quarks
 		elif value.startswith("TopPt"):
@@ -120,7 +120,7 @@ class AnalysisBuilder:
               # Trigger systematics
               items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
               #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
-              items.extend(["METTrgDataEff", "METTrgMCEff"])
+              items.extend(["METTrgEffData", "METTrgEffMC"])
               # Tau ID variation systematics
               items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet"])
               # Energy scales and JER systematics
