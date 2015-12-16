@@ -2897,16 +2897,20 @@ class Dataset:
         # Look at configInfo
         if not "isPileupReweighted" in self.info.keys():
             raise Exception("Key 'isPileupReweighted' missing in configinfo histogram!")
+        ratio = 1.0
         if self.info["isPileupReweighted"] > 0.0:
             delta = (self.info["isPileupReweighted"] - self.nAllEvents) / self.nAllEvents
             if _debugNAllEvents and abs(delta) > 0.00001:
                 print "dataset (%s): Updated NAllEvents to pileUpReweighted NAllEvents, change: %0.6f %%"%(self.getName(), delta*100.0)
-            self.nAllEvents = self.info["isPileupReweighted"]
+            ratio = ratio * self.info["isPileupReweighted"] / self.nAllEvents
+        if not "isTopPtReweighted" in self.info.keys():
+            raise Exception("Key 'isTopPtReweighted' missing in configinfo histogram!")
         if self.info["isTopPtReweighted"] > 0.0:
             delta = (self.info["isTopPtReweighted"] - self.nAllEvents) / self.nAllEvents
             if _debugNAllEvents and abs(delta) > 0.00001:
                 print "dataset (%s): Updated NAllEvents to isTopPtReweighted NAllEvents, change: %0.6f %%"%(self.getName(), delta*100.0)
-            self.nAllEvents = self.info["isTopPtReweighted"]
+            ratio = ratio * self.info["isTopPtReweighted"] / self.nAllEvents
+        self.nAllEvents = ratio * self.nAllEvents
 
     def getNAllEvents(self):
         if not hasattr(self, "nAllEvents"):
