@@ -4,8 +4,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-#dataVersion = "74Xmc"
-dataVersion = "74Xdata"
+dataVersion = "74Xmc"
+#dataVersion = "74Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion
@@ -23,7 +23,8 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #       '/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/022B08C4-C702-E511-9995-D4856459AC30.root',
-       '/store/data/Run2015D/Tau/MINIAOD/PromptReco-v3/000/256/630/00000/1E7E1004-225F-E511-AC7D-02163E011F9B.root',
+#       '/store/data/Run2015D/Tau/MINIAOD/PromptReco-v3/000/256/630/00000/1E7E1004-225F-E511-AC7D-02163E011F9B.root',
+       '/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v3/60000/007C8451-206A-E511-85ED-0025905A6136.root',
     )
 )
 
@@ -118,6 +119,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 )
 
 process.load("HiggsAnalysis.MiniAOD2TTree.METLegSkim_cfi")
+process.skim.GenWeights = process.dump.GenWeights
 
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")

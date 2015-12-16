@@ -29,6 +29,8 @@
 
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+
 #include <iostream>
 #include <regex>
 
@@ -47,13 +49,16 @@ class TauLegSkim : public edm::EDFilter {
         edm::EDGetTokenT<edm::View<pat::Tau>> tauToken;
         edm::EDGetTokenT<edm::View<pat::Muon>> muonToken;
 
+        edm::EDGetTokenT<GenEventInfoProduct> *genWeightToken;
+        std::vector<edm::ParameterSet> genWeights;
+
         std::vector<std::string> tauDiscriminators;
         std::vector<std::string> muonDiscriminators;
 
 	double tauPtCut,tauEtaCut;
 	double muonPtCut,muonEtaCut;
 
-        int nEvents, nSelectedEvents;
+        int nRead, nEvents, nSelectedEvents;
 };
 
 TauLegSkim::TauLegSkim(const edm::ParameterSet& iConfig)
@@ -72,6 +77,14 @@ TauLegSkim::TauLegSkim(const edm::ParameterSet& iConfig)
     muonPtCut          = iConfig.getParameter<double>("MuonPtCut");                            
     muonPtCut          = iConfig.getParameter<double>("MuonEtaCut");                            
 
+    genWeights = iConfig.getParameter<std::vector<edm::ParameterSet> >("GenWeights");
+    genWeightToken = new edm::EDGetTokenT<GenEventInfoProduct>[genWeights.size()];
+
+    for(size_t i = 0; i < genWeights.size(); ++i){
+      edm::InputTag inputtag = genWeights[i].getParameter<edm::InputTag>("src");
+      genWeightToken[i] = consumesCollector().consumes<GenEventInfoProduct>(inputtag);
+    }
+
     nEvents         = 0;
     nSelectedEvents = 0;
 }
@@ -81,15 +94,25 @@ TauLegSkim::~TauLegSkim(){
     double eff = 0;
     if(nEvents > 0) eff = ((double)nSelectedEvents)/((double) nEvents);
     std::cout << "TauLegSkim: " //  	edm::LogVerbatim("TauLegSkim") 
-              << " Number_events_read " << nEvents
-              << " Number_events_kept " << nSelectedEvents
+              << " Number_events_read     " << nRead
+              << " Number_events_weighted " << nEvents
+              << " Number_events_kept (w) " << nSelectedEvents
               << " Efficiency         " << eff << std::endl;
 }
 
 
 bool TauLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
 
-    nEvents++;
+    nRead++;
+    
+    int eventWeight = 1;
+    for(size_t i = 0; i < genWeights.size(); ++i){
+        edm::Handle<GenEventInfoProduct> handle;
+        iEvent.getByToken(genWeightToken[i], handle);
+        if(handle.isValid() && handle->weight() < 0) eventWeight = -1;
+    }
+
+    nEvents += eventWeight;
 
     // Trigger bits
     edm::Handle<edm::TriggerResults> trghandle;
@@ -155,7 +178,7 @@ bool TauLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
 std::cout << "check muTauInvMass " << muTauInvMass << std::endl;
     if(muTauInvMass < 70) return false;
 */
-    nSelectedEvents++;
+    nSelectedEvents += eventWeight;
     return true;
 }
 

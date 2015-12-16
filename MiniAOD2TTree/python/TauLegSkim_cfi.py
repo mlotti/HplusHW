@@ -19,4 +19,5 @@ skim = cms.EDFilter("TauLegSkim",
     MuonDiscriminators = cms.vstring(""),
     MuonPtCut      = cms.double(15),
     MuonEtaCut     = cms.double(2.4),
+    GenWeights     = cms.VPSet()
 )

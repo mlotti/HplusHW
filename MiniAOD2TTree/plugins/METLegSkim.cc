@@ -28,6 +28,8 @@
 
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+
 #include <iostream>
 #include <regex>
 
@@ -46,10 +48,13 @@ class METLegSkim : public edm::EDFilter {
         edm::EDGetTokenT<edm::View<pat::Jet>> jetToken;
         std::vector<std::string> jetUserFloats;
 
+        edm::EDGetTokenT<GenEventInfoProduct> *genWeightToken;
+        std::vector<edm::ParameterSet> genWeights;
+
 	double jetEtCut,jetEtaCut;
 	int nJets;
 
-        int nEvents, nSelectedEvents;
+        int nRead, nEvents, nSelectedEvents;
 };
 
 METLegSkim::METLegSkim(const edm::ParameterSet& iConfig)
@@ -60,10 +65,19 @@ METLegSkim::METLegSkim(const edm::ParameterSet& iConfig)
 
     jetUserFloats      = iConfig.getParameter<std::vector<std::string> >("JetUserFloats");
 
+    genWeights = iConfig.getParameter<std::vector<edm::ParameterSet> >("GenWeights");
+    genWeightToken = new edm::EDGetTokenT<GenEventInfoProduct>[genWeights.size()];
+
+    for(size_t i = 0; i < genWeights.size(); ++i){
+      edm::InputTag inputtag = genWeights[i].getParameter<edm::InputTag>("src");
+      genWeightToken[i] = consumesCollector().consumes<GenEventInfoProduct>(inputtag);
+    }
+
     jetEtCut           = iConfig.getParameter<double>("JetEtCut");
     jetEtaCut          = iConfig.getParameter<double>("JetEtaCut");                            
     nJets              = iConfig.getParameter<int>("NJets");
 
+    nRead           = 0;
     nEvents         = 0;
     nSelectedEvents = 0;
 }
@@ -73,15 +87,25 @@ METLegSkim::~METLegSkim(){
     double eff = 0;
     if(nEvents > 0) eff = ((double)nSelectedEvents)/((double) nEvents);
     std::cout << "METLegSkim: " //  	edm::LogVerbatim("METLegSkim") 
-              << " Number_events_read " << nEvents
-              << " Number_events_kept " << nSelectedEvents
+              << " Number_events_read     " << nRead
+              << " Number_events_weighted " << nEvents
+              << " Number_events_kept (w) " << nSelectedEvents
               << " Efficiency         " << eff << std::endl;
 }
 
 
 bool METLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
 
-    nEvents++;
+    nRead++;
+
+    int eventWeight = 1;
+    for(size_t i = 0; i < genWeights.size(); ++i){
+        edm::Handle<GenEventInfoProduct> handle;
+        iEvent.getByToken(genWeightToken[i], handle);
+        if(handle.isValid() && handle->weight() < 0) eventWeight = -1;
+    }
+
+    nEvents += eventWeight;
 
     // Trigger bits
     edm::Handle<edm::TriggerResults> trghandle;
@@ -143,7 +167,7 @@ bool METLegSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
     }
     if(njets < nJets) return false;
 
-    nSelectedEvents++;
+    nSelectedEvents += eventWeight;
     return true;
 }
 
