@@ -61,9 +61,10 @@ HplusTopPtWeightProducer::HplusTopPtWeightProducer(const edm::ParameterSet& iCon
   fParB(iConfig.getParameter<double>("parameterB"))
 {
   produces<double>();
-  hTopPtWeightAllEvents = new TH1F("topPtWeightAllEvents","topPtWeightAllEvents",2,0,2);
+  hTopPtWeightAllEvents = new TH1F("topPtWeightAllEvents","topPtWeightAllEvents",3,0,3);
   hTopPtWeightAllEvents->GetXaxis()->SetBinLabel(1, "control");
   hTopPtWeightAllEvents->GetXaxis()->SetBinLabel(2, "NAllEventsTopPtReweighted");
+  hTopPtWeightAllEvents->GetXaxis()->SetBinLabel(3, "NAllEventsTopPtReweightedPlus");
 }
 
 HplusTopPtWeightProducer::~HplusTopPtWeightProducer(){ }
@@ -103,6 +104,7 @@ void HplusTopPtWeightProducer::produce(edm::Event& iEvent, const edm::EventSetup
         weight *= TMath::Exp(fParA - fParB*p->pt());
       }
       hTopPtWeightAllEvents->SetBinContent(2, hTopPtWeightAllEvents->GetBinContent(2) + weight);
+      hTopPtWeightAllEvents->SetBinContent(2, hTopPtWeightAllEvents->GetBinContent(3) + weight*weight);
       std::auto_ptr<double> w(new double);
       *w = weight;
       iEvent.put(w);
