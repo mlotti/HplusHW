@@ -171,7 +171,7 @@ class AnalysisBuilder:
         for module in configs:
             module.registerAnalysis(process)
         print "\nAnalysisBuilder created %d modules\n"%len(configs)
-        print configs[0]._config
+        #print configs[0]._config
     
     ## Builds iteratively the variations
     # Logic: Variation specs are put into kwargs as key,value pairs 
