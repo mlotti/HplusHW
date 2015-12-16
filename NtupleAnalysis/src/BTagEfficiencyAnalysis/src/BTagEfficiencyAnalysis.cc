@@ -39,6 +39,9 @@ private:
   METFilterSelection fMETFilterSelection;
   Count cVertexSelection;
   TauSelection fTauSelection;
+  Count cFakeTauSFCounter;
+  Count cTauTriggerSFCounter;
+  Count cMetTriggerSFCounter;
   ElectronSelection fElectronSelection;
   MuonSelection fMuonSelection;
   JetSelection fJetSelection;
@@ -74,6 +77,9 @@ BTagEfficiencyAnalysis::BTagEfficiencyAnalysis(const ParameterSet& config)
   cVertexSelection(fEventCounter.addCounter("Primary vertex selection")),
   fTauSelection(config.getParameter<ParameterSet>("TauSelection"),
                 fEventCounter, fHistoWrapper, nullptr, ""),
+  cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")),
+  cTauTriggerSFCounter(fEventCounter.addCounter("Tau trigger SF")),
+  cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
   fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"),
                 fEventCounter, fHistoWrapper, nullptr, "Veto"),
   fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"),
@@ -145,6 +151,23 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
     fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
     fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
   }
+  
+//====== Fake tau SF
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
+    cFakeTauSFCounter.increment();
+  }
+
+//====== Tau trigger SF
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
+    cTauTriggerSFCounter.increment();
+  }
+
+//====== MET trigger SF
+  const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
+  fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  cMetTriggerSFCounter.increment();
 
 //====== Electron veto
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
@@ -162,7 +185,7 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
     return;
 
 //====== Collinear angular cuts
-  /*const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
+  /*
   const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
   if (!collinearData.passedSelection())
     return;

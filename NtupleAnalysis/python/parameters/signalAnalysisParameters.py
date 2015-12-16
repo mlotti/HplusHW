@@ -106,6 +106,8 @@ metSelection = PSet(
                METType = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
    applyPhiCorrections = False  # FIXME: no effect yet
 )
+# MET trigger SF
+scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal")
 
 #====== Angular cuts / back-to-back
 angularCutsBackToBack = PSet(

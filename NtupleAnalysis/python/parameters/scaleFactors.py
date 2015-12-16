@@ -68,20 +68,33 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
     reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "tauLegTriggerEfficiency2015.json")
     result = reader.getResult()
     if variationType == "MC":
-        _assignSF(result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], tauSelectionPset, direction)
+        _assignTrgSF("tauTriggerSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], tauSelectionPset, direction)
     elif variationType == "data":
-        _assignSF(result["binEdges"], result["SF"], result["SFdataUp"], result["SFdataDown"], tauSelectionPset, direction)
+        _assignTrgSF("tauTriggerSF", result["binEdges"], result["SF"], result["SFdataUp"], result["SFdataDown"], tauSelectionPset, direction)
     else:
         raise Exception("Error: Unsupported variation type '%s'! Valid options are: 'MC', 'data'"%variationType)
 
-##===== MET trigger SF
-
+##===== MET trigger SF (SF as function of MET)
+# \param METSelectionPset  the MET selection config PSet
+# \param direction         "nominal, "up", "down"
+# \param variationType     "MC", "data"  (the uncertainty in MC and data are variated separately)
+def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, variationType="MC"):
+    # FIXME: there is no mechanic right now to choose correct era / run range
+    # FIXME: this approach works as long as there is just one efficiency for the simulated samples
+    reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "metLegTriggerEfficiency2015_btag%s.json"%btagDiscrWorkingPoint)
+    result = reader.getResult()
+    if variationType == "MC":
+        _assignTrgSF("metTriggerSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], METSelectionPset, direction)
+    elif variationType == "data":
+        _assignTrgSF("metTriggerSF", result["binEdges"], result["SF"], result["SFdataUp"], result["SFdataDown"], METSelectionPset, direction)
+    else:
+        raise Exception("Error: Unsupported variation type '%s'! Valid options are: 'MC', 'data'"%variationType)
 
 ##===== Btag SF 
 
 
 ## Helper function
-def _assignSF(binEdges, SF, SFup, SFdown, pset, direction):
+def _assignTrgSF(name, binEdges, SF, SFup, SFdown, pset, direction):
     if not direction in ["nominal", "up", "down"]:
         raise Exception("Error: unknown option for SF direction('%s')!"%direction)
     myScaleFactors = SF[:]
@@ -89,10 +102,10 @@ def _assignSF(binEdges, SF, SFup, SFdown, pset, direction):
         myScaleFactors = SFup[:]
     elif direction == "down":
         myScaleFactors = SFdown[:]
-    pset.tauTriggerSF = PSet(
+    setattr(pset, name, PSet(
         binLeftEdges = binEdges[:],
         scaleFactors = myScaleFactors
-    )
+    ))
 
 ## Reader for trigger SF json files
 class TriggerSFJsonReader:
@@ -152,13 +165,12 @@ class TriggerSFJsonReader:
         for item in inputdict["bins"]:
             bindict = {}
             bindict[label+"eff"] = item["efficiency"]
-            # FIXME: check if the uncertainties are relative or absolute uncertainties
-            value = item["efficiency"]+item["uncertaintyPlus"]
+            value = item["efficiency"]*(1.0+item["uncertaintyPlus"])
             if value > 1.0:
                 bindict[label+"effup"] = 1.0
             else:
                 bindict[label+"effup"] = value
-            value = item["efficiency"]+item["uncertaintyMinus"]
+            value = item["efficiency"]*(1.0-item["uncertaintyMinus"])
             if value < 0.0:
                 bindict[label+"effdown"] = 0.0
             else:
