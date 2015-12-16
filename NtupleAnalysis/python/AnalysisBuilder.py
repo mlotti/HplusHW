@@ -46,7 +46,7 @@ class AnalysisConfig:
                     scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value), variationType)
 		# B and top quarks
 		elif value.startswith("TopPt"):
-                    self._config.TopPtReweighting.systematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
+                    self._config.topPtSystematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
 		else:
 		    if value != "nominal":
                         raise Exception("Error: unsupported variation item '%s'!"%value)

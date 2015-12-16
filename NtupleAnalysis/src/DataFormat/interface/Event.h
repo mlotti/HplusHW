@@ -74,6 +74,7 @@ public:
   const MET& L1extramet() const { return fL1extraMET; }
 
   const GenWeight& genWeight() const { return fGenWeight; }
+  const GenWeight_T<float>& topPtWeight() const { return fTopPtWeight; }
 
 private:
   EventID fEventID;
@@ -100,6 +101,7 @@ private:
   MET fL1extraMET;
 
   GenWeight fGenWeight;
+  GenWeight_T<float> fTopPtWeight;
 
   const bool fIsMC;
 };
