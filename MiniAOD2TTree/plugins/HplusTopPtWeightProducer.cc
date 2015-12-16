@@ -95,18 +95,19 @@ void HplusTopPtWeightProducer::produce(edm::Event& iEvent, const edm::EventSetup
     edm::Handle<GenEventInfoProduct> weightHandle;
     iEvent.getByToken(eventInfoToken, weightHandle);
     if (weightHandle.isValid()) {
-      double weight = 1.0;
+      double sign = 1.0;
       if (weightHandle->weight() < 0.0) {
-        weight = -1.0;
+        sign = -1.0;
       }
+      double weight = 1.0;
       std::vector<const reco::Candidate*> tops = GenParticleTools::findParticles(handle, 6);
       for (auto& p: tops) {
         weight *= TMath::Exp(fParA - fParB*p->pt());
       }
-      hTopPtWeightAllEvents->SetBinContent(2, hTopPtWeightAllEvents->GetBinContent(2) + weight);
-      hTopPtWeightAllEvents->SetBinContent(2, hTopPtWeightAllEvents->GetBinContent(3) + weight*weight);
+      hTopPtWeightAllEvents->SetBinContent(2, hTopPtWeightAllEvents->GetBinContent(2) + sign*weight);
+      hTopPtWeightAllEvents->SetBinContent(2, hTopPtWeightAllEvents->GetBinContent(3) + sign*weight*weight);
       std::auto_ptr<double> w(new double);
-      *w = weight;
+      *w = weight*sign;
       iEvent.put(w);
     }
   }
