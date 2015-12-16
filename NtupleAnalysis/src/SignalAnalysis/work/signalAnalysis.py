@@ -46,7 +46,7 @@ builder = AnalysisBuilder("SignalAnalysis",
                           dataEras,
                           searchModes,
                           #### Options ####
-                          doSystematicVariations=True,
+                          #doSystematicVariations=True,
                           usePUreweighting=True
                           )
 #builder.addVariation()

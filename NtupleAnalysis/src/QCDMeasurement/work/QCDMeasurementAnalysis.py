@@ -29,7 +29,7 @@ builder = AnalysisBuilder("QCDMeasurement",
                           searchModes,
                           #### Options ####
                           usePUreweighting=True,
-                          doSystematicVariations=True,
+                          #doSystematicVariations=True,
                           )
 #builder.addVariation()
 builder.build(process, allSelections)
