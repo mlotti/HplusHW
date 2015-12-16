@@ -2897,44 +2897,20 @@ class Dataset:
         # Look at configInfo
         if not "isPileupReweighted" in self.info.keys():
             raise Exception("Key 'isPileupReweighted' missing in configinfo histogram!")
+        ratio = 1.0
         if self.info["isPileupReweighted"] > 0.0:
             delta = (self.info["isPileupReweighted"] - self.nAllEvents) / self.nAllEvents
             if _debugNAllEvents and abs(delta) > 0.00001:
                 print "dataset (%s): Updated NAllEvents to pileUpReweighted NAllEvents, change: %0.6f %%"%(self.getName(), delta*100.0)
-            self.nAllEvents = self.info["isPileupReweighted"]
-        # FIXME: Add here NAllEvents update for top pt reweighting 
-        
-        # old 2012 code:
-        #if era == None:
-            #era = self._dataEra
-        #if era == None:
-            #raise Exception("%s: tried to update number of all events to pile-up reweighted value, but the data era was not set in the Dataset constructor nor was given as an argument" % self.rawName)
-
-        #if self.nAllEventsUnweighted < 0:
-            
-
-        #args = {}
-        #args.update(kwargs)
-        #if "pileupReweightType" not in kwargs and "pileupReweightType" in self.info:
-            #args["weightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["pileupReweightType"]]
-
-        #if "topPtReweightScheme" in self.info:
-            #if "topPtWeightType" not in kwargs:
-                #args["topPtWeightType"] = pileupReweightedAllEvents.PileupWeightType.fromString[self.info["topPtReweightType"]]
-            #try:
-                #self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, self.info["topPtReweightScheme"], **args)
-            #except KeyError:
-                ## Just ignore if no weights found for this dataset
-                #pass
-            #print "Using top-pt reweighted Nallevents for sample %s" % self.name
-        #else:
-            #if "topPtWeightType" in args:
-                #del args["topPtWeightType"]
-            #try:
-                #self.nAllEvents = pileupReweightedAllEvents.getWeightedAllEvents(self.rawName, era).getWeighted(self.nAllEventsUnweighted, **args)
-            #except KeyError:
-                ## Just ignore if no weights found for this dataset
-                #pass
+            ratio = ratio * self.info["isPileupReweighted"] / self.nAllEvents
+        if not "isTopPtReweighted" in self.info.keys():
+            raise Exception("Key 'isTopPtReweighted' missing in configinfo histogram!")
+        if self.info["isTopPtReweighted"] > 0.0:
+            delta = (self.info["isTopPtReweighted"] - self.nAllEvents) / self.nAllEvents
+            if _debugNAllEvents and abs(delta) > 0.00001:
+                print "dataset (%s): Updated NAllEvents to isTopPtReweighted NAllEvents, change: %0.6f %%"%(self.getName(), delta*100.0)
+            ratio = ratio * self.info["isTopPtReweighted"] / self.nAllEvents
+        self.nAllEvents = ratio * self.nAllEvents
 
     def getNAllEvents(self):
         if not hasattr(self, "nAllEvents"):

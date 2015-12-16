@@ -38,6 +38,7 @@ class EventInfoDumper {
         edm::EDGetTokenT<std::vector<PileupSummaryInfo> > puSummaryToken;
         edm::EDGetTokenT<LHEEventProduct> lheToken;
         edm::EDGetTokenT<edm::View<reco::Vertex> > vertexToken;
+        edm::EDGetTokenT<double> topPtToken;
         
 	unsigned long long event;
 	unsigned int run,lumi;
@@ -51,6 +52,7 @@ class EventInfoDumper {
         float distanceToNextPV;
         float distanceToClosestPV;
         float ptSumRatio; // Ratio of track pt sum of first and second vertex
+        float topPtWeight; // Weight produced by TopPtProducer
 
 };
 #endif

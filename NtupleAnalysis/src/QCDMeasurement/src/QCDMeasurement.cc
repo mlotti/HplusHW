@@ -36,10 +36,10 @@ private:
   Count cBaselineTauFakeTauSFCounter;
   Count cBaselineTauTauTriggerSFCounter;
   Count cBaselineTauOneTauCounter;
+  Count cBaselineTauMetTriggerSFCounter;
   ElectronSelection fBaselineTauElectronSelection;
   MuonSelection fBaselineTauMuonSelection;
   JetSelection fBaselineTauJetSelection;
-  Count cBaselineTauMetTriggerSFCounter;
   AngularCutsCollinear fBaselineTauAngularCutsCollinear;
   BJetSelection fBaselineTauBJetSelection;
   Count cBaselineTauBTaggingSFCounter;
@@ -50,10 +50,10 @@ private:
   Count cInvertedTauFakeTauSFCounter;
   Count cInvertedTauTauTriggerSFCounter;
   Count cInvertedTauOneTauCounter;
+  Count cInvertedTauMetTriggerSFCounter;
   ElectronSelection fInvertedTauElectronSelection;
   MuonSelection fInvertedTauMuonSelection;
   JetSelection fInvertedTauJetSelection;
-  Count cInvertedTauMetTriggerSFCounter;
   AngularCutsCollinear fInvertedTauAngularCutsCollinear;
   BJetSelection fInvertedTauBJetSelection;
   Count cInvertedTauBTaggingSFCounter;
@@ -98,13 +98,13 @@ QCDMeasurement::QCDMeasurement(const ParameterSet& config)
   cBaselineTauFakeTauSFCounter(fEventCounter.addCounter("BaselineTau: fake tau SF")),
   cBaselineTauTauTriggerSFCounter(fEventCounter.addCounter("BaselineTau: tau trigger SF")),
   cBaselineTauOneTauCounter(fEventCounter.addCounter("BaselineTau: exactly one tau")),
+  cBaselineTauMetTriggerSFCounter(fEventCounter.addCounter("BaselineTau: met trigger SF")),
   fBaselineTauElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"),
                 fEventCounter, fHistoWrapper, nullptr, "VetoBaselineTau"),
   fBaselineTauMuonSelection(config.getParameter<ParameterSet>("MuonSelection"),
                 fEventCounter, fHistoWrapper, nullptr, "VetoBaselineTau"),
   fBaselineTauJetSelection(config.getParameter<ParameterSet>("JetSelection"),
                 fEventCounter, fHistoWrapper, nullptr, "BaselineTau"),
-  cBaselineTauMetTriggerSFCounter(fEventCounter.addCounter("BaselineTau: met trigger SF")),
   fBaselineTauAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"),
                 fEventCounter, fHistoWrapper, nullptr, "BaselineTau"),
   fBaselineTauBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
@@ -119,13 +119,13 @@ QCDMeasurement::QCDMeasurement(const ParameterSet& config)
   cInvertedTauFakeTauSFCounter(fEventCounter.addCounter("InvertedTau: fake tau SF")),
   cInvertedTauTauTriggerSFCounter(fEventCounter.addCounter("InvertedTau: tau trigger SF")),
   cInvertedTauOneTauCounter(fEventCounter.addCounter("InvertedTau: exactly one tau")),
+  cInvertedTauMetTriggerSFCounter(fEventCounter.addCounter("InvertedTau: met trigger SF")),
   fInvertedTauElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "VetoInvertedTau"),
   fInvertedTauMuonSelection(config.getParameter<ParameterSet>("MuonSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "VetoInvertedTau"),
   fInvertedTauJetSelection(config.getParameter<ParameterSet>("JetSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "InvertedTau"),
-  cInvertedTauMetTriggerSFCounter(fEventCounter.addCounter("InvertedTau: met trigger SF")),
   fInvertedTauAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "InvertedTau"),
   fInvertedTauBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
@@ -313,6 +313,11 @@ void QCDMeasurement::process(Long64_t entry) {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau) {
+//====== MET trigger SF
+  const METSelection::Data silentMETData = fBaselineTauMETSelection.silentAnalyze(fEvent, nVertices);
+  fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  cBaselineTauMetTriggerSFCounter.increment();
+  
 //====== Electron veto
   const ElectronSelection::Data eData = fBaselineTauElectronSelection.analyze(event);
   if (eData.hasIdentifiedElectrons())
@@ -328,12 +333,7 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   if (!jetData.passedSelection())
     return;
 
-//====== MET trigger SF
-  // FIXME: code for applying the SF is currently missing
-  cBaselineTauMetTriggerSFCounter.increment();
-
 //====== Collinear angular cuts
-  const METSelection::Data silentMETData = fBaselineTauMETSelection.silentAnalyze(fEvent, nVertices);
   const double METvalue = silentMETData.getMET().R();
   const AngularCutsCollinear::Data collinearData = fBaselineTauAngularCutsCollinear.analyze(fEvent, tau, jetData, silentMETData);
   if (!collinearData.passedSelection())
@@ -377,6 +377,12 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau) {
+//====== MET trigger SF
+  const METSelection::Data silentMETData = fInvertedTauMETSelection.silentAnalyze(fEvent, nVertices);
+  fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  cInvertedTauMetTriggerSFCounter.increment();
+  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
+
 //====== Electron veto
   const ElectronSelection::Data eData = fInvertedTauElectronSelection.analyze(event);
   if (eData.hasIdentifiedElectrons())
@@ -392,12 +398,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   if (!jetData.passedSelection())
     return;
 
-//====== MET trigger SF
-  // FIXME: code for applying the SF is currently missing
-  cInvertedTauMetTriggerSFCounter.increment();
-
 //====== Collinear angular cuts
-  const METSelection::Data silentMETData = fInvertedTauMETSelection.silentAnalyze(fEvent, nVertices);
   const double METvalue = silentMETData.getMET().R();
   const AngularCutsCollinear::Data collinearData = fInvertedTauAngularCutsCollinear.analyze(fEvent, tau, jetData, silentMETData);
   if (!collinearData.passedSelection())

@@ -27,6 +27,9 @@ class PSet:
     def __getattr__(self, name):
         return self._data[name]
 
+    def __hasattr__(self, name):
+        return name in self._data.keys()
+
     def __setattr__(self, name, value):
         self.__dict__["_data"][name] = value
 
@@ -85,6 +88,9 @@ class Analyzer:
 
     def __getattr__(self, name):
         return getattr(self._pset, name)
+
+    def __hasattr__(self, name):
+        return hasattr(self._pset, name)
 
     def __setattr__(self, name, value):
         setattr(self.__dict__["_pset"], name, value)
@@ -428,6 +434,29 @@ class Process:
             readCallsStop = ROOT.TFile.GetFileReadCalls()
             readBytesStop = ROOT.TFile.GetFileBytesRead()
 
+            # Obtain Nall events for top pt corrections
+            NAllEventsTopPt = 0
+            if useTopPtCorrection:
+                for inname in dset.getFileNames():
+                    fIN = ROOT.TFile.Open(inname)
+                    h = fIN.Get("configInfo/topPtWeightAllEvents")
+                    if h != None:
+                        binNumber = 2 # nominal
+                        if hasattr(analyzer, "topPtSystematicVariation"):
+                            variation = getattr(analyzer, "topPtSystematicVariation")
+                            if variation == "minus":
+                                binNumber = 0
+                            # FIXME: The bin is to be added to the ttrees
+                            #elif variation == "plus":
+                                #binNumber = 3
+                                #if not h.GetXaxis().GetBinLabel().endsWith("Plus"):
+                                    #raise Exception("This should not happen")
+                        if binNumber > 0:
+                            NAllEventsTopPt += h.GetBinContent(binNumber)
+                    else:
+                        print "Warning: Could not obtain N(AllEvents) for top pt reweighting"
+                    fIN.Close()
+
             # Write configInfo
             fIN = ROOT.TFile.Open(dset.getFileNames()[0])
             cinfo = fIN.Get("configInfo/configinfo")
@@ -455,7 +484,7 @@ class Process:
                     cinfo.SetBinContent(n+2, nAllEventsPUWeighted / nanalyzers)
                 # Add "isTopPtReweighted" column
                 if useTopPtCorrection:
-                    cinfo.SetBinContent(n+3, 1) # The value needs to be read out from a counter and could be different for variations
+                    cinfo.SetBinContent(n+3, NAllEventsTopPt / nanalyzers)
                 # Write
                 cinfo.Write()
                 fIN.Close()

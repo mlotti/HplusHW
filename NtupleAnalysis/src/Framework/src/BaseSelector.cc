@@ -5,15 +5,25 @@ BaseSelector::BaseSelector(const ParameterSet& config):
   fEventCounter(fEventWeight),
   fHistoWrapper(fEventWeight, config.getParameter<std::string>("histogramAmbientLevel", "Vital")),
   fPileupWeight(config),
-  fTopPtWeight(config.getParameterOptional<ParameterSet>("TopPtReweighting")),
   cBaseAllEvents(fEventCounter.addCounter("Base::AllEvents")),
   cPileupWeighted(fEventCounter.addCounter("Base::PUReweighting")),
   cPrescaled(fEventCounter.addCounter("Base::Prescale")),
   cTopPtReweighted(fEventCounter.addCounter("Base::Weighted events with top pT")),
   cExclusiveSamplesWeighted(fEventCounter.addCounter("Base::Weighted events for exclusive samples")),
   fIsMC(config.isMC()),
-  bIsttbar(false)
-{}
+  bIsttbar(false),
+  iTopPtVariation(0)
+{
+  boost::optional<std::string> flag = config.getParameterOptional<std::string>("topPtSystematicVariation");
+  if (flag) {
+    if (*flag== "plus") {
+      iTopPtVariation = 1;
+    } else if (*flag == "minus") {
+      iTopPtVariation = -1;
+    }
+  }
+}
+
 BaseSelector::~BaseSelector() {
   fEventCounter.serialize();
 }
@@ -51,13 +61,18 @@ void BaseSelector::processInternal(Long64_t entry) {
   
   //====== Top pT weighting
   if (fEvent.isMC() && isttbar()) {
-    fEventWeight.multiplyWeight(fTopPtWeight.getWeight(fEvent));
+    // For down variation, do not apply weight
+    if (iTopPtVariation == 0) {
+      fEventWeight.multiplyWeight(std::abs(fEvent.topPtWeight().weight()));
+    } else if (iTopPtVariation == 1) {
+      // For up variation, apply weight twice 
+      fEventWeight.multiplyWeight(fEvent.topPtWeight().weight() * fEvent.topPtWeight().weight());
+    }
   }
   cTopPtReweighted.increment();
   
   //====== Combining of W+jets and Z+jets inclusive and exclusive samples // not needed right now
   cExclusiveSamplesWeighted.increment();
 
-  
   process(entry);
 }

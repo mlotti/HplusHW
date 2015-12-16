@@ -5,6 +5,7 @@
 #include "EventSelection/interface/BaseSelection.h"
 #include "DataFormat/interface/MET.h"
 #include "Framework/interface/EventCounter.h"
+#include "Framework/interface/GenericScaleFactor.h"
 #include "Tools/interface/DirectionalCut.h"
 
 #include <string>
@@ -46,7 +47,8 @@ public:
     const bool passedSelection() const { return bPassedSelection; }
     const math::XYVectorD& getMET() const;
     const float getMETSignificance() const { return fMETSignificance; }
-
+    const float getMETTriggerSF() const { return fMETTriggerSF; }
+    
     friend class METSelection;
 
   private:
@@ -56,6 +58,8 @@ public:
     std::vector<math::XYVectorD> fSelectedMET;
     /// MET significance
     float fMETSignificance;
+    /// Cache MET trigger SF
+    float fMETTriggerSF;
   };
   
   // Main class
@@ -83,6 +87,8 @@ private:
   const DirectionalCut<float> fMETSignificanceCut;
   const bool bApplyPhiCorrections;
   METType fMETType;
+  // MET trigger SF
+  GenericScaleFactor fMETTriggerSFReader;
   
   // Event counter for passing selection
   Count cPassedMETSelection;

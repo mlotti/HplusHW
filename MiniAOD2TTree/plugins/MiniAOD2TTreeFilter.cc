@@ -9,6 +9,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     //prescaleWeight(iConfig.getParameter<edm::ParameterSet>("PrescaleProvider"), consumesCollector(), this),
     outputFileName(iConfig.getParameter<std::string>("OutputFileName")),
     PUInfoInputFileName(iConfig.getParameter<std::string>("PUInfoInputFileName")),
+    TopPtInputFileName(iConfig.getParameter<std::string>("TopPtInputFileName")),
     codeVersion(iConfig.getParameter<std::string>("CodeVersion")),
     dataVersion(iConfig.getParameter<std::string>("DataVersion")),
     cmEnergy(iConfig.getParameter<int>("CMEnergy")),
@@ -276,12 +277,28 @@ void MiniAOD2TTreeFilter::endJob(){
           TH1F* hPUclone = dynamic_cast<TH1F*>(hPU->Clone());
           hPUclone->SetDirectory(fOUT);
 	  infodir->cd();
-//          fOUT->cd();
           hPUclone->Write();
         }
       }
       fPU->Close();
     }
+
+// copy top pt weight histogram from separate file (makes merging of root files so much easier)
+    if (PUInfoInputFileName.size()) {
+      TFile* fTopPt = TFile::Open(TopPtInputFileName.c_str());
+      if (fTopPt) {
+        // File open is successful
+        TH1F* hTopPt = dynamic_cast<TH1F*>(fTopPt->Get("topPtWeightAllEvents"));
+        if (hTopPt) {
+          // Histogram exists
+          TH1F* hTopPtClone = dynamic_cast<TH1F*>(hTopPt->Clone());
+          hTopPtClone->SetDirectory(fOUT);
+          infodir->cd();
+          hTopPtClone->Write();
+        }
+      }
+      fTopPt->Close();
+    }    
     
 // close output file
     fOUT->Close();

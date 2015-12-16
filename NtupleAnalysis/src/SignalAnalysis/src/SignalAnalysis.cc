@@ -32,10 +32,10 @@ private:
   TauSelection fTauSelection;
   Count cFakeTauSFCounter;
   Count cTauTriggerSFCounter;
+  Count cMetTriggerSFCounter;
   ElectronSelection fElectronSelection;
   MuonSelection fMuonSelection;
   JetSelection fJetSelection;
-  Count cMetTriggerSFCounter;
   AngularCutsCollinear fAngularCutsCollinear;
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
@@ -62,13 +62,13 @@ SignalAnalysis::SignalAnalysis(const ParameterSet& config)
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")),
   cTauTriggerSFCounter(fEventCounter.addCounter("Tau trigger SF")),
+  cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
   fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
   fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
   fJetSelection(config.getParameter<ParameterSet>("JetSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-  cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
   fAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
@@ -148,6 +148,13 @@ void SignalAnalysis::process(Long64_t entry) {
     fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
     cTauTriggerSFCounter.increment();
   }
+
+//====== MET trigger SF
+  const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
+  fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  cMetTriggerSFCounter.increment();
+  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
+  //std::cout << tauData.getSelectedTau().pt() << ":" << tauData.getTauMisIDSF() << ", " << tauData.getTauTriggerSF() << ", met=" << silentMETData.getMET().R() << ", SF=" << silentMETData.getMETTriggerSF() << std::endl;
   
 //====== Electron veto
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
@@ -164,13 +171,7 @@ void SignalAnalysis::process(Long64_t entry) {
   if (!jetData.passedSelection())
     return;
 
-//====== MET trigger SF
-  // FIXME: code for applying the SF is currently missing
-  cMetTriggerSFCounter.increment();
-  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
-  
 //====== Collinear angular cuts
-  const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
   const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
   if (!collinearData.passedSelection())
     return;
