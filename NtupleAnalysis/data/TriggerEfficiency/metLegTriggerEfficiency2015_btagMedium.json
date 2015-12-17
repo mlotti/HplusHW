@@ -94,13 +94,13 @@
              },
              {
                "pt"              :240.0,
-               "efficiency"      :0.0,
+               "efficiency"      :1.0,
                "uncertaintyPlus" :1.0,
                "uncertaintyMinus":0.0
              },
              {
                "pt"              :260.0,
-               "efficiency"      :0.0,
+               "efficiency"      :1.0,
                "uncertaintyPlus" :1.0,
                "uncertaintyMinus":0.0
              },

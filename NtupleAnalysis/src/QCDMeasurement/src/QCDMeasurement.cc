@@ -276,12 +276,15 @@ void QCDMeasurement::process(Long64_t entry) {
       // Apply fake tau SF
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getAntiIsolatedTauMisIDSF());
-        cBaselineTauFakeTauSFCounter.increment();
       }
+      cInvertedTauFakeTauSFCounter.increment();
       // Apply tau trigger SF
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getAntiIsolatedTauTriggerSF());
-        cBaselineTauTauTriggerSFCounter.increment();
+      }
+      cInvertedTauTauTriggerSFCounter.increment();
+      if (tauData.getAntiIsolatedTaus().size() == 1) {
+        cInvertedTauOneTauCounter.increment();
       }
       // Do rest of event selection
       doInvertedAnalysis(fEvent, tauData.getAntiIsolatedTau(), nVertices, tauData.getAntiIsolatedTauIsGenuineTau());
@@ -296,12 +299,15 @@ void QCDMeasurement::process(Long64_t entry) {
       // Apply fake tau SF
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
-        cInvertedTauFakeTauSFCounter.increment();
       }
+      cBaselineTauFakeTauSFCounter.increment();
       // Apply tau trigger SF
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
-        cInvertedTauTauTriggerSFCounter.increment();
+      }
+      cBaselineTauTauTriggerSFCounter.increment();
+      if (tauData.getSelectedTaus().size() == 1) {
+        cBaselineTauOneTauCounter.increment();
       }
       // Do rest of event selection
       doBaselineAnalysis(fEvent, tauData.getSelectedTau(), nVertices, tauData.isGenuineTau());
@@ -315,8 +321,11 @@ void QCDMeasurement::process(Long64_t entry) {
 void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau) {
 //====== MET trigger SF
   const METSelection::Data silentMETData = fBaselineTauMETSelection.silentAnalyze(fEvent, nVertices);
-  fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  if (event.isMC()) {
+    fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  }
   cBaselineTauMetTriggerSFCounter.increment();
+  //std::cout << "Baseline: met=" << silentMETData.getMET().R() << ", SF=" << silentMETData.getMETTriggerSF() << std::endl;
   
 //====== Electron veto
   const ElectronSelection::Data eData = fBaselineTauElectronSelection.analyze(event);
@@ -379,9 +388,12 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
 void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau) {
 //====== MET trigger SF
   const METSelection::Data silentMETData = fInvertedTauMETSelection.silentAnalyze(fEvent, nVertices);
-  fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  if (event.isMC()) {
+    fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  }
   cInvertedTauMetTriggerSFCounter.increment();
   fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
+  //std::cout << "Inverted: met=" << silentMETData.getMET().R() << ", SF=" << silentMETData.getMETTriggerSF() << std::endl;
 
 //====== Electron veto
   const ElectronSelection::Data eData = fInvertedTauElectronSelection.analyze(event);

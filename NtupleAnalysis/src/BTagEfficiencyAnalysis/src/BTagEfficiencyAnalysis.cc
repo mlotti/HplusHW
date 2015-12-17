@@ -166,7 +166,9 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
 
 //====== MET trigger SF
   const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
-  fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  }
   cMetTriggerSFCounter.increment();
 
 //====== Electron veto
