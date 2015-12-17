@@ -47,6 +47,7 @@ void METLegSelection::print(){}
 bool METLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
 
   xvariable = fEvent.met_Type1().et();
+  if(xvar == pu) xvariable = fEvent.vertexInfo().value();
 
   const TauSelection::Data tauData = fTauSelection.silentAnalyze(fEvent);
   if (!tauData.hasIdentifiedTaus()) return false;

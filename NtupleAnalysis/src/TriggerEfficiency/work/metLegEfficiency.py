@@ -73,6 +73,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
             triggerOR2 = []
         ),
         usePileupWeights = True,
+#        usePileupWeights = False,
         onlineSelection = onlineSelection,
         offlineSelection = leg,
         TauSelection      = signalAnalysis.tauSelection,
