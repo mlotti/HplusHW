@@ -277,12 +277,12 @@ void QCDMeasurement::process(Long64_t entry) {
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getAntiIsolatedTauMisIDSF());
       }
-      cBaselineTauFakeTauSFCounter.increment();
+      cInvertedTauFakeTauSFCounter.increment();
       // Apply tau trigger SF
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getAntiIsolatedTauTriggerSF());
       }
-      cBaselineTauTauTriggerSFCounter.increment();
+      cInvertedTauTauTriggerSFCounter.increment();
       if (tauData.getAntiIsolatedTaus().size() == 1) {
         cInvertedTauOneTauCounter.increment();
       }
@@ -300,12 +300,12 @@ void QCDMeasurement::process(Long64_t entry) {
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
       }
-      cInvertedTauFakeTauSFCounter.increment();
+      cBaselineTauFakeTauSFCounter.increment();
       // Apply tau trigger SF
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
       }
-      cInvertedTauTauTriggerSFCounter.increment();
+      cBaselineTauTauTriggerSFCounter.increment();
       if (tauData.getSelectedTaus().size() == 1) {
         cBaselineTauOneTauCounter.increment();
       }
@@ -325,6 +325,7 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
     fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
   }
   cBaselineTauMetTriggerSFCounter.increment();
+  //std::cout << "Baseline: met=" << silentMETData.getMET().R() << ", SF=" << silentMETData.getMETTriggerSF() << std::endl;
   
 //====== Electron veto
   const ElectronSelection::Data eData = fBaselineTauElectronSelection.analyze(event);
@@ -392,6 +393,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   }
   cInvertedTauMetTriggerSFCounter.increment();
   fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
+  //std::cout << "Inverted: met=" << silentMETData.getMET().R() << ", SF=" << silentMETData.getMETTriggerSF() << std::endl;
 
 //====== Electron veto
   const ElectronSelection::Data eData = fInvertedTauElectronSelection.analyze(event);
