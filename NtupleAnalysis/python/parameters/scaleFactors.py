@@ -156,6 +156,9 @@ class TriggerSFJsonReader:
             if abs(mcdict[key]["mceffdown"]) < 0.00001:
                 raise Exception("Down variation in bin '%s' is zero in json '%s'"%(key, filename))
             self.result["SFmcDown"].append(datadict[key]["dataeff"] / mcdict[key]["mceffdown"])
+            # Sanity check
+            if self.result["SF"][len(self.result["SF"])-1] < 0.00001:
+                raise Exception("Error: In file '%s' bin %s the SF is zero! Please fix!"%(filename, key))
 
     def getResult(self):
         return self.result
