@@ -13,6 +13,7 @@ Event::Event(const ParameterSet& config):
   fL1MET("L1MET"),
   fL1extraMET("L1MET_l1extra"),
   fGenWeight("GenWeight"),
+  fTopPtWeight("topPtWeight"),
   fIsMC(config.isMC())
 {
   // Trigger
@@ -112,6 +113,7 @@ void Event::setupBranches(BranchManager& mgr) {
   fGenParticleCollection.setupBranches(mgr);
   fGenMET.setupBranches(mgr);
   fGenWeight.setupBranches(mgr);
+  fTopPtWeight.setupBranches(mgr);
   fMET_Type1.setupBranches(mgr);
   fMET.setupBranches(mgr);
   fCaloMET.setupBranches(mgr);

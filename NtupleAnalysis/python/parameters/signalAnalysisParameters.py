@@ -20,15 +20,6 @@ trg = PSet(
   triggerOR2 = [],
 )
 
-#====== Top pt reweighting
-topPtReweighting = PSet(
-  # These are the 8 TeV combined coefficients, which seem to agree nicely with 13 TeV data, see https://indico.cern.ch/event/463929/session/2/contribution/61/attachments/1202097/1749947/Top_Report_151209.pdf
-  # Recipy from: https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting
-  # Formula: exp(A-Bx)
-  parameterA = 0.156,
-  parameterB = -0.00137,
-)
-
 #====== MET filter
 metFilter = PSet(
   discriminators = ["hbheNoiseTokenRun2Loose", # Loose is recommended
@@ -115,6 +106,8 @@ metSelection = PSet(
                METType = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
    applyPhiCorrections = False  # FIXME: no effect yet
 )
+# MET trigger SF
+scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal")
 
 #====== Angular cuts / back-to-back
 angularCutsBackToBack = PSet(
@@ -156,7 +149,6 @@ commonPlotsOptions = PSet(
 allSelections = PSet(
  histogramAmbientLevel = histoLevel,
                Trigger = trg,
-      TopPtReweighting = topPtReweighting,
              METFilter = metFilter,
           TauSelection = tauSelection,
      ElectronSelection = eVeto,

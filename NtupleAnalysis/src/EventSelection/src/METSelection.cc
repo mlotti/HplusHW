@@ -9,7 +9,10 @@
 //#include "Framework/interface/makeTH.h"
 
 METSelection::Data::Data() 
-: bPassedSelection(false) { }
+: bPassedSelection(false),
+  fMETSignificance(-1.0),
+  fMETTriggerSF(0.0)
+{ }
 
 METSelection::Data::~Data() { }
 
@@ -25,6 +28,8 @@ METSelection::METSelection(const ParameterSet& config, EventCounter& eventCounte
   fMETCut(config, "METCut"),
   fMETSignificanceCut(config, "METSignificanceCut"),
   bApplyPhiCorrections(config.getParameter<bool>("applyPhiCorrections")),
+  // MET trigger SF
+  fMETTriggerSFReader(config.getParameterOptional<ParameterSet>("metTriggerSF")),
   // Event counter for passing selection
   cPassedMETSelection(fEventCounter.addCounter("passed MET selection ("+postfix+")"))
 {
@@ -36,6 +41,8 @@ METSelection::METSelection(const ParameterSet& config)
   fMETCut(config, "METCut"),
   fMETSignificanceCut(config, "METSignificanceCut"),
   bApplyPhiCorrections(config.getParameter<bool>("applyPhiCorrections")),
+  // MET trigger SF
+  fMETTriggerSFReader(config.getParameterOptional<ParameterSet>("metTriggerSF")),
   // Event counter for passing selection
   cPassedMETSelection(fEventCounter.addCounter("passed MET selection"))
 {
@@ -101,12 +108,18 @@ METSelection::Data METSelection::privateAnalyze(const Event& iEvent, int nVertic
 //   else if (fMETType == kType1MET)
 //     output.fSelectedMET.push_back(iEvent.met_Type1().p2());
   output.fSelectedMET.push_back(iEvent.met().p2());
-  //output.fMETSignificance = iEvent.met().significance(); // FIXME uncomment when significance exists
+  output.fMETSignificance = iEvent.met().significance();
   
   //=== Apply phi corrections // FIXME: not implemented
   
+  // Set tau trigger SF value to data object
+  double metValue = output.getMET().R();
+  if (iEvent.isMC()) {
+    output.fMETTriggerSF = fMETTriggerSFReader.getScaleFactorValue(metValue);
+  } 
+  
   //=== Apply cut on MET
-  if (!fMETCut.passedCut(output.getMET().R()))
+  if (!fMETCut.passedCut(metValue))
     return output;
   
   //=== Apply cut on MET significance
@@ -115,8 +128,8 @@ METSelection::Data METSelection::privateAnalyze(const Event& iEvent, int nVertic
   
   //=== Passed MET selection
   output.bPassedSelection = true;
-  cPassedMETSelection.increment();
-  
+  cPassedMETSelection.increment();  
+ 
   // Return data object
   return output;
 }

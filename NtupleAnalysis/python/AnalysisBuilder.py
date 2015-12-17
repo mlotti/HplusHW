@@ -42,11 +42,14 @@ class AnalysisConfig:
                                                               self._getDirectionString(value))
 		# Trigger
 		elif value.startswith("TauTrgEff"):
-                    variationType = value.replace("TauTrgEff","")
+                    variationType = value.replace("TauTrgEff","").replace("Minus","").replace("Plus","")
                     scaleFactors.assignTauTriggerSF(self._config.TauSelection, self._getDirectionString(value), variationType)
+                elif value.startswith("METTrgEff"):
+                    variationType = value.replace("METTrgEff","").replace("Minus","").replace("Plus","")
+                    scaleFactors.assignMETTriggerSF(self._config.METSelection, self._config.BJetSelection.bjetDiscrWorkingPoint, self._getDirectionString(value), variationType)
 		# B and top quarks
 		elif value.startswith("TopPt"):
-                    self._config.TopPtReweighting.systematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
+                    self._config.topPtSystematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
 		else:
 		    if value != "nominal":
                         raise Exception("Error: unsupported variation item '%s'!"%value)
@@ -115,9 +118,9 @@ class AnalysisBuilder:
           if doSystematicVariations:
               items = []
               # Trigger systematics
-              #items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
+              items.extend(["TauTrgEffData", "TauTrgEffMC"]) 
               #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
-              #items.extend(["METTrgDataEff", "METTrgMCEff"])
+              items.extend(["METTrgEffData", "METTrgEffMC"])
               # Tau ID variation systematics
               items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet"])
               # Energy scales and JER systematics
@@ -168,6 +171,7 @@ class AnalysisBuilder:
         for module in configs:
             module.registerAnalysis(process)
         print "\nAnalysisBuilder created %d modules\n"%len(configs)
+        #print configs[0]._config
     
     ## Builds iteratively the variations
     # Logic: Variation specs are put into kwargs as key,value pairs 
