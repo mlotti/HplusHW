@@ -39,7 +39,9 @@ public:
   HistoSplitter& getHistoSplitter() { return fHistoSplitter; }
   /// Returns the histogram settings for pt histograms (usecase: QCD measurement)
   const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
-  /// Returns the histogram settings for MtBins (usecase: QCD measurement)
+  /// Returns the histogram settings for MET bins (usecase: QCD measurement)
+  const HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
+  /// Returns the histogram settings for Mt bins (usecase: QCD measurement)
   const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
   
   //===== unique filling methods (to be called inside the event selection routine only, i.e. (before a passing decision is done))

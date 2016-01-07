@@ -64,11 +64,15 @@ private:
   void doInvertedAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau);
   void doBaselineAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau);    
  
-  // Normalization histograms - baseline tau
+  //====== Normalization histograms - baseline tau
+  // After standard selections
   HistoSplitter::SplittedTripletTH1s hNormalizationBaselineTauAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hMtBaselineTauAfterStdSelections; // For QCD shape uncertainty
 
-  // Normalization histograms - inverted tau
+  //====== Normalization histograms - inverted tau
+  // After standard selections
   HistoSplitter::SplittedTripletTH1s hNormalizationInvertedTauAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hMtInvertedTauAfterStdSelections; // For QCD shape uncertainty
 
   // Purity histograms (no need to split in bins of tau pt, therefore just a triplet)
   // Add here more purity histograms at different point of event selections, if necessary
@@ -174,21 +178,35 @@ void QCDMeasurement::book(TDirectory *dir) {
   std::vector<TDirectory*> myNormalizationDirs = {myNormDir, myNormEWKFakeTausDir, myNormGenuineTausDir};
 
   // Normalization bin settings
-  const int nMetBins = 100;
-  const float fMetMin = 0.0;
-  const float fMetMax = 500.0;
+  const int nMetBins = fCommonPlots.getMetBinSettings().bins();
+  const float fMetMin = fCommonPlots.getMetBinSettings().min();
+  const float fMetMax = fCommonPlots.getMetBinSettings().max();
+  const int nMtBins = fCommonPlots.getMtBinSettings().bins();
+  const float fMtMin = fCommonPlots.getMtBinSettings().min();
+  const float fMtMax = fCommonPlots.getMtBinSettings().max();
+  if ((fMetMax-fMetMin) / nMetBins > 10.0) {
+    throw hplus::Exception("config") << "MET histogram bin width is larger than 10 GeV! This is not good for QCD measurement (edit python/parameters/signalAnalysisParameters.py)";
+  }
   // Create normalization histograms for baseline tau (use kSystematics only for the primary normalization histogram, otherwise kInformative)
   histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myNormalizationDirs,
     hNormalizationBaselineTauAfterStdSelections,
     "NormalizationMETBaselineTauAfterStdSelections", ";MET (GeV);N_{events}",
     nMetBins, fMetMin, fMetMax);
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myNormalizationDirs,
+    hMtBaselineTauAfterStdSelections,
+    "NormalizationMtBaselineTauAfterStdSelections", ";m_{T} (GeV);N_{events}",
+    nMtBins, fMtMin, fMtMax);
   
   // Create normalization histograms for inverted tau (use kSystematics only for the primary normalization histogram, otherwise kInformative)
   histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myNormalizationDirs,
     hNormalizationInvertedTauAfterStdSelections,
     "NormalizationMETInvertedTauAfterStdSelections", ";MET (GeV);N_{events}",
     nMetBins, fMetMin, fMetMax);
-  
+  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myNormalizationDirs,
+    hMtInvertedTauAfterStdSelections,
+    "NormalizationMtInvertedTauAfterStdSelections", ";m_{T} (GeV);N_{events}",
+    nMtBins, fMtMin, fMtMax);
+
   // ====== Purity histograms
   // Create directories and obtain binning
   myInclusiveLabel = "QCDPurity";
@@ -216,9 +234,6 @@ void QCDMeasurement::book(TDirectory *dir) {
   TDirectory* myQCDEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
   TDirectory* myQCDGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
   std::vector<TDirectory*> myQCDPlotDirs = {myQCDDir, myQCDEWKFakeTausDir, myQCDGenuineTausDir};
-  const int nMtBins = fCommonPlots.getMtBinSettings().bins();
-  const float fMtMin = fCommonPlots.getMtBinSettings().min();
-  const float fMtMax = fCommonPlots.getMtBinSettings().max();
 
   // Create shape histograms for baseline tau (inverted tau histograms are in common plots)
   histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kInformative, myQCDPlotDirs,
@@ -349,7 +364,9 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
     return;
 
 //====== Point of standard selections
+  double myTransverseMass = TransverseMass::reconstruct(tau, silentMETData.getMET());
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationBaselineTauAfterStdSelections, isFakeTau, METvalue);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtBaselineTauAfterStdSelections, isFakeTau, myTransverseMass);
   
 //====== b-jet selection
   const BJetSelection::Data bjetData = fBaselineTauBJetSelection.analyze(fEvent, jetData);
@@ -375,7 +392,7 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
 //====== All cuts passed
   cBaselineTauSelectedEvents.increment();
   // Fill final plots
-  double myTransverseMass = TransverseMass::reconstruct(tau, METData.getMET());
+  
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTauTransverseMass, !isFakeTau, myTransverseMass);
   
 //====== Experimental code
@@ -417,8 +434,10 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
     return;
 
 //====== Point of standard selections
+  double myTransverseMass = TransverseMass::reconstruct(tau, silentMETData.getMET());
   fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationInvertedTauAfterStdSelections, !isFakeTau, METvalue);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtInvertedTauAfterStdSelections, !isFakeTau, myTransverseMass);
   
 //====== b-jet selection
   const BJetSelection::Data bjetData = fInvertedTauBJetSelection.analyze(fEvent, jetData);
@@ -444,7 +463,6 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
 //====== All cuts passed
   cInvertedTauSelectedEvents.increment();
   // Fill final plots
-  //double myTransverseMass = TransverseMass::reconstruct(tau, METData.getMET());
   fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
   hInvertedTauTauPtAfterAllSelections->Fill(!isFakeTau, tau.pt());
   

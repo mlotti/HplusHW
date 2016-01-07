@@ -134,7 +134,7 @@ commonPlotsOptions = PSet(
         deltaPhiBins = PSet(nBins=18, axisMin=0., axisMax=180.), # used in 2D plots, i.e. putting high number of bins here will cause troubles
             rtauBins = PSet(nBins=55, axisMin=0., axisMax=1.1),
            njetsBins = PSet(nBins=20, axisMin=0., axisMax=20.),
-             metBins = PSet(nBins=80, axisMin=0., axisMax=800.),
+             metBins = PSet(nBins=80, axisMin=0., axisMax=800.), # please use 10 GeV bin width because of QCD measurement
        bjetDiscrBins = PSet(nBins=20, axisMin=-1.0, axisMax=1.0),
    angularCuts1DBins = PSet(nBins=52, axisMin=0., axisMax=260.),
          topMassBins = PSet(nBins=60, axisMin=0., axisMax=600.),
