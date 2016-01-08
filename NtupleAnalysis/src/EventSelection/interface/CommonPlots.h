@@ -68,14 +68,20 @@ public:
   void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight);
   //void fillControlPlotsAfterAllSelectionsWithFullMass(const Event& event, FullHiggsMassCalculator::Data& data);
 
+  //===== Filling of control plots for determining QCD shape uncertainty
+  void fillControlPlotsForQCDShapeUncertainty(const Event& event,
+                                              const AngularCutsBackToBack::Data& collinearAngularCutsData,
+                                              const BJetSelection::Data& bJetData,
+                                              const METSelection::Data& metData,
+                                              const AngularCutsCollinear::Data& backToBackAngularCutsData);
+  
   /// Getter for all vertices
   int nVertices() const { return iVertices; }
 
 private:
-  /// Returns true if common plots is created by QCD measurement
-  const bool isQCDMeasurement() const { return fAnalysisType == kQCDMeasurement ||
-    fAnalysisType == kQCDNormalizationSystematicsControlRegion || 
-    fAnalysisType == kQCDNormalizationSystematicsSignalRegion; }
+  /// Returns true if anti-isolated taus need to be used (QCD measurement)
+  const bool usesAntiIsolatedTaus() const { return fAnalysisType == kQCDMeasurement ||
+    fAnalysisType == kQCDNormalizationSystematicsControlRegion; }
   
 private:
   ///===== Config params
@@ -222,7 +228,7 @@ private:
   int iVertices;
   TauSelection::Data fTauData;
   //FakeTauIdentifier::Data fFakeTauData;
-  bool bIsFakeTau; // FIXME: a boolean used at the moment
+  bool bIsFakeTau;
   ElectronSelection::Data fElectronData;
   MuonSelection::Data fMuonData;
   JetSelection::Data fJetData;

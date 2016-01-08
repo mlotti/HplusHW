@@ -29,7 +29,11 @@ CommonPlots::CommonPlots(const ParameterSet& config, const AnalysisType type, Hi
   //fInvmassBinSettings(config.getParameter<ParameterSet>("invmassBins")),
 { 
   // Create CommonPlotsBase objects
-  fPUDependencyPlots = new PUDependencyPlots(histoWrapper, config.getParameter<bool>("enablePUDependencyPlots"), fNVerticesBinSettings);
+  bool enableStatus = config.getParameter<bool>("enablePUDependencyPlots");
+  if (fAnalysisType == kQCDNormalizationSystematicsSignalRegion || fAnalysisType == kQCDNormalizationSystematicsControlRegion) {
+    enableStatus = false;
+  }
+  fPUDependencyPlots = new PUDependencyPlots(histoWrapper, enableStatus, fNVerticesBinSettings);
   fBaseObjects.push_back(fPUDependencyPlots);
 }
 
@@ -43,13 +47,13 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
   std::string myGenuineLabel = "ForDataDrivenCtrlPlotsEWKGenuineTaus";
   if (fAnalysisType == kQCDNormalizationSystematicsSignalRegion) {
     myLabel += "QCDNormalizationSignal";
-    myFakeLabel += "QCDNormalizationSignal";
-    myGenuineLabel += "QCDNormalizationSignal";
+    myFakeLabel += "QCDNormalizationSignalEWKFakeTaus";
+    myGenuineLabel += "QCDNormalizationSignalEWKGenuineTaus";
   }
   if (fAnalysisType == kQCDNormalizationSystematicsControlRegion) {
     myLabel += "QCDNormalizationControl";
-    myFakeLabel += "QCDNormalizationControl";
-    myGenuineLabel += "QCDNormalizationControl";
+    myFakeLabel += "QCDNormalizationControlEWKFakeTaus";
+    myGenuineLabel += "QCDNormalizationControlEWKGenuineTaus";
   }
   TDirectory* myCtrlDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myLabel);
   TDirectory* myCtrlEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
@@ -284,14 +288,13 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
     36, 0, 180);
   
   // shape plots after all selections
-  if (fAnalysisType != kQCDNormalizationSystematicsSignalRegion && fAnalysisType != kQCDNormalizationSystematicsControlRegion) {
-    fHistoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myDirs3, hShapeTransverseMass, 
-      "shapeTransverseMass", ";m_{T}(tau,MET), GeV/c^{2};N_{events}",
-      fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
-    fHistoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myDirs3, hShapeProbabilisticBtagTransverseMass, 
-      "shapeTransverseMassProbabilisticBTag", ";m_{T}(tau,MET), GeV/c^{2};N_{events}",
-      fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
-  }
+  fHistoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myDirs3, hShapeTransverseMass, 
+    "shapeTransverseMass", ";m_{T}(tau,MET), GeV/c^{2};N_{events}",
+    fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+  fHistoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kSystematics, myDirs3, hShapeProbabilisticBtagTransverseMass, 
+    "shapeTransverseMassProbabilisticBTag", ";m_{T}(tau,MET), GeV/c^{2};N_{events}",
+    fMtBinSettings.bins(), fMtBinSettings.min(), fMtBinSettings.max());
+
   if (isData) {
     hNSelectedVsRunNumber = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, 
       "NSelectedVsRunNumber", "NSelectedVsRunNumber;Run number;N_{events}", 14000, 246000, 260000);
@@ -417,7 +420,7 @@ void CommonPlots::fillControlPlotsAfterTauSelection(const Event& event, const Ta
     bIsFakeTau = false;
     return;
   }
-  if (isQCDMeasurement()) {
+  if (usesAntiIsolatedTaus()) {
     if (data.hasAntiIsolatedTaus()) {
       bIsFakeTau = !(data.getAntiIsolatedTauIsGenuineTau());
     }
@@ -441,7 +444,7 @@ void CommonPlots::fillControlPlotsAfterMETTriggerScaleFactor(const Event& event)
 void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event) {
   // I.e. plots after standard selections
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterStdSelections, !bIsFakeTau, iVertices);
-  if (isQCDMeasurement()) {
+  if (usesAntiIsolatedTaus()) {
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterStdSelections, !bIsFakeTau, fTauData.getAntiIsolatedTau().pt());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterStdSelections, !bIsFakeTau, fTauData.getAntiIsolatedTau().eta());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterStdSelections, !bIsFakeTau, fTauData.getAntiIsolatedTau().phi());
@@ -476,7 +479,7 @@ void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event)
 
 void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterAllSelections, !bIsFakeTau, iVertices);
-  if (isQCDMeasurement()) {
+  if (usesAntiIsolatedTaus()) {
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPtAfterAllSelections, !bIsFakeTau, fTauData.getAntiIsolatedTau().pt());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauEtaAfterAllSelections, !bIsFakeTau, fTauData.getAntiIsolatedTau().eta());
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedTauPhiAfterAllSelections, !bIsFakeTau, fTauData.getAntiIsolatedTau().phi());
@@ -525,7 +528,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
 
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlDeltaPhiTauMetAfterAllSelections, !bIsFakeTau, fBackToBackAngularCutsData.getDeltaPhiTauMET());
   double myTransverseMass = -1.0;
-  if (isQCDMeasurement()) {
+  if (usesAntiIsolatedTaus()) {
     myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), fMETData.getMET());
   } else {
     myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
@@ -542,7 +545,7 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
 
 void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight) {
   double myTransverseMass = -1.0;
-  if (isQCDMeasurement()) {
+  if (usesAntiIsolatedTaus()) {
     myTransverseMass = TransverseMass::reconstruct(fTauData.getAntiIsolatedTau(), metData.getMET());
   } else {
     myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), metData.getMET());
@@ -551,4 +554,20 @@ void CommonPlots::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const 
     for (auto& p: fBaseObjects) {
     p->fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(event, metData, btagWeight);
   }
+}
+
+//===== Filling of control plots for determining QCD shape uncertainty
+void CommonPlots::fillControlPlotsForQCDShapeUncertainty(const Event& event,
+                                                         const AngularCutsBackToBack::Data& collinearAngularCutsData,
+                                                         const BJetSelection::Data& bJetData,
+                                                         const METSelection::Data& metData,
+                                                         const AngularCutsCollinear::Data& backToBackAngularCutsData) {
+  fillControlPlotsAfterTopologicalSelections(event);
+  // Note that the following methods store the data object as members
+  fillControlPlotsAtAngularCutsCollinear(event, collinearAngularCutsData);
+  fillControlPlotsAtMETSelection(event, metData);
+  fillControlPlotsAtBtagging(event, bJetData);
+  fillControlPlotsAtAngularCutsBackToBack(event, backToBackAngularCutsData);
+  // Fill plots after final selection
+  fillControlPlotsAfterAllSelections(event);
 }

@@ -26,6 +26,8 @@ private:
 
   /// Common plots
   CommonPlots fCommonPlots;
+  CommonPlots fNormalizationSystematicsSignalRegion;
+  CommonPlots fNormalizationSystematicsControlRegion;
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
   Count cTrigger;
@@ -91,6 +93,8 @@ REGISTER_SELECTOR(QCDMeasurement);
 QCDMeasurement::QCDMeasurement(const ParameterSet& config)
 : BaseSelector(config),
   fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDMeasurement, fHistoWrapper),
+  fNormalizationSystematicsSignalRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsSignalRegion, fHistoWrapper),
+  fNormalizationSystematicsControlRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsControlRegion, fHistoWrapper),
   cAllEvents(fEventCounter.addCounter("All events")),
   cTrigger(fEventCounter.addCounter("Passed trigger")),
   fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"),
@@ -145,6 +149,8 @@ QCDMeasurement::QCDMeasurement(const ParameterSet& config)
 void QCDMeasurement::book(TDirectory *dir) {
   // Book common plots histograms
   fCommonPlots.book(dir, isData());
+  fNormalizationSystematicsSignalRegion.book(dir, isData());
+  fNormalizationSystematicsControlRegion.book(dir, isData());
   //   fCommonPlotsBaselineAfterMetSF(fCommonPlots.createCommonPlotsFilledAtEveryStep("BaselineAfterMetSF",false,"")),
   // Book histograms in event selection classes
   fMETFilterSelection.bookHistograms(dir);
@@ -253,10 +259,13 @@ void QCDMeasurement::process(Long64_t entry) {
 
 //====== Initialize
   fCommonPlots.initialize();
+  fNormalizationSystematicsSignalRegion.initialize();
+  fNormalizationSystematicsControlRegion.initialize();
   cAllEvents.increment();
   int nVertices = fEvent.vertexInfo().value();
   fCommonPlots.setNvertices(nVertices);
-
+  fNormalizationSystematicsSignalRegion.setNvertices(nVertices);
+  fNormalizationSystematicsControlRegion.setNvertices(nVertices);
 
 //====== Apply trigger
   if (!(fEvent.passTriggerDecision()))
@@ -288,6 +297,9 @@ void QCDMeasurement::process(Long64_t entry) {
       // Set factorisation bin
       myFactorisationInfo.push_back(tauData.getAntiIsolatedTau().pt());
       fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
+      fNormalizationSystematicsControlRegion.setFactorisationBinForEvent(myFactorisationInfo);
+      fNormalizationSystematicsControlRegion.fillControlPlotsAfterTauSelection(fEvent, tauData);
+
       // Apply fake tau SF
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getAntiIsolatedTauMisIDSF());
@@ -311,6 +323,9 @@ void QCDMeasurement::process(Long64_t entry) {
       // Set factorisation bin
       myFactorisationInfo.push_back(tauData.getSelectedTau().pt());
       fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
+      fNormalizationSystematicsSignalRegion.setFactorisationBinForEvent(myFactorisationInfo);
+      fNormalizationSystematicsSignalRegion.fillControlPlotsAfterTauSelection(fEvent, tauData);
+
       // Apply fake tau SF
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
@@ -365,6 +380,9 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
 
 //====== Point of standard selections
   double myTransverseMass = TransverseMass::reconstruct(tau, silentMETData.getMET());
+  const BJetSelection::Data silentBjetData = fBaselineTauBJetSelection.silentAnalyze(fEvent, jetData);
+  const AngularCutsBackToBack::Data silentBackToBackData = fBaselineTauAngularCutsBackToBack.silentAnalyze(fEvent, tau, jetData, silentMETData);
+  fNormalizationSystematicsSignalRegion.fillControlPlotsForQCDShapeUncertainty(fEvent, collinearData, silentBjetData, silentMETData, silentBackToBackData);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationBaselineTauAfterStdSelections, isFakeTau, METvalue);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtBaselineTauAfterStdSelections, isFakeTau, myTransverseMass);
   
@@ -436,6 +454,9 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
 //====== Point of standard selections
   double myTransverseMass = TransverseMass::reconstruct(tau, silentMETData.getMET());
   fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
+  const BJetSelection::Data silentBjetData = fInvertedTauBJetSelection.silentAnalyze(fEvent, jetData);
+  const AngularCutsBackToBack::Data silentBackToBackData = fInvertedTauAngularCutsBackToBack.silentAnalyze(fEvent, tau, jetData, silentMETData);
+  fNormalizationSystematicsControlRegion.fillControlPlotsForQCDShapeUncertainty(fEvent, collinearData, silentBjetData, silentMETData, silentBackToBackData);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationInvertedTauAfterStdSelections, !isFakeTau, METvalue);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtInvertedTauAfterStdSelections, !isFakeTau, myTransverseMass);
   
