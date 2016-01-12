@@ -641,6 +641,68 @@ class QCDNormalizationManagerBase:
                 fOUT.write("#"+l+"\n")
         fOUT.close()
         print "Normalization factors written to '%s'"%filename
+        self._generateCoefficientPlot()
+
+    def _generateCoefficientPlot(self):
+        def makeGraph(markerStyle, color, binList, valueDict, upDict, downDict):
+            g = ROOT.TGraphAsymmErrors(len(binList))
+            for i in range(len(binList)):
+                g.SetPoint(i, i+0.5, valueDict[binList[i]])
+                g.SetPointEYhigh(i, upDict[binList[i]])
+                g.SetPointEYlow(i, downDict[binList[i]])
+            g.SetMarkerSize(1.4)
+            g.SetMarkerStyle(markerStyle)
+            g.SetLineColor(color)
+            g.SetLineWidth(2)
+            g.SetMarkerColor(color)
+            return g
+        # Obtain bin list in right order
+        keyList = []
+        keys = self._qcdNormalization.keys()
+        keys.sort()
+        for k in keys:
+            if "lt" in k:
+                keyList.append(k)
+        for k in keys:
+            if "eq" in k:
+                keyList.append(k)
+        for k in keys:
+            if "gt" in k:
+                keyList.append(k)
+        if "Inclusive" in keys:
+            keyList.append("Inclusive")
+        # Create graphs
+        gQCD = makeGraph(24, ROOT.kBlue, keyList, self._qcdNormalization, self._qcdNormalizationError, self._qcdNormalizationError)
+        gFake = makeGraph(27, ROOT.kRed, keyList, self._ewkFakesNormalization, self._ewkFakesNormalizationError, self._ewkFakesNormalizationError)
+        upError = {}
+        downError = {}
+        for k in keys:
+            upError[k] = self._combinedFakesNormalizationUp[k] - self._combinedFakesNormalization[k]
+            downError[k] = self._combinedFakesNormalization[k] - self._combinedFakesNormalizationDown[k]
+        gCombined = makeGraph(20, ROOT.kBlack, keyList, self._combinedFakesNormalization, upError, downError)
+        # Make plot
+        hFrame = ROOT.TH1F("frame","frame",len(keyList),0,len(keyList))
+        for i in range(len(keyList)):
+            hFrame.GetXaxis().SetBinLabel(i+1, keyList[i].replace("lt","<").replace("eq","=").replace("to","-").replace("gt",">"))
+        hFrame.SetMinimum(0.2)
+        hFrame.SetMaximum(0.5)
+        hFrame.GetYaxis().SetTitle("Normalization coefficient")
+        hFrame.GetXaxis().SetLabelSize(20)
+        c = ROOT.TCanvas()
+        hFrame.Draw()
+        gQCD.Draw("p same")
+        gFake.Draw("p same")
+        gCombined.Draw("p same")
+        histograms.addStandardTexts(cmsTextPosition="outframe")
+        l = ROOT.TLegend(0.2,0.7,0.5,0.9)
+        l.SetFillStyle(-1)
+        l.SetBorderSize(0)
+        l.AddEntry(gQCD, "Multijets", "p")
+        l.AddEntry(gFake, "EWK+tt mis-id #tau", "p")
+        l.AddEntry(gCombined, "Combined", "p")
+        l.Draw()
+        for item in ["png", "C", "pdf"]:
+            c.Print("QCDNormalisationCoefficients.%s"%item)
 
     ## Checks that input is valid
     def _checkInputValidity(self, templatesToBeFitted):
