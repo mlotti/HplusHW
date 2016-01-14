@@ -1,5 +1,6 @@
 from HiggsAnalysis.NtupleAnalysis.main import PSet
 import json
+import csv
 import os
 
 # This file contains all the scale factors and their uncertainties used in the analysis
@@ -91,7 +92,80 @@ def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, varia
         raise Exception("Error: Unsupported variation type '%s'! Valid options are: 'MC', 'data'"%variationType)
 
 ##===== Btag SF 
-
+# \param filename  Filename to the csv file provided by btag POG
+def obtainBtagSFDatabase(btagPset, filename, direction):
+    fullname = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), filename)
+    if not os.path.exists(fullname):
+        raise Exception("Error: Could not find btag POG btag SF payload csv file! (tried: %s)"%fullname)
+    # Obtain header row and rows
+    headerRow = None
+    rows = []
+    validAlgoHeaderPairs = {
+      "pfCombinedInclusiveSecondaryVertexV2BJetTags": "CSVv2"
+    }
+    if not btagPset.__getattr__("bjetDiscr") in validAlgoHeaderPairs.keys():
+        raise Exception("Error: No valid payload header ID has been specified for btag algo %s"%btagPset.__getattr__("bjetDiscr"))
+    directionLUT = { 
+      "nominal": " central",
+      "down": " down",
+      "up": " up"
+    }
+    workingPointLUT = {
+      "Loose": "0",
+      "Medium": "1",
+      "Tight": "2",
+    }
+    if not btagPset.__getattr__("bjetDiscrWorkingPoint") in workingPointLUT.keys():
+        raise Exception("Error: Btag working point '%s' is not defined in the look-up table!"%(btagPset.__getattr__("bjetDiscrWorkingPoint")))
+    # Column names in the btag payload file
+    headerColumnIndices = {
+      "OperatingPoint": None,
+      "measurementType": None,
+      "sysType": None,
+      "jetFlavor": None,
+      "etaMin": None,
+      "etaMax": None,
+      "ptMin": None,
+      "ptMax": None,
+      "discrMin": None,
+      "discrMax": None,
+      "formula": None
+    }
+    with open(fullname, 'rb') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            if headerRow == None:
+                headerRow = row[1:]
+                # Check that payload matches with tagger
+                if validAlgoHeaderPairs[btagPset.__getattr__("bjetDiscr")] != row[0]:
+                    raise Exception("Error: btag algo = %s is incompatible with btag SF payload file header '%s' (expected %s)!"%(btagPset.__getattr__("bjetDiscr"), row[0], validAlgoHeaderPairs[btagPset.__getattr__("bjetDiscr")]))
+                # Obtain column indices
+                for key in headerColumnIndices.keys():
+                    for i in range(len(headerRow)):
+                        if headerRow[i] == key or headerRow[i] == " "+key or headerRow[i] == " "+key+" ":
+                            headerColumnIndices[key] = i
+                    if headerColumnIndices[key] == None:
+                        raise Exception("Error: could not find column '%s' in file %s:\n  header = %s"%(key, fullname, headerRow))
+            else:
+                # Store only the rows which apply for the desired variation and working point
+                if row[headerColumnIndices["sysType"]] == directionLUT[direction]:
+                    if row[headerColumnIndices["OperatingPoint"]] == workingPointLUT[btagPset.__getattr__("bjetDiscrWorkingPoint")]:
+                        rows.append(row)
+    if len(rows) == 0:
+        raise Exception("Error: for unknown reason, no entries found from the btag SF payload (%s)!"%fullname)
+    # Convert output into vector of PSets
+    psetList = []
+    for row in rows:
+        p = PSet(jetFlavor=int(row[headerColumnIndices["jetFlavor"]]),
+                 ptMin=float(row[headerColumnIndices["ptMin"]]), 
+                 ptMax=float(row[headerColumnIndices["ptMax"]]), 
+                 etaMin=float(row[headerColumnIndices["etaMin"]]), 
+                 etaMax=float(row[headerColumnIndices["etaMax"]]), 
+                 discrMin=float(row[headerColumnIndices["discrMin"]]), 
+                 discrMax=float(row[headerColumnIndices["discrMax"]]), 
+                 formula=row[headerColumnIndices["formula"]])
+        psetList.append(p)
+    btagPset.btagSF = psetList
 
 ## Helper function
 def _assignTrgSF(name, binEdges, SF, SFup, SFdown, pset, direction):

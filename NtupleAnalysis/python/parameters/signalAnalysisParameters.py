@@ -97,6 +97,8 @@ bjetSelection = PSet(
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
 
+scaleFactors.obtainBtagSFDatabase(bjetSelection, "NtupleAnalysis/data/CSVv2.csv", "nominal")
+
 #====== MET selection
 metSelection = PSet(
            METCutValue = 120.0,
