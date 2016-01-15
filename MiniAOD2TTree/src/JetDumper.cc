@@ -105,19 +105,23 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       for(size_t i = 0; i < inputCollections.size(); ++i) {
         edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
         iSetup.get<JetCorrectionsRecord>().get(inputCollections[i].getParameter<std::string>("jecPayload"),JetCorParColl);
-        bool found = true;
+//        bool found = true;
         try {
           JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
+          fJECUncertainty.push_back(new JetCorrectionUncertainty(JetCorPar));
         } catch(cms::Exception e) {
           std::cout << "Warning: cannot find cell 'Uncertainty' in JEC uncertainty table; JEC uncertainty forced to 0" << std::endl;
-          found = false;
+//          found = false;
+          fJECUncertainty.push_back(nullptr);
         }
+/*
         if (found) {
           JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
           fJECUncertainty.push_back(new JetCorrectionUncertainty(JetCorPar));
         } else {
           fJECUncertainty.push_back(nullptr);
         }
+*/
       }
     }
 
