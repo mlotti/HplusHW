@@ -180,6 +180,18 @@ config = {
         "recoProcess": "RECO",
         "globalTag": "74X_mcRun2_asymptotic_v2",
         "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
+    },
+    "76Xdata": {
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+        "globalTag": "76X_dataRun2_HLT_frozen_v9",
+    },
+    "76Xmc": {
+        "simProcess": "SIM",
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+        "globalTag": "76X_mcRun2_asymptotic_v13",
+        "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
     }
 }
 
