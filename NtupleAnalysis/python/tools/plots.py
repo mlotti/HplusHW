@@ -2910,12 +2910,14 @@ class PlotDrawer:
         p.frame.GetYaxis().SetTitle(ylabel)
         xlabsize = self._getValue("xlabelsize", p, kwargs)
         if xlabsize is None:
-            xlabsize = p.histoMgr.getHistos()[0].getRootHisto().GetXaxis().GetLabelSize()
+            if not isinstance(p.histoMgr.getHistos()[0].getRootHisto(), ROOT.TEfficiency):
+                xlabsize = p.histoMgr.getHistos()[0].getRootHisto().GetXaxis().GetLabelSize()
         else:
             p.frame.GetXaxis().SetLabelSize(xlabsize)
         ylabsize = self._getValue("ylabelsize", p, kwargs)
         if ylabsize is None:
-            ylabsize = p.histoMgr.getHistos()[0].getRootHisto().GetYaxis().GetLabelSize()
+            if not isinstance(p.histoMgr.getHistos()[0].getRootHisto(), ROOT.TEfficiency):
+                ylabsize = p.histoMgr.getHistos()[0].getRootHisto().GetYaxis().GetLabelSize()
         else:
             p.frame.GetYaxis().SetLabelSize(ylabsize)
 
