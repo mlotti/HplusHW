@@ -97,7 +97,10 @@ bjetSelection = PSet(
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
 
-scaleFactors.obtainBtagSFDatabase(bjetSelection, "NtupleAnalysis/data/CSVv2.csv", "nominal")
+scaleFactors.setupBtagSFInformation(btagPset=bjetSelection, 
+                                    btagPayloadFilename="CSVv2.csv",
+                                    btagEfficiencyFilename="btageff_TTJets.json",
+                                    direction="nominal")
 
 #====== MET selection
 metSelection = PSet(

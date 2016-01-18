@@ -47,7 +47,20 @@ class AnalysisConfig:
                 elif value.startswith("METTrgEff"):
                     variationType = value.replace("METTrgEff","").replace("Minus","").replace("Plus","")
                     scaleFactors.assignMETTriggerSF(self._config.METSelection, self._config.BJetSelection.bjetDiscrWorkingPoint, self._getDirectionString(value), variationType)
-		# B and top quarks
+		# b tag SF
+		elif value.startswith("BTagSF") or value.startswith("BMistagSF"):
+                    variationType = None
+                    if value.startswith("BTagSF"):
+                        variationType = "tag"
+                    elif value.startswith("BMistagSF"):
+                        variationType = "mistag"
+                    direction = value.replace("BTagSF","").replace("BMistagSF","").replace("Minus","down").replace("Plus","up")
+                    scaleFactors.setupBtagSFInformation(self._config.BJetSelection,
+                                                        btagPayloadFilename="CSVv2.csv",
+                                                        btagEfficiencyFilename="btageff_TTJets.json",
+                                                        direction=direction,
+                                                        variationInfo=variationType)
+		# top quarks
 		elif value.startswith("TopPt"):
                     self._config.topPtSystematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
 		else:
@@ -125,8 +138,9 @@ class AnalysisBuilder:
               items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet"])
               # Energy scales and JER systematics
               items.extend(["tauES", "JES"]), # "JER", "UES"])
-              # b and top quarks systematics
-              #items.extend("BTagSF", "BMistagSF")
+              # b quark systematics
+              items.extend(["BTagSF", "BMistagSF"])
+              # top quark systematics
               if self._useTopPtReweighting:
                   items.append("TopPt") 
               # PU weight systematics
