@@ -195,9 +195,9 @@ void SignalAnalysis::process(Long64_t entry) {
 
 //====== b tag SF
   if (fEvent.isMC()) {
-    // FIXME missing code
-    cBTaggingSFCounter.increment();
+    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
   }
+  cBTaggingSFCounter.increment();
 
 //====== MET selection
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);

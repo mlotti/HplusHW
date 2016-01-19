@@ -393,7 +393,7 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
 
 //====== b tag SF
   if (fEvent.isMC()) {
-    // FIXME missing code
+    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     cBaselineTauBTaggingSFCounter.increment();
   }
 
@@ -467,7 +467,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
 
 //====== b tag SF
   if (fEvent.isMC()) {
-    // FIXME missing code
+    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     cInvertedTauBTaggingSFCounter.increment();
   }
 

@@ -4,6 +4,7 @@
 
 #include "EventSelection/interface/BaseSelection.h"
 #include "EventSelection/interface/JetSelection.h"
+#include "EventSelection/interface/BTagSFCalculator.h"
 #include "Framework/interface/EventCounter.h"
 #include "Tools/interface/DirectionalCut.h"
 
@@ -88,6 +89,8 @@ private:
   Count cSubAll;
   Count cSubPassedDiscriminator;
   Count cSubPassedNBjets;
+  // Scalefactor calculator
+  BTagSFCalculator fBTagSFCalculator;
   // Histograms
   std::vector<WrappedTH1*> hSelectedBJetPt;
   std::vector<WrappedTH1*> hSelectedBJetEta;
