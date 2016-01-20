@@ -12,7 +12,7 @@ BTagSFInputItem::BTagSFInputItem(float ptMin, float ptMax, const std::string for
   int v = fFormula.Compile(formula.c_str());
   if (v) {
     throw hplus::Exception("config") << "BTag SF formula '" << formula << "' does not compile for TFormula!";
-  }  
+  }
 }
 
 BTagSFInputItem::BTagSFInputItem(float ptMin, float ptMax, float eff)
@@ -22,9 +22,9 @@ BTagSFInputItem::BTagSFInputItem(float ptMin, float ptMax, float eff)
   std::stringstream s;
   s << eff;
   int v = fFormula.Compile(s.str().c_str());
-  if (!v) {
+  if (v) {
     throw hplus::Exception("config") << "BTag SF formula '" << eff << "' does not compile for TFormula!";
-  }  
+  }
 }
 
 BTagSFInputItem::~BTagSFInputItem() { }
@@ -38,14 +38,21 @@ bool BTagSFInputItem::matchesPtRange(float pt) const {
   return false;
 }
 
+float BTagSFInputItem::getValueByPt(float pt) const {
+  if (!matchesPtRange(pt)) {
+    throw hplus::Exception("assert") << "The requested pt (" << pt << ") is out of range!";
+  }
+  return fFormula.Eval(pt);
+}
+
 BTagSFCalculator::BTagSFCalculator(const ParameterSet& config)
 : isActive(true) {
-  handleEfficiencyInput(config.getParameter<std::vector<ParameterSet>>("btagEfficiency"));
+  handleEfficiencyInput(config.getParameterOptional<std::vector<ParameterSet>>("btagEfficiency"));
   setOverflowBin(fBToBEfficiency);
   setOverflowBin(fCToBEfficiency);
   setOverflowBin(fGToBEfficiency);
   setOverflowBin(fUdsToBEfficiency);
-  handleSFInput(config.getParameter<std::vector<ParameterSet>>("btagSF"));
+  handleSFInput(config.getParameterOptional<std::vector<ParameterSet>>("btagSF"));
   setOverflowBin(fBToBSF);
   setOverflowBin(fCToBSF);
   setOverflowBin(fGToBSF);
@@ -57,10 +64,19 @@ BTagSFCalculator::BTagSFCalculator(const ParameterSet& config)
   }
 }
 
-BTagSFCalculator::~BTagSFCalculator() { }
+BTagSFCalculator::~BTagSFCalculator() {
+  fBToBEfficiency.clear();
+  fCToBEfficiency.clear();
+  fGToBEfficiency.clear();
+  fUdsToBEfficiency.clear();
+  fBToBSF.clear();
+  fCToBSF.clear();
+  fGToBSF.clear();
+  fUdsToBSF.clear();
+}
 
 void BTagSFCalculator::bookHistograms(TDirectory* dir, HistoWrapper& histoWrapper) {
-  hBTagSF = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "btagSF", "btag SF", 500, 0., 5.);
+  //hBTagSF = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "btagSF", "btag SF", 500, 0., 5.);
 }
 
 float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, const std::vector<Jet>& selectedBJets) {
@@ -70,7 +86,7 @@ float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, const 
   for (auto &jet: selectedJets) {
     // See if the jet passed the b jet selection
     bool passedBJetSelection = false;
-    for (auto &bjet: selectedJets) {
+    for (auto &bjet: selectedBJets) {
       if (std::abs(jet.bjetDiscriminator() - bjet.bjetDiscriminator()) < 0.0001) {
         passedBJetSelection = true;
       }
@@ -98,13 +114,39 @@ float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, const 
     } else {
       totalSF *= (1.0 - eff * sf) / (1 - eff);
     }
+    //std::cout << totalSF << std::endl;
   }
-  hBTagSF->Fill(totalSF);
+  //hBTagSF->Fill(totalSF);
   return totalSF;
 }
 
-void BTagSFCalculator::handleEfficiencyInput(std::vector<ParameterSet> psets) {
-  for (auto p: psets) {
+size_t BTagSFCalculator::sizeOfEfficiencyList(BTagJetFlavorType flavor) const {
+  if (flavor == kBJet)
+    return fBToBEfficiency.size();
+  if (flavor == kCJet)
+    return fCToBEfficiency.size();
+  if (flavor == kGJet)
+    return fGToBEfficiency.size();
+  if (flavor == kUDSJet)
+    return fUdsToBEfficiency.size();
+  return 0;
+}
+
+size_t BTagSFCalculator::sizeOfSFList(BTagJetFlavorType flavor) const {
+  if (flavor == kBJet)
+    return fBToBSF.size();
+  if (flavor == kCJet)
+    return fCToBSF.size();
+  if (flavor == kGJet)
+    return fGToBSF.size();
+  if (flavor == kUDSJet)
+    return fUdsToBSF.size();
+  return 0; 
+}
+
+void BTagSFCalculator::handleEfficiencyInput(boost::optional<std::vector<ParameterSet>> psets) {
+  if (!psets) return;
+  for (auto &p: *psets) {
     // Obtain variables
     float ptMin = p.getParameter<float>("ptMin");
     float ptMax = p.getParameter<float>("ptMax");
@@ -121,10 +163,12 @@ void BTagSFCalculator::handleEfficiencyInput(std::vector<ParameterSet> psets) {
     else if (flavor == kUDSJet || flavor == kUDSGJet)
       fUdsToBEfficiency.push_back(BTagSFInputItem(ptMin, ptMax, s.str()));
   }
+  //std::cout << fBToBEfficiency.size() << " " << fCToBEfficiency.size() << " " << fGToBEfficiency.size() << " " << fUdsToBEfficiency.size() << std::endl;
 }
 
-void BTagSFCalculator::handleSFInput(std::vector<ParameterSet> psets) {
-  for (auto p: psets) {
+void BTagSFCalculator::handleSFInput(boost::optional<std::vector<ParameterSet>> psets) {
+  if (!psets) return;
+  for (auto &p: *psets) {
     // Obtain variables
     float ptMin = p.getParameter<float>("ptMin");
     float ptMax = p.getParameter<float>("ptMax");
@@ -133,13 +177,14 @@ void BTagSFCalculator::handleSFInput(std::vector<ParameterSet> psets) {
     // Store item
     if (flavor == kBJet)
       fBToBSF.push_back(BTagSFInputItem(ptMin, ptMax, s));
-    else if (flavor == kCJet)
+    if (flavor == kCJet)
       fCToBSF.push_back(BTagSFInputItem(ptMin, ptMax, s));
-    else if (flavor == kGJet || flavor == kUDSGJet)
+    if (flavor == kGJet || flavor == kUDSGJet)
       fGToBSF.push_back(BTagSFInputItem(ptMin, ptMax, s));
-    else if (flavor == kUDSJet || flavor == kUDSGJet)
+    if (flavor == kUDSJet || flavor == kUDSGJet)
       fUdsToBSF.push_back(BTagSFInputItem(ptMin, ptMax, s));
   }
+  //std::cout << fBToBSF.size() << " " << fCToBSF.size() << " " << fGToBSF.size() << " " << fUdsToBSF.size() << std::endl;
 }
 
 BTagSFCalculator::BTagJetFlavorType BTagSFCalculator::getFlavorTypeForEfficiency(std::string str) const {
@@ -171,14 +216,16 @@ void BTagSFCalculator::setOverflowBin(std::vector<BTagSFInputItem>& container) {
   float maxValue = -1.0;
   int index = -1;
   int i = 0;
-  for (auto p: container) {
+  for (auto &p: container) {
     if (maxValue > p.getPtMax()) {
       maxValue = p.getPtMax();
       index = i;
     }
     ++i;
   }
-  container[index].setAsOverflowBinPt();
+  if (index >= 0) {
+    container[index].setAsOverflowBinPt();
+  }
 }
 
 float BTagSFCalculator::getInputValueByPt(std::vector<BTagSFInputItem>& container, float pt) {

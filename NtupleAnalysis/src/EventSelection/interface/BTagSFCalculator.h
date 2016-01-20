@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "TFormula.h"
+#include "boost/optional.hpp"
 
 class ParameterSet;
 class HistoWrapper;
@@ -26,7 +27,7 @@ public:
   /// Returns true if the jet pt is higher than the range of this input item
   bool isGreaterThanPtRange(float pt) const { return pt > fPtMax; }
   /// Returns the input value
-  float getValueByPt(float pt) const { return fFormula.Eval(pt); }
+  float getValueByPt(float pt) const;
   /// Returns ptmax
   float getPtMax() const { return fPtMax; }
   /// Set as overflow bin
@@ -57,12 +58,16 @@ public:
   void bookHistograms(TDirectory* dir, HistoWrapper& histoWrapper);
   /// Calculate scale factor for the event
   float calculateSF(const std::vector<Jet>& selectedJets, const std::vector<Jet>& selectedBJets);
+  /// Returns the size of the efficiency config items
+  size_t sizeOfEfficiencyList(BTagJetFlavorType flavor) const;
+  /// Returns the size of the SF config items
+  size_t sizeOfSFList(BTagJetFlavorType flavor) const;
   
 private:
   /// Method for handling the efficiency input
-  void handleEfficiencyInput(std::vector<ParameterSet> psets);
+  void handleEfficiencyInput(boost::optional<std::vector<ParameterSet>> psets);
   /// Method for handling the SF input
-  void handleSFInput(std::vector<ParameterSet> psets);
+  void handleSFInput(boost::optional<std::vector<ParameterSet>> psets);
   /// Method for converting flavor string to flavor type
   BTagJetFlavorType getFlavorTypeForEfficiency(std::string str) const;
   /// Method for converting flavor string to flavor type
