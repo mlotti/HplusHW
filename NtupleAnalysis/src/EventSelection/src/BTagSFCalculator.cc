@@ -76,7 +76,7 @@ BTagSFCalculator::~BTagSFCalculator() {
 }
 
 void BTagSFCalculator::bookHistograms(TDirectory* dir, HistoWrapper& histoWrapper) {
-  //hBTagSF = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "btagSF", "btag SF", 500, 0., 5.);
+  hBTagSF = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "btagSF", "btag SF", 500, 0., 5.);
 }
 
 float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, const std::vector<Jet>& selectedBJets) {
@@ -116,7 +116,7 @@ float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, const 
     }
     //std::cout << totalSF << std::endl;
   }
-  //hBTagSF->Fill(totalSF);
+  hBTagSF->Fill(totalSF);
   return totalSF;
 }
 
