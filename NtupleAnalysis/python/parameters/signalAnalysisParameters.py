@@ -99,7 +99,9 @@ bjetSelection = PSet(
 
 scaleFactors.setupBtagSFInformation(btagPset=bjetSelection, 
                                     btagPayloadFilename="CSVv2.csv",
-                                    btagEfficiencyFilename="btageff_TTJets.json",
+                                    #btagEfficiencyFilename="btageff_TTJets.json",
+                                    #btagEfficiencyFilename="btageff_WJetsHT.json",
+                                    btagEfficiencyFilename="btageff_hybrid.json",
                                     direction="nominal")
 
 #====== MET selection

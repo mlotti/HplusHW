@@ -153,7 +153,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   }
   
   // Calculate and store b-jet scale factor weight and it's uncertainty
-  output.fBTaggingScaleFactorEventWeight = fBTagSFCalculator.calculateSF(output.fSelectedBJets, jetData.getSelectedJets());
+  output.fBTaggingScaleFactorEventWeight = fBTagSFCalculator.calculateSF(jetData.getSelectedJets(), output.fSelectedBJets);
   
   // Calculate probability for passing b tag cut without actually applying the cut
   output.fBTaggingPassProbability = calculateBTagPassingProbability(iEvent, jetData);

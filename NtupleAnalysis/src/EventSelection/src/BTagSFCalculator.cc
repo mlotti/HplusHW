@@ -105,17 +105,21 @@ float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, const 
     } else if (flavor == 21) { // g jet
       sf = getInputValueByPt(fGToBSF, jet.pt());
       eff = getInputValueByPt(fGToBEfficiency, jet.pt());
-    } else if (flavor == 1 || flavor == 2 || flavor == 3) { // uds jet
+    } else if (flavor == 0 || flavor == 1 || flavor == 2 || flavor == 3) { // uds jet
       sf = getInputValueByPt(fUdsToBSF, jet.pt());
       eff = getInputValueByPt(fUdsToBEfficiency, jet.pt());
+    } else {
+      throw hplus::Exception("Logic") << "Jet flavor " << flavor << " is not supported!";
     }
     if (passedBJetSelection) {
       totalSF *= sf;
     } else {
-      totalSF *= (1.0 - eff * sf) / (1 - eff);
+      totalSF *= (1.0 - eff * sf) / (1.0 - eff);
     }
+    //std::cout << "jet: flavor=" << flavor << " pt=" << jet.pt() << " pass=" << passedBJetSelection << " eff=" << eff << " sf=" << sf << std::endl;
     //std::cout << totalSF << std::endl;
   }
+  //std::cout << "SF=" << totalSF << std::endl;
   hBTagSF->Fill(totalSF);
   return totalSF;
 }

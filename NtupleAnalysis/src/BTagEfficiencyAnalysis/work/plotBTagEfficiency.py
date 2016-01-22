@@ -6,6 +6,10 @@ import array
 import json
 from optparse import OptionParser
 
+import ROOT
+ROOT.gROOT.SetBatch(True)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
@@ -14,9 +18,6 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 
-import ROOT
-ROOT.gROOT.SetBatch(True)
-ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 def findModuleNames(multicrabdir, prefix):
     items = os.listdir(multicrabdir)
@@ -192,7 +193,7 @@ def main():
     # Object for selecting data eras, search modes, and optimization modes
     myModuleSelector = analysisModuleSelector.AnalysisModuleSelector()
 
-    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
+    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
     myModuleSelector.addParserOptions(parser)
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", help="Path to the multicrab directory for input")
     parser.add_option("-d", "--dataset", dest="dataset", action="store", help="Name of the dataset to be plotted")

@@ -98,6 +98,7 @@ def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, varia
 # \param direction  "nominal"/"down"/"up"
 # \param variationInfo  "tag"/"mistag" This parameter specifies if the variation is applied for the b->b component or non-b->b component
 def setupBtagSFInformation(btagPset, btagPayloadFilename, btagEfficiencyFilename, direction, variationInfo=None):
+    #print "Settting btagSF: %s, %s"%(btagPayloadFilename, btagEfficiencyFilename)
     # Process the csv from the btag POG and add the relevant information to the PSet
     _setupBtagSFDatabase(btagPset, btagPayloadFilename, direction, variationInfo)
     # Process the json produced with BTagEfficiencyAnalysis and add the relevant information to the PSet
