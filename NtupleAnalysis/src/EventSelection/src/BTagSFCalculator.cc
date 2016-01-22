@@ -114,7 +114,12 @@ float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, const 
     if (passedBJetSelection) {
       totalSF *= sf;
     } else {
-      totalSF *= (1.0 - eff * sf) / (1.0 - eff);
+      float value = std::abs((1.0 - eff * sf) / (1.0 - eff));
+      if (std::abs(eff-1.0) < 0.00001 || value > 2.0) {
+        std::cout << "jet: flavor=" << flavor << " pt=" << jet.pt() << " pass=" << passedBJetSelection << " eff=" << eff << " sf=" << sf << std::endl;
+        value = 1.0;
+      }
+      totalSF *= value;
     }
     //std::cout << "jet: flavor=" << flavor << " pt=" << jet.pt() << " pass=" << passedBJetSelection << " eff=" << eff << " sf=" << sf << std::endl;
     //std::cout << totalSF << std::endl;
@@ -221,7 +226,7 @@ void BTagSFCalculator::setOverflowBin(std::vector<BTagSFInputItem>& container) {
   int index = -1;
   int i = 0;
   for (auto &p: container) {
-    if (maxValue > p.getPtMax()) {
+    if (p.getPtMax() > maxValue) {
       maxValue = p.getPtMax();
       index = i;
     }
@@ -238,5 +243,6 @@ float BTagSFCalculator::getInputValueByPt(std::vector<BTagSFInputItem>& containe
       return p.getValueByPt(pt);
     }
   }
+  throw hplus::Exception("Logic") << "Jet pt " << pt << " is out of range for btag SF calculation!";
   return 1.0;
 }
