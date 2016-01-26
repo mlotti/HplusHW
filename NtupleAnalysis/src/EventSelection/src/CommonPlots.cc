@@ -118,9 +118,9 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
     myFakeLabel += "QCDNormalizationControlEWKFakeTaus";
     myGenuineLabel += "QCDNormalizationControlEWKGenuineTaus";
   }
-  TDirectory* myCtrlDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myLabel);
-  TDirectory* myCtrlEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
-  TDirectory* myCtrlGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
+  TDirectory* myCtrlDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myLabel);
+  TDirectory* myCtrlEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
+  TDirectory* myCtrlGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myDirs2 = {myCtrlDir, myCtrlEWKFakeTausDir};
   std::vector<TDirectory*> myDirs3 = {myCtrlDir, myCtrlEWKFakeTausDir, myCtrlGenuineTausDir};
   std::vector<TDirectory*> myDirs;

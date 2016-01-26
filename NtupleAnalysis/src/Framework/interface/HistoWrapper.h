@@ -138,7 +138,10 @@ public:
   WrappedBase(const HistoWrapper& histoWrapper, T *histo, HistoLevel level):
     h(histo), fHistoWrapper(histoWrapper), fLevel(level) {}
   ~WrappedBase() {
-    if (isActive()) h->Delete();
+    if (h != nullptr) {
+      h->Delete();
+      h = nullptr;
+    }
   }
 
   /// Returns true if the histogram exists
@@ -231,9 +234,12 @@ public:
   ~WrappedTHxTripletBase() { 
     if (isActive()) {
       hInclusive->Delete();
+      hInclusive = nullptr;
       hFalse->Delete();
+      hFalse = nullptr;
       if (hTrue != nullptr) {
         hTrue->Delete();
+        hTrue = nullptr;
       }
     }
   }

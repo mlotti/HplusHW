@@ -91,7 +91,8 @@ HistoSplitter::HistoSplitter(const ParameterSet& config, HistoWrapper& histoWrap
   
 HistoSplitter::~HistoSplitter() {
   fHistoSplitterItems.clear();
-  delete hBinInfo;
+  // Commented out because it makes QCD measurement crash for unknown reason
+  //delete hBinInfo;
 }
 
 void HistoSplitter::bookHistograms(TDirectory* dir) {
@@ -100,16 +101,16 @@ void HistoSplitter::bookHistograms(TDirectory* dir) {
   if (hBinInfo->isActive()) {
     hBinInfo->getHisto()->GetXaxis()->SetBinLabel(1, "Control"); // Needed when merging histograms (divide by this number the other bins)
     hBinInfo->SetBinContent(1, 1);
+    // Fill binning information histogram
+    for (size_t i = 0; i < fHistoSplitterItems.size(); ++i) {
+      // Fill histogram
+      hBinInfo->getHisto()->GetXaxis()->SetBinLabel(i+2, fHistoSplitterItems[i].getLabel().c_str());
+      hBinInfo->SetBinContent(i+2, fHistoSplitterItems[i].getBinCount());
+    }
+    // Add control count - Needed when merging histograms (divide by this number the other bins)
+    hBinInfo->getHisto()->GetXaxis()->SetBinLabel(1, "Control");
+    hBinInfo->SetBinContent(1, 1);
   }
-  // Fill binning information histogram
-  for (size_t i = 0; i < fHistoSplitterItems.size(); ++i) {
-    // Fill histogram
-    hBinInfo->getHisto()->GetXaxis()->SetBinLabel(i+2, fHistoSplitterItems[i].getLabel().c_str());
-    hBinInfo->SetBinContent(i+2, fHistoSplitterItems[i].getBinCount());
-  }
-  // Add control count - Needed when merging histograms (divide by this number the other bins)
-  hBinInfo->getHisto()->GetXaxis()->SetBinLabel(1, "Control");
-  hBinInfo->SetBinContent(1, 1);
 }
 
 void HistoSplitter::initialize() {

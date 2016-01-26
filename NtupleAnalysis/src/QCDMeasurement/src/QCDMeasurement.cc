@@ -12,7 +12,7 @@
 class QCDMeasurement: public BaseSelector {
 public:
   explicit QCDMeasurement(const ParameterSet& config);
-  virtual ~QCDMeasurement() {}
+  virtual ~QCDMeasurement();
 
   /// Books histograms
   virtual void book(TDirectory *dir) override;
@@ -146,6 +146,15 @@ QCDMeasurement::QCDMeasurement(const ParameterSet& config)
   cInvertedTauSelectedEvents(fEventCounter.addCounter("InvertedTau: selected events"))
 { }
 
+QCDMeasurement::~QCDMeasurement() {
+  fCommonPlots.getHistoSplitter().deleteHistograms(hNormalizationBaselineTauAfterStdSelections);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hMtBaselineTauAfterStdSelections);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hNormalizationInvertedTauAfterStdSelections);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hMtInvertedTauAfterStdSelections);
+  delete hInvertedTauTauPtAfterAllSelections;
+  fCommonPlots.getHistoSplitter().deleteHistograms(hBaselineTauTransverseMass);
+}
+
 void QCDMeasurement::book(TDirectory *dir) {
   // Book common plots histograms
   fCommonPlots.book(dir, isData());
@@ -178,9 +187,9 @@ void QCDMeasurement::book(TDirectory *dir) {
   std::string myInclusiveLabel = "ForQCDNormalization";
   std::string myFakeLabel = myInclusiveLabel+"EWKFakeTaus";
   std::string myGenuineLabel = myInclusiveLabel+"EWKGenuineTaus";
-  TDirectory* myNormDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myInclusiveLabel);
-  TDirectory* myNormEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
-  TDirectory* myNormGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
+  TDirectory* myNormDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel);
+  TDirectory* myNormEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
+  TDirectory* myNormGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myNormalizationDirs = {myNormDir, myNormEWKFakeTausDir, myNormGenuineTausDir};
 
   // Normalization bin settings
@@ -218,9 +227,9 @@ void QCDMeasurement::book(TDirectory *dir) {
   myInclusiveLabel = "QCDPurity";
   myFakeLabel = myInclusiveLabel+"EWKFakeTaus";
   myGenuineLabel = myInclusiveLabel+"EWKGenuineTaus";
-  TDirectory* myPurityDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myInclusiveLabel);
-  TDirectory* myPurityEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
-  TDirectory* myPurityGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
+  TDirectory* myPurityDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel);
+  TDirectory* myPurityEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
+  TDirectory* myPurityGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myPurityDirs = {myPurityDir, myPurityEWKFakeTausDir, myPurityGenuineTausDir};
   const int nPtBins = fCommonPlots.getPtBinSettings().bins();
   const float fPtMin = fCommonPlots.getPtBinSettings().min();
@@ -236,9 +245,9 @@ void QCDMeasurement::book(TDirectory *dir) {
   myInclusiveLabel = "ForQCDMeasurement";
   myFakeLabel = myInclusiveLabel+"EWKFakeTaus";
   myGenuineLabel = myInclusiveLabel+"EWKGenuineTaus";
-  TDirectory* myQCDDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myInclusiveLabel);
-  TDirectory* myQCDEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
-  TDirectory* myQCDGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
+  TDirectory* myQCDDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel);
+  TDirectory* myQCDEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
+  TDirectory* myQCDGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myQCDPlotDirs = {myQCDDir, myQCDEWKFakeTausDir, myQCDGenuineTausDir};
 
   // Create shape histograms for baseline tau (inverted tau histograms are in common plots)
