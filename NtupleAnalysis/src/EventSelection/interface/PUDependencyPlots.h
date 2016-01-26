@@ -7,7 +7,7 @@
 class PUDependencyPlots : public CommonPlotsBase {
 public:
   PUDependencyPlots(HistoWrapper& histoWrapper, bool isEnabled, const HistogramSettings& settings);
-  ~PUDependencyPlots() { }
+  ~PUDependencyPlots();
   
   void setNvtx(int nvtx) { fNvtx = nvtx; }
   

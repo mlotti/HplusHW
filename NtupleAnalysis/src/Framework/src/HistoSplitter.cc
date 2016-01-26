@@ -89,7 +89,10 @@ HistoSplitter::HistoSplitter(const ParameterSet& config, HistoWrapper& histoWrap
   initialize();
 }
   
-HistoSplitter::~HistoSplitter() { }
+HistoSplitter::~HistoSplitter() {
+  fHistoSplitterItems.clear();
+  delete hBinInfo;
+}
 
 void HistoSplitter::bookHistograms(TDirectory* dir) {
   // Create histogram with binning information

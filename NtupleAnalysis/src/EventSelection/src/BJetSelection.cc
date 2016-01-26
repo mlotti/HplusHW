@@ -47,7 +47,10 @@ BJetSelection::BJetSelection(const ParameterSet& config)
   bookHistograms(new TDirectory());
 }
 
-BJetSelection::~BJetSelection() { }
+BJetSelection::~BJetSelection() {
+  for (auto p: hSelectedBJetPt) delete p;
+  for (auto p: hSelectedBJetEta) delete p;
+}
 
 void BJetSelection::initialize(const ParameterSet& config) {
   // Obtain algorithm and working point

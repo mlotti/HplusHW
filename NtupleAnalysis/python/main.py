@@ -430,11 +430,6 @@ class Process:
             else:
                 tchain.Process(tselector)
 
-            timeStop = time.time()
-            clockStop = time.clock()
-            readCallsStop = ROOT.TFile.GetFileReadCalls()
-            readBytesStop = ROOT.TFile.GetFileBytesRead()
-
             # Obtain Nall events for top pt corrections
             NAllEventsTopPt = 0
             if useTopPtCorrection:
@@ -468,8 +463,10 @@ class Process:
             configInfo.cd()
             dv = ROOT.TNamed("dataVersion", str(dset.getDataVersion()))
             dv.Write()
+            dv.Delete()
             cv = ROOT.TNamed("codeVersionAnalysis", git.getCommitId())
             cv.Write()
+            cv.Delete()
             if not cinfo == None:
                 # Add more information to configInfo
                 n = cinfo.GetNbinsX()
@@ -490,7 +487,7 @@ class Process:
                 cinfo.Write()
                 fIN.Close()
 
-            # Sum skim counters counters (from ttree)
+            # Sum skim counters (from ttree)
             hSkimCounterSum = None
             fINs = None
             for inname in dset.getFileNames():
@@ -500,6 +497,7 @@ class Process:
                     hSkimCounterSum = hSkimCounters.Clone()
                 else:
                     hSkimCounterSum.Add(hSkimCounters)
+                hSkimCounters.Delete()
                 if fINs == None:
                     fINs = []
                 fINs.append(fIN)
@@ -513,8 +511,8 @@ class Process:
                             dirlist.append(key.GetTitle())
                 # Add skim counters to the counter histograms
                 for d in dirlist:
-                    hCounter = tf.Get("%s/counters/counter"%d).Clone()
-                    hCounterWeighted = tf.Get("%s/counters/weighted/counter"%d).Clone()
+                    hCounter = tf.Get("%s/counters/counter"%d)
+                    hCounterWeighted = tf.Get("%s/counters/weighted/counter"%d)
                     # Resize axis
                     nCounters = hCounter.GetNbinsX()
                     nSkimCounters = hSkimCounterSum.GetNbinsX()
@@ -542,13 +540,25 @@ class Process:
                     hCounterWeighted.Sumw2(False)
                     hCounterWeighted.Sumw2()
                     tf.cd("%s/counters"%d)
+                    tf.CurrentDirectory().Delete("counter")
                     hCounter.Write("counter", ROOT.TObject.kOverwrite)
                     tf.cd("%s/counters/weighted"%d)
+                    tf.CurrentDirectory().Delete("counter")
                     hCounterWeighted.Write("counter", ROOT.TObject.kOverwrite)
+                    hCounter.Delete()
+                    hCounterWeighted.Delete()
+            configInfo.Delete()
+            if hSkimCounterSum != None:
+                hSkimCounterSum.Delete()
             if fINs != None:
                 for f in fINs:
                   f.Close()
             tf.Close()
+
+            timeStop = time.time()
+            clockStop = time.clock()
+            readCallsStop = ROOT.TFile.GetFileReadCalls()
+            readBytesStop = ROOT.TFile.GetFileBytesRead()
 
             calls = ""
             if _proof is not None:

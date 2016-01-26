@@ -26,6 +26,8 @@ BaseSelector::BaseSelector(const ParameterSet& config):
 
 BaseSelector::~BaseSelector() {
   fEventCounter.serialize();
+  delete hNvtxBeforeVtxReweighting;
+  delete hNvtxAfterVtxReweighting;
 }
 
 void BaseSelector::bookInternal(TDirectory *dir) {

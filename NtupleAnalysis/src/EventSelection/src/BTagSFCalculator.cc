@@ -170,7 +170,10 @@ BTagSFCalculator::BTagSFCalculator(const ParameterSet& config)
   }
 }
 
-BTagSFCalculator::~BTagSFCalculator() { }
+BTagSFCalculator::~BTagSFCalculator() {
+  delete hBTagSF;
+  delete hBTagSFRelUncert;
+}
 
 void BTagSFCalculator::bookHistograms(TDirectory* dir, HistoWrapper& histoWrapper) {
   hBTagSF = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "btagSF", "btag SF", 500, 0., 5.);

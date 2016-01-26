@@ -4,6 +4,7 @@
 #include "Framework/interface/SelectorFactory.h"
 #include "Framework/interface/EventSaver.h"
 
+#include "TROOT.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TProofOutputFile.h"
@@ -35,8 +36,7 @@ SelectorImpl::SelectorImpl():
   bIsttbar(false)
 {}
 
-SelectorImpl::~SelectorImpl() {
-}
+SelectorImpl::~SelectorImpl() { }
 
 Int_t SelectorImpl::Version() const {
   return 2;
@@ -250,6 +250,17 @@ void SelectorImpl::SlaveTerminate() {
   }
   fOutputFile = nullptr;
   fProofFile = nullptr;
+  
+//   std::cout << "***Slaveterminate" << std::endl;
+//   std::cout << "gDirectory" << gDirectory->GetList()->GetSize() << std::endl;
+//   std::cout << "list " << gROOT->GetList()->GetSize() << std::endl;
+//   std::cout << "globals " << gROOT->GetListOfGlobals()->GetSize() << std::endl;
+//   std::cout << "files" << gROOT->GetListOfFiles()->GetSize() << std::endl;
+//   TIter next(gROOT->GetListOfFiles());
+//   while (TFile* o = dynamic_cast<TFile*>(next())) {
+//     std::cout << "  file1: " << o->GetSize() << std::endl;
+//   }
+//   std::cout << "specials " << gROOT->GetListOfSpecials()->GetSize() << std::endl;
 }
 
 void SelectorImpl::Terminate() {

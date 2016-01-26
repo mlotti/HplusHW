@@ -3,6 +3,7 @@
 #include "EventSelection/interface/PUDependencyPlots.h"
 #include "DataFormat/interface/Event.h"
 
+
 CommonPlots::CommonPlots(const ParameterSet& config, const AnalysisType type, HistoWrapper& histoWrapper)
 : fEnableGenuineTauHistograms(true), // Needed always for limits
   //fEnableGenuineTauHistograms(config.getParameter<bool>("enableGenuineTauHistograms")),
@@ -25,8 +26,9 @@ CommonPlots::CommonPlots(const ParameterSet& config, const AnalysisType type, Hi
   fAngularCuts1DSettings(config.getParameter<ParameterSet>("angularCuts1DBins")),
   //fTopMassBinSettings(config.getParameter<ParameterSet>("topMassBins")),
   //fWMassBinSettings(config.getParameter<ParameterSet>("WMassBins")),
-  fMtBinSettings(config.getParameter<ParameterSet>("mtBins"))
+  fMtBinSettings(config.getParameter<ParameterSet>("mtBins")),
   //fInvmassBinSettings(config.getParameter<ParameterSet>("invmassBins")),
+  hNSelectedVsRunNumber(nullptr)
 { 
   // Create CommonPlotsBase objects
   bool enableStatus = config.getParameter<bool>("enablePUDependencyPlots");
@@ -37,7 +39,68 @@ CommonPlots::CommonPlots(const ParameterSet& config, const AnalysisType type, Hi
   fBaseObjects.push_back(fPUDependencyPlots);
 }
 
-CommonPlots::~CommonPlots() { }
+CommonPlots::~CommonPlots() {
+  fHistoSplitter.deleteHistograms(hCtrlNjets);
+  fHistoSplitter.deleteHistograms(hCtrlNjetsAfterJetSelectionAndMETSF);
+  fHistoSplitter.deleteHistograms(hCtrlCollinearAngularCutsMinimum);
+  fHistoSplitter.deleteHistograms(hCtrlCollinearAngularCutsJet1);
+  fHistoSplitter.deleteHistograms(hCtrlCollinearAngularCutsJet2);
+  fHistoSplitter.deleteHistograms(hCtrlCollinearAngularCutsJet3);
+  fHistoSplitter.deleteHistograms(hCtrlCollinearAngularCutsJet4);
+  fHistoSplitter.deleteHistograms(hCtrlNVerticesAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauPtAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauEtaAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauPhiAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauEtaPhiAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauLdgTrkPtAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauDecayModeAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauNProngsAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauRtauAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauSourceAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlNJetsAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlJetPtAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlJetEtaAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlJetEtaPhiAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlMET);
+  fHistoSplitter.deleteHistograms(hCtrlMETPhi);
+  fHistoSplitter.deleteHistograms(hCtrlNBJets);
+  fHistoSplitter.deleteHistograms(hCtrlBJetPt);
+  fHistoSplitter.deleteHistograms(hCtrlBJetEta);
+  fHistoSplitter.deleteHistograms(hCtrlBDiscriminator);
+  fHistoSplitter.deleteHistograms(hCtrlBackToBackAngularCutsMinimum);
+  fHistoSplitter.deleteHistograms(hCtrlBackToBackAngularCutsJet1);
+  fHistoSplitter.deleteHistograms(hCtrlBackToBackAngularCutsJet2);
+  fHistoSplitter.deleteHistograms(hCtrlBackToBackAngularCutsJet3);
+  fHistoSplitter.deleteHistograms(hCtrlBackToBackAngularCutsJet4);
+  fHistoSplitter.deleteHistograms(hCtrlNVerticesAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauPtAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauEtaAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauPhiAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauEtaPhiAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauLdgTrkPtAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauDecayModeAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauNProngsAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauRtauAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauSourceAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedTauIPxyAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlNJetsAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlJetPtAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlJetEtaAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlJetEtaPhiAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlCollinearAngularCutsMinimumAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlMETAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlMETPhiAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlNBJetsAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlBJetPtAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlBJetEtaAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlBDiscriminatorAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlBackToBackAngularCutsMinimumAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hCtrlDeltaPhiTauMetAfterAllSelections);
+  fHistoSplitter.deleteHistograms(hShapeTransverseMass);
+  fHistoSplitter.deleteHistograms(hShapeProbabilisticBtagTransverseMass);
+  if (hNSelectedVsRunNumber != nullptr) delete hNSelectedVsRunNumber;
+  for (auto p: fBaseObjects) delete p;
+}
 
 void CommonPlots::book(TDirectory *dir, bool isData) { 
   fHistoSplitter.bookHistograms(dir);

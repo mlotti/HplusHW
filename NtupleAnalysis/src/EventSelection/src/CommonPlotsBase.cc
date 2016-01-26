@@ -7,7 +7,8 @@
 CommonPlotsBase::CommonPlotsBase(HistoWrapper& histoWrapper, bool isEnabled)
 : fHistoWrapper(histoWrapper),
   bIsEnabled(isEnabled) { }
-
+CommonPlotsBase::~CommonPlotsBase() { }
+  
 void CommonPlotsBase::book(TDirectory* dir, bool isData) { }
 void CommonPlotsBase::reset() { }
 

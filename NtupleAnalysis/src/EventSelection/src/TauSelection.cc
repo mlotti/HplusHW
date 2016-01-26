@@ -123,7 +123,21 @@ TauSelection::TauSelection(const ParameterSet& config)
   bookHistograms(new TDirectory());
 }
 
-TauSelection::~TauSelection() { }
+TauSelection::~TauSelection() {
+  delete hTriggerMatchDeltaR;
+  delete hTauPtTriggerMatched;
+  delete hTauEtaTriggerMatched;
+  delete hNPassed;
+  delete hPtResolution;
+  delete hEtaResolution;
+  delete hPhiResolution;
+  delete hIsolPtBefore;
+  delete hIsolEtaBefore;
+  delete hIsolVtxBefore;
+  delete hIsolPtAfter;
+  delete hIsolEtaAfter;
+  delete hIsolVtxAfter;
+}
 
 void TauSelection::initialize(const ParameterSet& config) {
   

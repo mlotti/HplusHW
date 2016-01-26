@@ -50,7 +50,21 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, const std::stri
   bookHistograms(new TDirectory());
 }
 
-ElectronSelection::~ElectronSelection() { }
+ElectronSelection::~ElectronSelection() {
+  delete hElectronPtAll;
+  delete hElectronEtaAll;
+  delete hElectronPtPassed;
+  delete hElectronEtaPassed;
+  delete hPtResolution;
+  delete hEtaResolution;
+  delete hPhiResolution;
+  delete hIsolPtBefore;
+  delete hIsolEtaBefore;
+  delete hIsolVtxBefore;
+  delete hIsolPtAfter;
+  delete hIsolEtaAfter;
+  delete hIsolVtxAfter;
+}
 
 void ElectronSelection::initialize(const ParameterSet& config, const std::string& postfix) {
   if (postfix.find("veto") != std::string::npos || postfix.find("Veto") != std::string::npos)

@@ -65,7 +65,16 @@ JetSelection::JetSelection(const ParameterSet& config)
   bookHistograms(new TDirectory());
 }
 
-JetSelection::~JetSelection() { }
+JetSelection::~JetSelection() { 
+  delete hJetPtAll;
+  delete hJetEtaAll;
+  delete hJetPtPassed;
+  delete hJetEtaPassed;
+  for (auto p: hSelectedJetPt) delete p;
+  for (auto p: hSelectedJetEta) delete p;  
+  delete hJetMatchingToTauDeltaR;
+  delete hJetMatchingToTauPtRatio;
+}
 
 void JetSelection::initialize(const ParameterSet& config) {
   
