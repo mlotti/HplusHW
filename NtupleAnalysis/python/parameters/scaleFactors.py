@@ -98,11 +98,20 @@ def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, varia
 # \param direction  "nominal"/"down"/"up"
 # \param variationInfo  "tag"/"mistag" This parameter specifies if the variation is applied for the b->b component or non-b->b component
 def setupBtagSFInformation(btagPset, btagPayloadFilename, btagEfficiencyFilename, direction, variationInfo=None):
-    #print "Settting btagSF: %s, %s"%(btagPayloadFilename, btagEfficiencyFilename)
+    if not variationInfo in [None, "tag", "mistag"]:
+        raise Exception("Error: unknown parameter for variationInfo given (%s)! Valid options are: tag, mistag"%variationInfo)
+    #print "Setting btagSF: %s, %s"%(btagPayloadFilename, btagEfficiencyFilename)
     # Process the csv from the btag POG and add the relevant information to the PSet
     _setupBtagSFDatabase(btagPset, btagPayloadFilename, direction, variationInfo)
     # Process the json produced with BTagEfficiencyAnalysis and add the relevant information to the PSet
     _setupBtagEfficiency(btagPset, btagEfficiencyFilename, direction, variationInfo)
+    # Set syst. uncert. variation information
+    btagPset.btagSFVariationDirection = direction
+    if variationInfo == None:
+        btagPset.btagSFVariationInfo = "None"
+    else:
+        btagPset.btagSFVariationInfo = variationInfo
+    #print btagPset
 
 ## Helper function accessed through setupBtagSFInformation
 def _setupBtagSFDatabase(btagPset, btagPayloadFilename, direction, variationInfo):
@@ -163,24 +172,7 @@ def _setupBtagSFDatabase(btagPset, btagPayloadFilename, direction, variationInfo
             else:
                 # Store only the rows which apply for the desired variation and working point
                 if row[headerColumnIndices["OperatingPoint"]] == workingPointLUT[btagPset.__getattr__("bjetDiscrWorkingPoint")]:
-                    if direction == "nominal":
-                        if row[headerColumnIndices["sysType"]] == directionLUT[direction]:
-                            rows.append(row)
-                    else:
-                        if variationInfo == "tag":
-                            # Use the variation direction only for b->b and otherwise use nominal
-                            if int(row[headerColumnIndices["jetFlavor"]]) == 0 and row[headerColumnIndices["sysType"]] == directionLUT[direction]:
-                                rows.append(row)
-                            elif int(row[headerColumnIndices["jetFlavor"]]) > 0 and row[headerColumnIndices["sysType"]] == directionLUT["nominal"]:
-                                rows.append(row)
-                        elif variationInfo == "mistag":
-                            # Use the variation direction only for non-b->b and otherwise use nominal
-                            if int(row[headerColumnIndices["jetFlavor"]]) > 0 and row[headerColumnIndices["sysType"]] == directionLUT[direction]:
-                                rows.append(row)
-                            elif int(row[headerColumnIndices["jetFlavor"]]) == 0 and row[headerColumnIndices["sysType"]] == directionLUT["nominal"]:
-                                rows.append(row)
-                        else:
-                            raise Exception("Error: unknown parameter for variationInfo given (%s)! Valid options are: tag, mistag"%variationInfo)
+                    rows.append(row)
     if len(rows) == 0:
         raise Exception("Error: for unknown reason, no entries found from the btag SF payload (%s)!"%fullname)
     # Convert output into vector of PSets
@@ -193,6 +185,7 @@ def _setupBtagSFDatabase(btagPset, btagPayloadFilename, direction, variationInfo
                  etaMax=float(row[headerColumnIndices["etaMax"]]), 
                  discrMin=float(row[headerColumnIndices["discrMin"]]), 
                  discrMax=float(row[headerColumnIndices["discrMax"]]), 
+                 sysType=row[headerColumnIndices["sysType"]],
                  formula=row[headerColumnIndices["formula"]])
         psetList.append(p)
     btagPset.btagSF = psetList
@@ -212,42 +205,13 @@ def _setupBtagEfficiency(btagPset, btagEfficiencyFilename, direction, variationI
         # Require that the btag discriminator and working points match
         if row["discr"] == btagPset.__getattr__("bjetDiscr") and row["workingPoint"] == btagPset.__getattr__("bjetDiscrWorkingPoint"):
             #print row["discr"], row["workingPoint"], row["flavor"], row["ptMin"]
-            eff = None
-            effVariation = None
-            if direction == "nominal":
-                eff = row["eff"]
-            else:
-                if variationInfo == "tag":
-                    # Use the variation direction only for b->b and otherwise use nominal
-                    if row["flavor"] == "B":
-                        eff = row["eff"]
-                        effVariation = row["eff"+direction[0].upper()+direction[1:]]
-                    else:
-                        eff = row["eff"]
-                elif variationInfo == "mistag":
-                    # Use the variation direction only for non-b->b and otherwise use nominal
-                    if row["flavor"] != "B":
-                        eff = row["eff"]
-                        effVariation = row["eff"+direction[0].upper()+direction[1:]]
-                    else:
-                        eff = row["eff"]
-                else:
-                    raise Exception("Error: unknown parameter for variationInfo given (%s)! Valid options are: tag, mistag"%variationInfo)
-            if eff == None:
-                raise Exception("This should not happen")
-            if direction == "up" and effVariation != None:
-                eff = eff + effVariation
-                if eff > 1.0:
-                    eff = 1.0
-            elif direction == "minus" and effVariation != None:
-                eff = eff - effVariation
-                if eff < 0.0:
-                    eff = 0.0
-        p = PSet(jetFlavor=row["flavor"],
-                 ptMin=row["ptMin"],
-                 ptMax=row["ptMax"],
-                 eff=eff)
-        psetList.append(p)
+            p = PSet(jetFlavor=row["flavor"],
+                    ptMin=row["ptMin"],
+                    ptMax=row["ptMax"],
+                    eff=float(row["eff"]),
+                    effDown=float(row["effDown"]),
+                    effUp=float(row["effUp"]))
+            psetList.append(p)
     btagPset.btagEfficiency = psetList
 
 ## Helper function

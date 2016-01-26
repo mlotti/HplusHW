@@ -18,20 +18,22 @@ class WrappedTH1;
 
 class BTagSFInputItem {
 public:
-  BTagSFInputItem(float ptMin, float ptMax, const std::string formula);
+  BTagSFInputItem(float ptMin, float ptMax, const std::string& formula);
   BTagSFInputItem(float ptMin, float ptMax, float eff);
   ~BTagSFInputItem();
   
   /// Returns true if the jet pt is in the range of this input item
-  bool matchesPtRange(float pt) const;
+  const bool matchesPtRange(float pt) const;
   /// Returns true if the jet pt is higher than the range of this input item
-  bool isGreaterThanPtRange(float pt) const { return pt > fPtMax; }
+  const bool isGreaterThanPtRange(float pt) const { return pt > fPtMax; }
   /// Returns the input value
-  float getValueByPt(float pt) const;
+  const float getValueByPt(float pt) const;
   /// Returns ptmax
-  float getPtMax() const { return fPtMax; }
+  const float getPtMax() const { return fPtMax; }
   /// Set as overflow bin
-  void setAsOverflowBinPt() { bIsOverflowBinPt = true; }
+  void setAsOverflowBinPt();
+  /// Debug
+  void debug() const;
   
 private:
   float fPtMin;
@@ -40,7 +42,8 @@ private:
   TFormula fFormula;
 };
 
-class BTagSFCalculator {
+/// Mediator class between individual BTagSFInputItem and BTagSFCalculator
+class BTagSFInputStash {
 public:
   enum BTagJetFlavorType {
     kBJet,
@@ -48,6 +51,40 @@ public:
     kGJet,
     kUDSJet,
     kUDSGJet,
+  };
+  BTagSFInputStash();
+  ~BTagSFInputStash();
+  
+  /// Add input 
+  void addInput(BTagJetFlavorType flavor, float ptMin, float ptMax, const std::string& formula);
+  void addInput(BTagJetFlavorType flavor, float ptMin, float ptMax, float eff);
+  /// Returns the size of the collection
+  const size_t sizeOfList(BTagJetFlavorType flavor) const { return getConstCollection(flavor).size(); }
+  /// Returns value by pt
+  const float getInputValueByPt(BTagJetFlavorType flavor, float pt) const;
+  /// Set maximum bins as overflow bins
+  void setOverflowBinByPt(const std::string& label);
+  /// Debug
+  void debug() const;
+  
+private:
+  const std::vector<BTagSFInputItem*>& getConstCollection(BTagJetFlavorType flavor) const;
+  std::vector<BTagSFInputItem*>& getCollection(BTagJetFlavorType flavor);
+  
+  std::vector<BTagSFInputItem*> fBToB;
+  std::vector<BTagSFInputItem*> fCToB;
+  std::vector<BTagSFInputItem*> fGToB;
+  std::vector<BTagSFInputItem*> fUdsToB;
+};
+
+class BTagSFCalculator {
+public:
+  enum BTagSFVariationType {
+    kNominal,
+    kVariationTagUp,
+    kVariationMistagUp,
+    kVariationTagDown,
+    kVariationMistagDown,
   };
 
   /// Constructor
@@ -57,11 +94,11 @@ public:
   /// Book histograms
   void bookHistograms(TDirectory* dir, HistoWrapper& histoWrapper);
   /// Calculate scale factor for the event
-  float calculateSF(const std::vector<Jet>& selectedJets, const std::vector<Jet>& selectedBJets);
+  const float calculateSF(const std::vector<Jet>& selectedJets, const std::vector<Jet>& selectedBJets);
   /// Returns the size of the efficiency config items
-  size_t sizeOfEfficiencyList(BTagJetFlavorType flavor) const;
+  const size_t sizeOfEfficiencyList(BTagSFInputStash::BTagJetFlavorType flavor, const std::string& direction) const;
   /// Returns the size of the SF config items
-  size_t sizeOfSFList(BTagJetFlavorType flavor) const;
+  const size_t sizeOfSFList(BTagSFInputStash::BTagJetFlavorType flavor, const std::string& direction) const;
   
 private:
   /// Method for handling the efficiency input
@@ -69,29 +106,30 @@ private:
   /// Method for handling the SF input
   void handleSFInput(boost::optional<std::vector<ParameterSet>> psets);
   /// Method for converting flavor string to flavor type
-  BTagJetFlavorType getFlavorTypeForEfficiency(std::string str) const;
+  BTagSFInputStash::BTagJetFlavorType getFlavorTypeForEfficiency(const std::string& str) const;
   /// Method for converting flavor string to flavor type
-  BTagJetFlavorType getFlavorTypeForSF(int i) const;
-  /// Set overflow bin
-  void setOverflowBin(std::vector<BTagSFInputItem>& container);
+  BTagSFInputStash::BTagJetFlavorType getFlavorTypeForSF(int i) const;
   /// Find input value
   float getInputValueByPt(std::vector<BTagSFInputItem>& container, float pt);
+
+  /// Disentangle variation info type from config
+  const BTagSFVariationType parseVariationType(const ParameterSet& config) const;
   
-  
+  /// Systematic variation type
+  const BTagSFVariationType fVariationInfo;
   /// parton->b jet efficiencies from config
-  std::vector<BTagSFInputItem> fBToBEfficiency;
-  std::vector<BTagSFInputItem> fCToBEfficiency;
-  std::vector<BTagSFInputItem> fGToBEfficiency;
-  std::vector<BTagSFInputItem> fUdsToBEfficiency;
+  BTagSFInputStash fEfficiencies;
+  BTagSFInputStash fEfficienciesUp;
+  BTagSFInputStash fEfficienciesDown;
   /// parton->b jet data/MC scalefactors from config
-  std::vector<BTagSFInputItem> fBToBSF;
-  std::vector<BTagSFInputItem> fCToBSF;
-  std::vector<BTagSFInputItem> fGToBSF;
-  std::vector<BTagSFInputItem> fUdsToBSF;
-  // Validity of input
+  BTagSFInputStash fSF;
+  BTagSFInputStash fSFUp;
+  BTagSFInputStash fSFDown;
+  /// Validity of input
   bool isActive;
   // Histograms
   WrappedTH1* hBTagSF;
+  WrappedTH1* hBTagSFRelUncert;
 };
 
 #endif

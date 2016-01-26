@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include "TDirectory.h"
+#include "TMath.h"
 
 TEST_CASE("BTagSFCalculator works", "[EventSelection]") {
   SECTION("BTagSFInputItem") {
@@ -100,36 +101,50 @@ TEST_CASE("BTagSFCalculator works", "[EventSelection]") {
   effPset.put("ptMin", 30);
   effPset.put("ptMax", 50);
   effPset.put("eff", 0.456);
+  effPset.put("effUp", 0.029);
+  effPset.put("effDown", 0.029);
   effList.push_back(std::make_pair("", effPset));
   effPset.put("jetFlavor", "B");
   effPset.put("ptMin", 50);
   effPset.put("ptMax", 70);
   effPset.put("eff", 0.678);
+  effPset.put("effUp", 0.029);
+  effPset.put("effDown", 0.029);
   effList.push_back(std::make_pair("", effPset));
   effPset.put("jetFlavor", "B");
   effPset.put("ptMin", 70);
   effPset.put("ptMax", 500);
   effPset.put("eff", 0.987);
+  effPset.put("effUp", 0.029);
+  effPset.put("effDown", 0.029);
   effList.push_back(std::make_pair("", effPset));
   effPset.put("jetFlavor", "C");
   effPset.put("ptMin", 30);
   effPset.put("ptMax", 50);
   effPset.put("eff", 0.123);
+  effPset.put("effUp", 0.029);
+  effPset.put("effDown", 0.029);
   effList.push_back(std::make_pair("", effPset));
   effPset.put("jetFlavor", "C");
   effPset.put("ptMin", 50);
   effPset.put("ptMax", 500);
   effPset.put("eff", 0.156);
+  effPset.put("effUp", 0.029);
+  effPset.put("effDown", 0.029);
   effList.push_back(std::make_pair("", effPset));
   effPset.put("jetFlavor", "Light");
   effPset.put("ptMin", 30);
   effPset.put("ptMax", 50);
   effPset.put("eff", 0.098);
+  effPset.put("effUp", 0.029);
+  effPset.put("effDown", 0.029);
   effList.push_back(std::make_pair("", effPset));
   effPset.put("jetFlavor", "G");
   effPset.put("ptMin", 30);
   effPset.put("ptMax", 50);
   effPset.put("eff", 0.075);
+  effPset.put("effUp", 0.029);
+  effPset.put("effDown", 0.029);
   effList.push_back(std::make_pair("", effPset));
   tmp.add_child("btagEfficiency", effList);
   boost::property_tree::ptree sfPset;
@@ -138,26 +153,67 @@ TEST_CASE("BTagSFCalculator works", "[EventSelection]") {
   sfPset.put("ptMin", 30);
   sfPset.put("ptMax", 50);
   sfPset.put("formula", "0.91+0.01*x");
+  sfPset.put("sysType", " central");
   sfList.push_back(std::make_pair("", sfPset));
   sfPset.put("jetFlavor", 0); // 0 = b jet
   sfPset.put("ptMin", 50);
   sfPset.put("ptMax", 70);
   sfPset.put("formula", "0.85+0.01*x");
+  sfPset.put("sysType", " central");
   sfList.push_back(std::make_pair("", sfPset));
   sfPset.put("jetFlavor", 1); // 1 = c jet
   sfPset.put("ptMin", 30);
   sfPset.put("ptMax", 500);
   sfPset.put("formula", "0.87+0.01*x");
+  sfPset.put("sysType", " central");
   sfList.push_back(std::make_pair("", sfPset));
-  sfPset.put("jetFlavor", 2); // 2 = uds jet
+  sfPset.put("jetFlavor", 2); // 2 = udsg jet
   sfPset.put("ptMin", 30);
   sfPset.put("ptMax", 50);
   sfPset.put("formula", "1.07+0.01*x");
+  sfPset.put("sysType", " central");
   sfList.push_back(std::make_pair("", sfPset));
-  sfPset.put("jetFlavor", 2); // 2 = uds jet
+  sfPset.put("jetFlavor", 2); // 2 = udsg jet
   sfPset.put("ptMin", 50);
   sfPset.put("ptMax", 70);
   sfPset.put("formula", "1.02+0.01*x");
+  sfPset.put("sysType", " central");
+  sfList.push_back(std::make_pair("", sfPset));
+  sfPset.put("jetFlavor", 0); // 0 = b jet
+  sfPset.put("ptMin", 30);
+  sfPset.put("ptMax", 70);
+  sfPset.put("formula", "0.85+0.01*x");
+  sfPset.put("sysType", " up");
+  sfList.push_back(std::make_pair("", sfPset));
+  sfPset.put("jetFlavor", 1); // 1 = c jet
+  sfPset.put("ptMin", 30);
+  sfPset.put("ptMax", 500);
+  sfPset.put("formula", "0.87+0.01*x");
+  sfPset.put("sysType", " up");
+  sfList.push_back(std::make_pair("", sfPset));
+  sfPset.put("jetFlavor", 2); // 2 = udsg jet
+  sfPset.put("ptMin", 30);
+  sfPset.put("ptMax", 70);
+  sfPset.put("formula", "1.02+0.01*x");
+  sfPset.put("sysType", " up");
+  sfList.push_back(std::make_pair("", sfPset));
+  sfPset.put("jetFlavor", 0); // 0 = b jet
+  sfPset.put("ptMin", 30);
+  sfPset.put("ptMax", 70);
+  sfPset.put("formula", "0.85+0.01*x");
+  sfPset.put("sysType", " down");
+  sfList.push_back(std::make_pair("", sfPset));
+  sfPset.put("jetFlavor", 1); // 1 = c jet
+  sfPset.put("ptMin", 30);
+  sfPset.put("ptMax", 500);
+  sfPset.put("formula", "0.87+0.01*x");
+  sfPset.put("sysType", " down");
+  sfList.push_back(std::make_pair("", sfPset));
+  sfPset.put("jetFlavor", 2); // 2 = udsg jet
+  sfPset.put("ptMin", 30);
+  sfPset.put("ptMax", 70);
+  sfPset.put("formula", "1.03+0.01*x");
+  sfPset.put("sysType", " down");
   sfList.push_back(std::make_pair("", sfPset));
   tmp.add_child("btagSF", sfList);
 
@@ -173,14 +229,14 @@ TEST_CASE("BTagSFCalculator works", "[EventSelection]") {
     REQUIRE( jets.size() == 4 );
     std::vector<Jet> bjets = { jets[0] };
     // Check correct reading of config
-    REQUIRE( p.sizeOfEfficiencyList(BTagSFCalculator::kBJet) == 3 );
-    REQUIRE( p.sizeOfEfficiencyList(BTagSFCalculator::kCJet) == 2 );
-    REQUIRE( p.sizeOfEfficiencyList(BTagSFCalculator::kGJet) == 1 );
-    REQUIRE( p.sizeOfEfficiencyList(BTagSFCalculator::kUDSJet) == 1 );
-    REQUIRE( p.sizeOfSFList(BTagSFCalculator::kBJet) == 2 );
-    REQUIRE( p.sizeOfSFList(BTagSFCalculator::kCJet) == 1 );
-    REQUIRE( p.sizeOfSFList(BTagSFCalculator::kGJet) == 2 );
-    REQUIRE( p.sizeOfSFList(BTagSFCalculator::kUDSJet) == 2 );
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kBJet, "nominal") == 3 );
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kCJet, "nominal") == 2 );
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kGJet, "nominal") == 1 );
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kUDSJet, "nominal") == 1 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kBJet, "nominal") == 2 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kCJet, "nominal") == 1 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kGJet, "nominal") == 2 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kUDSJet, "nominal") == 2 );
     // Check individual SF values
     std::vector<Jet> jnull =  { };
     std::vector<Jet> j1 =  { jets[0] };
@@ -201,5 +257,113 @@ TEST_CASE("BTagSFCalculator works", "[EventSelection]") {
     CHECK( p.calculateSF(j4, b4) == Approx(1.07+0.01*37.) ); // g->b
     // Check combined SF values
     CHECK( p.calculateSF(jets, bjets) == Approx((0.91+0.01*34.) * (1.0-0.123*(0.87+0.01*35.))/(1.0-0.123) * (1.0-0.098*(1.07+0.01*36.))/(1.0-0.098) * (1.0-0.075*(1.07+0.01*37.))/(1.0-0.075)));
+  }
+  SECTION("SF up variation") {
+    tmp.put("btagSFVariationDirection", "up");
+    tmp.put("btagSFVariationInfo", "tag");
+    ParameterSet psetDefault(tmp, true, false);
+    //psetDefault.debug();
+    //REQUIRE_NOTHROW( BTagSFCalculator p(psetDefault) );
+    BTagSFCalculator p(psetDefault);
+    p.bookHistograms(&dir, histoWrapper);
+    mgr.setEntry(0);
+    REQUIRE( coll.size() == 4 );
+    std::vector<Jet> jets = coll.toVector();
+    REQUIRE( jets.size() == 4 );
+    std::vector<Jet> bjets = { jets[0] };
+    // Check correct reading of config
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kBJet, "up") == 3 );
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kCJet, "up") == 2 );
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kGJet, "up") == 1 );
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kUDSJet, "up") == 1 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kBJet, "up") == 1 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kCJet, "up") == 1 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kGJet, "up") == 1 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kUDSJet, "up") == 1 );
+    // Check individual SF values
+    std::vector<Jet> jnull =  { };
+    std::vector<Jet> j1 =  { jets[0] };
+    std::vector<Jet> b1 = { jets[0] };
+    double nominal = (1.0-0.456*(0.91+0.01*34.))/(1.0-0.456);
+    double a = (1.0-(0.91+0.01*34.))/(1.0-0.456)/(1.0-0.456);
+    double b = 0.456/(1.0-0.456);
+    double value = TMath::Sqrt(a*a*0.029*0.029+b*b*(0.85-0.91)*(0.85-0.91)) + nominal;
+    CHECK( p.calculateSF(j1, jnull) == Approx(value) ); // b->not b
+    CHECK( p.calculateSF(j1, b1) == Approx(0.85+0.01*34.) ); // b->b
+    std::vector<Jet> j2 =  { jets[1] };
+    std::vector<Jet> b2 = { jets[1] };
+    CHECK( p.calculateSF(j2, jnull) == Approx((1.0-0.123*(0.87+0.01*35.))/(1.0-0.123)) ); // c->not b
+    CHECK( p.calculateSF(j2, b2) == Approx(0.87+0.01*35.) ); // c->b
+    std::vector<Jet> j3 =  { jets[2] };
+    std::vector<Jet> b3 = { jets[2] };
+    CHECK( p.calculateSF(j3, jnull) == Approx((1.0-0.098*(1.07+0.01*36.))/(1.0-0.098)) ); // uds->not b
+    CHECK( p.calculateSF(j3, b3) == Approx(1.07+0.01*36.) ); // uds->b
+    std::vector<Jet> j4 =  { jets[3] };
+    std::vector<Jet> b4 = { jets[3] };
+    CHECK( p.calculateSF(j4, jnull) == Approx((1.0-0.075*(1.07+0.01*37.))/(1.0-0.075)) ); // g->not b
+    CHECK( p.calculateSF(j4, b4) == Approx(1.07+0.01*37.) ); // g->b
+    // Check combined SF values
+    CHECK( p.calculateSF(jets, bjets) == Approx((0.85+0.01*34.) * (1.0-0.123*(0.87+0.01*35.))/(1.0-0.123) * (1.0-0.098*(1.07+0.01*36.))/(1.0-0.098) * (1.0-0.075*(1.07+0.01*37.))/(1.0-0.075)));
+  }
+  SECTION("SF down variation") {
+    tmp.put("btagSFVariationDirection", "down");
+    tmp.put("btagSFVariationInfo", "mistag");
+    ParameterSet psetDefault(tmp, true, false);
+    //psetDefault.debug();
+    //REQUIRE_NOTHROW( BTagSFCalculator p(psetDefault) );
+    BTagSFCalculator p(psetDefault);
+    p.bookHistograms(&dir, histoWrapper);
+    mgr.setEntry(0);
+    REQUIRE( coll.size() == 4 );
+    std::vector<Jet> jets = coll.toVector();
+    REQUIRE( jets.size() == 4 );
+    std::vector<Jet> bjets = { jets[0] };
+    // Check correct reading of config
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kBJet, "up") == 3 );
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kCJet, "up") == 2 );
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kGJet, "up") == 1 );
+    REQUIRE( p.sizeOfEfficiencyList(BTagSFInputStash::kUDSJet, "up") == 1 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kBJet, "up") == 1 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kCJet, "up") == 1 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kGJet, "up") == 1 );
+    REQUIRE( p.sizeOfSFList(BTagSFInputStash::kUDSJet, "up") == 1 );
+    // Check individual SF values
+    std::vector<Jet> jnull =  { };
+    std::vector<Jet> j1 =  { jets[0] };
+    std::vector<Jet> b1 = { jets[0] };
+    double sf = 1.0;
+    CHECK( p.calculateSF(j1, jnull) == Approx((1.0-0.456*(0.91+0.01*34.))/(1.0-0.456)) ); // b->not b
+    CHECK( p.calculateSF(j1, b1) == Approx(0.91+0.01*34.) ); // b->b
+    sf = 0.91+0.01*34.;
+    std::vector<Jet> j2 =  { jets[1] };
+    std::vector<Jet> b2 = { jets[1] };
+    double nominal = (1.0-0.123*(0.87+0.01*35.))/(1.0-0.123);
+    double a = (1.0-(0.87+0.01*35.))/(1.0-0.123)/(1.0-0.123);
+    double b = 0.123/(1.0-0.123);
+    double value = nominal - TMath::Sqrt(a*a*0.029*0.029+b*b*(0.)*(0.));
+    sf *= value;
+    //std::cout << "nominal=" << nominal << " a=" << a << " b=" << b << " v=" << value << std::endl;
+    CHECK( p.calculateSF(j2, jnull) == Approx(value) ); // c->not b
+    CHECK( p.calculateSF(j2, b2) == Approx(0.87+0.01*35.) ); // c->b
+    std::vector<Jet> j3 =  { jets[2] };
+    std::vector<Jet> b3 = { jets[2] };
+    nominal = (1.0-0.098*(1.07+0.01*36.))/(1.0-0.098);
+    a = (1.0-(1.07+0.01*36.))/(1.0-0.098)/(1.0-0.098);
+    b = 0.098/(1.0-0.098);
+    value = nominal - TMath::Sqrt(a*a*0.029*0.029+b*b*(1.07-1.03)*0.01*36.0*(1.07-1.03)*0.01*36.0);
+    sf *= value;
+    CHECK( std::abs(p.calculateSF(j3, jnull) - value) < 0.001 ); // uds->not b
+    CHECK( p.calculateSF(j3, b3) == Approx(1.03+0.01*36.) ); // uds->b
+    std::vector<Jet> j4 =  { jets[3] };
+    std::vector<Jet> b4 = { jets[3] };
+    nominal = (1.0-0.075*(1.07+0.01*37.))/(1.0-0.075);
+    a = (1.0-(1.07+0.01*37.))/(1.0-0.075)/(1.0-0.075);
+    b = 0.075/(1.0-0.075);
+    value = nominal - TMath::Sqrt(a*a*0.029*0.029+b*b*(1.07-1.03)*0.01*36.0*(1.07-1.03)*0.01*36.0);
+    sf *= value;
+    CHECK( std::abs(p.calculateSF(j4, jnull) - value) < 0.001 ); // g->not b
+    CHECK( p.calculateSF(j4, b4) == Approx(1.03+0.01*37.) ); // g->b
+    // Check combined SF values
+    CHECK( std::abs(p.calculateSF(jets, bjets) - sf) < 0.001 );
   }
 }
