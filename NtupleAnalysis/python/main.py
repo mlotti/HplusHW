@@ -589,9 +589,6 @@ class Process:
             if hSkimCounterSum == None:
                 hSkimCounterSum = hSkimCounters.Clone()
                 hSkimCounterSum.SetDirectory(None) # Store the histogram to memory TDirectory, not into fIN
-                # Format bin labels
-                for i in range(hSkimCounterSum.GetNbinsX()):
-                    hSkimCounterSum.GetXaxis().SetBinLabel(i+1, "ttree: %s"%hSkimCounterSum.GetXaxis().GetBinLabel(i+1))
             else:
                 hSkimCounterSum.Add(hSkimCounters)
             hSkimCounters.Delete()
@@ -599,6 +596,10 @@ class Process:
         if hSkimCounterSum == None:
             # Construct an empty histogram
             hSkimCounterSum = ROOT.TH1F("SkimCounter","SkimCounter",1,0,1)
+        else:
+            # Format bin labels
+            for i in range(hSkimCounterSum.GetNbinsX()):
+                hSkimCounterSum.GetXaxis().SetBinLabel(i+1, "ttree: %s"%hSkimCounterSum.GetXaxis().GetBinLabel(i+1))
         hSkimCounterSum.SetName("SkimCounter")
         return hSkimCounterSum
 
