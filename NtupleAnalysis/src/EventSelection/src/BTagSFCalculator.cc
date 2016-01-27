@@ -44,6 +44,10 @@ const float BTagSFInputItem::getValueByPt(float pt) const {
   if (!matchesPtRange(pt)) {
     throw hplus::Exception("assert") << "The requested pt (" << pt << ") is out of range!";
   }
+  // For jet pt's above the maximum pt value, use the maximum value (otherwise the SF's become anomalously large)
+  if (pt > fPtMax) {
+    return fFormula.Eval(fPtMax);
+  }
   return fFormula.Eval(pt);
 }
 
@@ -219,29 +223,29 @@ const float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, 
       // x -> not b; apply (1-eff*SF)/(1-eff)
       double eff = fEfficiencies.getInputValueByPt(flavorType, jet.pt());
       double sfvalue = fSF.getInputValueByPt(flavorType, jet.pt());
+      double sfnominal = std::abs((1.0-eff*sfvalue) / (1.0-eff));
       if ((fVariationInfo == kVariationTagUp && flavor == 5) || (fVariationInfo == kVariationMistagUp && flavor != 5)) {
         double effDelta = fEfficienciesUp.getInputValueByPt(flavorType, jet.pt());
         double sfDelta = fSFUp.getInputValueByPt(flavorType, jet.pt()) - sfvalue;
         double a = (1-sfvalue) / (1.0-eff) / (1.0-eff); // d/deff((1-eff*SF)/(1-eff))
         double b = -eff / (1.0-eff); // d/dsf((1-eff*SF)/(1-eff))
         double sfuncert = TMath::Sqrt(a*a*effDelta*effDelta + b*b*sfDelta*sfDelta);
-        hBTagSFRelUncert->Fill(sfuncert/((1.0-eff*sfvalue) / (1.0-eff)));
-        sf = (1.0-eff*sfvalue) / (1.0-eff) + sfuncert;
+        sf = std::abs(sfnominal + sfuncert);
+        hBTagSFRelUncert->Fill(sfuncert/sfnominal);
       } else if ((fVariationInfo == kVariationTagDown && flavor == 5) || (fVariationInfo == kVariationMistagDown && flavor != 5)) {
         double effDelta = fEfficienciesDown.getInputValueByPt(flavorType, jet.pt());
         double sfDelta = fSFDown.getInputValueByPt(flavorType, jet.pt()) - sfvalue;
         double a = (1-sfvalue) / (1.0-eff) / (1.0-eff); // d/deff((1-eff*SF)/(1-eff))
         double b = -eff / (1.0-eff); // d/dsf((1-eff*SF)/(1-eff))
         double sfuncert = TMath::Sqrt(a*a*effDelta*effDelta + b*b*sfDelta*sfDelta);
-        sf = (1.0-eff*sfvalue) / (1.0-eff) - sfuncert;
-        hBTagSFRelUncert->Fill(sfuncert/((1.0-eff*sfvalue) / (1.0-eff)));
+        sf = std::abs(sfnominal - sfuncert);
+        hBTagSFRelUncert->Fill(sfuncert/sfnominal);
       } else {
-        sf = (1.0-eff*sfvalue) / (1.0-eff);
+        sf = sfnominal;
       }
       // Protect against div by zero
-      double value = std::abs((1.0 - eff * sfvalue) / (1.0 - eff));
-      if (std::abs(eff-1.0) < 0.00001 || value > 2.0) {
-        std::cout << "jet: flavor=" << flavor << " pt=" << jet.pt() << " pass=" << passedBJetSelection << " eff=" << eff << " sf=" << sf << std::endl;
+      if (std::abs(eff-1.0) < 0.00001 || sfnominal > 2.0) {
+        std::cout << "BtagSF: anomalously high sf, using sf=1 for this jet: flavor=" << flavor << " pt=" << jet.pt() << " pass btag=" << passedBJetSelection << " eff=" << eff << " sf=" << sf << std::endl;
         sf = 1.0;
       }
     }
