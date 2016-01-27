@@ -11,7 +11,7 @@
 
 class QCDMeasurement: public BaseSelector {
 public:
-  explicit QCDMeasurement(const ParameterSet& config);
+  explicit QCDMeasurement(const ParameterSet& config, const TH1* skimCounters);
   virtual ~QCDMeasurement();
 
   /// Books histograms
@@ -90,8 +90,8 @@ private:
 #include "Framework/interface/SelectorFactory.h"
 REGISTER_SELECTOR(QCDMeasurement);
 
-QCDMeasurement::QCDMeasurement(const ParameterSet& config)
-: BaseSelector(config),
+QCDMeasurement::QCDMeasurement(const ParameterSet& config, const TH1* skimCounters)
+: BaseSelector(config, skimCounters),
   fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDMeasurement, fHistoWrapper),
   fNormalizationSystematicsSignalRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsSignalRegion, fHistoWrapper),
   fNormalizationSystematicsControlRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsControlRegion, fHistoWrapper),

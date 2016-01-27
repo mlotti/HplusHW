@@ -16,7 +16,7 @@ public:
     kBtagG,
     kBtagLight,
   };
-  explicit BTagEfficiencyAnalysis(const ParameterSet& config);
+  explicit BTagEfficiencyAnalysis(const ParameterSet& config, const TH1* skimCounters);
   virtual ~BTagEfficiencyAnalysis() {}
 
   /// Books histograms
@@ -64,8 +64,8 @@ private:
 #include "Framework/interface/SelectorFactory.h"
 REGISTER_SELECTOR(BTagEfficiencyAnalysis);
 
-BTagEfficiencyAnalysis::BTagEfficiencyAnalysis(const ParameterSet& config)
-: BaseSelector(config),
+BTagEfficiencyAnalysis::BTagEfficiencyAnalysis(const ParameterSet& config, const TH1* skimCounters)
+: BaseSelector(config, skimCounters),
   fJetPtCutMin(config.getParameter<double>("jetPtCutMin")),
   fJetPtCutMax(config.getParameter<double>("jetPtCutMax")),
   fJetEtaCutMin(config.getParameter<double>("jetEtaCutMin")),
