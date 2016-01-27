@@ -139,7 +139,7 @@ public:
     h(histo), fHistoWrapper(histoWrapper), fLevel(level) {}
   ~WrappedBase() {
     if (h != nullptr) {
-      h->Delete();
+      //h->Delete();
       h = nullptr;
     }
   }
@@ -233,12 +233,12 @@ public:
   }
   ~WrappedTHxTripletBase() { 
     if (isActive()) {
-      hInclusive->Delete();
+      //hInclusive->Delete();
       hInclusive = nullptr;
-      hFalse->Delete();
+      //hFalse->Delete();
       hFalse = nullptr;
       if (hTrue != nullptr) {
-        hTrue->Delete();
+        //hTrue->Delete();
         hTrue = nullptr;
       }
     }
