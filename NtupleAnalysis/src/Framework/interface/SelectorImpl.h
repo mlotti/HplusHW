@@ -87,6 +87,7 @@ private:
   int fPrintAdaptCount;
   bool fPrintStatus;
 
+  TH1F *hSkimCounters;
   TH1F *hPUdata;
   TH1F *hPUmc;
   bool bIsttbar;

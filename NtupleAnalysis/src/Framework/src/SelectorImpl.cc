@@ -60,6 +60,7 @@ void SelectorImpl::Init(TTree *tree) {
   fBranchManager->setTree(tree);
   for(BaseSelector *selector: fSelectors){
     selector->setupBranches(*fBranchManager);
+    selector->setSkimCounters(hSkimCounters);
     if(hPUdata) selector->setPileUpWeights(hPUdata,hPUmc);
     selector->setIsttbar(bIsttbar);
   }
@@ -146,6 +147,9 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   ParameterSet options(params->options());
   fEventSaver = new EventSaver(options, fOutput);
 
+  // Skim counters
+  hSkimCounters = dynamic_cast<TH1F*>(fInput->FindObject("SkimCounter"));
+  
   TDirectory::AddDirectory(kFALSE);
   TH1::AddDirectory(kFALSE);
   TIter next(fInput);
@@ -159,7 +163,7 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
       std::string className = title.substr(0, pos);
       std::string config = title.substr(pos+1);
 
-      auto selector = SelectorFactory::create(className, config, params->isMC());
+      auto selector = SelectorFactory::create(className, config, params->isMC(), hSkimCounters);
       selector->setEventSaver(fEventSaver);
       TDirectory *subdir = nullptr;
       if(fOutputFile) {
@@ -176,9 +180,10 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
     }
   }
 
+  
   // Pileup weights
-  hPUdata = (TH1F*)fInput->FindObject("PileUpData");
-  hPUmc   = (TH1F*)fInput->FindObject("PileUpMC");
+  hPUdata = dynamic_cast<TH1F*>(fInput->FindObject("PileUpData"));
+  hPUmc   = dynamic_cast<TH1F*>(fInput->FindObject("PileUpMC"));
   
   // ttbar status
   const TNamed* ttbarNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isttbar"));

@@ -377,6 +377,10 @@ class Process:
                                     if hPUMC.GetBinContent(k) > 0.0:
                                         w = hPUs[aname].GetBinContent(k) / hPUMC.GetBinContent(k) * factor
                                         nAllEventsPUWeighted += w * hPUMC.GetBinContent(k)
+                    # Sum skim counters (from ttree)
+                    hSkimCounterSum = self._getSkimCounterSum(dset.getFileNames())
+                    inputList.Add(hSkimCounterSum)
+                    # Add name
                     anames.append(aname)
             if nanalyzers == 0:
                 print "Skipping %s, no analyzers" % dset.getName()
@@ -487,73 +491,15 @@ class Process:
                 cinfo.Write()
                 fIN.Close()
 
-            # Sum skim counters (from ttree)
-            hSkimCounterSum = None
-            fINs = None
-            for inname in dset.getFileNames():
-                fIN = ROOT.TFile.Open(inname)
-                hSkimCounters = fIN.Get("configInfo/SkimCounter")
-                if hSkimCounterSum == None:
-                    hSkimCounterSum = hSkimCounters.Clone()
-                else:
-                    hSkimCounterSum.Add(hSkimCounters)
-                hSkimCounters.Delete()
-                if fINs == None:
-                    fINs = []
-                fINs.append(fIN)
-            if hSkimCounterSum != None:
-                # Find out directories in the output file
-                dirlist = []
-                for key in tf.GetListOfKeys():
-                    matchStatus = False
-                    for name in anames:
-                        if key.GetTitle().startswith(name):
-                            dirlist.append(key.GetTitle())
-                # Add skim counters to the counter histograms
-                for d in dirlist:
-                    hCounter = tf.Get("%s/counters/counter"%d)
-                    hCounterWeighted = tf.Get("%s/counters/weighted/counter"%d)
-                    # Resize axis
-                    nCounters = hCounter.GetNbinsX()
-                    nSkimCounters = hSkimCounterSum.GetNbinsX()
-                    hCounter.SetBins(nCounters+nSkimCounters, 0., nCounters+nSkimCounters)
-                    hCounterWeighted.SetBins(nCounters+nSkimCounters, 0., nCounters+nSkimCounters)
-                    # Move bin data to right
-                    for i in range(0, nCounters):
-                        j = nCounters-i
-                        hCounter.SetBinContent(j+nSkimCounters, hCounter.GetBinContent(j))
-                        hCounter.SetBinError(j+nSkimCounters, hCounter.GetBinError(j))
-                        hCounter.GetXaxis().SetBinLabel(j+nSkimCounters, hCounter.GetXaxis().GetBinLabel(j))
-                        hCounterWeighted.SetBinContent(j+nSkimCounters, hCounterWeighted.GetBinContent(j))
-                        hCounterWeighted.SetBinError(j+nSkimCounters, hCounterWeighted.GetBinError(j))
-                        hCounterWeighted.GetXaxis().SetBinLabel(j+nSkimCounters, hCounterWeighted.GetXaxis().GetBinLabel(j))
-                    # Add skim counters
-                    for i in range(1, nSkimCounters+1):
-                        hCounter.SetBinContent(i, hSkimCounterSum.GetBinContent(i))
-                        hCounter.SetBinError(i, hSkimCounterSum.GetBinError(i))
-                        hCounter.GetXaxis().SetBinLabel(i, "ttree: %s"%hSkimCounterSum.GetXaxis().GetBinLabel(i))
-                        hCounterWeighted.SetBinContent(i, hSkimCounterSum.GetBinContent(i))
-                        hCounterWeighted.SetBinError(i, hSkimCounterSum.GetBinError(i))
-                        hCounterWeighted.GetXaxis().SetBinLabel(i, "ttree: %s"%hSkimCounterSum.GetXaxis().GetBinLabel(i))
-                    hCounter.Sumw2(False)
-                    hCounter.Sumw2()
-                    hCounterWeighted.Sumw2(False)
-                    hCounterWeighted.Sumw2()
-                    tf.cd("%s/counters"%d)
-                    tf.CurrentDirectory().Delete("counter")
-                    hCounter.Write("counter", ROOT.TObject.kOverwrite)
-                    tf.cd("%s/counters/weighted"%d)
-                    tf.CurrentDirectory().Delete("counter")
-                    hCounterWeighted.Write("counter", ROOT.TObject.kOverwrite)
-                    hCounter.Delete()
-                    hCounterWeighted.Delete()
+            # Memory management
             configInfo.Delete()
+            tf.Close()
+            for item in inputList:
+                if isinstance(item, ROOT.TObject):
+                    item.Delete()
+            inputList = None
             if hSkimCounterSum != None:
                 hSkimCounterSum.Delete()
-            if fINs != None:
-                for f in fINs:
-                  f.Close()
-            tf.Close()
 
             timeStop = time.time()
             clockStop = time.clock()
@@ -578,12 +524,33 @@ class Process:
             readMbytesTotal += readMbytes
 
         print
-
         if len(self._datasets) > 1:
             print "    Total: Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB, read speed %.2f MB/s" % (realTimeTotal, cpuTimeTotal, cpuTimeTotal/realTimeTotal*100, readMbytesTotal, readMbytesTotal/realTimeTotal)
         print "    Results are in", outputDir
 
         return outputDir
+
+    ## Sums the skim counters from input files and returns a pset containing them 
+    def _getSkimCounterSum(self, datasetFilenameList):
+        hSkimCounterSum = None
+        for inname in datasetFilenameList:
+            fIN = ROOT.TFile.Open(inname)
+            hSkimCounters = fIN.Get("configInfo/SkimCounter")
+            if hSkimCounterSum == None:
+                hSkimCounterSum = hSkimCounters.Clone()
+                hSkimCounterSum.SetDirectory(None) # Store the histogram to memory TDirectory, not into fIN
+                # Format bin labels
+                for i in range(hSkimCounterSum.GetNbinsX()):
+                    hSkimCounterSum.GetXaxis().SetBinLabel(i+1, "ttree: %s"%hSkimCounterSum.GetXaxis().GetBinLabel(i+1))
+            else:
+                hSkimCounterSum.Add(hSkimCounters)
+            hSkimCounters.Delete()
+            fIN.Close()
+        if hSkimCounterSum == None:
+            # Construct an empty histogram
+            hSkimCounterSum = ROOT.TH1F("SkimCounter","SkimCounter",1,0,1)
+        hSkimCounterSum.SetName("SkimCounter")
+        return hSkimCounterSum
 
 if __name__ == "__main__":
     import unittest
