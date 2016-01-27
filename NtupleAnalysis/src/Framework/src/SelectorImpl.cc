@@ -182,8 +182,8 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
 
   
   // Pileup weights
-  hPUdata = dynamic_cast<TH1F*>(fInput->FindObject("PileUpData"));
-  hPUmc   = dynamic_cast<TH1F*>(fInput->FindObject("PileUpMC"));
+  hPUdata = dynamic_cast<TH1*>(fInput->FindObject("PileUpData"));
+  hPUmc   = dynamic_cast<TH1*>(fInput->FindObject("PileUpMC"));
   
   // ttbar status
   const TNamed* ttbarNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isttbar"));

@@ -16,7 +16,7 @@ class BaseSelector;
 class BranchManager;
 class EventSaver;
 
-class TH1F;
+class TH1;
 
 class SelectorImplParams: public TObject {
 public:
@@ -87,9 +87,9 @@ private:
   int fPrintAdaptCount;
   bool fPrintStatus;
 
-  TH1F *hSkimCounters;
-  TH1F *hPUdata;
-  TH1F *hPUmc;
+  TH1 *hSkimCounters;
+  TH1 *hPUdata;
+  TH1 *hPUmc;
   bool bIsttbar;
   
 };
