@@ -367,7 +367,8 @@ class Process:
 
             for f in dset.getFileNames():
                 tchain.Add(f)
-            tchain.SetCacheLearnEntries(100);
+            tchain.SetCacheLearnEntries(1000);
+            tchain.SetCacheSize(10000000) # Set cache size to 10 MB (somehow it is not automatically set contrary to ROOT docs)
 
             tselector = ROOT.SelectorImpl()
 
@@ -389,13 +390,16 @@ class Process:
             readCallsStart = ROOT.TFile.GetFileReadCalls()
             timeStart = time.time()
             clockStart = time.clock()
-
+            
             if self._maxEvents > 0:
                 tchain.SetCacheEntryRange(0, self._maxEvents)
                 tchain.Process(tselector, "", self._maxEvents)
             else:
                 tchain.Process(tselector)
-
+            if _debugMemoryConsumption:
+                print "    MEMDBG: TChain cache statistics:"
+                tchain.PrintCacheStats()
+            
             # Obtain Nall events for top pt corrections
             NAllEventsTopPt = 0
             if useTopPtCorrection:
@@ -451,10 +455,12 @@ class Process:
                     cinfo.SetBinContent(n+3, NAllEventsTopPt / nanalyzers)
                 # Write
                 cinfo.Write()
+                ROOT.gROOT.GetListOfFiles().Remove(fIN);
                 fIN.Close()
 
             # Memory management
             configInfo.Delete()
+            ROOT.gROOT.GetListOfFiles().Remove(tf);
             tf.Close()
             for item in inputList:
                 if isinstance(item, ROOT.TObject):
@@ -482,7 +488,8 @@ class Process:
                 #while (TObject* o = dynamic_cast<TObject*>(next())) {
                   #o.Delete();
                 #}
-
+            
+            # Performance and information
             timeStop = time.time()
             clockStop = time.clock()
             readCallsStop = ROOT.TFile.GetFileReadCalls()

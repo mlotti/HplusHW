@@ -189,6 +189,18 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   const TNamed* ttbarNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isttbar"));
   if (ttbarNamed)
     bIsttbar = (ttbarNamed->GetTitle()[0] == '1');
+  
+//   std::cout << "gDirectory" << gDirectory->GetList()->GetSize() << std::endl;
+//   std::cout << "list " << gROOT->GetList()->GetSize() << std::endl;
+//   std::cout << "globals " << gROOT->GetListOfGlobals()->GetSize() << std::endl;
+//   std::cout << "files " << gROOT->GetListOfFiles()->GetSize() << std::endl;
+//   TIter nextFile(gROOT->GetListOfFiles());
+//   while (TDirectory* o = dynamic_cast<TDirectory*>(nextFile())) {
+//     std::cout << o->GetName() << ", " << o->GetList()->GetSize() << std::endl;
+//   }
+// 
+//   std::cout << "specials " << gROOT->GetListOfSpecials()->GetSize() << std::endl;
+//   
 }
 
 Bool_t SelectorImpl::Process(Long64_t entry) {
@@ -235,19 +247,18 @@ void SelectorImpl::SlaveTerminate() {
   // on each slave server.
 
   resetStatus();
-
   for(BaseSelector *selector: fSelectors) {
     delete selector;
   }
   fSelectors.clear();
-
   fEventSaver->terminate();
 
   delete fEventSaver;
   delete fBranchManager;
-
   if(fOutputFile) {
     fOutputFile->Write();
+    std::cout << "    Saved output file" << std::endl;
+    gROOT->GetListOfFiles()->Remove(fOutputFile);
     fOutputFile->Close();
     if(fProofFile) {
       fOutput->Add(fProofFile);
