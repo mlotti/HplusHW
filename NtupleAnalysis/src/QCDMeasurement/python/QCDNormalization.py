@@ -26,6 +26,7 @@ from HiggsAnalysis.NtupleAnalysis.tools.OrderedDict import OrderedDict
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.errorPropagation as errorPropagation
 import os
+import shutil
 import array
 import sys
 import datetime
@@ -186,8 +187,9 @@ def getModifiedBinLabelString(binLabel):
 
 ## Template holder for QCD measurement normalization
 class QCDNormalizationTemplate:
-    def __init__(self, name, quietMode=False):
+    def __init__(self, name, plotDirName, quietMode=False):
         self._name = name
+        self._plotDirName = plotDirName
         self._fitFunction = None
         self._fitKwargs = None
         self._fitRangeMin = None
@@ -390,7 +392,7 @@ class QCDNormalizationTemplate:
         h = self._histo.Clone(self._histo.GetName()+"clone")
         h.Scale(self._normalizationFactor)
         plot.histoMgr.appendHisto(histograms.Histo(h,self._histo.GetName()))
-        plot.createFrame("template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.1, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
+        plot.createFrame(self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.1, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
         histograms.addStandardTexts(cmsTextPosition="outframe")
         histograms.addText(0.36,0.89, "Integral = %d events"%int(self._histo.Integral()*self._normalizationFactor+0.5))
         histograms.addText(0.36,0.84, self._name)
@@ -502,7 +504,7 @@ class QCDNormalizationTemplate:
                 plot = plots.PlotBase()
                 plot.histoMgr.appendHisto(histograms.Histo(h,h.GetName()))
                 plot.histoMgr.appendHisto(histograms.Histo(fit, "fit"))
-                plot.createFrame("fit_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 1e-5, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
+                plot.createFrame(self._plotDirName+"/fit_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 1e-5, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
                 histograms.addText(0.36,0.84, self._name+", "+self._binLabel)
                 plot.getPad().SetLogy(True)
                 histograms.addStandardTexts(cmsTextPosition="outframe")
@@ -511,9 +513,13 @@ class QCDNormalizationTemplate:
 
 ## Base class for QCD measurement normalization from which specialized algorithm classes inherit
 class QCDNormalizationManagerBase:
-    def __init__(self, binLabels):
+    def __init__(self, binLabels, resultDirName):
         self._templates = {}
         self._binLabels = binLabels
+        self._plotDirName = "normalisationPlots_%s"%resultDirName
+        if os.path.exists(self._plotDirName):
+            shutil.rmtree(self._plotDirName)
+        os.mkdir(self._plotDirName)
         self._requiredTemplateList = []
         self._sources = {}
         self._commentLines = []
@@ -534,7 +540,7 @@ class QCDNormalizationManagerBase:
     def createTemplate(self, name):
         if name in self._templates.keys():
             raise Exception("Error: A template with name '%s' has already been created!"%name)
-        q = QCDNormalizationTemplate(name)
+        q = QCDNormalizationTemplate(name, self._plotDirName)
         self._templates[name] = q
         return q
    
@@ -643,7 +649,7 @@ class QCDNormalizationManagerBase:
             else:
                 fOUT.write("#"+l+"\n")
         fOUT.close()
-        print "Normalization factors written to '%s'"%filename
+        print "\nNormalization factors written to '%s'\n"%filename
         self._generateCoefficientPlot()
         self._generateDQMplot()
 
@@ -708,9 +714,9 @@ class QCDNormalizationManagerBase:
         backup = ROOT.gErrorIgnoreLevel
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
         for item in ["png", "C", "pdf"]:
-            c.Print("QCDNormalisationCoefficients.%s"%item)
+            c.Print(self._plotDirName+"/QCDNormalisationCoefficients.%s"%item)
         ROOT.gErrorIgnoreLevel = backup
-        print "Saved normalization coefficients into plot QCDNormalisationCoefficients.png"
+        print "Saved normalization coefficients into plot %s/QCDNormalisationCoefficients.png"%self._plotDirName
 
     ## Create a DQM style plot
     def _generateDQMplot(self):
@@ -753,12 +759,12 @@ class QCDNormalizationManagerBase:
         backup = ROOT.gErrorIgnoreLevel
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
         for item in ["png", "C", "pdf"]:
-            c.Print("QCDNormalisationDQM.%s"%item)
+            c.Print(self._plotDirName+"/QCDNormalisationDQM.%s"%item)
         ROOT.gErrorIgnoreLevel = backup
         ROOT.gStyle.SetPalette(1)
         print "Obtained %d warnings and %d errors for the normalization"%(nWarnings, nErrors)
         if nWarnings > 0 or nErrors > 0:
-            print "Please have a look at QCDNormalisationDQM.png to see the origin of the warning(s) and error(s)"
+            print "Please have a look at %s/QCDNormalisationDQM.png to see the origin of the warning(s) and error(s)"%self._plotDirName
 
     ## Checks that input is valid
     def _checkInputValidity(self, templatesToBeFitted):
@@ -803,7 +809,7 @@ class QCDNormalizationManagerBase:
                 print histogramDictionary
                 raise Exception("Error: Expected a dictionary of histograms")
             plot.histoMgr.appendHisto(histograms.Histo(histogramDictionary[k], k))
-        plot.createFrame("finalFit_"+"_"+binLabel, opts={"ymin": 1e-5, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
+        plot.createFrame(self._plotDirName+"/finalFit_"+"_"+binLabel, opts={"ymin": 1e-5, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
         histograms.addText(0.36,0.84, "Fit to data, "+binLabel)
         plot.getPad().SetLogy(True)
         histograms.addStandardTexts(cmsTextPosition="outframe")
@@ -856,8 +862,8 @@ class QCDNormalizationManagerBase:
 #  3) w_combined = a*w_QCD + (1-a)*w_EWKfake, a determined with MC for EWK fakes
 #  N_QCD can then be obtained with w_combined*(N_data - N_EWKtau)
 class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
-    def __init__(self, binLabels):
-        QCDNormalizationManagerBase.__init__(self, binLabels)
+    def __init__(self, binLabels, resultDirName):
+        QCDNormalizationManagerBase.__init__(self, binLabels, resultDirName)
         self._requiredTemplateList = ["EWKFakeTaus_Baseline", "EWKFakeTaus_Inverted",
                                       "EWKGenuineTaus_Baseline", "EWKGenuineTaus_Inverted",
                                       "EWKInclusive_Baseline", "EWKInclusive_Inverted",
@@ -874,7 +880,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         
         #===== Create a temporary template for data
         print "\n- Fitting templates to data ***default method***"
-        dataTemplate = QCDNormalizationTemplate("data")
+        dataTemplate = QCDNormalizationTemplate("data", self._plotDirName)
         binLabel = self._templates[self._requiredTemplateList[0]].getBinLabel()
         dataTemplate.setHistogram(dataHisto, binLabel)
         dataTemplate.plot()
@@ -904,12 +910,15 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         # should one divide the fractions with dataTemplate.getFittedParameters()[0] ??? (right now not because the correction is so small)
         nQCDFitted = dataTemplate.getFittedParameters()[1]*dataTemplate.getNeventsFromHisto(False)
         print "\n- Results:"
+        lines = ["... Bin: %s"%binLabel]
         self._commentLines.append("\nBin: %s"%binLabel)
-        print self._getSanityCheckTextForFit(binLabel)
-        print self._getSanityCheckTextForFractions(binLabel, "QCD",
+        lines.extend(self._getSanityCheckTextForFit(binLabel))
+        lines.extend(self._getSanityCheckTextForFractions(binLabel, "QCD",
             dataTemplate.getFittedParameters()[1], dataTemplate.getFittedParameterErrors()[1],
-            self._templates["QCD_Baseline"].getNeventsFromHisto(False), nQCDFitted)
-        print self._checkOverallNormalization(binLabel, dataTemplate.getFittedParameters()[0], dataTemplate.getFittedParameterErrors()[0])
+            self._templates["QCD_Baseline"].getNeventsFromHisto(False), nQCDFitted))
+        lines.extend(self._checkOverallNormalization(binLabel, dataTemplate.getFittedParameters()[0], dataTemplate.getFittedParameterErrors()[0]))
+        for line in lines:
+            print line
         
         #===== Normalization factor for QCD (from fit)
         qcdNormFactor = nQCDFitted / self._templates["QCD_Inverted"].getNeventsFromHisto(False)
@@ -937,8 +946,8 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
 #  2) w_combined = a*w_QCD + (1-a)*w_EWKfake, a determined with MC for EWK fakes
 #  N_QCD can then be obtained with w_combined*(N_data - N_EWKtau)
 class QCDNormalizationManagerExperimental1(QCDNormalizationManagerBase):
-    def __init__(self, binLabels):
-        QCDNormalizationManagerBase.__init__(self, binLabels)
+    def __init__(self, binLabels, resultDirName):
+        QCDNormalizationManagerBase.__init__(self, binLabels, resultDirName)
         self._requiredTemplateList = ["EWKFakeTaus_Baseline", "EWKFakeTaus_Inverted",
                                       "EWKGenuineTaus_Baseline", "EWKGenuineTaus_Inverted",
                                       "QCD_Baseline", "QCD_Inverted"]

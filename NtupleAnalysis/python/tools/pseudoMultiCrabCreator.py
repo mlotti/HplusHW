@@ -21,7 +21,11 @@ class PseudoMultiCrabCreator:
     ## Constructor
     # title is a string that goes to the multicrab directory name
     def __init__(self, title, inputMulticrabDir):
-        self._title = title
+        suffix = ""
+        s = inputMulticrabDir.split("_")
+        if s[len(s)-1].endswith("pr") or s[len(s)-1].endswith("prong"):
+            suffix = "_"+s[len(s)-1]
+        self._title = title+suffix
         self._mySubTitles = []
         self._modulesList = [] # List of PseudoMultiCrabModule objects
         self._inputMulticrabDir = inputMulticrabDir

@@ -36,7 +36,7 @@ selectOnlyBins = []#["Inclusive"] #["1"]
 
 def usage():
     print "\n"
-    print "### Usage:   InvertedTauID_Normalization.py_QCDandFakeTausFromData <multicrab dir>\n"
+    print "### Usage:   QCDMeasurementNormalization.py <multicrab dir>\n"
     print "\n"
     sys.exit()
 
@@ -162,7 +162,7 @@ def main(argv):
         
         #===== Initialize normalization calculator
         #manager = QCDNormalization.QCDNormalizationManagerExperimental1(binLabels)
-        manager = QCDNormalization.QCDNormalizationManagerDefault(binLabels)
+        manager = QCDNormalization.QCDNormalizationManagerDefault(binLabels, dirs[0])
         
         #===== Create templates (EWK fakes, EWK genuine, QCD; data template is created by manager)
         template_EWKFakeTaus_Baseline = manager.createTemplate("EWKFakeTaus_Baseline")
@@ -286,7 +286,13 @@ def main(argv):
             manager.calculateCombinedNormalizationCoefficient(qcdMt, ewkFakeTausMt)
 
         #===== Save normalization
-        manager.writeScaleFactorFile("QCDInvertedNormalizationFactors_%s.py"%HISTONAME, analysis, dataEra, searchMode)
+        # Detect suffix in input directory name
+        suffix = ""
+        s = dirs[0].split("_")
+        if s[len(s)-1].endswith("pr") or s[len(s)-1].endswith("prong"):
+            suffix = "_"+s[len(s)-1]
+        # Save
+        manager.writeScaleFactorFile("QCDInvertedNormalizationFactors_%s%s.py"%(HISTONAME, suffix), analysis, dataEra, searchMode)
 
 if __name__ == "__main__":
     main(sys.argv)
