@@ -758,7 +758,7 @@ class QCDNormalizationManagerBase:
         ROOT.gStyle.SetPalette(1)
         print "Obtained %d warnings and %d errors for the normalization"%(nWarnings, nErrors)
         if nWarnings > 0 or nErrors > 0:
-            print "Please have a look at QCDNormalisationDQM.png for what went wrong"
+            print "Please have a look at QCDNormalisationDQM.png to see the origin of the warning(s) and error(s)"
 
     ## Checks that input is valid
     def _checkInputValidity(self, templatesToBeFitted):

@@ -123,18 +123,21 @@ def main(argv):
         else:
             for hname in histonames:
                 binIndex = hname.replace("NormalizationMETBaselineTau"+HISTONAME,"")
-                bins.append(binIndex)
                 hDummy = dsetMgr.getDataset("Data").getDatasetRootHisto(COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex).getHistogram()
                 title = hDummy.GetTitle()
                 title = title.replace("METBaseline"+HISTONAME,"")
-                if binIndex == "Inclusive":
-                    binLabels.append(binIndex)
+                if hDummy.Integral() > 0.0:
+                    bins.append(binIndex)
+                    if binIndex == "Inclusive":
+                        binLabels.append(binIndex)
+                    else:
+                        binLabels.append(QCDNormalization.getModifiedBinLabelString(title))
+                    if FITMIN == None:
+                        FITMIN = hDummy.GetXaxis().GetXmin()
+                        FITMAX = hDummy.GetXaxis().GetXmax()
+                    hDummy.Delete()
                 else:
-                    binLabels.append(QCDNormalization.getModifiedBinLabelString(title))
-                if FITMIN == None:
-                    FITMIN = hDummy.GetXaxis().GetXmin()
-                    FITMAX = hDummy.GetXaxis().GetXmax()
-                hDummy.Delete()
+                    print "Skipping bin '%s' (%s) because it has no entries"%(binIndex, QCDNormalization.getModifiedBinLabelString(title))
         print "\nHistogram bins available",bins
         # Select bins by filter
         if len(selectOnlyBins) > 0:
