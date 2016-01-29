@@ -171,23 +171,23 @@ allSelections = PSet(
 ## Parses command line parameters and returns suffix for analysis
 def obtainAnalysisSuffix(argv):
     suffix = "" 
-    if "1prong" or "1pr" in argv:
+    if "1prong" in argv or "1pr" in argv:
         suffix = "1pr"
         print "Running on 1-prong taus"
-    elif "2prong" or "2pr" in argv:
+    elif "2prong" in argv or "2pr" in argv:
         suffix = "2pr"
         print "Running on 2-prong taus"
-    elif "3prong" or "3pr" in argv:
+    elif "3prong" in argv or "3pr" in argv:
         suffix = "3pr"
         print "Running on 3-prong taus"
     return suffix
 
 ## Parses command line parameters and adjusts the parameters accordingly
 def applyAnalysisCommandLineOptions(argv, config):
-    if "1prong" or "1pr" in argv:
+    if "1prong" in argv or "1pr" in argv:
         config.TauSelection.prongs = 1
-    elif "2prong" or "2pr" in argv:
+    elif "2prong" in argv or "2pr" in argv:
         config.TauSelection.prongs = 2
-    elif "3prong" or "3pr" in argv:
+    elif "3prong" in argv or "3pr" in argv:
         config.TauSelection.prongs = 3
 
