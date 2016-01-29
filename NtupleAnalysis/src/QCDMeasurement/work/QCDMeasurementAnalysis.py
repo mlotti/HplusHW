@@ -20,7 +20,7 @@ from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import all
 allSelections.CommonPlots.enableGenuineTauHistograms = True
 # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
 allSelections.CommonPlots.histogramSplitting = [
-    PSet(label="tauPt", binLowEdges=[60.0, 70.0, 80.0, 100.0], useAbsoluteValues=False),
+    PSet(label="tauPt", binLowEdges=[60.0, 80.0, 100.0], useAbsoluteValues=False),
   ]
 #===== Selection customisations
 #allSelections.TauSelection.rtau = 0.0
