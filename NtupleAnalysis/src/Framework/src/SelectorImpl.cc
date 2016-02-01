@@ -5,6 +5,7 @@
 #include "Framework/interface/EventSaver.h"
 
 #include "TROOT.h"
+#include "TProofServ.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "TProofOutputFile.h"
@@ -93,24 +94,9 @@ void SelectorImpl::Begin(TTree * /*tree*/) {
   // Check already here that we don't have two analyzers with same names
   // Why here and not SlaveBegin? Because we want the exception thrown in PROOF master
 
-  if(!fInput)
-    throw std::runtime_error("No input list to SelectorImpl!");
+  // Moved to SlaveBegin() because ref.guide https://root.cern.ch/doc/v606/classTSelector.html
+  // says it is better to put it to SlaveBegin() than Begin()
 
-  if(!dynamic_cast<const SelectorImplParams *>(fInput->FindObject("PARAMS"))) {
-    throw std::logic_error("No SelectorImplParams with name PARAMS in the input list");
-  }
-
-  std::unordered_set<std::string> analyzerNames;
-  TIter next(fInput);
-  while(const TObject *obj = next()) {
-    if(std::strncmp(obj->GetName(), "analyzer_", 9) == 0) {
-      std::string name(obj->GetName());
-      name = name.substr(9);
-      if(analyzerNames.find(name) != analyzerNames.end())
-        throw std::logic_error("Analyzer with name "+name+" already exists");
-      analyzerNames.insert(name);
-    }
-  }
 }
 
 void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
@@ -118,11 +104,53 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   // When running with PROOF SlaveBegin() is called on each slave server.
   // The tree argument is deprecated (on PROOF 0 is passed).
 
-  // Pick parameters
-  const SelectorImplParams *params = dynamic_cast<const SelectorImplParams *>(fInput->FindObject("PARAMS"));
-  fEntries = params->entries();
-  fPrintStatus = params->printStatus();
+  if(!fInput)
+    throw std::runtime_error("No input list to SelectorImpl!");
 
+  // Removed SelectorImplParams from use, it causes memory to corrupt with PROOF.
+  // Symptoms are: printing a boolean for isMC returns 153 instead of 0 or 1
+  // Guessing that it maybe something goes wrong with linkdef, but really no idea
+  // Fixed by taking SelectorImplParams out of the game
+  
+//   if(!dynamic_cast<const SelectorImplParams *>(fInput->FindObject("PARAMS"))) {
+//     throw std::logic_error("No SelectorImplParams with name PARAMS in the input list");
+//   }
+  //const SelectorImplParams* params = dynamic_cast<const SelectorImplParams *>(fInput->FindObject("PARAMS"));
+
+  // Note: no protection is applied here for missing options, add if necessary
+  gDirectory->cd();
+  const TNamed* entries = dynamic_cast<const TNamed*>(fInput->FindObject("entries"));
+  fEntries = std::stoi(entries->GetTitle());
+  const TNamed* printStatus = dynamic_cast<const TNamed*>(fInput->FindObject("printStatus"));
+  fPrintStatus = printStatus->GetTitle()[0] == '1';
+  const TNamed* isMC = dynamic_cast<const TNamed*>(fInput->FindObject("isMC"));
+  bIsMC = isMC->GetTitle()[0] == '1';
+  const TNamed* optionStr = dynamic_cast<const TNamed*>(fInput->FindObject("options"));
+  fOptionString = optionStr->GetTitle();
+
+  hSkimCounters = dynamic_cast<TH1F*>(fInput->FindObject("SkimCounter"));
+  hPUdata = dynamic_cast<TH1*>(fInput->FindObject("PileUpData"));
+  hPUmc   = dynamic_cast<TH1*>(fInput->FindObject("PileUpMC"));
+  const TNamed* ttbarNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isttbar"));
+  if (ttbarNamed) {
+    bIsttbar = (ttbarNamed->GetTitle()[0] == '1');
+  }
+  //if (gProofServ) gProofServ->SendAsynMessage(TString::Format("slave %d opt %s",int(fEntries),fOptionString.Data()));
+  //if (gProofServ) gProofServ->SendAsynMessage(TString::Format("********** %d %s", gProofServ->GetTotSessions(), gProofServ->GetOrdinal()));
+  
+  // Find analyzer names
+  std::unordered_set<std::string> analyzerNames;
+  TIter nnext(fInput);
+  while(const TObject *obj = nnext()) {
+    if(std::strncmp(obj->GetName(), "analyzer_", 9) == 0) {
+      std::string name(obj->GetName());
+      name = name.substr(9);
+      if(analyzerNames.find(name) != analyzerNames.end())
+        throw hplus::Exception("Logic") << "Analyzer with name " << name << " already exists";
+      analyzerNames.insert(name);
+    }
+  }
+ 
   // Use TProofOutputFile if requested (for PROOF)
   const TNamed *out = dynamic_cast<const TNamed *>(fInput->FindObject("PROOF_OUTPUTFILE_LOCATION"));
   if(out) {
@@ -141,18 +169,23 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
     }
   }
   // Otherwise use the fOutput list (unit tests)
-
   fBranchManager = new BranchManager();
-
-  ParameterSet options(params->options());
+  ParameterSet options(fOptionString.Data());
   fEventSaver = new EventSaver(options, fOutput);
-
-  // Skim counters
-  hSkimCounters = dynamic_cast<TH1F*>(fInput->FindObject("SkimCounter"));
-  
   TDirectory::AddDirectory(kFALSE);
   TH1::AddDirectory(kFALSE);
   TIter next(fInput);
+  TH1* hLocalSkimCounters = hSkimCounters;
+  if (gProofServ && std::string(gProofServ->GetOrdinal()) != std::string("0.0")) {
+    // For all other PROOF processes than the first one, set skim counters to zero
+    // to avoid unphysical multiplication
+    hLocalSkimCounters = dynamic_cast<TH1*>(hSkimCounters->Clone());
+    for (int i = 1; i <= hLocalSkimCounters->GetNbinsX(); ++i) {
+      hLocalSkimCounters->SetBinContent(i, 0.0);
+      hLocalSkimCounters->SetBinError(i, 0.0);
+    }
+  }
+  
   while(const TObject *obj = next()) {
     if(std::strncmp(obj->GetName(), "analyzer_", 9) == 0) {
       const TNamed *nm = dynamic_cast<const TNamed *>(obj);
@@ -163,7 +196,7 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
       std::string className = title.substr(0, pos);
       std::string config = title.substr(pos+1);
 
-      auto selector = SelectorFactory::create(className, config, params->isMC(), hSkimCounters);
+      auto selector = SelectorFactory::create(className, config, bIsMC, hLocalSkimCounters);
       selector->setEventSaver(fEventSaver);
       TDirectory *subdir = nullptr;
       if(fOutputFile) {
@@ -179,16 +212,6 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
       fSelectors.push_back(selector.release());
     }
   }
-
-  
-  // Pileup weights
-  hPUdata = dynamic_cast<TH1*>(fInput->FindObject("PileUpData"));
-  hPUmc   = dynamic_cast<TH1*>(fInput->FindObject("PileUpMC"));
-  
-  // ttbar status
-  const TNamed* ttbarNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isttbar"));
-  if (ttbarNamed)
-    bIsttbar = (ttbarNamed->GetTitle()[0] == '1');
   
 //   std::cout << "gDirectory" << gDirectory->GetList()->GetSize() << std::endl;
 //   std::cout << "list " << gROOT->GetList()->GetSize() << std::endl;
@@ -283,7 +306,6 @@ void SelectorImpl::Terminate() {
   // The Terminate() function is the last function to be called during
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
-
 }
 
 void SelectorImpl::printStatus() {

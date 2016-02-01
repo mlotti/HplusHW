@@ -55,7 +55,7 @@ builder.build(process, allSelections)
 
 # Run the analysis
 if "proof" in sys.argv:
-    raise Exception("Proof messes up the event weights, do not use for the moment!")
+    #raise Exception("Proof messes up the event weights, do not use for the moment!")
     process.run(proof=True)
 else:
     process.run()

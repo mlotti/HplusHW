@@ -376,7 +376,13 @@ class Process:
             # estimate for the analysis. If this turns out to be slow,
             # we could store the number of events along the file names
             # (whatever is the method for that)
-            inputList.Add(ROOT.SelectorImplParams(tchain.GetEntries(), dset.getDataVersion().isMC(), self._options.serialize_(), True))
+            inputList.Add(ROOT.TNamed("entries", str(tchain.GetEntries())))
+            if dset.getDataVersion().isMC():
+                inputList.Add(ROOT.TNamed("isMC", "1"))
+            else:
+                inputList.Add(ROOT.TNamed("isMC", "0"))
+            inputList.Add(ROOT.TNamed("options", self._options.serialize_()))
+            inputList.Add(ROOT.TNamed("printStatus", "1"))
 
             if _proof is not None:
                 tchain.SetProof(True)
