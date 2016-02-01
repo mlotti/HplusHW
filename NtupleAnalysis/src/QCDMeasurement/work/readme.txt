@@ -45,16 +45,15 @@ Instructions for running the QCD measurement:
    - The user may use the normalisation coefficients for both QCD and EWK fake taus (default) or just the
      coefficient for QCD (use parameter --qcdonly; this should be used only for testing purposes)
 
-5) Combine result from different prongs:
+5) Combine result from different prongs (few seconds):
    - Run steps (2), (3), and (4) for each prong selection (specify as command line parameter in step (2)
      as indicated)
-   - Since the pseudo-multicrab is data, it is already normalised to the luminosity of the data and
+   - Then combine the resulting pseudoMulticrab directories with
+       hplusMergeResultDirectories.py inputPseudoMulticrab1 inputPseudoMulticrab2 <...>
+   - The results are stored into the directory pseudoMulticrab_QCDMeasurement_merged_*
+   - Note that since the pseudo-multicrab is data, it is already normalised to the luminosity of the data and
      consequently no normalisation information is needed in the pseudo-multicrab directories for
-     the summing of orthogonally selected results
-   - Therefore, the pseudo-multicrab directories for the various prong selections can be summed with
-     the plain vanilla ROOT's hadd
-   - The summing needs to be done with a script that is to be written ...
-   - The results are stored into the directory pseudoMulticrab_QCDMeasurement
+     the summing of orthogonally selected results (makes life easier in the combination script)
 
 6) From QCD measurement to control plots and limits
    - To check the closure of the QCD measurement, produce the plots with:
