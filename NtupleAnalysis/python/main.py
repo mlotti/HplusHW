@@ -426,7 +426,8 @@ class Process:
                         if binNumber > 0:
                             NAllEventsTopPt += h.GetBinContent(binNumber)
                     else:
-                        print "Warning: Could not obtain N(AllEvents) for top pt reweighting"
+                        raise Exception("Warning: Could not obtain N(AllEvents) for top pt reweighting")
+                    ROOT.gROOT.GetListOfFiles().Remove(fIN)
                     fIN.Close()
 
             # Write configInfo
@@ -458,7 +459,7 @@ class Process:
                     cinfo.SetBinContent(n+2, nAllEventsPUWeighted / nanalyzers)
                 # Add "isTopPtReweighted" column
                 if useTopPtCorrection:
-                    cinfo.SetBinContent(n+3, NAllEventsTopPt / nanalyzers)
+                    cinfo.SetBinContent(n+3, NAllEventsTopPt)
                 # Write
                 cinfo.Write()
                 ROOT.gROOT.GetListOfFiles().Remove(fIN);
@@ -583,7 +584,7 @@ class Process:
                 for k in range(0, hPUMC.GetNbinsX()+2):
                     if hPUMC.GetBinContent(k) > 0.0:
                         w = hDataPUs[aname].GetBinContent(k) / hPUMC.GetBinContent(k) * factor
-                        nAllEventsPUWeighted = w * hPUMC.GetBinContent(k)
+                        nAllEventsPUWeighted += w * hPUMC.GetBinContent(k)
         return (nAllEventsPUWeighted, usePUweights)
  
     ## Sums the skim counters from input files and returns a pset containing them 
