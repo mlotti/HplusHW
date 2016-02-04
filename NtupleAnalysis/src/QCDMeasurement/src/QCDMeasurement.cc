@@ -193,9 +193,9 @@ void QCDMeasurement::book(TDirectory *dir) {
   std::vector<TDirectory*> myNormalizationDirs = {myNormDir, myNormEWKFakeTausDir, myNormGenuineTausDir};
 
   // Normalization bin settings
-  const int nMetBins = fCommonPlots.getMetBinSettings().bins();
   const float fMetMin = fCommonPlots.getMetBinSettings().min();
   const float fMetMax = fCommonPlots.getMetBinSettings().max();
+  const int nMetBins = fMetMax-fMetMin; // Use 1 GeV bin width
   const int nMtBins = fCommonPlots.getMtBinSettings().bins();
   const float fMtMin = fCommonPlots.getMtBinSettings().min();
   const float fMtMax = fCommonPlots.getMtBinSettings().max();
