@@ -138,6 +138,9 @@ for dataset in datasets:
 
         rName = rName.replace("-","_")
 
+        if "ext" in dataset.URL:
+            rName += "_ext"
+
         outfilepath = os.path.join(dirName,"crabConfig_"+rName+".py")
 
 	if not os.path.exists(os.path.join(dirName,rName)):
