@@ -331,7 +331,7 @@ class Process:
                     # ttbar status for top pt corrections
                     ttbarStatus = "0"
                     useTopPtCorrection = analyzer.exists("useTopPtWeights") and analyzer.__getattr__("useTopPtWeights")
-                    useTopPtCorrection = useTopPtCorrection and dset.getName().startswith("TTJets")
+                    useTopPtCorrection = useTopPtCorrection and dset.getName().startswith("TT")
                     if useTopPtCorrection:
                         ttbarStatus = "1"
                     inputList.Add(ROOT.TNamed("isttbar", ttbarStatus))
