@@ -16,7 +16,7 @@ Instructions for using:
 
 2) Produce plots and json files from the histograms, for example:
      ./plotBTagEfficiency.py --mcrab BTagEfficiencyAnalysis_160114_124705 --dataset T -e 0.10
-   Notice that this is done for one dataset only (such as TTJets or WJetsHT). The last
+   Notice that this is done for one dataset only (such as TT or TTJets or WJetsHT). The last
    parameter is the maximum allowed uncertainty in a pt bin (the bin width is automatically
    widened to meet this requirement)
 

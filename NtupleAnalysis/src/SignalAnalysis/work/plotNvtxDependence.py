@@ -47,7 +47,6 @@ def main():
     dsetMgr.updateNAllEventsToPUWeighted()
     plots.mergeRenameReorderForDataMC(dsetMgr)
     #dsetMgr.normalizeToLuminosity()
-    #dsetMgr.merge("EWK", ["WJets", "DYJetsToLL", "SingleTop", "Diboson", "TTJets"], keepSources=True)
     lumi = dsetMgr.getDataset("Data").getLuminosity()
 
     # Apply TDR style
@@ -82,6 +81,8 @@ def main():
     #plotSources["mu_isol_eta"] = ["muSelection_Veto/IsolEtaBefore","muSelection_Veto/IsolEtaAfter"]
     #plotSources["mu_isol_vtx"] = ["muSelection_Veto/IsolVtxBefore","muSelection_Veto/IsolVtxAfter"]
     dsetInputs = {
+        #"TTJets": ["TTJets"], # Madgraph with negative weights
+        "TT": ["TT"], # Powheg, no neg. weights -> large stats.
         "TTJets": ["TTJets"],
         "WJets": ["WJetsHT"],
         "EWK": ["TTJets", "WJetsHT", "DYJetsToLL", "SingleTop"],

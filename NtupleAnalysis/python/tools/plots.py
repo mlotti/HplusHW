@@ -108,6 +108,10 @@ _physicalToLogical.update({
     "TTJets_SemiLept": "TTJets_SemiLept",
     "TTJets_Hadronic".replace("_", "_ext_"): "TTJets_Hadronic",
     
+    # powheg ttbar
+    "TT": "TT",
+    "TT_ext": "TT_ext",
+    
     "WJetsToLNu": "WJetsToLNu",
     #"W1Jets": "W1Jets",
     #"W2Jets": "W2Jets",
@@ -203,6 +207,9 @@ _datasetMerge = {
     #"TTJets_FullLept": "TTJets",
     #"TTJets_SemiLept": "TTJets",
     #"TTJets_Hadronic": "TTJets",
+    
+    "TT": "TT",
+    "TT_ext": "TT",
 
     "WJetsToLNu": "WJets",
     #"W1Jets": "WJets",

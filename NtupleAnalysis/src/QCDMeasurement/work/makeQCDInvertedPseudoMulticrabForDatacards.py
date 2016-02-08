@@ -19,7 +19,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.pseudoMultiCrabCreator as pseudoMultiC
 
 _generalOptions = {
     "analysisName": "QCDMeasurement",
-    "ewkDatasetsForMerging": ["TTJets","WJetsHT","DYJetsToLLHT","SingleTop"], #,"Diboson"],
+    "ewkDatasetsForMerging": ["TT","WJetsHT","DYJetsToLLHT","SingleTop"], #,"Diboson"], # using TT instead of TTJets
     "normalizationFactorSource": "QCDInvertedNormalizationFactors_AfterStdSelections%s.py",
     "normalizationPoint": "AfterStdSelections",
     "normalizationSourcePrefix": "ForQCDNormalization/Normalization",
