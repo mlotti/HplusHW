@@ -185,7 +185,6 @@ class AnalysisBuilder:
         for module in configs:
             module.registerAnalysis(process)
         print "\nAnalysisBuilder created %d modules\n"%len(configs)
-        raise Exception
         #print configs[0]._config
     
     ## Builds iteratively the variations
