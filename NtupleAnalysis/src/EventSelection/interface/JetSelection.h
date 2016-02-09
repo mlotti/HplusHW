@@ -58,7 +58,7 @@ public:
     /// Obtain minimum Delta R between a jet and (MHT-jet)
     const double minDeltaRJetMHT() const { return fMinDeltaRJetMHT; }
     /// Obtain minimum Delta R between a jet and (MHT-jet)
-    const double maxDeltaRJetMHT() const { return fMaxDeltaRJetMHT; }
+    const double minDeltaRReversedJetMHT() const { return fMinDeltaRReversedJetMHT; }
     
     friend class JetSelection;
 
@@ -82,7 +82,7 @@ public:
     /// Minimum Delta R between a jet and (MHT-jet)
     double fMinDeltaRJetMHT;
     /// Maximum Delta R between a jet and (MHT-jet)
-    double fMaxDeltaRJetMHT;
+    double fMinDeltaRReversedJetMHT;
   };
   
   // Main class

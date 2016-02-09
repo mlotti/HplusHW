@@ -17,7 +17,7 @@ JetSelection::Data::Data()
   fMinDeltaPhiJetMHT(-1.0),
   fMaxDeltaPhiJetMHT(-1.0),
   fMinDeltaRJetMHT(-1.0),
-  fMaxDeltaRJetMHT(-1.0)
+  fMinDeltaRReversedJetMHT(-1.0)
 { }
 
 JetSelection::Data::~Data() { }
@@ -273,25 +273,30 @@ void JetSelection::calculateMHTInformation(JetSelection::Data& output, const mat
   output.fMinDeltaPhiJetMHT = 9999.0;
   output.fMaxDeltaPhiJetMHT = -1.0;
   output.fMinDeltaRJetMHT = 9999.0;
-  output.fMaxDeltaRJetMHT = -1.0;
+  output.fMinDeltaRReversedJetMHT = 9999.0;
   for(auto& p: fourMomenta) {
     math::XYZVectorD modifiedMHT = output.MHT();
     modifiedMHT.SetXYZ(output.fMHT.x() + p.x(),
                        output.fMHT.y() + p.y(),
                        output.fMHT.z() + p.z());
     double deltaPhi = ROOT::Math::VectorUtil::DeltaPhi(p, modifiedMHT);
-    double deltaR = ROOT::Math::VectorUtil::DeltaR(p, modifiedMHT);
     if (deltaPhi < output.fMinDeltaPhiJetMHT) {
       output.fMinDeltaPhiJetMHT = deltaPhi;
     }
     if (deltaPhi > output.fMaxDeltaPhiJetMHT) {
       output.fMaxDeltaPhiJetMHT = deltaPhi;
     }
+    double deltaR = ROOT::Math::VectorUtil::DeltaR(p, modifiedMHT);
     if (deltaR < output.fMinDeltaRJetMHT) {
       output.fMinDeltaRJetMHT = deltaR;
     }
-    if (deltaR > output.fMaxDeltaRJetMHT) {
-      output.fMaxDeltaRJetMHT = deltaR;
+    // Reverse one of the vectors and calculate DeltaR; small DeltaR means the system is back-to-back
+    modifiedMHT.SetXYZ(-output.fMHT.x(),
+                       -output.fMHT.y(),
+                       -output.fMHT.z());
+    double reversedSystemDeltaR = ROOT::Math::VectorUtil::DeltaR(p, modifiedMHT);
+    if (reversedSystemDeltaR < output.fMinDeltaRReversedJetMHT) {
+      output.fMinDeltaRReversedJetMHT = reversedSystemDeltaR;
     }
   }
 }
