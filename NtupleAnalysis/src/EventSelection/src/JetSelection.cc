@@ -279,7 +279,7 @@ void JetSelection::calculateMHTInformation(JetSelection::Data& output, const mat
     modifiedMHT.SetXYZ(output.fMHT.x() + p.x(),
                        output.fMHT.y() + p.y(),
                        output.fMHT.z() + p.z());
-    double deltaPhi = ROOT::Math::VectorUtil::DeltaPhi(p, modifiedMHT);
+    double deltaPhi = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(p, modifiedMHT));
     if (deltaPhi < output.fMinDeltaPhiJetMHT) {
       output.fMinDeltaPhiJetMHT = deltaPhi;
     }

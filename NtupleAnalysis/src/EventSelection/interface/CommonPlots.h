@@ -196,6 +196,12 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlJetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetEtaAfterAllSelections;
   HistoSplitter::SplittedTripletTH2s hCtrlJetEtaPhiAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlHTAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMHTAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMinDeltaPhiJetMHTAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMaxDeltaPhiJetMHTAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMinDeltaRJetMHTAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMinDeltaRReversedJetMHTAfterAllSelections;
 
   HistoSplitter::SplittedTripletTH1s hCtrlCollinearAngularCutsMinimumAfterAllSelections;
 
