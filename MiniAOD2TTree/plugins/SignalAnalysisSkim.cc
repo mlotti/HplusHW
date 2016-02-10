@@ -46,14 +46,14 @@ class SignalAnalysisSkim : public edm::EDFilter {
 
         edm::EDGetTokenT<edm::View<pat::Jet>> jetToken;
         std::vector<std::string> jetUserFloats;
-        const float fJetEtCut;
-        const float fJetEtaCut;
+        const double fJetEtCut;
+        const double fJetEtaCut;
         const int nJets;
         
         edm::EDGetTokenT<edm::View<pat::Tau>> tauToken;
-        const float fTauPtCut;
-        const float fTauEtaCut;
-        const float fTauLdgTrkPtCut;
+        const double fTauPtCut;
+        const double fTauEtaCut;
+        const double fTauLdgTrkPtCut;
 
         int nEvents;
         int nSelectedEvents;
@@ -64,13 +64,13 @@ SignalAnalysisSkim::SignalAnalysisSkim(const edm::ParameterSet& iConfig)
   triggerBits(iConfig.getParameter<std::vector<std::string> >("HLTPaths")),
   jetToken(consumes<edm::View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("JetCollection"))),
   jetUserFloats(iConfig.getParameter<std::vector<std::string> >("JetUserFloats")),
-  fJetEtCut(iConfig.getParameter<float>("JetEtCut")),
-  fJetEtaCut(iConfig.getParameter<float>("JetEtaCut")),
+  fJetEtCut(iConfig.getParameter<double>("JetEtCut")),
+  fJetEtaCut(iConfig.getParameter<double>("JetEtaCut")),
   nJets(iConfig.getParameter<int>("NJets")),
   tauToken(consumes<edm::View<pat::Tau>>(iConfig.getParameter<edm::InputTag>("TauCollection"))),
-  fTauPtCut(iConfig.getParameter<float>("TauPtCut")),
-  fTauEtaCut(iConfig.getParameter<float>("TauEtaCut")),
-  fTauLdgTrkPtCut(iConfig.getParameter<float>("TauLdgTrkPtCut")),
+  fTauPtCut(iConfig.getParameter<double>("TauPtCut")),
+  fTauEtaCut(iConfig.getParameter<double>("TauEtaCut")),
+  fTauLdgTrkPtCut(iConfig.getParameter<double>("TauLdgTrkPtCut")),
   nEvents(0),
   nSelectedEvents(0)
 {
