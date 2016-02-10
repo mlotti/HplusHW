@@ -25,6 +25,7 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 
@@ -45,27 +46,35 @@ class SignalAnalysisSkim : public edm::EDFilter {
 
         edm::EDGetTokenT<edm::View<pat::Jet>> jetToken;
         std::vector<std::string> jetUserFloats;
+        const float fJetEtCut;
+        const float fJetEtaCut;
+        const int nJets;
+        
+        edm::EDGetTokenT<edm::View<pat::Tau>> tauToken;
+        const float fTauPtCut;
+        const float fTauEtaCut;
+        const float fTauLdgTrkPtCut;
 
-	double jetEtCut,jetEtaCut;
-	int nJets;
-
-        int nEvents, nSelectedEvents;
+        int nEvents;
+        int nSelectedEvents;
 };
 
 SignalAnalysisSkim::SignalAnalysisSkim(const edm::ParameterSet& iConfig)
 : trgResultsToken(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("TriggerResults"))),
-  jetToken(consumes<edm::View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("JetCollection")))
+  triggerBits(iConfig.getParameter<std::vector<std::string> >("HLTPaths")),
+  jetToken(consumes<edm::View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("JetCollection"))),
+  jetUserFloats(iConfig.getParameter<std::vector<std::string> >("JetUserFloats")),
+  fJetEtCut(iConfig.getParameter<float>("JetEtCut")),
+  fJetEtaCut(iConfig.getParameter<float>("JetEtaCut")),
+  nJets(iConfig.getParameter<int>("NJets")),
+  tauToken(consumes<edm::View<pat::Tau>>(iConfig.getParameter<edm::InputTag>("TauCollection"))),
+  fTauPtCut(iConfig.getParameter<float>("TauPtCut")),
+  fTauEtaCut(iConfig.getParameter<float>("TauEtaCut")),
+  fTauLdgTrkPtCut(iConfig.getParameter<float>("TauLdgTrkPtCut")),
+  nEvents(0),
+  nSelectedEvents(0)
 {
-    triggerBits        = iConfig.getParameter<std::vector<std::string> >("HLTPaths");
-
-    jetUserFloats      = iConfig.getParameter<std::vector<std::string> >("JetUserFloats");
-
-    jetEtCut           = iConfig.getParameter<double>("JetEtCut");
-    jetEtaCut          = iConfig.getParameter<double>("JetEtaCut");                            
-    nJets              = iConfig.getParameter<int>("NJets");
-
-    nEvents         = 0;
-    nSelectedEvents = 0;
+  
 }
 
 
@@ -125,6 +134,23 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
 	if(!passed) return false; 
     }
 
+    // Taus
+    edm::Handle<edm::View<pat::Tau> > tauhandle;
+    iEvent.getByToken(tauToken, tauhandle);
+    int ntaus = 0;
+    if (tauhandle.isValid()){
+        for(size_t i = 0; i < tauhandle->size(); ++i) {
+            const pat::Tau& obj = tauhandle->at(i);
+            if (obj.p4().pt() < fTauPtCut) continue;
+            if (fabs(obj.p4().eta()) > fTauEtaCut) continue;
+            if (obj.leadChargedHadrCand()->p4().Pt() < fTauLdgTrkPtCut) continue;
+            // Passed the loose tau selections
+            ++ntaus;
+        }
+    }
+    if (ntaus == 0) return false;
+    
+    // Jets
     edm::Handle<edm::View<pat::Jet> > jethandle;
     iEvent.getByToken(jetToken, jethandle);
     int njets = 0;
@@ -132,8 +158,8 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
         for(size_t i=0; i<jethandle->size(); ++i) {
             const pat::Jet& obj = jethandle->at(i);
 
-	    if(obj.p4().pt() < jetEtCut) continue;
-	    if(fabs(obj.p4().eta()) > jetEtaCut) continue;
+	    if(obj.p4().pt() < fJetEtCut) continue;
+	    if(fabs(obj.p4().eta()) > fJetEtaCut) continue;
 /*
 	    bool passed = true;
 	    for(size_t j = 0; j < jetUserFloats.size(); ++j){
@@ -148,7 +174,8 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
 	}
     }
     if(njets < nJets) return false;
-
+    
+    // All selections passed
     nSelectedEvents++;
     return true;
 }

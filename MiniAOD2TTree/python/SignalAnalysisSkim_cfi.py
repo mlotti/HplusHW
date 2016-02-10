@@ -8,11 +8,18 @@ skim = cms.EDFilter("SignalAnalysisSkim",
         "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
         "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned_v",
     ),
+    # Taus
+    JetCollection  = cms.InputTag("slimmedTaus"),
+    TauPtCut       = cms.float(50.0),
+    TauEtaCut      = cms.float(2.1),
+    TauLdgTrkPtCut = cms.float(15.0),
+
+    # Jets
     JetCollection  = cms.InputTag("slimmedJets"),
     JetUserFloats  = cms.vstring(
 	"pileupJetId:fullDiscriminant",
     ),
-    JetEtCut       = cms.double(20),
-    JetEtaCut      = cms.double(2.4),
+    JetEtCut       = cms.float(20),
+    JetEtaCut      = cms.float(2.4),
     NJets          = cms.int32(4),
 )
