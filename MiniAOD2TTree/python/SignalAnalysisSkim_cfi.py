@@ -9,7 +9,7 @@ skim = cms.EDFilter("SignalAnalysisSkim",
         "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned_v",
     ),
     # Taus
-    JetCollection  = cms.InputTag("slimmedTaus"),
+    TauCollection  = cms.InputTag("slimmedTaus"),
     TauPtCut       = cms.double(50.0),
     TauEtaCut      = cms.double(2.1),
     TauLdgTrkPtCut = cms.double(15.0),
