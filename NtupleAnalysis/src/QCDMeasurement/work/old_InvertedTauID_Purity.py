@@ -8,33 +8,51 @@
 #
 ######################################################################
 
-analysis = "signalAnalysisInvertedTau"
+import ROOT
+ROOT.gROOT.SetBatch(True)
+from ROOT import *
+import math
+import sys
 
-searchMode = "Light"
-#searchMode = "Heavy"
+import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
+import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
+import HiggsAnalysis.NtupleAnalysis.tools.counter as counter
+import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
+import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
+import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
+import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
+import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
+
+from old_InvertedTauID import *
+#from QCDInvertedNormalizationFactors import *
+#from QCDInvertedNormalizationFactorsAfterStdSelections import *
+#from QCDInvertedNormalizationFactors_AfterStdSelections import *
+
+#dataEra = "Run2015C"
+#dataEra = "Run2015D"
+#dataEra = "Run2015CD"
+dataEra = "Run2015"
+
+#Tau_Run2015D_246908_258750_25ns
+#Tau_Run2015DPromptRecov3_246908_259891_25ns
+#Tau_Run2015DPromptRecov4_246908_259891_25ns
+searchMode = "80to1000"
 
 
-#dataEra = "Run2012AB"
-dataEra = "Run2012ABCD"
-#dataEra = "Run2011AB"
-#dataEra = "Run2012C"
-#dataEra = "Run2012D"
-#dataEra = "Run2011AB"
-#dataEra = "Run2012C"
-#dataEra = "Run2011B"
+def usage():
+    print "\n"
+    print "### Usage:   InvertedTauID_Normalization_QCDFromData.py <multicrab dir>\n"
+    print "\n"
+    sys.exit()
 
 
+    
+#analysis = "signalAnalysisInvertedTau"
 
 
-#optMode = "OptQCDTailKillerZeroPlus"
-#optMode = "OptQCDTailKillerLoosePlus"
-#optMode = "OptQCDTailKillerMediumPlus"
 
 #optMode = "OptQCDTailKillerMediumPlus"
 #optMode = "OptQCDTailKillerTightPlus"
-
-#optMode = ""
-
 optMode = ""
 
 #binning = [41,50,60,70,80,100,120,150,200]
@@ -43,28 +61,17 @@ binning = [41,50,60,70,80,100,120,150,300]
 HISTONAMES = []
 
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterTauVeto/SelectedTau_pT_AfterTauVetoInclusive")
-#HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut/SelectedTau_pT_AfterJetCutInclusive")
-HISTONAMES.append("Inverted/SelectedTau_pT_CollinearCuts/SelectedTau_pT_CollinearCutsInclusive")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterJetCut/SelectedTau_pT_AfterJetC
+HISTONAMES.append("QCDPurity/InvertedTauTauPtAfterAllSelections")
+#HISTONAMES.append("QCDPurityEWKGenuineTaus/InvertedTauTauPtAfterAllSelections")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterMetCut")
-HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging/SelectedTau_pT_AfterBtaggingInclusive")
-HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackCuts/SelectedTau_pT_BackToBackCutsInclusive")
+#HISTONAMES.append("Inverted/SelectedTau_pT_AfterBtagging/SelectedTau_pT_AfterBtaggingInclusive")
+#HISTONAMES.append("Inverted/SelectedTau_pT_BackToBackCuts/SelectedTau_pT_BackToBackCutsInclusive")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBveto/SelectedTau_pT_AfterBvetoInclusive")
 #HISTONAMES.append("Inverted/SelectedTau_pT_AfterBvetoPhiCuts/SelectedTau_pT_AfterBvetoPhiCutsInclusive")
 
 
-import ROOT
-import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
-import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
-import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
-import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
-
-from QCDInvertedNormalizationFactors import *
-
-import sys
-import array
-import re
 
 def usage():
     print
@@ -80,23 +87,28 @@ def main():
     dirs = []
     dirs.append(sys.argv[1])
         
-    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode)
+    #datasets = dataset.getDatasetsFromMulticrabDirs(dirs)
+    datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis)
+
+ #   consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="QCD inverted")
+    
     datasets.loadLuminosities()
     datasets.updateNAllEventsToPUWeighted()
 
     # erik
-    datasets.remove(filter(lambda name: "TTJets_SemiLept" in name, datasets.getAllDatasetNames()))
-    datasets.remove(filter(lambda name: "TTJets_FullLept" in name, datasets.getAllDatasetNames()))
-    datasets.remove(filter(lambda name: "TTJets_Hadronic" in name, datasets.getAllDatasetNames()))
-    
+#    datasets.remove(filter(lambda name: "TTJets_SemiLept" in name, datasets.getAllDatasetNames()))
+#    datasets.remove(filter(lambda name: "TTJets_FullLept" in name, datasets.getAllDatasetNames()))
+#    datasets.remove(filter(lambda name: "TTJets_Hadronic" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "WJetsToLNu" in name and not "WJetsToLNu_HT" in name, datasets.getAllDatasetNames()))
+       
     plots.mergeRenameReorderForDataMC(datasets)
 
     datasets.merge("EWK", [
                     "TTJets",
-                    "WJets",
+                    "WJetsHT",
                     "DYJetsToLL",
                     "SingleTop",
-                    "Diboson"
+                #    "Diboson"
                     ])
     style = tdrstyle.TDRStyle()
 
@@ -125,24 +137,26 @@ def main():
         if "SelectedTau_pT_BackToBackCuts"  in name:    
             legends["Purity%s"%i] = "BackToBack cuts" 
 
-    plot.createFrame("purityLoose", opts={"xmin": 40, "xmax": 160, "ymin": 0., "ymax": 1.05})
+   # plot.createFrame("purity_QCD_only", opts={"xmin": 40, "xmax": 160, "ymin": 0., "ymax": 1.05})
+    plot.createFrame("purity_QCD_only", opts={"xmin": 40, "xmax": 200, "ymin": 0., "ymax":1})
     plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("QCD purity")
 #    plot.setEnergy(datasets.getEnergies())
 
+#    plot.histoMgr.appendHisto(histograms.Histo(histo,"InvertedTauPtAfterAllSelections"))
     
     plot.histoMgr.setHistoLegendLabelMany(legends)
 
-    plot.setLegend(histograms.createLegend(0.3, 0.35, 0.6, 0.5))
+###    plot.setLegend(histograms.createLegend(0.2, 0.35, 0.6, 0.5))
     
  
 #    histograms.addText(0.2, 0.3, "TailKiller: MediumPlus", 18)
-    histograms.addText(0.35, 0.28, "BackToBack cuts: TightPlus", 20)
-    histograms.addText(0.35, 0.22, "2011B", 20)
+#    histograms.addText(0.35, 0.28, "BackToBack cuts: TightPlus", 20)
+#    histograms.addText(0.35, 0.22, "2011B", 20)
 
-
-    histograms.addText(0.2, 0.3, "TailKiller: MediumPlus", 18)
-#    histograms.addText(0.2, 0.3, "TailKiller: TightPlus", 18)
+    histograms.addText(0.3, 0.35, "QCD only", 20)
+    histograms.addText(0.3, 0.3, "After all selection cuts", 20)
+#    histograms.addText(0.2, 0.3, "QCD only", 18)
 
 
 
@@ -155,14 +169,15 @@ def main():
             
 def purityGraph(i,datasets,histo):
     inverted = plots.DataMCPlot(datasets, histo)
-#    inverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
-    inverted.histoMgr.forEachHisto(lambda h: h.setRootHisto(h.getRootHisto().Rebin(len(binning)-1,h.getRootHisto().GetName(),array.array('d',binning))))
+    inverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
+#    inverted.histoMgr.forEachHisto(lambda h: h.setRootHisto(h.getRootHisto().Rebin(len(binning)-1,h.getRootHisto().GetName(),array.array('d',binning))))
     
     invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone(histo)
-    invertedData.Scale(QCDInvertedNormalization["Inclusive"])
+#    invertedData.Scale(QCDInvertedNormalization["Inclusive"])
     invertedEWK  = inverted.histoMgr.getHisto("EWK").getRootHisto().Clone(histo)
-    invertedEWK.Scale(QCDInvertedNormalization["InclusiveEWK"])
+#    invertedEWK.Scale(QCDInvertedNormalization["InclusiveEWK"])
 
+#    print "Normalization: Inclusive", QCDNormalization["Inclusive"],"EWKFakeTausInclusive", EWKFakeTausNormalization["Inclusive"],"QCDPlusEWKFakeTausInclusive",QCDPlusEWKFakeTausNormalization["Inclusive"]
     numerator = invertedData.Clone()
     numerator.SetName("numerator")
     numerator.Add(invertedEWK,-1)

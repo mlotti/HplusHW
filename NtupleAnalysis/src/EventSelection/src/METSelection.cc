@@ -74,7 +74,10 @@ void METSelection::initialize(const ParameterSet& config) {
 }
 
 void METSelection::bookHistograms(TDirectory* dir) {
-  //TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "metSelection_"+sPostfix);
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "metSelection_"+sPostfix);
+  hMet = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "Met", "Met", 100, 0, 1000);
+
+
 }
 
 METSelection::Data METSelection::silentAnalyze(const Event& event, int nVertices) {
@@ -117,6 +120,7 @@ METSelection::Data METSelection::privateAnalyze(const Event& iEvent, int nVertic
   if (iEvent.isMC()) {
     output.fMETTriggerSF = fMETTriggerSFReader.getScaleFactorValue(metValue);
   } 
+  hMet->Fill(metValue);
   
   //=== Apply cut on MET
   if (!fMETCut.passedCut(metValue))
