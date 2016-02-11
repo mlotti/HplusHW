@@ -391,6 +391,7 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   double myTransverseMass = TransverseMass::reconstruct(tau, silentMETData.getMET());
   const BJetSelection::Data silentBjetData = fBaselineTauBJetSelection.silentAnalyze(fEvent, jetData);
   const AngularCutsBackToBack::Data silentBackToBackData = fBaselineTauAngularCutsBackToBack.silentAnalyze(fEvent, tau, jetData, silentMETData);
+  fNormalizationSystematicsSignalRegion.setGenuineTauStatus(isGenuineTau);
   fNormalizationSystematicsSignalRegion.fillControlPlotsForQCDShapeUncertainty(fEvent, collinearData, silentBjetData, silentMETData, silentBackToBackData);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationBaselineTauAfterStdSelections, isGenuineTau, METvalue);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtBaselineTauAfterStdSelections, isGenuineTau, myTransverseMass);
@@ -465,6 +466,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
   const BJetSelection::Data silentBjetData = fInvertedTauBJetSelection.silentAnalyze(fEvent, jetData);
   const AngularCutsBackToBack::Data silentBackToBackData = fInvertedTauAngularCutsBackToBack.silentAnalyze(fEvent, tau, jetData, silentMETData);
+  fNormalizationSystematicsControlRegion.setGenuineTauStatus(isGenuineTau);
   fNormalizationSystematicsControlRegion.fillControlPlotsForQCDShapeUncertainty(fEvent, collinearData, silentBjetData, silentMETData, silentBackToBackData);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationInvertedTauAfterStdSelections, isGenuineTau, METvalue);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtInvertedTauAfterStdSelections, isGenuineTau, myTransverseMass);

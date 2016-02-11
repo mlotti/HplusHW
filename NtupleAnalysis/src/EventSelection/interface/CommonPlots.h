@@ -43,6 +43,11 @@ public:
   const HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
   /// Returns the histogram settings for Mt bins (usecase: QCD measurement)
   const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
+
+  /** Special method for setting genuine tau status 
+    * (it is usually set through TauSelection via CommonPlots::fillControlPlotsAfterTauSelection)
+    */
+  void setGenuineTauStatus(const bool isGenuineTau) { bIsGenuineTau = isGenuineTau; };
   
   //===== unique filling methods (to be called inside the event selection routine only, i.e. (before a passing decision is done))
   void fillControlPlotsAtVertexSelection(const Event& event);
