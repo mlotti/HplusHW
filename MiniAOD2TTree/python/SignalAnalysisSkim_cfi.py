@@ -8,6 +8,13 @@ skim = cms.EDFilter("SignalAnalysisSkim",
         "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
         "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned_v",
     ),
+    # Taus
+    TauCollection  = cms.InputTag("slimmedTaus"),
+    TauPtCut       = cms.double(50.0),
+    TauEtaCut      = cms.double(2.1),
+    TauLdgTrkPtCut = cms.double(15.0),
+
+    # Jets
     JetCollection  = cms.InputTag("slimmedJets"),
     JetUserFloats  = cms.vstring(
 	"pileupJetId:fullDiscriminant",

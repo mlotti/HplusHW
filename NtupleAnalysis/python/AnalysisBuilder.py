@@ -173,13 +173,12 @@ class AnalysisBuilder:
                 modStr = "%s_%s_Run%s"%(self._name, searchMode, dataEra)
                 # Create nominal module without any variation
                 if "systematics" in self._variations.keys():
-                    if len(self._variations.keys()) == 1:
+                    if len(self._variations.keys()) > 1:
                         configs.append(AnalysisConfig(self._name, modStr, config))
                         print "Created nominal module: %s"%modStr
                 else:
-                    if len(self._variations.keys()) == 0:
-                        configs.append(AnalysisConfig(self._name, modStr, config))
-                        print "Created nominal module: %s"%modStr
+                    configs.append(AnalysisConfig(self._name, modStr, config))
+                    print "Created nominal module: %s"%modStr
                 # Create modules for optimization and systematics variations
                 configs.extend(self._buildVariation(config, modStr))
         # Register the modules

@@ -34,7 +34,9 @@ datasetsMuonData.append(Dataset('/SingleMuon/Run2015D-PromptReco-v3/MINIAOD',dat
 datasetsMuonData.append(Dataset('/SingleMuon/Run2015D-PromptReco-v4/MINIAOD',dataVersion="74Xdata",lumiMask=lumiMask25nsSilver))
 
 datasetsMiniAODv2_Top = []                                                                                                                                                                          
-datasetsMiniAODv2_Top.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v3/MINIAODSIM'))                                              
+#datasetsMiniAODv2_Top.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v3/MINIAODSIM'))                                              
+datasetsMiniAODv2_Top.append(Dataset('/TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'))
+datasetsMiniAODv2_Top.append(Dataset('/TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2_ext3-v1/MINIAODSIM'))
 #datasetsMiniAODv2_Top.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'))
 #datasetsMiniAODv2_Top.append(Dataset('/TTJets_HT-600to800_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'))
 #datasetsMiniAODv2_Top.append(Dataset('/TTJets_HT-800to1200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'))

@@ -205,6 +205,15 @@ class Process:
             self.addDataset(name)
 
     def addDatasetsFromMulticrab(self, directory, *args, **kwargs):
+        blacklist = []
+        if "blacklist" in kwargs.keys():
+            if isinstance(kwargs["blacklist"], str):
+                blacklist.append(kwargs["blacklist"])
+            elif isinstance(kwargs["blacklist"], list):
+                blacklist.extend(kwargs["blacklist"])
+            else:
+                raise Exception("Unsupported input format!")
+            del kwargs["blacklist"]
 #        dataset._optionDefaults["input"] = "miniaod2tree*.root"
         dataset._optionDefaults["input"] = "histograms-*.root"
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
@@ -212,8 +221,14 @@ class Process:
         dsetMgrCreator.close()
 
         for dset in dsets:
-            self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion(), lumiFile=dsetMgrCreator.getLumiFile())
-
+            isOnBlackList = False
+            for item in blacklist:
+                if dset.getName().startswith(item):
+                    isOnBlackList = True
+            if isOnBlackList:
+                print "Ignoring dataset because of blacklist options: '%s' ..."%dset.getName()
+            else:
+                self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion(), lumiFile=dsetMgrCreator.getLumiFile())
 
     # kwargs for 'includeOnlyTasks' or 'excludeTasks' to set the datasets over which this analyzer is processed, default is all datasets
     def addAnalyzer(self, name, analyzer, **kwargs):
@@ -331,7 +346,7 @@ class Process:
                     # ttbar status for top pt corrections
                     ttbarStatus = "0"
                     useTopPtCorrection = analyzer.exists("useTopPtWeights") and analyzer.__getattr__("useTopPtWeights")
-                    useTopPtCorrection = useTopPtCorrection and dset.getName().startswith("TTJets")
+                    useTopPtCorrection = useTopPtCorrection and dset.getName().startswith("TT")
                     if useTopPtCorrection:
                         ttbarStatus = "1"
                     inputList.Add(ROOT.TNamed("isttbar", ttbarStatus))

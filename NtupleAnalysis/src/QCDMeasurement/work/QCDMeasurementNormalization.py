@@ -90,7 +90,8 @@ def main(argv):
     plots.mergeWHandHH(dsetMgr)
 
     dsetMgr.merge("EWK", [
-	    "TTJets",
+	    #"TTJets", # Madgraph with negative weights
+            "TT", # Powheg, no neg. weights -> large stats.
             "WJetsHT",
             "DYJetsToLLHT",
             "SingleTop",
