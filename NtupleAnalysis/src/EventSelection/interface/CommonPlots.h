@@ -234,7 +234,7 @@ private:
   int iVertices;
   TauSelection::Data fTauData;
   //FakeTauIdentifier::Data fFakeTauData;
-  bool bIsFakeTau;
+  bool bIsGenuineTau;
   ElectronSelection::Data fElectronData;
   MuonSelection::Data fMuonData;
   JetSelection::Data fJetData;
