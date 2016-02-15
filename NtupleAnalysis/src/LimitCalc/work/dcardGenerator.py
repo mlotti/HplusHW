@@ -222,7 +222,7 @@ if __name__ == "__main__":
     myModuleSelector.addParserOptions(parser)
     parser.add_option("--lands", dest="lands", action="store_true", default=False, help="Generate datacards for LandS (not supported)")
     parser.add_option("--combine", dest="combine", action="store_true", default=True, help="Generate datacards for Combine (default=True)")
-    parser.add_option("--multipleDirs", dest="multipleDirs", action="store", help="Name of base dir for creating datacards for multiple directories (wildcard is added at the end)")
+    parser.add_option("-d", "--dir", dest="directories", action="append", help="Name of directories for creating datacards for multiple directories")
     parser.add_option("--systAnalysis", dest="systAnalysis", action="store_true", default=False, help="Runs the macro for generating systematic uncertainties plots")
     parser.add_option("--testShapeSensitivity", dest="testShapeSensitivity", action="store_true", default=False, help="Creates datacards for varying each shape nuisance up and down by 1 sigma")
     parser.add_option("--showcard", dest="showDatacard", action="store_true", default=False, help="Print datacards also to screen")
@@ -258,7 +258,7 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit()
     # Run main program
-    if opts.multipleDirs == None:
+    if len(opts.directories) == 0:
         if opts.debugProfiler:
             cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
         else:
@@ -266,11 +266,11 @@ if __name__ == "__main__":
         #cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
     else:
         # Find matching directories
-        (head, tail) = os.path.split(opts.multipleDirs)
-        myDirList = os.listdir(head)
-        for myDir in myDirList:
-            if myDir.startswith(tail):
-                if opts.debugProfiler:
-                    cProfile.run("main(opts, myModuleSelector, multipleDirs=os.path.join(head,myDir))")
-                else:
-                    main(opts, myModuleSelector, multipleDirs=os.path.join(head,myDir))
+        myDirList = os.listdir(".")
+        for item in opts.directories:
+            if not item in myDirList:
+                raise Exception("Error: Could not find directory '%s'!"%item)
+            if opts.debugProfiler:
+                cProfile.run("main(opts, myModuleSelector, multipleDirs=item)")
+            else:
+                main(opts, myModuleSelector, multipleDirs=item)
