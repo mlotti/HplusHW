@@ -10,6 +10,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import math
 import sys
+import os
 
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
@@ -19,18 +20,13 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.QCDMeasurement.QCDNormalization as QCDNormalization
-
+import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
 #==== Set analysis, data era, and search mode
 analysis = "QCDMeasurement"
 
-#dataEra = "Run2015C"
-#dataEra = "Run2015D"
-#dataEra = "Run2015CD"
-dataEra = "Run2015"
-
-searchMode = "80to1000"
-print analysis, dataEra, searchMode
+print "Analysis name:", analysis
 
 selectOnlyBins = []#["Inclusive"] #["1"]
 
@@ -47,21 +43,15 @@ def treatNegativeBins(h, label):
             print "histogram '%s': converted in bin %d a negative value (%f) to zero."%(label, k, h.GetBinContent(k))
             h.SetBinContent(k, 0.0)
 
-def main(argv):
+def main(argv, dsetMgr, moduleInfoString):
     COMBINEDHISTODIR = "ForQCDNormalization"
     FAKEHISTODIR = "ForQCDNormalizationEWKFakeTaus"
     GENUINEHISTODIR = "ForQCDNormalizationEWKGenuineTaus"
     comparisonList = ["AfterStdSelections"]
 
     dirs = []
-    if len(sys.argv) < 2:
-	usage()
-
     dirs.append(sys.argv[1])
     
-    # Create all dsetMgr from a multicrab task
-    dsetMgr = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra,  searchMode=searchMode, analysisName=analysis)
-
     # Check multicrab consistency
     consistencyCheck.checkConsistencyStandalone(dirs[0],dsetMgr,name="QCD inverted")
    
@@ -88,15 +78,23 @@ def main(argv):
 
     # Merge WH and HH dsetMgr to one (for each mass bin)
     plots.mergeWHandHH(dsetMgr)
-
-    dsetMgr.merge("EWK", [
-	    #"TTJets", # Madgraph with negative weights
-            "TT", # Powheg, no neg. weights -> large stats.
-            "WJetsHT",
-            "DYJetsToLLHT",
-            "SingleTop",
-            #"Diboson"
-            ])
+    # Merge MC EWK samples as one EWK sample
+    myMergeList = []
+    if "TT" in dsetMgr.getMCDatasetNames():
+        myMergeList.append("TT") # Powheg, no neg. weights -> large stats.
+    else:
+        myMergeList.append("TTJets") # Madgraph with negative weights
+        print "Warning: using TTJets as input, but this is suboptimal. Please switch to the TT sample (much more stats.)."
+    myMergeList.append("WJetsHT")
+    myMergeList.append("DYJetsToLLHT")
+    myMergeList.append("SingleTop")
+    if "Diboson" in dsetMgr.getMCDatasetNames():
+        myMergeList.append("Diboson")
+        print "Warning: ignoring diboson sample (since it does not exist) ..."
+    for item in myMergeList:
+        if not item in dsetMgr.getMCDatasetNames():
+            raise Exception("Error: tried to use dataset '%s' as part of the merged EWK dataset, but the dataset '%s' does not exist!"%(item,item))
+    dsetMgr.merge("EWK", myMergeList)
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -163,7 +161,7 @@ def main(argv):
         
         #===== Initialize normalization calculator
         #manager = QCDNormalization.QCDNormalizationManagerExperimental1(binLabels)
-        manager = QCDNormalization.QCDNormalizationManagerDefault(binLabels, dirs[0])
+        manager = QCDNormalization.QCDNormalizationManagerDefault(binLabels, dirs[0], moduleInfoString)
         
         #===== Create templates (EWK fakes, EWK genuine, QCD; data template is created by manager)
         template_EWKFakeTaus_Baseline = manager.createTemplate("EWKFakeTaus_Baseline")
@@ -231,7 +229,7 @@ def main(argv):
             hmetInverted_EWK_FakeTaus = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("EWK").getRootHisto().Clone(histoName)
 
             # Finalize histograms by rebinning
-            rebinFactor = 2 # Aim for 10 GeV binning
+            rebinFactor = 10 # Aim for 10 GeV binning
             for histogram in [hmetBase_data, hmetInverted_data, hmetBase_EWK_GenuineTaus, hmetInverted_EWK_GenuineTaus, hmetBase_EWK_FakeTaus, hmetInverted_EWK_FakeTaus]:
                  histogram.Rebin(rebinFactor)
 
@@ -287,13 +285,30 @@ def main(argv):
             manager.calculateCombinedNormalizationCoefficient(qcdMt, ewkFakeTausMt)
 
         #===== Save normalization
-        # Detect suffix in input directory name
-        suffix = ""
-        s = dirs[0].split("_")
-        if s[len(s)-1].endswith("pr") or s[len(s)-1].endswith("prong"):
-            suffix = "_"+s[len(s)-1]
-        # Save
-        manager.writeScaleFactorFile("QCDInvertedNormalizationFactors_%s%s.py"%(HISTONAME, suffix), analysis, dataEra, searchMode)
+        outFileName = "QCDNormalizationFactors_%s_%s.py"%(HISTONAME, moduleInfoString)
+        print argv[1],outFileName
+        outFileFullName = os.path.join(argv[1],outFileName)
+        manager.writeScaleFactorFile(outFileFullName, moduleInfoString)
 
 if __name__ == "__main__":
-    main(sys.argv)
+    # Check parameters
+    if len(sys.argv) < 2:
+        usage()
+    # Find out the era/search mode/optimization mode combinations and run each of them
+    myModuleSelector = analysisModuleSelector.AnalysisModuleSelector()
+    dsetMgrCreator = dataset.readFromMulticrabCfg(directory=sys.argv[1])
+    myModuleSelector.setPrimarySource("analysis", dsetMgrCreator)
+    myModuleSelector.doSelect(None)
+    #myModuleSelector.printSelectedCombinationCount()
+    for era in myModuleSelector.getSelectedEras():
+        for searchMode in myModuleSelector.getSelectedSearchModes():
+            for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
+                print ShellStyles.HighlightStyle()+"\nCalculating normalization for module %s/%s/%s%s"%(era, searchMode, optimizationMode, ShellStyles.NormalStyle())
+                # Construct info string for the module
+                moduleInfoString = "%s_%s"%(era, searchMode)
+                if len(optimizationMode) > 0:
+                    moduleInfoString += "_%s"%(optimizationMode)
+                # Create dataset manager
+                dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)
+                main(sys.argv, dsetMgr, moduleInfoString)
+    dsetMgrCreator.close()
