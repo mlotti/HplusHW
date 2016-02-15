@@ -26,6 +26,11 @@ import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 #==== Set analysis, data era, and search mode
 analysis = "QCDMeasurement"
 
+#==== Set rebin factor for normalization plots 
+# Histograms are generated with 1 GeV bin width, i.e. putting 10 here means 
+# that the fit is done on 10 GeV bins
+_rebinFactor = 10
+
 print "Analysis name:", analysis
 
 selectOnlyBins = []#["Inclusive"] #["1"]
@@ -229,9 +234,8 @@ def main(argv, dsetMgr, moduleInfoString):
             hmetInverted_EWK_FakeTaus = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("EWK").getRootHisto().Clone(histoName)
 
             # Finalize histograms by rebinning
-            rebinFactor = 10 # Aim for 10 GeV binning
             for histogram in [hmetBase_data, hmetInverted_data, hmetBase_EWK_GenuineTaus, hmetInverted_EWK_GenuineTaus, hmetBase_EWK_FakeTaus, hmetInverted_EWK_FakeTaus]:
-                 histogram.Rebin(rebinFactor)
+                 histogram.Rebin(_rebinFactor)
 
             #===== Obtain inclusive EWK histograms
             hmetBase_EWKinclusive = hmetBase_EWK_GenuineTaus.Clone("EWKinclusiveBase")
