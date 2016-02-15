@@ -128,9 +128,11 @@ class FitParameterOrthogonalizer:
         eigenValues = myDiagonalizedMatrix.GetEigenValues()
         self._eigenValues = []
         for i in range(0, eigenValues.GetNrows()):
-            if eigenValues(i) < 0: # This can happen because of small fluctuations
+            if eigenValues(i) < 0.0: # This can happen because of small fluctuations
                 self._eigenValues.append(0.0)
-            self._eigenValues.append(math.sqrt(eigenValues(i)))
+                print "Warning: Eigenvalue is zero (this usually means that the fit did not converge correctly)"
+            else:
+                self._eigenValues.append(math.sqrt(eigenValues(i)))
 
 # Unit tests
 if __name__ == "__main__":
