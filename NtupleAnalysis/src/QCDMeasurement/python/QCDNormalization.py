@@ -584,8 +584,8 @@ class QCDNormalizationManagerBase:
             if wUp > 1.0:
                 wUp = 1.0
             wDown = w - wError
-            if wDown < 1.0:
-                wDown = 1.0
+            if wDown < 0.0:
+                wDown = 0.0
         lines.append("   w = nQCD/(nQCD+nEWKfakes) = %f +- %f"%(w, wError))
         # Calculate the combined normalization factor (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)
         binLabel = self._templates[self._requiredTemplateList[0]].getBinLabel()
