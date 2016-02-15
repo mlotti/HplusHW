@@ -47,11 +47,12 @@ OptionIncludeSystematics=True # Set to true if you produced multicrabs with doSy
 
 OptionDoControlPlots=True
 OptionDoMergeFakeTauColumns=True # Merges the fake tau columns into one
-OptionCombineSingleColumnUncertainties=not True # Makes limit running faster
+OptionCombineSingleColumnUncertainties=False # Makes limit running faster
 OptionCtrlPlotsAtMt=True # Produce control plots after all selections (all selections for transverse mass)
 OptionDisplayEventYieldSummary=True
 OptionNumberOfDecimalsInSummaries=1
 OptionLimitOnSigmaBr=False # Is automatically set to true for heavy H+
+# Deprecated:
 OptionDoTBbarForHeavy=False # NOTE: usable only for 2012
 OptionAddSingleTopDependencyForMuParameter=False # Affects only light H+, 2012 only
 OptionAddSingleTopSignal=False # Affects only light H+, 2012 only
@@ -141,6 +142,9 @@ myShapeSystematics.extend(myBtagSystematics)
 myShapeSystematics.extend(myTopSystematics)
 #myShapeSystematics.extend(myPileupSystematics)
 
+if not OptionIncludeSystematics:
+    myShapeSystematics=[]
+
 myEmbeddingShapeSystematics=["trg_tau_dataeff","trg_L1ETM_dataeff","trg_muon_dataeff","ES_taus","Emb_mu_ID","Emb_WtauTomu"]
 
 ##############################################################################
@@ -217,7 +221,7 @@ else:
     DataGroups.append(DataGroup(label="tt_EWK_faketau", landsProcess=4,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
-                                datasetDefinition="TTJets",
+                                datasetDefinition="TT",
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
@@ -362,11 +366,11 @@ else:
     Nuisances.append(Nuisance(id="ES_taus", label="APPROXIMATION for tau ES",
         distr="lnN", function="Constant", value=0.03))
 # jet ES
-if "ES_taus" in myShapeSystematics:
+if "ES_jets" in myShapeSystematics:
     Nuisances.append(Nuisance(id="ES_jets", label="Jet energy scale",
         distr="shapeQ", function="ShapeVariation", systVariation="JES"))
 else:
-    Nuisances.append(Nuisance(id="ES_taus", label="APPROXIMATION for jet ES",
+    Nuisances.append(Nuisance(id="ES_jets", label="APPROXIMATION for jet ES",
         distr="lnN", function="Constant", value=0.03))
 # unclustered MET ES
 if "ES_METunclustered" in myShapeSystematics:
@@ -603,8 +607,8 @@ ControlPlots.append(ControlPlotInput(
                          "opts": {"ymin": 0.9} },
 ))
 ControlPlots.append(ControlPlotInput(
-    title            = "NjetsAfterJetSelectionAndMETSF",
-    histoName        = "NjetsAfterJetSelectionAndMETSF",
+    title            = "Njets_AfterStandardSelections",
+    histoName        = "Njets_AfterStandardSelections",
     details          = { "xlabel": "Number of selected jets",
                          "ylabel": "Events",
                          "divideByBinWidth": False,

@@ -343,7 +343,7 @@ class DatacardColumn():
         myShapeUncertDict = rhwu.getShapeUncertainties()
         # Check that asked variation exists
         if not systVariationName in myShapeUncertDict.keys():
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content!"%(self.getLabel(),systVariationName))
+            raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content (to run without shape systematics, set OptionIncludeSystematics to False)!"%(self.getLabel(),systVariationName))
         # Get histograms
         (hSystUp, hSystDown) = myShapeUncertDict[systVariationName]
         myNamePrefix = self.getLabel()+"_"+masterExtractorId
