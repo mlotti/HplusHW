@@ -625,11 +625,11 @@ class QCDNormalizationManagerBase:
         else:
             s += "    validForOptMode = \"\"\n"
         s += "    if not era == validForEra:\n"
-        s += "        raise Exception(\"Error: inconsistent era, normalisation factors valid for\",validForEra,\"but trying to use with\",era\")\n"
+        s += "        raise Exception(\"Error: inconsistent era, normalisation factors valid for\",validForEra,\"but trying to use with\",era)\n"
         s += "    if not searchMode == validForSearchMode:\n"
-        s += "        raise Exception(\"Error: inconsistent search mode, normalisation factors valid for\",validForSearchMode,\"but trying to use with\",searchMode\")\n"
+        s += "        raise Exception(\"Error: inconsistent search mode, normalisation factors valid for\",validForSearchMode,\"but trying to use with\",searchMode)\n"
         s += "    if not optimizationMode == validForOptMode:\n"
-        s += "        raise Exception(\"Error: inconsistent optimization mode, normalisation factors valid for\",validForOptMode,\"but trying to use with\",optimizationMode\")\n"
+        s += "        raise Exception(\"Error: inconsistent optimization mode, normalisation factors valid for\",validForOptMode,\"but trying to use with\",optimizationMode)\n"
         s += "\n"
         s += "QCDNormalization = {\n"
         for k in self._qcdNormalization:
