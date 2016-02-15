@@ -27,7 +27,7 @@ allSelections.CommonPlots.histogramSplitting = [
 #allSelections.BJetSelection.numberOfBJetsCutValue = 0
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 #===== End of selection customisations
-allSelections.TauSelection.prongs = 3
+allSelections.TauSelection.prongs = 1
 #allSelections.METSelection.METCutValue = 80.0
 allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0

@@ -83,12 +83,7 @@ private:
   // Other histograms
   HistoSplitter::SplittedTripletTH1s hBaselineTauTransverseMass; // the plot for baseline tau is in common plots
   
-  WrappedTH1 *hpTGenuineTauInvertedMetCut;
-  WrappedTH1 *hpTFakeTauInvertedMetCut;
-  WrappedTH1 *hpTGenuineTauInverted;
-  WrappedTH1 *hpTFakeTauInverted;
-  WrappedTH1 *hnumberofTausInverted;
-  WrappedTH1 *hnumberofTausBaseline;
+  //WrappedTH1 *hSelectedTaus;
   //WrappedTH1 *hAntiIsolatedTaus;
 };
 
@@ -262,13 +257,7 @@ void QCDMeasurement::book(TDirectory *dir) {
     nMtBins, fMtMin, fMtMax);
    
   // Other histograms (testing etc.)
-  hpTGenuineTauInverted =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "pTGenuineTauInverted", "pT genuine tau inverted", 100, 0, 400);
-  hpTFakeTauInverted =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "pTFakeTauInverted", "pT fake tau inverted", 100, 0, 400);
-  hpTGenuineTauInvertedMetCut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "pTGenuineTauInvertedMetCut", "pT genuine tau invertedMetCut", 100, 0, 400);                                                                                               
-  hpTFakeTauInvertedMetCut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "pTFakeTauInvertedMetCut", "pT fake tau inverted Met cut", 100, 0, 400);
-  hnumberofTausInverted =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "numberofTausInverted", "number of taus inverted", 20, 0, 20);  
-  hnumberofTausBaseline =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "numberofTausBaseline", "number of taus baseline", 20, 0, 20);  
-
+  
 }
 
 void QCDMeasurement::setupBranches(BranchManager& branchManager) {
@@ -327,17 +316,14 @@ void QCDMeasurement::process(Long64_t entry) {
       cInvertedTauFakeTauSFCounter.increment();
       // Apply tau trigger SF
       if (fEvent.isMC()) {
-        if (tauData.getAntiIsolatedTauIsGenuineTau()) hpTGenuineTauInverted->Fill( tauData.getAntiIsolatedTau().pt());
-	if (!tauData.getAntiIsolatedTauIsGenuineTau()) hpTFakeTauInverted->Fill( tauData.getAntiIsolatedTau().pt());
         fEventWeight.multiplyWeight(tauData.getAntiIsolatedTauTriggerSF());
       }
-      hnumberofTausInverted->Fill(tauData.getAntiIsolatedTaus().size());
       cInvertedTauTauTriggerSFCounter.increment();
       if (tauData.getAntiIsolatedTaus().size() == 1) {
         cInvertedTauOneTauCounter.increment();
       }
       // Do rest of event selection
-      doInvertedAnalysis(fEvent, tauData.getAntiIsolatedTau(), nVertices, !tauData.getAntiIsolatedTauIsGenuineTau());
+      doInvertedAnalysis(fEvent, tauData.getAntiIsolatedTau(), nVertices, tauData.getAntiIsolatedTauIsGenuineTau());
     }
   } else {
     // There is an isolated tau -> baseline
@@ -358,13 +344,12 @@ void QCDMeasurement::process(Long64_t entry) {
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
       }
-      hnumberofTausBaseline->Fill(tauData.getSelectedTaus().size());
       cBaselineTauTauTriggerSFCounter.increment();
       if (tauData.getSelectedTaus().size() == 1) {
         cBaselineTauOneTauCounter.increment();
       }
       // Do rest of event selection
-      doBaselineAnalysis(fEvent, tauData.getSelectedTau(), nVertices, !tauData.isGenuineTau());
+      doBaselineAnalysis(fEvent, tauData.getSelectedTau(), nVertices, tauData.isGenuineTau());
     }
   }
   // If further tests or selections are needed, please include them in the doInvertedAnalysis/doBaselineAnalysis methods
@@ -454,10 +439,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   cInvertedTauMetTriggerSFCounter.increment();
   fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
   //std::cout << "Inverted: met=" << silentMETData.getMET().R() << ", SF=" << silentMETData.getMETTriggerSF() << std::endl;
-  if (fEvent.isMC()) {
-    if (!isFakeTau ) hpTGenuineTauInvertedMetCut->Fill(tau.pt());
-    if (isFakeTau ) hpTFakeTauInvertedMetCut->Fill(tau.pt());
-  }
+
 //====== Electron veto
   const ElectronSelection::Data eData = fInvertedTauElectronSelection.analyze(event);
   if (eData.hasIdentifiedElectrons())
