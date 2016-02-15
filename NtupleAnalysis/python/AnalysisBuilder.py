@@ -153,8 +153,6 @@ class AnalysisBuilder:
                   self._variations["systematics"].append("%sMinus"%item)
 	  #self.addVariation("TauSelection.tauPtCut", [50,60])
 	  #self.addVariation("TauSelection.tauEtaCut", [0.5,1.5])
-	  
-              
     
     def addVariation(self, configItemString, listOfValues):
         self._variations[configItemString] = listOfValues
@@ -172,13 +170,8 @@ class AnalysisBuilder:
             for dataEra in self._dataEras:
                 modStr = "%s_%s_Run%s"%(self._name, searchMode, dataEra)
                 # Create nominal module without any variation
-                if "systematics" in self._variations.keys():
-                    if len(self._variations.keys()) > 1:
-                        configs.append(AnalysisConfig(self._name, modStr, config))
-                        print "Created nominal module: %s"%modStr
-                else:
-                    configs.append(AnalysisConfig(self._name, modStr, config))
-                    print "Created nominal module: %s"%modStr
+                configs.append(AnalysisConfig(self._name, modStr, config))
+                print "Created nominal module: %s"%modStr
                 # Create modules for optimization and systematics variations
                 configs.extend(self._buildVariation(config, modStr))
         # Register the modules
