@@ -5,7 +5,7 @@
 #include "EventSelection/interface/CommonPlots.h"
 #include "EventSelection/interface/EventSelections.h"
 #include "EventSelection/interface/TransverseMass.h"
-#include "DataFormat/interface/GenParticle.h"
+#include "DataFormat/interface/GenParticleGenerated.h"
 #include "TDirectory.h"
 #include "Math/GenVector/VectorUtil.h"
 
@@ -43,6 +43,7 @@ private:
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
   AngularCutsBackToBack fAngularCutsBackToBack;
+  GenParticleGeneratedCollection fGenParticleGeneratedCollection;
   Count cSelected;
     
   // Non-common histograms
@@ -374,20 +375,60 @@ void CorrelationAnalysis::process(Long64_t entry) {
   cSelected.increment();
   // Fill final plots
   fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
-  
+
+
 
 //====== Experimental selection code
   // if necessary
+
+  // std::vector<GenParticleGeneratedCollection> topdecay;
+  // fGenTop.getGenTopDecayMode();
+
+  for (size_t i = 0; i <  fGenParticleGeneratedCollection.getGenTopDecayMode().size(); ++i) {
+    // topdecay.push_back(fGenTop.getGenTopDecayMode()[i]); 
+    //     std::cout << "  topdecay " << fGenParticleGeneratedCollection.getGenTopDecayMode()[i]  << std::endl;
+   }
+
+  /*
+  size_t i = 0;
+  for(Jet jet: event.jets()) {
+    double myDeltaR = ROOT::Math::VectorUtil::DeltaR(tauP, jet.p4());
+    if (myDeltaR < myMinDeltaR) {
+      myMinDeltaR = myDeltaR;
+      mySelectedIndex = i;
+    }
+    i += 1;
+  }
+  */
+
+
+
+
+
+
+
+
+
   // Correlation cuts
   std::vector<Jet> selectedJets;
   std::vector<Jet> selectedBJets;
   std::vector<Jet> selectedNonBJets;
+  std::vector<Jet> selectedRealBJets;
+  std::vector<Jet> selectedLightJets;
+
   Jet maxPTjet;
   double maxPT=0;
 
   //  size_t maxIndex = jetData.getSelectedJets().size();
   for (size_t i = 0; i < jetData.getSelectedJets().size(); ++i) {
-
+    int flavor = std::abs(jetData.getSelectedJets()[i].pdgId());
+    if (flavor == 5) { // b jet                                                                                                              
+      selectedRealBJets.push_back(jetData.getSelectedJets()[i]); 
+    } else {
+      selectedLightJets.push_back(jetData.getSelectedJets()[i]);
+    }                           
+    
+      
     for (size_t j = 0; j <  bjetData.getSelectedBJets().size(); ++j) {
       double drJetBjet = ROOT::Math::VectorUtil::DeltaR(jetData.getSelectedJets()[i].p4(),bjetData.getSelectedBJets()[j].p4());
            if (drJetBjet > 0.5 ) selectedNonBJets.push_back(jetData.getSelectedJets()[i]);
@@ -432,7 +473,7 @@ void CorrelationAnalysis::process(Long64_t entry) {
   double jet1ID = jet1.pdgId();
   double jet2ID = jet2.pdgId();
   double jet3ID = jet3.pdgId();
-  //  std::cout << "  jet1ID "<<   jet1ID << "  jet2ID "<<   jet2ID <<  "  jet3ID "<<   jet3ID << std::endl;
+  //    std::cout << "  jet1ID "<<   fGenTop.getGenTopDecayMode() << "  jet2ID "<<   jet2ID <<  "  jet3ID "<<   jet3ID << std::endl;
   math::XYZTLorentzVector threeJets;
   threeJets = jet1.p4() + jet2.p4() + jet3.p4();
 
