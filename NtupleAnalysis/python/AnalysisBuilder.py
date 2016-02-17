@@ -82,9 +82,13 @@ class AnalysisConfig:
 		    else:
 			suffix += ".%s"%subkeys[i]
 		# Set value
-		if not hasattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1]):
-		    raise Exception("Error: Cannot find key %s.%s in the config!"%(suffix, subkeys[len(subkeys)-1]))
-		setattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1], value)
+		if key.startswith("AngularCuts") and subkeys[len(subkeys)-1] == "workingPoint":
+                    from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import setAngularCutsWorkingPoint
+                    setAngularCutsWorkingPoint(subconfig[len(subconfig)-1], value)
+                else:
+                    if not hasattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1]):
+                        raise Exception("Error: Cannot find key %s.%s in the config!"%(suffix, subkeys[len(subkeys)-1]))
+                    setattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1], value)
         
     ## Create and register the analysis after the changes have bene done to the config
     def registerAnalysis(self, process):

@@ -15,7 +15,7 @@ process = Process("SignalAnalysis"+obtainAnalysisSuffix(sys.argv))
 process.addDatasetsFromMulticrab(sys.argv[1])
 
 # Add config
-from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections,applyAnalysisCommandLineOptions
+from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections,applyAnalysisCommandLineOptions,setAngularCutsWorkingPoint
 # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
 allSelections.CommonPlots.histogramSplitting = [
     #PSet(label="tauPt", binLowEdges=[60.0, 70.0, 80.0, 100.0], useAbsoluteValues=False),
@@ -24,6 +24,7 @@ allSelections.CommonPlots.histogramSplitting = [
 #allSelections.TauSelection.rtau = 0.0
 #allSelections.BJetSelection.numberOfBJetsCutValue = 0
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
+setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
 #===== End of selection customisations
 
 applyAnalysisCommandLineOptions(sys.argv, allSelections)
@@ -37,18 +38,9 @@ builder = AnalysisBuilder("SignalAnalysis",
                           usePUreweighting=True,
                           doSystematicVariations=False
                           )
-#builder.addVariation()
+#builder.addVariation("METSelection.METCutValue", [100,120,140])
+#builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
 builder.build(process, allSelections)
-
-# Example of adding an analyzer whose configuration depends on dataVersion
-#def createAnalyzer(dataVersion):
-    #a = Analyzer("ExampleAnalysis")
-    #if dataVersion.isMC():
-        #a.tauPtCut = 10
-    #else:
-        #a.tauPtCut = 20
-    #return a
-#process.addAnalyzer("test2", createAnalyzer)
 
 # Pick events
 #process.addOptions(EventSaver = PSet(enabled = True,pickEvents = True))
