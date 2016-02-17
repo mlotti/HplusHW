@@ -197,7 +197,7 @@ for mass in HeavyMassPoints:
 #if OptionMassShape =="TransverseMass":#myQCD.setDatasetDefinition("QCDinvertedmt")
 #elif OptionMassShape =="FullMass":#myQCD.setDatasetDefinition("QCDinvertedinvmass")
 
-myQCD=DataGroup(label="CMS_Hptntj_QCDandFakeTau", landsProcess=3, validMassPoints=MassPoints,
+myQCD=DataGroup(label="CMS_Hptntj_QCDandFakeTau", landsProcess=1, validMassPoints=MassPoints,
                 #datasetType="QCD MC", datasetDefinition="QCD",
                 #nuisances=myShapeSystematics[:]+["xsect_QCD","CMS_lumi_13TeV"],
                 datasetType="QCD inverted", datasetDefinition="QCDMeasurementMT",
@@ -223,7 +223,7 @@ if OptionGenuineTauBackgroundSource =="DataDriven":
                                 ))
 else:
     # EWK genuine taus from MC
-    DataGroups.append(DataGroup(label="CMS_Hptntj_tt_genuinetau", landsProcess=4,
+    DataGroups.append(DataGroup(label="CMS_Hptntj_tt_genuinetau", landsProcess=3,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
                                 datasetDefinition="TT",
@@ -231,7 +231,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +myTopSystematics+["xsect_tt","CMS_lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_W_genuinetau", landsProcess=5,
+    DataGroups.append(DataGroup(label="CMS_Hptntj_W_genuinetau", landsProcess=4,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding", 
                                 datasetDefinition="WJetsHT",
@@ -239,7 +239,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["xsect_Wjets","CMS_lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_t_genuinetau", landsProcess=6,
+    DataGroups.append(DataGroup(label="CMS_Hptntj_t_genuinetau", landsProcess=5,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
                                 datasetDefinition="SingleTop",
@@ -247,7 +247,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["xsect_singleTop","CMS_lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_DY_genuinetau", landsProcess=7,
+    DataGroups.append(DataGroup(label="CMS_Hptntj_DY_genuinetau", landsProcess=6,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
                                 datasetDefinition="DYJetsToLLHT",
@@ -255,7 +255,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["xsect_DYtoll","CMS_lumi_13TeV"]))
-    #DataGroups.append(DataGroup(label="CMS_Hptntj_VV_genuinetau", landsProcess=8,
+    #DataGroups.append(DataGroup(label="CMS_Hptntj_VV_genuinetau", landsProcess=7,
                                 #shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus, 
                                 #datasetType="Embedding", 
                                 #datasetDefinition="Diboson",
