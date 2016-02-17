@@ -73,9 +73,10 @@ The not so short details of the above points:
       for the luminosity is smaller than this number. I.e. removes columns, which have negligible
       impact on limit yet needlessly slow down the limit calculation.
     . MinimumStatUncertainty: in limit calculation it is very important to give some statistical
-      uncertainty to shape bins which have zero counts. If this is neglected, one has seen even 
-      1.5 sigma deviation from correct results. The value is essentially a number describing how
-      many pb one generated MC event corresponds to. The same number is used for all MC samples.
+      uncertainty to shape bins which have zero counts or in which the stat.uncert. is below this value.
+      If this is neglected, one has seen even 1.5 sigma deviation from correct results. The value is
+      essentially a number describing how many pb one generated MC event corresponds to. The same number
+      is used for all MC samples.
   * Define histogram (histoPath*) and counter sources (SignalRateCounter, FakeRateCounter).
   * Define observation (i.e. source for data).
   * Define the list of shape systematics common to all columns in datacard. This is changed usually
@@ -131,12 +132,26 @@ The not so short details of the above points:
 - One should always check that the control plots look reasonable before proceeding to limit calculation.
 
 3) Optional: do tail fit
-- The tail fit does a parametrized fit onto the transverse mass tail. Above a specified mT value the
-  original counts are replaced by the fitted spectrum and the stat. uncertainty of it is replaced by
-  the uncertainty on the fit parameters. The fit parameter uncertainty is calculated in an orthogonal
-  base of them (through error matrix orthogonalization), i.e. in such base one can treat the fit
-  parameter uncertainties as uncorrelated.
-- Go inside the datacard directory and run there:
+- The tail fit does a parametrized fit onto the transverse mass tail for the backgrounds. Above a 
+  specified mT value the original counts are replaced by the fitted spectrum and the stat. uncertainty
+  of it is replaced by the uncertainty on the fit parameters. The fit parameter uncertainty is calculated
+  in an orthogonal base of them (through error matrix orthogonalization), i.e. in such base one can treat
+  the fit parameter uncertainties as uncorrelated.
+- First edit the settings file dcardTailFitSettings.py (or make a copy of it prior to editing). The
+  items, which need to be specified for each background are:
+  * Name of the background, i.e. the name of that background's column in the datacards
+  * Fit function (they are implemented in python/TailFitter.py)
+  * Minimum and maximum values for the range over which the fit is done
+  * The value above which the fitted counts (and their uncertainties) replace the original counts (and 
+    their stat. uncert.) 
+- In addition, general settings need to be set for:
+  * The final binning (the fit is done on the finely binned histograms, i.e. the binning specified when
+    running the analysis; see python/parameters/signalAnalysisParameters.py) is specified here. The last
+    bin will contain also the overflow events.
+  * Settings of minimum stat. uncertainty for bins with zero entries or for bins with stat.uncert. below
+    this value. Separate levels can be set for signal samples and background samples. The value is
+    essentially a number describing how many pb one generated MC event corresponds to.
+- To perform the fits, go inside the datacard directory and run there:
     ./dcardTailFitter.py -x dcardTailFitSettings.py
 - There are some further command line parameters:
   * -r   Does tail fit recursively to all subdirectories
@@ -144,6 +159,16 @@ The not so short details of the above points:
   * --doubleFitUncert  Double the fit uncertainty
   * --noSystUncert     Remove all syst. uncertainties
   * --lumiprojection --bkgxsecprojection  For projections, need to be validated before serious use
+- The tail fitter generates also a number of plots:
+  * Updated final shape plots on linear and log scale
+  * Plots for the fit parameter uncertainties, i.e. usable for checking that the fit is reasonable.
+- Note: please look carefully through the ROOT fit options and take into account the following:
+  * The fit is done on histograms with values ranging over many magnitudes -> likelihood fit is
+    strongly adviced (without the likelihood fit, the low value tail is usually not properly modelled
+    and that's where the potential signal usually is).
+  * The fit is done on histograms with weighted events counts, i.e. make sure that the fit does not
+    assume sqrt(N) type errors for the uncertainties, but instead supports weighted event counts.
+  
     
 4) Optional: manipulate cards (synchronize nuisance names, etc.)
 - Sometimes there arises the need to do some manipulation of the datacards such as changing nuisance names,
@@ -224,5 +249,9 @@ The not so short details of the above points:
   * invoke script(s) to create plots and tables of the output results
 
 7) Run scripts to create plots and tables from the combine output
-  - This is documented at: https://twiki.cern.ch/twiki/bin/view/CMS/HiggsChToTauNuFullyHadronicLimits
+- This is documented at: https://twiki.cern.ch/twiki/bin/view/CMS/HiggsChToTauNuFullyHadronicLimits
+- If you are in luck (or in bug) and there is a distinct separatation between the observed and expected curves, the
+  excess/deficit should be quantified, i.e. it's p-value should be calculated. Note that the usual limit plot does NOT
+  give a number how many sigmas the deviation represents. Follow the instructions for "Significance and p-value" on
+  the page https://twiki.cern.ch/twiki/bin/view/CMS/HiggsChToTauNuFullyHadronicLimits .
   
