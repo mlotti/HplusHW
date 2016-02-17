@@ -84,6 +84,15 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
       std::cout << "Config: JetDumper ignored, because 'Jets' is missing from config" << std::endl;
     }
 
+    topDumper = 0;
+    if (iConfig.exists("Top")) {
+        topCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("Top");
+        topDumper = new TopDumper(consumesCollector(), topCollections);
+        topDumper->book(Events);
+    } else {
+      std::cout << "Config: JetDumper ignored, because 'Jets' is missing from config" << std::endl;
+    }
+
     metDumper = 0;
     if (iConfig.exists("METs")) {
 	metCollections = iConfig.getParameter<std::vector<edm::ParameterSet>>("METs");
@@ -173,6 +182,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
 	if (trgDumper) trgDumper->triggerMatch(trigger::TriggerMuon,muonDumper->selected());
     }
     if (jetDumper) accept = accept && jetDumper->fill(iEvent,iSetup);
+    if (topDumper) accept = accept && topDumper->fill(iEvent,iSetup);
     if (metDumper) accept = accept && metDumper->fill(iEvent,iSetup);
     if (genMetDumper) accept = accept && genMetDumper->fill(iEvent,iSetup);
     if (genWeightDumper) accept = accept && genWeightDumper->fill(iEvent,iSetup);
@@ -192,6 +202,7 @@ void MiniAOD2TTreeFilter::reset(){
     if (electronDumper) electronDumper->reset();
     if (muonDumper) muonDumper->reset();
     if (jetDumper) jetDumper->reset();
+    if (topDumper) topDumper->reset();
     if (metDumper) metDumper->reset();
     if (genMetDumper) genMetDumper->reset();
     if (genWeightDumper) genWeightDumper->reset();
