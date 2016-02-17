@@ -392,11 +392,13 @@ class DatacardColumn():
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
             if myDatasetRootHisto.isMC():
                 # Set signal xsection
-                if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
-                     # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
-                     #myDatasetRootHisto.Delete()
-                     dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
-                     myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
+                if config.OptionLimitOnSigmaBr:
+                    if self._landsProcess <= 0:
+                        # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
+                        #myDatasetRootHisto.Delete()
+                        dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
+                        myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
+                        print "..... Assuming this is signal -> set cross section to 1 pb for limit calculation"
                 # Fix a bug in signal xsection
                 #elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
                      #if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 245.8) > 0.0001:
@@ -602,7 +604,7 @@ class DatacardColumn():
                                             if not isinstance(h.getRootHisto(),ROOT.TH2):
                                                 e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor, rootHistoWithUncertainties=h)
                         # Scale if asked
-                        if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
+                        if self._landsProcess > 0 and config.OptionLimitOnSigmaBr:
                             h.Scale(self._additionalNormalisationFactor)
                         # Store RootHistogramWithUncertainties
                         myDictionary = {}
