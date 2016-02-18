@@ -84,6 +84,8 @@ private:
   HistoSplitter::SplittedTripletTH1s hBaselineTauTransverseMass; // the plot for baseline tau is in common plots
   WrappedTH1 *hTauPt_inv_afterTau_realtau;
   WrappedTH1 *hTauPt_inv_afterTau;
+  WrappedTH1 *hTauPt_baseline_afterTau_realtau;
+  WrappedTH1 *hTauPt_baseline_afterTau;
   WrappedTH1 *hTauPt_inv_afterJets_realtau;
   WrappedTH1 *hTauPt_inv_afterJets;
   WrappedTH1 *hTauPt_inv_afterBtag_realtau;
@@ -285,6 +287,11 @@ void QCDMeasurement::book(TDirectory *dir) {
 
   hMet_inv_afterBtag =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterBtag", "Met_inv_afterBtag", 200, 0, 1000);
   hMet_inv_afterBtag_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterBtag_realTau", "Met_inv_afterBtag_realTau", 200, 0, 1000); 
+
+  hTauPt_baseline_afterTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_baseline_afterTau", "TauPt_baseline_afterTau", 200, 0, 1000);
+  hTauPt_baseline_afterTau_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_baseline_afterTau_realTau", "TauPt_baseline_afterTau_realTau", 200, 0, 1000); 
+
+
 }
 
 void QCDMeasurement::setupBranches(BranchManager& branchManager) {
@@ -392,6 +399,17 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   }
   cBaselineTauMetTriggerSFCounter.increment();
   //std::cout << "Baseline: met=" << silentMETData.getMET().R() << ", SF=" << silentMETData.getMETTriggerSF() << std::endl;
+
+
+  if (event.isMC()) {
+    if (isGenuineTau) hTauPt_baseline_afterTau_realtau->Fill(tau.pt());
+  }
+  if (!event.isMC() ) {
+    hTauPt_baseline_afterTau->Fill(tau.pt());
+  }
+  if (event.isMC() && !isGenuineTau ) {
+    hTauPt_baseline_afterTau->Fill(tau.pt());
+  }
   
 //====== Electron veto
   const ElectronSelection::Data eData = fBaselineTauElectronSelection.analyze(event);
@@ -536,6 +554,8 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
     fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     cInvertedTauBTaggingSFCounter.increment();
   }
+
+
 
   if (event.isMC()) {
     if (isGenuineTau) hTauPt_inv_afterBtag_realtau->Fill(tau.pt());
