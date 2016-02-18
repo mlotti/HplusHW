@@ -1,3 +1,4 @@
+
 // -*- c++ -*-
 #include "Framework/interface/BaseSelector.h"
 #include "Framework/interface/makeTH.h"
@@ -99,11 +100,13 @@ private:
   WrappedTH1 *hDeltaPt;
   WrappedTH2 *hJetEtSumVsJetTauMetEtSum;
   WrappedTH2 *hDPhiTauMetVsTransverseMass;
+
   WrappedTH1 *hJetTauMetEtSum;
   WrappedTH1 *hDrTau3Jets;
   WrappedTH1 *hJetTauEtSum;
   WrappedTH1 *hJetEtSum;
   WrappedTH1 *hDPhi3JetsMet;
+
   WrappedTH1 *hDphiMinus3jetcut;
   WrappedTH1 *hJetEtSumVsJetTauMetEtSum3JetCut;
   WrappedTH1 *hconstantEtSum; 
@@ -124,10 +127,12 @@ private:
   WrappedTH1 *hdeltaR_top_tau;
   WrappedTH1 *hdeltaR_jets;
   WrappedTH2 *hdeltaR_Wb_VS_topPt;
+
 };
 
 #include "Framework/interface/SelectorFactory.h"
 REGISTER_SELECTOR(CorrelationAnalysis);
+
 
 CorrelationAnalysis::CorrelationAnalysis(const ParameterSet& config, const TH1* skimCounters)
 : BaseSelector(config, skimCounters),
@@ -258,11 +263,13 @@ void CorrelationAnalysis::book(TDirectory *dir) {
   hdeltaR_jets = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "deltaR_jets", "deltaR_jets", 100, 0, 5);
   hdeltaR_Wb_VS_topPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "deltaR_Wb_VS_topPt", "deltaR_Wb_VS_topP", 100, 0, 5,100,0,1000);
   hTopPtVSDrCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TopPtVSDrCut", "TopPtVSDrCut", 100, -500, 500);
+
 }
 
 void CorrelationAnalysis::setupBranches(BranchManager& branchManager) {
   fEvent.setupBranches(branchManager);
 }
+
 
 void CorrelationAnalysis::process(Long64_t entry) {
 
@@ -466,9 +473,11 @@ void CorrelationAnalysis::process(Long64_t entry) {
   //  Jet jet2 = selectedNonBJets[1];
   //  Jet jet3 = selectedBJets[0];
 
+
   Jet jet1 = selectedJets[0];
   Jet jet2 = selectedJets[1];
   Jet jet3 = selectedJets[2];
+
 
   double jet1ID = jet1.pdgId();
   double jet2ID = jet2.pdgId();
@@ -524,9 +533,11 @@ void CorrelationAnalysis::process(Long64_t entry) {
   if (threeJets.pt()  > ptcut )    htransverseMass3JetCut->Fill(transverseMass);
   if (threeJets.pt()  > 150 )    htransverseMass3Jet150->Fill(transverseMass);
 
+
   if (!(threeJets.pt()  < ptcut && DeltaPhiTauMET  > 60)) { 
     htransverseMassTriangleCut->Fill(transverseMass);
   }
+
   if ((DeltaPhiTauMET -threeJets.pt()) > -100)    htransverseMassDeltaPhi3jetPtCutDiff->Fill(transverseMass);
   double deltaPhiVSmaxPtCut = maxPTjet.pt() + 200*DeltaPhiTauMET/180 - 400.;
   hdeltaPhiVSmaxPtCut-> Fill(deltaPhiVSmaxPtCut);
@@ -567,9 +578,11 @@ void CorrelationAnalysis::process(Long64_t entry) {
  // assume known slope                                                                                                                
   double constantEtSum = JetTauMetEtSum - 1.4 *  JetEtSum;
   // assume known constant term                                                                                                        
+
   double slopeEtSum = (JetTauMetEtSum - 100)/JetEtSum;
   hconstantEtSum->Fill(constantEtSum);
   hslopeEtSum->Fill(slopeEtSum);
+
 
 
    // Reset variables                                                                                                                 
@@ -700,3 +713,4 @@ void CorrelationAnalysis::process(Long64_t entry) {
 //====== Finalize
   fEventSaver.save();
 }
+

@@ -41,9 +41,11 @@ private:
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
   AngularCutsBackToBack fAngularCutsBackToBack;
+  JetCorrelations fJetCorrelations;
   Count cSelected;
     
   // Non-common histograms
+ 
 
 };
 
@@ -78,6 +80,8 @@ SignalAnalysis::SignalAnalysis(const ParameterSet& config, const TH1* skimCounte
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   fAngularCutsBackToBack(config.getParameter<ParameterSet>("AngularCutsBackToBack"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  fJetCorrelations(config.getParameter<ParameterSet>("JetCorrelations"),
+                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   cSelected(fEventCounter.addCounter("Selected events"))
 { }
 
@@ -94,8 +98,11 @@ void SignalAnalysis::book(TDirectory *dir) {
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
   fAngularCutsBackToBack.bookHistograms(dir);
+  fJetCorrelations.bookHistograms(dir);
   // Book non-common histograms
   //hExample =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "example pT", "example pT", 40, 0, 400);
+
+
 }
 
 void SignalAnalysis::setupBranches(BranchManager& branchManager) {
@@ -183,6 +190,7 @@ void SignalAnalysis::process(Long64_t entry) {
 
 //====== b-jet selection
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
+
   // Fill final shape plots with b tag efficiency applied as an event weight
   if (silentMETData.passedSelection()) {
     const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
@@ -193,17 +201,22 @@ void SignalAnalysis::process(Long64_t entry) {
   if (!bjetData.passedSelection())
     return;
 
+
 //====== b tag SF
   if (fEvent.isMC()) {
     fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
   }
   cBTaggingSFCounter.increment();
 
+
 //====== MET selection
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
   if (!METData.passedSelection())
     return;
-  
+  //  std::cout << "   Correlations "  << std::endl;       
+
+  //  const JetCorrelations::Data jetCorrelationsData = fJetCorrelations.analyze(fEvent, jetData,tauData, METData);  
+
 //====== Back-to-back angular cuts
   const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(fEvent, tauData.getSelectedTau(), jetData, METData);
   if (!backToBackData.passedSelection())
@@ -216,6 +229,9 @@ void SignalAnalysis::process(Long64_t entry) {
   
 
 //====== Experimental selection code
+  const JetCorrelations::Data jetCorrelationsData = fJetCorrelations.analyze(fEvent, jetData,tauData, METData);
+
+
   // if necessary
   
 //====== Finalize

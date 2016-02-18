@@ -125,6 +125,11 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
         cutValueJet3 = 0.0,   # Cut value in degrees (circular cut)
         cutValueJet4 = 0.0,   # Cut value in degrees (circular cut)
 )
+#====== Experimental
+jetCorrelations = PSet (
+
+)
+
 
 #====== Common plots options
 commonPlotsOptions = PSet(
@@ -165,8 +170,10 @@ allSelections = PSet(
          BJetSelection = bjetSelection,
           METSelection = metSelection,
  AngularCutsBackToBack = angularCutsBackToBack,
+       JetCorrelations = jetCorrelations,
            CommonPlots = commonPlotsOptions,
 )
+
 
 ## Parses command line parameters and returns suffix for analysis
 def obtainAnalysisSuffix(argv):
@@ -190,4 +197,5 @@ def applyAnalysisCommandLineOptions(argv, config):
         config.TauSelection.prongs = 2
     elif "3prong" in argv or "3pr" in argv:
         config.TauSelection.prongs = 3
+
 

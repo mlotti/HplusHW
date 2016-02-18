@@ -128,6 +128,7 @@ def main(argv):
 #    TauPtComparison(datasets)
 
    # Print counters
+
     doCounters(datasets)
 
 
@@ -148,11 +149,14 @@ def dataMCExample(datasets):
                             #"ForDataDrivenCtrlPlots/SelectedTau_pT_AfterStandardSelections"
                             "tauPt",
                             # Since the data datasets were removed, we have to set the luminosity by hand
+
                             # normalizeToLumi=20000
+
     )
 
     # Same as below, but more compact
     plots.drawPlot(plot, "taupt", xlabel="Tau p_{T} (GeV/c)", ylabel="Number of events",
+
                    rebin=10, stackMCHistograms=True, addMCUncertainty=False, addLuminosityText=True,
                    opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True, ratio=True)
 
@@ -243,6 +247,7 @@ def dataMCExample(datasets):
     createDrawPlot("deltaR_jets", xlabel="#DeltaR(jet,jet)", ylabel="Number of events", rebin=2, log=False)
 #    createDrawPlot("constantEtSum", xlabel="Constant term (GeV)", ylabel="Number of events", rebin=2, log=True)
 #    createDrawPlot("slopeEtSum", xlabel="Slope", ylabel="Number of events", rebin=2, log=True)
+
 #    plots.drawPlot( plots.DataMCPlot(datasets, "Pt3Jets", normalizeToLumi=20000), "Pt3Jets", xlabel="p_{T}^{3jets} (GeV/c)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 #    plots.drawPlot( plots.DataMCPlot(datasets, "DeltaPhiTauMet", normalizeToLumi=20000), "DeltaPhiTauMet", xlabel="#Delta#Phi(#tau,MET)", ylabel="Number of events", rebin=1, stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True, opts={"ymin": 1e-1, "ymaxfactor": 0.01}, log=False)
 
@@ -428,6 +433,7 @@ def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
 
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
+
     ewkDatasets = [
         "WJets", "TTJets",
 #        "WJets",                                                                                                                      
@@ -439,6 +445,7 @@ def doCounters(datasets):
 #    else:
     eventCounter.normalizeMCByLuminosity()
 
+
     print "============================================================"
     print "Main counter (MC normalized by collision data luminosity)"
     mainTable = eventCounter.getMainCounterTable()
@@ -448,6 +455,7 @@ def doCounters(datasets):
     # No uncertainties                                                                                                                                                                                                                                             
     cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=True))
     print mainTable.format(cellFormat)
+
     print eventCounter.getSubCounterTable("tau selection").format(cellFormat)
     print eventCounter.getSubCounterTable("e selection").format(cellFormat)
     print eventCounter.getSubCounterTable("mu selection").format(cellFormat)
@@ -455,6 +463,7 @@ def doCounters(datasets):
     print eventCounter.getSubCounterTable("angular cuts / Collinear").format(cellFormat)
     print eventCounter.getSubCounterTable("bjetselection").format(cellFormat)
     print eventCounter.getSubCounterTable("angular cuts / BackToBack").format(cellFormat)                                                                                                                                
+
 
 
 
@@ -470,5 +479,7 @@ def common(h, xlabel, ylabel, addLuminosityText=True, textFunction=None):
     h.save()
 
 
+
 if __name__ == "__main__":
     main(sys.argv)
+
