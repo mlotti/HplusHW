@@ -24,7 +24,7 @@ allSelections.CommonPlots.histogramSplitting = [
 #allSelections.TauSelection.rtau = 0.0
 #allSelections.BJetSelection.numberOfBJetsCutValue = 0
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
+#setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
 #===== End of selection customisations
 
 applyAnalysisCommandLineOptions(sys.argv, allSelections)
