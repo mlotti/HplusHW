@@ -71,8 +71,9 @@ AngularCutsBase::AngularCutsBase(const ParameterSet& config, const AngularCutsBa
 }
 
 AngularCutsBase::~AngularCutsBase() { 
-  for (size_t i = 0; i < nMaxJets; ++i) {
-    delete hOptimizationPlots[i];
+  for (size_t i = 0; i < hOptimizationPlots.size(); ++i) {
+    if (hOptimizationPlots[i] != nullptr)
+      delete hOptimizationPlots[i];
   }
   hOptimizationPlots.clear();
 }
