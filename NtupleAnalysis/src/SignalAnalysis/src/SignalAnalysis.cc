@@ -9,7 +9,7 @@
 
 class SignalAnalysis: public BaseSelector {
 public:
-  explicit SignalAnalysis(const ParameterSet& config);
+  explicit SignalAnalysis(const ParameterSet& config, const TH1* skimCounters);
   virtual ~SignalAnalysis() {}
 
   /// Books histograms
@@ -50,8 +50,8 @@ private:
 #include "Framework/interface/SelectorFactory.h"
 REGISTER_SELECTOR(SignalAnalysis);
 
-SignalAnalysis::SignalAnalysis(const ParameterSet& config)
-: BaseSelector(config),
+SignalAnalysis::SignalAnalysis(const ParameterSet& config, const TH1* skimCounters)
+: BaseSelector(config, skimCounters),
   fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kSignalAnalysis, fHistoWrapper),
   cAllEvents(fEventCounter.addCounter("All events")),
   cTrigger(fEventCounter.addCounter("Passed trigger")),
@@ -195,9 +195,9 @@ void SignalAnalysis::process(Long64_t entry) {
 
 //====== b tag SF
   if (fEvent.isMC()) {
-    // FIXME missing code
-    cBTaggingSFCounter.increment();
+    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
   }
+  cBTaggingSFCounter.increment();
 
 //====== MET selection
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);

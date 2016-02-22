@@ -49,7 +49,7 @@ private:
     bool contains(const std::string& l) const;
     size_t getLabelIndex(const std::string& l) const;
 
-    size_t insert(const std::string& label);
+    size_t insert(const std::string& label, double initialValue=0.0);
 
     void incrementCount(size_t countIndex, double weight);
     long int value(size_t countIndex);
@@ -79,8 +79,8 @@ public:
   EventCounter(const EventCounter&) = delete;
   EventCounter& operator=(const EventCounter&) = delete;
 
-  Count addCounter(const std::string& name);
-  Count addSubCounter(const std::string& subcounterName, const std::string& countName);
+  Count addCounter(const std::string& name, double initialValue=0.0);
+  Count addSubCounter(const std::string& subcounterName, const std::string& countName, double initialValue=0.0);
 
   void setOutput(TDirectory *dir);
   void serialize();

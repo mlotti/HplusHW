@@ -11,8 +11,8 @@
 
 class QCDMeasurement: public BaseSelector {
 public:
-  explicit QCDMeasurement(const ParameterSet& config);
-  virtual ~QCDMeasurement() {}
+  explicit QCDMeasurement(const ParameterSet& config, const TH1* skimCounters);
+  virtual ~QCDMeasurement();
 
   /// Books histograms
   virtual void book(TDirectory *dir) override;
@@ -63,8 +63,8 @@ private:
   AngularCutsBackToBack fInvertedTauAngularCutsBackToBack;
   Count cInvertedTauSelectedEvents;
   
-  void doInvertedAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau);
-  void doBaselineAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau);    
+  void doInvertedAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isGenuineTau);
+  void doBaselineAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isGenuineTau);    
  
   //====== Normalization histograms - baseline tau
   // After standard selections
@@ -90,8 +90,8 @@ private:
 #include "Framework/interface/SelectorFactory.h"
 REGISTER_SELECTOR(QCDMeasurement);
 
-QCDMeasurement::QCDMeasurement(const ParameterSet& config)
-: BaseSelector(config),
+QCDMeasurement::QCDMeasurement(const ParameterSet& config, const TH1* skimCounters)
+: BaseSelector(config, skimCounters),
   fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDMeasurement, fHistoWrapper),
   fNormalizationSystematicsSignalRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsSignalRegion, fHistoWrapper),
   fNormalizationSystematicsControlRegion(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kQCDNormalizationSystematicsControlRegion, fHistoWrapper),
@@ -146,6 +146,15 @@ QCDMeasurement::QCDMeasurement(const ParameterSet& config)
   cInvertedTauSelectedEvents(fEventCounter.addCounter("InvertedTau: selected events"))
 { }
 
+QCDMeasurement::~QCDMeasurement() {
+  fCommonPlots.getHistoSplitter().deleteHistograms(hNormalizationBaselineTauAfterStdSelections);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hMtBaselineTauAfterStdSelections);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hNormalizationInvertedTauAfterStdSelections);
+  fCommonPlots.getHistoSplitter().deleteHistograms(hMtInvertedTauAfterStdSelections);
+  delete hInvertedTauTauPtAfterAllSelections;
+  fCommonPlots.getHistoSplitter().deleteHistograms(hBaselineTauTransverseMass);
+}
+
 void QCDMeasurement::book(TDirectory *dir) {
   // Book common plots histograms
   fCommonPlots.book(dir, isData());
@@ -178,15 +187,15 @@ void QCDMeasurement::book(TDirectory *dir) {
   std::string myInclusiveLabel = "ForQCDNormalization";
   std::string myFakeLabel = myInclusiveLabel+"EWKFakeTaus";
   std::string myGenuineLabel = myInclusiveLabel+"EWKGenuineTaus";
-  TDirectory* myNormDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myInclusiveLabel);
-  TDirectory* myNormEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
-  TDirectory* myNormGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
+  TDirectory* myNormDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel);
+  TDirectory* myNormEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
+  TDirectory* myNormGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myNormalizationDirs = {myNormDir, myNormEWKFakeTausDir, myNormGenuineTausDir};
 
   // Normalization bin settings
-  const int nMetBins = fCommonPlots.getMetBinSettings().bins();
   const float fMetMin = fCommonPlots.getMetBinSettings().min();
   const float fMetMax = fCommonPlots.getMetBinSettings().max();
+  const int nMetBins = fMetMax-fMetMin; // Use 1 GeV bin width
   const int nMtBins = fCommonPlots.getMtBinSettings().bins();
   const float fMtMin = fCommonPlots.getMtBinSettings().min();
   const float fMtMax = fCommonPlots.getMtBinSettings().max();
@@ -218,9 +227,9 @@ void QCDMeasurement::book(TDirectory *dir) {
   myInclusiveLabel = "QCDPurity";
   myFakeLabel = myInclusiveLabel+"EWKFakeTaus";
   myGenuineLabel = myInclusiveLabel+"EWKGenuineTaus";
-  TDirectory* myPurityDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myInclusiveLabel);
-  TDirectory* myPurityEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
-  TDirectory* myPurityGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
+  TDirectory* myPurityDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel);
+  TDirectory* myPurityEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
+  TDirectory* myPurityGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myPurityDirs = {myPurityDir, myPurityEWKFakeTausDir, myPurityGenuineTausDir};
   const int nPtBins = fCommonPlots.getPtBinSettings().bins();
   const float fPtMin = fCommonPlots.getPtBinSettings().min();
@@ -236,9 +245,9 @@ void QCDMeasurement::book(TDirectory *dir) {
   myInclusiveLabel = "ForQCDMeasurement";
   myFakeLabel = myInclusiveLabel+"EWKFakeTaus";
   myGenuineLabel = myInclusiveLabel+"EWKGenuineTaus";
-  TDirectory* myQCDDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myInclusiveLabel);
-  TDirectory* myQCDEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myFakeLabel);
-  TDirectory* myQCDGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, myGenuineLabel);
+  TDirectory* myQCDDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myInclusiveLabel);
+  TDirectory* myQCDEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
+  TDirectory* myQCDGenuineTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myQCDPlotDirs = {myQCDDir, myQCDEWKFakeTausDir, myQCDGenuineTausDir};
 
   // Create shape histograms for baseline tau (inverted tau histograms are in common plots)
@@ -348,7 +357,7 @@ void QCDMeasurement::process(Long64_t entry) {
  
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau) {
+void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isGenuineTau) {
 //====== MET trigger SF
   const METSelection::Data silentMETData = fBaselineTauMETSelection.silentAnalyze(fEvent, nVertices);
   if (event.isMC()) {
@@ -382,9 +391,10 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   double myTransverseMass = TransverseMass::reconstruct(tau, silentMETData.getMET());
   const BJetSelection::Data silentBjetData = fBaselineTauBJetSelection.silentAnalyze(fEvent, jetData);
   const AngularCutsBackToBack::Data silentBackToBackData = fBaselineTauAngularCutsBackToBack.silentAnalyze(fEvent, tau, jetData, silentMETData);
+  fNormalizationSystematicsSignalRegion.setGenuineTauStatus(isGenuineTau);
   fNormalizationSystematicsSignalRegion.fillControlPlotsForQCDShapeUncertainty(fEvent, collinearData, silentBjetData, silentMETData, silentBackToBackData);
-  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationBaselineTauAfterStdSelections, isFakeTau, METvalue);
-  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtBaselineTauAfterStdSelections, isFakeTau, myTransverseMass);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationBaselineTauAfterStdSelections, isGenuineTau, METvalue);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtBaselineTauAfterStdSelections, isGenuineTau, myTransverseMass);
   
 //====== b-jet selection
   const BJetSelection::Data bjetData = fBaselineTauBJetSelection.analyze(fEvent, jetData);
@@ -393,7 +403,7 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
 
 //====== b tag SF
   if (fEvent.isMC()) {
-    // FIXME missing code
+    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     cBaselineTauBTaggingSFCounter.increment();
   }
 
@@ -411,7 +421,7 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   cBaselineTauSelectedEvents.increment();
   // Fill final plots
   
-  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTauTransverseMass, !isFakeTau, myTransverseMass);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTauTransverseMass, isGenuineTau, myTransverseMass);
   
 //====== Experimental code
 
@@ -420,7 +430,7 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isFakeTau) {
+void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isGenuineTau) {
 //====== MET trigger SF
   const METSelection::Data silentMETData = fInvertedTauMETSelection.silentAnalyze(fEvent, nVertices);
   if (event.isMC()) {
@@ -456,9 +466,10 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
   const BJetSelection::Data silentBjetData = fInvertedTauBJetSelection.silentAnalyze(fEvent, jetData);
   const AngularCutsBackToBack::Data silentBackToBackData = fInvertedTauAngularCutsBackToBack.silentAnalyze(fEvent, tau, jetData, silentMETData);
+  fNormalizationSystematicsControlRegion.setGenuineTauStatus(isGenuineTau);
   fNormalizationSystematicsControlRegion.fillControlPlotsForQCDShapeUncertainty(fEvent, collinearData, silentBjetData, silentMETData, silentBackToBackData);
-  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationInvertedTauAfterStdSelections, !isFakeTau, METvalue);
-  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtInvertedTauAfterStdSelections, !isFakeTau, myTransverseMass);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationInvertedTauAfterStdSelections, isGenuineTau, METvalue);
+  fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtInvertedTauAfterStdSelections, isGenuineTau, myTransverseMass);
   
 //====== b-jet selection
   const BJetSelection::Data bjetData = fInvertedTauBJetSelection.analyze(fEvent, jetData);
@@ -467,7 +478,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
 
 //====== b tag SF
   if (fEvent.isMC()) {
-    // FIXME missing code
+    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     cInvertedTauBTaggingSFCounter.increment();
   }
 
@@ -485,7 +496,7 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   cInvertedTauSelectedEvents.increment();
   // Fill final plots
   fCommonPlots.fillControlPlotsAfterAllSelections(fEvent);
-  hInvertedTauTauPtAfterAllSelections->Fill(!isFakeTau, tau.pt());
+  hInvertedTauTauPtAfterAllSelections->Fill(isGenuineTau, tau.pt());
   
 //====== Experimental code
 

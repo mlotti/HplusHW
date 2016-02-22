@@ -102,10 +102,15 @@ void HplusTopPtWeightProducer::produce(edm::Event& iEvent, const edm::EventSetup
       double weight = 1.0;
       std::vector<const reco::Candidate*> tops = GenParticleTools::findParticles(handle, 6);
       for (auto& p: tops) {
-        weight *= TMath::Exp(fParA - fParB*p->pt());
+        double pt = p->pt();
+        // Top pt weight is valid only up to 400 GeV
+        if (pt > 400.0) {
+          pt = 400.0;
+        }
+        weight *= TMath::Exp(fParA - fParB*pt);
       }
       hTopPtWeightAllEvents->SetBinContent(2, hTopPtWeightAllEvents->GetBinContent(2) + sign*weight);
-      hTopPtWeightAllEvents->SetBinContent(2, hTopPtWeightAllEvents->GetBinContent(3) + sign*weight*weight);
+      hTopPtWeightAllEvents->SetBinContent(3, hTopPtWeightAllEvents->GetBinContent(3) + sign*weight*weight);
       std::auto_ptr<double> w(new double);
       *w = weight*sign;
       iEvent.put(w);

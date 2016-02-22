@@ -97,6 +97,13 @@ bjetSelection = PSet(
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
 
+scaleFactors.setupBtagSFInformation(btagPset=bjetSelection, 
+                                    btagPayloadFilename="CSVv2.csv",
+                                    #btagEfficiencyFilename="btageff_TTJets.json",
+                                    #btagEfficiencyFilename="btageff_WJetsHT.json",
+                                    btagEfficiencyFilename="btageff_hybrid.json",
+                                    direction="nominal")
+
 #====== MET selection
 metSelection = PSet(
            METCutValue = 120.0,
@@ -160,3 +167,27 @@ allSelections = PSet(
  AngularCutsBackToBack = angularCutsBackToBack,
            CommonPlots = commonPlotsOptions,
 )
+
+## Parses command line parameters and returns suffix for analysis
+def obtainAnalysisSuffix(argv):
+    suffix = "" 
+    if "1prong" in argv or "1pr" in argv:
+        suffix = "1pr"
+        print "Running on 1-prong taus"
+    elif "2prong" in argv or "2pr" in argv:
+        suffix = "2pr"
+        print "Running on 2-prong taus"
+    elif "3prong" in argv or "3pr" in argv:
+        suffix = "3pr"
+        print "Running on 3-prong taus"
+    return suffix
+
+## Parses command line parameters and adjusts the parameters accordingly
+def applyAnalysisCommandLineOptions(argv, config):
+    if "1prong" in argv or "1pr" in argv:
+        config.TauSelection.prongs = 1
+    elif "2prong" in argv or "2pr" in argv:
+        config.TauSelection.prongs = 2
+    elif "3prong" in argv or "3pr" in argv:
+        config.TauSelection.prongs = 3
+

@@ -2943,8 +2943,14 @@ class Dataset:
         for f in self.files:
             o = aux.Get(f, realName)
             if o != None:
+                status = False
+                if isinstance(o, ROOT.TDirectoryFile):
+                    status = len(o.GetListOfKeys()) > 0
+                else:
+                    status = isinstance(o, ROOT.TH1)
                 o.Delete()
-                return True
+                return status
+        return False
 
     ## Get the dataset.DatasetRootHisto object for a named histogram.
     # 

@@ -18,6 +18,7 @@ class AnalysisConfig:
         for key in keys:
 	    value = kwargs[key]
 	    if key == "systematics":
+                self._config.histogramAmbientLevel = "Systematics"
                 # Energy scales
 		if value.startswith("tauES"):
 		    self._config.TauSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up").replace("tauES","TES")
@@ -47,7 +48,20 @@ class AnalysisConfig:
                 elif value.startswith("METTrgEff"):
                     variationType = value.replace("METTrgEff","").replace("Minus","").replace("Plus","")
                     scaleFactors.assignMETTriggerSF(self._config.METSelection, self._config.BJetSelection.bjetDiscrWorkingPoint, self._getDirectionString(value), variationType)
-		# B and top quarks
+		# b tag SF
+		elif value.startswith("BTagSF") or value.startswith("BMistagSF"):
+                    variationType = None
+                    if value.startswith("BTagSF"):
+                        variationType = "tag"
+                    elif value.startswith("BMistagSF"):
+                        variationType = "mistag"
+                    direction = value.replace("BTagSF","").replace("BMistagSF","").replace("Minus","down").replace("Plus","up")
+                    scaleFactors.setupBtagSFInformation(self._config.BJetSelection,
+                                                        btagPayloadFilename="CSVv2.csv",
+                                                        btagEfficiencyFilename="btageff_TTJets.json",
+                                                        direction=direction,
+                                                        variationInfo=variationType)
+		# top quarks
 		elif value.startswith("TopPt"):
                     self._config.topPtSystematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
 		else:
@@ -125,8 +139,9 @@ class AnalysisBuilder:
               items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet"])
               # Energy scales and JER systematics
               items.extend(["tauES", "JES"]), # "JER", "UES"])
-              # b and top quarks systematics
-              #items.extend("BTagSF", "BMistagSF")
+              # b quark systematics
+              items.extend(["BTagSF", "BMistagSF"])
+              # top quark systematics
               if self._useTopPtReweighting:
                   items.append("TopPt") 
               # PU weight systematics
@@ -158,13 +173,12 @@ class AnalysisBuilder:
                 modStr = "%s_%s_Run%s"%(self._name, searchMode, dataEra)
                 # Create nominal module without any variation
                 if "systematics" in self._variations.keys():
-                    if len(self._variations.keys()) == 1:
+                    if len(self._variations.keys()) > 1:
                         configs.append(AnalysisConfig(self._name, modStr, config))
                         print "Created nominal module: %s"%modStr
                 else:
-                    if len(self._variations.keys()) == 0:
-                        configs.append(AnalysisConfig(self._name, modStr, config))
-                        print "Created nominal module: %s"%modStr
+                    configs.append(AnalysisConfig(self._name, modStr, config))
+                    print "Created nominal module: %s"%modStr
                 # Create modules for optimization and systematics variations
                 configs.extend(self._buildVariation(config, modStr))
         # Register the modules

@@ -88,6 +88,11 @@ public:
   template<typename T>
   void SetBinLabel(std::vector<T*>& histoContainer, int i, std::string label);
   
+  //===== Deleting histograms
+  /// Delete histograms and release memory
+  template<typename T>
+  void deleteHistograms(std::vector<T*>& histoContainer);
+  
 protected: // Protected for easier unit testing
   /// Returns index to unfolded bin index
   const size_t getShapeBinIndex() const;
@@ -190,6 +195,14 @@ void HistoSplitter::SetBinLabel(std::vector<T*>& histoContainer, int i, std::str
   for (auto p: histoContainer) {
     p->SetBinLabel(i, label);
   }
+}
+
+template<typename T>
+void HistoSplitter::deleteHistograms(std::vector<T*>& histoContainer) {
+  for (auto p: histoContainer) {
+    delete p;
+  }
+  histoContainer.clear();
 }
 
 #endif

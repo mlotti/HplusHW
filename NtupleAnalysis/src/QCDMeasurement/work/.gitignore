@@ -1,3 +1,5 @@
-.pdf
-.png
-.C
+*.pdf
+*.png
+*.C
+QCDMeasurement*
+QCDInvertedNormalizationFactors*

@@ -19,8 +19,8 @@ import HiggsAnalysis.NtupleAnalysis.tools.pseudoMultiCrabCreator as pseudoMultiC
 
 _generalOptions = {
     "analysisName": "QCDMeasurement",
-    "ewkDatasetsForMerging": ["TTJets","WJetsHT","DYJetsToLLHT","SingleTop"], #,"Diboson"],
-    "normalizationFactorSource": "QCDInvertedNormalizationFactors_AfterStdSelections.py",
+    "ewkDatasetsForMerging": ["TT","WJetsHT","DYJetsToLLHT","SingleTop"], #,"Diboson"], # using TT instead of TTJets
+    "normalizationFactorSource": "QCDInvertedNormalizationFactors_AfterStdSelections%s.py",
     "normalizationPoint": "AfterStdSelections",
     "normalizationSourcePrefix": "ForQCDNormalization/Normalization",
     "ewkSourceForQCDPlusFakeTaus": "ForDataDrivenCtrlPlotsEWKGenuineTaus",
@@ -170,10 +170,17 @@ def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
     print "Module finished in %.1f s, estimated time to complete: %s"%(myLocalDelta, s)
 
 
-def importNormFactors(era):
-    src = _generalOptions["normalizationFactorSource"]
+def importNormFactors(era, multicrabDirName):
+    # Obtain suffix
+    suffix = ""
+    s = multicrabDirName.split("_")
+    if s[len(s)-1].endswith("pr") or s[len(s)-1].endswith("prong"):
+        suffix = "_"+s[len(s)-1]
+    # Construct source file name
+    src = _generalOptions["normalizationFactorSource"]%suffix
     if not os.path.exists(src):
         raise Exception(ShellStyles.ErrorLabel()+"Normalisation factors ('%s.py') not found!\nRun script InvertedTauID_Normalization.py to generate the normalization factors."%src)
+    print "Reading normalisation factors from:", src
     # Check if normalization coefficients are suitable for era
     myNormFactorsSafetyCheck = getattr(__import__(src.replace(".py","")), "QCDInvertedNormalizationSafetyCheck")
     myNormFactorsSafetyCheck(era)
@@ -258,7 +265,7 @@ if __name__ == "__main__":
             for searchMode in myModuleSelector.getSelectedSearchModes():
                 for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
                     #=====  Obtain normalization factors
-                    myNormFactors = importNormFactors(era)
+                    myNormFactors = importNormFactors(era, opts.multicrabDir)
                     #===== Nominal module
                     myModuleInfoString = "%s_%s"%(era, searchMode)
                     if len(optimizationMode) > 0:

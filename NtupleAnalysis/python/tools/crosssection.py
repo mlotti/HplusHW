@@ -158,6 +158,11 @@ backgroundCrossSections = CrossSectionList(
             "8": 245.8, # [10]
             "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
             }),
+    CrossSection("TT", {
+            "7": 172.0, # [10]
+            "8": 245.8, # [10]
+            "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
+            }),
     CrossSection("TTJets_HT600to800", {
             "13": 0.0, 
             }),
@@ -364,7 +369,7 @@ def setBackgroundCrossSections(datasets, doWNJetsWeighting=True, quietMode=False
         setBackgroundCrossSectionForDataset(dset, doWNJetsWeighting, quietMode)
 
 def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMode=False):
-    value = backgroundCrossSections.crossSection(dataset.getName(), dataset.getEnergy())
+    value = backgroundCrossSections.crossSection(dataset.getName().replace("_ext",""), dataset.getEnergy())
     if value is None:
         if "ChargedHiggs" in dataset.getName():
             value = 1.0 # Force signal xsection to 1 pb

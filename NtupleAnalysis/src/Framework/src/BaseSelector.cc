@@ -1,10 +1,11 @@
 #include "Framework/interface/BaseSelector.h"
 
-BaseSelector::BaseSelector(const ParameterSet& config):
+BaseSelector::BaseSelector(const ParameterSet& config, const TH1* skimCounters):
   fEvent(config),
   fEventCounter(fEventWeight),
   fHistoWrapper(fEventWeight, config.getParameter<std::string>("histogramAmbientLevel", "Vital")),
   fPileupWeight(config),
+  cSkimCounters(processSkimCounters(skimCounters)),
   cBaseAllEvents(fEventCounter.addCounter("Base::AllEvents")),
   cPileupWeighted(fEventCounter.addCounter("Base::PUReweighting")),
   cPrescaled(fEventCounter.addCounter("Base::Prescale")),
@@ -26,6 +27,12 @@ BaseSelector::BaseSelector(const ParameterSet& config):
 
 BaseSelector::~BaseSelector() {
   fEventCounter.serialize();
+  delete hNvtxBeforeVtxReweighting;
+  delete hNvtxAfterVtxReweighting;
+}
+
+void BaseSelector::setSkimCounters(TH1* hSkimCounters) {
+  
 }
 
 void BaseSelector::bookInternal(TDirectory *dir) {
@@ -75,4 +82,16 @@ void BaseSelector::processInternal(Long64_t entry) {
   cExclusiveSamplesWeighted.increment();
 
   process(entry);
+}
+
+std::vector<Count> BaseSelector::processSkimCounters(const TH1* skimCounters) {
+  std::vector<Count> counts;
+  // Skip if no histo was provided or if histogram is empty
+  if (skimCounters == nullptr) return counts;
+  if (skimCounters->GetXaxis()->GetBinLabel(1)[0] == '\0') return counts;
+  // Add skim counters
+  for (int i = 1; i <= skimCounters->GetNbinsX(); ++i) {
+    counts.push_back(fEventCounter.addCounter(skimCounters->GetXaxis()->GetBinLabel(i), skimCounters->GetBinContent(i)));
+  }
+  return counts;
 }

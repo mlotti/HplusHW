@@ -25,7 +25,8 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "All events")),
   cSubPassedDiscriminator(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed discriminator")),
-  cSubPassedNBjets(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed Nbjets"))
+  cSubPassedNBjets(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed Nbjets")),
+  fBTagSFCalculator(config)
 {
   initialize(config);
 }
@@ -39,13 +40,17 @@ BJetSelection::BJetSelection(const ParameterSet& config)
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("bjet selection", "All events")),
   cSubPassedDiscriminator(fEventCounter.addSubCounter("bjet selection", "Passed discriminator")),
-  cSubPassedNBjets(fEventCounter.addSubCounter("bjet selection", "Passed Nbjets"))
+  cSubPassedNBjets(fEventCounter.addSubCounter("bjet selection", "Passed Nbjets")),
+  fBTagSFCalculator(config)
 {
   initialize(config);
   bookHistograms(new TDirectory());
 }
 
-BJetSelection::~BJetSelection() { }
+BJetSelection::~BJetSelection() {
+  for (auto p: hSelectedBJetPt) delete p;
+  for (auto p: hSelectedBJetEta) delete p;
+}
 
 void BJetSelection::initialize(const ParameterSet& config) {
   // Obtain algorithm and working point
@@ -93,6 +98,7 @@ void BJetSelection::bookHistograms(TDirectory* dir) {
   hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetPt", "Second b-jet pT", 40, 0, 400));
   hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetEta", "First b-jet #eta", 50, -2.5, 2.5));
   hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetEta", "Second b-jet #eta", 50, -2.5, 2.5));
+  fBTagSFCalculator.bookHistograms(subdir, fHistoWrapper);
 }
 
 BJetSelection::Data BJetSelection::silentAnalyze(const Event& event, const JetSelection::Data& jetData) {
@@ -119,7 +125,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   cSubAll.increment();
   bool passedDisr = false;
   // Loop over muons
-  for(Jet jet: jetData.getSelectedJets()) {
+  for(const Jet& jet: jetData.getSelectedJets()) {
     // jet pt and eta cuts expected to be the same like for the selected jets for simplicity
     //=== Apply discriminator
     if (!(jet.bjetDiscriminator() > fDisriminatorValue))
@@ -150,7 +156,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   }
   
   // Calculate and store b-jet scale factor weight and it's uncertainty
-  // FIXME to be implemented
+  output.fBTaggingScaleFactorEventWeight = fBTagSFCalculator.calculateSF(jetData.getSelectedJets(), output.fSelectedBJets);
   
   // Calculate probability for passing b tag cut without actually applying the cut
   output.fBTaggingPassProbability = calculateBTagPassingProbability(iEvent, jetData);

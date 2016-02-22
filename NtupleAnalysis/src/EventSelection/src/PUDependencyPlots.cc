@@ -3,6 +3,22 @@
 PUDependencyPlots::PUDependencyPlots(HistoWrapper& histoWrapper, bool isEnabled, const HistogramSettings& settings)
 : CommonPlotsBase(histoWrapper, isEnabled),
   fHistoSettings(settings) { }
+  
+PUDependencyPlots::~PUDependencyPlots() {
+  delete hNvtxTrg;
+  delete hNvtxVtx;
+  delete hNvtxTau;
+  delete hNvtxAntiIsolatedTau;
+  delete hNvtxElectronVeto;
+  delete hNvtxMuonVeto;
+  delete hNvtxJetSelection;
+  delete hNvtxAngularCutsCollinear;
+  delete hNvtxMETSelection;
+  delete hNvtxBtagging;
+  delete hNvtxAngularCutsBackToBack;
+  delete hNvtxAllSelections;
+  delete hNvtxAllSelectionsWithProbabilisticBtag;
+}
 
 void PUDependencyPlots::book(TDirectory* dir, bool isData) {
   HistoLevel level = HistoLevel::kDebug;

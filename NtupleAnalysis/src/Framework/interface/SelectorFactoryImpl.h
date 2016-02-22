@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include "TH1.h"
 
 class BaseSelector;
 
@@ -17,7 +18,7 @@ namespace SelectorFactory {
       CreatorBase();
       virtual ~CreatorBase();
 
-      virtual BaseSelector *create(const ParameterSet& config) const = 0;
+      virtual BaseSelector *create(const ParameterSet& config, const TH1* skimCounters=nullptr) const = 0;
     };
 
     template <typename T>
@@ -26,8 +27,8 @@ namespace SelectorFactory {
       Creator() {};
       virtual ~Creator() {};
 
-      virtual BaseSelector *create(const ParameterSet& config) const override {
-        return new T(config);
+      virtual BaseSelector *create(const ParameterSet& config, const TH1* skimCounters=nullptr) const override {
+        return new T(config, skimCounters);
       };
     };
 

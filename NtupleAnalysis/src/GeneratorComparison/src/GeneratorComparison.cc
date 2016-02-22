@@ -9,7 +9,7 @@
 
 class GeneratorComparison: public BaseSelector {
 public:
-  explicit GeneratorComparison(const ParameterSet& config);
+  explicit GeneratorComparison(const ParameterSet& config, const TH1* skimCounters);
   virtual ~GeneratorComparison() {}
 
   virtual void book(TDirectory *dir) override;
@@ -121,8 +121,8 @@ private:
 #include "Framework/interface/SelectorFactory.h"
 REGISTER_SELECTOR(GeneratorComparison);
 
-GeneratorComparison::GeneratorComparison(const ParameterSet& config):
-  BaseSelector(config),
+GeneratorComparison::GeneratorComparison(const ParameterSet& config, const TH1* skimCounters):
+  BaseSelector(config, skimCounters),
   
   fTauPtCut(config.getParameter<float>("tauPtCut")),
   fTauEtaCut(config.getParameter<float>("tauEtaCut")),

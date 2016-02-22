@@ -46,6 +46,7 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/Top_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
 
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
@@ -98,6 +99,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Electrons = process.Electrons,
     Muons     = process.Muons,
     Jets      = process.Jets,
+    Top       = process.Top,
     METs      = process.METs,
     GenWeights = cms.VPSet(
         cms.PSet(
