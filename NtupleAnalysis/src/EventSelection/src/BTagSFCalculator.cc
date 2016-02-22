@@ -95,7 +95,7 @@ void BTagSFInputStash::setOverflowBinByPt(const std::string& label) {
   size_t i = 0;
   for (auto& container: collections) {
     if (!container.size()) {
-      std::cout << "Warning: Btag SF: empty collection for " << label << " flavor=" << i;
+      std::cout << "Warning: Btag SF: empty collection for " << label << " flavor=" << i << std::endl;
       continue;
     }
     float maxValue = -1.0;

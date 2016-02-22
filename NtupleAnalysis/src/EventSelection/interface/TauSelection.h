@@ -173,6 +173,10 @@ private:
   WrappedTH1 *hIsolPtAfter;
   WrappedTH1 *hIsolEtaAfter;
   WrappedTH1 *hIsolVtxAfter;
+  WrappedTH2 *hNprongsMatrixForAllAfterIsolation;
+  WrappedTH2 *hNprongsMatrixForBmesonsAfterIsolation;
+  WrappedTH2 *hNprongsMatrixForAllAfterAntiIsolation;
+  WrappedTH2 *hNprongsMatrixForBmesonsAfterAntiIsolation;
 };
 
 #endif

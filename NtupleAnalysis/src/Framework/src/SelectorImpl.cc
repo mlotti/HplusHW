@@ -105,7 +105,7 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   // The tree argument is deprecated (on PROOF 0 is passed).
 
   if(!fInput)
-    throw std::runtime_error("No input list to SelectorImpl!");
+    throw hplus::Exception("Logic") << "No input list to SelectorImpl!";
 
   // Removed SelectorImplParams from use, it causes memory to corrupt with PROOF.
   // Symptoms are: printing a boolean for isMC returns 153 instead of 0 or 1
@@ -120,19 +120,23 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   // Note: no protection is applied here for missing options, add if necessary
   gDirectory->cd();
   const TNamed* entries = dynamic_cast<const TNamed*>(fInput->FindObject("entries"));
-  fEntries = std::stoi(entries->GetTitle());
+  if (entries != nullptr)
+    fEntries = std::stoi(entries->GetTitle());
   const TNamed* printStatus = dynamic_cast<const TNamed*>(fInput->FindObject("printStatus"));
-  fPrintStatus = printStatus->GetTitle()[0] == '1';
+  if (printStatus != nullptr)
+    fPrintStatus = printStatus->GetTitle()[0] == '1';
   const TNamed* isMC = dynamic_cast<const TNamed*>(fInput->FindObject("isMC"));
-  bIsMC = isMC->GetTitle()[0] == '1';
+  if (isMC != nullptr)
+    bIsMC = isMC->GetTitle()[0] == '1';
   const TNamed* optionStr = dynamic_cast<const TNamed*>(fInput->FindObject("options"));
-  fOptionString = optionStr->GetTitle();
+  if (optionStr != nullptr)
+    fOptionString = optionStr->GetTitle();
 
   hSkimCounters = dynamic_cast<TH1F*>(fInput->FindObject("SkimCounter"));
   hPUdata = dynamic_cast<TH1*>(fInput->FindObject("PileUpData"));
   hPUmc   = dynamic_cast<TH1*>(fInput->FindObject("PileUpMC"));
   const TNamed* ttbarNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isttbar"));
-  if (ttbarNamed) {
+  if (ttbarNamed != nullptr) {
     bIsttbar = (ttbarNamed->GetTitle()[0] == '1');
   }
   //if (gProofServ) gProofServ->SendAsynMessage(TString::Format("slave %d opt %s",int(fEntries),fOptionString.Data()));

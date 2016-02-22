@@ -15,7 +15,7 @@ process = Process("QCDMeasurement"+obtainAnalysisSuffix(sys.argv))
 process.addDatasetsFromMulticrab(sys.argv[1], blacklist=["ChargedHiggs"])
 
 # Add config
-from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections,applyAnalysisCommandLineOptions
+from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections,applyAnalysisCommandLineOptions,setAngularCutsWorkingPoint
 # Enable genuine tau histograms for common plots (needed for calculating N_QCD)
 allSelections.CommonPlots.enableGenuineTauHistograms = True
 # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
@@ -26,6 +26,7 @@ allSelections.CommonPlots.histogramSplitting = [
 #allSelections.TauSelection.rtau = 0.0
 #allSelections.BJetSelection.numberOfBJetsCutValue = 0
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
+#setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
 #===== End of selection customisations
 allSelections.TauSelection.prongs = 1
 #allSelections.METSelection.METCutValue = 80.0
@@ -48,7 +49,8 @@ builder = AnalysisBuilder("QCDMeasurement",
                           usePUreweighting=True,
                           doSystematicVariations=False,
                           )
-#builder.addVariation()
+#builder.addVariation("METSelection.METCutValue", [100,120,140])
+#builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
 builder.build(process, allSelections)
 
 # Pick events
@@ -57,6 +59,7 @@ builder.build(process, allSelections)
 # Run the analysis
 if "proof" in sys.argv:
     #raise Exception("Proof messes up the event weights, do not use for the moment!")
+    #process.run(proof=True, proofWorkers=4)
     process.run(proof=True)
 else:
     process.run()

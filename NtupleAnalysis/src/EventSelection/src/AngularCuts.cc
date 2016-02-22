@@ -71,8 +71,9 @@ AngularCutsBase::AngularCutsBase(const ParameterSet& config, const AngularCutsBa
 }
 
 AngularCutsBase::~AngularCutsBase() { 
-  for (size_t i = 0; i < nMaxJets; ++i) {
-    delete hOptimizationPlots[i];
+  for (size_t i = 0; i < hOptimizationPlots.size(); ++i) {
+    if (hOptimizationPlots[i] != nullptr)
+      delete hOptimizationPlots[i];
   }
   hOptimizationPlots.clear();
 }
@@ -168,8 +169,10 @@ AngularCutsBase::Data AngularCutsBase::privateAnalyze(const Tau& tau, const JetS
   // Obtain minimum value
   output.fMinimumCutValue = 999.0;
   for (size_t i = 0; i < maxIndex; ++i) {
-    if (output.f1DCutVariables[i] >= 0.0 && output.f1DCutVariables[i] < output.fMinimumCutValue) {
-      output.fMinimumCutValue = output.f1DCutVariables[i];
+    if (i < nConsideredJets) {
+      if (output.f1DCutVariables[i] >= 0.0 && output.f1DCutVariables[i] < output.fMinimumCutValue) {
+        output.fMinimumCutValue = output.f1DCutVariables[i];
+      }
     }
   }
   // Fill main counter if passed

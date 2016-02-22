@@ -242,7 +242,7 @@ TEST_CASE("AngularCuts", "[EventSelection]") {
     CHECK( collData.get1DCutVariable(1) == Approx(175.223) );
     CHECK( collData.get1DCutVariable(2) == Approx(188.089) );
     CHECK( collData.get1DCutVariable(3) == Approx(126.761) );
-    CHECK( collData.getMinimumCutValue() == Approx(126.761) );
+    CHECK( collData.getMinimumCutValue() == Approx(175.223) );
     // 4 jets outside tau, MET collinear with jet 2
     mgr.setEntry(2);
     tauData = tausel.silentAnalyze(event);
