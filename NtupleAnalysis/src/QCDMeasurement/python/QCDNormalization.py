@@ -1089,7 +1089,7 @@ if __name__ == "__main__":
             return h
       
         def testInitialization(self):
-            q = QCDNormalizationTemplate("EWK testline")
+            q = QCDNormalizationTemplate("EWK testline", "dummy")
             # Test initialization
             with self.assertRaises(Exception):
                 q.getNeventsFromHisto(True)
@@ -1106,7 +1106,7 @@ if __name__ == "__main__":
                 q.doFit()
         
         def testEmptyHistogram(self):
-            q = QCDNormalizationTemplate("EWK testline")
+            q = QCDNormalizationTemplate("EWK testline", "dummy")
             h = ROOT.TH1F("h","h",10,0,10)
             q.setHistogram(h, "Inclusive bin")
             with self.assertRaises(Exception):
@@ -1116,7 +1116,7 @@ if __name__ == "__main__":
             h.Delete()
         
         def testFitWithoutFunction(self):
-            q = QCDNormalizationTemplate("EWK testline")
+            q = QCDNormalizationTemplate("EWK testline", "dummy")
             h = self._getGaussianHisto()
             q.setHistogram(h, "Inclusive bin")
             self.assertLess(abs(q.getNeventsFromHisto(True)-1000.0),0.001)
@@ -1139,7 +1139,7 @@ if __name__ == "__main__":
                 q.getNeventsErrorFit()
 
         def testFitParams(self):
-            q = QCDNormalizationTemplate("EWK testline")
+            q = QCDNormalizationTemplate("EWK testline", "dummy")
             # input format
             with self.assertRaises(Exception):
                 q.setDefaultFitParam(defaultInitialValue=2)
@@ -1169,7 +1169,7 @@ if __name__ == "__main__":
 
         def testSimpleFit(self):
             _createPlots = False # To test plotting, set to True
-            q = QCDNormalizationTemplate("EWK testline",quietMode=True)
+            q = QCDNormalizationTemplate("EWK testline", "dummy",quietMode=True)
             h = self._getGaussianHisto()
             q.setHistogram(h, "Inclusive bin")
             # Test proper parameters to fitter setting

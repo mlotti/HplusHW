@@ -13,7 +13,9 @@ BaseSelector::BaseSelector(const ParameterSet& config, const TH1* skimCounters):
   cExclusiveSamplesWeighted(fEventCounter.addCounter("Base::Weighted events for exclusive samples")),
   fIsMC(config.isMC()),
   bIsttbar(false),
-  iTopPtVariation(0)
+  iTopPtVariation(0),
+  hNvtxBeforeVtxReweighting(nullptr),
+  hNvtxAfterVtxReweighting(nullptr)
 {
   boost::optional<std::string> flag = config.getParameterOptional<std::string>("topPtSystematicVariation");
   if (flag) {
@@ -27,8 +29,10 @@ BaseSelector::BaseSelector(const ParameterSet& config, const TH1* skimCounters):
 
 BaseSelector::~BaseSelector() {
   fEventCounter.serialize();
-  delete hNvtxBeforeVtxReweighting;
-  delete hNvtxAfterVtxReweighting;
+  if (hNvtxBeforeVtxReweighting != nullptr)
+    delete hNvtxBeforeVtxReweighting;
+  if (hNvtxAfterVtxReweighting != nullptr)
+    delete hNvtxAfterVtxReweighting;
 }
 
 void BaseSelector::setSkimCounters(TH1* hSkimCounters) {
