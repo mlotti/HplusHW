@@ -36,7 +36,8 @@ class JetDumper : public BaseDumper {
         bool passJetID(int id, const pat::Jet& jet);
         
     private:
-	edm::EDGetTokenT<edm::View<pat::Jet>> *jetToken;
+	edm::EDGetTokenT<reco::GenParticleCollection> genParticleToken;
+        edm::EDGetTokenT<edm::View<pat::Jet>> *jetToken;
         std::vector<float> *discriminators;
         std::vector<double> *userfloats;
 	int nUserfloats;
@@ -53,6 +54,12 @@ class JetDumper : public BaseDumper {
 	std::vector<bool> *jetPUIDmedium;
 	std::vector<bool> *jetPUIDtight;
 
+        // MC origin
+        std::vector<bool> *originatesFromW;
+        std::vector<bool> *originatesFromZ;
+        std::vector<bool> *originatesFromTop;
+        std::vector<bool> *originatesFromChargedHiggs;
+        
         // 4-vector for generator jet
         FourVectorDumper *MCjet;
         

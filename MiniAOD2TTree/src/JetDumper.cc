@@ -3,11 +3,13 @@
 #include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
+#include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleTools.h"
 
 #include "DataFormats/JetReco/interface/PileupJetIdentifier.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
 
-JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets){
+JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets)
+: genParticleToken(iConsumesCollector.consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"))) {
     inputCollections = psets;
     booked           = false;
 
@@ -45,13 +47,17 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     jetPUIDmedium = new std::vector<bool>[inputCollections.size()];
     jetPUIDtight = new std::vector<bool>[inputCollections.size()];
     
+    originatesFromW = new std::vector<bool>[inputCollections.size()];
+    originatesFromZ = new std::vector<bool>[inputCollections.size()];
+    originatesFromTop = new std::vector<bool>[inputCollections.size()];
+    originatesFromChargedHiggs = new std::vector<bool>[inputCollections.size()]; 
+    
     MCjet = new FourVectorDumper[inputCollections.size()];
     
     systJESup = new FourVectorDumper[inputCollections.size()];
     systJESdown = new FourVectorDumper[inputCollections.size()];
     systJERup = new FourVectorDumper[inputCollections.size()];
     systJERdown = new FourVectorDumper[inputCollections.size()];
-
 }
 
 JetDumper::~JetDumper(){}
@@ -89,6 +95,11 @@ void JetDumper::book(TTree* tree){
     tree->Branch((name+"_PUIDmedium").c_str(),&jetPUIDmedium[i]);
     tree->Branch((name+"_PUIDtight").c_str(),&jetPUIDtight[i]);
     
+    tree->Branch((name+"_originatesFromW").c_str(),&originatesFromW[i]);
+    tree->Branch((name+"_originatesFromZ").c_str(),&originatesFromZ[i]);
+    tree->Branch((name+"_originatesFromTop").c_str(),&originatesFromTop[i]);
+    tree->Branch((name+"_originatesFromChargedHiggs").c_str(),&originatesFromChargedHiggs[i]);
+    
     MCjet[i].book(tree, name, "MCjet");
     
     systJESup[i].book(tree, name, "JESup");
@@ -121,10 +132,14 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       }
     }
 
+    edm::Handle <reco::GenParticleCollection> genParticlesHandle;
+    if (!iEvent.isRealData())
+      iEvent.getByToken(genParticleToken, genParticlesHandle);
+
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
         std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
 	std::vector<std::string> userfloatNames = inputCollections[ic].getParameter<std::vector<std::string> >("userFloats");
-	
+
         edm::Handle<edm::View<pat::Jet>> jetHandle;
         iEvent.getByToken(jetToken[ic], jetHandle);
 
@@ -172,6 +187,31 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		jetPUIDloose[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kLoose));
 		jetPUIDmedium[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kMedium));
 		jetPUIDtight[ic].push_back(PileupJetIdentifier::passJetId(puIDflag, PileupJetIdentifier::kTight));
+                
+                // MC origin
+                bool fromW = false;
+                bool fromZ = false;
+                bool fromTop = false;
+                bool fromHplus = false;
+                if (!iEvent.isRealData() || !(obj.genParton())) {
+                  // Find MC parton matching to jet
+                  std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(genParticlesHandle, obj.genParton());
+                  for (auto& pa: ancestry) {
+                    int absPid = std::abs(pa->pdgId());
+                    if (absPid == kFromW)
+                      fromW = true;
+                    else if (absPid == kFromZ)
+                      fromZ = true;
+                    else if (absPid == kFromHplus)
+                      fromHplus = true;
+                    else if (absPid == 6)
+                      fromTop = true;
+                  }
+                }
+                originatesFromW[ic].push_back(fromW);
+                originatesFromZ[ic].push_back(fromZ);
+                originatesFromTop[ic].push_back(fromTop);
+                originatesFromChargedHiggs[ic].push_back(fromHplus);
                 
                 // GenJet
                 if (obj.genJet() != nullptr) {
@@ -231,6 +271,11 @@ void JetDumper::reset(){
         jetPUIDloose[ic].clear();
 	jetPUIDmedium[ic].clear();
 	jetPUIDtight[ic].clear();
+        
+        originatesFromW[ic].clear();
+        originatesFromZ[ic].clear();
+        originatesFromTop[ic].clear();
+        originatesFromChargedHiggs[ic].clear();
         
         MCjet[ic].reset();
         // Systematics

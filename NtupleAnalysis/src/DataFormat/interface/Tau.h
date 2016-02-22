@@ -74,11 +74,11 @@ public:
   bool isUnknownTauDecay() const { return this->pdgId() == TauDecayMatchType::kTauDecayUnknown; /* NOTE: return this is assumed to be jet->tau */ }
   
   // Getters for MC tau origin
-  bool isFromZDecay() const { return this->pdgOrigin() == TauOriginType::kFromZ; }
-  bool isFromWDecay() const { return this->pdgOrigin() == TauOriginType::kFromW; }
-  bool isFromHplusDecay() const { return this->pdgOrigin() == TauOriginType::kFromHplus; }
-  bool isFromOtherSource() const { return this->pdgOrigin() == TauOriginType::kFromOtherSource; }
-  bool isFromUnknownSource() const { return this->pdgOrigin() == TauOriginType::kTauOriginUnknown; }
+  bool isFromZDecay() const { return this->pdgOrigin() == ParticleOriginType::kFromZ; }
+  bool isFromWDecay() const { return this->pdgOrigin() == ParticleOriginType::kFromW; }
+  bool isFromHplusDecay() const { return this->pdgOrigin() == ParticleOriginType::kFromHplus; }
+  bool isFromOtherSource() const { return this->pdgOrigin() == ParticleOriginType::kFromOtherSource; }
+  bool isFromUnknownSource() const { return this->pdgOrigin() == ParticleOriginType::kOriginUnknown; }
 
   // Getter for rtau
   double rtau() const {
