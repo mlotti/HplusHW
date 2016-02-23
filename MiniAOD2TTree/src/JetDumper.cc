@@ -206,7 +206,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                     int absPid = std::abs(p.pdgId());
                     if (absPid >= 1 && absPid <= 5) {
                       double myDeltaR = deltaR(jetMomentum, p.p4());
-                      if (myDeltaR < myBestDeltaR) {
+                      if (myDeltaR < 0.4 && myDeltaR < myBestDeltaR) {
                         myBestDeltaR = myDeltaR;
                         iCandidate = iMC;
                       }
@@ -214,7 +214,8 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                   }
                   if (iCandidate > 0) {
                     // Analyze ancestry
-                    std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(genParticlesHandle, (*genParticlesHandle)[iCandidate]);
+                    const reco::Candidate & p = (*genParticlesHandle)[iCandidate];
+                    std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(genParticlesHandle, &p);
                     for (auto& pa: ancestry) {
                       int absPid = std::abs(pa->pdgId());
                       if (absPid == kFromW)
