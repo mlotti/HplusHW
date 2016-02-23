@@ -196,19 +196,38 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 bool fromTop = false;
                 bool fromHplus = false;
                 bool fromUnknown = false;
-                if (!iEvent.isRealData() || !(obj.genParton())) {
+                if (!iEvent.isRealData()) {
                   // Find MC parton matching to jet
-                  std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(genParticlesHandle, obj.genParton());
-                  for (auto& pa: ancestry) {
-                    int absPid = std::abs(pa->pdgId());
-                    if (absPid == kFromW)
-                      fromW = true;
-                    else if (absPid == kFromZ)
-                      fromZ = true;
-                    else if (absPid == kFromHplus)
-                      fromHplus = true;
-                    else if (absPid == 6)
-                      fromTop = true;
+                  size_t iCandidate = 0;
+                  double myBestDeltaR = 9999;
+                  reco::Candidate::LorentzVector jetMomentum = obj.p4();
+                  for (size_t iMC=0; iMC < genParticlesHandle->size(); ++iMC) {
+                    const reco::Candidate & p = (*genParticlesHandle)[iMC];
+                    int absPid = std::abs(p.pdgId());
+                    if (absPid >= 1 && absPid <= 5) {
+                      double myDeltaR = deltaR(jetMomentum, p.p4());
+                      if (myDeltaR < myBestDeltaR) {
+                        myBestDeltaR = myDeltaR;
+                        iCandidate = iMC;
+                      }
+                    }
+                  }
+                  if (iCandidate > 0) {
+                    // Analyze ancestry
+                    std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(genParticlesHandle, (*genParticlesHandle)[iCandidate]);
+                    for (auto& pa: ancestry) {
+                      int absPid = std::abs(pa->pdgId());
+                      if (absPid == kFromW)
+                        fromW = true;
+                      else if (absPid == kFromZ)
+                        fromZ = true;
+                      else if (absPid == kFromHplus)
+                        fromHplus = true;
+                      else if (absPid == 6)
+                        fromTop = true;
+                    }
+                  } else {
+                    fromUnknown = true;
                   }
                 } else {
                   fromUnknown = true;
