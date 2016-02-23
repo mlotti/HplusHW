@@ -59,6 +59,7 @@ class JetDumper : public BaseDumper {
         std::vector<bool> *originatesFromZ;
         std::vector<bool> *originatesFromTop;
         std::vector<bool> *originatesFromChargedHiggs;
+        std::vector<bool> *originatesFromUnknown;
         
         // 4-vector for generator jet
         FourVectorDumper *MCjet;

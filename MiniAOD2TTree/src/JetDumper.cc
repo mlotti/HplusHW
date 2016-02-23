@@ -50,7 +50,8 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     originatesFromW = new std::vector<bool>[inputCollections.size()];
     originatesFromZ = new std::vector<bool>[inputCollections.size()];
     originatesFromTop = new std::vector<bool>[inputCollections.size()];
-    originatesFromChargedHiggs = new std::vector<bool>[inputCollections.size()]; 
+    originatesFromChargedHiggs = new std::vector<bool>[inputCollections.size()];
+    originatesFromUnknown = new std::vector<bool>[inputCollections.size()]; 
     
     MCjet = new FourVectorDumper[inputCollections.size()];
     
@@ -99,6 +100,7 @@ void JetDumper::book(TTree* tree){
     tree->Branch((name+"_originatesFromZ").c_str(),&originatesFromZ[i]);
     tree->Branch((name+"_originatesFromTop").c_str(),&originatesFromTop[i]);
     tree->Branch((name+"_originatesFromChargedHiggs").c_str(),&originatesFromChargedHiggs[i]);
+    tree->Branch((name+"_originatesFromUnknown").c_str(),&originatesFromUnknown[i]);
     
     MCjet[i].book(tree, name, "MCjet");
     
@@ -193,6 +195,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 bool fromZ = false;
                 bool fromTop = false;
                 bool fromHplus = false;
+                bool fromUnknown = false;
                 if (!iEvent.isRealData() || !(obj.genParton())) {
                   // Find MC parton matching to jet
                   std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(genParticlesHandle, obj.genParton());
@@ -207,11 +210,14 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                     else if (absPid == 6)
                       fromTop = true;
                   }
+                } else {
+                  fromUnknown = true;
                 }
                 originatesFromW[ic].push_back(fromW);
                 originatesFromZ[ic].push_back(fromZ);
                 originatesFromTop[ic].push_back(fromTop);
                 originatesFromChargedHiggs[ic].push_back(fromHplus);
+                originatesFromUnknown[ic].push_back(fromUnknown);
                 
                 // GenJet
                 if (obj.genJet() != nullptr) {
@@ -276,6 +282,7 @@ void JetDumper::reset(){
         originatesFromZ[ic].clear();
         originatesFromTop[ic].clear();
         originatesFromChargedHiggs[ic].clear();
+        originatesFromUnknown[ic].clear();
         
         MCjet[ic].reset();
         // Systematics
