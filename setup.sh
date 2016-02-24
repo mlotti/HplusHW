@@ -78,24 +78,24 @@ else
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH_APPEND:$LD_LIBRARY_PATH
 fi
 
-
+PPATHPREFIX = ".python"
 if [ "x$LOCATION" = "xCMSSW" ]; then
     if [ ! -e $CMSSW_BASE/python/HiggsAnalysis/NtupleAnalysis ]; then
         ln -s $HIGGSANALYSIS_BASE/NtupleAnalysis/python $CMSSW_BASE/python/HiggsAnalysis/NtupleAnalysis
     fi
-
+    PPATHPREFIX = "$CMSSW_BASE/python"
 fi
 
 # Need to create the following also on lxplus for limit calculation
-if [ ! -e .python/HiggsAnalysis ]; then
-    mkdir -p .python/HiggsAnalysis
-    touch .python/HiggsAnalysis/__init__.py
+if [ ! -e $PPATHPREFIX/HiggsAnalysis ]; then
+    mkdir -p $PPATHPREFIX/HiggsAnalysis
+    touch $PPATHPREFIX/HiggsAnalysis/__init__.py
 fi
 for DIR in NtupleAnalysis HeavyChHiggsToTauNu; do
-    if [ ! -e .python/HiggsAnalysis/$DIR ]; then
-        ln -s $HIGGSANALYSIS_BASE/$DIR/python .python/HiggsAnalysis/$DIR
-        touch .python/HiggsAnalysis/$DIR/__init__.py
-        for d in .python/HiggsAnalysis/$DIR/*; do
+    if [ ! -e $PPATHPREFIX/HiggsAnalysis/$DIR ]; then
+        ln -s $HIGGSANALYSIS_BASE/$DIR/python $PPATHPREFIX/HiggsAnalysis/$DIR
+        touch $PPATHPREFIX/HiggsAnalysis/$DIR/__init__.py
+        for d in $PPATHPREFIX/HiggsAnalysis/$DIR/*; do
             if [ -d $d ]; then
                 touch $d/__init__.py
             fi
@@ -103,10 +103,10 @@ for DIR in NtupleAnalysis HeavyChHiggsToTauNu; do
     fi
 done
 for DIR in `ls NtupleAnalysis/src` ; do
-    if [[ ! -e .python/HiggsAnalysis/$DIR ]] && [[ -e $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python ]]; then
-        ln -s $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python .python/HiggsAnalysis/$DIR
-        touch .python/HiggsAnalysis/$DIR/__init__.py
-        for d in .python/HiggsAnalysis/$DIR/*; do
+    if [[ ! -e $PPATHPREFIX/HiggsAnalysis/$DIR ]] && [[ -e $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python ]]; then
+        ln -s $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python $PPATHPREFIX/HiggsAnalysis/$DIR
+        touch $PPATHPREFIX/HiggsAnalysis/$DIR/__init__.py
+        for d in $PPATHPREFIX/HiggsAnalysis/$DIR/*; do
             if [ -d $d ]; then
                 touch $d/__init__.py
             fi
