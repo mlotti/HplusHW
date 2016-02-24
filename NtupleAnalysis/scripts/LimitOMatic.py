@@ -29,11 +29,12 @@ class Result:
         else:
             # Check if limits have already been calculated
             if os.path.exists("%s/%s/limits.json"%(self._basedir,self._jobDir)):
-                print "Limit already calculated"
+                print "Limit already calculated, skipping ..."
                 self._limitCalculated = True
             else:
-                if not self._opts.printonly and not self._opts.lhcTypeAsymptotic:
-                    self._getOutput()
+                self._createAndSubmit()
+                #if not self._opts.printonly and not self._opts.lhcTypeAsymptotic:
+                #    self._getOutput()
 
     def _findJobDir(self, basedir):
         self._jobDir = None
