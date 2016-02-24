@@ -45,15 +45,10 @@ class Result:
     def _createAndSubmit(self):
         # Go to base directory
         os.chdir(self._basedir)
-        # Find brlimit directory
-        s = ""
-        i = 0
-        while not os.path.exists("./%sbrlimit"%(s)) and i < 5:
-            s += "../"
-        if i == 5:
-            raise Exception("Error: Could not find test/brlimit directory!")
         # Create jobs
         myPath = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis/src/LimitCalc/work")
+        if not os.path.exists(myPath):
+            raise Exception("Error: Could not find directory '%s'!"%myPath)
         myCommand = os.path.join(myPath, "generateMultiCrabTaujets.py")
         if self._opts.combination:
             myCommand = os.path.join(myPath, "generateMultiCrabCombination.py")
