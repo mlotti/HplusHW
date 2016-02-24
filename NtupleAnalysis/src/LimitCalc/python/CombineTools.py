@@ -125,7 +125,7 @@ def produceLHCAsymptotic(opts, directory,
         cls = LHCTypeAsymptotic(opts.brlimit, opts.sigmabrlimit)
 
     print "Computing limits with %s CLs flavour" % cls.nameHuman()
-    print "Computing limits with Combine version %s" % Combine_tag
+    #print "Computing limits with Combine version %s" % Combine_tag
 
     mcc = MultiCrabCombine(opts, directory, massPoints, datacardPatterns, rootfilePatterns, cls)
     mcc.createMultiCrabDir(postfix)

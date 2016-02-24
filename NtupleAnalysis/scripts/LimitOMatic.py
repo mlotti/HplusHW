@@ -68,8 +68,8 @@ class Result:
             myGridStatus = False
         if myGridStatus:
             myCommand += " --create"
-        if self._opts.nomlfit:
-            myCommand += " --nomlfit"
+        if self._opts.mlfit:
+            myCommand += " --mlfit"
         if self._opts.significance:
             myCommand += " --significance"
         if self._opts.unblinded:

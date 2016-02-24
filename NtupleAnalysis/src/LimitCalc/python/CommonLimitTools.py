@@ -227,7 +227,7 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None, ful
     parser.add_option("--significance", dest="significance", action="store_true", default=False,
                       help="Run also expected (and with --final also observed) significance")
 
-    parser.add_option("--nomlfit", dest="nomlfit", action="store_false", default=True,
+    parser.add_option("--mlfit", dest="nomlfit", action="store_false", default=True,
                       help="Disable ML fit")
     parser.add_option("--nolimit", dest="limit", action="store_false", default=True,
                       help="Disable limit calculation (for e.g. just ML fit or significance)")
@@ -290,7 +290,7 @@ def parseOptionParser(parser):
     if opts.injectSignal:
         if opts.injectSignalMass is None:
             raise Exception("Signal injection enabled with --injectSignal, --injectSignalBRTop --injectSignalBRHplus, but injected mass point not specified with --injectSignalMass")
-        opts.nomlfit = False
+        opts.nomlfit = True
         opts.limit = False
 
     return opts
