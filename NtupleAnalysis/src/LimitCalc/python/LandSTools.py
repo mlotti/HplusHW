@@ -26,10 +26,10 @@ import shutil
 import subprocess
 
 
-import HiggsAnalysis.NtupleAnalysis.tools.multicrab
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 #import multicrabWorkflows
-import HiggsAnalysis.NtupleAnalysis.tools.git
-import HiggsAnalysis.NtupleAnalysis.tools.aux
+import HiggsAnalysis.NtupleAnalysis.tools.git as git
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 ## The LandS CVS tag to be used
 LandS_tag = "HEAD" # 28.01.2014: this is the only available, where shape bug in H+ has been fixed

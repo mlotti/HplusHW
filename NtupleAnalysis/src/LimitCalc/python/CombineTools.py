@@ -27,10 +27,10 @@ import shutil
 import tarfile
 import subprocess
 
-import HiggsAnalysis.NtupleAnalysis.tools.multicrab
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 #import HiggsAnalysis.NtupleAnalysis.tools.multicrabWorkflows
-import HiggsAnalysis.NtupleAnalysis.tools.git
-import HiggsAnalysis.NtupleAnalysis.tools.aux
+import HiggsAnalysis.NtupleAnalysis.tools.git as git
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import array
 
 import ROOT
