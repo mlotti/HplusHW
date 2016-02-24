@@ -717,7 +717,7 @@ hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.As
         #raise Exception("Unable to parse the output of command '%s'" % script)
 
     def _runMLFit(self, mass):
-        if mass in self.mlfitScripts.keys():
+        if mass in self.mlfitScripts.keys() and not self.opts.nomlfit:
             script = self.mlfitScripts[mass]
             self._run(script, "mlfit_m_%s_output.txt" % mass)
         else:
