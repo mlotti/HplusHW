@@ -640,7 +640,7 @@ class DatacardColumn():
                     print ShellStyles.WarningLabel()+"Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! Compensating up stat uncertainty to %f!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k), config.MinimumStatUncertainty)
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)                   
                 if self._rateResult._histograms[0].GetBinContent(k) < -0.001:
-                    print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
+                    #print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
                     self._rateResult._histograms[0].SetBinContent(k, 0.0)
                     #FIXME: if one adjusts the bin content, one needs to adjust accordingly the nuisances !!!
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)
