@@ -17,7 +17,7 @@ LightMassPoints=[80,90,100,120,140,150,155,160]
 #LightMassPoints=[140]
 LightMassPoints=[]
 
-#HeavyMassPoints=[180,190,200,220,250,300,400,500,600]
+#HeavyMassPoints=[180,200,220,250,300,350,400,500]
 #HeavyMassPoints=[180,220,300,600]
 HeavyMassPoints=[300]
 #HeavyMassPoints=[]
