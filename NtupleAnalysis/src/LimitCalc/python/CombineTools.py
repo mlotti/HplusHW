@@ -454,7 +454,7 @@ class LHCTypeAsymptotic:
 
     def _createMLFit(self, mass, fileName, datacardName, blindedMode):
         if self.opts.nomlfit:
-            print "skipping creation of ML fit scripts, to enable run without --nomlfit"
+            print "skipping creation of ML fit scripts, to enable run with --mlfit"
             return
           
         fname = fileName.replace("runCombine", "runCombineMLFit")
