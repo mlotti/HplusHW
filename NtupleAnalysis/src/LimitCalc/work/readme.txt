@@ -19,6 +19,10 @@ The compact checklist:
 7) Run scripts to create plots and tables from the combine output
 8) Done.
 
+For questions and troubleshooting, useful contacts are:
+- The Higgs combination group conveners and experts (especially Mingshui Chen and Nick Wardle)
+- Questions related to Combine harvester: Roger Wolf, Andrew Gilbert, Felix Frensch
+
 ---------------------------------------------
 The not so short details of the above points:
 ---------------------------------------------
