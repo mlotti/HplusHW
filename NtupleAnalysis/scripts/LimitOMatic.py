@@ -11,7 +11,7 @@ import subprocess
 import json
 from optparse import OptionParser
 
-import HiggsAnalysis.NtupleAnalysis.tools.CommonLimitTools as commonLimitTools
+import HiggsAnalysis.LimitCalc.CommonLimitTools as commonLimitTools
 
 class Result:
     def __init__(self, opts, basedir):
@@ -53,9 +53,10 @@ class Result:
         if i == 5:
             raise Exception("Error: Could not find test/brlimit directory!")
         # Create jobs
-        myCommand = "%sbrlimit/generateMultiCrabTaujets.py"%(s)
+        myPath = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis/src/LimitCalc/work")
+        myCommand = os.path.join(myPath, "generateMultiCrabTaujets.py")
         if self._opts.combination:
-            myCommand = "%sbrlimit/generateMultiCrabCombination.py"%(s)
+            myCommand = os.path.join(myPath, "generateMultiCrabCombination.py")
         if self._opts.brlimit:
             myCommand += " --brlimit"
         if self._opts.sigmabrlimit:
@@ -63,8 +64,10 @@ class Result:
         myGridStatus = True
         if hasattr(self._opts, "lepType") and self._opts.lepType:
             myCommand += " --lep"
+            raise Exception("The LEP type CLs is no longer supported. Please use --lhcasy (asymptotic LHC-type CLs.")
         if hasattr(self._opts, "lhcType") and self._opts.lhcType:
             myCommand += " --lhc"
+            raise Exception("The LHC type CLs is no longer supported. Please use --lhcasy (asymptotic LHC-type CLs.")
         if hasattr(self._opts, "lhcTypeAsymptotic") and self._opts.lhcTypeAsymptotic:
             myCommand += " --lhcasy"
             myGridStatus = False
