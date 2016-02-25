@@ -467,6 +467,9 @@ class TailFitter:
             myOverflow = function.Integral(h.GetXaxis().GetBinUpEdge(h.GetNbinsX()), 1e5)
             if myOverflow / myIntegral > 0.10:
                 print WarningLabel()+"In parametrized histogram '%s', the overflow bin is very large (%f %% of total); this could mean converging problems because of badly chosen fit function or range"%(name,myOverflow / myIntegral*100.0)
+            if myOverflow < 0.0:
+                print WarningLabel()+"In parametrized histogram '%s', the overflow bin is negative and set to zero; this could mean converging problems because of badly chosen fit function or range"%(name)
+                myOverflow = 0.0
             w = self._binWidthDuringFit
             h.SetBinContent(h.GetNbinsX(),h.GetBinContent(h.GetNbinsX()) + myOverflow/float(w))
 
