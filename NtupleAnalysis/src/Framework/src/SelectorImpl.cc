@@ -34,6 +34,8 @@ SelectorImpl::SelectorImpl():
   fChain(nullptr),
   fProofFile(nullptr), fOutputFile(nullptr),
   fPrintStep(20000), fPrintLastTime(0), fPrintAdaptCount(0), fPrintStatus(false),
+  fOptionString("{}"),
+  bIsMC(true),
   bIsttbar(false)
 {}
 
@@ -103,7 +105,7 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   // The SlaveBegin() function is called after the Begin() function.
   // When running with PROOF SlaveBegin() is called on each slave server.
   // The tree argument is deprecated (on PROOF 0 is passed).
-
+  
   if(!fInput)
     throw hplus::Exception("Logic") << "No input list to SelectorImpl!";
 
@@ -131,7 +133,6 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   const TNamed* optionStr = dynamic_cast<const TNamed*>(fInput->FindObject("options"));
   if (optionStr != nullptr)
     fOptionString = optionStr->GetTitle();
-
   hSkimCounters = dynamic_cast<TH1F*>(fInput->FindObject("SkimCounter"));
   hPUdata = dynamic_cast<TH1*>(fInput->FindObject("PileUpData"));
   hPUmc   = dynamic_cast<TH1*>(fInput->FindObject("PileUpMC"));
@@ -154,7 +155,6 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
       analyzerNames.insert(name);
     }
   }
- 
   // Use TProofOutputFile if requested (for PROOF)
   const TNamed *out = dynamic_cast<const TNamed *>(fInput->FindObject("PROOF_OUTPUTFILE_LOCATION"));
   if(out) {
@@ -189,7 +189,6 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
       hLocalSkimCounters->SetBinError(i, 0.0);
     }
   }
-  
   while(const TObject *obj = next()) {
     if(std::strncmp(obj->GetName(), "analyzer_", 9) == 0) {
       const TNamed *nm = dynamic_cast<const TNamed *>(obj);

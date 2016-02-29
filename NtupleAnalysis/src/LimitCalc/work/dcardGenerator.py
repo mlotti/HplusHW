@@ -258,7 +258,7 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit()
     # Run main program
-    if len(opts.directories) == 0:
+    if opts.directories == None or len(opts.directories) == 0:
         if opts.debugProfiler:
             cProfile.run("main(opts, myModuleSelector, multipleDirs=None)")
         else:

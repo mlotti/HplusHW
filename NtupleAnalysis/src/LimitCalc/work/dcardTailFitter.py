@@ -810,6 +810,7 @@ if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
     parser.add_option("-x", "--settings", dest="settings", action="store", help="Name (incl. path) of the settings file to be used as an input")
+    parser.add_option("-d", "--dir", dest="directories", action="append", help="Name of input directories")
     parser.add_option("-r", "--recursive", dest="recursive", action="store_true", default=False, help="Do tail fit recursively to all subdirectories")
     parser.add_option("--noFitUncert", dest="noFitUncert", action="store_true", default=False, help="No fit uncertainty")
     parser.add_option("--doubleFitUncert", dest="doubleFitUncert", action="store_true", default=False, help="Double the fit uncertainty")
@@ -827,7 +828,14 @@ if __name__ == "__main__":
     plots._legendLabels["BackgroundStatError"] = "Bkg. stat. unc"
     plots._legendLabels["BackgroundStatSystError"] = "Bkg. stat.#oplussyst. unc."
 
-    if opts.recursive:
+    if opts.directories != None:
+        opts.settings = "../"+opts.settings
+        for l in opts.directories:
+            print "\n*** TailFit for subdirectory %s ***"%l
+            os.chdir(l)
+            main(opts)
+            os.chdir("..")
+    elif opts.recursive:
 	opts.settings = "../"+opts.settings
 	myList = os.listdir(".")
 	myShortList = []

@@ -95,45 +95,47 @@ if ( ! $?LD_LIBRARY_PATH ) then
 else
     setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH_APPEND}:${LD_LIBRARY_PATH}"
 endif
+
+set PPATHPREFIX = ".python"
 if ( $LOCATION == "CMSSW" ) then
     if ( ! $?CMSSW_BASE || ! -e $CMSSW_BASE/python/HiggsAnalysis/NtupleAnalysis ) then
         ln -s $HIGGSANALYSIS_BASE/NtupleAnalysis/python $CMSSW_BASE/python/HiggsAnalysis/NtupleAnalysis
     endif
+    set PPATHPREFIX = "$CMSSW_BASE/python"
+endif
 
+# Need to create the following also on lxplus for limit calculation
+if ( ! -e $PPATHPREFIX/HiggsAnalysis ) then
+    mkdir -p $PPATHPREFIX/HiggsAnalysis
+    touch $PPATHPREFIX/HiggsAnalysis/__init__.py
+endif
+foreach DIR ( NtupleAnalysis HeavyChHiggsToTauNu )
+    if ( ! -e $PPATHPREFIX/HiggsAnalysis/$DIR ) then
+        ln -s $HIGGSANALYSIS_BASE/$DIR/python $PPATHPREFIX/HiggsAnalysis/$DIR
+        touch $PPATHPREFIX/HiggsAnalysis/$DIR/__init__.py
+        foreach d ( $PPATHPREFIX/HiggsAnalysis/$DIR/* )
+            if ( -d $d ) then
+                touch $d/__init__.py
+            endif
+        end
+    endif
+end
+foreach DIR ( `ls NtupleAnalysis/src` )
+    if ( ! -e $PPATHPREFIX/HiggsAnalysis/$DIR && -e $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python ) then
+        ln -s $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python $PPATHPREFIX/HiggsAnalysis/$DIR
+        touch $PPATHPREFIX/HiggsAnalysis/$DIR/__init__.py
+        foreach d ( $PPATHPREFIX/HiggsAnalysis/$DIR/* )
+            if ( -d $d ) then
+                touch $d/__init__.py
+            endif
+        end
+    endif
+end
+
+if ( -z PYTHONPATH ) then
+    setenv PYTHONPATH "${PWD}/.python"
 else
-    if ( ! -e .python/HiggsAnalysis ) then
-        mkdir -p .python/HiggsAnalysis
-        touch .python/HiggsAnalysis/__init__.py
-    endif
-    foreach DIR ( NtupleAnalysis HeavyChHiggsToTauNu )
-        if ( ! -e .python/HiggsAnalysis/$DIR ) then
-            ln -s $HIGGSANALYSIS_BASE/$DIR/python .python/HiggsAnalysis/$DIR
-            touch .python/HiggsAnalysis/$DIR/__init__.py
-            foreach d ( .python/HiggsAnalysis/$DIR/* )
-                if ( -d $d ) then
-                    touch $d/__init__.py
-                endif
-            end
-        endif
-    end
-    foreach DIR ( `ls NtupleAnalysis/src` )
-        if ( ! -e .python/HiggsAnalysis/$DIR && -e $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python ) then
-            ln -s $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python .python/HiggsAnalysis/$DIR
-            touch .python/HiggsAnalysis/$DIR/__init__.py
-            foreach d ( .python/HiggsAnalysis/$DIR/* )
-                if ( -d $d ) then
-                    touch $d/__init__.py
-                endif
-            end
-        endif
-    end
-
-    if ( -z PYTHONPATH ) then
-        setenv PYTHONPATH "${PWD}/.python"
-    else
-        setenv PYTHONPATH "${PWD}/.python:${PYTHONPATH}"
-    endif
-
+    setenv PYTHONPATH "${PWD}/.python:${PYTHONPATH}"
 endif
 
 setenv PATH "${HIGGSANALYSIS_BASE}/HeavyChHiggsToTauNu/scripts:${HIGGSANALYSIS_BASE}/NtupleAnalysis/scripts:${PATH}"

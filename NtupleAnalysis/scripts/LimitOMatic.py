@@ -11,7 +11,7 @@ import subprocess
 import json
 from optparse import OptionParser
 
-import HiggsAnalysis.NtupleAnalysis.tools.CommonLimitTools as commonLimitTools
+import HiggsAnalysis.LimitCalc.CommonLimitTools as commonLimitTools
 
 class Result:
     def __init__(self, opts, basedir):
@@ -29,11 +29,12 @@ class Result:
         else:
             # Check if limits have already been calculated
             if os.path.exists("%s/%s/limits.json"%(self._basedir,self._jobDir)):
-                print "Limit already calculated"
+                print "Limit already calculated, skipping ..."
                 self._limitCalculated = True
             else:
-                if not self._opts.printonly and not self._opts.lhcTypeAsymptotic:
-                    self._getOutput()
+                self._createAndSubmit()
+                #if not self._opts.printonly and not self._opts.lhcTypeAsymptotic:
+                #    self._getOutput()
 
     def _findJobDir(self, basedir):
         self._jobDir = None
@@ -45,17 +46,13 @@ class Result:
     def _createAndSubmit(self):
         # Go to base directory
         os.chdir(self._basedir)
-        # Find brlimit directory
-        s = ""
-        i = 0
-        while not os.path.exists("./%sbrlimit"%(s)) and i < 5:
-            s += "../"
-        if i == 5:
-            raise Exception("Error: Could not find test/brlimit directory!")
         # Create jobs
-        myCommand = "%sbrlimit/generateMultiCrabTaujets.py"%(s)
+        myPath = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis/src/LimitCalc/work")
+        if not os.path.exists(myPath):
+            raise Exception("Error: Could not find directory '%s'!"%myPath)
+        myCommand = os.path.join(myPath, "generateMultiCrabTaujets.py")
         if self._opts.combination:
-            myCommand = "%sbrlimit/generateMultiCrabCombination.py"%(s)
+            myCommand = os.path.join(myPath, "generateMultiCrabCombination.py")
         if self._opts.brlimit:
             myCommand += " --brlimit"
         if self._opts.sigmabrlimit:
@@ -63,15 +60,17 @@ class Result:
         myGridStatus = True
         if hasattr(self._opts, "lepType") and self._opts.lepType:
             myCommand += " --lep"
+            raise Exception("The LEP type CLs is no longer supported. Please use --lhcasy (asymptotic LHC-type CLs.")
         if hasattr(self._opts, "lhcType") and self._opts.lhcType:
             myCommand += " --lhc"
+            raise Exception("The LHC type CLs is no longer supported. Please use --lhcasy (asymptotic LHC-type CLs.")
         if hasattr(self._opts, "lhcTypeAsymptotic") and self._opts.lhcTypeAsymptotic:
             myCommand += " --lhcasy"
             myGridStatus = False
         if myGridStatus:
             myCommand += " --create"
-        if self._opts.nomlfit:
-            myCommand += " --nomlfit"
+        if not self._opts.nomlfit:
+            myCommand += " --mlfit"
         if self._opts.significance:
             myCommand += " --significance"
         if self._opts.unblinded:

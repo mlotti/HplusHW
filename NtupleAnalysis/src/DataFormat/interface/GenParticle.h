@@ -9,6 +9,8 @@ class GenParticle;
 
 class GenParticleCollection: public GenParticleGeneratedCollection { //, public ParticleIteratorAdaptor<GenParticleCollection> {
 public:
+  // using value_type = GenParticle;
+  
   GenParticleCollection() {}
   GenParticleCollection(const std::string& prefix): GenParticleGeneratedCollection(prefix) {}
   ~GenParticleCollection() {}

@@ -152,7 +152,9 @@ void BTagSFInputStash::debug() const {
 
 BTagSFCalculator::BTagSFCalculator(const ParameterSet& config)
 : fVariationInfo(parseVariationType(config)),
-  isActive(true) {
+  isActive(true),
+  hBTagSF(nullptr),
+  hBTagSFRelUncert(nullptr) {
   handleEfficiencyInput(config.getParameterOptional<std::vector<ParameterSet>>("btagEfficiency"));
   fEfficiencies.setOverflowBinByPt("EfficiencyNominal");
   fEfficienciesUp.setOverflowBinByPt("EfficiencyUp");
@@ -175,8 +177,8 @@ BTagSFCalculator::BTagSFCalculator(const ParameterSet& config)
 }
 
 BTagSFCalculator::~BTagSFCalculator() {
-  delete hBTagSF;
-  delete hBTagSFRelUncert;
+  if (hBTagSF) delete hBTagSF;
+  if (hBTagSFRelUncert) delete hBTagSFRelUncert;
 }
 
 void BTagSFCalculator::bookHistograms(TDirectory* dir, HistoWrapper& histoWrapper) {

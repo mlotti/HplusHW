@@ -1208,6 +1208,22 @@ class RootHistoWithUncertainties:
         # Update nominal histogram
         histogramsExtras.makeFlowBinsVisible(self._rootHisto)
 
+    ## Sets negative bins to zero events
+    def treatNegativeBins(self, minimumStatUncertainty):
+        def treatBins(h):
+            for i in range(h.GetNbinsX()):
+                if h.GetBinContent(i+1) < 0.0:
+                    h.SetBinContent(i+1, 0.0)
+        # Treat negative bins in rate histo
+        treatBins(self._rootHisto)
+        for i in range(self._rootHisto.GetNbinsX()):
+            if self._rootHisto.GetBinError(i+1) < minimumStatUncertainty:
+                self._rootHisto.SetBinError(i+1, minimumStatUncertainty)
+        # Treat negative bins in variations
+        for key, (hPlus, hMinus) in self._shapeUncertainties.iteritems():
+            treatBins(hPlus)
+            treatBins(hMinus)
+
     ## Add shape variation uncertainty (Note that the nominal value is subtracted from the variations to obtain absolute uncert.)
     #
     # \param name     Name of the uncertainty
