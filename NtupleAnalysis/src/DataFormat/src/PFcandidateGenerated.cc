@@ -9,8 +9,5 @@
 void PFcandidateGeneratedCollection::setupBranches(BranchManager& mgr) {
   ParticleCollection::setupBranches(mgr);
 
-  mgr.book(prefix()+"_IPTSignificance", &fIPTSignificance);
-  mgr.book(prefix()+"_IPTwrtPV", &fIPTwrtPV);
-  mgr.book(prefix()+"_IPzSignificance", &fIPzSignificance);
-  mgr.book(prefix()+"_IPzwrtPV", &fIPzwrtPV);
+
 }
