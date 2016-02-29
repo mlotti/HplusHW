@@ -170,11 +170,12 @@ def createOutputdirectory(myDir):
 
 if __name__ == "__main__":
     # Obtain normalization factors
-    myNormalizationFactorSource = "QCDInvertedNormalizationFactors.py"
+    myNormalizationFactorSource = "QCDInvertedNormalizationFactors_AfterStdSelections_1prong.py"
     myNormFactors = None
     myNormFactorsSafetyCheck = None
     if os.path.exists(myNormalizationFactorSource):
-        myNormFactorsImport = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalization")
+        #myNormFactorsImport = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalization")
+        myNormFactorsImport = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDNormalization")
         myNormFactorsSafetyCheck = getattr(__import__(myNormalizationFactorSource.replace(".py","")), "QCDInvertedNormalizationSafetyCheck")
         #QCDInvertedNormalizationSafetyCheck(era)
         myNormFactors = myNormFactorsImport.copy()
@@ -193,7 +194,7 @@ if __name__ == "__main__":
     (opts, args) = parser.parse_args()
 
     # Obtain multicrab directory
-    myMulticrabDir = "../FakeTauComparison_140603_182139/"
+    myMulticrabDir = "../QCDMeasurement_160219_105349_1prong/"
     if opts.multicrabDir != None:
         myMulticrabDir = opts.multicrabDir
 

@@ -79,7 +79,7 @@ def main(argv):
     datasets.remove(filter(lambda name: "Hplus_taunu_t-channel" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "Hplus_taunu_tW-channel" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "TTJets_SemiLept" in name, datasets.getAllDatasetNames()))
-    datasets.remove(filter(lambda name: "TTJets_FullLept" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "TTJets" in name, datasets.getAllDatasetNames()))
     #datasets.remove(filter(lambda name: "DYJetsToLL_M_50_HT" in name, datasets.getAllDatasetNames()))
 #    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
     #datasets.remove(filter(lambda name: "WJetsToLNu" in name, datasets.getAllDatasetNames()))
@@ -157,7 +157,7 @@ def dataMCExample(datasets):
 
      plots.drawPlot(plots.DataMCPlot(datasets, "QCDPurity/InvertedTauTauPtAfterAllSelections"),"InvertedTauTauPtAfterAllSelections",
                     xlabel="Tau p_{T} (GeV/c)", ylabel="Number of events",
-                    rebin=2, stackMCHistograms=True,
+                    rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
@@ -399,24 +399,46 @@ def dataMCExample(datasets):
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
   ####################################################################################        
-     plots.drawPlot(plots.DataMCPlot(datasets, "metSelection_InvertedTau/Met"), "Met",
+     plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/MET/METInclusive"), "METInclusive_ForDataDrivenCrlPlots",
                     xlabel="MET (GeV)", ylabel="Number of events",
-                    rebin=4, stackMCHistograms=True,
+                    rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+                    opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
+         
+     plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/MET_AfterAllSelections/MET_AfterAllSelectionsInclusive"), "MET_AfterAllSelectionsInclusive_ForDataDrivenCrlPlots",
+                    xlabel="MET (GeV)", ylabel="Number of events",
+                    rebin=2, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
+         
+     plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/shapeTransverseMass/shapeTransverseMassInclusive"), "shapeTransverseMassInclusive",
+                    xlabel="m_{T} (GeV)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10.0}, log=True)
      
+  
+         
+     plots.drawPlot(plots.DataMCPlot(datasets, "metSelection_InvertedTau/Met"), "MetInvertedTau",
+                    xlabel="MET (GeV)", ylabel="Number of events",
+                    rebin=2, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)   
      
      plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "MetInvertedTauAfterStdSelectionsInclusive",
                     xlabel="MET (GeV)", ylabel="Number of events",
-                    rebin=4, stackMCHistograms=True,
+                    rebin=15, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+                    opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
      
      plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelectionsInclusive",
                     xlabel="m_{T} (GeV)", ylabel="Number of events",
-                    rebin=4, stackMCHistograms=True,
+                    rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
@@ -434,6 +456,13 @@ def dataMCExample(datasets):
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+     
+     plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelections",
+                    xlabel="m_{T} (GeV)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
 
      plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalizationEWKGenuineTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "MetInvertedTauAfterStdSelectionsInclusiveGenuineTaus",
                     xlabel="MET (GeV)", ylabel="Number of events",
