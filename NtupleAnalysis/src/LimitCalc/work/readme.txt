@@ -11,13 +11,14 @@ The compact checklist:
 - produces a datacard / set of datacards (text file + root file with shapes)
 - produces a directory with data-driven control plots
 - produces a directory with additional information
-3) Optional: do tail fit
+3) Optional: do tail fit (recommended for heavy H+)
 4) Optional: manipulate cards (synchronize nuisance names, etc.)
 5) Move the datacard text and root files to lxplus
 6) Run combine on the datacard text and root files
 - produces output root files with the result
-7) Run scripts to create plots and tables from the combine output
-8) Done.
+7) Troubleshooting of combine
+8) Run scripts to create plots and tables from the combine output
+9) Done.
 
 For questions and troubleshooting, useful contacts are:
 - The Higgs combination group conveners and experts (especially Mingshui Chen and Nick Wardle)
@@ -135,12 +136,14 @@ The not so short details of the above points:
 - Producing the datacards and control plots for one set of cards takes about 20-30 s.
 - One should always check that the control plots look reasonable before proceeding to limit calculation.
 
-3) Optional: do tail fit
+3) Optional: do tail fit (recommended for heavy H+)
 - The tail fit does a parametrized fit onto the transverse mass tail for the backgrounds. Above a 
   specified mT value the original counts are replaced by the fitted spectrum and the stat. uncertainty
   of it is replaced by the uncertainty on the fit parameters. The fit parameter uncertainty is calculated
   in an orthogonal base of them (through error matrix orthogonalization), i.e. in such base one can treat
   the fit parameter uncertainties as uncorrelated.
+- The tail fit does make the limit calculation behave nice and stable. Running heavy H+ limits without tail
+  fit is known to be unstable; i.e. not all mass points will yield converged results if the tail fit is omitted.
 - First edit the settings file dcardTailFitSettings.py (or make a copy of it prior to editing). The
   items, which need to be specified for each background are:
   * Name of the background, i.e. the name of that background's column in the datacards
@@ -172,7 +175,7 @@ The not so short details of the above points:
     and that's where the potential signal usually is).
   * The fit is done on histograms with weighted events counts, i.e. make sure that the fit does not
     assume sqrt(N) type errors for the uncertainties, but instead supports weighted event counts.
-  
+- Always check that the fit on the various backgrounds makes sense before proceeding to calculating the limits.
     
 4) Optional: manipulate cards (synchronize nuisance names, etc.)
 - Sometimes there arises the need to do some manipulation of the datacards such as changing nuisance names,
@@ -252,10 +255,44 @@ The not so short details of the above points:
     manual checking (and editing of non-physical values) of the output is necessary.
   * invoke script(s) to create plots and tables of the output results
 
-7) Run scripts to create plots and tables from the combine output
+7) Troubleshooting of combine
+- There are various reasons why combine might crash or not converge. The following list shows the most common reasons:
+  * Symptom: combine does not run any limits.
+    . Cause a) format of datacard is not correct.
+    . Cause b) combine does not find a shape or shape nuisance histogram.
+  * Symptom: combine fails limits on some mass points.
+    . Cause a) unstable behavior of backgrounds -> try the tail fit (see (3)).
+    . Cause b) bad choice of signal strength (mu) scanning parameters -> adjust --rmin and --rmax (default 0..1 pb).
+                 Combine knows to look for mu values also outside the given bounds yet the stepping might be
+                 too coarse when that happens. The choice of the mu range does have a non-zero, yet usually
+                 negligible impact on the limit values.
+    . Cause c) a bug in the shape systematics -> check that it behaves like one expects (use plotShapes.py).
+                 One can try to convert that nuisance from shape to a scalar nuisance in the datacard generator
+                 (keyword: OptionConvertFromShapeToConstantList).
+    . Cause d) too large pulls on a nuisance -> remove all nuisances from a datacard and add them one at a
+                 time running combine after each addition. This may help to pinpoint the nuisance which
+                 gives raise to the instability or large pulls (which usually is a bug in the nuisance, but
+                 sometimes, especially when backgrounds have N_events>10000, can also be physical).
+  * In any case, the most convenient way to debug is to enter the datacard directory in question and enter
+    the latest CombineMultiCrab_* subdirectory in it. There one finds auto-generated scripts, which one may
+    run (runCombine_*). Run one of those interactively and you will get much more information about the error
+    message from combine. The auto-generated maximum likelihood (ML) fits are not necessary very stable; it
+    is adviced to follow the recipy at
+      https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG/HiggsPAGPreapprovalChecks
+    for doing the ML fits to see the pulls and constraints on the nuisances in the background-only and 
+    signal+background hypotheses.
+  
+8) Run scripts to create plots and tables from the combine output
 - This is documented at: https://twiki.cern.ch/twiki/bin/view/CMS/HiggsChToTauNuFullyHadronicLimits
 - If you are in luck (or in bug) and there is a distinct separatation between the observed and expected curves, the
   excess/deficit should be quantified, i.e. it's p-value should be calculated. Note that the usual limit plot does NOT
   give a number how many sigmas the deviation represents. Follow the instructions for "Significance and p-value" on
   the page https://twiki.cern.ch/twiki/bin/view/CMS/HiggsChToTauNuFullyHadronicLimits .
-  
+- Existing scripts:
+  * convert combine results into model-independent limit plot (plotBRLimit.py, run inside the runCombine_* directory)
+  * plot shape systematics (plotShapes.py, run inside the datacard directory)
+  * plot nuisance pulls and constraints (plotMLFits.py, run inside the runCombine_* directory)
+  * scanning of tan beta for model-dependent limits (follow instructions at
+      https://twiki.cern.ch/twiki/bin/view/CMS/HiggsChToTauNuFullyHadronicLimit
+    )
+      
