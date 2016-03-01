@@ -19,6 +19,7 @@ class CommonPlots {
 public:
   enum AnalysisType {
     kSignalAnalysis = 0,
+    kHplus2tbAnalysis= 0,
     kEmbedding,
     kQCDMeasurement,
     kQCDNormalizationSystematicsSignalRegion, // Needed for obtaining normalization systematics to data-driven control plots
