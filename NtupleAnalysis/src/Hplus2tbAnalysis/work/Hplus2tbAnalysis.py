@@ -11,7 +11,7 @@ if len(sys.argv) < 2:
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix 
-process = Process("SignalAnalysis"+obtainAnalysisSuffix(sys.argv))
+process = Process("Hplus2tbAnalysis"+obtainAnalysisSuffix(sys.argv))
 process.addDatasetsFromMulticrab(sys.argv[1])
 
 # Add config
@@ -30,7 +30,7 @@ applyAnalysisCommandLineOptions(sys.argv, allSelections)
 
 # Build analysis modules
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
-builder = AnalysisBuilder("SignalAnalysis", 
+builder = AnalysisBuilder("Hplus2tbAnalysis",
                           dataEras,
                           searchModes,
                           #### Options ####

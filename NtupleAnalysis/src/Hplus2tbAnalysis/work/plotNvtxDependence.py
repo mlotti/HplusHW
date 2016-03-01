@@ -21,7 +21,8 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 from HiggsAnalysis.NtupleAnalysis.tools.OrderedDict import OrderedDict
 
 # Configuration
-_analysis = "SignalAnalysis"
+#_analysis = "SignalAnalysis"
+_analysis = "Hplus2tbAnalysis"
 searchMode = "80to1000"
 dataEra = "Run2015"
 optMode = ""
