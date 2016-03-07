@@ -184,13 +184,13 @@ config = {
     "76Xdata": {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-        "globalTag": "76X_dataRun2_HLT_frozen_v9",
+        "globalTag": "76X_dataRun2_16Dec2015_v0",
     },
     "76Xmc": {
         "simProcess": "SIM",
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-        "globalTag": "76X_mcRun2_asymptotic_v13",
+        "globalTag": "76X_mcRun2_asymptotic_v12",
         "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
     }
 }
