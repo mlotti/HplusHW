@@ -6,8 +6,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-dataVersion = "74Xmc"
-#dataVersion = "74Xdata"
+dataVersion = "76Xmc"
+#dataVersion = "76Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
@@ -22,7 +22,7 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        '/store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v3/60000/00372E76-286A-E511-B90C-0025905A60D2.root',
+        '/store/mc/RunIISpring15MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/40000/00087FEB-236E-E511-9ACB-003048FF86CA.root'
 #        '/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
 #        '/store/data/Run2015D/Tau/MINIAOD/PromptReco-v3/000/256/587/00000/6E29A230-925D-E511-A2F2-02163E0140F1.root'
     )
@@ -118,14 +118,14 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         cms.PSet(
             branchname = cms.untracked.string("genParticles"),
             src = cms.InputTag("prunedGenParticles"),
-            saveAllGenParticles = cms.untracked.bool(False),
-            saveGenElectrons = cms.untracked.bool(True),
-            saveGenMuons = cms.untracked.bool(True),
-            saveGenTaus = cms.untracked.bool(True),
-            saveGenNeutrinos = cms.untracked.bool(True),
-            saveTopInfo = cms.untracked.bool(True),
-            saveWInfo = cms.untracked.bool(True),
-            saveHplusInfo = cms.untracked.bool(True),
+            saveAllGenParticles = cms.untracked.bool(True),
+#            saveGenElectrons = cms.untracked.bool(True),
+#            saveGenMuons = cms.untracked.bool(True),
+#            saveGenTaus = cms.untracked.bool(True),
+#            saveGenNeutrinos = cms.untracked.bool(True),
+#            saveTopInfo = cms.untracked.bool(True),
+#            saveWInfo = cms.untracked.bool(True),
+#            saveHplusInfo = cms.untracked.bool(True),
         )
     ),
     Tracks =  cms.VPSet(      
