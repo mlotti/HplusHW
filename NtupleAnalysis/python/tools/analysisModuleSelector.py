@@ -135,27 +135,34 @@ class AnalysisModuleSelector:
     def addOtherSource(self, label, dsetMgrCreator):
         self._otherSources.append(AnalysisModuleSelectorSource(dsetMgrCreator, label))
 
-    def doSelect(self, opts):
+    def doSelect(self, opts=None):
         # Find available modules
         self._findCommonAvailableEras()
         self._findCommonAvailableSearchModes()
         self._findCommonAvailableOptimizationModes()
         self._findCommonAvailableSystematicVariations()
         # Check if listing was invoked
-        if opts.listVariations:
+        if opts != None and opts.listVariations:
             self._printAvailableModules()
             sys.exit()
-        # Make sure that format of options for eras, search modes, and optimization modes is fine
-        self._correctOptionsFormat(opts)
-        # Check that selected options are fine for eras, search modes, and optimization modes
-        self._selectedEras = self._applySelectionOnModules("Era", opts.era, self._availableEras)
-        self._selectedSearchModes = self._applySelectionOnModules("SearchMode", opts.searchMode, self._availableSearchModes)
-        self._selectedOptimizationModes = self._applySelectionOnModules("OptimizationMode", opts.optimizationMode, self._availableOptimizationModes)
-        if not self._disableSystematicsList:
-            self._selectedSystematicVariations = self._applySelectionOnModules("SystematicVariation", opts.systematicVariation, self._availableSystematicVariations, [""]) # pick only the nominal as default
-        # Print as information a breakdown of selected eras, search modes, and optimization modes
-        self._printSelection()
-        # Now, the selected eras, search modes, and optimization modes are available with the getters
+        # Skip selection when no options are provided
+        if opts == None:
+            self._selectedEras = self._availableEras
+            self._selectedSearchModes = self._availableSearchModes
+            self._selectedOptimizationModes = self._availableOptimizationModes
+            self._selectedSystematicVariations = []
+        else:
+            # Make sure that format of options for eras, search modes, and optimization modes is fine
+            self._correctOptionsFormat(opts)
+            # Check that selected options are fine for eras, search modes, and optimization modes
+            self._selectedEras = self._applySelectionOnModules("Era", opts.era, self._availableEras)
+            self._selectedSearchModes = self._applySelectionOnModules("SearchMode", opts.searchMode, self._availableSearchModes)
+            self._selectedOptimizationModes = self._applySelectionOnModules("OptimizationMode", opts.optimizationMode, self._availableOptimizationModes)
+            if not self._disableSystematicsList:
+                self._selectedSystematicVariations = self._applySelectionOnModules("SystematicVariation", opts.systematicVariation, self._availableSystematicVariations, [""]) # pick only the nominal as default
+            # Print as information a breakdown of selected eras, search modes, and optimization modes
+            self._printSelection()
+            # Now, the selected eras, search modes, and optimization modes are available with the getters
 
     def _findCommonAvailableEras(self):
         myList = self._primarySource.getDataEras()

@@ -12,7 +12,7 @@
 
 class TriggerEfficiency: public BaseSelector {
 public:
-  explicit TriggerEfficiency(const ParameterSet& config);
+  explicit TriggerEfficiency(const ParameterSet& config, const TH1* skimCounters);
   virtual ~TriggerEfficiency();
 
   virtual void book(TDirectory *dir) override;
@@ -68,8 +68,8 @@ private:
 #include "Framework/interface/SelectorFactory.h"
 REGISTER_SELECTOR(TriggerEfficiency);
 
-TriggerEfficiency::TriggerEfficiency(const ParameterSet& config):
-  BaseSelector(config),
+TriggerEfficiency::TriggerEfficiency(const ParameterSet& config, const TH1* skimCounters):
+  BaseSelector(config, skimCounters),
   fName(config.getParameter<std::string>("name")),
   fOfflineSelection(config.getParameter<std::string>("offlineSelection")),
   fbinning(config.getParameter<std::vector<int>>("binning")),

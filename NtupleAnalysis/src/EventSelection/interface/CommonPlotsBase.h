@@ -13,7 +13,7 @@
 class CommonPlotsBase {
 public:
   CommonPlotsBase(HistoWrapper& histoWrapper, bool isEnabled);
-  ~CommonPlotsBase();
+  virtual ~CommonPlotsBase();
   
   bool isEnabled() const { return bIsEnabled; }
 

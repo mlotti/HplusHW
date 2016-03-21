@@ -50,7 +50,21 @@ MuonSelection::MuonSelection(const ParameterSet& config, const std::string& post
   bookHistograms(new TDirectory());
 }
 
-MuonSelection::~MuonSelection() { }
+MuonSelection::~MuonSelection() {
+  delete hMuonPtAll;
+  delete hMuonEtaAll;
+  delete hMuonPtPassed;
+  delete hMuonEtaPassed;
+  delete hPtResolution;
+  delete hEtaResolution;
+  delete hPhiResolution;
+  delete hIsolPtBefore;
+  delete hIsolEtaBefore;
+  delete hIsolVtxBefore;
+  delete hIsolPtAfter;
+  delete hIsolEtaAfter;
+  delete hIsolVtxAfter;
+}
 
 void MuonSelection::initialize(const ParameterSet& config, const std::string& postfix) {
   if (postfix.find("veto") != std::string::npos || postfix.find("Veto") != std::string::npos)

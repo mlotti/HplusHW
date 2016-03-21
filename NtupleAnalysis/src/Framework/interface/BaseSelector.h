@@ -29,7 +29,7 @@ class BranchManager;
 /// Selector base class
 class BaseSelector {
 public:
-  explicit BaseSelector(const ParameterSet& config);
+  explicit BaseSelector(const ParameterSet& config, const TH1* skimCounters=nullptr);
   virtual ~BaseSelector();
 
   void setEventSaver(EventSaver *saver) { fEventSaver.setSaver(saver); }
@@ -43,10 +43,15 @@ public:
   /// Processes internally event before process method is called
   void processInternal(Long64_t entry);
 
+  /// Sets skim counters
+  void setSkimCounters(TH1* hSkimCounters);
+  
+  /// Sets pileup weights
   void setPileUpWeights(TH1* hPUdata, TH1* hPUmc){
     fPileupWeight.calculateWeights(hPUdata,hPUmc);
   }
   
+  /// Sets flag for ttbar
   void setIsttbar(bool status) { bIsttbar = status; }
 
   /// Book internal histograms
@@ -70,6 +75,9 @@ protected:
   PileupWeight fPileupWeight;
 
 private:
+  std::vector<Count> processSkimCounters(const TH1* skimCounters);
+  
+  std::vector<Count> cSkimCounters;
   Count cBaseAllEvents;
   Count cPileupWeighted;
   Count cPrescaled;
@@ -83,9 +91,6 @@ private:
   // Internal histograms
   WrappedTH1* hNvtxBeforeVtxReweighting;
   WrappedTH1* hNvtxAfterVtxReweighting;
-  
-  
-  
 };
 
 #endif

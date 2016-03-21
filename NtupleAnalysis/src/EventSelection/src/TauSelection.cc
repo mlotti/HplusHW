@@ -123,7 +123,21 @@ TauSelection::TauSelection(const ParameterSet& config)
   bookHistograms(new TDirectory());
 }
 
-TauSelection::~TauSelection() { }
+TauSelection::~TauSelection() {
+  delete hTriggerMatchDeltaR;
+  delete hTauPtTriggerMatched;
+  delete hTauEtaTriggerMatched;
+  delete hNPassed;
+  delete hPtResolution;
+  delete hEtaResolution;
+  delete hPhiResolution;
+  delete hIsolPtBefore;
+  delete hIsolEtaBefore;
+  delete hIsolVtxBefore;
+  delete hIsolPtAfter;
+  delete hIsolEtaAfter;
+  delete hIsolVtxAfter;
+}
 
 void TauSelection::initialize(const ParameterSet& config) {
   
@@ -359,7 +373,7 @@ bool TauSelection::passTrgMatching(const Tau& tau, std::vector<math::LorentzVect
 bool TauSelection::passNprongsCut(const Tau& tau) const {
   if (fTauNprongs > 0) {
     if (fTauNprongs == 12) {
-      return (tau.decayMode() >= 0 && tau.decayMode() <= 4);
+      return (tau.decayMode() >= 0 && tau.decayMode() <= 9);
     } else if (fTauNprongs == 13) {
       return ((tau.decayMode() >= 0 && tau.decayMode() <= 4) || (tau.decayMode() >= 10 && tau.decayMode() <= 14));
     } else if (fTauNprongs == 23) {

@@ -35,21 +35,31 @@ public:
     Data();
     ~Data();
 
-    // Status of passing event selection
+    /// Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }
-    // Obtain number of selected jets
+    /// Obtain number of selected jets
     int getNumberOfSelectedJets() const { return fSelectedJets.size(); }
-    // Obtain collection of selected jets
+    /// Obtain collection of selected jets
     const std::vector<Jet>& getSelectedJets() const { return fSelectedJets; }
-    // Obtain collection of all jets
+    /// Obtain collection of all jets
     const std::vector<Jet>& getAllJets() const { return fAllJets; }
-    // Check if jet matching to selected tau was a success
+    /// Check if jet matching to selected tau was a success
     bool jetMatchedToTauFound() const { return (fJetMatchedToTau.size() > 0); }
-    // Obtain jet matching to selected tau
+    /// Obtain jet matching to selected tau
     const Jet& getJetMatchedToTau() const;
-    // Obtain HT
+    /// Obtain HT
     const double HT() const { return fHT; }
-
+    /// Obtain MHT
+    const math::XYZVectorD& MHT() const { return fMHT; }
+    /// Obtain minimum phi angle between a jet and (MHT-jet)
+    const double minDeltaPhiJetMHT() const { return fMinDeltaPhiJetMHT; }
+    /// Obtain maximum phi angle between a jet and (MHT-jet)
+    const double maxDeltaPhiJetMHT() const { return fMaxDeltaPhiJetMHT; }
+    /// Obtain minimum Delta R between a jet and (MHT-jet)
+    const double minDeltaRJetMHT() const { return fMinDeltaRJetMHT; }
+    /// Obtain minimum Delta R between a jet and (MHT-jet)
+    const double minDeltaRReversedJetMHT() const { return fMinDeltaRReversedJetMHT; }
+    
     friend class JetSelection;
 
   private:
@@ -63,6 +73,16 @@ public:
     std::vector<Jet> fJetMatchedToTau;
     /// HT (scalar sum of jets)
     double fHT;
+    /// MHT (negative vector sum of jets)
+    math::XYZVectorD fMHT;
+    /// Minimum phi angle between a jet and (MHT-jet)
+    double fMinDeltaPhiJetMHT;
+    /// Maximum phi angle between a jet and (MHT-jet)
+    double fMaxDeltaPhiJetMHT;
+    /// Minimum Delta R between a jet and (MHT-jet)
+    double fMinDeltaRJetMHT;
+    /// Maximum Delta R between a jet and (MHT-jet)
+    double fMinDeltaRReversedJetMHT;
   };
   
   // Main class
@@ -88,6 +108,8 @@ private:
   Data privateAnalyze(const Event& event, const math::LorentzVectorT<double>& tauP, const double tauPt);
   
   void findJetMatchingToTau(std::vector<Jet>& collection, const Event& event, const math::LorentzVectorT<double>& tauP);
+  /// Routine for calculating the MHT related values
+  void calculateMHTInformation(Data& output, const math::LorentzVectorT<double>& tauP, const double tauPt);
   
   
   // Input parameters

@@ -2,6 +2,8 @@
 #include "Framework/interface/Exception.h"
 
 #include <iostream>
+#include <TROOT.h>
+
 
 namespace {
   std::string histoLevelNames[static_cast<int>(HistoLevel::kNumberOfLevels)] = {
@@ -36,6 +38,19 @@ HistoWrapper::HistoWrapper(const EventWeight& eventWeight, const std::string& le
   }
 }
 HistoWrapper::~HistoWrapper() {
+//   printHistoStatistics();
+//   std::cout << "gDirectory" << gDirectory->GetList()->GetSize() << std::endl;
+//   std::cout << "list " << gROOT->GetList()->GetSize() << std::endl;
+//   std::cout << "globals " << gROOT->GetListOfGlobals()->GetSize() << std::endl;
+//   std::cout << "files" << gROOT->GetListOfFiles()->GetSize() << std::endl;
+//   std::cout << "specials " << gROOT->GetListOfSpecials()->GetSize() << std::endl;
+  //gDirectory->GetList()->Delete();
+//   gROOT->GetList()->Delete();
+//   gROOT->GetListOfGlobals()->Delete();
+//   TIter next(gROOT->GetList());
+//   while (TObject* o = dynamic_cast<TObject*>(next())) {
+//     o->Delete();
+//   }
 }
 
 void HistoWrapper::printHistoStatistics() const {

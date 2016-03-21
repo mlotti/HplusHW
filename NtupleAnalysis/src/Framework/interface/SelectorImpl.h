@@ -2,8 +2,12 @@
 #ifndef Framework_SelectorImpl_h
 #define Framework_SelectorImpl_h
 
+#include "Framework/interface/Exception.h"
+#include <boost_1_57_0/boost/concept_check.hpp>
+
 #include "TSelector.h"
 #include "TStopwatch.h"
+#include "TProofServ.h"
 
 #include <string>
 #include <vector>
@@ -16,14 +20,14 @@ class BaseSelector;
 class BranchManager;
 class EventSaver;
 
-class TH1F;
+class TH1;
 
 class SelectorImplParams: public TObject {
 public:
-  SelectorImplParams(): fOptions("{}"), fEntries(-1), fIsMC(false), fPrintStatus(false) {}
+  SelectorImplParams(): fOptions("{}"), fEntries(-1), fIsMC(false), fPrintStatus(false) { }
   SelectorImplParams(Long64_t entries, bool isMC, const std::string& options, bool printStatus):
     fOptions(options), fEntries(entries), fIsMC(isMC), fPrintStatus(printStatus)
-  {}
+  { }
   virtual ~SelectorImplParams();
 
   virtual const char *GetName() const;
@@ -87,8 +91,13 @@ private:
   int fPrintAdaptCount;
   bool fPrintStatus;
 
-  TH1F *hPUdata;
-  TH1F *hPUmc;
+  // Input parameters
+  TString fOptionString;
+  bool bIsMC;
+  
+  TH1 *hSkimCounters;
+  TH1 *hPUdata;
+  TH1 *hPUmc;
   bool bIsttbar;
   
 };

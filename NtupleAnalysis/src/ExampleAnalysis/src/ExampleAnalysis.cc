@@ -8,7 +8,7 @@
 
 class ExampleAnalysis: public BaseSelector {
 public:
-  explicit ExampleAnalysis(const ParameterSet& config);
+  explicit ExampleAnalysis(const ParameterSet& config, const TH1* skimCounters);
   virtual ~ExampleAnalysis() {}
 
   virtual void book(TDirectory *dir) override;
@@ -42,8 +42,8 @@ private:
 #include "Framework/interface/SelectorFactory.h"
 REGISTER_SELECTOR(ExampleAnalysis);
 
-ExampleAnalysis::ExampleAnalysis(const ParameterSet& config):
-  BaseSelector(config),
+ExampleAnalysis::ExampleAnalysis(const ParameterSet& config, const TH1* skimCounters):
+  BaseSelector(config, skimCounters),
   fTauPtCut(config.getParameter<float>("tauPtCut")),
   cAllEvents(fEventCounter.addCounter("All events")),
   cWeighted(fEventCounter.addCounter("Weighted")),

@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
+dataEras = ["2015"]
+#dataEras = ["2015B","2015C"]
+searchModes = ["80to1000"]
+
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 
-process = Process()
+process = Process("BTagEfficiencyAnalysis")
 
 # Example of adding a dataset which has its files defined in data/<dataset_name>.txt file
 #process.addDatasets(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6"])
@@ -10,26 +14,40 @@ process = Process()
 # Example of adding datasets from a multicrab directory
 import sys
 if len(sys.argv) < 2:
-    print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory>"
+    print "Usage: ./btagEfficiencyAnalysis.py <path-to-multicrab-directory>"
     sys.exit(0)
 process.addDatasetsFromMulticrab(sys.argv[1])
 
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
-allSelections.TauSelection.rtau = 0.0 # Disable rtau
+# Disable rtau
+allSelections.TauSelection.rtau = 0.0
 allSelections.__setattr__("jetPtCutMin", 0.0)
 allSelections.__setattr__("jetPtCutMax", 99990.0)
 allSelections.__setattr__("jetEtaCutMin", -2.5)
 allSelections.__setattr__("jetEtaCutMax", 2.5)
 
-for algo in ["combinedInclusiveSecondaryVertexV2BJetTags"]:
-    for wp in ["Loose", "Medium", "Tight"]:
-        selections = allSelections.clone()
-        selections.BJetSelection.bjetDiscr = algo
-        selections.BJetSelection.bjetDiscrWorkingPoint = wp
-        suffix = "_%s_%s"%(algo,wp)
-        print "Added analyzer for algo/wp: %s"%suffix
-        process.addAnalyzer("BTagEfficiency"+suffix, Analyzer("BTagEfficiencyAnalysis", config=selections, silent=False))
+#for algo in ["combinedInclusiveSecondaryVertexV2BJetTags"]:
+#    for wp in ["Loose", "Medium", "Tight"]:
+#        selections = allSelections.clone()
+#        selections.BJetSelection.bjetDiscr = algo
+#        selections.BJetSelection.bjetDiscrWorkingPoint = wp
+#        suffix = "_%s_%s"%(algo,wp)
+#        print "Added analyzer for algo/wp: %s"%suffix
+#        process.addAnalyzer("BTagEfficiency"+suffix, Analyzer("BTagEfficiencyAnalysis", config=selections, silent=False))
+
+# Build analysis modules
+from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
+builder = AnalysisBuilder("BTagEfficiencyAnalysis",
+                          dataEras,
+                          searchModes,
+                          #### Options ####
+                          usePUreweighting=True,
+                          doSystematicVariations=False,
+                          )
+builder.addVariation("BJetSelection.bjetDiscr", ["pfCombinedInclusiveSecondaryVertexV2BJetTags"])
+builder.addVariation("BJetSelection.bjetDiscrWorkingPoint", ["Loose", "Medium", "Tight"])
+builder.build(process, allSelections)
 
 # Example of adding an analyzer whose configuration depends on dataVersion
 #def createAnalyzer(dataVersion):
@@ -45,10 +63,10 @@ for algo in ["combinedInclusiveSecondaryVertexV2BJetTags"]:
 #process.addOptions(EventSaver = PSet(enabled = True,pickEvents = True))
 
 # Run the analysis
-if "proof" in sys.argv:
-    process.run(proof=True)
-else:
-    process.run()
+#if "proof" in sys.argv:
+#    process.run(proof=True)
+#else:
+process.run()
 
 # Run the analysis with PROOF
 # By default it uses all cores, but you can give proofWorkers=<N> as a parameter

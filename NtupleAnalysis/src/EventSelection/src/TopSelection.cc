@@ -61,7 +61,9 @@ TopSelection::TopSelection(const ParameterSet& config)
   bookHistograms(new TDirectory());
 }
 
-TopSelection::~TopSelection() { }
+TopSelection::~TopSelection() {
+  
+}
 
 void TopSelection::initialize(const ParameterSet& config) {
   

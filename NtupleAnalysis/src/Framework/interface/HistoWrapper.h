@@ -137,6 +137,12 @@ class WrappedBase {
 public:
   WrappedBase(const HistoWrapper& histoWrapper, T *histo, HistoLevel level):
     h(histo), fHistoWrapper(histoWrapper), fLevel(level) {}
+  ~WrappedBase() {
+    if (h != nullptr) {
+      //h->Delete();
+      h = nullptr;
+    }
+  }
 
   /// Returns true if the histogram exists
   bool isActive() const { return fHistoWrapper.isActive(fLevel); }
@@ -225,7 +231,18 @@ public:
     else
       hTrue = nullptr;
   }
-  ~WrappedTHxTripletBase() { }
+  ~WrappedTHxTripletBase() { 
+    if (isActive()) {
+      //hInclusive->Delete();
+      hInclusive = nullptr;
+      //hFalse->Delete();
+      hFalse = nullptr;
+      if (hTrue != nullptr) {
+        //hTrue->Delete();
+        hTrue = nullptr;
+      }
+    }
+  }
   
   /// Returns true if the histograms exist
   bool isActive() const { return fHistoWrapper.isActive(fLevel); }

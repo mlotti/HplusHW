@@ -68,7 +68,7 @@ public:
   }
   float bjetDiscriminator() const {
     if (!fCollection->bjetDiscriminatorIsValid())
-      return true;
+      return 1.0;
     return fCollection->fBJetDiscriminator->value()[index()];
   }
   

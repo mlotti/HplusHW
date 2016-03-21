@@ -102,9 +102,11 @@ class QCDInvertedShape:
             wQCDLabel = shape.getPhaseSpaceBinFileFriendlyTitle(i)
             if self._optionUseInclusiveNorm:
                 wQCDLabel = "Inclusive"
+            wQCD = 0.0
             if not wQCDLabel in normFactors.keys():
-                raise Exception(ShellStyles.ErrorLabel()+"No normalization factors available for bin '%s' when accessing histogram %s!"%(wQCDLabel,shape.getHistoName()))
-            wQCD = normFactors[wQCDLabel]
+                print ShellStyles.WarningLabel()+"No normalization factors available for bin '%s' when accessing histogram %s! Ignoring this bin..."%(wQCDLabel,shape.getHistoName())
+            else:
+                wQCD = normFactors[wQCDLabel]
             # Loop over bins in the shape histogram
             for j in range(1,h.GetNbinsX()+1):
                 myResult = 0.0
@@ -188,9 +190,11 @@ class QCDInvertedShape:
             wQCDLabel = shape.getPhaseSpaceBinFileFriendlyTitle(i)
             if self._optionUseInclusiveNorm:
                 wQCDLabel = "Inclusive"
+            wQCD = 0.0
             if not wQCDLabel in normFactors.keys():
-                raise Exception(ShellStyles.ErrorLabel()+"No normalization factors available for bin '%s' when accessing histogram %s!"%(wQCDLabel,shape.getHistoName()))
-            wQCD = normFactors[wQCDLabel]
+                print ShellStyles.WarningLabel()+"No normalization factors available for bin '%s' when accessing histogram %s! Ignoring this bin..."%(wQCDLabel,shape.getHistoName())
+            else:
+                wQCD = normFactors[wQCDLabel]
             # Loop over bins in the shape histogram
             for j in range(1,h.GetNbinsX()+1):
                 for k in range(1,h.GetNbinsY()+1):

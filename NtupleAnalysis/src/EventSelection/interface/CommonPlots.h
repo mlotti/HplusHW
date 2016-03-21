@@ -43,6 +43,11 @@ public:
   const HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
   /// Returns the histogram settings for Mt bins (usecase: QCD measurement)
   const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
+
+  /** Special method for setting genuine tau status 
+    * (it is usually set through TauSelection via CommonPlots::fillControlPlotsAfterTauSelection)
+    */
+  void setGenuineTauStatus(const bool isGenuineTau) { bIsGenuineTau = isGenuineTau; };
   
   //===== unique filling methods (to be called inside the event selection routine only, i.e. (before a passing decision is done))
   void fillControlPlotsAtVertexSelection(const Event& event);
@@ -196,6 +201,12 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlJetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetEtaAfterAllSelections;
   HistoSplitter::SplittedTripletTH2s hCtrlJetEtaPhiAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlHTAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMHTAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMinDeltaPhiJetMHTAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMaxDeltaPhiJetMHTAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMinDeltaRJetMHTAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMinDeltaRReversedJetMHTAfterAllSelections;
 
   HistoSplitter::SplittedTripletTH1s hCtrlCollinearAngularCutsMinimumAfterAllSelections;
 
@@ -228,7 +239,7 @@ private:
   int iVertices;
   TauSelection::Data fTauData;
   //FakeTauIdentifier::Data fFakeTauData;
-  bool bIsFakeTau;
+  bool bIsGenuineTau;
   ElectronSelection::Data fElectronData;
   MuonSelection::Data fMuonData;
   JetSelection::Data fJetData;

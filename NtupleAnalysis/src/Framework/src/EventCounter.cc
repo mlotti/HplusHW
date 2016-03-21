@@ -29,15 +29,15 @@ size_t EventCounter::Counter::getLabelIndex(const std::string& l) const {
   }
   return -1;
 }
-size_t EventCounter::Counter::insert(const std::string& label) {
+size_t EventCounter::Counter::insert(const std::string& label, double initialValue) {
   if(counter)
     throw std::logic_error("May not call addCounter() after setOutput()");
 
   size_t index = labels.size();
   labels.push_back(label);
   values.push_back(0);
-  weights.push_back(0);
-  weightsSquared.push_back(0);
+  weights.push_back(initialValue);
+  weightsSquared.push_back(initialValue*initialValue);
   return index;
 }
 void EventCounter::Counter::incrementCount(size_t countIndex, double weight) {
@@ -87,19 +87,19 @@ EventCounter::EventCounter(const EventWeight& weight):
 
 EventCounter::~EventCounter() {}
 
-Count EventCounter::addCounter(const std::string& name) {
+Count EventCounter::addCounter(const std::string& name, double initialValue) {
   if(fOutputHasBeenSet)
     throw std::logic_error("May not call addCounter() after setOutput()");
 
-  size_t index = fCounters[0].insert(name);
+  size_t index = fCounters[0].insert(name, initialValue);
   return Count(this, 0, index);
 }
-Count EventCounter::addSubCounter(const std::string& subcounterName, const std::string& countName) {
+Count EventCounter::addSubCounter(const std::string& subcounterName, const std::string& countName, double initialValue) {
   if(fOutputHasBeenSet)
     throw std::logic_error("May not call addSubCounter() after setOutput()");
 
   size_t counterIndex = findOrInsertCounter(subcounterName);
-  size_t countIndex = fCounters[counterIndex].insert(countName);
+  size_t countIndex = fCounters[counterIndex].insert(countName, initialValue);
   return Count(this, counterIndex, countIndex);
 }
 

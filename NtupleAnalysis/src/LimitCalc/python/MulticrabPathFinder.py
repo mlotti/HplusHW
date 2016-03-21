@@ -89,7 +89,7 @@ class MulticrabPathFinder:
         #return self.selectLatest(self.grep(dirs,"mbedding",file="inputInfo.txt"))
 
     def signalfind(self,dirs):
-	return self.selectLatest(self.grep(dirs,"SignalAnalysis_",file="multicrab.cfg"))
+	return self.selectLatest(self.grep(dirs,"SignalAnalysis",file="multicrab.cfg"))
 
     def qcdfactfind(self,dirs):
         myList = []

@@ -13,7 +13,11 @@
 JetSelection::Data::Data()
 : bPassedSelection(false),
   fJetMatchedToTau(0),
-  fHT(-1.0)
+  fHT(-1.0),
+  fMinDeltaPhiJetMHT(-1.0),
+  fMaxDeltaPhiJetMHT(-1.0),
+  fMinDeltaRJetMHT(-1.0),
+  fMinDeltaRReversedJetMHT(-1.0)
 { }
 
 JetSelection::Data::~Data() { }
@@ -65,7 +69,16 @@ JetSelection::JetSelection(const ParameterSet& config)
   bookHistograms(new TDirectory());
 }
 
-JetSelection::~JetSelection() { }
+JetSelection::~JetSelection() { 
+  delete hJetPtAll;
+  delete hJetEtaAll;
+  delete hJetPtPassed;
+  delete hJetEtaPassed;
+  for (auto p: hSelectedJetPt) delete p;
+  for (auto p: hSelectedJetEta) delete p;  
+  delete hJetMatchingToTauDeltaR;
+  delete hJetMatchingToTauPtRatio;
+}
 
 void JetSelection::initialize(const ParameterSet& config) {
   
@@ -207,6 +220,8 @@ JetSelection::Data JetSelection::privateAnalyze(const Event& event, const math::
   }
   if (tauPt > 0.0)
     output.fHT += tauPt;
+  // Calculate MHT
+  calculateMHTInformation(output, tauP, tauPt);
   // Fill pt and eta of jets
   size_t i = 0;
   for (Jet jet: output.fSelectedJets) {
@@ -234,4 +249,54 @@ void JetSelection::findJetMatchingToTau(std::vector<Jet>& collection, const Even
   }
   if (myMinDeltaR < 0.1)
     collection.push_back(event.jets()[mySelectedIndex]);
+}
+
+void JetSelection::calculateMHTInformation(JetSelection::Data& output, const math::LorentzVectorT<double>& tauP, const double tauPt) {
+  // Construct a list of the jet four momenta for speeding up calculations and for simplifying code
+  std::vector<math::LorentzVectorT<double>> fourMomenta;
+  for(Jet jet: output.getSelectedJets()) {
+    fourMomenta.push_back(jet.p4());
+  }
+  if (tauPt > 0.0) {
+    fourMomenta.push_back(tauP);
+  }
+  // Calculate MHT (negative vector sum of selected jets and the tau)
+  // I.e. not as sensitive as MET to forward calorimetry
+  output.fMHT.SetXYZ(0.0, 0.0, 0.0);
+  for(auto& p: fourMomenta) {
+    output.fMHT.SetXYZ(output.fMHT.x() - p.x(),
+                       output.fMHT.y() - p.y(),
+                       output.fMHT.z() - p.z());
+  }
+  // Calculate the minimum and maximum DeltaPhi and DeltaR of the jet/tau, MHT-jet/tau system
+  // I.e. look for events with collinear or back-to-back topologies architypal of QCD multi-jet events
+  output.fMinDeltaPhiJetMHT = 9999.0;
+  output.fMaxDeltaPhiJetMHT = -1.0;
+  output.fMinDeltaRJetMHT = 9999.0;
+  output.fMinDeltaRReversedJetMHT = 9999.0;
+  for(auto& p: fourMomenta) {
+    math::XYZVectorD modifiedMHT = output.MHT();
+    modifiedMHT.SetXYZ(output.fMHT.x() + p.x(),
+                       output.fMHT.y() + p.y(),
+                       output.fMHT.z() + p.z());
+    double deltaPhi = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(p, modifiedMHT));
+    if (deltaPhi < output.fMinDeltaPhiJetMHT) {
+      output.fMinDeltaPhiJetMHT = deltaPhi;
+    }
+    if (deltaPhi > output.fMaxDeltaPhiJetMHT) {
+      output.fMaxDeltaPhiJetMHT = deltaPhi;
+    }
+    double deltaR = ROOT::Math::VectorUtil::DeltaR(p, modifiedMHT);
+    if (deltaR < output.fMinDeltaRJetMHT) {
+      output.fMinDeltaRJetMHT = deltaR;
+    }
+    // Reverse one of the vectors and calculate DeltaR; small DeltaR means the system is back-to-back
+    modifiedMHT.SetXYZ(-output.fMHT.x(),
+                       -output.fMHT.y(),
+                       -output.fMHT.z());
+    double reversedSystemDeltaR = ROOT::Math::VectorUtil::DeltaR(p, modifiedMHT);
+    if (reversedSystemDeltaR < output.fMinDeltaRReversedJetMHT) {
+      output.fMinDeltaRReversedJetMHT = reversedSystemDeltaR;
+    }
+  }
 }

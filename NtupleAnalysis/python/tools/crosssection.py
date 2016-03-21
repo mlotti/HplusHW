@@ -158,6 +158,11 @@ backgroundCrossSections = CrossSectionList(
             "8": 245.8, # [10]
             "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
             }),
+    CrossSection("TT", {
+            "7": 172.0, # [10]
+            "8": 245.8, # [10]
+            "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
+            }),
     CrossSection("TTJets_HT600to800", {
             "13": 0.0, 
             }),
@@ -277,6 +282,15 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("DYJetsToLL_M_2000to3000", {
             "13": 0.0, # FIXME
             }),
+    CrossSection("DY2JetsToLL_M_50", {
+            "13": 3.345e+02, # [14]
+            }),
+    CrossSection("DY3JetsToLL_M_50", {
+            "13": 1.022e+02, # [14]
+            }),
+    CrossSection("DY4JetsToLL_M_50", {
+            "13": 5.446e+01, # [14]
+            }),
     CrossSection("DYToTauTau_M_20_", {
             "7": 4998, # [4], NNLO
             "8": 5745.25, # [9], NNLO
@@ -341,7 +355,13 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("ST_tW_antitop_5f_inclusiveDecays", {
             "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
+    CrossSection("ST_tW_antitop_5f_DS_inclusiveDecays", {
+            "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            }),
     CrossSection("ST_tW_top_5f_inclusiveDecays", {
+            "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            }),
+    CrossSection("ST_tW_top_5f_DS_inclusiveDecays", {
             "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_t_channel_antitop_4f_leptonDecays", {
@@ -364,7 +384,7 @@ def setBackgroundCrossSections(datasets, doWNJetsWeighting=True, quietMode=False
         setBackgroundCrossSectionForDataset(dset, doWNJetsWeighting, quietMode)
 
 def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMode=False):
-    value = backgroundCrossSections.crossSection(dataset.getName(), dataset.getEnergy())
+    value = backgroundCrossSections.crossSection(dataset.getName().replace("_ext",""), dataset.getEnergy())
     if value is None:
         if "ChargedHiggs" in dataset.getName():
             value = 1.0 # Force signal xsection to 1 pb

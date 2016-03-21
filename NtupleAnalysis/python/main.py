@@ -13,6 +13,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.git as git
 
 _debugPUreweighting = False
+_debugMemoryConsumption = False
 
 class PSet:
     def __init__(self, **kwargs):
@@ -204,6 +205,15 @@ class Process:
             self.addDataset(name)
 
     def addDatasetsFromMulticrab(self, directory, *args, **kwargs):
+        blacklist = []
+        if "blacklist" in kwargs.keys():
+            if isinstance(kwargs["blacklist"], str):
+                blacklist.append(kwargs["blacklist"])
+            elif isinstance(kwargs["blacklist"], list):
+                blacklist.extend(kwargs["blacklist"])
+            else:
+                raise Exception("Unsupported input format!")
+            del kwargs["blacklist"]
 #        dataset._optionDefaults["input"] = "miniaod2tree*.root"
         dataset._optionDefaults["input"] = "histograms-*.root"
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
@@ -211,8 +221,14 @@ class Process:
         dsetMgrCreator.close()
 
         for dset in dsets:
-            self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion(), lumiFile=dsetMgrCreator.getLumiFile())
-
+            isOnBlackList = False
+            for item in blacklist:
+                if dset.getName().startswith(item):
+                    isOnBlackList = True
+            if isOnBlackList:
+                print "Ignoring dataset because of blacklist options: '%s' ..."%dset.getName()
+            else:
+                self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion(), lumiFile=dsetMgrCreator.getLumiFile())
 
     # kwargs for 'includeOnlyTasks' or 'excludeTasks' to set the datasets over which this analyzer is processed, default is all datasets
     def addAnalyzer(self, name, analyzer, **kwargs):
@@ -300,25 +316,15 @@ class Process:
         readMbytesTotal = 0
         callsTotal = 0
 
-        # Sum data pu distributions
-        hPUs = {}
-        for aname, analyzerIE in self._analyzers.iteritems():
-            hPU = None
-            for dset in self._datasets:
-                if dset.getDataVersion().isData() and analyzerIE.runForDataset_(dset.getName()):
-                    if hPU is None:
-                        hPU = dset.getPileUp()
-                    else:
-                        hPU.Add(dset.getPileUp())
-            if hPU != None:
-                hPU.SetName("PileUpData")
-                hPUs[aname] = hPU
-            #else:
-            #    raise Exception("Cannot determine PU spectrum for data!")
- 
+
         # Process over datasets
         ndset = 0
         for dset in self._datasets:
+            # Get data PU distributions from data
+            #   This is done every time for a dataset since memory management is simpler to handle
+            #   if all the histograms in memory are deleted after reading a dataset is finished
+            hPUs = self._getDataPUhistos()
+            # Initialize
             ndset += 1
             inputList = ROOT.TList()
             nanalyzers = 0
@@ -340,42 +346,18 @@ class Process:
                     # ttbar status for top pt corrections
                     ttbarStatus = "0"
                     useTopPtCorrection = analyzer.exists("useTopPtWeights") and analyzer.__getattr__("useTopPtWeights")
-                    useTopPtCorrection = useTopPtCorrection and dset.getName().startswith("TTJets")
+                    useTopPtCorrection = useTopPtCorrection and dset.getName().startswith("TT")
                     if useTopPtCorrection:
                         ttbarStatus = "1"
                     inputList.Add(ROOT.TNamed("isttbar", ttbarStatus))
                     # Pileup reweighting
-                    if dset.getDataVersion().isMC():
-                        if aname in hPUs.keys():
-                            if _debugPUreweighting:
-                                for k in range(hPUs[aname].GetNbinsX()):
-                                    print "DEBUG(PUreweighting): dataPU:%d:%f"%(k+1, hPUs[aname].GetBinContent(k+1))
-                            inputList.Add(hPUs[aname])
-                        else:
-                            n = 50
-                            hFlat = ROOT.TH1F("dummyPU","dummyPU",n,0,n)
-                            for k in range(n):
-                                hFlat.Fill(k+1, 1.0/n)
-                            inputList.Add(hFlat)
-                            print "Warning: Using a flat pileup spectrum for data (which is missing) -> MC PU spectrum is unchanged"
-                        if dset.getPileUp() == None:
-                            raise Exception("Error: pileup spectrum is missing from dataset! Please switch to using newest multicrab!")
-                        hPUMC = dset.getPileUp().Clone()
-                        if hPUMC.GetNbinsX() != hPUs[aname].GetNbinsX():
-                            raise Exception("Pileup histogram dimension mismatch! data nPU has %d bins and MC nPU has %d bins"%(hPUs[aname].GetNbinsX(), hPUMC.GetNbinsX()))
-                        hPUMC.SetName("PileUpMC")
-                        if _debugPUreweighting:
-                            for k in range(hPUMC.GetNbinsX()):
-                                print "Debug(PUreweighting): MCPU:%d:%f"%(k+1, hPUMC.GetBinContent(k+1))
-                        inputList.Add(hPUMC)
-                        if analyzer.exists("usePileupWeights"):
-                            usePUweights = analyzer.__getattr__("usePileupWeights")
-                            if hPUs[aname].Integral() > 0.0:
-                                factor = hPUMC.Integral() / hPUs[aname].Integral()
-                                for k in range(0, hPUMC.GetNbinsX()+2):
-                                    if hPUMC.GetBinContent(k) > 0.0:
-                                        w = hPUs[aname].GetBinContent(k) / hPUMC.GetBinContent(k) * factor
-                                        nAllEventsPUWeighted += w * hPUMC.GetBinContent(k)
+                    (puAllEvents, puStatus) = self._parsePUweighting(dset, analyzer, aname, hPUs, inputList)
+                    nAllEventsPUWeighted += puAllEvents
+                    usePUweights = puStatus
+                    # Sum skim counters (from ttree)
+                    hSkimCounterSum = self._getSkimCounterSum(dset.getFileNames())
+                    inputList.Add(hSkimCounterSum)
+                    # Add name
                     anames.append(aname)
             if nanalyzers == 0:
                 print "Skipping %s, no analyzers" % dset.getName()
@@ -400,7 +382,8 @@ class Process:
 
             for f in dset.getFileNames():
                 tchain.Add(f)
-            tchain.SetCacheLearnEntries(100);
+            tchain.SetCacheLearnEntries(1000);
+            tchain.SetCacheSize(10000000) # Set cache size to 10 MB (somehow it is not automatically set contrary to ROOT docs)
 
             tselector = ROOT.SelectorImpl()
 
@@ -408,7 +391,13 @@ class Process:
             # estimate for the analysis. If this turns out to be slow,
             # we could store the number of events along the file names
             # (whatever is the method for that)
-            inputList.Add(ROOT.SelectorImplParams(tchain.GetEntries(), dset.getDataVersion().isMC(), self._options.serialize_(), True))
+            inputList.Add(ROOT.TNamed("entries", str(tchain.GetEntries())))
+            if dset.getDataVersion().isMC():
+                inputList.Add(ROOT.TNamed("isMC", "1"))
+            else:
+                inputList.Add(ROOT.TNamed("isMC", "0"))
+            inputList.Add(ROOT.TNamed("options", self._options.serialize_()))
+            inputList.Add(ROOT.TNamed("printStatus", "1"))
 
             if _proof is not None:
                 tchain.SetProof(True)
@@ -422,18 +411,16 @@ class Process:
             readCallsStart = ROOT.TFile.GetFileReadCalls()
             timeStart = time.time()
             clockStart = time.clock()
-
+            
             if self._maxEvents > 0:
                 tchain.SetCacheEntryRange(0, self._maxEvents)
                 tchain.Process(tselector, "", self._maxEvents)
             else:
                 tchain.Process(tselector)
-
-            timeStop = time.time()
-            clockStop = time.clock()
-            readCallsStop = ROOT.TFile.GetFileReadCalls()
-            readBytesStop = ROOT.TFile.GetFileBytesRead()
-
+            if _debugMemoryConsumption:
+                print "    MEMDBG: TChain cache statistics:"
+                tchain.PrintCacheStats()
+            
             # Obtain Nall events for top pt corrections
             NAllEventsTopPt = 0
             if useTopPtCorrection:
@@ -454,7 +441,8 @@ class Process:
                         if binNumber > 0:
                             NAllEventsTopPt += h.GetBinContent(binNumber)
                     else:
-                        print "Warning: Could not obtain N(AllEvents) for top pt reweighting"
+                        raise Exception("Warning: Could not obtain N(AllEvents) for top pt reweighting")
+                    ROOT.gROOT.GetListOfFiles().Remove(fIN)
                     fIN.Close()
 
             # Write configInfo
@@ -467,8 +455,10 @@ class Process:
             configInfo.cd()
             dv = ROOT.TNamed("dataVersion", str(dset.getDataVersion()))
             dv.Write()
+            dv.Delete()
             cv = ROOT.TNamed("codeVersionAnalysis", git.getCommitId())
             cv.Write()
+            cv.Delete()
             if not cinfo == None:
                 # Add more information to configInfo
                 n = cinfo.GetNbinsX()
@@ -484,70 +474,48 @@ class Process:
                     cinfo.SetBinContent(n+2, nAllEventsPUWeighted / nanalyzers)
                 # Add "isTopPtReweighted" column
                 if useTopPtCorrection:
-                    cinfo.SetBinContent(n+3, NAllEventsTopPt / nanalyzers)
+                    cinfo.SetBinContent(n+3, NAllEventsTopPt)
                 # Write
                 cinfo.Write()
+                ROOT.gROOT.GetListOfFiles().Remove(fIN);
                 fIN.Close()
 
-            # Sum skim counters counters (from ttree)
-            hSkimCounterSum = None
-            fINs = None
-            for inname in dset.getFileNames():
-                fIN = ROOT.TFile.Open(inname)
-                hSkimCounters = fIN.Get("configInfo/SkimCounter")
-                if hSkimCounterSum == None:
-                    hSkimCounterSum = hSkimCounters.Clone()
-                else:
-                    hSkimCounterSum.Add(hSkimCounters)
-                if fINs == None:
-                    fINs = []
-                fINs.append(fIN)
-            if hSkimCounterSum != None:
-                # Find out directories in the output file
-                dirlist = []
-                for key in tf.GetListOfKeys():
-                    matchStatus = False
-                    for name in anames:
-                        if key.GetTitle().startswith(name):
-                            dirlist.append(key.GetTitle())
-                # Add skim counters to the counter histograms
-                for d in dirlist:
-                    hCounter = tf.Get("%s/counters/counter"%d).Clone()
-                    hCounterWeighted = tf.Get("%s/counters/weighted/counter"%d).Clone()
-                    # Resize axis
-                    nCounters = hCounter.GetNbinsX()
-                    nSkimCounters = hSkimCounterSum.GetNbinsX()
-                    hCounter.SetBins(nCounters+nSkimCounters, 0., nCounters+nSkimCounters)
-                    hCounterWeighted.SetBins(nCounters+nSkimCounters, 0., nCounters+nSkimCounters)
-                    # Move bin data to right
-                    for i in range(0, nCounters):
-                        j = nCounters-i
-                        hCounter.SetBinContent(j+nSkimCounters, hCounter.GetBinContent(j))
-                        hCounter.SetBinError(j+nSkimCounters, hCounter.GetBinError(j))
-                        hCounter.GetXaxis().SetBinLabel(j+nSkimCounters, hCounter.GetXaxis().GetBinLabel(j))
-                        hCounterWeighted.SetBinContent(j+nSkimCounters, hCounterWeighted.GetBinContent(j))
-                        hCounterWeighted.SetBinError(j+nSkimCounters, hCounterWeighted.GetBinError(j))
-                        hCounterWeighted.GetXaxis().SetBinLabel(j+nSkimCounters, hCounterWeighted.GetXaxis().GetBinLabel(j))
-                    # Add skim counters
-                    for i in range(1, nSkimCounters+1):
-                        hCounter.SetBinContent(i, hSkimCounterSum.GetBinContent(i))
-                        hCounter.SetBinError(i, hSkimCounterSum.GetBinError(i))
-                        hCounter.GetXaxis().SetBinLabel(i, "ttree: %s"%hSkimCounterSum.GetXaxis().GetBinLabel(i))
-                        hCounterWeighted.SetBinContent(i, hSkimCounterSum.GetBinContent(i))
-                        hCounterWeighted.SetBinError(i, hSkimCounterSum.GetBinError(i))
-                        hCounterWeighted.GetXaxis().SetBinLabel(i, "ttree: %s"%hSkimCounterSum.GetXaxis().GetBinLabel(i))
-                    hCounter.Sumw2(False)
-                    hCounter.Sumw2()
-                    hCounterWeighted.Sumw2(False)
-                    hCounterWeighted.Sumw2()
-                    tf.cd("%s/counters"%d)
-                    hCounter.Write("counter", ROOT.TObject.kOverwrite)
-                    tf.cd("%s/counters/weighted"%d)
-                    hCounterWeighted.Write("counter", ROOT.TObject.kOverwrite)
-            if fINs != None:
-                for f in fINs:
-                  f.Close()
+            # Memory management
+            configInfo.Delete()
+            ROOT.gROOT.GetListOfFiles().Remove(tf);
             tf.Close()
+            for item in inputList:
+                if isinstance(item, ROOT.TObject):
+                    item.Delete()
+            inputList = None
+            if hSkimCounterSum != None:
+                hSkimCounterSum.Delete()
+            if _debugMemoryConsumption:
+                print "      MEMDBG: gDirectory", ROOT.gDirectory.GetList().GetSize()
+                print "      MEMDBG: list ", ROOT.gROOT.GetList().GetSize()
+                print "      MEMDBG: globals ", ROOT.gROOT.GetListOfGlobals().GetSize()
+                #for item in ROOT.gROOT.GetListOfGlobals():
+                    #print item.GetName()
+                print "      MEMDBG: files", ROOT.gROOT.GetListOfFiles().GetSize()
+                #for item in ROOT.gROOT.GetListOfFiles():
+                #    print "          %d items"%item.GetList().GetSize()
+                print "      MEMDBG: specials ", ROOT.gROOT.GetListOfSpecials().GetSize()
+                for item in ROOT.gROOT.GetListOfSpecials():
+                    print "          "+item.GetName()
+                
+                #gDirectory.GetList().Delete();
+                #gROOT.GetList().Delete();
+                #gROOT.GetListOfGlobals().Delete();
+                #TIter next(gROOT.GetList());
+                #while (TObject* o = dynamic_cast<TObject*>(next())) {
+                  #o.Delete();
+                #}
+            
+            # Performance and information
+            timeStop = time.time()
+            clockStop = time.clock()
+            readCallsStop = ROOT.TFile.GetFileReadCalls()
+            readBytesStop = ROOT.TFile.GetFileBytesRead()
 
             calls = ""
             if _proof is not None:
@@ -567,12 +535,95 @@ class Process:
             readMbytesTotal += readMbytes
 
         print
-
         if len(self._datasets) > 1:
             print "    Total: Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB, read speed %.2f MB/s" % (realTimeTotal, cpuTimeTotal, cpuTimeTotal/realTimeTotal*100, readMbytesTotal, readMbytesTotal/realTimeTotal)
         print "    Results are in", outputDir
 
         return outputDir
+
+    ## Returns PU histograms for data
+    def _getDataPUhistos(self):
+        hPUs = {}
+        for aname, analyzerIE in self._analyzers.iteritems():
+            hPU = None
+            for dset in self._datasets:
+                if dset.getDataVersion().isData() and analyzerIE.runForDataset_(dset.getName()):
+                    if hPU is None:
+                        hPU = dset.getPileUp().Clone()
+                    else:
+                        hPU.Add(dset.getPileUp())
+            if hPU != None:
+                hPU.SetName("PileUpData")
+                hPU.SetDirectory(None)
+                hPUs[aname] = hPU
+            #else:
+            #    raise Exception("Cannot determine PU spectrum for data!")
+        return hPUs
+ 
+    ## Obtains PU histogram for MC
+    # Returns tuple of N(all events PU weighted) and status of enabling PU weights
+    def _parsePUweighting(self, dset, analyzer, aname, hDataPUs, inputList):
+        if not dset.getDataVersion().isMC():
+            return (0.0, False)
+        hPUMC = None
+        nAllEventsPUWeighted = 0.0
+        if aname in hDataPUs.keys():
+            if _debugPUreweighting:
+                for k in range(hDataPUs[aname].GetNbinsX()):
+                    print "DEBUG(PUreweighting): dataPU:%d:%f"%(k+1, hDataPUs[aname].GetBinContent(k+1))
+            inputList.Add(hDataPUs[aname])
+        else:
+            n = 50
+            hFlat = ROOT.TH1F("dummyPU"+aname,"dummyPU"+aname,n,0,n)
+            hFlat.SetName("PileUpData")
+            for k in range(n):
+                hFlat.Fill(k+1, 1.0/n)
+            inputList.Add(hFlat)
+            hDataPUs[aname] = hFlat
+        if dset.getPileUp() == None:
+            raise Exception("Error: pileup spectrum is missing from dataset! Please switch to using newest multicrab!")
+        hPUMC = dset.getPileUp().Clone()
+        hPUMC.SetDirectory(None)
+
+        if hPUMC.GetNbinsX() != hDataPUs[aname].GetNbinsX():
+            raise Exception("Pileup histogram dimension mismatch! data nPU has %d bins and MC nPU has %d bins"%(hDataPUs[aname].GetNbinsX(), hPUMC.GetNbinsX()))
+        hPUMC.SetName("PileUpMC")
+        if _debugPUreweighting:
+            for k in range(hPUMC.GetNbinsX()):
+                print "Debug(PUreweighting): MCPU:%d:%f"%(k+1, hPUMC.GetBinContent(k+1))
+        inputList.Add(hPUMC)
+        if analyzer.exists("usePileupWeights"):
+            usePUweights = analyzer.__getattr__("usePileupWeights")
+            if hDataPUs[aname].Integral() > 0.0:
+                factor = hPUMC.Integral() / hDataPUs[aname].Integral()
+                for k in range(0, hPUMC.GetNbinsX()+2):
+                    if hPUMC.GetBinContent(k) > 0.0:
+                        w = hDataPUs[aname].GetBinContent(k) / hPUMC.GetBinContent(k) * factor
+                        nAllEventsPUWeighted += w * hPUMC.GetBinContent(k)
+        return (nAllEventsPUWeighted, usePUweights)
+ 
+    ## Sums the skim counters from input files and returns a pset containing them 
+    def _getSkimCounterSum(self, datasetFilenameList):
+        hSkimCounterSum = None
+        for inname in datasetFilenameList:
+            fIN = ROOT.TFile.Open(inname)
+            hSkimCounters = fIN.Get("configInfo/SkimCounter")
+            if hSkimCounterSum == None:
+                hSkimCounterSum = hSkimCounters.Clone()
+                hSkimCounterSum.SetDirectory(None) # Store the histogram to memory TDirectory, not into fIN
+            else:
+                hSkimCounterSum.Add(hSkimCounters)
+            hSkimCounters.Delete()
+            fIN.Close()
+        if hSkimCounterSum == None:
+            # Construct an empty histogram
+            hSkimCounterSum = ROOT.TH1F("SkimCounter","SkimCounter",1,0,1)
+        else:
+            # Format bin labels
+            for i in range(hSkimCounterSum.GetNbinsX()):
+                hSkimCounterSum.GetXaxis().SetBinLabel(i+1, "ttree: %s"%hSkimCounterSum.GetXaxis().GetBinLabel(i+1))
+        hSkimCounterSum.SetName("SkimCounter")
+        return hSkimCounterSum
 
 if __name__ == "__main__":
     import unittest

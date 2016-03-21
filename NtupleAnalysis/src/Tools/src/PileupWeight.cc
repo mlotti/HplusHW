@@ -52,7 +52,7 @@ PileupWeight::~PileupWeight() {}
 double PileupWeight::getWeight(const Event& fEvent){
   if(!fEnabled || fEvent.isData()) return 1;
 
-  if(h_weight == 0)
+  if(h_weight == nullptr)
     throw hplus::Exception("runtime") << "PileupWeight enabled, but no PileupWeights in multicrab!";
 
   int NPU = fEvent.vertexInfo().simulatedValue();

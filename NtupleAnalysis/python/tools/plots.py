@@ -54,15 +54,8 @@ _heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 50
 ## statistics. The mapping is used in the
 ## mergeRenameReorderForDataMC() function.
 _physicalMcAdd = {
-    #"WJets_TuneZ2star_v1_Summer12": "WJets_TuneZ2star_Summer12",
-    #"WJets_TuneZ2star_v2_Summer12": "WJets_TuneZ2star_Summer12",
-
-    #"QCD_Pt170to300_TuneZ2star_Summer12":    "QCD_Pt170to300_TuneZ2star_Summer12",
-    #"QCD_Pt170to300_TuneZ2star_v2_Summer12": "QCD_Pt170to300_TuneZ2star_Summer12",
-
-    #"QCD_Pt300to470_TuneZ2star_Summer12":    "QCD_Pt300to470_TuneZ2star_Summer12",
-    #"QCD_Pt300to470_TuneZ2star_v2_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
-    #"QCD_Pt300to470_TuneZ2star_v3_Summer12": "QCD_Pt300to470_TuneZ2star_Summer12",
+    "TT": "TT",
+    "TT_ext": "TT",
 }
 #for mass in _lightHplusMasses:
     #_physicalMcAdd["TTToHplusBWB_M%d_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
@@ -107,6 +100,9 @@ _physicalToLogical.update({
     "TTJets_FullLept": "TTJets_FullLept",
     "TTJets_SemiLept": "TTJets_SemiLept",
     "TTJets_Hadronic".replace("_", "_ext_"): "TTJets_Hadronic",
+    
+    # powheg ttbar
+    "TT": "TT",
     
     "WJetsToLNu": "WJetsToLNu",
     #"W1Jets": "W1Jets",
@@ -203,6 +199,9 @@ _datasetMerge = {
     #"TTJets_FullLept": "TTJets",
     #"TTJets_SemiLept": "TTJets",
     #"TTJets_Hadronic": "TTJets",
+    
+    "TT": "TT",
+    "TT_ext": "TT",
 
     "WJetsToLNu": "WJets",
     #"W1Jets": "WJets",
@@ -2910,12 +2909,14 @@ class PlotDrawer:
         p.frame.GetYaxis().SetTitle(ylabel)
         xlabsize = self._getValue("xlabelsize", p, kwargs)
         if xlabsize is None:
-            xlabsize = p.histoMgr.getHistos()[0].getRootHisto().GetXaxis().GetLabelSize()
+            if not isinstance(p.histoMgr.getHistos()[0].getRootHisto(), ROOT.TEfficiency):
+                xlabsize = p.histoMgr.getHistos()[0].getRootHisto().GetXaxis().GetLabelSize()
         else:
             p.frame.GetXaxis().SetLabelSize(xlabsize)
         ylabsize = self._getValue("ylabelsize", p, kwargs)
         if ylabsize is None:
-            ylabsize = p.histoMgr.getHistos()[0].getRootHisto().GetYaxis().GetLabelSize()
+            if not isinstance(p.histoMgr.getHistos()[0].getRootHisto(), ROOT.TEfficiency):
+                ylabsize = p.histoMgr.getHistos()[0].getRootHisto().GetYaxis().GetLabelSize()
         else:
             p.frame.GetYaxis().SetLabelSize(ylabsize)
 
