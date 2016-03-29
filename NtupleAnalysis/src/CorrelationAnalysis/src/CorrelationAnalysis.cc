@@ -388,13 +388,6 @@ void CorrelationAnalysis::process(Long64_t entry) {
 //====== Experimental selection code
   // if necessary
 
-  // std::vector<GenParticleGeneratedCollection> topdecay;
-  // fGenTop.getGenTopDecayMode();
-
-  for (size_t i = 0; i <  fGenParticleGeneratedCollection.getGenTopDecayMode().size(); ++i) {
-    // topdecay.push_back(fGenTop.getGenTopDecayMode()[i]); 
-    //     std::cout << "  topdecay " << fGenParticleGeneratedCollection.getGenTopDecayMode()[i]  << std::endl;
-   }
 
   /*
   size_t i = 0;

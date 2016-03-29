@@ -6,6 +6,7 @@
 #include "Framework/interface/HistoWrapper.h"
 #include "Framework/interface/Exception.h"
 #include "Math/GenVector/VectorUtil.h"
+#include "EventSelection/interface/TransverseMass.h"
 //#include "Framework/interface/makeTH.h"
 #include "TLorentzVector.h"
 
@@ -56,8 +57,12 @@ void JetCorrelations::bookHistograms(TDirectory* dir) {
   h3jetPtcut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "3JetsPtCut",  "3JetsPtCut", 200, 0, 600);
   hDrTau3Jets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "DrTau3Jets",  "DrTau3Jets", 200, 0, 5);
   hDPhiTauMetVsPt3jets =  fHistoWrapper.makeTH<TH2F>(HistoLevel::kInformative, subdir, "DPhiTauMetVsPt3jets",  "DPhiTauMetVsPt3jets", 180, 0, 180,200,0,600);
+  htransverseMassNoCut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "transverseMassNoCut",  "transverseMassNoCut", 200, 0, 600);
   htransverseMass3JetCut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "transverseMass3JetCut",  "transverseMass3JetCut", 200, 0, 600);
   htransverseMassTriangleCut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, "transverseMassTriangleCut",  "transverseMassTriangleCut", 200, 0, 600);
+  htransverseMassTriangleCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "transverseMassTriangleCut", "transverseMassTriangleCut", 200, 0., 800);  
+  htransverseMassDeltaR3JetsTauCut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "transverseMassDeltaR3JetsTauCut", "transverseMassDeltaR3JetsTauCut", 200, 0., 800);
+  htransverseMassDeltaRCorrCut =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "transverseMassDeltaRCorrCut", "transverseMassDeltaRCorrCut", 200, 0., 800);
 }  
 
 
@@ -156,7 +161,7 @@ JetCorrelations::Data JetCorrelations::privateAnalyze(const Event& iEvent, const
   hM3Jets->Fill(threeJets.mass());                                                                                                                                                                                                
   //  std::cout << "   threeJets.pt()"<<   threeJets.pt()   << std::endl;                                                                                                                                                          
    
- 
+  double transverseMass = TransverseMass::reconstruct(tauData.getSelectedTau(),metData.getMET() );
   double DeltaPhiTauMET = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(tauData.getSelectedTau().p4(), metData.getMET())*57.29578);
   hDPhiTauMetVsPt3jets->Fill(std::abs(DeltaPhiTauMET),threeJets.pt());
 
@@ -169,9 +174,22 @@ JetCorrelations::Data JetCorrelations::privateAnalyze(const Event& iEvent, const
   
 
  // mt with 3jet and  triangle cut                                                                                                                                                                                               
-  /*
-  if (threeJets.pt()  > ptcut )    htransverseMass3JetCut->Fill(transverseMass);
+  htransverseMassNoCut->Fill(transverseMass);
 
+  if (threeJets.pt()  > ptcut )    htransverseMass3JetCut->Fill(transverseMass);
+  if (!(threeJets.pt()  < ptcut && DeltaPhiTauMET  > 60)) { 
+    htransverseMassTriangleCut->Fill(transverseMass);
+  }
+
+  if ( drTau3Jets < 3 ) {
+    htransverseMassDeltaR3JetsTauCut->Fill(transverseMass);
+    if (DeltaPhiTauMET  > 90) {
+      htransverseMassDeltaRCorrCut->Fill(transverseMass);
+    }
+  }
+
+
+  /*
   if (!(threeJets.pt()  < ptcut && DeltaPhiTauMET  > 60)) {
     htransverseMassTriangleCut->Fill(transverseMass);
   }

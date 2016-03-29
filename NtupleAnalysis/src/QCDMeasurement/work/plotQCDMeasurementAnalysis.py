@@ -27,7 +27,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 
-#from InvertedTauID import *
+from old_InvertedTauID import *
 analysis = "QCDMeasurement"
 
 
@@ -58,9 +58,9 @@ def main(argv):
     datasets = dataset.getDatasetsFromMulticrabDirs(dirs,dataEra=dataEra, searchMode=searchMode, analysisName=analysis)
     #print datasets.getDatasetNames()
 
-    #print datasets
+    print " dirs ",dirs[0]
     # Check multicrab consistency
-    consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="CorrelationAnalysis")
+#    consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="CorrelationAnalysis")
    
   # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
@@ -108,15 +108,15 @@ def main(argv):
     # At the moment the cross sections must be set by hand
     #xsect.setBackgroundCrossSections(datasets)
 
-    """
-    datasets.merge("EWK", [
-        "TTJets",
-        "WJetsHT",
-        "DYJetsToLLHT",
-        "SingleTop",
+
+#    datasets.merge("EWK", [
+#        "TT",
+#        "WJetsHT",
+#        "DYJetsToLLHT",
+#        "SingleTop",
 #            "Diboson"
-        ])
-    """
+#        ])
+
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     style.setOptStat(True)
@@ -138,7 +138,24 @@ def main(argv):
     if drawToScreen:
         raw_input("Hit enter to continue")
 
+        
+try:
+    from QCDNormalizationFactors_AfterStdSelections_Run2015_80to1000 import *
+except ImportError:
+    print
+    print "    WARNING, QCDInvertedNormalizationFactors.py not found!"
+    print "    Run script InvertedTauID_Normalization.py to generate QCDInvertedNormalizationFactors.py"
+    print
 
+
+
+def normalisationInclusive():
+
+    norm_inc = QCDPlusEWKFakeTausNormalization["Inclusive"]
+ #   normEWK_inc = QCDInvertedNormalization["inclusiveEWK"]
+
+    print "inclusive norm", norm_inc
+    return norm_inc
 
 
 
@@ -155,7 +172,173 @@ def dataMCExample(datasets):
 #     )
 
 
-     plots.drawPlot(plots.DataMCPlot(datasets, "QCDPurity/InvertedTauTauPtAfterAllSelections"),"InvertedTauTauPtAfterAllSelections",
+    norm_inc = normalisationInclusive()
+
+    mtBaseline = []
+    mtInverted = []
+    mtBaseline_bbveto = []
+    mtInverted_bbveto = []
+
+######## closure test 
+    inverted = plots.DataMCPlot(datasets,"TransverseMass_inverted_Bveto")
+    inverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone("TransverseMass_inverted_Bveto")
+    
+    inverted_bbveto = plots.DataMCPlot(datasets,"TransverseMass_inverted_BBveto")
+    inverted_bbveto.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    invertedData_bbveto = inverted_bbveto.histoMgr.getHisto("Data").getRootHisto().Clone("TransverseMass_inverted_BBveto")
+#    invertedRe_bbvetoalTau = plots.DataMCPlot(datasets,"TransverseMass_inverted_Bveto_genuineTau")
+#    invertedEWKRealTau = invertedRealTau.histoMgr.getHisto("EWK").getRootHisto().Clone("TransverseMass_inverted_Bveto_genuineTau")
+    baseline = plots.DataMCPlot(datasets,"TransverseMass_baseline_Bveto")
+    baseline.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+
+    baselineData = baseline.histoMgr.getHisto("Data").getRootHisto().Clone("TransverseMass_baseline_Bveto")
+    baselineRealTau = plots.DataMCPlot(datasets,"TransverseMass_baseline_Bveto_genuineTau")
+    baselineRealTau.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10)) 
+    baselineEWKRealTau = baselineRealTau.histoMgr.getHisto("EWK").getRootHisto().Clone("TransverseMass_baseline_Bveto_genuineTau")
+
+    baseline_bbveto = plots.DataMCPlot(datasets,"TransverseMass_baseline_BBveto")
+    baseline_bbveto.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    baselineData_bbveto = baseline_bbveto.histoMgr.getHisto("Data").getRootHisto().Clone("TransverseMass_baseline_BBveto")
+    baselineRealTau_bbveto = plots.DataMCPlot(datasets,"TransverseMass_baseline_BBveto_genuineTau")
+    baselineRealTau_bbveto.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10)) 
+    baselineEWKRealTau_bbveto = baselineRealTau_bbveto.histoMgr.getHisto("EWK").getRootHisto().Clone("TransverseMass_baseline_BBveto_genuineTau")
+
+ 
+    invertedData_bbveto.Scale(norm_inc)
+    invertedData.Scale(norm_inc)
+               
+    dataMinusRealTau = baselineData.Clone()
+    dataMinusRealTau.SetName("dataMinusRealTau")
+    dataMinusRealTau.Add(baselineEWKRealTau,-1)
+    mtInverted.append(invertedData)
+    mtBaseline.append(dataMinusRealTau)
+    
+    dataMinusRealTau_bbveto = baselineData_bbveto.Clone()
+    dataMinusRealTau_bbveto.SetName("dataMinusRealTau")
+    dataMinusRealTau_bbveto.Add(baselineEWKRealTau_bbveto,-1)
+    mtInverted_bbveto.append(invertedData_bbveto)
+    mtBaseline_bbveto.append(dataMinusRealTau_bbveto)
+
+                                                  
+    hmtInverted = mtInverted[0].Clone("InvertedData")
+    hmtInverted.SetName("transverseMass")
+    hmtInverted.SetTitle("Inverted")
+    hmtInverted.Reset()
+    for histo in mtInverted:
+        hmtInverted.Add(histo)
+    print "Integral: after collinear cuts - EWK = ",hmtInverted.Integral()
+
+    hmtBaseline = mtBaseline[0].Clone("BaselineEWK")
+    hmtBaseline.SetName("transverseMass")
+    hmtBaseline.SetTitle("Baseline")
+    hmtBaseline.Reset()
+    for histo in mtBaseline:
+       hmtBaseline.Add(histo)
+    print "Integral Baseline - EWK genuine tau = ",hmtBaseline.Integral()
+
+    hmtInverted_bbveto = mtInverted_bbveto[0].Clone("InvertedData_bbveto")
+    hmtInverted_bbveto.SetName("transverseMass")
+    hmtInverted_bbveto.SetTitle("Inverted_bbveto")
+    hmtInverted_bbveto.Reset()
+    for histo in mtInverted_bbveto:
+        hmtInverted_bbveto.Add(histo)
+    print "Integral: after collinear cuts - EWK = ",hmtInverted_bbveto.Integral()
+
+    hmtBaseline_bbveto = mtBaseline_bbveto[0].Clone("BaselineEWK")
+    hmtBaseline_bbveto.SetName("transverseMass")
+    hmtBaseline_bbveto.SetTitle("Baseline")
+    hmtBaseline_bbveto.Reset()
+    for histo in mtBaseline_bbveto:
+       hmtBaseline_bbveto.Add(histo)
+    print "Integral Baseline - EWK genuine tau = ",hmtBaseline_bbveto.Integral()
+
+    invertedQCD = InvertedTauID()
+    invertedQCD.setLumi(datasets.getDataset("Data").getLuminosity())
+
+
+    # mt inverted-baseline comparison                                                                                                                                                    
+    closureTest_inverted = hmtInverted.Clone("Inverted")
+    closureTest_baseline = hmtBaseline.Clone("Baseline")
+    invertedQCD.setLabel("ClosureTestWithBjetVeto")
+    invertedQCD.mtComparison(closureTest_inverted,closureTest_baseline,"ClosureTestWithBjetVeto")
+
+    closureTest_inverted_bbveto = hmtInverted_bbveto.Clone("Inverted_bbveto")
+    closureTest_baseline_bbveto = hmtBaseline_bbveto.Clone("Baseline_bbveto")
+    invertedQCD.setLabel("ClosureTestWithBBVeto")
+    invertedQCD.mtComparison(closureTest_inverted_bbveto,closureTest_baseline_bbveto,"ClosureTestWithBBVeto")
+##################################################################
+    
+    def mtComparison(self,histo1,histo2,name,norm=1,sysError=0):
+
+	h1 = histo1.Clone("h1")
+	h2 = histo2.Clone("h2")
+
+	if sysError > 0:
+	    h1 = histograms.addSysError(h1,sysError)
+	    #h2 = histograms.addSysError(h2,sysError)
+
+#	if norm == 1:
+#        h1.Scale(1/h1.GetMaximum())
+#        h2.Scale(1/h2.GetMaximum())
+
+	# check that no bin has negative value, negative values possible after subtracting EWK from data  
+        iBin = 1
+        nBins = h1.GetNbinsX()
+        while iBin < nBins:
+	    value1 = h1.GetBinContent(iBin)
+	    value2 = h2.GetBinContent(iBin)
+
+	    #if value1 < 0:
+		#h1.SetBinContent(iBin,0)
+
+            #if value2 < 0:
+             #   h2.SetBinContent(iBin,0)
+            iBin = iBin + 1
+
+        h1.GetYaxis().SetTitle("Events / 20 GeV")
+        h1.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV)")
+
+        plot = plots.ComparisonPlot(
+            histograms.Histo(h1, "Inv"),histograms.Histo(h2, "Base"),
+            )
+           
+          # Set the styles
+
+        st1 = styles.getDataStyle().clone()
+        st2 = st1.clone()
+        st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
+        plot.histoMgr.forHisto("Base", st1)
+        plot.histoMgr.forHisto("Inv", st2)
+
+        # Set the legend labels
+        plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})       
+     # Set the legend styles
+        plot.histoMgr.setHistoLegendStyleAll("P")
+            
+        # Set the drawing styles
+        plot.histoMgr.setHistoDrawStyleAll("EP")
+
+        plot.createFrame("Comparison"+self.label, opts={"ymin":0.0, "xmax": 800},
+                        createRatio=True,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
+                        
+        plot.getPad().SetLogy(False)
+        plot.setLegend(histograms.createLegend(0.55,0.65,0.95,0.8))
+
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+        
+       # histograms.addText(0.6, 0.70, "Before MET cut", 22)
+        histograms.addText(0.6, 0.64, "B-jet veto", 22)
+        histograms.addText(0.6, 0.58, "Back-to-back cuts", 22)
+
+        plot.draw() 
+        plot.save()         
+###############################################################################
+
+        
+    plots.drawPlot(plots.DataMCPlot(datasets, "QCDPurity/InvertedTauTauPtAfterAllSelections"),"InvertedTauTauPtAfterAllSelections",
                     xlabel="Tau p_{T} (GeV/c)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
@@ -163,7 +346,7 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
 
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/jetPtAll"), "jetPtAll",
+    plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/jetPtAll"), "jetPtAll",
                     xlabel="Jet p_{T} (GeV/c)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
@@ -172,21 +355,21 @@ def dataMCExample(datasets):
 
      
   
-     plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/jetEtaAll"), "jetEtaAll",
+    plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/jetEtaAll"), "jetEtaAll",
                     xlabel="Jet #eta", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=False)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsFirstJetPt"), "selectedJetsFirstJetPt",
+    plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsFirstJetPt"), "selectedJetsFirstJetPt",
                     xlabel="First Jet p_{T} (GeV/c)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
 
-     plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsFirstJetEta"), "selectedJetsFirstJetEta",
+    plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsFirstJetEta"), "selectedJetsFirstJetEta",
                     xlabel="First Jet #eta", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
@@ -194,28 +377,28 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
 
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsSecondJetPt"), "selectedJetsSecondJetPt",
+    plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsSecondJetPt"), "selectedJetsSecondJetPt",
                     xlabel="Second Jet p_{T} (GeV/c)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
 
-     plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsSecondJetEta"), "selectedJetsSecondJetEta",
+    plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsSecondJetEta"), "selectedJetsSecondJetEta",
                     xlabel="First Jet #eta", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
 
-     plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsThirdJetPt"), "selectedJetsThirdJetPt",
+    plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsThirdJetPt"), "selectedJetsThirdJetPt",
                     xlabel="Third Jet p_{T} (GeV/c)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
 
-     plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsThirdJetEta"), "selectedJetsThirdJetEta",
+    plots.drawPlot(plots.DataMCPlot(datasets, "jetSelection_InvertedTau/selectedJetsThirdJetEta"), "selectedJetsThirdJetEta",
                     xlabel="Third Jet #eta", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
@@ -223,56 +406,56 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
 
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "eSelection_VetoInvertedTau/electronPtPassed"), "electronPtPassed",
+    plots.drawPlot(plots.DataMCPlot(datasets, "eSelection_VetoInvertedTau/electronPtPassed"), "electronPtPassed",
                     xlabel="Passed electron p_{T} (GeV/c)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "eSelection_VetoInvertedTau/electronEtaPassed"), "electronEtaPassed",
+    plots.drawPlot(plots.DataMCPlot(datasets, "eSelection_VetoInvertedTau/electronEtaPassed"), "electronEtaPassed",
                     xlabel="Passed electron #eta", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 1}, log=False)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "muSelection_VetoInvertedTau/IsolPtBefore"), "IsolPtBefore",
+    plots.drawPlot(plots.DataMCPlot(datasets, "muSelection_VetoInvertedTau/IsolPtBefore"), "IsolPtBefore",
                     xlabel="Muon p_{T} (GeV/c) before isolation", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "muSelection_VetoInvertedTau/IsolEtaBefore"), "IsolEtaBefore",
+    plots.drawPlot(plots.DataMCPlot(datasets, "muSelection_VetoInvertedTau/IsolEtaBefore"), "IsolEtaBefore",
                     xlabel="Muon #eta before isolation", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 1}, log=False)
          
-     plots.drawPlot(plots.DataMCPlot(datasets, "bjetSelection_InvertedTau/selectedBJetsFirstJetPt"), "selectedBJetsFirstJetPt",
+    plots.drawPlot(plots.DataMCPlot(datasets, "bjetSelection_InvertedTau/selectedBJetsFirstJetPt"), "selectedBJetsFirstJetPt",
                     xlabel="selected B Jets First Jet p_{T} (GeV/c)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "bjetSelection_InvertedTau/selectedBJetsSecondJetPt"), "selectedBJetsSecondJetPt",
+    plots.drawPlot(plots.DataMCPlot(datasets, "bjetSelection_InvertedTau/selectedBJetsSecondJetPt"), "selectedBJetsSecondJetPt",
                     xlabel="selected B Jets Second Jet p_{T} (GeV/c)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "bjetSelection_InvertedTau/selectedBJetsFirstJetEta"), "selectedBJetsFirstJetEta",
+    plots.drawPlot(plots.DataMCPlot(datasets, "bjetSelection_InvertedTau/selectedBJetsFirstJetEta"), "selectedBJetsFirstJetEta",
                     xlabel="selected B Jets First Jet #eta", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1, "ymaxfactor": 1}, log=False)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "bjetSelection_InvertedTau/selectedBJetsSecondJetEta"), "selectedBJetsSecondJetEta",
+    plots.drawPlot(plots.DataMCPlot(datasets, "bjetSelection_InvertedTau/selectedBJetsSecondJetEta"), "selectedBJetsSecondJetEta",
                     xlabel="selected B Jets Second Jet #eta", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
@@ -281,13 +464,13 @@ def dataMCExample(datasets):
 
 #####################################################################
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterTau_realTau"), "TauPt_inv_afterTau_realTau",
+    plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterTau_realTau"), "TauPt_inv_afterTau_realTau",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-     """     
+    """     
      inverted = plots.DataMCPlot(datasets,"TauPt_inv_afterTau")
      invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone("TauPt_inv_afterTau")
      invertedRealTau = plots.DataMCPlot(datasets,"TauPt_inv_afterTau_realTau")
@@ -295,50 +478,29 @@ def dataMCExample(datasets):
      dataMinusRealTau = invertedData.Clone()
      dataMinusRealTau.SetName("dataMinusRealTau")
      dataMinusRealTau.Add(invertedEWKRealTau,-1)
-     """
+    """
      
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterTau"), "TauPt_inv_afterTau",
-                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
-                    addMCUncertainty=False, ratio=True, createRatio=True,
-                    addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-     
-     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau"), "Met_inv_afterTau",
-                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
-                    addMCUncertainty=False, ratio=True, createRatio=True,
-                    addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau_realTau"), "Met_inv_afterTau_realTau",
-                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
-                    addMCUncertainty=False, ratio=True, createRatio=True,
-                    addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterJets_realTau"), "TauPt_inv_afterJets_realTau",
-                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
-                    addMCUncertainty=False, ratio=True, createRatio=True,
-                    addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-
-
-     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_baseline_afterTau"), "TauPt_baseline_afterTau",
-                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
-                    addMCUncertainty=False, ratio=True, createRatio=True,
-                    addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_baseline_afterTau_realTau"), "TauPt_baseline_afterTau_realTau",
+    plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterTau"), "TauPt_inv_afterTau",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterJets"), "TauPt_inv_afterJets",
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau"), "Met_inv_afterTau",
+                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau_realTau"), "Met_inv_afterTau_realTau",
+                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+    plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterJets_realTau"), "TauPt_inv_afterJets_realTau",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
@@ -346,13 +508,20 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
 
 
-     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterBtag_realTau"), "TauPt_inv_afterBtag_realTau",
+    plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_baseline_afterTau"), "TauPt_baseline_afterTau",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterBtag"), "TauPt_inv_afterBtag",
+    plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_baseline_afterTau_realTau"), "TauPt_baseline_afterTau_realTau",
+                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+     
+    plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterJets"), "TauPt_inv_afterJets",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
@@ -360,25 +529,39 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
 
 
-     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau_realTau"), "Met_inv_afterTau_realTau",
+    plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterBtag_realTau"), "TauPt_inv_afterBtag_realTau",
+                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+    plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterBtag"), "TauPt_inv_afterBtag",
+                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+
+
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau_realTau"), "Met_inv_afterTau_realTau",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau"), "Met_inv_afterTau",
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau"), "Met_inv_afterTau",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterJets_realTau"), "Met_inv_afterJets_realTau",
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterJets_realTau"), "Met_inv_afterJets_realTau",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterJets"), "Met_inv_afterJets",
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterJets"), "Met_inv_afterJets",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
@@ -386,34 +569,34 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
 
 
-     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterBtag_realTau"), "Met_inv_afterBtag_realTau",
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterBtag_realTau"), "Met_inv_afterBtag_realTau",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterBtag"), "Met_inv_afterBtag",
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterBtag"), "Met_inv_afterBtag",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
   ####################################################################################        
-     plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/MET/METInclusive"), "METInclusive_ForDataDrivenCrlPlots",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/MET/METInclusive"), "METInclusive_ForDataDrivenCrlPlots",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
          
-     plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/MET_AfterAllSelections/MET_AfterAllSelectionsInclusive"), "MET_AfterAllSelectionsInclusive_ForDataDrivenCrlPlots",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/MET_AfterAllSelections/MET_AfterAllSelectionsInclusive"), "MET_AfterAllSelectionsInclusive_ForDataDrivenCrlPlots",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
          
-     plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/shapeTransverseMass/shapeTransverseMassInclusive"), "shapeTransverseMassInclusive",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/shapeTransverseMass/shapeTransverseMassInclusive"), "shapeTransverseMassInclusive",
                     xlabel="m_{T} (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
@@ -422,56 +605,56 @@ def dataMCExample(datasets):
      
   
          
-     plots.drawPlot(plots.DataMCPlot(datasets, "metSelection_InvertedTau/Met"), "MetInvertedTau",
+    plots.drawPlot(plots.DataMCPlot(datasets, "metSelection_InvertedTau/Met"), "MetInvertedTau",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)   
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "MetInvertedTauAfterStdSelectionsInclusive",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "MetInvertedTauAfterStdSelectionsInclusive",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=15, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelectionsInclusive",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelectionsInclusive",
                     xlabel="m_{T} (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalizationEWKFakeTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "MetInvertedTauAfterStdSelectionsInclusiveFakeTaus",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalizationEWKFakeTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "MetInvertedTauAfterStdSelectionsInclusiveFakeTaus",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=4, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalizationEWKFakeTaus/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelectionsInclusiveFakeTaus",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalizationEWKFakeTaus/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelectionsInclusiveFakeTaus",
                     xlabel="m_{T} (GeV)", ylabel="Number of events",
                     rebin=4, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelections",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelections",
                     xlabel="m_{T} (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
 
-     plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalizationEWKGenuineTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "MetInvertedTauAfterStdSelectionsInclusiveGenuineTaus",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalizationEWKGenuineTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "MetInvertedTauAfterStdSelectionsInclusiveGenuineTaus",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=4, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
      
-     plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalizationEWKGenuineTaus/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelectionsInclusiveGenuineTaus",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalizationEWKGenuineTaus/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelectionsInclusiveGenuineTaus",
                     xlabel="m_{T} (GeV)", ylabel="Number of events",
                     rebin=4, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,

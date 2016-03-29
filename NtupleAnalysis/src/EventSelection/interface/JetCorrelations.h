@@ -90,9 +90,11 @@ private:
   WrappedTH1 *hM3Jets; 
   WrappedTH1 *h3jetPtcut; 
   WrappedTH1 *hDrTau3Jets;
+  WrappedTH1 *htransverseMassNoCut;
   WrappedTH1 *htransverseMass3JetCut;
   WrappedTH1 *htransverseMassTriangleCut;
-
+  WrappedTH1 *htransverseMassDeltaR3JetsTauCut;
+  WrappedTH1 *htransverseMassDeltaRCorrCut;
 };
 
 #endif

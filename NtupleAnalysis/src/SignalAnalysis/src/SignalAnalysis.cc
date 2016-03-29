@@ -215,7 +215,7 @@ void SignalAnalysis::process(Long64_t entry) {
     return;
   //  std::cout << "   Correlations "  << std::endl;       
 
-  //  const JetCorrelations::Data jetCorrelationsData = fJetCorrelations.analyze(fEvent, jetData,tauData, METData);  
+  const JetCorrelations::Data jetCorrelationsData = fJetCorrelations.analyze(fEvent, jetData,tauData, METData);  
 
 //====== Back-to-back angular cuts
   const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(fEvent, tauData.getSelectedTau(), jetData, METData);
@@ -229,7 +229,7 @@ void SignalAnalysis::process(Long64_t entry) {
   
 
 //====== Experimental selection code
-  const JetCorrelations::Data jetCorrelationsData = fJetCorrelations.analyze(fEvent, jetData,tauData, METData);
+  // const JetCorrelations::Data jetCorrelationsData = fJetCorrelations.analyze(fEvent, jetData,tauData, METData);
 
 
   // if necessary

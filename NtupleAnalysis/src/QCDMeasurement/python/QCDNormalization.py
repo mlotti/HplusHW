@@ -671,7 +671,7 @@ class QCDNormalizationManagerBase:
                 g.SetPoint(i, i+0.5, valueDict[binList[i]])
                 g.SetPointEYhigh(i, upDict[binList[i]])
                 g.SetPointEYlow(i, downDict[binList[i]])
-            g.SetMarkerSize(1.4)
+            g.SetMarkerSize(1.6)
             g.SetMarkerStyle(markerStyle)
             g.SetLineColor(color)
             g.SetLineWidth(2)
@@ -693,8 +693,8 @@ class QCDNormalizationManagerBase:
         if "Inclusive" in keys:
             keyList.append("Inclusive")
         # Create graphs
-        gQCD = makeGraph(24, ROOT.kBlue, keyList, self._qcdNormalization, self._qcdNormalizationError, self._qcdNormalizationError)
-        gFake = makeGraph(27, ROOT.kRed, keyList, self._ewkFakesNormalization, self._ewkFakesNormalizationError, self._ewkFakesNormalizationError)
+        gQCD = makeGraph(24, ROOT.kRed, keyList, self._qcdNormalization, self._qcdNormalizationError, self._qcdNormalizationError)
+        gFake = makeGraph(27, ROOT.kBlue, keyList, self._ewkFakesNormalization, self._ewkFakesNormalizationError, self._ewkFakesNormalizationError)
         upError = {}
         downError = {}
         for k in keys:
@@ -705,7 +705,7 @@ class QCDNormalizationManagerBase:
         hFrame = ROOT.TH1F("frame","frame",len(keyList),0,len(keyList))
         for i in range(len(keyList)):
             hFrame.GetXaxis().SetBinLabel(i+1, keyList[i].replace("lt","<").replace("eq","=").replace("to","-").replace("gt",">"))
-        hFrame.SetMinimum(0.01)
+        hFrame.SetMinimum(0.05)
         hFrame.SetMaximum(0.5)
         hFrame.GetYaxis().SetTitle("Normalization coefficient")
         hFrame.GetXaxis().SetLabelSize(20)
@@ -716,7 +716,9 @@ class QCDNormalizationManagerBase:
         gFake.Draw("p same")
         gCombined.Draw("p same")
         histograms.addStandardTexts(cmsTextPosition="outframe")
-        l = ROOT.TLegend(0.2,0.7,0.5,0.9)
+        #l = ROOT.TLegend(0.2,0.7,0.5,0.9) #original
+        l = ROOT.TLegend(0.3,0.3,0.6,0.5)
+       
         l.SetFillStyle(-1)
         l.SetBorderSize(0)
         l.AddEntry(gQCD, "Multijets", "p")

@@ -104,9 +104,9 @@ def main():
     plots.mergeRenameReorderForDataMC(datasets)
 
     datasets.merge("EWK", [
-                    "TTJets",
+                    "TT",
                     "WJetsHT",
-                    "DYJetsToLL",
+                    "DYJetsToLLHT",
                     "SingleTop",
                 #    "Diboson"
                     ])
@@ -138,7 +138,7 @@ def main():
             legends["Purity%s"%i] = "BackToBack cuts" 
 
    # plot.createFrame("purity_QCD_only", opts={"xmin": 40, "xmax": 160, "ymin": 0., "ymax": 1.05})
-    plot.createFrame("purity_QCD_only", opts={"xmin": 40, "xmax": 200, "ymin": 0., "ymax":1})
+    plot.createFrame("purity_QCD_only", opts={"xmin": 40, "xmax": 400, "ymin": 0., "ymax":1})
     plot.frame.GetXaxis().SetTitle("p_{T}^{#tau jet} (GeV/c)")
     plot.frame.GetYaxis().SetTitle("QCD purity")
 #    plot.setEnergy(datasets.getEnergies())
@@ -169,7 +169,7 @@ def main():
             
 def purityGraph(i,datasets,histo):
     inverted = plots.DataMCPlot(datasets, histo)
-    inverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
+    inverted.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))
 #    inverted.histoMgr.forEachHisto(lambda h: h.setRootHisto(h.getRootHisto().Rebin(len(binning)-1,h.getRootHisto().GetName(),array.array('d',binning))))
     
     invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone(histo)

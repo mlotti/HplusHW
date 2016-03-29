@@ -85,7 +85,10 @@ def main(argv):
 #    datasets.remove(filter(lambda name: "WJetsToLNu" in name, datasets.getAllDatasetNames()))
 #    datasets.remove(filter(lambda name: "DYJetsToLL" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: ("DYJetsToLL_M_10to50" in name or "DYJetsToLL_M_50" in name) and not "DYJetsToLL_M_50_HT" in name, datasets.getAllDatasetNames()))
-    datasets.remove(filter(lambda name: "WJetsToLNu" in name and not "WJetsToLNu_HT" in name, datasets.getAllDatasetNames()))      
+    datasets.remove(filter(lambda name: "WJetsToLNu" in name and not "WJetsToLNu_HT" in name, datasets.getAllDatasetNames()))
+
+
+     
     # Default merging nad ordering of data and MC datasets
     # All data datasets to "Data"
     # All QCD datasets to "QCD"
@@ -110,9 +113,9 @@ def main(argv):
     #xsect.setBackgroundCrossSections(datasets)
     if False:
         datasets.merge("EWK", [
-            "TTJets",
+            "TT",
             "WJetsHT",
-            "DYJetsToLL",
+            "DYJetsToLLHT",
             "SingleTop",
             "Diboson"
             ])
@@ -254,9 +257,9 @@ def dataMCExample(datasets):
 
 
 def getHistos(datasets,name1, name2, name3):
-     drh1 = datasets.getDataset("TTJets").getDatasetRootHisto(name1)
-     drh2 = datasets.getDataset("TTJets").getDatasetRootHisto(name2)
-     drh3 = datasets.getDataset("TTJets").getDatasetRootHisto(name3)
+     drh1 = datasets.getDataset("TT").getDatasetRootHisto(name1)
+     drh2 = datasets.getDataset("TT").getDatasetRootHisto(name2)
+     drh3 = datasets.getDataset("TT").getDatasetRootHisto(name3)
      drh1.setName("transverseMass")
      drh2.setName("transverseMassTriangleCut")
      drh3.setName("transverseMass3JetCut")

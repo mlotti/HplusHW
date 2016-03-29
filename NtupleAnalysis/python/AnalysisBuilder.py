@@ -18,7 +18,7 @@ class AnalysisConfig:
         for key in keys:
 	    value = kwargs[key]
 	    if key == "systematics":
-                self._config.histogramAmbientLevel = "Systematics"
+                self._config.histogramAmbientLevel = "Sstematics"
                 # Energy scales
 		if value.startswith("tauES"):
 		    self._config.TauSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up").replace("tauES","TES")

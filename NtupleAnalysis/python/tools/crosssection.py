@@ -42,7 +42,7 @@ class CrossSectionList:
 # [1] PREP
 # [2] https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingSummer2011
 # [3] from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
-# [4] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
+# [3] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
 # [5] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopMC2011
 # [6] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma
 # [7] https://twiki.cern.ch/twiki/bin/view/CMS/HiggsToTauTauWorkingHCP2012#53X_MC_Samples
