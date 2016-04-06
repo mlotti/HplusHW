@@ -28,7 +28,7 @@ allSelections.CommonPlots.histogramSplitting = [
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 #setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
 #===== End of selection customisations
-allSelections.TauSelection.prongs = 1
+allSelections.TauSelection.prongs = 3
 allSelections.METSelection.METCutValue = 100.0
 allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
@@ -47,7 +47,7 @@ builder = AnalysisBuilder("QCDMeasurement",
                           searchModes,
                           #### Options ####
                           usePUreweighting=True,
-                          doSystematicVariations=True,
+                          doSystematicVariations=False,
                           )
 #builder.addVariation("METSelection.METCutValue", [100,120,140])
 #builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])

@@ -21,7 +21,7 @@ allSelections.CommonPlots.histogramSplitting = [
     #PSet(label="tauPt", binLowEdges=[60.0, 70.0, 80.0, 100.0], useAbsoluteValues=False),
   ]
 #===== Selection customisations
-allSelections.TauSelection.prongs = 1
+allSelections.TauSelection.prongs = 3
 allSelections.METSelection.METCutValue = 100.0
 allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
