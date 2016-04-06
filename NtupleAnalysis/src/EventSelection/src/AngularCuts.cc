@@ -49,8 +49,8 @@ AngularCutsBase::AngularCutsBase(const ParameterSet& config, EventCounter& event
   bEnableOptimizationPlots(config.getParameter<bool>("enableOptimizationPlots")),
   sPrefix(prefix),
   fType(type),
-  cPassedAngularCuts(fEventCounter.addCounter("passed angular cuts / "+prefix+" ("+postfix+")")),
-  cSubAllEvents(fEventCounter.addSubCounter("angular cuts / "+prefix+" ("+postfix+")", "All events"))
+  cPassedAngularCuts(fEventCounter.addCounter("passed angular cuts "+prefix+" ("+postfix+")")),
+  cSubAllEvents(fEventCounter.addSubCounter("angular cuts "+prefix+" ("+postfix+")", "All events"))
 {
   initialize(config, postfix);
 }
@@ -96,7 +96,7 @@ void AngularCutsBase::initialize(const ParameterSet& config, const std::string& 
   for (size_t i = 0; i < nMaxJets; ++i) {
     s.str("");
     s << "Passed cut on jet " << i+1;
-    cSubPassedCuts.push_back(fEventCounter.addSubCounter("angular cuts / "+sPrefix+" ("+postfix+")", s.str()));
+    cSubPassedCuts.push_back(fEventCounter.addSubCounter("angular cuts "+sPrefix+" ("+postfix+")", s.str()));
   }
 }
 
