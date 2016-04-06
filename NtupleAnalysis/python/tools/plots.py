@@ -156,6 +156,9 @@ _physicalToLogical.update({
     "WW": "WW",
     "WZ": "WZ",
     "ZZ": "ZZ",
+
+    #"ChargedHiggs_HplusTB_HplusToTauNu_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
+    #"ChargedHiggs_HplusTB_HplusToTauB_M_200": "ChargedHiggs_HplusTB_HplusToTauB_M_200",
 })
 
 ## Map the datasets to be merged to the name of the merged dataset.
@@ -226,6 +229,9 @@ _datasetMerge = {
     "WW": "Diboson",
     "WZ": "Diboson",
     "ZZ": "Diboson",
+
+    #"ChargedHiggs_HplusTB_HplusToTauNu_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
+    #"ChargedHiggs_HplusTB_HplusToTauB_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
 }
 
 ## Default ordering of datasets
@@ -318,6 +324,8 @@ _legendLabels = {
     "MCStatError": "Sim. stat. unc.",
     "MCSystError": "Sim. syst. unc.",
     "MCStatSystError": "Sim. stat.#oplussyst. unc.",
+
+    #"ChargedHiggs_HplusTB_HplusToTauNu_M_200": "HplusTauNuPlusTB_M200"
 }
 for mass in _lightHplusMasses:
     _legendLabels["TTToHplusBWB_M%d"%mass] = "H^{+}W^{-} m_{H^{#pm}}=%d GeV"%mass
@@ -334,6 +342,8 @@ for mass in _heavyHplusMasses:
     _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 for mass in _heavyHplusToTBbarMasses:
     _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d GeV" % mass
+    
+
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {

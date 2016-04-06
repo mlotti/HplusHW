@@ -393,6 +393,7 @@ class QCDNormalizationTemplate:
         h.Scale(self._normalizationFactor)
         plot.histoMgr.appendHisto(histograms.Histo(h,self._histo.GetName()))
         plot.createFrame(self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.1, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
+        #plot.createFrame(self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.001, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
         histograms.addStandardTexts(cmsTextPosition="outframe")
         histograms.addText(0.36,0.89, "Integral = %d events"%int(self._histo.Integral()*self._normalizationFactor+0.5))
         histograms.addText(0.36,0.84, self._name)
@@ -704,9 +705,15 @@ class QCDNormalizationManagerBase:
         # Make plot
         hFrame = ROOT.TH1F("frame","frame",len(keyList),0,len(keyList))
         for i in range(len(keyList)):
+
             hFrame.GetXaxis().SetBinLabel(i+1, keyList[i].replace("lt","<").replace("eq","=").replace("to","-").replace("gt",">"))
-        hFrame.SetMinimum(0.05)
-        hFrame.SetMaximum(0.5)
+## for 3-prongs
+        hFrame.SetMinimum(0.0005)
+        hFrame.SetMaximum(0.01)
+ ## original
+       # hFrame.SetMinimum(0.05)
+       # hFrame.SetMaximum(0.5)
+                        
         hFrame.GetYaxis().SetTitle("Normalization coefficient")
         hFrame.GetXaxis().SetLabelSize(20)
         c = ROOT.TCanvas()
