@@ -157,11 +157,13 @@ def main():
     for dsetExt in dsetExtensions:
         print "Merging dataset %s ..."%dsetExt
         # Create directory for output dataset
-        outDsetName = "QCDMeasurement%s"%dsetExt
+#        outDsetName = "QCDMeasurement%s"%dsetExt
+        outDsetName = dsetExt
         outPath = os.path.join(outDirName, outDsetName, "res")
         os.mkdir(os.path.join(outDirName, outDsetName))
         os.mkdir(outPath)
         # Create output file
+        #print "    out:",os.path.join(outPath, "histograms-%s.root"%outDsetName)
         outFile = ROOT.TFile.Open(os.path.join(outPath, "histograms-%s.root"%outDsetName), "recreate")
         if outFile == None:
             raise Exception("Error creating output file for dataset '%s'!"%outDsetName)
@@ -170,7 +172,12 @@ def main():
         for n in sys.argv[1:]:
 #            inname = n.replace("pseudoMulticrab_","")+dsetExt
             inname = dsetExt
+
+#            if "pseudoMulticrab_" in n:
+#                inname = n.replace("pseudoMulticrab_","")+dsetExt
+
             fname = os.path.join(n, inname, "res", "histograms-%s.root"%(inname))
+            #print "     in:",fname
             if not os.path.exists(fname):
                 raise Exception("Error: Cannot find file '%s'!"%fname)
             fINs.append(ROOT.TFile.Open(fname))
