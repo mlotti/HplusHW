@@ -168,7 +168,8 @@ def main():
         # Open input root files
         fINs = []
         for n in sys.argv[1:]:
-            inname = n.replace("pseudoMulticrab_","")+dsetExt
+#            inname = n.replace("pseudoMulticrab_","")+dsetExt
+            inname = dsetExt
             fname = os.path.join(n, inname, "res", "histograms-%s.root"%(inname))
             if not os.path.exists(fname):
                 raise Exception("Error: Cannot find file '%s'!"%fname)
