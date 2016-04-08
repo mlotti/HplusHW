@@ -33,7 +33,7 @@ allSelections.AngularCutsCollinear.cutValueJet3 = 80.0
 allSelections.AngularCutsCollinear.cutValueJet4 = 80.0
 
 #allSelections.TauSelection.rtau = 0.0
-allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
+#allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
 #allSelections.BJetSelection.numberOfBJetsCutValue = 0
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 #setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")

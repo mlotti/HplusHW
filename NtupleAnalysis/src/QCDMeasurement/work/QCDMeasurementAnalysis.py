@@ -35,7 +35,7 @@ allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet4 = 40.0
 
-allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
+#allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
 #allSelections.BJetSelection.numberOfBJetsCutValue = 2
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "==" # options: ==, !=, <, <=, >, >=            
 applyAnalysisCommandLineOptions(sys.argv, allSelections)

@@ -40,8 +40,9 @@ tauSelection = PSet(
                   rtau = 0.0,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronTightMVA5",
       againstMuonDiscr = "againstMuonTight3",
-        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
-  
+        isolationDiscr = "byMediumIsolationMVA3newDMwLT",
+        #isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+          
 )
 # tau misidentification scale factors
 scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
