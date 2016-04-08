@@ -149,7 +149,8 @@ def main():
     if f == None:
         raise Exception("Error: Cannot write '%s'!"%os.path.join(outDirName,"multicrab.cfg"))
     for dsetExt in dsetExtensions:
-        f.write("[QCDMeasurement%s]\n"%dsetExt)
+#        f.write("[QCDMeasurement%s]\n"%dsetExt)
+        f.write("[%s]\n"%dsetExt)
     f.close()
     print "Created multicrab.cfg"
 
