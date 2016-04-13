@@ -24,6 +24,7 @@ allSelections.CommonPlots.histogramSplitting = [
   ]
 #===== Selection customisations
 #allSelections.TauSelection.rtau = 0.7
+allSelections.TauSelection.isolationDiscr = "byVTightIsolationMVA3newDMwLT" ## default = byMediumIsolationMVA3newDMwLT
 #allSelections.BJetSelection.numberOfBJetsCutValue = 0
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 #setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
@@ -47,7 +48,7 @@ builder = AnalysisBuilder("QCDMeasurement",
                           searchModes,
                           #### Options ####
                           usePUreweighting=True,
-                          doSystematicVariations=False,
+                          doSystematicVariations=True,
                           )
 #builder.addVariation("METSelection.METCutValue", [100,120,140])
 #builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])

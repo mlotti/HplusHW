@@ -22,6 +22,7 @@ allSelections.CommonPlots.histogramSplitting = [
   ]
 #===== Selection customisations
 allSelections.TauSelection.prongs = 1
+allSelections.TauSelection.isolationDiscr = "byMediumIsolationMVA3newDMwLT" ## default = byMediumIsolationMVA3newDMwLT   
 allSelections.METSelection.METCutValue = 100.0
 allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
@@ -32,7 +33,7 @@ allSelections.AngularCutsCollinear.cutValueJet2 = 80.0
 allSelections.AngularCutsCollinear.cutValueJet3 = 80.0
 allSelections.AngularCutsCollinear.cutValueJet4 = 80.0
 
-#allSelections.TauSelection.rtau = 0.0
+allSelections.TauSelection.rtau = 0.7
 #allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
 #allSelections.BJetSelection.numberOfBJetsCutValue = 0
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="

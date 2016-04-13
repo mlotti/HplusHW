@@ -159,7 +159,9 @@ The not so short details of the above points:
     this value. Separate levels can be set for signal samples and background samples. The value is
     essentially a number describing how many pb one generated MC event corresponds to.
 - To perform the fits, go inside the datacard directory and run there:
+
     ./dcardTailFitter.py -x dcardTailFitSettings.py
+
 - There are some further command line parameters:
   * -r   Does tail fit recursively to all subdirectories
   * --noFitUncert      No fit uncertainty
