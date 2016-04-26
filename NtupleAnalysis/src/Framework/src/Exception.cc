@@ -12,7 +12,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #ifndef HOST_LXPLUS
-//#include <sys/prctl.h>
 #include "Framework/interface/woTracer.h"
 #else
 #include "Framework/interface/wTracer.h"
