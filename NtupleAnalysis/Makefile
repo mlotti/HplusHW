@@ -165,7 +165,7 @@ $(1)/%.o: $(2)/%.cc
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$$$//' \
 	      -e '/^$$$$/ d' -e 's/$$$$/ :/' -e 's/ *//' < $(1)/$$*.d.tmp >> $(1)/$$*.d; \
 	  rm $(1)/$$*.d.tmp
-#	@cp $(OBJDIR)/Framework/src/*.pcm $(LIBDIR)/.	
+
 endef
 $(eval $(call BUILD_template,$(OBJDIR),$(SRCDIR)))
 $(eval $(call BUILD_template,$(OBJDIR)/test,$(TESTDIR)))
