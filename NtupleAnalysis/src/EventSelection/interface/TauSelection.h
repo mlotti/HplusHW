@@ -105,7 +105,8 @@ private:
   /// The actual selection
   Data privateAnalyze(const Event& iEvent);
   bool passTrgMatching(const Tau& tau, std::vector<math::LorentzVectorT<double>>& trgTaus) const;
-  bool passDecayModeFinding(const Tau& tau) const { return tau.decayModeFinding(); }
+  // !!!!!!!!!!!!!!!!!!!!!!!!!! bool passDecayModeFinding(const Tau& tau) const { return tau.decayModeFinding(); }
+  bool passDecayModeFinding(const Tau& tau) const { return tau.decayModeFindingNewDMs(); }
   bool passGenericDiscriminators(const Tau& tau) const { return tau.configurableDiscriminators(); }
   bool passPtCut(const Tau& tau) const { return tau.pt() > fTauPtCut; }
   bool passEtaCut(const Tau& tau) const { return std::abs(tau.eta()) < fTauEtaCut; }

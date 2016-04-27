@@ -124,7 +124,7 @@ def main(argv):
 
     dataMCExample(datasets)
 #    MtComparison(datasets)
-#    MtComparisonBaseline(datasets)
+    MetComparisonBaselineVsInverted(datasets)
 #    MetComparison(datasets)
 #    TauPtComparison(datasets)
 
@@ -425,14 +425,37 @@ def dataMCExample(datasets):
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
-         
+    
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/BackToBackAngularCutsMinimum_AfterAllSelections/BackToBackAngularCutsMinimum_AfterAllSelectionsInclusive"), "BackToBackAngularCutsMinimum_AfterAllSelectionsInclusive",
+                    xlabel="MET (GeV)", ylabel="Number of events",
+                    rebin=2, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 200, "ymaxfactor": 10}, log=True)
+    
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/BackToBackAngularCutsMinimum/BackToBackAngularCutsMinimumInclusive"), "BackToBackAngularCutsMinimumInclusive",
+                    xlabel="MET (GeV)", ylabel="Number of events",
+                    rebin=2, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 200, "ymaxfactor": 10}, log=True)
+
+                 
     plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/MET_AfterAllSelections/MET_AfterAllSelectionsInclusive"), "MET_AfterAllSelectionsInclusive_ForDataDrivenCrlPlots",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=2, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
-         
+    
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/NBjets/NBjetsInclusive"), "NBjetsInclusive",
+                    xlabel="N_{B jets}", ylabel="Number of events",
+                    rebin=1, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 10, "ymaxfactor": 10}, log=True)
+
+             
     plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/shapeTransverseMass/shapeTransverseMassInclusive"), "shapeTransverseMassInclusive",
                     xlabel="m_{T} (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
@@ -542,6 +565,35 @@ def MtComparison(datasets):
           
 #    rtauGen(mt, "MetComparison", rebin=1, ratio=True, defaultStyles=False)
 
+
+
+def MetComparisonBaselineVsInverted(datasets):
+    mt = plots.PlotBase(getHistos2(datasets,"ForQCDNormalization/NormalizationMETBaselineTauAfterStdSelections/NormalizationMETBaselineTauAfterStdSelectionsInclusive", "ForQCDNormalizationEWKFakeTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"))
+#    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mt._setLegendStyles()
+    st1 = styles.StyleCompound([styles.styles[2]])
+    st2 = styles.StyleCompound([styles.styles[1]])
+    #st3 = styles.StyleCompound([styles.styles[3]])
+    st1.append(styles.StyleLine(lineWidth=3))
+    st2.append(styles.StyleLine(lineStyle=3, lineWidth=3))
+   # st2.append(styles.StyleLine(lineStyle=3, lineWidth=3))
+    mt.histoMgr.forHisto("ForQCDNormalization/NormalizationMETBaselineTauAfterStdSelections/NormalizationMETBaselineTauAfterStdSelectionsInclusive", st1)
+    mt.histoMgr.forHisto("ForQCDNormalizationEWKFakeTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive", st2)
+ 
+    mt.histoMgr.setHistoLegendLabelMany({
+            "NormalizationMETBaselineTauAfterStdSelectionsInclusive": "Baseline",
+            "NormalizationMETInvertedTauAfterStdSelectionsInclusive": "Inverted",
+             })
+#    mt.histoMgr.setHistoDrawStyleAll("P")
+
+    mt.appendPlotObject(histograms.PlotText(50, 1, "1-prong Taus", size=20))
+    xlabel = "E_{T}^{miss} (GeV)"
+    ylabel = "Events / %.2f"
+    plots.drawPlot(mt, "MetComparisonBaselineVsInverted", xlabel=xlabel, ylabel=ylabel, rebinX=1, log=True,
+                   createLegend={"x1": 0.4, "y1": 0.75, "x2": 0.8, "y2": 0.9},
+                   ratio=False, opts2={"ymin": 0.5, "ymax": 1.5})
+
+
 def MtComparisonBaseline(datasets):
     mt = plots.PlotBase(getHistos(datasets,"ForQCDNormalization/NormalizationMETBaselineTauAfterStdSelections/NormalizationMETBaselineTauAfterStdSelectionsInclusive", "ForQCDNormalizationEWKFakeTaus/NormalizationMETBaselineTauAfterStdSelections/NormalizationMETBaselineTauAfterStdSelectionsInclusive", "ForQCDNormalizationEWKGenuineTaus/NormalizationMETBaselineTauAfterStdSelections/NormalizationMETBaselineTauAfterStdSelectionsInclusive"))
 #    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
@@ -569,16 +621,20 @@ def MtComparisonBaseline(datasets):
     plots.drawPlot(mt, "MtComparisonBaseline", xlabel=xlabel, ylabel=ylabel, rebinX=1, log=True,
                    createLegend={"x1": 0.4, "y1": 0.75, "x2": 0.8, "y2": 0.9},
                    ratio=False, opts2={"ymin": 0.5, "ymax": 1.5})
-          
+
+
+
+
+             
 #    rtauGen(mt, "MetComparison", rebin=1, ratio=True, defaultStyles=False)
 
 def getHistos2(datasets,name1, name2):
-     drh1 = datasets.getDataset("TTJets").getDatasetRootHisto("Met")
+     drh1 = datasets.getDataset("Data").getDatasetRootHisto(name1)
      #drh2 = datasets.getDataset("TT_pythia8").getDatasetRootHisto("Met")
-     drh2 = datasets.getDataset("TTJets").getDatasetRootHisto("Met")
+     drh2 = datasets.getDataset("Data").getDatasetRootHisto(name2)
 
-     drh1.setName("Met_madgraph")
-     drh2.setName("Met_pythia8")
+     drh1.setName("Baseline")
+     drh2.setName("Inverted")
      return [drh1, drh2]
 
 #mt = plots.PlotBase(getHistos("MetNoJetInHole", "MetJetInHole"))                                                                                                                                                                                                      
