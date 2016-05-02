@@ -207,7 +207,7 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           saveHelicityInformation(visibleTau, offspring, ic);
           // tau ancestry information
           std::vector<const reco::Candidate*> ancestry = GenParticleTools::findAncestry(handle, p);
-          int tauOriginCode = kTauOriginUnknown;
+          int tauOriginCode = kOriginUnknown;
           for (auto& p: ancestry) {
             int absPid = std::abs(p->pdgId());
             if (absPid == kFromZ || absPid == kFromW) {
@@ -217,7 +217,7 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
               tauAssociatedWithHpm[ic] = tauIndex;
             }
           }
-          if (tauOriginCode == kTauOriginUnknown && ancestry.size() > 0) {
+          if (tauOriginCode == kOriginUnknown && ancestry.size() > 0) {
             tauOriginCode = kFromOtherSource;
           }
           tauMother[ic].push_back(tauOriginCode);

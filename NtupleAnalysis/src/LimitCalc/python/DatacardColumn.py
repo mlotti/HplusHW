@@ -343,7 +343,7 @@ class DatacardColumn():
         myShapeUncertDict = rhwu.getShapeUncertainties()
         # Check that asked variation exists
         if not systVariationName in myShapeUncertDict.keys():
-            raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content!"%(self.getLabel(),systVariationName))
+            raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': Cannot find systematics variation %s, check that options in the datacard match to multicrab content (to run without shape systematics, set OptionIncludeSystematics to False)!"%(self.getLabel(),systVariationName))
         # Get histograms
         (hSystUp, hSystDown) = myShapeUncertDict[systVariationName]
         myNamePrefix = self.getLabel()+"_"+masterExtractorId
@@ -392,11 +392,13 @@ class DatacardColumn():
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
             if myDatasetRootHisto.isMC():
                 # Set signal xsection
-                if (config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")) or self._label[:2] == "Hp":
-                     # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
-                     #myDatasetRootHisto.Delete()
-                     dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
-                     myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
+                if config.OptionLimitOnSigmaBr:
+                    if self._landsProcess <= 0:
+                        # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
+                        #myDatasetRootHisto.Delete()
+                        dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
+                        myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
+                        print "..... Assuming this is signal -> set cross section to 1 pb for limit calculation"
                 # Fix a bug in signal xsection
                 #elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
                      #if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 245.8) > 0.0001:
@@ -602,7 +604,7 @@ class DatacardColumn():
                                             if not isinstance(h.getRootHisto(),ROOT.TH2):
                                                 e.extractHistograms(self, dsetMgr, mainCounterTable, luminosity, self._additionalNormalisationFactor, rootHistoWithUncertainties=h)
                         # Scale if asked
-                        if not (config.OptionLimitOnSigmaBr and self._label[:2] == "HW") or self._label[:2] == "Hp":
+                        if self._landsProcess > 0 and config.OptionLimitOnSigmaBr:
                             h.Scale(self._additionalNormalisationFactor)
                         # Store RootHistogramWithUncertainties
                         myDictionary = {}
@@ -638,7 +640,7 @@ class DatacardColumn():
                     print ShellStyles.WarningLabel()+"Rate value is zero or below min.stat.uncert. in bin %d for column '%s' (it was %f)! Compensating up stat uncertainty to %f!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k), config.MinimumStatUncertainty)
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)                   
                 if self._rateResult._histograms[0].GetBinContent(k) < -0.001:
-                    print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
+                    #print ShellStyles.WarningLabel()+"Rate value is negative in bin %d for column '%s' (it was %f)! This could have large effects to systematics, please fix!"%(k, self.getLabel(), self._rateResult._histograms[0].GetBinContent(k))
                     self._rateResult._histograms[0].SetBinContent(k, 0.0)
                     #FIXME: if one adjusts the bin content, one needs to adjust accordingly the nuisances !!!
                     self._rateResult._histograms[0].SetBinError(k, config.MinimumStatUncertainty)

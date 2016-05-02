@@ -11,7 +11,11 @@
 #include <cstring>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <sys/prctl.h> 
+#ifndef HOST_LXPLUS
+#include "Framework/interface/woTracer.h"
+#else
+#include "Framework/interface/wTracer.h"
+#endif
 
 #include "TSystem.h"
 
@@ -43,10 +47,10 @@ namespace hplus {
       return;
     // Use gdb to obtain backtrace
     int pid = getpid();
-#ifndef HOST_LXPLUS
-    // Do not apply on lxplus
-    prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0); // needed to disable temporarily ptracer
-#endif
+// #ifndef HOST_LXPLUS
+//     // Do not apply on lxplus
+//     prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0); // needed to disable temporarily ptracer
+// #endif
     int child_pid = fork(); // needed to disable temporarily ptracer
     if (!child_pid) {           
       std::stringstream cmd;

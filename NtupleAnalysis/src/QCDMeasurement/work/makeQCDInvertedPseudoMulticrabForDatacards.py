@@ -20,7 +20,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.pseudoMultiCrabCreator as pseudoMultiC
 _generalOptions = {
     "analysisName": "QCDMeasurement",
     "ewkDatasetsForMerging": ["TT","WJetsHT","DYJetsToLLHT","SingleTop"], #,"Diboson"], # using TT instead of TTJets
-    "normalizationFactorSource": "QCDInvertedNormalizationFactors_AfterStdSelections%s.py",
+    "normalizationFactorSource": "QCDNormalizationFactors_AfterStdSelections%s.py",
     "normalizationPoint": "AfterStdSelections",
     "normalizationSourcePrefix": "ForQCDNormalization/Normalization",
     "ewkSourceForQCDPlusFakeTaus": "ForDataDrivenCtrlPlotsEWKGenuineTaus",
@@ -170,24 +170,45 @@ def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
     print "Module finished in %.1f s, estimated time to complete: %s"%(myLocalDelta, s)
 
 
-def importNormFactors(era, multicrabDirName):
+def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     # Obtain suffix
     suffix = ""
     s = multicrabDirName.split("_")
     if s[len(s)-1].endswith("pr") or s[len(s)-1].endswith("prong"):
         suffix = "_"+s[len(s)-1]
+    # Find candidates for normalisation scripts
+    fileList = os.listdir(multicrabDirName)
+    scriptList = []
+    for item in fileList:
+        if item.startswith((_generalOptions["normalizationFactorSource"]%"").replace(".py","")):
+            scriptList.append(item)
+    moduleInfoString = "_%s_%s"%(era, searchMode)
+    if len(optimizationMode) > 0:
+        moduleInfoString += "_%s"%(optimizationMode)
     # Construct source file name
-    src = _generalOptions["normalizationFactorSource"]%suffix
+    src = os.path.join(multicrabDirName, _generalOptions["normalizationFactorSource"]%moduleInfoString)
     if not os.path.exists(src):
-        raise Exception(ShellStyles.ErrorLabel()+"Normalisation factors ('%s.py') not found!\nRun script InvertedTauID_Normalization.py to generate the normalization factors."%src)
+        if len(scriptList):
+            print "Found following normalization info files:"
+            for item in scriptList:
+                print "   ", item
+        else:
+            print "Found no normalization info files!"
+        raise Exception(ShellStyles.ErrorLabel()+"Normalisation factors ('%s') not found!\nRun script QCDMeasurementNormalization.py to generate the normalization factors."%src)
     print "Reading normalisation factors from:", src
     # Check if normalization coefficients are suitable for era
-    myNormFactorsSafetyCheck = getattr(__import__(src.replace(".py","")), "QCDInvertedNormalizationSafetyCheck")
-    myNormFactorsSafetyCheck(era)
+    s = src.replace(".py","").split("/")
+    if len(s) > 1:
+        # Insert the directory where the norm.coeff. files reside into the path so that they are found
+        sys.path.insert(0, os.path.join(os.getenv("PWD"), "/".join(map(str,s[:(len(s)-1)]))))
+    normFactorsImport = __import__(s[len(s)-1])
+    myNormFactorsSafetyCheck = getattr(normFactorsImport, "QCDInvertedNormalizationSafetyCheck")
+    # Check that the era, searchMode, optimizationMode info matches
+    myNormFactorsSafetyCheck(era, searchMode, optimizationMode)
     # Obtain normalization factors
-    myNormFactorsImport = getattr(__import__(src.replace(".py","")), "QCDNormalization")
-    myNormFactorsImportSystVarFakeWeightingDown = getattr(__import__(src.replace(".py","")), "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown")
-    myNormFactorsImportSystVarFakeWeightingUp = getattr(__import__(src.replace(".py","")), "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarUp")
+    myNormFactorsImport = getattr(normFactorsImport, "QCDNormalization")
+    myNormFactorsImportSystVarFakeWeightingDown = getattr(normFactorsImport, "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown")
+    myNormFactorsImportSystVarFakeWeightingUp = getattr(normFactorsImport, "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarUp")
     myNormFactors = {}
     myNormFactors["nominal"] = myNormFactorsImport
     myNormFactors["FakeWeightingDown"] = myNormFactorsImportSystVarFakeWeightingDown
@@ -265,7 +286,7 @@ if __name__ == "__main__":
             for searchMode in myModuleSelector.getSelectedSearchModes():
                 for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
                     #=====  Obtain normalization factors
-                    myNormFactors = importNormFactors(era, opts.multicrabDir)
+                    myNormFactors = importNormFactors(era, searchMode, optimizationMode, opts.multicrabDir)
                     #===== Nominal module
                     myModuleInfoString = "%s_%s"%(era, searchMode)
                     if len(optimizationMode) > 0:

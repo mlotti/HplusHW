@@ -6,7 +6,7 @@
 namespace {
   class SelectorTestSelectorFactory: public BaseSelector {
   public:
-    SelectorTestSelectorFactory(const ParameterSet& config):
+    SelectorTestSelectorFactory(const ParameterSet& config, const TH1* skimCounters=nullptr):
       BaseSelector(config),
       name(config.getParameter<std::string>("name")),
       intvalue(config.getParameter<int>("intvalue")),

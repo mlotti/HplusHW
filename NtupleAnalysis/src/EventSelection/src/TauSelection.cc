@@ -137,6 +137,10 @@ TauSelection::~TauSelection() {
   delete hIsolPtAfter;
   delete hIsolEtaAfter;
   delete hIsolVtxAfter;
+  delete hNprongsMatrixForAllAfterIsolation;
+  delete hNprongsMatrixForBmesonsAfterIsolation;
+  delete hNprongsMatrixForAllAfterAntiIsolation;
+  delete hNprongsMatrixForBmesonsAfterAntiIsolation;
 }
 
 void TauSelection::initialize(const ParameterSet& config) {
@@ -160,6 +164,10 @@ void TauSelection::bookHistograms(TDirectory* dir) {
   hIsolPtAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtAfter", "Tau pT before isolation is applied", 40, 0, 400);
   hIsolEtaAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaAfter", "Tau eta before isolation is applied", 50, -2.5, 2.5);
   hIsolVtxAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxAfter", "Nvertices before isolation is applied", 60, 0, 60);
+  hNprongsMatrixForAllAfterIsolation = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForAllAfterIsolation", ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
+  hNprongsMatrixForBmesonsAfterIsolation = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForBmesonsAfterIsolation", ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
+  hNprongsMatrixForAllAfterAntiIsolation = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForAllAfterAntiIsolation", ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
+  hNprongsMatrixForBmesonsAfterAntiIsolation = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForBmesonsAfterAntiIsolation", ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
 }
 
 TauSelection::Data TauSelection::silentAnalyze(const Event& event) {
@@ -303,6 +311,26 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
       fCommonPlots->fillControlPlotsAfterTauSelection(event, output);
     } else if (output.fAntiIsolatedTaus.size()) {
       fCommonPlots->fillControlPlotsAfterAntiIsolatedTauSelection(event, output);
+    }
+  }
+  // Fill Nprongs matrix plots
+  if (event.isMC()) {
+    if (output.fSelectedTaus.size()) {
+      // Isolated genuine tau exists
+      if (output.isGenuineTau()) {
+        hNprongsMatrixForAllAfterIsolation->Fill(output.getSelectedTau().mcNProngs(), output.getSelectedTau().nProngs());
+        if (output.getSelectedTau().isFromOtherSource()) {
+          hNprongsMatrixForBmesonsAfterIsolation->Fill(output.getSelectedTau().mcNProngs(), output.getSelectedTau().nProngs());
+        }
+      }
+    } else if (output.fAntiIsolatedTaus.size()) {
+      // No isolated tau, but isolated genuine tau(s) exist
+      if (output.getAntiIsolatedTauIsGenuineTau()) {
+        hNprongsMatrixForAllAfterAntiIsolation->Fill(output.getAntiIsolatedTau().mcNProngs(), output.getAntiIsolatedTau().nProngs());
+        if (output.getAntiIsolatedTau().isFromOtherSource()) {
+          hNprongsMatrixForBmesonsAfterAntiIsolation->Fill(output.getAntiIsolatedTau().mcNProngs(), output.getAntiIsolatedTau().nProngs());
+        }
+      }
     }
   }
   // Set tau misidentification SF value to data object

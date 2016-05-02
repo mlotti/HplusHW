@@ -289,20 +289,20 @@ def checkCrabInPath():
 ## \param postfix  Postfix string to the directory (after timestamp)
 ## \param path     Path to a directory where to create the multicrab
 ##                 directory (if None, crete to working directory)
-#def createTaskDir(prefix="multicrab", postfix="", path=None):
-    #while True:
-        #dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
-        #if len(postfix) > 0:
-            #dirname += "_" + postfix
-        #if path != None:
-            #dirname = os.path.join(path, dirname)
-        #if os.path.exists(dirname):
-            #time.sleep(1)
-            #continue
+def createTaskDir(prefix="multicrab", postfix="", path=None):
+    while True:
+        dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
+        if len(postfix) > 0:
+            dirname += "_" + postfix
+        if path != None:
+            dirname = os.path.join(path, dirname)
+        if os.path.exists(dirname):
+            time.sleep(1)
+            continue
 
-        #os.makedirs(dirname)
-        #break
-    #return dirname
+        os.makedirs(dirname)
+        break
+    return dirname
 
 def crabCfgTemplate(scheduler="arc", return_data=None, copy_data=None, crabLines=[], cmsswLines=[], userLines=[], gridLines=[]):
     if return_data is None and copy_data is None:

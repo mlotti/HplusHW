@@ -99,7 +99,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Electrons = process.Electrons,
     Muons     = process.Muons,
     Jets      = process.Jets,
-    Top       = process.Top,
+    #Top       = process.Top,
     METs      = process.METs,
     GenWeights = cms.VPSet(
         cms.PSet(
@@ -128,17 +128,17 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 #            saveHplusInfo = cms.untracked.bool(True),
         )
     ),
-    Tracks =  cms.VPSet(      
-        cms.PSet(
-            branchname = cms.untracked.string("PFcandidates"),
-            src = cms.InputTag("packedPFCandidates"),
-            OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
-            ptCut = cms.untracked.double(0.0), # pt < value
-            etaCut = cms.untracked.double(2.5), # abs(eta) < value
-            saveOnlyChargedParticles = cms.untracked.bool(True),
-            IPvsPVz = cms.untracked.double(5), # abs(IPz-PVz) < value
-        )
-    ),
+    #Tracks =  cms.VPSet( # Caution: this effectively doubles disc space usage
+    #    cms.PSet(
+    #        branchname = cms.untracked.string("PFcandidates"),
+    #        src = cms.InputTag("packedPFCandidates"),
+    #        OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    #        ptCut = cms.untracked.double(0.0), # pt < value
+    #        etaCut = cms.untracked.double(2.5), # abs(eta) < value
+    #        saveOnlyChargedParticles = cms.untracked.bool(True),
+    #        IPvsPVz = cms.untracked.double(5), # abs(IPz-PVz) < value
+    #    )
+    #),
 )
 
 # === Setup skim counters

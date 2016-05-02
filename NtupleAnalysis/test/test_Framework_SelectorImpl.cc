@@ -5,6 +5,7 @@
 #include "Framework/interface/SelectorImpl.h"
 #include "Framework/interface/BaseSelector.h"
 #include "Framework/interface/BranchManager.h"
+#include "Framework/interface/Exception.h"
 
 #include "TDirectory.h"
 #include "TH1F.h"
@@ -12,7 +13,7 @@
 namespace {
   class SelectorTestSelectorImplEmpty: public BaseSelector {
   public:
-    explicit SelectorTestSelectorImplEmpty(const ParameterSet& config):
+    explicit SelectorTestSelectorImplEmpty(const ParameterSet& config, const TH1* skimCounters=nullptr):
       BaseSelector(config) {}
     virtual ~SelectorTestSelectorImplEmpty() {}
 
@@ -23,7 +24,7 @@ namespace {
 
   class SelectorTestSelectorImpl: public BaseSelector {
   public:
-    explicit SelectorTestSelectorImpl(const ParameterSet& config):
+    explicit SelectorTestSelectorImpl(const ParameterSet& config, const TH1* skimCounters=nullptr):
       BaseSelector(config),
       mode(config.getParameter<int>("mode")),
       b_event(nullptr), b_num1(nullptr),
@@ -94,7 +95,6 @@ TEST_CASE("SelectorImpl works", "[Framework]") {
   SECTION("Single empty selector") {
     inputList.Add(new TNamed("analyzer_test", "SelectorTestSelectorImplEmpty:{}"));
     tree->Process(&tselector);
-
     TList *output = tselector.GetOutputList();
     REQUIRE( output );
     TObject *tmp = output->FindObject("test");
@@ -115,7 +115,7 @@ TEST_CASE("SelectorImpl works", "[Framework]") {
     inputList.Add(new TNamed("analyzer_test", "SelectorTestSelectorImplEmpty:{}"));
     inputList.Add(new TNamed("analyzer_test", "SelectorTestSelectorImplEmpty:{}"));
 
-    REQUIRE_THROWS_AS( tree->Process(&tselector), std::logic_error );
+    REQUIRE_THROWS_AS( tree->Process(&tselector), hplus::Exception );
   }
 
   SECTION("Two selectors doing some work") {

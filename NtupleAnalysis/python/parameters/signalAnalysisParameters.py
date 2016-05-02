@@ -126,6 +126,35 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
         cutValueJet4 = 0.0,   # Cut value in degrees (circular cut)
 )
 
+def setAngularCutsWorkingPoint(pset, workingPoint):
+    if workingPoint == "NoCut":
+        pset.cutValueJet1 = 0.0
+        pset.cutValueJet2 = 0.0
+        pset.cutValueJet3 = 0.0
+        pset.cutValueJet4 = 0.0
+    elif workingPoint == "Loose":
+        pset.cutValueJet1 = 40.0
+        pset.cutValueJet2 = 40.0
+        pset.cutValueJet3 = 40.0
+        pset.cutValueJet4 = 40.0
+    elif workingPoint == "Medium":
+        pset.cutValueJet1 = 60.0
+        pset.cutValueJet2 = 60.0
+        pset.cutValueJet3 = 60.0
+        pset.cutValueJet4 = 60.0
+    elif workingPoint == "Tight":
+        pset.cutValueJet1 = 80.0
+        pset.cutValueJet2 = 80.0
+        pset.cutValueJet3 = 80.0
+        pset.cutValueJet4 = 80.0
+    elif workingPoint == "VTight":
+        pset.cutValueJet1 = 100.0
+        pset.cutValueJet2 = 100.0
+        pset.cutValueJet3 = 100.0
+        pset.cutValueJet4 = 100.0
+    else:
+        raise Exception("Error: Unknown working point '%s' requested!"%workingPoint)
+
 #====== Common plots options
 commonPlotsOptions = PSet(
   # Splitting of histograms as function of one or more parameters

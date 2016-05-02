@@ -138,10 +138,10 @@ public:
   WrappedBase(const HistoWrapper& histoWrapper, T *histo, HistoLevel level):
     h(histo), fHistoWrapper(histoWrapper), fLevel(level) {}
   ~WrappedBase() {
-    if (h != nullptr) {
-      //h->Delete();
-      h = nullptr;
-    }
+//     if (h != nullptr) {
+//       //h->Delete();
+//       h = nullptr;
+//     }
   }
 
   /// Returns true if the histogram exists

@@ -98,9 +98,12 @@ TEST_CASE("JetSelection", "[EventSelection]") {
   std::vector<float> mcphi;  tree->Branch("Taus_phi_MCVisibleTau", &mcphi);
   std::vector<float> mce;    tree->Branch("Taus_e_MCVisibleTau", &mce);
   std::vector<short> mcPdgId;    tree->Branch("Taus_pdgId", &mcPdgId);
+  std::vector<short> pdgOrigin;    tree->Branch("Taus_pdgOrigin", &pdgOrigin);
   std::vector<float> lTrkPt;   tree->Branch("Taus_lChTrkPt", &lTrkPt);
   std::vector<float> lTrkEta;   tree->Branch("Taus_lChTrkEta", &lTrkEta);
   std::vector<int> decayMode;    tree->Branch("Taus_decayMode", &decayMode);
+  std::vector<short> nProngs;    tree->Branch("Taus_nProngs", &nProngs);
+  std::vector<short> mcProngs;    tree->Branch("Taus_mcNProngs", &mcProngs);
   std::vector<bool> eDiscr;    tree->Branch("Taus_againstElectronLooseMVA5", &eDiscr);
   std::vector<bool> muDiscr;   tree->Branch("Taus_againstMuonTight3", &muDiscr);
   std::vector<bool> isolDiscr; tree->Branch("Taus_byLooseCombinedIsolationDeltaBetaCorr3Hits", &isolDiscr);
@@ -134,9 +137,12 @@ TEST_CASE("JetSelection", "[EventSelection]") {
   mcphi = std::vector<float>{-2.9f, -0.5f,  1.f,  -2.3f, -1.7f,  0.3f, 0.8f,  1.1f};
   mce   = std::vector<float>{50.f,  20.f,  11.f,  50.f,  75.f,  11.f,  13.f, 90.f};
   mcPdgId = std::vector<short>{15,    15,    15,    15,    15,    15,    15,   15};
+  pdgOrigin = std::vector<short>{0, 0, 0, 0, 0, 0, 0, 0};
   lTrkPt = std::vector<float>{50.f,  60.f};
   lTrkEta = std::vector<float>{-1.3f, 0.3f};
   decayMode = std::vector<int>{1, 1};
+  nProngs = std::vector<short>{1, 1};
+  mcProngs = std::vector<short>{1, 1};
   tree->Fill();
   nevent = 3; // jet ID
   jetID  = std::vector<bool>{true, false, false, false, true, true, false, true};
