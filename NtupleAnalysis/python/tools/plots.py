@@ -300,7 +300,7 @@ _legendLabels = {
     "DYJetsToLLHT":            "Z/#gamma*+jets",
     "QCD_Pt20_MuEnriched":   "QCD (#mu enr.), #hat{p}_{T} > 20",
 
-    "SingleTop":             "Single t",
+    "SingleTop":             "Single top quark",
     "TToBLNu_s-channel":     "Single t (s channel)",
     "TToBLNu_t-channel":     "Single t (t channel)",
     "TToBLNu_tW-channel":    "Single t (tW channel)",

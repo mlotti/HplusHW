@@ -60,7 +60,7 @@ class PseudoMultiCrabCreator:
         if self._myBaseDir != None:
             return
         # Create directory structure
-        self._myBaseDir = "pseudoMulticrab_%s"%self._title
+        self._myBaseDir = os.path.join(self._inputMulticrabDir, "pseudoMulticrab_%s"%self._title)
         if os.path.exists(self._myBaseDir):
             shutil.rmtree(self._myBaseDir)
         os.mkdir(self._myBaseDir)

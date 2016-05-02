@@ -16,8 +16,8 @@ enum TauDecayMatchType {
   kTauDecaysToMuon = 1513
 };
 
-enum TauOriginType {
-  kTauOriginUnknown = 0,
+enum ParticleOriginType {
+  kOriginUnknown = 0,
   kFromZ = 23,
   kFromW = 24,
   kFromHplus = 37,

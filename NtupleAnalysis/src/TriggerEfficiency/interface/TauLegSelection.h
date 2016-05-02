@@ -120,7 +120,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
   if(xvar == pu) xvariable = fEvent.vertexInfo().value();
 
 
-  if(fEvent.isMC() && fabs(selectedTau->pdgId()) == 15) mcmatch = true;
+  if(fEvent.isMC() && abs(selectedTau->pdgId()) == 15) mcmatch = true;
   //if(fEvent.isMC())  std::cout << "check tau mc match " << selectedTau->pdgId() << std::endl;
   cTauLegTau.increment();
 

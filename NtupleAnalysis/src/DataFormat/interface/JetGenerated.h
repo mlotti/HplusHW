@@ -45,6 +45,11 @@ protected:
   const Branch<std::vector<bool>> *fPUIDloose;
   const Branch<std::vector<bool>> *fPUIDmedium;
   const Branch<std::vector<bool>> *fPUIDtight;
+  const Branch<std::vector<bool>> *fOriginatesFromChargedHiggs;
+  const Branch<std::vector<bool>> *fOriginatesFromTop;
+  const Branch<std::vector<bool>> *fOriginatesFromUnknown;
+  const Branch<std::vector<bool>> *fOriginatesFromW;
+  const Branch<std::vector<bool>> *fOriginatesFromZ;
   const Branch<std::vector<double>> *fPileupJetIdfullDiscriminant;
   const Branch<std::vector<float>> *fPfCombinedInclusiveSecondaryVertexV2BJetTags;
   const Branch<std::vector<float>> *fPfCombinedMVABJetTag;
@@ -98,6 +103,11 @@ public:
   bool PUIDloose() const { return this->fCollection->fPUIDloose->value()[this->index()]; }
   bool PUIDmedium() const { return this->fCollection->fPUIDmedium->value()[this->index()]; }
   bool PUIDtight() const { return this->fCollection->fPUIDtight->value()[this->index()]; }
+  bool originatesFromChargedHiggs() const { return this->fCollection->fOriginatesFromChargedHiggs->value()[this->index()]; }
+  bool originatesFromTop() const { return this->fCollection->fOriginatesFromTop->value()[this->index()]; }
+  bool originatesFromUnknown() const { return this->fCollection->fOriginatesFromUnknown->value()[this->index()]; }
+  bool originatesFromW() const { return this->fCollection->fOriginatesFromW->value()[this->index()]; }
+  bool originatesFromZ() const { return this->fCollection->fOriginatesFromZ->value()[this->index()]; }
   double pileupJetIdfullDiscriminant() const { return this->fCollection->fPileupJetIdfullDiscriminant->value()[this->index()]; }
   float pfCombinedInclusiveSecondaryVertexV2BJetTags() const { return this->fCollection->fPfCombinedInclusiveSecondaryVertexV2BJetTags->value()[this->index()]; }
   float pfCombinedMVABJetTag() const { return this->fCollection->fPfCombinedMVABJetTag->value()[this->index()]; }

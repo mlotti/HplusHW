@@ -42,7 +42,7 @@ TEST_CASE("BTagSFCalculator works", "[EventSelection]") {
     REQUIRE_THROWS_AS( item2.getValueByPt(20.), hplus::Exception );
     CHECK( item2.getValueByPt(40.) == 0.523f );
     REQUIRE_NOTHROW( item2.getValueByPt(60.) );
-    CHECK( item2.getValueByPt(60.) == 0.723f );
+    CHECK( item2.getValueByPt(60.) == 0.623f );
   }
   
   EventWeight weight;

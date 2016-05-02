@@ -513,10 +513,12 @@ class QCDNormalizationTemplate:
 
 ## Base class for QCD measurement normalization from which specialized algorithm classes inherit
 class QCDNormalizationManagerBase:
-    def __init__(self, binLabels, resultDirName):
+    def __init__(self, binLabels, resultDirName, moduleInfoString):
         self._templates = {}
         self._binLabels = binLabels
-        self._plotDirName = "normalisationPlots_%s"%resultDirName
+        if not os.path.exists("%s/normalisationPlots"%resultDirName):
+            os.mkdir("%s/normalisationPlots"%resultDirName)
+        self._plotDirName = "%s/normalisationPlots/%s"%(resultDirName, moduleInfoString)
         if os.path.exists(self._plotDirName):
             shutil.rmtree(self._plotDirName)
         os.mkdir(self._plotDirName)
@@ -582,8 +584,8 @@ class QCDNormalizationManagerBase:
             if wUp > 1.0:
                 wUp = 1.0
             wDown = w - wError
-            if wDown < 1.0:
-                wDown = 1.0
+            if wDown < 0.0:
+                wDown = 0.0
         lines.append("   w = nQCD/(nQCD+nEWKfakes) = %f +- %f"%(w, wError))
         # Calculate the combined normalization factor (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)
         binLabel = self._templates[self._requiredTemplateList[0]].getBinLabel()
@@ -607,18 +609,27 @@ class QCDNormalizationManagerBase:
         for l in lines:
             print l
         
-    def writeScaleFactorFile(self, filename, analysis, dataEra, searchMode):
+    def writeScaleFactorFile(self, filename, moduleInfoString):
+        moduleInfo = moduleInfoString.split("_")
         s = ""
         s += "# Generated on %s\n"%datetime.datetime.now().ctime()
         s += "# by %s\n"%os.path.basename(sys.argv[0])
         s += "\n"
         s += "import sys\n"
         s += "\n"
-        s += "def QCDInvertedNormalizationSafetyCheck(era):\n"
-        s += "    validForEra = \""+dataEra+"\"\n"
+        s += "def QCDInvertedNormalizationSafetyCheck(era, searchMode, optimizationMode):\n"
+        s += "    validForEra = \"%s\"\n"%moduleInfo[0]
+        s += "    validForSearchMode = \"%s\"\n"%moduleInfo[1]
+        if len(moduleInfo) == 3:
+            s += "    validForOptMode = \"%s\"\n"%moduleInfo[2]
+        else:
+            s += "    validForOptMode = \"\"\n"
         s += "    if not era == validForEra:\n"
-        s += "        print \"Warning, inconsistent era, normalisation factors valid for\",validForEra,\"but trying to use with\",era\n"
-        s += "        sys.exit()\n"
+        s += "        raise Exception(\"Error: inconsistent era, normalisation factors valid for\",validForEra,\"but trying to use with\",era)\n"
+        s += "    if not searchMode == validForSearchMode:\n"
+        s += "        raise Exception(\"Error: inconsistent search mode, normalisation factors valid for\",validForSearchMode,\"but trying to use with\",searchMode)\n"
+        s += "    if not optimizationMode == validForOptMode:\n"
+        s += "        raise Exception(\"Error: inconsistent optimization mode, normalisation factors valid for\",validForOptMode,\"but trying to use with\",optimizationMode)\n"
         s += "\n"
         s += "QCDNormalization = {\n"
         for k in self._qcdNormalization:
@@ -694,11 +705,12 @@ class QCDNormalizationManagerBase:
         hFrame = ROOT.TH1F("frame","frame",len(keyList),0,len(keyList))
         for i in range(len(keyList)):
             hFrame.GetXaxis().SetBinLabel(i+1, keyList[i].replace("lt","<").replace("eq","=").replace("to","-").replace("gt",">"))
-        hFrame.SetMinimum(0.2)
+        hFrame.SetMinimum(0.01)
         hFrame.SetMaximum(0.5)
         hFrame.GetYaxis().SetTitle("Normalization coefficient")
         hFrame.GetXaxis().SetLabelSize(20)
         c = ROOT.TCanvas()
+        c.SetLogy()
         hFrame.Draw()
         gQCD.Draw("p same")
         gFake.Draw("p same")
@@ -862,8 +874,8 @@ class QCDNormalizationManagerBase:
 #  3) w_combined = a*w_QCD + (1-a)*w_EWKfake, a determined with MC for EWK fakes
 #  N_QCD can then be obtained with w_combined*(N_data - N_EWKtau)
 class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
-    def __init__(self, binLabels, resultDirName):
-        QCDNormalizationManagerBase.__init__(self, binLabels, resultDirName)
+    def __init__(self, binLabels, resultDirName, moduleInfoString):
+        QCDNormalizationManagerBase.__init__(self, binLabels, resultDirName, moduleInfoString)
         self._requiredTemplateList = ["EWKFakeTaus_Baseline", "EWKFakeTaus_Inverted",
                                       "EWKGenuineTaus_Baseline", "EWKGenuineTaus_Inverted",
                                       "EWKInclusive_Baseline", "EWKInclusive_Inverted",
@@ -946,8 +958,8 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
 #  2) w_combined = a*w_QCD + (1-a)*w_EWKfake, a determined with MC for EWK fakes
 #  N_QCD can then be obtained with w_combined*(N_data - N_EWKtau)
 class QCDNormalizationManagerExperimental1(QCDNormalizationManagerBase):
-    def __init__(self, binLabels, resultDirName):
-        QCDNormalizationManagerBase.__init__(self, binLabels, resultDirName)
+    def __init__(self, binLabels, resultDirName, moduleInfoString):
+        QCDNormalizationManagerBase.__init__(self, binLabels, resultDirName, moduleInfoString)
         self._requiredTemplateList = ["EWKFakeTaus_Baseline", "EWKFakeTaus_Inverted",
                                       "EWKGenuineTaus_Baseline", "EWKGenuineTaus_Inverted",
                                       "QCD_Baseline", "QCD_Inverted"]
@@ -1077,7 +1089,7 @@ if __name__ == "__main__":
             return h
       
         def testInitialization(self):
-            q = QCDNormalizationTemplate("EWK testline")
+            q = QCDNormalizationTemplate("EWK testline", "dummy")
             # Test initialization
             with self.assertRaises(Exception):
                 q.getNeventsFromHisto(True)
@@ -1094,7 +1106,7 @@ if __name__ == "__main__":
                 q.doFit()
         
         def testEmptyHistogram(self):
-            q = QCDNormalizationTemplate("EWK testline")
+            q = QCDNormalizationTemplate("EWK testline", "dummy")
             h = ROOT.TH1F("h","h",10,0,10)
             q.setHistogram(h, "Inclusive bin")
             with self.assertRaises(Exception):
@@ -1104,7 +1116,7 @@ if __name__ == "__main__":
             h.Delete()
         
         def testFitWithoutFunction(self):
-            q = QCDNormalizationTemplate("EWK testline")
+            q = QCDNormalizationTemplate("EWK testline", "dummy")
             h = self._getGaussianHisto()
             q.setHistogram(h, "Inclusive bin")
             self.assertLess(abs(q.getNeventsFromHisto(True)-1000.0),0.001)
@@ -1127,7 +1139,7 @@ if __name__ == "__main__":
                 q.getNeventsErrorFit()
 
         def testFitParams(self):
-            q = QCDNormalizationTemplate("EWK testline")
+            q = QCDNormalizationTemplate("EWK testline", "dummy")
             # input format
             with self.assertRaises(Exception):
                 q.setDefaultFitParam(defaultInitialValue=2)
@@ -1157,7 +1169,7 @@ if __name__ == "__main__":
 
         def testSimpleFit(self):
             _createPlots = False # To test plotting, set to True
-            q = QCDNormalizationTemplate("EWK testline",quietMode=True)
+            q = QCDNormalizationTemplate("EWK testline", "dummy",quietMode=True)
             h = self._getGaussianHisto()
             q.setHistogram(h, "Inclusive bin")
             # Test proper parameters to fitter setting

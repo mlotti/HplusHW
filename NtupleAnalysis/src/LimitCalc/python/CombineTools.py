@@ -27,10 +27,10 @@ import shutil
 import tarfile
 import subprocess
 
-import HiggsAnalysis.NtupleAnalysis.tools.multicrab
+import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 #import HiggsAnalysis.NtupleAnalysis.tools.multicrabWorkflows
-import HiggsAnalysis.NtupleAnalysis.tools.git
-import HiggsAnalysis.NtupleAnalysis.tools.aux
+import HiggsAnalysis.NtupleAnalysis.tools.git as git
+import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import array
 
 import ROOT
@@ -125,7 +125,7 @@ def produceLHCAsymptotic(opts, directory,
         cls = LHCTypeAsymptotic(opts.brlimit, opts.sigmabrlimit)
 
     print "Computing limits with %s CLs flavour" % cls.nameHuman()
-    print "Computing limits with Combine version %s" % Combine_tag
+    #print "Computing limits with Combine version %s" % Combine_tag
 
     mcc = MultiCrabCombine(opts, directory, massPoints, datacardPatterns, rootfilePatterns, cls)
     mcc.createMultiCrabDir(postfix)
@@ -454,7 +454,7 @@ class LHCTypeAsymptotic:
 
     def _createMLFit(self, mass, fileName, datacardName, blindedMode):
         if self.opts.nomlfit:
-            print "skipping creation of ML fit scripts, to enable run without --nomlfit"
+            print "skipping creation of ML fit scripts, to enable run with --mlfit"
             return
           
         fname = fileName.replace("runCombine", "runCombineMLFit")
@@ -717,7 +717,7 @@ hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.As
         #raise Exception("Unable to parse the output of command '%s'" % script)
 
     def _runMLFit(self, mass):
-        if mass in self.mlfitScripts.keys():
+        if mass in self.mlfitScripts.keys() and not self.opts.nomlfit:
             script = self.mlfitScripts[mass]
             self._run(script, "mlfit_m_%s_output.txt" % mass)
         else:

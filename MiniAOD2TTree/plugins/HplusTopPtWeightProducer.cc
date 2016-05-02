@@ -109,8 +109,12 @@ void HplusTopPtWeightProducer::produce(edm::Event& iEvent, const edm::EventSetup
         }
         weight *= TMath::Exp(fParA - fParB*pt);
       }
+      // Take sqrt of weight
+      weight = TMath::Sqrt(weight);
+      // Calculate number of all weighted events
       hTopPtWeightAllEvents->SetBinContent(2, hTopPtWeightAllEvents->GetBinContent(2) + sign*weight);
       hTopPtWeightAllEvents->SetBinContent(3, hTopPtWeightAllEvents->GetBinContent(3) + sign*weight*weight);
+      // Save weight
       std::auto_ptr<double> w(new double);
       *w = weight*sign;
       iEvent.put(w);

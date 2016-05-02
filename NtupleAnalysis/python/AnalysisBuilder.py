@@ -82,9 +82,13 @@ class AnalysisConfig:
 		    else:
 			suffix += ".%s"%subkeys[i]
 		# Set value
-		if not hasattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1]):
-		    raise Exception("Error: Cannot find key %s.%s in the config!"%(suffix, subkeys[len(subkeys)-1]))
-		setattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1], value)
+		if key.startswith("AngularCuts") and subkeys[len(subkeys)-1] == "workingPoint":
+                    from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import setAngularCutsWorkingPoint
+                    setAngularCutsWorkingPoint(subconfig[len(subconfig)-1], value)
+                else:
+                    if not hasattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1]):
+                        raise Exception("Error: Cannot find key %s.%s in the config!"%(suffix, subkeys[len(subkeys)-1]))
+                    setattr(subconfig[len(subconfig)-1], subkeys[len(subkeys)-1], value)
         
     ## Create and register the analysis after the changes have bene done to the config
     def registerAnalysis(self, process):
@@ -153,8 +157,6 @@ class AnalysisBuilder:
                   self._variations["systematics"].append("%sMinus"%item)
 	  #self.addVariation("TauSelection.tauPtCut", [50,60])
 	  #self.addVariation("TauSelection.tauEtaCut", [0.5,1.5])
-	  
-              
     
     def addVariation(self, configItemString, listOfValues):
         self._variations[configItemString] = listOfValues
@@ -172,13 +174,8 @@ class AnalysisBuilder:
             for dataEra in self._dataEras:
                 modStr = "%s_%s_Run%s"%(self._name, searchMode, dataEra)
                 # Create nominal module without any variation
-                if "systematics" in self._variations.keys():
-                    if len(self._variations.keys()) > 1:
-                        configs.append(AnalysisConfig(self._name, modStr, config))
-                        print "Created nominal module: %s"%modStr
-                else:
-                    configs.append(AnalysisConfig(self._name, modStr, config))
-                    print "Created nominal module: %s"%modStr
+                configs.append(AnalysisConfig(self._name, modStr, config))
+                print "Created nominal module: %s"%modStr
                 # Create modules for optimization and systematics variations
                 configs.extend(self._buildVariation(config, modStr))
         # Register the modules

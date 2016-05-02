@@ -747,13 +747,13 @@ class TableProducer:
             for c in self._datasetGroups:
                 if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
                     # Find out what type the column is
-                    if c.getLabel().startswith("HH"):
+                    if c.getLabel().startswith("HH") or c.getLabel().startswith("CMS_Hptntj_HH"):
                         HH = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                    elif c.getLabel().startswith("WH") or c.getLabel().startswith("HW"):
+                    elif c.getLabel().startswith("WH") or c.getLabel().startswith("HW") or c.getLabel().startswith("CMS_Hptntj_HW") or c.getLabel().startswith("CMS_Hptntj_WH"):
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                    elif c.getLabel().startswith("Hp"):
+                    elif c.getLabel().startswith("Hp") or c.getLabel().startswith("CMS_Hptntj_Hp"):
                         HW = c.getCachedShapeRootHistogramWithUncertainties().Clone()
-                    elif c.getLabel().startswith("HST"):
+                    elif c.getLabel().startswith("HST") or c.getLabel().startswith("CMS_Hptntj_HST"):
                         HST = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.typeIsQCD():
                         if QCD == None:

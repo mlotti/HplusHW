@@ -20,10 +20,7 @@ public:
 
 
 protected:
-  const Branch<std::vector<float>> *fIPTSignificance;
-  const Branch<std::vector<float>> *fIPTwrtPV;
-  const Branch<std::vector<float>> *fIPzSignificance;
-  const Branch<std::vector<float>> *fIPzwrtPV;
+
 };
 
 
@@ -38,10 +35,7 @@ public:
 
 
 
-  float IPTSignificance() const { return this->fCollection->fIPTSignificance->value()[this->index()]; }
-  float IPTwrtPV() const { return this->fCollection->fIPTwrtPV->value()[this->index()]; }
-  float IPzSignificance() const { return this->fCollection->fIPzSignificance->value()[this->index()]; }
-  float IPzwrtPV() const { return this->fCollection->fIPzwrtPV->value()[this->index()]; }
+
 
 protected:
 

@@ -33,7 +33,11 @@ ROOT.gROOT.SetBatch(True) # no flashing canvases
 _myOriginalDir = "originalDatacards"
 
 def _isSignal(label):
-    return label.startswith("HH") or label.startswith("HW") or label.startswith("Hp")
+    if label.startswith("HH") or label.startswith("HW") or label.startswith("Hp"):
+        return True
+    if label.startswith("CMS_Hptntj_HH") or label.startswith("CMS_Hptntj_HW") or label.startswith("CMS_Hptntj_Hp"):
+        return True
+    return False
 
 # Return info of column names from datacard file
 def parseColumnNames(lines):
@@ -101,18 +105,26 @@ def checkSettings(config):
     # treatment of fit uncertainty
     if not hasattr(config, "applyFitUncertaintyAsBinByBinUncertainty"):
         raise Exception(ErrorLabel()+"Boolean variable 'applyFitUncertaintyAsBinByBinUncertainty' is missing from settings! Please add!")
-    # QCD
-    if not hasattr(config, "QCD"):
-        raise Exception(ErrorLabel()+"Dictionary 'QCD' with settings for QCD is missing from settings! Please add!")
-    checkFitFunc(config.QCD,"QCD")
-    # Embedding
-    if not hasattr(config, "EWKTau"):
-        raise Exception(ErrorLabel()+"Dictionary 'EWKTau' with settings for EWK+tt with taus is missing from settings! Please add!")
-    checkFitFunc(config.EWKTau,"EWKTau")
-    # EWK+tt fakes
-    if not hasattr(config, "EWKFake"):
-        raise Exception(ErrorLabel()+"Dictionary 'EWKFake' with settings for EWK+tt misidentified taus is missing from settings! Please add!")
-    checkFitFunc(config.EWKFake,"EWKFake")
+    # Fit settings
+    if not hasattr(config, "fitSettings"):
+        raise Exception(ErrorLabel()+"List of dictionaries of fit settings 'fitSettings' is missing from config!")
+    # Fit functions
+    for item in config.fitSettings:
+        checkFitFunc(item,item["id"])
+    
+    #
+    ## QCD
+    #if not hasattr(config, "QCD"):
+        #raise Exception(ErrorLabel()+"Dictionary 'QCD' with settings for QCD is missing from settings! Please add!")
+    #checkFitFunc(config.QCD,"QCD")
+    ## Embedding
+    #if not hasattr(config, "EWKTau"):
+        #raise Exception(ErrorLabel()+"Dictionary 'EWKTau' with settings for EWK+tt with taus is missing from settings! Please add!")
+    #checkFitFunc(config.EWKTau,"EWKTau")
+    ## EWK+tt fakes
+    #if not hasattr(config, "EWKFake"):
+        #raise Exception(ErrorLabel()+"Dictionary 'EWKFake' with settings for EWK+tt misidentified taus is missing from settings! Please add!")
+    #checkFitFunc(config.EWKFake,"EWKFake")
 
 def getAndRebinRateHisto(columnName, rootFile, binlist):
     myName = "%s_fineBinning"%columnName
@@ -347,9 +359,9 @@ def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo, opts, obs
     myOutput += mySeparatorLine
     return myOutput
 
-def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminosity):
+def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminosity, opts):
     def addOrReplace(dictionary, key, newItem):
-        if dictionary[key] == None:
+        if not key in dictionary.keys():
             dictionary[key] = newItem.Clone()
         else:
             dictionary[key].Add(newItem)
@@ -362,10 +374,6 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
 
     # Create for each column a root histo with uncertainties
     myDict = OrderedDict()
-    myDict["Hp"] = None
-    myDict["QCD"] = None
-    myDict["EWKtau"] = None
-    myDict["EWKfakes"] = None
     myTotal = None
     for c in columnNames:
         hRate = aux.Clone(getHisto(cachedHistos, c))
@@ -391,21 +399,24 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
         # Store column info
         _myBr = 0.01
         myAddToTotalStatus = False
-        if c.startswith("HH"):
+        if c.startswith("HH") or c.startswith("CMS_Hptntj_HH"):
             myRHWU.Scale(_myBr**2)
             addOrReplace(myDict, "Hp", myRHWU)
-        elif c.startswith("HW"):
+        elif c.startswith("HW") or c.startswith("CMS_Hptntj_HW"):
             myRHWU.Scale(2.0*_myBr*(1.0-_myBr))
             addOrReplace(myDict, "Hp", myRHWU)
-        elif c.startswith("Hp"):
+        elif c.startswith("Hp") or c.startswith("CMS_Hptntj_Hp"):
             addOrReplace(myDict, "Hp", myRHWU)
-        elif c == "EWK_Tau":
+        elif c == "EWK_Tau" or c.startswith("CMS_Hptntj_EWK_Tau"):
             addOrReplace(myDict, "EWKtau", myRHWU)
+            myAddToTotalStatus = True
+        elif c.endswith("genuinetau"):
+            addOrReplace(myDict, c.replace("CMS_Hptntj_",""), myRHWU)
             myAddToTotalStatus = True
         elif c.endswith("faketau"):
             addOrReplace(myDict, "EWKfakes", myRHWU)
             myAddToTotalStatus = True
-        elif c.startswith("QCD"):
+        elif c.startswith("QCD") or c.startswith("CMS_Hptntj_QCD"):
             addOrReplace(myDict, "QCD", myRHWU)
             myAddToTotalStatus = True
         else:
@@ -451,11 +462,25 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             myHisto = histograms.Histo(setTailFitUncToStat(myDict["EWKtau"].Clone()),"Embedding",legendLabel=ControlPlotMaker._legendLabelEmbedding)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
+        for c in myDict.keys():
+            if c.endswith("genuinetau"):
+                histoID = c.replace("CMS_Hptntj_","").replace("_genuinetau","")
+                lookupTable = { # Map column name to style in plots.py
+                  "tt": "TT",
+                  "W": "WJets",
+                  "t": "SingleTop",
+                  "DY": "DYJetsToLL",
+                  "VV": "Diboson"
+                }
+                histoString = lookupTable[histoID]
+                myHisto = histograms.Histo(setTailFitUncToStat(myDict[c].Clone()),histoString,legendLabel=c.replace("CMS_Hptntj_",""))
+                myHisto.setIsDataMC(isData=False, isMC=True)
+                myStackList.append(myHisto)
         if "EWKfakes" in myDict.keys() and myDict["EWKfakes"] != None:
             myHisto = histograms.Histo(myDict["EWKfakes"].Clone(),"EWKfakes",legendLabel=ControlPlotMaker._legendLabelEWKFakes)
             myHisto.setIsDataMC(isData=False, isMC=True)
             myStackList.append(myHisto)
-        myBlindedStatus = False
+        myBlindedStatus = not opts.unblinded
         myBlindingString = None
         hObsLocal = aux.Clone(hObs)
         if myBlindedStatus:
@@ -558,7 +583,7 @@ def main(opts):
     config = aux.load_module(opts.settings)
     checkSettings(config)
     os.system("cp %s ."%opts.settings)
-    myFitSettingsList = [config.QCD, config.EWKTau, config.EWKFake, config.EWKTauMC]
+    myFitSettingsList = config.fitSettings[:]
 
     # Copy unfitted cards for provenance information if necessary
     if not os.path.exists(_myOriginalDir):
@@ -762,7 +787,7 @@ def main(opts):
         myDrawPlotsStatus = False
         myObsIntegral = hObs.Integral()
         # Print summary info
-        printSummaryInfo(myColumnNames, myNuisanceInfo, myHistogramCache, hObs, m, myLuminosity)
+        printSummaryInfo(myColumnNames, myNuisanceInfo, myHistogramCache, hObs, m, myLuminosity, opts)
         # Histogram cache contains now all root files and nuisance table is now up to date
         # Create new root file and write
         myRootFilename = myRootfilePattern%m
@@ -782,15 +807,17 @@ def main(opts):
         print "... Generated datacard files %s and %s"%(myFilename, myRootFilename)
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=False,conflict_handler="resolve")
+    parser = OptionParser(usage="Usage: %prog [options]",add_help_option=True,conflict_handler="resolve")
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Print more information")
     parser.add_option("-x", "--settings", dest="settings", action="store", help="Name (incl. path) of the settings file to be used as an input")
+    parser.add_option("-d", "--dir", dest="directories", action="append", help="Name of input directories")
     parser.add_option("-r", "--recursive", dest="recursive", action="store_true", default=False, help="Do tail fit recursively to all subdirectories")
     parser.add_option("--noFitUncert", dest="noFitUncert", action="store_true", default=False, help="No fit uncertainty")
     parser.add_option("--doubleFitUncert", dest="doubleFitUncert", action="store_true", default=False, help="Double the fit uncertainty")
     parser.add_option("--noSystUncert", dest="noSystUncert", action="store_true", default=False, help="Remove all syst. uncertainties")
     parser.add_option("--lumiprojection", dest="lumiProjection", action="store", type="float", default=1.0, help="Projection on luminosity")
     parser.add_option("--bkgxsecprojection", dest="bkgxsecProjection", action="store", type="float", default=1.0, help="Projection on background xsection")
+    parser.add_option("--final", dest="unblinded", action="store_true", default=False, help="Use only for final plots")
     (opts, args) = parser.parse_args()
 
     myStyle = tdrstyle.TDRStyle()
@@ -801,7 +828,14 @@ if __name__ == "__main__":
     plots._legendLabels["BackgroundStatError"] = "Bkg. stat. unc"
     plots._legendLabels["BackgroundStatSystError"] = "Bkg. stat.#oplussyst. unc."
 
-    if opts.recursive:
+    if opts.directories != None:
+        opts.settings = "../"+opts.settings
+        for l in opts.directories:
+            print "\n*** TailFit for subdirectory %s ***"%l
+            os.chdir(l)
+            main(opts)
+            os.chdir("..")
+    elif opts.recursive:
 	opts.settings = "../"+opts.settings
 	myList = os.listdir(".")
 	myShortList = []

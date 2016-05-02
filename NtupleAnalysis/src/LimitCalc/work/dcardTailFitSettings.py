@@ -22,60 +22,45 @@ applyfrom = fitstart
 function = "FitFuncExpTailExoAlternate"
 #function = "FitFuncExpTailTauTauAlternate"
 
-# Fit settings for QCD
-QCD = {
-    "id": "QCD",
-    #"fitfunc": "FitFuncExpTailFourParamAlternate",
-    "fitfunc": function,
-    "fitmin": fitstart, #140
-    "fitmax": fitstop,
-    "applyFrom": applyfrom, # 160
-}
-
-# Fit settings for EWK+tt with taus
-EWKTau = {
-    "id": "EWK_Tau",
-    #"fitfunc": "FitFuncSimpleExp",
-    #"fitfunc": "FitFuncExpTailExo",
-    "fitfunc": function,
-    "fitmin": fitstart, #120
-    "fitmax": fitstop,
-    "applyFrom": applyfrom,
-}
-
-# Fit settings for EWK+tt with taus
-EWKTauMC = {
-    "id": "MC_EWKTau",
-    #"fitfunc": "FitFuncSimpleExp",
-    #"fitfunc": "FitFuncExpTailExo",
-    "fitfunc": function,
-    "fitmin": fitstart, # 140
-    "fitmax": fitstop,
-    "applyFrom": applyfrom,
-}
-
-# Fit settings for EWK+tt with fake taus
-EWKFake = {
-    "id": "MC_faketau",
-    #"fitfunc": "FitFuncSimpleExp",
-    #"fitfunc": "FitFuncExpTailExo",
-    "fitfunc": function,
-    "fitmin": fitstart, # 140
-    "fitmax": fitstop,
-    "applyFrom": applyfrom,
-}
-
-# Fit settings for EWK+tt with fake taus
-EWKFake = {
-    "id": "EWKnontt_faketau",
-    #"fitfunc": "FitFuncSimpleExp",
-    #"fitfunc": "FitFuncExpTailExo",
-    "fitfunc": function,
-    "fitmin": fitstart, # 140
-    "fitmax": fitstop,
-    "applyFrom": applyfrom,
-}
-
+fitSettings = [
+    # Fit settings for QCD
+    {
+        "id": "QCD",
+        #"fitfunc": "FitFuncExpTailFourParamAlternate",
+        "fitfunc": function,
+        "fitmin": fitstart, #140
+        "fitmax": fitstop,
+        "applyFrom": applyfrom, # 160
+    },
+    # Fit settings for EWK+tt with taus from data
+    {
+        "id": "EWK_Tau",
+        #"fitfunc": "FitFuncSimpleExp",
+        #"fitfunc": "FitFuncExpTailExo",
+        "fitfunc": function,
+        "fitmin": fitstart, #120
+        "fitmax": fitstop,
+        "applyFrom": applyfrom,
+    },
+    # Fit settings for EWK+tt with taus from MC
+    {
+        "id": "genuinetau",
+        "fitfunc": function,
+        "fitmin": fitstart, # 140
+        "fitmax": fitstop,
+        "applyFrom": applyfrom,
+    },
+    # Fit settings for EWK+tt with fake taus
+    {
+        "id": "MC_faketau",
+        #"fitfunc": "FitFuncSimpleExp",
+        #"fitfunc": "FitFuncExpTailExo",
+        "fitfunc": function,
+        "fitmin": fitstart, # 140
+        "fitmax": fitstop,
+        "applyFrom": applyfrom,
+    }
+]
 
 # List of backgrounds, for which no fit is done
 Blacklist = [
