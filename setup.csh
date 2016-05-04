@@ -9,14 +9,12 @@
 # Note:
 # tested so far LOCATION="" and LOCATION="jade"
 #================================================================================================
-echo "=== setup.csh"
-
 if ( $?HIGGSANALYSIS_BASE ) then
     echo "Standalone environment already loaded"
     exit
 endif
 
-echo "\n===Determining LOCATION variable"
+# echo "\n===Determining LOCATION variable"
 # Detect CMSSW
 set LOCATION=""
 if ( $?CMSSW_BASE ) then
@@ -33,13 +31,13 @@ if ( $LOCATION == "" ) then
 	set LOCATION="mac"
     endif
 endif
-echo "LOCATION is $LOCATION"
+# echo "LOCATION is $LOCATION"
 
 setenv HIGGSANALYSIS_BASE $PWD
-echo "HIGGSANALYSIS_BASE is $HIGGSANALYSIS_BASE"
+# echo "HIGGSANALYSIS_BASE is $HIGGSANALYSIS_BASE"
 
 if ( $LOCATION == "lxplus" ) then
-    echo "\n=== Sourcing lxplus environments for gcc 4.8 and ROOT 6.04.00"
+    echo "\n=== Sourcing lxplus environments"
     source /afs/cern.ch/sw/lcg/contrib/gcc/4.8/x86_64-slc6-gcc48-opt/setup.csh
     setenv ROOTSYS /afs/cern.ch/sw/lcg/app/releases/ROOT/6.04.00/x86_64-slc6-gcc48-opt/root
     setenv LD_LIBRARY_PATH "${ROOTSYS}/lib:${LD_LIBRARY_PATH}"
@@ -90,7 +88,7 @@ if ( $LOCATION == "jade" ) then
 endif
 
 
-echo "\n=== Appending to LD_LIBRARY_PATH"
+# echo "\n=== Appending to LD_LIBRARY_PATH"
 set LD_LIBRARY_PATH_APPEND="$HIGGSANALYSIS_BASE/NtupleAnalysis/lib:${LD_LIBRARY_PATH_APPEND}"
 if ( ! $?LD_LIBRARY_PATH ) then
     setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH_APPEND}"
@@ -98,9 +96,9 @@ else
     setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH_APPEND}:${LD_LIBRARY_PATH}"
 endif
 
-echo "\n=== Creating symbolic links and hidden directories for $LOCATION"
+# echo "\n=== Creating symbolic links and hidden directories for $LOCATION"
 set PATHPREFIX=.python
-echo "PATHPREFIX is $PATHPREFIX"
+# echo "PATHPREFIX is $PATHPREFIX"
 
 if ( $LOCATION == "CMSSW" ) then    
     if ( ! $?CMSSW_BASE || ! -e $CMSSW_BASE/python/HiggsAnalysis/NtupleAnalysis ) then
@@ -109,14 +107,14 @@ if ( $LOCATION == "CMSSW" ) then
 
 else
     if ( ! -e $PATHPREFIX/HiggsAnalysis ) then
-	echo "\n=== Creating $PATHPREFIX directory under `pwd`. Creating __init__.py"
+	# echo "\n=== Creating $PATHPREFIX directory under `pwd`. Creating __init__.py"
         mkdir -p $PATHPREFIX/HiggsAnalysis
         touch $PATHPREFIX/HiggsAnalysis/__init__.py
     endif
 
-    echo "\n=== Loop over directories under NtupleAnalysis/ and HeavyChHiggsToTauNu/"
+    # echo "\n=== Loop over directories under NtupleAnalysis/ and HeavyChHiggsToTauNu/"
     foreach DIR ( NtupleAnalysis HeavyChHiggsToTauNu )
-	#echo "DIR=$DIR"
+	# echo "DIR=$DIR"
 
 	set LINK_NAME=$PATHPREFIX/HiggsAnalysis/$DIR
 	set TARGET=$HIGGSANALYSIS_BASE/$DIR/python
@@ -125,15 +123,15 @@ else
 	# If $PATHPREFIX/HiggsAnalysis/$DIR does not exist
         if ( ! -e $PATHPREFIX/HiggsAnalysis/$DIR ) then
 
-            echo "Linking $TARGET with $LINK_NAME"
+            # echo "Linking $TARGET with $LINK_NAME"
 	    ln -s $TARGET $LINK_NAME
 
-	    echo "Creating $PYINIT"
+	    # echo "Creating $PYINIT"
             touch $PYINIT
 	    
             foreach d ( $PATHPREFIX/HiggsAnalysis/$DIR/* )
                 if ( -d $d ) then
-		    echo "Creating $d/__init__.py"
+		    # echo "Creating $d/__init__.py"
                     touch $d/__init__.py
                 endif
             end
@@ -143,12 +141,10 @@ else
 
     echo "\n=== Loop over directories under NtupleAnalysis/src"
     foreach DIR ( `ls NtupleAnalysis/src` )
-	#echo "DIR=$DIR"
+	# echo "DIR=$DIR"
 
 	# NOTE: Remove last "/" from directory name. The "/" at the end causes the linking to FAIL for some shells
 	set DIR=`echo $DIR | sed 's/\(.*\)\//\1 /'`
-	echo "-->DIR=$DIR"
-
 	set LINK_NAME=$PATHPREFIX/HiggsAnalysis/$DIR
 	set TARGET=$HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python
 	set PYINIT=$LINK_NAME/__init__.py
@@ -156,34 +152,50 @@ else
 	# If $LINK_NAME does not exist and $TARGET exists
         if ( ! -e $LINK_NAME && -e $HIGGSANALYSIS_BASE/NtupleAnalysis/src/$DIR/python ) then
 
-            echo "Linking $TARGET with $LINK_NAME"
+            # echo "Linking $TARGET with $LINK_NAME"
             ln -s $TARGET $LINK_NAME
 
-            echo "Creating $PYINIT"
+            # echo "Creating $PYINIT"
             touch $PYINIT
 
             foreach d ( $PATHPREFIX/HiggsAnalysis/$DIR/* )
                 if ( -d $d ) then
-		    echo "Creating $d/__init__.py"
+		    # echo "Creating $d/__init__.py"
                     touch $d/__init__.py
                 endif
             end
         endif
     end
 
-    echo "Setting PYTHONPATH"
+    # Set PYTHONPATH
     if ( -z PYTHONPATH ) then
-        setenv PYTHONPATH '${PWD}/$PATHPREFIX' #NOTE: Double quotes will NOT WORK for some shells!!!
-        echo "PYTHONPATH is $PYTHONPATH"
+	# echo "PYTHONPATH has zero length. Creating it"
+        #setenv PYTHONPATH "${PWD}/$PATHPREFIX" #NOTE: Double quotes will NOT WORK for some shells! 
+        #setenv PYTHONPATH '${PWD}/$PATHPREFIX' #NOTE: Single quotes will NOT set the full path
+	setenv PYTHONPATH ${PWD}/$PATHPREFIX    #NOTE: Single quotes will NOT set the full path
+        # echo "PYTHONPATH is $PYTHONPATH"
     else
-        setenv PYTHONPATH '${PWD}/$PATHPREFIX:${PYTHONPATH}'  #NOTE: Double quotes will NOT WORK for some shells!!!
-        echo "PYTHONPATH is $PYTHONPATH"
+	# echo "PYTHONPATH already exists. Appending to it"
+        #setenv PYTHONPATH "${PWD}/$PATHPREFIX:${PYTHONPATH}" #NOTE: Double quotes will NOT WORK for some shells
+	#setenv PYTHONPATH '${PWD}/$PATHPREFIX:${PYTHONPATH}' #NOTE: Single quotes will NOT set the full path
+	setenv PYTHONPATH ${PWD}/${PATHPREFIX}:${PYTHONPATH} 
+        # echo "PYTHONPATH is $PYTHONPATH"
     endif
 
 endif
 
-echo "\n=== Setting PATH variable"
+
+# echo "\n=== Setting PATH variable"
 setenv PATH "${HIGGSANALYSIS_BASE}/HeavyChHiggsToTauNu/scripts:${HIGGSANALYSIS_BASE}/NtupleAnalysis/scripts:${PATH}"
 
-echo "\n=== Install externals (if necessary)"
+# echo "\n=== Install externals (if necessary)"
 sh +x installexternals.sh
+
+echo "\n=== The environment variables set are:"
+echo "LOCATION is $LOCATION"
+echo "HIGGSANALYSIS_BASE is $HIGGSANALYSIS_BASE"
+echo "PATHPREFIX is $PATHPREFIX"
+echo "ROOTSYS is $ROOTSYS"
+echo "LD_LIBRARY_PATH is $LD_LIBRARY_PATH"
+echo "PYTHONPATH is $PYTHONPATH"
+echo "PATH is $PATH"
