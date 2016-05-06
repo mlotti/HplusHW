@@ -309,6 +309,8 @@ class DatacardColumn():
 
     ## Get control plots
     def getControlPlotByIndex(self,index):
+        if index >= len(self._controlPlots):
+            return None
         return self._controlPlots[index]
 
     ## Get correct control plot
