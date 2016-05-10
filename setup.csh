@@ -173,10 +173,10 @@ else
 
     echo "Setting PYTHONPATH"
     if ( -z PYTHONPATH ) then
-        setenv PYTHONPATH '${PWD}/$PATHPREFIX' #NOTE: Double quotes will NOT WORK for some shells!!!
+        setenv PYTHONPATH ${PWD}/${PATHPREFIX} #NOTE: Double quotes will NOT WORK for some shells!!!
         echo "PYTHONPATH is $PYTHONPATH"
     else
-        setenv PYTHONPATH '${PWD}/$PATHPREFIX:${PYTHONPATH}'  #NOTE: Double quotes will NOT WORK for some shells!!!
+        setenv PYTHONPATH ${PWD}/${PATHPREFIX}:${PYTHONPATH}  #NOTE: Double quotes will NOT WORK for some shells!!!
         echo "PYTHONPATH is $PYTHONPATH"
     endif
 
