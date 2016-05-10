@@ -190,7 +190,7 @@ config = {
         "simProcess": "SIM",
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-        "globalTag": "76X_mcRun2_asymptotic_v12",
+        "globalTag": "76X_mcRun2_asymptotic_RunIIFall15DR76_v1",
         "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
     }
 }
