@@ -512,7 +512,7 @@ class InvertedTauID:
     
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
-        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
+#        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
         
         if "WithBjetVeto" in name:
             #histograms.addText(0.6, 0.70, "Before MET cut", 22)

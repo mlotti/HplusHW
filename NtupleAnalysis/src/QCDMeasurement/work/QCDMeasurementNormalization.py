@@ -71,7 +71,11 @@ def main(argv, dsetMgr, moduleInfoString):
     # Include only 120 mass bin of HW and HH dsetMgr
     dsetMgr.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "HplusTB" in name, dsetMgr.getAllDatasetNames()))
-    # Default merging nad ordering of data and MC dsetMgr
+    dsetMgr.remove(filter(lambda name: "DY2JetsToLL" in name, dsetMgr.getAllDatasetNames()))
+    dsetMgr.remove(filter(lambda name: "DY3JetsToLL" in name, dsetMgr.getAllDatasetNames()))
+    dsetMgr.remove(filter(lambda name: "DY4JetsToLL" in name, dsetMgr.getAllDatasetNames()))
+      
+        # Default merging nad ordering of data and MC dsetMgr
     # All data dsetMgr to "Data"
     # All QCD dsetMgr to "QCD"
     # All single top dsetMgr to "SingleTop"
@@ -91,7 +95,7 @@ def main(argv, dsetMgr, moduleInfoString):
         myMergeList.append("TTJets") # Madgraph with negative weights
         print "Warning: using TTJets as input, but this is suboptimal. Please switch to the TT sample (much more stats.)."
     myMergeList.append("WJetsHT")
-    myMergeList.append("DYJetsToLLHT")
+    myMergeList.append("DYJetsToLL")
     myMergeList.append("SingleTop")
     if "Diboson" in dsetMgr.getMCDatasetNames():
         myMergeList.append("Diboson")

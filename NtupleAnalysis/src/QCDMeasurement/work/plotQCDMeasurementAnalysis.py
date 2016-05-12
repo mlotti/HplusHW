@@ -320,14 +320,14 @@ def dataMCExample(datasets):
      
     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterTau"), "TauPt_inv_afterTau",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
+                    rebin=10, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
      
     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau"), "Met_inv_afterTau",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
+                    rebin=10, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
@@ -360,7 +360,7 @@ def dataMCExample(datasets):
      
     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterJets"), "TauPt_inv_afterJets",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
+                    rebin=10, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
@@ -374,7 +374,7 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterBtag"), "TauPt_inv_afterBtag",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
+                    rebin=10, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
@@ -435,7 +435,7 @@ def dataMCExample(datasets):
     
     plots.drawPlot(plots.DataMCPlot(datasets, "ForDataDrivenCtrlPlots/BackToBackAngularCutsMinimum/BackToBackAngularCutsMinimumInclusive"), "BackToBackAngularCutsMinimumInclusive",
                     xlabel="MET (GeV)", ylabel="Number of events",
-                    rebin=2, stackMCHistograms=True,
+                    rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 200, "ymaxfactor": 10}, log=True)
@@ -465,22 +465,22 @@ def dataMCExample(datasets):
      
   
          
-    plots.drawPlot(plots.DataMCPlot(datasets, "metSelection_InvertedTau/Met"), "MetInvertedTau",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "METInvertedTauAfterStdSelectionsInclusive",
                     xlabel="MET (GeV)", ylabel="Number of events",
-                    rebin=2, stackMCHistograms=True,
+                    rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)   
      
-    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "MetInvertedTauAfterStdSelectionsInclusive",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"), "METInvertedTauAfterStdSelectionsInclusive",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=15, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
      
-    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelectionsInclusive",
-                    xlabel="m_{T} (GeV)", ylabel="Number of events",
+    plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMETBaselineTauAfterStdSelections/NormalizationMETBaselineTauAfterStdSelectionsInclusive"), "METBaselineTauAfterStdSelectionsInclusive",
+                    xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
@@ -502,7 +502,7 @@ def dataMCExample(datasets):
      
     plots.drawPlot(plots.DataMCPlot(datasets, "ForQCDNormalization/NormalizationMtInvertedTauAfterStdSelections/NormalizationMtInvertedTauAfterStdSelectionsInclusive"), "MtInvertedTauAfterStdSelections",
                     xlabel="m_{T} (GeV)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
+                    rebin=10, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 500, "ymaxfactor": 10}, log=True)
@@ -568,7 +568,7 @@ def MtComparison(datasets):
 
 
 def MetComparisonBaselineVsInverted(datasets):
-    mt = plots.PlotBase(getHistos2(datasets,"ForQCDNormalization/NormalizationMETBaselineTauAfterStdSelections/NormalizationMETBaselineTauAfterStdSelectionsInclusive", "ForQCDNormalizationEWKFakeTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"))
+    mt = plots.PlotBase(getHistos2(datasets,"ForQCDNormalization/NormalizationMETBaselineTauAfterStdSelections/NormalizationMETBaselineTauAfterStdSelectionsInclusive", "ForQCDNormalization/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"))
 #    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     mt._setLegendStyles()
     st1 = styles.StyleCompound([styles.styles[2]])
@@ -578,7 +578,7 @@ def MetComparisonBaselineVsInverted(datasets):
     st2.append(styles.StyleLine(lineStyle=3, lineWidth=3))
    # st2.append(styles.StyleLine(lineStyle=3, lineWidth=3))
     mt.histoMgr.forHisto("ForQCDNormalization/NormalizationMETBaselineTauAfterStdSelections/NormalizationMETBaselineTauAfterStdSelectionsInclusive", st1)
-    mt.histoMgr.forHisto("ForQCDNormalizationEWKFakeTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive", st2)
+    mt.histoMgr.forHisto("ForQCDNormalization/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive", st2)
  
     mt.histoMgr.setHistoLegendLabelMany({
             "NormalizationMETBaselineTauAfterStdSelectionsInclusive": "Baseline",
