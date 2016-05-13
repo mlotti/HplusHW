@@ -330,7 +330,7 @@ void GenParticleDumper::reset(){
         eta[ic].clear();
         phi[ic].clear();
         e[ic].clear();
-        et[ic].clear();
+        //et[ic].clear();
         pdgId[ic].clear();
         //status[ic].clear();
         mother[ic].clear();

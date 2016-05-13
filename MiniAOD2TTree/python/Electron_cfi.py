@@ -6,7 +6,8 @@ Electrons = cms.VPSet(
         src = cms.InputTag("slimmedElectrons"),
         rhoSource = cms.InputTag("fixedGridRhoFastjetAll"), # for PU mitigation in isolation
         IDprefix = cms.string("egmGsfElectronIDs"),
-        discriminators = cms.vstring("mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp80",
-                                     "mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp90")
+	discriminators = cms.vstring()
+#        discriminators = cms.vstring("mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp80",
+#                                     "mvaEleID-PHYS14-PU20bx25-nonTrig-V1-wp90")
     )
 )
