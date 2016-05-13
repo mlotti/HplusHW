@@ -16,14 +16,14 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  GenParticle operator[](size_t i) const;
-  std::vector<GenParticle> toVector() const;
+  //GenParticle operator[](size_t i) const;
+  //std::vector<GenParticle> toVector() const;
 
-  friend class GenParticle;
-  friend class GenParticleGenerated<GenParticleCollection>;
-  friend class Particle<GenParticleCollection>;
+  //friend class GenParticle;
+  //friend class GenParticleGenerated<GenParticleCollection>;
+  //friend class Particle<GenParticleCollection>;
 };
-
+/*
 class GenParticle: public GenParticleGenerated<GenParticleCollection> {
 public:
  GenParticle() {}
@@ -50,5 +50,5 @@ inline
 std::vector<GenParticle> GenParticleCollection::toVector() const {
   return ParticleCollectionBase::toVector(*this);
 }
-
+*/
 #endif

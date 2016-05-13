@@ -29,12 +29,14 @@ bool MCTools::IsNeutrino(const int pdgId){
 TLorentzVector MCTools::GetP4(const int genP_Index){
 
   TLorentzVector p4;
+/*
   GenParticle genP = GetGenP(genP_Index);
   double genP_Pt   = genP.pt();
   double genP_Eta  = genP.eta();
   double genP_Phi  = genP.phi();                                                                                                                                           
   double genP_Mass = genP.mass();
   p4.SetPtEtaPhiM(genP_Pt, genP_Eta, genP_Phi, genP_Mass);
+*/
   return p4;
 }
 
@@ -51,18 +53,18 @@ bool MCTools::RecursivelyLookForMotherId(const unsigned int genP_Index,
    */
 
   // cout << "=== MCTools::RecursivelyLookForMotherId():\n\t Requires debugging!" << endl;
+/*
   GenParticle genP     = GetGenP(genP_Index);
   unsigned short nMoms = genP.mothers().size();
   if (nMoms == 0) return false;
-
+*/
 #ifdef DEBUG
   cout << "Looking for mother #" << momId << " of GenParticle with index (pdgid) "<< genP_Index << "(" << genP_pdgId << ")" << endl;
 #endif
-
+  /*
   int myId;
   // For-loop: All mothers
   for (unsigned short i = 0; i < nMoms; i++){
-
     unsigned int mom_Index = genP.mothers().at(i);
     GenParticle mom        = GetGenP(mom_Index);
     int mom_PdgId          = mom.pdgId();
@@ -78,6 +80,7 @@ bool MCTools::RecursivelyLookForMotherId(const unsigned int genP_Index,
     if (myId == momId) return true;
     if (RecursivelyLookForMotherId(mom_Index, momId, bAbsoluteMomId) ) return true;
   }
+*/
   return false;
 }
 
@@ -95,7 +98,7 @@ int MCTools::GetPosOfMotherId(const unsigned int genP_Index,
      Note:
      What if there are more than 1 mothers? In that case what should I return? 
    */
-
+/*
   GenParticle genP     = GetGenP(genP_Index);
   unsigned short nMoms = genP.mothers().size();
   if (nMoms == 0) return -1; // 65535;
@@ -132,6 +135,7 @@ int MCTools::GetPosOfMotherId(const unsigned int genP_Index,
       return mom_Index;
     }
   }// for (unsigned short i = 0; i < nMoms; i++){
+*/
   return -1;//65535;
 }
 
@@ -150,7 +154,7 @@ bool MCTools::LookForMotherId(const unsigned int genP_Index,
      Note:
      What if there are more than 1 mothers? In that case what should I return? 
    */
-
+/*
   GenParticle genP     = GetGenP(genP_Index);
   unsigned short nMoms = genP.mothers().size();
 
@@ -172,6 +176,7 @@ bool MCTools::LookForMotherId(const unsigned int genP_Index,
     if (myId == momId) return true;
 
   }// for (unsigned short i = 0; i < nMoms; i++) {
+*/
   return false;
 }
 
@@ -180,6 +185,8 @@ TLorentzVector MCTools::GetVisibleP4(const unsigned int genP_Index){
 
   // Overloaded version ofTLorentzVector MCTools::GetVisibleP4() 
 
+  TLorentzVector p4(0,0,0,0);
+/*
   GenParticle genP = GetGenP(genP_Index);
   const vector<short unsigned int> daughters = genP.daughters();
 
@@ -205,14 +212,16 @@ TLorentzVector MCTools::GetVisibleP4(const unsigned int genP_Index){
     p4 += tmp;
 
   } // For-loop: Daughters
-
+*/
   return p4;
 }
 
 
 int MCTools::GetLdgDaughter(const int genP_Index, 
 			    bool bOnlyChargedDaughters){
+  int ldgPtIndex = -1;  
 
+/*
   GenParticle genP = GetGenP(genP_Index);
   const vector<short unsigned int> daughters = genP.daughters();
 
@@ -245,7 +254,7 @@ int MCTools::GetLdgDaughter(const int genP_Index,
     }
     
   }  // For-loop: Daughters
-
+*/
   return ldgPtIndex;
 }
 
@@ -253,7 +262,9 @@ int MCTools::GetLdgDaughter(const int genP_Index,
 double MCTools::GetHadronicTauMaxSignalCone(const int genP_Index,
 					    bool bOnlyChargedDaughters, 
 					    double minPt){
+  double dRMax = -1.0;
 
+/*
   GenParticle genP = GetGenP(genP_Index);
 
   if ( abs(genP.pdgId()) != 15) {
@@ -296,14 +307,14 @@ double MCTools::GetHadronicTauMaxSignalCone(const int genP_Index,
     if (dR > dRMax) dRMax = dR;
     
   } // For-loop: Daughters
-
+*/
   return dRMax;
 }
 
 
 void MCTools::GetHadronicTauFinalDaughters(const int genP_Index,
 					   vector<short int>& finalDaughters){
-
+/*
   cout << "=== MCTools::GetHadronicTauFinalDaughters():\n\t Requires debugging!" << endl;
   GenParticle genP = GetGenP(genP_Index);
   int genP_PdgId   = abs(genP.pdgId());
@@ -353,6 +364,7 @@ void MCTools::GetHadronicTauFinalDaughters(const int genP_Index,
 
     GetHadronicTauFinalDaughters(dau_Index, finalDaughters);
   }
+*/
   return;
 }
 
@@ -361,7 +373,7 @@ void MCTools::GetHadronicTauFinalDaughters(const int genP_Index,
 void MCTools::_GetHadronicTauChargedOrNeutralPions(int genP_Index, 
 						   bool charged,
 						   vector<short int> &pions){
-
+/*
   cout << "=== MCTools::_GetHadronicTauChargedOrNeutralPions():\n\t Requires debugging!" << endl;  
 
   // Only consider taus
@@ -399,7 +411,7 @@ void MCTools::_GetHadronicTauChargedOrNeutralPions(int genP_Index,
     pions.push_back(dau_Index);
     
   } // For-loop: Daughters
-  
+*/  
   return;
 }
 
@@ -431,7 +443,7 @@ bool MCTools::IsFinalStateTau(const int genP_Index){
     In other words, it checks if a tau decays to a tau.
     If yes, return false.
   */
-
+/*
   GenParticle genP = GetGenP(genP_Index);
   int genP_PdgId   = genP.pdgId();
 
@@ -447,6 +459,7 @@ bool MCTools::IsFinalStateTau(const int genP_Index){
     int dau_PdgId   = dau.pdgId();   
     if ( TMath::Abs(dau_PdgId) == 15) return false;
   }
+*/
   return true;
 }
 
@@ -464,7 +477,7 @@ int MCTools::GetTauDecayMode(const int genP_Index){
   */
 
   cout << "=== MCTools::GetTauDecayMode():\n\t Requires debugging!" << endl;
-  
+/*  
   GenParticle genP = GetGenP(genP_Index);
   int genP_PdgId   = genP.pdgId();
 
@@ -524,13 +537,13 @@ int MCTools::GetTauDecayMode(const int genP_Index){
   else{
     return ((nCharged/2)*10 + nPi0s); // it returns a value depending on nProngs+nPi0s (i.e. 3prongs+3pi0 =13)
   }
-
+*/
   return 0; // unknown decay
 }
 
 
 void MCTools::PrintMothersRecursively(const int genP_Index, bool bPrintHeaders){
-
+/*
   GenParticle genP = GetGenP(genP_Index);
   int genP_PdgId   = genP.pdgId();
 
@@ -556,12 +569,13 @@ void MCTools::PrintMothersRecursively(const int genP_Index, bool bPrintHeaders){
   }
 
   if (bPrintHeaders) cout << string(15*4, '=') << endl;
+*/
   return;
 }
 
 
 void MCTools::PrintDaughtersRecursively(const int genP_Index, bool bPrintHeaders){
-
+/*
   GenParticle genP = GetGenP(genP_Index);
   int genP_PdgId   = genP.pdgId();
 
@@ -587,12 +601,13 @@ void MCTools::PrintDaughtersRecursively(const int genP_Index, bool bPrintHeaders
   }
 
   if (bPrintHeaders) cout << string(15*4, '=') << endl;
+*/
   return;
 }
 
 
 void MCTools::PrintGenParticle(const int genP_Index, bool bPrintHeaders){
-
+/*
   GenParticle genP    = GetGenP(genP_Index);
   double genP_Pt      = genP.pt();
   double genP_Eta     = genP.eta();
@@ -641,6 +656,7 @@ void MCTools::PrintGenParticle(const int genP_Index, bool bPrintHeaders){
        << setw(6)  << dau_1        << setw(6)  << dau_2        << endl;  
   
   //  << setw(10) << setprecision(3) << genP_Pt
+*/
   return;
 }
 
@@ -670,7 +686,7 @@ double MCTools::GetLxy(const int genP_Index,
      GenParticles.
      OTHER K_S^0).
   */
-  
+/*  
   GenParticle genP = GetGenP(genP_Index);
   double refX  = 0.0;
   double refY  = 0.0;
@@ -694,7 +710,8 @@ double MCTools::GetLxy(const int genP_Index,
 #ifdef DEBUG
   cout << "Lxy = [(" << dau_VtxX << " - " << refX << ")^2 + (" <<  dau_VtxY << " - " << refY << ")^2]^(1/2) = " << Lxy << " [cm]" << endl;
 #endif
-  return Lxy;
+*/
+  return 0;//Lxy;
 }
 
 
@@ -718,7 +735,7 @@ double MCTools::GetD0Mag(const int genP_Index,
      https://root.cern.ch/root/html524/TMath.html#TopOfPage
      https://root.cern.ch/doc/master/classTLorentzVector.html
   */
-  
+  /*
   // Ensure GenParticle with index genP_Index has mother with index mom_Index
   if ( !IsItsMother(genP_Index, mom_Index) ) return -1.0;
 
@@ -740,12 +757,14 @@ double MCTools::GetD0Mag(const int genP_Index,
 #endif
 
   return d0Mag;
+*/
+return 0;
 }
 
 
 bool MCTools::IsItsMother(const int genP_Index,
 			  const int mom_Index){
-  
+/*  
   GenParticle genP = GetGenP(genP_Index);
 
   // For-loop: All mothers
@@ -753,6 +772,6 @@ bool MCTools::IsItsMother(const int genP_Index,
     unsigned short mom_Index_tmp = genP.mothers().at(i);
     if (mom_Index == mom_Index_tmp) return true;
   }
-
+*/
   return false;
 }

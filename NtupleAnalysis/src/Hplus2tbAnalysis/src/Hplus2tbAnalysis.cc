@@ -119,10 +119,10 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
     int genP_pdgId     = p.pdgId();
     double genP_pt     = p.pt();
     double genP_eta    = p.eta();
-    double genP_Status = p.status(); // PYTHIA8: http://home.thep.lu.se/~torbjorn/pythia81html/ParticleProperties.html
+    //double genP_Status = p.status(); // PYTHIA8: http://home.thep.lu.se/~torbjorn/pythia81html/ParticleProperties.html
     
     if( genP_pdgId == 6) hAssociatedTPt->Fill(p.pt());
-    if( genP_pdgId == 6) hAssociatedTPt->Fill(p.pt()); 
+    //    if( genP_pdgId == 6) hAssociatedTPt->Fill(p.pt()); 
   }
 
 
