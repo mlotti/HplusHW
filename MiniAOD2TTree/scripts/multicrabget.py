@@ -9,7 +9,7 @@ from CRABAPI.RawCommand import crabCommand
 
 def usage():
     print
-    print "### Usage:   ",os.path.basename(sys.argv[0])," <multicrab dir|crab dir>"
+    print "### Usage:   ",os.path.basename(sys.argv[0])," <multicrab dir|crab dir> [--command=LCG --checksum=no]"
     print
     sys.exit()
 
@@ -20,10 +20,13 @@ def main():
 
     dirs = sys.argv[1:]
 
+    options = []
     datasetdirs = []
     for d in dirs:
         if os.path.exists(d) and os.path.isdir(d):
             datasetdirs.append(os.path.abspath(d))
+	if d.startswith("--",0,2):
+	    options.append(d)
     if len(dirs) == 0:
         datasetdirs.append(os.path.abspath("."))
 
@@ -63,7 +66,7 @@ def main():
             finished,failed,retrievedLog,retrievedOut = retrievedFiles(d,res)
             if retrievedLog < finished:
                 touch(d)
-                dummy=crabCommand('getlog', dir = d)
+                dummy=crabCommand('getlog', *options, dir = d)
             if retrievedOut < finished:
                 dummy=crabCommand('getoutput', dir = d)
                 touch(d)
