@@ -74,7 +74,8 @@ def main(argv, dsetMgr, moduleInfoString):
     dsetMgr.remove(filter(lambda name: "DY2JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "DY3JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "DY4JetsToLL" in name, dsetMgr.getAllDatasetNames()))
-      
+    dsetMgr.remove(filter(lambda name: "ST" in name, dsetMgr.getAllDatasetNames()))
+          
         # Default merging nad ordering of data and MC dsetMgr
     # All data dsetMgr to "Data"
     # All QCD dsetMgr to "QCD"
@@ -96,7 +97,7 @@ def main(argv, dsetMgr, moduleInfoString):
         print "Warning: using TTJets as input, but this is suboptimal. Please switch to the TT sample (much more stats.)."
     myMergeList.append("WJetsHT")
     myMergeList.append("DYJetsToLL")
-    myMergeList.append("SingleTop")
+   # myMergeList.append("SingleTop")
     if "Diboson" in dsetMgr.getMCDatasetNames():
         myMergeList.append("Diboson")
         print "Warning: ignoring diboson sample (since it does not exist) ..."

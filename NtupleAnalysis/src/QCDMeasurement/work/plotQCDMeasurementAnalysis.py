@@ -85,7 +85,12 @@ def main(argv):
     #datasets.remove(filter(lambda name: "WJetsToLNu" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: ("DYJetsToLL_M_10to50" in name or "DYJetsToLL_M_50" in name) and not "DYJetsToLL_M_50_HT" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "WJetsToLNu" in name and not "WJetsToLNu_HT" in name, datasets.getAllDatasetNames()))  
-    # Default merging nad ordering of data and MC datasets
+    datasets.remove(filter(lambda name: "DY2JetsToLL" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "DY3JetsToLL" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "DY4JetsToLL" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "ST" in name, datasets.getAllDatasetNames()))
+               
+        # Default merging nad ordering of data and MC datasets
     # All data datasets to "Data"
     # All QCD datasets to "QCD"
     # All single top datasets to "SingleTop"
@@ -300,14 +305,14 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1, "ymaxfactor": 1}, log=False)
 
 #####################################################################
-     
+    """
     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterTau_realTau"), "TauPt_inv_afterTau_realTau",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-    """     
+     
      inverted = plots.DataMCPlot(datasets,"TauPt_inv_afterTau")
      invertedData = inverted.histoMgr.getHisto("Data").getRootHisto().Clone("TauPt_inv_afterTau")
      invertedRealTau = plots.DataMCPlot(datasets,"TauPt_inv_afterTau_realTau")
@@ -337,13 +342,41 @@ def dataMCExample(datasets):
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+    """
     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterJets_realTau"), "TauPt_inv_afterJets_realTau",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-
+                    
+    plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_baseline_afterTau_realTau"), "TauPt_baseline_afterTau_realTau",
+                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+                    
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau_realTau"), "Met_inv_afterTau_realTau",
+                    xlabel="MET (GeV)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+                    
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterJets_realTau"), "Met_inv_afterJets_realTau",
+                    xlabel="MET (GeV)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterBtag_realTau"), "Met_inv_afterBtag_realTau",
+                    xlabel="MET (GeV)", ylabel="Number of events",
+                    rebin=5, stackMCHistograms=True,
+                    addMCUncertainty=False, ratio=True, createRatio=True,
+                    addLuminosityText=True, 
+                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+    """
 
     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_baseline_afterTau"), "TauPt_baseline_afterTau",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
@@ -366,12 +399,7 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
 
 
-    plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterBtag_realTau"), "TauPt_inv_afterBtag_realTau",
-                    xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
-                    addMCUncertainty=False, ratio=True, createRatio=True,
-                    addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+ 
     plots.drawPlot(plots.DataMCPlot(datasets, "TauPt_inv_afterBtag"), "TauPt_inv_afterBtag",
                     xlabel="p_{T}^{#tau jet} (GeV/c)", ylabel="Number of events",
                     rebin=10, stackMCHistograms=True,
@@ -380,24 +408,14 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
 
 
-    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau_realTau"), "Met_inv_afterTau_realTau",
-                    xlabel="MET (GeV)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
-                    addMCUncertainty=False, ratio=True, createRatio=True,
-                    addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+
     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterTau"), "Met_inv_afterTau",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
                     addMCUncertainty=False, ratio=True, createRatio=True,
                     addLuminosityText=True, 
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
-    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterJets_realTau"), "Met_inv_afterJets_realTau",
-                    xlabel="MET (GeV)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
-                    addMCUncertainty=False, ratio=True, createRatio=True,
-                    addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+
     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterJets"), "Met_inv_afterJets",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
@@ -406,12 +424,7 @@ def dataMCExample(datasets):
                     opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
 
 
-    plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterBtag_realTau"), "Met_inv_afterBtag_realTau",
-                    xlabel="MET (GeV)", ylabel="Number of events",
-                    rebin=5, stackMCHistograms=True,
-                    addMCUncertainty=False, ratio=True, createRatio=True,
-                    addLuminosityText=True, 
-                    opts={"ymin": 1e-1,"xmax": 800, "ymaxfactor": 10}, log=True)
+
     plots.drawPlot(plots.DataMCPlot(datasets, "Met_inv_afterBtag"), "Met_inv_afterBtag",
                     xlabel="MET (GeV)", ylabel="Number of events",
                     rebin=5, stackMCHistograms=True,
