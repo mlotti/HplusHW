@@ -78,12 +78,12 @@ else
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH_APPEND:$LD_LIBRARY_PATH
 fi
 
-export PPATHPREFIX =.python
+export PPATHPREFIX=.python
 if [ "x$LOCATION" = "xCMSSW" ]; then
     if [ ! -e $CMSSW_BASE/python/HiggsAnalysis/NtupleAnalysis ]; then
         ln -s $HIGGSANALYSIS_BASE/NtupleAnalysis/python $CMSSW_BASE/python/HiggsAnalysis/NtupleAnalysis
     fi
-    PPATHPREFIX = "$CMSSW_BASE/python"
+    export PPATHPREFIX="$CMSSW_BASE/python"
 fi
 
 # Need to create the following also on lxplus for limit calculation

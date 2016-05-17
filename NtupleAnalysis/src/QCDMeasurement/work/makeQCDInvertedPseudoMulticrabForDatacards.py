@@ -53,9 +53,9 @@ class ModuleBuilder:
             self._dsetMgr.close()
         if self._dsetMgrCreator != None:
             self._dsetMgrCreator.close()
+        ROOT.gDirectory.GetList().Delete()
         ROOT.gROOT.CloseFiles()
         ROOT.gROOT.GetListOfCanvases().Delete()
-        ROOT.gDirectory.GetList().Delete()
         
     def createDsetMgr(self, multicrabDir, era, searchMode, optimizationMode=None, systematicVariation=None):
         self._era = era

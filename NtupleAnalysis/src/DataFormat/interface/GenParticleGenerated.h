@@ -11,7 +11,8 @@ class GenParticleGeneratedCollection {
 public:
   using float_type = double;
   explicit GenParticleGeneratedCollection(const std::string& prefix="genParticles")
-  : fGenElectron(prefix),
+  : fGenParticles(prefix),
+    fGenElectron(prefix),
     fGenHplus(prefix),
     fGenHplusNeutrinos(prefix),
     fGenMuon(prefix),
@@ -43,6 +44,7 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
+  const std::vector<Particle<ParticleCollection<float_type>>> getGenParticles() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenElectronCollection() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenHplusCollection() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenHplusNeutrinosCollection() const;
@@ -57,6 +59,7 @@ public:
   const std::vector<Particle<ParticleCollection<float_type>>> getGenWCollection() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenWNeutrinosCollection() const;
 protected:
+  ParticleCollection<float_type> fGenParticles;
   ParticleCollection<float_type> fGenElectron;
   ParticleCollection<float_type> fGenHplus;
   ParticleCollection<float_type> fGenHplusNeutrinos;
