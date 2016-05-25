@@ -90,9 +90,10 @@ def createAnalyzer(dataVersion,era):
             discriminators = ["Muons_TrgMatch_IsoMu16_eta2p1"],
         ),
         TauSelection = PSet(
-            discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",
+            discriminators = ["byMediumIsolationMVA3newDMwLT",
                              "againstMuonTight3",
                              "againstElectronMediumMVA5"],
+            nprongs = 1,
         ),
         binning = binning,
         xLabel  = xLabel,
