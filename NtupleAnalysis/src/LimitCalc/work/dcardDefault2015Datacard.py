@@ -250,7 +250,8 @@ else:
     DataGroups.append(DataGroup(label="CMS_Hptntj_DY_genuinetau", landsProcess=6,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
-                                datasetDefinition="DYJetsToLLHT",
+                                #datasetDefinition="DYJetsToLLHT",
+                                datasetDefinition="DYJetsToLL",
                                 validMassPoints=MassPoints,
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]

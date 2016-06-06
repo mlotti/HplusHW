@@ -74,7 +74,7 @@ def main(argv, dsetMgr, moduleInfoString):
     dsetMgr.remove(filter(lambda name: "DY2JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "DY3JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "DY4JetsToLL" in name, dsetMgr.getAllDatasetNames()))
-    dsetMgr.remove(filter(lambda name: "ST" in name, dsetMgr.getAllDatasetNames()))
+    dsetMgr.remove(filter(lambda name: "WJetsToLNu_HT" in name, dsetMgr.getAllDatasetNames()))
           
         # Default merging nad ordering of data and MC dsetMgr
     # All data dsetMgr to "Data"
@@ -95,7 +95,9 @@ def main(argv, dsetMgr, moduleInfoString):
     else:
         myMergeList.append("TTJets") # Madgraph with negative weights
         print "Warning: using TTJets as input, but this is suboptimal. Please switch to the TT sample (much more stats.)."
-    myMergeList.append("WJetsHT")
+#    myMergeList.append("WJetsHT")
+    myMergeList.append("WJets")
+
     myMergeList.append("DYJetsToLL")
    # myMergeList.append("SingleTop")
     if "Diboson" in dsetMgr.getMCDatasetNames():

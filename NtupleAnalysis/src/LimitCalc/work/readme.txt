@@ -122,7 +122,9 @@ The not so short details of the above points:
   
 2) Running datacard generator on the input datacard
 - Running the datacard generator is done with
+
     ./dcardGenerator.py -x dcardDefault2015Datacard.py
+
 - There are several command line parameters:
   * -l    Prints a list of available era/searchMode/optimizationMode options (datacards are created
           separately for each one of them).
