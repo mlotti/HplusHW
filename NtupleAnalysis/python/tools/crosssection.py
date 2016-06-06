@@ -42,7 +42,7 @@ class CrossSectionList:
 # [1] PREP
 # [2] https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingSummer2011
 # [3] from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
-# [4] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
+# [3] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
 # [5] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopMC2011
 # [6] https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma
 # [7] https://twiki.cern.ch/twiki/bin/view/CMS/HiggsToTauTauWorkingHCP2012#53X_MC_Samples
@@ -132,10 +132,16 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt_470to600_MuEnrichedPt5", {
             "13": 7.921e+01, # 7.921e+01 +- 5.425e-02 [14]
     }),
+ #   CrossSection("WW", {
+ #           "7": 43.0, # [3]
+ #           "8": 54.838, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
+ #           "13": 118.7, # [13] NNLO QCD
+ #           }),
+            ######### from Andrea: WW -> lnqq : 52pb + WW -> lnln : 12.46pb
     CrossSection("WW", {
             "7": 43.0, # [3]
             "8": 54.838, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
-            "13": 118.7, # [13] NNLO QCD
+            "13": 64.46, # [13] NNLO QCD
             }),
     CrossSection("WZ", {
             "7": 18.2, # [3]
@@ -161,7 +167,13 @@ backgroundCrossSections = CrossSectionList(
             "8": 245.8, # [10]
             "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
             }),
+
     CrossSection("TT", {
+            "7": 172.0, # [10]
+            "8": 245.8, # [10]
+            "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
+            }),
+    CrossSection("TT_ext", {
             "7": 172.0, # [10]
             "8": 245.8, # [10]
             "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
@@ -231,6 +243,7 @@ backgroundCrossSections = CrossSectionList(
             "8": 214.0,
             }),
     # end W+Njets 
+
     CrossSection("DYJetsToLL_M_50", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
@@ -355,14 +368,16 @@ backgroundCrossSections = CrossSectionList(
             "7": 1.44, # [5,6]
             "8": 1.76, # [8]
             }),
+            #################### modified
     CrossSection("ST_tW_antitop_5f_inclusiveDecays", {
-            "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            "13": 30.09, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_tW_antitop_5f_DS_inclusiveDecays", {
             "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
+            ############################### modified
     CrossSection("ST_tW_top_5f_inclusiveDecays", {
-            "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            "13": 30.11, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_tW_top_5f_DS_inclusiveDecays", {
             "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
@@ -374,6 +389,23 @@ backgroundCrossSections = CrossSectionList(
             "13": 136.02, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_s_channel_4f_leptonDecays", {
+            "13": 10.32, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            }),
+            ########################################### test for 743, modified
+    CrossSection("ST_t_channel_antitop_4f_inclusiveDecays", {
+            "13": 80.95, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            }),
+           ########################################### UUSI
+    CrossSection("ST_s_channel_4f_InclusiveDecays", {
+            "13": 10.32, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            }),
+    CrossSection("ST_tW_top_4f_inclusiveDecays", {
+            "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            }),
+    CrossSection("ST_t_channel_top_4f_inclusiveDecays", {
+            "13": 136.02, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            }),
+    CrossSection("ST_s_channel_4f_InclusiveDecays", {
             "13": 10.32, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
 )
