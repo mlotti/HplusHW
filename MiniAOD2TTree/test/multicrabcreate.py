@@ -11,8 +11,8 @@ import sys
 import datetime
 
 #PSET = "miniAODGEN2TTree_cfg.py"
-#PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
-PSET = "miniAOD2TTree_METLegSkim_cfg.py"
+PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
+#PSET = "miniAOD2TTree_METLegSkim_cfg.py"
 #PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
 #PSET = "miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py"
 
@@ -21,33 +21,33 @@ from datasets import *
 datasets = []
 
 tauLegDatasets         = []
-tauLegDatasets.extend(datasetsMuonData76x)
-tauLegDatasets.extend(datasetsMiniAODv2_DY76x)
+tauLegDatasets.extend(datasetsMuonData)
+#tauLegDatasets.extend(datasetsMiniAODv2_DY76x)
 #tauLegDatasets.extend(datasetsMiniAODv2_Top76x)
 #tauLegDatasets.extend(datasetsMiniAODv2_WJets76x)
 #tauLegDatasets.extend(datasetsMiniAODv2_QCDMuEnriched76x)
-tauLegDatasets.extend(datasetsMiniAODv2_H12576x)
+#tauLegDatasets.extend(datasetsMiniAODv2_H12576x)
                                                                                                                                                          
 metLegDatasets         = []
-metLegDatasets.extend(datasetsTauData76x)
-metLegDatasets.extend(datasetsMiniAODv2_DY76x)                                                                                                                                                         
-metLegDatasets.extend(datasetsMiniAODv2_Top76x)                                                                                                                                                        
-metLegDatasets.extend(datasetsMiniAODv2_WJets76x)                                                                                                                                                      
-metLegDatasets.extend(datasetsMiniAODv2_QCD76x)
+metLegDatasets.extend(datasetsTauData)
+#metLegDatasets.extend(datasetsMiniAODv2_DY76x)                                                                                                                                                         
+#metLegDatasets.extend(datasetsMiniAODv2_Top76x)                                                                                                                                                        
+#metLegDatasets.extend(datasetsMiniAODv2_WJets76x)                                                                                                                                                      
+#metLegDatasets.extend(datasetsMiniAODv2_QCD76x)
 
 signalAnalysisDatasets = []
-signalAnalysisDatasets.extend(datasetsTauData76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_DY76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_Top76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_WJets76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_Diboson76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_QCD76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTauNu76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
+#signalAnalysisDatasets.extend(datasetsTauData76x)
+#signalAnalysisDatasets.extend(datasetsMiniAODv2_DY76x)
+#signalAnalysisDatasets.extend(datasetsMiniAODv2_Top76x)
+#signalAnalysisDatasets.extend(datasetsMiniAODv2_WJets76x)
+#signalAnalysisDatasets.extend(datasetsMiniAODv2_Diboson76x)
+#signalAnalysisDatasets.extend(datasetsMiniAODv2_QCD76x)
+#signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTauNu76x)
+#signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
 
 hplus2tbAnalysisDatasets = []
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TT76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
+#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TT76x)
+#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
 
 datadataset_re = re.compile("^/(?P<name>\S+?)/(?P<run>Run\S+?)/")
 mcdataset_re = re.compile("^/(?P<name>\S+?)/")
