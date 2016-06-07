@@ -108,7 +108,7 @@ def main(opts, args):
                 if opts.verbose:
                     print output
         
-            files.append((d, os.path.join(d, "results", "lumiSummary.json")))
+            files.append((d, os.path.join(d, "results", "processedLumis.json")))
     files.extend([(None, f) for f in opts.files])
     
     data = {}
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     parser.add_option("--truncate", dest="truncate", default=False, action="store_true",
                       help="Truncate the output file before writing")
     parser.add_option("--noreport", dest="report", action="store_false", default=True,
-                      help="Do not run 'crab -report', i.e. you guarantee that the lumiSummary.json contains already all jobs.")
+                      help="Do not run 'crab -report', i.e. you guarantee that the processedLumis.json contains already all jobs.")
     parser.add_option("--verbose", dest="verbose", action="store_true", default=False,
                       help="Print outputs of the commands which are executed")
     parser.add_option("--lumiCalc1", dest="lumicalc", action="store_const", const="lumiCalc1",

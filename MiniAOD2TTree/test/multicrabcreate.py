@@ -12,8 +12,9 @@ import datetime
 
 #PSET = "miniAODGEN2TTree_cfg.py"
 #PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
-#PSET = "miniAOD2TTree_METLegSkim_cfg.py"
-PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
+PSET = "miniAOD2TTree_METLegSkim_cfg.py"
+#PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
+#PSET = "miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py"
 
 from datasets import *
 
@@ -42,11 +43,16 @@ signalAnalysisDatasets.extend(datasetsMiniAODv2_Top76x)
 signalAnalysisDatasets.extend(datasetsMiniAODv2_WJets76x)
 signalAnalysisDatasets.extend(datasetsMiniAODv2_Diboson76x)
 signalAnalysisDatasets.extend(datasetsMiniAODv2_QCD76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_Signal76x)
+signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTauNu76x)
+signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
 
+hplus2tbAnalysisDatasets = []
+hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TT76x)
+hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
 
 datadataset_re = re.compile("^/(?P<name>\S+?)/(?P<run>Run\S+?)/")
 mcdataset_re = re.compile("^/(?P<name>\S+?)/")
+ext_re = re.compile("(?P<name>_ext\d+)-")
 
 version = ""
 pwd = os.getcwd()
@@ -58,7 +64,7 @@ if match:
     version = version.replace("pre","p")
     version = version.replace("patch","p")
 
-analysis = "SignalAnalysis"
+analysis = "DUMMY"
 leg_re = re.compile("miniAOD2TTree_(?P<leg>\S+)Skim_cfg.py")
 match = leg_re.search(PSET)
 if match:
@@ -66,6 +72,8 @@ if match:
 
 if analysis == "SignalAnalysis":
     datasets = signalAnalysisDatasets
+if analysis == "Hplus2tbAnalysis":
+    datasets = hplus2tbAnalysisDatasets
 if analysis == "TauLeg":
     datasets = tauLegDatasets
 if analysis == "METLeg":
@@ -121,6 +129,9 @@ for dataset in datasets:
         tev_match = tev_re.search(rName)
         if tev_match:
             rName = tev_match.group("name")
+        ext_match = ext_re.search(dataset.URL)
+        if ext_match:
+            rName+=ext_match.group("name")
 
 	if dataset.isData():
 	    runrangeMatch = rr_re.search(dataset.lumiMask)
@@ -137,8 +148,8 @@ for dataset in datasets:
 
         rName = rName.replace("-","_")
 
-        if "ext" in dataset.URL:
-            rName += "_ext"
+#        if "ext" in dataset.URL:
+#            rName += "_ext"
 
         outfilepath = os.path.join(dirName,"crabConfig_"+rName+".py")
 

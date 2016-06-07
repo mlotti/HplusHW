@@ -332,7 +332,7 @@ def analyze(analysis):
     namePull = "TauMET_"+analysis+"_DataVsMC_"+hName+"s"
 
     plots.mergeRenameReorderForDataMC(datasets)
-    datasets.merge("MC", ["TTJets","WJets","DYJetsToLL","SingleTop","QCD"], keepSources=True)
+    datasets.merge("MC", ["TT","WJets","DYJetsToLL","SingleTop","QCD"], keepSources=True)
 
     drh1 = datasets.getDataset("Data").getDatasetRootHisto(hName)
     drh2 = datasets.getDataset("MC").getDatasetRootHisto(hName)
