@@ -22,10 +22,7 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-       '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/274/087/00000/BA19CFA7-0725-E611-B5B3-02163E0133BE.root',
-#        '/store/mc/RunIISpring15MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/40000/00087FEB-236E-E511-9ACB-003048FF86CA.root'
-#        '/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
-#        '/store/data/Run2015D/Tau/MINIAOD/PromptReco-v3/000/256/587/00000/6E29A230-925D-E511-A2F2-02163E0140F1.root'
+       '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
     )
 )
 
