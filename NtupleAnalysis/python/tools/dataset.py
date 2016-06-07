@@ -2579,8 +2579,8 @@ class Dataset:
         # the files increases the reading (object lookup?) performance
         # when reading from many analysis directories in a single
         # script.
-        for f in self.files:
-            f.Clear()
+#        for f in self.files:
+#            f.Clear() # uncommented by Santeri in order to avoid segmentation faults
 
     ## Close the files
     #
@@ -2915,17 +2915,21 @@ class Dataset:
             raise Exception("Key 'isPileupReweighted' missing in configinfo histogram!")
         ratio = 1.0
         if self.info["isPileupReweighted"] > 0.0:
-            delta = (self.info["isPileupReweighted"] - self.nAllEvents) / self.nAllEvents
+            delta = 0.0
+            if(self.nAllEvents > 0.0): 
+                delta = (self.info["isPileupReweighted"] - self.nAllEvents) / self.nAllEvents
+                ratio = ratio * self.info["isPileupReweighted"] / self.nAllEvents
             if _debugNAllEvents and abs(delta) > 0.00001:
                 print "dataset (%s): Updated NAllEvents to pileUpReweighted NAllEvents, change: %0.6f %%"%(self.getName(), delta*100.0)
-            ratio = ratio * self.info["isPileupReweighted"] / self.nAllEvents
         if not "isTopPtReweighted" in self.info.keys():
             raise Exception("Key 'isTopPtReweighted' missing in configinfo histogram!")
         if self.info["isTopPtReweighted"] > 0.0:
-            delta = (self.info["isTopPtReweighted"] - self.nAllEvents) / self.nAllEvents
+            delta = 0.0
+            if(self.nAllEvents > 0.0):
+                delta = (self.info["isTopPtReweighted"] - self.nAllEvents) / self.nAllEvents
+                ratio = ratio * self.info["isTopPtReweighted"] / self.nAllEvents
             if _debugNAllEvents and abs(delta) > 0.00001:
                 print "dataset (%s): Updated NAllEvents to isTopPtReweighted NAllEvents, change: %0.6f %%"%(self.getName(), delta*100.0)
-            ratio = ratio * self.info["isTopPtReweighted"] / self.nAllEvents
         self.nAllEvents = ratio * self.nAllEvents
 
     def getNAllEvents(self):
@@ -4166,7 +4170,6 @@ class DatasetManagerCreator:
                 if not helpFound:
                     raise e
                 raise Exception(msg)
-
             manager.append(dset)
 
         if len(self._baseDirectory) > 0:
