@@ -67,6 +67,7 @@ def loopOverDirectory(dirname, inputFiles, outputFile):
 
         if isinstance(obj, ROOT.TDirectory):
             loopOverDirectory(os.path.join(dirname, keyname), inputFiles, outputFile)
+            status = outputFile.cd(dirname) # after looping over subdirectory, cd back to the current directory
         elif isinstance(obj, ROOT.TH1):
             if _debug:
                 print "    merging %s: %s"%(className, os.path.join(dirname, keyname))
