@@ -66,7 +66,7 @@ def _assignJetToTauSF(tauSelectionPset, etaRegion, dirNumber):
 def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
     # FIXME: there is no mechanic right now to choose correct era / run range
     # FIXME: this approach works as long as there is just one efficiency for the simulated samples
-    reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "tauLegTriggerEfficiency2015_1prong.json")
+    reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "tauLegTriggerEfficiency2015_3prong.json")
     result = reader.getResult()
     if variationType == "MC":
         _assignTrgSF("tauTriggerSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], tauSelectionPset, direction)

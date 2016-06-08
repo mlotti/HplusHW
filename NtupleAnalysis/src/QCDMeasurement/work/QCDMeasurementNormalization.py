@@ -206,7 +206,7 @@ def main(argv, dsetMgr, moduleInfoString):
         template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=boundary, norm=1, rejectPoints=1),
                                                  FITMIN, FITMAX)
         template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
-                                                          defaultUpperLimit=[ 20, 150, 50,    1.0])
+                                                          defaultUpperLimit=[ 20, 150, 100,    1.0])
         # Note that the same function is used for QCD only and QCD+EWK fakes
         template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", norm=1), FITMIN, FITMAX)
         template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[0.0001, 0.001, 0.1, 0.0,  10, 0.0001, 0.001],
@@ -274,7 +274,7 @@ def main(argv, dsetMgr, moduleInfoString):
             manager.plotTemplates()
             
             #===== Fit individual templates to data
-            fitOptions = "R B" # RBLW
+            fitOptions = "RBLW" #"R B" # RBLW
             manager.calculateNormalizationCoefficients(hmetBase_data, fitOptions, FITMIN, FITMAX)
             
             #===== Calculate combined normalisation coefficient (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)

@@ -93,22 +93,10 @@
                "uncertaintyMinus":0.841344746068
              },
              {
-               "pt"              :240.0,
-               "efficiency"      :0.0,
-               "uncertaintyPlus" :1.0,
-               "uncertaintyMinus":0.0
-             },
-             {
                "pt"              :260.0,
                "efficiency"      :1.0,
                "uncertaintyPlus" :0.0,
                "uncertaintyMinus":0.841344746068
-             },
-             {
-               "pt"              :280.0,
-               "efficiency"      :0.0,
-               "uncertaintyPlus" :1.0,
-               "uncertaintyMinus":0.0
              }
           ]
       }
@@ -201,22 +189,10 @@
                "uncertaintyMinus":0.00364413106361
              },
              {
-               "pt"              :240.0,
-               "efficiency"      :0.987618696016,
-               "uncertaintyPlus" :0.0071656291397,
-               "uncertaintyMinus":0.0071656291397
-             },
-             {
                "pt"              :260.0,
                "efficiency"      :0.992733192119,
                "uncertaintyPlus" :0.00500099292816,
                "uncertaintyMinus":0.00500099292816
-             },
-             {
-               "pt"              :280.0,
-               "efficiency"      :0.999202861771,
-               "uncertaintyPlus" :0.000797138229011,
-               "uncertaintyMinus":0.000798012351721
              }
           ]
       }
