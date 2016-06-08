@@ -11,9 +11,9 @@ import sys
 import datetime
 
 #PSET = "miniAODGEN2TTree_cfg.py"
-PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
+#PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
-#PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
+PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
 #PSET = "miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py"
 
 from datasets import *
@@ -108,7 +108,7 @@ crab_splitunits_re = re.compile("config.Data.unitsPerJob")
 crab_dbs_re = re.compile("config.Data.inputDBS")
 tune_re = re.compile("(?P<name>\S+)_Tune")
 tev_re = re.compile("(?P<name>\S+)_13TeV")
-rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON(?P<Silver>(_\S+|))\.")
+rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions\d\d(?P<BunchSpacing>\S*)_JSON(?P<Silver>(_\S+|))\.")
 #rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON")
 #rr_re = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15_(?P<BunchSpacing>\d+ns)_JSON_v")
 
