@@ -16,7 +16,7 @@ from PythonWriter import PythonWriter
 pythonWriter = PythonWriter()
 
 ROOT.gROOT.SetBatch(True)
-plotDir = "METLeg2015"
+plotDir = "METLeg2016"
 
 formats = [".pdf",".png"]
 
@@ -33,29 +33,39 @@ def main():
 
     paths = [sys.argv[1]]
 
-    analysis = "METLeg_2015D_MET80"
+    analysis = "METLeg_2016B_MET80"
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau\S+25ns$|TTJets$")
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau_Run2015D_PromptReco_v4_246908_260426_25ns$|DYJetsToLL_M_50$")
+    datasetsMC = None
+#    datasetsMC = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_")
 
     for d in datasets.getAllDatasets():
         print d.getName()
     style = tdrstyle.TDRStyle()
 
     dataset1 = datasets.getDataDatasets()
-    dataset2 = datasets.getMCDatasets()
+    dataset2 = dataset1
+    createRatio = False
+    if isinstance(datasetsMC,dataset.DatasetManager):
+        dataset2 = datasetsMC.getMCDatasets()
+        createRatio = True
 
     eff1_MET80 = getEfficiency(dataset1)
     eff2_MET80 = getEfficiency(dataset2)
 
     styles.dataStyle.apply(eff1_MET80)
-    styles.mcStyle.apply(eff2_MET80)
     eff1_MET80.SetMarkerSize(1)
-    eff2_MET80.SetMarkerSize(1.5)
+    if createRatio:
+        styles.mcStyle.apply(eff2_MET80)
+        eff2_MET80.SetMarkerSize(1.5)
 
-    p = plots.ComparisonPlot(histograms.HistoGraph(eff1_MET80, "eff1_MET80", "p", "P"),
-                             histograms.HistoGraph(eff2_MET80, "eff2_MET80", "p", "P"))
+    if createRatio:
+        p = plots.ComparisonPlot(histograms.HistoGraph(eff1_MET80, "eff1_MET80", "p", "P"),
+                                 histograms.HistoGraph(eff2_MET80, "eff2_MET80", "p", "P"))
+    else:
+        p = plots.PlotBase([histograms.HistoGraph(eff1_MET80, "eff1_MET80", "p", "P")])
 
     opts = {"ymin": 0, "ymax": 1.1}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
@@ -66,15 +76,21 @@ def main():
     legend1 = "Data"
 #    legend2 = "MC (TTJets)"
     legend2 = "MC"
-    p.histoMgr.setHistoLegendLabelMany({"eff1_MET80": legend1, "eff2_MET80": legend2})
 
-    p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
+    if createRatio:
+        p.histoMgr.setHistoLegendLabelMany({"eff1_MET80": legend1, "eff2_MET80": legend2})
+        p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
+    else:
+        p.histoMgr.setHistoLegendLabelMany({"eff1_MET80": legend1})
+        p.createFrame(os.path.join(plotDir, name), opts=opts, opts2=opts2)
+
     p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.8), **moveLegend))
 
     p.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
     p.getFrame().GetXaxis().SetTitle("MET Type 1 (GeV)")
-    p.getFrame2().GetYaxis().SetTitle("Ratio")
-    p.getFrame2().GetYaxis().SetTitleOffset(1.6)
+    if createRatio:
+        p.getFrame2().GetYaxis().SetTitle("Ratio")
+        p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
 #    histograms.addText(0.2, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
@@ -99,6 +115,9 @@ def main():
     pythonWriter.addMCParameters(label,eff2_MET80)
 
     pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency2015.json"))
+
+    if not createRatio:
+        sys.exit()
 
     """
     #### MET120
@@ -151,10 +170,10 @@ def main():
     """
 
     # CaloMET
-
+    """
     #### MET80
 
-    analysisc = "METLeg_2015D_CaloMET_MET80"
+    analysisc = "METLeg_2016B_CaloMET_MET80"
     datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc)
     datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc,excludeTasks="Tau\S+25ns_Silver$")
 #    datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc,includeOnlyTasks="Tau\S+25ns$|TTJets$")
@@ -202,7 +221,7 @@ def main():
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
     p.save(formats)
-
+    """
     """
     #### MET120 
 

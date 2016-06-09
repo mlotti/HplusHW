@@ -16,7 +16,7 @@ from PythonWriter import PythonWriter
 pythonWriter = PythonWriter()
 
 ROOT.gROOT.SetBatch(True)
-plotDir = "TauLeg2015"
+plotDir = "TauLeg2016"
 
 formats = [".pdf",".png"]
 
@@ -148,19 +148,23 @@ def analyze(analysis):
     paths = [sys.argv[1]]
 
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125")
-    datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL")
+    datasetsDY = None
+#    datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="GluGluHToTauTau_M125|TTJets")
     datasetsH125 = None
 #    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125",emptyDatasetsAsNone=True)
-    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125")
+#    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125")
 
     datasets.loadLuminosities()
 
     style = tdrstyle.TDRStyle()
 
     dataset1 = datasets.getDataDatasets()
+    dataset2 = dataset1
 #    dataset2 = datasets.getMCDatasets()
-    dataset2 = datasetsDY.getMCDatasets()
+    if not datasetsDY == None:
+        dataset2 = datasetsDY.getMCDatasets()
+
 
     eff1 = getEfficiency(dataset1)
     eff2 = getEfficiency(dataset2)
@@ -185,9 +189,12 @@ def analyze(analysis):
         p = plots.ComparisonManyPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
                                     [histograms.HistoGraph(eff2, "eff2", "p", "P"),
                                      histograms.HistoGraph(eff3, "eff3", "p", "P")])
-    else:
+    elif isinstance(datasetsDY,dataset.DatasetManager):
         p = plots.ComparisonPlot(histograms.HistoGraph(eff1, "eff1", "p", "P"),
                                  histograms.HistoGraph(eff2, "eff2", "p", "P"))
+    else:
+        p = plots.PlotBase([histograms.HistoGraph(eff1, "eff1", "p", "P")])
+
 
     fit("Data",p,eff1,20,200)
     fit("MC",p,eff2,20,200)
@@ -203,17 +210,25 @@ def analyze(analysis):
     legend1 = "Data"
     legend2 = "MC (DY)"
     legend3 = "MC (H125)"
-    p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
+    createRatio = False
+    p.histoMgr.setHistoLegendLabelMany({"eff1": legend1})
+    if isinstance(datasetsDY,dataset.DatasetManager):
+        p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
+        createRatio = True
     if isinstance(datasetsH125,dataset.DatasetManager):
         p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2, "eff3": legend3})
 
-    p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
+    if createRatio:
+        p.createFrame(os.path.join(plotDir, name), createRatio=createRatio, opts=opts, opts2=opts2)
+    else:
+        p.createFrame(os.path.join(plotDir, name), opts=opts, opts2=opts2)
     p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 
     p.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
     p.getFrame().GetXaxis().SetTitle("#tau-jet p_{T} (GeV/c)")
-    p.getFrame2().GetYaxis().SetTitle("Ratio")
-    p.getFrame2().GetYaxis().SetTitleOffset(1.6)
+    if createRatio:
+        p.getFrame2().GetYaxis().SetTitle("Ratio")
+        p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
     label = analysis.split("_")[len(analysis.split("_")) -1]
@@ -238,6 +253,9 @@ def analyze(analysis):
     pythonWriter.addMCParameters(label,eff2)
 
     pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency2015.json"))
+
+    if not createRatio:
+        sys.exit()
 
     #########################################################################                                                                                                                              
 
@@ -326,7 +344,7 @@ def analyze(analysis):
     pPU.save(formats)
 
     #########################################################################
-
+    """
     hName = "Pull"
 #    hName = "Sub"
     namePull = "TauMET_"+analysis+"_DataVsMC_"+hName+"s"
@@ -387,7 +405,7 @@ def analyze(analysis):
 
     histograms.addStandardTexts(lumi=lumi)
     p_pull.save(formats)
-
+    """
     #########################################################################                                                                                                                               
     print "Output written in",plotDir
 
@@ -398,9 +416,9 @@ def main():
         usage()
 
 #    analyze("TauLeg_2015C")
-    analyze("TauLeg_2015D")
+#    analyze("TauLeg_2015D")
 #    analyze("TauLeg_2015CD")
-
+    analyze("TauLeg_2016B")
 
 if __name__ == "__main__":
     main()
