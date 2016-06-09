@@ -54,6 +54,11 @@ def runRange(era):
         runmin = 253888
         runmax = 260627
 
+    if era == "2016B":
+        lumi = 1
+        runmin = 271036
+        runmax = 274240
+
     if lumi == 0:
         print "Unknown era",era,"exiting.."
         sys.exit()
@@ -120,6 +125,10 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
                                     "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1",
                                     "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_JetIdCleaned_vx",
                                     "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_vx"]
+        if era == "2016B":
+            a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_vx"]
+            a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_vx"]
+
 
         lumi,runmin,runmax = runRange(era)
         a.lumi    = lumi
@@ -128,7 +137,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
     else:
         a.Trigger.triggerOR = ["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"]
         a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]
-        if era == "2015C" or era == "2015D" or era == "2015CD":
+        if era == "2015C" or era == "2015D" or era == "2015CD" or era == "2016B":
             a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1",
                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_vx"]
             a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1",
@@ -141,16 +150,16 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
 
 def addAnalyzer(era,onlineSelection):
     dv = ["53Xdata22Jan2013","53mcS10"]
-    if era == "2015C" or era == "2015D" or era == "2015CD":
-        dv = ["74Xdata","74Xmc"]
+    if era == "2016B":
+        dv = ["80Xdata","80Xmc"]
     process.addAnalyzer("METLeg_"+era+"_"+onlineSelection, lambda dv: createAnalyzer(dv, era, onlineSelection))
 
 #addAnalyzer("2012ABCD")
 #addAnalyzer("2012D")
 #addAnalyzer("2012ABCD_CaloMET")
 #addAnalyzer("2015D","MET80")
-addAnalyzer("2015D","MET80")
-addAnalyzer("2015D_CaloMET","MET80")
+addAnalyzer("2016B","MET80")
+addAnalyzer("2016B_CaloMET","MET80")
 #addAnalyzer("2015A","MET120")
 #addAnalyzer("2015A_CaloMET","MET120")
 

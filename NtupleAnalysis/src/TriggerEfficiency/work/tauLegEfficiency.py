@@ -59,6 +59,11 @@ def runRange(era):
         runmin = 253888
         runmax = 260627
 
+    if era == "2016B":
+        lumi = 0.803
+        runmin = 271036
+        runmax = 274240
+
     if lumi == 0:
         print "Unknown era",era,"exiting.."
         sys.exit()
@@ -90,9 +95,9 @@ def createAnalyzer(dataVersion,era):
             discriminators = ["Muons_TrgMatch_IsoMu16_eta2p1"],
         ),
         TauSelection = PSet(
-            discriminators = ["byMediumIsolationMVA3newDMwLT",
-                             "againstMuonTight3",
-                             "againstElectronMediumMVA5"],
+            discriminators = ["byLooseCombinedIsolationDeltaBetaCorr3Hits",#"byMediumIsolationMVA3newDMwLT",
+                              "againstMuonTight3",
+                              "againstElectronMediumMVA6"],
             nprongs = 1,
         ),
         binning = binning,
@@ -141,6 +146,10 @@ def createAnalyzer(dataVersion,era):
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v2",
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v3",
                                    "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_v1"]
+        if era == "2016B":
+            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_vx"]
+            a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_vx"]
+
 #            a.Trigger.triggerOR = ["HLT_IsoMu20_eta2p1_v1",
 #                                   "HLT_IsoMu20_eta2p1_v2",
 #                                   "HLT_IsoMu17_eta2p1_v2"]
@@ -154,7 +163,7 @@ def createAnalyzer(dataVersion,era):
     else:
         a.Trigger.triggerOR = ["HLT_IsoMu15_eta2p1_L1ETM20_v5"]
         a.Trigger.triggerOR2 = ["HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v6"]
-        if era == "2015C" or era == "2015D" or era == "2015CD":
+        if era == "2015C" or era == "2015D" or era == "2015CD" or era == "2016B":
             a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_CaloMET30_v1",
                                    "HLT_IsoMu16_eta2p1_MET30_vx",
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_vx"]
@@ -178,8 +187,9 @@ def addAnalyzer(era):
 #addAnalyzer("2012ABC")
 #addAnalyzer("2012D")
 #addAnalyzer("2015C")
-addAnalyzer("2015D")
+#addAnalyzer("2015D")
 #addAnalyzer("2015CD")
+addAnalyzer("2016B")
 
 
 
