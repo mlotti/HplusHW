@@ -38,7 +38,7 @@ tauSelection = PSet(
         tauLdgTrkPtCut = 30.0,
                 prongs = 123,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                   rtau = 0.0,   # to disable set to 0.0
-  againstElectronDiscr = "againstElectronTightMVA5",
+  againstElectronDiscr = "againstElectronTightMVA6",
       againstMuonDiscr = "againstMuonTight3",
         isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
   

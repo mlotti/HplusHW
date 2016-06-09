@@ -32,7 +32,7 @@ public:
     return n;
   }
   std::vector<std::string> getAgainstElectronDiscriminatorNames() const {
-    static std::vector<std::string> n = { std::string("againstElectronLooseMVA5"), std::string("againstElectronMVA5category"), std::string("againstElectronMediumMVA5"), std::string("againstElectronTightMVA5"), std::string("againstElectronVLooseMVA5"), std::string("againstElectronVTightMVA5")};
+    static std::vector<std::string> n = { std::string("againstElectronLooseMVA6"), std::string("againstElectronLooseMVA6Raw"),std::string("againstElectronMVA6category"), std::string("againstElectronMediumMVA6"), std::string("againstElectronTightMVA6"), std::string("againstElectronVLooseMVA6"), std::string("againstElectronVTightMVA6")};
     return n;
   }
 
@@ -44,12 +44,13 @@ protected:
 
 protected:
   const Branch<std::vector<bool>> *fTrgMatch_LooseIsoPFTau50_Trk30_eta2p1;
-  const Branch<std::vector<bool>> *fAgainstElectronLooseMVA5;
-  const Branch<std::vector<bool>> *fAgainstElectronMVA5category;
-  const Branch<std::vector<bool>> *fAgainstElectronMediumMVA5;
-  const Branch<std::vector<bool>> *fAgainstElectronTightMVA5;
-  const Branch<std::vector<bool>> *fAgainstElectronVLooseMVA5;
-  const Branch<std::vector<bool>> *fAgainstElectronVTightMVA5;
+  const Branch<std::vector<bool>> *fAgainstElectronLooseMVA6;
+  const Branch<std::vector<bool>> *fAgainstElectronLooseMVA6Raw;
+  const Branch<std::vector<bool>> *fAgainstElectronMVA6category;
+  const Branch<std::vector<bool>> *fAgainstElectronMediumMVA6;
+  const Branch<std::vector<bool>> *fAgainstElectronTightMVA6;
+  const Branch<std::vector<bool>> *fAgainstElectronVLooseMVA6;
+  const Branch<std::vector<bool>> *fAgainstElectronVTightMVA6;
   const Branch<std::vector<bool>> *fAgainstMuonLoose3;
   const Branch<std::vector<bool>> *fAgainstMuonTight3;
   const Branch<std::vector<bool>> *fByCombinedIsolationDeltaBetaCorrRaw3Hits;

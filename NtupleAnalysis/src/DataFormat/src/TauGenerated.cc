@@ -12,12 +12,13 @@ void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   fmatchingJet.setupBranches(mgr);
 
   mgr.book(prefix()+"_TrgMatch_LooseIsoPFTau50_Trk30_eta2p1", &fTrgMatch_LooseIsoPFTau50_Trk30_eta2p1);
-  mgr.book(prefix()+"_againstElectronLooseMVA5", &fAgainstElectronLooseMVA5);
-  mgr.book(prefix()+"_againstElectronMVA5category", &fAgainstElectronMVA5category);
-  mgr.book(prefix()+"_againstElectronMediumMVA5", &fAgainstElectronMediumMVA5);
-  mgr.book(prefix()+"_againstElectronTightMVA5", &fAgainstElectronTightMVA5);
-  mgr.book(prefix()+"_againstElectronVLooseMVA5", &fAgainstElectronVLooseMVA5);
-  mgr.book(prefix()+"_againstElectronVTightMVA5", &fAgainstElectronVTightMVA5);
+  mgr.book(prefix()+"_againstElectronLooseMVA6", &fAgainstElectronLooseMVA6);
+  mgr.book(prefix()+"_againstElectronLooseMVA6Raw", &fAgainstElectronLooseMVA6Raw);
+  mgr.book(prefix()+"_againstElectronMVA6category", &fAgainstElectronMVA6category);
+  mgr.book(prefix()+"_againstElectronMediumMVA6", &fAgainstElectronMediumMVA6);
+  mgr.book(prefix()+"_againstElectronTightMVA6", &fAgainstElectronTightMVA6);
+  mgr.book(prefix()+"_againstElectronVLooseMVA6", &fAgainstElectronVLooseMVA6);
+  mgr.book(prefix()+"_againstElectronVTightMVA6", &fAgainstElectronVTightMVA6);
   mgr.book(prefix()+"_againstMuonLoose3", &fAgainstMuonLoose3);
   mgr.book(prefix()+"_againstMuonTight3", &fAgainstMuonTight3);
   mgr.book(prefix()+"_byCombinedIsolationDeltaBetaCorrRaw3Hits", &fByCombinedIsolationDeltaBetaCorrRaw3Hits);
