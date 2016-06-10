@@ -252,10 +252,10 @@ def analyze(analysis):
     pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1)
     pythonWriter.addMCParameters(label,eff2)
 
-    pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency2015.json"))
+    pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency2016.json"))
 
-    if not createRatio:
-        sys.exit()
+#    if not createRatio:
+#        sys.exit()
 
     #########################################################################                                                                                                                              
 
@@ -279,23 +279,33 @@ def analyze(analysis):
         p_eta = plots.ComparisonManyPlot(histograms.HistoGraph(eff1eta, "eff1eta", "p", "P"),
                                         [histograms.HistoGraph(eff2eta, "eff2eta", "p", "P"),
                                          histograms.HistoGraph(eff3eta, "eff3eta", "p", "P")])
-    else:
+    elif isinstance(datasetsDY,dataset.DatasetManager):
         p_eta = plots.ComparisonPlot(histograms.HistoGraph(eff1eta, "eff1eta", "p", "P"),
                                      histograms.HistoGraph(eff2eta, "eff2eta", "p", "P"))
+    else:
+        p_eta = plots.PlotBase([histograms.HistoGraph(eff1eta, "eff1eta", "p", "P")])
 
-    p_eta.histoMgr.setHistoLegendLabelMany({"eff1eta": legend1, "eff2eta": legend2})
+    p_eta.histoMgr.setHistoLegendLabelMany({"eff1eta": legend1})
+    if isinstance(datasetsDY,dataset.DatasetManager):
+        p_eta.histoMgr.setHistoLegendLabelMany({"eff1eta": legend1, "eff2eta": legend2})
     if isinstance(datasetsH125,dataset.DatasetManager):
         p_eta.histoMgr.setHistoLegendLabelMany({"eff1eta": legend1, "eff2eta": legend2, "eff3eta": legend3})
 
     name = "TauMET_"+analysis+"_DataVsMC_PFTauEta"
-    p_eta.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
+
+    if createRatio:
+        p_eta.createFrame(os.path.join(plotDir, name), createRatio=createRatio, opts=opts, opts2=opts2)
+    else:
+        p_eta.createFrame(os.path.join(plotDir, name), opts=opts, opts2=opts2)
+
     moveLegendEta = {"dx": -0.5, "dy": -0.65, "dh": -0.1}
     p_eta.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegendEta))
 
     p_eta.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
     p_eta.getFrame().GetXaxis().SetTitle("#tau-jet #eta")
-    p_eta.getFrame2().GetYaxis().SetTitle("Ratio")
-    p_eta.getFrame2().GetYaxis().SetTitleOffset(1.6)
+    if createRatio:
+        p_eta.getFrame2().GetYaxis().SetTitle("Ratio")
+        p_eta.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.2, 0.46, "LooseIsoPFTau50_Trk30_eta2p1", 17)
     histograms.addText(0.2, 0.38, analysis.split("_")[len(analysis.split("_")) -1], 17)
@@ -307,6 +317,65 @@ def analyze(analysis):
     p_eta.save(formats)
 
     #########################################################################
+    
+    eff1phi = getEfficiency(dataset1,"NumeratorPhi","DenominatorPhi")
+    eff2phi = getEfficiency(dataset2,"NumeratorPhi","DenominatorPhi")
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        eff3phi = getEfficiency(datasetsH125.getMCDatasets(),"NumeratorPhi","DenominatorPhi")
+
+    styles.dataStyle.apply(eff1phi)
+    styles.mcStyle.apply(eff2phi)
+    eff1phi.SetMarkerSize(1)
+
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        styles.mcStyle.apply(eff3phi)
+        eff3phi.SetMarkerSize(1.5)
+        eff3phi.SetMarkerColor(4)
+        eff3phi.SetLineColor(4)
+
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        p_phi = plots.ComparisonManyPlot(histograms.HistoGraph(eff1phi, "eff1phi", "p", "P"),
+                                        [histograms.HistoGraph(eff2phi, "eff2phi", "p", "P"),
+                                         histograms.HistoGraph(eff3phi, "eff3phi", "p", "P")])
+    elif isinstance(datasetsDY,dataset.DatasetManager):
+        p_phi = plots.ComparisonPlot(histograms.HistoGraph(eff1phi, "eff1phi", "p", "P"),
+                                     histograms.HistoGraph(eff2phi, "eff2phi", "p", "P"))
+    else:
+        p_phi = plots.PlotBase([histograms.HistoGraph(eff1phi, "eff1phi", "p", "P")])
+
+    p_phi.histoMgr.setHistoLegendLabelMany({"eff1phi": legend1})
+    if isinstance(datasetsDY,dataset.DatasetManager):
+        p_phi.histoMgr.setHistoLegendLabelMany({"eff1phi": legend1, "eff2phi": legend2})
+    if isinstance(datasetsH125,dataset.DatasetManager):
+        p_phi.histoMgr.setHistoLegendLabelMany({"eff1phi": legend1, "eff2phi": legend2, "eff3phi": legend3})
+
+    name = "TauMET_"+analysis+"_DataVsMC_PFTauPhi"
+
+    if createRatio:
+        p_phi.createFrame(os.path.join(plotDir, name), createRatio=createRatio, opts=opts, opts2=opts2)
+    else:
+        p_phi.createFrame(os.path.join(plotDir, name), opts=opts, opts2=opts2)
+
+    moveLegendPhi = {"dx": -0.5, "dy": -0.65, "dh": -0.1}
+    p_phi.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegendPhi))
+
+    p_phi.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
+    p_phi.getFrame().GetXaxis().SetTitle("#tau-jet #phi")
+    if createRatio:
+        p_phi.getFrame2().GetYaxis().SetTitle("Ratio")
+        p_phi.getFrame2().GetYaxis().SetTitleOffset(1.6)
+
+    histograms.addText(0.2, 0.46, "LooseIsoPFTau50_Trk30_eta2p1", 17)
+    histograms.addText(0.2, 0.38, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.2, 0.31, "Runs "+datasets.loadRunRange(), 17)
+
+    p_phi.draw()
+    histograms.addStandardTexts(lumi=lumi)
+
+    p_phi.save(formats)
+    print "check phi"
+    
+    ######################################################################### 
 
     namePU = "TauMET_"+analysis+"_DataVsMC_nVtx"
 
@@ -318,21 +387,31 @@ def analyze(analysis):
     eff1PU.SetMarkerSize(1)
     eff2PU.SetMarkerSize(1.5)
 
-    pPU = plots.ComparisonManyPlot(histograms.HistoGraph(eff1PU, "eff1", "p", "P"),
-                                   [histograms.HistoGraph(eff2PU, "eff2", "p", "P")])
+    if isinstance(datasetsDY,dataset.DatasetManager):
+        pPU = plots.ComparisonManyPlot(histograms.HistoGraph(eff1PU, "eff1", "p", "P"),
+                                      [histograms.HistoGraph(eff2PU, "eff2", "p", "P")])
+        pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
+    else:
+        pPU = plots.PlotBase([histograms.HistoGraph(eff1PU, "eff1", "p", "P")])
+        pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1})
 
+    optsPU = {"ymin": 0.01, "ymax": 1.0}
+    if createRatio:
+        pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=optsPU, opts2=opts2)
+    else:
+        pPU.createFrame(os.path.join(plotDir, namePU), opts=optsPU, opts2=opts2)
 
-    pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
-
-    optsPU = {"ymin": 0.001, "ymax": 0.1}
-    pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=optsPU, opts2=opts2)
     pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-    pPU.getPad1().SetLogy(True)
+    if createRatio:
+        pPU.getPad1().SetLogy(True)
+    else:
+        pPU.getPad().SetLogy(True)
 
     pPU.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
     pPU.getFrame().GetXaxis().SetTitle("Number of reco vertices")
-    pPU.getFrame2().GetYaxis().SetTitle("Ratio")
-    pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
+    if createRatio:
+        pPU.getFrame2().GetYaxis().SetTitle("Ratio")
+        pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
     histograms.addText(0.5, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)

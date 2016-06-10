@@ -124,6 +124,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
     xhltvariable = selectedHltTau.pt();
   }
   if(xvar == eta) xvariable = selectedTau->eta();
+  if(xvar == phi) xvariable = selectedTau->phi();
   if(xvar == pu) xvariable = fEvent.vertexInfo().value();
 
 

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-enum Xvar {pt, eta, pu};
+enum Xvar {pt, eta, phi, pu};
 
 class TrgBaseSelection {
  public:

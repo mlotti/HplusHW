@@ -55,6 +55,9 @@ private:
   WrappedTH1 *hNumEta;
   WrappedTH1 *hDenEta;
 
+  WrappedTH1 *hNumPhi;
+  WrappedTH1 *hDenPhi;
+
   WrappedTH1 *hNumPU;
   WrappedTH1 *hDenPU;
 
@@ -141,6 +144,11 @@ void TriggerEfficiency::book(TDirectory *dir) {
   hDenEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorEta", "DenominatorEta", 7,-2.1, 2.1);
   hDenEta->GetXaxis()->SetTitle(fxLabel.c_str());
 
+  hNumPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorPhi", "NumeratorPhi", 7,-3.14, 3.14);
+  hNumPhi->GetXaxis()->SetTitle(fxLabel.c_str());
+
+  hDenPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorPhi", "DenominatorPhi", 7,-3.14, 3.14);
+  hDenPhi->GetXaxis()->SetTitle(fxLabel.c_str());
 
   hNumPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorPU", "NumeratorPU", 4, 5, 25.);
   hNumPU->GetXaxis()->SetTitle("nVtx");
@@ -194,6 +202,13 @@ void TriggerEfficiency::process(Long64_t entry) {
     hDenEta->Fill(xvariable);
     if(selection->onlineSelection(fEvent)) {
       hNumEta->Fill(xvariable);
+    }
+  }
+  if(selection->offlineSelection(fEvent,phi)){ // eff vs phi
+    double xvariable = selection->xVariable();
+    hDenPhi->Fill(xvariable);
+    if(selection->onlineSelection(fEvent)) {
+      hNumPhi->Fill(xvariable);
     }
   }
   if(selection->offlineSelection(fEvent,pu)){ // eff vs nVtx
