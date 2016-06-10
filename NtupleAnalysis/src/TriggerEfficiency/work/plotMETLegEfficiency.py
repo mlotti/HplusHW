@@ -332,15 +332,16 @@ def main():
 
 
     opts = {"ymin": 0.001, "ymax": 0.1}
+    moveLegend = {"dx": -0.5, "dy": -0.1, "dh": -0.1}
     if createRatio:
         pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=opts, opts2=opts2)
     else:
         pPU.createFrame(os.path.join(plotDir, namePU), opts=opts, opts2=opts2)
     pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-    if createRatio:
-        pPU.getPad1().SetLogy(True)
-    else:
-        pPU.getPad().SetLogy(True)
+#    if createRatio:
+#        pPU.getPad1().SetLogy(True)
+#    else:
+#        pPU.getPad().SetLogy(True)
 
     pPU.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
     pPU.getFrame().GetXaxis().SetTitle("Number of reco vertices")
@@ -348,9 +349,9 @@ def main():
         pPU.getFrame2().GetYaxis().SetTitle("Ratio")
         pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.4, 0.45, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
-    histograms.addText(0.4, 0.38, analysis.split("_")[len(analysis.split("_")) -1], 17)
-    histograms.addText(0.4, 0.31, "Runs "+datasets.loadRunRange(), 17)
+    histograms.addText(0.4, 0.85, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
+    histograms.addText(0.4, 0.78, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.4, 0.71, "Runs "+datasets.loadRunRange(), 17)
 
     pPU.draw()
     histograms.addStandardTexts(lumi=lumi)

@@ -400,11 +400,12 @@ def analyze(analysis):
     else:
         pPU.createFrame(os.path.join(plotDir, namePU), opts=optsPU, opts2=opts2)
 
+    moveLegend = {"dx": -0.2, "dy": -0.6, "dh": -0.1}
     pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-    if createRatio:
-        pPU.getPad1().SetLogy(True)
-    else:
-        pPU.getPad().SetLogy(True)
+#    if createRatio:
+#        pPU.getPad1().SetLogy(True)
+#    else:
+#        pPU.getPad().SetLogy(True)
 
     pPU.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
     pPU.getFrame().GetXaxis().SetTitle("Number of reco vertices")
@@ -412,9 +413,9 @@ def analyze(analysis):
         pPU.getFrame2().GetYaxis().SetTitle("Ratio")
         pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
-    histograms.addText(0.5, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
-    histograms.addText(0.5, 0.46, "Runs "+datasets.loadRunRange(), 17)
+    histograms.addText(0.5, 0.5, "LooseIsoPFTau50_Trk30_eta2p1", 17)
+    histograms.addText(0.5, 0.43, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.5, 0.36, "Runs "+datasets.loadRunRange(), 17)
 
     pPU.draw()
     histograms.addStandardTexts(lumi=lumi)
