@@ -221,6 +221,9 @@ def obtainAnalysisSuffix(argv):
 
 ## Parses command line parameters and adjusts the parameters accordingly
 def applyAnalysisCommandLineOptions(argv, config):
+    if len(argv) < 3:
+        return
+    print "Applying command line options"
     if "1prong" in argv or "1pr" in argv:
         config.TauSelection.prongs = 1
     elif "2prong" in argv or "2pr" in argv:
@@ -228,4 +231,5 @@ def applyAnalysisCommandLineOptions(argv, config):
     elif "3prong" in argv or "3pr" in argv:
         config.TauSelection.prongs = 3
 
+    scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal")
 
