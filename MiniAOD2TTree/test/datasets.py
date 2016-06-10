@@ -16,9 +16,11 @@ class Dataset :
 
 
 datasetsTauData = []
+datasetsTauData.append(Dataset('/Tau/Run2016B-PromptReco-v1/MINIAOD',dataVersion="80Xdata"))
 datasetsTauData.append(Dataset('/Tau/Run2016B-PromptReco-v2/MINIAOD',dataVersion="80Xdata"))
 
 datasetsMuonData = []
+datasetsMuonData.append(Dataset('/SingleMuon/Run2016B-PromptReco-v1/MINIAOD',dataVersion="80Xdata"))
 datasetsMuonData.append(Dataset('/SingleMuon/Run2016B-PromptReco-v2/MINIAOD',dataVersion="80Xdata"))
 
 
