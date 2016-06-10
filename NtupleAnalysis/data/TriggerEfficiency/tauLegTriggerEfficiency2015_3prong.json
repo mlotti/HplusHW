@@ -9,12 +9,6 @@
           "luminosity": 2164.976,
           "bins" : [
              {
-               "pt"              :20.0,
-               "efficiency"      :0.0212765957447,
-               "uncertaintyPlus" :0.0472300050925,
-               "uncertaintyMinus":0.0176077302193
-             },
-             {
                "pt"              :30.0,
                "efficiency"      :0.10775862069,
                "uncertaintyPlus" :0.0243697868829,
@@ -43,12 +37,6 @@
                "efficiency"      :0.916666666667,
                "uncertaintyPlus" :0.0536391471323,
                "uncertaintyMinus":0.0995071817359
-             },
-             {
-               "pt"              :100.0,
-               "efficiency"      :0.923076923077,
-               "uncertaintyPlus" :0.0637222303422,
-               "uncertaintyMinus":0.155415375679
              }
           ]
       }
@@ -56,12 +44,6 @@
   "mcParameters": {
       "2015D": {
           "bins" : [
-             {
-               "pt"              :20.0,
-               "efficiency"      :0.0,
-               "uncertaintyPlus" :0.0,
-               "uncertaintyMinus":0.0
-             },
              {
                "pt"              :30.0,
                "efficiency"      :0.0545038884289,
@@ -91,12 +73,6 @@
                "efficiency"      :0.950345333425,
                "uncertaintyPlus" :0.0496027361968,
                "uncertaintyMinus":0.0496027361968
-             },
-             {
-               "pt"              :100.0,
-               "efficiency"      :1.0,
-               "uncertaintyPlus" :0.0,
-               "uncertaintyMinus":0.0
              }
           ]
       }

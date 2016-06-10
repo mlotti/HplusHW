@@ -96,8 +96,9 @@ def main(argv, dsetMgr, moduleInfoString):
         myMergeList.append("TTJets") # Madgraph with negative weights
         print "Warning: using TTJets as input, but this is suboptimal. Please switch to the TT sample (much more stats.)."
 
-    myMergeList.append("WJetsHT")
-####    myMergeList.append("DYJetsToLLHT")
+    #myMergeList.append("WJetsHT")
+    myMergeList.append("WJets")
+    ####    myMergeList.append("DYJetsToLLHT")
     myMergeList.append("SingleTop")
 
     if "Diboson" in dsetMgr.getMCDatasetNames():
