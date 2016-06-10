@@ -36,13 +36,13 @@ metLegDatasets.extend(datasetsTauData)
 #metLegDatasets.extend(datasetsMiniAODv2_QCD76x)
 
 signalAnalysisDatasets = []
-#signalAnalysisDatasets.extend(datasetsTauData76x)
+signalAnalysisDatasets.extend(datasetsTauData)
 #signalAnalysisDatasets.extend(datasetsMiniAODv2_DY76x)
-#signalAnalysisDatasets.extend(datasetsMiniAODv2_Top76x)
+signalAnalysisDatasets.extend(datasetsTop)
 #signalAnalysisDatasets.extend(datasetsMiniAODv2_WJets76x)
 #signalAnalysisDatasets.extend(datasetsMiniAODv2_Diboson76x)
 #signalAnalysisDatasets.extend(datasetsMiniAODv2_QCD76x)
-#signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTauNu76x)
+signalAnalysisDatasets.extend(datasetsSignalTauNu)
 #signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
 
 hplus2tbAnalysisDatasets = []
