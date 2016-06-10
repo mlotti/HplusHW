@@ -8,6 +8,9 @@ skim = cms.EDFilter("SignalAnalysisSkim",
         "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET110_v",
         "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
     ),
+# FIXME: Temporarily CaloMET to emulate trigger MET leg 09062016/SL
+    METCollection  = cms.InputTag("slimmedMETs"),
+
     # Taus
     TauCollection  = cms.InputTag("slimmedTaus"),
     TauPtCut       = cms.double(50.0),
