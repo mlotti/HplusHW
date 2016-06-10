@@ -373,7 +373,6 @@ def analyze(analysis):
     histograms.addStandardTexts(lumi=lumi)
 
     p_phi.save(formats)
-    print "check phi"
     
     ######################################################################### 
 

@@ -114,11 +114,54 @@ def main():
     pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
     pythonWriter.addMCParameters(label,eff2_MET80)
 
-    pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency2015.json"))
+    pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency2016.json"))
 
-    if not createRatio:
-        sys.exit()
+    #########################################################################                                             
 
+    eff1phi = getEfficiency(dataset1,"NumeratorPhi","DenominatorPhi")
+    eff2phi = getEfficiency(dataset2,"NumeratorPhi","DenominatorPhi")
+
+    styles.dataStyle.apply(eff1phi)
+    styles.mcStyle.apply(eff2phi)
+    eff1phi.SetMarkerSize(1)
+
+    if isinstance(datasetsMC,dataset.DatasetManager):
+        p_phi = plots.ComparisonPlot(histograms.HistoGraph(eff1phi, "eff1phi", "p", "P"),
+                                     histograms.HistoGraph(eff2phi, "eff2phi", "p", "P"))
+    else:
+        p_phi = plots.PlotBase([histograms.HistoGraph(eff1phi, "eff1phi", "p", "P")])
+
+    p_phi.histoMgr.setHistoLegendLabelMany({"eff1phi": legend1})
+    if isinstance(datasetsMC,dataset.DatasetManager):
+        p_phi.histoMgr.setHistoLegendLabelMany({"eff1phi": legend1, "eff2phi": legend2})
+
+    opts = {"ymin": 0, "ymax": 0.1}
+    name = "TauMET_"+analysis+"_DataVsMC_PFMETPhi"
+
+    if createRatio:
+        p_phi.createFrame(os.path.join(plotDir, name), createRatio=createRatio, opts=opts, opts2=opts2)
+    else:
+        p_phi.createFrame(os.path.join(plotDir, name), opts=opts, opts2=opts2)
+
+    moveLegendPhi = {"dx": -0.5, "dy": -0.6, "dh": -0.1}
+    p_phi.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegendPhi))
+
+    p_phi.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
+    p_phi.getFrame().GetXaxis().SetTitle("MET Type 1 #phi")
+    if createRatio:
+        p_phi.getFrame2().GetYaxis().SetTitle("Ratio")
+        p_phi.getFrame2().GetYaxis().SetTitleOffset(1.6)
+
+    histograms.addText(0.4, 0.86, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
+    histograms.addText(0.4, 0.78, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.4, 0.71, "Runs "+datasets.loadRunRange(), 17)
+
+    p_phi.draw()
+    histograms.addStandardTexts(lumi=lumi)
+
+    p_phi.save(formats)
+
+    #########################################################################                                             
     """
     #### MET120
 
@@ -279,25 +322,35 @@ def main():
     eff1PU.SetMarkerSize(1)
     eff2PU.SetMarkerSize(1.5)
 
-    pPU = plots.ComparisonManyPlot(histograms.HistoGraph(eff1PU, "eff1", "p", "P"),
-                                   [histograms.HistoGraph(eff2PU, "eff2", "p", "P")])
+    if isinstance(datasetsMC,dataset.DatasetManager):
+        pPU = plots.ComparisonManyPlot(histograms.HistoGraph(eff1PU, "eff1", "p", "P"),
+                                      [histograms.HistoGraph(eff2PU, "eff2", "p", "P")])
+        pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
+    else:
+        pPU = plots.PlotBase([histograms.HistoGraph(eff1PU, "eff1", "p", "P")])
+        pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1})
 
-
-    pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
 
     opts = {"ymin": 0.001, "ymax": 0.1}
-    pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=opts, opts2=opts2)
+    if createRatio:
+        pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=opts, opts2=opts2)
+    else:
+        pPU.createFrame(os.path.join(plotDir, namePU), opts=opts, opts2=opts2)
     pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-    pPU.getPad1().SetLogy(True)
+    if createRatio:
+        pPU.getPad1().SetLogy(True)
+    else:
+        pPU.getPad().SetLogy(True)
 
     pPU.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
     pPU.getFrame().GetXaxis().SetTitle("Number of reco vertices")
-    pPU.getFrame2().GetYaxis().SetTitle("Ratio")
-    pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
+    if createRatio:
+        pPU.getFrame2().GetYaxis().SetTitle("Ratio")
+        pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.4, 0.25, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
-    histograms.addText(0.4, 0.18, analysis.split("_")[len(analysis.split("_")) -1], 17)
-    histograms.addText(0.4, 0.11, "Runs "+datasets.loadRunRange(), 17)
+    histograms.addText(0.4, 0.45, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
+    histograms.addText(0.4, 0.38, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.4, 0.31, "Runs "+datasets.loadRunRange(), 17)
 
     pPU.draw()
     histograms.addStandardTexts(lumi=lumi)
