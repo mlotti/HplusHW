@@ -24,7 +24,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 
-from old_InvertedTauID import *
+from InvertedTauID import *
 #dataEra = "Run2015C"
 #dataEra = "Run2015D"
 #dataEra = "Run2015CD"
@@ -90,7 +90,7 @@ def main(argv):
             "WJets",
             "DYJetsToLL",
             "SingleTop",
-#            "Diboson"
+            "Diboson"
             ])
 
     # Apply TDR style
@@ -146,10 +146,10 @@ def main(argv):
             metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
             metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(RebinFactor))
 
-            metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("ForQCDNormalization/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
-            metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("ForQCDNormalization/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
-            metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
-            metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
+            metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
+            metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone("ForQCDNormalization/NormalizationMETBaselineTau"+HISTONAME+"/NormalizationMETBaselineTau"+HISTONAME+bin)
+            metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone("ForQCDNormalization/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
+            metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone("ForQCDNormalization/NormalizationMETInvertedTau"+HISTONAME+"/NormalizationMETInvertedTau"+HISTONAME+bin)
 
             metBase_QCD = metBase_data.Clone("QCD")
             metBase_QCD.Add(metBase_EWK,-1)

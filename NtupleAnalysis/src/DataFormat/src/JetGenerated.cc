@@ -8,7 +8,9 @@
 
 void JetGeneratedCollection::setupBranches(BranchManager& mgr) {
   ParticleCollection::setupBranches(mgr);
+
   fMCjet.setupBranches(mgr);
+
 
   mgr.book(prefix()+"_IDloose", &fIDloose);
   mgr.book(prefix()+"_IDtight", &fIDtight);

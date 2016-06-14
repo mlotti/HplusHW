@@ -37,12 +37,6 @@
                "efficiency"      :0.916666666667,
                "uncertaintyPlus" :0.0536391471323,
                "uncertaintyMinus":0.0995071817359
-             },
-             {
-               "pt"              :100.0,
-               "efficiency"      :0.923076923077,
-               "uncertaintyPlus" :0.0637222303422,
-               "uncertaintyMinus":0.155415375679
              }
           ]
       }
@@ -79,12 +73,6 @@
                "efficiency"      :0.950345333425,
                "uncertaintyPlus" :0.0496027361968,
                "uncertaintyMinus":0.0496027361968
-             },
-             {
-               "pt"              :100.0,
-               "efficiency"      :1.0,
-               "uncertaintyPlus" :0.0,
-               "uncertaintyMinus":0.0
              }
           ]
       }

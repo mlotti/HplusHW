@@ -6,49 +6,43 @@ dataEras = ["2015"]
 searchModes = ["80to1000"]
 
 if len(sys.argv) < 2:
-    print "Usage: ./QCDMeasurementAnalysis.py <path-to-multicrab-directory> <1pr> <2pr> <3pr>"
+    print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory> <1pr> <2pr> <3pr>"
     sys.exit(0)
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
-from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix
-process = Process("QCDMeasurement"+obtainAnalysisSuffix(sys.argv))
-process.addDatasetsFromMulticrab(sys.argv[1], blacklist=["ChargedHiggs"])
+from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix 
+process = Process("CorrelationAnalysis"+obtainAnalysisSuffix(sys.argv))
+process.addDatasetsFromMulticrab(sys.argv[1])
 
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections,applyAnalysisCommandLineOptions,setAngularCutsWorkingPoint
-# Enable genuine tau histograms for common plots (needed for calculating N_QCD)
-allSelections.CommonPlots.enableGenuineTauHistograms = True
 # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
 allSelections.CommonPlots.histogramSplitting = [
-    PSet(label="tauPt", binLowEdges=[60.0, 80.0, 100.0], useAbsoluteValues=False),
+    #PSet(label="tauPt", binLowEdges=[60.0, 70.0, 80.0, 100.0], useAbsoluteValues=False),
   ]
 #===== Selection customisations
-#allSelections.TauSelection.rtau = 0.7
-allSelections.TauSelection.isolationDiscr = "byMediumIsolationMVA3newDMwLT" ## default = byMediumIsolationMVA3newDMwLT
-#allSelections.BJetSelection.numberOfBJetsCutValue = 0
-#allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-#setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
-#===== End of selection customisations
-allSelections.TauSelection.prongs = 3
-allSelections.METSelection.METCutValue = 100.0
+allSelections.TauSelection.prongs = 1
+allSelections.METSelection.METCutValue = 80.0
 allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet4 = 40.0
+#allSelections.TauSelection.rtau = 0.0
+#allSelections.BJetSelection.numberOfBJetsCutValue = 0
+#allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
+#setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
+#===== End of selection customisations
 
-#allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
-#allSelections.BJetSelection.numberOfBJetsCutValue = 2
-#allSelections.BJetSelection.numberOfBJetsCutDirection = "==" # options: ==, !=, <, <=, >, >=            
 applyAnalysisCommandLineOptions(sys.argv, allSelections)
 
 # Build analysis modules
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
-builder = AnalysisBuilder("QCDMeasurement", 
+builder = AnalysisBuilder("CorrelationAnalysis", 
                           dataEras,
                           searchModes,
                           #### Options ####
                           usePUreweighting=True,
-                          doSystematicVariations=False,
+                          doSystematicVariations=False
                           )
 #builder.addVariation("METSelection.METCutValue", [100,120,140])
 #builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
@@ -60,11 +54,10 @@ builder.build(process, allSelections)
 # Run the analysis
 if "proof" in sys.argv:
     #raise Exception("Proof messes up the event weights, do not use for the moment!")
-    #process.run(proof=True, proofWorkers=4)
     process.run(proof=True)
 else:
     process.run()
 
 # Run the analysis with PROOF
 # By default it uses all cores, but you can give proofWorkers=<N> as a parameter
-
+#process.run(proof=True)

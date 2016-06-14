@@ -174,8 +174,10 @@ def main():
         for n in sys.argv[1:]:
 #            inname = n.replace("pseudoMulticrab_","")+dsetExt
             inname = dsetExt
+
 #            if "pseudoMulticrab_" in n:
 #                inname = n.replace("pseudoMulticrab_","")+dsetExt
+
             fname = os.path.join(n, inname, "res", "histograms-%s.root"%(inname))
             #print "     in:",fname
             if not os.path.exists(fname):

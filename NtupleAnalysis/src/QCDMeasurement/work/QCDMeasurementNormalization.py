@@ -71,7 +71,12 @@ def main(argv, dsetMgr, moduleInfoString):
     # Include only 120 mass bin of HW and HH dsetMgr
     dsetMgr.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "HplusTB" in name, dsetMgr.getAllDatasetNames()))
-    # Default merging nad ordering of data and MC dsetMgr
+    dsetMgr.remove(filter(lambda name: "DY2JetsToLL" in name, dsetMgr.getAllDatasetNames()))
+    dsetMgr.remove(filter(lambda name: "DY3JetsToLL" in name, dsetMgr.getAllDatasetNames()))
+    dsetMgr.remove(filter(lambda name: "DY4JetsToLL" in name, dsetMgr.getAllDatasetNames()))
+    dsetMgr.remove(filter(lambda name: "WJetsToLNu_HT" in name, dsetMgr.getAllDatasetNames()))
+          
+        # Default merging nad ordering of data and MC dsetMgr
     # All data dsetMgr to "Data"
     # All QCD dsetMgr to "QCD"
     # All single top dsetMgr to "SingleTop"
@@ -90,9 +95,12 @@ def main(argv, dsetMgr, moduleInfoString):
     else:
         myMergeList.append("TTJets") # Madgraph with negative weights
         print "Warning: using TTJets as input, but this is suboptimal. Please switch to the TT sample (much more stats.)."
-    myMergeList.append("WJetsHT")
-####    myMergeList.append("DYJetsToLLHT")
+
+    #myMergeList.append("WJetsHT")
+    myMergeList.append("WJets")
+    ####    myMergeList.append("DYJetsToLLHT")
     myMergeList.append("SingleTop")
+
     if "Diboson" in dsetMgr.getMCDatasetNames():
         myMergeList.append("Diboson")
         print "Warning: ignoring diboson sample (since it does not exist) ..."
@@ -200,6 +208,7 @@ def main(argv, dsetMgr, moduleInfoString):
                                                  FITMIN, FITMAX)
         template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
                                                           defaultUpperLimit=[ 20, 150, 60,    1.0])
+
         # Note that the same function is used for QCD only and QCD+EWK fakes
         template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", norm=1), FITMIN, FITMAX)
         template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[0.0001, 0.001, 0.1, 0.0,  10, 0.0001, 0.001],
@@ -268,6 +277,7 @@ def main(argv, dsetMgr, moduleInfoString):
             
             #===== Fit individual templates to data
             fitOptions = "R BLW" # RBLW
+
             manager.calculateNormalizationCoefficients(hmetBase_data, fitOptions, FITMIN, FITMAX)
             
             #===== Calculate combined normalisation coefficient (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)

@@ -40,8 +40,9 @@ tauSelection = PSet(
                   rtau = 0.0,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronTightMVA5",
       againstMuonDiscr = "againstMuonTight3",
-        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
-  
+        isolationDiscr = "byMediumIsolationMVA3newDMwLT",
+        #isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+          
 )
 # tau misidentification scale factors
 scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
@@ -125,6 +126,11 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
         cutValueJet3 = 0.0,   # Cut value in degrees (circular cut)
         cutValueJet4 = 0.0,   # Cut value in degrees (circular cut)
 )
+#====== Experimental
+jetCorrelations = PSet (
+
+)
+
 
 def setAngularCutsWorkingPoint(pset, workingPoint):
     if workingPoint == "NoCut":
@@ -194,8 +200,10 @@ allSelections = PSet(
          BJetSelection = bjetSelection,
           METSelection = metSelection,
  AngularCutsBackToBack = angularCutsBackToBack,
+       JetCorrelations = jetCorrelations,
            CommonPlots = commonPlotsOptions,
 )
+
 
 ## Parses command line parameters and returns suffix for analysis
 def obtainAnalysisSuffix(argv):
@@ -222,4 +230,6 @@ def applyAnalysisCommandLineOptions(argv, config):
         config.TauSelection.prongs = 2
     elif "3prong" in argv or "3pr" in argv:
         config.TauSelection.prongs = 3
+
     scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal")
+
