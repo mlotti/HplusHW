@@ -68,3 +68,41 @@ def getStatus():
 ## Output of 'git diff'
 def getDiff():
     return _execute(["git", "diff"])
+
+
+# Write all git information (commit id, status, diff) to a given directory
+def writeCodeGitInfo(taskDirName, bVerbose=True):
+    '''
+    Write git version information to a directory
+    '''
+    version     = getCommitId()
+    gitFileList = []
+
+    if version != None: 
+        # Write the git code version to a file (first line of: git show --pretty="%H"                                                                                              
+        fileName = "git_commit.txt"
+        f = open(os.path.join(taskDirName, fileName), "w")
+        f.write(version + "\n")
+        f.close()
+        gitFileList.append(fileName)
+
+        # Write the git code status to a file (git status)
+        fileName = "git_status.txt"
+        f = open(os.path.join(taskDirName, fileName), "w")
+        f.write(getStatus()+"\n")
+        f.close()
+        gitFileList.append(fileName)
+        
+        # Write the git code status to a file (git diff)
+        fileName = "git_diff.txt"
+        f = open(os.path.join(taskDirName, fileName), "w")
+        f.write(getDiff()+"\n")
+        f.close()
+        gitFileList.append(fileName)
+    else:
+        raise Exception("Could not determine the git version of the code!")
+
+    if(bVerbose):
+        print "=== git.py:\n\t Copied %s to '%s'." % ("'" + "', '".join(gitFileList) + "'", taskDirName)
+
+    return gitFileList
