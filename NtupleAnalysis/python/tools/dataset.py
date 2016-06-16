@@ -2584,7 +2584,7 @@ class Dataset:
         for f in self.files:
             # Skip this step if on OS X (crashes)
             if _platform == "darwin":
-                print "=== dataset.py: Skip the clearing the in-memory representations of the files in MAC OS X (causes crash)"
+                #print "=== dataset.py: Skip the clearing the in-memory representations of the files in macOS (causes crash)"
                 continue
 #            else:
 #                f.Clear() # uncommented by Santeri in order to avoid segmentation faults
