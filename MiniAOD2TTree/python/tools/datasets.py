@@ -249,36 +249,36 @@ datasetsMiniAODv2_TTZToQQ76x.append(Dataset('/TTZToQQ_TuneCUETP8M1_13TeV-amcatnl
 
 
 datasetsMiniAODv2_WJetsToQQ76x = []
-datasetsMiniAODv2_WJetsToQQ76X.append(Dataset('/WJetsToQQ_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
-datasetsMiniAODv2_WJetsToQQ76X.append(Dataset('/WJetsToQQ_HT180_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_WJetsToQQ76x.append(Dataset('/WJetsToQQ_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_WJetsToQQ76x.append(Dataset('/WJetsToQQ_HT180_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 
 
 datasetsMiniAODv2_ZJetsToQQ76x = []
-datasetsMiniAODv2_ZJetsToQQ76X.append(Dataset('/ZJetsToQQ_HT600toInf_13TeV-madgraph/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v3/MINIAODSIM'))
+datasetsMiniAODv2_ZJetsToQQ76x.append(Dataset('/ZJetsToQQ_HT600toInf_13TeV-madgraph/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v3/MINIAODSIM'))
 
 
-datasetsMiniAODv2_DibosonG76X = []
-datasetsMiniAODv2_DibosonG76X.append(Dataset('/WWG_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/MINIAODSIM'))
-datasetsMiniAODv2_DibosonG76X.append(Dataset('/WZG_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_DibosonG76x = []
+datasetsMiniAODv2_DibosonG76x.append(Dataset('/WWG_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/MINIAODSIM'))
+datasetsMiniAODv2_DibosonG76x.append(Dataset('/WZG_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 # /WZJJ_QCD_13TeV-madgraph-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM
 
 
-datasetsMiniAODv2_WWTo4Q76X = []
-datasetsMiniAODv2_WWTo4Q76X.append(Dataset('/WWTo4Q_13TeV-powheg/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
-datasetsMiniAODv2_WWTo4Q76X.append(Dataset('/WWTo4Q_4f_13TeV_amcatnloFXFX_madspin_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_WWTo4Q76x = []
+datasetsMiniAODv2_WWTo4Q76x.append(Dataset('/WWTo4Q_13TeV-powheg/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_WWTo4Q76x.append(Dataset('/WWTo4Q_4f_13TeV_amcatnloFXFX_madspin_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 
 
-datasetsMiniAODv2_ZZTo4Q76X = []
-datasetsMiniAODv2_ZZTo4Q76X.append(Dataset('/ZZTo4Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_ZZTo4Q76x = []
+datasetsMiniAODv2_ZZTo4Q76x.append(Dataset('/ZZTo4Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 
 
-datasetsMiniAODv2_ttbb76X = []
-datasetsMiniAODv2_ttbb76X.append(Dataset('/ttbb_4FS_ckm_amcatnlo_madspin_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
-datasetsMiniAODv2_ttbb76X.append(Dataset('/ttbb_4FS_ckm_amcatnlo_madspin_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v2/MINIAODSIM'))
+datasetsMiniAODv2_ttbb76x = []
+datasetsMiniAODv2_ttbb76x.append(Dataset('/ttbb_4FS_ckm_amcatnlo_madspin_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_ttbb76x.append(Dataset('/ttbb_4FS_ckm_amcatnlo_madspin_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v2/MINIAODSIM'))
 
 
-datasetsMiniAODv2_Triboson76X = []
-datasetsMiniAODv2_Triboson76X.append(Dataset('/WWW_4F_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v3/MINIAODSIM'))
-datasetsMiniAODv2_Triboson76X.append(Dataset('/WWZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
-datasetsMiniAODv2_Triboson76X.append(Dataset('/WZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
-datasetsMiniAODv2_Triboson76X.append(Dataset('/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_Triboson76x = []
+datasetsMiniAODv2_Triboson76x.append(Dataset('/WWW_4F_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v3/MINIAODSIM'))
+datasetsMiniAODv2_Triboson76x.append(Dataset('/WWZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_Triboson76x.append(Dataset('/WZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_Triboson76x.append(Dataset('/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))

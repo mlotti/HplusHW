@@ -76,12 +76,12 @@ signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
 hplus2tbAnalysisDatasets = []
 hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
 hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_DYToQQ76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_QCD76X)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_QCDbEnriched76X)
+hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_QCD76x)
+#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_QCDbEnriched76x)
 #hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_QCDbGenFilter76x)
 #hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_QCDHTBins76x)
 hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_Top76x) #Single-Top and TT
-#h plus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TT76x) #included in Top76X
+#h plus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TT76x) #included in Top76x
 #hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_GGJets76x)
 #hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_GJets76x)
 #hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TGJets76x)
@@ -95,12 +95,12 @@ hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TTTT76x)
 hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TTZToQQ76x)
 hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_WJetsToQQ76x)
 hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_ZJetsToQQ76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_Diboson76X) #
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_DibosonG76X)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_WWTo4Q76X)
-h#plus2tbAnalysisDatasets.extend(datasetsMiniAODv2_ZZTo4Q76X)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_ttbb76X)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_Triboson76X)
+hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_Diboson76x) #
+#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_DibosonG76x)
+#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_WWTo4Q76x)
+h#plus2tbAnalysisDatasets.extend(datasetsMiniAODv2_ZZTo4Q76x)
+hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_ttbb76x)
+hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_Triboson76x)
 
 
 #================================================================================================ 
