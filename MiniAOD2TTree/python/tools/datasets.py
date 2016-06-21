@@ -228,11 +228,11 @@ datasetsMiniAODv2_TTJetsHT76x.append(Dataset('/TTJets_HT-2500toInf_TuneCUETP8M1_
 
 
 datasetsMiniAODv2_TTWJets76x = []
-datasetsMiniAODv2_TTWJetsTo76x.append(Dataset('/ttWJets_13TeV_madgraphMLM/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_TTWJets76x.append(Dataset('/ttWJets_13TeV_madgraphMLM/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 
 
 datasetsMiniAODv2_TTZJets76x = []
-datasetsMiniAODv2_TTZJetsTo76x.append(Dataset('/ttZJets_13TeV_madgraphMLM/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_TTZJets76x.append(Dataset('/ttZJets_13TeV_madgraphMLM/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 
 
 datasetsMiniAODv2_TTWJetsToQQ76x = []
