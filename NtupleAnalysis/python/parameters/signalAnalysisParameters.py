@@ -40,7 +40,7 @@ tauSelection = PSet(
                   rtau = 0.0,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronTightMVA5",
       againstMuonDiscr = "againstMuonTight3",
-        isolationDiscr = "byMediumIsolationMVA3newDMwLT",
+        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
         #isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
           
 )
