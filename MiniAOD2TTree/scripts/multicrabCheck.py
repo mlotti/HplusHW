@@ -524,6 +524,7 @@ def main(opts, args):
     datasets     = GetDatasetAbsolutePaths(datasetdirs)
     baseNames    = GetDatasetBasenames(datasets)
     Verbose("Found %s CRAB task directories:\n\t%s" % ( len(datasets), "\n\t".join(baseNames)), True)
+    summaryDict = {}
 
     # For-loop: All dataset directories (absolute paths)
     for index, d in enumerate(datasets):
@@ -537,8 +538,9 @@ def main(opts, args):
         # Get task dashboard URL
         taskDashboard = GetTaskDashboardURL(d)
         
-        # Get task status
+        # Get task status and add to dictionary        
         taskStatus = GetTaskStatus(d) 
+        summaryDict[d.split("/")[-1]] = taskStatus
 
         # Kill task if requested by user
         reports += GetTaskReports(d, taskStatus, taskDashboard)
@@ -547,7 +549,36 @@ def main(opts, args):
     if 0:
         for r in reports:
             r.Print()
-        
+
+    PrintTaskSummary(summaryDict)
+    return
+
+
+def PrintTaskSummary(summaryDict):
+    '''
+    Print a summary table of all submitted tasks with minimal information.
+    The purpose it to easily determine which jobs are done, running and failed.
+    '''
+    if not opts.summary:
+        return
+
+    summary  = []
+    msgAlign = "{:<3} {:<50} {:<20}"
+    header   = msgAlign.format("#", "Dataset",  "Status")
+    hLine    = "="*len(header)
+    summary.append(hLine)
+    summary.append(header)
+    summary.append(hLine)
+    
+    # For-loop: All datasets (key) and corresponding status (value)
+    for i, d in enumerate(summaryDict):
+        line = msgAlign.format(i+1, d,  summaryDict[d])
+        summary.append(line)
+    summary.append(hLine)
+
+    # For-loop: All lines in summary table
+    for l in summary:
+        print l
     return
 
 
@@ -697,11 +728,12 @@ if __name__ == "__main__":
     '''
 
     parser = OptionParser(usage="Usage: %prog [options]")
-    parser.add_option("-v", "--verbose"   , dest="verbose"   , default=False, action="store_true", help="Verbose mode")
-    parser.add_option("-p", "--promptUser", dest="promptUser", default=False, action="store_true", help="Prompt user before executing CRAB commands")
-    parser.add_option("-r", "--resubmit"  , dest="resubmit"  , default=False, action="store_true", help="Resubmit all failed jobs")
-    parser.add_option("-k", "--kill"      , dest="kill"      , default=False, action="store_true", help="Kill all submitted jobs")
-    parser.add_option("-g", "--get"       , dest="get"       , default=False, action="store_true", help="Get output of finished jobs")
+    parser.add_option("-v", "--verbose"   , dest="verbose"   , default=False, action="store_true" , help="Verbose mode [defaut=False]")
+    parser.add_option("-p", "--promptUser", dest="promptUser", default=False, action="store_true" , help="Prompt user before executing CRAB commands [defaut=False]")
+    parser.add_option("-r", "--resubmit"  , dest="resubmit"  , default=False, action="store_true" , help="Resubmit all failed jobs [defaut=False]")
+    parser.add_option("-k", "--kill"      , dest="kill"      , default=False, action="store_true" , help="Kill all submitted jobs [defaut=False]")
+    parser.add_option("-g", "--get"       , dest="get"       , default=False, action="store_true" , help="Get output of finished jobs [defaut=False]")
+    parser.add_option("-s", "--summary"   , dest="summary"   , default=True , action="store_false", help="Print summary table of datasets and status [defaut=True]")
     (opts, args) = parser.parse_args()
 
     sys.exit( main(opts, args) )
