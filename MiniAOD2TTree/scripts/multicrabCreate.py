@@ -21,10 +21,10 @@ https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial#Setup_the_e
 # USER Options
 #================================================================================================
 #PSET = "miniAODGEN2TTree_cfg.py"
-#PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
+PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
 #PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
-PSET = "miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py"
+#PSET = "miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py"
 
 
 #================================================================================================
@@ -333,12 +333,12 @@ def GetRequestName(dataset):
         # Append the Run Range (for Data samples only)
 	if dataset.isData():
 		runRangeMatch = runRange_re.search(dataset.lumiMask)
-		if runrangeMatch:
+		if runRangeMatch:
 			runRange= runRangeMatch.group("RunRange")
 			runRange = runRange.replace("-","_")
-			bunchSpace = runrangeMatch.group("BunchSpacing")
+			bunchSpace = runRangeMatch.group("BunchSpacing")
 			requestName += "_" + runRange + bunchSpace
-		Ag = runrangeMatch.group("Silver")
+		Ag = runRangeMatch.group("Silver")
                 if Ag == "_Silver": # Use  chemical element of silver (Ag)
 			requestName += Ag
 #            s = (dataset.URL).split("/")
