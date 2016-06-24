@@ -231,8 +231,8 @@ def GetTaskDirName(analysis, version, datasets):
 		dirName+= "_"+match.group("bx")
 
 	# Append the creation time to the task directory name    
-	time = datetime.datetime.now().strftime("%d%b%Y_%Hh%Mm%Ss")
-	# time = datetime.datetime.now().strftime("%Y%m%dT%H%M") #original
+	# time = datetime.datetime.now().strftime("%d%b%Y_%Hh%Mm%Ss")
+	time = datetime.datetime.now().strftime("%Y%m%dT%H%M") #original
 	dirName+= "_" + time
 
 	# If directory already exists (resubmission)

@@ -650,9 +650,9 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     tableRows.append(hLine)
 
     tableRows.append( txtAlign.format("%sIdle"             % (colors.GRAY  ), nIdle    , "/", nTotal ) )
-    tableRows.append( txtAlign.format("%sUnknown"          % (colors.YELLOW), nUnknown , "/", nTotal ) )
+    tableRows.append( txtAlign.format("%sUnknown"          % (colors.GRAY), nUnknown , "/", nTotal ) )
     tableRows.append( txtAlign.format("%sFailed"           % (colors.RED   ), nFail    , "/", nTotal ) )
-    tableRows.append( txtAlign.format("%sRunning"          % (colors.GREEN ), nRun     , "/", nTotal ) )
+    tableRows.append( txtAlign.format("%sRunning"          % (colors.ORANGE), nRun     , "/", nTotal ) )
     tableRows.append( txtAlign.format("%sTransferring"     % (colors.ORANGE), nTransfer, "/", nTotal ) )
     tableRows.append( txtAlign.format("%sDone"             % (colors.WHITE ), nFinish  , "/", nTotal ) )
     tableRows.append( txtAlign.format("%sRetrieved Logs"   % (colors.PURPLE), nLogs    , "/", nTotal ) )
