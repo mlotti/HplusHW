@@ -106,6 +106,8 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
   }
   if(ntaus != 1) return false;
 
+  if(selectedTau->charge() * selectedMuon->charge() != -1 ) return false;
+
   //  boost::optional<HLTTau> selectedHltTau;
   math::LorentzVectorT<double> selectedHltTau;
   double drmin = 999;
@@ -134,9 +136,8 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
   double muTauInvMass = (selectedMuon->p4() + selectedTau->p4()).M();
   if(xvar == pt) hInvM->Fill(muTauInvMass);
   //  std::cout << "check muTauInvMass " << selectedMuon->pt() << " " << selectedTau->pt() << " " << muTauInvMass << std::endl;
-  //  if(!(muTauInvMass < 80)) return false;
+  if(!(muTauInvMass > 20 && muTauInvMass < 80)) return false;
   //  if(!(muTauInvMass < 100)) return false; // 80 -> 100 because of H125 sample. 23112015/S.Lehti
-  
   cTauLegInvMass.increment();
 
   double muMetMt = sqrt( 2 * selectedMuon->pt() * fEvent.met_Type1().et() * (1-cos(selectedMuon->phi()-fEvent.met_Type1().phi())) );
@@ -155,10 +156,10 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
   }
   //  std::cout << "check njets " << fEvent.jets().size() << " " << njets << std::endl;
   hNjets->Fill(njets);
-  if(njets > 2) return false;
+  //if(njets > 2) return false;
 
   //bool selected = false;
-  //  if(ntaus > 0 && nmuons > 0 && muTauInvMass < 80 && muMetMt < 40) selected = true;
+  //if(ntaus > 0 && nmuons > 0 && muTauInvMass < 80 && muMetMt < 40) selected = true;
   //  if(ntaus > 0 && nmuons > 0) selected = true;
   //return selected;
   return true;

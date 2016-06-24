@@ -11,7 +11,9 @@ void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   fMCVisibleTau.setupBranches(mgr);
   fmatchingJet.setupBranches(mgr);
 
+  mgr.book(prefix()+"_TrgMatch_LooseIsoPFTau20", &fTrgMatch_LooseIsoPFTau20);
   mgr.book(prefix()+"_TrgMatch_LooseIsoPFTau50_Trk30_eta2p1", &fTrgMatch_LooseIsoPFTau50_Trk30_eta2p1);
+  mgr.book(prefix()+"_TrgMatch_MediumIsoPFTau40_Trk1_eta2p1_Reg", &fTrgMatch_MediumIsoPFTau40_Trk1_eta2p1_Reg);
   mgr.book(prefix()+"_againstElectronLooseMVA5", &fAgainstElectronLooseMVA5);
   mgr.book(prefix()+"_againstElectronMVA5category", &fAgainstElectronMVA5category);
   mgr.book(prefix()+"_againstElectronMediumMVA5", &fAgainstElectronMediumMVA5);
@@ -49,6 +51,7 @@ void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_lNeutrTrkPt", &fLNeutrTrkPt);
   mgr.book(prefix()+"_IPxy", &fIPxy);
   mgr.book(prefix()+"_IPxySignif", &fIPxySignif);
+  mgr.book(prefix()+"_charge", &fCharge);
   mgr.book(prefix()+"_decayMode", &fDecayMode);
   mgr.book(prefix()+"_mcNPizero", &fMcNPizero);
   mgr.book(prefix()+"_mcNProngs", &fMcNProngs);
