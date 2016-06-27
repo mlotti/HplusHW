@@ -43,7 +43,9 @@ protected:
   ParticleCollection<double> fmatchingJet;
 
 protected:
+  const Branch<std::vector<bool>> *fTrgMatch_LooseIsoPFTau20;
   const Branch<std::vector<bool>> *fTrgMatch_LooseIsoPFTau50_Trk30_eta2p1;
+  const Branch<std::vector<bool>> *fTrgMatch_MediumIsoPFTau40_Trk1_eta2p1_Reg;
   const Branch<std::vector<bool>> *fAgainstElectronLooseMVA5;
   const Branch<std::vector<bool>> *fAgainstElectronMVA5category;
   const Branch<std::vector<bool>> *fAgainstElectronMediumMVA5;
@@ -81,6 +83,7 @@ protected:
   const Branch<std::vector<double>> *fLNeutrTrkPt;
   const Branch<std::vector<float>> *fIPxy;
   const Branch<std::vector<float>> *fIPxySignif;
+  const Branch<std::vector<short>> *fCharge;
   const Branch<std::vector<short>> *fDecayMode;
   const Branch<std::vector<short>> *fMcNPizero;
   const Branch<std::vector<short>> *fMcNProngs;
@@ -145,7 +148,9 @@ public:
   const Particle<ParticleCollection<double>>* MCVisibleTau() const { return &fMCVisibleTau; }
   const Particle<ParticleCollection<double>>* matchingJet() const { return &fmatchingJet; }
 
+  bool TrgMatch_LooseIsoPFTau20() const { return this->fCollection->fTrgMatch_LooseIsoPFTau20->value()[this->index()]; }
   bool TrgMatch_LooseIsoPFTau50_Trk30_eta2p1() const { return this->fCollection->fTrgMatch_LooseIsoPFTau50_Trk30_eta2p1->value()[this->index()]; }
+  bool TrgMatch_MediumIsoPFTau40_Trk1_eta2p1_Reg() const { return this->fCollection->fTrgMatch_MediumIsoPFTau40_Trk1_eta2p1_Reg->value()[this->index()]; }
   bool againstElectronLooseMVA5() const { return this->fCollection->fAgainstElectronLooseMVA5->value()[this->index()]; }
   bool againstElectronMVA5category() const { return this->fCollection->fAgainstElectronMVA5category->value()[this->index()]; }
   bool againstElectronMediumMVA5() const { return this->fCollection->fAgainstElectronMediumMVA5->value()[this->index()]; }
@@ -183,6 +188,7 @@ public:
   double lNeutrTrkPt() const { return this->fCollection->fLNeutrTrkPt->value()[this->index()]; }
   float IPxy() const { return this->fCollection->fIPxy->value()[this->index()]; }
   float IPxySignif() const { return this->fCollection->fIPxySignif->value()[this->index()]; }
+  short charge() const { return this->fCollection->fCharge->value()[this->index()]; }
   short decayMode() const { return this->fCollection->fDecayMode->value()[this->index()]; }
   short mcNPizero() const { return this->fCollection->fMcNPizero->value()[this->index()]; }
   short mcNProngs() const { return this->fCollection->fMcNProngs->value()[this->index()]; }

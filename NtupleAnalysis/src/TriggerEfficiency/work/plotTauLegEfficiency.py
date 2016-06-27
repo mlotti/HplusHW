@@ -147,20 +147,21 @@ def analyze(analysis):
 
     paths = [sys.argv[1]]
 
-    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125")
+    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125|DYJetsToLL")
     datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL")
+#    datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeOnlyTasks="DYJetsToLL")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="GluGluHToTauTau_M125|TTJets")
     datasetsH125 = None
 #    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125",emptyDatasetsAsNone=True)
-    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125")
+#    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125")
 
     datasets.loadLuminosities()
 
     style = tdrstyle.TDRStyle()
 
     dataset1 = datasets.getDataDatasets()
-#    dataset2 = datasets.getMCDatasets()
-    dataset2 = datasetsDY.getMCDatasets()
+    dataset2 = datasets.getMCDatasets()
+#    dataset2 = datasetsDY.getMCDatasets()
 
     eff1 = getEfficiency(dataset1)
     eff2 = getEfficiency(dataset2)
@@ -211,7 +212,7 @@ def analyze(analysis):
     p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 
     p.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
-    p.getFrame().GetXaxis().SetTitle("#tau-jet p_{T} (GeV/c)")
+    p.getFrame().GetXaxis().SetTitle("offline #tau_{h} p_{T} (GeV/c)")
     p.getFrame2().GetYaxis().SetTitle("Ratio")
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
@@ -275,7 +276,7 @@ def analyze(analysis):
     p_eta.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegendEta))
 
     p_eta.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
-    p_eta.getFrame().GetXaxis().SetTitle("#tau-jet #eta")
+    p_eta.getFrame().GetXaxis().SetTitle("offline #tau_{h} #eta")
     p_eta.getFrame2().GetYaxis().SetTitle("Ratio")
     p_eta.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
@@ -306,7 +307,7 @@ def analyze(analysis):
 
     pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
 
-    optsPU = {"ymin": 0.001, "ymax": 0.1}
+    optsPU = {"ymin": 0.1, "ymax": 1.2}
     pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=optsPU, opts2=opts2)
     pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
     pPU.getPad1().SetLogy(True)
@@ -326,13 +327,13 @@ def analyze(analysis):
     pPU.save(formats)
 
     #########################################################################
-
+    """
     hName = "Pull"
 #    hName = "Sub"
     namePull = "TauMET_"+analysis+"_DataVsMC_"+hName+"s"
 
     plots.mergeRenameReorderForDataMC(datasets)
-    datasets.merge("MC", ["TTJets","WJets","DYJetsToLL","SingleTop","QCD"], keepSources=True)
+    datasets.merge("MC", ["TT","WJets","DYJetsToLL","SingleTop","QCD"], keepSources=True)
 
     drh1 = datasets.getDataset("Data").getDatasetRootHisto(hName)
     drh2 = datasets.getDataset("MC").getDatasetRootHisto(hName)
@@ -387,7 +388,7 @@ def analyze(analysis):
 
     histograms.addStandardTexts(lumi=lumi)
     p_pull.save(formats)
-
+    """
     #########################################################################                                                                                                                               
     print "Output written in",plotDir
 

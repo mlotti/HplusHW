@@ -23,7 +23,7 @@ Jets = cms.VPSet(
             "pfCombinedMVABJetTag",
         ),
         userFloats = cms.vstring(
-           "pileupJetId:fullDiscriminant"
+#           "pileupJetId:fullDiscriminant"
         ),
     ),
     cms.PSet(
@@ -40,7 +40,7 @@ Jets = cms.VPSet(
             "pfCombinedMVABJetTag", # Does not work
         ),
         userFloats = cms.vstring(
-           "pileupJetId:fullDiscriminant"
+#           "pileupJetId:fullDiscriminant"
         ),
     )
 )

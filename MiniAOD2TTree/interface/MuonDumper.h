@@ -39,6 +39,9 @@ class MuonDumper : public BaseDumper {
         edm::EDGetTokenT<edm::View<pat::Muon>> *muonToken;
         edm::EDGetTokenT<reco::GenParticleCollection> genParticleToken;
         edm::EDGetTokenT<edm::View<reco::Vertex>> vertexToken;
+
+        std::vector<short> *q;
+
         std::vector<bool> *isGlobalMuon;
         // Note that isSoftMuon and isHighPtMuon are at the moment not PF compatible
         std::vector<bool> *isLooseMuon;

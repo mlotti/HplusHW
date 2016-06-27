@@ -13,6 +13,8 @@ MuonDumper::MuonDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<
     phi = new std::vector<double>[inputCollections.size()];    
     e   = new std::vector<double>[inputCollections.size()];    
 
+    q   = new std::vector<short>[inputCollections.size()];
+
     //p4  = new std::vector<reco::Candidate::LorentzVector>[inputCollections.size()];
     //pdgId = new std::vector<short>[inputCollections.size()];
     isGlobalMuon = new std::vector<bool>[inputCollections.size()];
@@ -51,6 +53,8 @@ void MuonDumper::book(TTree* tree){
         tree->Branch((name+"_eta").c_str(),&eta[i]);
         tree->Branch((name+"_phi").c_str(),&phi[i]);
         tree->Branch((name+"_e").c_str(),&e[i]);
+
+        tree->Branch((name+"_charge").c_str(),&q[i]);
 
         tree->Branch((name+"_isGlobalMuon").c_str(),&isGlobalMuon[i]);
         tree->Branch((name+"_muIDLoose").c_str(),&isLooseMuon[i]);
@@ -92,6 +96,8 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 eta[ic].push_back(obj.p4().eta());
                 phi[ic].push_back(obj.p4().phi());
                 e[ic].push_back(obj.p4().energy());
+
+                q[ic].push_back(obj.charge());
                 
 		isGlobalMuon[ic].push_back(obj.isGlobalMuon());
 
@@ -145,15 +151,17 @@ void MuonDumper::fillMCMatchInfo(size_t ic, edm::Handle<reco::GenParticleCollect
 }
 
 
-void MuonDumper::reset(){                                                                                                                                           
-    if(booked){                                                                                                                                                     
-      for(size_t ic = 0; ic < inputCollections.size(); ++ic){                                                                                                       
-                                                                                                                                                                    
-        pt[ic].clear();                                                                                                                                             
-        eta[ic].clear();                                                                                                                                            
-        phi[ic].clear();                                                                                                                                            
-        e[ic].clear();                                                                                                                                              
-                                                                                                                                                                    
+void MuonDumper::reset(){
+    if(booked){         
+      for(size_t ic = 0; ic < inputCollections.size(); ++ic){
+                        
+        pt[ic].clear();
+        eta[ic].clear();
+        phi[ic].clear();
+        e[ic].clear();  
+
+        q[ic].clear();
+
         isGlobalMuon[ic].clear();
         isLooseMuon[ic].clear();
         isMediumMuon[ic].clear();
@@ -161,9 +169,9 @@ void MuonDumper::reset(){
         relIsoDeltaBetaCorrected[ic].clear();
         
         MCmuon[ic].reset();
-      }                                                                                                                                                             
-      for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){                                                                                       
-        discriminators[ic].clear();                                                                                                                                 
-      }                                                                                                                                                             
-    }                                                                                                                                                               
+      }
+      for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
+        discriminators[ic].clear();
+      }
+    }  
 }

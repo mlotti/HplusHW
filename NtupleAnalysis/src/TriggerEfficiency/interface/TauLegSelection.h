@@ -18,6 +18,8 @@ class TauLegSelection : public TrgBaseSelection {
   void print();
 
  private:
+  short fnprongs;
+
   WrappedTH1 *hMuPt;
   WrappedTH1 *hTauPt;
   WrappedTH1 *hInvM;
@@ -40,6 +42,11 @@ TauLegSelection::TauLegSelection(const ParameterSet& setup, EventCounter& fEvent
 {
   init(setup);
   //  fHistoWrapper = histoWrapper;
+  const ParameterSet& tauSelection = setup.getParameter<ParameterSet>("TauSelection");
+  fnprongs = tauSelection.getParameter<int>("nprongs");
+  std::cout << "        Tau selection nprongs " << fnprongs << std::endl;
+  std::vector<std::string> discrs = tauSelection.getParameter<std::vector<std::string> >("discriminators");
+  for(std::string i: discrs) std::cout << "        Tau discriminators " << i << std::endl;
 }
 TauLegSelection::~TauLegSelection(){}
 
@@ -90,7 +97,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
     if(xvar != pt && !(tau.pt() > 50)) continue;
     if(!(std::abs(tau.eta()) < 2.1)) continue;
     if(!(tau.lChTrkPt() > 20)) continue;
-    //    if(!(tau.nProngs() == 1)) continue;
+    if((fnprongs == 1 || fnprongs == 3) && !(tau.nProngs() == fnprongs)) continue;
     if(!tau.decayModeFinding()) continue;
     if(!tau.configurableDiscriminators()) continue;
 
@@ -98,6 +105,8 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
     if(!selectedTau || (tau.pt() > selectedTau->pt()) ) selectedTau = tau;
   }
   if(ntaus != 1) return false;
+
+  if(selectedTau->charge() * selectedMuon->charge() != -1 ) return false;
 
   //  boost::optional<HLTTau> selectedHltTau;
   math::LorentzVectorT<double> selectedHltTau;
@@ -127,9 +136,8 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
   double muTauInvMass = (selectedMuon->p4() + selectedTau->p4()).M();
   if(xvar == pt) hInvM->Fill(muTauInvMass);
   //  std::cout << "check muTauInvMass " << selectedMuon->pt() << " " << selectedTau->pt() << " " << muTauInvMass << std::endl;
-  //  if(!(muTauInvMass < 80)) return false;
+  if(!(muTauInvMass > 20 && muTauInvMass < 80)) return false;
   //  if(!(muTauInvMass < 100)) return false; // 80 -> 100 because of H125 sample. 23112015/S.Lehti
-  
   cTauLegInvMass.increment();
 
   double muMetMt = sqrt( 2 * selectedMuon->pt() * fEvent.met_Type1().et() * (1-cos(selectedMuon->phi()-fEvent.met_Type1().phi())) );
@@ -148,10 +156,10 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
   }
   //  std::cout << "check njets " << fEvent.jets().size() << " " << njets << std::endl;
   hNjets->Fill(njets);
-  if(njets > 2) return false;
+  //if(njets > 2) return false;
 
   //bool selected = false;
-  //  if(ntaus > 0 && nmuons > 0 && muTauInvMass < 80 && muMetMt < 40) selected = true;
+  //if(ntaus > 0 && nmuons > 0 && muTauInvMass < 80 && muMetMt < 40) selected = true;
   //  if(ntaus > 0 && nmuons > 0) selected = true;
   //return selected;
   return true;

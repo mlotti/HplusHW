@@ -20,6 +20,8 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.pileupReweightedAllEvents as pileupReweightedAllEvents
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as crosssection
 
+from sys import platform as _platform
+
 _debugNAllEvents = False
 
 # era name -> list of era parts in data dataset names
@@ -2579,8 +2581,13 @@ class Dataset:
         # the files increases the reading (object lookup?) performance
         # when reading from many analysis directories in a single
         # script.
-#        for f in self.files:
-#            f.Clear() # uncommented by Santeri in order to avoid segmentation faults
+        for f in self.files:
+            # Skip this step if on OS X (crashes)
+            if _platform == "darwin":
+                #print "=== dataset.py: Skip the clearing the in-memory representations of the files in macOS (causes crash)"
+                continue
+#            else:
+#                f.Clear() # uncommented by Santeri in order to avoid segmentation faults
 
     ## Close the files
     #

@@ -4,6 +4,7 @@
 
 #include "EventSelection/interface/CommonPlots.h"
 #include "EventSelection/interface/EventSelections.h"
+#include "EventSelection/interface/TransverseMass.h"
 
 #include "TDirectory.h"
 
@@ -41,10 +42,15 @@ private:
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
   AngularCutsBackToBack fAngularCutsBackToBack;
+  //  JetCorrelations fJetCorrelations;
   Count cSelected;
     
   // Non-common histograms
-
+ 
+  WrappedTH1 *hTransverseMass_ttRegion;
+  //  WrappedTH1 *hTransverseMass_WRegion;
+  WrappedTH1 *hTransverseMass_ttRegion_bbcuts;
+  //  WrappedTH1 *hTransverseMass_WRegion_bbcuts;
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -78,6 +84,8 @@ SignalAnalysis::SignalAnalysis(const ParameterSet& config, const TH1* skimCounte
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   fAngularCutsBackToBack(config.getParameter<ParameterSet>("AngularCutsBackToBack"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+// fJetCorrelations(config.getParameter<ParameterSet>("JetCorrelations"),
+//                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   cSelected(fEventCounter.addCounter("Selected events"))
 { }
 
@@ -94,8 +102,13 @@ void SignalAnalysis::book(TDirectory *dir) {
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
   fAngularCutsBackToBack.bookHistograms(dir);
+  //  fJetCorrelations.bookHistograms(dir);
   // Book non-common histograms
   //hExample =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "example pT", "example pT", 40, 0, 400);
+  hTransverseMass_ttRegion =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_ttRegion", "TransverseMass_ttRegion", 200, 0, 800);
+  //  hTransverseMass_WRegion =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_WRegion", "TransverseMass_WRegion", 200, 0, 800);
+  hTransverseMass_ttRegion_bbcuts =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_ttRegion_bbcuts", "TransverseMass_ttRegion_bbcuts", 200, 0, 800);
+  //  hTransverseMass_WRegion_bbcuts =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_WRegion", "TransverseMass_WRegion_bbcuts", 200, 0, 800);
 }
 
 void SignalAnalysis::setupBranches(BranchManager& branchManager) {
@@ -175,14 +188,15 @@ void SignalAnalysis::process(Long64_t entry) {
 
 //====== Collinear angular cuts
   const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
-  if (!collinearData.passedSelection())
-    return;
+  //  if (!collinearData.passedSelection())
+  //   return;
 
 //====== Point of standard selections
   fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);
 
 //====== b-jet selection
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
+
   // Fill final shape plots with b tag efficiency applied as an event weight
   if (silentMETData.passedSelection()) {
     const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
@@ -193,21 +207,41 @@ void SignalAnalysis::process(Long64_t entry) {
   if (!bjetData.passedSelection())
     return;
 
+
 //====== b tag SF
   if (fEvent.isMC()) {
     fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
   }
   cBTaggingSFCounter.increment();
 
+
 //====== MET selection
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
   if (!METData.passedSelection())
     return;
+
+
+  double myTransverseMass = TransverseMass::reconstruct(tauData.getSelectedTau(), METData.getMET());
+
+  if (collinearData.passedSelection()) {
+    hTransverseMass_ttRegion->Fill(myTransverseMass);
+    //    hTransverseMass_WRegion->Fill(myTransverseMass);
+  }
   
+
+  //  const JetCorrelations::Data jetCorrelationsData = fJetCorrelations.analyze(fEvent, jetData,tauData, METData);  
+
 //====== Back-to-back angular cuts
   const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(fEvent, tauData.getSelectedTau(), jetData, METData);
   if (!backToBackData.passedSelection())
     return;
+
+
+  if (!collinearData.passedSelection()) {
+    hTransverseMass_ttRegion_bbcuts->Fill(myTransverseMass);
+    //    hTransverseMass_WRegion_bbcuts->Fill(myTransverseMass);
+  }
+
 
 //====== All cuts passed
   cSelected.increment();
@@ -216,6 +250,9 @@ void SignalAnalysis::process(Long64_t entry) {
   
 
 //====== Experimental selection code
+  // const JetCorrelations::Data jetCorrelationsData = fJetCorrelations.analyze(fEvent, jetData,tauData, METData);
+
+
   // if necessary
   
 //====== Finalize

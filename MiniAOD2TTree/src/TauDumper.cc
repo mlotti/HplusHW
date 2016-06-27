@@ -15,6 +15,7 @@ TauDumper::TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     phi = new std::vector<double>[inputCollections.size()];    
     e   = new std::vector<double>[inputCollections.size()];    
     pdgId = new std::vector<short>[inputCollections.size()];
+    q   = new std::vector<short>[inputCollections.size()];
 
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
     discriminators = new std::vector<bool>[inputCollections.size()*nDiscriminators];
@@ -67,6 +68,7 @@ void TauDumper::book(TTree* tree){
         tree->Branch((name+"_eta").c_str(),&eta[i]);
         tree->Branch((name+"_phi").c_str(),&phi[i]);
         tree->Branch((name+"_e").c_str(),&e[i]);
+        tree->Branch((name+"_charge").c_str(),&q[i]);
 
 	//tree->Branch((name+"_p4").c_str(),&p4[i]);
         tree->Branch((name+"_pdgId").c_str(),&pdgId[i]);
@@ -122,6 +124,7 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         eta[ic].push_back(tau.p4().eta());
         phi[ic].push_back(tau.p4().phi());
         e[ic].push_back(tau.p4().energy());
+        q[ic].push_back(tau.charge());
 
         //p4[ic].push_back(tau.p4());
         
@@ -334,6 +337,7 @@ void TauDumper::reset(){
         eta[ic].clear();
         phi[ic].clear();
         e[ic].clear();
+        q[ic].clear();
 
 	//p4[ic].clear();
 	lChTrackPt[ic].clear();

@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 def produceCustomisations(process):
     process.CustomisationsSequence = cms.Sequence()
     reproduceJEC(process)
-    reproduceElectronID(process)
+#    reproduceElectronID(process)
     reproduceMETNoiseFilters(process)
     print "=== Customisations done"
 

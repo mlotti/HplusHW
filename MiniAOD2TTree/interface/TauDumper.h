@@ -38,6 +38,8 @@ class TauDumper : public BaseDumper {
         edm::EDGetTokenT<edm::View<pat::Jet>> *jetToken;
         edm::EDGetTokenT<reco::GenParticleCollection> genParticleToken;
 
+        std::vector<short> *q;
+
         std::vector<double> *lChTrackPt;
         std::vector<double> *lChTrackEta;
         std::vector<double> *lNeutrTrackPt;

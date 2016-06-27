@@ -219,7 +219,7 @@ class InvertedTauID:
         st1 = styles.getDataStyle().clone()
         st2 = st1.clone()
         st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
-	plot.histoMgr.forHisto("Base", st1)
+        plot.histoMgr.forHisto("Base", st1)
         plot.histoMgr.forHisto("Inv", st2)
         
         # Set the legend labels
@@ -443,8 +443,91 @@ class InvertedTauID:
         if "MtbvetoAllDeltaPhiCuts"  in name:
             histograms.addText(0.25, 0.4, "B-tagging factorisation", 23)
             histograms.addText(0.25, 0.3, "#Delta#phi(#tau jet,MET) vs #Delta#phi(jet1/2/3,MET) cuts", 20)
+
+
+##################################################################
+    
+    def mtComparison(self,histo1,histo2,name,norm=1,sysError=0):
+
+        h1 = histo1.Clone("h1")
+        h2 = histo2.Clone("h2")
+        #print "h1", h1
+    
+        if sysError > 0:
+            h1 = histograms.addSysError(h1,sysError)
+            h2 = histograms.addSysError(h2,sysError)
+
+       # if norm == 1:
+        #h1.Scale(1/h1.GetMaximum())
+        #h2.Scale(1/h2.GetMaximum())
         
+        #h1.Scale(1/h1.Integral())
+        #h2.Scale(1/h2.Integral())
+        print ",hmtBaseline.Integral()",h1.Integral()    
+#    if norm == 1:
+	# check that no bin has negative value, negative values possible after subtracting EWK from data  
+        """
+        iBin = 1
+    nBins = h1.GetNbinsX()
+    while iBin < nBins:
+        value1 = h1.GetBinContent(iBin)
+	    value2 = h2.GetBinContent(iBin)
+
+	    #if value1 < 0:
+		#h1.SetBinContent(iBin,0)
+
+            #if value2 < 0:
+             #   h2.SetBinContent(iBin,0)
+        iBin = iBin + 1
+        """
+        h1.GetYaxis().SetTitle("Events / 40 GeV")
+        h1.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV)")
+
+        plot = plots.ComparisonPlot(
+            histograms.Histo(h1, "Inv"),histograms.Histo(h2, "Base"),
+            )
+           
+    # Set the styles
+
+        st1 = styles.getDataStyle().clone()
+        st2 = st1.clone()
+        st1.append(styles.StyleMarker(markerColor=ROOT.kBlue))
+        st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
+        plot.histoMgr.forHisto("Base", st1)
+        plot.histoMgr.forHisto("Inv", st2)
+
+        # Set the legend labels
+        plot.histoMgr.setHistoLegendLabelMany({"Inv": "Inverted","Base": "Baseline"})       
+        # Set the legend styles
+        plot.histoMgr.setHistoLegendStyleAll("P")
+            
+    # Set the drawing styles
+        plot.histoMgr.setHistoDrawStyleAll("EP")
+
+        plot.createFrame("Comparison"+self.label, opts={"ymin":0.0, "xmax": 600},
+            createRatio=True,  opts2={"ymin": 0, "ymax": 2})  # bounds of the ratio plot
+
+        plot.getPad().SetLogy(False)
+        plot.setLegend(histograms.createLegend(0.6,0.7,0.9,0.9))
+    
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+#        histograms.addLuminosityText(x=None, y=None, lumi=self.lumi)
         
+        if "WithBjetVeto" in name:
+            #histograms.addText(0.6, 0.70, "Before MET cut", 22)
+            histograms.addText(0.65, 0.6, "B-jet veto", 22)
+            #histograms.addText(0.6, 0.58, "Back-to-back cuts", 22)
+        if "WithBBVeto" in name:
+            #histograms.addText(0.6, 0.70, "Before MET cut", 22)
+            histograms.addText(0.6, 0.65, "Back-to-back cut veto", 20)
+            #histograms.addText(0.6, 0.58, "Back-to-back cuts", 22)   
+        plot.draw() 
+        plot.save()         
+###############################################################################
+
+                  
+    """"
     def mtComparison(self,histo1,histo2,name,norm=1,sysError=0):
 
 	h1 = histo1.Clone("h1")
@@ -549,7 +632,7 @@ class InvertedTauID:
         st1 = styles.getDataStyle().clone()
         st2 = st1.clone()
         st2.append(styles.StyleMarker(markerColor=ROOT.kRed))
-	plot.histoMgr.forHisto("Base", st1)
+        plot.histoMgr.forHisto("Base", st1)
         plot.histoMgr.forHisto("Inv", st2)
         
         # Set the legend labels
@@ -952,7 +1035,7 @@ class InvertedTauID:
         plot.draw() 
         plot.save()
 
-        
+        """        
 
     def comparison(self,histo1,histo2,norm=1):
 
