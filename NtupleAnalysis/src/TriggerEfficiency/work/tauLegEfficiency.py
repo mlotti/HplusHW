@@ -62,7 +62,7 @@ def runRange(era):
     if era == "2016B":
         lumi = 0.803
         runmin = 271036
-        runmax = 274240
+        runmax = 275125
 
     if lumi == 0:
         print "Unknown era",era,"exiting.."
