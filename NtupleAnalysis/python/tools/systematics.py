@@ -96,10 +96,10 @@ _crossSectionUncertainty = {
     "TTJets": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.066), # 13 TeV, arxiv:1303.6254 and https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
     "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.066), # same as above
     "HplusTB": ScalarUncertaintyItem("xsect", 0.30),
-    "SingleTop": ScalarUncertaintyItem("xsect", 0.062), # 13 TeV, for tW, ref?
-    "WJets":  ScalarUncertaintyItem("xsect", 0.050), # 13 TeV, ref?
-    "DYJetsToLL": ScalarUncertaintyItem("xsect", 0.043), # 13 TeV, ref?
-    "Diboson": ScalarUncertaintyItem("xsect", 0.038), # 13 TeV, ref?
+    "SingleTop": ScalarUncertaintyItem("xsect", 0.054), # 13 TeV, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec#Single_top_Wt_channel_cross_sect
+    "WJets":  ScalarUncertaintyItem("xsect", 0.038), # 13 TeV, https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
+    "DYJetsToLL": ScalarUncertaintyItem("xsect", plus=0.040, minus=0.038), # 13 TeV, https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
+    "Diboson": ScalarUncertaintyItem("xsect", 0.065), # 13 TeV, https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
     "QCD": ScalarUncertaintyItem("xsect", 1.00), # We do not trust the MC QCD, therefore 100 % uncertainty
     "QCD_Pt20_MuEnriched": ScalarUncertaintyItem("xsect", 1.00), # We do not trust the MC QCD, therefore 100 % uncertainty
     "default": ScalarUncertaintyItem("xsect", 0.00),
