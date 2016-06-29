@@ -15,7 +15,7 @@ GenParticleDumper::GenParticleDumper(edm::ConsumesCollector&& iConsumesCollector
   phi = new std::vector<double>[inputCollections.size()];    
   e   = new std::vector<double>[inputCollections.size()];    
   pdgId = new std::vector<short>[inputCollections.size()];
-  //status = new std::vector<short>[inputCollections.size()];
+  status = new std::vector<short>[inputCollections.size()];
   mother = new std::vector<short>[inputCollections.size()];
 
   // Electrons
@@ -85,6 +85,7 @@ void GenParticleDumper::book(TTree* tree){
       tree->Branch((name+"_e").c_str(),&e[i]);
       tree->Branch((name+"_pdgId").c_str(),&pdgId[i]);
       tree->Branch((name+"_mother").c_str(),&mother[i]);
+      tree->Branch((name+"_status").c_str(),&status[i]);
     }
     if (inputCollections[i].getUntrackedParameter<bool>("saveGenElectrons", false)) {
       electrons[i].book(tree, name, "GenElectron");
@@ -144,6 +145,7 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           phi[ic].push_back(gp.phi());
           e[ic].push_back(gp.energy());   
           pdgId[ic].push_back(gp.pdgId());
+	  status[ic].push_back(gp.status());
           // Find mother index
           short index = -1;
           if (gp.mother() != nullptr) {
@@ -332,7 +334,7 @@ void GenParticleDumper::reset(){
         e[ic].clear();
         //et[ic].clear();
         pdgId[ic].clear();
-        //status[ic].clear();
+        status[ic].clear();
         mother[ic].clear();
       }
       if (inputCollections[ic].getUntrackedParameter<bool>("saveGenElectrons", false)) {
