@@ -18,6 +18,7 @@ class Dataset :
 # 76X: https://cmsweb.cern.ch/das/request?instance=prod%2Fglobal&view=list&input=dataset%3D%2F%2A%2F%2ARunIIFall15MiniAODv2-PU25nsData2015v1%2A%2F%2A&idx=50&limit=50
 #================================================================================================
 datasetsTauData76x = []
+datasetsTauData76x.append(Dataset('/Tau/Run2015C_25ns-27Jan2016-v1/MINIAOD',dataVersion="76Xdata"))
 datasetsTauData76x.append(Dataset('/Tau/Run2015D-16Dec2015-v1/MINIAOD',dataVersion="76Xdata"))
 
 
