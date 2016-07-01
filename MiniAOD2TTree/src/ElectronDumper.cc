@@ -23,7 +23,7 @@ ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std:
     electronToken = new edm::EDGetTokenT<edm::View<pat::Electron>>[inputCollections.size()];
     gsfElectronToken = new edm::EDGetTokenT<edm::View<reco::GsfElectron>>[inputCollections.size()];
     rhoToken = new edm::EDGetTokenT<double>[inputCollections.size()];
-    electronIDToken = new edm::EDGetTokenT<edm::ValueMap<bool>>[inputCollections.size()*nDiscriminators];
+//    electronIDToken = new edm::EDGetTokenT<edm::ValueMap<bool>>[inputCollections.size()*nDiscriminators];
     
     for(size_t i = 0; i < inputCollections.size(); ++i){
         edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
@@ -31,12 +31,14 @@ ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std:
         gsfElectronToken[i] = iConsumesCollector.consumes<edm::View<reco::GsfElectron>>(inputtag);
         edm::InputTag rhoSource = inputCollections[i].getParameter<edm::InputTag>("rhoSource");
         rhoToken[i] = iConsumesCollector.consumes<double>(rhoSource);
-        std::string IDprefix = inputCollections[i].getParameter<std::string>("IDprefix");
+        //std::string IDprefix = inputCollections[i].getParameter<std::string>("IDprefix");
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
+	/*
         for (size_t j = 0; j < discriminatorNames.size(); ++j) {
             edm::InputTag discrTag(IDprefix, discriminatorNames[j]);
             electronIDToken[i*discriminatorNames.size()+j] = iConsumesCollector.consumes<edm::ValueMap<bool>>(discrTag);
         }
+        */
     }
     
     useFilter = false;
@@ -91,11 +93,13 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
             // Setup handles for ID
             std::vector<edm::Handle<edm::ValueMap<bool>>> IDhandles;
             std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
+/*
             for (size_t j = 0; j < discriminatorNames.size(); ++j) {
               edm::Handle<edm::ValueMap<bool>> IDhandle;
               iEvent.getByToken(electronIDToken[ic*inputCollections.size()+j], IDhandle);
               IDhandles.push_back(IDhandle);
             }
+*/
 	    for(size_t i=0; i<electronHandle->size(); ++i) {
     		const pat::Electron& obj = electronHandle->at(i);
 
@@ -116,12 +120,21 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 
                 // Calculate relative isolation with effective area
                 // FIXME: recipy for effective area is missing
-                
+		/*                
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
                   // https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
                   discriminators[inputCollections.size()*iDiscr+ic].push_back((*(IDhandles[iDiscr]))[gsfHandle->ptrAt(i)]);
 		}
-
+                */
+                for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
+                  discriminators[inputCollections.size()*iDiscr+ic].push_back(obj.electronID(discriminatorNames[iDiscr]));
+                }
+                /*
+                const std::vector< std::pair<std::string,float>  > eleIDs = obj.electronIDs();
+		for(uint iDiscr = 0; iDiscr < eleIDs.size(); ++iDiscr) {
+                  std::cout << "check ele ids " << eleIDs[iDiscr].first << " " << eleIDs[iDiscr].second << std::endl;
+                }
+                */
 		// MC match info
 		if (!iEvent.isRealData())
                   fillMCMatchInfo(ic, genParticlesHandle, obj);
