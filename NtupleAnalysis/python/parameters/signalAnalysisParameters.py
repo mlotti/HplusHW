@@ -36,12 +36,13 @@ tauSelection = PSet(
               tauPtCut = 60.0,
              tauEtaCut = 2.1,
         tauLdgTrkPtCut = 30.0,
-                prongs = 123,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
+                prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                   rtau = 0.0,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronTightMVA6",
       againstMuonDiscr = "againstMuonTight3",
-        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
-  
+        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
+        #isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+          
 )
 # tau misidentification scale factors
 scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
@@ -106,7 +107,7 @@ scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
 
 #====== MET selection
 metSelection = PSet(
-           METCutValue = 120.0,
+           METCutValue = 100.0,
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
   METSignificanceCutValue = -1000.0,
   METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
@@ -125,6 +126,11 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
         cutValueJet3 = 0.0,   # Cut value in degrees (circular cut)
         cutValueJet4 = 0.0,   # Cut value in degrees (circular cut)
 )
+#====== Experimental
+jetCorrelations = PSet (
+
+)
+
 
 def setAngularCutsWorkingPoint(pset, workingPoint):
     if workingPoint == "NoCut":
@@ -194,8 +200,10 @@ allSelections = PSet(
          BJetSelection = bjetSelection,
           METSelection = metSelection,
  AngularCutsBackToBack = angularCutsBackToBack,
+       JetCorrelations = jetCorrelations,
            CommonPlots = commonPlotsOptions,
 )
+
 
 ## Parses command line parameters and returns suffix for analysis
 def obtainAnalysisSuffix(argv):
@@ -213,10 +221,15 @@ def obtainAnalysisSuffix(argv):
 
 ## Parses command line parameters and adjusts the parameters accordingly
 def applyAnalysisCommandLineOptions(argv, config):
+    if len(argv) < 3:
+        return
+    print "Applying command line options"
     if "1prong" in argv or "1pr" in argv:
         config.TauSelection.prongs = 1
     elif "2prong" in argv or "2pr" in argv:
         config.TauSelection.prongs = 2
     elif "3prong" in argv or "3pr" in argv:
         config.TauSelection.prongs = 3
+
+    scaleFactors.assignTauTriggerSF(config.TauSelection, "nominal")
 

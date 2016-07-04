@@ -24,7 +24,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 
-from InvertedTauID import *
+from old_InvertedTauID import *
 #dataEra = "Run2015C"
 #dataEra = "Run2015D"
 #dataEra = "Run2015CD"
@@ -90,7 +90,7 @@ def main(argv):
             "WJets",
             "DYJetsToLL",
             "SingleTop",
-            "Diboson"
+#            "Diboson"
             ])
 
     # Apply TDR style

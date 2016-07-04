@@ -67,6 +67,7 @@ def loopOverDirectory(dirname, inputFiles, outputFile):
 
         if isinstance(obj, ROOT.TDirectory):
             loopOverDirectory(os.path.join(dirname, keyname), inputFiles, outputFile)
+            status = outputFile.cd(dirname) # after looping over subdirectory, cd back to the current directory
         elif isinstance(obj, ROOT.TH1):
             if _debug:
                 print "    merging %s: %s"%(className, os.path.join(dirname, keyname))
@@ -173,8 +174,10 @@ def main():
         for n in sys.argv[1:]:
 #            inname = n.replace("pseudoMulticrab_","")+dsetExt
             inname = dsetExt
+
 #            if "pseudoMulticrab_" in n:
 #                inname = n.replace("pseudoMulticrab_","")+dsetExt
+
             fname = os.path.join(n, inname, "res", "histograms-%s.root"%(inname))
             #print "     in:",fname
             if not os.path.exists(fname):

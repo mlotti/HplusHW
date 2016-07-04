@@ -23,12 +23,22 @@ allSelections.CommonPlots.histogramSplitting = [
     PSet(label="tauPt", binLowEdges=[60.0, 80.0, 100.0], useAbsoluteValues=False),
   ]
 #===== Selection customisations
-#allSelections.TauSelection.rtau = 0.0
+#allSelections.TauSelection.rtau = 0.7
+allSelections.TauSelection.isolationDiscr = "byMediumIsolationMVA3newDMwLT" ## default = byMediumIsolationMVA3newDMwLT
 #allSelections.BJetSelection.numberOfBJetsCutValue = 0
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 #setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
 #===== End of selection customisations
+allSelections.TauSelection.prongs = 3
+allSelections.METSelection.METCutValue = 100.0
+allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
+allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
+allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
+allSelections.AngularCutsBackToBack.cutValueJet4 = 40.0
 
+#allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
+#allSelections.BJetSelection.numberOfBJetsCutValue = 2
+#allSelections.BJetSelection.numberOfBJetsCutDirection = "==" # options: ==, !=, <, <=, >, >=            
 applyAnalysisCommandLineOptions(sys.argv, allSelections)
 
 # Build analysis modules

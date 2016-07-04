@@ -76,14 +76,55 @@ private:
   HistoSplitter::SplittedTripletTH1s hNormalizationInvertedTauAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hMtInvertedTauAfterStdSelections; // For QCD shape uncertainty
 
+  //  HistoSplitter::SplittedTripletTH1s hClosureTestInvertedTauBveto;
+  // HistoSplitter::SplittedTripletTH1s hClosureTestBaselineTauBveto; 
+
+
   // Purity histograms (no need to split in bins of tau pt, therefore just a triplet)
   // Add here more purity histograms at different point of event selections, if necessary
   WrappedTH1Triplet* hInvertedTauTauPtAfterAllSelections;
   
   // Other histograms
   HistoSplitter::SplittedTripletTH1s hBaselineTauTransverseMass; // the plot for baseline tau is in common plots
-  
-  //WrappedTH1 *hSelectedTaus;
+  WrappedTH1 *hTauPt_inv_afterTau_realtau;
+  WrappedTH1 *hTauPt_inv_afterTau;
+  WrappedTH1 *hTauPt_baseline_afterTau_realtau;
+  WrappedTH1 *hTauPt_baseline_afterTau;
+  WrappedTH1 *hTauPt_inv_afterJets_realtau;
+  WrappedTH1 *hTauPt_inv_afterJets;
+  WrappedTH1 *hTauPt_inv_afterBtag_realtau;
+  WrappedTH1 *hTauPt_inv_afterBtag;
+  WrappedTH1 *hMet_inv_afterTau_realtau;
+  WrappedTH1 *hMet_inv_afterTau;
+  WrappedTH1 *hMet_inv_afterJets_realtau;
+  WrappedTH1 *hMet_inv_afterJets;
+  WrappedTH1 *hMet_inv_afterBtag_realtau;
+  WrappedTH1 *hMet_inv_afterBtag;
+  WrappedTH1 *hTransverseMass_inverted_Bveto;
+  WrappedTH1 *hTransverseMass_baseline_Bveto;
+  WrappedTH1 *hTransverseMass_inverted_Bveto_genuineTau;
+  WrappedTH1 *hTransverseMass_baseline_Bveto_genuineTau;
+  WrappedTH1 *hTransverseMass_inverted_all;
+  WrappedTH1 *hTransverseMass_baseline_all;
+  WrappedTH1 *hTransverseMass_inverted_all_genuineTau;
+  WrappedTH1 *hTransverseMass_baseline_all_genuineTau;
+  WrappedTH1 *hTransverseMass_inverted_BBveto;
+  WrappedTH1 *hTransverseMass_baseline_BBveto;
+  WrappedTH1 *hTransverseMass_baseline_Bveto_BBveto;
+  WrappedTH1 *hTransverseMass_inverted_Bveto_BBveto;
+  WrappedTH1 *hTransverseMass_inverted_BBveto_genuineTau;
+  WrappedTH1 *hTransverseMass_baseline_BBveto_genuineTau;
+  WrappedTH1 *hTransverseMass_inverted_Bveto_noMet;
+  WrappedTH1 *hTransverseMass_baseline_Bveto_noMet;
+  WrappedTH1 *hTransverseMass_inverted_BBveto_noMet;
+  WrappedTH1 *hTransverseMass_baseline_BBveto_noMet;
+  WrappedTH1 *hTransverseMass_baseline_Bveto_BBveto_noMet;
+  WrappedTH1 *hTransverseMass_inverted_Bveto_BBveto_noMet;
+  WrappedTH1 *hTransverseMass_inverted_Bveto_genuineTau_noMet;
+  WrappedTH1 *hTransverseMass_baseline_Bveto_genuineTau_noMet;
+  WrappedTH1 *hTransverseMass_inverted_BBveto_genuineTau_noMet;
+  WrappedTH1 *hTransverseMass_baseline_BBveto_genuineTau_noMet;
+
   //WrappedTH1 *hAntiIsolatedTaus;
 };
 
@@ -151,6 +192,8 @@ QCDMeasurement::~QCDMeasurement() {
   fCommonPlots.getHistoSplitter().deleteHistograms(hMtBaselineTauAfterStdSelections);
   fCommonPlots.getHistoSplitter().deleteHistograms(hNormalizationInvertedTauAfterStdSelections);
   fCommonPlots.getHistoSplitter().deleteHistograms(hMtInvertedTauAfterStdSelections);
+  //  fCommonPlots.getHistoSplitter().deleteHistograms(hClosureTestInvertedTauBveto);
+  // fCommonPlots.getHistoSplitter().deleteHistograms(hClosureTestBaselineTauBveto);
   delete hInvertedTauTauPtAfterAllSelections;
   fCommonPlots.getHistoSplitter().deleteHistograms(hBaselineTauTransverseMass);
 }
@@ -255,9 +298,58 @@ void QCDMeasurement::book(TDirectory *dir) {
     hBaselineTauTransverseMass,
     "BaselineTauShapeTransverseMass", ";m_{T} (GeV);N_{events}",
     nMtBins, fMtMin, fMtMax);
-   
+   	
+  hTransverseMass_inverted_Bveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto", "TransverseMass_inverted_Bveto", 200, 0, 800);
+  hTransverseMass_baseline_Bveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto", "TransverseMass_baseline_Bveto", 200, 0, 800);
+  hTransverseMass_inverted_Bveto_BBveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto_BBveto", "TransverseMass_inverted_Bveto_BBveto", 200, 0, 800);
+  hTransverseMass_baseline_Bveto_BBveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto_BBveto", "TransverseMass_baseline_Bveto_BBveto", 200, 0, 800);
+  hTransverseMass_inverted_all =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_all", "TransverseMass_inverted_all", 200, 0, 800);
+  hTransverseMass_baseline_all =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_all", "TransverseMass_baseline_all", 200, 0, 800);
+  hTransverseMass_inverted_all_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_all_genuineTau", "TransverseMass_inverted_all_genuineTau", 200, 0, 800);
+  hTransverseMass_baseline_all_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_all_genuineTau", "TransverseMass_baseline_all_genuineTau", 200, 0, 800);
+  hTransverseMass_inverted_Bveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto_noMet", "TransverseMass_inverted_Bveto_noMet", 200, 0, 800);
+  hTransverseMass_baseline_Bveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto_noMet", "TransverseMass_baseline_Bveto_noMet", 200, 0, 800);
+  hTransverseMass_inverted_Bveto_BBveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto_BBveto_noMet", "TransverseMass_inverted_Bveto_BBveto_noMet", 200, 0, 800);
+  hTransverseMass_baseline_Bveto_BBveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto_BBveto_noMet", "TransverseMass_baseline_Bveto_BBveto_noMet", 200, 0, 800);
+  hTransverseMass_inverted_Bveto_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto_genuineTau", "TransverseMass_inverted_Bveto_genuineTau", 200, 0, 800);
+  hTransverseMass_baseline_Bveto_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto_genuineTau", "TransverseMass_baseline_Bveto_genuineTau", 200, 0, 800);
+  hTransverseMass_inverted_Bveto_genuineTau_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto_genuineTau_noMet", "TransverseMass_inverted_Bveto_genuineTau_noMet", 200, 0, 800);
+  hTransverseMass_baseline_Bveto_genuineTau_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto_genuineTau_noMet", "TransverseMass_baseline_Bveto_genuineTau_noMet", 200, 0, 800);
+
+  hTransverseMass_inverted_BBveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_BBveto", "TransverseMass_inverted_BBveto", 200, 0, 800);
+  hTransverseMass_baseline_BBveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_BBveto", "TransverseMass_baseline_BBveto", 200, 0, 800);
+  hTransverseMass_inverted_BBveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_BBveto_noMet", "TransverseMass_inverted_BBveto_noMet", 200, 0, 800);
+  hTransverseMass_baseline_BBveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_BBveto_noMet", "TransverseMass_baseline_BBveto_noMet", 200, 0, 800);
+  hTransverseMass_inverted_BBveto_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_BBveto_genuineTau", "TransverseMass_inverted_BBveto_genuineTau", 200, 0, 800);
+  hTransverseMass_baseline_BBveto_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_BBveto_genuineTau", "TransverseMass_baseline_BBveto_genuineTau", 200, 0, 800);
+
+  hTransverseMass_inverted_BBveto_genuineTau_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_BBveto_genuineTau_noMet", "TransverseMass_inverted_BBveto_genuineTau_noMet", 200, 0, 800);
+  hTransverseMass_baseline_BBveto_genuineTau_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_BBveto_genuineTau_noMet", "TransverseMass_baseline_BBveto_genuineTau_noMet", 200, 0, 800);
+
+
   // Other histograms (testing etc.)
-  
+  hTauPt_inv_afterTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterTau", "TauPt_inv_afterTau", 200, 0, 1000);
+  hTauPt_inv_afterTau_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterTau_realTau", "TauPt_inv_afterTau_realTau", 200, 0, 1000); 
+
+  hTauPt_inv_afterJets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterJets", "TauPt_inv_afterJets", 200, 0, 1000);
+  hTauPt_inv_afterJets_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterJets_realTau", "TauPt_inv_afterJets_realTau", 200, 0, 1000); 
+
+  hTauPt_inv_afterBtag =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterBtag", "TauPt_inv_afterBtag", 200, 0, 1000);
+  hTauPt_inv_afterBtag_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterBtag_realTau", "TauPt_inv_afterBtag_realTau", 200, 0, 1000);
+
+  hMet_inv_afterTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterTau", "Met_inv_afterTau", 200, 0, 1000);
+  hMet_inv_afterTau_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterTau_realTau", "Met_inv_afterTau_realTau", 200, 0, 1000); 
+
+  hMet_inv_afterJets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterJets", "Met_inv_afterJets", 200, 0, 1000);
+  hMet_inv_afterJets_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterJets_realTau", "Met_inv_afterJets_realTau", 200, 0, 1000); 
+
+  hMet_inv_afterBtag =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterBtag", "Met_inv_afterBtag", 200, 0, 1000);
+  hMet_inv_afterBtag_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterBtag_realTau", "Met_inv_afterBtag_realTau", 200, 0, 1000); 
+
+  hTauPt_baseline_afterTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_baseline_afterTau", "TauPt_baseline_afterTau", 200, 0, 1000);
+  hTauPt_baseline_afterTau_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_baseline_afterTau_realTau", "TauPt_baseline_afterTau_realTau", 200, 0, 1000); 
+
+
 }
 
 void QCDMeasurement::setupBranches(BranchManager& branchManager) {
@@ -365,6 +457,17 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   }
   cBaselineTauMetTriggerSFCounter.increment();
   //std::cout << "Baseline: met=" << silentMETData.getMET().R() << ", SF=" << silentMETData.getMETTriggerSF() << std::endl;
+
+
+  if (event.isMC()) {
+    if (isGenuineTau) hTauPt_baseline_afterTau_realtau->Fill(tau.pt());
+  }
+  if (!event.isMC() ) {
+    hTauPt_baseline_afterTau->Fill(tau.pt());
+  }
+  if (event.isMC() && !isGenuineTau ) {
+    hTauPt_baseline_afterTau->Fill(tau.pt());
+  }
   
 //====== Electron veto
   const ElectronSelection::Data eData = fBaselineTauElectronSelection.analyze(event);
@@ -398,8 +501,34 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   
 //====== b-jet selection
   const BJetSelection::Data bjetData = fBaselineTauBJetSelection.analyze(fEvent, jetData);
-  if (!bjetData.passedSelection())
+  if (!bjetData.passedSelection()) {
+   // plot closure test
+    hTransverseMass_baseline_Bveto_noMet->Fill(myTransverseMass);
+
+    if (!silentBackToBackData.passedSelection()) hTransverseMass_baseline_Bveto_BBveto_noMet->Fill(myTransverseMass);
+    if (event.isMC() && isGenuineTau ) {
+      hTransverseMass_baseline_Bveto_genuineTau_noMet->Fill(myTransverseMass);
+    }
+
+    if (silentMETData.passedSelection()) {  
+      //      if (silentBackToBackData.passedSelection()) {
+	hTransverseMass_baseline_Bveto->Fill(myTransverseMass);
+	if (!silentBackToBackData.passedSelection()) hTransverseMass_baseline_Bveto_BBveto->Fill(myTransverseMass);
+	if (event.isMC() && isGenuineTau ) {
+	  hTransverseMass_baseline_Bveto_genuineTau->Fill(myTransverseMass);
+	}
+	//     }
+    }
     return;
+  }
+  if (!silentBackToBackData.passedSelection()) {
+    hTransverseMass_baseline_BBveto_noMet->Fill(myTransverseMass);
+    if (event.isMC() && isGenuineTau ) {
+      hTransverseMass_baseline_BBveto_genuineTau_noMet->Fill(myTransverseMass);
+    }
+
+  }
+
 
 //====== b tag SF
   if (fEvent.isMC()) {
@@ -414,8 +543,16 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   
 //====== Back-to-back angular cuts
   const AngularCutsBackToBack::Data backToBackData = fBaselineTauAngularCutsBackToBack.analyze(fEvent, tau, jetData, METData);
-  if (!backToBackData.passedSelection())
+  if (!backToBackData.passedSelection()) {
+
+    hTransverseMass_baseline_BBveto->Fill(myTransverseMass);
+    if (event.isMC() && isGenuineTau ) {
+      hTransverseMass_baseline_BBveto_genuineTau->Fill(myTransverseMass);
+    }
+
     return;
+  }
+
 
 //====== All cuts passed
   cBaselineTauSelectedEvents.increment();
@@ -425,20 +562,41 @@ void QCDMeasurement::doBaselineAnalysis(const Event& event, const Tau& tau, cons
   
 //====== Experimental code
 
+  hTransverseMass_baseline_all->Fill(myTransverseMass);
+   if (event.isMC() && isGenuineTau ) {
+    hTransverseMass_baseline_all_genuineTau->Fill(myTransverseMass);
+   }
 //====== Save selected event ID for pick events
   fEventSaver.save();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, const int nVertices, const bool isGenuineTau) {
+
+
 //====== MET trigger SF
   const METSelection::Data silentMETData = fInvertedTauMETSelection.silentAnalyze(fEvent, nVertices);
+
   if (event.isMC()) {
     fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
   }
   cInvertedTauMetTriggerSFCounter.increment();
   fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
   //std::cout << "Inverted: met=" << silentMETData.getMET().R() << ", SF=" << silentMETData.getMETTriggerSF() << std::endl;
+
+  if (event.isMC()) {
+    if (isGenuineTau) hTauPt_inv_afterTau_realtau->Fill(tau.pt());
+    if (isGenuineTau) hMet_inv_afterTau_realtau->Fill(silentMETData.getMET().R());
+  }
+  if (!event.isMC() ) {
+    hTauPt_inv_afterTau->Fill(tau.pt());
+    hMet_inv_afterTau->Fill(silentMETData.getMET().R());
+  }
+  if (event.isMC() && !isGenuineTau ) {
+    hTauPt_inv_afterTau->Fill(tau.pt());
+    hMet_inv_afterTau->Fill(silentMETData.getMET().R());
+  }
+
 
 //====== Electron veto
   const ElectronSelection::Data eData = fInvertedTauElectronSelection.analyze(event);
@@ -455,6 +613,18 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   if (!jetData.passedSelection())
     return;
 
+  if (event.isMC()) {
+    if (isGenuineTau) hTauPt_inv_afterJets_realtau->Fill(tau.pt());
+    if (isGenuineTau) hMet_inv_afterJets_realtau->Fill(silentMETData.getMET().R());
+  }
+  if (event.isMC() && !isGenuineTau ) {
+    hTauPt_inv_afterJets->Fill(tau.pt());
+    hMet_inv_afterJets->Fill(silentMETData.getMET().R());
+  }
+  if (!event.isMC() ) {
+    hTauPt_inv_afterJets->Fill(tau.pt());
+    hMet_inv_afterJets->Fill(silentMETData.getMET().R());
+  }
 //====== Collinear angular cuts
   const double METvalue = silentMETData.getMET().R();
   const AngularCutsCollinear::Data collinearData = fInvertedTauAngularCutsCollinear.analyze(fEvent, tau, jetData, silentMETData);
@@ -470,16 +640,57 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   fNormalizationSystematicsControlRegion.fillControlPlotsForQCDShapeUncertainty(fEvent, collinearData, silentBjetData, silentMETData, silentBackToBackData);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hNormalizationInvertedTauAfterStdSelections, isGenuineTau, METvalue);
   fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hMtInvertedTauAfterStdSelections, isGenuineTau, myTransverseMass);
-  
+ 
+ 
 //====== b-jet selection
   const BJetSelection::Data bjetData = fInvertedTauBJetSelection.analyze(fEvent, jetData);
-  if (!bjetData.passedSelection())
+  if (!bjetData.passedSelection()) {
+    hTransverseMass_inverted_Bveto_noMet->Fill(myTransverseMass);
+    if (event.isMC() && isGenuineTau ) {
+      hTransverseMass_inverted_Bveto_genuineTau_noMet->Fill(myTransverseMass);
+    }
+
+    if (!silentBackToBackData.passedSelection()) hTransverseMass_inverted_Bveto_BBveto_noMet->Fill(myTransverseMass);
+    // plot closure test
+    if (silentMETData.passedSelection()) {  
+      //      if (silentBackToBackData.passedSelection()) {
+	hTransverseMass_inverted_Bveto->Fill(myTransverseMass);
+	if (!silentBackToBackData.passedSelection()) hTransverseMass_inverted_Bveto_BBveto->Fill(myTransverseMass);
+	if (event.isMC() && isGenuineTau ) {
+	  hTransverseMass_inverted_Bveto_genuineTau->Fill(myTransverseMass);
+	}
+	//     }
+    } 
     return;
+  }
+  if (!silentBackToBackData.passedSelection()) {
+    hTransverseMass_inverted_BBveto_noMet->Fill(myTransverseMass);
+    if (event.isMC() && isGenuineTau ) {
+      hTransverseMass_inverted_BBveto_genuineTau_noMet->Fill(myTransverseMass);
+    }
+
+  }
 
 //====== b tag SF
   if (fEvent.isMC()) {
     fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     cInvertedTauBTaggingSFCounter.increment();
+  }
+
+
+
+  if (event.isMC()) {
+    if (isGenuineTau) hTauPt_inv_afterBtag_realtau->Fill(tau.pt());
+    if (isGenuineTau) hMet_inv_afterBtag_realtau->Fill(silentMETData.getMET().R());
+  }
+
+  if (event.isMC() && !isGenuineTau ) {
+    hTauPt_inv_afterBtag->Fill(tau.pt());
+    hMet_inv_afterBtag->Fill(silentMETData.getMET().R());
+  }
+  if (!event.isMC()) {
+    hTauPt_inv_afterBtag->Fill(tau.pt());
+    hMet_inv_afterBtag->Fill(silentMETData.getMET().R());
   }
 
 //====== MET selection
@@ -489,8 +700,13 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   
 //====== Back-to-back angular cuts
   const AngularCutsBackToBack::Data backToBackData = fInvertedTauAngularCutsBackToBack.analyze(fEvent, tau, jetData, METData);
-  if (!backToBackData.passedSelection())
+  if (!backToBackData.passedSelection()) {
+    hTransverseMass_inverted_BBveto->Fill(myTransverseMass);
+    if (event.isMC() && isGenuineTau ) {
+      hTransverseMass_inverted_BBveto_genuineTau->Fill(myTransverseMass);
+    }
     return;
+  }
 
 //====== All cuts passed
   cInvertedTauSelectedEvents.increment();
@@ -499,6 +715,10 @@ void QCDMeasurement::doInvertedAnalysis(const Event& event, const Tau& tau, cons
   hInvertedTauTauPtAfterAllSelections->Fill(isGenuineTau, tau.pt());
   
 //====== Experimental code
+  hTransverseMass_inverted_all->Fill(myTransverseMass);
+  if (event.isMC() && isGenuineTau ) {
+    hTransverseMass_inverted_all_genuineTau->Fill(myTransverseMass);
+  }
 
 //====== Save selected event ID for pick events
   fEventSaver.save();

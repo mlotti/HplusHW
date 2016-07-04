@@ -1,114 +1,102 @@
 {
-  "_timestamp":   "Generated on Thu Dec 17 08:33:15 2015 by HiggsAnalysis/NtupleAnalysis/src/TriggerEfficiency/work/PythonWriter.py",
-  "_rootVersion": "6.04/00",
+  "_timestamp":   "Generated on Tue Jun  7 14:46:04 2016 by HiggsAnalysis/NtupleAnalysis/src/TriggerEfficiency/work/PythonWriter.py",
+  "_rootVersion": "6.04/14",
   "dataParameters": {
       "runs_256629_260627": {
           "era": "2015D",
           "firstRun"  :256629,
           "lastRun"   :260627,
-          "luminosity": 2081.886,
+          "luminosity": 2165.715,
           "bins" : [
              {
                "pt"              :20.0,
-               "efficiency"      :0.0106888361045,
-               "uncertaintyPlus" :0.00313783580058,
-               "uncertaintyMinus":0.00248795599866
+               "efficiency"      :0.0173092053501,
+               "uncertaintyPlus" :0.00448331933696,
+               "uncertaintyMinus":0.00364234357567
              },
              {
                "pt"              :30.0,
-               "efficiency"      :0.0292307692308,
-               "uncertaintyPlus" :0.00545563971296,
-               "uncertaintyMinus":0.00467200740905
+               "efficiency"      :0.022869022869,
+               "uncertaintyPlus" :0.00590226389914,
+               "uncertaintyMinus":0.00480384463782
              },
              {
                "pt"              :40.0,
-               "efficiency"      :0.0383693045564,
-               "uncertaintyPlus" :0.00786441975962,
-               "uncertaintyMinus":0.00665832629612
+               "efficiency"      :0.0672268907563,
+               "uncertaintyPlus" :0.011899411877,
+               "uncertaintyMinus":0.0103271062211
              },
              {
                "pt"              :50.0,
-               "efficiency"      :0.0574712643678,
-               "uncertaintyPlus" :0.0134439871253,
-               "uncertaintyMinus":0.0112027569727
+               "efficiency"      :0.0495626822157,
+               "uncertaintyPlus" :0.0146772326625,
+               "uncertaintyMinus":0.0117292174439
              },
              {
                "pt"              :60.0,
-               "efficiency"      :0.1330472103,
-               "uncertaintyPlus" :0.0260970951809,
-               "uncertaintyMinus":0.0226527001585
+               "efficiency"      :0.155555555556,
+               "uncertaintyPlus" :0.0318483336106,
+               "uncertaintyMinus":0.0276424603552
              },
              {
                "pt"              :70.0,
-               "efficiency"      :0.159722222222,
-               "uncertaintyPlus" :0.0365500317647,
-               "uncertaintyMinus":0.0313098522506
+               "efficiency"      :0.182795698925,
+               "uncertaintyPlus" :0.0491137676096,
+               "uncertaintyMinus":0.0414317150399
              },
              {
                "pt"              :80.0,
-               "efficiency"      :0.254385964912,
-               "uncertaintyPlus" :0.0473670940148,
-               "uncertaintyMinus":0.0426218170957
+               "efficiency"      :0.238095238095,
+               "uncertaintyPlus" :0.0556315516234,
+               "uncertaintyMinus":0.048651977098
              },
              {
                "pt"              :100.0,
-               "efficiency"      :0.425531914894,
-               "uncertaintyPlus" :0.0835619639228,
-               "uncertaintyMinus":0.0799772911371
+               "efficiency"      :0.341463414634,
+               "uncertaintyPlus" :0.0895371741788,
+               "uncertaintyMinus":0.0806781464698
              },
              {
                "pt"              :120.0,
-               "efficiency"      :0.761904761905,
-               "uncertaintyPlus" :0.0987130633743,
-               "uncertaintyMinus":0.128987815352
+               "efficiency"      :0.684210526316,
+               "uncertaintyPlus" :0.117338864444,
+               "uncertaintyMinus":0.140624993424
              },
              {
                "pt"              :140.0,
-               "efficiency"      :0.666666666667,
-               "uncertaintyPlus" :0.211935221871,
-               "uncertaintyMinus":0.282023462085
+               "efficiency"      :0.625,
+               "uncertaintyPlus" :0.196075614151,
+               "uncertaintyMinus":0.234946487636
              },
              {
                "pt"              :160.0,
                "efficiency"      :1.0,
                "uncertaintyPlus" :0.0,
-               "uncertaintyMinus":0.26422943474
+               "uncertaintyMinus":0.231260479746
              },
              {
                "pt"              :180.0,
                "efficiency"      :1.0,
                "uncertaintyPlus" :0.0,
-               "uncertaintyMinus":0.231260479746
+               "uncertaintyMinus":0.36887757085
              },
              {
                "pt"              :200.0,
                "efficiency"      :1.0,
                "uncertaintyPlus" :0.0,
-               "uncertaintyMinus":0.601684479424
+               "uncertaintyMinus":0.458641675296
              },
              {
                "pt"              :220.0,
                "efficiency"      :1.0,
                "uncertaintyPlus" :0.0,
-               "uncertaintyMinus":0.601684479424
-             },
-             {
-               "pt"              :240.0,
-               "efficiency"      :1.0,
-               "uncertaintyPlus" :1.0,
-               "uncertaintyMinus":0.0
+               "uncertaintyMinus":0.841344746068
              },
              {
                "pt"              :260.0,
                "efficiency"      :1.0,
                "uncertaintyPlus" :0.0,
                "uncertaintyMinus":0.841344746068
-             },
-             {
-               "pt"              :280.0,
-               "efficiency"      :1.0,
-               "uncertaintyPlus" :0.0,
-               "uncertaintyMinus":0.601684479424
              }
           ]
       }
@@ -118,105 +106,93 @@
           "bins" : [
              {
                "pt"              :20.0,
-               "efficiency"      :0.0375703028252,
-               "uncertaintyPlus" :0.0100326638496,
-               "uncertaintyMinus":0.0100326638496
+               "efficiency"      :0.00850588066167,
+               "uncertaintyPlus" :0.00492715300645,
+               "uncertaintyMinus":0.00492715300645
              },
              {
                "pt"              :30.0,
-               "efficiency"      :0.0263738402051,
-               "uncertaintyPlus" :0.0104947350076,
-               "uncertaintyMinus":0.0104947350076
+               "efficiency"      :0.059381947806,
+               "uncertaintyPlus" :0.0303186115952,
+               "uncertaintyMinus":0.0303186115952
              },
              {
                "pt"              :40.0,
-               "efficiency"      :0.0524085964131,
-               "uncertaintyPlus" :0.0124527413614,
-               "uncertaintyMinus":0.0124527413614
+               "efficiency"      :0.0259193547129,
+               "uncertaintyPlus" :0.0134404268005,
+               "uncertaintyMinus":0.0134404268005
              },
              {
                "pt"              :50.0,
-               "efficiency"      :0.0654107148293,
-               "uncertaintyPlus" :0.0160619050137,
-               "uncertaintyMinus":0.0160619050137
+               "efficiency"      :0.0290815227743,
+               "uncertaintyPlus" :0.0127472416056,
+               "uncertaintyMinus":0.0127472416056
              },
              {
                "pt"              :60.0,
-               "efficiency"      :0.0901404265371,
-               "uncertaintyPlus" :0.0211422944158,
-               "uncertaintyMinus":0.0211422944158
+               "efficiency"      :0.148937032305,
+               "uncertaintyPlus" :0.0839824979666,
+               "uncertaintyMinus":0.0839824979666
              },
              {
                "pt"              :70.0,
-               "efficiency"      :0.141762339125,
-               "uncertaintyPlus" :0.0237522771436,
-               "uncertaintyMinus":0.0237522771436
+               "efficiency"      :0.190362205366,
+               "uncertaintyPlus" :0.102328550563,
+               "uncertaintyMinus":0.102328550563
              },
              {
                "pt"              :80.0,
-               "efficiency"      :0.252662732347,
-               "uncertaintyPlus" :0.02336506024,
-               "uncertaintyMinus":0.02336506024
+               "efficiency"      :0.143916550621,
+               "uncertaintyPlus" :0.0514323340633,
+               "uncertaintyMinus":0.0514323340633
              },
              {
                "pt"              :100.0,
-               "efficiency"      :0.358233660056,
-               "uncertaintyPlus" :0.0371234181474,
-               "uncertaintyMinus":0.0371234181474
+               "efficiency"      :0.431361909823,
+               "uncertaintyPlus" :0.0257439269774,
+               "uncertaintyMinus":0.0257439269774
              },
              {
                "pt"              :120.0,
-               "efficiency"      :0.612648736671,
-               "uncertaintyPlus" :0.0423972221173,
-               "uncertaintyMinus":0.0423972221173
+               "efficiency"      :0.663223361601,
+               "uncertaintyPlus" :0.0433810181506,
+               "uncertaintyMinus":0.0433810181506
              },
              {
                "pt"              :140.0,
-               "efficiency"      :0.747835956948,
-               "uncertaintyPlus" :0.0416772951915,
-               "uncertaintyMinus":0.0416772951915
+               "efficiency"      :0.809511995326,
+               "uncertaintyPlus" :0.0146290540671,
+               "uncertaintyMinus":0.0146290540671
              },
              {
                "pt"              :160.0,
-               "efficiency"      :0.81648691519,
-               "uncertaintyPlus" :0.0415496819075,
-               "uncertaintyMinus":0.0415496819075
+               "efficiency"      :0.886842298482,
+               "uncertaintyPlus" :0.0484221255142,
+               "uncertaintyMinus":0.0484221255142
              },
              {
                "pt"              :180.0,
-               "efficiency"      :0.832530435409,
-               "uncertaintyPlus" :0.0485071142208,
-               "uncertaintyMinus":0.0485071142208
+               "efficiency"      :0.964520071807,
+               "uncertaintyPlus" :0.00474934689326,
+               "uncertaintyMinus":0.00474934689326
              },
              {
                "pt"              :200.0,
-               "efficiency"      :0.946805989882,
-               "uncertaintyPlus" :0.0385555166675,
-               "uncertaintyMinus":0.0385555166675
+               "efficiency"      :0.977052568169,
+               "uncertaintyPlus" :0.00506441472717,
+               "uncertaintyMinus":0.00506441472717
              },
              {
                "pt"              :220.0,
-               "efficiency"      :0.973695978248,
-               "uncertaintyPlus" :0.0263040217519,
-               "uncertaintyMinus":0.0300512213425
-             },
-             {
-               "pt"              :240.0,
-               "efficiency"      :1.0,
-               "uncertaintyPlus" :0.0,
-               "uncertaintyMinus":0.0355226543937
+               "efficiency"      :0.989150487417,
+               "uncertaintyPlus" :0.00364413106361,
+               "uncertaintyMinus":0.00364413106361
              },
              {
                "pt"              :260.0,
-               "efficiency"      :0.99262953864,
-               "uncertaintyPlus" :0.00737046136043,
-               "uncertaintyMinus":0.0319520381675
-             },
-             {
-               "pt"              :280.0,
-               "efficiency"      :0.992497992703,
-               "uncertaintyPlus" :0.00750200729737,
-               "uncertaintyMinus":0.00775448244777
+               "efficiency"      :0.992733192119,
+               "uncertaintyPlus" :0.00500099292816,
+               "uncertaintyMinus":0.00500099292816
              }
           ]
       }

@@ -3,6 +3,8 @@ import FWCore.ParameterSet.Config as cms
 skim = cms.EDFilter("Hplus2tbAnalysisSkim",
     TriggerResults = cms.InputTag("TriggerResults::HLT"),
     HLTPaths       = cms.vstring(
+#       "HLT_PFHT200_v",
+        "HLT_QuadPFJet_DoubleBTagCSV_VBF_Mqq200_v",
     ),
 
     # Jets

@@ -93,6 +93,8 @@ private:
   // Event counter for passing selection
   Count cPassedMETSelection;
   // Histograms
+  WrappedTH1 *hMet;
+
 };
 
 #endif

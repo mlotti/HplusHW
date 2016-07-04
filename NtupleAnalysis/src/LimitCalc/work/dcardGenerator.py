@@ -182,7 +182,7 @@ def main(opts, moduleSelector, multipleDirs):
         for d in myOutputDirectories:
             print "\nGenerating systematics plots for",d
             os.chdir(d)
-            os.system("../../brlimit/plotShapes.py")
+            os.system("../plotShapes.py")
             os.chdir("..")
 
     # Make tar file

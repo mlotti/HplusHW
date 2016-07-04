@@ -122,7 +122,9 @@ The not so short details of the above points:
   
 2) Running datacard generator on the input datacard
 - Running the datacard generator is done with
+
     ./dcardGenerator.py -x dcardDefault2015Datacard.py
+
 - There are several command line parameters:
   * -l    Prints a list of available era/searchMode/optimizationMode options (datacards are created
           separately for each one of them).
@@ -159,7 +161,9 @@ The not so short details of the above points:
     this value. Separate levels can be set for signal samples and background samples. The value is
     essentially a number describing how many pb one generated MC event corresponds to.
 - To perform the fits, go inside the datacard directory and run there:
+
     ./dcardTailFitter.py -x dcardTailFitSettings.py
+
 - There are some further command line parameters:
   * -r   Does tail fit recursively to all subdirectories
   * --noFitUncert      No fit uncertainty

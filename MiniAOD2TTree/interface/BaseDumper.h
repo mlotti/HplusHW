@@ -45,6 +45,7 @@ class BaseDumper {
 
 //	std::vector<reco::Candidate::LorentzVector> *p4;
 	std::vector<short> *pdgId;
+        std::vector<short> *status;
 
 	int nDiscriminators;
 	std::vector<bool> *discriminators;
