@@ -15,7 +15,8 @@ ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std:
     //pdgId = new std::vector<short>[inputCollections.size()];
 
     relIsoDeltaBetaCorrected = new std::vector<float>[inputCollections.size()];
-    
+    effAreaIsoDeltaBetaCorrected = new std::vector<float>[inputCollections.size()];
+
     MCelectron = new FourVectorDumper[inputCollections.size()];
     
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
@@ -61,6 +62,7 @@ void ElectronDumper::book(TTree* tree){
         tree->Branch((name+"_e").c_str(),&e[i]);
 
         tree->Branch((name+"_relIsoDeltaBeta").c_str(),&relIsoDeltaBetaCorrected[i]);
+        tree->Branch((name+"_effAreaIsoDeltaBeta").c_str(),&effAreaIsoDeltaBetaCorrected[i]);
 
         MCelectron[i].book(tree, name, "MCelectron");
         
@@ -90,6 +92,7 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
             // Setup handles for rho
             edm::Handle<double> rhoHandle;
             iEvent.getByToken(rhoToken[ic], rhoHandle);
+            double rho = *(rhoHandle.product());
             // Setup handles for ID
             std::vector<edm::Handle<edm::ValueMap<bool>>> IDhandles;
             std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
@@ -118,8 +121,23 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 double relIso = isolation / obj.pt();
                 relIsoDeltaBetaCorrected[ic].push_back(relIso);
                 
-                // Calculate relative isolation with effective area
-                // FIXME: recipy for effective area is missing
+                // Calculate relative isolation with effective area https://indico.cern.ch/event/369239/contributions/874575/attachments/1134761/1623262/talk_effective_areas_25ns.pdf
+		double ea = 0.;
+		if ( fabs(obj.p4().eta()) < 1.0 ) ea= 0.1752 ;
+		else if (fabs(obj.p4().eta()) < 1.479 ) ea = 0.1862 ;
+		else if (fabs(obj.p4().eta()) < 2.0 ) ea = 0.1411 ;
+		else if (fabs(obj.p4().eta()) < 2.2 ) ea = 0.1534 ;
+		else if (fabs(obj.p4().eta()) < 2.3 ) ea = 0.1903 ;
+		else if (fabs(obj.p4().eta()) < 2.4 ) ea = 0.2243 ;
+		else if (fabs(obj.p4().eta()) < 2.5 ) ea = 0.2687 ;
+
+		double eaIso = obj.pfIsolationVariables().sumChargedHadronPt 
+                  + std::max(obj.pfIsolationVariables().sumNeutralHadronEt
+		  + obj.pfIsolationVariables().sumPhotonEt
+                  - rho * ea, 0.0);
+                effAreaIsoDeltaBetaCorrected[ic].push_back(eaIso);
+
+
 		/*                
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
                   // https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
@@ -172,7 +190,8 @@ void ElectronDumper::reset(){
       e[ic].clear();                                                                                                                                              
                                                                                                                                                                   
       relIsoDeltaBetaCorrected[ic].clear();
-      
+      effAreaIsoDeltaBetaCorrected[ic].clear();
+
       MCelectron[ic].reset();
     }                                                                                                                                                             
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){                                                                                       
