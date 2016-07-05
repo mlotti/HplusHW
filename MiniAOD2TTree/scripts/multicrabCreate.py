@@ -21,9 +21,9 @@ https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial#Setup_the_e
 # USER Options
 #================================================================================================
 #PSET = "miniAODGEN2TTree_cfg.py"
-PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
+#PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
-#PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
+PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
 #PSET = "miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py"
 
 
@@ -447,7 +447,7 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath = "crabConfig.py
 			# Set the "unitsPerJob" field which suggests (but not impose) how many files, lumi sections or events to include in each job.
 			match = crab_splitunits_re.search(line)	
 			if match:
-				line = "config.Data.unitsPerJob = 100\n"
+				line = "config.Data.unitsPerJob = 50\n"
 		else:
 			pass
 
