@@ -6,8 +6,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-#dataVersion = "80Xmc"
-dataVersion = "80Xdata"
+dataVersion = "80Xmc"
+#dataVersion = "80Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
@@ -22,7 +22,8 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-       '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
+#       '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
+       '/store/mc/RunIISpring16MiniAODv1/ChargedHiggs_HplusTB_HplusToTauNu_M-500_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/50000/128F2F69-5727-E611-B9E6-02163E0135F5.root',
     )
 )
 
