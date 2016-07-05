@@ -31,14 +31,12 @@ protected:
   ParticleCollection<double> fMCmuon;
 
 protected:
-  const Branch<std::vector<bool>> *fTrgMatch_IsoMu16_eta2p1;
-  const Branch<std::vector<bool>> *fTrgMatch_IsoMu17_eta2p1;
-  const Branch<std::vector<bool>> *fTrgMatch_IsoMu20_eta2p1;
   const Branch<std::vector<bool>> *fIsGlobalMuon;
   const Branch<std::vector<bool>> *fMuIDLoose;
   const Branch<std::vector<bool>> *fMuIDMedium;
   const Branch<std::vector<bool>> *fMuIDTight;
-  const Branch<std::vector<float>> *fRelIsoDeltaBeta;
+  const Branch<std::vector<float>> *fRelIsoDeltaBeta03;
+  const Branch<std::vector<float>> *fRelIsoDeltaBeta04;
   const Branch<std::vector<short>> *fCharge;
 };
 
@@ -64,14 +62,12 @@ public:
 
   const Particle<ParticleCollection<double>>* MCmuon() const { return &fMCmuon; }
 
-  bool TrgMatch_IsoMu16_eta2p1() const { return this->fCollection->fTrgMatch_IsoMu16_eta2p1->value()[this->index()]; }
-  bool TrgMatch_IsoMu17_eta2p1() const { return this->fCollection->fTrgMatch_IsoMu17_eta2p1->value()[this->index()]; }
-  bool TrgMatch_IsoMu20_eta2p1() const { return this->fCollection->fTrgMatch_IsoMu20_eta2p1->value()[this->index()]; }
   bool isGlobalMuon() const { return this->fCollection->fIsGlobalMuon->value()[this->index()]; }
   bool muIDLoose() const { return this->fCollection->fMuIDLoose->value()[this->index()]; }
   bool muIDMedium() const { return this->fCollection->fMuIDMedium->value()[this->index()]; }
   bool muIDTight() const { return this->fCollection->fMuIDTight->value()[this->index()]; }
-  float relIsoDeltaBeta() const { return this->fCollection->fRelIsoDeltaBeta->value()[this->index()]; }
+  float relIsoDeltaBeta03() const { return this->fCollection->fRelIsoDeltaBeta03->value()[this->index()]; }
+  float relIsoDeltaBeta04() const { return this->fCollection->fRelIsoDeltaBeta04->value()[this->index()]; }
   short charge() const { return this->fCollection->fCharge->value()[this->index()]; }
 
 protected:

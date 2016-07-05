@@ -144,7 +144,7 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
     hIsolEtaBefore->Fill(muon.eta());
     if (fCommonPlotsIsEnabled())
       hIsolVtxBefore->Fill(fCommonPlots->nVertices());
-    if (muon.relIsoDeltaBeta() > fRelIsoCut) continue;
+    if (muon.relIsoDeltaBeta04() > fRelIsoCut) continue;
     passedIsol = true;
     hIsolPtAfter->Fill(muon.pt());
     hIsolEtaAfter->Fill(muon.eta());
