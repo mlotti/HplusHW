@@ -14,7 +14,6 @@ class Dataset :
         return False
 
 
-
 datasetsTauData = []
 datasetsTauData.append(Dataset('/Tau/Run2016B-PromptReco-v2/MINIAOD',dataVersion="80Xdata"))
 datasetsTauData.append(Dataset('/Tau/Run2016C-PromptReco-v2/MINIAOD',dataVersion="80Xdata"))

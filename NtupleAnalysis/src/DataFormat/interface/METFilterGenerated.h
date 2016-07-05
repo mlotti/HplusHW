@@ -17,13 +17,16 @@ public:
   void setupBranches(BranchManager& mgr);
 
   std::vector<std::string> getDiscriminatorNames() const {
-    static std::vector<std::string> n = { std::string("Flag_CSCTightHaloFilter"), std::string("Flag_eeBadScFilter"), std::string("Flag_goodVertices"), std::string("hbheIsoNoiseToken"), std::string("hbheNoiseTokenRun2Loose"), std::string("hbheNoiseTokenRun2Tight") };
+    static std::vector<std::string> n = { std::string("Flag_CSCTightHaloFilter"), std::string("Flag_EcalDeadCellTriggerPrimitiveFilter"), std::string("Flag_HBHENoiseFilter"), std::string("Flag_HBHENoiseIsoFilter"), std::string("Flag_eeBadScFilter"), std::string("Flag_goodVertices"), std::string("hbheIsoNoiseToken"), std::string("hbheNoiseTokenRun2Loose"), std::string("hbheNoiseTokenRun2Tight") };
     return n;
   }
 
   std::vector<std::function<bool()>> getDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->passFlag_CSCTightHaloFilter(); },
+      [&](){ return this->passFlag_EcalDeadCellTriggerPrimitiveFilter(); },
+      [&](){ return this->passFlag_HBHENoiseFilter(); },
+      [&](){ return this->passFlag_HBHENoiseIsoFilter(); },
       [&](){ return this->passFlag_eeBadScFilter(); },
       [&](){ return this->passFlag_goodVertices(); },
       [&](){ return this->passHbheIsoNoiseToken(); },
@@ -34,6 +37,9 @@ public:
   }
 
   bool passFlag_CSCTightHaloFilter() const { return fFlag_CSCTightHaloFilter->value(); }
+  bool passFlag_EcalDeadCellTriggerPrimitiveFilter() const { return fFlag_EcalDeadCellTriggerPrimitiveFilter->value(); }
+  bool passFlag_HBHENoiseFilter() const { return fFlag_HBHENoiseFilter->value(); }
+  bool passFlag_HBHENoiseIsoFilter() const { return fFlag_HBHENoiseIsoFilter->value(); }
   bool passFlag_eeBadScFilter() const { return fFlag_eeBadScFilter->value(); }
   bool passFlag_goodVertices() const { return fFlag_goodVertices->value(); }
   bool passHbheIsoNoiseToken() const { return fHbheIsoNoiseToken->value(); }
@@ -42,6 +48,9 @@ public:
 
 protected:
   const Branch<bool> *fFlag_CSCTightHaloFilter;
+  const Branch<bool> *fFlag_EcalDeadCellTriggerPrimitiveFilter;
+  const Branch<bool> *fFlag_HBHENoiseFilter;
+  const Branch<bool> *fFlag_HBHENoiseIsoFilter;
   const Branch<bool> *fFlag_eeBadScFilter;
   const Branch<bool> *fFlag_goodVertices;
   const Branch<bool> *fHbheIsoNoiseToken;

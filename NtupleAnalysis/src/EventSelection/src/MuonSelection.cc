@@ -71,7 +71,7 @@ void MuonSelection::initialize(const ParameterSet& config, const std::string& po
     fVetoMode = true;
   std::string isolString = config.getParameter<std::string>("muonIsolation");
   if (isolString == "veto" || isolString == "Veto") {
-    fRelIsoCut = 0.20; // Based on 2012 isolation
+    fRelIsoCut = 0.25; // Loose iso sync'ed with MIT
   } else if (isolString == "tight" || isolString == "Tight") {
     fRelIsoCut = 0.12; // Based on 2012 isolation
   } else {
@@ -144,7 +144,7 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
     hIsolEtaBefore->Fill(muon.eta());
     if (fCommonPlotsIsEnabled())
       hIsolVtxBefore->Fill(fCommonPlots->nVertices());
-    if (muon.relIsoDeltaBeta() > fRelIsoCut) continue;
+    if (muon.relIsoDeltaBeta04() > fRelIsoCut) continue;
     passedIsol = true;
     hIsolPtAfter->Fill(muon.pt());
     hIsolEtaAfter->Fill(muon.eta());

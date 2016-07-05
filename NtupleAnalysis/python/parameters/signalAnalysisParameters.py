@@ -23,7 +23,9 @@ trg = PSet(
 #====== MET filter
 metFilter = PSet(
   discriminators = ["hbheNoiseTokenRun2Loose", # Loose is recommended
-                    "hbheIsoNoiseToken", # under scrutiny
+#                    "hbheIsoNoiseToken", # under scrutiny
+                    "Flag_HBHENoiseIsoFilter",
+                    "Flag_EcalDeadCellTriggerPrimitiveFilter",
                     "Flag_CSCTightHaloFilter",
                     "Flag_eeBadScFilter",
                     "Flag_goodVertices"]
@@ -36,12 +38,14 @@ tauSelection = PSet(
               tauPtCut = 60.0,
              tauEtaCut = 2.1,
         tauLdgTrkPtCut = 30.0,
-                prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
+                prongs = 13,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                   rtau = 0.0,   # to disable set to 0.0
-  againstElectronDiscr = "againstElectronTightMVA6",
+
+#  againstElectronDiscr = "againstElectronTightMVA6",
+  againstElectronDiscr = "",
       againstMuonDiscr = "againstMuonTight3",
-        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
-        #isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+#        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
+        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
           
 )
 # tau misidentification scale factors
@@ -56,6 +60,7 @@ eVeto = PSet(
          electronPtCut = 15.0,
         electronEtaCut = 2.5,
 #            electronID = "mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", # highest (wp90) for vetoing (2012: wp95)
+            electronID = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
      electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
@@ -71,11 +76,11 @@ muVeto = PSet(
 jetSelection = PSet(
                jetType = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
               jetPtCut = 30.0,
-             jetEtaCut = 2.5,
+             jetEtaCut = 4.7,
      tauMatchingDeltaR = 0.4,
   numberOfJetsCutValue = 3,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
-            jetIDDiscr = "IDtight", # options: IDloose, IDtight, IDtightLeptonVeto
+            jetIDDiscr = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
           jetPUIDDiscr = "", # does not work at the moment 
 )
  
@@ -91,6 +96,8 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
  
 #====== B-jet selection
 bjetSelection = PSet(
+              jetPtCut = 30.0,
+             jetEtaCut = 2.5,
              #bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
              bjetDiscr = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
  bjetDiscrWorkingPoint = "Loose",

@@ -8,9 +8,7 @@
 
 void JetGeneratedCollection::setupBranches(BranchManager& mgr) {
   ParticleCollection::setupBranches(mgr);
-
   fMCjet.setupBranches(mgr);
-
 
   mgr.book(prefix()+"_IDloose", &fIDloose);
   mgr.book(prefix()+"_IDtight", &fIDtight);
@@ -23,7 +21,6 @@ void JetGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_originatesFromUnknown", &fOriginatesFromUnknown);
   mgr.book(prefix()+"_originatesFromW", &fOriginatesFromW);
   mgr.book(prefix()+"_originatesFromZ", &fOriginatesFromZ);
-  mgr.book(prefix()+"_pileupJetIdfullDiscriminant", &fPileupJetIdfullDiscriminant);
   mgr.book(prefix()+"_pfCombinedInclusiveSecondaryVertexV2BJetTags", &fPfCombinedInclusiveSecondaryVertexV2BJetTags);
   mgr.book(prefix()+"_pfCombinedMVABJetTag", &fPfCombinedMVABJetTag);
   mgr.book(prefix()+"_pfJetBProbabilityBJetTags", &fPfJetBProbabilityBJetTags);

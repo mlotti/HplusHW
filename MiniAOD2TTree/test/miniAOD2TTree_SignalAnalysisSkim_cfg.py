@@ -26,6 +26,8 @@ process.source = cms.Source("PoolSource",
        '/store/mc/RunIISpring16MiniAODv1/ChargedHiggs_HplusTB_HplusToTauNu_M-500_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/50000/128F2F69-5727-E611-B9E6-02163E0135F5.root',
     )
 )
+from Hplus1500GeV_cfg import source
+process.source = source
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag

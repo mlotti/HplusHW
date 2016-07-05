@@ -47,8 +47,9 @@ class MuonDumper : public BaseDumper {
         std::vector<bool> *isLooseMuon;
         std::vector<bool> *isMediumMuon;
         std::vector<bool> *isTightMuon;
-        std::vector<float> *relIsoDeltaBetaCorrected;
-        
+        std::vector<float> *relIsoDeltaBetaCorrected03; // isol cone 0.3
+        std::vector<float> *relIsoDeltaBetaCorrected04; // isol cone 0.4
+
         // 4-vector for generator muon
         FourVectorDumper *MCmuon;
 

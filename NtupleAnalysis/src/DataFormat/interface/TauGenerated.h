@@ -43,9 +43,7 @@ protected:
   ParticleCollection<double> fmatchingJet;
 
 protected:
-  const Branch<std::vector<bool>> *fTrgMatch_LooseIsoPFTau20;
   const Branch<std::vector<bool>> *fTrgMatch_LooseIsoPFTau50_Trk30_eta2p1;
-  const Branch<std::vector<bool>> *fTrgMatch_MediumIsoPFTau32_Trk1_eta2p1_Reg;
   const Branch<std::vector<bool>> *fAgainstElectronLooseMVA6;
   const Branch<std::vector<bool>> *fAgainstElectronMVA6Raw;
   const Branch<std::vector<bool>> *fAgainstElectronMVA6category;
@@ -215,9 +213,7 @@ public:
   const Particle<ParticleCollection<double>>* MCVisibleTau() const { return &fMCVisibleTau; }
   const Particle<ParticleCollection<double>>* matchingJet() const { return &fmatchingJet; }
 
-  bool TrgMatch_LooseIsoPFTau20() const { return this->fCollection->fTrgMatch_LooseIsoPFTau20->value()[this->index()]; }
   bool TrgMatch_LooseIsoPFTau50_Trk30_eta2p1() const { return this->fCollection->fTrgMatch_LooseIsoPFTau50_Trk30_eta2p1->value()[this->index()]; }
-  bool TrgMatch_MediumIsoPFTau32_Trk1_eta2p1_Reg() const { return this->fCollection->fTrgMatch_MediumIsoPFTau32_Trk1_eta2p1_Reg->value()[this->index()]; }
   bool againstElectronLooseMVA6() const { return this->fCollection->fAgainstElectronLooseMVA6->value()[this->index()]; }
   bool againstElectronMVA6Raw() const { return this->fCollection->fAgainstElectronMVA6Raw->value()[this->index()]; }
   bool againstElectronMVA6category() const { return this->fCollection->fAgainstElectronMVA6category->value()[this->index()]; }

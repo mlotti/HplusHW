@@ -10,7 +10,10 @@ void ElectronGeneratedCollection::setupBranches(BranchManager& mgr) {
   ParticleCollection::setupBranches(mgr);
   fMCelectron.setupBranches(mgr);
 
-  mgr.book(prefix()+"_mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80", &fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80);
-  mgr.book(prefix()+"_mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90", &fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90);
+  mgr.book(prefix()+"_cutBasedElectronID_Spring15_25ns_V1_standalone_loose", &fCutBasedElectronID_Spring15_25ns_V1_standalone_loose);
+  mgr.book(prefix()+"_cutBasedElectronID_Spring15_25ns_V1_standalone_medium", &fCutBasedElectronID_Spring15_25ns_V1_standalone_medium);
+  mgr.book(prefix()+"_cutBasedElectronID_Spring15_25ns_V1_standalone_tight", &fCutBasedElectronID_Spring15_25ns_V1_standalone_tight);
+  mgr.book(prefix()+"_cutBasedElectronID_Spring15_25ns_V1_standalone_veto", &fCutBasedElectronID_Spring15_25ns_V1_standalone_veto);
+  mgr.book(prefix()+"_effAreaIsoDeltaBeta", &fEffAreaIsoDeltaBeta);
   mgr.book(prefix()+"_relIsoDeltaBeta", &fRelIsoDeltaBeta);
 }

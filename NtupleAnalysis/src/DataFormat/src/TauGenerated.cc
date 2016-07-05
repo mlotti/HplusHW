@@ -11,9 +11,7 @@ void TauGeneratedCollection::setupBranches(BranchManager& mgr) {
   fMCVisibleTau.setupBranches(mgr);
   fmatchingJet.setupBranches(mgr);
 
-  mgr.book(prefix()+"_TrgMatch_LooseIsoPFTau20", &fTrgMatch_LooseIsoPFTau20);
   mgr.book(prefix()+"_TrgMatch_LooseIsoPFTau50_Trk30_eta2p1", &fTrgMatch_LooseIsoPFTau50_Trk30_eta2p1);
-  mgr.book(prefix()+"_TrgMatch_MediumIsoPFTau32_Trk1_eta2p1_Reg", &fTrgMatch_MediumIsoPFTau32_Trk1_eta2p1_Reg);
   mgr.book(prefix()+"_againstElectronLooseMVA6", &fAgainstElectronLooseMVA6);
   mgr.book(prefix()+"_againstElectronMVA6Raw", &fAgainstElectronMVA6Raw);
   mgr.book(prefix()+"_againstElectronMVA6category", &fAgainstElectronMVA6category);
