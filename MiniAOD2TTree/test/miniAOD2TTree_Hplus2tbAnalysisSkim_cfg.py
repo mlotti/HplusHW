@@ -1,5 +1,9 @@
-# For miniAOD instructions see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2015 
-
+'''
+For miniAOD instructions see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2015 
+'''
+#================================================================================================  
+# Import Modules
+#================================================================================================  
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
@@ -12,18 +16,19 @@ dataVersion = "80Xmc"
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(1000) #-1
 )
 
 process.load("FWCore/MessageService/MessageLogger_cfi")
 process.MessageLogger.categories.append("TriggerBitCounter")
-process.MessageLogger.cerr.FwkReport.reportEvery = 10000 # print the event number for every 100th event
+process.MessageLogger.cerr.FwkReport.reportEvery = 100 # print the event number for every 100th event
 process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.untracked.int32(10)) # print max 100 warnings
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-       '/store/mc/RunIIFall15MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext3-v1/20000/007E40C9-B4A4-E511-BD19-842B2B7680DF.root'
-    )
+        #'/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/150/00000/66051AAF-D819-E611-BD3D-02163E011D55.root',
+        '/store/mc/RunIISpring16MiniAODv2/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/20000/04F56101-3739-E611-90EE-0CC47A78A41C.root',
+        )
 )
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
@@ -69,15 +74,33 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Trigger = cms.PSet(
 	TriggerResults = cms.InputTag("TriggerResults::HLT"),
 	TriggerBits = cms.vstring(
-            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
-            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_JetIdCleaned_v",
-            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
-            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned_v",
+            "HLT_QuadJet45_DoubleBTagCSV_p087_v2",
+            "HLT_QuadPFJet_VBF_v5",
+            "HLT_PFHT300_v3",
+            "HLT_PFHT400_v3",
+            "HLT_PFHT475_v3",
+            "HLT_PFHT600_v4",
+            "HLT_PFHT650_v4",
+            "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v2",
+            "HLT_PFHT450_SixJet40_BTagCSV_p056_v2",
+            "HLT_PFHT400_SixJet30_v4",
+            "HLT_PFHT450_SixJet40_v4",
+            "HLT_HT200_v2",
+            "HLT_HT275_v2",
+            "HLT_HT325_v2",
+            "HLT_HT425_v2",
+            "HLT_HT575_v2",
+            "HLT_HT650_v3",
+            "HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200_v2",
+            "HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460_v2",
+            "HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240_v2",
+            "HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500_v2",
+            "HLT_QuadPFJet_VBF_v5",
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
         TriggerMatch = cms.untracked.vstring(
-            "LooseIsoPFTau50_Trk30_eta2p1",
+            #"LooseIsoPFTau50_Trk30_eta2p1",
         ),
 	filter = cms.untracked.bool(False)
     ),

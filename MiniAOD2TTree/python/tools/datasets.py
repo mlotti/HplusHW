@@ -18,16 +18,16 @@ datasetsTauData = []
 datasetsTauData.append(Dataset('/Tau/Run2016B-PromptReco-v2/MINIAOD',dataVersion="80Xdata"))
 datasetsTauData.append(Dataset('/Tau/Run2016C-PromptReco-v2/MINIAOD',dataVersion="80Xdata"))
 
+datasetsJetHTData = []
+datasetsJetHTData.append(Dataset('JetHT/Run2016B-PromptReco-v2/MINIAOD',dataVersion="80Xdata"))
+
 datasetsMuonData = []
 datasetsMuonData.append(Dataset('/SingleMuon/Run2016B-PromptReco-v2/MINIAOD',dataVersion="80Xdata"))
-
 
 datasetsTop =[]
 datasetsTop.append(Dataset('/TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext3-v1/MINIAODSIM'))
 
-
 datasetsSignalTauNu = []
-
 
 datasetsSignalTB = []
 datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM'))
