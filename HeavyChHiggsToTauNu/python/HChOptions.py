@@ -162,7 +162,7 @@ def getOptionsDataVersion(dataVersion, options=None, useDefaultSignalTrigger=Tru
     options = getOptions(options)
     if options.dataVersion != "":
         dataVersion = options.dataVersion
-    print "Data version is", dataVersion
+    #print "Data version is", dataVersion
 
     dataVersion = DataVersion(dataVersion)
     if useDefaultSignalTrigger and len(options.trigger) == 0 and dataVersion.isMC() and options.tauEmbeddingInput == 0:
