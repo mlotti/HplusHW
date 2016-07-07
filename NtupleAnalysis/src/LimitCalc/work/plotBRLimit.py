@@ -96,8 +96,8 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
     #    dy -= 0.1
     
     x = 0.51
-    x = 0.4
-    legend = histograms.createLegend(x-0.01, 0.78+dy, 0.92, 0.92+dy)
+    x = 0.45
+    legend = histograms.createLegend(x, 0.78+dy, x+0.4, 0.92+dy)
     legend.SetMargin(0.17)
     # make room for the final state text
     if opts.excludedArea:
@@ -139,7 +139,7 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
 
     size = 20
     x = 0.51
-    x = 0.4
+    x = 0.45
     process = limit.process
     if limits.isHeavyStatus:
         process = limit.processHeavy
