@@ -4,11 +4,11 @@ skim = cms.EDFilter("Hplus2tbAnalysisSkim",
     TriggerResults = cms.InputTag("TriggerResults::HLT"),
     HLTPaths       = cms.vstring(
         # #"HLT_QuadPFJet_DoubleBTagCSV_VBF_Mqq200_v",
-        # "HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200_v2",
-        # "HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460_v2",
-        # "HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240_v2",
-        # "HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500_v2",
-        # "HLT_QuadPFJet_VBF_v5",
+        # "HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200_v",
+        # "HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460_v",
+        # "HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240_v",
+        # "HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500_v",
+        # "HLT_QuadPFJet_VBF_v",
     ),
 
     # Jets
