@@ -11,6 +11,7 @@ from HiggsAnalysis.LimitCalc.Extractor import ExtractorMode,CounterExtractor,Sha
 from HiggsAnalysis.NtupleAnalysis.tools.systematics import ScalarUncertaintyItem,getBinningForPlot
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.histogramsExtras as histogramExtras
 import HiggsAnalysis.QCDMeasurement.systematicsForMetShapeDifference as systematicsForMetShapeDifference
 from math import sqrt,pow
@@ -394,6 +395,7 @@ class DatacardColumn():
             myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
             if myDatasetRootHisto.isMC():
                 # Set signal xsection
+                # for heavy H+
                 if config.OptionLimitOnSigmaBr:
                     if self._landsProcess <= 0:
                         # Set cross section of sample to 1 pb in order to obtain limit on sigma x Br
@@ -401,13 +403,15 @@ class DatacardColumn():
                         dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(1)
                         myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
                         print "..... Assuming this is signal -> set cross section to 1 pb for limit calculation"
-                # Fix a bug in signal xsection
-                #elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH")):
-                     #if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - 245.8) > 0.0001:
-                         #print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 245.8 pb according to arXiv:1303.6254"
-                         ##myDatasetRootHisto.Delete()
-                         #dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(245.8)
-                         #myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
+                # for light H+, use 13 TeV ttbar xsect from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
+                elif (not config.OptionLimitOnSigmaBr and (self._label[:2] == "HW" or self._label[:2] == "HH" or self._label[:2] == "WH")):
+                     ttbarxsect = xsect.backgroundCrossSections.crossSection("TTJets", energy="13")
+                     if abs(dsetMgr.getDataset(self.getDatasetMgrColumn()).getCrossSection() - ttbarxsect) > 0.0001:
+                         print ShellStyles.WarningLabel()+"Forcing light H+ xsection to 13 TeV ttbar cross section %f in DatacardColumn.py"%ttbarxsect
+                         dsetMgr.getDataset(self.getDatasetMgrColumn()).setCrossSection(ttbarxsect)
+                         myDatasetRootHisto = dsetMgr.getDataset(self.getDatasetMgrColumn()).getDatasetRootHisto(mySystematics.histogram(self.getFullShapeHistoName()))
+
+
                 # Normalize to luminosity
                 myDatasetRootHisto.normalizeToLuminosity(luminosity)
             self._cachedShapeRootHistogramWithUncertainties = myDatasetRootHisto.getHistogramWithUncertainties().Clone()
