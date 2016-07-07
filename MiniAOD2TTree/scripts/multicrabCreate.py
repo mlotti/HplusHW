@@ -46,61 +46,61 @@ from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
 # Dataset Grouping 
 #================================================================================================
 datasets = []
-#datasets.append('/DYJetsToLL_M-50_13TeV-madgraph-pythia8-tauola_v2/Spring14miniaod-PU20bx25_POSTLS170_V5-v1/MINIAODSIM')
 
 tauLegDatasets         = []
-tauLegDatasets.extend(datasetsMuonData76x)
-tauLegDatasets.extend(datasetsMiniAODv2_DY76x)
-#tauLegDatasets.extend(datasetsMiniAODv2_Top76x)
-#tauLegDatasets.extend(datasetsMiniAODv2_WJets76x)
-#tauLegDatasets.extend(datasetsMiniAODv2_QCDMuEnriched76x)
-tauLegDatasets.extend(datasetsMiniAODv2_H12576x)
+tauLegDatasets.extend(datasetsMuonData)
+tauLegDatasets.extend(datasetsDY)
+#tauLegDatasets.extend(datasetsTop)
+#tauLegDatasets.extend(datasetsWJets)
+#tauLegDatasets.extend(datasetsQCDMuEnriched)
+#tauLegDatasets.extend(datasetsH125)
 
 metLegDatasets = []
-metLegDatasets.extend(datasetsTauData76x)
-metLegDatasets.extend(datasetsMiniAODv2_DY76x)
-metLegDatasets.extend(datasetsMiniAODv2_Top76x)
-metLegDatasets.extend(datasetsMiniAODv2_WJets76x)
-metLegDatasets.extend(datasetsMiniAODv2_QCD76x)
+metLegDatasets.extend(datasetsTauData)
+metLegDatasets.extend(datasetsDY)
+metLegDatasets.extend(datasetsTop)
+metLegDatasets.extend(datasetsWJets)
+metLegDatasets.extend(datasetsQCD)
 
 signalAnalysisDatasets = []
-signalAnalysisDatasets.extend(datasetsTauData76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_DY76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_Top76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_WJets76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_Diboson76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_QCD76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTauNu76x)
-signalAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
+signalAnalysisDatasets.extend(datasetsTauData)
+signalAnalysisDatasets.extend(datasetsDY)
+signalAnalysisDatasets.extend(datasetsTop)
+signalAnalysisDatasets.extend(datasetsWJets)
+signalAnalysisDatasets.extend(datasetsDiboson)
+signalAnalysisDatasets.extend(datasetsQCD)
+signalAnalysisDatasets.extend(datasetsSignalTauNu)
+signalAnalysisDatasets.extend(datasetsSignalTB)
 
 hplus2tbAnalysisDatasets = []
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_SignalTB76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_DYToQQ76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_QCD76x)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_QCDbEnriched76x)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_QCDbGenFilter76x)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_QCDHTBins76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_Top76x) #Single-Top and TT
-#h plus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TT76x) #included in Top76x
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_GGJets76x)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_GJets76x)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TGJets76x)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TTGJets76x)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TTJets76x)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TTJetsHT76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TTWJets76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TTZJets76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TTWJetsToQQ76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TTTT76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_TTZToQQ76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_WJetsToQQ76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_ZJetsToQQ76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_Diboson76x) #
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_DibosonG76x)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_WWTo4Q76x)
-#hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_ZZTo4Q76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_ttbb76x)
-hplus2tbAnalysisDatasets.extend(datasetsMiniAODv2_Triboson76x)
+hplus2tbAnalysisDatasets.extend(datasetsJetHTData)
+hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
+#hplus2tbAnalysisDatasets.extend(datasetsDYToQQ)
+#hplus2tbAnalysisDatasets.extend(datasetsQCD)
+##hplus2tbAnalysisDatasets.extend(datasetsQCDbEnriched)
+##hplus2tbAnalysisDatasets.extend(datasetsQCDbGenFilter)
+##hplus2tbAnalysisDatasets.extend(datasetsQCDHTBins)
+hplus2tbAnalysisDatasets.extend(datasetsTop) #Single-Top and TT
+##h plus2tbAnalysisDatasets.extend(datasetsTT) #included in Top
+##hplus2tbAnalysisDatasets.extend(datasetsGGJets)
+##hplus2tbAnalysisDatasets.extend(datasetsGJets)
+##hplus2tbAnalysisDatasets.extend(datasetsTGJets)
+##hplus2tbAnalysisDatasets.extend(datasetsTTGJets)
+##hplus2tbAnalysisDatasets.extend(datasetsTTJets)
+##hplus2tbAnalysisDatasets.extend(datasetsTTJetsHT)
+#hplus2tbAnalysisDatasets.extend(datasetsTTWJets)
+#hplus2tbAnalysisDatasets.extend(datasetsTTZJets)
+#hplus2tbAnalysisDatasets.extend(datasetsTTWJetsToQQ)
+#hplus2tbAnalysisDatasets.extend(datasetsTTTT)
+#hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ)
+#hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ)
+#hplus2tbAnalysisDatasets.extend(datasetsZJetsToQQ)
+#hplus2tbAnalysisDatasets.extend(datasetsDiboson) #
+##hplus2tbAnalysisDatasets.extend(datasetsDibosonG)
+##hplus2tbAnalysisDatasets.extend(datasetsWWTo4Q)
+##hplus2tbAnalysisDatasets.extend(datasetsZZTo4Q)
+#hplus2tbAnalysisDatasets.extend(datasetsttbb)
+#hplus2tbAnalysisDatasets.extend(datasetsTriboson)
 
 
 #================================================================================================ 
@@ -237,8 +237,8 @@ def GetTaskDirName(analysis, version, datasets):
 
 	# If directory already exists (resubmission)
 	# if len(sys.argv) == 2 and os.path.exists(sys.argv[1]) and os.path.isdir(sys.argv[1]): #original
-	if opts.dirName != "" and os.path.isdir(opts.dirName):
-		dirName = opts.dirName
+	if os.path.exists(opts.dirName) and os.path.isdir(opts.dirName):
+	    dirName = opts.dirName
 
 	return dirName
 
@@ -338,9 +338,9 @@ def GetRequestName(dataset):
 			runRange = runRange.replace("-","_")
 			bunchSpace = runRangeMatch.group("BunchSpacing")
 			requestName += "_" + runRange + bunchSpace
-		Ag = runRangeMatch.group("Silver")
-                if Ag == "_Silver": # Use  chemical element of silver (Ag)
-			requestName += Ag
+			Ag = runRangeMatch.group("Silver")
+			if Ag == "_Silver": # Use  chemical element of silver (Ag)
+				requestName += Ag
 #            s = (dataset.URL).split("/")
 #            requestName = s[1] + "_" + s[2]
 
