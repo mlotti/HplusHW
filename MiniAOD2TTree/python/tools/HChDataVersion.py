@@ -184,12 +184,14 @@ config = {
     "76Xdata": {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
+        "metFilteringProcess": "RECO",
         "globalTag": "76X_dataRun2_16Dec2015_v0",
     },
     "76Xmc": {
         "simProcess": "SIM",
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
+        "metFilteringProcess": "PAT",
         "globalTag": "76X_mcRun2_asymptotic_RunIIFall15DR76_v1",
         "signalTrigger": "HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6",
     },
@@ -222,6 +224,7 @@ class DataVersion:
         self.trigger = conf["triggerProcess"]
         self.recoProcess = conf.get("recoProcess", None)
         self.simProcess = conf.get("simProcess", None)
+        self.metFilteringProcess = conf.get("metFilteringProcess", None)
         self.version = dataVersion
         self.globalTag = conf["globalTag"]
 
@@ -288,6 +291,11 @@ class DataVersion:
         if not self.simProcess:
             raise Exception("Sim process name is not available for %s" % self.version)
         return self.simProcess
+
+    def getMETFilteringProcess(self):
+        if not self.metFilteringProcess:
+            raise Exception("MET filtering process name is not available for %s" % self.version)
+        return self.metFilteringProcess
 
     def getGlobalTag(self):
         return self.globalTag

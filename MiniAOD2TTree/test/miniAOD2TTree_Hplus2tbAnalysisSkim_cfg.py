@@ -82,9 +82,6 @@ process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag())
 #================================================================================================  
 # Set up tree dumper
 #================================================================================================  
-TrgResultsSource = "TriggerResults::PAT"
-if dataVersion.isData():
-    TrgResultsSource = "TriggerResults::RECO"
 
 ####
 msgAlign = "{:<10} {:<30} {:<25} {:<25}"
@@ -158,8 +155,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = cms.PSet(
-        triggerResults            = cms.InputTag(TrgResultsSource),
-        printTriggerResultsList   = cms.untracked.bool(False),
+        triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())),
+        printTriggerResultsList = cms.untracked.bool(False),
         filtersFromTriggerResults = cms.vstring(
             "Flag_HBHENoiseFilter",
             "Flag_HBHENoiseIsoFilter",
