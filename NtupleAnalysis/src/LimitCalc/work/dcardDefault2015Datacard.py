@@ -256,14 +256,14 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["xsect_DYtoll","CMS_lumi_13TeV"]))
-    #DataGroups.append(DataGroup(label="CMS_Hptntj_VV_genuinetau", landsProcess=7,
-                                #shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus, 
-                                #datasetType="Embedding", 
-                                #datasetDefinition="Diboson",
-                                #validMassPoints=MassPoints,
-                                #nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
-                                  #+myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                                  #+["xsect_VV","CMS_lumi_13TeV"]))
+    DataGroups.append(DataGroup(label="CMS_Hptntj_VV_genuinetau", landsProcess=7,
+                                shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus, 
+                                datasetType="Embedding", 
+                                datasetDefinition="Diboson",
+                                validMassPoints=MassPoints,
+                                nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
+                                  +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
+                                  +["xsect_VV","CMS_lumi_13TeV"]))
     # Merge EWK as one column or not
     #if not OptionSeparateFakeTtbarFromFakeBackground:
         #mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
