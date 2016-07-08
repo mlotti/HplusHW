@@ -6,8 +6,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-dataVersion = "80Xmc"
-#dataVersion = "80Xdata"
+#dataVersion = "80Xmc"
+dataVersion = "80Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
@@ -22,8 +22,8 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#       '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
-       '/store/mc/RunIISpring16MiniAODv1/ChargedHiggs_HplusTB_HplusToTauNu_M-500_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/50000/128F2F69-5727-E611-B9E6-02163E0135F5.root',
+       '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
+#       '/store/mc/RunIISpring16MiniAODv2/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-120_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/80000/003E6DB6-1E42-E611-AFBB-D4AE526A023A.root'
     )
 )
 
@@ -68,7 +68,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
-	TriggerResults = cms.InputTag("TriggerResults::HLT"),
+	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
 	TriggerBits = cms.vstring(
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET90_v",
@@ -148,6 +148,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
+process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
 
 # === Setup customizations
 from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations

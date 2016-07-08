@@ -80,7 +80,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
-	TriggerResults = cms.InputTag("TriggerResults::HLT"),
+	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
 	TriggerBits = cms.vstring(
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_v",
 	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
@@ -128,6 +128,7 @@ process.skim.GenWeights = process.dump.GenWeights
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
+process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
 
 # === Setup customizations
 from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
