@@ -23,8 +23,8 @@ https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial#Setup_the_e
 #PSET = "miniAODGEN2TTree_cfg.py"
 #PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
-PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
-#PSET = "miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py"
+#PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
+PSET = "miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py"
 
 
 #================================================================================================
@@ -39,68 +39,7 @@ import datetime
 from optparse import OptionParser
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git
 from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
-#from datasets import *
 
-
-#================================================================================================
-# Dataset Grouping 
-#================================================================================================
-datasets = []
-
-tauLegDatasets         = []
-tauLegDatasets.extend(datasetsMuonData)
-tauLegDatasets.extend(datasetsDY)
-#tauLegDatasets.extend(datasetsTop)
-#tauLegDatasets.extend(datasetsWJets)
-#tauLegDatasets.extend(datasetsQCDMuEnriched)
-#tauLegDatasets.extend(datasetsH125)
-
-metLegDatasets = []
-metLegDatasets.extend(datasetsTauData)
-metLegDatasets.extend(datasetsDY)
-metLegDatasets.extend(datasetsTop)
-metLegDatasets.extend(datasetsWJets)
-metLegDatasets.extend(datasetsQCD)
-
-signalAnalysisDatasets = []
-signalAnalysisDatasets.extend(datasetsTauData)
-signalAnalysisDatasets.extend(datasetsDY)
-signalAnalysisDatasets.extend(datasetsTop)
-signalAnalysisDatasets.extend(datasetsWJets)
-signalAnalysisDatasets.extend(datasetsDiboson)
-signalAnalysisDatasets.extend(datasetsQCD)
-signalAnalysisDatasets.extend(datasetsSignalTauNu)
-signalAnalysisDatasets.extend(datasetsSignalTB)
-
-hplus2tbAnalysisDatasets = []
-hplus2tbAnalysisDatasets.extend(datasetsJetHTData)
-hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
-#hplus2tbAnalysisDatasets.extend(datasetsDYToQQ)
-#hplus2tbAnalysisDatasets.extend(datasetsQCD)
-##hplus2tbAnalysisDatasets.extend(datasetsQCDbEnriched)
-##hplus2tbAnalysisDatasets.extend(datasetsQCDbGenFilter)
-##hplus2tbAnalysisDatasets.extend(datasetsQCDHTBins)
-hplus2tbAnalysisDatasets.extend(datasetsTop) #Single-Top and TT
-##h plus2tbAnalysisDatasets.extend(datasetsTT) #included in Top
-##hplus2tbAnalysisDatasets.extend(datasetsGGJets)
-##hplus2tbAnalysisDatasets.extend(datasetsGJets)
-##hplus2tbAnalysisDatasets.extend(datasetsTGJets)
-##hplus2tbAnalysisDatasets.extend(datasetsTTGJets)
-##hplus2tbAnalysisDatasets.extend(datasetsTTJets)
-##hplus2tbAnalysisDatasets.extend(datasetsTTJetsHT)
-#hplus2tbAnalysisDatasets.extend(datasetsTTWJets)
-#hplus2tbAnalysisDatasets.extend(datasetsTTZJets)
-#hplus2tbAnalysisDatasets.extend(datasetsTTWJetsToQQ)
-#hplus2tbAnalysisDatasets.extend(datasetsTTTT)
-#hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ)
-#hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ)
-#hplus2tbAnalysisDatasets.extend(datasetsZJetsToQQ)
-#hplus2tbAnalysisDatasets.extend(datasetsDiboson) #
-##hplus2tbAnalysisDatasets.extend(datasetsDibosonG)
-##hplus2tbAnalysisDatasets.extend(datasetsWWTo4Q)
-##hplus2tbAnalysisDatasets.extend(datasetsZZTo4Q)
-#hplus2tbAnalysisDatasets.extend(datasetsttbb)
-#hplus2tbAnalysisDatasets.extend(datasetsTriboson)
 
 
 #================================================================================================ 
@@ -165,22 +104,14 @@ def GetAnalysis():
 	return analysis
 
 
-def GetDatasetList(analysis):
-	'''
-	Get the list of datasets to be processed, according to the analysis type.
-	This will be used to setup the multicrab job accordingly.
-	'''
-	Verbose("GetDatasetList()")
-
-	if analysis == "SignalAnalysis":
-		datasets = signalAnalysisDatasets
-	if analysis == "Hplus2tbAnalysis":
-		datasets = hplus2tbAnalysisDatasets
-	if analysis == "TauLeg":
-		datasets = tauLegDatasets
-	if analysis == "METLeg":
-		datasets = metLegDatasets
-	return datasets
+#def GetDatasetList( DatasetGroup):
+#	'''
+#	Get the list of datasets to be processed, according to the analysis type.
+#	This will be used to setup the multicrab job accordingly.
+#	'''
+#	Verbose("GetDatasetList()")
+#	DatasetGroup.
+#	return datasets
 
 
 def AbortCrabTask(keystroke):
@@ -470,7 +401,7 @@ def main(opts, args):
 	# Get general info
 	version     = GetCMSSW()
 	analysis    = GetAnalysis()
-	datasets    = GetDatasetList(analysis)
+	datasets    = DatasetGroup(analysis).GetDatasetList()
 	taskDirName = GetTaskDirName(analysis, version, datasets)
 
 	# Give user last chance to abort
