@@ -95,7 +95,7 @@ SignalAnalysisSkim::~SignalAnalysisSkim(){
 bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetup ){
 
     nEvents++;
-/* FIXME: Disabling trigger, since no trigger in MC 09062016/SL
+
     // Trigger bits
     edm::Handle<edm::TriggerResults> trghandle;
     iEvent.getByToken(trgResultsToken,trghandle);
@@ -137,7 +137,7 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 	if(!passed) return false; 
     }
-*/
+/*
     // FIXME: CaloMET to emulate Trigger MET leg, to skim the samples at least with the MET leg 09062016/SL
     edm::Handle<edm::View<pat::MET>> methandle;                                                                                                                                                    
     iEvent.getByToken(metToken, methandle);                                                                                                                                                        
@@ -151,7 +151,7 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
 	if(caloMET < 80) return false;
       }
     }
-
+*/
 
     // Taus
     edm::Handle<edm::View<pat::Tau> > tauhandle;
