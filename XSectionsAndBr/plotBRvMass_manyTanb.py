@@ -445,7 +445,7 @@ def main():
     yMin = 0.85
     yMax = 1.00
     if parseOpts.logy==True:
-        yMin = 1e-03
+        yMin = 1e-04
         yMax = 1.1
 
         
@@ -496,12 +496,14 @@ def main():
 
     # Create & Customise a TLegend
     Print("Creating TLegend")
-    yMinLeg = 0.85 - 0.07*(len(tanbList)-1)
-    leg = ROOT.TLegend(0.70, yMinLeg, 0.93, 0.92)
-    leg.SetHeader("BR("+ ConvertToLatex(parseOpts.boson) + "#rightarrow" + ConvertToLatex(parseOpts.decayTo) + ")")
+    #yMinLeg = 0.85 - 0.07*(len(tanbList)-1)
+    #leg = ROOT.TLegend(0.70, yMinLeg, 0.93, 0.92)
+    yMinLeg = 0.65 - 0.07*(len(tanbList)-1)
+    leg = ROOT.TLegend(0.19, yMinLeg, 0.42, 0.72)
     leg.SetFillColor(0)
     leg.SetFillStyle(3002)
     leg.SetBorderSize(0)
+    #leg.SetHeader("BR("+ ConvertToLatex(parseOpts.boson) + "#rightarrow" + ConvertToLatex(parseOpts.decayTo) + ")")
 
 
     # Sanity check
@@ -584,7 +586,9 @@ def main():
 
     # Create text to be drawn on the canvas
     Print("Creating information text for canvas")
-    t1 = PlotText(0.16, 0.95, "tan#beta=%s-%s" % (parseOpts.tanbMin, parseOpts.tanbMax), None, False )
+    #t1 = PlotText(0.16, 0.95, "tan#beta=%s-%s" % (parseOpts.tanbMin, parseOpts.tanbMax), None, False )
+    brLabel = "BR("+ ConvertToLatex(parseOpts.boson) + "#rightarrow" + ConvertToLatex(parseOpts.decayTo) + ")"
+    t1 = PlotText(0.16, 0.95, brLabel, None, False )
     t2 = PlotText(0.40, 0.95, "#sqrt{s}=%s" % (energy.replace("TeV", " TeV")), None, False)
     t3 = PlotText(0.57, 0.95, "LHC HIGGS XS WG", None, False)
     t4 = PlotText(0.67, 0.95, ConvertFileToScenario(parseOpts.file), None, False)
