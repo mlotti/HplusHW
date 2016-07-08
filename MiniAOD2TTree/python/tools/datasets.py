@@ -194,11 +194,14 @@ class DatasetGroup:
         return self.GroupDict[self.analysis]
 
 
-    def PrintDatasets(self):
+    def PrintDatasets(self, printHeader=False):
         '''
         Print all datasets for given analysis
         '''
         datasetList = self.GroupDict[self.analysis]
 
-        self.Print("Printing datasets for analysis \"%s\":\n\t%s" % (self.analysis, "\n\t".join(str(d.URL) for d in datasetList) ) )
+        if printHeader==True:
+            self.Print("The datasets for analysis \"%s\" are:\n\t%s" % (self.analysis, "\n\t".join(str(d.URL) for d in datasetList) ), True)
+        else:
+            self.Print("\n\t".join(str(d.URL) for d in datasetList), False)
         return
