@@ -2,7 +2,7 @@
 
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
+from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
@@ -27,8 +27,6 @@ process.source = cms.Source("PoolSource",
 #        '/store/data/Run2015D/Tau/MINIAOD/PromptReco-v3/000/256/587/00000/6E29A230-925D-E511-A2F2-02163E0140F1.root'
     )
 )
-from Hplus1500GeV_cfg import source
-process.source = source
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
