@@ -83,10 +83,8 @@ process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag())
 # Set up tree dumper
 #================================================================================================  
 TrgResultsSource = "TriggerResults::PAT"
-TrgResultsTag    = "TriggerResults::HLT2"
 if dataVersion.isData():
     TrgResultsSource = "TriggerResults::RECO"
-    TrgResultsTag    = "TriggerResults::HLT"
 
 ####
 msgAlign = "{:<10} {:<30} {:<25} {:<25}"
@@ -94,7 +92,7 @@ title    =  msgAlign.format("Data", "Global Tag", "Trigger Source", "Trigger Tag
 print "="*len(title)
 print title
 print "="*len(title)
-print msgAlign.format(dataVersion.version, dataVersion.getGlobalTag(), TrgResultsSource, TrgResultsTag)
+print msgAlign.format(dataVersion.version, dataVersion.getGlobalTag(), TrgResultsSource, dataVersion.getTriggerProcess())
 print 
 ####
 
@@ -127,7 +125,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TopPtProducer           = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
-	TriggerResults = cms.InputTag(TrgResultsTag),
+	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
 	TriggerBits    = cms.vstring(
             "HLT_QuadJet45_DoubleBTagCSV_p087_v",
             "HLT_QuadPFJet_VBF_v",
@@ -223,7 +221,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 process.load("HiggsAnalysis.MiniAOD2TTree.Hplus2tbAnalysisSkim_cfi")
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
-
+process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
 
 #================================================================================================ 
 # Setup customizations
