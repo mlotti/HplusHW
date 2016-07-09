@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 '''
-Usage (submit):
-multicrab.py -s T2_CH_CERN -p miniAOD2TTree_SignalAnalysisSkim_cfg.py -v
-
-
-Usage (re-submit):
-multicrab.py -d <multicrab-dir-to-be-resubmitted>
+Usage:
+multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_SignalAnalysisSkim_cfg.py -v
+multicrab.py --status <task_dir> --url -v
+multicrab.py --get <task_dir> --ask 
+multicrab.py --resubmit <task_dir> --ask -v --url
+multicrab.py --kill <task_dir>
 
 
 Description:
@@ -14,10 +14,11 @@ It is also used retrieve output and check status of submitted CRAB jobs.
 The file datasets.py is used an an auxiliary file to determine the samples to be processesed.
 
 
-Retrieve some logs which refuse to come out otherwise:
+To retrieve some logs which refuse to come out otherwise:
 crab log <dir> --command=LCG --checksum=no
 
 
+To-do:
 Launching the command with a multicrab-dir as a parameter:
 [username@lxplus0036:test]$ multicrabcreate.py <multicrab_dir> resubmits some crab tasks within the multicrab dir.
 
@@ -537,7 +538,7 @@ def checkJob(opts, args):
         taskDashboard = GetTaskDashboardURL(d)
         
         # Get task status and add to dictionary        
-        taskStatus = GetTaskStatus(d) 
+        taskStatus = GetTaskStatus(d).replace("\t", "")
         summaryDict[d.split("/")[-1]] = taskStatus
 
         # Kill task if requested by user
@@ -558,17 +559,20 @@ def PrintTaskSummary(summaryDict):
     The purpose it to easily determine which jobs are done, running and failed.
     '''
     summary  = []
-    msgAlign = "{:<3} {:<50} {:<30}"
+    msgAlign = "{:<3} {:<50} {:>30}"
     header   = msgAlign.format("#", "Dataset",  "Status")
     hLine    = "="*len(header)
+    summary.append("\n")
     summary.append(hLine)
     summary.append(header)
     summary.append(hLine)
     
     # For-loop: All datasets (key) and corresponding status (value)
-    for i, d in enumerate(summaryDict):
-        line = msgAlign.format(i+1, d,  summaryDict[d])
+    i = 0
+    for dataset in summaryDict:
+        line = msgAlign.format(i+1, dataset,  summaryDict[dataset])
         summary.append(line)
+        i += 1
     summary.append(hLine)
 
     # For-loop: All lines in summary table
@@ -639,7 +643,8 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     dataset   = directory.split("/")[-1]
     hLine     = "="*40
     status    = GetTaskStatus(directory).replace("\t", "")
-    header    = "{:^34}".format(dataset + " (" + status +")")
+    # header    = "{:^34}".format(dataset + " (" + status +")")
+    header    = "{:^34}".format(dataset)
     tableRows.append(hLine)
     tableRows.append(header)
     tableRows.append(hLine)
@@ -657,7 +662,6 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     if verbose:
         for r in tableRows:
             Print(r, False)
-        #print colors.WHITE
         
     # Sanity check
     if verbose and status == "COMPLETED":
@@ -667,7 +671,8 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
             Print( "Missing output files(s) job ID: %s" % missingOuts)
 
     # Print the dashboard url 
-    Print(dashboardURL, False)
+    if opts.url:
+        Print(dashboardURL, False)
     return finished, failed, retrievedLog, retrievedOut
 
 
@@ -1114,27 +1119,26 @@ if __name__ == "__main__":
     DIRNAME = ""
 
     parser = OptionParser(usage="Usage: %prog [options]")
-    parser.add_option("-v", "--verbose", dest="verbose"    , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
     parser.add_option("--create"  , dest="create"    , default=False, action="store_true", help="Flag to create a CRAB job [default: False")
     parser.add_option("--status"  , dest="status"    , default=False, action="store_true", help="Flag to check the status of all CRAB jobs [default: False")
     parser.add_option("--get"     , dest="get"       , default=False, action="store_true", help="Get output of finished jobs [defaut: False]")
-    #parser.add_option("--checksum", dest="checksum"  , default=False, action="store_true", help="Get output with adler32 checksum [default: False")
     parser.add_option("--resubmit", dest="resubmit"  , default=False, action="store_true", help="Resubmit all failed jobs [defaut: False]")
     parser.add_option("--kill"    , dest="kill"      , default=False, action="store_true", help="Kill all submitted jobs [defaut: False]")
-    #
+    parser.add_option("-v", "--verbose", dest="verbose"    , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
     parser.add_option("-a", "--ask"    , dest="ask"        , default=False  , action="store_true", help="Prompt user before executing CRAB commands [defaut: False]")
     parser.add_option("-p", "--pset"   , dest="pset"       , default=PSET   , type="string"      , help="The python cfg file to be used by cmsRun [default: %s]" % (PSET))
     parser.add_option("-d", "--dir"    , dest="dirName"    , default=DIRNAME, type="string"      , help="Custom name for CRAB1 directory name [default: %s]" % (DIRNAME))
     parser.add_option("-s", "--site"   , dest="storageSite", default=SITE   , type="string"      , help="Site where the output will be copied to [default: %s]" % (SITE))
-    
-    parser.add_option('-o', '--options', dest='options'    , default=""     , type="string"      , help="Options for crab command  [default: \"\"]") #fixme
+    parser.add_option("-u", "--url"    , dest="url"        , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
+    #parser.add_option('-o', '--options', dest='options'    , default=""     , type="string"      , help="Options for crab command  [default: \"\"]") #fixme
+    #parser.add_option("--checksum", dest="checksum"  , default=False, action="store_true", help="Get output with adler32 checksum [default: False") #fixme
     (opts, args) = parser.parse_args()
 
     if opts.create == True and opts.status == True:
         raise Exception("Cannot both create and check a CRAB job!")	    
     if opts.create == True:
         sys.exit( createJob(opts, args) )
-    elif opts.status == True or opts.get == True:
+    elif opts.status == True or opts.get == True or opts.resubmit == True:
         sys.exit( checkJob(opts, args) )
     else:
         raise Exception("Must either create or check a CRAB job!")
