@@ -88,11 +88,15 @@ class colors:
         RED, GREEN, BLUE, GRAY, WHITE, ORANGE, CYAN, PURPLE, LIGHTRED, PINK, YELLOW = '', '', '', '', '', '', '', '', '', '', ''
 
 
+#================================================================================================ 
+# Class Definition
+#================================================================================================ 
 class Report:
     def __init__(self, name, allJobs, retrieved, status, dashboardURL):
         '''
         Constructor 
         '''
+        Verbose("__init__()")
         self.name         = name
         self.allJobs      = str(allJobs)
         self.retrieved    = str(retrieved)
@@ -103,14 +107,18 @@ class Report:
 
 
     def Print(self, printHeader=True):
+        '''
+        Simple function to print report.
+        '''
+        Verbose("Print()")
         name = os.path.basename(self.name)
         while len(name) < 30:
             name += " "
 
-	fName = __file__.split("/")[-1]            
+	fName = GetSelfName()
 	cName = self.__class__.__name__
         name  = fName + ": " + cName
-        if printHeadeer:
+        if printHeader:
             print "=== ", name
         msg  = '{:<20} {:<40}'.format("\t %sDataset"           % (colors.WHITE) , ": " + self.dataset)
         msg += '\n {:<20} {:<40}'.format("\t %sRetrieved Jobs" % (colors.WHITE) , ": " + self.retrieved + " / " + self.allJobs)
@@ -121,6 +129,7 @@ class Report:
     
 
     def GetURL():
+        Verbose("GetURL()")
         return self.dashboardURL
 
 
@@ -136,6 +145,7 @@ class Report:
         KILLFAILED: The 'kill' action has failed.
         RESUBMITFAILED: The 'resubmit' action has failed.
         '''
+        Verbose("GetTaskStatusStyle()")
         
         # Remove all whitespace characters (space, tab, newline, etc.)
         status = ''.join(status.split())
@@ -179,7 +189,8 @@ def AskUser(msg):
     Prompts user for keyboard feedback to a certain question. 
     Returns true if keystroke is \"y\", false otherwise.
     '''
-
+    Verbose("AskUser()")
+    
     keystroke = raw_input("\t" +  msg + " (y/n): ")
     if (keystroke.lower()) == "y":
         return True
@@ -194,6 +205,7 @@ def GetTaskStatusBool(datasetPath):
     Check the crab.log for the given task to determine the status.
     If the the string "Done" is found inside skip it.
     '''
+    Verbose("GetTaskStatusBool()")
     crabLog      = os.path.join(datasetPath,"crab.log")
     stringToGrep = "Done"
     cmd          = "grep '%s' %s" % (stringToGrep, crabLog)
@@ -208,7 +220,8 @@ def GetTaskDashboardURL(datasetPath):
     Call the "grep" command to look for the dashboard URL from the crab.log file 
     of a given dataset. It uses as input parameter the absolute path of the task dir (datasetPath)
     '''
-
+    Verbose("GetTaskDashboardURL()")
+    
     # Variable Declaration
     crabLog      = os.path.join(datasetPath, "crab.log")
     grepFile     = os.path.join(datasetPath, "grep.tmp")
@@ -238,7 +251,8 @@ def GetTaskStatus(datasetPath):
     Call the "grep" command to look for the "Task status" from the crab.log file 
     of a given dataset. It uses as input parameter the absolute path of the task dir (datasetPath)
     '''
-
+    Verbose("GetTaskStatus()")
+    
     # Variable Declaration
     crabLog      = os.path.join(datasetPath, "crab.log")
     grepFile     = os.path.join(datasetPath, "grep.tmp")
@@ -264,12 +278,16 @@ def GetTaskStatus(datasetPath):
 
 
 def GetTaskReports(datasetPath, status, dashboardURL):
-    # Variable Declaration
-    reports = []
+    '''
+    Execute "crab status", get task logs and output. 
+    Resubmit or kill task according to user options.
+    '''
+    Verbose("GetTaskReports()")
+
+    report = None
     
     # Get all files under <dataset_dir>/results/
     files = execute("ls %s" % os.path.join( datasetPath, "results") )
-
 
     Verbose("crab status --dir=%s" % (GetLast2Dirs(datasetPath)), False)
     try:
@@ -282,7 +300,7 @@ def GetTaskReports(datasetPath, status, dashboardURL):
         Verbose("Retrieving Files (1/2)")
         finished, failed, retrievedLog, retrievedOut = RetrievedFiles(datasetPath, result, dashboardURL, False)
            
-        # Get the task logs
+        # Get the task logs & output ?        
         Verbose("Getting Task Logs")
         GetTaskLogs(datasetPath, retrievedLog, finished)
 
@@ -307,7 +325,6 @@ def GetTaskReports(datasetPath, status, dashboardURL):
         # Append the report
         Verbose("Appending Report")
         report = Report(datasetPath, alljobs, retrieved, status, dashboardURL)
-        reports.append(report)        
 
         # Determine if task is DONE or not
         Verbose("Determining if Task is DONE")
@@ -318,13 +335,9 @@ def GetTaskReports(datasetPath, status, dashboardURL):
     # Catch exceptions (Errors detected during execution which may not be "fatal")
     except:
         msg = sys.exc_info()[1]
-        reports.append( Report(datasetPath, "?", "?", "?", dashboardURL) )
+        report = Report(datasetPath, "?", "?", "?", dashboardURL)
         Print("crab status failed with message \"%s\". Skipping ..." % ( msg ), False)
-
-        # Verbose("Re-executing \"crab status\" command, this time with full verbosity")
-        # setConsoleLogLevel(1)
-        # result = crabCommand('status', dir = datasetPath)
-    return reports
+    return report
 
 
 def GetTaskLogs(taskPath, retrievedLog, finished):
@@ -332,6 +345,8 @@ def GetTaskLogs(taskPath, retrievedLog, finished):
     If the number of retrieved logs files is smaller than the number of finished jobs,
     execute the CRAB command "getlog" to retrieve all unretrieved logs files.
     '''
+    Verbose("GetTaskLogs()")
+    
     if retrievedLog == finished:
         return
         
@@ -339,7 +354,7 @@ def GetTaskLogs(taskPath, retrievedLog, finished):
         Verbose("Retrieved logs (%s) < finished (%s). Retrieving CRAB logs ..." % (retrievedLog, finished) )
         touch(taskPath)
         dummy = crabCommand('getlog', dir=taskPath)
-        # crab log <dir> --command=LCG --checksum=no   #FIXME
+        # crab log <dir> --command=LCG --checksum=no #fixme: add support?
     else:
         Verbose("Retrieved logs (%s) < finished (%s). To retrieve CRAB logs relaunch script with --get option." % (retrievedLog, finished) )
     return
@@ -350,6 +365,8 @@ def GetTaskOutput(taskPath, retrievedOut, finished):
     If the number of retrieved output files is smaller than the number of finished jobs,
     execute the CRAB command "getoutput" to retrieve all unretrieved output files.
     '''
+    Verbose("GetTaskOutput()")
+    
     if retrievedOut == finished:
         return
     
@@ -362,12 +379,9 @@ def GetTaskOutput(taskPath, retrievedOut, finished):
                 return
         else:
             Verbose("Retrieved output (%s) < finished (%s). Retrieving CRAB output ..." % (retrievedOut, finished) )
-            cmd = "getoutput"
-            #print msg "\t-> Executing (the equivalent of): crab %s --dir %s" % (cmd, opts.options)
-            # FIXME
-            dummy = crabCommand(cmd, dir = taskPath, *opts.options.split() ) #fixme: ' 1  2   3  '.split() returns ['1', '2', '3'], 
-            # want to add --checksum?
-            #if opts.checksum: #FIXME
+            #cmd = "crab %s --dir %s" % ("get", taskPath)
+            #execute(cmd)
+            dummy = crabCommand("getoutput", dir=taskPath) #fixme: add checksum?
             touch(taskPath)
     else:
         Verbose("Retrieved output (%s) < finished (%s). To retrieve CRAB output relaunch script with --get option." % (retrievedOut, finished) )
@@ -379,14 +393,22 @@ def ResubmitTask(taskPath, failed):
     If the number of failed jobs is greater than zero, 
     execute the CRAB command "resubmit" to resubmit all failed jobs.
     '''
+    Verbose("ResubmitTask()")
+    
     if failed == 0:
         return
 
-    if opts.resubmit:
+    if not opts.resubmit:
+        return
+
+    if opts.ask:
+        if AskUser("Kill task \"%s\"?" % (GetLast2Dirs(taskPath)) ):
+            dummy = crabCommand('resubmit', dir=taskPath)
+        else:
+            return
+    else:
         Print("Found \"Failed\" jobs! Resubmitting ...")
         dummy = crabCommand('resubmit', dir=taskPath)
-    else:
-        Verbose("Found \"Failed\" jobs! To resubmit relaunch script with --resubmit option.")
     return
 
 
@@ -395,12 +417,13 @@ def KillTask(taskPath):
     If the number of failed jobs is greater than zero, 
     execute the CRAB command "resubmit" to resubmit all failed jobs.
     '''
+    Verbose("KillTask()")
+    
     if not opts.kill:
         return
     
     taskStatus = GetTaskStatus(taskPath)
     taskStatus = taskStatus.replace("\t", "")
-
     forbidden  = ["KILLED", "UNKNOWN", "DONE", "COMPLETED", "QUEUED"]
     if taskStatus in forbidden:
         Print("Cannot kill a task if it is in the \"%s\" state. Skipping ..." % (taskStatus) )
@@ -419,8 +442,8 @@ def KillTask(taskPath):
 
 
 def find_between(myString, first, last ):
-    '''
-    '''
+    Verbose("find_between()")
+
     try:
         start = myString.index( first ) + len( first )
         end   = myString.index( last, start )
@@ -430,27 +453,19 @@ def find_between(myString, first, last ):
 
 
 def find_between_r(myString, first, last ):
-    '''
-    '''
+    Verbose("find_between_r()")
+    
     try:
         start = myString.rindex( first ) + len( first )
         end   = myString.rindex( last, start )
         return myString[start:end]
     except ValueError:
         return ""
-
-
-def usage():
-    '''
-    Informs user of how the script must be used.
-    '''
-    Print("Usage: ", os.path.basename(sys.argv[0]), " <multicrab dir>", True)
-    sys.exit()
     
 
 def GetMulticrabAbsolutePaths(dirs):
-    '''
-    '''
+    Verbose("GetMulticrabAbsolutePaths()")
+    
     datasetdirs = []
     # For-loop: All CRAB dirs (relative paths)
     for d in dirs:
@@ -464,8 +479,8 @@ def GetMulticrabAbsolutePaths(dirs):
 
 
 def GetDatasetAbsolutePaths(datasetdirs):
-    '''
-    '''
+    Verbose("GetDatasetAbsolutePaths()")
+    
     datasets = []
     # For-loop: All CRAB dirs (absolute paths)
     for d in datasetdirs:
@@ -485,6 +500,8 @@ def GetDatasetAbsolutePaths(datasetdirs):
 
 
 def GetDatasetBasenames(datasets):
+    Verbose("GetDatasetBasenames()")
+    
     basenames = []
     for d in datasets:
         basenames.append(os.path.basename(d))
@@ -492,6 +509,8 @@ def GetDatasetBasenames(datasets):
 
 
 def GetLast2Dirs(datasetPath):
+    Verbose("GetLast2Dirs()")
+    
     last2Dirs = datasetPath.split("/")[-2]+ "/" + datasetPath.split("/")[-1]
     return last2Dirs
 
@@ -499,7 +518,11 @@ def GetLast2Dirs(datasetPath):
 #================================================================================================
 # Submit Programs
 #================================================================================================
-def checkJob(opts, args):
+def CheckJob(opts, args):
+    '''
+    Check status, retrieve, resubmit, kill CRAB tasks.
+    '''
+    Verbose("CheckJob()")
 
     # Force crabCommand to stay quite
     if not opts.verbose:
@@ -509,75 +532,74 @@ def checkJob(opts, args):
     crabConsoleLogLevel = getConsoleLogLevel()
     Verbose("The current \"crabCommand\" console log level is set to \"%s\"" % (crabConsoleLogLevel), True)
     
-    # Ensure script is called with at least one argument (apart from script name)
-    if len(sys.argv) == 1:
-        scriptName = sys.argv[0] 
-        usage()
-
     # Get the CRAB dir(s) name (passed as argument)
     dirs = sys.argv[1:]
 
     # Initialise Variables
-    reports      = []
+    reportDict   = {}
     datasetdirs  = GetMulticrabAbsolutePaths(dirs)
     datasets     = GetDatasetAbsolutePaths(datasetdirs)
     baseNames    = GetDatasetBasenames(datasets)
     Verbose("Found %s CRAB task directories:\n\t%s" % ( len(datasets), "\n\t".join(baseNames)), True)
-    summaryDict = {}
 
     # For-loop: All dataset directories (absolute paths)
     for index, d in enumerate(datasets):
         
-        Print("%s (%s/%s)" % ( GetLast2Dirs(d), index+1, len(datasets) ), True)
+        if opts.verbose:
+            Print("%s (%s/%s)" % ( GetLast2Dirs(d), index+1, len(datasets) ), True)
 
         # Check if task is in "DONE" state
         if GetTaskStatusBool(d):
             continue
 
-        # Get task dashboard URL
+        # Get CRAB task dashboard URL
         taskDashboard = GetTaskDashboardURL(d)
         
-        # Get task status and add to dictionary        
+        # Resubmit/Kill a CRAb task
+        #reports += GetTaskReports(d, taskStatus, taskDashboard) #FIXME
+
+        
+        # Get CRAB task status
         taskStatus = GetTaskStatus(d).replace("\t", "")
-        summaryDict[d.split("/")[-1]] = taskStatus
 
-        # Kill task if requested by user
-        reports += GetTaskReports(d, taskStatus, taskDashboard)
+        # Get the CRAB task report & add to dictionary
+        report = GetTaskReports(d, taskStatus, taskDashboard) #FIXME
+        reportDict[d.split("/")[-1]] = report
 
-    # For-loop: All CRAB reports
-    if 0:
-        for r in reports:
-            r.Print()
-
-    PrintTaskSummary(summaryDict)
+    # Print summary of all CRAB tasks
+    PrintTaskSummary(reportDict)
     return
 
 
-def PrintTaskSummary(summaryDict):
+def PrintTaskSummary(reportDict):
     '''
     Print a summary table of all submitted tasks with minimal information.
     The purpose it to easily determine which jobs are done, running and failed.
     '''
-    summary  = []
-    msgAlign = "{:<3} {:<50} {:>30}"
-    header   = msgAlign.format("#", "Dataset",  "Status")
+    Verbose("PrintTaskSummary()")
+    
+    reports  = []
+    msgAlign = "{:<3} {:<60} {:^20} {:>6} {:>1} {:<6}"
+    header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "Ret.", "/", "Tot.")
     hLine    = "="*len(header)
-    summary.append("\n")
-    summary.append(hLine)
-    summary.append(header)
-    summary.append(hLine)
+    # reports.append("\n")
+    reports.append(hLine)
+    reports.append(header)
+    reports.append(hLine)
     
     # For-loop: All datasets (key) and corresponding status (value)
-    i = 0
-    for dataset in summaryDict:
-        line = msgAlign.format(i+1, dataset,  summaryDict[dataset])
-        summary.append(line)
-        i += 1
-    summary.append(hLine)
-
-    # For-loop: All lines in summary table
-    for l in summary:
-        print l
+    for i, dataset in enumerate(reportDict):
+        report = reportDict[dataset]
+        status = report.status
+        ret    = report.retrieved
+        tot    = report.allJobs
+        line   = msgAlign.format(i+1, dataset, status, ret,  "/", tot)
+        reports.append(line)
+    reports.append(hLine)
+    
+    # For-loop: All lines in report table
+    for r in reports:
+        print r
     return
 
 
@@ -587,6 +609,8 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     the logs and output files have been retrieved. Returns all these in form
     of lists
     '''
+    Verbose("RetrievedFiles()")
+    
     # Initialise variables
     retrievedLog = 0
     retrievedOut = 0
@@ -641,14 +665,15 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     txtAlign  = "{:<25} {:>4} {:<1} {:<4}"
     tableRows = []
     dataset   = directory.split("/")[-1]
-    hLine     = "="*40
+    length    = 40 #len(dataset)
+    hLine     = "="*length
     status    = GetTaskStatus(directory).replace("\t", "")
-    # header    = "{:^34}".format(dataset + " (" + status +")")
-    header    = "{:^34}".format(dataset)
+    txtAlignB = "{:<%s}" % (length)
+    header    = txtAlignB.format(dataset)
     tableRows.append(hLine)
     tableRows.append(header)
     tableRows.append(hLine)
-
+    
     tableRows.append( txtAlign.format("%sIdle"             % (colors.GRAY  ), nIdle    , "/", nTotal ) )
     tableRows.append( txtAlign.format("%sUnknown"          % (colors.GRAY), nUnknown , "/", nTotal ) )
     tableRows.append( txtAlign.format("%sFailed"           % (colors.RED   ), nFail    , "/", nTotal ) )
@@ -662,7 +687,8 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     if verbose:
         for r in tableRows:
             Print(r, False)
-        
+        print
+    
     # Sanity check
     if verbose and status == "COMPLETED":
         if len(missingLogs) > 0:
@@ -677,8 +703,7 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
 
 
 def exists(dataset,filename):
-    '''
-    '''
+    Verbose("exists()")
     fname = os.path.join(dataset,"results",filename)
     fname = execute("ls %s"%fname)[0]
     return os.path.exists(fname)
@@ -690,14 +715,14 @@ def touch(path):
     It is also used to change the timestamps (i.e., dates and times of the most recent access and modification)
     on existing files and directories.
     '''
+    Verbose("touch()")
     if os.path.exists(path):
         os.system("touch %s" % path)
     return
 
 
 def execute(cmd):
-    '''
-    '''
+    Verbose("execute()")
     p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
     (s_in, s_out) = (p.stdin, p.stdout)
@@ -713,386 +738,403 @@ def execute(cmd):
 #================================================================================================ 
 # Function Definitions
 #================================================================================================ 
+def GetSelfName():
+    Verbose("GetSelfName()")    
+    return __file__.split("/")[-1]
+
+
+def RemoveNonAscii(myString):
+    '''
+    Removes formatting from string   
+    '''
+    Verbose("RemoveNonAscii()")
+    return "".join(i for i in myString if ord(i)<126 and ord(i)>31)
+
+
 def Verbose(msg, printHeader=False):
-	'''
-	Calls Print() only if verbose options is set to true.
-	'''
-	if not opts.verbose:
-		return
-	Print(msg, printHeader)
+    '''
+    Calls Print() only if verbose options is set to true.
+    '''
+    if not opts.verbose:
 	return
+    Print(msg, printHeader)
+    return
 
 
 def Print(msg, printHeader=True):
-        '''
-	Simple print function. If verbose option is enabled prints, otherwise does nothing.
-        '''
-        fName = __file__.split("/")[-1]
-        if printHeader:
-                print "=== ", fName
-        print "\t", msg
-        return
+    '''
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.
+    '''
+    Verbose("Print()")
+    
+    fName = __file__.split("/")[-1]
+    if printHeader:
+        print "=== ", fName
+    print "\t", msg
+    return
 
 
 def GetCMSSW():
-	'''
-	Get a command-line-friendly format of the CMSSW version currently use.
-	https://docs.python.org/2/howto/regex.html
-	'''
-	Verbose("GetCMSSW()")
+    '''
+    Get a command-line-friendly format of the CMSSW version currently use.
+    https://docs.python.org/2/howto/regex.html
+    '''
+    Verbose("GetCMSSW()")
 	
-	# Get the current working directory
-	pwd = os.getcwd()
+    # Get the current working directory
+    pwd = os.getcwd()
 
-	# Create a compiled regular expression object
-	cmssw_re = re.compile("/CMSSW_(?P<version>\S+?)/")
+    # Create a compiled regular expression object
+    cmssw_re = re.compile("/CMSSW_(?P<version>\S+?)/")
 
-	# Scan through the string 'pwd' & look for any location where the compiled RE 'cmssw_re' matches
-	match = cmssw_re.search(pwd)
+    # Scan through the string 'pwd' & look for any location where the compiled RE 'cmssw_re' matches
+    match = cmssw_re.search(pwd)
 
-	# Return the string matched by the RE. Convert to desirable format
-	version = ""
-	if match:
-		version = match.group("version")
-		version = version.replace("_","")
-		version = version.replace("pre","p")
-		version = version.replace("patch","p")
-	return version
+    # Return the string matched by the RE. Convert to desirable format
+    version = ""
+    if match:
+	version = match.group("version")
+	version = version.replace("_","")
+	version = version.replace("pre","p")
+	version = version.replace("patch","p")
+    return version
 
 
 def GetAnalysis():
-	'''
-	Get the analysis type. This will later-ono help determine the datasets to be used.
-	https://docs.python.org/2/howto/regex.html
-	'''
-	Verbose("GetAnalysis()")
+    '''
+    Get the analysis type. This will later-ono help determine the datasets to be used.
+    https://docs.python.org/2/howto/regex.html
+    '''
+    Verbose("GetAnalysis()")
     
-	# Create a compiled regular expression object
-	leg_re = re.compile("miniAOD2TTree_(?P<leg>\S+)Skim_cfg.py")
+    # Create a compiled regular expression object
+    leg_re = re.compile("miniAOD2TTree_(?P<leg>\S+)Skim_cfg.py")
 
-	# Scan through the string 'pwd' & look for any location where the compiled RE 'cmssw_re' matches
-	match = leg_re.search(PSET)
+    # Scan through the string 'pwd' & look for any location where the compiled RE 'cmssw_re' matches
+    match = leg_re.search(PSET)
 
-	# Return the string matched by the RE. Convert to desirable format
-	analysis = "DUMMY"
-	if match:
-		analysis = match.group("leg")
-	return analysis
+    # Return the string matched by the RE. Convert to desirable format
+    analysis = "DUMMY"
+    if match:
+	analysis = match.group("leg")
+    return analysis
 
 
-def AbortCrabTask(keystroke):
-	'''
-	Give user last chance to abort CRAB task creation.
-	'''
-	message = "=== multicrabcreate.py:\n\tPress \"%s\" to abort, any other key to proceed: " % (keystroke)
+def AbortTask(keystroke):
+    '''
+    Give user last chance to abort CRAB task creation.
+    '''
+    Verbose("AbortTask()")
+    
+    message = "=== %s:\n\tPress \"%s\" to abort, any other key to proceed: " % (GetSelfName(), keystroke)
 
-	response = raw_input(message)
-	if (response!= keystroke):
-		return
-	else:
-		print "=== multicrabcreate.py:\n\tEXIT"
-		sys.exit()
+    response = raw_input(message)
+    if (response!= keystroke):
 	return
+    else:
+	print "=== %s:\n\tEXIT" % (GetSelfName())
+	sys.exit()
+    return
 
 
 def AskToContinue(analysis, opts):
-	'''
-	Inform user of the analysis type and datasets to be user in the multi-CRAB job creation. Offer chance to abort sequence 
-	'''
-	Verbose("AskToContinue()")
+    '''
+    Inform user of the analysis type and datasets to be user in the multi-CRAB job creation. Offer chance to abort sequence 
+    '''
+    Verbose("AskToContinue()")
 
-	Print("Creating CRAB task for analysis \"%s\" with PSet=\"%s\":" % (analysis, opts.pset) )
-	DatasetGroup(analysis).PrintDatasets(False)
-	Print("Will submit to Storage Site \"%s\" [User MUST have write access to destination site!]" % (opts.storageSite))
+    Print("Creating CRAB task for analysis \"%s\" with PSet=\"%s\":" % (analysis, opts.pset) )
+    DatasetGroup(analysis).PrintDatasets(False)
+    Print("Will submit to Storage Site \"%s\" [User MUST have write access to destination site!]" % (opts.storageSite))
     
-	AbortCrabTask(keystroke="q")
-	return
+    AbortTask(keystroke="q")
+    return
 
 
 def GetTaskDirName(analysis, version, datasets):
-	'''
-	Get the name of the CRAB task directory to be created. For the user's benefit this
-	will include the CMSSW version and possibly important information from
-	the dataset used, such as the bunch-crossing time.
-	'''
-	Verbose("GetTaskDirName()")
+    '''
+    Get the name of the CRAB task directory to be created. For the user's benefit this
+    will include the CMSSW version and possibly important information from
+    the dataset used, such as the bunch-crossing time.
+    '''
+    Verbose("GetTaskDirName()")
 
-	# Constuct basic task directory name
-	dirName = "multicrab"
-	dirName+= "_"  + analysis
-	dirName+= "_v" + version
+    # Constuct basic task directory name
+    dirName = "multicrab"
+    dirName+= "_"  + analysis
+    dirName+= "_v" + version
+    
+    # Add dataset-specific info, like bunch-crossing info
+    bx_re = re.compile("\S+(?P<bx>\d\dns)_\S+")
+    match = bx_re.search(datasets[0].URL)
+    if match:
+	dirName+= "_"+match.group("bx")
 
-	# Add dataset-specific info, like bunch-crossing info
-	bx_re = re.compile("\S+(?P<bx>\d\dns)_\S+")
-	match = bx_re.search(datasets[0].URL)
-	if match:
-		dirName+= "_"+match.group("bx")
+    # Append the creation time to the task directory name    
+    # time = datetime.datetime.now().strftime("%d%b%Y_%Hh%Mm%Ss")
+    time = datetime.datetime.now().strftime("%Y%m%dT%H%M")
+    dirName+= "_" + time
 
-	# Append the creation time to the task directory name    
-	# time = datetime.datetime.now().strftime("%d%b%Y_%Hh%Mm%Ss")
-	time = datetime.datetime.now().strftime("%Y%m%dT%H%M") #original
-	dirName+= "_" + time
+    # If directory already exists (resubmission)
+    if os.path.exists(opts.dirName) and os.path.isdir(opts.dirName):
+	dirName = opts.dirName
 
-	# If directory already exists (resubmission)
-	# if len(sys.argv) == 2 and os.path.exists(sys.argv[1]) and os.path.isdir(sys.argv[1]): #original
-	if os.path.exists(opts.dirName) and os.path.isdir(opts.dirName):
-	    dirName = opts.dirName
-
-	return dirName
+    return dirName
 
 
 def CreateTaskDir(dirName, PSET):
-	'''
-	Create the CRAB task directory and copy inside it the PSET to be used for the CRAB job.
-	'''
-	Verbose("CreateTaskDir()")
+    '''
+    Create the CRAB task directory and copy inside it the PSET to be used for the CRAB job.
+    '''
+    Verbose("CreateTaskDir()")
 
-	# Copy file to be used (and others to be tracked) to the task directory
-	cmd = "cp %s %s" %(PSET, dirName)
+    # Copy file to be used (and others to be tracked) to the task directory
+    cmd = "cp %s %s" %(PSET, dirName)
 
-	if not os.path.exists(dirName):
-		os.mkdir(dirName)
-		os.system(cmd)
+    if not os.path.exists(dirName):
+	os.mkdir(dirName)
+	os.system(cmd)
 
-	# Write the commit id, "git status", "git diff" command output the directory created for the multicrab task
-	gitFileList = git.writeCodeGitInfo(dirName, False)
-
-	Verbose("Copied %s to '%s'." % ("'" + "', '".join(gitFileList) + "'", dirName) )
-	return
+    # Write the commit id, "git status", "git diff" command output the directory created for the multicrab task
+    gitFileList = git.writeCodeGitInfo(dirName, False)
+    
+    Verbose("Copied %s to '%s'." % ("'" + "', '".join(gitFileList) + "'", dirName) )
+    return
 
 
 def SubmitTaskDir(taskDirName, requestName):
-	'''
-	Submit a given CRAB task using the specific cfg file.
-	'''
-
-	Verbose("SubmitCrabTask()")
+    '''
+    Submit a given CRAB task using the specific cfg file.
+    '''
+    Verbose("SubmitCrabTask()")
 	
-	outfilePath = os.path.join(taskDirName, "crabConfig_" + requestName + ".py")
+    outfilePath = os.path.join(taskDirName, "crabConfig_" + requestName + ".py")
 
-	# Submit the CRAB task
-	cmd_submit = "crab submit " + outfilePath
-	Verbose(cmd_submit)
-	os.system(cmd_submit)
+    # Submit the CRAB task
+    cmd_submit = "crab submit " + outfilePath
+    Verbose(cmd_submit)
+    os.system(cmd_submit)
 
-	# Rename the CRAB task directory (remove "crab_" from its name)
-	cmd_mv = "mv " + os.path.join(taskDirName, "crab_" + requestName) + " " + os.path.join(taskDirName, requestName)
-	Verbose(cmd_mv)
-	os.system(cmd_mv)
-	return
+    # Rename the CRAB task directory (remove "crab_" from its name)
+    cmd_mv = "mv " + os.path.join(taskDirName, "crab_" + requestName) + " " + os.path.join(taskDirName, requestName)
+    Verbose(cmd_mv)
+    os.system(cmd_mv)
+    return
 
 
 def GetRequestName(dataset):
-	'''
-	Return the file name and path to an (empty) crabConfig_*.py file where "*" 
-	contains the dataset name and other information such as tune, COM, Run number etc..
-	of the Data or MC sample used
-	'''
-                                                                                           
-	# Create compiled regular expression objects
-	datadataset_re = re.compile("^/(?P<name>\S+?)/(?P<run>Run\S+?)/")
-	mcdataset_re   = re.compile("^/(?P<name>\S+?)/")
-	tune_re        = re.compile("(?P<name>\S+)_Tune")
-	tev_re         = re.compile("(?P<name>\S+)_13TeV")
-	ext_re         = re.compile("(?P<name>_ext\d+)-")
-	runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON(?P<Silver>(_\S+|))\.")
-	# runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON")
-	# runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15_(?P<BunchSpacing>\d+ns)_JSON_v")
-	
-	# Scan through the string 'dataset.URL' & look for any location where the compiled RE 'mcdataset_re' matches
-	match = mcdataset_re.search(dataset.URL)
-	if dataset.isData():
-		match = datadataset_re.search(dataset.URL)
-
-	if match:
-		# Append the dataset name     
-		requestName = match.group("name")
-
-        # Append the Run number (for Data samples only)
-	if dataset.isData():
-		requestName+= "_"
-		requestName+= match.group("run")
-
-        # Append the MC-tune (for MC samples only) 
-	tune_match = tune_re.search(requestName)
-	if tune_match:
-		requestName = tune_match.group("name")
-
-        # Append the COM Energy (for MC samples only) 
-        tev_match = tev_re.search(requestName)
-        if tev_match:
-		requestName = tev_match.group("name")
-
-        # Append the Ext
-        ext_match = ext_re.search(dataset.URL)
-        if ext_match:
-		requestName+=ext_match.group("name")
-
-        # Append the Run Range (for Data samples only)
-	if dataset.isData():
-		runRangeMatch = runRange_re.search(dataset.lumiMask)
-		if runRangeMatch:
-			runRange= runRangeMatch.group("RunRange")
-			runRange = runRange.replace("-","_")
-			bunchSpace = runRangeMatch.group("BunchSpacing")
-			requestName += "_" + runRange + bunchSpace
-			Ag = runRangeMatch.group("Silver")
-			if Ag == "_Silver": # Use  chemical element of silver (Ag)
-				requestName += Ag
-#            s = (dataset.URL).split("/")
-#            requestName = s[1] + "_" + s[2]
-
-        # Finally, replace dashes with underscores    
-        requestName = requestName.replace("-","_")
-
-        #if "ext" in dataset.URL:
-        #requestName += "_ext"
-	return requestName
-
-
-def EnsurePathDoesNotExit(taskDirName, requestName):
-	'''
-	Ensures that file does not already exist
-	'''
-	filePath = os.path.join(taskDirName, requestName)
+    '''
+    Return the file name and path to an (empty) crabConfig_*.py file where "*" 
+    contains the dataset name and other information such as tune, COM, Run number etc..
+    of the Data or MC sample used
+    '''
+    Verbose("GetRequestName()")
     
-	if not os.path.exists(filePath):
-		return
-	else:
-		raise Exception("File '%s' already exists!" % (filePath) )
+    # Create compiled regular expression objects
+    datadataset_re = re.compile("^/(?P<name>\S+?)/(?P<run>Run\S+?)/")
+    mcdataset_re   = re.compile("^/(?P<name>\S+?)/")
+    tune_re        = re.compile("(?P<name>\S+)_Tune")
+    tev_re         = re.compile("(?P<name>\S+)_13TeV")
+    ext_re         = re.compile("(?P<name>_ext\d+)-")
+    runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON(?P<Silver>(_\S+|))\.")
+    # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON")
+    # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15_(?P<BunchSpacing>\d+ns)_JSON_v")
+    
+    # Scan through the string 'dataset.URL' & look for any location where the compiled RE 'mcdataset_re' matches
+    match = mcdataset_re.search(dataset.URL)
+    if dataset.isData():
+	match = datadataset_re.search(dataset.URL)
+        
+    # Append the dataset name
+    if match:
+	requestName = match.group("name")
+
+    # Append the Run number (for Data samples only)
+    if dataset.isData():
+	requestName+= "_"
+	requestName+= match.group("run")
+
+    # Append the MC-tune (for MC samples only) 
+    tune_match = tune_re.search(requestName)
+    if tune_match:
+	requestName = tune_match.group("name")
+
+    # Append the COM Energy (for MC samples only) 
+    tev_match = tev_re.search(requestName)
+    if tev_match:
+	requestName = tev_match.group("name")
+
+    # Append the Ext
+    ext_match = ext_re.search(dataset.URL)
+    if ext_match:
+	requestName+=ext_match.group("name")
+
+    # Append the Run Range (for Data samples only)
+    if dataset.isData():
+	runRangeMatch = runRange_re.search(dataset.lumiMask)
+	if runRangeMatch:
+	    runRange= runRangeMatch.group("RunRange")
+	    runRange = runRange.replace("-","_")
+	    bunchSpace = runRangeMatch.group("BunchSpacing")
+	    requestName += "_" + runRange + bunchSpace
+	    Ag = runRangeMatch.group("Silver")
+	    if Ag == "_Silver": # Use  chemical element of silver (Ag)
+		requestName += Ag
+
+    # Finally, replace dashes with underscores    
+    requestName = requestName.replace("-","_")
+    
+    return requestName
+
+
+def EnsurePathDoesNotExist(taskDirName, requestName):
+    '''
+    Ensures that file does not already exist
+    '''
+    Verbose("EnsurePathDoesNotExist()")
+    
+    filePath = os.path.join(taskDirName, requestName)
+    
+    if not os.path.exists(filePath):
 	return
+    else:
+	raise Exception("File '%s' already exists!" % (filePath) )
+    return
 
 
 def CreateCfgFile(dataset, taskDirName, requestName, infilePath = "crabConfig.py"):
-	'''
-	Creates a CRAB-specific configuration file which will be used in the submission
-	of a job. The function uses as input a generic cfg file which is then customised
-	based on the dataset type used.
-	'''
-	Verbose("CreateCfgFile()")
+    '''
+    Creates a CRAB-specific configuration file which will be used in the submission
+    of a job. The function uses as input a generic cfg file which is then customised
+    based on the dataset type used.
+    '''
+    Verbose("CreateCfgFile()")
 	
-	outfilePath = os.path.join(taskDirName, "crabConfig_" + requestName + ".py")
+    outfilePath = os.path.join(taskDirName, "crabConfig_" + requestName + ".py")
     
-	# Check that file does not already exist
-	EnsurePathDoesNotExit(taskDirName, outfilePath)
+    # Check that file does not already exist
+    EnsurePathDoesNotExist(taskDirName, outfilePath)
 
-	# Open input file (read mode) and output file (write mode)
-	fIN  = open(infilePath , "r")
-	fOUT = open(outfilePath, "w")
+    # Open input file (read mode) and output file (write mode)
+    fIN  = open(infilePath , "r")
+    fOUT = open(outfilePath, "w")
 
-	# Create compiled regular expression objects
-	crab_requestName_re = re.compile("config.General.requestName")
-	crab_workArea_re    = re.compile("config.General.workArea")
-	crab_pset_re        = re.compile("config.JobType.psetName")
-	crab_psetParams_re  = re.compile("config.JobType.pyCfgParams")
-	crab_dataset_re     = re.compile("config.Data.inputDataset")
-	crab_split_re       = re.compile("config.Data.splitting")# = 'FileBased'
-	crab_splitunits_re  = re.compile("config.Data.unitsPerJob")
-	crab_dbs_re         = re.compile("config.Data.inputDBS")
-	crab_storageSite_re = re.compile("config.Site.storageSite") #NEW
+    # Create compiled regular expression objects
+    crab_requestName_re = re.compile("config.General.requestName")
+    crab_workArea_re    = re.compile("config.General.workArea")
+    crab_pset_re        = re.compile("config.JobType.psetName")
+    crab_psetParams_re  = re.compile("config.JobType.pyCfgParams")
+    crab_dataset_re     = re.compile("config.Data.inputDataset")
+    crab_split_re       = re.compile("config.Data.splitting")# = 'FileBased'
+    crab_splitunits_re  = re.compile("config.Data.unitsPerJob")
+    crab_dbs_re         = re.compile("config.Data.inputDBS")
+    crab_storageSite_re = re.compile("config.Site.storageSite") #NEW
 
-	# For-loop: All line of input fine
-	for line in fIN:
+    # For-loop: All line of input fine
+    for line in fIN:
 	    
-		# Skip lines whicha are commented out #FIXME
-		if line[0] == "#":
-			continue
+	# Skip lines which are commented out
+	if line[0] == "#":
+	    continue
 	    
-		# Set the "inputDataset" field which specifies the name of the dataset. Can be official CMS dataset or a dataset produced by a user.
-		match = crab_dataset_re.search(line)
-		if match:
-			line = "config.Data.inputDataset = '" + dataset.URL + "'\n"
+	# Set the "inputDataset" field which specifies the name of the dataset. Can be official CMS dataset or a dataset produced by a user.
+        match = crab_dataset_re.search(line)
+	if match:
+	    line = "config.Data.inputDataset = '" + dataset.URL + "'\n"
 
-		# Set the "requestName" field which specifies the request/task name. Used by CRAB to create a project directory (named crab_<requestName>)    
-		match = crab_requestName_re.search(line)
-		if match:
-			line = "config.General.requestName = '" + requestName + "'\n"
+	# Set the "requestName" field which specifies the request/task name. Used by CRAB to create a project directory (named crab_<requestName>)    
+	match = crab_requestName_re.search(line)
+	if match:
+	    line = "config.General.requestName = '" + requestName + "'\n"
 
-		# Set the "workArea" field which specifies the (full or relative path) where to create the CRAB project directory. 
-		match = crab_workArea_re.search(line)
-		if match:
-			line = "config.General.workArea = '" + taskDirName + "'\n"
+	# Set the "workArea" field which specifies the (full or relative path) where to create the CRAB project directory. 
+	match = crab_workArea_re.search(line)
+	if match:
+	    line = "config.General.workArea = '" + taskDirName + "'\n"
 			
-		# Set the "psetName" field which specifies the name of the CMSSW pset_cfg.py file that will be run via cmsRun.
-		match = crab_pset_re.search(line)
-		if match:
-			line = "config.JobType.psetName = '" + PSET  +"'\n"
+	# Set the "psetName" field which specifies the name of the CMSSW pset_cfg.py file that will be run via cmsRun.
+	match = crab_pset_re.search(line)
+	if match:
+	    line = "config.JobType.psetName = '" + PSET  +"'\n"
 
-		# Set the "pyCfgParams" field which contains list of parameters to pass to the pset_cfg.py file.            
-		match = crab_psetParams_re.search(line)
-		if match:
-			line = "config.JobType.pyCfgParams = ['dataVersion=" + dataset.dataVersion +"']\n"
+	# Set the "pyCfgParams" field which contains list of parameters to pass to the pset_cfg.py file.            
+	match = crab_psetParams_re.search(line)
+	if match:
+	    line = "config.JobType.pyCfgParams = ['dataVersion=" + dataset.dataVersion +"']\n"
 
-		# Set the "inputDBS" field which specifies the URL of the DBS reader instance where the input dataset is published     
-		match = crab_dbs_re.search(line)
-		if match:
-			line = "config.Data.inputDBS = '" + dataset.DBS + "'\n"
+	# Set the "inputDBS" field which specifies the URL of the DBS reader instance where the input dataset is published     
+	match = crab_dbs_re.search(line)
+	if match:
+	    line = "config.Data.inputDBS = '" + dataset.DBS + "'\n"
 
-		# Set the "storageSite" field which specifies the destination site for submission [User MUST have write access to destination site!]
-		match = crab_storageSite_re.search(line)
-		if match:
-			line = "config.Site.storageSite = '" + opts.storageSite + "'\n"
+	# Set the "storageSite" field which specifies the destination site for submission [User MUST have write access to destination site!]
+	match = crab_storageSite_re.search(line)
+	if match:
+	    line = "config.Site.storageSite = '" + opts.storageSite + "'\n"
 
-		# Only if dataset is real data
-		if dataset.isData():
+	# Only if dataset is real data
+	if dataset.isData():
 
-			# Set the "splitting" field which specifies the mode to use to split the task in jobs ('FileBased', 'LumiBased', or 'EventAwareLumiBased') 
-			match = crab_split_re.search(line)
-			if match:
-				line = "config.Data.splitting = 'LumiBased'\n"
-				line+= "config.Data.lumiMask = '"+ dataset.lumiMask + "'\n"
+	    # Set the "splitting" field which specifies the mode to use to split the task in jobs ('FileBased', 'LumiBased', or 'EventAwareLumiBased') 
+	    match = crab_split_re.search(line)
+	    if match:
+		line = "config.Data.splitting = 'LumiBased'\n"
+		line+= "config.Data.lumiMask = '"+ dataset.lumiMask + "'\n"
+                
+	    # Set the "unitsPerJob" field which suggests (but not impose) how many files, lumi sections or events to include in each job.
+	    match = crab_splitunits_re.search(line)	
+	    if match:
+		line = "config.Data.unitsPerJob = 50\n"
+	else:
+	    pass
 
-			# Set the "unitsPerJob" field which suggests (but not impose) how many files, lumi sections or events to include in each job.
-			match = crab_splitunits_re.search(line)	
-			if match:
-				line = "config.Data.unitsPerJob = 50\n"
-		else:
-			pass
+	# Write line to the output file
+        fOUT.write(line)
 
-		# Write line to the output file
-		fOUT.write(line)
-
-	# Close input and output files 
-	fOUT.close()
-	fIN.close()
+    # Close input and output files 
+    fOUT.close()
+    fIN.close()
     
-	Verbose("Created CRAB cfg file \"%s\"" % (fOUT.name) )
-	return
+    Verbose("Created CRAB cfg file \"%s\"" % (fOUT.name) )
+    return
 
 #================================================================================================
 # Create Program
 #================================================================================================ 
-def createJob(opts, args):
+def CreateJob(opts, args):
+    '''
+    Create & submit a CRAB task, using the user-defined PSET and list of datasets.
+    '''
+    Verbose("CreateJob()")
+    
+    # Get general info
+    version     = GetCMSSW()
+    analysis    = GetAnalysis()
+    datasets    = DatasetGroup(analysis).GetDatasetList()
+    taskDirName = GetTaskDirName(analysis, version, datasets)
 
-	# Get general info
-	version     = GetCMSSW()
-	analysis    = GetAnalysis()
-	datasets    = DatasetGroup(analysis).GetDatasetList()
-	taskDirName = GetTaskDirName(analysis, version, datasets)
-
-	# Give user last chance to abort
-	AskToContinue(analysis, opts)
+    # Give user last chance to abort
+    AskToContinue(analysis, opts)
+    
+    # Create CRAB task diractory
+    CreateTaskDir(taskDirName, PSET)
+    
+    # For-loop: All datasets
+    for dataset in datasets:
+        
+	Verbose("Getting request name, creating cfg file && submitting CRAB task for dataset \"%s\"" % (dataset) )
 	
-	# Create CRAB task diractory
-	CreateTaskDir(taskDirName, PSET)
+	# Create CRAB configuration file for each dataset
+	requestName = GetRequestName(dataset)
 	
-	# For-loop: All datasets
-	for dataset in datasets:
-
-		Verbose("Getting request name, creating cfg file && submitting CRAB task for dataset \"%s\"" % (dataset) )
+	# Create a CRAB cfg file for each dataset
+	CreateCfgFile(dataset, taskDirName, requestName, "crabConfig.py")
 		
-		# Create CRAB configuration file for each dataset
-		requestName = GetRequestName(dataset)
+	
+	# Sumbit job for CRAB cfg file
+	SubmitTaskDir(taskDirName, requestName)
 		
-		# Create a CRAB cfg file for each dataset
-		CreateCfgFile(dataset, taskDirName, requestName, "crabConfig.py")
-		
-		
-		# Sumbit job for CRAB cfg file
-		SubmitTaskDir(taskDirName, requestName)
-		
-	return 0
-
+    return 0
 
 
 if __name__ == "__main__":
@@ -1130,15 +1172,14 @@ if __name__ == "__main__":
     parser.add_option("-d", "--dir"    , dest="dirName"    , default=DIRNAME, type="string"      , help="Custom name for CRAB1 directory name [default: %s]" % (DIRNAME))
     parser.add_option("-s", "--site"   , dest="storageSite", default=SITE   , type="string"      , help="Site where the output will be copied to [default: %s]" % (SITE))
     parser.add_option("-u", "--url"    , dest="url"        , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
-    #parser.add_option('-o', '--options', dest='options'    , default=""     , type="string"      , help="Options for crab command  [default: \"\"]") #fixme
     #parser.add_option("--checksum", dest="checksum"  , default=False, action="store_true", help="Get output with adler32 checksum [default: False") #fixme
     (opts, args) = parser.parse_args()
 
     if opts.create == True and opts.status == True:
         raise Exception("Cannot both create and check a CRAB job!")	    
     if opts.create == True:
-        sys.exit( createJob(opts, args) )
+        sys.exit( CreateJob(opts, args) )
     elif opts.status == True or opts.get == True or opts.resubmit == True:
-        sys.exit( checkJob(opts, args) )
+        sys.exit( CheckJob(opts, args) )
     else:
         raise Exception("Must either create or check a CRAB job!")
