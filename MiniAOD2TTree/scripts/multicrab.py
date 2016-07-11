@@ -2,9 +2,9 @@
 '''
 Usage:
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_SignalAnalysisSkim_cfg.py -v
-multicrab.py --status <task_dir> --url -v
+multicrab.py --status <task_dir> --url --verbose
 multicrab.py --get <task_dir> --ask 
-multicrab.py --resubmit <task_dir> --ask -v --url
+multicrab.py --resubmit --ask <task_dir>
 multicrab.py --kill <task_dir>
 
 
@@ -402,7 +402,7 @@ def ResubmitTask(taskPath, failed):
         return
 
     if opts.ask:
-        if AskUser("Kill task \"%s\"?" % (GetLast2Dirs(taskPath)) ):
+        if AskUser("Resubmit task \"%s\"?" % (GetLast2Dirs(taskPath)) ):
             dummy = crabCommand('resubmit', dir=taskPath)
         else:
             return
@@ -1179,7 +1179,7 @@ if __name__ == "__main__":
         raise Exception("Cannot both create and check a CRAB job!")	    
     if opts.create == True:
         sys.exit( CreateJob(opts, args) )
-    elif opts.status == True or opts.get == True or opts.resubmit == True:
+    elif opts.status == True or opts.get == True or opts.resubmit == True or opts.kill == True:
         sys.exit( CheckJob(opts, args) )
     else:
         raise Exception("Must either create or check a CRAB job!")
