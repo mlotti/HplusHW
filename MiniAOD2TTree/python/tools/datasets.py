@@ -1,4 +1,4 @@
-lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON.txt"
+lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-275783_13TeV_PromptReco_Collisions16_JSON.txt"
 
 #================================================================================================ 
 # Class Definition
@@ -111,9 +111,9 @@ signalAnalysisDatasets.extend(datasetsDY)
 signalAnalysisDatasets.extend(datasetsTop)
 signalAnalysisDatasets.extend(datasetsWJets)
 signalAnalysisDatasets.extend(datasetsDiboson)
-signalAnalysisDatasets.extend(datasetsQCD)
+#signalAnalysisDatasets.extend(datasetsQCD)
 signalAnalysisDatasets.extend(datasetsSignalTauNu)
-signalAnalysisDatasets.extend(datasetsSignalTB)
+#signalAnalysisDatasets.extend(datasetsSignalTB)
 
 
 hplus2tbAnalysisDatasets = []
