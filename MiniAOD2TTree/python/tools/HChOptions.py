@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.VarParsing as VarParsing
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
+from HiggsAnalysis.MiniAOD2TTree.tools.HChDataVersion import DataVersion
 import sys
 
 validSampleValues = [

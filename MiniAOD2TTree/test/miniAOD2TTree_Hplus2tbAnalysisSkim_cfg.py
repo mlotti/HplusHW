@@ -33,11 +33,6 @@ process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
 
 # ===== Set up tree dumper =====
-TrgResultsSource = "TriggerResults::PAT"
-if dataVersion.isData():
-    TrgResultsSource = "TriggerResults::RECO"
-print "Trigger source has been set to:",TrgResultsSource
-
 process.load("HiggsAnalysis/MiniAOD2TTree/PUInfo_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/TopPt_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Tau_cfi")
@@ -82,7 +77,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = cms.PSet(
-        triggerResults = cms.InputTag(TrgResultsSource),
+        triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())),
         printTriggerResultsList = cms.untracked.bool(False),
         filtersFromTriggerResults = cms.vstring(
             "Flag_HBHENoiseFilter",
