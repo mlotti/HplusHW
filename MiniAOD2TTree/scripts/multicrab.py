@@ -435,7 +435,7 @@ def KillTask(taskPath):
         Print("Killing jobs ...")
     
     if opts.ask:
-        if AskUser("Kill task \"%s\"?" % (GetLast2Dirs(taskPAth)) ):
+        if AskUser("Kill task \"%s\"?" % (GetLast2Dirs(taskPath)) ):
             dummy = crabCommand('kill', dir=taskPath)
         else:
             pass
