@@ -129,7 +129,7 @@ def getTauIDUncertainty(isGenuineTau=True):
         return ScalarUncertaintyItem("tauID", 0.00)
 
 def getLuminosityUncertainty():
-    return ScalarUncertaintyItem("lumi", 0.09) # 0.026 for 8 TeV
+    return ScalarUncertaintyItem("lumi", 0.027) # 0.026 for 8 TeV, 0.027 for 13 TeV
 
 def getProbabilisticBtagUncertainty():
     return ScalarUncertaintyItem("probBtag", 0.5)
