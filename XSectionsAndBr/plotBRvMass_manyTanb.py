@@ -63,6 +63,7 @@ from ROOT import gROOT
 from ROOT import TFile
 
 import tdrstyle as tdrstyle
+import LHCHiggsStyle as lhcstyle
 
 
 #================================================================================================
@@ -436,9 +437,9 @@ def main():
     '''
     
     # Setup the correct style
-    Print("Setting the TDR style", True)
-    style = tdrstyle.TDRStyle()
-
+    Print("Setting the style", True)
+    #style = tdrstyle.TDRStyle()
+    style = lhcstyle.SetLHCHiggsStyle()
 
     # Setup the correct y-axis range
     Print("Setting the y-axis range", True)
@@ -592,6 +593,7 @@ def main():
     t2 = PlotText(0.40, 0.95, "#sqrt{s}=%s" % (energy.replace("TeV", " TeV")), None, False)
     t3 = PlotText(0.57, 0.95, "LHC HIGGS XS WG", None, False)
     t4 = PlotText(0.67, 0.95, ConvertFileToScenario(parseOpts.file), None, False)
+    t5 = PlotText(0.985, 0.20, "Based on data from the LHCHXSWG", None, False, align="left", color=ROOT.kBlack, font=None, angle=90)
 
     # Draw stuff on the canvas
     Print("Drawing various objects on the canvas")
@@ -604,6 +606,8 @@ def main():
     # t2.Draw()
     # t3.Draw()
     t4.Draw()
+    t5.Draw()
+
     if parseOpts.logx==True:
         Print("Setting x-axis to log-scale")
         c1.SetLogx()

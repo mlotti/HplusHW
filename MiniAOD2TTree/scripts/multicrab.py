@@ -1,29 +1,32 @@
 #!/usr/bin/env python
 '''
-Usage:
-multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_SignalAnalysisSkim_cfg.py -v
-multicrab.py --status <task_dir> --url --verbose
-multicrab.py --get <task_dir> --ask 
-multicrab.py --resubmit --ask <task_dir>
-multicrab.py --kill <task_dir>
+Creation/Submission:
+multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_SignalAnalysisSkim_cfg.py
+multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
 
+Re-Submission:
+multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <task_dir> 
+
+Check Status:
+multicrab.py --status --url --url --verbose <task_dir> 
+
+Get Output:
+multicrab.py --get --ask <task_dir> 
+
+Resubmit Failed Jobs:
+multicrab.py --resubmit --ask <task_dir>
+
+Kill All Jobs:
+multicrab.py --kill <task_dir>
 
 Description:
 This script is used to create CRAB jobs, with certain customisable options.
 It is also used retrieve output and check status of submitted CRAB jobs.
 The file datasets.py is used an an auxiliary file to determine the samples to be processesed.
-
-
 To retrieve some logs which refuse to come out otherwise:
 crab log <dir> --command=LCG --checksum=no
 
-
-To-do:
-Launching the command with a multicrab-dir as a parameter:
-[username@lxplus0036:test]$ multicrabcreate.py <multicrab_dir> resubmits some crab tasks within the multicrab dir.
-
-
-Links:
+Useful Links:
 https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
 https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial#Setup_the_environment
 https://github.com/dmwm/CRABClient/tree/master/src/python/CRABClient/Commands
@@ -195,7 +198,7 @@ def AskUser(msg):
     if (keystroke.lower()) == "y":
         return True
     elif (keystroke.lower()) == "n":
-        return True
+        return False
     else:
         AskUser(msg)
     
@@ -553,11 +556,7 @@ def CheckJob(opts, args):
             continue
 
         # Get CRAB task dashboard URL
-        taskDashboard = GetTaskDashboardURL(d)
-        
-        # Resubmit/Kill a CRAb task
-        #reports += GetTaskReports(d, taskStatus, taskDashboard) #FIXME
-
+        taskDashboard = GetTaskDashboardURL(d)    
         
         # Get CRAB task status
         taskStatus = GetTaskStatus(d).replace("\t", "")
@@ -802,7 +801,7 @@ def GetCMSSW():
 
 def GetAnalysis():
     '''
-    Get the analysis type. This will later-ono help determine the datasets to be used.
+    Get the analysis type. This will later-on help determine the datasets to be used.
     https://docs.python.org/2/howto/regex.html
     '''
     Verbose("GetAnalysis()")
@@ -811,12 +810,15 @@ def GetAnalysis():
     leg_re = re.compile("miniAOD2TTree_(?P<leg>\S+)Skim_cfg.py")
 
     # Scan through the string 'pwd' & look for any location where the compiled RE 'cmssw_re' matches
-    match = leg_re.search(PSET)
+    match = leg_re.search(opts.pset)
 
     # Return the string matched by the RE. Convert to desirable format
     analysis = "DUMMY"
     if match:
 	analysis = match.group("leg")
+    else:
+        raise Exception("Could not determine the analysis type from the PSET \"%s\"" % (opts.pset) )
+
     return analysis
 
 
@@ -837,13 +839,13 @@ def AbortTask(keystroke):
     return
 
 
-def AskToContinue(analysis, opts):
+def AskToContinue(taskDirName, analysis, opts):
     '''
     Inform user of the analysis type and datasets to be user in the multi-CRAB job creation. Offer chance to abort sequence 
     '''
     Verbose("AskToContinue()")
 
-    Print("Creating CRAB task for analysis \"%s\" with PSet=\"%s\":" % (analysis, opts.pset) )
+    Print("Creating CRAB task \"%s\" for analysis \"%s\" with PSet=\"%s\":" % (taskDirName, analysis, opts.pset) )
     DatasetGroup(analysis).PrintDatasets(False)
     Print("Will submit to Storage Site \"%s\" [User MUST have write access to destination site!]" % (opts.storageSite))
     
@@ -892,12 +894,16 @@ def CreateTaskDir(dirName, PSET):
     cmd = "cp %s %s" %(PSET, dirName)
 
     if not os.path.exists(dirName):
+        Verbose("mkidr %s" % (dirName))
 	os.mkdir(dirName)
+
+        Verbose(cmd)
 	os.system(cmd)
+    else:
+        pass
 
     # Write the commit id, "git status", "git diff" command output the directory created for the multicrab task
-    gitFileList = git.writeCodeGitInfo(dirName, False)
-    
+    gitFileList = git.writeCodeGitInfo(dirName, False)    
     Verbose("Copied %s to '%s'." % ("'" + "', '".join(gitFileList) + "'", dirName) )
     return
 
@@ -998,7 +1004,11 @@ def EnsurePathDoesNotExist(taskDirName, requestName):
     if not os.path.exists(filePath):
 	return
     else:
-	raise Exception("File '%s' already exists!" % (filePath) )
+        msg = "File '%s' already exists!" % (filePath)
+        if AskUser(msg + " Proceed and overwrite it?"):
+            return
+	else:
+            raise Exception(msg)
     return
 
 
@@ -1114,7 +1124,7 @@ def CreateJob(opts, args):
     taskDirName = GetTaskDirName(analysis, version, datasets)
 
     # Give user last chance to abort
-    AskToContinue(analysis, opts)
+    AskToContinue(taskDirName, analysis, opts)
     
     # Create CRAB task diractory
     CreateTaskDir(taskDirName, PSET)
@@ -1122,16 +1132,19 @@ def CreateJob(opts, args):
     # For-loop: All datasets
     for dataset in datasets:
         
-	Verbose("Getting request name, creating cfg file && submitting CRAB task for dataset \"%s\"" % (dataset) )
+	Verbose("Creating CRAB configuration file for dataset \"%s\"" % (dataset))
+        requestName = GetRequestName(dataset)
+
+        Verbose("Checking for already existing tasks (in case of resubmission)")
+        fullDir = taskDirName + "/" + requestName
+        if os.path.exists(fullDir) and os.path.isdir(fullDir):
+            Print("Dataset \"%s\" already exists! Skipping creation & submission steps" % (requestName))
+            continue 
+
+        Verbose("Creating cfg file for dataset \"%s\"" % (dataset) )
+	CreateCfgFile(dataset, taskDirName, requestName, "crabConfig.py")		
 	
-	# Create CRAB configuration file for each dataset
-	requestName = GetRequestName(dataset)
-	
-	# Create a CRAB cfg file for each dataset
-	CreateCfgFile(dataset, taskDirName, requestName, "crabConfig.py")
-		
-	
-	# Sumbit job for CRAB cfg file
+        Verbose("Submitting jobs for dataset \"%s\"" % (dataset) )
 	SubmitTaskDir(taskDirName, requestName)
 		
     return 0
@@ -1169,7 +1182,7 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose"    , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
     parser.add_option("-a", "--ask"    , dest="ask"        , default=False  , action="store_true", help="Prompt user before executing CRAB commands [defaut: False]")
     parser.add_option("-p", "--pset"   , dest="pset"       , default=PSET   , type="string"      , help="The python cfg file to be used by cmsRun [default: %s]" % (PSET))
-    parser.add_option("-d", "--dir"    , dest="dirName"    , default=DIRNAME, type="string"      , help="Custom name for CRAB1 directory name [default: %s]" % (DIRNAME))
+    parser.add_option("-d", "--dir"    , dest="dirName"    , default=DIRNAME, type="string"      , help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))
     parser.add_option("-s", "--site"   , dest="storageSite", default=SITE   , type="string"      , help="Site where the output will be copied to [default: %s]" % (SITE))
     parser.add_option("-u", "--url"    , dest="url"        , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
     #parser.add_option("--checksum", dest="checksum"  , default=False, action="store_true", help="Get output with adler32 checksum [default: False") #fixme

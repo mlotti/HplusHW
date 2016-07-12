@@ -29,7 +29,7 @@ datasetsTauData.append(Dataset('/Tau/Run2016C-PromptReco-v2/MINIAOD', dataVersio
 datasetsJetHTData = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FJetHT%2FRun2016*-PromptReco-v2%2FMINIAOD"
 datasetsJetHTData.append(Dataset('/JetHT/Run2016B-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
-datasetsJetHTData.append(Dataset('/JetHT/Run2016C-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+#datasetsJetHTData.append(Dataset('/JetHT/Run2016C-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
 
 
 datasetsMuonData = []
@@ -117,7 +117,7 @@ signalAnalysisDatasets.extend(datasetsSignalTauNu)
 
 
 hplus2tbAnalysisDatasets = []
-hplus2tbAnalysisDatasets.extend(datasetsJetHTData)
+#hplus2tbAnalysisDatasets.extend(datasetsJetHTData)
 hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
 # hplus2tbAnalysisDatasets.extend(datasetsDYToQQ)
 # hplus2tbAnalysisDatasets.extend(datasetsQCD)   

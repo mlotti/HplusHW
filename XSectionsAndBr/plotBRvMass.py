@@ -76,6 +76,7 @@ from ROOT import gROOT
 from ROOT import TFile
 
 import tdrstyle as tdrstyle
+import LHCHiggsStyle as lhcstyle
 
 
 #================================================================================================
@@ -136,11 +137,11 @@ class PlotText:
     \param color   Color of the text
     \param font    Specify font explicitly
     '''
-    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack, font=None):
+    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack, font=None, angle=0):
         self.x = x
         self.y = y
-        self.text = text
-
+        self.text  = text
+        self.angle = angle
         self.l = ROOT.TLatex()
         self.l.SetNDC()
         if not bold:
@@ -161,6 +162,7 @@ class PlotText:
         else:
             self.l.SetTextAlign(align)
         self.l.SetTextColor(color)
+        self.l.SetTextAngle(angle)
 
     def Draw(self, options=None):
         '''
@@ -220,9 +222,12 @@ class mssm_xs_tools(object):
 #================================================================================================
 # Function Definition
 #================================================================================================
+def GetSelfName():
+    return __file__.split("/")[-1]
+
 def Print(msg, printHeader=False):
     if printHeader:
-        print "=== mssm_xs_tools.py:\n\t", msg
+        print "=== %s:\n\t %s" % (GetSelfName(), msg)
     else:
         print "\t", msg 
     return
@@ -452,8 +457,9 @@ def main():
     '''
     
     # Setup the correct style
-    Print("Setting the TDR style", True)
-    style = tdrstyle.TDRStyle()
+    Print("Setting the style", True)
+    # style = tdrstyle.TDRStyle()
+    style = lhcstyle.SetLHCHiggsStyle()
         
     # Global Setting: Sets max digits permitted for the axis labels (above this notation with 10^N is used)
     ROOT.TGaxis.SetMaxDigits(10)
@@ -558,6 +564,7 @@ def main():
     t2 = PlotText(0.40, 0.95, "#sqrt{s}=%s" % (energy.replace("TeV", " TeV")), None, False)
     t3 = PlotText(0.57, 0.95, "LHC HIGGS XS WG", None, False)
     t4 = PlotText(0.67, 0.95, ConvertFileToScenario(parseOpts.file), None, False)
+    t5 = PlotText(0.985, 0.20, "Based on data from the LHCHXSWG", None, False, align="left", color=ROOT.kBlack, font=None, angle=90)
 
     # Draw stuff on the canvas
     Print("Drawing various objects on the canvas")
@@ -570,6 +577,8 @@ def main():
     # t2.Draw()
     # t3.Draw()
     t4.Draw()
+    t5.Draw()
+
     if xLog==True or float(parseOpts.massMax) > 1000.0:
         Print("Setting x-axis to log-scale (xLog=%s)" % (xLog))
         c1.SetLogx()
