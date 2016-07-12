@@ -1,23 +1,22 @@
 #!/usr/bin/env python
 '''
 Creation/Submission:
-multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_SignalAnalysisSkim_cfg.py
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
 
 Re-Submission:
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <task_dir> 
 
 Check Status:
-multicrab.py --status --url --url --verbose <task_dir> 
+multicrab.py --status --url --url --verbose -d <task_dir> 
 
 Get Output:
-multicrab.py --get --ask <task_dir> 
+multicrab.py --get --ask -d <task_dir> 
 
 Resubmit Failed Jobs:
-multicrab.py --resubmit --ask <task_dir>
+multicrab.py --resubmit --ask -d <task_dir>
 
 Kill All Jobs:
-multicrab.py --kill <task_dir>
+multicrab.py --kill -d <task_dir>
 
 Description:
 This script is used to create CRAB jobs, with certain customisable options.
@@ -113,7 +112,6 @@ class Report:
         '''
         Simple function to print report.
         '''
-        Verbose("Print()")
         name = os.path.basename(self.name)
         while len(name) < 30:
             name += " "
@@ -237,7 +235,7 @@ def GetTaskDashboardURL(datasetPath):
         # Sanity check (file exists)
         if os.path.exists( grepFile ):
             results      = [i for i in open(grepFile, 'r').readlines()]
-            dashboardURL = find_between( results[0], "URL:\t", "\n" )
+            dashboardURL = FindBetween( results[0], "URL:\t", "\n" )
             # Verbose("Removing temporary file \"%s\"" % (grepFile), False)
             os.system("rm -f %s " % (grepFile) )
         else:
@@ -268,7 +266,7 @@ def GetTaskStatus(datasetPath):
         # Sanity check (file exists)
         if os.path.exists( grepFile ):
             results = [i for i in open(grepFile, 'r').readlines()]
-            status  = find_between( results[-1], stringToGrep, "\n" )
+            status  = FindBetween( results[-1], stringToGrep, "\n" )
             # Verbose("Removing temporary file \"%s\"" % (grepFile), False)
             os.system("rm -f %s " % (grepFile) )
         else:
@@ -290,7 +288,7 @@ def GetTaskReports(datasetPath, status, dashboardURL):
     report = None
     
     # Get all files under <dataset_dir>/results/
-    files = execute("ls %s" % os.path.join( datasetPath, "results") )
+    files = Execute("ls %s" % os.path.join( datasetPath, "results") )
 
     Verbose("crab status --dir=%s" % (GetLast2Dirs(datasetPath)), False)
     try:
@@ -355,7 +353,7 @@ def GetTaskLogs(taskPath, retrievedLog, finished):
         
     if opts.get:
         Verbose("Retrieved logs (%s) < finished (%s). Retrieving CRAB logs ..." % (retrievedLog, finished) )
-        touch(taskPath)
+        Touch(taskPath)
         dummy = crabCommand('getlog', dir=taskPath)
         # crab log <dir> --command=LCG --checksum=no #fixme: add support?
     else:
@@ -377,15 +375,15 @@ def GetTaskOutput(taskPath, retrievedOut, finished):
         if opts.ask:
             if AskUser("Retrieved output (%s) < finished (%s). Retrieve CRAB output?" % (retrievedOut, finished) ):
                 dummy = crabCommand('getoutput', dir=taskPath)
-                touch(taskPath)
+                Touch(taskPath)
             else:
                 return
         else:
             Verbose("Retrieved output (%s) < finished (%s). Retrieving CRAB output ..." % (retrievedOut, finished) )
             #cmd = "crab %s --dir %s" % ("get", taskPath)
-            #execute(cmd)
+            #Execute(cmd)
             dummy = crabCommand("getoutput", dir=taskPath) #fixme: add checksum?
-            touch(taskPath)
+            Touch(taskPath)
     else:
         Verbose("Retrieved output (%s) < finished (%s). To retrieve CRAB output relaunch script with --get option." % (retrievedOut, finished) )
     return
@@ -444,8 +442,8 @@ def KillTask(taskPath):
     return
 
 
-def find_between(myString, first, last ):
-    Verbose("find_between()")
+def FindBetween(myString, first, last ):
+    Verbose("FindBetween()")
 
     try:
         start = myString.index( first ) + len( first )
@@ -455,8 +453,8 @@ def find_between(myString, first, last ):
         return ""
 
 
-def find_between_r(myString, first, last ):
-    Verbose("find_between_r()")
+def FindBetweenR(myString, first, last ):
+    Verbose("FindBetweenR()")
     
     try:
         start = myString.rindex( first ) + len( first )
@@ -492,7 +490,7 @@ def GetDatasetAbsolutePaths(datasetdirs):
             datasets.append(d)
 
         # Get the contents of this directory
-        cands = execute("ls -tr %s"%d)
+        cands = Execute("ls -tr %s"%d)
         # For-loop: All directory contents
         for c in cands:
             path = os.path.join(d, c)
@@ -535,9 +533,10 @@ def CheckJob(opts, args):
     crabConsoleLogLevel = getConsoleLogLevel()
     Verbose("The current \"crabCommand\" console log level is set to \"%s\"" % (crabConsoleLogLevel), True)
     
-    # Get the CRAB dir(s) name (passed as argument)
-    dirs = sys.argv[1:]
-
+    ## Get the CRAB dir(s) name (passed as argument)
+    #dirs = sys.argv[1:]
+    dirs = [opts.dirName]
+    
     # Initialise Variables
     reportDict   = {}
     datasetdirs  = GetMulticrabAbsolutePaths(dirs)
@@ -630,8 +629,8 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
         # Assess the jobs status individually
         if r[0] == 'finished':
             finished += 1
-            foundLog  = exists(directory, "cmsRun_%i.log.tar.gz" % r[1])
-            foundOut  = exists(directory, "*_%i.root" % r[1])
+            foundLog  = Exists(directory, "cmsRun_%i.log.tar.gz" % r[1])
+            foundOut  = Exists(directory, "*_%i.root" % r[1])
             if foundLog:
                 retrievedLog += 1
             if foundOut:
@@ -701,27 +700,27 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     return finished, failed, retrievedLog, retrievedOut
 
 
-def exists(dataset,filename):
-    Verbose("exists()")
+def Exists(dataset,filename):
+    Verbose("Exists()")
     fname = os.path.join(dataset,"results",filename)
-    fname = execute("ls %s"%fname)[0]
+    fname = Execute("ls %s"%fname)[0]
     return os.path.exists(fname)
 
 
-def touch(path):
+def Touch(path):
     '''
     The "touch" command is the easiest way to create new, empty files. 
     It is also used to change the timestamps (i.e., dates and times of the most recent access and modification)
     on existing files and directories.
     '''
-    Verbose("touch()")
+    Verbose("Touch()")
     if os.path.exists(path):
         os.system("touch %s" % path)
     return
 
 
-def execute(cmd):
-    Verbose("execute()")
+def Execute(cmd):
+    Verbose("Execute()")
     p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
     (s_in, s_out) = (p.stdin, p.stdout)
@@ -764,8 +763,6 @@ def Print(msg, printHeader=True):
     '''
     Simple print function. If verbose option is enabled prints, otherwise does nothing.
     '''
-    Verbose("Print()")
-    
     fName = __file__.split("/")[-1]
     if printHeader:
         print "=== ", fName
@@ -1193,6 +1190,9 @@ if __name__ == "__main__":
     if opts.create == True:
         sys.exit( CreateJob(opts, args) )
     elif opts.status == True or opts.get == True or opts.resubmit == True or opts.kill == True:
-        sys.exit( CheckJob(opts, args) )
+        if opts.dirName == "":
+            raise Exception("Must provide a multiCRAB dir with the -d option!")            
+        else:
+            sys.exit( CheckJob(opts, args) )
     else:
         raise Exception("Must either create or check a CRAB job!")
