@@ -6,7 +6,7 @@ For miniAOD instructions see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/Wor
 #================================================================================================  
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
+from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 
 
 #================================================================================================  
@@ -89,7 +89,7 @@ title    =  msgAlign.format("Data", "Global Tag", "Trigger Source", "Trigger Tag
 print "="*len(title)
 print title
 print "="*len(title)
-print msgAlign.format(dataVersion.version, dataVersion.getGlobalTag(), TrgResultsSource, dataVersion.getTriggerProcess())
+print msgAlign.format(dataVersion.version, dataVersion.getGlobalTag(), dataVersion.getMETFilteringProcess(), dataVersion.getTriggerProcess())
 print 
 ####
 
@@ -122,7 +122,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TopPtProducer           = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
-	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
+	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
 	TriggerBits    = cms.vstring(
             "HLT_QuadJet45_DoubleBTagCSV_p087_v",
             "HLT_QuadPFJet_VBF_v",
