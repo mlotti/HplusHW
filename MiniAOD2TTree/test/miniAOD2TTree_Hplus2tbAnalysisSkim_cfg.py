@@ -122,7 +122,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TopPtProducer           = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
-	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
+	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
 	TriggerBits    = cms.vstring(
             "HLT_QuadJet45_DoubleBTagCSV_p087_v",
             "HLT_QuadPFJet_VBF_v",
