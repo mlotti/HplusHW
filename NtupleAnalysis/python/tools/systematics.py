@@ -93,29 +93,57 @@ class ScalarUncertaintyItem:
         return max([self._uncertUp, self._uncertDown])
 
 _crossSectionUncertainty = {
-    "TTJets": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.066), # 13 TeV, arxiv:1303.6254 and https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
-    "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.066), # same as above
+    # TTJets, based on arxiv:1303.6254 and https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
+    "TTJets_scale": ScalarUncertaintyItem("xsect", plus=19.77/831.76, minus=29.20/831.76),
+    "TTJets_pdf": ScalarUncertaintyItem("xsect", 35.06/831.76),
+    "TTJets_mass": ScalarUncertaintyItem("xsect", plus=23.18/831.76, minus=22.45/831.76),    
+    "TTJets": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.066), # scale, pdf and mass combined (quadratically)
+
+    # Light H+ signal, normalized to TTJets --> use combined TTJets uncertainty
+    "TTToHplus": ScalarUncertaintyItem("xsect", plus=0.062, minus=0.066),
+
+    # Heavy H+ signal, what is the effect of this number?
     "HplusTB": ScalarUncertaintyItem("xsect", 0.30),
-    "SingleTop": ScalarUncertaintyItem("xsect", 0.062), # 13 TeV, for tW, ref?
-    "WJets":  ScalarUncertaintyItem("xsect", 0.050), # 13 TeV, ref?
-    "DYJetsToLL": ScalarUncertaintyItem("xsect", 0.043), # 13 TeV, ref?
-    "Diboson": ScalarUncertaintyItem("xsect", 0.038), # 13 TeV, ref?
-    "QCD": ScalarUncertaintyItem("xsect", 1.00), # We do not trust the MC QCD, therefore 100 % uncertainty
-    "QCD_Pt20_MuEnriched": ScalarUncertaintyItem("xsect", 1.00), # We do not trust the MC QCD, therefore 100 % uncertainty
+    
+    # Single top, based on http://arxiv.org/abs/1311.0283 and https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec#Single_top_Wt_channel_cross_sect
+    "SingleTop_scale":  ScalarUncertaintyItem("xsect", 1.80/71.7),
+    "SingleTop_pdf":  ScalarUncertaintyItem("xsect", 3.40/71.7), 
+    "SingleTop": ScalarUncertaintyItem("xsect", 0.062), # scale and pdf combined (quadratically)
+
+    # W+jets, based on "Total W" on https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
+    "WJets_scale":  ScalarUncertaintyItem("xsect", plus=165.7/20508.9, minus=88.2/20508.9), 
+    "WJets_pdf":  ScalarUncertaintyItem("xsect", 770.9/20508.9),
+    "WJets":  ScalarUncertaintyItem("xsect", 0.050), # scale and pdf combined (quadratically)
+    
+    # DY, based on "Z/a* (50) on https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive
+    "DYJetsToLL_scale": ScalarUncertaintyItem("xsect", plus=13.2/2008.4, minus=7.5/2008.4),
+    "DYJetsToLL_pdf": ScalarUncertaintyItem("xsect", 75.0/2008.4), 
+    "DYJetsToLL": ScalarUncertaintyItem("xsect", 0.043), # scale and pdf combined (quadratically)
+    
+    # Diboson, values from MIT PAS AN-16-194 (see also https://twiki.cern.ch/twiki/bin/view/CMS/StandardModelCrossSectionsat13TeVInclusive)
+    "Diboson_scale": ScalarUncertaintyItem("xsect", 0.032), 
+    "Diboson_pdf": ScalarUncertaintyItem("xsect", 0.044),
+    "Diboson": ScalarUncertaintyItem("xsect", 0.054), # scale and pdf combined (quadratically)
+    
+    # MC QCD: we do not trust the MC QCD, therefore 100 % uncertainty
+    "QCD": ScalarUncertaintyItem("xsect", 1.00),
+    "QCD_Pt20_MuEnriched": ScalarUncertaintyItem("xsect", 1.00),
+    
+    # default: no uncertainty
     "default": ScalarUncertaintyItem("xsect", 0.00),
 }
 
-def getCrossSectionUncertainty(datasetName):
-    if datasetName in _crossSectionUncertainty:
-        return _crossSectionUncertainty[datasetName]
-    if "pseudo" in datasetName:
+def getCrossSectionUncertainty(uncertName):
+    if uncertName in _crossSectionUncertainty:
+        return _crossSectionUncertainty[uncertName]
+    if "pseudo" in uncertName:
         return _crossSectionUncertainty["default"]
     # Ok, dataset name not found and not in the known list, give a warning message
-    print ShellStyles.WarningLabel()+"Could not find cross section uncertainty for dataset label: %s!%s"%(datasetName,ShellStyles.NormalStyle())
+    print ShellStyles.WarningLabel()+"Could not find cross section uncertainty for dataset label: %s!%s"%(uncertName,ShellStyles.NormalStyle())
     return _crossSectionUncertainty["default"]
 
-# def getLeptonVetoUncertainty(datasetName):
-#     if "pseudo" in datasetName:
+# def getLeptonVetoUncertainty(uncertName):
+#     if "pseudo" in uncertName:
 #         return ScalarUncertaintyItem("LeptonVeto", 0.00)
 #     return ScalarUncertaintyItem("LeptonVeto", 0.002)
 
