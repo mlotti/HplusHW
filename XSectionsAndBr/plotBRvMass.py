@@ -76,7 +76,7 @@ from ROOT import gROOT
 from ROOT import TFile
 
 import tdrstyle as tdrstyle
-import LHCHiggsStyle as lhcstyle
+#import LHCHiggsStyle as lhcstyle
 
 
 #================================================================================================
@@ -87,7 +87,7 @@ xLog = False
 yMin = 1e-04
 yMax = 1.1
 #savePath    = os.getcwd()
-savePath    = "/afs/cern.ch/user/a/attikis/public/html/brPlots/"
+savePath    = "/afs/cern.ch/user/m/mkolosov/public/html/brPlots/BR_new/"
 saveFormats = ["png", "pdf", "C"]
 Colours     = {}
 Colours["AA"]    = ROOT.kGray+2
@@ -320,6 +320,8 @@ def ConvertToLatex(text):
     # Single replacements & Special cases
     if text == "H":
         return "H^{0}"
+    elif text == "h":
+        return "h^{0}"
     elif text == "AW":
         return "A^{0}W^{+}"
     elif text == "hW":
@@ -330,6 +332,8 @@ def ConvertToLatex(text):
         return "Z^{0}#gamma"
     elif text == "Zh":
         return "Z^{0}h^{0}"
+    elif text == "WW":
+        return "W^{+}W^{-}"
     elif text == "ZZ":
         return "Z^{0}Z^{0}"
     elif text == "AA":
@@ -447,8 +451,78 @@ def CustomiseGraph(gr, grName, colour, gTitle, xTitle, yTitle):
     # Fill Style
     gr.SetFillColor(colour)
     gr.SetFillStyle(3001)
-
     return   
+
+
+def GetRangeOfA(f, histoNames):
+    '''
+    dmin/dmax is the absolute variance between the wanted minimum (parseOpts.massMin) /maximum (parseOpts.massMax)
+    and the nearest real minimum  (the minimum mass of the boson of all histograms, around the wanted minimum) / maximum. 
+    Example: 
+    Given minimum = parseOpts.massMin = 180
+    Given maximum = parseOpts.massMax = 1000.0
+    The real minimum (taking into account all the histograms (decays)) around the wanted minimum is 180.04800415 and the
+    real maximum around the given maximum is 998.427978516. 
+    So the dmin is 0.04800415 and dmax=1.57202148438.
+    The bin that corresponds to that dmin is bin_minA=69 and to that dmax is bin_maxA=310. 
+    Having the bin number we can calculate the mass of A corresponding to the real minimum and maximum mBoson.
+    For the example, is minimum mA = 158 and maximum mA = 995.0.  
+    '''    
+    mssm = mssm_xs_tools(parseOpts.file, True, 0)
+    
+    dmin = 99999.999
+    dmax = 99999.999
+    
+    bin_minA = -1
+    bin_maxA = -1
+    
+    # For-loop: All decays
+    for hName in histoNames:
+        hist = f.Get(hName)
+        
+        if parseOpts.boson == "A" :
+            
+            if float(parseOpts.massMin) < 90.0:
+                Print("WARNING! the lower A boson mass in the plots is 90.0 Ge. Setting the lower A boson mass in the plots to 90 GeV.")
+                parseOpts.massMin = "90"
+            else:
+                pass
+            
+            if float(parseOpts.massMax) > 2000.0:
+                Print("WARNING! the upper A boson mass in the plots is 2 TeV. the upper A boson mass in the plots to 2 TeV.")
+                parseOpts.massMax = "2000"
+            else:
+                pass
+            
+            # Get the number of bins
+            binMinA = hist.GetXaxis().FindBin(float(parseOpts.massMin))
+            binMaxA = hist.GetXaxis().FindBin(float(parseOpts.massMax))
+            continue
+
+        # For-loop: All x-axis bins
+        for x in range(1, hist.GetNbinsX()+1):
+            
+            mA = hist.GetXaxis().GetBinCenter(x)
+            mass = mssm.mass(parseOpts.boson, mA, float(parseOpts.tanb)) 
+            
+            dmass_min = abs(mass - float(parseOpts.massMin))
+            dmass_max = abs(mass - float(parseOpts.massMax))
+            
+            if  dmass_min < dmin:
+                dmin     = dmass_min
+                binMinA = x
+                
+            if  dmass_max < dmax:
+                dmax     = dmass_max
+                binMaxA = x
+    
+    if parseOpts.boson != "A":
+        minBosonMass = mssm.mass(parseOpts.boson, hist.GetXaxis().GetBinCenter(binMinA), float(parseOpts.tanb))
+        maxBosonMass = mssm.mass(parseOpts.boson, hist.GetXaxis().GetBinCenter(binMaxA), float(parseOpts.tanb))
+        Print("WARNING! the lower %s boson mass in the plots for the given minimum is %s" % (parseOpts.boson, minBosonMass) )
+        Print("WARNING! the upper %s boson mass in the plots for the given maximum is %s" % (maxBosonMass, parseOpts.boson) )
+    
+    return binMinA, binMaxA
 
 
 def main():
@@ -458,8 +532,8 @@ def main():
     
     # Setup the correct style
     Print("Setting the style", True)
-    # style = tdrstyle.TDRStyle()
-    style = lhcstyle.SetLHCHiggsStyle()
+    style = tdrstyle.TDRStyle()
+    #style = lhcstyle.SetLHCHiggsStyle()
         
     # Global Setting: Sets max digits permitted for the axis labels (above this notation with 10^N is used)
     ROOT.TGaxis.SetMaxDigits(10)
@@ -500,6 +574,9 @@ def main():
     leg.SetFillStyle(3002)
     leg.SetBorderSize(0)
 
+    # Get the bin numbers corresponding to minimum/maximum of the A mass 
+    minBin, maxBin = GetRangeOfA(f, histoNames)
+    
     # For-loop: All decays for given boson
     for hName in histoNames:
 
@@ -511,14 +588,20 @@ def main():
 
         # Get the X in the decay (Higgs->X)
         decayTo = hName.split("_")[-1]
-
+        
         # For-loop: All available mass values (ignore zero-bin)
-        for x in range(1, hist.GetNbinsX()+1):
+        for x in range( minBin, maxBin+1):
             
             # Get x- and y-values of histogram
-            mass = hist.GetXaxis().GetBinCenter(x)
-            br   = mssm.br(parseOpts.boson + "->" + decayTo, mass, float(parseOpts.tanb))
-              
+            mA = hist.GetXaxis().GetBinCenter(x)
+            if parseOpts.boson == "A" :
+                mass = mA
+            else:
+                mass = mssm.mass(parseOpts.boson, mA, float(parseOpts.tanb))
+
+            # Calculate the branching ratio of the decay (for user-defined boson)
+            br = mssm.br(parseOpts.boson + "->" + decayTo, mA, float(parseOpts.tanb))
+            
             # Apply mass cut-off values
             if mass < float(parseOpts.massMin):
                 continue
@@ -620,7 +703,7 @@ if __name__ == "__main__":
         sys.exit(0)
     else:
         pass
-
+     
     # Program execution
     main()
 

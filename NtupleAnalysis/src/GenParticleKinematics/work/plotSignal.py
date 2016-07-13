@@ -85,11 +85,12 @@ def main():
         # mcDatasets   = datasets.getMCDatasets()
 
         # Build ROOT histos from individual datasets
-        dataset1 = datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_400").getDatasetRootHisto(hName)
+        dataset1 = datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_200").getDatasetRootHisto(hName)
         dataset2 = datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_300").getDatasetRootHisto(hName)
+        dataset3 = datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_400").getDatasetRootHisto(hName)
+        dataset4 = datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_500").getDatasetRootHisto(hName)
         # dataset2 = datasets.getDataset("TT_ext3").getDatasetRootHisto(hName)
         # datasets.getDataset("TT_ext3").setCrossSection(831.76)
-        
         
         # Normalise datasets
         if normalizeTo == "One":
@@ -117,18 +118,42 @@ def main():
         
         # Customise histos
         histo2 = dataset2.getHistogram()
-        styles.ttStyle.apply(histo2)
+        styles.signal300Style.apply(histo2)
         # histo2.SetMarkerStyle(ROOT.kFullCross)
-        histo2.SetFillStyle(3001)
-        histo2.SetFillColor(styles.ttStyle.color)
+        # histo2.SetFillStyle(3001)
+        # histo2.SetFillColor(styles.ttStyle.color)
         # removeNegatives(histo2)
         # removeErrorBars(histo2)
         histo2.Rebin(rebinFactor)
 
+        histo3 = dataset3.getHistogram()
+        styles.signal400Style.apply(histo3)
+        # histo2.SetMarkerStyle(ROOT.kFullCross)
+        # histo2.SetFillStyle(3001)
+        # histo2.SetFillColor(styles.ttStyle.color)
+        # removeNegatives(histo2)
+        # removeErrorBars(histo2)
+        histo3.Rebin(rebinFactor)
+
+        histo4 = dataset4.getHistogram()
+        styles.signal500Style.apply(histo4)
+        # histo2.SetMarkerStyle(ROOT.kFullCross)
+        # histo2.SetFillStyle(3001)
+        # histo2.SetFillColor(styles.ttStyle.color)
+        # removeNegatives(histo2)
+        # removeErrorBars(histo2)
+        histo4.Rebin(rebinFactor)
+
 
         # Create a comparison plot
-        p = plots.ComparisonPlot(histograms.Histo(histo1, "m_{H^{#pm}} = 400 GeV/c^{2}", "p", "P"),
-                                 histograms.Histo(histo2, "m_{H^{#pm}} = 300 GeV/c^{2}", "F", "HIST,E,9"))
+#        p = plots.ComparisonPlot(histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
+#                                histograms.Histo(histo4, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9"))
+# #                                 histograms.Histo(histo2, "t#bar{t}", "F", "HIST,E,9"))
+
+        p = plots.ComparisonManyPlot(histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "F", "HIST,E,9"),
+                                     [histograms.Histo(histo2, "m_{H^{#pm}} = 300 GeV/c^{2}", "p", "P"),
+                                      histograms.Histo(histo3, "m_{H^{#pm}} = 400 GeV/c^{2}", "p", "P"),
+                                      histograms.Histo(histo4, "m_{H^{#pm}} = 500 GeV/c^{2}", "p", "P")])
 #                                 histograms.Histo(histo2, "t#bar{t}", "F", "HIST,E,9"))
         
         # Create a comparison plot (One histogram is treated as a reference histogram, and all other histograms are compared with respect to that)

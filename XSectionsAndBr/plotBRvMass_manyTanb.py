@@ -63,13 +63,12 @@ from ROOT import gROOT
 from ROOT import TFile
 
 import tdrstyle as tdrstyle
-import LHCHiggsStyle as lhcstyle
-
+#import LHCHiggsStyle as lhcstyle
 
 #================================================================================================
 # Options
 #================================================================================================
-savePath    = "/afs/cern.ch/user/a/attikis/public/html/brPlots/"
+savePath    = "/afs/cern.ch/user/m/mkolosov/public/html/brPlots/TanBeta_new/"
 #savePath    = os.getcwd() + "/"
 saveFormats = ["png", "pdf", "C"]
 Colours     = {}
@@ -291,6 +290,7 @@ def ConvertFileToScenario(fileName):
     return scenario
 
 
+
 def ConvertToLatex(text):
     '''
     Convert special characters to LaTeX format for plotting purposes.
@@ -300,6 +300,8 @@ def ConvertToLatex(text):
     # Single replacements & Special cases
     if text == "H":
         return "H^{0}"
+    elif text == "h":
+        return "h^{0}"
     elif text == "AW":
         return "A^{0}W^{+}"
     elif text == "hW":
@@ -310,6 +312,8 @@ def ConvertToLatex(text):
         return "Z^{0}#gamma"
     elif text == "Zh":
         return "Z^{0}h^{0}"
+    elif text == "WW":
+        return "W^{+}W^{-}"
     elif text == "ZZ":
         return "Z^{0}Z^{0}"
     elif text == "AA":
@@ -332,6 +336,7 @@ def ConvertToLatex(text):
     text = text.replace("gluglu" , "gg")
     text = text.replace("gamgam" , "#gamma#gamma")
     return text
+    
 
 
 def GetKeyNames(f, folder = "" ):
@@ -431,24 +436,94 @@ def CustomiseGraph(gr, grName, colour, gTitle, xTitle, yTitle):
     return   
 
 
+
+def GetRangeOfA(f, hName, tanb):
+    '''
+    dmin/dmax is the absolute variance between the wanted minimum (parseOpts.massMin) /maximum (parseOpts.massMax)
+    and the nearest real minimum/ maximum. 
+    Example: 
+    Given minimum = parseOpts.massMin = 180
+    Given maximum = parseOpts.massMax = 1000.0
+    The real minimum  around the wanted minimum is 180.04800415 and the
+    real maximum around the given maximum is 998.427978516. 
+    So the dmin is 0.04800415 and dmax=1.57202148438.
+    The bin that corresponds to that dmin is bin_minA=69 and to that dmax is bin_maxA=310. 
+    Having the bin number we can calculate the mass of A corresponding to the real minimum and maximum mBoson.
+    For the example, is minimum mA = 158 and maximum mA = 995.0.  
+    '''    
+    mssm = mssm_xs_tools(parseOpts.file, True, 0)
+    
+    dmin = 99999.999
+    dmax = 99999.999
+    
+    bin_minA = -1
+    bin_maxA = -1
+    
+    hist = f.Get(hName)
+        
+    if parseOpts.boson == "A" :
+            
+        if float(parseOpts.massMin) < 90.0:
+            Print("WARNING! the lower A boson mass in the plots is 90.0 Ge. Setting the lower A boson mass in the plots to 90 GeV.")
+            parseOpts.massMin = "90"
+        else:
+            pass
+        
+        if float(parseOpts.massMax) > 2000.0:
+            Print("WARNING! the upper A boson mass in the plots is 2 TeV. the upper A boson mass in the plots to 2 TeV.")
+            parseOpts.massMax = "2000"
+        else:
+            pass
+            
+        # Get the number of bins
+        binMinA = hist.GetXaxis().FindBin(float(parseOpts.massMin))
+        binMaxA = hist.GetXaxis().FindBin(float(parseOpts.massMax))
+    else:
+        # For-loop: All x-axis bins
+        for x in range(1, hist.GetNbinsX()+1):
+        
+            mA = hist.GetXaxis().GetBinCenter(x)
+            mass = mssm.mass(parseOpts.boson, mA, tanb) 
+            
+            dmass_min = abs(mass - float(parseOpts.massMin))
+            dmass_max = abs(mass - float(parseOpts.massMax))
+            
+            if  dmass_min < dmin:
+                dmin     = dmass_min
+                binMinA = x
+                
+            if  dmass_max < dmax:
+                dmax     = dmass_max
+                binMaxA = x
+    
+        minBosonMass = mssm.mass(parseOpts.boson, hist.GetXaxis().GetBinCenter(binMinA), tanb)
+        maxBosonMass = mssm.mass(parseOpts.boson, hist.GetXaxis().GetBinCenter(binMaxA), tanb)
+        Print("WARNING! the lower %s boson mass in the plots for tanb %s and for the given minimum is %s" % (parseOpts.boson, tanb, minBosonMass))
+        Print("WARNING! the upper %s boson mass in the plots for tanb %s and for the given maximum is %s" % (parseOpts.boson, tanb, maxBosonMass))
+        
+    return binMinA, binMaxA
+
+
+
 def main():
     '''
     The main function.
     '''
     
     # Setup the correct style
-    Print("Setting the style", True)
-    #style = tdrstyle.TDRStyle()
-    style = lhcstyle.SetLHCHiggsStyle()
-
-    # Setup the correct y-axis range
+    Print("Setting the TDR style", True)
+    style = tdrstyle.TDRStyle()
+    #style = lhcstyle.SetLHCHiggsStyle()
+    
+    #Marina
+    #Setup the correct y-axis range
     Print("Setting the y-axis range", True)
-    yMin = 0.85
-    yMax = 1.00
-    if parseOpts.logy==True:
-        yMin = 1e-04
-        yMax = 1.1
-
+    yMin = 1e-04
+    yMax = 1.1
+    #if parseOpts.logy==True:
+    #    yMin = 1e-04
+    #    yMax = 1.1
+        
         
     # Global Setting: Sets max digits permitted for the axis labels (above this notation with 10^N is used)
     ROOT.TGaxis.SetMaxDigits(10)
@@ -478,8 +553,7 @@ def main():
 
     # For-loop: All available higgs bosons
     histoNames = GetListOfHistoNames(f, parseOpts.boson)
-
-
+    
     # Create canvas
     cName = "TCanvas_" + parseOpts.boson + "_tanb" + parseOpts.tanbMin + "to" + parseOpts.tanbMax
     Print("Creating canvas with name %s" % (cName) )
@@ -506,7 +580,6 @@ def main():
     leg.SetBorderSize(0)
     #leg.SetHeader("BR("+ ConvertToLatex(parseOpts.boson) + "#rightarrow" + ConvertToLatex(parseOpts.decayTo) + ")")
 
-
     # Sanity check
     decayHisto = "br_" + parseOpts.boson + "_" + parseOpts.decayTo
     if (decayHisto) not in histoNames:
@@ -515,37 +588,56 @@ def main():
             decays.append(h.split("_")[-1])
         raise Exception("ERROR! Could not find decay (%s) for boson (%s). Available decays for %s:\n%s" % (parseOpts.boson, parseOpts.decayTo, parseOpts.boson, "\n".join(decays)) )
     
+
+    
+    
     # For-loop: All decays for given boson
     for hName in histoNames:
-                
+        
         # Get the TH2 from the ROOT file (x=mass, y=tan(beta), z=BR)
         hist = f.Get(hName)
 
         # Get the X in the decay (Higgs->X)
         decayTo = hName.split("_")[-1]
 
+        
         # If decay not of interest continue
         if decayTo != parseOpts.decayTo:
             continue        
 
+        print "Histogram Name=", hName
+        
         counter = 0
         # For-loop: All tanb values
         for tanb in tanbList:
+            
+            print "tanb=", tanb
+            
             counter += 1
             colour = Colours.values()[counter]            
             
+            # Get the bin numbers corresponding to minimum/maximum of the A mass 
+            minBin, maxBin = GetRangeOfA(f, hName, tanb)
+            
+            print "minBin=", minBin, " maxBin=", maxBin
+
             # Create lists to hold the x- and y- values
             massList    = []
             brList      = []
-
+            
             # For-loop: All available mass values (ignore zero-bin)
-            for x in range(1, hist.GetNbinsX()+1):
-
+            for x in range(minBin, maxBin+1):
 
                 # Get x- and y-values of histogram
-                mass = hist.GetXaxis().GetBinCenter(x)
-                br   = mssm.br(parseOpts.boson + "->" + decayTo, mass, float(tanb))
-              
+                mA = hist.GetXaxis().GetBinCenter(x)
+                if parseOpts.boson == "A" :
+                    mass = mA
+                else:
+                    mass = mssm.mass(parseOpts.boson, mA, tanb)
+
+                # Calculate the branching ratio of the decay (for user-defined boson)
+                br = mssm.br(parseOpts.boson + "->" + decayTo, mA, tanb)
+            
                 # Apply mass cut-off values
                 if mass < float(parseOpts.massMin):
                     continue
@@ -585,6 +677,7 @@ def main():
             # Add to TLegend
             leg.AddEntry(tGraph, "tan#beta=" + str(tanb), "l")
 
+
     # Create text to be drawn on the canvas
     Print("Creating information text for canvas")
     #t1 = PlotText(0.16, 0.95, "tan#beta=%s-%s" % (parseOpts.tanbMin, parseOpts.tanbMax), None, False )
@@ -593,7 +686,6 @@ def main():
     t2 = PlotText(0.40, 0.95, "#sqrt{s}=%s" % (energy.replace("TeV", " TeV")), None, False)
     t3 = PlotText(0.57, 0.95, "LHC HIGGS XS WG", None, False)
     t4 = PlotText(0.67, 0.95, ConvertFileToScenario(parseOpts.file), None, False)
-    t5 = PlotText(0.985, 0.20, "Based on data from the LHCHXSWG", None, False, align="left", color=ROOT.kBlack, font=None, angle=90)
 
     # Draw stuff on the canvas
     Print("Drawing various objects on the canvas")
@@ -606,8 +698,6 @@ def main():
     # t2.Draw()
     # t3.Draw()
     t4.Draw()
-    t5.Draw()
-
     if parseOpts.logx==True:
         Print("Setting x-axis to log-scale")
         c1.SetLogx()
@@ -617,6 +707,7 @@ def main():
         c1.SetLogy()
     c1.Update()
     
+
     # Customise axes
     Print("Customising TMultiGraph axes")
     mGraph.GetYaxis().SetRangeUser(yMin, yMax)
@@ -656,7 +747,7 @@ if __name__ == "__main__":
         sys.exit(0)
     else:
         pass
-
+    
     # Program execution
     main()
 
