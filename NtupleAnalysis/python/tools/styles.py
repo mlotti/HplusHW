@@ -243,6 +243,7 @@ signal350Style = signalStyle.clone()
 signal400Style = signalStyle.clone()
 signal500Style = signalStyle.clone()
 signal600Style = signalStyle.clone()
+signal1500Style = signalStyle.clone()
 
 qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
 ewkStyle = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)
