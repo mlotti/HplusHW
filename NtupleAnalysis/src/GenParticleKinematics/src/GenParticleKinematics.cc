@@ -158,14 +158,16 @@ void GenParticleKinematics::process(Long64_t entry) {
   math::XYZTLorentzVector Htb_BQuark_p4;
   math::XYZTLorentzVector Htb_tbW_BQuark_p4;
   math::XYZTLorentzVector Htb_tbW_WBoson_p4;
-  math::XYZTLorentzVector Htb_tbW_Wqq_WQuark_p4;
-  math::XYZTLorentzVector Htb_bbW_Wqq_WAntiQuark_p4;
+  math::XYZTLorentzVector Htb_tbW_Wqq_Quark_p4;
+  math::XYZTLorentzVector Htb_tbW_Wqq_AntiQuark_p4;
   
   // Associated productions
   math::XYZTLorentzVector associated_TQuark_p4;
   math::XYZTLorentzVector associated_BQuark_p4;
   
   // Other
+  math::XYZTLorentzVector gtt_tbW_Wqq_Quark_p4;
+  math::XYZTLorentzVector gtt_tbW_Wqq_AntiQuark_p4;
   math::XYZTLorentzVector gtt_tbW_WBoson_p4;
   math::XYZTLorentzVector gtt_tbW_BQuark_p4;
 
@@ -305,8 +307,15 @@ void GenParticleKinematics::process(Long64_t entry) {
 	// H+->tb, t->bW, W->qq
 	if( std::abs(genMom_pdgId) == 24 && RecursivelyLookForMotherId(fEvent, genP_index, 37, true) ){
 
-	  if (genP_pdgId > 0) Htb_tbW_Wqq_WQuark_p4 = p.p4();
-	  if (genP_pdgId < 0) Htb_bbW_Wqq_WAntiQuark_p4 = p.p4();    
+	  if (genP_pdgId > 0) Htb_tbW_Wqq_Quark_p4 = p.p4();
+	  if (genP_pdgId < 0) Htb_tbW_Wqq_AntiQuark_p4 = p.p4();    
+	}
+
+	// g->tt, t->bWH, t->bW, W->qq
+	if( std::abs(genMom_pdgId) == 24 && RecursivelyLookForMotherId(fEvent, genP_index, 6, true) ){
+
+	  if (genP_pdgId > 0) gtt_tbW_Wqq_Quark_p4 = p.p4();
+	  if (genP_pdgId < 0) gtt_tbW_Wqq_AntiQuark_p4 = p.p4();
 	}
 
       }  // if: Quarks
@@ -326,11 +335,37 @@ void GenParticleKinematics::process(Long64_t entry) {
   }//for-loop: genParticles
 
 
-  // Event-based calculations: 
-  double dr = ROOT::Math::VectorUtil::DeltaR(Htb_TQuark_p4, Htb_BQuark_p4);
-  std::cout << "dr = " << dr << std::endl;
+  // H+->tb, t->bW, W->qq
+  double dR_Htb_TQuark_Htb_BQuark            = ROOT::Math::VectorUtil::DeltaR(Htb_TQuark_p4, Htb_BQuark_p4);
+  double dR_Htb_TQuark_associated_TQuark     = ROOT::Math::VectorUtil::DeltaR(Htb_TQuark_p4, associated_TQuark_p4);
+  double dR_Htb_TQuark_associated_BQuark     = ROOT::Math::VectorUtil::DeltaR(Htb_TQuark_p4, associated_BQuark_p4);
+  double dR_Htb_BQuark_Htb_tbW_BQuark        = ROOT::Math::VectorUtil::DeltaR(Htb_BQuark_p4, Htb_tbW_BQuark_p4);
+  double dR_Htb_BQuark_Htb_tbW_Wqq_Quark     = ROOT::Math::VectorUtil::DeltaR(Htb_BQuark_p4, Htb_tbW_Wqq_Quark_p4);
+  double dR_Htb_BQuark_Htb_tbW_Wqq_AntiQuark = ROOT::Math::VectorUtil::DeltaR(Htb_BQuark_p4, Htb_tbW_Wqq_AntiQuark_p4);
+  
+  // Associated products
+  double dR_associated_TQuark_associated_BQuark  = ROOT::Math::VectorUtil::DeltaR(associated_TQuark_p4, associated_BQuark_p4);
+  double dR_associated_TQuark_gtt_tbW_BQuark     = ROOT::Math::VectorUtil::DeltaR(associated_TQuark_p4, gtt_tbW_BQuark_p4); 
+  double dR_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark     = ROOT::Math::VectorUtil::DeltaR(gtt_tbW_BQuark_p4, gtt_tbW_Wqq_Quark_p4);
+  double dR_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark = ROOT::Math::VectorUtil::DeltaR(gtt_tbW_BQuark_p4, gtt_tbW_Wqq_AntiQuark_p4);
+  
+
+  // Htb_HPlus_p4;
+  // Htb_TQuark_p4;
+  // Htb_BQuark_p4;
+  // Htb_tbW_WBoson_p4;
+  // Htb_tbW_Wqq_Quark_p4;
+  // Htb_tbW_Wqq_AntiQuark_p4;
+  // associated_TQuark_p4;
+  // associated_BQuark_p4;
+  // gtt_tbW_WBoson_p4;
+  // gtt_tbW_BQuark_p4;
+
+
 
   
+
+
   // Apply trigger
   if (!fEvent.passTriggerDecision()) return;
   cTrigger.increment();
