@@ -401,16 +401,16 @@ class QCDInvertedResultManager:
         self._shapePlots.append(myPlotHisto)
         self._shapePlotLabels.append(plotName)
         # MC EWK and purity
-        #myPlotMCEWKHisto = aux.Clone(myPlot.getResultMCEWK(), "ctrlPlotMCEWKInManager")
-        #myPlotMCEWKHisto.SetName(plotName+"%d_MCEWK"%i)
-        #myPlotMCEWKHisto.SetTitle(plotName+"_MCEWK")
-        #self._shapePlots.append(myPlotMCEWKHisto)
-        #self._shapePlotLabels.append(myPlotMCEWKHisto.GetTitle())
-        #myPlotPurityHisto = aux.Clone(myPlot.getResultPurity(), "ctrlPlotPurityInManager")
-        #myPlotPurityHisto.SetName(plotName+"%d_Purity"%i)
-        #myPlotPurityHisto.SetTitle(plotName+"_Purity")
-        #self._shapePlots.append(myPlotPurityHisto)
-        #self._shapePlotLabels.append(myPlotPurityHisto.GetTitle())
+        myPlotMCEWKHisto = aux.Clone(myPlot.getResultMCEWK(), "ctrlPlotMCEWKInManager")
+        myPlotMCEWKHisto.SetName(plotName+"%d_MCEWK"%i)
+        myPlotMCEWKHisto.SetTitle(plotName+"_MCEWK")
+        self._shapePlots.append(myPlotMCEWKHisto)
+        self._shapePlotLabels.append(myPlotMCEWKHisto.GetTitle())
+        myPlotPurityHisto = aux.Clone(myPlot.getResultPurity(), "ctrlPlotPurityInManager")
+        myPlotPurityHisto.SetName(plotName+"%d_Purity"%i)
+        myPlotPurityHisto.SetTitle(plotName+"_Purity")
+        self._shapePlots.append(myPlotPurityHisto)
+        self._shapePlotLabels.append(myPlotPurityHisto.GetTitle())
         return myPlotHisto
 
     def _obtainQCDNormalizationSystHistograms(self, shapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc):
