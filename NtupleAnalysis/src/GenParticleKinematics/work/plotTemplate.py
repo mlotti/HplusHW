@@ -31,7 +31,7 @@ user        = getpass.getuser()
 initial     = getpass.getuser()[0]
 savePath    = "/afs/cern.ch/user/%s/%s/public/html/%s/" % (initial, user, analysis)
 saveFormats = [".png"] #,".pdf",".C"]
-kinVar      = "Pt"  # "Pt", "Eta", "Phi"
+kinVar      = "Pt"  # "Pt", "Eta", "Phi", "dR"
 normalizeTo = "One" # "", "One", "XSection", "Luminosity"
 rebinFactor = 2     # 5
 ratio       = False
@@ -244,27 +244,41 @@ def removeErrorBars(histo):
         histo.SetBinError(bin, 0.0)
     return
 
+
 def getHistoNames(kinVar):
 
     isValidVar(kinVar)
 
     hNames = []
-    hNames.append("gtt_TQuark_" + kinVar)
-    hNames.append("gtt_tbW_WBoson_" + kinVar)
-    hNames.append("gtt_tbW_BQuark_" + kinVar)
-    hNames.append("tbH_HPlus_" + kinVar)
-    hNames.append("tbH_TQuark_" + kinVar)
-    hNames.append("tbH_BQuark_" + kinVar)
-    hNames.append("tbH_tbW_WBoson_" + kinVar)
-    hNames.append("tbH_tbW_BQuark_" + kinVar)
-    hNames.append("gbb_BQuark_" + kinVar)
+    if kinVar != "dR":
+        hNames.append("gtt_TQuark_" + kinVar)
+        hNames.append("gtt_tbW_WBoson_" + kinVar)
+        hNames.append("gtt_tbW_BQuark_" + kinVar)
+        hNames.append("tbH_HPlus_" + kinVar)
+        hNames.append("tbH_TQuark_" + kinVar)
+        hNames.append("tbH_BQuark_" + kinVar)
+        hNames.append("tbH_tbW_WBoson_" + kinVar)
+        hNames.append("tbH_tbW_BQuark_" + kinVar)
+        hNames.append("gbb_BQuark_" + kinVar)
+    else:
+        hNames.append("h_dR_Htb_TQuark_Htb_BQuark_" + kinVar)
+        hNames.append("h_dR_Htb_TQuark_associated_TQuark_" + kinVar)
+        hNames.append("h_dR_Htb_TQuark_associated_BQuark_" + kinVar)
+        hNames.append("h_dR_Htb_BQuark_Htb_tbW_BQuark_" + kinVar)
+        hNames.append("h_dR_Htb_BQuark_Htb_tbW_Wqq_Quark_" + kinVar)
+        hNames.append("h_dR_Htb_BQuark_Htb_tbW_Wqq_AntiQuark_" + kinVar)
+        hNames.append("h_dR_associated_TQuark_associated_BQuark_" + kinVar)
+        hNames.append("h_dR_associated_TQuark_gtt_tbW_BQuark_" + kinVar)
+        hNames.append("h_dR_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_" + kinVar)
+        hNames.append("h_dR_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_" + kinVar)
+        
     return hNames
 
 
 def getUnitsX(kinVar):
 
     isValidVar(kinVar)    
-    VarsToUnits = {"Pt": "GeV/c", "Eta": "", "Phi": "rads"}
+    VarsToUnits = {"Pt": "GeV/c", "Eta": "", "Phi": "rads", "dR": ""}
 
     return VarsToUnits[kinVar]
 
@@ -272,7 +286,7 @@ def getUnitsX(kinVar):
 def getSymbolX(kinVar):
 
     isValidVar(kinVar)
-    VarsToSymbols = {"Pt": "p_{T}", "Eta": "#eta", "Phi": "#phi"}
+    VarsToSymbols = {"Pt": "p_{T}", "Eta": "#eta", "Phi": "#phi", "dR": "#DeltaR"}
 
     return VarsToSymbols[kinVar]
 
@@ -280,7 +294,7 @@ def getSymbolX(kinVar):
 def getUnitsFormatX(kinVar):
 
     isValidVar(kinVar)
-    VarsToNDecimals = {"Pt": "%0.0f", "Eta": "%0.2f", "Phi": "%0.03f"}
+    VarsToNDecimals = {"Pt": "%0.0f", "Eta": "%0.2f", "Phi": "%0.03f", "dR": "%0.02f"}
 
     return VarsToNDecimals[kinVar]
 
@@ -308,7 +322,7 @@ def getTitleY(normalizeTo, kinVar, opts):
 
     
 def isValidVar(kinVar):
-    validVars = ["Pt", "Eta", "Phi"]
+    validVars = ["Pt", "Eta", "Phi", "dR"]
     if kinVar not in validVars:
         raise Exception("Invalid kinematics variable \"%s\". Please choose one of the following: %s" % (kinVar, "\"" + "\", \"".join(validVars) ) + "\"")
     return

@@ -67,6 +67,17 @@ private:
   WrappedTH1 *h_tbH_tbW_BQuark_Phi;
   WrappedTH1 *h_gbb_BQuark_Phi;
 
+  WrappedTH1 *h_Htb_TQuark_Htb_BQuark_dR;
+  WrappedTH1 *h_Htb_TQuark_associated_TQuark_dR;
+  WrappedTH1 *h_Htb_TQuark_associated_BQuark_dR;
+  WrappedTH1 *h_Htb_BQuark_Htb_tbW_BQuark_dR;
+  WrappedTH1 *h_Htb_BQuark_Htb_tbW_Wqq_Quark_dR;
+  WrappedTH1 *h_Htb_BQuark_Htb_tbW_Wqq_AntiQuark_dR;
+  WrappedTH1 *h_associated_TQuark_associated_BQuark_dR;
+  WrappedTH1 *h_associated_TQuark_gtt_tbW_BQuark_dR;
+  WrappedTH1 *h_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dR;
+  WrappedTH1 *h_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dR;
+
 };
 
 #include "Framework/interface/SelectorFactory.h"
@@ -117,6 +128,23 @@ void GenParticleKinematics::book(TDirectory *dir) {
   h_tbH_tbW_BQuark_Phi =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "tbH_tbW_BQuark_Phi", "tbH, tbW, b-quark pT", 100, -3.1416, +3.1416);
   h_gbb_BQuark_Phi     =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir,  "gbb_BQuark_Phi"   , "gtt, b-quark pT, "   , 100, -3.1416, +3.1416);
 
+  // deltaR
+  h_Htb_TQuark_Htb_BQuark_dR                = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "Htb_TQuark_Htb_BQuark_dR"               , "dR(t, b)", 100, 0.0, +10.0);
+  h_Htb_TQuark_associated_TQuark_dR         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "Htb_TQuark_associated_TQuark_dR"        , "dR(t, t)", 100, 0.0, +10.0);
+  h_Htb_TQuark_associated_BQuark_dR         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "Htb_TQuark_associated_BQuark_dR"        , "dR(t, b)", 100, 0.0, +10.0);
+  h_Htb_BQuark_Htb_tbW_BQuark_dR            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "Htb_BQuark_Htb_tbW_BQuark_dR"           , "dR(b, b)", 100, 0.0, +10.0);
+  h_Htb_BQuark_Htb_tbW_Wqq_Quark_dR         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "Htb_BQuark_Htb_tbW_Wqq_Quark_dR"        , "dR(b, q)", 100, 0.0, +10.0);
+  h_Htb_BQuark_Htb_tbW_Wqq_AntiQuark_dR     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "Htb_BQuark_Htb_tbW_Wqq_AntiQuark_dR"    , "dR(b, q)", 100, 0.0, +10.0);
+  h_associated_TQuark_associated_BQuark_dR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associated_TQuark_associated_BQuark_dR" , "dR(b, b)", 100, 0.0, +10.0);
+  h_associated_TQuark_gtt_tbW_BQuark_dR     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associated_TQuark_gtt_tbW_BQuark_dR"    , "dR(t, b)", 100, 0.0, +10.0);
+  h_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dR     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dR"    , "dR(b, q)", 100, 0.0, +10.0);
+  h_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dR", "dR(b, q)", 100, 0.0, +10.0);
+
+  // B-quarks
+  // h_BQuark_Ldg_Pt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "BQuark_Ldg_Pt"  , "Ldg b-quark, pT"                 , 100, 0.0, +500.0);
+  // h_BQuark_NLdg_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "BQuark_NLdg_Pt" , "Next-to-Ldg b-quark, pT"         , 100, 0.0, +500.0);
+  // h_BQuark_NNLdg_Pt = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "BQuark_NNLdg_Pt", "Next-to-Next-to-Ldg b-quark, pT" , 100, 0.0, +500.0);
+  
   // TDirectory *WDir = dir->mkdir("W");
   // hWTauRtau1Pr0Pizero = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, WDir, "tauRtau1Pr0Pizero", "tauRtau1Pr0Pizero", 60, 0.0, 1.2);
   
@@ -150,7 +178,6 @@ void GenParticleKinematics::process(Long64_t entry) {
   // Event-based variables
   h_genMET_Et ->Fill(fEvent.genMET().et());
   h_genMET_Phi->Fill(fEvent.genMET().Phi());
-  // h_genMET_Sig->Fill(fEvent.genMET().Significance());
 
   // HPlus & decay product
   math::XYZTLorentzVector Htb_HPlus_p4;
@@ -170,7 +197,7 @@ void GenParticleKinematics::process(Long64_t entry) {
   math::XYZTLorentzVector gtt_tbW_Wqq_AntiQuark_p4;
   math::XYZTLorentzVector gtt_tbW_WBoson_p4;
   math::XYZTLorentzVector gtt_tbW_BQuark_p4;
-
+ 
   int genP_index = -1;
   // For-loop: GenParticles
   for (auto& p: fEvent.genparticles().getGenParticles()) {
@@ -348,7 +375,18 @@ void GenParticleKinematics::process(Long64_t entry) {
   double dR_associated_TQuark_gtt_tbW_BQuark     = ROOT::Math::VectorUtil::DeltaR(associated_TQuark_p4, gtt_tbW_BQuark_p4); 
   double dR_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark     = ROOT::Math::VectorUtil::DeltaR(gtt_tbW_BQuark_p4, gtt_tbW_Wqq_Quark_p4);
   double dR_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark = ROOT::Math::VectorUtil::DeltaR(gtt_tbW_BQuark_p4, gtt_tbW_Wqq_AntiQuark_p4);
-  
+
+  // Fill dR histos
+  h_Htb_TQuark_Htb_BQuark_dR                ->Fill( dR_Htb_TQuark_Htb_BQuark);
+  h_Htb_TQuark_associated_TQuark_dR         ->Fill( dR_Htb_TQuark_associated_TQuark);
+  h_Htb_TQuark_associated_BQuark_dR         ->Fill( dR_Htb_TQuark_associated_BQuark);
+  h_Htb_BQuark_Htb_tbW_BQuark_dR            ->Fill( dR_Htb_BQuark_Htb_tbW_BQuark);
+  h_Htb_BQuark_Htb_tbW_Wqq_Quark_dR         ->Fill( dR_Htb_BQuark_Htb_tbW_Wqq_Quark);
+  h_Htb_BQuark_Htb_tbW_Wqq_AntiQuark_dR     ->Fill( dR_Htb_BQuark_Htb_tbW_Wqq_AntiQuark);
+  h_associated_TQuark_associated_BQuark_dR  ->Fill( dR_associated_TQuark_associated_BQuark);
+  h_associated_TQuark_gtt_tbW_BQuark_dR     ->Fill( dR_associated_TQuark_gtt_tbW_BQuark);
+  h_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_dR     ->Fill( dR_gtt_tbW_BQuark_gtt_tbW_Wqq_Quark);
+  h_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_dR ->Fill( dR_gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark);
 
   // Htb_HPlus_p4;
   // Htb_TQuark_p4;
@@ -360,10 +398,6 @@ void GenParticleKinematics::process(Long64_t entry) {
   // associated_BQuark_p4;
   // gtt_tbW_WBoson_p4;
   // gtt_tbW_BQuark_p4;
-
-
-
-  
 
 
   // Apply trigger
