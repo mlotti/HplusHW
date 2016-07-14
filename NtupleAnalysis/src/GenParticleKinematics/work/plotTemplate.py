@@ -257,7 +257,7 @@ def getHistoNames(kinVar):
     hNames.append("tbH_BQuark_" + kinVar)
     hNames.append("tbH_tbW_WBoson_" + kinVar)
     hNames.append("tbH_tbW_BQuark_" + kinVar)
-    hNames.append("gtt_BQuark_" + kinVar)
+    hNames.append("gbb_BQuark_" + kinVar)
     return hNames
 
 
