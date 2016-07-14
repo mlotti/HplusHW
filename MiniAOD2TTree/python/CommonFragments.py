@@ -5,11 +5,12 @@ import FWCore.ParameterSet.Config as cms
 # - Call produceCustomisations just before cms.Path
 # - Add process.CustomisationsSequence to the cms.Path
 
-def produceCustomisations(process):
+def produceCustomisations(process,isData):
     process.CustomisationsSequence = cms.Sequence()
     reproduceJEC(process)
 #    reproduceElectronID(process)
     reproduceMETNoiseFilters(process)
+    reproduceMET(process,isData)
     print "=== Customisations done"
 
 # ===== Reproduce jet collections with the latest JEC =====
@@ -75,21 +76,72 @@ def reproduceMETNoiseFilters(process):
     process.CustomisationsSequence += process.HBHENoiseFilterResultProducer
 
 # ===== Set up MET uncertainties - FIXME: does not work at the moment =====
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATTools#MET_Systematics_Tools
-#def reproduceMET(process):
-    #import PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties as metUncertaintyTools
-    #metUncertaintyTools.runMETCorrectionsAndUncertainties(process=process,
-                                                      #metType="PF",
-                                                      #correctionLevel=["T0","T1","Txy"], # additional options: Smear
-                                                      #computeUncertainties=True,
-                                                      #produceIntermediateCorrections=False,
-                                                      #addToPatDefaultSequence=True,
-                                                      #jetCollection=cms.InputTag("slimmedJets"),
-                                                      #jetCollectionUnskimmed=cms.InputTag("slimmedJets"),
-                                                      #electronCollection="",
-                                                      #muonCollection="",
-                                                      #tauCollection="",
-                                                      #pfCandCollection=cms.InputTag("packedPFCandidates"),
-                                                      #onMiniAOD=True,
-                                                      #postfix="Type01xy")
+# https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#A_tool_to_help_you_calculate_MET
+def reproduceMET(process,isdata):
 
+    if isdata:
+	return
+
+    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+    
+    #default configuration for miniAOD reprocessing, change the isData flag to run on data
+    #for a full met computation, remove the pfCandColl input
+    runMetCorAndUncFromMiniAOD(process,
+                           isData=isdata,
+                           )
+    process.selectedPatJetsForMetT1T2Corr.src = cms.InputTag("cleanedPatJets")
+    process.patPFMetT1.src = cms.InputTag("slimmedMETs")
+
+    process.CustomisationsSequence += process.patJetCorrFactorsReapplyJEC 
+    process.CustomisationsSequence += process.patJetsReapplyJEC
+    process.CustomisationsSequence += process.basicJetsForMet
+    process.CustomisationsSequence += process.jetSelectorForMet
+    process.CustomisationsSequence += process.cleanedPatJets
+    process.CustomisationsSequence += process.metrawCalo
+    process.CustomisationsSequence += process.selectedPatJetsForMetT1T2Corr   
+    process.CustomisationsSequence += process.patPFMetT1T2Corr
+    process.CustomisationsSequence += process.patPFMetT1
+
+    process.CustomisationsSequence += process.patMetUncertaintySequence
+    process.CustomisationsSequence += process.patShiftedModuleSequence
+    process.CustomisationsSequence += process.patMetCorrectionSequence
+
+    """    
+    # puppi jets and puppi met
+    from PhysicsTools.PatAlgos.slimming.puppiForMET_cff import makePuppiesFromMiniAOD
+    makePuppiesFromMiniAOD(process);
+
+    runMetCorAndUncFromMiniAOD(process,
+                             isData=isdata,
+                             pfCandColl=cms.InputTag("puppiForMET"),
+                             recoMetFromPFCs=True,
+                             reclusterJets=True,
+                             jetFlavor="AK4PFPuppi",
+                             postfix="Puppi"
+                             )
+    process.patPFMetPuppi.addGenMET = cms.bool(False)
+    process.basicJetsForMetPuppi.src = cms.InputTag("slimmedJetsPuppi")
+    process.patPFMetT1Puppi.src = cms.InputTag("slimmedMETsPuppi")
+
+    process.producePatPFMETCorrectionsPuppi.remove(process.patPFMetPuppi)
+    process.CustomisationsSequence += process.producePatPFMETCorrectionsPuppi
+
+#    process.CustomisationsSequence += process.pfNoLepPUPPI
+#    process.CustomisationsSequence += process.puppiNoLep
+#    process.CustomisationsSequence += process.pfLeptonsPUPPET
+#    process.CustomisationsSequence += process.puppiMerged
+#    process.CustomisationsSequence += process.puppiForMET
+##    process.CustomisationsSequence += process.pfMetPuppi
+##    process.CustomisationsSequence += process.patPFMetPuppi
+#    process.CustomisationsSequence += process.ak4PFJetsPuppi
+#    process.CustomisationsSequence += process.basicJetsForMetPuppi
+#    process.CustomisationsSequence += process.jetSelectorForMetPuppi
+#    process.CustomisationsSequence += process.cleanedPatJetsPuppi
+#    process.CustomisationsSequence += process.pfMetPuppi
+#    process.CustomisationsSequence += process.metrawCaloPuppi
+#    process.CustomisationsSequence += process.patPFMetT1Puppi
+#
+#    process.CustomisationsSequence += process.patMetUncertaintySequencePuppi
+#    process.CustomisationsSequence += process.patShiftedModuleSequencePuppi
+#    process.CustomisationsSequence += process.patMetCorrectionSequencePuppi
+    """
