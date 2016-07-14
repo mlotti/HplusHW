@@ -7,7 +7,7 @@ import FWCore.ParameterSet.Config as cms
 
 def produceCustomisations(process,isData):
     process.CustomisationsSequence = cms.Sequence()
-    reproduceJEC(process)
+#    reproduceJEC(process)
 #    reproduceElectronID(process)
     reproduceMETNoiseFilters(process)
     reproduceMET(process,isData)
