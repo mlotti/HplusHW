@@ -147,7 +147,7 @@ process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.ge
 
 # === Setup customizations
 from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
-produceCustomisations(process) # This produces process.CustomisationsSequence which needs to be included to path
+produceCustomisations(process,dataVersion.isData()) # This produces process.CustomisationsSequence which needs to be included to path
 
 # module execution
 process.runEDFilter = cms.Path(process.PUInfo*
