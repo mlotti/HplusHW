@@ -1,62 +1,38 @@
 #!/usr/bin/env python
-import sys
-
-dataEras = ["2015"]
-#dataEras = ["2015B","2015C"]
-searchModes = ["80to1000"]
-
-if len(sys.argv) < 2:
-    print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory> <1pr> <2pr> <3pr>"
-    sys.exit(0)
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
-from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix 
-process = Process("CorrelationAnalysis"+obtainAnalysisSuffix(sys.argv))
+
+process = Process()
+
+# Example of adding a dataset which has its files defined in data/<dataset_name>.txt file
+#process.addDatasets(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6"])
+
+# Example of adding datasets from a multicrab directory
+import sys
+if len(sys.argv) != 2:
+    print "Usage: ./metAnalysis.py <path-to-multicrab-directory>"
+    sys.exit(0)
 process.addDatasetsFromMulticrab(sys.argv[1])
 
-# Add config
-from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections,applyAnalysisCommandLineOptions,setAngularCutsWorkingPoint
-# Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
-allSelections.CommonPlots.histogramSplitting = [
-    #PSet(label="tauPt", binLowEdges=[60.0, 70.0, 80.0, 100.0], useAbsoluteValues=False),
-  ]
-#===== Selection customisations
-allSelections.TauSelection.prongs = 1
-allSelections.METSelection.METCutValue = 80.0
-allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
-allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
-allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
-allSelections.AngularCutsBackToBack.cutValueJet4 = 40.0
-#allSelections.TauSelection.rtau = 0.0
-#allSelections.BJetSelection.numberOfBJetsCutValue = 0
-#allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
-#setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
-#===== End of selection customisations
 
-applyAnalysisCommandLineOptions(sys.argv, allSelections)
+# Example of adding an analyzer
+process.addAnalyzer("test", Analyzer("CorrelationAnalysis",
+                                     tauPtCut = 50
+#                                     metCut = 60 
+))
 
-# Build analysis modules
-from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
-builder = AnalysisBuilder("CorrelationAnalysis", 
-                          dataEras,
-                          searchModes,
-                          #### Options ####
-                          usePUreweighting=True,
-                          doSystematicVariations=False
-                          )
-#builder.addVariation("METSelection.METCutValue", [100,120,140])
-#builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
-builder.build(process, allSelections)
-
-# Pick events
-#process.addOptions(EventSaver = PSet(enabled = True,pickEvents = True))
+# Example of adding an analyzer whose configuration depends on dataVersion
+def createAnalyzer(dataVersion):
+    a = Analyzer("CorrelationAnalysis")
+    if dataVersion.isMC():
+        a.tauPtCut = 10
+    else:
+        a.tauPtCut = 20
+    return a
+process.addAnalyzer("test2", createAnalyzer)
 
 # Run the analysis
-if "proof" in sys.argv:
-    #raise Exception("Proof messes up the event weights, do not use for the moment!")
-    process.run(proof=True)
-else:
-    process.run()
+process.run()
 
 # Run the analysis with PROOF
 # By default it uses all cores, but you can give proofWorkers=<N> as a parameter
