@@ -207,10 +207,12 @@ myQCD=DataGroup(label="CMS_Hptntj_QCDandFakeTau", landsProcess=1, validMassPoint
                 datasetType="QCD inverted", datasetDefinition="QCDMeasurementMT",
                 nuisances=myTrgSystematics[:]
                           +myESSystematics[:]+myBtagSystematics[:]+myTopSystematics[:]
-                          +["CMS_Hptntj_QCDbkg_templateFit"], #,"xsect_tt_forQCD","CMS_lumi_13TeV_forQCD"]+myTauIDSystematics[:],
+                          +["CMS_Hptntj_QCDbkg_templateFit"]#+["CMS_Hptntj_QCDkbg_metshape"], #FIXME: add MET shape uncertainty
+                          +["CMS_scale_tt_forQCD","CMS_pdf_tt_forQCD","CMS_mass_tt_forQCD"] #approximation: only ttbar xsect uncertinty applied to QCD, as ttbar dominates the EWK BG (but uncertainty is scaled according to 1-purity, i.e. #all_tt+EWK_events_in_QCDandFakeTau/#all_events_in_QCDandFakeTau)
+                          +["CMS_lumi_13TeV_forQCD"],
+                           #,"xsect_tt_forQCD",""]+myTauIDSystematics[:],
                 shapeHistoName=shapeHistoName, histoPath=histoPathInclusive)
 DataGroups.append(myQCD)
-print "*** Warning *** FIXME: Add QCD uncertainties CMS_mass_scale_forQCD, CMS_pdf_tt_forQCD, CMS_mass_tt_forQCD and CMS_lumi_13TeV_forQCD"
 
 if OptionGenuineTauBackgroundSource =="DataDriven":
     # EWK genuine taus from embedding
