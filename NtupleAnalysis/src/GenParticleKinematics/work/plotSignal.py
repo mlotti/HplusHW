@@ -96,12 +96,18 @@ def main():
         if normalizeTo == "One":
             dataset1.normalizeToOne()
             dataset2.normalizeToOne()
+            dataset3.normalizeToOne()
+            dataset4.normalizeToOne()
         elif normalizeTo == "XSection":
             dataset1.normalizeByCrossSection()
             dataset2.normalizeByCrossSection()
+            dataset3.normalizeByCrossSection()
+            dataset4.normalizeByCrossSection()
         elif normalizeTo == "Luminosity":
             dataset1.normalizeToLumi(intLumi)
             dataset2.normalizeToLumi(intLumi)
+            dataset3.normalizeToLumi(intLumi)
+            dataset4.normalizeToLumi(intLumi)
         else:
             isValidNorm(normalizeTo)
         
@@ -146,22 +152,14 @@ def main():
 
 
         # Create a comparison plot
-#        p = plots.ComparisonPlot(histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
-#                                histograms.Histo(histo4, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9"))
-# #                                 histograms.Histo(histo2, "t#bar{t}", "F", "HIST,E,9"))
+        #p = plots.ComparisonPlot(histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
+        #                         histograms.Histo(histo2, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9"))
 
-        p = plots.ComparisonManyPlot(histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "F", "HIST,E,9"),
-                                     [histograms.Histo(histo2, "m_{H^{#pm}} = 300 GeV/c^{2}", "p", "P"),
-                                      histograms.Histo(histo3, "m_{H^{#pm}} = 400 GeV/c^{2}", "p", "P"),
-                                      histograms.Histo(histo4, "m_{H^{#pm}} = 500 GeV/c^{2}", "p", "P")])
-#                                 histograms.Histo(histo2, "t#bar{t}", "F", "HIST,E,9"))
+        p = plots.ComparisonManyPlot( histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
+                                      [histograms.Histo(histo2, "m_{H^{#pm}} = 300 GeV/c^{2}", "p", "P"),
+                                       histograms.Histo(histo3, "m_{H^{#pm}} = 400 GeV/c^{2}", "p", "P"),
+                                       histograms.Histo(histo4, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9")])
         
-        # Create a comparison plot (One histogram is treated as a reference histogram, and all other histograms are compared with respect to that)
-        # p = plots.ComparisonManyPlot(histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
-        #                             [histograms.Histo(histo2, "m_{H^{#pm}} = 300 GeV/c^{2}", "F", "HIST9"),
-        #                              histograms.Histo(histo3, "t#bar{t}", "F", "HIST9")])
-
-    
         # Customise plots
         opts      = {"ymin": 0.0, "binWidthX": histo1.GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(kinVar)}
         ratioOpts = {"ymin": 0.0, "ymax": 2.0 , "binWidthX": histo1.GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(kinVar)}
@@ -169,7 +167,7 @@ def main():
         
 
         # Customise Legend
-        moveLegend = {"dx": -0.1, "dy": +0.0, "dh": -0.2}
+        moveLegend = {"dx": -0.1, "dy": +0.0, "dh": +0.0}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 
 

@@ -120,7 +120,7 @@ hplus2tbAnalysisDatasets = []
 #hplus2tbAnalysisDatasets.extend(datasetsJetHTData)
 hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
 # hplus2tbAnalysisDatasets.extend(datasetsDYToQQ)
-# hplus2tbAnalysisDatasets.extend(datasetsQCD)   
+hplus2tbAnalysisDatasets.extend(datasetsQCD)   
 ## hplus2tbAnalysisDatasets.extend(datasetsQCDbEnriched)
 ## hplus2tbAnalysisDatasets.extend(datasetsQCDbGenFilter)
 ## hplus2tbAnalysisDatasets.extend(datasetsQCDHTBins)
