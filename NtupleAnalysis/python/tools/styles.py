@@ -259,6 +259,7 @@ signal500Style = StyleCompound([
         StyleFill(fillStyle=3001, fillColor=ROOT.kOrange+1), 
         StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kOrange+1) ])
 signal600Style = signalStyle.clone()
+signal1500Style = signalStyle.clone()
 
 qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
 ewkStyle = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)

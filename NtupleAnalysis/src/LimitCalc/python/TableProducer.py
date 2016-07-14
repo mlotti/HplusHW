@@ -998,7 +998,6 @@ class TableProducer:
                         else:
                             if c.hasNuisanceByMasterId(n[0]): 
                                 myResult = c.getFullNuisanceResultByMasterId(n[0])
-                                print "TYPE of myResult.getResult(): ",type(myResult.getResult())
                                 if isinstance(myResult.getResult(), ScalarUncertaintyItem):
                                     myErrorDown = myResult.getResult().getUncertaintyDown()
                                     myErrorUp = myResult.getResult().getUncertaintyUp()

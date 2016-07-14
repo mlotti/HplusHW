@@ -46,7 +46,7 @@ import styles
 import aux
 
 _lightHplusMasses = [80, 90, 100, 120, 140, 150, 155, 160]
-_heavyHplusMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600]
+_heavyHplusMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600,1500]
 _heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 500, 600, 700]
 
 ## These MC datasets must be added together before any
