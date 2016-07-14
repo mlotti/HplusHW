@@ -19,6 +19,7 @@ Jets = cms.VPSet(
         srcJERup   = cms.InputTag("shiftedPatJetResUp"),
         srcJERdown = cms.InputTag("shiftedPatJetResDown"),
 #        jecPayload = JECpayloadAK4PFchs.payload,
+
         discriminators = cms.vstring(
             "pfJetBProbabilityBJetTags",
             "pfJetProbabilityBJetTags",
