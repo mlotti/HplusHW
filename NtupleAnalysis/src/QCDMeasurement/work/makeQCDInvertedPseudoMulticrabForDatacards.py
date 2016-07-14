@@ -274,10 +274,12 @@ if __name__ == "__main__":
     myGlobalStartTime = time.time()
     for shapeType in opts.shape:
         # Determine normalization sources
-        _generalOptions["normalizationDataSource"] = "%s%s%s"%(_generalOptions["normalizationSourcePrefix"], shapeType, _generalOptions["normalizationPoint"])
-        prefix = _generalOptions["EWKsource"].replace(_generalOptions["dataSource"],"")
-        _generalOptions["normalizationEWKSource"] = _generalOptions["normalizationSourcePrefix"].replace("/","%s/"%prefix)
-        _generalOptions["normalizationEWKSource"] += "%s%s"%(shapeType, _generalOptions["normalizationPoint"])
+        #_generalOptions["normalizationDataSource"] = "%s%s%s"%(_generalOptions["normalizationSourcePrefix"], shapeType, _generalOptions["normalizationPoint"]) #obsolete
+        _generalOptions["normalizationDataSource"] = "ForDataDrivenCtrlPlots"
+#        prefix = _generalOptions["EWKsource"].replace(_generalOptions["dataSource"],"")
+#        _generalOptions["normalizationEWKSource"] = _generalOptions["normalizationSourcePrefix"].replace("/","%s/"%prefix)
+#        _generalOptions["normalizationEWKSource"] += "%s%s"%(shapeType, _generalOptions["normalizationPoint"])
+        _generalOptions["normalizationEWKSource"] = "ForDataDrivenCtrlPlots"
         # Initialize
         myOutputCreator.initialize(shapeType)
         print ShellStyles.HighlightStyle()+"Creating dataset for shape: %s%s"%(shapeType,ShellStyles.NormalStyle())
@@ -304,13 +306,14 @@ if __name__ == "__main__":
                     nominalModule.buildModule(_generalOptions["dataSource"],
                                               _generalOptions["EWKsource"],
                                               myNormFactors["nominal"],
-                                              calculateQCDNormalizationSyst=False, #FIXME: True
+                                              calculateQCDNormalizationSyst=True, # buildQCDNormalizationSystModule uses these!
                                               normDataSrc=_generalOptions["normalizationDataSource"],
                                               normEWKSrc=_generalOptions["normalizationEWKSource"])
-                    if False: # FIXME
-                        #===== QCD normalization systematics
-                        nominalModule.buildQCDNormalizationSystModule(_generalOptions["dataSource"],
-                                                                      _generalOptions["EWKsource"])
+                    #===== QCD normalization systematics
+                    nominalModule.buildQCDNormalizationSystModule(_generalOptions["dataSource"],
+                                                                  _generalOptions["EWKsource"])
+                    if False: #FIXME
+                    
                         #===== Quark gluon weighting systematics
                         nominalModule.buildQCDQuarkGluonWeightingSystModule(_generalOptions["dataSource"],
                                                                             _generalOptions["EWKsource"],

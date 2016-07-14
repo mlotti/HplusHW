@@ -207,7 +207,7 @@ myQCD=DataGroup(label="CMS_Hptntj_QCDandFakeTau", landsProcess=1, validMassPoint
                 datasetType="QCD inverted", datasetDefinition="QCDMeasurementMT",
                 nuisances=myTrgSystematics[:]
                           +myESSystematics[:]+myBtagSystematics[:]+myTopSystematics[:]
-                          +["CMS_Hptntj_QCDbkg_templateFit"]#+["CMS_Hptntj_QCDkbg_metshape"], #FIXME: add MET shape uncertainty
+                          +["CMS_Hptntj_QCDbkg_templateFit","CMS_Hptntj_QCDkbg_metshape"]
                           +["CMS_scale_tt_forQCD","CMS_pdf_tt_forQCD","CMS_mass_tt_forQCD"] #approximation: only ttbar xsect uncertinty applied to QCD, as ttbar dominates the EWK BG (but uncertainty is scaled according to 1-purity, i.e. #all_tt+EWK_events_in_QCDandFakeTau/#all_events_in_QCDandFakeTau)
                           +["CMS_lumi_13TeV_forQCD"],
                            #,"xsect_tt_forQCD",""]+myTauIDSystematics[:],

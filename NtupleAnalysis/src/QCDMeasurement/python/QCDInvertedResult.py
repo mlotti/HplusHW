@@ -446,11 +446,11 @@ class QCDInvertedResultManager:
         #self._QCDNormalizationSystPlots.append(hDown)
         #self._QCDNormalizationSystPlotLabels.append(hDown.GetTitle())
         # Store source histograms
-        hNum = aux.Clone(myPlotRegionTransitionSyst.getCombinedSignalRegionHistogram(), "QCDfactMgrSystQCDSystNumerator%d"%i)
+        hNum = aux.Clone(myPlotRegionTransitionSyst.getCombinedSignalRegionHistogram(), "QCDfactMgrSystQCDSystNumerator")
         hNum.SetTitle(plotName+"systQCDNumerator")
         self._QCDNormalizationSystPlots.append(hNum)
         self._QCDNormalizationSystPlotLabels.append(hNum.GetTitle())
-        hDenom = aux.Clone(myPlotRegionTransitionSyst.getCombinedCtrlRegionHistogram(), "QCDfactMgrSystQCDSystDenominator%d"%i)
+        hDenom = aux.Clone(myPlotRegionTransitionSyst.getCombinedCtrlRegionHistogram(), "QCDfactMgrSystQCDSystDenominator")
         hDenom.SetTitle(plotName+"systQCDDenominator")
         self._QCDNormalizationSystPlots.append(hDenom)
         self._QCDNormalizationSystPlotLabels.append(hDenom.GetTitle())
