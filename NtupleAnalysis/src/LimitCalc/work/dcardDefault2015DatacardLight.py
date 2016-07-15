@@ -210,7 +210,7 @@ myQCD=DataGroup(label="CMS_Hptntj_QCDandFakeTau", landsProcess=1, validMassPoint
                           +["CMS_Hptntj_QCDbkg_templateFit","CMS_Hptntj_QCDkbg_metshape"]
                           +["CMS_scale_tt_forQCD","CMS_pdf_tt_forQCD","CMS_mass_tt_forQCD"] #approximation: only ttbar xsect uncertinty applied to QCD, as ttbar dominates the EWK BG (but uncertainty is scaled according to 1-purity, i.e. #all_tt+EWK_events_in_QCDandFakeTau/#all_events_in_QCDandFakeTau)
                           +["CMS_lumi_13TeV_forQCD"],
-                           #,"xsect_tt_forQCD",""]+myTauIDSystematics[:],
+                          +["CMS_eff_t_forQCD"],
                 shapeHistoName=shapeHistoName, histoPath=histoPathInclusive)
 DataGroups.append(myQCD)
 
@@ -330,12 +330,14 @@ Nuisances.append(Nuisance(id="CMS_veto_mu", label="mu veto",
 ))
 #=====tau ID and mis-ID
 # tau ID
-if "CMS_eff_t" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_eff_t", label="tau-jet ID (no Rtau) genuine taus",
-        distr="shapeQ", function="ShapeVariation", systVariation="GenuineTau"))
-else:
-    Nuisances.append(Nuisance(id="CMS_eff_t", label="APPROXIMATION for tau-jet ID (no Rtau) genuine taus",
-        distr="lnN", function="Constant", value=0.06))
+Nuisances.append(Nuisance(id="CMS_eff_t", label="tau-jet ID (no Rtau) uncertainty for genuine taus",
+    distr="lnN", function="Constant", value=0.06))
+Nuisances.append(Nuisance(id="CMS_eff_t_forQCD", label="tau-jet ID (no Rtau) uncertainty for genuine taus",
+    distr="lnN", function="ConstantForQCD", value=0.06))
+# tau ID high-pT
+if "CMS_eff_t_highpt" in myShapeSystematics:
+    Nuisances.append(Nuisance(id="CMS_eff_t_highpt", label="tau-jet ID (no Rtau) high-pt uncertainty for genuine taus",
+        distr="shapeQ", function="ShapeVariation", systVariation="GenuineTau"))       
 # e->tau mis-ID
 if "CMS_fake_eToTau" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_fake_eToTau", label="tau-jet ID (no Rtau) e->tau",
@@ -558,6 +560,7 @@ if "CMS_eff_t_constShape" in myEmbeddingShapeSystematics:
 #MergeNuisances.append(["CMS_mistag_b","CMS_mistag_b_genuinetau"])
 #MergeNuisances.append(["CMS_pileup","CMS_pileup_genuinetau"])
 
+MergeNuisances.append(["CMS_eff_t","CMS_eff_t_forQCD"])
 #MergeNuisances.append(["xsect_tt", "xsect_tt_forQCD"])
 MergeNuisances.append(["CMS_scale_tt", "CMS_scale_tt_forQCD"])
 MergeNuisances.append(["CMS_pdf_tt", "CMS_pdf_tt_forQCD"])
