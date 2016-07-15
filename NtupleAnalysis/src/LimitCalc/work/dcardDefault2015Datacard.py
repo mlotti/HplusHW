@@ -319,7 +319,7 @@ else:
 Nuisances.append(Nuisance(id="CMS_veto_e", label="e veto",
     distr="lnN", function="Ratio",
     numerator="passed e selection (Veto)", # main counter name after electron veto
-    denominator="Tau trigger SF", # main counter name before electron and muon veto
+    denominator="Met trigger SF", # main counter name before electron and muon veto
     scaling=0.02
 ))
 Nuisances.append(Nuisance(id="CMS_veto_mu", label="mu veto",
