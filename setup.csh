@@ -101,7 +101,7 @@ else
     endif
 
     # echo "\n=== Loop over directories under NtupleAnalysis/ and HeavyChHiggsToTauNu/"
-    foreach DIR ( NtupleAnalysis HeavyChHiggsToTauNu )
+    foreach DIR ( NtupleAnalysis )
 	# echo "DIR=$DIR"
 
 	set LINK_NAME=$PATHPREFIX/HiggsAnalysis/$DIR
@@ -168,7 +168,8 @@ endif
 
 
 #echo "\n=== Setting PATH variable"
-setenv PATH "${HIGGSANALYSIS_BASE}/HeavyChHiggsToTauNu/scripts:${HIGGSANALYSIS_BASE}/NtupleAnalysis/scripts:${PATH}"
+#setenv PATH "${HIGGSANALYSIS_BASE}/HeavyChHiggsToTauNu/scripts:${HIGGSANALYSIS_BASE}/NtupleAnalysis/scripts:${PATH}"
+setenv PATH "${HIGGSANALYSIS_BASE}/NtupleAnalysis/scripts:${PATH}"
 
 #echo "\n=== Install externals (if necessary)"
 sh +x installexternals.sh
