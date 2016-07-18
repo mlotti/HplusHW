@@ -47,6 +47,7 @@ OptionRealisticEmbeddingWithMC=True # Only relevant for OptionReplaceEmbeddingBy
 OptionIncludeSystematics=True # Set to true if you produced multicrabs with doSystematics=True
 
 OptionDoControlPlots= not True #FIXME: if you want control plots, switch this to true!
+OptionDoMergeEWKttbar = True #FIXME: if true, merges tt and singleTop into one and Wjets+DY+diboson into another background
 OptionDoMergeFakeTauColumns=True # Merges the fake tau columns into one
 OptionCombineSingleColumnUncertainties=False # Makes limit running faster
 OptionCtrlPlotsAtMt=True # Produce control plots after all selections (all selections for transverse mass)
@@ -276,6 +277,10 @@ else:
         #mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
     #else:
         #mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
+
+    if OptionDoMergeEWKttbar:
+        mergeColumnsByLabel.append({"label": "CMS_Hptntj_tt_and_singleTop_genuinetau", "mergeList": ["CMS_Hptntj_tt_genuinetau","CMS_Hptntj_t_genuinetau"]})    
+        mergeColumnsByLabel.append({"label": "CMS_Hptntj_EWK_genuinetau", "mergeList": ["CMS_Hptntj_W_genuinetau","CMS_Hptntj_DY_genuinetau","CMS_Hptntj_VV_genuinetau"]})
 
 # Reserve column 2
 # This was necessary for LandS; code could be updated to combine for this piece

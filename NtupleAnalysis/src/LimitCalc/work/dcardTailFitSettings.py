@@ -64,8 +64,6 @@ fitSettings = [
 
 # List of backgrounds, for which no fit is done
 Blacklist = [
-  #"t_EWK_faketau",
-  #"tt_EWK_faketau",
-  #"QCDinv",
-  #"EWK_Tau",
+#    "CMS_Hptntj_DY_genuinetau","DY_genuinetau", #blacklisted because contribution from DY is ~zero above mT=180 GeV (=fitstart=applyfrom)
+#    "CMS_Hptntj_W_genuinetau","W_genuinetau", #FIXME: temporarily blacklisted to get rid of errors
 ]
