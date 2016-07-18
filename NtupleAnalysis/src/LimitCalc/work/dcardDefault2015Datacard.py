@@ -134,7 +134,7 @@ Observation=ObservationInput(datasetDefinition="Data", shapeHistoName=shapeHisto
 myTrgSystematics=["CMS_trg_taumet_tau_dataeff","CMS_trg_taumet_tau_MCeff", # Trigger tau part
                   "CMS_trg_taumet_MET_dataeff","CMS_trg_taumet_MET_MCeff"] # Trigger MET part
 myTauIDSystematics=["CMS_eff_t"] #tau ID
-myTauMisIDSystematics=["CMS_fake_eToTau","CMS_fake_muToTau","CMS_fake_jetToTau"] # tau mis-ID
+#myTauMisIDSystematics=["CMS_fake_eToTau","CMS_fake_muToTau","CMS_fake_jetToTau"] # tau mis-ID
 myESSystematics=["CMS_scale_t","CMS_scale_j","CMS_res_j","CMS_scale_met"] # TES, JES, CMS_res_j, UES
 myBtagSystematics=["CMS_tag_b","CMS_mistag_b"] # b tag and mistag
 myTopSystematics=["CMS_Hptntj_topPtReweighting"] # top pt reweighting
@@ -144,7 +144,7 @@ myLeptonVetoSystematics=["CMS_veto_e","CMS_veto_mu"] # CMS_pileup
 myShapeSystematics=[]
 myShapeSystematics.extend(myTrgSystematics)
 #myShapeSystematics.extend(myTauIDSystematics)
-myShapeSystematics.extend(myTauMisIDSystematics)
+#myShapeSystematics.extend(myTauMisIDSystematics)
 myShapeSystematics.extend(["CMS_scale_t","CMS_scale_j"]) #myESSystematics)
 myShapeSystematics.extend(myBtagSystematics)
 myShapeSystematics.extend(myTopSystematics)
@@ -172,7 +172,7 @@ for mass in LightMassPoints:
     hwx.setLabel("CMS_Hptntj_HW"+str(mass)+"_a")
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
-    hwx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
+    hwx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:] #+myTauMisIDSystematics[:]
                      +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
 #                     +["xsect_tt","CMS_lumi_13TeV"])
                      +["CMS_scale_tt","CMS_pdf_tt","CMS_mass_tt","CMS_lumi_13TeV"])
@@ -184,7 +184,7 @@ for mass in HeavyMassPoints:
     hx.setLabel("CMS_Hptntj_Hp"+str(mass)+"_a")
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
-    hx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
+    hx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:] #+myTauMisIDSystematics[:]
                     +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                     +["CMS_lumi_13TeV"])
     if not OptionDoTBbarForHeavy:    
@@ -211,6 +211,7 @@ myQCD=DataGroup(label="CMS_Hptntj_QCDandFakeTau", landsProcess=1, validMassPoint
                           +["CMS_scale_tt_forQCD","CMS_pdf_tt_forQCD","CMS_mass_tt_forQCD"] #approximation: only ttbar xsect uncertinty applied to QCD, as ttbar dominates the EWK BG (but uncertainty is scaled according to 1-purity, i.e. #all_tt+EWK_events_in_QCDandFakeTau/#all_events_in_QCDandFakeTau)
                           +["CMS_lumi_13TeV_forQCD"]
                           +["CMS_eff_t_forQCD"],
+                          #approximation: myLeptonVetoSystematics neglected for QCD
                 shapeHistoName=shapeHistoName, histoPath=histoPathInclusive)
 DataGroups.append(myQCD)
 
@@ -339,12 +340,12 @@ if "CMS_eff_t_highpt" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_eff_t_highpt", label="tau-jet ID (no Rtau) high-pt uncertainty for genuine taus",
         distr="shapeQ", function="ShapeVariation", systVariation="GenuineTau"))       
 # e->tau mis-ID
-if "CMS_fake_eToTau" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_fake_eToTau", label="tau-jet ID (no Rtau) e->tau",
-        distr="shapeQ", function="ShapeVariation", systVariation="FakeTauElectron"))
-else:
-    Nuisances.append(Nuisance(id="CMS_fake_eToTau", label="APPROXIMATION for tau-jet ID (no Rtau) e->tau",
-        distr="lnN", function="Constant", value=0.001))
+#if "CMS_fake_eToTau" in myShapeSystematics:
+#    Nuisances.append(Nuisance(id="CMS_fake_eToTau", label="tau-jet ID (no Rtau) e->tau",
+#        distr="shapeQ", function="ShapeVariation", systVariation="FakeTauElectron"))
+#else:
+#    Nuisances.append(Nuisance(id="CMS_fake_eToTau", label="APPROXIMATION for tau-jet ID (no Rtau) e->tau",
+#        distr="lnN", function="Constant", value=0.001))
 #if "CMS_fake_eToTauBarrel" in myShapeSystematics:
     #Nuisances.append(Nuisance(id="CMS_fake_eToTauBarrel", label="tau-jet ID (no Rtau) e->tau (barrel)",
         #distr="shapeQ", function="ShapeVariation", systVariation="GenuineTau"))
@@ -358,19 +359,19 @@ else:
     #Nuisances.append(Nuisance(id="CMS_fake_eToTauEndcap", label="APPROXIMATION for tau-jet ID (no Rtau) e->tau (endcap)",
         #distr="lnN", function="Constant", value=0.001))
 # mu->tau mis-ID
-if "CMS_fake_muToTau" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_fake_muToTau", label="tau-jet ID (no Rtau) mu->tau",
-        distr="shapeQ", function="ShapeVariation", systVariation="FakeTauMuon"))
-else:
-    Nuisances.append(Nuisance(id="CMS_fake_muToTau", label="APPROXIMATION for tau-jet ID (no Rtau) mu->tau",
-        distr="lnN", function="Constant", value=0.001))
+#if "CMS_fake_muToTau" in myShapeSystematics:
+#    Nuisances.append(Nuisance(id="CMS_fake_muToTau", label="tau-jet ID (no Rtau) mu->tau",
+#        distr="shapeQ", function="ShapeVariation", systVariation="FakeTauMuon"))
+#else:
+#    Nuisances.append(Nuisance(id="CMS_fake_muToTau", label="APPROXIMATION for tau-jet ID (no Rtau) mu->tau",
+#        distr="lnN", function="Constant", value=0.001))
 # jet->tau mis-ID
-if "CMS_fake_jetToTau" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_fake_jetToTau", label="tau-jet ID (no Rtau) jet->tau",
-        distr="shapeQ", function="ShapeVariation", systVariation="FakeTauJet"))
-else:
-    Nuisances.append(Nuisance(id="CMS_fake_jetToTau", label="APPROXIMATION for tau-jet ID (no Rtau) jet->tau",
-        distr="lnN", function="Constant", value=0.01))
+#if "CMS_fake_jetToTau" in myShapeSystematics:
+#    Nuisances.append(Nuisance(id="CMS_fake_jetToTau", label="tau-jet ID (no Rtau) jet->tau",
+#        distr="shapeQ", function="ShapeVariation", systVariation="FakeTauJet"))
+#else:
+#    Nuisances.append(Nuisance(id="CMS_fake_jetToTau", label="APPROXIMATION for tau-jet ID (no Rtau) jet->tau",
+#        distr="lnN", function="Constant", value=0.01))
 #===== energy scales
 # tau ES
 if "CMS_scale_t" in myShapeSystematics:
