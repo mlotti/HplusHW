@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
+from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
@@ -127,7 +127,7 @@ process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.ge
 
 # === Setup customizations
 from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
-produceCustomisations(process) # This produces process.CustomisationsSequence which needs to be included to path
+produceCustomisations(process,dataVersion.isData()) # This produces process.CustomisationsSequence which needs to be included to path
             
 # module execution
 process.runEDFilter = cms.Path(process.PUInfo*
