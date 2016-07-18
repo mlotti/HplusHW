@@ -1,11 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git #HiggsAnalysis.HeavyChHiggsToTauNu.tools.git as git
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
+from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-dataVersion = "76Xmc"
-#dataVersion = "76Xdata"
+#dataVersion = "76Xmc"
+dataVersion = "76Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion
@@ -19,8 +19,12 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#       '/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/6CA1C627-246C-E511-8A6A-02163E014147.root',
-	'/store/mc/RunIIFall15MiniAODv2/DY2JetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/10000/044F8A3A-43B8-E511-8F98-0025904CF75A.root',
+       '/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v4/000/258/174/00000/5E0232D4-F96C-E511-A1CD-02163E013388.root',
+#	'/store/mc/RunIIFall15MiniAODv2/DY2JetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/10000/044F8A3A-43B8-E511-8F98-0025904CF75A.root',
+    ),
+    secondaryFileNames = cms.untracked.vstring(
+       '/store/data/Run2015D/SingleMuon/AOD/PromptReco-v4/000/258/174/00000/067F479F-F96C-E511-8BED-02163E01464A.root',
+       '/store/data/Run2015D/SingleMuon/AOD/PromptReco-v4/000/258/174/00000/0AAF1966-D76C-E511-AEBA-02163E0145C8.root',
     )
 )
 
@@ -69,6 +73,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     ),
     EventInfo = cms.PSet(
 	PileupSummaryInfoSrc = process.PUInfo.PileupSummaryInfoSrc,
+	LumiScalersSrc = cms.InputTag("scalersRawToDigi"),
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
         TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
@@ -145,7 +150,7 @@ process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
 
 # === Setup customizations
 from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
-produceCustomisations(process) # This produces process.CustomisationsSequence which needs to be included to path
+produceCustomisations(process,dataVersion.isData()) # This produces process.CustomisationsSequence which needs to be included to path
 
 # module execution
 process.runEDFilter = cms.Path(process.PUInfo*
