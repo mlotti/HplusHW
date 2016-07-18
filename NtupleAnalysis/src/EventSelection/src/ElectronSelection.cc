@@ -71,7 +71,7 @@ void ElectronSelection::initialize(const ParameterSet& config, const std::string
     fVetoMode = true;
   std::string isolString = config.getParameter<std::string>("electronIsolation");
   if (isolString == "veto" || isolString == "Veto") {
-    fRelIsoCut = 0.25; // Loose iso sync'ed with MIT
+    fRelIsoCut = 0.15; // Loose iso sync'ed with MIT
   } else if (isolString == "tight" || isolString == "Tight") {
     fRelIsoCut = 0.10; // Based on 2012 cut based isolation
   } else {
