@@ -466,11 +466,15 @@ class DatacardColumn():
         # Obtain overall purity for QCD
         self._purityForFinalShape = None
         myAveragePurity = None
-        if self.typeIsQCDinverted() and False: # FIXME switch on when purity exists
-            myDsetRootHisto = myShapeExtractor.extractQCDPurityHistogram(self, dsetMgr, self.getFullShapeHistoName())
-            self._rateResult.setPurityHistogram(myDsetRootHisto.getHistogram())
-            myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self.getPurityHistogram())
-            #print "*** Average QCD purity", myAveragePurity
+        try:
+            if self.typeIsQCDinverted():
+                myDsetRootHisto = myShapeExtractor.extractQCDPurityHistogram(self, dsetMgr, self.getFullShapeHistoName())
+                self._rateResult.setPurityHistogram(myDsetRootHisto.getHistogram())
+                myAveragePurity = myShapeExtractor.extractQCDPurityAsValue(myRateHistograms[0], self.getPurityHistogram())
+                #print "*** Average QCD purity", myAveragePurity
+        except:
+            print "ERROR: It looks like the purity histogram does not exist!"
+            raise
 
         # Obtain results for nuisances
         # Add the scalar uncertainties to the cached RootHistoWithUncertainties object
@@ -673,7 +677,7 @@ class DatacardColumn():
 	# Treat QCD MET shape nuisance
 	myQCDMetshapeFoundStatus = False
 	for j in range(0,len(self._nuisanceResults)):
-	    if self._nuisanceResults[j].getId() == "QCD_metshape":
+	    if "QCD_metshape" in self._nuisanceResults[j].getId():
                 myQCDMetshapeFoundStatus = True
 		hDenominator = None
 		hNumerator = None

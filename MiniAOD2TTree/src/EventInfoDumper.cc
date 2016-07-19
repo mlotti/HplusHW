@@ -11,7 +11,9 @@ EventInfoDumper::EventInfoDumper(edm::ConsumesCollector&& iConsumesCollector, co
   vertexToken(iConsumesCollector.consumes<edm::View<reco::Vertex>>(pset.getParameter<edm::InputTag>("OfflinePrimaryVertexSrc"))),
   topPtToken(iConsumesCollector.consumes<double>(pset.getParameter<edm::InputTag>("TopPtProducer")))
 {
-
+    bookLumiScalers = pset.exists("LumiScalersSrc");
+    if(bookLumiScalers) 
+        instLumiToken = iConsumesCollector.consumes<std::vector<LumiScalers>>(pset.getParameter<edm::InputTag>("LumiScalersSrc"));
 }
 
 EventInfoDumper::~EventInfoDumper(){}
@@ -21,6 +23,7 @@ void EventInfoDumper::book(TTree* tree){
     tree->Branch("run",&run);     
     tree->Branch("lumi",&lumi);
     tree->Branch("prescale",&prescale);
+    if(bookLumiScalers) tree->Branch("instLumi",&instLumi);
     tree->Branch("nPUvertices",&nPU);
     tree->Branch("NUP",&NUP);
     tree->Branch("nGoodOfflineVertices",&nGoodOfflinePV);
@@ -37,6 +40,7 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     event = iEvent.id().event();
     run   = iEvent.run();
     lumi  = iEvent.luminosityBlock();
+    instLumi = -1;
     prescale = 1.0;
     nPU = -1;
     NUP = -1;
@@ -50,6 +54,14 @@ bool EventInfoDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 break;
             }
         }
+    }
+
+    if(bookLumiScalers){
+      edm::Handle<LumiScalersCollection> hinstLumi;
+      iEvent.getByToken(instLumiToken, hinstLumi);
+      if(hinstLumi.isValid()){ // this is in AOD, not in MINIAOD. If needed, use two-files-solution
+	instLumi = hinstLumi->begin()->instantLumi();
+      }   
     }
 
     // number of jets for combining W+Jets/Z+jets inclusive with exclusive
