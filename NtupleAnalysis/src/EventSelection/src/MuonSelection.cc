@@ -71,7 +71,7 @@ void MuonSelection::initialize(const ParameterSet& config, const std::string& po
     fVetoMode = true;
   std::string isolString = config.getParameter<std::string>("muonIsolation");
   if (isolString == "veto" || isolString == "Veto") {
-    fRelIsoCut = 0.25; // Loose iso sync'ed with MIT
+    fRelIsoCut = 0.15; // Loose iso sync'ed with MIT
   } else if (isolString == "tight" || isolString == "Tight") {
     fRelIsoCut = 0.12; // Based on 2012 isolation
   } else {

@@ -11,6 +11,7 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
+#include "DataFormats/Scalers/interface/LumiScalers.h"
 
 #include <string>
 #include <vector>
@@ -36,12 +37,14 @@ class EventInfoDumper {
         bool filter();
 
         edm::EDGetTokenT<std::vector<PileupSummaryInfo> > puSummaryToken;
+        edm::EDGetTokenT<std::vector<LumiScalers> > instLumiToken;
         edm::EDGetTokenT<LHEEventProduct> lheToken;
         edm::EDGetTokenT<edm::View<reco::Vertex> > vertexToken;
         edm::EDGetTokenT<double> topPtToken;
         
 	unsigned long long event;
 	unsigned int run,lumi;
+	float instLumi;
         float prescale;
 	short nPU;
 	short NUP;
@@ -54,5 +57,6 @@ class EventInfoDumper {
         float ptSumRatio; // Ratio of track pt sum of first and second vertex
         float topPtWeight; // Weight produced by TopPtProducer
 
+	bool bookLumiScalers;
 };
 #endif

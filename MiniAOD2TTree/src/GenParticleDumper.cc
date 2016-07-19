@@ -14,9 +14,13 @@ GenParticleDumper::GenParticleDumper(edm::ConsumesCollector&& iConsumesCollector
   eta = new std::vector<double>[inputCollections.size()];    
   phi = new std::vector<double>[inputCollections.size()];    
   e   = new std::vector<double>[inputCollections.size()];    
-  pdgId = new std::vector<short>[inputCollections.size()];
+  pdgId  = new std::vector<short>[inputCollections.size()];
   status = new std::vector<short>[inputCollections.size()];
+  charge = new std::vector<short>[inputCollections.size()];
   mother = new std::vector<short>[inputCollections.size()];
+  vtxX   = new std::vector<double>[inputCollections.size()];
+  vtxY   = new std::vector<double>[inputCollections.size()];
+  vtxZ   = new std::vector<double>[inputCollections.size()];
 
   // Electrons
   electrons = new FourVectorDumper[inputCollections.size()];
@@ -79,13 +83,17 @@ void GenParticleDumper::book(TTree* tree){
     if(name.length() == 0) name = inputCollections[i].getParameter<edm::InputTag>("src").label();
 
     if (inputCollections[i].getUntrackedParameter<bool>("saveAllGenParticles", false)) {
-      tree->Branch((name+"_pt").c_str(),&pt[i]);
-      tree->Branch((name+"_eta").c_str(),&eta[i]);
-      tree->Branch((name+"_phi").c_str(),&phi[i]);
-      tree->Branch((name+"_e").c_str(),&e[i]);
-      tree->Branch((name+"_pdgId").c_str(),&pdgId[i]);
-      tree->Branch((name+"_mother").c_str(),&mother[i]);
-      tree->Branch((name+"_status").c_str(),&status[i]);
+      tree->Branch((name+"_pt").c_str()    , &pt[i]);
+      tree->Branch((name+"_eta").c_str()   , &eta[i]);
+      tree->Branch((name+"_phi").c_str()   , &phi[i]);
+      tree->Branch((name+"_e").c_str()     , &e[i]);
+      tree->Branch((name+"_pdgId").c_str() , &pdgId[i]);
+      tree->Branch((name+"_mother").c_str(), &mother[i]);
+      tree->Branch((name+"_status").c_str(), &status[i]);
+      tree->Branch((name+"_charge").c_str(), &charge[i]);
+      tree->Branch((name+"_vtxX").c_str()  , &vtxX[i]);
+      tree->Branch((name+"_vtxY").c_str()  , &vtxY[i]);
+      tree->Branch((name+"_vtxZ").c_str()  , &vtxZ[i]);
     }
     if (inputCollections[i].getUntrackedParameter<bool>("saveGenElectrons", false)) {
       electrons[i].book(tree, name, "GenElectron");
@@ -146,6 +154,11 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           e[ic].push_back(gp.energy());   
           pdgId[ic].push_back(gp.pdgId());
 	  status[ic].push_back(gp.status());
+	  charge[ic].push_back(gp.charge());
+	  vtxX[ic].push_back(gp.vx());
+	  vtxY[ic].push_back(gp.vy());
+	  vtxZ[ic].push_back(gp.vz());
+    
           // Find mother index
           short index = -1;
           if (gp.mother() != nullptr) {
@@ -335,7 +348,11 @@ void GenParticleDumper::reset(){
         //et[ic].clear();
         pdgId[ic].clear();
         status[ic].clear();
+        charge[ic].clear();
         mother[ic].clear();
+        vtxX[ic].clear();
+        vtxY[ic].clear();
+        vtxZ[ic].clear();
       }
       if (inputCollections[ic].getUntrackedParameter<bool>("saveGenElectrons", false)) {
         electrons[ic].reset();

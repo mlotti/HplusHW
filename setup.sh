@@ -91,7 +91,7 @@ if [ ! -e $PPATHPREFIX/HiggsAnalysis ]; then
     mkdir -p $PPATHPREFIX/HiggsAnalysis
     touch $PPATHPREFIX/HiggsAnalysis/__init__.py
 fi
-for DIR in NtupleAnalysis HeavyChHiggsToTauNu; do
+for DIR in NtupleAnalysis; do
     if [ ! -e $PPATHPREFIX/HiggsAnalysis/$DIR ]; then
         ln -s $HIGGSANALYSIS_BASE/$DIR/python $PPATHPREFIX/HiggsAnalysis/$DIR
         touch $PPATHPREFIX/HiggsAnalysis/$DIR/__init__.py
@@ -120,7 +120,8 @@ else
     export PYTHONPATH=$PWD/.python:$PYTHONPATH
 fi
 
-export PATH=$HIGGSANALYSIS_BASE/HeavyChHiggsToTauNu/scripts:$HIGGSANALYSIS_BASE/NtupleAnalysis/scripts:$PATH
+#export PATH=$HIGGSANALYSIS_BASE/HeavyChHiggsToTauNu/scripts:$HIGGSANALYSIS_BASE/NtupleAnalysis/scripts:$PATH
+export PATH=$HIGGSANALYSIS_BASE/NtupleAnalysis/scripts:$PATH
 
 # Install externals if necessary
 sh +x installexternals.sh

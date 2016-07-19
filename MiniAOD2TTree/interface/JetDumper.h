@@ -38,10 +38,16 @@ class JetDumper : public BaseDumper {
     private:
 	edm::EDGetTokenT<reco::GenParticleCollection> genParticleToken;
         edm::EDGetTokenT<edm::View<pat::Jet>> *jetToken;
+
+        edm::EDGetTokenT<edm::View<pat::Jet>> *jetJESup;
+        edm::EDGetTokenT<edm::View<pat::Jet>> *jetJESdown;
+        edm::EDGetTokenT<edm::View<pat::Jet>> *jetJERup;
+        edm::EDGetTokenT<edm::View<pat::Jet>> *jetJERdown;
+
         std::vector<float> *discriminators;
         std::vector<double> *userfloats;
 	int nUserfloats;
-        std::vector<JetCorrectionUncertainty*> fJECUncertainty;
+        //std::vector<JetCorrectionUncertainty*> fJECUncertainty;
 
         std::vector<int> *hadronFlavour;
         std::vector<int> *partonFlavour;
