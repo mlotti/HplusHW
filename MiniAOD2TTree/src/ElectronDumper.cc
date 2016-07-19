@@ -131,10 +131,11 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		else if (fabs(obj.p4().eta()) < 2.4 ) ea = 0.2243 ;
 		else if (fabs(obj.p4().eta()) < 2.5 ) ea = 0.2687 ;
 
-		double eaIso = obj.pfIsolationVariables().sumChargedHadronPt 
+		double eaisolation = obj.pfIsolationVariables().sumChargedHadronPt 
                   + std::max(obj.pfIsolationVariables().sumNeutralHadronEt
 		  + obj.pfIsolationVariables().sumPhotonEt
                   - rho * ea, 0.0);
+                double eaIso = eaisolation / obj.pt();
                 effAreaIsoDeltaBetaCorrected[ic].push_back(eaIso);
 
 
