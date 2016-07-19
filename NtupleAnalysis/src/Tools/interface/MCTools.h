@@ -1,97 +1,45 @@
 // -*- c++ -*-                                
-#ifndef Framework_MCTools_h
-#define Framework_MCTools_h
+#ifndef Tools_MCTools_h
+#define Tools_MCTools_h
 
-#include "DataFormat/interface/Event.h"
-
+// System
 #include <cmath>
 #include <iomanip>
 #include <string>
 #include <vector>
 
+// User
+#include "DataFormat/interface/Event.h"
+#include "Auxiliary/interface/Tools.h"
+
+// ROOT
 #include "TLorentzVector.h"
 #include "Math/VectorUtil.h"
 
 using namespace std;
-// typedef GenParticleCollection genParticle;
+typedef Particle<ParticleCollection<double> > genParticle;
 
 class MCTools {
   
 public:
   MCTools(Event &fEvt);
   ~MCTools();
-  GenParticle GetGenP(const size_t genP_Index);
-
-  bool RecursivelyLookForMotherId(const unsigned int genP_Index, 
-				  int momId, 
-				  const bool posn);
-
-  TLorentzVector GetP4(const int genP_Index);
-
-  bool LookForMotherId(const unsigned int genP_Index, 
-		       int momId, 
-		       const bool bAbsoluteMomId);
-
-  TLorentzVector GetVisibleP4(const unsigned int genP_Index);
-
+  TLorentzVector GetVisibleP4(const unsigned int genP_index);
   bool IsNeutrino(const int pdgId);
-
-  int GetPosOfMotherId(const unsigned int genP_Index,
-		       int momId, 
-		       const bool bAbsoluteMomId);
-
-  bool IsItsMother(const int genP_Index,
-		   const int mom_Index);
-
-  int GetLdgDaughter(const int genP_Index, 
-		     bool bOnlyChargedDaughters);
-
-  double GetHadronicTauMaxSignalCone(const int genP_Index, 
-				     bool bOnlyChargedDaughters, 
-				     double minPt);
-
-  void GetHadronicTauFinalDaughters(const int genP_Index,
-				    std::vector<short int>& finalDaughters);
-
-  void GetHadronicTauChargedPions(const int genP_Index, 
-				  std::vector<short int> &chargedPions);
-
-  void GetHadronicTauNeutralPions(const int genP_Index,
-				  std::vector<short int> &neutralPions);
-
-  bool IsFinalStateTau(const int genP_Index);
-
-  int GetTauDecayMode(const int genP_Index);
-
-  void PrintMothersRecursively(const int genP_Index, 
-			       bool bPrintHeaders=true);
-
-  void PrintDaughtersRecursively(const int genP_Index,
-				 bool bPrintHeaders=true);
-
-  void PrintGenParticle(const int genP_Index, 
-			bool bPrintHeaders=true);
-
+  bool RecursivelyLookForMotherId(const int genP_index, int wantedMom_pdgId, const bool bAbsoluteMomId);
+  double GetD0Mag(const int genP_index,	const int mom_Index, bool wrtPV=true);
+  double GetLxy(const int genP_index,	bool wrtPV=true);
   double GetVertexX(void){return fEvent->vertexInfo().pvX();}
-
   double GetVertexY(void){return fEvent->vertexInfo().pvY();}
-
   double GetVertexZ(void){return fEvent->vertexInfo().pvZ();}
-
-  double GetLxy(const int genP_Index,
-		bool wrtPV=true);
-
-  double GetD0Mag(const int genP_Index,
-		  const int mom_Index,
-		  bool wrtPV=true);
-
+  int GetLdgDaughter(const int genP_index);
+  std::vector<int> GetDaughters(const int my_index, const int my_id, bool bSkipSelf);
+  void PrintDaughtersRecursively(const int genP_index);
+  void _PrintDaughtersRecursively(const int genP_index, Table &table);
+  void PrintGenParticle(const int genP_index, bool bPrintHeaders=true);
 private:
   Event *fEvent;
-
-  void _GetHadronicTauChargedOrNeutralPions(int tauIndex, 
-					    bool charged,
-					    std::vector<short int> &pions);
-
+  Tools auxTools;
 
   
 };
