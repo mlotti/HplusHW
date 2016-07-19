@@ -881,14 +881,14 @@ def GetTaskDirName(analysis, version, datasets):
     return dirName
 
 
-def CreateTaskDir(dirName, PSET):
+def CreateTaskDir(dirName):
     '''
     Create the CRAB task directory and copy inside it the PSET to be used for the CRAB job.
     '''
     Verbose("CreateTaskDir()")
 
     # Copy file to be used (and others to be tracked) to the task directory
-    cmd = "cp %s %s" %(PSET, dirName)
+    cmd = "cp %s %s" %(opts.pset, dirName)
 
     if not os.path.exists(dirName):
         Verbose("mkidr %s" % (dirName))
@@ -1062,7 +1062,7 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath = "crabConfig.py
 	# Set the "psetName" field which specifies the name of the CMSSW pset_cfg.py file that will be run via cmsRun.
 	match = crab_pset_re.search(line)
 	if match:
-	    line = "config.JobType.psetName = '" + PSET  +"'\n"
+	    line = "config.JobType.psetName = '" + opts.pset +"'\n"
 
 	# Set the "pyCfgParams" field which contains list of parameters to pass to the pset_cfg.py file.            
 	match = crab_psetParams_re.search(line)
@@ -1124,7 +1124,7 @@ def CreateJob(opts, args):
     AskToContinue(taskDirName, analysis, opts)
     
     # Create CRAB task diractory
-    CreateTaskDir(taskDirName, PSET)
+    CreateTaskDir(taskDirName)
     
     # For-loop: All datasets
     for dataset in datasets:
