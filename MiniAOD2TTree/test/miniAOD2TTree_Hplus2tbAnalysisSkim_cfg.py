@@ -12,13 +12,13 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 #================================================================================================  
 # Options
 #================================================================================================  
-maxEvents    = 100
+maxEvents    = 1000
 maxWarnings  = 100
 reportEvery  = 100
-dataVersion  = "80Xdata"
-datasetFiles = ['/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/150/00000/66051AAF-D819-E611-BD3D-02163E011D55.root']
-#dataVersion  = "80Xmc" 
-#datasetFiles = ['/store/mc/RunIISpring16MiniAODv2/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/20000/04F56101-3739-E611-90EE-0CC47A78A41C.root']
+#dataVersion  = "80Xdata"
+#datasetFiles = ['/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/150/00000/66051AAF-D819-E611-BD3D-02163E011D55.root']
+dataVersion  = "80Xmc" 
+datasetFiles = ['/store/mc/RunIISpring16MiniAODv2/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/20000/04F56101-3739-E611-90EE-0CC47A78A41C.root']
 
 # For debugging purposes
 debug       = False
@@ -84,7 +84,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, str(dataVersion.getGlobalTag())
 #================================================================================================  
 
 ####
-msgAlign = "{:<10} {:<30} {:<25} {:<25}"
+msgAlign = "{:<10} {:<55} {:<25} {:<25}"
 title    =  msgAlign.format("Data", "Global Tag", "Trigger Source", "Trigger Tag")
 print "="*len(title)
 print title
