@@ -124,6 +124,7 @@ def main():
     from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
 
     # Additional selection definitions
+    allSelections.__setattr__("Verbose", opts.verbose)
     allSelections.__setattr__("TopQuark_Pt" ,  10.0)
     allSelections.__setattr__("TopQuark_Eta",   2.4)
     
@@ -206,6 +207,7 @@ if __name__ == "__main__":
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", help="List of datasets in mcrab to include")
     parser.add_option("-e", "--excludeTasks"    , dest="excludeTasks"    , action="store", help="List of datasets in mcrab to exclude")
     parser.add_option("-n", "--nEvts"           , dest="nEvts"           , action="store", type=int, default = -1, help="Number of events to run on")
+    parser.add_option("-v", "--verbose"         , dest="verbose"         , action="store_true", default = False  , help="Enable verbosity (for debugging)")
     (opts, args) = parser.parse_args()
 
     if opts.mcrab == None:

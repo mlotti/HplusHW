@@ -75,7 +75,9 @@ def main():
         # Calculate Integrated Luminosity
         intLumi = GetLumi(datasets)
     
-    
+
+    # hNames.extend(["genMET_Et", "genMET_Phi"])
+                  
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
         plotName = hName #analysis + "_" + hName
@@ -116,30 +118,15 @@ def main():
         # Customise histos
         histo1 = dataset1.getHistogram()
         styles.signal200Style.apply(histo1)
-        # histo1.SetMarkerStyle(ROOT.kFullCircle)
-        # histo1.SetFillStyle(3001)
-        # histo1.SetFillColor(histo2.GetMarkerColor())
-        # removeNegatives(histo1)
-        # removeErrorBars(histo1)
         histo1.Rebin(rebinFactor)
         
         # Customise histos
         histo2 = dataset2.getHistogram()
         styles.signal300Style.apply(histo2)
-        # histo2.SetMarkerStyle(ROOT.kFullCross)
-        # histo2.SetFillStyle(3001)
-        # histo2.SetFillColor(styles.ttStyle.color)
-        # removeNegatives(histo2)
-        # removeErrorBars(histo2)
         histo2.Rebin(rebinFactor)
 
         histo3 = dataset3.getHistogram()
         styles.signal400Style.apply(histo3)
-        # histo2.SetMarkerStyle(ROOT.kFullCross)
-        # histo2.SetFillStyle(3001)
-        # histo2.SetFillColor(styles.ttStyle.color)
-        # removeNegatives(histo2)
-        # removeErrorBars(histo2)
         histo3.Rebin(rebinFactor)
 
         histo4 = dataset4.getHistogram()
@@ -285,13 +272,13 @@ def getHistoNames(kinVar):
         hNames.append("gbb_BQuark_" + kinVar)
     else:
         hNames.append("Htb_TQuark_Htb_BQuark_" + kinVar)
-        hNames.append("Htb_TQuark_associated_TQuark_" + kinVar)
-        hNames.append("Htb_TQuark_associated_BQuark_" + kinVar)
+        hNames.append("Htb_TQuark_gtt_TQuark_" + kinVar)
+        hNames.append("Htb_TQuark_bgg_BQuark_" + kinVar)
         hNames.append("Htb_BQuark_Htb_tbW_BQuark_" + kinVar)
         hNames.append("Htb_BQuark_Htb_tbW_Wqq_Quark_" + kinVar)
         hNames.append("Htb_BQuark_Htb_tbW_Wqq_AntiQuark_" + kinVar)
-        hNames.append("associated_TQuark_associated_BQuark_" + kinVar)
-        hNames.append("associated_TQuark_gtt_tbW_BQuark_" + kinVar)
+        hNames.append("gtt_TQuark_gbb_BQuark_" + kinVar)
+        hNames.append("gtt_TQuark_gtt_tbW_BQuark_" + kinVar)
         hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_" + kinVar)
         hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_" + kinVar)
     return hNames
