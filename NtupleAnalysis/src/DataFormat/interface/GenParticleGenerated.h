@@ -11,12 +11,12 @@ class GenParticleGeneratedCollection {
 public:
   using float_type = double;
   explicit GenParticleGeneratedCollection(const std::string& prefix="genParticles")
-  : fGenParticles(prefix),
-    fGenElectron(prefix),
+  : fGenElectron(prefix),
     fGenHplus(prefix),
     fGenHplusNeutrinos(prefix),
     fGenMuon(prefix),
     fGenNeutrinos(prefix),
+    fGenParticles(prefix),
     fGenTau(prefix),
     fGenTauNeutrinos(prefix),
     fGenTop(prefix),
@@ -44,12 +44,12 @@ public:
 
   void setupBranches(BranchManager& mgr);
 
-  const std::vector<Particle<ParticleCollection<float_type>>> getGenParticles() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenElectronCollection() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenHplusCollection() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenHplusNeutrinosCollection() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenMuonCollection() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenNeutrinosCollection() const;
+  const std::vector<Particle<ParticleCollection<float_type>>> getGenParticles() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenTauCollection() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenTauNeutrinosCollection() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenTopCollection() const;
@@ -59,12 +59,12 @@ public:
   const std::vector<Particle<ParticleCollection<float_type>>> getGenWCollection() const;
   const std::vector<Particle<ParticleCollection<float_type>>> getGenWNeutrinosCollection() const;
 protected:
-  ParticleCollection<float_type> fGenParticles;
   ParticleCollection<float_type> fGenElectron;
   ParticleCollection<float_type> fGenHplus;
   ParticleCollection<float_type> fGenHplusNeutrinos;
   ParticleCollection<float_type> fGenMuon;
   ParticleCollection<float_type> fGenNeutrinos;
+  ParticleCollection<float_type> fGenParticles;
   ParticleCollection<float_type> fGenTau;
   ParticleCollection<float_type> fGenTauNeutrinos;
   ParticleCollection<float_type> fGenTop;
