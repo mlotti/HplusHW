@@ -245,6 +245,7 @@ _datasetOrder.extend([
     "QCD",
     "QCDdata",
     "QCD_Pt20_MuEnriched",
+    "EWK", #merged
     "WJets",
     "W1Jets",
     "W2Jets",
@@ -259,6 +260,7 @@ _datasetOrder.extend([
     "WToTauNu",
     "TTJets",
     "TT",
+    "TTandSingleTop", #merged
     "DYJetsToLL",
     "DYJetsToLLHT",
     "SingleTop",
@@ -283,6 +285,10 @@ _legendLabels = {
     "WJets_1bquark":         "W+jets (1 b)",
     "WJets_2bquark":         "W+jets (2 b)",
     "WJets_3bquark":         "W+jets (#geq3 b)",
+    
+    "TTandSingleTop":        "t#bar{t}+single top",
+    "EWK":                   "EWK",
+
 
     "QCD_Pt30to50":          "QCD, 30 < #hat{p}_{T} < 50",
     "QCD_Pt50to80":          "QCD, 50 < #hat{p}_{T} < 80",
@@ -369,6 +375,10 @@ _plotStyles = {
     "QCD_Pt20_MuEnriched":   styles.qcdStyle,
     "SingleTop":             styles.stStyle,
     "Diboson":               styles.dibStyle,
+    
+    # For merged MC
+    "TTandSingleTop":        styles.ttStyle,
+    "EWK":                   styles.wStyle,
 
     # Ratio stuff
     "Ratio":                   styles.ratioStyle,
