@@ -71,7 +71,7 @@ void ElectronSelection::initialize(const ParameterSet& config, const std::string
     fVetoMode = true;
   std::string isolString = config.getParameter<std::string>("electronIsolation");
   if (isolString == "veto" || isolString == "Veto") {
-    fRelIsoCut = 0.15; // Based on 2012 cut based isolation
+    fRelIsoCut = 0.15; // Loose iso sync'ed with MIT
   } else if (isolString == "tight" || isolString == "Tight") {
     fRelIsoCut = 0.10; // Based on 2012 cut based isolation
   } else {
@@ -144,7 +144,8 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
     hIsolEtaBefore->Fill(electron.eta());
     if (fCommonPlotsIsEnabled())
       hIsolVtxBefore->Fill(fCommonPlots->nVertices());
-    if (electron.relIsoDeltaBeta() > fRelIsoCut) continue;
+////    if (electron.relIsoDeltaBeta() > fRelIsoCut) continue;
+    if (electron.effAreaIsoDeltaBeta() > fRelIsoCut) continue;
     passedIsol = true;
     hIsolPtAfter->Fill(electron.pt());
     hIsolEtaAfter->Fill(electron.eta());

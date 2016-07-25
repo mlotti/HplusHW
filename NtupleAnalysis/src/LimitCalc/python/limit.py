@@ -83,7 +83,7 @@ _finalstateYmaxBR = {
     "etau": 0.4,
     "mutau": 0.4,
     "emu": 0.8,
-    "default": 0.025,
+    "default": 0.1,
 }
 
 ## Default y axis maximum values for sigma x BR limit for the final states

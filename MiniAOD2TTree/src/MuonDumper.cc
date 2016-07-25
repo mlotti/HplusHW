@@ -21,7 +21,8 @@ MuonDumper::MuonDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<
     isLooseMuon = new std::vector<bool>[inputCollections.size()];
     isMediumMuon = new std::vector<bool>[inputCollections.size()];
     isTightMuon = new std::vector<bool>[inputCollections.size()];
-    relIsoDeltaBetaCorrected = new std::vector<float>[inputCollections.size()];
+    relIsoDeltaBetaCorrected03 = new std::vector<float>[inputCollections.size()];
+    relIsoDeltaBetaCorrected04 = new std::vector<float>[inputCollections.size()];
 
     MCmuon = new FourVectorDumper[inputCollections.size()];
     
@@ -60,7 +61,8 @@ void MuonDumper::book(TTree* tree){
         tree->Branch((name+"_muIDLoose").c_str(),&isLooseMuon[i]);
         tree->Branch((name+"_muIDMedium").c_str(),&isMediumMuon[i]);
         tree->Branch((name+"_muIDTight").c_str(),&isTightMuon[i]);
-        tree->Branch((name+"_relIsoDeltaBeta").c_str(),&relIsoDeltaBetaCorrected[i]);
+        tree->Branch((name+"_relIsoDeltaBeta03").c_str(),&relIsoDeltaBetaCorrected03[i]); // cone 0.3
+        tree->Branch((name+"_relIsoDeltaBeta04").c_str(),&relIsoDeltaBetaCorrected04[i]); // cone 0.4
 
         MCmuon[i].book(tree, name, "MCmuon");
         
@@ -111,12 +113,20 @@ bool MuonDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                   isTightMuon[ic].push_back(obj.isTightMuon(vertexHandle->at(0)));
                 }
                 // Calculate relative isolation in cone of DeltaR=0.3
-                double isolation = (obj.pfIsolationR03().sumChargedHadronPt
+                double isolation03 = (obj.pfIsolationR03().sumChargedHadronPt
                   + std::max(obj.pfIsolationR03().sumNeutralHadronEt
                         + obj.pfIsolationR03().sumPhotonEt
                         - 0.5 * obj.pfIsolationR03().sumPUPt, 0.0));
-                double relIso = isolation / obj.pt();
-                relIsoDeltaBetaCorrected[ic].push_back(relIso);
+                double relIso03 = isolation03 / obj.pt();
+                relIsoDeltaBetaCorrected03[ic].push_back(relIso03);
+
+                // Calculate relative isolation in cone of DeltaR=0.3
+                double isolation04 = (obj.pfIsolationR04().sumChargedHadronPt
+		  + std::max(obj.pfIsolationR04().sumNeutralHadronEt
+		  + obj.pfIsolationR04().sumPhotonEt
+		  - 0.5 * obj.pfIsolationR04().sumPUPt, 0.0));
+                double relIso04 = isolation04 / obj.pt();
+                relIsoDeltaBetaCorrected04[ic].push_back(relIso04);
 
 		//p4[ic].push_back(obj.p4());
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
@@ -166,8 +176,9 @@ void MuonDumper::reset(){
         isLooseMuon[ic].clear();
         isMediumMuon[ic].clear();
         isTightMuon[ic].clear();
-        relIsoDeltaBetaCorrected[ic].clear();
-        
+        relIsoDeltaBetaCorrected03[ic].clear();
+	relIsoDeltaBetaCorrected04[ic].clear();
+
         MCmuon[ic].reset();
       }
       for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){

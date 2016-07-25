@@ -39,6 +39,7 @@ class ElectronDumper : public BaseDumper {
         edm::EDGetTokenT<edm::ValueMap<bool>> *electronIDToken;
         
         std::vector<float> *relIsoDeltaBetaCorrected;
+        std::vector<float> *effAreaIsoDeltaBetaCorrected;
         
         // 4-vector for generator electron
         FourVectorDumper *MCelectron;

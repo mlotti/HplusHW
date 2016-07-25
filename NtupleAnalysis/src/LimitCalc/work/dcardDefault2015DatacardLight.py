@@ -1,6 +1,6 @@
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 
-# This datacard should be used for calculating limits for heavy H+, for light Hplus use dcardDefault2015DatacardLight.py
+# This datacard should be used for calculating limits for light H+, for heavy Hplus use dcardDefault2015DatacardLight.py
 
 DataCardName ='Default_13TeV'
 #Path='test'
@@ -14,16 +14,16 @@ Path='test_1pr'
 #Path='testbtagtight'
 #Path='testnorm'
 
-#LightMassPoints=[80,90,100,120,140,150,155,160]
+LightMassPoints=[80,90,100,120,140,150,155,160]
 #LightMassPoints=[80,100,150,155,160]
 #LightMassPoints=[80,120,160]
 #LightMassPoints=[140]
-LightMassPoints=[]
+#LightMassPoints=[]
 
-HeavyMassPoints=[180,200,220,250,300,350,400,500]
+#HeavyMassPoints=[180,200,220,250,300,350,400,500]
 #HeavyMassPoints=[180,220,300,600]
 #HeavyMassPoints=[300]
-#HeavyMassPoints=[]
+HeavyMassPoints=[]
 
 MassPoints=LightMassPoints[:]+HeavyMassPoints[:]
 
@@ -41,7 +41,7 @@ OptionMassShape="TransverseMass"
 #OptionGenuineTauBackgroundSource="DataDriven"                        # EWK+tt genuine taus from embedding
 OptionGenuineTauBackgroundSource="MC_FakeAndGenuineTauNotSeparated"   # EWK+tt genuine taus from MC
 
-OptionSeparateFakeTtbarFromFakeBackground=False # NOTE: this flag should be put true for light H+ and to false for heavy H+
+OptionSeparateFakeTtbarFromFakeBackground=True # NOTE: this flag should be put true for light H+ and to false for heavy H+
 
 OptionRealisticEmbeddingWithMC=True # Only relevant for OptionReplaceEmbeddingByMC==True
 OptionIncludeSystematics=True # Set to true if you produced multicrabs with doSystematics=True
@@ -169,7 +169,7 @@ mergeColumnsByLabel=[]
 for mass in LightMassPoints:
     myMassList=[mass]
     hwx=signalTemplate.clone()
-    hwx.setLabel("CMS_Hptntj_HW"+str(mass)+"_a")
+    hwx.setLabel("HW"+str(mass)+"_a")
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
     hwx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
@@ -181,7 +181,7 @@ for mass in LightMassPoints:
 for mass in HeavyMassPoints:
     myMassList=[mass]
     hx=signalTemplate.clone()
-    hx.setLabel("CMS_Hptntj_Hp"+str(mass)+"_a")
+    hx.setLabel("Hp"+str(mass)+"_a")
     hx.setLandSProcess(0)
     hx.setValidMassPoints(myMassList)
     hx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:]+myTauMisIDSystematics[:]
@@ -218,7 +218,7 @@ if OptionGenuineTauBackgroundSource =="DataDriven":
     # EWK genuine taus from embedding
     myEmbDataDrivenNuisances=["CMS_EmbSingleMu_QCDcontam","CMS_EmbSingleMu_hybridCaloMET","CMS_Hptntj_taubkg_reweighting"] # EWK + ttbar with genuine taus
     EmbeddingIdList=[3]
-    DataGroups.append(DataGroup(label="CMS_Hptntj_EWK_Tau", landsProcess=1, 
+    DataGroups.append(DataGroup(label="EWK_Tau", landsProcess=1, 
                                 shapeHistoName=shapeHistoName, histoPath=histoPathInclusive,
                                 datasetType="Embedding", 
                                 #datasetDefinition=["SingleMu"], 
@@ -229,7 +229,7 @@ if OptionGenuineTauBackgroundSource =="DataDriven":
                                 ))
 else:
     # EWK genuine taus from MC
-    DataGroups.append(DataGroup(label="CMS_Hptntj_tt_genuinetau", landsProcess=3,
+    DataGroups.append(DataGroup(label="tt_genuinetau", landsProcess=3,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
                                 datasetDefinition="TT",
@@ -237,7 +237,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +myTopSystematics+["CMS_scale_tt","CMS_pdf_tt","CMS_mass_tt","CMS_lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_W_genuinetau", landsProcess=4,
+    DataGroups.append(DataGroup(label="W_genuinetau", landsProcess=4,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding", 
                                 datasetDefinition="WJets",
@@ -245,7 +245,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_Wjets","CMS_pdf_Wjets","CMS_lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_t_genuinetau", landsProcess=5,
+    DataGroups.append(DataGroup(label="t_genuinetau", landsProcess=5,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
                                 datasetDefinition="SingleTop",
@@ -253,7 +253,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_singleTop","CMS_pdf_singleTop","CMS_lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_DY_genuinetau", landsProcess=6,
+    DataGroups.append(DataGroup(label="DY_genuinetau", landsProcess=6,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
                                 #datasetDefinition="DYJetsToLLHT",
@@ -262,7 +262,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_DY","CMS_pdf_DY","CMS_lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_VV_genuinetau", landsProcess=7,
+    DataGroups.append(DataGroup(label="VV_genuinetau", landsProcess=7,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus, 
                                 datasetType="Embedding", 
                                 datasetDefinition="Diboson",
@@ -425,7 +425,6 @@ if "CMS_pileup" in myShapeSystematics:
 else:
     Nuisances.append(Nuisance(id="CMS_pileup", label="APPROXIMATION for CMS_pileup",
         distr="lnN", function="Constant",value=0.05))
-
 #===== Cross section uncertainties
 
 # ttbar

@@ -15,7 +15,8 @@ ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std:
     //pdgId = new std::vector<short>[inputCollections.size()];
 
     relIsoDeltaBetaCorrected = new std::vector<float>[inputCollections.size()];
-    
+    effAreaIsoDeltaBetaCorrected = new std::vector<float>[inputCollections.size()];
+
     MCelectron = new FourVectorDumper[inputCollections.size()];
     
     nDiscriminators = inputCollections[0].getParameter<std::vector<std::string> >("discriminators").size();
@@ -23,7 +24,7 @@ ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std:
     electronToken = new edm::EDGetTokenT<edm::View<pat::Electron>>[inputCollections.size()];
     gsfElectronToken = new edm::EDGetTokenT<edm::View<reco::GsfElectron>>[inputCollections.size()];
     rhoToken = new edm::EDGetTokenT<double>[inputCollections.size()];
-    electronIDToken = new edm::EDGetTokenT<edm::ValueMap<bool>>[inputCollections.size()*nDiscriminators];
+//    electronIDToken = new edm::EDGetTokenT<edm::ValueMap<bool>>[inputCollections.size()*nDiscriminators];
     
     for(size_t i = 0; i < inputCollections.size(); ++i){
         edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
@@ -31,12 +32,14 @@ ElectronDumper::ElectronDumper(edm::ConsumesCollector&& iConsumesCollector, std:
         gsfElectronToken[i] = iConsumesCollector.consumes<edm::View<reco::GsfElectron>>(inputtag);
         edm::InputTag rhoSource = inputCollections[i].getParameter<edm::InputTag>("rhoSource");
         rhoToken[i] = iConsumesCollector.consumes<double>(rhoSource);
-        std::string IDprefix = inputCollections[i].getParameter<std::string>("IDprefix");
+        //std::string IDprefix = inputCollections[i].getParameter<std::string>("IDprefix");
         std::vector<std::string> discriminatorNames = inputCollections[i].getParameter<std::vector<std::string> >("discriminators");
+	/*
         for (size_t j = 0; j < discriminatorNames.size(); ++j) {
             edm::InputTag discrTag(IDprefix, discriminatorNames[j]);
             electronIDToken[i*discriminatorNames.size()+j] = iConsumesCollector.consumes<edm::ValueMap<bool>>(discrTag);
         }
+        */
     }
     
     useFilter = false;
@@ -59,6 +62,7 @@ void ElectronDumper::book(TTree* tree){
         tree->Branch((name+"_e").c_str(),&e[i]);
 
         tree->Branch((name+"_relIsoDeltaBeta").c_str(),&relIsoDeltaBetaCorrected[i]);
+        tree->Branch((name+"_effAreaIsoDeltaBeta").c_str(),&effAreaIsoDeltaBetaCorrected[i]);
 
         MCelectron[i].book(tree, name, "MCelectron");
         
@@ -88,14 +92,17 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
             // Setup handles for rho
             edm::Handle<double> rhoHandle;
             iEvent.getByToken(rhoToken[ic], rhoHandle);
+            double rho = *(rhoHandle.product());
             // Setup handles for ID
             std::vector<edm::Handle<edm::ValueMap<bool>>> IDhandles;
             std::vector<std::string> discriminatorNames = inputCollections[ic].getParameter<std::vector<std::string> >("discriminators");
+/*
             for (size_t j = 0; j < discriminatorNames.size(); ++j) {
               edm::Handle<edm::ValueMap<bool>> IDhandle;
               iEvent.getByToken(electronIDToken[ic*inputCollections.size()+j], IDhandle);
               IDhandles.push_back(IDhandle);
             }
+*/
 	    for(size_t i=0; i<electronHandle->size(); ++i) {
     		const pat::Electron& obj = electronHandle->at(i);
 
@@ -114,14 +121,39 @@ bool ElectronDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 double relIso = isolation / obj.pt();
                 relIsoDeltaBetaCorrected[ic].push_back(relIso);
                 
-                // Calculate relative isolation with effective area
-                // FIXME: recipy for effective area is missing
-                
+                // Calculate relative isolation with effective area https://indico.cern.ch/event/369239/contributions/874575/attachments/1134761/1623262/talk_effective_areas_25ns.pdf
+		double ea = 0.;
+		if ( fabs(obj.p4().eta()) < 1.0 ) ea= 0.1752 ;
+		else if (fabs(obj.p4().eta()) < 1.479 ) ea = 0.1862 ;
+		else if (fabs(obj.p4().eta()) < 2.0 ) ea = 0.1411 ;
+		else if (fabs(obj.p4().eta()) < 2.2 ) ea = 0.1534 ;
+		else if (fabs(obj.p4().eta()) < 2.3 ) ea = 0.1903 ;
+		else if (fabs(obj.p4().eta()) < 2.4 ) ea = 0.2243 ;
+		else if (fabs(obj.p4().eta()) < 2.5 ) ea = 0.2687 ;
+
+		double eaisolation = obj.pfIsolationVariables().sumChargedHadronPt 
+                  + std::max(obj.pfIsolationVariables().sumNeutralHadronEt
+		  + obj.pfIsolationVariables().sumPhotonEt
+                  - rho * ea, 0.0);
+                double eaIso = eaisolation / obj.pt();
+                effAreaIsoDeltaBetaCorrected[ic].push_back(eaIso);
+
+
+		/*                
 		for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
                   // https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentificationRun2
                   discriminators[inputCollections.size()*iDiscr+ic].push_back((*(IDhandles[iDiscr]))[gsfHandle->ptrAt(i)]);
 		}
-
+                */
+                for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
+                  discriminators[inputCollections.size()*iDiscr+ic].push_back(obj.electronID(discriminatorNames[iDiscr]));
+                }
+                /*
+                const std::vector< std::pair<std::string,float>  > eleIDs = obj.electronIDs();
+		for(uint iDiscr = 0; iDiscr < eleIDs.size(); ++iDiscr) {
+                  std::cout << "check ele ids " << eleIDs[iDiscr].first << " " << eleIDs[iDiscr].second << std::endl;
+                }
+                */
 		// MC match info
 		if (!iEvent.isRealData())
                   fillMCMatchInfo(ic, genParticlesHandle, obj);
@@ -159,7 +191,8 @@ void ElectronDumper::reset(){
       e[ic].clear();                                                                                                                                              
                                                                                                                                                                   
       relIsoDeltaBetaCorrected[ic].clear();
-      
+      effAreaIsoDeltaBetaCorrected[ic].clear();
+
       MCelectron[ic].reset();
     }                                                                                                                                                             
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){                                                                                       

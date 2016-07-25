@@ -18,6 +18,8 @@ BJetSelection::Data::~Data() { }
 
 BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
+  fJetPtCut(config.getParameter<float>("jetPtCut")),
+  fJetEtaCut(config.getParameter<float>("jetEtaCut")),
   fNumberOfJetsCut(config, "numberOfBJetsCut"),
   fDisriminatorValue(-1.0),
   // Event counter for passing selection
@@ -33,6 +35,8 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
 
 BJetSelection::BJetSelection(const ParameterSet& config)
 : BaseSelection(),
+  fJetPtCut(config.getParameter<float>("jetPtCut")),
+  fJetEtaCut(config.getParameter<float>("jetEtaCut")),
   fNumberOfJetsCut(config, "numberOfBJetsCut"),
   fDisriminatorValue(-1.0),
   // Event counter for passing selection
@@ -123,10 +127,20 @@ BJetSelection::Data BJetSelection::analyze(const Event& event, const JetSelectio
 BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData) {
   Data output;
   cSubAll.increment();
+  bool passedEta = false;
+  bool passedPt = false;
   bool passedDisr = false;
   // Loop over muons
   for(const Jet& jet: jetData.getSelectedJets()) {
-    // jet pt and eta cuts expected to be the same like for the selected jets for simplicity
+    // jet pt and eta cuts can differ from the jet selection
+    //=== Apply cut on eta   
+    if (std::fabs(jet.eta()) > fJetEtaCut)
+      continue;
+    passedEta = true;  
+    //=== Apply cut on pt
+    if (jet.pt() < fJetPtCut)
+      continue;
+    passedPt = true;
     //=== Apply discriminator
     if (!(jet.bjetDiscriminator() > fDisriminatorValue))
       continue;
@@ -135,7 +149,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     output.fSelectedBJets.push_back(jet);
   }
   // Fill counters so far
-  if (passedDisr)
+  if (passedEta&&passedPt&&passedDisr)
     cSubPassedDiscriminator.increment();
   //=== Apply cut on number of selected b jets
   if (!fNumberOfJetsCut.passedCut(output.getNumberOfSelectedBJets()))

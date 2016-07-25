@@ -21,11 +21,14 @@ def writeFiles(header, source, headerName, sourceName):
     f = open(ccfile, "w")
     f.write(source)
     f.close()
-    print "Generated "+hfile
-    print "Generated " +ccfile
+    print "Generated " + hfile
+    print "Generated " + ccfile
 
 def getAdditionalFourVectorBranches(types, prefix):
+    '''
+    '''
     result = []
+
     for t in types.keys():
         if t.startswith("%s_eta"%prefix):
             suffix = t.replace("%s_eta"%prefix,"")
@@ -45,9 +48,13 @@ def generateParticle(types, particle, discriminatorCaptions):
     particleBranches = [particle+"s_"+x for x in ["pt", "eta", "phi", "e", "pdgId"]] # these are handled by Particle class
     branchNames = filter(lambda n: n[0:len(particle)+2] == particle+"s_", types.keys())
     branchNames.sort(key=lambda n: types[n]+n)
+    Verbose("Branch names for '%s' are:\n\t%s" % (particle, "\n\t".join(branchNames)), True)
+
     # Obtain four-vector branches and remove them from the branch list
     additionalFourVectorBranches = getAdditionalFourVectorBranches(types, particle+"s")
     additionalFourVectorBranches.sort()
+
+    Verbose("Additional 4-vector Branches for '%s' are:\n\t %s" % (particle, "\n\t ".join(additionalFourVectorBranches)), True)
     for item in additionalFourVectorBranches:
         i = 0
         while i < len(branchNames):
@@ -59,10 +66,11 @@ def generateParticle(types, particle, discriminatorCaptions):
                 i += 1
 
     particleFloatType = None
-    branchObjects = []
-    branchAccessors = []
-    branchBooks = []
-    for branch in branchNames:
+    branchObjects     = []
+    branchAccessors   = []
+    branchBooks       = []
+    # For-loop: All branch names
+    for i, branch in enumerate(branchNames):
         name = branch[len(particle)+2:]
         capname = name[0].upper()+name[1:]
         vectype = types[branch]
@@ -71,17 +79,22 @@ def generateParticle(types, particle, discriminatorCaptions):
             raise Exception("Could not interpret type %s as vector" % vectype)
         realtype = m.group("type")
         
+        # Print a table to see what's going on
+        PrintTable(i, "{:<55} {:<55} {:<30} {:>30}", ["Name", "CapName", "VecType", "RealType"], [name, capname, vectype, realtype])
+        
+        # For "pt", "eta", "phi", "e", "pdgId"
         if branch in particleBranches:
             if particleFloatType == None:
                 particleFloatType = realtype
             elif particleFloatType != realtype:
                 if realtype in ["float", "double"]:
                     raise Exception("Mismatch in 4-vector branch types: all of them must be of the same type, and now {branch} has {type} while others have {otype}".format(branch=branch, type=realtype, otype=particleFloatType))
-        else:
+        else: # Not "pt", "eta", "phi", "e", "pdgId"
             # Collect branches
             branchObjects.append("  const Branch<std::{vectype}> *f{vecname};".format(vectype=vectype, vecname=capname))
             branchAccessors.append("  {type} {name}() const {{ return this->fCollection->f{capname}->value()[this->index()]; }}".format(type=realtype, name=name, capname=capname))
             branchBooks.append("  mgr.book(prefix()+\"_{name}\", &f{capname});".format(name=name, capname=capname))
+
             # Collect discriminators
             for k in discriminatorCaptions.keys():
                 if branch.startswith(particle) and k in branch:
@@ -139,6 +152,7 @@ def generateParticle(types, particle, discriminatorCaptions):
     inits = ""
     inits += "\n".join(map(str,initList))
     fvectorgetters = ""
+
     for item in additionalFourVectorBranches:
         fvectorgetters += "  const ParticleCollection<double>* get%sCollection() const { return &f%s; }\n"%(item, item)
     if len(additionalFourVectorBranches) > 0:
@@ -235,13 +249,25 @@ void {type}Collection::setupBranches(BranchManager& mgr) {{
 """.format(type=particle+"Generated", fvectorBranches=fvectorBranches, branchBooks="\n".join(branchBooks))
     writeFiles(header, source, particle+"Generated.h", particle+"Generated.cc")
 
-## Auto-generates the contents of the genparticle collection (note: only collection, no single genparticles provided)
+
 def generateGenParticles(types, particle):
+    '''
+    Auto-generates the contents of the genparticle collection (note: only collection, no single genparticles provided)
+    '''
+
+    # Generate branch names
     branchNames = filter(lambda n: n[0:len(particle)+2] == particle+"s_", types.keys())
     branchNames.sort(key=lambda n: types[n]+n)
+    Verbose("Branch names for '%s' are:\n\t%s" % (particle, "\n\t".join(branchNames)), True)
+
     # Obtain four-vector branches and remove them from the branch list
     additionalFourVectorBranches = getAdditionalFourVectorBranches(types, particle+"s")
+
+    # Bug-fix (Alexandros, 20 July 2016): Add the GenParticles by hand (temporary fix)
+    additionalFourVectorBranches.append("GenParticles") 
     additionalFourVectorBranches.sort()
+
+    Verbose("Additional 4-vector Branches for '%s' are:\n\t %s" % (particle, "\n\t ".join(additionalFourVectorBranches)), True)
     for item in additionalFourVectorBranches:
         i = 0
         while i < len(branchNames):
@@ -251,7 +277,9 @@ def generateGenParticles(types, particle):
                 del branchNames[i]
             else:
                 i += 1
+    # Determine float type 
     floattype = None
+
     if len(additionalFourVectorBranches) > 0:
         for t in types.keys():
             if "%ss_pt_%s"%(particle, additionalFourVectorBranches[0]) == t:
@@ -261,15 +289,27 @@ def generateGenParticles(types, particle):
                 floattype = m.group("type")
         if floattype == None:
             raise Exception("Error: this should not happen")
+    else:
+        floattype = "double" # default value
 
     branchObjects = []
-    branchBooks = []
+    branchBooks   = []
     branchGetters = []
-    for branch in branchNames:
-        name = branch[len(particle)+2:]
-        capname = name[0].upper()+name[1:]
+    # Temporary Bug-fix (Alexandros, 20 July 2016)
+    ignoreList = ["genParticles_e", "genParticles_eta", "genParticles_phi", "genParticles_pt", "genParticles_vtxX", 
+                  "genParticles_vtxY", "genParticles_vtxZ", "genParticles_charge", "genParticles_mother", "genParticles_pdgId", "genParticles_status"]
+    for i, branch in enumerate(branchNames):
+        # Temporary Bug-fix (Alexandros, 20 July 2016)
+        if branch in ignoreList:
+            continue
+        else:
+           pass
+
+        name     = branch[len(particle)+2:]
+        capname  = name[0].upper()+name[1:]
         datatype = types[branch]
-        m = re_vector.search(datatype)
+
+        m        = re_vector.search(datatype)
         realtype = types[branch]
         if not m:
             datatype = types[branch]
@@ -277,6 +317,9 @@ def generateGenParticles(types, particle):
             datatype = "std::%s"%datatype
             realtype = m.group("type")
         
+        # Print a table to see what's going on
+        PrintTable(i, "{:<20} {:<20} {:<40} {:>20}", ["Name", "CapName", "DataType", "RealType"], [name, capname, datatype, realtype])
+
         # Collect branches
         branchObjects.append("  const Branch<{datatype}> *f{vecname};".format(datatype=datatype, vecname=capname))
         branchBooks.append("  mgr.book(\"{type}s_{name}\", &f{capname});".format(type=particle, name=name, capname=capname))
@@ -299,19 +342,31 @@ def generateGenParticles(types, particle):
         preInit += "f%s(prefix)"%item
     initList = []
     for item in additionalFourVectorBranches:
+        if item == "GenParticles":
+            continue
         initList.append('    f%s.setEnergySystematicsVariation("_%s");'%(item, item))
     inits = ""
     inits += "\n".join(map(str,initList))
-    fvectorgetters = ""
+    fvectorgetters     = ""
     fvectorgettersimpl = ""
-    for item in additionalFourVectorBranches:
-        fvectorgetters += "  const std::vector<Particle<ParticleCollection<float_type>>> get%sCollection() const;\n"%item
-        fvectorgettersimpl += "const std::vector<Particle<ParticleCollection<%s>>> %sGeneratedCollection::get%sCollection() const {\n"%(floattype, particle[0].upper()+particle[1:],item)
-        fvectorgettersimpl += "  std::vector<Particle<ParticleCollection<float_type>>> v;\n"
-        fvectorgettersimpl += "  for (size_t i = 0; i < f%s.size(); ++i)\n"%item
-        fvectorgettersimpl += "    v.push_back(Particle<ParticleCollection<float_type>>(&f%s, i));\n"%item
-        fvectorgettersimpl += "  return v;\n"
-        fvectorgettersimpl += "}\n"
+    for item in additionalFourVectorBranches:        
+        # Bug-fix (Alexandros, 20 July 2016): Add the GenParticles by hand (temporary fix)
+        if item == "GenParticles":
+            fvectorgetters     += "  const std::vector<Particle<ParticleCollection<float_type>>> get%s() const;\n"%item
+            fvectorgettersimpl += "const std::vector<Particle<ParticleCollection<%s>>> %sGeneratedCollection::get%s() const {\n"%(floattype, particle[0].upper()+particle[1:],item)
+            fvectorgettersimpl += "  std::vector<Particle<ParticleCollection<float_type>>> v;\n"
+            fvectorgettersimpl += "  for (size_t i = 0; i < f%s.size(); ++i)\n"%item
+            fvectorgettersimpl += "    v.push_back(Particle<ParticleCollection<float_type>>(&f%s, i));\n"%item
+            fvectorgettersimpl += "  return v;\n"
+            fvectorgettersimpl += "}\n"
+        else:
+            fvectorgetters     += "  const std::vector<Particle<ParticleCollection<float_type>>> get%sCollection() const;\n"%item
+            fvectorgettersimpl += "const std::vector<Particle<ParticleCollection<%s>>> %sGeneratedCollection::get%sCollection() const {\n"%(floattype, particle[0].upper()+particle[1:],item)
+            fvectorgettersimpl += "  std::vector<Particle<ParticleCollection<float_type>>> v;\n"
+            fvectorgettersimpl += "  for (size_t i = 0; i < f%s.size(); ++i)\n"%item
+            fvectorgettersimpl += "    v.push_back(Particle<ParticleCollection<float_type>>(&f%s, i));\n"%item
+            fvectorgettersimpl += "  return v;\n"
+            fvectorgettersimpl += "}\n"
     if len(additionalFourVectorBranches) > 0:
         fvectorgetters += "protected:\n"
     for item in additionalFourVectorBranches:
@@ -497,14 +552,56 @@ def main(opts, args):
     return 0
 
 
+def Verbose(msg, printHeader=False):
+    '''
+    Calls Print() only if verbose options is set to true.
+    '''
+    if not opts.verbose:
+        return
+    Print(msg, printHeader)
+    return
+
+
+def Print(msg, printHeader=True):
+    '''
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader:
+        print "=== ", fName
+    print "\t", msg
+    return
+
+
+def PrintTable(counter, textAlign, colNamesList, colValuesList):
+    '''
+    '''
+    if not opts.verbose:
+        return
+
+    rows  = []
+    title = textAlign.format(*colNamesList)
+    hLine = "="*len(title)
+    vals  = textAlign.format(*colValuesList)
+
+    if (counter < 1):
+        rows.append(hLine)
+        rows.append(title)
+        rows.append(hLine)
+    rows.append(vals)
+
+    for r in rows:
+        print r
+    return
+
+
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options] root_file")
-    parser.add_option("--tree", dest="tree", default="Events",
-                      help="Generate data format from this tree (default: 'Events')")
+    parser.add_option("-t", "--tree"   , dest="tree"    , default="Events", help="Generate data format from this tree [default: 'Events']")
+    parser.add_option("-v", "--verbose", dest="verbose" , default=False   , action="store_true", help="Verbose mode for debugging purposes [default: False]")
 
     (opts, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("You should give exactly one root_file, got %d" % len(args))
-
 
     sys.exit(main(opts, args))

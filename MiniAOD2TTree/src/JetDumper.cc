@@ -27,10 +27,26 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     discriminators = new std::vector<float>[inputCollections.size()*nDiscriminators];
     nUserfloats = inputCollections[0].getParameter<std::vector<std::string> >("userFloats").size();
     userfloats = new std::vector<double>[inputCollections.size()*nUserfloats];
-    jetToken = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
+    jetToken   = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
+    jetJESup   = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
+    jetJESdown = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
+    jetJERup   = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
+    jetJERdown = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
     for(size_t i = 0; i < inputCollections.size(); ++i){
         edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
         jetToken[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtag);
+
+	edm::InputTag inputtagJESup = inputCollections[i].getParameter<edm::InputTag>("srcJESup");
+        jetJESup[i]   = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJESup);
+
+        edm::InputTag inputtagJESdown = inputCollections[i].getParameter<edm::InputTag>("srcJESdown");
+        jetJESdown[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJESdown);
+
+        edm::InputTag inputtagJERup = inputCollections[i].getParameter<edm::InputTag>("srcJERup");
+        jetJERup[i]   = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJERup);
+        
+        edm::InputTag inputtagJERdown = inputCollections[i].getParameter<edm::InputTag>("srcJERdown");
+        jetJERdown[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJERdown);
     }
     
     useFilter = false;
@@ -113,7 +129,7 @@ void JetDumper::book(TTree* tree){
 
 bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if (!booked) return true;
-
+/*
     if (!fJECUncertainty.size()) {
       for(size_t i = 0; i < inputCollections.size(); ++i) {
         edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
@@ -127,17 +143,17 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 //          found = false;
           fJECUncertainty.push_back(nullptr);
         }
-/*
-        if (found) {
-          JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
-          fJECUncertainty.push_back(new JetCorrectionUncertainty(JetCorPar));
-        } else {
-          fJECUncertainty.push_back(nullptr);
-        }
-*/
+
+//        if (found) {
+//          JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
+//          fJECUncertainty.push_back(new JetCorrectionUncertainty(JetCorPar));
+//        } else {
+//          fJECUncertainty.push_back(nullptr);
+//        }
+//
       }
     }
-
+*/
     edm::Handle <reco::GenParticleCollection> genParticlesHandle;
     if (!iEvent.isRealData())
       iEvent.getByToken(genParticleToken, genParticlesHandle);
@@ -252,6 +268,50 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 
                 // Systematics
                 if (!iEvent.isRealData()) {
+	          edm::Handle<edm::View<pat::Jet>> jetJESupHandle;
+        	  iEvent.getByToken(jetJESup[ic], jetJESupHandle);
+
+                  if(jetJESupHandle.isValid()){
+                    const pat::Jet& sysobj = jetJESupHandle->at(i);
+                    systJESup[ic].add(sysobj.p4().pt(),
+                                      sysobj.p4().eta(),
+                                      sysobj.p4().phi(),
+                                      sysobj.p4().energy());
+                  }
+
+                  edm::Handle<edm::View<pat::Jet>> jetJESdownHandle;
+                  iEvent.getByToken(jetJESdown[ic], jetJESdownHandle);
+                      
+                  if(jetJESdownHandle.isValid()){
+                    const pat::Jet& sysobj = jetJESdownHandle->at(i);
+                    systJESdown[ic].add(sysobj.p4().pt(),
+                                        sysobj.p4().eta(),
+                                        sysobj.p4().phi(),
+                                        sysobj.p4().energy());
+                  }
+
+                  edm::Handle<edm::View<pat::Jet>> jetJERupHandle;
+                  iEvent.getByToken(jetJERup[ic], jetJERupHandle);
+                      
+                  if(jetJERupHandle.isValid()){
+                    const pat::Jet& sysobj = jetJERupHandle->at(i);
+                    systJERup[ic].add(sysobj.p4().pt(),
+                                      sysobj.p4().eta(),
+                                      sysobj.p4().phi(),
+                                      sysobj.p4().energy());
+                  }
+                
+                  edm::Handle<edm::View<pat::Jet>> jetJERdownHandle;
+                  iEvent.getByToken(jetJERdown[ic], jetJERdownHandle);
+                
+                  if(jetJERdownHandle.isValid()){
+                    const pat::Jet& sysobj = jetJERdownHandle->at(i);  
+                    systJERdown[ic].add(sysobj.p4().pt(),
+                                        sysobj.p4().eta(),
+                                        sysobj.p4().phi(),
+                                        sysobj.p4().energy());
+                  }
+/*
                   // JES
                   double uncUp = 0.0;
                   double uncDown = 0.0;
@@ -275,7 +335,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                                       obj.p4().phi(),
                                       obj.p4().energy()*(1.0-uncDown));
                   // JER
-                  
+*/                
                 }
             }
         }

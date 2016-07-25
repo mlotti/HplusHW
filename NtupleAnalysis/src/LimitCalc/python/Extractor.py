@@ -792,7 +792,7 @@ class QCDShapeVariationExtractor(ExtractorBase):
             raise Exception(ShellStyles.ErrorLabel()+"DatasetColumn '%s': QCD systematics %s exists already!!"%(datasetColumn.getLabel(),self._systVariation))
         # Obtain histograms
         dset = dsetMgr.getDataset(datasetColumn.getDatasetMgrColumn())
-        mySource = "SystVar"+self._systVariation
+        mySource = "_SystVar"+self._systVariation
         myRateHisto = None
         if rootHistoWithUncertainties == None:
             myRateHisto = datasetColumn.getCachedShapeRootHistogramWithUncertainties().getRootHisto()
@@ -800,10 +800,9 @@ class QCDShapeVariationExtractor(ExtractorBase):
             myRateHisto = rootHistoWithUncertainties.getRootHisto()
         myHistoNamePrefix = myRateHisto.GetName().replace("_cloned","").replace("_"+dset.name,"")
         myHistoNameShort = myHistoNamePrefix
-        if not "shape" in myHistoNamePrefix:
-            myHistoNamePrefix = "ForDataDrivenCtrlPlots/"+myHistoNamePrefix
-        (hNum, hNumName) = dset.getRootHisto(myHistoNamePrefix+"Numerator", analysisPostfix=mySource)
-        (hDenom, hDenomName) = dset.getRootHisto(myHistoNamePrefix+"Denominator", analysisPostfix=mySource)
+        myHistoNamePrefix = "ForDataDrivenCtrlPlots/"+myHistoNamePrefix
+        (hNum, hNumName) = dset.getRootHisto(myHistoNamePrefix+"systQCDNumerator", analysisPostfix=mySource)
+        (hDenom, hDenomName) = dset.getRootHisto(myHistoNamePrefix+"systQCDDenominator", analysisPostfix=mySource)
         # Store original source histograms
         mySourceNamePrefix = "%s_%sSource"%(datasetColumn.getLabel(),self.getId())
         hNumSource = aux.Clone(hNum, mySourceNamePrefix+"_Numerator")

@@ -22,7 +22,7 @@ public:
   void setupBranches(BranchManager& mgr);
 
   std::vector<std::string> getIDDiscriminatorNames() const {
-    static std::vector<std::string> n = { std::string("mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80"), std::string("mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90")};
+    static std::vector<std::string> n = { std::string("cutBasedElectronID_Spring15_25ns_V1_standalone_loose"), std::string("cutBasedElectronID_Spring15_25ns_V1_standalone_medium"), std::string("cutBasedElectronID_Spring15_25ns_V1_standalone_tight"), std::string("cutBasedElectronID_Spring15_25ns_V1_standalone_veto")};
     return n;
   }
 
@@ -31,8 +31,11 @@ protected:
   ParticleCollection<double> fMCelectron;
 
 protected:
-  const Branch<std::vector<bool>> *fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80;
-  const Branch<std::vector<bool>> *fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90;
+  const Branch<std::vector<bool>> *fCutBasedElectronID_Spring15_25ns_V1_standalone_loose;
+  const Branch<std::vector<bool>> *fCutBasedElectronID_Spring15_25ns_V1_standalone_medium;
+  const Branch<std::vector<bool>> *fCutBasedElectronID_Spring15_25ns_V1_standalone_tight;
+  const Branch<std::vector<bool>> *fCutBasedElectronID_Spring15_25ns_V1_standalone_veto;
+  const Branch<std::vector<float>> *fEffAreaIsoDeltaBeta;
   const Branch<std::vector<float>> *fRelIsoDeltaBeta;
 };
 
@@ -49,16 +52,21 @@ public:
 
   std::vector<std::function<bool()>> getIDDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
-      [&](){ return this->mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80(); },
-      [&](){ return this->mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90(); }
+      [&](){ return this->cutBasedElectronID_Spring15_25ns_V1_standalone_loose(); },
+      [&](){ return this->cutBasedElectronID_Spring15_25ns_V1_standalone_medium(); },
+      [&](){ return this->cutBasedElectronID_Spring15_25ns_V1_standalone_tight(); },
+      [&](){ return this->cutBasedElectronID_Spring15_25ns_V1_standalone_veto(); }
     };
     return values;
   }
 
   const Particle<ParticleCollection<double>>* MCelectron() const { return &fMCelectron; }
 
-  bool mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80() const { return this->fCollection->fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp80->value()[this->index()]; }
-  bool mvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90() const { return this->fCollection->fMvaEleID_PHYS14_PU20bx25_nonTrig_V1_wp90->value()[this->index()]; }
+  bool cutBasedElectronID_Spring15_25ns_V1_standalone_loose() const { return this->fCollection->fCutBasedElectronID_Spring15_25ns_V1_standalone_loose->value()[this->index()]; }
+  bool cutBasedElectronID_Spring15_25ns_V1_standalone_medium() const { return this->fCollection->fCutBasedElectronID_Spring15_25ns_V1_standalone_medium->value()[this->index()]; }
+  bool cutBasedElectronID_Spring15_25ns_V1_standalone_tight() const { return this->fCollection->fCutBasedElectronID_Spring15_25ns_V1_standalone_tight->value()[this->index()]; }
+  bool cutBasedElectronID_Spring15_25ns_V1_standalone_veto() const { return this->fCollection->fCutBasedElectronID_Spring15_25ns_V1_standalone_veto->value()[this->index()]; }
+  float effAreaIsoDeltaBeta() const { return this->fCollection->fEffAreaIsoDeltaBeta->value()[this->index()]; }
   float relIsoDeltaBeta() const { return this->fCollection->fRelIsoDeltaBeta->value()[this->index()]; }
 
 protected:

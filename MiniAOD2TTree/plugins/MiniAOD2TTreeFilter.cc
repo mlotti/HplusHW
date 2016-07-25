@@ -90,7 +90,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
         topDumper = new TopDumper(consumesCollector(), topCollections);
         topDumper->book(Events);
     } else {
-      std::cout << "Config: JetDumper ignored, because 'Jets' is missing from config" << std::endl;
+      std::cout << "Config: TopDumper ignored, because 'Top' is missing from config" << std::endl;
     }
 
     metDumper = 0;

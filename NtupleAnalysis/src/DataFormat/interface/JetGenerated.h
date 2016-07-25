@@ -50,7 +50,6 @@ protected:
   const Branch<std::vector<bool>> *fOriginatesFromUnknown;
   const Branch<std::vector<bool>> *fOriginatesFromW;
   const Branch<std::vector<bool>> *fOriginatesFromZ;
-  const Branch<std::vector<double>> *fPileupJetIdfullDiscriminant;
   const Branch<std::vector<float>> *fPfCombinedInclusiveSecondaryVertexV2BJetTags;
   const Branch<std::vector<float>> *fPfCombinedMVABJetTag;
   const Branch<std::vector<float>> *fPfJetBProbabilityBJetTags;
@@ -108,7 +107,6 @@ public:
   bool originatesFromUnknown() const { return this->fCollection->fOriginatesFromUnknown->value()[this->index()]; }
   bool originatesFromW() const { return this->fCollection->fOriginatesFromW->value()[this->index()]; }
   bool originatesFromZ() const { return this->fCollection->fOriginatesFromZ->value()[this->index()]; }
-  double pileupJetIdfullDiscriminant() const { return this->fCollection->fPileupJetIdfullDiscriminant->value()[this->index()]; }
   float pfCombinedInclusiveSecondaryVertexV2BJetTags() const { return this->fCollection->fPfCombinedInclusiveSecondaryVertexV2BJetTags->value()[this->index()]; }
   float pfCombinedMVABJetTag() const { return this->fCollection->fPfCombinedMVABJetTag->value()[this->index()]; }
   float pfJetBProbabilityBJetTags() const { return this->fCollection->fPfJetBProbabilityBJetTags->value()[this->index()]; }
