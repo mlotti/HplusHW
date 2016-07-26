@@ -102,6 +102,11 @@ public:
   float_type e()   const { return fCollection->fE->value()[index()]; }
   short pdgId()  const { return fCollection->fPdgId->value()[index()]; }
   short mother() const { return fCollection->fMother->value()[index()]; }
+  short status() const { return fCollection->fStatus->value()[index()]; }
+  short charge() const { return fCollection->fCharge->value()[index()]; }
+  double vtxX() const { return fCollection->fVtxX->value()[index()]; }
+  double vtxY() const { return fCollection->fVtxY->value()[index()]; }
+  double vtxZ() const { return fCollection->fVtxZ->value()[index()]; }
   
   float_type Phi() const { return phi(); }
 
@@ -183,7 +188,12 @@ public:
     fPhi(nullptr),
     fE(nullptr),
     fPdgId(nullptr),
-    fMother(nullptr)
+    fMother(nullptr),
+    fStatus(nullptr),
+    fCharge(nullptr),
+    fVtxX(nullptr),
+    fVtxY(nullptr),
+    fVtxZ(nullptr)
   {}
   ~ParticleCollection() {}
 
@@ -194,6 +204,11 @@ public:
     mgr.book(prefix()+"_e"   +energySystematicsVariation(), &fE);
     mgr.book(prefix()+"_pdgId"                            , &fPdgId);
     mgr.book(prefix()+"_mother"                           , &fMother);
+    mgr.book(prefix()+"_status"                           , &fStatus);
+    mgr.book(prefix()+"_charge"                           , &fCharge);
+    mgr.book(prefix()+"_vtxX"                             , &fVtxX);
+    mgr.book(prefix()+"_vtxY"                             , &fVtxY);
+    mgr.book(prefix()+"_vtxZ"                             , &fVtxZ);
   }
 
   size_t size() const { return fPt->value().size(); }
@@ -210,7 +225,12 @@ protected:
   const Branch<std::vector<float_type>> *fPhi;
   const Branch<std::vector<float_type>> *fE;
   const Branch<std::vector<short>> *fPdgId;
-  const Branch<std::vector<short>> *fMother; 
+  const Branch<std::vector<short>> *fMother;
+  const Branch<std::vector<short>> *fStatus;
+  const Branch<std::vector<short>> *fCharge;
+  const Branch<std::vector<double>> *fVtxX;
+  const Branch<std::vector<double>> *fVtxY;
+  const Branch<std::vector<double>> *fVtxZ;
 };
 
 #endif
