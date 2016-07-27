@@ -574,58 +574,54 @@ double MCTools::GetLxy(const int genP_index,
   //
   // Description:
   // Investigate the genParticle with index "genP_index". Find its 
-  // production and decay vertices. The method vertexX() returns the 
-  // production vertex. So, in order to determine the decay vertex 
-  // we take one of the particle's daughtes and ask for its prodution
-  // vertex. 
+  // production and decay vertices. The method GetPV() returns the 
+  // Primary Vertex of the hard interaction. So, in order to determine
+  // the decay vertex we take one of the particle's daughtes and
+  // ask for its prodution vertex.  Return Lxy in mm.
   //
   // Explanation:
   // The distance traversed by a long-lived particle is Lxy (decay length).
   // Assuming the origin (0, 0) as the Primary Vertex (the point where the
-  // particle was produced) and (vtx_X, vtx_Y) as the Secondary Vertex (the
+  // particle was produced) and (vtxX, vtxY) as the Secondary Vertex (the
   // point where the long-lived particle reaches before decaying), then Lxy is
   // obtained from Pythagoras theorem. Particles that decay promptly should 
   // have Lxy very close to zero.
   //
   // Note: [from https://hypernews.cern.ch/HyperNews/CMS/get/generators/2429/1.html]
   // In CMS default pythia8 configuration K_S^0 is considered long-lived
-  // enough that we leave them undecayed and they are passed to geant.  So geant
+  // enough that we leave them undecayed and they are passed to GEANT.  So GEANT
   // will decay them, but you will see them as status 1 for what concerns the
-  // GenParticles.
-  // OTHER K_S^0).
+  // genParticles.
   //
 
-  genParticle p;
-  genParticle d;
-  genParticle fs;
- 
-  // If particle decays to itself, get the last in the chain
-  p  = fEvent->genparticles().getGenParticles()[genP_index];
-  int fs_index = GetFinalSelf(genP_index);
-  fs = fEvent->genparticles().getGenParticles()[fs_index];
+  // Get the genParticle
+  genParticle p = fEvent->genparticles().getGenParticles()[genP_index];
 
-  // Reference point
-  double refX  = 0.0;
-  double refY  = 0.0;
+  // If proton return 0
+  genParticle m;
+  int mom_index = p.mother();
+  if( (p.pdgId() == 2212) && (mom_index < 0)) return 0.0;
 
   // Get the daughters
-  std::vector<int>  daughters = GetDaughters(fs_index, false);
-  if (daughters.size() == 0) return -1.0;
+  std::vector<int>  daughters = GetDaughters(genP_index, false);
+  if (daughters.size() == 0) return 0.0;
 
-  // Get one of the daugthers to determine the decay vertex (what if no daughters?)
-  int dau_index   = daughters.at(0);
-  d = fEvent->genparticles().getGenParticles()[dau_index];
-  double dau_vtxX = d.vtxX(); // [in cm]
-  double dau_vtxY = d.vtxY(); // [in cm]
+  // Get one of the daugthers to determine the decay vertex
+  int dau_index = daughters.at(0);
+  genParticle d = fEvent->genparticles().getGenParticles()[dau_index];
 
-  if (wrtPV)
-    {
-      refX = GetVertexX();
-      refY = GetVertexY();
-    }
+  // Get the daughter production vertex
+  ROOT::Math::XYZPoint dau_xyz(d.vtxX()*10, d.vtxY()*10, d.vtxZ()*10); // [in mm]
 
-  // Calculate Lxy
-  double LxySq = pow( (dau_vtxX - refX), 2) + pow( (dau_vtxY - refY), 2);
+  // Get the reference point: (pvX, pvY) or (0,0)?
+  ROOT::Math::XYZPoint xyz;
+  ROOT::Math::XYZPoint vtx = GetVertex(); // in mm 
+  ROOT::Math::XYZPoint pv  = GetPV();     // in mm
+  if (wrtPV) xyz = pv;
+  else xyz = vtx;
+  
+  // Calculate the distance Lxy (in mm)
+  double LxySq = pow( (dau_xyz.x() - xyz.x()), 2) + pow( (dau_xyz.y() - xyz.y()), 2);
   double Lxy   = sqrt(LxySq);
 
   return Lxy;
@@ -637,14 +633,15 @@ double MCTools::GetD0Mag(const int genP_index,
 
   //
   //  Description:
-  //  Investigate the genParticle with index "genP_index". 
+  //  Investigate the genParticle with index "genP_index". Return
+  //  |d0| in mm.
   // 
   //  Explanation: 
   //  The distance traversed by a long-lived particle is Lxy (decay length).
   //  Particles that decay promptly should have Lxy very close to zero.
   //  Simple trigonometry will reveal that the tangent of the angle between the
   //  long-lived particles' decay product and it's own direction will give:
-  //  sin( |phi_mom - genP_Phi| ) = d0/Lxy
+  //  sin( |genP_phi - mom_phi| ) = d0/Lxy
   //  Then d0 can be simply obtained by multiplying the tangent of the azimuthal
   //  angle difference with the decay length Lxy.
   // 
@@ -653,38 +650,89 @@ double MCTools::GetD0Mag(const int genP_index,
   //  https://root.cern.ch/doc/master/classTLorentzVector.html
   // 
 
-  genParticle p;  
-  genParticle m;
-  genParticle fs;
-
   // Get the particle
-  p = fEvent->genparticles().getGenParticles()[genP_index];
+  genParticle p = fEvent->genparticles().getGenParticles()[genP_index];
   
   // Particle MUST have a mother!
+  genParticle m;
   int mom_index = p.mother();
-
   if (mom_index >= 0) m = fEvent->genparticles().getGenParticles()[mom_index];
-  else return -1.0;
+  else return 0.0; //-99999.0;
     
-  // If particle decays to itself, get the last in the chain
-  int fs_index = GetFinalSelf(genP_index);
-  fs = fEvent->genparticles().getGenParticles()[fs_index];
-
   // Ensure the particle has more than 1 daughters
-  std::vector<int> daughters = GetDaughters(fs_index, false);
-  if (daughters.size() < 2) return -1.0;
+  std::vector<int> daughters = GetDaughters(genP_index, false);
+  if (daughters.size() < 2) return 0.0; //-99999.0;
 
   // Get the TLorentzVectors
   TLorentzVector p_p4;
   p_p4.SetPtEtaPhiM(p.p4().pt(), p.p4().eta(), p.p4().phi(), p.p4().mass() );
 
+
   TLorentzVector m_p4;
   m_p4.SetPtEtaPhiM(m.p4().pt(), m.p4().eta(), m.p4().phi(), m.p4().mass() );
-  
-  // Calculate the |d0|
+  // Sanity check
+  if ( (m.p4().pt() == 0) && (m.p4().phi() == 0) ) return 0.0; //-99999.0;
+
+	 
+  // Calculate the Aagle between two vectors (in radians)
   double angle = p_p4.Angle( m_p4.Vect() );
-  double Lxy   = GetLxy(fs_index, wrtPV);
+  
+  // Get the Lxy (in mm)
+  double Lxy = GetLxy(genP_index, wrtPV); 
+
+  // Calculate the |d0| (in mm). [The TMath::Sin() requires angle in radians]
   double d0Mag = TMath::Sin(angle) * Lxy;
+  // std::cout << "d0Mag = TMath::Sin("<<angle<<") * " << Lxy << "= " << d0Mag  << std::endl;
 
   return d0Mag;
+}
+
+
+ROOT::Math::XYZPoint MCTools::GetPV(void){
+
+  //
+  //  Description:
+  //  Return the offline Primary Vertex (PV) as a XYZPoint (by default in mm).
+  // 
+
+  ROOT::Math::XYZPoint pv(fEvent->vertexInfo().pvX(), fEvent->vertexInfo().pvY(), fEvent->vertexInfo().pvZ() );
+  
+  return pv;
+}
+
+
+ROOT::Math::XYZPoint MCTools::GetVertex(void){
+
+  //
+  //  Description:
+  //  Return the genParticle vertex as a XYZPoint (in mm).
+  //  This is defined as the vertex of the proton (first) daughters.
+  // 
+
+  // Declarations
+  ROOT::Math::XYZPoint vtx(0.0, 0.0, 0.0);
+  
+  // For-loop: All genParticles 
+  int genP_index = -1;
+  for (auto& p: fEvent->genparticles().getGenParticles())
+    {
+      genP_index++;
+
+      // Skip the protons (have no vertex)
+      if (p.pdgId() == 2212) continue;
+
+      // Get the daughters
+      std::vector<int> genP_daughters = GetDaughters(genP_index, false);
+
+      // Get the mother
+      int genMom_index = p.mother();
+      genParticle m    = fEvent->genparticles().getGenParticles()[genMom_index];
+      if (m.pdgId() == 2212)
+	{
+	  vtx.SetXYZ(p.vtxX()*10, p.vtxY()*10, p.vtxZ()*10);
+	  break;
+	}
+    }
+  
+  return vtx;
 }

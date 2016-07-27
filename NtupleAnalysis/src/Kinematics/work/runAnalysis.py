@@ -49,7 +49,7 @@ import ROOT
 #================================================================================================
 # Options
 #================================================================================================
-prefix      = "GenParticleKinematics"
+prefix      = "Kinematics"
 postfix     = ""
 dataEras    = ["2015"] # dataEras = ["2015B","2015C"]
 searchModes = ["80to1000"]
@@ -99,7 +99,6 @@ def main():
     # Setup the process
     # ================================================================================================
     process = Process(prefix, postfix, opts.nEvts)
-    # process = Process("GenParticleKinematics"+obtainAnalysisSuffix(sys.argv))
 
             
     # ================================================================================================

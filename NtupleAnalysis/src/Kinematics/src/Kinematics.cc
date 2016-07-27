@@ -13,10 +13,10 @@
 #include "TDirectory.h"
 #include "Math/VectorUtil.h"
 
-class GenParticleKinematics: public BaseSelector {
+class Kinematics: public BaseSelector {
 public:
-  explicit GenParticleKinematics(const ParameterSet& config, const TH1* skimCounters);
-  virtual ~GenParticleKinematics() {}
+  explicit Kinematics(const ParameterSet& config, const TH1* skimCounters);
+  virtual ~Kinematics() {}
 
   /// Books histograms
   virtual void book(TDirectory *dir) override;
@@ -110,9 +110,9 @@ private:
 };
 
 #include "Framework/interface/SelectorFactory.h"
-REGISTER_SELECTOR(GenParticleKinematics);
+REGISTER_SELECTOR(Kinematics);
 
-GenParticleKinematics::GenParticleKinematics(const ParameterSet& config, const TH1* skimCounters)
+Kinematics::Kinematics(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_Verbose(config.getParameter<bool>("Verbose")),
     cfg_TopQuark_Pt(config.getParameter<double>("TopQuark_Pt")),
@@ -137,7 +137,7 @@ GenParticleKinematics::GenParticleKinematics(const ParameterSet& config, const T
   
 { }
 
-void GenParticleKinematics::book(TDirectory *dir) {
+void Kinematics::book(TDirectory *dir) {
 
   // Book histograms
   h_genMET_Et         =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "genMET_Et" , "gen MET Et" , 100,  0.0   , 500.0);
@@ -206,12 +206,12 @@ void GenParticleKinematics::book(TDirectory *dir) {
   return;
 }
 
-void GenParticleKinematics::setupBranches(BranchManager& branchManager) {
+void Kinematics::setupBranches(BranchManager& branchManager) {
   fEvent.setupBranches(branchManager);
 }
 
 
-void GenParticleKinematics::process(Long64_t entry) {
+void Kinematics::process(Long64_t entry) {
 
 
   if ( !fEvent.isMC() ) return;
@@ -223,7 +223,7 @@ void GenParticleKinematics::process(Long64_t entry) {
   cAllEvents.increment();
   
   // Define the table
-  Table table("Evt | Index | PdgId | Status | Charge | Pt | Eta | Phi | abs(d0) | Lxy | vX | vY | vZ | Mom | Daus (Index)", "Text"); //LaTeX or Text
+  Table table("Evt | Index | PdgId | Status | Charge | Pt | Eta | Phi | Vertex (mm) | d0 (mm) | Lxy (mm) | Mom | Daus (Index)", "Text"); //LaTeX or Text
   
   // Event-based variables
   h_genMET_Et ->Fill(fEvent.genMET().et());
@@ -271,10 +271,12 @@ void GenParticleKinematics::process(Long64_t entry) {
     // double genP_energy   = p.e();
     int genP_status      = p.status();
     int genP_charge      = p.charge();
-    double genP_vtxX     = p.vtxX();
-    double genP_vtxY     = p.vtxY();
-    double genP_vtxZ     = p.vtxZ();
-      
+    double genP_vtxX     = p.vtxX()*10; // in mm
+    double genP_vtxY     = p.vtxY()*10; // in mm
+    double genP_vtxZ     = p.vtxZ()*10; // in mm
+    double genP_d0       = mcTools.GetD0Mag(genP_index, false); // in mm
+    double genP_Lxy      = mcTools.GetLxy(genP_index, false); // in mm
+    
     // Daughter properties
     std::vector<int> genP_daughters_index    = mcTools.GetDaughters(genP_index, false);
     // std::vector<int> genP_daughters_pdgId    = mcTools.GetDaughters(genP_index, true);
@@ -312,11 +314,9 @@ void GenParticleKinematics::process(Long64_t entry) {
     table.AddRowColumn(row, auxTools.ToString(genP_pt , 3)     );
     table.AddRowColumn(row, auxTools.ToString(genP_eta, 4)     );
     table.AddRowColumn(row, auxTools.ToString(genP_phi, 3)     );
-    table.AddRowColumn(row, auxTools.ToString( mcTools.GetD0Mag(genP_index, false),3) );
-    table.AddRowColumn(row, auxTools.ToString( mcTools.GetLxy(genP_index, false), 3) );
-    table.AddRowColumn(row, auxTools.ToString(genP_vtxX, 3)    );
-    table.AddRowColumn(row, auxTools.ToString(genP_vtxY, 3)    );
-    table.AddRowColumn(row, auxTools.ToString(genP_vtxZ, 3)    );
+    table.AddRowColumn(row, "(" + auxTools.ToString(genP_vtxX, 3) + ", " + auxTools.ToString(genP_vtxY, 3)  + ", " + auxTools.ToString(genP_vtxZ, 3) + ")" );
+    table.AddRowColumn(row, auxTools.ToString(genP_d0,  3)     );
+    table.AddRowColumn(row, auxTools.ToString(genP_Lxy, 3)     );
     table.AddRowColumn(row, auxTools.ToString(genMom_index)    );
     table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genP_daughters_index) );
     row++;
@@ -388,7 +388,7 @@ void GenParticleKinematics::process(Long64_t entry) {
 	    else
 	      {
 		if (0) mcTools.PrintGenParticle(fs_index);
-		// throw hplus::Exception("Logic") << "GenParticleKinematics::process() Top quark whose origins are not accounted for. Need to rethink this.";
+		// throw hplus::Exception("Logic") << "Kinematics::process() Top quark whose origins are not accounted for. Need to rethink this.";
 	      }
 	  }// Has H+ mother
 	else
@@ -428,7 +428,7 @@ void GenParticleKinematics::process(Long64_t entry) {
 	      }
 	    else
 	      {	      
-		// throw hplus::Exception("Logic") << "GenParticleKinematics::process() Top quark whose origins are not accounted for. Need to rethink this.";
+		// throw hplus::Exception("Logic") << "Kinematics::process() Top quark whose origins are not accounted for. Need to rethink this.";
 	      }
 	  }
       }// B-quarks
@@ -467,7 +467,7 @@ void GenParticleKinematics::process(Long64_t entry) {
 	  }
 	else
 	  {
-	    // throw hplus::Exception("Logic") << "GenParticleKinematics::process() Top quark whose origins are not accounted for. Need to rethink this.";
+	    // throw hplus::Exception("Logic") << "Kinematics::process() Top quark whose origins are not accounted for. Need to rethink this.";
 	  }
       }// T-Quarks
     else if(std::abs(genP_pdgId) == 37) //HPlus
@@ -527,7 +527,7 @@ void GenParticleKinematics::process(Long64_t entry) {
 		}
 	      else
 		{
-		  throw hplus::Exception("Logic") << "GenParticleKinematics::process() W daughters whose origins are not accounted for. Need to rethink this.";
+		  throw hplus::Exception("Logic") << "Kinematics::process() W daughters whose origins are not accounted for. Need to rethink this.";
 		}
 	    }// For-loop: All daughters
 	  }
@@ -574,14 +574,14 @@ void GenParticleKinematics::process(Long64_t entry) {
 		}
 	      else
 		{
-		  throw hplus::Exception("Logic") << "GenParticleKinematics::process() W daughters whose origins are not accounted for. Need to rethink this.";
+		  throw hplus::Exception("Logic") << "Kinematics::process() W daughters whose origins are not accounted for. Need to rethink this.";
 		}
 	    }// For-loop: All daughters
 	  }
       }//W-Bosons
     else
       {
-	// throw hplus::Exception("Logic") << "GenParticleKinematics::process()";
+	// throw hplus::Exception("Logic") << "Kinematics::process()";
       }    
     
   }//for-loop: genParticles
