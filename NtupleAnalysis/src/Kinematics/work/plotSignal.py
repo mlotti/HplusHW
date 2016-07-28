@@ -26,13 +26,13 @@ import ROOT
 #================================================================================================
 # Variable Definition
 #================================================================================================
-analysis    = "GenParticleKinematics"
+analysis    = "Kinematics"
 user        = getpass.getuser()
 initial     = getpass.getuser()[0]
 #savePath    = "/afs/cern.ch/user/%s/%s/public/html/%s/" % (initial, user, analysis)
 savePath    = "/Users/%s/Desktop/Plots/" % (user)
 saveFormats = [".png"] #,".pdf",".C"]
-kinVar      = "dR"  # "Pt", "Eta", "Phi"
+kinVar      = "Eta"  # "Pt", "Eta", "Phi", "dR"
 normalizeTo = "One" # "", "One", "XSection", "Luminosity"
 rebinFactor = 2     # 5
 ratio       = False
@@ -45,7 +45,6 @@ def main():
 
     style    = tdrstyle.TDRStyle()
     hNames   = getHistoNames(kinVar)
-    # hName    = hNames[0]
 
     # Set ROOT batch mode boolean
     ROOT.gROOT.SetBatch(parseOpts.batchMode)
@@ -76,7 +75,10 @@ def main():
         intLumi = GetLumi(datasets)
     
 
-    # hNames.extend(["genMET_Et", "genMET_Phi"])
+    hNames.extend(["genMET_Et", "genMET_Phi", "genHT_GenJets", "genHT_GenParticles", "GenJet_Multiplicity",
+                   "SelGenJet_MaxDiJetMass_Mass", "SelGenJet_MaxDiJetMass_Pt", "SelGenJet_MaxDiJetMass_Eta", "SelGenJet_MaxDiJetMass_dR", "SelGenJet_MaxDiJetMass_Rapidity", 
+                   "SelGenJet_Multiplicity", "SelGenJet_LdgDiJet_Mass"])
+
                   
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
@@ -142,11 +144,14 @@ def main():
         # Create a comparison plot
         #p = plots.ComparisonPlot(histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
         #                         histograms.Histo(histo2, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9"))
-
+        
         p = plots.ComparisonManyPlot( histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
-                                      [histograms.Histo(histo2, "m_{H^{#pm}} = 300 GeV/c^{2}", "p", "P"),
-                                       histograms.Histo(histo3, "m_{H^{#pm}} = 400 GeV/c^{2}", "p", "P"),
-                                       histograms.Histo(histo4, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9")])
+                                      [histograms.Histo(histo4, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9")])
+
+        #p = plots.ComparisonManyPlot( histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
+        #                              [histograms.Histo(histo2, "m_{H^{#pm}} = 300 GeV/c^{2}", "p", "P"),
+        #                               histograms.Histo(histo3, "m_{H^{#pm}} = 400 GeV/c^{2}", "p", "P"),
+        #                               histograms.Histo(histo4, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9")])
         
         # Customise plots
         opts      = {"ymin": 0.0, "binWidthX": histo1.GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(kinVar)}
@@ -262,18 +267,30 @@ def getHistoNames(kinVar):
     hNames = []
     if kinVar != "dR":
         hNames.append("gtt_TQuark_" + kinVar)
+        hNames.append("gbb_BQuark_" + kinVar)
         hNames.append("gtt_tbW_WBoson_" + kinVar)
         hNames.append("gtt_tbW_BQuark_" + kinVar)
+        hNames.append("gtt_tbW_Wqq_Quark_" + kinVar)
+        hNames.append("gtt_tbW_Wqq_AntiQuark_" + kinVar)
         hNames.append("tbH_HPlus_" + kinVar)
         hNames.append("tbH_TQuark_" + kinVar)
         hNames.append("tbH_BQuark_" + kinVar)
         hNames.append("tbH_tbW_WBoson_" + kinVar)
         hNames.append("tbH_tbW_BQuark_" + kinVar)
-        hNames.append("gbb_BQuark_" + kinVar)
+        hNames.append("Htb_tbW_Wqq_Quark_" + kinVar)
+        hNames.append("Htb_tbW_Wqq_AntiQuark_" + kinVar)
+        hNames.append("BQuark_Ldg_"    + kinVar)
+        hNames.append("BQuark_NLdg_"   + kinVar)
+        hNames.append("BQuark_NNLdg_"  + kinVar)
+        hNames.append("BQuark_NNNLdg_" + kinVar)
+        hNames.append("GenJet_Ldg_"    + kinVar)
+        hNames.append("GenJet_NLdg_"   + kinVar)
+        hNames.append("GenJet_NNLdg_"  + kinVar)
+        hNames.append("GenJet_NNNLdg_" + kinVar)
     else:
         hNames.append("Htb_TQuark_Htb_BQuark_" + kinVar)
         hNames.append("Htb_TQuark_gtt_TQuark_" + kinVar)
-        hNames.append("Htb_TQuark_bgg_BQuark_" + kinVar)
+        hNames.append("Htb_TQuark_gbb_BQuark_" + kinVar)
         hNames.append("Htb_BQuark_Htb_tbW_BQuark_" + kinVar)
         hNames.append("Htb_BQuark_Htb_tbW_Wqq_Quark_" + kinVar)
         hNames.append("Htb_BQuark_Htb_tbW_Wqq_AntiQuark_" + kinVar)

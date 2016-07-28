@@ -108,13 +108,13 @@ int MCTools::GetFinalSelf(const int genP_index){
 
   int new_index = genP_index;
   genParticle p = fEvent->genparticles().getGenParticles()[genP_index];
-  vector<int> genP_daughters = GetAllDaughters(genP_index, false);
-  if (genP_daughters.size() < 1) return new_index;
+  vector<int> daughters = GetAllDaughters(genP_index, false);
+  if (daughters.size() < 1) return new_index;
   
   // For-loop: All daughters
-  for (unsigned short i = 0; i < genP_daughters.size(); i++){
+  for (unsigned short i = 0; i < daughters.size(); i++){
 
-    int dau_index = genP_daughters.at(i);
+    int dau_index = daughters.at(i);
     genParticle d = fEvent->genparticles().getGenParticles()[dau_index];
     if ( d.pdgId() == p.pdgId() ) new_index = dau_index;
   }
@@ -405,7 +405,6 @@ vector<int> MCTools::GetAllDaughters(const int genP_index, bool bGetIds){
     _GetAllDaughters(dau_index, genP_allDaughters, bGetIds);
   }
 
-    
   return genP_allDaughters;
 }
 

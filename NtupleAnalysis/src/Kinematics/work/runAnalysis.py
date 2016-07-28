@@ -1,19 +1,19 @@
-#!/usr/bin/env python                                                                                                                                                              
-'''                                                                                                                                                                                
-INSTRUCTIONS:                                                                                                                                                                      
-The required minimum input is a multiCRAB directory with at least one dataset. If successfull                                                                                      
-a pseudo multiCRAB with name "analysis_YYMMDD_HHMMSS/" will be created, inside which each                                                                                          
-dataset has its own directory with the results (ROOT files with histograms). These can be later                                                                                    
-used as input to plotting scripts to get the desired results.                                                                                                                      
-                                                                                                                                                                                   
+#!/usr/bin/env python
+'''
+INSTRUCTIONS:
+The required minimum input is a multiCRAB directory with at least one dataset. If successfull
+a pseudo multiCRAB with name "analysis_YYMMDD_HHMMSS/" will be created, inside which each
+dataset has its own directory with the results (ROOT files with histograms). These can be later
+used as input to plotting scripts to get the desired results.
 
-PROOF:                                                                                                                                                                             
-Enable only if your analysis is CPU-limited (e.g. limit calculation) With one analyzer at                                                                                          
-a time most probably you are I/O -limited. The limit is how much memory one process is using.                                                                                      
-                                                                                                                                                                                  
 
-USAGE:                                                                                                                                                                             
-./runAnalysis.py -m <path-to-multicrab-directory> -j <numOfCores> -i <DatasetName>
+PROOF:
+Enable only if your analysis is CPU-limited (e.g. limit calculation) With one analyzer at
+a time most probably you are I/O -limited. The limit is how much memory one process is using.
+
+
+USAGE:
+./runAnalysis.py -m <multicrab-directory> -j <numOfCores> -i <DatasetName>
                                                                                                                                                                                    
 
 Example:
@@ -22,14 +22,14 @@ or
 ./runAnalysis.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
 
                                                                                                                                                                                    
-ROOT:                                                                                                                                                                              
-The available ROOT options for the Error-Ignore-Level are (const Int_t):                                                                                                           
-        kUnset    =  -1                                                                                                                                                            
-        kPrint    =   0                                                                                                                                                            
-        kInfo     =   1000                                                                                                                                                         
-        kWarning  =   2000                                                                                                                                                         
-        kError    =   3000                                                                                                                                                         
-        kBreak    =   4000                                                                                                                                                         
+ROOT:
+The available ROOT options for the Error-Ignore-Level are (const Int_t):
+        kUnset    =  -1
+        kPrint    =   0
+        kInfo     =   1000
+        kWarning  =   2000
+        kError    =   3000
+        kBreak    =   4000
 '''
 
 
@@ -160,12 +160,12 @@ def main():
                               usePUreweighting=True,
                               doSystematicVariations=False)
 
+    # Perform variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])                                                                                                              
     # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])                                                                                       
 
-    from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
+    # Build the builder
     builder.build(process, allSelections)
-
 
     # ================================================================================================
     # Example of adding an analyzer whose configuration depends on dataVersion
