@@ -13,6 +13,7 @@ import os
 import sys
 from optparse import OptionParser
 import getpass
+import socket
 
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
@@ -27,15 +28,17 @@ import ROOT
 # Variable Definition
 #================================================================================================
 analysis    = "Kinematics"
-user        = getpass.getuser()
-initial     = getpass.getuser()[0]
-#savePath    = "/afs/cern.ch/user/%s/%s/public/html/%s/" % (initial, user, analysis)
-savePath    = "/Users/%s/Desktop/Plots/" % (user)
-saveFormats = [".png"] #,".pdf",".C"]
 kinVar      = "Eta"  # "Pt", "Eta", "Phi", "dR"
-normalizeTo = "One" # "", "One", "XSection", "Luminosity"
-rebinFactor = 2     # 5
-ratio       = False
+kwargs      = {
+    "referenceHisto" : "M_200",
+    "ignoreHistos"   : ["M_300", "M_400"],
+    "saveFormats"    : [".png"],
+    "normalizeTo"    : "One",
+    "rebin"          : 2,
+    "createRatio"    : False,
+    "removeNegatives": False,
+    "removeErrorBars": False
+}
 
 
 #================================================================================================
@@ -45,22 +48,12 @@ def main():
 
     style    = tdrstyle.TDRStyle()
     hNames   = getHistoNames(kinVar)
-
+    
     # Set ROOT batch mode boolean
     ROOT.gROOT.SetBatch(parseOpts.batchMode)
-
-    # Get all datasets from the mcrab dir
-    datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis)
-    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_")
-    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_")
-    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
-
     
-    # Inform user of datasets retrieved
-    Print("Got following datasets from multicrab dir \"%s\"" % parseOpts.mcrab)
-    for d in datasets.getAllDatasets():
-        print "\t", d.getName()
-
+    # Get all datasets from the mcrab dir
+    datasets  = GetDatasetsFromDir(parseOpts.mcrab, analysis)
 
     # Determine Integrated Luminosity (If Data datasets present)
     intLumi = 0.0
@@ -74,95 +67,29 @@ def main():
         # Calculate Integrated Luminosity
         intLumi = GetLumi(datasets)
     
-
-    hNames.extend(["genMET_Et", "genMET_Phi", "genHT_GenJets", "genHT_GenParticles", "GenJet_Multiplicity",
-                   "SelGenJet_MaxDiJetMass_Mass", "SelGenJet_MaxDiJetMass_Pt", "SelGenJet_MaxDiJetMass_Eta", "SelGenJet_MaxDiJetMass_dR", "SelGenJet_MaxDiJetMass_Rapidity", 
-                   "SelGenJet_Multiplicity", "SelGenJet_LdgDiJet_Mass"])
-
                   
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
-        plotName = hName #analysis + "_" + hName
+        plotName = hName
+        savePath = GetSavePath(analysis)
         saveName = os.path.join(savePath, plotName)
-        
-        # Get Data or MC datasets
-        # dataDatasets = datasets.getDataDatasets()
-        # mcDatasets   = datasets.getMCDatasets()
-
-        # Build ROOT histos from individual datasets
-        dataset1 = datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_200").getDatasetRootHisto(hName)
-        dataset2 = datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_300").getDatasetRootHisto(hName)
-        dataset3 = datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_400").getDatasetRootHisto(hName)
-        dataset4 = datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_500").getDatasetRootHisto(hName)
-        # dataset2 = datasets.getDataset("TT_ext3").getDatasetRootHisto(hName)
-        # datasets.getDataset("TT_ext3").setCrossSection(831.76)
-        
-        # Normalise datasets
-        if normalizeTo == "One":
-            dataset1.normalizeToOne()
-            dataset2.normalizeToOne()
-            dataset3.normalizeToOne()
-            dataset4.normalizeToOne()
-        elif normalizeTo == "XSection":
-            dataset1.normalizeByCrossSection()
-            dataset2.normalizeByCrossSection()
-            dataset3.normalizeByCrossSection()
-            dataset4.normalizeByCrossSection()
-        elif normalizeTo == "Luminosity":
-            dataset1.normalizeToLumi(intLumi)
-            dataset2.normalizeToLumi(intLumi)
-            dataset3.normalizeToLumi(intLumi)
-            dataset4.normalizeToLumi(intLumi)
-        else:
-            isValidNorm(normalizeTo)
-        
-    
-        # Customise histos
-        histo1 = dataset1.getHistogram()
-        styles.signal200Style.apply(histo1)
-        histo1.Rebin(rebinFactor)
-        
-        # Customise histos
-        histo2 = dataset2.getHistogram()
-        styles.signal300Style.apply(histo2)
-        histo2.Rebin(rebinFactor)
-
-        histo3 = dataset3.getHistogram()
-        styles.signal400Style.apply(histo3)
-        histo3.Rebin(rebinFactor)
-
-        histo4 = dataset4.getHistogram()
-        styles.signal500Style.apply(histo4)
-        # histo2.SetMarkerStyle(ROOT.kFullCross)
-        # histo2.SetFillStyle(3001)
-        # histo2.SetFillColor(styles.ttStyle.color)
-        # removeNegatives(histo2)
-        # removeErrorBars(histo2)
-        histo4.Rebin(rebinFactor)
-
+                
+        # Get customised histos
+        rootHistos, histos    = GetCustomisedHistos(datasets, hName, **kwargs)
+        refHisto, otherHistos = GetHistosForPlot(histos, rootHistos, **kwargs)            
 
         # Create a comparison plot
-        #p = plots.ComparisonPlot(histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
-        #                         histograms.Histo(histo2, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9"))
+        p = plots.ComparisonManyPlot(refHisto, otherHistos)
         
-        p = plots.ComparisonManyPlot( histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
-                                      [histograms.Histo(histo4, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9")])
-
-        #p = plots.ComparisonManyPlot( histograms.Histo(histo1, "m_{H^{#pm}} = 200 GeV/c^{2}", "p", "P"),
-        #                              [histograms.Histo(histo2, "m_{H^{#pm}} = 300 GeV/c^{2}", "p", "P"),
-        #                               histograms.Histo(histo3, "m_{H^{#pm}} = 400 GeV/c^{2}", "p", "P"),
-        #                               histograms.Histo(histo4, "m_{H^{#pm}} = 500 GeV/c^{2}", "F", "HIST,E,9")])
-        
-        # Customise plots
-        opts      = {"ymin": 0.0, "binWidthX": histo1.GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(kinVar)}
-        ratioOpts = {"ymin": 0.0, "ymax": 2.0 , "binWidthX": histo1.GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(kinVar)}
-        p.createFrame(os.path.join(savePath, plotName), createRatio=ratio, opts=opts, opts2=ratioOpts)
-        
+        # Create a frame
+        opts      = {"ymin": 0.0, "binWidthX": histos[0].GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(kinVar)}
+        ratioOpts = {"ymin": 0.0, "ymax": 2.0 , "binWidthX": histos[0].GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(kinVar)}
+        fileName = os.path.join(savePath, plotName)
+        p.createFrame(fileName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
 
         # Customise Legend
-        moveLegend = {"dx": -0.1, "dy": +0.0, "dh": +0.0}
+        moveLegend = {"dx": -0.1, "dy": +0.0, "dh": -0.1}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-
 
         # Customise text
         if intLumi > 0.0:
@@ -172,32 +99,133 @@ def main():
         # histograms.addText(0.4, 0.9, "Alexandros Attikis", 17)
         # histograms.addText(0.4, 0.11, "Runs " + datasets.loadRunRange(), 17)
 
-
         # Customise frame
         p.setEnergy("13")
-        p.getFrame().GetYaxis().SetTitle( getTitleY(normalizeTo, kinVar, opts) )
+        p.getFrame().GetYaxis().SetTitle( getTitleY(kwargs.get("normalizeTo"), kinVar, opts) )
         p.getFrame().GetXaxis().SetTitle( getTitleX(kinVar, opts) )
-        if ratio:
+        if kwargs.get("createRatio"):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-
         #  Draw plots
         p.draw()
-
     
         # Save canvas under custom dir
         if counter == 0:
-            Print("Saving plots in %s format(s)" % (len(saveFormats)) )
-        SavePlotterCanvas(p, savePath, saveName, saveFormats)
+            Print("Saving plots in %s format(s)" % (len(kwargs.get("saveFormats"))) )
+        SavePlotterCanvas(p, saveName, savePath, **kwargs)
 
     return
 
 #================================================================================================
 # Auxiliary Function Definition
 #================================================================================================
+def GetDatasetsFromDir(mcrab, analysis):
+
+    datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
+    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_")
+    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
+
+    # Inform user of datasets retrieved
+    Print("Got following datasets from multicrab dir \"%s\"" % mcrab)
+    for d in datasets.getAllDatasets():
+        print "\t", d.getName()
+    return datasets
+
+
+def GetHistosForPlot(histos, rootHistos, **kwargs):
+    refHisto    = None
+    otherHistos = []
+    ignoreHistos = []
+
+    # For-loop: histos
+    for rh in rootHistos:
+        hName = rh.getName()
+        for iName in kwargs.get("ignoreHistos"):
+            if iName in hName:
+                ignoreHistos.append(hName)
+                break
+
+    # For-loop: histos
+    for rh, h in zip(rootHistos, histos):
+        legName = "m_{H^{#pm}} = %s GeV/c^{2}" % (rh.getName().split("_M_")[-1])
+
+        if kwargs.get("referenceHisto") in rh.getName():
+            refHisto = histograms.Histo(h, legName, "p", "P")
+        elif rh.getName() in ignoreHistos:
+            continue
+        else:
+            otherHistos.append( histograms.Histo(h, legName,  "F", "HIST,E,9") )
+    return refHisto, otherHistos
+
+
+def GetCustomisedHistos(datasets, hName, **kwargs):
+    # Declarations
+    rootHistos = []
+    histos     = []
+
+    # Get Data or MC datasets
+    myDatasets = datasets.getAllDatasets()
+    # myDatasets = datasets.getDataDatasets()
+    # myDatasets   = datasets.getMCDatasets()
+
+    
+    # For-loop: All-Datasets
+    for d in myDatasets:
+        
+        # Build ROOT histos from individual datasets
+        h = datasets.getDataset(d.getName()).getDatasetRootHisto(hName)
+
+        # Set the cross-section
+        # d.getDataset("TT_ext3").setCrossSection(831.76)        
+
+        # Append to ROOT histos list
+        rootHistos.append(h)
+        
+
+    # Normalise ROOT histograms
+    for h in rootHistos:
+        if kwargs.get("normalizeTo") == "One":
+            h.normalizeToOne()
+        elif kwargs.get("normalizeTo") == "XSection":
+            h.normalizeByCrossSection()
+        elif kwargs.get("normalizeTo") == "Luminosity":
+            h.normalizeToLumi(intLumi)
+        else:
+            isValidNorm(normalizeTo)
+    
+    # Apply styles
+    styleDict = {
+        "ChargedHiggs_HplusTB_HplusToTB_M_500": styles.signal500Style, 
+        "ChargedHiggs_HplusTB_HplusToTB_M_400": styles.signal400Style,
+        "ChargedHiggs_HplusTB_HplusToTB_M_300": styles.signal300Style,
+        "ChargedHiggs_HplusTB_HplusToTB_M_200": styles.signal200Style}
+
+    # For-loop: All root histos
+    for rh in rootHistos:
+        h = rh.getHistogram()
+        styleDict[rh.getName()].apply(h)
+
+        # Rebinning
+        h.Rebin(kwargs.get("rebin"))
+
+        # Remove negative histo entries
+        if kwargs.get("removeNegatives"):
+            removeNegatives(h)
+
+        # Remove error bars 
+        if kwargs.get("removeErrorBars"):
+            removeErrorBars(h)
+
+        # Append the histogram
+        histos.append(h)
+        
+    return rootHistos, histos
+        
+
 def GetSelfName():
     return __file__.split("/")[-1]
+
 
 def Print(msg, printHeader=True):
     if printHeader:
@@ -206,6 +234,7 @@ def Print(msg, printHeader=True):
         print msg 
     return
 
+
 def Verbose(msg, printHeader=True):
     if not parseOpts.verbose:
         return
@@ -213,9 +242,21 @@ def Verbose(msg, printHeader=True):
     return
 
 
-def SavePlotterCanvas(p, savePath, saveName, formats, ):
+def GetSavePath(analysis):
+    user    = getpass.getuser()
+    initial = getpass.getuser()[0]
+    if "lxplus" in socket.gethostname():
+        savePath = "/afs/cern.ch/user/%s/%s/public/html/%s/" % (initial, user, analysis)
+    else:
+        savePath = "/Users/%s/Desktop/Plots/" % (user)
+    return savePath
+
+
+def SavePlotterCanvas(p, saveName, savePath, **kwargs):
+    formats  = kwargs.get("saveFormats")
     Verbose("Saving plots in %s format(s)" % (len(formats)) )
 
+    # For-loop: All formats to save file
     for ext in formats:        
         sName = saveName + ext
 
