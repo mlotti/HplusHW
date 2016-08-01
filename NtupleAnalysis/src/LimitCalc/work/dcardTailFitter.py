@@ -360,6 +360,9 @@ def createDatacardOutput(originalCardLines, columnNames, nuisanceInfo, opts, obs
     return myOutput
 
 def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminosity, opts):
+
+    config = aux.load_module(opts.settings)
+
     def addOrReplace(dictionary, key, newItem):
         if not key in dictionary.keys():
             dictionary[key] = newItem.Clone()
@@ -375,7 +378,14 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
     # Create for each column a root histo with uncertainties
     myDict = OrderedDict()
     myTotal = None
+
+    # Loop over columns (datasets)
     for c in columnNames:
+    
+        # Bugfix to prevent crashing with blacklisted datasets
+        if c in config.Blacklist:
+            continue
+
         hRate = aux.Clone(getHisto(cachedHistos, c))
         myRHWU = RootHistoWithUncertainties(hRate)
         for n in myNuisanceInfo:
@@ -440,7 +450,7 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
             (systUp,systDown) = myDict[item].getRateSystUncertainty()
             #myDict[item].Debug()
             print "%11s: %.1f +- %.1f (stat.) + %.1f - %.1f (syst.)"%(item,rate,stat,systUp,systDown)
-    print "Observation: %d\n"%hObs.Integral(0,hObs.GetNbinsX()+2)
+    print "Observation: %d\n\n"%hObs.Integral(0,hObs.GetNbinsX()+2)
 
     def setTailFitUncToStat(rhwu):
         tailfitNames = filter(lambda n: "_TailFit_" in n, rhwu.getShapeUncertaintyNames())
@@ -470,7 +480,9 @@ def printSummaryInfo(columnNames, myNuisanceInfo, cachedHistos, hObs, m, luminos
                   "W": "WJets",
                   "t": "SingleTop",
                   "DY": "DYJetsToLL",
-                  "VV": "Diboson"
+                  "VV": "Diboson",
+                  "tt_and_singleTop": "TTandSingleTop",
+                  "EWK": "EWK"
                 }
                 histoString = lookupTable[histoID]
                 myHisto = histograms.Histo(setTailFitUncToStat(myDict[c].Clone()),histoString,legendLabel=c.replace("CMS_Hptntj_",""))
