@@ -79,9 +79,6 @@ def reproduceMETNoiseFilters(process):
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#A_tool_to_help_you_calculate_MET
 def reproduceMET(process,isdata):
 
-    if isdata:
-	return
-
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
     
     #default configuration for miniAOD reprocessing, change the isData flag to run on data
@@ -89,6 +86,7 @@ def reproduceMET(process,isdata):
     runMetCorAndUncFromMiniAOD(process,
                            isData=isdata,
                            )
+
     process.selectedPatJetsForMetT1T2Corr.src = cms.InputTag("cleanedPatJets")
     process.patPFMetT1.src = cms.InputTag("slimmedMETs")
 
@@ -102,9 +100,14 @@ def reproduceMET(process,isdata):
     process.CustomisationsSequence += process.patPFMetT1T2Corr
     process.CustomisationsSequence += process.patPFMetT1
 
-    process.CustomisationsSequence += process.patMetUncertaintySequence
-    process.CustomisationsSequence += process.patShiftedModuleSequence
     process.CustomisationsSequence += process.patMetCorrectionSequence
+
+    if isdata:
+        return
+
+    process.CustomisationsSequence += process.patMetUncertaintySequence #only for MC
+    process.CustomisationsSequence += process.patShiftedModuleSequence #only for MC
+
 
     """    
     # puppi jets and puppi met
