@@ -35,16 +35,17 @@ metFilter = PSet(
 tauSelection = PSet(
   applyTriggerMatching = True,
    triggerMatchingCone = 0.1,   # DeltaR for matching offline tau with trigger tau
-              tauPtCut = 60.0,
+              tauPtCut = 60.0, #for heavy H+, overriden in signalAnalysis.py for light H+
              tauEtaCut = 2.1,
         tauLdgTrkPtCut = 30.0,
                 prongs = 13,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                   rtau = 0.0,   # to disable set to 0.0
-#  againstElectronDiscr = "againstElectronTightMVA5",
-  againstElectronDiscr = "",
-      againstMuonDiscr = "againstMuonTight3",
-#        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
-        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+  againstElectronDiscr = "againstElectronTightMVA5",
+#  againstElectronDiscr = "",
+      againstMuonDiscr = "againstMuonLoose3",
+#        isolationDiscr = "byMediumIsolationMVA3oldDMwLT", #HIP old
+#        isolationDiscr = "byMediumIsolationMVA3newDMwLT", #HIP new
+        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits", #MIT
           
 )
 # tau misidentification scale factors
@@ -75,7 +76,7 @@ muVeto = PSet(
 jetSelection = PSet(
                jetType = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
               jetPtCut = 30.0,
-             jetEtaCut = 4.7,
+             jetEtaCut = 0.0, #4.7,
      tauMatchingDeltaR = 0.4,
   numberOfJetsCutValue = 3,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
@@ -113,7 +114,7 @@ scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
 
 #====== MET selection
 metSelection = PSet(
-           METCutValue = 100.0,
+           METCutValue = 100.0, #for heavy H+, overriden in signalAnalysis.py for light H+
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
   METSignificanceCutValue = -1000.0,
   METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
