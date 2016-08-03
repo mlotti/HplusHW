@@ -192,9 +192,9 @@ _datasetMerge = {
     "QCD_Pt_170to300_MuEnrichedPt5": "QCD",
     "QCD_Pt_300to470_MuEnrichedPt5": "QCD",
 
-    "ST_s_channel_4f_leptonDecays": "SingleTop",
-    "ST_t_channel_antitop_4f_leptonDecays": "SingleTop",
-    "ST_t_channel_top_4f_leptonDecays": "SingleTop",
+    "ST_s_channel_4f_InclusiveDecays": "SingleTop",
+    "ST_t_channel_antitop_4f_inclusiveDecays": "SingleTop",
+    "ST_t_channel_top_4f_inclusiveDecays": "SingleTop",
     "ST_tW_antitop_5f_inclusiveDecays": "SingleTop",
     "ST_tW_top_5f_inclusiveDecays": "SingleTop",
 
