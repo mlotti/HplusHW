@@ -226,6 +226,7 @@ _datasetMerge = {
     "DYJetsToLL_M_50_HT_400to600": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLLHT",
 
+    # Diboson merge, comment this away to keep WW, WZ, ZZ samples separate
     "WW": "Diboson",
     "WZ": "Diboson",
     "ZZ": "Diboson",
@@ -265,6 +266,9 @@ _datasetOrder.extend([
     "DYJetsToLLHT",
     "SingleTop",
     "Diboson",
+    "WW",
+    "WZ",
+    "ZZ"
 ])
 
 ## Map the logical dataset names to legend labels
@@ -375,6 +379,9 @@ _plotStyles = {
     "QCD_Pt20_MuEnriched":   styles.qcdStyle,
     "SingleTop":             styles.stStyle,
     "Diboson":               styles.dibStyle,
+    "WW":                    styles.dibStyle,
+    "WZ":                    styles.dibStyle,
+    "ZZ":                    styles.dibStyle,
     
     # For merged MC
     "TTandSingleTop":        styles.ttStyle,
