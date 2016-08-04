@@ -47,7 +47,7 @@ OptionAddSingleTopSignal=False # Affects only light H+, 2012 only
 
 # Convert the following nuisances from shape to constant
 
-#OptionConvertFromShapeToConstantList=["CMS_trg_taumet_tau","CMS_trg_t_dataeff","CMS_trg_t_MCeff",
+#OptionConvertFromShapeToConstantList=["CMS_trg_taumet_tau","CMS_eff_t_trg_data","CMS_eff_t_trg_MC",
 #                                      "CMS_trg_taumet_L1ETM_dataeff","CMS_trg_taumet_L1ETM_MCeff","CMS_trg_taumet_L1ETM",
 #                                      "CMS_trg_muon_dataeff", # triggers
 #                                      #"CMS_eff_t", # tau ID
@@ -68,7 +68,7 @@ OptionConvertFromShapeToConstantList=[] # FIXME
 OptionSeparateShapeAndNormalizationFromSystVariationList=[#"CMS_scale_t"
                                                         ]
 # For projections
-CMS_trg_met_dataeffScaleFactor=None # Default is None, i.e. 1.0
+CMS_eff_met_trg_dataScaleFactor=None # Default is None, i.e. 1.0
 
 # Options for reports and article
 OptionBr=0.01  # Br(t->bH+)
@@ -119,9 +119,8 @@ Observation=ObservationInput(datasetDefinition="Data", shapeHistoName=shapeHisto
 
 ##############################################################################
 # Define systematics lists commmon to datasets
-myTrgSystematics=["CMS_trg_t_dataeff","CMS_trg_t_MCeff", # Trigger tau part
-                  "CMS_eff_met", # this is in fact CMS_trg_met_dataeff
-                   "CMS_trg_met_MCeff"] # Trigger MET part
+myTrgSystematics=["CMS_eff_t_trg_data","CMS_eff_t_trg_MC", # Trigger tau part
+                  "CMS_eff_met_trg_data","CMS_eff_met_trg_MC"] # Trigger MET part
 myTauIDSystematics=["CMS_eff_t"] #tau ID
 #myTauMisIDSystematics=["CMS_fake_eToTau","CMS_fake_muToTau","CMS_fake_jetToTau"] # tau mis-ID
 myESSystematics=["CMS_scale_t","CMS_scale_j","CMS_res_j","CMS_scale_met"] # TES, JES, CMS_res_j, UES
@@ -142,7 +141,7 @@ myShapeSystematics.extend(myTopSystematics)
 if not OptionIncludeSystematics:
     myShapeSystematics=[]
 
-myEmbeddingShapeSystematics=["CMS_trg_t_dataeff","CMS_trg_taumet_L1ETM_dataeff","CMS_trg_muon_dataeff","CMS_scale_t","CMS_Hptntj_taubkg_ID_mu","CMS_Hptntj_taubkg_WtauToMu"]
+myEmbeddingShapeSystematics=["CMS_eff_t_trg_data","CMS_trg_taumet_L1ETM_dataeff","CMS_trg_muon_dataeff","CMS_scale_t","CMS_Hptntj_taubkg_ID_mu","CMS_Hptntj_taubkg_WtauToMu"]
 
 ##############################################################################
 # DataGroup (i.e. columns in datacard) definitions
@@ -296,29 +295,29 @@ if "CMS_eff_t_highpt" in myShapeSystematics:
         distr="shapeQ", function="ShapeVariation", systVariation="GenuineTau"))       
 
 #=====tau and MET trg
-if "CMS_trg_t_dataeff" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_trg_t_dataeff", label="tau+MET trg tau part data eff.",
+if "CMS_eff_t_trg_data" in myShapeSystematics:
+    Nuisances.append(Nuisance(id="CMS_eff_t_trg_data", label="tau+MET trg tau part data eff.",
         distr="shapeQ", function="ShapeVariation", systVariation="TauTrgEffData"))
 else:
-    Nuisances.append(Nuisance(id="CMS_trg_t_dataeff", label="APPROXIMATION for tau+MET trg tau part data eff.",
+    Nuisances.append(Nuisance(id="CMS_eff_t_trg_data", label="APPROXIMATION for tau+MET trg tau part data eff.",
         distr="lnN", function="Constant", value=0.015))
-if "CMS_trg_t_MCeff" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_trg_t_MCeff", label="tau+MET trg tau part MC eff.",
+if "CMS_eff_t_trg_MC" in myShapeSystematics:
+    Nuisances.append(Nuisance(id="CMS_eff_t_trg_MC", label="tau+MET trg tau part MC eff.",
         distr="shapeQ", function="ShapeVariation", systVariation="TauTrgEffMC"))
 else:
-    Nuisances.append(Nuisance(id="CMS_trg_t_MCeff", label="APPROXIMATION for tau+MET trg tau part MC eff.",
+    Nuisances.append(Nuisance(id="CMS_eff_t_trg_MC", label="APPROXIMATION for tau+MET trg tau part MC eff.",
         distr="lnN", function="Constant", value=0.010))
-if "CMS_eff_met" in myShapeSystematics: #this is in fact CMS_trg_met_dataeff
-    Nuisances.append(Nuisance(id="CMS_eff_met", label="tau+MET trg MET data eff.",
+if "CMS_eff_met_trg_data" in myShapeSystematics: #this is in fact CMS_eff_met_trg_data
+    Nuisances.append(Nuisance(id="CMS_eff_met_trg_data", label="tau+MET trg MET data eff.",
         distr="shapeQ", function="ShapeVariation", systVariation="METTrgEffData"))
 else:
     Nuisances.append(Nuisance(id="CMS_eff_met", label="APPROXIMATION for tau+MET trg MET data eff.",
         distr="lnN", function="Constant", value=0.15))
-if "CMS_trg_met_MCeff" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_trg_met_MCeff", label="tau+MET trg MET MC eff.",
+if "CMS_eff_met_trg_MC" in myShapeSystematics:
+    Nuisances.append(Nuisance(id="CMS_eff_met_trg_MC", label="tau+MET trg MET MC eff.",
         distr="shapeQ", function="ShapeVariation", systVariation="METTrgEffMC"))
 else:
-    Nuisances.append(Nuisance(id="CMS_trg_met_MCeff", label="APPROXIMATION for tau+MET trg MET MC eff.",
+    Nuisances.append(Nuisance(id="CMS_eff_met_trg_MC", label="APPROXIMATION for tau+MET trg MET MC eff.",
         distr="lnN", function="Constant", value=0.01))
 #=====lepton veto
 Nuisances.append(Nuisance(id="CMS_eff_e_veto", label="e veto",
@@ -554,12 +553,12 @@ if OptionGenuineTauBackgroundSource == "DataDriven":
 MergeNuisances=[]
 
 # Merge trigger nuisances into tau/met efficiency
-#MergeNuisances.append(["CMS_eff_t","CMS_trg_t_dataeff","CMS_trg_t_MCeff"]) #FIXME: CMS_eff_t should be shape for this to work, add also high-pT uncertainty
-MergeNuisances.append(["CMS_trg_t_dataeff","CMS_trg_t_MCeff"])
-MergeNuisances.append(["CMS_eff_met","CMS_trg_met_MCeff"])
+#MergeNuisances.append(["CMS_eff_t","CMS_eff_t_trg_data","CMS_eff_t_trg_MC"]) #FIXME: CMS_eff_t should be shape for this to work, add also high-pT uncertainty
+#MergeNuisances.append(["CMS_eff_t_trg_data","CMS_eff_t_trg_MC"]) #FIXME: mergning should add uncerteinties quadratically
+#MergeNuisances.append(["CMS_eff_met","CMS_eff_met_trg_MC"]) #FIXME: mergning should add uncerteinties quadratically
 
 # Correlate b tagging and b mistagging
-MergeNuisances.append(["CMS_eff_b","CMS_fake_b"])
+#MergeNuisances.append(["CMS_eff_b","CMS_fake_b"]) #FIXME: mergning should add uncerteinties quadratically
 
 # Correlate ttbar and single top xsect uncertainties
 MergeNuisances.append(["CMS_scale_ttbar","CMS_scale_singleTop"])
