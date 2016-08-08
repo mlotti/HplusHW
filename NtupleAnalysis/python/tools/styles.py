@@ -238,27 +238,27 @@ signal190Style = signalStyle.clone()
 signal200Style = StyleCompound([
         Style(ROOT.kFullCross, ROOT.kBlue), 
         StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullCross),
-        StyleFill(fillStyle=3001, fillColor=ROOT.kBlue), 
+        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue), 
         StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kBlue) ])
 signal220Style = signalStyle.clone()
 signal250Style = signalStyle.clone()
 signal300Style = StyleCompound([
         Style(ROOT.kFullTriangleUp, ROOT.kRed), 
         StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
-        StyleFill(fillStyle=3001, fillColor=ROOT.kRed), 
+        StyleFill(fillStyle=1001, fillColor=ROOT.kRed), 
         StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kRed) ])
 signal350Style = signalStyle.clone()
 signal400Style = StyleCompound([
         Style(ROOT.kFullTriangleDown, ROOT.kSpring+5), 
         StyleMarker(markerSize=1.2, markerColor=ROOT.kSpring+5, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
-        StyleFill(fillStyle=3001, fillColor=ROOT.kSpring+5), 
+        StyleFill(fillStyle=1001, fillColor=ROOT.kSpring+5), 
         StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kSpring+5) ])
 signal500Style = StyleCompound([
-        Style(ROOT.kFullCircle, ROOT.kOrange+1), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+1, markerSizes=None, markerStyle=ROOT.kFullCircle),
-        StyleFill(fillStyle=3001, fillColor=ROOT.kOrange+1), 
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kOrange+1) ])
-signal600Style = signalStyle.clone()
+        Style(ROOT.kFullCircle, ROOT.kOrange+7), 
+        StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+7, markerSizes=None, markerStyle=ROOT.kFullCircle),
+        StyleFill(fillStyle=1001, fillColor=ROOT.kOrange+7), 
+        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kOrange-7) ])
+signal600Style  = signalStyle.clone()
 signal1500Style = signalStyle.clone()
 
 qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)

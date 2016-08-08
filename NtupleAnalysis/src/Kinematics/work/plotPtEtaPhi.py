@@ -28,10 +28,12 @@ import ROOT
 # Variable Definition
 #================================================================================================
 analysis    = "Kinematics"
-kinVar      = "Eta"  # "Pt", "Eta", "Phi", "dR"
+#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/signal/"
+myPath      = None
+kinVar      = "dEta"  # "Pt", "Eta", "Rap", "Phi", "dR" "dEta" "dPhi" "dRap"
 kwargs      = {
     "referenceHisto" : "M_200",
-    "ignoreHistos"   : ["M_300", "M_400"],
+    "ignoreHistos"   : [], #["M_300", "M_400"],
     "saveFormats"    : [".png"],
     "normalizeTo"    : "One",
     "rebin"          : 2,
@@ -48,7 +50,8 @@ def main():
 
     style    = tdrstyle.TDRStyle()
     hNames   = getHistoNames(kinVar)
-    
+    savePath = myPath
+
     # Set ROOT batch mode boolean
     ROOT.gROOT.SetBatch(parseOpts.batchMode)
     
@@ -60,7 +63,7 @@ def main():
     if len(datasets.getDataDatasets()) != 0:
         # Load Luminosity JSON file
         datasets.loadLuminosities(fname="lumi.json")
-
+        
         # Load RUN range
         # runRange = datasets.loadRunRange(fname="runrange.json")
 
@@ -71,7 +74,10 @@ def main():
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
         plotName = hName
-        savePath = GetSavePath(analysis)
+        if savePath == None:
+            savePath = GetSavePath(analysis)
+        else:
+            pass
         saveName = os.path.join(savePath, plotName)
                 
         # Get customised histos
@@ -122,9 +128,10 @@ def main():
 #================================================================================================
 def GetDatasetsFromDir(mcrab, analysis):
 
-    datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
+    # datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
     # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_")
     # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
+    datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_180|M_220|M_250")
 
     # Inform user of datasets retrieved
     Print("Got following datasets from multicrab dir \"%s\"" % mcrab)
@@ -134,8 +141,8 @@ def GetDatasetsFromDir(mcrab, analysis):
 
 
 def GetHistosForPlot(histos, rootHistos, **kwargs):
-    refHisto    = None
-    otherHistos = []
+    refHisto     = None
+    otherHistos  = []
     ignoreHistos = []
 
     # For-loop: histos
@@ -305,47 +312,62 @@ def getHistoNames(kinVar):
 
     isValidVar(kinVar)
 
-    hNames = []
-    if kinVar != "dR":
-        hNames.append("gtt_TQuark_" + kinVar)
-        hNames.append("gbb_BQuark_" + kinVar)
-        hNames.append("gtt_tbW_WBoson_" + kinVar)
-        hNames.append("gtt_tbW_BQuark_" + kinVar)
-        hNames.append("gtt_tbW_Wqq_Quark_" + kinVar)
-        hNames.append("gtt_tbW_Wqq_AntiQuark_" + kinVar)
-        hNames.append("tbH_HPlus_" + kinVar)
-        hNames.append("tbH_TQuark_" + kinVar)
-        hNames.append("tbH_BQuark_" + kinVar)
-        hNames.append("tbH_tbW_WBoson_" + kinVar)
-        hNames.append("tbH_tbW_BQuark_" + kinVar)
-        hNames.append("Htb_tbW_Wqq_Quark_" + kinVar)
-        hNames.append("Htb_tbW_Wqq_AntiQuark_" + kinVar)
-        hNames.append("BQuark_Ldg_"    + kinVar)
-        hNames.append("BQuark_NLdg_"   + kinVar)
-        hNames.append("BQuark_NNLdg_"  + kinVar)
-        hNames.append("BQuark_NNNLdg_" + kinVar)
-        hNames.append("GenJet_Ldg_"    + kinVar)
-        hNames.append("GenJet_NLdg_"   + kinVar)
-        hNames.append("GenJet_NNLdg_"  + kinVar)
-        hNames.append("GenJet_NNNLdg_" + kinVar)
+    hNames    = []
+    distances = ["dR", "dEta", "dRap"]
+    if kinVar not in distances:
+        hNames.append("gtt_TQuark_"            + kinVar) # Pt Eta Phi Rap
+        hNames.append("gbb_BQuark_"            + kinVar) # Pt Eta Phi Rap
+        hNames.append("gtt_tbW_WBoson_"        + kinVar) # Pt Eta Phi Rap
+        hNames.append("gtt_tbW_BQuark_"        + kinVar) # Pt Eta Phi Rap
+        hNames.append("gtt_tbW_Wqq_Quark_"     + kinVar) # Pt Eta Phi Rap
+        hNames.append("gtt_tbW_Wqq_AntiQuark_" + kinVar) # Pt Eta Phi Rap
+        hNames.append("tbH_HPlus_"             + kinVar) # Pt Eta Phi Rap
+        hNames.append("tbH_TQuark_"            + kinVar) # Pt Eta Phi Rap
+        hNames.append("tbH_BQuark_"            + kinVar) # Pt Eta Phi Rap
+        hNames.append("tbH_tbW_WBoson_"        + kinVar) # Pt Eta Phi Rap
+        hNames.append("tbH_tbW_BQuark_"        + kinVar) # Pt Eta Phi Rap
+        hNames.append("Htb_tbW_Wqq_Quark_"     + kinVar) # Pt Eta Phi Rap
+        hNames.append("Htb_tbW_Wqq_AntiQuark_" + kinVar) # Pt Eta Phi Rap
+        #
+        hNames.append("BQuark1_" + kinVar) # Pt Eta Rap Phi
+        hNames.append("BQuark2_" + kinVar) # Pt Eta Rap Phi
+        hNames.append("BQuark3_" + kinVar) # Pt Eta Rap Phi
+        hNames.append("BQuark4_" + kinVar) # Pt Eta Rap Phi
+        hNames.append("GenJet1_" + kinVar) # Pt Eta Rap
+        hNames.append("GenJet2_" + kinVar) # Pt Eta Rap
+        hNames.append("GenJet3_" + kinVar) # Pt Eta Rap
+        hNames.append("GenJet4_" + kinVar) # Pt Eta Rap
+        hNames.append("GenJet5_" + kinVar) # Pt Eta Rap
+        hNames.append("GenJet6_" + kinVar) # Pt Eta Rap
+        #
+        hNames.append("AL3CJetsFromHPlus_GenJet1_" + kinVar) # Pt Eta Rap
+        hNames.append("AL3CJetsFromHPlus_GenJet2_" + kinVar) # Pt Eta Rap
+        hNames.append("AL3CJetsFromHPlus_GenJet3_" + kinVar) # Pt Eta Rap
+        hNames.append("AL3CJetsFromHPlus_GenJet4_" + kinVar) # Pt Eta Rap
+        hNames.append("AL3CJetsFromHPlus_GenJet5_" + kinVar) # Pt Eta Rap
+        hNames.append("AL3CJetsFromHPlus_GenJet6_" + kinVar) # Pt Eta Rap
     else:
-        hNames.append("Htb_TQuark_Htb_BQuark_" + kinVar)
-        hNames.append("Htb_TQuark_gtt_TQuark_" + kinVar)
-        hNames.append("Htb_TQuark_gbb_BQuark_" + kinVar)
-        hNames.append("Htb_BQuark_Htb_tbW_BQuark_" + kinVar)
-        hNames.append("Htb_BQuark_Htb_tbW_Wqq_Quark_" + kinVar)
-        hNames.append("Htb_BQuark_Htb_tbW_Wqq_AntiQuark_" + kinVar)
-        hNames.append("gtt_TQuark_gbb_BQuark_" + kinVar)
-        hNames.append("gtt_TQuark_gtt_tbW_BQuark_" + kinVar)
-        hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_" + kinVar)
-        hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_" + kinVar)
+        hNames.append("Htb_TQuark_Htb_BQuark_"                + kinVar) #dR dEta dRap dPhi 
+        hNames.append("Htb_TQuark_gtt_TQuark_"                + kinVar) #dR dEta dRap dPhi 
+        hNames.append("Htb_TQuark_gbb_BQuark_"                + kinVar) #dR dEta dRap dPhi 
+        hNames.append("Htb_BQuark_Htb_tbW_BQuark_"            + kinVar) #dR dEta dRap dPhi 
+        hNames.append("Htb_BQuark_Htb_tbW_Wqq_Quark_"         + kinVar) #dR dEta dRap dPhi 
+        hNames.append("Htb_BQuark_Htb_tbW_Wqq_AntiQuark_"     + kinVar) #dR dEta dRap dPhi
+        hNames.append("Htb_tbW_BQuark_Htb_tbW_Wqq_Quark_"     + kinVar) #dR dEta dRap dPhi 
+        hNames.append("Htb_tbW_BQuark_Htb_tbW_Wqq_AntiQuark_" + kinVar) #dR dEta dRap dPhi 
+        hNames.append("gtt_TQuark_gbb_BQuark_"                + kinVar) #dR dEta dRap dPhi 
+        hNames.append("gtt_TQuark_gtt_tbW_BQuark_"            + kinVar) #dR dEta dRap dPhi 
+        hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_"     + kinVar) #dR dEta dRap dPhi 
+        hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_" + kinVar) #dR dEta dRap dPhi 
+
+        
     return hNames
 
 
 def getUnitsX(kinVar):
 
     isValidVar(kinVar)    
-    VarsToUnits = {"Pt": "GeV/c", "Eta": "", "Phi": "rads", "dR": ""}
+    VarsToUnits = {"Pt": "GeV/c", "Eta": "", "Rap": "", "Phi": "rads", "dR": "", "dEta": "", "dRap": "", "dPhi": "rads"}
 
     return VarsToUnits[kinVar]
 
@@ -353,7 +375,7 @@ def getUnitsX(kinVar):
 def getSymbolX(kinVar):
 
     isValidVar(kinVar)
-    VarsToSymbols = {"Pt": "p_{T}", "Eta": "#eta", "Phi": "#phi", "dR": "#DeltaR"}
+    VarsToSymbols = {"Pt": "p_{T}", "Eta": "#eta", "Rap": "#omega", "Phi": "#phi", "dR": "#DeltaR", "dEta": "#Delta#eta", "dRap": "#Delta#omega", "dPhi": "#Delta#phi"}
 
     return VarsToSymbols[kinVar]
 
@@ -361,7 +383,7 @@ def getSymbolX(kinVar):
 def getUnitsFormatX(kinVar):
 
     isValidVar(kinVar)
-    VarsToNDecimals = {"Pt": "%0.0f", "Eta": "%0.2f", "Phi": "%0.03f", "dR": "%0.02f"}
+    VarsToNDecimals = {"Pt": "%0.0f", "Eta": "%0.2f", "Rap": "%0.2f", "Phi": "%0.3f", "dR": "%0.2f", "dEta": "%0.2f", "dRap": "%0.2f", "dPhi": "%0.2f"}
 
     return VarsToNDecimals[kinVar]
 
@@ -389,7 +411,7 @@ def getTitleY(normalizeTo, kinVar, opts):
 
     
 def isValidVar(kinVar):
-    validVars = ["Pt", "Eta", "Phi", "dR"]
+    validVars = ["Pt", "Eta", "Rap", "Phi", "dR", "dEta", "dRap", "dPhi"]
     if kinVar not in validVars:
         raise Exception("Invalid kinematics variable \"%s\". Please choose one of the following: %s" % (kinVar, "\"" + "\", \"".join(validVars) ) + "\"")
     return
@@ -426,3 +448,4 @@ if __name__ == "__main__":
 
     if not parseOpts.batchMode:
         raw_input("=== plotTemplate.py: Press any key to quit ROOT ...")
+        

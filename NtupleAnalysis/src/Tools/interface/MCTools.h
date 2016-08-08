@@ -28,7 +28,10 @@ public:
   ~MCTools();
   ROOT::Math::XYZPoint GetPV(void);     // in mm
   ROOT::Math::XYZPoint GetVertex(void); // in mm
+  double DeltaPhi(const double phi1, const double phi2);
+  double DeltaAbs(const double val1, const double val2);
   double GetD0Mag(const int genP_index, bool wrtPV=true);
+  double GetRapidity(const math::XYZTLorentzVector p4);
   double GetLxy(const int genP_index,	bool wrtPV=true);
   int GetFinalSelf(const int genP_index);
   int GetLdgDaughter(const int genP_index);

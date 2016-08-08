@@ -17,6 +17,40 @@ MCTools::MCTools(Event &fEvt){
 MCTools::~MCTools(){}  
 
 
+double MCTools::DeltaPhi(const double phi1, 
+			 const double phi2){
+  //	
+  // See: https://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_4_2/doc/html/d1/d92/DataFormats_2Math_2interface_2deltaPhi_8h_source.html
+  //
+  Double_t result = phi1 - phi2;
+  while (result > PI) result -= 2*PI;
+  while (result <= -PI) result += 2*PI; 
+
+  return result;
+}
+
+
+double MCTools::DeltaAbs(const double val1, 
+			 const double val2){
+  //
+  // See: https://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_4_2/doc/html/d1/d92/DataFormats_2Math_2interface_2deltaPhi_8h_source.html
+  //
+  Double_t deltaAbs = fabs ( val1 - val2 );
+  return deltaAbs;
+}
+
+
+double MCTools::GetRapidity(const math::XYZTLorentzVector p4){
+  // 
+  // Description:
+  // Returns rapidity of the particle with 4-momentum p4.
+  //
+  double rapidity = 0.5*log( (p4.e() + p4.pz()) / (p4.e() - p4.pz()) );
+  return rapidity;
+}
+
+
+
 bool MCTools::IsNeutrino(const int pdgId){
 
   // 

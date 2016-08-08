@@ -28,12 +28,14 @@ import ROOT
 # Variable Definition
 #================================================================================================
 analysis    = "Kinematics"
+#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/signal/"
+myPath      = None
 kwargs      = {
     "referenceHisto" : "M_200",
     "ignoreHistos"   : ["M_300", "M_400"],
     "saveFormats"    : [".png"],
     "normalizeTo"    : "One",
-    "rebin"          : 2,
+    "rebin"          : 1,
     "createRatio"    : False,
     "removeNegatives": False,
     "removeErrorBars": False
@@ -43,14 +45,37 @@ hNames = ["genMET_Et",
           "genMET_Phi",
           "genHT_GenJets",
           "genHT_GenParticles",
-          "GenJet_Multiplicity",
-          "SelGenJet_MaxDiJetMass_Mass",
-          "SelGenJet_MaxDiJetMass_Pt",
-          "SelGenJet_MaxDiJetMass_Eta",
-          "SelGenJet_MaxDiJetMass_dR",
-          "SelGenJet_MaxDiJetMass_Rapidity", 
           "SelGenJet_Multiplicity",
-          "SelGenJet_LdgDiJet_Mass"]
+          "MaxDiJetMass_Pt",
+          "MaxDiJetMass_Eta",
+          "MaxDiJetMass_Mass",
+          "MaxDiJetMass_Rap",
+          "MaxDiJetMass_dR",
+          "MaxDiJetMass_dRrap", #new
+          "MaxDiJetMass_dEta",  #new
+          "MaxDiJetMass_dPhi",  #new 
+          #"MaxDiJetMass_dEta_Vs_dPhi", #new 
+          #"MaxDiJetMass_dRap_Vs_dPhi", #new
+          "BQuarkPair_dRMin_pT",   #new
+          "BQuarkPair_dRMin_dEta", #new
+          "BQuarkPair_dRMin_dPhi", #new
+          "BQuarkPair_dRMin_dR",   #new
+          "BQuarkPair_dRMin_Mass", #new
+          "Htb_tbW_bqq_Pt",  #new
+          "Htb_tbW_bqq_Rap", #new
+          "gtt_tbW_bqq_Pt",  #new
+          "gtt_tbW_bqq_Rap", #new
+          #"BQuark1_BQuark2_dEta_Vs_dPhi", #new
+          #"BQuark1_BQuark3_dEta_Vs_dPhi", #new
+          #"BQuark1_BQuark4_dEta_Vs_dPhi", #new
+          #"BQuark2_BQuark3_dEta_Vs_dPhi", #new
+          #"BQuark2_BQuark4_dEta_Vs_dPhi", #new
+          #"BQuark3_BQuark4_dEta_Vs_dPhi", #new
+          #"Jet1Jet2_dEta_Vs_Jet3Jet4_dEta", #new
+          #"Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi", #new  
+          #"Jet1Jet2_dEta_Vs_Jet1Jet2_Mass", #new
+          #"Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", #new
+]
 
 #================================================================================================
 # Main
@@ -58,6 +83,7 @@ hNames = ["genMET_Et",
 def main():
 
     style    = tdrstyle.TDRStyle()
+    savePath = myPath
     
     # Set ROOT batch mode boolean
     ROOT.gROOT.SetBatch(parseOpts.batchMode)
@@ -80,7 +106,10 @@ def main():
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
         plotName = hName
-        savePath = GetSavePath(analysis)
+        if savePath == None:
+            savePath = GetSavePath(analysis)
+        else:
+            pass
         saveName = os.path.join(savePath, plotName)
                 
         # Get customised histos
@@ -111,7 +140,7 @@ def main():
         # Customise frame
         p.setEnergy("13")
         p.getFrame().GetYaxis().SetTitle( getTitleY(kwargs.get("normalizeTo"), hName, opts) )
-        p.getFrame().GetXaxis().SetTitle( getTitleX(hName, opts) )
+        #p.getFrame().GetXaxis().SetTitle( getTitleX(hName, opts) )
         if kwargs.get("createRatio"):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             p.getFrame2().GetYaxis().SetTitleOffset(1.6)
@@ -216,7 +245,8 @@ def GetCustomisedHistos(datasets, hName, **kwargs):
         styleDict[rh.getName()].apply(h)
 
         # Rebinning
-        h.Rebin(kwargs.get("rebin"))
+        if not isinstance(h, ROOT.TH2F):
+            h.Rebin(kwargs.get("rebin"))
 
         # Remove negative histo entries
         if kwargs.get("removeNegatives"):
@@ -254,6 +284,7 @@ def Verbose(msg, printHeader=True):
 def GetSavePath(analysis):
     user    = getpass.getuser()
     initial = getpass.getuser()[0]
+    
     if "lxplus" in socket.gethostname():
         savePath = "/afs/cern.ch/user/%s/%s/public/html/%s/" % (initial, user, analysis)
     else:
@@ -319,14 +350,27 @@ def getUnitsX(hName):
         "genMET_Phi"                     : "rads",
         "genHT_GenJets"                  : "GeV" ,
         "genHT_GenParticles"             : "GeV",
-        "GenJet_Multiplicity"            : "",
-        "SelGenJet_LdgDiJet_Mass"        : "GeV/c^{2}",
-        "SelGenJet_MaxDiJetMass_Mass"    : "GeV/c^{2}",
-        "SelGenJet_MaxDiJetMass_Pt"      : "GeV/c",
-        "SelGenJet_MaxDiJetMass_Eta"     : "",
-        "SelGenJet_MaxDiJetMass_dR"      : "",
-        "SelGenJet_MaxDiJetMass_Rapidity": "", 
         "SelGenJet_Multiplicity"         : "",
+        "MaxDiJetMass_Mass"              : "GeV/c^{2}",        
+        "MaxDiJetMass_Pt"                : "GeV/c",
+        "MaxDiJetMass_Eta"               : "",
+        "MaxDiJetMass_dR"                : "",
+        "MaxDiJetMass_Rap"               : "",
+        "MaxDiJetMass_dRrap"             : "",
+        "MaxDiJetMass_dEta"              : "",
+        "MaxDiJetMass_dPhi"              : "rads",
+        "MaxDiJetMass_dRrap"             : "", 
+        "MaxDiJetMass_dEta_Vs_dPhi"      : "", 
+        "MaxDiJetMass_dRap_Vs_dPhi"      : "",
+        "BQuarkPair_dRMin_pT"            : "GeV/c",
+        "BQuarkPair_dRMin_dEta"          : "",
+        "BQuarkPair_dRMin_dPhi"          : "rads",
+        "BQuarkPair_dRMin_dR"            : "",
+        "BQuarkPair_dRMin_Mass"          : "GeV/c^{2}",
+        "Htb_tbW_bqq_Pt"                 : "GeV/c",
+        "Htb_tbW_bqq_Rap"                : "",
+        "gtt_tbW_bqq_Pt"                 : "GeV/c",
+        "gtt_tbW_bqq_Rap"                : "",        
     }
     return VarsToUnits[hName]
 
@@ -338,14 +382,27 @@ def getSymbolX(hName):
         "genMET_Phi"                     : "#phi",
         "genHT_GenJets"                  : "H_{T}" ,
         "genHT_GenParticles"             : "H_{T}",
-        "GenJet_Multiplicity"            : "N (genJets)",
-        "SelGenJet_LdgDiJet_Mass"        : "m(jet_{1}, jet_{2})",
-        "SelGenJet_MaxDiJetMass_Mass"    : "max[m(jet_{i}, jet_{j})] m",
-        "SelGenJet_MaxDiJetMass_Pt"      : "max[m(jet_{i}, jet_{j})] p_{T}",
-        "SelGenJet_MaxDiJetMass_Eta"     : "max[m(jet_{i}, jet_{j})] #eta",
-        "SelGenJet_MaxDiJetMass_dR"      : "max[m(jet_{i}, jet_{j})] #DeltaR",
-        "SelGenJet_MaxDiJetMass_Rapidity": "max[m(jet_{i}, jet_{j})] y", #y = 0.5ln[(E+pz)/(E-pz)]",
         "SelGenJet_Multiplicity"         : "N (selected genJets)",
+        "MaxDiJetMass_Mass"              : "M(jj)_{max} M",
+        "MaxDiJetMass_Pt"                : "M(jj)_{max} p_{T}",
+        "MaxDiJetMass_Eta"               : "M(jj)_{max} #eta",
+        "MaxDiJetMass_dR"                : "M(jj)_{max} #DeltaR",
+        "MaxDiJetMass_Rap"               : "M(jj)_{max} #omega", #omega = 0.5ln[(E+pz)/(E-pz)]",
+        "MaxDiJetMass_dRrap"             : "M(jj)_{max} #DeltaR_{#omega}",
+        "MaxDiJetMass_dEta"              : "M(jj)_{max} #Delta#eta",
+        "MaxDiJetMass_dPhi"              : "M(jj)_{max} #Delta#phi",
+        "MaxDiJetMass_dRrap"             : "M(jj)_{max} #Delta#omega", 
+        "MaxDiJetMass_dEta_Vs_dPhi"      : "M(jj)_{max} #Delta#eta", 
+        "MaxDiJetMass_dRap_Vs_dPhi"      : "M(jj)_{max} #Delta#omega",        
+        "BQuarkPair_dRMin_pT"            : "#DeltaR_{min}(bb) p_{T}",
+        "BQuarkPair_dRMin_dEta"          : "#DeltaR_{min}(bb) #Delta#eta",
+        "BQuarkPair_dRMin_dPhi"          : "#DeltaR_{min}(bb) #Delta#phi",
+        "BQuarkPair_dRMin_dR"            : "#DeltaR_{min}(bb) #DeltaR",
+        "BQuarkPair_dRMin_Mass"          : "#DeltaR_{min}(bb) M",
+        "Htb_tbW_bqq_Pt"                 : "bqq (H+) p_{T}",
+        "Htb_tbW_bqq_Rap"                : "bqq (H+) #omega",
+        "gtt_tbW_bqq_Pt"                 : "bqq (t) p_{T}",
+        "gtt_tbW_bqq_Rap"                : "bqq (t) #omega",
     }
     return VarsToSymbols[hName]
 
@@ -357,14 +414,29 @@ def getUnitsFormatX(hName):
         "genMET_Phi"                     : "%0.3f",
         "genHT_GenJets"                  : "%0.0f",
         "genHT_GenParticles"             : "%0.0f",
-        "GenJet_Multiplicity"            : "%0.0f",
-        "SelGenJet_LdgDiJet_Mass"        : "%0.0f",
-        "SelGenJet_MaxDiJetMass_Mass"    : "%0.0f",
-        "SelGenJet_MaxDiJetMass_Pt"      : "%0.0f",
-        "SelGenJet_MaxDiJetMass_Eta"     : "%0.2f",
-        "SelGenJet_MaxDiJetMass_dR"      : "%0.2f",
-        "SelGenJet_MaxDiJetMass_Rapidity": "%0.1f",
         "SelGenJet_Multiplicity"         : "%0.0f",
+        "MaxDiJetMass_Mass"              : "%0.0f",
+        "MaxDiJetMass_Pt"                : "%0.0f",
+        "MaxDiJetMass_Eta"               : "%0.2f",
+        "MaxDiJetMass_dR"                : "%0.2f",
+        "MaxDiJetMass_Rap"               : "%0.2f",
+        "MaxDiJetMass_dRrap"             : "%0.2f",
+        "MaxDiJetMass_dEta"              : "%0.2f",
+        "MaxDiJetMass_dPhi"              : "%0.2f",
+        "MaxDiJetMass_dRrap"             : "%0.2f",
+        "MaxDiJetMass_dEta_Vs_dPhi"      : "%0.2f",
+        "MaxDiJetMass_dRap_Vs_dPhi"      : "%0.2f",
+        "BQuarkPair_dRMin_pT"            : "%0.0f",
+        "BQuarkPair_dRMin_dEta"          : "%0.2f",
+        "BQuarkPair_dRMin_dPhi"          : "%0.2f",
+        "BQuarkPair_dRMin_dR"            : "%0.2f",
+        "BQuarkPair_dRMin_Mass"          : "%0.0f",
+        "Htb_tbW_bqq_Pt"                 : "%0.0f",
+        "Htb_tbW_bqq_Rap"                : "%0.2f",
+        "Htb_tbW_bqq_Mass"               : "%0.0f",
+        "gtt_tbW_bqq_Pt"                 : "%0.0f",
+        "gtt_tbW_bqq_Rap"                : "%0.2f",
+        "gtt_tbW_bqq_Mass"               : "%0.0f",
     }
     return VarsToNDecimals[hName]
 
@@ -429,3 +501,16 @@ if __name__ == "__main__":
 
     if not parseOpts.batchMode:
         raw_input("=== plotTemplate.py: Press any key to quit ROOT ...")
+
+'''
+"BQuark1_BQuark2_dEta_Vs_dPhi", #new
+"BQuark1_BQuark3_dEta_Vs_dPhi", #new
+"BQuark1_BQuark4_dEta_Vs_dPhi", #new
+"BQuark2_BQuark3_dEta_Vs_dPhi", #new
+"BQuark2_BQuark4_dEta_Vs_dPhi", #new
+"BQuark3_BQuark4_dEta_Vs_dPhi", #new
+"Jet1Jet2_dEta_Vs_Jet3Jet4_dEta", #new
+"Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi", #new  
+"Jet1Jet2_dEta_Vs_Jet1Jet2_Mass", #new
+"Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", #new
+'''          
