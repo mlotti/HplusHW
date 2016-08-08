@@ -17,7 +17,7 @@ MassPoints=LightMassPoints[:]+HeavyMassPoints[:]
 
 ##############################################################################
 # Options
-OptionIncludeSystematics=not True # Set to true if you produced multicrabs with doSystematics=True
+OptionIncludeSystematics= True # Set to true if you produced multicrabs with doSystematics=True
 OptionDoControlPlots= not True #FIXME: if you want control plots, switch this to true!
 OptionDoMergeEWKttbar = False #FIXME: if true, merges tt and singleTop into one and Wjets+DY+diboson into another background
 
@@ -387,7 +387,7 @@ else:
 # tau ES
 if "CMS_scale_t" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_scale_t", label="Tau energy scale",
-        distr="shapeQ", function="ShapeVariation", systVariation="tauES"))
+        distr="shapeQ", function="ShapeVariation", systVariation="TauES"))
 else:
     Nuisances.append(Nuisance(id="CMS_scale_t", label="APPROXIMATION for tau ES",
         distr="lnN", function="Constant", value=0.03))
@@ -401,14 +401,14 @@ else:
 # unclustered MET ES
 if "CMS_scale_met" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_scale_met", label="Unclustered MET energy scale",
-        distr="shapeQ", function="ShapeVariation", systVariation="CMS_res_j"))
+        distr="shapeQ", function="ShapeVariation", systVariation="UES"))
 else:
     Nuisances.append(Nuisance(id="CMS_scale_met", label="APPROXIMATION for unclustered MET ES",
         distr="lnN", function="Constant",value=0.03))
 # CMS_res_j
 if "CMS_res_j" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_res_j", label="Jet energy resolution",
-        distr="shapeQ", function="ShapeVariation", systVariation="CMS_res_j"))
+        distr="shapeQ", function="ShapeVariation", systVariation="JER"))
 else:
     Nuisances.append(Nuisance(id="CMS_res_j", label="APPROXIMATION for CMS_res_j",
         distr="lnN", function="Constant",value=0.03))
