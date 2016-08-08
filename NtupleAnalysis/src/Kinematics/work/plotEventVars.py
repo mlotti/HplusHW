@@ -41,40 +41,31 @@ kwargs      = {
     "removeErrorBars": False
 }
 
-hNames = ["genMET_Et",
-          "genMET_Phi",
-          "genHT_GenJets",
-          "genHT_GenParticles",
-          "SelGenJet_Multiplicity",
-          "MaxDiJetMass_Pt",
-          "MaxDiJetMass_Eta",
-          "MaxDiJetMass_Mass",
-          "MaxDiJetMass_Rap",
-          "MaxDiJetMass_dR",
-          "MaxDiJetMass_dRrap", #new
-          "MaxDiJetMass_dEta",  #new
-          "MaxDiJetMass_dPhi",  #new 
-          #"MaxDiJetMass_dEta_Vs_dPhi", #new 
-          #"MaxDiJetMass_dRap_Vs_dPhi", #new
-          "BQuarkPair_dRMin_pT",   #new
-          "BQuarkPair_dRMin_dEta", #new
-          "BQuarkPair_dRMin_dPhi", #new
-          "BQuarkPair_dRMin_dR",   #new
-          "BQuarkPair_dRMin_Mass", #new
-          "Htb_tbW_bqq_Pt",  #new
-          "Htb_tbW_bqq_Rap", #new
-          "gtt_tbW_bqq_Pt",  #new
-          "gtt_tbW_bqq_Rap", #new
-          #"BQuark1_BQuark2_dEta_Vs_dPhi", #new
-          #"BQuark1_BQuark3_dEta_Vs_dPhi", #new
-          #"BQuark1_BQuark4_dEta_Vs_dPhi", #new
-          #"BQuark2_BQuark3_dEta_Vs_dPhi", #new
-          #"BQuark2_BQuark4_dEta_Vs_dPhi", #new
-          #"BQuark3_BQuark4_dEta_Vs_dPhi", #new
-          #"Jet1Jet2_dEta_Vs_Jet3Jet4_dEta", #new
-          #"Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi", #new  
-          #"Jet1Jet2_dEta_Vs_Jet1Jet2_Mass", #new
-          #"Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", #new
+hNames = [
+    "genMET_Et",
+    "genMET_Phi",
+    "genHT_GenJets",
+    "genHT_GenParticles",
+    "SelGenJet_Multiplicity",
+    "MaxDiJetMass_Pt",
+    "MaxDiJetMass_Eta",
+    "MaxDiJetMass_Mass",
+    "MaxDiJetMass_Rap",
+    "MaxDiJetMass_dR",
+    "MaxDiJetMass_dRrap",
+    "MaxDiJetMass_dEta",
+    "MaxDiJetMass_dPhi",
+    "BQuarkPair_dRMin_pT",
+    "BQuarkPair_dRMin_dEta",
+    "BQuarkPair_dRMin_dPhi",
+    "BQuarkPair_dRMin_dR",
+    "BQuarkPair_dRMin_Mass",
+    "Htb_tbW_bqq_Pt",
+    "Htb_tbW_bqq_Rap",
+    "Htb_tbW_bqq_Mass",
+    "gtt_tbW_bqq_Pt",
+    "gtt_tbW_bqq_Rap",
+    "gtt_tbW_bqq_Mass",
 ]
 
 #================================================================================================
@@ -120,8 +111,8 @@ def main():
         p = plots.ComparisonManyPlot(refHisto, otherHistos)
         
         # Create a frame
-        opts      = {"ymin": 0.0, "binWidthX": histos[0].GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(hName)}
-        ratioOpts = {"ymin": 0.0, "ymax": 2.0 , "binWidthX": histos[0].GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(hName)}
+        opts      = {"ymin": 0.0, "binWidthX": histos[0].GetXaxis().GetBinWidth(0)}#, "xUnits": getUnitsX(hName)}
+        ratioOpts = {"ymin": 0.0, "ymax": 2.0 , "binWidthX": histos[0].GetXaxis().GetBinWidth(0)}
         fileName = os.path.join(savePath, plotName)
         p.createFrame(fileName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
 
@@ -140,7 +131,6 @@ def main():
         # Customise frame
         p.setEnergy("13")
         p.getFrame().GetYaxis().SetTitle( getTitleY(kwargs.get("normalizeTo"), hName, opts) )
-        #p.getFrame().GetXaxis().SetTitle( getTitleX(hName, opts) )
         if kwargs.get("createRatio"):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             p.getFrame2().GetYaxis().SetTitleOffset(1.6)
@@ -343,70 +333,6 @@ def removeErrorBars(histo):
     return
 
 
-def getUnitsX(hName):
-
-    VarsToUnits = {
-        "genMET_Et"                      : "GeV",
-        "genMET_Phi"                     : "rads",
-        "genHT_GenJets"                  : "GeV" ,
-        "genHT_GenParticles"             : "GeV",
-        "SelGenJet_Multiplicity"         : "",
-        "MaxDiJetMass_Mass"              : "GeV/c^{2}",        
-        "MaxDiJetMass_Pt"                : "GeV/c",
-        "MaxDiJetMass_Eta"               : "",
-        "MaxDiJetMass_dR"                : "",
-        "MaxDiJetMass_Rap"               : "",
-        "MaxDiJetMass_dRrap"             : "",
-        "MaxDiJetMass_dEta"              : "",
-        "MaxDiJetMass_dPhi"              : "rads",
-        "MaxDiJetMass_dRrap"             : "", 
-        "MaxDiJetMass_dEta_Vs_dPhi"      : "", 
-        "MaxDiJetMass_dRap_Vs_dPhi"      : "",
-        "BQuarkPair_dRMin_pT"            : "GeV/c",
-        "BQuarkPair_dRMin_dEta"          : "",
-        "BQuarkPair_dRMin_dPhi"          : "rads",
-        "BQuarkPair_dRMin_dR"            : "",
-        "BQuarkPair_dRMin_Mass"          : "GeV/c^{2}",
-        "Htb_tbW_bqq_Pt"                 : "GeV/c",
-        "Htb_tbW_bqq_Rap"                : "",
-        "gtt_tbW_bqq_Pt"                 : "GeV/c",
-        "gtt_tbW_bqq_Rap"                : "",        
-    }
-    return VarsToUnits[hName]
-
-
-def getSymbolX(hName):
-
-    VarsToSymbols = {
-        "genMET_Et"                      : "E_{T}",
-        "genMET_Phi"                     : "#phi",
-        "genHT_GenJets"                  : "H_{T}" ,
-        "genHT_GenParticles"             : "H_{T}",
-        "SelGenJet_Multiplicity"         : "N (selected genJets)",
-        "MaxDiJetMass_Mass"              : "M(jj)_{max} M",
-        "MaxDiJetMass_Pt"                : "M(jj)_{max} p_{T}",
-        "MaxDiJetMass_Eta"               : "M(jj)_{max} #eta",
-        "MaxDiJetMass_dR"                : "M(jj)_{max} #DeltaR",
-        "MaxDiJetMass_Rap"               : "M(jj)_{max} #omega", #omega = 0.5ln[(E+pz)/(E-pz)]",
-        "MaxDiJetMass_dRrap"             : "M(jj)_{max} #DeltaR_{#omega}",
-        "MaxDiJetMass_dEta"              : "M(jj)_{max} #Delta#eta",
-        "MaxDiJetMass_dPhi"              : "M(jj)_{max} #Delta#phi",
-        "MaxDiJetMass_dRrap"             : "M(jj)_{max} #Delta#omega", 
-        "MaxDiJetMass_dEta_Vs_dPhi"      : "M(jj)_{max} #Delta#eta", 
-        "MaxDiJetMass_dRap_Vs_dPhi"      : "M(jj)_{max} #Delta#omega",        
-        "BQuarkPair_dRMin_pT"            : "#DeltaR_{min}(bb) p_{T}",
-        "BQuarkPair_dRMin_dEta"          : "#DeltaR_{min}(bb) #Delta#eta",
-        "BQuarkPair_dRMin_dPhi"          : "#DeltaR_{min}(bb) #Delta#phi",
-        "BQuarkPair_dRMin_dR"            : "#DeltaR_{min}(bb) #DeltaR",
-        "BQuarkPair_dRMin_Mass"          : "#DeltaR_{min}(bb) M",
-        "Htb_tbW_bqq_Pt"                 : "bqq (H+) p_{T}",
-        "Htb_tbW_bqq_Rap"                : "bqq (H+) #omega",
-        "gtt_tbW_bqq_Pt"                 : "bqq (t) p_{T}",
-        "gtt_tbW_bqq_Rap"                : "bqq (t) #omega",
-    }
-    return VarsToSymbols[hName]
-
-
 def getUnitsFormatX(hName):
 
     VarsToNDecimals = {
@@ -423,9 +349,8 @@ def getUnitsFormatX(hName):
         "MaxDiJetMass_dRrap"             : "%0.2f",
         "MaxDiJetMass_dEta"              : "%0.2f",
         "MaxDiJetMass_dPhi"              : "%0.2f",
-        "MaxDiJetMass_dRrap"             : "%0.2f",
         "MaxDiJetMass_dEta_Vs_dPhi"      : "%0.2f",
-        "MaxDiJetMass_dRap_Vs_dPhi"      : "%0.2f",
+        "MaxDiJetMass_dRrap"             : "%0.2f",
         "BQuarkPair_dRMin_pT"            : "%0.0f",
         "BQuarkPair_dRMin_dEta"          : "%0.2f",
         "BQuarkPair_dRMin_dPhi"          : "%0.2f",
@@ -441,15 +366,6 @@ def getUnitsFormatX(hName):
     return VarsToNDecimals[hName]
 
 
-def getTitleX(kinVar, opts):
-    unitsX = opts.get("xUnits")
-    if unitsX != "":
-        titleX = getSymbolX(kinVar) + " (%s)" % unitsX
-    else:
-        titleX = getSymbolX(kinVar)
-    return titleX
-
-
 def getSymbolY(normalizeTo):
     isValidNorm(normalizeTo)
     NormToSymbols = {"One": "Arbitrary Units", "Luminosity": "Events", "": "Arbitrary Units", "XSection": "#sigma [pb]"}
@@ -457,9 +373,11 @@ def getSymbolY(normalizeTo):
     return NormToSymbols[normalizeTo]
     
 
-def getTitleY(normalizeTo, kinVar, opts):
-
-    titleY = getSymbolY(normalizeTo) + " / %s %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX"), opts.get("xUnits") )
+def getTitleY(normalizeTo, kinVar, opts):    
+    if opts.get("xUnits")!=None:
+        titleY = getSymbolY(normalizeTo) + " / %s %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX"), opts.get("xUnits") )
+    else:
+        titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )
     return titleY
 
     
@@ -502,15 +420,16 @@ if __name__ == "__main__":
     if not parseOpts.batchMode:
         raw_input("=== plotTemplate.py: Press any key to quit ROOT ...")
 
-'''
-"BQuark1_BQuark2_dEta_Vs_dPhi", #new
-"BQuark1_BQuark3_dEta_Vs_dPhi", #new
-"BQuark1_BQuark4_dEta_Vs_dPhi", #new
-"BQuark2_BQuark3_dEta_Vs_dPhi", #new
-"BQuark2_BQuark4_dEta_Vs_dPhi", #new
-"BQuark3_BQuark4_dEta_Vs_dPhi", #new
-"Jet1Jet2_dEta_Vs_Jet3Jet4_dEta", #new
-"Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi", #new  
-"Jet1Jet2_dEta_Vs_Jet1Jet2_Mass", #new
-"Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", #new
-'''          
+
+#"MaxDiJetMass_dEta_Vs_dPhi",
+#"MaxDiJetMass_dRap_Vs_dPhi",
+#"BQuark1_BQuark2_dEta_Vs_dPhi",
+#"BQuark1_BQuark3_dEta_Vs_dPhi",
+#"BQuark1_BQuark4_dEta_Vs_dPhi",
+#"BQuark2_BQuark3_dEta_Vs_dPhi",
+#"BQuark2_BQuark4_dEta_Vs_dPhi",
+#"BQuark3_BQuark4_dEta_Vs_dPhi",
+#"Jet1Jet2_dEta_Vs_Jet3Jet4_dEta",
+#"Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi",
+#"Jet1Jet2_dEta_Vs_Jet1Jet2_Mass",
+#"Jet3Jet4_dEta_Vs_Jet3Jet4_Mass",

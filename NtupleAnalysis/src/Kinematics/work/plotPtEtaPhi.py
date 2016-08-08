@@ -337,15 +337,15 @@ def getHistoNames(kinVar):
         hNames.append("GenJet2_" + kinVar) # Pt Eta Rap
         hNames.append("GenJet3_" + kinVar) # Pt Eta Rap
         hNames.append("GenJet4_" + kinVar) # Pt Eta Rap
-        hNames.append("GenJet5_" + kinVar) # Pt Eta Rap
-        hNames.append("GenJet6_" + kinVar) # Pt Eta Rap
+        hNames.append("GenJet5_" + kinVar) # Pt Eta Rap  #new
+        hNames.append("GenJet6_" + kinVar) # Pt Eta Rap  #new
         #
-        hNames.append("AL3CJetsFromHPlus_GenJet1_" + kinVar) # Pt Eta Rap
-        hNames.append("AL3CJetsFromHPlus_GenJet2_" + kinVar) # Pt Eta Rap
-        hNames.append("AL3CJetsFromHPlus_GenJet3_" + kinVar) # Pt Eta Rap
-        hNames.append("AL3CJetsFromHPlus_GenJet4_" + kinVar) # Pt Eta Rap
-        hNames.append("AL3CJetsFromHPlus_GenJet5_" + kinVar) # Pt Eta Rap
-        hNames.append("AL3CJetsFromHPlus_GenJet6_" + kinVar) # Pt Eta Rap
+        hNames.append("AL3CJetsFromHPlus_GenJet1_" + kinVar) # Pt Eta Rap #new
+        hNames.append("AL3CJetsFromHPlus_GenJet2_" + kinVar) # Pt Eta Rap #new
+        hNames.append("AL3CJetsFromHPlus_GenJet3_" + kinVar) # Pt Eta Rap #new
+        hNames.append("AL3CJetsFromHPlus_GenJet4_" + kinVar) # Pt Eta Rap #new
+        hNames.append("AL3CJetsFromHPlus_GenJet5_" + kinVar) # Pt Eta Rap #new
+        hNames.append("AL3CJetsFromHPlus_GenJet6_" + kinVar) # Pt Eta Rap #new
     else:
         hNames.append("Htb_TQuark_Htb_BQuark_"                + kinVar) #dR dEta dRap dPhi 
         hNames.append("Htb_TQuark_gtt_TQuark_"                + kinVar) #dR dEta dRap dPhi 
