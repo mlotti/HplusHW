@@ -76,7 +76,7 @@ muVeto = PSet(
 jetSelection = PSet(
                jetType = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
               jetPtCut = 30.0,
-             jetEtaCut = 0.0, #4.7,
+             jetEtaCut = 4.7,
      tauMatchingDeltaR = 0.4,
   numberOfJetsCutValue = 3,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
