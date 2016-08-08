@@ -17,7 +17,7 @@ MassPoints=LightMassPoints[:]+HeavyMassPoints[:]
 
 ##############################################################################
 # Options
-OptionIncludeSystematics=True # Set to true if you produced multicrabs with doSystematics=True
+OptionIncludeSystematics=not True # Set to true if you produced multicrabs with doSystematics=True
 OptionDoControlPlots= not True #FIXME: if you want control plots, switch this to true!
 OptionDoMergeEWKttbar = False #FIXME: if true, merges tt and singleTop into one and Wjets+DY+diboson into another background
 
@@ -189,17 +189,19 @@ for mass in HeavyMassPoints:
 #if OptionMassShape =="TransverseMass":#myQCD.setDatasetDefinition("QCDinvertedmt")
 #elif OptionMassShape =="FullMass":#myQCD.setDatasetDefinition("QCDinvertedinvmass")
 
+myQCDSystematics = myTrgSystematics[:]+myESSystematics[:]+myBtagSystematics[:]+myTopSystematics[:]+myPileupSystematics[:]
+#approximation 1: only ttbar xsect uncertinty applied to QCD, as ttbar dominates the EWK BG (but uncertainty is scaled according to 1-purity, i.e. #all_ttbar+EWK_events_in_QCDandFakeTau/#all_events_in_QCDandFakeTau)
+myQCDSystematics+=["CMS_scale_ttbar_forQCD","CMS_pdf_ttbar_forQCD","CMS_mass_ttbar_forQCD","lumi_13TeV_forQCD","CMS_eff_t_forQCD"]
+#approximation 2: myLeptonVetoSystematics neglected for QCD
+
+if OptionIncludeSystematics: #these can be used only if QCDMeasurement has been run with systematics
+    myQCDSystematics += ["CMS_Hptntj_QCDbkg_templateFit","CMS_Hptntj_QCDkbg_metshape"]
+
 myQCD=DataGroup(label="CMS_Hptntj_QCDandFakeTau", landsProcess=1, validMassPoints=MassPoints,
                 #datasetType="QCD MC", datasetDefinition="QCD",
                 #nuisances=myShapeSystematics[:]+["xsect_QCD","lumi_13TeV"],
                 datasetType="QCD inverted", datasetDefinition="QCDMeasurementMT",
-                nuisances=myTrgSystematics[:]
-                          +myESSystematics[:]+myBtagSystematics[:]+myTopSystematics[:]+myPileupSystematics[:]
-                          +["CMS_Hptntj_QCDbkg_templateFit","CMS_Hptntj_QCDkbg_metshape"]
-                          +["CMS_scale_ttbar_forQCD","CMS_pdf_ttbar_forQCD","CMS_mass_ttbar_forQCD"] #approximation: only ttbar xsect uncertinty applied to QCD, as ttbar dominates the EWK BG (but uncertainty is scaled according to 1-purity, i.e. #all_ttbar+EWK_events_in_QCDandFakeTau/#all_events_in_QCDandFakeTau)
-                          +["lumi_13TeV_forQCD"]
-                          +["CMS_eff_t_forQCD"],
-                          #approximation: myLeptonVetoSystematics neglected for QCD
+                nuisances=myQCDSystematics,
                 shapeHistoName=shapeHistoName, histoPath=histoPathInclusive)
 DataGroups.append(myQCD)
 
@@ -307,11 +309,11 @@ if "CMS_eff_t_trg_MC" in myShapeSystematics:
 else:
     Nuisances.append(Nuisance(id="CMS_eff_t_trg_MC", label="APPROXIMATION for tau+MET trg tau part MC eff.",
         distr="lnN", function="Constant", value=0.010))
-if "CMS_eff_met_trg_data" in myShapeSystematics: #this is in fact CMS_eff_met_trg_data
+if "CMS_eff_met_trg_data" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_eff_met_trg_data", label="tau+MET trg MET data eff.",
         distr="shapeQ", function="ShapeVariation", systVariation="METTrgEffData"))
 else:
-    Nuisances.append(Nuisance(id="CMS_eff_met", label="APPROXIMATION for tau+MET trg MET data eff.",
+    Nuisances.append(Nuisance(id="CMS_eff_met_trg_data", label="APPROXIMATION for tau+MET trg MET data eff.",
         distr="lnN", function="Constant", value=0.15))
 if "CMS_eff_met_trg_MC" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_eff_met_trg_MC", label="tau+MET trg MET MC eff.",
@@ -526,10 +528,11 @@ Nuisances.append(Nuisance(id="lumi_13TeV_forQCD", label="lumi_13TeVnosity",
     value=systematics.getLuminosityUncertainty()))
 
 #===== QCD measurement
-Nuisances.append(Nuisance(id="CMS_Hptntj_QCDbkg_templateFit", label="QCDInv: fit", 
-    distr="lnN", function="Constant", value=0.03))
-Nuisances.append(Nuisance(id="CMS_Hptntj_QCDkbg_metshape", label="QCD met shape syst.",
-    distr="shapeQ", function="QCDShapeVariation", systVariation="QCDNormSource"))
+if OptionIncludeSystematics:
+    Nuisances.append(Nuisance(id="CMS_Hptntj_QCDbkg_templateFit", label="QCDInv: fit", 
+        distr="lnN", function="Constant", value=0.03))
+    Nuisances.append(Nuisance(id="CMS_Hptntj_QCDkbg_metshape", label="QCD met shape syst.",
+        distr="shapeQ", function="QCDShapeVariation", systVariation="QCDNormSource"))
 
 #===== Embedding
 if OptionGenuineTauBackgroundSource == "DataDriven":
