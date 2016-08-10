@@ -80,9 +80,9 @@ muVeto = PSet(
 jetSelection = PSet(
     jetType                  = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
     jetPtCut                 = 30.0,
-    jetEtaCut                = 4.7,
-    tauMatchingDeltaR        = 0.4,
-    numberOfJetsCutValue     = 3,
+    jetEtaCut                =  2.5,
+    tauMatchingDeltaR        =  0.4,
+    numberOfJetsCutValue     =  4,
     numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
     jetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
     jetPUIDDiscr             = "", # does not work at the moment 
@@ -114,6 +114,19 @@ metSelection = PSet(
     METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
     METType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
     applyPhiCorrections          = False
+)
+
+
+#================================================================================================
+# HT selection
+#================================================================================================
+htSelection = PSet(
+    HTCutValue                 = 300.0,
+    HTCutDirection             = ">=", # options: ==, !=, <, <=, >, >=
+    #HTSignificanceCutValue     = -1000.0,
+    #HTSignificanceCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+    #HTType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
+    #applyPhiCorrections          = False
 )
 
 #================================================================================================
@@ -159,6 +172,7 @@ allSelections = PSet(
     JetSelection          = jetSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,
+    HTSelection           = htSelection,
     MuonSelection         = muVeto,
     Trigger               = trigger,
     HistogramAmbientLevel = histogramAmbientLevel,
