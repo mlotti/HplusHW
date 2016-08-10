@@ -28,15 +28,15 @@ import ROOT
 # Variable Definition
 #================================================================================================
 analysis    = "Kinematics"
-#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/signal/"
-myPath      = None
-kinVar      = "dEta"  # "Pt", "Eta", "Rap", "Phi", "dR" "dEta" "dPhi" "dRap"
+myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_09August2016/figures/signal/"
+#myPath      = None
+kinVar      = "Pt" # "Pt", "Eta", "Rap", "dR" "dEta" "dPhi" "dRap"
 kwargs      = {
     "referenceHisto" : "M_200",
     "ignoreHistos"   : [], #["M_300", "M_400"],
-    "saveFormats"    : [".png"],
+    "saveFormats"    : [".pdf", ".png"],
     "normalizeTo"    : "One",
-    "rebin"          : 2,
+    "rebin"          : 1,
     "createRatio"    : False,
     "removeNegatives": False,
     "removeErrorBars": False
@@ -88,7 +88,7 @@ def main():
         p = plots.ComparisonManyPlot(refHisto, otherHistos)
         
         # Create a frame
-        opts      = {"ymin": 0.0, "binWidthX": histos[0].GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(kinVar)}
+        opts      = {"ymin": 0.0, "binWidthX": histos[0].GetXaxis().GetBinWidth(0)}#, "xUnits": getUnitsX(kinVar)}
         ratioOpts = {"ymin": 0.0, "ymax": 2.0 , "binWidthX": histos[0].GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(kinVar)}
         fileName = os.path.join(savePath, plotName)
         p.createFrame(fileName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
@@ -108,7 +108,7 @@ def main():
         # Customise frame
         p.setEnergy("13")
         p.getFrame().GetYaxis().SetTitle( getTitleY(kwargs.get("normalizeTo"), kinVar, opts) )
-        p.getFrame().GetXaxis().SetTitle( getTitleX(kinVar, opts) )
+        #p.getFrame().GetXaxis().SetTitle( getTitleX(kinVar, opts) )
         if kwargs.get("createRatio"):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             p.getFrame2().GetYaxis().SetTitleOffset(1.6)
@@ -313,7 +313,7 @@ def getHistoNames(kinVar):
     isValidVar(kinVar)
 
     hNames    = []
-    distances = ["dR", "dEta", "dRap"]
+    distances = ["dR", "dEta", "dRap", "dPhi"]
     if kinVar not in distances:
         hNames.append("gtt_TQuark_"            + kinVar) # Pt Eta Phi Rap
         hNames.append("gbb_BQuark_"            + kinVar) # Pt Eta Phi Rap
@@ -405,13 +405,16 @@ def getSymbolY(normalizeTo):
     
 
 def getTitleY(normalizeTo, kinVar, opts):
-
-    titleY = getSymbolY(normalizeTo) + " / %s %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX"), opts.get("xUnits") )
+    #if opts.get("xUnits")!=None:
+     #   titleY = getSymbolY(normalizeTo) + " / %s %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX"), opts.get("xUnits") )
+    #else:
+    #    titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )
+    titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )    
     return titleY
 
     
 def isValidVar(kinVar):
-    validVars = ["Pt", "Eta", "Rap", "Phi", "dR", "dEta", "dRap", "dPhi"]
+    validVars = ["Pt", "Eta", "Rap", "dR", "dEta", "dRap", "dPhi"]
     if kinVar not in validVars:
         raise Exception("Invalid kinematics variable \"%s\". Please choose one of the following: %s" % (kinVar, "\"" + "\", \"".join(validVars) ) + "\"")
     return
