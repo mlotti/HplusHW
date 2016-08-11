@@ -81,9 +81,8 @@ jetSelection = PSet(
     jetType                  = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
     jetPtCut                 = 30.0,
     jetEtaCut                =  2.5,
-    tauMatchingDeltaR        =  0.4,
     numberOfJetsCutValue     =  4,
-    numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+    numberOfJetsCutDirection = ">=",  # options: ==, !=, <, <=, >, >=
     jetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
     jetPUIDDiscr             = "", # does not work at the moment 
 )
@@ -121,12 +120,11 @@ metSelection = PSet(
 # HT selection
 #================================================================================================
 htSelection = PSet(
-    HTCutValue                 = 300.0,
-    HTCutDirection             = ">=", # options: ==, !=, <, <=, >, >=
-    #HTSignificanceCutValue     = -1000.0,
-    #HTSignificanceCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+    HtCutValue                 = 300.0,
+    HtCutDirection             = ">=", # options: ==, !=, <, <=, >, >=
+    HtSignificanceCutValue     = -1000.0,
+    HtSignificanceCutDirection = ">=", # options: ==, !=, <, <=, >, >=
     #HTType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
-    #applyPhiCorrections          = False
 )
 
 #================================================================================================
@@ -142,23 +140,21 @@ commonPlotsOptions = PSet(
     # Splitting of histograms as function of one or more parameters
     # Example: histogramSplitting = [PSet(label="tauPt", binLowEdges=[60, 70, 80, 100, 120], useAbsoluteValues=False)],
     histogramSplitting = [],
+
     # By default, inclusive (i.e. fake tau+genuine tau) and fake tau histograms are produced. Set to true to also produce genuine tau histograms
     enableGenuineTauHistograms = False, 
+
     # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
-    nVerticesBins     = PSet(nBins = 60, axisMin =  0.0, axisMax=  60.0),
-    ptBins            = PSet(nBins = 50, axisMin =  0.0, axisMax= 500.0),
-    etaBins           = PSet(nBins = 60, axisMin = -3.0, axisMax=   3.0),
-    phiBins           = PSet(nBins = 72, axisMin = -3.1415926, axisMax=3.1415926),
-    deltaPhiBins      = PSet(nBins = 18, axisMin =  0.0, axisMax = 180.0), # used in 2D plots, i.e. putting high number of bins here will cause troubles
-    rtauBins          = PSet(nBins = 55, axisMin =  0.0, axisMax =   1.1),
-    njetsBins         = PSet(nBins = 20, axisMin =  0.0, axisMax =  20.0),
-    metBins           = PSet(nBins = 80, axisMin =  0.0, axisMax = 800.0), # please use 10 GeV bin width because of QCD measurement
-    bjetDiscrBins     = PSet(nBins = 20, axisMin = -1.0, axisMax =   1.0),
-    angularCuts1DBins = PSet(nBins = 52, axisMin =  0.0, axisMax = 260.0),
-    topMassBins       = PSet(nBins = 60, axisMin =  0.0, axisMax = 600.0),
-    WMassBins         = PSet(nBins = 60, axisMin =  0.0, axisMax = 300.0),
-    mtBins            = PSet(nBins =160, axisMin =  0.0, axisMax = 800.0), # 5 GeV bin width for tail fitter
-    invmassBins       = PSet(nBins = 50, axisMin =  0.0, axisMax = 500.0),    
+    ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax= 500.0),
+    etaBins           = PSet(nBins = 100, axisMin = -5.0, axisMax=   5.0),
+    phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax=   3.2),
+    #phiBins           = PSet(nBins =  72, axisMin = -3.1415926, axisMax=3.1415926),
+    invmassBins       = PSet(nBins =  50, axisMin =  0.0, axisMax = 500.0),
+    deltaEtaBins      = PSet(nBins =  50, axisMin =  0.0, axisMax=  10.0),
+    deltaPhiBins      = PSet(nBins =  32, axisMin =  0.0, axisMax =  3.2),  # Note: putting high number of bins here will cause troubles
+    deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax=  10.0),
+    njetsBins         = PSet(nBins =  20, axisMin =  0.0, axisMax = 10.0),
+    metBins           = PSet(nBins =  80, axisMin =  0.0, axisMax = 800.0), # Note: use 10 GeV bin width because of QCD measurement
     enablePUDependencyPlots = True, # Enable/Disable some debug-level plots
 )
 
@@ -172,7 +168,7 @@ allSelections = PSet(
     JetSelection          = jetSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,
-    HTSelection           = htSelection,
+    HtSelection           = htSelection,
     MuonSelection         = muVeto,
     Trigger               = trigger,
     HistogramAmbientLevel = histogramAmbientLevel,
