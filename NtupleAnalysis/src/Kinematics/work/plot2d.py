@@ -24,59 +24,43 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 import ROOT
 
-
 #================================================================================================
 # Variable Definition
 #================================================================================================
+massPoint   = "200"
 analysis    = "Kinematics"
 #myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
 myPath      = None
 kwargs      = {
-    "referenceHisto" : "M_200",
-    "saveFormats"    : [".png"], #, ".pdf"],
-    "normalizeTo"    : "One",
-    "rebin"          : 1,
-    "createRatio"    : False,
+    "saveFormats" : [".png"],
+    "rebinX"      : 1,
+    "rebinY"      : 1,
+    "normalizeTo" : "One",
+    "zMin"        : 1e-4,
+    "zMax"        : 0.5e-1,
 }
 
 hNames = [
-    "genMET_Et",
-    #"genMET_Phi",
-    "genHT_GenJets",
-    "genHT_GenParticles",
-    "SelGenJet_Multiplicity",
-    "MaxDiJetMass_Pt",
-    "MaxDiJetMass_Eta",
-    "MaxDiJetMass_Mass",
-    "MaxDiJetMass_Rap",
-    "MaxDiJetMass_dR",
-    "MaxDiJetMass_dRrap",
-    "MaxDiJetMass_dEta",
-    "MaxDiJetMass_dPhi",
-    "BQuarkPair_dRMin_pT",
-    "BQuarkPair_dRMin_dEta",
-    "BQuarkPair_dRMin_dPhi",
-    "BQuarkPair_dRMin_dR",
-    "BQuarkPair_dRMin_Mass",
-    "BQuarkPair_dRMin_jet1_dR",
-    "BQuarkPair_dRMin_jet1_dEta",
-    "BQuarkPair_dRMin_jet1_dPhi",
-    "BQuarkPair_dRMin_jet2_dR",
-    "BQuarkPair_dRMin_jet2_dEta",
-    "BQuarkPair_dRMin_jet2_dPhi",
-    "Htb_tbW_bqq_Pt",
-    "Htb_tbW_bqq_Rap",
-    "Htb_tbW_bqq_Mass",
-    "Htb_tbW_bqq_dRMax_dR",
-    "Htb_tbW_bqq_dRMax_dRap",
-    "Htb_tbW_bqq_dRMax_dPhi",
-    "gtt_tbW_bqq_Pt",
-    "gtt_tbW_bqq_Rap",
-    "gtt_tbW_bqq_Mass",
-    "gtt_tbW_bqq_dRMax_dR",
-    "gtt_tbW_bqq_dRMax_dRap",
-    "gtt_tbW_bqq_dRMax_dPhi",
+    #"MaxDiJetMass_dEta_Vs_dPhi",
+    "MaxDiJetMass_dRap_Vs_dPhi",
+    "BQuark1_BQuark2_dEta_Vs_dPhi",
+    "BQuark1_BQuark3_dEta_Vs_dPhi",
+    "BQuark1_BQuark4_dEta_Vs_dPhi",
+    "BQuark2_BQuark3_dEta_Vs_dPhi",
+    "BQuark2_BQuark4_dEta_Vs_dPhi",
+    "BQuark3_BQuark4_dEta_Vs_dPhi",
+    "BQuarkPair_dRMin_Eta1_Vs_Eta2",
+    "BQuarkPair_dRMin_Phi1_Vs_Phi2",
+    "BQuarkPair_dRMin_Pt1_Vs_Pt2",
+    "BQuarkPair_dRMin_dEta_Vs_dPhi",
+    "Htb_tbW_bqq_dRMax_dRap_Vs_dPhi",
+    "gtt_tbW_bqq_dRMax_dRap_Vs_dPhi",
+    "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta",
+    "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi",
+    "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass",
+    "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass",
 ]
+
 
 
 #================================================================================================
@@ -85,6 +69,15 @@ hNames = [
 def main():
 
     style    = tdrstyle.TDRStyle()
+    #style.setWide(True)
+    style.setPaletteMy()
+    ROOT.gStyle.SetNumberContours(20)
+    # tdrstyle.setDeepSeaPalette()
+    # tdrstyle.setRainBowPalette()
+    # tdrstyle.setDarkBodyRadiatorPalette()
+    # tdrstyle.setGreyScalePalette()
+    # tdrstyle.setTwoColorHuePalette()
+ 
     savePath = myPath
     
     # Set ROOT batch mode boolean
@@ -95,31 +88,57 @@ def main():
 
     # Determine Integrated Luminosity (If Data datasets present)
     intLumi = GetLumi(datasets)
-    
+        
+                  
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
         if savePath == None:
             savePath = GetSavePath(analysis)
         saveName = os.path.join(savePath, hName)
                 
+
         # Get customised histos
-        rootHistos, histos    = GetCustomisedHistos(datasets, hName, **kwargs)
-        refHisto, otherHistos = GetHistosForPlot(histos, rootHistos, **kwargs)            
+        rootHistos = GetCustomisedHistos(datasets, hName, **kwargs)
 
         
         # Create a comparison plot
-        p = plots.ComparisonManyPlot(refHisto, otherHistos)
+        p = plots.PlotBase(rootHistos, len(kwargs.get("saveFormats")))
         
 
         # Remove negative contributions (BEFORE rebinning)
-        RemoveNegativeBins(histos, p)
+        RemoveNegativeBins(rootHistos[0].getHistogram(), p)
+
+
+        # Customize
+        p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs.get("rebinX")))
+        p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinY(kwargs.get("rebinY")))
+        p.histoMgr.setHistoDrawStyleAll("COLZ")        
+        # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetRangeUser(1.0, 5.0))
+        # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetRangeUser(1.0, 5.0))
+        # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetZaxis().SetRangeUser(0.0, 0.015))
+        p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMinimum(kwargs.get("zMin")))
+        p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMaximum(kwargs.get("zMax")))
 
         
         # Create a frame
-        opts      = {"ymin": 0.0, "ymaxfactor": 1.0}
-        ratioOpts = {"ymin": 0.0, "ymax": 2.0}
+        opts     = {"xmin": 0.0, "ymin": 0.0, "ymaxfactor": 1.0} #"ymax": 3.8}
         fileName = os.path.join(savePath, hName)
-        p.createFrame(fileName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
+        p.createFrame(fileName, **opts)
+        # Customise frame
+        p.getFrame().GetXaxis().SetTitle( getTitleX(rootHistos[0], **kwargs) )
+        p.getFrame().GetYaxis().SetTitle( getTitleY(rootHistos[0], **kwargs) )
+        p.getFrame().GetZaxis().SetTitle( getTitleZ(rootHistos[0], **kwargs) ) #dev
+        
+
+        # SetLog
+        p.getPad().SetLogy(False)
+        p.getPad().SetLogx(False)
+        p.getPad().SetLogz(True)
+
+        
+        # Add cut line/box
+        _kwargs = { "lessThan": True}
+        #p.addCutBoxAndLine(cutValue=5, fillColor=ROOT.kBlue+2, box=False, line=True, **_kwargs)
 
         
         # Customise Legend
@@ -127,24 +146,19 @@ def main():
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
         p.removeLegend()
 
+
+        # Add MC Uncertainty (Invalid method for a 2-d histogram)
+        #p.addMCUncertainty()
+
         
-        # Customise frame
-        p.getFrame().GetYaxis().SetTitle( getTitleY(rootHistos[0], **kwargs) )
-        # p.setEnergy("13")
-        if kwargs.get("createRatio"):
-            p.getFrame2().GetYaxis().SetTitle("Ratio")
-            p.getFrame2().GetYaxis().SetTitleOffset(1.6)
-
-
         #  Draw plots
         p.draw()
-    
+
+        
         # Customise text
         histograms.addStandardTexts(lumi=intLumi)
-        # histograms.addText(0.4, 0.9, "Alexandros Attikis", 17)
-        # histograms.addText(0.4, 0.11, "Runs " + datasets.loadRunRange(), 17)
 
-
+        
         # Save canvas under custom dir
         if counter == 0:
             Print("Saving plots in %s format(s)" % (len(kwargs.get("saveFormats"))) )
@@ -155,10 +169,18 @@ def main():
 #================================================================================================
 # Auxiliary Function Definition
 #================================================================================================
+def RemoveNegativeBins(h, p):
+    for i in range(h.GetNbinsX()):
+        for j in range(h.GetNbinsY()):
+            if h.GetBinContent(i, j) < 0:
+                p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetBinContent(i, j, 0))
+    return
+
+                
 def GetDatasetsFromDir(mcrab, analysis):
 
-    datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
-    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_")
+    # datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
+    datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_%s" % massPoint)
     # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
     # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_180|M_220|M_250")
     
@@ -169,49 +191,21 @@ def GetDatasetsFromDir(mcrab, analysis):
     return datasets
 
 
-def GetHistosForPlot(histos, rootHistos, **kwargs):
-    refHisto     = None
-    otherHistos  = []
-
-    # For-loop: histos
-    for rh in rootHistos:
-        hName = rh.getName()
-
-    # For-loop: histos
-    for rh, h in zip(rootHistos, histos):
-        legName = "m_{H^{#pm}} = %s GeV/c^{2}" % (rh.getName().split("_M_")[-1])
-        
-        if kwargs.get("referenceHisto") in rh.getName():
-            refHisto = histograms.Histo(h, legName, "p", "P")
-        else:
-            otherHistos.append( histograms.Histo(h, legName,  "F", "HIST,E,9") )
-    return refHisto, otherHistos
-
-
 def GetCustomisedHistos(datasets, hName, **kwargs):
-    # Declarations
     rootHistos = []
-    histos     = []
 
     # Get Data or MC datasets
     myDatasets = datasets.getAllDatasets()
     # myDatasets = datasets.getDataDatasets()
     # myDatasets   = datasets.getMCDatasets()
 
-    
     # For-loop: All-Datasets
     for d in myDatasets:
         
         # Build ROOT histos from individual datasets
         h = datasets.getDataset(d.getName()).getDatasetRootHisto(hName)
-
-        # Set the cross-section
-        # d.getDataset("TT_ext3").setCrossSection(831.76)        
-
-        # Append to ROOT histos list
         rootHistos.append(h)
         
-
     # Normalise ROOT histograms
     for h in rootHistos:
         if kwargs.get("normalizeTo") == "One":
@@ -220,29 +214,11 @@ def GetCustomisedHistos(datasets, hName, **kwargs):
             h.normalizeByCrossSection()
         elif kwargs.get("normalizeTo") == "Luminosity":
             h.normalizeToLumi(intLumi)
+        elif kwargs.get("normalizeTo") == "":
+            pass
         else:
             isValidNorm(normalizeTo)
-    
-    # Apply styles
-    styleDict = {
-        "ChargedHiggs_HplusTB_HplusToTB_M_500": styles.signal500Style, 
-        "ChargedHiggs_HplusTB_HplusToTB_M_400": styles.signal400Style,
-        "ChargedHiggs_HplusTB_HplusToTB_M_300": styles.signal300Style,
-        "ChargedHiggs_HplusTB_HplusToTB_M_200": styles.signal200Style}
-
-    # For-loop: All root histos
-    for rh in rootHistos:
-        h = rh.getHistogram()
-        styleDict[rh.getName()].apply(h)
-
-        # Rebinning
-        if not isinstance(h, ROOT.TH2F):
-            h.Rebin(kwargs.get("rebin"))
-
-        # Append the histogram
-        histos.append(h)
-        
-    return rootHistos, histos
+    return rootHistos
         
 
 def GetSelfName():
@@ -287,7 +263,7 @@ def SavePlotterCanvas(p, saveName, savePath, **kwargs):
         if "html" in sName:
             sName = sName.replace("/afs/cern.ch/user/%s/" % (initial), "http://cmsdoc.cern.ch/~")
             sName = sName.replace("%s/public/html/" % (user), "%s/" % (user))
-            
+
         # Print save name
         print "\t", sName
 
@@ -323,42 +299,66 @@ def GetLumi(datasets):
     return intLumi
 
 
-def RemoveNegativeBins(hList, p):
-    for h in hList:        
-        for i in range(h.GetNbinsX()):
-            for j in range(h.GetNbinsY()):
-                if h.GetBinContent(i, j) < 0:
-                    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetBinContent(i, j, 0))
-    return
+def getUnitsFormatX(hName):
+
+    VarsToNDecimals = {
+        "MaxDiJetMass_dEta_Vs_dPhi"      : "%0.2f",
+        "MaxDiJetMass_dRap_Vs_dPhi"      : "%0.2f",
+        "BQuark1_BQuark2_dEta_Vs_dPhi"   : "%0.2f",
+        "BQuark1_BQuark3_dEta_Vs_dPhi"   : "%0.2f",
+        "BQuark1_BQuark4_dEta_Vs_dPhi"   : "%0.2f",
+        "BQuark2_BQuark3_dEta_Vs_dPhi"   : "%0.2f",
+        "BQuark2_BQuark4_dEta_Vs_dPhi"   : "%0.2f",
+        "BQuark3_BQuark4_dEta_Vs_dPhi"   : "%0.2f",
+        "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta" : "%0.2f",
+        "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi" : "%0.2f",
+        "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass" : "%0.2f",
+        "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass" : "%0.2f",
+    }
+    
+    return VarsToNDecimals[hName]
 
 
 def getSymbolY(normalizeTo):
     isValidNorm(normalizeTo)
-    NormToSymbols = {"One": "Arbitrary Units", "Luminosity": "Events", "": "Arbitrary Units", "XSection": "#sigma [pb]"}
+    NormToSymbols = {"One": "Arbitrary Units", "Luminosity": "Events", "": "Arbitrary Units", "XSection": "#sigma [pb]", "": ""}
+    
     return NormToSymbols[normalizeTo]
     
 
+def getTitleX(histo, **kwargs):
+    binWidthX = histo.getHistogram().GetXaxis().GetBinWidth(1)*kwargs.get("rebinX")
+    
+    if binWidthX < 1:
+        titleX    = histo.getHistogram().GetXaxis().GetTitle() + " / %0.1f" %  float(binWidthX)
+    elif binWidthX < 0.1:
+        titleX    = histo.getHistogram().GetXaxis().GetTitle() + " / %0.2f" %  float(binWidthX)
+    elif binWidthX < 0.01:
+        titleX    = histo.getHistogram().GetXaxis().GetTitle() + " / %0.3f" %  float(binWidthX)
+    else:
+        titleX    = histo.getHistogram().GetXaxis().GetTitle() + " / %0.0f" %  float(binWidthX)
+    return titleX
+
+
 def getTitleY(histo, **kwargs):
-    binWidthY = histo.getHistogram().GetXaxis().GetBinWidth(1)*kwargs.get("rebin")
+    binWidthY = histo.getHistogram().GetYaxis().GetBinWidth(1)*kwargs.get("rebinY")
 
     if binWidthY < 1:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.1f" %  float(binWidthY)
+        titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %0.1f" %  float(binWidthY)    
     elif binWidthY < 0.1:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.2f" %  float(binWidthY)
+        titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %0.2f" %  float(binWidthY)
     elif binWidthY < 0.01:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.3f" %  float(binWidthY)
+        titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %0.3f" %  float(binWidthY)
     else:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.0f" %  float(binWidthY)
+        titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %0.0f" %  float(binWidthY)
     return titleY
 
+
+def getTitleZ(histo, **kwargs):
+    titleZ    = getSymbolY(kwargs.get("normalizeTo"))
+    return titleZ
+
     
-def isValidVar(kinVar):
-    validVars = ["Pt", "Eta", "Phi", "dR"]
-    if kinVar not in validVars:
-        raise Exception("Invalid kinematics variable \"%s\". Please choose one of the following: %s" % (kinVar, "\"" + "\", \"".join(validVars) ) + "\"")
-    return
-
-
 def isValidNorm(normalizeTo):
     validNorms = ["One", "XSection", "Luminosity", ""]
 
@@ -390,3 +390,48 @@ if __name__ == "__main__":
 
     if not parseOpts.batchMode:
         raw_input("=== plotTemplate.py: Press any key to quit ROOT ...")
+
+
+#        args = {
+#            "xlabel": "x",
+#            "ylabel": "y",
+#            "zlabel": "z",
+#            "xlabelsize": None,
+#            "ylabelsize": None,
+#            "zhisto": None,
+#            "log": False,
+#            "ratio": False,
+#            "ratioYlabel": None, 
+#            "ratioInvert": False,
+#            "ratioType": None,
+#            #"ratioErrorOptions": 
+#            "ratioCreateLegend": True,
+#            #"ratioMoveLegend":
+#            #"opts":
+#            #"optsLog":
+#            #"opts2":
+#            #"canvasOpts":
+#            "backgroundColor": ROOT.kRed,
+#            "rebin": 1,
+#            "rebinX": 1,
+#            "rebinY": 1,
+#            "rebinToWidthX": None,
+#            "rebinToWidthY": None,
+#            "divideByBinWidth": None,
+#            "errorBarsX": True,
+#            "createLegend": None,
+#            #"moveLegend": 
+#            #"customizeBeforeFrame":
+#            #"customizeBeforeDraw":
+#            #"customizeBeforeSave":
+#            #"addLuminosityText":
+#            "stackMCHistograms": True,
+#            "addMCUncertainty": True,
+#            "cmsText": True,
+#            "cmsExtraText": True,
+#            "addCmsText": True,
+#            "cmsTextPosition": None,
+#            "cmsExtraTextPosition": None,
+#        }
+#        
+#        p.setDrawOptions(**args)
