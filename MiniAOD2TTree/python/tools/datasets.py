@@ -1,4 +1,4 @@
-lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-275783_13TeV_PromptReco_Collisions16_JSON.txt"
+lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-277148_13TeV_PromptReco_Collisions16_JSON.txt"
 
 #================================================================================================ 
 # Class Definition
@@ -24,6 +24,9 @@ datasetsTauData = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTau%2FRun2016*-PromptReco-v2%2FMINIAOD"
 datasetsTauData.append(Dataset('/Tau/Run2016B-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
 datasetsTauData.append(Dataset('/Tau/Run2016C-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsTauData.append(Dataset('/Tau/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsTauData.append(Dataset('/Tau/Run2016E-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsTauData.append(Dataset('/Tau/Run2016F-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das))
 
 
 datasetsJetHTData = []
@@ -36,6 +39,9 @@ datasetsMuonData = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FSingleMuon%2FRun2016*-PromptReco-v2%2FMINIAOD"
 datasetsMuonData.append(Dataset('/SingleMuon/Run2016B-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
 datasetsMuonData.append(Dataset('/SingleMuon/Run2016C-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsMuonData.append(Dataset('/SingleMuon/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsMuonData.append(Dataset('/SingleMuon/Run2016E-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsMuonData.append(Dataset('/SingleMuon/Run2016F-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das))
 
 
 datasetsTop = []
@@ -44,10 +50,12 @@ datasetsTop.append(Dataset('/TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16M
 
 
 datasetsDY = []
-
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FDY*%2FRunII*16MiniAODv2-*_reHLT_*%2FMINIAODSIM"
+datasetsDY.append(Dataset('/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 datasetsWJets = []
-
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWJets*%2FRunII*16MiniAODv2-*_reHLT_*%2FMINIAODSIM"
+datasetsWJets.append(Dataset('/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 datasetsDiboson = []
 
