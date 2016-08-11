@@ -28,12 +28,11 @@ import ROOT
 # Variable Definition
 #================================================================================================
 analysis    = "Kinematics"
-myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_09August2016/figures/signal/"
-#myPath      = None
+#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
+myPath      = None
 kinVar      = "Pt" # "Pt", "Eta", "Rap", "dR" "dEta" "dPhi" "dRap"
 kwargs      = {
     "referenceHisto" : "M_200",
-    "ignoreHistos"   : [], #["M_300", "M_400"],
     "saveFormats"    : [".pdf", ".png"],
     "normalizeTo"    : "One",
     "rebin"          : 1,
@@ -107,6 +106,7 @@ def main():
 
         # Customise frame
         p.setEnergy("13")
+        #p.getFrame().GetYaxis().SetTitle( getTitleY(histos[0], opts) )
         p.getFrame().GetYaxis().SetTitle( getTitleY(kwargs.get("normalizeTo"), kinVar, opts) )
         #p.getFrame().GetXaxis().SetTitle( getTitleX(kinVar, opts) )
         if kwargs.get("createRatio"):
@@ -143,15 +143,10 @@ def GetDatasetsFromDir(mcrab, analysis):
 def GetHistosForPlot(histos, rootHistos, **kwargs):
     refHisto     = None
     otherHistos  = []
-    ignoreHistos = []
 
     # For-loop: histos
     for rh in rootHistos:
         hName = rh.getName()
-        for iName in kwargs.get("ignoreHistos"):
-            if iName in hName:
-                ignoreHistos.append(hName)
-                break
 
     # For-loop: histos
     for rh, h in zip(rootHistos, histos):
@@ -159,8 +154,6 @@ def GetHistosForPlot(histos, rootHistos, **kwargs):
 
         if kwargs.get("referenceHisto") in rh.getName():
             refHisto = histograms.Histo(h, legName, "p", "P")
-        elif rh.getName() in ignoreHistos:
-            continue
         else:
             otherHistos.append( histograms.Histo(h, legName,  "F", "HIST,E,9") )
     return refHisto, otherHistos
@@ -382,18 +375,30 @@ def getSymbolX(kinVar):
 
 def getUnitsFormatX(kinVar):
 
-    isValidVar(kinVar)
+    isValidVar(kinVar)s
     VarsToNDecimals = {"Pt": "%0.0f", "Eta": "%0.2f", "Rap": "%0.2f", "Phi": "%0.3f", "dR": "%0.2f", "dEta": "%0.2f", "dRap": "%0.2f", "dPhi": "%0.2f"}
 
     return VarsToNDecimals[kinVar]
 
 
-def getTitleX(kinVar, opts):
-    unitsX = opts.get("xUnits")
-    if unitsX != "":
-        titleX = getSymbolX(kinVar) + " (%s)" % unitsX
-    else:
-        titleX = getSymbolX(kinVar)
+#def getTitleX(kinVar, opts):
+#    unitsX = opts.get("xUnits")
+#    if unitsX != "":
+#        titleX = getSymbolX(kinVar) + " (%s)" % unitsX
+#    else:
+#        titleX = getSymbolX(kinVar)
+#    return titleX
+
+
+def getTitleY(histo, **kwargs):
+    binWidthY = histo.getHistogram().GetYaxis().GetBinWidth(1)*kwargs.get("rebinY")
+    titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %s" %  str(binWidthY)
+    return titleY
+
+
+def getTitleX(histo, **kwargs):
+    binWidthX = histo.getHistogram().GetXaxis().GetBinWidth(1)*kwargs.get("rebinX")
+    titleX    = histo.getHistogram().GetXaxis().GetTitle() + " / %s" %  str(binWidthX)
     return titleX
 
 
@@ -404,13 +409,13 @@ def getSymbolY(normalizeTo):
     return NormToSymbols[normalizeTo]
     
 
-def getTitleY(normalizeTo, kinVar, opts):
-    #if opts.get("xUnits")!=None:
-     #   titleY = getSymbolY(normalizeTo) + " / %s %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX"), opts.get("xUnits") )
-    #else:
-    #    titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )
-    titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )    
-    return titleY
+#def getTitleY(normalizeTo, kinVar, opts):
+#    #if opts.get("xUnits")!=None:
+#     #   titleY = getSymbolY(normalizeTo) + " / %s %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX"), opts.get("xUnits") )
+#    #else:
+#    #    titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )
+#    titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )    
+#    return titleY
 
     
 def isValidVar(kinVar):

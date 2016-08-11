@@ -24,26 +24,24 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 import ROOT
 
+
 #================================================================================================
 # Variable Definition
 #================================================================================================
 analysis    = "Kinematics"
-myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_09August2016/figures/signal/"
-#myPath      = None
+#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
+myPath      = None
 kwargs      = {
     "referenceHisto" : "M_200",
-    "ignoreHistos"   : ["M_300", "M_400"],
     "saveFormats"    : [".png", ".pdf"],
     "normalizeTo"    : "One",
     "rebin"          : 1,
     "createRatio"    : False,
-    "removeNegatives": False,
-    "removeErrorBars": False
 }
 
 hNames = [
     "genMET_Et",
-    "genMET_Phi",
+    #"genMET_Phi",
     "genHT_GenJets",
     "genHT_GenParticles",
     "SelGenJet_Multiplicity",
@@ -60,13 +58,26 @@ hNames = [
     "BQuarkPair_dRMin_dPhi",
     "BQuarkPair_dRMin_dR",
     "BQuarkPair_dRMin_Mass",
+    "BQuarkPair_dRMin_jet1_dR",
+    "BQuarkPair_dRMin_jet1_dEta",
+    "BQuarkPair_dRMin_jet1_dPhi",
+    "BQuarkPair_dRMin_jet2_dR",
+    "BQuarkPair_dRMin_jet2_dEta",
+    "BQuarkPair_dRMin_jet2_dPhi",
     "Htb_tbW_bqq_Pt",
     "Htb_tbW_bqq_Rap",
     "Htb_tbW_bqq_Mass",
+    "Htb_tbW_bqq_dRMax_dR",
+    "Htb_tbW_bqq_dRMax_dRap",
+    "Htb_tbW_bqq_dRMax_dPhi",
     "gtt_tbW_bqq_Pt",
     "gtt_tbW_bqq_Rap",
     "gtt_tbW_bqq_Mass",
+    "gtt_tbW_bqq_dRMax_dR",
+    "gtt_tbW_bqq_dRMax_dRap",
+    "gtt_tbW_bqq_dRMax_dPhi",
 ]
+
 
 #================================================================================================
 # Main
@@ -81,27 +92,16 @@ def main():
     
     # Get all datasets from the mcrab dir
     datasets  = GetDatasetsFromDir(parseOpts.mcrab, analysis)
+
     # Determine Integrated Luminosity (If Data datasets present)
-    intLumi = 0.0
-    if len(datasets.getDataDatasets()) != 0:
-        # Load Luminosity JSON file
-        datasets.loadLuminosities(fname="lumi.json")
-
-        # Load RUN range
-        # runRange = datasets.loadRunRange(fname="runrange.json")
-
-        # Calculate Integrated Luminosity
-        intLumi = GetLumi(datasets)
+    intLumi = GetLumi(datasets)
     
                   
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
-        plotName = hName
         if savePath == None:
             savePath = GetSavePath(analysis)
-        else:
-            pass
-        saveName = os.path.join(savePath, plotName)
+        saveName = os.path.join(savePath, hName)
                 
         # Get customised histos
         rootHistos, histos    = GetCustomisedHistos(datasets, hName, **kwargs)
@@ -113,7 +113,7 @@ def main():
         # Create a frame
         opts      = {"ymin": 0.0, "binWidthX": histos[0].GetXaxis().GetBinWidth(0)}#, "xUnits": getUnitsX(hName)}
         ratioOpts = {"ymin": 0.0, "ymax": 2.0 , "binWidthX": histos[0].GetXaxis().GetBinWidth(0)}
-        fileName = os.path.join(savePath, plotName)
+        fileName = os.path.join(savePath, hName)
         p.createFrame(fileName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
 
         # Customise Legend
@@ -130,7 +130,8 @@ def main():
 
         # Customise frame
         p.setEnergy("13")
-        p.getFrame().GetYaxis().SetTitle( getTitleY(kwargs.get("normalizeTo"), hName, opts) )
+        p.getFrame().GetYaxis().SetTitle( getTitleY(rootHistos[0], **kwargs) )
+        #p.getFrame().GetYaxis().SetTitle( getTitleY(kwargs.get("normalizeTo"), hName, opts) )
         if kwargs.get("createRatio"):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             p.getFrame2().GetYaxis().SetTitleOffset(1.6)
@@ -150,10 +151,11 @@ def main():
 #================================================================================================
 def GetDatasetsFromDir(mcrab, analysis):
 
-    datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
+    #datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
     # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_")
     # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
-
+    datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_180|M_220|M_250")
+    
     # Inform user of datasets retrieved
     Print("Got following datasets from multicrab dir \"%s\"" % mcrab)
     for d in datasets.getAllDatasets():
@@ -164,15 +166,10 @@ def GetDatasetsFromDir(mcrab, analysis):
 def GetHistosForPlot(histos, rootHistos, **kwargs):
     refHisto     = None
     otherHistos  = []
-    ignoreHistos = []
 
     # For-loop: histos
     for rh in rootHistos:
         hName = rh.getName()
-        for iName in kwargs.get("ignoreHistos"):
-            if iName in hName:
-                ignoreHistos.append(hName)
-                break
 
     # For-loop: histos
     for rh, h in zip(rootHistos, histos):
@@ -180,8 +177,6 @@ def GetHistosForPlot(histos, rootHistos, **kwargs):
         
         if kwargs.get("referenceHisto") in rh.getName():
             refHisto = histograms.Histo(h, legName, "p", "P")
-        elif rh.getName() in ignoreHistos:
-            continue
         else:
             otherHistos.append( histograms.Histo(h, legName,  "F", "HIST,E,9") )
     return refHisto, otherHistos
@@ -237,14 +232,6 @@ def GetCustomisedHistos(datasets, hName, **kwargs):
         # Rebinning
         if not isinstance(h, ROOT.TH2F):
             h.Rebin(kwargs.get("rebin"))
-
-        # Remove negative histo entries
-        if kwargs.get("removeNegatives"):
-            removeNegatives(h)
-
-        # Remove error bars 
-        if kwargs.get("removeErrorBars"):
-            removeErrorBars(h)
 
         # Append the histogram
         histos.append(h)
@@ -312,6 +299,16 @@ def GetLumi(datasets):
     '''
     Print("Determining integrated luminosity from data-datasets")
 
+    intLumi = None
+    if len(datasets.getDataDatasets()) == 0:
+        return intLumi
+
+    # Load Luminosity JSON file
+    datasets.loadLuminosities(fname="lumi.json")
+
+    # Load RUN range
+    # runRange = datasets.loadRunRange(fname="runrange.json")
+
     # For-loop: All Data datasets
     for d in datasets.getDataDatasets():
         print "\tluminosity", d.getName(), d.getLuminosity()
@@ -369,16 +366,20 @@ def getUnitsFormatX(hName):
 def getSymbolY(normalizeTo):
     isValidNorm(normalizeTo)
     NormToSymbols = {"One": "Arbitrary Units", "Luminosity": "Events", "": "Arbitrary Units", "XSection": "#sigma [pb]"}
-    
     return NormToSymbols[normalizeTo]
     
 
-def getTitleY(normalizeTo, kinVar, opts):    
-    if opts.get("xUnits")!=None:
-        titleY = getSymbolY(normalizeTo) + " / %s %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX"), opts.get("xUnits") )
-    else:
-        titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )
+def getTitleY(histo, **kwargs):
+    binWidthY = histo.getHistogram().GetYaxis().GetBinWidth(1)*kwargs.get("rebin")
+    titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %s" %  str(binWidthY)
     return titleY
+
+#def getTitleY(normalizeTo, kinVar, opts):    
+#    if opts.get("xUnits")!=None:
+#        titleY = getSymbolY(normalizeTo) + " / %s %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX"), opts.get("xUnits") )
+#    else:
+#        titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )
+#    return titleY
 
     
 def isValidVar(kinVar):
