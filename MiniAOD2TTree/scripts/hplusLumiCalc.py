@@ -172,7 +172,7 @@ def main(opts, args):
         # PileUp
         fOUT = os.path.join(task, "results", "PileUp.root")
 	minBiasXsec = 80000
-        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%i","--maxPileupBin","50","--numPileupBins","50",fOUT]%minBiasXsec
+        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT]
         pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         puoutput = pu.communicate()[0]
         puret = pu.returncode
@@ -199,11 +199,29 @@ def main(opts, args):
 	puUncert = 0.05
 
 	minBiasXsec = minBiasXsec*(1+puUncert)
-	pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%i","--maxPileupBin","50","--numPileupBins","50",fOUT,"--pileupHistName","pileup_up"]%minBiasXsec
+	pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT.replace(".root","_up.root"),"--pileupHistName","pileup_up"]
+        pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	puoutput = pu.communicate()[0]
 
         minBiasXsec = minBiasXsec*(1-puUncert)
-        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%i","--maxPileupBin","50","--numPileupBins","50",fOUT,"--pileupHistName","pileup_down"]%minBiasXsec
+        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT.replace(".root","_down.root"),"--pileupHistName","pileup_down"]
+        pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        puoutput = pu.communicate()[0]
 
+	fPU = ROOT.TFile.Open(fOUT,"UPDATE")
+	fPUup = ROOT.TFile.Open(fOUT.replace(".root","_up.root"),"r")
+	h_pu = fPUup.Get("pileup_up")
+	fPU.cd()
+	h_pu.Write()
+	fPUup.Close()
+
+        fPUdown = ROOT.TFile.Open(fOUT.replace(".root","_down.root"),"r")                                                                                                                                                                                               
+        h_pu = fPUdown.Get("pileup_down")                                                                                                                                                                                                                           
+        fPU.cd()                                                                                                                                                                                                                                                
+        h_pu.Write()                                                                                                                                                                                                                                            
+        fPUdown.Close()
+
+	fPU.Close()
 
     if len(data) > 0:
         f = open(opts.output, "wb")
