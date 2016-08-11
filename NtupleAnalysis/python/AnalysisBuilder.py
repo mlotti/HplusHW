@@ -20,10 +20,15 @@ class AnalysisConfig:
 	    if key == "systematics":
                 self._config.histogramAmbientLevel = "Systematics"
                 # Energy scales
-		if value.startswith("tauES"):
-		    self._config.TauSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up").replace("tauES","TES")
+		if value.startswith("TauES"):
+		    self._config.TauSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up").replace("TauES","TES")
 		elif value.startswith("JES"):
 		    self._config.JetSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up")
+		elif value.startswith("JER"):
+		    self._config.JetSelection.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up")
+		elif value.startswith("UES"):
+		    self._config.METSelection.systematicVariation = "_"+value.replace("Plus_x","down_x").replace("Minus_x","up_x").replace("UES","MET_Type1_UnclusteredEn") #FIXME: should also _y be taken into account?
+		    self._config.METSelection.systematicVariation = "_"+value.replace("Plus_y","down_y").replace("Minus_y","up_y").replace("UES","MET_Type1_UnclusteredEn") #FIXME: should also _y be taken into account?
 		# Fake tau 
 		elif value.startswith("FakeTau"):
                     etaRegion = "full"
@@ -142,7 +147,7 @@ class AnalysisBuilder:
               # Tau ID variation systematics
               items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet"])
               # Energy scales and JER systematics
-              items.extend(["tauES", "JES"]), # "JER", "UES"])
+              items.extend(["TauES", "JES", "JER", "UES"])
               # b quark systematics
               items.extend(["BTagSF", "BMistagSF"])
               # top quark systematics
