@@ -171,7 +171,8 @@ def main(opts, args):
 
         # PileUp
         fOUT = os.path.join(task, "results", "PileUp.root")
-        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","80000","--maxPileupBin","50","--numPileupBins","50",fOUT]
+	minBiasXsec = 80000
+        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%i","--maxPileupBin","50","--numPileupBins","50",fOUT]%minBiasXsec
         pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         puoutput = pu.communicate()[0]
         puret = pu.returncode
@@ -192,6 +193,17 @@ def main(opts, args):
             f = open(opts.output, "wb")
             json.dump(data, f, sort_keys=True, indent=2)
             f.close()
+
+        # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
+        # change the --minBiasXsec value in the pileupCalc.py command by +/-5% around the chosen central value.
+	puUncert = 0.05
+
+	minBiasXsec = minBiasXsec*(1+puUncert)
+	pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%i","--maxPileupBin","50","--numPileupBins","50",fOUT,"--pileupHistName","pileup_up"]%minBiasXsec
+
+        minBiasXsec = minBiasXsec*(1-puUncert)
+        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%i","--maxPileupBin","50","--numPileupBins","50",fOUT,"--pileupHistName","pileup_down"]%minBiasXsec
+
 
     if len(data) > 0:
         f = open(opts.output, "wb")
