@@ -28,18 +28,15 @@ import ROOT
 # Variable Definition
 #================================================================================================
 analysis    = "Kinematics"
-myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_09August2016/figures/signal/"
-#myPath      = None
-kinVar      = "Pt" # "Pt", "Eta", "Rap", "dR" "dEta" "dPhi" "dRap"
+#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
+myPath      = None
+kinVar      = "dPhi" # "Pt", "Eta", "Rap", "dR" "dEta" "dPhi" "dRap"
 kwargs      = {
     "referenceHisto" : "M_200",
-    "ignoreHistos"   : [], #["M_300", "M_400"],
-    "saveFormats"    : [".pdf", ".png"],
+    "saveFormats"    : [".png"], #, ".pdf"],
     "normalizeTo"    : "One",
     "rebin"          : 1,
     "createRatio"    : False,
-    "removeNegatives": False,
-    "removeErrorBars": False
 }
 
 
@@ -87,35 +84,40 @@ def main():
         # Create a comparison plot
         p = plots.ComparisonManyPlot(refHisto, otherHistos)
         
+
+        # Remove negative contributions (BEFORE rebinning)
+        RemoveNegativeBins(histos, p)
+
+
         # Create a frame
-        opts      = {"ymin": 0.0, "binWidthX": histos[0].GetXaxis().GetBinWidth(0)}#, "xUnits": getUnitsX(kinVar)}
-        ratioOpts = {"ymin": 0.0, "ymax": 2.0 , "binWidthX": histos[0].GetXaxis().GetBinWidth(0), "xUnits": getUnitsX(kinVar)}
+        opts      = {"ymin": 0.0, "ymaxfactor": 1.0}
+        ratioOpts = {"ymin": 0.0, "ymax": 2.0}
         fileName = os.path.join(savePath, plotName)
         p.createFrame(fileName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
 
+        
         # Customise Legend
         moveLegend = {"dx": -0.1, "dy": +0.0, "dh": -0.1}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-
-        # Customise text
-        if intLumi > 0.0:
-            histograms.addStandardTexts(lumi=intLumi)
-        else:
-            histograms.addStandardTexts()
-        # histograms.addText(0.4, 0.9, "Alexandros Attikis", 17)
-        # histograms.addText(0.4, 0.11, "Runs " + datasets.loadRunRange(), 17)
+        p.removeLegend()
+        
 
         # Customise frame
-        p.setEnergy("13")
-        p.getFrame().GetYaxis().SetTitle( getTitleY(kwargs.get("normalizeTo"), kinVar, opts) )
-        #p.getFrame().GetXaxis().SetTitle( getTitleX(kinVar, opts) )
+        p.getFrame().GetYaxis().SetTitle( getTitleY(rootHistos[0], **kwargs) )
+        #p.setEnergy("13")
         if kwargs.get("createRatio"):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
         #  Draw plots
         p.draw()
-    
+
+        # Customise text
+        histograms.addStandardTexts(lumi=intLumi)
+        # histograms.addText(0.4, 0.9, "Alexandros Attikis", 17)
+        # histograms.addText(0.4, 0.11, "Runs " + datasets.loadRunRange(), 17)
+
+        
         # Save canvas under custom dir
         if counter == 0:
             Print("Saving plots in %s format(s)" % (len(kwargs.get("saveFormats"))) )
@@ -128,10 +130,10 @@ def main():
 #================================================================================================
 def GetDatasetsFromDir(mcrab, analysis):
 
-    # datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
+    datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
     # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_")
     # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
-    datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_180|M_220|M_250")
+    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_180|M_220|M_250")
 
     # Inform user of datasets retrieved
     Print("Got following datasets from multicrab dir \"%s\"" % mcrab)
@@ -143,15 +145,10 @@ def GetDatasetsFromDir(mcrab, analysis):
 def GetHistosForPlot(histos, rootHistos, **kwargs):
     refHisto     = None
     otherHistos  = []
-    ignoreHistos = []
 
     # For-loop: histos
     for rh in rootHistos:
         hName = rh.getName()
-        for iName in kwargs.get("ignoreHistos"):
-            if iName in hName:
-                ignoreHistos.append(hName)
-                break
 
     # For-loop: histos
     for rh, h in zip(rootHistos, histos):
@@ -159,8 +156,6 @@ def GetHistosForPlot(histos, rootHistos, **kwargs):
 
         if kwargs.get("referenceHisto") in rh.getName():
             refHisto = histograms.Histo(h, legName, "p", "P")
-        elif rh.getName() in ignoreHistos:
-            continue
         else:
             otherHistos.append( histograms.Histo(h, legName,  "F", "HIST,E,9") )
     return refHisto, otherHistos
@@ -284,9 +279,7 @@ def SavePlotterCanvas(p, saveName, savePath, **kwargs):
     return
 
         
-def GetLumi(datasets):
-    '''
-    '''
+def GetLumi(datasets):       
     Print("Determining integrated luminosity from data-datasets")
 
     # For-loop: All Data datasets
@@ -297,16 +290,14 @@ def GetLumi(datasets):
     return intLumi
 
 
-def removeNegatives(histo):
-    for bin in range(histo.GetNbinsX()):
-        if histo.GetBinContent(bin) < 0:
-            histo.SetBinContent(bin, 0.0)
+def RemoveNegativeBins(hList, p):
+    for h in hList:        
+        for i in range(h.GetNbinsX()):
+            for j in range(h.GetNbinsY()):
+                if h.GetBinContent(i, j) < 0:
+                    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetBinContent(i, j, 0))
     return
 
-def removeErrorBars(histo):
-    for bin in range(histo.GetNbinsX()):
-        histo.SetBinError(bin, 0.0)
-    return
 
 def getHistoNames(kinVar):
 
@@ -328,24 +319,24 @@ def getHistoNames(kinVar):
         hNames.append("tbH_tbW_BQuark_"        + kinVar) # Pt Eta Phi Rap
         hNames.append("Htb_tbW_Wqq_Quark_"     + kinVar) # Pt Eta Phi Rap
         hNames.append("Htb_tbW_Wqq_AntiQuark_" + kinVar) # Pt Eta Phi Rap
-        #
-        hNames.append("BQuark1_" + kinVar) # Pt Eta Rap Phi
-        hNames.append("BQuark2_" + kinVar) # Pt Eta Rap Phi
-        hNames.append("BQuark3_" + kinVar) # Pt Eta Rap Phi
-        hNames.append("BQuark4_" + kinVar) # Pt Eta Rap Phi
-        hNames.append("GenJet1_" + kinVar) # Pt Eta Rap
-        hNames.append("GenJet2_" + kinVar) # Pt Eta Rap
-        hNames.append("GenJet3_" + kinVar) # Pt Eta Rap
-        hNames.append("GenJet4_" + kinVar) # Pt Eta Rap
-        hNames.append("GenJet5_" + kinVar) # Pt Eta Rap  #new
-        hNames.append("GenJet6_" + kinVar) # Pt Eta Rap  #new
-        #
-        hNames.append("AL3CJetsFromHPlus_GenJet1_" + kinVar) # Pt Eta Rap #new
-        hNames.append("AL3CJetsFromHPlus_GenJet2_" + kinVar) # Pt Eta Rap #new
-        hNames.append("AL3CJetsFromHPlus_GenJet3_" + kinVar) # Pt Eta Rap #new
-        hNames.append("AL3CJetsFromHPlus_GenJet4_" + kinVar) # Pt Eta Rap #new
-        hNames.append("AL3CJetsFromHPlus_GenJet5_" + kinVar) # Pt Eta Rap #new
-        hNames.append("AL3CJetsFromHPlus_GenJet6_" + kinVar) # Pt Eta Rap #new
+        if kinVar not in ["Rap"]:
+            hNames.append("BQuark1_" + kinVar) # Pt Eta 
+            hNames.append("BQuark2_" + kinVar) # Pt Eta 
+            hNames.append("BQuark3_" + kinVar) # Pt Eta 
+            hNames.append("BQuark4_" + kinVar) # Pt Eta 
+            hNames.append("GenJet1_" + kinVar) # Pt Eta 
+            hNames.append("GenJet2_" + kinVar) # Pt Eta 
+            hNames.append("GenJet3_" + kinVar) # Pt Eta 
+            hNames.append("GenJet4_" + kinVar) # Pt Eta 
+            hNames.append("GenJet5_" + kinVar) # Pt Eta 
+            hNames.append("GenJet6_" + kinVar) # Pt Eta 
+            #
+            hNames.append("AL3CJetsFromHPlus_GenJet1_" + kinVar) # Pt Eta
+            hNames.append("AL3CJetsFromHPlus_GenJet2_" + kinVar) # Pt Eta
+            hNames.append("AL3CJetsFromHPlus_GenJet3_" + kinVar) # Pt Eta
+            hNames.append("AL3CJetsFromHPlus_GenJet4_" + kinVar) # Pt Eta
+            hNames.append("AL3CJetsFromHPlus_GenJet5_" + kinVar) # Pt Eta
+            hNames.append("AL3CJetsFromHPlus_GenJet6_" + kinVar) # Pt Eta
     else:
         hNames.append("Htb_TQuark_Htb_BQuark_"                + kinVar) #dR dEta dRap dPhi 
         hNames.append("Htb_TQuark_gtt_TQuark_"                + kinVar) #dR dEta dRap dPhi 
@@ -359,42 +350,21 @@ def getHistoNames(kinVar):
         hNames.append("gtt_TQuark_gtt_tbW_BQuark_"            + kinVar) #dR dEta dRap dPhi 
         hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_"     + kinVar) #dR dEta dRap dPhi 
         hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_" + kinVar) #dR dEta dRap dPhi 
-
-        
     return hNames
 
 
-def getUnitsX(kinVar):
+def getTitleY(histo, **kwargs):
+    binWidthY = histo.getHistogram().GetXaxis().GetBinWidth(1)*kwargs.get("rebin")
 
-    isValidVar(kinVar)    
-    VarsToUnits = {"Pt": "GeV/c", "Eta": "", "Rap": "", "Phi": "rads", "dR": "", "dEta": "", "dRap": "", "dPhi": "rads"}
-
-    return VarsToUnits[kinVar]
-
-
-def getSymbolX(kinVar):
-
-    isValidVar(kinVar)
-    VarsToSymbols = {"Pt": "p_{T}", "Eta": "#eta", "Rap": "#omega", "Phi": "#phi", "dR": "#DeltaR", "dEta": "#Delta#eta", "dRap": "#Delta#omega", "dPhi": "#Delta#phi"}
-
-    return VarsToSymbols[kinVar]
-
-
-def getUnitsFormatX(kinVar):
-
-    isValidVar(kinVar)
-    VarsToNDecimals = {"Pt": "%0.0f", "Eta": "%0.2f", "Rap": "%0.2f", "Phi": "%0.3f", "dR": "%0.2f", "dEta": "%0.2f", "dRap": "%0.2f", "dPhi": "%0.2f"}
-
-    return VarsToNDecimals[kinVar]
-
-
-def getTitleX(kinVar, opts):
-    unitsX = opts.get("xUnits")
-    if unitsX != "":
-        titleX = getSymbolX(kinVar) + " (%s)" % unitsX
+    if binWidthY < 1:
+        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.1f" %  float(binWidthY)
+    elif binWidthY < 0.1:
+        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.2f" %  float(binWidthY)
+    elif binWidthY < 0.01:
+        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.3f" %  float(binWidthY)
     else:
-        titleX = getSymbolX(kinVar)
-    return titleX
+        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.0f" %  float(binWidthY)
+    return titleY
 
 
 def getSymbolY(normalizeTo):
@@ -403,15 +373,6 @@ def getSymbolY(normalizeTo):
     
     return NormToSymbols[normalizeTo]
     
-
-def getTitleY(normalizeTo, kinVar, opts):
-    #if opts.get("xUnits")!=None:
-     #   titleY = getSymbolY(normalizeTo) + " / %s %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX"), opts.get("xUnits") )
-    #else:
-    #    titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )
-    titleY = getSymbolY(normalizeTo) + " / %s" % ( getUnitsFormatX(kinVar) % opts.get("binWidthX") )    
-    return titleY
-
     
 def isValidVar(kinVar):
     validVars = ["Pt", "Eta", "Rap", "dR", "dEta", "dRap", "dPhi"]

@@ -27,22 +27,21 @@ import ROOT
 #================================================================================================
 # Variable Definition
 #================================================================================================
+massPoint   = "200"
 analysis    = "Kinematics"
-#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/signal/"
+#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
 myPath      = None
 kwargs      = {
     "saveFormats" : [".png"],
     "rebinX"      : 1,
     "rebinY"      : 1,
     "normalizeTo" : "One",
-    "binWidthX"   : 0.10, #dev
-    "binWidthY"   : 0.20, #dev
-    "zMin"        : 1e-5,
+    "zMin"        : 1e-4,
     "zMax"        : 0.5e-1,
 }
 
 hNames = [
-    # "MaxDiJetMass_dEta_Vs_dPhi",
+    #"MaxDiJetMass_dEta_Vs_dPhi",
     "MaxDiJetMass_dRap_Vs_dPhi",
     "BQuark1_BQuark2_dEta_Vs_dPhi",
     "BQuark1_BQuark3_dEta_Vs_dPhi",
@@ -50,12 +49,19 @@ hNames = [
     "BQuark2_BQuark3_dEta_Vs_dPhi",
     "BQuark2_BQuark4_dEta_Vs_dPhi",
     "BQuark3_BQuark4_dEta_Vs_dPhi",
+    "BQuarkPair_dRMin_Eta1_Vs_Eta2",
+    "BQuarkPair_dRMin_Phi1_Vs_Phi2",
+    "BQuarkPair_dRMin_Pt1_Vs_Pt2",
+    "BQuarkPair_dRMin_dEta_Vs_dPhi",
+    "Htb_tbW_bqq_dRMax_dRap_Vs_dPhi",
+    "gtt_tbW_bqq_dRMax_dRap_Vs_dPhi",
     "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta",
     "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi",
-
     "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass",
     "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass",
 ]
+
+
 
 #================================================================================================
 # Main
@@ -99,7 +105,7 @@ def main():
         p = plots.PlotBase(rootHistos, len(kwargs.get("saveFormats")))
         
 
-        # Remove negative contributions (BEFORE rebinnin)
+        # Remove negative contributions (BEFORE rebinning)
         RemoveNegativeBins(rootHistos[0].getHistogram(), p)
 
 
@@ -132,7 +138,7 @@ def main():
         
         # Add cut line/box
         _kwargs = { "lessThan": True}
-        p.addCutBoxAndLine(cutValue=5, fillColor=ROOT.kBlue+2, box=False, line=True, **_kwargs)
+        #p.addCutBoxAndLine(cutValue=5, fillColor=ROOT.kBlue+2, box=False, line=True, **_kwargs)
 
         
         # Customise Legend
@@ -174,9 +180,10 @@ def RemoveNegativeBins(h, p):
 def GetDatasetsFromDir(mcrab, analysis):
 
     # datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
-    datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_500")
+    datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_%s" % massPoint)
     # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
-
+    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_180|M_220|M_250")
+    
     # Inform user of datasets retrieved
     Print("Got following datasets from multicrab dir \"%s\"" % mcrab)
     for d in datasets.getAllDatasets():
@@ -321,14 +328,31 @@ def getSymbolY(normalizeTo):
 
 def getTitleX(histo, **kwargs):
     binWidthX = histo.getHistogram().GetXaxis().GetBinWidth(1)*kwargs.get("rebinX")
-    titleX    = histo.getHistogram().GetXaxis().GetTitle() + " / %s" %  str(binWidthX)
+    
+    if binWidthX < 1:
+        titleX    = histo.getHistogram().GetXaxis().GetTitle() + " / %0.1f" %  float(binWidthX)
+    elif binWidthX < 0.1:
+        titleX    = histo.getHistogram().GetXaxis().GetTitle() + " / %0.2f" %  float(binWidthX)
+    elif binWidthX < 0.01:
+        titleX    = histo.getHistogram().GetXaxis().GetTitle() + " / %0.3f" %  float(binWidthX)
+    else:
+        titleX    = histo.getHistogram().GetXaxis().GetTitle() + " / %0.0f" %  float(binWidthX)
     return titleX
 
 
 def getTitleY(histo, **kwargs):
     binWidthY = histo.getHistogram().GetYaxis().GetBinWidth(1)*kwargs.get("rebinY")
-    titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %s" %  str(binWidthY)
+
+    if binWidthY < 1:
+        titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %0.1f" %  float(binWidthY)    
+    elif binWidthY < 0.1:
+        titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %0.2f" %  float(binWidthY)
+    elif binWidthY < 0.01:
+        titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %0.3f" %  float(binWidthY)
+    else:
+        titleY    = histo.getHistogram().GetYaxis().GetTitle() + " / %0.0f" %  float(binWidthY)
     return titleY
+
 
 def getTitleZ(histo, **kwargs):
     titleZ    = getSymbolY(kwargs.get("normalizeTo"))
