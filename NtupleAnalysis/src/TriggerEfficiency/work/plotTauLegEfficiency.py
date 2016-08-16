@@ -148,8 +148,8 @@ def analyze(analysis):
     paths = [sys.argv[1]]
 
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125")
-    datasetsDY = None
-#    datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL")
+#    datasetsDY = None
+    datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="GluGluHToTauTau_M125|TTJets")
     datasetsH125 = None
 #    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125",emptyDatasetsAsNone=True)
@@ -497,7 +497,8 @@ def main():
 #    analyze("TauLeg_2015C")
 #    analyze("TauLeg_2015D")
 #    analyze("TauLeg_2015CD")
-    analyze("TauLeg_2016B")
+#    analyze("TauLeg_2016B")
+    analyze("TauLeg_2016ICHEP")
 
 if __name__ == "__main__":
     main()

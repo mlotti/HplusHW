@@ -59,6 +59,11 @@ def runRange(era):
         runmin = 271036
         runmax = 274240
 
+    if era == "2016ICHEP":
+        lumi = 12900
+        runmin = 271036
+        runmax = 276811
+        
     if lumi == 0:
         print "Unknown era",era,"exiting.."
         sys.exit()
@@ -125,7 +130,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
                                     "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1",
                                     "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_JetIdCleaned_vx",
                                     "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_vx"]
-        if era == "2016B":
+        if era == "2016B" or era == "2016ICHEP":
             a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_vx"]
             a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_vx"]
 
@@ -137,7 +142,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
     else:
         a.Trigger.triggerOR = ["HLT_LooseIsoPFTau35_Trk20_Prong1_v6"]
         a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau35_Trk20_Prong1_MET70_v6"]
-        if era == "2015C" or era == "2015D" or era == "2015CD" or era == "2016B":
+        if era == "2015C" or era == "2015D" or era == "2015CD" or era == "2016B" or era == "2016ICHEP":
             a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1",
                                    "HLT_LooseIsoPFTau50_Trk30_eta2p1_vx"]
             a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1",
@@ -158,8 +163,9 @@ def addAnalyzer(era,onlineSelection):
 #addAnalyzer("2012D")
 #addAnalyzer("2012ABCD_CaloMET")
 #addAnalyzer("2015D","MET80")
-addAnalyzer("2016B","MET80")
-addAnalyzer("2016B_CaloMET","MET80")
+#addAnalyzer("2016B","MET80")
+#addAnalyzer("2016B_CaloMET","MET80")
+addAnalyzer("2016ICHEP","MET90")
 #addAnalyzer("2015A","MET120")
 #addAnalyzer("2015A_CaloMET","MET120")
 
