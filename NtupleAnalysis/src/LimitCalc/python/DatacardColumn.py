@@ -557,7 +557,7 @@ class DatacardColumn():
                         # Obtain overall purity for QCD
                         myAverageCtrlPlotPurity = None
                         hCtrlPlotPurity = None
-                        if self.typeIsQCDinverted() and False: #FIXME switch on when purity exists
+                        if self.typeIsQCDinverted(): #and False: #FIXME switch on when purity exists
                             myDsetHisto = c.extractQCDPurityHistogram(self, dsetMgr)
                             hCtrlPlotPurity = aux.Clone(myDsetHisto.getHistogram())
                             myAverageCtrlPlotPurity = c.extractQCDPurityAsValue(myRateHistograms[0], hCtrlPlotPurity)

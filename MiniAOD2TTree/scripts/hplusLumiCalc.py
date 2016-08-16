@@ -171,7 +171,8 @@ def main(opts, args):
 
         # PileUp
         fOUT = os.path.join(task, "results", "PileUp.root")
-        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","80000","--maxPileupBin","50","--numPileupBins","50",fOUT]
+#        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","80000","--maxPileupBin","50","--numPileupBins","50",fOUT] # 2015 xsec 80000
+        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","63000","--maxPileupBin","50","--numPileupBins","50",fOUT] # 2016 xsec 63000
         pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         puoutput = pu.communicate()[0]
         puret = pu.returncode

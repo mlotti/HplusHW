@@ -21,9 +21,10 @@ allSelections.CommonPlots.histogramSplitting = [
     #PSet(label="tauPt", binLowEdges=[60.0, 70.0, 80.0, 100.0], useAbsoluteValues=False),
   ]
 #===== Selection customisations
-allSelections.TauSelection.prongs = 3
+allSelections.TauSelection.prongs = 13
 allSelections.TauSelection.isolationDiscr = "byMediumIsolationMVA3newDMwLT" ## default = byMediumIsolationMVA3newDMwLT   
-allSelections.METSelection.METCutValue = 100.0
+#allSelections.TauSelection.tauPtCut = 50.0 #uncomment for light H+ (default 60.0 for heavy H+)
+#allSelections.METSelection.METCutValue = 80.0 #uncomment for light H+ (default 100.0 for heavy H+)
 allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
@@ -49,7 +50,7 @@ builder = AnalysisBuilder("SignalAnalysis",
                           searchModes,
                           #### Options ####
                           usePUreweighting=True,
-                          doSystematicVariations=False
+                          doSystematicVariations=True
                           )
 #builder.addVariation("METSelection.METCutValue", [100,120,140])
 #builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])

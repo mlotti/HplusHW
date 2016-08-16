@@ -67,6 +67,10 @@ def main(argv, dsetMgr, moduleInfoString):
 
     # Read integrated luminosities of data dsetMgr from lumi.json
     dsetMgr.loadLuminosities()
+    
+    print "\Datasets list (initial):\n"
+    print dsetMgr.getMCDatasetNames()
+    print "\n"
 
     # Include only 120 mass bin of HW and HH dsetMgr
     dsetMgr.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, dsetMgr.getAllDatasetNames()))
@@ -75,6 +79,10 @@ def main(argv, dsetMgr, moduleInfoString):
     dsetMgr.remove(filter(lambda name: "DY3JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "DY4JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "WJetsToLNu_HT" in name, dsetMgr.getAllDatasetNames()))
+
+    print "\Datasets after filter removals:\n"
+    print dsetMgr.getMCDatasetNames()
+    print "\n"
           
         # Default merging nad ordering of data and MC dsetMgr
     # All data dsetMgr to "Data"
@@ -82,6 +90,10 @@ def main(argv, dsetMgr, moduleInfoString):
     # All single top dsetMgr to "SingleTop"
     # WW, WZ, ZZ to "Diboson"
     plots.mergeRenameReorderForDataMC(dsetMgr)
+
+    print "\Datasets after mergeRenameReorderForDataMC:\n"
+    print dsetMgr.getMCDatasetNames()
+    print "\n"
 
     # Set BR(t->H) to 0.05, keep BR(H->tau) in 1
     xsect.setHplusCrossSectionsToBR(dsetMgr, br_tH=0.05, br_Htaunu=1)
@@ -98,16 +110,22 @@ def main(argv, dsetMgr, moduleInfoString):
 
     #myMergeList.append("WJetsHT")
     myMergeList.append("WJets")
-    ####    myMergeList.append("DYJetsToLLHT")
+    myMergeList.append("DYJetsToLL")
     myMergeList.append("SingleTop")
 
     if "Diboson" in dsetMgr.getMCDatasetNames():
         myMergeList.append("Diboson")
-        print "Warning: ignoring diboson sample (since it does not exist) ..."
+    else:
+        print "Warning: ignoring diboson sample (since merged diboson sample does not exist) ..."
+
     for item in myMergeList:
         if not item in dsetMgr.getMCDatasetNames():
             raise Exception("Error: tried to use dataset '%s' as part of the merged EWK dataset, but the dataset '%s' does not exist!"%(item,item))
     dsetMgr.merge("EWK", myMergeList)
+
+    print "\nFinal dataset list:\n"
+    print dsetMgr.getMCDatasetNames()
+    print "\n"
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -135,6 +153,7 @@ def main(argv, dsetMgr, moduleInfoString):
         else:
             for hname in histonames:
                 binIndex = hname.replace("NormalizationMETBaselineTau"+HISTONAME,"")
+                print "DEBUG: We are looking for hisrogram "+COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex
                 hDummy = dsetMgr.getDataset("Data").getDatasetRootHisto(COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex).getHistogram()
                 title = hDummy.GetTitle()
                 title = title.replace("METBaseline"+HISTONAME,"")
