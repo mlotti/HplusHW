@@ -4,6 +4,14 @@
 Usage:
 ./plotTemplate.py -m <pseudo_mcrab_directory>
 
+ROOT:
+The available ROOT options for the Error-Ignore-Level are (const Int_t):
+        kUnset    =  -1
+        kPrint    =   0
+        kInfo     =   1000
+        kWarning  =   2000
+        kError    =   3000
+        kBreak    =   4000
 '''
 
 #================================================================================================
@@ -25,30 +33,33 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import ROOT
 import array
 
+
 #================================================================================================
-# Variable Definition
+# User Options
 #================================================================================================
 analysis    = "Kinematics"
 cutDirection= ">"
-verbose     = True
-myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
-#myPath      = None
+#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
+myPath      = None
+verbose     = False
 kwargs      = {
-    "referenceHisto" : "M_200",
-    "saveFormats"    : [".png", ".pdf"],
-    "normalizeTo"    : "One",
-    "rebin"          : 1,
-    "createRatio"    : False,
+    "referenceDataset": "ChargedHiggs_HplusTB_HplusToTB_M_500",
+    "saveFormats"     : [".png"], #, ".pdf"],
+    "normalizeTo"     : "One",
+    "rebin"           : 1,
+    "createRatio"     : True,
 }
 
 
+#================================================================================================
+# Variable Definition
+#================================================================================================
 styleDict = {
     "ChargedHiggs_HplusTB_HplusToTB_M_500": styles.signal500Style, 
     "ChargedHiggs_HplusTB_HplusToTB_M_400": styles.signal400Style,
     "ChargedHiggs_HplusTB_HplusToTB_M_300": styles.signal300Style,
     "ChargedHiggs_HplusTB_HplusToTB_M_200": styles.signal200Style
 }
-
 
 hNames  = [
 #    "genMET_Et",
@@ -148,53 +159,57 @@ def main():
 
     # Set ROOT batch mode boolean
     ROOT.gROOT.SetBatch(parseOpts.batchMode)
+    ROOT.gErrorIgnoreLevel = 3000
     
 
     # Get all datasets from the mcrab dir
     datasets  = GetDatasetsFromDir(parseOpts.mcrab, analysis)
-    #refDataset    = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_200")
-    #otherDatasets = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_200")
+    # datasets      = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_200")
+    # otherDatasets = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_200")
+
     
-    # Determine Integrated Luminosity (If Data datasets present)
+    # Determine Integrated Luminosity
     intLumi = GetLumi(datasets)
     
                   
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
-        if savePath == None:
-            savePath = GetSavePath(analysis)
-        else:
-            pass
-        if cutDirection == ">":
-            saveName = os.path.join(savePath, hName + "_GreaterThan")
-        else:
-            saveName = os.path.join(savePath, hName + "_LessThan")
-
+    
+        # Get the save path
+        savePath = GetSavePath(analysis, savePath)
+        
+        # Get the save name (according to cut direction)
+        saveName = GetSaveName(savePath, hName, cutDirection)
+        
         # Get customised histos
         rootHistos, histos    = GetCustomisedHistos(datasets, hName, **kwargs)
         refHisto, otherHistos = GetHistosForPlot(histos, rootHistos, **kwargs)            
+        
+        # ERROR BARS?
+        
+        # Get the referece TGraph
+        #refEfftmp = getCutEfficiency(datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_%s" % kwargs.get("referenceDataset")), hName, cutDirection)
+        #refEff    = histograms.HistoGraph(refEfftmp, plots._legendLabels["ChargedHiggs_HplusTB_HplusToTB_%s" % kwargs.get("referenceDataset")], "p", "P")
+        refEff = getCutEfficiencyTGraph(datasets.getDataset(kwargs.get("referenceDataset")), hName, cutDirection)
 
-        # Create a comparison plot
-        refEfftmp = getCutEfficiency(datasets.getDataset("ChargedHiggs_HplusTB_HplusToTB_M_200"), hName, cutDirection)
-        refEff    = histograms.HistoGraph(refEfftmp, plots._legendLabels["ChargedHiggs_HplusTB_HplusToTB_M_200"], "p", "P")
 
-        otherEff = []
+        # Get the referece TGraph
+        otherEff  = []
         for d in datasets.getMCDatasets():
-            print d.getName()
-            if kwargs.get("referenceHisto") in d.getName():
+            if d.getName() == kwargs.get("referenceDataset"):
                 continue
             else:
-                h = getCutEfficiency(d, hName, cutDirection)
-                otherEff.append(histograms.HistoGraph(h, plots._legendLabels[d.getName()], "p", "P"))
+                #h = getCutEfficiencyHisto(d, hName, cutDirection)
+                t = getCutEfficiencyTGraph(d, hName, cutDirection)
+                otherEff.append(t) #histograms.HistoGraph(h, plots._legendLabels[d.getName()], "p", "P"))
                 
         # Plot the efficiencies
-        #p = plots.ComparisonManyPlot(refEff, otherEff)
         p = plots.ComparisonManyPlot(refEff, otherEff)        
         
 
         # Create a frame
-        opts      = {"ymin": 0.0, "ymaxfactor": 1.2}
-        ratioOpts = {"ymin": 0.0, "ymax": 2.0}
+        opts      = {"ymin": 0.0, "ymaxfactor": 1.2} #"ymax": 5e-1}
+        ratioOpts = {"ymin": 0.0, "ymaxfactor": 1.2} #"ymax": 2.0}
         fileName = os.path.join(savePath, hName)
         p.createFrame(fileName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
 
@@ -203,8 +218,8 @@ def main():
         moveLegend = {"dx": -0.1 , "dy": +0.0, "dh": -0.2}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
         #p.removeLegend()
-        
 
+        
         # Customise frame
         p.getFrame().GetYaxis().SetTitle( getTitleY(rootHistos[0], **kwargs).replace("Arbitrary Units", "efficiency (%s)" % (cutDirection)))
         #p.setEnergy("13")
@@ -212,6 +227,16 @@ def main():
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
+        # SetLog
+        p.getPad().SetLogy(False)
+        p.getPad().SetLogx(False)
+        p.getPad().SetLogz(False)
+        
+        # Add cut line/box
+        _kwargs = { "lessThan": False}
+        p.addCutBoxAndLine(cutValue=6, fillColor=ROOT.kAzure-4, box=False, line=True, **_kwargs)
+
+        
         #  Draw plots
         p.draw()
 
@@ -231,7 +256,13 @@ def main():
 #================================================================================================
 # Auxiliary Function Definition
 #================================================================================================
-def getCutEfficiency(dataset, histoName, cutDirection):
+def getCutEfficiencyTGraph(dataset, histoName, cutDirection):
+    effHisto = getCutEfficiencyHisto(dataset, histoName, cutDirection)
+    effGraph = histograms.HistoGraph(effHisto, plots._legendLabels[dataset.getName()], "p", "P")
+    return effGraph
+
+
+def getCutEfficiencyHisto(dataset, histoName, cutDirection):
 
     # Choose statistics options
     #statOption = ROOT.TEfficiency.kFNormal
@@ -255,32 +286,34 @@ def getCutEfficiency(dataset, histoName, cutDirection):
     denominator.Reset()
         
     table    = []
-    hLine    = "="*100
-    msgAlign = '{:<5} {:<10} {:<10} {:<20} {:<20} {:<20}'
-    title    = msgAlign.format("Bin", "LowEdge", "Center", "HighEdge", "Pass", "Total", "Efficiency")
+    hLine    = "="*140
+    msgAlign = '{:<5} {:<10} {:<10} {:<20} {:<20} {:<20} {:<20} {:<20}'
+    title    = msgAlign.format("Bin", "LowEdge", "Center", "HighEdge", "BinContent", "Pass", "Total", "Efficiency")
     table.append(hLine)
     table.append(title)
     table.append(hLine)
     
     nBinsX = h.GetNbinsX()+1
+    titleX =  h.GetXaxis().GetTitle()
     for iBin in range(1, nBinsX):
 
         binLowEdge = h.GetBinLowEdge(iBin)
         binCenter  = h.GetBinCenter(iBin)
         binWidth   = h.GetBinWidth(iBin)
-        binHighEdge= binLowEdge + binWidth 
+        binHighEdge= binLowEdge + binWidth
+        binContent = h.GetBinContent(iBin)
         nTotal     = h.Integral( 0, nBinsX )
         if cutDirection == ">":
-            nPass  = h.Integral(iBin, nBinsX)
+            nPass  = h.Integral(iBin+1, nBinsX)
         elif cutDirection == "<":
-            nPass  = nTotal - h.Integral(iBin, nBinsX)
+            nPass  = nTotal - h.Integral(iBin+1, nBinsX)
         else:
             raise Exception("Invalid cut direction  \"%s\". Please choose either \">\" or \"<\"" % (cutDirection))
         numerator.SetBinContent(iBin, nPass)
         denominator.SetBinContent(iBin, nTotal)
         
         eff    = nPass/nTotal
-        values = msgAlign.format(iBin, binLowEdge, binCenter, binHighEdge, nPass, nTotal, eff)
+        values = msgAlign.format(iBin, binLowEdge, binCenter, binHighEdge, binContent, nPass, nTotal, eff)
         table.append(values)
     table.append(hLine)
         
@@ -314,7 +347,7 @@ def getCutEfficiency(dataset, histoName, cutDirection):
         teff.SetStatisticOption(self.statOption)
 
     style = styleDict[dataset.getName()]
-    return convert2TGraph(teff, dataset, style )
+    return convert2TGraph(teff, dataset, style, titleX)
 
 
 def getEfficiency(datasets, numerator="Numerator", denominator="Denominator"):
@@ -389,7 +422,7 @@ def removeNegatives(histo):
     return
 
 
-def convert2TGraph(tefficiency, dataset, style):
+def convert2TGraph(tefficiency, dataset, style, titleX):
     x     = []
     y     = []
     xerrl = []
@@ -416,7 +449,10 @@ def convert2TGraph(tefficiency, dataset, style):
                                     array.array("d",xerrh),
                                     array.array("d",yerrl),
                                     array.array("d",yerrh))
+
     tgraph.SetName(dataset.getName())
+    tgraph.GetXaxis().SetTitle(titleX)
+
     style.apply(tgraph)
     return tgraph
 
@@ -447,7 +483,7 @@ def GetHistosForPlot(histos, rootHistos, **kwargs):
     for rh, h in zip(rootHistos, histos):
         legName = "m_{H^{#pm}} = %s GeV/c^{2}" % (rh.getName().split("_M_")[-1])
 
-        if kwargs.get("referenceHisto") in rh.getName():
+        if rh.getName() == kwargs.get("referenceDataset"):
             refHisto = histograms.Histo(h, legName, "p", "P")
         else:
             otherHistos.append( histograms.Histo(h, legName,  "F", "HIST,E,9") )
@@ -531,7 +567,9 @@ def Verbose(msg, printHeader=True):
     return
 
 
-def GetSavePath(analysis):
+def GetSavePath(analysis, savePath):
+    if savePath != None:
+        return savePath
     user    = getpass.getuser()
     initial = getpass.getuser()[0]
     if "lxplus" in socket.gethostname():
@@ -539,6 +577,14 @@ def GetSavePath(analysis):
     else:
         savePath = "/Users/%s/Desktop/Plots/" % (user)
     return savePath
+
+
+def GetSaveName(savePath, hName, cutDirection):
+    if cutDirection == ">":
+        saveName = os.path.join(savePath, hName + "_GreaterThan")
+    else:
+        saveName = os.path.join(savePath, hName + "_LessThan")
+    return saveName
 
 
 def SaveAs(p, savePath, saveName, **kwargs):
