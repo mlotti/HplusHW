@@ -16,7 +16,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
 
 # PileUp calc according to https://indico.cern.ch/event/459797/contribution/3/attachments/1181542/1711291/PPD_PileUp.pdf
-PileUpJSON = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/PileUp/pileup_latest.txt"
+PileUpJSON = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt"
 
 dataVersion_re = re.compile("dataVersion=(?P<dataVersion>[^: ]+)")
 pu_re = re.compile("\|\s+\S+\s+\|\s+\S+\s+\|\s+.*\s+\|\s+.*\s+\|\s+\S+\s+\|\s+\S+\s+\|\s+(?P<lumi>\d+(\.\d*)?|\.\d+)\s+\|\s+(?P<pu>\d+(\.\d*)?|\.\d+)\s+\|\s+\S+\s+\|")
@@ -171,8 +171,8 @@ def main(opts, args):
 
         # PileUp
         fOUT = os.path.join(task, "results", "PileUp.root")
-#        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","80000","--maxPileupBin","50","--numPileupBins","50",fOUT] # 2015 xsec 80000
-        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","63000","--maxPileupBin","50","--numPileupBins","50",fOUT] # 2016 xsec 63000
+	minBiasXsec = 80000
+        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT]
         pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         puoutput = pu.communicate()[0]
         puret = pu.returncode
@@ -193,6 +193,35 @@ def main(opts, args):
             f = open(opts.output, "wb")
             json.dump(data, f, sort_keys=True, indent=2)
             f.close()
+
+        # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
+        # change the --minBiasXsec value in the pileupCalc.py command by +/-5% around the chosen central value.
+	puUncert = 0.05
+
+	minBiasXsec = minBiasXsec*(1+puUncert)
+	pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT.replace(".root","_up.root"),"--pileupHistName","pileup_up"]
+        pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	puoutput = pu.communicate()[0]
+
+        minBiasXsec = minBiasXsec*(1-puUncert)
+        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT.replace(".root","_down.root"),"--pileupHistName","pileup_down"]
+        pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        puoutput = pu.communicate()[0]
+
+	fPU = ROOT.TFile.Open(fOUT,"UPDATE")
+	fPUup = ROOT.TFile.Open(fOUT.replace(".root","_up.root"),"r")
+	h_pu = fPUup.Get("pileup_up")
+	fPU.cd()
+	h_pu.Write()
+	fPUup.Close()
+
+        fPUdown = ROOT.TFile.Open(fOUT.replace(".root","_down.root"),"r")                                                                                                                                                                                               
+        h_pu = fPUdown.Get("pileup_down")                                                                                                                                                                                                                           
+        fPU.cd()                                                                                                                                                                                                                                                
+        h_pu.Write()                                                                                                                                                                                                                                            
+        fPUdown.Close()
+
+	fPU.Close()
 
     if len(data) > 0:
         f = open(opts.output, "wb")
