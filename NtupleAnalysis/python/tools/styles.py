@@ -203,6 +203,13 @@ errorStyle3 = StyleCompound([StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-
 errorRatioStatStyle = StyleCompound([StyleError(ROOT.kGray, 1001, linecolor=ROOT.kGray)])
 errorRatioSystStyle = StyleCompound([StyleError(ROOT.kGray+1, 1001, linecolor=ROOT.kGray+1)])
 
+effGreaterThanStyle = StyleCompound([
+        StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen-3, markerSizes=None, markerStyle=ROOT.kFullCircle),
+        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kGreen-3) ])
+effLessThanStyle    = StyleCompound([
+        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullSquare),
+        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kBlue) ])
+
 ratioStyle = dataStyle.clone()
 ratioLineStyle = StyleCompound([StyleLine(lineColor=ROOT.kRed, lineWidth=2, lineStyle=3)])
 

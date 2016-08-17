@@ -350,6 +350,7 @@ for mass in _lightHplusMasses:
     _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 for mass in _heavyHplusMasses:
     _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
+    _legendLabels["ChargedHiggs_HplusTB_HplusToTB_M_%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 for mass in _heavyHplusToTBbarMasses:
     _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d GeV" % mass
     
@@ -1501,6 +1502,24 @@ class PlotBase:
 
         for f in formats:
             self.cf.canvas.SaveAs(self.cf.canvas.GetName()+f)
+
+        ROOT.gErrorIgnoreLevel = backup
+        
+    ## Save the plot to file(s)
+    #
+    # \param formats   Save to these formats (if not given, the values
+    #                  given in the constructor and in
+    #                  appendSaveFormat() are used
+    # \param saveName  Alternative name for saving
+    def saveAs(self, saveName, formats=None):
+        if formats == None:
+            formats = self.saveFormats
+
+        backup = ROOT.gErrorIgnoreLevel
+        ROOT.gErrorIgnoreLevel = ROOT.kWarning
+
+        for f in formats:
+            self.cf.canvas.SaveAs(saveName+f)
 
         ROOT.gErrorIgnoreLevel = backup
 
