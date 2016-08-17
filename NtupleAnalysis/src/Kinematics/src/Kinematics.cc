@@ -192,34 +192,34 @@ private:
   WrappedTH1 *h_BQuarkPair_dRMin_dPhi;
   WrappedTH1 *h_BQuarkPair_dRMin_dR;
   WrappedTH1 *h_BQuarkPair_dRMin_Mass;
-  WrappedTH2 *h_BQuarkPair_dRMin_Eta1_Vs_Eta2;  // new
-  WrappedTH2 *h_BQuarkPair_dRMin_Phi1_Vs_Phi2;  // new
-  WrappedTH2 *h_BQuarkPair_dRMin_Pt1_Vs_Pt2;    // new
+  WrappedTH2 *h_BQuarkPair_dRMin_Eta1_Vs_Eta2;
+  WrappedTH2 *h_BQuarkPair_dRMin_Phi1_Vs_Phi2;
+  WrappedTH2 *h_BQuarkPair_dRMin_Pt1_Vs_Pt2;
   WrappedTH2 *h_BQuarkPair_dRMin_dEta_Vs_dPhi;
-  WrappedTH1 *h_BQuarkPair_dRMin_jet1_dR; // new
-  WrappedTH1 *h_BQuarkPair_dRMin_jet1_dEta; // new
-  WrappedTH1 *h_BQuarkPair_dRMin_jet1_dPhi; // new
-  WrappedTH1 *h_BQuarkPair_dRMin_jet2_dR; // new
-  WrappedTH1 *h_BQuarkPair_dRMin_jet2_dEta; // new
-  WrappedTH1 *h_BQuarkPair_dRMin_jet2_dPhi; // new
+  WrappedTH1 *h_BQuarkPair_dRMin_jet1_dR;
+  WrappedTH1 *h_BQuarkPair_dRMin_jet1_dEta;
+  WrappedTH1 *h_BQuarkPair_dRMin_jet1_dPhi;
+  WrappedTH1 *h_BQuarkPair_dRMin_jet2_dR;
+  WrappedTH1 *h_BQuarkPair_dRMin_jet2_dEta;
+  WrappedTH1 *h_BQuarkPair_dRMin_jet2_dPhi;
 
   // GenParticles: bqq trijet system (H+)
   WrappedTH1 *h_Htb_tbW_bqq_Pt;
   WrappedTH1 *h_Htb_tbW_bqq_Rap;
   WrappedTH1 *h_Htb_tbW_bqq_Mass;
-  WrappedTH1 *h_Htb_tbW_bqq_dRMax_dR;           // new
-  WrappedTH1 *h_Htb_tbW_bqq_dRMax_dRap;         // new
-  WrappedTH1 *h_Htb_tbW_bqq_dRMax_dPhi;         // new
-  WrappedTH2 *h_Htb_tbW_bqq_dRMax_dRap_Vs_dPhi; // new
+  WrappedTH1 *h_Htb_tbW_bqq_dRMax_dR;
+  WrappedTH1 *h_Htb_tbW_bqq_dRMax_dRap;
+  WrappedTH1 *h_Htb_tbW_bqq_dRMax_dPhi;
+  WrappedTH2 *h_Htb_tbW_bqq_dRMax_dRap_Vs_dPhi;
 
   // GenParticles: bqq trijet system (associated top)
   WrappedTH1 *h_gtt_tbW_bqq_Pt;
   WrappedTH1 *h_gtt_tbW_bqq_Rap;
   WrappedTH1 *h_gtt_tbW_bqq_Mass;
-  WrappedTH1 *h_gtt_tbW_bqq_dRMax_dR;           // new
-  WrappedTH1 *h_gtt_tbW_bqq_dRMax_dRap;         // new
-  WrappedTH1 *h_gtt_tbW_bqq_dRMax_dPhi;         // new
-  WrappedTH2 *h_gtt_tbW_bqq_dRMax_dRap_Vs_dPhi; // new
+  WrappedTH1 *h_gtt_tbW_bqq_dRMax_dR;
+  WrappedTH1 *h_gtt_tbW_bqq_dRMax_dRap;
+  WrappedTH1 *h_gtt_tbW_bqq_dRMax_dPhi;
+  WrappedTH2 *h_gtt_tbW_bqq_dRMax_dRap_Vs_dPhi;
 
   // GenJets
   WrappedTH1 *h_GenJet1_Pt;
@@ -507,10 +507,13 @@ void Kinematics::book(TDirectory *dir) {
   h_gtt_tbW_bqq_dRMax_dRap_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "gtt_tbW_bqq_dRMax_dRap_Vs_dPhi", ";#Delta#omega;#Delta#phi (rads)", nBinsdRap, mindRap, maxdRap, nBinsdPhi, mindPhi, maxdPhi);
   
   // Leading Jets
-  h_Jet1Jet2_dEta_Vs_Jet3Jet4_dEta = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta", ";#Delta#eta;#Delta#eta", nBinsdEta, mindEta, maxdEta, nBinsdEta, mindEta, maxdEta);
-  h_Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi", ";#Delta#phi (rads);#Delta#phi (rads)", nBinsdPhi, mindPhi, maxdPhi, nBinsdPhi, mindPhi, maxdPhi);
-  h_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass", ";#Delta#eta;M (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
-  h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", ";#Delta#eta;M (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
+  h_Jet1Jet2_dEta_Vs_Jet3Jet4_dEta = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta", ";#Delta#eta(j_{1},j_{2});#Delta#eta(j_{3},j_{4})", nBinsdEta, mindEta, maxdEta, nBinsdEta, mindEta, maxdEta);
+
+  h_Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi", ";#Delta#phi(j_{1},j_{2}) (rads);#Delta#phi(j_{3},j_{4}) (rads)", nBinsdPhi, mindPhi, maxdPhi, nBinsdPhi, mindPhi, maxdPhi);
+
+  h_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass", ";#Delta#eta(j_{1},j_{2});M(j_{1},j_{2}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
+
+  h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", ";#Delta#eta(j_{3},j_{4});M(j_{4},j_{4}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
 
   
   // GenJets
@@ -531,15 +534,15 @@ void Kinematics::book(TDirectory *dir) {
   h_GenJet6_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet6_Eta", ";#eta", nBinsEta, minEta, maxEta);
 
   // GenJets: Dijet with largest mass
-  h_MaxDiJetMass_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Pt"   , ";M(jj)_{max} p_{T} (GeV/c)"    , nBinsPt, minPt, maxPt);
-  h_MaxDiJetMass_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Eta"  , ";M(jj)_{max} #eta"             , nBinsEta, minEta, maxEta);
-  h_MaxDiJetMass_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Rap"  , ";M(jj)_{max} #omega"           , nBinsRap, minRap, maxRap);
-  h_MaxDiJetMass_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Mass" , ";M(jj)_{max} M (GeV/c^{2})"    , 50,  0.0, +1000.0);  
-  h_MaxDiJetMass_dEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dEta" , ";M(jj)_{max} #Delta#eta"       , nBinsdEta, mindEta, maxdEta);
-  h_MaxDiJetMass_dRap  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRap" , ";M(jj)_{max} #Delta#omega"     , nBinsdRap, mindRap, maxdRap);
-  h_MaxDiJetMass_dPhi  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dPhi" , ";M(jj)_{max} #Delta#phi"       , nBinsdPhi, mindPhi, maxdPhi);  
-  h_MaxDiJetMass_dR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dR"   , ";M(jj)_{max} #DeltaR"          , nBinsdR, mindR, maxdR);  
-  h_MaxDiJetMass_dRrap = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRrap", ";M(jj)_{max} #DeltaR_{#omega}" , nBinsdR, mindR, maxdR);  
+  h_MaxDiJetMass_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Pt"   , ";p_{T} (GeV/c)"    , nBinsPt, minPt, maxPt);
+  h_MaxDiJetMass_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Eta"  , ";#eta"             , nBinsEta, minEta, maxEta);
+  h_MaxDiJetMass_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Rap"  , ";#omega"           , nBinsRap, minRap, maxRap);
+  h_MaxDiJetMass_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Mass" , ";M (GeV/c^{2})"    , 50,  0.0, +1000.0);  
+  h_MaxDiJetMass_dEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dEta" , ";#Delta#eta"       , nBinsdEta, mindEta, maxdEta);
+  h_MaxDiJetMass_dRap  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRap" , ";#Delta#omega"     , nBinsdRap, mindRap, maxdRap);
+  h_MaxDiJetMass_dPhi  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dPhi" , ";#Delta#phi"       , nBinsdPhi, mindPhi, maxdPhi);  
+  h_MaxDiJetMass_dR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dR"   , ";#DeltaR"          , nBinsdR, mindR, maxdR);  
+  h_MaxDiJetMass_dRrap = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRrap", ";#DeltaR_{#omega}" , nBinsdR, mindR, maxdR);  
   h_MaxDiJetMass_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "MaxDiJetMass_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)"  , nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
   h_MaxDiJetMass_dRap_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRap_Vs_dPhi", ";#Delta#omega;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
 
@@ -619,7 +622,6 @@ void Kinematics::process(Long64_t entry) {
   if (selJets_p4.at(2).pt() < 40) return;
 
  
-
 
   // Indices
   int Htb_HPlus_index             = -1.0;

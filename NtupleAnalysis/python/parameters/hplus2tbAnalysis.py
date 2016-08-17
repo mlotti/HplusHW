@@ -146,7 +146,7 @@ commonPlotsOptions = PSet(
 
     # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
     ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax= 500.0),
-    etaBins           = PSet(nBins = 100, axisMin = -5.0, axisMax=   5.0),
+    etaBins           = PSet(nBins =  50, axisMin = -5.0, axisMax=   5.0),
     phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax=   3.2),  # PSet(nBins =  72, axisMin = -3.1415926, axisMax=3.1415926),
     invmassBins       = PSet(nBins =  50, axisMin =  0.0, axisMax = 500.0),
     deltaEtaBins      = PSet(nBins =  50, axisMin =  0.0, axisMax=  10.0),

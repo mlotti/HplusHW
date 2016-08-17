@@ -29,11 +29,11 @@ import ROOT
 # Variable Definition
 #================================================================================================
 analysis    = "Kinematics"
-#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
-myPath      = None
+myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
+#myPath      = None
 kwargs      = {
     "referenceHisto" : "M_200",
-    "saveFormats"    : [".png"], #, ".pdf"],
+    "saveFormats"    : [".png", ".pdf"],
     "normalizeTo"    : "One",
     "rebin"          : 1,
     "createRatio"    : False,
@@ -52,6 +52,7 @@ hNames = [
     "MaxDiJetMass_dR",
     "MaxDiJetMass_dRrap",
     "MaxDiJetMass_dEta",
+    "MaxDiJetMass_dRap",
     "MaxDiJetMass_dPhi",
     "BQuarkPair_dRMin_pT",
     "BQuarkPair_dRMin_dEta",
@@ -116,7 +117,7 @@ def main():
 
         
         # Create a frame
-        opts      = {"ymin": 0.0, "ymaxfactor": 1.0}
+        opts      = {"ymin": 0.0, "ymaxfactor": 1.2}
         ratioOpts = {"ymin": 0.0, "ymax": 2.0}
         fileName = os.path.join(savePath, hName)
         p.createFrame(fileName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
@@ -125,7 +126,7 @@ def main():
         # Customise Legend
         moveLegend = {"dx": -0.1, "dy": +0.0, "dh": -0.1}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-        p.removeLegend()
+        #p.removeLegend()
 
         
         # Customise frame
@@ -301,8 +302,6 @@ def SavePlotterCanvas(p, saveName, savePath, **kwargs):
 
         
 def GetLumi(datasets):
-    '''
-    '''
     Print("Determining integrated luminosity from data-datasets")
 
     intLumi = None

@@ -29,14 +29,14 @@ import ROOT
 #================================================================================================
 massPoint   = "200"
 analysis    = "Kinematics"
-#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
-myPath      = None
+myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/M_%s/" % (massPoint)
+#myPath      = None
 kwargs      = {
-    "saveFormats" : [".png"],
+    "saveFormats" : [".png", ".pdf"],
     "rebinX"      : 1,
     "rebinY"      : 1,
     "normalizeTo" : "One",
-    "zMin"        : 1e-4,
+    "zMin"        : 1e-6,
     "zMax"        : 0.5e-1,
 }
 
@@ -106,18 +106,18 @@ def main():
         
 
         # Remove negative contributions (BEFORE rebinning)
-        RemoveNegativeBins(rootHistos[0].getHistogram(), p)
+        #RemoveNegativeBins(rootHistos[0].getHistogram(), p)
 
 
         # Customize
         p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs.get("rebinX")))
         p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinY(kwargs.get("rebinY")))
-        p.histoMgr.setHistoDrawStyleAll("COLZ")        
+        p.histoMgr.setHistoDrawStyleAll("COL") #"CONT4" "COLZ" "COL"
         # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetRangeUser(1.0, 5.0))
         # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetRangeUser(1.0, 5.0))
         # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetZaxis().SetRangeUser(0.0, 0.015))
-        p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMinimum(kwargs.get("zMin")))
-        p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMaximum(kwargs.get("zMax")))
+        #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMinimum(kwargs.get("zMin")))
+        #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMaximum(kwargs.get("zMax")))
 
         
         # Create a frame
@@ -157,7 +157,8 @@ def main():
         
         # Customise text
         histograms.addStandardTexts(lumi=intLumi)
-
+        histograms.addText(0.73, 0.88, "m_{H^{+}}=%s GeV/c^{2}" % (massPoint), 17)
+        #histograms.addText(0.73, 0.88, "m_{H^{#pm}}=%s GeV/c^{2}" % (massPoint), 17)
         
         # Save canvas under custom dir
         if counter == 0:

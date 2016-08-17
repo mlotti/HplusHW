@@ -28,12 +28,11 @@ import ROOT
 # Variable Definition
 #================================================================================================
 analysis    = "Kinematics"
-#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
-myPath      = None
-kinVar      = "dPhi" # "Pt", "Eta", "Rap", "dR" "dEta" "dPhi" "dRap"
+myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
+#myPath      = None
 kwargs      = {
     "referenceHisto" : "M_200",
-    "saveFormats"    : [".png"], #, ".pdf"],
+    "saveFormats"    : [".png", ".pdf"],
     "normalizeTo"    : "One",
     "rebin"          : 1,
     "createRatio"    : False,
@@ -46,26 +45,19 @@ kwargs      = {
 def main():
 
     style    = tdrstyle.TDRStyle()
-    hNames   = getHistoNames(kinVar)
+    hNames   = getHistoNames()
     savePath = myPath
 
     # Set ROOT batch mode boolean
     ROOT.gROOT.SetBatch(parseOpts.batchMode)
     
+
     # Get all datasets from the mcrab dir
     datasets  = GetDatasetsFromDir(parseOpts.mcrab, analysis)
 
-    # Determine Integrated Luminosity (If Data datasets present)
-    intLumi = 0.0
-    if len(datasets.getDataDatasets()) != 0:
-        # Load Luminosity JSON file
-        datasets.loadLuminosities(fname="lumi.json")
-        
-        # Load RUN range
-        # runRange = datasets.loadRunRange(fname="runrange.json")
 
-        # Calculate Integrated Luminosity
-        intLumi = GetLumi(datasets)
+    # Determine Integrated Luminosity (If Data datasets present)
+    intLumi = GetLumi(datasets)
     
                   
     # For-loop: All Histogram names
@@ -90,7 +82,7 @@ def main():
 
 
         # Create a frame
-        opts      = {"ymin": 0.0, "ymaxfactor": 1.0}
+        opts      = {"ymin": 0.0, "ymaxfactor": 1.2}
         ratioOpts = {"ymin": 0.0, "ymax": 2.0}
         fileName = os.path.join(savePath, plotName)
         p.createFrame(fileName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
@@ -99,7 +91,7 @@ def main():
         # Customise Legend
         moveLegend = {"dx": -0.1, "dy": +0.0, "dh": -0.1}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-        p.removeLegend()
+        #p.removeLegend()
         
 
         # Customise frame
@@ -279,8 +271,18 @@ def SavePlotterCanvas(p, saveName, savePath, **kwargs):
     return
 
         
-def GetLumi(datasets):       
+def GetLumi(datasets):
     Print("Determining integrated luminosity from data-datasets")
+
+    intLumi = None
+    if len(datasets.getDataDatasets()) == 0:
+        return intLumi
+
+    # Load Luminosity JSON file
+    datasets.loadLuminosities(fname="lumi.json")
+
+    # Load RUN range
+    # runRange = datasets.loadRunRange(fname="runrange.json")
 
     # For-loop: All Data datasets
     for d in datasets.getDataDatasets():
@@ -299,57 +301,55 @@ def RemoveNegativeBins(hList, p):
     return
 
 
-def getHistoNames(kinVar):
-
-    isValidVar(kinVar)
-
-    hNames    = []
-    distances = ["dR", "dEta", "dRap", "dPhi"]
-    if kinVar not in distances:
-        hNames.append("gtt_TQuark_"            + kinVar) # Pt Eta Phi Rap
-        hNames.append("gbb_BQuark_"            + kinVar) # Pt Eta Phi Rap
-        hNames.append("gtt_tbW_WBoson_"        + kinVar) # Pt Eta Phi Rap
-        hNames.append("gtt_tbW_BQuark_"        + kinVar) # Pt Eta Phi Rap
-        hNames.append("gtt_tbW_Wqq_Quark_"     + kinVar) # Pt Eta Phi Rap
-        hNames.append("gtt_tbW_Wqq_AntiQuark_" + kinVar) # Pt Eta Phi Rap
-        hNames.append("tbH_HPlus_"             + kinVar) # Pt Eta Phi Rap
-        hNames.append("tbH_TQuark_"            + kinVar) # Pt Eta Phi Rap
-        hNames.append("tbH_BQuark_"            + kinVar) # Pt Eta Phi Rap
-        hNames.append("tbH_tbW_WBoson_"        + kinVar) # Pt Eta Phi Rap
-        hNames.append("tbH_tbW_BQuark_"        + kinVar) # Pt Eta Phi Rap
-        hNames.append("Htb_tbW_Wqq_Quark_"     + kinVar) # Pt Eta Phi Rap
-        hNames.append("Htb_tbW_Wqq_AntiQuark_" + kinVar) # Pt Eta Phi Rap
-        if kinVar not in ["Rap"]:
-            hNames.append("BQuark1_" + kinVar) # Pt Eta 
-            hNames.append("BQuark2_" + kinVar) # Pt Eta 
-            hNames.append("BQuark3_" + kinVar) # Pt Eta 
-            hNames.append("BQuark4_" + kinVar) # Pt Eta 
-            hNames.append("GenJet1_" + kinVar) # Pt Eta 
-            hNames.append("GenJet2_" + kinVar) # Pt Eta 
-            hNames.append("GenJet3_" + kinVar) # Pt Eta 
-            hNames.append("GenJet4_" + kinVar) # Pt Eta 
-            hNames.append("GenJet5_" + kinVar) # Pt Eta 
-            hNames.append("GenJet6_" + kinVar) # Pt Eta 
-            #
-            hNames.append("AL3CJetsFromHPlus_GenJet1_" + kinVar) # Pt Eta
-            hNames.append("AL3CJetsFromHPlus_GenJet2_" + kinVar) # Pt Eta
-            hNames.append("AL3CJetsFromHPlus_GenJet3_" + kinVar) # Pt Eta
-            hNames.append("AL3CJetsFromHPlus_GenJet4_" + kinVar) # Pt Eta
-            hNames.append("AL3CJetsFromHPlus_GenJet5_" + kinVar) # Pt Eta
-            hNames.append("AL3CJetsFromHPlus_GenJet6_" + kinVar) # Pt Eta
-    else:
-        hNames.append("Htb_TQuark_Htb_BQuark_"                + kinVar) #dR dEta dRap dPhi 
-        hNames.append("Htb_TQuark_gtt_TQuark_"                + kinVar) #dR dEta dRap dPhi 
-        hNames.append("Htb_TQuark_gbb_BQuark_"                + kinVar) #dR dEta dRap dPhi 
-        hNames.append("Htb_BQuark_Htb_tbW_BQuark_"            + kinVar) #dR dEta dRap dPhi 
-        hNames.append("Htb_BQuark_Htb_tbW_Wqq_Quark_"         + kinVar) #dR dEta dRap dPhi 
-        hNames.append("Htb_BQuark_Htb_tbW_Wqq_AntiQuark_"     + kinVar) #dR dEta dRap dPhi
-        hNames.append("Htb_tbW_BQuark_Htb_tbW_Wqq_Quark_"     + kinVar) #dR dEta dRap dPhi 
-        hNames.append("Htb_tbW_BQuark_Htb_tbW_Wqq_AntiQuark_" + kinVar) #dR dEta dRap dPhi 
-        hNames.append("gtt_TQuark_gbb_BQuark_"                + kinVar) #dR dEta dRap dPhi 
-        hNames.append("gtt_TQuark_gtt_tbW_BQuark_"            + kinVar) #dR dEta dRap dPhi 
-        hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_"     + kinVar) #dR dEta dRap dPhi 
-        hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_" + kinVar) #dR dEta dRap dPhi 
+def getHistoNames():
+    
+    hNames  = []
+    kinVar  = ["Pt", "Eta", "Rap"]
+    distVar = ["dR", "dEta", "dRap", "dPhi"]
+    for var in kinVar:
+        hNames.append("gtt_TQuark_"            + var)
+        hNames.append("gbb_BQuark_"            + var)
+        hNames.append("gtt_tbW_WBoson_"        + var)
+        hNames.append("gtt_tbW_BQuark_"        + var)
+        hNames.append("gtt_tbW_Wqq_Quark_"     + var)
+        hNames.append("gtt_tbW_Wqq_AntiQuark_" + var)
+        hNames.append("tbH_HPlus_"             + var)
+        hNames.append("tbH_TQuark_"            + var)
+        hNames.append("tbH_BQuark_"            + var)
+        hNames.append("tbH_tbW_WBoson_"        + var)
+        hNames.append("tbH_tbW_BQuark_"        + var)
+        hNames.append("Htb_tbW_Wqq_Quark_"     + var)
+        hNames.append("Htb_tbW_Wqq_AntiQuark_" + var)
+        if var not in ["Rap"]:
+            hNames.append("BQuark1_" + var)
+            hNames.append("BQuark2_" + var)
+            hNames.append("BQuark3_" + var)
+            hNames.append("BQuark4_" + var)
+            hNames.append("GenJet1_" + var)
+            hNames.append("GenJet2_" + var)
+            hNames.append("GenJet3_" + var)
+            hNames.append("GenJet4_" + var)
+            hNames.append("GenJet5_" + var)
+            hNames.append("GenJet6_" + var)
+            hNames.append("AL3CJetsFromHPlus_GenJet1_" + var)
+            hNames.append("AL3CJetsFromHPlus_GenJet2_" + var)
+            hNames.append("AL3CJetsFromHPlus_GenJet3_" + var)
+            hNames.append("AL3CJetsFromHPlus_GenJet4_" + var)
+            hNames.append("AL3CJetsFromHPlus_GenJet5_" + var)
+            hNames.append("AL3CJetsFromHPlus_GenJet6_" + var)
+    for var in distVar:
+        hNames.append("Htb_TQuark_Htb_BQuark_"                + var)
+        hNames.append("Htb_TQuark_gtt_TQuark_"                + var)
+        hNames.append("Htb_TQuark_gbb_BQuark_"                + var)
+        hNames.append("Htb_BQuark_Htb_tbW_BQuark_"            + var)
+        hNames.append("Htb_BQuark_Htb_tbW_Wqq_Quark_"         + var)
+        hNames.append("Htb_BQuark_Htb_tbW_Wqq_AntiQuark_"     + var)
+        hNames.append("Htb_tbW_BQuark_Htb_tbW_Wqq_Quark_"     + var)
+        hNames.append("Htb_tbW_BQuark_Htb_tbW_Wqq_AntiQuark_" + var)
+        hNames.append("gtt_TQuark_gbb_BQuark_"                + var)
+        hNames.append("gtt_TQuark_gtt_tbW_BQuark_"            + var)
+        hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_"     + var)
+        hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_" + var)
     return hNames
 
 
