@@ -124,6 +124,7 @@ _physicalToLogical.update({
     "DYJetsToLL_M_50_HT_400to600": "DYJetsToLL_M_50_HT_400to600",
     "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLL_M_50_HT_600toInf",
     
+    "QCD_Pt_15to30":   "QCD_Pt_15to30",
     "QCD_Pt_30to50":   "QCD_Pt_30to50",
     "QCD_Pt_50to80":   "QCD_Pt_50to80",
     "QCD_Pt_80to120":  "QCD_Pt_80to120",
@@ -171,6 +172,7 @@ _lightSignalMerge = {}
     #_lightSignalMerge["Hplus_taunu_M%d" % mass] = "TTOrTToHplus_M%d"%mass
 
 _datasetMerge = {
+    "QCD_Pt_15to30":   "QCD",
     "QCD_Pt_30to50":   "QCD",
     "QCD_Pt_50to80":   "QCD",
     "QCD_Pt_80to120":  "QCD",
@@ -294,6 +296,7 @@ _legendLabels = {
     "EWK":                   "EWK",
 
 
+    "QCD_Pt15to30":          "QCD, 15 < #hat{p}_{T} < 30",
     "QCD_Pt30to50":          "QCD, 30 < #hat{p}_{T} < 50",
     "QCD_Pt50to80":          "QCD, 50 < #hat{p}_{T} < 80",
     "QCD_Pt80to120":         "QCD, 80 < #hat{p}_{T} < 120",
@@ -308,7 +311,8 @@ _legendLabels = {
     "QCD_Pt1800to2400":      "QCD, 2400 < #hat{p}_{T} < 2400",
     "QCD_Pt2400to3200":      "QCD, 3200 < #hat{p}_{T} < 3200",
     "QCD_Pt3200toInf":       "QCD, #hat{p}_{T} > 3200",
-
+    "QCD"            :       "QCD (MC)",
+    
     "QCDdata": "QCD (data driven)",
 
 #    "DYJetsToLL":            "DY+jets",
