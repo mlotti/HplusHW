@@ -74,7 +74,7 @@ public:
   const MET& met_Type1() const { return fMET_Type1; }
   const MET& calomet() const { return fCaloMET; }
   const MET& L1met() const { 
-    if(isMC()) return L1extramet();
+    ////    if(isMC()) return L1extramet(); // moved to stage2 l1etm, l1extra obsolete. 19082016/SL
     return fL1MET; 
   }
   const MET& L1extramet() const { return fL1extraMET; }
