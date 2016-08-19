@@ -23,7 +23,7 @@ MinimumStatUncertaintyBkg = 0.5
 
 
 fitstart = 180
-fitstop = 1600 # extended, used to be 700
+fitstop = 4000 # extended, used to be 700
 applyfrom = fitstart
 function = "FitFuncExpTailExoAlternate"
 #function = "FitFuncExpTailTauTauAlternate"
@@ -50,7 +50,7 @@ fitSettings = [
     },
     # Fit settings for EWK+tt with taus from MC
     {
-        "id": "genuinetau",
+        "id": "t_genuine",
         "fitfunc": function,
         "fitmin": fitstart, # 140
         "fitmax": fitstop,
