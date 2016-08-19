@@ -44,13 +44,19 @@ public:
     return fTriggerOr2.isEmpty();
   }
   bool passTriggerDecision() const {
+    if (!passL1Decision(fL1ETMThreshold)) return false;
     if (configurableTriggerIsEmpty() && configurableTrigger2IsEmpty())
       return true;
     if (configurableTrigger2IsEmpty())
       return configurableTriggerDecision();
     return configurableTriggerDecision() || configurableTriggerDecision2();
   }
-  
+  bool passL1Decision(float L1ETMcut = 0) const {
+    if(L1ETMcut > 0){
+      if(L1met().et() < L1ETMcut) return false;
+    }
+    return true;
+  }  
   const EventID& eventID() const { return fEventID; }
   const VertexInfo& vertexInfo() const { return fVertexInfo; }
   const METFilter& metFilter() const { return fMETFilter; }
@@ -103,6 +109,7 @@ private:
   GenWeight fGenWeight;
   GenWeight_T<float> fTopPtWeight;
 
+  float fL1ETMThreshold;
   const bool fIsMC;
 };
 

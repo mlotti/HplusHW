@@ -73,10 +73,11 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
     if tauSelectionPset.prongs == 3:
         nprongs = "3prong"
 
-    tauTrgJson = "tauLegTriggerEfficiency2015_"+nprongs+".json"
+####    tauTrgJson = "tauLegTriggerEfficiency2015_"+nprongs+".json"
+    tauTrgJson = "tauLegTriggerEfficiency2016_2016BCD.json"
     print "Taking tau trigger eff/sf from",tauTrgJson
 
-    reader = TriggerSFJsonReader("2015D", "runs_256629_260627", tauTrgJson)
+    reader = TriggerSFJsonReader("2016ICHEP", "runs_271036_276811", tauTrgJson)
 
     result = reader.getResult()
     if variationType == "MC":
@@ -93,7 +94,8 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
 def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, variationType="MC"):
     # FIXME: there is no mechanic right now to choose correct era / run range
     # FIXME: this approach works as long as there is just one efficiency for the simulated samples
-    reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "metLegTriggerEfficiency2015_btag%s.json"%btagDiscrWorkingPoint)
+####    reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "metLegTriggerEfficiency2015_btag%s.json"%btagDiscrWorkingPoint)
+    reader = TriggerSFJsonReader("2016ICHEP", "runs_271036_276811", "metLegTriggerEfficiency2016_MET90_2016BCD.json") 
     result = reader.getResult()
     if variationType == "MC":
         _assignTrgSF("metTriggerSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], METSelectionPset, direction)
