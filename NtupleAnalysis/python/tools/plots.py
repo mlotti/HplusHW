@@ -311,8 +311,25 @@ _legendLabels = {
     "QCD_Pt1800to2400":      "QCD, 2400 < #hat{p}_{T} < 2400",
     "QCD_Pt2400to3200":      "QCD, 3200 < #hat{p}_{T} < 3200",
     "QCD_Pt3200toInf":       "QCD, #hat{p}_{T} > 3200",
-    "QCD"            :       "QCD (MC)",
+
     
+    "QCD_Pt_15to30":          "QCD, 15 < #hat{p}_{T} < 30",
+    "QCD_Pt_30to50":          "QCD, 30 < #hat{p}_{T} < 50",
+    "QCD_Pt_50to80":          "QCD, 50 < #hat{p}_{T} < 80",
+    "QCD_Pt_80to120":         "QCD, 80 < #hat{p}_{T} < 120",
+    "QCD_Pt_120to170":        "QCD, 120 < #hat{p}_{T} < 170",
+    "QCD_Pt_170to300":        "QCD, 170 < #hat{p}_{T} < 300",
+    "QCD_Pt_300to470":        "QCD, 300 < #hat{p}_{T} < 470",
+    "QCD_Pt_470to600":        "QCD, 470 < #hat{p}_{T} < 600",
+    "QCD_Pt_600to800":        "QCD, 600 < #hat{p}_{T} < 800",
+    "QCD_Pt_800to1000":       "QCD, 800 < #hat{p}_{T} < 1000",
+    "QCD_Pt_1000to1400":      "QCD, 1400 < #hat{p}_{T} < 1400",
+    "QCD_Pt_1400to1800":      "QCD, 1800 < #hat{p}_{T} < 1800",
+    "QCD_Pt_1800to2400":      "QCD, 2400 < #hat{p}_{T} < 2400",
+    "QCD_Pt_2400to3200":      "QCD, 3200 < #hat{p}_{T} < 3200",
+    "QCD_Pt_3200toInf":       "QCD, #hat{p}_{T} > 3200",
+    "QCD"            :        "QCD",
+
     "QCDdata": "QCD (data driven)",
 
 #    "DYJetsToLL":            "DY+jets",

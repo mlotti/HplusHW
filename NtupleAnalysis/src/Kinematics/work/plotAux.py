@@ -51,9 +51,51 @@ styleDict = {
 #================================================================================================
 # Auxiliary Function Definition
 #================================================================================================
-def GetSavePath(analysis, savePath):
+def HasKeys(keyList, **kwargs):
+    for key in keyList:
+        if key not in kwargs:
+            raise Exception("Could not find the keyword \"%s\" in kwargs" % (key) )
+    return
+
+
+def SetLogAndGrid(p, **kwargs):
     '''
     '''
+    HasKeys(["createRatio", "logX", "logY", "gridX", "gridY"], **kwargs)
+    ratio = kwargs.get("createRatio")
+    logX  = kwargs.get("logX")
+    logY  = kwargs.get("logY")
+    gridX = kwargs.get("gridX")
+    gridY = kwargs.get("gridY")
+    
+    if ratio:
+        p.getPad1().SetLogy(logY)
+        p.getPad1().SetLogx(logX)
+        #
+        p.getPad2().SetLogy(logY)
+        p.getPad2().SetLogx(logX)
+        #
+        p.getPad1().SetGridx(gridX)
+        p.getPad1().SetGridy(gridY)
+        p.getPad2().SetGridx(gridX)
+        p.getPad2().SetGridy(gridY)
+    else:
+        p.getPad().SetLogy(logY)
+        p.getPad().SetLogx(logX)
+        p.getPad().SetGridx(gridX)
+        p.getPad().SetGridy(gridY)
+
+            
+    
+def GetSavePath(**kwargs):
+    '''
+    '''
+    HasKeys(["savePath", "analysis", "verbose"], **kwargs)
+    savePath = kwargs.get("savePath")
+    analysis = kwargs.get("analysis")
+    verbose  = kwargs.get("verbose")
+    
+    Verbose("Constructing path where plots will be saved", verbose)    
     if savePath != None:
         return savePath
     user    = getpass.getuser()
@@ -65,30 +107,101 @@ def GetSavePath(analysis, savePath):
     return savePath
 
 
-def GetSaveName(savePath, hName, cutDirection=None):
+def GetSaveName(savePathNew, hName, **kwargs):
     '''
     '''
+    HasKeys(["savePath", "verbose"], **kwargs)
+    verbose      = kwargs.get("verbose")
+    cutDirection = kwargs.get("cutDirection")
+
+    Verbose("Constructing name of plot to  be saved", verbose)    
+    forbidden   = ["/"]
+    replacement = "_"
+    for f in forbidden:
+        if f in hName:
+            Print("Replacing forbidden character \"%s\" with \"%s\" in saveName  \"%s\"" % (f, replacement, hName))
+            hName = hName.replace(f, replacement)
+            
     if cutDirection == None:
-        saveName = os.path.join(savePath, hName)
+        saveName = os.path.join(savePathNew, hName)
     elif cutDirection == ">":
-        saveName = os.path.join(savePath, hName + "_GreaterThan")
+        saveName = os.path.join(savePathNew, hName + "_GreaterThan")
     else:
-        saveName = os.path.join(savePath, hName + "_LessThan")
+        saveName = os.path.join(savePathNew, hName + "_LessThan")
+        
     return saveName
 
 
-def GetCutEfficiencyTGraph(dataset, histoName, cutDirection, statOpt="C-P", verbose=False):
+
+def GetSavePathAndName(hName, **kwargs):
     '''
     '''
-    effHisto = GetCutEfficiencyHisto(dataset, histoName, cutDirection)
-    effGraph = histograms.HistoGraph(effHisto, plots._legendLabels[dataset.getName()], "p", "P")
-    return effGraph
+    HasKeys(["verbose"], **kwargs)
+    verbose  = kwargs.get("verbose")
+
+    Verbose("Getting save path and name", verbose)
+    savePathNew = GetSavePath(**kwargs)
+    saveName    = GetSaveName(savePathNew, hName, **kwargs)
+    return savePathNew, saveName
 
 
-def GetCutEfficiencyHisto(dataset, histoName, cutDirection, statOpt="C-P", verbose=False):
-    '''
-    '''
 
+def GetCutEfficiencyTGraphs(datasetsMgr, histoName, statOpt="C-P", **kwargs):
+    '''
+    '''
+    HasKeys(["refDataset", "drawStyle", "legStyle", "cutDirection"], **kwargs)
+    refGraph     = None
+    otherGraphs  = []
+    refDataset   = kwargs.get("refDataset")
+    drawStyle    = kwargs.get("drawStyle")
+    legStyle     = kwargs.get("legStyle")
+    legLabel     = plots._legendLabels[refDataset]
+    
+    refHisto, otherHistos = GetCutEfficiencyHistos(datasetsMgr, histoName, statOpt="C-P", **kwargs)
+    refGraph = histograms.HistoGraph(refHisto, legLabel, legStyle, drawStyle)
+
+    # For-loop: All efficiency histos
+    for h in otherHistos:
+        legLabel = plots._legendLabels[h.GetName()]
+        otherGraphs.append(histograms.HistoGraph(h, legLabel, legStyle, drawStyle))
+
+    if refGraph == None:
+        raise Exception("The \"reference\" graph is None!")
+    elif len(otherGraphs) < 1:
+        raise Exception("The \"other\" graph list empty!")    
+    else:
+        return refGraph, otherGraphs
+
+
+
+def GetCutEfficiencyHistos(datasetsMgr, histoName, statOpt="C-P", **kwargs):
+    '''
+    '''
+    HasKeys(["verbose", "refDataset", "cutDirection"], **kwargs)
+    refDataset  = kwargs.get("refDataset")
+    refHisto    = None
+    otherHistos = []
+
+   # For-loop: All dataset objects            
+    for d in datasetsMgr.getAllDatasets():
+
+        histo = GetCutEfficiencyHisto(datasetsMgr.getDataset(d.getName()), histoName, **kwargs)
+        if d.getName() == refDataset:
+            refHisto = histo
+        else:
+            otherHistos.append(histo)
+    return refHisto, otherHistos
+
+    
+    
+def GetCutEfficiencyHisto(dataset, histoName, statOpt="C-P", **kwargs):
+    '''
+    '''
+    HasKeys(["verbose", "refDataset", "normalizeTo", "cutDirection"], **kwargs)
+    verbose     = kwargs.get("verbose")
+    normalizeTo = kwargs.get("normalizeTo")
+    cutDirection= kwargs.get("cutDirection")
+        
     # Choose statistics options
     if statOpt == "C-P":
         statOption = ROOT.TEfficiency.kFCP # Clopper-Pearson
@@ -104,7 +217,9 @@ def GetCutEfficiencyHisto(dataset, histoName, cutDirection, statOpt="C-P", verbo
     isData = False
     teff   = ROOT.TEfficiency()
 
-    h = dataset.getDatasetRootHisto(histoName).getHistogram()
+    rootHisto = dataset.getDatasetRootHisto(histoName)
+    NormalizeRootHisto(rootHisto, dataset.isMC(), normalizeTo)
+    h = rootHisto.getHistogram()
     if h.GetEntries() == 0:
         return
     RemoveNegatives(h)
@@ -321,86 +436,84 @@ def GetDatasetsFromDir(mcrab, analysis):
     # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_180|M_220|M_250")
 
     # Inform user of datasets retrieved
-    Print("Got following datasets from multicrab dir \"%s\"" % mcrab)
+    Verbose("Got the following datasets from multicrab dir \"%s\"" % mcrab)
     for d in datasets.getAllDatasets():
-        print "\t", d.getName()
+        Verbose( "\t", d.getName(), False)
     return datasets
 
 
-def GetHistosForPlot(histos, rootHistos, **kwargs):
+
+def GetHistosForPlotter(datasetsMgr, histoName, **kwargs):
+    '''
+    '''
+    HasKeys(["refDataset", "drawStyle", "legStyle"], **kwargs)
     refHisto     = None
     otherHistos  = []
+    refDataset   = kwargs.get("refDataset")
+    drawStyle    = kwargs.get("drawStyle")
+    legStyle     = kwargs.get("legStyle")
+    normalizeTo  = kwargs.get("normalizeTo")
 
-    # For-loop: histos
-    for rh in rootHistos:
-        hName = rh.getName()
+    # For-loop: All dataset objects
+    for d in datasetsMgr.getAllDatasets():
+        rootHisto = datasetsMgr.getDataset(d.getName()).getDatasetRootHisto(histoName)
 
-    # For-loop: histos
-    for rh, h in zip(rootHistos, histos):
-        legName = "m_{H^{#pm}} = %s GeV/c^{2}" % (rh.getName().split("_M_")[-1])
+        # Apply Normalization
+        NormalizeRootHisto(rootHisto, d.isMC(), normalizeTo)
 
-        if rh.getName() == kwargs.get("referenceDataset"):
-            refHisto = histograms.Histo(h, legName, "p", "P")
+        # Get the histogram
+        histo     = rootHisto.getHistogram()    
+        legName   = plots._legendLabels[d.getName()]
+
+        # Apply Styling
+        styleDict[d.getName()].apply(histo)
+        
+        if d.getName() == refDataset:
+            refHisto = histograms.Histo(histo, legName, legStyle, drawStyle)
         else:
-            otherHistos.append( histograms.Histo(h, legName,  "F", "HIST,E,9") )
-    return refHisto, otherHistos
+            otherHisto = histograms.Histo(histo, legName, legStyle, drawStyle)
+            otherHistos.append(otherHisto)
+
+    if refHisto == None:
+        raise Exception("The \"reference\" histogram is None!")
+    elif len(otherHistos) < 1:
+        raise Exception("The \"other\" histogram list empty!")    
+    else:
+        return refHisto, otherHistos
 
 
-def GetCustomisedHistos(datasets, hName, **kwargs):
-    # Declarations
+
+def ApplyHistoStyles(datasetsMgr, histoName, **kwargs):
+    '''
+    FIXME: Does not seem to apply the styles.
+    '''
+    Print("Applying style to histograms for all datasets:")
+
+    # For-loop: All-Datasets
+    datasets    = datasetsMgr.getAllDatasets()
+    for d in datasets:
+        Print("\t" + d.getName(), False)
+        rootHisto = datasetsMgr.getDataset(d.getName()).getDatasetRootHisto(histoName)
+        histo     = rootHisto.getHistogram()
+        styleDict[d.getName()].apply(histo)
+    return
+
+
+
+def GetCustomisedHistos(datasetsMgr, histoName, **kwargs):
+    '''
+    '''
     rootHistos = []
     histos     = []
-
-    # Get Data or MC datasets
-    myDatasets = datasets.getAllDatasets()
-    # myDatasets = datasets.getDataDatasets()
-    # myDatasets   = datasets.getMCDatasets()
-
-    
     # For-loop: All-Datasets
-    for d in myDatasets:
-        
-        # Build ROOT histos from individual datasets
-        h = datasets.getDataset(d.getName()).getDatasetRootHisto(hName)
-
-        # Set the cross-section
-        # d.getDataset("TT_ext3").setCrossSection(831.76)        
-
-        # Append to ROOT histos list
-        rootHistos.append(h)
-        
-
-    # Normalise ROOT histograms
-    for h in rootHistos:
-        if kwargs.get("normalizeTo") == "One":
-            h.normalizeToOne()
-        elif kwargs.get("normalizeTo") == "XSection":
-            h.normalizeByCrossSection()
-        elif kwargs.get("normalizeTo") == "Luminosity":
-            h.normalizeToLumi(intLumi)
-        else:
-            isValidNorm(normalizeTo)
-    
-
-    # For-loop: All root histos
-    for rh in rootHistos:
-        h = rh.getHistogram()
-        styleDict[rh.getName()].apply(h)
-
-        # Rebinning
-        h.Rebin(kwargs.get("rebin"))
-
-        # Remove negative histo entries
-        if kwargs.get("removeNegatives"):
-            RemoveNegatives(h)
-
-        # Remove error bars 
-        if kwargs.get("removeErrorBars"):
-            removeErrorBars(h)
-
-        # Append the histogram
-        histos.append(h)
-        
+    datasets    = datasetsMgr.getAllDatasets()
+    for d in datasets:
+        Print("\t" + d.getName(), False)
+        rootHisto = datasetsMgr.getDataset(d.getName()).getDatasetRootHisto(histoName)
+        histo     = rootHisto.getHistogram()
+        styleDict[d.getName()].apply(histo)
+        rootHistos.append(rootHisto)
+        histos.append(histo)
     return rootHistos, histos
         
 
@@ -423,32 +536,13 @@ def Verbose(msg, printHeader=True, verbose=False):
     return
 
 
-def GetSavePath(analysis, savePath):
-    if savePath != None:
-        return savePath
-    user    = getpass.getuser()
-    initial = getpass.getuser()[0]
-    if "lxplus" in socket.gethostname():
-        savePath = "/afs/cern.ch/user/%s/%s/public/html/%s/" % (initial, user, analysis)
-    else:
-        savePath = "/Users/%s/Desktop/Plots/" % (user)
-    return savePath
-
-
-def GetSaveName(savePath, hName, cutDirection):
-    if cutDirection == ">":
-        saveName = os.path.join(savePath, hName + "_GreaterThan")
-    else:
-        saveName = os.path.join(savePath, hName + "_LessThan")
-    return saveName
-
-
-def SaveAs(p, savePath, saveName, **kwargs):
-    formats  = kwargs.get("saveFormats")
-    Verbose("Saving plots in %s format(s)" % (len(formats)) )
+def SaveAs(p, savePath, saveName, saveFormats):
+    '''
+    '''
+    Verbose("Saving plots in %s format(s)" % (len(saveFormats)))
 
     # For-loop: All formats to save file
-    for ext in formats:        
+    for ext in saveFormats:        
         sName = saveName + ext
 
         # Change print name if saved under html
@@ -464,28 +558,35 @@ def SaveAs(p, savePath, saveName, **kwargs):
             os.mkdir(savePath)
 
         # Save the plots
-        p.saveAs(saveName, formats)
+        p.saveAs(saveName, saveFormats)
     return
 
         
-def GetLumi(datasets):
+def GetLumi(datasetsMgr):
     Print("Determining integrated luminosity from data-datasets")
 
-    intLumi = None
-    if len(datasets.getDataDatasets()) == 0:
-        return intLumi
+    intLumi = -1
+    if len(datasetsMgr.getDataDatasets()) == 0:
+        intLumi = None
 
-    # Load Luminosity JSON file
-    datasets.loadLuminosities(fname="lumi.json")
+    datasets = datasetsMgr.getAllDatasetNames()
+
+    # Either get luminosity from merged data, or load luminosity from JSON file (before merging datasets)
+    if "Data" in datasets:
+        intLumi = datasetsMgr.getDataset("Data").getLuminosity()
+    else:
+        if "DatasetManager" not in str(datasetsMgr.__class__):
+            datasetsMgr.loadLuminosities(fname="lumi.json")
 
     # Load RUN range
     # runRange = datasets.loadRunRange(fname="runrange.json")
 
     # For-loop: All Data datasets
-    for d in datasets.getDataDatasets():
-        print "\tluminosity", d.getName(), d.getLuminosity()
-        intLumi += d.getLuminosity()
-    print "\tluminosity, sum", intLumi
+    if intLumi == None:
+        for d in datasetsMgr.getDataDatasets():
+            print "\tluminosity", d.getName(), d.getLuminosity()
+            intLumi += d.getLuminosity()
+    print "\tIntegrated Luminosity is %s (pb)" % (intLumi)
     return intLumi
 
 
@@ -498,56 +599,98 @@ def RemoveNegativeBins(hList, p):
     return
 
 
-def getTitleY(histo, **kwargs):
-    binWidthY = histo.getHistogram().GetXaxis().GetBinWidth(1)*kwargs.get("rebin")
+def RemoveNegativeBins(datasetsMgr, histoName, p):
+    Print("Removing negative bins in histograms for all datasets:")
 
-    if binWidthY < 1:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.1f" %  float(binWidthY)
-    elif binWidthY < 0.1:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.2f" %  float(binWidthY)
-    elif binWidthY < 0.01:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.3f" %  float(binWidthY)
+    # For-loop: All-Datasets
+    datasets = datasetsMgr.getAllDatasets()
+    for d in datasets:
+        Print("\t" + d.getName(), False)
+        rootHisto = datasetsMgr.getDataset(d.getName()).getDatasetRootHisto(histoName)
+        histo     = rootHisto.getHistogram()
+        for i in range(histo.GetNbinsX()):
+            for j in range(histo.GetNbinsY()):
+                if histo.GetBinContent(i, j) < 0:
+                    p.histoMgr.forEachHisto(lambda histo: histo.getRootHisto().SetBinContent(i, j, 0))
+    return
+
+
+
+def NormalizeRootHistos(datasetsMgr, histoName, **kwargs):
+    '''
+    FIXME: Does not seem to apply the styles.
+    # \li \a normalizeToOne           Normalize the histograms to one (True/False)
+    # \li \a normalizeByCrossSection  Normalize the histograms by the dataset cross sections (True/False)
+    # \li \a normalizeToLumi          Normalize the histograms to a given luminosity (number)
+    '''
+    HasKeys(["normalizeTo"], **kwargs)
+    normalizeTo = kwargs.get("normalizeTo")
+    datasets    = datasetsMgr.getAllDatasets()
+    
+    Print("Normalising all datasets to \"%s\":" % (normalizeTo))
+    for d in datasets:
+        Print("\t" + d.getName(), False)
+        rootHisto = datasetsMgr.getDataset(d.getName()).getDatasetRootHisto(histoName)
+        NormalizeRootHisto(rootHisto, d.isMC(), normalizeTo) #alex
+        
+    return
+
+
+def NormalizeRootHisto(rootHisto, isMC, normalizeTo):
+    '''
+    # \li \a normalizeToOne           Normalize the histograms to one (True/False)
+    # \li \a normalizeByCrossSection  Normalize the histograms by the dataset cross sections (True/False)
+    # \li \a normalizeToLumi          Normalize the histograms to a given luminosity (number)
+    '''    
+    if normalizeTo == "One":
+        rootHisto.normalizeToOne()
+    elif normalizeTo == "XSection":
+        if isMC:
+            rootHisto.normalizeByCrossSection()
+    elif normalizeTo == "Luminosity":
+        rootHisto.normalizeToLumi(intLumi)
     else:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.0f" %  float(binWidthY)
+        IsValidNorm(normalizeTo)
+    return
+
+
+def getTitleY(histo, titleY=None, **kwargs):
+    '''
+    '''
+    HasKeys(["normalizeTo"], **kwargs)
+
+    if titleY == None:
+        titleY = getSymbolY(kwargs.get("normalizeTo"))
+        
+    if isinstance(histo, (ROOT.TGraphAsymmErrors, ROOT.TGraph)):
+        return titleY
+    
+    # Include the binwidth in the y-title
+    #binWidthY = histo.getHistogram().GetXaxis().GetBinWidth(1)
+    binWidthY = histo.getRootHisto().GetXaxis().GetBinWidth(1)
+    
+    if binWidthY < 1:
+        titleY    = titleY + " / %0.1f" %  float(binWidthY)
+    elif binWidthY < 0.1:
+        titleY    = titleY + " / %0.2f" %  float(binWidthY)
+    elif binWidthY < 0.01:
+        titleY    = titleY + " / %0.3f" %  float(binWidthY)
+    else:
+        titleY    = titleY + " / %0.0f" %  float(binWidthY)
     return titleY
 
 
 def getSymbolY(normalizeTo):
-    isValidNorm(normalizeTo)
+    IsValidNorm(normalizeTo)
     NormToSymbols = {"One": "Arbitrary Units", "Luminosity": "Events", "": "Arbitrary Units", "XSection": "#sigma [pb]"}
     
     return NormToSymbols[normalizeTo]
     
 
-def isValidNorm(normalizeTo):
+def IsValidNorm(normalizeTo):
     validNorms = ["One", "XSection", "Luminosity", ""]
 
     if normalizeTo not in validNorms:
         raise Exception("Invalid normalization option \"%s\". Please choose one of the following: %s" % (normalizeTo, "\"" + "\", \"".join(validNorms) ) + "\"")
     return
-
-
-#================================================================================================
-# Main
-#================================================================================================
-if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-m", "--mcrab"    , dest="mcrab"    , action="store", help="Path to the multicrab directory for input")
-    parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=True, help="Enables batch mode (canvas creation does NOT generates a window)")
-    parser.add_option("-v", "--verbose"  , dest="verbose"  , action="store_true", default=False, help="Enables verbose mode (for debugging purposes)")
-    (parseOpts, parseArgs) = parser.parse_args()
-
-    # Require at least two arguments (script-name, path to multicrab)
-    if parseOpts.mcrab == None:
-        Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
-        print __doc__
-        sys.exit(0)
-    else:
-        pass
-
-    # Program execution
-    main()
-
-    if not parseOpts.batchMode:
-        raw_input("=== plotTemplate.py: Press any key to quit ROOT ...")
         

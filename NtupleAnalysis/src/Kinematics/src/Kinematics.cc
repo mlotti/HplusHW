@@ -558,10 +558,10 @@ void Kinematics::book(TDirectory *dir) {
   h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", ";#Delta#eta(j_{3},j_{4});M(j_{4},j_{4}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
   
   // GenJets
-  h_SelGenJet_N_NoPreselections         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SelGenJet_N_NoPreselections"        , ";N (selected jets)" , 20, -0.5, +15.5);
-  h_SelGenJet_N_AfterLeptonVeto         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SelGenJet_N_AfterLeptonVeto"        , ";N (selected jets)" , 20, -0.5, +15.5);
-  h_SelGenJet_N_AfterLeptonVetoNJetsCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SelGenJet_N_AfterLeptonVetoNJetsCut", ";N (selected jets)" , 20, -0.5, +15.5);
-  h_SelGenJet_N_AfterPreselections      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SelGenJet_N_AfterPreselections"     , ";N (selected jets)" , 20, -0.5, +15.5);
+  h_SelGenJet_N_NoPreselections         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SelGenJet_N_NoPreselections"        , ";N (selected jets)" , 16, -0.5, +15.5);
+  h_SelGenJet_N_AfterLeptonVeto         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SelGenJet_N_AfterLeptonVeto"        , ";N (selected jets)" , 16, -0.5, +15.5);
+  h_SelGenJet_N_AfterLeptonVetoNJetsCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SelGenJet_N_AfterLeptonVetoNJetsCut", ";N (selected jets)" , 16, -0.5, +15.5);
+  h_SelGenJet_N_AfterPreselections      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SelGenJet_N_AfterPreselections"     , ";N (selected jets)" , 16, -0.5, +15.5);
   //
   h_GenJet1_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet1_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
   h_GenJet2_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet2_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);

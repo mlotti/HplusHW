@@ -38,36 +38,43 @@ import array
 #================================================================================================
 # User Options
 #================================================================================================
-analysis    = "Kinematics"
-cutDirection= ">"
-#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/"
-myPath      = None
-verbose     = False
-kwargs      = {
-    "referenceDataset": "ChargedHiggs_HplusTB_HplusToTB_M_500",
-    "saveFormats"     : [".png"], #, ".pdf"],
-    "normalizeTo"     : "One",
-    "rebin"           : 1,
-    "createRatio"     : True,
+kwargs = {
+    "analysis"       : "Kinematics",
+    "cutDirection"   : ">",
+    #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/signal/",
+    "savePath"       : None,
+    "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_500",
+    "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_200"], #["QCD"],
+    "saveFormats"    : [".png"], #, ".pdf"],
+    "normalizeTo"    : "XSection", #One", "XSection", "Luminosity"
+    "createRatio"    : True,
+    "logX"           : False,
+    "logY"           : False,
+    "gridX"          : True,
+    "gridY"          : False,
+    "drawStyle"      : "CPE", 
+    "legStyle"       : "LP", 
+    "verbose"        : False,
+    "cutValue"       : 5,
+    "cutBox"         : False,
+    "cutLine"        : False,
+    "cutLessthan"    : False,
+    "cutFillColour"  : ROOT.kAzure-4,
 }
 
 
 #================================================================================================
-# Variable Definition
+# Histograms
 #================================================================================================
-styleDict = {
-    "ChargedHiggs_HplusTB_HplusToTB_M_500": styles.signal500Style, 
-    "ChargedHiggs_HplusTB_HplusToTB_M_400": styles.signal400Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_300": styles.signal300Style,
-    "ChargedHiggs_HplusTB_HplusToTB_M_200": styles.signal200Style
-}
-
 hNames  = [
 #    "genMET_Et",
 #    #"genMET_Phi",
 #    "genHT_GenJets",
 #    "genHT_GenParticles",
-    "SelGenJet_Multiplicity",
+    "SelGenJet_N_NoPreselections",
+#    "SelGenJet_N_AfterLeptonVeto",
+#    "SelGenJet_N_AfterLeptonVetoNJetsCut",
+#    "SelGenJet_N_AfterPreselections", 
 #    "MaxDiJetMass_Pt",
 #    "MaxDiJetMass_Eta",
 #    "MaxDiJetMass_Mass",
@@ -155,82 +162,70 @@ distVar = ["dR", "dEta", "dRap", "dPhi"]
 #================================================================================================
 def main():
 
-    style    = tdrstyle.TDRStyle()
-    savePath = myPath
-
+    style = tdrstyle.TDRStyle()
+    
     # Set ROOT batch mode boolean
     ROOT.gROOT.SetBatch(parseOpts.batchMode)
     ROOT.gErrorIgnoreLevel = 3000
     
-
     # Get all datasets from the mcrab dir
-    datasets  = GetDatasetsFromDir(parseOpts.mcrab, analysis)
-    # datasets      = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_200")
-    # otherDatasets = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_200")
+    datasetsMgr  = GetDatasetsFromDir(parseOpts.mcrab, kwargs.get("analysis"))
+    # datasetsMgr  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=kwargs.get("analysis"), includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_200")
+    # datasetsMgr  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=kwargs.get("analysis"), excludeTasks="M_200")
 
-    
     # Determine Integrated Luminosity
-    intLumi = GetLumi(datasets)
+    intLumi = GetLumi(datasetsMgr)
+
+    # Update to PU
+    datasetsMgr.updateNAllEventsToPUWeighted()
     
-                  
+    # Remove datasets
+    datasetsMgr.remove(kwargs.get("rmDataset"))
+    # datasetsMgr.remove(filter(lambda name: not "QCD" in name, datasetsMgr.getAllDatasetNames()))
+    # datasetsMgr.remove(filter(lambda name: "QCD" in name in name, datasetsMgr.getAllDatasetNames()))
+    
+    # Set custom XSections
+    # d.getDataset("TT_ext3").setCrossSection(831.76)
+    
+    # Default merging & ordering: "Data", "QCD", "SingleTop", "Diboson"
+    plots.mergeRenameReorderForDataMC(datasetsMgr) #WARNING: Merged MC histograms must be normalized to something!
+
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
     
-        # Get the save path
-        savePath = GetSavePath(analysis, savePath)
-        
-        # Get the save name (according to cut direction)
-        saveName = GetSaveName(savePath, hName, cutDirection)
-        
-        # Get customised histos
-        rootHistos, histos    = GetCustomisedHistos(datasets, hName, **kwargs)
-        refHisto, otherHistos = GetHistosForPlot(histos, rootHistos, **kwargs)            
-        
-        # Get the referece TGraph.  ERROR BARS?
-        refEff = GetCutEfficiencyTGraph(datasets.getDataset(kwargs.get("referenceDataset")), hName, cutDirection)
+        savePath, saveName = GetSavePathAndName(hName, **kwargs)
+    
+        # Get efficiency histos
+        refEff, otherEff = GetCutEfficiencyTGraphs(datasetsMgr, hName, "C-P", **kwargs)
+        #refEff, otherEff = GetCutEfficiencyHistos(datasetsMgr, hName,  "C-P", **kwargs)
 
-        # Get the referece TGraph
-        otherEff  = []
-        for d in datasets.getMCDatasets():
-            if d.getName() == kwargs.get("referenceDataset"):
-                continue
-            else:
-                t = GetCutEfficiencyTGraph(d, hName, cutDirection)
-                otherEff.append(t)
-                
         # Plot the efficiencies
         p = plots.ComparisonManyPlot(refEff, otherEff)        
-        
-
+                
         # Create a frame
         opts      = {"ymin": 0.0, "ymaxfactor": 1.2} #"ymax": 5e-1}
-        ratioOpts = {"ymin": 0.0, "ymaxfactor": 1.2} #"ymax": 2.0}
-        fileName = os.path.join(savePath, hName)
-        p.createFrame(fileName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
-
+        ratioOpts = {"ymin": 0.0, "ymaxfactor": 1.2}
+        p.createFrame(saveName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
         
         # Customise Legend
         moveLegend = {"dx": -0.1 , "dy": +0.0, "dh": -0.2}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
         #p.removeLegend()
-
         
         # Customise frame
-        p.getFrame().GetYaxis().SetTitle( getTitleY(rootHistos[0], **kwargs).replace("Arbitrary Units", "efficiency (%s)" % (cutDirection)))
-        #p.setEnergy("13")
+        p.getFrame().GetYaxis().SetTitle( getTitleY(refEff, titleY = "efficiency (%s)" % (kwargs.get("cutDirection")), **kwargs) )
+        # p.setEnergy("13")
         if kwargs.get("createRatio"):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
         # SetLog
-        p.getPad().SetLogy(False)
-        p.getPad().SetLogx(False)
-        p.getPad().SetLogz(False)
+        SetLogAndGrid(p, **kwargs)
+
         
         # Add cut line/box
-        _kwargs = { "lessThan": False}
-        p.addCutBoxAndLine(cutValue=6, fillColor=ROOT.kAzure-4, box=False, line=True, **_kwargs)
-
+        _kwargs = { "lessThan": kwargs.get("cutLessThan")}
+        p.addCutBoxAndLine(cutValue=kwargs.get("cutValue"), fillColor=kwargs.get("cutFillColour"), box=kwargs.get("cutBox"), line=kwargs.get("cutLine"), **_kwargs)
         
         #  Draw plots
         p.draw()
@@ -238,102 +233,13 @@ def main():
         # Customise text
         histograms.addStandardTexts(lumi=intLumi)
         # histograms.addText(0.4, 0.9, "Alexandros Attikis", 17)
-        # histograms.addText(0.4, 0.11, "Runs " + datasets.loadRunRange(), 17)
+        # histograms.addText(0.4, 0.11, "Runs " + datasetsMgr.loadRunRange(), 17)
 
         
         # Save canvas under custom dir
-        if counter == 0:
-            Print("Saving plots in %s format(s)" % (len(kwargs.get("saveFormats"))) )
-        SaveAs(p, savePath, saveName, **kwargs)
+        SaveAs(p, savePath, saveName, kwargs.get("saveFormats"))
 
     return
-
-#================================================================================================
-# Auxiliary Function Definition
-#================================================================================================
-def SaveAs(p, savePath, saveName, **kwargs):
-    formats  = kwargs.get("saveFormats")
-    Verbose("Saving plots in %s format(s)" % (len(formats)), True, parseOpts.verbose)
-
-    # For-loop: All formats to save file
-    for ext in formats:        
-        sName = saveName + ext
-
-        # Change print name if saved under html
-        if "html" in sName:
-            sName = sName.replace("/afs/cern.ch/user/%s/" % (initial), "http://cmsdoc.cern.ch/~")
-            sName = sName.replace("%s/public/html/" % (user), "%s/" % (user))
-            
-        # Print save name
-        print "\t", sName
-
-        # Check if dir exists
-        if not os.path.exists(savePath):
-            os.mkdir(savePath)
-
-        # Save the plots
-        p.saveAs(saveName, formats)
-    return
-
-        
-def GetLumi(datasets):
-    Print("Determining integrated luminosity from data-datasets")
-
-    intLumi = None
-    if len(datasets.getDataDatasets()) == 0:
-        return intLumi
-
-    # Load Luminosity JSON file
-    datasets.loadLuminosities(fname="lumi.json")
-
-    # Load RUN range
-    # runRange = datasets.loadRunRange(fname="runrange.json")
-
-    # For-loop: All Data datasets
-    for d in datasets.getDataDatasets():
-        print "\tluminosity", d.getName(), d.getLuminosity()
-        intLumi += d.getLuminosity()
-    print "\tluminosity, sum", intLumi
-    return intLumi
-
-
-def RemoveNegativeBins(hList, p):
-    for h in hList:        
-        for i in range(h.GetNbinsX()):
-            for j in range(h.GetNbinsY()):
-                if h.GetBinContent(i, j) < 0:
-                    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetBinContent(i, j, 0))
-    return
-
-
-def getTitleY(histo, **kwargs):
-    binWidthY = histo.getHistogram().GetXaxis().GetBinWidth(1)*kwargs.get("rebin")
-
-    if binWidthY < 1:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.1f" %  float(binWidthY)
-    elif binWidthY < 0.1:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.2f" %  float(binWidthY)
-    elif binWidthY < 0.01:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.3f" %  float(binWidthY)
-    else:
-        titleY    = getSymbolY(kwargs.get("normalizeTo")) + " / %0.0f" %  float(binWidthY)
-    return titleY
-
-
-def getSymbolY(normalizeTo):
-    isValidNorm(normalizeTo)
-    NormToSymbols = {"One": "Arbitrary Units", "Luminosity": "Events", "": "Arbitrary Units", "XSection": "#sigma [pb]"}
-    
-    return NormToSymbols[normalizeTo]
-    
-
-def isValidNorm(normalizeTo):
-    validNorms = ["One", "XSection", "Luminosity", ""]
-
-    if normalizeTo not in validNorms:
-        raise Exception("Invalid normalization option \"%s\". Please choose one of the following: %s" % (normalizeTo, "\"" + "\", \"".join(validNorms) ) + "\"")
-    return
-
 
 #================================================================================================
 # Main
