@@ -17,6 +17,9 @@ Event::Event(const ParameterSet& config):
   fIsMC(config.isMC())
 {
   // Trigger
+  boost::optional<float> fL1ETM = config.getParameterOptional<float>("Trigger.L1ETM");
+  fL1ETMThreshold = 0;
+  if(fL1ETM) fL1ETMThreshold = static_cast<float>(*fL1ETM);
   boost::optional<std::vector<std::string>> triggerOR = config.getParameterOptional<std::vector<std::string>>("Trigger.triggerOR", std::vector<std::string>{});
   if(triggerOR) {
     if (triggerOR->size())
