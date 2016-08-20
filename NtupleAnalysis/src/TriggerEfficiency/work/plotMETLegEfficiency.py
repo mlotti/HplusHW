@@ -33,13 +33,13 @@ def main():
 
     paths = [sys.argv[1]]
 
-    analysis = "METLeg_2016B_MET80"
+    analysis = "METLeg_2016ICHEP_MET90"
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau\S+25ns$|TTJets$")
     datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau_Run2015D_PromptReco_v4_246908_260426_25ns$|DYJetsToLL_M_50$")
-    datasetsMC = None
-#    datasetsMC = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_")
+#    datasetsMC = None
+    datasetsMC = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_")
 
     for d in datasets.getAllDatasets():
         print d.getName()
@@ -92,7 +92,7 @@ def main():
         p.getFrame2().GetYaxis().SetTitle("Ratio")
         p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
+    histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_MET90", 17)
 #    histograms.addText(0.2, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
     label = analysis.split("_")[1]
     histograms.addText(0.2, 0.53, label, 17)

@@ -38,7 +38,7 @@ BTagSFInputItem::BTagSFInputItem(float ptMin, float ptMax, float eff)
 BTagSFInputItem::~BTagSFInputItem() { }
 
 const bool BTagSFInputItem::matchesPtRange(float pt) const { 
-  if (pt > fPtMin) {
+  if (pt >= fPtMin) {
     if (bIsOverflowBinPt || pt <= fPtMax) {
       return true;
     }
