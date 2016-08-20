@@ -264,11 +264,11 @@ signal500Style = StyleCompound([
         Style(ROOT.kFullCircle, ROOT.kOrange+7), 
         StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+7, markerSizes=None, markerStyle=ROOT.kFullCircle),
         StyleFill(fillStyle=1001, fillColor=ROOT.kOrange+7), 
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kOrange-7) ])
+        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kOrange+7) ])
 signal600Style  = signalStyle.clone()
 signal1500Style = signalStyle.clone()
 
-qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
+qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2) 
 ewkStyle = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)
 qcdFillStyle = StyleCompound([StyleFill(fillColor=ROOT.kOrange-2)])
 ewkFillStyle = StyleCompound([StyleFill(fillColor=ROOT.kMagenta-2)])
