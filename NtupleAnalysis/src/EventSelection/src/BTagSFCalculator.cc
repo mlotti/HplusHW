@@ -7,6 +7,10 @@
 
 #include "TMath.h"
 
+// --- BTagSFInputitem ---
+
+
+// Constructor using formula string
 BTagSFInputItem::BTagSFInputItem(float ptMin, float ptMax, const std::string& formula)
 : fPtMin(ptMin),
   fPtMax(ptMax),
@@ -17,6 +21,7 @@ BTagSFInputItem::BTagSFInputItem(float ptMin, float ptMax, const std::string& fo
   }
 }
 
+// Constructor using efficiency number
 BTagSFInputItem::BTagSFInputItem(float ptMin, float ptMax, float eff)
 : fPtMin(ptMin),
   fPtMax(ptMax),
@@ -29,6 +34,7 @@ BTagSFInputItem::BTagSFInputItem(float ptMin, float ptMax, float eff)
   }
 }
 
+// Destructor
 BTagSFInputItem::~BTagSFInputItem() { }
 
 const bool BTagSFInputItem::matchesPtRange(float pt) const { 
@@ -40,6 +46,7 @@ const bool BTagSFInputItem::matchesPtRange(float pt) const {
   return false;
 }
 
+// Evaluate SF for given pT
 const float BTagSFInputItem::getValueByPt(float pt) const {
   if (!matchesPtRange(pt)) {
     throw hplus::Exception("assert") << "The requested pt (" << pt << ") is out of range!";
@@ -53,14 +60,21 @@ const float BTagSFInputItem::getValueByPt(float pt) const {
 
 void BTagSFInputItem::setAsOverflowBinPt() { bIsOverflowBinPt = true; }
 
+// Print debug information
 void BTagSFInputItem::debug() const {
   std::cout << "ptmin=" << fPtMin << " ptmax=" << fPtMax 
             << " overflow=" << bIsOverflowBinPt 
             << " formula=" << fFormula.GetExpFormula() << std::endl;
 }
 
+
+// --- BTagSFInputStash ---
+
+
+// Constructor
 BTagSFInputStash::BTagSFInputStash() { }
 
+// Destructor
 BTagSFInputStash::~BTagSFInputStash() {
   std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
   for (auto& container: collections) {
@@ -71,14 +85,17 @@ BTagSFInputStash::~BTagSFInputStash() {
   }
 }
 
+// Create new input item corresponding to certain flavor and pT range (using formula string)
 void BTagSFInputStash::addInput(BTagJetFlavorType flavor, float ptMin, float ptMax, const std::string& formula) {
   getCollection(flavor).push_back(new BTagSFInputItem(ptMin, ptMax, formula));
 }
 
+// Create new input item corresponding to certain flavor and pT range (using eff)
 void BTagSFInputStash::addInput(BTagJetFlavorType flavor, float ptMin, float ptMax, float eff) {
   getCollection(flavor).push_back(new BTagSFInputItem(ptMin, ptMax, eff));
 }
 
+// Per-jet SF (by pT)
 const float BTagSFInputStash::getInputValueByPt(BTagJetFlavorType flavor, float pt) const {
   for (auto &p: getConstCollection(flavor)) {
     if (p->matchesPtRange(pt)) {
@@ -90,6 +107,7 @@ const float BTagSFInputStash::getInputValueByPt(BTagJetFlavorType flavor, float 
   return 1.0;
 }
 
+// Define overflow bin
 void BTagSFInputStash::setOverflowBinByPt(const std::string& label) {
   std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
   size_t i = 0;
@@ -117,6 +135,7 @@ void BTagSFInputStash::setOverflowBinByPt(const std::string& label) {
   }
 }
 
+// Get const vector of input items (according to flavor)
 const std::vector<BTagSFInputItem*>& BTagSFInputStash::getConstCollection(BTagJetFlavorType flavor) const {
   if (flavor == kBJet)
     return fBToB;
@@ -129,6 +148,7 @@ const std::vector<BTagSFInputItem*>& BTagSFInputStash::getConstCollection(BTagJe
   throw hplus::Exception("Logic") << "Unknown flavor requested! " << flavor;
 }
 
+// Get vector of input items (according to flavor)
 std::vector<BTagSFInputItem*>& BTagSFInputStash::getCollection(BTagJetFlavorType flavor) {
   if (flavor == kBJet)
     return fBToB;
@@ -141,6 +161,7 @@ std::vector<BTagSFInputItem*>& BTagSFInputStash::getCollection(BTagJetFlavorType
   throw hplus::Exception("Logic") << "Unknown flavor requested! " << flavor;
 }
 
+// Debug prints
 void BTagSFInputStash::debug() const {
   std::vector<std::vector<BTagSFInputItem*>> collections = { fBToB, fCToB, fGToB, fUdsToB };
   for (auto p: collections) {
@@ -150,19 +171,26 @@ void BTagSFInputStash::debug() const {
   }
 }
 
+
+// --- BTagSFCalculator ---
+
+// Constructor
 BTagSFCalculator::BTagSFCalculator(const ParameterSet& config)
 : fVariationInfo(parseVariationType(config)),
   isActive(true),
   hBTagSF(nullptr),
   hBTagSFRelUncert(nullptr) {
+  // Import efficiencies
   handleEfficiencyInput(config.getParameterOptional<std::vector<ParameterSet>>("btagEfficiency"));
   fEfficiencies.setOverflowBinByPt("EfficiencyNominal");
   fEfficienciesUp.setOverflowBinByPt("EfficiencyUp");
   fEfficienciesDown.setOverflowBinByPt("EfficiencyDown");
+  // Import scale factors
   handleSFInput(config.getParameterOptional<std::vector<ParameterSet>>("btagSF"));
   fSF.setOverflowBinByPt("SFnominal");
   fSFUp.setOverflowBinByPt("SFup");
   fSFDown.setOverflowBinByPt("SFdown");
+  // Debug prints
   //fEfficiencies.debug();
   //fEfficienciesUp.debug();
   //fEfficienciesDown.debug();
@@ -176,20 +204,24 @@ BTagSFCalculator::BTagSFCalculator(const ParameterSet& config)
   }
 }
 
+// Destructor
 BTagSFCalculator::~BTagSFCalculator() {
   if (hBTagSF) delete hBTagSF;
   if (hBTagSFRelUncert) delete hBTagSFRelUncert;
 }
 
+// Book histograms
 void BTagSFCalculator::bookHistograms(TDirectory* dir, HistoWrapper& histoWrapper) {
   hBTagSF = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "btagSF", "btag SF", 500, 0., 5.);
   hBTagSFRelUncert = histoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "btagSFRelUncert", "Relative btagSF uncert.", 100, 0., 1.);
 }
 
+
+// Calculate scale factors
 const float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, const std::vector<Jet>& selectedBJets) {
   if (!isActive) return 1.0;
 
-  double totalSF = 1.0;
+  double totalSF = 1.0; // final number to be returned
   for (auto &jet: selectedJets) {
     // See if the jet passed the b jet selection
     bool passedBJetSelection = false;
@@ -213,36 +245,49 @@ const float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, 
     // Such approach simplifies notably the error propagation
     double sf = 0.;
     if (passedBJetSelection) {
-      // x -> b jet; just apply the SF or SF+deltaSF
+    // x -> b jet; just apply the SF or SF+deltaSF
       if ((fVariationInfo == kVariationTagUp && flavor == 5) || (fVariationInfo == kVariationMistagUp && flavor != 5)) {
+      // up variation
         sf = fSFUp.getInputValueByPt(flavorType, jet.pt());
+      // down variation
       } else if ((fVariationInfo == kVariationTagDown && flavor == 5) || (fVariationInfo == kVariationMistagDown && flavor != 5)) {
         sf = fSFDown.getInputValueByPt(flavorType, jet.pt());
+      // nominal
       } else {
         sf = fSF.getInputValueByPt(flavorType, jet.pt());
       }
     } else {
-      // x -> not b; apply (1-eff*SF)/(1-eff)
+    // x -> not b; apply (1-eff*SF)/(1-eff) where eff = MC efficiency, SF = per-jet scale factor
       double eff = fEfficiencies.getInputValueByPt(flavorType, jet.pt());
       double sfvalue = fSF.getInputValueByPt(flavorType, jet.pt());
+      // nominal
       double sfnominal = std::abs((1.0-eff*sfvalue) / (1.0-eff));
+      // up variation
       if ((fVariationInfo == kVariationTagUp && flavor == 5) || (fVariationInfo == kVariationMistagUp && flavor != 5)) {
         double effDelta = fEfficienciesUp.getInputValueByPt(flavorType, jet.pt());
         double sfDelta = fSFUp.getInputValueByPt(flavorType, jet.pt()) - sfvalue;
+        // error propagation
         double a = (1-sfvalue) / (1.0-eff) / (1.0-eff); // d/deff((1-eff*SF)/(1-eff))
         double b = -eff / (1.0-eff); // d/dsf((1-eff*SF)/(1-eff))
+        // squared sum of eff and SF uncertainties
         double sfuncert = TMath::Sqrt(a*a*effDelta*effDelta + b*b*sfDelta*sfDelta);
         sf = std::abs(sfnominal + sfuncert);
         hBTagSFRelUncert->Fill(sfuncert/sfnominal);
-      } else if ((fVariationInfo == kVariationTagDown && flavor == 5) || (fVariationInfo == kVariationMistagDown && flavor != 5)) {
+      }
+      // down variation
+      else if ((fVariationInfo == kVariationTagDown && flavor == 5) || (fVariationInfo == kVariationMistagDown && flavor != 5)) {
         double effDelta = fEfficienciesDown.getInputValueByPt(flavorType, jet.pt());
         double sfDelta = fSFDown.getInputValueByPt(flavorType, jet.pt()) - sfvalue;
+        // error propagation (as above)
         double a = (1-sfvalue) / (1.0-eff) / (1.0-eff); // d/deff((1-eff*SF)/(1-eff))
         double b = -eff / (1.0-eff); // d/dsf((1-eff*SF)/(1-eff))
+        // squared sum of eff and SF uncertainties
         double sfuncert = TMath::Sqrt(a*a*effDelta*effDelta + b*b*sfDelta*sfDelta);
         sf = std::abs(sfnominal - sfuncert);
         hBTagSFRelUncert->Fill(sfuncert/sfnominal);
-      } else {
+      } 
+      // nominal
+      else {
         sf = sfnominal;
       }
       // Protect against div by zero
@@ -261,6 +306,8 @@ const float BTagSFCalculator::calculateSF(const std::vector<Jet>& selectedJets, 
   return totalSF;
 }
 
+
+// Get size of const list
 const size_t BTagSFCalculator::sizeOfEfficiencyList(BTagSFInputStash::BTagJetFlavorType flavor, const std::string& direction) const {
   if (direction == "nominal")
     return fEfficiencies.sizeOfList(flavor);
@@ -271,6 +318,7 @@ const size_t BTagSFCalculator::sizeOfEfficiencyList(BTagSFInputStash::BTagJetFla
   return 0;
 }
 
+// Get list size
 const size_t BTagSFCalculator::sizeOfSFList(BTagSFInputStash::BTagJetFlavorType flavor, const std::string& direction) const {
   if (direction == "nominal")
     return fSF.sizeOfList(flavor);
@@ -281,6 +329,7 @@ const size_t BTagSFCalculator::sizeOfSFList(BTagSFInputStash::BTagJetFlavorType 
   return 0;
 }
 
+// Import efficiencies
 void BTagSFCalculator::handleEfficiencyInput(boost::optional<std::vector<ParameterSet>> psets) {
   if (!psets) return;
   for (auto &p: *psets) {
@@ -299,6 +348,7 @@ void BTagSFCalculator::handleEfficiencyInput(boost::optional<std::vector<Paramet
   }
 }
 
+// Import scale factors
 void BTagSFCalculator::handleSFInput(boost::optional<std::vector<ParameterSet>> psets) {
   if (!psets) return;
   for (auto &p: *psets) {
@@ -331,6 +381,7 @@ void BTagSFCalculator::handleSFInput(boost::optional<std::vector<ParameterSet>> 
   //std::cout << fBToBSF.size() << " " << fCToBSF.size() << " " << fGToBSF.size() << " " << fUdsToBSF.size() << std::endl;
 }
 
+// Get flavor type for efficiency
 BTagSFInputStash::BTagJetFlavorType BTagSFCalculator::getFlavorTypeForEfficiency(const std::string& str) const {
   if (str == "B") {
     return BTagSFInputStash::kBJet;
@@ -344,6 +395,7 @@ BTagSFInputStash::BTagJetFlavorType BTagSFCalculator::getFlavorTypeForEfficiency
   throw hplus::Exception("config") << "Unknown flavor '" << str << "'!";
 }
 
+// Get flavor type for scale factor
 BTagSFInputStash::BTagJetFlavorType BTagSFCalculator::getFlavorTypeForSF(int i) const {
   if (i == 0) {
     return BTagSFInputStash::kBJet;
@@ -355,6 +407,7 @@ BTagSFInputStash::BTagJetFlavorType BTagSFCalculator::getFlavorTypeForSF(int i) 
   throw hplus::Exception("config") << "Unknown flavor '" << i << "'!";
 }
 
+// Parser
 const BTagSFCalculator::BTagSFVariationType BTagSFCalculator::parseVariationType(const ParameterSet& config) const {
   boost::optional<std::string> sDirection = config.getParameterOptional<std::string>("btagSFVariationDirection");
   boost::optional<std::string> sVariationInfo = config.getParameterOptional<std::string>("btagSFVariationInfo");
