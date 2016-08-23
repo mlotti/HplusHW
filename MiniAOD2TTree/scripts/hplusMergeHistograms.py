@@ -228,6 +228,8 @@ def pileup(fname):
             if os.path.exists(puFile):
                 fIN = ROOT.TFile.Open(puFile)
                 hPU = fIN.Get("pileup")
+		hPUup = fIN.Get("pileup_up")
+		hPUdown = fIN.Get("pileup_down")
             else:
                 print "PileUp not found in",os.path.dirname(fname),", did you run hplusLumiCalc?"
 #        else:
@@ -239,6 +241,8 @@ def pileup(fname):
         if not hPU == None:
             fOUT.cd("configInfo")
             hPU.Write("",ROOT.TObject.kOverwrite)
+            hPUup.Write("",ROOT.TObject.kOverwrite)
+            hPUdown.Write("",ROOT.TObject.kOverwrite)
 
         fOUT.Close()
 

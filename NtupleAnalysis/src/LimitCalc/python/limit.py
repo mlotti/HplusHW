@@ -32,8 +32,8 @@ def massUnit():
 BR = "#it{B}"
 
 ## The label for the physics process
-#process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
-process = "t #rightarrow H^{+}b"
+process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
+#process = "t #rightarrow H^{+}b"
 processHeavy = "pp #rightarrow #bar{t}(b)H^{+}, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
 processCombination = "pp #rightarrow #bar{t}(b)H^{+}"
 

@@ -28,6 +28,10 @@ public:
 
   CommonPlots(const ParameterSet& config, const CommonPlots::AnalysisType type, HistoWrapper& histoWrapper);
   ~CommonPlots();
+
+  //Tau ID syst switches
+  bool tauIDup;
+  bool tauIDdown;
   
   void book(TDirectory* dir, bool isData);
   
