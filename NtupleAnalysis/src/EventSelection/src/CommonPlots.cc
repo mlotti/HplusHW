@@ -131,6 +131,22 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
   std::vector<TDirectory*> myDirs3 = {myCtrlDir, myCtrlEWKFakeTausDir, myCtrlGenuineTausDir};
   std::vector<TDirectory*> myDirs;
   
+  ////Needed for TauIDSyst
+  auto dirName = dir->GetName();
+  std::string str(dirName);
+
+  tauIDup=false;
+  tauIDdown=false;
+
+  if(str.std::string::find("TauIDSystPlus") != std::string::npos){
+        tauIDup=true;
+  }
+  if(str.std::string::find("TauIDSystMinus")!= std::string::npos){
+        tauIDdown=true;
+  }
+
+
+
   if (fEnableGenuineTauHistograms) {
     for (auto& p: myDirs3)
       myDirs.push_back(p);
@@ -630,7 +646,17 @@ void CommonPlots::fillControlPlotsAfterAllSelections(const Event& event) {
   } else {
     myTransverseMass = TransverseMass::reconstruct(fTauData.getSelectedTau(), fMETData.getMET());
   }
-  fHistoSplitter.fillShapeHistogramTriplet(hShapeTransverseMass, bIsGenuineTau, myTransverseMass);
+
+  //Create the up and down variation for tau ID shape
+  //Could probably be done in a nicer way elsewhere...
+
+  if(tauIDup && fTauData.hasIdentifiedTaus() &&fTauData.getSelectedTau().pt()>=200){
+    fHistoSplitter.fillShapeHistogramTriplet(hShapeTransverseMass, bIsGenuineTau, myTransverseMass, (hShapeTransverseMass[0]->UnprotectedGetWeight()+0.2*fTauData.getSelectedTau().pt()/1000.0));
+  }else if(tauIDdown && fTauData.hasIdentifiedTaus() && fTauData.getSelectedTau().pt()>=200){
+    fHistoSplitter.fillShapeHistogramTriplet(hShapeTransverseMass, bIsGenuineTau, myTransverseMass, (hShapeTransverseMass[0]->UnprotectedGetWeight()-0.2*fTauData.getSelectedTau().pt()/1000.0));
+  }else{
+    fHistoSplitter.fillShapeHistogramTriplet(hShapeTransverseMass, bIsGenuineTau, myTransverseMass);
+  }
   
   if (event.isData()) {
     hNSelectedVsRunNumber->Fill(event.eventID().run());
