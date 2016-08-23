@@ -40,6 +40,7 @@ _dataEras = {
     "Run2015D": ["_Run2015D"],
     "Run2015CD": ["_Run2015C", "_Run2015D"],
     "Run2015": ["_Run2015C", "_Run2015D"],
+    "Run2016": ["_Run2016B", "_Run2016C", "_Run2016D"],
 }
 
 ## Construct DatasetManager from a list of MultiCRAB directory names.
