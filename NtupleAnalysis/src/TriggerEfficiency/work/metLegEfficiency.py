@@ -135,7 +135,7 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
                                     "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_v1",
                                     "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_JetIdCleaned_vx",
                                     "HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_vx"]
-        if "2016" in era":
+        if "2016" in era:
             a.Trigger.triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_vx"]
             a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_vx"]
 
