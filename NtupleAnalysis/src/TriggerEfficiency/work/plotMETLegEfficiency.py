@@ -33,6 +33,7 @@ def main():
 
     paths = [sys.argv[1]]
 
+#    analysis = "METLeg_2016MET80_MET80"
     analysis = "METLeg_2016ICHEP_MET90"
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau\S+25ns$|TTJets$")
