@@ -2,6 +2,7 @@
 
 import os
 import sys
+import re
 import ROOT
 import array
 
@@ -33,87 +34,94 @@ def main():
 
     paths = [sys.argv[1]]
 
-#    analysis = "METLeg_2016MET80_MET80"
-    analysis = "METLeg_2016ICHEP_MET90"
-#    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
+    analysisList = []
+    analysisList.append("METLeg_2016MET80_MET80")
+    analysisList.append("METLeg_2016ICHEP_MET90")
+
+    met_re = re.compile("_(?P<met>MET\d+)$")
+    for analysis in analysisList:
+
+        met = "METX"
+        met_match = met_re.search(analysis)
+        if met_match:
+            met = met_match.group("met")
+
+        datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau\S+25ns$|TTJets$")
-    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
+#        datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau_Run2015D_PromptReco_v4_246908_260426_25ns$|DYJetsToLL_M_50$")
 #    datasetsMC = None
-    datasetsMC = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_")
+        datasetsMC = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_")
 
-    for d in datasets.getAllDatasets():
-        print d.getName()
-    style = tdrstyle.TDRStyle()
+        for d in datasets.getAllDatasets():
+            print d.getName()
+            style = tdrstyle.TDRStyle()
 
-    dataset1 = datasets.getDataDatasets()
-    dataset2 = dataset1
-    createRatio = False
-    if isinstance(datasetsMC,dataset.DatasetManager):
-        dataset2 = datasetsMC.getMCDatasets()
-        createRatio = True
+            dataset1 = datasets.getDataDatasets()
+            dataset2 = dataset1
+            createRatio = False
+            if isinstance(datasetsMC,dataset.DatasetManager):
+                dataset2 = datasetsMC.getMCDatasets()
+                createRatio = True
 
-    eff1_MET80 = getEfficiency(dataset1)
-    eff2_MET80 = getEfficiency(dataset2)
+        eff1_MET80 = getEfficiency(dataset1)
+        eff2_MET80 = getEfficiency(dataset2)
 
-    styles.dataStyle.apply(eff1_MET80)
-    eff1_MET80.SetMarkerSize(1)
-    if createRatio:
-        styles.mcStyle.apply(eff2_MET80)
-        eff2_MET80.SetMarkerSize(1.5)
+        styles.dataStyle.apply(eff1_MET80)
+        eff1_MET80.SetMarkerSize(1)
+        if createRatio:
+            styles.mcStyle.apply(eff2_MET80)
+            eff2_MET80.SetMarkerSize(1.5)
 
-    if createRatio:
-        p = plots.ComparisonPlot(histograms.HistoGraph(eff1_MET80, "eff1_MET80", "p", "P"),
-                                 histograms.HistoGraph(eff2_MET80, "eff2_MET80", "p", "P"))
-    else:
-        p = plots.PlotBase([histograms.HistoGraph(eff1_MET80, "eff1_MET80", "p", "P")])
+        if createRatio:
+            p = plots.ComparisonPlot(histograms.HistoGraph(eff1_MET80, "eff1_MET80", "p", "P"),
+                                     histograms.HistoGraph(eff2_MET80, "eff2_MET80", "p", "P"))
+        else:
+            p = plots.PlotBase([histograms.HistoGraph(eff1_MET80, "eff1_MET80", "p", "P")])
 
-    opts = {"ymin": 0, "ymax": 1.1}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-    moveLegend = {"dx": -0.55, "dy": -0.15}
+        opts = {"ymin": 0, "ymax": 1.1}
+        opts2 = {"ymin": 0.5, "ymax": 1.5}
+        moveLegend = {"dx": -0.55, "dy": -0.15}
 
-    name = "TauMET_"+analysis+"_DataVsMC_PFMET"
+        name = "TauMET_"+analysis+"_DataVsMC_PFMET"
 
-    legend1 = "Data"
-#    legend2 = "MC (TTJets)"
-    legend2 = "MC"
+        legend1 = "Data"
+        #    legend2 = "MC (TTJets)"
+        legend2 = "MC"
 
-    if createRatio:
-        p.histoMgr.setHistoLegendLabelMany({"eff1_MET80": legend1, "eff2_MET80": legend2})
-        p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
-    else:
-        p.histoMgr.setHistoLegendLabelMany({"eff1_MET80": legend1})
-        p.createFrame(os.path.join(plotDir, name), opts=opts, opts2=opts2)
+        if createRatio:
+            p.histoMgr.setHistoLegendLabelMany({"eff1_MET80": legend1, "eff2_MET80": legend2})
+            p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
+        else:
+            p.histoMgr.setHistoLegendLabelMany({"eff1_MET80": legend1})
+            p.createFrame(os.path.join(plotDir, name), opts=opts, opts2=opts2)
 
-    p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.8), **moveLegend))
+        p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.8), **moveLegend))
 
-    p.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
-    p.getFrame().GetXaxis().SetTitle("MET Type 1 (GeV)")
-    if createRatio:
-        p.getFrame2().GetYaxis().SetTitle("Ratio")
-        p.getFrame2().GetYaxis().SetTitleOffset(1.6)
+        p.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
+        p.getFrame().GetXaxis().SetTitle("MET Type 1 (GeV)")
+        if createRatio:
+            p.getFrame2().GetYaxis().SetTitle("Ratio")
+            p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_MET90", 17)
-#    histograms.addText(0.2, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
-    label = analysis.split("_")[1]
-    histograms.addText(0.2, 0.53, label, 17)
-    runRange = datasets.loadRunRange()
-    histograms.addText(0.2, 0.46, "Runs "+runRange, 17)
+        histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_"+met, 17)
+        #    histograms.addText(0.2, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
+        label = analysis.split("_")[1]
+        histograms.addText(0.2, 0.53, label, 17)
+        runRange = datasets.loadRunRange()
+        histograms.addText(0.2, 0.46, "Runs "+runRange, 17)
 
-    p.draw()
-    lumi = 0.0
-    for d in datasets.getDataDatasets():
-        print "luminosity",d.getName(),d.getLuminosity()
-        lumi += d.getLuminosity()
-    print "luminosity, sum",lumi
-    histograms.addStandardTexts(lumi=lumi)
+        p.draw()
+        lumi = datasets.loadLumi()
+        print "luminosity, sum",lumi
+        histograms.addStandardTexts(lumi=lumi)
 
-    if not os.path.exists(plotDir):
-        os.mkdir(plotDir)
-    p.save(formats)
+        if not os.path.exists(plotDir):
+            os.mkdir(plotDir)
+        p.save(formats)
 
-    pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
-    pythonWriter.addMCParameters(label,eff2_MET80)
+        pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
+        pythonWriter.addMCParameters(label,eff2_MET80)
 
     pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency2016.json"))
 

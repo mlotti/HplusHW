@@ -3744,6 +3744,14 @@ class DatasetManager:
 ####            if self.hasDataset(name):
 ####                self.getDataset(name).setLuminosity(value)
 
+    def loadLumi(self, fname="lumi.json"):
+        import json
+        jsonname = os.path.join(self.datasets[0].basedir, fname)
+        if not os.path.exists(jsonname):
+            raise Exception("Lumi JSON file '%s' does not exist. Have you set runMin/runMax and lumi in the analyzer?" % jsonname)
+        data = json.load(open(jsonname))
+        return data[self.datasets[0].getAnalysisName()]
+
     def loadRunRange(self, fname="runrange.json"):
         import json
         jsonname = os.path.join(self.datasets[0].basedir, fname)

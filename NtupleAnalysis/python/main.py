@@ -281,9 +281,9 @@ class Process:
                     raise Exception("Luminosity JSON file %s has a dataset for which the luminosity has already been loaded; please check the luminosity JSON files\n%s" % (fname, k, "\n".join(lumifiles)))
             lumidata.update(data)
         if len(lumidata) > 0:
-            f = open(os.path.join(outputDir, "lumi.json"), "w")
-            json.dump(lumidata, f, sort_keys=True, indent=2)
-            f.close()
+#            f = open(os.path.join(outputDir, "lumi.json"), "w")
+#            json.dump(lumidata, f, sort_keys=True, indent=2)
+#            f.close()
 
             # Add run range in a json file, if runMin and runMax in pset
             rrdata = {}
@@ -295,11 +295,16 @@ class Process:
                             ana = ana(dset.getDataVersion())
                             if ana.__getattr__("runMax") > 0:
                                 rrdata[aname] = "%s-%s"%(ana.__getattr__("runMin"),ana.__getattr__("runMax"))
+                                lumidata[aname] = ana.__getattr__("lumi")
                                 break
             if len(rrdata) > 0:
                 f = open(os.path.join(outputDir, "runrange.json"), "w")
                 json.dump(rrdata, f, sort_keys=True, indent=2)
                 f.close()
+
+            f = open(os.path.join(outputDir, "lumi.json"), "w")
+            json.dump(lumidata, f, sort_keys=True, indent=2)
+            f.close()
 
         # Setup proof if asked
         _proof = None

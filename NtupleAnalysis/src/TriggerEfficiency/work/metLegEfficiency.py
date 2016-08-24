@@ -65,7 +65,7 @@ def runRange(era):
         runmax = 276437 # MET80 prescaled to 0 from 276453->
 
     if era == "2016ICHEP":
-        lumi = 12900
+        lumi = 5398.687+2395.577+4255.52
         runmin = 271036
         runmax = 276811
         
