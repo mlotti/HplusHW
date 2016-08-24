@@ -75,7 +75,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
-	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
+	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
 #        TriggerResults = cms.InputTag("TriggerResults::HLT25NSV4L1V5"),
 #        TriggerResults = cms.InputTag("TriggerResults::TauHLT"),
 
@@ -91,7 +91,9 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             "HLT_IsoMu20_v",
             "HLT_IsoMu21_eta2p1_LooseIsoPFTau20_SingleL1_v",
             "HLT_IsoMu21_eta2p1_MediumIsoPFTau32_Trk1_eta2p1_Reg_v",
+            "HLT_IsoMu21_eta2p1_LooseIsoPFTau50_Trk30_eta2p1_SingleL1_v",
             "HLT_IsoMu22_v",
+            "HLT_IsoMu22_eta2p1_v",
             "HLT_IsoMu24_v",
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),

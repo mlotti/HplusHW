@@ -40,6 +40,7 @@ _dataEras = {
     "Run2015D": ["_Run2015D"],
     "Run2015CD": ["_Run2015C", "_Run2015D"],
     "Run2015": ["_Run2015C", "_Run2015D"],
+    "Run2016": ["_Run2016B", "_Run2016C", "_Run2016D"],
 }
 
 ## Construct DatasetManager from a list of MultiCRAB directory names.
@@ -3742,6 +3743,14 @@ class DatasetManager:
 ####        for name, value in data.iteritems():
 ####            if self.hasDataset(name):
 ####                self.getDataset(name).setLuminosity(value)
+
+    def loadLumi(self, fname="lumi.json"):
+        import json
+        jsonname = os.path.join(self.datasets[0].basedir, fname)
+        if not os.path.exists(jsonname):
+            raise Exception("Lumi JSON file '%s' does not exist. Have you set runMin/runMax and lumi in the analyzer?" % jsonname)
+        data = json.load(open(jsonname))
+        return data[self.datasets[0].getAnalysisName()]
 
     def loadRunRange(self, fname="runrange.json"):
         import json

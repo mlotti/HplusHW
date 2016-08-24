@@ -11,7 +11,7 @@ HeavyMassPoints=[]
 if LightAnalysis:
     LightMassPoints=[80,90,100,120,140,150,155,160]
 else:
-    HeavyMassPoints=[180,200,220,250,300,350,400,500]
+    HeavyMassPoints=[180,200,220,250,300,350,400,500,750,1000,2000,3000]
 
 MassPoints=LightMassPoints[:]+HeavyMassPoints[:]
 
@@ -19,7 +19,7 @@ MassPoints=LightMassPoints[:]+HeavyMassPoints[:]
 # Options
 OptionIncludeSystematics= True # Set to true if you produced multicrabs with doSystematics=True
 OptionDoControlPlots= not True #FIXME: if you want control plots, switch this to true!
-OptionDoMergeEWKttbar = False #FIXME: if true, merges tt and singleTop into one and Wjets+DY+diboson into another background
+OptionDoMergeEWKttbar = False #FIXME: if true, merges ttbar and singleTop into one and Wjets+DY+diboson into another background
 
 BlindAnalysis=True
 OptionBlindThreshold=None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
@@ -122,8 +122,11 @@ Observation=ObservationInput(datasetDefinition="Data", shapeHistoName=shapeHisto
 myTrgSystematics=["CMS_eff_t_trg_data","CMS_eff_t_trg_MC", # Trigger tau part
                   "CMS_eff_met_trg_data","CMS_eff_met_trg_MC"] # Trigger MET part
 myTauIDSystematics=["CMS_eff_t"] #tau ID
+if not LightAnalysis:
+    myTauIDSystematics.extend(["CMS_eff_t_highpt"])
+
 #myTauMisIDSystematics=["CMS_fake_eToTau","CMS_fake_muToTau","CMS_fake_jetToTau"] # tau mis-ID
-myESSystematics=["CMS_scale_t","CMS_scale_j","CMS_res_j","CMS_scale_met"] # TES, JES, CMS_res_j, UES
+myESSystematics=["CMS_scale_t","CMS_scale_j"] #,"CMS_res_j","CMS_scale_met"] # TES, JES, CMS_res_j, UES #FIXME
 myBtagSystematics=["CMS_eff_b","CMS_fake_b"] # b tag and mistag
 myTopSystematics=["CMS_Hptntj_topPtReweight"] # top pt reweighting
 myPileupSystematics=["CMS_pileup"] # CMS_pileup
@@ -131,9 +134,10 @@ myLeptonVetoSystematics=["CMS_eff_e_veto","CMS_eff_m_veto"] # CMS_pileup
 
 myShapeSystematics=[]
 myShapeSystematics.extend(myTrgSystematics)
-#myShapeSystematics.extend(myTauIDSystematics)
+if not LightAnalysis:
+    myShapeSystematics.extend(["CMS_eff_t_highpt"])
 #myShapeSystematics.extend(myTauMisIDSystematics)
-myShapeSystematics.extend(["CMS_scale_t","CMS_scale_j"]) #myESSystematics)
+myShapeSystematics.extend(myESSystematics)
 myShapeSystematics.extend(myBtagSystematics)
 myShapeSystematics.extend(myTopSystematics)
 #myShapeSystematics.extend(myPileupSystematics)
@@ -157,7 +161,7 @@ mergeColumnsByLabel=[]
 for mass in LightMassPoints:
     myMassList=[mass]
     hwx=signalTemplate.clone()
-    hwx.setLabel("CMS_Hptntj_HW"+str(mass)+"_a")
+    hwx.setLabel("HW"+str(mass)+"_a")
     hwx.setLandSProcess(0)
     hwx.setValidMassPoints(myMassList)
     hwx.setNuisances(myTrgSystematics[:]+myTauIDSystematics[:] #+myTauMisIDSystematics[:]
@@ -197,7 +201,11 @@ myQCDSystematics+=["CMS_scale_ttbar_forQCD","CMS_pdf_ttbar_forQCD","CMS_mass_ttb
 if OptionIncludeSystematics: #these can be used only if QCDMeasurement has been run with systematics
     myQCDSystematics += ["CMS_Hptntj_QCDbkg_templateFit","CMS_Hptntj_QCDkbg_metshape"]
 
-myQCD=DataGroup(label="CMS_Hptntj_QCDandFakeTau", landsProcess=1, validMassPoints=MassPoints,
+labelPrefix="CMS_Hptntj_"
+if LightAnalysis:
+    labelPrefix=""
+
+myQCD=DataGroup(label=labelPrefix+"QCDandFakeTau", landsProcess=1, validMassPoints=MassPoints,
                 #datasetType="QCD MC", datasetDefinition="QCD",
                 #nuisances=myShapeSystematics[:]+["xsect_QCD","lumi_13TeV"],
                 datasetType="QCD inverted", datasetDefinition="QCDMeasurementMT",
@@ -220,7 +228,7 @@ if OptionGenuineTauBackgroundSource =="DataDriven":
                                 ))
 else:
     # EWK genuine taus from MC
-    DataGroups.append(DataGroup(label="CMS_Hptntj_ttbar_t_genuine", landsProcess=3,
+    DataGroups.append(DataGroup(label=labelPrefix+"ttbar_t_genuine", landsProcess=3,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
                                 datasetDefinition="TT",
@@ -228,7 +236,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +myTopSystematics+["CMS_scale_ttbar","CMS_pdf_ttbar","CMS_mass_ttbar","lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_W_t_genuine", landsProcess=4,
+    DataGroups.append(DataGroup(label=labelPrefix+"W_t_genuine", landsProcess=4,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding", 
                                 datasetDefinition="WJets",
@@ -236,7 +244,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_Wjets","CMS_pdf_Wjets","lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_singleTop_t_genuine", landsProcess=5,
+    DataGroups.append(DataGroup(label=labelPrefix+"singleTop_t_genuine", landsProcess=5,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
                                 datasetDefinition="SingleTop",
@@ -244,7 +252,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_singleTop","CMS_pdf_singleTop","lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_DY_t_genuine", landsProcess=6,
+    DataGroups.append(DataGroup(label=labelPrefix+"DY_t_genuine", landsProcess=6,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
                                 #datasetDefinition="DYJetsToLLHT",
@@ -253,7 +261,7 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_DY","CMS_pdf_DY","lumi_13TeV"]))
-    DataGroups.append(DataGroup(label="CMS_Hptntj_VV_t_genuine", landsProcess=7,
+    DataGroups.append(DataGroup(label=labelPrefix+"VV_t_genuine", landsProcess=7,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus, 
                                 datasetType="Embedding", 
                                 datasetDefinition="Diboson",
@@ -289,13 +297,12 @@ Nuisances=[]
 # tau ID
 Nuisances.append(Nuisance(id="CMS_eff_t", label="tau-jet ID (no Rtau) uncertainty for genuine taus",
     distr="lnN", function="Constant", value=0.06))
-Nuisances.append(Nuisance(id="CMS_eff_t_forQCD", label="tau-jet ID (no Rtau) uncertainty for genuine taus",
+Nuisances.append(Nuisance(id="CMS_eff_t_forQCD", label="tau-jet ID uncertainty for genuine taus",
     distr="lnN", function="ConstantForQCD", value=0.06))
 # tau ID high-pT
 if "CMS_eff_t_highpt" in myShapeSystematics:
-    Nuisances.append(Nuisance(id="CMS_eff_t_highpt", label="tau-jet ID (no Rtau) high-pt uncertainty for genuine taus",
-        distr="shapeQ", function="ShapeVariation", systVariation="GenuineTau"))       
-
+    Nuisances.append(Nuisance(id="CMS_eff_t_highpt", label="tau-jet ID high-pt uncertainty for genuine taus",
+        distr="shapeQ", function="ShapeVariation", systVariation="TauIDSyst"))       
 #=====tau and MET trg
 if "CMS_eff_t_trg_data" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_eff_t_trg_data", label="tau+MET trg tau part data eff.",
