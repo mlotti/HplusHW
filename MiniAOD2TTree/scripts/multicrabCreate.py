@@ -23,8 +23,8 @@ https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial#Setup_the_e
 #PSET = "miniAODGEN2TTree_cfg.py"
 #PSET = "miniAOD2TTree_TauLegSkim_cfg.py"
 #PSET = "miniAOD2TTree_METLegSkim_cfg.py"
-#PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
-PSET = "miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py"
+PSET = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
+#PSET = "miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py"
 
 
 #================================================================================================

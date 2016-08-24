@@ -16,8 +16,8 @@ Jets = cms.VPSet(
         src = cms.InputTag("cleanedPatJets"),
         srcJESup   = cms.InputTag("shiftedPatJetEnUp"),
 	srcJESdown = cms.InputTag("shiftedPatJetEnDown"),
-        srcJERup   = cms.InputTag("shiftedPatJetResUp"),
-        srcJERdown = cms.InputTag("shiftedPatJetResDown"),
+        srcJERup   = cms.InputTag("shiftedPatSmearedJetResUp"),
+        srcJERdown = cms.InputTag("shiftedPatSmearedJetResDown"),
 #        jecPayload = JECpayloadAK4PFchs.payload,
 
         discriminators = cms.vstring(
