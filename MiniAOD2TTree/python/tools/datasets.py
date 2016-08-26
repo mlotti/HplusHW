@@ -127,6 +127,7 @@ datasetsMiniAODv2_SignalTauNu76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTa
 datasetsMiniAODv2_SignalTauNu76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-400_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 datasetsMiniAODv2_SignalTauNu76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-500_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 datasetsMiniAODv2_SignalTauNu76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-750_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
+datasetsMiniAODv2_SignalTauNu76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-800_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 datasetsMiniAODv2_SignalTauNu76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-1000_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 datasetsMiniAODv2_SignalTauNu76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-2000_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 datasetsMiniAODv2_SignalTauNu76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-3000_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
@@ -134,6 +135,7 @@ datasetsMiniAODv2_SignalTauNu76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTa
 #================================================================================================ 
 # H->tb
 #================================================================================================ 
+
 datasetsMiniAODv2_SignalTB76x = []
 datasetsMiniAODv2_SignalTB76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauB_M-180_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 datasetsMiniAODv2_SignalTB76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauB_M-200_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
@@ -143,7 +145,6 @@ datasetsMiniAODv2_SignalTB76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauB_
 datasetsMiniAODv2_SignalTB76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauB_M-350_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 datasetsMiniAODv2_SignalTB76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauB_M-400_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
 datasetsMiniAODv2_SignalTB76x.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauB_M-500_13TeV_amcatnlo_pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
-
 
 datasetsMiniAODv2_DYToQQ76x = []
 datasetsMiniAODv2_DYToQQ76x.append(Dataset('/DYJetsToQQ_HT180_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'))
