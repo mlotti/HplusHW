@@ -5,11 +5,15 @@ lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13T
 #================================================================================================ 
 # Class Definition
 #================================================================================================ 
+import os
+
 class Dataset:
     def __init__(self, url, dbs="global", dataVersion="80Xmc", dasQuery="", lumiMask=lumiMask):
         self.URL = url
         self.DBS = dbs
         self.dataVersion = dataVersion
+        if not os.path.dirname(lumiMask):
+            lumiMask = os.path.join(os.environ['CMSSW_BASE'],"src/HiggsAnalysis/MiniAOD2TTree/data",lumiMask)
         self.lumiMask = lumiMask
         self.DASquery = dasQuery
 
@@ -24,12 +28,14 @@ class Dataset:
 #================================================================================================ 
 datasetsTauData = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTau%2FRun2016*-PromptReco-v2%2FMINIAOD"
-datasetsTauData.append(Dataset('/Tau/Run2016B-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
-datasetsTauData.append(Dataset('/Tau/Run2016C-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
-datasetsTauData.append(Dataset('/Tau/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
-datasetsTauData.append(Dataset('/Tau/Run2016E-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
-datasetsTauData.append(Dataset('/Tau/Run2016F-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das))
-datasetsTauData.append(Dataset('/Tau/Run2016G-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsTauData.append(Dataset('/Tau/Run2016B-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016B.txt"))
+datasetsTauData.append(Dataset('/Tau/Run2016C-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275420-276283_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016C.txt"))
+datasetsTauData.append(Dataset('/Tau/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276437_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016D_MET80.txt"))
+datasetsTauData.append(Dataset('/Tau/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276453-276582_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016D_noMET80.txt"))
+datasetsTauData.append(Dataset('/Tau/Run2016E-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277075-277420_13TeV_PromptReco_Collisions16_JSON_NoL1T_Tau_Run2016E.txt"))
+datasetsTauData.append(Dataset('/Tau/Run2016F-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277816-278800_13TeV_PromptReco_Collisions16_JSON_NoL1T_Tau_Run2016F_HIP.txt"))
+datasetsTauData.append(Dataset('/Tau/Run2016F-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_PromptReco_Collisions16_JSON_NoL1T_Tau_Run2016F_HIPfixed.txt"))
+#datasetsTauData.append(Dataset('/Tau/Run2016G-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask=))
 
 datasetsJetHTData = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FJetHT%2FRun2016*-PromptReco-v2%2FMINIAOD"
