@@ -99,6 +99,7 @@ def reproduceMET(process,isdata):
 
     from CondCore.DBCommon.CondDBSetup_cfi import *
     import os
+
     if isdata:
       era="Spring16_25nsV6_DATA"
     else:
