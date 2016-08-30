@@ -953,7 +953,8 @@ void Kinematics::process(Long64_t entry) {
 		}
 	      else
 		{
-		  throw hplus::Exception("Logic") << "Kinematics::process() W daughters whose origins are not accounted for. Need to rethink this.";
+		  // throw hplus::Exception("Logic") << "Kinematics::process() W daughters whose origins are not accounted for. Need to rethink this.";
+		  std::cout << "*** Kinematics::process() W daughters whose origins are not accounted for. Need to rethink this." << std::endl;
 		}
 	    } // For-loop: All daughters
 	  } // Has H+ mother

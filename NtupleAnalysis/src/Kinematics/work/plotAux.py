@@ -29,22 +29,24 @@ styleDict = {
     htb + "M_400"      : styles.signal400Style,
     htb + "M_300"      : styles.signal300Style,
     htb + "M_200"      : styles.signal200Style,
-    "QCD"              : styles.qcdStyle,
-    "QCD_Pt_15to30"    : styles.qcdStyle, 
-    "QCD_Pt_30to50"    : styles.qcdStyle, 
-    "QCD_Pt_50to80"    : styles.qcdStyle,
-    "QCD_Pt_80to120"   : styles.qcdStyle, 
-    "QCD_Pt_120to170"  : styles.qcdStyle, 
-    "QCD_Pt_170to300"  : styles.qcdStyle, 
-    "QCD_Pt_300to470"  : styles.qcdStyle, 
-    "QCD_Pt_470to600"  : styles.qcdStyle,         
-    "QCD_Pt_600to800"  : styles.qcdStyle, 
-    "QCD_Pt_800to1000" : styles.qcdStyle, 
-    "QCD_Pt_1000to1400": styles.qcdStyle, 
-    "QCD_Pt_1400to1800": styles.qcdStyle, 
-    "QCD_Pt_1800to2400": styles.qcdStyle, 
-    "QCD_Pt_2400to3200": styles.qcdStyle, 
-    "QCD_Pt_3200toInf" : styles.qcdStyle,
+    "QCD"              : styles.qcdStyle, #qcdStyle, #qcdFillStyle,
+    "QCD_Pt_15to30"    : styles.qcdFillStyle, 
+    "QCD_Pt_30to50"    : styles.qcdFillStyle, 
+    "QCD_Pt_50to80"    : styles.qcdFillStyle,
+    "QCD_Pt_80to120"   : styles.qcdFillStyle, 
+    "QCD_Pt_120to170"  : styles.qcdFillStyle, 
+    "QCD_Pt_170to300"  : styles.qcdFillStyle, 
+    "QCD_Pt_300to470"  : styles.qcdFillStyle, 
+    "QCD_Pt_470to600"  : styles.qcdFillStyle,         
+    "QCD_Pt_600to800"  : styles.qcdFillStyle, 
+    "QCD_Pt_800to1000" : styles.qcdFillStyle, 
+    "QCD_Pt_1000to1400": styles.qcdFillStyle, 
+    "QCD_Pt_1400to1800": styles.qcdFillStyle, 
+    "QCD_Pt_1800to2400": styles.qcdFillStyle, 
+    "QCD_Pt_2400to3200": styles.qcdFillStyle, 
+    "QCD_Pt_3200toInf" : styles.qcdFillStyle,
+    #"TT"               : styles.ttStyle,
+    "TT"               : styles.ewkStyle,
 }
 
 
@@ -197,7 +199,7 @@ def GetCutEfficiencyHistos(datasetsMgr, histoName, statOpt="C-P", **kwargs):
 def GetCutEfficiencyHisto(dataset, histoName, statOpt="C-P", **kwargs):
     '''
     '''
-    HasKeys(["verbose", "refDataset", "normalizeTo", "cutDirection"], **kwargs)
+    HasKeys(["verbose", "normalizeTo", "cutDirection"], **kwargs)
     verbose     = kwargs.get("verbose")
     normalizeTo = kwargs.get("normalizeTo")
     cutDirection= kwargs.get("cutDirection")
@@ -469,9 +471,13 @@ def GetHistosForPlotter(datasetsMgr, histoName, **kwargs):
         styleDict[d.getName()].apply(histo)
         
         if d.getName() == refDataset:
+            #histo.SetFillStyle(3001)
             refHisto = histograms.Histo(histo, legName, legStyle, drawStyle)
         else:
-            otherHisto = histograms.Histo(histo, legName, legStyle, drawStyle)
+            #otherHisto = histograms.Histo(histo, legName, legStyle, drawStyle)
+            #otherHisto = histograms.Histo(histo, legName, "F", "HIST9")
+            otherHisto = histograms.Histo(histo, legName, "LP", "P") # fixme alex
+            
             otherHistos.append(otherHisto)
 
     if refHisto == None:

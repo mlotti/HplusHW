@@ -29,10 +29,10 @@ import ROOT
 #================================================================================================
 massPoint   = "200"
 analysis    = "Kinematics"
-myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_16August2016/figures/signal/M_%s/" % (massPoint)
-#myPath      = None
+#myPath      = "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/signal/M_%s/" % (massPoint)
+myPath      = None
 kwargs      = {
-    "saveFormats" : [".png", ".pdf"],
+    "saveFormats" : [".png"],# ".pdf"],
     "rebinX"      : 1,
     "rebinY"      : 1,
     "normalizeTo" : "One",
@@ -68,7 +68,7 @@ hNames = [
 #================================================================================================
 def main():
 
-    style    = tdrstyle.TDRStyle()
+    style = tdrstyle.TDRStyle()
     #style.setWide(True)
     style.setPaletteMy()
     ROOT.gStyle.SetNumberContours(20)
@@ -116,8 +116,8 @@ def main():
         # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetRangeUser(1.0, 5.0))
         # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetRangeUser(1.0, 5.0))
         # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetZaxis().SetRangeUser(0.0, 0.015))
-        #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMinimum(kwargs.get("zMin")))
-        #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMaximum(kwargs.get("zMax")))
+        # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMinimum(kwargs.get("zMin")))
+        # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMaximum(kwargs.get("zMax")))
 
         
         # Create a frame

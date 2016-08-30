@@ -190,6 +190,12 @@ def main():
     # Default merging & ordering: "Data", "QCD", "SingleTop", "Diboson"
     plots.mergeRenameReorderForDataMC(datasetsMgr) #WARNING: Merged MC histograms must be normalized to something!
 
+    # Remove datasets (for merged names)
+    datasetsMgr.remove(kwargs.get("rmDataset"))
+    # datasetsMgr.remove(filter(lambda name: not "QCD" in name, datasetsMgr.getAllDatasetNames()))
+    # datasetsMgr.remove(filter(lambda name: "QCD" in name in name, datasetsMgr.getAllDatasetNames()))
+
+    
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
     
