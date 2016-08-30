@@ -45,8 +45,8 @@ styleDict = {
     "QCD_Pt_1800to2400": styles.qcdFillStyle, 
     "QCD_Pt_2400to3200": styles.qcdFillStyle, 
     "QCD_Pt_3200toInf" : styles.qcdFillStyle,
-    #"TT"               : styles.ttStyle,
-    "TT"               : styles.ewkStyle,
+    "TT"               : styles.ttStyle,
+    #"TT"               : styles.ewkStyle,
 }
 
 
@@ -67,27 +67,30 @@ def SetLogAndGrid(p, **kwargs):
     ratio = kwargs.get("createRatio")
     logX  = kwargs.get("logX")
     logY  = kwargs.get("logY")
+    logZ  = kwargs.get("logZ")
     gridX = kwargs.get("gridX")
     gridY = kwargs.get("gridY")
     
     if ratio:
-        p.getPad1().SetLogy(logY)
         p.getPad1().SetLogx(logX)
+        p.getPad1().SetLogy(logY)
         #
-        p.getPad2().SetLogy(logY)
         p.getPad2().SetLogx(logX)
+        p.getPad2().SetLogy(logY)
         #
         p.getPad1().SetGridx(gridX)
         p.getPad1().SetGridy(gridY)
+        #
         p.getPad2().SetGridx(gridX)
         p.getPad2().SetGridy(gridY)
     else:
-        p.getPad().SetLogy(logY)
         p.getPad().SetLogx(logX)
+        p.getPad().SetLogy(logY)
+        p.getPad().SetLogz(logZ)
         p.getPad().SetGridx(gridX)
         p.getPad().SetGridy(gridY)
+    return
 
-            
     
 def GetSavePath(**kwargs):
     '''
@@ -553,8 +556,10 @@ def SaveAs(p, savePath, saveName, saveFormats):
 
         # Change print name if saved under html
         if "html" in sName:
-            sName = sName.replace("/afs/cern.ch/user/%s/" % (initial), "http://cmsdoc.cern.ch/~")
-            sName = sName.replace("%s/public/html/" % (user), "%s/" % (user))
+            user    = getpass.getuser()
+            initial = getpass.getuser()[0]
+            sName   = sName.replace("/afs/cern.ch/user/%s/" % (initial), "http://cmsdoc.cern.ch/~")
+            sName   = sName.replace("%s/public/html/" % (user), "%s/" % (user))
             
         # Print save name
         print "\t", sName
@@ -660,32 +665,69 @@ def NormalizeRootHisto(rootHisto, isMC, normalizeTo):
     return
 
 
-def getTitleY(histo, titleY=None, **kwargs):
+def getTitleX(histo, title=None, **kwargs):
     '''
     '''
     HasKeys(["normalizeTo"], **kwargs)
 
-    if titleY == None:
-        titleY = getSymbolY(kwargs.get("normalizeTo"))
+    if title == None:
+        title = histo.getRootHisto().GetXaxis().GetTitle()
         
     if isinstance(histo, (ROOT.TGraphAsymmErrors, ROOT.TGraph)):
-        return titleY
+        return title
     
     # Include the binwidth in the y-title
-    #binWidthY = histo.getHistogram().GetXaxis().GetBinWidth(1)
-    binWidthY = histo.getRootHisto().GetXaxis().GetBinWidth(1)
+    binWidth = histo.getRootHisto().GetYaxis().GetBinWidth(1)
     
-    if binWidthY < 1:
-        titleY    = titleY + " / %0.1f" %  float(binWidthY)
-    elif binWidthY < 0.1:
-        titleY    = titleY + " / %0.2f" %  float(binWidthY)
-    elif binWidthY < 0.01:
-        titleY    = titleY + " / %0.3f" %  float(binWidthY)
+    if binWidth < 1:
+        title    = title + " / %0.1f" %  float(binWidth)
+    elif binWidth < 0.1:
+        title    = title + " / %0.2f" %  float(binWidth)
+    elif binWidth < 0.01:
+        title    = title + " / %0.3f" %  float(binWidth)
     else:
-        titleY    = titleY + " / %0.0f" %  float(binWidthY)
-    return titleY
+        title    = title + " / %0.0f" %  float(binWidth)
+    return title
 
 
+def getTitleY(histo, title=None, **kwargs):
+    '''
+    '''
+    HasKeys(["normalizeTo"], **kwargs)
+
+    if title == None:
+        title = getSymbolY(kwargs.get("normalizeTo"))
+        
+    if isinstance(histo, (ROOT.TGraphAsymmErrors, ROOT.TGraph)):
+        return title
+    
+    # Include the binwidth in the title
+    binWidth = histo.getRootHisto().GetXaxis().GetBinWidth(1)
+    
+    if binWidth < 1:
+        title    = title + " / %0.1f" %  float(binWidth)
+    elif binWidth < 0.1:
+        title    = title + " / %0.2f" %  float(binWidth)
+    elif binWidth < 0.01:
+        title    = title + " / %0.3f" %  float(binWidth)
+    else:
+        title    = title + " / %0.0f" %  float(binWidth)
+    return title
+
+
+def getTitleZ(histo, title=None, **kwargs):
+    '''
+    '''
+    HasKeys(["normalizeTo"], **kwargs)
+    
+    if title == None:
+        title = getSymbolY(kwargs.get("normalizeTo"))
+    return title
+        
+    if isinstance(histo, (ROOT.TGraphAsymmErrors, ROOT.TGraph)):
+        return title
+
+    
 def getSymbolY(normalizeTo):
     IsValidNorm(normalizeTo)
     NormToSymbols = {"One": "Arbitrary Units", "Luminosity": "Events", "": "Arbitrary Units", "XSection": "#sigma [pb]"}
