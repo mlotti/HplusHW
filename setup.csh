@@ -28,6 +28,8 @@ if ( $LOCATION == "" ) then
         set LOCATION="lxplus"
     else if (`hostname` =~ "Mac"* ) then
 	set LOCATION="mac"
+    else if (`hostname` =~ *".cern.ch" ) then #Example: p06109780e53561.cern.ch
+	set LOCATION="lxbatch"
     endif
 endif
 
@@ -37,7 +39,7 @@ setenv HIGGSANALYSIS_BASE $PWD
 
 
 set LD_LIBRARY_PATH_APPEND=""
-if ( $LOCATION == "lxplus" ) then
+if ( $LOCATION == "lxplus" || $LOCATION == "lxbatch" ) then
     echo "\n=== Sourcing $LOCATION environments (Hand-picked from CMSSW_7_6_5)"
     echo "To update:"
     echo "1) create a developer area (cmsrel):"

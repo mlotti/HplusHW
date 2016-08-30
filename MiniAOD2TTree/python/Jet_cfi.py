@@ -20,14 +20,11 @@ Jets = cms.VPSet(
         srcJERdown = cms.InputTag("shiftedPatJetResDown"),
 #        jecPayload = JECpayloadAK4PFchs.payload,
 
-        discriminators = cms.vstring(
-            "pfJetBProbabilityBJetTags",
-            "pfJetProbabilityBJetTags",
-            #"pfCombinedSecondaryVertexBJetTags",
-            #"pfCombinedInclusiveSecondaryVertexBJetTags",
-            #"combinedInclusiveSecondaryVertexV2BJetTags", # for 72x
-            "pfCombinedInclusiveSecondaryVertexV2BJetTags", # for 74x
-            "pfCombinedMVABJetTag",
+        discriminators = cms.vstring( #https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X
+            "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+            "pfCombinedMVAV2BJetTags", 
+            "pfCombinedCvsLJetTags", 
+            "pfCombinedCvsBJetTags"
         ),
         userFloats = cms.vstring(
 #           "pileupJetId:fullDiscriminant"
