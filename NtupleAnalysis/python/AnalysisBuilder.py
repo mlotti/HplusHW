@@ -53,6 +53,11 @@ class AnalysisConfig:
                 elif value.startswith("METTrgEff"):
                     variationType = value.replace("METTrgEff","").replace("Minus","").replace("Plus","")
                     scaleFactors.assignMETTriggerSF(self._config.METSelection, self._config.BJetSelection.bjetDiscrWorkingPoint, self._getDirectionString(value), variationType)
+
+                # tau ID syst
+                elif value.startswith("TauIDSyst"):
+                    self._config.systematicVariation = "_"+value.replace("Plus","down").replace("Minus","up")
+
 		# b tag SF
 		elif value.startswith("BTagSF") or value.startswith("BMistagSF"):
                     variationType = None
@@ -145,7 +150,7 @@ class AnalysisBuilder:
               #items.extend(["L1ETMDataEff", "L1ETMMCEff"])
               items.extend(["METTrgEffData", "METTrgEffMC"])
               # Tau ID variation systematics
-              items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet"])
+              items.extend(["FakeTauElectron", "FakeTauMuon", "FakeTauJet", "TauIDSyst"])
               # Energy scales and JER systematics
               items.extend(["TauES", "JES", "JER", "UES"])
               # b quark systematics

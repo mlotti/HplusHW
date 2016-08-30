@@ -38,7 +38,7 @@ BTagSFInputItem::BTagSFInputItem(float ptMin, float ptMax, float eff)
 BTagSFInputItem::~BTagSFInputItem() { }
 
 const bool BTagSFInputItem::matchesPtRange(float pt) const { 
-  if (pt > fPtMin) {
+  if (pt >= fPtMin) {
     if (bIsOverflowBinPt || pt <= fPtMax) {
       return true;
     }
@@ -103,7 +103,8 @@ const float BTagSFInputStash::getInputValueByPt(BTagJetFlavorType flavor, float 
     }
   }
   //std::cout << "***" << getConstCollection(flavor).size() << std::endl;
-  throw hplus::Exception("Logic") << "Jet pt " << pt << " flavor " << flavor << " is out of range for btag SF calculation!";
+//  throw hplus::Exception("Logic") << "Jet pt " << pt << " flavor " << flavor << " is out of range for btag SF calculation!";
+  std::cout << "Warning: Jet pt " << pt << " flavor " << flavor << " is out of range for btag SF calculation!";
   return 1.0;
 }
 

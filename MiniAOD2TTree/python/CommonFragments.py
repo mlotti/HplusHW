@@ -93,9 +93,43 @@ def reproduceMETNoiseFilters(process):
     # Do not apply EDfilters for HBHE noise, the discriminators for them are saved into the ttree
     process.CustomisationsSequence += process.HBHENoiseFilterResultProducer
 
-# ===== Set up MET uncertainties - FIXME: does not work at the moment =====
+# ===== Set up MET uncertainties =====
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#A_tool_to_help_you_calculate_MET
 def reproduceMET(process,isdata):
+
+    from CondCore.DBCommon.CondDBSetup_cfi import *
+    import os
+
+    jerera="Fall15_25nsV2"
+
+##___________________________External JER file________________________________||
+    
+    process.jer = cms.ESSource("PoolDBESSource",CondDBSetup,
+#                               connect = cms.string("sqlite:PhysicsTools/PatUtils/data/JER/"+jerera+"_MC.db"),
+                               connect = cms.string("sqlite:"+jerera+"_MC_JER.db"),
+                               toGet =  cms.VPSet(
+        #######
+        ### read the PFchs  
+
+        cms.PSet(
+          record = cms.string('JetResolutionRcd'),
+          tag    = cms.string('JR_'+jerera+'_MC_PtResolution_AK4PFchs'),
+          label  = cms.untracked.string('AK4PFchs_pt')
+          ),
+        cms.PSet(
+          record = cms.string("JetResolutionRcd"),
+          tag    = cms.string('JR_'+jerera+'_MC_PhiResolution_AK4PFchs'),
+          label  = cms.untracked.string("AK4PFchs_phi")
+          ),
+        cms.PSet( 
+          record = cms.string('JetResolutionScaleFactorRcd'),
+          tag    = cms.string('JR_'+jerera+'_MC_SF_AK4PFchs'),
+          label  = cms.untracked.string('AK4PFchs')
+          ),
+
+        ) )
+                  
+    process.es_prefer_jer = cms.ESPrefer("PoolDBESSource",'jer')
 
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
     
@@ -105,26 +139,26 @@ def reproduceMET(process,isdata):
                            isData=isdata,
                            )
 
-    process.selectedPatJetsForMetT1T2Corr.src = cms.InputTag("cleanedPatJets")
-    process.patPFMetT1.src = cms.InputTag("slimmedMETs")
+#    process.selectedPatJetsForMetT1T2Corr.src = cms.InputTag("cleanedPatJets")
+#    process.patPFMetT1.src = cms.InputTag("slimmedMETs")
+#
+#    process.CustomisationsSequence += process.patJetCorrFactorsReapplyJEC 
+#    process.CustomisationsSequence += process.patJetsReapplyJEC
+#    process.CustomisationsSequence += process.basicJetsForMet
+#    process.CustomisationsSequence += process.jetSelectorForMet
+#    process.CustomisationsSequence += process.cleanedPatJets
+#    process.CustomisationsSequence += process.metrawCalo
+#    process.CustomisationsSequence += process.selectedPatJetsForMetT1T2Corr   
+#    process.CustomisationsSequence += process.patPFMetT1T2Corr
+#    process.CustomisationsSequence += process.patPFMetT1
 
-    process.CustomisationsSequence += process.patJetCorrFactorsReapplyJEC 
-    process.CustomisationsSequence += process.patJetsReapplyJEC
-    process.CustomisationsSequence += process.basicJetsForMet
-    process.CustomisationsSequence += process.jetSelectorForMet
-    process.CustomisationsSequence += process.cleanedPatJets
-    process.CustomisationsSequence += process.metrawCalo
-    process.CustomisationsSequence += process.selectedPatJetsForMetT1T2Corr   
-    process.CustomisationsSequence += process.patPFMetT1T2Corr
-    process.CustomisationsSequence += process.patPFMetT1
-
-    process.CustomisationsSequence += process.patMetCorrectionSequence
+#    process.CustomisationsSequence += process.patMetCorrectionSequence
 
     if isdata:
         return
 
-    process.CustomisationsSequence += process.patMetUncertaintySequence #only for MC
-    process.CustomisationsSequence += process.patShiftedModuleSequence #only for MC
+#    process.CustomisationsSequence += process.patMetUncertaintySequence #only for MC
+#    process.CustomisationsSequence += process.patShiftedModuleSequence #only for MC
 
 
     """    

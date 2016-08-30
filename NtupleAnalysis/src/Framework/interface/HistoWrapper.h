@@ -263,6 +263,9 @@ public:
     }
   }
 
+  double UnprotectedGetWeight() const { return fHistoWrapper.getWeight(); }
+
+
 protected: 
   double getWeight() const { return fHistoWrapper.getWeight(); }
   
