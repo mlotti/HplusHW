@@ -75,7 +75,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
-	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
+	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
 	TriggerBits = cms.vstring(
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_v",
 	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",

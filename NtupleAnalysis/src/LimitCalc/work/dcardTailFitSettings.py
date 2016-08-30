@@ -40,7 +40,7 @@ fitSettings = [
     },
     # Fit settings for EWK+tt with taus from data
     {
-        "id": "EWK_Tau",
+        "id": "CMS_Hptntj_EWK_t_genuine",
         #"fitfunc": "FitFuncSimpleExp",
         #"fitfunc": "FitFuncExpTailExo",
         "fitfunc": function,
@@ -50,7 +50,7 @@ fitSettings = [
     },
     # Fit settings for EWK+tt with taus from MC
     {
-        "id": "genuinetau",
+        "id": "CMS_Hptntj_ttbar_and_singleTop_t_genuine",
         "fitfunc": function,
         "fitmin": fitstart, # 140
         "fitmax": fitstop,
@@ -70,6 +70,6 @@ fitSettings = [
 
 # List of backgrounds, for which no fit is done
 Blacklist = [
-    "CMS_Hptntj_DY_genuinetau","DY_genuinetau", #blacklisted because contribution from DY is ~zero above mT=180 GeV (=fitstart=applyfrom)
+#    "CMS_Hptntj_DY_genuinetau","DY_genuinetau", #blacklisted because contribution from DY is ~zero above mT=180 GeV (=fitstart=applyfrom)
 #    "CMS_Hptntj_W_genuinetau","W_genuinetau", #FIXME: temporarily blacklisted to get rid of errors
 ]

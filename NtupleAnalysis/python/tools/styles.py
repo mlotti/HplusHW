@@ -203,13 +203,6 @@ errorStyle3 = StyleCompound([StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-
 errorRatioStatStyle = StyleCompound([StyleError(ROOT.kGray, 1001, linecolor=ROOT.kGray)])
 errorRatioSystStyle = StyleCompound([StyleError(ROOT.kGray+1, 1001, linecolor=ROOT.kGray+1)])
 
-effGreaterThanStyle = StyleCompound([
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen-3, markerSizes=None, markerStyle=ROOT.kFullCircle),
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kGreen-3) ])
-effLessThanStyle    = StyleCompound([
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullSquare),
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kBlue) ])
-
 ratioStyle = dataStyle.clone()
 ratioLineStyle = StyleCompound([StyleLine(lineColor=ROOT.kRed, lineWidth=2, lineStyle=3)])
 
@@ -255,20 +248,28 @@ signal300Style = StyleCompound([
         StyleFill(fillStyle=1001, fillColor=ROOT.kRed), 
         StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kRed) ])
 signal350Style = signalStyle.clone()
-signal400Style = StyleCompound([
-        Style(ROOT.kFullTriangleDown, ROOT.kSpring+5), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kSpring+5, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kSpring+5), 
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kSpring+5) ])
-signal500Style = StyleCompound([
-        Style(ROOT.kFullCircle, ROOT.kOrange+7), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+7, markerSizes=None, markerStyle=ROOT.kFullCircle),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kOrange+7), 
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kOrange+7) ])
-signal600Style  = signalStyle.clone()
+#signal400Style = StyleCompound([
+#        Style(ROOT.kFullTriangleDown, ROOT.kSpring+5), 
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kSpring+5, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kSpring+5), 
+#        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kSpring+5) ])
+#signal500Style = StyleCompound([
+#        Style(ROOT.kFullCircle, ROOT.kOrange+7), 
+#        StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+7, markerSizes=None, markerStyle=ROOT.kFullCircle),
+#        StyleFill(fillStyle=1001, fillColor=ROOT.kOrange+7), 
+#        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kOrange-7) ])
+#signal600Style  = signalStyle.clone()
+signal400Style = signalStyle.clone()
+signal500Style = signalStyle.clone()
+signal600Style = signalStyle.clone()
+signal700Style = signalStyle.clone()
+signal750Style = signalStyle.clone()
+signal1000Style = signalStyle.clone()
 signal1500Style = signalStyle.clone()
+signal2000Style = signalStyle.clone()
+signal3000Style = signalStyle.clone()
 
-qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2) 
+qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
 ewkStyle = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)
 qcdFillStyle = StyleCompound([StyleFill(fillColor=ROOT.kOrange-2)])
 ewkFillStyle = StyleCompound([StyleFill(fillColor=ROOT.kMagenta-2)])
