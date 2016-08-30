@@ -34,7 +34,7 @@ kwargs = {
     #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/signal/",
     "savePath"       : None,
     "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200",
-    "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300", "ChargedHiggs_HplusTB_HplusToTB_M_500"], #"QCD"],
+    "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"], #"QCD"],
     "saveFormats"    : [".png"],# ".pdf"],
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "createRatio"    : False,
@@ -42,8 +42,8 @@ kwargs = {
     "logY"           : False,
     "gridX"          : True,
     "gridY"          : True,
-    "drawStyle"      : "P", # "P",  #"HIST9"
-    "legStyle"       : "LP",     # "LP", "F"
+    "drawStyle"      : "HIST9", # "P",  #"HIST9"
+    "legStyle"       : "F",     # "LP", "F"
     "verbose"        : False,
     "cutValue"       : 5,
     "cutBox"         : False,
@@ -151,7 +151,7 @@ def main():
         p.createFrame(saveName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
         
         # Customise Legend
-        moveLegend = {"dx": -0.1, "dy": +0.0, "dh": -0.2}
+        moveLegend = {"dx": -0.1, "dy": +0.0, "dh": -0.1}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
         #p.removeLegend()
 
@@ -169,6 +169,10 @@ def main():
         _kwargs = { "lessThan": kwargs.get("cutLessThan")}
         p.addCutBoxAndLine(cutValue=kwargs.get("cutValue"), fillColor=kwargs.get("cutFillColour"), box=kwargs.get("cutBox"), line=kwargs.get("cutLine"), **_kwargs)
         
+        # Move the refDataset to first in the draw order (back)
+        histoNames = [h.getName() for h in p.histoMgr.getHistos()]
+        p.histoMgr.reorder(filter(lambda n: plots._legendLabels[kwargs.get("refDataset") ] not in n, histoNames))
+
         #  Draw plots
         p.draw()
 
