@@ -34,6 +34,7 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'miniAOD2TTree_cfg.py'
 config.JobType.pyCfgParams = ''
 config.JobType.outputFiles = ['miniaod2tree.root']
+config.JobType.inputFiles = ['Spring16_25nsV6_DATA_JEC.db','Spring16_25nsV6_MC_JEC.db','Spring16_25nsV6_MC_JER.db']
 # options:
 #config.JobType.generator
 #config.JobType.inputFiles

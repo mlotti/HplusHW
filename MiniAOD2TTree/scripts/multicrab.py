@@ -939,7 +939,8 @@ def GetRequestName(dataset):
     tune_re        = re.compile("(?P<name>\S+)_Tune")
     tev_re         = re.compile("(?P<name>\S+)_13TeV")
     ext_re         = re.compile("(?P<name>_ext\d+)-")
-    runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON(?P<Silver>(_\S+|))\.")
+    runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_")
+    # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON(?P<Silver>(_\S+|))\.")
     # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON")
     # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15_(?P<BunchSpacing>\d+ns)_JSON_v")
     
@@ -978,15 +979,15 @@ def GetRequestName(dataset):
 	if runRangeMatch:
 	    runRange= runRangeMatch.group("RunRange")
 	    runRange = runRange.replace("-","_")
-	    bunchSpace = runRangeMatch.group("BunchSpacing")
-	    requestName += "_" + runRange + bunchSpace
-	    Ag = runRangeMatch.group("Silver")
-	    if Ag == "_Silver": # Use  chemical element of silver (Ag)
-		requestName += Ag
+	    #bunchSpace = runRangeMatch.group("BunchSpacing")
+	    requestName += "_" + runRange #+ bunchSpace
+	    #Ag = runRangeMatch.group("Silver")
+	    #if Ag == "_Silver": # Use  chemical element of silver (Ag)
+            #    requestName += Ag
 
     # Finally, replace dashes with underscores    
     requestName = requestName.replace("-","_")
-    
+
     return requestName
 
 

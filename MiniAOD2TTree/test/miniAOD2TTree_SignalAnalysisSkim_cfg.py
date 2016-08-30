@@ -20,6 +20,12 @@ process.MessageLogger.categories.append("TriggerBitCounter")
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000 # print the event number for every 100th event
 process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.untracked.int32(10)) # print max 100 warnings
 
+# Set the process options -- Display summary at the end, enable unscheduled execution
+process.options = cms.untracked.PSet(
+    allowUnscheduled = cms.untracked.bool(True),
+    wantSummary = cms.untracked.bool(False)
+)
+
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #       '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
