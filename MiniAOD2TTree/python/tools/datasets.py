@@ -39,9 +39,12 @@ datasetsTauData.append(Dataset('/Tau/Run2016F-PromptReco-v1/MINIAOD', dataVersio
 #datasetsTauData.append(Dataset('/Tau/Run2016G-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask=))
 
 datasetsJetHTData = []
-das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FJetHT%2FRun2016*-PromptReco-v2%2FMINIAOD"
+das = "https://cmsweb.cern.ch/das/request?instance=prod%2Fglobal&limit=50&input=dataset%3D%2FJetHT%2FRun2016%2A-PromptReco-v2%2FMINIAOD&view=list"
 datasetsJetHTData.append(Dataset('/JetHT/Run2016B-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
-#datasetsJetHTData.append(Dataset('/JetHT/Run2016C-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsJetHTData.append(Dataset('/JetHT/Run2016C-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsJetHTData.append(Dataset('/JetHT/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsJetHTData.append(Dataset('/JetHT/Run2016E-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das))
+datasetsJetHTData.append(Dataset('/JetHT/Run2016F-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das))
 
 
 datasetsMuonData = []
@@ -58,9 +61,16 @@ datasetsTop = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTT_TuneCUETP8M1_13TeV-powheg-pythia8%2FRunII*16MiniAODv2-*%2FMINIAODSIM"
 datasetsTop.append(Dataset('/TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext3-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
+
+datasetsTTJets = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset+dataset%3D%2FTTJets*%2FRunII*16MiniAODv2-*_reHLT_*%2FMINIAODSIM"
+datasetsTTJets.append(Dataset('/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das)) # less stats && -ve weights
+
+
 datasetsDY = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FDY*%2FRunII*16MiniAODv2-*_reHLT_*%2FMINIAODSIM"
 datasetsDY.append(Dataset('/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
 
 datasetsWJets = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWJets*%2FRunII*16MiniAODv2-*_reHLT_*%2FMINIAODSIM"
@@ -136,13 +146,13 @@ datasetsSignalTauNu.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-3000_13
 
 datasetsSignalTB = []
 das = " https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FChargedHiggs_HplusTB_HplusToTB_M-*%2FRunII*16MiniAODv2-*%2FMINIAODSIMa"
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-200_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-220_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-250_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-220_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-250_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-300_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-350_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-400_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-350_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+#datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-400_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 
@@ -195,19 +205,21 @@ hplus2tbAnalysisDatasets.extend(datasetsQCD)
 ## hplus2tbAnalysisDatasets.extend(datasetsQCDbGenFilter)
 ## hplus2tbAnalysisDatasets.extend(datasetsQCDHTBins)
 hplus2tbAnalysisDatasets.extend(datasetsTop)
-## h plus2tbAnalysisDatasets.extend(datasetsTT)
+# hplus2tbAnalysisDatasets.extend(datasetsTTJets) #less stas && -ve weights (tmp until we add trigger)
+## hplus2tbAnalysisDatasets.extend(datasetsTT)
 ## hplus2tbAnalysisDatasets.extend(datasetsGGJets)
 ## hplus2tbAnalysisDatasets.extend(datasetsGJets)
 ## hplus2tbAnalysisDatasets.extend(datasetsTGJets)
 ## hplus2tbAnalysisDatasets.extend(datasetsTTGJets)     
 ## hplus2tbAnalysisDatasets.extend(datasetsTTJets)
 ## hplus2tbAnalysisDatasets.extend(datasetsTTJetsHT)    
-# hplus2tbAnalysisDatasets.extend(datasetsTTWJets)
+# hplus2tbAnalysisDatasets.extend(datasetsTTDWJets)
 # hplus2tbAnalysisDatasets.extend(datasetsTTZJets)
 # hplus2tbAnalysisDatasets.extend(datasetsTTWJetsToQQ)  
 # hplus2tbAnalysisDatasets.extend(datasetsTTTT)  
 # hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ)
-# hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ)    
+# hplus2tbAnalysisDatasets.extend(datasetsWJets)
+# hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ)
 # hplus2tbAnalysisDatasets.extend(datasetsZJetsToQQ)    
 # hplus2tbAnalysisDatasets.extend(datasetsDiboson) #    
 ## hplus2tbAnalysisDatasets.extend(datasetsDibosonG)    

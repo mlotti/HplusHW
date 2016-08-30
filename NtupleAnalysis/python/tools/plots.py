@@ -124,6 +124,7 @@ _physicalToLogical.update({
     "DYJetsToLL_M_50_HT_400to600": "DYJetsToLL_M_50_HT_400to600",
     "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLL_M_50_HT_600toInf",
     
+    "QCD_Pt_15to30":   "QCD_Pt_15to30",
     "QCD_Pt_30to50":   "QCD_Pt_30to50",
     "QCD_Pt_50to80":   "QCD_Pt_50to80",
     "QCD_Pt_80to120":  "QCD_Pt_80to120",
@@ -171,6 +172,7 @@ _lightSignalMerge = {}
     #_lightSignalMerge["Hplus_taunu_M%d" % mass] = "TTOrTToHplus_M%d"%mass
 
 _datasetMerge = {
+    "QCD_Pt_15to30":   "QCD",
     "QCD_Pt_30to50":   "QCD",
     "QCD_Pt_50to80":   "QCD",
     "QCD_Pt_80to120":  "QCD",
@@ -294,6 +296,7 @@ _legendLabels = {
     "EWK":                   "EWK",
 
 
+    "QCD_Pt15to30":          "QCD, 15 < #hat{p}_{T} < 30",
     "QCD_Pt30to50":          "QCD, 30 < #hat{p}_{T} < 50",
     "QCD_Pt50to80":          "QCD, 50 < #hat{p}_{T} < 80",
     "QCD_Pt80to120":         "QCD, 80 < #hat{p}_{T} < 120",
@@ -308,6 +311,24 @@ _legendLabels = {
     "QCD_Pt1800to2400":      "QCD, 2400 < #hat{p}_{T} < 2400",
     "QCD_Pt2400to3200":      "QCD, 3200 < #hat{p}_{T} < 3200",
     "QCD_Pt3200toInf":       "QCD, #hat{p}_{T} > 3200",
+
+    
+    "QCD_Pt_15to30":          "QCD, 15 < #hat{p}_{T} < 30",
+    "QCD_Pt_30to50":          "QCD, 30 < #hat{p}_{T} < 50",
+    "QCD_Pt_50to80":          "QCD, 50 < #hat{p}_{T} < 80",
+    "QCD_Pt_80to120":         "QCD, 80 < #hat{p}_{T} < 120",
+    "QCD_Pt_120to170":        "QCD, 120 < #hat{p}_{T} < 170",
+    "QCD_Pt_170to300":        "QCD, 170 < #hat{p}_{T} < 300",
+    "QCD_Pt_300to470":        "QCD, 300 < #hat{p}_{T} < 470",
+    "QCD_Pt_470to600":        "QCD, 470 < #hat{p}_{T} < 600",
+    "QCD_Pt_600to800":        "QCD, 600 < #hat{p}_{T} < 800",
+    "QCD_Pt_800to1000":       "QCD, 800 < #hat{p}_{T} < 1000",
+    "QCD_Pt_1000to1400":      "QCD, 1400 < #hat{p}_{T} < 1400",
+    "QCD_Pt_1400to1800":      "QCD, 1800 < #hat{p}_{T} < 1800",
+    "QCD_Pt_1800to2400":      "QCD, 2400 < #hat{p}_{T} < 2400",
+    "QCD_Pt_2400to3200":      "QCD, 3200 < #hat{p}_{T} < 3200",
+    "QCD_Pt_3200toInf":       "QCD, #hat{p}_{T} > 3200",
+    "QCD"            :        "QCD",
 
     "QCDdata": "QCD (data driven)",
 
@@ -350,6 +371,7 @@ for mass in _lightHplusMasses:
     _legendLabels["TTOrTToHplus_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 for mass in _heavyHplusMasses:
     _legendLabels["HplusTB_M%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
+    _legendLabels["ChargedHiggs_HplusTB_HplusToTB_M_%d"%mass] = "H^{+} m_{H^{+}}=%d GeV" % mass
 for mass in _heavyHplusToTBbarMasses:
     _legendLabels["HplusToTBbar_M%d"%mass] = "H^{+}#rightarrowtb m_{H^{+}}=%d GeV" % mass
     
@@ -1501,6 +1523,24 @@ class PlotBase:
 
         for f in formats:
             self.cf.canvas.SaveAs(self.cf.canvas.GetName()+f)
+
+        ROOT.gErrorIgnoreLevel = backup
+        
+    ## Save the plot to file(s)
+    #
+    # \param formats   Save to these formats (if not given, the values
+    #                  given in the constructor and in
+    #                  appendSaveFormat() are used
+    # \param saveName  Alternative name for saving
+    def saveAs(self, saveName, formats=None):
+        if formats == None:
+            formats = self.saveFormats
+
+        backup = ROOT.gErrorIgnoreLevel
+        ROOT.gErrorIgnoreLevel = ROOT.kWarning
+
+        for f in formats:
+            self.cf.canvas.SaveAs(saveName+f)
 
         ROOT.gErrorIgnoreLevel = backup
 
