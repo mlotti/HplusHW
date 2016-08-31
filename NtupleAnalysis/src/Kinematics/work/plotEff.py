@@ -41,23 +41,23 @@ import array
 kwargs = {
     "analysis"       : "Kinematics",
     "cutDirection"   : ">",
-    #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/signal/",
+    #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/all/",
     "savePath"       : None,
-    "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_500",
-    "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_200"], #["QCD"],
-    "saveFormats"    : [".png"], #, ".pdf"],
+    "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200",
+    "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"], #["QCD"],
+    "saveFormats"    : [".png"],#, ".pdf"],
     "normalizeTo"    : "XSection", #One", "XSection", "Luminosity"
-    "createRatio"    : True,
+    "createRatio"    : False,
     "logX"           : False,
     "logY"           : False,
     "gridX"          : True,
     "gridY"          : False,
-    "drawStyle"      : "CPE", 
+    "drawStyle"      : "CPE",  #CPE
     "legStyle"       : "LP", 
     "verbose"        : False,
-    "cutValue"       : 5,
+    "cutValue"       : 6,
     "cutBox"         : False,
-    "cutLine"        : False,
+    "cutLine"        : True,
     "cutLessthan"    : False,
     "cutFillColour"  : ROOT.kAzure-4,
 }
@@ -67,14 +67,14 @@ kwargs = {
 # Histograms
 #================================================================================================
 hNames  = [
-#    "genMET_Et",
-#    #"genMET_Phi",
-#    "genHT_GenJets",
+    #"genMET_Et",
+    #"genMET_Phi",
+    #"genHT_GenJets",
 #    "genHT_GenParticles",
     "SelGenJet_N_NoPreselections",
-#    "SelGenJet_N_AfterLeptonVeto",
-#    "SelGenJet_N_AfterLeptonVetoNJetsCut",
-#    "SelGenJet_N_AfterPreselections", 
+    #"SelGenJet_N_AfterLeptonVeto",
+    #"SelGenJet_N_AfterLeptonVetoNJetsCut",
+    # "SelGenJet_N_AfterPreselections", 
 #    "MaxDiJetMass_Pt",
 #    "MaxDiJetMass_Eta",
 #    "MaxDiJetMass_Mass",
@@ -109,40 +109,32 @@ hNames  = [
 #    "gtt_tbW_bqq_dRMax_dPhi",
 ]
 
-kinVar  = ["Pt"] #, "Eta", "Rap"]
-distVar = ["dR", "dEta", "dRap", "dPhi"]
-#for var in kinVar:
-#    hNames.append("gtt_TQuark_"            + var)
-#    hNames.append("gbb_BQuark_"            + var)
-#    hNames.append("gtt_tbW_WBoson_"        + var)
-#    hNames.append("gtt_tbW_BQuark_"        + var)
-#    hNames.append("gtt_tbW_Wqq_Quark_"     + var)
-#    hNames.append("gtt_tbW_Wqq_AntiQuark_" + var)
-#    hNames.append("tbH_HPlus_"             + var)
-#    hNames.append("tbH_TQuark_"            + var)
-#    hNames.append("tbH_BQuark_"            + var)
-#    hNames.append("tbH_tbW_WBoson_"        + var)
-#    hNames.append("tbH_tbW_BQuark_"        + var)
-#    hNames.append("Htb_tbW_Wqq_Quark_"     + var)
-#    hNames.append("Htb_tbW_Wqq_AntiQuark_" + var)
-#    if var not in ["Rap"]:
-#        hNames.append("BQuark1_" + var)
-#        hNames.append("BQuark2_" + var)
-#        hNames.append("BQuark3_" + var)
-#        hNames.append("BQuark4_" + var)
-#        hNames.append("GenJet1_" + var)
-#        hNames.append("GenJet2_" + var)
-#        hNames.append("GenJet3_" + var)
-#        hNames.append("GenJet4_" + var)
-#        hNames.append("GenJet5_" + var)
-#        hNames.append("GenJet6_" + var)
-#        hNames.append("AL3CJetsFromHPlus_GenJet1_" + var)
-#        hNames.append("AL3CJetsFromHPlus_GenJet2_" + var)
-#        hNames.append("AL3CJetsFromHPlus_GenJet3_" + var)
-#        hNames.append("AL3CJetsFromHPlus_GenJet4_" + var)
-#        hNames.append("AL3CJetsFromHPlus_GenJet5_" + var)
-#        hNames.append("AL3CJetsFromHPlus_GenJet6_" + var)
-#for var in distVar:
+## for var in ["Pt"]: #, "Eta", "Rap"]
+## #    hNames.append("gtt_TQuark_"            + var)
+## #    hNames.append("gbb_BQuark_"            + var)
+## #    hNames.append("gtt_tbW_WBoson_"        + var)
+## #    hNames.append("gtt_tbW_BQuark_"        + var)
+## #    hNames.append("gtt_tbW_Wqq_Quark_"     + var)
+## #    hNames.append("gtt_tbW_Wqq_AntiQuark_" + var)
+## #    hNames.append("tbH_HPlus_"             + var)
+## #    hNames.append("tbH_TQuark_"            + var)
+## #    hNames.append("tbH_BQuark_"            + var)
+## #    hNames.append("tbH_tbW_WBoson_"        + var)
+## #    hNames.append("tbH_tbW_BQuark_"        + var)
+## #    hNames.append("Htb_tbW_Wqq_Quark_"     + var)
+## #    hNames.append("Htb_tbW_Wqq_AntiQuark_" + var)
+##     if var not in ["Rap"]:
+##         #hNames.append("BQuark1_" + var)
+##         #hNames.append("BQuark2_" + var)
+##         #hNames.append("BQuark3_" + var)
+##         #hNames.append("BQuark4_" + var)
+##         hNames.append("GenJet1_" + var)
+##         hNames.append("GenJet2_" + var)
+##         hNames.append("GenJet3_" + var)
+##         hNames.append("GenJet4_" + var)
+##         hNames.append("GenJet5_" + var)
+##         hNames.append("GenJet6_" + var)
+## #for var in ["dR", "dEta", "dRap", "dPhi"]:
 #    hNames.append("Htb_TQuark_Htb_BQuark_"                + var)
 #    hNames.append("Htb_TQuark_gtt_TQuark_"                + var)
 #    hNames.append("Htb_TQuark_gbb_BQuark_"                + var)
@@ -185,7 +177,8 @@ def main():
     # datasetsMgr.remove(filter(lambda name: "QCD" in name in name, datasetsMgr.getAllDatasetNames()))
     
     # Set custom XSections
-    # d.getDataset("TT_ext3").setCrossSection(831.76)
+    # datasetsMgr.getDataset("TT_ext3").setCrossSection(831.76)
+    
     
     # Default merging & ordering: "Data", "QCD", "SingleTop", "Diboson"
     plots.mergeRenameReorderForDataMC(datasetsMgr) #WARNING: Merged MC histograms must be normalized to something!
@@ -197,13 +190,15 @@ def main():
 
     
     # For-loop: All Histogram names
-    for counter, hName in enumerate(hNames):
+    for hName in hNames:
     
         savePath, saveName = GetSavePathAndName(hName, **kwargs)
     
         # Get efficiency histos
-        refEff, otherEff = GetCutEfficiencyTGraphs(datasetsMgr, hName, "C-P", **kwargs)
-        #refEff, otherEff = GetCutEfficiencyHistos(datasetsMgr, hName,  "C-P", **kwargs)
+        refEff, otherEff = GetCutEfficiencyTGraphs(datasetsMgr, hName, "kFCP", **kwargs)
+        # refEff, otherEff = GetCutEfficiencyTGraphs(datasetsMgr, hName, "kFFC", **kwargs)
+        # refEff, otherEff = GetCutEfficiencyTGraphs(datasetsMgr, hName, "kBJeffrey", **kwargs)
+        # refEff, otherEff = GetCutEfficiencyTGraphs(datasetsMgr, hName, "kFNormal", **kwargs)
 
         # Plot the efficiencies
         p = plots.ComparisonManyPlot(refEff, otherEff)        
@@ -214,12 +209,11 @@ def main():
         p.createFrame(saveName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
         
         # Customise Legend
-        moveLegend = {"dx": -0.1 , "dy": +0.0, "dh": -0.2}
+        moveLegend = {"dx": -0.1 , "dy": +0.0, "dh": -0.1}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
         #p.removeLegend()
         
         # Customise frame
-        p.getFrame().GetYaxis().SetTitle( getTitleY(refEff, titleY = "efficiency (%s)" % (kwargs.get("cutDirection")), **kwargs) )
         # p.setEnergy("13")
         if kwargs.get("createRatio"):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
@@ -232,6 +226,10 @@ def main():
         # Add cut line/box
         _kwargs = { "lessThan": kwargs.get("cutLessThan")}
         p.addCutBoxAndLine(cutValue=kwargs.get("cutValue"), fillColor=kwargs.get("cutFillColour"), box=kwargs.get("cutBox"), line=kwargs.get("cutLine"), **_kwargs)
+
+        # Move the refDataset to first in the draw order (back)
+        histoNames = [h.getName() for h in p.histoMgr.getHistos()]
+        p.histoMgr.reorder(filter(lambda n: plots._legendLabels[kwargs.get("refDataset") ] not in n, histoNames))
         
         #  Draw plots
         p.draw()

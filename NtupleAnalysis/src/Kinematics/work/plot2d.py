@@ -46,7 +46,7 @@ kwargs = {
     "logZ"           : True,
     "gridX"          : True,
     "gridY"          : True,
-    "drawStyle"      : "COLZ", #"CONT4" "COLZ" "COL"
+    "drawStyle"      : "COL", #"CONT4" "COLZ" "COL"
     "legStyle"       : "F",     # "LP", "F"
     "verbose"        : False,
     "cutValue"       : None,

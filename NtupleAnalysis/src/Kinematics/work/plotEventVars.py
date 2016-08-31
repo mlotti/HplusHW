@@ -31,11 +31,11 @@ import ROOT
 #================================================================================================
 kwargs = {
     "analysis"       : "Kinematics",
-    #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/signal/",
-    "savePath"       : None,
+    "savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/all/",
+    #"savePath"       : None,
     "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200",
     "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"], #"QCD"],
-    "saveFormats"    : [".png"],# ".pdf"],
+    "saveFormats"    : [".png", ".pdf"],
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "createRatio"    : False,
     "logX"           : False,

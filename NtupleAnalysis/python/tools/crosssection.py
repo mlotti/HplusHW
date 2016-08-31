@@ -423,6 +423,7 @@ def setBackgroundCrossSections(datasets, doWNJetsWeighting=True, quietMode=False
 
 def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMode=False):
     value = backgroundCrossSections.crossSection(dataset.getName().replace("_ext",""), dataset.getEnergy())
+    value = backgroundCrossSections.crossSection(dataset.getName().replace("_ext3",""), dataset.getEnergy())
     if value is None:
         if "ChargedHiggs" in dataset.getName():
             value = 1.0 # Force signal xsection to 1 pb
@@ -450,8 +451,8 @@ def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMo
             msg = "\n*** Note: signal is forced at the moment to 1 pb in NtupleAnalysis/python/tools/crossection.py"
         if not quietMode:
             print txtAlign.format("Setting", dataset.getName(), "cross section to ", "%0.6f" %(value), "pb", msg)
-#    else:
-#        print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy())
+    else:
+        print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy())
 
 
 ########################################

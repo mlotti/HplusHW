@@ -8,6 +8,7 @@ import sys
 from optparse import OptionParser
 import getpass
 import socket
+import math
 
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
@@ -86,7 +87,8 @@ def SetLogAndGrid(p, **kwargs):
     else:
         p.getPad().SetLogx(logX)
         p.getPad().SetLogy(logY)
-        p.getPad().SetLogz(logZ)
+        if logZ != None:
+            p.getPad().SetLogz(logZ)
         p.getPad().SetGridx(gridX)
         p.getPad().SetGridy(gridY)
     return
@@ -151,7 +153,7 @@ def GetSavePathAndName(hName, **kwargs):
 
 
 
-def GetCutEfficiencyTGraphs(datasetsMgr, histoName, statOpt="C-P", **kwargs):
+def GetCutEfficiencyTGraphs(datasetsMgr, histoName, statOpt, **kwargs):
     '''
     '''
     HasKeys(["refDataset", "drawStyle", "legStyle", "cutDirection"], **kwargs)
@@ -162,7 +164,7 @@ def GetCutEfficiencyTGraphs(datasetsMgr, histoName, statOpt="C-P", **kwargs):
     legStyle     = kwargs.get("legStyle")
     legLabel     = plots._legendLabels[refDataset]
     
-    refHisto, otherHistos = GetCutEfficiencyHistos(datasetsMgr, histoName, statOpt="C-P", **kwargs)
+    refHisto, otherHistos = GetCutEfficiencyHistos(datasetsMgr, histoName, statOpt, **kwargs)
     refGraph = histograms.HistoGraph(refHisto, legLabel, legStyle, drawStyle)
 
     # For-loop: All efficiency histos
@@ -179,7 +181,7 @@ def GetCutEfficiencyTGraphs(datasetsMgr, histoName, statOpt="C-P", **kwargs):
 
 
 
-def GetCutEfficiencyHistos(datasetsMgr, histoName, statOpt="C-P", **kwargs):
+def GetCutEfficiencyHistos(datasetsMgr, histoName, statOpt, **kwargs):
     '''
     '''
     HasKeys(["verbose", "refDataset", "cutDirection"], **kwargs)
@@ -190,7 +192,7 @@ def GetCutEfficiencyHistos(datasetsMgr, histoName, statOpt="C-P", **kwargs):
    # For-loop: All dataset objects            
     for d in datasetsMgr.getAllDatasets():
 
-        histo = GetCutEfficiencyHisto(datasetsMgr.getDataset(d.getName()), histoName, **kwargs)
+        histo = GetCutEfficiencyHisto(datasetsMgr.getDataset(d.getName()), histoName, statOpt, **kwargs)
         if d.getName() == refDataset:
             refHisto = histo
         else:
@@ -199,83 +201,124 @@ def GetCutEfficiencyHistos(datasetsMgr, histoName, statOpt="C-P", **kwargs):
 
     
     
-def GetCutEfficiencyHisto(dataset, histoName, statOpt="C-P", **kwargs):
+def GetCutEfficiencyHisto(dataset, histoName, statOpt, **kwargs):
     '''
+    See https://root.cern.ch/doc/master/classTEfficiency.html
     '''
     HasKeys(["verbose", "normalizeTo", "cutDirection"], **kwargs)
     verbose     = kwargs.get("verbose")
     normalizeTo = kwargs.get("normalizeTo")
     cutDirection= kwargs.get("cutDirection")
+    Verbose("Calculating the cut-efficiency (%s) for histo with name %s" % (cutDirection, histoName) )
         
     # Choose statistics options
-    if statOpt == "C-P":
-        statOption = ROOT.TEfficiency.kFCP # Clopper-Pearson
-    elif statOpt == "F-C":
-        statOption = ROOT.TEfficiency.kFFC # Feldman-Cousins
-    elif statOpt == "Normal":
-        statOption = ROOT.TEfficiency.kFNormal
+    statOpts = ["kFCP", "kFNormal", "KFWilson", "kFAC", "kFFC", "kBJeffrey", "kBUniform", "kBayesian"]
+    if statOpt not in statOpts:
+        raise Exception("Invalid statistics option \"%s\". Please choose one from the following:\n\t%s" % (statOpt, "\n\t".join(statOpts)))
+
+    if statOpt == "kFCP":
+        statOption = ROOT.TEfficiency.kFCP      # Clopper-Pearson
+    elif statOpt == "kFNormal":
+        statOption = ROOT.TEfficiency.kFNormal  # Normal Approximation
+    elif statOpt == "kFWilson":
+        statOption = ROOT.TEfficiency.kFWilson  # Wilson
+    elif statOpt == "kFAC":
+        statOption = ROOT.TEfficiency.kFAC      # Agresti-Coull
+    elif statOpt == "kFFC":
+        statOption = ROOT.TEfficiency.kFFC      # Feldman-Cousins
+    elif statOpt == "kBJeffrey":
+        statOption = ROOT.TEfficiency.kBJeffrey # Jeffrey
+    elif statOpt == "kBUniform":
+        statOption = ROOT.TEfficiency.kBUniform # Uniform Prior
+    elif statOpt == "kBayesian":
+        statOption = ROOT.TEfficiency.kBayesian # Custom Prior
     else:
-        raise Exception("Invalid statistics option \"%s\". Please choose from  \"C-P\", \"F-C\", and \"Normal\"" % (statOpt))
+        raise Exception("This should never be reached")    
+        
 
     # Declare variables & options
     first  = True
     isData = False
     teff   = ROOT.TEfficiency()
 
+    # Get the ROOT histogram
     rootHisto = dataset.getDatasetRootHisto(histoName)
+
+    # Normalise the histogram
     NormalizeRootHisto(rootHisto, dataset.isMC(), normalizeTo)
+
+    ## Get a clone of the wrapped histogram normalized as requested.
     h = rootHisto.getHistogram()
+    titleX   = h.GetXaxis().GetTitle()
+    binWidth = h.GetXaxis().GetBinWidth(0)
+    titleY   = "efficiency (%s) / %s" % (cutDirection, GetBinwidthDecimals(binWidth) % (binWidth) )
+    
+    # If empty return
     if h.GetEntries() == 0:
         return
-    RemoveNegatives(h)
-        
-    numerator = h.Clone("Numerator")
-    numerator.Reset()
 
-    denominator = h.Clone("denominator")
+    # Create the numerator/denominator histograms
+    numerator   = h.Clone("Numerator")
+    denominator = h.Clone("Denominator")
+
+    # Reset the numerator/denominator histograms
+    numerator.Reset()
     denominator.Reset()
-        
-    table    = []
-    hLine    = "="*140
-    msgAlign = '{:<5} {:<10} {:<10} {:<20} {:<20} {:<20} {:<20} {:<20}'
-    title    = msgAlign.format("Bin", "LowEdge", "Center", "HighEdge", "BinContent", "Pass", "Total", "Efficiency")
-    table.append(hLine)
-    table.append(title)
-    table.append(hLine)
-    
+
+    # Calculate the instances passing a given cut (all bins)
     nBinsX = h.GetNbinsX()+1
-    titleX =  h.GetXaxis().GetTitle()
     for iBin in range(1, nBinsX):
 
-        binLowEdge = h.GetBinLowEdge(iBin)
-        binCenter  = h.GetBinCenter(iBin)
-        binWidth   = h.GetBinWidth(iBin)
-        binHighEdge= binLowEdge + binWidth
-        binContent = h.GetBinContent(iBin)
-        nTotal     = h.Integral( 0, nBinsX )
+        nTotal = h.Integral(0, nBinsX)
+
         if cutDirection == ">":
             nPass  = h.Integral(iBin+1, nBinsX)
         elif cutDirection == "<":
             nPass  = nTotal - h.Integral(iBin+1, nBinsX)
         else:
             raise Exception("Invalid cut direction  \"%s\". Please choose either \">\" or \"<\"" % (cutDirection))
+
+        # Sanity check
+        if nPass < 0:
+            nPass = 0
+            
+        # Fill the numerator/denominator histograms
+        # print "iBin = %s, nPass = %s, nTotal = %s" % (iBin, nPass, nTotal)
         numerator.SetBinContent(iBin, nPass)
+        numerator.SetBinError(iBin, math.sqrt(nPass)/10)
+        #
         denominator.SetBinContent(iBin, nTotal)
+        denominator.SetBinError(iBin, math.sqrt(nTotal)/10)
         
-        eff    = nPass/nTotal
-        values = msgAlign.format(iBin, binLowEdge, binCenter, binHighEdge, binContent, nPass, nTotal, eff)
+    # Check for negative values
+    CheckNegatives(numerator, denominator)
+
+    # Create TEfficiency object using the two histos
+    eff = ROOT.TEfficiency(numerator, denominator)
+    eff.SetStatisticOption(statOption)
+    Print("The statistic option is set to %s" % (eff.GetStatisticOption()) )
+
+    # Save info in a table (debugging)
+    table    = []
+    hLine    = "="*70
+    msgAlign = '{:<5} {:<20} {:<20} {:<20}'
+    title    = msgAlign.format("Bin", "Efficiency", "Error-Low", "Error-Up")
+    table.append("\n" + hLine)
+    table.append(title)
+    table.append(hLine)
+    for iBin in range(1, nBinsX):
+        e      = eff.GetEfficiency(iBin)
+        errLow = eff.GetEfficiencyErrorLow(iBin)
+        errUp  = eff.GetEfficiencyErrorUp(iBin)
+        values = msgAlign.format(iBin, e, errLow, errUp)
         table.append(values)
     table.append(hLine)
-        
+
+    # Verbose mode
     if verbose:
         for l in table:
             print l
 
-    n = numerator
-    d = denominator
-    CheckNegatives(n, d)
-    eff = ROOT.TEfficiency(n, d)
-    eff.SetStatisticOption(statOption)
     weight = 1
     if dataset.isMC():
         weight = dataset.getCrossSection()
@@ -284,20 +327,20 @@ def GetCutEfficiencyHisto(dataset, histoName, statOpt="C-P", **kwargs):
     if first:
         teff = eff
         if dataset.isData():
-            tn = n
-            td = d
+            tn = numerator
+            td = denominator
         first = False
     else:
         teff.Add(eff)
         if dataset.isData():
-            tn.Add(n)
-            td.Add(d)
+            tn.Add(numerator)
+            td.Add(denominator)
     if isData:
         teff = ROOT.TEfficiency(tn, td)
         teff.SetStatisticOption(self.statOption)
 
     style = styleDict[dataset.getName()]
-    return Convert2TGraph(teff, dataset, style, titleX)
+    return Convert2TGraph(teff, dataset, style, titleX, titleY)
 
 
 def getEfficiency(datasets, numerator="Numerator", denominator="Denominator"):
@@ -318,7 +361,7 @@ def getEfficiency(datasets, numerator="Numerator", denominator="Denominator"):
         if d.GetEntries() == 0:
             continue
 
-        CheckNegatives(n, d)
+        CheckNegatives(n, d, True)
         RemoveNegatives(n)
         print dataset.getName(),"entries",n.GetEntries(),d.GetEntries()
         print "    bins",n.GetNbinsX(),d.GetNbinsX()
@@ -387,16 +430,13 @@ def CheckNegatives(n, d, verbose=False):
 
 
 def RemoveNegatives(histo):
-    '''
-    '''
-    # For-loop: All bins in x-axis
     for binX in range(histo.GetNbinsX()+1):
         if histo.GetBinContent(binX) < 0:
             histo.SetBinContent(binX, 0.0)
     return
 
 
-def Convert2TGraph(tefficiency, dataset, style, titleX):
+def Convert2TGraph(tefficiency, dataset, style, titleX, titleY):
     '''
     '''
     x     = []
@@ -428,6 +468,7 @@ def Convert2TGraph(tefficiency, dataset, style, titleX):
 
     tgraph.SetName(dataset.getName())
     tgraph.GetXaxis().SetTitle(titleX)
+    tgraph.GetYaxis().SetTitle(titleY)
 
     style.apply(tgraph)
     return tgraph
@@ -665,9 +706,22 @@ def NormalizeRootHisto(rootHisto, isMC, normalizeTo):
     return
 
 
+def GetBinwidthDecimals(binWidth):
+    if binWidth < 1:
+        return " %0.1f"
+    elif binWidth < 0.1:
+        return " %0.2f"
+    elif binWidth < 0.01:
+        return " %0.3f"
+    elif binWidth < 0.001:
+        return " %0.4f"
+    elif binWidth < 0.0001:
+        return " %0.5f"
+    else:
+        return " %0.0f"
+
+
 def getTitleX(histo, title=None, **kwargs):
-    '''
-    '''
     HasKeys(["normalizeTo"], **kwargs)
 
     if title == None:
@@ -678,15 +732,7 @@ def getTitleX(histo, title=None, **kwargs):
     
     # Include the binwidth in the y-title
     binWidth = histo.getRootHisto().GetYaxis().GetBinWidth(1)
-    
-    if binWidth < 1:
-        title    = title + " / %0.1f" %  float(binWidth)
-    elif binWidth < 0.1:
-        title    = title + " / %0.2f" %  float(binWidth)
-    elif binWidth < 0.01:
-        title    = title + " / %0.3f" %  float(binWidth)
-    else:
-        title    = title + " / %0.0f" %  float(binWidth)
+    title    = title + " / %s" % (GetBinwidthDecimals(binWidth) % (binWidth) )
     return title
 
 
@@ -703,15 +749,7 @@ def getTitleY(histo, title=None, **kwargs):
     
     # Include the binwidth in the title
     binWidth = histo.getRootHisto().GetXaxis().GetBinWidth(1)
-    
-    if binWidth < 1:
-        title    = title + " / %0.1f" %  float(binWidth)
-    elif binWidth < 0.1:
-        title    = title + " / %0.2f" %  float(binWidth)
-    elif binWidth < 0.01:
-        title    = title + " / %0.3f" %  float(binWidth)
-    else:
-        title    = title + " / %0.0f" %  float(binWidth)
+    title    = title + " / %s" % (GetBinwidthDecimals(binWidth) % (binWidth) )
     return title
 
 
