@@ -18,10 +18,8 @@ USAGE:
 
 Example:
 ./runAnalysis.py -m /multicrab_CMSSW752_Default_07Jan2016/
-
+or
 ./runAnalysis.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
-
-/runAnalysis.py -m $dmcrab/multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
 
                                                                                                                                                                                    
 ROOT:
@@ -50,7 +48,7 @@ import ROOT
 #================================================================================================
 # Options
 #================================================================================================
-prefix      = "Kinematics"
+prefix      = "HtbKinematics"
 postfix     = ""
 dataEras    = ["2015"] # dataEras = ["2015B","2015C"]
 searchModes = ["80to1000"]

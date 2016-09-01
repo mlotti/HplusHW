@@ -30,19 +30,19 @@ import ROOT
 #================================================================================================
 kwargs = {
     "analysis"       : "Kinematics",
-    #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_31August2016/figures/all/",
+    #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_xAugust2016/figures/signal/",
     "savePath"       : None,
     "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200",
     "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"], #["QCD"],
-    "saveFormats"    : [".png"],#, ".pdf"],
+    "saveFormats"    : [".png"],# ".pdf"],
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
-    "createRatio"    : False,
+    "createRatio"    : True,
     "logX"           : False,
     "logY"           : False,
     "gridX"          : True,
     "gridY"          : True,
-    "drawStyle"      : "HIST9", # "P",  #"HIST9"
-    "legStyle"       : "F",     # "LP", "F"
+    "drawStyle"      : "HIST9", 
+    "legStyle"       : "F",
     "verbose"        : True,
     "cutValue"       : 5,
     "cutBox"         : False,
@@ -52,45 +52,11 @@ kwargs = {
 }
 
 
-hNames  = []
-for var in ["Pt", "Eta", "Rap"]:
-#    hNames.append("gtt_TQuark_"            + var)
-#    hNames.append("gbb_BQuark_"            + var)
-#    hNames.append("gtt_tbW_WBoson_"        + var)
-#    hNames.append("gtt_tbW_BQuark_"        + var)
-#    hNames.append("gtt_tbW_Wqq_Quark_"     + var)
-#    hNames.append("gtt_tbW_Wqq_AntiQuark_" + var)
-#    hNames.append("tbH_HPlus_"             + var)
-#    hNames.append("tbH_TQuark_"            + var)
-#    hNames.append("tbH_BQuark_"            + var)
-#    hNames.append("tbH_tbW_WBoson_"        + var)
-#    hNames.append("tbH_tbW_BQuark_"        + var)
-#    hNames.append("Htb_tbW_Wqq_Quark_"     + var)
-#    hNames.append("Htb_tbW_Wqq_AntiQuark_" + var)
-    if var not in ["Rap"]:
-        hNames.append("BQuark1_" + var)
-        hNames.append("BQuark2_" + var)
-        hNames.append("BQuark3_" + var)
-        hNames.append("BQuark4_" + var)
-        hNames.append("GenJet1_" + var)
-        hNames.append("GenJet2_" + var)
-        hNames.append("GenJet3_" + var)
-        hNames.append("GenJet4_" + var)
-        hNames.append("GenJet5_" + var)
-        hNames.append("GenJet6_" + var)
-#for var in ["dR", "dEta", "dRap", "dPhi"]:
-#    hNames.append("Htb_TQuark_Htb_BQuark_"                + var)
-#    hNames.append("Htb_TQuark_gtt_TQuark_"                + var)
-#    hNames.append("Htb_TQuark_gbb_BQuark_"                + var)
-#    hNames.append("Htb_BQuark_Htb_tbW_BQuark_"            + var)
-#    hNames.append("Htb_BQuark_Htb_tbW_Wqq_Quark_"         + var)
-#    hNames.append("Htb_BQuark_Htb_tbW_Wqq_AntiQuark_"     + var)
-#    hNames.append("Htb_tbW_BQuark_Htb_tbW_Wqq_Quark_"     + var)
-#    hNames.append("Htb_tbW_BQuark_Htb_tbW_Wqq_AntiQuark_" + var)
-#    hNames.append("gtt_TQuark_gbb_BQuark_"                + var)
-#    hNames.append("gtt_TQuark_gtt_tbW_BQuark_"            + var)
-#    hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_"     + var)
-#    hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_" + var)
+#================================================================================================
+# Histograms
+#================================================================================================
+hNames = ["counters/weighted/Branching",
+          "counters/weighted/Preselections"]
 
 
 #================================================================================================
@@ -139,7 +105,6 @@ def main():
         # Create a comparison plot
         p = plots.ComparisonManyPlot(refHisto, otherHistos)
 
-
         # Remove negative contributions
         #RemoveNegativeBins(datasetsMgr, hName, p)
 
@@ -166,11 +131,13 @@ def main():
         # Add cut line/box
         _kwargs = { "lessThan": kwargs.get("cutLessThan")}
         p.addCutBoxAndLine(cutValue=kwargs.get("cutValue"), fillColor=kwargs.get("cutFillColour"), box=kwargs.get("cutBox"), line=kwargs.get("cutLine"), **_kwargs)
+        
 
         # Move the refDataset to first in the draw order (back)
         histoNames = [h.getName() for h in p.histoMgr.getHistos()]
         p.histoMgr.reorder(filter(lambda n: plots._legendLabels[kwargs.get("refDataset") ] not in n, histoNames))
-                
+
+
         #  Draw plots
         p.draw()
 
@@ -183,7 +150,6 @@ def main():
         SaveAs(p, savePath, saveName, kwargs.get("saveFormats"))
 
     return
-
 
 #================================================================================================
 # Main
