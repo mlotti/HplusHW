@@ -12,22 +12,22 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 #================================================================================================  
 # Options
 #================================================================================================  
-maxEvents    = 10000
+maxEvents    = 2000
 maxWarnings  = 100
 reportEvery  = 100
-dataVersion  = "80Xdata"
-datasetFiles = ['/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/150/00000/66051AAF-D819-E611-BD3D-02163E011D55.root',
-                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/1E4ABD0D-DA19-E611-9396-02163E014258.root',
-                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/224967FC-D919-E611-9902-02163E0122C2.root',
-                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/28FAAD53-DA19-E611-BF0F-02163E01456A.root',
-                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/3A5F9A87-D919-E611-9CCE-02163E0138E1.root',
-                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/3EB12316-DA19-E611-AD3F-02163E012B1F.root',
-                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/4A968941-DA19-E611-AF6F-02163E011DF8.root',
-                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/5ADC50FC-D919-E611-88EF-02163E0122C2.root',
-                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/5CB64C01-DA19-E611-8344-02163E013630.root',
-                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/5E8CA453-DA19-E611-A049-02163E01456A.root']
-#dataVersion  = "80Xmc" 
-#datasetFiles = ['/store/mc/RunIISpring16MiniAODv2/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/20000/04F56101-3739-E611-90EE-0CC47A78A41C.root']
+#dataVersion  = "80Xdata"
+#datasetFiles = ['/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/150/00000/66051AAF-D819-E611-BD3D-02163E011D55.root',
+#                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/1E4ABD0D-DA19-E611-9396-02163E014258.root',
+#                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/224967FC-D919-E611-9902-02163E0122C2.root',
+#                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/28FAAD53-DA19-E611-BF0F-02163E01456A.root',
+#                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/3A5F9A87-D919-E611-9CCE-02163E0138E1.root',
+#                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/3EB12316-DA19-E611-AD3F-02163E012B1F.root',
+#                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/4A968941-DA19-E611-AF6F-02163E011DF8.root',
+#                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/5ADC50FC-D919-E611-88EF-02163E0122C2.root',
+#                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/5CB64C01-DA19-E611-8344-02163E013630.root',
+#                '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/5E8CA453-DA19-E611-A049-02163E01456A.root']
+dataVersion  = "80Xmc" 
+datasetFiles = ['/store/mc/RunIISpring16MiniAODv2/ChargedHiggs_HplusTB_HplusToTB_M-180_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/20000/04F56101-3739-E611-90EE-0CC47A78A41C.root']
 
 # For debugging purposes
 debug       = False
@@ -210,6 +210,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname          = cms.untracked.string("genParticles"),
             src                 = cms.InputTag("prunedGenParticles"),
             saveAllGenParticles = cms.untracked.bool(True),
+            saveGenBooleans     = cms.untracked.bool(True),
+            saveGenStatusFlags  = cms.untracked.bool(True),
             saveGenElectrons    = cms.untracked.bool(False),
             saveGenMuons        = cms.untracked.bool(False),
             saveGenTaus         = cms.untracked.bool(False),

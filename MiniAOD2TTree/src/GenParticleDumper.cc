@@ -1,8 +1,7 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleDumper.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/NtupleAnalysis_fwd.h"
 #include "HiggsAnalysis/MiniAOD2TTree/interface/GenParticleTools.h"
-
-
+#include "DataFormats/HepMCCandidate/interface/GenStatusFlags.h"
 #include "TLorentzVector.h"
 
 GenParticleDumper::GenParticleDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<edm::ParameterSet>& psets){
@@ -10,10 +9,10 @@ GenParticleDumper::GenParticleDumper(edm::ConsumesCollector&& iConsumesCollector
   booked           = false;
 
   // General particle list
-  pt  = new std::vector<double>[inputCollections.size()];
-  eta = new std::vector<double>[inputCollections.size()];    
-  phi = new std::vector<double>[inputCollections.size()];    
-  e   = new std::vector<double>[inputCollections.size()];    
+  pt     = new std::vector<double>[inputCollections.size()];
+  eta    = new std::vector<double>[inputCollections.size()];    
+  phi    = new std::vector<double>[inputCollections.size()];    
+  e      = new std::vector<double>[inputCollections.size()];    
   pdgId  = new std::vector<short>[inputCollections.size()];
   status = new std::vector<short>[inputCollections.size()];
   charge = new std::vector<short>[inputCollections.size()];
@@ -21,6 +20,33 @@ GenParticleDumper::GenParticleDumper(edm::ConsumesCollector&& iConsumesCollector
   vtxX   = new std::vector<double>[inputCollections.size()];
   vtxY   = new std::vector<double>[inputCollections.size()];
   vtxZ   = new std::vector<double>[inputCollections.size()];
+  // collisionId = new std::vector<int>[inputCollections.size()];
+
+  // Booleans
+  fromHardProcessBeforeFSR                     = new std::vector<bool>[inputCollections.size()];
+  fromHardProcessDecayed                       = new std::vector<bool>[inputCollections.size()];
+  fromHardProcessFinalState                    = new std::vector<bool>[inputCollections.size()];
+  isDirectHardProcessTauDecayProductFinalState = new std::vector<bool>[inputCollections.size()];
+  isDirectPromptTauDecayProductFinalState      = new std::vector<bool>[inputCollections.size()];
+  isHardProcess                                = new std::vector<bool>[inputCollections.size()];
+  isLastCopy                                   = new std::vector<bool>[inputCollections.size()];
+  isLastCopyBeforeFSR                          = new std::vector<bool>[inputCollections.size()];
+  // isMostlyLikePythia6Status3                   = new std::vector<bool>[inputCollections.size()];
+  isPromptDecayed                              = new std::vector<bool>[inputCollections.size()];
+  isPromptFinalState                           = new std::vector<bool>[inputCollections.size()];
+
+  // Flags
+  fromHardProcess                    = new std::vector<bool>[inputCollections.size()];
+  isDecayedLeptonHadron              = new std::vector<bool>[inputCollections.size()];
+  isDirectHadronDecayProduct         = new std::vector<bool>[inputCollections.size()];
+  isDirectHardProcessTauDecayProduct = new std::vector<bool>[inputCollections.size()];
+  isDirectPromptTauDecayProduct      = new std::vector<bool>[inputCollections.size()];
+  isDirectTauDecayProduct            = new std::vector<bool>[inputCollections.size()];
+  isFirstCopy                        = new std::vector<bool>[inputCollections.size()];
+  isHardProcessTauDecayProduct       = new std::vector<bool>[inputCollections.size()];
+  isPrompt                           = new std::vector<bool>[inputCollections.size()];
+  isPromptTauDecayProduct            = new std::vector<bool>[inputCollections.size()];
+  isTauDecayProduct                  = new std::vector<bool>[inputCollections.size()];
 
   // Electrons
   electrons = new FourVectorDumper[inputCollections.size()];
@@ -83,10 +109,11 @@ void GenParticleDumper::book(TTree* tree){
     if(name.length() == 0) name = inputCollections[i].getParameter<edm::InputTag>("src").label();
 
     if (inputCollections[i].getUntrackedParameter<bool>("saveAllGenParticles", false)) {
-      tree->Branch((name+"_pt").c_str()    , &pt[i]);
-      tree->Branch((name+"_eta").c_str()   , &eta[i]);
-      tree->Branch((name+"_phi").c_str()   , &phi[i]);
-      tree->Branch((name+"_e").c_str()     , &e[i]);
+      // General particle list
+      tree->Branch((name+"_pt").c_str() , &pt[i]);
+      tree->Branch((name+"_eta").c_str(), &eta[i]);
+      tree->Branch((name+"_phi").c_str(), &phi[i]);
+      tree->Branch((name+"_e").c_str()  , &e[i]);
       tree->Branch((name+"_pdgId").c_str() , &pdgId[i]);
       tree->Branch((name+"_mother").c_str(), &mother[i]);
       tree->Branch((name+"_status").c_str(), &status[i]);
@@ -94,6 +121,34 @@ void GenParticleDumper::book(TTree* tree){
       tree->Branch((name+"_vtxX").c_str()  , &vtxX[i]);
       tree->Branch((name+"_vtxY").c_str()  , &vtxY[i]);
       tree->Branch((name+"_vtxZ").c_str()  , &vtxZ[i]);
+      // tree->Branch((name+"_collisionId").c_str(), &collisionId[i]); // particle comes from primary interaction or PU?
+
+      // Booleans
+      tree->Branch((name+"_fromHardProcessBeforeFSR").c_str(), &fromHardProcessBeforeFSR[i]);
+      tree->Branch((name+"_fromHardProcessDecayed").c_str(), &fromHardProcessDecayed[i]);
+      tree->Branch((name+"_fromHardProcessFinalState").c_str(), &fromHardProcessFinalState[i]);
+      tree->Branch((name+"_isDirectHardProcessTauDecayProductFinalState").c_str(), &isDirectHardProcessTauDecayProductFinalState[i]);
+      tree->Branch((name+"_isDirectPromptTauDecayProductFinalState").c_str(), &isDirectPromptTauDecayProductFinalState[i]);
+      tree->Branch((name+"_isHardProcess").c_str(), &isHardProcess[i]);
+      tree->Branch((name+"_isLastCopy").c_str(), &isLastCopy[i]);
+      tree->Branch((name+"_isLastCopyBeforeFSR").c_str(), &isLastCopyBeforeFSR[i]);
+      // tree->Branch((name+"_isMostlyLikePythia6Status3").c_str(), &isMostlyLikePythia6Status3[i]);
+      tree->Branch((name+"_isPromptDecayed").c_str(), &isPromptDecayed[i]);
+      tree->Branch((name+"_isPromptFinalState").c_str(), &isPromptFinalState[i]);
+
+      // Flags
+      tree->Branch((name+"_fromHardProcess").c_str(), &fromHardProcess[i]);
+      tree->Branch((name+"_isDecayedLeptonHadron").c_str(), &isDecayedLeptonHadron[i]);
+      tree->Branch((name+"_isDirectHadronDecayProduct").c_str(), &isDirectHadronDecayProduct[i]);
+      tree->Branch((name+"_isDirectHardProcessTauDecayProduct").c_str(), &isDirectHardProcessTauDecayProduct[i]);
+      tree->Branch((name+"_isDirectPromptTauDecayProduct").c_str(), &isDirectPromptTauDecayProduct[i]);
+      tree->Branch((name+"_isDirectTauDecayProduct").c_str(), &isDirectTauDecayProduct[i]);
+      tree->Branch((name+"_isFirstCopy").c_str(), &isFirstCopy[i]);
+      tree->Branch((name+"_isHardProcessTauDecayProduct").c_str(), &isHardProcessTauDecayProduct[i]);
+      tree->Branch((name+"_isPrompt").c_str(), &isPrompt[i]);
+      tree->Branch((name+"_isPromptTauDecayProduct").c_str(), &isPromptTauDecayProduct[i]);
+      tree->Branch((name+"_isTauDecayProduct").c_str(), &isTauDecayProduct[i]);
+
     }
     if (inputCollections[i].getUntrackedParameter<bool>("saveGenElectrons", false)) {
       electrons[i].book(tree, name, "GenElectron");
@@ -147,7 +202,7 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
       // General particle list
       if (inputCollections[ic].getUntrackedParameter<bool>("saveAllGenParticles", false)) {
         for(size_t i = 0; i < handle->size(); ++i) {
-          const reco::Candidate & gp = handle->at(i);
+	  const reco::GenParticle & gp = handle->at(i);
           pt[ic].push_back(gp.pt());
           eta[ic].push_back(gp.eta());
           phi[ic].push_back(gp.phi());
@@ -158,7 +213,65 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  vtxX[ic].push_back(gp.vx());
 	  vtxY[ic].push_back(gp.vy());
 	  vtxZ[ic].push_back(gp.vz());
-    
+	  // collisionId[ic].push_back(gp.collisionId());
+	  
+	  // Booleans (https://cmssdt.cern.ch/SDT/doxygen/CMSSW_8_0_14/doc/html/d5/dd4/classreco_1_1GenParticle.html#a57bb7f850421b2fe463a80ad75888fe3)
+	  if (inputCollections[ic].getUntrackedParameter<bool>("saveGenBooleans", false)) {
+
+	    fromHardProcessBeforeFSR[ic].push_back(gp.fromHardProcessBeforeFSR());
+	    fromHardProcessDecayed[ic].push_back(gp.fromHardProcessDecayed());
+	    fromHardProcessFinalState[ic].push_back(gp.fromHardProcessFinalState());
+	    isDirectHardProcessTauDecayProductFinalState[ic].push_back(gp.isDirectHardProcessTauDecayProductFinalState());
+	    isDirectPromptTauDecayProductFinalState[ic].push_back(gp.isDirectPromptTauDecayProductFinalState());
+	    isHardProcess[ic].push_back(gp.isHardProcess());
+	    isLastCopy[ic].push_back(gp.isLastCopy());
+	    isLastCopyBeforeFSR[ic].push_back(gp.isLastCopyBeforeFSR());
+	    // isMostlyLikePythia6Status3[ic].push_back(gp.isMostlyLikePythia6Status3());
+	    isPromptDecayed[ic].push_back(gp.isPromptDecayed());	    
+	    isPromptFinalState[ic].push_back(gp.isPromptFinalState());
+
+	    // std::cout << "gp.fromHardProcessBeforeFSR () = "                    << gp.fromHardProcessBeforeFSR()                     << std::endl;
+	    // std::cout << "gp.fromHardProcessDecayed() = "                       << gp.fromHardProcessDecayed()                       << std::endl;
+	    // std::cout << "gp.fromHardProcessFinalState() = "                    << gp.fromHardProcessFinalState()                    << std::endl;
+	    // std::cout << "gp.isDirectHardProcessTauDecayProductFinalState() = " << gp.isDirectHardProcessTauDecayProductFinalState() << std::endl;
+	    // std::cout << "gp.isDirectPromptTauDecayProductFinalState() = "      << gp.isDirectPromptTauDecayProductFinalState()      << std::endl;
+	    // std::cout << "gp.isHardProcess() = "                                << gp.isHardProcess()                      << std::endl;
+	    // std::cout << "gp.isLastCopy() = "                                   << gp.isLastCopy()                         << std::endl;
+	    // std::cout << "gp.isLastCopyBeforeFSR() = "                          << gp.isLastCopyBeforeFSR()                << std::endl;
+	    // // std::cout << "gp.isMostlyLikePythia6Status3() = "                   << gp.isMostlyLikePythia6Status3()         << std::endl;
+	    // std::cout << "gp.isPromptDecayed() = "                              << gp.isPromptDecayed()                    << std::endl;
+	    // std::cout << "gp.isPromptFinalSate() = "                            << gp.isPromptFinalState()                 << std::endl;
+	  }
+
+	  // Flags (https://cmssdt.cern.ch/SDT/doxygen/CMSSW_8_0_14/doc/html/d6/d67/structreco_1_1GenStatusFlags.html)
+	  if (inputCollections[ic].getUntrackedParameter<bool>("saveGenStatusFlags", false)) {
+	    reco::GenStatusFlags flags = gp.statusFlags();
+
+	    fromHardProcess[ic].push_back(flags.fromHardProcess());
+	    isDecayedLeptonHadron[ic].push_back(flags.isDecayedLeptonHadron());
+	    isDirectHadronDecayProduct[ic].push_back(flags.isDirectHadronDecayProduct());
+	    isDirectHardProcessTauDecayProduct[ic].push_back(flags.isDirectHardProcessTauDecayProduct());
+	    isDirectPromptTauDecayProduct[ic].push_back(flags.isDirectPromptTauDecayProduct());
+	    isDirectTauDecayProduct[ic].push_back(flags.isDirectTauDecayProduct());
+	    isFirstCopy[ic].push_back(flags.isFirstCopy());
+	    isHardProcessTauDecayProduct[ic].push_back(flags.isHardProcessTauDecayProduct());
+	    isPrompt[ic].push_back(flags.isPrompt());
+	    isPromptTauDecayProduct[ic].push_back(flags.isPromptTauDecayProduct());
+	    isTauDecayProduct[ic].push_back(flags.isTauDecayProduct());
+
+	    // std::cout << "flags.fromHardProcess = "                      << flags.fromHardProcess()                    << std::endl;
+	    // std::cout << "flags.isDecayedLeptonHadron() = "              << flags.isDecayedLeptonHadron()              << std::endl;
+	    // std::cout << "flags.isDirectHadronDecayProduct() = "         << flags.isDirectHadronDecayProduct()         << std::endl;
+	    // std::cout << "flags.isDirectHardProcessTauDecayProduct() = " << flags.isDirectHardProcessTauDecayProduct() << std::endl;
+	    // std::cout << "flags.isDirectPromptTauDecayProduct() = "      << flags.isDirectPromptTauDecayProduct()      << std::endl;
+	    // std::cout << "flags.isDirectTauDecayProduct() = "            << flags.isDirectTauDecayProduct()            << std::endl;
+	    // std::cout << "flags.isFirstCopy () = "                       << flags.isFirstCopy()                        << std::endl;
+	    // std::cout << "flags.isHardProcessTauDecayProduct() = "       << flags.isHardProcessTauDecayProduct()       << std::endl;
+	    // std::cout << "flags.isPrompt() = "                           << flags.isPrompt()                           << std::endl;
+	    // std::cout << "flags.isPromptTauDecayProduct() = "            << flags.isPromptTauDecayProduct()            << std::endl;
+	    // std::cout << "flags.isTauDecayProduct() = "                  << flags.isTauDecayProduct()                  << std::endl;
+	  }
+	  
           // Find mother index
           short index = -1;
           if (gp.mother() != nullptr) {
@@ -170,6 +283,8 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           mother[ic].push_back(index);
         }
       }
+
+
       // MC electrons
       if (inputCollections[ic].getUntrackedParameter<bool>("saveGenElectrons", false)) {
         saveLeptons(handle, electrons[ic], 11);
@@ -341,7 +456,8 @@ void GenParticleDumper::reset(){
   if(booked){
     for(size_t ic = 0; ic < inputCollections.size(); ++ic){
       if (inputCollections[ic].getUntrackedParameter<bool>("saveAllGenParticles", false)) {
-        pt[ic].clear();
+        // General particle list
+	pt[ic].clear();
         eta[ic].clear();
         phi[ic].clear();
         e[ic].clear();
@@ -353,6 +469,33 @@ void GenParticleDumper::reset(){
         vtxX[ic].clear();
         vtxY[ic].clear();
         vtxZ[ic].clear();
+	// collisionId[ic].clear();
+
+	// Booleans
+	fromHardProcessBeforeFSR[ic].clear();
+	fromHardProcessDecayed[ic].clear();
+	fromHardProcessFinalState[ic].clear();
+	isDirectHardProcessTauDecayProductFinalState[ic].clear();
+	isDirectPromptTauDecayProductFinalState[ic].clear();
+	isHardProcess[ic].clear();
+	isLastCopy[ic].clear();
+	isLastCopyBeforeFSR[ic].clear();
+	// isMostlyLikePythia6Status3[ic].clear();
+	isPromptDecayed[ic].clear();
+	isPromptFinalState[ic].clear();
+
+	// Flags
+	fromHardProcess[ic].clear();
+	isDecayedLeptonHadron[ic].clear();
+	isDirectHadronDecayProduct[ic].clear();
+	isDirectHardProcessTauDecayProduct[ic].clear();
+	isDirectPromptTauDecayProduct[ic].clear();
+	isDirectTauDecayProduct[ic].clear();
+	isFirstCopy[ic].clear();
+	isHardProcessTauDecayProduct[ic].clear();
+	isPrompt[ic].clear();
+	isPromptTauDecayProduct[ic].clear();
+	isTauDecayProduct[ic].clear();
       }
       if (inputCollections[ic].getUntrackedParameter<bool>("saveGenElectrons", false)) {
         electrons[ic].reset();
