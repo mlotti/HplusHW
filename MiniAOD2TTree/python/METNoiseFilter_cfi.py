@@ -1,7 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 METNoiseFilter = cms.PSet(
-    triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())),   
+#    triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())),   
+    triggerResults = cms.InputTag("TriggerResults::HLT"),
     printTriggerResultsList = cms.untracked.bool(False),
     filtersFromTriggerResults = cms.vstring(
         "Flag_HBHENoiseFilter",

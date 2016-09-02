@@ -110,6 +110,8 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Top_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/METNoiseFilter_cfi")
+process.METNoiseFilter.triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())) 
 
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName      = cms.string("miniaod2tree.root"),
