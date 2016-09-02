@@ -1095,7 +1095,7 @@ void HtbKinematics::process(Long64_t entry) {
   int iJet = 0;
   if (selJets_p4.size() > 1) {
     // For-loop: All selected jets 
-    for (int i=0; i < selJets_p4.size(); i++)
+    for (size_t i=0; i < selJets_p4.size(); i++)
       {
 	iJet++;
 	double genJ_Pt  = selJets_p4.at(i).pt();

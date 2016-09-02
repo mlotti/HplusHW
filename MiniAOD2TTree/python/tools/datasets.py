@@ -272,14 +272,15 @@ class DatasetGroup:
         Create dataset grouping in a dictionary for easy access.
         '''
 
-        analyses = ["SignalAnalysis", "Hplus2tbAnalysis", "TauLeg", "METLeg"]
+        analyses = ["SignalAnalysis", "Hplus2tbAnalysis", "TauLeg", "METLeg", "All"]
         if self.analysis not in analyses:
-            raise Exception("Unknown analysis \"%s\". Please select one of the following:\n" % ("\n".join(analyses) ) )
+            raise Exception("Unknown analysis \"%s\". Please select one of the following: \"%s" % (self.analysis, "\", \"".join(analyses) + "\".") )
 
         self.GroupDict["SignalAnalysis"]   = signalAnalysisDatasets
         self.GroupDict["Hplus2tbAnalysis"] = hplus2tbAnalysisDatasets
         self.GroupDict["TauLeg"]           = tauLegDatasets
         self.GroupDict["METLeg"]           = metLegDatasets
+        self.GroupDict["All"]              = signalAnalysisDatasets + hplus2tbAnalysisDatasets + metLegDatasets + metLegDatasets
         return
 
 

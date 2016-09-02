@@ -12,7 +12,7 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 #================================================================================================  
 # Options
 #================================================================================================  
-maxEvents    = 2000
+maxEvents    = 5000
 maxWarnings  = 100
 reportEvery  = 100
 #dataVersion  = "80Xdata"

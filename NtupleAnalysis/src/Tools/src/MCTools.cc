@@ -124,7 +124,7 @@ bool MCTools::HasDaughter(const int genP_index,
   else daughters = GetDaughters(genP_index, false);
 
   // For-loop: Daughters
-  for (int i = 0; i < daughters.size(); i++)
+  for (size_t i = 0; i < daughters.size(); i++)
     {
       int dau_index         = daughters.at(i);
       const genParticle dau = fEvent->genparticles().getGenParticles()[dau_index];
@@ -362,7 +362,7 @@ void MCTools::PrintDaughters(const int genP_index, bool bPrintIds){
 
   
   // For-loop: All daughters
-  for (int iDau = 0; iDau < genP_daughters.size(); iDau++){
+  for (size_t iDau = 0; iDau < genP_daughters.size(); iDau++){
 
     // Increment row number
     row++;
@@ -433,7 +433,7 @@ vector<int> MCTools::GetAllDaughters(const int genP_index, bool bGetIds){
   genP_allDaughters.insert(genP_allDaughters.end(), genP_daus.begin(), genP_daus.end());
   
   // For each daugher, get its daughters
-  for (int iDau = 0; iDau < genP_daughters.size(); iDau++){
+  for (size_t iDau = 0; iDau < genP_daughters.size(); iDau++){
 
     int dau_index = genP_daughters.at(iDau);
     _GetAllDaughters(dau_index, genP_allDaughters, bGetIds);
@@ -468,7 +468,7 @@ void MCTools::_GetAllDaughters(const int genP_index, vector<int> &genP_allDaught
   genP_allDaughters.insert(genP_allDaughters.end(), genP_daus.begin(), genP_daus.end());
   
   // For each daugher, get its daughter
-  for (int iDau = 0; iDau < genP_daughters.size(); iDau++){
+  for (size_t iDau = 0; iDau < genP_daughters.size(); iDau++){
     
     // Get daugther properties
     int dau_index               = genP_daughters.at(iDau);
@@ -516,7 +516,7 @@ void MCTools::_PrintDaughters(const int genP_index,
   vector<int> genP_daughters = GetDaughters(genP_index, false);
   
   // For-loop: All daughters
-  for (int iDau = 0; iDau < genP_daughters.size(); iDau++){
+  for (size_t iDau = 0; iDau < genP_daughters.size(); iDau++){
 
     // Increment row number
     row++;
