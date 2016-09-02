@@ -651,19 +651,19 @@ void HtbKinematics::process(Long64_t entry) {
   int nWToMuNu = 0;
 
   // Indices
-  int Htb_HPlus_index             = -1.0;
-  int Htb_TQuark_index            = -1.0;
-  int Htb_BQuark_index            = -1.0;
-  int Htb_tbW_BQuark_index        = -1.0;
-  int Htb_tbW_WBoson_index        = -1.0;
-  int Htb_tbW_Wqq_Quark_index     = -1.0;
-  int Htb_tbW_Wqq_AntiQuark_index = -1.0;
-  int gtt_TQuark_index            = -1.0;
-  int gbb_BQuark_index            = -1.0;
-  int gtt_tbW_Wqq_Quark_index     = -1.0;
-  int gtt_tbW_Wqq_AntiQuark_index = -1.0;
-  int gtt_tbW_WBoson_index        = -1.0;
-  int gtt_tbW_BQuark_index        = -1.0; 
+  // int Htb_HPlus_index             = -1.0;
+  // int Htb_TQuark_index            = -1.0;
+  // int Htb_BQuark_index            = -1.0;
+  // int Htb_tbW_BQuark_index        = -1.0;
+  // int Htb_tbW_WBoson_index        = -1.0;
+  // int Htb_tbW_Wqq_Quark_index     = -1.0;
+  // int Htb_tbW_Wqq_AntiQuark_index = -1.0;
+  // int gtt_TQuark_index            = -1.0;
+  // int gbb_BQuark_index            = -1.0;
+  // int gtt_tbW_Wqq_Quark_index     = -1.0;
+  // int gtt_tbW_Wqq_AntiQuark_index = -1.0;
+  // int gtt_tbW_WBoson_index        = -1.0;
+  // int gtt_tbW_BQuark_index        = -1.0; 
 
   // 4-momenta
   math::XYZTLorentzVector Htb_HPlus_p4;
@@ -685,9 +685,9 @@ void HtbKinematics::process(Long64_t entry) {
   Table table("Evt | Index | PdgId | Status | Charge | Pt | Eta | Phi | E | Vertex (mm) | Mom | Daus (Index)", "Text"); //LaTeX or Text
   
   int row      = 0;
-  bool bWToLNu = false;
+  // bool bWToLNu = false;
   // For-loop: GenParticles
-  for (int genP_index=0; genP_index < fEvent.genparticles().getGenParticles().size(); genP_index++) {
+  for (size_t genP_index=0; genP_index < fEvent.genparticles().getGenParticles().size(); genP_index++) {
 
     // Create the genParticles
     genParticle p = fEvent.genparticles().getGenParticles()[genP_index];
@@ -808,14 +808,14 @@ void HtbKinematics::process(Long64_t entry) {
 		// H+->tb, t->bW, b (NOTE: t->Wb dominant, but t->Ws and t->Wd also possible! Also t->Zc and t->Zu)
 		cHtb_tbW_BQuark.increment();
 		Htb_tbW_BQuark_p4    = fs.p4();
-		Htb_tbW_BQuark_index = fs_index;
+		// Htb_tbW_BQuark_index = fs_index;
 	      }
 	    else if (std::abs(genMom_pdgId) == 37) // Has top immediate mother
 	      {
 		// H+->tb, b
 		cHtb_BQuark.increment();
 		Htb_BQuark_p4    = fs.p4();
-		Htb_BQuark_index = fs_index;
+		// Htb_BQuark_index = fs_index;
 	      }
 	    else
 	      {
@@ -831,7 +831,7 @@ void HtbKinematics::process(Long64_t entry) {
 		// g->bb, b (flavour-excited )	       
 		cgbb_BQuark.increment();
 		gbb_BQuark_p4    = fs.p4();
-		gbb_BQuark_index = fs_index;
+		// gbb_BQuark_index = fs_index;
 
 	      }
 	    else if (std::abs(genMom_pdgId) == 6) // Has top immediate mother
@@ -839,7 +839,7 @@ void HtbKinematics::process(Long64_t entry) {
 		// g->tt, t->bW, b (NOTE: t->Wb dominant, but t->Ws and t->Wd also possible!)
 		cgtt_tbW_BQuark.increment();
 		gtt_tbW_BQuark_p4    = fs.p4();
-		gtt_tbW_BQuark_index = fs_index;
+		// gtt_tbW_BQuark_index = fs_index;
 
 	      }
 	    else if (mcTools.HasMother(genP_index, 4,  true) ) // Rare events (~1 in 1000)
@@ -847,7 +847,7 @@ void HtbKinematics::process(Long64_t entry) {
 		// g->bb, b (flavour-excited )
 		cgbb_BQuark.increment();
 		gbb_BQuark_p4    = fs.p4();
-		gbb_BQuark_index = fs_index;
+		// gbb_BQuark_index = fs_index;
 	      }
 	    else
 	      {	      
@@ -864,21 +864,21 @@ void HtbKinematics::process(Long64_t entry) {
 	    // H+->tb (From HPlus decay)
 	    cHtb_TQuark.increment();
 	    Htb_TQuark_p4    = fs.p4();
-	    Htb_TQuark_index = fs_index;
+	    // Htb_TQuark_index = fs_index;
       	  }
 	else if ( (std::abs(genMom_pdgId) == 21) || (g.pdgId() == 2212) ) // Has glu immediate mother OR p grandmother
 	  {	     
 	    // g->tt (Associated top)
 	    cgtt_TQuark.increment();
 	    gtt_TQuark_p4    = fs.p4();
-	    gtt_TQuark_index = fs_index; 
+	    // gtt_TQuark_index = fs_index; 
 	  }
 	else if (mcTools.HasMother(genP_index, 4,  true) ) // Rare events (~1 in 1000)
 	  {
 	    // g->tt (Associated top)
 	    cgtt_TQuark.increment();
 	    gtt_TQuark_p4    = fs.p4();
-	    gtt_TQuark_index = fs_index;
+	    // gtt_TQuark_index = fs_index;
 	  }
 	else
 	  {
@@ -891,7 +891,7 @@ void HtbKinematics::process(Long64_t entry) {
 	// tb->H+, H+
 	cHtb_HPlus.increment();
 	Htb_HPlus_p4    = fs.p4();
-	Htb_HPlus_index = fs_index;
+	// Htb_HPlus_index = fs_index;
 
       } // HPlus
     else if(std::abs(genP_pdgId) == 24) //W-bosons
@@ -902,7 +902,7 @@ void HtbKinematics::process(Long64_t entry) {
 	    // H+->tb, t->bW, W-boson (NOTE: t->Wb dominant, but t->Ws and t->Wd also possible!)
 	    cHtb_tbW_WBoson.increment();
 	    Htb_tbW_WBoson_p4    = fs.p4();
-	    Htb_tbW_WBoson_index = fs_index;
+	    // Htb_tbW_WBoson_index = fs_index;
 
 	    // H+->tb, t->bW, W->qq (NOTE: t->Wb dominant, but t->Ws and t->Wd also possible!)
 	    std::vector<int> daughters = mcTools.GetDaughters(fs_index, false);
@@ -920,21 +920,21 @@ void HtbKinematics::process(Long64_t entry) {
 		      // Quarks
 		      cHtb_tbW_Wqq_Quark.increment();
 		      Htb_tbW_Wqq_Quark_p4    = d.p4();
-		      Htb_tbW_Wqq_Quark_index = dau_index;
+		      // Htb_tbW_Wqq_Quark_index = dau_index;
 		    }
 		  else
 		    {
 		      // Anti-Quarks
 		      cHtb_tbW_Wqq_AntiQuark.increment();
 		      Htb_tbW_Wqq_AntiQuark_p4    = d.p4();
-		      Htb_tbW_Wqq_AntiQuark_index = dau_index;
+		      // Htb_tbW_Wqq_AntiQuark_index = dau_index;
 		    }
 		}
 	      else if( mcTools.IsLepton(d.pdgId() ) )
 		{
 		  // H+->tb, t->bW, W->l v (NOTE: t->Wb dominant, but t->Ws and t->Wd also possible!)
 		  cHtb_tbW_Wqq_Leptons.increment();
-		  bWToLNu = true;
+		  // bWToLNu = true;
 
 		  if ( std::abs(d.pdgId()) == 11)
 		    {		      
@@ -963,7 +963,7 @@ void HtbKinematics::process(Long64_t entry) {
 	    // g->tt, t->bW, W-boson (NOTE: t->Wb dominant, but t->Ws and t->Wd also possible!)
 	    cgtt_tbW_WBoson.increment();
 	    gtt_tbW_WBoson_p4    = fs.p4();
-	    gtt_tbW_WBoson_index = fs_index;
+	    // gtt_tbW_WBoson_index = fs_index;
 
 
 	    // g->tt, t->bWH, t->bW, W->qq (NOTE: t->Wb dominant, but t->Ws and t->Wd also possible!)
@@ -982,21 +982,21 @@ void HtbKinematics::process(Long64_t entry) {
 		    // Quarks
 		    cgtt_tbW_Wqq_Quark.increment();
 		    gtt_tbW_Wqq_Quark_p4    = d.p4();
-		    gtt_tbW_Wqq_Quark_index = dau_index;
+		    // gtt_tbW_Wqq_Quark_index = dau_index;
 		  }	       
 		else
 		  {
 		    // AntiQuarks
 		    cgtt_tbW_Wqq_AntiQuark.increment();
 		    gtt_tbW_Wqq_AntiQuark_p4    = d.p4();
-		    gtt_tbW_Wqq_AntiQuark_index = dau_index;
+		    // gtt_tbW_Wqq_AntiQuark_index = dau_index;
 		  }
 	      }
 	      else if( mcTools.IsLepton(d.pdgId() ) )
 		{
 		  // g->tt, t->bWH, t->bW, W->l v (NOTE: t->Wb dominant, but t->Ws and t->Wd also possible!)
 		  cgtt_tbW_Wqq_Leptons.increment();
-		  bWToLNu = true;		  
+		  // bWToLNu = true;		  
 		  if ( std::abs(d.pdgId()) == 11)
 		    {		      
 		      if ( d.p4().pt() < cfg_ElectronPtCut) continue;
@@ -1218,9 +1218,9 @@ void HtbKinematics::process(Long64_t entry) {
   int deltaRMax_i  = -1;
   int deltaRMax_j  = -1;
   // For-loop: All p4 of bqq system
-  for (int i = 0; i < bqq_p4.size(); i++)    
+  for (size_t i = 0; i < bqq_p4.size(); i++)    
     {
-      for (int j = i+1; j < bqq_p4.size(); j++)
+      for (size_t j = i+1; j < bqq_p4.size(); j++)
 	{
 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(bqq_p4.at(i), bqq_p4.at(j));
 	  if (deltaR > deltaRMax)
@@ -1257,9 +1257,9 @@ void HtbKinematics::process(Long64_t entry) {
   deltaRMax_j  = -1;
 
   // For-loop: All p4 of bqq system
-  for (int i = 0; i < bqq_p4.size(); i++)    
+  for (size_t i = 0; i < bqq_p4.size(); i++)    
     {
-      for (int j = i+1; j < bqq_p4.size(); j++)
+      for (size_t j = i+1; j < bqq_p4.size(); j++)
 	{
 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(bqq_p4.at(i), bqq_p4.at(j));
 	  if (deltaR > deltaRMax)
@@ -1499,7 +1499,7 @@ void HtbKinematics::process(Long64_t entry) {
   int deltaRMin_j  = -1;
   
   // For-loop: All (pT-sorted) b-quarks
-  for (int i = 0; i < bQuarks_p4.size(); i++)
+  for (size_t i = 0; i < bQuarks_p4.size(); i++)
     {
 
       double dEta_1_2 = std::fabs(bQuarks_p4.at(0).eta() - bQuarks_p4.at(1).eta());
@@ -1547,7 +1547,7 @@ void HtbKinematics::process(Long64_t entry) {
 	}
       else{}
 
-      for (int j = i+1; j < bQuarks_p4.size(); j++)
+      for (size_t j = i+1; j < bQuarks_p4.size(); j++)
 	{
 	  
 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(bQuarks_p4.at(i), bQuarks_p4.at(j));

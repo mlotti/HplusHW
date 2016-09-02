@@ -441,7 +441,7 @@ void Kinematics::process(Long64_t entry) {
   
   int row = 0;
   // For-loop: GenParticles
-  for (int genP_index=0; genP_index < fEvent.genparticles().getGenParticles().size(); genP_index++) {
+  for (size_t genP_index=0; genP_index < fEvent.genparticles().getGenParticles().size(); genP_index++) {
 
     // Create the genParticles
     genParticle p = fEvent.genparticles().getGenParticles()[genP_index];
@@ -467,13 +467,13 @@ void Kinematics::process(Long64_t entry) {
     
     // Mom and Grand-mom properties    
     int genMom_index     = p.mother();
-    int genMom_pdgId     = 0;
+    // int genMom_pdgId     = 0;
     int genGmom_index    = -1;
     if (genMom_index >= 0)
       {
 	// Mom
 	m = fEvent.genparticles().getGenParticles()[genMom_index];
-	genMom_pdgId  = m.pdgId();
+	// genMom_pdgId  = m.pdgId();
 
 	// Grand-mom
 	genGmom_index = m.mother();
@@ -503,7 +503,32 @@ void Kinematics::process(Long64_t entry) {
 	else table.AddRowColumn(row, ".. Too many .." );
 	row++;
       }
-	       
+
+
+    // TMP ============================================================================================================================================
+   std::cout << " 1 = " << p.fromHardProcessBeforeFSR() << std::endl;
+   std::cout << " 2 = " << p.fromHardProcessDecayed() << std::endl;
+   std::cout << " 3 = " << p.fromHardProcessFinalState() << std::endl;
+   std::cout << " 4 = " << p.isDirectHardProcessTauDecayProductFinalState() << std::endl;
+   std::cout << " 5 = " << p.isDirectPromptTauDecayProductFinalState() << std::endl;
+   std::cout << " 6 = " << p.isHardProcess() << std::endl;
+   std::cout << " 7 = " << p.isLastCopy() << std::endl;
+   std::cout << " 8 = " << p.isLastCopyBeforeFSR() << std::endl;
+   std::cout << " 9 = " << p.isPromptDecayed() << std::endl;
+   std::cout << "10 = " << p.isPromptFinalState() << std::endl;
+   std::cout << "11 = " << p.fromHardProcess() << std::endl;
+   std::cout << "12 = " << p.isDecayedLeptonHadron() << std::endl;
+   std::cout << "13 = " << p.isDirectHadronDecayProduct() << std::endl;
+   std::cout << "14 = " << p.isDirectHardProcessTauDecayProduct() << std::endl;
+   std::cout << "15 = " << p.isDirectPromptTauDecayProduct() << std::endl;
+   std::cout << "16 = " << p.isDirectTauDecayProduct() << std::endl;
+   std::cout << "17 = " << p.isFirstCopy() << std::endl;
+   std::cout << "18 = " << p.isHardProcessTauDecayProduct() << std::endl;
+   std::cout << "19 = " << p.isPrompt() << std::endl;
+   std::cout << "20 = " << p.isPromptTauDecayProduct() << std::endl;
+   std::cout << "21 = " << p.isTauDecayProduct() << std::endl;
+    // TMP ============================================================================================================================================
+
     // Consider only status=22 (intermediate) or status=23 (outgoing) particles
     if( (genP_status != 22) && (genP_status != 23) ) continue;
 
@@ -635,7 +660,7 @@ void Kinematics::process(Long64_t entry) {
 
   int iJet = 0;  
   // For-loop: All selected jets 
-  for (int i=0; i < selJets_p4.size(); i++)
+  for (size_t i=0; i < selJets_p4.size(); i++)
     {
       iJet++;
       double genJ_Pt  = selJets_p4.at(i).pt();
@@ -675,7 +700,7 @@ void Kinematics::process(Long64_t entry) {
       else{}
 	
       // // For-loop: All selected jets (nested)
-      // for (int j=i+1; j < selJets_p4.size(); j++)
+      // for (size_t j=i+1; j < selJets_p4.size(); j++)
       // 	{
       // 	  math::XYZTLorentzVector p4_i = selJets_p4.at(i);
       // 	  math::XYZTLorentzVector p4_j = selJets_p4.at(j);
@@ -764,9 +789,9 @@ void Kinematics::process(Long64_t entry) {
   int deltaRMax_i  = -1;
   int deltaRMax_j  = -1;
   // For-loop: All p4 of bqq system
-  for (int i = 0; i < bqq_p4.size(); i++)    
+  for (size_t i = 0; i < bqq_p4.size(); i++)    
     {
-      for (int j = i+1; j < bqq_p4.size(); j++)
+      for (size_t j = i+1; j < bqq_p4.size(); j++)
 	{
 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(bqq_p4.at(i), bqq_p4.at(j));
 	  if (deltaR > deltaRMax)
@@ -813,9 +838,9 @@ void Kinematics::process(Long64_t entry) {
   deltaRMax_j  = -1;
   
   // For-loop: All p4 of bqq system
-  for (int i = 0; i < bqq_p4.size(); i++)    
+  for (size_t i = 0; i < bqq_p4.size(); i++)    
     {
-      for (int j = i+1; j < bqq_p4.size(); j++)
+      for (size_t j = i+1; j < bqq_p4.size(); j++)
 	{
 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(bqq_p4.at(i), bqq_p4.at(j));
 	  if (deltaR > deltaRMax)
@@ -860,16 +885,16 @@ void Kinematics::process(Long64_t entry) {
   double dPhi_3_4  = 999.9;
 
   // For-loop: All (pT-sorted) b-quarks (FIXME)
-  // for (int i = 0; i < bqq_p4.size(); i++)    
+  // for (size_t i = 0; i < bqq_p4.size(); i++)    
   //     {
-  // 	for (int j = i+1; j < bqq_p4.size(); j++)
+  // 	for (size_t j = i+1; j < bqq_p4.size(); j++)
   // 	  {
 
   // Fill histos
   h_BQuarks_N->Fill(bQuarks_p4.size());
   
   // For-loop: All b-quarks
-  for (int i = 0; i < bQuarks_p4.size(); i++)
+  for (size_t i = 0; i < bQuarks_p4.size(); i++)
     {
       
       if (bQuarks_p4.size() >= 2)
@@ -937,7 +962,7 @@ void Kinematics::process(Long64_t entry) {
 	}
           
       // For-Loop (Nested): All b-quarks
-      for (int j = i+1; j < bQuarks_p4.size(); j++)
+      for (size_t j = i+1; j < bQuarks_p4.size(); j++)
 	{	  
 
 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(bQuarks_p4.at(i), bQuarks_p4.at(j));
