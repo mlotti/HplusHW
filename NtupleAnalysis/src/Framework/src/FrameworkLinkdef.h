@@ -10,5 +10,7 @@
 // rootcint complains that this is already defined, but without TTree
 // complains that it is not
 #pragma link C++ class std::vector<float>+;
+#pragma link C++ class vector<short> +;
+#pragma link C++ class vector<vector<short> >+;
 
 #endif

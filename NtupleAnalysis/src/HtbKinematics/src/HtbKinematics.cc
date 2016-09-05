@@ -725,7 +725,7 @@ void HtbKinematics::process(Long64_t entry) {
 
     
     // Mom and Grand-mom properties    
-    int genMom_index     = p.mother();
+    int genMom_index     = p.mothers().at(0);
     int genMom_pdgId     = 0;
     int genGmom_index    = -1;
     if (genMom_index >= 0)
@@ -735,7 +735,7 @@ void HtbKinematics::process(Long64_t entry) {
 	genMom_pdgId  = m.pdgId();
 
 	// Grand-mom
-	genGmom_index = m.mother();
+	genGmom_index = m.mothers().at(0);
 	g = fEvent.genparticles().getGenParticles()[genGmom_index];
       } 
 

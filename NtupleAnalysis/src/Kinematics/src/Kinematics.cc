@@ -461,25 +461,30 @@ void Kinematics::process(Long64_t entry) {
     double genP_vtxX     = p.vtxX()*10; // in mm
     double genP_vtxY     = p.vtxY()*10; // in mm
     double genP_vtxZ     = p.vtxZ()*10; // in mm
+    math::XYZTLorentzVector genP_p4;
+    genP_p4 = p.p4();
 
     // Daughter properties
-    std::vector<int> genP_daughters_index = mcTools.GetDaughters(genP_index, false);
+    std::vector<short> genP_daughters_index = p.daughters(); //mcTools.GetDaughters(genP_index, false);
       
-    // Mom and Grand-mom properties    
-    int genMom_index     = p.mother();
+    // Mom and Grand-mom properties
+    int genMom_index = -1;
+    if ( p.mothers().size() >0 ) genMom_index = p.mothers().at(0);
+
+    /*
     // int genMom_pdgId     = 0;
     int genGmom_index    = -1;
-    if (genMom_index >= 0)
+      if (genMom_index >= 0)
       {
 	// Mom
 	m = fEvent.genparticles().getGenParticles()[genMom_index];
 	// genMom_pdgId  = m.pdgId();
 
 	// Grand-mom
-	genGmom_index = m.mother();
+	genGmom_index = m.mothers().at(0);
 	g = fEvent.genparticles().getGenParticles()[genGmom_index];
       } 
-   
+    */   
     
     // Consider only status=22 (intermediate) or status=23 (outgoing) particles
     // if( (genP_status != 22) && (genP_status != 23) ) continue;
@@ -537,12 +542,6 @@ void Kinematics::process(Long64_t entry) {
       }
 
 
-    // If particle decays to itself, get the last in the chain
-    int fs_index   = mcTools.GetFinalSelf(genP_index);
-    genParticle fs = fEvent.genparticles().getGenParticles()[fs_index];
-    math::XYZTLorentzVector fs_p4;
-    fs_p4 = fs.p4();
-    
     // Leptons    
     if( mcTools.IsLepton(p.pdgId() ) )
       {
@@ -566,10 +565,10 @@ void Kinematics::process(Long64_t entry) {
 	if(std::abs(genP_pdgId) == 5)
 	  {
 	    
-	    bQuarks_p4.push_back( fs_p4 );
+	    bQuarks_p4.push_back( genP_p4 );
 	    
-	    if ( mcTools.HasMother(genP_index, +6, false) ) tbWPlus_BQuark_p4  = fs_p4;
-	    if ( mcTools.HasMother(genP_index, -6, false) ) tbWMinus_BQuark_p4 = fs_p4;
+	    if ( mcTools.HasMother(genP_index, +6, false) ) tbWPlus_BQuark_p4  = genP_p4;
+	    if ( mcTools.HasMother(genP_index, -6, false) ) tbWMinus_BQuark_p4 = genP_p4;
 	    
 	    
 	  }// b-quarks
@@ -578,7 +577,7 @@ void Kinematics::process(Long64_t entry) {
 	if(std::abs(genP_pdgId) == 6)
 	  {
 	    
-	    tQuarks_p4.push_back( fs_p4 );
+	    tQuarks_p4.push_back( genP_p4 );
 	    
 	  }//t-quarks
 	
@@ -587,8 +586,8 @@ void Kinematics::process(Long64_t entry) {
 	if ( mcTools.HasMother(genP_index, -24, false) )
 	  {
 	    
-	    if (genP_pdgId > 0) tbWPlus_Wqq_Quark_p4 = fs_p4;
-	    else tbWPlus_Wqq_AntiQuark_p4 = fs_p4;
+	    if (genP_pdgId > 0) tbWPlus_Wqq_Quark_p4 = genP_p4;
+	    else tbWPlus_Wqq_AntiQuark_p4 = genP_p4;
 	    
 	  }//W-
 
@@ -596,8 +595,8 @@ void Kinematics::process(Long64_t entry) {
 	if ( mcTools.HasMother(genP_index, +24, false) )
 	  {
 
-	    if (genP_pdgId > 0) tbWMinus_Wqq_Quark_p4 = fs_p4;
-	    else tbWMinus_Wqq_AntiQuark_p4 = fs_p4;
+	    if (genP_pdgId > 0) tbWMinus_Wqq_Quark_p4 = genP_p4;
+	    else tbWMinus_Wqq_AntiQuark_p4 = genP_p4;
 	    
 	  }// W+
 
