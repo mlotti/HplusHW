@@ -101,7 +101,8 @@ public:
   float_type phi() const { return fCollection->fPhi->value()[index()]; }
   float_type e()   const { return fCollection->fE->value()[index()]; }
   short pdgId()  const { return fCollection->fPdgId->value()[index()]; }
-  short mother() const { return fCollection->fMother->value()[index()]; }
+  std::vector<short> mothers() const { return fCollection->fMothers->value()[index()]; } // Required: "#pragma link C++ class vector<vector<short> >+;" in Framework/src/FrameworkLinkdef.h 
+  std::vector<short> daughters() const { return fCollection->fDaughters->value()[index()]; } // Required: "#pragma link C++ class vector<vector<short> >+;" in Framework/src/FrameworkLinkdef.h 
   short status() const { return fCollection->fStatus->value()[index()]; }
   short charge() const { return fCollection->fCharge->value()[index()]; }
   double vtxX() const { return fCollection->fVtxX->value()[index()]; }
@@ -209,7 +210,8 @@ public:
     fPhi(nullptr),
     fE(nullptr),
     fPdgId(nullptr),
-    fMother(nullptr),
+    fMothers(nullptr),
+    fDaughters(nullptr),
     fStatus(nullptr),
     fCharge(nullptr),
     fVtxX(nullptr),
@@ -242,17 +244,18 @@ public:
   ~ParticleCollection() {}
 
   void setupBranches(BranchManager& mgr) {
-    mgr.book(prefix()+"_pt"  +energySystematicsVariation(), &fPt);
-    mgr.book(prefix()+"_eta" +energySystematicsVariation(), &fEta);
-    mgr.book(prefix()+"_phi" +energySystematicsVariation(), &fPhi);
-    mgr.book(prefix()+"_e"   +energySystematicsVariation(), &fE);
-    mgr.book(prefix()+"_pdgId" , &fPdgId);
-    mgr.book(prefix()+"_mother", &fMother);
-    mgr.book(prefix()+"_status", &fStatus);
-    mgr.book(prefix()+"_charge", &fCharge);
-    mgr.book(prefix()+"_vtxX"  , &fVtxX);
-    mgr.book(prefix()+"_vtxY"  , &fVtxY);
-    mgr.book(prefix()+"_vtxZ"  , &fVtxZ);
+    mgr.book(prefix()+"_pt"  + energySystematicsVariation(), &fPt);
+    mgr.book(prefix()+"_eta" + energySystematicsVariation(), &fEta);
+    mgr.book(prefix()+"_phi" + energySystematicsVariation(), &fPhi);
+    mgr.book(prefix()+"_e"   + energySystematicsVariation(), &fE);
+    mgr.book(prefix()+"_pdgId"    , &fPdgId);
+    mgr.book(prefix()+"_mothers"  , &fMothers);
+    mgr.book(prefix()+"_daughters", &fDaughters);
+    mgr.book(prefix()+"_status"   , &fStatus);
+    mgr.book(prefix()+"_charge"   , &fCharge);
+    mgr.book(prefix()+"_vtxX"     , &fVtxX);
+    mgr.book(prefix()+"_vtxY"     , &fVtxY);
+    mgr.book(prefix()+"_vtxZ"     , &fVtxZ);
     // FIXME: These must be moved (added becaused autogenerate script not fully operation for GenParticles)
     mgr.book(prefix()+"_fromHardProcessBeforeFSR"                    , &fFromHardProcessBeforeFSR);
     mgr.book(prefix()+"_fromHardProcessDecayed"                      , &fFromHardProcessDecayed);
@@ -291,7 +294,8 @@ protected:
   const Branch<std::vector<float_type>> *fPhi;
   const Branch<std::vector<float_type>> *fE;
   const Branch<std::vector<short>> *fPdgId;
-  const Branch<std::vector<short>> *fMother;
+  const Branch<std::vector< std::vector<short> >> *fMothers;
+  const Branch<std::vector< std::vector<short> >> *fDaughters;
   const Branch<std::vector<short>> *fStatus;
   const Branch<std::vector<short>> *fCharge;
   const Branch<std::vector<double>> *fVtxX;

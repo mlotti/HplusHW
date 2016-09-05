@@ -380,7 +380,7 @@ if __name__ == "__main__":
     DIRNAME = ""
 
     parser = OptionParser(usage="Usage: %prog [options]")
-    parser.add_option("-d", "--dataset" , dest="dataset" , default="ChargedHiggs_HplusTB_HplusToTB_M_180", help="Dataset to include in multicrab dir [default: ChargedHiggs_HplusTB_HplusToTB_M_200]")
+    parser.add_option("-d", "--dataset" , dest="dataset" , default="ChargedHiggs_HplusTB_HplusToTB_M_200", help="Dataset to include in multicrab dir [default: ChargedHiggs_HplusTB_HplusToTB_M_200]")
     parser.add_option("-f", "--rootFile", dest="rootFile", default=None, help="The ROOT file (miniaod2tree.root) to be copied inside the multicrab dir[default: None]")
     parser.add_option("-v", "--verbose" , dest="verbose" , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
     parser.add_option("-a", "--ask"     , dest="ask"     , default=False  , action="store_true", help="Prompt user before executing CRAB commands [defaut: False]")
