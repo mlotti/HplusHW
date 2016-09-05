@@ -9,44 +9,46 @@ GenParticleDumper::GenParticleDumper(edm::ConsumesCollector&& iConsumesCollector
   booked           = false;
 
   // General particle list
-  pt     = new std::vector<double>[inputCollections.size()];
-  eta    = new std::vector<double>[inputCollections.size()];    
-  phi    = new std::vector<double>[inputCollections.size()];    
-  e      = new std::vector<double>[inputCollections.size()];    
-  pdgId  = new std::vector<short>[inputCollections.size()];
-  status = new std::vector<short>[inputCollections.size()];
-  charge = new std::vector<short>[inputCollections.size()];
-  mother = new std::vector<short>[inputCollections.size()];
-  vtxX   = new std::vector<double>[inputCollections.size()];
-  vtxY   = new std::vector<double>[inputCollections.size()];
-  vtxZ   = new std::vector<double>[inputCollections.size()];
+  pt        = new std::vector<double>[inputCollections.size()];
+  eta       = new std::vector<double>[inputCollections.size()];    
+  phi       = new std::vector<double>[inputCollections.size()];    
+  e         = new std::vector<double>[inputCollections.size()];    
+  pdgId     = new std::vector<short>[inputCollections.size()];
+  status    = new std::vector<short>[inputCollections.size()];
+  charge    = new std::vector<short>[inputCollections.size()];
+  // mother    = new std::vector<short>[inputCollections.size()];
+  mothers   = new std::vector< std::vector<short> >[inputCollections.size()];
+  daughters = new std::vector< std::vector<short> >[inputCollections.size()];
+  vtxX      = new std::vector<double>[inputCollections.size()];
+  vtxY      = new std::vector<double>[inputCollections.size()];
+  vtxZ      = new std::vector<double>[inputCollections.size()];
   // collisionId = new std::vector<int>[inputCollections.size()];
 
-  // Booleans
-  fromHardProcessBeforeFSR                     = new std::vector<bool>[inputCollections.size()];
-  fromHardProcessDecayed                       = new std::vector<bool>[inputCollections.size()];
-  fromHardProcessFinalState                    = new std::vector<bool>[inputCollections.size()];
-  isDirectHardProcessTauDecayProductFinalState = new std::vector<bool>[inputCollections.size()];
-  isDirectPromptTauDecayProductFinalState      = new std::vector<bool>[inputCollections.size()];
-  isHardProcess                                = new std::vector<bool>[inputCollections.size()];
-  isLastCopy                                   = new std::vector<bool>[inputCollections.size()];
-  isLastCopyBeforeFSR                          = new std::vector<bool>[inputCollections.size()];
-  // isMostlyLikePythia6Status3                   = new std::vector<bool>[inputCollections.size()];
-  isPromptDecayed                              = new std::vector<bool>[inputCollections.size()];
-  isPromptFinalState                           = new std::vector<bool>[inputCollections.size()];
+  // Booleans (https://cmssdt.cern.ch/SDT/doxygen/CMSSW_7_4_7/doc/html/d2/d4e/MCTruthHelper_8h_source.html)
+  fromHardProcessBeforeFSR                     = new std::vector<bool>[inputCollections.size()]; // is the direct descendant of a hard process particle of the same pdg id
+  fromHardProcessDecayed                       = new std::vector<bool>[inputCollections.size()]; // is the decayed direct descendant of a hard process particle (such as a tau from the hard process)
+  fromHardProcessFinalState                    = new std::vector<bool>[inputCollections.size()]; // is the final state direct descendant of a hard process particle  
+  isDirectHardProcessTauDecayProductFinalState = new std::vector<bool>[inputCollections.size()]; // is the final state of a direct decay product of a tau from the hard process
+  isDirectPromptTauDecayProductFinalState      = new std::vector<bool>[inputCollections.size()]; // is the final state of a direct decay product from a prompt tau 
+  isHardProcess                                = new std::vector<bool>[inputCollections.size()]; // is part of the hard process  
+  isLastCopy                                   = new std::vector<bool>[inputCollections.size()]; // is the last copy of the particle in the chain with the same pdg id (final physical momentum)
+  isLastCopyBeforeFSR                          = new std::vector<bool>[inputCollections.size()]; // is the last copy of the particle in the chain with the same pdg id (before QED or QCD FSR)
+  // isMostlyLikePythia6Status3                   = new std::vector<bool>[inputCollections.size()]; 
+  isPromptDecayed                              = new std::vector<bool>[inputCollections.size()]; // is prompt and decayed 
+  isPromptFinalState                           = new std::vector<bool>[inputCollections.size()]; // is prompt and final state  
 
-  // Flags
-  fromHardProcess                    = new std::vector<bool>[inputCollections.size()];
-  isDecayedLeptonHadron              = new std::vector<bool>[inputCollections.size()];
-  isDirectHadronDecayProduct         = new std::vector<bool>[inputCollections.size()];
-  isDirectHardProcessTauDecayProduct = new std::vector<bool>[inputCollections.size()];
-  isDirectPromptTauDecayProduct      = new std::vector<bool>[inputCollections.size()];
-  isDirectTauDecayProduct            = new std::vector<bool>[inputCollections.size()];
-  isFirstCopy                        = new std::vector<bool>[inputCollections.size()];
-  isHardProcessTauDecayProduct       = new std::vector<bool>[inputCollections.size()];
-  isPrompt                           = new std::vector<bool>[inputCollections.size()];
-  isPromptTauDecayProduct            = new std::vector<bool>[inputCollections.size()];
-  isTauDecayProduct                  = new std::vector<bool>[inputCollections.size()];
+  // Flags (https://cmssdt.cern.ch/SDT/doxygen/CMSSW_7_4_7/doc/html/d2/d4e/MCTruthHelper_8h_source.html)
+  fromHardProcess                    = new std::vector<bool>[inputCollections.size()]; // is the direct descendant of a hard process particle of the same pdg id
+  isDecayedLeptonHadron              = new std::vector<bool>[inputCollections.size()]; // is a decayed hadron, muon, or tau (does not include resonance decays like W, Z, Higgs, top ..)
+  isDirectHadronDecayProduct         = new std::vector<bool>[inputCollections.size()]; // is a direct decay product from a hadron
+  isDirectHardProcessTauDecayProduct = new std::vector<bool>[inputCollections.size()]; // is a direct decay product of a tau from the hard process
+  isDirectPromptTauDecayProduct      = new std::vector<bool>[inputCollections.size()]; // is a direct decay product from a prompt tau 
+  isDirectTauDecayProduct            = new std::vector<bool>[inputCollections.size()]; // is a direct tau decay product
+  isFirstCopy                        = new std::vector<bool>[inputCollections.size()]; // is the first copy of the particle in the chain with the same pdg id
+  isHardProcessTauDecayProduct       = new std::vector<bool>[inputCollections.size()]; // is a direct or indirect decay product of a tau from the hard process
+  isPrompt                           = new std::vector<bool>[inputCollections.size()]; // is prompt (not from hadron, muon, or tau decay)
+  isPromptTauDecayProduct            = new std::vector<bool>[inputCollections.size()]; // is a direct or indirect decay product of a prompt tau
+  isTauDecayProduct                  = new std::vector<bool>[inputCollections.size()]; // is a direct or indirect tau decay product
 
   // Electrons
   electrons = new FourVectorDumper[inputCollections.size()];
@@ -115,7 +117,9 @@ void GenParticleDumper::book(TTree* tree){
       tree->Branch((name+"_phi").c_str(), &phi[i]);
       tree->Branch((name+"_e").c_str()  , &e[i]);
       tree->Branch((name+"_pdgId").c_str() , &pdgId[i]);
-      tree->Branch((name+"_mother").c_str(), &mother[i]);
+      // tree->Branch((name+"_mother").c_str(), &mother[i]);
+      tree->Branch((name+"_mothers").c_str(), &mothers[i]);
+      tree->Branch((name+"_daughters").c_str(), &daughters[i]);
       tree->Branch((name+"_status").c_str(), &status[i]);
       tree->Branch((name+"_charge").c_str(), &charge[i]);
       tree->Branch((name+"_vtxX").c_str()  , &vtxX[i]);
@@ -235,12 +239,12 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    // std::cout << "gp.fromHardProcessFinalState() = "                    << gp.fromHardProcessFinalState()                    << std::endl;
 	    // std::cout << "gp.isDirectHardProcessTauDecayProductFinalState() = " << gp.isDirectHardProcessTauDecayProductFinalState() << std::endl;
 	    // std::cout << "gp.isDirectPromptTauDecayProductFinalState() = "      << gp.isDirectPromptTauDecayProductFinalState()      << std::endl;
-	    // std::cout << "gp.isHardProcess() = "                                << gp.isHardProcess()                      << std::endl;
-	    // std::cout << "gp.isLastCopy() = "                                   << gp.isLastCopy()                         << std::endl;
-	    // std::cout << "gp.isLastCopyBeforeFSR() = "                          << gp.isLastCopyBeforeFSR()                << std::endl;
-	    // // std::cout << "gp.isMostlyLikePythia6Status3() = "                   << gp.isMostlyLikePythia6Status3()         << std::endl;
-	    // std::cout << "gp.isPromptDecayed() = "                              << gp.isPromptDecayed()                    << std::endl;
-	    // std::cout << "gp.isPromptFinalSate() = "                            << gp.isPromptFinalState()                 << std::endl;
+	    // std::cout << "gp.isHardProcess() = "                                << gp.isHardProcess()                                << std::endl;
+	    // std::cout << "gp.isLastCopy() = "                                   << gp.isLastCopy()                                   << std::endl;
+	    // std::cout << "gp.isLastCopyBeforeFSR() = "                          << gp.isLastCopyBeforeFSR()                          << std::endl;
+	    // std::cout << "gp.isMostlyLikePythia6Status3() = "                   << gp.isMostlyLikePythia6Status3()                   << std::endl;
+	    // std::cout << "gp.isPromptDecayed() = "                              << gp.isPromptDecayed()                              << std::endl;
+	    // std::cout << "gp.isPromptFinalSate() = "                            << gp.isPromptFinalState()                           << std::endl;
 	  }
 
 	  // Flags (https://cmssdt.cern.ch/SDT/doxygen/CMSSW_8_0_14/doc/html/d6/d67/structreco_1_1GenStatusFlags.html)
@@ -271,18 +275,72 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	    // std::cout << "flags.isPromptTauDecayProduct() = "            << flags.isPromptTauDecayProduct()            << std::endl;
 	    // std::cout << "flags.isTauDecayProduct() = "                  << flags.isTauDecayProduct()                  << std::endl;
 	  }
-	  
+
+
+	  /*
           // Find mother index
           short index = -1;
           if (gp.mother() != nullptr) {
+	    // std::cout << "gp.numberOfMothers()  = " << gp.numberOfMothers() << std::endl;
+	    // std::cout << "gp.mother(gp.numberOfMothers()-1) = " << gp.mother(gp.numberOfMothers()-1) << std::endl;
             for(size_t j = 0; j < handle->size(); ++j) {
               if (gp.mother() == &(handle->at(j)))
                 index = j;
             }
           }
           mother[ic].push_back(index);
-        }
-      }
+	  */
+	  
+          // Find mother indices
+          short index = -1;
+	  std::vector<short> _mothers;
+          if (gp.numberOfMothers() != 0){
+	    // std::cout << "=== gp.at(" << i << ").numberOfMothers() = " << gp.numberOfMothers() << std::endl;
+
+	    for(size_t j = 0; j < gp.numberOfMothers(); ++j) {
+	      for(size_t k = 0; k < handle->size(); ++k) {
+		{
+		  if (gp.mother(j) == &(handle->at(k)))
+		    {
+		      index = k;
+		      // std::cout << "\tgp.mother("<< j <<").index = " << k << std::endl;
+		    }
+		}
+	      }
+	      if (index >= 0) _mothers.push_back(index);
+	      index = -1;
+	    }
+	    // std::cout << "\n" << std::endl;
+	  }
+	  mothers[ic].push_back(_mothers);
+	  
+
+	  // Find daughter indices
+	  index = -1;
+	  std::vector<short> _daughters;
+	  if (gp.numberOfDaughters() != 0) {
+	    // std::cout << "=== gp.at(" << i << ").numberOfDaughters() = " << gp.numberOfDaughters() << std::endl;
+
+	    for(size_t j = 0; j < gp.numberOfDaughters(); ++j) {
+	      for(size_t k = 0; k < handle->size(); ++k) {
+
+		if (gp.daughter(j) == &(handle->at(k)))
+		  {
+		    index = k;
+		    // std::cout << "\tgp.daughter("<< j <<").index = " << k << std::endl;
+		  }
+
+	      }
+	      if (index >= 0) _daughters.push_back(index);
+	      index = -1;
+	    }
+	    // std::cout << "\n" << std::endl;
+	  }
+	  daughters[ic].push_back(_daughters);
+	  
+
+	}// for(size_t i = 0; i < handle->size(); ++i) {
+      }// if (inputCollections[i].getUntrackedParameter<bool>("saveAllGenParticles", false)) {
 
 
       // MC electrons
@@ -465,7 +523,9 @@ void GenParticleDumper::reset(){
         pdgId[ic].clear();
         status[ic].clear();
         charge[ic].clear();
-        mother[ic].clear();
+        // mother[ic].clear();
+	mothers[ic].clear();
+	daughters[ic].clear();
         vtxX[ic].clear();
         vtxY[ic].clear();
         vtxZ[ic].clear();

@@ -464,7 +464,7 @@ void Kinematics::process(Long64_t entry) {
 
     // Daughter properties
     std::vector<int> genP_daughters_index = mcTools.GetDaughters(genP_index, false);
-    
+      
     // Mom and Grand-mom properties    
     int genMom_index     = p.mother();
     // int genMom_pdgId     = 0;
@@ -480,6 +480,38 @@ void Kinematics::process(Long64_t entry) {
 	g = fEvent.genparticles().getGenParticles()[genGmom_index];
       } 
    
+    
+    // Consider only status=22 (intermediate) or status=23 (outgoing) particles
+    // if( (genP_status != 22) && (genP_status != 23) ) continue;
+    
+    // TESTING
+    // if (!p.isPrompt()) continue;
+    // if (!p.isPromptDecayed()) continue;
+    // if (!p.isPromptFinalState()) continue;
+    // if (!p.isDecayedLeptonHadron()) continue;
+    if (!p.isTauDecayProduct()) continue;
+    // if (!p.isPromptTauDecayProduct()) continue;
+    // if (!p.isDirectTauDecayProduct()) continue;
+    // if (!p.isDirectPromptTauDecayProduct()) continue;
+    // if (!p.isDirectPromptTauDecayProductFinalState()) continue;
+    // if (!p.isDirectHadronDecayProduct()) continue;	
+    // if (!p.isDirectHardProcessTauDecayProductFinalState()) continue;
+    // if (!p.isHardProcess()) continue;
+    // if (!p.fromHardProcess()) continue;
+    // if (!p.fromHardProcessDecayed()) continue;
+    // if (!p.fromHardProcessFinalState()) continue;
+    // if (!p.isHardProcessTauDecayProduct()) continue;
+    // if (!p.isDirectHardProcessTauDecayProduct()) continue;
+    // if (!p.fromHardProcessBeforeFSR()) continue;
+    // if (!p.isFirstCopy()) continue;
+    // if (!p.isLastCopy()) continue;
+    // if (!p.isLastCopyBeforeFSR()) continue;
+
+    // mcTools.PrintGenParticle(44);
+    // mcTools.PrintDaughters(44, false);
+    // mcTools.PrintDaughters(genP_index, true);
+    // TESTING
+
     // Add table rows
     if (cfg_Verbose)
       {
@@ -504,33 +536,6 @@ void Kinematics::process(Long64_t entry) {
 	row++;
       }
 
-
-    // TMP ============================================================================================================================================
-   std::cout << " 1 = " << p.fromHardProcessBeforeFSR() << std::endl;
-   std::cout << " 2 = " << p.fromHardProcessDecayed() << std::endl;
-   std::cout << " 3 = " << p.fromHardProcessFinalState() << std::endl;
-   std::cout << " 4 = " << p.isDirectHardProcessTauDecayProductFinalState() << std::endl;
-   std::cout << " 5 = " << p.isDirectPromptTauDecayProductFinalState() << std::endl;
-   std::cout << " 6 = " << p.isHardProcess() << std::endl;
-   std::cout << " 7 = " << p.isLastCopy() << std::endl;
-   std::cout << " 8 = " << p.isLastCopyBeforeFSR() << std::endl;
-   std::cout << " 9 = " << p.isPromptDecayed() << std::endl;
-   std::cout << "10 = " << p.isPromptFinalState() << std::endl;
-   std::cout << "11 = " << p.fromHardProcess() << std::endl;
-   std::cout << "12 = " << p.isDecayedLeptonHadron() << std::endl;
-   std::cout << "13 = " << p.isDirectHadronDecayProduct() << std::endl;
-   std::cout << "14 = " << p.isDirectHardProcessTauDecayProduct() << std::endl;
-   std::cout << "15 = " << p.isDirectPromptTauDecayProduct() << std::endl;
-   std::cout << "16 = " << p.isDirectTauDecayProduct() << std::endl;
-   std::cout << "17 = " << p.isFirstCopy() << std::endl;
-   std::cout << "18 = " << p.isHardProcessTauDecayProduct() << std::endl;
-   std::cout << "19 = " << p.isPrompt() << std::endl;
-   std::cout << "20 = " << p.isPromptTauDecayProduct() << std::endl;
-   std::cout << "21 = " << p.isTauDecayProduct() << std::endl;
-    // TMP ============================================================================================================================================
-
-    // Consider only status=22 (intermediate) or status=23 (outgoing) particles
-    if( (genP_status != 22) && (genP_status != 23) ) continue;
 
     // If particle decays to itself, get the last in the chain
     int fs_index   = mcTools.GetFinalSelf(genP_index);

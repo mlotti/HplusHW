@@ -44,7 +44,9 @@ private:
   
   // General particle list
   std::vector<int> *collisionId;
-  std::vector<short> *mother;
+  // std::vector<short> *mother;
+  std::vector< std::vector<short> > *mothers;
+  std::vector< std::vector<short> > *daughters;
 
   // Booleans
   std::vector<bool> *fromHardProcessBeforeFSR;

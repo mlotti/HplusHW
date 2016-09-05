@@ -24,6 +24,7 @@ It is also used retrieve output and check status of submitted CRAB jobs.
 The file datasets.py is used an an auxiliary file to determine the samples to be processesed.
 To retrieve some logs which refuse to come out otherwise:
 crab log <dir> --command=LCG --checksum=no
+crab getoutput <dir> --command=LCG --checksum=no
 
 Useful Links:
 https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
@@ -94,7 +95,7 @@ class colors:
 # Class Definition
 #================================================================================================ 
 class Report:
-    def __init__(self, name, allJobs, retrieved, status, dashboardURL):
+    def __init__(self, name, allJobs, retrieved, finished, failed, retrievedLog, retrievedOut, status, dashboardURL):
         '''
         Constructor 
         '''
@@ -105,6 +106,10 @@ class Report:
         self.dataset      = self.name.split("/")[-1]
         self.dashboardURL = dashboardURL
         self.status       = self.GetTaskStatusStyle(status)
+        self.finished     = finished
+        self.failed       = failed
+        self.retrievedLog = retrievedLog
+        self.retrievedOut = retrievedOut
         return
 
 
@@ -325,7 +330,7 @@ def GetTaskReports(datasetPath, status, dashboardURL):
 
         # Append the report
         Verbose("Appending Report")
-        report = Report(datasetPath, alljobs, retrieved, status, dashboardURL)
+        report = Report(datasetPath, alljobs, retrieved, finished, failed, retrievedLog, retrievedOut,  status, dashboardURL)
 
         # Determine if task is DONE or not
         Verbose("Determining if Task is DONE")
@@ -336,7 +341,7 @@ def GetTaskReports(datasetPath, status, dashboardURL):
     # Catch exceptions (Errors detected during execution which may not be "fatal")
     except:
         msg = sys.exc_info()[1]
-        report = Report(datasetPath, "?", "?", "?", dashboardURL)
+        report = Report(datasetPath, "?", "?", "?", "?", "?", "?", "?", dashboardURL) 
         Print("crab status failed with message \"%s\". Skipping ..." % ( msg ), False)
     return report
 
@@ -577,8 +582,11 @@ def PrintTaskSummary(reportDict):
     Verbose("PrintTaskSummary()")
     
     reports  = []
-    msgAlign = "{:<3} {:<60} {:^20} {:>6} {:>1} {:<6}"
-    header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "Ret.", "/", "Tot.")
+    #msgAlign = "{:<3} {:<60} {:^20} {:>6} {:>1} {:<6}"
+    #header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "Ret.", "/", "Tot.")
+    msgAlign = "{:<3} {:<60} {:^20} {:>10} {:>10} {:>10} {:>10} {:>10}"
+    header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "All", "Finished", "Failed", "Logs", "Output")
+    #retrieved, finished, failed, retrievedLog, retrievedOut
     hLine    = "="*len(header)
     # reports.append("\n")
     reports.append(hLine)
@@ -587,11 +595,17 @@ def PrintTaskSummary(reportDict):
     
     # For-loop: All datasets (key) and corresponding status (value)
     for i, dataset in enumerate(reportDict):
-        report = reportDict[dataset]
-        status = report.status
-        ret    = report.retrieved
-        tot    = report.allJobs
-        line   = msgAlign.format(i+1, dataset, status, ret,  "/", tot)
+        report  = reportDict[dataset]
+        status  = report.status
+        allJobs = report.allJobs
+        finished= report.finished
+        failed  = report.failed
+        rLogs   = report.retrievedLog
+        rOutput = report.retrievedOut
+        line   = msgAlign.format(i+1, dataset, status, allJobs, finished, failed, rLogs, rOutput)
+        #ret    = report.retrieved
+        #tot    = report.allJobs
+        #line   = msgAlign.format(i+1, dataset, status, ret,  "/", tot)
         reports.append(line)
     reports.append(hLine)
     
@@ -1003,10 +1017,11 @@ def EnsurePathDoesNotExist(taskDirName, requestName):
 	return
     else:
         msg = "File '%s' already exists!" % (filePath)
-        if AskUser(msg + " Proceed and overwrite it?"):
-            return
-	else:
-            raise Exception(msg)
+        Print(msg + "\n\tProceeding to overwrite file.")
+        #if AskUser(msg + "\n\tProceed and overwrite it?"):
+        #    return
+	#else:
+        #    raise Exception(msg)
     return
 
 
