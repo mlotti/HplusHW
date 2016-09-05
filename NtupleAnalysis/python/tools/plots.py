@@ -2317,6 +2317,7 @@ class ComparisonManyPlot(PlotBase, PlotRatioBase):
 # values please see the constructor (__init__())
 # \li Rebinning
 # \li Stacking of MC histograms, and adding total MC (stat) uncertainty
+# \li Is x axis in log or linear scale
 # \li Is y axis in log or linear scale
 # \li Frame bounds (X/Y axis min/max) (separate defaults for linear and log scale, and for ratio pad)
 # \li Adding the ratio pad
@@ -2375,7 +2376,8 @@ class PlotDrawer:
     # \param xlabelsize          Default Y axis label size (None for default)
     # \param ylabelsize          Default Y axis label size (None for default)
     # \param zhisto              Histo name for the Z information (for updating palette etc) (None for first histogram)
-    # \param log                 Should Y axis be in log scale by default?
+    # \param logx                Should X axis be in log scale by default?
+    # \param log                 Should Y axis be in log scale by default?    
     # \param ratio               Should the ratio pad be drawn?
     # \param ratioYlabel         The Y axis title for the ratio pad (None for default)
     # \param ratioInvert         Should the ratio be inverted?
@@ -2417,6 +2419,7 @@ class PlotDrawer:
                  ylabelsize = None,
                  zhisto=None,
                  log=False,
+                 logx=False,
                  ratio=False,
                  ratioYlabel=None,
                  ratioInvert=False,
@@ -2427,6 +2430,7 @@ class PlotDrawer:
                  ratioMoveLegend={},
                  opts={},
                  optsLog={},
+                 optsLogx={},
                  opts2={},
                  canvasOpts=None,
                  backgroundColor=None,
@@ -2459,6 +2463,7 @@ class PlotDrawer:
         self.ylabelsizeDefault = ylabelsize;
         self.zhistoDefault = zhisto
         self.logDefault = log
+        self.logxDefault = logx
         self.ratioDefault = ratio
         self.ratioYlabelDefault = ratioYlabel
         self.ratioInvertDefault = ratioInvert
@@ -2467,10 +2472,12 @@ class PlotDrawer:
         self.ratioErrorOptionsDefault = ratioErrorOptions
         self.ratioCreateLegendDefault = ratioCreateLegend
         self.ratioMoveLegendDefault = ratioMoveLegend
-        self.optsDefault = {"ymin": 0, "ymaxfactor": 1.1}
+        self.optsDefault = {"ymin": 0, "ymaxfactor": 2.0}
         self.optsDefault.update(opts)
-        self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2}
+        self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2.0}
         self.optsLogDefault.update(optsLog)
+        self.optsLogxDefault = {"xmin": 5, "xmax": 6000}
+        self.optsLogxDefault.update(optsLogx)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
         self.canvasOptsDefault = canvasOpts
@@ -2751,10 +2758,14 @@ class PlotDrawer:
             customize(p)
 
         log = self._getValue("log", p, kwargs)
+        logx = self._getValue("logx", p, kwargs)
 
         optsPostfix = ""
         if log:
             optsPostfix = "Log"
+        if logx:
+            optsPostfix = "Logx"
+
         _opts = self._getValue("opts", p, kwargs, optsPostfix)
         _opts2 = self._getValue("opts2", p, kwargs)
 
@@ -2787,6 +2798,9 @@ class PlotDrawer:
         p.createFrame(name, **args)
         if log:
             p.getPad().SetLogy(log)
+        if logx:
+            p.getPad().SetLogx(logx) 
+            p.getPad2().SetLogx(logx)               
 
         if errorBarsX:
             ROOT.gStyle.SetErrorX(errorXbackup)
