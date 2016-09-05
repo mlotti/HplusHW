@@ -68,6 +68,13 @@ process.MessageLogger.categories.append("TriggerBitCounter")
 process.MessageLogger.cerr.FwkReport.reportEvery = reportEvery # print the event number for every 100th event
 process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.untracked.int32(maxWarnings)) # print max 100 warnings
 
+#================================================================================================  
+# Set the process options -- Display summary at the end, enable unscheduled execution
+#================================================================================================  
+process.options = cms.untracked.PSet(
+    allowUnscheduled = cms.untracked.bool(True),
+    wantSummary = cms.untracked.bool(False)
+    )
 
 #================================================================================================  
 # Define the input files 
