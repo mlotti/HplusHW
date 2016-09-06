@@ -14,7 +14,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 
 # brilcalc usage taken from
 # https://twiki.cern.ch/twiki/bin/view/CMS/CertificationTools#Lumi_calculation
-NormTagJSON = "/afs/cern.ch/user/l/lumipro/public/normtag_file/moriond16_normtag.json"
+NormTagJSON = "/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json"
 
 
 # PileUp calc according to https://indico.cern.ch/event/459797/contribution/3/attachments/1181542/1711291/PPD_PileUp.pdf
