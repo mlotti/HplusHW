@@ -1168,7 +1168,7 @@ if __name__ == "__main__":
     VERBOSE = False
     PSET    = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
     SITE    = "T2_FI_HIP"
-    DIRNAME = ""
+    DIRNAME = os.getcwd()
 
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("--create"  , dest="create"    , default=False, action="store_true", help="Flag to create a CRAB job [default: False")
