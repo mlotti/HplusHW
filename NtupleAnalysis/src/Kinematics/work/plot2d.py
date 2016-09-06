@@ -32,9 +32,9 @@ kwargs = {
     "analysis"       : "Kinematics",
     #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_31August2016/figures/QCD/",
     "savePath"       : None,
-    "refDataset"     : "QCD",
-    "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"], #"QCD"]
-    "saveFormats"    : [".png", ".pdf"],
+    "refDataset"     : "TT", #ChargedHiggs_HplusTB_HplusToTB_M_300, TT, QCD
+    # "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"], #"QCD"]
+    "saveFormats"    : [".png"],# ".pdf"],
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "zMin"           : 1e-5,
     "zMax"           : 5e-2,
@@ -59,17 +59,17 @@ kwargs = {
 
 hNames = [
     #"MaxDiJetMass_dEta_Vs_dPhi",
-    "MaxDiJetMass_dRap_Vs_dPhi",
-#    "BQuark1_BQuark2_dEta_Vs_dPhi",
-#    "BQuark1_BQuark3_dEta_Vs_dPhi",
-#    "BQuark1_BQuark4_dEta_Vs_dPhi",
-#    "BQuark2_BQuark3_dEta_Vs_dPhi",
-#    "BQuark2_BQuark4_dEta_Vs_dPhi",
-#    "BQuark3_BQuark4_dEta_Vs_dPhi",
-#    "BQuarkPair_dRMin_Eta1_Vs_Eta2",
-#    "BQuarkPair_dRMin_Phi1_Vs_Phi2",
-#    "BQuarkPair_dRMin_Pt1_Vs_Pt2",
-#    "BQuarkPair_dRMin_dEta_Vs_dPhi",
+#    "MaxDiJetMass_dRap_Vs_dPhi",
+    "BQuark1_BQuark2_dEta_Vs_dPhi",
+    "BQuark1_BQuark3_dEta_Vs_dPhi",
+    "BQuark1_BQuark4_dEta_Vs_dPhi",
+    "BQuark2_BQuark3_dEta_Vs_dPhi",
+    "BQuark2_BQuark4_dEta_Vs_dPhi",
+    "BQuark3_BQuark4_dEta_Vs_dPhi",
+    "BQuarkPair_dRMin_Eta1_Vs_Eta2",
+    "BQuarkPair_dRMin_Phi1_Vs_Phi2",
+    "BQuarkPair_dRMin_Pt1_Vs_Pt2",
+    "BQuarkPair_dRMin_dEta_Vs_dPhi",
 #    "Htb_tbW_bqq_dRMax_dRap_Vs_dPhi",
 #    "gtt_tbW_bqq_dRMax_dRap_Vs_dPhi",
     "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta",
@@ -109,8 +109,8 @@ def main():
     datasetsMgr.updateNAllEventsToPUWeighted()
 
     # Remove datasets
-    datasetsMgr.remove(kwargs.get("rmDataset"))
-    # datasetsMgr.remove(filter(lambda name: not kwargs.get("refDataset") in name, datasetsMgr.getAllDatasetNames()))
+    #datasetsMgr.remove(kwargs.get("rmDataset"))
+    datasetsMgr.remove(filter(lambda name: not kwargs.get("refDataset") in name, datasetsMgr.getAllDatasetNames()))
 
     # Set custom XSections
     # d.getDataset("TT_ext3").setCrossSection(831.76)
@@ -119,7 +119,7 @@ def main():
     plots.mergeRenameReorderForDataMC(datasetsMgr) #WARNING: Merged MC histograms must be normalized to something!
 
     # Remove datasets (for merged names)
-    datasetsMgr.remove(kwargs.get("rmDataset"))
+    # datasetsMgr.remove(kwargs.get("rmDataset"))
                   
     # For-loop: All Histogram names
     for hName in hNames:
@@ -127,7 +127,7 @@ def main():
 
         # Get Histos for Plotter
         refHisto, otherHistos = GetHistosForPlotter(datasetsMgr, hName, **kwargs)
-        
+
         # Create a plot
         p = plots.PlotBase([refHisto], kwargs.get("saveFormats"))
         

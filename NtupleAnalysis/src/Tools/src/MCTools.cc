@@ -195,7 +195,7 @@ std::vector<int> MCTools::GetDaughters(const int my_index,
 }
 
 
-bool MCTools::HasMother(const int genP_index,
+bool MCTools::HasMother(std::vector<short> genP_mothers,
 			int wantedMom_pdgId,
 			const bool bAbsoluteMomId){
   // 
@@ -207,34 +207,26 @@ bool MCTools::HasMother(const int genP_index,
 
   if (bAbsoluteMomId) wantedMom_pdgId = std::abs(wantedMom_pdgId);
   
-  std::cout << "*** MCTools::HadMother() WARNING! Since CMSSW_8X this is obsolete. Needs some fixing. Returning false" << std::endl;
-  return false;
-  
-  /*
   // Get the mother index
-  const genParticle p = fEvent->genparticles().getGenParticles()[genP_index];
-  double genMom_index = p.mother();
-    
-  // If mother index less than 0, return false
-  if (genMom_index < 0) return false;
+  if (genP_mothers.size() < 1) return false;
   
-  // Valid mother exists, therefore get its pdgId
-  const genParticle m = fEvent->genparticles().getGenParticles()[genMom_index];
-  int genMom_pdgId    = 0;
-  if (bAbsoluteMomId) genMom_pdgId = std::abs(m.pdgId());
-  else genMom_pdgId = m.pdgId();
-
-  if (genMom_pdgId == wantedMom_pdgId)
+  // Look for mothers
+  int genMom_pdgId = 0;
+  for (size_t i = 0; i < genP_mothers.size(); i++)
     {
-      return true;
-    }
-  if (HasMother(genMom_index, wantedMom_pdgId, bAbsoluteMomId) )
-    {
-      return true;
+      
+      
+      const genParticle m = fEvent->genparticles().getGenParticles()[genP_mothers.at(i)];
+      if (bAbsoluteMomId) genMom_pdgId = std::abs(m.pdgId());
+      else genMom_pdgId = m.pdgId();
+      
+      if (genMom_pdgId == wantedMom_pdgId)
+	{
+	  return true;
+	}
     }
   
   return false;
-  */
 }
 
 

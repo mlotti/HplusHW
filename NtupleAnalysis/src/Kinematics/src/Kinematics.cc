@@ -138,17 +138,17 @@ private:
   WrappedTH1 *h_GenJet6_Eta;
 
   // GenJets: Dijet with largest mass
-  // WrappedTH1 *h_MaxDiJetMass_Pt;
-  // WrappedTH1 *h_MaxDiJetMass_Eta;
-  // WrappedTH1 *h_MaxDiJetMass_Rap; 
-  // WrappedTH1 *h_MaxDiJetMass_Mass;
-  // WrappedTH1 *h_MaxDiJetMass_dR;
-  // WrappedTH1 *h_MaxDiJetMass_dRrap;
-  // WrappedTH1 *h_MaxDiJetMass_dEta;
-  // WrappedTH1 *h_MaxDiJetMass_dPhi;
-  // WrappedTH1 *h_MaxDiJetMass_dRap;
-  // WrappedTH2 *h_MaxDiJetMass_dEta_Vs_dPhi;
-  // WrappedTH2 *h_MaxDiJetMass_dRap_Vs_dPhi;  
+  WrappedTH1 *h_MaxDiJetMass_Pt;
+  WrappedTH1 *h_MaxDiJetMass_Eta;
+  WrappedTH1 *h_MaxDiJetMass_Rap; 
+  WrappedTH1 *h_MaxDiJetMass_Mass;
+  WrappedTH1 *h_MaxDiJetMass_dR;
+  WrappedTH1 *h_MaxDiJetMass_dRrap;
+  WrappedTH1 *h_MaxDiJetMass_dEta;
+  WrappedTH1 *h_MaxDiJetMass_dPhi;
+  WrappedTH1 *h_MaxDiJetMass_dRap;
+  WrappedTH2 *h_MaxDiJetMass_dEta_Vs_dPhi;
+  WrappedTH2 *h_MaxDiJetMass_dRap_Vs_dPhi;  
 
   // Correlations 
   WrappedTH2 *h_BQuark1_BQuark2_dEta_Vs_dPhi;
@@ -354,17 +354,17 @@ void Kinematics::book(TDirectory *dir) {
   h_GenJet6_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet6_Eta", ";#eta", nBinsEta, minEta, maxEta);
 
   // GenJets: Dijet with largest mass
-  // h_MaxDiJetMass_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Pt"   , ";p_{T} (GeV/c)"    , nBinsPt, minPt, maxPt);
-  // h_MaxDiJetMass_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Eta"  , ";#eta"             , nBinsEta, minEta, maxEta);
-  // h_MaxDiJetMass_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Rap"  , ";#omega"           , nBinsRap, minRap, maxRap);
-  // h_MaxDiJetMass_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Mass" , ";M (GeV/c^{2})"    , 50,  0.0, +1000.0);  
-  // h_MaxDiJetMass_dEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dEta" , ";#Delta#eta"       , nBinsdEta, mindEta, maxdEta);
-  // h_MaxDiJetMass_dRap  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRap" , ";#Delta#omega"     , nBinsdRap, mindRap, maxdRap);
-  // h_MaxDiJetMass_dPhi  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dPhi" , ";#Delta#phi"       , nBinsdPhi, mindPhi, maxdPhi);  
-  // h_MaxDiJetMass_dR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dR"   , ";#DeltaR"          , nBinsdR, mindR, maxdR);  
-  // h_MaxDiJetMass_dRrap = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRrap", ";#DeltaR_{#omega}" , nBinsdR, mindR, maxdR);  
-  // h_MaxDiJetMass_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "MaxDiJetMass_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)"  , nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
-  // h_MaxDiJetMass_dRap_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRap_Vs_dPhi", ";#Delta#omega;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_MaxDiJetMass_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Pt"   , ";p_{T} (GeV/c)"    , nBinsPt, minPt, maxPt);
+  h_MaxDiJetMass_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Eta"  , ";#eta"             , nBinsEta, minEta, maxEta);
+  h_MaxDiJetMass_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Rap"  , ";#omega"           , nBinsRap, minRap, maxRap);
+  h_MaxDiJetMass_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Mass" , ";M (GeV/c^{2})"    , 50,  0.0, +1000.0);  
+  h_MaxDiJetMass_dEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dEta" , ";#Delta#eta"       , nBinsdEta, mindEta, maxdEta);
+  h_MaxDiJetMass_dRap  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRap" , ";#Delta#omega"     , nBinsdRap, mindRap, maxdRap);
+  h_MaxDiJetMass_dPhi  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dPhi" , ";#Delta#phi"       , nBinsdPhi, mindPhi, maxdPhi);  
+  h_MaxDiJetMass_dR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dR"   , ";#DeltaR"          , nBinsdR, mindR, maxdR);  
+  h_MaxDiJetMass_dRrap = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRrap", ";#DeltaR_{#omega}" , nBinsdR, mindR, maxdR);  
+  h_MaxDiJetMass_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "MaxDiJetMass_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)"  , nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
+  h_MaxDiJetMass_dRap_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "MaxDiJetMass_dRap_Vs_dPhi", ";#Delta#omega;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
 
   // Correlations
   h_BQuark1_BQuark2_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuark1_BQuark2_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
@@ -437,7 +437,7 @@ void Kinematics::process(Long64_t entry) {
   math::XYZTLorentzVector tbWMinus_Wqq_AntiQuark_p4;
 
   // Define the table
-  Table table("Evt | Index | PdgId | Status | Charge | Pt | Eta | Phi | E | Vertex (mm) | Mom | Daus (Index)", "Text"); //LaTeX or Text
+  Table table("Evt | Index | PdgId | Status | Charge | Pt | Eta | Phi | E | Vertex (mm) | Mothers | Daughters", "Text"); //LaTeX or Text
   
   int row = 0;
   // For-loop: GenParticles
@@ -461,47 +461,27 @@ void Kinematics::process(Long64_t entry) {
     double genP_vtxX     = p.vtxX()*10; // in mm
     double genP_vtxY     = p.vtxY()*10; // in mm
     double genP_vtxZ     = p.vtxZ()*10; // in mm
+    std::vector<short> genP_daughters = p.daughters();
+    std::vector<short> genP_mothers   = p.mothers();
     math::XYZTLorentzVector genP_p4;
     genP_p4 = p.p4();
 
-    // Daughter properties
-    std::vector<short> genP_daughters_index = p.daughters(); //mcTools.GetDaughters(genP_index, false);
-      
-    // Mom and Grand-mom properties
-    int genMom_index = -1;
-    if ( p.mothers().size() >0 ) genMom_index = p.mothers().at(0);
 
-    /*
-    // int genMom_pdgId     = 0;
-    int genGmom_index    = -1;
-      if (genMom_index >= 0)
-      {
-	// Mom
-	m = fEvent.genparticles().getGenParticles()[genMom_index];
-	// genMom_pdgId  = m.pdgId();
-
-	// Grand-mom
-	genGmom_index = m.mothers().at(0);
-	g = fEvent.genparticles().getGenParticles()[genGmom_index];
-      } 
-    */   
-    
-    // Consider only status=22 (intermediate) or status=23 (outgoing) particles
-    // if( (genP_status != 22) && (genP_status != 23) ) continue;
-    
-    // TESTING
+    ///////////////////////////////////////////////////////////////////////////
+    // Filtering
+    ///////////////////////////////////////////////////////////////////////////
     // if (!p.isPrompt()) continue;
     // if (!p.isPromptDecayed()) continue;
     // if (!p.isPromptFinalState()) continue;
     // if (!p.isDecayedLeptonHadron()) continue;
-    if (!p.isTauDecayProduct()) continue;
+    // if (!p.isTauDecayProduct()) continue;
     // if (!p.isPromptTauDecayProduct()) continue;
     // if (!p.isDirectTauDecayProduct()) continue;
     // if (!p.isDirectPromptTauDecayProduct()) continue;
     // if (!p.isDirectPromptTauDecayProductFinalState()) continue;
     // if (!p.isDirectHadronDecayProduct()) continue;	
     // if (!p.isDirectHardProcessTauDecayProductFinalState()) continue;
-    // if (!p.isHardProcess()) continue;
+    if (!p.isHardProcess()) continue;
     // if (!p.fromHardProcess()) continue;
     // if (!p.fromHardProcessDecayed()) continue;
     // if (!p.fromHardProcessFinalState()) continue;
@@ -532,10 +512,10 @@ void Kinematics::process(Long64_t entry) {
 	table.AddRowColumn(row, "(" + auxTools.ToString(genP_vtxX, 3) + ", " + auxTools.ToString(genP_vtxY, 3)  + ", " + auxTools.ToString(genP_vtxZ, 3) + ")" );
 	// table.AddRowColumn(row, auxTools.ToString(genP_d0,  3)     );
 	// table.AddRowColumn(row, auxTools.ToString(genP_Lxy, 3)     );
-	table.AddRowColumn(row, auxTools.ToString(genMom_index)    );
-	if (genP_daughters_index.size() < 6)
+	table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genP_mothers) );
+	if (genP_daughters.size() < 6)
 	  {
-	    table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genP_daughters_index) );
+	    table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genP_daughters) );
 	  }
 	else table.AddRowColumn(row, ".. Too many .." );
 	row++;
@@ -567,8 +547,8 @@ void Kinematics::process(Long64_t entry) {
 	    
 	    bQuarks_p4.push_back( genP_p4 );
 	    
-	    if ( mcTools.HasMother(genP_index, +6, false) ) tbWPlus_BQuark_p4  = genP_p4;
-	    if ( mcTools.HasMother(genP_index, -6, false) ) tbWMinus_BQuark_p4 = genP_p4;
+	    if ( mcTools.HasMother(genP_mothers, +6, false) ) tbWPlus_BQuark_p4  = genP_p4;
+	    if ( mcTools.HasMother(genP_mothers, -6, false) ) tbWMinus_BQuark_p4 = genP_p4;
 	    
 	    
 	  }// b-quarks
@@ -583,7 +563,7 @@ void Kinematics::process(Long64_t entry) {
 	
 	
 	// W-
-	if ( mcTools.HasMother(genP_index, -24, false) )
+	if ( mcTools.HasMother(genP_mothers, -24, false) )
 	  {
 	    
 	    if (genP_pdgId > 0) tbWPlus_Wqq_Quark_p4 = genP_p4;
@@ -592,7 +572,7 @@ void Kinematics::process(Long64_t entry) {
 	  }//W-
 
 	// W+
-	if ( mcTools.HasMother(genP_index, +24, false) )
+	if ( mcTools.HasMother(genP_mothers, +24, false) )
 	  {
 
 	    if (genP_pdgId > 0) tbWMinus_Wqq_Quark_p4 = genP_p4;
@@ -606,7 +586,6 @@ void Kinematics::process(Long64_t entry) {
   }//for-loop: genParticles
   
 
-  
   ///////////////////////////////////////////////////////////////////////////
   // Preselection Cuts (python/parameters/hplus2tbAnalysis.py)
   ///////////////////////////////////////////////////////////////////////////
@@ -652,15 +631,15 @@ void Kinematics::process(Long64_t entry) {
   std::vector<double> v_dijet_dPhi;
   std::vector<double> v_dijet_dRap;
   
-  // double maxDijetMass_mass;
-  // math::XYZTLorentzVector maxDijetMass_p4;
-  // int maxDijetMass_pos;
-  // double maxDijetMass_dR;
-  // double maxDijetMass_dRrap;
-  // double maxDijetMass_dEta;
-  // double maxDijetMass_dPhi;
-  // double maxDijetMass_dRap;
-  // double maxDijetMass_rapidity;
+  double maxDijetMass_mass;
+  math::XYZTLorentzVector maxDijetMass_p4;
+  int maxDijetMass_pos;
+  double maxDijetMass_dR;
+  double maxDijetMass_dRrap;
+  double maxDijetMass_dEta;
+  double maxDijetMass_dPhi;
+  double maxDijetMass_dRap;
+  double maxDijetMass_rapidity;
 
   int iJet = 0;  
   // For-loop: All selected jets 
@@ -703,56 +682,58 @@ void Kinematics::process(Long64_t entry) {
 	}
       else{}
 	
-      // // For-loop: All selected jets (nested)
-      // for (size_t j=i+1; j < selJets_p4.size(); j++)
-      // 	{
-      // 	  math::XYZTLorentzVector p4_i = selJets_p4.at(i);
-      // 	  math::XYZTLorentzVector p4_j = selJets_p4.at(j);
-      // 	  math::XYZTLorentzVector p4   = p4_i + p4_j;
-      // 	  double rap_i = mcTools.GetRapidity(p4_i);
-      // 	  double rap_j = mcTools.GetRapidity(p4_j);
-      // 	  double dR    = ROOT::Math::VectorUtil::DeltaR(p4_i, p4_j);
-      // 	  double dRap  = std::fabs(rap_i - rap_j);
-      // 	  double dEta  = std::fabs(p4_i.eta() - p4_j.eta());
-      // 	  double dPhi  = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(p4_i, p4_j));
-	    
-      // 	  v_dijet_p4.push_back( p4 );
-      // 	  v_dijet_masses.push_back( p4.mass() );
-      // 	  v_dijet_dR.push_back( dR );
-      // 	  v_dijet_dRrap.push_back( sqrt( pow(dRap, 2) + pow(dPhi, 2) ) ); 
-      // 	  v_dijet_dEta.push_back( dEta ); 
-      // 	  v_dijet_dRap.push_back( dRap );
-      // 	  v_dijet_dPhi.push_back( dPhi );
+       // For-loop: All selected jets (nested)
+       for (size_t j=i+1; j < selJets_p4.size(); j++)
+       	{
+       	  math::XYZTLorentzVector p4_i = selJets_p4.at(i);
+       	  math::XYZTLorentzVector p4_j = selJets_p4.at(j);
+       	  math::XYZTLorentzVector p4   = p4_i + p4_j;
+       	  double rap_i = mcTools.GetRapidity(p4_i);
+       	  double rap_j = mcTools.GetRapidity(p4_j);
+       	  double dR    = ROOT::Math::VectorUtil::DeltaR(p4_i, p4_j);
+       	  double dRap  = std::fabs(rap_i - rap_j);
+       	  double dEta  = std::fabs(p4_i.eta() - p4_j.eta());
+       	  double dPhi  = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(p4_i, p4_j));
+          
+       	  v_dijet_p4.push_back( p4 );
+       	  v_dijet_masses.push_back( p4.mass() );
+       	  v_dijet_dR.push_back( dR );
+       	  v_dijet_dRrap.push_back( sqrt( pow(dRap, 2) + pow(dPhi, 2) ) ); 
+       	  v_dijet_dEta.push_back( dEta ); 
+       	  v_dijet_dRap.push_back( dRap );
+       	  v_dijet_dPhi.push_back( dPhi );
 
-      // 	}
+       	}
     }
-
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   // MaxDiJet: DiJet combination with largest mass
   //////////////////////////////////////////////////////////////////////////////////////////////////////
-  // maxDijetMass_pos      = std::max_element(v_dijet_masses.begin(), v_dijet_masses.end()) - v_dijet_masses.begin();
-  // maxDijetMass_mass     = v_dijet_masses.at(maxDijetMass_pos);
-  // maxDijetMass_p4       = v_dijet_p4.at(maxDijetMass_pos);
-  // maxDijetMass_dR       = v_dijet_dR.at(maxDijetMass_pos);
-  // maxDijetMass_dRrap    = v_dijet_dRrap.at(maxDijetMass_pos);
-  // maxDijetMass_dEta     = v_dijet_dEta.at(maxDijetMass_pos);
-  // maxDijetMass_dPhi     = v_dijet_dPhi.at(maxDijetMass_pos);
-  // maxDijetMass_dRap     = v_dijet_dRap.at(maxDijetMass_pos);
-  // maxDijetMass_rapidity = mcTools.GetRapidity(maxDijetMass_p4);
-  
+  if (v_dijet_masses.size() > 0)
+    {
+      maxDijetMass_pos      = std::max_element(v_dijet_masses.begin(), v_dijet_masses.end()) - v_dijet_masses.begin();
+      maxDijetMass_mass     = v_dijet_masses.at(maxDijetMass_pos);
+      maxDijetMass_p4       = v_dijet_p4.at(maxDijetMass_pos);
+      maxDijetMass_dR       = v_dijet_dR.at(maxDijetMass_pos);
+      maxDijetMass_dRrap    = v_dijet_dRrap.at(maxDijetMass_pos);
+      maxDijetMass_dEta     = v_dijet_dEta.at(maxDijetMass_pos);
+      maxDijetMass_dPhi     = v_dijet_dPhi.at(maxDijetMass_pos);
+      maxDijetMass_dRap     = v_dijet_dRap.at(maxDijetMass_pos);
+      maxDijetMass_rapidity = mcTools.GetRapidity(maxDijetMass_p4);
+    }
+
   // Fill histos
-  // h_MaxDiJetMass_Mass ->Fill( maxDijetMass_mass     );
-  // h_MaxDiJetMass_Pt   ->Fill( maxDijetMass_p4.pt()  );
-  // h_MaxDiJetMass_Eta  ->Fill( maxDijetMass_p4.eta() );
-  // h_MaxDiJetMass_Rap  ->Fill( maxDijetMass_rapidity );
-  // h_MaxDiJetMass_dR   ->Fill( maxDijetMass_dR       );
-  // h_MaxDiJetMass_dRrap->Fill( maxDijetMass_dRrap    );
-  // h_MaxDiJetMass_dEta ->Fill( maxDijetMass_dEta     );
-  // h_MaxDiJetMass_dPhi ->Fill( maxDijetMass_dPhi     );
-  // h_MaxDiJetMass_dRap ->Fill( maxDijetMass_dRap     );
-  // h_MaxDiJetMass_dEta_Vs_dPhi->Fill( maxDijetMass_dEta, maxDijetMass_dPhi );
-  // h_MaxDiJetMass_dRap_Vs_dPhi->Fill( maxDijetMass_dRap, maxDijetMass_dPhi );
+  h_MaxDiJetMass_Mass ->Fill( maxDijetMass_mass     );
+  h_MaxDiJetMass_Pt   ->Fill( maxDijetMass_p4.pt()  );
+  h_MaxDiJetMass_Eta  ->Fill( maxDijetMass_p4.eta() );
+  h_MaxDiJetMass_Rap  ->Fill( maxDijetMass_rapidity );
+  h_MaxDiJetMass_dR   ->Fill( maxDijetMass_dR       );
+  h_MaxDiJetMass_dRrap->Fill( maxDijetMass_dRrap    );
+  h_MaxDiJetMass_dEta ->Fill( maxDijetMass_dEta     );
+  h_MaxDiJetMass_dPhi ->Fill( maxDijetMass_dPhi     );
+  h_MaxDiJetMass_dRap ->Fill( maxDijetMass_dRap     );
+  h_MaxDiJetMass_dEta_Vs_dPhi->Fill( maxDijetMass_dEta, maxDijetMass_dPhi );
+  h_MaxDiJetMass_dRap_Vs_dPhi->Fill( maxDijetMass_dRap, maxDijetMass_dPhi );
 
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////

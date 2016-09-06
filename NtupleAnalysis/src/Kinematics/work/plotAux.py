@@ -499,6 +499,7 @@ def GetHistosForPlotter(datasetsMgr, histoName, **kwargs):
     drawStyle    = kwargs.get("drawStyle")
     legStyle     = kwargs.get("legStyle")
     normalizeTo  = kwargs.get("normalizeTo")
+    histoType    = None
 
     # For-loop: All dataset objects
     for d in datasetsMgr.getAllDatasets():
@@ -508,7 +509,8 @@ def GetHistosForPlotter(datasetsMgr, histoName, **kwargs):
         NormalizeRootHisto(rootHisto, d.isMC(), normalizeTo)
 
         # Get the histogram
-        histo     = rootHisto.getHistogram()    
+        histo     = rootHisto.getHistogram()
+        histoType = type(histo)
         legName   = plots._legendLabels[d.getName()]
 
         # Apply Styling
@@ -521,15 +523,16 @@ def GetHistosForPlotter(datasetsMgr, histoName, **kwargs):
             #otherHisto = histograms.Histo(histo, legName, legStyle, drawStyle)
             #otherHisto = histograms.Histo(histo, legName, "F", "HIST9")
             otherHisto = histograms.Histo(histo, legName, "LP", "P") # fixme alex
-            
             otherHistos.append(otherHisto)
 
     if refHisto == None:
         raise Exception("The \"reference\" histogram is None!")
-    elif len(otherHistos) < 1:
-        raise Exception("The \"other\" histogram list empty!")    
-    else:
-        return refHisto, otherHistos
+    if len(otherHistos) < 1:
+        if( "TH2" in str(histoType) ):
+            otherHistos.append("EMPTY") # fixme: temporary fix, otherwise crash for TH2
+        else:
+            raise Exception("The \"other\" histogram list empty!")
+    return refHisto, otherHistos
 
 
 
