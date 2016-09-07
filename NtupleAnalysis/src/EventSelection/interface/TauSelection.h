@@ -142,6 +142,7 @@ private:
   
   // Event counter for passing selection
   Count cPassedTauSelection;
+  Count cPassedTauSelectionGenuine;
   Count cPassedTauSelectionMultipleTaus;
   Count cPassedAntiIsolatedTauSelection;
   Count cPassedAntiIsolatedTauSelectionMultipleTaus;

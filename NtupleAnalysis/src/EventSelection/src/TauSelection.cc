@@ -58,6 +58,7 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
   cPassedTauSelection(fEventCounter.addCounter("passed tau selection ("+postfix+")")),
+  cPassedTauSelectionGenuine(fEventCounter.addCounter("passed tau selection and genuine ("+postfix+")")),
   cPassedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple selected taus ("+postfix+")")),
   cPassedAntiIsolatedTauSelection(fEventCounter.addCounter("passed anti-isolated tau selection ("+postfix+")")),
   cPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple anti-isolated taus ("+postfix+")")),
@@ -100,6 +101,7 @@ TauSelection::TauSelection(const ParameterSet& config)
   fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
   cPassedTauSelection(fEventCounter.addCounter("passed tau selection")),
+  cPassedTauSelectionGenuine(fEventCounter.addCounter("passed tau selection and genuine")),
   cPassedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple selected taus")),
   cPassedAntiIsolatedTauSelection(fEventCounter.addCounter("passed anti-isolated tau selection")),
   cPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple anti-isolated taus")),
@@ -376,6 +378,8 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     cSubPassedAntiIsolationRtau.increment();
   if (output.fSelectedTaus.size() > 0)
     cPassedTauSelection.increment();
+  if (output.fSelectedTaus.size() > 0 && output.isGenuineTau())
+    cPassedTauSelectionGenuine.increment();
   if (output.fSelectedTaus.size() > 1)
     cPassedTauSelectionMultipleTaus.increment();
   if (output.fAntiIsolatedTaus.size() > 0)

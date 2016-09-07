@@ -127,7 +127,7 @@ if not LightAnalysis and OptionIncludeSystematics:
     myTauIDSystematics.extend(["CMS_eff_t_highpt"])
 
 #myTauMisIDSystematics=["CMS_fake_eToTau","CMS_fake_muToTau","CMS_fake_jetToTau"] # tau mis-ID
-myESSystematics=["CMS_scale_t","CMS_scale_j"] #,"CMS_res_j","CMS_scale_met"] # TES, JES, CMS_res_j, UES #FIXME
+myESSystematics=["CMS_scale_t","CMS_scale_j","CMS_res_j","CMS_scale_met"] # TES, JES, CMS_res_j, UES #FIXME
 myBtagSystematics=["CMS_eff_b","CMS_fake_b"] # b tag and mistag
 myTopSystematics=["CMS_Hptntj_topPtReweight"] # top pt reweighting
 myPileupSystematics=["CMS_pileup"] # CMS_pileup
@@ -199,8 +199,9 @@ myQCDSystematics = myTrgSystematics[:]+myESSystematics[:]+myBtagSystematics[:]+m
 myQCDSystematics+=["CMS_scale_ttbar_forQCD","CMS_pdf_ttbar_forQCD","CMS_mass_ttbar_forQCD","lumi_13TeV_forQCD","CMS_eff_t_forQCD"]
 #approximation 2: myLeptonVetoSystematics neglected for QCD
 
-if OptionIncludeSystematics: #these can be used only if QCDMeasurement has been run with systematics
-    myQCDSystematics += ["CMS_Hptntj_QCDbkg_templateFit","CMS_Hptntj_QCDkbg_metshape"]
+if OptionIncludeSystematics: 
+    myQCDSystematics += ["CMS_eff_t_highpt"]
+    myQCDSystematics += ["CMS_Hptntj_QCDbkg_templateFit","CMS_Hptntj_QCDkbg_metshape"] #these can be used only if QCDMeasurement has been run with systematics
 
 labelPrefix="CMS_Hptntj_"
 if LightAnalysis:
@@ -245,14 +246,14 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_Wjets","CMS_pdf_Wjets","lumi_13TeV"]))
-    DataGroups.append(DataGroup(label=labelPrefix+"singleTop_t_genuine", landsProcess=5,
-                                shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
-                                datasetType="Embedding",
-                                datasetDefinition="SingleTop",
-                                validMassPoints=MassPoints,
-                                nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
-                                  +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                                  +["CMS_scale_singleTop","CMS_pdf_singleTop","lumi_13TeV"]))
+#    DataGroups.append(DataGroup(label=labelPrefix+"singleTop_t_genuine", landsProcess=5,
+#                                shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
+#                                datasetType="Embedding",
+#                                datasetDefinition="SingleTop",
+#                                validMassPoints=MassPoints,
+#                                nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
+#                                  +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
+#                                  +["CMS_scale_singleTop","CMS_pdf_singleTop","lumi_13TeV"]))
     DataGroups.append(DataGroup(label=labelPrefix+"DY_t_genuine", landsProcess=6,
                                 shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus,
                                 datasetType="Embedding",
@@ -262,14 +263,14 @@ else:
                                 nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
                                   +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
                                   +["CMS_scale_DY","CMS_pdf_DY","lumi_13TeV"]))
-    DataGroups.append(DataGroup(label=labelPrefix+"VV_t_genuine", landsProcess=7,
-                                shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus, 
-                                datasetType="Embedding", 
-                                datasetDefinition="Diboson",
-                                validMassPoints=MassPoints,
-                                nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
-                                  +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
-                                  +["CMS_scale_VV","CMS_pdf_VV","lumi_13TeV"]))
+#    DataGroups.append(DataGroup(label=labelPrefix+"VV_t_genuine", landsProcess=7,
+#                                shapeHistoName=shapeHistoName, histoPath=histoPathGenuineTaus, 
+#                                datasetType="Embedding", 
+#                                datasetDefinition="Diboson",
+#                                validMassPoints=MassPoints,
+#                                nuisances=myTrgSystematics[:]+myTauIDSystematics[:]
+#                                  +myESSystematics[:]+myBtagSystematics[:]+myPileupSystematics[:]+myLeptonVetoSystematics[:]
+#                                  +["CMS_scale_VV","CMS_pdf_VV","lumi_13TeV"]))
     # Merge EWK as one column or not
     #if not OptionSeparateFakeTtbarFromFakeBackground:
         #mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["tt_EWK_faketau","W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
@@ -277,9 +278,9 @@ else:
         #mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
 
     if OptionDoMergeEWKttbar:
-        mergeColumnsByLabel.append({"label": labelPrefix+"EWK_t_genuine", "mergeList": [labelPrefix+"W_t_genuine",labelPrefix+"DY_t_genuine",labelPrefix+"VV_t_genuine"]})
+        mergeColumnsByLabel.append({"label": labelPrefix+"EWK_t_genuine", "mergeList": [labelPrefix+"W_t_genuine",labelPrefix+"DY_t_genuine"]}) #,labelPrefix+"VV_t_genuine"]})
         if not LightAnalysis:
-            mergeColumnsByLabel.append({"label": labelPrefix+"ttbar_and_singleTop_t_genuine", "mergeList": [labelPrefix+"ttbar_t_genuine",labelPrefix+"singleTop_t_genuine"]})    
+            mergeColumnsByLabel.append({"label": labelPrefix+"ttbar_and_singleTop_t_genuine", "mergeList": [labelPrefix+"ttbar_t_genuine"]}) #,labelPrefix+"singleTop_t_genuine"]})    
 
 # Reserve column 2
 # This was necessary for LandS; code could be updated to combine for this piece
