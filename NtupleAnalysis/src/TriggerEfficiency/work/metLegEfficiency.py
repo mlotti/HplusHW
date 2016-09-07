@@ -55,6 +55,16 @@ def getDatasetsForEras(dsets,era):
             dOUT.append(dset)
     return dOUT
 
+def isData(dataVersion):
+    dataVersion = str(dataVersion)
+    #print type(dataVersion)                                                                                                          
+    #print dataVersion                                                                                                                
+    dv_re = re.compile("data")
+    match = dv_re.search(dataVersion)
+    if match:
+        return True
+    return False
+
 def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
     useCaloMET = False
     if "CaloMET" in era:
@@ -157,8 +167,8 @@ def addAnalyzer(era,onlineSelection):
 #addAnalyzer("2016B_CaloMET","MET80")
 #addAnalyzer("2016D","MET90")
 #addAnalyzer("2016E","MET90")
-addAnalyzer("2016MET80","MET80")
-#addAnalyzer("2016ICHEP","MET90")
+#addAnalyzer("2016MET80","MET80")
+addAnalyzer("2016ICHEP","MET90")
 #addAnalyzer("2016","MET90")
 #addAnalyzer("2015A","MET120")
 #addAnalyzer("2015A_CaloMET","MET120")

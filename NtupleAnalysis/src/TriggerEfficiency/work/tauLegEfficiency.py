@@ -185,8 +185,8 @@ def addAnalyzer(era):
 #addAnalyzer("2015CD")
 #addAnalyzer("2016B")
 #addAnalyzer("2016C")
-addAnalyzer("2016D")
-addAnalyzer("2016E")
+#addAnalyzer("2016D")
+#addAnalyzer("2016E")
 addAnalyzer("2016ICHEP")
 #addAnalyzer("2016HIP")
 

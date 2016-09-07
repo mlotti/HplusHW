@@ -125,8 +125,10 @@ def analyze(analysis=None):
         histograms.addText(0.2, 0.46, "Runs "+runRange, 17)
 
         p.draw()
-        print "check lumi"
-        lumi = datasets.loadLumi()
+        lumi = 0.0
+        for d in datasets.getDataDatasets():
+            print "luminosity",d.getName(),d.getLuminosity()
+            lumi += d.getLuminosity()
         print "luminosity, sum",lumi
         histograms.addStandardTexts(lumi=lumi)
 
