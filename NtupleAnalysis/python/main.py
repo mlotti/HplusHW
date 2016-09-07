@@ -2,6 +2,7 @@ import os
 import time
 import copy
 import json
+import re
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -231,6 +232,32 @@ class Process:
                 self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion(), lumiFile=dsetMgrCreator.getLumiFile())
 
     # kwargs for 'includeOnlyTasks' or 'excludeTasks' to set the datasets over which this analyzer is processed, default is all datasets
+
+    def getDatasets(self):
+        return self._datasets
+
+    def setDatasets(self, datasets):
+        self._datasets = datasets
+
+    def getRuns(self):
+        runmin = -1
+        runmax = -1
+        run_re = re.compile("\S+_Run20\S+_(?P<min>\d\d\d\d\d\d)_(?P<max>\d\d\d\d\d\d)")
+        for d in self._datasets:
+            if d.getDataVersion().isData():
+                match = run_re.search(d.getName())
+                if match:
+                    min_ = int(match.group("min"))
+                    max_ = int(match.group("max"))
+                    if runmin < 0:
+                        runmin = min_
+                    else:
+                        if min_ < runmin:
+                            runmin = min_
+                    if max_ > runmax:
+                        runmax = max_
+        return runmin,runmax
+
     def addAnalyzer(self, name, analyzer, **kwargs):
         if self.hasAnalyzer(name):
             raise Exception("Analyzer '%s' already exists" % name)
@@ -295,7 +322,7 @@ class Process:
                             ana = ana(dset.getDataVersion())
                             if ana.__getattr__("runMax") > 0:
                                 rrdata[aname] = "%s-%s"%(ana.__getattr__("runMin"),ana.__getattr__("runMax"))
-                                lumidata[aname] = ana.__getattr__("lumi")
+                                #lumidata[aname] = ana.__getattr__("lumi")
                                 break
             if len(rrdata) > 0:
                 f = open(os.path.join(outputDir, "runrange.json"), "w")
@@ -409,7 +436,6 @@ class Process:
                 inputList.Add(ROOT.TNamed("PROOF_OUTPUTFILE_LOCATION", resFileName))
             else:
                 inputList.Add(ROOT.TNamed("OUTPUTFILE_LOCATION", resFileName))
-
             tselector.SetInputList(inputList)
 
             readBytesStart = ROOT.TFile.GetFileBytesRead()

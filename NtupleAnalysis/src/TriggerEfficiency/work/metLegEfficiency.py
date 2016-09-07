@@ -3,7 +3,9 @@
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 import HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters as signalAnalysis
 
-process = Process(outputPrefix="metLegEfficiency")
+import re
+
+#process = Process(outputPrefix="metLegEfficiency")
 
 # Example of adding a dataset which has its files defined in data/<dataset_name>.txt file
 #process.addDatasets(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6"])
@@ -13,7 +15,7 @@ import sys
 if len(sys.argv) != 2:
     print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory>"
     sys.exit(0)
-process.addDatasetsFromMulticrab(sys.argv[1])
+#process.addDatasetsFromMulticrab(sys.argv[1])
 
 leg     = "metlegSelection"
 binning = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
@@ -30,50 +32,28 @@ yLabel  = "Level-1 + HLT MET efficiency"
 
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
-def runRange(era):
-    lumi   = 0
-    runmin = 0
-    runmax = 0
-    if era == "2012ABCD":
-        lumi   =  887.501000+4440.000000+6843.000000+281.454000+7318.000000
-        runmin = 190456
-        runmax = 208686
+eras = {}
+eras["2016D"]     = "Tau_Run2016D"
+eras["2016E"]     = "Tau_Run2016E"
+eras["2016MET80"] = "Tau_Run2016B|Tau_Run2016C|Tau_Run2016D_PromptReco_v2_276315_276437"
+eras["2016ICHEP"] = "Tau_Run2016B|Tau_Run2016C|Tau_Run2016D"
+eras["2016"]      = "Tau_Run2016"
 
-    if era == "2012D":
-        lumi   = 7318
-        runmin = 203777
-        runmax = 208686
+runmin = -1
+runmax = -1
 
-    if era == "2015D":
-        lumi = 1
-        runmin = 256629
-        runmax = 260627
-
-    if era == "2015CD":
-        lumi = 1
-        runmin = 253888
-        runmax = 260627
-
-    if era == "2016B":
-        lumi = 1
-        runmin = 271036
-        runmax = 274240
-
-    if era == "2016MET80":
-        lumi = 8721.29
-        runmin = 271036
-        runmax = 276437 # MET80 prescaled to 0 from 276453->
-
-    if era == "2016ICHEP":
-        lumi = 5398.687+2395.577+4255.52
-        runmin = 271036
-        runmax = 276811
-        
-    if lumi == 0:
-        print "Unknown era",era,"exiting.."
-        sys.exit()
-
-    return lumi,runmin,runmax
+#from tauLegEfficiency import getDatasetsForEras
+def getDatasetsForEras(dsets,era):
+    dset_re = re.compile(era)
+    dOUT = []
+    for dset in dsets:
+        if dset.getDataVersion().isData():
+            match = dset_re.search(dset.getName())
+            if match:
+                dOUT.append(dset)
+        else:
+            dOUT.append(dset)
+    return dOUT
 
 def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
     useCaloMET = False
@@ -140,8 +120,8 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
             a.Trigger.triggerOR2 = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_"+onlineSelection+"_vx"]
 
 
-        lumi,runmin,runmax = runRange(era)
-        a.lumi    = lumi
+#        lumi,runmin,runmax = runRange(era)
+#        a.lumi    = lumi
         a.runMin  = runmin
         a.runMax  = runmax
     else:
@@ -159,10 +139,15 @@ def createAnalyzer(dataVersion,era,onlineSelection = "MET80"):
     return a
 
 def addAnalyzer(era,onlineSelection):
-    dv = ["53Xdata22Jan2013","53mcS10"]
-    if era == "2016B":
-        dv = ["80Xdata","80Xmc"]
+    process = Process(outputPrefix="metLegEfficiency_"+era)
+    process.addDatasetsFromMulticrab(sys.argv[1])
+    ds = getDatasetsForEras(process.getDatasets(),eras[era])
+    process.setDatasets(ds)
+    global runmin,runmax
+    runmin,runmax = process.getRuns()
     process.addAnalyzer("METLeg_"+era+"_"+onlineSelection, lambda dv: createAnalyzer(dv, era, onlineSelection))
+    process.run()
+
 
 #addAnalyzer("2012ABCD")
 #addAnalyzer("2012D")
@@ -170,8 +155,11 @@ def addAnalyzer(era,onlineSelection):
 #addAnalyzer("2015D","MET80")
 #addAnalyzer("2016B","MET80")
 #addAnalyzer("2016B_CaloMET","MET80")
+#addAnalyzer("2016D","MET90")
+#addAnalyzer("2016E","MET90")
 addAnalyzer("2016MET80","MET80")
-addAnalyzer("2016ICHEP","MET90")
+#addAnalyzer("2016ICHEP","MET90")
+#addAnalyzer("2016","MET90")
 #addAnalyzer("2015A","MET120")
 #addAnalyzer("2015A_CaloMET","MET120")
 
@@ -179,7 +167,7 @@ addAnalyzer("2016ICHEP","MET90")
 #process.addOptions(EventSaver = PSet(enabled = True, pickEvents = True))
 
 # Run the analysis
-process.run()
+#process.run()
 
 # Run the analysis with PROOF
 # By default it uses all cores, but you can give proofWorkers=<N> as a parameter

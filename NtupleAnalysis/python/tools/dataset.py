@@ -3753,7 +3753,14 @@ class DatasetManager:
         if not os.path.exists(jsonname):
             raise Exception("Lumi JSON file '%s' does not exist. Have you set runMin/runMax and lumi in the analyzer?" % jsonname)
         data = json.load(open(jsonname))
-        return data[self.datasets[0].getAnalysisName()]
+        if self.datasets[0].getAnalysisName() in data:
+            return data[self.datasets[0].getAnalysisName()]
+        else:
+            lumi = 0
+            for ds in data.keys():
+                lumi += data[ds]
+            return lumi
+        return -1
 
     def loadRunRange(self, fname="runrange.json"):
         import json

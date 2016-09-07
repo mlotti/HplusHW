@@ -32,14 +32,27 @@ def main():
     if len(sys.argv) < 2:
         usage()
 
+    analyze()
+
+
+def analyze(analysis=None):
+
     paths = [sys.argv[1]]
 
+    if not analysis == None:
+        datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
+    else:
+        datasets = dataset.getDatasetsFromMulticrabDirs(paths)
+        analysis = datasets.getAllDatasets()[0].getAnalysisName()
+
     analysisList = []
-    analysisList.append("METLeg_2016MET80_MET80")
-    analysisList.append("METLeg_2016ICHEP_MET90")
+#    analysisList.append("METLeg_2016MET80_MET80")
+#    analysisList.append("METLeg_2016ICHEP_MET90")
+#    analysisList.append("METLeg_2016_MET90")
 
     met_re = re.compile("_(?P<met>MET\d+)$")
-    for analysis in analysisList:
+    if True:
+    #for analysis in analysisList:
 
         met = "METX"
         met_match = met_re.search(analysis)
@@ -112,6 +125,7 @@ def main():
         histograms.addText(0.2, 0.46, "Runs "+runRange, 17)
 
         p.draw()
+        print "check lumi"
         lumi = datasets.loadLumi()
         print "luminosity, sum",lumi
         histograms.addStandardTexts(lumi=lumi)
@@ -123,7 +137,7 @@ def main():
         pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1_MET80)
         pythonWriter.addMCParameters(label,eff2_MET80)
 
-    pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency2016.json"))
+    pythonWriter.writeJSON(os.path.join(plotDir,"metLegTriggerEfficiency_"+label+".json"))
 
     #########################################################################                                             
 

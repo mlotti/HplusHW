@@ -143,11 +143,16 @@ def Print(graph):
         print "x,y",x,y
 
 
-def analyze(analysis):
+def analyze(analysis=None):
 
     paths = [sys.argv[1]]
 
-    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125")
+    if not analysis == None:
+        datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125")
+    else:
+        datasets = dataset.getDatasetsFromMulticrabDirs(paths,excludeTasks="Silver|GluGluHToTauTau_M125")
+        analysis = datasets.getAllDatasets()[0].getAnalysisName()
+
 #    datasetsDY = None
     datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="GluGluHToTauTau_M125|TTJets")
@@ -252,7 +257,7 @@ def analyze(analysis):
     pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1)
     pythonWriter.addMCParameters(label,eff2)
 
-    pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency2016.json"))
+    pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency_"+label+".json"))
 
 #    if not createRatio:
 #        sys.exit()
@@ -498,7 +503,9 @@ def main():
 #    analyze("TauLeg_2015D")
 #    analyze("TauLeg_2015CD")
 #    analyze("TauLeg_2016B")
-    analyze("TauLeg_2016ICHEP")
+#    analyze("TauLeg_2016C")
+#    analyze("TauLeg_2016ICHEP")
+    analyze()
 
 if __name__ == "__main__":
     main()
