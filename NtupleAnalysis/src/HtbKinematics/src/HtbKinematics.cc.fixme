@@ -1147,7 +1147,7 @@ void HtbKinematics::process(Long64_t entry) {
 	else{}
 	
 	// For-loop: All selected jets (nested)
-	for (int j=i+1; j < selJets_p4.size(); j++)
+	for (size_t j=i+1; j < selJets_p4.size(); j++)
 	  {
 	    math::XYZTLorentzVector p4_i = selJets_p4.at(i);
 	    math::XYZTLorentzVector p4_j = selJets_p4.at(j);
