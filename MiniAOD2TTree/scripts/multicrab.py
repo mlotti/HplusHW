@@ -11,6 +11,7 @@ multicrab.py --status --url --url --verbose -d <task_dir>
 
 Get Output:
 multicrab.py --get --ask -d <task_dir> 
+multicrab.py --log
 
 Resubmit Failed Jobs:
 multicrab.py --resubmit --ask -d <task_dir>
@@ -356,10 +357,11 @@ def GetTaskLogs(taskPath, retrievedLog, finished):
     if retrievedLog == finished:
         return
         
-    if opts.get:
+    if opts.get or opts.log:
         Verbose("Retrieved logs (%s) < finished (%s). Retrieving CRAB logs ..." % (retrievedLog, finished) )
         Touch(taskPath)
-        dummy = crabCommand('getlog', dir=taskPath)
+        #dummy = crabCommand('getlog', dir=taskPath)
+        dummy = crabCommand('getlog', 'command=LCG', 'checksum=no', dir=taskPath)
         # crab log <dir> --command=LCG --checksum=no #fixme: add support?
     else:
         Verbose("Retrieved logs (%s) < finished (%s). To retrieve CRAB logs relaunch script with --get option." % (retrievedLog, finished) )
@@ -1190,6 +1192,7 @@ if __name__ == "__main__":
     parser.add_option("--create"  , dest="create"    , default=False, action="store_true", help="Flag to create a CRAB job [default: False")
     parser.add_option("--status"  , dest="status"    , default=False, action="store_true", help="Flag to check the status of all CRAB jobs [default: False")
     parser.add_option("--get"     , dest="get"       , default=False, action="store_true", help="Get output of finished jobs [defaut: False]")
+    parser.add_option("--log"     , dest="log"       , default=False, action="store_true", help="Get log files of finished jobs [defaut: False]")
     parser.add_option("--resubmit", dest="resubmit"  , default=False, action="store_true", help="Resubmit all failed jobs [defaut: False]")
     parser.add_option("--kill"    , dest="kill"      , default=False, action="store_true", help="Kill all submitted jobs [defaut: False]")
     parser.add_option("-v", "--verbose", dest="verbose"    , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
@@ -1205,7 +1208,7 @@ if __name__ == "__main__":
         raise Exception("Cannot both create and check a CRAB job!")	    
     if opts.create == True:
         sys.exit( CreateJob(opts, args) )
-    elif opts.status == True or opts.get == True or opts.resubmit == True or opts.kill == True:
+    elif opts.status == True or opts.get == True or opts.log == True or opts.resubmit == True or opts.kill == True:
         if opts.dirName == "":
             raise Exception("Must provide a multiCRAB dir with the -d option!")            
         else:
