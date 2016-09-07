@@ -48,6 +48,8 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Top_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/METNoiseFilter_cfi")
+process.METNoiseFilter.triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess()))
 
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
@@ -83,22 +85,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         ),
 	filter = cms.untracked.bool(False)
     ),
-    METNoiseFilter = cms.PSet(
-        triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())),
-        printTriggerResultsList = cms.untracked.bool(False),
-        filtersFromTriggerResults = cms.vstring(
-            "Flag_HBHENoiseFilter",
-            "Flag_HBHENoiseIsoFilter",
-            "Flag_CSCTightHaloFilter",
-#            "Flag_CSCTightHalo2015Filter",
-            "Flag_EcalDeadCellTriggerPrimitiveFilter",
-            "Flag_goodVertices",
-            "Flag_eeBadScFilter",
-        ),
-        hbheNoiseTokenRun2LooseSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Loose'),
-        hbheNoiseTokenRun2TightSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
-        hbheIsoNoiseTokenSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHEIsoNoiseFilterResult'),
-    ),
+    METNoiseFilter = process.METNoiseFilter,
     Taus      = process.Taus,
     Electrons = process.Electrons,
     Muons     = process.Muons,
@@ -123,6 +110,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("genParticles"),
             src = cms.InputTag("prunedGenParticles"),
             saveAllGenParticles = cms.untracked.bool(True),
+            saveGenBooleans     = cms.untracked.bool(False),
+            saveGenStatusFlags  = cms.untracked.bool(False),
 #            saveGenElectrons = cms.untracked.bool(True),
 #            saveGenMuons = cms.untracked.bool(True),
 #            saveGenTaus = cms.untracked.bool(True),

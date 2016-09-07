@@ -90,8 +90,21 @@ def reproduceMETNoiseFilters(process):
     process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
     process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False)
     process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
+
+    process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
+    process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
+    process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    process.BadPFMuonFilter.taggingMode   = cms.bool(True)
+
+    process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
+    process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
+    process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    process.BadChargedCandidateFilter.taggingMode   = cms.bool(True)
+
     # Do not apply EDfilters for HBHE noise, the discriminators for them are saved into the ttree
     process.CustomisationsSequence += process.HBHENoiseFilterResultProducer
+    process.CustomisationsSequence += process.BadPFMuonFilter
+    process.CustomisationsSequence += process.BadChargedCandidateFilter
 
 # ===== Set up MET uncertainties =====
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#A_tool_to_help_you_calculate_MET

@@ -30,7 +30,7 @@ styleDict = {
     htb + "M_400"      : styles.signal400Style,
     htb + "M_300"      : styles.signal300Style,
     htb + "M_200"      : styles.signal200Style,
-    "QCD"              : styles.qcdFillStyle, #qcdStyle, #qcdFillStyle,
+    "QCD"              : styles.qcdStyle, #qcdStyle, #qcdFillStyle,
     "QCD_Pt_15to30"    : styles.qcdFillStyle, 
     "QCD_Pt_30to50"    : styles.qcdFillStyle, 
     "QCD_Pt_50to80"    : styles.qcdFillStyle,
@@ -499,7 +499,6 @@ def GetHistosForPlotter(datasetsMgr, histoName, **kwargs):
     drawStyle    = kwargs.get("drawStyle")
     legStyle     = kwargs.get("legStyle")
     normalizeTo  = kwargs.get("normalizeTo")
-    histoType    = None
 
     # For-loop: All dataset objects
     for d in datasetsMgr.getAllDatasets():
@@ -509,8 +508,7 @@ def GetHistosForPlotter(datasetsMgr, histoName, **kwargs):
         NormalizeRootHisto(rootHisto, d.isMC(), normalizeTo)
 
         # Get the histogram
-        histo     = rootHisto.getHistogram()
-        histoType = type(histo)
+        histo     = rootHisto.getHistogram()    
         legName   = plots._legendLabels[d.getName()]
 
         # Apply Styling
@@ -523,16 +521,15 @@ def GetHistosForPlotter(datasetsMgr, histoName, **kwargs):
             #otherHisto = histograms.Histo(histo, legName, legStyle, drawStyle)
             #otherHisto = histograms.Histo(histo, legName, "F", "HIST9")
             otherHisto = histograms.Histo(histo, legName, "LP", "P") # fixme alex
+            
             otherHistos.append(otherHisto)
 
     if refHisto == None:
         raise Exception("The \"reference\" histogram is None!")
-    if len(otherHistos) < 1:
-        if( "TH2" in str(histoType) ):
-            otherHistos.append("EMPTY") # fixme: temporary fix, otherwise crash for TH2
-        else:
-            raise Exception("The \"other\" histogram list empty!")
-    return refHisto, otherHistos
+    elif len(otherHistos) < 1:
+        raise Exception("The \"other\" histogram list empty!")    
+    else:
+        return refHisto, otherHistos
 
 
 
@@ -745,8 +742,6 @@ def getTitleY(histo, title=None, **kwargs):
     if title == None:
         if isinstance(histo, (ROOT.TH1)):
             title = getSymbolY(kwargs.get("normalizeTo"))
-            if title == None:
-                title = "Events"
         else:
             title = histo.getRootHisto().GetYaxis().GetTitle()            
         

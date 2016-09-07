@@ -41,6 +41,8 @@ private:
   edm::EDGetTokenT<bool> hbheNoiseTokenRun2LooseToken;
   edm::EDGetTokenT<bool> hbheNoiseTokenRun2TightToken;
   edm::EDGetTokenT<bool> hbheIsoNoiseToken;
+  edm::EDGetTokenT<bool> badPFMuonFilterToken;
+  edm::EDGetTokenT<bool> badChargedCandidateFilterToken;
   
   //const edm::InputTag edm::InputTag triggerObjects;
   //const edm::InputTag edm::InputTag l1extra;

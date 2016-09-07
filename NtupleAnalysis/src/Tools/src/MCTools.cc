@@ -124,7 +124,7 @@ bool MCTools::HasDaughter(const int genP_index,
   else daughters = GetDaughters(genP_index, false);
 
   // For-loop: Daughters
-  for (int i = 0; i < daughters.size(); i++)
+  for (size_t i = 0; i < daughters.size(); i++)
     {
       int dau_index         = daughters.at(i);
       const genParticle dau = fEvent->genparticles().getGenParticles()[dau_index];
@@ -139,6 +139,8 @@ bool MCTools::HasDaughter(const int genP_index,
  
 
 int MCTools::GetFinalSelf(const int genP_index){
+  std::cout << "*** MCTools::GetFinalSelf(): WARNING! Since CMSSW_8X this is obsolete. Doing nothing" << std::endl;
+  return -1;
 
   int new_index = genP_index;
   genParticle p = fEvent->genparticles().getGenParticles()[genP_index];
@@ -167,10 +169,12 @@ std::vector<int> MCTools::GetDaughters(const int my_index,
   // daughter of the particle with (index, id)=(my_index, my_id).
   // Returns all daughters in an std::vector.
   //
+  std::cout << "*** MCTools::GetDaughters(): WARNING! Since CMSSW_8X this is obsolete. Doing nothing" << std::endl;
 
-  int genP_index = -1;
   std::vector<int> genP_daughters;
   
+  /*
+  int genP_index = -1;
   // For-loop: GenParticles
   for (auto& p: fEvent->genparticles().getGenParticles()) {
     
@@ -185,12 +189,13 @@ std::vector<int> MCTools::GetDaughters(const int my_index,
     if (bReturnIds) genP_daughters.push_back(genP_pdgId);
     else genP_daughters.push_back(genP_index);
   }
+  */
 
   return genP_daughters;
 }
 
 
-bool MCTools::HasMother(const int genP_index,
+bool MCTools::HasMother(std::vector<short> genP_mothers,
 			int wantedMom_pdgId,
 			const bool bAbsoluteMomId){
   // 
@@ -203,25 +208,22 @@ bool MCTools::HasMother(const int genP_index,
   if (bAbsoluteMomId) wantedMom_pdgId = std::abs(wantedMom_pdgId);
   
   // Get the mother index
-  const genParticle p = fEvent->genparticles().getGenParticles()[genP_index];
-  double genMom_index = p.mother();
-    
-  // If mother index less than 0, return false
-  if (genMom_index < 0) return false;
+  if (genP_mothers.size() < 1) return false;
   
-  // Valid mother exists, therefore get its pdgId
-  const genParticle m = fEvent->genparticles().getGenParticles()[genMom_index];
-  int genMom_pdgId    = 0;
-  if (bAbsoluteMomId) genMom_pdgId = std::abs(m.pdgId());
-  else genMom_pdgId = m.pdgId();
-
-  if (genMom_pdgId == wantedMom_pdgId)
+  // Look for mothers
+  int genMom_pdgId = 0;
+  for (size_t i = 0; i < genP_mothers.size(); i++)
     {
-      return true;
-    }
-  if (HasMother(genMom_index, wantedMom_pdgId, bAbsoluteMomId) )
-    {
-      return true;
+      
+      
+      const genParticle m = fEvent->genparticles().getGenParticles()[genP_mothers.at(i)];
+      if (bAbsoluteMomId) genMom_pdgId = std::abs(m.pdgId());
+      else genMom_pdgId = m.pdgId();
+      
+      if (genMom_pdgId == wantedMom_pdgId)
+	{
+	  return true;
+	}
     }
   
   return false;
@@ -326,6 +328,10 @@ void MCTools::PrintDaughters(const int genP_index, bool bPrintIds){
 
   // Get genParticles of interest
   const genParticle genP  = fEvent->genparticles().getGenParticles()[genP_index];
+  std::cout << "*** WARNING! Since CMSSW_8X this is obsolete. Doing nothing" << std::endl;
+  return;
+
+  /*
   int genMom_index        =  genP.mother();
   int genMom_pdgId        = 0;
   if (genMom_index >= 0)
@@ -362,7 +368,7 @@ void MCTools::PrintDaughters(const int genP_index, bool bPrintIds){
 
   
   // For-loop: All daughters
-  for (int iDau = 0; iDau < genP_daughters.size(); iDau++){
+  for (size_t iDau = 0; iDau < genP_daughters.size(); iDau++){
 
     // Increment row number
     row++;
@@ -399,6 +405,7 @@ void MCTools::PrintDaughters(const int genP_index, bool bPrintIds){
   table.Print(true);
 
   return;
+*/
 }
 
 
@@ -433,7 +440,7 @@ vector<int> MCTools::GetAllDaughters(const int genP_index, bool bGetIds){
   genP_allDaughters.insert(genP_allDaughters.end(), genP_daus.begin(), genP_daus.end());
   
   // For each daugher, get its daughters
-  for (int iDau = 0; iDau < genP_daughters.size(); iDau++){
+  for (size_t iDau = 0; iDau < genP_daughters.size(); iDau++){
 
     int dau_index = genP_daughters.at(iDau);
     _GetAllDaughters(dau_index, genP_allDaughters, bGetIds);
@@ -468,7 +475,7 @@ void MCTools::_GetAllDaughters(const int genP_index, vector<int> &genP_allDaught
   genP_allDaughters.insert(genP_allDaughters.end(), genP_daus.begin(), genP_daus.end());
   
   // For each daugher, get its daughter
-  for (int iDau = 0; iDau < genP_daughters.size(); iDau++){
+  for (size_t iDau = 0; iDau < genP_daughters.size(); iDau++){
     
     // Get daugther properties
     int dau_index               = genP_daughters.at(iDau);
@@ -516,7 +523,7 @@ void MCTools::_PrintDaughters(const int genP_index,
   vector<int> genP_daughters = GetDaughters(genP_index, false);
   
   // For-loop: All daughters
-  for (int iDau = 0; iDau < genP_daughters.size(); iDau++){
+  for (size_t iDau = 0; iDau < genP_daughters.size(); iDau++){
 
     // Increment row number
     row++;
@@ -560,7 +567,9 @@ void MCTools::PrintGenParticle(const int genP_index, bool bPrintHeaders){
   // Description:
   // Print most properties of the GenParticle with index "genP_index". 
   //
-  
+  std::cout << "*** MCTools::PrintGenParticle(): WARNING! Since CMSSW_8X this is obsolete. Doing nothing" << std::endl;
+  return;
+
   // GenParticle
   math::XYZTLorentzVector genP_p4;
   const genParticle genP = fEvent->genparticles().getGenParticles()[genP_index];
@@ -569,7 +578,7 @@ void MCTools::PrintGenParticle(const int genP_index, bool bPrintHeaders){
   int genP_status        = genP.status();
 
   // Mother
-  int genMom_index = genP.mother();
+  int genMom_index = genP.mothers().at(0);
   int genMom_pdgId = -999999;
   if (genMom_index >= 0)
     {
@@ -632,7 +641,7 @@ double MCTools::GetLxy(const int genP_index,
 
   // If proton return 0
   genParticle m;
-  int mom_index = p.mother();
+  int mom_index = p.mothers().at(0);
   if( (p.pdgId() == 2212) && (mom_index < 0)) return 0.0;
 
   // Get the daughters
@@ -688,7 +697,7 @@ double MCTools::GetD0Mag(const int genP_index,
   
   // Particle MUST have a mother!
   genParticle m;
-  int mom_index = p.mother();
+  int mom_index = p.mothers().at(0);
   if (mom_index >= 0) m = fEvent->genparticles().getGenParticles()[mom_index];
   else return 0.0; //-99999.0;
     
@@ -758,7 +767,7 @@ ROOT::Math::XYZPoint MCTools::GetVertex(void){
       std::vector<int> genP_daughters = GetDaughters(genP_index, false);
 
       // Get the mother
-      int genMom_index = p.mother();
+      int genMom_index = p.mothers().at(0);
       genParticle m    = fEvent->genparticles().getGenParticles()[genMom_index];
       if (m.pdgId() == 2212)
 	{

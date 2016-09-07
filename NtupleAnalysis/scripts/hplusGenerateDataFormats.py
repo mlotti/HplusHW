@@ -288,19 +288,21 @@ def generateGenParticles(types, particle):
                     raise Exception("Error (%s): Additional four vector type is not a vector!"%particle)
                 floattype = m.group("type")
         if floattype == None:
-            raise Exception("Error: this should not happen")
+            msg = "=== WARNING: floattype=\"None\" while working on \"%s\". This should not happen! Changing to value to \"double\"." % (t)
+            #print msg
+            InformUser(msg)
+            floattype = "double"
+            #raise Exception("Error: this should not happen")
     else:
         floattype = "double" # default value
 
     branchObjects = []
     branchBooks   = []
     branchGetters = []
-    # Temporary Bug-fix (Alexandros, 20 July 2016)
-    ignoreList = ["genParticles_e", "genParticles_eta", "genParticles_phi", "genParticles_pt", "genParticles_vtxX", 
-                  "genParticles_vtxY", "genParticles_vtxZ", "genParticles_charge", "genParticles_mother", "genParticles_pdgId", "genParticles_status"]
+
+    # Temporary Bug-fix (Alexandros, 01 September 2016)
     for i, branch in enumerate(branchNames):
-        # Temporary Bug-fix (Alexandros, 20 July 2016)
-        if branch in ignoreList:
+        if "genParticles_" in branch:
             continue
         else:
            pass
@@ -572,6 +574,32 @@ def Print(msg, printHeader=True):
     print "\t", msg
     return
 
+
+def AskUser(msg):
+    '''
+    Prompts user for keyboard feedback to a certain question.
+    Returns true if keystroke is \"y\", false otherwise.
+    '''
+    Verbose("AskUser()")
+
+    keystroke = raw_input("\t" +  msg + " (y/n): ")
+    if (keystroke.lower()) == "y":
+        return True
+    elif (keystroke.lower()) == "n":
+        return False
+    else:
+        AskUser(msg)
+
+def InformUser(msg):
+    '''
+    Prompts user for keyboard feedback to a certain question.
+    Returns true if keystroke is \"y\", false otherwise.
+    '''
+    Verbose("InformUser()")
+
+    keystroke = raw_input(msg + "\nPress any key to continue..")
+    return
+    
 
 def PrintTable(counter, textAlign, colNamesList, colValuesList):
     '''

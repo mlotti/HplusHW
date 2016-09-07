@@ -30,7 +30,7 @@ import ROOT
 #================================================================================================
 kwargs = {
     "analysis"       : "Kinematics",
-    "savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/all/",
+    "savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_31August2016/figures/all/",
     #"savePath"       : None,
     "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200",
     "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"], #["QCD"],
@@ -38,7 +38,7 @@ kwargs = {
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "createRatio"    : False,
     "logX"           : False,
-    "logY"           : True,
+    "logY"           : False,
     "gridX"          : True,
     "gridY"          : True,
     "drawStyle"      : "HIST9", # "P",  #"HIST9"
@@ -67,12 +67,11 @@ for var in ["Pt", "Eta", "Rap"]:
 #    hNames.append("tbH_tbW_BQuark_"        + var)
 #    hNames.append("Htb_tbW_Wqq_Quark_"     + var)
 #    hNames.append("Htb_tbW_Wqq_AntiQuark_" + var)
-    hNames.append("BQuarks_N")
     if var not in ["Rap"]:
-        hNames.append("BQuark1_" + var)
-        hNames.append("BQuark2_" + var)
-        hNames.append("BQuark3_" + var)
-        hNames.append("BQuark4_" + var)
+#        hNames.append("BQuark1_" + var)
+#        hNames.append("BQuark2_" + var)
+#        hNames.append("BQuark3_" + var)
+#        hNames.append("BQuark4_" + var)
         hNames.append("GenJet1_" + var)
         hNames.append("GenJet2_" + var)
         hNames.append("GenJet3_" + var)
@@ -145,10 +144,7 @@ def main():
         #RemoveNegativeBins(datasetsMgr, hName, p)
 
         # Create a frame
-        if kwargs.get("logY"):
-            opts = {"ymin": 1e-5, "ymaxfactor": 10}
-        else:
-            opts = {"ymin": 0.0, "ymaxfactor": 1.2}
+        opts      = {"ymin": 0.0, "ymaxfactor": 1.2}
         ratioOpts = {"ymin": 0.0, "ymax": 2.0}
         p.createFrame(saveName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
         
