@@ -24,7 +24,10 @@ metFilter = PSet(
                     "Flag_EcalDeadCellTriggerPrimitiveFilter",
                     "Flag_CSCTightHaloFilter",
                     "Flag_eeBadScFilter",
-                    "Flag_goodVertices"]
+                    "Flag_goodVertices",
+                    "Flag_globalTightHalo2016Filter",
+                    "badPFMuonFilter",
+                    "badChargedCandidateFilter"]
 )
 
 #====== Tau selection
