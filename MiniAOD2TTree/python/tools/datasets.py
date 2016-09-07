@@ -76,7 +76,60 @@ datasetsWJets = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWJets*%2FRunII*16MiniAODv2-*_reHLT_*%2FMINIAODSIM"
 datasetsWJets.append(Dataset('/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
+
+datasetsWJetsToQQ_noReHLT = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWJetsToQQ_HT-600ToInf_*%2FRunIISpring16MiniAODv2-*%2F*"
+datasetsWJetsToQQ_noReHLT.append(Dataset('/WJetsToQQ_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
+
+datasetsTTWJetsToQQ_noReHLT = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FQCD_Pt_*_TuneCUETP8M1_13TeV_pythia8%2FRunII*16MiniAODv2-*_reHLT_*%2FMINIAODSIM"
+datasetsTTWJetsToQQ_noReHLT.append(Dataset('/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
+
+datasetsTTBB_noReHLT = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2Fttbb_4FS_ckm_amcatnlo_madspin_pythia8*%2FRunIISpring16MiniAODv2-*%2F*"
+datasetsTTBB_noReHLT.append(Dataset('/ttbb_4FS_ckm_amcatnlo_madspin_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsTTBB_noReHLT.append(Dataset('/ttbb_4FS_ckm_amcatnlo_madspin_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
+
+datasetsTTTT_noReHLT = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTTTT_TuneCUETP8M1*%2FRunIISpring16MiniAODv2-*%2F*"
+datasetsTTTT_noReHLT.append(Dataset('/TTTT_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
+
+datasetsTTZToQQ_noReHLT = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTTZToQQ*%2FRunIISpring16MiniAODv2-*%2F*"
+datasetsTTZToQQ_noReHLT.append(Dataset('/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
+
+datasetsZJetsToQQ = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FZJetsToQQ_HT600toInf*%2FRunIISpring16MiniAODv2-*%2F*"
+datasetsZJetsToQQ.append(Dataset('/ZJetsToQQ_HT600toInf_13TeV-madgraph/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
+
 datasetsDiboson = []
+
+
+datasetsDibosonToQQ_noReHLT = []
+das1 = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWZ_TuneCUETP8M1*%2FRunIISpring16MiniAODv2-*%2F*"
+das2 = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWWTo4Q_13TeV-powheg*%2FRunIISpring16MiniAODv2-*%2F*"
+das3 = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FZZTo4Q_13TeV*%2FRunIISpring16MiniAODv2-*%2F*"
+datasetsDibosonToQQ_noReHLT.append(Dataset('/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das1))
+datasetsDibosonToQQ_noReHLT.append(Dataset('/WWTo4Q_13TeV-powheg/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das2))
+datasetsDibosonToQQ_noReHLT.append(Dataset('/ZZTo4Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das3))
+
+
+datasetsSingleTop_noReHLT = []
+das1 = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FST_t-channel_antitop_*_TuneCUETP8M1*%2FRunIISpring16MiniAODv2-*%2F*"
+das2 = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FST_t-channel_top_4f_inclusiveDecays_*_TuneCUETP8M1*%2FRunIISpring16MiniAODv2-*%2F*"
+das3 = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FST_tW_antitop_5f_inclusiveDecays_*_TuneCUETP8M1*%2FRunIISpring16MiniAODv2-*%2F*"
+das4 = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FST_tW_top_5f_inclusiveDecays_*_TuneCUETP8M1*%2FRunIISpring16MiniAODv2-*%2F*"
+datasetsSingleTop_noReHLT.append(Dataset('/ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das1))
+datasetsSingleTop_noReHLT.append(Dataset('/ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das2))
+datasetsSingleTop_noReHLT.append(Dataset('/ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das3))
+datasetsSingleTop_noReHLT.append(Dataset('/ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v2/MINIAODSIM', dataVersion="80Xmc", dasQuery=das4))
+
 
 
 datasetsQCD = []
@@ -96,6 +149,18 @@ datasetsQCD.append(Dataset('/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/RunIIS
 datasetsQCD.append(Dataset('/QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 datasetsQCD.append(Dataset('/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 datasetsQCD.append(Dataset('/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
+
+datasetsQCDbEnriched_noReHLT = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FQCD_bEnriched_*%2FRunIISpring16MiniAODv2-*%2F*"
+datasetsQCDbEnriched_noReHLT.append(Dataset('/QCD_bEnriched_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsQCDbEnriched_noReHLT.append(Dataset('/QCD_bEnriched_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsQCDbEnriched_noReHLT.append(Dataset('/QCD_bEnriched_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsQCDbEnriched_noReHLT.append(Dataset('/QCD_bEnriched_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsQCDbEnriched_noReHLT.append(Dataset('/QCD_bEnriched_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsQCDbEnriched_noReHLT.append(Dataset('/QCD_bEnriched_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsQCDbEnriched_noReHLT.append(Dataset('/QCD_bEnriched_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsQCDbEnriched_noReHLT.append(Dataset('/QCD_bEnriched_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 
 datasetsQCDMuEnriched = []
@@ -166,6 +231,7 @@ datasetsNoReHLT.append(Dataset('/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16Mini
 datasetsNoReHLT.append(Dataset('/ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 
+
 #================================================================================================ 
 # Dataset Grouping
 #================================================================================================ 
@@ -199,34 +265,32 @@ signalAnalysisDatasets.extend(datasetsSignalTauNu)
 hplus2tbAnalysisDatasets = []
 #hplus2tbAnalysisDatasets.extend(datasetsJetHTData)
 hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
-# hplus2tbAnalysisDatasets.extend(datasetsDYToQQ)
 hplus2tbAnalysisDatasets.extend(datasetsQCD)   
-## hplus2tbAnalysisDatasets.extend(datasetsQCDbEnriched)
-## hplus2tbAnalysisDatasets.extend(datasetsQCDbGenFilter)
-## hplus2tbAnalysisDatasets.extend(datasetsQCDHTBins)
+hplus2tbAnalysisDatasets.extend(datasetsQCDbEnriched_noReHLT)
 hplus2tbAnalysisDatasets.extend(datasetsTop)
+hplus2tbAnalysisDatasets.extend(datasetsZJetsToQQ)
+hplus2tbAnalysisDatasets.extend(datasetsTTWJetsToQQ_noReHLT)  
+hplus2tbAnalysisDatasets.extend(datasetsTTTT_noReHLT)  
+hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ_noReHLT)
+hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ_noReHLT)
+hplus2tbAnalysisDatasets.extend(datasetsDibosonToQQ_noReHLT)
+hplus2tbAnalysisDatasets.extend(datasetsSingleTop_noReHLT)
+hplus2tbAnalysisDatasets.extend(datasetsTTBB_noReHLT)
 # hplus2tbAnalysisDatasets.extend(datasetsTTJets) #less stas && -ve weights (tmp until we add trigger)
-## hplus2tbAnalysisDatasets.extend(datasetsTT)
 ## hplus2tbAnalysisDatasets.extend(datasetsGGJets)
 ## hplus2tbAnalysisDatasets.extend(datasetsGJets)
 ## hplus2tbAnalysisDatasets.extend(datasetsTGJets)
 ## hplus2tbAnalysisDatasets.extend(datasetsTTGJets)     
 ## hplus2tbAnalysisDatasets.extend(datasetsTTJets)
 ## hplus2tbAnalysisDatasets.extend(datasetsTTJetsHT)    
-# hplus2tbAnalysisDatasets.extend(datasetsTTDWJets)
-# hplus2tbAnalysisDatasets.extend(datasetsTTZJets)
-# hplus2tbAnalysisDatasets.extend(datasetsTTWJetsToQQ)  
-# hplus2tbAnalysisDatasets.extend(datasetsTTTT)  
-# hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ)
-# hplus2tbAnalysisDatasets.extend(datasetsWJets)
-# hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ)
-# hplus2tbAnalysisDatasets.extend(datasetsZJetsToQQ)    
-# hplus2tbAnalysisDatasets.extend(datasetsDiboson) #    
+## hplus2tbAnalysisDatasets.extend(datasetsTT)
+## hplus2tbAnalysisDatasets.extend(datasetsQCDbGenFilter)
+## hplus2tbAnalysisDatasets.extend(datasetsQCDHTBins)
 ## hplus2tbAnalysisDatasets.extend(datasetsDibosonG)    
 ## hplus2tbAnalysisDatasets.extend(datasetsWWTo4Q)
-## hplus2tbAnalysisDatasets.extend(datasetsZZTo4Q)
-# hplus2tbAnalysisDatasets.extend(datasetsttbb)  
+# hplus2tbAnalysisDatasets.extend(datasetsDYToQQ)
 # hplus2tbAnalysisDatasets.extend(datasetsTriboson) 
+# hplus2tbAnalysisDatasets.extend(datasetsWJets)
 
 
 #================================================================================================ 
