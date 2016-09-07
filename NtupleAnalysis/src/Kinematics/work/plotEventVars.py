@@ -31,10 +31,10 @@ import ROOT
 #================================================================================================
 kwargs = {
     "analysis"       : "Kinematics",
-    "savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_31August2016/figures/all/",
-    #"savePath"       : None,
-    "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200",
-    "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"], #"QCD"],
+    #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/all/",
+    "savePath"       : None,
+    "refDataset"     : "QCD", #ChargedHiggs_HplusTB_HplusToTB_M_200
+    "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"],
     "saveFormats"    : [".png", ".pdf"],
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "createRatio"    : False,
@@ -54,21 +54,39 @@ kwargs = {
 
 
 hNames = [
-    # "genMET_Et", #logy
-    "genHT_GenJets",
-    "SelGenJet_N_NoPreselections",
-    "SelGenJet_N_AfterLeptonVeto",
-    "SelGenJet_N_AfterLeptonVetoNJetsCut",
-    "SelGenJet_N_AfterPreselections", 
-    "MaxDiJetMass_Pt",
-    "MaxDiJetMass_Eta",
-    "MaxDiJetMass_Mass",
-    "MaxDiJetMass_Rap",
-    "MaxDiJetMass_dR",
-    "MaxDiJetMass_dRrap",
-    "MaxDiJetMass_dEta",
-    "MaxDiJetMass_dRap",
-    "MaxDiJetMass_dPhi",
+#    "BQuarkPair_dRMin_pT",
+#    "BQuarkPair_dRMin_dEta",
+#    "BQuarkPair_dRMin_dPhi",
+    "BQuarkPair_dRMin_dR",
+#    "BQuarkPair_dRMin_Mass",
+#    "BQuarkPair_dRMin_jet1_dR",
+#    "BQuarkPair_dRMin_jet1_dEta",
+#    "BQuarkPair_dRMin_jet1_dPhi",
+#    "BQuarkPair_dRMin_jet2_dR",
+#    "BQuarkPair_dRMin_jet2_dEta",
+#    "BQuarkPair_dRMin_jet2_dPhi",
+#    "tbWMinus_bqq_Pt",
+#    "tbWMinus_bqq_Rap",
+#    "tbWMinus_bqq_Mass",
+#    "tbWMinus_bqq_dRMax_dR",
+#    "tbWMinus_bqq_dRMax_dRap",
+#    "tbWMinus_bqq_dRMax_dPhi",
+#    "tbWPlus_bqq_Pt",
+#    "tbWPlus_bqq_Rap",
+#    "tbWPlus_bqq_Mass",
+#    "tbWPlus_bqq_dRMax_dR",
+#    "tbWPlus_bqq_dRMax_dRap",
+#    "tbWPlus_bqq_dRMax_dPhi",
+#    "MaxDiJetMass_Pt",
+#    "MaxDiJetMass_Eta",
+#    "MaxDiJetMass_Mass",
+#    "MaxDiJetMass_Rap",
+#    "MaxDiJetMass_dR",
+#    "MaxDiJetMass_dRrap",
+#    "MaxDiJetMass_dEta",
+#    "MaxDiJetMass_dRap",
+#    "MaxDiJetMass_dPhi",
+#    "SelGenJet_N_AfterLeptonVeto",
 ]
 
 
@@ -165,8 +183,9 @@ def main():
         #RemoveNegativeBins(datasetsMgr, hName, p)
 
         # Create a frame
-        if kwargs.get("logY"):
-            opts = {"ymin": 1e-5, "ymaxfactor": 10}
+        if kwargs.get("logY")==True:
+            opts = {"ymin": 1e-4, "ymaxfactor": 10}
+            #opts = {"ymin": 1e-3, "ymax": 1}
         else:
             opts = {"ymin": 0.0, "ymaxfactor": 1.2}
         ratioOpts = {"ymin": 0.0, "ymax": 2.0}

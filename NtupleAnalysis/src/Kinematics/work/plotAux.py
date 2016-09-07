@@ -30,7 +30,7 @@ styleDict = {
     htb + "M_400"      : styles.signal400Style,
     htb + "M_300"      : styles.signal300Style,
     htb + "M_200"      : styles.signal200Style,
-    "QCD"              : styles.qcdStyle, #qcdStyle, #qcdFillStyle,
+    "QCD"              : styles.qcdFillStyle, #qcdStyle, #qcdFillStyle,
     "QCD_Pt_15to30"    : styles.qcdFillStyle, 
     "QCD_Pt_30to50"    : styles.qcdFillStyle, 
     "QCD_Pt_50to80"    : styles.qcdFillStyle,
@@ -745,6 +745,8 @@ def getTitleY(histo, title=None, **kwargs):
     if title == None:
         if isinstance(histo, (ROOT.TH1)):
             title = getSymbolY(kwargs.get("normalizeTo"))
+            if title == None:
+                title = "Events"
         else:
             title = histo.getRootHisto().GetYaxis().GetTitle()            
         
