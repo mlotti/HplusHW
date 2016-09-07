@@ -161,7 +161,8 @@ class TableProducer:
         # Print event yield summary table
         self.makeEventYieldSummary()
         # Print systematics summary table
-        self.makeSystematicsSummary()
+        self.makeSystematicsSummary(light=True)
+        self.makeSystematicsSummary(light=False)        
         # Prints QCD purity information
         #self.makeQCDPuritySummary() #FIXME missing
 
@@ -869,15 +870,15 @@ class TableProducer:
 
     ## Returns a string with proper numerical formatting
     def _getFormattedSystematicsNumber(self,value):
-        if abs(value) > 0.1:
+        if abs(value) >= 0.1:
             return "%.0f"%(abs(value)*100)
-        elif abs(value) > 0.001:
+        elif abs(value) >= 0.001:
             return "%.1f"%(abs(value)*100)
         else:
-            return "$<$~0.1"
+            return "\\textless~0.1"
 
     ## Prints systematics summary table
-    def makeSystematicsSummary(self):
+    def makeSystematicsSummary(self,light=False):
 #        myColumnOrder = ["HH",
 #                         "HW",
 #                         "QCD",
@@ -887,12 +888,16 @@ class TableProducer:
 #                         "EWK_tt_faketau",
 #                         "EWK_W_faketau",
 #                         "EWK_t_faketau"]
-        myColumnOrder = ["Hptntj_Hp",
+        signalColumn="CMS_Hptntj_Hp"
+        if light:
+            signalColumn="HW"
+        myColumnOrder = ["CMS_Hptntj_Hp",
                          "QCDandFakeTau",
-                         "tt_genuinetau",
-                         "W_genuinetau",
-                         "t_genuinetau",
-                         "DY_genuinetau"]
+                         "ttbar_t_genuine",
+                         "W_t_genuine",
+                         "singleTop_t_genuine",
+                         "DY_t_genuine",
+                         "VV_t_genuine"]
 
 # Old list:
 #        myNuisanceOrder = [["01","$\\tau - p_T^{miss}$ trigger"], # trg
@@ -914,64 +919,54 @@ class TableProducer:
 #                           [["17","18","19","22","24","25","26","27"], "simulation stat."], # MC statistics
 #                           [["28","29","30","31","32"], "cross section"], # cross section
 #                           ["33", "luminosity"]] # luminosity
-        myNuisanceOrder = [["CMS_trg_taumet_tau_dataeff","CMS trg taumet tau dataeff"], #first ID, then the text that goes to the table
-                           ["CMS_trg_taumet_tau_MCeff","CMS trg taumet tau MCeff"],
-                           ["CMS_trg_taumet_MET_dataeff","CMS trg taumet MET dataeff"],
-                           ["CMS_trg_taumet_MET_MCeff","CMS trg taumet MET MCeff"],
-                           ["CMS_veto_e","CMS veto e"],
-                           ["CMS_veto_mu","CMS veto mu"],
-                           ["CMS_eff_t","CMS eff t"],
-                           ["CMS_fake_eToTau","CMS fake eToTau"],
-                           ["CMS_fake_muToTau","CMS fake muToTau"],
-                           ["CMS_fake_jetToTau","CMS fake jetToTau"],
-                           ["CMS_scale_t","CMS scale t"],
-                           ["CMS_scale_j","CMS scale j"],
-                           ["CMS_scale_met","CMS scale met"],
-                           ["CMS_res_j","CMS res j"],
-                           ["CMS_tag_b","CMS tag b"],
-                           ["CMS_mistag_b","CMS mistag b"],
-                           ["CMS_Hptntj_topPtReweighting","CMS Hptntj topPtReweighting"],
-                           ["CMS_pileup","CMS pileup"],
-                           ["xsect_tt", "xsect tt"],
-                           ["xsect_Wjets","xsect Wjets"],
-                           ["xsect_singleTop","xsect singleTop"],
-                           ["xsect_DYtoll","xsect DYtoll"],
-                           ["CMS_lumi_13TeV","CMS lumi 13TeV"],
-                           ["CMS_Hptntj_QCDbkg_templateFit","CMS Hptntj QCDbkg templateFit"],
-                           ["CMS_Hptntj_QCDandFakeTau_TailFit_par0","CMS Hptntj QCDandFakeTau TailFit par0"],
-                           ["CMS_Hptntj_QCDandFakeTau_TailFit_par1","CMS Hptntj QCDandFakeTau TailFit par1"],
-                           ["CMS_Hptntj_tt_genuinetau_TailFit_par0","CMS Hptntj tt genuinetau TailFit par0"],
-                           ["CMS_Hptntj_tt_genuinetau_TailFit_par1","CMS Hptntj tt genuinetau TailFit par1"],
-                           ["CMS_Hptntj_W_genuinetau_TailFit_par0","CMS Hptntj W genuinetau TailFit par0"],
-                           ["CMS_Hptntj_W_genuinetau_TailFit_par1","CMS Hptntj W genuinetau TailFit par1"],
-                           ["CMS_Hptntj_t_genuinetau_TailFit_par0","CMS Hptntj t genuinetau TailFit par0"],
-                           ["CMS_Hptntj_t_genuinetau_TailFit_par1","CMS Hptntj t genuinetau TailFit par1"],
-                           ["CMS_Hptntj_DY_genuinetau_TailFit_par0","CMS Hptntj DY genuinetau TailFit par0"],
-                           ["CMS_Hptntj_DY_genuinetau_TailFit_par1","CMS Hptntj DY genuinetau TailFit par1"]]
-
+        myNuisanceOrder = [["CMS_eff_t","tau ID"], # first ID, then the text that goes to the table
+                           ["CMS_eff_t_highpt","high-$p_{T}$ tau ID"],        
+                           ["CMS_eff_t_trg_data","trigger tau leg eff. for data"],
+                           ["CMS_eff_t_trg_MC","trigger tau leg eff. for MC"],
+                           ["CMS_eff_met_trg_data","trigger MET leg eff. for data"],
+                           ["CMS_eff_met_trg_MC","trigger MET leg eff. for MC"],
+                           ["CMS_eff_e_veto","electron veto eff."],
+                           ["CMS_eff_m_veto","muon veto eff."],
+#                           ["CMS_fake_eToTau","CMS fake eToTau"],
+#                           ["CMS_fake_muToTau","CMS fake muToTau"],
+#                           ["CMS_fake_jetToTau","CMS fake jetToTau"],
+                           ["CMS_eff_b","b-tagging eff."],
+                           ["CMS_fake_b","b-mistagging eff."],
+                           ["CMS_scale_t","tau energy scale"],
+                           ["CMS_scale_j","jet energy scale"],
+                           ["CMS_scale_met","MET unclustered energy scale"],
+                           ["CMS_res_j","jet energy resolution"],
+                           ["CMS_Hptntj_topPtReweight","top $p_T$ reweighting"],
+                           ["CMS_pileup","pileup reweighting"],
+                           ["CMS_scale_ttbar", "ttbar scale"],
+                           ["CMS_pdf_ttbar", "ttbar pdf"],
+                           ["CMS_mass_ttbar", "ttbar mass"],
+                           ["CMS_scale_Wjets", "W+jets scale"],
+                           ["CMS_pdf_Wjets", "W+jets pdf"],
+                           ["CMS_scale_DY", "DY scale"],
+                           ["CMS_pdf_DY", "DY pdf"],
+                           ["CMS_scale_VV", "diboson scale"],
+                           ["CMS_pdf_VV", "diboson pdf"],
+                           ["lumi_13TeV","luminosity (13 TeV)"],
+                           ["CMS_Hptntj_QCDbkg_templateFit","QCD template fit"],
+                           ["CMS_Hptntj_QCDkbg_metshape","QCD MET shape"]
+                       ]
         # Make table
         myTable = []
-        for n in myNuisanceOrder:
+        for n in myNuisanceOrder: # for each nuisance
+            resultFound=False
             myRow = [n[1]]
+            isShape=False
             for columnName in myColumnOrder:
-#                myMinValue = 9999.0
-#                myMaxValue = -9999.0
-#                mySavedMinResult = None
-#                mySavedMaxResult = None
                 myMinErrorUp = 9999.0
                 myMinErrorDown = 9999.0
                 myMaxErrorUp = -9999.0
                 myMaxErrorDown = -9999.0
                 myErrorUp = 0.0
                 myErrorDown = 0.0
-
-#                print "row=",myRow
-#                print "column=",columnName
-
                 for c in self._datasetGroups: 
-                    if columnName in c.getLabel():
-                        # Correct row+column found, now check if it corresponds to nuisance list
-                        if isinstance(n[0], list): 
+                    if columnName in c.getLabel(): # if column name matches to dataset group label
+                        if isinstance(n[0], list): # if this column+nuisance combination matches to a list, loop over the list
                             for nid in n[0]:
                                 if c.hasNuisanceByMasterId(nid):
                                     # find error up and error down
@@ -982,20 +977,22 @@ class TableProducer:
                                     elif isinstance(myResult.getResult(), list):
                                         myErrorDown = max(myResult.getResult())
                                         myErrorUp = myErrorDown
-                                    else:
-                                        myErrorDown = myResult.getResult()
+                                    else: #if shape systematic
+                                        myErrorDown = self._getAverageShapeUncertainty(nid,c)
                                         myErrorUp = myErrorDown
+                                        myRow += " (S)"
+                                        isShape=True
                                     # update min and max values for error up
-                                    if (myErrorUp > myMinErrorUp):
+                                    if (myErrorUp < myMinErrorUp):
                                         myMinErrorUp = myErrorUp
-                                    if (myErrorUp < myMaxErrorUp):
+                                    if (myErrorUp > myMaxErrorUp):
                                         myMaxErrorUp = myErrorUp
                                     # update min and max values for error down
-                                    if (myErrorDown > myMinErrorDown):
+                                    if (myErrorDown < myMinErrorDown):
                                         myMinErrorDown = myErrorDown
-                                    if (myErrorDown < myMaxErrorDown):
-                                        myMaxErrorDown = myErrorDown                                  
-                        else:
+                                    if (myErrorDown > myMaxErrorDown):
+                                        myMaxErrorDown = myErrorDown     
+                        else: # if this column+nuisance does not match to a list, but just one entry
                             if c.hasNuisanceByMasterId(n[0]): 
                                 myResult = c.getFullNuisanceResultByMasterId(n[0])
                                 if isinstance(myResult.getResult(), ScalarUncertaintyItem):
@@ -1004,11 +1001,10 @@ class TableProducer:
                                 elif isinstance(myResult, list):
                                     myErrorDown = max(myResult.getResult())
                                     myErrorUp = myErrorDown
-                                else:
-                                    myErrorDown = myResult.getResult()
+                                else: # if shape systematic
+                                    myErrorDown = self._getAverageShapeUncertainty(n[0],c)
                                     myErrorUp = myErrorDown
-#                                    print "myErrorDown=",myErrorDown
-#                                    print "myErrorUp=",myErrorUp
+                                    isShape=True
                                 # update min and max values for error up
                                 if (myErrorUp < myMinErrorUp):
                                     myMinErrorUp = myErrorUp
@@ -1018,19 +1014,25 @@ class TableProducer:
                                 if (myErrorDown < myMinErrorDown):
                                     myMinErrorDown = myErrorDown
                                 if (myErrorDown > myMaxErrorDown):
-                                    myMaxErrorDown = myErrorDown     
+                                    myMaxErrorDown = myErrorDown
+#                        print "  n[0]="+str(n[0])+", columnName="+columnName+"was in c.getLabel()="+c.getLabel()+", so min/max might be updated:"              
+#                        print "    -myMinErrorUp = ",myMinErrorUp
+#                        print "    -myMinErrorDown = ",myMinErrorDown
+#                        print "    -myMaxErrorUp = ",myMaxErrorUp
+#                        print "    -myMaxErrorDown = ",myMaxErrorDown
 
-#                    print "    myMinErrorUp = ",myMinErrorUp
-#                    print "    myMinErrorDown = ",myMinErrorDown
-#                    print "    myMaxErrorUp = ",myMaxErrorUp
-#                    print "    myMaxErrorDown = ",myMaxErrorDown
+#                print "The final min/max for columnName="+columnName+" are:"
+#                print "-myMinErrorUp = ",myMinErrorUp
+#                print "-myMinErrorDown = ",myMinErrorDown
+#                print "-myMaxErrorUp = ",myMaxErrorUp
+#                print "-myMaxErrorDown = ",myMaxErrorDown
 
                 myStr = ""
 
                 # if result not found
                 if (abs(myMaxErrorUp) > 9000 or abs(myMinErrorUp) > 9000 or abs(myMaxErrorDown) > 9000 or abs(myMinErrorDown) > 9000):
                     myStr = "$-$"
-                # if result found and no need for writing range, but one or two numbers is enougth
+                # if result found and no need for writing range
                 elif ( (myMaxErrorUp-myMinErrorUp)<0.001 and (myMaxErrorDown-myMinErrorDown)<0.001 ): #PROBLEM HERE!
                     if abs(myMaxErrorDown-myMaxErrorUp) < 0.001: # if symmetric error
                         myStr = self._getFormattedSystematicsNumber(myMaxErrorUp)
@@ -1049,6 +1051,8 @@ class TableProducer:
 
 
                 myRow.append(myStr)
+            if isShape:
+                myRow[0]+=" (S)"
             myTable.append(myRow)
 
         # Make table
@@ -1058,14 +1062,15 @@ class TableProducer:
         myOutput += "\\renewcommand{\\arraystretch}{1.2}\n"
         myOutput += "\\begin{table}%%[h]\n"
         myOutput += "\\begin{center}\n"
-        myOutput += "\\caption{The systematic uncertainties (in \\%) for signal and the backgrounds.}\n"
+        myOutput += "\\caption{The systematic uncertainties (in \\%) for signal and the backgrounds. The uncertainties, which depend on the final distribution bin, are marked with (S) and for them the maximum contracted value of the negative or positive variation is displayed.}"
         myOutput += "\\label{tab:summary:systematics}\n"
         myOutput += "\\vskip 0.1 in\n"
         myOutput += "\\noindent\\makebox[\\textwidth]{\n"
-        myOutput += "\\begin{tabular}{|l|c|c|cccc|}\n"
+        myOutput += "\\begin{tabular}{l|c|c|ccccc}\n"
         myOutput += "\\hline\n"
-        myOutput += "& Signal  &  QCD and $\\tau$~fakes & \multicolumn{4}{c|}{EWK+$t\\bar{t}$ genuine $\\tau$} \\"
-        myCaptionLine = [["","","","","tt","W","t","DY"]] 
+        myOutput += "& Signal & Fake tau & \multicolumn{5}{c}{EWK+t\={t} genuine tau}"
+        myOutput += "\n \\\\"
+        myCaptionLine = [["","","","t\={t}","W+jets","single top","DY","Diboson"]] 
         # Calculate dimensions of tables
         myWidths = []
         myWidths = calculateCellWidths(myWidths, myTable)
@@ -1083,7 +1088,12 @@ class TableProducer:
         myOutput += "\\renewcommand{\\arraystretch}{1}\n"
         myOutput += "\\end{document}"
         # Save output to file
-        myFilename = self._infoDirname+"/SystematicsSummary_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")+".tex"
+        mySignalText="heavy"
+        if light:
+           mySignalText="light"
+        myFilename = self._infoDirname+"/SystematicsSummary_"+mySignalText
+#        myFilename += "_"+self._timestamp+"_"+self._outputPrefix+"_"+self._config.DataCardName.replace(" ","_")
+        myFilename+=".tex"
         myFile = open(myFilename, "w")
         myFile.write(myOutput)
         myFile.close()
@@ -1128,6 +1138,23 @@ class TableProducer:
         myFile.close()
         h.IsA().Destructor(h)
 
+    ## Gets the maximum of the average values of up and down variations for a given shape systematic and dataset
+    def _getAverageShapeUncertainty(self,syst_id,c): # arguments: ID of the nuisance and dataset group
+         myDownAverage = 0.0
+         myUpAverage = 0.0
+         for n in self._extractors: # loop over systematics
+            if (n.getDistribution() == "shapeQ") and (n.getId() == syst_id) and c.hasNuisanceByMasterId(syst_id): # if shape systematic
+                myHistograms = c.getFullNuisanceResultByMasterId(syst_id).getHistograms()
+                if len(myHistograms) > 0:
+                    hDown = myHistograms[1]
+                    hUp = myHistograms[0]
+                    hNominal = c.getRateHistogram()
+                    # Calculate
+                    if hNominal.Integral() > 0.0:
+                        myDownAverage = abs(hDown.Integral()-hNominal.Integral())/hNominal.Integral()
+                        myUpAverage = abs(hUp.Integral()-hNominal.Integral())/hNominal.Integral()
+         return max(myDownAverage,myUpAverage)
+    
     ## Creates datacards with 0 +-1 -> 1 +- 0 shift for each shape nuisance
     def _createDatacardsForShapeSensitivityTest(self):
         myIdList = []
