@@ -150,10 +150,10 @@ void TriggerEfficiency::book(TDirectory *dir) {
   hDenPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorPhi", "DenominatorPhi", 7,-3.14, 3.14);
   hDenPhi->GetXaxis()->SetTitle(fxLabel.c_str());
 
-  hNumPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorPU", "NumeratorPU", 4, 5, 25.);
+  hNumPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorPU", "NumeratorPU", 7, 5, 40.);
   hNumPU->GetXaxis()->SetTitle("nVtx");
 
-  hDenPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorPU", "DenominatorPU", 4, 5, 25.);
+  hDenPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorPU", "DenominatorPU", 7, 5, 40.);
   hDenPU->GetXaxis()->SetTitle("nVtx");
 
   hNumMCMatch = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorMCMatch", "NumeratorMCMatch", fbinning.size()-1, xbins);
