@@ -532,10 +532,10 @@ Nuisances.append(Nuisance(id="xsect_QCD", label="QCD MC cross section",
 #===== Luminosity
 Nuisances.append(Nuisance(id="lumi_13TeV", label="lumi_13TeVnosity",
     distr="lnN", function="Constant",
-    value=systematics.getLuminosityUncertainty()))
+    value=systematics.getLuminosityUncertainty("2016")))
 Nuisances.append(Nuisance(id="lumi_13TeV_forQCD", label="lumi_13TeVnosity",
     distr="lnN", function="ConstantForQCD",
-    value=systematics.getLuminosityUncertainty()))
+    value=systematics.getLuminosityUncertainty("2016")))
 
 #===== QCD measurement
 if OptionIncludeSystematics:

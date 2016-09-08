@@ -156,8 +156,15 @@ def getTauIDUncertainty(isGenuineTau=True):
     else:
         return ScalarUncertaintyItem("tauID", 0.00)
 
-def getLuminosityUncertainty():
-    return ScalarUncertaintyItem("lumi", 0.027) # 0.026 for 8 TeV, 0.027 for 13 TeV
+def getLuminosityUncertainty(year="2015"):
+    if year=="2012":
+        return ScalarUncertaintyItem("lumi", 0.026) # for 8 TeV
+    elif year=="2015":
+        return ScalarUncertaintyItem("lumi", 0.027) # for 13 TeV 2015, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/TWikiLUM
+    elif year=="2016":
+        return ScalarUncertaintyItem("lumi", 0.062) # for 13 TeV 2016, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/TWikiLUM
+    else:
+        return ScalarUncertaintyItem("lumi", 0.027) # default, here 13 TeV 2015
 
 def getProbabilisticBtagUncertainty():
     return ScalarUncertaintyItem("probBtag", 0.5)
