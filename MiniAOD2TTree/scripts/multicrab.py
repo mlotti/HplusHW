@@ -1186,7 +1186,7 @@ if __name__ == "__main__":
     VERBOSE = False
     PSET    = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
     SITE    = "T2_FI_HIP"
-    DIRNAME = os.getcwd()
+    DIRNAME = ""
 
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("--create"  , dest="create"    , default=False, action="store_true", help="Flag to create a CRAB job [default: False")
@@ -1203,6 +1203,9 @@ if __name__ == "__main__":
     parser.add_option("-u", "--url"    , dest="url"        , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
     #parser.add_option("--checksum", dest="checksum"  , default=False, action="store_true", help="Get output with adler32 checksum [default: False") #fixme
     (opts, args) = parser.parse_args()
+
+    if opts.create == False and opts.dirName == "":
+	opts.dirName = os.getcwd()
 
     if opts.create == True and opts.status == True:
         raise Exception("Cannot both create and check a CRAB job!")	    
