@@ -39,6 +39,7 @@ class Table{
   std::string GetMergedColumnsInRow(int iRow, int iColumnStart, int iColumnEnd);
   std::string GetTableFormat(void){return format_;}
   std::string GetTitleRow(void);
+  void AppendToTitleRow(std::string);
   int GetColumnsInString(std::string title);
   int GetNumberOfColumns(int iRow=-1);
   int GetNumberOfColumnsIncludingDeleted(int iRow=-1);

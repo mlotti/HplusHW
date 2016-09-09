@@ -30,6 +30,8 @@ if ( $LOCATION == "" ) then
 	set LOCATION="mac"
     else if (`hostname` =~ *".cern.ch" ) then #Example: p06109780e53561.cern.ch
 	set LOCATION="lxbatch"
+     else if (`hostname` =~ *".fnal.gov" ) then #Example: cmslpc35.fnal.gov
+        set LOCATION="lpc"
     endif
 endif
 

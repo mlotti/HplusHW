@@ -35,7 +35,7 @@ kwargs = {
     "savePath"       : None,
     "refDataset"     : "QCD", #ChargedHiggs_HplusTB_HplusToTB_M_200
     "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"],
-    "saveFormats"    : [".png", ".pdf"],
+    "saveFormats"    : [".png"],#, ".pdf"],
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "createRatio"    : False,
     "logX"           : False,
@@ -54,17 +54,17 @@ kwargs = {
 
 
 hNames = [
-#    "BQuarkPair_dRMin_pT",
-#    "BQuarkPair_dRMin_dEta",
-#    "BQuarkPair_dRMin_dPhi",
+    "BQuarkPair_dRMin_pT",
+    "BQuarkPair_dRMin_dEta",
+    "BQuarkPair_dRMin_dPhi",
     "BQuarkPair_dRMin_dR",
-#    "BQuarkPair_dRMin_Mass",
-#    "BQuarkPair_dRMin_jet1_dR",
-#    "BQuarkPair_dRMin_jet1_dEta",
-#    "BQuarkPair_dRMin_jet1_dPhi",
-#    "BQuarkPair_dRMin_jet2_dR",
-#    "BQuarkPair_dRMin_jet2_dEta",
-#    "BQuarkPair_dRMin_jet2_dPhi",
+    "BQuarkPair_dRMin_Mass",
+    "BQuarkPair_dRMin_jet1_dR",
+    "BQuarkPair_dRMin_jet1_dEta",
+    "BQuarkPair_dRMin_jet1_dPhi",
+    "BQuarkPair_dRMin_jet2_dR",
+    "BQuarkPair_dRMin_jet2_dEta",
+    "BQuarkPair_dRMin_jet2_dPhi",
 #    "tbWMinus_bqq_Pt",
 #    "tbWMinus_bqq_Rap",
 #    "tbWMinus_bqq_Mass",

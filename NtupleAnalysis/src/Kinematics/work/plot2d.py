@@ -30,10 +30,10 @@ import ROOT
 #================================================================================================
 kwargs = {
     "analysis"       : "Kinematics",
-    "savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/M_200/",
-    # "savePath"       : None,
-    "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200", #ChargedHiggs_HplusTB_HplusToTB_M_
-    "saveFormats"    : [".png", ".pdf"],
+    #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/M_200/",
+    "savePath"       : None,
+    "refDataset"     : "QCD", #ChargedHiggs_HplusTB_HplusToTB_M_, TT, QCD
+    "saveFormats"    : [".png"],#, ".pdf"],
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "zMin"           : 1e-5,
     "zMax"           : 5e-2,

@@ -21,8 +21,9 @@ Example:
 
 ./runAnalysis.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
 
-/runAnalysis.py -m $dmcrab/multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
+/runAnalysis.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
 
+./runAnalysis.py -m <multicrab-directory> -e TT_ext
                                                                                                                                                                                    
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
