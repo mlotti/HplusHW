@@ -2,6 +2,7 @@ import os
 import time
 import copy
 import json
+import sys
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -169,8 +170,13 @@ class Dataset:
     def getLumiFile(self):
         return self._lumiFile
 
-    def getPileUp(self):
-        return self._pileup
+    def getPileUp(self,direction):
+        if direction=="up":
+            return self._pileup["up"]
+        elif direction=="down":
+            return self._pileup["down"]
+        else:
+            return self._pileup["nominal"]
       
     def getNAllEvents(self):
         return self._nAllEvents
@@ -195,7 +201,11 @@ class Process:
         prec = dataset.DatasetPrecursor(name, files)
         if dataVersion is None:
             dataVersion = prec.getDataVersion()
-        pileUp = prec.getPileUp()
+        #get pileup
+        pileUp = {}
+        pileUp["nominal"]=prec.getPileUp("nominal")
+        pileUp["up"]=prec.getPileUp("up")
+        pileUp["down"]=prec.getPileUp("down")
         nAllEvents = prec.getNAllEvents()
         prec.close()
         self._datasets.append( Dataset(name, files, dataVersion, lumiFile, pileUp, nAllEvents) )
@@ -546,16 +556,26 @@ class Process:
         hPUs = {}
         for aname, analyzerIE in self._analyzers.iteritems():
             hPU = None
+            direction="nominal"
+            analyzer = analyzerIE.getAnalyzer()
+            if hasattr(analyzer, "PUWeightSystematicVariation"):
+                direction=getattr(analyzer, "PUWeightSystematicVariation")
             for dset in self._datasets:
                 if dset.getDataVersion().isData() and analyzerIE.runForDataset_(dset.getName()):
                     if hPU is None:
-                        hPU = dset.getPileUp().Clone()
+                        hPU = dset.getPileUp(direction).Clone()
                     else:
-                        hPU.Add(dset.getPileUp())
+                        hPU.Add(dset.getPileUp(direction))
             if hPU != None:
                 hPU.SetName("PileUpData")
                 hPU.SetDirectory(None)
                 hPUs[aname] = hPU
+#                #Debug prints:
+#                sys.stderr.write("_getDataPUhistos saves direction ")
+#                sys.stderr.write(direction)
+#                sys.stderr.write(" histograms for aname ")
+#                sys.stderr.write(aname)
+#                sys.stderr.write("\n")
             #else:
             #    raise Exception("Cannot determine PU spectrum for data!")
         return hPUs
@@ -580,9 +600,9 @@ class Process:
                 hFlat.Fill(k+1, 1.0/n)
             inputList.Add(hFlat)
             hDataPUs[aname] = hFlat
-        if dset.getPileUp() == None:
+        if dset.getPileUp("nominal") == None:
             raise Exception("Error: pileup spectrum is missing from dataset! Please switch to using newest multicrab!")
-        hPUMC = dset.getPileUp().Clone()
+        hPUMC = dset.getPileUp("nominal").Clone()
         hPUMC.SetDirectory(None)
 
         if hPUMC.GetNbinsX() != hDataPUs[aname].GetNbinsX():
