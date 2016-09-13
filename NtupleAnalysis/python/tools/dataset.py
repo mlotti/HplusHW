@@ -3860,15 +3860,6 @@ class DatasetPrecursor:
         self._pileup_down = None
         self._nAllEvents = 0.0
 
-        if self._dataVersion is None:
-            self._isData = False
-            self._isPseudo = False
-            self._isMC = False
-        else:
-            self._isData = "data" in self._dataVersion
-            self._isPseudo = "pseudo" in self._dataVersion
-            self._isMC = not (self._isData or self._isPseudo)
-
         for name in self._filenames:
             rf = ROOT.TFile.Open(name)
             # Below is important to use '==' instead of 'is' to check for
@@ -3901,7 +3892,7 @@ class DatasetPrecursor:
                         self._pileup = pileup
                 else:
                     self._pileup.Add(pileup)
-                if not self._isMC:
+                if ("data" in self._dataVersion):
                     # pileup (up)
                     pileup_up = aux.Get(rf, "configInfo/pileup_up")
                     if pileup_up == None:
@@ -3931,6 +3922,15 @@ class DatasetPrecursor:
                         self._nAllEvents += counters.GetBinContent(1)
                 if self._nAllEvents == 0.0:
                     print "Warning (DatasetPrecursor): N(allEvents) = 0 !!!"
+
+        if self._dataVersion is None:
+            self._isData = False
+            self._isPseudo = False
+            self._isMC = False
+        else:
+            self._isData = "data" in self._dataVersion
+            self._isPseudo = "pseudo" in self._dataVersion
+            self._isMC = not (self._isData or self._isPseudo)
 
     def getName(self):
         return self._name
