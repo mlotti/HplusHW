@@ -50,6 +50,7 @@ import sys
 import time
 import datetime
 import subprocess
+import tarfile
 from optparse import OptionParser
 
 # See: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRABClientLibraryAPI#The_crabCommand_API
@@ -313,7 +314,7 @@ def GetTaskReports(datasetPath, status, dashboardURL):
         # Assess JOB success/failure for task
         Verbose("Retrieving Files (1/2)")
         running, finished, failed, retrievedLog, retrievedOut = RetrievedFiles(datasetPath, result, dashboardURL, False)
-           
+
         # Get the task logs & output ?        
         Verbose("Getting Task Logs")
         GetTaskLogs(datasetPath, retrievedLog, finished)
@@ -353,7 +354,51 @@ def GetTaskReports(datasetPath, status, dashboardURL):
         Print("crab status failed with message \"%s\". Skipping ..." % ( msg ), False)
     return report
 
+def CheckTaskReport(f):
+    exitCode_re = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<exitcode>\d+)")
+    if tarfile.is_tarfile(f):
+        fIN = tarfile.open(f)
+        log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+        for member in fIN.getmembers():
+            logfile = fIN.extractfile(member)  
+            match = log_re.search(logfile.name)
+            if match:
+                for line in reversed(logfile.readlines()):
+                    exitMatch = exitCode_re.search(line)
+                    if exitMatch:
+			return int(exitMatch.group("exitcode"))
+    return -1
 
+
+def CheckTaskReports(datasetPath):
+    '''
+    Opening crab logs to find out if they really are ok
+    '''
+    exitCodeJobs = []
+    exitCode_re = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<exitcode>\d+)")
+    # Get all files under <dataset_dir>/results/
+    files = Execute("ls %s" % os.path.join( datasetPath, "results") )
+    tar_re = re.compile("cmsRun_(?P<job>\d+)\.log\.tar\.gz")
+    for f in files:
+	tarmatch = tar_re.search(f)
+	if tarmatch:
+            tarFile = os.path.join(datasetPath, "results", f)
+            if tarfile.is_tarfile(tarFile):
+                fIN = tarfile.open(tarFile)
+                log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+                for member in fIN.getmembers():
+                    logfile = fIN.extractfile(member)
+                    match = log_re.search(logfile.name)
+                    if match:
+                        for line in reversed(logfile.readlines()):
+                            exitMatch = exitCode_re.search(line)
+                            if exitMatch:
+                                exitCode = int(exitMatch.group("exitcode"))
+                                if not exitCode == 0:
+                                    exitCodeJobs.append(int(tarmatch.group("job")))
+                                break
+    return exitCodeJobs
+	
 def GetTaskLogs(taskPath, retrievedLog, finished):
     '''
     If the number of retrieved logs files is smaller than the number of finished jobs,
@@ -416,6 +461,8 @@ def ResubmitTask(taskPath, failed):
     if not opts.resubmit:
         return
 
+    joblist = JobList(failed)
+
     if opts.ask:
         if AskUser("Resubmit task \"%s\"?" % (GetLast2Dirs(taskPath)) ):
             dummy = crabCommand('resubmit', dir=taskPath)
@@ -423,7 +470,9 @@ def ResubmitTask(taskPath, failed):
             return
     else:
         Print("Found \"Failed\" jobs! Resubmitting ...")
-        dummy = crabCommand('resubmit', dir=taskPath)
+#        dummy = crabCommand('resubmit', dir=taskPath)
+#        dummy = crabCommand('resubmit', [taskPath, 'jobids=%s'%joblist, 'force'])
+        os.system("crab resubmit %s --jobids=%s --force"%(taskPath,joblist))
     return
 
 
@@ -557,6 +606,7 @@ def CheckJob(opts, args):
     datasets     = GetDatasetAbsolutePaths(datasetdirs)
     baseNames    = GetDatasetBasenames(datasets)
     Verbose("Found %s CRAB task directories:\n\t%s" % ( len(datasets), "\n\t".join(baseNames)), True)
+    exitCodeJobs = {}
 
     # For-loop: All dataset directories (absolute paths)
     for index, d in enumerate(datasets):
@@ -609,7 +659,7 @@ def PrintTaskSummary(reportDict):
         allJobs = report.allJobs
         running = report.running
         finished= report.finished
-        failed  = report.failed
+        failed  = len(report.failed)
         rLogs   = report.retrievedLog
         rOutput = report.retrievedOut
         line   = msgAlign.format(i+1, dataset, status, allJobs, running, finished, failed, rLogs, rOutput)
@@ -624,6 +674,22 @@ def PrintTaskSummary(reportDict):
         print r
     return
 
+def JobList(jobs):
+    joblist = ""
+    for i,e in enumerate(sorted(jobs)):
+        joblist += str(e)
+        if i < len(jobs)-1:
+            joblist += ","
+    return joblist
+
+def PrintExitCodeSummary(exitCodeJobs):
+    print "Jobs with problems"
+    for k in exitCodeJobs.keys():
+        if not exitCodeJobs[k] == None and len(exitCodeJobs[k]) > 0:
+            joblist = JobList(exitCodeJobs[k])
+            print "        ",os.path.basename(k)," jobs with problems"
+            print "         crab resubmit %s --jobids %s --force"%(os.path.basename(k),joblist)
+
 
 def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     '''
@@ -637,7 +703,7 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     retrievedLog = 0
     retrievedOut = 0
     finished     = 0
-    failed       = 0
+    failed       = []
     transferring = 0
     running      = 0
     idle         = 0
@@ -657,6 +723,9 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
             foundOut  = Exists(directory, "*_%i.root" % r[1])
             if foundLog:
                 retrievedLog += 1
+                exitCode = CheckTaskReport(os.path.join(directory, "results", "cmsRun_%i.log.tar.gz" % r[1]))
+                if not exitCode == 0:
+                    failed.append( r[1] )
             if foundOut:
                 retrievedOut += 1
             if foundLog and not foundOut:
@@ -664,7 +733,7 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
             if foundOut and not foundLog:
                 missingLogs.append( r[1] )
         elif r[0] == 'failed':
-            failed += 1
+            failed.append( r[1] )
         elif r[0] == 'transferring':
             transferring += 1 
         elif r[0] == 'idle':
@@ -673,14 +742,15 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
             running+= 1 
         else:
             unknown+= 1 
-        
+    failed = list(set(failed))
+    
     # Print results in a nice table
     nTotal    = str(nJobs)
     nRun      = str(running)
     nTransfer = str(transferring)
     nFinish   = str(finished)
     nUnknown  = str(unknown)
-    nFail     = str(failed)
+    nFail     = str(len(failed))
     nIdle     = str(idle)
     nLogs     = ''.join( str(retrievedLog).split() ) 
     nOut      = ''.join( str(retrievedOut).split() )
