@@ -74,10 +74,10 @@ def assignTauTriggerSF(tauSelectionPset, direction, variationType="MC"):
         nprongs = "3prong"
 
 ####    tauTrgJson = "tauLegTriggerEfficiency2015_"+nprongs+".json"
-    tauTrgJson = "tauLegTriggerEfficiency2016.json"
+    tauTrgJson = "tauLegTriggerEfficiency2016_ICHEP.json"
     print "Taking tau trigger eff/sf from",tauTrgJson
 
-    reader = TriggerSFJsonReader("2016HIP", "runs_273150_278800", tauTrgJson)
+    reader = TriggerSFJsonReader("2016ICHEP", "runs_273150_276437", tauTrgJson)
 
     result = reader.getResult()
     if variationType == "MC":
