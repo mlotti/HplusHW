@@ -25,6 +25,13 @@ It is also used retrieve output and check status of submitted CRAB jobs.
 The file datasets.py is used an an auxiliary file to determine the samples to be processesed.
 To retrieve some logs which refuse to come out otherwise:
 crab log <dir> --command=LCG --checksum=no
+crab getoutput <dir> --command=LCG --checksum=no
+
+Hints:
+To check whether you have write persmissions on a T2 centre use the command
+crab checkwrite --site
+For example:
+crab checkwrite --site T2_CH_CERN
 
 Useful Links:
 https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
@@ -43,6 +50,7 @@ import sys
 import time
 import datetime
 import subprocess
+import tarfile
 from optparse import OptionParser
 
 # See: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRABClientLibraryAPI#The_crabCommand_API
@@ -95,7 +103,7 @@ class colors:
 # Class Definition
 #================================================================================================ 
 class Report:
-    def __init__(self, name, allJobs, retrieved, status, dashboardURL):
+    def __init__(self, name, allJobs, retrieved, running, finished, failed, retrievedLog, retrievedOut, status, dashboardURL):
         '''
         Constructor 
         '''
@@ -103,9 +111,14 @@ class Report:
         self.name         = name
         self.allJobs      = str(allJobs)
         self.retrieved    = str(retrieved)
+        self.running      = str(running)
         self.dataset      = self.name.split("/")[-1]
         self.dashboardURL = dashboardURL
         self.status       = self.GetTaskStatusStyle(status)
+        self.finished     = finished
+        self.failed       = failed
+        self.retrievedLog = retrievedLog
+        self.retrievedOut = retrievedOut
         return
 
 
@@ -300,8 +313,8 @@ def GetTaskReports(datasetPath, status, dashboardURL):
     
         # Assess JOB success/failure for task
         Verbose("Retrieving Files (1/2)")
-        finished, failed, retrievedLog, retrievedOut = RetrievedFiles(datasetPath, result, dashboardURL, False)
-           
+        running, finished, failed, retrievedLog, retrievedOut = RetrievedFiles(datasetPath, result, dashboardURL, False)
+
         # Get the task logs & output ?        
         Verbose("Getting Task Logs")
         GetTaskLogs(datasetPath, retrievedLog, finished)
@@ -320,13 +333,13 @@ def GetTaskReports(datasetPath, status, dashboardURL):
             
         # Assess JOB success/failure for task (again)
         Verbose("Retrieving Files (2/2)")
-        finished, failed, retrievedLog, retrievedOut = RetrievedFiles(datasetPath, result, dashboardURL, True)
+        running, finished, failed, retrievedLog, retrievedOut = RetrievedFiles(datasetPath, result, dashboardURL, True)
         retrieved = min(finished, retrievedLog, retrievedOut)
         alljobs   = len(result['jobList'])        
 
         # Append the report
         Verbose("Appending Report")
-        report = Report(datasetPath, alljobs, retrieved, status, dashboardURL)
+        report = Report(datasetPath, alljobs, retrieved, running, finished, failed, retrievedLog, retrievedOut,  status, dashboardURL)
 
         # Determine if task is DONE or not
         Verbose("Determining if Task is DONE")
@@ -337,11 +350,55 @@ def GetTaskReports(datasetPath, status, dashboardURL):
     # Catch exceptions (Errors detected during execution which may not be "fatal")
     except:
         msg = sys.exc_info()[1]
-        report = Report(datasetPath, "?", "?", "?", dashboardURL)
+        report = Report(datasetPath, "?", "?", "?", "?", "?", "?", "?", "?", dashboardURL) 
         Print("crab status failed with message \"%s\". Skipping ..." % ( msg ), False)
     return report
 
+def CheckTaskReport(f):
+    exitCode_re = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<exitcode>\d+)")
+    if tarfile.is_tarfile(f):
+        fIN = tarfile.open(f)
+        log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+        for member in fIN.getmembers():
+            logfile = fIN.extractfile(member)  
+            match = log_re.search(logfile.name)
+            if match:
+                for line in reversed(logfile.readlines()):
+                    exitMatch = exitCode_re.search(line)
+                    if exitMatch:
+			return int(exitMatch.group("exitcode"))
+    return -1
 
+
+def CheckTaskReports(datasetPath):
+    '''
+    Opening crab logs to find out if they really are ok
+    '''
+    exitCodeJobs = []
+    exitCode_re = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<exitcode>\d+)")
+    # Get all files under <dataset_dir>/results/
+    files = Execute("ls %s" % os.path.join( datasetPath, "results") )
+    tar_re = re.compile("cmsRun_(?P<job>\d+)\.log\.tar\.gz")
+    for f in files:
+	tarmatch = tar_re.search(f)
+	if tarmatch:
+            tarFile = os.path.join(datasetPath, "results", f)
+            if tarfile.is_tarfile(tarFile):
+                fIN = tarfile.open(tarFile)
+                log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+                for member in fIN.getmembers():
+                    logfile = fIN.extractfile(member)
+                    match = log_re.search(logfile.name)
+                    if match:
+                        for line in reversed(logfile.readlines()):
+                            exitMatch = exitCode_re.search(line)
+                            if exitMatch:
+                                exitCode = int(exitMatch.group("exitcode"))
+                                if not exitCode == 0:
+                                    exitCodeJobs.append(int(tarmatch.group("job")))
+                                break
+    return exitCodeJobs
+	
 def GetTaskLogs(taskPath, retrievedLog, finished):
     '''
     If the number of retrieved logs files is smaller than the number of finished jobs,
@@ -404,6 +461,8 @@ def ResubmitTask(taskPath, failed):
     if not opts.resubmit:
         return
 
+    joblist = JobList(failed)
+
     if opts.ask:
         if AskUser("Resubmit task \"%s\"?" % (GetLast2Dirs(taskPath)) ):
             dummy = crabCommand('resubmit', dir=taskPath)
@@ -411,7 +470,9 @@ def ResubmitTask(taskPath, failed):
             return
     else:
         Print("Found \"Failed\" jobs! Resubmitting ...")
-        dummy = crabCommand('resubmit', dir=taskPath)
+#        dummy = crabCommand('resubmit', dir=taskPath)
+#        dummy = crabCommand('resubmit', [taskPath, 'jobids=%s'%joblist, 'force'])
+        os.system("crab resubmit %s --jobids=%s --force"%(taskPath,joblist))
     return
 
 
@@ -545,6 +606,7 @@ def CheckJob(opts, args):
     datasets     = GetDatasetAbsolutePaths(datasetdirs)
     baseNames    = GetDatasetBasenames(datasets)
     Verbose("Found %s CRAB task directories:\n\t%s" % ( len(datasets), "\n\t".join(baseNames)), True)
+    exitCodeJobs = {}
 
     # For-loop: All dataset directories (absolute paths)
     for index, d in enumerate(datasets):
@@ -579,8 +641,11 @@ def PrintTaskSummary(reportDict):
     Verbose("PrintTaskSummary()")
     
     reports  = []
-    msgAlign = "{:<3} {:<60} {:^20} {:>6} {:>1} {:<6}"
-    header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "Ret.", "/", "Tot.")
+    #msgAlign = "{:<3} {:<60} {:^20} {:>6} {:>1} {:<6}"
+    #header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "Ret.", "/", "Tot.")
+    msgAlign = "{:<3} {:<60} {:^20} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}"
+    header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "All", "Running", "Finished", "Failed", "Logs", "Output")
+    #retrieved, finished, failed, retrievedLog, retrievedOut
     hLine    = "="*len(header)
     # reports.append("\n")
     reports.append(hLine)
@@ -589,11 +654,18 @@ def PrintTaskSummary(reportDict):
     
     # For-loop: All datasets (key) and corresponding status (value)
     for i, dataset in enumerate(reportDict):
-        report = reportDict[dataset]
-        status = report.status
-        ret    = report.retrieved
-        tot    = report.allJobs
-        line   = msgAlign.format(i+1, dataset, status, ret,  "/", tot)
+        report  = reportDict[dataset]
+        status  = report.status
+        allJobs = report.allJobs
+        running = report.running
+        finished= report.finished
+        failed  = len(report.failed)
+        rLogs   = report.retrievedLog
+        rOutput = report.retrievedOut
+        line   = msgAlign.format(i+1, dataset, status, allJobs, running, finished, failed, rLogs, rOutput)
+        #ret    = report.retrieved
+        #tot    = report.allJobs
+        #line   = msgAlign.format(i+1, dataset, status, ret,  "/", tot)
         reports.append(line)
     reports.append(hLine)
     
@@ -601,6 +673,22 @@ def PrintTaskSummary(reportDict):
     for r in reports:
         print r
     return
+
+def JobList(jobs):
+    joblist = ""
+    for i,e in enumerate(sorted(jobs)):
+        joblist += str(e)
+        if i < len(jobs)-1:
+            joblist += ","
+    return joblist
+
+def PrintExitCodeSummary(exitCodeJobs):
+    print "Jobs with problems"
+    for k in exitCodeJobs.keys():
+        if not exitCodeJobs[k] == None and len(exitCodeJobs[k]) > 0:
+            joblist = JobList(exitCodeJobs[k])
+            print "        ",os.path.basename(k)," jobs with problems"
+            print "         crab resubmit %s --jobids %s --force"%(os.path.basename(k),joblist)
 
 
 def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
@@ -615,7 +703,7 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     retrievedLog = 0
     retrievedOut = 0
     finished     = 0
-    failed       = 0
+    failed       = []
     transferring = 0
     running      = 0
     idle         = 0
@@ -635,6 +723,9 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
             foundOut  = Exists(directory, "*_%i.root" % r[1])
             if foundLog:
                 retrievedLog += 1
+                exitCode = CheckTaskReport(os.path.join(directory, "results", "cmsRun_%i.log.tar.gz" % r[1]))
+                if not exitCode == 0:
+                    failed.append( r[1] )
             if foundOut:
                 retrievedOut += 1
             if foundLog and not foundOut:
@@ -642,7 +733,7 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
             if foundOut and not foundLog:
                 missingLogs.append( r[1] )
         elif r[0] == 'failed':
-            failed += 1
+            failed.append( r[1] )
         elif r[0] == 'transferring':
             transferring += 1 
         elif r[0] == 'idle':
@@ -651,14 +742,15 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
             running+= 1 
         else:
             unknown+= 1 
-        
+    failed = list(set(failed))
+    
     # Print results in a nice table
     nTotal    = str(nJobs)
     nRun      = str(running)
     nTransfer = str(transferring)
     nFinish   = str(finished)
     nUnknown  = str(unknown)
-    nFail     = str(failed)
+    nFail     = str(len(failed))
     nIdle     = str(idle)
     nLogs     = ''.join( str(retrievedLog).split() ) 
     nOut      = ''.join( str(retrievedOut).split() )
@@ -699,7 +791,7 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     # Print the dashboard url 
     if opts.url:
         Print(dashboardURL, False)
-    return finished, failed, retrievedLog, retrievedOut
+    return running, finished, failed, retrievedLog, retrievedOut
 
 
 def Exists(dataset,filename):
@@ -941,7 +1033,8 @@ def GetRequestName(dataset):
     tune_re        = re.compile("(?P<name>\S+)_Tune")
     tev_re         = re.compile("(?P<name>\S+)_13TeV")
     ext_re         = re.compile("(?P<name>_ext\d+)-")
-    runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON(?P<Silver>(_\S+|))\.")
+    runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_")
+    # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON(?P<Silver>(_\S+|))\.")
     # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15(?P<BunchSpacing>\S*)_JSON")
     # runRange_re    = re.compile("Cert_(?P<RunRange>\d+-\d+)_13TeV_PromptReco_Collisions15_(?P<BunchSpacing>\d+ns)_JSON_v")
     
@@ -980,15 +1073,15 @@ def GetRequestName(dataset):
 	if runRangeMatch:
 	    runRange= runRangeMatch.group("RunRange")
 	    runRange = runRange.replace("-","_")
-	    bunchSpace = runRangeMatch.group("BunchSpacing")
-	    requestName += "_" + runRange + bunchSpace
-	    Ag = runRangeMatch.group("Silver")
-	    if Ag == "_Silver": # Use  chemical element of silver (Ag)
-		requestName += Ag
+	    #bunchSpace = runRangeMatch.group("BunchSpacing")
+	    requestName += "_" + runRange #+ bunchSpace
+	    #Ag = runRangeMatch.group("Silver")
+	    #if Ag == "_Silver": # Use  chemical element of silver (Ag)
+            #    requestName += Ag
 
     # Finally, replace dashes with underscores    
     requestName = requestName.replace("-","_")
-    
+
     return requestName
 
 
@@ -1004,10 +1097,11 @@ def EnsurePathDoesNotExist(taskDirName, requestName):
 	return
     else:
         msg = "File '%s' already exists!" % (filePath)
-        if AskUser(msg + " Proceed and overwrite it?"):
-            return
-	else:
-            raise Exception(msg)
+        Print(msg + "\n\tProceeding to overwrite file.")
+        #if AskUser(msg + "\n\tProceed and overwrite it?"):
+        #    return
+	#else:
+        #    raise Exception(msg)
     return
 
 
@@ -1137,7 +1231,7 @@ def CreateJob(opts, args):
         Verbose("Checking for already existing tasks (in case of resubmission)")
         fullDir = taskDirName + "/" + requestName
         if os.path.exists(fullDir) and os.path.isdir(fullDir):
-            Print("Dataset \"%s\" already exists! Skipping creation & submission steps" % (requestName))
+            Print("Dataset \"%s\" already exists! Skipping ..." % (requestName))
             continue 
 
         Verbose("Creating cfg file for dataset \"%s\"" % (dataset) )
@@ -1170,7 +1264,7 @@ if __name__ == "__main__":
     VERBOSE = False
     PSET    = "miniAOD2TTree_SignalAnalysisSkim_cfg.py"
     SITE    = "T2_FI_HIP"
-    DIRNAME = os.getcwd()
+    DIRNAME = ""
 
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("--create"  , dest="create"    , default=False, action="store_true", help="Flag to create a CRAB job [default: False")
@@ -1187,6 +1281,9 @@ if __name__ == "__main__":
     parser.add_option("-u", "--url"    , dest="url"        , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
     #parser.add_option("--checksum", dest="checksum"  , default=False, action="store_true", help="Get output with adler32 checksum [default: False") #fixme
     (opts, args) = parser.parse_args()
+
+    if opts.create == False and opts.dirName == "":
+	opts.dirName = os.getcwd()
 
     if opts.create == True and opts.status == True:
         raise Exception("Cannot both create and check a CRAB job!")	    
