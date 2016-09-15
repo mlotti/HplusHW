@@ -8,7 +8,7 @@ METNoiseFilter = cms.PSet(
         "Flag_HBHENoiseFilter",
         "Flag_HBHENoiseIsoFilter",
         "Flag_CSCTightHaloFilter",
-#        "Flag_CSCTightHalo2015Filter",
+        "Flag_globalTightHalo2016Filter",
         "Flag_EcalDeadCellTriggerPrimitiveFilter",
         "Flag_goodVertices",
         "Flag_eeBadScFilter",
