@@ -18,11 +18,12 @@ trg = PSet(
 
 #====== MET filter
 metFilter = PSet(
-  discriminators = ["hbheNoiseTokenRun2Loose", # Loose is recommended
+  discriminators = [#"hbheNoiseTokenRun2Loose", # Loose is recommended
 #                    "hbheIsoNoiseToken", # under scrutiny
+                    "Flag_HBHENoiseFilter",
                     "Flag_HBHENoiseIsoFilter",
                     "Flag_EcalDeadCellTriggerPrimitiveFilter",
-                    "Flag_CSCTightHaloFilter",
+#                    "Flag_CSCTightHaloFilter",
                     "Flag_eeBadScFilter",
                     "Flag_goodVertices",
                     "Flag_globalTightHalo2016Filter",
