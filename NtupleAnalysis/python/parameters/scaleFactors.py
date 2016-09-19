@@ -10,6 +10,11 @@ import os
 # Both are supplied as config parameters, but the type (2) SF's are accessed 
 # via GenericScaleFactor c++ class, which causes some naming scheme rules
 
+# Tau ID efficiency scale factor
+# https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation13TeV
+def assignTauIdentificationSF(tauSelectionPset):
+    tauSelectionPset.tauIdentificationSF = 0.83 # for Run-2 2016
+
 
 ##===== Tau misidentification (simple SF)
 # \param tauSelectionPset  the tau config PSet
