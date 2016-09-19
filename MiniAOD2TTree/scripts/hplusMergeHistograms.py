@@ -303,7 +303,14 @@ def main(opts, args):
 
         if opts.test:
             if len(exitCodes) > 0:
-                print "        jobs with problems:",sorted(exitCodes)
+                exitCodes_s = ""
+                for i,e in enumerate(sorted(exitCodes)):
+                    exitCodes_s += str(e)
+                    if i < len(exitCodes)-1:
+                        exitCodes_s += ","
+#                print "        jobs with problems:",sorted(exitCodes)                                                                                                                                
+                print "        jobs with problems:",len(exitCodes)
+                print "        crab resubmit %s --jobids %s --force"%(d,exitCodes_s)
             continue
 
         if len(files) == 0:

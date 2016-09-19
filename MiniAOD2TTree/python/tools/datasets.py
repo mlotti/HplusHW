@@ -1,6 +1,6 @@
 #lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON.txt" # ICHEP dataset 271036-276811
 #lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-277148_13TeV_PromptReco_Collisions16_JSON.txt"
-lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-279588_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt"
+lumiMask = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-279931_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt"
 
 #================================================================================================ 
 # Class Definition
@@ -32,7 +32,7 @@ das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglo
 datasetsTauData.append(Dataset('/Tau/Run2016B-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016B.txt"))
 datasetsTauData.append(Dataset('/Tau/Run2016C-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275420-276283_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016C.txt"))
 datasetsTauData.append(Dataset('/Tau/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276437_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016D_MET80.txt"))
-datasetsTauData.append(Dataset('/Tau/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276453-276582_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016D_noMET80.txt"))
+datasetsTauData.append(Dataset('/Tau/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276453-276811_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016D_noMET80.txt"))
 datasetsTauData.append(Dataset('/Tau/Run2016E-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277075-277420_13TeV_PromptReco_Collisions16_JSON_NoL1T_Tau_Run2016E.txt"))
 datasetsTauData.append(Dataset('/Tau/Run2016F-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277816-278800_13TeV_PromptReco_Collisions16_JSON_NoL1T_Tau_Run2016F_HIP.txt"))
 datasetsTauData.append(Dataset('/Tau/Run2016F-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_PromptReco_Collisions16_JSON_NoL1T_Tau_Run2016F_HIPfixed.txt"))
@@ -51,7 +51,7 @@ datasetsMuonData = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FSingleMuon%2FRun2016*-PromptReco-v2%2FMINIAOD"
 datasetsMuonData.append(Dataset('/SingleMuon/Run2016B-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_273150-275376_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016B.txt")) # Tau used when SingleMuon same
 datasetsMuonData.append(Dataset('/SingleMuon/Run2016C-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_275420-276283_13TeV_PromptReco_Collisions16_JSON_Tau_Run2016C.txt"))
-datasetsMuonData.append(Dataset('/SingleMuon/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276437_13TeV_PromptReco_Collisions16_JSON_SingleMuon_Run2016D.txt"))
+datasetsMuonData.append(Dataset('/SingleMuon/Run2016D-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276315-276811_13TeV_PromptReco_Collisions16_JSON_SingleMuon_Run2016D.txt"))
 datasetsMuonData.append(Dataset('/SingleMuon/Run2016E-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_276830-277420_13TeV_PromptReco_Collisions16_JSON_NoL1T_SingleMuon_Run2016E.txt"))
 datasetsMuonData.append(Dataset('/SingleMuon/Run2016F-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_277816-278800_13TeV_PromptReco_Collisions16_JSON_NoL1T_Tau_Run2016F_HIP.txt"))
 datasetsMuonData.append(Dataset('/SingleMuon/Run2016F-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278801-278808_13TeV_PromptReco_Collisions16_JSON_NoL1T_Tau_Run2016F_HIPfixed.txt"))
@@ -265,29 +265,30 @@ signalAnalysisDatasets.extend(datasetsSignalTauNu)
 hplus2tbAnalysisDatasets = []
 #hplus2tbAnalysisDatasets.extend(datasetsJetHTData)
 hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
-hplus2tbAnalysisDatasets.extend(datasetsQCD)   
+#hplus2tbAnalysisDatasets.extend(datasetsQCD)   
 hplus2tbAnalysisDatasets.extend(datasetsQCDbEnriched_noReHLT)
-hplus2tbAnalysisDatasets.extend(datasetsTop)
+# hplus2tbAnalysisDatasets.extend(datasetsTop) # tmp: too large for lxplus
+#hplus2tbAnalysisDatasets.extend(datasetsTTJets) #less stas && -ve weights
 hplus2tbAnalysisDatasets.extend(datasetsZJetsToQQ)
 hplus2tbAnalysisDatasets.extend(datasetsTTWJetsToQQ_noReHLT)  
 hplus2tbAnalysisDatasets.extend(datasetsTTTT_noReHLT)  
 hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ_noReHLT)
 hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ_noReHLT)
 hplus2tbAnalysisDatasets.extend(datasetsDibosonToQQ_noReHLT)
-hplus2tbAnalysisDatasets.extend(datasetsSingleTop_noReHLT)
-hplus2tbAnalysisDatasets.extend(datasetsTTBB_noReHLT)
-# hplus2tbAnalysisDatasets.extend(datasetsTTJets) #less stas && -ve weights (tmp until we add trigger)
-## hplus2tbAnalysisDatasets.extend(datasetsGGJets)
-## hplus2tbAnalysisDatasets.extend(datasetsGJets)
-## hplus2tbAnalysisDatasets.extend(datasetsTGJets)
-## hplus2tbAnalysisDatasets.extend(datasetsTTGJets)     
-## hplus2tbAnalysisDatasets.extend(datasetsTTJets)
-## hplus2tbAnalysisDatasets.extend(datasetsTTJetsHT)    
-## hplus2tbAnalysisDatasets.extend(datasetsTT)
-## hplus2tbAnalysisDatasets.extend(datasetsQCDbGenFilter)
-## hplus2tbAnalysisDatasets.extend(datasetsQCDHTBins)
-## hplus2tbAnalysisDatasets.extend(datasetsDibosonG)    
-## hplus2tbAnalysisDatasets.extend(datasetsWWTo4Q)
+# hplus2tbAnalysisDatasets.extend(datasetsSingleTop_noReHLT) #fixme: commented for space issues
+# hplus2tbAnalysisDatasets.extend(datasetsTTBB_noReHLT)# fixme: commented for space issues
+#
+# hplus2tbAnalysisDatasets.extend(datasetsGGJets)
+# hplus2tbAnalysisDatasets.extend(datasetsGJets)
+# hplus2tbAnalysisDatasets.extend(datasetsTGJets)
+# hplus2tbAnalysisDatasets.extend(datasetsTTGJets)     
+# hplus2tbAnalysisDatasets.extend(datasetsTTJets)
+# hplus2tbAnalysisDatasets.extend(datasetsTTJetsHT)    
+# hplus2tbAnalysisDatasets.extend(datasetsTT)
+# hplus2tbAnalysisDatasets.extend(datasetsQCDbGenFilter)
+# hplus2tbAnalysisDatasets.extend(datasetsQCDHTBins)
+# hplus2tbAnalysisDatasets.extend(datasetsDibosonG)    
+# hplus2tbAnalysisDatasets.extend(datasetsWWTo4Q)
 # hplus2tbAnalysisDatasets.extend(datasetsDYToQQ)
 # hplus2tbAnalysisDatasets.extend(datasetsTriboson) 
 # hplus2tbAnalysisDatasets.extend(datasetsWJets)

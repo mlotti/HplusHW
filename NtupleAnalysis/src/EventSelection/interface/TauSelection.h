@@ -46,6 +46,7 @@ public:
     const float getRtauOfSelectedTau() const { return fRtau; }
     const bool isGenuineTau() const { return fIsGenuineTau; }
     const size_t getFakeTauID() const { return getSelectedTau().pdgId(); } // For codes see MiniAOD2TTree/interface/NtupleAnalysis_fwd.h
+    const float getTauIDSF() const { return fTauIDSF; }
     const float getTauMisIDSF() const { return fTauMisIDSF; }
     const float getTauTriggerSF() const { return fTauTriggerSF; }
     
@@ -69,6 +70,8 @@ public:
     float fRtau;
     /// Cache genuine tau status for selected tau (to avoid crashes for data)
     bool fIsGenuineTau;
+    /// Cache tau identification scale factor
+    float fTauIDSF;
     /// Cache tau misidentification scale factor 
     float fTauMisIDSF;
     /// Cache for tau trigger SF
@@ -118,6 +121,7 @@ private:
   bool passRtauCut(const Tau& tau) const { return tau.rtau() > fTauRtauCut; }
   std::vector<TauMisIDRegionType> assignTauMisIDSFRegion(const ParameterSet& config, const std::string& label) const;
   std::vector<float> assignTauMisIDSFValue(const ParameterSet& config, const std::string& label) const;
+  void setTauIDSFValue(Data& data);
   void setTauMisIDSFValue(Data& data);
   float setTauMisIDSFValueHelper(const Tau& tau);
   bool tauMisIDSFBelongsToRegion(TauMisIDRegionType region, double eta);
@@ -130,6 +134,8 @@ private:
   const float fTauLdgTrkPtCut;
   const int fTauNprongs;
   const float fTauRtauCut;
+  // tau identification SF
+  float fTauIDSF;
   // tau misidentification SF
   std::vector<TauMisIDRegionType> fEToTauMisIDSFRegion;
   std::vector<float> fEToTauMisIDSFValue;
