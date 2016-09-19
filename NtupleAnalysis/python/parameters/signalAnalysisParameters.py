@@ -46,6 +46,8 @@ tauSelection = PSet(
 #        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
         isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
 )
+# tau identification scale factors
+scaleFactors.assignTauIdentificationSF(tauSelection)
 # tau misidentification scale factors
 scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")

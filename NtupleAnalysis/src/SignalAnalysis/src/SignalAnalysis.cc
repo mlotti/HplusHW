@@ -31,6 +31,7 @@ private:
   METFilterSelection fMETFilterSelection;
   Count cVertexSelection;
   TauSelection fTauSelection;
+  Count cTauIDSFCounter;
   Count cFakeTauSFCounter;
   Count cTauTriggerSFCounter;
   Count cMetTriggerSFCounter;
@@ -66,6 +67,7 @@ SignalAnalysis::SignalAnalysis(const ParameterSet& config, const TH1* skimCounte
   cVertexSelection(fEventCounter.addCounter("Primary vertex selection")),
   fTauSelection(config.getParameter<ParameterSet>("TauSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+  cTauIDSFCounter(fEventCounter.addCounter("Tau ID SF")),
   cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")),
   cTauTriggerSFCounter(fEventCounter.addCounter("Tau trigger SF")),
   cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
@@ -151,7 +153,13 @@ void SignalAnalysis::process(Long64_t entry) {
     return;
   if (fEvent.isMC() && !tauData.isGenuineTau()) //if not genuine tau, reject the events (fake tau events are taken into account in QCDandFakeTau measurement)
     return;
-  
+
+//====== Tau ID SF
+  if (fEvent.isMC()) {
+    fEventWeight.multiplyWeight(tauData.getTauIDSF());
+    cTauIDSFCounter.increment();
+  }
+
 //====== Fake tau SF
   if (fEvent.isMC()) {
     fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
