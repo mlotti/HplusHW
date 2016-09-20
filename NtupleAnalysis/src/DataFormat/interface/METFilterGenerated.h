@@ -23,6 +23,7 @@ public:
 
   std::vector<std::function<bool()>> getDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
+      [&](){ return this->passFlag_CSCTightHalo2015Filter(); },
       [&](){ return this->passFlag_CSCTightHaloFilter(); },
       [&](){ return this->passFlag_EcalDeadCellTriggerPrimitiveFilter(); },
       [&](){ return this->passFlag_HBHENoiseFilter(); },
@@ -39,6 +40,7 @@ public:
     return values;
   }
 
+  bool passFlag_CSCTightHalo2015Filter() const { return fFlag_CSCTightHalo2015Filter->value(); }
   bool passFlag_CSCTightHaloFilter() const { return fFlag_CSCTightHaloFilter->value(); }
   bool passFlag_EcalDeadCellTriggerPrimitiveFilter() const { return fFlag_EcalDeadCellTriggerPrimitiveFilter->value(); }
   bool passFlag_HBHENoiseFilter() const { return fFlag_HBHENoiseFilter->value(); }
@@ -53,6 +55,7 @@ public:
   bool passHbheNoiseTokenRun2Tight() const { return fHbheNoiseTokenRun2Tight->value(); }
 
 protected:
+  const Branch<bool> *fFlag_CSCTightHalo2015Filter;
   const Branch<bool> *fFlag_CSCTightHaloFilter;
   const Branch<bool> *fFlag_EcalDeadCellTriggerPrimitiveFilter;
   const Branch<bool> *fFlag_HBHENoiseFilter;

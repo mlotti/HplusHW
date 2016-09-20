@@ -2,6 +2,10 @@
 '''
 Creation/Submission:
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+multicrab.py --create -s T2_US_Nebraska -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+multicrab.py --create -s T2_US_Wisconsin -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
 
 Re-Submission:
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <task_dir> 
