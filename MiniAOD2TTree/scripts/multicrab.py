@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 '''
 Creation/Submission:
-multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
-multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
-multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
-multicrab.py --create -s T2_US_Nebraska -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
-multicrab.py --create -s T2_US_Wisconsin -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py --noTransfer
+multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py --noTransfer
+multicrab.py --create -s T2_US_Nebraska -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py --noTransfer
+multicrab.py --create -s T2_US_Wisconsin -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py --noTransfer
 
 Re-Submission:
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <task_dir> 
@@ -1109,11 +1108,13 @@ def EnsurePathDoesNotExist(taskDirName, requestName):
     return
 
 
-def CreateCfgFile(dataset, taskDirName, requestName, infilePath = "crabConfig.py"):
+def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
     '''
     Creates a CRAB-specific configuration file which will be used in the submission
     of a job. The function uses as input a generic cfg file which is then customised
     based on the dataset type used.
+
+    infilePath = "crabConfig.py"
     '''
     Verbose("CreateCfgFile()")
 	
@@ -1127,15 +1128,17 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath = "crabConfig.py
     fOUT = open(outfilePath, "w")
 
     # Create compiled regular expression objects
-    crab_requestName_re = re.compile("config.General.requestName")
-    crab_workArea_re    = re.compile("config.General.workArea")
-    crab_pset_re        = re.compile("config.JobType.psetName")
-    crab_psetParams_re  = re.compile("config.JobType.pyCfgParams")
-    crab_dataset_re     = re.compile("config.Data.inputDataset")
-    crab_split_re       = re.compile("config.Data.splitting")# = 'FileBased'
-    crab_splitunits_re  = re.compile("config.Data.unitsPerJob")
-    crab_dbs_re         = re.compile("config.Data.inputDBS")
-    crab_storageSite_re = re.compile("config.Site.storageSite") #NEW
+    crab_requestName_re     = re.compile("config.General.requestName")
+    crab_workArea_re        = re.compile("config.General.workArea")
+    crab_transferOutputs_re = re.compile("config.General.transferOutputs")
+    crab_transferLogs_re    = re.compile("config.General.transferLogs")
+    crab_pset_re            = re.compile("config.JobType.psetName")
+    crab_psetParams_re      = re.compile("config.JobType.pyCfgParams")
+    crab_dataset_re         = re.compile("config.Data.inputDataset")
+    crab_split_re           = re.compile("config.Data.splitting")# = 'FileBased'
+    crab_splitunits_re      = re.compile("config.Data.unitsPerJob")
+    crab_dbs_re             = re.compile("config.Data.inputDBS")
+    crab_storageSite_re     = re.compile("config.Site.storageSite") #NEW
 
     # For-loop: All line of input fine
     for line in fIN:
@@ -1158,7 +1161,17 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath = "crabConfig.py
 	match = crab_workArea_re.search(line)
 	if match:
 	    line = "config.General.workArea = '" + taskDirName + "'\n"
-			
+
+	# Set the "transferOutputs" field which specifies whether or not to transfer the output files to the storage site. 
+        match = crab_transferOutputs_re.search(line)
+        if match:
+            line = "config.General.transferOutputs = '" + str(not opts.noTransfer) + "'\n"
+
+	# Set the "transferLogs" field which specifies whether or not to copy the jobs log files to the storage site
+        match = crab_transferLogs_re.search(line)
+        if match:
+            line = "config.General.transferLogs = '" + str(not opts.noTransfer) + "'\n"
+
 	# Set the "psetName" field which specifies the name of the CMSSW pset_cfg.py file that will be run via cmsRun.
 	match = crab_pset_re.search(line)
 	if match:
@@ -1203,6 +1216,7 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath = "crabConfig.py
     fIN.close()
     
     Verbose("Created CRAB cfg file \"%s\"" % (fOUT.name) )
+    exit()# alex
     return
 
 #================================================================================================
@@ -1239,7 +1253,7 @@ def CreateJob(opts, args):
             continue 
 
         Verbose("Creating cfg file for dataset \"%s\"" % (dataset) )
-	CreateCfgFile(dataset, taskDirName, requestName, "crabConfig.py")		
+	CreateCfgFile(dataset, taskDirName, requestName, "crabConfig.py", opts)
 	
         Verbose("Submitting jobs for dataset \"%s\"" % (dataset) )
 	SubmitTaskDir(taskDirName, requestName)
@@ -1277,12 +1291,13 @@ if __name__ == "__main__":
     parser.add_option("--log"     , dest="log"       , default=False, action="store_true", help="Get log files of finished jobs [defaut: False]")
     parser.add_option("--resubmit", dest="resubmit"  , default=False, action="store_true", help="Resubmit all failed jobs [defaut: False]")
     parser.add_option("--kill"    , dest="kill"      , default=False, action="store_true", help="Kill all submitted jobs [defaut: False]")
-    parser.add_option("-v", "--verbose", dest="verbose"    , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
-    parser.add_option("-a", "--ask"    , dest="ask"        , default=False  , action="store_true", help="Prompt user before executing CRAB commands [defaut: False]")
-    parser.add_option("-p", "--pset"   , dest="pset"       , default=PSET   , type="string"      , help="The python cfg file to be used by cmsRun [default: %s]" % (PSET))
-    parser.add_option("-d", "--dir"    , dest="dirName"    , default=DIRNAME, type="string"      , help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))
-    parser.add_option("-s", "--site"   , dest="storageSite", default=SITE   , type="string"      , help="Site where the output will be copied to [default: %s]" % (SITE))
-    parser.add_option("-u", "--url"    , dest="url"        , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
+    parser.add_option("-v", "--verbose"   , dest="verbose"    , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
+    parser.add_option("-a", "--ask"       , dest="ask"        , default=False  , action="store_true", help="Prompt user before executing CRAB commands [defaut: False]")
+    parser.add_option("-p", "--pset"      , dest="pset"       , default=PSET   , type="string"      , help="The python cfg file to be used by cmsRun [default: %s]" % (PSET))
+    parser.add_option("-d", "--dir"       , dest="dirName"    , default=DIRNAME, type="string"      , help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))
+    parser.add_option("-s", "--site"      , dest="storageSite", default=SITE   , type="string"      , help="Site where the output will be copied to [default: %s]" % (SITE))
+    parser.add_option("-u", "--url"       , dest="url"        , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
+    parser.add_option("-n", "--noTransfer", dest="noTransfer" , default=False  , action="store_true", help="Disable transfer of output/log files [default: False]")
     #parser.add_option("--checksum", dest="checksum"  , default=False, action="store_true", help="Get output with adler32 checksum [default: False") #fixme
     (opts, args) = parser.parse_args()
 

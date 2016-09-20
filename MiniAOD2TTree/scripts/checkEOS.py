@@ -61,7 +61,7 @@ def GetEosContentsList(opts):
     if "lxplus" in GetHost():
         cmd = "eos ls"
     elif "cmslpc" in GetHost():
-        cms = "eosls"
+        cmd = "eosls"
     else:
         raise Exception("Unsupported hostname \"%s\"." % (GetHost()) )
     csh_cmd = cmd + " " + eosPath
