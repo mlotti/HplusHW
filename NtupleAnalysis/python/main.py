@@ -619,8 +619,12 @@ class Process:
         if hPUMC.GetNbinsX() != hDataPUs[aname].GetNbinsX():
             raise Exception("Pileup histogram dimension mismatch! data nPU has %d bins and MC nPU has %d bins"%(hDataPUs[aname].GetNbinsX(), hPUMC.GetNbinsX()))
         hPUMC.SetName("PileUpMC")
+#        if _debugPUreweighting:
+#            for k in range(hPUMC.GetNbinsX()):
+#                print "Debug(PUreweighting): MCPU:%d:%f"%(k+1, hPUMC.GetBinContent(k+1))
+        inputList.Add(hPUMC)
         if analyzer.exists("usePileupWeights"):
-            usePUweights = analyzer.__getattr__("usePileupWeights")
+            usePUweights = analyzer.__getattr__("usePileupWeights")           
             if _debugPUreweighting:
                 print "Debug(PUreweighting,aname=%s): hDataPUs[aname].Integral(): %f"%(aname,hDataPUs[aname].Integral())                        
                 print "Debug(PUreweighting,aname=%s): hDataPUs[aname].Mean(): %f"%(aname,hDataPUs[aname].GetMean())                        
@@ -629,17 +633,10 @@ class Process:
                 for k in range(0, hPUMC.GetNbinsX()+2):
                     if hPUMC.GetBinContent(k) > 0.0:
                         w = hDataPUs[aname].GetBinContent(k) / hPUMC.GetBinContent(k) * factor
-                        reweightedBinContent=w*hPUMC.GetBinContent(k)
-                        nAllEventsPUWeighted += reweightedBinContent
-                        # bugfix: update also the hPUMC bins themselves
-                        hPUMC.SetBinContent(k,reweightedBinContent)                 
+                        nAllEventsPUWeighted += w * hPUMC.GetBinContent(k)
             if _debugPUreweighting:
                 print "Debug(PUreweighting,aname=%s): normalization factor: %f"%(aname,factor)                        
                 print "Debug(PUreweighting,aname=%s): nAllEventsPUWeighted: %f"%(aname,nAllEventsPUWeighted)                        
-#                for k in range(hPUMC.GetNbinsX()):
-#                    print "Debug(PUreweighting,aname=%s): MCPU:%d:%f"%(aname,k+1, hPUMC.GetBinContent(k+1))
-        inputList.Add(hPUMC)
-
         return (nAllEventsPUWeighted, usePUweights)
  
     ## Sums the skim counters from input files and returns a pset containing them 
