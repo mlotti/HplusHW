@@ -1165,12 +1165,13 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
 	# Set the "transferOutputs" field which specifies whether or not to transfer the output files to the storage site. 
         match = crab_transferOutputs_re.search(line)
         if match:
-            line = "config.General.transferOutputs = '" + str(not opts.noTransfer) + "'\n"
+            line = "config.General.transferOutputs = %s\n" % (not opts.noTransfer)
 
 	# Set the "transferLogs" field which specifies whether or not to copy the jobs log files to the storage site
         match = crab_transferLogs_re.search(line)
         if match:
-            line = "config.General.transferLogs = '" + str(not opts.noTransfer) + "'\n"
+            #line = "config.General.transferLogs = '" + (not opts.noTransfer) + "'\n"
+            line = "config.General.transferLogs = %s\n" % (not opts.noTransfer)
 
 	# Set the "psetName" field which specifies the name of the CMSSW pset_cfg.py file that will be run via cmsRun.
 	match = crab_pset_re.search(line)
@@ -1216,7 +1217,6 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
     fIN.close()
     
     Verbose("Created CRAB cfg file \"%s\"" % (fOUT.name) )
-    exit()# alex
     return
 
 #================================================================================================
