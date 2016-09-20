@@ -41,7 +41,7 @@ setenv HIGGSANALYSIS_BASE $PWD
 
 
 set LD_LIBRARY_PATH_APPEND=""
-if ( $LOCATION == "lxplus" || $LOCATION == "lxbatch" ) then
+if ( $LOCATION == "lxplus" || $LOCATION == "lxbatch" || $LOCATION == "lpc" ) then
     echo "\n=== Sourcing $LOCATION environments (Hand-picked from CMSSW_7_6_5)"
     echo "To update:"
     echo "1) create a developer area (cmsrel):"

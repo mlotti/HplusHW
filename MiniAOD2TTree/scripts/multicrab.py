@@ -2,6 +2,10 @@
 '''
 Creation/Submission:
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+multicrab.py --create -s T2_US_Nebraska -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
+multicrab.py --create -s T2_US_Wisconsin -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
 
 Re-Submission:
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <task_dir> 
@@ -1187,7 +1191,7 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath = "crabConfig.py
 	    # Set the "unitsPerJob" field which suggests (but not impose) how many files, lumi sections or events to include in each job.
 	    match = crab_splitunits_re.search(line)	
 	    if match:
-		line = "config.Data.unitsPerJob = 50\n"
+		line = "config.Data.unitsPerJob = 25\n"
 	else:
 	    pass
 
