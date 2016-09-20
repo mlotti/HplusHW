@@ -207,12 +207,12 @@ class Process:
         pileUp["up"]=prec.getPileUp("up")
         pileUp["down"]=prec.getPileUp("down")
         #Debug prints:
-        if ("data" in prec.getDataVersion()):
-          sys.stderr.write("addDataset (main.py) l. 210 saves the following means  for nominal, up and down: ")
-          sys.stderr.write(str(pileUp["nominal"].GetMean())+", ")
-          sys.stderr.write(str(pileUp["up"].GetMean())+", ")
-          sys.stderr.write(str(pileUp["down"].GetMean()))
-          sys.stderr.write("\n\n")
+#        if ("data" in prec.getDataVersion()):
+#          sys.stderr.write("addDataset (main.py) l. 210 saves the following means  for nominal, up and down: ")
+#          sys.stderr.write(str(pileUp["nominal"].GetMean())+", ")
+#          sys.stderr.write(str(pileUp["up"].GetMean())+", ")
+#          sys.stderr.write(str(pileUp["down"].GetMean()))
+#          sys.stderr.write("\n\n")
 
         nAllEvents = prec.getNAllEvents()
         prec.close()
@@ -578,14 +578,14 @@ class Process:
                 hPU.SetName("PileUpData")
                 hPU.SetDirectory(None)
                 hPUs[aname] = hPU
-                #Debug prints:
-                sys.stderr.write("_getDataPUhistos saves direction ")
-                sys.stderr.write(direction)
-                sys.stderr.write(" histograms for aname ")
-                sys.stderr.write(aname)
-                sys.stderr.write(", mean =")
-                sys.stderr.write(str(hPUs[aname].GetMean()))
-                sys.stderr.write("\n")
+#                #Debug prints:
+#                sys.stderr.write("_getDataPUhistos saves direction ")
+#                sys.stderr.write(direction)
+#                sys.stderr.write(" histograms for aname ")
+#                sys.stderr.write(aname)
+#                sys.stderr.write(", mean =")
+#                sys.stderr.write(str(hPUs[aname].GetMean()))
+#                sys.stderr.write("\n")
                 
             else:
                 raise Exception("Cannot determine PU spectrum for data!")
