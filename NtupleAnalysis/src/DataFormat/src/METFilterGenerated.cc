@@ -5,6 +5,7 @@
 #include "DataFormat/interface/METFilterGenerated.h"
 
 void METFilterGenerated::setupBranches(BranchManager& mgr) {
+  mgr.book("METFilter_Flag_CSCTightHalo2015Filter", &fFlag_CSCTightHalo2015Filter);
   mgr.book("METFilter_Flag_CSCTightHaloFilter", &fFlag_CSCTightHaloFilter);
   mgr.book("METFilter_Flag_EcalDeadCellTriggerPrimitiveFilter", &fFlag_EcalDeadCellTriggerPrimitiveFilter);
   mgr.book("METFilter_Flag_HBHENoiseFilter", &fFlag_HBHENoiseFilter);

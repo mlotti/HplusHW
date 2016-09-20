@@ -17,12 +17,13 @@ public:
   void setupBranches(BranchManager& mgr);
 
   std::vector<std::string> getDiscriminatorNames() const {
-    static std::vector<std::string> n = { std::string("Flag_CSCTightHaloFilter"), std::string("Flag_EcalDeadCellTriggerPrimitiveFilter"), std::string("Flag_HBHENoiseFilter"), std::string("Flag_HBHENoiseIsoFilter"), std::string("Flag_eeBadScFilter"), std::string("Flag_goodVertices"), std::string("hbheIsoNoiseToken"), std::string("hbheNoiseTokenRun2Loose"), std::string("hbheNoiseTokenRun2Tight") };
+    static std::vector<std::string> n = { std::string("Flag_CSCTightHalo2015Filter"), std::string("Flag_CSCTightHaloFilter"), std::string("Flag_EcalDeadCellTriggerPrimitiveFilter"), std::string("Flag_HBHENoiseFilter"), std::string("Flag_HBHENoiseIsoFilter"), std::string("Flag_eeBadScFilter"), std::string("Flag_goodVertices"), std::string("hbheIsoNoiseToken"), std::string("hbheNoiseTokenRun2Loose"), std::string("hbheNoiseTokenRun2Tight") };
     return n;
   }
 
   std::vector<std::function<bool()>> getDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
+      [&](){ return this->passFlag_CSCTightHalo2015Filter(); },
       [&](){ return this->passFlag_CSCTightHaloFilter(); },
       [&](){ return this->passFlag_EcalDeadCellTriggerPrimitiveFilter(); },
       [&](){ return this->passFlag_HBHENoiseFilter(); },
@@ -36,6 +37,7 @@ public:
     return values;
   }
 
+  bool passFlag_CSCTightHalo2015Filter() const { return fFlag_CSCTightHalo2015Filter->value(); }
   bool passFlag_CSCTightHaloFilter() const { return fFlag_CSCTightHaloFilter->value(); }
   bool passFlag_EcalDeadCellTriggerPrimitiveFilter() const { return fFlag_EcalDeadCellTriggerPrimitiveFilter->value(); }
   bool passFlag_HBHENoiseFilter() const { return fFlag_HBHENoiseFilter->value(); }
@@ -47,6 +49,7 @@ public:
   bool passHbheNoiseTokenRun2Tight() const { return fHbheNoiseTokenRun2Tight->value(); }
 
 protected:
+  const Branch<bool> *fFlag_CSCTightHalo2015Filter;
   const Branch<bool> *fFlag_CSCTightHaloFilter;
   const Branch<bool> *fFlag_EcalDeadCellTriggerPrimitiveFilter;
   const Branch<bool> *fFlag_HBHENoiseFilter;
