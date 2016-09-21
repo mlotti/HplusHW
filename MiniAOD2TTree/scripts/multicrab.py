@@ -17,10 +17,12 @@ multicrab.py --get --ask -d <task_dir>
 multicrab.py --log
 
 Get Output (from specific datasets):
-multicrab.py --get -d <task_dir> -i JetHT_Run2016B_PromptReco_v2_271036_279931
+multicrab.py --get -d <task_dir> -i <keyword>
+multicrab.py --get -d <task_dir> -i QCD
 
 Get Output (from all datasets except a specific datasets):
-multicrab.py --get -d <task_dir> -e JetHT_Run2016B_PromptReco_v2_271036_279931
+multicrab.py --get -d <task_dir> -e <keyword>
+multicrab.py --get -d <task_dir> -e JetHT
 
 Resubmit Failed Jobs:
 multicrab.py --resubmit --ask -d <task_dir>
@@ -300,7 +302,6 @@ def GetTaskStatus(datasetPath):
     return status
 
 
-
 def GetTaskReports(datasetPath, status, dashboardURL):
     '''
     Execute "crab status", get task logs and output. 
@@ -363,6 +364,7 @@ def GetTaskReports(datasetPath, status, dashboardURL):
         Print("crab status failed with message \"%s\". Skipping ..." % ( msg ), False)
     return report
 
+
 def CheckTaskReport(f):
     exitCode_re = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<exitcode>\d+)")
     if tarfile.is_tarfile(f):
@@ -408,6 +410,7 @@ def CheckTaskReports(datasetPath):
                                 break
     return exitCodeJobs
 	
+
 def GetTaskLogs(taskPath, retrievedLog, finished):
     '''
     If the number of retrieved logs files is smaller than the number of finished jobs,
@@ -577,51 +580,77 @@ def GetDatasetBasenames(datasets):
     
     basenames = []
     for d in datasets:
-        basenames.append(os.path.basename(d))
+        basenames.append( GetBasename(d) )
     return basenames
 
 
-def GetIncludeExcludeDatasets(datasets, baseNames, opts):
+def GetBasename(fullPath):
+    Verbose("GetBasename()")
+    return os.path.basename(fullPath)
+
+
+def GetRegularExpression(arg):
+    Verbose("GetRegularExpression(): " + arg)
+    if isinstance(arg, basestring):
+        arg = [arg]
+    return [re.compile(a) for a in arg]
+
+
+def GetIncludeExcludeDatasets(datasets, opts):
     '''
-    Does nothing by default, unless the user specifies a dataset to include (--include <datasetName>) or 
-    to exclude (--exclude <datasetName>) when executing the script. This function filters for the inlcude/exclude
+    Does nothing by default, unless the user specifies a dataset to include (--includeTasks <datasetNames>) or 
+    to exclude (--excludeTasks <datasetNames>) when executing the script. This function filters for the inlcude/exclude
     datasets and returns the lists of datasets and baseNames to be used further in the program.
     '''
     Verbose("GetIncludeExcludeDatasets()")
-        
-    # Include option (replaces all datasets with a single user-specified dataset)
-    if opts.include != "None":
-        if opts.include in baseNames:
-            baseNames = [opts.include]        
-            for d in datasets:
-                if opts.include in d:
-                    datasets = [d]
-        else:
-            raise Exception("Could not find dataset \"%s\". Please select one of the following:\n\t%s" % (opts.include, "\n\t".join(baseNames)) )
+    
+    # Initialise lists
+    newDatasets  = []
 
-    # Exclude option (removes datasets)
-    if opts.exclude != "None":
-        if opts.exclude in baseNames:
-            baseNames.remove(opts.exclude)
-            for d in datasets:
-                if opts.include in d:
-                    datasets.remove(d)
-        else:
-            raise Exception("Could not find dataset \"%s\". Please select one of the following:\n\t%s" % (opts.include, "\n\t".join(baseNames)) )
-    return baseNames, datasets
+    # Exclude datasets
+    if opts.excludeTasks != "None":
+        tmp = []
+        exclude = GetRegularExpression(opts.excludeTasks)
+
+        for d in datasets:            
+            task  = GetBasename(d) 
+            found = False
+
+            for e_re in exclude:
+                if e_re.search(task):
+                    found = True
+                    break
+            if found:
+                continue
+            newDatasets.append(d)
+        return newDatasets
+
+    # Include datasets
+    if opts.includeTasks != "None":
+        tmp = []
+        include = GetRegularExpression(opts.includeTasks)
+
+        for d in datasets:
+            task  = GetBasename(d)
+            found = False
+
+            for i_re in include:
+                if i_re.search(task):
+                    found = True
+                    break
+            if found:
+                newDatasets.append(d)
+        return newDatasets
+
+    return datasets
 
     
-
 def GetLast2Dirs(datasetPath):
     Verbose("GetLast2Dirs()")
-    
     last2Dirs = datasetPath.split("/")[-2]+ "/" + datasetPath.split("/")[-1]
     return last2Dirs
 
 
-#================================================================================================
-# Submit Programs
-#================================================================================================
 def CheckJob(opts, args):
     '''
     Check status, retrieve, resubmit, kill CRAB tasks.
@@ -648,15 +677,15 @@ def CheckJob(opts, args):
     # Initialise Variables
     reportDict   = {}
     datasetdirs  = GetMulticrabAbsolutePaths(dirs)
-    datasets     = GetDatasetAbsolutePaths(datasetdirs)
-    baseNames    = GetDatasetBasenames(datasets)
-    Verbose("Found %s CRAB task directories:\n\t%s" % ( len(datasets), "\n\t".join(baseNames)), True)
+    tmpDatasets  = GetDatasetAbsolutePaths(datasetdirs)
+    tmpBasenames = GetDatasetBasenames(tmpDatasets)
+    Verbose("Found %s CRAB task directories:\n\t%s" % ( len(tmpDatasets), "\n\t".join(tmpBasenames)), True)
 
-    # xenios
-    baseNames, datasets = GetIncludeExcludeDatasets(datasets, baseNames, opts)
-#    print baseNames
-#    print datasets
-#    exit()
+    # Check include/exclude options
+    datasets     = GetIncludeExcludeDatasets(tmpDatasets, opts)
+    basenames    = GetDatasetBasenames(datasets)
+    Verbose("Will only consider %s CRAB task directories:\n\t%s" % ( len(datasets), "\n\t".join(basenames)), True)
+
 
     exitCodeJobs = {}
     # For-loop: All dataset directories (absolute paths)
@@ -724,6 +753,7 @@ def PrintTaskSummary(reportDict):
         print r
     return
 
+
 def JobList(jobs):
     joblist = ""
     for i,e in enumerate(sorted(jobs)):
@@ -731,6 +761,7 @@ def JobList(jobs):
         if i < len(jobs)-1:
             joblist += ","
     return joblist
+
 
 def PrintExitCodeSummary(exitCodeJobs):
     print "Jobs with problems"
@@ -878,13 +909,11 @@ def Execute(cmd):
     ret=[]
     for line in f:
         ret.append(line.replace("\n", ""))
-        
+
     f.close()
     return ret
 
-#================================================================================================ 
-# Function Definitions
-#================================================================================================ 
+
 def GetSelfName():
     Verbose("GetSelfName()")    
     return __file__.split("/")[-1]
@@ -1136,7 +1165,6 @@ def GetRequestName(dataset):
 
     # Finally, replace dashes with underscores    
     requestName = requestName.replace("-","_")
-
     return requestName
 
 
@@ -1153,10 +1181,6 @@ def EnsurePathDoesNotExist(taskDirName, requestName):
     else:
         msg = "File '%s' already exists!" % (filePath)
         Print(msg + "\n\tProceeding to overwrite file.")
-        #if AskUser(msg + "\n\tProceed and overwrite it?"):
-        #    return
-	#else:
-        #    raise Exception(msg)
     return
 
 
@@ -1271,9 +1295,7 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
     Verbose("Created CRAB cfg file \"%s\"" % (fOUT.name) )
     return
 
-#================================================================================================
-# Create Program
-#================================================================================================ 
+
 def CreateJob(opts, args):
     '''
     Create & submit a CRAB task, using the user-defined PSET and list of datasets.
@@ -1343,15 +1365,15 @@ if __name__ == "__main__":
     parser.add_option("--log"     , dest="log"       , default=False, action="store_true", help="Get log files of finished jobs [defaut: False]")
     parser.add_option("--resubmit", dest="resubmit"  , default=False, action="store_true", help="Resubmit all failed jobs [defaut: False]")
     parser.add_option("--kill"    , dest="kill"      , default=False, action="store_true", help="Kill all submitted jobs [defaut: False]")
-    parser.add_option("-v", "--verbose"   , dest="verbose"    , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
-    parser.add_option("-a", "--ask"       , dest="ask"        , default=False  , action="store_true", help="Prompt user before executing CRAB commands [defaut: False]")
-    parser.add_option("-p", "--pset"      , dest="pset"       , default=PSET   , type="string"      , help="The python cfg file to be used by cmsRun [default: %s]" % (PSET))
-    parser.add_option("-d", "--dir"       , dest="dirName"    , default=DIRNAME, type="string"      , help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))
-    parser.add_option("-s", "--site"      , dest="storageSite", default=SITE   , type="string"      , help="Site where the output will be copied to [default: %s]" % (SITE))
-    parser.add_option("-u", "--url"       , dest="url"        , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
-    parser.add_option("-n", "--noTransfer", dest="noTransfer" , default=False  , action="store_true", help="Disable transfer of output/log files [default: False]")
-    parser.add_option("-i", "--include"   , dest="include"    , default="None" , type="string"      , help="Only perform action for this dataset [default: \"\"]")
-    parser.add_option("-e", "--exclude"   , dest="exclude"    , default="None" , type="string"      , help="Exclude this dataset from action [default: \"\"]")
+    parser.add_option("-v", "--verbose"   , dest="verbose"      , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
+    parser.add_option("-a", "--ask"       , dest="ask"          , default=False  , action="store_true", help="Prompt user before executing CRAB commands [defaut: False]")
+    parser.add_option("-p", "--pset"      , dest="pset"         , default=PSET   , type="string"      , help="The python cfg file to be used by cmsRun [default: %s]" % (PSET))
+    parser.add_option("-d", "--dir"       , dest="dirName"      , default=DIRNAME, type="string"      , help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))
+    parser.add_option("-s", "--site"      , dest="storageSite"  , default=SITE   , type="string"      , help="Site where the output will be copied to [default: %s]" % (SITE))
+    parser.add_option("-u", "--url"       , dest="url"          , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
+    parser.add_option("-n", "--noTransfer", dest="noTransfer"   , default=False  , action="store_true", help="Disable transfer of output/log files [default: False]")
+    parser.add_option("-i", "--includeTask", dest="includeTasks", default="None" , type="string"      , help="Only perform action for this dataset(s) [default: \"\"]")
+    parser.add_option("-e", "--excludeTask", dest="excludeTasks", default="None" , type="string"      , help="Exclude this dataset(s) from action [default: \"\"]")
     #parser.add_option("--checksum", dest="checksum"  , default=False, action="store_true", help="Get output with adler32 checksum [default: False") #fixme
     (opts, args) = parser.parse_args()
 
