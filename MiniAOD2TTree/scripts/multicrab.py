@@ -10,11 +10,17 @@ Re-Submission:
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <task_dir> 
 
 Check Status:
-multicrab.py --status --url --url --verbose -d <task_dir> 
+multicrab.py --status --url --url --verbose -d <task_dir>
 
 Get Output:
-multicrab.py --get --ask -d <task_dir> 
+multicrab.py --get --ask -d <task_dir>
 multicrab.py --log
+
+Get Output (from specific datasets):
+multicrab.py --get -d <task_dir> -i JetHT_Run2016B_PromptReco_v2_271036_279931
+
+Get Output (from all datasets except a specific datasets):
+multicrab.py --get -d <task_dir> -e JetHT_Run2016B_PromptReco_v2_271036_279931
 
 Resubmit Failed Jobs:
 multicrab.py --resubmit --ask -d <task_dir>
@@ -575,6 +581,37 @@ def GetDatasetBasenames(datasets):
     return basenames
 
 
+def GetIncludeExcludeDatasets(datasets, baseNames, opts):
+    '''
+    Does nothing by default, unless the user specifies a dataset to include (--include <datasetName>) or 
+    to exclude (--exclude <datasetName>) when executing the script. This function filters for the inlcude/exclude
+    datasets and returns the lists of datasets and baseNames to be used further in the program.
+    '''
+    Verbose("GetIncludeExcludeDatasets()")
+        
+    # Include option (replaces all datasets with a single user-specified dataset)
+    if opts.include != "None":
+        if opts.include in baseNames:
+            baseNames = [opts.include]        
+            for d in datasets:
+                if opts.include in d:
+                    datasets = [d]
+        else:
+            raise Exception("Could not find dataset \"%s\". Please select one of the following:\n\t%s" % (opts.include, "\n\t".join(baseNames)) )
+
+    # Exclude option (removes datasets)
+    if opts.exclude != "None":
+        if opts.exclude in baseNames:
+            baseNames.remove(opts.exclude)
+            for d in datasets:
+                if opts.include in d:
+                    datasets.remove(d)
+        else:
+            raise Exception("Could not find dataset \"%s\". Please select one of the following:\n\t%s" % (opts.include, "\n\t".join(baseNames)) )
+    return baseNames, datasets
+
+    
+
 def GetLast2Dirs(datasetPath):
     Verbose("GetLast2Dirs()")
     
@@ -591,9 +628,14 @@ def CheckJob(opts, args):
     '''
     Verbose("CheckJob()")
 
+    useEOS = False
+    if (opts.noTransfer):
+        useEOS = True
+
     # Force crabCommand to stay quite
     if not opts.verbose:
         setConsoleLogLevel(LOGLEVEL_MUTE)
+        Verbose("Will check jobs from EOS!")
 
     # Retrieve the current crabCommand console log level:
     crabConsoleLogLevel = getConsoleLogLevel()
@@ -609,13 +651,18 @@ def CheckJob(opts, args):
     datasets     = GetDatasetAbsolutePaths(datasetdirs)
     baseNames    = GetDatasetBasenames(datasets)
     Verbose("Found %s CRAB task directories:\n\t%s" % ( len(datasets), "\n\t".join(baseNames)), True)
-    exitCodeJobs = {}
 
+    # xenios
+    baseNames, datasets = GetIncludeExcludeDatasets(datasets, baseNames, opts)
+#    print baseNames
+#    print datasets
+#    exit()
+
+    exitCodeJobs = {}
     # For-loop: All dataset directories (absolute paths)
     for index, d in enumerate(datasets):
-        
-        if opts.verbose:
-            Print("%s (%s/%s)" % ( GetLast2Dirs(d), index+1, len(datasets) ), True)
+
+        Verbose("%s (%s/%s)" % ( GetLast2Dirs(d), index+1, len(datasets) ), True)
 
         # Check if task is in "DONE" state
         if GetTaskStatusBool(d):
@@ -625,7 +672,7 @@ def CheckJob(opts, args):
         taskDashboard = GetTaskDashboardURL(d)    
         
         # Get CRAB task status
-        taskStatus = GetTaskStatus(d).replace("\t", "")
+        taskStatus = GetTaskStatus(d).replace("\t", "") #alex
 
         # Get the CRAB task report & add to dictionary
         report = GetTaskReports(d, taskStatus, taskDashboard) #FIXME
@@ -797,9 +844,12 @@ def RetrievedFiles(directory, crabResults, dashboardURL, verbose):
     return running, finished, failed, retrievedLog, retrievedOut
 
 
-def Exists(dataset,filename):
-    Verbose("Exists()")
-    fname = os.path.join(dataset,"results",filename)
+def Exists(dataset, filename):
+    '''
+    Checks that a dataset filename exists by executing the ls command for its full path.
+    '''
+    fname = os.path.join(dataset, "results", filename)
+    Verbose("Exists(): " + fname)
     fname = Execute("ls %s"%fname)[0]
     return os.path.exists(fname)
 
@@ -817,7 +867,9 @@ def Touch(path):
 
 
 def Execute(cmd):
-    Verbose("Execute()")
+    '''
+    '''
+    Verbose("Execute(): " + cmd)
     p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
     (s_in, s_out) = (p.stdin, p.stdout)
@@ -1298,6 +1350,8 @@ if __name__ == "__main__":
     parser.add_option("-s", "--site"      , dest="storageSite", default=SITE   , type="string"      , help="Site where the output will be copied to [default: %s]" % (SITE))
     parser.add_option("-u", "--url"       , dest="url"        , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
     parser.add_option("-n", "--noTransfer", dest="noTransfer" , default=False  , action="store_true", help="Disable transfer of output/log files [default: False]")
+    parser.add_option("-i", "--include"   , dest="include"    , default="None" , type="string"      , help="Only perform action for this dataset [default: \"\"]")
+    parser.add_option("-e", "--exclude"   , dest="exclude"    , default="None" , type="string"      , help="Exclude this dataset from action [default: \"\"]")
     #parser.add_option("--checksum", dest="checksum"  , default=False, action="store_true", help="Get output with adler32 checksum [default: False") #fixme
     (opts, args) = parser.parse_args()
 
