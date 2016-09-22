@@ -65,23 +65,13 @@ void BJetSelection::initialize(const ParameterSet& config) {
     throw hplus::Exception("config") << "b-tagging algorithm working point '" << sWorkingPoint
                                      << "' is not valid!\nValid values are: Loose, Medium, Tight";
   if (sAlgorithm == "pfCombinedInclusiveSecondaryVertexV2BJetTags") {
-    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation76X
+    // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X
     if (sWorkingPoint == "Loose")
       fDisriminatorValue = 0.460;
     else if (sWorkingPoint == "Medium")
       fDisriminatorValue = 0.800;
     else if (sWorkingPoint == "Tight")
       fDisriminatorValue = 0.935;
-/*
-  } else if (sAlgorithm == "pfCombinedSecondaryVertexBJetTags") {
-    // Run 1 legacy values
-    if (sWorkingPoint == "Loose")
-      fDisriminatorValue = 0.244;
-    else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.679;
-    else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.898;
-*/
   } else if (sAlgorithm == "pfCombinedMVA2BJetTags") {
     if (sWorkingPoint == "Loose")
       fDisriminatorValue = -0.715;
@@ -89,13 +79,13 @@ void BJetSelection::initialize(const ParameterSet& config) {
       fDisriminatorValue = 0.185;
     else if (sWorkingPoint == "Tight")
       fDisriminatorValue = 0.875;
-  } else if (sAlgorithm == "pfJetProbabilityBJetTags") {
+  } else if (sAlgorithm == "pfCombinedCvsLJetTags" || sAlgorithm == "pfCombinedCvsBJetTags") {
     if (sWorkingPoint == "Loose")
-      fDisriminatorValue = 0.245;
+      fDisriminatorValue = -0.17;
     else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.515;
+      fDisriminatorValue = 0.08;
     else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.760;    
+      fDisriminatorValue = 0.45;    
   }
   
   if (fDisriminatorValue < 0.0) {
