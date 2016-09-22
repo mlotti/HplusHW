@@ -32,7 +32,7 @@ public:
     return n;
   }
   std::vector<std::string> getAgainstElectronDiscriminatorNames() const {
-    static std::vector<std::string> n = { std::string("againstElectronLooseMVA5"), std::string("againstElectronMVA5category"), std::string("againstElectronMediumMVA5"), std::string("againstElectronTightMVA5"), std::string("againstElectronVLooseMVA5"), std::string("againstElectronVTightMVA5")};
+    static std::vector<std::string> n = { std::string("againstElectronLooseMVA5"), std::string("againstElectronLooseMVA6"), std::string("againstElectronMVA5category"), std::string("againstElectronMediumMVA5"), std::string("againstElectronMediumMVA6"), std::string("againstElectronTightMVA5"), std::string("againstElectronTightMVA6"), std::string("againstElectronVLooseMVA5"), std::string("againstElectronVLooseMVA6"), std::string("againstElectronVTightMVA5"), std::string("againstElectronVTightMVA6")};
     return n;
   }
 
@@ -45,11 +45,16 @@ protected:
 protected:
   const Branch<std::vector<bool>> *fTrgMatch_LooseIsoPFTau50_Trk30_eta2p1;
   const Branch<std::vector<bool>> *fAgainstElectronLooseMVA5;
+  const Branch<std::vector<bool>> *fAgainstElectronLooseMVA6;
   const Branch<std::vector<bool>> *fAgainstElectronMVA5category;
   const Branch<std::vector<bool>> *fAgainstElectronMediumMVA5;
+  const Branch<std::vector<bool>> *fAgainstElectronMediumMVA6;
   const Branch<std::vector<bool>> *fAgainstElectronTightMVA5;
+  const Branch<std::vector<bool>> *fAgainstElectronTightMVA6;
   const Branch<std::vector<bool>> *fAgainstElectronVLooseMVA5;
+  const Branch<std::vector<bool>> *fAgainstElectronVLooseMVA6;
   const Branch<std::vector<bool>> *fAgainstElectronVTightMVA5;
+  const Branch<std::vector<bool>> *fAgainstElectronVTightMVA6;
   const Branch<std::vector<bool>> *fAgainstMuonLoose3;
   const Branch<std::vector<bool>> *fAgainstMuonTight3;
   const Branch<std::vector<bool>> *fByCombinedIsolationDeltaBetaCorrRaw3Hits;
@@ -134,11 +139,16 @@ public:
   std::vector<std::function<bool()>> getAgainstElectronDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
       [&](){ return this->againstElectronLooseMVA5(); },
+      [&](){ return this->againstElectronLooseMVA6(); },
       [&](){ return this->againstElectronMVA5category(); },
       [&](){ return this->againstElectronMediumMVA5(); },
+      [&](){ return this->againstElectronMediumMVA6(); },
       [&](){ return this->againstElectronTightMVA5(); },
+      [&](){ return this->againstElectronTightMVA6(); },
       [&](){ return this->againstElectronVLooseMVA5(); },
-      [&](){ return this->againstElectronVTightMVA5(); }
+      [&](){ return this->againstElectronVLooseMVA6(); },
+      [&](){ return this->againstElectronVTightMVA5(); },
+      [&](){ return this->againstElectronVTightMVA6(); }
     };
     return values;
   }
@@ -148,11 +158,16 @@ public:
 
   bool TrgMatch_LooseIsoPFTau50_Trk30_eta2p1() const { return this->fCollection->fTrgMatch_LooseIsoPFTau50_Trk30_eta2p1->value()[this->index()]; }
   bool againstElectronLooseMVA5() const { return this->fCollection->fAgainstElectronLooseMVA5->value()[this->index()]; }
+  bool againstElectronLooseMVA6() const { return this->fCollection->fAgainstElectronLooseMVA6->value()[this->index()]; }
   bool againstElectronMVA5category() const { return this->fCollection->fAgainstElectronMVA5category->value()[this->index()]; }
   bool againstElectronMediumMVA5() const { return this->fCollection->fAgainstElectronMediumMVA5->value()[this->index()]; }
+  bool againstElectronMediumMVA6() const { return this->fCollection->fAgainstElectronMediumMVA6->value()[this->index()]; }
   bool againstElectronTightMVA5() const { return this->fCollection->fAgainstElectronTightMVA5->value()[this->index()]; }
+  bool againstElectronTightMVA6() const { return this->fCollection->fAgainstElectronTightMVA6->value()[this->index()]; }
   bool againstElectronVLooseMVA5() const { return this->fCollection->fAgainstElectronVLooseMVA5->value()[this->index()]; }
+  bool againstElectronVLooseMVA6() const { return this->fCollection->fAgainstElectronVLooseMVA6->value()[this->index()]; }
   bool againstElectronVTightMVA5() const { return this->fCollection->fAgainstElectronVTightMVA5->value()[this->index()]; }
+  bool againstElectronVTightMVA6() const { return this->fCollection->fAgainstElectronVTightMVA6->value()[this->index()]; }
   bool againstMuonLoose3() const { return this->fCollection->fAgainstMuonLoose3->value()[this->index()]; }
   bool againstMuonTight3() const { return this->fCollection->fAgainstMuonTight3->value()[this->index()]; }
   bool byCombinedIsolationDeltaBetaCorrRaw3Hits() const { return this->fCollection->fByCombinedIsolationDeltaBetaCorrRaw3Hits->value()[this->index()]; }

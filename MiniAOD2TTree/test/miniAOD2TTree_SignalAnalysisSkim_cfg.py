@@ -28,9 +28,8 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        '/store/mc/RunIISpring15MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/40000/00087FEB-236E-E511-9ACB-003048FF86CA.root'
-#        '/store/data/Run2015C/SingleMuon/MINIAOD/PromptReco-v1/000/254/906/00000/2A365D2E-D74B-E511-9D09-02163E012539.root'
-#        '/store/data/Run2015D/Tau/MINIAOD/PromptReco-v3/000/256/587/00000/6E29A230-925D-E511-A2F2-02163E0140F1.root'
+#	'/store/data/Run2015D/Tau/MINIAOD/16Dec2015-v1/00000/F2BB6529-A3B0-E511-A786-6CC2173BC1D0.root'
+	'/store/mc/RunIIFall15MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext4-v1/60000/00C8EBD5-61D2-E511-8E2F-02163E016064.root'
     )
 )
 
@@ -91,7 +90,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             "Flag_HBHENoiseFilter",
             "Flag_HBHENoiseIsoFilter",
             "Flag_CSCTightHaloFilter",
-#            "Flag_CSCTightHalo2015Filter",
+            "Flag_CSCTightHalo2015Filter",
             "Flag_EcalDeadCellTriggerPrimitiveFilter",
             "Flag_goodVertices",
             "Flag_eeBadScFilter",
