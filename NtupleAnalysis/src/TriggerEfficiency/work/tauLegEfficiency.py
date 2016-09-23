@@ -137,6 +137,10 @@ def createAnalyzer(dataVersion,era):
         if era == "2016ICHEP":
             a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_vx"]
             a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_vx"]
+
+        if era == "2016HIPFIXED":
+            a.Trigger.triggerOR = ["HLT_IsoMu22_eta2p1_vx"]
+            a.Trigger.triggerOR2= ["HLT_IsoMu21_eta2p1_LooseIsoPFTau50_Trk30_eta2p1_SingleL1_vx"]
                                     
 #            a.Trigger.triggerOR = ["HLT_IsoMu20_eta2p1_v1",
 #                                   "HLT_IsoMu20_eta2p1_v2",
@@ -189,7 +193,7 @@ def addAnalyzer(era):
 #addAnalyzer("2016E")
 addAnalyzer("2016ICHEP")
 #addAnalyzer("2016HIP")
-
+#addAnalyzer("2016HIPFIXED")
 
 # Run the analysis
 #process.run()
