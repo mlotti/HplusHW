@@ -711,10 +711,10 @@ class SignificanceData:
 # Remove mass points lower than 100 since
 # statisticalFunctions.tanbForBR cannot handle them (they are unphysical)
 # also remove points lower than 115 since excluded by LEP
-def cleanGraph(graph, minX=95):
+def cleanGraph(graph, massPoint):
     i=0
     while (i<graph.GetN()):
-        if (graph.GetX()[i]<minX):
+        if (graph.GetX()[i] > massPoint-0.01 and graph.GetX()[i] < massPoint+0.01):
             graph.RemovePoint(i)
         else:
             i=i+1        
@@ -1216,10 +1216,11 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     name = name.replace("-","_")
     
     if isHeavy:
-        frameXmin = 200
+        frameXmin = 180
+        frameXmax = 500
         if "_mA" in name:
             frameXmin = 140
-        plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": 600})
+        plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
     else:
         frameXmax = 160
         frameXmin = 90
@@ -1231,7 +1232,7 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     plot.frame.GetXaxis().SetTitle(xlabel)
     plot.frame.GetYaxis().SetTitle(tanblimit)
 
-    plot.getPad().SetLogy(True)
+####    plot.getPad().SetLogy(True)
 
     plot.draw()
     
