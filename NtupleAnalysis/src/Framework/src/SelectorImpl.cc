@@ -64,7 +64,7 @@ void SelectorImpl::Init(TTree *tree) {
   for(BaseSelector *selector: fSelectors){
     selector->setupBranches(*fBranchManager);
     selector->setSkimCounters(hSkimCounters);
-    if(hPUdata) selector->setPileUpWeights(hPUdata,hPUmc);
+    if(hPUdata) selector->setPileUpWeights(hPUdata,hPUdataUp,hPUdataDown,hPUmc);
     selector->setIsttbar(bIsttbar);
   }
 }
@@ -134,7 +134,10 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   if (optionStr != nullptr)
     fOptionString = optionStr->GetTitle();
   hSkimCounters = dynamic_cast<TH1F*>(fInput->FindObject("SkimCounter"));
-  hPUdata = dynamic_cast<TH1*>(fInput->FindObject("PileUpData"));
+  std::cout << "gDirectory" << gDirectory->GetList()->GetSize() << std::endl;
+  hPUdata = dynamic_cast<TH1*>(fInput->FindObject("PileUpData"));  
+  hPUdataUp = dynamic_cast<TH1*>(fInput->FindObject("PileUpDataUp"));  
+  hPUdataDown = dynamic_cast<TH1*>(fInput->FindObject("PileUpDataDown"));  
   hPUmc   = dynamic_cast<TH1*>(fInput->FindObject("PileUpMC"));
   const TNamed* ttbarNamed = dynamic_cast<const TNamed*>(fInput->FindObject("isttbar"));
   if (ttbarNamed != nullptr) {

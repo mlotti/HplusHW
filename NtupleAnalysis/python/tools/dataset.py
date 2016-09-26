@@ -3856,6 +3856,8 @@ class DatasetPrecursor:
         self._rootFiles = []
         self._dataVersion = None
         self._pileup = None
+        self._pileup_up = None
+        self._pileup_down = None
         self._nAllEvents = 0.0
 
         for name in self._filenames:
@@ -3879,16 +3881,36 @@ class DatasetPrecursor:
 
             isTree = aux.Get(rf, "Events") != None
             if isTree:
-                pileup = aux.Get(rf, "pileup")
+                # pileup (nominal)
+#                pileup = aux.Get(rf, "pileup")
+#                if pileup == None:
+                pileup = aux.Get(rf, "configInfo/pileup")
                 if pileup == None:
-                    pileup = aux.Get(rf, "configInfo/pileup")
-                    if pileup == None:
-                        print "Unable to find 'pileup' or 'configInfo/pileup' from ROOT file '%s'" % name
+                    print "Unable to find 'configInfo/pileup' from ROOT file '%s'" % name
                 if self._pileup is None:
                     if pileup != None:
                         self._pileup = pileup
                 else:
                     self._pileup.Add(pileup)
+                if ("data" in self._dataVersion):
+                    # pileup (up)
+                    pileup_up = aux.Get(rf, "configInfo/pileup_up")
+                    if pileup_up == None:
+                        print "Unable to find 'configInfo/pileup_up' from ROOT file '%s'" % name
+                    if self._pileup_up is None:
+                        if pileup_up != None:
+                            self._pileup_up = pileup_up
+                    else:
+                        self._pileup_up.Add(pileup_up)
+                    # pileup (down)
+                    pileup_down = aux.Get(rf, "configInfo/pileup_down")
+                    if pileup_down == None:
+                        print "Unable to find 'configInfo/pileup_down' from ROOT file '%s'" % name
+                    if self._pileup_down is None:
+                        if pileup_down != None:
+                            self._pileup_down = pileup_down
+                    else:
+                        self._pileup_down.Add(pileup_down)
             
             # Obtain nAllEvents
             if isTree:
@@ -3931,8 +3953,13 @@ class DatasetPrecursor:
     def getDataVersion(self):
         return self._dataVersion
 
-    def getPileUp(self):
-        return self._pileup
+    def getPileUp(self,direction):
+        if direction=="up":
+            return self._pileup_up
+        elif direction=="down":
+            return self._pileup_down
+        else:          
+            return self._pileup
 
     def getNAllEvents(self):
         return self._nAllEvents
