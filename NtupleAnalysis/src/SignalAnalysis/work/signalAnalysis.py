@@ -5,6 +5,9 @@ dataEras = ["2015"]
 #dataEras = ["2015B","2015C"]
 searchModes = ["80to1000"]
 
+lightAnalysis = False
+#lightAnalysis = True
+
 if len(sys.argv) < 2:
     print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory> <1pr> <2pr> <3pr>"
     sys.exit(0)
@@ -12,7 +15,10 @@ if len(sys.argv) < 2:
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix 
 process = Process("SignalAnalysis"+obtainAnalysisSuffix(sys.argv))
-process.addDatasetsFromMulticrab(sys.argv[1])
+blacklist = ["ChargedHiggs_TTToHplusBWB"]
+if lightAnalysis:
+    blacklist = ["ChargedHiggs_HplusTB"]
+process.addDatasetsFromMulticrab(sys.argv[1],blacklist=blacklist)
 
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections,applyAnalysisCommandLineOptions,setAngularCutsWorkingPoint
@@ -22,8 +28,9 @@ allSelections.CommonPlots.histogramSplitting = [
   ]
 #===== Selection customisations
 allSelections.TauSelection.prongs = 1
-#allSelections.TauSelection.tauPtCut = 50.0 #uncomment for light H+ (default 60.0 for heavy H+)
-#allSelections.METSelection.METCutValue = 80.0 #uncomment for light H+ (default 100.0 for heavy H+)
+if lightAnalysis:
+    allSelections.TauSelection.tauPtCut = 50.0 #uncomment for light H+ (default 60.0 for heavy H+)
+    allSelections.METSelection.METCutValue = 80.0 #uncomment for light H+ (default 100.0 for heavy H+)
 allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
