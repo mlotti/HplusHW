@@ -13,7 +13,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.git as git
 
-_debugPUreweighting = True
+_debugPUreweighting = False
 _debugMemoryConsumption = False
 
 class PSet:
@@ -423,6 +423,12 @@ class Process:
             else:
                 inputList.Add(ROOT.TNamed("OUTPUTFILE_LOCATION", resFileName))
 
+#            if _debugPUreweighting:
+#                print "\n\nDebug(inputlist): Input list contains:"
+#                print "--- start of input list ---"
+#                inputList.Print("",1)
+#                print "--- end of input list \n\n"
+
             tselector.SetInputList(inputList)
 
             readBytesStart = ROOT.TFile.GetFileBytesRead()
@@ -575,7 +581,13 @@ class Process:
                     else:
                         hPU.Add(dset.getPileUp(direction))
             if hPU != None:
-                hPU.SetName("PileUpData")
+                if direction == "plus":
+                    direction_postfix="Up"
+                elif direction == "minus":
+                    direction_postfix = "Down"
+                else:
+                    direction_postfix = ""
+                hPU.SetName("PileUpData"+direction_postfix)
                 hPU.SetDirectory(None)
                 hPUs[aname] = hPU
 #                #Debug prints:
