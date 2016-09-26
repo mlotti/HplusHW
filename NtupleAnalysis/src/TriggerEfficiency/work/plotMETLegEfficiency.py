@@ -40,6 +40,7 @@ def analyze(analysis=None):
     paths = [sys.argv[1]]
 
     if not analysis == None:
+#        datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis, includeOnlyTasks="Tau|TT")
         datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
     else:
         datasets = dataset.getDatasetsFromMulticrabDirs(paths)
@@ -92,6 +93,11 @@ def analyze(analysis=None):
         else:
             p = plots.PlotBase([histograms.HistoGraph(eff1_MET80, "eff1_MET80", "p", "P")])
 
+
+        #from plotTauLegEfficiency import fit
+        #fit("Data",p,eff1_MET80,20,300)
+        #fit("MC",p,eff2_MET80,20,300)
+
         opts = {"ymin": 0, "ymax": 1.1}
         opts2 = {"ymin": 0.5, "ymax": 1.5}
         moveLegend = {"dx": -0.55, "dy": -0.15}
@@ -100,7 +106,8 @@ def analyze(analysis=None):
 
         legend1 = "Data"
         #    legend2 = "MC (TTJets)"
-        legend2 = "MC"
+        #legend2 = "MC"
+        legend2 = "Simulation"
 
         if createRatio:
             p.histoMgr.setHistoLegendLabelMany({"eff1_MET80": legend1, "eff2_MET80": legend2})
@@ -117,9 +124,11 @@ def analyze(analysis=None):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-        histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_"+met, 17)
+#        histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_"+met, 17)
+        histograms.addText(0.4, 0.87, "LooseIsoPFTau50_Trk30_eta2p1_"+met, 17)
         #    histograms.addText(0.2, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
-        label = analysis.split("_")[1]
+#        label = analysis.split("_")[1]
+        label = "2016"
         histograms.addText(0.2, 0.53, label, 17)
         runRange = datasets.loadRunRange()
         histograms.addText(0.2, 0.46, "Runs "+runRange, 17)
@@ -160,7 +169,7 @@ def analyze(analysis=None):
     if isinstance(datasetsMC,dataset.DatasetManager):
         p_phi.histoMgr.setHistoLegendLabelMany({"eff1phi": legend1, "eff2phi": legend2})
 
-    opts = {"ymin": 0, "ymax": 0.1}
+    opts = {"ymin": 0, "ymax": 0.3}
     name = "TauMET_"+analysis+"_DataVsMC_PFMETPhi"
 
     if createRatio:
@@ -168,7 +177,8 @@ def analyze(analysis=None):
     else:
         p_phi.createFrame(os.path.join(plotDir, name), opts=opts, opts2=opts2)
 
-    moveLegendPhi = {"dx": -0.5, "dy": -0.6, "dh": -0.1}
+#    moveLegendPhi = {"dx": -0.5, "dy": -0.6, "dh": -0.1}
+    moveLegendPhi = {"dx": -0.55, "dy": -0.15, "dh": -0.1}
     p_phi.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegendPhi))
 
     p_phi.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
@@ -177,8 +187,9 @@ def analyze(analysis=None):
         p_phi.getFrame2().GetYaxis().SetTitle("Ratio")
         p_phi.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.4, 0.86, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
-    histograms.addText(0.4, 0.78, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.4, 0.86, "LooseIsoPFTau50_Trk30_eta2p1_"+met, 17)
+#   histograms.addText(0.4, 0.78, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.4, 0.78, "2016", 17)
     histograms.addText(0.4, 0.71, "Runs "+datasets.loadRunRange(), 17)
 
     p_phi.draw()
@@ -356,8 +367,9 @@ def analyze(analysis=None):
         pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1})
 
 
-    opts = {"ymin": 0.001, "ymax": 0.1}
-    moveLegend = {"dx": -0.5, "dy": -0.1, "dh": -0.1}
+    opts = {"ymin": 0.001, "ymax": 1.0}
+    moveLegend = {"dx": -0.33, "dy": -0.25, "dh": -0.1}
+    createRatio = False
     if createRatio:
         pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=opts, opts2=opts2)
     else:
@@ -374,8 +386,9 @@ def analyze(analysis=None):
         pPU.getFrame2().GetYaxis().SetTitle("Ratio")
         pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.4, 0.85, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
-    histograms.addText(0.4, 0.78, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.4, 0.85, "LooseIsoPFTau50_Trk30_eta2p1_MET90", 17)
+#    histograms.addText(0.4, 0.78, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.4, 0.78, "2016", 17)
     histograms.addText(0.4, 0.71, "Runs "+datasets.loadRunRange(), 17)
 
     pPU.draw()
