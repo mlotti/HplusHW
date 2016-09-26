@@ -47,11 +47,20 @@ public:
   void setSkimCounters(TH1* hSkimCounters);
   
   /// Sets pileup weights
-  void setPileUpWeights(TH1* hPUdata, TH1* hPUmc){
-    fPileupWeight.calculateWeights(hPUdata,hPUmc);
+  void setPileUpWeights(TH1* hPUdata,TH1* hPUdataUp, TH1* hPUdataDown, TH1* hPUmc){
+    if (iPileupWeightVariation == 1) {
+      fPileupWeight.calculateWeights(hPUdataUp,hPUmc);
+//      std::cout << "BaseSelector.h is now calculating weights with up variation, iPileupWeightVariation=" << iPileupWeightVariation << std::endl; // debug print
+    } else if (iPileupWeightVariation == -1) {
+//      std::cout << "BaseSelector.h is now calculating weights with down variation, iPileupWeightVariation=" << iPileupWeightVariation << std::endl; // debug print
+      fPileupWeight.calculateWeights(hPUdataDown,hPUmc);
+    } else {
+//      std::cout << "BaseSelector.h is now calculating weights with nominal variation, iPileupWeightVariation=" << iPileupWeightVariation << std::endl; // debug print
+      fPileupWeight.calculateWeights(hPUdata,hPUmc);
+    }
   }
   
-  /// Sets flag for ttbar
+  /// Sets tflag for ttbar
   void setIsttbar(bool status) { bIsttbar = status; }
 
   /// Book internal histograms
@@ -87,7 +96,8 @@ private:
   const bool fIsMC;
   bool bIsttbar;
   int iTopPtVariation;
-  
+  int iPileupWeightVariation;
+    
   // Internal histograms
   WrappedTH1* hNvtxBeforeVtxReweighting;
   WrappedTH1* hNvtxAfterVtxReweighting;
