@@ -13,7 +13,7 @@ import os
 # Tau ID efficiency scale factor
 # https://twiki.cern.ch/twiki/bin/view/CMS/TauIDRecommendation13TeV
 def assignTauIdentificationSF(tauSelectionPset):
-    tauSelectionPset.tauIdentificationSF = 0.83 # for Run-2 2016
+    tauSelectionPset.tauIdentificationSF = 0.9 # for Run-2 2016
 
 
 ##===== Tau misidentification (simple SF)
