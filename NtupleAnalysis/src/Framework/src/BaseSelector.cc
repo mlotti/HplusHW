@@ -14,6 +14,7 @@ BaseSelector::BaseSelector(const ParameterSet& config, const TH1* skimCounters):
   fIsMC(config.isMC()),
   bIsttbar(false),
   iTopPtVariation(0),
+  iPileupWeightVariation(0),
   hNvtxBeforeVtxReweighting(nullptr),
   hNvtxAfterVtxReweighting(nullptr)
 {
@@ -25,7 +26,18 @@ BaseSelector::BaseSelector(const ParameterSet& config, const TH1* skimCounters):
       iTopPtVariation = -1;
     }
   }
+  boost::optional<std::string> PUflag = config.getParameterOptional<std::string>("PUWeightSystematicVariation");
+//  std::cout << "PUflag=" << PUflag << std::endl; // debug print
+  if (PUflag) {
+    if (*PUflag== "plus") {
+      iPileupWeightVariation = 1;
+    } else if (*PUflag == "minus") {
+      iPileupWeightVariation = -1;
+    }
+  }
 }
+
+
 
 BaseSelector::~BaseSelector() {
   fEventCounter.serialize();
