@@ -97,6 +97,8 @@ private:
   
   TH1 *hSkimCounters;
   TH1 *hPUdata;
+  TH1 *hPUdataUp;
+  TH1 *hPUdataDown;
   TH1 *hPUmc;
   bool bIsttbar;
   

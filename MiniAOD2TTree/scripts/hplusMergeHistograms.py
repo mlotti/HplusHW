@@ -240,9 +240,9 @@ def pileup(fname):
 
         if not hPU == None:
             fOUT.cd("configInfo")
-            hPU.Write("",ROOT.TObject.kOverwrite)
-            hPUup.Write("",ROOT.TObject.kOverwrite)
-            hPUdown.Write("",ROOT.TObject.kOverwrite)
+            hPU.Write("pileup",ROOT.TObject.kOverwrite)
+            hPUup.Write("pileup_up",ROOT.TObject.kOverwrite)
+            hPUdown.Write("pileup_down",ROOT.TObject.kOverwrite)
 
         fOUT.Close()
 
