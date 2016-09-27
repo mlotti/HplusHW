@@ -252,7 +252,7 @@ def GetHostname():
     return socket.gethostname()
 
 
-def GetTaskStatusBool(datasetPath): # xenios
+def GetTaskStatusBool(datasetPath):
     '''
     Check the crab.log for the given task to determine the status.
     If the the string "Done" is found inside skip it.
