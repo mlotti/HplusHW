@@ -12,8 +12,10 @@ Jets = cms.VPSet(
     cms.PSet(
         branchname = cms.untracked.string("Jets"),
 #        src = cms.InputTag("patJetsReapplyJECAK4CHS"), # made from ak4PFJetsCHS
-#        src = cms.InputTag("updatedPatJetsUpdatedJEC"),
-        src = cms.InputTag("cleanedPatJets"),
+        src = cms.InputTag("updatedPatJetsUpdatedJEC"),
+#        src = cms.InputTag("selectedPatJetsForMetT1T2SmearCorr"),
+#        src = cms.InputTag("cleanedPatJets"),
+#        src = cms.InputTag("patJetsReapplyJEC"),
         srcJESup   = cms.InputTag("shiftedPatJetEnUp"),
 	srcJESdown = cms.InputTag("shiftedPatJetEnDown"),
         srcJERup   = cms.InputTag("shiftedPatSmearedJetResUp"),

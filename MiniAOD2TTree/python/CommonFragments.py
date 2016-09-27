@@ -11,6 +11,7 @@ def produceCustomisations(process,isData):
 #    reproduceElectronID(process)
     reproduceMETNoiseFilters(process)
     reproduceMET(process,isData)
+    reproduceJEC(process)
     print "=== Customisations done"
 
 # ===== Reproduce jet collections with the latest JEC =====
@@ -20,7 +21,8 @@ def reproduceJEC(process):
     from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
     updateJetCollection(
         process,
-        jetSource = cms.InputTag('slimmedJets'),
+#        jetSource = cms.InputTag('slimmedJets'),
+        jetSource = cms.InputTag('cleanedPatJets'),
         labelName = 'UpdatedJEC',
         jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None')  # Do not forget 'L2L3Residual' on data!
     )
@@ -38,13 +40,13 @@ def reproduceJEC(process):
 #      jetSource = cms.InputTag("slimmedJets"),
 #      jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJECAK4CHS"))
 #    )
-    # PUPPI jets
-    updateJetCollection(
-        process,
-        jetSource = cms.InputTag('slimmedJetsPuppi'),
-        labelName = 'UpdatedJECPuppi',
-        jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None')  # Do not$
-    )
+#    # PUPPI jets
+#    updateJetCollection(
+#        process,
+#        jetSource = cms.InputTag('slimmedJetsPuppi'),
+#        labelName = 'UpdatedJECPuppi',
+#        jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None')  # Do not$
+#    )
 #    if not hasattr(process, "JECpayloadAK4PFPuppi"):
 #        raise Exception("Error: Could not access process.JECpayloadAK4PFPuppi! Please load Jet_cfi.py before calling customizations")
 #    process.patJetCorrFactorsReapplyJECPuppi = patJetCorrFactorsUpdated.clone(
@@ -67,8 +69,8 @@ def reproduceJEC(process):
 #    process.CustomisationsSequence += process.patJetsReapplyJECPuppi
     process.CustomisationsSequence += process.patJetCorrFactorsUpdatedJEC
     process.CustomisationsSequence += process.updatedPatJetsUpdatedJEC
-    process.CustomisationsSequence += process.patJetCorrFactorsUpdatedJECPuppi
-    process.CustomisationsSequence += process.updatedPatJetsUpdatedJECPuppi
+#    process.CustomisationsSequence += process.patJetCorrFactorsUpdatedJECPuppi
+#    process.CustomisationsSequence += process.updatedPatJetsUpdatedJECPuppi
 
 
 # ===== Set up electron ID (VID framework) =====
