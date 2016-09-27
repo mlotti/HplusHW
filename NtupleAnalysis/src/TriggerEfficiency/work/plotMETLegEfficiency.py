@@ -33,10 +33,10 @@ def main():
 
     paths = [sys.argv[1]]
 
-    analysis = "METLeg_2015D_MET80"
-#    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
-#    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau\S+25ns$|TTJets$")
-    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
+    analysis = "METLeg_2015CD_MET80"
+    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
+#    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau|TT$")
+#    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="DYJetsToLL|WJetsToLNu$")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau_Run2015D_PromptReco_v4_246908_260426_25ns$|DYJetsToLL_M_50$")
 
     for d in datasets.getAllDatasets():
@@ -65,7 +65,8 @@ def main():
 
     legend1 = "Data"
 #    legend2 = "MC (TTJets)"
-    legend2 = "MC"
+#    legend2 = "MC"
+    legend2 = "Simulation"
     p.histoMgr.setHistoLegendLabelMany({"eff1_MET80": legend1, "eff2_MET80": legend2})
 
     p.createFrame(os.path.join(plotDir, name), createRatio=True, opts=opts, opts2=opts2)
@@ -76,12 +77,13 @@ def main():
     p.getFrame2().GetYaxis().SetTitle("Ratio")
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
+    histograms.addText(0.4, 0.2, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
 #    histograms.addText(0.2, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
-    label = analysis.split("_")[1]
-    histograms.addText(0.2, 0.53, label, 17)
+#    label = analysis.split("_")[1]
+    label = "2015"
+    histograms.addText(0.4, 0.13, label, 17)
     runRange = datasets.loadRunRange()
-    histograms.addText(0.2, 0.46, "Runs "+runRange, 17)
+    histograms.addText(0.4, 0.06, "Runs "+runRange, 17)
 
     p.draw()
     lumi = 0.0
@@ -150,11 +152,12 @@ def main():
     p.save(formats)
     """
 
+    """
     # CaloMET
 
     #### MET80
 
-    analysisc = "METLeg_2015D_CaloMET_MET80"
+    analysisc = "METLeg_2015CD_CaloMET_MET80"
     datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc)
     datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc,excludeTasks="Tau\S+25ns_Silver$")
 #    datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc,includeOnlyTasks="Tau\S+25ns$|TTJets$")
@@ -202,7 +205,7 @@ def main():
     if not os.path.exists(plotDir):
         os.mkdir(plotDir)
     p.save(formats)
-
+    """
     """
     #### MET120 
 
@@ -266,19 +269,20 @@ def main():
 
     pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
 
-    opts = {"ymin": 0.001, "ymax": 0.1}
-    pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=opts, opts2=opts2)
+    opts = {"ymin": 0.001, "ymax": 2.0}
+    moveLegend = {"dx": -0.5, "dy": -0.5, "dh": -0.1}
+    pPU.createFrame(os.path.join(plotDir, namePU), createRatio=False, opts=opts, opts2=opts2)
     pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-    pPU.getPad1().SetLogy(True)
+    pPU.getPad().SetLogy(True)
 
     pPU.getFrame().GetYaxis().SetTitle("L1+HLT MET efficiency")
     pPU.getFrame().GetXaxis().SetTitle("Number of reco vertices")
-    pPU.getFrame2().GetYaxis().SetTitle("Ratio")
-    pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
+    #pPU.getFrame2().GetYaxis().SetTitle("Ratio")
+    #pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.4, 0.25, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
-    histograms.addText(0.4, 0.18, analysis.split("_")[len(analysis.split("_")) -1], 17)
-    histograms.addText(0.4, 0.11, "Runs "+datasets.loadRunRange(), 17)
+    histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1_MET80", 17)
+    histograms.addText(0.2, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.2, 0.46, "Runs "+datasets.loadRunRange(), 17)
 
     pPU.draw()
     histograms.addStandardTexts(lumi=lumi)
