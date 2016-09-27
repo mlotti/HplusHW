@@ -395,7 +395,6 @@ def GetTaskReports(datasetPath, status, dashboardURL, opts):
 
 def CheckTaskReport(taskDir, jobId,  opts):
     '''
-    STILL UNDER CONSTRUCTION
     Probes the log-file tarball for a given jobId to 
     determine the job status or exit code.
     '''
@@ -403,15 +402,30 @@ def CheckTaskReport(taskDir, jobId,  opts):
 
     filePath    = os.path.join(taskDir, "results", "cmsRun_%i.log.tar.gz" % jobId)
     exitCode_re = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<exitcode>\d+)")
+
+    # Ensure file is indeed a tarfile 
     if tarfile.is_tarfile(filePath):
+
+        # Open the tarball
         fIN = tarfile.open(filePath)
         log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+
+        # For-loop: All files inside tarball
         for member in fIN.getmembers():
+
+            # Extract the log file
             logfile = fIN.extractfile(member)  
-            match = log_re.search(logfile.name)
+            match   = log_re.search(logfile.name)
+
+            # Regular Expression match for log-file
             if match:
+                # For-loop: All lines of log-file
                 for line in reversed(logfile.readlines()):
+
+                    # Search for exit code
                     exitMatch = exitCode_re.search(line)
+
+                    # If exit code found, return the value
                     if exitMatch:
 			return int(exitMatch.group("exitcode"))
     return -1
@@ -494,14 +508,23 @@ def GetTaskOutput(taskPath, retrievedOut, finished):
 
     if opts.deleteOutput:
         Verbose("Deleting all ROOT files stored locally in the multicrab directory", False)
-        rootFiles = Execute("ls -tr %s" % (taskPath + "/results/miniaod2tree_*.root") )
+        rootFiles    = Execute("ls -tr %s" % (taskPath + "/results/miniaod2tree_*.root") )
+
+        rootFilesEOS = []
+        for f in rootFiles:
+            rootFilesEOS.append( ConvertPathToEOS(f, opts) )
+
         if len(rootFiles) > 0:
             decision  = AskUser("Are you sure you want to permanently delete the following files ?\n\t%s\n\t" % ("\n\t".join(rootFiles)), True)
             if decision:
-                rmOut = Execute("rm -f %s" % (taskPath + "/results/miniaod2tree_*.root") )
-            else:
-                pass
+                for f in rootFiles:
+                    rmOut = Execute("rm -f %s" % (f))  # taskPath + "/results/miniaod2tree_*.root") )
 
+        if len(rootFilesEOS) > 0:
+            decision  = AskUser("Are you sure you want to permanently delete the following files ?\n\t%s\n\t" % ("\n\t".join(rootFilesEOS)), True)
+            if decision:
+                for f in rootFilesEOS:
+                    rmOut = Execute("eos rm -f %s" % (f) )
     return
 
 
@@ -527,9 +550,7 @@ def ResubmitTask(taskPath, failed):
             return
     else:
         Print("Found \"Failed\" jobs! Resubmitting ...")
-#        dummy = crabCommand('resubmit', dir=taskPath)
-#        dummy = crabCommand('resubmit', [taskPath, 'jobids=%s'%joblist, 'force'])
-        os.system("crab resubmit %s --jobids=%s --force"%(taskPath,joblist))
+        os.system("crab resubmit %s --jobids=%s --force" % (taskPath,joblist) )
     return
 
 
@@ -880,7 +901,8 @@ def RetrievedFiles(taskDir, crabResults, dashboardURL, printTable, opts):
                 retrievedLog += 1
                 exitCode = CheckTaskReport(taskDir, jobId, opts)
                 if not exitCode == 0:
-                    failed.append( jobId )
+                    Verbose("Found failed job for task=\"%s\" with jobId=\"%s\" and exitCode=\"%s\"" % (taskDir, jobId, exitCode) )
+                    failed.append( jobId )                    
             if foundOut:
                 retrievedOut += 1
             if foundLog and not foundOut:
@@ -978,7 +1000,12 @@ def WalkEOSDir(pathOnEOS, opts):
     Verbose(cmd)
     dirContents = Execute(cmd)
 
-    Verbose("Walking the EOS directory \"%s\"." % (pathOnEOS))
+    # Sometimes an error occures (for unknown reasons). Try alternative
+    if "symbol lookup error" in dirContents[0]:
+        raise Exception("%s\".\n\t\"%s\"." % (cmd, dirContents[0]) )
+    else:
+        Verbose("Walking the EOS directory \"%s\" with contents:\n\t%s" % (pathOnEOS, "\n\t".join(dirContents)))
+    
     
     # A very, very dirty way to find the deepest directory where the ROOT files are located!
     if len(dirContents) == 1:
@@ -1004,10 +1031,11 @@ def Exists(dataset, filename):
     Verbose("Exists()", False)
 
     fileName = os.path.join(dataset, "results", filename)
-    cmd      = "ls"
+    cmd      = "ls " + fileName
 
-    Verbose(cmd + " " + fileName)
-    fname = Execute("%s %s" % (cmd, fileName) )[0] #fixme: is this not used?
+    Verbose(cmd)
+    files     = Execute("%s" % (cmd) ) #not used
+    firstFile = files[0] #not used
     return os.path.exists(fileName)
 
 
@@ -1018,17 +1046,20 @@ def ExistsEOS(dataset, subDir, fileName, opts):
     Verbose("ExistsEOS()", False)
 
     fullPath = os.path.join(dataset, subDir, fileName)
-    cmd      = ConvertCommandToEOS("ls", opts)
+    cmd_eos  = ConvertCommandToEOS("ls", opts)
+    cmd      = cmd_eos + " " + fullPath
+    
+    Verbose(cmd)
+    files  = Execute("%s" % (cmd) )
 
-    Verbose(cmd + " " + fullPath)
-    fname = Execute("%s %s" % (cmd, fullPath) )[0]
-
-    if "Unable to stat" in fname:
+    # If file is not found there won't be a list of files; there will be an error message
+    errMsg = files[0]
+    if "Unable to stat" in errMsg:
         return False
-    elif fname == fileName:
+    elif errMsg == fileName:
         return True
     else:
-        raise Exception("This should never be reached!")        
+        raise Exception("This should not be reached! Execution of command \"%s\" returned \"%s\"" % (cmd, errMsg))
 
 
 def Touch(path):
@@ -1047,7 +1078,9 @@ def Execute(cmd):
     '''
     Executes a given command and return the output.
     '''
-    Verbose("Execute(): " + cmd)
+    Verbose("Execute()", True)
+
+    Verbose("Executing command: \"%s\"" % (cmd))
     p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
     stdin  = p.stdout
@@ -1561,18 +1594,22 @@ def ConvertCommandToEOS(cmd, opts):
     Convert a given command to EOS-path. Used when working solely with EOS
     and files are not copied to local working directory    
     '''
-    Verbose("ConvertCommandToEOS()")
+    Verbose("ConvertCommandToEOS()", True)
 
     # Define a map mapping bash command with EOS commands
     cmdMap = {}
-    cmdMap["ls"] = "eos ls"
+    # cmdMap["ls"] = "eos ls" #Will NOT work due to a conflict between the EOS and CMSSW environment
+    cmdMap["ls"] = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select ls" #"eos ls" is an ALIAS for this command. Works
     cmdMap["rm"] = "eos rm"
 
     # EOS commands differ on LPC!
     if "fnal" in GetHostname():
         for key in cmdMap:
-            cmdMap[key] = cmdMap[key].replace("eos ", "eos")
-
+            if key == "ls": # exception because I use the full command, not the alias
+                cmdMap[key] = "eosls"
+            else:
+                cmdMap[key] = cmdMap[key].replace("eos ", "eos")
+        
     if cmd not in cmdMap:
         raise Exception("Could not find EOS-equivalent for cammand \"%s\"." % (cmd) )
 
@@ -1613,7 +1650,7 @@ def CreateJob(opts, args):
 	CreateCfgFile(dataset, taskDirName, requestName, "crabConfig.py", opts)
                 
         Verbose("Submitting jobs for dataset \"%s\"" % (dataset), True)
-	#SubmitTaskDir(taskDirName, requestName) #XENIOS
+	SubmitTaskDir(taskDirName, requestName)
 		
     return 0
 
@@ -1656,8 +1693,8 @@ if __name__ == "__main__":
     parser.add_option("-u", "--url"        , dest="url"          , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
     parser.add_option("-i", "--includeTask", dest="includeTasks" , default="None" , type="string"      , help="Only perform action for this dataset(s) [default: \"\"]")
     parser.add_option("-e", "--excludeTask", dest="excludeTasks" , default="None" , type="string"      , help="Exclude this dataset(s) from action [default: \"\"]")
-    parser.add_option("--deleteOutput"     , dest="deleteOutput" , default=False  , action="store_true", help="WARNING! Will delete all ROOT retrieved in cwd [default: False]")
     parser.add_option("--noTransfer", dest="noTransfer", default=False, action="store_true", help="Disable transfer of output/log files  [default: False]")
+    parser.add_option("--deleteOutput"     , dest="deleteOutput" , default=False  , action="store_true", help="WARNING! Will delete all ROOT retrieved in cwd [default: False]")
     (opts, args) = parser.parse_args()
 
     if opts.create == False and opts.dirName == "":
