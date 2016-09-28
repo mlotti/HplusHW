@@ -1210,12 +1210,12 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
 
     if isHeavy:
         x = 0.50
-        y = -0.11
+        y = -0.25#-0.11
         #if scenario.replace("-LHCHXSWG", "") in ["lightstop", "mhmaxup"]:
         #    y += 0.05
     else:
         x = 0.2
-        y = -0.15
+        y = -0.05
     plot.setLegend(histograms.createLegend(x-0.01, y+0.6-(captionLines-0.2)*captionLineSpacing, x+0.45, y+0.9-(captionLines-0.2)*captionLineSpacing))
     plot.legend.SetMargin(0.17)
 
