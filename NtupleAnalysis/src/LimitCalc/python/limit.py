@@ -63,11 +63,11 @@ tanblimit = "tan #beta"
 
 ## Label for m(H+)
 def mHplus():
-    return "m_{H^{+}} [%s]" % massUnit()
+    return "m_{H^{+}} (%s)" % massUnit()
 
 ## Label for m(A)
 def mA():
-    return "m_{A} [%s]" % massUnit()
+    return "m_{A} (%s)" % massUnit()
 
 
 ## Labels for the final states
