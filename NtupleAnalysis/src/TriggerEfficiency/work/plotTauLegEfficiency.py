@@ -202,7 +202,8 @@ def analyze(analysis):
     name = "TauMET_"+analysis+"_DataVsMC_PFTauPt"
 
     legend1 = "Data"
-    legend2 = "MC (DY)"
+#    legend2 = "MC (DY)"
+    legend2 = "Simulation"
     legend3 = "MC (H125)"
     p.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
     if isinstance(datasetsH125,dataset.DatasetManager):
@@ -217,7 +218,8 @@ def analyze(analysis):
     p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
-    label = analysis.split("_")[len(analysis.split("_")) -1]
+#    label = analysis.split("_")[len(analysis.split("_")) -1]
+    label = "2015"
     histograms.addText(0.5, 0.53, label, 17)
     runRange = datasets.loadRunRange()
     histograms.addText(0.5, 0.46, "Runs "+runRange, 17)
@@ -281,7 +283,7 @@ def analyze(analysis):
     p_eta.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.2, 0.46, "LooseIsoPFTau50_Trk30_eta2p1", 17)
-    histograms.addText(0.2, 0.38, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.2, 0.38, label, 17)
     histograms.addText(0.2, 0.31, "Runs "+datasets.loadRunRange(), 17)
 
     p_eta.draw()
@@ -308,18 +310,19 @@ def analyze(analysis):
     pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1, "eff2": legend2})
 
     optsPU = {"ymin": 0.1, "ymax": 1.2}
-    pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=optsPU, opts2=opts2)
+    moveLegend = {"dx": -0.5, "dy": -0.5, "dh": -0.1}
+    pPU.createFrame(os.path.join(plotDir, namePU), createRatio=False, opts=optsPU, opts2=opts2)
     pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-    pPU.getPad1().SetLogy(True)
+    pPU.getPad().SetLogy(True)
 
     pPU.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
     pPU.getFrame().GetXaxis().SetTitle("Number of reco vertices")
-    pPU.getFrame2().GetYaxis().SetTitle("Ratio")
-    pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
+    #pPU.getFrame2().GetYaxis().SetTitle("Ratio")
+    #pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
-    histograms.addText(0.5, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
-    histograms.addText(0.5, 0.46, "Runs "+datasets.loadRunRange(), 17)
+    histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
+    histograms.addText(0.2, 0.53, label, 17)
+    histograms.addText(0.2, 0.46, "Runs "+datasets.loadRunRange(), 17)
 
     pPU.draw()
     histograms.addStandardTexts(lumi=lumi)
@@ -399,8 +402,8 @@ def main():
         usage()
 
 #    analyze("TauLeg_2015C")
-    analyze("TauLeg_2015D")
-#    analyze("TauLeg_2015CD")
+#    analyze("TauLeg_2015D")
+    analyze("TauLeg_2015CD")
 
 
 if __name__ == "__main__":
