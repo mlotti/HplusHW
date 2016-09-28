@@ -1077,11 +1077,16 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         obs = graphs["obs"]
         excluded = aux.Clone(ROOT.TGraph(obs))
         excluded.SetName("ExcludedArea")
-        excluded.SetPoint(excluded.GetN(), -1.0, obs.GetY()[excluded.GetN()-1])
-        excluded.SetPoint(excluded.GetN(), -1.0, 69.0)
-        excluded.SetPoint(excluded.GetN(), 1000.0, 69.0)
-        excluded.SetPoint(excluded.GetN(), 1000.0, obs.GetY()[0])
-        excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
+        if isHeavy:
+            excluded.SetPoint(excluded.GetN(),obs.GetX()[obs.GetN()-1],69.0)
+            excluded.SetPoint(excluded.GetN(), -1.0, 69.0)
+            excluded.SetPoint(excluded.GetN(), -1.0, obs.GetY()[0])
+        else:
+            excluded.SetPoint(excluded.GetN(), -1.0, obs.GetY()[excluded.GetN()-1])
+            excluded.SetPoint(excluded.GetN(), -1.0, 69.0)
+            excluded.SetPoint(excluded.GetN(), 1000.0, 69.0)
+            excluded.SetPoint(excluded.GetN(), 1000.0, obs.GetY()[0])
+            excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
         setExcludedStyle(excluded)
         graphs["excluded"] = excluded
         if "isomass" in graphs.keys() and "_mA" in name:
@@ -1104,16 +1109,19 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
             truncateBeyondIsomass(graphs["isomass"], excludedDown)
 
     # Set styles
-    expected = graphs["exp"]
-    setExpectedStyle(expected)
+    if "exp" in graphs.keys():
+        expected = graphs["exp"]
+        setExpectedStyle(expected)
     if "expDown" in graphs.keys():
         setExpectedStyle(graphs["expDown"])
         setExpectedGreenBandStyle(graphs["exp1Down"])
         setExpectedYellowBandStyle(graphs["exp2Down"])
-    expected1 = graphs["exp1"]
-    setExpectedGreenBandStyle(expected1)
-    expected2 = graphs["exp2"]
-    setExpectedYellowBandStyle(expected2)
+    if "exp1" in graphs.keys():
+        expected1 = graphs["exp1"]
+        setExpectedGreenBandStyle(expected1)
+    if "exp2" in graphs.keys():
+        expected2 = graphs["exp2"]
+        setExpectedYellowBandStyle(expected2)
 
     if "Allowed" in graphs.keys():
         allowed = graphs["Allowed"]
@@ -1169,16 +1177,19 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     if "isomass" in graphs.keys():
         truncateBeyondIsomass(graphs["isomass"], expected1)
         truncateBeyondIsomass(graphs["isomass"], expected2)
-    plotsList.append(histograms.HistoGraph(expected, "Expected", drawStyle="L", legendStyle=None))
+    print "check graphs.keys()",graphs.keys()
+    if "exp" in graphs.keys():
+        plotsList.append(histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L", legendStyle=None))
     if "expDown" in graphs.keys():
         plotsList.append(histograms.HistoGraph(graphs["expDown"], "Expected", drawStyle="L", legendStyle=None))
-    plotsList.append(histograms.HistoGraph(expected1, "Expected1", drawStyle="F", legendStyle="fl"))
+    if "exp1" in graphs.keys():
+        plotsList.append(histograms.HistoGraph(graphs["exp1"], "Expected1", drawStyle="F", legendStyle="fl"))
     if "exp1Down" in graphs.keys():
         if "isomass" in graphs.keys():
             truncateBeyondIsomass(graphs["isomass"], graphs["exp1Down"])
         plotsList.append(histograms.HistoGraph(graphs["exp1Down"], "Expected median #pm 1#sigma", drawStyle="F", legendStyle=None))
-    
-    plotsList.append(histograms.HistoGraph(expected2, "Expected2", drawStyle="F", legendStyle="fl"))
+    if "exp2" in graphs.keys():
+        plotsList.append(histograms.HistoGraph(graphs["exp2"], "Expected2", drawStyle="F", legendStyle="fl"))
     if "exp2Down" in graphs.keys():
         if "isomass" in graphs.keys():
             truncateBeyondIsomass(graphs["isomass"], graphs["exp2Down"])
