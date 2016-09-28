@@ -248,11 +248,13 @@ def analyze(analysis=None):
     p.save(formats)
     """
 
+    """
     # CaloMET
     """
     #### MET80
 
     analysisc = "METLeg_2016B_CaloMET_MET80"
+
     datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc)
     datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc,excludeTasks="Tau\S+25ns_Silver$")
 #    datasetsc = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysisc,includeOnlyTasks="Tau\S+25ns$|TTJets$")

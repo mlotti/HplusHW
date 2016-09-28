@@ -46,7 +46,8 @@ def main():
         match = json_re.search(argv)
         if match:
             jsonfile = match.group(0)
-    jsonfile = "limits_light2016.json"
+#    jsonfile = "limits_light2016.json"
+    jsonfile = "limitsForMSSMplots_v1_light.json"
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/lightHplus_configuration.json")
     limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/lightHplus_configuration.json")
 
@@ -55,9 +56,10 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    if limit.forPaper:
-        histograms.cmsTextMode = histograms.CMSMode.PAPER
-    #histograms.cmsTextMode = histograms.CMSMode.PAPER # tmp
+#    if limit.forPaper:
+#        histograms.cmsTextMode = histograms.CMSMode.PAPER
+    histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
+#    histograms.cmsTextMode = histograms.CMSMode.PAPER # tmp
     #histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED # tmp
     limit.forPaper = True # to get GeV without c^2
 

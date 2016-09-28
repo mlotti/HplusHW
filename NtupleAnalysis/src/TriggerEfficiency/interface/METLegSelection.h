@@ -47,8 +47,14 @@ void METLegSelection::print(){}
 bool METLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
 
   xvariable = fEvent.met_Type1().et();
-  if(xvar == phi) xvariable = fEvent.met_Type1().phi();
-  if(xvar == pu) xvariable = fEvent.vertexInfo().value();
+  if(xvar == phi) {
+    xvariable = fEvent.met_Type1().phi();
+    if(fEvent.met_Type1().et() < 80) return false;
+  }
+  if(xvar == pu) {
+    xvariable = fEvent.vertexInfo().value();
+    if(fEvent.met_Type1().et() < 80) return false;
+  }
 
   const TauSelection::Data tauData = fTauSelection.silentAnalyze(fEvent);
   if (!tauData.hasIdentifiedTaus()) return false;

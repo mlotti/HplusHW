@@ -46,7 +46,8 @@ def main():
         match = json_re.search(argv)
         if match:
             jsonfile = match.group(0)
-    jsonfile = "limits_heavy2016.json"                                                                                
+#    jsonfile = "limits_heavy2016.json"
+    jsonfile = "limitsForMSSMplots_v1_heavy.json"
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="configurationHeavy.json")
     limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/heavyHplus_configuration.json")
 
@@ -55,10 +56,11 @@ def main():
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    if limit.forPaper:
-        histograms.cmsTextMode = histograms.CMSMode.PAPER
+    #if limit.forPaper:
+    #    histograms.cmsTextMode = histograms.CMSMode.PAPER
     #histograms.cmsTextMode = histograms.CMSMode.PAPER # tmp
-    histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED # tmp
+    #histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED # tmp
+    histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
     limit.forPaper = True # to get GeV without c^2
 
     # Get BR limits
@@ -86,7 +88,7 @@ def main():
             print "    REMOVING POINT",obs.GetY()[i]," corresponding mass=",obs.GetX()[i]
             obs.RemovePoint(i)
     print
-    
+
     graphs["exp"] = limits.expectedGraph()
     graphs["exp1"] = limits.expectedBandGraph(sigma=1)
     graphs["exp2"] = limits.expectedBandGraph(sigma=2)

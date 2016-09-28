@@ -240,6 +240,7 @@ def analyze(analysis=None):
     histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
 #    label = analysis.split("_")[len(analysis.split("_")) -1]
     label = "2016"
+
     histograms.addText(0.5, 0.53, label, 17)
     runRange = datasets.loadRunRange()
     histograms.addText(0.5, 0.46, "Runs "+runRange, 17)
@@ -503,9 +504,6 @@ def main():
     if len(sys.argv) < 2:
         usage()
 
-#    analyze("TauLeg_2015C")
-#    analyze("TauLeg_2015D")
-#    analyze("TauLeg_2015CD")
 #    analyze("TauLeg_2016B")
 #    analyze("TauLeg_2016C")
 #    analyze("TauLeg_2016ICHEP")
