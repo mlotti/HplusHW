@@ -681,9 +681,13 @@ def pileup(fileName, opts):
             Print("PileUp not found in", os.path.dirname(filePath), ", did you run hplusLumiCalc.py?")
         if not hPU == None:
             fOUT.cd("configInfo")
-            hPU.Write("", ROOT.TObject.kOverwrite)     # hPU.Write("pileup", ROOT.TObject.kOverwrite)          # unclear which of 2 is correct
-            hPUup.Write("", ROOT.TObject.kOverwrite)   # hPUup.Write("pileup_up", ROOT.TObject.kOverwrite)     # unclear which of 2 is correct
-            hPUdown.Write("", ROOT.TObject.kOverwrite) # hPUdown.Write("pileup_down", ROOT.TObject.kOverwrite) # unclear which of 2 is correct
+            hPU.Write("", ROOT.TObject.kOverwrite)
+            hPUup.Write("", ROOT.TObject.kOverwrite)
+            hPUdown.Write("", ROOT.TObject.kOverwrite)
+            # Sami's repo had these instead:
+            #hPU.Write("pileup",ROOT.TObject.kOverwrite)
+            #hPUup.Write("pileup_up",ROOT.TObject.kOverwrite)
+            #hPUdown.Write("pileup_down",ROOT.TObject.kOverwrite)
 
         Verbose("Closing file \"%s\"." % (filePath) )
         fOUT.Close()

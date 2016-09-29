@@ -65,29 +65,27 @@ void BJetSelection::initialize(const ParameterSet& config) {
     throw hplus::Exception("config") << "b-tagging algorithm working point '" << sWorkingPoint
                                      << "' is not valid!\nValid values are: Loose, Medium, Tight";
   if (sAlgorithm == "pfCombinedInclusiveSecondaryVertexV2BJetTags") {
-    // Oct 2015 https://indico.cern.ch/event/455330/session/1/contribution/173/attachments/1175466/1699105/DMajumder_CMSWeek22Oct_BTVReport_v1.pdf
+    // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X
     if (sWorkingPoint == "Loose")
-      fDisriminatorValue = 0.605;
+      fDisriminatorValue = 0.460;
     else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.890;
+      fDisriminatorValue = 0.800;
     else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.970;
-  } else if (sAlgorithm == "pfCombinedSecondaryVertexBJetTags") {
-    // Run 1 legacy values
+      fDisriminatorValue = 0.935;
+  } else if (sAlgorithm == "pfCombinedMVA2BJetTags") {
     if (sWorkingPoint == "Loose")
-      fDisriminatorValue = 0.244;
+      fDisriminatorValue = -0.715;
     else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.679;
+      fDisriminatorValue = 0.185;
     else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.898;
-  } else if (sAlgorithm == "pfJetProbabilityBJetTags") {
-    // Oct 2015 https://indico.cern.ch/event/455330/session/1/contribution/173/attachments/1175466/1699105/DMajumder_CMSWeek22Oct_BTVReport_v1.pdf
+      fDisriminatorValue = 0.875;
+  } else if (sAlgorithm == "pfCombinedCvsLJetTags" || sAlgorithm == "pfCombinedCvsBJetTags") {
     if (sWorkingPoint == "Loose")
-      fDisriminatorValue = 0.275;
+      fDisriminatorValue = -0.17;
     else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.545;
+      fDisriminatorValue = 0.08;
     else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.790;    
+      fDisriminatorValue = 0.45;    
   }
   
   if (fDisriminatorValue < 0.0) {

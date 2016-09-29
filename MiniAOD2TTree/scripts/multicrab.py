@@ -1461,7 +1461,7 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
 	    # Set the "unitsPerJob" field which suggests (but not impose) how many files, lumi sections or events to include in each job.
 	    match = crab_splitunits_re.search(line)	
 	    if match:
-		line = "config.Data.unitsPerJob = 50\n"
+		line = "config.Data.unitsPerJob = 25\n"
 	else:
 	    pass
 

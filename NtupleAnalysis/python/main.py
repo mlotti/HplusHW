@@ -3,6 +3,7 @@ import time
 import copy
 import json
 import re
+import sys
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -170,8 +171,13 @@ class Dataset:
     def getLumiFile(self):
         return self._lumiFile
 
-    def getPileUp(self):
-        return self._pileup
+    def getPileUp(self,direction):
+        if direction=="plus":
+            return self._pileup["up"]
+        elif direction=="minus":
+            return self._pileup["down"]
+        else:
+            return self._pileup["nominal"]
       
     def getNAllEvents(self):
         return self._nAllEvents
@@ -196,7 +202,19 @@ class Process:
         prec = dataset.DatasetPrecursor(name, files)
         if dataVersion is None:
             dataVersion = prec.getDataVersion()
-        pileUp = prec.getPileUp()
+        #get pileup
+        pileUp = {}
+        pileUp["nominal"]=prec.getPileUp("nominal")
+        pileUp["up"]=prec.getPileUp("up")
+        pileUp["down"]=prec.getPileUp("down")
+        #Debug prints:
+#        if ("data" in prec.getDataVersion()):
+#          sys.stderr.write("addDataset (main.py) l. 210 saves the following means  for nominal, up and down: ")
+#          sys.stderr.write(str(pileUp["nominal"].GetMean())+", ")
+#          sys.stderr.write(str(pileUp["up"].GetMean())+", ")
+#          sys.stderr.write(str(pileUp["down"].GetMean()))
+#          sys.stderr.write("\n\n")
+
         nAllEvents = prec.getNAllEvents()
         prec.close()
         self._datasets.append( Dataset(name, files, dataVersion, lumiFile, pileUp, nAllEvents) )
@@ -436,6 +454,13 @@ class Process:
                 inputList.Add(ROOT.TNamed("PROOF_OUTPUTFILE_LOCATION", resFileName))
             else:
                 inputList.Add(ROOT.TNamed("OUTPUTFILE_LOCATION", resFileName))
+
+#            if _debugPUreweighting:
+#                print "\n\nDebug(inputlist): Input list contains:"
+#                print "--- start of input list ---"
+#                inputList.Print("",1)
+#                print "--- end of input list \n\n"
+
             tselector.SetInputList(inputList)
 
             readBytesStart = ROOT.TFile.GetFileBytesRead()
@@ -577,18 +602,37 @@ class Process:
         hPUs = {}
         for aname, analyzerIE in self._analyzers.iteritems():
             hPU = None
+            direction="nominal"
+            analyzer = analyzerIE.getAnalyzer()
+            if hasattr(analyzer, "PUWeightSystematicVariation"):
+                direction=getattr(analyzer, "PUWeightSystematicVariation")
             for dset in self._datasets:
                 if dset.getDataVersion().isData() and analyzerIE.runForDataset_(dset.getName()):
                     if hPU is None:
-                        hPU = dset.getPileUp().Clone()
+                        hPU = dset.getPileUp(direction).Clone()
                     else:
-                        hPU.Add(dset.getPileUp())
+                        hPU.Add(dset.getPileUp(direction))
             if hPU != None:
-                hPU.SetName("PileUpData")
+                if direction == "plus":
+                    direction_postfix="Up"
+                elif direction == "minus":
+                    direction_postfix = "Down"
+                else:
+                    direction_postfix = ""
+                hPU.SetName("PileUpData"+direction_postfix)
                 hPU.SetDirectory(None)
                 hPUs[aname] = hPU
-            #else:
-            #    raise Exception("Cannot determine PU spectrum for data!")
+#                #Debug prints:
+#                sys.stderr.write("_getDataPUhistos saves direction ")
+#                sys.stderr.write(direction)
+#                sys.stderr.write(" histograms for aname ")
+#                sys.stderr.write(aname)
+#                sys.stderr.write(", mean =")
+#                sys.stderr.write(str(hPUs[aname].GetMean()))
+#                sys.stderr.write("\n")
+                
+            else:
+                raise Exception("Cannot determine PU spectrum for data!")
         return hPUs
  
     ## Obtains PU histogram for MC
@@ -599,9 +643,9 @@ class Process:
         hPUMC = None
         nAllEventsPUWeighted = 0.0
         if aname in hDataPUs.keys():
-            if _debugPUreweighting:
-                for k in range(hDataPUs[aname].GetNbinsX()):
-                    print "DEBUG(PUreweighting): dataPU:%d:%f"%(k+1, hDataPUs[aname].GetBinContent(k+1))
+#            if _debugPUreweighting:
+#                for k in range(hDataPUs[aname].GetNbinsX()):
+#                    print "DEBUG(PUreweighting,aname=%s): dataPU:%d:%f"%(aname,k+1, hDataPUs[aname].GetBinContent(k+1))
             inputList.Add(hDataPUs[aname])
         else:
             n = 50
@@ -611,26 +655,32 @@ class Process:
                 hFlat.Fill(k+1, 1.0/n)
             inputList.Add(hFlat)
             hDataPUs[aname] = hFlat
-        if dset.getPileUp() == None:
+        if dset.getPileUp("nominal") == None:
             raise Exception("Error: pileup spectrum is missing from dataset! Please switch to using newest multicrab!")
-        hPUMC = dset.getPileUp().Clone()
+        hPUMC = dset.getPileUp("nominal").Clone()
         hPUMC.SetDirectory(None)
 
         if hPUMC.GetNbinsX() != hDataPUs[aname].GetNbinsX():
             raise Exception("Pileup histogram dimension mismatch! data nPU has %d bins and MC nPU has %d bins"%(hDataPUs[aname].GetNbinsX(), hPUMC.GetNbinsX()))
         hPUMC.SetName("PileUpMC")
-        if _debugPUreweighting:
-            for k in range(hPUMC.GetNbinsX()):
-                print "Debug(PUreweighting): MCPU:%d:%f"%(k+1, hPUMC.GetBinContent(k+1))
+#        if _debugPUreweighting:
+#            for k in range(hPUMC.GetNbinsX()):
+#                print "Debug(PUreweighting): MCPU:%d:%f"%(k+1, hPUMC.GetBinContent(k+1))
         inputList.Add(hPUMC)
         if analyzer.exists("usePileupWeights"):
-            usePUweights = analyzer.__getattr__("usePileupWeights")
+            usePUweights = analyzer.__getattr__("usePileupWeights")           
+            if _debugPUreweighting:
+                print "Debug(PUreweighting,aname=%s): hDataPUs[aname].Integral(): %f"%(aname,hDataPUs[aname].Integral())                        
+                print "Debug(PUreweighting,aname=%s): hDataPUs[aname].Mean(): %f"%(aname,hDataPUs[aname].GetMean())                        
             if hDataPUs[aname].Integral() > 0.0:
                 factor = hPUMC.Integral() / hDataPUs[aname].Integral()
                 for k in range(0, hPUMC.GetNbinsX()+2):
                     if hPUMC.GetBinContent(k) > 0.0:
                         w = hDataPUs[aname].GetBinContent(k) / hPUMC.GetBinContent(k) * factor
                         nAllEventsPUWeighted += w * hPUMC.GetBinContent(k)
+            if _debugPUreweighting:
+                print "Debug(PUreweighting,aname=%s): normalization factor: %f"%(aname,factor)                        
+                print "Debug(PUreweighting,aname=%s): nAllEventsPUWeighted: %f"%(aname,nAllEventsPUWeighted)                        
         return (nAllEventsPUWeighted, usePUweights)
  
     ## Sums the skim counters from input files and returns a pset containing them 

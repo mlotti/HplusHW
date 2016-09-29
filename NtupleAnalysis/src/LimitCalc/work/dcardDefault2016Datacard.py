@@ -299,9 +299,9 @@ Nuisances=[]
 #=====tau ID and mis-ID
 # tau ID
 Nuisances.append(Nuisance(id="CMS_eff_t", label="tau-jet ID (no Rtau) uncertainty for genuine taus",
-    distr="lnN", function="Constant", value=0.06))
+    distr="lnN", function="Constant", value=0.10))
 Nuisances.append(Nuisance(id="CMS_eff_t_forQCD", label="tau-jet ID uncertainty for genuine taus",
-    distr="lnN", function="ConstantForQCD", value=0.06))
+    distr="lnN", function="ConstantForQCD", value=0.10))
 # tau ID high-pT
 if "CMS_eff_t_highpt" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_eff_t_highpt", label="tau-jet ID high-pt uncertainty for genuine taus",
@@ -532,10 +532,10 @@ Nuisances.append(Nuisance(id="xsect_QCD", label="QCD MC cross section",
 #===== Luminosity
 Nuisances.append(Nuisance(id="lumi_13TeV", label="lumi_13TeVnosity",
     distr="lnN", function="Constant",
-    value=systematics.getLuminosityUncertainty()))
+    value=systematics.getLuminosityUncertainty("2016")))
 Nuisances.append(Nuisance(id="lumi_13TeV_forQCD", label="lumi_13TeVnosity",
     distr="lnN", function="ConstantForQCD",
-    value=systematics.getLuminosityUncertainty()))
+    value=systematics.getLuminosityUncertainty("2016")))
 
 #===== QCD measurement
 if OptionIncludeSystematics:
