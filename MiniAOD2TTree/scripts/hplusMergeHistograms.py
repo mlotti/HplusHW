@@ -32,6 +32,7 @@ from optparse import OptionParser
 import tarfile
 import getpass
 import socket
+import timeit
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -52,22 +53,25 @@ replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://m
 # Class Definition
 #================================================================================================ 
 class Report:
-    def __init__(self, dataset, inputFiles, mergedFiles, mergedFilesSizes):
+    def __init__(self, dataset, inputFiles, mergedFiles, mergedFilesSizes, mergedFilesTimes):
         Verbose("class Report:__init__()")
         self.dataset          = dataset
         self.mergePath        = os.path.dirname( mergedFiles[0])
         self.inputFiles       = inputFiles
         self.mergedFiles      = mergedFiles
         self.mergedFilesSizes = mergedFilesSizes
+        self.mergedFilesTimes = mergedFilesTimes
         self.nInputFiles      = len(inputFiles)
         self.nMergedFiles     = len(mergedFiles)
 
         # For-loop: All keys in dictionary (=paths to merged files)
-        sizeSum = 0
+        sizeSum   = 0
+        mergeTime = 0
         for key in mergedFilesSizes:
-            sizeSum += mergedFilesSizes[key]
+            sizeSum   += mergedFilesSizes[key]
+            mergeTime += mergedFilesTimes[key]
         self.mergedFilesSize  = sizeSum
-
+        self.mergedFilesTime  = mergeTime
         return
 
 
@@ -84,53 +88,6 @@ class Report:
         print msg
         return
 
-
-    def GetTaskStatusStyle(self, status):
-        '''
-        NEW, RESUBMIT, KILL: Temporary statuses to indicate the action ('submit', 'resubmit' or 'kill') that has to be applied to the task.
-        QUEUED: An action ('submit', 'resubmit' or 'kill') affecting the task is queued in the CRAB3 system.
-        SUBMITTED: The task was submitted to HTCondor as a DAG task. The DAG task is currently running.
-        SUBMITFAILED: The 'submit' action has failed (CRAB3 was unable to create a DAG task).
-        FAILED: The DAG task completed all nodes and at least one is a permanent failure.
-        COMPLETED: All nodes have been completed
-        KILLED: The user killed the task.
-        KILLFAILED: The 'kill' action has failed.
-        RESUBMITFAILED: The 'resubmit' action has failed.
-        '''
-        Verbose("GetTaskStatusStyle()", True)
-        
-        # Remove all whitespace characters (space, tab, newline, etc.)
-        status = ''.join(status.split())
-        if status == "NEW":
-            status = "%s%s%s" % (colors.BLUE, status, colors.WHITE)
-        elif status == "RESUBMIT":
-            status = "%s%s%s" % (colors.BLUE, status, colors.WHITE)
-        elif status == "QUEUED": 
-            status = "%s%s%s" % (colors.GRAY, status, colors.WHITE)            
-        elif status == "SUBMITTED":
-            status = "%s%s%s" % (colors.BLUE, status, colors.WHITE)
-        elif status == "SUBMITFAILED": 
-            status = "%s%s%s" % (colors.RED, status, colors.WHITE)
-        elif status == "FAILED": 
-            status = "%s%s%s" % (colors.RED, status, colors.WHITE)
-        elif status == "COMPLETED":
-            status = "%s%s%s" % (colors.GREEN, status, colors.WHITE)
-        elif status == "KILLED":
-            status = "%s%s%s" % (colors.ORANGE, status, colors.WHITE)
-        elif status == "KILLFAILED":
-            status = "%s%s%s" % (colors.ORANGE, status, colors.WHITE)
-        elif status == "RESUBMITFAILED": 
-            status = "%s%s%s" % (colors.ORANGE, status, colors.WHITE)
-        elif status == "?": 
-            status = "%s%s%s" % (colors.PINK, status, colors.WHITE)
-        elif status == "UNDETERMINED": 
-            status = "%s%s%s" % (colors.CYAN, status, colors.WHITE)
-        elif status == "UNKNOWN": 
-            status = "%s%s%s" % (colors.LIGHTRED, status, colors.WHITE)
-        else:
-            raise Exception("Unexpected task status \"%s\"." % (status) )
-
-        return status
 
 #================================================================================================
 # Function Definitions
@@ -156,14 +113,40 @@ def Print(msg, printHeader=True):
     return
 
 
+def CreateProgressBar():
+    Verbose("CreateProgressBar()")
+
+    # setup toolbar
+    toolbar_width = 100
+    sys.stdout.write("\t[%s]" % (" " * toolbar_width))
+    sys.stdout.flush()
+
+    # Return to start of line, after '['
+    #sys.stdout.write("\b" * (toolbar_width + 1))
+    sys.stdout.write("\b" * (toolbar_width  + len("\t")))
+    return
+
+
+def FillProgressBar(char, width):
+    Verbose("FillProgressBar()")
+    factor = 100/width
+    sys.stdout.write(char * factor)
+    sys.stdout.flush()
+    return
+
+
+def FinishProgressBar():
+    sys.stdout.write("\n")
+    return
+
+
 def histoToDict(histo):
     '''
     '''
     ret = {}
     
     for bin in xrange(1, histo.GetNbinsX()+1):
-        ret[histo.GetXaxis().GetBinLabel(bin)] = histo.GetBinContent(bin)
-    
+        ret[histo.GetXaxis().GetBinLabel(bin)] = histo.GetBinContent(bin)    
     return ret
 
 
@@ -765,6 +748,16 @@ def FileExists(filePath, opts):
     return True
 
 
+def GetCrabDirectories(opts):
+    '''
+    Returns
+    '''
+    Verbose("GetCrabDirectories()")
+    crabDirsTmp = multicrab.getTaskDirectories(opts)
+    crabDirs = GetIncludeExcludeDatasets(crabDirsTmp, opts)
+    return crabDirs
+
+
 def GetIncludeExcludeDatasets(datasets, opts):
     '''
     Does nothing by default, unless the user specifies a dataset to include (--includeTasks <datasetNames>) or
@@ -881,12 +874,13 @@ def MergeFiles(mergeName, mergeNameEOS, inputFiles, opts):
 
 def PrintSummary(reports):
     '''
+    Self explanatory
     '''
     Verbose("PrintSummary()")
     
     table    = []
-    msgAlign = "{:<3} {:<50} {:^15} {:^15} {:^15}"
-    header   = msgAlign.format("#", "Dataset", "Input Files", "Merged Files", "Merge Size (GB)")
+    msgAlign = "{:<3} {:<50} {:^15} {:^15} {:^15} {:^10}"
+    header   = msgAlign.format("#", "Dataset", "Input Files", "Merged Files", "Merge Size (GB)", "Time Elapsed (s)")
     hLine    = "="*len(header)
     table.append(hLine)
     table.append(header)
@@ -895,13 +889,42 @@ def PrintSummary(reports):
     #For-loop: All reports
     for i, r in enumerate(reports):
         #table.append( msgAlign.format(i+1, r.dataset, r.mergePath, r.nInputFiles, r.nMergedFiles, r.mergedFilesSize) )
-        table.append( msgAlign.format(i+1, r.dataset, r.nInputFiles, r.nMergedFiles, "%0.3f" % r.mergedFilesSize) )
+        table.append( msgAlign.format(i+1, r.dataset, r.nInputFiles, r.nMergedFiles, "%0.3f" % r.mergedFilesSize, "%0.3f" % r.mergedFilesTime) )
 
     # Print the table
+    print
     for l in table:
         print l
     print
     return
+
+
+
+def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
+    '''
+    Loops over all stdout files of a given CRAB task, to obtain 
+    and return the corresponding output files and exit-codes.
+    '''
+    Verbose("GetTaskOutputAndExitCodes()")
+
+    # Definitions
+    files = []
+    exitCodes = []
+        
+    # For-loop: All stdout files of given task
+    for f in stdoutFiles:
+        try:
+            histoFile = GetHistogramFile(taskName, f, opts)
+            if histoFile != None:
+                files.append(histoFile)
+            else:
+                Print("Task %s, skipping job %s: input root file not found from stdout" % (taskName, f) )
+        except multicrab.ExitCodeException, e:
+            Print("Task %s, skipping job %s: %s" % (taskName, f, str(e)) )
+            exit_match = exit_re.search(f)
+            if exit_match:
+                exitCodes.append(int(exit_match.group("exitcode")))
+    return files, exitCodes
 
 
 def main(opts, args):
@@ -910,43 +933,40 @@ def main(opts, args):
     Verbose("main()", True)
     
     # Get the multicrab task names (=dir names)
-    crabDirsTmp = multicrab.getTaskDirectories(opts)
-    crabdirs    = GetIncludeExcludeDatasets(crabDirsTmp, opts)
-
-    Verbose("The multicrab directories are:\n\t%s" % ( "\n\t".join(crabdirs)), True)
-
+    mcrabDir = os.path.basename(os.getcwd())
+    crabDirs = GetCrabDirectories(opts)
+    nTasks   = len(crabDirs)
+    if nTasks < 1:
+        Print("Did not find any tasks under %s. EXIT" % (mrabDir) )
+        return 0
+    
+    #Print("Found %s task(s) in %s:\n\t%s" % ( nTasks, mcrabDir, "\n\t".join(crabDirs)), True)
+    Print("Found %s task(s) in %s" % ( nTasks, mcrabDir) )
+    
     # Construct regular expressions for output files
     global re_histos
     re_histos.append(re.compile("^output files:.*?(?P<file>%s)" % opts.input))
     re_histos.append(re.compile("^\s+file\s+=\s+(?P<file>%s)" % opts.input))
     exit_re = re.compile("/results/cmsRun_(?P<exitcode>\d+)\.log\.tar\.gz")
-
+    
+    # Definitions
     reports = []
-    mergedFiles      = []
+    mergedFiles = []
     mergedFilesSizes = {}
-    # For-loop: All multicrab task names
-    for d in crabdirs:
-        d = d.replace("/", "")
-        stdoutFiles = glob.glob(os.path.join(d, "results", "cmsRun_*.log.tar.gz"))
-        Verbose("The stdout files for task \"%s\" are:\n\t%s" % ( d, "\n\t".join(stdoutFiles)), True)
+    mergedFilesTimes = {}
 
-        files     = []
-        exitCodes = []
-        # For-loop: All stdout files for task "d"
-        for f in stdoutFiles:
-            try:
-                histoFile = GetHistogramFile(d, f, opts)
-                if histoFile != None:
-                    files.append(histoFile)
-                else:
-                    print "Task %s, skipping job %s: input root file not found from stdout" % (d, f)
-            except multicrab.ExitCodeException, e:
-                print "Task %s, skipping job %s: %s" % (d, f, str(e))
-                exit_match = exit_re.search(f)
-                if exit_match:
-                    exitCodes.append(int(exit_match.group("exitcode")))
+    # For-loop: All task names
+    for d in crabDirs:
+        taskName = d.replace("/", "")
 
-        # For Testing purposes
+        # Get all log files for given task
+        stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
+        Verbose("The stdout files for task \"%s\" are:\n\t%s" % ( taskName, "\n\t".join(stdoutFiles)), True)
+
+        # Definitions
+        files, exitCodes = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
+
+        # For Testing purposes: FIXME
         if opts.test:
             if len(exitCodes) > 0:
                 exitCodes_s = ""
@@ -955,34 +975,39 @@ def main(opts, args):
                     if i < len(exitCodes)-1:
                         exitCodes_s += ","
                 print "        jobs with problems:",len(exitCodes)
-                print "        crab resubmit %s --jobids %s --force"%(d,exitCodes_s)
+                print "        crab resubmit %s --jobids %s --force"%(taskName, exitCodes_s)
             continue
 
+        # Check that output files were found. If so, check that they exist!
         if len(files) == 0:
-            print "Task %s, skipping, no files to merge" % d
-            continue
-        
-        CheckThatFilesExist(files, opts)
-        Verbose("Found \"%s\" files for task \"%s\":\n\t%s" % (len(files), d, "\n\t".join(files)) )
+            Print("Task %s, skipping, no files to merge" % taskName)
+            continue        
+        else:
+            CheckThatFilesExist(files, opts)
+        Print("Task %s, with %s ROOT files" % (taskName, len(files)), False)
         
         # Split files according to user-defined options
         filesSplit = splitFiles(files, opts.filesPerMerge, opts)
         if len(filesSplit) == 1:
-            Print("Task %s, merging %d file(s)" % (d, len(files)) )
+            Print("Task %s, merging %d file(s)" % (taskName, len(files)), False)
         else:
-            Print("Task %s, merging %d files to %d file(s)" % (d, len(files), len(filesSplit)) )
+            Print("Task %s, merging %d files to %d file(s)" % (taskName, len(files), len(filesSplit)), False)
+
+        # Create a simple progress bar
+        CreateProgressBar()
 
         # For-loop: All splitted files
         for index, inputFiles in filesSplit:
-            Print("Merging %s/%s" % (index+1, len(filesSplit)), False)
-            taskName = d
-
+            Verbose("Merging %s/%s" % (index+1, len(filesSplit)), False)
+            FillProgressBar("=", len(filesSplit))
+            taskNameAndNum = d
+            
             # Assign "task-number" if merging more than 1 files
             if len(filesSplit) > 1:
-                taskName += "-%d" % index
+                taskNameAndNum += "-%d" % index
 
             # Get the merge name of the files
-            mergeName    = os.path.join(d, "results", opts.output % taskName)
+            mergeName    = os.path.join(d, "results", opts.output % taskNameAndNum)
             mergeNameEOS = ConvertPathToEOS(mergeName, "", opts)
 
             # If merge file exists already rename it as .backup            
@@ -1006,7 +1031,9 @@ def main(opts, args):
                     shutil.move(mergeName, mergeName + ".backup")
 
             # Merge the ROOT files
+            time_start = timeit.timeit()
             ret = MergeFiles(mergeName, mergeNameEOS, inputFiles, opts)
+            time_end = timeit.timeit()
             if ret != 0:
                 return ret
             
@@ -1020,9 +1047,11 @@ def main(opts, args):
             if opts.filesInEOS:
                 mergedFiles.append((mergeNameEOS, inputFiles))
                 mergedFilesSizes[mergeNameEOS] = mergeFileSize
+                mergedFilesTimes[mergeNameEOS] = time_end-time_start
             else:
                 mergedFiles.append((mergeName, inputFiles))
                 mergedFilesSizes[mergeName] = mergeFileSize
+                mergedFilesTimes[mergeName] = time_end-time_start
 
             # Sanity check
             try:
@@ -1051,7 +1080,7 @@ def main(opts, args):
                         pass
 
     # Create report
-    reports.append(Report( ConvertTasknameToEOS(d, opts), inputFiles, mergedFiles[0], mergedFilesSizes))
+    reports.append(Report( ConvertTasknameToEOS(taskName, opts), inputFiles, mergedFiles[0], mergedFilesSizes, mergedFilesTimes))
         
     # Append "delete" message
     deleteMessage = ""
@@ -1060,11 +1089,13 @@ def main(opts, args):
     if opts.deleteImmediately:
         deleteMessage = " (source files deleted immediately)"
 
-    Print("Merged histogram files%s:" % (deleteMessage), False)
+    # Finish the progress bar
+    FinishProgressBar()
+
+    Print("Merged files%s:" % (deleteMessage), False)
     # For-loop: All merged files
     for f, sourceFiles in mergedFiles:
         Print("%s [from %d file(s)]" % (f, len(sourceFiles)), False)
-        
         Verbose("Deleting folders in file \"%s\"." % (f) )
         delete(f, "Generated", opts)
         delete(f, "Commit", opts)
@@ -1083,7 +1114,6 @@ def main(opts, args):
                         Verbose(cmd)
                         os.remove(srcFile)
         pileup(f, opts)
-
 
     # Print summary table using reports
     PrintSummary(reports)
@@ -1147,7 +1177,7 @@ if __name__ == "__main__":
     if opts.filesPerMerge == 0:
         parser.error("--filesPerMerge must be non-zero")
 
-    if opts.test:
-        opts.verbose = True
+#    if opts.test:
+#        opts.verbose = True #iro
 
     sys.exit(main(opts, args))
