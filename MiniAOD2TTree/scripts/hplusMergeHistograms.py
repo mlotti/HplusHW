@@ -52,17 +52,22 @@ replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://m
 # Class Definition
 #================================================================================================ 
 class Report:
-    def __init__(self, name, allJobs, retrieved, running, finished, failed, retrievedLog, retrievedOut, eosLog, eosOut, status, dashboardURL):
+    def __init__(self, dataset, inputFiles, mergedFiles, mergedFilesSizes):
         Verbose("class Report:__init__()")
-        self.name            = name
-        self.task            = str(allJobs)
-        self.filePath        = str(retrieved)
-        self.filePathEOS     = str(running)
-        self.fileSize        = self.name.split("/")[-1]
-        self.fileSizeMerged  = dashboardURL
-        self.host            = self.GetTaskStatusStyle(status)
-        self.nFiles          = finished
-        self.nFilesMerged    = failed
+        self.dataset          = dataset
+        self.mergePath        = os.path.dirname( mergedFiles[0])
+        self.inputFiles       = inputFiles
+        self.mergedFiles      = mergedFiles
+        self.mergedFilesSizes = mergedFilesSizes
+        self.nInputFiles      = len(inputFiles)
+        self.nMergedFiles     = len(mergedFiles)
+
+        # For-loop: All keys in dictionary (=paths to merged files)
+        sizeSum = 0
+        for key in mergedFilesSizes:
+            sizeSum += mergedFilesSizes[key]
+        self.mergedFilesSize  = sizeSum
+
         return
 
 
@@ -659,10 +664,11 @@ def pileup(fileName, opts):
     fOUT.cd()
 
     # Definitoins
-    hPU   = None
+    hPU = None
+    dataVersion = fOUT.Get("configInfo/dataVersion")
     dv_re = re.compile("data")  
     match = dv_re.search(dataVersion.GetTitle())
-    dataVersion = fOUT.Get("configInfo/dataVersion")
+
     if match: 
         puFileTmp = os.path.join(os.path.dirname(filePath), "PileUp.root")
         puFile    = prefix + puFileTmp
@@ -675,9 +681,9 @@ def pileup(fileName, opts):
             Print("PileUp not found in", os.path.dirname(filePath), ", did you run hplusLumiCalc.py?")
         if not hPU == None:
             fOUT.cd("configInfo")
-            hPU.Write("", ROOT.TObject.kOverwrite)
-            hPUup.Write("", ROOT.TObject.kOverwrite)
-            hPUdown.Write("", ROOT.TObject.kOverwrite)
+            hPU.Write("", ROOT.TObject.kOverwrite)     # hPU.Write("pileup", ROOT.TObject.kOverwrite)          # unclear which of 2 is correct
+            hPUup.Write("", ROOT.TObject.kOverwrite)   # hPUup.Write("pileup_up", ROOT.TObject.kOverwrite)     # unclear which of 2 is correct
+            hPUdown.Write("", ROOT.TObject.kOverwrite) # hPUdown.Write("pileup_down", ROOT.TObject.kOverwrite) # unclear which of 2 is correct
 
         Verbose("Closing file \"%s\"." % (filePath) )
         fOUT.Close()
@@ -869,6 +875,31 @@ def MergeFiles(mergeName, mergeNameEOS, inputFiles, opts):
             return ret
 
 
+def PrintSummary(reports):
+    '''
+    '''
+    Verbose("PrintSummary()")
+    
+    table    = []
+    msgAlign = "{:<3} {:<50} {:^15} {:^15} {:^15}"
+    header   = msgAlign.format("#", "Dataset", "Input Files", "Merged Files", "Merge Size (GB)")
+    hLine    = "="*len(header)
+    table.append(hLine)
+    table.append(header)
+    table.append(hLine)
+
+    #For-loop: All reports
+    for i, r in enumerate(reports):
+        #table.append( msgAlign.format(i+1, r.dataset, r.mergePath, r.nInputFiles, r.nMergedFiles, r.mergedFilesSize) )
+        table.append( msgAlign.format(i+1, r.dataset, r.nInputFiles, r.nMergedFiles, "%0.3f" % r.mergedFilesSize) )
+
+    # Print the table
+    for l in table:
+        print l
+    print
+    return
+
+
 def main(opts, args):
     '''
     '''
@@ -886,7 +917,9 @@ def main(opts, args):
     re_histos.append(re.compile("^\s+file\s+=\s+(?P<file>%s)" % opts.input))
     exit_re = re.compile("/results/cmsRun_(?P<exitcode>\d+)\.log\.tar\.gz")
 
-    mergedFiles = []
+    reports = []
+    mergedFiles      = []
+    mergedFilesSizes = {}
     # For-loop: All multicrab task names
     for d in crabdirs:
         d = d.replace("/", "")
@@ -974,20 +1007,25 @@ def main(opts, args):
                 return ret
             
             # Inform user of progress
+            mergeFileSize = GetFileSize(mergeNameEOS, opts, True)
             if len(filesSplit) > 1:
                 #Print("done %d" % index)
-                Verbose("Merged \"%s\" (\"%0.3f\" GB)." % (mergeNameEOS, GetFileSize(mergeNameEOS, opts, True) ), False )
+                Verbose("Merged \"%s\" (\"%0.3f\" GB)." % (mergeNameEOS, mergeFileSize), False )
                 
             # Keep track of merged files
             if opts.filesInEOS:
                 mergedFiles.append((mergeNameEOS, inputFiles))
+                mergedFilesSizes[mergeNameEOS] = mergeFileSize
             else:
                 mergedFiles.append((mergeName, inputFiles))
+                mergedFilesSizes[mergeName] = mergeFileSize
 
             # Sanity check
             try:
                 if opts.filesInEOS:
-                    sanityCheck(GetXrdcpPrefix(opts) + mergeNameEOS, inputFiles)
+                    # sanityCheck(GetXrdcpPrefix(opts) + mergeNameEOS, inputFiles)
+                    pass #fixme: is this still needed? If not can use the time saved! 
+                # Error in <TNetXNGFile::Open>: [ERROR] Server responded with an error: [3005] Unable to open - no replica exists /eos/cms/store/user/attikis/CRAB3_TransferData/ZZTo4Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_ZZTo4Q/160921_141857/0000/histograms-ZZTo4Q-4.root; No such device
                 else:
                     sanityCheck(mergeName, inputFiles)
             except SanityCheckException, e:
@@ -995,7 +1033,6 @@ def main(opts, args):
                 opts.deleteImmediately = False
                 opts.delete = False
             if opts.deleteImmediately:
-
                 # For-loop: All input files
                 for srcFile in inputFiles:
                     if not opts.test:
@@ -1009,7 +1046,9 @@ def main(opts, args):
                     else:
                         pass
 
-    
+    # Create report
+    reports.append(Report( ConvertTasknameToEOS(d, opts), inputFiles, mergedFiles[0], mergedFilesSizes))
+        
     # Append "delete" message
     deleteMessage = ""
     if opts.delete:
@@ -1040,6 +1079,10 @@ def main(opts, args):
                         Verbose(cmd)
                         os.remove(srcFile)
         pileup(f, opts)
+
+
+    # Print summary table using reports
+    PrintSummary(reports)
 
     return 0
 
