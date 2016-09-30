@@ -53,39 +53,42 @@ replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://m
 # Class Definition
 #================================================================================================ 
 class Report:
-    def __init__(self, dataset, inputFiles, mergedFiles, mergedFilesSizes, mergedFilesTimes):
+    def __init__(self, dataset, mergeFileMap, mergeSizeMap, mergeTimeMap, cleanTimeMap, filesExist):
         Verbose("class Report:__init__()")
-        self.dataset          = dataset
-        self.mergePath        = os.path.dirname( mergedFiles[0])
-        self.inputFiles       = inputFiles
-        self.mergedFiles      = mergedFiles
-        self.mergedFilesSizes = mergedFilesSizes
-        self.mergedFilesTimes = mergedFilesTimes
-        self.nInputFiles      = len(inputFiles)
-        self.nMergedFiles     = len(mergedFiles)
+        self.dataset = dataset
+        self.inputFiles  = []
+        self.mergedFiles = []
+        self.mergePath        = "N/A"
+        if len(self.mergedFiles) > 0:
+            self.mergePath    = os.path.dirname( self.mergedFiles[0]) 
+        self.mergeFileMap     = mergeFileMap    # mergeFileName -> inputFiles map
+        self.mergeSizeMap     = mergeSizeMap    # mergeFileName -> mergeFileSize map
+        self.mergeTimeMap     = mergeTimeMap    # mergeFileName -> mergeTime map
+        self.cleanTimeMap     = cleanTimeMap    # mergeFileName -> cleanTime map
+        self.nPreMergedFiles  = filesExist
+        self.mergedFiles      = mergeFileMap.keys()
+        for key in mergeFileMap.keys():
+            self.inputFiles.extend( mergeFileMap[key] )
 
-        # For-loop: All keys in dictionary (=paths to merged files)
+        print 
+        print "mergeFileMap.values() = ", (mergeFileMap.values())
+        print 
+        print "mergeFileMap.keys() = ", (mergeFileMap.keys())
         sizeSum   = 0
         mergeTime = 0
-        for key in mergedFilesSizes:
-            sizeSum   += mergedFilesSizes[key]
-            mergeTime += mergedFilesTimes[key]
-        self.mergedFilesSize  = sizeSum
-        self.mergedFilesTime  = mergeTime/60.0
-        return
+        cleanTime = 0
+        # For-loop: All keys in dictionary (=paths to merged files)
+        for key in mergeSizeMap:
+            sizeSum   += mergeSizeMap[key]
+            mergeTime += mergeTimeMap[key]
+            cleanTime += cleanTimeMap[key]
 
-
-    def Print(self, printHeader=True):
-        '''
-        Simple function to print report.
-        '''
-        name = os.path.basename(self.name)
-        txtFormat = '{:<20} {:<40}'
-        msg  = txtAlign.format("\t %sName"     % (colors.WHITE) , ": " + self.name)
-        msg += txtAlign.format("\t %Task"      % (colors.WHITE) , ": " + self.task)
-        msg += txtAlign.format("\t %FilePath"  % (colors.WHITE) , ": " + self.filePath)
-        msg += txtAlign.format("\t %sFileSize" % (colors.WHITE) , ": " + self.fileSize)
-        print msg
+        # Assign more values
+        self.nInputFiles      = len(self.inputFiles)
+        self.nMergedFiles     = len(self.mergedFiles)
+        self.mergedFilesSize = sizeSum
+        self.mergeTimeTotal  = mergeTime/60.0 #in minutes
+        self.cleanTimeTotal  = cleanTime/60.0 #in minutes
         return
 
 
@@ -220,7 +223,7 @@ def getHistogramFileSE(stdoutFile, opts):
             raise Exception("Other output SE's than madhatter are not supported at the moment (encountered PFN %s)"%histoFile)
         histoFile = histoFile.replace(replace_madhatter[0], replace_madhatter[1])
     return histoFile
-n
+
 
 def getHistogramFileEOS(stdoutFile, opts):
     '''
@@ -234,7 +237,7 @@ def getHistogramFileEOS(stdoutFile, opts):
 
     # Open the "stdoutFile" (does not need to be on EOS)
     if not os.path.exists(stdoutFile):
-        raise Exception("File \"%s\" does not exist" % (stdoutFile) )
+        raise Exception("File %s does not exist" % (stdoutFile) )
 
     # Open the standard output file
     f = open(stdoutFile)
@@ -249,13 +252,13 @@ def getHistogramFileEOS(stdoutFile, opts):
         # Drop the log/cmsRun_1.log.tar.gz and add histoFile to path to get EOS path for histoFile
         histoFileEOS = stdoutFileEOS.rsplit("/", 2)[0] + "/" + histoFile
     else:
-        Verbose("Could not determine the jobId of file \"%s\". match = " % (stdoutFile, match) )
-        #raise Exception("Could not determine the jobId of file \"%s\". match = " % (stdoutFile, match) )
+        Verbose("Could not determine the jobId of file %s. match = " % (stdoutFile, match) )
+        #raise Exception("Could not determine the jobId of file %s. match = " % (stdoutFile, match) )
     
     # Cloe the standard output file
     f.close()
     
-    Verbose("The output file from job with id \"%s\" for task \"%s\" is \"%s\"" % (jobId, stdoutFile.split("/")[0], histoFileEOS) )
+    Verbose("The output file from job with id %s for task %s is %s" % (jobId, stdoutFile.split("/")[0], histoFileEOS) )
     return histoFileEOS
     
 
@@ -269,7 +272,7 @@ def GetHistogramFile(taskName, f, opts):
         #histoFile = getHistogramFileSE(f, opts) #obsolete!
         histoFile = getHistogramFileEOS(f, opts)
         if histoFile != None:
-            Verbose("The ROOT file for task \"%s\" is \"%s\"." % (taskName, histoFile) )
+            Verbose("The ROOT file for task %s is %s." % (taskName, histoFile) )
             return histoFile
         else:
             Print("Task %s, skipping job %s: input root file not found from stdout" % (taskName, f) )
@@ -300,9 +303,9 @@ def ConvertTasknameToEOS(taskName, opts):
     crabCfgFile = "crabConfig_%s.py" % (taskName)
     fullPath    =  os.getcwd() + "/" + crabCfgFile
     if not os.path.exists(fullPath):
-        raise Exception("Unable to find the file \"crabConfig_%s.py\"." % (taskName) )
+        raise Exception("Unable to find the file crabConfig_%s.py." % (taskName) )
 
-    #Verbose("Determining EOS dataset name for task \"%s\" by reading file \"%s\"." % (taskName, fullPath))
+    #Verbose("Determining EOS dataset name for task %s by reading file %s." % (taskName, fullPath))
     # For-loop: All lines in cfg file
     for l in open(fullPath): 
         keyword = "config.Data.inputDataset = "
@@ -310,9 +313,9 @@ def ConvertTasknameToEOS(taskName, opts):
             taskNameEOS = l.replace(keyword, "").split("/")[1]
 
     if taskNameEOS == None:
-        raise Exception("Unable to find the crabConfig_<dataset>.py for task with name \"%s\"." % (taskName) )
+        raise Exception("Unable to find the crabConfig_<dataset>.py for task with name %s." % (taskName) )
 
-    Verbose("The conversion of task name \"%s\" into EOS-compatible is \"%s\"" % (taskName, taskNameEOS) )
+    Verbose("The conversion of task name %s into EOS-compatible is %s" % (taskName, taskNameEOS) )
     return taskNameEOS
 
 
@@ -334,14 +337,14 @@ def WalkEOSDir(pathOnEOS, opts): #fixme: bad code
     # Verbose(cmd)
     dirContents = Execute(cmd)
     if "symbol lookup error" in dirContents[0]:
-        raise Exception("%s\".\n\t\"%s\"." % (cmd, dirContents[0]) )
+        raise Exception("%s.\n\t%s." % (cmd, dirContents[0]) )
 
-    #Verbose("Walking the EOS directory \"%s\" with contents:\n\t%s" % (pathOnEOS, "\n\t".join(dirContents)))
+    #Verbose("Walking the EOS directory %s with contents:\n\t%s" % (pathOnEOS, "\n\t".join(dirContents)))
 
     # A very, very dirty way to find the deepest directory where the ROOT files are located!
     if len(dirContents) == 1:
         subDir = dirContents[0]
-        # Verbose("Found sub-directory \"%s\" under the EOS path \"%s\"!" % (subDir, pathOnEOS) )
+        # Verbose("Found sub-directory %s under the EOS path %s!" % (subDir, pathOnEOS) )
         pathOnEOS = WalkEOSDir(pathOnEOS + "/" + subDir, opts)
     else:
         rootFiles = []
@@ -351,7 +354,7 @@ def WalkEOSDir(pathOnEOS, opts): #fixme: bad code
             else:
                 rootFiles.append(pathOnEOS + "/" + f)
         pathOnEOS += "/"
-        #Verbose("Reached end of the line. Found \"%s\" ROOT files under \"%s\"!"  % (len(rootFiles), pathOnEOS))
+        #Verbose("Reached end of the line. Found %s ROOT files under %s!"  % (len(rootFiles), pathOnEOS))
     return pathOnEOS
 
 
@@ -386,7 +389,7 @@ def ConvertCommandToEOS(cmd, opts):
 
 
     if cmd not in cmdMap:
-        raise Exception("Could not find EOS-equivalent for cammand \"%s\"." % (cmd) )
+        raise Exception("Could not find EOS-equivalent for cammand %s." % (cmd) )
 
     return cmdMap[cmd]
 
@@ -396,7 +399,7 @@ def Execute(cmd):
     Executes a given command and return the output.
     '''
     Verbose("Execute()", True)
-    Verbose("Executing command: \"%s\"" % (cmd))
+    Verbose("Executing command: %s" % (cmd))
     p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
     stdin  = p.stdin
@@ -419,7 +422,7 @@ def ConvertPathToEOS(fullPath, path_postfix, opts):
     taskNameEOS   = ConvertTasknameToEOS(taskName, opts)
     pathEOS       = WalkEOSDir(path_prefix + "/" + taskNameEOS, opts) # + "/"
     fullPathEOS   = pathEOS + path_postfix + fileName
-    Verbose("Converted \"%s\" (default) to \"%s\" (EOS-compatible)" % (fullPath, fullPathEOS) )
+    Verbose("Converted %s (default) to %s (EOS-compatible)" % (fullPath, fullPathEOS) )
     return fullPathEOS
 
 
@@ -445,7 +448,7 @@ def splitFiles(files, filesPerEntry, opts):
             # Calculate cumulative size
             fileSize = GetFileSize(f, opts)
             sumsize +=  fileSize
-            Verbose("File \"%s\" has a size of \"%s\" (sumsize=\"%s\")." % (f, fileSize, sumsize) )
+            Verbose("File %s has a size of %s (sumsize=%s)." % (f, fileSize, sumsize) )
 
             # Impose upper limit on file size
             if sumsize > maxsize:
@@ -474,10 +477,10 @@ def GetFileSize(filePath, opts, convertToGB=False):
     Return the file size, irrespective of whether it is located locally or
     on EOS.
     '''
-    Verbose("GetFileSize()")
+    Verbose("GetFileSize()", True)
     HOST = socket.gethostname()
-
-    Verbose("Determining size for file \"%s\"" % (filePath) )
+    
+    Verbose("Determining size for file %s" % (filePath) )
     if opts.filesInEOS:
         if "fnal" in HOST:
             eos = "eos root://cmseos.fnal.gov ls -l" #alias to "eosls -l"
@@ -497,13 +500,21 @@ def GetFileSize(filePath, opts, convertToGB=False):
         elif "lxplus" in HOST:
             eos  = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select" #simply "eos" will not work
             cmd  = "%s find --size %s" % (eos, filePath)
+            Verbose(cmd)
             ret  = Execute("%s" % (cmd) )
 
             # Get the size as integer
-            size_str = ret[0].split()[-1].rsplit("size=")[-1]
-            size     = int(size_str)
+            error = False
+            for msg in ret:
+                if "error" in msg:
+                    error = True
+            if error:
+                size = 0
+            else:
+                size_str = ret[0].split()[-1].rsplit("size=")[-1]
+                size     = int(size_str)
         else:
-            raise Exception("Unsupported host \"%s\"" % (HOST) )
+            raise Exception("Unsupported host %s" % (HOST) )
     else:
         size = os.stat(filePath).st_size
 
@@ -532,7 +543,7 @@ def hadd(opts, mergeName, inputFiles, path_prefix=""):
         inputFilesNew = mergeName
         mergeNameNew = mergeName
 
-    Verbose("Creating file \"%s\" from the following files:\n\t%s" % (mergeNameNew, "\n\t".join(inputFilesNew)) )
+    Verbose("Creating file %s from the following files:\n\t%s" % (mergeNameNew, "\n\t".join(inputFilesNew)) )
     
     # Construct the ROOT-file merge command (hadd)
     cmd = ["hadd"]
@@ -578,7 +589,7 @@ def sanityCheck(mergedFile, inputFiles):
     Verbose("sanityCheck()", True)
 
     histoPath = "configInfo/configinfo" #bin1=control (=number_of_merged-files), bin2=energy (=13*number_of_merged-files)
-    Verbose("Investigating \"%s\" in merged file \"%s\"" % (histoPath, mergedFile) )
+    Verbose("Investigating %s in merged file %s" % (histoPath, mergedFile) )
     tfile = ROOT.TFile.Open(mergedFile)
     configinfo = tfile.Get(histoPath)
     if configinfo:
@@ -611,10 +622,10 @@ def delete(fileName, regexp, opts):
     fileMode = "UPDATE"
 
     # Open the ROOT file
-    Verbose("Opening ROOT file \"%s\" in \"%s\" mode." % (filePath, fileMode) )
+    Verbose("Opening ROOT file %s in %s mode." % (filePath, fileMode) )
     fIN = ROOT.TFile.Open(filePath, fileMode)
     if fIN == None:
-        raise Exception("Could not open \"%s\". Does it exist?" % (filePath) )
+        raise Exception("Could not open ROOT file %s. Does it exist?" % (filePath) )
     fIN.cd()
     keys = fIN.GetListOfKeys()
 
@@ -625,7 +636,7 @@ def delete(fileName, regexp, opts):
             dir = fIN.GetDirectory(keyName)
             if dir:
                 fIN.cd(keyName)
-                Verbose("Deleting folder matching \"%s\" in file \"%s\"." % (regexp, filePath) )
+                Verbose("Deleting folder matching %s in file %s." % (regexp, filePath) )
                 delFolder(regexp)
                 fIN.cd()
     delFolder(regexp)
@@ -635,11 +646,15 @@ def delete(fileName, regexp, opts):
 
 def pileup(fileName, opts):
     '''
+    If dataversion is NOT "data", return.
+    Otherwise, read the PileUp.root file and
+    get 3 PU histograms (pileup, pileup_up variation, pileup_down variation)
+    and write them to the fileName passed as argument.
     '''
-    Verbose("pileup(): Hasn't been tested yet!", True)
+    Verbose("pileup()", True)
     
     if FileExists(fileName, opts ) == False:
-        raise Exception("The file \"%s\" does not exist!" % (fileName) )
+        raise Exception("The file %s does not exist!" % (fileName) )
 
     # Definitions
     prefix = ""
@@ -649,17 +664,20 @@ def pileup(fileName, opts):
     fileMode = "UPDATE"
 
     # Open the ROOT file
-    Verbose("Opening ROOT file \"%s\" in \"%s\" mode." % (filePath, fileMode) )
+    Verbose("Opening ROOT file %s in %s mode." % (filePath, fileMode) )
     fOUT = ROOT.TFile.Open(filePath, fileMode)
     fOUT.cd()
 
-    # Definitoins
+    # Definitions
     hPU = None
     dataVersion = fOUT.Get("configInfo/dataVersion")
     dv_re = re.compile("data")  
     match = dv_re.search(dataVersion.GetTitle())
 
-    if match: 
+    # If dataset is not data, do nothing
+    if not match:
+        return
+
         puFileTmp = os.path.join(os.path.dirname(filePath), "PileUp.root")
         puFile    = prefix + puFileTmp
         if FileExists(puFile):
@@ -669,17 +687,15 @@ def pileup(fileName, opts):
             hPUdown = fIN.Get("pileup_down")
         else:
             Print("PileUp not found in", os.path.dirname(filePath), ", did you run hplusLumiCalc.py?")
+
+        # Now write the PY histograms in the input file
         if not hPU == None:
             fOUT.cd("configInfo")
-            hPU.Write("", ROOT.TObject.kOverwrite)
-            hPUup.Write("", ROOT.TObject.kOverwrite)
-            hPUdown.Write("", ROOT.TObject.kOverwrite)
-            # Sami's repo had these instead:
-            #hPU.Write("pileup",ROOT.TObject.kOverwrite)
-            #hPUup.Write("pileup_up",ROOT.TObject.kOverwrite)
-            #hPUdown.Write("pileup_down",ROOT.TObject.kOverwrite)
+            hPU.Write("pileup", ROOT.TObject.kOverwrite)
+            hPUup.Write("pileup_up", ROOT.TObject.kOverwrite)
+            hPUdown.Write("pileup_down", ROOT.TObject.kOverwrite)
 
-        Verbose("Closing file \"%s\"." % (filePath) )
+        Verbose("Closing file %s." % (filePath) )
         fOUT.Close()
     return
 
@@ -723,7 +739,7 @@ def CheckThatFilesExist(fileList, opts):
     # For-loop: All files in list
     for f in fileList:
         if FileExists(f, opts ) == False:
-            raise Exception("The file \"%s\" does not exist!" % (f) )
+            raise Exception("The file %s does not exist!" % (f) )
             return False
     return True
 
@@ -746,7 +762,7 @@ def FileExists(filePath, opts):
         elif errMsg == filePath.split("/")[-1]:
             return True
         else:
-            raise Exception("This should not be reached! Execution of command \"%s\" returned \"%s\"" % (cmd, errMsg))
+            raise Exception("This should not be reached! Execution of command %s returned %s" % (cmd, errMsg))
     else:
         if os.path.isfile(filePath):
             return True
@@ -825,8 +841,10 @@ def GetXrdcpPrefix(opts):
     Returns the prefix for the file address when copying files from EOS.
     For example, a file located in EOS under:
     /store/user/attikis/CRAB3_TransferData/WZ_TuneCUETP8M1_13TeV-pythia8/
+
     on LXPLUS becomes:
     root://eoscms.cern.ch//eos//cms/store/user/attikis/CRAB3_TransferData/WZ_TuneCUETP8M1_13TeV-pythia8/
+
     while on LPC becomes:
     root://cmseos.fnal.gov//store/user/attikis/CRAB3_TransferData/WZ_TuneCUETP8M1_13TeV-pythia8/
     '''
@@ -838,17 +856,17 @@ def GetXrdcpPrefix(opts):
     HOST = socket.gethostname()
     path_prefix = ""
 
-    Verbose("Determining prefix for xrdcp for host \"%s\"" % (HOST) )
+    Verbose("Determining prefix for xrdcp for host %s" % (HOST) )
     if "fnal" in HOST:
         path_prefix = "root://cmseos.fnal.gov/"
     elif "lxplus" in HOST:
         path_prefix = "root://eoscms.cern.ch//eos//cms/"
     else:
-        raise Exception("Unsupported host \"%s\"" % (HOST) )
+        raise Exception("Unsupported host %s" % (HOST) )
     return path_prefix
 
 
-def MergeFiles(mergeName, mergeNameEOS, inputFiles, opts):
+def MergeFiles(mergeName, inputFiles, opts):
     '''
     Merges ROOT files, either stored locally or on EOS.
     '''
@@ -856,7 +874,7 @@ def MergeFiles(mergeName, mergeNameEOS, inputFiles, opts):
         if opts.filesInEOS:
             prefix   = GetXrdcpPrefix(opts)
             srcFile  = prefix + inputFiles[0]
-            destFile = prefix + mergeNameEOS
+            destFile = prefix + mergeName
             cmd      = "xrdcp %s %s" % (srcFile, destFile)
             Verbose(cmd)
             ret = Execute(cmd)
@@ -871,11 +889,12 @@ def MergeFiles(mergeName, mergeNameEOS, inputFiles, opts):
             return 0
     else:
         if opts.filesInEOS:
-            ret = hadd(opts, mergeNameEOS, inputFiles, GetXrdcpPrefix(opts) )
-            #Print("Done \"%s\" (\"%s\" GB)." % (mergeNameEOS, GetFileSize(mergeNameEOS, opts, True) ), False )
+            ret = hadd(opts, mergeName, inputFiles, GetXrdcpPrefix(opts) )
+            Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts, True) ), False )
             return ret
         else:
             ret = hadd(opts, mergeName, inputFiles)    
+            Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts, True) ), False )
             return ret
 
 
@@ -886,8 +905,8 @@ def PrintSummary(reports):
     Verbose("PrintSummary()")
     
     table    = []
-    msgAlign = "{:<3} {:<50} {:^15} {:^20} {:^20} {:^20}"
-    header   = msgAlign.format("#", "Dataset", "Input Files", "Merged Files", "Merge Size (GB)", "Merge Time (min)")
+    msgAlign = "{:<3} {:<50} {:^15} {:^15} {:^15} {:^15} {:^15} {:^15}"
+    header   = msgAlign.format("#", "Dataset", "Input Files", "Merged Files", "Pre-Merged Files", "Size (GB)", "Merge Time (min)", "Clean Time (min)")
     hLine    = "="*len(header)
     table.append(hLine)
     table.append(header)
@@ -895,7 +914,7 @@ def PrintSummary(reports):
 
     #For-loop: All reports
     for i, r in enumerate(reports):
-        table.append( msgAlign.format(i+1, r.dataset, r.nInputFiles, r.nMergedFiles, "%0.2f" % r.mergedFilesSize, "%0.2f" % r.mergedFilesTime) )
+        table.append( msgAlign.format(i+1, r.dataset, r.nInputFiles, r.nMergedFiles, r.nPreMergedFiles, "%0.2f" % r.mergedFilesSize, "%0.2f" % r.mergeTimeTotal, "%0.2f" % r.cleanTimeTotal) )
 
     # Print the table
     print
@@ -955,6 +974,112 @@ def ExamineExitCodes(taskName, exitCodes):
     return
 
 
+def OverwriteMergeFile(mergeName, opts):
+    '''
+    Check whether the target merge file already exists or not.
+    If it does it does nothing by default, or if the --test option is enabled.
+    If the --overwrite option is enabled, the existing file is renamed to <mergeName>.root.backup
+    '''
+    Verbose("OverwriteMergeFile()")
+
+    if not opts.test:
+        return
+
+    if opts.filesInEOS:
+        if opts.overwrite:
+            mergeNameNew = mergeName + ".backup"
+            Print("File %s already exists.\n\tRenaming to %s." % (mergeName, mergeNameNew) )
+            fileName    = GetXrdcpPrefix(opts) + mergeName
+            fileNameNew = GetXrdcpPrefix(opts) + mergeNameNew
+            cp_cmd      = "xrdcp %s %s" % (fileName, fileNameNew)
+            Verbose(cp_cmd)
+            ret = Execute(cp_cmd)
+            # Now remove the original file
+            rm_cmd = ConvertCommandToEOS("rm", opts) + " %s" % (mergeName)
+            Print(rm_cmd)
+            ret = Execute(rm_cmd)            
+        else:
+            Verbose("File %s already exists. Skipping .." % (mergeName) )
+    else:
+        if opts.overwrite:
+            Print("mv %s %s" % (mergeName, mergeName + ".backup") )
+            shutil.move(mergeName, mergeName + ".backup")
+        else:
+            Verbose("File %s already exists. Skipping .." % (mergeName) )
+    return
+
+
+def CheckControlHisto(mergeName, inputFiles):
+    '''
+    Check that configInfo/configinfo control bin matches to number of
+    input files, in order to monitor a mysterious bug reported by Lauri.
+    If working on EOS skip this test to speed things up.
+    '''
+    Verbose("CheckControlHisto()")
+    try:
+        if opts.filesInEOS:
+            # Skip this sanity check to speed things up
+            # sanityCheck(GetXrdcpPrefix(opts) + mergeNameEOS, inputFiles)
+            pass
+        else:
+            sanityCheck(mergeName, inputFiles)
+    except SanityCheckException, e:
+        Print("Task %s: %s; disabling input file deletion" % (taskName, str(e)) )
+        opts.deleteImmediately = False
+        opts.delete = False
+    return
+
+
+
+def DeleteFiles(fileList, opts):
+    '''
+    If the --test option is used, do nothing.
+    Otherwise, delete the source files immediately after merging to save disk space.
+    '''
+    Verbose("DeleteFiles()")
+    if opts.test:
+        return
+
+    # For-loop: All input files
+    for f in fileList:
+        if opts.filesInEOS:
+            cmd = ConvertCommandToEOS("rm", opts) + " " + f
+            Verbose(cmd)
+            ret = Execute(cmd)
+        else:
+            cmd = "rm %s" % f
+            Verbose(cmd)
+            os.remove(f)
+    return
+
+
+def GetDeleteMessage(opts):
+    '''
+    '''
+    Verbose("GetDeleteMessage()")
+
+    deleteMessage = ""
+    if opts.delete:
+        deleteMessage = " (source files deleted)"
+    if opts.deleteImmediately:
+        deleteMessage = " (source files deleted immediately)"
+    return deleteMessage
+
+
+def DeleteFolders(filePath, foldersToDelete, opts):
+    '''
+    Delete folders (TNamed) from merged files (due to merged multiple copies are present)
+    '''
+    Verbose("DeleteFolders()")
+    
+    Verbose("Deleting following folders in file %s:\n\t%s" % (filePath, "\n\t".join(foldersToDelete)) )
+    # For-loop: All folders to be deleted
+    for folder in foldersToDelete:
+        Verbose("Deleting %s in file %s" % (folder, filePath) )    
+        delete(filePath, folder, opts)
+    return
+
+
 def main(opts, args):
     '''
     '''
@@ -979,17 +1104,19 @@ def main(opts, args):
     
     # Definitions
     reports = []
-    mergedFiles = []
-    mergedFilesSizes = {}
-    mergedFilesTimes = {}
+    filesExist   = 0
+    mergeFileMap = {}
+    mergeSizeMap = {}
+    mergeTimeMap = {}
+    cleanTimeMap = {}
 
     # For-loop: All task names
     for d in crabDirs:
         taskName = d.replace("/", "")
 
         # Get all log files for given task
-        stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
-        Verbose("The stdout files for task \"%s\" are:\n\t%s" % ( taskName, "\n\t".join(stdoutFiles)), True)
+        stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz")) #fixme: shoud I get this from EOS?
+        Verbose("The stdout files for task %s are:\n\t%s" % ( taskName, "\n\t".join(stdoutFiles)), True)
 
         # Definitions
         files, exitCodes = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
@@ -1011,7 +1138,7 @@ def main(opts, args):
         filesSplit = splitFiles(files, opts.filesPerMerge, opts)
 
         # Create a simple progress bar
-        CreateProgressBar(taskName, filesSplit, files) #iro
+        CreateProgressBar(taskName, filesSplit, files)
 
         # For-loop: All splitted files
         for index, inputFiles in filesSplit:
@@ -1025,156 +1152,74 @@ def main(opts, args):
 
             # Get the merge name of the files
             mergeName    = os.path.join(d, "results", opts.output % taskNameAndNum)
-            mergeNameEOS = ConvertPathToEOS(mergeName, "", opts)
-
-            # If merge file exists already rename it as .backup            
+            #mergeNameEOS = ConvertPathToEOS(mergeName, "", opts)
             if opts.filesInEOS:
-                if FileExists(mergeNameEOS, opts) and not opts.test:
-#
-#                    mergeNameEOSNew = mergeNameEOS + ".backup"
-#                    Print("File \"%s\" already exists.\n\tRenaming to \"%s\"." % (mergeNameEOS, mergeNameEOSNew) )
-#                    fileName    = GetXrdcpPrefix(opts) + mergeNameEOS
-#                    fileNameNew = GetXrdcpPrefix(opts) + mergeNameEOSNew
-#                    cp_cmd      = "xrdcp %s %s" % (fileName, fileNameNew)
-#                    Verbose(cp_cmd)
-#                    ret = Execute(cp_cmd)
-#
-#                    # Now remove the original file
-#                    rm_cmd = ConvertCommandToEOS("rm", opts) + " %s" % (mergeNameEOS)
-#                    Print(rm_cmd)
-#                    ret = Execute(rm_cmd)
-#
-##### merge conflict begins
-#####                tmp += "-%d" % index
-#####            mergeName = os.path.join(d, "results", opts.output % tmp)
-#            if os.path.exists(mergeName) and not opts.test:
-#                #shutil.move(mergeName, mergeName+".backup")
-#                if opts.overwrite:
-#                    if opts.verbose:
-#                        print "mv %s %s" % (mergeName, mergeName+".backup")
-#                    shutil.move(mergeName, mergeName+".backup")
-#                else:
-#                    continue
-#
-#            # FIXME: add here reading of first xrootd file, finding all TTrees, and writing the TList to mergeName file
-#            if opts.filesInSE:
-#                raise Exception("--filesInSE feature is not fully implemented")
-#
-#            if len(inputFiles) == 1:
-#                if opts.verbose:
-#                    print "cp %s %s" % (inputFiles[0], mergeName)
-#                if not opts.test:
-#                    shutil.copy(inputFiles[0], mergeName)
-##### end of merge conflict
-                    if opts.overwrite:
-                        mergeNameEOSNew = mergeNameEOS + ".backup"
-                        Print("File \"%s\" already exists.\n\tRenaming to \"%s\"." % (mergeNameEOS, mergeNameEOSNew) )
-                        fileName    = GetXrdcpPrefix(opts) + mergeNameEOS
-                        fileNameNew = GetXrdcpPrefix(opts) + mergeNameEOSNew
-                        cp_cmd      = "xrdcp %s %s" % (fileName, fileNameNew)
-                        Verbose(cp_cmd)
-                        ret = Execute(cp_cmd)
-                        # Now remove the original file
-                        rm_cmd = ConvertCommandToEOS("rm", opts) + " %s" % (mergeNameEOS)
-                        Print(rm_cmd)
-                        ret = Execute(rm_cmd)
-                    else:
-                        Verbose("File %s already exists. Skipping .." % (mergeNameEOS) )
-            else:
-                if FileExists(mergeName, opts) and not opts.test:
-                    if opts.overwrite:
-                        Print("mv %s %s" % (mergeName, mergeName + ".backup") )
-                        shutil.move(mergeName, mergeName + ".backup")
-                    else:
-                        Verbose("File %s already exists. Skipping .." % (mergeName) )
+                mergeName = ConvertPathToEOS(mergeName, "", opts)
+
+            # If merge file already exists skip it or rename it as .backup
+            if FileExists(mergeName, opts):
+                if opts.overwrite:
+                    OverwriteMergeFile(mergeName, opts)
+                else: 
+                    filesExist += 1
+                    continue
 
             # Merge the ROOT files
             time_start = time.time()
-            ret = MergeFiles(mergeName, mergeNameEOS, inputFiles, opts)
+            ret = MergeFiles(mergeName, inputFiles, opts)
             time_end = time.time()
             dtMerge = time_end-time_start
             if ret != 0:
                 return ret
             
-            # Inform user of progress
-            mergeFileSize = GetFileSize(mergeNameEOS, opts, True)
+            # Get the file sie
+            mergeFileSize = GetFileSize(mergeName, opts, True)
             if len(filesSplit) > 1:
-                #Print("done %d" % index)
-                Verbose("Merged \"%s\" (\"%0.3f\" GB)." % (mergeNameEOS, mergeFileSize), False )
+                Verbose("Merged %s (%0.3f GB)." % (mergeName, mergeFileSize), False )
                 
             # Keep track of merged files
-            if opts.filesInEOS:
-                mergedFiles.append((mergeNameEOS, inputFiles))
-                mergedFilesSizes[mergeNameEOS] = mergeFileSize
-                mergedFilesTimes[mergeNameEOS] = dtMerge
-            else:
-                mergedFiles.append((mergeName, inputFiles))
-                mergedFilesSizes[mergeName] = mergeFileSize
-                mergedFilesTimes[mergeName] = dtMerge
+            mergeFileMap[mergeName] = inputFiles
+            mergeSizeMap[mergeName] = mergeFileSize
+            mergeTimeMap[mergeName] = dtMerge
 
             # Sanity check
-            try:
-                if opts.filesInEOS:
-                    # sanityCheck(GetXrdcpPrefix(opts) + mergeNameEOS, inputFiles)
-                    pass #fixme: is this still needed? If not can use the time saved! 
-                # Error in <TNetXNGFile::Open>: [ERROR] Server responded with an error: [3005] Unable to open - no replica exists /eos/cms/store/user/attikis/CRAB3_TransferData/ZZTo4Q_13TeV_amcatnloFXFX_madspin_pythia8/crab_ZZTo4Q/160921_141857/0000/histograms-ZZTo4Q-4.root; No such device
-                else:
-                    sanityCheck(mergeName, inputFiles)
-            except SanityCheckException, e:
-                Print("Task %s: %s; disabling input file deletion" % (d, str(e)) )
-                opts.deleteImmediately = False
-                opts.delete = False
+            CheckControlHisto(mergeName, inputFiles)
+
+            # Delete all input files after merging them
             if opts.deleteImmediately:
-                # For-loop: All input files
-                for srcFile in inputFiles:
-                    if not opts.test:
-                        if opts.filesInEOS:
-                            cmd = ConvertCommandToEOS("rm", opts) + " " + srcFile
-                            Verbose(cmd)
-                            ret = Execute(cmd)
-                        else:
-                            cmd = "rm %s" % srcFile
-                            os.remove(srcFile)
-                    else:
-                        pass
-
-    # Create report
-    reports.append(Report( ConvertTasknameToEOS(taskName, opts), inputFiles, mergedFiles[0], mergedFilesSizes, mergedFilesTimes))
+                DeleteFiles(inputFiles, opts)
         
-    # Append "delete" message
-    deleteMessage = ""
-    if opts.delete:
-        deleteMessage = " (source files deleted)"
-    if opts.deleteImmediately:
-        deleteMessage = " (source files deleted immediately)"
-
     # Finish the progress bar
     FinishProgressBar()
 
-    Print("Merged files%s:" % (deleteMessage), False)
+    # Append "delete" message
+    deleteMsg = GetDeleteMessage(opts)
+    Print("Merged files%s:" % (deleteMsg), False)
+    
+    foldersToDelete = ["Generated", "Commit", "dataVersion"]
     # For-loop: All merged files
-    for f, sourceFiles in mergedFiles:
-        Print("%s [from %d file(s)]" % (f, len(sourceFiles)), False)
-        Verbose("Deleting folders in file \"%s\"." % (f) )
-        delete(f, "Generated", opts)
-        delete(f, "Commit", opts)
-        delete(f, "dataVersion", opts)
+    for key in mergeFileMap.keys():
+        f = key
+        sourceFiles = mergeFileMap[key]
+        Verbose("Merge files: %s\n\tSource files: %s" % (f, sourceFiles) )
+
+        Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), False)
+        time_start = time.time()
+        DeleteFolders(f, foldersToDelete, opts)
+        time_end = time.time()
+        dtClean = (time_end-time_start)
+        cleanTimeMap[key] = dtClean
 
         # Delete files after merging?
         if opts.delete and not opts.deleteImmediately:
-            for srcFile in sourceFiles:
-                if not opts.test:
-                    if opts.filesInEOS:
-                        cmd = ConvertCommandToEOS("rm", opts) + " " + srcFile
-                        Verbose(cmd)
-                        ret = Execute(cmd)
-                    else:
-                        cmd = "rm %s" % srcFile
-                        Verbose(cmd)
-                        os.remove(srcFile)
+            DeleteFiles(sourceFiles, opts)
+
+        # Add pile-up histos
         pileup(f, opts)
 
     # Print summary table using reports
+    
+    reports.append(Report( ConvertTasknameToEOS(taskName, opts), mergeFileMap, mergeSizeMap, mergeTimeMap, cleanTimeMap, filesExist))
     PrintSummary(reports)
 
     return 0
@@ -1206,10 +1251,9 @@ if __name__ == "__main__":
 
     parser.add_option("-o", dest="output", type="string", default="histograms-%s.root",
                       help="Pattern for merged output root files (use '%s' for crab directory name) [default: 'histograms-%s.root']")
-    parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true",
-                     help="Overwrite histograms-%s.root files (default False)")
+
     parser.add_option("--test", dest="test", default=False, action="store_true",
-                      help="Just test, do not do any merging or deleting. Useful for checking what would happen. Implies --verbose [default: 'False']")
+                      help="Just test, do not do any merging or deleting. Useful for checking what would happen. [default: 'False']")
 
     parser.add_option("--delete", dest="delete", default=False, action="store_true",
                       help="Delete the source files to save disk space (default is to keep the files) [default: 'False']")
@@ -1242,8 +1286,5 @@ if __name__ == "__main__":
 
     if opts.filesPerMerge == 0:
         parser.error("--filesPerMerge must be non-zero")
-
-#    if opts.test:
-#        opts.verbose = True #iro
 
     sys.exit(main(opts, args))

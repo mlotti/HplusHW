@@ -74,10 +74,6 @@ process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.un
 process.options = cms.untracked.PSet(
     allowUnscheduled = cms.untracked.bool(True),
     wantSummary = cms.untracked.bool(False)
-
-process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(
-       '/store/mc/RunIIFall15MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext3-v1/20000/007E40C9-B4A4-E511-BD19-842B2B7680DF.root'
     )
 
 #================================================================================================  
