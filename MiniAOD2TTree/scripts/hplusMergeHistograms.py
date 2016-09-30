@@ -32,7 +32,7 @@ from optparse import OptionParser
 import tarfile
 import getpass
 import socket
-import timeit
+import time
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -45,7 +45,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 # Global Definitions
 #================================================================================================
 re_histos = []
-re_se     = re.compile("newPfn =\s*(?P<url>\S+)")
+re_se = re.compile("newPfn =\s*(?P<url>\S+)")
 replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://madhatter.csc.fi:1094")
 
 
@@ -71,7 +71,7 @@ class Report:
             sizeSum   += mergedFilesSizes[key]
             mergeTime += mergedFilesTimes[key]
         self.mergedFilesSize  = sizeSum
-        self.mergedFilesTime  = mergeTime
+        self.mergedFilesTime  = mergeTime/60.0
         return
 
 
@@ -113,12 +113,19 @@ def Print(msg, printHeader=True):
     return
 
 
-def CreateProgressBar():
+def CreateProgressBar(taskName, filesSplit, files):
+    '''
+    '''
     Verbose("CreateProgressBar()")
+
+    if len(filesSplit) == 1:
+        msg = "Task %s, merging %d file(s)" % (taskName, len(files) )
+    else:
+        msg = "Task %s, merging %d files to %d file(s)" % (taskName, len(files), len(filesSplit) )
 
     # setup toolbar
     toolbar_width = 100
-    sys.stdout.write("\t[%s]" % (" " * toolbar_width))
+    sys.stdout.write("\t%s: [%s]" % (msg, " " * toolbar_width))
     sys.stdout.flush()
 
     # Return to start of line, after '['
@@ -879,8 +886,8 @@ def PrintSummary(reports):
     Verbose("PrintSummary()")
     
     table    = []
-    msgAlign = "{:<3} {:<50} {:^15} {:^15} {:^15} {:^10}"
-    header   = msgAlign.format("#", "Dataset", "Input Files", "Merged Files", "Merge Size (GB)", "Time Elapsed (s)")
+    msgAlign = "{:<3} {:<50} {:^15} {:^20} {:^20} {:^20}"
+    header   = msgAlign.format("#", "Dataset", "Input Files", "Merged Files", "Merge Size (GB)", "Merge Time (min)")
     hLine    = "="*len(header)
     table.append(hLine)
     table.append(header)
@@ -888,8 +895,7 @@ def PrintSummary(reports):
 
     #For-loop: All reports
     for i, r in enumerate(reports):
-        #table.append( msgAlign.format(i+1, r.dataset, r.mergePath, r.nInputFiles, r.nMergedFiles, r.mergedFilesSize) )
-        table.append( msgAlign.format(i+1, r.dataset, r.nInputFiles, r.nMergedFiles, "%0.3f" % r.mergedFilesSize, "%0.3f" % r.mergedFilesTime) )
+        table.append( msgAlign.format(i+1, r.dataset, r.nInputFiles, r.nMergedFiles, "%0.2f" % r.mergedFilesSize, "%0.2f" % r.mergedFilesTime) )
 
     # Print the table
     print
@@ -925,6 +931,28 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
             if exit_match:
                 exitCodes.append(int(exit_match.group("exitcode")))
     return files, exitCodes
+
+
+def ExamineExitCodes(taskName, exitCodes):
+    '''
+    Examine all exit codes (passed as a list) and determine if there are 
+    jobs with problems. 
+
+    Print command for job resubmission.
+    '''
+    Verbose("ExamineExitCodes()")
+    if len(exitCodes) < 1:
+        return
+
+    exitCodes_s = ""
+    # For-loop: All exit codes
+    for i,e in enumerate(sorted(exitCodes)):
+        exitCodes_s += str(e)
+        if i < len(exitCodes)-1:
+            exitCodes_s += ","
+            Print("jobs with problems:%s" % (len(exitCodes) ) )
+            Print("crab resubmit %s --jobids %s --force" % (taskName, exitCodes_s) )
+    return
 
 
 def main(opts, args):
@@ -966,17 +994,10 @@ def main(opts, args):
         # Definitions
         files, exitCodes = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
 
-        # For Testing purposes: FIXME
+        # For Testing purposes
         if opts.test:
-            if len(exitCodes) > 0:
-                exitCodes_s = ""
-                for i,e in enumerate(sorted(exitCodes)):
-                    exitCodes_s += str(e)
-                    if i < len(exitCodes)-1:
-                        exitCodes_s += ","
-                print "        jobs with problems:",len(exitCodes)
-                print "        crab resubmit %s --jobids %s --force"%(taskName, exitCodes_s)
-            continue
+            ExamineExitCodes(taskName, exitCodes)
+            continue            
 
         # Check that output files were found. If so, check that they exist!
         if len(files) == 0:
@@ -984,17 +1005,13 @@ def main(opts, args):
             continue        
         else:
             CheckThatFilesExist(files, opts)
-        Print("Task %s, with %s ROOT files" % (taskName, len(files)), False)
+        Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
         
         # Split files according to user-defined options
         filesSplit = splitFiles(files, opts.filesPerMerge, opts)
-        if len(filesSplit) == 1:
-            Print("Task %s, merging %d file(s)" % (taskName, len(files)), False)
-        else:
-            Print("Task %s, merging %d files to %d file(s)" % (taskName, len(files), len(filesSplit)), False)
 
         # Create a simple progress bar
-        CreateProgressBar()
+        CreateProgressBar(taskName, filesSplit, files) #iro
 
         # For-loop: All splitted files
         for index, inputFiles in filesSplit:
@@ -1031,9 +1048,10 @@ def main(opts, args):
                     shutil.move(mergeName, mergeName + ".backup")
 
             # Merge the ROOT files
-            time_start = timeit.timeit()
+            time_start = time.time()
             ret = MergeFiles(mergeName, mergeNameEOS, inputFiles, opts)
-            time_end = timeit.timeit()
+            time_end = time.time()
+            dtMerge = time_end-time_start
             if ret != 0:
                 return ret
             
@@ -1047,11 +1065,11 @@ def main(opts, args):
             if opts.filesInEOS:
                 mergedFiles.append((mergeNameEOS, inputFiles))
                 mergedFilesSizes[mergeNameEOS] = mergeFileSize
-                mergedFilesTimes[mergeNameEOS] = time_end-time_start
+                mergedFilesTimes[mergeNameEOS] = dtMerge
             else:
                 mergedFiles.append((mergeName, inputFiles))
                 mergedFilesSizes[mergeName] = mergeFileSize
-                mergedFilesTimes[mergeName] = time_end-time_start
+                mergedFilesTimes[mergeName] = dtMerge
 
             # Sanity check
             try:
