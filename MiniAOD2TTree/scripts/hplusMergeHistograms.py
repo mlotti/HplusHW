@@ -963,6 +963,29 @@ def main(opts, args):
                     rm_cmd = ConvertCommandToEOS("rm", opts) + " %s" % (mergeNameEOS)
                     Print(rm_cmd)
                     ret = Execute(rm_cmd)
+
+#### merge conflict begins
+####                tmp += "-%d" % index
+####            mergeName = os.path.join(d, "results", opts.output % tmp)
+            if os.path.exists(mergeName) and not opts.test:
+                #shutil.move(mergeName, mergeName+".backup")
+                if opts.overwrite:
+                    if opts.verbose:
+                        print "mv %s %s" % (mergeName, mergeName+".backup")
+                    shutil.move(mergeName, mergeName+".backup")
+                else:
+                    continue
+
+            # FIXME: add here reading of first xrootd file, finding all TTrees, and writing the TList to mergeName file
+            if opts.filesInSE:
+                raise Exception("--filesInSE feature is not fully implemented")
+
+            if len(inputFiles) == 1:
+                if opts.verbose:
+                    print "cp %s %s" % (inputFiles[0], mergeName)
+                if not opts.test:
+                    shutil.copy(inputFiles[0], mergeName)
+#### end of merge conflict
             else:
                 if FileExists(mergeName, opts) and not opts.test:
                     Print("mv %s %s" % (mergeName, mergeName + ".backup") )
@@ -1070,7 +1093,8 @@ if __name__ == "__main__":
 
     parser.add_option("-o", dest="output", type="string", default="histograms-%s.root",
                       help="Pattern for merged output root files (use '%s' for crab directory name) [default: 'histograms-%s.root']")
-
+    parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true",
+                     help="Overwrite histograms-%s.root files (default False)")
     parser.add_option("--test", dest="test", default=False, action="store_true",
                       help="Just test, do not do any merging or deleting. Useful for checking what would happen. Implies --verbose [default: 'False']")
 
