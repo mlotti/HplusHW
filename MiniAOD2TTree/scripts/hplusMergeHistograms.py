@@ -327,7 +327,11 @@ def main(opts, args):
             if os.path.exists(mergeName) and not opts.test:
                 if opts.verbose:
                     print "mv %s %s" % (mergeName, mergeName+".backup")
-                shutil.move(mergeName, mergeName+".backup")
+                #shutil.move(mergeName, mergeName+".backup")
+                if opts.overwrite:
+                    shutil.move(mergeName, mergeName+".backup")
+                else:
+                    continue
 
             # FIXME: add here reading of first xrootd file, finding all TTrees, and writing the TList to mergeName file
             if opts.filesInSE:
@@ -395,6 +399,8 @@ if __name__ == "__main__":
                       help="Regex for input root files (note: remember to escape * and ? !) (default: 'histograms_.*?\.root')")
     parser.add_option("-o", dest="output", type="string", default="histograms-%s.root",
                       help="Pattern for merged output root files (use '%s' for crab directory name) (default: 'histograms-%s.root')")
+    parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true",
+                     help="Overwrite histograms-%s.root files (default False)")
     parser.add_option("--test", dest="test", default=False, action="store_true",
                       help="Just test, do not do any merging or deleting (might be useful for checking what would happen). Implies --verbose.")
     parser.add_option("--delete", dest="delete", default=False, action="store_true",
