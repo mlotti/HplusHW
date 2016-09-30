@@ -220,7 +220,7 @@ def getHistogramFileSE(stdoutFile, opts):
             raise Exception("Other output SE's than madhatter are not supported at the moment (encountered PFN %s)"%histoFile)
         histoFile = histoFile.replace(replace_madhatter[0], replace_madhatter[1])
     return histoFile
-
+n
 
 def getHistogramFileEOS(stdoutFile, opts):
     '''
@@ -1030,22 +1030,27 @@ def main(opts, args):
             # If merge file exists already rename it as .backup            
             if opts.filesInEOS:
                 if FileExists(mergeNameEOS, opts) and not opts.test:
-                    mergeNameEOSNew = mergeNameEOS + ".backup"
-                    Print("File \"%s\" already exists.\n\tRenaming to \"%s\"." % (mergeNameEOS, mergeNameEOSNew) )
-                    fileName    = GetXrdcpPrefix(opts) + mergeNameEOS
-                    fileNameNew = GetXrdcpPrefix(opts) + mergeNameEOSNew
-                    cp_cmd      = "xrdcp %s %s" % (fileName, fileNameNew)
-                    Verbose(cp_cmd)
-                    ret = Execute(cp_cmd)
-
-                    # Now remove the original file
-                    rm_cmd = ConvertCommandToEOS("rm", opts) + " %s" % (mergeNameEOS)
-                    Print(rm_cmd)
-                    ret = Execute(rm_cmd)
+                    if opts.overwrite:
+                        mergeNameEOSNew = mergeNameEOS + ".backup"
+                        Print("File \"%s\" already exists.\n\tRenaming to \"%s\"." % (mergeNameEOS, mergeNameEOSNew) )
+                        fileName    = GetXrdcpPrefix(opts) + mergeNameEOS
+                        fileNameNew = GetXrdcpPrefix(opts) + mergeNameEOSNew
+                        cp_cmd      = "xrdcp %s %s" % (fileName, fileNameNew)
+                        Verbose(cp_cmd)
+                        ret = Execute(cp_cmd)
+                        # Now remove the original file
+                        rm_cmd = ConvertCommandToEOS("rm", opts) + " %s" % (mergeNameEOS)
+                        Print(rm_cmd)
+                        ret = Execute(rm_cmd)
+                    else:
+                        Verbose("File %s already exists. Skipping .." % (mergeNameEOS) )
             else:
                 if FileExists(mergeName, opts) and not opts.test:
-                    Print("mv %s %s" % (mergeName, mergeName + ".backup") )
-                    shutil.move(mergeName, mergeName + ".backup")
+                    if opts.overwrite:
+                        Print("mv %s %s" % (mergeName, mergeName + ".backup") )
+                        shutil.move(mergeName, mergeName + ".backup")
+                    else:
+                        Verbose("File %s already exists. Skipping .." % (mergeName) )
 
             # Merge the ROOT files
             time_start = time.time()
@@ -1181,14 +1186,20 @@ if __name__ == "__main__":
     parser.add_option("--filesInEOS", dest="filesInEOS", default=False, action="store_true",
                       help="The ROOT files to be merged are in an EOS. Merge the files from there (xrootd protocol). File locations are read from cmsRun_*.log.tar.gz files. [default: 'False']")
 
-    parser.add_option("--includeTasks", dest="includeTasks" , default="", type="string", help="Only perform action for this dataset(s) [default: '']")
+    parser.add_option("--includeTasks", dest="includeTasks" , default="", type="string", 
+                      help="Only perform action for this dataset(s) [default: '']")
 
-    parser.add_option("--excludeTasks", dest="excludeTasks" , default="", type="string", help="Exclude this dataset(s) from action [default: '']")    
+    parser.add_option("--excludeTasks", dest="excludeTasks" , default="", type="string", 
+                      help="Exclude this dataset(s) from action [default: '']")    
 
     parser.add_option("--allowJobExitCode", dest="allowJobExitCodes", default=[], action="append", type="int",
                       help="Allow merging files from this non-zero job exit code (zero exe exit code is still required). Can be given multiple times [default: '[]']")
 
-    parser.add_option("-v", "--verbose"    , dest="verbose"      , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
+    parser.add_option("-v", "--verbose"    , dest="verbose"      , default=VERBOSE, action="store_true", 
+                      help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
+
+    parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true", 
+                      help="Overwrite histograms-%s.root files (default False)")
 
     (opts, args) = parser.parse_args()
 
