@@ -1606,7 +1606,7 @@ def ConvertCommandToEOS(cmd, opts):
     if "fnal" in GetHostname():
         for key in cmdMap:
             if key == "ls": # exception because I use the full command, not the alias
-                cmdMap[key] = "eosls"
+                cmdMap[key] = "eos root://cmseos.fnal.gov ls"
             else:
                 cmdMap[key] = cmdMap[key].replace("eos ", "eos")
         
