@@ -69,11 +69,6 @@ class Report:
         self.mergedFiles      = mergeFileMap.keys()
         for key in mergeFileMap.keys():
             self.inputFiles.extend( mergeFileMap[key] )
-
-        print 
-        print "mergeFileMap.values() = ", (mergeFileMap.values())
-        print 
-        print "mergeFileMap.keys() = ", (mergeFileMap.keys())
         sizeSum   = 0
         mergeTime = 0
         cleanTime = 0
