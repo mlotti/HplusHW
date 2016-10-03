@@ -117,13 +117,17 @@ def CreateProgressBar(taskName, filesSplit, files):
     Verbose("CreateProgressBar()")
 
     if len(filesSplit) == 1:
-        msg = "Task %s, merging %d file(s)" % (taskName, len(files) )
+        msg = "\tTask %s, merging %d file(s)" % (taskName, len(files) )
     else:
-        msg = "Task %s, merging %d files to %d file(s)" % (taskName, len(files), len(filesSplit) )
+        msg = "\tTask %s, merging %d files to %d file(s)" % (taskName, len(files), len(filesSplit) )
 
     # setup toolbar
-    toolbar_width = 99 #100
-    sys.stdout.write("\t%s: [%s]" % (msg, " " * toolbar_width))
+    toolbar_width = 100
+    align = "{:<80} {:<100}"
+    pbar  = "[" + " " * toolbar_width + "]"
+    txt   = align.format(msg, pbar)
+    sys.stdout.write(txt)
+    #sys.stdout.write("\t%s: [%s]" % (msg, " " * toolbar_width))
     sys.stdout.flush()
 
     # Return to start of line, after '['
@@ -935,7 +939,7 @@ def MergeFiles(mergeName, inputFiles, opts):
             return ret
 
 
-def PrintSummary(reports):
+def PrintSummary(taskReports):
     '''
     Self explanatory
     '''
@@ -943,15 +947,18 @@ def PrintSummary(reports):
     
     table    = []
     msgAlign = "{:<3} {:<50} {:^15} {:^15} {:^15} {:^15} {:^15} {:^15}"
-    header   = msgAlign.format("#", "Dataset", "Input Files", "Merged Files", "Pre-Merged Files", "Size (GB)", "Merge Time (min)", "Clean Time (min)")
+    header   = msgAlign.format("#", "Task Name", "Input Files", "Merged Files", "Pre-Merged Files", "Size (GB)", "Merge Time (min)", "Clean Time (min)")
     hLine    = "="*len(header)
     table.append(hLine)
     table.append(header)
     table.append(hLine)
 
     #For-loop: All reports
-    for i, r in enumerate(reports):
+    i = 1
+    for key in taskReports.keys():
+        r = taskReports[key]
         table.append( msgAlign.format(i+1, r.dataset, r.nInputFiles, r.nMergedFiles, r.nPreMergedFiles, "%0.2f" % r.mergedFilesSize, "%0.2f" % r.mergeTimeTotal, "%0.2f" % r.cleanTimeTotal) )
+        i+=1
 
     # Print the table
     print
@@ -1140,8 +1147,8 @@ def main(opts, args):
     exit_re = re.compile("/results/cmsRun_(?P<exitcode>\d+)\.log\.tar\.gz")
     
     # Definitions
-    reports = []
     filesExist   = 0
+    taskReports  = {}
     mergeFileMap = {}
     mergeSizeMap = {}
     mergeTimeMap = {}
@@ -1229,8 +1236,10 @@ def main(opts, args):
             if opts.deleteImmediately:
                 DeleteFiles(inputFiles, opts)
         
-    # Finish the progress bar
-    FinishProgressBar()
+        # Finish the progress bar
+        FinishProgressBar()
+        taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, cleanTimeMap, filesExist) #iro
+
 
     # Append "delete" message
     deleteMsg = GetDeleteMessage(opts)
@@ -1249,7 +1258,7 @@ def main(opts, args):
         time_end = time.time()
         dtClean  = (time_end-time_start)
         cleanTimeMap[key] = dtClean
-
+        
         # Delete files after merging?
         if opts.delete and not opts.deleteImmediately:
             DeleteFiles(sourceFiles, opts)
@@ -1258,9 +1267,12 @@ def main(opts, args):
         pileup(f, opts)
 
     # Print summary table using reports
-    #fullTaskName = ConvertTasknameToEOS(taskName, opts)
-    reports.append(Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, cleanTimeMap, filesExist) )
-    PrintSummary(reports)
+        for key in cleanTimeMap.keys(): #iro
+            print "key = ", key
+        #taskReports[key] = cleanTimeMap[key]
+        #taskReports[key] = cleanTimeMap[key]
+    #reports.append(Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, cleanTimeMap, filesExist) )
+    PrintSummary(taskReports)
 
     return 0
 
