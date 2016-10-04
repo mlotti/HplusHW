@@ -81,3 +81,20 @@ Taus = cms.VPSet(
     )
 )
 
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV
+Taus_TauPOGRecommendation = Taus.copy()
+Taus_TauPOGRecommendation[0].discriminators = cms.vstring(
+                'againstElectronLooseMVA6',                                                                                                                                                                                               
+                'againstElectronMediumMVA6',                                                                                                                                                                                              
+                'againstElectronTightMVA6',                                                                                                                                                                                               
+                'againstElectronVLooseMVA6',                                                                                                                                                                                              
+                'againstElectronVTightMVA6',                                                                                                                                                                                              
+                'againstMuonLoose3',                                                                                                                                                                                                      
+                'againstMuonTight3',                                                                                                                                                                                                      
+                'byLooseCombinedIsolationDeltaBetaCorr3Hits',                                                                                                                                                                             
+                'byMediumCombinedIsolationDeltaBetaCorr3Hits',                                                                                                                                                                            
+                'byTightCombinedIsolationDeltaBetaCorr3Hits',                                                                                                                                                                             
+                'decayModeFinding',                                                                                                                                                                                                       
+                'decayModeFindingNewDMs'
+)
+
