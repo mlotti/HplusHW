@@ -33,7 +33,7 @@ _rebinFactor = 10
 
 print "Analysis name:", analysis
 
-selectOnlyBins = ["Inclusive"] #["1"]
+selectOnlyBins = []#["Inclusive"] #["1"]
 
 def usage():
     print "\n"
