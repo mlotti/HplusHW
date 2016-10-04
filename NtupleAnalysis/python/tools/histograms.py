@@ -1840,7 +1840,10 @@ class HistoTotalUncertainty(HistoGraph):
         tmp.SetDirectory(0)
         for h in rootHistosWithUnc[1:]:
             tmp.Add(h)
-        tmpgr = tmp.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
+        if uncertaintyMode.equal(Uncertainty.SystOnly):
+            tmpgr = tmp.getSystematicUncertaintyGraph()
+        else:
+            tmpgr = tmp.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
         HistoGraph.__init__(self, dataset.RootHistoWithUncertainties(tmpgr), name, "F", "E2")
         self._histo.SetName(rootHistosWithUnc[0].GetName()+"_errors")
         self.histos = histos

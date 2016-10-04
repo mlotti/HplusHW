@@ -1253,8 +1253,17 @@ class RootHistoWithUncertainties:
         if name in self._shapeUncertainties.keys():
             raise Exception("Uncertainty '%s' has already been added!"%name)
         plusClone.Add(self._rootHisto, -1.0)
-        minusClone.Add(self._rootHisto, -1.0)
+        minusClone.Add(self._rootHisto, -1.0) # is this really correct? or should we have 'minusClone.Scale(-1)' afterwards to get this as "rootHisto - minus_band"?
         # Store
+        self._shapeUncertainties[name] = (plusClone, minusClone)
+
+    def addAbsoluteShapeUncertainty(self, name, th1Plus, th1Minus):
+        if name in self._shapeUncertainties.keys():
+            raise Exception("Uncertainty '%s' has already been added!"%name)
+        plusClone = aux.Clone(th1Plus)
+        minusClone = aux.Clone(th1Minus)
+        self._checkConsistency(name, plusClone)
+        self._checkConsistency(name, minusClone)
         self._shapeUncertainties[name] = (plusClone, minusClone)
 
     ## Remove superfluous shape variation uncertainties
