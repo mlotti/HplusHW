@@ -631,7 +631,7 @@ class BRXSDatabaseInterface:
         x = []
         y = []
 
-        mHpStart = 200
+        mHpStart = 175
         upper_x00 = []
         upper_y00 = []
         if higgs == "mh":
@@ -642,7 +642,8 @@ class BRXSDatabaseInterface:
                 x.append(lower_x00[j])
                 y.append(lower_y00[j])
                 print "mh lower_x00,lower_y00",lower_x00[j],lower_y00[j]
-        
+#        x.append(175)
+#        y.append(11.0)
         tanbStart = 5
         if higgs == "mH" or higgs == "mA":
             tanbStart = 1
@@ -661,7 +662,7 @@ class BRXSDatabaseInterface:
 
         #for i in range(len(x)):
         #    print "check x0,y0",x[i],y[i]
-        
+
         if higgs == "mh":
             lower_x,lower_y = self.getLimits(higgs,xVariableName,"tanb",selection,self.lowerLimit(mhMeasurement))
             upper_x,upper_y = self.getLimits(higgs,xVariableName,"tanb",selection,self.upperLimit(mhMeasurement))
@@ -2664,10 +2665,10 @@ def test():
 	db = BRXSDatabaseInterface(match.group(0),program="FeynHiggs")
 #        db.Print(variable="mH",selection="mA==110 && mu==3300")
 #        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mA==110 && mu==3300")
-        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mHp==155 && mu==200")
+#        db.Print(variable="BR_tHpb*BR_Hp_taunu",selection="mHp==155 && mu==200")
 #        db.Print(variable="mHp",selection="mA==110 && mu==3300")
 #        db.Print(variable="mHp")
-#        db.Print(variable="mh",selection="mHp==200&&mu==200")
+        db.Print(variable="mh",selection="mHp==180&&mu==500")
 #        db.Print(variable="0.001*2*tHp_xsec*BR_Hp_taunu",selection="mHp==300&&mu==200")
 #        db.Print(variable="tHp_xsec",selection="mHp==200 && tanb== 40")
 

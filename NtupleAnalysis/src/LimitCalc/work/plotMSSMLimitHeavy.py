@@ -47,7 +47,7 @@ def main():
         if match:
             jsonfile = match.group(0)
 #    jsonfile = "limits_heavy2016.json"
-    jsonfile = "limitsForMSSMplots_v1_heavy.json"
+    jsonfile = "limits2016/limitsForMSSMplots_v3_heavy.json"
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="configurationHeavy.json")
     limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/heavyHplus_configuration.json")
 
@@ -123,7 +123,8 @@ def main():
 
     # Interpret in MSSM
     xVariable = "mHp"
-    selection = "mHp > 0 && mu==200"
+#    selection = "mHp > 0 && mu==200"
+    selection = "mHp > 0 && mu==500"
 #    scenario = "MSSM m_{h}^{max}"
     scenario = os.path.split(rootfile)[-1].replace(".root","")
     print scenario
