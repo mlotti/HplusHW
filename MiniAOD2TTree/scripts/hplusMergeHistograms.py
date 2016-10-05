@@ -1194,7 +1194,15 @@ def GetPreexistingMergedFiles(taskPath):
     Verbose(cmd)
     dirContents = Execute(cmd)
     preMergedFiles = filter(lambda x: "histograms-" in x, dirContents)
-    return preMergedFiles
+
+    # For-loop: All files
+    mergeSizeMap = {}
+    mergeTimeMap = {}
+    for f in preMergedFiles:
+        mergeSizeMap[f] = GetFileSize(taskPath + "/" + f, opts, True)
+        mergeTimeMap[f] = 0.0
+    filesExist = len(preMergedFiles)
+    return filesExist, mergeSizeMap, mergeTimeMap
 
 
 def main(opts, args):
@@ -1256,10 +1264,11 @@ def main(opts, args):
             continue        
         else:            
             if not CheckThatFilesExist(taskName, files, opts):
-                preMergedFiles = GetPreexistingMergedFiles(os.path.dirname(files[0]))
-                filesExist = len(preMergedFiles)
-                taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+                filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]))
+                taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
                 continue
+            else:
+                pass
 
         Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
         
