@@ -1,0 +1,27 @@
+{
+  "clsConfig": {
+    "scanRmax": {
+      "default": null
+    }, 
+    "scanRmin": {
+      "default": null
+    }
+  }, 
+  "clsType": "LHC", 
+  "codeVersion": "0d1f6ed47ac8e187ef97874c8ca1e802db1c6e72", 
+  "datacards": [
+    "lands_datacard_hplushadronic_m%s.txt"
+  ], 
+  "landsVersion": "HEAD", 
+  "masspoints": [
+    "100", 
+    "120", 
+    "140", 
+    "150", 
+    "155", 
+    "160"
+  ], 
+  "rootfiles": [
+    "lands_histograms_hplushadronic_m%s.root"
+  ]
+}

@@ -21,10 +21,10 @@ void JetGeneratedCollection::setupBranches(BranchManager& mgr) {
   mgr.book(prefix()+"_originatesFromUnknown", &fOriginatesFromUnknown);
   mgr.book(prefix()+"_originatesFromW", &fOriginatesFromW);
   mgr.book(prefix()+"_originatesFromZ", &fOriginatesFromZ);
+  mgr.book(prefix()+"_pfCombinedCvsBJetTags", &fPfCombinedCvsBJetTags);
+  mgr.book(prefix()+"_pfCombinedCvsLJetTags", &fPfCombinedCvsLJetTags);
   mgr.book(prefix()+"_pfCombinedInclusiveSecondaryVertexV2BJetTags", &fPfCombinedInclusiveSecondaryVertexV2BJetTags);
-  mgr.book(prefix()+"_pfCombinedMVABJetTag", &fPfCombinedMVABJetTag);
-  mgr.book(prefix()+"_pfJetBProbabilityBJetTags", &fPfJetBProbabilityBJetTags);
-  mgr.book(prefix()+"_pfJetProbabilityBJetTags", &fPfJetProbabilityBJetTags);
+  mgr.book(prefix()+"_pfCombinedMVAV2BJetTags", &fPfCombinedMVAV2BJetTags);
   mgr.book(prefix()+"_hadronFlavour", &fHadronFlavour);
   mgr.book(prefix()+"_partonFlavour", &fPartonFlavour);
 }

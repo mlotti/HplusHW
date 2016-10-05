@@ -101,13 +101,35 @@ public:
   float_type phi() const { return fCollection->fPhi->value()[index()]; }
   float_type e()   const { return fCollection->fE->value()[index()]; }
   short pdgId()  const { return fCollection->fPdgId->value()[index()]; }
-  short mother() const { return fCollection->fMother->value()[index()]; }
+  std::vector<short> mothers() const { return fCollection->fMothers->value()[index()]; } // Required: "#pragma link C++ class vector<vector<short> >+;" in Framework/src/FrameworkLinkdef.h 
+  std::vector<short> daughters() const { return fCollection->fDaughters->value()[index()]; } // Required: "#pragma link C++ class vector<vector<short> >+;" in Framework/src/FrameworkLinkdef.h 
   short status() const { return fCollection->fStatus->value()[index()]; }
   short charge() const { return fCollection->fCharge->value()[index()]; }
   double vtxX() const { return fCollection->fVtxX->value()[index()]; }
   double vtxY() const { return fCollection->fVtxY->value()[index()]; }
   double vtxZ() const { return fCollection->fVtxZ->value()[index()]; }
-  
+  bool fromHardProcessBeforeFSR() const { return fCollection->fFromHardProcessBeforeFSR->value()[index()]; }
+  bool fromHardProcessDecayed() const { return fCollection->fFromHardProcessDecayed->value()[index()]; }
+  bool fromHardProcessFinalState() const { return fCollection->fFromHardProcessFinalState->value()[index()]; }
+  bool isDirectHardProcessTauDecayProductFinalState() const { return fCollection->fIsDirectHardProcessTauDecayProductFinalState->value()[index()]; }
+  bool isDirectPromptTauDecayProductFinalState() const { return fCollection->fIsDirectPromptTauDecayProductFinalState->value()[index()]; }
+  bool isHardProcess() const { return fCollection->fIsHardProcess->value()[index()]; }
+  bool isLastCopy() const { return fCollection->fIsLastCopy->value()[index()]; }
+  bool isLastCopyBeforeFSR() const { return fCollection->fIsLastCopyBeforeFSR->value()[index()]; }
+  bool isPromptDecayed() const { return fCollection->fIsPromptDecayed->value()[index()]; }
+  bool isPromptFinalState() const { return fCollection->fIsPromptFinalState->value()[index()]; }
+  bool fromHardProcess() const { return fCollection->fFromHardProcess->value()[index()]; }
+  bool isDecayedLeptonHadron() const { return fCollection->fIsDecayedLeptonHadron->value()[index()]; }
+  bool isDirectHadronDecayProduct() const { return fCollection->fIsDirectHadronDecayProduct->value()[index()]; }
+  bool isDirectHardProcessTauDecayProduct() const { return fCollection->fIsDirectHardProcessTauDecayProduct->value()[index()]; }
+  bool isDirectPromptTauDecayProduct() const { return fCollection->fIsDirectPromptTauDecayProduct->value()[index()]; }
+  bool isDirectTauDecayProduct() const { return fCollection->fIsDirectTauDecayProduct->value()[index()]; }
+  bool isFirstCopy() const { return fCollection->fIsFirstCopy->value()[index()]; }
+  bool isHardProcessTauDecayProduct() const { return fCollection->fIsHardProcessTauDecayProduct->value()[index()]; }
+  bool isPrompt() const { return fCollection->fIsPrompt->value()[index()]; }
+  bool isPromptTauDecayProduct() const { return fCollection->fIsPromptTauDecayProduct->value()[index()]; }
+  bool isTauDecayProduct() const { return fCollection->fIsTauDecayProduct->value()[index()]; }
+
   float_type Phi() const { return phi(); }
 
   // Note: asking for polarP4 is more expensive than asking any of
@@ -188,27 +210,74 @@ public:
     fPhi(nullptr),
     fE(nullptr),
     fPdgId(nullptr),
-    fMother(nullptr),
+    fMothers(nullptr),
+    fDaughters(nullptr),
     fStatus(nullptr),
     fCharge(nullptr),
     fVtxX(nullptr),
     fVtxY(nullptr),
-    fVtxZ(nullptr)
+    fVtxZ(nullptr),
+    // FIXME: These must be moved (added becaused autogenerate script not fully operation for GenParticles)
+    fFromHardProcessBeforeFSR(nullptr),
+    fFromHardProcessDecayed(nullptr),
+    fFromHardProcessFinalState(nullptr),
+    fIsDirectHardProcessTauDecayProductFinalState(nullptr),
+    fIsDirectPromptTauDecayProductFinalState(nullptr),
+    fIsHardProcess(nullptr),
+    fIsLastCopy(nullptr),
+    fIsLastCopyBeforeFSR(nullptr),
+    fIsPromptDecayed(nullptr),
+    fIsPromptFinalState(nullptr),
+    fFromHardProcess(nullptr),
+    fIsDecayedLeptonHadron(nullptr),
+    fIsDirectHadronDecayProduct(nullptr),
+    fIsDirectHardProcessTauDecayProduct(nullptr),
+    fIsDirectPromptTauDecayProduct(nullptr),
+    fIsDirectTauDecayProduct(nullptr),
+    fIsFirstCopy(nullptr),
+    fIsHardProcessTauDecayProduct(nullptr),
+    fIsPrompt(nullptr),
+    fIsPromptTauDecayProduct(nullptr),
+    fIsTauDecayProduct(nullptr)
+
   {}
   ~ParticleCollection() {}
 
   void setupBranches(BranchManager& mgr) {
-    mgr.book(prefix()+"_pt"  +energySystematicsVariation(), &fPt);
-    mgr.book(prefix()+"_eta" +energySystematicsVariation(), &fEta);
-    mgr.book(prefix()+"_phi" +energySystematicsVariation(), &fPhi);
-    mgr.book(prefix()+"_e"   +energySystematicsVariation(), &fE);
-    mgr.book(prefix()+"_pdgId"                            , &fPdgId);
-    mgr.book(prefix()+"_mother"                           , &fMother);
-    mgr.book(prefix()+"_status"                           , &fStatus);
-    mgr.book(prefix()+"_charge"                           , &fCharge);
-    mgr.book(prefix()+"_vtxX"                             , &fVtxX);
-    mgr.book(prefix()+"_vtxY"                             , &fVtxY);
-    mgr.book(prefix()+"_vtxZ"                             , &fVtxZ);
+    mgr.book(prefix()+"_pt"  + energySystematicsVariation(), &fPt);
+    mgr.book(prefix()+"_eta" + energySystematicsVariation(), &fEta);
+    mgr.book(prefix()+"_phi" + energySystematicsVariation(), &fPhi);
+    mgr.book(prefix()+"_e"   + energySystematicsVariation(), &fE);
+    mgr.book(prefix()+"_pdgId"    , &fPdgId);
+    mgr.book(prefix()+"_mothers"  , &fMothers);
+    mgr.book(prefix()+"_daughters", &fDaughters);
+    mgr.book(prefix()+"_status"   , &fStatus);
+    mgr.book(prefix()+"_charge"   , &fCharge);
+    mgr.book(prefix()+"_vtxX"     , &fVtxX);
+    mgr.book(prefix()+"_vtxY"     , &fVtxY);
+    mgr.book(prefix()+"_vtxZ"     , &fVtxZ);
+    // FIXME: These must be moved (added becaused autogenerate script not fully operation for GenParticles)
+    mgr.book(prefix()+"_fromHardProcessBeforeFSR"                    , &fFromHardProcessBeforeFSR);
+    mgr.book(prefix()+"_fromHardProcessDecayed"                      , &fFromHardProcessDecayed);
+    mgr.book(prefix()+"_fromHardProcessFinalState"                   , &fFromHardProcessFinalState);
+    mgr.book(prefix()+"_isDirectHardProcessTauDecayProductFinalState", &fIsDirectHardProcessTauDecayProductFinalState);
+    mgr.book(prefix()+"_isDirectPromptTauDecayProductFinalState"     , &fIsDirectPromptTauDecayProductFinalState);
+    mgr.book(prefix()+"_isHardProcess"                               , &fIsHardProcess); 
+    mgr.book(prefix()+"_isLastCopy"                                  , &fIsLastCopy);
+    mgr.book(prefix()+"_isLastCopyBeforeFSR"                         , &fIsLastCopyBeforeFSR);
+    mgr.book(prefix()+"_isPromptDecayed"                             , &fIsPromptDecayed);
+    mgr.book(prefix()+"_isPromptFinalState"                          , &fIsPromptFinalState);
+    mgr.book(prefix()+"_fromHardProcess"                             , &fFromHardProcess);
+    mgr.book(prefix()+"_isDecayedLeptonHadron"                       , &fIsDecayedLeptonHadron);
+    mgr.book(prefix()+"_isDirectHadronDecayProduct"                  , &fIsDirectHadronDecayProduct);
+    mgr.book(prefix()+"_isDirectHardProcessTauDecayProduct"          , &fIsDirectHardProcessTauDecayProduct);
+    mgr.book(prefix()+"_isDirectPromptTauDecayProduct"               , &fIsDirectPromptTauDecayProduct);
+    mgr.book(prefix()+"_isDirectTauDecayProduct"                     , &fIsDirectTauDecayProduct);
+    mgr.book(prefix()+"_isFirstCopy"                                 , &fIsFirstCopy);
+    mgr.book(prefix()+"_isHardProcessTauDecayProduct"                , &fIsHardProcessTauDecayProduct);
+    mgr.book(prefix()+"_isPrompt"                                    , &fIsPrompt);
+    mgr.book(prefix()+"_isPromptTauDecayProduct"                     , &fIsPromptTauDecayProduct);
+    mgr.book(prefix()+"_isTauDecayProduct"                           , &fIsTauDecayProduct);
   }
 
   size_t size() const { return fPt->value().size(); }
@@ -225,12 +294,36 @@ protected:
   const Branch<std::vector<float_type>> *fPhi;
   const Branch<std::vector<float_type>> *fE;
   const Branch<std::vector<short>> *fPdgId;
-  const Branch<std::vector<short>> *fMother;
+  const Branch<std::vector< std::vector<short> >> *fMothers;
+  const Branch<std::vector< std::vector<short> >> *fDaughters;
   const Branch<std::vector<short>> *fStatus;
   const Branch<std::vector<short>> *fCharge;
   const Branch<std::vector<double>> *fVtxX;
   const Branch<std::vector<double>> *fVtxY;
   const Branch<std::vector<double>> *fVtxZ;
+  // FIXME: These must be moved (added becaused autogenerate script not fully operation for GenParticles)
+  const Branch<std::vector<bool>> *fFromHardProcessBeforeFSR;
+  const Branch<std::vector<bool>> *fFromHardProcessDecayed;
+  const Branch<std::vector<bool>> *fFromHardProcessFinalState;
+  const Branch<std::vector<bool>> *fIsDirectHardProcessTauDecayProductFinalState;
+  const Branch<std::vector<bool>> *fIsDirectPromptTauDecayProductFinalState;
+  const Branch<std::vector<bool>> *fIsHardProcess;
+  const Branch<std::vector<bool>> *fIsLastCopy;
+  const Branch<std::vector<bool>> *fIsLastCopyBeforeFSR;
+  const Branch<std::vector<bool>> *fIsPromptDecayed;
+  const Branch<std::vector<bool>> *fIsPromptFinalState;
+  const Branch<std::vector<bool>> *fFromHardProcess;
+  const Branch<std::vector<bool>> *fIsDecayedLeptonHadron;
+  const Branch<std::vector<bool>> *fIsDirectHadronDecayProduct;
+  const Branch<std::vector<bool>> *fIsDirectHardProcessTauDecayProduct;
+  const Branch<std::vector<bool>> *fIsDirectPromptTauDecayProduct;
+  const Branch<std::vector<bool>> *fIsDirectTauDecayProduct;
+  const Branch<std::vector<bool>> *fIsFirstCopy;
+  const Branch<std::vector<bool>> *fIsHardProcessTauDecayProduct;
+  const Branch<std::vector<bool>> *fIsPrompt;
+  const Branch<std::vector<bool>> *fIsPromptTauDecayProduct;
+  const Branch<std::vector<bool>> *fIsTauDecayProduct;
+
 };
 
 #endif

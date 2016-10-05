@@ -12,8 +12,10 @@ from HiggsAnalysis.NtupleAnalysis.tools.aux import execute
 
 import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 
-# lumiCalc.py usage taken from
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
+# brilcalc usage taken from
+# https://twiki.cern.ch/twiki/bin/view/CMS/CertificationTools#Lumi_calculation
+NormTagJSON = "/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json"
+
 
 # PileUp calc according to https://indico.cern.ch/event/459797/contribution/3/attachments/1181542/1711291/PPD_PileUp.pdf
 PileUpJSON = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt"
@@ -136,7 +138,8 @@ def main(opts, args):
             print " http://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html"
             sys.exit()
 
-	cmd = [exe,"lumi","--byls", "-u/pb","-i", jsonfile]
+#        cmd = [exe,"lumi","--byls", "-u/pb","-i", jsonfile]
+	cmd = [exe,"lumi","-b", "STABLE BEAMS", "--normtag",NormTagJSON,"-u/pb","-i", jsonfile]
         if opts.verbose:
             print " ".join(cmd)
 
@@ -171,8 +174,11 @@ def main(opts, args):
 
         # PileUp
         fOUT = os.path.join(task, "results", "PileUp.root")
-	minBiasXsec = 80000
+        minBiasXsec = 63000
+#        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","80000","--maxPileupBin","50","--numPileupBins","50",fOUT] # 2015 xsec 80000
+#        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","63000","--maxPileupBin","50","--numPileupBins","50",fOUT] # 2016 xsec 63000
         pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT]
+
         pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         puoutput = pu.communicate()[0]
         puret = pu.returncode

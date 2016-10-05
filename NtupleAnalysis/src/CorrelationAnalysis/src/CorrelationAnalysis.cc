@@ -472,9 +472,9 @@ void CorrelationAnalysis::process(Long64_t entry) {
   Jet jet3 = selectedJets[2];
 
 
-  double jet1ID = jet1.pdgId();
-  double jet2ID = jet2.pdgId();
-  double jet3ID = jet3.pdgId();
+  // double jet1ID = jet1.pdgId();
+  // double jet2ID = jet2.pdgId();
+  // double jet3ID = jet3.pdgId();
   //    std::cout << "  jet1ID "<<   fGenTop.getGenTopDecayMode() << "  jet2ID "<<   jet2ID <<  "  jet3ID "<<   jet3ID << std::endl;
   math::XYZTLorentzVector threeJets;
   threeJets = jet1.p4() + jet2.p4() + jet3.p4();
@@ -584,9 +584,9 @@ void CorrelationAnalysis::process(Long64_t entry) {
     double nominalW = 80.4; //value used in simulation (unchanged)                                                                              
     double sigmaTop = 26.9; //RMS of Gaussian fit to 2012 TTJets_SemiLept (used to be 18.0)                                                 
     double sigmaW = 14.4; //RMS of Gaussian fit to 2012 TTJets_SemiLept (used to be 11.0)                                         
-    bool topmassfound = false;
-    double topMass = -999;
-    double WMass = -999;
+    // bool topmassfound = false;
+    // double topMass = -999;
+    // double WMass = -999;
     double dR_jets;
     double dR_top_tau;
     double dR_Wb;
@@ -608,7 +608,7 @@ void CorrelationAnalysis::process(Long64_t entry) {
       Jet jet2 = selectedJets[i2];
       if (ROOT::Math::VectorUtil::DeltaR(jet1.p4(), jet2.p4()) < 0.4) continue;
       candW = jet1.p4() + jet2.p4();
-      WMass = candW.M();
+      // WMass = candW.M();
       hWCandMass->Fill(recoW.M()); 
       if (candW.M() < 120 && candW.M() > 50)  WCandFound = true;
 
@@ -624,8 +624,8 @@ void CorrelationAnalysis::process(Long64_t entry) {
           Jet1 = jet1;
           Jet2 = jet2;
           Jetb = jet3;
-          topMass = candTop.M();
-          topmassfound = true;
+          // topMass = candTop.M();
+          // topmassfound = true;
 	  recoTop = candTop;
 	  recoW = candW;
 	  dR_jets = ROOT::Math::VectorUtil::DeltaR(jet1.p4(), jet2.p4());

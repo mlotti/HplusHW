@@ -170,7 +170,8 @@ def createOutputdirectory(myDir):
 
 if __name__ == "__main__":
     # Obtain normalization factors
-    myNormalizationFactorSource = "QCDInvertedNormalizationFactors_AfterStdSelections_1prong.py"
+#    myNormalizationFactorSource = "QCDInvertedNormalizationFactors_AfterStdSelections_1prong.py"
+    myNormalizationFactorSource = "QCDNormalizationFactors_AfterStdSelections_Run2016BCD_80to1000.py"
     myNormFactors = None
     myNormFactorsSafetyCheck = None
     if os.path.exists(myNormalizationFactorSource):

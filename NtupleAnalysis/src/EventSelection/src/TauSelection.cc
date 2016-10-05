@@ -16,6 +16,7 @@
 TauSelection::Data::Data() 
 : fRtau(-1.0),
   fIsGenuineTau(false),
+  fTauIDSF(1.0),
   fTauMisIDSF(1.0),
   fTauTriggerSF(1.0),
   fRtauAntiIsolatedTau(-1.0),
@@ -47,6 +48,8 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
   fTauNprongs(config.getParameter<int>("prongs")),
   fTauRtauCut(config.getParameter<float>("rtau")),
+  // tau identification SF
+  fTauIDSF(config.getParameter<float>("tauIdentificationSF")), 
   // tau misidentification SF
   fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
   fEToTauMisIDSFValue(assignTauMisIDSFValue(config, "E")),
@@ -58,6 +61,7 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
   cPassedTauSelection(fEventCounter.addCounter("passed tau selection ("+postfix+")")),
+  cPassedTauSelectionGenuine(fEventCounter.addCounter("passed tau selection and genuine ("+postfix+")")),
   cPassedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple selected taus ("+postfix+")")),
   cPassedAntiIsolatedTauSelection(fEventCounter.addCounter("passed anti-isolated tau selection ("+postfix+")")),
   cPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple anti-isolated taus ("+postfix+")")),
@@ -100,6 +104,7 @@ TauSelection::TauSelection(const ParameterSet& config)
   fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
   cPassedTauSelection(fEventCounter.addCounter("passed tau selection")),
+  cPassedTauSelectionGenuine(fEventCounter.addCounter("passed tau selection and genuine")),
   cPassedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple selected taus")),
   cPassedAntiIsolatedTauSelection(fEventCounter.addCounter("passed anti-isolated tau selection")),
   cPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple anti-isolated taus")),
@@ -144,7 +149,7 @@ TauSelection::~TauSelection() {
 }
 
 void TauSelection::initialize(const ParameterSet& config) {
-  
+
 }
 
 void TauSelection::bookHistograms(TDirectory* dir) {
@@ -333,6 +338,11 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
       }
     }
   }
+  // Set tau identification SF value to data object
+  if (event.isMC()) {
+    setTauIDSFValue(output);
+  }
+
   // Set tau misidentification SF value to data object
   if (event.isMC()) {
     setTauMisIDSFValue(output);
@@ -376,6 +386,8 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     cSubPassedAntiIsolationRtau.increment();
   if (output.fSelectedTaus.size() > 0)
     cPassedTauSelection.increment();
+  if (output.fSelectedTaus.size() > 0 && output.isGenuineTau())
+    cPassedTauSelectionGenuine.increment();
   if (output.fSelectedTaus.size() > 1)
     cPassedTauSelectionMultipleTaus.increment();
   if (output.fAntiIsolatedTaus.size() > 0)
@@ -439,6 +451,14 @@ std::vector<float> TauSelection::assignTauMisIDSFValue(const ParameterSet& confi
 //   if (!result.size())
 //     throw hplus::Exception("config") << "Could not found " << label << "->tau misID SF in config!";
   return result;
+}
+
+void TauSelection::setTauIDSFValue(Data& data) {
+  if (data.hasIdentifiedTaus()) {
+    if (data.isGenuineTau()) {
+      data.fTauIDSF = fTauIDSF;
+    }
+  }
 }
 
 void TauSelection::setTauMisIDSFValue(Data& data) {

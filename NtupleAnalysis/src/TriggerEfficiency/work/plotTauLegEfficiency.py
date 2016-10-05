@@ -143,13 +143,18 @@ def Print(graph):
         print "x,y",x,y
 
 
-def analyze(analysis):
+def analyze(analysis=None):
 
     paths = [sys.argv[1]]
 
-    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125")
-    datasetsDY = None
-#    datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL")
+    if not analysis == None:
+        datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Silver|GluGluHToTauTau_M125")
+    else:
+        datasets = dataset.getDatasetsFromMulticrabDirs(paths,excludeTasks="Silver|GluGluHToTauTau_M125")
+        analysis = datasets.getAllDatasets()[0].getAnalysisName()
+
+#    datasetsDY = None
+    datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="GluGluHToTauTau_M125|TTJets")
     datasetsH125 = None
 #    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125",emptyDatasetsAsNone=True)
@@ -208,7 +213,8 @@ def analyze(analysis):
     name = "TauMET_"+analysis+"_DataVsMC_PFTauPt"
 
     legend1 = "Data"
-    legend2 = "MC (DY)"
+#    legend2 = "MC (DY)"
+    legend2 = "Simulation"
     legend3 = "MC (H125)"
     createRatio = False
     p.histoMgr.setHistoLegendLabelMany({"eff1": legend1})
@@ -225,13 +231,16 @@ def analyze(analysis):
     p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 
     p.getFrame().GetYaxis().SetTitle("HLT tau efficiency")
-    p.getFrame().GetXaxis().SetTitle("#tau-jet p_{T} (GeV/c)")
+#    p.getFrame().GetXaxis().SetTitle("#tau-jet p_{T} (GeV/c)")
+    p.getFrame().GetXaxis().SetTitle("#tau_{h} p_{T} (GeV/c)")
     if createRatio:
         p.getFrame2().GetYaxis().SetTitle("Ratio")
         p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
-    label = analysis.split("_")[len(analysis.split("_")) -1]
+#    label = analysis.split("_")[len(analysis.split("_")) -1]
+    label = "2016"
+
     histograms.addText(0.5, 0.53, label, 17)
     runRange = datasets.loadRunRange()
     histograms.addText(0.5, 0.46, "Runs "+runRange, 17)
@@ -252,7 +261,7 @@ def analyze(analysis):
     pythonWriter.addParameters(plotDir,label,runRange,lumi,eff1)
     pythonWriter.addMCParameters(label,eff2)
 
-    pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency2016.json"))
+    pythonWriter.writeJSON(os.path.join(plotDir,"tauLegTriggerEfficiency_"+label+".json"))
 
 #    if not createRatio:
 #        sys.exit()
@@ -308,7 +317,7 @@ def analyze(analysis):
         p_eta.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.2, 0.46, "LooseIsoPFTau50_Trk30_eta2p1", 17)
-    histograms.addText(0.2, 0.38, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.2, 0.38, label, 17)
     histograms.addText(0.2, 0.31, "Runs "+datasets.loadRunRange(), 17)
 
     p_eta.draw()
@@ -366,7 +375,7 @@ def analyze(analysis):
         p_phi.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.2, 0.46, "LooseIsoPFTau50_Trk30_eta2p1", 17)
-    histograms.addText(0.2, 0.38, analysis.split("_")[len(analysis.split("_")) -1], 17)
+    histograms.addText(0.2, 0.38, label, 17)
     histograms.addText(0.2, 0.31, "Runs "+datasets.loadRunRange(), 17)
 
     p_phi.draw()
@@ -395,12 +404,13 @@ def analyze(analysis):
         pPU.histoMgr.setHistoLegendLabelMany({"eff1": legend1})
 
     optsPU = {"ymin": 0.01, "ymax": 1.0}
+    createRatio = False
     if createRatio:
         pPU.createFrame(os.path.join(plotDir, namePU), createRatio=True, opts=optsPU, opts2=opts2)
     else:
         pPU.createFrame(os.path.join(plotDir, namePU), opts=optsPU, opts2=opts2)
 
-    moveLegend = {"dx": -0.2, "dy": -0.6, "dh": -0.1}
+    moveLegend = {"dx": -0.5, "dy": -0.5, "dh": -0.1}
     pPU.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
 #    if createRatio:
 #        pPU.getPad1().SetLogy(True)
@@ -413,9 +423,9 @@ def analyze(analysis):
         pPU.getFrame2().GetYaxis().SetTitle("Ratio")
         pPU.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-    histograms.addText(0.5, 0.5, "LooseIsoPFTau50_Trk30_eta2p1", 17)
-    histograms.addText(0.5, 0.43, analysis.split("_")[len(analysis.split("_")) -1], 17)
-    histograms.addText(0.5, 0.36, "Runs "+datasets.loadRunRange(), 17)
+    histograms.addText(0.2, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
+    histograms.addText(0.2, 0.53, label, 17)
+    histograms.addText(0.2, 0.46, "Runs "+datasets.loadRunRange(), 17)
 
     pPU.draw()
     histograms.addStandardTexts(lumi=lumi)
@@ -494,10 +504,10 @@ def main():
     if len(sys.argv) < 2:
         usage()
 
-#    analyze("TauLeg_2015C")
-#    analyze("TauLeg_2015D")
-#    analyze("TauLeg_2015CD")
-    analyze("TauLeg_2016B")
+#    analyze("TauLeg_2016B")
+#    analyze("TauLeg_2016C")
+#    analyze("TauLeg_2016ICHEP")
+    analyze()
 
 if __name__ == "__main__":
     main()

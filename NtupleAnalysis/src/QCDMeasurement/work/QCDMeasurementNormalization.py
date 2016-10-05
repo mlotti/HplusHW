@@ -33,7 +33,7 @@ _rebinFactor = 10
 
 print "Analysis name:", analysis
 
-selectOnlyBins = ["Inclusive"] #["1"]
+selectOnlyBins = []#["Inclusive"] #["1"]
 
 def usage():
     print "\n"
@@ -111,7 +111,12 @@ def main(argv, dsetMgr, moduleInfoString):
     #myMergeList.append("WJetsHT")
     myMergeList.append("WJets")
     myMergeList.append("DYJetsToLL")
-    myMergeList.append("SingleTop")
+
+    if "SingleTop" in dsetMgr.getMCDatasetNames():
+        myMergeList.append("SingleTop")
+    else:
+        print "Warning: ignoring single top sample (since merged diboson sample does not exist) ..."
+
 
     if "Diboson" in dsetMgr.getMCDatasetNames():
         myMergeList.append("Diboson")

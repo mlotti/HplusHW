@@ -22,7 +22,7 @@ public:
   void setupBranches(BranchManager& mgr);
 
   std::vector<std::string> getBJetTagsDiscriminatorNames() const {
-    static std::vector<std::string> n = { std::string("pfCombinedInclusiveSecondaryVertexV2BJetTags"), std::string("pfJetBProbabilityBJetTags"), std::string("pfJetProbabilityBJetTags")};
+    static std::vector<std::string> n = { std::string("pfCombinedCvsBJetTags"), std::string("pfCombinedInclusiveSecondaryVertexV2BJetTags"), std::string("pfCombinedMVAV2BJetTags")};
     return n;
   }
   std::vector<std::string> getPUIDDiscriminatorNames() const {
@@ -50,10 +50,10 @@ protected:
   const Branch<std::vector<bool>> *fOriginatesFromUnknown;
   const Branch<std::vector<bool>> *fOriginatesFromW;
   const Branch<std::vector<bool>> *fOriginatesFromZ;
+  const Branch<std::vector<float>> *fPfCombinedCvsBJetTags;
+  const Branch<std::vector<float>> *fPfCombinedCvsLJetTags;
   const Branch<std::vector<float>> *fPfCombinedInclusiveSecondaryVertexV2BJetTags;
-  const Branch<std::vector<float>> *fPfCombinedMVABJetTag;
-  const Branch<std::vector<float>> *fPfJetBProbabilityBJetTags;
-  const Branch<std::vector<float>> *fPfJetProbabilityBJetTags;
+  const Branch<std::vector<float>> *fPfCombinedMVAV2BJetTags;
   const Branch<std::vector<int>> *fHadronFlavour;
   const Branch<std::vector<int>> *fPartonFlavour;
 };
@@ -71,9 +71,9 @@ public:
 
   std::vector<std::function<bool()>> getBJetTagsDiscriminatorValues() const {
     static std::vector<std::function<bool()>> values = {
+      [&](){ return this->pfCombinedCvsBJetTags(); },
       [&](){ return this->pfCombinedInclusiveSecondaryVertexV2BJetTags(); },
-      [&](){ return this->pfJetBProbabilityBJetTags(); },
-      [&](){ return this->pfJetProbabilityBJetTags(); }
+      [&](){ return this->pfCombinedMVAV2BJetTags(); }
     };
     return values;
   }
@@ -107,10 +107,10 @@ public:
   bool originatesFromUnknown() const { return this->fCollection->fOriginatesFromUnknown->value()[this->index()]; }
   bool originatesFromW() const { return this->fCollection->fOriginatesFromW->value()[this->index()]; }
   bool originatesFromZ() const { return this->fCollection->fOriginatesFromZ->value()[this->index()]; }
+  float pfCombinedCvsBJetTags() const { return this->fCollection->fPfCombinedCvsBJetTags->value()[this->index()]; }
+  float pfCombinedCvsLJetTags() const { return this->fCollection->fPfCombinedCvsLJetTags->value()[this->index()]; }
   float pfCombinedInclusiveSecondaryVertexV2BJetTags() const { return this->fCollection->fPfCombinedInclusiveSecondaryVertexV2BJetTags->value()[this->index()]; }
-  float pfCombinedMVABJetTag() const { return this->fCollection->fPfCombinedMVABJetTag->value()[this->index()]; }
-  float pfJetBProbabilityBJetTags() const { return this->fCollection->fPfJetBProbabilityBJetTags->value()[this->index()]; }
-  float pfJetProbabilityBJetTags() const { return this->fCollection->fPfJetProbabilityBJetTags->value()[this->index()]; }
+  float pfCombinedMVAV2BJetTags() const { return this->fCollection->fPfCombinedMVAV2BJetTags->value()[this->index()]; }
   int hadronFlavour() const { return this->fCollection->fHadronFlavour->value()[this->index()]; }
   int partonFlavour() const { return this->fCollection->fPartonFlavour->value()[this->index()]; }
 

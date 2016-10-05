@@ -56,7 +56,7 @@ defaultNumberOfJobs = 20
 
 
 ## Default command line options for LHC-CLs (asymptotic, observed limit)
-lhcAsymptoticOptionsObserved = '-M Asymptotic --picky -v 2 --rRelAcc 0.001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerTolerance=0.5 --cminFallbackAlgo "Minuit,0:0.001"' #--minimizerTolerance changed from 0.001 (used in 2014 paper) to 0.1 to make all mass points converge
+lhcAsymptoticOptionsObserved = '-M Asymptotic --picky -v 2 --rRelAcc 0.001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001"' #--minimizerTolerance changed from 0.001 (used in 2014 paper) to 0.1 to make all mass points converge
 ## Default command line options for LHC-CLs (asymptotic, expected limit)
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
@@ -64,7 +64,7 @@ lhcAsymptoticRminSigmaBr = "0.0" # pb
 lhcAsymptoticRminBrLimit = "0.0" # plain number
 ## Default "Rmax" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRmaxSigmaBr = "1.0" # pb
-lhcAsymptoticRmaxBrLimit = "0.05" # plain number (updated to 0.05 from 0.03 in 2014 paper due to higher limits)
+lhcAsymptoticRmaxBrLimit = "0.1" # plain number (updated to 0.05 from 0.03 in 2014 paper due to higher limits)
 
 ## Default command line options for observed significance
 lhcFreqSignificanceObserved = "-M ProfileLikelihood --significance --scanPoints 1000"

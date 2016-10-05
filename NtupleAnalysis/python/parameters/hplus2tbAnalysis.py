@@ -58,45 +58,50 @@ metFilter = PSet(
 # Electron veto
 #================================================================================================
 eVeto = PSet(
-    electronPtCut     = 15.0,
-    electronEtaCut    = 2.5,
-    electronID        = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-    electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronPtCut         = 15.0,
+    electronEtaCut        = 2.5,
+    electronNCutValue     =  1,
+    electronNCutDirection = "<",  # options: ==, !=, <, <=, >, >=
+    electronID            = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
+    electronIsolation     = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
 #================================================================================================
 # Muon veto
 #================================================================================================
 muVeto = PSet(
-    muonPtCut     = 10.0,
-    muonEtaCut    = 2.5,
-    muonID        = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
-    muonIsolation = "veto",      # loosest possible for vetoing ("veto"), "tight" for selecting
+    muonPtCut         = 10.0,
+    muonEtaCut        = 2.5,
+    muonNCutValue     =  1,
+    muonNCutDirection = "<",  # options: ==, !=, <, <=, >, >=
+    muonID            = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
+    muonIsolation     = "veto",      # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
 #================================================================================================
 # Jet selection
 #================================================================================================
 jetSelection = PSet(
-    jetType                  = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-    jetPtCut                 = 30.0,
-    jetEtaCut                =  2.5,
-    numberOfJetsCutValue     =  4,
-    numberOfJetsCutDirection = ">=",  # options: ==, !=, <, <=, >, >=
-    jetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
-    jetPUIDDiscr             = "", # does not work at the moment 
+    jetType          = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
+    jetPtCut         = 30.0,
+    jetEtaCut        =  5.0,
+    jetNCutValue     =  6,
+    jetNCutDirection = ">=",  # options: ==, !=, <, <=, >, >=
+    #jetLdgPtCuts     = [70.0, 50.0, 40.0], # ldg, subldg, etc..
+    jetIDDiscr       = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
+    jetPUIDDiscr     = "", # does not work at the moment 
 )
 
 #================================================================================================
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    jetPtCut                  = 30.0,
-    jetEtaCut                 = 2.5,
-    bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
-    bjetDiscrWorkingPoint     = "Loose",
-    numberOfBJetsCutValue     = 1,
-    numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+    bjetPtCut             = 30.0,
+    bjetEtaCut            = 2.5,
+    bjetDiscr             = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+    bjetDiscrWorkingPoint = "Loose",
+    bjetNCutValue         = 1,
+    bjetNCutDirection     = ">=", # options: ==, !=, <, <=, >, >=
 )
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
@@ -146,7 +151,7 @@ commonPlotsOptions = PSet(
 
     # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
     ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax= 500.0),
-    etaBins           = PSet(nBins = 100, axisMin = -5.0, axisMax=   5.0),
+    etaBins           = PSet(nBins =  50, axisMin = -5.0, axisMax=   5.0),
     phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax=   3.2),  # PSet(nBins =  72, axisMin = -3.1415926, axisMax=3.1415926),
     invmassBins       = PSet(nBins =  50, axisMin =  0.0, axisMax = 500.0),
     deltaEtaBins      = PSet(nBins =  50, axisMin =  0.0, axisMax=  10.0),
@@ -164,11 +169,11 @@ allSelections = PSet(
     BJetSelection         = bjetSelection,
     CommonPlots           = commonPlotsOptions,
     ElectronSelection     = eVeto,
+    MuonSelection         = muVeto,
     JetSelection          = jetSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,
     HtSelection           = htSelection,
-    MuonSelection         = muVeto,
     Trigger               = trigger,
     HistogramAmbientLevel = histogramAmbientLevel,
     Verbose               = verbose,

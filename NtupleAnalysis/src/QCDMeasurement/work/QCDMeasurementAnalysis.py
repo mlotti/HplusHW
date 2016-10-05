@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 import sys
 
-dataEras = ["2015"]
+dataEras = ["2016BCD"]
 #dataEras = ["2015B","2015C"]
 searchModes = ["80to1000"]
+
+lightAnalysis = False
+#lightAnalysis = True
 
 if len(sys.argv) < 2:
     print "Usage: ./QCDMeasurementAnalysis.py <path-to-multicrab-directory> <1pr> <2pr> <3pr>"
@@ -23,10 +26,10 @@ allSelections.CommonPlots.histogramSplitting = [
     PSet(label="tauPt", binLowEdges=[60.0, 80.0, 100.0], useAbsoluteValues=False),
   ]
 #===== Selection customisations
-allSelections.TauSelection.prongs = 13
-allSelections.TauSelection.isolationDiscr = "byMediumIsolationMVA3newDMwLT" ## default = byMediumIsolationMVA3newDMwLT   
-#allSelections.TauSelection.tauPtCut = 50.0 #uncomment for light H+ (default 60.0 for heavy H+)
-#allSelections.METSelection.METCutValue = 80.0 #uncomment for light H+ (default 100.0 for heavy H+)
+allSelections.TauSelection.prongs = 1
+if lightAnalysis:
+    allSelections.TauSelection.tauPtCut = 50.0 #uncomment for light H+ (default 60.0 for heavy H+)
+    allSelections.METSelection.METCutValue = 80.0 #uncomment for light H+ (default 100.0 for heavy H+)
 allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0

@@ -11,6 +11,7 @@ def produceCustomisations(process,isData):
 #    reproduceElectronID(process)
     reproduceMETNoiseFilters(process)
     reproduceMET(process,isData)
+    reproduceJEC(process)
     print "=== Customisations done"
 
 # ===== Reproduce jet collections with the latest JEC =====
@@ -20,7 +21,8 @@ def reproduceJEC(process):
     from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
     updateJetCollection(
         process,
-        jetSource = cms.InputTag('slimmedJets'),
+#        jetSource = cms.InputTag('slimmedJets'),
+        jetSource = cms.InputTag('cleanedPatJets'),
         labelName = 'UpdatedJEC',
         jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None')  # Do not forget 'L2L3Residual' on data!
     )
@@ -38,13 +40,13 @@ def reproduceJEC(process):
 #      jetSource = cms.InputTag("slimmedJets"),
 #      jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJECAK4CHS"))
 #    )
-    # PUPPI jets
-    updateJetCollection(
-        process,
-        jetSource = cms.InputTag('slimmedJetsPuppi'),
-        labelName = 'UpdatedJECPuppi',
-        jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None')  # Do not$
-    )
+#    # PUPPI jets
+#    updateJetCollection(
+#        process,
+#        jetSource = cms.InputTag('slimmedJetsPuppi'),
+#        labelName = 'UpdatedJECPuppi',
+#        jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None')  # Do not$
+#    )
 #    if not hasattr(process, "JECpayloadAK4PFPuppi"):
 #        raise Exception("Error: Could not access process.JECpayloadAK4PFPuppi! Please load Jet_cfi.py before calling customizations")
 #    process.patJetCorrFactorsReapplyJECPuppi = patJetCorrFactorsUpdated.clone(
@@ -67,8 +69,8 @@ def reproduceJEC(process):
 #    process.CustomisationsSequence += process.patJetsReapplyJECPuppi
     process.CustomisationsSequence += process.patJetCorrFactorsUpdatedJEC
     process.CustomisationsSequence += process.updatedPatJetsUpdatedJEC
-    process.CustomisationsSequence += process.patJetCorrFactorsUpdatedJECPuppi
-    process.CustomisationsSequence += process.updatedPatJetsUpdatedJECPuppi
+#    process.CustomisationsSequence += process.patJetCorrFactorsUpdatedJECPuppi
+#    process.CustomisationsSequence += process.updatedPatJetsUpdatedJECPuppi
 
 
 # ===== Set up electron ID (VID framework) =====
@@ -90,8 +92,21 @@ def reproduceMETNoiseFilters(process):
     process.HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
     process.HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False)
     process.HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
+
+    process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
+    process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
+    process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    process.BadPFMuonFilter.taggingMode   = cms.bool(True)
+
+    process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
+    process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
+    process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    process.BadChargedCandidateFilter.taggingMode   = cms.bool(True)
+
     # Do not apply EDfilters for HBHE noise, the discriminators for them are saved into the ttree
     process.CustomisationsSequence += process.HBHENoiseFilterResultProducer
+    process.CustomisationsSequence += process.BadPFMuonFilter
+    process.CustomisationsSequence += process.BadChargedCandidateFilter
 
 # ===== Set up MET uncertainties =====
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#A_tool_to_help_you_calculate_MET
@@ -100,7 +115,35 @@ def reproduceMET(process,isdata):
     from CondCore.DBCommon.CondDBSetup_cfi import *
     import os
 
-    jerera="Fall15_25nsV2"
+    if isdata:
+      era="Spring16_25nsV6_DATA"
+    else:
+      era="Spring16_25nsV6_MC"
+    jerera="Spring16_25nsV6"
+
+##___________________________External JEC file________________________________||
+ 
+    process.jec = cms.ESSource("PoolDBESSource",CondDBSetup,
+#                               connect = cms.string("sqlite:PhysicsTools/PatUtils/data/"+era+".db"),
+                               connect = cms.string("sqlite:"+era+"_JEC.db"),
+                               toGet =  cms.VPSet(
+            cms.PSet(
+                record = cms.string("JetCorrectionsRecord"),
+                tag = cms.string("JetCorrectorParametersCollection_"+era+"_AK4PF"),
+                label= cms.untracked.string("AK4PF")
+                ),
+            cms.PSet(
+                record = cms.string("JetCorrectionsRecord"),
+                tag = cms.string("JetCorrectorParametersCollection_"+era+"_AK4PFchs"),  
+                label= cms.untracked.string("AK4PFchs")
+                ),
+            cms.PSet(record  = cms.string("JetCorrectionsRecord"),
+                tag     = cms.string("JetCorrectorParametersCollection_"+era+"_AK4PFPuppi"),
+                label   = cms.untracked.string("AK4PFPuppi")
+                ),
+            )
+                               )
+    process.es_prefer_jec = cms.ESPrefer("PoolDBESSource",'jec')
 
 ##___________________________External JER file________________________________||
     
@@ -126,9 +169,28 @@ def reproduceMET(process,isdata):
           tag    = cms.string('JR_'+jerera+'_MC_SF_AK4PFchs'),
           label  = cms.untracked.string('AK4PFchs')
           ),
-
-        ) )
                   
+        #######
+        ### read the Puppi JER
+                
+        cms.PSet( 
+          record = cms.string('JetResolutionRcd'),
+          tag    = cms.string('JR_'+jerera+'_MC_PtResolution_AK4PFPuppi'),
+          label  = cms.untracked.string('AK4PFPuppi_pt')
+          ),
+        cms.PSet(
+          record = cms.string("JetResolutionRcd"),
+          tag = cms.string('JR_'+jerera+'_MC_PhiResolution_AK4PFPuppi'),
+          label= cms.untracked.string("AK4PFPuppi_phi")
+          ),
+        cms.PSet(
+          record = cms.string('JetResolutionScaleFactorRcd'),
+          tag    = cms.string('JR_'+jerera+'_MC_SF_AK4PFPuppi'),
+          label  = cms.untracked.string('AK4PFPuppi')
+          ),
+          
+        ) )
+          
     process.es_prefer_jer = cms.ESPrefer("PoolDBESSource",'jer')
 
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD

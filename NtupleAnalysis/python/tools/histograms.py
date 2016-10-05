@@ -35,7 +35,7 @@ cmsText = {
     CMSMode.NONE: None,
     CMSMode.PRELIMINARY: "Preliminary",
     CMSMode.PAPER: "",
-    CMSMode.UNPUBLISHED: "Unpublished",
+    CMSMode.UNPUBLISHED: "Preliminary",
     CMSMode.SIMULATION : "Simulation",
     CMSMode.SIMULATION_PRELIMINARY : "Preliminary simulation",
     CMSMode.SIMULATION_UNPUBLISHED: "Simulation unpublished",
@@ -387,8 +387,9 @@ def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
 # \param cmsText         If not None, override the "CMS" text
 # \param cmsExtraText    If not None, override the CMS extra text (e.g. "Preliminary")
 def addStandardTexts(lumi=None, sqrts=None, addCmsText=True, cmsTextPosition=None, cmsExtraTextPosition=None, cmsText=None, cmsExtraText=None):
-    if cmsTextPosition is None:
-        cmsTextPosition = "left"
+#    if cmsTextPosition is None:
+#        cmsTextPosition = "left"
+    cmsTextPosition = "outframe"
 
     lumiTextSize = 40*0.6
     cmsTextFrac = 0.75
@@ -1840,7 +1841,10 @@ class HistoTotalUncertainty(HistoGraph):
         tmp.SetDirectory(0)
         for h in rootHistosWithUnc[1:]:
             tmp.Add(h)
-        tmpgr = tmp.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
+        if uncertaintyMode.equal(Uncertainty.SystOnly):
+            tmpgr = tmp.getSystematicUncertaintyGraph()
+        else:
+            tmpgr = tmp.getSystematicUncertaintyGraph(addStatistical=True, addSystematic=False)
         HistoGraph.__init__(self, dataset.RootHistoWithUncertainties(tmpgr), name, "F", "E2")
         self._histo.SetName(rootHistosWithUnc[0].GetName()+"_errors")
         self.histos = histos

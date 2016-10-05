@@ -20,6 +20,12 @@ process.MessageLogger.categories.append("TriggerBitCounter")
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000 # print the event number for every 100th event
 process.MessageLogger.cerr.TriggerBitCounter = cms.untracked.PSet(limit = cms.untracked.int32(10)) # print max 100 warnings
 
+# Set the process options -- Display summary at the end, enable unscheduled execution
+process.options = cms.untracked.PSet(
+    allowUnscheduled = cms.untracked.bool(True),
+    wantSummary = cms.untracked.bool(False)
+)
+
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
        '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
@@ -55,6 +61,8 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/METNoiseFilter_cfi")
+process.METNoiseFilter.triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())) 
 
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
@@ -75,7 +83,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
-	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
+	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
 	TriggerBits = cms.vstring(
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_v",
 	    "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
@@ -87,22 +95,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
 	filter = cms.untracked.bool(False)
     ),
-    METNoiseFilter = cms.PSet(
-        triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())),
-        printTriggerResultsList = cms.untracked.bool(False), 
-        filtersFromTriggerResults = cms.vstring(
-            "Flag_HBHENoiseFilter",
-            "Flag_HBHENoiseIsoFilter",
-            "Flag_CSCTightHaloFilter",
-#            "Flag_CSCTightHalo2015Filter",
-            "Flag_EcalDeadCellTriggerPrimitiveFilter",
-            "Flag_goodVertices",
-            "Flag_eeBadScFilter",
-        ),
-        hbheNoiseTokenRun2LooseSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Loose'),
-        hbheNoiseTokenRun2TightSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
-        hbheIsoNoiseTokenSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHEIsoNoiseFilterResult'),
-    ),
+    METNoiseFilter = process.METNoiseFilter,
     Taus      = process.Taus,
     Electrons = process.Electrons,
     Muons     = process.Muons,

@@ -5,7 +5,7 @@ from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 import os
 import re
 
-process = Process(outputPrefix="tauLegEfficiency")
+#process = Process(outputPrefix="tauLegEfficiency")
 
 # Example of adding a dataset which has its files defined in data/<dataset_name>.txt file
 #process.addDatasets(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6"])
@@ -16,7 +16,7 @@ if len(sys.argv) != 2:
     print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory>"
     sys.exit(0)
 
-process.addDatasetsFromMulticrab(sys.argv[1])
+#process.addDatasetsFromMulticrab(sys.argv[1])
 #process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="SingleMuon_Run2015D_PromptReco_v3_246908_260426_25ns$")
 #process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="SingleMuon_Run2015")
 #process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="DYJetsToLL_M50")
@@ -24,51 +24,35 @@ process.addDatasetsFromMulticrab(sys.argv[1])
 
 leg     = "taulegSelection"
 #binning = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
-binning = [20, 30, 40, 50, 60, 80, 100, 200]
+binning = [20, 30, 40, 50, 60, 80, 100, 120, 200]
 xLabel  = "#tau-jet p_{T} (GeV/c)"
 yLabel  = "HLT tau efficiency"
 
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
-def runRange(era):
-    lumi   = 0
-    runmin = 0
-    runmax = 0
-    if era == "2012ABC":
-        lumi   =  11736  
-        runmin = 190456
-        runmax = 202585
+eras = {}
+eras["2016B"] = "SingleMuon_Run2016B"
+eras["2016C"] = "SingleMuon_Run2016C"
+eras["2016D"] = "SingleMuon_Run2016D"
+eras["2016E"] = "SingleMuon_Run2016E"
+eras["2016ICHEP"] = "SingleMuon_Run2016B|SingleMuon_Run2016C|SingleMuon_Run2016D"
+eras["2016HIP"] = "SingleMuon_Run2016B|SingleMuon_Run2016C|SingleMuon_Run2016D|SingleMuon_Run2016E|SingleMuon_Run2016F_PromptReco_v1_277816_278800"
+eras["2016HIPFIXED"] = "SingleMuon_Run2016F_PromptReco_v1_278801_278808|SingleMuon_Run2016G"
 
-    if era == "2012D":
-        lumi   = 7274
-        runmin = 202807
-        runmax = 208686
+runmin = -1
+runmax = -1
 
-    if era == "2015C":
-        lumi = 15.478
-        runmin = 253888
-        runmax = 254914
-
-    if era == "2015D":
-        lumi = 001.2157
-        runmin = 256629
-        runmax = 260627
-
-    if era == "2015CD":
-        lumi = 16.6937
-        runmin = 253888
-        runmax = 260627
-
-    if era == "2016B":
-        lumi = 0.803
-        runmin = 271036
-        runmax = 275125
-
-    if lumi == 0:
-        print "Unknown era",era,"exiting.."
-        sys.exit()
-
-    return lumi,runmin,runmax
+def getDatasetsForEras(dsets,era):
+    dset_re = re.compile(era)
+    dOUT = []
+    for dset in dsets:
+        if dset.getDataVersion().isData():
+            match = dset_re.search(dset.getName())
+            if match:
+                dOUT.append(dset)
+        else:
+            dOUT.append(dset)
+    return dOUT
 
 def isData(dataVersion):
     dataVersion = str(dataVersion)
@@ -146,24 +130,32 @@ def createAnalyzer(dataVersion,era):
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v2",
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v3",
                                    "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_v1"]
-        if era == "2016B":
+        if "2016" in era:
             a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_vx"]
             a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_vx"]
 
+        if era == "2016ICHEP":
+            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_vx"]
+            a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_vx"]
+
+        if era == "2016HIPFIXED":
+            a.Trigger.triggerOR = ["HLT_IsoMu22_eta2p1_vx"]
+            a.Trigger.triggerOR2= ["HLT_IsoMu21_eta2p1_LooseIsoPFTau50_Trk30_eta2p1_SingleL1_vx"]
+                                    
 #            a.Trigger.triggerOR = ["HLT_IsoMu20_eta2p1_v1",
 #                                   "HLT_IsoMu20_eta2p1_v2",
 #                                   "HLT_IsoMu17_eta2p1_v2"]
 #            a.Trigger.triggerOR2= ["HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v1",
 #                                   "HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v2"]
 
-        lumi,runmin,runmax = runRange(era)
-        a.lumi    = lumi
+#        runmin,runmax = process.getRuns()
+#        a.lumi    = lumi
         a.runMin  = runmin
         a.runMax  = runmax
     else:
         a.Trigger.triggerOR = ["HLT_IsoMu15_eta2p1_L1ETM20_v5"]
         a.Trigger.triggerOR2 = ["HLT_IsoMu15_eta2p1_LooseIsoPFTau35_Trk20_Prong1_L1ETM20_v6"]
-        if era == "2015C" or era == "2015D" or era == "2015CD" or era == "2016B":
+        if era == "2015C" or era == "2015D" or era == "2015CD" or "2016" in era:
             a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_CaloMET30_v1",
                                    "HLT_IsoMu16_eta2p1_MET30_vx",
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_vx"]
@@ -177,10 +169,16 @@ def createAnalyzer(dataVersion,era):
     return a
 
 def addAnalyzer(era):
-    dv = ["53Xdata22Jan2013","53mcS10"]
-    if era == "2015C" or era == "2015D" or era == "2015CD":
-        dv = ["74Xdata","74Xmc"]
+    process = Process(outputPrefix="tauLegEfficiency_"+era)
+#    process.setDatasets([])
+    process.addDatasetsFromMulticrab(sys.argv[1])
+    ds = getDatasetsForEras(process.getDatasets(),eras[era])
+    process.setDatasets(ds)
+    global runmin,runmax
+    runmin,runmax = process.getRuns()
     process.addAnalyzer("TauLeg_"+era, lambda dv: createAnalyzer(dv, era))
+#    process.addAnalyzer("TauLeg_"+era, createAnalyzer(dv, era))
+    process.run()
 
 #dv = ["53Xdata22Jan2013","53mcS10"]
 #process.addAnalyzer("TauLeg_2012D", lambda dv: createAnalyzer(dv,"2012D"), excludeTasks=["2012A","2012B", "2012C"])
@@ -189,12 +187,17 @@ def addAnalyzer(era):
 #addAnalyzer("2015C")
 #addAnalyzer("2015D")
 #addAnalyzer("2015CD")
-addAnalyzer("2016B")
-
+#addAnalyzer("2016B")
+#addAnalyzer("2016C")
+#addAnalyzer("2016D")
+#addAnalyzer("2016E")
+addAnalyzer("2016ICHEP")
+#addAnalyzer("2016HIP")
+#addAnalyzer("2016HIPFIXED")
 
 
 # Run the analysis
-process.run()
+#process.run()
 
 
 # Run the analysis with PROOF

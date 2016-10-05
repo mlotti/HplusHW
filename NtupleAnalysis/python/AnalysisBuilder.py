@@ -74,6 +74,9 @@ class AnalysisConfig:
 		# top quarks
 		elif value.startswith("TopPt"):
                     self._config.topPtSystematicVariation = value.replace("TopPt","").replace("Plus","plus").replace("Minus","minus")
+#		# PU weights
+		elif value.startswith("PUWeight"):
+                    self._config.PUWeightSystematicVariation = value.replace("PUWeight","").replace("Plus","plus").replace("Minus","minus")
 		else:
 		    if value != "nominal":
                         raise Exception("Error: unsupported variation item '%s'!"%value)
@@ -159,7 +162,7 @@ class AnalysisBuilder:
               if self._useTopPtReweighting:
                   items.append("TopPt") 
               # PU weight systematics
-              #items.extend(["PUWeight"])
+              items.extend(["PUWeight"])
               # Create configs
               self._variations["systematics"] = []
               for item in items:

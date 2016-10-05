@@ -46,17 +46,20 @@ def main():
         match = json_re.search(argv)
         if match:
             jsonfile = match.group(0)
-
-    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/lightHplus_configuration.json")
+#    jsonfile = "limits_light2016.json"
+    jsonfile = "limits2016/limitsForMSSMplots_v2_light.json"
+#    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/lightHplus_configuration.json")
+    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/lightHplus_configuration.json")
 
     # Enable OpenGL
     ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    if limit.forPaper:
-        histograms.cmsTextMode = histograms.CMSMode.PAPER
-    #histograms.cmsTextMode = histograms.CMSMode.PAPER # tmp
+#    if limit.forPaper:
+#        histograms.cmsTextMode = histograms.CMSMode.PAPER
+    histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
+#    histograms.cmsTextMode = histograms.CMSMode.PAPER # tmp
     #histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED # tmp
     limit.forPaper = True # to get GeV without c^2
 
@@ -102,7 +105,7 @@ def main():
 
     # Remove m=80
     for gr in graphs.values():
-        limit.cleanGraph(gr, minX=90)
+        limit.cleanGraph(gr, 80)
 
     print "Plotting graphs"                    
     for key in graphs.keys():
@@ -114,8 +117,8 @@ def main():
 
     # Interpret in MSSM
     xVariable = "mHp"
-#    selection = "mu==200"
-    selection = "mHp > 0"
+    selection = "mu==200"
+#    selection = "mHp > 0"
 #    scenario = "MSSM m_{h}^{max}"
     scenario = os.path.split(rootfile)[-1].replace(".root","")
 
@@ -135,9 +138,10 @@ def main():
 	graphs["Allowed"] = db.mhLimit("mH","mHp",selection,"125.0+-3.0")
     else:
         graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.0+-3.0")
-    graphs["isomass"] = None
+#    graphs["isomass"] = None
     
     limit.doTanBetaPlotLight("limitsTanb_light_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario)
+    sys.exit()
 
     # mH+ -> mA
     print "Replotting the graphs for (mA,tanb)"

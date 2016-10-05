@@ -1,7 +1,5 @@
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 
-# This datacard should be used for calculating limits for heavy H+, for light Hplus use dcardDefault2015DatacardLight.py
-
 DataCardName ='Default_13TeV'
 LightAnalysis = not True # set True for light H+
 
@@ -13,13 +11,16 @@ if LightAnalysis:
 else:
     HeavyMassPoints=[180,200,220,250,300,350,400,500,750,1000,2000,3000]
 
+#LightMassPoints=[120] # for control plots
+#HeavyMassPoints=[500] # for control plots
+
 MassPoints=LightMassPoints[:]+HeavyMassPoints[:]
 
 ##############################################################################
 # Options
 OptionIncludeSystematics= True # Set to true if you produced multicrabs with doSystematics=True
 OptionDoControlPlots= not True #FIXME: if you want control plots, switch this to true!
-OptionDoMergeEWKttbar = False #FIXME: if true, merges ttbar and singleTop into one and Wjets+DY+diboson into another background
+OptionDoMergeEWKttbar = False #FIXME: if true, Wjets+DY+diboson into one background and for heavy H+, also merges ttbar and singleTop into one background
 
 BlindAnalysis=True
 OptionBlindThreshold=None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
@@ -122,7 +123,7 @@ Observation=ObservationInput(datasetDefinition="Data", shapeHistoName=shapeHisto
 myTrgSystematics=["CMS_eff_t_trg_data","CMS_eff_t_trg_MC", # Trigger tau part
                   "CMS_eff_met_trg_data","CMS_eff_met_trg_MC"] # Trigger MET part
 myTauIDSystematics=["CMS_eff_t"] #tau ID
-if not LightAnalysis:
+if not LightAnalysis and OptionIncludeSystematics:
     myTauIDSystematics.extend(["CMS_eff_t_highpt"])
 
 #myTauMisIDSystematics=["CMS_fake_eToTau","CMS_fake_muToTau","CMS_fake_jetToTau"] # tau mis-ID
@@ -140,7 +141,7 @@ if not LightAnalysis:
 myShapeSystematics.extend(myESSystematics)
 myShapeSystematics.extend(myBtagSystematics)
 myShapeSystematics.extend(myTopSystematics)
-#myShapeSystematics.extend(myPileupSystematics)
+myShapeSystematics.extend(myPileupSystematics)
 
 if not OptionIncludeSystematics:
     myShapeSystematics=[]
@@ -276,8 +277,9 @@ else:
         #mergeColumnsByLabel.append({"label": "EWKnontt_faketau", "mergeList": ["W_EWK_faketau","t_EWK_faketau","DY_EWK_faketau","VV_EWK_faketau"]})
 
     if OptionDoMergeEWKttbar:
-        mergeColumnsByLabel.append({"label": "CMS_Hptntj_ttbar_and_singleTop_t_genuine", "mergeList": ["CMS_Hptntj_ttbar_t_genuine","CMS_Hptntj_singleTop_t_genuine"]})    
-        mergeColumnsByLabel.append({"label": "CMS_Hptntj_EWK_t_genuine", "mergeList": ["CMS_Hptntj_W_t_genuine","CMS_Hptntj_DY_t_genuine","CMS_Hptntj_VV_t_genuine"]})
+        mergeColumnsByLabel.append({"label": labelPrefix+"EWK_t_genuine", "mergeList": [labelPrefix+"W_t_genuine",labelPrefix+"DY_t_genuine",labelPrefix+"VV_t_genuine"]})
+        if not LightAnalysis:
+            mergeColumnsByLabel.append({"label": labelPrefix+"ttbar_and_singleTop_t_genuine", "mergeList": [labelPrefix+"ttbar_t_genuine",labelPrefix+"singleTop_t_genuine"]})    
 
 # Reserve column 2
 # This was necessary for LandS; code could be updated to combine for this piece
@@ -431,7 +433,7 @@ else:
 #===== Pileup
 if "CMS_pileup" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_pileup", label="CMS_pileup",
-        distr="shapeQ", function="ShapeVariation", systVariation="Pileup"))
+        distr="shapeQ", function="ShapeVariation", systVariation="PUWeight"))
 else:
     Nuisances.append(Nuisance(id="CMS_pileup", label="APPROXIMATION for CMS_pileup",
         distr="lnN", function="Constant",value=0.05))
@@ -529,10 +531,10 @@ Nuisances.append(Nuisance(id="xsect_QCD", label="QCD MC cross section",
 #===== Luminosity
 Nuisances.append(Nuisance(id="lumi_13TeV", label="lumi_13TeVnosity",
     distr="lnN", function="Constant",
-    value=systematics.getLuminosityUncertainty()))
+    value=systematics.getLuminosityUncertainty("2015")))
 Nuisances.append(Nuisance(id="lumi_13TeV_forQCD", label="lumi_13TeVnosity",
     distr="lnN", function="ConstantForQCD",
-    value=systematics.getLuminosityUncertainty()))
+    value=systematics.getLuminosityUncertainty("2015")))
 
 #===== QCD measurement
 if OptionIncludeSystematics:
@@ -991,7 +993,7 @@ if OptionMassShape =="TransverseMass":
             "log": False,
             "opts": {"ymin": 0.0},
             "opts2": {"ymin": 0.0, "ymax": 2.0}
-        }, blindedRange=[81, 1000], # specify range min,max if blinding applies to this control plot
+        }, blindedRange=[81, 6000], # specify range min,max if blinding applies to this control plot
         flowPlotCaption="final", # Leave blank if you don't want to include the item to the selection flow plot
     ))
     ControlPlots.append(ControlPlotInput(title="TransverseMassLog",
@@ -1008,7 +1010,40 @@ if OptionMassShape =="TransverseMass":
             "log": True,
             "opts": {"ymin": 1e-4},
             "opts2": {"ymin": 0.0, "ymax": 2.0}
-        }, blindedRange=[81, 1000], # specify range min,max if blinding applies to this control plot
+        }, blindedRange=[81, 6000], # specify range min,max if blinding applies to this control plot
+    ))
+    ControlPlots.append(ControlPlotInput(title="TransverseMassLogx",
+        histoName="shapeTransverseMass",
+        details={"cmsTextPosition": "right",
+            #"xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss})",
+            #"ylabel": "Events/^{}#Deltam_{T}",
+            #"unit": "GeV",
+            "xlabel": "m_{T} (GeV)",
+            "ylabel": "< Events / bin >", "ylabelBinInfo": False,
+            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
+            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
+            "divideByBinWidth": True,
+            "logx": True,
+            "opts": {"ymin": 1e-4,"ymaxfactor": 1.25},
+            "opts2": {"ymin": 0.0, "ymax": 2.0}
+        }, blindedRange=[81, 6000], # specify range min,max if blinding applies to this control plot
+    ))
+    ControlPlots.append(ControlPlotInput(title="TransverseMassLogxLog",
+        histoName="shapeTransverseMass",
+        details={"cmsTextPosition": "right",
+            #"xlabel": "m_{T}(^{}#tau_{h},^{}E_{T}^{miss})",
+            #"ylabel": "Events/^{}#Deltam_{T}",
+            #"unit": "GeV",
+            "xlabel": "m_{T} (GeV)",
+            "ylabel": "< Events / bin >", "ylabelBinInfo": False,
+            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
+            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
+            "divideByBinWidth": True,
+            "log": True,
+            "logx": True,
+            "opts": {"ymin": 1e-4,"ymaxfactor": 10.0},
+            "opts2": {"ymin": 0.0, "ymax": 2.0}
+        }, blindedRange=[81, 6000], # specify range min,max if blinding applies to this control plot
     ))
 elif OptionMassShape =="FullMass":
     ControlPlots.append(ControlPlotInput(title="FullMass",
@@ -1020,7 +1055,7 @@ elif OptionMassShape =="FullMass":
           "log": False,
           "opts": {"ymin": 0.0},
           "opts2": {"ymin": 0.0, "ymax": 2.0},
-        }, blindedRange=[-1, 1000], # specify range min,max if blinding applies to this control plot
+        }, blindedRange=[-1, 6000], # specify range min,max if blinding applies to this control plot
         flowPlotCaption="final", # Leave blank if you don't want to include the item to the selection flow plot
     ))
 

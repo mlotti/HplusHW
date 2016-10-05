@@ -677,7 +677,7 @@ class DatacardColumn():
 	# Treat QCD MET shape nuisance
 	myQCDMetshapeFoundStatus = False
 	for j in range(0,len(self._nuisanceResults)):
-	    if "QCD_metshape" in self._nuisanceResults[j].getId():
+	    if "CMS_Hptntj_QCDkbg_metshape" in self._nuisanceResults[j].getId():
                 myQCDMetshapeFoundStatus = True
 		hDenominator = None
 		hNumerator = None
