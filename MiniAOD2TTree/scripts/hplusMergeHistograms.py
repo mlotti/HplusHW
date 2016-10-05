@@ -1170,17 +1170,14 @@ def GetTaskLogFiles(taskName, opts):
 
         # Sometimes glob doesn't work (for unknown reasons)
         if len(stdoutFiles) < 1:
-            Verbose("Task %s, could not obtain log files with glob. \n\tTrying alternative method. If problems persist retry without setting the CRAB environment" % (taskName) )
+            Print("Could NOT obtain log files with glob. Trying alternative method. If problems persist retry without setting the CRAB` environment")
             cmd = ConvertCommandToEOS("ls", opts) + " " + tmp
             Verbose(cmd)
             dirContents = Execute(cmd)
             stdoutFiles = dirContents
-            stdoutFiles = [tmp + f for f in dirContents if ".log.tar.gz" in f]            
+            stdoutFiles = [tmp + f for f in dirContents if ".log.tar.gz" in f]
     else:
         stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
-
-    if len(stdoutFiles) < 1:
-        raise Exception("Task %s, could not obtain log files." % (taskName) )
     return stdoutFiles
         
 

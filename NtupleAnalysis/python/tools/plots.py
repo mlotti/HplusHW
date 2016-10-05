@@ -331,7 +331,9 @@ _legendLabels = {
     "QCD_Pt_3200toInf":       "QCD, #hat{p}_{T} > 3200",
     "QCD"            :        "QCD",
 
-    "QCDdata": "QCD (data driven)",
+#    "QCDdata": "QCD (data driven)",
+    "QCDdata": "Mis-ID. #tau_{h} (data)",
+
 
 #    "DYJetsToLL":            "DY+jets",
     "DYJetsToLL":            "Z/#gamma*+jets",
@@ -2180,7 +2182,10 @@ class DataMCPlot2(PlotBase, PlotRatioBase):
         systKey = "MCSystError"
         if histograms.uncertaintyMode.addStatToSyst():
             systKey = "MCStatSystError"
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
+        if histograms.uncertaintyMode.equal(histograms.Uncertainty.SystOnly):
+            self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels[systKey])
+        else:
+            self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"], legendLabel=_legendLabels["MCStatError"], uncertaintyLegendLabel=_legendLabels[systKey])
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
