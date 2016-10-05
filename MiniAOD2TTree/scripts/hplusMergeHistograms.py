@@ -1184,6 +1184,19 @@ def GetTaskLogFiles(taskName, opts):
     return stdoutFiles
         
 
+def GetPreexistingMergedFiles(taskPath):
+    '''
+    Returns a list with the full path of all pre-existing merged ROOT files
+    '''
+    Verbose("GetPreexistingMergedFiles()")
+
+    cmd = ConvertCommandToEOS("ls", opts) + " " + taskPath
+    Verbose(cmd)
+    dirContents = Execute(cmd)
+    preMergedFiles = filter(lambda x: "histograms-" in x, dirContents)
+    return preMergedFiles
+
+
 def main(opts, args):
     '''
     '''
@@ -1243,7 +1256,11 @@ def main(opts, args):
             continue        
         else:            
             if not CheckThatFilesExist(taskName, files, opts):
+                preMergedFiles = GetPreexistingMergedFiles(os.path.dirname(files[0]))
+                filesExist = len(preMergedFiles)
+                taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
                 continue
+
         Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
         
         # Split files according to user-defined options
