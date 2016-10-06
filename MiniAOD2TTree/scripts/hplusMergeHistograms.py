@@ -364,7 +364,7 @@ def getHistogramFileEOS(stdoutFile, opts):
     localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
 
     # Open the standard output file
-    Print("Opening log file %s" % (stdoutFile), True )
+    Verbose("Opening log file %s" % (stdoutFile), True )
     f = open(stdoutFile)
 
     # Get the jobId with regular expression
@@ -1315,9 +1315,8 @@ def GetPreexistingMergedFiles(taskPath):
     Verbose("GetPreexistingMergedFiles()", True)
 
     cmd = ConvertCommandToEOS("ls", opts) + " " + taskPath
-    Print(cmd)
+    Verbose(cmd)
     dirContents = Execute(cmd)
-    print "dirContents = ", dirContents
     preMergedFiles = filter(lambda x: "histograms-" in x, dirContents)
 
     # For-loop: All files
@@ -1328,7 +1327,6 @@ def GetPreexistingMergedFiles(taskPath):
         mergeTimeMap[f] = 0.0
     filesExist = len(preMergedFiles)
 
-    print "-> filesExist = ", filesExist
     return filesExist, mergeSizeMap, mergeTimeMap
 
 
@@ -1391,8 +1389,6 @@ def main(opts, args):
             continue        
         else:            
             if not CheckThatFilesExist(taskName, files, opts):
-                print "\n\t".join(files)
-                sys.exit()
                 filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]))
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
                 continue
