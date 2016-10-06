@@ -27,6 +27,8 @@ import datetime
 import subprocess
 from optparse import OptionParser
 
+import ROOT
+
 import HiggsAnalysis.MiniAOD2TTree.tools.git as git
 from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
 
@@ -34,6 +36,106 @@ from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
 #================================================================================================ 
 # Function Definitions
 #================================================================================================ 
+def FileExists(filePath, opts):
+    '''
+    Checks that a file exists by executing the ls command for its full path, 
+    or the corresponding "EOS" command if opts.filesInEOS is enabled.
+    '''
+    Verbose("FileExists()", False)
+    
+    #if opts.filesInEOS: #fixme: limits use of FileExists
+    if "CRAB3_TransferData" in filePath: # fixme: just a better alternative to "if opts.filesInEOS:"
+        cmd = ConvertCommandToEOS("ls", opts) + " " + filePath
+        ret = Execute("%s" % (cmd) )
+        # If file is not found there won't be a list of files; there will be an error message
+        errMsg = ret[0]
+        if "Unable to stat" in errMsg:
+            return False
+        elif errMsg == filePath.split("/")[-1]:
+            return True
+        else:
+            raise Exception("This should not be reached! Execution of command %s returned %s" % (cmd, errMsg))
+    else:
+        if os.path.isfile(filePath):
+            return True
+        else:
+            return False
+    return True
+
+
+def pileup(fileName, opts):
+    '''
+    If dataversion is NOT "data", return.
+    Otherwise, read the PileUp.root file and
+    get 3 PU histograms (pileup, pileup_up variation, pileup_down variation)
+    and write them to the fileName passed as argument.
+    '''
+    Verbose("pileup()", True)
+    
+    if FileExists(fileName, opts ) == False:
+        raise Exception("The file %s does not exist!" % (fileName) )
+
+    # Definitions
+    prefix = ""
+    if opts.filesInEOS:
+        #prefix = GetXrdcpPrefix(opts)
+        prefix = GetFileOpenPrefix(opts)
+    filePath = prefix + fileName
+    fileMode = "UPDATE"
+
+    # Open the ROOT file
+    nAttempts   = 1
+    maxAttempts = 10
+    fOUT = None
+    while nAttempts < maxAttempts:
+        try:
+            Verbose("Attempt #%s: Opening ROOT file %s in %s mode." % (nAttempts, filePath, fileMode) )
+            fOUT = ROOT.TFile.Open(filePath, fileMode)
+            fOUT.cd()
+            break
+        except:
+            nAttempts += 1
+            Print("TFile::Open(\"%s\", \"%s\") failed (%s/%s). Retrying..." % (filePath, fileMode, nAttempts, maxAttempts) )
+
+    # Safety clause
+    if fOUT == None:
+        raise Exception("TFile::Open(\"%s\", \"%s\") failed" % (filePath, fileMode) )
+    else:
+        Verbose("Successfully opened %s in %s mode (after %s attempts)" % (filePath, fileMode, nAttempts) )
+
+    # Definitions
+    hPU = None
+    dataVersion = fOUT.Get("configInfo/dataVersion")
+    dv_re = re.compile("data")  
+    Verbose("The data version of file %s is %s"   % (fileName, dataVersion.GetTitle()))
+    match = dv_re.search(dataVersion.GetTitle())
+
+    # If dataset is not data, do nothing
+    if not match:
+        return
+
+        puFileTmp = os.path.join(os.path.dirname(filePath), "PileUp.root")
+        puFile    = prefix + puFileTmp
+        if FileExists(puFile):
+            fIN      = ROOT.TFile.Open(puFile)
+            hPU     = fIN.Get("pileup")
+            hPUup   = fIN.Get("pileup_up")
+            hPUdown = fIN.Get("pileup_down")
+        else:
+            Print("PileUp not found in", os.path.dirname(filePath), ", did you run hplusLumiCalc.py?")
+
+        # Now write the PY histograms in the input file
+        if not hPU == None:
+            fOUT.cd("configInfo")
+            hPU.Write("pileup", ROOT.TObject.kOverwrite)
+            hPUup.Write("pileup_up", ROOT.TObject.kOverwrite)
+            hPUdown.Write("pileup_down", ROOT.TObject.kOverwrite)
+
+        Verbose("Closing file %s." % (filePath) )
+        fOUT.Close()
+    return
+
+
 def GetSelfName():
     Verbose("GetSelfName()")    
     return __file__.split("/")[-1]
@@ -352,6 +454,8 @@ def CreateJob(opts, args):
         cmd = "cp %s %s" % (opts.rootFile, os.path.join(resultsDir, resultsFile) )
 	os.system(cmd)
 
+        pileup(opts.rootFile, opts)
+
     Print("Pseudo multi-CRAB directory \"%s\" successfully created" % (taskDirName))
     os.system("ls -lt")
     return 0
@@ -380,12 +484,27 @@ if __name__ == "__main__":
     DIRNAME = ""
 
     parser = OptionParser(usage="Usage: %prog [options]")
-    parser.add_option("-d", "--dataset" , dest="dataset" , default="ChargedHiggs_HplusTB_HplusToTB_M_200", help="Dataset to include in multicrab dir [default: ChargedHiggs_HplusTB_HplusToTB_M_200]")
-    parser.add_option("-f", "--rootFile", dest="rootFile", default=None, help="The ROOT file (miniaod2tree.root) to be copied inside the multicrab dir[default: None]")
-    parser.add_option("-v", "--verbose" , dest="verbose" , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
-    parser.add_option("-a", "--ask"     , dest="ask"     , default=False  , action="store_true", help="Prompt user before executing CRAB commands [defaut: False]")
-    parser.add_option("-p", "--pset"    , dest="pset"    , default=PSET   , type="string"      , help="The python cfg file to be used by cmsRun [default: %s]" % (PSET))
-    parser.add_option("-r", "--dir"     , dest="dirName" , default=DIRNAME, type="string"      , help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))
+    parser.add_option("-d", "--dataset" , dest="dataset" , default="ChargedHiggs_HplusTB_HplusToTB_M_200", 
+                      help="Dataset to include in multicrab dir [default: ChargedHiggs_HplusTB_HplusToTB_M_200]")
+
+    parser.add_option("-f", "--rootFile", dest="rootFile", default=None, 
+                      help="The ROOT file (miniaod2tree.root) to be copied inside the multicrab dir[default: None]")
+
+    parser.add_option("-v", "--verbose" , dest="verbose" , default=VERBOSE, action="store_true",
+                      help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
+
+    parser.add_option("-a", "--ask"     , dest="ask"     , default=False  , action="store_true",
+                      help="Prompt user before executing CRAB commands [defaut: False]")
+
+    parser.add_option("-p", "--pset"    , dest="pset"    , default=PSET   , type="string"      ,
+                      help="The python cfg file to be used by cmsRun [default: %s]" % (PSET))
+
+    parser.add_option("-r", "--dir"     , dest="dirName" , default=DIRNAME, type="string"      ,
+                      help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))
+
+    parser.add_option("--filesInEOS", dest="filesInEOS", default=False, 
+                      help="Dumby varialbe [default: False]")
+
     (opts, args) = parser.parse_args()
  
     if opts.rootFile == None:
