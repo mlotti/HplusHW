@@ -87,6 +87,7 @@ import socket
 # See: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRABClientLibraryAPI#The_crabCommand_API
 from CRABAPI.RawCommand import crabCommand
 from CRABClient.UserUtilities import setConsoleLogLevel
+from CRABClient.UserUtilities import getUsernameFromSiteDB
 
 # See: https://github.com/dmwm/CRABClient/blob/master/src/python/CRABClient/ClientUtilities.py
 from CRABClient.ClientUtilities import LOGLEVEL_MUTE
@@ -335,7 +336,7 @@ def GetTaskReports(datasetPath, opts):
     Execute "crab status", get task logs and output. 
     Resubmit or kill task according to user options.
     '''
-    Verbose("GetTaskReports()", True) #iro
+    Verbose("GetTaskReports()", True)
 
     report = None
     
@@ -752,6 +753,7 @@ def CheckJob(opts, args):
 
     # Create a dictionary to map TaskName <-> CRAB Report
     reportDict = GetCrabReportDictionary(datasets)
+
 
     # Print a summary table with information on each CRAB Task
     PrintTaskSummary(reportDict)
@@ -1409,7 +1411,8 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
     crab_split_re           = re.compile("config.Data.splitting")# = 'FileBased'
     crab_splitunits_re      = re.compile("config.Data.unitsPerJob")
     crab_dbs_re             = re.compile("config.Data.inputDBS")
-    crab_storageSite_re     = re.compile("config.Site.storageSite") #NEW
+    crab_storageSite_re     = re.compile("config.Site.storageSite")
+    crab_outLFNDirBase_re   = re.compile("config.Data.outLFNDirBase")
 
     # For-loop: All line of input fine
     for line in fIN:
@@ -1453,6 +1456,12 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
 	if match:
 	    line = "config.Site.storageSite = '" + opts.storageSite + "'\n"
 
+        match = crab_outLFNDirBase_re.search(line)
+	if match:
+            baseDir = '/store/user/%s/CRAB3_TransferData' % (getUsernameFromSiteDB())
+            fullDir = os.path.join(baseDir, taskDirName)
+	    line = "config.Data.outLFNDirBase = '" + fullDir + "'\n"
+    
 	# Only if dataset is real data
 	if dataset.isData():
 
@@ -1475,7 +1484,7 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
     # Close input and output files 
     fOUT.close()
     fIN.close()
-    
+
     Verbose("Created CRAB cfg file \"%s\"" % (fOUT.name) )
     return
 
@@ -1521,14 +1530,16 @@ def ConvertPathToEOS(path, opts):
     '''
     Verbose("ConvertPathToEOS()", True)
 
+    Verbose("Converting %s path s to EOS-compatible" % (path))
     taskName            = path.split("/")[-1]
     taskNameEOS         = ConvertTasknameToEOS(taskName, opts)
-    stringToBeReplaced  = opts.dirName
-    stringToReplaceWith = "/store/user/%s/CRAB3_TransferData" % (getpass.getuser())
+    mcrabDir            = os.path.basename(opts.dirName)
+    stringToBeReplaced  = opts.dirName    
+    #stringToReplaceWith = "/store/user/%s/CRAB3_TransferData/" % (getpass.getuser())
+    stringToReplaceWith = "/store/user/%s/CRAB3_TransferData/%s" % (getpass.getuser(), mcrabDir)
     eosPathTmp          = path.replace(stringToBeReplaced, stringToReplaceWith)
     pathEOS             = eosPathTmp.replace(taskName, taskNameEOS)
-    Verbose("Converted \"%s\" (default) to \"%s\" (EOS-compatible)" % (path, pathEOS))
-
+    Verbose("Converted %s (default) to %s (EOS)" % (path, pathEOS))
     return pathEOS
 
 
@@ -1565,7 +1576,7 @@ def ConvertTasknameToEOS(taskName, opts):
     '''
     Get the full dataset name as found EOS.
     '''
-    Verbose("ConvertDatasetnameToEOS()", True)
+    Verbose("ConvertTasknameToEOS()", True)
     
     datasetsPaths = GetDatasetsPaths(opts)
     taskNames     = GetDatasetBasenames(datasetsPaths)
@@ -1604,7 +1615,6 @@ def ConvertCommandToEOS(cmd, opts):
 
     # Define a map mapping bash command with EOS commands
     cmdMap = {}
-    # cmdMap["ls"] = "eos ls" #Will NOT work due to a conflict between the EOS and CMSSW environment
     cmdMap["ls"] = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select ls" #"eos ls" is an ALIAS for this command. Works
     cmdMap["rm"] = "eos rm"
 
