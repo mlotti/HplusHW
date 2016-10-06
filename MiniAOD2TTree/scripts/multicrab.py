@@ -11,7 +11,7 @@ multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
 
 
 Check Status:
-multicrab.py --status --url --url --verbose -d <task_dir>
+multicrab.py --status --url --verbose -d <task_dir>
 
 
 Get Output:
@@ -303,7 +303,7 @@ def GetTaskStatus(datasetPath):
     Call the "grep" command to look for the "Task status" from the crab.log file 
     of a given dataset. It uses as input parameter the absolute path of the task dir (datasetPath)
     '''
-    Verbose("GetTaskStatus()")
+    Verbose("GetTaskStatus()", True)
     
     # Variable Declaration
     crabLog      = os.path.join(datasetPath, "crab.log")
@@ -316,7 +316,7 @@ def GetTaskStatus(datasetPath):
         raise Exception("File \"%s\" not found!" % (crabLog) )
 
     # Execute the command
-    if os.system(cmd) == 0:
+    if os.system(cmd) == 0: #iro
 
         if os.path.exists( grepFile ):
             results = [i for i in open(grepFile, 'r').readlines()]
@@ -330,12 +330,12 @@ def GetTaskStatus(datasetPath):
     return status
 
 
-def GetTaskReports(datasetPath, status, dashboardURL, opts):
+def GetTaskReports(datasetPath, opts):
     '''
     Execute "crab status", get task logs and output. 
     Resubmit or kill task according to user options.
     '''
-    Verbose("GetTaskReports()", True)
+    Verbose("GetTaskReports()", True) #iro
 
     report = None
     
@@ -344,11 +344,19 @@ def GetTaskReports(datasetPath, status, dashboardURL, opts):
 
     Verbose("crab status --dir=%s" % (GetLast2Dirs(datasetPath)), False)
     try:
+        d = GetBasename(datasetPath)
 
         # Execute "crab status --dir=datasetPath"
         Verbose("Getting task status", False)
         result = crabCommand('status', dir=datasetPath)
+        Verbose("Calling crab --status for dataset %s returned %s" % (d, result) )
     
+        # Get CRAB task status
+        status = GetTaskStatus(d).replace("\t", "")
+
+        # Get CRAB task dashboard URL
+        dashboardURL = GetTaskDashboardURL(d)
+
         # Assess JOB success/failure for task
         Verbose("Retrieving files (1/2)", True)
         running, finished, failed, retrievedLog, retrievedOut, eosLog, eosOut = RetrievedFiles(datasetPath, result, dashboardURL, False, opts)
@@ -387,8 +395,8 @@ def GetTaskReports(datasetPath, status, dashboardURL, opts):
 
     # Catch exceptions (Errors detected during execution which may not be "fatal")
     except:
-        msg = sys.exc_info()[1]        
-        report = Report(datasetPath, "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", dashboardURL) 
+        msg = sys.exc_info()[1]
+        report = Report(datasetPath, "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?") 
         Print("crab status failed with message \"%s\". Skipping ..." % ( msg ), True)
     return report
 
@@ -506,25 +514,27 @@ def GetTaskOutput(taskPath, retrievedOut, finished):
     else:
         Verbose("Retrieved output (%s) < finished (%s). To retrieve CRAB output relaunch script with --get option." % (retrievedOut, finished) )
 
-    if opts.deleteOutput:
-        Verbose("Deleting all ROOT files stored locally in the multicrab directory", False)
-        rootFiles    = Execute("ls -tr %s" % (taskPath + "/results/miniaod2tree_*.root") )
-
-        rootFilesEOS = []
-        for f in rootFiles:
-            rootFilesEOS.append( ConvertPathToEOS(f, opts) )
-
-        if len(rootFiles) > 0:
-            decision  = AskUser("Are you sure you want to permanently delete the following files ?\n\t%s\n\t" % ("\n\t".join(rootFiles)), True)
-            if decision:
-                for f in rootFiles:
-                    rmOut = Execute("rm -f %s" % (f))  # taskPath + "/results/miniaod2tree_*.root") )
-
-        if len(rootFilesEOS) > 0:
-            decision  = AskUser("Are you sure you want to permanently delete the following files ?\n\t%s\n\t" % ("\n\t".join(rootFilesEOS)), True)
-            if decision:
-                for f in rootFilesEOS:
-                    rmOut = Execute("eos rm -f %s" % (f) )
+    # iro
+    #if opts.deleteOutput:
+    #    Verbose("Deleting all ROOT files stored locally in the multicrab directory", False)
+    #    rootFiles    = Execute("ls -tr %s" % (taskPath + "/results/miniaod2tree_*.root") )
+    #
+    #    rootFilesEOS = []
+    #    for f in rootFiles:
+    #        rootFilesEOS.append( ConvertPathToEOS(f, opts) )
+    #
+    #    if len(rootFiles) > 0:
+    #        decision  = AskUser("Are you sure you want to permanently delete the following files ?\n\t%s\n\t" % ("\n\t".join(rootFiles)), True)
+    #        if decision:
+    #            for f in rootFiles:
+    #                rmOut = Execute("rm -f %s" % (f))  # taskPath + "/results/miniaod2tree_*.root") )
+    #
+    #    if len(rootFilesEOS) > 0:
+    #        decision  = AskUser("Are you sure you want to permanently delete the following files ?\n\t%s\n\t" % ("\n\t".join(rootFilesEOS)), True)
+    #        if decision:
+    #            for f in rootFilesEOS:
+    #                rmOut = Execute("eos rm -f %s" % (f) )
+    # iro
     return
 
 
@@ -734,7 +744,11 @@ def CheckJob(opts, args):
     
     # Get the paths for the datasets (absolute paths)
     datasets = GetDatasetsPaths(opts)
-    Verbose("Working with %s CRAB task directories:\n\t%s" % ( len(datasets), "\n\t".join( GetDatasetBasenames(datasets) ) ), True)
+    if len(datasets) < 1:
+        Print("Found %s CRAB tasks under %s! Exit .." % (opts.dirName) )
+        return
+    else:
+        Verbose("Working with %s CRAB task directories:\n\t%s" % ( len(datasets), "\n\t".join( GetDatasetBasenames(datasets) ) ), True)
 
     # Create a dictionary to map TaskName <-> CRAB Report
     reportDict = GetCrabReportDictionary(datasets)
@@ -752,8 +766,9 @@ def GetCrabReportDictionary(datasets):
     task name (basename of dataset path) to the CRAB 
     report for that task.    
     '''
-    reportDict = {}
+    Verbose("GetCrabReportDictionary()", True)
 
+    reportDict = {}
     # For-loop: All (absolute) paths of the datasets
     for index, d in enumerate(datasets):
         
@@ -762,16 +777,11 @@ def GetCrabReportDictionary(datasets):
         # Check if task is in "DONE" state
         if GetTaskStatusBool(d):
             continue
-
-        # Get CRAB task dashboard URL
-        taskDashboard = GetTaskDashboardURL(d)    
         
-        # Get CRAB task status
-        taskStatus = GetTaskStatus(d).replace("\t", "")
-
         # Get the CRAB task report & add to dictionary (retrieves job output!)
-        report = GetTaskReports(d, taskStatus, taskDashboard, opts)
+        report = GetTaskReports(d, opts)
         reportDict[d.split("/")[-1]] = report
+
     return reportDict
 
     
@@ -839,6 +849,9 @@ def GetEOSDir(taskDir, opts):
     Converts the taskDir into the EOS path equivalent
     '''
     Verbose("GetEOSDir()")
+    
+    if not opts.filesInEOS:
+        return ""
 
     tmpDirEOS  = ConvertPathToEOS(taskDir, opts) 
     taskDirEOS = WalkEOSDir(tmpDirEOS, opts)
@@ -884,19 +897,22 @@ def RetrievedFiles(taskDir, crabResults, dashboardURL, printTable, opts):
         if jobStatus == 'finished':
             finished += 1
 
-            # Convert the local path to the task taskDir to an EOS path
-            taskDirEOS  = GetEOSDir(taskDir, opts)    
-            foundLogEOS = ExistsEOS(taskDirEOS, "log", "cmsRun_%i.log.tar.gz" % jobId, opts)
-            foundOutEOS = ExistsEOS(taskDirEOS, ""   , "miniaod2tree_%i.root" % jobId, opts)
-            Verbose("foundLogEOS=%s , foundOutEOS=%s" % (foundLogEOS, foundOutEOS))
-            if foundLogEOS:
-                eosLog += 1
-            if foundOutEOS:
-                eosOut += 1
-
+            # Count Output & Logfiles (EOS)
+            if opts.filesInEOS:
+                taskDirEOS  = GetEOSDir(taskDir, opts)    
+                foundLogEOS = ExistsEOS(taskDirEOS, "log", "cmsRun_%i.log.tar.gz" % jobId, opts)
+                foundOutEOS = ExistsEOS(taskDirEOS, ""   , "miniaod2tree_%i.root" % jobId, opts)
+                Verbose("foundLogEOS=%s , foundOutEOS=%s" % (foundLogEOS, foundOutEOS))
+                if foundLogEOS:
+                    eosLog += 1
+                if foundOutEOS:
+                    eosOut += 1
+            else:
+                pass
+                
+            # Count Output & Logfiles (local)
             foundLog = Exists(taskDir, "cmsRun_%i.log.tar.gz" % jobId) 
             foundOut = Exists(taskDir, "miniaod2tree_%i.root" % jobId)
-
             if foundLog:
                 retrievedLog += 1
                 exitCode = CheckTaskReport(taskDir, jobId, opts)
@@ -1417,18 +1433,6 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
 	if match:
 	    line = "config.General.workArea = '" + taskDirName + "'\n"
 
-	# Set the "transferOutputs" field which specifies whether or not to transfer the output files to the storage site. 
-        match = crab_transferOutputs_re.search(line)
-        if match:
-            line = "config.General.transferOutputs = %s\n" % (not opts.noTransfer)
-        # WARNING! If set to False, the output files are discarded and the user can not recover them
-
-	# Set the "transferLogs" field which specifies whether or not to copy the jobs log files to the storage site
-        match = crab_transferLogs_re.search(line)
-        if match:
-            line = "config.General.transferLogs = %s\n" % (not opts.noTransfer)
-        # WARNING! If set to False, the output files are discarded and the user can not recover them
-
 	# Set the "psetName" field which specifies the name of the CMSSW pset_cfg.py file that will be run via cmsRun.
 	match = crab_pset_re.search(line)
 	if match:
@@ -1483,6 +1487,8 @@ def GetDatasetsPaths(opts):
     --excludeTask options are used, they are taken into consideration
     accordingly.
     '''
+    Verbose("GetDatasetsPaths()", True)
+
     # Get the multi-CRAB working dir
     multicrabDirPath = [opts.dirName]
 
@@ -1679,22 +1685,56 @@ if __name__ == "__main__":
     DIRNAME = ""
 
     parser = OptionParser(usage="Usage: %prog [options]")
-    parser.add_option("--create"  , dest="create"    , default=False, action="store_true", help="Flag to create a CRAB job [default: False")
-    parser.add_option("--status"  , dest="status"    , default=False, action="store_true", help="Flag to check the status of all CRAB jobs [default: False")
-    parser.add_option("--get"     , dest="get"       , default=False, action="store_true", help="Get output of finished jobs [defaut: False]")
-    parser.add_option("--log"     , dest="log"       , default=False, action="store_true", help="Get log files of finished jobs [defaut: False]")
-    parser.add_option("--resubmit", dest="resubmit"  , default=False, action="store_true", help="Resubmit all failed jobs [defaut: False]")
-    parser.add_option("--kill"    , dest="kill"      , default=False, action="store_true", help="Kill all submitted jobs [defaut: False]")
-    parser.add_option("-v", "--verbose"    , dest="verbose"      , default=VERBOSE, action="store_true", help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
-    parser.add_option("-a", "--ask"        , dest="ask"          , default=False  , action="store_true", help="Prompt user before executing CRAB commands [defaut: False]")
-    parser.add_option("-p", "--pset"       , dest="pset"         , default=PSET   , type="string"      , help="The python cfg file to be used by cmsRun [default: %s]" % (PSET))
-    parser.add_option("-d", "--dir"        , dest="dirName"      , default=DIRNAME, type="string"      , help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))
-    parser.add_option("-s", "--site"       , dest="storageSite"  , default=SITE   , type="string"      , help="Site where the output will be copied to [default: %s]" % (SITE))
-    parser.add_option("-u", "--url"        , dest="url"          , default=False  , action="store_true", help="Print the dashboard URL for the CARB task [default: False]")
-    parser.add_option("-i", "--includeTask", dest="includeTasks" , default="None" , type="string"      , help="Only perform action for this dataset(s) [default: \"\"]")
-    parser.add_option("-e", "--excludeTask", dest="excludeTasks" , default="None" , type="string"      , help="Exclude this dataset(s) from action [default: \"\"]")
-    parser.add_option("--noTransfer", dest="noTransfer", default=False, action="store_true", help="Disable transfer of output/log files  [default: False]")
-    parser.add_option("--deleteOutput"     , dest="deleteOutput" , default=False  , action="store_true", help="WARNING! Will delete all ROOT retrieved in cwd [default: False]")
+    parser.add_option("--create", dest="create", default=False, action="store_true", 
+                      help="Flag to create a CRAB job [default: False")
+
+    parser.add_option("--status", dest="status", default=False, action="store_true", 
+                      help="Flag to check the status of all CRAB jobs [default: False")
+
+    parser.add_option("--get", dest="get", default=False, action="store_true", 
+                      help="Get output of finished jobs [defaut: False]")
+
+    parser.add_option("--log", dest="log", default=False, action="store_true", 
+                      help="Get log files of finished jobs [defaut: False]")
+
+    parser.add_option("--resubmit", dest="resubmit", default=False, action="store_true", 
+                      help="Resubmit all failed jobs [defaut: False]")
+
+    parser.add_option("--kill", dest="kill", default=False, action="store_true", 
+                      help="Kill all submitted jobs [defaut: False]")
+
+    parser.add_option("-v", "--verbose", dest="verbose", default=VERBOSE, action="store_true",
+                      help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
+
+    parser.add_option("-a", "--ask", dest="ask", default=False, action="store_true",
+                      help="Prompt user before executing CRAB commands [defaut: False]")
+
+    parser.add_option("-p", "--pset", dest="pset", default=PSET, type="string",
+                      help="The python cfg file to be used by cmsRun [default: %s]" % (PSET))
+
+    parser.add_option("-d", "--dir", dest="dirName", default=DIRNAME, type="string",
+                      help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))
+
+    parser.add_option("-s", "--site", dest="storageSite", default=SITE, type="string", 
+                      help="Site where the output will be copied to [default: %s]" % (SITE))
+
+    parser.add_option("-u", "--url", dest="url", default=False, action="store_true", 
+                      help="Print the dashboard URL for the CARB task [default: False]")
+
+    parser.add_option("-i", "--includeTasks", dest="includeTasks", default="None", type="string", 
+                      help="Only perform action for this dataset(s) [default: \"\"]")
+
+    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", default="None", type="string", 
+                      help="Exclude this dataset(s) from action [default: \"\"]")
+
+    parser.add_option("--filesInEOS", dest="filesInEOS", default=False, action="store_true",
+                      help="The CRAB files are in a local EOS. Do not use files from the local multicrab directory [default: 'False']")
+
+    # iro
+    #parser.add_option("--deleteOutput", dest="deleteOutput", default=False, action="store_true", 
+    #                  help="WARNING! Will delete all ROOT retrieved in cwd [default: False]")
+    # iro
+
     (opts, args) = parser.parse_args()
 
     if opts.create == False and opts.dirName == "":
@@ -1702,6 +1742,7 @@ if __name__ == "__main__":
 
     if opts.create == True and opts.status == True:
         raise Exception("Cannot both create and check a CRAB job!")	    
+
     if opts.create == True:
         sys.exit( CreateJob(opts, args) )
     elif opts.status == True or opts.get == True or opts.log == True or opts.resubmit == True or opts.kill == True:

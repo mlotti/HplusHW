@@ -47,13 +47,22 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 re_histos = []
 re_se = re.compile("newPfn =\s*(?P<url>\S+)")
 replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://madhatter.csc.fi:1094")
-
+PBARWIDTH = 80
 
 #================================================================================================ 
 # Class Definition
 #================================================================================================ 
+class ExitCodeException(Exception):
+    '''
+    Exception for non-succesful crab job exit codes
+    '''
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
+
 class Report:
-    def __init__(self, dataset, mergeFileMap, mergeSizeMap, mergeTimeMap, cleanTimeMap, filesExist):
+    def __init__(self, dataset, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist):
         Verbose("class Report:__init__()")
         self.dataset = dataset
         self.inputFiles  = []
@@ -64,26 +73,32 @@ class Report:
         self.mergeFileMap     = mergeFileMap    # mergeFileName -> inputFiles map
         self.mergeSizeMap     = mergeSizeMap    # mergeFileName -> mergeFileSize map
         self.mergeTimeMap     = mergeTimeMap    # mergeFileName -> mergeTime map
-        self.cleanTimeMap     = cleanTimeMap    # mergeFileName -> cleanTime map
         self.nPreMergedFiles  = filesExist
         self.mergedFiles      = mergeFileMap.keys()
+        self.cleanTimeTotal   = 0
+
+        # For-loop: All keys in dictionary (=paths to merged files)
         for key in mergeFileMap.keys():
             self.inputFiles.extend( mergeFileMap[key] )
+
         sizeSum   = 0
         mergeTime = 0
-        cleanTime = 0
         # For-loop: All keys in dictionary (=paths to merged files)
-        for key in mergeSizeMap:
+        for key in self.mergeSizeMap.keys():
             sizeSum   += mergeSizeMap[key]
             mergeTime += mergeTimeMap[key]
-            cleanTime += cleanTimeMap[key]
-
+            
         # Assign more values
         self.nInputFiles      = len(self.inputFiles)
         self.nMergedFiles     = len(self.mergedFiles)
         self.mergedFilesSize = sizeSum
         self.mergeTimeTotal  = mergeTime/60.0 #in minutes
-        self.cleanTimeTotal  = cleanTime/60.0 #in minutes
+        return
+
+
+    def SetCleanTime(self, cleanTime):
+        Verbose("SetCleanTime()")
+        self.cleanTimeTotal = cleanTime/60.0 #in minutes
         return
 
 
@@ -105,9 +120,11 @@ def Print(msg, printHeader=True):
     Simple print function. If verbose option is enabled prints, otherwise does nothing.
     '''
     fName = __file__.split("/")[-1]
-    if printHeader:
+    if printHeader==True:
         print "=== ", fName
-    print "\t", msg
+        print "\t", msg
+    else:
+        print "\t", msg
     return
 
 
@@ -119,27 +136,26 @@ def CreateProgressBar(taskName, filesSplit, files):
     if len(filesSplit) == 1:
         msg = "\tTask %s, merging %d file(s)" % (taskName, len(files) )
     else:
-        msg = "\tTask %s, merging %d files to %d file(s)" % (taskName, len(files), len(filesSplit) )
+        msg = "\tTask %s, merging %d file(s) to %d file(s)" % (taskName, len(files), len(filesSplit) )
+
 
     # setup toolbar
-    toolbar_width = 100
-    align = "{:<80} {:<100}"
-    pbar  = "[" + " " * toolbar_width + "]"
+    width = PBARWIDTH
+    align = "{:<80} {:<%s}" % (width)
+    pbar  = "[" + " " * width + "]"
     txt   = align.format(msg, pbar)
     sys.stdout.write(txt)
-    #sys.stdout.write("\t%s: [%s]" % (msg, " " * toolbar_width))
     sys.stdout.flush()
 
     # Return to start of line, after '['
-    #sys.stdout.write("\b" * (toolbar_width + 1))
-    sys.stdout.write("\b" * (toolbar_width  + len("\t")))
+    sys.stdout.write("\b" * (width  + len("\t")))
     return
 
 
 def FillProgressBar(char, width):
     Verbose("FillProgressBar()")
 
-    factor = 100/width
+    factor = PBARWIDTH/width
     sys.stdout.write(char * factor)
     sys.stdout.flush()
     return
@@ -160,10 +176,113 @@ def histoToDict(histo):
     return ret
 
 
+def GetLocalOrEOSPath(stdoutFile, opts):
+    '''
+    This function was created due to problems encountered when working on LXPLUS 
+    with the --filesInEOS option. Basically, although files existed on EOS it 
+    gave an error that they did not exist. So I wrote this little hack to copy the 
+    files locally and then raed it.
+    It returns either the local or EOS path, whichever necessary. 
+
+    WARNING! If the file is copied locally it must then be removed
+    '''
+    Verbose("GetLocalOrEOSCopy()", True)
+
+    localCopy = False
+    if not FileExists(stdoutFile, opts):
+        raise Exception("Cannot assert if job succeeded as file %s does not exist!" % (stdoutFile) )
+
+    try:
+        f = open(stdoutFile)
+    except IOError as e:
+        errMsg = "I/O error({0}): {1} %s".format(e.errno, e.strerror) % (stdoutFile)
+        Verbose(errMsg)
+        # For unknown reasons on LXPLUS EOS the files cannot be found, even if it exists
+        if opts.filesInEOS:
+            Verbose("File %s could not be found/read on EOS. Attempting to copy it locally and then read it" % (stdoutFile) )
+            srcFile  = GetXrdcpPrefix(opts) + stdoutFile
+            destFile = os.path.basename(stdoutFile)
+            cmd      = "xrdcp %s %s" % (srcFile, destFile)
+            Verbose(cmd)
+            ret = Execute(cmd)
+            stdoutFile = os.path.join(os.getcwd(), os.path.basename(stdoutFile) )
+            localCopy = True
+            return localCopy, stdoutFile
+        else:
+            raise Exception(errMsg)
+    return localCopy, stdoutFile
+
+
+def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
+    '''
+    Given crab job stdout file, ensure that the job succeeded
+    \param stdoutFile   Path to crab job stdout file
+    \param allowJobExitCodes  Consider jobs with these non-zero exit codes to be succeeded
+    If any of the checks fail, raises ExitCodeException
+    '''
+    Verbose("AssertJobSucceeded()", True)
+
+    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
+
+    re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
+    re_job = re.compile("JobExitCode=(?P<code>\d+)")
+
+    exeExitCode = None
+    jobExitCode = None
+    
+    Verbose("Checking whether file %s is a tarfile" % (stdoutFile) )
+    if tarfile.is_tarfile(stdoutFile):
+        fIN = tarfile.open(stdoutFile)
+        log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+
+        #For-loop: All tarfile contents (=members)
+        for member in fIN.getmembers():
+
+            # Extract the tarball
+            f = fIN.extractfile(member)
+            match = log_re.search(f.name)
+
+            # If "cmsRun-stdout*.log" file is found
+            if match:
+                
+                # For-loop: All lines in file
+                for line in f:
+                    m = re_exe.search(line)
+                    if m:
+                        exeExitCode = int(m.group("code"))
+                        continue
+                    m = re_job.search(line)
+                    if m:
+                        jobExitCode = int(m.group("code"))
+                        continue
+        fIN.close()
+
+    # If log file was copied locally remove it!
+    if localCopy:
+        Verbose("Removing local copy of stdout tarfile %s" % (stdoutFile) )
+        cmd = "rm -f %s" % (stdoutFile)
+        Verbose(cmd)
+        ret = Execute(cmd)
+
+    jobExitCode = exeExitCode
+    if exeExitCode == None:
+        raise ExitCodeException("No exeExitCode")
+    if jobExitCode == None:
+        raise ExitCodeException("No jobExitCode")
+    if exeExitCode != 0:
+        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
+    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
+        raise ExitCodeException("Job exit code is %d" % jobExitCode)
+    return
+
+
 def getHistogramFile(stdoutFile, opts):
     '''
     '''
-    multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+    Verbose("getHistogramFile()", True)
+
+    Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) #multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
 
     if tarfile.is_tarfile(stdoutFile):
@@ -204,7 +323,9 @@ def getHistogramFileSE(stdoutFile, opts):
     -> OBSOLETE <-
     '''
     Verbose("getHistogramFileSE()", True)
-    multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+
+    Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
 
     # Open the "stdoutFile"
@@ -229,17 +350,21 @@ def getHistogramFileEOS(stdoutFile, opts):
     '''
     '''
     Verbose("getHistogramFileEOS()", True)
-    multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+
+    Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+
     histoFile = None
 
     # Convert the local path of the stdoutFile to an EOS path that file
     # stdoutFileEOS = ConvertPathToEOS(stdoutFile, "log/", opts)
 
-    # Open the "stdoutFile" (does not need to be on EOS)
-    if not os.path.exists(stdoutFile):
-        raise Exception("File %s does not exist" % (stdoutFile) )
+    # Open the "stdoutFile"
+    stdoutFileEOS = stdoutFile
+    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
 
     # Open the standard output file
+    Verbose("Opening log file %s" % (stdoutFile), True )
     f = open(stdoutFile)
 
     # Get the jobId with regular expression
@@ -248,13 +373,18 @@ def getHistogramFileEOS(stdoutFile, opts):
     if match:
         jobId     = match.group("job")
         output    = "miniaod2tree_%s.root" % (jobId)
-        histoFile = stdoutFile.rsplit("/", 2)[0] + "/" + output
-        #histoFile = stdoutFileEOS.rsplit("/", 2)[0] + "/" + histoFile
+        histoFile = stdoutFileEOS.rsplit("/", 2)[0] + "/" + output
     else:
         Verbose("Could not determine the jobId of file %s. match = " % (stdoutFile, match) )
     
-    # Cloe the standard output file
+    # Close (and delete if copied locally) the standard output file
     f.close()
+    if localCopy:
+        Verbose("Removing local copy of stdout tarfile %s" % (stdoutFile) )
+        cmd = "rm -f %s" % (stdoutFile)
+        Verbose(cmd)
+        ret = Execute(cmd)
+
     Verbose("The output file from job with id %s for task %s is %s" % (jobId, stdoutFile.split("/")[0], histoFile) )
     return histoFile
     
@@ -331,7 +461,7 @@ def WalkEOSDir(pathOnEOS, opts): #fixme: bad code
     
     # Listing all files under the path
     cmd = ConvertCommandToEOS("ls", opts) + " " + pathOnEOS
-    # Verbose(cmd)
+    Verbose(cmd)
     dirContents = Execute(cmd)
     if "symbol lookup error" in dirContents[0]:
         raise Exception("%s.\n\t%s." % (cmd, dirContents[0]) )
@@ -407,14 +537,19 @@ def Execute(cmd):
     return ret
 
 
+def GetEOSHomeDir():
+    home = "/store/user/%s/CRAB3_TransferData" % (getpass.getuser())
+    return home
+
+
 def ConvertPathToEOS(fullPath, path_postfix, opts, isDir=False):
     '''
     Takes as input a path to a file or dir of a given multicrab task stored locally
     and converts it to the analogous path for EOS.
     '''
     Verbose("ConvertPathToEOS()", True)
-
-    path_prefix   = "/store/user/%s/CRAB3_TransferData" % (getpass.getuser())
+ 
+    path_prefix = GetEOSHomeDir()
     if not isDir:
         taskName      = fullPath.split("/")[0]
         fileName      = fullPath.split("/")[-1]
@@ -426,7 +561,7 @@ def ConvertPathToEOS(fullPath, path_postfix, opts, isDir=False):
     taskNameEOS   = ConvertTasknameToEOS(taskName, opts)
     pathEOS       = WalkEOSDir(path_prefix + "/" + taskNameEOS, opts) # + "/"
     fullPathEOS   = pathEOS + path_postfix + fileName
-    Verbose("Converted %s (default) to %s (EOS-compatible)" % (fullPath, fullPathEOS) )
+    Verbose("Converted %s (default) to %s (EOS)" % (fullPath, fullPathEOS) )
     return fullPathEOS
 
 
@@ -472,8 +607,19 @@ def splitFiles(files, filesPerEntry, opts):
             ret.append( (i, files[beg(i):end(i)]) )
             i += 1
 
-    Verbose("Returning a %s-long list of tuples" % (len(ret)) )
-    return ret
+    # Remove empty tuples (Some rare Instances where we had (0, [])
+    splitFiles = filter(lambda x: len(x[1])!=0, ret)
+
+    # Print the tuples
+    align = "{:<3} {:<100}"
+    msg   = "\n"
+    # For-loop: All Tuple pair
+    for x in splitFiles:
+        msg += align.format(x[0], x[1]) + "\n"
+        Verbose("Splitted files as follows:%s" % (msg) )
+
+    Verbose("Returning a %s-long list of tuples" % (len(splitFiles)) )
+    return splitFiles
 
 
 def GetFileSize(filePath, opts, convertToGB=False):
@@ -530,7 +676,9 @@ def hadd(opts, mergeName, inputFiles, path_prefix=""):
     '''
     '''
     Verbose("hadd()", True)
-
+    if len(inputFiles) < 1:
+        raise Exception("Attempting to merge 0 files! Somethings was gone wrong!")
+    
     if path_prefix.endswith("/"):
         mergeNameNew  = path_prefix[:-1] + mergeName
     else:
@@ -748,17 +896,25 @@ def GetRegularExpression(arg):
     return [re.compile(a) for a in arg]
 
 
-def CheckThatFilesExist(fileList, opts):
+def CheckThatFilesExist(taskName, fileList, opts):
     '''
+    Counts the number of files passed in the list to see 
+    if all exist!
     '''
     Verbose("CheckThatFilesExist()", True)
 
     # For-loop: All files in list
+    nFiles = len(fileList)
+    nExist = 0
     for f in fileList:
-        if FileExists(f, opts ) == False:
-            raise Exception("The file %s does not exist!" % (f) )
-            return False
-    return True
+        if FileExists(f, opts):
+            nExist += 1
+        
+    if nExist != nFiles:
+        Print("Task %s, found %s ROOT files but expected %s. Have you already run this script? Skipping .." % (taskName, nExist, nFiles), False)
+        return False
+    else:
+        return True
 
 
 def FileExists(filePath, opts):
@@ -833,7 +989,7 @@ def GetIncludeExcludeDatasets(datasets, opts):
         tmp = []
         include = GetRegularExpression(opts.includeTasks)
 
-        Verbose("Will include the following tasks (using re) :%s" % (include) )
+        Verbose("Will include the following tasks (using re) :%s" % (opts.includeTasks) )
         # For-loop: All datasets/tasks
         for d in datasets:
             task  = d #GetBasename(d)
@@ -911,7 +1067,9 @@ def MergeFiles(mergeName, inputFiles, opts):
     Verbose("MergeFiles()")
 
     Verbose("Attempting to merge:\n\t%s\n\tto\n\t%s." % ("\n\t".join(inputFiles), mergeName) )
-    if len(inputFiles) == 1:
+    if len(inputFiles) < 1:
+        raise Exception("Attempting to merge 0 files! Somethings was gone wrong!")
+    elif len(inputFiles) == 1:
         if opts.filesInEOS:
             prefix   = GetXrdcpPrefix(opts)
             srcFile  = prefix + inputFiles[0]
@@ -946,7 +1104,7 @@ def PrintSummary(taskReports):
     Verbose("PrintSummary()")
     
     table    = []
-    msgAlign = "{:<3} {:<50} {:^15} {:^15} {:^15} {:^15} {:^15} {:^15}"
+    msgAlign = "{:<3} {:<50} {:^15} {:^15} {:^15} {:^18} {:^18} {:^18}"
     header   = msgAlign.format("#", "Task Name", "Input Files", "Merged Files", "Pre-Merged Files", "Size (GB)", "Merge Time (min)", "Clean Time (min)")
     hLine    = "="*len(header)
     table.append(hLine)
@@ -954,11 +1112,11 @@ def PrintSummary(taskReports):
     table.append(hLine)
 
     #For-loop: All reports
-    i = 1
+    index = 1
     for key in taskReports.keys():
         r = taskReports[key]
-        table.append( msgAlign.format(i+1, r.dataset, r.nInputFiles, r.nMergedFiles, r.nPreMergedFiles, "%0.2f" % r.mergedFilesSize, "%0.2f" % r.mergeTimeTotal, "%0.2f" % r.cleanTimeTotal) )
-        i+=1
+        table.append( msgAlign.format(index, r.dataset, r.nInputFiles, r.nMergedFiles, r.nPreMergedFiles, "%0.3f" % r.mergedFilesSize, "%0.3f" % r.mergeTimeTotal, "%0.3f" % r.cleanTimeTotal) )
+        index+=1
 
     # Print the table
     print
@@ -973,12 +1131,13 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
     Loops over all stdout files of a given CRAB task, to obtain 
     and return the corresponding output files and exit-codes.
     '''
-    Verbose("GetTaskOutputAndExitCodes()")
+    Verbose("GetTaskOutputAndExitCodes()", True)
 
     # Definitions
     files = []
     exitCodes = []
-        
+    
+    Verbose("Getting output files & exit codes for task %s" % (taskName) )
     # For-loop: All stdout files of given task
     for f in stdoutFiles:
         Verbose("Getting output files & exit codes for task %s (by reading %s)" % (taskName, f) )
@@ -1124,22 +1283,77 @@ def DeleteFolders(filePath, foldersToDelete, opts):
     return
 
 
+def GetTaskLogFiles(taskName, opts):
+    '''
+    '''
+    Verbose("GetTaskLogFiles()")
+    if opts.filesInEOS:
+        tmp = ConvertPathToEOS(taskName, "log/", opts, isDir=True)
+        Verbose("Obtaining stdout files for task %s from %s" % (taskName, tmp), True)
+        stdoutFiles = glob.glob(tmp + "cmsRun_*.log.tar.gz")        
+
+        # Sometimes glob doesn't work (for unknown reasons)
+        if len(stdoutFiles) < 1:
+            Verbose("Task %s, could not obtain log files with glob. \n\tTrying alternative method. If problems persist retry without setting the CRAB environment" % (taskName) )
+            cmd = ConvertCommandToEOS("ls", opts) + " " + tmp
+            Verbose(cmd)
+            dirContents = Execute(cmd)
+            stdoutFiles = dirContents
+            stdoutFiles = [tmp + f for f in dirContents if ".log.tar.gz" in f]            
+    else:
+        stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
+
+    if len(stdoutFiles) < 1:
+        raise Exception("Task %s, could not obtain log files." % (taskName) )
+    return stdoutFiles
+        
+
+def GetPreexistingMergedFiles(taskPath):
+    '''
+    Returns a list with the full path of all pre-existing merged ROOT files
+    '''
+    Verbose("GetPreexistingMergedFiles()", True)
+
+    cmd = ConvertCommandToEOS("ls", opts) + " " + taskPath
+    Verbose(cmd)
+    dirContents = Execute(cmd)
+    preMergedFiles = filter(lambda x: "histograms-" in x, dirContents)
+
+    # For-loop: All files
+    mergeSizeMap = {}
+    mergeTimeMap = {}
+    for f in preMergedFiles:
+        mergeSizeMap[f] = GetFileSize(taskPath + "/" + f, opts, True)
+        mergeTimeMap[f] = 0.0
+    filesExist = len(preMergedFiles)
+
+    return filesExist, mergeSizeMap, mergeTimeMap
+
+
 def main(opts, args):
     '''
     '''
     Verbose("main()", True)
     
     # Get the multicrab task names (=dir names)
-    mcrabDir = os.path.basename(os.getcwd())
-    crabDirs = GetCrabDirectories(opts)
-    nTasks   = len(crabDirs)
+    mcrabDir    = os.path.basename(os.getcwd())
+    crabDirs    = GetCrabDirectories(opts)
+    nTasks      = len(crabDirs)
+    taskNameMap = {}
+
     if nTasks < 1:
-        Print("Did not find any tasks under %s. EXIT" % (mrabDir) )
+        Print("Did not find any tasks under %s. EXIT" % (mcrabDir) )
         return 0
     
-    #Print("Found %s task(s) in %s:\n\t%s" % ( nTasks, mcrabDir, "\n\t".join(crabDirs)), True)
-    Print("Found %s task(s) in %s" % ( nTasks, mcrabDir) )
-    
+    if opts.filesInEOS:
+        Print("Found %s task(s) for %s in EOS" % (nTasks, mcrabDir) )
+    else:
+        Print("Found %s task(s) in %s" % (nTasks, mcrabDir) )
+        
+    # Map taskName -> taskNameEOS
+    for d in crabDirs:
+        taskNameMap[d] = ConvertTasknameToEOS(d, opts)
+        
     # Construct regular expressions for output files
     global re_histos
     re_histos.append(re.compile("^output files:.*?(?P<file>%s)" % opts.input))
@@ -1152,18 +1366,13 @@ def main(opts, args):
     mergeFileMap = {}
     mergeSizeMap = {}
     mergeTimeMap = {}
-    cleanTimeMap = {}
+    cleanTime    = {}
 
     # For-loop: All task names
     for d in crabDirs:
         taskName = d.replace("/", "")
 
-        # Get all log files for given task
-        if opts.filesInEOS:
-            tmp = ConvertPathToEOS(taskName, "log/", opts, isDir=True)
-            stdoutFiles = glob.glob(tmp + "cmsRun_*.log.tar.gz")
-        else:
-            stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
+        stdoutFiles = GetTaskLogFiles(taskName, opts)
         Verbose("The stdout files for task %s are:\n\t%s" % ( taskName, "\n\t".join(stdoutFiles)), True)
 
         # Definitions
@@ -1176,10 +1385,16 @@ def main(opts, args):
 
         # Check that output files were found. If so, check that they exist!
         if len(files) == 0:
-            Print("Task %s, skipping, no files to merge" % taskName)
+            Print("Task %s, skipping, no files to merge" % (taskName), False)
             continue        
-        else:
-            CheckThatFilesExist(files, opts)
+        else:            
+            if not CheckThatFilesExist(taskName, files, opts):
+                filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]))
+                taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+                continue
+            else:
+                pass
+
         Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
         
         # Split files according to user-defined options
@@ -1199,7 +1414,7 @@ def main(opts, args):
                 taskNameAndNum += "-%d" % index
 
             # Get the merge name of the files
-            mergeName    = os.path.join(d, "results", opts.output % taskNameAndNum)
+            mergeName = os.path.join(d, "results", opts.output % taskNameAndNum)
             if opts.filesInEOS:
                 mergeName = ConvertPathToEOS(mergeName, "", opts)
 
@@ -1238,8 +1453,8 @@ def main(opts, args):
         
         # Finish the progress bar
         FinishProgressBar()
-        taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, cleanTimeMap, filesExist) #iro
-
+        #taskName = ConvertTasknameToEOS(taskName, opts)
+        taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
 
     # Append "delete" message
     deleteMsg = GetDeleteMessage(opts)
@@ -1250,15 +1465,23 @@ def main(opts, args):
     for key in mergeFileMap.keys():
         f = key
         sourceFiles = mergeFileMap[key]
+        taskName    = key.replace(GetEOSHomeDir() + "/", "").split("/")[0].replace("-", "_")
         Verbose("Merge files: %s\n\tSource files: %s" % (f, sourceFiles) )
 
         Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), False)
+        # Delete folders & Calculate the clean-time (in seconds)
         time_start = time.time()
         DeleteFolders(f, foldersToDelete, opts)
         time_end = time.time()
         dtClean  = (time_end-time_start)
-        cleanTimeMap[key] = dtClean
         
+        # Save the total clean time for this task
+        if taskName not in cleanTime.keys():
+            cleanTime[taskName] = dtClean 
+        else:
+            cleanTime[taskName] = cleanTime[taskName] + dtClean
+        #print "cleanTime[%s] = %s" % (taskName, cleanTime[taskName])
+            
         # Delete files after merging?
         if opts.delete and not opts.deleteImmediately:
             DeleteFiles(sourceFiles, opts)
@@ -1266,12 +1489,12 @@ def main(opts, args):
         # Add pile-up histos
         pileup(f, opts)
 
+
     # Print summary table using reports
-        for key in cleanTimeMap.keys(): #iro
-            print "key = ", key
-        #taskReports[key] = cleanTimeMap[key]
-        #taskReports[key] = cleanTimeMap[key]
-    #reports.append(Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, cleanTimeMap, filesExist) )
+    for taskName in taskReports.keys():
+        eos = taskNameMap[taskName].replace("-", "_")
+        if eos in cleanTime.keys():
+            taskReports[taskName].SetCleanTime( cleanTime[eos] )
     PrintSummary(taskReports)
 
     return 0
