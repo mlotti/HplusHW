@@ -47,7 +47,7 @@ def main():
         if match:
             jsonfile = match.group(0)
 #    jsonfile = "limits_heavy2016.json"
-    jsonfile = "limits2016/limitsForMSSMplots_v3_heavy.json"
+    jsonfile = "limits2016/limitsForMSSMplots_ICHEP_v3_heavy.json"
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="configurationHeavy.json")
     limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/heavyHplus_configuration.json")
 
@@ -106,7 +106,7 @@ def main():
 
     # Remove m=180,190
     for gr in graphs.values():
-        limit.cleanGraph(gr, 750)
+#        limit.cleanGraph(gr, 750)
         limit.cleanGraph(gr, 800)
         limit.cleanGraph(gr, 1000)
         limit.cleanGraph(gr, 2000)
@@ -123,12 +123,14 @@ def main():
 
     # Interpret in MSSM
     xVariable = "mHp"
-#    selection = "mHp > 0 && mu==200"
-    selection = "mHp > 0 && mu==500"
+    selection = "mHp > 0 && mu==200"
+#    selection = "mHp > 0 && mu==500"
 #    scenario = "MSSM m_{h}^{max}"
     scenario = os.path.split(rootfile)[-1].replace(".root","")
     print scenario
 
+    from JsonWriter import JsonWriter
+    jsonWriter = JsonWriter()
     for key in graphs.keys():
         print "Graph--------------------------------",key
         graphs[key] = db.graphToTanBeta(graphs[key],xVariable,selection,highTanbRegion=True)
@@ -138,6 +140,7 @@ def main():
             #obsminus = db.getTheorUncert(graphs[key],xVariable,selection,"-")
             #graphs["obs_th_minus"] = db.graphToTanBeta(obsminus,xVariable,selection)
         print key,"done"
+        jsonWriter.addGraph(key,graphs[key])
 
 #    graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
     if scenario == "lowMH-LHCHXSWG":
@@ -165,6 +168,17 @@ def main():
             #print graphs["Allowed"].GetX()[i], graphs["Allowed"].GetY()[i]
         
 #    del graphs["isomass"]
+
+    jsonWriter.addGraph("Allowed",graphs["Allowed"])
+
+    jsonWriter.addParameter("name","limitsTanb_heavy_"+scenario)
+    jsonWriter.addParameter("scenario",scenario)
+    jsonWriter.addParameter("luminosity",limits.getLuminosity())
+    jsonWriter.addParameter("finalStateText",limits.getFinalstateText())
+    jsonWriter.addParameter("mHplus",limit.mHplus())
+    jsonWriter.addParameter("selection",selection)
+    jsonWriter.write("MSSMLimitHeavy_"+scenario+".json")
+
     limit.doTanBetaPlotHeavy("limitsTanb_heavy_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario)
     sys.exit()	
  

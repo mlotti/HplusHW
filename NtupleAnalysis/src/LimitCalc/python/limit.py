@@ -1053,7 +1053,7 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     #if opts.excludedArea:
     ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
     
-    isHeavy = regime != "light"
+#    isHeavy = regime != "light"
     tanbMax = 60
 
     if forPaper:
@@ -1077,32 +1077,44 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         obs = graphs["obs"]
         excluded = aux.Clone(ROOT.TGraph(obs))
         excluded.SetName("ExcludedArea")
-        if isHeavy:
+        if regime == "heavy":
             excluded.SetPoint(excluded.GetN(),obs.GetX()[obs.GetN()-1],69.0)
             excluded.SetPoint(excluded.GetN(), -1.0, 69.0)
             excluded.SetPoint(excluded.GetN(), -1.0, obs.GetY()[0])
+        elif regime == "light":
+            excluded.SetPoint(excluded.GetN(), -1.0, obs.GetY()[excluded.GetN()-1])
+            excluded.SetPoint(excluded.GetN(), -1.0, 69.0)
+            excluded.SetPoint(excluded.GetN(), 1000.0, 69.0)
+            excluded.SetPoint(excluded.GetN(), 1000.0, obs.GetY()[0])
+            excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
         else:
             excluded.SetPoint(excluded.GetN(), -1.0, obs.GetY()[excluded.GetN()-1])
             excluded.SetPoint(excluded.GetN(), -1.0, 69.0)
             excluded.SetPoint(excluded.GetN(), 1000.0, 69.0)
             excluded.SetPoint(excluded.GetN(), 1000.0, obs.GetY()[0])
             excluded.SetPoint(excluded.GetN(), obs.GetX()[0], obs.GetY()[0])
+
         setExcludedStyle(excluded)
         graphs["excluded"] = excluded
         if "isomass" in graphs.keys() and "_mA" in name:
             truncateBeyondIsomass(graphs["isomass"], excluded)
         if "obsDown" in graphs.keys():
             excludedDown = aux.Clone(graphs["obsDown"])
-            if isHeavy:
+            if regime == "heavy":
                 excludedDown.SetPoint(excludedDown.GetN(),1000.0, 0.999)
                 excludedDown.SetPoint(excludedDown.GetN(),-1.0,0.999)
                 excludedDown.SetPoint(excludedDown.GetN(),excludedDown.GetX()[0],excludedDown.GetY()[0])
-            else:
+            elif regime == "light":
                 excludedDown.SetPoint(excludedDown.GetN(),-1.0, excludedDown.GetY()[excludedDown.GetN()-1])
                 excludedDown.SetPoint(excludedDown.GetN(),-1.0,0.999)
                 excludedDown.SetPoint(excludedDown.GetN(),180,0.999)
                 excludedDown.SetPoint(excludedDown.GetN(),180,excludedDown.GetY()[0])
                 excludedDown.SetPoint(excludedDown.GetN(),excludedDown.GetX()[0],excludedDown.GetY()[0])
+            else:
+                excludedDown.SetPoint(excludedDown.GetN(),1000.0, 0.999)
+                excludedDown.SetPoint(excludedDown.GetN(),-1.0,0.999)
+                excludedDown.SetPoint(excludedDown.GetN(),excludedDown.GetX()[0],excludedDown.GetY()[0])
+
             setExcludedStyle(excludedDown)
             graphs["excludedDown"] = excludedDown
         if "isomass" in graphs.keys() and "_mA" in name:
@@ -1177,7 +1189,7 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     if "isomass" in graphs.keys():
         truncateBeyondIsomass(graphs["isomass"], expected1)
         truncateBeyondIsomass(graphs["isomass"], expected2)
-    print "check graphs.keys()",graphs.keys()
+
     if "exp" in graphs.keys():
         plotsList.append(histograms.HistoGraph(graphs["exp"], "Expected", drawStyle="L", legendStyle=None))
     if "expDown" in graphs.keys():
@@ -1208,14 +1220,17 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     if isinstance(finalstateText, list):
         captionLines += len(finalstateText) - 1
 
-    if isHeavy:
+    if regime == "heavy":
         x = 0.52
         y = -0.25#-0.11
         #if scenario.replace("-LHCHXSWG", "") in ["lightstop", "mhmaxup"]:
         #    y += 0.05
-    else:
+    elif regime == "light":
         x = 0.2
         y = -0.05
+    else:
+        x = 0.52
+        y = -0.25
     plot.setLegend(histograms.createLegend(x-0.01, y+0.6-(captionLines-0.2)*captionLineSpacing, x+0.45, y+0.9-(captionLines-0.2)*captionLineSpacing))
     plot.legend.SetMargin(0.17)
 
@@ -1226,14 +1241,21 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     name = os.path.basename(name)
     name = name.replace("-","_")
     
-    if isHeavy:
+    if regime == "heavy":
         frameXmin = 180
         frameXmax = 500
         if "_mA" in name:
             frameXmin = 140
         plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
-    else:
+    elif regime == "light":
         frameXmax = 160
+        frameXmin = 90
+        if "_mA" in name:
+            frameXmax = 145
+            frameXmin = 50
+        plot.createFrame(name, opts={"ymin": 1, "ymax": tanbMax, "xmin": frameXmin, "xmax": frameXmax})
+    else:
+        frameXmax = 600
         frameXmin = 90
         if "_mA" in name:
             frameXmax = 145
@@ -1248,10 +1270,12 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     plot.draw()
     
     plot.setLuminosity(luminosity)
-    if isHeavy:
+    if regime == "heavy":
         plot.addStandardTexts(cmsTextPosition="right")
-    else:
+    elif regime == "light":
         plot.addStandardTexts(cmsTextPosition="left")
+    else:
+        plot.addStandardTexts(cmsTextPosition="right")
 #    histograms.addLuminosityText(x=None, y=None, lumi="2.3-4.9")
 
     size = 20
@@ -1259,11 +1283,12 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
         histograms.addText(x, y+0.9, process, size=size)
     elif regime == "heavy":
         histograms.addText(x+0.01, y+0.84, processHeavy, size=size)
-    elif regime == "combination":
-        histograms.addText(x, y+0.9, processCombination, size=size)
+    elif regime == "combined":
+        histograms.addText(x, y, processCombination, size=size)
     else:
         raise Exception("Unknown option for regime")
     y -= captionLineSpacing
+    print "check finalstateText",finalstateText,x,y
     if isinstance(finalstateText, str):
         histograms.addText(x+0.01, y+0.84, finalstateText, size=size)
         y -= captionLineSpacing
@@ -1273,7 +1298,8 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
             y -= captionLineSpacing
     else:
         raise Exception("not implemented")
-    histograms.addText(x-0.3, y+0.695, "^{}%s"%getTypesetScenarioName(scenario), size=size)
+    histograms.addText(x-0.21, y+0.695, "^{}%s"%getTypesetScenarioName(scenario), size=size)
+#    histograms.addText(x-0.3, y+0.695, "^{}%s"%getTypesetScenarioName(scenario), size=size)
 #    histograms.addText(x-0.33, y+0.695, "^{}%s"%getTypesetScenarioName(scenario), size=size) # mhmaxup
 #    histograms.addText(x, y+0.93, "^{}%s"%getTypesetScenarioName(scenario), size=size)
 #    histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
