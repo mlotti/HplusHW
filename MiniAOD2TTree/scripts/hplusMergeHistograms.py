@@ -52,6 +52,15 @@ PBARWIDTH = 80
 #================================================================================================ 
 # Class Definition
 #================================================================================================ 
+class ExitCodeException(Exception):
+    '''
+    Exception for non-succesful crab job exit codes
+    '''
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
+
 class Report:
     def __init__(self, dataset, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist):
         Verbose("class Report:__init__()")
@@ -167,10 +176,113 @@ def histoToDict(histo):
     return ret
 
 
+def GetLocalOrEOSPath(stdoutFile, opts):
+    '''
+    This function was created due to problems encountered when working on LXPLUS 
+    with the --filesInEOS option. Basically, although files existed on EOS it 
+    gave an error that they did not exist. So I wrote this little hack to copy the 
+    files locally and then raed it.
+    It returns either the local or EOS path, whichever necessary. 
+
+    WARNING! If the file is copied locally it must then be removed
+    '''
+    Verbose("GetLocalOrEOSCopy()", True)
+
+    localCopy = False
+    if not FileExists(stdoutFile, opts):
+        raise Exception("Cannot assert if job succeeded as file %s does not exist!" % (stdoutFile) )
+
+    try:
+        f = open(stdoutFile)
+    except IOError as e:
+        errMsg = "I/O error({0}): {1} %s".format(e.errno, e.strerror) % (stdoutFile)
+        Verbose(errMsg)
+        # For unknown reasons on LXPLUS EOS the files cannot be found, even if it exists
+        if opts.filesInEOS:
+            Verbose("File %s could not be found/read on EOS. Attempting to copy it locally and then read it" % (stdoutFile) )
+            srcFile  = GetXrdcpPrefix(opts) + stdoutFile
+            destFile = os.path.basename(stdoutFile)
+            cmd      = "xrdcp %s %s" % (srcFile, destFile)
+            Verbose(cmd)
+            ret = Execute(cmd)
+            stdoutFile = os.path.join(os.getcwd(), os.path.basename(stdoutFile) )
+            localCopy = True
+            return localCopy, stdoutFile
+        else:
+            raise Exception(errMsg)
+    return localCopy, stdoutFile
+
+
+def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
+    '''
+    Given crab job stdout file, ensure that the job succeeded
+    \param stdoutFile   Path to crab job stdout file
+    \param allowJobExitCodes  Consider jobs with these non-zero exit codes to be succeeded
+    If any of the checks fail, raises ExitCodeException
+    '''
+    Verbose("AssertJobSucceeded()", True)
+
+    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
+
+    re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
+    re_job = re.compile("JobExitCode=(?P<code>\d+)")
+
+    exeExitCode = None
+    jobExitCode = None
+    
+    Verbose("Checking whether file %s is a tarfile" % (stdoutFile) )
+    if tarfile.is_tarfile(stdoutFile):
+        fIN = tarfile.open(stdoutFile)
+        log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+
+        #For-loop: All tarfile contents (=members)
+        for member in fIN.getmembers():
+
+            # Extract the tarball
+            f = fIN.extractfile(member)
+            match = log_re.search(f.name)
+
+            # If "cmsRun-stdout*.log" file is found
+            if match:
+                
+                # For-loop: All lines in file
+                for line in f:
+                    m = re_exe.search(line)
+                    if m:
+                        exeExitCode = int(m.group("code"))
+                        continue
+                    m = re_job.search(line)
+                    if m:
+                        jobExitCode = int(m.group("code"))
+                        continue
+        fIN.close()
+
+    # If log file was copied locally remove it!
+    if localCopy:
+        Verbose("Removing local copy of stdout tarfile %s" % (stdoutFile) )
+        cmd = "rm -f %s" % (stdoutFile)
+        Verbose(cmd)
+        ret = Execute(cmd)
+
+    jobExitCode = exeExitCode
+    if exeExitCode == None:
+        raise ExitCodeException("No exeExitCode")
+    if jobExitCode == None:
+        raise ExitCodeException("No jobExitCode")
+    if exeExitCode != 0:
+        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
+    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
+        raise ExitCodeException("Job exit code is %d" % jobExitCode)
+    return
+
+
 def getHistogramFile(stdoutFile, opts):
     '''
     '''
-    multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+    Verbose("getHistogramFile()", True)
+
+    Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) #multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
 
     if tarfile.is_tarfile(stdoutFile):
@@ -211,7 +323,9 @@ def getHistogramFileSE(stdoutFile, opts):
     -> OBSOLETE <-
     '''
     Verbose("getHistogramFileSE()", True)
-    multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+
+    Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
 
     # Open the "stdoutFile"
@@ -236,17 +350,21 @@ def getHistogramFileEOS(stdoutFile, opts):
     '''
     '''
     Verbose("getHistogramFileEOS()", True)
-    multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+
+    Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+
     histoFile = None
 
     # Convert the local path of the stdoutFile to an EOS path that file
     # stdoutFileEOS = ConvertPathToEOS(stdoutFile, "log/", opts)
 
-    # Open the "stdoutFile" (does not need to be on EOS)
-    if not os.path.exists(stdoutFile):
-        raise Exception("File %s does not exist" % (stdoutFile) )
+    # Open the "stdoutFile"
+    stdoutFileEOS = stdoutFile
+    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
 
     # Open the standard output file
+    Print("Opening log file %s" % (stdoutFile), True )
     f = open(stdoutFile)
 
     # Get the jobId with regular expression
@@ -255,13 +373,18 @@ def getHistogramFileEOS(stdoutFile, opts):
     if match:
         jobId     = match.group("job")
         output    = "miniaod2tree_%s.root" % (jobId)
-        histoFile = stdoutFile.rsplit("/", 2)[0] + "/" + output
-        #histoFile = stdoutFileEOS.rsplit("/", 2)[0] + "/" + histoFile
+        histoFile = stdoutFileEOS.rsplit("/", 2)[0] + "/" + output
     else:
         Verbose("Could not determine the jobId of file %s. match = " % (stdoutFile, match) )
     
-    # Cloe the standard output file
+    # Close (and delete if copied locally) the standard output file
     f.close()
+    if localCopy:
+        Verbose("Removing local copy of stdout tarfile %s" % (stdoutFile) )
+        cmd = "rm -f %s" % (stdoutFile)
+        Verbose(cmd)
+        ret = Execute(cmd)
+
     Verbose("The output file from job with id %s for task %s is %s" % (jobId, stdoutFile.split("/")[0], histoFile) )
     return histoFile
     
@@ -784,7 +907,7 @@ def CheckThatFilesExist(taskName, fileList, opts):
     nFiles = len(fileList)
     nExist = 0
     for f in fileList:
-        if FileExists(f, opts ):
+        if FileExists(f, opts):
             nExist += 1
         
     if nExist != nFiles:
@@ -1008,12 +1131,13 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
     Loops over all stdout files of a given CRAB task, to obtain 
     and return the corresponding output files and exit-codes.
     '''
-    Verbose("GetTaskOutputAndExitCodes()")
+    Verbose("GetTaskOutputAndExitCodes()", True)
 
     # Definitions
     files = []
     exitCodes = []
-        
+    
+    Verbose("Getting output files & exit codes for task %s" % (taskName) )
     # For-loop: All stdout files of given task
     for f in stdoutFiles:
         Verbose("Getting output files & exit codes for task %s (by reading %s)" % (taskName, f) )
@@ -1188,11 +1312,12 @@ def GetPreexistingMergedFiles(taskPath):
     '''
     Returns a list with the full path of all pre-existing merged ROOT files
     '''
-    Verbose("GetPreexistingMergedFiles()")
+    Verbose("GetPreexistingMergedFiles()", True)
 
     cmd = ConvertCommandToEOS("ls", opts) + " " + taskPath
-    Verbose(cmd)
+    Print(cmd)
     dirContents = Execute(cmd)
+    print "dirContents = ", dirContents
     preMergedFiles = filter(lambda x: "histograms-" in x, dirContents)
 
     # For-loop: All files
@@ -1202,6 +1327,8 @@ def GetPreexistingMergedFiles(taskPath):
         mergeSizeMap[f] = GetFileSize(taskPath + "/" + f, opts, True)
         mergeTimeMap[f] = 0.0
     filesExist = len(preMergedFiles)
+
+    print "-> filesExist = ", filesExist
     return filesExist, mergeSizeMap, mergeTimeMap
 
 
@@ -1264,6 +1391,8 @@ def main(opts, args):
             continue        
         else:            
             if not CheckThatFilesExist(taskName, files, opts):
+                print "\n\t".join(files)
+                sys.exit()
                 filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]))
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
                 continue
