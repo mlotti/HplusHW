@@ -6,8 +6,12 @@ multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg
 multicrab.py --create -s T2_US_Nebraska -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
 
 
-Re-Submission:
+Re-Create (for example, when you get "Cannot find .requestcache" for a given task):
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <task_dir> 
+Example:
+rm -rf /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8019_20161006T1003/<taskDir>
+multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8019_20161006T1003/
+(the above will re-create the job just for the dataset <task_dir>)
 
 
 Check Status:
