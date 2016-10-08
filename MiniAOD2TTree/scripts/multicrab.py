@@ -135,7 +135,7 @@ class colors:
 # Class Definition
 #================================================================================================ 
 class Report:
-    def __init__(self, name, allJobs, retrieved, running, finished, failed, retrievedLog, retrievedOut, eosLog, eosOut, status, dashboardURL):
+    def __init__(self, name, allJobs, retrieved, running, finished, failed, transferring, retrievedLog, retrievedOut, eosLog, eosOut, status, dashboardURL):
         '''
         Constructor 
         '''
@@ -149,6 +149,7 @@ class Report:
         self.status          = self.GetTaskStatusStyle(status)
         self.finished        = finished
         self.failed          = failed
+        self.transferring    = transferring
         self.retrievedLog    = retrievedLog
         self.retrievedOut    = retrievedOut
         self.eosLog          = eosLog
@@ -317,7 +318,7 @@ def GetTaskStatus(datasetPath):
         raise Exception("File \"%s\" not found!" % (crabLog) )
 
     # Execute the command
-    if os.system(cmd) == 0: #iro
+    if os.system(cmd) == 0:
 
         if os.path.exists( grepFile ):
             results = [i for i in open(grepFile, 'r').readlines()]
@@ -341,7 +342,7 @@ def GetTaskReports(datasetPath, opts):
     report = None
     
     # Get all files under <dataset_dir>/results/
-    files = Execute("ls %s" % os.path.join( datasetPath, "results") ) #iro
+    files = Execute("ls %s" % os.path.join( datasetPath, "results") )
 
     Verbose("crab status --dir=%s" % (GetLast2Dirs(datasetPath)), False)
     try:
@@ -360,7 +361,7 @@ def GetTaskReports(datasetPath, opts):
 
         # Assess JOB success/failure for task
         Verbose("Retrieving files (1/2)", True)
-        running, finished, failed, retrievedLog, retrievedOut, eosLog, eosOut = RetrievedFiles(datasetPath, result, dashboardURL, False, opts)
+        running, finished, transferring, failed, retrievedLog, retrievedOut, eosLog, eosOut = RetrievedFiles(datasetPath, result, dashboardURL, False, opts)
 
         # Get the task logs & output ?        
         Verbose("Getting task logs", True)
@@ -368,7 +369,7 @@ def GetTaskReports(datasetPath, opts):
 
         # Get the task output
         Verbose("Getting task output")
-        GetTaskOutput(datasetPath, retrievedOut, finished) #iro
+        GetTaskOutput(datasetPath, retrievedOut, finished)
 
         # Resubmit task if failed jobs found
         Verbose("Resubmitting failed tasks")
@@ -380,13 +381,13 @@ def GetTaskReports(datasetPath, opts):
             
         # Assess JOB success/failure for task (again)
         Verbose("Retrieving Files (2/2)")
-        running, finished, failed, retrievedLog, retrievedOut, eosLog, eosOut = RetrievedFiles(datasetPath, result, dashboardURL, True, opts)
+        running, finished, transferring, failed, retrievedLog, retrievedOut, eosLog, eosOut = RetrievedFiles(datasetPath, result, dashboardURL, True, opts)
         retrieved = min(finished, retrievedLog, retrievedOut)
         alljobs   = len(result['jobList'])        
 
         # Append the report
         Verbose("Appending Report")
-        report = Report(datasetPath, alljobs, retrieved, running, finished, failed, retrievedLog, retrievedOut, eosLog, eosOut, status, dashboardURL)
+        report = Report(datasetPath, alljobs, retrieved, running, finished, failed, transferring, retrievedLog, retrievedOut, eosLog, eosOut, status, dashboardURL)
 
         # Determine if task is DONE or not
         Verbose("Determining if Task is DONE")
@@ -397,7 +398,7 @@ def GetTaskReports(datasetPath, opts):
     # Catch exceptions (Errors detected during execution which may not be "fatal")
     except:
         msg = sys.exc_info()[1]
-        report = Report(datasetPath, "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?") 
+        report = Report(datasetPath, "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?") 
         Print("crab status failed with message \"%s\". Skipping ..." % ( msg ), True)
     return report
 
@@ -515,27 +516,6 @@ def GetTaskOutput(taskPath, retrievedOut, finished):
     else:
         Verbose("Retrieved output (%s) < finished (%s). To retrieve CRAB output relaunch script with --get option." % (retrievedOut, finished) )
 
-    # iro
-    #if opts.deleteOutput:
-    #    Verbose("Deleting all ROOT files stored locally in the multicrab directory", False)
-    #    rootFiles    = Execute("ls -tr %s" % (taskPath + "/results/miniaod2tree_*.root") )
-    #
-    #    rootFilesEOS = []
-    #    for f in rootFiles:
-    #        rootFilesEOS.append( ConvertPathToEOS(f, opts) )
-    #
-    #    if len(rootFiles) > 0:
-    #        decision  = AskUser("Are you sure you want to permanently delete the following files ?\n\t%s\n\t" % ("\n\t".join(rootFiles)), True)
-    #        if decision:
-    #            for f in rootFiles:
-    #                rmOut = Execute("rm -f %s" % (f))  # taskPath + "/results/miniaod2tree_*.root") )
-    #
-    #    if len(rootFilesEOS) > 0:
-    #        decision  = AskUser("Are you sure you want to permanently delete the following files ?\n\t%s\n\t" % ("\n\t".join(rootFilesEOS)), True)
-    #        if decision:
-    #            for f in rootFilesEOS:
-    #                rmOut = Execute("eos rm -f %s" % (f) )
-    # iro
     return
 
 
@@ -795,8 +775,8 @@ def PrintTaskSummary(reportDict):
     Verbose("PrintTaskSummary()")
     
     reports  = []
-    msgAlign = "{:<3} {:<50} {:^20} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10}"
-    header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "All", "Running", "Finished", "Failed", "Logs", "Output", "Logs (EOS)", "Output (EOS)" )
+    msgAlign = "{:<3} {:<40} {:^20} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10}"
+    header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "All", "Running", "Failed", "Transfer", "Finished", "Logs", "Output", "Logs (EOS)", "Output (EOS)" )
     hLine    = "="*len(header)
     reports.append(hLine)
     reports.append(header)
@@ -813,12 +793,13 @@ def PrintTaskSummary(reportDict):
         allJobs    = report.allJobs
         running    = report.running
         finished   = report.finished
+        transfer   = report.transferring
         failed     = len(report.failed)
         rLogs      = report.retrievedLog
         rOutput    = report.retrievedOut
         rLogsEOS   = report.eosLog
         rOutputEOS = report.eosOut
-        line       = msgAlign.format(i+1, dataset, status, allJobs, running, finished, failed, rLogs, rOutput, rLogsEOS, rOutputEOS)
+        line       = msgAlign.format(i+1, dataset, status, allJobs, running, failed, transfer, finished, rLogs, rOutput, rLogsEOS, rOutputEOS)
         reports.append(line)
     reports.append(hLine)
     
@@ -958,7 +939,7 @@ def RetrievedFiles(taskDir, crabResults, dashboardURL, printTable, opts):
     if opts.url:
         Print(dashboardURL, False)
 
-    return running, finished, failed, retrievedLog, retrievedOut, eosLog, eosOut
+    return running, finished, transferring, failed, retrievedLog, retrievedOut, eosLog, eosOut
 
 
 def GetReportTable(taskDir, nJobs, running, transferring, finished, unknown, failed, idle, retrievedLog, retrievedOut, eosLog, eosOut):
@@ -1739,11 +1720,6 @@ if __name__ == "__main__":
 
     parser.add_option("--filesInEOS", dest="filesInEOS", default=False, action="store_true",
                       help="The CRAB files are in a local EOS. Do not use files from the local multicrab directory [default: 'False']")
-
-    # iro
-    #parser.add_option("--deleteOutput", dest="deleteOutput", default=False, action="store_true", 
-    #                  help="WARNING! Will delete all ROOT retrieved in cwd [default: False]")
-    # iro
 
     (opts, args) = parser.parse_args()
 

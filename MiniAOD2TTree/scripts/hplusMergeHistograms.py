@@ -402,7 +402,7 @@ def GetHistogramFile(taskName, f, opts):
             Verbose("The ROOT file for task %s is %s." % (taskName, histoFile) )
             return histoFile
         else:
-            Print("Task %s, skipping job %s: input root file not found from stdout" % (taskName, f) )
+            Print("Task %s, skipping job %s: input root file not found from stdout" % (taskName, os.path.basename(f)) )
     else:
         histoFile = getHistogramFile(f, opts)
         if histoFile != None:
@@ -410,9 +410,9 @@ def GetHistogramFile(taskName, f, opts):
             if os.path.exists(path):
                 return histoFile
             else:
-                print "Task %s, skipping job %s: input root file found from stdout, but does not exist" % (taskName, f)
+                Verbose("Task %s, skipping job %s: input root file found from stdout, but does not exist" % (taskName, os.path.basename(f) ) )
         else:
-            print "Task %s, skipping job %s: input root file not found from stdout" % (taskName, f)
+            Verbose("Task %s, skipping job %s: input root file not found from stdout" % (taskName, os.path.basename(f) ))
     return histoFile
 
 
@@ -907,8 +907,16 @@ def CheckThatFilesExist(taskName, fileList, opts):
     nFiles = len(fileList)
     nExist = 0
     for f in fileList:
-        if FileExists(f, opts):
+
+        if opts.filesInEOS:
+            fileName = ConvertPathToEOS(f, "", opts, isDir=False)
+        else:
+            fileName = f
+
+        if FileExists(fileName, opts):
             nExist += 1
+        else:
+            Verbose("Task %s, file %s not found!" % (taskName, os.path.basename(f)) )
         
     if nExist != nFiles:
         Print("Task %s, found %s ROOT files but expected %s. Have you already run this script? Skipping .." % (taskName, nExist, nFiles), False)
@@ -1146,9 +1154,9 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
             if histoFile != None:
                 files.append(histoFile)
             else:
-                Print("Task %s, skipping job %s: input root file not found from stdout" % (taskName, f) )
+                Verbose("Task %s, skipping job %s: input root file not found from stdout" % (taskName, os.path.basename(f)) )
         except multicrab.ExitCodeException, e:
-            Print("Task %s, skipping job %s: %s" % (taskName, f, str(e)) )
+            Verbose("Task %s, skipping job %s: %s" % (taskName, os.path.basename(f), str(e)) )
             exit_match = exit_re.search(f)
             if exit_match:
                 exitCodes.append(int(exit_match.group("exitcode")))
@@ -1308,13 +1316,16 @@ def GetTaskLogFiles(taskName, opts):
     return stdoutFiles
         
 
-def GetPreexistingMergedFiles(taskPath):
+def GetPreexistingMergedFiles(taskPath, opts):
     '''
     Returns a list with the full path of all pre-existing merged ROOT files
     '''
     Verbose("GetPreexistingMergedFiles()", True)
-
-    cmd = ConvertCommandToEOS("ls", opts) + " " + taskPath
+    
+    if opts.filesInEOS:
+        cmd = ConvertCommandToEOS("ls", opts) + " " + taskPath
+    else:
+        cmd = "ls"  + " " + taskPath
     Verbose(cmd)
     dirContents = Execute(cmd)
     preMergedFiles = filter(lambda x: "histograms-" in x, dirContents)
@@ -1322,7 +1333,10 @@ def GetPreexistingMergedFiles(taskPath):
     # For-loop: All files
     mergeSizeMap = {}
     mergeTimeMap = {}
+    
+    # For-loop: All merged ROOT files
     for f in preMergedFiles:
+        Verbose("Getting file size for file %s" % (f))
         mergeSizeMap[f] = GetFileSize(taskPath + "/" + f, opts, True)
         mergeTimeMap[f] = 0.0
     filesExist = len(preMergedFiles)
@@ -1388,12 +1402,15 @@ def main(opts, args):
             Print("Task %s, skipping, no files to merge" % (taskName), False)
             continue        
         else:            
+            files = [taskName + "/results/" + x for x in files]
             if not CheckThatFilesExist(taskName, files, opts):
-                filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]))
+                filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
                 continue
             else:
                 pass
+            
+        sys.exit(0)
 
         Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
         
