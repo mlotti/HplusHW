@@ -537,6 +537,10 @@ def ResubmitTask(taskPath, failed):
         return
 
     joblist = JobList(failed)
+    
+    # Sanity check
+    if len(joblist) < 1:
+        return
 
     if opts.ask:
         if AskUser("Resubmit task \"%s\"?" % (GetLast2Dirs(taskPath)) ):
@@ -544,8 +548,13 @@ def ResubmitTask(taskPath, failed):
         else:
             return
     else:
-        Print("Found \"Failed\" jobs! Resubmitting ...")
-        os.system("crab resubmit %s --jobids=%s --force" % (taskPath,joblist) )
+        taskName = os.path.basename(taskPath)
+        Print("Found %s failed jobs! Resubmitting ..." % (len(joblist) ) )
+        #os.system("crab resubmit %s --jobids=%s --force" % (taskPath,joblist) )
+        Print("crab resubmit %s --jobids %s" % (taskName, ",".join(joblist) ) )
+        result = crabCommand('resubmit', jobids=joblist, dir=taskPath)
+        Verbose("Calling crab resubmit %s --jobids %s returned" % (taskName, ",".join(joblist), result ) )
+
     return
 
 
@@ -779,7 +788,7 @@ def PrintTaskSummary(reportDict):
     Verbose("PrintTaskSummary()")
     
     reports  = []
-    msgAlign = "{:<3} {:<40} {:^20} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10}"
+    msgAlign = "{:<3} {:<55} {:^20} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10} {:^10}"
     header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "All", "Running", "Failed", "Transfer", "Finished", "Logs", "Output", "Logs (EOS)", "Output (EOS)" )
     hLine    = "="*len(header)
     reports.append(hLine)
