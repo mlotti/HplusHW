@@ -604,6 +604,10 @@ class Process:
             hPU = None
             direction="nominal"
             analyzer = analyzerIE.getAnalyzer()
+            if analyzer.exists("usePileupWeights"):
+                usePUweights = analyzer.__getattr__("usePileupWeights")
+                if not usePUweights:
+                    continue
             if hasattr(analyzer, "PUWeightSystematicVariation"):
                 direction=getattr(analyzer, "PUWeightSystematicVariation")
             for dset in self._datasets:
