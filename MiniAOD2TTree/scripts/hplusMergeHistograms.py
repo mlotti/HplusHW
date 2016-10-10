@@ -232,6 +232,7 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
     
     Verbose("Checking whether file %s is a tarfile" % (stdoutFile) )
     if tarfile.is_tarfile(stdoutFile):
+        Verbose("File %s is a tarfile" % (stdoutFile) )
         fIN = tarfile.open(stdoutFile)
         log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
 
@@ -256,6 +257,8 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
                         jobExitCode = int(m.group("code"))
                         continue
         fIN.close()
+    else:
+        Verbose("File %s is not a tarfile" % (stdoutFile) )
 
     # If log file was copied locally remove it!
     if localCopy:
@@ -916,7 +919,10 @@ def CheckThatFilesExist(taskName, fileList, opts):
     # For-loop: All files in list
     nFiles = len(fileList)
     nExist = 0
+
+    # For-loop: All files in the list
     for f in fileList:
+        Verbose("Checking whether file %s exists" % (f) )
 
         if opts.filesInEOS:
             fileName = ConvertPathToEOS(taskName, f, "", opts, isDir=False)
