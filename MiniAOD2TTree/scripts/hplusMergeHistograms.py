@@ -282,7 +282,7 @@ def getHistogramFile(stdoutFile, opts):
     Verbose("getHistogramFile()", True)
 
     Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
-    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) #multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
 
     if tarfile.is_tarfile(stdoutFile):
@@ -355,9 +355,6 @@ def getHistogramFileEOS(stdoutFile, opts):
     AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
 
     histoFile = None
-
-    # Convert the local path of the stdoutFile to an EOS path that file
-    # stdoutFileEOS = ConvertPathToEOS(stdoutFile, "log/", opts)
 
     # Open the "stdoutFile"
     stdoutFileEOS = stdoutFile
@@ -534,24 +531,26 @@ def Execute(cmd):
     for line in stdout:
         ret.append(line.replace("\n", ""))
     stdout.close()
+    Verbose("Command %s returned:\n\t%s" % (cmd, "\n\t".join(ret)))
     return ret
 
 
-def GetEOSHomeDir():
-    home = "/store/user/%s/CRAB3_TransferData" % (getpass.getuser())
+def GetEOSHomeDir(opts):
+    #home = "/store/user/%s/CRAB3_TransferData" % (getpass.getuser())
+    home = "/store/user/%s/CRAB3_TransferData/%s" % (getpass.getuser(), opts.dirName)
     return home
 
 
-def ConvertPathToEOS(fullPath, path_postfix, opts, isDir=False):
+def ConvertPathToEOS(taskName, fullPath, path_postfix, opts, isDir=False):
     '''
     Takes as input a path to a file or dir of a given multicrab task stored locally
     and converts it to the analogous path for EOS.
     '''
     Verbose("ConvertPathToEOS()", True)
  
-    path_prefix = GetEOSHomeDir()
+    path_prefix = GetEOSHomeDir(opts)
     if not isDir:
-        taskName      = fullPath.split("/")[0]
+        #taskName      = fullPath.split("/")[0]
         fileName      = fullPath.split("/")[-1]
     else:
         taskName      = fullPath
@@ -622,7 +621,7 @@ def splitFiles(files, filesPerEntry, opts):
     return splitFiles
 
 
-def GetFileSize(filePath, opts, convertToGB=False):
+def GetFileSize(filePath, opts, convertToGB=True):
     '''
     Return the file size, irrespective of whether it is located locally or
     on EOS.
@@ -630,12 +629,13 @@ def GetFileSize(filePath, opts, convertToGB=False):
     Verbose("GetFileSize()", True)
     HOST = socket.gethostname()
     
-    Verbose("Determining size for file %s" % (filePath) )
+    Verbose("Determining size for file %s (host=%s)" % (filePath, HOST) )
     if opts.filesInEOS:
         if "fnal" in HOST:
             cmd = ConvertCommandToEOS("ls -l", opts) + " " + filePath
+            opts.Verbose = True
             ret = Execute("%s" % (cmd) )[0].split()
-
+            opts.Verbose = False
             # Get the size as integer
             permissions = ret[0]
             unkownVar   = ret[1]
@@ -646,6 +646,8 @@ def GetFileSize(filePath, opts, convertToGB=False):
             dayOfMonth  = ret[6]
             time        = ret[7]
             filename    = ret[8] # or ret[-1]
+            # Print("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
+
         elif "lxplus" in HOST:
             eos  = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select" #simply "eos" will not work
             cmd  = "%s find --size %s" % (eos, filePath)
@@ -667,9 +669,14 @@ def GetFileSize(filePath, opts, convertToGB=False):
     else:
         size = os.stat(filePath).st_size
 
+    # Convert Bytes to Giga-Bytes (GB)
+    sizeGB = size/1024.0/1024.0/1024.0
+
+    Verbose("Determined size for file %s to be %s Bytes (%s GB)" % (filePath, size, sizeGB) )
     if convertToGB:
-        size = size/1024.0/1024.0/1024.0 #GB
-    return size
+        return sizeGB
+    else:
+        return size
 
 
 def hadd(opts, mergeName, inputFiles, path_prefix=""):
@@ -695,6 +702,9 @@ def hadd(opts, mergeName, inputFiles, path_prefix=""):
 
     # Construct the ROOT-file merge command (hadd)
     cmd = ["hadd"]
+    # Pass "-f" argument to force re-creation of output file.
+    if opts.overwrite:
+        cmd.append("-f") 
     cmd.append(mergeNameNew)
     cmd.extend(inputFilesNew)
     
@@ -909,7 +919,7 @@ def CheckThatFilesExist(taskName, fileList, opts):
     for f in fileList:
 
         if opts.filesInEOS:
-            fileName = ConvertPathToEOS(f, "", opts, isDir=False)
+            fileName = ConvertPathToEOS(taskName, f, "", opts, isDir=False)
         else:
             fileName = f
 
@@ -932,7 +942,6 @@ def FileExists(filePath, opts):
     '''
     Verbose("FileExists()", False)
     
-    #if opts.filesInEOS: #fixme: limits use of FileExists
     if "CRAB3_TransferData" in filePath: # fixme: just a better alternative to "if opts.filesInEOS:"
         cmd = ConvertCommandToEOS("ls", opts) + " " + filePath
         ret = Execute("%s" % (cmd) )
@@ -955,7 +964,8 @@ def FileExists(filePath, opts):
 def GetCrabDirectories(opts):
     Verbose("GetCrabDirectories()")
 
-    crabDirsTmp = multicrab.getTaskDirectories(opts)
+    opts2 = None
+    crabDirsTmp = multicrab.getTaskDirectories(opts2)
     crabDirs = GetIncludeExcludeDatasets(crabDirsTmp, opts)
     return crabDirs
 
@@ -1097,11 +1107,11 @@ def MergeFiles(mergeName, inputFiles, opts):
     else:
         if opts.filesInEOS:
             ret = hadd(opts, mergeName, inputFiles, GetXrdcpPrefix(opts) )
-            Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts, True) ), False )
+            Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts) ), False )
             return ret
         else:
             ret = hadd(opts, mergeName, inputFiles)    
-            Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts, True) ), False )
+            Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts) ), False )
             return ret
 
 
@@ -1294,9 +1304,10 @@ def DeleteFolders(filePath, foldersToDelete, opts):
 def GetTaskLogFiles(taskName, opts):
     '''
     '''
-    Verbose("GetTaskLogFiles()")
+    Verbose("GetTaskLogFiles()", True)
     if opts.filesInEOS:
-        tmp = ConvertPathToEOS(taskName, "log/", opts, isDir=True)
+        Verbose("Task %s, converting path to EOS to get log files" % (taskName) )
+        tmp = ConvertPathToEOS(taskName, taskName, "log/", opts, isDir=True)
         Verbose("Obtaining stdout files for task %s from %s" % (taskName, tmp), True)
         stdoutFiles = glob.glob(tmp + "cmsRun_*.log.tar.gz")        
 
@@ -1337,7 +1348,7 @@ def GetPreexistingMergedFiles(taskPath, opts):
     # For-loop: All merged ROOT files
     for f in preMergedFiles:
         Verbose("Getting file size for file %s" % (f))
-        mergeSizeMap[f] = GetFileSize(taskPath + "/" + f, opts, True)
+        mergeSizeMap[f] = GetFileSize(taskPath + "/" + f, opts)
         mergeTimeMap[f] = 0.0
     filesExist = len(preMergedFiles)
 
@@ -1402,7 +1413,8 @@ def main(opts, args):
             Print("Task %s, skipping, no files to merge" % (taskName), False)
             continue        
         else:            
-            files = [taskName + "/results/" + x for x in files]
+            if not opts.filesInEOS:
+                files = [taskName + "/results/" + x for x in files] # fixme: verify that only for filesInEOS option needed
             if not CheckThatFilesExist(taskName, files, opts):
                 filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
@@ -1410,8 +1422,6 @@ def main(opts, args):
             else:
                 pass
             
-        sys.exit(0)
-
         Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
         
         # Split files according to user-defined options
@@ -1433,7 +1443,7 @@ def main(opts, args):
             # Get the merge name of the files
             mergeName = os.path.join(d, "results", opts.output % taskNameAndNum)
             if opts.filesInEOS:
-                mergeName = ConvertPathToEOS(mergeName, "", opts)
+                mergeName = ConvertPathToEOS(taskName, mergeName, "", opts)
 
             # If merge file already exists skip it or rename it as .backup
             if FileExists(mergeName, opts):
@@ -1451,8 +1461,8 @@ def main(opts, args):
             if ret != 0:
                 return ret
 
-            # Get the file sie
-            mergeFileSize = GetFileSize(mergeName, opts, True)
+            # Get the file size
+            mergeFileSize = GetFileSize(mergeName, opts)
             if len(filesSplit) > 1:
                 Verbose("Merged %s (%0.3f GB)." % (mergeName, mergeFileSize), False )
 
@@ -1470,7 +1480,6 @@ def main(opts, args):
         
         # Finish the progress bar
         FinishProgressBar()
-        #taskName = ConvertTasknameToEOS(taskName, opts)
         taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
 
     # Append "delete" message
@@ -1482,7 +1491,7 @@ def main(opts, args):
     for key in mergeFileMap.keys():
         f = key
         sourceFiles = mergeFileMap[key]
-        taskName    = key.replace(GetEOSHomeDir() + "/", "").split("/")[0].replace("-", "_")
+        taskName    = key.replace(GetEOSHomeDir(opts) + "/", "").split("/")[0].replace("-", "_")
         Verbose("Merge files: %s\n\tSource files: %s" % (f, sourceFiles) )
 
         Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), False)
@@ -1535,13 +1544,14 @@ if __name__ == "__main__":
 
     # Default Values
     VERBOSE = False
+    DIRNAME = ""
     
     parser = OptionParser(usage="Usage: %prog [options]")
-    multicrab.addOptions(parser)
-    parser.add_option("-i", dest="input", type="string", default="histograms_.*?\.root",
+    # multicrab.addOptions(parser)
+    parser.add_option("--input", dest="input", type="string", default="histograms_.*?\.root",
                       help="Regex for input root files (note: remember to escape * and ? !) [default: 'histograms_.*?\.root']")
 
-    parser.add_option("-o", dest="output", type="string", default="histograms-%s.root",
+    parser.add_option("--output", dest="output", type="string", default="histograms-%s.root",
                       help="Pattern for merged output root files (use '%s' for crab directory name) [default: 'histograms-%s.root']")
 
     parser.add_option("--test", dest="test", default=False, action="store_true",
@@ -1559,10 +1569,10 @@ if __name__ == "__main__":
     parser.add_option("--filesInEOS", dest="filesInEOS", default=False, action="store_true",
                       help="The ROOT files to be merged are in an EOS. Merge the files from there (xrootd protocol). File locations are read from cmsRun_*.log.tar.gz files. [default: 'False']")
 
-    parser.add_option("--includeTasks", dest="includeTasks" , default="", type="string", 
+    parser.add_option("-i", "--includeTasks", dest="includeTasks" , default="", type="string", 
                       help="Only perform action for this dataset(s) [default: '']")
 
-    parser.add_option("--excludeTasks", dest="excludeTasks" , default="", type="string", 
+    parser.add_option("-e", "--excludeTasks", dest="excludeTasks" , default="", type="string", 
                       help="Exclude this dataset(s) from action [default: '']")    
 
     parser.add_option("--allowJobExitCode", dest="allowJobExitCodes", default=[], action="append", type="int",
@@ -1574,7 +1584,13 @@ if __name__ == "__main__":
     parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true", 
                       help="Overwrite histograms-%s.root files (default False)")
 
+    parser.add_option("-d", "--dir", dest="dirName", default=DIRNAME, type="string",
+                      help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))   
+
     (opts, args) = parser.parse_args()
+
+    if opts.dirName == "":
+        opts.dirName = os.path.basename(os.getcwd())
 
     if opts.filesPerMerge == 0:
         parser.error("--filesPerMerge must be non-zero")
