@@ -3,14 +3,13 @@
 Creation/Submission:
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py 
 multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
-multicrab.py --create -s T2_US_Nebraska -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py
 
 
 Re-Create (for example, when you get "Cannot find .requestcache" for a given task):
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <task_dir> 
 Example:
 rm -rf /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8019_20161006T1003/<taskDir>
-multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8019_20161006T1003/
+multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8019_20161006T1003/
 (the above will re-create the job just for the dataset <task_dir>)
 
 
@@ -55,7 +54,7 @@ crab getoutput <dir> --command=LCG --checksum=no
 
 Hint 1:
 To check whether you have write persmissions on a T2 centre use the command
-crab checkwrite --site
+crab checkwrite --site 
 For example:
 crab checkwrite --site T2_CH_CERN
 
@@ -850,7 +849,8 @@ def GetEOSDir(taskDir, opts):
         return ""
 
     tmpDirEOS  = ConvertPathToEOS(taskDir, opts) 
-    taskDirEOS = WalkEOSDir(tmpDirEOS, opts)
+    taskName   = os.path.basename(taskDir)
+    taskDirEOS = WalkEOSDir(taskName, tmpDirEOS, opts)
     Verbose("The EOS dir is \"%s\"." % (taskDirEOS) )
     return taskDirEOS
 
@@ -999,13 +999,14 @@ def GetReportTable(taskDir, nJobs, running, transferring, finished, unknown, fai
     return table
 
 
-def WalkEOSDir(pathOnEOS, opts):
+def WalkEOSDir(taskName, pathOnEOS, opts):
     '''
     Looks inside the EOS path "pathOnEOS" directory by directory.
     Since OS commands do not work on EOS, I have written this function
     in a vary "dirty" way.. hoping to make it more robust in the future!
     '''
     Verbose("WalkEOSDir()", True)
+    
     
     # Listing all files under the path
     cmd = ConvertCommandToEOS("ls", opts) + " " + pathOnEOS
@@ -1023,16 +1024,25 @@ def WalkEOSDir(pathOnEOS, opts):
     if len(dirContents) == 1:
         subDir = dirContents[0]
         Verbose("Found sub-directory \"%s\" under the EOS path \"%s\"!" % (subDir, pathOnEOS) )    
-        pathOnEOS = WalkEOSDir(pathOnEOS + "/" + subDir, opts)
+        pathOnEOS = WalkEOSDir(taskName, pathOnEOS + "/" + subDir, opts)
     else:
-        rootFiles = []
-        for f in dirContents:
-            if ".root" not in f:
-                continue
-            else:
-                rootFiles.append(pathOnEOS + "/" + f)
-        pathOnEOS += "/"
-        Verbose("Reached end of the line. Found \"%s\" ROOT files under \"%s\"!"  % (len(rootFiles), pathOnEOS))
+        subDir = None
+        for d in dirContents:
+            if d == "crab_" + taskName:
+                subDir = d
+            
+        # Special case required due to all data (Tau, JetHT) put under a single directory in EOS
+        if subDir != None:
+            pathOnEOS = WalkEOSDir(taskName, pathOnEOS + "/" + subDir, opts)
+        else:
+            rootFiles = []
+            for f in dirContents:
+                if ".root" not in f:
+                    continue
+                else:
+                    rootFiles.append(pathOnEOS + "/" + f)
+            pathOnEOS += "/"
+            Verbose("Reached end of the line. Found \"%s\" ROOT files under \"%s\"!"  % (len(rootFiles), pathOnEOS))
     return pathOnEOS
 
 
@@ -1402,7 +1412,7 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
     crab_pset_re            = re.compile("config.JobType.psetName")
     crab_psetParams_re      = re.compile("config.JobType.pyCfgParams")
     crab_dataset_re         = re.compile("config.Data.inputDataset")
-    crab_split_re           = re.compile("config.Data.splitting")# = 'FileBased'
+    crab_split_re           = re.compile("config.Data.splitting")
     crab_splitunits_re      = re.compile("config.Data.unitsPerJob")
     crab_dbs_re             = re.compile("config.Data.inputDBS")
     crab_storageSite_re     = re.compile("config.Site.storageSite")
@@ -1453,9 +1463,9 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
         match = crab_outLFNDirBase_re.search(line)
 	if match:
             baseDir = '/store/user/%s/CRAB3_TransferData' % (getUsernameFromSiteDB())
-            fullDir = os.path.join(baseDir, taskDirName)
+            fullDir = os.path.join(baseDir, os.path.basename(taskDirName) )
 	    line = "config.Data.outLFNDirBase = '" + fullDir + "'\n"
-    
+            
 	# Only if dataset is real data
 	if dataset.isData():
 
@@ -1653,7 +1663,7 @@ def CreateJob(opts, args):
         Verbose("Checking for already existing tasks (in case of resubmission)")
         fullDir = taskDirName + "/" + requestName
         if os.path.exists(fullDir) and os.path.isdir(fullDir):
-            Print("Dataset \"%s\" already exists! Skipping ..." % (requestName))
+            Print("Dataset \"%s\" already exists! Skipping ..." % (requestName), False)
             continue 
 
         Verbose("Creating cfg file for dataset \"%s\"" % (dataset), True)
