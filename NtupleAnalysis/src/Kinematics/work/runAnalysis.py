@@ -202,6 +202,28 @@ def main():
         
 #================================================================================================      
 if __name__ == "__main__":
+    '''
+    https://docs.python.org/3/library/argparse.html
+
+    name or flags...: Either a name or a list of option strings, e.g. foo or -f, --foo.
+    action..........: The basic type of action to be taken when this argument is encountered at the command line.
+    nargs...........: The number of command-line arguments that should be consumed.
+    const...........: A constant value required by some action and nargs selections.
+    default.........: The value produced if the argument is absent from the command line.
+    type............: The type to which the command-line argument should be converted.
+    choices.........: A container of the allowable values for the argument.
+    required........: Whether or not the command-line option may be omitted (optionals only).
+    help............: A brief description of what the argument does.
+    metavar.........: A name for the argument in usage messages.
+    dest............: The name of the attribute to be added to the object returned by parse_args().
+    '''
+
+    # Default Values
+    VERBOSE     = False
+    PUREWEIGHT  = False
+    SYSTEMATICS = False
+
+
     
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
@@ -219,8 +241,8 @@ if __name__ == "__main__":
     parser.add_option("-n", "--nEvts", dest="nEvts", action="store", type=int, default = -1,
                       help="Number of events to run on")
 
-    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default = False, 
-                      help="Enable verbosity (for debugging)")
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default = VERBOSE, 
+                      help="Enable verbosity (for debugging) (default: %s)" % (VERBOSE))
 
     parser.add_option("-h", "--histoLevel", dest="histoLevel", action="store", default = "Informative", 
                       help="Histogram ambient level (default: Informative)")
