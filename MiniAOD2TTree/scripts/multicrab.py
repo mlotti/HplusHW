@@ -787,8 +787,8 @@ def PrintTaskSummary(reportDict):
     Verbose("PrintTaskSummary()")
     
     reports  = []
-    msgAlign = "{:<3} {:<50} {:^15} {:^6} {:^8} {:^8} {:^8} {:^8} {:^6} {:^10} {:^12} {:^12}"
-    header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "All", "Running", "Failed", "Transfer", "Finished", "Logs", "Output", "Logs (EOS)", "Output (EOS)" )
+    msgAlign = "{:<3} {:<50} {:^20} {:^8} {:^8} {:^8} {:^8} {:^8} {:^8} {:^10} {:^10} {:^10}"
+    header   = msgAlign.format("#", "Dataset", "%s%s%s" % (colors.WHITE, "Status", colors.WHITE), "All", "Running", "Failed", "Transfer", "Finished", "Logs", "Out", "Logs (EOS)", "Out (EOS)" )
     hLine    = "="*len(header)
     reports.append(hLine)
     reports.append(header)

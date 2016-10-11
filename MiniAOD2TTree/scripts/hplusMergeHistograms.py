@@ -47,7 +47,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 re_histos = []
 re_se = re.compile("newPfn =\s*(?P<url>\S+)")
 replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://madhatter.csc.fi:1094")
-PBARWIDTH = 80
+PBARLENGTH = 80
 
 #================================================================================================ 
 # Class Definition
@@ -144,41 +144,50 @@ def Print(msg, printHeader=True):
     return
 
 
-def CreateProgressBar(taskName, filesSplit, files):
-    '''
-    '''
-    Verbose("CreateProgressBar()")
+def PrintMergeDetails(taskName, filesSplit, files):
+    Verbose("PrintMergeDetails()")
 
     if len(filesSplit) == 1:
-        msg = "\tTask %s, merging %d file(s)" % (taskName, len(files) )
+        msg = "Task %s, merging %d file(s)" % (taskName, len(files) )
     else:
-        msg = "\tTask %s, merging %d file(s) to %d file(s)" % (taskName, len(files), len(filesSplit) )
+        msg = "Task %s, merging %d file(s) to %d file(s)" % (taskName, len(files), len(filesSplit) )
 
-
-    # setup toolbar
-    width = PBARWIDTH
-    align = "{:<80} {:<%s}" % (width)
-    pbar  = "[" + " " * width + "]"
-    txt   = align.format(msg, pbar)
-    sys.stdout.write(txt)
-    sys.stdout.flush()
-
-    # Return to start of line, after '['
-    sys.stdout.write("\b" * (width  + len("\t")))
-    return
-
-
-def FillProgressBar(char, width):
-    Verbose("FillProgressBar()")
-
-    factor = PBARWIDTH/width
-    sys.stdout.write(char * factor)
-    sys.stdout.flush()
+    Print(msg)
     return
 
 
 def FinishProgressBar():
-    sys.stdout.write("\n")
+    Verbose("FinishProgressBar()")
+    sys.stdout.write('\n')
+    return
+
+
+def PrintProgressBar(taskName, iteration, total):
+    '''
+    Call in a loop to create terminal progress bar
+    @params:
+    iteration   - Required  : current iteration (Int)
+    total       - Required  : total iterations (Int)
+    prefix      - Optional  : prefix string (Str)
+    suffix      - Optional  : suffix string (Str)
+    decimals    - Optional  : positive number of decimals in percent complete (Int)
+    barLength   - Optional  : character length of bar (Int)
+    '''
+    Verbose("PrintProgressBar()")
+
+    #prefix          = 'Progress:'
+    prefix          = "\t" + taskName
+    suffix          = 'Complete'
+    decimals        = 1
+    barLength       = PBARLENGTH
+    formatStr       = "{0:." + str(decimals) + "f}"
+    percents        = formatStr.format(100 * (iteration / float(total)))
+    filledLength    = int(round(barLength * iteration / float(total)))
+    bar             = '=' * filledLength + '-' * (barLength - filledLength)
+    sys.stdout.write('\r%s |%s| %s%s %s' % (prefix, bar, percents, '%', suffix)),
+    #if iteration == total:
+    #    sys.stdout.write('\n')
+    sys.stdout.flush()
     return
 
 
@@ -1466,7 +1475,7 @@ def main(opts, args):
         filesSplit = splitFiles(files, opts.filesPerMerge, opts)
 
         # Create a simple progress bar
-        CreateProgressBar(taskName, filesSplit, files)
+        PrintMergeDetails(taskName, filesSplit, files)
 
         # For-loop: All splitted files
         for index, inputFiles in filesSplit:
@@ -1488,7 +1497,7 @@ def main(opts, args):
                 if opts.overwrite:
                     OverwriteMergeFile(mergeName, opts)
                 else: 
-                    FillProgressBar("=", len(filesSplit))
+                    PrintProgressBar(taskName, len(filesSplit), len(filesSplit))
                     filesExist += 1
                     continue
 
@@ -1518,10 +1527,10 @@ def main(opts, args):
                 DeleteFiles(inputFiles, opts)
 
             # Update Progress bar
-            FillProgressBar("=", len(filesSplit))
+            PrintProgressBar(taskName, index, len(filesSplit))
 
-        # Finish the progress bar
         FinishProgressBar()
+        # Finish the progress bar
         taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
 
     # Append "delete" message
@@ -1548,7 +1557,6 @@ def main(opts, args):
             cleanTime[taskName] = dtClean 
         else:
             cleanTime[taskName] = cleanTime[taskName] + dtClean
-        #print "cleanTime[%s] = %s" % (taskName, cleanTime[taskName])
             
         # Delete files after merging?
         if opts.delete and not opts.deleteImmediately:
