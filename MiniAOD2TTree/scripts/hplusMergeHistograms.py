@@ -675,7 +675,8 @@ def GetFileSize(filePath, opts, convertToGB=True):
             dayOfMonth  = ret[6]
             time        = ret[7]
             filename    = ret[8] # or ret[-1]
-            #Print("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
+            #
+            Verbose("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
 
         elif "lxplus" in HOST:
             eos  = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select" #simply "eos" will not work
