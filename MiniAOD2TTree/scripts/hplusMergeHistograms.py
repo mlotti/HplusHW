@@ -105,6 +105,22 @@ class Report:
 #================================================================================================
 # Function Definitions
 #================================================================================================
+def AskUser(msg, printHeader=False):
+    '''
+    Prompts user for keyboard feedback to a certain question. 
+    Returns true if keystroke is \"y\", false otherwise.
+OB    '''
+    Verbose("AskUser()", printHeader)
+    
+    keystroke = raw_input("\t" +  msg + " (y/n): ")
+    if (keystroke.lower()) == "y":
+        return True
+    elif (keystroke.lower()) == "n":
+        return False
+    else:
+        AskUser(msg)
+
+
 def Verbose(msg, printHeader=False):
     '''
     Calls Print() only if verbose options is set to true.
@@ -354,7 +370,7 @@ def getHistogramFileEOS(stdoutFile, opts):
     '''
     Verbose("getHistogramFileEOS()", True)
 
-    Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
+    Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False ) #iro
     AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
 
     histoFile = None
@@ -586,8 +602,8 @@ def splitFiles(files, filesPerEntry, opts):
         # For-loop: All files (with ifile counter)
         for ifile,f in enumerate(files):
 
-            # Calculate cumulative size
-            fileSize = GetFileSize(f, opts)
+            # Calculate cumulative size (in Bytes)
+            fileSize = GetFileSize(f, opts, False) 
             sumsize +=  fileSize
             Verbose("File %s has a size of %s (sumsize=%s)." % (f, fileSize, sumsize) )
 
@@ -1319,7 +1335,11 @@ def GetTaskLogFiles(taskName, opts):
 
         # Sometimes glob doesn't work (for unknown reasons)
         if len(stdoutFiles) < 1:
-            Verbose("Task %s, could not obtain log files with glob. \n\tTrying alternative method. If problems persist retry without setting the CRAB environment" % (taskName) )
+            msg = "Task %s, could not obtain log files with glob." % (taskName)
+            msg += "\n\tTrying alternative method. If problems persist retry without setting the CRAB environment."
+            Print(msg, True)
+            keystroke = raw_input("\tPress any key to continue ..")
+
             cmd = ConvertCommandToEOS("ls", opts) + " " + tmp
             Verbose(cmd)
             dirContents = Execute(cmd)
@@ -1439,7 +1459,7 @@ def main(opts, args):
         # For-loop: All splitted files
         for index, inputFiles in filesSplit:
             Verbose("Merging %s/%s" % (index+1, len(filesSplit)), False)
-            FillProgressBar("=", len(filesSplit))
+
             taskNameAndNum = d
             
             # Assign "task-number" if merging more than 1 files
@@ -1483,7 +1503,10 @@ def main(opts, args):
             # Delete all input files after merging them
             if opts.deleteImmediately:
                 DeleteFiles(inputFiles, opts)
-        
+
+            # Update Progress bar
+            FillProgressBar("=", len(filesSplit))
+
         # Finish the progress bar
         FinishProgressBar()
         taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
