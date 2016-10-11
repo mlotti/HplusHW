@@ -317,7 +317,7 @@ def getHistogramFile(stdoutFile, opts):
 
         # For-loop: All tarball members (contents)
         for member in fIN.getmembers():
-            Verbose("Looking for cmsRun-stdout-*.log files in tarball memember file " % (member) )
+            Verbose("Looking for cmsRun-stdout-*.log files in tarball memember file %s" % (member) )
             f = fIN.extractfile(member)
             match = log_re.search(f.name)
             if match:
