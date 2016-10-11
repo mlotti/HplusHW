@@ -197,26 +197,32 @@ def GetLocalOrEOSPath(stdoutFile, opts):
     This function was created due to problems encountered when working on LXPLUS 
     with the --filesInEOS option. Basically, although files existed on EOS it 
     gave an error that they did not exist. So I wrote this little hack to copy the 
-    files locally and then raed it.
+    files locally and then read it.
     It returns either the local or EOS path, whichever necessary. 
 
     WARNING! If the file is copied locally it must then be removed
     '''
     Verbose("GetLocalOrEOSCopy()", True)
-
+    
     localCopy = False
     if not FileExists(stdoutFile, opts):
         raise Exception("Cannot assert if job succeeded as file %s does not exist!" % (stdoutFile) )
 
     try:
-        f = open(stdoutFile)
+        Verbose("Attempting to open file %s" % (stdoutFile) )
+        f = open(GetXrdcpPrefix(opts) + stdoutFile) 
     except IOError as e:
         errMsg = "I/O error({0}): {1} %s".format(e.errno, e.strerror) % (stdoutFile)
         Verbose(errMsg)
         # For unknown reasons on LXPLUS EOS the files cannot be found, even if it exists
         if opts.filesInEOS:
             Verbose("File %s could not be found/read on EOS. Attempting to copy it locally and then read it" % (stdoutFile) )
-            srcFile  = GetXrdcpPrefix(opts) + stdoutFile
+            
+            if "fnal" in socket.gethostname():
+                srcFile  = "root://cmseos.fnal.gov/" + stdoutFile #
+            else:
+                srcFile  = GetXrdcpPrefix(opts) + stdoutFile
+            
             destFile = os.path.basename(stdoutFile)
             cmd      = "xrdcp %s %s" % (srcFile, destFile)
             Verbose(cmd)
@@ -238,7 +244,7 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
     '''
     Verbose("AssertJobSucceeded()", True)
 
-    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
+    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts) #iro
 
     re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
     re_job = re.compile("JobExitCode=(?P<code>\d+)")
@@ -304,10 +310,14 @@ def getHistogramFile(stdoutFile, opts):
     AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
 
+    Verbose("Asserting that file %s is a tarball" % (stdoutFile) )
     if tarfile.is_tarfile(stdoutFile):
         fIN = tarfile.open(stdoutFile)
         log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+
+        # For-loop: All tarball members (contents)
         for member in fIN.getmembers():
+            Verbose("Looking for cmsRun-stdout-*.log files in tarball memember file " % (member) )
             f = fIN.extractfile(member)
             match = log_re.search(f.name)
             if match:
@@ -370,14 +380,14 @@ def getHistogramFileEOS(stdoutFile, opts):
     '''
     Verbose("getHistogramFileEOS()", True)
 
-    Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False ) #iro
+    Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
     AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
 
     histoFile = None
 
     # Open the "stdoutFile"
     stdoutFileEOS = stdoutFile
-    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
+    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts) #iro
 
     # Open the standard output file
     Verbose("Opening log file %s" % (stdoutFile), True )
@@ -660,12 +670,12 @@ def GetFileSize(filePath, opts, convertToGB=True):
             unkownVar   = ret[1]
             username    = ret[2]
             group       = ret[3]
-            size        = int(ret[4])
+            size        = float(ret[4]) #int(ret[4])
             month       = ret[5]
             dayOfMonth  = ret[6]
             time        = ret[7]
             filename    = ret[8] # or ret[-1]
-            # Print("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
+            #Print("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
 
         elif "lxplus" in HOST:
             eos  = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select" #simply "eos" will not work
@@ -1337,14 +1347,15 @@ def GetTaskLogFiles(taskName, opts):
         if len(stdoutFiles) < 1:
             msg = "Task %s, could not obtain log files with glob." % (taskName)
             msg += "\n\tTrying alternative method. If problems persist retry without setting the CRAB environment."
-            Print(msg, True)
-            keystroke = raw_input("\tPress any key to continue ..")
+            Verbose(msg, True)
+            #keystroke = raw_input("\tPress any key to continue ..")
 
             cmd = ConvertCommandToEOS("ls", opts) + " " + tmp
             Verbose(cmd)
             dirContents = Execute(cmd)
             stdoutFiles = dirContents
-            stdoutFiles = [tmp + f for f in dirContents if ".log.tar.gz" in f]            
+            stdoutFiles = [tmp + f for f in dirContents if ".log.tar.gz" in f]
+            Verbose("Task %s, found the follwoing log files:\n\t%s" % (taskName, "\n\t".join(stdoutFiles) ) )
     else:
         stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
 
@@ -1476,6 +1487,7 @@ def main(opts, args):
                 if opts.overwrite:
                     OverwriteMergeFile(mergeName, opts)
                 else: 
+                    FillProgressBar("=", len(filesSplit))
                     filesExist += 1
                     continue
 

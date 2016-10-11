@@ -1396,7 +1396,8 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
     Verbose("CreateCfgFile()")
 	
     outfilePath = os.path.join(taskDirName, "crabConfig_" + requestName + ".py")
-    
+    Verbose("Task %s, creating CRAB configuration file %s" % (dataset, outfilePath) )
+
     # Check that file does not already exist
     EnsurePathDoesNotExist(taskDirName, outfilePath)
 
@@ -1462,10 +1463,10 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
 
         match = crab_outLFNDirBase_re.search(line)
 	if match:
-            baseDir = '/store/user/%s/CRAB3_TransferData' % (getUsernameFromSiteDB())
-            fullDir = os.path.join(baseDir, os.path.basename(taskDirName) )
-	    line = "config.Data.outLFNDirBase = '" + fullDir + "'\n"
-            
+            mcrabDir = os.path.basename(opts.dirName[:-1])  # exclude last "/", either-wise fails
+            fullDir  = "/store/user/%s/CRAB3_TransferData/%s" % (getUsernameFromSiteDB(), mcrabDir) # NOT getpass.getuser()
+            line     = "config.Data.outLFNDirBase = '" + fullDir + "'\n"
+
 	# Only if dataset is real data
 	if dataset.isData():
 
@@ -1478,7 +1479,7 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
 	    # Set the "unitsPerJob" field which suggests (but not impose) how many files, lumi sections or events to include in each job.
 	    match = crab_splitunits_re.search(line)	
 	    if match:
-		line = "config.Data.unitsPerJob = 25\n"
+		line = "config.Data.unitsPerJob = 75\n"
 	else:
 	    pass
 
@@ -1539,8 +1540,8 @@ def ConvertPathToEOS(path, opts):
     taskNameEOS         = ConvertTasknameToEOS(taskName, opts)
     mcrabDir            = os.path.basename(opts.dirName)
     stringToBeReplaced  = opts.dirName    
-    #stringToReplaceWith = "/store/user/%s/CRAB3_TransferData/" % (getpass.getuser())
-    stringToReplaceWith = "/store/user/%s/CRAB3_TransferData/%s" % (getpass.getuser(), mcrabDir)
+    #stringToReplaceWith = "/store/user/%s/CRAB3_TransferData/%s" % (getpass.getuser(), mcrabDir) # LPC and CRAB usernames NOT the same
+    stringToReplaceWith = "/store/user/%s/CRAB3_TransferData/%s" % (getUsernameFromSiteDB(), mcrabDir)
     eosPathTmp          = path.replace(stringToBeReplaced, stringToReplaceWith)
     pathEOS             = eosPathTmp.replace(taskName, taskNameEOS)
     Verbose("Converted %s (default) to %s (EOS)" % (path, pathEOS))
@@ -1657,19 +1658,18 @@ def CreateJob(opts, args):
     # For-loop: All datasets
     for dataset in datasets:
         
-	Verbose("Creating CRAB configuration file for dataset \"%s\"" % (dataset))
+        Verbose("Task %s, creating CRAB configuration file" % (dataset) )
         requestName = GetRequestName(dataset)
+        fullDir     = taskDirName + "/" + requestName
 
-        Verbose("Checking for already existing tasks (in case of resubmission)")
-        fullDir = taskDirName + "/" + requestName
         if os.path.exists(fullDir) and os.path.isdir(fullDir):
-            Print("Dataset \"%s\" already exists! Skipping ..." % (requestName), False)
+            Print("Task %s already exists! Skipping ..." % (requestName), False)
             continue 
 
-        Verbose("Creating cfg file for dataset \"%s\"" % (dataset), True)
+        Verbose("Task %s, creating crabConfig_%s.py file" % (dataset, dataset), True)
 	CreateCfgFile(dataset, taskDirName, requestName, "crabConfig.py", opts)
-                
-        Verbose("Submitting jobs for dataset \"%s\"" % (dataset), True)
+
+        Verbose("Task %s, submitting jobs" % (dataset), True)
 	SubmitTaskDir(taskDirName, requestName)
 		
     return 0
