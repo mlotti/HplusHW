@@ -85,7 +85,8 @@ class Report:
         mergeTime = 0
         # For-loop: All keys in dictionary (=paths to merged files)
         for key in self.mergeSizeMap.keys():
-            sizeSum   += mergeSizeMap[key]
+            if not mergeSizeMap[key] == None:
+                sizeSum   += mergeSizeMap[key]
             mergeTime += mergeTimeMap[key]
             
         # Assign more values
@@ -294,10 +295,10 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
         raise ExitCodeException("No exeExitCode")
     if jobExitCode == None:
         raise ExitCodeException("No jobExitCode")
-    if exeExitCode != 0:
-        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
-    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
-        raise ExitCodeException("Job exit code is %d" % jobExitCode)
+####    if exeExitCode != 0:
+####        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
+####    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
+####        raise ExitCodeException("Job exit code is %d" % jobExitCode)
     return
 
 
@@ -437,6 +438,7 @@ def GetHistogramFile(taskName, f, opts):
                 return histoFile
             else:
                 Verbose("Task %s, skipping job %s: input root file found from stdout, but does not exist" % (taskName, os.path.basename(f) ) )
+                return None
         else:
             Verbose("Task %s, skipping job %s: input root file not found from stdout" % (taskName, os.path.basename(f) ))
     return histoFile
@@ -614,7 +616,8 @@ def splitFiles(files, filesPerEntry, opts):
 
             # Calculate cumulative size (in Bytes)
             fileSize = GetFileSize(f, opts, False) 
-            sumsize +=  fileSize
+            if not fileSize == None:
+                sumsize +=  fileSize
             Verbose("File %s has a size of %s (sumsize=%s)." % (f, fileSize, sumsize) )
 
             # Impose upper limit on file size
@@ -697,7 +700,10 @@ def GetFileSize(filePath, opts, convertToGB=True):
         else:
             raise Exception("Unsupported host %s" % (HOST) )
     else:
-        size = os.stat(filePath).st_size
+        if os.path.exists(filePath):
+            size = os.stat(filePath).st_size
+        else:
+            return None
 
     # Convert Bytes to Giga-Bytes (GB)
     sizeGB = size/1024.0/1024.0/1024.0
@@ -776,6 +782,8 @@ def sanityCheck(mergedFile, inputFiles):
     '''
     Verbose("sanityCheck()", True)
 
+    if not os.path.exists(mergedFile):
+        return
     histoPath = "configInfo/configinfo" #bin1=control (=number_of_merged-files), bin2=energy (=13*number_of_merged-files)
     Verbose("Investigating %s in merged file %s" % (histoPath, mergedFile) )
     tfile = ROOT.TFile.Open(mergedFile)
@@ -784,7 +792,7 @@ def sanityCheck(mergedFile, inputFiles):
 	info = histoToDict(configinfo)
         if int(info["control"]) != len(inputFiles):
             raise SanityCheckException("configInfo/configinfo:control = %d, len(inputFiles) = %d" % (int(info["control"]), len(inputFiles)))
-
+    tfile.Close()
 
 def delete(fileName, regexp, opts):
     '''
@@ -1186,6 +1194,7 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
 
     # Definitions
     files = []
+    missing = 0
     exitCodes = []
     
     Verbose("Getting output files & exit codes for task %s" % (taskName) )
@@ -1197,16 +1206,17 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
             if histoFile != None:
                 files.append(histoFile)
             else:
+                missing += 1
                 Verbose("Task %s, skipping job %s: input root file not found from stdout" % (taskName, os.path.basename(f)) )
         except multicrab.ExitCodeException, e:
             Verbose("Task %s, skipping job %s: %s" % (taskName, os.path.basename(f), str(e)) )
             exit_match = exit_re.search(f)
             if exit_match:
                 exitCodes.append(int(exit_match.group("exitcode")))
-    return files, exitCodes
+    return files, missing, exitCodes
 
 
-def ExamineExitCodes(taskName, exitCodes):
+def ExamineExitCodes(taskName, exitCodes, missingFiles):
     '''
     Examine all exit codes (passed as a list) and determine if there are 
     jobs with problems. 
@@ -1214,8 +1224,14 @@ def ExamineExitCodes(taskName, exitCodes):
     Print command for job resubmission.
     '''
     Verbose("ExamineExitCodes()")
+
+    print "\n    Task",taskName
     if len(exitCodes) < 1:
-        return
+        Print("No jobs with non-zero exit codes",printHeader=False)
+####        return
+
+    if missingFiles > 0:
+        Print("jobs with missing files:%s" %missingFiles,printHeader=False)
 
     exitCodes_s = ""
     # For-loop: All exit codes
@@ -1223,8 +1239,8 @@ def ExamineExitCodes(taskName, exitCodes):
         exitCodes_s += str(e)
         if i < len(exitCodes)-1:
             exitCodes_s += ","
-            Print("jobs with problems:%s" % (len(exitCodes) ) )
-            Print("crab resubmit %s --jobids %s --force" % (taskName, exitCodes_s) )
+            Print("jobs with problems:%s" % (len(exitCodes) ),printHeader=False)
+            Print("crab resubmit %s --jobids %s --force" % (taskName, exitCodes_s),printHeader=False)
     return
 
 
@@ -1360,8 +1376,8 @@ def GetTaskLogFiles(taskName, opts):
     else:
         stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
 
-    if len(stdoutFiles) < 1:
-        raise Exception("Task %s, could not obtain log files." % (taskName) )
+####    if len(stdoutFiles) < 1:
+####        raise Exception("Task %s, could not obtain log files." % (taskName) )
     return stdoutFiles
         
 
@@ -1439,12 +1455,12 @@ def main(opts, args):
         Verbose("The stdout files for task %s are:\n\t%s" % ( taskName, "\n\t".join(stdoutFiles)), True)
 
         # Definitions
-        files, exitCodes = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
+        files, missingFiles, exitCodes = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
 
         # For Testing purposes
         if opts.test:
-            ExamineExitCodes(taskName, exitCodes)
-            continue            
+            ExamineExitCodes(taskName, exitCodes, missingFiles)
+####            continue            
 
         # Check that output files were found. If so, check that they exist!
         if len(files) == 0:
@@ -1453,14 +1469,17 @@ def main(opts, args):
         else:            
             if not opts.filesInEOS:
                 files = [taskName + "/results/" + x for x in files] # fixme: verify that only for filesInEOS option needed
-            if not CheckThatFilesExist(taskName, files, opts):
-                filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
-                taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
-                continue
-            else:
-                pass
-            
+####            if not CheckThatFilesExist(taskName, files, opts):
+            filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
+            taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+####                continue
+####            else:
+####                pass
+
         Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
+
+        if opts.test:
+            continue
         
         # Split files according to user-defined options
         filesSplit = splitFiles(files, opts.filesPerMerge, opts)
@@ -1502,7 +1521,7 @@ def main(opts, args):
 
             # Get the file size
             mergeFileSize = GetFileSize(mergeName, opts)
-            if len(filesSplit) > 1:
+            if len(filesSplit) > 1 and not mergeFileSize == None:
                 Verbose("Merged %s (%0.3f GB)." % (mergeName, mergeFileSize), False )
 
             # Keep track of merged files
@@ -1523,6 +1542,9 @@ def main(opts, args):
         # Finish the progress bar
         FinishProgressBar()
         taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+
+    if opts.test:
+        return
 
     # Append "delete" message
     deleteMsg = GetDeleteMessage(opts)
