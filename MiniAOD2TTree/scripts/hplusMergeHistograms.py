@@ -312,10 +312,10 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
         raise ExitCodeException("No exeExitCode")
     if jobExitCode == None:
         raise ExitCodeException("No jobExitCode")
-####    if exeExitCode != 0:
-####        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
-####    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
-####        raise ExitCodeException("Job exit code is %d" % jobExitCode)
+####sami    if exeExitCode != 0:
+####sami        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
+####sami    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
+####sami        raise ExitCodeException("Job exit code is %d" % jobExitCode)
     return
 
 
@@ -1245,7 +1245,7 @@ def ExamineExitCodes(taskName, exitCodes, missingFiles):
     print "\n    Task",taskName
     if len(exitCodes) < 1:
         Print("No jobs with non-zero exit codes",printHeader=False)
-####        return
+####sami        return
 
     if missingFiles > 0:
         Print("jobs with missing files:%s" %missingFiles,printHeader=False)
@@ -1393,8 +1393,8 @@ def GetTaskLogFiles(taskName, opts):
     else:
         stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
 
-####    if len(stdoutFiles) < 1:
-####        raise Exception("Task %s, could not obtain log files." % (taskName) )
+####sami    if len(stdoutFiles) < 1:
+####sami        raise Exception("Task %s, could not obtain log files." % (taskName) )
     return stdoutFiles
         
 
@@ -1477,7 +1477,7 @@ def main(opts, args):
         # For Testing purposes
         if opts.test:
             ExamineExitCodes(taskName, exitCodes, missingFiles)
-####            continue            
+####sami            continue            
 
         # Check that output files were found. If so, check that they exist!
         if len(files) == 0:
@@ -1486,12 +1486,12 @@ def main(opts, args):
         else:            
             if not opts.filesInEOS:
                 files = [taskName + "/results/" + x for x in files] # fixme: verify that only for filesInEOS option needed
-####            if not CheckThatFilesExist(taskName, files, opts):
+####sami            if not CheckThatFilesExist(taskName, files, opts):
             filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
             taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
-####                continue
-####            else:
-####                pass
+####sami                continue
+####sami            else:
+####sami                pass
 
         Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
 
