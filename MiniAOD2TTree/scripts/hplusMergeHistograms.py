@@ -145,14 +145,16 @@ def Print(msg, printHeader=True):
 
 
 def PrintMergeDetails(taskName, filesSplit, files):
-    Verbose("PrintMergeDetails()")
+    '''
+    '''
+    Verbose("PrintMergeDetails()", True)
 
     if len(filesSplit) == 1:
         msg = "Task %s, merging %d file(s)" % (taskName, len(files) )
     else:
         msg = "Task %s, merging %d file(s) to %d file(s)" % (taskName, len(files), len(filesSplit) )
 
-    Print(msg)
+    Verbose(msg, False)
     return
 
 
@@ -180,13 +182,19 @@ def PrintProgressBar(taskName, iteration, total):
     suffix          = 'Complete'
     decimals        = 1
     barLength       = PBARLENGTH
+    txtSize         = 50
+    fillerSize      = txtSize - len(taskName)
+    if fillerSize < 0:
+        fillerSize = 0
+    filler          = " "*fillerSize
     formatStr       = "{0:." + str(decimals) + "f}"
     percents        = formatStr.format(100 * (iteration / float(total)))
     filledLength    = int(round(barLength * iteration / float(total)))
     bar             = '=' * filledLength + '-' * (barLength - filledLength)
-    sys.stdout.write('\r%s |%s| %s%s %s' % (prefix, bar, percents, '%', suffix)),
-    #if iteration == total:
-    #    sys.stdout.write('\n')
+    sys.stdout.write('\r%s%s |%s| %s%s %s' % (prefix, filler, bar, percents, '%', suffix)),
+    
+    # if iteration == total:
+    # sys.stdout.write('\n')
     sys.stdout.flush()
     return
 
@@ -1474,7 +1482,7 @@ def main(opts, args):
         # Split files according to user-defined options
         filesSplit = splitFiles(files, opts.filesPerMerge, opts)
 
-        # Create a simple progress bar
+        # Print what you are merging
         PrintMergeDetails(taskName, filesSplit, files)
 
         # For-loop: All splitted files
