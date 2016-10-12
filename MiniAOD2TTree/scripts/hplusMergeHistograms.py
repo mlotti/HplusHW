@@ -177,7 +177,7 @@ def PrintProgressBar(taskName, iteration, total):
     '''
     Verbose("PrintProgressBar()")
 
-    #prefix          = 'Progress:'
+    iteration      += 1 # since what is passed is the index of the file (starts from zero)
     prefix          = "\t" + taskName
     suffix          = 'Complete'
     decimals        = 1
