@@ -312,10 +312,10 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
         raise ExitCodeException("No exeExitCode")
     if jobExitCode == None:
         raise ExitCodeException("No jobExitCode")
-####sami    if exeExitCode != 0:
-####sami        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
-####sami    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
-####sami        raise ExitCodeException("Job exit code is %d" % jobExitCode)
+    if exeExitCode != 0:
+        Print("Executable exit code is %d" % exeExitCode)
+    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
+        Print("Job exit code is %d" % jobExitCode)
     return
 
 
@@ -682,21 +682,29 @@ def GetFileSize(filePath, opts, convertToGB=True):
     if opts.filesInEOS:
         if "fnal" in HOST:
             cmd = ConvertCommandToEOS("ls -l", opts) + " " + filePath
-            opts.Verbose = True
             ret = Execute("%s" % (cmd) )[0].split()
-            opts.Verbose = False
-            # Get the size as integer
+            #Print("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
+            
+            # Store all values
             permissions = ret[0]
             unkownVar   = ret[1]
             username    = ret[2]
             group       = ret[3]
-            size        = float(ret[4]) #int(ret[4])
+            size        = ret[4]
             month       = ret[5]
             dayOfMonth  = ret[6]
             time        = ret[7]
             filename    = ret[8] # or ret[-1]
-            #
-            Verbose("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
+
+            # Get the size as float
+            error = False
+            for msg in ret:
+                if "No" in msg: # No such file..
+                    error = True
+            if error:
+                size = -1.0
+            else:
+                size = float(size)
 
         elif "lxplus" in HOST:
             eos  = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select" #simply "eos" will not work
@@ -704,16 +712,16 @@ def GetFileSize(filePath, opts, convertToGB=True):
             Verbose(cmd)
             ret  = Execute("%s" % (cmd) )
 
-            # Get the size as integer
+            # Get the size as float
             error = False
             for msg in ret:
                 if "error" in msg:
                     error = True
             if error:
-                size = 0
+                size = -1.0
             else:
                 size_str = ret[0].split()[-1].rsplit("size=")[-1]
-                size     = int(size_str)
+                size     = float(size_str)
         else:
             raise Exception("Unsupported host %s" % (HOST) )
     else:
@@ -1269,13 +1277,13 @@ def OverwriteMergeFile(mergeName, opts):
     '''
     Verbose("OverwriteMergeFile()")
 
-    if not opts.test:
+    if opts.test:
         return
 
     if opts.filesInEOS:
         if opts.overwrite:
             mergeNameNew = mergeName + ".backup"
-            Print("File %s already exists.\n\tRenaming to %s." % (mergeName, mergeNameNew) )
+            Verbose("File %s already exists.\n\tRenaming to %s." % (mergeName, mergeNameNew) )
             fileName    = GetXrdcpPrefix(opts) + mergeName
             fileNameNew = GetXrdcpPrefix(opts) + mergeNameNew
             cp_cmd      = "xrdcp %s %s" % (fileName, fileNameNew)
@@ -1283,13 +1291,13 @@ def OverwriteMergeFile(mergeName, opts):
             ret = Execute(cp_cmd)
             # Now remove the original file
             rm_cmd = ConvertCommandToEOS("rm", opts) + " %s" % (mergeName)
-            Print(rm_cmd)
+            Verbose(rm_cmd)
             ret = Execute(rm_cmd)            
         else:
             Verbose("File %s already exists. Skipping .." % (mergeName) )
     else:
         if opts.overwrite:
-            Print("mv %s %s" % (mergeName, mergeName + ".backup") )
+            Verbose("mv %s %s" % (mergeName, mergeName + ".backup") )
             shutil.move(mergeName, mergeName + ".backup")
         else:
             Verbose("File %s already exists. Skipping .." % (mergeName) )
@@ -1393,8 +1401,9 @@ def GetTaskLogFiles(taskName, opts):
     else:
         stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
 
-####sami    if len(stdoutFiles) < 1:
-####sami        raise Exception("Task %s, could not obtain log files." % (taskName) )
+    if len(stdoutFiles) < 1:
+        #raise Exception("Task %s, could not obtain log files." % (taskName) )
+        Print("Task %s, could not obtain log files." % (taskName) ) #sami
     return stdoutFiles
         
 
@@ -1477,7 +1486,6 @@ def main(opts, args):
         # For Testing purposes
         if opts.test:
             ExamineExitCodes(taskName, exitCodes, missingFiles)
-####sami            continue            
 
         # Check that output files were found. If so, check that they exist!
         if len(files) == 0:
@@ -1486,15 +1494,18 @@ def main(opts, args):
         else:            
             if not opts.filesInEOS:
                 files = [taskName + "/results/" + x for x in files] # fixme: verify that only for filesInEOS option needed
-####sami            if not CheckThatFilesExist(taskName, files, opts):
-            filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
-            taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
-####sami                continue
-####sami            else:
-####sami                pass
+
+            if not CheckThatFilesExist(taskName, files, opts):
+                filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
+                taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+                if not opts.test: #sami
+                    continue
+            else:
+                pass
 
         Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
 
+        # If this is a test skip the remaining part
         if opts.test:
             continue
         
@@ -1524,7 +1535,9 @@ def main(opts, args):
                 if opts.overwrite:
                     OverwriteMergeFile(mergeName, opts)
                 else: 
-                    PrintProgressBar(taskName, len(filesSplit), len(filesSplit))
+                    filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
+                    taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+                    PrintProgressBar(taskName, 0, 1)
                     filesExist += 1
                     continue
 
@@ -1534,7 +1547,11 @@ def main(opts, args):
             time_end = time.time()
             dtMerge = time_end-time_start
             if ret != 0:
+                Verbose("MergeFiles() returned %s" % (ret))
                 return ret
+            else:
+                Verbose("MergeFiles() returned %s" % (ret) )
+                pass
 
             # Get the file size
             mergeFileSize = GetFileSize(mergeName, opts)
@@ -1557,8 +1574,8 @@ def main(opts, args):
             PrintProgressBar(taskName, index, len(filesSplit))
 
         FinishProgressBar()
-        # Finish the progress bar
-        taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+        if taskName not in taskReports.keys():
+            taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
 
     if opts.test:
         return
@@ -1623,8 +1640,9 @@ if __name__ == "__main__":
     '''
 
     # Default Values
-    VERBOSE = False
-    DIRNAME = ""
+    VERBOSE   = False
+    OVERWRITE = False
+    DIRNAME   = ""
     
     parser = OptionParser(usage="Usage: %prog [options]")
     # multicrab.addOptions(parser)
@@ -1638,10 +1656,10 @@ if __name__ == "__main__":
                       help="Just test, do not do any merging or deleting. Useful for checking what would happen. [default: 'False']")
 
     parser.add_option("--delete", dest="delete", default=False, action="store_true",
-                      help="Delete the source files to save disk space (default is to keep the files) [default: 'False']")
+                      help="Delete the source files after all crab tasks have been merged (to save disk space) [default: 'False']")
 
     parser.add_option("--deleteImmediately", dest="deleteImmediately", default=False, action="store_true",
-                      help="Delete the source files immediately after merging to save disk space (--delete deletes them after all crab tasks have been merged) [default: 'False']")
+                      help="Delete the source files immediately after merging to save disk space [default: 'False']")
 
     parser.add_option("--filesPerMerge", dest="filesPerMerge", default=-1, type="int",
                       help="Merge at most this many files together, possibly resulting to multiple merged files. Use case: large ntuples. (default: -1 to merge all files to one) [default: '-1']")
@@ -1662,7 +1680,7 @@ if __name__ == "__main__":
                       help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
 
     parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true", 
-                      help="Overwrite histograms-%s.root files (default False)")
+                      help="Overwrite histograms-*.root files [default %s]" % (OVERWRITE))
 
     parser.add_option("-d", "--dir", dest="dirName", default=DIRNAME, type="string",
                       help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))   
