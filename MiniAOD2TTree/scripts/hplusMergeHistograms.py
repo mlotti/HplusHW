@@ -612,8 +612,9 @@ def ConvertPathToEOS(taskName, fullPath, path_postfix, opts, isDir=False):
     return fullPathEOS
 
 
-def splitFiles(files, filesPerEntry, opts):
+def splitFiles(taskName, files, filesPerEntry, opts):
     '''    
+    Split all output ROOT files into small groups of files to be merged
     '''
     Verbose("splitFiles()")
 
@@ -629,7 +630,9 @@ def splitFiles(files, filesPerEntry, opts):
         firstFile = 0
 
         # For-loop: All files (with ifile counter)
-        for ifile,f in enumerate(files):
+        for ifile, f in enumerate(files):
+
+            PrintProgressBar(taskName + ", Split:", ifile, len(files) )
 
             # Calculate cumulative size (in Bytes)
             fileSize = GetFileSize(f, opts, False) 
@@ -654,6 +657,9 @@ def splitFiles(files, filesPerEntry, opts):
         while beg(i) < len(files):
             ret.append( (i, files[beg(i):end(i)]) )
             i += 1
+
+    # Flush stdout
+    FinishProgressBar()
 
     # Remove empty tuples (Some rare Instances where we had (0, [])
     splitFiles = filter(lambda x: len(x[1])!=0, ret)
@@ -1153,7 +1159,7 @@ def MergeFiles(mergeName, inputFiles, opts):
     '''
     Verbose("MergeFiles()")
 
-    Verbose("Attempting to merge:\n\t%s\n\tto\n\t%s." % ("\n\t".join(inputFiles), mergeName) )
+    Print("Attempting to merge:\n\t%s\n\tto\n\t%s." % ("\n\t".join(inputFiles), mergeName) )
     if len(inputFiles) < 1:
         raise Exception("Attempting to merge 0 files! Somethings was gone wrong!")
     elif len(inputFiles) == 1:
@@ -1292,7 +1298,7 @@ def ExamineExitCodes(taskName, exitCodes, missingFiles):
     '''
     Verbose("ExamineExitCodes()")
 
-    print "\n    Task",taskName
+    print "\n    Task", taskName
     if len(exitCodes) < 1:
         Print("No jobs with non-zero exit codes",printHeader=False)
     else:
@@ -1311,13 +1317,15 @@ def ExamineExitCodes(taskName, exitCodes, missingFiles):
     return
 
 
-def OverwriteMergeFile(mergeName, opts):
+def RenameMergeFile(mergeName, opts):
     '''
     Check whether the target merge file already exists or not.
     If it does it does nothing by default, or if the --test option is enabled.
     If the --overwrite option is enabled, the existing file is renamed to <mergeName>.root.backup
+    
+    Stopped using this since 13 October 2016 (not very useful at the time)
     '''
-    Verbose("OverwriteMergeFile()")
+    Verbose("RenameMergeFile()")
 
     if opts.test:
         return
@@ -1478,8 +1486,7 @@ def GetPreexistingMergedFiles(taskPath, opts):
 
 
 def main(opts, args):
-    '''
-    '''
+
     Verbose("main()", True)
     
     # Get the multicrab task names (=dir names)
@@ -1558,7 +1565,7 @@ def main(opts, args):
             continue
         
         # Split files according to user-defined options
-        filesSplit = splitFiles(files, opts.filesPerMerge, opts)
+        filesSplit = splitFiles(taskName, files, opts.filesPerMerge, opts)
 
         # Print what you are merging
         PrintMergeDetails(taskName, filesSplit, files)
@@ -1580,17 +1587,15 @@ def main(opts, args):
 
             # If merge file already exists skip it or rename it as .backup
             if FileExists(mergeName, opts):
-                if opts.overwrite:
-                    OverwriteMergeFile(mergeName, opts)
-                else: 
-                    filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
-                    taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
-                    PrintProgressBar(taskName, 0, 1)
-                    filesExist += 1
-                    continue
+                filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
+                taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+                PrintProgressBar(taskName + ", Merge:", 0, 1)
+                filesExist += 1
+                continue
 
             # Merge the ROOT files
             time_start = time.time()
+            Print(mergeName)
             ret = MergeFiles(mergeName, inputFiles, opts)
             time_end = time.time()
             dtMerge = time_end-time_start
@@ -1666,7 +1671,9 @@ def main(opts, args):
         PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean:", index, len(mergeFileMap.keys()))
         index += 1
 
+    # Flush stdout
     FinishProgressBar()
+
     # Print summary table using reports
     for taskName in taskReports.keys():
         eos = taskNameMap[taskName].replace("-", "_")
@@ -1733,7 +1740,7 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose"    , dest="verbose"      , default=VERBOSE, action="store_true", 
                       help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
 
-    parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true", 
+    parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true", #iro 
                       help="Overwrite histograms-*.root files [default %s]" % (OVERWRITE))
 
     parser.add_option("-d", "--dir", dest="dirName", default=DIRNAME, type="string",
