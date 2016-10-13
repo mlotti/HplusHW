@@ -1496,9 +1496,10 @@ def main(opts, args):
         Print("Found %s task(s) in %s" % (nTasks, mcrabDir) )
         
     # Map taskName -> taskNameEOS
-    for d in crabDirs:
-        taskNameMap[d] = ConvertTasknameToEOS(d, opts)
-    taskNameMapR = {v: k for k, v in taskNameMap.items()} #reverse map
+    if opts.filesInEOS:
+        for d in crabDirs:
+            taskNameMap[d] = ConvertTasknameToEOS(d, opts)
+        taskNameMapR = {v: k for k, v in taskNameMap.items()} #reverse map
 
     # Construct regular expressions for output files
     global re_histos
