@@ -47,7 +47,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 re_histos = []
 re_se = re.compile("newPfn =\s*(?P<url>\S+)")
 replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://madhatter.csc.fi:1094")
-PBARWIDTH = 80
+PBARLENGTH = 80
 
 #================================================================================================ 
 # Class Definition
@@ -145,41 +145,58 @@ def Print(msg, printHeader=True):
     return
 
 
-def CreateProgressBar(taskName, filesSplit, files):
+def PrintMergeDetails(taskName, filesSplit, files):
     '''
     '''
-    Verbose("CreateProgressBar()")
+    Verbose("PrintMergeDetails()", True)
 
     if len(filesSplit) == 1:
-        msg = "\tTask %s, merging %d file(s)" % (taskName, len(files) )
+        msg = "Task %s, merging %d file(s)" % (taskName, len(files) )
     else:
-        msg = "\tTask %s, merging %d file(s) to %d file(s)" % (taskName, len(files), len(filesSplit) )
+        msg = "Task %s, merging %d file(s) to %d file(s)" % (taskName, len(files), len(filesSplit) )
 
-
-    # setup toolbar
-    width = PBARWIDTH
-    align = "{:<80} {:<%s}" % (width)
-    pbar  = "[" + " " * width + "]"
-    txt   = align.format(msg, pbar)
-    sys.stdout.write(txt)
-    sys.stdout.flush()
-
-    # Return to start of line, after '['
-    sys.stdout.write("\b" * (width  + len("\t")))
-    return
-
-
-def FillProgressBar(char, width):
-    Verbose("FillProgressBar()")
-
-    factor = PBARWIDTH/width
-    sys.stdout.write(char * factor)
-    sys.stdout.flush()
+    Verbose(msg, False)
     return
 
 
 def FinishProgressBar():
-    sys.stdout.write("\n")
+    Verbose("FinishProgressBar()")
+    sys.stdout.write('\n')
+    return
+
+
+def PrintProgressBar(taskName, iteration, total):
+    '''
+    Call in a loop to create terminal progress bar
+    @params:
+    iteration   - Required  : current iteration (Int)
+    total       - Required  : total iterations (Int)
+    prefix      - Optional  : prefix string (Str)
+    suffix      - Optional  : suffix string (Str)
+    decimals    - Optional  : positive number of decimals in percent complete (Int)
+    barLength   - Optional  : character length of bar (Int)
+    '''
+    Verbose("PrintProgressBar()")
+
+    iteration      += 1 # since what is passed is the index of the file (starts from zero)
+    prefix          = "\t" + taskName
+    suffix          = 'Complete'
+    decimals        = 1
+    barLength       = PBARLENGTH
+    txtSize         = 50
+    fillerSize      = txtSize - len(taskName)
+    if fillerSize < 0:
+        fillerSize = 0
+    filler          = " "*fillerSize
+    formatStr       = "{0:." + str(decimals) + "f}"
+    percents        = formatStr.format(100 * (iteration / float(total)))
+    filledLength    = int(round(barLength * iteration / float(total)))
+    bar             = '=' * filledLength + '-' * (barLength - filledLength)
+    sys.stdout.write('\r%s%s |%s| %s%s %s' % (prefix, filler, bar, percents, '%', suffix)),
+    
+    # if iteration == total:
+    # sys.stdout.write('\n')
+    sys.stdout.flush()
     return
 
 
@@ -245,7 +262,7 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
     '''
     Verbose("AssertJobSucceeded()", True)
 
-    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts) #iro
+    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
 
     re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
     re_job = re.compile("JobExitCode=(?P<code>\d+)")
@@ -295,10 +312,10 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
         raise ExitCodeException("No exeExitCode")
     if jobExitCode == None:
         raise ExitCodeException("No jobExitCode")
-####    if exeExitCode != 0:
-####        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
-####    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
-####        raise ExitCodeException("Job exit code is %d" % jobExitCode)
+    if exeExitCode != 0:
+        Print("Executable exit code is %d" % exeExitCode)
+    if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
+        Print("Job exit code is %d" % jobExitCode)
     return
 
 
@@ -388,7 +405,7 @@ def getHistogramFileEOS(stdoutFile, opts):
 
     # Open the "stdoutFile"
     stdoutFileEOS = stdoutFile
-    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts) #iro
+    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
 
     # Open the standard output file
     Verbose("Opening log file %s" % (stdoutFile), True )
@@ -665,21 +682,29 @@ def GetFileSize(filePath, opts, convertToGB=True):
     if opts.filesInEOS:
         if "fnal" in HOST:
             cmd = ConvertCommandToEOS("ls -l", opts) + " " + filePath
-            opts.Verbose = True
             ret = Execute("%s" % (cmd) )[0].split()
-            opts.Verbose = False
-            # Get the size as integer
+            #Print("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
+            
+            # Store all values
             permissions = ret[0]
             unkownVar   = ret[1]
             username    = ret[2]
             group       = ret[3]
-            size        = float(ret[4]) #int(ret[4])
+            size        = ret[4]
             month       = ret[5]
             dayOfMonth  = ret[6]
             time        = ret[7]
             filename    = ret[8] # or ret[-1]
-            #
-            Verbose("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
+
+            # Get the size as float
+            error = False
+            for msg in ret:
+                if "No" in msg: # No such file..
+                    error = True
+            if error:
+                size = -1.0
+            else:
+                size = float(size)
 
         elif "lxplus" in HOST:
             eos  = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select" #simply "eos" will not work
@@ -687,16 +712,16 @@ def GetFileSize(filePath, opts, convertToGB=True):
             Verbose(cmd)
             ret  = Execute("%s" % (cmd) )
 
-            # Get the size as integer
+            # Get the size as float
             error = False
             for msg in ret:
                 if "error" in msg:
                     error = True
             if error:
-                size = 0
+                size = -1.0
             else:
                 size_str = ret[0].split()[-1].rsplit("size=")[-1]
-                size     = int(size_str)
+                size     = float(size_str)
         else:
             raise Exception("Unsupported host %s" % (HOST) )
     else:
@@ -1291,13 +1316,13 @@ def OverwriteMergeFile(mergeName, opts):
     '''
     Verbose("OverwriteMergeFile()")
 
-    if not opts.test:
+    if opts.test:
         return
 
     if opts.filesInEOS:
         if opts.overwrite:
             mergeNameNew = mergeName + ".backup"
-            Print("File %s already exists.\n\tRenaming to %s." % (mergeName, mergeNameNew) )
+            Verbose("File %s already exists.\n\tRenaming to %s." % (mergeName, mergeNameNew) )
             fileName    = GetXrdcpPrefix(opts) + mergeName
             fileNameNew = GetXrdcpPrefix(opts) + mergeNameNew
             cp_cmd      = "xrdcp %s %s" % (fileName, fileNameNew)
@@ -1305,13 +1330,13 @@ def OverwriteMergeFile(mergeName, opts):
             ret = Execute(cp_cmd)
             # Now remove the original file
             rm_cmd = ConvertCommandToEOS("rm", opts) + " %s" % (mergeName)
-            Print(rm_cmd)
+            Verbose(rm_cmd)
             ret = Execute(rm_cmd)            
         else:
             Verbose("File %s already exists. Skipping .." % (mergeName) )
     else:
         if opts.overwrite:
-            Print("mv %s %s" % (mergeName, mergeName + ".backup") )
+            Verbose("mv %s %s" % (mergeName, mergeName + ".backup") )
             shutil.move(mergeName, mergeName + ".backup")
         else:
             Verbose("File %s already exists. Skipping .." % (mergeName) )
@@ -1415,8 +1440,9 @@ def GetTaskLogFiles(taskName, opts):
     else:
         stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
 
-####    if len(stdoutFiles) < 1:
-####        raise Exception("Task %s, could not obtain log files." % (taskName) )
+    if len(stdoutFiles) < 1:
+        #raise Exception("Task %s, could not obtain log files." % (taskName) )
+        Print("Task %s, could not obtain log files." % (taskName) ) #sami
     return stdoutFiles
         
 
@@ -1454,10 +1480,11 @@ def main(opts, args):
     Verbose("main()", True)
     
     # Get the multicrab task names (=dir names)
-    mcrabDir    = os.path.basename(os.getcwd())
-    crabDirs    = GetCrabDirectories(opts)
-    nTasks      = len(crabDirs)
-    taskNameMap = {}
+    mcrabDir      = os.path.basename(os.getcwd())
+    crabDirs      = GetCrabDirectories(opts)
+    nTasks        = len(crabDirs)
+    taskNameMap   = {}
+    tasskNameMapR = {}
 
     if nTasks < 1:
         Print("Did not find any tasks under %s. EXIT" % (mcrabDir) )
@@ -1471,7 +1498,8 @@ def main(opts, args):
     # Map taskName -> taskNameEOS
     for d in crabDirs:
         taskNameMap[d] = ConvertTasknameToEOS(d, opts)
-        
+    taskNameMapR = {v: k for k, v in taskNameMap.items()} #reverse map
+
     # Construct regular expressions for output files
     global re_histos
     re_histos.append(re.compile("^output files:.*?(?P<file>%s)" % opts.input))
@@ -1499,7 +1527,6 @@ def main(opts, args):
         # For Testing purposes
         if opts.test:
             ExamineExitCodes(taskName, exitCodes, missingFiles)
-####            continue            
 
         # Check that output files were found. If so, check that they exist!
         if len(files) == 0:
@@ -1508,23 +1535,29 @@ def main(opts, args):
         else:            
             if not opts.filesInEOS:
                 files = [taskName + "/results/" + x for x in files] # fixme: verify that only for filesInEOS option needed
-####            if not CheckThatFilesExist(taskName, files, opts):
-            filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
-            taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
-####                continue
-####            else:
-####                pass
+            else:
+                pass
+
+            # If files to be merged do NOT exist (and this is not a test), print report (perhaps files have already been merged)
+            if not CheckThatFilesExist(taskName, files, opts) and not opts.test:
+                Print("Task %s, skipping, some files are missing" % (taskName) )
+                filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
+                taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+                continue
+            else:
+                pass
 
         Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
 
+        # If this is a test skip the remaining part
         if opts.test:
             continue
         
         # Split files according to user-defined options
         filesSplit = splitFiles(files, opts.filesPerMerge, opts)
 
-        # Create a simple progress bar
-        CreateProgressBar(taskName, filesSplit, files)
+        # Print what you are merging
+        PrintMergeDetails(taskName, filesSplit, files)
 
         # For-loop: All splitted files
         for index, inputFiles in filesSplit:
@@ -1546,7 +1579,9 @@ def main(opts, args):
                 if opts.overwrite:
                     OverwriteMergeFile(mergeName, opts)
                 else: 
-                    FillProgressBar("=", len(filesSplit))
+                    filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
+                    taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+                    PrintProgressBar(taskName, 0, 1)
                     filesExist += 1
                     continue
 
@@ -1556,7 +1591,11 @@ def main(opts, args):
             time_end = time.time()
             dtMerge = time_end-time_start
             if ret != 0:
+                Verbose("MergeFiles() returned %s" % (ret))
                 return ret
+            else:
+                Verbose("MergeFiles() returned %s" % (ret) )
+                pass
 
             # Get the file size
             mergeFileSize = GetFileSize(mergeName, opts)
@@ -1576,11 +1615,11 @@ def main(opts, args):
                 DeleteFiles(inputFiles, opts)
 
             # Update Progress bar
-            FillProgressBar("=", len(filesSplit))
+            PrintProgressBar(taskName + ", Merge:", index, len(filesSplit) )
 
-        # Finish the progress bar
         FinishProgressBar()
-        taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+        if taskName not in taskReports.keys():
+            taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
 
     if opts.test:
         return
@@ -1591,10 +1630,12 @@ def main(opts, args):
     
     foldersToDelete = ["Generated", "Commit", "dataVersion"]
     # For-loop: All merged files
+    index = 0
     for key in mergeFileMap.keys():
         f = key
         sourceFiles = mergeFileMap[key]
-        taskName    = key.replace(GetEOSHomeDir(opts) + "/", "").split("/")[0].replace("-", "_")
+        taskNameEOS = key.replace(GetEOSHomeDir(opts) + "/", "").split("/")[0]
+        taskName    = taskNameEOS.replace("-", "_")
         Verbose("Merge files: %s\n\tSource files: %s" % (f, sourceFiles) )
 
         Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), False)
@@ -1609,7 +1650,6 @@ def main(opts, args):
             cleanTime[taskName] = dtClean 
         else:
             cleanTime[taskName] = cleanTime[taskName] + dtClean
-        #print "cleanTime[%s] = %s" % (taskName, cleanTime[taskName])
             
         # Delete files after merging?
         if opts.delete and not opts.deleteImmediately:
@@ -1618,7 +1658,11 @@ def main(opts, args):
         # Add pile-up histos
         pileup(f, opts)
 
+        # Update Progress bar
+        PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean:", index, len(mergeFileMap.keys()))
+        index += 1
 
+    FinishProgressBar()
     # Print summary table using reports
     for taskName in taskReports.keys():
         eos = taskNameMap[taskName].replace("-", "_")
@@ -1646,8 +1690,9 @@ if __name__ == "__main__":
     '''
 
     # Default Values
-    VERBOSE = False
-    DIRNAME = ""
+    VERBOSE   = False
+    OVERWRITE = False
+    DIRNAME   = ""
     
     parser = OptionParser(usage="Usage: %prog [options]")
     # multicrab.addOptions(parser)
@@ -1661,10 +1706,10 @@ if __name__ == "__main__":
                       help="Just test, do not do any merging or deleting. Useful for checking what would happen. [default: 'False']")
 
     parser.add_option("--delete", dest="delete", default=False, action="store_true",
-                      help="Delete the source files to save disk space (default is to keep the files) [default: 'False']")
+                      help="Delete the source files after all crab tasks have been merged (to save disk space) [default: 'False']")
 
     parser.add_option("--deleteImmediately", dest="deleteImmediately", default=False, action="store_true",
-                      help="Delete the source files immediately after merging to save disk space (--delete deletes them after all crab tasks have been merged) [default: 'False']")
+                      help="Delete the source files immediately after merging to save disk space [default: 'False']")
 
     parser.add_option("--filesPerMerge", dest="filesPerMerge", default=-1, type="int",
                       help="Merge at most this many files together, possibly resulting to multiple merged files. Use case: large ntuples. (default: -1 to merge all files to one) [default: '-1']")
@@ -1685,7 +1730,7 @@ if __name__ == "__main__":
                       help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
 
     parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true", 
-                      help="Overwrite histograms-%s.root files (default False)")
+                      help="Overwrite histograms-*.root files [default %s]" % (OVERWRITE))
 
     parser.add_option("-d", "--dir", dest="dirName", default=DIRNAME, type="string",
                       help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))   
