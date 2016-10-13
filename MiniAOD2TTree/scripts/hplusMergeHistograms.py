@@ -1444,7 +1444,7 @@ def DeleteFolders(filePath, foldersToDelete, opts):
     '''
     Verbose("DeleteFolders()")
     
-    Print("Deleting following folders in file %s:\n\t%s" % (filePath, "\n\t".join(foldersToDelete)) )
+    Verbose("Deleting following folders in file %s:\n\t%s" % (filePath, "\n\t".join(foldersToDelete)) )
     # For-loop: All folders to be deleted
     for folder in foldersToDelete:
         Verbose("Deleting %s in file %s" % (folder, filePath) )    
