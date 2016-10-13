@@ -110,7 +110,7 @@ def AskUser(msg, printHeader=False):
     '''
     Prompts user for keyboard feedback to a certain question. 
     Returns true if keystroke is \"y\", false otherwise.
-OB    '''
+    '''
     Verbose("AskUser()", printHeader)
     
     keystroke = raw_input("\t" +  msg + " (y/n): ")
@@ -1169,13 +1169,6 @@ def MergeFiles(mergeName, inputFiles, opts):
     '''
     Verbose("MergeFiles()")
 
-#    if opts.filesInEOS:        
-#        msg = "\r" + mergeName.replace(GetEOSHomeDir(opts), "")
-#    else:
-#        msg = "\r" + mergeName
-#    sys.stdout.write(msg)
-    #sys.stdout.flush() #iro
-
     Verbose("Attempting to merge:\n\t%s\n\tto\n\t%s." % ("\n\t".join(inputFiles), mergeName) )
     if len(inputFiles) < 1:
         raise Exception("Attempting to merge 0 files! Somethings was gone wrong!")
@@ -1511,6 +1504,29 @@ def GetPreexistingMergedFiles(taskPath, opts):
     return filesExist, mergeSizeMap, mergeTimeMap
 
 
+def LinkFiles(taskName, fileList):
+    '''
+    Loops over all files in the list and creates symbolic links
+    '''
+    Verbose("LinkFiles()", True)
+    
+    Verbose("Task %s, creating symbolic links" % (taskName))
+
+    # For-loop: All files
+    for index, f in enumerate(fileList):
+        srcFile  = f
+        destFile = "/".join(f.split("/")[-1:])
+        cmd = "ln -s %s %s" % (srcFile, os.path.join(taskName, "results", destFile))
+        Verbose(cmd)
+        ret = Execute(cmd)
+        # Update Progress bar
+        PrintProgressBar(taskName + ", Links", index, len(fileList), "[" + destFile + "]")
+
+    # Flush stdout
+    FinishProgressBar()
+    return
+
+
 def main(opts, args):
 
     Verbose("main()", True)
@@ -1560,6 +1576,12 @@ def main(opts, args):
 
         # Definitions
         files, missingFiles, exitCodes = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
+
+        # Create symbolic links for output & log files?
+        if opts.linksToEOS:
+            LinkFiles(taskName, stdoutFiles)
+            LinkFiles(taskName, files)
+            return
 
         # For Testing purposes
         if opts.test:
@@ -1652,8 +1674,7 @@ def main(opts, args):
                 DeleteFiles(inputFiles, opts)
 
             # Update Progress bar
-            #mergePath = "/".join(mergeName.split("/")[-6:]) #too big
-            mergePath = "/".join(mergeName.split("/")[-1:]) #fits terminal
+            mergePath = "/".join(mergeName.split("/")[-1:]) #fits terminal, [-6:] is too big to fit
             PrintProgressBar(taskName + ", Merge", index, len(filesSplit), "[" + mergePath + "]")
 
         # Flush stdout
@@ -1737,9 +1758,10 @@ if __name__ == "__main__":
     '''
 
     # Default Values
-    VERBOSE   = False
-    OVERWRITE = False
-    DIRNAME   = ""
+    VERBOSE    = False
+    OVERWRITE  = False
+    DIRNAME    = ""
+    LINKSTOEOS = False
     
     parser = OptionParser(usage="Usage: %prog [options]")
     # multicrab.addOptions(parser)
@@ -1776,11 +1798,14 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose"    , dest="verbose"      , default=VERBOSE, action="store_true", 
                       help="Verbose mode for debugging purposes [default: %s]" % (VERBOSE))
 
-    parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true", #iro 
+    parser.add_option("--overwrite", dest="overwrite", default=False, action="store_true",
                       help="Overwrite histograms-*.root files [default %s]" % (OVERWRITE))
 
     parser.add_option("-d", "--dir", dest="dirName", default=DIRNAME, type="string",
                       help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))   
+
+    parser.add_option("-l", "--linksToEOS", dest="linksToEOS", default=LINKSTOEOS, action="store_true",
+                      help="Create locally symbolic links to output/log files stored in EOS [default: %s]" % (LINKSTOEOS))
 
     (opts, args) = parser.parse_args()
 
