@@ -47,7 +47,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 re_histos = []
 re_se = re.compile("newPfn =\s*(?P<url>\S+)")
 replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://madhatter.csc.fi:1094")
-PBARLENGTH = 20
+PBARLENGTH = 10
 
 #================================================================================================ 
 # Class Definition
@@ -165,7 +165,7 @@ def FinishProgressBar():
     return
 
 
-def PrintProgressBar(taskName, iteration, total):
+def PrintProgressBar(taskName, iteration, total, suffix = ""):
     '''
     Call in a loop to create terminal progress bar
     @params:
@@ -180,7 +180,6 @@ def PrintProgressBar(taskName, iteration, total):
 
     iteration      += 1 # since what is passed is the index of the file (starts from zero)
     prefix          = "\t" + taskName
-    suffix          = 'Completed'
     decimals        = 1
     barLength       = PBARLENGTH
     txtSize         = 60
@@ -829,7 +828,9 @@ def sanityCheck(mergedFile, inputFiles):
         if int(info["control"]) != len(inputFiles):
             raise SanityCheckException("configInfo/configinfo:control = %d, len(inputFiles) = %d" % (int(info["control"]), len(inputFiles)))
     tfile.Close()
+    return
 
+    
 def delete(fileName, regexp, opts):
     '''
     Delete a folder matching the regular expression "regexp"
@@ -1173,7 +1174,6 @@ def MergeFiles(mergeName, inputFiles, opts):
 #        msg = "\r" + mergeName
 #    sys.stdout.write(msg)
     #sys.stdout.flush() #iro
-
 
     Verbose("Attempting to merge:\n\t%s\n\tto\n\t%s." % ("\n\t".join(inputFiles), mergeName) )
     if len(inputFiles) < 1:
@@ -1623,7 +1623,7 @@ def main(opts, args):
 
             # Merge the ROOT files
             time_start = time.time()
-            PrintProgressBar(taskName + ", Merge:", -1, 100 )
+            PrintProgressBar(taskName + ", Merge:", -1, 100, "[" + os.path.basename(mergeName) + "]")
             ret = MergeFiles(mergeName, inputFiles, opts)
             time_end = time.time()
             dtMerge = time_end-time_start
@@ -1697,7 +1697,11 @@ def main(opts, args):
         pileup(f, opts)
 
         # Update Progress bar
-        PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean:", index, len(mergeFileMap.keys()))
+        if opts.filesInEOS:
+            PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean:", index, len(mergeFileMap.keys()))
+        else:
+            PrintProgressBar(taskName + ", Clean:", index, len(mergeFileMap.keys()))
+            
         index += 1
 
     # Flush stdout
