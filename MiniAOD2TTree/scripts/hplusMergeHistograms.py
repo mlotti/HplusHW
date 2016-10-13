@@ -1447,7 +1447,7 @@ def DeleteFolders(filePath, foldersToDelete, opts):
     Print("Deleting following folders in file %s:\n\t%s" % (filePath, "\n\t".join(foldersToDelete)) )
     # For-loop: All folders to be deleted
     for folder in foldersToDelete:
-        Print("Deleting %s in file %s" % (folder, filePath) )    
+        Verbose("Deleting %s in file %s" % (folder, filePath) )    
         delete(filePath, folder, opts)
     return
 
@@ -1652,7 +1652,8 @@ def main(opts, args):
                 DeleteFiles(inputFiles, opts)
 
             # Update Progress bar
-            mergePath = "/".join(mergeName.split("/")[-6:])
+            #mergePath = "/".join(mergeName.split("/")[-6:]) #too big
+            mergePath = "/".join(mergeName.split("/")[-1:]) #fits terminal
             PrintProgressBar(taskName + ", Merge", index, len(filesSplit), "[" + mergePath + "]")
 
         # Flush stdout
