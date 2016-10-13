@@ -313,9 +313,9 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
     if jobExitCode == None:
         raise ExitCodeException("No jobExitCode")
     if exeExitCode != 0:
-        Print("Executable exit code is %d" % exeExitCode)
+        Verbose("Executable exit code is %d" % exeExitCode)
     if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
-        Print("Job exit code is %d" % jobExitCode)
+        Verbose("Job exit code is %d" % jobExitCode)
     return
 
 
@@ -1442,7 +1442,7 @@ def GetTaskLogFiles(taskName, opts):
 
     if len(stdoutFiles) < 1:
         #raise Exception("Task %s, could not obtain log files." % (taskName) )
-        Print("Task %s, could not obtain log files." % (taskName) ) #sami
+        Print("Task %s, could not obtain log files." % (taskName),False) #sami
     return stdoutFiles
         
 
