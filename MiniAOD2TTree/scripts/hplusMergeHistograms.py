@@ -180,7 +180,7 @@ def PrintProgressBar(taskName, iteration, total):
 
     iteration      += 1 # since what is passed is the index of the file (starts from zero)
     prefix          = "\t" + taskName
-    suffix          = 'Complete'
+    suffix          = 'Completed'
     decimals        = 1
     barLength       = PBARLENGTH
     txtSize         = 60
@@ -665,15 +665,17 @@ def splitFiles(taskName, files, filesPerEntry, opts):
     splitFiles = filter(lambda x: len(x[1])!=0, ret)
 
     # Print the tuples
-    align = "{:<3} {:<100}"
-    msg   = "\n"
-    # For-loop: All Tuple pair
-    for x in splitFiles:
-        msg += align.format(x[0], x[1]) + "\n"
-        Verbose("Splitted files as follows:%s" % (msg) )
-
-    Verbose("Returning a %s-long list of tuples" % (len(splitFiles)) )
-    return splitFiles
+    if not opts.verbose:
+        return splitFiles
+    else:
+        align = "{:<3} {:<100}"
+        msg   = "\n"
+        # For-loop: All Tuple pair
+        for x in splitFiles:
+            msg += align.format(x[0], x[1]) + "\n"
+            Verbose("Splitted files as follows:%s" % (msg) )
+        Verbose("Returning a %s-long list of tuples" % (len(splitFiles)) )
+        return splitFiles
 
 
 def GetFileSize(filePath, opts, convertToGB=True):
@@ -1513,11 +1515,11 @@ def main(opts, args):
     Verbose("main()", True)
     
     # Get the multicrab task names (=dir names)
-    mcrabDir      = os.path.basename(os.getcwd())
-    crabDirs      = GetCrabDirectories(opts)
-    nTasks        = len(crabDirs)
-    taskNameMap   = {}
-    tasskNameMapR = {}
+    mcrabDir     = os.path.basename(os.getcwd())
+    crabDirs     = GetCrabDirectories(opts)
+    nTasks       = len(crabDirs)
+    taskNameMap  = {}
+    taskNameMapR = {}
 
     if nTasks < 1:
         Print("Did not find any tasks under %s. EXIT" % (mcrabDir) )
@@ -1596,7 +1598,6 @@ def main(opts, args):
         # For-loop: All splitted files
         for index, inputFiles in filesSplit:
             Verbose("Merging %s/%s" % (index+1, len(filesSplit)), False)
-
             taskNameAndNum = d
             
             # Assign "task-number" if merging more than 1 files
@@ -1607,6 +1608,8 @@ def main(opts, args):
             mergeName = os.path.join(d, "results", opts.output % taskNameAndNum)
             if opts.filesInEOS:
                 mergeName = ConvertPathToEOS(taskName, mergeName, "", opts)
+            else:
+                pass
 
             # If merge file already exists skip it or rename it as .backup
             if FileExists(mergeName, opts) and not opts.overwrite:
@@ -1615,9 +1618,12 @@ def main(opts, args):
                 PrintProgressBar(taskName + ", Merge:", 0, 1)
                 filesExist += 1
                 continue
+            else:
+                pass
 
             # Merge the ROOT files
             time_start = time.time()
+            PrintProgressBar(taskName + ", Merge:", -1, 100 )
             ret = MergeFiles(mergeName, inputFiles, opts)
             time_end = time.time()
             dtMerge = time_end-time_start
@@ -1699,9 +1705,10 @@ def main(opts, args):
 
     # Print summary table using reports
     for taskName in taskReports.keys():
-        eos = taskNameMap[taskName].replace("-", "_")
-        if eos in cleanTime.keys():
-            taskReports[taskName].SetCleanTime( cleanTime[eos] )
+        if opts.filesInEOS:
+            eos = taskNameMap[taskName].replace("-", "_")
+            if eos in cleanTime.keys():
+                taskReports[taskName].SetCleanTime( cleanTime[eos] )
     PrintSummary(taskReports)
 
     return 0
