@@ -183,15 +183,16 @@ def PrintProgressBar(taskName, iteration, total, suffix = ""):
     decimals        = 1
     barLength       = PBARLENGTH
     txtSize         = 60
-    fillerSize      = txtSize - len(taskName)
-    if fillerSize < 0:
-        fillerSize = 0
-    filler          = " "*fillerSize
+    #fillerSize      = txtSize - len(taskName)
+    #if fillerSize < 0:
+    #    fillerSize = 0
+    #filler          = " "*fillerSize
     formatStr       = "{0:." + str(decimals) + "f}"
     percents        = formatStr.format(100 * (iteration / float(total)))
     filledLength    = int(round(barLength * iteration / float(total)))
     bar             = '=' * filledLength + '-' * (barLength - filledLength)
-    sys.stdout.write('\r%s%s |%s| %s%s %s' % (prefix, filler, bar, percents, '%', suffix)),
+    sys.stdout.write('\r%s: |%s| %s%s %s' % (prefix, bar, percents, '%', suffix)),
+    #sys.stdout.write('\r%s%s |%s| %s%s %s' % (prefix, filler, bar, percents, '%', suffix)),
     
     # if iteration == total:
     # sys.stdout.write('\n')
@@ -631,7 +632,7 @@ def splitFiles(taskName, files, filesPerEntry, opts):
         # For-loop: All files (with ifile counter)
         for ifile, f in enumerate(files):
 
-            PrintProgressBar(taskName + ", Split:", ifile, len(files) )
+            PrintProgressBar(taskName + ", Split", ifile, len(files) )
 
             # Calculate cumulative size (in Bytes)
             fileSize = GetFileSize(f, opts, False) 
@@ -1007,7 +1008,7 @@ def CheckThatFilesExist(taskName, fileList, opts):
             Verbose("Task %s, file %s not found!" % (taskName, os.path.basename(f)) )
 
         # Update Progress bar
-        PrintProgressBar(taskName + ", Check:", index, len(fileList) )
+        PrintProgressBar(taskName + ", Check", index, len(fileList) )
 
     # Flush stdout
     FinishProgressBar()
@@ -1307,7 +1308,7 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
                 exitCodes.append(int(exit_match.group("exitcode")))
         
         # Update progress bar
-        PrintProgressBar(taskName + ", Files:", index, len(stdoutFiles) )
+        PrintProgressBar(taskName + ", Files", index, len(stdoutFiles) )
 
     # Flush stdout
     FinishProgressBar()
@@ -1615,7 +1616,7 @@ def main(opts, args):
             if FileExists(mergeName, opts) and not opts.overwrite:
                 filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
-                PrintProgressBar(taskName + ", Merge:", 0, 1)
+                PrintProgressBar(taskName + ", Merge", 0, 1)
                 filesExist += 1
                 continue
             else:
@@ -1623,7 +1624,6 @@ def main(opts, args):
 
             # Merge the ROOT files
             time_start = time.time()
-            PrintProgressBar(taskName + ", Merge:", -1, 100, "[" + os.path.basename(mergeName) + "]")
             ret = MergeFiles(mergeName, inputFiles, opts)
             time_end = time.time()
             dtMerge = time_end-time_start
@@ -1652,7 +1652,8 @@ def main(opts, args):
                 DeleteFiles(inputFiles, opts)
 
             # Update Progress bar
-            PrintProgressBar(taskName + ", Merge:", index, len(filesSplit) )
+            mergePath = "/".join(mergeName.split("/")[-6:])
+            PrintProgressBar(taskName + ", Merge", index, len(filesSplit), "[" + mergePath + "]")
 
         # Flush stdout
         FinishProgressBar()
@@ -1698,9 +1699,9 @@ def main(opts, args):
 
         # Update Progress bar
         if opts.filesInEOS:
-            PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean:", index, len(mergeFileMap.keys()))
+            PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean", index, len(mergeFileMap.keys()))
         else:
-            PrintProgressBar(taskName + ", Clean:", index, len(mergeFileMap.keys()))
+            PrintProgressBar(taskName + ", Clean", index, len(mergeFileMap.keys()))
             
         index += 1
 

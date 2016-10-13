@@ -103,7 +103,7 @@ from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
 #================================================================================================ 
 # Global Definitions
 #================================================================================================ 
-PBARLENGTH = 80
+PBARLENGTH = 20
 
 # A map pairing local <task-name> to EOS <task-name>
 taskNameMap = {} 
@@ -270,7 +270,7 @@ class Report:
 #================================================================================================ 
 # Function Definitions
 #================================================================================================ 
-def PrintProgressBar(taskName, iteration, total):
+def PrintProgressBar(taskName, iteration, total, suffix=""):
     '''
     Call in a loop to create terminal progress bar
     @params:
@@ -285,7 +285,6 @@ def PrintProgressBar(taskName, iteration, total):
 
     iteration      += 1 # since enumerate starts from 0
     prefix          = taskName
-    suffix          = 'Complete'
     decimals        = 1
     barLength       = PBARLENGTH
     txtSize         = 50
