@@ -47,7 +47,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 re_histos = []
 re_se = re.compile("newPfn =\s*(?P<url>\S+)")
 replace_madhatter = ("srm://madhatter.csc.fi:8443/srm/managerv2?SFN=", "root://madhatter.csc.fi:1094")
-PBARLENGTH = 80
+PBARLENGTH = 20
 
 #================================================================================================ 
 # Class Definition
@@ -183,7 +183,7 @@ def PrintProgressBar(taskName, iteration, total):
     suffix          = 'Complete'
     decimals        = 1
     barLength       = PBARLENGTH
-    txtSize         = 50
+    txtSize         = 60
     fillerSize      = txtSize - len(taskName)
     if fillerSize < 0:
         fillerSize = 0
@@ -705,6 +705,9 @@ def GetFileSize(filePath, opts, convertToGB=True):
                 size = -1.0
             else:
                 size = float(size)
+                
+            if size == 0:
+                Verbose("On FNAL's LPC the size of merged files after merging is quoted to be indeed  zero (althought it is not). This is NOT a script bug.")
 
         elif "lxplus" in HOST:
             eos  = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select" #simply "eos" will not work
