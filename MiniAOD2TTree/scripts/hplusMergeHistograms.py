@@ -262,7 +262,7 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
     '''
     Verbose("AssertJobSucceeded()", True)
 
-    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts) #iro
+    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
 
     re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
     re_job = re.compile("JobExitCode=(?P<code>\d+)")
@@ -405,7 +405,7 @@ def getHistogramFileEOS(stdoutFile, opts):
 
     # Open the "stdoutFile"
     stdoutFileEOS = stdoutFile
-    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts) #iro
+    localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
 
     # Open the standard output file
     Verbose("Opening log file %s" % (stdoutFile), True )
@@ -1441,10 +1441,11 @@ def main(opts, args):
     Verbose("main()", True)
     
     # Get the multicrab task names (=dir names)
-    mcrabDir    = os.path.basename(os.getcwd())
-    crabDirs    = GetCrabDirectories(opts)
-    nTasks      = len(crabDirs)
-    taskNameMap = {}
+    mcrabDir      = os.path.basename(os.getcwd())
+    crabDirs      = GetCrabDirectories(opts)
+    nTasks        = len(crabDirs)
+    taskNameMap   = {}
+    tasskNameMapR = {}
 
     if nTasks < 1:
         Print("Did not find any tasks under %s. EXIT" % (mcrabDir) )
@@ -1458,7 +1459,8 @@ def main(opts, args):
     # Map taskName -> taskNameEOS
     for d in crabDirs:
         taskNameMap[d] = ConvertTasknameToEOS(d, opts)
-        
+    taskNameMapR = {v: k for k, v in taskNameMap.items()} #reverse map
+
     # Construct regular expressions for output files
     global re_histos
     re_histos.append(re.compile("^output files:.*?(?P<file>%s)" % opts.input))
@@ -1494,12 +1496,15 @@ def main(opts, args):
         else:            
             if not opts.filesInEOS:
                 files = [taskName + "/results/" + x for x in files] # fixme: verify that only for filesInEOS option needed
+            else:
+                pass
 
-            if not CheckThatFilesExist(taskName, files, opts):
+            # If files to be merged do NOT exist (and this is not a test), print report (perhaps files have already been merged)
+            if not CheckThatFilesExist(taskName, files, opts) and not opts.test:
+                Print("Task %s, skipping, some files are missing" % (taskName) )
                 filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
-                if not opts.test: #sami
-                    continue
+                continue
             else:
                 pass
 
@@ -1571,7 +1576,7 @@ def main(opts, args):
                 DeleteFiles(inputFiles, opts)
 
             # Update Progress bar
-            PrintProgressBar(taskName, index, len(filesSplit))
+            PrintProgressBar(taskName + ", Merge:", index, len(filesSplit) )
 
         FinishProgressBar()
         if taskName not in taskReports.keys():
@@ -1586,10 +1591,12 @@ def main(opts, args):
     
     foldersToDelete = ["Generated", "Commit", "dataVersion"]
     # For-loop: All merged files
+    index = 0
     for key in mergeFileMap.keys():
         f = key
         sourceFiles = mergeFileMap[key]
-        taskName    = key.replace(GetEOSHomeDir(opts) + "/", "").split("/")[0].replace("-", "_")
+        taskNameEOS = key.replace(GetEOSHomeDir(opts) + "/", "").split("/")[0]
+        taskName    = taskNameEOS.replace("-", "_")
         Verbose("Merge files: %s\n\tSource files: %s" % (f, sourceFiles) )
 
         Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), False)
@@ -1612,7 +1619,11 @@ def main(opts, args):
         # Add pile-up histos
         pileup(f, opts)
 
+        # Update Progress bar
+        PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean:", index, len(mergeFileMap.keys()))
+        index += 1
 
+    FinishProgressBar()
     # Print summary table using reports
     for taskName in taskReports.keys():
         eos = taskNameMap[taskName].replace("-", "_")
