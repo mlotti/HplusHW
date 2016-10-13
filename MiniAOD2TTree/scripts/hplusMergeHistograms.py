@@ -1185,6 +1185,43 @@ def PrintSummary(taskReports):
     return
 
 
+def CheckTaskReport(logfilepath):
+    '''
+    Probes the log-file tarball for a given jobId to
+    determine the job status or exit code.
+    '''
+    Verbose("CheckTaskReport()", True)
+        
+    filePath    = logfilepath
+    exitCode_re = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<exitcode>\d+)")
+    
+    # Ensure file is indeed a tarfile
+    if tarfile.is_tarfile(filePath):
+    
+        # Open the tarball
+        fIN = tarfile.open(filePath)
+        log_re = re.compile("cmsRun-stdout-(?P<job>\d+)\.log")
+            
+        # For-loop: All files inside tarball
+        for member in fIN.getmembers():
+                
+            # Extract the log file
+            logfile = fIN.extractfile(member)
+            match   = log_re.search(logfile.name)
+                        
+            # Regular Expression match for log-file
+            if match:
+                # For-loop: All lines of log-file
+                for line in reversed(logfile.readlines()):
+                                    
+                    # Search for exit code
+                    exitMatch = exitCode_re.search(line)
+        
+                    # If exit code found, return the value
+                    if exitMatch:
+                        return int(exitMatch.group("exitcode"))
+    return -1
+
 def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
     '''
     Loops over all stdout files of a given CRAB task, to obtain 
@@ -1196,20 +1233,22 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
     files = []
     missing = 0
     exitCodes = []
+
+    exit_re = re.compile("/results/cmsRun_(?P<exitcode>\d+)\.log\.tar\.gz")
     
     Verbose("Getting output files & exit codes for task %s" % (taskName) )
     # For-loop: All stdout files of given task
     for f in stdoutFiles:
         Verbose("Getting output files & exit codes for task %s (by reading %s)" % (taskName, f) )
-        try:
-            histoFile = GetHistogramFile(taskName, f, opts)
-            if histoFile != None:
-                files.append(histoFile)
-            else:
-                missing += 1
-                Verbose("Task %s, skipping job %s: input root file not found from stdout" % (taskName, os.path.basename(f)) )
-        except multicrab.ExitCodeException, e:
-            Verbose("Task %s, skipping job %s: %s" % (taskName, os.path.basename(f), str(e)) )
+        histoFile = GetHistogramFile(taskName, f, opts)
+        if histoFile != None:
+            files.append(histoFile)
+        else:
+            missing += 1
+            Verbose("Task %s, skipping job %s: input root file not found from stdout" % (taskName, os.path.basename(f)) )
+
+        exitcode = CheckTaskReport(f)
+        if exitcode != 0:
             exit_match = exit_re.search(f)
             if exit_match:
                 exitCodes.append(int(exit_match.group("exitcode")))
@@ -1228,19 +1267,19 @@ def ExamineExitCodes(taskName, exitCodes, missingFiles):
     print "\n    Task",taskName
     if len(exitCodes) < 1:
         Print("No jobs with non-zero exit codes",printHeader=False)
-####        return
+    else:
+        exitCodes_s = ""
+        # For-loop: All exit codes
+        for i,e in enumerate(sorted(exitCodes)):
+            exitCodes_s += str(e)
+            if i < len(exitCodes)-1:
+                exitCodes_s += ","
+        Print("jobs with non-zero exit codes: %s" % (len(exitCodes) ),printHeader=False)
+        Print("crab resubmit %s --jobids %s --force" % (taskName, exitCodes_s),printHeader=False)
 
     if missingFiles > 0:
-        Print("jobs with missing files:%s" %missingFiles,printHeader=False)
+        Print("jobs with missing files: %s" %missingFiles,printHeader=False)
 
-    exitCodes_s = ""
-    # For-loop: All exit codes
-    for i,e in enumerate(sorted(exitCodes)):
-        exitCodes_s += str(e)
-        if i < len(exitCodes)-1:
-            exitCodes_s += ","
-            Print("jobs with problems:%s" % (len(exitCodes) ),printHeader=False)
-            Print("crab resubmit %s --jobids %s --force" % (taskName, exitCodes_s),printHeader=False)
     return
 
 
