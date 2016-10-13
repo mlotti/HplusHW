@@ -14,26 +14,15 @@ or
 [NOTE: Steps 1)->3) only need to be done once (creates/compiles required C++ libraries).]
 
 
-for comparison:
-./mssm_xs_tools.py -f 13TeV/newmhmax_mu200_13TeV.root -l 100 -u 600 -t 10
-
-
 for AN (light):
-./mssm_xs_tools.py -f 13TeV/mhmodm_mu200_13TeV.root -l 80 -u 160 -t 10 && ./mssm_xs_tools.py -f 13TeV/mhmodp_mu200_13TeV.root -l 80 -u 160 -t 10
-./mssm_xs_tools.py -f 13TeV/mhmodm_mu200_13TeV.root -l 80 -u 160 -t 20 && ./mssm_xs_tools.py -f 13TeV/mhmodp_mu200_13TeV.root -l 80 -u 160 -t 20
-./mssm_xs_tools.py -f 13TeV/mhmodm_mu200_13TeV.root -l 80 -u 160 -t 30 && ./mssm_xs_tools.py -f 13TeV/mhmodp_mu200_13TeV.root -l 80 -u 160 -t 30
-./mssm_xs_tools.py -f 13TeV/newmhmax_mu200_13TeV.root -l 80 -u 160 -t 10
-./mssm_xs_tools.py -f 13TeV/newmhmax_mu200_13TeV.root -l 80 -u 160 -t 20
-./mssm_xs_tools.py -f 13TeV/newmhmax_mu200_13TeV.root -l 80 -u 160 -t 30
+./plotBosonMass_manyTanb.py -f 13TeV/newmhmax_mu200_13TeV.root --tanbMin 5 --tanbMax 40 --tanbStep 5 -l 80 -u 160 -b h
+./plotBosonMass_manyTanb.py -f 13TeV/newmhmax_mu200_13TeV.root --tanbMin 5 --tanbMax 40 --tanbStep 5 -l 120 -u 160 -b H
+./plotBosonMass_manyTanb.py -f 13TeV/newmhmax_mu200_13TeV.root --tanbMin 5 --tanbMax 40 --tanbStep 5 -l 120 -u 160 -b Hp
 
-
+  
 for AN (heavy):
-./mssm_xs_tools.py -f 13TeV/mhmodm_mu200_13TeV.root -l 160 -u 2000 -t 10 && ./mssm_xs_tools.py -f 13TeV/mhmodp_mu200_13TeV.root -l 160 -u 2000 -t 10
-./mssm_xs_tools.py -f 13TeV/mhmodm_mu200_13TeV.root -l 160 -u 2000 -t 20 && ./mssm_xs_tools.py -f 13TeV/mhmodp_mu200_13TeV.root -l 160 -u 2000 -t 20
-./mssm_xs_tools.py -f 13TeV/mhmodm_mu200_13TeV.root -l 160 -u 2000 -t 30 && ./mssm_xs_tools.py -f 13TeV/mhmodp_mu200_13TeV.root -l 160 -u 2000 -t 30
-./mssm_xs_tools.py -f 13TeV/newmhmax_mu200_13TeV.root -l 160 -u 2000 -t 10
-./mssm_xs_tools.py -f 13TeV/newmhmax_mu200_13TeV.root -l 160 -u 2000 -t 20
-./mssm_xs_tools.py -f 13TeV/newmhmax_mu200_13TeV.root -l 160 -u 2000 -t 30
+./plotBosonMass_manyTanb.py -f 13TeV/newmhmax_mu200_13TeV.root --tanbMin 5 --tanbMax 40 --tanbStep 5 -l 160 -u 2000 -b H --logx
+./plotBosonMass_manyTanb.py -f 13TeV/newmhmax_mu200_13TeV.root --tanbMin 5 --tanbMax 40 --tanbStep 5 -l 160 -u 2000 -b Hp --logx
 
 
 Links:
@@ -60,6 +49,7 @@ self.lib = cdll.LoadLibrary('./mssm_xs_tools_C.so')  # fails! macOS needs absolu
 # Import Modules
 #================================================================================================
 import sys
+import os
 from optparse import OptionParser
 from ctypes import cdll
 from ctypes import c_bool
@@ -77,48 +67,45 @@ from ROOT import TFile
 import tdrstyle as tdrstyle
 
 
-#================================================================================================
+#=========================================================================
 # Options
-#================================================================================================
-yLog = True
-xLog = False
-yMin = 1e-04
-yMax = 1.1
-savePath    = "/afs/cern.ch/user/a/attikis/public/html/brPlots/"
+#=========================================================================
+
+savePath    = "/afs/cern.ch/user/m/mkolosov/public/html/BosonMass/"
 saveFormats = ["png", "pdf", "C"]
 Colours     = {}
-Colours["tb"]    = ROOT.kRed
-Colours["taunu"] = ROOT.kBlue
-Colours["cs"]    = ROOT.kBlack
+Colours["AA"]    = ROOT.kGray+2
+Colours["AW"]    = ROOT.kMagenta
 Colours["HW"]    = ROOT.kOrange
 Colours["SUSY"]  = ROOT.kCyan-5
-Colours["enu"]   = ROOT.kViolet-6
-Colours["hW"]    = ROOT.kGreen+3
-Colours["munu"]  = ROOT.kCyan
-Colours["us"]    = ROOT.kGray+1
-Colours["AW"]    = ROOT.kMagenta
-Colours["cb"]    = ROOT.kGreen
+Colours["WHp"]   = ROOT.kTeal-3
+Colours["WW"]    = ROOT.kOrange-7
+Colours["ZA"]    = ROOT.kMagenta+2
+Colours["ZZ"]    = ROOT.kOrange-9
 Colours["Zgam"]  = ROOT.kMagenta+3
 Colours["Zh"]    = ROOT.kRed-5
-Colours["uu"]    = ROOT.kMagenta+2
-Colours["dd"]    = ROOT.kYellow+1
-Colours["cc"]    = ROOT.kOrange+3
-Colours["ss"]    = ROOT.kAzure+7
-Colours["tt"]    = ROOT.kTeal-3
 Colours["bb"]    = ROOT.kRed
-Colours["gluglu"]= ROOT.kYellow+1
-Colours["hh"]    = ROOT.kBlack
-Colours["gamgam"]= ROOT.kMagenta-2
+Colours["cb"]    = ROOT.kGreen
+Colours["cc"]    = ROOT.kOrange+3
+Colours["cs"]    = ROOT.kBlack
+Colours["dd"]    = ROOT.kYellow+1
 Colours["ee"]    = ROOT.kMagenta-7
+Colours["enu"]   = ROOT.kViolet-6
+Colours["gamgam"]= ROOT.kMagenta-2
+Colours["gluglu"]= ROOT.kYellow+1
+Colours["hW"]    = ROOT.kGreen+3
+Colours["hh"]    = ROOT.kBlack
 Colours["mumu"]  = ROOT.kSpring-8
+Colours["munu"]  = ROOT.kCyan
+Colours["ss"]    = ROOT.kAzure+7
+Colours["taunu"] = ROOT.kBlue
 Colours["tautau"]= ROOT.kBlue
-Colours["WW"]    = ROOT.kOrange-7
-Colours["ZZ"]    = ROOT.kOrange-9
-Colours["AA"]    = ROOT.kGray+2
-Colours["WHp"]   = ROOT.kTeal-3
-Colours["ZA"]    = ROOT.kMagenta+2
+Colours["tb"]    = ROOT.kRed
+Colours["tt"]    = ROOT.kTeal-3
+Colours["us"]    = ROOT.kGray+1
+Colours["uu"]    = ROOT.kMagenta+2
 
-    
+   
 #================================================================================================
 # Class definition
 #================================================================================================
@@ -134,11 +121,11 @@ class PlotText:
     \param color   Color of the text
     \param font    Specify font explicitly
     '''
-    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack, font=None):
+    def __init__(self, x, y, text, size=None, bold=True, align="left", color=ROOT.kBlack, font=None, angle=0):
         self.x = x
         self.y = y
-        self.text = text
-
+        self.text  = text
+        self.angle = angle
         self.l = ROOT.TLatex()
         self.l.SetNDC()
         if not bold:
@@ -159,6 +146,7 @@ class PlotText:
         else:
             self.l.SetTextAlign(align)
         self.l.SetTextColor(color)
+        self.l.SetTextAngle(angle)
 
     def Draw(self, options=None):
         '''
@@ -170,7 +158,7 @@ class PlotText:
         self.l.DrawLatex(self.x, self.y, self.text)    
         return
         
-
+    
 class mssm_xs_tools(object):
     """
     Class mssm_xs_tools:
@@ -246,12 +234,12 @@ def GetSaveName(parseOpts):
     including all input parameters values.
     '''
     name = parseOpts.file.split("/")[-1].replace(".root", "")
-    name += "_tanb" + parseOpts.tanb
+    name += "_tanb" + parseOpts.tanbMin
+    name += "to"    + parseOpts.tanbMax
     name += "_"     + parseOpts.boson 
     name += "_m"    + parseOpts.massMin
     name += "to"    + parseOpts.massMax
     return name
-
 
 def GetListSize(listOfLists):
     '''
@@ -313,6 +301,8 @@ def ConvertToLatex(text):
     # Single replacements & Special cases
     if text == "H":
         return "H^{0}"
+    elif text == "h":
+        return "h^{0}"
     elif text == "AW":
         return "A^{0}W^{+}"
     elif text == "hW":
@@ -323,13 +313,16 @@ def ConvertToLatex(text):
         return "Z^{0}#gamma"
     elif text == "Zh":
         return "Z^{0}h^{0}"
+    elif text == "WW":
+        return "W^{+}W^{-}"
     elif text == "ZZ":
         return "Z^{0}Z^{0}"
     elif text == "AA":
         return "A^{0}A^{0}"
     else:
         pass
-
+    
+    
     # Other cases
     text = text.replace("Hp"     , "H^{+}")
     text = text.replace("enu"    , "e^{+}#nu_{e}")
@@ -356,45 +349,33 @@ def GetKeyNames(f, folder = "" ):
     return [key.GetName() for key in ROOT.gDirectory.GetListOfKeys()]
 
 
-def GetListOfHistoNames(f, higgs):
+def GetHistoName(f, higgs):
     '''
-    Returns the list of BR/Decays available for a given mother list.
+    Returns the list of masses available for a given mother list.
     '''
-    Verbose("Getting list of histogram names (non-zero integral) from ROOT file %s" % (f.GetName()) )
-    decays = []
-
+    Verbose("Getting list of histogram names from ROOT file %s" % (f.GetName()) )
+    
     # Get all objects in the ROOT file
     keyList = GetKeyNames(f, "")
 
     # For-loop: All objects in the ROOT file
     for key in keyList:
-            
-        # If key not BR of interest skip it
-        if 'br_' + higgs + '_' not in key:
+        if 'm_' + higgs not in key:
             continue
-
-        # Get the decay and corresponding BR [2D histogram with x = mass, y=tan(beta), z=BR]
-        decay = key.split("_")[-1]
-        hist  = f.Get(key)
-            
-        # Skip decays with zero BR 
-        if hist.Integral() <= 0.0:
-            pass
-        else:
-           decays.append(key)
-    return decays
+        hist  = key
+    return hist
 
 
-def PrintTable(mom, decayTo, massValues, brValues):
+def PrintTable(boson, mA_Values, mBoson_Values, tanb):
     '''
-    Print table of higgs mass and BR for a given channel.
+    Print table of the mass of A and the corresponding higgs mass
     '''
-    Verbose("Printing decays table")
-
+    Verbose("Printing the masses of A and "+boson+" for tanb=" + str(tanb))
+    
     # Construct the msg list & title format
     msgList  = []
     txtAlign = "{:<20} {:<20}"
-    title    = txtAlign.format("Mass (GeV)", "B(%s -> %s)" % (mom, decayTo))
+    title    = txtAlign.format("Mass A (GeV)", "Mass %s (GeV)" % boson)
     hLine    = "="*40
 
     # Append title to message list
@@ -403,8 +384,8 @@ def PrintTable(mom, decayTo, massValues, brValues):
     msgList.append(hLine)
     
     # For-loop: Two lists simultaneously
-    for m, br in zip(massValues, brValues):
-        msg = txtAlign.format(m, br)
+    for mA, mBoson in zip(mA_Values, mBoson_Values):
+        msg = txtAlign.format(mA, mBoson)
         msgList.append(msg)
 
     # For-loop: All messages to be printed
@@ -443,6 +424,73 @@ def CustomiseGraph(gr, grName, colour, gTitle, xTitle, yTitle):
 
     return   
 
+def GetRangeOfA(f, hName, tanb):
+    '''
+    dmin/dmax is the absolute variance between the wanted minimum (parseOpts.massMin) /maximum (parseOpts.massMax)
+    and the nearest real minimum  (the minimum mass of the boson of all histograms, around the wanted minimum) / maximum. 
+    Example: 
+    Given minimum = parseOpts.massMin = 180
+    Given maximum = parseOpts.massMax = 1000.0
+    The real minimum (taking into account all the histograms (decays)) around the wanted minimum is 180.04800415 and the
+    real maximum around the given maximum is 998.427978516. 
+    So the dmin is 0.04800415 and dmax=1.57202148438.
+    The bin that corresponds to that dmin is bin_minA=69 and to that dmax is bin_maxA=310. 
+    Having the bin number we can calculate the mass of A corresponding to the real minimum and maximum mBoson.
+    For the example, is minimum mA = 158 and maximum mA = 995.0.  
+    '''    
+    mssm = mssm_xs_tools(parseOpts.file, True, 0)
+    
+    dmin = 99999.999
+    dmax = 99999.999
+    
+    bin_minA = -1
+    bin_maxA = -1
+    
+    
+    hist = f.Get(hName)
+        
+    if parseOpts.boson == "A" :
+            
+        if float(parseOpts.massMin) < 90.0:
+            Print("WARNING! the lower A boson mass in the plots is 90.0 Ge. Setting the lower A boson mass in the plots to 90 GeV.")
+            parseOpts.massMin = "90"
+        else:
+            pass
+        
+        if float(parseOpts.massMax) > 2000.0:
+            Print("WARNING! the upper A boson mass in the plots is 2 TeV. the upper A boson mass in the plots to 2 TeV.")
+            parseOpts.massMax = "2000"
+        else:
+            pass
+            
+        # Get the number of bins
+        binMinA = hist.GetXaxis().FindBin(float(parseOpts.massMin))
+        binMaxA = hist.GetXaxis().FindBin(float(parseOpts.massMax))
+    else:
+        # For-loop: All x-axis bins
+        for x in range(1, hist.GetNbinsX()+1):
+            
+            mA = hist.GetXaxis().GetBinCenter(x)
+            mass = mssm.mass(parseOpts.boson, mA, tanb)
+            
+            dmass_min = abs(mass - float(parseOpts.massMin))
+            dmass_max = abs(mass - float(parseOpts.massMax))
+            
+            if  dmass_min < dmin:
+                dmin     = dmass_min
+                binMinA = x
+                
+            if  dmass_max < dmax:
+                dmax     = dmass_max
+                binMaxA = x
+                
+        minBosonMass = mssm.mass(parseOpts.boson, hist.GetXaxis().GetBinCenter(binMinA), tanb)
+        maxBosonMass = mssm.mass(parseOpts.boson, hist.GetXaxis().GetBinCenter(binMaxA), tanb)
+        Print("WARNING! the lower %s boson mass in the plots for tanb %s and for the given minimum is %s" % (parseOpts.boson, tanb, minBosonMass))
+        Print("WARNING! the upper %s boson mass in the plots for tanb %s and for the given maximum is %s" % (parseOpts.boson, tanb, maxBosonMass))
+    
+    return binMinA, binMaxA
+
 
 def main():
     '''
@@ -452,16 +500,20 @@ def main():
     # Setup the correct style
     Print("Setting the TDR style", True)
     style = tdrstyle.TDRStyle()
-        
+
+    # Setup the correct x-axis range
+    #xMin = float(parseOpts.massMin)
+    #xMax = float(parseOpts.massMax)
+    
     # Global Setting: Sets max digits permitted for the axis labels (above this notation with 10^N is used)
     ROOT.TGaxis.SetMaxDigits(10)
-
+    
     # Set ROOT batch mode boolean
     Print("Batch-Mode is set to %s" % (parseOpts.batchMode))
     ROOT.gROOT.SetBatch(parseOpts.batchMode)
-
+    
     # Create an access tools object to calculate stuff
-    Print("Using file %s, tan(beta) = %s, higgs = %s" % (parseOpts.file, parseOpts.tanb, parseOpts.boson) )
+    Print("Using file %s, tan(beta) = %s to %s (%s steps), higgs = %s" % (parseOpts.file, parseOpts.tanbMin, parseOpts.tanbMax, parseOpts.tanbStep, parseOpts.boson) )
     mssm = mssm_xs_tools(parseOpts.file, True, 0)
 
     # Open ROOT file
@@ -469,11 +521,22 @@ def main():
     f = ROOT.TFile(parseOpts.file)
     energy = parseOpts.file.split("/")[0]
 
-    # For-loop: All available higgs bosons
-    histoNames = GetListOfHistoNames(f, parseOpts.boson)
+    
+    # Create tanb list
+    tanbList = []
+    for tb in range(int(parseOpts.tanbMin), int(parseOpts.tanbMax)+int(parseOpts.tanbStep), int(parseOpts.tanbStep)):
+        tanbList.append(tb)
 
+    # Sane limit
+    if len(tanbList) > 10:
+        raise Exception("ERROR! Too many (%s) tanBeta values to be plotted. Maximum allowed is 10. Refine you min, max, and step values" % (len(tanbList)))
+    
+    # For-loop: All available higgs bosons
+    histName = GetHistoName(f, parseOpts.boson)
+    hist     = f.Get(histName)
+    
     # Create canvas
-    cName = "TCanvas_" + parseOpts.boson + "_tanb" + parseOpts.tanb
+    cName = "TCanvas_" + parseOpts.boson + "_tanb" + parseOpts.tanbMin + "to" + parseOpts.tanbMax
     Print("Creating canvas with name %s" % (cName) )
     c1 = ROOT.TCanvas(cName, cName)
     c1.cd()
@@ -481,136 +544,151 @@ def main():
     # Create & Customise a TMultiGraph
     Print("Creating  TMultiGraph")
     mGraph = ROOT.TMultiGraph()
-    xTitle = "m_{"+ ConvertToLatex(parseOpts.boson) +"} [GeV]"
-    yTitle = "BR("+ ConvertToLatex(parseOpts.boson) + ")"
+    xTitle = "m_{A} [GeV]"
+    yTitle = "m_{"+ ConvertToLatex(parseOpts.boson) +"} [GeV]"
     mGraph.SetTitle("; %s ; %s" % (xTitle, yTitle) )
-
+    
     # Create & Customise a TLegend
-    Print("Creating  TMultiGraph")
-    leg = ROOT.TLegend(0.65, 0.45, 0.92, 0.92)
+    Print("Creating TLegend")
+    yMinLeg = 0.65 - 0.07*(len(tanbList)-1)
+    leg = ROOT.TLegend(0.19, 0.6, 0.42, 0.9)
     leg.SetFillColor(0)
     leg.SetFillStyle(3002)
     leg.SetBorderSize(0)
-
-    # For-loop: All decays for given boson
-    for hName in histoNames:
-
-        massList    = []
-        brList      = []
-
-        # Get the TH2 from the ROOT file (x=mass, y=tan(beta), z=BR)
-        hist = f.Get(hName)
-
-        # Get the X in the decay (Higgs->X)
-        decayTo = hName.split("_")[-1]
-
+    
+    counter = 0
+    # For-loop: All tanb values
+    for tanb in tanbList:
+        counter += 1
+        colour = Colours.values()[counter]            
+        
+        # Get the bin numbers corresponding to minimum/maximum of the A mass 
+        minBin, maxBin = GetRangeOfA(f, histName, tanb)
+        
+        # Create lists to hold the x- and y- values
+        mA_List      = []
+        mBoson_List  = []
+        
         # For-loop: All available mass values (ignore zero-bin)
-        for x in range(1, hist.GetNbinsX()+1):
+        for x in range(minBin, maxBin+1):
             
             # Get x- and y-values of histogram
-            mass = hist.GetXaxis().GetBinCenter(x)
-            br   = mssm.br(parseOpts.boson + "->" + decayTo, mass, float(parseOpts.tanb))
-              
+            mA = hist.GetXaxis().GetBinCenter(x)
+            
+            if parseOpts.boson == "A":
+                mass_boson = mA
+            else:
+                mass_boson = mssm.mass(parseOpts.boson, mA, tanb)
+                
             # Apply mass cut-off values
-            if mass < float(parseOpts.massMin):
+            if mass_boson < float(parseOpts.massMin):
                 continue
-            if mass > float(parseOpts.massMax):
+            if mass_boson > float(parseOpts.massMax):
                 break
-
-            # If decay outside range don't add it!
-            if br < yMin:
-                continue 
-
-            # Save mass/br values to a list
-            massList.append(mass)
-            brList.append(br)
-
+            
+            # Save mass values to a list
+            mA_List.append(mA)
+            mBoson_List.append(mass_boson)                                    
+        
         # Sanity check
-        nPoints = GetListSize([massList, brList])
+        nPoints = GetListSize([mA_List, mBoson_List])
 
         # Skip empty decays
         if nPoints < 1:
             continue
 
         # Create arrays compatible with TGraph
-        massValues = array('f', massList)
-        brValues   = array('f', brList)
-
-        # Print mass-BR values
+        mA_Values      = array('f', mA_List)
+        mBoson_Values  = array('f', mBoson_List)
+        
+        # Print mass A - mass Boson values
         if parseOpts.verbose:
-            PrintTable(parseOpts.boson, decayTo, massValues, brValues)
-                    
+            PrintTable(parseOpts.boson, mA_Values, mBoson_Values, tanb)
+            
         # Create & Customise a TGraph
-        tGraph = ROOT.TGraph(len(massValues), massValues, brValues)
-        CustomiseGraph(tGraph, hName, Colours[decayTo] , "", "", "")
+        tGraph = ROOT.TGraph(len(mA_Values), mA_Values, mBoson_Values)
+        CustomiseGraph(tGraph, histName, colour, "", "", "")
 
         # Add the TGraph to the TMultiGraph
         mGraph.Add(tGraph)
-
+        
         # Add to TLegend
-        leg.AddEntry(tGraph, "BR("+ ConvertToLatex(parseOpts.boson) + "#rightarrow" + ConvertToLatex(decayTo) + ")", "lp")
+        leg.AddEntry(tGraph, "tan#beta=" + str(tanb), "l")
+
 
     # Create text to be drawn on the canvas
     Print("Creating information text for canvas")
-    t1 = PlotText(0.16, 0.95, "tan#beta=%s" % (parseOpts.tanb), None, False )
+    #t1 = PlotText(0.16, 0.95, "tan#beta=%s" % (parseOpts.tanb), None, False )
     t2 = PlotText(0.40, 0.95, "#sqrt{s}=%s" % (energy.replace("TeV", " TeV")), None, False)
-    # t3 = PlotText(0.45, 0.95, "FeynHiggs+HDECAY", None, False)
-    # t3 = PlotText(0.71, 0.95, "LHCHXSWG", None, False)
     t3 = PlotText(0.57, 0.95, "LHC HIGGS XS WG", None, False)
-    t4 = PlotText(0.67, 0.16, ConvertFileToScenario(parseOpts.file), None, False)
-
+    t4 = PlotText(0.67, 0.95, ConvertFileToScenario(parseOpts.file), None, False)
+    t5 = PlotText(0.985, 0.20, "Based on data from the LHCHXSWG", None, False, align="left", color=ROOT.kBlack, font=None, angle=90)
+    
+    
     # Draw stuff on the canvas
     Print("Drawing various objects on the canvas")
-    mGraph.Draw("AC") #fixme
+    mGraph.Draw("AC")
     mGraph.GetXaxis().SetNoExponent()
     mGraph.GetXaxis().SetMoreLogLabels()
     mGraph.GetXaxis().SetTitleOffset(1.05)
     leg.Draw()
-    t1.Draw()
-    # t2.Draw()
-    t3.Draw()
+    #t1.Draw()
+    #t2.Draw()
+    #t3.Draw()
     t4.Draw()
-    if xLog==True or float(parseOpts.massMax) > 1000.0:
-        Print("Setting x-axis to log-scale (xLog=%s)" % (xLog))
+    t5.Draw()
+    
+    if parseOpts.logx==True:
+        Print("Setting x-axis to log-scale")
         c1.SetLogx()
-    if yLog==True:
-        Print("Setting y-axis to log-scale (yLog=%s)" % (yLog))
-        mGraph.SetMinimum(yMin)
+    if parseOpts.logy==True:
+        Print("Setting y-axis to log-scale")
+        #mGraph.SetMinimum(yMin)
         c1.SetLogy()
-    c1.Update()
     
     # Customise axes
     Print("Customising TMultiGraph axes")
-    mGraph.GetYaxis().SetRangeUser(yMin, yMax)
-    mGraph.GetXaxis().SetRangeUser(float(parseOpts.massMin), float(parseOpts.massMax))
-
+    #mGraph.GetXaxis().SetRangeUser(xMin, xMax)
+    mGraph.GetYaxis().SetRangeUser(float(parseOpts.massMin), float(parseOpts.massMax))
+    
+    c1.Update()
+    
     # Save & Close the canvas
     Print("Saving plots in %s format(s)" % (len(saveFormats)) )
     SaveCanvas(c1, saveFormats, savePath, parseOpts)
     return
-
 
 #================================================================================================
 # Main
 #================================================================================================
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-v", "--verbose"   , dest="verbose"  , action="store_true" , default=False , help="Enables verbose mode (for debugging)")
-    parser.add_option("-b", "--batchMode" , dest="batchMode", action="store_false", default=True  , help="Enables batch mode (does NOT generates a window)")
-    parser.add_option("-t", "--tanb"      , dest="tanb"     , action="store"      , default=-1.0  , help="The value of tan(beta) to use in plots")
-    parser.add_option("-f", "--file"      , dest="file"     , action="store"      , default=None  , help="The (ROOT) file to be used in the plots")
-    parser.add_option("-b", "--boson"     , dest="boson"    , action="store"      , default="Hp"  , help="The (Higgs) boson to consider in the plots (H, Hp, h, A)")
-    parser.add_option("-l", "--massMin"   , dest="massMin"  , action="store"      , default=80.0  , help="The lower (Higgs) boson mass in the plots (H, Hp, h, A)")
-    parser.add_option("-u", "--massMax"   , dest="massMax"  , action="store"      , default=2000.0, help="The upper (Higgs) boson mass in the plots (H, Hp, h, A)")
+    parser.add_option("-v", "--verbose"   , dest="verbose"  , action="store_true" , default=False  , help="Enables verbose mode (for debugging)")
+    parser.add_option("-b", "--batchMode" , dest="batchMode", action="store_false", default=True   , help="Enables batch mode (does NOT generates a window)")
+    parser.add_option("-f", "--file"      , dest="file"     , action="store"      , default=None   , help="The (ROOT) file to be used in the plots")
+    parser.add_option("-b", "--boson"     , dest="boson"    , action="store"      , default="Hp"   , help="The (Higgs) boson to consider in the plots (H, Hp, h)")
+    parser.add_option("-l", "--massMin"   , dest="massMin"  , action="store"      , default=80.0   , help="The lower (Higgs) boson mass in the plots (H, Hp, h, A)")
+    parser.add_option("-u", "--massMax"   , dest="massMax"  , action="store"      , default=2000.0 , help="The upper (Higgs) boson mass in the plots (H, Hp, h, A)")
+    parser.add_option("--tanbMin" , dest="tanbMin" , action="store"     , default=-1.0   , help="The min value of tan(beta) to use in plots")
+    parser.add_option("--tanbMax" , dest="tanbMax" , action="store"     , default=-1.0   , help="The max value of tan(beta) to use in plots")
+    parser.add_option("--tanbStep", dest="tanbStep", action="store"     , default=-1.0   , help="The step value of tan(beta) to use in plots")
+    parser.add_option("--logx"    , dest="logx"    , action="store_true", default=False  , help="Set x-axis in log scale? (default: False)")
+    parser.add_option("--logy"    , dest="logy"    , action="store_true", default=False  , help="Set y-axis in log scale? (default: False)")
+    
     (parseOpts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
-    if parseOpts.tanb == -1.0 or parseOpts.file == None:
+    if parseOpts.tanbMin == -1.0 or parseOpts.tanbMax == -1.0 or parseOpts.tanbStep == -1.0 or parseOpts.file == None:
         print "Not enough arguments passed to script execution. Printing docstring & EXIT."
         print __doc__
         sys.exit(0)
     else:
         pass
+
+    if parseOpts.boson == "A":
+        print "Choose one of the (Higgs) bosons: H, Hp, h to plot its mass as a function of mA."
+        print __doc__
+        sys.exit(0)
 
     # Program execution
     main()

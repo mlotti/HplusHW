@@ -126,6 +126,7 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
     xhltvariable = selectedHltTau.pt();
   }
   if(xvar == eta) xvariable = selectedTau->eta();
+  if(xvar == phi) xvariable = selectedTau->phi();
   if(xvar == pu) xvariable = fEvent.vertexInfo().value();
 
 
@@ -136,7 +137,9 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
   double muTauInvMass = (selectedMuon->p4() + selectedTau->p4()).M();
   if(xvar == pt) hInvM->Fill(muTauInvMass);
   //  std::cout << "check muTauInvMass " << selectedMuon->pt() << " " << selectedTau->pt() << " " << muTauInvMass << std::endl;
+
   if(!(muTauInvMass > 20 && muTauInvMass < 80)) return false;
+
   //  if(!(muTauInvMass < 100)) return false; // 80 -> 100 because of H125 sample. 23112015/S.Lehti
   cTauLegInvMass.increment();
 

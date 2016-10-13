@@ -47,7 +47,14 @@ void METLegSelection::print(){}
 bool METLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
 
   xvariable = fEvent.met_Type1().et();
-  if(xvar == pu) xvariable = fEvent.vertexInfo().value();
+  if(xvar == phi) {
+    xvariable = fEvent.met_Type1().phi();
+    if(fEvent.met_Type1().et() < 80) return false;
+  }
+  if(xvar == pu) {
+    xvariable = fEvent.vertexInfo().value();
+    if(fEvent.met_Type1().et() < 80) return false;
+  }
 
   const TauSelection::Data tauData = fTauSelection.silentAnalyze(fEvent);
   if (!tauData.hasIdentifiedTaus()) return false;
@@ -117,18 +124,18 @@ bool METLegSelection::onlineSelection(Event& fEvent){
   bool hltdecision = fEvent.configurableTriggerDecision2();
   //  std::cout << "check METLegSelection::onlineSelection " << hltdecision << " " << fEvent.L1met().et() << std::endl;
 return hltdecision;
-  double L1METcut  = 50;
-  if(onlineselectionstr == "MET120") L1METcut = 70;
+  double L1METcut  = 80;
+  if(onlineselectionstr == "MET80") L1METcut = 70;
   double l1MET = fEvent.L1met().et();
   return l1MET > L1METcut && hltdecision;
 }
 
 bool METLegSelection::caloMETSelection(Event& fEvent){
-  double L1METcut  = 50;
-  double HLTMETcut = 80;
-  if(onlineselectionstr == "MET120") {
+  double L1METcut  = 80;
+  double HLTMETcut = 90;
+  if(onlineselectionstr == "MET80") {
     L1METcut = 70;
-    HLTMETcut = 120;
+    HLTMETcut = 80;
   }
   double l1MET = fEvent.L1met().et();
   double caloMET = fEvent.calomet().et();

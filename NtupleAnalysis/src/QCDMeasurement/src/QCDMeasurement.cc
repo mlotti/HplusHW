@@ -35,6 +35,8 @@ private:
   Count cVertexSelection;
   TauSelection fTauSelection;
   // Counters for baseline tau leg (note that the event selection objects contain also some main counters)
+  Count cBaselineTauTauIDCounter;
+  Count cBaselineTauTauIDSFCounter;
   Count cBaselineTauFakeTauSFCounter;
   Count cBaselineTauTauTriggerSFCounter;
   Count cBaselineTauOneTauCounter;
@@ -49,6 +51,7 @@ private:
   AngularCutsBackToBack fBaselineTauAngularCutsBackToBack;
   Count cBaselineTauSelectedEvents;
   // Counters for inverted tau leg (note that the event selection objects contain also some main counters)
+  Count cInvertedTauTauIDSFCounter;
   Count cInvertedTauFakeTauSFCounter;
   Count cInvertedTauTauTriggerSFCounter;
   Count cInvertedTauOneTauCounter;
@@ -144,6 +147,8 @@ QCDMeasurement::QCDMeasurement(const ParameterSet& config, const TH1* skimCounte
   fTauSelection(config.getParameter<ParameterSet>("TauSelection"),
                 fEventCounter, fHistoWrapper, &fCommonPlots, ""),
   // Baseline tau counters and selection objects (no common plots produced)
+  cBaselineTauTauIDCounter(fEventCounter.addCounter("BaselineTau: tau ID")),
+  cBaselineTauTauIDSFCounter(fEventCounter.addCounter("BaselineTau: tau ID SF")),
   cBaselineTauFakeTauSFCounter(fEventCounter.addCounter("BaselineTau: fake tau SF")),
   cBaselineTauTauTriggerSFCounter(fEventCounter.addCounter("BaselineTau: tau trigger SF")),
   cBaselineTauOneTauCounter(fEventCounter.addCounter("BaselineTau: exactly one tau")),
@@ -165,6 +170,7 @@ QCDMeasurement::QCDMeasurement(const ParameterSet& config, const TH1* skimCounte
                 fEventCounter, fHistoWrapper, nullptr, "BaselineTau"),
   cBaselineTauSelectedEvents(fEventCounter.addCounter("BaselineTau: selected events")),
   // Inverted tau counters and selection objects (common plots produced)
+  cInvertedTauTauIDSFCounter(fEventCounter.addCounter("InvertedTau: tau ID SF")),
   cInvertedTauFakeTauSFCounter(fEventCounter.addCounter("InvertedTau: fake tau SF")),
   cInvertedTauTauTriggerSFCounter(fEventCounter.addCounter("InvertedTau: tau trigger SF")),
   cInvertedTauOneTauCounter(fEventCounter.addCounter("InvertedTau: exactly one tau")),
@@ -401,6 +407,13 @@ void QCDMeasurement::process(Long64_t entry) {
       fNormalizationSystematicsControlRegion.setFactorisationBinForEvent(myFactorisationInfo);
       fNormalizationSystematicsControlRegion.fillControlPlotsAfterTauSelection(fEvent, tauData);
 
+      //====== Tau ID SF 
+      if (fEvent.isMC()) {
+	// inverted = not passed tau id = no SF used.
+	//fEventWeight.multiplyWeight(tauData.getTauIDSF());
+      }
+      cInvertedTauTauIDSFCounter.increment();
+
       // Apply fake tau SF
       if (fEvent.isMC()) {
         fEventWeight.multiplyWeight(tauData.getAntiIsolatedTauMisIDSF());
@@ -426,6 +439,13 @@ void QCDMeasurement::process(Long64_t entry) {
       fCommonPlots.setFactorisationBinForEvent(myFactorisationInfo);
       fNormalizationSystematicsSignalRegion.setFactorisationBinForEvent(myFactorisationInfo);
       fNormalizationSystematicsSignalRegion.fillControlPlotsAfterTauSelection(fEvent, tauData);
+
+      cBaselineTauTauIDCounter.increment();
+      //====== Tau ID SF       
+      if (fEvent.isMC()) {
+	fEventWeight.multiplyWeight(tauData.getTauIDSF());
+      }
+      cBaselineTauTauIDSFCounter.increment();
 
       // Apply fake tau SF
       if (fEvent.isMC()) {

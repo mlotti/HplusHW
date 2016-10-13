@@ -43,8 +43,37 @@ private:
   edm::EDGetTokenT<reco::GenParticleCollection> *token;
   
   // General particle list
-  std::vector<short> *mother;
-  
+  std::vector<int> *collisionId;
+  // std::vector<short> *mother;
+  std::vector< std::vector<short> > *mothers;
+  std::vector< std::vector<short> > *daughters;
+
+  // Booleans
+  std::vector<bool> *fromHardProcessBeforeFSR;
+  std::vector<bool> *fromHardProcessDecayed;
+  std::vector<bool> *fromHardProcessFinalState;
+  std::vector<bool> *isDirectHardProcessTauDecayProductFinalState;
+  std::vector<bool> *isDirectPromptTauDecayProductFinalState;
+  std::vector<bool> *isHardProcess;
+  std::vector<bool> *isLastCopy;
+  std::vector<bool> *isLastCopyBeforeFSR;
+  // std::vector<bool> *isMostlyLikePythia6Status3;
+  std::vector<bool> *isPromptDecayed;
+  std::vector<bool> *isPromptFinalState;
+
+  // Flags
+  std::vector<bool> *fromHardProcess;
+  std::vector<bool> *isDecayedLeptonHadron;
+  std::vector<bool> *isDirectHadronDecayProduct;
+  std::vector<bool> *isDirectHardProcessTauDecayProduct;
+  std::vector<bool> *isDirectPromptTauDecayProduct;
+  std::vector<bool> *isDirectTauDecayProduct;
+  std::vector<bool> *isFirstCopy;
+  std::vector<bool> *isHardProcessTauDecayProduct;
+  std::vector<bool> *isPrompt;
+  std::vector<bool> *isPromptTauDecayProduct;
+  std::vector<bool> *isTauDecayProduct;
+
   // MC electrons
   FourVectorDumper *electrons;
   

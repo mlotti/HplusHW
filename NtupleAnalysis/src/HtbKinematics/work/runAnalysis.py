@@ -1,19 +1,19 @@
-#!/usr/bin/env python                                                                                                                                                              
-'''                                                                                                                                                                                
-INSTRUCTIONS:                                                                                                                                                                      
-The required minimum input is a multiCRAB directory with at least one dataset. If successfull                                                                                      
-a pseudo multiCRAB with name "analysis_YYMMDD_HHMMSS/" will be created, inside which each                                                                                          
-dataset has its own directory with the results (ROOT files with histograms). These can be later                                                                                    
-used as input to plotting scripts to get the desired results.                                                                                                                      
-                                                                                                                                                                                   
+#!/usr/bin/env python
+'''
+INSTRUCTIONS:
+The required minimum input is a multiCRAB directory with at least one dataset. If successfull
+a pseudo multiCRAB with name "analysis_YYMMDD_HHMMSS/" will be created, inside which each
+dataset has its own directory with the results (ROOT files with histograms). These can be later
+used as input to plotting scripts to get the desired results.
 
-PROOF:                                                                                                                                                                             
-Enable only if your analysis is CPU-limited (e.g. limit calculation) With one analyzer at                                                                                          
-a time most probably you are I/O -limited. The limit is how much memory one process is using.                                                                                      
-                                                                                                                                                                                  
 
-USAGE:                                                                                                                                                                             
-./runAnalysis.py -m <path-to-multicrab-directory> -j <numOfCores> -i <DatasetName>
+PROOF:
+Enable only if your analysis is CPU-limited (e.g. limit calculation) With one analyzer at
+a time most probably you are I/O -limited. The limit is how much memory one process is using.
+
+
+USAGE:
+./runAnalysis.py -m <multicrab-directory> -j <numOfCores> -i <DatasetName>
                                                                                                                                                                                    
 
 Example:
@@ -22,14 +22,14 @@ or
 ./runAnalysis.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
 
                                                                                                                                                                                    
-ROOT:                                                                                                                                                                              
-The available ROOT options for the Error-Ignore-Level are (const Int_t):                                                                                                           
-        kUnset    =  -1                                                                                                                                                            
-        kPrint    =   0                                                                                                                                                            
-        kInfo     =   1000                                                                                                                                                         
-        kWarning  =   2000                                                                                                                                                         
-        kError    =   3000                                                                                                                                                         
-        kBreak    =   4000                                                                                                                                                         
+ROOT:
+The available ROOT options for the Error-Ignore-Level are (const Int_t):
+        kUnset    =  -1
+        kPrint    =   0
+        kInfo     =   1000
+        kWarning  =   2000
+        kError    =   3000
+        kBreak    =   4000
 '''
 
 
@@ -40,7 +40,6 @@ import sys
 from optparse import OptionParser
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
-from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix
 from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
 
 
@@ -49,7 +48,7 @@ import ROOT
 #================================================================================================
 # Options
 #================================================================================================
-prefix      = "GenParticleKinematics"
+prefix      = "HtbKinematics"
 postfix     = ""
 dataEras    = ["2015"] # dataEras = ["2015B","2015C"]
 searchModes = ["80to1000"]
@@ -99,7 +98,6 @@ def main():
     # Setup the process
     # ================================================================================================
     process = Process(prefix, postfix, opts.nEvts)
-    # process = Process("GenParticleKinematics"+obtainAnalysisSuffix(sys.argv))
 
             
     # ================================================================================================
@@ -121,11 +119,15 @@ def main():
     # ================================================================================================                                                                             
     # Selection customisations                                                                                                                                                     
     # ================================================================================================                                                                             
-    from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
+    from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections
+    #from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
 
-    # Additional selection definitions
-    allSelections.__setattr__("TopQuark_Pt" ,  10.0)
-    allSelections.__setattr__("TopQuark_Eta",   2.4)
+    # Overwrite verbosity
+    allSelections.verbose = opts.verbose
+
+    # Overwrite histo ambient level (Options: Systematics, Vital, Informative, Debug)
+    allSelections.histogramAmbientLevel = opts.histoLevel
+
     
     # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
     # allSelections.CommonPlots.histogramSplitting = [                                                                                                                             
@@ -160,12 +162,12 @@ def main():
                               usePUreweighting=True,
                               doSystematicVariations=False)
 
+    # Perform variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])                                                                                                              
     # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])                                                                                       
 
-    from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
+    # Build the builder
     builder.build(process, allSelections)
-
 
     # ================================================================================================
     # Example of adding an analyzer whose configuration depends on dataVersion
@@ -202,15 +204,14 @@ def main():
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab"           , dest="mcrab"           , action="store", help="Path to the multicrab directory for input")
-    parser.add_option("-j", "--jCores"          , dest="jCores"          , action="store", type=int, help="Number of CPU cores (PROOF workes) to use. Default is all available.")
+    parser.add_option("-j", "--jCores"          , dest="jCores"          , action="store", type=int, help="Number of CPU cores (PROOF workes) to use. (default: all available)")
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", help="List of datasets in mcrab to include")
     parser.add_option("-e", "--excludeTasks"    , dest="excludeTasks"    , action="store", help="List of datasets in mcrab to exclude")
-    parser.add_option("-n", "--nEvts"           , dest="nEvts"           , action="store", type=int, default = -1, help="Number of events to run on")
+    parser.add_option("-n", "--nEvts"           , dest="nEvts"           , action="store", type=int, default = -1 , help="Number of events to run on")
+    parser.add_option("-v", "--verbose"         , dest="verbose"         , action="store_true", default = False   , help="Enable verbosity (for debugging)")
+    parser.add_option("-h", "--histoLevel"      , dest="histoLevel"      , action="store", default = "Informative", help="Histogram ambient level (default: Informative)")
     (opts, args) = parser.parse_args()
 
     if opts.mcrab == None:
         raise Exception("Please provide input multicrab directory with -m")
     main()
-#================================================================================================                                                                                  
-
-

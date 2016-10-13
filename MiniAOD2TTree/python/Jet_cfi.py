@@ -12,22 +12,21 @@ Jets = cms.VPSet(
     cms.PSet(
         branchname = cms.untracked.string("Jets"),
 #        src = cms.InputTag("patJetsReapplyJECAK4CHS"), # made from ak4PFJetsCHS
-#        src = cms.InputTag("updatedPatJetsUpdatedJEC"),
-        src = cms.InputTag("cleanedPatJets"),
+        src = cms.InputTag("updatedPatJetsUpdatedJEC"),
+#        src = cms.InputTag("selectedPatJetsForMetT1T2SmearCorr"),
+#        src = cms.InputTag("cleanedPatJets"),
+#        src = cms.InputTag("patJetsReapplyJEC"),
         srcJESup   = cms.InputTag("shiftedPatJetEnUp"),
 	srcJESdown = cms.InputTag("shiftedPatJetEnDown"),
         srcJERup   = cms.InputTag("shiftedPatSmearedJetResUp"),
         srcJERdown = cms.InputTag("shiftedPatSmearedJetResDown"),
 #        jecPayload = JECpayloadAK4PFchs.payload,
 
-        discriminators = cms.vstring(
-            "pfJetBProbabilityBJetTags",
-            "pfJetProbabilityBJetTags",
-            #"pfCombinedSecondaryVertexBJetTags",
-            #"pfCombinedInclusiveSecondaryVertexBJetTags",
-            #"combinedInclusiveSecondaryVertexV2BJetTags", # for 72x
-            "pfCombinedInclusiveSecondaryVertexV2BJetTags", # for 74x
-            "pfCombinedMVABJetTag",
+        discriminators = cms.vstring( #https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X
+            "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+            "pfCombinedMVAV2BJetTags", 
+            "pfCombinedCvsLJetTags", 
+            "pfCombinedCvsBJetTags"
         ),
         userFloats = cms.vstring(
 #           "pileupJetId:fullDiscriminant"

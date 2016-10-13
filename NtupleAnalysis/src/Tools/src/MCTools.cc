@@ -14,372 +14,308 @@ MCTools::MCTools(Event &fEvt){
   if( fEvent->isData()==true ) return; 
 }
 
+
 MCTools::~MCTools(){}  
+
+
+double MCTools::DeltaPhi(const double phi1, 
+			 const double phi2){
+  //	
+  // See: https://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_4_2/doc/html/d1/d92/DataFormats_2Math_2interface_2deltaPhi_8h_source.html
+  //
+  Double_t result = phi1 - phi2;
+  while (result > PI) result -= 2*PI;
+  while (result <= -PI) result += 2*PI; 
+
+  return result;
+}
+
+
+double MCTools::DeltaAbs(const double val1, 
+			 const double val2){
+  //
+  // See: https://cmssdt.cern.ch/SDT/doxygen/CMSSW_4_4_2/doc/html/d1/d92/DataFormats_2Math_2interface_2deltaPhi_8h_source.html
+  //
+  Double_t deltaAbs = fabs ( val1 - val2 );
+  return deltaAbs;
+}
+
+
+double MCTools::GetRapidity(const math::XYZTLorentzVector p4){
+  // 
+  // Description:
+  // Returns rapidity of the particle with 4-momentum p4.
+  //
+  double rapidity = 0.5*log( (p4.e() + p4.pz()) / (p4.e() - p4.pz()) );
+  return rapidity;
+}
+
 
 
 bool MCTools::IsNeutrino(const int pdgId){
 
   // 
   // Description:
-  // Returns true if genParticle is neutrino (e,mu,tau) else false.
+  // Returns true if genParticle is neutrino (v_e, v_mu, v_tau), else false.
   //
 
-  if( ( fabs(pdgId) == 12)  || ( fabs(pdgId) == 14)  || ( fabs(pdgId) == 16) ) return true;
+  if( (abs(pdgId) == 12) || (abs(pdgId) == 14) || (abs(pdgId) == 16) ) return true;
   else return false;
 }
 
-std::vector<int> MCTools::GetDaughters(const int my_index,
-				       const int my_id,
-				       bool bSkipSelf){
-  
+
+bool MCTools::IsLepton(const int pdgId){
+
   // 
   // Description:
-  // Investigate all GenParticle and look for their mother's genP_index. 
-  // If that index matches the my_index AND the genMom_pdgId matched my_id
-  // then the genP is considered a daughter of the particle with 
-  // (index, id)=(my_index, my_id). Return all daughters in an std::vector.
+  // Returns true if genParticle is a lepton (e, mu, tau & associated neutrinos), else false.
   //
 
-  int genP_index = -1;
-  std::vector<int> genP_daughters;
-  
-  // For-loop: GenParticles
-  for (auto& p: fEvent->genparticles().getGenParticles()) {
-    
-    genP_index++;
-    int genP_pdgId   = p.pdgId();
-    int genMom_index = p.mother();
-
-    
-    // Check if mother
-    if (genMom_index != my_index) continue;
-
-    if (bSkipSelf == true && my_id == genP_pdgId) continue;
-
-    // Save daughter
-    genP_daughters.push_back(genP_index);
-  }
-
-  return genP_daughters;
+  if( (abs(pdgId) == 11) || (abs(pdgId) == 12)  ||
+      (abs(pdgId) == 13) || (abs(pdgId) == 14)  ||
+      (abs(pdgId) == 15) || (abs(pdgId) == 16) ) return true;
+  else return false;
 }
 
 
+bool MCTools::IsChargedLepton(const int pdgId){
 
-bool MCTools::RecursivelyLookForMotherId(const int genP_index,
-					 int wantedMom_pdgId,
-					 const bool bAbsoluteMomId){
   // 
   // Description:
-  // Investigate all the mothers of the GenParticle with index "genP_index". 
-  // If any of the GenParticle's mothers has an id equal to "momId" return true,
-  // otherwise return false. 
+  // Returns true if genParticle is a charged lepton (e, mu, tau), else false.
   //
 
-  if (bAbsoluteMomId) wantedMom_pdgId = std::abs(wantedMom_pdgId);
-  
-  // Get the mother index
-  const genParticle p = fEvent->genparticles().getGenParticles()[genP_index];
-  double genMom_index = p.mother();
-    
-  // If mother index less than 0, return false
-  if (genMom_index < 0) return false;
-  
-  // Valid mother exists, therefore get its pdgId
-  const genParticle m = fEvent->genparticles().getGenParticles()[genMom_index];
-  int genMom_pdgId = m.pdgId();
-
-  if (genMom_pdgId == wantedMom_pdgId)
-    {
-      return true;
-    }
-  if (RecursivelyLookForMotherId(genMom_index, wantedMom_pdgId, bAbsoluteMomId) )
-    {
-      return true;
-    }
-  
-  return false;
+  if( (abs(pdgId) == 11) || (abs(pdgId) == 13) || (abs(pdgId) == 15) ) return true;
+  else return false;
 }
 
 
-
-TLorentzVector MCTools::GetVisibleP4(const unsigned int genP_index){
-
-  // 
-  // Description:
-  // Return the 4-vector of all of the genParticle's daughters, except for neutrinos.
-  //
-
-  const genParticle genP     = fEvent->genparticles().getGenParticles()[genP_index];
-  vector<int> genP_daughters = GetDaughters(genP_index, genP.pdgId(), true);
-
-  TLorentzVector p4(0,0,0,0);
-  if (genP_daughters.size() == 0) return p4;
-
-  // For-loop: Daughters
-  for (unsigned short i = 0; i < genP_daughters.size(); i++){
-
-    // Get daughter
-    int dau_Index = genP_daughters.at(i);
-    const genParticle dau = fEvent->genparticles().getGenParticles()[dau_Index];
-
-    // Get properties
-    math::XYZTLorentzVector dau_p4;
-    dau_p4        = dau.p4();
-    int dau_PdgId = dau.pdgId();
-
-     // Skip invisible daughters (neutrinos)
-    if ( IsNeutrino(dau_PdgId) ) continue;
-
-     TLorentzVector tmp;
-     tmp.SetPtEtaPhiM(dau_p4.pt(), dau_p4.eta(), dau_p4.phi(), dau_p4.mass());
-     p4 += tmp;
-
-   } // For-loop: Daughters
- 
-  return p4;
-}
-
-
-int MCTools::GetLdgDaughter(const int genP_index){  // bool bOnlyChargedDaughters){
+bool MCTools::IsQuark(const int pdgId){
 
   // 
   // Description:
-  // Returns index for the genParticle's leading pT daughter.
+  // Returns true if genParticle is a quark (u, d, c, s, t, b), else false.
   //
 
-
-  // Declarations
-  const genParticle genP     = fEvent->genparticles().getGenParticles()[genP_index];
-  vector<int> genP_daughters = GetDaughters(genP_index, genP.pdgId(), true);
-  int ldgPtIndex = -1;
-  double ldgPt   = -1.0;
-
-  if (genP_daughters.size() == 0) return ldgPtIndex;
-
-  // For-loop: Daughters
-  for (size_t i = 0; i < genP_daughters.size(); i++){
-    
-    int dau_Index   = genP_daughters.at(i);
-    const genParticle dau = fEvent->genparticles().getGenParticles()[dau_Index];
-    int dau_PdgId   = dau.pdgId();
-
-    // Skip invisible daughters (neutrinos)
-    if ( IsNeutrino(dau_PdgId) ) continue;
-
-    // Get pt and charge
-    double dau_Pt  = dau.pt();
-    // int dau_Charge = dau.charge();
-    
-    // if(bOnlyChargedDaughters && fabs(dau_Charge) < 1 ) continue;
-
-    // Find leading daughter index
-    if (dau_Pt > ldgPt ){
-      ldgPt      = dau_Pt;
-      ldgPtIndex = dau_Index;
-    }
-    
-  }  // For-loop: Daughters
-
-  return ldgPtIndex;
+  if( (abs(pdgId) == 1) || (abs(pdgId) == 2)  ||
+      (abs(pdgId) == 3) || (abs(pdgId) == 4)  ||
+      (abs(pdgId) == 5) || (abs(pdgId) == 6) ) return true;
+  else return false;
 }
 
 
-
-void MCTools::PrintDaughtersRecursively(const int genP_index){
+void MCTools::PrintGenDaughters(const genParticle &genP){
   
   // 
   // Description:
-  // Loops over all daughters of the genParticle with index genP_index
-  // and print index and id of each daugthers. For each daughter the same
-  // procedure is done in parallel so that the entire 'family' is printed.
+  // Loops over all daughters of the particle and prints all its daugthers. 
+  // For each daughter the same procedure is done in parallel so that the entire 'family' is printed.
   //
 
   // Create the table format
-  Table table("# | genP_index | genP_PdgId | dau_Index | dau_PdgId", "Text"); //LaTeX  
+  Table table(" | (Mothers) | Particle | -> | A | -> | B | -> | C | -> | D | -> | E | -> | F | -> | G | -> | H | -> | I", "Text");
 
-  // Get genParticle
-  const genParticle genP = fEvent->genparticles().getGenParticles()[genP_index];
-  int genP_PdgId         = genP.pdgId();
+  // Create pointer to the particle
+  const genParticle *p = &genP;
   
-  // Get daugthers
-  vector<int> genP_daughters = GetDaughters(genP_index, genP.pdgId(), true);
-  if (genP_daughters.size() == 0) return;
+  // Count of numbrer of rows
+  int iRow = 0;
 
+  // Add rows to the table
+  std::string s_moms;
+  if (p->mothers().size() > 0)  s_moms = "(" + auxTools.ConvertIntVectorToString(p->mothers()) + ")"; 
+  else s_moms = "(NONE)";
+  
+  std::string s_daughters;
+  if (p->daughters().size() > 0) s_daughters = auxTools.ConvertIntVectorToString(p->daughters());
+  else s_daughters = "END";
+
+  if (0) std::cout << "\n=== MCTools::PrintGenDaughters(): p->index() = " << p->index() << ", p->daughters().size() = " << p->daughters().size() << std::endl;
+  table.AddRowColumn(iRow, auxTools.ToString(iRow) );
+  table.AddRowColumn(iRow, s_moms);
+  table.AddRowColumn(iRow, auxTools.ToString(p->index()));
+  table.AddRowColumn(iRow, "->");
+  table.AddRowColumn(iRow, s_daughters);
+  
   // For-loop: All daughters
-  for (unsigned short i = 0; i < genP_daughters.size(); i++){
+  for (size_t iDau = 0; iDau < p->daughters().size(); iDau++){
+    
+    // Increment index of the table row
+    iRow++;    
 
     // Get daugther properties
-    int dau_Index         = genP_daughters.at(i);
-    const genParticle dau = fEvent->genparticles().getGenParticles()[dau_Index];
-    int dau_PdgId         = dau.pdgId();
-
-    table.AddRowColumn(i, auxTools.ToString(i, 1));
-    table.AddRowColumn(i, auxTools.ToString(genP_index, 1));
-    table.AddRowColumn(i, auxTools.ToString(genP_PdgId, 1));
-    table.AddRowColumn(i, auxTools.ToString(dau_Index , 1));
-    table.AddRowColumn(i, auxTools.ToString(dau_PdgId , 1));
-    _PrintDaughtersRecursively(dau_Index, table);
+    int dau_index        = p->daughters().at(iDau);
+    const genParticle d = fEvent->genparticles().getGenParticles()[dau_index];
+    if (0) std::cout << "=== MCTools::PrintGenDaughters(): d.index() = " << d.index() << ", d.daughters().size() = " << d.daughters().size() << std::endl;
+    
+    std::string s_daughters;
+    if (d.daughters().size() > 0) s_daughters = auxTools.ConvertIntVectorToString(d.daughters());
+    else s_daughters = "END";
+    
+    table.AddRowColumn(iRow, auxTools.ToString(iRow) );
+    // Add 3 empty columns, thus shift the daughter cells to the right
+    for (int i=1; i<= 3; i++) table.AddRowColumn(iRow, " ");
+    table.AddRowColumn(iRow, auxTools.ToString(dau_index));
+    table.AddRowColumn(iRow, "->");
+    table.AddRowColumn(iRow, s_daughters);
+    _PrintGenDaughters(d, iRow, table, 0);
   }
   
+  // Print the table
   table.Print(true);
-
+  
   return;
+
 }
 
 
-void MCTools::_PrintDaughtersRecursively(const int genP_index,
-					 Table &table){
+void MCTools::_PrintGenDaughters(const genParticle &p, 
+				 int &iRow, 
+				 Table &table,
+				 int shiftLevel){
   
   // 
   // Description:
-  // Loops over all daughters of the genParticle with index genP_index
-  // and print index and id of each daugthers. For each daughter the same
-  // procedure is done in parallel so that the entire 'family' is printed.
-  // Auxiliary function
+  // Auxiliary function, meant to be used with MCTools::PrintGenDaughters().
   //
-
-  // Get genParticle
-  const genParticle genP = fEvent->genparticles().getGenParticles()[genP_index];
-  int genP_PdgId         = genP.pdgId();
-  
-  // Get daugthers
-  vector<int> genP_daughters = GetDaughters(genP_index, genP.pdgId(), true);
-  if (genP_daughters.size() == 0) return;
+  vector<short> daughters = p.daughters();  
 
   // For-loop: All daughters
-  for (unsigned short i = 0; i < genP_daughters.size(); i++){
+  for (size_t iDau = 0; iDau < daughters.size(); iDau++){
 
-    // Get daugther properties
-    int dau_Index         = genP_daughters.at(i);
-    const genParticle dau = fEvent->genparticles().getGenParticles()[dau_Index];
-    int dau_PdgId         = dau.pdgId();
+    // Increment index of the table row
+    iRow++;    
 
-    table.AddRowColumn(i, auxTools.ToString(i, 1));
-    table.AddRowColumn(i, auxTools.ToString(genP_index, 1));
-    table.AddRowColumn(i, auxTools.ToString(genP_PdgId, 1));
-    table.AddRowColumn(i, auxTools.ToString(dau_Index , 1));
-    table.AddRowColumn(i, auxTools.ToString(dau_PdgId , 1));
+    int dau_index = daughters.at(iDau);
+    const genParticle d = fEvent->genparticles().getGenParticles()[dau_index];
+    
+    std::string s_daughters;
+    if (d.daughters().size() > 0) s_daughters = auxTools.ConvertIntVectorToString(d.daughters());
+    else s_daughters = "END";
+    
+    table.AddRowColumn(iRow, auxTools.ToString(iRow));
+    // Add empty columns to  shift the daughter columns to the right
+    int nShift = 5+2*shiftLevel;
+
+    // N.B.: If this is not controled well it causes segmentation fault!
+    if (shiftLevel < 7) // can go up values of 5 and 6 but seg faults at some point
+      {
+	for (int i=1; i<= nShift; i++) table.AddRowColumn(iRow, " ");
+      }
+    else
+      {
+	std::cout << "MCTools::_PrintGenDaughters(): Reached limit in nested loop" << std::endl;
+	break;
+      }
+    
+    table.AddRowColumn(iRow, auxTools.ToString(d.index()));
+    table.AddRowColumn(iRow, "->");
+    table.AddRowColumn(iRow, s_daughters);
+    shiftLevel++;
+    _PrintGenDaughters(d, iRow, table, shiftLevel);
+    shiftLevel--;
   }
 
   return;
+
 }
 
 
-void MCTools::PrintGenParticle(const int genP_index, bool bPrintHeaders){
+void MCTools::PrintGenParticle(const genParticle &genP, bool bPrintHeaders){
 
   //
   // Description:
-  // Print most properties of the GenParticle with index "genP_index". 
+  // Print most properties of the GenParticle.
   //
-  
-  // GenParticle
-  math::XYZTLorentzVector genP_p4;
-  const genParticle genP = fEvent->genparticles().getGenParticles()[genP_index];
-  genP_p4                = genP.p4();
-  int genP_pdgId         = genP.pdgId();
 
-  // Mother
-  int genMom_index = genP.mother();
-  int genMom_pdgId = -999999;
-  if (genMom_index >= 0)
-    {
-      const Particle<ParticleCollection<double> > m = fEvent->genparticles().getGenParticles()[genMom_index];
-      genMom_pdgId  = m.pdgId();      
-    } 
+  // Get the particle
+  const genParticle *p = &genP;
 
-  // Daugthers
-  vector<int> genP_daughters = GetDaughters(genP_index, genP.pdgId(), true);
-
-  Table table("Index | PdgId | Pt | Eta | Phi | Energy | Mass | Rapidity | Beta | Mom (Index) | Mom (PdgId) | Daus | Daus (Index)", "Text"); //LaTeX
-  table.AddRowColumn(0, auxTools.ToString(genP_index   , 1));
-  table.AddRowColumn(0, auxTools.ToString(genP_pdgId   , 1));
-  table.AddRowColumn(0, auxTools.ToString(genP_p4.pt() , 3));
-  table.AddRowColumn(0, auxTools.ToString(genP_p4.eta(), 4));
-  table.AddRowColumn(0, auxTools.ToString(genP_p4.phi(), 3));
-  table.AddRowColumn(0, auxTools.ToString(genP_p4.e()  , 4));
-  table.AddRowColumn(0, auxTools.ToString(genP_p4.mass()  , 4));
-  table.AddRowColumn(0, auxTools.ToString(genP_p4.Rapidity(), 4));
-  table.AddRowColumn(0, auxTools.ToString(genP_p4.Beta(), 4));
-  table.AddRowColumn(0, auxTools.ToString(genMom_index)    );
-  table.AddRowColumn(0, auxTools.ToString(genMom_pdgId)    );
-  table.AddRowColumn(0, auxTools.ToString(genP_daughters.size(), 1) );
-  table.AddRowColumn(0, auxTools.ConvertIntVectorToString(genP_daughters) );
+  // Fill the table 
+  Table table("Index | Pt | Eta | Phi | Energy |  PdgId | Status | Mass | Charge | Vertex (mm) | Rapidity | Beta | Mother(s) | Daughter(s)", "Text"); //LaTeX
+  table.AddRowColumn(0, auxTools.ToString(p->index()        , 1) );
+  table.AddRowColumn(0, auxTools.ToString(p->p4().pt()      , 3) );
+  table.AddRowColumn(0, auxTools.ToString(p->p4().eta()     , 4) );
+  table.AddRowColumn(0, auxTools.ToString(p->p4().phi()     , 3) );
+  table.AddRowColumn(0, auxTools.ToString(p->p4().e()       , 4) );
+  table.AddRowColumn(0, auxTools.ToString(p->pdgId()        , 1) );
+  table.AddRowColumn(0, auxTools.ToString(p->status()       , 1) );
+  table.AddRowColumn(0, auxTools.ToString(p->p4().mass()    , 4) );
+  table.AddRowColumn(0, auxTools.ToString(p->charge()       , 1) );
+  table.AddRowColumn(0, "(" + auxTools.ToString(p->vtxX()*10, 3) + ", " + auxTools.ToString(p->vtxY()*10, 3)  + ", " + auxTools.ToString(p->vtxZ()*10, 3) + ")" );
+  table.AddRowColumn(0, auxTools.ToString(p->p4().Rapidity(), 4) );
+  table.AddRowColumn(0, auxTools.ToString(p->p4().Beta()    , 4) );
+  table.AddRowColumn(0, auxTools.ConvertIntVectorToString(p->mothers()  ) );
+  table.AddRowColumn(0, auxTools.ConvertIntVectorToString(p->daughters()) );
 
   table.Print(bPrintHeaders);
   return;
 }
 
 
-double MCTools::GetLxy(const int genP_index,
-		       bool wrtPV){
+double MCTools::GetLxy(const genParticle &genP,
+		       const genParticle &mother,
+		       const genParticle &daughter,
+		       ROOT::Math::XYZPoint vtx){
 
-  std::cout << "WARNING! The function MCTools::GetLxy() is still under construction" << std::endl;
   //
   // Description:
-  // Investigate the genParticle with index "genP_index". Find its 
-  // production and decay vertices. The method vertexX() returns the 
-  // production vertex. So, in order to determine the decay vertex 
-  // we take one of the particle's daughtes and ask for its prodution
-  // vertex. 
+  // Find the particle production vertexand decay vertex. The variale pv
+  // is the Primary Vertex of the hard interaction (in mm). So, in order to determine
+  // the decay vertex we take one of the particle's daughtes and
+  // ask for its prodution vertex.  Return Lxy in mm.
   //
   // Explanation:
   // The distance traversed by a long-lived particle is Lxy (decay length).
   // Assuming the origin (0, 0) as the Primary Vertex (the point where the
-  // particle was produced) and (vtx_X, vtx_Y) as the Secondary Vertex (the
+  // particle was produced) and (vtxX, vtxY) as the Secondary Vertex (the
   // point where the long-lived particle reaches before decaying), then Lxy is
   // obtained from Pythagoras theorem. Particles that decay promptly should 
   // have Lxy very close to zero.
   //
   // Note: [from https://hypernews.cern.ch/HyperNews/CMS/get/generators/2429/1.html]
   // In CMS default pythia8 configuration K_S^0 is considered long-lived
-  // enough that we leave them undecayed and they are passed to geant.  So geant
+  // enough that we leave them undecayed and they are passed to GEANT.  So GEANT
   // will decay them, but you will see them as status 1 for what concerns the
-  // GenParticles.
-  // OTHER K_S^0).
+  // genParticles.
   //
 
-  /*
-  GenParticle genP = GetGenP(genP_index);
-  double refX  = 0.0;
-  double refY  = 0.0;
+  // Get the particles
+  const genParticle *p = &genP;
+  const genParticle *d = &daughter;
 
-  const vector<short unsigned int> daughters = genP.daughters();
-  if (daughters.size() == 0) return -1.0;
+  // Ensure the particle has a mother!
+  // if( (p->index() == 0) || (p->index() == 1) ) return -1.0;
+  if (p->mothers().size() < 1) return 0.0;
 
-  // Get one of the daugthers to determine the decay vertex (What if no daughters?)
-  int dau_Index   = daughters.at(0);
-  GenParticle dau = GetGenP(dau_Index);
-  double dau_VtxX = dau.vertexX(); // [in cm]
-  double dau_VtxY = dau.vertexY(); // [in cm]
-  if (wrtPV)
-    {
-      refX = GetVertexX();
-      refY = GetVertexY();
-    }
-  double LxySq    = pow( (dau_VtxX - refX), 2) + pow( (dau_VtxY - refY), 2);
-  double Lxy      = sqrt(LxySq);
+  // Ensure the particle has more than 1 daughters
+  if (p->daughters().size() < 1) return -2.0;
+  
+  // Calculate the distance Lxy (in mm) wrt to the point "vtx"
+  double LxySq = pow( (d->vtxX() - vtx.x()), 2) + pow( (d->vtxY() - vtx.y()), 2);
+  double Lxy   = sqrt(LxySq)*10; // factor of 10 needed convert from cm to mm
+
+  if (0) std::cout << "\n=== MCTools::GetLxy(): Lxy = " << Lxy << " (mm) wrt point (" << vtx.x() << ", " << vtx.y() << ", " << vtx.z() << "). Particle with index " << p->index() << " was produced at (" << p->vtxX() << ", " << p->vtxY() << ", " << p->vtxZ() << ") and decayed at (" << d->vtxX() << ", " << d->vtxY() << ", " << d->vtxZ() << ")." << std::endl;
 
   return Lxy;
-  */
-  return 0.0;
 }
 
 
-double MCTools::GetD0Mag(const int genP_index,
-			 const int mom_Index,
-			 bool wrtPV){
-
-  std::cout << "WARNING! The function MCTools::GetD0Mag() is still under construction" << std::endl;
+double MCTools::GetD0(const genParticle &genP,
+		      const genParticle &mother,
+		      const genParticle &daughter,
+		      ROOT::Math::XYZPoint vtx){
+  
   //
   //  Description:
-  //  Investigate the genParticle with index "genP_index". 
+  //  Returns the particle's |d0| in mm.
   // 
   //  Explanation: 
   //  The distance traversed by a long-lived particle is Lxy (decay length).
   //  Particles that decay promptly should have Lxy very close to zero.
   //  Simple trigonometry will reveal that the tangent of the angle between the
   //  long-lived particles' decay product and it's own direction will give:
-  //  sin( |phi_mom - genP_Phi| ) = d0/Lxy
+  //  sin( |genP_phi - mom_phi| ) = d0/Lxy
   //  Then d0 can be simply obtained by multiplying the tangent of the azimuthal
   //  angle difference with the decay length Lxy.
   // 
@@ -388,25 +324,69 @@ double MCTools::GetD0Mag(const int genP_index,
   //  https://root.cern.ch/doc/master/classTLorentzVector.html
   // 
 
-  /*
-  // Ensure GenParticle with index genP_index has mother with index mom_Index
-  if ( !IsItsMother(genP_index, mom_Index) ) return -1.0;
+  // Get the particles
+  const genParticle *p = &genP;
+  const genParticle *m = &mother;
+ 
+  // Ensure the particle has a mother!
+  if (p->mothers().size() < 1) return 0.0;
 
-  // Ensure GenParticle with index genP_index has more than 1 daughters
-  GenParticle genP = GetGenP(genP_index);
-  if (genP.daughters().size() < 2) return -1.0;
+  // If the mother is the incoming proton return 0
+  if( (m->index() == 0) || (m->index() == 1) ) return -1.0;
 
-  // Get 4-momenta (to calculate angle between the mother and daughter directions)
-  TLorentzVector genP_p4 = GetP4(genP_index);
-  TLorentzVector mom_p4  = GetP4(mom_Index);
+  // Ensure the particle has more than 1 daughters
+  if (p->daughters().size() < 1) return -2.0;
 
-  // Calculate the |d0|
-  double angle = genP_p4.Angle(mom_p4.Vect());
-  double Lxy   = GetLxy(genP_index, wrtPV);
+  // Get the TLorentzVectors
+  TLorentzVector p_p4;
+  p_p4.SetPtEtaPhiM(p->p4().pt(), p->p4().eta(), p->p4().phi(), p->p4().mass() );
+
+  TLorentzVector m_p4;
+  m_p4.SetPtEtaPhiM(m->p4().pt(), m->p4().eta(), m->p4().phi(), m->p4().mass() );
+
+  // In case mother has zero pt ( angle = nan)
+  if (m_p4.Pt() == 0) return -3.0;
+
+
+  // Calculate the Angle between two vectors (in radians)
+  double angle = p_p4.Angle( m_p4.Vect() );
+  
+  // Get the Lxy (in mm)
+  double Lxy = GetLxy(genP, mother, daughter, vtx); 
+
+  // Calculate the |d0| (in mm). [The TMath::Sin() requires angle in radians]
   double d0Mag = TMath::Sin(angle) * Lxy;
+  
+  if (0) std::cout << "=== MCTools::GetD0(): |d0| = Sin("<<angle<<") * " << Lxy << " = " << d0Mag  << ", wrt point (" << vtx.x() << ", " << vtx.y() << ", " << vtx.z() << "). Particle with index " << p->index() << " has mother with index " << m->index() << "." << std::endl;
 
   return d0Mag;
-*/
+}
+
+
+
+bool MCTools::HasMother(const genParticle &p,
+			const int mom_pdgId){
   
-return 0.0;
+  //
+  //  Description:
+  //  Returns true if the particle has a mother with pdgId equal to mom_pdgId.
+  // 
+
+  // PrintGenParticle(p);
+
+  // Ensure the particle has a mother!
+  if (p.mothers().size() < 1) return false;
+
+  // For-loop: All mothers
+  for (size_t iMom = 0; iMom < p.mothers().size(); iMom++)
+    {
+
+      int mom_index =  p.mothers().at(iMom);
+      const genParticle m = fEvent->genparticles().getGenParticles()[mom_index];
+      if (m.pdgId() == mom_pdgId) return true;
+      else continue;
+
+    }
+
+  return false;
 }

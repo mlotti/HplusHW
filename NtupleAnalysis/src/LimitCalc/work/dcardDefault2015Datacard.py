@@ -141,7 +141,7 @@ if not LightAnalysis:
 myShapeSystematics.extend(myESSystematics)
 myShapeSystematics.extend(myBtagSystematics)
 myShapeSystematics.extend(myTopSystematics)
-#myShapeSystematics.extend(myPileupSystematics)
+myShapeSystematics.extend(myPileupSystematics)
 
 if not OptionIncludeSystematics:
     myShapeSystematics=[]
@@ -433,7 +433,7 @@ else:
 #===== Pileup
 if "CMS_pileup" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_pileup", label="CMS_pileup",
-        distr="shapeQ", function="ShapeVariation", systVariation="Pileup"))
+        distr="shapeQ", function="ShapeVariation", systVariation="PUWeight"))
 else:
     Nuisances.append(Nuisance(id="CMS_pileup", label="APPROXIMATION for CMS_pileup",
         distr="lnN", function="Constant",value=0.05))

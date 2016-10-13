@@ -145,7 +145,7 @@ def main():
                               dataEras,
                               searchModes,
                               ### Options
-                              usePUreweighting=True,
+                              usePUreweighting=False,
                               doSystematicVariations=False)
 
     # builder.addVariation("METSelection.METCutValue", [100,120,140])                                                                                                              

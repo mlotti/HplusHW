@@ -46,19 +46,21 @@ def main():
         match = json_re.search(argv)
         if match:
             jsonfile = match.group(0)
-                                                                                
+#    jsonfile = "limits_heavy2016.json"
+    jsonfile = "limits2016/limitsForMSSMplots_ICHEP_v3_heavy.json"
 #    limits = limit.BRLimits(limitsfile=jsonfile,configfile="configurationHeavy.json")
-    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limitdata/heavyHplus_configuration.json")
+    limits = limit.BRLimits(limitsfile=jsonfile,configfile="limits2016/heavyHplus_configuration.json")
 
     # Enable OpenGL
     ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    if limit.forPaper:
-        histograms.cmsTextMode = histograms.CMSMode.PAPER
+    #if limit.forPaper:
+    #    histograms.cmsTextMode = histograms.CMSMode.PAPER
     #histograms.cmsTextMode = histograms.CMSMode.PAPER # tmp
-    histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED # tmp
+    #histograms.cmsTextMode = histograms.CMSMode.UNPUBLISHED # tmp
+    histograms.cmsTextMode = histograms.CMSMode.PRELIMINARY
     limit.forPaper = True # to get GeV without c^2
 
     # Get BR limits
@@ -86,7 +88,7 @@ def main():
             print "    REMOVING POINT",obs.GetY()[i]," corresponding mass=",obs.GetX()[i]
             obs.RemovePoint(i)
     print
-    
+
     graphs["exp"] = limits.expectedGraph()
     graphs["exp1"] = limits.expectedBandGraph(sigma=1)
     graphs["exp2"] = limits.expectedBandGraph(sigma=2)
@@ -103,8 +105,13 @@ def main():
 #        graphs["obs_th_minus"] = obs_th_minus
 
     # Remove m=180,190
-#    for gr in graphs.values():
-#        limit.cleanGraph(gr, minX=200)
+    for gr in graphs.values():
+#        limit.cleanGraph(gr, 750)
+        limit.cleanGraph(gr, 800)
+        limit.cleanGraph(gr, 1000)
+        limit.cleanGraph(gr, 2000)
+        limit.cleanGraph(gr, 3000)
+
 
     print "Plotting graphs"                    
     for key in graphs.keys():
@@ -116,11 +123,14 @@ def main():
 
     # Interpret in MSSM
     xVariable = "mHp"
-    selection = "mHp > 0"
+    selection = "mHp > 0 && mu==200"
+#    selection = "mHp > 0 && mu==500"
 #    scenario = "MSSM m_{h}^{max}"
     scenario = os.path.split(rootfile)[-1].replace(".root","")
     print scenario
 
+    from JsonWriter import JsonWriter
+    jsonWriter = JsonWriter()
     for key in graphs.keys():
         print "Graph--------------------------------",key
         graphs[key] = db.graphToTanBeta(graphs[key],xVariable,selection,highTanbRegion=True)
@@ -130,13 +140,13 @@ def main():
             #obsminus = db.getTheorUncert(graphs[key],xVariable,selection,"-")
             #graphs["obs_th_minus"] = db.graphToTanBeta(obsminus,xVariable,selection)
         print key,"done"
-
+        jsonWriter.addGraph(key,graphs[key])
 
 #    graphs["mintanb"] = db.minimumTanbGraph("mHp",selection)
     if scenario == "lowMH-LHCHXSWG":
         graphs["Allowed"] = db.mhLimit("mH","mHp",selection,"125.0+-3.0")
     else:
-        graphs["Allowed"] = db.mhLimit("mh","mHp",selection,"125.0+-3.0")
+        graphs["Allowed"] = db.mhLimit("mh","mHp",selection+"&&mHp>175","125.0+-3.0")
 
     if scenario == "tauphobic-LHCHXSWG":
         # Fix a buggy second upper limit (the order of points is left to right, then right to left; remove further passes to fix the bug)
@@ -157,11 +167,22 @@ def main():
         #for i in range(0, graphs["Allowed"].GetN()):
             #print graphs["Allowed"].GetX()[i], graphs["Allowed"].GetY()[i]
         
-    graphs["isomass"] = None
-    
+#    del graphs["isomass"]
+
+    jsonWriter.addGraph("Allowed",graphs["Allowed"])
+
+    jsonWriter.addParameter("name","limitsTanb_heavy_"+scenario)
+    jsonWriter.addParameter("scenario",scenario)
+    jsonWriter.addParameter("luminosity",limits.getLuminosity())
+    jsonWriter.addParameter("finalStateText",limits.getFinalstateText())
+    jsonWriter.addParameter("mHplus",limit.mHplus())
+    jsonWriter.addParameter("selection",selection)
+    jsonWriter.write("MSSMLimitHeavy_"+scenario+".json")
+
     limit.doTanBetaPlotHeavy("limitsTanb_heavy_"+scenario, graphs, limits.getLuminosity(), limits.getFinalstateText(), limit.mHplus(), scenario)
-	
-    # mH+ -> mA
+    sys.exit()	
+ 
+   # mH+ -> mA
     print "Replotting the graphs for (mA,tanb)"
     for key in graphs.keys():
 	print key

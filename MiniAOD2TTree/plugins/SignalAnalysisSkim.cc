@@ -26,6 +26,7 @@
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 
@@ -55,6 +56,8 @@ class SignalAnalysisSkim : public edm::EDFilter {
         const double fTauEtaCut;
         const double fTauLdgTrkPtCut;
 
+        edm::EDGetTokenT<edm::View<pat::MET>> metToken;
+
         int nEvents;
         int nSelectedEvents;
 };
@@ -71,6 +74,7 @@ SignalAnalysisSkim::SignalAnalysisSkim(const edm::ParameterSet& iConfig)
   fTauPtCut(iConfig.getParameter<double>("TauPtCut")),
   fTauEtaCut(iConfig.getParameter<double>("TauEtaCut")),
   fTauLdgTrkPtCut(iConfig.getParameter<double>("TauLdgTrkPtCut")),
+  metToken(consumes<edm::View<pat::MET>>(iConfig.getParameter<edm::InputTag>("METCollection"))),
   nEvents(0),
   nSelectedEvents(0)
 {
@@ -133,6 +137,21 @@ bool SignalAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 	if(!passed) return false; 
     }
+/*
+    // FIXME: CaloMET to emulate Trigger MET leg, to skim the samples at least with the MET leg 09062016/SL
+    edm::Handle<edm::View<pat::MET>> methandle;                                                                                                                                                    
+    iEvent.getByToken(metToken, methandle);                                                                                                                                                        
+    if(methandle.isValid()){
+      // Member ftion caloMETPt() returns caloMET only for slimmedMETs, for MET_Type1_NoHF and Puppi it seems to return the PFMET.                                                            
+      // Fixed by hard coding the caloMET to use slimmedMETs                                                                                                                                  
+      // 05112015/SL                                                                                                                                                                          
+      if(methandle->ptrAt(0)->caloMETPt()){                                                                   
+	double caloMET = methandle->ptrAt(0)->caloMETPt();
+	//std::cout << "check skim calomet " << caloMET << std::endl;
+	if(caloMET < 80) return false;
+      }
+    }
+*/
 
     // Taus
     edm::Handle<edm::View<pat::Tau> > tauhandle;

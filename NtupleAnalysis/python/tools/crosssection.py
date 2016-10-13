@@ -56,6 +56,9 @@ class CrossSectionList:
 # [15] McM
 
 backgroundCrossSections = CrossSectionList(
+    CrossSection("QCD_Pt_15to30", {
+            "13": 2237000000., # [12]
+            }),
     CrossSection("QCD_Pt_30to50", {
             "7": 5.312e+07, # [2]
             "8": 6.6285328e7, # [1]
@@ -420,6 +423,7 @@ def setBackgroundCrossSections(datasets, doWNJetsWeighting=True, quietMode=False
 
 def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMode=False):
     value = backgroundCrossSections.crossSection(dataset.getName().replace("_ext",""), dataset.getEnergy())
+    value = backgroundCrossSections.crossSection(dataset.getName().replace("_ext3",""), dataset.getEnergy())
     if value is None:
         if "ChargedHiggs" in dataset.getName():
             value = 1.0 # Force signal xsection to 1 pb
@@ -439,15 +443,16 @@ def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMo
 
     if value is not None:
         dataset.setCrossSection(value)
-        msg = ""
+        msg      = ""
+        txtAlign = "{0:<10} {1:<40} {2:>15} {3:>20} {4:<5} {5:<50}"
         if value == 0:
-            msg = "  *** Note: to set non-zero xsection; edit NtupleAnalysis/python/tools/crossection.py ***"
+            msg = "\n*** Note: to set non-zero xsection; edit NtupleAnalysis/python/tools/crossection.py"
         if "ChargedHiggs" in dataset.getName():
-            msg = "  *** Note: signal is forced at the moment to 1 pb in NtupleAnalysis/python/tools/crossection.py ***"
+            msg = "\n*** Note: signal is forced at the moment to 1 pb in NtupleAnalysis/python/tools/crossection.py"
         if not quietMode:
-            print "Setting %50s cross section to %10f pb %s" % (dataset.getName(), value, msg)
-#    else:
-#        print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy())
+            print txtAlign.format("Setting", dataset.getName(), "cross section to ", "%0.6f" %(value), "pb", msg)
+    else:
+        print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy())
 
 
 ########################################
@@ -635,3 +640,4 @@ def printHplusCrossSections(tanbetas=[10, 20, 30, 40], mu=defaultMu, energy="7")
 if __name__ == "__main__":
     printHplusCrossSections(energy="7")
     printHplusCrossSections(energy="8")
+    printHplusCrossSections(energy="13")
