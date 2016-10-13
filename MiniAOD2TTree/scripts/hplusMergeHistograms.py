@@ -990,7 +990,7 @@ def CheckThatFilesExist(taskName, fileList, opts):
     nExist = 0
 
     # For-loop: All files in the list
-    for f in fileList:
+    for index, f in enumerate(fileList):
         Verbose("Checking whether file %s exists" % (f) )
 
         if opts.filesInEOS:
@@ -1002,7 +1002,13 @@ def CheckThatFilesExist(taskName, fileList, opts):
             nExist += 1
         else:
             Verbose("Task %s, file %s not found!" % (taskName, os.path.basename(f)) )
-        
+
+        # Update Progress bar
+        PrintProgressBar(taskName + ", Check:", index, len(filesSplit) )
+
+    # Flush stdout
+    FinishProgressBar()
+
     if nExist != nFiles:
         Print("Task %s, found %s ROOT files but expected %s. Have you already run this script? Skipping .." % (taskName, nExist, nFiles), False)
         return False
@@ -1159,7 +1165,15 @@ def MergeFiles(mergeName, inputFiles, opts):
     '''
     Verbose("MergeFiles()")
 
-    Print("Attempting to merge:\n\t%s\n\tto\n\t%s." % ("\n\t".join(inputFiles), mergeName) )
+#    if opts.filesInEOS:        
+#        msg = "\r" + mergeName.replace(GetEOSHomeDir(opts), "")
+#    else:
+#        msg = "\r" + mergeName
+#    sys.stdout.write(msg)
+    #sys.stdout.flush() #iro
+
+
+    Verbose("Attempting to merge:\n\t%s\n\tto\n\t%s." % ("\n\t".join(inputFiles), mergeName) )
     if len(inputFiles) < 1:
         raise Exception("Attempting to merge 0 files! Somethings was gone wrong!")
     elif len(inputFiles) == 1:
@@ -1256,6 +1270,7 @@ def CheckTaskReport(logfilepath):
                         return int(exitMatch.group("exitcode"))
     return -1
 
+
 def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
     '''
     Loops over all stdout files of a given CRAB task, to obtain 
@@ -1271,8 +1286,10 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
     exit_re = re.compile("/results/cmsRun_(?P<exitcode>\d+)\.log\.tar\.gz")
     
     Verbose("Getting output files & exit codes for task %s" % (taskName) )
+
     # For-loop: All stdout files of given task
-    for f in stdoutFiles:
+    for index, f in enumerate(stdoutFiles):
+
         Verbose("Getting output files & exit codes for task %s (by reading %s)" % (taskName, f) )
         histoFile = GetHistogramFile(taskName, f, opts)
         if histoFile != None:
@@ -1286,6 +1303,13 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
             exit_match = exit_re.search(f)
             if exit_match:
                 exitCodes.append(int(exit_match.group("exitcode")))
+        
+        # Update progress bar
+        PrintProgressBar(taskName + ", stdout:", index, len(stdoutFiles) )
+
+    # Flush stdout
+    FinishProgressBar()
+
     return files, missing, exitCodes
 
 
@@ -1417,16 +1441,17 @@ def DeleteFolders(filePath, foldersToDelete, opts):
     '''
     Verbose("DeleteFolders()")
     
-    Verbose("Deleting following folders in file %s:\n\t%s" % (filePath, "\n\t".join(foldersToDelete)) )
+    Print("Deleting following folders in file %s:\n\t%s" % (filePath, "\n\t".join(foldersToDelete)) )
     # For-loop: All folders to be deleted
     for folder in foldersToDelete:
-        Verbose("Deleting %s in file %s" % (folder, filePath) )    
+        Print("Deleting %s in file %s" % (folder, filePath) )    
         delete(filePath, folder, opts)
     return
 
 
 def GetTaskLogFiles(taskName, opts):
     '''
+    Get all the log files for the given CRAB task
     '''
     Verbose("GetTaskLogFiles()", True)
     if opts.filesInEOS:
@@ -1440,8 +1465,6 @@ def GetTaskLogFiles(taskName, opts):
             msg = "Task %s, could not obtain log files with glob." % (taskName)
             msg += "\n\tTrying alternative method. If problems persist retry without setting the CRAB environment."
             Verbose(msg, True)
-            #keystroke = raw_input("\tPress any key to continue ..")
-
             cmd = ConvertCommandToEOS("ls", opts) + " " + tmp
             Verbose(cmd)
             dirContents = Execute(cmd)
@@ -1586,7 +1609,7 @@ def main(opts, args):
                 mergeName = ConvertPathToEOS(taskName, mergeName, "", opts)
 
             # If merge file already exists skip it or rename it as .backup
-            if FileExists(mergeName, opts):
+            if FileExists(mergeName, opts) and not opts.overwrite:
                 filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
                 PrintProgressBar(taskName + ", Merge:", 0, 1)
@@ -1595,7 +1618,6 @@ def main(opts, args):
 
             # Merge the ROOT files
             time_start = time.time()
-            Print(mergeName)
             ret = MergeFiles(mergeName, inputFiles, opts)
             time_end = time.time()
             dtMerge = time_end-time_start
@@ -1626,6 +1648,7 @@ def main(opts, args):
             # Update Progress bar
             PrintProgressBar(taskName + ", Merge:", index, len(filesSplit) )
 
+        # Flush stdout
         FinishProgressBar()
         if taskName not in taskReports.keys():
             taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
@@ -1647,8 +1670,8 @@ def main(opts, args):
         taskName    = taskNameEOS.replace("-", "_")
         Verbose("Merge files: %s\n\tSource files: %s" % (f, sourceFiles) )
 
-        Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), False)
         # Delete folders & Calculate the clean-time (in seconds)
+        Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), False)
         time_start = time.time()
         DeleteFolders(f, foldersToDelete, opts)
         time_end = time.time()
