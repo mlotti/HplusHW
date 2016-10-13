@@ -1004,7 +1004,7 @@ def CheckThatFilesExist(taskName, fileList, opts):
             Verbose("Task %s, file %s not found!" % (taskName, os.path.basename(f)) )
 
         # Update Progress bar
-        PrintProgressBar(taskName + ", Check:", index, len(filesSplit) )
+        PrintProgressBar(taskName + ", Check:", index, len(fileList) )
 
     # Flush stdout
     FinishProgressBar()
@@ -1305,7 +1305,7 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
                 exitCodes.append(int(exit_match.group("exitcode")))
         
         # Update progress bar
-        PrintProgressBar(taskName + ", stdout:", index, len(stdoutFiles) )
+        PrintProgressBar(taskName + ", Files:", index, len(stdoutFiles) )
 
     # Flush stdout
     FinishProgressBar()
