@@ -1577,6 +1577,11 @@ def main(opts, args):
         taskName    = d.replace("/", "")
         stdoutFiles = GetTaskLogFiles(taskName, opts)
         Verbose("The stdout files for task %s are:\n\t%s" % ( taskName, "\n\t".join(stdoutFiles)), True)
+        
+        # Create symbolic links for merge files?
+        if opts.linksToEOS:
+            LinkFiles(taskName, stdoutFiles)
+            #continue
 
         # Definitions
         files, missingFiles, exitedJobs = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
@@ -1744,6 +1749,7 @@ def main(opts, args):
     PrintSummary(taskReports)
 
     return 0
+
 
 if __name__ == "__main__":
     '''

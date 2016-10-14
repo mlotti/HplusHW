@@ -568,9 +568,12 @@ def GetTaskLogs(taskPath, retrievedLog, finished):
     if opts.get or opts.log:
         Verbose("Retrieved logs (%s) < finished (%s). Retrieving CRAB logs ..." % (retrievedLog, finished) )
         Touch(taskPath)
-        #dummy = crabCommand('getlog', 'command=LCG', 'checksum=no', dir=taskPath) # Produces Warning: 'crab getlog' command takes no arguments, 2 given
-        dummy = crabCommand('getlog', dir=taskPath)
-        # crab log <dir> --command=LCG --checksum=no #fixme: add support?
+        if "fnal" in GetHostname():
+            # "crab getoutput <task>" only works if the "-K ADLER32 option" is  removed (enabled by default)
+            # the checksum validation seems to be causing trouble - CRAB can't autodetect whether to use it or not
+            result = crabCommand('getlog', checksum="no", dir=taskPath)
+        else:
+            result = crabCommand('getlog', dir=taskPath)
     else:
         Verbose("Retrieved logs (%s) < finished (%s). To retrieve CRAB logs relaunch script with --get option." % (retrievedLog, finished) )
     return
@@ -589,13 +592,24 @@ def GetTaskOutput(taskPath, retrievedOut, finished):
     if opts.get:
         if opts.ask:
             if AskUser("Retrieved output (%s) < finished (%s). Retrieve CRAB output?" % (retrievedOut, finished) ):
-                dummy = crabCommand('getoutput', dir=taskPath)            
+                if "fnal" in GetHostname():
+                    # "crab getoutput <task>" only works if the "-K ADLER32 option" is  removed (enabled by default)
+                    # the checksum validation seems to be causing trouble - CRAB can't autodetect whether to use it or not
+                    result = crabCommand('getoutput', checksum="no", dir=taskPath)
+                else:
+                    result = crabCommand('getoutput', dir=taskPath)            
                 Touch(taskPath)
             else:
                 return
         else:
             Verbose("Retrieved output (%s) < finished (%s). Retrieving CRAB output ..." % (retrievedOut, finished) )
-            dummy = crabCommand("getoutput", dir=taskPath)
+
+            if "fnal" in GetHostname():
+                # "crab getoutput <task>" only works if the "-K ADLER32 option" is  removed (enabled by default)
+                # the checksum validation seems to be causing trouble - CRAB can't autodetect whether to use it or not
+                result = crabCommand('getoutput', checksum="no", dir=taskPath)
+            else:
+                result = crabCommand("getoutput", dir=taskPath)
             Touch(taskPath)
     else:
         Verbose("Retrieved output (%s) < finished (%s). To retrieve CRAB output relaunch script with --get option." % (retrievedOut, finished) )
