@@ -301,14 +301,16 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
 
     jobExitCode = exeExitCode
     if exeExitCode == None:
-        raise ExitCodeException("No exeExitCode")
+        #raise ExitCodeException("File %s, No exeExitCode" % (stdoutFile) )
+        Verbose("File %s, No exeExitCode. Will be treated like a job with non-zero exitcode" % (stdoutFile), False)
     if jobExitCode == None:
-        raise ExitCodeException("No jobExitCode")
+        #raise ExitCodeException("File %s, No jobExitCode" % (stdoutFile) )
+        Verbose("File %s, No jobExitCode. Will be treated like a job witn non-zero exitcode" % (stdoutFile), False)
     if exeExitCode != 0:
-        Verbose("Executable exit code is %d" % exeExitCode)
+        Verbose("File %s, executable exit code is %s" % (stdoutFile, exeExitCode) )
     if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
-        Verbose("Job exit code is %d" % jobExitCode)
-    return
+        Verbose("File %s, job exit code is %s" % (stdoutFile, jobExitCode) )
+    return #iro fixme
 
 
 def getHistogramFile(stdoutFile, opts):
@@ -317,7 +319,7 @@ def getHistogramFile(stdoutFile, opts):
     Verbose("getHistogramFile()", True)
 
     Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
-    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
 
     Verbose("Asserting that file %s is a tarball" % (stdoutFile) )
@@ -364,7 +366,7 @@ def getHistogramFileSE(stdoutFile, opts):
     Verbose("getHistogramFileSE()", True)
 
     Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
-    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
     histoFile = None
 
     # Open the "stdoutFile"
@@ -391,7 +393,7 @@ def getHistogramFileEOS(stdoutFile, opts):
     Verbose("getHistogramFileEOS()", True)
 
     Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
-    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes) # multicrab.assertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
 
     histoFile = None
 
@@ -877,14 +879,14 @@ def delete(fileName, regexp, opts):
     return
 
 
-def pileup(fileName, opts):
+def WritePileupHistos(fileName, opts):
     '''
     If dataversion is NOT "data", return.
     Otherwise, read the PileUp.root file and
     get 3 PU histograms (pileup, pileup_up variation, pileup_down variation)
     and write them to the fileName passed as argument.
     '''
-    Verbose("pileup()", True)
+    Verbose("WritePileupHistos()", True)
     
     if FileExists(fileName, opts ) == False:
         raise Exception("The file %s does not exist!" % (fileName) )
@@ -1263,7 +1265,11 @@ def CheckTaskReport(logfilepath):
         
                     # If exit code found, return the value
                     if exitMatch:
-                        return int(exitMatch.group("exitcode"))
+                        exitCode = int(exitMatch.group("exitcode"))
+                        Verbose("File %s, exitcode is %s" % (member.name, exitCode) )
+                        return exitCode
+    
+    Print("File %s, exitcode is %s" % (member.name, -1) )#iro
     return -1
 
 
@@ -1316,9 +1322,9 @@ def ExamineExitCodes(taskName, exitCodes, missingFiles):
     '''
     Verbose("ExamineExitCodes()")
 
-    print "\n    Task", taskName
+    #Print("Task %s, " % (taskName) )
     if len(exitCodes) < 1:
-        Print("No jobs with non-zero exit codes",printHeader=False)
+        Print("%s, No jobs with non-zero exit codes" % (taskName), False)
     else:
         exitCodes_s = ""
         # For-loop: All exit codes
@@ -1326,8 +1332,8 @@ def ExamineExitCodes(taskName, exitCodes, missingFiles):
             exitCodes_s += str(e)
             if i < len(exitCodes)-1:
                 exitCodes_s += ","
-        Print("jobs with non-zero exit codes: %s" % (len(exitCodes) ),printHeader=False)
-        Print("crab resubmit %s --jobids %s --force" % (taskName, exitCodes_s),printHeader=False)
+        Print("%s, jobs with non-zero exit codes: %s" % (taskName, len(exitCodes) ), False)
+        Print("crab resubmit %s --jobids %s --force" % (taskName, exitCodes_s), False)
 
     if missingFiles > 0:
         Print("jobs with missing files: %s" %missingFiles,printHeader=False)
@@ -1568,17 +1574,15 @@ def main(opts, args):
     # For-loop: All task names
     Verbose("Looping over all tasks in %s" % (opts.dirName), True)
     for d in crabDirs:
-        taskName = d.replace("/", "")
 
+        taskName    = d.replace("/", "")
         stdoutFiles = GetTaskLogFiles(taskName, opts)
         Verbose("The stdout files for task %s are:\n\t%s" % ( taskName, "\n\t".join(stdoutFiles)), True)
 
         # Definitions
         files, missingFiles, exitCodes = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
-
-        # Create symbolic links for output & log files?
-        #if opts.linksToEOS:
-        #    LinkFiles(taskName, stdoutFiles)
+        print exitCodes
+        sys.exit()
 
         # For Testing purposes
         if opts.test:
@@ -1683,6 +1687,9 @@ def main(opts, args):
         if taskName not in taskReports.keys():
             taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
 
+        # Change line
+        print
+            
     if opts.test:
         return
 
@@ -1718,7 +1725,7 @@ def main(opts, args):
             DeleteFiles(sourceFiles, opts)
 
         # Add pile-up histos
-        pileup(f, opts)
+        WritePileupHistos(f, opts)
 
         # Update Progress bar
         if opts.filesInEOS:
