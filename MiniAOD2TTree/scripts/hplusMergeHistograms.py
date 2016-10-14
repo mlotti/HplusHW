@@ -183,19 +183,11 @@ def PrintProgressBar(taskName, iteration, total, suffix = ""):
     decimals        = 1
     barLength       = PBARLENGTH
     txtSize         = 60
-    #fillerSize      = txtSize - len(taskName)
-    #if fillerSize < 0:
-    #    fillerSize = 0
-    #filler          = " "*fillerSize
     formatStr       = "{0:." + str(decimals) + "f}"
     percents        = formatStr.format(100 * (iteration / float(total)))
     filledLength    = int(round(barLength * iteration / float(total)))
     bar             = '=' * filledLength + '-' * (barLength - filledLength)
     sys.stdout.write('\r%s: |%s| %s%s %s' % (prefix, bar, percents, '%', suffix)),
-    #sys.stdout.write('\r%s%s |%s| %s%s %s' % (prefix, filler, bar, percents, '%', suffix)),
-    
-    # if iteration == total:
-    # sys.stdout.write('\n')
     sys.stdout.flush()
     return
 
@@ -491,7 +483,7 @@ def ConvertTasknameToEOS(taskName, opts):
     return taskNameEOS
 
 
-def WalkEOSDir(pathOnEOS, opts): #fixme: bad code 
+def WalkEOSDir(taskName, pathOnEOS, opts): #fixme: bad code 
     '''
     Looks inside the EOS path "pathOnEOS" directory by directory.
     Since OS commands do not work on EOS, I have written this function
@@ -511,22 +503,29 @@ def WalkEOSDir(pathOnEOS, opts): #fixme: bad code
     if "symbol lookup error" in dirContents[0]:
         raise Exception("%s.\n\t%s." % (cmd, dirContents[0]) )
 
-    #Verbose("Walking the EOS directory %s with contents:\n\t%s" % (pathOnEOS, "\n\t".join(dirContents)))
+    Verbose("Walking the EOS directory %s with contents:\n\t%s" % (pathOnEOS, "\n\t".join(dirContents)))
 
     # A very, very dirty way to find the deepest directory where the ROOT files are located!
     if len(dirContents) == 1:
         subDir = dirContents[0]
-        # Verbose("Found sub-directory %s under the EOS path %s!" % (subDir, pathOnEOS) )
-        pathOnEOS = WalkEOSDir(pathOnEOS + "/" + subDir, opts)
+        Verbose("Found sub-directory %s under the EOS path %s!" % (subDir, pathOnEOS) )
+        pathOnEOS = WalkEOSDir(taskName, pathOnEOS + "/" + subDir, opts)
     else:
         rootFiles = []
+        for d in dirContents:
+            subDir = d 
+            if "crab_"+taskName in subDir:
+                pathOnEOS = WalkEOSDir(taskName, pathOnEOS + "/" + subDir, opts)
+            else:
+                pass
+        
         for f in dirContents:
             if ".root" not in f:
                 continue
             else:
                 rootFiles.append(pathOnEOS + "/" + f)
         pathOnEOS += "/"
-        #Verbose("Reached end of the line. Found %s ROOT files under %s!"  % (len(rootFiles), pathOnEOS))
+        Verbose("Reached end of the line. Found %s ROOT files under %s."  % (len(rootFiles), pathOnEOS))
     return pathOnEOS
 
 
@@ -557,7 +556,6 @@ def ConvertCommandToEOS(cmd, opts):
         eosAlias = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select "
         for key in cmdMap:
             cmdMap[key] = cmdMap[key].replace("eos", eosAlias)
-
 
     if cmd not in cmdMap:
         raise Exception("Could not find EOS-equivalent for cammand %s." % (cmd) )
@@ -606,7 +604,7 @@ def ConvertPathToEOS(taskName, fullPath, path_postfix, opts, isDir=False):
 
     Verbose("Converting %s to EOS (taskName = %s, fileName = %s)" % (fullPath, taskName, fileName) )
     taskNameEOS   = ConvertTasknameToEOS(taskName, opts)
-    pathEOS       = WalkEOSDir(path_prefix + "/" + taskNameEOS, opts) # + "/"
+    pathEOS       = WalkEOSDir(taskName, path_prefix + "/" + taskNameEOS, opts) # + "/"
     fullPathEOS   = pathEOS + path_postfix + fileName
     Verbose("Converted %s (default) to %s (EOS)" % (fullPath, fullPathEOS) )
     return fullPathEOS
@@ -632,6 +630,7 @@ def splitFiles(taskName, files, filesPerEntry, opts):
         # For-loop: All files (with ifile counter)
         for ifile, f in enumerate(files):
 
+            # Update Progress bar
             PrintProgressBar(taskName + ", Split", ifile, len(files) )
 
             # Calculate cumulative size (in Bytes)
@@ -1014,7 +1013,7 @@ def CheckThatFilesExist(taskName, fileList, opts):
     FinishProgressBar()
 
     if nExist != nFiles:
-        Print("Task %s, found %s ROOT files but expected %s. Have you already run this script? Skipping .." % (taskName, nExist, nFiles), False)
+        Print("Task %s, found %s ROOT files but expected %s. Have you already run this script?" % (taskName, nExist, nFiles), False)
         return False
     else:
         return True
@@ -1052,6 +1051,7 @@ def GetCrabDirectories(opts):
     opts2 = None
     crabDirsTmp = multicrab.getTaskDirectories(opts2)
     crabDirs = GetIncludeExcludeDatasets(crabDirsTmp, opts)
+    crabDirs = filter(lambda x: "multicrab_" not in x, crabDirs) #remove "multicrab_" directory from list
     return crabDirs
 
 
@@ -1275,12 +1275,10 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
     Verbose("GetTaskOutputAndExitCodes()", True)
 
     # Definitions
-    files = []
-    missing = 0
+    missing   = 0
+    files     = []
     exitCodes = []
-
-    exit_re = re.compile("/results/cmsRun_(?P<exitcode>\d+)\.log\.tar\.gz")
-    
+    exit_re   = re.compile("/results/cmsRun_(?P<exitcode>\d+)\.log\.tar\.gz")
     Verbose("Getting output files & exit codes for task %s" % (taskName) )
 
     # For-loop: All stdout files of given task
@@ -1304,8 +1302,8 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
         PrintProgressBar(taskName + ", Files", index, len(stdoutFiles) )
 
     # Flush stdout
-    FinishProgressBar()
-
+    if len(stdoutFiles)>0:
+        FinishProgressBar()
     return files, missing, exitCodes
 
 
@@ -1456,6 +1454,7 @@ def GetTaskLogFiles(taskName, opts):
         Verbose("Obtaining stdout files for task %s from %s" % (taskName, tmp), True)
         stdoutFiles = glob.glob(tmp + "cmsRun_*.log.tar.gz")        
 
+        Verbose("Found %s stdout files" % (len(stdoutFiles) ) )
         # Sometimes glob doesn't work (for unknown reasons)
         if len(stdoutFiles) < 1:
             msg = "Task %s, could not obtain log files with glob." % (taskName)
@@ -1466,13 +1465,13 @@ def GetTaskLogFiles(taskName, opts):
             dirContents = Execute(cmd)
             stdoutFiles = dirContents
             stdoutFiles = [tmp + f for f in dirContents if ".log.tar.gz" in f]
-            Verbose("Task %s, found the follwoing log files:\n\t%s" % (taskName, "\n\t".join(stdoutFiles) ) )
+            Verbose("Task %s, found the following log files:\n\t%s" % (taskName, "\n\t".join(stdoutFiles) ) )
     else:
         stdoutFiles = glob.glob(os.path.join(taskName, "results", "cmsRun_*.log.tar.gz"))
 
     if len(stdoutFiles) < 1:
         #raise Exception("Task %s, could not obtain log files." % (taskName) )
-        Print("Task %s, could not obtain log files." % (taskName),False) #sami
+        Verbose("Task %s, could not obtain log files." % (taskName), False)
     return stdoutFiles
         
 
@@ -1511,7 +1510,6 @@ def LinkFiles(taskName, fileList):
     Verbose("LinkFiles()", True)
     
     Verbose("Task %s, creating symbolic links" % (taskName))
-
     # For-loop: All files
     for index, f in enumerate(fileList):
         srcFile  = f
@@ -1568,6 +1566,7 @@ def main(opts, args):
     cleanTime    = {}
 
     # For-loop: All task names
+    Verbose("Looping over all tasks in %s" % (opts.dirName), True)
     for d in crabDirs:
         taskName = d.replace("/", "")
 
@@ -1578,10 +1577,8 @@ def main(opts, args):
         files, missingFiles, exitCodes = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
 
         # Create symbolic links for output & log files?
-        if opts.linksToEOS:
-            LinkFiles(taskName, stdoutFiles)
-            LinkFiles(taskName, files)
-            return
+        #if opts.linksToEOS:
+        #    LinkFiles(taskName, stdoutFiles)
 
         # For Testing purposes
         if opts.test:
@@ -1589,7 +1586,7 @@ def main(opts, args):
 
         # Check that output files were found. If so, check that they exist!
         if len(files) == 0:
-            Print("Task %s, skipping, no files to merge" % (taskName), False)
+            Verbose("Task %s, skipping, no files to merge" % (taskName), False)
             continue        
         else:            
             if not opts.filesInEOS:
@@ -1598,14 +1595,13 @@ def main(opts, args):
                 pass
 
             # If files to be merged do NOT exist (and this is not a test), print report (perhaps files have already been merged)
-            if not CheckThatFilesExist(taskName, files, opts) and not opts.test:
+            if not CheckThatFilesExist(taskName, files, opts) and not opts.test and not opts.linksToEOS:
                 Print("Task %s, skipping, some files are missing" % (taskName) )
                 filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
                 continue
             else:
                 pass
-
         Verbose("Task %s, with %s ROOT files" % (taskName, len(files)), False)
 
         # If this is a test skip the remaining part
@@ -1636,6 +1632,11 @@ def main(opts, args):
 
             # If merge file already exists skip it or rename it as .backup
             if FileExists(mergeName, opts) and not opts.overwrite:
+
+                # Create symbolic links for merge files?
+                if opts.linksToEOS:
+                    LinkFiles(taskName, [mergeName])
+                    continue
                 filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
                 PrintProgressBar(taskName + ", Merge", 0, 1)
