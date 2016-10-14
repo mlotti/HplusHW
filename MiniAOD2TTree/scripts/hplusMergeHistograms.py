@@ -1269,7 +1269,7 @@ def CheckTaskReport(logfilepath):
                         Verbose("File %s, exitcode is %s" % (member.name, exitCode) )
                         return exitCode
     
-    Print("File %s, exitcode is %s" % (member.name, -1) )#iro
+    Verbose("File %s, exitcode is %s" % (member.name, -1) )
     return -1
 
 
@@ -1281,10 +1281,10 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
     Verbose("GetTaskOutputAndExitCodes()", True)
 
     # Definitions
-    missing   = 0
-    files     = []
-    exitCodes = []
-    exit_re   = re.compile("/results/cmsRun_(?P<exitcode>\d+)\.log\.tar\.gz")
+    missing    = 0
+    files      = []
+    exitedJobs = []
+    jobId_re   = re.compile("cmsRun_(?P<jobId>\d+)\.log\.tar\.gz")  #re.compile("/results/cmsRun_(?P<jobId>\d+)\.log\.tar\.gz")
     Verbose("Getting output files & exit codes for task %s" % (taskName) )
 
     # For-loop: All stdout files of given task
@@ -1300,9 +1300,9 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
 
         exitcode = CheckTaskReport(f)
         if exitcode != 0:
-            exit_match = exit_re.search(f)
+            exit_match = jobId_re.search(f)
             if exit_match:
-                exitCodes.append(int(exit_match.group("exitcode")))
+                exitedJobs.append(int(exit_match.group("jobId")))
         
         # Update progress bar
         PrintProgressBar(taskName + ", Files", index, len(stdoutFiles) )
@@ -1310,10 +1310,10 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
     # Flush stdout
     if len(stdoutFiles)>0:
         FinishProgressBar()
-    return files, missing, exitCodes
+    return files, missing, exitedJobs
 
 
-def ExamineExitCodes(taskName, exitCodes, missingFiles):
+def ExamineExitCodes(taskName, exitedJobs, missingFiles):
     '''
     Examine all exit codes (passed as a list) and determine if there are 
     jobs with problems. 
@@ -1323,21 +1323,20 @@ def ExamineExitCodes(taskName, exitCodes, missingFiles):
     Verbose("ExamineExitCodes()")
 
     #Print("Task %s, " % (taskName) )
-    if len(exitCodes) < 1:
+    if len(exitedJobs) < 1:
         Print("%s, No jobs with non-zero exit codes" % (taskName), False)
     else:
-        exitCodes_s = ""
+        exitedJobs_s = ""
         # For-loop: All exit codes
-        for i,e in enumerate(sorted(exitCodes)):
-            exitCodes_s += str(e)
-            if i < len(exitCodes)-1:
-                exitCodes_s += ","
-        Print("%s, jobs with non-zero exit codes: %s" % (taskName, len(exitCodes) ), False)
-        Print("crab resubmit %s --jobids %s --force" % (taskName, exitCodes_s), False)
+        for i,e in enumerate(sorted(exitedJobs)):
+            exitedJobs_s += str(e)
+            if i < len(exitedJobs)-1:
+                exitedJobs_s += ","
+        Print("%s, jobs with non-zero exit codes: %s" % (taskName, len(exitedJobs) ), False)
+        Print("crab resubmit %s --jobids %s --force" % (taskName, exitedJobs_s), False)
 
     if missingFiles > 0:
-        Print("jobs with missing files: %s" %missingFiles,printHeader=False)
-
+        Print("jobs with missing files: %s" %missingFiles, False)
     return
 
 
@@ -1580,13 +1579,11 @@ def main(opts, args):
         Verbose("The stdout files for task %s are:\n\t%s" % ( taskName, "\n\t".join(stdoutFiles)), True)
 
         # Definitions
-        files, missingFiles, exitCodes = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
-        print exitCodes
-        sys.exit()
+        files, missingFiles, exitedJobs = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
 
         # For Testing purposes
         if opts.test:
-            ExamineExitCodes(taskName, exitCodes, missingFiles)
+            ExamineExitCodes(taskName, exitedJobs, missingFiles)
 
         # Check that output files were found. If so, check that they exist!
         if len(files) == 0:
