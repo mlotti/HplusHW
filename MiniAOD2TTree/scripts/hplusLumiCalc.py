@@ -236,6 +236,26 @@ def GetCrabDirectories(opts):
     return sorted(crabdirs)
 
 
+def Execute(cmd):
+    '''
+    Executes a given command and return the output.
+    '''
+    Verbose("Execute()", True)
+
+    Verbose("Executing command: %s" % (cmd))
+    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+    output = p.communicate()[0]
+    ret    = p.returncode
+
+    #stdin  = p.stdout
+    #stdout = p.stdout
+    #ret    = []
+    #for line in stdout:
+    #    ret.append(line.replace("\n", ""))
+    #
+    #stdout.close()
+    return output, ret
+
 
 def main(opts, args):
     '''
@@ -293,14 +313,13 @@ def main(opts, args):
             files.append((d, os.path.join(d, "results", "processedLumis.json")))
 
             # Update progress bar
-            PrintProgressBar(d + ", Report", index, len(crabdirs) )
+            PrintProgressBar(d + ", Crab", index, len(crabdirs) )
 
     # Flush stdout
     FinishProgressBar()
 
     # Extend the list
     files.extend([(None, f) for f in opts.files])
-
 
     data  = {}
     index = -1
@@ -325,15 +344,18 @@ def main(opts, args):
             pass
 
         # Run the steps to get the Pileup histo
-	cmd = [exe,"lumi","-b", "STABLE BEAMS", "--normtag", NormTagJSON, "-u /pb", "-i", jsonfile]
-        Verbose(" ".join(cmd) )
-        p      = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = p.communicate()[0]
-        ret    = p.returncode
+        PrintProgressBar(task + ", Lumi", index, len(files), "[" + os.path.basename(jsonfile) + "]")
+        cmd = [exe,"lumi","-b", "STABLE BEAMS", "--normtag", NormTagJSON, "-u /pb", "-i", jsonfile]
+        output, ret = Execute(cmd) #iro
+        #Verbose(" ".join(cmd) )
+        #p      = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        #output = p.communicate()[0]
+        #ret    = p.returncode
+
 
         # If return value is not zero print failure
         if ret != 0:
-            Print("Call to %s failed with return value %d with command" % (cmd[0], ret), True)
+            Print("Call to %s failed with return value %d with command" % (cmd[0], ret ), True)
             Print(" ".join(cmd) )
             Print(output)
             return 1
@@ -343,7 +365,7 @@ def main(opts, args):
         lumi = -1.0
         unit = None
 
-        #For-loop: All lines
+        #For-loop: All lines in "crab report <task>" output
         for line in lines:
             m = unit_re.search(line)
             if m:
@@ -415,7 +437,7 @@ def main(opts, args):
 	fPU.Close()
 
         # Update progress bar
-        PrintProgressBar(task + ", Lumi", index, len(files) )
+        #PrintProgressBar(task + ", Lumi", index, len(files) ) #iro
         
     # Flush stdout
     FinishProgressBar()
