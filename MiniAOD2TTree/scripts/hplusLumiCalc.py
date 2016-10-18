@@ -227,13 +227,109 @@ def GetCrabDirectories(opts):
 
     crabdirs = multicrab.getTaskDirectories(opts)
     crabdirs = filter(lambda x: "multicrab_" not in x, crabdirs) # Remove "multicrab_" directory from list 
-    crabdirs = filter(lambda x: "2016B_" not in x, crabdirs) #tmp fixme iro
-    crabdirs = filter(lambda x: "2016C_" not in x, crabdirs) #tmp fixme iro
-    crabdirs = filter(lambda x: "2016D_" not in x, crabdirs) #tmp fixme iro
 
     crabdirs = GetIncludeExcludeDatasets(crabdirs, opts)
     # Return list (alphabetically ordered)
     return sorted(crabdirs)
+
+
+def GetLumiAndUnits(output):
+    '''
+    Reads output of "brilcalc" command 
+    and finds and returns the lumi and units
+    '''
+    Verbose("GetLumiAndUnits()", True)
+
+    # Definitions
+    lumi = -1.0
+    unit = None
+
+    # Regular expressions
+    unit_re = re.compile("totrecorded\(/(?P<unit>.*)\)") 
+    lumi_re = re.compile("\|\s+(?P<recorded>\d+\.*\d*)\s+\|\s*$")
+
+
+    Verbose("Looping over all lines out brilcalc command output")
+    #For-loop: All lines in "crab report <task>" output
+    for line in output:
+        m = unit_re.search(line)
+        if m:
+            unit = m.group("unit")
+            
+        m = lumi_re.search(line)
+        if m:
+            lumi = float(m.group("recorded")) # lumiCalc2.py returns pb^-1
+
+    if unit == None:
+        raise Exception("Didn't find unit information from lumiCalc output, command was %s" % " ".join(cmd))
+    lumi = convertLumi(lumi, unit)
+    #print
+    return lumi, unit
+
+        
+def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="true", maxPileupBin="50", numPileupBins="50"):
+    '''
+    Script to estimate pileup distribution using xing instantaneous luminosity
+    information and minimum bias cross section.  Output is TH1D stored in root
+    file.     
+
+    For more help type in the terminal:
+    pileupCalc.py --help
+    '''
+    Verbose("CallPileupCalc()", True)
+    
+    Verbose("Task %s, creating Pileup ROOT file" % (task) )
+    cmd = ["pileupCalc.py", "-i", inputFile, "--inputLumiJSON", inputLumiJSON, "--calcMode", calcMode, "--minBiasXsec", minBiasXsec, "--maxPileupBin", maxPileupBin, "--numPileupBins", numPileupBins, fOUT]
+    sys_cmd = " ".join([str(c) for c in cmd])
+    Verbose(sys_cmd)
+    pu       = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    output = pu.communicate()[0]
+    ret    = pu.returncode
+    if ret != 0:
+        Print("Call to %s failed with return value %d with command" % (pucmd[0], puret) )
+        Print(" ".join(pucmd) )
+        print output
+    return ret, output
+
+
+def CallBrilcalc(task, BeamStatus, CorrectionTag, LumiUnit, InputFile, printOutput=False):
+    '''
+    Executes brilcalc and returns the execuble exit code and the output
+    in the form of a list of strings.
+
+    The original version of the code did not work for tcsh (built for "bash" I assume)
+    p      = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    output = p.communicate()[0]
+    ret    = p.returncode
+
+    For more help type in the terminal:
+    brilcalc lumi --help        
+    '''
+    Verbose("CallBrilcalc()", True)
+
+    # brilcalc lumi -u /pb -i JSON-file
+    home = os.environ['HOME']
+    path = os.path.join(home, ".local/bin")
+    exe  = os.path.join(path, "brilcalc")
+
+    # Ensure brilcal executable exists
+    if not os.path.exists(exe):
+        Print("brilcalc not found, have you installed it?", True)
+        Print("http://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html")
+        sys.exit()
+
+    # Execute the command
+    cmd = [exe,"lumi", "-b", BeamStatus, "--normtag", CorrectionTag, "-u", LumiUnit, "-i", InputFile]
+    brilcalc_out = "%s.brilcalc" % (task)
+    sys_cmd = " ".join(cmd) + "> %s" % brilcalc_out
+    Verbose(sys_cmd)
+    ret     = os.system(sys_cmd)
+    output = [i for i in open(brilcalc_out, 'r').readlines()]
+    
+    if printOutput:
+        for o in output:
+            print o.replace('\n', "")
+    return ret, output
 
 
 def Execute(cmd):
@@ -243,18 +339,40 @@ def Execute(cmd):
     Verbose("Execute()", True)
 
     Verbose("Executing command: %s" % (cmd))
-    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+    p = subprocess.Popen(cmd, shell=True, executable='/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
     output = p.communicate()[0]
     ret    = p.returncode
-
-    #stdin  = p.stdout
-    #stdout = p.stdout
-    #ret    = []
-    #for line in stdout:
-    #    ret.append(line.replace("\n", ""))
-    #
-    #stdout.close()
     return output, ret
+
+
+def PrintSummary(data, lumiUnit):
+    '''
+    Prints a table summarising the task and the recorded luminosity.
+    Also prints the total integrated luminosity.
+    '''
+    Verbose("PrintSummary()")
+    table   = []
+    table.append("")
+    align   = "{:<3} {:<50} {:>20} {:<7}"
+    hLine   = "="*80
+    header  = align.format("#", "Task", "Luminosity", "Units")
+    data    = OrderedDict(sorted(data.items(), key=lambda t: t[0]))
+    table.append(hLine)
+    table.append(header)
+    table.append(hLine)
+
+    index   = 0
+    intLumi = 0    
+    for task, lumi in data.items():
+        index+=1
+        table.append( align.format(index, task, "%.3f"%lumi, lumiUnit ) )
+        intLumi+= lumi
+    table.append(hLine)
+    table.append( align.format("", "", "%.3f"%intLumi, lumiUnit) )
+    table.append("")
+    for row in table:
+        Print(row)
+    return
 
 
 def main(opts, args):
@@ -271,10 +389,9 @@ def main(opts, args):
     Verbose("main()", True)
     
     cell = "\|\s+(?P<%s>\S+)\s+"
-    lumi_re = re.compile("\|\s+(?P<recorded>\d+\.*\d*)\s+\|\s*$")
-    unit_re = re.compile("totrecorded\(/(?P<unit>.*)\)") 
 
     if not opts.truncate and os.path.exists(opts.output):
+        Verbose("Opening OUTPUT file %s in \"r\"(read) mode" % (opts.output) )
         f = open(opts.output, "r")
         data = json.load(f)
         f.close()
@@ -330,29 +447,9 @@ def main(opts, args):
         Verbose("%s, %s" % (task, os.path.basename(jsonfile) ) )
         lumicalc = opts.lumicalc
 
-	# brilcalc lumi -u /pb -i JSON-file
-        home = os.environ['HOME']
-        path = os.path.join(home, ".local/bin")
-        exe  = os.path.join(path, "brilcalc")
-
-        # Ensure brilcal executable exists
-        if not os.path.exists(exe):
-            Print("brilcalc not found, have you installed it?", True)
-            Print("http://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html")
-            sys.exit()
-        else:
-            pass
-
         # Run the steps to get the Pileup histo
-        PrintProgressBar(task + ", Lumi", index, len(files), "[" + os.path.basename(jsonfile) + "]")
-        cmd = [exe,"lumi","-b", "STABLE BEAMS", "--normtag", NormTagJSON, "-u /pb", "-i", jsonfile]
-        output, ret = Execute(cmd) #iro
-        #Verbose(" ".join(cmd) )
-        #p      = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        #output = p.communicate()[0]
-        #ret    = p.returncode
-
-
+        ret, output = CallBrilcalc(task, BeamStatus='"STABLE BEAMS"', CorrectionTag=NormTagJSON, LumiUnit="/pb", InputFile=jsonfile)
+        
         # If return value is not zero print failure
         if ret != 0:
             Print("Call to %s failed with return value %d with command" % (cmd[0], ret ), True)
@@ -361,48 +458,25 @@ def main(opts, args):
             return 1
         Verbose(output)
 
-        lines = output.split("\n")
-        lumi = -1.0
-        unit = None
-
-        #For-loop: All lines in "crab report <task>" output
-        for line in lines:
-            m = unit_re.search(line)
-            if m:
-                unit = m.group("unit")
-            
-            m = lumi_re.search(line)
-            if m:
-                lumi = float(m.group("recorded")) # lumiCalc2.py returns pb^-1
-
-        if unit == None:
-            raise Exception("Didn't find unit information from lumiCalc output, command was %s" % " ".join(cmd))
-        lumi = convertLumi(lumi, unit)
-
-        print
+        # Determine Lumi and units from output
+        Verbose("Determining Luminosity and its Units")
+        lumi, lumiUnit = GetLumiAndUnits(output)
 
         # PileUp
+        Verbose("Task %s, creating Pileup ROOT files" % (task) )
         fOUT = os.path.join(task, "results", "PileUp.root")
         minBiasXsec = 63000
-        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT]
-
-        pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        puoutput = pu.communicate()[0]
-        puret = pu.returncode
-        if puret != 0:
-            print "Call to",pucmd[0],"failed with return value %d with command" % puret
-            print " ".join(pucmd)
-            print puoutput
-            return puret
-
+        puret, puoutput = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50")
+    
         if task == None:
-            print "File %s recorded luminosity %f pb^-1" % (jsonfile, lumi)
+            Verbose("File %s recorded luminosity %f pb^-1" % (jsonfile, lumi) )
         else:
-            print "Task %s recorded luminosity %f pb^-1" % (task, lumi)
+            Verbose("Task %s recorded luminosity %f pb^-1" % (task, lumi) )
             data[task] = lumi
 
         # Save the json file after each data task in case of future errors
         if len(data) > 0:
+            Verbose("Opening OUTPUT file %s in \"w\"(=write) and \"b\"(=binary) mode" % (opts.output) )
             f = open(opts.output, "wb")
             json.dump(data, f, sort_keys=True, indent=2)
             f.close()
@@ -410,7 +484,7 @@ def main(opts, args):
         # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
         # change the --minBiasXsec value in the pileupCalc.py command by +/-5% around the chosen central value.
 	puUncert = 0.05
-
+        
 	minBiasXsec = minBiasXsec*(1+puUncert)
 	pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT.replace(".root","_up.root"),"--pileupHistName","pileup_up"]
         pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -436,18 +510,24 @@ def main(opts, args):
 
 	fPU.Close()
 
-        # Update progress bar
-        #PrintProgressBar(task + ", Lumi", index, len(files) ) #iro
-        
+        # Update progress bar        
+        PrintProgressBar(task + ", Lumi", index, len(files), "[" + os.path.basename(jsonfile) + "]")
+
     # Flush stdout
     FinishProgressBar()
 
+    # Inform user of results
+    PrintSummary(data, lumiUnit)
+
     if len(data) > 0:
+        Verbose("Opening OUTPUT file %s in \"w\"(=write) and \"b\"(=binary) mode" % (opts.output) )
         f = open(opts.output, "wb")
         json.dump(data, f, sort_keys=True, indent=2)
         f.close()
+        Print("File \"%s\" created." % (f.name), True)
 
     return 0
+
 
 if __name__ == "__main__":
     '''
@@ -477,10 +557,10 @@ if __name__ == "__main__":
 
     multicrab.addOptions(parser)
 
-    parser.add_option("-f", dest="files", type="string", action="append", default=FILES,
+    parser.add_option("-f", "--files", dest="files", type="string", action="append", default=FILES,
                       help="JSON files to calculate the luminosity for (this or -d is required) [default: %s]" % (FILES) )
 
-    parser.add_option("--output", "-o", dest="output", type="string", default=OUTPUT,
+    parser.add_option("-o", "--output", dest="output", type="string", default=OUTPUT,
                       help="Output file to write the dataset integrated luminosities [default: %s]" % (OUTPUT) )
 
     parser.add_option("--truncate", dest="truncate", default=TRUNCATE, action="store_true",
