@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 '''
+Prerequisites:
+http://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html
+
 Description:
 Once all the jobs have been successfully retrieved from a multicrab job two scripts must then be run:
 1) hplusLumiCalc.py:
@@ -10,15 +13,39 @@ is no need to run this if only MC samples were processed.
 Merges ROOT files into one (or more) files. It also reads TopPt.root and adds a "top-pt-correction-weigh" histogram in miniaod2tree.root files. 
 The maximum allowable size for a single ROOT file is limited to 2 GB (but can be overwritten).
 
+BRIL tools analyse data in the database server at CERN which is closed to the outside.
+Therefore the most convienient way is to run the toolkit on hosts (private or public) at CERN. 
+If you must use the software installed outside the CERN intranet, a ssh tunnel to the database server at CERN has to be established first. 
+Since the tunneling procedure requires a valid cern computer account, a complete unregistered person will not be able to access the BRIL data in any case.
+The following instruction assumes the easiest setup: 
+you have two open sessions on the SAME off-site host, e.g. cmslpc32.fnal.gov, one for the ssh tunnel and another for execution. 
+It is also assumed that all the software are installed and the $PATH variable set correctly on the execution shell.
 
-Usage: (from inside a multicrab_AnalysisType_vXYZ_TimeStamp directory)
+
+Usage:
+1) LXPLUS:
+cd multicrab_AnalysisType_vXYZ_TimeStamp
+export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH  (bash)
+setenv PATH ${PATH}:$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin: (csh)
 hplusLumicalc.py
+
+2) LPC (or outside LXPLUS in general):
+open two terminals
+for both terminals, ssh to the same machine (e.g. ssh -YK aattikis@cmslpc37.fnal.gov)
+setup CMSSW and CRAB environments
+terminal 1: (ssh tunneling session)
+ssh -N -L 10121:itrac50012-v.cern.ch:10121 attikis@lxplus.cern.ch
+
+terminal 2 (while terminal 1 is open):
+cd multicrab_AnalysisType_vXYZ_TimeStamp
+export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH  (bash)
+setenv PATH ${PATH}:$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin: (csh)
+hplusLumicalc.py --offsite
 
 
 Comments:
 brilcalc usage taken from
 https://twiki.cern.ch/twiki/bin/view/CMS/CertificationTools#Lumi_calculation
-
 PileUp calc according to
 https://indico.cern.ch/event/459797/contribution/3/attachments/1181542/1711291/PPD_PileUp.pdf
 
@@ -267,7 +294,7 @@ def GetLumiAndUnits(output):
     return lumi, unit
 
         
-def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="true", maxPileupBin="50", numPileupBins="50"):
+def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName="pileup"):
     '''
     Script to estimate pileup distribution using xing instantaneous luminosity
     information and minimum bias cross section.  Output is TH1D stored in root
@@ -279,7 +306,10 @@ def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="
     Verbose("CallPileupCalc()", True)
     
     Verbose("Task %s, creating Pileup ROOT file" % (task) )
-    cmd = ["pileupCalc.py", "-i", inputFile, "--inputLumiJSON", inputLumiJSON, "--calcMode", calcMode, "--minBiasXsec", minBiasXsec, "--maxPileupBin", maxPileupBin, "--numPileupBins", numPileupBins, fOUT]
+    cmd = ["pileupCalc.py", "-i", inputFile, "--inputLumiJSON", inputLumiJSON, "--calcMode", calcMode, 
+           "--minBiasXsec", minBiasXsec, "--maxPileupBin", maxPileupBin, "--numPileupBins", numPileupBins, 
+           fOUT, "--pileupHistName", pileupHistName]
+
     sys_cmd = " ".join([str(c) for c in cmd])
     Verbose(sys_cmd)
     pu       = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -319,7 +349,11 @@ def CallBrilcalc(task, BeamStatus, CorrectionTag, LumiUnit, InputFile, printOutp
         sys.exit()
 
     # Execute the command
-    cmd = [exe,"lumi", "-b", BeamStatus, "--normtag", CorrectionTag, "-u", LumiUnit, "-i", InputFile]
+    cmd     = [exe,"lumi", "-b", BeamStatus, "--normtag", CorrectionTag, "-u", LumiUnit, "-i", InputFile]
+    cmd_ssh = ["-c", "offsite"]
+    if opts.offsite:
+        cmd.extend(cmd_ssh)
+
     brilcalc_out = "%s.brilcalc" % (task)
     sys_cmd = " ".join(cmd) + "> %s" % brilcalc_out
     Verbose(sys_cmd)
@@ -355,7 +389,7 @@ def PrintSummary(data, lumiUnit):
     table.append("")
     align   = "{:<3} {:<50} {:>20} {:<7}"
     hLine   = "="*80
-    header  = align.format("#", "Task", "Luminosity", "Units")
+    header  = align.format("#", "Task", "Luminosity", "")
     data    = OrderedDict(sorted(data.items(), key=lambda t: t[0]))
     table.append(hLine)
     table.append(header)
@@ -375,6 +409,21 @@ def PrintSummary(data, lumiUnit):
     return
 
 
+def IsSSHReady(opts):
+    '''
+    Ensures user confirms ssh tunnel is open
+    '''
+    Verbose("IsSSHReady()", True)
+
+    if not opts.offsite:
+        return
+    ssh_ready = AskUser("Is the ssh tunneling session ready?", True)
+    if not ssh_ready:
+        sys.exit()
+    else:
+        return
+
+
 def main(opts, args):
     '''
     Calculates luminosity with LumiCalc and the pile-up with pileupCalc for collision dataset samples. 
@@ -389,6 +438,9 @@ def main(opts, args):
     Verbose("main()", True)
     
     cell = "\|\s+(?P<%s>\S+)\s+"
+
+    # Ensure user has the ssh tunnel session ready (if required)
+    IsSSHReady(opts)
 
     if not opts.truncate and os.path.exists(opts.output):
         Verbose("Opening OUTPUT file %s in \"r\"(read) mode" % (opts.output) )
@@ -463,9 +515,10 @@ def main(opts, args):
         lumi, lumiUnit = GetLumiAndUnits(output)
 
         # PileUp
+        minBiasXsec = 63000
+
         Verbose("Task %s, creating Pileup ROOT files" % (task) )
         fOUT = os.path.join(task, "results", "PileUp.root")
-        minBiasXsec = 63000
         puret, puoutput = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50")
     
         if task == None:
@@ -483,21 +536,19 @@ def main(opts, args):
 
         # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
         # change the --minBiasXsec value in the pileupCalc.py command by +/-5% around the chosen central value.
-	puUncert = 0.05
-        
-	minBiasXsec = minBiasXsec*(1+puUncert)
-	pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT.replace(".root","_up.root"),"--pileupHistName","pileup_up"]
-        pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	puoutput = pu.communicate()[0]
+	puUncert    = 0.05
+        minBiasXsec = minBiasXsec*(1+puUncert)
+        fOUT_up     = fOUT.replace(".root","_up.root")
+        ret, output = CallPileupCalc(task, fOUT_up, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", "pileup_up")
 
         minBiasXsec = minBiasXsec*(1-puUncert)
-        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT.replace(".root","_down.root"),"--pileupHistName","pileup_down"]
-        pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        puoutput = pu.communicate()[0]
+        fOUT_down   = fOUT.replace(".root","_down.root")
+        ret, output = CallPileupCalc(task, fOUT_down, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", "pileup_down")
 
-	fPU = ROOT.TFile.Open(fOUT,"UPDATE")
+        # Write
+	fPU   = ROOT.TFile.Open(fOUT,"UPDATE")
 	fPUup = ROOT.TFile.Open(fOUT.replace(".root","_up.root"),"r")
-	h_pu = fPUup.Get("pileup_up")
+	h_pu  = fPUup.Get("pileup_up")
 	fPU.cd()
 	h_pu.Write()
 	fPUup.Close()
@@ -552,6 +603,7 @@ if __name__ == "__main__":
     TRUNCATE = False
     REPORT   = True
     VERBOSE  = False
+    OFFSITE  = False
 
     parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
 
@@ -583,6 +635,10 @@ if __name__ == "__main__":
 
     parser.add_option("-i", "--includeTasks", dest="includeTasks" , default="", type="string", 
                       help="Only perform action for this dataset(s) [default: '']")
+
+    parser.add_option("--offsite", dest="offsite" , action="store_true", default=OFFSITE, 
+                      help="Run bril tools as usual with connection string -c offsite. [default: %s]" % (OFFSITE) )
+
 
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
