@@ -633,13 +633,13 @@ def splitFiles(taskName, files, filesPerEntry, opts):
         for ifile, f in enumerate(files):
 
             # Update Progress bar
-            PrintProgressBar(taskName + ", Split", ifile, len(files) )
+            PrintProgressBar(taskName + ", Split", ifile, len(files), "[" + os.path.basename(f) + "]")
 
             # Calculate cumulative size (in Bytes)
             fileSize = GetFileSize(f, opts, False) 
             if not fileSize == None:
                 sumsize +=  fileSize
-            Verbose("File %s has a size of %s (sumsize=%s)." % (f, fileSize, sumsize) )
+            Print("File %s has a size of %s (sumsize=%s)." % (f, fileSize, sumsize) )
 
             # Impose upper limit on file size
             if sumsize > maxsize:
@@ -1009,13 +1009,14 @@ def CheckThatFilesExist(taskName, fileList, opts):
             Verbose("Task %s, file %s not found!" % (taskName, os.path.basename(f)) )
 
         # Update Progress bar
-        PrintProgressBar(taskName + ", Check", index, len(fileList) )
+        PrintProgressBar(taskName + ", Check", index, len(fileList), "[" + os.path.basename(f) + "]")
+            
 
     # Flush stdout
     FinishProgressBar()
 
     if nExist != nFiles:
-        Print("Task %s, found %s ROOT files but expected %s. Have you already run this script?" % (taskName, nExist, nFiles), False)
+        Print("%s, found %s ROOT files but expected %s. Have you already run this script?" % (taskName, nExist, nFiles), False)
         return False
     else:
         return True
@@ -1305,7 +1306,7 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
                 exitedJobs.append(int(exit_match.group("jobId")))
         
         # Update progress bar
-        PrintProgressBar(taskName + ", Files", index, len(stdoutFiles) )
+        PrintProgressBar(taskName + ", Files", index, len(stdoutFiles), "[" + os.path.basename(f) + "]")
 
     # Flush stdout
     if len(stdoutFiles)>0:
@@ -1503,9 +1504,9 @@ def GetPreexistingMergedFiles(taskPath, opts):
         Verbose("Getting file size for file %s" % (f))
         mergeSizeMap[f] = GetFileSize(taskPath + "/" + f, opts)
         mergeTimeMap[f] = 0.0
-    filesExist = len(preMergedFiles)
-
-    return filesExist, mergeSizeMap, mergeTimeMap
+    #filesExist = len(preMergedFiles)
+    #return filesExist, mergeSizeMap, mergeTimeMap
+    return preMergedFiles, mergeSizeMap, mergeTimeMap
 
 
 def LinkFiles(taskName, fileList):
@@ -1518,12 +1519,18 @@ def LinkFiles(taskName, fileList):
     # For-loop: All files
     for index, f in enumerate(fileList):
         srcFile  = f
-        destFile = "/".join(f.split("/")[-1:])
-        cmd = "ln -s %s %s" % (srcFile, os.path.join(taskName, "results", destFile))
-        Verbose(cmd)
-        ret = Execute(cmd)
+        fName    = "/".join(f.split("/")[-1:])
+        destFile = os.path.join(taskName, "results", fName)
+        cmd = "ln -s %s %s" % (srcFile, destFile)
+
+        # Create the symbolic link
+        if not os.path.isfile(destFile):
+            Verbose(cmd)
+            ret = os.system(cmd)
+            # ret = Execute(cmd)
+
         # Update Progress bar
-        PrintProgressBar(taskName + ", Links", index, len(fileList), "[" + destFile + "]")
+        PrintProgressBar(taskName + ", Links", index, len(fileList), "[" + os.path.basename(destFile) + "]")
 
     # Flush stdout
     FinishProgressBar()
@@ -1601,10 +1608,19 @@ def main(opts, args):
                 pass
 
             # If files to be merged do NOT exist (and this is not a test), print report (perhaps files have already been merged)
-            if not CheckThatFilesExist(taskName, files, opts) and not opts.test and not opts.linksToEOS:
-                Print("Task %s, skipping, some files are missing" % (taskName) )
-                filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
+            if not CheckThatFilesExist(taskName, files, opts) and not opts.test:
+                Verbose("%s, skipping, some files are missing" % (taskName) )
+                mergeFiles, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
+                filesExist = len(mergeFiles)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
+
+                # Create symbolic links?
+                if opts.linksToEOS:
+                    mList = []
+                    for f in mergeFiles:
+                        mFile = ConvertPathToEOS(taskName, os.path.join(d, "results", f), "", opts)
+                        mList.append(mFile)
+                    LinkFiles(taskName, mList)
                 continue
             else:
                 pass
@@ -1622,15 +1638,19 @@ def main(opts, args):
 
         # For-loop: All splitted files
         for index, inputFiles in filesSplit:
+
             Verbose("Merging %s/%s" % (index+1, len(filesSplit)), False)
             taskNameAndNum = d
             
             # Assign "task-number" if merging more than 1 files
             if len(filesSplit) > 1:
                 taskNameAndNum += "-%d" % index
+            else:
+                Verbose("%s, splitted output to %s files" % (taskName, len(filesSplit) ) )
 
             # Get the merge name of the files
             mergeName = os.path.join(d, "results", opts.output % taskNameAndNum)
+            Verbose("%s, mergeName is %s" % (taskName, mergeName) )
             if opts.filesInEOS:
                 mergeName = ConvertPathToEOS(taskName, mergeName, "", opts)
             else:
@@ -1639,17 +1659,19 @@ def main(opts, args):
             # If merge file already exists skip it or rename it as .backup
             if FileExists(mergeName, opts) and not opts.overwrite:
 
-                # Create symbolic links for merge files?
-                if opts.linksToEOS:
-                    LinkFiles(taskName, [mergeName])
-                    continue
-                filesExist, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
+                mergeFiles, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
+                filesExist = len(mergeFiles)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
                 PrintProgressBar(taskName + ", Merge", 0, 1)
                 filesExist += 1
+                #iro
                 continue
             else:
-                pass
+                Print("%s, merge file  %s does not already exist. Will create it" % (taskName, mergeName) )
+
+            # Skip if linking enabled
+            if opts.linksToEOS:
+                continue
 
             # Merge the ROOT files
             time_start = time.time()
@@ -1731,21 +1753,23 @@ def main(opts, args):
 
         # Update Progress bar
         if opts.filesInEOS:
-            PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean", index, len(mergeFileMap.keys()))
+            PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean", index, len(mergeFileMap.keys()), "[" + os.path.basename(f) + "]")
         else:
-            PrintProgressBar(taskName + ", Clean", index, len(mergeFileMap.keys()))
+            PrintProgressBar(taskName + ", Clean", index, len(mergeFileMap.keys()), "[" + os.path.basename(f) + "]")
             
         index += 1
 
     # Flush stdout
     FinishProgressBar()
 
-    # Print summary table using reports
+    # Calculate the total clean times
     for taskName in taskReports.keys():
         if opts.filesInEOS:
             eos = taskNameMap[taskName].replace("-", "_")
             if eos in cleanTime.keys():
                 taskReports[taskName].SetCleanTime( cleanTime[eos] )
+
+    # Print summary table using reports
     PrintSummary(taskReports)
 
     return 0
@@ -1769,11 +1793,12 @@ if __name__ == "__main__":
     '''
 
     # Default Values
-    VERBOSE    = False
-    OVERWRITE  = False
-    DIRNAME    = ""
-    LINKSTOEOS = False
-    
+    VERBOSE       = False
+    OVERWRITE     = False
+    DIRNAME       = ""
+    LINKSTOEOS    = False
+    FILESPERMERGE = -1
+
     parser = OptionParser(usage="Usage: %prog [options]")
     # multicrab.addOptions(parser)
     parser.add_option("--input", dest="input", type="string", default="histograms_.*?\.root",
@@ -1791,8 +1816,8 @@ if __name__ == "__main__":
     parser.add_option("--deleteImmediately", dest="deleteImmediately", default=False, action="store_true",
                       help="Delete the source files immediately after merging to save disk space [default: 'False']")
 
-    parser.add_option("--filesPerMerge", dest="filesPerMerge", default=-1, type="int",
-                      help="Merge at most this many files together, possibly resulting to multiple merged files. Use case: large ntuples. (default: -1 to merge all files to one) [default: '-1']")
+    parser.add_option("--filesPerMerge", dest="filesPerMerge", default=FILESPERMERGE, type="int",
+                      help="Merge at most this many files together, possibly resulting to multiple merged files. Use case: large ntuples. (default: -1 to merge all files to one) [default: %s]" %(FILESPERMERGE) )
 
     parser.add_option("--filesInEOS", dest="filesInEOS", default=False, action="store_true",
                       help="The ROOT files to be merged are in an EOS. Merge the files from there (xrootd protocol). File locations are read from cmsRun_*.log.tar.gz files. [default: 'False']")
