@@ -275,7 +275,7 @@ hplus2tbAnalysisDatasets.extend(datasetsSignalTB)
 hplus2tbAnalysisDatasets.extend(datasetsQCD)   
 hplus2tbAnalysisDatasets.extend(datasetsQCDbEnriched_noReHLT)
 hplus2tbAnalysisDatasets.extend(datasetsTop)
-#hplus2tbAnalysisDatasets.extend(datasetsTTJets) #less stas && -ve weights
+hplus2tbAnalysisDatasets.extend(datasetsTTJets)
 hplus2tbAnalysisDatasets.extend(datasetsZJetsToQQ)
 hplus2tbAnalysisDatasets.extend(datasetsTTWJetsToQQ_noReHLT)  
 hplus2tbAnalysisDatasets.extend(datasetsTTTT_noReHLT)  

@@ -19,6 +19,7 @@ GenParticleDumper::GenParticleDumper(edm::ConsumesCollector&& iConsumesCollector
   // mother    = new std::vector<short>[inputCollections.size()];
   mothers   = new std::vector< std::vector<short> >[inputCollections.size()];
   daughters = new std::vector< std::vector<short> >[inputCollections.size()];
+
   vtxX      = new std::vector<double>[inputCollections.size()];
   vtxY      = new std::vector<double>[inputCollections.size()];
   vtxZ      = new std::vector<double>[inputCollections.size()];
@@ -214,9 +215,9 @@ bool GenParticleDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           pdgId[ic].push_back(gp.pdgId());
 	  status[ic].push_back(gp.status());
 	  charge[ic].push_back(gp.charge());
-	  vtxX[ic].push_back(gp.vx());
-	  vtxY[ic].push_back(gp.vy());
-	  vtxZ[ic].push_back(gp.vz());
+	  // vtxX[ic].push_back(gp.vx());
+	  // vtxY[ic].push_back(gp.vy());
+	  // vtxZ[ic].push_back(gp.vz());
 	  // collisionId[ic].push_back(gp.collisionId());
 	  
 	  // Booleans (https://cmssdt.cern.ch/SDT/doxygen/CMSSW_8_0_14/doc/html/d5/dd4/classreco_1_1GenParticle.html#a57bb7f850421b2fe463a80ad75888fe3)
