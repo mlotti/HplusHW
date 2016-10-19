@@ -290,7 +290,6 @@ def GetLumiAndUnits(output):
     if unit == None:
         raise Exception("Didn't find unit information from lumiCalc output, command was %s" % " ".join(cmd))
     lumi = convertLumi(lumi, unit)
-    #print
     return lumi, unit
 
         
@@ -302,23 +301,28 @@ def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="
 
     For more help type in the terminal:
     pileupCalc.py --help
+
+    See the script on git-hub:
+    https://github.com/cms-sw/RecoLuminosity-LumiDB/blob/master/scripts/pileupCalc.py
     '''
     Verbose("CallPileupCalc()", True)
     
     Verbose("Task %s, creating Pileup ROOT file" % (task) )
     cmd = ["pileupCalc.py", "-i", inputFile, "--inputLumiJSON", inputLumiJSON, "--calcMode", calcMode, 
            "--minBiasXsec", minBiasXsec, "--maxPileupBin", maxPileupBin, "--numPileupBins", numPileupBins, 
-           fOUT, "--pileupHistName", pileupHistName]
+           fOUT, "--pileupHistName", pileupHistName] #, "--verbose"
 
     sys_cmd = " ".join([str(c) for c in cmd])
     Verbose(sys_cmd)
-    pu       = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    pu     = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output = pu.communicate()[0]
     ret    = pu.returncode
     if ret != 0:
-        Print("Call to %s failed with return value %d with command" % (pucmd[0], puret) )
+        Print("Call to %s failed with return value %d with command" % (cmd[0], ret) )
         Print(" ".join(pucmd) )
         print output
+
+    Verbose(output) #fixme: should print if len(output) > 0
     return ret, output
 
 
@@ -379,12 +383,34 @@ def Execute(cmd):
     return output, ret
 
 
+def PrintPuFilesCreated(puFiles):
+    '''
+    Inform user of PileUp files created
+    '''
+    Verbose("PrintPuFilesCreated()", True)
+    
+    # Sort alphabetically
+    puFiles = OrderedDict(sorted(puFiles.items(), key=lambda t: t[0]))
+
+    # For-loop: All task-fList pairs
+    index = -1
+    for task, fList in puFiles.items():
+        for f in fList:
+            index +=1
+            if index == 0:
+                Print("File \"%s\" created." % (f), True)
+            else:
+                Print("File \"%s\" created." % (f) )
+        
+    return
+
+
 def PrintSummary(data, lumiUnit):
     '''
     Prints a table summarising the task and the recorded luminosity.
     Also prints the total integrated luminosity.
     '''
-    Verbose("PrintSummary()")
+    Verbose("PrintSummary()", True)
     table   = []
     table.append("")
     align   = "{:<3} {:<50} {:>20} {:<7}"
@@ -396,7 +422,8 @@ def PrintSummary(data, lumiUnit):
     table.append(hLine)
 
     index   = 0
-    intLumi = 0    
+    intLumi = 0
+    # For-loop: All task-lumi pairs
     for task, lumi in data.items():
         index+=1
         table.append( align.format(index, task, "%.3f"%lumi, lumiUnit ) )
@@ -482,7 +509,7 @@ def main(opts, args):
             files.append((d, os.path.join(d, "results", "processedLumis.json")))
 
             # Update progress bar
-            PrintProgressBar(d + ", Crab", index, len(crabdirs) )
+            PrintProgressBar(d + ", Crab Report", index, len(crabdirs) )
 
     # Flush stdout
     FinishProgressBar()
@@ -490,8 +517,10 @@ def main(opts, args):
     # Extend the list
     files.extend([(None, f) for f in opts.files])
 
-    data  = {}
-    index = -1
+    data     = {}
+    puFiles  = {}
+    index    = -1
+    lumiUnit = ""
     # For-loop: All json files
     for task, jsonfile in files:
         index += 1
@@ -500,6 +529,7 @@ def main(opts, args):
         lumicalc = opts.lumicalc
 
         # Run the steps to get the Pileup histo
+        PrintProgressBar(task + ", BrilCalc   ", index, len(files), "[" + os.path.basename(jsonfile) + "]")
         ret, output = CallBrilcalc(task, BeamStatus='"STABLE BEAMS"', CorrectionTag=NormTagJSON, LumiUnit="/pb", InputFile=jsonfile)
         
         # If return value is not zero print failure
@@ -514,18 +544,8 @@ def main(opts, args):
         Verbose("Determining Luminosity and its Units")
         lumi, lumiUnit = GetLumiAndUnits(output)
 
-        # PileUp
-        minBiasXsec = 63000
-
-        Verbose("Task %s, creating Pileup ROOT files" % (task) )
-        fOUT = os.path.join(task, "results", "PileUp.root")
-        puret, puoutput = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50")
-    
-        if task == None:
-            Verbose("File %s recorded luminosity %f pb^-1" % (jsonfile, lumi) )
-        else:
-            Verbose("Task %s recorded luminosity %f pb^-1" % (task, lumi) )
-            data[task] = lumi
+        # Save lumi in task-lumi dictionary
+        data[task] = lumi 
 
         # Save the json file after each data task in case of future errors
         if len(data) > 0:
@@ -533,49 +553,90 @@ def main(opts, args):
             f = open(opts.output, "wb")
             json.dump(data, f, sort_keys=True, indent=2)
             f.close()
+        else:
+            pass
 
-        # https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
-        # change the --minBiasXsec value in the pileupCalc.py command by +/-5% around the chosen central value.
+        # PileUp [https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors]
+        minBiasXsec = 63000
+        Verbose("Task %s, creating Pileup ROOT files" % (task) )
+        fOUT  = os.path.join(task, "results", "PileUp.root")
+        hName = "pileup"
+        PrintProgressBar(task + ", PileupCalc ", index, len(files), "[" + os.path.basename(jsonfile) + "]")
+        ret, output = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName=hName)
+
+
+        Verbose("Task %s, changing the --minBiasXsec value in the pileupCalc.py command by +0.05 around the chosen central value." % (task) )
 	puUncert    = 0.05
         minBiasXsec = minBiasXsec*(1+puUncert)
         fOUT_up     = fOUT.replace(".root","_up.root")
-        ret, output = CallPileupCalc(task, fOUT_up, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", "pileup_up")
+        hName_up    = "pileup_up"
+        PrintProgressBar(task + ", PileupCalc+", index, len(files), "[" + os.path.basename(jsonfile) + "]")
+        ret, output = CallPileupCalc(task, fOUT_up, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName=hName_up)
 
+
+        Verbose("Task %s, changing the --minBiasXsec value in the pileupCalc.py command by -0.05 around the chosen central value." % (task) )
         minBiasXsec = minBiasXsec*(1-puUncert)
         fOUT_down   = fOUT.replace(".root","_down.root")
-        ret, output = CallPileupCalc(task, fOUT_down, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", "pileup_down")
+        hName_down  = "pileup_down"
+        PrintProgressBar(task + ", PileupCalc-", index, len(files), "[" + os.path.basename(jsonfile) + "]")
+        ret, output = CallPileupCalc(task, fOUT_down, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName=hName_down)
 
-        # Write
-	fPU   = ROOT.TFile.Open(fOUT,"UPDATE")
-	fPUup = ROOT.TFile.Open(fOUT.replace(".root","_up.root"),"r")
-	h_pu  = fPUup.Get("pileup_up")
+
+        Verbose("Task %s, opening all Pileup ROOT files" % (task) )
+	fPU      = ROOT.TFile.Open(fOUT     ,"UPDATE")
+	fPU_up   = ROOT.TFile.Open(fOUT_up  , "r")
+        fPU_down = ROOT.TFile.Open(fOUT_down, "r")
+
+
+        Verbose("Task %s, getting Up/Down Pileup histograms from corresponding ROOT files" % (task) )
+	h_pu      = fPU.Get("pileup")
+	h_pu_up   = fPU_up.Get("pileup_up")
+        h_pu_down = fPU_down.Get("pileup_down")
+
+
+        Verbose("Task %s, sanity check on Pileup histograms" % (task) )        
+        hList = []
+        hList.append(h_pu)
+        hList.append(h_pu_up)
+        hList.append(h_pu_down)
+        #For-loop: All histos
+        for h in hList:
+            Verbose("Histogram %s (xMin=%s, xMax=%s) has %s entries (mean=%s, RMS=%s)" % (h.GetName(), h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax(), h.GetEntries(), h.GetMean(), h.GetRMS() ) )
+            
+
+        Verbose("Task %s, writing Up/Down Pileup ROOT histos to %s file" % (task, fPU.GetName() ) )
 	fPU.cd()
-	h_pu.Write()
-	fPUup.Close()
-
-        fPUdown = ROOT.TFile.Open(fOUT.replace(".root","_down.root"),"r")
-        h_pu = fPUdown.Get("pileup_down")
-        fPU.cd()
-        h_pu.Write()
-        fPUdown.Close()
-
-	fPU.Close()
+	h_pu_up.Write()
+        h_pu_down.Write()
 
         # Update progress bar        
-        PrintProgressBar(task + ", Lumi", index, len(files), "[" + os.path.basename(jsonfile) + "]")
+        PrintProgressBar(task + ", Close Files", index, len(files), "[" + os.path.basename(jsonfile) + "]")
+
+        Verbose("Task %s, closing Pileup ROOT files" % (task) )
+	fPU.Close()
+        fPU_up.Close()
+        fPU_down.Close()
+        
+        # Save ROOT files names
+        rList = [fPU.GetName(), fPU_up.GetName(), fPU_down.GetName()]
+        puFiles[task] = rList
 
     # Flush stdout
     FinishProgressBar()
 
-    # Inform user of results
-    PrintSummary(data, lumiUnit)
+    # Print Pileup files created
+    PrintPuFilesCreated(puFiles)
 
+    # Dump all the luminosity data to the output file 
     if len(data) > 0:
         Verbose("Opening OUTPUT file %s in \"w\"(=write) and \"b\"(=binary) mode" % (opts.output) )
         f = open(opts.output, "wb")
         json.dump(data, f, sort_keys=True, indent=2)
         f.close()
-        Print("File \"%s\" created." % (f.name), True)
+    Print("File \"%s\" created." % (f.name), True)
+
+    # Inform user of results
+    PrintSummary(data, lumiUnit)
 
     return 0
 
