@@ -8,9 +8,10 @@ multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg
 Re-Create (for example, when you get "Cannot find .requestcache" for a given task):
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <task_dir> 
 Example:
-rm -rf /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8019_20161006T1003/<taskDir>
-multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8019_20161006T1003/
-(the above will re-create the job just for the dataset <task_dir>)
+cd <multicrab_dir>
+rm -rf <task_dir>
+cd CMSSW_X_Y_Y/src/HiggsAnalysis/MiniAOD2TTree/test
+multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <multicrab_dir>
 
 
 Check Status:
@@ -1600,7 +1601,10 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
 
         match = crab_outLFNDirBase_re.search(line)
 	if match:
-            mcrabDir = os.path.basename(opts.dirName[:-1])  # exclude last "/", either-wise fails
+            if opts.dirName.endswith("/"):
+                mcrabDir = os.path.basename(opts.dirName[:-1])  # exclude last "/", either-wise fails
+            else:
+                mcrabDir = os.path.basename(opts.dirName)
             fullDir  = "/store/user/%s/CRAB3_TransferData/%s" % (getUsernameFromSiteDB(), mcrabDir) # NOT getpass.getuser()
             line     = "config.Data.outLFNDirBase = '" + fullDir + "'\n"
 
@@ -1800,10 +1804,11 @@ def CreateJob(opts, args):
     Verbose("CreateJob()", True)
     
     # Get general info
-    version     = GetCMSSW()
-    analysis    = GetAnalysis()
-    datasets    = DatasetGroup(analysis).GetDatasetList()
-    taskDirName = GetTaskDirName(analysis, version, datasets)
+    version      = GetCMSSW()
+    analysis     = GetAnalysis()
+    datasets     = DatasetGroup(analysis).GetDatasetList()
+    taskDirName  = GetTaskDirName(analysis, version, datasets)
+    opts.dirName = taskDirName
 
     # Give user last chance to abort
     AskToContinue(taskDirName, analysis, opts)
