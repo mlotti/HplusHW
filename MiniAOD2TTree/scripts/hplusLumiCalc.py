@@ -331,9 +331,9 @@ def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="
         print output
 
     if len(output) > 0:
-        Print(output) #fixme: should print if len(output) > 0
+        Print(output) #fixme: "Consider using a higher value of --maxPileupBin"
     else:
-        Verbose(output) #fixme, iro
+        Verbose(output)
     return ret, output
 
 

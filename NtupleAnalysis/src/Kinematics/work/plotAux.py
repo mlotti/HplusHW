@@ -28,8 +28,12 @@ htb = "ChargedHiggs_HplusTB_HplusToTB_"
 styleDict = {
     htb + "M_500"      : styles.signal500Style, 
     htb + "M_400"      : styles.signal400Style,
+    htb + "M_350"      : styles.signal350Style,
     htb + "M_300"      : styles.signal300Style,
+    htb + "M_250"      : styles.signal250Style,
+    htb + "M_220"      : styles.signal220Style,
     htb + "M_200"      : styles.signal200Style,
+    htb + "M_180"      : styles.signal180Style,
     "QCD"              : styles.qcdFillStyle, #qcdStyle, #qcdFillStyle,
     "QCD_Pt_15to30"    : styles.qcdFillStyle, 
     "QCD_Pt_30to50"    : styles.qcdFillStyle, 
@@ -46,6 +50,14 @@ styleDict = {
     "QCD_Pt_1800to2400": styles.qcdFillStyle, 
     "QCD_Pt_2400to3200": styles.qcdFillStyle, 
     "QCD_Pt_3200toInf" : styles.qcdFillStyle,
+
+    "QCD_bEnriched_HT300to500"  : styles.qcdFillStyle,
+    "QCD_bEnriched_HT500to700"  : styles.qcdFillStyle,
+    "QCD_bEnriched_HT700to1000" : styles.qcdFillStyle,
+    "QCD_bEnriched_HT1000to1500": styles.qcdFillStyle,
+    "QCD_bEnriched_HT1500to2000": styles.qcdFillStyle,
+    "QCD_bEnriched_HT2000toInf" : styles.qcdFillStyle,
+
     "TT"               : styles.ttStyle,
     #"TT"               : styles.ewkStyle,
 }

@@ -140,6 +140,13 @@ _physicalToLogical.update({
     "QCD_Pt_2400to3200": "QCD_Pt_2400to3200",
     "QCD_Pt_3200toInf": "QCD_Pt_3200toInf",
 
+    "QCD_bEnriched_HT300to500"  : "QCD_bEnriched_HT300to500",
+    "QCD_bEnriched_HT500to700"  : "QCD_bEnriched_HT500to700",
+    "QCD_bEnriched_HT700to1000" : "QCD_bEnriched_HT700to1000",
+    "QCD_bEnriched_HT1000to1500": "QCD_bEnriched_HT1000to1500",
+    "QCD_bEnriched_HT1500to2000": "QCD_bEnriched_HT1500to2000",
+    "QCD_bEnriched_HT2000toInf" : "QCD_bEnriched_HT2000toInf" ,
+
     "QCD_Pt20_MuEnriched": "QCD_Pt20_MuEnriched",
 
     "QCD_Pt_50to80_MuEnrichedPt5": "QCD_Pt_50to80_MuEnrichedPt5",
@@ -312,7 +319,6 @@ _legendLabels = {
     "QCD_Pt1800to2400":      "QCD, 2400 < #hat{p}_{T} < 2400",
     "QCD_Pt2400to3200":      "QCD, 3200 < #hat{p}_{T} < 3200",
     "QCD_Pt3200toInf":       "QCD, #hat{p}_{T} > 3200",
-
     
     "QCD_Pt_15to30":          "QCD, 15 < #hat{p}_{T} < 30",
     "QCD_Pt_30to50":          "QCD, 30 < #hat{p}_{T} < 50",
@@ -330,6 +336,13 @@ _legendLabels = {
     "QCD_Pt_2400to3200":      "QCD, 3200 < #hat{p}_{T} < 3200",
     "QCD_Pt_3200toInf":       "QCD, #hat{p}_{T} > 3200",
     "QCD"            :        "QCD",
+
+    "QCD_bEnriched_HT300to500"  : "QCD-b, 300 < H_{T} < 500",
+    "QCD_bEnriched_HT500to700"  : "QCD-b, 500 < H_{T} < 700",
+    "QCD_bEnriched_HT700to1000" : "QCD-b, 700 < H_{T} < 1500",
+    "QCD_bEnriched_HT1000to1500": "QCD-b, 1000 < H_{T} < 1500",
+    "QCD_bEnriched_HT1500to2000": "QCD-b, 1500 < H_{T} < 2000",
+    "QCD_bEnriched_HT2000toInf" : "QCD-b, 2000 < H_{T} < #infty",
 
 #    "QCDdata": "QCD (data driven)",
     "QCDdata": "Mis-ID. #tau_{h} (data)",
