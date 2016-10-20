@@ -76,8 +76,9 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 PBARLENGTH  = 10
 
 # JSON files
-NormTagJSON = "/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json"
-PileUpJSON  = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt"
+NormTagJSON     = "/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json"
+PileUpJSON_2016 = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/PileUp/pileup_latest.txt"
+PileUpJSON_2015 = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt"
 
 # Regular Expression
 dataVersion_re = re.compile("dataVersion=(?P<dataVersion>[^: ]+)")
@@ -476,6 +477,16 @@ def main(opts, args):
     
     cell = "\|\s+(?P<%s>\S+)\s+"
 
+    allowedColl = ["2015", "2016"]
+    if opts.collisions == "2016":
+        PileUpJSON = PileUpJSON_2016
+    elif opts.collisions == "2015":
+        PileUpJSON = PileUpJSON_2015
+    else:
+        Print("Unsupported collisions option \"%s\". Please select from the following:\n\t%s" % (opts.collisions, ", ".join( allowedColl) ), True)
+        sys.exit()
+
+
     # Ensure user has the ssh tunnel session ready (if required)
     IsSSHReady(opts)
 
@@ -669,12 +680,13 @@ if __name__ == "__main__":
     '''
 
     # Default Values
-    FILES    = []
-    OUTPUT   = "lumi.json"
-    TRUNCATE = False
-    REPORT   = True
-    VERBOSE  = False
-    OFFSITE  = False
+    FILES      = []
+    OUTPUT     = "lumi.json"
+    TRUNCATE   = False
+    REPORT     = True
+    VERBOSE    = False
+    OFFSITE    = False
+    COLLISIONS = None
 
     parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
 
@@ -710,6 +722,9 @@ if __name__ == "__main__":
     parser.add_option("--offsite", dest="offsite" , action="store_true", default=OFFSITE, 
                       help="Run bril tools as usual with connection string -c offsite. [default: %s]" % (OFFSITE) )
 
+    parser.add_option("-c", "--collisions", dest="collisions", type="string", default=COLLISIONS, 
+                      help="The year of collisions considered, to determine the correct PileUp txt file for pileupCalc. [default: %s]" % (COLLISIONS) )
+
 
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
@@ -717,6 +732,11 @@ if __name__ == "__main__":
     if opts.lumicalc == None:
         opts.lumicalc = "brilcalc"
 
+    if opts.collisions == None:
+        Print("Must provide the year of collisions to consider, to determine the Pilep txt used by pileupCalc (e.g. --collisions 2016). Exit")
+        sys.exit()
+
+    # Inform user
     Print("Calculating luminosity with %s" % opts.lumicalc, True)
     Print("Calculating pileup with pileupCalc")
 
