@@ -127,7 +127,14 @@ def AskUser(msg, printHeader=False):
     '''
     Verbose("AskUser()", printHeader)
     
-    keystroke = raw_input("\t" +  msg + " (y/n): ")
+    fName = __file__.split("/")[-1]
+    if printHeader==True:
+        fullmsg = "=== " + fName
+        fullmsg += "\n\t" + msg + " (y/n): "
+    else:
+        fullmsg = "\t" + msg + " (y/n): "
+
+    keystroke = raw_input(fullmsg)
     if (keystroke.lower()) == "y":
         return True
     elif (keystroke.lower()) == "n":
@@ -322,7 +329,10 @@ def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="
         Print(" ".join(pucmd) )
         print output
 
-    Verbose(output) #fixme: should print if len(output) > 0
+    if len(output) > 0:
+        Print(output) #fixme: should print if len(output) > 0
+    else:
+        Verbose(output) #fixme, iro
     return ret, output
 
 
@@ -444,7 +454,7 @@ def IsSSHReady(opts):
 
     if not opts.offsite:
         return
-    ssh_ready = AskUser("Is the ssh tunneling session ready?", True)
+    ssh_ready = AskUser("Script executed outside LXPLUS (--offsite enabled). Is the ssh tunneling session ready?", True)
     if not ssh_ready:
         sys.exit()
     else:
