@@ -1,10 +1,30 @@
 ## \package crosssection
-# Background and signal cross sections
-#
-# All cross sections are in pb
+''' 
+Description: 
+Background and signal cross sections (in pb)
 
-########################################
-# Background cross section table
+How to Compute Cross Sections with the GenXSecAnalyzer:
+The cross-sections found with this tool are those predicted by the respective generators. 
+There may be better estimates, coming from dedicated task forces, theory papers etc. 
+In general, you should refer to the GenXsecTaskForce Twiki to find the best estimates.
+
+First find tte path of a ROOT file for a given dataset "someFile.root", by searching 
+on DAS (for example, dataset=/WW_TuneCUETP8M1*/RunIISpring16MiniAODv2-*/* in https://cmsweb.cern.ch/das/)
+Download the dedicated analyzer and run on that single file:
+- curl https://raw.githubusercontent.com/syuvivida/generator/master/cross_section/runJob/ana.py  -o ana.py
+- cmsRun ana.py inputFiles="someFile.root" maxEvents=-1
+The last output line is the final cross section:
+"After filter: final cross section = X +- Y pb"
+
+Example:
+cmsRun ana.py inputFiles="/store/mc/RunIISpring16MiniAODv2/QCD_bEnriched_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/70000/00DFB564-393F-E611-A97A-02163E012F6E.root" maxEvents=-1
+
+
+Links:
+https://twiki.cern.ch/twiki/bin/view/CMS/GenXsecTaskForce
+https://twiki.cern.ch/twiki/bin/view/CMS/HowToGenXSecAnalyzer#Running_the_GenXSecAnalyzer_on_a
+
+'''
 
 ## Cross section of a single process (physical dataset)
 class CrossSection:
@@ -54,6 +74,7 @@ class CrossSectionList:
 # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
 # [14] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV / GenXSecAnalyzer
 # [15] McM
+# [16] https://twiki.cern.ch/twiki/bin/view/CMS/HowToGenXSecAnalyzer#Running_the_GenXSecAnalyzer_on_a
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt_15to30", {
@@ -246,7 +267,6 @@ backgroundCrossSections = CrossSectionList(
             "8": 214.0,
             }),
     # end W+Njets 
-
     CrossSection("DYJetsToLL_M_50", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
@@ -411,7 +431,44 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("ST_s_channel_4f_InclusiveDecays", {
             "13": 10.32, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
-)
+    ########################################### Added for H+->tb
+    CrossSection("QCD_bEnriched_HT300to500", {
+            "13": 8.764e+04, #8.764e+04 +- 2.824e+02 pb [16] (inputFiles="02A6676C-5942-E611-814D-842B2B7680C9.root")
+            }),
+    CrossSection("QCD_bEnriched_HT500to700", {
+            "13": 1.598e+03, #1.598e+03 +- 7.620e+00 pb [16] (inputFiles="00DFB564-393F-E611-A97A-02163E012F6E.root")
+            }),
+    CrossSection("QCD_bEnriched_HT700to1000", {
+            "13": 3.197e+02, #3.197e+02 +- 1.518e+00 pb [16] (inputFiles="000E889E-0E1B-E611-A3D8-0025905C3E38.root")
+            }),
+    CrossSection("QCD_bEnriched_HT1000to1500", {
+            "13": 5.093e+01, #5.093e+01 +- 3.080e-01 pb [16] (inputFiles="16C63A43-591E-E611-BF07-008CFA197E84.root")
+            }),
+    CrossSection("QCD_bEnriched_HT1500to2000", {
+            "13": 4.383e+00, #4.383e+00 +- 1.492e-01 pb [16] (inputFiles="30A9A48A-7A3A-E611-B1B4-0050560210EC.root")
+            }),
+    CrossSection("QCD_bEnriched_HT2000toInf", {
+            "13": 7.858e-01, #7.858e-01 +- 8.107e-03 pb [16] (inputFiles="0A2A7965-611C-E611-931D-AC853D9DACE1.root")
+            }),
+    CrossSection("TTTT_ext1", {
+            "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16] (inputFiles="02262C1A-EC1C-E611-B7BF-A0369F310374.root")
+            }),
+    CrossSection("TTWJetsToQQ", {
+            "13": 4.034e-01, #4.034e-01 +- 2.493e-03 pb [16] (inputFiles="2211E19A-CC1E-E611-97CC-44A84225C911.root")
+            }),
+    CrossSection("TTZToQQ", {
+            "13": 5.297e-01, #5.297e-01 +- 7.941e-04 pb [16] (inputFiles="204FB864-5D1A-E611-9BA7-001E67A3F49D.root")
+            }),
+    CrossSection("WJetsToQQ_HT_600ToInf", {
+            "13": 9.936e+01, #9.936e+01 +- 4.407e-01 pb [16] (inputFiles="0EA1D6CA-931A-E611-BFCD-BCEE7B2FE01D.root")
+            }),
+    CrossSection("WWTo4Q", {
+            "13": 4.520e+01, #4.520e+01 +- 3.608e-02 pb [16] (inputFiles="0A4AE358-861F-E611-A48C-44A84225C851.root")
+            }),
+    CrossSection("ZJetsToQQ_HT600toInf", {
+            "13": 5.822e+02, #5.822e+02 +- 7.971e-02 pb [16] (inputFiles="0E546A76-E03A-E611-9259-0CC47A4DEDEE.root")
+            }),
+    )
 
 ## Set background process cross sections
 #

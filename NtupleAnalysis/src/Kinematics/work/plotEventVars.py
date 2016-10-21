@@ -29,13 +29,27 @@ import ROOT
 #================================================================================================
 # Variable Definition
 #================================================================================================
+signal = [
+    "ChargedHiggs_HplusTB_HplusToTB_M_180",
+    "ChargedHiggs_HplusTB_HplusToTB_M_200",
+    "ChargedHiggs_HplusTB_HplusToTB_M_220",
+    "ChargedHiggs_HplusTB_HplusToTB_M_250",
+    "ChargedHiggs_HplusTB_HplusToTB_M_300",
+    "ChargedHiggs_HplusTB_HplusToTB_M_350",
+    "ChargedHiggs_HplusTB_HplusToTB_M_400",
+    "ChargedHiggs_HplusTB_HplusToTB_M_500",
+    ]
+signal200 = filter(lambda x: "M_200" not in x, signal)
+signal500 = filter(lambda x: "M_500" not in x, signal)
+signal2   = [s for s in signal if s not in ["ChargedHiggs_HplusTB_HplusToTB_M_200", "ChargedHiggs_HplusTB_HplusToTB_M_500"] ]
+
 kwargs = {
     "analysis"       : "Kinematics",
     #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/all/",
     #"savePath"       : None,
-    "savePath"       : os.getcwd() + "Plots/",
-    "refDataset"     : "QCD", #ChargedHiggs_HplusTB_HplusToTB_M_200
-    "rmDataset"      : [""],
+    "savePath"       : os.getcwd() + "/Plots/",
+    "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200", #ChargedHiggs_HplusTB_HplusToTB_M_200
+    "rmDataset"      : ["QCD"] + signal2,
     "saveFormats"    : [".png"],#, ".pdf"],
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "createRatio"    : False,
@@ -155,12 +169,18 @@ def main():
     datasetsMgr.updateNAllEventsToPUWeighted()
 
     # Remove datasets
+    print kwargs.get("rmDataset")
     datasetsMgr.remove(kwargs.get("rmDataset"))
     # datasetsMgr.remove(filter(lambda name: not "QCD" in name, datasetsMgr.getAllDatasetNames()))
     # datasetsMgr.remove(filter(lambda name: "QCD" in name in name, datasetsMgr.getAllDatasetNames()))
     
     # Set custom XSections
-    # d.getDataset("TT_ext3").setCrossSection(831.76)
+    #datasetsMgr.getDataset("QCD_bEnriched_HT1000to1500").setCrossSection(1.0)
+    #datasetsMgr.getDataset("QCD_bEnriched_HT1500to2000").setCrossSection(1.0)
+    #datasetsMgr.getDataset("QCD_bEnriched_HT2000toInf").setCrossSection(1.0)
+    #datasetsMgr.getDataset("QCD_bEnriched_HT300to500").setCrossSection(1.0)
+    #datasetsMgr.getDataset("QCD_bEnriched_HT500to700").setCrossSection(1.0)
+    #datasetsMgr.getDataset("QCD_bEnriched_HT700to1000").setCrossSection(1.0)
     
     # Default merging & ordering: "Data", "QCD", "SingleTop", "Diboson"
     plots.mergeRenameReorderForDataMC(datasetsMgr) #WARNING: Merged MC histograms must be normalized to something!
@@ -193,7 +213,7 @@ def main():
         p.createFrame(saveName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
         
         # Customise Legend
-        moveLegend = {"dx": -0.1, "dy": +0.0, "dh": -0.1}
+        moveLegend = {"dx": -0.2, "dy": +0.0, "dh": -0.1}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
         #p.removeLegend()
 

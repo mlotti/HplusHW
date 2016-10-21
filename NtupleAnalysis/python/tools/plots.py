@@ -201,6 +201,13 @@ _datasetMerge = {
     "QCD_Pt_170to300_MuEnrichedPt5": "QCD",
     "QCD_Pt_300to470_MuEnrichedPt5": "QCD",
 
+    "QCD_bEnriched_HT300to500"  : "QCD-b",
+    "QCD_bEnriched_HT500to700"  : "QCD-b",
+    "QCD_bEnriched_HT700to1000" : "QCD-b",
+    "QCD_bEnriched_HT1000to1500": "QCD-b",
+    "QCD_bEnriched_HT1500to2000": "QCD-b",
+    "QCD_bEnriched_HT2000toInf" : "QCD-b",
+
     "ST_s_channel_4f_InclusiveDecays": "SingleTop",
     "ST_t_channel_antitop_4f_inclusiveDecays": "SingleTop",
     "ST_t_channel_top_4f_inclusiveDecays": "SingleTop",
@@ -303,7 +310,6 @@ _legendLabels = {
     "TTandSingleTop":        "t#bar{t}+single top",
     "EWK":                   "EWK",
 
-
     "QCD_Pt15to30":          "QCD, 15 < #hat{p}_{T} < 30",
     "QCD_Pt30to50":          "QCD, 30 < #hat{p}_{T} < 50",
     "QCD_Pt50to80":          "QCD, 50 < #hat{p}_{T} < 80",
@@ -337,12 +343,13 @@ _legendLabels = {
     "QCD_Pt_3200toInf":       "QCD, #hat{p}_{T} > 3200",
     "QCD"            :        "QCD",
 
-    "QCD_bEnriched_HT300to500"  : "QCD-b, 300 < H_{T} < 500",
-    "QCD_bEnriched_HT500to700"  : "QCD-b, 500 < H_{T} < 700",
-    "QCD_bEnriched_HT700to1000" : "QCD-b, 700 < H_{T} < 1500",
-    "QCD_bEnriched_HT1000to1500": "QCD-b, 1000 < H_{T} < 1500",
-    "QCD_bEnriched_HT1500to2000": "QCD-b, 1500 < H_{T} < 2000",
-    "QCD_bEnriched_HT2000toInf" : "QCD-b, 2000 < H_{T} < #infty",
+    "QCD_bEnriched_HT300to500"   : "QCD-b, 300 < H_{T} < 500",
+    "QCD_bEnriched_HT500to700"   : "QCD-b, 500 < H_{T} < 700",
+    "QCD_bEnriched_HT700to1000"  : "QCD-b, 700 < H_{T} < 1500",
+    "QCD_bEnriched_HT1000to1500" : "QCD-b, 1000 < H_{T} < 1500",
+    "QCD_bEnriched_HT1500to2000" : "QCD-b, 1500 < H_{T} < 2000",
+    "QCD_bEnriched_HT2000toInf"  : "QCD-b, 2000 < H_{T} < #infty",
+    "QCD-b"                      : "QCD-b, 300 < H_{T} < #infty", #"QCD-b",
 
 #    "QCDdata": "QCD (data driven)",
     "QCDdata": "Mis-ID. #tau_{h} (data)",

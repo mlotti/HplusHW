@@ -34,6 +34,7 @@ styleDict = {
     htb + "M_220"      : styles.signal220Style,
     htb + "M_200"      : styles.signal200Style,
     htb + "M_180"      : styles.signal180Style,
+    "QCD-b"            : styles.qcdStyle,
     "QCD"              : styles.qcdFillStyle, #qcdStyle, #qcdFillStyle,
     "QCD_Pt_15to30"    : styles.qcdFillStyle, 
     "QCD_Pt_30to50"    : styles.qcdFillStyle, 
