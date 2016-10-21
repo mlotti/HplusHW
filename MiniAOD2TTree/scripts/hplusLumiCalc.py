@@ -28,6 +28,8 @@ cd multicrab_AnalysisType_vXYZ_TimeStamp
 export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH  (bash)
 setenv PATH ${PATH}:$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin: (csh)
 hplusLumicalc.py
+or
+hplusLumiCalc.py -i 2016 --transferToEOS --collisions 2016 --offsite
 
 2) LPC (or outside LXPLUS in general):
 open two terminals
@@ -63,6 +65,8 @@ import sys
 import glob
 import subprocess
 import json
+import getpass
+import socket
 from optparse import OptionParser
 from collections import OrderedDict
 import ROOT
@@ -88,6 +92,170 @@ pu_re = re.compile("\|\s+\S+\s+\|\s+\S+\s+\|\s+.*\s+\|\s+.*\s+\|\s+\S+\s+\|\s+\S
 #================================================================================================
 # Function Definition
 #================================================================================================
+def ConvertCommandToEOS(cmd, opts):
+    '''
+    Convert a given command to EOS-path. Used when working solely with EOS
+    and files are not copied to local working directory
+    '''
+    Verbose("ConvertCommandToEOS()", True)
+
+    # Define a map mapping bash command with EOS commands
+    cmdMap = {}
+    cmdMap["ls"]    = "eos ls"
+    cmdMap["ls -l"] = "eos ls -l"
+    cmdMap["rm"]    = "eos rm"
+    cmdMap["size"]  = "eos find --size"
+
+    # EOS commands differ on LPC!
+    if "fnal" in socket.gethostname():
+
+        # Define alias for eos (broken by cmsenv)
+        eosAlias = "eos root://cmseos.fnal.gov"
+        for key in cmdMap:
+            cmdMap[key] = cmdMap[key].replace("eos", eosAlias)
+
+    # Currect "eos" alias being broken on lxplus after cmsenv is set
+    if "lxplus" in socket.gethostname():
+        
+        # Define alias for eos (broken by cmsenv)
+        eosAlias = "/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select "
+        for key in cmdMap:
+            cmdMap[key] = cmdMap[key].replace("eos", eosAlias)
+
+    if cmd not in cmdMap:
+        raise Exception("Could not find EOS-equivalent for cammand %s." % (cmd) )
+    return cmdMap[cmd]
+
+
+def GetEOSHomeDir(opts):
+    home = "/store/user/%s/CRAB3_TransferData/%s" % (getpass.getuser(), opts.dirName)
+    return home
+
+
+def Execute(cmd):
+    '''
+    Executes a given command and return the output.
+    '''
+    Verbose("Execute()", True)
+    Verbose("Executing command: %s" % (cmd))
+    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+
+    stdin  = p.stdin
+    stdout = p.stdout
+    ret    = []
+    for line in stdout:
+        ret.append(line.replace("\n", ""))
+    stdout.close()
+    Verbose("Command %s returned:\n\t%s" % (cmd, "\n\t".join(ret)))
+    return ret
+
+
+def ConvertTasknameToEOS(taskName, opts):
+    '''
+    Get the full dataset name as found EOS.
+    '''
+    Verbose("ConvertTasknameToEOS()", False)
+    
+    # Variable definition
+    crabCfgFile   = None
+    taskNameEOS   = None
+
+    # Get the crab cfg file for this task 
+    crabCfgFile = "crabConfig_%s.py" % (taskName)
+    fullPath    =  os.getcwd() + "/" + crabCfgFile
+    
+    if not os.path.exists(fullPath):
+        raise Exception("Unable to find the file crabConfig_%s.py." % (taskName) )
+
+    # For-loop: All lines in cfg file
+    for l in open(fullPath): 
+        keyword = "config.Data.inputDataset = "
+        if keyword in l:
+            taskNameEOS = l.replace(keyword, "").split("/")[1]
+
+    if taskNameEOS == None:
+        raise Exception("Unable to find the crabConfig_<dataset>.py for task with name %s." % (taskName) )
+
+    Verbose("The conversion of task name %s into EOS-compatible is %s" % (taskName, taskNameEOS) )
+    return taskNameEOS
+
+
+def ConvertPathToEOS(taskName, fullPath, path_postfix, opts, isDir=False):
+    '''
+    Takes as input a path to a file or dir of a given multicrab task stored locally
+    and converts it to the analogous path for EOS.
+    '''
+    Verbose("ConvertPathToEOS()", True)
+ 
+    path_prefix = GetEOSHomeDir(opts)
+    if not isDir:
+        fileName      = fullPath.split("/")[-1]
+    else:
+        taskName      = fullPath
+        fileName      = ""
+
+    Verbose("Converting %s to EOS (taskName = %s, fileName = %s)" % (fullPath, taskName, fileName) )
+    taskNameEOS   = ConvertTasknameToEOS(taskName, opts)
+    pathEOS       = WalkEOSDir(taskName, os.path.join(path_prefix, taskNameEOS), opts)
+    fullPathEOS   = pathEOS + path_postfix + fileName
+    Verbose("Converted %s (default) to %s (EOS)" % (fullPath, fullPathEOS) )
+    return fullPathEOS
+
+
+def WalkEOSDir(taskName, pathOnEOS, opts): #fixme: bad code 
+    '''
+    Looks inside the EOS path "pathOnEOS" directory by directory.
+    Since OS commands do not work on EOS, I have written this function
+    in a vary "dirty" way.. hoping to make it more robust in the future!
+
+    WARNING! Use with caution. If a given task has 2 sub-directories 
+    (e.g. same sample but 2 different multicrab submissions) before the
+    output files this will fail. The reason is that the function is currently
+    written to assume that each directory has only 1 subdirectory.
+    '''
+    Verbose("WalkEOSDir()", True)
+    
+    # Listing all files under the path
+    cmd = ConvertCommandToEOS("ls", opts) + " " + pathOnEOS
+    Verbose(cmd)
+    dirContents = Execute(cmd)
+    dirContents = [x for x in dirContents if isinstance(x, str)] # Remove non-string entries from list 
+    dirContents = filter(bool, dirContents) # Remove empty string entries from list 
+    if "\n" in dirContents[0]:
+        dirContents = dirContents[0].split("\n")
+
+    for d in dirContents:
+        if d=="":
+            dirContents.remove(d)
+        
+    if "symbol lookup error" in dirContents[0]:
+        raise Exception("%s.\n\t%s." % (cmd, dirContents[0]) )
+
+    Verbose("Walking the EOS directory %s with %s contents:\n\t%s" % (pathOnEOS, len(dirContents), "\n\t".join(dirContents) ) )
+
+    # A very, very dirty way to find the deepest directory where the ROOT files are located!
+    if len(dirContents) == 1:
+        subDir = dirContents[0]
+        Verbose("Found sub-directory %s under the EOS path %s!" % (subDir, pathOnEOS) )
+        pathOnEOS = WalkEOSDir(taskName, os.path.join(pathOnEOS, subDir), opts)
+    else:
+        rootFiles = []
+        # For-loop: All dir contents
+        for d in dirContents:
+            subDir = d 
+            if "crab_" + taskName in subDir:
+                pathOnEOS = WalkEOSDir(taskName, os.path.join(pathOnEOS, subDir), opts)
+        
+        for f in dirContents:
+            if ".root" not in f:
+                continue
+            else:
+                rootFiles.append( os.path.join(pathOnEOS, f) )
+        pathOnEOS += "/"
+        Verbose("Reached end of the line. Found %s ROOT files under %s."  % (len(rootFiles), pathOnEOS))
+    return pathOnEOS
+
+
 def FinishProgressBar():
     Verbose("FinishProgressBar()")
     sys.stdout.write('\n')
@@ -283,7 +451,6 @@ def GetLumiAndUnits(output):
     unit_re = re.compile("totrecorded\(/(?P<unit>.*)\)") 
     lumi_re = re.compile("\|\s+(?P<recorded>\d+\.*\d*)\s+\|\s*$")
 
-
     Verbose("Looping over all lines out brilcalc command output")
     #For-loop: All lines in "crab report <task>" output
     for line in output:
@@ -296,7 +463,7 @@ def GetLumiAndUnits(output):
             lumi = float(m.group("recorded")) # lumiCalc2.py returns pb^-1
 
     if unit == None:
-        raise Exception("Didn't find unit information from lumiCalc output, command was %s" % " ".join(cmd))
+        raise Exception("Didn't find unit information from lumiCalc output:\n\t%s" % "".join(output))
     lumi = convertLumi(lumi, unit)
     return lumi, unit
 
@@ -370,11 +537,20 @@ def CallBrilcalc(task, BeamStatus, CorrectionTag, LumiUnit, InputFile, printOutp
         cmd.extend(cmd_ssh)
 
     brilcalc_out = "%s.brilcalc" % (task)
-    sys_cmd = " ".join(cmd) + "> %s" % brilcalc_out
+    sys_cmd = " ".join(cmd) + " > %s" % brilcalc_out
     Verbose(sys_cmd)
-    ret     = os.system(sys_cmd)
+
+    ret    = os.system(sys_cmd)
     output = [i for i in open(brilcalc_out, 'r').readlines()]
     
+    # If return value is not zero print failure
+    if ret != 0:
+        Print("Call to %s failed with return value %d with command" % (cmd[0], ret ), True)
+        Print(" ".join(cmd) )
+        Print(output)
+        sys.exit()
+        #return ret, output
+
     if printOutput:
         for o in output:
             print o.replace('\n', "")
@@ -460,6 +636,67 @@ def IsSSHReady(opts):
         sys.exit()
     else:
         return
+
+
+def CopyFileToEOS(task, fOUT, opts):
+    '''
+    Copies file of given task to corresponding path onn EOS.
+    '''
+    Verbose("CopyFileToEOS()")
+    fOUT_EOS = ConvertPathToEOS(task, fOUT, "", opts, isDir=False)
+    Verbose("Copying %s to %s" % (fOUT, fOUT_EOS) )
+
+    srcFile  = fOUT
+    destFile = GetXrdcpPrefix(opts) + fOUT_EOS
+    cmd      = "xrdcp %s %s" % (srcFile, destFile)
+    Verbose(cmd)
+    ret = Execute(cmd)
+    #Print("File \"%s\" created." % (destFile), False)
+    return fOUT_EOS
+
+
+def CopyLumiJsonToEOS(f, opts):
+    '''
+    Copies file of given task to corresponding path onn EOS.
+    '''
+    Verbose("CopyLumiJsonToEOS()")
+
+    srcFile   = f.name
+    destFile_ = os.path.join(GetEOSHomeDir(opts), opts.dirName, srcFile)
+    destFile  = GetXrdcpPrefix(opts) + destFile_
+    cmd       = "xrdcp %s %s" % (srcFile, destFile)
+    Verbose(cmd)
+    ret = Execute(cmd)
+    Print("File \"%s\" created." % (destFile_), False)
+    return
+
+
+def GetXrdcpPrefix(opts):
+    '''
+    Returns the prefix for the file address when copying files from EOS.
+    For example, a file located in EOS under:
+    /store/user/attikis/CRAB3_TransferData/WZ_TuneCUETP8M1_13TeV-pythia8/
+
+    on LXPLUS becomes:
+    root://eoscms.cern.ch//eos//cms/store/user/attikis/CRAB3_TransferData/WZ_TuneCUETP8M1_13TeV-pythia8/
+
+    while on LPC becomes:
+    root://cmseos.fnal.gov//store/user/attikis/CRAB3_TransferData/WZ_TuneCUETP8M1_13TeV-pythia8/
+    '''
+    Verbose("GetXrdcpPrefix()")
+
+    # Definitions
+    HOST = socket.gethostname()
+    path_prefix = ""
+
+    Verbose("Determining prefix for xrdcp for host %s" % (HOST) )
+    if "fnal" in HOST:
+        path_prefix = "root://cmseos.fnal.gov/"
+    elif "lxplus" in HOST:
+        path_prefix = "root://eoscms.cern.ch//eos//cms/"
+    else:
+        raise Exception("Unsupported host %s" % (HOST) )
+    return path_prefix
 
 
 def main(opts, args):
@@ -551,15 +788,7 @@ def main(opts, args):
 
         # Run the steps to get the Pileup histo
         PrintProgressBar(task + ", BrilCalc   ", index, len(files), "[" + os.path.basename(jsonfile) + "]")
-        ret, output = CallBrilcalc(task, BeamStatus='"STABLE BEAMS"', CorrectionTag=NormTagJSON, LumiUnit="/pb", InputFile=jsonfile)
-        
-        # If return value is not zero print failure
-        if ret != 0:
-            Print("Call to %s failed with return value %d with command" % (cmd[0], ret ), True)
-            Print(" ".join(cmd) )
-            Print(output)
-            return 1
-        Verbose(output)
+        ret, output =  CallBrilcalc(task, BeamStatus='"STABLE BEAMS"', CorrectionTag=NormTagJSON, LumiUnit="/pb", InputFile=jsonfile)
 
         # Determine Lumi and units from output
         Verbose("Determining Luminosity and its Units")
@@ -580,19 +809,19 @@ def main(opts, args):
         # PileUp [https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors]
         minBiasXsec = 63000
         Verbose("Task %s, creating Pileup ROOT files" % (task) )
-        fOUT  = os.path.join(task, "results", "PileUp.root")
+        fOUT     = os.path.join(task, "results", "PileUp.root")
         hName = "pileup"
         PrintProgressBar(task + ", PileupCalc ", index, len(files), "[" + os.path.basename(jsonfile) + "]")
-        ret, output = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName=hName)
+        ret, output = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="80", numPileupBins="80", pileupHistName=hName)
 
-
+            
         Verbose("Task %s, changing the --minBiasXsec value in the pileupCalc.py command by +0.05 around the chosen central value." % (task) )
 	puUncert    = 0.05
         minBiasXsec = minBiasXsec*(1+puUncert)
         fOUT_up     = fOUT.replace(".root","_up.root")
         hName_up    = "pileup_up"
         PrintProgressBar(task + ", PileupCalc+", index, len(files), "[" + os.path.basename(jsonfile) + "]")
-        ret, output = CallPileupCalc(task, fOUT_up, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName=hName_up)
+        ret, output = CallPileupCalc(task, fOUT_up, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="80", numPileupBins="80", pileupHistName=hName_up)
 
 
         Verbose("Task %s, changing the --minBiasXsec value in the pileupCalc.py command by -0.05 around the chosen central value." % (task) )
@@ -600,8 +829,7 @@ def main(opts, args):
         fOUT_down   = fOUT.replace(".root","_down.root")
         hName_down  = "pileup_down"
         PrintProgressBar(task + ", PileupCalc-", index, len(files), "[" + os.path.basename(jsonfile) + "]")
-        ret, output = CallPileupCalc(task, fOUT_down, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName=hName_down)
-
+        ret, output = CallPileupCalc(task, fOUT_down, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="80", numPileupBins="80", pileupHistName=hName_down)
 
         Verbose("Task %s, opening all Pileup ROOT files" % (task) )
 	fPU      = ROOT.TFile.Open(fOUT     ,"UPDATE")
@@ -640,6 +868,15 @@ def main(opts, args):
         
         # Save ROOT files names
         rList = [fPU.GetName(), fPU_up.GetName(), fPU_down.GetName()]
+
+        # Copy files to EOS?
+        if opts.transferToEOS:
+            fOUT_EOS      = CopyFileToEOS(task, fOUT     , opts)    
+            fOUT_up_EOS   = CopyFileToEOS(task, fOUT_up  , opts)    
+            fOUT_down_EOS = CopyFileToEOS(task, fOUT_down, opts)    
+            rList.extend([fOUT_EOS, fOUT_up_EOS, fOUT_down_EOS])
+
+        # Create task-file dictionary
         puFiles[task] = rList
 
     # Flush stdout
@@ -655,6 +892,9 @@ def main(opts, args):
         json.dump(data, f, sort_keys=True, indent=2)
         f.close()
     Print("File \"%s\" created." % (f.name), True)
+
+    if opts.transferToEOS:
+        CopyLumiJsonToEOS(f, opts) 
 
     # Inform user of results
     PrintSummary(data, lumiUnit)
@@ -680,13 +920,15 @@ if __name__ == "__main__":
     '''
 
     # Default Values
-    FILES      = []
-    OUTPUT     = "lumi.json"
-    TRUNCATE   = False
-    REPORT     = True
-    VERBOSE    = False
-    OFFSITE    = False
-    COLLISIONS = None
+    FILES         = []
+    OUTPUT        = "lumi.json"
+    TRUNCATE      = False
+    REPORT        = True
+    VERBOSE       = False
+    OFFSITE       = False
+    COLLISIONS    = None
+    DIRNAME       = ""
+    TRANSFERTOEOS = False
 
     parser = OptionParser(usage="Usage: %prog [options] [crab task dirs]\n\nCRAB task directories can be given either as the last arguments, or with -d.")
 
@@ -725,15 +967,28 @@ if __name__ == "__main__":
     parser.add_option("-c", "--collisions", dest="collisions", type="string", default=COLLISIONS, 
                       help="The year of collisions considered, to determine the correct PileUp txt file for pileupCalc. [default: %s]" % (COLLISIONS) )
 
+    parser.add_option("--dirName", dest="dirName", default=DIRNAME, type="string",
+                      help="Custom name for CRAB directory name [default: %s]" % (DIRNAME))
+
+    parser.add_option("--transferToEOS", dest="transferToEOS", default=TRANSFERTOEOS, action="store_true",
+                      help="The output ROOT files will be transfered to appropriate EOS paths [default: '%s']" % (TRANSFERTOEOS) )
 
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
     
+    if opts.dirName == "":
+        opts.dirName = os.path.basename(os.getcwd())
+
+    if "lxplus" not in socket.gethostname() and not opts.offsite:
+        Print("Must enable the --offsite option when working outside LXPLUS. Read docstrings. Exit", True)
+        #print __doc__
+        sys.exit()
+
     if opts.lumicalc == None:
         opts.lumicalc = "brilcalc"
 
     if opts.collisions == None:
-        Print("Must provide the year of collisions to consider, to determine the Pilep txt used by pileupCalc (e.g. --collisions 2016). Exit")
+        Print("Must provide the year of collisions to consider, to determine the Pilep txt used by pileupCalc (e.g. --collisions 2016). Exit", True)
         sys.exit()
 
     # Inform user

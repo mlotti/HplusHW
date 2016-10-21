@@ -639,7 +639,7 @@ def splitFiles(taskName, files, filesPerEntry, opts):
             fileSize = GetFileSize(f, opts, False) 
             if not fileSize == None:
                 sumsize +=  fileSize
-            Print("File %s has a size of %s (sumsize=%s)." % (f, fileSize, sumsize) )
+            Verbose("File %s has a size of %s (sumsize=%s)." % (f, fileSize, sumsize) )
 
             # Impose upper limit on file size
             if sumsize > maxsize:
@@ -1667,7 +1667,7 @@ def main(opts, args):
                 #iro
                 continue
             else:
-                Print("%s, merge file  %s does not already exist. Will create it" % (taskName, mergeName) )
+                Verbose("%s, merge file  %s does not already exist. Will create it" % (taskName, mergeName) )
 
             # Skip if linking enabled
             if opts.linksToEOS:
@@ -1798,6 +1798,7 @@ if __name__ == "__main__":
     DIRNAME       = ""
     LINKSTOEOS    = False
     FILESPERMERGE = -1
+    FILESINEOS    = False
 
     parser = OptionParser(usage="Usage: %prog [options]")
     # multicrab.addOptions(parser)
@@ -1817,10 +1818,10 @@ if __name__ == "__main__":
                       help="Delete the source files immediately after merging to save disk space [default: 'False']")
 
     parser.add_option("--filesPerMerge", dest="filesPerMerge", default=FILESPERMERGE, type="int",
-                      help="Merge at most this many files together, possibly resulting to multiple merged files. Use case: large ntuples. (default: -1 to merge all files to one) [default: %s]" %(FILESPERMERGE) )
+                      help="Merge at most this many files together (-1 to merge all files to one). [default: %s]" %(FILESPERMERGE) )
 
-    parser.add_option("--filesInEOS", dest="filesInEOS", default=False, action="store_true",
-                      help="The ROOT files to be merged are in an EOS. Merge the files from there (xrootd protocol). File locations are read from cmsRun_*.log.tar.gz files. [default: 'False']")
+    parser.add_option("--filesInEOS", dest="filesInEOS", default=FILESINEOS, action="store_true",
+                      help="The ROOT files to be merged are in an EOS. Merge the files from there (xrootd protocol). [default: '%s']" % (FILESINEOS) )
 
     parser.add_option("-i", "--includeTasks", dest="includeTasks" , default="", type="string", 
                       help="Only perform action for this dataset(s) [default: '']")
