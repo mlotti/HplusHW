@@ -273,7 +273,7 @@ class DatasetContainer:
             myParams["opts2"] = {"ymin": 0.7, "ymax":1.3}
             myParams["opts"] = {"ymin": 0.0}
             if opts.logx:
-                myParams["opts"] = {"ymin": 10.0, "xmax":10000.0}
+                myParams["opts"] = {"ymin": 10.0, "xmax":5000.0}
                 myParams["logx"] = True
             if opts.light:
                 myParams["opts"] = {"ymin": 0.0, "xmax":1000.0}

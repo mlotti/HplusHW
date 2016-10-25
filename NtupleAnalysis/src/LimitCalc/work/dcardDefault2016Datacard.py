@@ -605,6 +605,7 @@ EWKPath="ForDataDrivenCtrlPlotsEWKGenuineTaus"
                          #"divideByBinWidth": False,
                          #"unit": "",
                          #"log": True,
+                         #"ratioLegendPosition": "right",
                          #"opts": {"ymin": 0.0009} }))
 ControlPlots.append(ControlPlotInput(
     title            = "SelectedTau_pT_AfterStandardSelections",
@@ -614,7 +615,8 @@ ControlPlots.append(ControlPlotInput(
                          "divideByBinWidth": True,
                          "unit": "GeV/c",
                          "log": True,
-                         "opts": {"ymin": 0.0009} }))
+                         "legendPosition": "NE",
+                         "opts": {"ymin": 0.0009, "ymaxfactor": 25, "xmax": 500} }))
 #ControlPlots.append(ControlPlotInput(
     #title            = "SelectedTau_p_AfterStandardSelections",
     #histoName        = "SelectedTau_p_AfterStandardSelections",
@@ -633,7 +635,7 @@ ControlPlots.append(ControlPlotInput(
                          "unit": "",
                          "log": True,
                          "legendPosition": "SW",
-                         "opts": {"ymin": 0.009} }))
+                         "opts": {"ymin": 0.0009} }))
 ControlPlots.append(ControlPlotInput(
     title            = "SelectedTau_phi_AfterStandardSelections",
     histoName        = "SelectedTau_phi_AfterStandardSelections",
@@ -643,7 +645,7 @@ ControlPlots.append(ControlPlotInput(
                          "unit": "{}^{o}",
                          "log": True,
                          "legendPosition": "SW",
-                         "opts": {"ymin": 0.009} }))
+                         "opts": {"ymin": 0.0009} }))
 ControlPlots.append(ControlPlotInput(
     title            = "SelectedTau_ldgTrkPt_AfterStandardSelections",
     histoName        = "SelectedTau_ldgTrkPt_AfterStandardSelections",
@@ -653,7 +655,7 @@ ControlPlots.append(ControlPlotInput(
                          "unit": "GeV/c",
                          "log": True,
                          "ratioLegendPosition": "right",
-                         "opts": {"ymin": 0.0009} }))
+                         "opts": {"ymin": 0.0009, "ymaxfactor": 10, "xmax": 500} }))
 #ControlPlots.append(ControlPlotInput(
     #title            = "SelectedTau_LeadingTrackP_AfterStandardSelections",
     #histoName        = "SelectedTau_LeadingTrackP_AfterStandardSelections",
@@ -673,7 +675,8 @@ ControlPlots.append(ControlPlotInput(
                          "unit": "",
                          "log": True,
                          "legendPosition": "SE",
-                         "opts": {"ymin": 0.009} },
+                         "ratioLegendPosition": "right",
+                         "opts": {"ymin": 0.0009} },
 ))
 ControlPlots.append(ControlPlotInput(
     title            = "SelectedTau_DecayMode_AfterStandardSelections",
@@ -728,7 +731,7 @@ ControlPlots.append(ControlPlotInput(
                          "divideByBinWidth": True,
                          "unit": "GeV/c",
                          "log": True,
-                         "opts": {"ymin": 0.009} },
+                         "opts": {"ymin": 0.0009, "ymaxfactor": 10, "xmax": 500} },
 ))
 ControlPlots.append(ControlPlotInput(
     title            = "JetEta_AfterStandardSelections",
@@ -750,9 +753,10 @@ ControlPlots.append(ControlPlotInput(
                          "divideByBinWidth": False,
                          "unit": "{}^{o}",
                          "log": True,
-                         "legendPosition": "SE",
+                         "legendPosition": "SW",
                          "opts": {"ymin": 0.09} },
-    flowPlotCaption  = "R_{coll}^{min}", # Leave blank if you don't want to include the item to the selection flow plot
+#    flowPlotCaption  = "R_{coll}^{min}", # Leave blank if you don't want to include the item to the selection flow plot
+    flowPlotCaption  = "", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 ControlPlots.append(ControlPlotInput(
     title            = "BJetSelection",
@@ -784,7 +788,7 @@ ControlPlots.append(ControlPlotInput(
                          "divideByBinWidth": True,
                          "unit": "GeV/c",
                          "log": True,
-                         "opts": {"ymin": 0.0009} },
+                         "opts": {"ymin": 0.0009, "ymaxfactor": 10, "xmax": 500} },
 ))
 ControlPlots.append(ControlPlotInput(
     title            = "BJetEta",
@@ -805,7 +809,7 @@ ControlPlots.append(ControlPlotInput(
                          "divideByBinWidth": True,
                          "unit": "GeV",
                          "log": True,
-                         "opts": {"ymin": 0.00009} },
+                         "opts": {"ymin": 0.00009, "ymaxfactor": 10, "xmax": 500} },
     flowPlotCaption  = "^{}E_{T}^{miss}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
 ControlPlots.append(ControlPlotInput(
@@ -826,7 +830,7 @@ ControlPlots.append(ControlPlotInput(
                          #"divideByBinWidth": True,
                          #"unit": "GeV",
                          #"log": True,
-                         #"opts": {"ymin": 0.0009} }))
+                         #"opts": {"ymin": 0.0009, "ymaxfactor": 10, "xmax": 500} }))
 #for i in range(1,5):
     #ControlPlots.append(ControlPlotInput(
         #title            = "CollinearAngularCuts2DJet%d"%i,
@@ -836,7 +840,7 @@ ControlPlots.append(ControlPlotInput(
                             #"divideByBinWidth": False,
                             #"unit": "{}^{o}",
                             #"log": False,
-                            #"legendPosition": "NW",
+                            #"legendPosition": "NE",
                             #"opts": {"zmin": 0.0} },
     #))
     #ControlPlots.append(ControlPlotInput(
@@ -847,7 +851,7 @@ ControlPlots.append(ControlPlotInput(
                             #"divideByBinWidth": False,
                             #"unit": "{}^{o}",
                             #"log": False,
-                            #"legendPosition": "NW",
+                            #"legendPosition": "NE",
                             #"opts": {"zmin": 0.0} },
     #))
 #ControlPlots.append(ControlPlotInput(
@@ -858,7 +862,7 @@ ControlPlots.append(ControlPlotInput(
                         #"divideByBinWidth": False,
                         #"unit": "{}^{o}",
                         #"log": False,
-                        #"legendPosition": "NW",
+                        #"legendPosition": "NE",
                         #"opts": {"zmin": 0.0} },
 #))
 #ControlPlots.append(ControlPlotInput(
@@ -869,7 +873,7 @@ ControlPlots.append(ControlPlotInput(
                         #"divideByBinWidth": False,
                         #"unit": "{}^{o}",
                         #"log": False,
-                        #"legendPosition": "NW",
+                        #"legendPosition": "NE",
                         #"opts": {"zmin": 0.0} },
 #))
 #ControlPlots.append(ControlPlotInput(
@@ -880,7 +884,7 @@ ControlPlots.append(ControlPlotInput(
                         #"divideByBinWidth": False,
                         #"unit": "{}^{o}",
                         #"log": True,
-                        #"legendPosition": "NW",
+                        #"legendPosition": "NE",
                         #"opts": {"ymin": 0.9} },
 #))
 #ControlPlots.append(ControlPlotInput(
@@ -891,7 +895,7 @@ ControlPlots.append(ControlPlotInput(
                         #"divideByBinWidth": False,
                         #"unit": "{}^{o}",
                         #"log": True,
-                        #"legendPosition": "NW",
+                        #"legendPosition": "NE",
                         #"opts": {"ymin": 0.9} },
 #))
 #ControlPlots.append(ControlPlotInput(
@@ -974,7 +978,7 @@ ControlPlots.append(ControlPlotInput(
                          "divideByBinWidth": False,
                          "unit": "{}^{o}",
                          "log": True,
-                         "legendPosition": "SE",
+                         "legendPosition": "SW",
                          "opts": {"ymin": 0.09} },
     flowPlotCaption  = "^{}R_{bb}^{min}", # Leave blank if you don't want to include the item to the selection flow plot
 ))
@@ -988,11 +992,11 @@ if OptionMassShape =="TransverseMass":
             #"unit": "GeV",
             "xlabel": "m_{T} (GeV)",
             "ylabel": "< Events / bin >", "ylabelBinInfo": False,
-            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
-            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
+#            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
+#            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
             "divideByBinWidth": True,
             "log": False,
-            "opts": {"ymin": 0.0},
+            "opts": {"ymin": 0.0, "ymaxfactor": 1.1, "xmax": 500},
             "opts2": {"ymin": 0.0, "ymax": 2.0}
         }, blindedRange=[81, 6000], # specify range min,max if blinding applies to this control plot
         flowPlotCaption="final", # Leave blank if you don't want to include the item to the selection flow plot
@@ -1005,11 +1009,11 @@ if OptionMassShape =="TransverseMass":
             #"unit": "GeV",
             "xlabel": "m_{T} (GeV)",
             "ylabel": "< Events / bin >", "ylabelBinInfo": False,
-            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
-            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
+#            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
+#            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
             "divideByBinWidth": True,
             "log": True,
-            "opts": {"ymin": 1e-4},
+            "opts": {"ymin": 1e-4, "ymaxfactor": 15, "xmax": 500},
             "opts2": {"ymin": 0.0, "ymax": 2.0}
         }, blindedRange=[81, 6000], # specify range min,max if blinding applies to this control plot
     ))
@@ -1021,11 +1025,11 @@ if OptionMassShape =="TransverseMass":
             #"unit": "GeV",
             "xlabel": "m_{T} (GeV)",
             "ylabel": "< Events / bin >", "ylabelBinInfo": False,
-            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
-            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
+#            "moveLegend": {"dx": -0.10, "dy": -0.12, "dh":0.1},
+#            "ratioMoveLegend": {"dx": -0.06, "dy": -0.33},
             "divideByBinWidth": True,
             "logx": True,
-            "opts": {"ymin": 1e-4,"ymaxfactor": 1.25},
+            "opts": {"ymin": 1e-4,"ymaxfactor": 1.3,"xmax": 5000},
             "opts2": {"ymin": 0.0, "ymax": 2.0}
         }, blindedRange=[81, 6000], # specify range min,max if blinding applies to this control plot
     ))
@@ -1042,7 +1046,7 @@ if OptionMassShape =="TransverseMass":
             "divideByBinWidth": True,
             "log": True,
             "logx": True,
-            "opts": {"ymin": 1e-4,"ymaxfactor": 10.0},
+            "opts": {"xmin": 9, "ymin": 1e-4,"ymaxfactor": 10.0},
             "opts2": {"ymin": 0.0, "ymax": 2.0}
         }, blindedRange=[81, 6000], # specify range min,max if blinding applies to this control plot
     ))
@@ -1068,6 +1072,7 @@ if OptionCtrlPlotsAtMt:
           "divideByBinWidth": False,
           "unit": "",
           "log": True,
+          "ratioLegendPosition": "right",
           "opts": {"ymin": 0.0009} }))
     ControlPlots.append(ControlPlotInput(title="SelectedTau_pT_AfterAllSelections",
         histoName="SelectedTau_pT_AfterAllSelections",
@@ -1076,7 +1081,7 @@ if OptionCtrlPlotsAtMt:
           "divideByBinWidth": True,
           "unit": "GeV/c",
           "log": True,
-          "opts": {"ymin": 0.0009} }))
+          "opts": {"ymin": 0.0009, "ymaxfactor": 15, "xmax": 500} }))
     ControlPlots.append(ControlPlotInput(title="SelectedTau_eta_AfterAllSelections",
         histoName="SelectedTau_eta_AfterAllSelections",
         details={ "xlabel": "Selected #tau #eta",
@@ -1103,7 +1108,7 @@ if OptionCtrlPlotsAtMt:
           "unit": "GeV/c",
           "log": True,
           "ratioLegendPosition": "right",
-          "opts": {"ymin": 0.0009} }))
+          "opts": {"ymin": 0.0009, "ymaxfactor": 10, "xmax": 500} }))
     ControlPlots.append(ControlPlotInput(title="SelectedTau_Rtau_AfterAllSelections",
         histoName="SelectedTau_Rtau_AfterAllSelections",
         details={ "xlabel": "Selected #tau R_{#tau}",
@@ -1112,6 +1117,7 @@ if OptionCtrlPlotsAtMt:
         "unit": "",
         "log": True,
         "legendPosition": "SE",
+        "ratioLegendPosition": "right",
         "opts": {"ymin": 0.009} }))
     ControlPlots.append(ControlPlotInput(title="SelectedTau_Rtau_FullRange_AfterAllSelections",
         histoName="SelectedTau_Rtau_AfterAllSelections",
@@ -1166,7 +1172,7 @@ if OptionCtrlPlotsAtMt:
         "divideByBinWidth": True,
         "unit": "GeV/c",
         "log": True,
-        "opts": {"ymin": 0.009} }))
+        "opts": {"ymin": 0.009, "ymaxfactor": 10, "xmax": 500} }))
     ControlPlots.append(ControlPlotInput(title="JetEta_AfterAllSelections",
     histoName="JetEta_AfterAllSelections",
         details={ "xlabel": "jet #eta",
@@ -1183,7 +1189,7 @@ if OptionCtrlPlotsAtMt:
         "divideByBinWidth": False,
         "unit": "{}^{o}",
         "log": True,
-        "legendPosition": "NW",
+        "legendPosition": "NE",
         "opts": {"ymin": 0.09} }))
     ControlPlots.append(ControlPlotInput(title="BJetSelection_AfterAllSelections",
         histoName="NBjets_AfterAllSelections",
@@ -1209,7 +1215,7 @@ if OptionCtrlPlotsAtMt:
         "divideByBinWidth": True,
         "unit": "GeV/c",
         "log": True,
-        "opts": {"ymin": 0.0009} }))
+        "opts": {"ymin": 0.0009, "ymaxfactor": 10, "xmax": 500} }))
     ControlPlots.append(ControlPlotInput(title="BJetEta_AfterAllSelections",
         histoName="BJetEta_AfterAllSelections",
         details={ "xlabel": "b jet #eta",
@@ -1226,7 +1232,7 @@ if OptionCtrlPlotsAtMt:
         "divideByBinWidth": True,
         "unit": "GeV",
         "log": True,
-        "opts": {"ymin": 0.0009} }))
+        "opts": {"ymin": 0.0009, "ymaxfactor": 10, "xmax": 500} }))
     ControlPlots.append(ControlPlotInput(title="METPhi_AfterAllSelections",
         histoName="METPhi_AfterAllSelections",
         details={ "xlabel": "E_{T}^{miss} #phi",
@@ -1244,7 +1250,7 @@ if OptionCtrlPlotsAtMt:
                 #"divideByBinWidth": False,
                 #"unit": "{}^{o}",
                 #"log": False,
-                #"legendPosition": "NW"))
+                #"legendPosition": "NE"))
     #ControlPlots.append(ControlPlotInput(title="AngularCuts2DMinimum_AfterAllSelections",
         #histoName="ImprovedDeltaPhiCuts2DMinimum",
         #details={ "xlabel": "#Delta#phi(#tau,E_{T}^{miss})",
@@ -1252,7 +1258,7 @@ if OptionCtrlPlotsAtMt:
             #"divideByBinWidth": False,
             #"unit": "{}^{o}",
             #"log": False,
-            #"legendPosition": "NW",
+            #"legendPosition": "NE",
             #"opts": {"zmin": 0.0} }))
     ControlPlots.append(ControlPlotInput(title="DeltaPhiTauMet_AfterAllSelections",
         histoName="DeltaPhiTauMet_AfterAllSelections",
@@ -1261,7 +1267,7 @@ if OptionCtrlPlotsAtMt:
         "divideByBinWidth": False,
         "unit": "{}^{o}",
         "log": True,
-        "legendPosition": "NW",
+        "legendPosition": "NE",
         "opts": {"ymin": 0.9} }))
     #ControlPlots.append(ControlPlotInput(title="MinDeltaPhiTauJet_AfterAllSelections",
         #histoName="MinDeltaPhiTauJet_AfterAllSelections",
@@ -1270,7 +1276,7 @@ if OptionCtrlPlotsAtMt:
             #"divideByBinWidth": False,
             #"unit": "{}^{o}",
             #"log": True,
-            #"legendPosition": "NW",
+            #"legendPosition": "NE",
             #"opts": {"ymin": 0.9} }))
     #ControlPlots.append(ControlPlotInput(title="MaxDeltaPhiTauJet_AfterAllSelections",
         #histoName="MaxDeltaPhiTauJet_AfterAllSelections",
@@ -1279,7 +1285,7 @@ if OptionCtrlPlotsAtMt:
             #"divideByBinWidth": False,
             #"unit": "{}^{o}",
             #"log": True,
-            #"legendPosition": "NW",
+            #"legendPosition": "NE",
             #"opts": {"ymin": 0.9} }))
     #ControlPlots.append(ControlPlotInput(title="DeltaPhi_AfterAllSelections",
         #histoName="deltaPhi_AfterAllSelections",
