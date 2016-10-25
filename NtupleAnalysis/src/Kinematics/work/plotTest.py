@@ -49,7 +49,6 @@ kwargs = {
     #"savePath"       : None,
     "savePath"       : os.getcwd() + "/Plots/",
     "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_180",
-    "rmDataset"      : [], #["QCD"],
     "saveFormats"    : [".png"],
     "normalizeTo"    : "Luminosity", #One", "XSection", "Luminosity"
     "createRatio"    : False,
@@ -93,27 +92,19 @@ def main(opts):
     # Set ROOT batch mode boolean
     ROOT.gROOT.SetBatch(opts.batchMode)
     
-    # Get all datasets from the mcrab dird
+    # Setup & configure the dataset manager
     datasetsMgr = GetDatasetsFromDir(opts.mcrab, opts, **kwargs)
     intLumi     = GetLumi(datasetsMgr)
     datasetsMgr.updateNAllEventsToPUWeighted()
-    
-    # Print Information
     datasetsMgr.PrintCrossSections()
     datasetsMgr.PrintLuminosities()
-
-    # Set custom XSections
     if 0:
-        datasetsMgr.getDataset("QCD_bEnriched_HT1000to1500").setCrossSection(1.0)
-    
-    # Default merging & ordering: "Data", "QCD", "SingleTop", "Diboson" (Merged MC histograms must be normalized to something)
-    plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        for d in datasetsMgr.getDatasets:
+            if "ChargedHiggs" in d:
+                datasetsMgr.getDataset(d).setCrossSection(2.0)
+    plots.mergeRenameReorderForDataMC(datasetsMgr)  # Merged MC histograms must be normalized to something
 
-    # Remove datasets
-    rmList = kwargs.get("rmDataset")
-    if len(rmList) > 0:
-        Print("Removing the following datasets: %s" % (", ".join(rmList) ), True)
-        datasetsMgr.remove(kwargs.get("rmDataset"))
+    datasetsMgr.remove(kwargs.get("rmDataset"))
         # datasetsMgr.remove(filter(lambda name: not "QCD" in name, datasetsMgr.getAllDatasetNames()))
     
     # Print dataset information
