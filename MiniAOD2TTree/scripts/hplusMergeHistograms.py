@@ -214,6 +214,9 @@ def GetLocalOrEOSPath(stdoutFile, opts):
     '''
     Verbose("GetLocalOrEOSCopy()", True)
     
+    if "fnal" in socket.gethostname(): #iro
+        return False, stdoutFile
+    
     localCopy = False
     if not FileExists(stdoutFile, opts):
         raise Exception("Cannot assert if job succeeded as file %s does not exist!" % (stdoutFile) )
@@ -245,7 +248,7 @@ def GetLocalOrEOSPath(stdoutFile, opts):
     return localCopy, stdoutFile
 
 
-def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
+def AssertJobSucceeded(stdoutFile, allowJobExitCodes, opts):
     '''
     Given crab job stdout file, ensure that the job succeeded
     \param stdoutFile   Path to crab job stdout file
@@ -254,6 +257,9 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
     '''
     Verbose("AssertJobSucceeded()", True)
 
+    if opts.skipVerify:
+        return
+    
     localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
 
     re_exe = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<code>\d+)")
@@ -310,7 +316,7 @@ def AssertJobSucceeded(stdoutFile, allowJobExitCodes=[]):
         Verbose("File %s, executable exit code is %s" % (stdoutFile, exeExitCode) )
     if jobExitCode != 0 and not jobExitCode in allowJobExitCodes:
         Verbose("File %s, job exit code is %s" % (stdoutFile, jobExitCode) )
-    return #iro fixme
+    return #fixme: is this okay?
 
 
 def getHistogramFile(stdoutFile, opts):
@@ -319,7 +325,7 @@ def getHistogramFile(stdoutFile, opts):
     Verbose("getHistogramFile()", True)
 
     Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
-    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes, opts)
     histoFile = None
 
     Verbose("Asserting that file %s is a tarball" % (stdoutFile) )
@@ -366,7 +372,7 @@ def getHistogramFileSE(stdoutFile, opts):
     Verbose("getHistogramFileSE()", True)
 
     Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
-    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes, opts)
     histoFile = None
 
     # Open the "stdoutFile"
@@ -389,11 +395,27 @@ def getHistogramFileSE(stdoutFile, opts):
 
 def getHistogramFileEOS(stdoutFile, opts):
     '''
+    "r"   Open text file for reading. The stream is positioned at the
+    beginning of the file.
+
+    "w"   Truncate file to zero length or create text file for writing.
+    The stream is positioned at the  beginning of the file.
+    
+    "w+"  Open for reading and writing. The stream is positioned at the 
+    beginning of the file.
+
+    "a"  Open for writing.  The file is created if it does not exist.  
+    The stream is positioned at the beginning of the file.
+
+    "a+"  Open for reading and writing.  The file is created if it does not
+    exist.  The stream is positioned at the end of the file.  Subse-
+    quent writes to the file will always end up at the then current
+    end of file, irrespective of any intervening fseek(3) or similar.
     '''
     Verbose("getHistogramFileEOS()", True)
 
     Verbose("Asserting that job succeeded by reading file %s" % (stdoutFile), False )
-    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes)
+    AssertJobSucceeded(stdoutFile, opts.allowJobExitCodes, opts)
 
     histoFile = None
 
@@ -402,12 +424,13 @@ def getHistogramFileEOS(stdoutFile, opts):
     localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
 
     # Open the standard output file
-    Verbose("Opening log file %s" % (stdoutFile), True )
-    f = open(stdoutFile)
-
+    # !Verbose("Opening log file %s" % (stdoutFile), True ) #fixme: is this really needed?
+    # f = open(stdoutFile, "r")  #fixme: is this really needed?
+    
     # Get the jobId with regular expression
     log_re = re.compile("cmsRun_(?P<job>\d+)\.log.tar.gz")
-    match = log_re.search(f.name)
+    match = log_re.search(stdoutFile)
+    #match = log_re.search(f.name)
     if match:
         jobId     = match.group("job")
         output    = "miniaod2tree_%s.root" % (jobId)
@@ -416,7 +439,8 @@ def getHistogramFileEOS(stdoutFile, opts):
         Verbose("Could not determine the jobId of file %s. match = " % (stdoutFile, match) )
     
     # Close (and delete if copied locally) the standard output file
-    f.close()
+    #f.close() #fixme: is this really needed?
+
     if localCopy:
         Verbose("Removing local copy of stdout tarfile %s" % (stdoutFile) )
         cmd = "rm -f %s" % (stdoutFile)
@@ -633,7 +657,7 @@ def splitFiles(taskName, files, filesPerEntry, opts):
         for ifile, f in enumerate(files):
 
             # Update Progress bar
-            PrintProgressBar(taskName + ", Split", ifile, len(files), "[" + os.path.basename(f) + "]")
+            PrintProgressBar(taskName + ", Split ", ifile, len(files), "[" + os.path.basename(f) + "]")
 
             # Calculate cumulative size (in Bytes)
             fileSize = GetFileSize(f, opts, False) 
@@ -930,25 +954,26 @@ def WritePileupHistos(fileName, opts):
     if not match:
         return
 
-        puFileTmp = os.path.join(os.path.dirname(filePath), "PileUp.root")
-        puFile    = prefix + puFileTmp
-        if FileExists(puFile):
-            fIN      = ROOT.TFile.Open(puFile)
-            hPU     = fIN.Get("pileup")
-            hPUup   = fIN.Get("pileup_up")
-            hPUdown = fIN.Get("pileup_down")
-        else:
-            Print("PileUp not found in", os.path.dirname(filePath), ", did you run hplusLumiCalc.py?")
+    puFileTmp = os.path.join(os.path.dirname(filePath), "PileUp.root")
+    puFile    = prefix + puFileTmp
+    if FileExists(puFile, opts):
+        fIN      = ROOT.TFile.Open(puFile)
+        hPU     = fIN.Get("pileup")
+        hPUup   = fIN.Get("pileup_up")
+        hPUdown = fIN.Get("pileup_down")
+    else:
+        Print("%s not found in %s. Did you run hplusLumiCalc.py? Exit" % (puFile, os.path.dirname(filePath) ) )
+        sys.exit()
 
-        # Now write the PY histograms in the input file
-        if not hPU == None:
-            fOUT.cd("configInfo")
-            hPU.Write("pileup", ROOT.TObject.kOverwrite)
-            hPUup.Write("pileup_up", ROOT.TObject.kOverwrite)
-            hPUdown.Write("pileup_down", ROOT.TObject.kOverwrite)
+    # Now write the PU histograms in the input file
+    if hPU != None: #fixme: is this okay?
+        fOUT.cd("configInfo")
+        hPU.Write("pileup", ROOT.TObject.kOverwrite)
+        hPUup.Write("pileup_up", ROOT.TObject.kOverwrite)
+        hPUdown.Write("pileup_down", ROOT.TObject.kOverwrite)
 
-        Verbose("Closing file %s." % (filePath) )
-        fOUT.Close()
+    Verbose("Closing file %s." % (filePath) )
+    fOUT.Close()
     return
 
 
@@ -1009,7 +1034,7 @@ def CheckThatFilesExist(taskName, fileList, opts):
             Verbose("Task %s, file %s not found!" % (taskName, os.path.basename(f)) )
 
         # Update Progress bar
-        PrintProgressBar(taskName + ", Check", index, len(fileList), "[" + os.path.basename(f) + "]")
+        PrintProgressBar(taskName + ", Check ", index, len(fileList), "[" + os.path.basename(f) + "]")
             
 
     # Flush stdout
@@ -1183,25 +1208,26 @@ def MergeFiles(mergeName, inputFiles, opts):
             cmd      = "xrdcp %s %s" % (srcFile, destFile)
             Verbose(cmd)
             ret = Execute(cmd)
-            #return ret
-            return 0
+            ret = 0
         else:
             Verbose("cp %s %s" % (inputFiles[0], mergeName) )
             if not opts.test:
                 shutil.copy(inputFiles[0], mergeName)
-            else:
-                pass
-            return 0
+            ret=0
     else:
         if opts.filesInEOS:
             ret = hadd(opts, mergeName, inputFiles, GetXrdcpPrefix(opts) )
             Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts) ), False )
-            return ret
         else:
             ret = hadd(opts, mergeName, inputFiles)    
             Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts) ), False )
-            return ret
 
+    # Before proceeding make sure the merged file is not corrupt
+    if RootFileIsCorrupt(mergeName):
+        Print("%s found to be corrupt, re-merging" % (mergeName))
+        MergeFiles(mergeName, inputFiles, opts) #fixme: validate
+
+    return ret
 
 def PrintSummary(taskReports):
     '''
@@ -1232,13 +1258,17 @@ def PrintSummary(taskReports):
     return
 
 
-def CheckTaskReport(logfilepath):
+def CheckTaskReport(logfilepath, opts):
     '''
     Probes the log-file tarball for a given jobId to
     determine the job status or exit code.
     '''
     Verbose("CheckTaskReport()", True)
         
+    
+    if opts.skipVerify:
+        return 0
+
     filePath    = logfilepath
     exitCode_re = re.compile("process\s+id\s+is\s+\d+\s+status\s+is\s+(?P<exitcode>\d+)")
     
@@ -1299,14 +1329,14 @@ def GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts):
             missing += 1
             Verbose("Task %s, skipping job %s: input root file not found from stdout" % (taskName, os.path.basename(f)) )
 
-        exitcode = CheckTaskReport(f)
+        exitcode = CheckTaskReport(f, opts)
         if exitcode != 0:
             exit_match = jobId_re.search(f)
             if exit_match:
                 exitedJobs.append(int(exit_match.group("jobId")))
         
         # Update progress bar
-        PrintProgressBar(taskName + ", Files", index, len(stdoutFiles), "[" + os.path.basename(f) + "]")
+        PrintProgressBar(taskName + ", Files ", index, len(stdoutFiles), "[" + os.path.basename(f) + "]")
 
     # Flush stdout
     if len(stdoutFiles)>0:
@@ -1399,8 +1429,44 @@ def CheckControlHisto(mergeName, inputFiles):
     return
 
 
+def RootFileIsCorrupt(fileName):
+    '''
+    Check integrity of ROOT File. Return true if file is corrupt, 
+    otherwise return false.
+    
+    https://root.cern.ch/phpBB3/viewtopic.php?t=5906
+    '''
+    Verbose("RootFileIsCorrupt()", True)
+    if fileName == None:
+        return False
 
-def DeleteFiles(fileList, opts):
+    # If open in update mode and the function finds something to recover, a new directory header is written to the file.
+    openMode = "UPDATE"
+    r = ROOT.TFile.Open(fileName, openMode)
+    if not isinstance(r, ROOT.TFile):
+        Print("Opened file %s but it is not an instance of ROOT::TFile(). Exit" % (fileName) )
+        sys.exit()
+        
+    Verbose("Opened file %s in mode %s" % (fileName, openMode) )
+
+    ret = False
+    if not r:
+        Print("File %s does not exist" % (fileName) )
+        ret = True
+    elif r.IsZombie():
+        Print("File %s is Zombie (unusable)" % (fileName) )
+        ret = True
+    elif r.TestBit(ROOT.TFile.kRecovered):
+        Print("File %s has been recovered" % (r.GetName() ) )
+        ret = True
+    else:
+        Verbose("%s succesfully opened" % (r.GetName() ) )
+        r.Close()
+        ret = False
+    return ret
+    
+
+def DeleteFiles(taskName, mergeFile, fileList, opts):
     '''
     If the --test option is used, do nothing.
     Otherwise, delete the source files immediately after merging to save disk space.
@@ -1409,8 +1475,14 @@ def DeleteFiles(fileList, opts):
     if opts.test:
         return
 
+    # Before proceeding make sure the merged file is not corrupt
+    if RootFileIsCorrupt(mergeFile):
+        Print("%s, merge-file %s is corrupt. Will not delete any input file. EXIT" % (taskName, mergeFile) )
+        sys.exit()
+
     # For-loop: All input files
-    for f in fileList:
+    for index, f in enumerate(fileList):
+        PrintProgressBar(taskName + ", Delete", index, len(fileList), "[" + os.path.basename(f) + "]")
         if opts.filesInEOS:
             cmd = ConvertCommandToEOS("rm", opts) + " " + f
             Verbose(cmd)
@@ -1419,6 +1491,7 @@ def DeleteFiles(fileList, opts):
             cmd = "rm %s" % f
             Verbose(cmd)
             os.remove(f)
+            
     return
 
 
@@ -1478,6 +1551,12 @@ def GetTaskLogFiles(taskName, opts):
     if len(stdoutFiles) < 1:
         #raise Exception("Task %s, could not obtain log files." % (taskName) )
         Verbose("Task %s, could not obtain log files." % (taskName), False)
+
+    # Sort the list naturally (alphanumeric strings). 
+    if 1:
+        stdoutFiles = natural_sort(stdoutFiles)
+        #print "\n\t".join(stdoutFiles)
+
     return stdoutFiles
         
 
@@ -1509,6 +1588,15 @@ def GetPreexistingMergedFiles(taskPath, opts):
     return preMergedFiles, mergeSizeMap, mergeTimeMap
 
 
+def natural_sort(myList): 
+    '''
+    Function for natural sorting of string list
+    '''
+    convert = lambda text: int(text) if text.isdigit() else text.lower() 
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    return sorted(myList, key = alphanum_key)
+
+
 def LinkFiles(taskName, fileList):
     '''
     Loops over all files in the list and creates symbolic links
@@ -1530,10 +1618,7 @@ def LinkFiles(taskName, fileList):
             # ret = Execute(cmd)
 
         # Update Progress bar
-        PrintProgressBar(taskName + ", Links", index, len(fileList), "[" + os.path.basename(destFile) + "]")
-
-    # Flush stdout
-    FinishProgressBar()
+        PrintProgressBar(taskName + ", Links ", index, len(fileList), "[" + os.path.basename(destFile) + "]")
     return
 
 
@@ -1579,16 +1664,20 @@ def main(opts, args):
 
     # For-loop: All task names
     Verbose("Looping over all tasks in %s" % (opts.dirName), True)
-    for d in crabDirs:
+    for index, d in enumerate(crabDirs):
+        
+        # Change line for each new task
+        if index!=0:
+            print
 
+        # Get the task log files (human-sorted0
         taskName    = d.replace("/", "")
         stdoutFiles = GetTaskLogFiles(taskName, opts)
         Verbose("The stdout files for task %s are:\n\t%s" % ( taskName, "\n\t".join(stdoutFiles)), True)
         
         # Create symbolic links for merge files?
         if opts.linksToEOS:
-            LinkFiles(taskName, stdoutFiles)
-            #continue
+            pass #LinkFiles(taskName, stdoutFiles)
 
         # Definitions
         files, missingFiles, exitedJobs = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
@@ -1607,8 +1696,16 @@ def main(opts, args):
             else:
                 pass
 
-            # If files to be merged do NOT exist (and this is not a test), print report (perhaps files have already been merged)
+            # If not ALL task output files exist (and this is not a test), print report (perhaps files have already been merged)
             if not CheckThatFilesExist(taskName, files, opts) and not opts.test:
+
+                # Delete input files?
+                if opts.delete or opts.deleteImmediately:
+                    if AskUser("%s, delete %s files?:\n\t%s" % (taskName, len(files), "\n\t".join([os.path.basename(f) for f in files])) ):
+                        DeleteFiles(taskName, None, files, opts)
+                    else:
+                        pass
+
                 Verbose("%s, skipping, some files are missing" % (taskName) )
                 mergeFiles, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
                 filesExist = len(mergeFiles)
@@ -1617,10 +1714,12 @@ def main(opts, args):
                 # Create symbolic links?
                 if opts.linksToEOS:
                     mList = []
+                    #For-loop: All merge files
                     for f in mergeFiles:
                         mFile = ConvertPathToEOS(taskName, os.path.join(d, "results", f), "", opts)
                         mList.append(mFile)
                     LinkFiles(taskName, mList)
+                FinishProgressBar()
                 continue
             else:
                 pass
@@ -1662,16 +1761,24 @@ def main(opts, args):
                 mergeFiles, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
                 filesExist = len(mergeFiles)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
-                PrintProgressBar(taskName + ", Merge", 0, 1)
-                filesExist += 1
-                #iro
+                PrintProgressBar(taskName + ", Merge ", 0, 1)
+                filesExist += 1                
+            
+                # Delete input files?
+                if opts.delete:
+                    DeleteFiles(taskName, mergeName, inputFiles, opts)
+                                    
+                # Create symbolic links?
+                if opts.linksToEOS:
+                    mList = []
+                    # For-loop: All merge files
+                    for f in mergeFiles:
+                        mFile = ConvertPathToEOS(taskName, os.path.join(d, "results", f), "", opts)
+                        mList.append(mFile)
+                    LinkFiles(taskName, mList)
                 continue
             else:
                 Verbose("%s, merge file  %s does not already exist. Will create it" % (taskName, mergeName) )
-
-            # Skip if linking enabled
-            if opts.linksToEOS:
-                continue
 
             # Merge the ROOT files
             time_start = time.time()
@@ -1700,20 +1807,20 @@ def main(opts, args):
 
             # Delete all input files after merging them
             if opts.deleteImmediately:
-                DeleteFiles(inputFiles, opts)
+                DeleteFiles(taskName, mergeName, inputFiles, opts)
 
             # Update Progress bar
             mergePath = "/".join(mergeName.split("/")[-1:]) #fits terminal, [-6:] is too big to fit
-            PrintProgressBar(taskName + ", Merge", index, len(filesSplit), "[" + mergePath + "]")
+            PrintProgressBar(taskName + ", Merge ", index, len(filesSplit), "[" + mergePath + "]")
 
         # Flush stdout
         FinishProgressBar()
         if taskName not in taskReports.keys():
             taskReports[taskName] = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
 
-        # Change line
-        print
-            
+    # Empty line before proceeding to cleaning
+    print
+
     if opts.test:
         return
 
@@ -1746,16 +1853,16 @@ def main(opts, args):
             
         # Delete files after merging?
         if opts.delete and not opts.deleteImmediately:
-            DeleteFiles(sourceFiles, opts)
+            DeleteFiles(taskName, f, sourceFiles, opts)
 
         # Add pile-up histos
         WritePileupHistos(f, opts)
 
         # Update Progress bar
         if opts.filesInEOS:
-            PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean", index, len(mergeFileMap.keys()), "[" + os.path.basename(f) + "]")
+            PrintProgressBar(taskNameMapR[taskNameEOS] + ", Clean ", index, len(mergeFileMap.keys()), "[" + os.path.basename(f) + "]")
         else:
-            PrintProgressBar(taskName + ", Clean", index, len(mergeFileMap.keys()), "[" + os.path.basename(f) + "]")
+            PrintProgressBar(taskName + ", Clean ", index, len(mergeFileMap.keys()), "[" + os.path.basename(f) + "]")
             
         index += 1
 
@@ -1799,6 +1906,7 @@ if __name__ == "__main__":
     LINKSTOEOS    = False
     FILESPERMERGE = -1
     FILESINEOS    = False
+    SKIPVERIFY    = False
 
     parser = OptionParser(usage="Usage: %prog [options]")
     # multicrab.addOptions(parser)
@@ -1843,6 +1951,9 @@ if __name__ == "__main__":
 
     parser.add_option("-l", "--linksToEOS", dest="linksToEOS", default=LINKSTOEOS, action="store_true",
                       help="Create locally symbolic links to output/log files stored in EOS [default: %s]" % (LINKSTOEOS))
+
+    parser.add_option("-s", "--skipVerify", dest="skipVerify", default=SKIPVERIFY, action="store_true",
+                      help="Do not probe the log-file tarball for a given jobId to determine the job status or exit code. [default: %s]" % (SKIPVERIFY))
 
     (opts, args) = parser.parse_args()
 

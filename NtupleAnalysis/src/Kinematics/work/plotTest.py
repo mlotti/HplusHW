@@ -2,10 +2,22 @@
 '''
 
 Usage:
+Launch default script
 ./plotTemplate.py -m <pseudo_mcrab_directory>
 
-'''
+Launch but exclude the M_180 sample
+./plotTest.py -m Kinematics_161025_020335 -e M_180
 
+Launch but exclude the multiple signal samples
+./plotTest.py -m Kinematics_161025_020335 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400"
+
+Launch but only include the QCD_Pt samples
+./plotTest.py -m Kinematics_161025_020335 -i QCD_Pt
+
+Launch but exclude various samples
+./plotTest.py -m Kinematics_161025_020335 -e "M_200|M_220|M_250|M_300|M_350|M_400|QCD_Pt|JetHT"
+
+'''
 #================================================================================================
 # Imports
 #================================================================================================
@@ -25,33 +37,21 @@ from plotAux import *
 
 import ROOT
 
-
 #================================================================================================
 # Variable Definition
 #================================================================================================
-signal = [
-    "ChargedHiggs_HplusTB_HplusToTB_M_180",
-    "ChargedHiggs_HplusTB_HplusToTB_M_200",
-    "ChargedHiggs_HplusTB_HplusToTB_M_220",
-    "ChargedHiggs_HplusTB_HplusToTB_M_250",
-    "ChargedHiggs_HplusTB_HplusToTB_M_300",
-    "ChargedHiggs_HplusTB_HplusToTB_M_350",
-    "ChargedHiggs_HplusTB_HplusToTB_M_400",
-    "ChargedHiggs_HplusTB_HplusToTB_M_500",
-    ]
-signal200 = filter(lambda x: "M_200" not in x, signal)
-signal500 = filter(lambda x: "M_500" not in x, signal)
-signal2   = [s for s in signal if s not in ["ChargedHiggs_HplusTB_HplusToTB_M_200", "ChargedHiggs_HplusTB_HplusToTB_M_500"] ]
-
 kwargs = {
+    "dataEra"        : "Run2016",
+    "searchMode"     : "80to1000",
     "analysis"       : "Kinematics",
+    "optMode"        : "",
     #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/all/",
     #"savePath"       : None,
     "savePath"       : os.getcwd() + "/Plots/",
-    "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200", #ChargedHiggs_HplusTB_HplusToTB_M_200
-    "rmDataset"      : ["QCD"] + signal2,
-    "saveFormats"    : [".png"],#, ".pdf"],
-    "normalizeTo"    : "XSection", #One", "XSection", "Luminosity"
+    "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_180",
+    "rmDataset"      : [], #["QCD"],
+    "saveFormats"    : [".png"],
+    "normalizeTo"    : "Luminosity", #One", "XSection", "Luminosity"
     "createRatio"    : False,
     "logX"           : False,
     "logY"           : True,
@@ -80,117 +80,44 @@ hNames = [
     "BQuarkPair_dRMin_jet2_dR",
     "BQuarkPair_dRMin_jet2_dEta",
     "BQuarkPair_dRMin_jet2_dPhi",
-#    "tbWMinus_bqq_Pt",
-#    "tbWMinus_bqq_Rap",
-#    "tbWMinus_bqq_Mass",
-#    "tbWMinus_bqq_dRMax_dR",
-#    "tbWMinus_bqq_dRMax_dRap",
-#    "tbWMinus_bqq_dRMax_dPhi",
-#    "tbWPlus_bqq_Pt",
-#    "tbWPlus_bqq_Rap",
-#    "tbWPlus_bqq_Mass",
-#    "tbWPlus_bqq_dRMax_dR",
-#    "tbWPlus_bqq_dRMax_dRap",
-#    "tbWPlus_bqq_dRMax_dPhi",
-#    "MaxDiJetMass_Pt",
-#    "MaxDiJetMass_Eta",
-#    "MaxDiJetMass_Mass",
-#    "MaxDiJetMass_Rap",
-#    "MaxDiJetMass_dR",
-#    "MaxDiJetMass_dRrap",
-#    "MaxDiJetMass_dEta",
-#    "MaxDiJetMass_dRap",
-#    "MaxDiJetMass_dPhi",
-#    "SelGenJet_N_AfterLeptonVeto",
-]
-
-
-#hNames = [
-#    "genMET_Et",
-#    "genMET_Phi",
-#    "genHT_GenJets",
-#    "genHT_GenParticles",
-#    "SelGenJet_N_NoPreselections",
-#    "SelGenJet_N_AfterLeptonVeto",
-#    "SelGenJet_N_AfterLeptonVetoNJetsCut",
-#    "SelGenJet_N_AfterPreselections", 
-#    "MaxDiJetMass_Pt",
-#    "MaxDiJetMass_Eta",
-#    "MaxDiJetMass_Mass",
-#    "MaxDiJetMass_Rap",
-#    "MaxDiJetMass_dR",
-#    "MaxDiJetMass_dRrap",
-#    "MaxDiJetMass_dEta",
-#    "MaxDiJetMass_dRap",
-#    "MaxDiJetMass_dPhi",
-#    "BQuarkPair_dRMin_pT",
-#    "BQuarkPair_dRMin_dEta",
-#    "BQuarkPair_dRMin_dPhi",
-#    "BQuarkPair_dRMin_dR",
-#    "BQuarkPair_dRMin_Mass",
-#    "BQuarkPair_dRMin_jet1_dR",
-#    "BQuarkPair_dRMin_jet1_dEta",
-#    "BQuarkPair_dRMin_jet1_dPhi",
-#    "BQuarkPair_dRMin_jet2_dR",
-#    "BQuarkPair_dRMin_jet2_dEta",
-#    "BQuarkPair_dRMin_jet2_dPhi",
-#    "Htb_tbW_bqq_Pt",
-#    "Htb_tbW_bqq_Rap",
-#    "Htb_tbW_bqq_Mass",
-#    "Htb_tbW_bqq_dRMax_dR",
-#    "Htb_tbW_bqq_dRMax_dRap",
-#    "Htb_tbW_bqq_dRMax_dPhi",
-#    "gtt_tbW_bqq_Pt",
-#    "gtt_tbW_bqq_Rap",
-#    "gtt_tbW_bqq_Mass",
-#    "gtt_tbW_bqq_dRMax_dR",
-#    "gtt_tbW_bqq_dRMax_dRap",
-#    "gtt_tbW_bqq_dRMax_dPhi",
-#]
+    ]
 
 
 #================================================================================================
 # Main
 #================================================================================================
-def main():
+def main(opts):
 
-    style    = tdrstyle.TDRStyle()
+    style = tdrstyle.TDRStyle()
     
     # Set ROOT batch mode boolean
-    ROOT.gROOT.SetBatch(parseOpts.batchMode)
+    ROOT.gROOT.SetBatch(opts.batchMode)
     
-    # Get all datasets from the mcrab dir
-    datasetsMgr  = GetDatasetsFromDir(parseOpts.mcrab, kwargs.get("analysis"))
-
-    # Determine Integrated Luminosity (If Data datasets present)
-    intLumi = GetLumi(datasetsMgr)
-    
-    # Update to PU
+    # Get all datasets from the mcrab dird
+    datasetsMgr = GetDatasetsFromDir(opts.mcrab, opts, **kwargs)
+    intLumi     = GetLumi(datasetsMgr)
     datasetsMgr.updateNAllEventsToPUWeighted()
+    
+    # Print Information
+    datasetsMgr.PrintCrossSections()
+    datasetsMgr.PrintLuminosities()
+
+    # Set custom XSections
+    if 0:
+        datasetsMgr.getDataset("QCD_bEnriched_HT1000to1500").setCrossSection(1.0)
+    
+    # Default merging & ordering: "Data", "QCD", "SingleTop", "Diboson" (Merged MC histograms must be normalized to something)
+    plots.mergeRenameReorderForDataMC(datasetsMgr) 
 
     # Remove datasets
-    print kwargs.get("rmDataset")
-    datasetsMgr.remove(kwargs.get("rmDataset"))
-    # datasetsMgr.remove(filter(lambda name: not "QCD" in name, datasetsMgr.getAllDatasetNames()))
-    # datasetsMgr.remove(filter(lambda name: "QCD" in name in name, datasetsMgr.getAllDatasetNames()))
+    rmList = kwargs.get("rmDataset")
+    if len(rmList) > 0:
+        Print("Removing the following datasets: %s" % (", ".join(rmList) ), True)
+        datasetsMgr.remove(kwargs.get("rmDataset"))
+        # datasetsMgr.remove(filter(lambda name: not "QCD" in name, datasetsMgr.getAllDatasetNames()))
     
-    # Set custom XSections
-    #datasetsMgr.getDataset("QCD_bEnriched_HT1000to1500").setCrossSection(1.0)
-    #datasetsMgr.getDataset("QCD_bEnriched_HT1500to2000").setCrossSection(1.0)
-    #datasetsMgr.getDataset("QCD_bEnriched_HT2000toInf").setCrossSection(1.0)
-    #datasetsMgr.getDataset("QCD_bEnriched_HT300to500").setCrossSection(1.0)
-    #datasetsMgr.getDataset("QCD_bEnriched_HT500to700").setCrossSection(1.0)
-    #datasetsMgr.getDataset("QCD_bEnriched_HT700to1000").setCrossSection(1.0)
-    
-    # Default merging & ordering: "Data", "QCD", "SingleTop", "Diboson"
-    plots.mergeRenameReorderForDataMC(datasetsMgr) #WARNING: Merged MC histograms must be normalized to something!
-
-    # Remove datasets (for merged names)
-    datasetsMgr.remove(kwargs.get("rmDataset"))
-    
-    # Print the cross
-    datasetsMgr.PrintXSections() #emacs /uscms/home/aattikis/scratch0/CMSSW_8_0_19/src/HiggsAnalysis/NtupleAnalysis/python/tools/dataset.py
-
+    # Print dataset information
+    datasetsMgr.PrintInfo()
 
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
@@ -217,7 +144,7 @@ def main():
         p.createFrame(saveName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
         
         # Customise Legend
-        moveLegend = {"dx": -0.2, "dy": +0.0, "dh": -0.1}
+        moveLegend = {"dx": -0.15, "dy": +0.0, "dh": +0.2}
         p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
         #p.removeLegend()
 
@@ -248,7 +175,7 @@ def main():
         # histograms.addText(0.4, 0.11, "Runs " + datasetsMgr.loadRunRange(), 17)
         
         # Save canvas under custom dir
-        SaveAs(p, savePath, saveName, kwargs.get("saveFormats"))
+        SaveAs(p, savePath, saveName, kwargs.get("saveFormats"), counter==0)
 
     return
 
@@ -258,13 +185,26 @@ def main():
 #================================================================================================
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-m", "--mcrab"    , dest="mcrab"    , action="store", help="Path to the multicrab directory for input")
-    parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=True, help="Enables batch mode (canvas creation does NOT generates a window)")
-    parser.add_option("-v", "--verbose"  , dest="verbose"  , action="store_true", default=False, help="Enables verbose mode (for debugging purposes)")
-    (parseOpts, parseArgs) = parser.parse_args()
+
+    parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
+                      help="Path to the multicrab directory for input")
+
+    parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=True, 
+                      help="Enables batch mode (canvas creation does NOT generates a window)")
+
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, 
+                      help="Enables verbose mode (for debugging purposes)")
+
+    parser.add_option("-i", "--includeTasks", dest="includeTasks" , default="", type="string",
+                      help="Only perform action for this dataset(s) [default: '']")
+
+    parser.add_option("-e", "--excludeTasks", dest="excludeTasks" , default="", type="string",
+                      help="Exclude this dataset(s) from action [default: '']")
+
+    (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
-    if parseOpts.mcrab == None:
+    if opts.mcrab == None:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         print __doc__
         sys.exit(0)
@@ -272,7 +212,7 @@ if __name__ == "__main__":
         pass
 
     # Program execution
-    main()
+    main(opts)
 
-    if not parseOpts.batchMode:
+    if not opts.batchMode:
         raw_input("=== plotTemplate.py: Press any key to quit ROOT ...")

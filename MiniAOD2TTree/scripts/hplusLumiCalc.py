@@ -42,7 +42,7 @@ terminal 2 (while terminal 1 is open):
 cd multicrab_AnalysisType_vXYZ_TimeStamp
 export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH  (bash)
 setenv PATH ${PATH}:$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin: (csh)
-hplusLumicalc.py --offsite
+hplusLumiCalc.py -i 2016 --transferToEOS --collisions 2016 --offsite
 
 
 Comments:
@@ -397,8 +397,13 @@ def isMCTask(taskdir):
     return not isData
 
 
-def isEmpty(taskdir):
+def isEmpty(taskdir, opts):
+    '''
+    If task directory is empty return True
+    '''    
     Verbose("isEmpty()", True)
+    if opts.transferToEOS:
+        return False
     path  = os.path.join(taskdir, "results")
     files = execute("ls %s"%path)
     return len(files)==0
@@ -746,7 +751,7 @@ def main(opts, args):
                 Print("%s, ignoring, it looks like MC" % d)
                 continue
 
-            if isEmpty(d):
+            if isEmpty(d, opts):
                 Print("%s, ignoring, it looks empty" % d)
                 continue
     
@@ -891,10 +896,9 @@ def main(opts, args):
         f = open(opts.output, "wb")
         json.dump(data, f, sort_keys=True, indent=2)
         f.close()
-    Print("File \"%s\" created." % (f.name), True)
-
-    if opts.transferToEOS:
-        CopyLumiJsonToEOS(f, opts) 
+        Print("File \"%s\" created." % (f.name), True)
+        if opts.transferToEOS:
+            CopyLumiJsonToEOS(f, opts) 
 
     # Inform user of results
     PrintSummary(data, lumiUnit)

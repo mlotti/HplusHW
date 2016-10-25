@@ -26,6 +26,7 @@ import array
 #================================================================================================
 htb = "ChargedHiggs_HplusTB_HplusToTB_"
 styleDict = {
+    "Data"             : styles.dataStyle,
     htb + "M_500"      : styles.signal500Style, 
     htb + "M_400"      : styles.signal400Style,
     htb + "M_350"      : styles.signal350Style,
@@ -59,8 +60,15 @@ styleDict = {
     "QCD_bEnriched_HT1500to2000": styles.qcdFillStyle,
     "QCD_bEnriched_HT2000toInf" : styles.qcdFillStyle,
 
-    "TT"               : styles.ttStyle,
-    #"TT"               : styles.ewkStyle,
+    "TT"                   : styles.ttStyle,
+    "SingleTop"            : styles.stsStyle,
+    "TTTT"                 : styles.ewkStyle,
+    "TTWJetsToQQ"          : styles.ttwStyle,
+    "TTZToQQ"              : styles.ttzStyle,
+    "WJetsToQQ_HT_600ToInf": styles.wjetsStyle,
+    "WWTo4Q"               : styles.wStyle,
+    "ZJetsToQQ_HT600toInf" : styles.zjetsStyle,
+    "ZZTo4Q"               : styles.zzStyle ,
 }
 
 
@@ -487,12 +495,20 @@ def Convert2TGraph(tefficiency, dataset, style, titleX, titleY):
     return tgraph
 
 
-def GetDatasetsFromDir(mcrab, analysis):
+def GetDatasetsFromDir(mcrab, opts, **kwargs):
 
-    datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], analysisName=analysis)
-    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_")
-    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
-    # datasets  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=analysis, excludeTasks="M_180|M_220|M_250")
+    dataEra    = kwargs.get("dataEra")
+    searchMode = kwargs.get("searchMode")
+    analysis   = kwargs.get("analysis")
+    optMode    = kwargs.get("optMode")
+
+    if opts.includeTasks != "":
+        datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], dataEra=dataEra, searchMode=searchMode, analysisName=analysis, includeOnlyTasks=opts.includeTasks, optimizationMode=optMode)
+    elif opts.excludeTasks != "":
+        datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], dataEra=dataEra, searchMode=searchMode, analysisName=analysis, excludeTasks=opts.excludeTasks, optimizationMode=optMode)
+        # excludeTasks="M_180|M_220|M_250"
+    else:
+        datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode)
 
     # Inform user of datasets retrieved
     Verbose("Got the following datasets from multicrab dir \"%s\"" % mcrab)
@@ -519,7 +535,7 @@ def GetHistosForPlotter(datasetsMgr, histoName, **kwargs):
         rootHisto = datasetsMgr.getDataset(d.getName()).getDatasetRootHisto(histoName)
 
         # Apply Normalization
-        NormalizeRootHisto(rootHisto, d.isMC(), normalizeTo)
+        NormalizeRootHisto(datasetsMgr, rootHisto, d.isMC(), normalizeTo)
 
         # Get the histogram
         histo     = rootHisto.getHistogram()
@@ -587,25 +603,33 @@ def GetSelfName():
     return __file__.split("/")[-1]
 
 
-def Print(msg, printHeader=True):
-    if printHeader:
-        print "=== %s: %s" % (GetSelfName(), msg)
+def Print(msg, printHeader=False):
+    '''                                                                                                                                                                      
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.                                                                                      
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader==True:
+        print "=== ", fName
+        print "\t", msg
     else:
-        print msg 
+        print "\t", msg
     return
 
 
 def Verbose(msg, printHeader=True, verbose=False):
     if not verbose:
         return
-    Print (msg, printHeader)
+    Print(msg, printHeader)
     return
 
 
-def SaveAs(p, savePath, saveName, saveFormats):
+def SaveAs(p, savePath, saveName, saveFormats, verbose):
     '''
     '''
-    Verbose("Saving plots in %s format(s)" % (len(saveFormats)))
+    Verbose("Saving plots in %s format(s)" % (len(saveFormats)), True)
+
+    if verbose:
+        Print("Saving plots in %s format(s)" % (len(saveFormats)), True)
 
     # For-loop: All formats to save file
     for ext in saveFormats:        
@@ -631,30 +655,32 @@ def SaveAs(p, savePath, saveName, saveFormats):
 
         
 def GetLumi(datasetsMgr):
-    Print("Determining integrated luminosity from data-datasets")
+    '''
+    '''
+    Verbose("GetLumi()", True)
 
-    intLumi = -1
+    intLumi  = -1
+    jsonFile = "lumi.json"
+
     if len(datasetsMgr.getDataDatasets()) == 0:
-        intLumi = None
-
-    datasets = datasetsMgr.getAllDatasetNames()
+        return intLumi
 
     # Either get luminosity from merged data, or load luminosity from JSON file (before merging datasets)
-    if "Data" in datasets:
+    if "Data" in datasetsMgr.getAllDatasetNames():
+        Verbose("Loading luminosities from merge data", False)
         intLumi = datasetsMgr.getDataset("Data").getLuminosity()
     else:
-        if "DatasetManager" not in str(datasetsMgr.__class__):
-            datasetsMgr.loadLuminosities(fname="lumi.json")
+        Verbose("Loading luminosities from \"%s\"" % (jsonFile), False)
+        datasetsMgr.loadLuminosities(fname=jsonFile)
 
     # Load RUN range
     # runRange = datasets.loadRunRange(fname="runrange.json")
 
     # For-loop: All Data datasets
-    if intLumi == None:
-        for d in datasetsMgr.getDataDatasets():
-            print "\tluminosity", d.getName(), d.getLuminosity()
-            intLumi += d.getLuminosity()
-    print "\tIntegrated Luminosity is %s (pb)" % (intLumi)
+    for d in datasetsMgr.getDataDatasets():
+        Verbose("%s, luminosity is %s pb" % (d.getName(), d.getLuminosity()), False)
+        intLumi += d.getLuminosity()
+    Verbose("Integrated Luminosity is %s (pb)" % (intLumi), False)
     return intLumi
 
 
@@ -689,7 +715,7 @@ def NormalizeRootHistos(datasetsMgr, histoName, **kwargs):
     FIXME: Does not seem to apply the styles.
     # \li \a normalizeToOne           Normalize the histograms to one (True/False)
     # \li \a normalizeByCrossSection  Normalize the histograms by the dataset cross sections (True/False)
-    # \li \a normalizeToLumi          Normalize the histograms to a given luminosity (number)
+    # \li \a normalizeToLuminosity    Normalize the histograms to a given luminosity (number)
     '''
     HasKeys(["normalizeTo"], **kwargs)
     normalizeTo = kwargs.get("normalizeTo")
@@ -699,16 +725,16 @@ def NormalizeRootHistos(datasetsMgr, histoName, **kwargs):
     for d in datasets:
         Print("\t" + d.getName(), False)
         rootHisto = datasetsMgr.getDataset(d.getName()).getDatasetRootHisto(histoName)
-        NormalizeRootHisto(rootHisto, d.isMC(), normalizeTo) #alex
+        NormalizeRootHisto(datasetsMgr, rootHisto, d.isMC(), normalizeTo) #alex
         
     return
 
 
-def NormalizeRootHisto(rootHisto, isMC, normalizeTo):
+def NormalizeRootHisto(datasetsMgr, rootHisto, isMC, normalizeTo):
     '''
     # \li \a normalizeToOne           Normalize the histograms to one (True/False)
     # \li \a normalizeByCrossSection  Normalize the histograms by the dataset cross sections (True/False)
-    # \li \a normalizeToLumi          Normalize the histograms to a given luminosity (number)
+    # \li \a normalizeToLuminosity    Normalize the histograms to a given luminosity (number)
     '''    
     if normalizeTo == "One":
         rootHisto.normalizeToOne()
@@ -716,7 +742,9 @@ def NormalizeRootHisto(rootHisto, isMC, normalizeTo):
         if isMC:
             rootHisto.normalizeByCrossSection()
     elif normalizeTo == "Luminosity":
-        rootHisto.normalizeToLumi(intLumi)
+        intLumi = GetLumi(datasetsMgr)
+        if not rootHisto.isData():
+            rootHisto.normalizeToLuminosity(intLumi)
     else:
         IsValidNorm(normalizeTo)
     return
@@ -761,8 +789,11 @@ def getTitleY(histo, title=None, **kwargs):
             if title == None:
                 title = "Events"
         else:
-            title = histo.getRootHisto().GetYaxis().GetTitle()            
-        
+            #title = histo.getRootHisto().GetYaxis().GetTitle()
+            title = getSymbolY(kwargs.get("normalizeTo"))
+    else:
+        pass
+
     if isinstance(histo, (ROOT.TGraphAsymmErrors, ROOT.TGraph)):
         return title
     
@@ -788,7 +819,8 @@ def getTitleZ(histo, title=None, **kwargs):
 def getSymbolY(normalizeTo):
     IsValidNorm(normalizeTo)
     NormToSymbols = {"One": "Arbitrary Units", "Luminosity": "Events", "": "Arbitrary Units", "XSection": "#sigma [pb]"}
-    
+    if normalizeTo not in NormToSymbols.keys():
+        raise Exception("Unsupported normalization key \"%s\" for y-axis units" % (normalizeTo))
     return NormToSymbols[normalizeTo]
     
 

@@ -222,7 +222,15 @@ _datasetMerge = {
     "TT": "TT",
     "TT_ext": "TT",
     "TT_ext3": "TT",
-    
+
+    "TTTT_ext1"            : "TTTT",
+    "TTWJetsToQQ"          : "TTWJetsToQQ",
+    "TTZToQQ"              : "TTZToQQ",
+    "WJetsToQQ_HT_600ToInf": "WJetsToQQ_HT_600ToInf",
+    "WWTo4Q"               : "WWTo4Q",
+    "ZJetsToQQ_HT600toInf" : "ZJetsToQQ_HT600toInf",
+    "ZZTo4Q"               : "ZZTo4Q",
+
     "WJetsToLNu": "WJets",
     #"W1Jets": "WJets",
     #"W2Jets": "WJets",
@@ -292,12 +300,19 @@ _datasetOrder.extend([
 _legendLabels = {
     "Data":                  "Data",
 
-    "TTJets":                "t#bar{t}+jets",
-    "TT":                    "t#bar{t}",
-
+    "TTJets"               : "t#bar{t}+jets",
+    "TT"                   : "t#bar{t}",
+    "TTTT"                 : "t#bar{t}t#bar{t}",
+    "TTWJetsToQQ"          : "W+t#bar{t} (W#rightarrowq#bar{q'})",
+    "TTZToQQ"              : "Z+t#bar{t} (Z#rightarrowq#bar{q'})",
+    "WJetsToQQ_HT_600ToInf": "W+jets (W#rightarrowq#bar{q'})", #, 600 < H_{T} < Inf",
+    "WWTo4Q"               : "WW (W#rightarrowq#bar{q'})",
+    "ZJetsToQQ_HT600toInf" : "Z+jets (Z#rightarrowq#bar{q})", #, 600 < H_{T} < Inf",
+    'ZZTo4Q'               : "ZZ (Z#rightarrowq#bar{q})",
+     
     "WJets":                 "W+jets",
     "WJetsHT":               "W+jets",
-    "WToTauNu":              "W#to#tau#nu",
+    "WToTauNu":              "W#rightarrow#tau#nu",
     "W1Jets":                "W+1 jets",
     "W2Jets":                "W+2 jets",
     "W3Jets":                "W+3 jets",
@@ -348,8 +363,8 @@ _legendLabels = {
     "QCD_bEnriched_HT700to1000"  : "QCD-b, 700 < H_{T} < 1500",
     "QCD_bEnriched_HT1000to1500" : "QCD-b, 1000 < H_{T} < 1500",
     "QCD_bEnriched_HT1500to2000" : "QCD-b, 1500 < H_{T} < 2000",
-    "QCD_bEnriched_HT2000toInf"  : "QCD-b, 2000 < H_{T} < #infty",
-    "QCD-b"                      : "QCD-b, 300 < H_{T} < #infty", #"QCD-b",
+    "QCD_bEnriched_HT2000toInf"  : "QCD-b, 2000 < H_{T} < Inf",
+    "QCD-b"                      : "QCD (b-enriched)", # -b, 300 < H_{T} < Inf",
 
 #    "QCDdata": "QCD (data driven)",
     "QCDdata": "Mis-ID. #tau_{h} (data)",
@@ -360,16 +375,16 @@ _legendLabels = {
     "DYJetsToLLHT":            "Z/#gamma*+jets",
     "QCD_Pt20_MuEnriched":   "QCD (#mu enr.), #hat{p}_{T} > 20",
 
-    "SingleTop":             "Single top quark",
-    "TToBLNu_s-channel":     "Single t (s channel)",
-    "TToBLNu_t-channel":     "Single t (t channel)",
-    "TToBLNu_tW-channel":    "Single t (tW channel)",
-    "T_t-channel":           "Single t (t channel)",
-    "Tbar_t-channel":        "Single #bar{t} (t channel)",
-    "T_tW-channel":          "Single t (tW channel)",
-    "Tbar_tW-channel":       "Single #bar{t} (tW channel)",
-    "T_s-channel":           "Single t (s channel)",
-    "Tbar_s-channel":        "Single #bar{t} (s channel)",
+    "SingleTop"         : "Single t",
+    "TToBLNu_s-channel" : "Single t (s channel)",
+    "TToBLNu_t-channel" : "Single t (t channel)",
+    "TToBLNu_tW-channel": "Single t (tW channel)",
+    "T_t-channel"       : "Single t (t channel)",
+    "Tbar_t-channel"    : "Single #bar{t} (t channel)",
+    "T_tW-channel"      : "Single t (tW channel)",
+    "Tbar_tW-channel"   : "Single #bar{t} (tW channel)",
+    "T_s-channel"       : "Single t (s channel)",
+    "Tbar_s-channel"    : "Single #bar{t} (s channel)",
 
     # Ratio uncertainties
     "BackgroundStatError":     "Stat. unc.",
@@ -584,6 +599,7 @@ def mergeRenameReorderForDataMC(datasetMgr, keepSourcesMC=False):
             pass
     newOrder.extend(mcNames)
     datasetMgr.selectAndReorder(newOrder)
+
 
 ## Merge WH and HH datasets for each mass point
 #

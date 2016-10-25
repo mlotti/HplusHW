@@ -97,7 +97,7 @@ datasetsTTWJetsToQQ_noReHLT.append(Dataset('/TTWJetsToQQ_TuneCUETP8M1_13TeV-amca
 datasetsTTBB_noReHLT = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2Fttbb_4FS_ckm_amcatnlo_madspin_pythia8*%2FRunIISpring16MiniAODv2-*%2F*"
 datasetsTTBB_noReHLT.append(Dataset('/ttbb_4FS_ckm_amcatnlo_madspin_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-datasetsTTBB_noReHLT.append(Dataset('/ttbb_4FS_ckm_amcatnlo_madspin_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+#datasetsTTBB_noReHLT.append(Dataset('/ttbb_4FS_ckm_amcatnlo_madspin_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das)) ### CURRENTLY HAVE NAMING PROBLEMS IN EOS. IF NEEDED LAUNCH ALONE
 
 
 datasetsTTTT_noReHLT = []

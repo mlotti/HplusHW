@@ -26,28 +26,61 @@ https://twiki.cern.ch/twiki/bin/view/CMS/HowToGenXSecAnalyzer#Running_the_GenXSe
 
 '''
 
-## Cross section of a single process (physical dataset)
+DEGUB = False
+def Verbose(msg, printHeader=False):
+    '''
+    Calls Print() only if verbose options is set to true.
+    '''
+
+    if not DEBUG:
+        return
+    Print(msg, printHeader)
+    return
+
+
+def Print(msg, printHeader=True):
+    '''
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader==True:
+        print "=== ", fName
+        print "\t", msg
+    else:
+        print "\t", msg
+    return
+
+
 class CrossSection:
-    ## Constructor
-    #
-    # \parma name              Name of the process
-    # \param energyDictionary  Dictionary of energy -> cross section (energy as string in TeV, cross section as float in pb)
+    '''
+    Cross section of a single process (physical dataset)
+    
+     Constructor
+    
+     \parma name              Name of the process
+     \param energyDictionary  Dictionary of energy -> cross section (energy as string in TeV, cross section as float in pb)
+     '''
     def __init__(self, name, energyDictionary):
         self.name = name
         for key, value in energyDictionary.iteritems():
             setattr(self, key, value)
 
-    ## Get cross section
-    #
-    # \param energy  Energy as string in TeV
     def get(self, energy):
+        '''
+        Get cross section
+        
+        \param energy  Energy as string in TeV
+        '''
         try:
             return getattr(self, energy)
         except AttributeError:
             raise Exception("No cross section set for process %s for energy %s" % (self.name, energy))
 
-## List of CrossSection objects
+
 class CrossSectionList:
+    '''
+    List of CrossSection objects
+    '''
     def __init__(self, *args):
         self.crossSections = args[:]
 
@@ -468,6 +501,10 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("ZJetsToQQ_HT600toInf", {
             "13": 5.822e+02, #5.822e+02 +- 7.971e-02 pb [16] (inputFiles="0E546A76-E03A-E611-9259-0CC47A4DEDEE.root")
             }),
+    CrossSection("ZZTo4Q", {
+            "13": 6.883e+00, #6.883e+00 +- 3.718e-02 pb [16] (inputFiles="024C4223-171B-E611-81E5-0025904E4064.root")
+            }),
+
     )
 
 ## Set background process cross sections
@@ -505,11 +542,13 @@ def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMo
         if value == 0:
             msg = "\n*** Note: to set non-zero xsection; edit NtupleAnalysis/python/tools/crossection.py"
         if "ChargedHiggs" in dataset.getName():
-            msg = "\n*** Note: signal is forced at the moment to 1 pb in NtupleAnalysis/python/tools/crossection.py"
+            #msg = "\n*** Note: signal is forced at the moment to 1 pb in NtupleAnalysis/python/tools/crossection.py"
+            msg = ""
         if not quietMode:
-            print txtAlign.format("Setting", dataset.getName(), "cross section to ", "%0.6f" %(value), "pb", msg)
+            msg = txtAlign.format("Setting", dataset.getName(), "cross section to ", "%0.6f" %(value), "pb", msg)
+            Print(msg, False)
     else:
-        print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy())
+        Print("Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy()), True)
 
 
 ########################################
