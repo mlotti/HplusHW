@@ -16,6 +16,8 @@ multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg
 
 Check Status:
 multicrab.py --status --url --verbose -d <task_dir>
+or
+multicrab.py --status -i "QCD_bEnriched_HT300|2016B|2016E|2016F|2016G|ST_tW_antitop|ST_t_channel_top"
 
 
 Get Output:
@@ -1824,7 +1826,7 @@ def CreateJob(opts, args):
         fullDir     = taskDirName + "/" + requestName
 
         if os.path.exists(fullDir) and os.path.isdir(fullDir):
-            Print("Task %s already exists! Skipping ..." % (requestName), False)
+            Verbose("Task %s already exists! Skipping ..." % (requestName), False)
             continue 
 
         Verbose("Task %s, creating crabConfig_%s.py file" % (dataset, dataset), True)
