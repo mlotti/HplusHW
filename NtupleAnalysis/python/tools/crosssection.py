@@ -16,9 +16,14 @@ Download the dedicated analyzer and run on that single file:
 The last output line is the final cross section:
 "After filter: final cross section = X +- Y pb"
 
+To get the files for a given dataset:
+das_client --limit 0 --query "file dataset=<datasetName>"
+Example:
+das_client --limit 0 --query "file dataset=/QCD_bEnriched_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"
+
+
 Example:
 cmsRun ana.py inputFiles="/store/mc/RunIISpring16MiniAODv2/QCD_bEnriched_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/70000/00DFB564-393F-E611-A97A-02163E012F6E.root" maxEvents=-1
-
 
 Links:
 https://twiki.cern.ch/twiki/bin/view/CMS/GenXsecTaskForce
@@ -465,6 +470,12 @@ backgroundCrossSections = CrossSectionList(
             "13": 10.32, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     ########################################### Added for H+->tb
+    CrossSection("QCD_bEnriched_HT100to200", {
+            "13": 1.318e+06, #1.318e+06 +- 6.249e+03 pb [16] (inputFiles="00356B59-2E1D-E611-BB0F-08606E15EABA.root")
+            }),
+    CrossSection("QCD_bEnriched_HT200to300", {
+            "13": 1.318e+06, # [16] (inputFiles="02A6676C-5942-E611-814D-842B2B7680C9.root")
+            }),
     CrossSection("QCD_bEnriched_HT300to500", {
             "13": 8.764e+04, #8.764e+04 +- 2.824e+02 pb [16] (inputFiles="02A6676C-5942-E611-814D-842B2B7680C9.root")
             }),
@@ -504,7 +515,9 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("ZZTo4Q", {
             "13": 6.883e+00, #6.883e+00 +- 3.718e-02 pb [16] (inputFiles="024C4223-171B-E611-81E5-0025904E4064.root")
             }),
-
+    CrossSection("ttbb_4FS_ckm_amcatnlo_madspin_pythia8", {
+            "13": 1.393e+01, #1.393e+01 +- 3.629e-02 pb [16] (inputFiles="0641890F-F72C-E611-9EA8-02163E014B5F.root")
+            }),   
     )
 
 ## Set background process cross sections

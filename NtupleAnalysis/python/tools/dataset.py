@@ -3458,36 +3458,38 @@ class DatasetAddedMC(DatasetMerged):
         ret += "%s]),\n" % indent
         return ret
 
-## Collection of Dataset objects which are managed together.
-# 
-# Holds both an ordered list of Dataset objects, and a name->object
-# map for convenient access by dataset name.
-#
-# \todo The code structure could be simplified by getting rid of
-# dataset.DatasetRootHisto. This would mean that the MC normalisation
-# should be handled in dataset.DatasetManagager and dataset.Dataset,
-# with an interface similar to what dataset.DatasetRootHisto and
-# histograms.HistoManager provide now (i.e. user first sets the
-# normalisation scheme, and then asks histograms which are then
-# normalised as requested). dataset.Dataset and dataset.DatasetManager
-# should then return ROOT TH1s, with which user is free to do what
-# (s)he wants. histograms.HistoManager and histograms.HistoManagerImpl
-# could be merged, as it would take already-normalized histograms as
-# input (the input should still be histograms.Histo classes in order
-# to give user freedom to provide fully customized version of such
-# wrapper class if necessary). The interface of plots.PlotBase would
-# still accept TH1/TGraph, so no additional burden would appear for
-# the usual use cases with plots. The information of a histogram being
-# data/MC in histograms.Histo could also be removed (as it is
-# sometimes too restrictive), and the use in plots.PlotBase (and
-# deriving classes) could be transformed to identify the data/MC
-# datasets (for default formatting purposes) by the name of the
-# histograms (in the usual workflow the histograms have the dataset
-# name), with the possibility that user can easily modify the names of
-# data/MC histograms. This would bring more flexibility on that front,
-# and easier customization when necessary.
+
 class DatasetManager:
+    '''
+    Collection of Dataset objects which are managed together.
     
+    Holds both an ordered list of Dataset objects, and a name->object
+    map for convenient access by dataset name.
+    
+    \todo The code structure could be simplified by getting rid of
+    dataset.DatasetRootHisto. This would mean that the MC normalisation
+    should be handled in dataset.DatasetManagager and dataset.Dataset,
+    with an interface similar to what dataset.DatasetRootHisto and
+    histograms.HistoManager provide now (i.e. user first sets the
+    normalisation scheme, and then asks histograms which are then
+    normalised as requested). dataset.Dataset and dataset.DatasetManager
+    should then return ROOT TH1s, with which user is free to do what
+    (s)he wants. histograms.HistoManager and histograms.HistoManagerImpl
+    could be merged, as it would take already-normalized histograms as
+    input (the input should still be histograms.Histo classes in order
+    to give user freedom to provide fully customized version of such
+    wrapper class if necessary). The interface of plots.PlotBase would
+    still accept TH1/TGraph, so no additional burden would appear for
+    the usual use cases with plots. The information of a histogram being
+    data/MC in histograms.Histo could also be removed (as it is
+    sometimes too restrictive), and the use in plots.PlotBase (and
+    deriving classes) could be transformed to identify the data/MC
+    datasets (for default formatting purposes) by the name of the
+    histograms (in the usual workflow the histograms have the dataset
+    name), with the possibility that user can easily modify the names of
+    data/MC histograms. This would bring more flexibility on that front,
+    and easier customization when necessary.
+    '''    
     def __init__(self, base=""):
         '''
         Constructor
@@ -3521,6 +3523,7 @@ class DatasetManager:
 
 
     def _setBaseDirectory(self, base):
+        Verbose("_setBaseDirectory()", True)
         for d in self.datasets:
             d._setBaseDirectory(base)
         return
@@ -3589,25 +3592,41 @@ class DatasetManager:
         copy.extend(self)
         return copy
 
-    ## Make a deep copy of the DatasetManager object.
-    # 
-    # Nothing is shared between the DatasetManagers.
-    #
-    # Useful e.g. if you want to have two sets of same datasets, but
-    # others are somehow modified (e.g. cross section)
+
     def deepCopy(self):
+        '''
+        Make a deep copy of the DatasetManager object.
+        
+        Nothing is shared between the DatasetManagers.
+        
+        Useful e.g. if you want to have two sets of same datasets, but
+        others are somehow modified (e.g. cross section)
+        '''
+        Verbose("deepCopy()", True)
+
         copy = DatasetManager()
         for d in self.datasets:
             copy.append(d.deepCopy())
         return copy
 
-    ## Set the centre-of-mass energy for all datasets
+
     def setEnergy(self, energy):
+        '''
+        Set the centre-of-mass energy for all datasets
+        '''
+        Verbose("setEnergy()", True)
+
         for d in self.datasets:
             d.setEnergy(energy)
+        return
+            
 
-    ## Get a list of centre-of-mass energies of the datasets
     def getEnergies(self):
+        '''
+        Get a list of centre-of-mass energies of the datasets
+        '''
+        Verbose("getEnergies()", True)
+
         tmp = {}
         for d in self.datasets:
             tmp[d.getEnergy()] = 1
@@ -3615,8 +3634,10 @@ class DatasetManager:
         energies.sort()
         return energies
 
+
     def hasDataset(self, name):
         return name in self.datasetMap
+
 
     def getDataset(self, name):
         return self.datasetMap[name]
@@ -4049,7 +4070,7 @@ class DatasetManager:
         in a nice formated table.
         '''
         Verbose("PrintCrossSections()")
-        align  = "{:<3} {:<50} {:>14} {:>3} "
+        align  = "{:<3} {:<50} {:>24} {:>3} "
         header = align.format("#", "Dataset", "Cross Section", "")
         hLine  = "="*len(header)
         table  = []
