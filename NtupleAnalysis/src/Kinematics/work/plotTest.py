@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 '''
-
 Usage:
 Launch default script
 ./plotTemplate.py -m <pseudo_mcrab_directory>
@@ -16,8 +15,8 @@ Launch but only include the QCD_Pt samples
 
 Launch but exclude various samples
 ./plotTest.py -m Kinematics_161025_020335 -e "M_200|M_220|M_250|M_300|M_350|M_400|QCD_Pt|JetHT"
-
 '''
+
 #================================================================================================
 # Imports
 #================================================================================================
@@ -36,6 +35,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 from plotAux import *
 
 import ROOT
+
 
 #================================================================================================
 # Variable Definition
@@ -59,9 +59,9 @@ kwargs = {
     "drawStyle"      : "HIST9", # "P",  #"HIST9"
     "legStyle"       : "F",     # "LP", "F"
     "verbose"        : False,
-    "cutValue"       : 5,
-    "cutBox"         : False,
+    "cutValue"       : 15,
     "cutLine"        : False,
+    "cutBox"         : False,
     "cutLessthan"    : False,
     "cutFillColour"  : ROOT.kAzure-4,
 }
@@ -91,81 +91,97 @@ def main(opts):
     
     # Set ROOT batch mode boolean
     ROOT.gROOT.SetBatch(opts.batchMode)
-    
+
+    # ========================================
+    # Datasets
+    # ========================================
     # Setup & configure the dataset manager
     datasetsMgr = GetDatasetsFromDir(opts.mcrab, opts, **kwargs)
     intLumi     = GetLumi(datasetsMgr)
     datasetsMgr.updateNAllEventsToPUWeighted()
     datasetsMgr.PrintCrossSections()
     datasetsMgr.PrintLuminosities()
-    if 0:
-        for d in datasetsMgr.getDatasets:
-            if "ChargedHiggs" in d:
-                datasetsMgr.getDataset(d).setCrossSection(2.0)
-    plots.mergeRenameReorderForDataMC(datasetsMgr)  # Merged MC histograms must be normalized to something
 
-    datasetsMgr.remove(kwargs.get("rmDataset"))
-        # datasetsMgr.remove(filter(lambda name: not "QCD" in name, datasetsMgr.getAllDatasetNames()))
+    # Set/Overwrite cross-sections
+    for d in datasetsMgr.getAllDatasets():
+        if "ChargedHiggs" in d.getName():
+            datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
+    
+    # Merge datasts (Note: Merged MC histograms must be normalized to something)
+    plots.mergeRenameReorderForDataMC(datasetsMgr)
+
+    # Remove datasets
+    if 0:
+        datasetsMgr.remove("TTJets")
+        datasetsMgr.remove(filter(lambda name: not "QCD" in name, datasetsMgr.getAllDatasetNames()))
     
     # Print dataset information
     datasetsMgr.PrintInfo()
 
-    # For-loop: All Histogram names
+
+    # ========================================
+    # Histograms
+    # ========================================
     for counter, hName in enumerate(hNames):
         
-        # Get the save path and name
-        savePath, saveName = GetSavePathAndName(hName, **kwargs)
-        
-        # Get Histos for Plotter
+        # Get the save path and name, Get Histos for Plotter
+        savePath, saveName    = GetSavePathAndName(hName, **kwargs)
         refHisto, otherHistos = GetHistosForPlotter(datasetsMgr, hName, **kwargs)
         
         # Create a comparison plot
         p = plots.ComparisonManyPlot(refHisto, otherHistos)
 
         # Remove negative contributions
-        #RemoveNegativeBins(datasetsMgr, hName, p)
+        if 0:
+            RemoveNegativeBins(datasetsMgr, hName, p)
 
-        # Create a frame
+        # Y-axis
+        ratioOpts = {"ymin": 0.0, "ymax": 2.0}
         if kwargs.get("logY")==True:
-            opts = {"ymin": 1e-4, "ymaxfactor": 10}
-            #opts = {"ymin": 1e-3, "ymax": 1}
+            opts = {"ymin": 1e-2, "ymaxfactor": 100}
         else:
             opts = {"ymin": 0.0, "ymaxfactor": 1.2}
-        ratioOpts = {"ymin": 0.0, "ymax": 2.0}
-        p.createFrame(saveName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
-        
-        # Customise Legend
-        moveLegend = {"dx": -0.15, "dy": +0.0, "dh": +0.2}
-        p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-        #p.removeLegend()
 
-        # Customise frame
+        # ========================================
+        # Frame
+        # ========================================
+        p.createFrame(saveName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
+
+        # Legend
+        moveLegend = {"dx": -0.11, "dy": +0.0, "dh": +0.2}
+        p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+
+        # Move the refDataset to first in the draw order (back)
+        histoNames = [h.getName() for h in p.histoMgr.getHistos()]
+        p.histoMgr.reorder(filter(lambda n: plots._legendLabels[kwargs.get("refDataset") ] not in n, histoNames))
+        if 0:
+            p.removeLegend()
+
+        # Axes
         p.getFrame().GetYaxis().SetTitle( getTitleY(refHisto, **kwargs) )
-        #p.setEnergy("13")
         if kwargs.get("createRatio"):
             p.getFrame2().GetYaxis().SetTitle("Ratio")
             p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
-        # SetLog
+        # Set Log and Grid
         SetLogAndGrid(p, **kwargs)
 
-        # Add cut line/box
-        _kwargs = { "lessThan": kwargs.get("cutLessThan")}
+        # Cut line / Cut box
+        _kwargs = {"lessThan": kwargs.get("cutLessthan")}
         p.addCutBoxAndLine(cutValue=kwargs.get("cutValue"), fillColor=kwargs.get("cutFillColour"), box=kwargs.get("cutBox"), line=kwargs.get("cutLine"), **_kwargs)
-        
-        # Move the refDataset to first in the draw order (back)
-        histoNames = [h.getName() for h in p.histoMgr.getHistos()]
-        p.histoMgr.reorder(filter(lambda n: plots._legendLabels[kwargs.get("refDataset") ] not in n, histoNames))
 
-        #  Draw plots
+        # Draw the final plot
         p.draw()
 
-        # Customise text
+
+        # ========================================
+        # Add Text
+        # ========================================
         histograms.addStandardTexts(lumi=intLumi)
         # histograms.addText(0.4, 0.9, "Alexandros Attikis", 17)
         # histograms.addText(0.4, 0.11, "Runs " + datasetsMgr.loadRunRange(), 17)
-        
-        # Save canvas under custom dir
+
+        # Save the canvas to a file
         SaveAs(p, savePath, saveName, kwargs.get("saveFormats"), counter==0)
 
     return

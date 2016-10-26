@@ -437,7 +437,8 @@ void Kinematics::process(Long64_t entry) {
       {
 	if ( p.isHardProcess() ) 
 	  {
-	    pv.SetXYZ( p.vtxX(), p.vtxY(), p.vtxZ() );
+	    //pv.SetXYZ( p.vtxX(), p.vtxY(), p.vtxZ() ); //obsolete variables
+	    pv.SetXYZ( 0, 0, 0);
 	    foundPV = true;
 	  }
       }
@@ -520,7 +521,7 @@ void Kinematics::process(Long64_t entry) {
     double genP_phi    = p.phi();
     double genP_energy = p.e();
     int genP_charge    = p.charge();
-    ROOT::Math::XYZPoint genP_vtx(p.vtxX()*10, p.vtxY()*10, p.vtxZ()*10); //in mm
+    // ROOT::Math::XYZPoint genP_vtx(p.vtxX()*10, p.vtxY()*10, p.vtxZ()*10); //in mm
     math::XYZTLorentzVector genP_p4;
     genP_p4 = p.p4();
     
@@ -531,8 +532,8 @@ void Kinematics::process(Long64_t entry) {
     // Assign mother/daughers for Lxy & d0 calculation
     if (genP_mothers.size() > 0  ) m = fEvent.genparticles().getGenParticles()[genP_mothers.at(0)];
     if (genP_daughters.size() > 0) d = fEvent.genparticles().getGenParticles()[genP_daughters.at(0)];
-    double genP_Lxy = mcTools.GetLxy(p, m, d, pv);
-    double genP_d0  = mcTools.GetD0( p, m, d, pv);
+    // double genP_Lxy = mcTools.GetLxy(p, m, d, pv);
+    // double genP_d0  = mcTools.GetD0( p, m, d, pv);
     
     // Filtering    
     if (!p.isLastCopy()) continue;
@@ -571,9 +572,12 @@ void Kinematics::process(Long64_t entry) {
 	table.AddRowColumn(row, auxTools.ToString(genP_eta, 4)     );
 	table.AddRowColumn(row, auxTools.ToString(genP_phi, 3)     );
 	table.AddRowColumn(row, auxTools.ToString(genP_energy, 3)  );
-	table.AddRowColumn(row, "(" + auxTools.ToString(genP_vtx.x(), 3) + ", " + auxTools.ToString(genP_vtx.y(), 3)  + ", " + auxTools.ToString(genP_vtx.z(), 3) + ")" );
-	table.AddRowColumn(row, auxTools.ToString(genP_Lxy, 3)     );
-	table.AddRowColumn(row, auxTools.ToString(genP_d0,  3)     );
+	// table.AddRowColumn(row, "(" + auxTools.ToString(genP_vtx.x(), 3) + ", " + auxTools.ToString(genP_vtx.y(), 3)  + ", " + auxTools.ToString(genP_vtx.z(), 3) + ")" );
+	table.AddRowColumn(row, "N/A" );
+	// table.AddRowColumn(row, auxTools.ToString(genP_Lxy, 3)     );
+	// table.AddRowColumn(row, auxTools.ToString(genP_d0,  3)     );
+	table.AddRowColumn(row, "N/A" );
+	table.AddRowColumn(row, "N/A" );
 	if (genP_mothers.size() < 6)
 	  {
 	    table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genP_mothers) );

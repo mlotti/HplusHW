@@ -35,8 +35,8 @@ styleDict = {
     htb + "M_220"      : styles.signal220Style,
     htb + "M_200"      : styles.signal200Style,
     htb + "M_180"      : styles.signal180Style,
-    "QCD-b"            : styles.qcdStyle,
-    "QCD"              : styles.qcdFillStyle, #qcdStyle, #qcdFillStyle,
+    "QCD-b"            : styles.qcdBEnrichedStyle,
+    "QCD"              : styles.qcdStyle, #qcdFillStyle,
     "QCD_Pt_15to30"    : styles.qcdFillStyle, 
     "QCD_Pt_30to50"    : styles.qcdFillStyle, 
     "QCD_Pt_50to80"    : styles.qcdFillStyle,
@@ -61,14 +61,17 @@ styleDict = {
     "QCD_bEnriched_HT2000toInf" : styles.qcdFillStyle,
 
     "TT"                   : styles.ttStyle,
-    "SingleTop"            : styles.stsStyle,
-    "TTTT"                 : styles.ewkStyle,
+    "TTJets"               : styles.ttjetsStyle,
+    "SingleTop"            : styles.singleTopStyle,
+    "TTTT"                 : styles.ttttStyle,
     "TTWJetsToQQ"          : styles.ttwStyle,
     "TTZToQQ"              : styles.ttzStyle,
     "WJetsToQQ_HT_600ToInf": styles.wjetsStyle,
     "WWTo4Q"               : styles.wStyle,
     "ZJetsToQQ_HT600toInf" : styles.zjetsStyle,
     "ZZTo4Q"               : styles.zzStyle ,
+    "Diboson"              : styles.dibStyle,
+    "ttbb"                 : styles.ttbbStyle,
 }
 
 

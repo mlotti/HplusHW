@@ -232,7 +232,8 @@ void MCTools::PrintGenParticle(const genParticle &genP, bool bPrintHeaders){
   const genParticle *p = &genP;
 
   // Fill the table 
-  Table table("Index | Pt | Eta | Phi | Energy |  PdgId | Status | Mass | Charge | Vertex (mm) | Rapidity | Beta | Mother(s) | Daughter(s)", "Text"); //LaTeX
+  //  Table table("Index | Pt | Eta | Phi | Energy |  PdgId | Status | Mass | Charge | Vertex (mm) | Rapidity | Beta | Mother(s) | Daughter(s)", "Text"); //LaTeX
+  Table table("Index | Pt | Eta | Phi | Energy |  PdgId | Status | Mass | Charge | Rapidity | Beta | Mother(s) | Daughter(s)", "Text"); //LaTeX
   table.AddRowColumn(0, auxTools.ToString(p->index()        , 1) );
   table.AddRowColumn(0, auxTools.ToString(p->p4().pt()      , 3) );
   table.AddRowColumn(0, auxTools.ToString(p->p4().eta()     , 4) );
@@ -242,7 +243,7 @@ void MCTools::PrintGenParticle(const genParticle &genP, bool bPrintHeaders){
   table.AddRowColumn(0, auxTools.ToString(p->status()       , 1) );
   table.AddRowColumn(0, auxTools.ToString(p->p4().mass()    , 4) );
   table.AddRowColumn(0, auxTools.ToString(p->charge()       , 1) );
-  table.AddRowColumn(0, "(" + auxTools.ToString(p->vtxX()*10, 3) + ", " + auxTools.ToString(p->vtxY()*10, 3)  + ", " + auxTools.ToString(p->vtxZ()*10, 3) + ")" );
+  // table.AddRowColumn(0, "(" + auxTools.ToString(p->vtxX()*10, 3) + ", " + auxTools.ToString(p->vtxY()*10, 3)  + ", " + auxTools.ToString(p->vtxZ()*10, 3) + ")" );
   table.AddRowColumn(0, auxTools.ToString(p->p4().Rapidity(), 4) );
   table.AddRowColumn(0, auxTools.ToString(p->p4().Beta()    , 4) );
   table.AddRowColumn(0, auxTools.ConvertIntVectorToString(p->mothers()  ) );
@@ -280,9 +281,11 @@ double MCTools::GetLxy(const genParticle &genP,
   // genParticles.
   //
 
+  std::cout << "\n=== MCTools::GetLxy(): Decommissioned due to genP variables vtxX, vtxY, vtxZ becoming obsolete (took too much space)" << std::endl;
+
   // Get the particles
   const genParticle *p = &genP;
-  const genParticle *d = &daughter;
+  // const genParticle *d = &daughter;
 
   // Ensure the particle has a mother!
   // if( (p->index() == 0) || (p->index() == 1) ) return -1.0;
@@ -292,10 +295,11 @@ double MCTools::GetLxy(const genParticle &genP,
   if (p->daughters().size() < 1) return -2.0;
   
   // Calculate the distance Lxy (in mm) wrt to the point "vtx"
-  double LxySq = pow( (d->vtxX() - vtx.x()), 2) + pow( (d->vtxY() - vtx.y()), 2);
+  double LxySq = 0;
+  // double LxySq = pow( (d->vtxX() - vtx.x()), 2) + pow( (d->vtxY() - vtx.y()), 2); //vtxX, vtxY, vtxZ obsolete (took too much space)
   double Lxy   = sqrt(LxySq)*10; // factor of 10 needed convert from cm to mm
 
-  if (0) std::cout << "\n=== MCTools::GetLxy(): Lxy = " << Lxy << " (mm) wrt point (" << vtx.x() << ", " << vtx.y() << ", " << vtx.z() << "). Particle with index " << p->index() << " was produced at (" << p->vtxX() << ", " << p->vtxY() << ", " << p->vtxZ() << ") and decayed at (" << d->vtxX() << ", " << d->vtxY() << ", " << d->vtxZ() << ")." << std::endl;
+  // if (0) std::cout << "\n=== MCTools::GetLxy(): Lxy = " << Lxy << " (mm) wrt point (" << vtx.x() << ", " << vtx.y() << ", " << vtx.z() << "). Particle with index " << p->index() << " was produced at (" << p->vtxX() << ", " << p->vtxY() << ", " << p->vtxZ() << ") and decayed at (" << d->vtxX() << ", " << d->vtxY() << ", " << d->vtxZ() << ")." << std::endl;
 
   return Lxy;
 }
