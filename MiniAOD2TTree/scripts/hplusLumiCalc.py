@@ -818,7 +818,7 @@ def main(opts, args):
         fOUT     = os.path.join(task, "results", "PileUp.root")
         hName = "pileup"
         PrintProgressBar(task + ", PileupCalc ", index, len(files), "[" + os.path.basename(jsonfile) + "]")
-        ret, output = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="80", numPileupBins="80", pileupHistName=hName)
+        ret, output = CallPileupCalc(task, fOUT, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName=hName)
 
             
         Verbose("Task %s, changing the --minBiasXsec value in the pileupCalc.py command by +0.05 around the chosen central value." % (task) )
@@ -827,7 +827,7 @@ def main(opts, args):
         fOUT_up     = fOUT.replace(".root","_up.root")
         hName_up    = "pileup_up"
         PrintProgressBar(task + ", PileupCalc+", index, len(files), "[" + os.path.basename(jsonfile) + "]")
-        ret, output = CallPileupCalc(task, fOUT_up, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="80", numPileupBins="80", pileupHistName=hName_up)
+        ret, output = CallPileupCalc(task, fOUT_up, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName=hName_up)
 
 
         Verbose("Task %s, changing the --minBiasXsec value in the pileupCalc.py command by -0.05 around the chosen central value." % (task) )
@@ -835,7 +835,7 @@ def main(opts, args):
         fOUT_down   = fOUT.replace(".root","_down.root")
         hName_down  = "pileup_down"
         PrintProgressBar(task + ", PileupCalc-", index, len(files), "[" + os.path.basename(jsonfile) + "]")
-        ret, output = CallPileupCalc(task, fOUT_down, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="80", numPileupBins="80", pileupHistName=hName_down)
+        ret, output = CallPileupCalc(task, fOUT_down, jsonfile, PileUpJSON, str(minBiasXsec), calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName=hName_down)
 
         Verbose("Task %s, opening all Pileup ROOT files" % (task) )
 	fPU      = ROOT.TFile.Open(fOUT     ,"UPDATE")
