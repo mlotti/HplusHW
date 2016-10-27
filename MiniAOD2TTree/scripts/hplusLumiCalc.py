@@ -636,7 +636,8 @@ def IsSSHReady(opts):
 
     if not opts.offsite:
         return
-    ssh_ready = AskUser("Script executed outside LXPLUS (--offsite enabled). Is the ssh tunneling session ready?", True)
+    cmd_ssh   = "ssh -N -L 10121:itrac50012-v.cern.ch:10121 <username>@lxplus.cern.ch\n\tPress "
+    ssh_ready = AskUser("Script executed outside LXPLUS (--offsite enabled). Is the ssh tunneling session ready?\n\t%s" % (cmd_ssh), True)
     if not ssh_ready:
         sys.exit()
     else:
