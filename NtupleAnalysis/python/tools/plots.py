@@ -51,6 +51,9 @@ import styles
 import aux
 
 
+#================================================================================================
+# Global Definitions
+#================================================================================================
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
 _heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750, 1000, 2000, 3000]
 _heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 500,  600,  700,  750, 1000, 2000, 3000]
@@ -2096,45 +2099,59 @@ class MCPlot(PlotSameBase):
             del kwargs["opts2"]
         self.createFrame(filename, **kwargs)
 
-## Class for data-MC comparison plot.
-# 
-# Several assumptions have been made for this plotting class. If these
-# are not met, one should consider either adding the feature to this
-# class (if the required change is relatively small), or creating
-# another class (if the change is large).
-# <ul>
-# <li> There can be exactly one histogram with the name "Data" for collision data
-#      <ul>
-#      <li> If the "Data" histogram is not there, this class works as
-#           plots.MCPlot, except normalization by cross section is not
-#           supported. Also the data/MC ratio is not drawn. </li>
-#      </ul></li>
-# <li> There is always at least one MC histogram </li>
-# <li> Only the MC histograms are stacked, and it should be done with the
-#      stackMCHistograms() method </li>
-# <li> Data/MC ratio pad can be added to the same TCanvas, the MC
-#      considered in the ratio are the stacked ones </li>
-# <li> The MC is normalized by the integrated luminosity of the collision
-#      data by default
-#      <ul>
-#      <li> Normalization to unit area (normalizeToOne) is also supported
-#           such that all non-stacked histograms are normalized to unit
-#           area, and the total area of stacked histograms is normalized to
-#           unit area while the ratios of the individual datasets is
-#           determined from the cross sections. The support is in the base class. </li>
-#     </ul></li>
-# </ul>
+
 class DataMCPlot(PlotSameBase, PlotRatioBase):
-    ## Construct from DatasetManager and a histogram path
-    #
-    # \param datasetMgr       DatasetManager for datasets
-    # \param name             Path of the histogram in the ROOT files
-    # \param normalizeToLumi  If None, MC is implicitly normalized to
-    #                         the luminosity of data. If not None, MC
-    #                         is normalized to the this value of
-    #                         integrated luminosity (in pb^-1)
-    # \param kwargs           Keyword arguments, forwarded to PlotSameBase.__init__()
+    '''
+    Class for data-MC comparison plot.
+    
+    Several assumptions have been made for this plotting class. If these
+    are not met, one should consider either adding the feature to this
+    class (if the required change is relatively small), or creating
+    another class (if the change is large).
+    <ul>
+    <li> There can be exactly one histogram with the name "Data" for collision data
+    <ul>
+
+    <li> If the "Data" histogram is not there, this class works as
+    plots.MCPlot, except normalization by cross section is not
+    supported. Also the data/MC ratio is not drawn. </li>
+
+    </ul></li>
+    <li> There is always at least one MC histogram </li>
+
+    <li> Only the MC histograms are stacked, and it should be done with the
+    stackMCHistograms() method </li>
+
+    <li> Data/MC ratio pad can be added to the same TCanvas, the MC
+    considered in the ratio are the stacked ones </li>
+
+    <li> The MC is normalized by the integrated luminosity of the collision
+    data by default
+    
+    <ul>
+    <li> Normalization to unit area (normalizeToOne) is also supported
+    such that all non-stacked histograms are normalized to unit
+    area, and the total area of stacked histograms is normalized to
+    unit area while the ratios of the individual datasets is
+    determined from the cross sections. The support is in the base class. </li>
+
+    </ul></li>
+    </ul>
+    '''
     def __init__(self, datasetMgr, name, normalizeToLumi=None, **kwargs):
+        '''
+        Construct from DatasetManager and a histogram path
+        
+        \param datasetMgr       DatasetManager for datasets
+
+        \param name             Path of the histogram in the ROOT files
+
+        \param normalizeToLumi  If None, MC is implicitly normalized to
+        the luminosity of data. If not None, MC is normalized to the this value of
+        integrated luminosity (in pb^-1)
+
+         \param kwargs           Keyword arguments, forwarded to PlotSameBase.__init__()
+        '''
         PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
         PlotRatioBase.__init__(self)
         
