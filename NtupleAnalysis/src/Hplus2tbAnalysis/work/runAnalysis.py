@@ -221,10 +221,8 @@ if __name__ == "__main__":
 
     # Default Values
     VERBOSE     = False
-    PUREWEIGHT  = False
+    PUREWEIGHT  = True
     SYSTEMATICS = False
-
-
     
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 

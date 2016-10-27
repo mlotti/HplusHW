@@ -9,6 +9,9 @@ or
 or
 checkEOS.py -c -d /store/user/aattikis/CRAB3_TransferData/multicrab_Hplus2tbAnalysis_v8019_20161020T0152
 
+Clear a specific directory in EOS:
+checkEOS.py -d /store/user/aattikis/CRAB3_TransferData/multicrab_Hplus2tbAnalysis_v8019_20161020T0152/ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/crab_ST_t_channel_top_4f_inclusiveDecays/161026_084523/0000/ -c
+
 Description:
 This script is used to check quota and delete files/directories on EOS.
 
