@@ -114,72 +114,65 @@ def main(opts):
     # Print dataset information
     datasetsMgr.PrintInfo()
 
-    # ========================================
-    # Histograms
-    # ========================================
-    for counter, hName in enumerate(hNames):
+    # Get the save path and name, Get Histos for Plotter
+    savePath, saveName = GetSavePathAndName(hNames[0], **kwargs)
+    
+    # Create data-MC comparison plot, with the default 
+    # - legend labels (defined in plots._legendLabels)
+    # - plot styles (defined in plots._plotStyles, and in styles)
+    # - drawing styles ('HIST' for MC, 'EP' for data)
+    # - legend styles ('L' for MC, 'P' for data)
+    p = plots.DataMCPlot(datasetsMgr, hNames[0])
+
+    # Create a comparison plot
+    plots.drawPlot(p, "iro", xlabel="Tau p_{T} (GeV/c)", ylabel="Events", rebin=1, 
+                   stackMCHistograms=True, addMCUncertainty=True, addLuminosityText=True,
+                   opts={"ymin": 1e-1, "ymaxfactor": 10}, log=True)
+    
+    # Y-axis
+    ratioOpts = {"ymin": 0.0, "ymax": 2.0}
+    if kwargs.get("logY")==True:
+        opts = {"ymin": 1e-2, "ymaxfactor": 100}
+    else:
+        opts = {"ymin": 0.0, "ymaxfactor": 1.2}
         
-        # Get the save path and name, Get Histos for Plotter
-        savePath, saveName    = GetSavePathAndName(hName, **kwargs)
-        refHisto, otherHistos = GetHistosForPlotter(datasetsMgr, hName, **kwargs)
-        
-        # Create a comparison plot
-        #p = plots.ComparisonManyPlot(refHisto, otherHistos)
-        p = plots.DataMCPlot(datasetsMgr, hName)
-
-        # Remove negative contributions
-        if 0:
-            RemoveNegativeBins(datasetsMgr, hName, p)
-
-        # Y-axis
-        ratioOpts = {"ymin": 0.0, "ymax": 2.0}
-        if kwargs.get("logY")==True:
-            opts = {"ymin": 1e-2, "ymaxfactor": 100}
-        else:
-            opts = {"ymin": 0.0, "ymaxfactor": 1.2}
-
-        # ========================================
-        # Frame
-        # ========================================
-        p.createFrame(saveName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
-
-        # Legend
-        moveLegend = {"dx": -0.11, "dy": +0.0, "dh": +0.2}
-        p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
-
-        # Move the refDataset to first in the draw order (back)
-        histoNames = [h.getName() for h in p.histoMgr.getHistos()]
-        p.histoMgr.reorder(filter(lambda n: plots._legendLabels[kwargs.get("refDataset") ] not in n, histoNames))
-        if 0:
-            p.removeLegend()
-
-        # Axes
-        #p.getFrame().GetYaxis().SetTitle( getTitleY(refHisto, **kwargs) )
-        #p.getFrame().GetYaxis().SetTitle( getTitleY(p.histoMgr.getHistos()[0], **kwargs) )
-        if kwargs.get("createRatio"):
-            p.getFrame2().GetYaxis().SetTitle("Ratio")
-            p.getFrame2().GetYaxis().SetTitleOffset(1.6)
-
-        # Set Log and Grid
-        SetLogAndGrid(p, **kwargs)
-
-        # Cut line / Cut box
-        _kwargs = {"lessThan": kwargs.get("cutLessthan")}
-        p.addCutBoxAndLine(cutValue=kwargs.get("cutValue"), fillColor=kwargs.get("cutFillColour"), box=kwargs.get("cutBox"), line=kwargs.get("cutLine"), **_kwargs)
-
-        # Draw the final plot
-        p.draw()
-
-
-        # ========================================
-        # Add Text
-        # ========================================
-        histograms.addStandardTexts(lumi=intLumi)
-        # histograms.addText(0.4, 0.9, "Alexandros Attikis", 17)
-        # histograms.addText(0.4, 0.11, "Runs " + datasetsMgr.loadRunRange(), 17)
-
-        # Save the canvas to a file
-        SaveAs(p, savePath, saveName, kwargs.get("saveFormats"), counter==0)
+    #p.createFrame(saveName, createRatio=kwargs.get("createRatio"), opts=opts, opts2=ratioOpts)
+    
+    # Legend
+    #moveLegend = {"dx": -0.11, "dy": +0.0, "dh": +0.2}
+    #p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+    
+    
+    #if 0:
+    #    p.removeLegend()
+    #
+    ## Axes
+    ## p.getFrame().GetYaxis().SetTitle( getTitleY(refHisto, **kwargs) )
+    ## p.getFrame().GetYaxis().SetTitle( getTitleY(p.histoMgr.getHistos()[0], **kwargs) )
+    #if kwargs.get("createRatio"):
+    #    p.getFrame2().GetYaxis().SetTitle("Ratio")
+    #    p.getFrame2().GetYaxis().SetTitleOffset(1.6)
+    #
+    ## Set Log and Grid
+    #SetLogAndGrid(p, **kwargs)
+    #
+    ## Cut line / Cut box
+    #_kwargs = {"lessThan": kwargs.get("cutLessthan")}
+    #p.addCutBoxAndLine(cutValue=kwargs.get("cutValue"), fillColor=kwargs.get("cutFillColour"), box=kwargs.get("cutBox"), line=kwargs.get("cutLine"), **_kwargs)
+    #
+    ## Draw the final plot
+    #p.draw()
+    #
+    #
+    ## ========================================
+    ## Add Text
+    ## ========================================
+    #histograms.addStandardTexts(lumi=intLumi)
+    ## histograms.addText(0.4, 0.9, "Alexandros Attikis", 17)
+    ## histograms.addText(0.4, 0.11, "Runs " + datasetsMgr.loadRunRange(), 17)
+    
+    # Save the canvas to a file
+    SaveAs(p, savePath, saveName, kwargs.get("saveFormats"), True)
 
     return
 

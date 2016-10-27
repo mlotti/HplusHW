@@ -792,8 +792,7 @@ def getTitleY(histo, title=None, **kwargs):
             if title == None:
                 title = "Events"
         else:
-            #title = histo.getRootHisto().GetYaxis().GetTitle()
-            title = getSymbolY(kwargs.get("normalizeTo"))
+            title = getSymbolY(kwargs.get("normalizeTo"))            
     else:
         pass
 

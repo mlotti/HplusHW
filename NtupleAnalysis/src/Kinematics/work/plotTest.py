@@ -41,6 +41,7 @@ import ROOT
 # Variable Definition
 #================================================================================================
 kwargs = {
+    "verbose"        : False,
     "dataEra"        : "Run2016",
     "searchMode"     : "80to1000",
     "analysis"       : "Kinematics",
@@ -58,7 +59,6 @@ kwargs = {
     "gridY"          : True,
     "drawStyle"      : "HIST9", # "P",  #"HIST9"
     "legStyle"       : "F",     # "LP", "F"
-    "verbose"        : False,
     "cutValue"       : 15,
     "cutLine"        : False,
     "cutBox"         : False,
@@ -87,6 +87,7 @@ hNames = [
 #================================================================================================
 def main(opts):
 
+    # Setup the style
     style = tdrstyle.TDRStyle()
     
     # Set ROOT batch mode boolean
@@ -191,6 +192,7 @@ def main(opts):
 # Main
 #================================================================================================
 if __name__ == "__main__":
+
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
 
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 

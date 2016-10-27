@@ -176,7 +176,7 @@ Kinematics::Kinematics(const ParameterSet& config, const TH1* skimCounters)
     PSet_JetSelection(config.getParameter<ParameterSet>("JetSelection")),
     cfg_JetPtCut(config.getParameter<float>("JetSelection.jetPtCut")),
     cfg_JetEtaCut(config.getParameter<float>("JetSelection.jetEtaCut")),
-    cfg_JetNumberCut(config, "JetSelection.jetNCut"),
+    cfg_JetNumberCut(config, "JetSelection.numberOfJetsCut"),
     PSet_ElectronSelection(config.getParameter<ParameterSet>("ElectronSelection")),
     cfg_ElectronPtCut(config.getParameter<float>("ElectronSelection.electronPtCut")),  
     cfg_ElectronEtaCut(config.getParameter<float>("ElectronSelection.electronEtaCut")),
@@ -219,12 +219,12 @@ void Kinematics::book(TDirectory *dir) {
   cuts.AddRowColumn(1, auxTools.ToString(cfg_MuonEtaCut) );
   cuts.AddRowColumn(1, "-");
   //
-  cuts.AddRowColumn(2, PSet_JetSelection.getParameter<string>("jetNCutDirection") );
+  cuts.AddRowColumn(2, PSet_JetSelection.getParameter<string>("numberOfJetsCutDirection") );
   cuts.AddRowColumn(2, PSet_ElectronSelection.getParameter<string>("electronNCutDirection") );
   cuts.AddRowColumn(2, PSet_MuonSelection.getParameter<string>("muonNCutDirection") );
   cuts.AddRowColumn(2, PSet_HtSelection.getParameter<string>("HtCutDirection") );
   //
-  cuts.AddRowColumn(3, auxTools.ToString(PSet_JetSelection.getParameter<int>("jetNCutValue")) );
+  cuts.AddRowColumn(3, auxTools.ToString(PSet_JetSelection.getParameter<int>("numberOfJetsCutValue")) );
   cuts.AddRowColumn(3, auxTools.ToString(PSet_ElectronSelection.getParameter<int>("electronNCutValue")) );
   cuts.AddRowColumn(3, auxTools.ToString(PSet_MuonSelection.getParameter<int>("muonNCutValue")) );
   cuts.AddRowColumn(3, PSet_HtSelection.getParameter<string>("HtCutValue") );
@@ -333,7 +333,7 @@ void Kinematics::book(TDirectory *dir) {
 
   h_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass", ";#Delta#eta(j_{1},j_{2});M(j_{1},j_{2}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
 
-  h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", ";#Delta#eta(j_{3},j_{4});M(j_{4},j_{4}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
+  h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", ";#Delta#eta(j_{3},j_{4});M(j_{3},j_{4}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
   
   // GenJets
   h_GenJet_N_NoPreselections         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet_N_NoPreselections"        , ";N (selected jets)" , 16, -0.5, +15.5);

@@ -3977,7 +3977,8 @@ class DatasetManager:
         cross-sections (MC) or luminosity (data)
         '''
         Verbose("PrintInfo()", True)
-        
+
+        # Table setup
         table   = []
         table.append("")
         align   = "{:<3} {:<50} {:>20} {:<3} {:>20} {:>15} {:<3}"
@@ -3986,8 +3987,6 @@ class DatasetManager:
         table.append(hLine)
         table.append(header)
         table.append(hLine)
-
-        # Definitions
 
         # For-loop: All datasets
         for index, d in enumerate(self.datasets):
