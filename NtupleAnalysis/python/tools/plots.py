@@ -280,8 +280,8 @@ for mass in _heavyHplusMasses:
 _datasetOrder.extend([
     "QCD",
     "QCDdata",
+    "QCD-b",
     "QCD_Pt20_MuEnriched",
-    "ZJetsToQQ_HT600toInf", # Htb
     "EWK", #merged    
     "WJets",
     "W1Jets",
@@ -295,13 +295,14 @@ _datasetOrder.extend([
     "WJets",
     "WJetsHT",
     "WToTauNu",
-    "WJetsToQQ_HT_600ToInf", # Htb
     "TTJets",
     "TT",
+    "ZJetsToQQ_HT600toInf", # Htb
     "TTandSingleTop", #merged
     "DYJetsToLL",
     "DYJetsToLLHT",
     "SingleTop",
+    "WJetsToQQ_HT_600ToInf", # Htb
     "Diboson",
     "WW",
     "WZ",
