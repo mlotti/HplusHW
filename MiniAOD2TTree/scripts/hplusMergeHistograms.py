@@ -609,7 +609,15 @@ def Execute(cmd):
 
 def GetEOSHomeDir(opts):
     #home = "/store/user/%s/CRAB3_TransferData" % (getpass.getuser())
-    home = "/store/user/%s/CRAB3_TransferData/%s" % (getpass.getuser(), opts.dirName)
+
+    HOST = socket.gethostname()
+    if "fnal" in HOST:
+        prefix = "/eos/uscms"
+    elif "lxplus" in HOST:
+        prefix = ""
+    else:
+        raise Exception("Unsupported host %s" % (HOST) )
+    home = prefix + "/store/user/%s/CRAB3_TransferData/%s" % (getpass.getuser(), opts.dirName)
     return home
 
 

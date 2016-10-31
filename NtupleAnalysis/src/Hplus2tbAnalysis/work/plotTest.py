@@ -175,7 +175,8 @@ def main(opts):
     plots.mergeRenameReorderForDataMC(datasetsMgr)
 
     # Remove datasets
-    datasetsMgr.remove("QCD-b") # datasetsMgr.remove("QCD")
+    datasetsMgr.remove("QCD-b") 
+    # datasetsMgr.remove("QCD")
     
     # Print dataset information
     datasetsMgr.PrintInfo()
@@ -186,7 +187,7 @@ def main(opts):
     # Create a comparison plot
     ratioOpts = {"ymin": 0.0, "ymax": 2.0}
     if kwargs.get("logY")==True:
-        canvOpts = {"ymin": 1e-1, "ymaxfactor": 100}
+        canvOpts = {"xmin": 1.0, "ymin": 1e-1, "ymaxfactor": 100} #FIXME: remove xmin
     else:
         canvOpts = {"ymin": 0.0, "ymaxfactor": 1.2}
 

@@ -21,8 +21,10 @@ public:
 
 private:
   // Input parameters
+  const HistogramSettings cfg_PtBinSetting;
+  const HistogramSettings cfg_EtaBinSetting;
 
-  /// Common plots
+  // Common plots
   CommonPlots fCommonPlots;
   // Event selection classes and event counters (in same order like they are applied)
   Count cAllEvents;
@@ -32,7 +34,7 @@ private:
   // TauSelection fTauSelection;
   // Count cFakeTauSFCounter;
   // Count cTauTriggerSFCounter;
-  Count cMetTriggerSFCounter;
+  // Count cMetTriggerSFCounter;
   ElectronSelection fElectronSelection;
   MuonSelection fMuonSelection;
   JetSelection fJetSelection;
@@ -44,7 +46,8 @@ private:
   Count cSelected;
     
   // Non-common histograms
-  WrappedTH1 *hAssociatedTPt;
+  WrappedTH1 *hAssociatedTop_Pt;
+  WrappedTH1 *hAssociatedTop_Eta;
 
 };
 
@@ -53,38 +56,34 @@ REGISTER_SELECTOR(Hplus2tbAnalysis);
 
 Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
+    cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
+    cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kHplus2tbAnalysis, fHistoWrapper),
-    cAllEvents(fEventCounter.addCounter("All events")),
-    cTrigger(fEventCounter.addCounter("Passed trigger")),
-    fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"),
-			fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    cVertexSelection(fEventCounter.addCounter("Primary vertex selection")),
-    // fTauSelection(config.getParameter<ParameterSet>("TauSelection"),
-    //               fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    // cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")),
-    // cTauTriggerSFCounter(fEventCounter.addCounter("Tau trigger SF")),
-    cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
-    fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"),
-		       fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
-    fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"),
-		   fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
-    fJetSelection(config.getParameter<ParameterSet>("JetSelection"),
-		  fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    // fAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"),
-    //                fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"),
-		   fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cAllEvents(fEventCounter.addCounter("all events")),
+    cTrigger(fEventCounter.addCounter("passed trigger")),
+    fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cVertexSelection(fEventCounter.addCounter("passed PV")),
+    // fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    // cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")), cTauTriggerSFCounter(fEventCounter.addCounter("Tau trigger SF")),
+    // cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
+    fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    // fAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
-    fMETSelection(config.getParameter<ParameterSet>("METSelection"),
-		  fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    //fAngularCutsBackToBack(config.getParameter<ParameterSet>("AngularCutsBackToBack"),
-    //             fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    cSelected(fEventCounter.addCounter("Selected events"))
+    fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    // fAngularCutsBackToBack(config.getParameter<ParameterSet>("AngularCutsBackToBack"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    cSelected(fEventCounter.addCounter("Selected Events"))
 { }
 
+
 void Hplus2tbAnalysis::book(TDirectory *dir) {
+
+  
   // Book common plots histograms
   fCommonPlots.book(dir, isData());
+
   // Book histograms in event selection classes
   fMETFilterSelection.bookHistograms(dir);
   // fTauSelection.bookHistograms(dir);
@@ -94,16 +93,29 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   // fAngularCutsCollinear.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
-  //fAngularCutsBackToBack.bookHistograms(dir);
+  // fAngularCutsBackToBack.bookHistograms(dir);
+  
   // Book non-common histograms
-  //hExample =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "example pT", "example pT", 40, 0, 400);
-  hAssociatedTPt =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTPt", "Associated t pT", 40, 0, 400);
-
+  const int nBinsPt   = cfg_PtBinSetting.bins();
+  const double minPt  = cfg_PtBinSetting.min();
+  const double maxPt  = cfg_PtBinSetting.max();
+  
+  const int nBinsEta  = cfg_EtaBinSetting.bins();
+  const double minEta = cfg_EtaBinSetting.min();
+  const double maxEta = cfg_EtaBinSetting.max();
+ 
+  hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
+  
+  return;
 }
+
 
 void Hplus2tbAnalysis::setupBranches(BranchManager& branchManager) {
   fEvent.setupBranches(branchManager);
+  return;
 }
+
 
 void Hplus2tbAnalysis::process(Long64_t entry) {
 
@@ -115,26 +127,32 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
 
   // For-loop: GenParticles
   if (fEvent.isMC()) {
-
+    
     for (auto& p: fEvent.genparticles().getGenParticles()) {
 
-      int genP_pdgId     = p.pdgId();
-      // double genP_pt     = p.pt();
-      // double genP_eta    = p.eta();
-      //double genP_Status = p.status(); // PYTHIA8: http://home.thep.lu.se/~torbjorn/pythia81html/ParticleProperties.html
+      int genP_pdgId  = p.pdgId();
+      double genP_pt  = p.pt();
+      double genP_eta = p.eta();
+      // double genP_Status = p.status(); // PYTHIA8: http://home.thep.lu.se/~torbjorn/pythia81html/ParticleProperties.html
       
-      if( genP_pdgId == 6) hAssociatedTPt->Fill(p.pt());
-      //    if( genP_pdgId == 6) hAssociatedTPt->Fill(p.pt()); 
+      if( genP_pdgId == 6)
+	{
+	  hAssociatedTop_Pt ->Fill( genP_pt  );
+	  hAssociatedTop_Eta->Fill( genP_eta );
+	}
+      
     }
   }
 
 
-  
-  //====== Apply trigger
+  //================================================================================================   
+  // Apply trigger 
+  //================================================================================================   
   if (0) std::cout << "=== Trigger" << std::endl;
-  // if ( !(fEvent.passTriggerDecision()) ) return;
   std::string TriggerName = "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056";
+  // std::string TriggerName = "HLT_PFHT450_SixJet40_BTagCSV_p056";
   if ( !(fEvent.passHLTDecisionByName(TriggerName)) ) return;
+  // if ( !(fEvent.passTriggerDecision()) ) return; // need to implement
 
   cTrigger.increment();
   int nVertices = fEvent.vertexInfo().value();
@@ -142,83 +160,107 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   fCommonPlots.fillControlPlotsAfterTrigger(fEvent);
 
 
-  //====== MET filters to remove events with spurious sources of fake MET
+  //================================================================================================   
+  // MET filters (to remove events with spurious sources of fake MET)
+  //================================================================================================   
   if (0) std::cout << "=== MET Filters" << std::endl;
   const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
   if (!metFilterData.passedSelection()) return;
   
 
-  //====== GenParticle analysis
+  //================================================================================================   
+  // GenParticle analysis
+  //================================================================================================   
   if (0) std::cout << "=== GenParticles" << std::endl;
-  
+  // if necessary
 
-  //====== Check that primary vertex exists
+  //================================================================================================   
+  // Primarty Vertex (Check that a PV exists)
+  //================================================================================================   
   if (0) std::cout << "=== Vertices" << std::endl;
   if (nVertices < 1) return;
+
   cVertexSelection.increment();
   fCommonPlots.fillControlPlotsAtVertexSelection(fEvent);
 
   
-  //====== Tau selection
+  //================================================================================================   
+  // Tau selection
+  //================================================================================================   
   //const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
   // if (!tauData.hasIdentifiedTaus())
   //return;
 
   
-  //====== Fake tau SF
+  // Fake tau SF
   if (fEvent.isMC()) {
     // fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
     // cFakeTauSFCounter.increment();
   }
 
 
-  //====== Tau trigger SF
+  // Tau trigger SF
   if (fEvent.isMC()) {
     // fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
     // cTauTriggerSFCounter.increment();
   }
 
 
-  //====== MET trigger SF
+  //================================================================================================   
+  // MET trigger SF
+  //================================================================================================   
   if (0) std::cout << "=== MET Trigger SF" << std::endl;
   const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
-  if (fEvent.isMC()) {
-    fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
-  }
-  cMetTriggerSFCounter.increment();
-  fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
+  // if (fEvent.isMC()) {
+  //   fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
+  // }
+  // cMetTriggerSFCounter.increment();
+  // fCommonPlots.fillControlPlotsAfterMETTriggerScaleFactor(fEvent);
   
 
-  //====== Electron veto
+  //================================================================================================   
+  // Electron veto
+  //================================================================================================   
   if (0) std::cout << "=== Electron veto" << std::endl;
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
   if (eData.hasIdentifiedElectrons()) return;
 
 
-  //====== Muon veto
+  //================================================================================================
+  // Muon veto
+  //================================================================================================
   if (0) std::cout << "=== Muon veto" << std::endl;
   const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
   if (muData.hasIdentifiedMuons()) return;
 
 
-  //====== Jet selection
+  //================================================================================================
+  // Jet selection
+  //================================================================================================
   if (0) std::cout << "=== Jet selection" << std::endl;
   const JetSelection::Data jetData = fJetSelection.analyzeWithoutTau(fEvent);
   if (!jetData.passedSelection()) return;
 
 
-  // //====== Collinear angular cuts
+  //================================================================================================
+  // Collinear angular cuts
+  //================================================================================================
   //   const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
   //   if (!collinearData.passedSelection())
   //    return;
 
 
-  //====== Point of standard selections
+  //================================================================================================
+  // Standard Selections
+  //================================================================================================
   if (0) std::cout << "=== Standard selection" << std::endl;
   // fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);  // hasIdentifiedTaus()
-  
-  //====== b-jet selection
-  if (0) std::cout << "=== b-jet selection" << std::endl;
+
+
+  //================================================================================================  
+  // BJet selection
+  //================================================================================================
+  if (0) std::cout << "=== BJet selection" << std::endl;
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
   // Fill final shape plots with b tag efficiency applied as an event weight
   //if (silentMETData.passedSelection()) {
@@ -229,7 +271,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // }
   if (!bjetData.passedSelection()) return;
 
-  //====== b-jet SF
+  // BJet SF
   if (0) std::cout << "=== b-jet SF" << std::endl;
   if (fEvent.isMC()) {
     fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
@@ -237,29 +279,44 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   cBTaggingSFCounter.increment();
 
 
-  //====== MET selection
+  //================================================================================================
+  // MET selection
+  //================================================================================================
   if (0) std::cout << "=== MET selection" << std::endl;
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
   if (!METData.passedSelection()) return;
   
 
-  // //====== Back-to-back angular cuts
+  //================================================================================================
+  // Back-to-back angular cuts
+  //================================================================================================
   //   const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(fEvent, tauData.getSelectedTau(), jetData, METData);
   //   if (!backToBackData.passedSelection())
   //     return;
 
 
-  //====== All cuts passed
+  //================================================================================================
+  // All cuts passed
+  //================================================================================================
   if (0) std::cout << "=== All cuts passed" << std::endl;
   cSelected.increment();
 
+
+
+  //================================================================================================
   // Fill final plots
+  //================================================================================================
   // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent); // hasIdentifiedTaus()
   
 
-  //====== Experimental selection code
+  //================================================================================================
+  // Experimental selection code
+  //================================================================================================
   // if necessary
   
-  //====== Finalize
+
+  //================================================================================================
+  // Finalize
+  //================================================================================================
   fEventSaver.save();
 }
