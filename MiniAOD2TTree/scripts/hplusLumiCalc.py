@@ -54,6 +54,12 @@ https://indico.cern.ch/event/459797/contribution/3/attachments/1181542/1711291/P
 
 Useful Links:
 http://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html
+
+Installing BRIL:
+bash
+bash-4.1$ export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH
+bash-4.1$ pip uninstall brilws
+bash-4.1$ pip install --install-option="--prefix=$HOME/.local" brilws
 '''
 
 #================================================================================================
