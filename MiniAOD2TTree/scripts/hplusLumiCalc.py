@@ -547,11 +547,12 @@ def CallBrilcalc(task, BeamStatus, CorrectionTag, LumiUnit, InputFile, printOutp
     if opts.offsite:
         cmd.extend(cmd_ssh)
 
-    brilcalc_out = "%s.brilcalc" % (task)
-    sys_cmd = " ".join(cmd) + " > %s" % brilcalc_out
+    brilcalc_out = os.path.join(task, "results", "brilcalc.log")
+    sys_cmd = " ".join(cmd) + " > %s" %brilcalc_out
     Verbose(sys_cmd)
 
     ret    = os.system(sys_cmd)
+
     output = [i for i in open(brilcalc_out, 'r').readlines()]
     
     # If return value is not zero print failure
@@ -937,7 +938,7 @@ if __name__ == "__main__":
     REPORT        = True
     VERBOSE       = False
     OFFSITE       = False
-    COLLISIONS    = None
+    COLLISIONS    = "2016"
     DIRNAME       = ""
     TRANSFERTOEOS = False
 
@@ -1004,6 +1005,6 @@ if __name__ == "__main__":
 
     # Inform user
     Print("Calculating luminosity with %s" % opts.lumicalc, True)
-    Print("Calculating pileup with pileupCalc")
+    Print("Calculating pileup with pileupCalc (collisions %s)" % (opts.collisions) )
 
     sys.exit(main(opts, args))
