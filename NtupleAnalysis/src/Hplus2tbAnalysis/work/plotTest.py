@@ -175,8 +175,8 @@ def main(opts):
     plots.mergeRenameReorderForDataMC(datasetsMgr)
 
     # Remove datasets
-    datasetsMgr.remove("QCD-b") 
-    # datasetsMgr.remove("QCD")
+    # datasetsMgr.remove("QCD-b") 
+    datasetsMgr.remove("QCD")
     
     # Print dataset information
     datasetsMgr.PrintInfo()

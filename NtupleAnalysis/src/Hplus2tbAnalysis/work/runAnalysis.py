@@ -160,7 +160,7 @@ def main():
     builder = AnalysisBuilder(prefix,
                               dataEras,
                               searchModes,
-                              usePUreweighting=opts.puReweight,
+                              usePUreweighting=not opts.noPUreweighting,
                               doSystematicVariations=opts.systematics)
 
     # Perform variations (e.g. for optimisation)
@@ -221,7 +221,7 @@ if __name__ == "__main__":
 
     # Default Values
     VERBOSE     = False
-    PUREWEIGHT  = True
+    PUREWEIGHT  = False
     SYSTEMATICS = False
     
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
@@ -246,8 +246,8 @@ if __name__ == "__main__":
     parser.add_option("-h", "--histoLevel", dest="histoLevel", action="store", default = "Informative", 
                       help="Histogram ambient level (default: Informative)")
 
-    parser.add_option("--puReweight", dest="puReweight", action="store_true", default = PUREWEIGHT, 
-                      help="Apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )
+    parser.add_option("--noPUreweighting", dest="noPUreweighting", action="store_true", default = PUREWEIGHT, 
+                      help="Do NOT apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )
 
     parser.add_option("--systematics", dest="systematics", action="store_true", default = SYSTEMATICS, 
                       help="Do systematics variations  (default: %s)" % (SYSTEMATICS) )

@@ -214,7 +214,7 @@ def GetLocalOrEOSPath(stdoutFile, opts):
     '''
     Verbose("GetLocalOrEOSCopy()", True)
     
-    if "fnal" in socket.gethostname(): #iro
+    if "fnal" in socket.gethostname():
         return False, stdoutFile
     
     localCopy = False
@@ -608,11 +608,15 @@ def Execute(cmd):
 
 
 def GetEOSHomeDir(opts):
+    '''
+    '''
+    Verbose("GetEOSHomeDir()", True)
     #home = "/store/user/%s/CRAB3_TransferData" % (getpass.getuser())
-
+    
     HOST = socket.gethostname()
     if "fnal" in HOST:
-        prefix = "/eos/uscms"
+        #prefix = "/eos/uscms"
+        prefix = "" #fixme: iro
     elif "lxplus" in HOST:
         prefix = ""
     else:
@@ -1169,8 +1173,8 @@ def GetXrdcpPrefix(opts):
     Verbose("Determining prefix for xrdcp for host %s" % (HOST) )
     if "fnal" in HOST:
         #path_prefix = "root://cmsxrootd.fnal.gov/" # doesn't work
-        #path_prefix = "root://cmseos.fnal.gov/"    # doesn't work
-        path_prefix = ""        
+        path_prefix = "root://cmseos.fnal.gov//"    # doesn't work
+        # path_prefix = "" 
     elif "lxplus" in HOST:
         path_prefix = "root://eoscms.cern.ch//eos//cms/"
     else:
@@ -1230,10 +1234,10 @@ def MergeFiles(mergeName, inputFiles, opts):
             ret = hadd(opts, mergeName, inputFiles)    
             Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts) ), False )
 
-    # Before proceeding make sure the merged file is not corrupt
-    if RootFileIsCorrupt(mergeName):
-        Print("%s found to be corrupt, re-merging" % (mergeName))
-        MergeFiles(mergeName, inputFiles, opts) #fixme: validate
+   # # Before proceeding make sure the merged file is not corrupt
+   # if RootFileIsCorrupt(mergeName):
+   #     Print("%s found to be corrupt, re-merging" % (mergeName))
+   #     MergeFiles(mergeName, inputFiles, opts) #fixme: validate
 
     return ret
 
