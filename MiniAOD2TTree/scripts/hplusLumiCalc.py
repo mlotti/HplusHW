@@ -547,7 +547,7 @@ def CallBrilcalc(task, BeamStatus, CorrectionTag, LumiUnit, InputFile, printOutp
     if opts.offsite:
         cmd.extend(cmd_ssh)
 
-    brilcalc_out = "brilcalc.log" % (task)
+    brilcalc_out = "brilcalc.log"
     sys_cmd = " ".join(cmd) + " > %s" % (os.path.join(task, "results", brilcalc_out) )
     Verbose(sys_cmd)
 
