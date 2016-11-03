@@ -99,7 +99,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Taus      = process.Taus,
     Electrons = process.Electrons,
     Muons     = process.Muons,
-    Jets      = process.Jets,
+    Jets      = process.JetsNoSysVariations,
     METs      = process.METsNoSysVariations,
     GenWeights = cms.VPSet(
         cms.PSet(

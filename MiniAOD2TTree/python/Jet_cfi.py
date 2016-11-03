@@ -16,6 +16,7 @@ Jets = cms.VPSet(
 #        src = cms.InputTag("selectedPatJetsForMetT1T2SmearCorr"),
 #        src = cms.InputTag("cleanedPatJets"),
 #        src = cms.InputTag("patJetsReapplyJEC"),
+	systVariations = cms.bool(True),
         srcJESup   = cms.InputTag("shiftedPatJetEnUp"),
 	srcJESdown = cms.InputTag("shiftedPatJetEnDown"),
         srcJERup   = cms.InputTag("shiftedPatSmearedJetResUp"),
@@ -53,3 +54,10 @@ Jets = cms.VPSet(
 #        ),
 #    )
 )
+
+JetsNoSysVariations = cms.VPSet()
+for i in range(len(Jets)):
+    pset = Jets[i].clone()
+    pset.systVariations = cms.bool(False)
+    JetsNoSysVariations.append(pset)
+
