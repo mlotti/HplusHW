@@ -615,8 +615,8 @@ def GetEOSHomeDir(opts):
     
     HOST = socket.gethostname()
     if "fnal" in HOST:
-        #prefix = "/eos/uscms"
-        prefix = "" #fixme: iro
+        prefix = "/eos/uscms"
+        # prefix = "" #do NOT use this "mount fuse" as it fails for multiple files
     elif "lxplus" in HOST:
         prefix = ""
     else:
@@ -930,9 +930,8 @@ def WritePileupHistos(fileName, opts):
     # Definitions
     prefix = ""
     if opts.filesInEOS:
-        #prefix = GetXrdcpPrefix(opts)
-        prefix = GetFileOpenPrefix(opts)
-    filePath = prefix + fileName
+        prefix = GetXrdcpPrefix(opts)
+        # prefix = GetFileOpenPrefix(opts)
     fileMode = "UPDATE"
 
     # Open the ROOT file
@@ -941,19 +940,19 @@ def WritePileupHistos(fileName, opts):
     fOUT = None
     while nAttempts < maxAttempts:
         try:
-            Verbose("Attempt #%s: Opening ROOT file %s in %s mode." % (nAttempts, filePath, fileMode) )
-            fOUT = ROOT.TFile.Open(filePath, fileMode)
+            Verbose("Attempt #%s: Opening ROOT file %s in %s mode." % (nAttempts, fileName, fileMode) )
+            fOUT = ROOT.TFile.Open(prefix + fileName, fileMode)
             fOUT.cd()
             break
         except:
             nAttempts += 1
-            Print("TFile::Open(%s, %s) failed (%s/%s). Retrying..." % (filePath, fileMode, nAttempts, maxAttempts) )
+            Print("TFile::Open(%s, %s) failed (%s/%s). Retrying..." % (fileName, fileMode, nAttempts, maxAttempts) )
 
     # Safety clause
     if fOUT == None:
-        raise Exception("TFile::Open(%s, %s) failed" % (filePath, fileMode) )
+        raise Exception("TFile::Open(%s, %s) failed" % (prefix + fileName, fileMode) )
     else:
-        Verbose("Successfully opened %s in %s mode (after %s attempts)" % (filePath, fileMode, nAttempts) )
+        Verbose("Successfully opened %s in %s mode (after %s attempts)" % (fileName, fileMode, nAttempts) )
 
     # Definitions
     hPU = None
@@ -966,15 +965,14 @@ def WritePileupHistos(fileName, opts):
     if not match:
         return
 
-    puFileTmp = os.path.join(os.path.dirname(filePath), "PileUp.root")
-    puFile    = prefix + puFileTmp
+    puFile = os.path.join(os.path.dirname(fileName), "PileUp.root")
     if FileExists(puFile, opts):
-        fIN      = ROOT.TFile.Open(puFile)
+        fIN     = ROOT.TFile.Open(prefix + puFile)
         hPU     = fIN.Get("pileup")
         hPUup   = fIN.Get("pileup_up")
         hPUdown = fIN.Get("pileup_down")
     else:
-        Print("%s not found in %s. Did you run hplusLumiCalc.py? Exit" % (puFile, os.path.dirname(filePath) ) )
+        Print("%s not found in %s. Did you run hplusLumiCalc.py? Exit" % (puFile, os.path.dirname(fileName) ) )
         sys.exit()
 
     # Now write the PU histograms in the input file
@@ -984,7 +982,7 @@ def WritePileupHistos(fileName, opts):
         hPUup.Write("pileup_up", ROOT.TObject.kOverwrite)
         hPUdown.Write("pileup_down", ROOT.TObject.kOverwrite)
 
-    Verbose("Closing file %s." % (filePath) )
+    Verbose("Closing file %s." % (fileName) )
     fOUT.Close()
     return
 
@@ -1070,7 +1068,10 @@ def FileExists(filePath, opts):
         cmd = ConvertCommandToEOS("ls", opts) + " " + filePath
         ret = Execute("%s" % (cmd) )
         # If file is not found there won't be a list of files; there will be an error message
-        errMsg = ret[0]
+        errMsg = ""
+        if len(ret) > 0:
+            errMsg = ret[0]
+
         if "Unable to stat" in errMsg:
             return False
         elif errMsg == filePath.split("/")[-1]:
@@ -1173,7 +1174,7 @@ def GetXrdcpPrefix(opts):
     Verbose("Determining prefix for xrdcp for host %s" % (HOST) )
     if "fnal" in HOST:
         #path_prefix = "root://cmsxrootd.fnal.gov/" # doesn't work
-        path_prefix = "root://cmseos.fnal.gov//"    # doesn't work
+        path_prefix = "root://cmseos.fnal.gov//"
         # path_prefix = "" 
     elif "lxplus" in HOST:
         path_prefix = "root://eoscms.cern.ch//eos//cms/"
@@ -1193,9 +1194,8 @@ def GetFileOpenPrefix(opts):
 
     Verbose("Determining prefix for opening ROOT files for host %s" % (HOST) )
     if "fnal" in HOST:
-        #path_prefix = "root://cmsxrootd.fnal.gov/" # freezes
-        #path_prefix = "root://cmseos.fnal.gov//" #doesn't really work
-        path_prefix = "" #works
+        path_prefix = "root://cmseos.fnal.gov/"
+        # path_prefix = "" #fixme: iro
     elif "lxplus" in HOST:
         path_prefix = "root://eoscms.cern.ch//eos//cms/"
     else:
@@ -1234,10 +1234,10 @@ def MergeFiles(mergeName, inputFiles, opts):
             ret = hadd(opts, mergeName, inputFiles)    
             Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts) ), False )
 
-   # # Before proceeding make sure the merged file is not corrupt
-   # if RootFileIsCorrupt(mergeName):
-   #     Print("%s found to be corrupt, re-merging" % (mergeName))
-   #     MergeFiles(mergeName, inputFiles, opts) #fixme: validate
+    # Before proceeding make sure the merged file is not corrupt
+    if RootFileIsCorrupt(mergeName, opts): #fixme: iro (not required. optional)
+        Print("%s found to be corrupt, re-merging" % (mergeName))
+        MergeFiles(mergeName, inputFiles, opts) #fixme: validate
 
     return ret
 
@@ -1441,7 +1441,7 @@ def CheckControlHisto(mergeName, inputFiles):
     return
 
 
-def RootFileIsCorrupt(fileName):
+def RootFileIsCorrupt(fileName, opts):
     '''
     Check integrity of ROOT File. Return true if file is corrupt, 
     otherwise return false.
@@ -1453,6 +1453,9 @@ def RootFileIsCorrupt(fileName):
         return False
 
     # If open in update mode and the function finds something to recover, a new directory header is written to the file.
+    prefix = GetXrdcpPrefix(opts)
+    fileName = prefix + fileName
+
     openMode = "UPDATE"
     r = ROOT.TFile.Open(fileName, openMode)
     if not isinstance(r, ROOT.TFile):
@@ -1488,9 +1491,9 @@ def DeleteFiles(taskName, mergeFile, fileList, opts):
         return
 
     # Before proceeding make sure the merged file is not corrupt
-    if RootFileIsCorrupt(mergeFile):
+    if RootFileIsCorrupt(mergeFile, opts):
         Print("%s, merge-file %s is corrupt. Will not delete any input file. EXIT" % (taskName, mergeFile) )
-        sys.exit()
+        sys.exit() 
 
     # For-loop: All input files
     for index, f in enumerate(fileList):
@@ -1773,7 +1776,6 @@ def main(opts, args):
                 mergeFiles, mergeSizeMap, mergeTimeMap = GetPreexistingMergedFiles(os.path.dirname(files[0]), opts)
                 filesExist = len(mergeFiles)
                 taskReports[taskName]  = Report( taskName, mergeFileMap, mergeSizeMap, mergeTimeMap, filesExist)
-                PrintProgressBar(taskName + ", Merge ", 0, 1)
                 filesExist += 1                
             
                 # Delete input files?
@@ -1791,7 +1793,7 @@ def main(opts, args):
                 continue
             else:
                 Verbose("%s, merge file  %s does not already exist. Will create it" % (taskName, mergeName) )
-
+        
             # Merge the ROOT files
             time_start = time.time()
             ret = MergeFiles(mergeName, inputFiles, opts)
