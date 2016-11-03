@@ -12,6 +12,7 @@ import time
 import StringIO
 import hashlib
 import array
+import socket
 from collections import OrderedDict
 
 import ROOT
@@ -183,7 +184,6 @@ def readFromMulticrabCfg(**kwargs):
     Verbose("Found the following task directories:\n\t%s" % ("\n\t".join(taskDirs) ) )
     taskDirs = aux.includeExcludeTasks(taskDirs, **kwargs)
     taskDirs.sort()
-
     managerCreator = readFromCrabDirs(taskDirs, baseDirectory=dirname, **kwargs)
     return managerCreator
 
@@ -263,13 +263,15 @@ def readFromCrabDirs(taskdirs, emptyDatasetsAsNone=False, **kwargs):
             files = glob.glob(os.path.join(resdir, inputFile))
         else:
             # crab3
-            files = glob.glob(os.path.join(d, "results", inputFile))
+            files = glob.glob(os.path.join(d, "results", inputFile))        
             name = name.replace("crab_", "")
         if len(files) == 0:
             print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, inputFile, os.path.join(d, "res"))
             noFiles = True
             continue
-
+        
+        # If the files are symbolic links store the target path. Otherwise leave unchanged
+        files = ConvertSymLinks(files)
         dlist.append( (name+postfix, files) )
 
     if noFiles:
@@ -283,8 +285,33 @@ def readFromCrabDirs(taskdirs, emptyDatasetsAsNone=False, **kwargs):
         if emptyDatasetsAsNone:
             return None
         raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
-
     return readFromRootFiles(dlist, **kwargs)
+
+
+def ConvertSymLinks(fileList):
+    '''
+    '''
+    Verbose("ConvertSymLinks()", True)
+    HOST = socket.gethostname()
+    bUseSymLinks = False
+    
+    if "fnal" in HOST:
+        prefix = "root://cmseos.fnal.gov//"
+    elif "lxplus" in HOST:
+        prefix = "root://eoscms.cern.ch//"
+    else:
+        prefix = ""
+
+    # If the file is symbolic link store the target path
+    for i, f in enumerate(fileList):
+        if not os.path.islink(f):
+            continue
+        bUseSymLinks = True
+        fileList[i] = prefix + os.path.realpath(f)
+
+    if bUseSymLinks:
+        Verbose("SymLinks detected. Appended the prefix \"%s\" to all ROOT file paths" % (prefix) )
+    return fileList
 
 
 def getDatasetsFromRootFiles(rootFileList, **kwargs):

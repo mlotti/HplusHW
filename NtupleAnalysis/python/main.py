@@ -220,6 +220,32 @@ class Process:
         self._options = PSet()
         return
 
+    
+    def ConvertSymLinks(fileList):
+        '''
+        '''
+        Verbose("ConvertSymLinks()", True)
+        HOST = socket.gethostname()
+        bUseSymLinks = False
+
+        if "fnal" in HOST:
+            prefix = "root://cmseos.fnal.gov//"
+        elif "lxplus" in HOST:
+            prefix = "root://eoscms.cern.ch//"
+        else:
+            prefix = ""
+            
+        # If the file is symbolic link store the target path
+        for i, f in enumerate(fileList):
+            if not os.path.islink(f):
+                continue
+            bUseSymLinks = True
+            fileList[i] = prefix + os.path.realpath(f)
+
+        if bUseSymLinks:
+            Verbose("SymLinks detected. Appended the prefix \"%s\" to all ROOT file paths" % (prefix) )
+        return fileList
+
 
     def addDataset(self, name, files=None, dataVersion=None, lumiFile=None):
         '''
@@ -228,25 +254,8 @@ class Process:
         if files is None:
             files = datasetsTest.getFiles(name)
 
-        HOST = socket.gethostname() 
-        bUseSymLinks = False
-        # If the file is symbolic link store the target path
-        for i, f in enumerate(files): 
-
-            if not os.path.islink(f):
-                continue
-
-            bUseSymLinks = True
-            if "fnal" in HOST:
-                prefix = "root://cmseos.fnal.gov//"
-            elif "lxplus" in HOST:
-                prefix = "root://eoscms.cern.ch//"
-            else:
-                prefix = ""
-            files[i] = prefix + os.path.realpath(f) 
-
-        if bUseSymLinks:
-            Print("SymLinks detected. Appended the prefix \"%s\" to all ROOT file paths" % (prefix) )
+        # If the files are symbolic links store the target path. Otherwise leave unchanged 
+        #files = ConvertSymLinks(files)
 
         prec = dataset.DatasetPrecursor(name, files)
         if dataVersion is None:
