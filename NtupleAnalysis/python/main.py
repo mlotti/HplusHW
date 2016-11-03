@@ -4,6 +4,7 @@ import copy
 import json
 import re
 import sys
+import socket
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -14,8 +15,31 @@ import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.git as git
 
+
+_debugMode = False
 _debugPUreweighting = False
 _debugMemoryConsumption = False
+
+def Verbose(msg, printHeader=False):                                                                                                                                         
+    '''                                                                                                                                                                      
+    Calls Print() only if verbose options is set to true.                                                                                                                    
+    '''                                                                                                                                                                      
+    if not _debugMode:
+        return
+    Print(msg, printHeader)
+    return
+
+
+def Print(msg, printHeader=True):
+    '''                                                                                                                                                                      
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.                                                                                      
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader:
+        print "=== ", fName
+    print "\t", msg
+    return
+    
 
 class PSet:
     def __init__(self, **kwargs):
@@ -186,18 +210,43 @@ class Process:
     def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents=-1):
         ROOT.gSystem.Load("libHPlusAnalysis.so")
 
-        self._outputPrefix = outputPrefix
+        self._verbose       = _debugMode
+        self._outputPrefix  = outputPrefix
         self._outputPostfix = outputPostfix
 
         self._datasets = []
         self._analyzers = {}
         self._maxEvents = maxEvents
         self._options = PSet()
+        return
+
 
     def addDataset(self, name, files=None, dataVersion=None, lumiFile=None):
-
+        '''
+        '''
+        Verbose("addDataset()", True)
         if files is None:
             files = datasetsTest.getFiles(name)
+
+        HOST = socket.gethostname() 
+        bUseSymLinks = False
+        # If the file is symbolic link store the target path
+        for i, f in enumerate(files): 
+
+            if not os.path.islink(f):
+                continue
+
+            bUseSymLinks = True
+            if "fnal" in HOST:
+                prefix = "root://cmseos.fnal.gov//"
+            elif "lxplus" in HOST:
+                prefix = "root://eoscms.cern.ch//"
+            else:
+                prefix = ""
+            files[i] = prefix + os.path.realpath(f) 
+
+        if bUseSymLinks:
+            Print("SymLinks detected. Appended the prefix \"%s\" to all ROOT file paths" % (prefix) )
 
         prec = dataset.DatasetPrecursor(name, files)
         if dataVersion is None:
