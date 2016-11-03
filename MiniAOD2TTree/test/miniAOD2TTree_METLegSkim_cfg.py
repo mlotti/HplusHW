@@ -100,7 +100,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     Electrons = process.Electrons,
     Muons     = process.Muons,
     Jets      = process.Jets,
-    METs      = process.METs,
+    METs      = process.METsNoSysVariations,
     GenWeights = cms.VPSet(
         cms.PSet(
             branchname = cms.untracked.string("GenWeights"),
