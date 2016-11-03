@@ -76,6 +76,7 @@ Taus = cms.VPSet(
             ),
             filter = cms.untracked.bool(False), 
             jetSrc = cms.InputTag("slimmedJets"), # made from ak4PFJetsCHS
+            systVariations = cms.bool(True),
             TESvariation = cms.untracked.double(0.03),
             TESvariationExtreme = cms.untracked.double(0.10)
     )
@@ -98,3 +99,6 @@ Taus_TauPOGRecommendation[0].discriminators = cms.vstring(
                 'decayModeFindingNewDMs'
 )
 
+TausNoSysVariations = Taus_TauPOGRecommendation.copy()
+for i in range(len(TausNoSysVariations)):
+    TausNoSysVariations[i].systVariations = cms.bool(False)

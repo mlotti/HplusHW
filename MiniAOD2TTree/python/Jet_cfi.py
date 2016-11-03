@@ -55,9 +55,14 @@ Jets = cms.VPSet(
 #    )
 )
 
-JetsNoSysVariations = cms.VPSet()
-for i in range(len(Jets)):
-    pset = Jets[i].clone()
-    pset.systVariations = cms.bool(False)
-    JetsNoSysVariations.append(pset)
+JetsNoSysVariations = Jets.copy()
+for i in range(len(JetsNoSysVariations)):
+    JetsNoSysVariations[i].systVariations = cms.bool(False)
+
+
+#JetsNoSysVariations = cms.VPSet()
+#for i in range(len(Jets)):
+#    pset = Jets[i].clone()
+#    pset.systVariations = cms.bool(False)
+#    JetsNoSysVariations.append(pset)
 
