@@ -1848,8 +1848,10 @@ def main(opts, args):
     for key in mergeFileMap.keys():
         f = key
         sourceFiles = mergeFileMap[key]
-        taskNameEOS = key.replace(GetEOSHomeDir(opts) + "/", "").split("/")[0]
-        taskName    = taskNameEOS.replace("-", "_")
+        taskName = key.split("/")[0]
+        if opts.filesInEOS:
+            taskNameEOS = key.replace(GetEOSHomeDir(opts) + "/", "").split("/")[0]
+            taskName    = taskNameEOS.replace("-", "_")
         Verbose("Merge files: %s\n\tSource files: %s" % (f, sourceFiles) )
 
         # Delete folders & Calculate the clean-time (in seconds)
