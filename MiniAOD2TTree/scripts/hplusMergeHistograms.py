@@ -560,7 +560,7 @@ def ConvertCommandToEOS(cmd, opts):
     Convert a given command to EOS-path. Used when working solely with EOS
     and files are not copied to local working directory
     '''
-    # Verbose("ConvertCommandToEOS()", True)
+    Verbose("ConvertCommandToEOS()", True)
     
     # Define a map mapping bash command with EOS commands
     cmdMap = {}
@@ -728,7 +728,7 @@ def GetFileSize(filePath, opts, convertToGB=True):
         if "fnal" in HOST:
             cmd = ConvertCommandToEOS("ls -l", opts) + " " + filePath
             ret = Execute("%s" % (cmd) )[0].split()
-            #Print("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
+            # Print("\n\t".join(ret) ) #fixme: on LPC, "size" during merging returns zero for MERGED files. not a script bug.
             
             # Store all values
             permissions = ret[0]
@@ -744,7 +744,7 @@ def GetFileSize(filePath, opts, convertToGB=True):
             # Get the size as float
             error = False
             for msg in ret:
-                if "No" in msg: # No such file..
+                if "No such file" in msg: # No such file..
                     error = True
             if error:
                 size = -1.0
@@ -883,20 +883,19 @@ def delete(fileName, regexp, opts):
     # Example on LXPLUS:
     f = ROOT.TFile.Open("root://eoscms//eos/cms//store/user/attikis/CRAB3_TransferData/WZ_TuneCUETP8M1_13TeV-pythia8/crab_WZ/160921_141816/0000/histograms-WZ-1.root", "UPDATE") # works
     '''
-    Verbose("delete()")
+    Verbose("delete()", True)
     
     # Definitions
     prefix = ""
     if opts.filesInEOS:
         prefix = GetXrdcpPrefix(opts)
-    filePath = prefix + fileName
     fileMode = "UPDATE"
 
     # Open the ROOT file
-    Verbose("Opening ROOT file %s in %s mode." % (filePath, fileMode) )
-    fIN = ROOT.TFile.Open(filePath, fileMode)
+    Verbose("Opening ROOT file %s in %s mode." % (fileName, fileMode) )
+    fIN = ROOT.TFile.Open(prefix + fileName, fileMode)
     if fIN == None:
-        raise Exception("Could not open ROOT file %s. Does it exist?" % (filePath) )
+        raise Exception("Could not open ROOT file %s. Does it exist?" % (fileName) )
     fIN.cd()
     keys = fIN.GetListOfKeys()
 
@@ -907,7 +906,7 @@ def delete(fileName, regexp, opts):
             dir = fIN.GetDirectory(keyName)
             if dir:
                 fIN.cd(keyName)
-                Verbose("Deleting folder matching %s in file %s." % (regexp, filePath) )
+                Verbose("Deleting folder matching %s in file %s." % (regexp, fileName) )
                 delFolder(regexp)
                 fIN.cd()
     delFolder(regexp)
@@ -990,7 +989,7 @@ def WritePileupHistos(fileName, opts):
 def delFolder(regexp):
     '''
     '''
-    Verbose("delFolder()")
+    Verbose("delFolder()", True)
 
     # Definitions
     keys    = ROOT.gDirectory.GetListOfKeys()
@@ -1234,10 +1233,10 @@ def MergeFiles(mergeName, inputFiles, opts):
             ret = hadd(opts, mergeName, inputFiles)    
             Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts) ), False )
 
-    # Before proceeding make sure the merged file is not corrupt
-    if RootFileIsCorrupt(mergeName, opts): #fixme: iro (not required. optional)
-        Print("%s found to be corrupt, re-merging" % (mergeName))
-        MergeFiles(mergeName, inputFiles, opts) #fixme: validate
+#    # Before proceeding make sure the merged file is not corrupt
+#    if RootFileIsCorrupt(mergeName, opts): #fixme: iro (not required. optional)
+#        Print("%s found to be corrupt, re-merging" % (mergeName))
+#        MergeFiles(mergeName, inputFiles, opts) #fixme: validate
 
     return ret
 
@@ -1490,10 +1489,10 @@ def DeleteFiles(taskName, mergeFile, fileList, opts):
     if opts.test:
         return
 
-    # Before proceeding make sure the merged file is not corrupt
-    if RootFileIsCorrupt(mergeFile, opts):
-        Print("%s, merge-file %s is corrupt. Will not delete any input file. EXIT" % (taskName, mergeFile) )
-        sys.exit() 
+#    # Before proceeding make sure the merged file is not corrupt
+#    if RootFileIsCorrupt(mergeFile, opts):
+#        Print("%s, merge-file %s is corrupt. Will not delete any input file. EXIT" % (taskName, mergeFile) )
+#        sys.exit() 
 
     # For-loop: All input files
     for index, f in enumerate(fileList):
@@ -1699,7 +1698,8 @@ def main(opts, args):
 
         # For Testing purposes
         if opts.test:
-            ExamineExitCodes(taskName, exitedJobs, missingFiles)
+            ExamineExitCodes(taskName, exitedJobs, missingFiles)            
+            continue
 
         # Check that output files were found. If so, check that they exist!
         if len(files) == 0:
@@ -1793,8 +1793,10 @@ def main(opts, args):
                 continue
             else:
                 Verbose("%s, merge file  %s does not already exist. Will create it" % (taskName, mergeName) )
-        
+
             # Merge the ROOT files
+            mergePath = "/".join(mergeName.split("/")[-1:]) #fits terminal, [-6:] is too big to fit
+            PrintProgressBar(taskName + ", Merge ", index-1, len(filesSplit), "[" + mergePath + "]")
             time_start = time.time()
             ret = MergeFiles(mergeName, inputFiles, opts)
             time_end = time.time()
@@ -1824,7 +1826,6 @@ def main(opts, args):
                 DeleteFiles(taskName, mergeName, inputFiles, opts)
 
             # Update Progress bar
-            mergePath = "/".join(mergeName.split("/")[-1:]) #fits terminal, [-6:] is too big to fit
             PrintProgressBar(taskName + ", Merge ", index, len(filesSplit), "[" + mergePath + "]")
 
         # Flush stdout

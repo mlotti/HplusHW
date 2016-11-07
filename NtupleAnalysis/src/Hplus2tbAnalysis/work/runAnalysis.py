@@ -246,7 +246,7 @@ if __name__ == "__main__":
     parser.add_option("-h", "--histoLevel", dest="histoLevel", action="store", default = "Informative", 
                       help="Histogram ambient level (default: Informative)")
 
-    parser.add_option("--noPUreweighting", dest="noPUreweighting", action="store_true", default = PUREWEIGHT, 
+    parser.add_option("--noPU", dest="noPUreweighting", action="store_true", default = PUREWEIGHT, 
                       help="Do NOT apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )
 
     parser.add_option("--systematics", dest="systematics", action="store_true", default = SYSTEMATICS, 
