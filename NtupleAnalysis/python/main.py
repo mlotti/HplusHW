@@ -705,7 +705,7 @@ class Process:
             hPU = None
             direction="nominal"
             analyzer = analyzerIE.getAnalyzer()
-            if analyzer.exists("usePileupWeights"):
+            if hasattr(analyzer,"usePileupWeights"):
                 usePUweights = analyzer.__getattr__("usePileupWeights")
                 if not usePUweights:
                     continue
