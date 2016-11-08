@@ -1,10 +1,15 @@
-## \package dataset
-# Dataset utilities and classes
-#
-# This package contains classes and utilities for dataset management.
-# There are also some functions and classes not directly related to
-# dataset management, but are placed here due to some dependencies.
+'''
+\package dataset
+Dataset utilities and classes
 
+This package contains classes and utilities for dataset management.
+There are also some functions and classes not directly related to
+dataset management, but are placed here due to some dependencies.
+'''
+
+#================================================================================================
+# Import modules
+#================================================================================================
 import glob, os, sys, re
 import math
 import copy
@@ -24,6 +29,10 @@ import HiggsAnalysis.NtupleAnalysis.tools.crosssection as crosssection
 
 from sys import platform as _platform
 
+
+#================================================================================================
+# Global Definitions
+#================================================================================================
 _debugNAllEvents = False
 DEBUG = False
 
@@ -51,6 +60,9 @@ _dataEras = {
 }
 
 
+#================================================================================================
+# Function Definition
+#================================================================================================
 def Verbose(msg, printHeader=False):
     '''
     Calls Print() only if verbose options is set to true.                                                                                                                     
@@ -352,7 +364,7 @@ def readFromRootFiles(rootFileList, **kwargs):
     all available analyses (with DatasetManagerCreator.printAnalyses()),
     and exit.
     '''
-    Verbose("getDatasetsFromRootFiles()", True)
+    Verbose("readFromRootFiles()", True)
     
     creator = DatasetManagerCreator(rootFileList, **kwargs)
     if "opts" in kwargs and kwargs["opts"].listAnalyses:
@@ -388,9 +400,16 @@ def addOptions(parser, analysisName=None, searchMode=None, dataEra=None, optimiz
                       help="List available analysis name information, and quit.")
     parser.add_option("--counterDir", "-c", dest="counterDir", type="string", default=None,
                       help="TDirectory name containing the counters, relative to the analysis directory (default: analysisDirectory+'/counters')")
+    return
 
-## Generic settings class
+
+#================================================================================================
+# Class Definition
+#================================================================================================
 class Settings:
+    '''
+    Generic settings class
+    '''
     def __init__(self, **defaults):
         self.data = copy.deepcopy(defaults)
 
@@ -421,10 +440,16 @@ class Settings:
     def clone(self, **kwargs):
         return copy.deepcopy(self)
 
-## Represents counter count value with uncertainty.
+
+#================================================================================================
+# Class Definition
+#================================================================================================
 class Count:
+    '''
+    Represents counter count value with uncertainty.
+    '''
     ## Constructor
-    def __init__(self, value, uncertainty=0.0, systUncertainty=0.0):
+    def __init__(self, value, uncertainty=0.0, systUncertainty=0.0):        
         self._value = value
         self._uncertainty = uncertainty
         self._systUncertainty = systUncertainty
@@ -483,8 +508,14 @@ class Count:
     ## \var _systUncertainty
     # Systematic uncertainty of the count
 
-## Represents counter count value with asymmetric uncertainties.
+
+#================================================================================================
+# Class Definition
+#================================================================================================
 class CountAsymmetric:
+    '''
+    Represents counter count value with asymmetric uncertainties.
+    '''
     def __init__(self, value, uncertaintyLow, uncertaintyHigh):
         self._value = value
         self._uncertaintyLow = uncertaintyLow
@@ -712,37 +743,51 @@ def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
     return (selected, notSelected, firstIndex)
 
 
-## Helper class for obtaining histograms from TTree
-#
-# This class provides an easy way to get a histogram from a TTree. It
-# is inteded to be used with dataset.Dataset.getDatasetRootHisto()
-# such that instead of giving the name of the histogram, an object of
-# this class is given instead. dataset.Dataset.getDatasetRootHisto()
-# will then call the draw() method of this class for actually
-# producing the histogram.
-#
-# TreeDraw objects can easily be cloned from existing TreeDraw object
-# with the clone() method. This method allows overriding the
-# parameters given in constructor.
-#
-# Note that TreeDraw does not hold any results or TTree objects, only
-# the recipe to produce a histogram from a TTree.
+#================================================================================================
+# Class Definition
+#================================================================================================
 class TreeDraw:
-    ## Constructor
-    #
-    # \param tree       Path to the TTree object in a file
-    # \param varexp     Expression for the variable, if given it should also include the histogram name and binning explicitly.
-    # \param selection  Draw only those entries passing this selection
-    # \param weight     Weight the entries with this weight
-    # \param binLabelsX X-axis bin labels (optional)
-    # \param binLabelsY Y-axis bin labels (optional)
-    # \param binLabelsZ Z-axis bin labels (optional)
-    #
-    # If varexp is not given, the number of entries passing selection
-    # is counted (ignoring weight). In this case the returned TH1 has
-    # 1 bin, which contains the event count and the uncertainty of the
-    # event count (calculated as sqrt(N)).
+    '''
+    Helper class for obtaining histograms from TTree
+
+    This class provides an easy way to get a histogram from a TTree. It
+    is inteded to be used with dataset.Dataset.getDatasetRootHisto()
+    such that instead of giving the name of the histogram, an object of
+    this class is given instead. dataset.Dataset.getDatasetRootHisto()
+    will then call the draw() method of this class for actually
+    producing the histogram.
+    
+    TreeDraw objects can easily be cloned from existing TreeDraw object
+    with the clone() method. This method allows overriding the
+    parameters given in constructor.
+    
+    Note that TreeDraw does not hold any results or TTree objects, only
+    the recipe to produce a histogram from a TTree.
+    '''
     def __init__(self, tree, varexp="", selection="", weight="", binLabelsX=None, binLabelsY=None, binLabelsZ=None):
+        '''
+        Constructor
+        
+        \param tree       Path to the TTree object in a file
+
+        \param varexp     Expression for the variable, if given it should
+        also include the histogram name and binning explicitly.
+
+        \param selection  Draw only those entries passing this selection
+
+        \param weight     Weight the entries with this weight
+
+        \param binLabelsX X-axis bin labels (optional)
+
+        \param binLabelsY Y-axis bin labels (optional)
+
+        \param binLabelsZ Z-axis bin labels (optional)
+        
+        If varexp is not given, the number of entries passing selection
+        is counted (ignoring weight). In this case the returned TH1 has
+        1 bin, which contains the event count and the uncertainty of the
+        event count (calculated as sqrt(N)).
+        '''
         self.tree = tree
         self.varexp = varexp
         self.selection = selection
@@ -851,20 +896,27 @@ class TreeDraw:
     ## \var weight
     # Weight the entries with this weight
 
-## Helper class for running code for selected TTree entries
-#
-# A function is given to the constructor, the function is called for
-# each TTree entry passing the selection. The TTree object is given as
-# a parameter, leaf/branch data can then be read from it.
-#
-# Main use case: producing pickEvents list from a TTree
+#================================================================================================
+# Class Definition
+#================================================================================================
 class TreeScan:
-    ## Constructor
-    #
-    # \param tree       Path to the TTree object in a file
-    # \param function   Function to call for each TTree entry
-    # \param selection  Select only these TTree entries
+    '''
+    Helper class for running code for selected TTree entries
+
+    A function is given to the constructor, the function is called for
+    each TTree entry passing the selection. The TTree object is given as
+    a parameter, leaf/branch data can then be read from it.
+    
+    Main use case: producing pickEvents list from a TTree
+    '''
     def __init__(self, tree, function, selection=""):
+        '''
+        Constructor
+        
+        \param tree       Path to the TTree object in a file
+        \param function   Function to call for each TTree entry
+        \param selection  Select only these TTree entries
+        '''
         self.tree = tree
         self.function = function
         self.selection = selection
@@ -876,11 +928,14 @@ class TreeScan:
         args.update(kwargs)
         return TreeScan(**args)
 
-    ## Process TTree
-    #
-    # \param datasetName  Dataset object. Only needed for compatible interface with
-    #                     dataset.TreeDrawCompound
+
     def draw(self, dataset):
+        '''
+        Process TTree
+        
+        \param datasetName  Dataset object. Only needed for compatible interface with
+        dataset.TreeDrawCompound
+        '''
         rootFile = dataset.getRootFile()
         tree = rootFile.Get(self.tree)
         if tree == None:
@@ -899,17 +954,24 @@ class TreeScan:
     ## \var selection
     # Select only these TTree entries
 
-## Provides ability to have separate dataset.TreeDraws for different datasets
-#
-# One specifies a default dataset.TreeDraw, and the exceptions for that with a
-# map from string to dataset.TreeDraw.
+#================================================================================================
+# Class Definition
+#================================================================================================
 class TreeDrawCompound:
-    ## Constructor
-    #
-    # \param default     Default dataset.TreeDraw
-    # \param datasetMap  Dictionary for the overriding dataset.TreeDraw objects
-    #                    containing dataset names as keys, and TreeDraws as values.
+    '''
+    Provides ability to have separate dataset.TreeDraws for different datasets
+    
+    One specifies a default dataset.TreeDraw, and the exceptions for that with a
+    map from string to dataset.TreeDraw.
+    '''
     def __init__(self, default, datasetMap={}):
+        '''
+        Constructor
+    
+        \param default     Default dataset.TreeDraw
+        \param datasetMap  Dictionary for the overriding dataset.TreeDraw objects
+        containing dataset names as keys, and TreeDraws as values.        
+        '''
         self.default = default
         self.datasetMap = datasetMap
 
@@ -979,8 +1041,13 @@ def treeDrawToNumEntries(treeDraw):
         return _treeDrawToNumEntriesSingle(treeDraw)
 
 
-## Class to encapsulate shape/normalization systematics for plot creation
+#================================================================================================
+# Class Definition
+#================================================================================================
 class Systematics:
+    '''
+    Class to encapsulate shape/normalization systematics for plot creation
+    '''
     class OnlyForMC:
         pass
     class OnlyForPseudo:
@@ -1073,16 +1140,24 @@ class Systematics:
             settings = settings.clone(**kwargs)
         return SystematicsHelper(name, settings)
 
-## Helper class to do the work for obtaining uncertainties from their sources for a requested histogram
-#
-# The object should be created with Systematics.histogram(), i.e. not
-# directly.
+#================================================================================================
+# Class Definition
+#================================================================================================
 class SystematicsHelper:
-    ## Constructor
-    #
-    # \param histoName   Name of the histogram to read
-    # \param settings    Settings object for systematic recipe
+    '''
+    Helper class to do the work for obtaining uncertainties from their 
+    sources for a requested histogram
+    
+    The object should be created with Systematics.histogram(), i.e. not
+    directly.
+    '''
     def __init__(self, histoName, settings):
+        '''
+        Constructor
+        
+        \param histoName   Name of the histogram to read
+        \param settings    Settings object for systematic recipe
+        '''
         self._histoName = histoName
         self._settings = settings
 
@@ -4207,11 +4282,15 @@ class DatasetManager:
     # Directory (absolute/relative to current working directory) where
     # the luminosity JSON file is located (see loadLuminosities())
 
-## Precursor dataset, helper class for DatasetManagerCreator
-#
-# This holds the name, ROOT file, and data/MC status of a dataset.
+
 class DatasetPrecursor:
+    '''
+    Precursor dataset, helper class for DatasetManagerCreator
+    
+    This holds the name, ROOT file, and data/MC status of a dataset.
+    '''
     def __init__(self, name, filenames):
+        Verbose("__init__", True)
         self._name = name
         if isinstance(filenames, basestring):
             self._filenames = [filenames]
@@ -4225,8 +4304,12 @@ class DatasetPrecursor:
         self._pileup_down = None
         self._nAllEvents = 0.0
 
+        Print("Opening ROOT files", True)
         for name in self._filenames:
+
+            Verbose(name, False)
             rf = ROOT.TFile.Open(name)
+
             # Below is important to use '==' instead of 'is' to check for
             # null file
             if rf == None:
@@ -4340,28 +4423,32 @@ _analysisNameSkipList = [re.compile("^SystVar"), re.compile("configInfo"), re.co
 _analysisSearchModes = re.compile("_\d+to\d+_")
 _dataDataEra_re = re.compile("_Run201\d\S_")
 
-## Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
-#
-# The mai is to first create an object of this class to represent a
-# multicrab directory, and then create one or many DatasetManagers,
-# which then correspond to a single analysis directory within the ROOT
-# files.
+
 class DatasetManagerCreator:
-    ## Constructor
-    #
-    # \param rootFileList  List of (\a name, \a filenames) pairs (\a
-    #                      name should be string, \a filenames can be
-    #                      string or list of strings). \a name is taken
-    #                      as the dataset name, and \a filenames as the
-    #                      path(s) to the ROOT file(s).
-    # \param kwargs        Keyword arguments (see below)
-    #
-    # <b>Keyword arguments</b>
-    # \li \a baseDirectory    Base directory of the datasets (delivered later to DatasetManager._setBaseDirectory())
-    #
-    # Creates DatasetPrecursor objects for each ROOT file, reads the
-    # contents of first MC file to get list of available analyses.
+    '''
+    Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
+    The mai is to first create an object of this class to represent a
+    multicrab directory, and then create one or many DatasetManagers,
+    which then correspond to a single analysis directory within the ROOT
+    files.
+    '''
     def __init__(self, rootFileList, **kwargs):
+        '''
+        Constructor
+        
+        \param rootFileList  List of (\a name, \a filenames) pairs (\a
+        name should be string, \a filenames can be string or list of strings). 
+        \a name is taken as the dataset name, and \a filenames as the
+        path(s) to the ROOT file(s).
+
+        \param kwargs        Keyword arguments (see below)
+        
+        <b>Keyword arguments</b>
+        \li \a baseDirectory    Base directory of the datasets (delivered later to DatasetManager._setBaseDirectory())
+    
+        Creates DatasetPrecursor objects for each ROOT file, reads the
+        contents of first MC file to get list of available analyses.
+        '''
         self._precursors = [DatasetPrecursor(name, filenames) for name, filenames in rootFileList]
         self._baseDirectory = kwargs.get("baseDirectory", "")
         
@@ -4387,8 +4474,11 @@ class DatasetManagerCreator:
 
         self._dataDataEras = dataEras.keys()
         self._dataDataEras.sort()
+        return
+
 
     def _readAnalysisContent(self, precursor):
+        Verbose("_readAnalysisContent()", True)
         contents = aux.listDirectoryContent(precursor.getFiles()[0], lambda key: key.IsFolder())
 
         def skipItem(name):

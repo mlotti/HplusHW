@@ -1,18 +1,60 @@
-## Package: AnalysisConfig
-# Analysis configuration, with ability to create the main analyzer 
-# and the analyzers for the N systematic uncertainty variations and other variations based on the config
+'''
+Package: AnalysisConfig
 
+Analysis configuration, with ability to create the main analyzer 
+and the analyzers for the N systematic uncertainty variations 
+and other variations based on the config.
+'''
+
+#================================================================================================  
+# Imports
+#================================================================================================  
 from HiggsAnalysis.NtupleAnalysis.main import Analyzer
 import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 
-## Container class for analysis configuration
+#================================================================================================
+# Global Definitions
+#================================================================================================
+VERBOSE = False
+
+#================================================================================================
+# Function Definition
+#================================================================================================
+def Verbose(msg, printHeader=False):
+    '''                                                                                                                                                                       
+    Calls Print() only if verbose options is set to true.                                                                                                                     
+    '''
+    if not VERBOSE:
+        return
+    Print(msg, printHeader)
+    return
+
+
+def Print(msg, printHeader=True):
+    '''                                                                                                                                                                       
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.                                                                                       
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader:
+        print "=== ", fName
+    print "\t", msg
+    return
+
+#================================================================================================
+# Class Definition
+#================================================================================================
 class AnalysisConfig:
+    '''
+    Container class for analysis configuration
+    '''
     def __init__(self, selectorName, moduleName, config, **kwargs):
+        Verbose("__init__()", True)
         self._selectorName = selectorName
         self._moduleName = moduleName
         self._config = config.clone()
         #self.__dict__.update(kwargs)
 	#print kwargs
+
         #===== Process all keyword arguments to make changes to the config
         keys = kwargs.keys()
         for key in keys:
@@ -105,10 +147,14 @@ class AnalysisConfig:
         
     ## Create and register the analysis after the changes have bene done to the config
     def registerAnalysis(self, process):
+        Verbose("registerAnalysis()", True)
         process.addAnalyzer(self._moduleName, Analyzer(self._selectorName, config=self._config, silent=True))
+        return
+
 
     ## Convert value string into direction string
     def _getDirectionString(self, value):
+        Verbose("_getDirectionString()", True)
         direction = None
         if value.endswith("Plus"):
             direction = "up"
@@ -116,8 +162,14 @@ class AnalysisConfig:
             direction = "down"
         return direction
     
-## Class for building analyses
+
+#================================================================================================
+# Class Definition
+#================================================================================================
 class AnalysisBuilder:
+    '''
+    Class for building analyses
+    '''
     def __init__(self,
                  name,                  # The module name (beware, the downstream python code has assumptions on this)
                  # Required options
@@ -143,7 +195,6 @@ class AnalysisBuilder:
           
           self._usePUreweighting = usePUreweighting
           self._useTopPtReweighting = useTopPtReweighting
-          
           self._variations={}
           # Process systematic uncertainty variations
           if doSystematicVariations:
@@ -170,11 +221,16 @@ class AnalysisBuilder:
                   self._variations["systematics"].append("%sMinus"%item)
 	  #self.addVariation("TauSelection.tauPtCut", [50,60])
 	  #self.addVariation("TauSelection.tauEtaCut", [0.5,1.5])
-    
+          return
+
     def addVariation(self, configItemString, listOfValues):
+        Verbose("addVariation()", True)
         self._variations[configItemString] = listOfValues
-    
+        return
+
+
     def build(self, process, config):
+        Verbose("build()", True)
         # Add here options to the config
         config.__setattr__("usePileupWeights", self._usePUreweighting)
         config.__setattr__("useTopPtWeights", self._useTopPtReweighting)
@@ -188,20 +244,25 @@ class AnalysisBuilder:
                 modStr = "%s_%s_Run%s"%(self._name, searchMode, dataEra)
                 # Create nominal module without any variation
                 configs.append(AnalysisConfig(self._name, modStr, config))
-                print "Created nominal module: %s"%modStr
+                Print("Created nominal module: %s" % (modStr) )
                 # Create modules for optimization and systematics variations
                 configs.extend(self._buildVariation(config, modStr))
         # Register the modules
         for module in configs:
             module.registerAnalysis(process)
-        print "\nAnalysisBuilder created %d modules\n"%len(configs)
+        Print("Created %d modules\n" % (len(configs)) )
         #print configs[0]._config
-    
-    ## Builds iteratively the variations
-    # Logic: Variation specs are put into kwargs as key,value pairs 
-    #        For systematics key=systematics, value=identifier; only a single systematics variation per module is allowed
-    #        For variations key=config entry, value=value; multiple simultaneous variations per module are allowed
+        return
+        
+
     def _buildVariation(self, config, moduleName, optName="", systName="", level=0, **kwargs):
+        '''
+        Builds iteratively the variations
+        Logic: Variation specs are put into kwargs as key,value pairs 
+        For systematics key=systematics, value=identifier; only a single systematics variation per module is allowed
+        For variations key=config entry, value=value; multiple simultaneous variations per module are allowed
+        '''
+        Verbose("_buildVariation()", True)
         configs = []
         keys = self._variations.keys()
         if len(keys) == 0:
@@ -235,5 +296,6 @@ class AnalysisBuilder:
                 del kwargs[keys[level]]
                 print "Created variation module %s"%modStr
         return configs
+
 # TODO:
 # need to figure out how to set scale factors

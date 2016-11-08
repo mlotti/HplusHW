@@ -20,7 +20,7 @@ or
 Example:
 ./runAnalysis.py -m /multicrab_CMSSW752_Default_07Jan2016/
 ./runAnalysis.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
-/runAnalysis.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
+./runAnalysis.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
 ./runAnalysis.py -m <multicrab-directory> -e TT_extOB
 ./runAnalysis.py -m <multicrab_directory> -n 10 -e "QCD_bEnriched_HT300|2016|ST_"
 
@@ -246,7 +246,7 @@ if __name__ == "__main__":
     parser.add_option("-h", "--histoLevel", dest="histoLevel", action="store", default = "Informative", 
                       help="Histogram ambient level (default: Informative)")
 
-    parser.add_option("--noPUreweighting", dest="noPUreweighting", action="store_true", default = PUREWEIGHT, 
+    parser.add_option("--noPU", dest="noPUreweighting", action="store_true", default = PUREWEIGHT, 
                       help="Do NOT apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )
 
     parser.add_option("--systematics", dest="systematics", action="store_true", default = SYSTEMATICS, 

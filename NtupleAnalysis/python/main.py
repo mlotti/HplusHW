@@ -1,3 +1,6 @@
+#================================================================================================  
+# Import modules
+#================================================================================================  
 import os
 import time
 import copy
@@ -15,15 +18,21 @@ import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.git as git
 
-
+#================================================================================================  
+# Global Definitions
+#================================================================================================  
 _debugMode = False
 _debugPUreweighting = False
 _debugMemoryConsumption = False
 
-def Verbose(msg, printHeader=False):                                                                                                                                         
-    '''                                                                                                                                                                      
-    Calls Print() only if verbose options is set to true.                                                                                                                    
-    '''                                                                                                                                                                      
+
+#================================================================================================
+# Function Definition
+#================================================================================================
+def Verbose(msg, printHeader=False):
+    '''
+    Calls Print() only if verbose options is set to true.
+    '''
     if not _debugMode:
         return
     Print(msg, printHeader)
@@ -31,7 +40,7 @@ def Verbose(msg, printHeader=False):
 
 
 def Print(msg, printHeader=True):
-    '''                                                                                                                                                                      
+    '''
     Simple print function. If verbose option is enabled prints, otherwise does nothing.                                                                                      
     '''
     fName = __file__.split("/")[-1]
@@ -41,6 +50,9 @@ def Print(msg, printHeader=True):
     return
     
 
+#================================================================================================
+# Class Definition
+#================================================================================================
 class PSet:
     def __init__(self, **kwargs):
         self.__dict__["_data"] = copy.deepcopy(kwargs)
@@ -95,6 +107,10 @@ def File(fname):
         raise Exception("The file %s does not exist" % self._fullpath)
     return fullpath
 
+
+#================================================================================================
+# Class Definition
+#================================================================================================
 class Analyzer:
     def __init__(self, className, **kwargs):
         self.__dict__["_className"] = className
@@ -131,6 +147,9 @@ class Analyzer:
     def config_(self):
         return self.__dict__["_pset"].serialize_()
 
+#================================================================================================
+# Class Definition
+#================================================================================================
 class AnalyzerWithIncludeExclude:
     def __init__(self, analyzer, **kwargs):
         self._analyzer = analyzer
@@ -149,6 +168,9 @@ class AnalyzerWithIncludeExclude:
         return len(tasks) == 1
 
 
+#================================================================================================
+# Class Definition
+#================================================================================================
 class DataVersion:
     def __init__(self, dataVersion):
         self._version = dataVersion
@@ -174,6 +196,9 @@ class DataVersion:
     def isS10(self):
         return self._isMC() and "S10" in self._version
 
+#================================================================================================
+# Class Definition
+#================================================================================================
 class Dataset:
     def __init__(self, name, files, dataVersion, lumiFile, pileup, nAllEvents):
         self._name = name
@@ -206,6 +231,9 @@ class Dataset:
     def getNAllEvents(self):
         return self._nAllEvents
 
+#================================================================================================
+# Class Definition
+#================================================================================================
 class Process:
     def __init__(self, outputPrefix="analysis", outputPostfix="", maxEvents=-1):
         ROOT.gSystem.Load("libHPlusAnalysis.so")
@@ -213,16 +241,18 @@ class Process:
         self._verbose       = _debugMode
         self._outputPrefix  = outputPrefix
         self._outputPostfix = outputPostfix
-
-        self._datasets = []
+        self._datasets  = []
         self._analyzers = {}
         self._maxEvents = maxEvents
-        self._options = PSet()
+        self._options   = PSet()
         return
-
     
     def ConvertSymLinks(fileList):
         '''
+        Takes as argument a list of files.
+        If any of those are (EOS) symbolic links
+        this will append the correct prefix for 
+        accessing them on EOS.
         '''
         Verbose("ConvertSymLinks()", True)
         HOST = socket.gethostname()
@@ -254,9 +284,6 @@ class Process:
         if files is None:
             files = datasetsTest.getFiles(name)
 
-        # If the files are symbolic links store the target path. Otherwise leave unchanged 
-        #files = ConvertSymLinks(files)
-
         prec = dataset.DatasetPrecursor(name, files)
         if dataVersion is None:
             dataVersion = prec.getDataVersion()
@@ -276,12 +303,24 @@ class Process:
         nAllEvents = prec.getNAllEvents()
         prec.close()
         self._datasets.append( Dataset(name, files, dataVersion, lumiFile, pileUp, nAllEvents) )
+        return
 
-    def addDatasets(self, names): # no explicit files possible here
+
+    def addDatasets(self, names):
+        '''
+        No explicit files possible here
+        '''
+        Verbose("addDataset()", True)
         for name in names:
             self.addDataset(name)
+        return
 
+        
     def addDatasetsFromMulticrab(self, directory, *args, **kwargs):
+        '''
+        kwargs for 'includeOnlyTasks' or 'excludeTasks' to set the datasets over which this analyzer is processed, default is all datasets
+        '''
+        Verbose("addDatasetsFromMulticrab()", True)
         blacklist = []
         if "blacklist" in kwargs.keys():
             if isinstance(kwargs["blacklist"], str):
@@ -291,7 +330,8 @@ class Process:
             else:
                 raise Exception("Unsupported input format!")
             del kwargs["blacklist"]
-#        dataset._optionDefaults["input"] = "miniaod2tree*.root"
+
+        # dataset._optionDefaults["input"] = "miniaod2tree*.root"
         dataset._optionDefaults["input"] = "histograms-*.root"
         dsetMgrCreator = dataset.readFromMulticrabCfg(directory=directory, *args, **kwargs)
         dsets = dsetMgrCreator.getDatasetPrecursors()
@@ -306,8 +346,8 @@ class Process:
                 print "Ignoring dataset because of blacklist options: '%s' ..."%dset.getName()
             else:
                 self.addDataset(dset.getName(), dset.getFileNames(), dataVersion=dset.getDataVersion(), lumiFile=dsetMgrCreator.getLumiFile())
+        return
 
-    # kwargs for 'includeOnlyTasks' or 'excludeTasks' to set the datasets over which this analyzer is processed, default is all datasets
 
     def getDatasets(self):
         return self._datasets
@@ -335,9 +375,12 @@ class Process:
         return runmin,runmax
 
     def addAnalyzer(self, name, analyzer, **kwargs):
+        Verbose("addAnalyzer()", True)
         if self.hasAnalyzer(name):
             raise Exception("Analyzer '%s' already exists" % name)
         self._analyzers[name] = AnalyzerWithIncludeExclude(analyzer, **kwargs)
+        return
+
 
     # FIXME: not sure if these two actually make sense
     def getAnalyzer(self, name):
@@ -471,15 +514,15 @@ class Process:
                 print "Skipping %s, no analyzers" % dset.getName()
                 continue
 
-            print "*** Processing dataset (%d/%d): %s"%(ndset, len(self._datasets), dset.getName())
+            Print("Processing dataset (%d/%d): %s" % (ndset, len(self._datasets), dset.getName()) )
             if dset.getDataVersion().isData():
                 lumivalue = "--- not available in lumi.json (or lumi.json not available) ---"
                 if dset.getName() in lumidata.keys():
                     lumivalue = lumidata[dset.getName()]
-                print "    Luminosity: %s fb-1"%lumivalue
-            print "    Using pileup weights:", usePUweights
+                Print("Luminosity: %s fb-1" % (lumivalue), False)
+            Print("Using pileup weights: %s" % (usePUweights), False)
             if useTopPtCorrection:
-                print "    Using top pt weights: True"
+                Print("Using top pt weights: True")
 
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())
