@@ -20,7 +20,7 @@ To get the files for a given dataset:
 das_client --limit 0 --query "file dataset=<datasetName>"
 Example:
 das_client --limit 0 --query "file dataset=/QCD_bEnriched_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"
-
+das_client --limit 0 --query "file dataset=/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM"
 
 Example:
 cmsRun ana.py inputFiles="/store/mc/RunIISpring16MiniAODv2/QCD_bEnriched_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/70000/00DFB564-393F-E611-A97A-02163E012F6E.root" maxEvents=-1
@@ -224,12 +224,11 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("TTJets_Hadronic", {
             "8": 245.8* 114.0215/249.50, # [10], BR from [11]
             }),
-    CrossSection("TTJets", {
+    CrossSection("TTJets", {            
             "7": 172.0, # [10]
             "8": 245.8, # [10]
-            "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
+            "13": 6.639e+02, #6.639e+02 +- 8.237e+00 pb [16] (inputFiles="001AFDCE-C33B-E611-B032-0025905D1C54.root")            
             }),
-
     CrossSection("TT", {
             "7": 172.0, # [10]
             "8": 245.8, # [10]
