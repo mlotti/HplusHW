@@ -1233,11 +1233,6 @@ def MergeFiles(mergeName, inputFiles, opts):
             ret = hadd(opts, mergeName, inputFiles)    
             Verbose("Done %s (%s GB)." % (mergeName, GetFileSize(mergeName, opts) ), False )
 
-#    # Before proceeding make sure the merged file is not corrupt
-#    if RootFileIsCorrupt(mergeName, opts): #fixme: iro (not required. optional)
-#        Print("%s found to be corrupt, re-merging" % (mergeName))
-#        MergeFiles(mergeName, inputFiles, opts) #fixme: validate
-
     return ret
 
 def PrintSummary(taskReports):
@@ -1419,7 +1414,7 @@ def RenameMergeFile(mergeName, opts):
     return
 
 
-def CheckControlHisto(mergeName, inputFiles):
+def CheckControlHisto(taskName, mergeName, inputFiles):
     '''
     Check that configInfo/configinfo control bin matches to number of
     input files, in order to monitor a mysterious bug reported by Lauri.
@@ -1434,7 +1429,7 @@ def CheckControlHisto(mergeName, inputFiles):
         else:
             sanityCheck(mergeName, inputFiles)
     except SanityCheckException, e:
-        Print("Task %s: %s; disabling input file deletion" % (taskName, str(e)) )
+        Print("%s: %s; disabling input file deletion" % (taskName, str(e)) )
         opts.deleteImmediately = False
         opts.delete = False
     return
@@ -1488,11 +1483,6 @@ def DeleteFiles(taskName, mergeFile, fileList, opts):
     Verbose("DeleteFiles()")
     if opts.test:
         return
-
-#    # Before proceeding make sure the merged file is not corrupt
-#    if RootFileIsCorrupt(mergeFile, opts):
-#        Print("%s, merge-file %s is corrupt. Will not delete any input file. EXIT" % (taskName, mergeFile) )
-#        sys.exit() 
 
     # For-loop: All input files
     for index, f in enumerate(fileList):
@@ -1819,7 +1809,7 @@ def main(opts, args):
             mergeTimeMap[mergeName] = dtMerge
 
             # Sanity check
-            CheckControlHisto(mergeName, inputFiles)
+            CheckControlHisto(taskName, mergeName, inputFiles)
 
             # Delete all input files after merging them
             if opts.deleteImmediately:

@@ -20,7 +20,7 @@ or
 Example:
 ./runAnalysis.py -m /multicrab_CMSSW752_Default_07Jan2016/
 ./runAnalysis.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
-/runAnalysis.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
+./runAnalysis.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
 ./runAnalysis.py -m <multicrab-directory> -e TT_extOB
 ./runAnalysis.py -m <multicrab_directory> -n 10 -e "QCD_bEnriched_HT300|2016|ST_"
 
