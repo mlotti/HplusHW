@@ -10,6 +10,8 @@ TauDumper::TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     inputCollections = psets;
     booked           = false;
 
+    systVariations = inputCollections[0].getParameter<bool>("systVariations");
+
     pt  = new std::vector<double>[inputCollections.size()];
     eta = new std::vector<double>[inputCollections.size()];    
     phi = new std::vector<double>[inputCollections.size()];    
@@ -35,12 +37,14 @@ TauDumper::TauDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     MCNPiZeros = new std::vector<short>[inputCollections.size()];
     MCtau = new FourVectorDumper[inputCollections.size()];
     matchingJet = new FourVectorDumper[inputCollections.size()];
-    
-    systTESup = new FourVectorDumper[inputCollections.size()];
-    systTESdown = new FourVectorDumper[inputCollections.size()];
-    systExtremeTESup = new FourVectorDumper[inputCollections.size()];
-    systExtremeTESdown = new FourVectorDumper[inputCollections.size()];
-    
+
+    if(systVariations){
+      systTESup = new FourVectorDumper[inputCollections.size()];
+      systTESdown = new FourVectorDumper[inputCollections.size()];
+      systExtremeTESup = new FourVectorDumper[inputCollections.size()];
+      systExtremeTESdown = new FourVectorDumper[inputCollections.size()];
+    }
+
     tauToken = new edm::EDGetTokenT<edm::View<pat::Tau> >[inputCollections.size()];
     jetToken = new edm::EDGetTokenT<edm::View<pat::Jet> >[inputCollections.size()];
     for(size_t i = 0; i < inputCollections.size(); ++i){
@@ -92,11 +96,12 @@ void TauDumper::book(TTree* tree){
 	for(size_t iDiscr = 0; iDiscr < discriminatorNames.size(); ++iDiscr) {
 	    tree->Branch((name+"_"+discriminatorNames[iDiscr]).c_str(),&discriminators[inputCollections.size()*iDiscr+i]);
 	}
-	
-	systTESup[i].book(tree, name, "TESup");
-        systTESdown[i].book(tree, name, "TESdown");
-        systExtremeTESup[i].book(tree, name, "TESextremeUp");
-        systExtremeTESdown[i].book(tree, name, "TESextremeDown");
+        if(systVariations){	
+          systTESup[i].book(tree, name, "TESup");
+          systTESdown[i].book(tree, name, "TESdown");
+          systExtremeTESup[i].book(tree, name, "TESextremeUp");
+          systExtremeTESdown[i].book(tree, name, "TESextremeDown");
+        }
     }
 }
 
@@ -154,7 +159,7 @@ bool TauDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
           discriminators[inputCollections.size()*iDiscr+ic].push_back(tau.tauID(discriminatorNames[iDiscr]));
         }
         // Systematics variations
-        if (!iEvent.isRealData()) {
+        if (systVariations && !iEvent.isRealData()) {
           systTESup[ic].add(tau.p4().pt()*(1.0+TESvariation),
                             tau.p4().eta(),
                             tau.p4().phi(),
@@ -356,10 +361,12 @@ void TauDumper::reset(){
         MCtau[ic].reset();
         matchingJet[ic].reset();
         // Systematics
-        systTESup[ic].reset();
-        systTESdown[ic].reset();
-        systExtremeTESup[ic].reset();
-        systExtremeTESdown[ic].reset();
+        if(systVariations){
+          systTESup[ic].reset();
+          systTESdown[ic].reset();
+          systExtremeTESup[ic].reset();
+          systExtremeTESdown[ic].reset();
+        }
       }
       for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
 	discriminators[ic].clear();

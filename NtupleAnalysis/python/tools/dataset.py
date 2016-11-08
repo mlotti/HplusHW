@@ -635,7 +635,7 @@ def _rescaleInfo(d):
 
     ret = {}
     for k, v in d.iteritems():
-        if k in ["isPileupReweighted"]:
+        if k in ["isPileupReweighted","isTopPtReweighted"]:
             ret[k] = v
         else:
             ret[k] = v*factor

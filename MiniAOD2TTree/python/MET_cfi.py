@@ -46,3 +46,7 @@ METs = cms.VPSet(
         src = cms.InputTag("patPFMetT1TauEnUp")  
     ),
 )
+
+METsNoSysVariations = cms.VPSet()
+METsNoSysVariations.append(METs[0])
+
