@@ -17,6 +17,9 @@ Launch but exclude various samples
 ./plotTest.py -m Kinematics_161025_020335 -e "M_200|M_220|M_250|M_300|M_350|M_400|QCD_Pt|JetHT"
 or 
 ./plotTest.py -m Hplus2tbAnalysis_161026_135227 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|ZZTo4Q"
+
+Last Used:
+./plotTest.py -m Hplus2tbAnalysis_161108_064941 -e "QCD_Pt_15to30|TTJets" && rsync --partial --progress *.png attikis@lxplus.cern.ch:~/public/html/.
 '''
 
 #================================================================================================
@@ -48,7 +51,7 @@ kwargs = {
     "optMode"          : "",
     "savePath"         : os.getcwd() + "/Plots/", #"/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/all/",
     "saveFormats"      : [".png", ".pdf"],
-    "xlabel"           : "b-tag SF", 
+    "xlabel"           : "", #b-tag SF
     "ylabel"           : "Events / %.0f",
     "rebinX"           : 1,
     "rebinY"           : 1,
@@ -67,7 +70,8 @@ kwargs = {
     "gridY"            : True,
     "cmsExtraText"     : "Preliminary", #"Preliminary" "Simulation"
     "removeLegend"     : False,
-    "moveLegend"       : {"dx": -0.05, "dy": +0.0, "dh": +0.1},
+    "moveLegend"       : {"dx": -0.05, "dy": +0.0, "dh": -0.1},
+    #"moveLegend"       : {"dx": -0.45, "dy": -0.4, "dh": +0.1},
     "cutValue"         : 1.2,
     "cutLine"          : False,
     "cutBox"           : False,
@@ -77,14 +81,14 @@ kwargs = {
 
 
 hNames = ["counters/weighted/counter",
-    #"btagSF",
-    #"counters/weighted/counter",
-    #"counters/weighted/METFilter selection",
-    #"counters/weighted/e selection (Veto)",
-    #"counters/weighted/mu selection (Veto)",
-    #"counters/weighted/jet selection",
-    #"counters/weighted/bjet selection",
-    ]
+          #"btagSF",
+          #"counters/weighted/counter",
+          #"counters/weighted/METFilter selection",
+          #"counters/weighted/e selection (Veto)",
+          #"counters/weighted/mu selection (Veto)",
+          #"counters/weighted/jet selection",
+          #"counters/weighted/bjet selection",
+          ]
 
 
 #================================================================================================
@@ -176,7 +180,7 @@ def main(opts):
 
     # Remove datasets
     # datasetsMgr.remove("QCD-b") 
-    datasetsMgr.remove("QCD")
+    # datasetsMgr.remove("QCD")
     
     # Print dataset information
     datasetsMgr.PrintInfo()
@@ -187,7 +191,7 @@ def main(opts):
     # Create a comparison plot
     ratioOpts = {"ymin": 0.0, "ymax": 2.0}
     if kwargs.get("logY")==True:
-        canvOpts = {"xmin": 1.0, "ymin": 1e-1, "ymaxfactor": 100} #FIXME: remove xmin
+        canvOpts = {"xmin": 0.0, "ymin": 1e-1, "ymaxfactor": 10}
     else:
         canvOpts = {"ymin": 0.0, "ymaxfactor": 1.2}
 
