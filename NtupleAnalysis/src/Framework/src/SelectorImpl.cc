@@ -134,7 +134,7 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   if (optionStr != nullptr)
     fOptionString = optionStr->GetTitle();
   hSkimCounters = dynamic_cast<TH1F*>(fInput->FindObject("SkimCounter"));
-  std::cout << "gDirectory" << gDirectory->GetList()->GetSize() << std::endl;
+  //std::cout << "gDirectory" << gDirectory->GetList()->GetSize() << std::endl;
   hPUdata = dynamic_cast<TH1*>(fInput->FindObject("PileUpData"));  
   hPUdataUp = dynamic_cast<TH1*>(fInput->FindObject("PileUpDataUp"));  
   hPUdataDown = dynamic_cast<TH1*>(fInput->FindObject("PileUpDataDown"));  
