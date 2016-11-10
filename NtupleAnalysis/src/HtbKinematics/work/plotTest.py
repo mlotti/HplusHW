@@ -9,7 +9,6 @@ Launch but exclude the M_180 sample
 
 Launch but exclude the multiple signal samples
 ./plotTest.py -m Kinematics_161025_020335 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400"
-
 Launch but only include the QCD_Pt samples
 ./plotTest.py -m Kinematics_161025_020335 -i QCD_Pt
 
@@ -19,8 +18,7 @@ or
 ./plotTest.py -m Hplus2tbAnalysis_161026_135227 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|ZZTo4Q"
 
 Last Used:
-./plotTest.py -m Hplus2tbAnalysis_161108_064941 -e "QCD_Pt_15to30|TTJets" && rsync --partial --progress *.png attikis@lxplus.cern.ch:~/public/html/.
-./plotTest.py -m Kinematics_161109_20161104T0853 -e "TTTT|TTJets|M_220|M_250|M_300|M_350|M_400|QCD_Pt|TTWJetsToQQ|TTZToQQ|WZ|WW|ZZTo4Q|ttbb"
+./plotTest.py -m HtbKinematics_161110_070459
 '''
 
 #================================================================================================
@@ -44,14 +42,15 @@ import ROOT
 #================================================================================================
 # Variable Definition
 #================================================================================================
+print "Change dataEra to Run2016"
 kwargs = {
     "verbose"          : False,
-    "dataEra"          : "Run2016",
+    "dataEra"          : "Run2015",
     "searchMode"       : "80to1000",
-    "analysis"         : "Kinematics",
+    "analysis"         : "HtbKinematics",
     "optMode"          : "",
     "savePath"         : os.getcwd() + "/Plots/", #"/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/all/",
-    "saveFormats"      : [".png", ".pdf"],
+    "saveFormats"      : [".png"], #, ".pdf"],
     "xlabel"           : None, #b-tag SF
     "ylabel"           : "Arbitrary Units / %.0f", #"Events / %.0f",
     "rebinX"           : 1,
@@ -81,7 +80,65 @@ kwargs = {
 
 
 
+# hNames = [
+# 
+#     "BQuarkPair_dRMin_dPhi",
+#     "BQuarkPair_dRMin_dR",
+#     "BQuarkPair_dRMin_Mass",
+#     "BQuarkPair_dRMin_jet1_dR",
+#     "BQuarkPair_dRMin_jet1_dEta",
+#     "BQuarkPair_dRMin_jet1_dPhi",
+#     "BQuarkPair_dRMin_jet2_dR",
+#     "BQuarkPair_dRMin_jet2_dEta",
+#     "BQuarkPair_dRMin_jet2_dPhi",
+#     "tbWMinus_bqq_Pt",
+#     "tbWMinus_bqq_Rap",
+#     "tbWMinus_bqq_Mass",
+#     "tbWMinus_bqq_dRMax_dR",
+#     "tbWMinus_bqq_dRMax_dRap",
+#     "tbWMinus_bqq_dRMax_dPhi",
+#     "tbWPlus_bqq_Pt",
+#     "tbWPlus_bqq_Rap",
+#     "tbWPlus_bqq_Mass",
+#     "tbWPlus_bqq_dRMax_dR",
+#     "tbWPlus_bqq_dRMax_dRap",
+#     "tbWPlus_bqq_dRMax_dPhi",
+#     "MaxDiJetMass_Pt",
+#     "MaxDiJetMass_Eta",
+#     "MaxDiJetMass_Mass",
+#     "MaxDiJetMass_Rap",
+#     "MaxDiJetMass_dR",
+#     "MaxDiJetMass_dRrap",
+#     "MaxDiJetMass_dEta",
+#     "MaxDiJetMass_dRap",
+#     "MaxDiJetMass_dPhi",
+# #    "SelGenJet_N_AfterLeptonVeto",
+# ]
+
+
 hNames = [
+    "counters/weighted/counter",
+    "genMET_Et",
+    "genMET_Phi",
+    "genHT_GenJets",
+    "genHT_GenParticles",
+    "SelGenJet_N_NoPreselections",
+    "SelGenJet_N_AfterLeptonVeto",
+    "SelGenJet_N_AfterLeptonVetoNJetsCut",
+    "SelGenJet_N_AfterPreselections", 
+    "tt_Pt",
+    "tt_Eta",
+    "tt_Mass",
+    "tt_Rap",
+    "MaxDiJetMass_Pt",
+    "MaxDiJetMass_Eta",
+    "MaxDiJetMass_Mass",
+    "MaxDiJetMass_Rap",
+    "MaxDiJetMass_dR",
+    "MaxDiJetMass_dRrap",
+    "MaxDiJetMass_dEta",
+    "MaxDiJetMass_dRap",
+    "MaxDiJetMass_dPhi",
     "BQuarkPair_dRMin_pT",
     "BQuarkPair_dRMin_dEta",
     "BQuarkPair_dRMin_dPhi",
@@ -93,83 +150,19 @@ hNames = [
     "BQuarkPair_dRMin_jet2_dR",
     "BQuarkPair_dRMin_jet2_dEta",
     "BQuarkPair_dRMin_jet2_dPhi",
-#    "tbWMinus_bqq_Pt",
-#    "tbWMinus_bqq_Rap",
-#    "tbWMinus_bqq_Mass",
-#    "tbWMinus_bqq_dRMax_dR",
-#    "tbWMinus_bqq_dRMax_dRap",
-#    "tbWMinus_bqq_dRMax_dPhi",
-#    "tbWPlus_bqq_Pt",
-#    "tbWPlus_bqq_Rap",
-#    "tbWPlus_bqq_Mass",
-#    "tbWPlus_bqq_dRMax_dR",
-#    "tbWPlus_bqq_dRMax_dRap",
-#    "tbWPlus_bqq_dRMax_dPhi",
-    "MaxDiJetMass_Pt",
-    "MaxDiJetMass_Eta",
-    "MaxDiJetMass_Mass",
-    "MaxDiJetMass_Rap",
-    "MaxDiJetMass_dR",
-    "MaxDiJetMass_dRrap",
-    "MaxDiJetMass_dEta",
-    "MaxDiJetMass_dRap",
-    "MaxDiJetMass_dPhi",
-#    "SelGenJet_N_AfterLeptonVeto",
+    "Htb_tbW_bqq_Pt",
+    "Htb_tbW_bqq_Rap",
+    "Htb_tbW_bqq_Mass",
+    "Htb_tbW_bqq_dRMax_dR",
+    "Htb_tbW_bqq_dRMax_dRap",
+    "Htb_tbW_bqq_dRMax_dPhi",
+    "gtt_tbW_bqq_Pt",
+    "gtt_tbW_bqq_Rap",
+    "gtt_tbW_bqq_Mass",
+    "gtt_tbW_bqq_dRMax_dR",
+    "gtt_tbW_bqq_dRMax_dRap",
+    "gtt_tbW_bqq_dRMax_dPhi",
 ]
-
-
-#hNames = [
-#    "genMET_Et",
-#    "genMET_Phi",
-#    "genHT_GenJets",
-#    "genHT_GenParticles",
-#    "SelGenJet_N_NoPreselections",
-#    "SelGenJet_N_AfterLeptonVeto",
-#    "SelGenJet_N_AfterLeptonVetoNJetsCut",
-#    "SelGenJet_N_AfterPreselections", 
-#    "MaxDiJetMass_Pt",
-#    "MaxDiJetMass_Eta",
-#    "MaxDiJetMass_Mass",
-#    "MaxDiJetMass_Rap",
-#    "MaxDiJetMass_dR",
-#    "MaxDiJetMass_dRrap",
-#    "MaxDiJetMass_dEta",
-#    "MaxDiJetMass_dRap",
-#    "MaxDiJetMass_dPhi",
-#    "BQuarkPair_dRMin_pT",
-#    "BQuarkPair_dRMin_dEta",
-#    "BQuarkPair_dRMin_dPhi",
-#    "BQuarkPair_dRMin_dR",
-#    "BQuarkPair_dRMin_Mass",
-#    "BQuarkPair_dRMin_jet1_dR",
-#    "BQuarkPair_dRMin_jet1_dEta",
-#    "BQuarkPair_dRMin_jet1_dPhi",
-#    "BQuarkPair_dRMin_jet2_dR",
-#    "BQuarkPair_dRMin_jet2_dEta",
-#    "BQuarkPair_dRMin_jet2_dPhi",
-#    "Htb_tbW_bqq_Pt",
-#    "Htb_tbW_bqq_Rap",
-#    "Htb_tbW_bqq_Mass",
-#    "Htb_tbW_bqq_dRMax_dR",
-#    "Htb_tbW_bqq_dRMax_dRap",
-#    "Htb_tbW_bqq_dRMax_dPhi",
-#    "gtt_tbW_bqq_Pt",
-#    "gtt_tbW_bqq_Rap",
-#    "gtt_tbW_bqq_Mass",
-#    "gtt_tbW_bqq_dRMax_dR",
-#    "gtt_tbW_bqq_dRMax_dRap",
-#    "gtt_tbW_bqq_dRMax_dPhi",
-#]
-
-# hNames = ["counters/weighted/counter",
-#           #"btagSF",
-#           #"counters/weighted/counter",
-#           #"counters/weighted/METFilter selection",
-#           #"counters/weighted/e selection (Veto)",
-#           #"counters/weighted/mu selection (Veto)",
-#           #"counters/weighted/jet selection",
-#           #"counters/weighted/bjet selection",
-#           ]
 
 
 #================================================================================================
@@ -189,27 +182,6 @@ def Verbose(msg, printHeader=True, verbose=False):
     if not verbose:
         return
     Print(msg, printHeader)
-    return
-
-
-def SaveAs(p, savePath, saveName, saveFormats, verbose):
-
-    # For-loop: All formats to save file
-    for i, ext in enumerate(saveFormats):
-        sName = saveName + ext
-        if "html" in sName:
-            user    = getpass.getuser()
-            initial = getpass.getuser()[0]
-            sName   = sName.replace("/afs/cern.ch/user/%s/" % (initial), "http://cmsdoc.cern.ch/~")
-            sName   = sName.replace("%s/public/html/" % (user), "%s/" % (user))
-
-        if not os.path.exists(savePath):
-            os.mkdir(savePath)
-
-        fullPath = os.path.join(savePath, saveName + ext)
-        Print("%s" % fullPath, i==0)
-
-    p.saveAs(os.path.join(savePath, saveName), saveFormats)
     return
 
 
@@ -248,7 +220,7 @@ def main(hName, opts):
     # Setup & configure the dataset manager
     datasetsMgr = GetDatasetsFromDir(opts.mcrab, opts, **kwargs)
     datasetsMgr.updateNAllEventsToPUWeighted()
-    datasetsMgr.PrintCrossSections()
+    # datasetsMgr.PrintCrossSections()
     # datasetsMgr.PrintLuminosities()
 
     # Set/Overwrite cross-sections
@@ -261,14 +233,18 @@ def main(hName, opts):
 
     # Remove datasets
     # datasetsMgr.remove("QCD-b") 
-    # datasetsMgr.remove("QCD")
     
     # Print dataset information
     datasetsMgr.PrintInfo()
-
+    
     # Create  plot, with the default 
     s = {"normalizeToOne": True}
     p = plots.MCPlot(datasetsMgr, hName, **s)
+    p.histoMgr.setHistoLegendStyleAll("LP")
+    p.histoMgr.setHistoDrawStyleAll("EP")
+    p.histoMgr.setHistoLegendStyle("ChargedHiggs_HplusTB_HplusToTB_M_200", "F")
+    p.histoMgr.setHistoDrawStyle ("ChargedHiggs_HplusTB_HplusToTB_M_200", "HIST")
+
 
     # Create a comparison plot
     ratioOpts = {"ymin": 0.0, "ymax": 2.0}
@@ -279,7 +255,7 @@ def main(hName, opts):
 
     # Draw a customised plot & Save it
     plots.drawPlot(p, 
-                   hName.replace("/", "_").replace(" ", "_").replace("(", "_").replace(")", ""),
+                   os.path.join(kwargs.get("savePath"), hName.replace("/", "_").replace(" ", "_").replace("(", "_").replace(")", "") ),
                    xlabel=kwargs.get("xlabel"), 
                    ylabel=kwargs.get("ylabel"),
                    rebinX=kwargs.get("rebinX"), 
@@ -310,10 +286,6 @@ def main(hName, opts):
     # Additional text
     # histograms.addText(0.4, 0.9, "Alexandros Attikis", 17)
     # histograms.addText(0.4, 0.11, "Runs " + datasetsMgr.loadRunRange(), 17)
-    
-    # Save the canvas to a file
-    SaveAs(p, kwargs.get("savePath"), hName.replace("/","_"), kwargs.get("saveFormats"), True)
-
     
     if not opts.batchMode:
         raw_input("=== plotTest.py:\n\tPress any key to quit ROOT ...")
