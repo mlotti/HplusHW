@@ -443,6 +443,10 @@ for mass in _heavyHplusToTBbarMasses:
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
+    "ChargedHiggs_HplusTB_HplusToTB_M_200": styles.signal200Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_300": styles.signal300Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_500": styles.signal500Style,
+
     "DYJetsToLL"    : styles.dyStyle,
     "DYJetsToLLHT"  : styles.dyStyle,
     "Data"          : styles.dataStyle,

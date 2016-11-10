@@ -626,7 +626,7 @@ def Verbose(msg, printHeader=True, verbose=False):
     return
 
 
-def SaveAs(p, savePath, saveName, saveFormats, verbose):
+def SaveAs(p, savePath, saveName, saveFormats, verbose=True):
     '''
     '''
     Verbose("Saving plots in %s format(s)" % (len(saveFormats)), True)

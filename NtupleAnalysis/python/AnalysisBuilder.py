@@ -250,7 +250,7 @@ class AnalysisBuilder:
         # Register the modules
         for module in configs:
             module.registerAnalysis(process)
-        Print("Created %d modules\n" % (len(configs)) )
+        Print("Created %d modules" % (len(configs)) )
         #print configs[0]._config
         return
         

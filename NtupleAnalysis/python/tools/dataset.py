@@ -4304,7 +4304,7 @@ class DatasetPrecursor:
         self._pileup_down = None
         self._nAllEvents = 0.0
 
-        Print("Opening ROOT files", True)
+        Verbose("Opening ROOT files", False)
         for name in self._filenames:
 
             Verbose(name, False)
