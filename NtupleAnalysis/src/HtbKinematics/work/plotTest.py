@@ -42,20 +42,19 @@ import ROOT
 #================================================================================================
 # Variable Definition
 #================================================================================================
-print "Change dataEra to Run2016"
 kwargs = {
     "verbose"          : False,
-    "dataEra"          : "Run2015",
+    "dataEra"          : "Run2016",
     "searchMode"       : "80to1000",
     "analysis"         : "HtbKinematics",
     "optMode"          : "",
     "savePath"         : os.getcwd() + "/Plots/", #"/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/all/",
     "saveFormats"      : [".png"], #, ".pdf"],
-    "xlabel"           : None, #b-tag SF
+    "xlabel"           : None,
     "ylabel"           : "Arbitrary Units / %.0f", #"Events / %.0f",
     "rebinX"           : 1,
     "rebinY"           : 1,
-    "xlabelsize"       : None, #10
+    "xlabelsize"       : 10, #None, #10
     "ratio"            : False,
     "ratioYlabel"      : None,
     "ratioInvert"      : False,
@@ -70,7 +69,7 @@ kwargs = {
     "gridY"            : True,
     "cmsExtraText"     : "Preliminary", #"Preliminary" "Simulation"
     "removeLegend"     : False,
-    "moveLegend"       : {"dx": -0.1, "dy": +0.0, "dh": +0.1},
+    "moveLegend"       : {"dx": -0.1, "dy": +0.0, "dh": -0.2  },
     "cutValue"         : None, #1.2,
     "cutLine"          : False,
     "cutBox"           : False,
@@ -118,6 +117,7 @@ kwargs = {
 
 hNames = [
     "counters/weighted/counter",
+    "counters/Branching",
     "genMET_Et",
     "genMET_Phi",
     "genHT_GenJets",
@@ -235,16 +235,15 @@ def main(hName, opts):
     # datasetsMgr.remove("QCD-b") 
     
     # Print dataset information
-    datasetsMgr.PrintInfo()
+    # datasetsMgr.PrintInfo()
     
     # Create  plot, with the default 
     s = {"normalizeToOne": True}
     p = plots.MCPlot(datasetsMgr, hName, **s)
     p.histoMgr.setHistoLegendStyleAll("LP")
     p.histoMgr.setHistoDrawStyleAll("EP")
-    p.histoMgr.setHistoLegendStyle("ChargedHiggs_HplusTB_HplusToTB_M_200", "F")
-    p.histoMgr.setHistoDrawStyle ("ChargedHiggs_HplusTB_HplusToTB_M_200", "HIST")
-
+    p.histoMgr.setHistoLegendStyle("ChargedHiggs_HplusTB_HplusToTB_M_500", "F")
+    p.histoMgr.setHistoDrawStyle ("ChargedHiggs_HplusTB_HplusToTB_M_500", "HIST")
 
     # Create a comparison plot
     ratioOpts = {"ymin": 0.0, "ymax": 2.0}

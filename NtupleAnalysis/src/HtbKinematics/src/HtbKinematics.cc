@@ -588,7 +588,7 @@ void HtbKinematics::book(TDirectory *dir) {
   h_tt_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tt_Pt"   , ";p_{T} (GeV/c)"    , nBinsPt, minPt, maxPt);
   h_tt_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tt_Eta"  , ";#eta"             , nBinsEta, minEta, maxEta);
   h_tt_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tt_Rap"  , ";#omega"           , nBinsRap, minRap, maxRap);
-  h_tt_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tt_Mass" , ";M (GeV/c^{2})"    , 50,  0.0, +1000.0);  
+  h_tt_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tt_Mass" , ";M (GeV/c^{2})"    , 100,  0.0, +2000.0);  
 
   // GenJets: Dijet with largest mass
   h_MaxDiJetMass_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MaxDiJetMass_Pt"   , ";p_{T} (GeV/c)"    , nBinsPt, minPt, maxPt);
@@ -661,21 +661,23 @@ void HtbKinematics::process(Long64_t entry) {
   ///////////////////////////////////////////////////////////////////////////
   int nWToENu  = 0;
   int nWToMuNu = 0;
+  bool bSkipEvent = false;
+  bool bFoundFlavourExcitedB = false;
 
   // Indices
-  int Htb_HPlus_index             = -1.0;
-  int Htb_TQuark_index            = -1.0;
-  int Htb_BQuark_index            = -1.0;
-  int Htb_tbW_BQuark_index        = -1.0;
-  int Htb_tbW_WBoson_index        = -1.0;
-  int Htb_tbW_Wqq_Quark_index     = -1.0;
-  int Htb_tbW_Wqq_AntiQuark_index = -1.0;
-  int gtt_TQuark_index            = -1.0;
-  int gbb_BQuark_index            = -1.0;
-  int gtt_tbW_Wqq_Quark_index     = -1.0;
-  int gtt_tbW_Wqq_AntiQuark_index = -1.0;
-  int gtt_tbW_WBoson_index        = -1.0;
-  int gtt_tbW_BQuark_index        = -1.0; 
+  // int Htb_HPlus_index             = -1.0;
+  // int Htb_TQuark_index            = -1.0;
+  // int Htb_BQuark_index            = -1.0;
+  // int Htb_tbW_BQuark_index        = -1.0;
+  // int Htb_tbW_WBoson_index        = -1.0;
+  // int Htb_tbW_Wqq_Quark_index     = -1.0;
+  // int Htb_tbW_Wqq_AntiQuark_index = -1.0;
+  // int gtt_TQuark_index            = -1.0;
+  // int gbb_BQuark_index            = -1.0;
+  // int gtt_tbW_Wqq_Quark_index     = -1.0;
+  // int gtt_tbW_Wqq_AntiQuark_index = -1.0;
+  // int gtt_tbW_WBoson_index        = -1.0;
+  // int gtt_tbW_BQuark_index        = -1.0; 
 
   // 4-momenta
   math::XYZTLorentzVector Htb_HPlus_p4;
@@ -699,10 +701,6 @@ void HtbKinematics::process(Long64_t entry) {
   int row = 0;
   // For-loop: GenParticles
   for (auto& p: fEvent.genparticles().getGenParticles()) {
-
-    // Consider only status=22 (intermediate) or status=23 (outgoing) particles
-    // if ( (p.status() != 22) && (p.status() != 23) ) continue;
-
 
     // Particle properties
     short genP_index     = p.index();
@@ -780,34 +778,33 @@ void HtbKinematics::process(Long64_t entry) {
 
 
     // Add table rows
-    if (cfg_Verbose)
+    //if (cfg_Verbose){
+    table.AddRowColumn(row, auxTools.ToString(entry)           );
+    table.AddRowColumn(row, auxTools.ToString(genP_index)      );
+    table.AddRowColumn(row, auxTools.ToString(genP_pdgId)      );
+    table.AddRowColumn(row, auxTools.ToString(genP_status)     );
+    table.AddRowColumn(row, auxTools.ToString(genP_charge)     );
+    table.AddRowColumn(row, auxTools.ToString(genP_pt , 3)     );
+    table.AddRowColumn(row, auxTools.ToString(genP_eta, 4)     );
+    table.AddRowColumn(row, auxTools.ToString(genP_phi, 3)     );
+    table.AddRowColumn(row, auxTools.ToString(genP_energy, 3)  );
+    table.AddRowColumn(row, "(" + auxTools.ToString(genP_vtxX, 3) + ", " + auxTools.ToString(genP_vtxY, 3)  + ", " + auxTools.ToString(genP_vtxZ, 3) + ")" );
+    table.AddRowColumn(row, auxTools.ToString(genP_d0 , 3)     );
+    table.AddRowColumn(row, auxTools.ToString(genP_Lxy, 3)     );	
+    if (genMoms_index.size() < 6)
       {
-	table.AddRowColumn(row, auxTools.ToString(entry)           );
-	table.AddRowColumn(row, auxTools.ToString(genP_index)      );
-	table.AddRowColumn(row, auxTools.ToString(genP_pdgId)      );
-	table.AddRowColumn(row, auxTools.ToString(genP_status)     );
-	table.AddRowColumn(row, auxTools.ToString(genP_charge)     );
-	table.AddRowColumn(row, auxTools.ToString(genP_pt , 3)     );
-	table.AddRowColumn(row, auxTools.ToString(genP_eta, 4)     );
-	table.AddRowColumn(row, auxTools.ToString(genP_phi, 3)     );
-	table.AddRowColumn(row, auxTools.ToString(genP_energy, 3)  );
-	table.AddRowColumn(row, "(" + auxTools.ToString(genP_vtxX, 3) + ", " + auxTools.ToString(genP_vtxY, 3)  + ", " + auxTools.ToString(genP_vtxZ, 3) + ")" );
-	table.AddRowColumn(row, auxTools.ToString(genP_d0 , 3)     );
-	table.AddRowColumn(row, auxTools.ToString(genP_Lxy, 3)     );	
-	if (genMoms_index.size() < 6)
-	  {
-	    table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genMoms_index) );
-	    // table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genMoms_pdgId) );
-	  }
-        else table.AddRowColumn(row, ".. Too many .." );
-	if (genDaus_index.size() < 6)
-          {
-	    table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genDaus_index) );
-	    // table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genDaus_pdgId) );
-          }
-        else table.AddRowColumn(row, ".. Too many .." );
-	row++;
+	table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genMoms_index) );
+	// table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genMoms_pdgId) );
       }
+    else table.AddRowColumn(row, ".. Too many .." );
+    if (genDaus_index.size() < 6)
+      {
+	table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genDaus_index) );
+	// table.AddRowColumn(row, auxTools.ConvertIntVectorToString(genDaus_pdgId) );
+      }
+    else table.AddRowColumn(row, ".. Too many .." );
+    row++;
+    //  }
 	       
 
     // Filtering
@@ -842,7 +839,7 @@ void HtbKinematics::process(Long64_t entry) {
 	       
 	cgtt_TQuark.increment();
 	gtt_TQuark_p4    = p.p4();
-	gtt_TQuark_index = genP_index; 
+	// gtt_TQuark_index = genP_index; 
 
 
 	for (auto& d: genP_daughters) 
@@ -852,16 +849,20 @@ void HtbKinematics::process(Long64_t entry) {
 	      {
 		cgtt_tbW_BQuark.increment();
 		gtt_tbW_BQuark_p4 = p.p4();
-		gtt_tbW_BQuark_index = genP_index;
+		// gtt_tbW_BQuark_index = genP_index;
 	      }
 	    else if (d.pdgId() == -24)// g->tt, t->bW, W-boson
 	      {
 		// NOTE: t->Wb dominant, but t->Ws and t->Wd also possible!
 		cgtt_tbW_WBoson.increment();
 		gtt_tbW_WBoson_p4    = p.p4();
-		gtt_tbW_WBoson_index = genP_index;
+		// gtt_tbW_WBoson_index = genP_index;
 	      }
-	    else throw hplus::Exception("Logic") << "HtbKinematics::process() Unexpected top-quark daughter.";
+	    else
+	      {
+		// throw hplus::Exception("Logic") << "HtbKinematics::process() Unexpected top-quark daughter.";
+		bSkipEvent = true;
+	      }
 
 	  } // for (auto& d: genP_daughters)
       }// if (genP_pdgId == -6)
@@ -881,15 +882,15 @@ void HtbKinematics::process(Long64_t entry) {
 		  {
 		    // Quarks
 		    cgtt_tbW_Wqq_Quark.increment();
-		    gtt_tbW_Wqq_Quark_p4    = d.p4();
-		    gtt_tbW_Wqq_Quark_index = d.index();
+		    gtt_tbW_Wqq_Quark_p4 = d.p4();
+		    // gtt_tbW_Wqq_Quark_index = d.index();
 		  }	       
 		else
 		  {
 		    // AntiQuarks
 		    cgtt_tbW_Wqq_AntiQuark.increment();
-		    gtt_tbW_Wqq_AntiQuark_p4    = d.p4();
-		    gtt_tbW_Wqq_AntiQuark_index = d.index();
+		    gtt_tbW_Wqq_AntiQuark_p4 = d.p4();
+		    // gtt_tbW_Wqq_AntiQuark_index = d.index();
 		  }
 	      }	  
 	    else if ( mcTools.IsLepton(d.pdgId() ) )// g->tt, t->bWH, t->bW, W->l v
@@ -913,8 +914,9 @@ void HtbKinematics::process(Long64_t entry) {
 	      }
 	    else
 	      {
-		// throw hplus::Exception("Logic") << "HtbKinematics::process() W daughters whose origins are not accounted for. Need to rethink this.";
-		std::cout << "*** HtbKinematics::process() W daughters whose origins are not accounted for. Need to rethink this." << std::endl;
+		throw hplus::Exception("Logic") << "HtbKinematics::process() W daughters whose origins are not accounted for. Need to rethink this.";
+		// std::cout << "*** HtbKinematics::process() W daughters whose origins are not accounted for. Need to rethink this." << std::endl;
+		// bSkipEvent = true;
 	      }
 	  }// for (auto& d: genP_daughters)
       }// if (genP_pdgId == -24)
@@ -928,7 +930,7 @@ void HtbKinematics::process(Long64_t entry) {
 
 	cHtb_HPlus.increment();
 	Htb_HPlus_p4 = p.p4();
-	Htb_HPlus_index = genP_index;
+	// Htb_HPlus_index = genP_index;
 
 	for (auto& d: genP_daughters) 
 	  {
@@ -938,18 +940,19 @@ void HtbKinematics::process(Long64_t entry) {
 		
 		cHtb_TQuark.increment();
 		Htb_TQuark_p4 = p.p4();
-		Htb_TQuark_index = genP_index;
+		// Htb_TQuark_index = genP_index;
 	      }
 	    else if ( d.pdgId() == -5)// H->tb, b
 	      {
 		cHtb_BQuark.increment();
 		Htb_BQuark_p4 = p.p4();
-		Htb_BQuark_index = genP_index;
+		// Htb_BQuark_index = genP_index;
 	      }
 	    else
 	      {
 		// throw hplus::Exception("Logic") << "HtbKinematics::process() B-quark whose origins are not accounted for. Need to rethink this.";
-		std::cout << "*** HtbKinematics::process() H+ daughters whose origins are not accounted for. Need to rethink this." << std::endl;
+		// std::cout << "*** HtbKinematics::process() H+ daughters whose origins are not accounted for. Need to rethink this." << std::endl;
+		bSkipEvent = true;
 	      }
 
 	  }// for (auto& d: genP_daughters) 
@@ -975,7 +978,7 @@ void HtbKinematics::process(Long64_t entry) {
 		// NOTE: t->Wb dominant, but t->Ws and t->Wd also possible!)
 		cHtb_tbW_WBoson.increment();
 		Htb_tbW_WBoson_p4    = p.p4();
-		Htb_tbW_WBoson_index = genP_index;
+		// Htb_tbW_WBoson_index = genP_index;
 	      }
 	    else if ( d.pdgId() == +5)// H->tb, t->bW+, b
 	      {
@@ -984,7 +987,7 @@ void HtbKinematics::process(Long64_t entry) {
 		// NOTE: t->Wb dominant, but t->Ws and t->Wd also possible! Also t->Zc and t->Zu
 		cHtb_tbW_BQuark.increment();
 		Htb_tbW_BQuark_p4 = p.p4();
-		Htb_tbW_BQuark_index = genP_index;
+		// Htb_tbW_BQuark_index = genP_index;
 	      }
 	    else
 	      {
@@ -1016,14 +1019,14 @@ void HtbKinematics::process(Long64_t entry) {
 		    // Quarks
 		    cHtb_tbW_Wqq_Quark.increment();
 		    Htb_tbW_Wqq_Quark_p4 = d.p4();
-		    Htb_tbW_Wqq_Quark_index = d.index();
+		    // Htb_tbW_Wqq_Quark_index = d.index();
 		  }
 		else
 		  {
 		    // Anti-Quarks
 		    cHtb_tbW_Wqq_AntiQuark.increment();
 		    Htb_tbW_Wqq_AntiQuark_p4 = d.p4();
-		    Htb_tbW_Wqq_AntiQuark_index = d.index();
+		    // Htb_tbW_Wqq_AntiQuark_index = d.index();
 		  }
 	      }
 	    else if ( mcTools.IsLepton(d.pdgId() ) ) // H+->tb, t->bW+, W+->l v
@@ -1047,8 +1050,8 @@ void HtbKinematics::process(Long64_t entry) {
 	      }
 	    else
 	      {
-		// throw hplus::Exception("Logic") << "HtbKinematics::process() W daughters whose origins are not accounted for. Need to rethink this.";
-		std::cout << "*** HtbKinematics::process() W+ (H->tb) daughters whose origins are not accounted for. Need to rethink this." << std::endl;
+		throw hplus::Exception("Logic") << "HtbKinematics::process() W daughters whose origins are not accounted for. Need to rethink this.";
+		// std::cout << "*** HtbKinematics::process() W+ (H->tb) daughters whose origins are not accounted for. Need to rethink this." << std::endl;
 	      }
 	    
 	  }// for (auto& d: genP_daughters) 
@@ -1066,14 +1069,19 @@ void HtbKinematics::process(Long64_t entry) {
 	// Comes from proton or gluon
 	bool fromGluon  = std::find(genMoms_pdgId.begin(), genMoms_pdgId.end(), 21) != genMoms_pdgId.end();
 	bool fromProton = std::find(genMoms_pdgId.begin(), genMoms_pdgId.end(), 2212) != genMoms_pdgId.end();
-	if (fromGluon==false && fromProton==false) continue;
+	bool fromDQuark = std::find(genMoms_pdgId.begin(), genMoms_pdgId.end(), 1) != genMoms_pdgId.end();
+	bool fromUQuark = std::find(genMoms_pdgId.begin(), genMoms_pdgId.end(), 2) != genMoms_pdgId.end();
+	bool fromSQuark = std::find(genMoms_pdgId.begin(), genMoms_pdgId.end(), 3) != genMoms_pdgId.end();
+	bool fromCQuark = std::find(genMoms_pdgId.begin(), genMoms_pdgId.end(), 4) != genMoms_pdgId.end();
+	if (fromGluon==false && fromProton==false && fromUQuark==false && fromDQuark==false && fromCQuark==false && fromSQuark==false) continue;
 	
 	// mcTools.PrintGenParticle(p);
         // mcTools.PrintGenDaughters(p);
 	
+	bFoundFlavourExcitedB = true;
 	cgbb_BQuark.increment();
 	gbb_BQuark_p4 = p.p4();
-	gbb_BQuark_index = genP_index;
+	// gbb_BQuark_index = genP_index;
 
       }// if (genP_pdgId == 5)
 
@@ -1082,6 +1090,11 @@ void HtbKinematics::process(Long64_t entry) {
 
   // std::cout << "PSet_JetSelection.getParameter<float>(jetPtCut) = " << PSet_JetSelection.getParameter<float>("jetPtCut") << std::endl;
   
+  // if (bFoundFlavourExcitedB==false)
+  //   {
+  //   table.Print();
+  //   return;
+  //   }
   
   ///////////////////////////////////////////////////////////////////////////
   // BEFORE Preselection Cuts
@@ -1093,6 +1106,9 @@ void HtbKinematics::process(Long64_t entry) {
   ///////////////////////////////////////////////////////////////////////////
   // Preselection Cuts (python/parameters/hplus2tbAnalysis.py)
   ///////////////////////////////////////////////////////////////////////////
+  // Skip event if various forbidden decays detected (t->Wd, t->Ws instead of dominant t->Wb)
+  if ( bSkipEvent ) return;
+
   // Lepton Veto
   if ( !cfg_ElectronNumberCut.passedCut(nWToENu) ) return;
   if ( !cfg_MuonNumberCut.passedCut(nWToMuNu) ) return;
