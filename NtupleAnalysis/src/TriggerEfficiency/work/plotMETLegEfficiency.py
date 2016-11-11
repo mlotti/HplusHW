@@ -248,7 +248,6 @@ def analyze(analysis=None):
     p.save(formats)
     """
 
-    """
     # CaloMET
     """
     #### MET80
