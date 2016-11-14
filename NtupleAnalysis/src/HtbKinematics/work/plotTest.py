@@ -162,7 +162,31 @@ hNames = [
     "gtt_tbW_bqq_dRMax_dR",
     "gtt_tbW_bqq_dRMax_dRap",
     "gtt_tbW_bqq_dRMax_dPhi",
-]
+    "Htb_tbW_WBoson_Htb_BQuark_dR",
+    "Htb_tbW_WBoson_Htb_tbW_BQuark_dR",
+    "Htb_tbW_WBoson_gtt_tbW_BQuark_dR",
+    "Htb_tbW_WBoson_gbb_BQuark_dR",
+    "gtt_tbW_WBoson_Htb_BQuark_dR",
+    "gtt_tbW_WBoson_Htb_tbW_BQuark_dR",
+    "gtt_tbW_WBoson_gtt_tbW_BQuark_dR",
+    "gtt_tbW_WBoson_gbb_BQuark_dR",
+    "Htb_tbW_WBoson_Htb_BQuark_dEta",
+    "Htb_tbW_WBoson_Htb_tbW_BQuark_dEta",
+    "Htb_tbW_WBoson_gtt_tbW_BQuark_dEta",
+    "Htb_tbW_WBoson_gbb_BQuark_dEta",
+    "gtt_tbW_WBoson_Htb_BQuark_dEta",
+    "gtt_tbW_WBoson_Htb_tbW_BQuark_dEta",
+    "gtt_tbW_WBoson_gtt_tbW_BQuark_dEta",
+    "gtt_tbW_WBoson_gbb_BQuark_dEta",
+    "Htb_tbW_WBoson_Htb_BQuark_dPhi",
+    "Htb_tbW_WBoson_Htb_tbW_BQuark_dPhi",
+    "Htb_tbW_WBoson_gtt_tbW_BQuark_dPhi",
+    "Htb_tbW_WBoson_gbb_BQuark_dPhi",
+    "gtt_tbW_WBoson_Htb_BQuark_dPhi",
+    "gtt_tbW_WBoson_Htb_tbW_BQuark_dPhi",
+    "gtt_tbW_WBoson_gtt_tbW_BQuark_dPhi",
+    "gtt_tbW_WBoson_gbb_BQuark_dPhi"
+    ]
 
 
 #================================================================================================
