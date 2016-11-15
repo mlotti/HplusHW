@@ -254,9 +254,11 @@ _datasetMerge = {
     "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLLHT",
 
     # Diboson merge, comment this away to keep WW, WZ, ZZ samples separate
-    "WW": "Diboson",
-    "WZ": "Diboson",
-    "ZZ": "Diboson",
+    "WWTo4Q": "Diboson",
+    "ZZTo4Q": "Diboson",
+    "WW"    : "Diboson",
+    "WZ"    : "Diboson",
+    "ZZ"    : "Diboson",
 
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8_ext1": "TTBB",

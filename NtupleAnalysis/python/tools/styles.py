@@ -270,6 +270,7 @@ signal400Style = StyleCompound([
 signal500Style = StyleCompound([
         Style(ROOT.kFullCircle, ROOT.kOrange+7), 
         StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+7, markerSizes=None, markerStyle=ROOT.kFullCircle),
+        StyleFill(fillStyle=1001, fillColor=ROOT.kOrange+7), 
         StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kOrange+7) ])
 #signal600Style  = signalStyle.clone()
 #signal400Style = signalStyle.clone()

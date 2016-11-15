@@ -20,6 +20,13 @@ or
 
 Last Used:
 ./plotTest.py -m Hplus2tbAnalysis_161108_064941 -e "QCD_Pt_15to30|TTJets" && rsync --partial --progress *.png attikis@lxplus.cern.ch:~/public/html/.
+
+./plotTest.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ" && rsync --partial --progress counters_weighted_counter.* attikis@lxplus.cern.ch:~/public/html/2016B-2016G/.
+
+./plotTest.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016F_PromptReco_v1_278801_278808|2016G" && rsync --partial --progress counters_weighted_counter.* attikis@lxplus.cern.ch:~/public/html/2016B-2016F/.
+
+./plotTest.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016B|2016C|2016D|2016E|2016F_PromptReco_v1_277816_278800" && rsync --partial --progress counters_weighted_counter.* attikis@lxplus.cern.ch:~/public/html/2016F-2016G/.
+
 '''
 
 #================================================================================================
@@ -228,7 +235,7 @@ def main(opts):
     # histograms.addText(0.4, 0.11, "Runs " + datasetsMgr.loadRunRange(), 17)
     
     # Save the canvas to a file
-    SaveAs(p, kwargs.get("savePath"), hNames[0].replace("/","_"), kwargs.get("saveFormats"), True)
+    # SaveAs(p, kwargs.get("savePath"), hNames[0].replace("/","_"), kwargs.get("saveFormats"), True)
 
     
     if not opts.batchMode:
