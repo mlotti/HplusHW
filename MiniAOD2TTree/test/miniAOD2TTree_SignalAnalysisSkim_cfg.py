@@ -78,7 +78,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET110_v",
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
             "HLT_VLooseIsoPFTau120_Trk50_eta2p1_v",
-            "HLT_VLooseIsoPFTau140_Trk50_eta2p1_v"
+            "HLT_VLooseIsoPFTau140_Trk50_eta2p1_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_v"
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
