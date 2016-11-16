@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 '''
+
 Usage:
 Launch default script
 ./plotTemplate.py -m <pseudo_mcrab_directory>
@@ -18,14 +19,15 @@ Launch but exclude various samples
 or 
 ./plotTest.py -m Hplus2tbAnalysis_161026_135227 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|ZZTo4Q"
 
+
 Last Used:
 ./plotTest.py -m Hplus2tbAnalysis_161108_064941 -e "QCD_Pt_15to30|TTJets" && rsync --partial --progress *.png attikis@lxplus.cern.ch:~/public/html/.
 
-./plotTest.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ" && rsync --partial --progress counters_weighted_counter.* attikis@lxplus.cern.ch:~/public/html/2016B-2016G/.
+./plotTest.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ"
 
-./plotTest.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016F_PromptReco_v1_278801_278808|2016G" && rsync --partial --progress counters_weighted_counter.* attikis@lxplus.cern.ch:~/public/html/2016B-2016F/.
+./plotTest.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016F_PromptReco_v1_278801_278808|2016G"
 
-./plotTest.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016B|2016C|2016D|2016E|2016F_PromptReco_v1_277816_278800" && rsync --partial --progress counters_weighted_counter.* attikis@lxplus.cern.ch:~/public/html/2016F-2016G/.
+./plotTest.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016B|2016C|2016D|2016E|2016F_PromptReco_v1_277816_278800"
 
 '''
 
@@ -60,9 +62,9 @@ kwargs = {
     "saveFormats"      : [".png", ".pdf"],
     "xlabel"           : "", #b-tag SF
     "ylabel"           : "Events / %.0f",
-    "rebinX"           : 1,
+    "rebinX"           : 4,
     "rebinY"           : 1,
-    "xlabelsize"       : 10, #None, #10
+    "xlabelsize"       : None, #10
     "ratio"            : True,
     "ratioYlabel"      : None,
     "ratioInvert"      : False,
@@ -77,8 +79,8 @@ kwargs = {
     "gridY"            : True,
     "cmsExtraText"     : "Preliminary", #"Preliminary" "Simulation"
     "removeLegend"     : False,
-    "moveLegend"       : {"dx": -0.05, "dy": +0.0, "dh": -0.1},
-    #"moveLegend"       : {"dx": -0.45, "dy": -0.4, "dh": +0.1},
+    #"moveLegend"       : {"dx": -0.05, "dy": +0.0, "dh": -0.1},
+    "moveLegend"       : {"dx": -0.45, "dy": -0.4, "dh": +0.1},
     "cutValue"         : 1.2,
     "cutLine"          : False,
     "cutBox"           : False,
@@ -87,8 +89,8 @@ kwargs = {
 }
 
 
-hNames = ["counters/weighted/counter",
-          #"btagSF",
+hNames = [#"counters/weighted/counter",
+          "btagSF",
           #"counters/weighted/counter",
           #"counters/weighted/METFilter selection",
           #"counters/weighted/e selection (Veto)",
