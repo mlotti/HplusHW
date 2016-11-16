@@ -82,9 +82,42 @@ private:
   WrappedTH1 *h_BQuark2_Eta;
   WrappedTH1 *h_BQuark3_Eta;
   WrappedTH1 *h_BQuark4_Eta;
+ 
 
   // GenParticles: BQuarks pair closest together
-  WrappedTH1 *h_BQuarkPair_dRMin_pT;
+  WrappedTH1 *h_BQuarkPair_dR;
+  WrappedTH1 *h_BQuarkPair_dEta;
+  WrappedTH1 *h_BQuarkPair_dPhi;
+  WrappedTH1 *h_BQuarkPair_dRAverage;
+  WrappedTH1 *h_BQuarkPair_dEtaAverage;
+  WrappedTH1 *h_BQuarkPair_dPhiAverage;
+  //
+  WrappedTH1 *h_BQuarkPair_MaxPt_Pt;
+  WrappedTH1 *h_BQuarkPair_MaxPt_Eta;
+  WrappedTH1 *h_BQuarkPair_MaxPt_Phi;
+  WrappedTH1 *h_BQuarkPair_MaxPt_M;
+  WrappedTH1 *h_BQuarkPair_MaxPt_jet1_dR;
+  WrappedTH1 *h_BQuarkPair_MaxPt_jet1_dEta;
+  WrappedTH1 *h_BQuarkPair_MaxPt_jet1_dPhi;
+  WrappedTH1 *h_BQuarkPair_MaxPt_jet2_dR;
+  WrappedTH1 *h_BQuarkPair_MaxPt_jet2_dEta;
+  WrappedTH1 *h_BQuarkPair_MaxPt_jet2_dPhi;
+  //  
+  WrappedTH1 *h_BQuarkPair_MaxMass_Pt;
+  WrappedTH1 *h_BQuarkPair_MaxMass_Eta;
+  WrappedTH1 *h_BQuarkPair_MaxMass_Phi;
+  WrappedTH1 *h_BQuarkPair_MaxMass_M;
+  WrappedTH1 *h_BQuarkPair_MaxMass_jet1_dR;
+  WrappedTH1 *h_BQuarkPair_MaxMass_jet1_dEta;
+  WrappedTH1 *h_BQuarkPair_MaxMass_jet1_dPhi;
+  WrappedTH1 *h_BQuarkPair_MaxMass_jet2_dR;
+  WrappedTH1 *h_BQuarkPair_MaxMass_jet2_dEta;
+  WrappedTH1 *h_BQuarkPair_MaxMass_jet2_dPhi;
+
+  WrappedTH1 *h_BQuarkPair_dRMin_Pt;
+  WrappedTH1 *h_BQuarkPair_dRMin_Eta;
+  WrappedTH1 *h_BQuarkPair_dRMin_Rap;
+  WrappedTH1 *h_BQuarkPair_dRMin_Phi;
   WrappedTH1 *h_BQuarkPair_dRMin_dEta;
   WrappedTH1 *h_BQuarkPair_dRMin_dPhi;
   WrappedTH1 *h_BQuarkPair_dRMin_dR;
@@ -99,24 +132,6 @@ private:
   WrappedTH1 *h_BQuarkPair_dRMin_jet2_dR;
   WrappedTH1 *h_BQuarkPair_dRMin_jet2_dEta;
   WrappedTH1 *h_BQuarkPair_dRMin_jet2_dPhi;
-
-  // GenParticles: bqq trijet system (H+)
-  WrappedTH1 *h_tbWPlus_bqq_Pt;
-  WrappedTH1 *h_tbWPlus_bqq_Rap;
-  WrappedTH1 *h_tbWPlus_bqq_Mass;
-  WrappedTH1 *h_tbWPlus_bqq_dRMax_dR;
-  WrappedTH1 *h_tbWPlus_bqq_dRMax_dRap;
-  WrappedTH1 *h_tbWPlus_bqq_dRMax_dPhi;
-  WrappedTH2 *h_tbWPlus_bqq_dRMax_dRap_Vs_dPhi;
-
-  // GenParticles: bqq trijet system (associated top)
-  WrappedTH1 *h_tbWMinus_bqq_Pt;
-  WrappedTH1 *h_tbWMinus_bqq_Rap;
-  WrappedTH1 *h_tbWMinus_bqq_Mass;
-  WrappedTH1 *h_tbWMinus_bqq_dRMax_dR;
-  WrappedTH1 *h_tbWMinus_bqq_dRMax_dRap;
-  WrappedTH1 *h_tbWMinus_bqq_dRMax_dPhi;
-  WrappedTH2 *h_tbWMinus_bqq_dRMax_dRap_Vs_dPhi;
 
   // GenJets
   WrappedTH1 *h_GenJet_N_NoPreselections;
@@ -138,7 +153,6 @@ private:
   WrappedTH1 *h_GenJet5_Eta;
   WrappedTH1 *h_GenJet6_Eta;
 
-
   // GenJets: Dijet with largest mass
   WrappedTH1 *h_MaxDiJetMass_Pt;
   WrappedTH1 *h_MaxDiJetMass_Eta;
@@ -151,6 +165,21 @@ private:
   WrappedTH1 *h_MaxDiJetMass_dRap;
   WrappedTH2 *h_MaxDiJetMass_dEta_Vs_dPhi;
   WrappedTH2 *h_MaxDiJetMass_dRap_Vs_dPhi;  
+
+  // GenJets: Trijet with largest pT
+  WrappedTH1 *h_MaxTriJetPt_Pt;
+  WrappedTH1 *h_MaxTriJetPt_Eta;
+  WrappedTH1 *h_MaxTriJetPt_Rap; 
+  WrappedTH1 *h_MaxTriJetPt_Mass;
+  WrappedTH1 *h_MaxTriJetPt_dEtaMax;
+  WrappedTH1 *h_MaxTriJetPt_dPhiMax;
+  WrappedTH1 *h_MaxTriJetPt_dRMax;
+  WrappedTH1 *h_MaxTriJetPt_dEtaMin;
+  WrappedTH1 *h_MaxTriJetPt_dPhiMin;
+  WrappedTH1 *h_MaxTriJetPt_dRMin;
+  WrappedTH1 *h_MaxTriJetPt_dEtaAverage;
+  WrappedTH1 *h_MaxTriJetPt_dPhiAverage;
+  WrappedTH1 *h_MaxTriJetPt_dRAverage;
 
   // Correlations 
   WrappedTH2 *h_BQuark1_BQuark2_dEta_Vs_dPhi;
@@ -288,43 +317,58 @@ void Kinematics::book(TDirectory *dir) {
   h_BQuark3_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuark3_Eta", ";#eta", nBinsEta, minEta, maxEta);
   h_BQuark4_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuark4_Eta", ";#eta", nBinsEta, minEta, maxEta);
 
+  // GenParticles: BQuarks pairs
+  h_BQuarkPair_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_dRAverage   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRAverage"   , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_dEtaAverage = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dEtaAverage" , ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_dPhiAverage = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dPhiAverage" , ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+
+  // GenParticles: BQuarks pairs with maximum pT
+  h_BQuarkPair_MaxPt_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_Pt"  , ";p_{T} (GeV/c)"     , nBinsPt  , minPt  , maxPt  );
+  h_BQuarkPair_MaxPt_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_Eta" , ";#eta"              , nBinsEta , minEta , maxEta );
+  h_BQuarkPair_MaxPt_Phi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_Phi" , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
+  h_BQuarkPair_MaxPt_M   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_M"   , ";M (GeV/c^{2})"     , 100      ,    0.0 , 1000.0 );
+  h_BQuarkPair_MaxPt_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet1_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxPt_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet1_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxPt_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet1_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_MaxPt_jet2_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet2_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxPt_jet2_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet2_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxPt_jet2_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet2_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
+
+  // GenParticles: BQuarks pairs with maximum mass
+  h_BQuarkPair_MaxMass_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_Pt"  , ";p_{T} (GeV/c)"     , nBinsPt  , minPt  , maxPt  );
+  h_BQuarkPair_MaxMass_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_Eta" , ";#eta"              , nBinsEta , minEta , maxEta );
+  h_BQuarkPair_MaxMass_Phi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_Phi" , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
+  h_BQuarkPair_MaxMass_M   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_M"   , ";M (GeV/c^{2})"     , 100      ,    0.0 , 1000.0 );
+  h_BQuarkPair_MaxMass_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet1_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxMass_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet1_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxMass_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet1_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_MaxMass_jet2_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet2_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxMass_jet2_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet2_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxMass_jet2_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet2_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
+
   // GenParticles: BQuarks pair closest together
-  h_BQuarkPair_dRMin_pT        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_pT"       , ";p_{T} (GeV/c)"     ,  nBinsPt  , minPt  , maxPt  );
-  h_BQuarkPair_dRMin_dEta      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dEta"     , ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_dRMin_dPhi      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dPhi"     , ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_dRMin_dR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dR"       , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
-  h_BQuarkPair_dRMin_Mass      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Mass"     , ";M (GeV/c^{2})"     ,  nBinsM   , minM   , maxM   );
-  h_BQuarkPair_dRMin_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet1_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_dRMin_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet1_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_dRMin_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet1_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
-  h_BQuarkPair_dRMin_jet2_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet2_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
-  h_BQuarkPair_dRMin_jet2_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet2_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
-  h_BQuarkPair_dRMin_jet2_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet2_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_dRMin_Pt        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Pt"       , ";p_{T} (GeV/c)"     , nBinsPt  , minPt  , maxPt  );
+  h_BQuarkPair_dRMin_Eta       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Eta"      , ";#eta"              , nBinsEta , minEta , maxEta );
+  h_BQuarkPair_dRMin_Rap       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Rap"      , ";#omega"            , nBinsRap , minRap , maxRap );
+  h_BQuarkPair_dRMin_Phi       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Phi"      , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
+  h_BQuarkPair_dRMin_dEta      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dEta"     , ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_dRMin_dPhi      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dPhi"     , ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_dRMin_dR        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dR"       , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_dRMin_Mass      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Mass"     , ";M (GeV/c^{2})"     , nBinsM   , minM   , maxM   );
+  h_BQuarkPair_dRMin_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet1_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_dRMin_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet1_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_dRMin_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet1_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
+  h_BQuarkPair_dRMin_jet2_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet2_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_dRMin_jet2_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet2_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_dRMin_jet2_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_jet2_dR"  , ";#DeltaR"           , nBinsdR  , mindR  , maxdR  );
   //
   h_BQuarkPair_dRMin_Eta1_Vs_Eta2 = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Eta1_Vs_Eta2", ";#eta;#eta", nBinsEta, minEta, maxEta, nBinsEta, minEta, maxEta);
   h_BQuarkPair_dRMin_Phi1_Vs_Phi2 = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Phi1_Vs_Phi2", ";#phi;#phi", nBinsPhi, minPhi, maxPhi, nBinsPhi, minPhi, maxPhi);
   h_BQuarkPair_dRMin_Pt1_Vs_Pt2   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_Pt1_Vs_Pt2"  , ";p_{T} (GeV/c); p_{T} (GeV/c)", nBinsPt, minPt, maxPt, nBinsPt, minPt, maxPt);
   h_BQuarkPair_dRMin_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuarkPair_dRMin_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
-
-  // GenParticles: bqq trijet system (W+)
-  h_tbWPlus_bqq_Pt         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWPlus_bqq_Pt"   , ";p_{T} (GeV/c)"    ,  nBinsPt, minPt, maxPt);
-  h_tbWPlus_bqq_Rap        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWPlus_bqq_Rap"  , ";#omega"           ,  nBinsRap, minRap, maxRap);
-  h_tbWPlus_bqq_Mass       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWPlus_bqq_Mass" , ";M (GeV/c^{2})"    ,  nBinsM, minM, maxM);
-  h_tbWPlus_bqq_dRMax_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWPlus_bqq_dRMax_dPhi" , ";#Delta#phi (rads)",  nBinsdPhi, mindPhi, maxdPhi);
-  h_tbWPlus_bqq_dRMax_dRap = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWPlus_bqq_dRMax_dRap" , ";#Delta#omega"     ,  nBinsdRap, mindRap, maxdRap);
-  h_tbWPlus_bqq_dRMax_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWPlus_bqq_dRMax_dR"   , ";#DeltaR"          ,  nBinsdR, mindR, maxdR);
-  //
-  h_tbWPlus_bqq_dRMax_dRap_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "tbWPlus_bqq_dRMax_dRap_Vs_dPhi", ";#Delta#omega;#Delta#phi (rads)", nBinsdRap, mindRap, maxdRap, nBinsdPhi, mindPhi, maxdPhi);
-
-  // GenParticles: bqq trijet system (W-)
-  h_tbWMinus_bqq_Pt         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWMinus_bqq_Pt"   , ";p_{T} (GeV/c^{2})",  nBinsPt, minPt, maxPt);
-  h_tbWMinus_bqq_Rap        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWMinus_bqq_Rap"  , ";#omega"           ,  nBinsRap, minRap, maxRap);
-  h_tbWMinus_bqq_Mass       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWMinus_bqq_Mass" , ";M (GeV/c^{2})"    ,  nBinsM, minM, maxM);
-  //
-  h_tbWMinus_bqq_dRMax_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWMinus_bqq_dRMax_dPhi", ";#Delta#phi (rads)",  nBinsdPhi, mindPhi, maxdPhi);
-  h_tbWMinus_bqq_dRMax_dRap = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWMinus_bqq_dRMax_dRap", ";#Delta#omega"     ,  nBinsdRap, mindRap, maxdRap);
-  h_tbWMinus_bqq_dRMax_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "tbWMinus_bqq_dRMax_dR"  , ";#DeltaR"          ,  nBinsdR, mindR, maxdR);  
-  h_tbWMinus_bqq_dRMax_dRap_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "tbWMinus_bqq_dRMax_dRap_Vs_dPhi", ";#Delta#omega;#Delta#phi (rads)", nBinsdRap, mindRap, maxdRap, nBinsdPhi, mindPhi, maxdPhi);
   
   // Leading Jets
   h_Jet1Jet2_dEta_Vs_Jet3Jet4_dEta = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta", ";#Delta#eta(j_{1},j_{2});#Delta#eta(j_{3},j_{4})", nBinsdEta, mindEta, maxdEta, nBinsdEta, mindEta, maxdEta);
@@ -368,6 +412,21 @@ void Kinematics::book(TDirectory *dir) {
   h_MaxDiJetMass_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kInformative, dir, "MaxDiJetMass_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)"  , nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
   h_MaxDiJetMass_dRap_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kInformative, dir, "MaxDiJetMass_dRap_Vs_dPhi", ";#Delta#omega;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
 
+  // GenJets: Trijet with largest pT
+  h_MaxTriJetPt_Pt    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_Pt"   , ";p_{T} (GeV/c)"    , nBinsPt, minPt, maxPt);
+  h_MaxTriJetPt_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_Eta"  , ";#eta"             , nBinsEta, minEta, maxEta);
+  h_MaxTriJetPt_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_Rap"  , ";#omega"           , nBinsRap, minRap, maxRap);
+  h_MaxTriJetPt_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_Mass" , ";M (GeV/c^{2})"    , 50,  0.0, +1000.0);  
+  h_MaxTriJetPt_dEtaMax  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dEtaMax", ";#Delta#eta"  , nBinsdEta, mindEta, maxdEta);
+  h_MaxTriJetPt_dPhiMax  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dPhiMax", ";#Delta#phi"  , nBinsdPhi, mindPhi, maxdPhi);  
+  h_MaxTriJetPt_dRMax    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dRMax"  , ";#DeltaR"     , nBinsdR  , mindR  , maxdR  );
+  h_MaxTriJetPt_dEtaMin  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dEtaMin", ";#Delta#eta"  , nBinsdEta, mindEta, maxdEta);
+  h_MaxTriJetPt_dPhiMin  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dPhiMin", ";#Delta#phi"  , nBinsdPhi, mindPhi, maxdPhi);  
+  h_MaxTriJetPt_dRMin    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dRMin"  , ";#DeltaR"     , nBinsdR  , mindR  , maxdR  );
+  h_MaxTriJetPt_dEtaAverage  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dEtaAverage", ";#Delta#eta"  , nBinsdEta, mindEta, maxdEta);
+  h_MaxTriJetPt_dPhiAverage  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dPhiAverage", ";#Delta#phi"  , nBinsdPhi, mindPhi, maxdPhi);  
+  h_MaxTriJetPt_dRAverage    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_dRAverage"  , ";#Delta#omega", nBinsdRap, mindRap, maxdRap);
+
   // Correlations
   h_BQuark1_BQuark2_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuark1_BQuark2_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
   h_BQuark1_BQuark3_dEta_Vs_dPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "BQuark1_BQuark3_dEta_Vs_dPhi", ";#Delta#eta;#Delta#phi (rads)", nBinsdEta, mindEta, maxdEta, nBinsdPhi, mindPhi, maxdPhi);
@@ -397,6 +456,7 @@ void Kinematics::process(Long64_t entry) {
   // GenJets Calculations
   /////////////////////////////////////////////////////////////////////////// 
   if(0) std::cout << "=== GenJets" << std::endl;
+
   std::vector<math::XYZTLorentzVector> selJets_p4;
   int nSelJets   = 0;
   double genJ_HT = 0.0;
@@ -505,9 +565,8 @@ void Kinematics::process(Long64_t entry) {
   for (auto& p: fEvent.genparticles().getGenParticles()) {
 
     // Create the genParticles
-    // genParticle p = fEvent.genparticles().getGenParticles()[genP_index];
-    genParticle m;
-    genParticle d;
+    // genParticle m;
+    // genParticle d;
 
     // mcTools.PrintGenParticle(p);
     // mcTools.PrintGenDaughters(p);
@@ -530,10 +589,8 @@ void Kinematics::process(Long64_t entry) {
     std::vector<short> genP_daughters = p.daughters();
     
     // Assign mother/daughers for Lxy & d0 calculation
-    if (genP_mothers.size() > 0  ) m = fEvent.genparticles().getGenParticles()[genP_mothers.at(0)];
-    if (genP_daughters.size() > 0) d = fEvent.genparticles().getGenParticles()[genP_daughters.at(0)];
-    // double genP_Lxy = mcTools.GetLxy(p, m, d, pv);
-    // double genP_d0  = mcTools.GetD0( p, m, d, pv);
+    // if (genP_mothers.size() > 0  ) m = fEvent.genparticles().getGenParticles()[genP_mothers.at(0)];
+    // if (genP_daughters.size() > 0) d = fEvent.genparticles().getGenParticles()[genP_daughters.at(0)];
     
     // Filtering    
     if (!p.isLastCopy()) continue;
@@ -702,9 +759,9 @@ void Kinematics::process(Long64_t entry) {
        	  double rap_i = mcTools.GetRapidity(p4_i);
        	  double rap_j = mcTools.GetRapidity(p4_j);
        	  double dR    = ROOT::Math::VectorUtil::DeltaR(p4_i, p4_j);
-       	  double dRap  = std::fabs(rap_i - rap_j);
-       	  double dEta  = std::fabs(p4_i.eta() - p4_j.eta());
-       	  double dPhi  = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(p4_i, p4_j));
+       	  double dRap  = std::abs(rap_i - rap_j);
+       	  double dEta  = std::abs(p4_i.eta() - p4_j.eta());
+       	  double dPhi  = std::abs(ROOT::Math::VectorUtil::DeltaPhi(p4_i, p4_j));
           
        	  v_dijet_p4.push_back( p4 );
        	  v_dijet_masses.push_back( p4.mass() );
@@ -761,7 +818,7 @@ void Kinematics::process(Long64_t entry) {
       double jet1_Phi = selJets_p4.at(0).phi();
       double jet2_Eta = selJets_p4.at(1).eta();
       double jet2_Phi = selJets_p4.at(1).phi();      
-      h_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass ->Fill(std::fabs(jet1_Eta - jet2_Eta), (selJets_p4.at(0) + selJets_p4.at(1)).mass() );
+      h_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass ->Fill(std::abs(jet1_Eta - jet2_Eta), (selJets_p4.at(0) + selJets_p4.at(1)).mass() );
 
       if (selJets_p4.size() >= 4)
 	{
@@ -769,127 +826,240 @@ void Kinematics::process(Long64_t entry) {
 	  double jet3_Phi = selJets_p4.at(2).phi();
 	  double jet4_Eta = selJets_p4.at(3).eta();
 	  double jet4_Phi = selJets_p4.at(3).phi();
-	  h_Jet1Jet2_dEta_Vs_Jet3Jet4_dEta ->Fill(std::fabs(jet1_Eta - jet2_Eta), std::fabs(jet3_Eta - jet4_Eta));
-	  h_Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi ->Fill(std::fabs(jet1_Phi - jet2_Phi), std::fabs(jet3_Phi - jet4_Phi));      
-	  h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass ->Fill(std::fabs(jet3_Eta - jet4_Eta), (selJets_p4.at(2) + selJets_p4.at(3)).mass() );
+	  h_Jet1Jet2_dEta_Vs_Jet3Jet4_dEta ->Fill(std::abs(jet1_Eta - jet2_Eta), std::abs(jet3_Eta - jet4_Eta));
+	  h_Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi ->Fill(std::abs(jet1_Phi - jet2_Phi), std::abs(jet3_Phi - jet4_Phi));      
+	  h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass ->Fill(std::abs(jet3_Eta - jet4_Eta), (selJets_p4.at(2) + selJets_p4.at(3)).mass() );
 	}     
     }  
     
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
-  // TriJet System (W+)
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
-  if(0) std::cout << "=== TriJet System (W+)" << std::endl;
-  math::XYZTLorentzVector tbWPlus_bqq_p4 = tbWPlus_BQuark_p4 + tbWPlus_Wqq_Quark_p4 + tbWPlus_Wqq_AntiQuark_p4;
-
-  // Find max separation
-  std::vector<math::XYZTLorentzVector> bqq_p4;
-  bqq_p4.push_back(tbWPlus_BQuark_p4);
-  bqq_p4.push_back(tbWPlus_Wqq_Quark_p4);
-  bqq_p4.push_back(tbWPlus_Wqq_AntiQuark_p4);
-  double deltaRMax = -1.0;
-  int deltaRMax_i  = -1;
-  int deltaRMax_j  = -1;
-  // For-loop: All p4 of bqq system
-  for (size_t i = 0; i < bqq_p4.size(); i++)    
-    {
-      for (size_t j = i+1; j < bqq_p4.size(); j++)
-	{
-	  double deltaR = ROOT::Math::VectorUtil::DeltaR(bqq_p4.at(i), bqq_p4.at(j));
-	  if (deltaR > deltaRMax)
-	    {
-	      deltaRMax   = deltaR;
-	      deltaRMax_i = i;
-	      deltaRMax_j = j;
-	    }
-	}
-    } // For-loop: All p4 of bqq system
   
-  // double bqq_dEta = std::fabs(bqq_p4.at(deltaRMax_i).eta() - bqq_p4.at(deltaRMax_j).eta());
-  double bqq_dRap = -1.0;
-  double bqq_dPhi = -1.0;
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
+  // GenJets: Trijet with largest pT
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
+  if(0) std::cout << "=== Trijet (Max Pt)" << std::endl;
 
-  if (deltaRMax_i >= 0 && deltaRMax_j >= 0)
+  int nTriJetCands = 0;
+  double dR_ij     = 0.0;
+  double dR_ik     = 0.0;
+  double dR_jk     = 0.0;
+  double dEta_ij   = 0.0;
+  double dEta_ik   = 0.0;
+  double dEta_jk   = 0.0;
+  double dPhi_ij   = 0.0;
+  double dPhi_ik   = 0.0;
+  double dPhi_jk   = 0.0;
+  double dRSum     = 0.0;
+  double dEtaSum   = 0.0;
+  double dPhiSum   = 0.0;
+  std::vector<double> dEta_ijk;
+  std::vector<double> dPhi_ijk;
+  std::vector<double> dR_ijk;
+
+  math::XYZTLorentzVector TriJetMaxPt_p4(0,0,0,0);
+
+  if (selJets_p4.size() > 2)
     {
-      bqq_dRap = std::fabs(mcTools.GetRapidity(bqq_p4.at(deltaRMax_i) ) - mcTools.GetRapidity(bqq_p4.at(deltaRMax_j) ) );
-      bqq_dPhi = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(bqq_p4.at(deltaRMax_i), bqq_p4.at(deltaRMax_j)));
+
+      // For-loop: All Bquarks
+      for (auto i = selJets_p4.begin(); i != selJets_p4.end()-2; ++i) {
+	
+	// Initialise values
+	dR_ij     = 0.0;
+	dR_ik     = 0.0;
+	dR_jk     = 0.0;
+	dEta_ij   = 0.0;
+	dEta_ik   = 0.0;
+	dEta_jk   = 0.0;
+	dPhi_ij   = 0.0;
+	dPhi_ik   = 0.0;
+	dPhi_jk   = 0.0;
+
+	// For-loop: All Bquarks (nested)
+	for (auto j = i+1; j != selJets_p4.end()-1; ++j) {
+
+	  // For-loop: All Bquarks (doubly-nested)
+	  for (auto k = j+1; k != selJets_p4.end(); ++k) {
+	    nTriJetCands++;
+	    
+	    // Calculations
+	    dR_ij = ROOT::Math::VectorUtil::DeltaR(*i, *j);
+	    dR_ijk.push_back(dR_ij);
+	    dR_ik = ROOT::Math::VectorUtil::DeltaR(*i, *k);
+	    dR_ijk.push_back(dR_ik);
+	    dR_jk = ROOT::Math::VectorUtil::DeltaR(*j, *k);
+	    dR_ijk.push_back(dR_jk);
+
+	    dEta_ij = std::abs( i->Eta() - j->Eta() );
+	    dEta_ijk.push_back(dEta_ij);
+	    dEta_ik = std::abs( i->Eta() - k->Eta() );
+	    dEta_ijk.push_back(dEta_ik);
+	    dEta_jk = std::abs( j->Eta() - k->Eta() );
+	    dEta_ijk.push_back(dEta_jk);
+
+	    dPhi_ij = std::abs( ROOT::Math::VectorUtil::DeltaPhi(*i, *j) );
+	    dPhi_ijk.push_back(dEta_ij);
+	    dPhi_ik = std::abs( ROOT::Math::VectorUtil::DeltaPhi(*i, *k) );
+	    dPhi_ijk.push_back(dEta_ik);
+	    dPhi_jk = std::abs( ROOT::Math::VectorUtil::DeltaPhi(*j, *k) );
+	    dPhi_ijk.push_back(dEta_jk);	    
+
+	    math::XYZTLorentzVector p4 = *i + *j + *k;
+	    if ( p4.Pt() > TriJetMaxPt_p4.Pt() )  TriJetMaxPt_p4 = p4;
+	    
+	    // Calculate
+	    dRSum   += (dR_ij   + dR_ik   + dR_jk  )/3;
+	    dEtaSum += (dEta_ij + dEta_ik + dEta_jk)/3;
+	    dPhiSum += (dPhi_ij + dPhi_ik + dPhi_jk)/3;
+	  }
+	}
+      }
     }
-  
+	
   // Fill Histos
-  h_tbWPlus_bqq_Pt->Fill( tbWPlus_bqq_p4.pt());
-  h_tbWPlus_bqq_Rap->Fill( mcTools.GetRapidity(tbWPlus_bqq_p4) );
-  h_tbWPlus_bqq_Mass->Fill( tbWPlus_bqq_p4.mass() );
-  h_tbWPlus_bqq_dRMax_dR->Fill( deltaRMax );
-  h_tbWPlus_bqq_dRMax_dRap->Fill( bqq_dRap );
-  h_tbWPlus_bqq_dRMax_dPhi->Fill( bqq_dPhi );
-  h_tbWPlus_bqq_dRMax_dRap_Vs_dPhi->Fill( bqq_dRap, bqq_dPhi );
-  
-  
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
-  // TriJet System (W-)
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
-  if(0) std::cout << "=== TriJet System (W-)" << std::endl;
-  math::XYZTLorentzVector tbWMinus_bqq_p4 = tbWMinus_Wqq_Quark_p4 + tbWMinus_Wqq_AntiQuark_p4 + tbWMinus_BQuark_p4;
-  
-  // Fix max separation (again)
-  bqq_p4.clear();
-  bqq_p4.push_back(tbWMinus_BQuark_p4);
-  bqq_p4.push_back(tbWMinus_Wqq_Quark_p4);
-  bqq_p4.push_back(tbWMinus_Wqq_AntiQuark_p4);
-  deltaRMax    = -1.0;
-  deltaRMax_i  = -1;
-  deltaRMax_j  = -1;
-  
-  // For-loop: All p4 of bqq system
-  for (size_t i = 0; i < bqq_p4.size(); i++)    
-    {
-      for (size_t j = i+1; j < bqq_p4.size(); j++)
-	{
-	  double deltaR = ROOT::Math::VectorUtil::DeltaR(bqq_p4.at(i), bqq_p4.at(j));
-	  if (deltaR > deltaRMax)
-	    {
-	      deltaRMax   = deltaR;
-	      deltaRMax_i = i;
-	      deltaRMax_j = j;
-	    }
-	}
-    } // For-loop: All p4 of bqq system
-  
-  bqq_dRap = std::fabs(mcTools.GetRapidity(bqq_p4.at(deltaRMax_i) ) - mcTools.GetRapidity(bqq_p4.at(deltaRMax_j) ) );
-  bqq_dPhi = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(bqq_p4.at(deltaRMax_i), bqq_p4.at(deltaRMax_j)));
-  
-  // Fill Histos
-  h_tbWMinus_bqq_Pt->Fill( tbWMinus_bqq_p4.pt() );
-  h_tbWMinus_bqq_Rap->Fill( mcTools.GetRapidity(tbWMinus_bqq_p4) );
-  h_tbWMinus_bqq_Mass->Fill( tbWMinus_bqq_p4.mass() );
-  h_tbWMinus_bqq_dRMax_dR->Fill( deltaRMax );
-  h_tbWMinus_bqq_dRMax_dRap->Fill( bqq_dRap );
-  h_tbWMinus_bqq_dRMax_dPhi->Fill( bqq_dPhi );
-  h_tbWMinus_bqq_dRMax_dRap_Vs_dPhi ->Fill( bqq_dRap, bqq_dPhi );
+  h_MaxTriJetPt_Pt          ->Fill( TriJetMaxPt_p4.Pt()  );
+  h_MaxTriJetPt_Eta         ->Fill( TriJetMaxPt_p4.Eta() );
+  h_MaxTriJetPt_Rap         ->Fill( mcTools.GetRapidity(TriJetMaxPt_p4));
+  h_MaxTriJetPt_Mass        ->Fill( TriJetMaxPt_p4.M() );
+  h_MaxTriJetPt_dEtaMax     ->Fill( *max_element(dEta_ijk.begin(), dEta_ijk.end() ) );
+  h_MaxTriJetPt_dPhiMax     ->Fill( *max_element(dPhi_ijk.begin(), dPhi_ijk.end() ) );
+  h_MaxTriJetPt_dRMax       ->Fill( *max_element(dR_ijk.begin()  , dR_ijk.end()   ) );
+  h_MaxTriJetPt_dEtaMin     ->Fill( *min_element(dEta_ijk.begin(), dEta_ijk.end() ) );
+  h_MaxTriJetPt_dPhiMin     ->Fill( *min_element(dPhi_ijk.begin(), dPhi_ijk.end() ) );
+  h_MaxTriJetPt_dRMin       ->Fill( *min_element(dR_ijk.begin()  , dR_ijk.end()   ) );
+  h_MaxTriJetPt_dEtaAverage ->Fill( dEtaSum/nTriJetCands );
+  h_MaxTriJetPt_dPhiAverage ->Fill( dPhiSum/nTriJetCands );  
+  h_MaxTriJetPt_dRAverage   ->Fill( dRSum/nTriJetCands   );
 
-  
+
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   // B-quarks (pT sorted)
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   if(0) std::cout << "=== BQuarks" << std::endl;
   std::sort( bQuarks_p4.begin(), bQuarks_p4.end(), PtComparator() );  
+  
+  std::vector<math::XYZTLorentzVector> selBQuarks_p4;
+  // For-loop: All  BQuarks
+  for (auto i = bQuarks_p4.begin(); i != bQuarks_p4.end(); ++i) {
+    
+    // Apply selection cuts
+    if (i->Pt() < 15.0) continue;
+    if (std::abs(i->Eta()) > cfg_JetEtaCut) continue;
+    
+    // Save this BQuark
+    selBQuarks_p4.push_back(*i);
+  }
+  
 
   // Fill histos
   h_BQuarks_N->Fill(bQuarks_p4.size());
+
+  // For-loop: All bquark combinations
+  int nBPairs = 0;
+  double dR   = 0.0;
+  double dEta = 0.0;
+  double dPhi = 0.0;
+  dRSum   = 0.0;
+  dEtaSum = 0.0;
+  dPhiSum = 0.0;
+  math::XYZTLorentzVector maxPt_p4(0,0,0,0);
+  math::XYZTLorentzVector maxMass_p4(0,0,0,0);
+
+  //  if (bQuarks_p4.size() > 1)
+  if (selBQuarks_p4.size() > 1)
+    {
+
+      // For-loop: All Bquarks
+      // for (auto i = bQuarks_p4.begin(); i != bQuarks_p4.end(); ++i) {
+      for (auto i = selBQuarks_p4.begin(); i != selBQuarks_p4.end(); ++i) {
+	
+	// Initialise values
+	dR      = 0.0;
+	dEta    = 0.0;
+	dPhi    = 0.0;
+
+	// For-loop: All Bquarks (nested)
+	// for (auto j = i+1; j != bQuarks_p4.end(); ++j) {
+	for (auto j = i+1; j != selBQuarks_p4.end(); ++j) {
+	  
+	  dR   = ROOT::Math::VectorUtil::DeltaR(*i, *j);
+	  dEta = std::abs(i->Eta() - j->Eta() );
+	  dPhi = std::abs(ROOT::Math::VectorUtil::DeltaPhi(*i, *j));
+	  nBPairs++;
+
+	  math::XYZTLorentzVector pair_p4 = *i + *j;
+	  if ( pair_p4.Pt() > maxPt_p4.Pt() )  maxPt_p4 = pair_p4;
+	  if ( pair_p4.M() > maxMass_p4.M() )  maxMass_p4 = pair_p4;
+	  
+	  // Fill Histos
+	  h_BQuarkPair_dR->Fill(dR);
+	  h_BQuarkPair_dEta->Fill(dEta);
+	  h_BQuarkPair_dPhi->Fill(dPhi);
+	  
+	  // Calculate
+	  dRSum   += dR;
+	  dEtaSum += dEta;
+	  dPhiSum += dPhi;
+	}
+      }
+
+      // Fill Histos
+      h_BQuarkPair_dRAverage->Fill  ( dRSum/nBPairs   );
+      h_BQuarkPair_dEtaAverage->Fill( dEtaSum/nBPairs );
+      h_BQuarkPair_dPhiAverage->Fill( dPhiSum/nBPairs );
+      //
+      h_BQuarkPair_MaxPt_Pt  ->Fill( maxPt_p4.Pt()  );
+      h_BQuarkPair_MaxPt_Eta ->Fill( maxPt_p4.Eta() );
+      h_BQuarkPair_MaxPt_Phi ->Fill( maxPt_p4.Phi() );
+      h_BQuarkPair_MaxPt_M   ->Fill( maxPt_p4.M()   );
+      if (selJets_p4.size() > 0)
+	{
+	  h_BQuarkPair_MaxPt_jet1_dEta ->Fill( std::abs(maxPt_p4.eta() - selJets_p4.at(0).eta()) );
+	  h_BQuarkPair_MaxPt_jet1_dPhi ->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(maxPt_p4, selJets_p4.at(0) ) ) );
+	  h_BQuarkPair_MaxPt_jet1_dR   ->Fill( ROOT::Math::VectorUtil::DeltaR(maxPt_p4, selJets_p4.at(0) ) );
+	}
+      
+      if (selJets_p4.size() > 1)
+	{
+	  h_BQuarkPair_MaxPt_jet2_dEta ->Fill( std::abs(maxPt_p4.eta() - selJets_p4.at(1).eta()) );
+	  h_BQuarkPair_MaxPt_jet2_dPhi ->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(maxPt_p4, selJets_p4.at(1) ) ) );
+	  h_BQuarkPair_MaxPt_jet2_dR   ->Fill( ROOT::Math::VectorUtil::DeltaR(maxPt_p4, selJets_p4.at(1) ) );
+	}
+      //
+      h_BQuarkPair_MaxMass_Pt  ->Fill( maxMass_p4.Pt()  );
+      h_BQuarkPair_MaxMass_Eta ->Fill( maxMass_p4.Eta() );
+      h_BQuarkPair_MaxMass_Phi ->Fill( maxMass_p4.Phi() );
+      h_BQuarkPair_MaxMass_M   ->Fill( maxMass_p4.M()   );
+      if (selJets_p4.size() > 0)
+	{
+	  h_BQuarkPair_MaxMass_jet1_dEta ->Fill( std::abs(maxMass_p4.eta() - selJets_p4.at(0).eta()) );
+	  h_BQuarkPair_MaxMass_jet1_dPhi ->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(maxMass_p4, selJets_p4.at(0) ) ) );
+	  h_BQuarkPair_MaxMass_jet1_dR   ->Fill( ROOT::Math::VectorUtil::DeltaR(maxMass_p4, selJets_p4.at(0) ) );
+	}
+      
+      if (selJets_p4.size() > 1)
+	{
+	  h_BQuarkPair_MaxMass_jet2_dEta ->Fill( std::abs(maxMass_p4.eta() - selJets_p4.at(1).eta()) );
+	  h_BQuarkPair_MaxMass_jet2_dPhi ->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(maxMass_p4, selJets_p4.at(1) ) ) );
+	  h_BQuarkPair_MaxMass_jet2_dR   ->Fill( ROOT::Math::VectorUtil::DeltaR(maxMass_p4, selJets_p4.at(1) ) );
+	}
+
+    }
+  // else std::cout << "0 b-quarks!" << std::endl;
   
   if (bQuarks_p4.size() >= 2)
     {
-      double dEta_1_2 = std::fabs(bQuarks_p4.at(0).eta() - bQuarks_p4.at(1).eta());
-      double dPhi_1_2 = std::fabs(bQuarks_p4.at(0).phi() - bQuarks_p4.at(1).phi());
+      double dEta_1_2 = std::abs(bQuarks_p4.at(0).eta() - bQuarks_p4.at(1).eta());
+      double dPhi_1_2 = std::abs(bQuarks_p4.at(0).phi() - bQuarks_p4.at(1).phi());
 
       h_BQuark1_BQuark2_dEta_Vs_dPhi->Fill( dEta_1_2 , dPhi_1_2 );
     }
   
   if (bQuarks_p4.size() >= 3) 
     {
-      double dEta_1_3 = std::fabs(bQuarks_p4.at(0).eta() - bQuarks_p4.at(2).eta());
-      double dPhi_1_3 = std::fabs(bQuarks_p4.at(0).phi() - bQuarks_p4.at(2).phi());
-      double dEta_2_3 = std::fabs(bQuarks_p4.at(1).eta() - bQuarks_p4.at(2).eta());
-      double dPhi_2_3 = std::fabs(bQuarks_p4.at(1).phi() - bQuarks_p4.at(2).phi());
+      double dEta_1_3 = std::abs(bQuarks_p4.at(0).eta() - bQuarks_p4.at(2).eta());
+      double dPhi_1_3 = std::abs(bQuarks_p4.at(0).phi() - bQuarks_p4.at(2).phi());
+      double dEta_2_3 = std::abs(bQuarks_p4.at(1).eta() - bQuarks_p4.at(2).eta());
+      double dPhi_2_3 = std::abs(bQuarks_p4.at(1).phi() - bQuarks_p4.at(2).phi());
       
       h_BQuark1_BQuark3_dEta_Vs_dPhi->Fill( dEta_1_3 , dPhi_1_3 );
       h_BQuark2_BQuark3_dEta_Vs_dPhi->Fill( dEta_2_3 , dPhi_2_3 );
@@ -897,12 +1067,12 @@ void Kinematics::process(Long64_t entry) {
   
   if (bQuarks_p4.size() >= 4) 
     {
-      double dEta_1_4 = std::fabs(bQuarks_p4.at(0).eta() - bQuarks_p4.at(3).eta());
-      double dPhi_1_4 = std::fabs(bQuarks_p4.at(0).phi() - bQuarks_p4.at(3).phi());
-      double dEta_2_4 = std::fabs(bQuarks_p4.at(1).eta() - bQuarks_p4.at(3).eta());
-      double dPhi_2_4 = std::fabs(bQuarks_p4.at(1).phi() - bQuarks_p4.at(3).phi());
-      double dEta_3_4 = std::fabs(bQuarks_p4.at(2).eta() - bQuarks_p4.at(3).eta());
-      double dPhi_3_4 = std::fabs(bQuarks_p4.at(2).phi() - bQuarks_p4.at(3).phi());
+      double dEta_1_4 = std::abs(bQuarks_p4.at(0).eta() - bQuarks_p4.at(3).eta());
+      double dPhi_1_4 = std::abs(bQuarks_p4.at(0).phi() - bQuarks_p4.at(3).phi());
+      double dEta_2_4 = std::abs(bQuarks_p4.at(1).eta() - bQuarks_p4.at(3).eta());
+      double dPhi_2_4 = std::abs(bQuarks_p4.at(1).phi() - bQuarks_p4.at(3).phi());
+      double dEta_3_4 = std::abs(bQuarks_p4.at(2).eta() - bQuarks_p4.at(3).eta());
+      double dPhi_3_4 = std::abs(bQuarks_p4.at(2).phi() - bQuarks_p4.at(3).phi());
 
       h_BQuark1_BQuark4_dEta_Vs_dPhi->Fill( dEta_1_4 , dPhi_1_4 );
       h_BQuark2_BQuark4_dEta_Vs_dPhi->Fill( dEta_2_4 , dPhi_2_4 );
@@ -962,11 +1132,14 @@ void Kinematics::process(Long64_t entry) {
   if (deltaRMin_i>= 0  && deltaRMin_j >= 0)
     {
       math::XYZTLorentzVector bQuarkPair_dRMin_p4 = bQuarks_p4.at(deltaRMin_i) + bQuarks_p4.at(deltaRMin_j);
-      double bQuarkPair_dEta = std::fabs(bQuarks_p4.at(deltaRMin_i).eta() - bQuarks_p4.at(deltaRMin_j).eta());
-      double bQuarkPair_dPhi = std::fabs(ROOT::Math::VectorUtil::DeltaPhi(bQuarks_p4.at(deltaRMin_i), bQuarks_p4.at(deltaRMin_j)));
+      double bQuarkPair_dEta = std::abs(bQuarks_p4.at(deltaRMin_i).eta() - bQuarks_p4.at(deltaRMin_j).eta());
+      double bQuarkPair_dPhi = std::abs(ROOT::Math::VectorUtil::DeltaPhi(bQuarks_p4.at(deltaRMin_i), bQuarks_p4.at(deltaRMin_j)));
 
       // Fill Histos
-      h_BQuarkPair_dRMin_pT   ->Fill( bQuarkPair_dRMin_p4.pt() );
+      h_BQuarkPair_dRMin_Pt   ->Fill( bQuarkPair_dRMin_p4.pt() );
+      h_BQuarkPair_dRMin_Eta  ->Fill( bQuarkPair_dRMin_p4.eta() );
+      h_BQuarkPair_dRMin_Rap  ->Fill( mcTools.GetRapidity( bQuarkPair_dRMin_p4) );
+      h_BQuarkPair_dRMin_Phi  ->Fill( bQuarkPair_dRMin_p4.phi() );
       h_BQuarkPair_dRMin_dEta ->Fill( bQuarkPair_dEta );
       h_BQuarkPair_dRMin_dPhi ->Fill( bQuarkPair_dPhi );
       h_BQuarkPair_dRMin_dR   ->Fill( deltaRMin );
@@ -979,15 +1152,15 @@ void Kinematics::process(Long64_t entry) {
       // Fill histos
       if (selJets_p4.size() > 0)
 	{
-	  h_BQuarkPair_dRMin_jet1_dEta ->Fill( std::fabs(bQuarkPair_dRMin_p4.eta() - selJets_p4.at(0).eta()) );
-	  h_BQuarkPair_dRMin_jet1_dPhi ->Fill( std::fabs(ROOT::Math::VectorUtil::DeltaPhi(bQuarkPair_dRMin_p4, selJets_p4.at(0) ) ) );
+	  h_BQuarkPair_dRMin_jet1_dEta ->Fill( std::abs(bQuarkPair_dRMin_p4.eta() - selJets_p4.at(0).eta()) );
+	  h_BQuarkPair_dRMin_jet1_dPhi ->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(bQuarkPair_dRMin_p4, selJets_p4.at(0) ) ) );
 	  h_BQuarkPair_dRMin_jet1_dR   ->Fill( ROOT::Math::VectorUtil::DeltaR(bQuarkPair_dRMin_p4, selJets_p4.at(0) ) );
 	}
       
       if (selJets_p4.size() > 1)
 	{
-	  h_BQuarkPair_dRMin_jet2_dEta ->Fill( std::fabs(bQuarkPair_dRMin_p4.eta() - selJets_p4.at(1).eta()) );
-	  h_BQuarkPair_dRMin_jet2_dPhi ->Fill( std::fabs(ROOT::Math::VectorUtil::DeltaPhi(bQuarkPair_dRMin_p4, selJets_p4.at(1) ) ) );
+	  h_BQuarkPair_dRMin_jet2_dEta ->Fill( std::abs(bQuarkPair_dRMin_p4.eta() - selJets_p4.at(1).eta()) );
+	  h_BQuarkPair_dRMin_jet2_dPhi ->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(bQuarkPair_dRMin_p4, selJets_p4.at(1) ) ) );
 	  h_BQuarkPair_dRMin_jet2_dR   ->Fill( ROOT::Math::VectorUtil::DeltaR(bQuarkPair_dRMin_p4, selJets_p4.at(1) ) );
 	}
     }
