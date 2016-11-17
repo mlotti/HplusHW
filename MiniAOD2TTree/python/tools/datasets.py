@@ -51,7 +51,7 @@ datasetsJetHTData.append(Dataset('/JetHT/Run2016F-23Sep2016-v1/MINIAOD', dataVer
 datasetsJetHTData.append(Dataset('/JetHT/Run2016G-23Sep2016-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_278816-280385_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2_JetHT_Run2016G.txt"))
 datasetsJetHTData.append(Dataset('/JetHT/Run2016H-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T_JetHT_Run2016H_v1.txt"))
 datasetsJetHTData.append(Dataset('/JetHT/Run2016H-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask="Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T_JetHT_Run2016H_v2.txt"))
-datasetsJetHTData.append(Dataset('/JetHT/Run2016H-PromptReco-v2/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask=lumiMask)
+datasetsJetHTData.append(Dataset('/JetHT/Run2016H-PromptReco-v3/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask=lumiMask)
 
 
 datasetsMuonData = []
