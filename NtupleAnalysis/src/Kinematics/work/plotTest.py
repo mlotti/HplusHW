@@ -18,7 +18,7 @@ or
 ./plotTest.py -m Hplus2tbAnalysis_161026_135227 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|ZZTo4Q"
 
 Last Used:
-./plotTest.py -m Kinematics_161115_035858
+./plotTest.py -m Kinematics_161116_20161104T0853 -i "M_200|M_500|TT_ext|TTTT|TTBB|TTZ|ttb|ZJets|QCD_b"
 '''
 
 #================================================================================================
@@ -51,7 +51,7 @@ kwargs = {
     "savePath"         : os.getcwd() + "/Plots/", #"/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/all/",
     "saveFormats"      : [".png"], #, ".pdf"],
     "xlabel"           : None,
-    "ylabel"           : "Arbitrary Units / %.0f", #"Events / %.0f",
+    "ylabel"           : "Arbitrary Units / %.1f", #"Events / %.0f",
     "rebinX"           : 1,
     "rebinY"           : 1,
     "xlabelsize"       : None, #10, #None, #10
@@ -233,6 +233,8 @@ def main(hName, opts):
     p.histoMgr.setHistoDrawStyleAll("EP")
     p.histoMgr.setHistoLegendStyle("ChargedHiggs_HplusTB_HplusToTB_M_500", "F")
     p.histoMgr.setHistoDrawStyle ("ChargedHiggs_HplusTB_HplusToTB_M_500", "HIST")
+    #datasetsMgr.getDataset("ZJetsToQQ_HT600toInf").getDatasetRootHisto(hName).getHistogram().SetMarkerColor(ROOT.kBlack)
+
 
     # Create a comparison plot
     ratioOpts = {"ymin": 0.0, "ymax": 2.0}

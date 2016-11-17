@@ -268,10 +268,10 @@ signal400Style = StyleCompound([
         StyleFill(fillStyle=1001, fillColor=ROOT.kSpring+5), 
         StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kSpring+5) ])
 signal500Style = StyleCompound([
-        Style(ROOT.kFullCircle, ROOT.kOrange+7), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+7, markerSizes=None, markerStyle=ROOT.kFullCircle),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kOrange+7), 
-        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kOrange+7) ])
+        Style(ROOT.kFullCircle, ROOT.kBlue+3), 
+        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue+3, markerSizes=None, markerStyle=ROOT.kFullCircle),
+        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue+3), 
+        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue+3) ])
 #signal600Style  = signalStyle.clone()
 #signal400Style = signalStyle.clone()
 #signal500Style = signalStyle.clone()
