@@ -48,6 +48,7 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
   fTauNprongs(config.getParameter<int>("prongs")),
   fTauRtauCut(config.getParameter<float>("rtau")),
+  fVetoMode(false),
   // tau identification SF
   fTauIDSF(config.getParameter<float>("tauIdentificationSF")), 
   // tau misidentification SF
@@ -81,10 +82,10 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   cSubPassedAntiIsolation(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolation")),
   cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated Rtau"))
 { 
-  initialize(config);
-}
+  initialize(config, postfix);
+} 
 
-TauSelection::TauSelection(const ParameterSet& config)
+TauSelection::TauSelection(const ParameterSet& config, const std::string& postfix)
 : BaseSelection(),
   bApplyTriggerMatching(config.getParameter<bool>("applyTriggerMatching")),
   fTriggerTauMatchingCone(config.getParameter<float>("triggerMatchingCone")),
@@ -93,6 +94,7 @@ TauSelection::TauSelection(const ParameterSet& config)
   fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
   fTauNprongs(config.getParameter<int>("prongs")),
   fTauRtauCut(config.getParameter<float>("rtau")),
+  fVetoMode(false),
   // tau misidentification SF
   fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
   fEToTauMisIDSFValue(assignTauMisIDSFValue(config, "E")),
@@ -124,7 +126,7 @@ TauSelection::TauSelection(const ParameterSet& config)
   cSubPassedAntiIsolation(fEventCounter.addSubCounter("tau selection", "Passed anti-isolation")),
   cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated Rtau"))
 { 
-  initialize(config);
+  initialize(config, postfix);
   bookHistograms(new TDirectory());
 }
 
@@ -148,8 +150,11 @@ TauSelection::~TauSelection() {
   delete hNprongsMatrixForBmesonsAfterAntiIsolation;
 }
 
-void TauSelection::initialize(const ParameterSet& config) {
-
+void TauSelection::initialize(const ParameterSet& config, const std::string& postfix) {
+  if (postfix.find("veto") != std::string::npos || postfix.find("Veto") != std::string::npos)
+    {
+      fVetoMode = true;
+    }
 }
 
 void TauSelection::bookHistograms(TDirectory* dir) {
@@ -386,6 +391,13 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     cSubPassedAntiIsolationRtau.increment();
   if (output.fSelectedTaus.size() > 0)
     cPassedTauSelection.increment();
+  if (fVetoMode) {
+    if (output.fSelectedTaus.size() == 0)
+      cPassedTauSelection.increment();
+  } else {
+    if (output.fSelectedTaus.size() > 0)
+      cPassedTauSelection.increment();
+  }
   if (output.fSelectedTaus.size() > 0 && output.isGenuineTau())
     cPassedTauSelectionGenuine.increment();
   if (output.fSelectedTaus.size() > 1)

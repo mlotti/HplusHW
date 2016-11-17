@@ -126,23 +126,23 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   cAllEvents.increment();
 
   // For-loop: GenParticles
-  if (fEvent.isMC()) {
-    
-    for (auto& p: fEvent.genparticles().getGenParticles()) {
-
-      int genP_pdgId  = p.pdgId();
-      double genP_pt  = p.pt();
-      double genP_eta = p.eta();
-      // double genP_Status = p.status(); // PYTHIA8: http://home.thep.lu.se/~torbjorn/pythia81html/ParticleProperties.html
-      
-      if( genP_pdgId == 6)
-	{
-	  hAssociatedTop_Pt ->Fill( genP_pt  );
-	  hAssociatedTop_Eta->Fill( genP_eta );
-	}
-      
-    }
-  }
+//  if (fEvent.isMC()) {
+//    
+//    for (auto& p: fEvent.genparticles().getGenParticles()) 
+//      {
+//	
+//	int genP_pdgId  = p.pdgId();
+//	double genP_pt  = p.pt();
+//	double genP_eta = p.eta();
+//	// double genP_Status = p.status(); // PYTHIA8: http://home.thep.lu.se/~torbjorn/pythia81html/ParticleProperties.html
+//	
+//	if( genP_pdgId == 6)
+//	  {
+//	    hAssociatedTop_Pt ->Fill( genP_pt  );
+//	    hAssociatedTop_Eta->Fill( genP_eta );
+//	  }
+//      }
+//  }
 
 
   //================================================================================================   
@@ -258,7 +258,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Standard selection" << std::endl;
-  // fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);  // hasIdentifiedTaus()
+  // fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);  // hasIdentifiedTaus() needed
 
 
   //================================================================================================  
