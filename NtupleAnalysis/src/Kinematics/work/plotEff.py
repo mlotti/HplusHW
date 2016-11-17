@@ -66,25 +66,100 @@ kwargs = {
 #================================================================================================
 # Histograms
 #================================================================================================
-hNames  = [
-     # "genMET_Et",
-     #"genMET_Phi",
-     #"genHT_GenJets",
-     # "genHT_GenParticles",
-     "SelGenJet_N_NoPreselections",
-     "SelGenJet_N_AfterLeptonVeto",
-     "SelGenJet_N_AfterLeptonVetoNJetsCut",
-     "SelGenJet_N_AfterPreselections", 
-     "MaxDiJetMass_Pt",
-     "MaxDiJetMass_Eta",
-     "MaxDiJetMass_Mass",
-     "MaxDiJetMass_Rap",
-     "MaxDiJetMass_dR",
-     "MaxDiJetMass_dRrap",
-     "MaxDiJetMass_dEta",
-     "MaxDiJetMass_dRap",
-     "MaxDiJetMass_dPhi",
-#    "BQuarkPair_dRMin_pT",
+hNames = [
+    "BQuarkPair_dRMin_Pt",
+    "BQuarkPair_dRMin_Eta",
+    "BQuarkPair_dRMin_Rap",
+    "BQuarkPair_dRMin_Phi",
+    "BQuarkPair_dRMin_dEta",
+    "BQuarkPair_dRMin_dPhi",
+    "BQuarkPair_dRMin_dR",
+    "BQuarkPair_dRMin_Mass",
+    "BQuarkPair_dRMin_jet1_dR",
+    "BQuarkPair_dRMin_jet1_dEta",
+    "BQuarkPair_dRMin_jet1_dPhi",
+    "BQuarkPair_dRMin_jet2_dR",
+    "BQuarkPair_dRMin_jet2_dEta",
+    "BQuarkPair_dRMin_jet2_dPhi",
+    "MaxDiJetMass_Pt",
+    "MaxDiJetMass_Eta",
+    "MaxDiJetMass_Mass",
+    "MaxDiJetMass_Rap",
+    "MaxDiJetMass_dR",
+    "MaxDiJetMass_dRrap",
+    "MaxDiJetMass_dEta",
+    "MaxDiJetMass_dRap",
+    "MaxDiJetMass_dPhi",
+    "BQuarkPair_dR",
+    "BQuarkPair_dEta",
+    "BQuarkPair_dPhi",
+    "BQuarkPair_dRAverage",
+    "BQuarkPair_dEtaAverage",
+    "BQuarkPair_dPhiAverage",
+    "BQuarkPair_MaxPt_Pt",
+    "BQuarkPair_MaxPt_Eta",
+    "BQuarkPair_MaxPt_Phi",
+    "BQuarkPair_MaxPt_M",
+    "BQuarkPair_MaxPt_jet1_dR",
+    "BQuarkPair_MaxPt_jet1_dEta",
+    "BQuarkPair_MaxPt_jet1_dPhi",
+    "BQuarkPair_MaxPt_jet2_dR",
+    "BQuarkPair_MaxPt_jet2_dEta",
+    "BQuarkPair_MaxPt_jet2_dPhi",
+    "BQuarkPair_MaxMass_Pt",
+    "BQuarkPair_MaxMass_Eta",
+    "BQuarkPair_MaxMass_Phi",
+    "BQuarkPair_MaxMass_M",
+    "BQuarkPair_MaxMass_jet1_dR",
+    "BQuarkPair_MaxMass_jet1_dEta",
+    "BQuarkPair_MaxMass_jet1_dPhi",
+    "BQuarkPair_MaxMass_jet2_dR",
+    "BQuarkPair_MaxMass_jet2_dEta",
+    "BQuarkPair_MaxMass_jet2_dPhi",
+    "BQuarks_N",
+    "BQuark1_Pt",
+    "BQuark2_Pt",
+#    "BQuark3_Pt",
+#    "BQuark4_Pt",
+#    "BQuark1_Eta",
+#    "BQuark2_Eta",
+#    "BQuark3_Eta",
+#    "BQuark4_Eta",
+    "MaxTriJetPt_Pt",
+    "MaxTriJetPt_Eta",
+    "MaxTriJetPt_Rap",
+    "MaxTriJetPt_Mass",
+    "MaxTriJetPt_dEtaMax",
+    "MaxTriJetPt_dPhiMax",
+    "MaxTriJetPt_dRMax",
+    "MaxTriJetPt_dEtaMin",
+    "MaxTriJetPt_dPhiMin",
+    "MaxTriJetPt_dRMin",
+    "MaxTriJetPt_dEtaAverage",
+    "MaxTriJetPt_dPhiAverage",
+    "MaxTriJetPt_dRAverage",
+    ]
+
+
+#hNames  = [
+#     # "genMET_Et",
+#     #"genMET_Phi",
+#     #"genHT_GenJets",
+#     # "genHT_GenParticles",
+#     "SelGenJet_N_NoPreselections",
+#     "SelGenJet_N_AfterLeptonVeto",
+#     "SelGenJet_N_AfterLeptonVetoNJetsCut",
+#     "SelGenJet_N_AfterPreselections", 
+#     "MaxDiJetMass_Pt",
+#     "MaxDiJetMass_Eta",
+#     "MaxDiJetMass_Mass",
+#     "MaxDiJetMass_Rap",
+#     "MaxDiJetMass_dR",
+#     "MaxDiJetMass_dRrap",
+#     "MaxDiJetMass_dEta",
+#     "MaxDiJetMass_dRap",
+#     "MaxDiJetMass_dPhi",
+##    "BQuarkPair_dRMin_pT",
 #    "BQuarkPair_dRMin_dEta",
 #    "BQuarkPair_dRMin_dPhi",
 #    "BQuarkPair_dRMin_dR",
@@ -107,9 +182,9 @@ hNames  = [
 #    "gtt_tbW_bqq_dRMax_dR",
 #    "gtt_tbW_bqq_dRMax_dRap",
 #    "gtt_tbW_bqq_dRMax_dPhi",
-]
+#]
 
-for var in ["Pt"]: #, "Eta", "Rap"]
+# for var in ["Pt"]: #, "Eta", "Rap"]
 ## #    hNames.append("gtt_TQuark_"            + var)
 ## #    hNames.append("gbb_BQuark_"            + var)
 ## #    hNames.append("gtt_tbW_WBoson_"        + var)
@@ -123,17 +198,17 @@ for var in ["Pt"]: #, "Eta", "Rap"]
 ## #    hNames.append("tbH_tbW_BQuark_"        + var)
 ## #    hNames.append("Htb_tbW_Wqq_Quark_"     + var)
 ## #    hNames.append("Htb_tbW_Wqq_AntiQuark_" + var)
-     if var not in ["Rap"]:
+#     if var not in ["Rap"]:
 ##         #hNames.append("BQuark1_" + var)
 ##         #hNames.append("BQuark2_" + var)
 ##         #hNames.append("BQuark3_" + var)
 ##         #hNames.append("BQuark4_" + var)
-         hNames.append("GenJet1_" + var)
-         hNames.append("GenJet2_" + var)
-         hNames.append("GenJet3_" + var)
-         hNames.append("GenJet4_" + var)
-         hNames.append("GenJet5_" + var)
-         hNames.append("GenJet6_" + var)
+#         hNames.append("GenJet1_" + var)
+#         hNames.append("GenJet2_" + var)
+#         hNames.append("GenJet3_" + var)
+#         hNames.append("GenJet4_" + var)
+#         hNames.append("GenJet5_" + var)
+#         hNames.append("GenJet6_" + var)
 ## #for var in ["dR", "dEta", "dRap", "dPhi"]:
 #    hNames.append("Htb_TQuark_Htb_BQuark_"                + var)
 #    hNames.append("Htb_TQuark_gtt_TQuark_"                + var)
@@ -148,11 +223,26 @@ for var in ["Pt"]: #, "Eta", "Rap"]
 #    hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_Quark_"     + var)
 #    hNames.append("gtt_tbW_BQuark_gtt_tbW_Wqq_AntiQuark_" + var)
 
+def GetDatasetsFromDir(mcrab, opts, **kwargs):
+    dataEra    = kwargs.get("dataEra")
+    searchMode = kwargs.get("searchMode")
+    analysis   = kwargs.get("analysis")
+    optMode    = kwargs.get("optMode")
+
+    if opts.includeTasks != "":
+        datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], dataEra=dataEra, searchMode=searchMode, analysisName=analysis, includeOnlyTasks=opts.includeTasks, optimizationMode=optMode)
+    elif opts.excludeTasks != "":
+        datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], dataEra=dataEra, searchMode=searchMode, analysisName=analysis, excludeTasks=opts.excludeTasks, optimizationMode=optMode)
+        # excludeTasks="M_180|M_220|M_250"
+    else:
+        datasets = dataset.getDatasetsFromMulticrabDirs([mcrab], dataEra=dataEra, searchMode=searchMode, analysisName=analysis, optimizationMode=optMode)
+    return datasets
+
 
 #================================================================================================
 # Main
 #================================================================================================
-def main():
+def main(opts):
 
     style = tdrstyle.TDRStyle()
     
@@ -161,7 +251,7 @@ def main():
     ROOT.gErrorIgnoreLevel = 3000
     
     # Get all datasets from the mcrab dir
-    datasetsMgr  = GetDatasetsFromDir(parseOpts.mcrab, kwargs.get("analysis"))
+    datasetsMgr  = GetDatasetsFromDir(parseOpts.mcrab, opts, **kwargs)
     # datasetsMgr  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=kwargs.get("analysis"), includeOnlyTasks="ChargedHiggs_HplusTB_HplusToTB_M_200")
     # datasetsMgr  = dataset.getDatasetsFromMulticrabDirs([parseOpts.mcrab], analysisName=kwargs.get("analysis"), excludeTasks="M_200")
 
@@ -250,9 +340,22 @@ def main():
 #================================================================================================
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-m", "--mcrab"    , dest="mcrab"    , action="store", help="Path to the multicrab directory for input")
-    parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=True, help="Enables batch mode (canvas creation does NOT generates a window)")
-    parser.add_option("-v", "--verbose"  , dest="verbose"  , action="store_true", default=False, help="Enables verbose mode (for debugging purposes)")
+    
+    parser.add_option("-m", "--mcrab", dest="mcrab", action="store",
+                      help="Path to the multicrab directory for input")
+    
+    parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=True,
+                      help="Enables batch mode (canvas creation  NOT generates a window)")
+
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False,
+                      help="Enables verbose mode (for debugging purposes)")
+
+    parser.add_option("-i", "--includeTasks", dest="includeTasks" , default="", type="string",
+                      help="Only perform action for this dataset(s) [default: '']")
+
+    parser.add_option("-e", "--excludeTasks", dest="excludeTasks" , default="", type="string",
+                                    help="Exclude this dataset(s) from action [default: '']")
+
     (parseOpts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -264,7 +367,7 @@ if __name__ == "__main__":
         pass
 
     # Program execution
-    main()
+    main(parseOpts)
 
     if not parseOpts.batchMode:
         raw_input("=== plotTemplate.py: Press any key to quit ROOT ...")
