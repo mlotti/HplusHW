@@ -8,7 +8,8 @@ skim = cms.EDFilter("SignalAnalysisSkim",
         "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET110_v",
         "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
         "HLT_VLooseIsoPFTau120_Trk50_eta2p1_v",
-        "HLT_VLooseIsoPFTau140_Trk50_eta2p1_v"
+        "HLT_VLooseIsoPFTau140_Trk50_eta2p1_v",
+        "HLT_LooseIsoPFTau50_Trk30_eta2p1_v"
     ),
 # FIXME: Temporarily CaloMET to emulate trigger MET leg 09062016/SL
     METCollection  = cms.InputTag("slimmedMETs"),
