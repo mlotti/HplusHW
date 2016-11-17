@@ -54,7 +54,7 @@ kwargs = {
     "ylabel"           : "Arbitrary Units / %.0f", #"Events / %.0f",
     "rebinX"           : 1,
     "rebinY"           : 1,
-    "xlabelsize"       : 10, #None, #10
+    "xlabelsize"       : None, #10, #None, #10
     "ratio"            : False,
     "ratioYlabel"      : None,
     "ratioInvert"      : False,
@@ -78,54 +78,17 @@ kwargs = {
 }
 
 
-
-# hNames = [
-# 
-#     "BQuarkPair_dRMin_dPhi",
-#     "BQuarkPair_dRMin_dR",
-#     "BQuarkPair_dRMin_Mass",
-#     "BQuarkPair_dRMin_jet1_dR",
-#     "BQuarkPair_dRMin_jet1_dEta",
-#     "BQuarkPair_dRMin_jet1_dPhi",
-#     "BQuarkPair_dRMin_jet2_dR",
-#     "BQuarkPair_dRMin_jet2_dEta",
-#     "BQuarkPair_dRMin_jet2_dPhi",
-#     "tbWMinus_bqq_Pt",
-#     "tbWMinus_bqq_Rap",
-#     "tbWMinus_bqq_Mass",
-#     "tbWMinus_bqq_dRMax_dR",
-#     "tbWMinus_bqq_dRMax_dRap",
-#     "tbWMinus_bqq_dRMax_dPhi",
-#     "tbWPlus_bqq_Pt",
-#     "tbWPlus_bqq_Rap",
-#     "tbWPlus_bqq_Mass",
-#     "tbWPlus_bqq_dRMax_dR",
-#     "tbWPlus_bqq_dRMax_dRap",
-#     "tbWPlus_bqq_dRMax_dPhi",
-#     "MaxDiJetMass_Pt",
-#     "MaxDiJetMass_Eta",
-#     "MaxDiJetMass_Mass",
-#     "MaxDiJetMass_Rap",
-#     "MaxDiJetMass_dR",
-#     "MaxDiJetMass_dRrap",
-#     "MaxDiJetMass_dEta",
-#     "MaxDiJetMass_dRap",
-#     "MaxDiJetMass_dPhi",
-# #    "SelGenJet_N_AfterLeptonVeto",
-# ]
-
-
 hNames = [
     "counters/weighted/counter",
     "counters/Branching",
-    "genMET_Et",
-    "genMET_Phi",
-    "genHT_GenJets",
-    "genHT_GenParticles",
-    "SelGenJet_N_NoPreselections",
-    "SelGenJet_N_AfterLeptonVeto",
-    "SelGenJet_N_AfterLeptonVetoNJetsCut",
-    "SelGenJet_N_AfterPreselections", 
+    #"genMET_Et",
+    #"genMET_Phi",
+    #"genHT_GenJets",
+    #"genHT_GenParticles",
+    #"SelGenJet_N_NoPreselections",
+    #"SelGenJet_N_AfterLeptonVeto",
+    #"SelGenJet_N_AfterLeptonVetoNJetsCut",
+    #"SelGenJet_N_AfterPreselections", 
     "tt_Pt",
     "tt_Eta",
     "tt_Mass",
