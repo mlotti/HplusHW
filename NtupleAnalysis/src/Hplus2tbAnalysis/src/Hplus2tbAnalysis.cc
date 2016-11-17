@@ -31,12 +31,12 @@ private:
   Count cTrigger;
   METFilterSelection fMETFilterSelection;
   Count cVertexSelection;
-  // TauSelection fTauSelection;
   // Count cFakeTauSFCounter;
   // Count cTauTriggerSFCounter;
   // Count cMetTriggerSFCounter;
   ElectronSelection fElectronSelection;
   MuonSelection fMuonSelection;
+  TauSelection fTauSelection;
   JetSelection fJetSelection;
   // AngularCutsCollinear fAngularCutsCollinear;
   BJetSelection fBJetSelection;
@@ -63,11 +63,11 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     cTrigger(fEventCounter.addCounter("passed trigger")),
     fMETFilterSelection(config.getParameter<ParameterSet>("METFilter"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cVertexSelection(fEventCounter.addCounter("passed PV")),
-    // fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     // cFakeTauSFCounter(fEventCounter.addCounter("Fake tau SF")), cTauTriggerSFCounter(fEventCounter.addCounter("Tau trigger SF")),
     // cMetTriggerSFCounter(fEventCounter.addCounter("Met trigger SF")),
     fElectronSelection(config.getParameter<ParameterSet>("ElectronSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
+    fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     // fAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
@@ -86,9 +86,9 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
 
   // Book histograms in event selection classes
   fMETFilterSelection.bookHistograms(dir);
-  // fTauSelection.bookHistograms(dir);
   fElectronSelection.bookHistograms(dir);
   fMuonSelection.bookHistograms(dir);
+  fTauSelection.bookHistograms(dir);
   fJetSelection.bookHistograms(dir);
   // fAngularCutsCollinear.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
@@ -185,28 +185,6 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
 
   
   //================================================================================================   
-  // Tau selection
-  //================================================================================================   
-  //const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
-  // if (!tauData.hasIdentifiedTaus())
-  //return;
-
-  
-  // Fake tau SF
-  if (fEvent.isMC()) {
-    // fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
-    // cFakeTauSFCounter.increment();
-  }
-
-
-  // Tau trigger SF
-  if (fEvent.isMC()) {
-    // fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
-    // cTauTriggerSFCounter.increment();
-  }
-
-
-  //================================================================================================   
   // MET trigger SF
   //================================================================================================   
   if (0) std::cout << "=== MET Trigger SF" << std::endl;
@@ -232,6 +210,32 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   if (0) std::cout << "=== Muon veto" << std::endl;
   const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
   if (muData.hasIdentifiedMuons()) return;
+
+
+  //================================================================================================   
+  // Tau Veto (HToTauNu Orthogonality)
+  //================================================================================================   
+  if (0) std::cout << "=== Tau-Veto" << std::endl;
+  const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
+  if (tauData.hasIdentifiedTaus() ) return;
+
+  
+  // Fake-Tau SF
+  if (fEvent.isMC()) 
+    {      
+      // Not needed unless a tau is used!
+      // fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
+      // cFakeTauSFCounter.increment();
+    }
+  
+
+  // Tau-Trigger SF
+  if (fEvent.isMC())
+    {
+      // Not needed unless a tau is used!
+      // fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
+      // cTauTriggerSFCounter.increment();
+    }
 
 
   //================================================================================================
