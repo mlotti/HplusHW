@@ -71,6 +71,7 @@ public:
   //===== unique filling methods (to be called AFTER return statement from analysis routine)
   void setNvertices(int vtx) { iVertices = vtx; fPUDependencyPlots->setNvtx(vtx); }
   void fillControlPlotsAfterTrigger(const Event& event);
+  void fillControlPlotsAfterMETFilter(const Event& event);
   void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);

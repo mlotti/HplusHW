@@ -35,6 +35,7 @@ public:
   
   //===== unique filling methods (to be called AFTER return statement from analysis routine)
   virtual void fillControlPlotsAfterTrigger(const Event& event);
+  virtual void fillControlPlotsAfterMETFilter(const Event& event);
   virtual void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data);
   virtual void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
   virtual void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);

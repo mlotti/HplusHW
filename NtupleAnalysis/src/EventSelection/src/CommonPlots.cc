@@ -523,6 +523,12 @@ void CommonPlots::fillControlPlotsAfterTrigger(const Event& event) {
   } 
 }
 
+void CommonPlots::fillControlPlotsAfterMETFilter(const Event& event) {
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAfterMETFilter(event);
+  } 
+}
+
 void CommonPlots::fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data) {
   // Code logic: if there is no identified tau (or anti-isolated tau for QCD), the code will for sure crash later
   // This piece of code is called from TauSelection, so there one cannot judge if things go right or not, 

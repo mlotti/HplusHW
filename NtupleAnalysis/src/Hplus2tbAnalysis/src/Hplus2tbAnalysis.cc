@@ -125,28 +125,34 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
 
   cAllEvents.increment();
 
+
+  //================================================================================================   
+  // GenParticle analysis
+  //================================================================================================   
+  if (0) std::cout << "=== GenParticles" << std::endl;
   // For-loop: GenParticles
-//  if (fEvent.isMC()) {
-//    
-//    for (auto& p: fEvent.genparticles().getGenParticles()) 
-//      {
-//	
-//	int genP_pdgId  = p.pdgId();
-//	double genP_pt  = p.pt();
-//	double genP_eta = p.eta();
-//	// double genP_Status = p.status(); // PYTHIA8: http://home.thep.lu.se/~torbjorn/pythia81html/ParticleProperties.html
-//	
-//	if( genP_pdgId == 6)
-//	  {
-//	    hAssociatedTop_Pt ->Fill( genP_pt  );
-//	    hAssociatedTop_Eta->Fill( genP_eta );
-//	  }
-//      }
-//  }
+  //  if (fEvent.isMC()) {
+  //    
+  //    for (auto& p: fEvent.genparticles().getGenParticles()) 
+  //      {
+  //	
+  //	int genP_pdgId  = p.pdgId();
+  //	double genP_pt  = p.pt();
+  //	double genP_eta = p.eta();
+  //	// double genP_Status = p.status(); // PYTHIA8: http://home.thep.lu.se/~torbjorn/pythia81html/ParticleProperties.html
+  //	
+  //	if( genP_pdgId == 6)
+  //	  {
+  //	    hAssociatedTop_Pt ->Fill( genP_pt  );
+  //	    hAssociatedTop_Eta->Fill( genP_eta );
+  //	  }
+  //      }
+  //  }
+  
 
 
   //================================================================================================   
-  // Apply trigger 
+  // 1) Apply trigger 
   //================================================================================================   
   if (0) std::cout << "=== Trigger" << std::endl;
   std::string TriggerName = "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056";
@@ -161,21 +167,16 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
 
 
   //================================================================================================   
-  // MET filters (to remove events with spurious sources of fake MET)
+  // 2) MET filters (to remove events with spurious sources of fake MET)
   //================================================================================================   
-  if (0) std::cout << "=== MET Filters" << std::endl;
+  if (0) std::cout << "=== MET Filter" << std::endl;
   const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
   if (!metFilterData.passedSelection()) return;
-  
+  fCommonPlots.fillControlPlotsAfterMETFilter(fEvent);  
+
 
   //================================================================================================   
-  // GenParticle analysis
-  //================================================================================================   
-  if (0) std::cout << "=== GenParticles" << std::endl;
-  // if necessary
-
-  //================================================================================================   
-  // Primarty Vertex (Check that a PV exists)
+  // 3) Primarty Vertex (Check that a PV exists)
   //================================================================================================   
   if (0) std::cout << "=== Vertices" << std::endl;
   if (nVertices < 1) return;
@@ -185,10 +186,10 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
 
   
   //================================================================================================   
-  // MET trigger SF
+  // 4) Trigger SF
   //================================================================================================   
-  if (0) std::cout << "=== MET Trigger SF" << std::endl;
-  const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
+  // if (0) std::cout << "=== MET Trigger SF" << std::endl;
+  // const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
   // if (fEvent.isMC()) {
   //   fEventWeight.multiplyWeight(silentMETData.getMETTriggerSF());
   // }
@@ -197,7 +198,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   
 
   //================================================================================================   
-  // Electron veto
+  // 5) Electron veto (Orthogonality)
   //================================================================================================   
   if (0) std::cout << "=== Electron veto" << std::endl;
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
@@ -205,7 +206,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
 
 
   //================================================================================================
-  // Muon veto
+  // 6) Muon veto (Orthogonality)
   //================================================================================================
   if (0) std::cout << "=== Muon veto" << std::endl;
   const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
@@ -213,7 +214,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
 
 
   //================================================================================================   
-  // Tau Veto (HToTauNu Orthogonality)
+  // 7) Tau Veto (HToTauNu Orthogonality)
   //================================================================================================   
   if (0) std::cout << "=== Tau-Veto" << std::endl;
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
@@ -239,7 +240,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
 
 
   //================================================================================================
-  // Jet selection
+  // 8) Jet selection
   //================================================================================================
   if (0) std::cout << "=== Jet selection" << std::endl;
   const JetSelection::Data jetData = fJetSelection.analyzeWithoutTau(fEvent);
@@ -247,22 +248,14 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
 
 
   //================================================================================================
-  // Collinear angular cuts
-  //================================================================================================
-  //   const AngularCutsCollinear::Data collinearData = fAngularCutsCollinear.analyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
-  //   if (!collinearData.passedSelection())
-  //    return;
-
-
-  //================================================================================================
   // Standard Selections
   //================================================================================================
-  if (0) std::cout << "=== Standard selection" << std::endl;
+  // if (0) std::cout << "=== Standard selection" << std::endl;
   // fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);  // hasIdentifiedTaus() needed
 
 
   //================================================================================================  
-  // BJet selection
+  // 9) BJet selection
   //================================================================================================
   if (0) std::cout << "=== BJet selection" << std::endl;
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
@@ -275,29 +268,25 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // }
   if (!bjetData.passedSelection()) return;
 
-  // BJet SF
-  if (0) std::cout << "=== b-jet SF" << std::endl;
-  if (fEvent.isMC()) {
-    fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
-  }
+
+  //================================================================================================  
+  // 10) BJet SF  
+  //================================================================================================
+  if (0) std::cout << "=== BJet SF" << std::endl;
+  if (fEvent.isMC()) 
+    {
+      fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
+    }
   cBTaggingSFCounter.increment();
 
 
   //================================================================================================
-  // MET selection
+  // 11) MET selection
   //================================================================================================
   if (0) std::cout << "=== MET selection" << std::endl;
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
   if (!METData.passedSelection()) return;
   
-
-  //================================================================================================
-  // Back-to-back angular cuts
-  //================================================================================================
-  //   const AngularCutsBackToBack::Data backToBackData = fAngularCutsBackToBack.analyze(fEvent, tauData.getSelectedTau(), jetData, METData);
-  //   if (!backToBackData.passedSelection())
-  //     return;
-
 
   //================================================================================================
   // All cuts passed

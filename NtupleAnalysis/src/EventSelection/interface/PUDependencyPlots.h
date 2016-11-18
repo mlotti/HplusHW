@@ -15,6 +15,7 @@ public:
   void reset() { fNvtx = -1; }
   
   void fillControlPlotsAfterTrigger(const Event& event);
+  void fillControlPlotsAfterMETFilter(const Event& event);
   void fillControlPlotsAtVertexSelection(const Event& event);
   void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
@@ -36,6 +37,7 @@ private:
   int fNvtx;
   
   WrappedTH1* hNvtxTrg;
+  WrappedTH1* hNvtxMETFilter;
   WrappedTH1* hNvtxVtx;
   WrappedTH1* hNvtxTau;
   WrappedTH1* hNvtxAntiIsolatedTau;

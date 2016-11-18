@@ -6,6 +6,7 @@ PUDependencyPlots::PUDependencyPlots(HistoWrapper& histoWrapper, bool isEnabled,
   
 PUDependencyPlots::~PUDependencyPlots() {
   delete hNvtxTrg;
+  delete hNvtxMETFilter;
   delete hNvtxVtx;
   delete hNvtxTau;
   delete hNvtxAntiIsolatedTau;
@@ -29,6 +30,8 @@ void PUDependencyPlots::book(TDirectory* dir, bool isData) {
   TDirectory* myDir = fHistoWrapper.mkdir(level, dir, "PUDependency");
   
   hNvtxTrg = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxTrg", ";N_{vtx};N_{events}",
+                                        fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
+  hNvtxMETFilter = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxMETFilter", ";N_{vtx};N_{events}",
                                         fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
   hNvtxVtx = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxVtx", ";N_{vtx};N_{events}",
                                         fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
@@ -61,6 +64,12 @@ void PUDependencyPlots::book(TDirectory* dir, bool isData) {
 void PUDependencyPlots::fillControlPlotsAfterTrigger(const Event& event) { 
   hNvtxTrg->Fill(fNvtx);
 }
+
+
+void PUDependencyPlots::fillControlPlotsAfterMETFilter(const Event& event) { 
+  hNvtxMETFilter->Fill(fNvtx);
+}
+
 
 void PUDependencyPlots::fillControlPlotsAtVertexSelection(const Event& event) {
   hNvtxVtx->Fill(fNvtx);
