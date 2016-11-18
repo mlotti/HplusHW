@@ -21,6 +21,7 @@ public:
   //void fillControlPlotsAtVetoTauSelection(const Event& event, const VetoTauSelection::Data& tauVetoData);
   void fillControlPlotsAtElectronSelection(const Event& event, const ElectronSelection::Data& data);
   void fillControlPlotsAtMuonSelection(const Event& event, const MuonSelection::Data& data);
+  void fillControlPlotsAtTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAtJetSelection(const Event& event, const JetSelection::Data& data);
   void fillControlPlotsAtAngularCutsCollinear(const Event& event, const AngularCutsCollinear::Data& data);
   void fillControlPlotsAtMETSelection(const Event& event, const METSelection::Data& data);
@@ -40,6 +41,7 @@ private:
   WrappedTH1* hNvtxAntiIsolatedTau;
   WrappedTH1* hNvtxElectronVeto;
   WrappedTH1* hNvtxMuonVeto;
+  WrappedTH1* hNvtxTauVeto;
   WrappedTH1* hNvtxJetSelection;
   WrappedTH1* hNvtxAngularCutsCollinear;
   WrappedTH1* hNvtxMETSelection;

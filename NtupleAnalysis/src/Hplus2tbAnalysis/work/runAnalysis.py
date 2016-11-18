@@ -32,6 +32,17 @@ The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kWarning  =   2000
         kError    =   3000
         kBreak    =   4000
+
+HistoLevel:
+For the histogramAmbientLevel each DEEPER level is a SUBSET of the rest. 
+For example "kDebug" will include all kDebug histos but also kInformative, kVital, kSystematics, and kNever.  
+Setting histogramAmbientLevel=kSystematics will include kSystematics AND kNever.
+    1. kNever = 0,
+    2. kSystematics,
+    3. kVital,
+    4. kInformative,
+    5. kDebug,
+    6. kNumberOfLevels
 '''
 
 #================================================================================================
@@ -243,8 +254,8 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default = VERBOSE, 
                       help="Enable verbosity (for debugging) (default: %s)" % (VERBOSE))
 
-    parser.add_option("-h", "--histoLevel", dest="histoLevel", action="store", default = "Informative", 
-                      help="Histogram ambient level (default: Informative)")
+    parser.add_option("-h", "--histoLevel", dest="histoLevel", action="store", default = "Debug",
+                      help="Histogram ambient level (default: Debug)")
 
     parser.add_option("--noPU", dest="noPUreweighting", action="store_true", default = PUREWEIGHT, 
                       help="Do NOT apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )

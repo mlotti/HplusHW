@@ -17,6 +17,7 @@ void CommonPlotsBase::reset() { }
 void CommonPlotsBase::fillControlPlotsAtVertexSelection(const Event& event) { }
 void CommonPlotsBase::fillControlPlotsAtElectronSelection(const Event& event, const ElectronSelection::Data& data) { }
 void CommonPlotsBase::fillControlPlotsAtMuonSelection(const Event& event, const MuonSelection::Data& data) { }
+void CommonPlotsBase::fillControlPlotsAtTauSelection(const Event& event, const TauSelection::Data& data) { }
 void CommonPlotsBase::fillControlPlotsAtJetSelection(const Event& event, const JetSelection::Data& data) { }
 void CommonPlotsBase::fillControlPlotsAtAngularCutsCollinear(const Event& event, const AngularCutsCollinear::Data& data) { }
 void CommonPlotsBase::fillControlPlotsAtMETSelection(const Event& event, const METSelection::Data& data) { }

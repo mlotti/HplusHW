@@ -59,6 +59,7 @@ public:
   //void fillControlPlotsAtVetoTauSelection(const Event& event, const VetoTauSelection::Data& tauVetoData);
   void fillControlPlotsAtElectronSelection(const Event& event, const ElectronSelection::Data& data);
   void fillControlPlotsAtMuonSelection(const Event& event, const MuonSelection::Data& data);
+  void fillControlPlotsAtTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAtJetSelection(const Event& event, const JetSelection::Data& data);
   void fillControlPlotsAtAngularCutsCollinear(const Event& event, const AngularCutsCollinear::Data& data);
   void fillControlPlotsAtMETSelection(const Event& event, const METSelection::Data& data);
@@ -139,6 +140,8 @@ private:
   // electron veto
   
   // muon veto
+
+  // tau veto
  
   // jet selection
   HistoSplitter::SplittedTripletTH1s hCtrlNjets;

@@ -11,6 +11,7 @@ PUDependencyPlots::~PUDependencyPlots() {
   delete hNvtxAntiIsolatedTau;
   delete hNvtxElectronVeto;
   delete hNvtxMuonVeto;
+  delete hNvtxTauVeto;
   delete hNvtxJetSelection;
   delete hNvtxAngularCutsCollinear;
   delete hNvtxMETSelection;
@@ -38,6 +39,8 @@ void PUDependencyPlots::book(TDirectory* dir, bool isData) {
   hNvtxElectronVeto = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxElectronVeto", ";N_{vtx};N_{events}",
                                         fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
   hNvtxMuonVeto = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxMuonVeto", ";N_{vtx};N_{events}",
+                                        fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
+  hNvtxTauVeto = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxTauVeto", ";N_{vtx};N_{events}",
                                         fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
   hNvtxJetSelection = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxJetSelection", ";N_{vtx};N_{events}",
                                         fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
@@ -82,6 +85,11 @@ void PUDependencyPlots::fillControlPlotsAtElectronSelection(const Event& event, 
 void PUDependencyPlots::fillControlPlotsAtMuonSelection(const Event& event, const MuonSelection::Data& data)  {
   if (data.hasIdentifiedMuons()) return;
   hNvtxMuonVeto->Fill(fNvtx);
+}
+
+void PUDependencyPlots::fillControlPlotsAtTauSelection(const Event& event, const TauSelection::Data& data)  {
+  if (data.hasIdentifiedTaus()) return;
+  hNvtxTauVeto->Fill(fNvtx);
 }
 
 void PUDependencyPlots::fillControlPlotsAtJetSelection(const Event& event, const JetSelection::Data& data)  {

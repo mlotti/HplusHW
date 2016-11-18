@@ -149,10 +149,6 @@ private:
   
   // Event counter for passing selection
   Count cPassedTauSelection;
-  Count cPassedTauSelectionGenuine;
-  Count cPassedTauSelectionMultipleTaus;
-  Count cPassedAntiIsolatedTauSelection;
-  Count cPassedAntiIsolatedTauSelectionMultipleTaus;
   // Sub counters
   Count cSubAll;
   Count cSubPassedTriggerMatching;
@@ -168,6 +164,10 @@ private:
   Count cSubPassedRtau;
   Count cSubPassedAntiIsolation;
   Count cSubPassedAntiIsolationRtau;
+  Count cSubPassedTauSelectionGenuine;
+  Count cSubPassedTauSelectionMultipleTaus;
+  Count cSubPassedAntiIsolatedTauSelection;
+  Count cSubPassedAntiIsolatedTauSelectionMultipleTaus;
   // Histograms
   WrappedTH1 *hTriggerMatchDeltaR;
   WrappedTH1 *hTauPtTriggerMatched;
