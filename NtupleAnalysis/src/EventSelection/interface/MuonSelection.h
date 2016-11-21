@@ -94,8 +94,12 @@ private:
   // Histograms
   WrappedTH1 *hMuonPtAll;
   WrappedTH1 *hMuonEtaAll;
+  WrappedTH1 *hMuonRelIsoAll;
   WrappedTH1 *hMuonPtPassed;
   WrappedTH1 *hMuonEtaPassed;
+  WrappedTH1 *hMuonRelIsoPassed;
+  WrappedTH1 *hMuonRelIsoPassedPtEta;
+  WrappedTH1 *hMuonRelIsoPassedPtEtaId;
   WrappedTH1 *hPtResolution;
   WrappedTH1 *hEtaResolution;
   WrappedTH1 *hPhiResolution;

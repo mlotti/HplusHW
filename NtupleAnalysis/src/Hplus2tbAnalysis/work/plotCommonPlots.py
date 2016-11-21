@@ -90,7 +90,7 @@ kwargs = {
 
 hNames = [
     "PUDependency/NvtxTrg",
-    "PUDependencyNvtxMETFilter",
+    "PUDependency/NvtxMETFilter",
     "PUDependency/NvtxVtx",
     "PUDependency/NvtxElectronVeto",
     "PUDependency/NvtxMuonVeto",
@@ -114,6 +114,62 @@ hNames = [
     "eSelection_Veto/IsolPtAfter",
     "eSelection_Veto/IsolEtaAfter",
     "eSelection_Veto/IsolVtxAfter",
+    #
+    "muSelection_Veto/muonPtAll",
+    "muSelection_Veto/muonEtaAll",
+    "muSelection_Veto/muonRelIsoAll",
+    "muSelection_Veto/muonPtPassed" ,
+    "muSelection_Veto/muonRelIsoPassed",
+    "muSelection_Veto/muonIsolAll",
+    "muSelection_Veto/ptResolution" ,
+    "muSelection_Veto/etaResolution",
+    "muSelection_Veto/phiResolution",
+    "muSelection_Veto/IsolPtBefore" ,
+    "muSelection_Veto/IsolEtaBefore",
+    "muSelection_Veto/IsolVtxBefore",
+    "muSelection_Veto/IsolPtAfter"  ,
+    "muSelection_Veto/IsolEtaAfter" ,
+    "muSelection_Veto/IsolVtxAfter" ,
+    #
+    # "tauSelection_Veto/triggerMatchDeltaR", 
+    # "tauSelection_Veto/tauPtTriggerMatched",
+    # "tauSelection_Veto/tauEtaTriggerMatched",
+     "tauSelection_Veto/tauNpassed",
+     "tauSelection_Veto/ptResolution",
+     "tauSelection_Veto/etaResolution",
+     "tauSelection_Veto/phiResolution",
+     "tauSelection_Veto/IsolPtBefore",
+     "tauSelection_Veto/IsolEtaBefore",
+     "tauSelection_Veto/IsolVtxBefore",
+     "tauSelection_Veto/IsolPtAfter",
+     "tauSelection_Veto/IsolEtaAfter",
+     "tauSelection_Veto/IsolVtxAfter",
+     # "tauSelection_Veto/NprongsMatrixForAllAfterIsolation", #2D
+     # "tauSelection_Veto/NprongsMatrixForBmesonsAfterIsolation", #2D
+     # "tauSelection_Veto/NprongsMatrixForAllAfterAntiIsolation", #2D
+     # "tauSelection_Veto/NprongsMatrixForBmesonsAfterAntiIsolation", #2D
+     #
+    "jetSelection_/jetPtAll",
+    "jetSelection_/jetEtaAll",
+    "jetSelection_/jetPtPassed",
+    "jetSelection_/jetEtaPassed",
+    "jetSelection_/selectedJetsFirstJetPt",
+    "jetSelection_/selectedJetsSecondJetPt",
+    "jetSelection_/selectedJetsThirdJetPt",
+    "jetSelection_/selectedJetsFourthJetPt",
+    "jetSelection_/selectedJetsFirstJetEta",
+    "jetSelection_/selectedJetsSecondJetEta",
+    "jetSelection_/selectedJetsThirdJetEta",
+    "jetSelection_/selectedJetsFourthJetEta",
+    # "jetSelection_/JetMatchingToTauDeltaR",
+    # "jetSelection_/JetMatchingToTauPtRatio",
+    #
+    "bjetSelection_/selectedBJetsFirstJetPt",
+    "bjetSelection_/selectedBJetsSecondJetPt",
+    "bjetSelection_/selectedBJetsFirstJetEta",
+    "bjetSelection_/selectedBJetsSecondJetEta",
+    #
+    "metSelection_/Met",
     ]
 
 

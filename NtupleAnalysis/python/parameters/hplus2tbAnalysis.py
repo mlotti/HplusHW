@@ -91,12 +91,10 @@ metFilter = PSet(
 # Electron veto
 #================================================================================================
 eVeto = PSet(
-    electronPtCut         = 15.0,
-    electronEtaCut        = 2.5,
-    electronNCutValue     =  1,
-    electronNCutDirection = "<",    # options: ==, !=, <, <=, >, >=
-    electronID            = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-    electronIsolation     = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronPtCut     = 15.0,
+    electronEtaCut    = 2.5,
+    electronID        = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
+    electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
 #================================================================================================
