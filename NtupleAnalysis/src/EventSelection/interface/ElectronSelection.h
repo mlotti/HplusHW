@@ -92,8 +92,12 @@ private:
   // Histograms
   WrappedTH1 *hElectronPtAll;
   WrappedTH1 *hElectronEtaAll;
+  WrappedTH1 *hElectronRelIsoAll;
   WrappedTH1 *hElectronPtPassed;
   WrappedTH1 *hElectronEtaPassed;
+  WrappedTH1 *hElectronRelIsoPassed;
+  WrappedTH1 *hElectronRelIsoPassedPtEta;
+  WrappedTH1 *hElectronRelIsoPassedPtEtaId;
   WrappedTH1 *hPtResolution;
   WrappedTH1 *hEtaResolution;
   WrappedTH1 *hPhiResolution;

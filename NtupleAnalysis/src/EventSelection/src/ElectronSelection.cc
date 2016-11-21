@@ -53,8 +53,12 @@ ElectronSelection::ElectronSelection(const ParameterSet& config, const std::stri
 ElectronSelection::~ElectronSelection() {
   delete hElectronPtAll;
   delete hElectronEtaAll;
+  delete hElectronRelIsoAll;
   delete hElectronPtPassed;
   delete hElectronEtaPassed;
+  delete hElectronRelIsoPassed;
+  delete hElectronRelIsoPassedPtEta;
+  delete hElectronRelIsoPassedPtEtaId;
   delete hPtResolution;
   delete hEtaResolution;
   delete hPhiResolution;
@@ -83,12 +87,18 @@ void ElectronSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "eSelection_"+sPostfix);
   hElectronPtAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronPtAll"    , "Electron pT, all;p_{T} (GeV/c)", 40, 0, 400);
   hElectronEtaAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronEtaAll"   , "Electron eta, all;#eta", 50, -2.5, 2.5);
+  hElectronRelIsoAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronRelIsoAll"   , "Electron relative isolation, all;Relative Isolation", 200, 0.0, 10.0);
   hElectronPtPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronPtPassed" , "Electron pT, passed;p_{T} (GeV/c)", 40, 0, 400);
   hElectronEtaPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronEtaPassed", "Electron eta, passed;#eta", 50, -2.5, 2.5);
+  hElectronRelIsoPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronRelIsoPassed", "Electron relative isolation, passed;Relative Isolation", 200, 0.0, 10.0);
+  hElectronRelIsoPassedPtEta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronRelIsoPassedPtEta", "Electron relative isolation, passed pT, eta ;Relative Isolation", 200, 0.0, 10.0);
+  hElectronRelIsoPassedPtEtaId = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "electronRelIsoPassedPtEtaId", "Electron relative isolation, passed pT, eta, Id ;Relative Isolation", 200, 0.0, 10.0);
+
   // Resolutions
   hPtResolution  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution" , "(reco pT - gen pT) / reco pT;(p_{T}^{reco} - p_{T}^{gen})/p_{T}^{reco}", 200, -1.0, 1.0);
   hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", "(reco eta - gen eta) / reco eta;(#eta^{reco} - #eta^{gen})/#eta^{reco}", 200, -1.0, 1.0);
   hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", "(reco phi - gen phi) / reco phi;(#phi^{reco} - #phi^{gen})/#phi^{reco}", 200, -1.0, 1.0);
+
   // Isolation efficiency
   hIsolPtBefore  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore" , "Electron pT before isolation is applied;p_{T} (GeV/c)", 40, 0, 400);
   hIsolEtaBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaBefore", "Electron eta before isolation is applied;#eta", 50, -2.5, 2.5);
@@ -126,8 +136,12 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
   bool passedIsol = false;
   // Loop over electrons
   for(Electron electron: event.electrons()) {
+
     hElectronPtAll->Fill(electron.pt());
     hElectronEtaAll->Fill(electron.eta());
+    // hElectronRelIsoAll->Fill(electron.relIsoDeltaBeta());
+    hElectronRelIsoAll->Fill(electron.effAreaIsoDeltaBeta());
+
     // Apply cut on pt
     if (electron.pt() < fElectronPtCut)
       continue;
@@ -136,9 +150,15 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
     if (std::fabs(electron.eta()) > fElectronEtaCut)
       continue;
     passedEta = true;
+    // hElectronRelIsoPassedPtEta->Fill(electron.relIsoDeltaBeta());
+    hElectronRelIsoPassedPtEta->Fill(electron.effAreaIsoDeltaBeta());
+
     // Apply cut on electron ID
     if (!electron.electronIDDiscriminator()) continue;
     passedID = true;
+    // hElectronRelIsoPassedPtEtaId->Fill(electron.relIsoDeltaBeta());
+    hElectronRelIsoPassedPtEtaId->Fill(electron.effAreaIsoDeltaBeta());
+
     // Apply cut on electron isolation
     hIsolPtBefore->Fill(electron.pt());
     hIsolEtaBefore->Fill(electron.eta());
@@ -151,9 +171,13 @@ ElectronSelection::Data ElectronSelection::privateAnalyze(const Event& event) {
     hIsolEtaAfter->Fill(electron.eta());
     if (fCommonPlotsIsEnabled())
       hIsolVtxAfter->Fill(fCommonPlots->nVertices());
+
     // Passed all cuts
     hElectronPtPassed->Fill(electron.pt());
     hElectronEtaPassed->Fill(electron.eta());
+    // hElectronRelIsoPassed->Fill(electron.relIsoDeltaBeta());
+    hElectronRelIsoPassed->Fill(electron.effAreaIsoDeltaBeta());
+
     if (electron.pt() > output.fHighestSelectedElectronPt) {
       output.fHighestSelectedElectronPt = electron.pt();
       output.fHighestSelectedElectronEta = electron.eta();

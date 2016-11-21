@@ -53,8 +53,12 @@ MuonSelection::MuonSelection(const ParameterSet& config, const std::string& post
 MuonSelection::~MuonSelection() {
   delete hMuonPtAll;
   delete hMuonEtaAll;
+  delete hMuonRelIsoAll;
   delete hMuonPtPassed;
   delete hMuonEtaPassed;
+  delete hMuonRelIsoPassed;
+  delete hMuonRelIsoPassedPtEta;
+  delete hMuonRelIsoPassedPtEtaId;
   delete hPtResolution;
   delete hEtaResolution;
   delete hPhiResolution;
@@ -90,10 +94,11 @@ void MuonSelection::bookHistograms(TDirectory* dir) {
   hMuonRelIsoPassedPtEta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoPassedPtEta", "Muon relative isolation, passed pT, eta ;Relative Isolation", 200, 0.0, 10.0);
   hMuonRelIsoPassedPtEtaId = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoPassedPtEtaId", "Muon relative isolation, passed pT, eta, Id ;Relative Isolation", 200, 0.0, 10.0);
 
-  // Resolution
+  // Resolutions
   hPtResolution  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution" , "(reco pT - gen pT) / reco pT;(p_{T}^{reco} - p_{T}^{gen})/p_{T}^{reco}", 200, -1.0, 1.0);
   hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", "(reco eta - gen eta) / reco eta;(#eta^{reco} - #eta^{gen})/#eta^{reco}", 200, -1.0, 1.0);
   hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", "(reco phi - gen phi) / reco phi;(#phi^{reco} - #phi^{gen})/#phi^{reco}", 200, -1.0, 1.0);
+
   // Isolation efficiency
   hIsolPtBefore  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore" , "Muon pT before isolation is applied;(p_{T}^{reco} - p_{T}^{gen})/p_{T}^{reco}", 40, 0, 400);
   hIsolEtaBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaBefore", "Muon eta before isolation is applied;#eta", 50, -2.5, 2.5);

@@ -65,6 +65,7 @@ kwargs = {
     "rebinX"           : 1,
     "rebinY"           : 1,
     "xlabelsize"       : 10,
+    "ylabelsize"       : None,
     "ratio"            : True,
     "ratioYlabel"      : None,
     "ratioInvert"      : False,
@@ -199,7 +200,7 @@ def main(hName, opts):
     # Create a comparison plot
     ratioOpts = {"ymin": 0.0, "ymax": 2.0}
     if kwargs.get("logY")==True:
-        canvOpts = {"xmin": 0.0, "ymin": 1e-1, "ymaxfactor": 10}
+        canvOpts = {"xmin": 0.0, "ymin": 1e-1, "ymaxfactor": 10} #"xmin": 6.0 for main counter
     else:
         canvOpts = {"ymin": 0.0, "ymaxfactor": 1.2}
 
@@ -211,6 +212,7 @@ def main(hName, opts):
                    rebinX=kwargs.get("rebinX"), 
                    rebinY=kwargs.get("rebinY"),
                    xlabelsize=kwargs.get("xlabelsize"),
+                   ylabelsize=kwargs.get("ylabelsize"),
                    ratio=kwargs.get("ratio"), 
                    stackMCHistograms=kwargs.get("stackMCHistograms"), 
                    ratioYlabel=kwargs.get("ratioYlabel"),
