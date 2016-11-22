@@ -162,7 +162,7 @@ void TauSelection::bookHistograms(TDirectory* dir) {
   hTriggerMatchDeltaR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR"  , "Trigger match #DeltaR;#DeltaR", 60, 0, 3.);
   hTauPtTriggerMatched  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauPtTriggerMatched" , "Tau pT, trigger matched;p_{T} (GeV/c)", 40, 0, 400);
   hTauEtaTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauEtaTriggerMatched", "Tau eta, trigger matched;#eta", 50, -2.5, 2.5);
-  hNPassed              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauNpassed"          , "Number of passed taus;Number of taus", 20, 0, 20);
+  hNPassed              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauNpassed"          , "Number of passed taus;Number of taus", 10, 0, 10);
   // Resolutions
   hPtResolution  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution" , "(reco pT - gen pT) / reco pT;(p_{T}^{reco} - p_{T}^{gen})/p_{T}^{reco}", 200, -1.0, 1.0);
   hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", "(reco eta - gen eta) / reco eta;(#eta^{reco} - #eta^{gen})/#eta^{reco}", 200, -1.0, 1.0);
