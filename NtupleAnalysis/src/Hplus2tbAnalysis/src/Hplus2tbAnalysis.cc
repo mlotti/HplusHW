@@ -155,11 +155,11 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // 1) Apply trigger 
   //================================================================================================   
   if (0) std::cout << "=== Trigger" << std::endl;
-  std::string TriggerName = "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056";
+  // std::string TriggerName = "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056";
   // std::string TriggerName = "HLT_PFHT450_SixJet40_BTagCSV_p056";
-  if ( !(fEvent.passHLTDecisionByName(TriggerName)) ) return;
-  // if ( !(fEvent.passTriggerDecision()) ) return; // need to implement
-
+  // if ( !(fEvent.passHLTDecisionByName(TriggerName)) ) return;
+  if ( !(fEvent.passTriggerDecision()) ) return;
+  
   cTrigger.increment();
   int nVertices = fEvent.vertexInfo().value();
   fCommonPlots.setNvertices(nVertices);
