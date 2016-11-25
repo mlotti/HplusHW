@@ -98,17 +98,17 @@ private:
   WrappedTH1 *hMuonPtPassed;
   WrappedTH1 *hMuonEtaPassed;
   WrappedTH1 *hMuonRelIsoPassed;
-  WrappedTH1 *hMuonRelIsoPassedPtEta;
-  WrappedTH1 *hMuonRelIsoPassedPtEtaId;
   WrappedTH1 *hPtResolution;
   WrappedTH1 *hEtaResolution;
   WrappedTH1 *hPhiResolution;
   WrappedTH1 *hIsolPtBefore;
   WrappedTH1 *hIsolEtaBefore;
   WrappedTH1 *hIsolVtxBefore;
+  WrappedTH1 *hIsolRelIsoBefore;
   WrappedTH1 *hIsolPtAfter;
   WrappedTH1 *hIsolEtaAfter;
   WrappedTH1 *hIsolVtxAfter;
+  WrappedTH1 *hIsolRelIsoAfter;
 };
 
 #endif
