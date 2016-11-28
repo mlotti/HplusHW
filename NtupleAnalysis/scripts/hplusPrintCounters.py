@@ -18,7 +18,13 @@ def main(opts):
     if len(opts.files) > 0:
         datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], opts=opts, weightedCounters=opts.weighted)
     else:
-        datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, weightedCounters=opts.weighted)
+        multicrabDir = os.getcwd()
+        for d in sys.argv:
+            if os.path.exists(d) and os.path.isdir(d):
+                multicrabDir = os.path.abspath(d)
+
+        #datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, weightedCounters=opts.weighted)
+        datasets = dataset.getDatasetsFromMulticrabDirs([multicrabDir],opts=opts, weightedCounters=opts.weighted)
 
     if os.path.exists(opts.lumifile):
         datasets.loadLuminosities(opts.lumifile)

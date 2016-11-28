@@ -208,15 +208,15 @@ import tarfile
 # The order of the task names is the same as they are in the
 # configuration file.
 def getTaskDirectories(opts, filename="multicrab.cfg", directory=""):
-    if hasattr(opts, "dirs") and len(opts.dirs) > 0:
-        ret = []
-        for d in opts.dirs:
-            if d[-1] == "/":
-                ret.append(d[0:-1])
-            else:
-                ret.append(d)
-        return ret
-    else:
+#    if hasattr(opts, "dirs") and len(opts.dirs) > 0:
+#        ret = []
+#        for d in opts.dirs:
+#            if d[-1] == "/":
+#                ret.append(d[0:-1])
+#            else:
+#                ret.append(d)
+#        return ret
+#    else:
         fname = os.path.join(directory, filename)
         if os.path.exists(fname):
             taskNames = _getTaskDirectories_crab2(fname)
