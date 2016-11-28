@@ -253,7 +253,7 @@ signal200Style = StyleCompound([
         Style(ROOT.kFullCross, ROOT.kBlue), 
         StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullCross),
         StyleFill(fillStyle=1001, fillColor=ROOT.kBlue), 
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kBlue) ])
+        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue) ])
 signal220Style = signalStyle.clone()
 signal250Style = signalStyle.clone()
 signal300Style = StyleCompound([
@@ -268,10 +268,10 @@ signal400Style = StyleCompound([
         StyleFill(fillStyle=1001, fillColor=ROOT.kSpring+5), 
         StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kSpring+5) ])
 signal500Style = StyleCompound([
-        Style(ROOT.kFullCircle, ROOT.kOrange+7), 
-        StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+7, markerSizes=None, markerStyle=ROOT.kFullCircle),
-        StyleFill(fillStyle=1001, fillColor=ROOT.kOrange+7), 
-        StyleLine(lineStyle=ROOT.kSolid, lineWidth=3, lineColor=ROOT.kOrange+7) ])
+        Style(ROOT.kFullCircle, ROOT.kBlue+3), 
+        StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue+3, markerSizes=None, markerStyle=ROOT.kFullCircle),
+        StyleFill(fillStyle=1001, fillColor=ROOT.kBlue+3), 
+        StyleLine(lineStyle=ROOT.kDashed, lineWidth=3, lineColor=ROOT.kBlue+3) ])
 #signal600Style  = signalStyle.clone()
 #signal400Style = signalStyle.clone()
 #signal500Style = signalStyle.clone()
@@ -299,7 +299,7 @@ sttwStyle         = stStyle
 ttStyle           = Style(ROOT.kFullSquare, ROOT.kMagenta-2)
 ttbbStyle         = Style(ROOT.kOpenCross, ROOT.kPink-9)
 ttjetsStyle       = Style(ROOT.kPlus, ROOT.kMagenta-4)
-ttttStyle         = Style(ROOT.kFullStar, ROOT.kYellow-10)
+ttttStyle         = Style(ROOT.kFullStar, ROOT.kYellow-9)
 ttwStyle          = Style(ROOT.kOpenSquare, ROOT.kSpring+9)
 ttzStyle          = Style(ROOT.kFullDiamond, ROOT.kAzure-4)
 wStyle            = Style(ROOT.kFullTriangleDown, ROOT.kOrange+9)

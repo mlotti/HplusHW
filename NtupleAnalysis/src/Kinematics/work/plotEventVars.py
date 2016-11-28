@@ -49,9 +49,8 @@ kwargs = {
     #"savePath"       : None,
     "savePath"       : os.getcwd() + "/Plots/",
     "refDataset"     : "ChargedHiggs_HplusTB_HplusToTB_M_200", #ChargedHiggs_HplusTB_HplusToTB_M_200
-    "rmDataset"      : ["QCD"] + signal2,
     "saveFormats"    : [".png"],#, ".pdf"],
-    "normalizeTo"    : "XSection", #One", "XSection", "Luminosity"
+    "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "createRatio"    : False,
     "logX"           : False,
     "logY"           : True,
@@ -152,15 +151,16 @@ hNames = [
 #================================================================================================
 # Main
 #================================================================================================
-def main():
+def main(opts):
 
     style    = tdrstyle.TDRStyle()
     
     # Set ROOT batch mode boolean
-    ROOT.gROOT.SetBatch(parseOpts.batchMode)
+    ROOT.gROOT.SetBatch(opts.batchMode)
     
     # Get all datasets from the mcrab dir
-    datasetsMgr  = GetDatasetsFromDir(parseOpts.mcrab, kwargs.get("analysis"))
+    # def GetDatasetsFromDir(mcrab, opts, **kwargs): #iro
+    datasetsMgr  = GetDatasetsFromDir(opts.mcrab, opts, **kwargs) #kwargs.get("analysis"))
 
     # Determine Integrated Luminosity (If Data datasets present)
     intLumi = GetLumi(datasetsMgr)
@@ -169,8 +169,8 @@ def main():
     datasetsMgr.updateNAllEventsToPUWeighted()
 
     # Remove datasets
-    print kwargs.get("rmDataset")
-    datasetsMgr.remove(kwargs.get("rmDataset"))
+    #print kwargs.get("rmDataset")
+    #datasetsMgr.remove(kwargs.get("rmDataset"))
     # datasetsMgr.remove(filter(lambda name: not "QCD" in name, datasetsMgr.getAllDatasetNames()))
     # datasetsMgr.remove(filter(lambda name: "QCD" in name in name, datasetsMgr.getAllDatasetNames()))
     
@@ -186,11 +186,10 @@ def main():
     plots.mergeRenameReorderForDataMC(datasetsMgr) #WARNING: Merged MC histograms must be normalized to something!
 
     # Remove datasets (for merged names)
-    datasetsMgr.remove(kwargs.get("rmDataset"))
+    # datasetsMgr.remove(kwargs.get("rmDataset"))
     
     # Print the cross
-    datasetsMgr.PrintXSections() #emacs /uscms/home/aattikis/scratch0/CMSSW_8_0_19/src/HiggsAnalysis/NtupleAnalysis/python/tools/dataset.py
-
+    datasetsMgr.PrintCrossSections()
 
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
@@ -258,13 +257,25 @@ def main():
 #================================================================================================
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-m", "--mcrab"    , dest="mcrab"    , action="store", help="Path to the multicrab directory for input")
-    parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=True, help="Enables batch mode (canvas creation does NOT generates a window)")
-    parser.add_option("-v", "--verbose"  , dest="verbose"  , action="store_true", default=False, help="Enables verbose mode (for debugging purposes)")
-    (parseOpts, parseArgs) = parser.parse_args()
+    parser.add_option("-m", "--mcrab"    , dest="mcrab"    , action="store", 
+                      help="Path to the multicrab directory for input")
+
+    parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", 
+                      default=True, help="Enables batch mode (canvas creation does NOT generates a window)")
+
+    parser.add_option("-v", "--verbose"  , dest="verbose"  , action="store_true", default=False, 
+                      help="Enables verbose mode (for debugging purposes)")
+
+    parser.add_option("-i", "--includeTasks", dest="includeTasks" , default="", type="string",
+                      help="Only perform action for this dataset(s) [default: '']")
+    
+    parser.add_option("-e", "--excludeTasks", dest="excludeTasks" , default="", type="string",
+                      help="Exclude this dataset(s) from action [default: '']")
+    
+    (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
-    if parseOpts.mcrab == None:
+    if opts.mcrab == None:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         print __doc__
         sys.exit(0)
@@ -272,7 +283,7 @@ if __name__ == "__main__":
         pass
 
     # Program execution
-    main()
+    main(opts)
 
-    if not parseOpts.batchMode:
+    if not opts.batchMode:
         raw_input("=== plotTemplate.py: Press any key to quit ROOT ...")

@@ -14,14 +14,12 @@ a time most probably you are I/O -limited. The limit is how much memory one proc
 
 USAGE:
 ./runAnalysis.py -m <multicrab-directory> -j <numOfCores> -i <DatasetName>
-                                                                                                                                                                                   
 
 Example:
 ./runAnalysis.py -m /multicrab_CMSSW752_Default_07Jan2016/
 or
 ./runAnalysis.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
 
-                                                                                                                                                                                   
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kUnset    =  -1
@@ -33,7 +31,7 @@ The available ROOT options for the Error-Ignore-Level are (const Int_t):
 '''
 
 
-#================================================================================================                                                                                  
+#================================================================================================
 # Imports
 #================================================================================================
 import sys
@@ -50,7 +48,7 @@ import ROOT
 #================================================================================================
 prefix      = "HtbKinematics"
 postfix     = ""
-dataEras    = ["2015"] # dataEras = ["2015B","2015C"]
+dataEras    = ["2016"] # dataEras = ["2015B","2015C"]
 searchModes = ["80to1000"]
 
 ROOT.gErrorIgnoreLevel = 0 
@@ -85,7 +83,7 @@ def Print(msg, printHeader=True):
 #================================================================================================
 def main():
 
-    # Require at least two arguments (script-name, path to multicrab)                                                                                                              
+    # Require at least two arguments (script-name, path to multicrab)
     if len(sys.argv) < 2:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         print __doc__
@@ -159,12 +157,12 @@ def main():
                               dataEras,
                               searchModes,
                               ### Options
-                              usePUreweighting=True,
+                              usePUreweighting=False,
                               doSystematicVariations=False)
 
     # Perform variations (e.g. for optimisation)
-    # builder.addVariation("METSelection.METCutValue", [100,120,140])                                                                                                              
-    # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])                                                                                       
+    # builder.addVariation("METSelection.METCutValue", [100,120,140])
+    # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"]) 
 
     # Build the builder
     builder.build(process, allSelections)
@@ -200,7 +198,7 @@ def main():
         process.run()
 
         
-#================================================================================================                                                                                  
+#================================================================================================
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab"           , dest="mcrab"           , action="store", help="Path to the multicrab directory for input")

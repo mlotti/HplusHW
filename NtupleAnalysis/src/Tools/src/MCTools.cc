@@ -281,7 +281,7 @@ double MCTools::GetLxy(const genParticle &genP,
   // genParticles.
   //
 
-  std::cout << "\n=== MCTools::GetLxy(): Decommissioned due to genP variables vtxX, vtxY, vtxZ becoming obsolete (took too much space)" << std::endl;
+  if (0) std::cout << "\n=== MCTools::GetLxy(): Decommissioned due to genP variables vtxX, vtxY, vtxZ becoming obsolete (took too much space)" << std::endl;
 
   // Get the particles
   const genParticle *p = &genP;
@@ -331,7 +331,7 @@ double MCTools::GetD0(const genParticle &genP,
   // Get the particles
   const genParticle *p = &genP;
   const genParticle *m = &mother;
- 
+
   // Ensure the particle has a mother!
   if (p->mothers().size() < 1) return 0.0;
 
@@ -351,7 +351,6 @@ double MCTools::GetD0(const genParticle &genP,
   // In case mother has zero pt ( angle = nan)
   if (m_p4.Pt() == 0) return -3.0;
 
-
   // Calculate the Angle between two vectors (in radians)
   double angle = p_p4.Angle( m_p4.Vect() );
   
@@ -359,11 +358,11 @@ double MCTools::GetD0(const genParticle &genP,
   double Lxy = GetLxy(genP, mother, daughter, vtx); 
 
   // Calculate the |d0| (in mm). [The TMath::Sin() requires angle in radians]
-  double d0Mag = TMath::Sin(angle) * Lxy;
+  double d0 = TMath::Sin(angle) * Lxy;
   
-  if (0) std::cout << "=== MCTools::GetD0(): |d0| = Sin("<<angle<<") * " << Lxy << " = " << d0Mag  << ", wrt point (" << vtx.x() << ", " << vtx.y() << ", " << vtx.z() << "). Particle with index " << p->index() << " has mother with index " << m->index() << "." << std::endl;
+  if (0) std::cout << "=== MCTools::GetD0(): |d0| = Sin("<<angle<<") * " << Lxy << " = " << d0  << ", wrt point (" << vtx.x() << ", " << vtx.y() << ", " << vtx.z() << "). Particle with index " << p->index() << " has mother with index " << m->index() << "." << std::endl;
 
-  return d0Mag;
+  return d0;
 }
 
 

@@ -6,11 +6,13 @@ PUDependencyPlots::PUDependencyPlots(HistoWrapper& histoWrapper, bool isEnabled,
   
 PUDependencyPlots::~PUDependencyPlots() {
   delete hNvtxTrg;
+  delete hNvtxMETFilter;
   delete hNvtxVtx;
   delete hNvtxTau;
   delete hNvtxAntiIsolatedTau;
   delete hNvtxElectronVeto;
   delete hNvtxMuonVeto;
+  delete hNvtxTauVeto;
   delete hNvtxJetSelection;
   delete hNvtxAngularCutsCollinear;
   delete hNvtxMETSelection;
@@ -29,6 +31,8 @@ void PUDependencyPlots::book(TDirectory* dir, bool isData) {
   
   hNvtxTrg = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxTrg", ";N_{vtx};N_{events}",
                                         fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
+  hNvtxMETFilter = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxMETFilter", ";N_{vtx};N_{events}",
+                                        fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
   hNvtxVtx = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxVtx", ";N_{vtx};N_{events}",
                                         fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
   hNvtxTau = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxTau", ";N_{vtx};N_{events}",
@@ -38,6 +42,8 @@ void PUDependencyPlots::book(TDirectory* dir, bool isData) {
   hNvtxElectronVeto = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxElectronVeto", ";N_{vtx};N_{events}",
                                         fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
   hNvtxMuonVeto = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxMuonVeto", ";N_{vtx};N_{events}",
+                                        fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
+  hNvtxTauVeto = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxTauVeto", ";N_{vtx};N_{events}",
                                         fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
   hNvtxJetSelection = fHistoWrapper.makeTH<TH1F>(level, myDir, "NvtxJetSelection", ";N_{vtx};N_{events}",
                                         fHistoSettings.bins(), fHistoSettings.min(), fHistoSettings.max());
@@ -58,6 +64,12 @@ void PUDependencyPlots::book(TDirectory* dir, bool isData) {
 void PUDependencyPlots::fillControlPlotsAfterTrigger(const Event& event) { 
   hNvtxTrg->Fill(fNvtx);
 }
+
+
+void PUDependencyPlots::fillControlPlotsAfterMETFilter(const Event& event) { 
+  hNvtxMETFilter->Fill(fNvtx);
+}
+
 
 void PUDependencyPlots::fillControlPlotsAtVertexSelection(const Event& event) {
   hNvtxVtx->Fill(fNvtx);
@@ -82,6 +94,11 @@ void PUDependencyPlots::fillControlPlotsAtElectronSelection(const Event& event, 
 void PUDependencyPlots::fillControlPlotsAtMuonSelection(const Event& event, const MuonSelection::Data& data)  {
   if (data.hasIdentifiedMuons()) return;
   hNvtxMuonVeto->Fill(fNvtx);
+}
+
+void PUDependencyPlots::fillControlPlotsAtTauSelection(const Event& event, const TauSelection::Data& data)  {
+  if (data.hasIdentifiedTaus()) return;
+  hNvtxTauVeto->Fill(fNvtx);
 }
 
 void PUDependencyPlots::fillControlPlotsAtJetSelection(const Event& event, const JetSelection::Data& data)  {

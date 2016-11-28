@@ -479,7 +479,7 @@ def GetLumiAndUnits(output):
     return lumi, unit
 
         
-def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="true", maxPileupBin="50", numPileupBins="50", pileupHistName="pileup"):
+def CallPileupCalc(task, fOUT, inputFile, inputLumiJSON, minBiasXsec, calcMode="true", maxPileupBin="100", numPileupBins="100", pileupHistName="pileup"):
     '''
     Script to estimate pileup distribution using xing instantaneous luminosity
     information and minimum bias cross section.  Output is TH1D stored in root

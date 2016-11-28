@@ -52,22 +52,11 @@ void BooleanOr::throwEmpty() const {
 }
 
 bool BooleanOr::value_SearchBranches(std::string triggerName) const {
-  int index=-1;
-  int counter=0;
   bool branchValue=false;
-  for(auto& name: fBranchNames) {
-    //std::cout<<"triggerName="<<name<<std::endl;
-    if(name == triggerName){
-      index=counter;
-    }
-    counter++;
-  }
-  int counter2=0;
-  for(const Branch<bool> *branch: fBranches){
-    if (counter2==index){
-      branchValue=branch->value();
-    }
-    counter2++;
+  std::string genericName = triggerName + "_vx";
+  for (const Branch<bool> *branch: fBranches){
+    if (branch->getName() != genericName) continue;
+    branchValue = branch->value();
   }
   return branchValue;
 }

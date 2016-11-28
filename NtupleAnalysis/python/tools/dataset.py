@@ -2980,7 +2980,11 @@ class Dataset:
                 raise Exception("Could not find counter histogram, message: %s" % str(e))
             self.nAllEventsUnweighted = -1
         if not normalizationCheckStatus:
-            raise Exception("Error: dset=%s: Unweighted skimcounter is smaller than all events counter of analysis! Please check (this is known to happen when running PROOF on samples with negative generator weights."%self.name)
+            msg  = "Error: dset=%s: Unweighted skimcounter is smaller than all events counter of analysis!" % (self.name)
+            msg += "Please check (this is known to happen when running PROOF on samples with negative generator weights."
+            #raise Exception(msg)
+            Print(msg)
+            raw_input("\tPress any key to continue")
 
         self.nAllEventsWeighted = None
         self.nAllEvents = self.nAllEventsUnweighted
@@ -4304,7 +4308,7 @@ class DatasetPrecursor:
         self._pileup_down = None
         self._nAllEvents = 0.0
 
-        Print("Opening ROOT files", True)
+        Verbose("Opening ROOT files", False)
         for name in self._filenames:
 
             Verbose(name, False)

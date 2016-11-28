@@ -254,9 +254,11 @@ _datasetMerge = {
     "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLLHT",
 
     # Diboson merge, comment this away to keep WW, WZ, ZZ samples separate
-    "WW": "Diboson",
-    "WZ": "Diboson",
-    "ZZ": "Diboson",
+    "WWTo4Q": "Diboson",
+    "ZZTo4Q": "Diboson",
+    "WW"    : "Diboson",
+    "WZ"    : "Diboson",
+    "ZZ"    : "Diboson",
 
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8_ext1": "TTBB",
@@ -443,6 +445,10 @@ for mass in _heavyHplusToTBbarMasses:
 
 ## Map the logical dataset names to plot styles
 _plotStyles = {
+    "ChargedHiggs_HplusTB_HplusToTB_M_200": styles.signal200Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_300": styles.signal300Style,
+    "ChargedHiggs_HplusTB_HplusToTB_M_500": styles.signal500Style,
+
     "DYJetsToLL"    : styles.dyStyle,
     "DYJetsToLLHT"  : styles.dyStyle,
     "Data"          : styles.dataStyle,

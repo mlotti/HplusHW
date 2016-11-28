@@ -83,7 +83,8 @@ Taus = cms.VPSet(
 )
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV
-Taus_TauPOGRecommendation = Taus.copy()
+Taus_TauPOGRecommendation = cms.VPSet()
+Taus_TauPOGRecommendation.append(Taus[0].clone())
 Taus_TauPOGRecommendation[0].discriminators = cms.vstring(
                 'againstElectronLooseMVA6',                                                                                                                                                                                               
                 'againstElectronMediumMVA6',                                                                                                                                                                                              
@@ -99,6 +100,7 @@ Taus_TauPOGRecommendation[0].discriminators = cms.vstring(
                 'decayModeFindingNewDMs'
 )
 
-TausNoSysVariations = Taus_TauPOGRecommendation.copy()
+TausNoSysVariations = cms.VPSet()
+TausNoSysVariations.append(Taus_TauPOGRecommendation[0].clone())
 for i in range(len(TausNoSysVariations)):
     TausNoSysVariations[i].systVariations = cms.bool(False)

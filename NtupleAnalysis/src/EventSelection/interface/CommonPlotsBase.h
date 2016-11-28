@@ -24,6 +24,7 @@ public:
   //virtual void fillControlPlotsAtVetoTauSelection(const Event& event, const VetoTauSelection::Data& tauVetoData);
   virtual void fillControlPlotsAtElectronSelection(const Event& event, const ElectronSelection::Data& data);
   virtual void fillControlPlotsAtMuonSelection(const Event& event, const MuonSelection::Data& data);
+  virtual void fillControlPlotsAtTauSelection(const Event& event, const TauSelection::Data& data);
   virtual void fillControlPlotsAtJetSelection(const Event& event, const JetSelection::Data& data);
   virtual void fillControlPlotsAtAngularCutsCollinear(const Event& event, const AngularCutsCollinear::Data& data);
   virtual void fillControlPlotsAtMETSelection(const Event& event, const METSelection::Data& data);
@@ -34,6 +35,7 @@ public:
   
   //===== unique filling methods (to be called AFTER return statement from analysis routine)
   virtual void fillControlPlotsAfterTrigger(const Event& event);
+  virtual void fillControlPlotsAfterMETFilter(const Event& event);
   virtual void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data);
   virtual void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
   virtual void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);

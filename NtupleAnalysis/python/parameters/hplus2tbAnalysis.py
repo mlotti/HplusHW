@@ -17,7 +17,7 @@ trigger = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
     triggerOR = [
         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
-        "HLT_PFHT450_SixJet40_BTagCSV_p056",
+        # "HLT_PFHT450_SixJet40_BTagCSV_p056",
         #"HLT_QuadJet45_DoubleBTagCSV_p087",
         #"HLT_QuadPFJetBF",
         #"HLT_PFHT300",
@@ -44,6 +44,37 @@ trigger = PSet(
   triggerOR2 = [],
 )
 
+
+
+#================================================================================================
+# Tau selection (sync with HToTauNu analysis)
+#================================================================================================
+# import HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters as signalAnalysis
+#tauSelection = signalAnalysis.tauSelection
+
+tauSelection = PSet(
+    applyTriggerMatching = False,
+    triggerMatchingCone  = 0.1,  # DeltaR for matching offline tau with trigger tau
+    tauPtCut             = 60.0, # for heavy H+, overriden in signalAnalysis.py for light H+
+    tauEtaCut            = 2.1,  #
+    tauLdgTrkPtCut       = 30.0, #
+    prongs               = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
+    rtau                 = 0.0,  # to disable set to 0.0
+    againstElectronDiscr = "againstElectronTightMVA6",
+    againstMuonDiscr     = "againstMuonLoose3",
+    isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+    )
+
+# tau identification scale factors
+scaleFactors.assignTauIdentificationSF(tauSelection)
+# tau misidentification scale factors
+scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
+# tau trigger SF
+scaleFactors.assignTauTriggerSF(tauSelection, "nominal")
+
+
 #================================================================================================
 # MET filter
 #================================================================================================
@@ -60,12 +91,10 @@ metFilter = PSet(
 # Electron veto
 #================================================================================================
 eVeto = PSet(
-    electronPtCut         = 15.0,
-    electronEtaCut        = 2.5,
-    electronNCutValue     =  1,
-    electronNCutDirection = "<",    # options: ==, !=, <, <=, >, >=
-    electronID            = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-    electronIsolation     = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronPtCut     = 15.0,
+    electronEtaCut    = 2.5,
+    electronID        = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
+    electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
 #================================================================================================
@@ -74,8 +103,6 @@ eVeto = PSet(
 muVeto = PSet(
     muonPtCut         = 10.0,
     muonEtaCut        = 2.5,
-    muonNCutValue     =  1,
-    muonNCutDirection = "<",         # options: ==, !=, <, <=, >, >=
     muonID            = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
     muonIsolation     = "veto",      # loosest possible for vetoing ("veto"), "tight" for selecting
 )
@@ -103,7 +130,7 @@ bjetSelection = PSet(
     jetEtaCut                 = 2.5,
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Loose",
-    numberOfBJetsCutValue     = 1,
+    numberOfBJetsCutValue     = 2,
     numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
 
@@ -185,6 +212,7 @@ allSelections = PSet(
     HistogramAmbientLevel = histogramAmbientLevel,
     HtSelection           = htSelection,
     JetSelection          = jetSelection,
+    TauSelection          = tauSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,
     MuonSelection         = muVeto,
