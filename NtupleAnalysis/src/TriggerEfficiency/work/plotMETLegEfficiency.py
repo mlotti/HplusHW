@@ -5,6 +5,7 @@ import sys
 import re
 import ROOT
 import array
+import string
 
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
@@ -19,7 +20,7 @@ pythonWriter = PythonWriter()
 ROOT.gROOT.SetBatch(True)
 plotDir = "METLeg2016"
 
-formats = [".pdf",".png"]
+formats = [".pdf",".png",".C",".root"]
 
 def usage():
     print "\n"
@@ -60,6 +61,7 @@ def analyze(analysis=None):
         if met_match:
             met = met_match.group("met")
 
+        print "Analysis",analysis
         datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis)
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="Tau\S+25ns$|TTJets$")
 #        datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="Tau_Run2015C|Tau\S+25ns_Silver$|DYJetsToLL|WJetsToLNu$")
@@ -128,7 +130,8 @@ def analyze(analysis=None):
         histograms.addText(0.4, 0.87, "LooseIsoPFTau50_Trk30_eta2p1_"+met, 17)
         #    histograms.addText(0.2, 0.53, analysis.split("_")[len(analysis.split("_")) -1], 17)
 #        label = analysis.split("_")[1]
-        label = "2016"
+#        label = "2016"
+        label = string.replace(analysis,"METLeg_","")
         histograms.addText(0.2, 0.53, label, 17)
         runRange = datasets.loadRunRange()
         histograms.addText(0.2, 0.46, "Runs "+runRange, 17)
@@ -248,7 +251,6 @@ def analyze(analysis=None):
     p.save(formats)
     """
 
-    """
     # CaloMET
     """
     #### MET80

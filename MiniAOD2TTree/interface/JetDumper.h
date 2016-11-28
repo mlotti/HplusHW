@@ -71,6 +71,7 @@ class JetDumper : public BaseDumper {
         FourVectorDumper *MCjet;
         
         // Systematics variations for tau 4-vector
+	bool systVariations;
         FourVectorDumper *systJESup;
         FourVectorDumper *systJESdown;
         FourVectorDumper *systJERup;

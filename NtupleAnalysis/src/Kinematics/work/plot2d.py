@@ -29,14 +29,19 @@ import ROOT
 # Variable Definition
 #================================================================================================
 kwargs = {
+    "verbose"        : False,
+    "dataEra"        : "Run2016",
+    "searchMode"     : "80to1000",
     "analysis"       : "Kinematics",
+    "optMode"        : "",
     #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/M_200/",
-    "savePath"       : None,
-    "refDataset"     : "QCD", #ChargedHiggs_HplusTB_HplusToTB_M_, TT, QCD
-    "saveFormats"    : [".png"],#, ".pdf"],
-    "normalizeTo"    : "One", #One", "XSection", "Luminosity"
-    "zMin"           : 1e-5,
-    "zMax"           : 5e-2,
+    #"savePath"       : None,
+    "savePath"       : os.getcwd() + "/Plots/",
+    "refDataset"     : "QCD-b",
+    "saveFormats"    : [".png"],
+    "normalizeTo"    : "Luminosity", #One", "XSection", "Luminosity"
+    "zMin"           : 1e-1,
+    "zMax"           : None,
     "rebinX"         : 1,
     "rebinY"         : 1,
     "createRatio"    : False,
@@ -47,13 +52,11 @@ kwargs = {
     "gridY"          : True,
     "drawStyle"      : "COLZ", #"CONT4" "COLZ" "COL"
     "legStyle"       : "F",     # "LP", "F"
-    "verbose"        : False,
     "cutValue"       : None,
     "cutBox"         : False,
     "cutLine"        : False,
     "cutLessthan"    : False,
     "cutFillColour"  : ROOT.kAzure-4,
-    # "rmDataset"      : ["ChargedHiggs_HplusTB_HplusToTB_M_300"], #"QCD"]
 }
 
 
@@ -85,7 +88,7 @@ hNames = [
 #================================================================================================
 # Main
 #================================================================================================
-def main():
+def main(opts):
 
     style = tdrstyle.TDRStyle()
     #style.setWide(True)
@@ -99,32 +102,37 @@ def main():
  
     
     # Set ROOT batch mode boolean
-    ROOT.gROOT.SetBatch(parseOpts.batchMode)
+    ROOT.gROOT.SetBatch(opts.batchMode)
     
-    # Get all datasets from the mcrab dir
-    datasetsMgr  = GetDatasetsFromDir(parseOpts.mcrab, kwargs.get("analysis"))
-
-    # Determine Integrated Luminosity (If Data datasets present)
-    intLumi = GetLumi(datasetsMgr)
-    
-    # Update to PU
+    # ========================================
+    # Datasets
+    # ========================================
+    # Setup & configure the dataset manager
+    datasetsMgr = GetDatasetsFromDir(opts.mcrab, opts, **kwargs)
+    intLumi     = GetLumi(datasetsMgr)
     datasetsMgr.updateNAllEventsToPUWeighted()
+    datasetsMgr.PrintCrossSections()
+    datasetsMgr.PrintLuminosities()
+
+    # Set/Overwrite cross-sections
+    for d in datasetsMgr.getAllDatasets():
+        if "ChargedHiggs" in d.getName():
+            datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
+    
+    # Merge datasts (Note: Merged MC histograms must be normalized to something)
+    plots.mergeRenameReorderForDataMC(datasetsMgr)
 
     # Remove datasets
-    #datasetsMgr.remove(kwargs.get("rmDataset"))
-    datasetsMgr.remove(filter(lambda name: not kwargs.get("refDataset") in name, datasetsMgr.getAllDatasetNames()))
-
-    # Set custom XSections
-    # d.getDataset("TT_ext3").setCrossSection(831.76)
+    if 0:
+        datasetsMgr.remove("TTJets")
+        datasetsMgr.remove(filter(lambda name: not "QCD" in name, datasetsMgr.getAllDatasetNames()))
     
-    # Default merging & ordering: "Data", "QCD", "SingleTop", "Diboson"
-    plots.mergeRenameReorderForDataMC(datasetsMgr) #WARNING: Merged MC histograms must be normalized to something!
+    # Print dataset information
+    datasetsMgr.PrintInfo()
 
-    # Remove datasets (for merged names)
-    # datasetsMgr.remove(kwargs.get("rmDataset"))
                   
     # For-loop: All Histogram names
-    for hName in hNames:
+    for counter, hName in enumerate(hNames):
         savePath, saveName = GetSavePathAndName(hName, **kwargs)                
 
         # Get Histos for Plotter
@@ -153,8 +161,7 @@ def main():
 
         # Customise frame
         p.getFrame().GetXaxis().SetTitle( getTitleX(refHisto, **kwargs) )
-        p.getFrame().GetYaxis().SetTitle( getTitleY(refHisto, **kwargs) )
-        # p.getFrame().GetZaxis().SetTitle( getTitleZ(refHisto, **kwargs) ) #does not work
+        #p.getFrame().GetYaxis().SetTitle( getTitleY(refHisto, **kwargs) )
         
         # SetLog
         SetLogAndGrid(p, **kwargs)
@@ -176,11 +183,11 @@ def main():
 
         # Customise text
         histograms.addStandardTexts(lumi=intLumi)
-        histograms.addText(0.16, 0.95, plots._legendLabels[kwargs.get("refDataset")], 22)
-        #histograms.addText(0.73, 0.88, plots._legendLabels[kwargs.get("refDataset")], 17)
+        #histograms.addText(0.17, 0.95, plots._legendLabels[kwargs.get("refDataset")], 22)
+        histograms.addText(0.17, 0.88, plots._legendLabels[kwargs.get("refDataset")], 17)
         
         # Save canvas under custom dir
-        SaveAs(p, savePath, saveName, kwargs.get("saveFormats"))
+        SaveAs(p, savePath, saveName, kwargs.get("saveFormats"), counter==0)
 
     return
 
@@ -188,14 +195,28 @@ def main():
 # Main
 #================================================================================================
 if __name__ == "__main__":
+
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
-    parser.add_option("-m", "--mcrab"    , dest="mcrab"    , action="store", help="Path to the multicrab directory for input")
-    parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=True, help="Enables batch mode (canvas creation does NOT generates a window)")
-    parser.add_option("-v", "--verbose"  , dest="verbose"  , action="store_true", default=False, help="Enables verbose mode (for debugging purposes)")
-    (parseOpts, parseArgs) = parser.parse_args()
+
+    parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
+                      help="Path to the multicrab directory for input")
+
+    parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=True, 
+                      help="Enables batch mode (canvas creation does NOT generates a window)")
+
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=False, 
+                      help="Enables verbose mode (for debugging purposes)")
+
+    parser.add_option("-i", "--includeTasks", dest="includeTasks" , default="", type="string",
+                      help="Only perform action for this dataset(s) [default: '']")
+
+    parser.add_option("-e", "--excludeTasks", dest="excludeTasks" , default="", type="string",
+                      help="Exclude this dataset(s) from action [default: '']")
+
+    (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
-    if parseOpts.mcrab == None:
+    if opts.mcrab == None:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         print __doc__
         sys.exit(0)
@@ -203,9 +224,9 @@ if __name__ == "__main__":
         pass
 
     # Program execution
-    main()
+    main(opts)
 
-    if not parseOpts.batchMode:
+    if not opts.batchMode:
         raw_input("=== plotTemplate.py: Press any key to quit ROOT ...")
 
 

@@ -105,9 +105,9 @@ public:
   std::vector<short> daughters() const { return fCollection->fDaughters->value()[index()]; } // Required: "#pragma link C++ class vector<vector<short> >+;" in Framework/src/FrameworkLinkdef.h 
   short status() const { return fCollection->fStatus->value()[index()]; }
   short charge() const { return fCollection->fCharge->value()[index()]; }
-  double vtxX() const { return fCollection->fVtxX->value()[index()]; }
-  double vtxY() const { return fCollection->fVtxY->value()[index()]; }
-  double vtxZ() const { return fCollection->fVtxZ->value()[index()]; }
+  // double vtxX() const { return fCollection->fVtxX->value()[index()]; }
+  // double vtxY() const { return fCollection->fVtxY->value()[index()]; }
+  // double vtxZ() const { return fCollection->fVtxZ->value()[index()]; }
   bool fromHardProcessBeforeFSR() const { return fCollection->fFromHardProcessBeforeFSR->value()[index()]; }
   bool fromHardProcessDecayed() const { return fCollection->fFromHardProcessDecayed->value()[index()]; }
   bool fromHardProcessFinalState() const { return fCollection->fFromHardProcessFinalState->value()[index()]; }
@@ -214,9 +214,9 @@ public:
     fDaughters(nullptr),
     fStatus(nullptr),
     fCharge(nullptr),
-    fVtxX(nullptr),
-    fVtxY(nullptr),
-    fVtxZ(nullptr),
+    // fVtxX(nullptr),
+    // fVtxY(nullptr),
+    // fVtxZ(nullptr),
     // FIXME: These must be moved (added becaused autogenerate script not fully operation for GenParticles)
     fFromHardProcessBeforeFSR(nullptr),
     fFromHardProcessDecayed(nullptr),
@@ -253,9 +253,9 @@ public:
     mgr.book(prefix()+"_daughters", &fDaughters);
     mgr.book(prefix()+"_status"   , &fStatus);
     mgr.book(prefix()+"_charge"   , &fCharge);
-    mgr.book(prefix()+"_vtxX"     , &fVtxX);
-    mgr.book(prefix()+"_vtxY"     , &fVtxY);
-    mgr.book(prefix()+"_vtxZ"     , &fVtxZ);
+    // mgr.book(prefix()+"_vtxX"     , &fVtxX);
+    // mgr.book(prefix()+"_vtxY"     , &fVtxY);
+    // mgr.book(prefix()+"_vtxZ"     , &fVtxZ);
     // FIXME: These must be moved (added becaused autogenerate script not fully operation for GenParticles)
     mgr.book(prefix()+"_fromHardProcessBeforeFSR"                    , &fFromHardProcessBeforeFSR);
     mgr.book(prefix()+"_fromHardProcessDecayed"                      , &fFromHardProcessDecayed);
@@ -298,9 +298,9 @@ protected:
   const Branch<std::vector< std::vector<short> >> *fDaughters;
   const Branch<std::vector<short>> *fStatus;
   const Branch<std::vector<short>> *fCharge;
-  const Branch<std::vector<double>> *fVtxX;
-  const Branch<std::vector<double>> *fVtxY;
-  const Branch<std::vector<double>> *fVtxZ;
+  // const Branch<std::vector<double>> *fVtxX;
+  // const Branch<std::vector<double>> *fVtxY;
+  // const Branch<std::vector<double>> *fVtxZ;
   // FIXME: These must be moved (added becaused autogenerate script not fully operation for GenParticles)
   const Branch<std::vector<bool>> *fFromHardProcessBeforeFSR;
   const Branch<std::vector<bool>> *fFromHardProcessDecayed;

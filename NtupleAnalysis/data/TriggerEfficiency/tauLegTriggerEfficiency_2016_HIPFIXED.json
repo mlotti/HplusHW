@@ -1,0 +1,116 @@
+{
+  "_timestamp":   "Generated on Fri Sep 16 16:47:10 2016 by HiggsAnalysis/NtupleAnalysis/src/TriggerEfficiency/work/PythonWriter.py",
+  "_rootVersion": "6.04/14",
+  "dataParameters": {
+      "runs_278801_279931": {
+          "era": "2016HIPFIXED",
+          "firstRun"  :278801,
+          "lastRun"   :279931,
+          "luminosity": 4804.481,
+          "bins" : [
+             {
+               "pt"              :20.0,
+               "efficiency"      :0.0219282979464,
+               "uncertaintyPlus" :0.00308608893012,
+               "uncertaintyMinus":0.00273211895971
+             },
+             {
+               "pt"              :30.0,
+               "efficiency"      :0.0396659707724,
+               "uncertaintyPlus" :0.00440126919971,
+               "uncertaintyMinus":0.00399680252129
+             },
+             {
+               "pt"              :40.0,
+               "efficiency"      :0.121278941566,
+               "uncertaintyPlus" :0.011828157674,
+               "uncertaintyMinus":0.0109511346498
+             },
+             {
+               "pt"              :50.0,
+               "efficiency"      :0.660098522167,
+               "uncertaintyPlus" :0.0347760557274,
+               "uncertaintyMinus":0.0364649448214
+             },
+             {
+               "pt"              :60.0,
+               "efficiency"      :0.8,
+               "uncertaintyPlus" :0.0404472460279,
+               "uncertaintyMinus":0.0468188622053
+             },
+             {
+               "pt"              :80.0,
+               "efficiency"      :0.821428571429,
+               "uncertaintyPlus" :0.0748699767506,
+               "uncertaintyMinus":0.102762023591
+             },
+             {
+               "pt"              :100.0,
+               "efficiency"      :0.9375,
+               "uncertaintyPlus" :0.0517609683975,
+               "uncertaintyMinus":0.129429134796
+             },
+             {
+               "pt"              :120.0,
+               "efficiency"      :0.894736842105,
+               "uncertaintyPlus" :0.0676896510428,
+               "uncertaintyMinus":0.122321715465
+             }
+          ]
+      }
+  },
+  "mcParameters": {
+      "2016HIPFIXED": {
+          "bins" : [
+             {
+               "pt"              :20.0,
+               "efficiency"      :0.0399121673595,
+               "uncertaintyPlus" :0.00341283665105,
+               "uncertaintyMinus":0.00341283665105
+             },
+             {
+               "pt"              :30.0,
+               "efficiency"      :0.0428345467808,
+               "uncertaintyPlus" :0.00274479831737,
+               "uncertaintyMinus":0.00274479831737
+             },
+             {
+               "pt"              :40.0,
+               "efficiency"      :0.120111381466,
+               "uncertaintyPlus" :0.00597060916061,
+               "uncertaintyMinus":0.00597060916061
+             },
+             {
+               "pt"              :50.0,
+               "efficiency"      :0.670182550972,
+               "uncertaintyPlus" :0.0178614449382,
+               "uncertaintyMinus":0.0178614449382
+             },
+             {
+               "pt"              :60.0,
+               "efficiency"      :0.829701695003,
+               "uncertaintyPlus" :0.018991187916,
+               "uncertaintyMinus":0.018991187916
+             },
+             {
+               "pt"              :80.0,
+               "efficiency"      :0.892032590888,
+               "uncertaintyPlus" :0.0293409878255,
+               "uncertaintyMinus":0.0293409878255
+             },
+             {
+               "pt"              :100.0,
+               "efficiency"      :0.939244794737,
+               "uncertaintyPlus" :0.0296716102738,
+               "uncertaintyMinus":0.0296716102738
+             },
+             {
+               "pt"              :120.0,
+               "efficiency"      :0.840271800035,
+               "uncertaintyPlus" :0.0449869763392,
+               "uncertaintyMinus":0.0449869763392
+             }
+          ]
+      }
+  }
+}

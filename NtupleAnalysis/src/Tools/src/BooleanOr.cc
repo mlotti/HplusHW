@@ -2,6 +2,7 @@
 #include "Framework/interface/Exception.h"
 
 #include <sstream>
+#include <iostream>
 
 BooleanOr::BooleanOr() {}
 BooleanOr::~BooleanOr() {}
@@ -48,4 +49,14 @@ void BooleanOr::throwEmpty() const {
     names += name;
   }
   throw hplus::Exception("DataFormat") << "BooleanOr: None of the requested branches '" << names << "' exist in the TTree";
+}
+
+bool BooleanOr::value_SearchBranches(std::string triggerName) const {
+  bool branchValue=false;
+  std::string genericName = triggerName + "_vx";
+  for (const Branch<bool> *branch: fBranches){
+    if (branch->getName() != genericName) continue;
+    branchValue = branch->value();
+  }
+  return branchValue;
 }

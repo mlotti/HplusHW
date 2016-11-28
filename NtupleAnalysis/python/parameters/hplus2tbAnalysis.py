@@ -7,7 +7,7 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 # General parameters
 #================================================================================================
 verbose               = False
-histogramAmbientLevel = "Vital"  # Options: Systematics, Vital, Informative, Debug
+histogramAmbientLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
 
 
 #================================================================================================
@@ -16,31 +16,64 @@ histogramAmbientLevel = "Vital"  # Options: Systematics, Vital, Informative, Deb
 trigger = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
     triggerOR = [
-        "HLT_QuadJet45_DoubleBTagCSV_p087_v",
-        "HLT_QuadPFJet_VBF_v",
-        "HLT_PFHT300_v",
-        "HLT_PFHT400_v",
-        "HLT_PFHT475_v",
-        "HLT_PFHT600_v",
-        "HLT_PFHT650_v",
-        "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v",
-        "HLT_PFHT450_SixJet40_BTagCSV_p056_v",
-        "HLT_PFHT400_SixJet30_v",
-        "HLT_PFHT450_SixJet40_v",
-        "HLT_HT200_v",
-        "HLT_HT275_v",
-        "HLT_HT325_v",
-        "HLT_HT425_v",
-        "HLT_HT575_v",
-        "HLT_HT650_v",
-        "HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200_v",
-        "HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460_v",
-        "HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240_v",
-        "HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500_v",
-        "HLT_QuadPFJet_VBF_v",
+        "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
+        # "HLT_PFHT450_SixJet40_BTagCSV_p056",
+        #"HLT_QuadJet45_DoubleBTagCSV_p087",
+        #"HLT_QuadPFJetBF",
+        #"HLT_PFHT300",
+        #"HLT_PFHT400",
+        #"HLT_PFHT475",
+        #"HLT_PFHT600",
+        #"HLT_PFHT650",
+        #"HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
+        #"HLT_PFHT450_SixJet40_BTagCSV_p056",
+        #"HLT_PFHT400_SixJet30",
+        #"HLT_PFHT450_SixJet40",
+        #"HLT_HT200",
+        #"HLT_HT275",
+        #"HLT_HT325",
+        #"HLT_HT425",
+        #"HLT_HT575",
+        #"HLT_HT650",
+        #"HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200",
+        #"HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460",
+        #"HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240",
+        #"HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500",
+        #"HLT_QuadPFJet_VBF",
     ],
   triggerOR2 = [],
 )
+
+
+
+#================================================================================================
+# Tau selection (sync with HToTauNu analysis)
+#================================================================================================
+# import HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters as signalAnalysis
+#tauSelection = signalAnalysis.tauSelection
+
+tauSelection = PSet(
+    applyTriggerMatching = False,
+    triggerMatchingCone  = 0.1,  # DeltaR for matching offline tau with trigger tau
+    tauPtCut             = 60.0, # for heavy H+, overriden in signalAnalysis.py for light H+
+    tauEtaCut            = 2.1,  #
+    tauLdgTrkPtCut       = 30.0, #
+    prongs               = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
+    rtau                 = 0.0,  # to disable set to 0.0
+    againstElectronDiscr = "againstElectronTightMVA6",
+    againstMuonDiscr     = "againstMuonLoose3",
+    isolationDiscr       = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
+    )
+
+# tau identification scale factors
+scaleFactors.assignTauIdentificationSF(tauSelection)
+# tau misidentification scale factors
+scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
+scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
+# tau trigger SF
+scaleFactors.assignTauTriggerSF(tauSelection, "nominal")
+
 
 #================================================================================================
 # MET filter
@@ -58,12 +91,10 @@ metFilter = PSet(
 # Electron veto
 #================================================================================================
 eVeto = PSet(
-    electronPtCut         = 15.0,
-    electronEtaCut        = 2.5,
-    electronNCutValue     =  1,
-    electronNCutDirection = "<",  # options: ==, !=, <, <=, >, >=
-    electronID            = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
-    electronIsolation     = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
+    electronPtCut     = 15.0,
+    electronEtaCut    = 2.5,
+    electronID        = "cutBasedElectronID_Spring15_25ns_V1_standalone_veto",
+    electronIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
 #================================================================================================
@@ -72,8 +103,6 @@ eVeto = PSet(
 muVeto = PSet(
     muonPtCut         = 10.0,
     muonEtaCut        = 2.5,
-    muonNCutValue     =  1,
-    muonNCutDirection = "<",  # options: ==, !=, <, <=, >, >=
     muonID            = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
     muonIsolation     = "veto",      # loosest possible for vetoing ("veto"), "tight" for selecting
 )
@@ -82,27 +111,29 @@ muVeto = PSet(
 # Jet selection
 #================================================================================================
 jetSelection = PSet(
-    jetType          = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-    jetPtCut         = 30.0,
-    jetEtaCut        =  5.0,
-    jetNCutValue     =  6,
-    jetNCutDirection = ">=",  # options: ==, !=, <, <=, >, >=
-    #jetLdgPtCuts     = [70.0, 50.0, 40.0], # ldg, subldg, etc..
-    jetIDDiscr       = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
-    jetPUIDDiscr     = "", # does not work at the moment 
+    jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
+    jetPtCut                 = 30.0,
+    jetEtaCut                =  5.0,
+    numberOfJetsCutValue     =  6,
+    numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
+    jetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
+    jetPUIDDiscr             = "",        # does not work at the moment 
+    tauMatchingDeltaR        = 0.4,       # todo: remove dependency
+    # jetLdgPtCuts             = [70.0, 50.0, 40.0],
 )
 
 #================================================================================================
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    bjetPtCut             = 30.0,
-    bjetEtaCut            = 2.5,
-    bjetDiscr             = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
-    bjetDiscrWorkingPoint = "Loose",
-    bjetNCutValue         = 1,
-    bjetNCutDirection     = ">=", # options: ==, !=, <, <=, >, >=
+    jetPtCut                  = 30.0,
+    jetEtaCut                 = 2.5,
+    bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+    bjetDiscrWorkingPoint     = "Loose",
+    numberOfBJetsCutValue     = 2,
+    numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
+
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
                                     btagEfficiencyFilename = "btageff_hybrid.json",
@@ -113,9 +144,9 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 #================================================================================================
 metSelection = PSet(
     METCutValue                 = 100.0,
-    METCutDirection             = ">", # options: ==, !=, <, <=, >, >=
+    METCutDirection             = "<=",        # options: ==, !=, <, <=, >, >=
     METSignificanceCutValue     = -1000.0,
-    METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
+    METSignificanceCutDirection = ">",         # options: ==, !=, <, <=, >, >=
     METType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
     applyPhiCorrections          = False
 )
@@ -126,10 +157,10 @@ metSelection = PSet(
 #================================================================================================
 htSelection = PSet(
     HtCutValue                 = 300.0,
-    HtCutDirection             = ">=", # options: ==, !=, <, <=, >, >=
+    HtCutDirection             = ">=",        # options: ==, !=, <, <=, >, >=
     HtSignificanceCutValue     = -1000.0,
-    HtSignificanceCutDirection = ">=", # options: ==, !=, <, <=, >, >=
-    #HTType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
+    HtSignificanceCutDirection = ">=",        # options: ==, !=, <, <=, >, >=
+    # HTType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
 )
 
 #================================================================================================
@@ -150,16 +181,25 @@ commonPlotsOptions = PSet(
     enableGenuineTauHistograms = False, 
 
     # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
-    ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax= 500.0),
-    etaBins           = PSet(nBins =  50, axisMin = -5.0, axisMax=   5.0),
-    phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax=   3.2),  # PSet(nBins =  72, axisMin = -3.1415926, axisMax=3.1415926),
+    nVerticesBins     = PSet(nBins =  80, axisMin =  0.0, axisMax =  60.0),
+    bjetDiscrBins     = PSet(nBins =  20, axisMin = -1.0, axisMax =   1.0),
+    ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax = 500.0),
+    etaBins           = PSet(nBins =  50, axisMin = -5.0, axisMax =   5.0),
+    phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax =   3.2),  # PSet(nBins =  72, axisMin = -3.1415926, axisMax=3.1415926),
     invmassBins       = PSet(nBins =  50, axisMin =  0.0, axisMax = 500.0),
-    deltaEtaBins      = PSet(nBins =  50, axisMin =  0.0, axisMax=  10.0),
+    deltaEtaBins      = PSet(nBins =  50, axisMin =  0.0, axisMax =  10.0),
     deltaPhiBins      = PSet(nBins =  32, axisMin =  0.0, axisMax =  3.2),  # Note: putting high number of bins here will cause troubles
-    deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax=  10.0),
+    deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax =  10.0),
     njetsBins         = PSet(nBins =  20, axisMin =  0.0, axisMax = 10.0),
     metBins           = PSet(nBins =  80, axisMin =  0.0, axisMax = 800.0), # Note: use 10 GeV bin width because of QCD measurement
     enablePUDependencyPlots = True, # Enable/Disable some debug-level plots
+    # Todo: Remove dependency on these unused
+    rtauBins          = PSet(nBins=55, axisMin=0., axisMax=1.1),
+    angularCuts1DBins = PSet(nBins=52, axisMin=0., axisMax=260.),
+    topMassBins = PSet(nBins=60, axisMin=0., axisMax=600.),
+    WMassBins = PSet(nBins=60, axisMin=0., axisMax=300.),
+    mtBins = PSet(nBins=800, axisMin=0., axisMax=4000.), # 5 GeV bin width for tail fitter
+    #invmassBins = PSet(nBins=50, axisMin=0., axisMax=500.),
 )
 
 #================================================================================================
@@ -169,13 +209,14 @@ allSelections = PSet(
     BJetSelection         = bjetSelection,
     CommonPlots           = commonPlotsOptions,
     ElectronSelection     = eVeto,
-    MuonSelection         = muVeto,
+    HistogramAmbientLevel = histogramAmbientLevel,
+    HtSelection           = htSelection,
     JetSelection          = jetSelection,
+    TauSelection          = tauSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,
-    HtSelection           = htSelection,
+    MuonSelection         = muVeto,
     Trigger               = trigger,
-    HistogramAmbientLevel = histogramAmbientLevel,
     Verbose               = verbose,
 )
 

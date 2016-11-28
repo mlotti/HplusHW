@@ -167,11 +167,17 @@ bool Hplus2tbAnalysisSkim::filter(edm::Event& iEvent, const edm::EventSetup& iSe
         }else passed = true;
 	if(!passed) return false; 
     }
+    else
+      {
+	// trghandle.isValid() == False:
+	// If the trigger handle is not valid, The event will always be accepted, regardless of whether any of the skim trigger-bits are true or not.
+	// So for example, all non-reHLT samples will NOT be skimmed by any trigger. Instead all events will be regarded as having passed the skim trigger.
+      }
 
     if (cfg_verbose) 
       {
 	std::cout << "=== Passed Trigger:\n\t" << std::endl;
-	for (auto& p: cfg_triggerBits) std::cout << p << " ";
+	for (auto& p: cfg_triggerBits) std::cout << p << "\n";
 	std::cout << "\n" << std::endl;
       }	
 

@@ -96,11 +96,11 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = process.METNoiseFilter,
-    Taus      = process.Taus,
+    Taus      = process.TausNoSysVariations,
     Electrons = process.Electrons,
     Muons     = process.Muons,
-    Jets      = process.Jets,
-    METs      = process.METs,
+    Jets      = process.JetsNoSysVariations,
+    METs      = process.METsNoSysVariations,
     GenWeights = cms.VPSet(
         cms.PSet(
             branchname = cms.untracked.string("GenWeights"),

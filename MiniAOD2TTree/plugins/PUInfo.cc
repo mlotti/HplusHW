@@ -42,7 +42,7 @@ PUInfo::PUInfo(const edm::ParameterSet& iConfig) :
   filename(iConfig.getParameter<std::string>("OutputFileName"))
 {
 
-  hPU = new TH1F("pileup","pileup",50,0,50);
+  hPU = new TH1F("pileup","pileup",100,0,100);
 }
 
 PUInfo::~PUInfo() {}

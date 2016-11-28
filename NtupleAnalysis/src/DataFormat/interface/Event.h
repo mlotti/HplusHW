@@ -57,6 +57,10 @@ public:
     }
     return true;
   }  
+  bool passHLTDecisionByName(std::string& trigger) const {
+    return fTriggerOr.value_SearchBranches(trigger);
+  }
+
   const EventID& eventID() const { return fEventID; }
   const VertexInfo& vertexInfo() const { return fVertexInfo; }
   const METFilter& metFilter() const { return fMETFilter; }

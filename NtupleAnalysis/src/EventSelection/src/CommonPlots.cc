@@ -169,6 +169,8 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
   
   // muon veto
 
+  // tau veto
+
   // jet selection
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNjets, 
     "Njets", ";Number of selected jets;N_{events}",
@@ -451,6 +453,13 @@ void CommonPlots::fillControlPlotsAtMuonSelection(const Event& event, const Muon
   }
 }
 
+void CommonPlots::fillControlPlotsAtTauSelection(const Event& event, const TauSelection::Data& data) {
+  fTauData = data;
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAtTauSelection(event, data);
+  }
+}
+
 void CommonPlots::fillControlPlotsAtJetSelection(const Event& event, const JetSelection::Data& data) {
   fJetData = data;
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNjets, bIsGenuineTau, fJetData.getNumberOfSelectedJets());
@@ -511,6 +520,12 @@ void CommonPlots::fillControlPlotsAtAngularCutsBackToBack(const Event& event, co
 void CommonPlots::fillControlPlotsAfterTrigger(const Event& event) {
   for (auto& p: fBaseObjects) {
     p->fillControlPlotsAfterTrigger(event);
+  } 
+}
+
+void CommonPlots::fillControlPlotsAfterMETFilter(const Event& event) {
+  for (auto& p: fBaseObjects) {
+    p->fillControlPlotsAfterMETFilter(event);
   } 
 }
 

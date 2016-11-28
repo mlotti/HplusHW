@@ -8,13 +8,16 @@ multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg
 Re-Create (for example, when you get "Cannot find .requestcache" for a given task):
 multicrab.py --create -s T2_CH_CERN -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <task_dir> 
 Example:
-rm -rf /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8019_20161006T1003/<taskDir>
-multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d /uscms_data/d3/aattikis/workspace/multicrab/multicrab_Hplus2tbAnalysis_v8019_20161006T1003/
-(the above will re-create the job just for the dataset <task_dir>)
+cd <multicrab_dir>
+rm -rf <task_dir>
+cd CMSSW_X_Y_Y/src/HiggsAnalysis/MiniAOD2TTree/test
+multicrab.py --create -s T3_US_FNALLPC -p miniAOD2TTree_Hplus2tbAnalysisSkim_cfg.py -d <multicrab_dir>
 
 
 Check Status:
 multicrab.py --status --url --verbose -d <task_dir>
+or
+multicrab.py --status -i "QCD_bEnriched_HT300|2016B|2016E|2016F|2016G|ST_tW_antitop|ST_t_channel_top"
 
 
 Get Output:
@@ -103,7 +106,7 @@ from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
 #================================================================================================ 
 # Global Definitions
 #================================================================================================ 
-PBARLENGTH = 80
+PBARLENGTH = 20
 
 # A map pairing local <task-name> to EOS <task-name>
 taskNameMap = {} 
@@ -270,7 +273,7 @@ class Report:
 #================================================================================================ 
 # Function Definitions
 #================================================================================================ 
-def PrintProgressBar(taskName, iteration, total):
+def PrintProgressBar(taskName, iteration, total, suffix=""):
     '''
     Call in a loop to create terminal progress bar
     @params:
@@ -285,7 +288,6 @@ def PrintProgressBar(taskName, iteration, total):
 
     iteration      += 1 # since enumerate starts from 0
     prefix          = taskName
-    suffix          = 'Complete'
     decimals        = 1
     barLength       = PBARLENGTH
     txtSize         = 50
@@ -569,9 +571,12 @@ def GetTaskLogs(taskPath, retrievedLog, finished):
     if opts.get or opts.log:
         Verbose("Retrieved logs (%s) < finished (%s). Retrieving CRAB logs ..." % (retrievedLog, finished) )
         Touch(taskPath)
-        #dummy = crabCommand('getlog', 'command=LCG', 'checksum=no', dir=taskPath) # Produces Warning: 'crab getlog' command takes no arguments, 2 given
-        dummy = crabCommand('getlog', dir=taskPath)
-        # crab log <dir> --command=LCG --checksum=no #fixme: add support?
+        if "fnal" in GetHostname():
+            # "crab getoutput <task>" only works if the "-K ADLER32 option" is  removed (enabled by default)
+            # the checksum validation seems to be causing trouble - CRAB can't autodetect whether to use it or not
+            result = crabCommand('getlog', checksum="no", dir=taskPath)
+        else:
+            result = crabCommand('getlog', dir=taskPath)
     else:
         Verbose("Retrieved logs (%s) < finished (%s). To retrieve CRAB logs relaunch script with --get option." % (retrievedLog, finished) )
     return
@@ -590,13 +595,24 @@ def GetTaskOutput(taskPath, retrievedOut, finished):
     if opts.get:
         if opts.ask:
             if AskUser("Retrieved output (%s) < finished (%s). Retrieve CRAB output?" % (retrievedOut, finished) ):
-                dummy = crabCommand('getoutput', dir=taskPath)            
+                if "fnal" in GetHostname():
+                    # "crab getoutput <task>" only works if the "-K ADLER32 option" is  removed (enabled by default)
+                    # the checksum validation seems to be causing trouble - CRAB can't autodetect whether to use it or not
+                    result = crabCommand('getoutput', checksum="no", dir=taskPath)
+                else:
+                    result = crabCommand('getoutput', dir=taskPath)            
                 Touch(taskPath)
             else:
                 return
         else:
             Verbose("Retrieved output (%s) < finished (%s). Retrieving CRAB output ..." % (retrievedOut, finished) )
-            dummy = crabCommand("getoutput", dir=taskPath)
+
+            if "fnal" in GetHostname():
+                # "crab getoutput <task>" only works if the "-K ADLER32 option" is  removed (enabled by default)
+                # the checksum validation seems to be causing trouble - CRAB can't autodetect whether to use it or not
+                result = crabCommand('getoutput', checksum="no", dir=taskPath)
+            else:
+                result = crabCommand("getoutput", dir=taskPath)
             Touch(taskPath)
     else:
         Verbose("Retrieved output (%s) < finished (%s). To retrieve CRAB output relaunch script with --get option." % (retrievedOut, finished) )
@@ -631,9 +647,10 @@ def ResubmitTask(taskPath, failed):
     else:
         taskName = os.path.basename(taskPath)
         Print("Found %s failed jobs! Resubmitting ..." % (len(joblist) ) )
-        Print("crab resubmit %s --jobids %s" % (taskName, ",".join(joblist) ) )
+        Print("crab resubmit %s --jobids %s" % (taskName, joblist) )
+#        result = crabCommand('resubmit', jobids=joblist, dir=taskPath, force=True)
         result = crabCommand('resubmit', jobids=joblist, dir=taskPath)
-        Verbose("Calling crab resubmit %s --jobids %s returned" % (taskName, ",".join(joblist), result ) )
+        Verbose("Calling crab resubmit %s --jobids %s returned" % (taskName, joblist, result ) )
 
     return
 
@@ -1587,7 +1604,10 @@ def CreateCfgFile(dataset, taskDirName, requestName, infilePath, opts):
 
         match = crab_outLFNDirBase_re.search(line)
 	if match:
-            mcrabDir = os.path.basename(opts.dirName[:-1])  # exclude last "/", either-wise fails
+            if opts.dirName.endswith("/"):
+                mcrabDir = os.path.basename(opts.dirName[:-1])  # exclude last "/", either-wise fails
+            else:
+                mcrabDir = os.path.basename(opts.dirName)
             fullDir  = "/store/user/%s/CRAB3_TransferData/%s" % (getUsernameFromSiteDB(), mcrabDir) # NOT getpass.getuser()
             line     = "config.Data.outLFNDirBase = '" + fullDir + "'\n"
 
@@ -1787,10 +1807,11 @@ def CreateJob(opts, args):
     Verbose("CreateJob()", True)
     
     # Get general info
-    version     = GetCMSSW()
-    analysis    = GetAnalysis()
-    datasets    = DatasetGroup(analysis).GetDatasetList()
-    taskDirName = GetTaskDirName(analysis, version, datasets)
+    version      = GetCMSSW()
+    analysis     = GetAnalysis()
+    datasets     = DatasetGroup(analysis).GetDatasetList()
+    taskDirName  = GetTaskDirName(analysis, version, datasets)
+    opts.dirName = taskDirName
 
     # Give user last chance to abort
     AskToContinue(taskDirName, analysis, opts)
@@ -1806,7 +1827,7 @@ def CreateJob(opts, args):
         fullDir     = taskDirName + "/" + requestName
 
         if os.path.exists(fullDir) and os.path.isdir(fullDir):
-            Print("Task %s already exists! Skipping ..." % (requestName), False)
+            Verbose("Task %s already exists! Skipping ..." % (requestName), False)
             continue 
 
         Verbose("Task %s, creating crabConfig_%s.py file" % (dataset, dataset), True)
