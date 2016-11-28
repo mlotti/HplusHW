@@ -80,24 +80,18 @@ from HiggsAnalysis.NtupleAnalysis.tools.aux import execute
 
 import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 
-
-
 #================================================================================================
 # Global Definitions
 #================================================================================================
 PBARLENGTH  = 10
 
-# JSON files
-#   brilcalc usage taken from
-#   https://twiki.cern.ch/twiki/bin/view/CMS/CertificationTools#Lumi_calculation
-NormTagJSON     = "/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json"
+# Recommended minimum bias xsection
+minBiasXsecNominal = 69200 #from https://twiki.cern.ch/twiki/bin/viewauth/CMS/POGRecipesICHEP2016
 
-#   PileUp calc according to https://indico.cern.ch/event/459797/contribution/3/attachments/1181542/1711291/PPD_PileUp.pdf
+# JSON files
+NormTagJSON     = "/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json"
 PileUpJSON_2016 = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/PileUp/pileup_latest.txt"
 PileUpJSON_2015 = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt"
-
-# Recommended minimum bias cross section
-minBiasXsecNominal = 69200 # recommendation for ICHEP2016 data, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/POGRecipesICHEP2016
 
 # Regular Expression
 dataVersion_re = re.compile("dataVersion=(?P<dataVersion>[^: ]+)")
@@ -808,84 +802,6 @@ def main(opts, args):
         Verbose("%s, %s" % (task, os.path.basename(jsonfile) ) )
         lumicalc = opts.lumicalc
 
-<<<<<<< HEAD
-        #print
-        #print "================================================================================"
-        #print "Dataset %s:" % d
-#        if lumicalc == "lumiCalc1":
-#            cmd = ["lumiCalc.py", "-i", jsonfile, "--with-correction", "--nowarning", "overview", "-b", "stable"]
-#        if lumicalc == "lumiCalc2":
-#            cmd = ["lumiCalc2.py", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
-#        if lumicalc == "pixelLumiCalc":
-#            cmd = ["pixelLumiCalc.py", "-i", jsonfile, "--nowarning", "overview"]
-        #cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-r", "132440", "--nowarning", "overview"]
-        #ret = subprocess.call(cmd)
-
-	# brilcalc lumi -u /pb -i JSON-file
-        home = os.environ['HOME']
-        path = os.path.join(home,".local/bin")
-        exe  = os.path.join(path,"brilcalc")
-        if not os.path.exists(exe):
-            print " brilcalc not found, have you installed it?"
-            print " http://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html"
-            sys.exit()
-
-#        cmd = [exe,"lumi","--byls", "-u/pb","-i", jsonfile]
-	cmd = [exe,"lumi","-b", "STABLE BEAMS", "--normtag",NormTagJSON,"-u/pb","-i", jsonfile]
-        if opts.verbose:
-            print " ".join(cmd)
-
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = p.communicate()[0]
-        ret = p.returncode
-        if ret != 0:
-            print "Call to",cmd[0],"failed with return value %d with command" % ret
-            print " ".join(cmd)
-            print output
-            return 1
-        if opts.verbose:
-            print output
-
-
-        lines = output.split("\n")
-        lumi = -1.0
-        unit = None
-        for line in lines:
-            m = unit_re.search(line)
-            if m:
-                unit = m.group("unit")
-#                break
-
-            m = lumi_re.search(line)
-            if m:
-                lumi = float(m.group("recorded")) # lumiCalc2.py returns pb^-1
-
-        if unit == None:
-            raise Exception("Didn't find unit information from lumiCalc output, command was %s" % " ".join(cmd))
-        lumi = convertLumi(lumi, unit)
-
-        # PileUp
-        fOUT = os.path.join(task, "results", "PileUp.root")
-        minBiasXsec = minBiasXsecNominal
-#        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","80000","--maxPileupBin","50","--numPileupBins","50",fOUT] # 2015 xsec 80000
-#        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","63000","--maxPileupBin","50","--numPileupBins","50",fOUT] # 2016 xsec 63000
-        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT]
-
-        pu = subprocess.Popen(pucmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        puoutput = pu.communicate()[0]
-        puret = pu.returncode
-        if puret != 0:
-            print "Call to",pucmd[0],"failed with return value %d with command" % puret
-            print " ".join(pucmd)
-            print puoutput
-            return puret
-
-        if task == None:
-            print "File %s recorded luminosity %f pb^-1" % (jsonfile, lumi)
-        else:
-            print "Task %s recorded luminosity %f pb^-1" % (task, lumi)
-            data[task] = lumi
-=======
         # Run the steps to get the Pileup histo
         PrintProgressBar(task + ", BrilCalc   ", index, len(files), "[" + os.path.basename(jsonfile) + "]")
         ret, output =  CallBrilcalc(task, BeamStatus='"STABLE BEAMS"', CorrectionTag=NormTagJSON, LumiUnit="/pb", InputFile=jsonfile)
@@ -896,7 +812,6 @@ def main(opts, args):
 
         # Save lumi in task-lumi dictionary
         data[task] = lumi 
->>>>>>> sami/master
 
         # Save the json file after each data task in case of future errors
         if len(data) > 0:
@@ -908,7 +823,7 @@ def main(opts, args):
             pass
 
         # PileUp [https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors]
-        minBiasXsec = 63000
+        minBiasXsec = minBiasXsecNominal
         Verbose("Task %s, creating Pileup ROOT files" % (task) )
         fOUT     = os.path.join(task, "results", "PileUp.root")
         hName = "pileup"
