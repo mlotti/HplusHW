@@ -38,7 +38,7 @@ eras["2016E"] = "SingleMuon_Run2016E"
 eras["2016ICHEP"] = "SingleMuon_Run2016B|SingleMuon_Run2016C|SingleMuon_Run2016D"
 eras["2016HIP"] = "SingleMuon_Run2016B|SingleMuon_Run2016C|SingleMuon_Run2016D|SingleMuon_Run2016E|SingleMuon_Run2016F_PromptReco_v1_277816_278800"
 eras["2016HIPFIXED"] = "SingleMuon_Run2016F_PromptReco_v1_278801_278808|SingleMuon_Run2016G"
-
+eras["2016"] = "SingleMuon_Run2016"
 runmin = -1
 runmax = -1
 
@@ -131,8 +131,8 @@ def createAnalyzer(dataVersion,era):
                                    "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v3",
                                    "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_v1"]
         if "2016" in era:
-            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_vx"]
-            a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_vx"]
+            a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_vx","HLT_IsoMu22_eta2p1_vx"]
+            a.Trigger.triggerOR2= ["HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_vx","HLT_IsoMu21_eta2p1_LooseIsoPFTau50_Trk30_eta2p1_SingleL1_vx"]
 
         if era == "2016ICHEP":
             a.Trigger.triggerOR = ["HLT_IsoMu16_eta2p1_MET30_vx"]
@@ -191,10 +191,10 @@ def addAnalyzer(era):
 #addAnalyzer("2016C")
 #addAnalyzer("2016D")
 #addAnalyzer("2016E")
-addAnalyzer("2016ICHEP")
+#addAnalyzer("2016ICHEP")
 #addAnalyzer("2016HIP")
 #addAnalyzer("2016HIPFIXED")
-
+addAnalyzer("2016")
 
 # Run the analysis
 #process.run()

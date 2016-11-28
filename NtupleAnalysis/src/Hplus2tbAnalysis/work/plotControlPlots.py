@@ -1,33 +1,33 @@
-!#!/usr/bin/env python
+#!/usr/bin/env python
 '''
 
 Usage:
 Launch default script
-./plotCounters.py -m <pseudo_mcrab_directory>
+./plotControlPlots.py -m <pseudo_mcrab_directory>
 
 Launch but exclude the M_180 sample
-./plotCounters.py -m Kinematics_161025_020335 -e M_180
+./plotControlPlots.py -m Kinematics_161025_020335 -e M_180
 
 Launch but exclude the multiple signal samples
-./plotCounters.py -m Kinematics_161025_020335 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400"
+./plotControlPlots.py -m Kinematics_161025_020335 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400"
 
 Launch but only include the QCD_Pt samples
-./plotCounters.py -m Kinematics_161025_020335 -i QCD_Pt
+./plotControlPlots.py -m Kinematics_161025_020335 -i QCD_Pt
 
 Launch but exclude various samples
-./plotCounters.py -m Kinematics_161025_020335 -e "M_200|M_220|M_250|M_300|M_350|M_400|QCD_Pt|JetHT"
+./plotControlPlots.py -m Kinematics_161025_020335 -e "M_200|M_220|M_250|M_300|M_350|M_400|QCD_Pt|JetHT"
 or 
-./plotCounters.py -m Hplus2tbAnalysis_161026_135227 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|ZZTo4Q"
+./plotControlPlots.py -m Hplus2tbAnalysis_161026_135227 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|ZZTo4Q"
 
 
 Last Used:
-./plotCounters.py -m Hplus2tbAnalysis_161108_064941 -e "QCD_Pt_15to30|TTJets" && rsync --partial --progress *.png attikis@lxplus.cern.ch:~/public/html/.
+./plotControlPlots.py -m Hplus2tbAnalysis_161108_064941 -e "QCD_Pt_15to30|TTJets" && rsync --partial --progress *.png attikis@lxplus.cern.ch:~/public/html/.
 
-./plotCounters.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ"
+./plotControlPlots.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ"
 
-./plotCounters.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016F_PromptReco_v1_278801_278808|2016G"
+./plotControlPlots.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016F_PromptReco_v1_278801_278808|2016G"
 
-./plotCounters.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016B|2016C|2016D|2016E|2016F_PromptReco_v1_277816_278800"
+./plotControlPlots.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016B|2016C|2016D|2016E|2016F_PromptReco_v1_277816_278800"
 
 '''
 
@@ -60,7 +60,7 @@ kwargs = {
     "optMode"          : "",
     "savePath"         : os.getcwd() + "/Plots/",
     "saveFormats"      : [".png", ".pdf"],
-    "xlabel"           : "", #b-tag SF
+    "xlabel"           : None, #b-tag SF
     "ylabel"           : "Events / %.0f",
     "rebinX"           : 1,
     "rebinY"           : 1,
@@ -107,24 +107,26 @@ hNames = [
     "eSelection_Veto/electronEtaPassed",
     "eSelection_Veto/electronRelIsoAll",
     "eSelection_Veto/electronRelIsoPassed",
-    "eSelection_Veto/electronRelIsoPassedPtEta",
-    "eSelection_Veto/electronRelIsoPassedPtEtaId",
+    ### "eSelection_Veto/electronRelIsoPassedPtEta",
+    ### "eSelection_Veto/electronRelIsoPassedPtEtaId",
     "eSelection_Veto/ptResolution",
     "eSelection_Veto/etaResolution",
     "eSelection_Veto/phiResolution",
     "eSelection_Veto/IsolPtBefore",
     "eSelection_Veto/IsolEtaBefore",
     "eSelection_Veto/IsolVtxBefore",
+    "eSelection_Veto/IsolRelIsoBefore",
     "eSelection_Veto/IsolPtAfter",
     "eSelection_Veto/IsolEtaAfter",
     "eSelection_Veto/IsolVtxAfter",
+    "eSelection_Veto/IsolRelIsoAfter",
     #
     "muSelection_Veto/muonPtAll",
     "muSelection_Veto/muonEtaAll",
     "muSelection_Veto/muonRelIsoAll",
     "muSelection_Veto/muonRelIsoPassed",
-    "muSelection_Veto/muonRelIsoPassedPtEta",
-    "muSelection_Veto/muonRelIsoPassedPtEtaId",
+    ### "muSelection_Veto/muonRelIsoPassedPtEta",
+    ### "muSelection_Veto/muonRelIsoPassedPtEtaId",
     "muSelection_Veto/muonPtPassed" ,
     "muSelection_Veto/muonRelIsoPassed",
     "muSelection_Veto/muonRelIsoAll",
@@ -134,9 +136,11 @@ hNames = [
     "muSelection_Veto/IsolPtBefore" ,
     "muSelection_Veto/IsolEtaBefore",
     "muSelection_Veto/IsolVtxBefore",
+    "muSelection_Veto/IsolRelIsoBefore",
     "muSelection_Veto/IsolPtAfter"  ,
     "muSelection_Veto/IsolEtaAfter" ,
     "muSelection_Veto/IsolVtxAfter" ,
+    "muSelection_Veto/IsolRelIsoAfter" ,
     #
     # "tauSelection_Veto/triggerMatchDeltaR", 
     # "tauSelection_Veto/tauPtTriggerMatched",
@@ -164,17 +168,25 @@ hNames = [
     "jetSelection_/selectedJetsSecondJetPt",
     "jetSelection_/selectedJetsThirdJetPt",
     "jetSelection_/selectedJetsFourthJetPt",
+    "jetSelection_/selectedJetsFifthJetPt",
+    "jetSelection_/selectedJetsSixthJetPt",
     "jetSelection_/selectedJetsFirstJetEta",
     "jetSelection_/selectedJetsSecondJetEta",
     "jetSelection_/selectedJetsThirdJetEta",
     "jetSelection_/selectedJetsFourthJetEta",
+    "jetSelection_/selectedJetsFifthJetEta",
+    "jetSelection_/selectedJetsSixthJetEta",
     # "jetSelection_/JetMatchingToTauDeltaR",
     # "jetSelection_/JetMatchingToTauPtRatio",
     #
     "bjetSelection_/selectedBJetsFirstJetPt",
     "bjetSelection_/selectedBJetsSecondJetPt",
+    "bjetSelection_/selectedBJetsThirdJetPt",
+    "bjetSelection_/selectedBJetsFourthJetPt",
     "bjetSelection_/selectedBJetsFirstJetEta",
     "bjetSelection_/selectedBJetsSecondJetEta",
+    "bjetSelection_/selectedBJetsThirdJetEta",
+    "bjetSelection_/selectedBJetsFourthJetEta",
     #
     "metSelection_/Met",
     ]
@@ -280,7 +292,7 @@ def main(hName, opts):
     # Create a comparison plot
     ratioOpts = {"ymin": 0.0, "ymax": 2.0}
     if kwargs.get("logY")==True:
-        canvOpts = {"xmin": 0.0, "ymin": 1e-1, "ymaxfactor": 10}
+        canvOpts = {"xmin": 0.0, "xmax": 50.0, "ymin": 1e-1, "ymaxfactor": 10}
     else:
         canvOpts = {"ymin": 0.0, "ymaxfactor": 1.2}
 
@@ -317,7 +329,7 @@ def main(hName, opts):
     # histograms.addText(0.4, 0.11, "Runs " + datasetsMgr.loadRunRange(), 17)
     
     if not opts.batchMode:
-        raw_input("=== plotCounters.py:\n\tPress any key to quit ROOT ...")
+        raw_input("=== plotControlPlots.py:\n\tPress any key to quit ROOT ...")
 
     return
 
@@ -359,4 +371,4 @@ if __name__ == "__main__":
         main(h, opts)
 
     if not opts.batchMode:
-        raw_input("=== plotCounters.py: Press any key to quit ROOT ...")
+        raw_input("=== plotControlPlots.py: Press any key to quit ROOT ...")

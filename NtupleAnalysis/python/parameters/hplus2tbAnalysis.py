@@ -17,7 +17,7 @@ trigger = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
     triggerOR = [
         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
-        "HLT_PFHT450_SixJet40_BTagCSV_p056",
+        # "HLT_PFHT450_SixJet40_BTagCSV_p056",
         #"HLT_QuadJet45_DoubleBTagCSV_p087",
         #"HLT_QuadPFJetBF",
         #"HLT_PFHT300",
@@ -103,8 +103,6 @@ eVeto = PSet(
 muVeto = PSet(
     muonPtCut         = 10.0,
     muonEtaCut        = 2.5,
-    muonNCutValue     =  1,
-    muonNCutDirection = "<",         # options: ==, !=, <, <=, >, >=
     muonID            = "muIDLoose", # loosest option for vetoing (options: muIDLoose, muIDMedium, muIDTight)
     muonIsolation     = "veto",      # loosest possible for vetoing ("veto"), "tight" for selecting
 )

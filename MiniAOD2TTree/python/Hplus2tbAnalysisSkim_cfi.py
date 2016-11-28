@@ -12,7 +12,7 @@ skim = cms.EDFilter("Hplus2tbAnalysisSkim",
     # Jets (https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID#Recommendations_for_13_TeV_data)
     JetCollection  = cms.InputTag("slimmedJets"),
     JetUserFloats  = cms.vstring(
-	"pileupJetId:fullDiscriminant",
+	"pileupJetId:fullDiscriminant", #currently disabled
     ),
     JetEtCut       = cms.double(20.0),
     JetEtaCut      = cms.double(2.4),

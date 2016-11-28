@@ -102,7 +102,7 @@ def assignMETTriggerSF(METSelectionPset, btagDiscrWorkingPoint, direction, varia
     # FIXME: this approach works as long as there is just one efficiency for the simulated samples
 ####    reader = TriggerSFJsonReader("2015D", "runs_256629_260627", "metLegTriggerEfficiency2015_btag%s.json"%btagDiscrWorkingPoint)
 ####    reader = TriggerSFJsonReader("2016", "runs_271036_279588", "metLegTriggerEfficiency2016.json") 
-    reader = TriggerSFJsonReader("2016", "runs_271036_283685", "metLegTriggerEfficiency_2016_MET90_L1ETM100.json")
+    reader = TriggerSFJsonReader("2016_MET90", "runs_273150_284044", "metLegTriggerEfficiency_2016_MET90_L1ETM100.json")
     result = reader.getResult()
     if variationType == "MC":
         _assignTrgSF("metTriggerSF", result["binEdges"], result["SF"], result["SFmcUp"], result["SFmcDown"], METSelectionPset, direction)
