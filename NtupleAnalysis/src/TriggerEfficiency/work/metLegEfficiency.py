@@ -168,8 +168,10 @@ def addAnalyzer(era,onlineSelection):
 #addAnalyzer("2016D","MET90")
 #addAnalyzer("2016E","MET90")
 #addAnalyzer("2016MET80","MET80")
-addAnalyzer("2016ICHEP","MET90")
-#addAnalyzer("2016","MET90")
+#addAnalyzer("2016ICHEP","MET90")
+addAnalyzer("2016","MET90")
+#addAnalyzer("2016","MET110")
+
 
 # Pick events
 #process.addOptions(EventSaver = PSet(enabled = True, pickEvents = True))
