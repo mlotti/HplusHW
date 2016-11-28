@@ -16,9 +16,12 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 # https://twiki.cern.ch/twiki/bin/view/CMS/CertificationTools#Lumi_calculation
 NormTagJSON = "/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json"
 
-
 # PileUp calc according to https://indico.cern.ch/event/459797/contribution/3/attachments/1181542/1711291/PPD_PileUp.pdf
-PileUpJSON = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt"
+PileUpJSON = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/PileUp/pileup_latest.txt"
+
+# Recommended minimum bias cross section
+minBiasXsecNominal = 69200 # recommendation for ICHEP2016 data, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/POGRecipesICHEP2016
+
 
 dataVersion_re = re.compile("dataVersion=(?P<dataVersion>[^: ]+)")
 pu_re = re.compile("\|\s+\S+\s+\|\s+\S+\s+\|\s+.*\s+\|\s+.*\s+\|\s+\S+\s+\|\s+\S+\s+\|\s+(?P<lumi>\d+(\.\d*)?|\.\d+)\s+\|\s+(?P<pu>\d+(\.\d*)?|\.\d+)\s+\|\s+\S+\s+\|")
@@ -174,7 +177,7 @@ def main(opts, args):
 
         # PileUp
         fOUT = os.path.join(task, "results", "PileUp.root")
-        minBiasXsec = 63000
+        minBiasXsec = minBiasXsecNominal
 #        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","80000","--maxPileupBin","50","--numPileupBins","50",fOUT] # 2015 xsec 80000
 #        pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","63000","--maxPileupBin","50","--numPileupBins","50",fOUT] # 2016 xsec 63000
         pucmd = ["pileupCalc.py","-i",jsonfile,"--inputLumiJSON",PileUpJSON,"--calcMode","true","--minBiasXsec","%s"%minBiasXsec,"--maxPileupBin","50","--numPileupBins","50",fOUT]
