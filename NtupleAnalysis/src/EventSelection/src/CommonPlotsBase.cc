@@ -32,7 +32,7 @@ void CommonPlotsBase::fillControlPlotsAfterTrigger(const Event& event) { }
 void CommonPlotsBase::fillControlPlotsAfterMETFilter(const Event& event) { }
 void CommonPlotsBase::fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data) { }
 void CommonPlotsBase::fillControlPlotsAfterMETTriggerScaleFactor(const Event& event) { }
-void CommonPlotsBase::fillControlPlotsAfterTopologicalSelections(const Event& event) { }
-void CommonPlotsBase::fillControlPlotsAfterAllSelections(const Event& event) { }
+void CommonPlotsBase::fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau) { }
+void CommonPlotsBase::fillControlPlotsAfterAllSelections(const Event& event, bool withoutTau) { }
 void CommonPlotsBase::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight) { }
 //void CommonPlotsBase::fillControlPlotsAfterAllSelectionsWithFullMass(const Event& event, FullHiggsMassCalculator::Data& data) { }

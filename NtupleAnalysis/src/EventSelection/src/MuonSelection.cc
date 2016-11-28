@@ -85,12 +85,12 @@ void MuonSelection::initialize(const ParameterSet& config, const std::string& po
 
 void MuonSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "muSelection_"+sPostfix);
-  hMuonPtAll         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtAll"       , "Muon pT, all;p_{T} (GeV/c)", 40, 0, 400);
+  hMuonPtAll         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtAll"       , "Muon pT, all;p_{T} (GeV/c)", 50, 0.0, 500.0);
   hMuonEtaAll        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonEtaAll"      , "Muon eta, all;#eta", 50, -2.5, 2.5);
-  hMuonRelIsoAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoAll"   , "Muon relative isolation, all;Relative Isolation", 1000, 0.0, 100.0);
-  hMuonPtPassed      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtPassed"    , "Muon pT, passed;p_{T} (GeV/c)", 40, 0, 400);
+  hMuonRelIsoAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoAll"   , "Muon relative isolation, all;Relative Isolation", 30, 0.0, 300.0);
+  hMuonPtPassed      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonPtPassed"    , "Muon pT, passed;p_{T} (GeV/c)", 50, 0.0, 500.0);
   hMuonEtaPassed     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonEtaPassed"   , "Muon eta, passed;#eta", 50, -2.5, 2.5);
-  hMuonRelIsoPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoPassed", "Muon relative isolation, passed;Relative Isolation", 1000, 0.0, 100.0);
+  hMuonRelIsoPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "muonRelIsoPassed", "Muon relative isolation, passed;Relative Isolation", 100, 0.0, 1.0);
 
   // Resolutions
   hPtResolution  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution" , "(reco pT - gen pT) / reco pT;(p_{T}^{reco} - p_{T}^{gen})/p_{T}^{reco}", 200, -1.0, 1.0);
@@ -98,14 +98,14 @@ void MuonSelection::bookHistograms(TDirectory* dir) {
   hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", "(reco phi - gen phi) / reco phi;(#phi^{reco} - #phi^{gen})/#phi^{reco}", 200, -1.0, 1.0);
 
   // Isolation efficiency
-  hIsolPtBefore     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore"    , "Muon pT before isolation is applied;p_{T} (GeV/c)", 40, 0, 400);
+  hIsolPtBefore     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore"    , "Muon pT before isolation is applied;p_{T} (GeV/c)", 50, 0.0, 500.0);
   hIsolEtaBefore    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaBefore"   , "Muon eta before isolation is applied;#eta", 50, -2.5, 2.5);
   hIsolVtxBefore    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxBefore"   , "Nvertices before isolation is applied;Number of Vertices", 60, 0, 60);
-  hIsolRelIsoBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolRelIsoBefore", "Muon relative isolation before isolation is applied;Relative Isolation", 1000, 0.0, 100.0);
-  hIsolPtAfter      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtAfter"     , "Muon pT after isolation is applied;p_{T} (GeV/c)", 40, 0, 400);
+  hIsolRelIsoBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolRelIsoBefore", "Muon relative isolation before isolation is applied;Relative Isolation", 30, 0.0, 300.0);
+  hIsolPtAfter      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtAfter"     , "Muon pT after isolation is applied;p_{T} (GeV/c)", 50, 0, 500.0);
   hIsolEtaAfter     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaAfter"    , "Muon eta after isolation is applied;#eta", 50, -2.5, 2.5);
   hIsolVtxAfter     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxAfter"    , "Nvertices after isolation is applied;Number of Vertices", 60, 0, 60);
-  hIsolRelIsoAfter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolRelIsoAfter" , "Muon relative isolation after isolation is applied;Relative Isolation", 1000, 0.0, 100.0);
+  hIsolRelIsoAfter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolRelIsoAfter" , "Muon relative isolation after isolation is applied;Relative Isolation", 100, 0.0, 1.0);
 }
 
 MuonSelection::Data MuonSelection::silentAnalyze(const Event& event) {

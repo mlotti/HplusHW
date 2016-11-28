@@ -3,31 +3,31 @@
 
 Usage:
 Launch default script
-./plotControlPlots.py -m <pseudo_mcrab_directory>
+./plotCounters.py -m <pseudo_mcrab_directory>
 
 Launch but exclude the M_180 sample
-./plotControlPlots.py -m Kinematics_161025_020335 -e M_180
+./plotCounters.py -m Kinematics_161025_020335 -e M_180
 
 Launch but exclude the multiple signal samples
-./plotControlPlots.py -m Kinematics_161025_020335 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400"
+./plotCounters.py -m Kinematics_161025_020335 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400"
 
 Launch but only include the QCD_Pt samples
-./plotControlPlots.py -m Kinematics_161025_020335 -i QCD_Pt
+./plotCounters.py -m Kinematics_161025_020335 -i QCD_Pt
 
 Launch but exclude various samples
-./plotControlPlots.py -m Kinematics_161025_020335 -e "M_200|M_220|M_250|M_300|M_350|M_400|QCD_Pt|JetHT"
+./plotCounters.py -m Kinematics_161025_020335 -e "M_200|M_220|M_250|M_300|M_350|M_400|QCD_Pt|JetHT"
 or 
-./plotControlPlots.py -m Hplus2tbAnalysis_161026_135227 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|ZZTo4Q"
+./plotCounters.py -m Hplus2tbAnalysis_161026_135227 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|ZZTo4Q"
 
 
 Last Used:
-./plotControlPlots.py -m Hplus2tbAnalysis_161108_064941 -e "QCD_Pt_15to30|TTJets" && rsync --partial --progress *.png attikis@lxplus.cern.ch:~/public/html/.
+./plotCounters.py -m Hplus2tbAnalysis_161108_064941 -e "QCD_Pt_15to30|TTJets" && rsync --partial --progress *.png attikis@lxplus.cern.ch:~/public/html/.
 
-./plotControlPlots.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ"
+./plotCounters.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ"
 
-./plotControlPlots.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016F_PromptReco_v1_278801_278808|2016G"
+./plotCounters.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016F_PromptReco_v1_278801_278808|2016G"
 
-./plotControlPlots.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016B|2016C|2016D|2016E|2016F_PromptReco_v1_277816_278800"
+./plotCounters.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016B|2016C|2016D|2016E|2016F_PromptReco_v1_277816_278800"
 
 '''
 
@@ -89,106 +89,36 @@ kwargs = {
 
 
 hNames = [
-    "PUDependency/NvtxTrg",
-    "PUDependency/NvtxMETFilter",
-    "PUDependency/NvtxVtx",
-    "PUDependency/NvtxElectronVeto",
-    "PUDependency/NvtxMuonVeto",
-    "PUDependency/NvtxTauVeto",
-    "PUDependency/NvtxJetSelection",
-    "PUDependency/NvtxBtagging",
-    "PUDependency/NvtxMETSelection",
-    "PUDependency/NvtxAllSelections",
-    #"PUDependency/NvtxAllSelectionsWithProbabilisticBtag"
-    #
-    "eSelection_Veto/electronPtAll",
-    "eSelection_Veto/electronEtaAll",
-    "eSelection_Veto/electronPtPassed",
-    "eSelection_Veto/electronEtaPassed",
-    "eSelection_Veto/electronRelIsoAll",
-    "eSelection_Veto/electronRelIsoPassed",
-    ### "eSelection_Veto/electronRelIsoPassedPtEta",
-    ### "eSelection_Veto/electronRelIsoPassedPtEtaId",
-    "eSelection_Veto/ptResolution",
-    "eSelection_Veto/etaResolution",
-    "eSelection_Veto/phiResolution",
-    "eSelection_Veto/IsolPtBefore",
-    "eSelection_Veto/IsolEtaBefore",
-    "eSelection_Veto/IsolVtxBefore",
-    "eSelection_Veto/IsolRelIsoBefore",
-    "eSelection_Veto/IsolPtAfter",
-    "eSelection_Veto/IsolEtaAfter",
-    "eSelection_Veto/IsolVtxAfter",
-    "eSelection_Veto/IsolRelIsoAfter",
-    #
-    "muSelection_Veto/muonPtAll",
-    "muSelection_Veto/muonEtaAll",
-    "muSelection_Veto/muonRelIsoAll",
-    "muSelection_Veto/muonRelIsoPassed",
-    ### "muSelection_Veto/muonRelIsoPassedPtEta",
-    ### "muSelection_Veto/muonRelIsoPassedPtEtaId",
-    "muSelection_Veto/muonPtPassed" ,
-    "muSelection_Veto/muonRelIsoPassed",
-    "muSelection_Veto/muonRelIsoAll",
-    "muSelection_Veto/ptResolution" ,
-    "muSelection_Veto/etaResolution",
-    "muSelection_Veto/phiResolution",
-    "muSelection_Veto/IsolPtBefore" ,
-    "muSelection_Veto/IsolEtaBefore",
-    "muSelection_Veto/IsolVtxBefore",
-    "muSelection_Veto/IsolRelIsoBefore",
-    "muSelection_Veto/IsolPtAfter"  ,
-    "muSelection_Veto/IsolEtaAfter" ,
-    "muSelection_Veto/IsolVtxAfter" ,
-    "muSelection_Veto/IsolRelIsoAfter" ,
-    #
-    # "tauSelection_Veto/triggerMatchDeltaR", 
-    # "tauSelection_Veto/tauPtTriggerMatched",
-    # "tauSelection_Veto/tauEtaTriggerMatched",
-     "tauSelection_Veto/tauNpassed",
-     "tauSelection_Veto/ptResolution",
-     "tauSelection_Veto/etaResolution",
-     "tauSelection_Veto/phiResolution",
-     "tauSelection_Veto/IsolPtBefore",
-     "tauSelection_Veto/IsolEtaBefore",
-     "tauSelection_Veto/IsolVtxBefore",
-     "tauSelection_Veto/IsolPtAfter",
-     "tauSelection_Veto/IsolEtaAfter",
-     "tauSelection_Veto/IsolVtxAfter",
-     # "tauSelection_Veto/NprongsMatrixForAllAfterIsolation", #2D
-     # "tauSelection_Veto/NprongsMatrixForBmesonsAfterIsolation", #2D
-     # "tauSelection_Veto/NprongsMatrixForAllAfterAntiIsolation", #2D
-     # "tauSelection_Veto/NprongsMatrixForBmesonsAfterAntiIsolation", #2D
-     #
-    "jetSelection_/jetPtAll",
-    "jetSelection_/jetEtaAll",
-    "jetSelection_/jetPtPassed",
-    "jetSelection_/jetEtaPassed",
-    "jetSelection_/selectedJetsFirstJetPt",
-    "jetSelection_/selectedJetsSecondJetPt",
-    "jetSelection_/selectedJetsThirdJetPt",
-    "jetSelection_/selectedJetsFourthJetPt",
-    "jetSelection_/selectedJetsFifthJetPt",
-    "jetSelection_/selectedJetsSixthJetPt",
-    "jetSelection_/selectedJetsFirstJetEta",
-    "jetSelection_/selectedJetsSecondJetEta",
-    "jetSelection_/selectedJetsThirdJetEta",
-    "jetSelection_/selectedJetsFourthJetEta",
-    "jetSelection_/selectedJetsFifthJetEta",
-    "jetSelection_/selectedJetsSixthJetEta",
-    # "jetSelection_/JetMatchingToTauDeltaR",
-    # "jetSelection_/JetMatchingToTauPtRatio",
-    #
-    "bjetSelection_/selectedBJetsFirstJetPt",
-    "bjetSelection_/selectedBJetsSecondJetPt",
-    "bjetSelection_/selectedBJetsThirdJetPt",
-    "bjetSelection_/selectedBJetsFourthJetPt",
-    "bjetSelection_/selectedBJetsFirstJetEta",
-    "bjetSelection_/selectedBJetsSecondJetEta",
-    "bjetSelection_/selectedBJetsThirdJetEta",
-    "bjetSelection_/selectedBJetsFourthJetEta",
-    #
-    "metSelection_/Met",
+    "ForDataDrivenCtrlPlots/NVertices_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/SelectedTau_pT_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/SelectedTau_eta_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/SelectedTau_phi_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/SelectedTau_ldgTrkPt_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/SelectedTau_DecayMode_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/SelectedTau_Nprongs_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/SelectedTau_Rtau_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/SelectedTau_source_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/SelectedTau_IPxy_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/DeltaPhiTauMet_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/CollinearAngularCutsMinimum_AfterAllSelections",
+    # "ForDataDrivenCtrlPlots/BackToBackAngularCutsMinimum_AfterAllSelections",
+    ### "ForDataDrivenCtrlPlots/SelectedTau_etaphi_AfterAllSelections", # 2D
+    "ForDataDrivenCtrlPlots/Njets_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/JetPt_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/JetEta_AfterAllSelections",
+    ### "ForDataDrivenCtrlPlots/JetEtaPhi_AfterAllSelections", # 2D
+    "ForDataDrivenCtrlPlots/HT_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/MHT_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/MinDeltaPhiJetMHT_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/MaxDeltaPhiJetMHT_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/MinDeltaRJetMHT_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/MinDeltaRJetMHTReversed_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/MET_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/METPhi_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/NBjets_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/BJetPt_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/BJetEta_AfterAllSelections",
+    "ForDataDrivenCtrlPlots/BtagDiscriminator_AfterAllSelections",
     ]
 
 
@@ -292,7 +222,6 @@ def main(hName, opts):
     # Create a comparison plot
     ratioOpts = {"ymin": 0.0, "ymax": 2.0}
     if kwargs.get("logY")==True:
-        #canvOpts = {"xmin": 0.0, "xmax": 50.0, "ymin": 1e-1, "ymaxfactor": 10}
         canvOpts = {"xmin": 0.0, "ymin": 1e-1, "ymaxfactor": 10}
     else:
         canvOpts = {"ymin": 0.0, "ymaxfactor": 1.2}
@@ -330,7 +259,7 @@ def main(hName, opts):
     # histograms.addText(0.4, 0.11, "Runs " + datasetsMgr.loadRunRange(), 17)
     
     if not opts.batchMode:
-        raw_input("=== plotControlPlots.py:\n\tPress any key to quit ROOT ...")
+        raw_input("=== plotCounters.py:\n\tPress any key to quit ROOT ...")
 
     return
 
@@ -372,4 +301,4 @@ if __name__ == "__main__":
         main(h, opts)
 
     if not opts.batchMode:
-        raw_input("=== plotControlPlots.py: Press any key to quit ROOT ...")
+        raw_input("=== plotCounters.py: Press any key to quit ROOT ...")
