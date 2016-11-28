@@ -155,9 +155,6 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // 1) Apply trigger 
   //================================================================================================   
   if (0) std::cout << "=== Trigger" << std::endl;
-  // std::string TriggerName = "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056";
-  // std::string TriggerName = "HLT_PFHT450_SixJet40_BTagCSV_p056";
-  // if ( !(fEvent.passHLTDecisionByName(TriggerName)) ) return;
   if ( !(fEvent.passTriggerDecision()) ) return;
   
   cTrigger.increment();
@@ -220,7 +217,6 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
   if (tauData.hasIdentifiedTaus() ) return;
 
-  
   // Fake-Tau SF
   if (fEvent.isMC()) 
     {      
@@ -251,14 +247,15 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // Standard Selections
   //================================================================================================
   // if (0) std::cout << "=== Standard selection" << std::endl;
-  // fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent);  // hasIdentifiedTaus() needed
-
+  fCommonPlots.fillControlPlotsAfterTopologicalSelections(fEvent, true);
+  
 
   //================================================================================================  
   // 9) BJet selection
   //================================================================================================
   if (0) std::cout << "=== BJet selection" << std::endl;
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
+
   // Fill final shape plots with b tag efficiency applied as an event weight
   //if (silentMETData.passedSelection()) {
   // const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
@@ -286,6 +283,15 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   if (0) std::cout << "=== MET selection" << std::endl;
   const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
   if (!METData.passedSelection()) return;
+
+
+
+  //================================================================================================
+  // 12) HT selection
+  //================================================================================================
+  // if (0) std::cout << "=== HT selection" << std::endl;
+  // const METSelection::Data HTData = fMETSelection.analyze(fEvent, nVertices);
+  // if (!HTData.passedSelection()) return;
   
 
   //================================================================================================
@@ -295,17 +301,10 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   cSelected.increment();
 
 
-
   //================================================================================================
   // Fill final plots
   //================================================================================================
-  // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent); // hasIdentifiedTaus()
-  
-
-  //================================================================================================
-  // Experimental selection code
-  //================================================================================================
-  // if necessary
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, true);
   
 
   //================================================================================================

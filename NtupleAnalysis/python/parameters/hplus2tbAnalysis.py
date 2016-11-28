@@ -181,17 +181,18 @@ commonPlotsOptions = PSet(
     enableGenuineTauHistograms = False, 
 
     # Bin settings (final bin setting done in datacardGenerator, there also variable bin width is supported)
-    nVerticesBins     = PSet(nBins =  80, axisMin =  0.0, axisMax =  60.0),
-    bjetDiscrBins     = PSet(nBins =  20, axisMin = -1.0, axisMax =   1.0),
-    ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax = 500.0),
-    etaBins           = PSet(nBins =  50, axisMin = -5.0, axisMax =   5.0),
-    phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax =   3.2),  # PSet(nBins =  72, axisMin = -3.1415926, axisMax=3.1415926),
-    invmassBins       = PSet(nBins =  50, axisMin =  0.0, axisMax = 500.0),
-    deltaEtaBins      = PSet(nBins =  50, axisMin =  0.0, axisMax =  10.0),
-    deltaPhiBins      = PSet(nBins =  32, axisMin =  0.0, axisMax =  3.2),  # Note: putting high number of bins here will cause troubles
-    deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax =  10.0),
-    njetsBins         = PSet(nBins =  20, axisMin =  0.0, axisMax = 10.0),
-    metBins           = PSet(nBins =  80, axisMin =  0.0, axisMax = 800.0), # Note: use 10 GeV bin width because of QCD measurement
+    nVerticesBins     = PSet(nBins = 100, axisMin =  0.0, axisMax =  100.0),
+    bjetDiscrBins     = PSet(nBins = 120, axisMin =  0.0, axisMax =    1.2),
+    ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax =  500.0),
+    etaBins           = PSet(nBins =  50, axisMin = -5.0, axisMax =    5.0),
+    phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax =    3.2),  # PSet(nBins =  72, axisMin = -3.1415926, axisMax=3.1415926),
+    invmassBins       = PSet(nBins =  50, axisMin =  0.0, axisMax =  500.0),
+    deltaEtaBins      = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
+    deltaPhiBins      = PSet(nBins =  32, axisMin =  0.0, axisMax =    3.2),  # Note: putting high number of bins here will cause troubles
+    deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
+    njetsBins         = PSet(nBins =  18, axisMin =  0.0, axisMax =   18.0),
+    metBins           = PSet(nBins =  50, axisMin =  0.0, axisMax =  500.0), # Note: use 10 GeV bin width because of QCD measurement
+    htBins            = PSet(nBins =  80, axisMin =  0.0, axisMax = 4000.0),
     enablePUDependencyPlots = True, # Enable/Disable some debug-level plots
     # Todo: Remove dependency on these unused
     rtauBins          = PSet(nBins=55, axisMin=0., axisMax=1.1),

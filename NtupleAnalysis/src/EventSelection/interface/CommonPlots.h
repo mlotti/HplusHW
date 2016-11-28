@@ -46,6 +46,8 @@ public:
   const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
   /// Returns the histogram settings for MET bins (usecase: QCD measurement)
   const HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
+  /// Returns the histogram settings for HT bins (usecase: Htb analysis)
+  const HistogramSettings& getHtBinSettings() const { return fHtBinSettings; }
   /// Returns the histogram settings for Mt bins (usecase: QCD measurement)
   const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
 
@@ -75,8 +77,8 @@ public:
   void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
-  void fillControlPlotsAfterTopologicalSelections(const Event& event);
-  void fillControlPlotsAfterAllSelections(const Event& event);
+  void fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau=false);
+  void fillControlPlotsAfterAllSelections(const Event& event, bool withoutTau=false);
   void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight);
   //void fillControlPlotsAfterAllSelectionsWithFullMass(const Event& event, FullHiggsMassCalculator::Data& data);
 
@@ -114,9 +116,11 @@ private:
   const HistogramSettings fEtaBinSettings;
   const HistogramSettings fPhiBinSettings;
   const HistogramSettings fDeltaPhiBinSettings;
+  const HistogramSettings fDeltaRBinSettings;
   const HistogramSettings fRtauBinSettings;
   const HistogramSettings fNjetsBinSettings;
   const HistogramSettings fMetBinSettings;
+  const HistogramSettings fHtBinSettings;
   const HistogramSettings fBJetDiscriminatorBinSettings;
   const HistogramSettings fAngularCuts1DSettings;
   //const HistogramSettings fTopMassBinSettings;
