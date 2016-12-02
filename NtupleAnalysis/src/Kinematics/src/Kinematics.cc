@@ -36,9 +36,20 @@ public:
   // iro
   virtual TMatrixDSym ComputeMomentumTensor(std::vector<math::XYZTLorentzVector> jets, double r = 2.0); 
   virtual TMatrixDSym ComputeMomentumTensor2D(std::vector<math::XYZTLorentzVector> jets);
-  virtual vector<float> CalcMomentumTensorEigenValues(std::vector<math::XYZTLorentzVector> jets);
-  virtual vector<float> CalcSphericityTensorEigenValues(std::vector<math::XYZTLorentzVector> jets);
-  virtual double GetAlphaT(std::vector<math::XYZTLorentzVector> jets);
+  virtual vector<float> GetMomentumTensorEigenValues(std::vector<math::XYZTLorentzVector> jets,
+						     float &C,
+						     float &D,
+						     float &H2);
+  virtual vector<float> GetMomentumTensorEigenValues2D(std::vector<math::XYZTLorentzVector> jets, 
+						       float &Circularity);
+  virtual vector<float> GetSphericityTensorEigenValues(std::vector<math::XYZTLorentzVector> jets,
+						       float &y23, float &Sphericity, float &SphericityT, float &Aplanarity, float &Planarity, float &Y);
+  virtual double GetAlphaT(std::vector<math::XYZTLorentzVector> jets,
+			   float &HT,
+			   float &JT,
+			   float &MHT,
+			   float &Centrality);
+
 
 private:
   // Input parameters
@@ -82,16 +93,17 @@ private:
   WrappedTH1 *h_Sphericity;
   WrappedTH1 *h_SphericityT;
   WrappedTH1 *h_Y;
+  WrappedTH2 *h_S_Vs_Y;
   WrappedTH1 *h_Aplanarity;
   WrappedTH1 *h_Planarity;
   WrappedTH1 *h_CParameter;
   WrappedTH1 *h_DParameter;
   WrappedTH1 *h_H2;
   WrappedTH1 *h_Circularity;
+  WrappedTH1 *h_Centrality;
   WrappedTH1 *h_HT;
   WrappedTH1 *h_JT;
   WrappedTH1 *h_MHT;
-  WrappedTH1 *h_dHT;
   WrappedTH1 *h_AlphaT;
 
   // GenParticles: BQuarks
@@ -280,7 +292,7 @@ void Kinematics::book(TDirectory *dir) {
   cuts.AddRowColumn(3, PSet_HtSelection.getParameter<string>("HtCutValue") );
   //
   std::cout << "\n" << std::endl;
-  cuts.Print();
+  if (cfg_Verbose) cuts.Print();
 
   
   // Fixed binning
@@ -327,21 +339,22 @@ void Kinematics::book(TDirectory *dir) {
   h_genHT_GenJets     =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital      , dir, "genHT_GenJets", ";GenJ H_{T} (GeV)"             ,  75,  0.0, +1500.0);  
 
   // Event-Shape Variables
-  h_y23         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "y23"        , "y23"           , 20, 0.0,    0.5);
-  h_Sphericity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Sphericity" , "Sphericity"    , 40, 0.0,    1.0);
-  h_SphericityT = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SphericityT", "Sphericity_{T}", 40, 0.0,    1.0);
-  h_Y           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Y"          , "Y"             , 20, 0.0,    1.0);
-  h_Aplanarity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Aplanarity" , "Aplanarity"    , 20, 0.0,    0.5);
-  h_Planarity   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Planarity"  , "Planarity"     , 20, 0.0,    0.5);
-  h_CParameter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "CParameter" , "C-Param"       , 20, 0.0,    1.0);
-  h_DParameter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DParameter" , "D-Param"       , 20, 0.0,    1.0);
-  h_H2          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DParameter" , "H_{2} "        , 20, 0.0,    1.0);
-  h_Circularity = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Circularity", "Circularity"   , 20, 0.0,    1.0);
-  h_HT          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "HT"         , "HT"            , 50, 0.0, 5000.0);
-  h_JT          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "JT"         , "JT"            , 50, 0.0, 5000.0);
-  h_MHT         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MHT"        , "MHT"           , 20, 0.0, 1000.0);
-  h_dHT         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "dHT"        , "dHT"           , 20, 0.0, 1000.0);
-  h_AlphaT      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "alphaT"     , "alphaT"        , 50, 0.0,    5.0);
+  h_y23         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "y23"        , ";y23"           , 25, 0.0,    0.5);
+  h_Sphericity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Sphericity" , ";Sphericity"    , 20, 0.0,    1.0);
+  h_SphericityT = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SphericityT", ";Sphericity_{T}", 20, 0.0,    1.0);
+  h_Y           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Y"          , ";Y"             , 25, 0.0,    0.5);
+  h_S_Vs_Y      = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "S_Vs_Y"     , ";Sphericity;Y=#frac{#sqrt{3}}{2}x(Q1-Q2)", 20, 0.0, 1.0, 25, 0.0, 0.5);
+  h_Aplanarity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Aplanarity" , ";Aplanarity" , 25, 0.0, 0.5);
+  h_Planarity   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Planarity"  , ";Planarity"  , 25, 0.0, 0.5);
+  h_CParameter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "CParameter" , ";C"          , 20, 0.0, 1.0);
+  h_DParameter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DParameter" , ";D"          , 20, 0.0, 1.0);
+  h_H2          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "H2"         , ";H_{2}"      , 20, 0.0, 1.0);
+  h_Circularity = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Circularity", ";Circularity", 20, 0.0, 1.0);
+  h_Centrality  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Centrality" , ";Centrality" , 20, 0.0, 1.0);
+  h_HT          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "HT"         , ";H_{T}"      , 30, 0.0, 1500.0);
+  h_JT          = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "JT"         , ";J_{T}"      , 30, 0.0, 1500.0);
+  h_MHT         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "MHT"        , ";MHT"        , 30, 0.0,  300.0);
+  h_AlphaT      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "AlphaT"     , ";#alpha_{T}" , 20, 0.0,    1.0);
 
   // GenParticles: B-quarks
   h_BQuarks_N   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarks_N" , ";N (b-quarks)" , 10, -0.5, +9.5);
@@ -519,31 +532,6 @@ void Kinematics::process(Long64_t entry) {
  
 
   ///////////////////////////////////////////////////////////////////////////
-  // Event-Shape Variables
-  ///////////////////////////////////////////////////////////////////////////
-  vector<float> a = CalcMomentumTensorEigenValues(selJets_p4);
-  vector<float> b = CalcSphericityTensorEigenValues(selJets_p4);
-  double alphaT   = GetAlphaT(selJets_p4);
-
-
-
-  // h_y23         ->Fill();
-  // h_Sphericity  ->Fill();
-  // h_SphericityT ->Fill();
-  // h_Y           ->Fill();
-  // h_Aplanarity  ->Fill();
-  // h_Planarity   ->Fill();
-  // h_CParameter  ->Fill();
-  // h_DParameter  ->Fill();
-  // h_H2          ->Fill();
-  // h_Circularity ->Fill();
-  // h_HT          ->Fill();
-  // h_JT          ->Fill();
-  // h_MHT         ->Fill();
-  // h_dHT         ->Fill();
-  // h_AlphaT      ->Fill();
-
-  ///////////////////////////////////////////////////////////////////////////
   // Lepton Veto & Primary Vertex
   ///////////////////////////////////////////////////////////////////////////
   if(0) std::cout << "=== Lepton Veto & Primary Vertex" << std::endl;
@@ -607,6 +595,37 @@ void Kinematics::process(Long64_t entry) {
   if ( !cfg_HtCut.passedCut(genJ_HT) ) return;
   cSubPassedHtCut.increment();
   h_GenJet_N_AfterPreselections->Fill(nSelJets);  
+
+
+  ///////////////////////////////////////////////////////////////////////////
+  // Event-Shape Variables
+  ///////////////////////////////////////////////////////////////////////////
+  float C, D, H2;
+  float Circularity;
+  float y23, Sphericity, SphericityT, Aplanarity, Planarity, Y; // functions to return values when properly implemented
+  float HT, JT, MHT, Centrality;
+  vector<float> a = GetMomentumTensorEigenValues(selJets_p4, C, D, H2);
+  vector<float> b = GetMomentumTensorEigenValues2D(selJets_p4, Circularity);
+  vector<float> c = GetSphericityTensorEigenValues(selJets_p4, y23, Sphericity, SphericityT, Aplanarity, Planarity, Y);
+  double alphaT   = GetAlphaT(selJets_p4, HT, JT, MHT, Centrality);
+
+  // Fill Histograms
+  h_y23         ->Fill(y23);
+  h_Sphericity  ->Fill(Sphericity);
+  h_SphericityT ->Fill(SphericityT);
+  h_Y           ->Fill(Y);
+  h_S_Vs_Y      ->Fill(Sphericity, Y);
+  h_Aplanarity  ->Fill(Aplanarity);
+  h_Planarity   ->Fill(Planarity);
+  h_CParameter  ->Fill(C);
+  h_DParameter  ->Fill(D);
+  h_H2          ->Fill(H2);
+  h_Circularity ->Fill(Circularity);
+  h_Centrality  ->Fill(Centrality);
+  h_HT          ->Fill(HT);
+  h_JT          ->Fill(JT);
+  h_MHT         ->Fill(MHT);
+  h_AlphaT      ->Fill(alphaT);
 
 
   ///////////////////////////////////////////////////////////////////////////
@@ -1232,7 +1251,10 @@ void Kinematics::process(Long64_t entry) {
 }
 
 
-vector<float> Kinematics::CalcMomentumTensorEigenValues(std::vector<math::XYZTLorentzVector> jets){
+vector<float> Kinematics::GetMomentumTensorEigenValues(std::vector<math::XYZTLorentzVector> jets,
+						       float &C,
+						       float &D,
+						       float &H2){
 
   // Tensor required for calculation of: Sphericity, Aplanarity, Planarity
   // Need all particles in event to calculate kinematic variables. Use all tracks (ch. particles) instead.
@@ -1277,11 +1299,10 @@ vector<float> Kinematics::CalcMomentumTensorEigenValues(std::vector<math::XYZTLo
       throw hplus::Exception("LogicError") << "Failure of requirement that eigenvalues are ordered as Q1 >= Q2 >= Q3 (Q1 >= 0). Q1 = " << Q1 << ", Q2 = " << Q2 << ", Q3 = " << Q3;
     }
 
-
   // Calculate the linear combinations C and D
-  float C  = 3*(Q1*Q2 + Q1*Q3 + Q2*Q3); // Used to measure the 3-jet structure. Vanishes for perfece 2-jet event. Related to the 2nd Fox-Wolfram Moment (H2)
-  float D  = 27*Q1*Q2*Q3; // Used to measure the 4-jet structure. Vanishes for a planar event
-  float H2 = 1-C; // The C-measure is related to the second Fox-Wolfram moment (see below), $C = 1 - H_2$.
+  C  = 3*(Q1*Q2 + Q1*Q3 + Q2*Q3); // Used to measure the 3-jet structure. Vanishes for perfece 2-jet event. Related to the 2nd Fox-Wolfram Moment (H2)
+  D  = 27*Q1*Q2*Q3; // Used to measure the 4-jet structure. Vanishes for a planar event
+  H2 = 1-C; // The C-measure is related to the second Fox-Wolfram moment (see below), $C = 1 - H_2$.
 
   // C
   if ( abs(C-1.0) > 1 + 1e-4 )
@@ -1300,42 +1321,8 @@ vector<float> Kinematics::CalcMomentumTensorEigenValues(std::vector<math::XYZTLo
     {
       throw hplus::Exception("LogicError") << "Failure of requirement that the 2nd Fox-Wolfram Moment (H2) satisfies the inequality: 0.0 <= H2 <= 1.0. Found that H2 = " << H2;
     }
-
-
-
-  // For Circularity, the momentum tensor is the 2×2 submatrix of Mjk, normalized by the sum of pT instead by the sum of
-  // This matrix has two eigenvalues Qi with 0 < Q1 < Q2. The following definition for the circularity C has been used:
-  //  C = 2 × min (Q1,Q2) / (Q1 +Q2)
-  // The circularity C is especially interesting for hadron colliders because it only uses the momentum values in x and y direction transverse
-  // to the beam line. So C is a two dimensional event shape variable and is therefore independent from a boost along z. 
-  // In addition, the normalization by the sum of the particle momenta makes C highly independent from energy calibration effects  (systematic uncertainty).
-  // C takes small values for linear and high values for circular events. 
   
-  // Find the Momentum-Tensor EigenValues (E1, E2)
-  TMatrixDSym MomentumTensor2D = ComputeMomentumTensor2D(jets);
-  TMatrixDSymEigen eigen2D(MomentumTensor);
-  TVectorD eigenvals2D = eigen2D.GetEigenValues();
-
-  // Store & Sort the eigenvalues
-  vector<float> eigenvalues2D(2);
-  eigenvalues2D.at(0) = eigenvals2D[0]; // E1
-  eigenvalues2D.at(1) = eigenvals2D[1]; // E2
-  sort( eigenvalues2D.begin(), eigenvalues2D.end(), std::greater<float>() );
-
-  // Save the final eigenvalues
-  float E1 = eigenvalues2D.at(0);
-  float E2 = eigenvalues2D.at(1);
-
-  // Sanity check on eigenvalues: (E1 > E2)
-  bInequality = (E1 > 0 && E1 > E2);
-  if ( !(bInequality) )
-    {
-      throw hplus::Exception("LogicError") << "Failure of requirement that eigenvalues are ordered as Q1 >= Q2";
-    }
-  float Circularity = 2*std::min(E1, E2)/(E1+E2);
-
-
-  if (1)
+  if (0)
     {
 
       Table vars("Variable | Value | Allowed Range | Definition", "Text"); //LaTeX or Text
@@ -1353,11 +1340,58 @@ vector<float> Kinematics::CalcMomentumTensorEigenValues(std::vector<math::XYZTLo
       vars.AddRowColumn(2, auxTools.ToString(H2) );
       vars.AddRowColumn(2, "0.0 <= H2 <= 1.0 ");
       vars.AddRowColumn(2, "H2 = 1-C");
-      //
-      vars.AddRowColumn(3, "Circularity");
-      vars.AddRowColumn(3, auxTools.ToString(Circularity) );
-      vars.AddRowColumn(3, "0.0 <= C <= 1.0 ");
-      vars.AddRowColumn(3, "C = 2 × min (Q1,Q2)/(Q1+Q2)");
+      vars.Print();
+    }
+
+  return eigenvalues;
+}
+
+
+vector<float> Kinematics::GetMomentumTensorEigenValues2D(std::vector<math::XYZTLorentzVector> jets,
+							 float &Circularity){
+
+  // For Circularity, the momentum tensor is the 2×2 submatrix of Mjk, normalized by the sum of pT instead by the sum of
+  // This matrix has two eigenvalues Qi with 0 < Q1 < Q2. The following definition for the circularity C has been used:
+  //  C = 2 × min (Q1,Q2) / (Q1 +Q2)
+  // The circularity C is especially interesting for hadron colliders because it only uses the momentum values in x and y direction transverse
+  // to the beam line. So C is a two dimensional event shape variable and is therefore independent from a boost along z. 
+  // In addition, the normalization by the sum of the particle momenta makes C highly independent from energy calibration effects  (systematic uncertainty).
+  // C takes small values for linear and high values for circular events. 
+  
+  // Find the Momentum-Tensor EigenValues (E1, E2)
+  TMatrixDSym MomentumTensor = ComputeMomentumTensor2D(jets);
+  TMatrixDSymEigen eigen(MomentumTensor);
+  TVectorD eigenvals = eigen.GetEigenValues();
+
+  // Store & Sort the eigenvalues
+  vector<float> eigenvalues(2);
+  eigenvalues.at(0) = eigenvals[0]; // Q1
+  eigenvalues.at(1) = eigenvals[1]; // Q2
+  sort( eigenvalues.begin(), eigenvalues.end(), std::greater<float>() );
+
+  // Save the final eigenvalues
+  float Q1 = eigenvalues.at(0);
+  float Q2 = eigenvalues.at(1);
+
+  // Sanity check on eigenvalues: (Q1 > Q2)
+  if (Q1 == 0) return eigenvalues;
+
+  bool bInequality = (Q1 > 0 && Q1 > Q2);
+  if ( !(bInequality) )
+    {
+      throw hplus::Exception("LogicError") << "Failure of requirement that eigenvalues are ordered as Q1 >= Q2. Found Q1 = " << Q1 << ", Q2 " << Q2;
+    }
+  
+  // Calculate circularity
+  Circularity = 2*std::min(Q1, Q2)/(Q1+Q2);
+
+  if (0)
+    {      
+      Table vars("Variable | Value | Allowed Range | Definition", "Text"); //LaTeX or Text
+      vars.AddRowColumn(0, "Circularity");
+      vars.AddRowColumn(0, auxTools.ToString(Circularity) );
+      vars.AddRowColumn(0, "0.0 <= C <= 1.0 ");
+      vars.AddRowColumn(0, "C = 2 × min (Q1,Q2)/(Q1+Q2)");
       vars.Print();
     }
   
@@ -1366,7 +1400,9 @@ vector<float> Kinematics::CalcMomentumTensorEigenValues(std::vector<math::XYZTLo
 
 
 
-vector<float> Kinematics::CalcSphericityTensorEigenValues(std::vector<math::XYZTLorentzVector> jets){ // iro
+vector<float> Kinematics::GetSphericityTensorEigenValues(std::vector<math::XYZTLorentzVector> jets,
+							 float &y23, float &Sphericity, float &SphericityT, float &Aplanarity, 
+							 float &Planarity, float &Y){
 
   // C, D parameters
   // Need all particles in event to calculate kinematic variables. Use all tracks (ch. particles) instead.
@@ -1424,12 +1460,12 @@ vector<float> Kinematics::CalcSphericityTensorEigenValues(std::vector<math::XYZT
   // Calculate the event-shape variables
   float pT3Squared  = pow(jets.at(2).Pt(), 2);
   float HT2Squared  = pow(jets.at(0).Pt() + jets.at(1).Pt(), 2);
-  float y23         = pT3Squared/HT2Squared;
-  float Sphericity  = -1.0;
-  float SphericityT = -1.0;
-  float Aplanarity  = -1.0;
-  float Planarity   = -1.0;
-  float Y = (sqrt(3.0)/2.0)*(Q2-Q1); // Calculate the Y (for Y-S plane)
+  y23         = pT3Squared/HT2Squared;
+  Sphericity  = -1.0;
+  SphericityT = -1.0;
+  Aplanarity  = -1.0;
+  Planarity   = -1.0;
+  Y = (sqrt(3.0)/2.0)*(Q2-Q3); // (Since Q1>Q2, then my Q1 corresponds to Q3 when Q's are reversed-ordered). Calculate the Y (for Y-S plane)
 
   // Check the value of the third-jet resolution
   if (abs(y23-0.25) > 0.25 + 1e-4)
@@ -1468,7 +1504,7 @@ vector<float> Kinematics::CalcSphericityTensorEigenValues(std::vector<math::XYZT
 
 
 
-  if (1)
+  if (0)
     {
 
       Table vars("Variable | Value | Allowed Range | Definition", "Text"); //LaTeX or Text
@@ -1500,7 +1536,7 @@ vector<float> Kinematics::CalcSphericityTensorEigenValues(std::vector<math::XYZT
       vars.AddRowColumn(5, "Y");
       vars.AddRowColumn(5, auxTools.ToString(Y) );
       vars.AddRowColumn(5, "");
-      vars.AddRowColumn(5, "Y = sqrt(3)/2 x (Q2 - Q1)");
+      vars.AddRowColumn(5, "Y = sqrt(3)/2 x (Q1 - Q2)");
       vars.Print();
     }
     
@@ -1669,7 +1705,11 @@ TMatrixDSym Kinematics::ComputeMomentumTensor2D(std::vector<math::XYZTLorentzVec
 }
 
 
-double Kinematics::GetAlphaT(std::vector<math::XYZTLorentzVector> jets){
+double Kinematics::GetAlphaT(std::vector<math::XYZTLorentzVector> jets,
+			     float &HT,
+			     float &JT,
+			     float &MHT,
+			     float &Centrality){
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /// AlphaT:
@@ -1724,12 +1764,20 @@ double Kinematics::GetAlphaT(std::vector<math::XYZTLorentzVector> jets){
 
   /// Declaration of variables 
   unsigned nJets = jets.size();
-  std::vector<float> vEt, vPx, vPy, vPz;
+
+  // Sanity Check
+  if ( jets.size() < 2 )
+    {
+      return -1.0;
+    }
+
+  std::vector<float> vE, vEt, vPx, vPy, vPz;
   std::vector<bool> vPseudo_jet1;
   const bool bList = true;
 
   // For-Loop: All jets
   for (auto& jet: jets){
+    vE.push_back( jet.E() );
     vEt.push_back( jet.Et() );
     vPx.push_back( jet.Px() );
     vPy.push_back( jet.Py() );
@@ -1737,6 +1785,7 @@ double Kinematics::GetAlphaT(std::vector<math::XYZTLorentzVector> jets){
   }
 
   // Calculate sums
+  float fSum_e  = accumulate( vE.begin() , vE.end() , 0.0 );
   float fSum_et = accumulate( vEt.begin(), vEt.end(), 0.0 );
   float fSum_px = accumulate( vPx.begin(), vPx.end(), 0.0 );
   float fSum_py = accumulate( vPy.begin(), vPy.end(), 0.0 );
@@ -1762,7 +1811,6 @@ double Kinematics::GetAlphaT(std::vector<math::XYZTLorentzVector> jets){
     // Find configuration with minimum value of DeltaHt 
     if ( ( fabs(fDelta_sum_et) < fMin_delta_sum_et || fMin_delta_sum_et < 0.0 ) ) {
       fMin_delta_sum_et = fabs(fDelta_sum_et);
-      iCombinationIndex = k; /// overwritten everytime a new minimum is found
       if ( bList && jet.size() == vEt.size() ){vPseudo_jet1.resize(jet.size());}
     }
 
@@ -1774,14 +1822,15 @@ double Kinematics::GetAlphaT(std::vector<math::XYZTLorentzVector> jets){
       throw hplus::Exception("LogicError") << "Minimum Delta(Sum_Et) is less than zero! fMin_delta_sum_et = " << fMin_delta_sum_et;
     }
   
-  // Calculate 
-  float HT     = fSum_et;
-  float JT     = fSum_et - vEt.at(0); // Ht without considering the Ldg Jet of the Event
-  float dHT    = fMin_delta_sum_et;
-  float MHT    = sqrt(pow(fSum_px,2) + pow(fSum_py,2));
+  // Calculate Event-Shape Variables
+  float dHT = fMin_delta_sum_et;
+  HT  = fSum_et;
+  JT  = fSum_et - vEt.at(0); // Ht without considering the Ldg Jet of the Event
+  MHT = sqrt(pow(fSum_px,2) + pow(fSum_py,2));
+  Centrality = fSum_et/fSum_e;
   float AlphaT = ( 0.5 * ( HT - dHT ) / sqrt( pow(HT,2) - pow(MHT,2) ) );
 
-  if (1)
+  if (0)
     {
 
       Table vars("Variable | Value | Definition", "Text"); //LaTeX or Text
@@ -1806,7 +1855,6 @@ double Kinematics::GetAlphaT(std::vector<math::XYZTLorentzVector> jets){
       vars.AddRowColumn(4, "AlphaT = 0.5 x (HT - dHT) /sqr( pow(HT, 2) - pow(MHT, 2))");
       vars.Print();
     }
-
 
   return AlphaT;
 }

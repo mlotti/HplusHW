@@ -60,6 +60,7 @@ styleDict = {
     "QCD_bEnriched_HT1500to2000": styles.qcdFillStyle,
     "QCD_bEnriched_HT2000toInf" : styles.qcdFillStyle,
 
+    "TTBB"                   : styles.ttbbStyle,
     "TT"                   : styles.ttStyle,
     "TTJets"               : styles.ttjetsStyle,
     "SingleTop"            : styles.singleTopStyle,

@@ -36,10 +36,11 @@ kwargs = {
     "optMode"        : "",
     #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/M_200/",
     #"savePath"       : None,
-    "savePath"       : os.getcwd() + "/Plots/",
+    #"savePath"       : os.getcwd() + "/Plots/",
+    "savePath"       : "/publicweb/a/aattikis/EvtShapeVars/",
     "refDataset"     : "QCD-b",
     "saveFormats"    : [".png"],
-    "normalizeTo"    : "Luminosity", #One", "XSection", "Luminosity"
+    "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "zMin"           : 1e-1,
     "zMax"           : None,
     "rebinX"         : 1,
@@ -75,12 +76,13 @@ hNames = [
     "BQuarkPair_dRMin_dEta_Vs_dPhi",
 #    "Htb_tbW_bqq_dRMax_dRap_Vs_dPhi",
 #    "gtt_tbW_bqq_dRMax_dRap_Vs_dPhi",
-    "tbWPlus_bqq_dRMax_dRap_Vs_dPhi",
-    "tbWMinus_bqq_dRMax_dRap_Vs_dPhi",
+#    "tbWPlus_bqq_dRMax_dRap_Vs_dPhi",
+#    "tbWMinus_bqq_dRMax_dRap_Vs_dPhi",
     "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta",
     "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi",
     "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass",
     "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass",
+    "S_Vs_Y",
 ]
 
 
