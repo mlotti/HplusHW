@@ -36,10 +36,10 @@ kwargs = {
     "optMode"        : "",
     #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/M_200/",
     #"savePath"       : None,
-    #"savePath"       : os.getcwd() + "/Plots/",
-    "savePath"       : "/publicweb/a/aattikis/EvtShapeVars/",
+    "savePath"       : os.getcwd() + "/Plots/",
+    #"savePath"       : "/publicweb/a/aattikis/EvtShapeVars/",
     "refDataset"     : "QCD-b",
-    "saveFormats"    : [".png"],
+    "saveFormats"    : [".png", ".pdf"],
     "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "zMin"           : 1e-1,
     "zMax"           : None,
