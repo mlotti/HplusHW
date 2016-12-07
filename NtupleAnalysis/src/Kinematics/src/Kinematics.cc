@@ -131,6 +131,9 @@ private:
   WrappedTH1 *h_BQuarkPair_MaxPt_Eta;
   WrappedTH1 *h_BQuarkPair_MaxPt_Phi;
   WrappedTH1 *h_BQuarkPair_MaxPt_M;
+  WrappedTH1 *h_BQuarkPair_MaxPt_dEta;
+  WrappedTH1 *h_BQuarkPair_MaxPt_dPhi;
+  WrappedTH1 *h_BQuarkPair_MaxPt_dR;
   WrappedTH1 *h_BQuarkPair_MaxPt_jet1_dR;
   WrappedTH1 *h_BQuarkPair_MaxPt_jet1_dEta;
   WrappedTH1 *h_BQuarkPair_MaxPt_jet1_dPhi;
@@ -142,6 +145,9 @@ private:
   WrappedTH1 *h_BQuarkPair_MaxMass_Eta;
   WrappedTH1 *h_BQuarkPair_MaxMass_Phi;
   WrappedTH1 *h_BQuarkPair_MaxMass_M;
+  WrappedTH1 *h_BQuarkPair_MaxMass_dEta;
+  WrappedTH1 *h_BQuarkPair_MaxMass_dPhi;
+  WrappedTH1 *h_BQuarkPair_MaxMass_dR;
   WrappedTH1 *h_BQuarkPair_MaxMass_jet1_dR;
   WrappedTH1 *h_BQuarkPair_MaxMass_jet1_dEta;
   WrappedTH1 *h_BQuarkPair_MaxMass_jet1_dPhi;
@@ -358,11 +364,11 @@ void Kinematics::book(TDirectory *dir) {
   h_genHT_GenJets     =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital      , dir, "genHT_GenJets", ";GenJ H_{T} (GeV)"             ,  75,  0.0, +1500.0);  
 
   // Event-Shape Variables
-  h_y23         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "y23"        , ";y23"           , 25, 0.0,    0.5);
-  h_Sphericity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Sphericity" , ";Sphericity"    , 20, 0.0,    1.0);
-  h_SphericityT = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SphericityT", ";Sphericity_{T}", 20, 0.0,    1.0);
-  h_Y           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Y"          , ";Y"             , 25, 0.0,    0.5);
-  h_S_Vs_Y      = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "S_Vs_Y"     , ";Sphericity;Y=#frac{#sqrt{3}}{2}x(Q1-Q2)", 20, 0.0, 1.0, 25, 0.0, 0.5);
+  h_y23         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "y23"        , ";y_{23}"        , 25, 0.0,    0.25);
+  h_Sphericity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Sphericity" , ";Sphericity"    , 20, 0.0,    1.00);
+  h_SphericityT = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "SphericityT", ";Sphericity_{T}", 20, 0.0,    1.00);
+  h_Y           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Y"          , ";Y"             , 50, 0.0,    0.50);
+  h_S_Vs_Y      = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "S_Vs_Y"     , ";Sphericity;Y=#frac{#sqrt{3}}{2}x(Q1-Q2)", 100, 0.0, 1.0, 50, 0.0, 0.5);
   h_Aplanarity  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Aplanarity" , ";Aplanarity" , 25, 0.0, 0.5);
   h_Planarity   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Planarity"  , ";Planarity"  , 25, 0.0, 0.5);
   h_CParameter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "CParameter" , ";C"          , 20, 0.0, 1.0);
@@ -408,6 +414,9 @@ void Kinematics::book(TDirectory *dir) {
   h_BQuarkPair_MaxPt_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_Eta" , ";#eta"              , nBinsEta , minEta , maxEta );
   h_BQuarkPair_MaxPt_Phi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_Phi" , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
   h_BQuarkPair_MaxPt_M   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_M"   , ";M (GeV/c^{2})"     , 100      ,    0.0 , 1000.0 );
+  h_BQuarkPair_MaxPt_dEta= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxPt_dPhi= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxPt_dR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_dR"  , ";#DeltaR"           ,  nBinsdR , mindR  , maxdR  );
   h_BQuarkPair_MaxPt_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet1_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
   h_BQuarkPair_MaxPt_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet1_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
   h_BQuarkPair_MaxPt_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxPt_jet1_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
@@ -420,6 +429,9 @@ void Kinematics::book(TDirectory *dir) {
   h_BQuarkPair_MaxMass_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_Eta" , ";#eta"              , nBinsEta , minEta , maxEta );
   h_BQuarkPair_MaxMass_Phi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_Phi" , ";#phi (rads)"       , nBinsPhi , minPhi , maxPhi );
   h_BQuarkPair_MaxMass_M   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_M"   , ";M (GeV/c^{2})"     , 100      ,    0.0 , 1000.0 );
+  h_BQuarkPair_MaxMass_dEta= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_dEta", ";#Delta#eta"        , nBinsdEta, mindEta, maxdEta);
+  h_BQuarkPair_MaxMass_dPhi= fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_dPhi", ";#Delta#phi (rads)" , nBinsdPhi, mindPhi, maxdPhi);
+  h_BQuarkPair_MaxMass_dR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_dR"  , ";#DeltaR"           ,  nBinsdR , mindR  , maxdR  );
   h_BQuarkPair_MaxMass_jet1_dEta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet1_dEta", ";#Delta#eta"        ,  nBinsdEta, mindEta, maxdEta);
   h_BQuarkPair_MaxMass_jet1_dPhi = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet1_dPhi", ";#Delta#phi (rads)" ,  nBinsdPhi, mindPhi, maxdPhi);
   h_BQuarkPair_MaxMass_jet1_dR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "BQuarkPair_MaxMass_jet1_dR"  , ";#DeltaR"           ,  nBinsdR  , mindR  , maxdR  );
@@ -522,9 +534,9 @@ void Kinematics::book(TDirectory *dir) {
   h_dRMinDiJet_NoBJets_Eta   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_Eta"  , ";#eta"             , nBinsEta, minEta, maxEta);
   h_dRMinDiJet_NoBJets_Rap   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_Rap"  , ";#omega"           , nBinsRap, minRap, maxRap);
   h_dRMinDiJet_NoBJets_Mass  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_Mass" , ";M (GeV/c^{2})"    , 50, 0.0, +500.0);  
-  h_dRMinDiJet_NoBJets_dEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_dEta" , ";#Delta#eta"       , 30, 0.0,    3.0);
+  h_dRMinDiJet_NoBJets_dEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_dEta" , ";#Delta#eta"       , 40, 0.0,    2.0);
   h_dRMinDiJet_NoBJets_dPhi  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_dPhi" , ";#Delta#phi"       , nBinsdPhi, mindPhi, maxdPhi);  
-  h_dRMinDiJet_NoBJets_dR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_dR"   , ";#DeltaR"          , 30, 0.0,    3.0);
+  h_dRMinDiJet_NoBJets_dR    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "dRMinDiJet_NoBJets_dR"   , ";#DeltaR"          , 40, 0.0,    2.0);
 
   // GenJets: Trijet with largest pT
   h_MaxTriJetPt_Pt       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "MaxTriJetPt_Pt"     , ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
@@ -1069,6 +1081,13 @@ void Kinematics::process(Long64_t entry) {
   dEtaSum = 0.0;
   dPhiSum = 0.0;
   math::XYZTLorentzVector maxPt_p4(0,0,0,0);
+  double maxPt_dEta = 0.0;
+  double maxPt_dPhi = 0.0;
+  double maxPt_dR   = 0.0;
+  double maxMass_dEta = 0.0;
+  double maxMass_dPhi = 0.0;
+  double maxMass_dR   = 0.0;
+
   math::XYZTLorentzVector maxMass_p4(0,0,0,0);
 
   if (selBQuarks_p4.size() > 1)
@@ -1091,8 +1110,20 @@ void Kinematics::process(Long64_t entry) {
 	  nBPairs++;
 
 	  math::XYZTLorentzVector pair_p4 = *i + *j;
-	  if ( pair_p4.Pt() > maxPt_p4.Pt() )  maxPt_p4 = pair_p4;
-	  if ( pair_p4.M() > maxMass_p4.M() )  maxMass_p4 = pair_p4;
+	  if ( pair_p4.Pt() > maxPt_p4.Pt() )
+	    {
+	      maxPt_dEta = dEta;
+	      maxPt_dPhi = dPhi;
+	      maxPt_dR   = dR;
+	      maxPt_p4   = pair_p4;
+	    }
+	  if ( pair_p4.M() > maxMass_p4.M() ) 
+	    {
+	      maxMass_p4   = pair_p4;
+	      maxMass_dEta = dEta;
+	      maxMass_dPhi = dPhi;
+	      maxMass_dR   = dR;
+	    }
 	  
 	  // Fill Histos
 	  h_BQuarkPair_dR->Fill(dR);
@@ -1115,6 +1146,10 @@ void Kinematics::process(Long64_t entry) {
       h_BQuarkPair_MaxPt_Eta ->Fill( maxPt_p4.Eta() );
       h_BQuarkPair_MaxPt_Phi ->Fill( maxPt_p4.Phi() );
       h_BQuarkPair_MaxPt_M   ->Fill( maxPt_p4.M()   );
+      h_BQuarkPair_MaxPt_dEta->Fill( maxPt_dEta );
+      h_BQuarkPair_MaxPt_dPhi->Fill( maxPt_dPhi );
+      h_BQuarkPair_MaxPt_dR  ->Fill( maxPt_dR   );
+
       if (selJets_p4.size() > 0)
 	{
 	  h_BQuarkPair_MaxPt_jet1_dEta ->Fill( std::abs(maxPt_p4.eta() - selJets_p4.at(0).eta()) );
@@ -1133,6 +1168,9 @@ void Kinematics::process(Long64_t entry) {
       h_BQuarkPair_MaxMass_Eta ->Fill( maxMass_p4.Eta() );
       h_BQuarkPair_MaxMass_Phi ->Fill( maxMass_p4.Phi() );
       h_BQuarkPair_MaxMass_M   ->Fill( maxMass_p4.M()   );
+      h_BQuarkPair_MaxMass_dEta->Fill( maxMass_dEta     );
+      h_BQuarkPair_MaxMass_dPhi->Fill( maxMass_dPhi     );
+      h_BQuarkPair_MaxMass_dR  ->Fill( maxMass_dR       );
       if (selJets_p4.size() > 0)
 	{
 	  h_BQuarkPair_MaxMass_jet1_dEta ->Fill( std::abs(maxMass_p4.eta() - selJets_p4.at(0).eta()) );
@@ -1458,7 +1496,7 @@ vector<float> Kinematics::GetMomentumTensorEigenValues2D(std::vector<math::XYZTL
     }
   
   // Calculate circularity
-  Circularity = 2*std::min(Q1, Q2)/(Q1+Q2);
+  Circularity = 2*std::min(Q1, Q2)/(Q1+Q2); // is this definition correct?
 
   if (0)
     {      
