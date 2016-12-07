@@ -3140,8 +3140,9 @@ class Dataset:
     def getNormFactor(self):
         nAllEvents = self.getNAllEvents()
         if nAllEvents == 0:
-            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateNAllEventsToPUWeighted() has not been called." % self.name)
-
+#            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateNAllEventsToPUWeighted() has not been called." % self.name)
+             print "Warning: all events == 0"
+             return 0
         return self.getCrossSection() / nAllEvents
 
     ## Check if a ROOT histogram exists in this dataset

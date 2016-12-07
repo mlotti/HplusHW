@@ -123,9 +123,12 @@ bool METLegSelection::onlineSelection(Event& fEvent){
   if(fEvent.configurableTrigger2IsEmpty()) return caloMETSelection(fEvent);
   bool hltdecision = fEvent.configurableTriggerDecision2();
   //  std::cout << "check METLegSelection::onlineSelection " << hltdecision << " " << fEvent.L1met().et() << std::endl;
-return hltdecision;
+  //return hltdecision;
   double L1METcut  = 80;
   if(onlineselectionstr == "MET80") L1METcut = 70;
+  //  if(onlineselectionstr == "MET90") L1METcut = 90;
+  if(onlineselectionstr == "MET90") L1METcut = 100;
+  if(onlineselectionstr == "MET110") L1METcut = 100;
   double l1MET = fEvent.L1met().et();
   return l1MET > L1METcut && hltdecision;
 }
