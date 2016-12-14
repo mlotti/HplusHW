@@ -1,25 +1,34 @@
 #!/usr/bin/env python
 '''
+
 Usage:
 Launch default script
-./plotEvtShapeVars.py -m <pseudo_mcrab_directory>
+./plotControlPlots.py -m <pseudo_mcrab_directory>
 
 Launch but exclude the M_180 sample
-./plotEvtShapeVars.py -m Kinematics_161025_020335 -e M_180
+./plotControlPlots.py -m Kinematics_161025_020335 -e M_180
 
 Launch but exclude the multiple signal samples
-./plotEvtShapeVars.py -m Kinematics_161025_020335 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400"
+./plotControlPlots.py -m Kinematics_161025_020335 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400"
+
 Launch but only include the QCD_Pt samples
-./plotEvtShapeVars.py -m Kinematics_0819_full -i QCD_Pt
+./plotControlPlots.py -m Kinematics_161025_020335 -i QCD_Pt
 
 Launch but exclude various samples
-./plotEvtShapeVars.py -m Kinematics_0819_full/ -e "M_200|M_220|M_250|M_300|M_350|M_400|QCD_Pt|JetHT"
+./plotControlPlots.py -m Kinematics_161025_020335 -e "M_200|M_220|M_250|M_300|M_350|M_400|QCD_Pt|JetHT"
 or 
-./plotEvtShapeVars.py -m Kinematics_0819_full/ -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|ZZTo4Q"
+./plotControlPlots.py -m Hplus2tbAnalysis_161026_135227 -e "M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|ZZTo4Q"
+
 
 Last Used:
-./plotEvtShapeVars.py -m Kinematics_0819_full/ -e "ZJets|TTTT_ext1|ttbb"
-./plotEvtShapeVars.py -m Kinematics_0819_full/ -e "ZJets|TTTT_ext1"
+./plotControlPlots.py -m Hplus2tbAnalysis_161108_064941 -e "QCD_Pt_15to30|TTJets" && rsync --partial --progress *.png attikis@lxplus.cern.ch:~/public/html/.
+
+./plotControlPlots.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ"
+
+./plotControlPlots.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016F_PromptReco_v1_278801_278808|2016G"
+
+./plotControlPlots.py -m Hplus2tbAnalysis_161109_20161104T0853/ -e "ChargedHiggs|QCD_b|QCD_Pt_15to30|TTJets|ST_t|WW|WZ|ZZ|TTTT|TTZToQQ|ttbb|TTWJetsToQQ|WJetsToQQ|2016B|2016C|2016D|2016E|2016F_PromptReco_v1_277816_278800"
+
 '''
 
 #================================================================================================
@@ -47,31 +56,31 @@ kwargs = {
     "verbose"          : False,
     "dataEra"          : "Run2016",
     "searchMode"       : "80to1000",
-    "analysis"         : "Kinematics",
+    "analysis"         : "Hplus2tbAnalysis",
     "optMode"          : "",
-    "savePath"         : os.getcwd() + "/Plots/", #"/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/all/",
-    #"savePath"         : "/publicweb/a/aattikis/EvtShapeVars/",
+    "savePath"         : os.getcwd() + "/Plots/",
     "saveFormats"      : [".png", ".pdf"],
-    "xlabel"           : None,
-    "ylabel"           : "Arbitrary Units / %.2f",
+    "xlabel"           : None, #b-tag SF
+    "ylabel"           : "Events / %.0f",
     "rebinX"           : 1,
     "rebinY"           : 1,
-    "xlabelsize"       : None, #10, #None, #10
-    "ratio"            : False,
+    "xlabelsize"       : None, 
+    "ratio"            : True,
     "ratioYlabel"      : None,
     "ratioInvert"      : False,
-    "stackMCHistograms": False,
-    "addMCUncertainty" : False,
-    "addLuminosityText": False,
+    "stackMCHistograms": True,
+    "addMCUncertainty" : True,
+    "addLuminosityText": True,
     "addCmsText"       : True,
     "errorBarsX"       : True,
+    "logX"             : False,
     "logY"             : True,
     "gridX"            : True,
     "gridY"            : True,
     "cmsExtraText"     : "Preliminary", #"Preliminary" "Simulation"
     "removeLegend"     : False,
-    "moveLegend"       : {"dx": -0.1, "dy": 0.0, "dh": +0.0},
-    "cutValue"         : None, #1.2,
+    "moveLegend"       : {"dx": -0.05, "dy": +0.0, "dh": -0.1},
+    "cutValue"         : 1.2,
     "cutLine"          : False,
     "cutBox"           : False,
     "cutLessthan"      : False,
@@ -80,129 +89,20 @@ kwargs = {
 
 
 hNames = [
-#     "dRMinDiJet_NoBJets_Pt",
-#     "dRMinDiJet_NoBJets_Eta",
-#     "dRMinDiJet_NoBJets_Rap",
-#     "dRMinDiJet_NoBJets_Mass",
-#     "dRMinDiJet_NoBJets_dR",
-#     "dRMinDiJet_NoBJets_dEta",
-#     "dRMinDiJet_NoBJets_dPhi",
-#     "GenJet1_BJetsFirst_Pt",
-#     "GenJet2_BJetsFirst_Pt",
-#     "GenJet3_BJetsFirst_Pt",
-#     "GenJet4_BJetsFirst_Pt",
-#     "GenJet5_BJetsFirst_Pt",
-#     "GenJet6_BJetsFirst_Pt",
-#     "y23",
-#     "Sphericity",
-#     "SphericityT",
-#     "Y",
-#     "Aplanarity",
-#     "Planarity",
-#     "CParameter",
-#     "DParameter",
-#     "H2",
-#     "Circularity",
-#     "Centrality",
-#     "HT",
-#     "JT",
-#     "MHT",
-    "AlphaT",
-#    "BQuarkPair_dRMin_Pt",
-#    "BQuarkPair_dRMin_Eta",
-#    "BQuarkPair_dRMin_Rap",
-#    "BQuarkPair_dRMin_Phi",
-#    "BQuarkPair_dRMin_dEta",
-#    "BQuarkPair_dRMin_dPhi",
-#    "BQuarkPair_dRMin_dR",
-#    "BQuarkPair_dRMin_Mass",
-#    "BQuarkPair_dRMin_jet1_dR",
-#    "BQuarkPair_dRMin_jet1_dEta",
-#    "BQuarkPair_dRMin_jet1_dPhi",
-#    "BQuarkPair_dRMin_jet2_dR",
-#    "BQuarkPair_dRMin_jet2_dEta",
-#    "BQuarkPair_dRMin_jet2_dPhi",
-#    "MaxDiJetMass_Pt",
-#    "MaxDiJetMass_Eta",
-#    "MaxDiJetMass_Mass",
-#    "MaxDiJetMass_Rap",
-#    "MaxDiJetMass_dR",
-#    "MaxDiJetMass_dRrap",
-#    "MaxDiJetMass_dEta",
-#    "MaxDiJetMass_dRap",
-#    "MaxDiJetMass_dPhi",
-#    "BQuarkPair_dR",
-#    "BQuarkPair_dEta",
-#    "BQuarkPair_dPhi",
-#    "BQuarkPair_dRAverage",
-#    "BQuarkPair_dEtaAverage",
-#    "BQuarkPair_dPhiAverage",
-#    "BQuarkPair_MaxPt_Pt",
-#    "BQuarkPair_MaxPt_Eta",
-#    "BQuarkPair_MaxPt_Phi",
-#    "BQuarkPair_MaxPt_M",
-#    "BQuarkPair_MaxPt_dEta",
-#    "BQuarkPair_MaxPt_dPhi",
-#    "BQuarkPair_MaxPt_dR",
-#    "BQuarkPair_MaxPt_jet1_dR",
-#    "BQuarkPair_MaxPt_jet1_dEta",
-#    "BQuarkPair_MaxPt_jet1_dPhi",
-#    "BQuarkPair_MaxPt_jet2_dR",
-#    "BQuarkPair_MaxPt_jet2_dEta",
-#    "BQuarkPair_MaxPt_jet2_dPhi",
-#    "BQuarkPair_MaxMass_Pt",
-#    "BQuarkPair_MaxMass_Eta",
-#    "BQuarkPair_MaxMass_Phi",
-#    "BQuarkPair_MaxMass_M",
-#    "BQuarkPair_MaxMass_dEta",
-#    "BQuarkPair_MaxMass_dPhi",
-#    "BQuarkPair_MaxMass_dR",
-#    "BQuarkPair_MaxMass_jet1_dR",
-#    "BQuarkPair_MaxMass_jet1_dEta",
-#    "BQuarkPair_MaxMass_jet1_dPhi",
-#    "BQuarkPair_MaxMass_jet2_dR",
-#    "BQuarkPair_MaxMass_jet2_dEta",
-#    "BQuarkPair_MaxMass_jet2_dPhi",
-#    "BQuarks_N",
-#    "BQuark1_Pt",
-#    "BQuark2_Pt",
-#    "BQuark3_Pt",
-#    "BQuark4_Pt",
-#    "BQuark1_Eta",
-#    "BQuark2_Eta",
-#    "BQuark3_Eta",
-#    "BQuark4_Eta",
-#    "GenJet1_Pt",
-#    "GenJet2_Pt",
-#    "GenJet3_Pt",
-#    "GenJet4_Pt",
-#    "GenJet5_Pt",
-#    "GenJet6_Pt",
-#    "GenJet1_Eta",
-#    "GenJet2_Eta",
-#    "GenJet3_Eta",
-#    "GenJet4_Eta",
-#    "GenJet5_Eta",
-#    "GenJet6_Eta",
-#    "MaxTriJetPt_Pt",
-#    "MaxTriJetPt_Eta",
-#    "MaxTriJetPt_Rap",
-#    "MaxTriJetPt_Mass",
-#    "MaxTriJetPt_dEtaMax",
-#    "MaxTriJetPt_dPhiMax",
-#    "MaxTriJetPt_dRMax",
-#    "MaxTriJetPt_dEtaMin",
-#    "MaxTriJetPt_dPhiMin",
-#    "MaxTriJetPt_dRMin",
-#    "MaxTriJetPt_dEtaAverage",
-#    "MaxTriJetPt_dPhiAverage",
-#    "MaxTriJetPt_dRAverage",
+    "bjetSelection_/selectedBJetsFirstJetPt",
+    "bjetSelection_/selectedBJetsSecondJetPt",
+    "bjetSelection_/selectedBJetsThirdJetPt",
+    "bjetSelection_/selectedBJetsFourthJetPt",
+    "bjetSelection_/selectedBJetsFirstJetEta",
+    "bjetSelection_/selectedBJetsSecondJetEta",
+    "bjetSelection_/selectedBJetsThirdJetEta",
+    "bjetSelection_/selectedBJetsFourthJetEta",
+    # "metSelection_/Met",
     ]
 
 
-
 #================================================================================================
-# Function Definition
+# Main
 #================================================================================================
 def Print(msg, printHeader=False):
     fName = __file__.split("/")[-1]
@@ -218,6 +118,27 @@ def Verbose(msg, printHeader=True, verbose=False):
     if not verbose:
         return
     Print(msg, printHeader)
+    return
+
+
+def SaveAs(p, savePath, saveName, saveFormats, verbose):
+
+    # For-loop: All formats to save file
+    for i, ext in enumerate(saveFormats):
+        sName = saveName + ext
+        if "html" in sName:
+            user    = getpass.getuser()
+            initial = getpass.getuser()[0]
+            sName   = sName.replace("/afs/cern.ch/user/%s/" % (initial), "http://cmsdoc.cern.ch/~")
+            sName   = sName.replace("%s/public/html/" % (user), "%s/" % (user))
+
+        if not os.path.exists(savePath):
+            os.mkdir(savePath)
+
+        fullPath = os.path.join(savePath, saveName + ext)
+        Print("%s" % fullPath, i==0)
+
+    p.saveAs(os.path.join(savePath, saveName), saveFormats)
     return
 
 
@@ -256,8 +177,8 @@ def main(hName, opts):
     # Setup & configure the dataset manager
     datasetsMgr = GetDatasetsFromDir(opts.mcrab, opts, **kwargs)
     datasetsMgr.updateNAllEventsToPUWeighted()
-    # datasetsMgr.PrintCrossSections()
-    # datasetsMgr.PrintLuminosities()
+    datasetsMgr.PrintCrossSections()
+    datasetsMgr.PrintLuminosities()
 
     # Set/Overwrite cross-sections
     for d in datasetsMgr.getAllDatasets():
@@ -269,30 +190,25 @@ def main(hName, opts):
 
     # Remove datasets
     # datasetsMgr.remove("QCD-b") 
+    # datasetsMgr.remove("QCD")
     
     # Print dataset information
-    # datasetsMgr.PrintInfo()
+    datasetsMgr.PrintInfo()
+
+    # Create data-MC comparison plot, with the default 
+    p = plots.DataMCPlot(datasetsMgr, hName)
     
-    # Create  plot, with the default 
-    s = {"normalizeToOne": True}
-    p = plots.MCPlot(datasetsMgr, hName, **s)
-    p.histoMgr.setHistoLegendStyleAll("LP")
-    p.histoMgr.setHistoDrawStyleAll("EP")
-    p.histoMgr.setHistoLegendStyle("ChargedHiggs_HplusTB_HplusToTB_M_500", "F")
-    p.histoMgr.setHistoDrawStyle ("ChargedHiggs_HplusTB_HplusToTB_M_500", "HIST")
-    #datasetsMgr.getDataset("ZJetsToQQ_HT600toInf").getDatasetRootHisto(hName).getHistogram().SetMarkerColor(ROOT.kBlack)
-
-
     # Create a comparison plot
     ratioOpts = {"ymin": 0.0, "ymax": 2.0}
     if kwargs.get("logY")==True:
-        canvOpts = {"xmin": 0.0, "ymin": 1e-5, "ymaxfactor": 10}
+        #canvOpts = {"xmin": 0.0, "xmax": 50.0, "ymin": 1e-1, "ymaxfactor": 10}
+        canvOpts = {"xmin": 0.0, "ymin": 1e-1, "ymaxfactor": 10}
     else:
         canvOpts = {"ymin": 0.0, "ymaxfactor": 1.2}
 
     # Draw a customised plot & Save it
     plots.drawPlot(p, 
-                   os.path.join(kwargs.get("savePath"), hName.replace("/", "_").replace(" ", "_").replace("(", "_").replace(")", "") ),
+                   "Plots/" + hName.replace("/", "_").replace(" ", "_").replace("(", "_").replace(")", ""),
                    xlabel=kwargs.get("xlabel"), 
                    ylabel=kwargs.get("ylabel"),
                    rebinX=kwargs.get("rebinX"), 
@@ -310,8 +226,6 @@ def main(hName, opts):
                    errorBarsX=kwargs.get("errorBarsX"),
                    cmsExtraText=kwargs.get("cmsExtraText"),
                    moveLegend=kwargs.get("moveLegend"),
-                   drawStyle="P",
-                   legendStyle="LP",
                    #cutLine=kwargs.get("cutValue"),
                    cutBox={"cutValue": kwargs.get("cutValue"), "fillColor": kwargs.get("cutFillColour"), "box": kwargs.get("cutBox"), "line": kwargs.get("cutLine"), "lessThan": kwargs.get("cutLessthan")},
                    )
@@ -325,7 +239,7 @@ def main(hName, opts):
     # histograms.addText(0.4, 0.11, "Runs " + datasetsMgr.loadRunRange(), 17)
     
     if not opts.batchMode:
-        raw_input("=== plotTest.py:\n\tPress any key to quit ROOT ...")
+        raw_input("=== plotControlPlots.py:\n\tPress any key to quit ROOT ...")
 
     return
 
@@ -363,8 +277,8 @@ if __name__ == "__main__":
         pass
 
     # Program execution
-    for histo in hNames:
-        main(histo, opts)
+    for h in hNames:
+        main(h, opts)
 
     if not opts.batchMode:
-        raw_input("=== plotTemplate.py: Press any key to quit ROOT ...")
+        raw_input("=== plotControlPlots.py: Press any key to quit ROOT ...")
