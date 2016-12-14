@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 '''
 
-Usage:
-Launch default script
-./plotHistograms.py -m <pseudo_mcrab_directory>
+Usage (single plot):
+./plotHistograms.py -m <pseudo_mcrab_directory> <jsonfile>
+
+Usage (multiple plots):
+./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json
+or
+./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json json/AfterStandardSelections/*.json
+
 
 Last Used:
-./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ BjetPt.json
+./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/BjetPt.json
+or
+./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/*.json
 
 '''
 
@@ -64,7 +71,7 @@ def GetLumi(datasetsMgr):
 
 def GetDatasetsFromDir(opts, json):
     Verbose("Getting datasets")
-
+    
     if len(json["samples"])<1:
         Print("No samples defined in the JSON file. Exit", True)
         print __doc__
@@ -74,7 +81,7 @@ def GetDatasetsFromDir(opts, json):
                                                     dataEra=json["dataEra"],
                                                     searchMode=json["searchMode"],
                                                     analysisName=json["analysis"],
-                                                    includeOnlyTasks=json["samples"],
+                                                    includeOnlyTasks="|".join(json["samples"]),
                                                     optimizationMode=json["optMode"])
     
 def Plot(jsonfile, opts):
@@ -147,7 +154,7 @@ def DataMCPlot(datasetsMgr, json):
                    stackMCHistograms = json["stackMCHistograms"]=="True", 
                    ratioInvert       = json["ratioInvert"]=="True",
                    addMCUncertainty  = json["addMCUncertainty"]=="True",
-                   addLuminosityText = False, #json["addLuminosityText"]=="True",
+                   addLuminosityText = json["addLuminosityText"]=="True",
                    addCmsText        = json["addCmsText"]=="True",
                    cmsExtraText      = json["cmsExtraText"],
                    opts              = json["opts"],
@@ -156,7 +163,7 @@ def DataMCPlot(datasetsMgr, json):
                    errorBarsX        = json["errorBarsX"]=="True", 
                    moveLegend        = json["moveLegend"],
                    # cutLine           = json["cutValue"], #cannot have this and "cutBox" defined
-                   cutBox            = {"cutValue": json["cutValue"], "fillColor": json["cutFillColour"], "box": json["cutBox"], "line": json["cutLine"], "greaterThan": json["cutGreaterThan"]},
+                   cutBox            = {"cutValue": json["cutValue"], "fillColor": json["cutFillColour"], "box": json["cutBox"]=="True", "line": json["cutLine"]=="True", "greaterThan": json["cutGreaterThan"]=="True"},
                    # xlabelsize        = json["xlabelsize"],
                    )
     
