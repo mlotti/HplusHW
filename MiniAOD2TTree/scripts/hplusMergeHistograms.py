@@ -113,7 +113,10 @@ def AskUser(msg, printHeader=False):
     '''
     Verbose("AskUser()", printHeader)
     
-    keystroke = raw_input("\t" +  msg + " (y/n): ")
+    fName = __file__.split("/")[-1]
+
+    Print(msg, printHeader)
+    keystroke = raw_input("\t(y/n): ")
     if (keystroke.lower()) == "y":
         return True
     elif (keystroke.lower()) == "n":
@@ -1050,8 +1053,11 @@ def CheckThatFilesExist(taskName, fileList, opts):
     FinishProgressBar()
 
     if nExist != nFiles:
-        Print("%s, found %s ROOT files but expected %s. Have you already run this script?" % (taskName, nExist, nFiles), False)
-        return False
+        msg  = "%s, found %s ROOT files but expected %s. Have you already run this script? " % (taskName, nExist, nFiles)
+        msg += "Would you like to proceed with the merging anyway?"
+        # return False
+        return AskUser(msg, True)
+    
     else:
         return True
 

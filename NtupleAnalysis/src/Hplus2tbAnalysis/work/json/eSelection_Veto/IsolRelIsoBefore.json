@@ -35,6 +35,6 @@
     "cutValue": 0.15,
     "cutFillColour": 16,
     "cutBox": "False",
-    "cutLine": "False",
+    "cutLine": "True",
     "cutGreaterThan": "False"
 }

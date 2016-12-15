@@ -14,7 +14,8 @@ Last Used:
 ./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/BjetPt.json
 or
 ./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/*.json
-
+or
+./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/*/*.json
 '''
 
 #================================================================================================
@@ -141,6 +142,14 @@ def DataMCPlot(datasetsMgr, json):
         if json["rebinY"] != "None":
             p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinY(json["rebinY"]))
 
+    # Label size (optional. Commonly Used in counters)
+    xlabelSize = None
+    if "xlabelsize" in json:
+        xlabelSize = json["xlabelsize"]
+    ylabelSize = None
+    if "ylabelsize" in json:
+        ylabelSize = json["ylabelsize"]
+
     # Draw a customised plot
     saveName = os.path.join(json["saveDir"], json["title"])
     plots.drawPlot(p, 
@@ -164,7 +173,8 @@ def DataMCPlot(datasetsMgr, json):
                    moveLegend        = json["moveLegend"],
                    # cutLine           = json["cutValue"], #cannot have this and "cutBox" defined
                    cutBox            = {"cutValue": json["cutValue"], "fillColor": json["cutFillColour"], "box": json["cutBox"]=="True", "line": json["cutLine"]=="True", "greaterThan": json["cutGreaterThan"]=="True"},
-                   # xlabelsize        = json["xlabelsize"],
+                   xlabelsize        = xlabelSize,
+                   ylabelsize        = ylabelSize,
                    )
     
     # Remove legend?
