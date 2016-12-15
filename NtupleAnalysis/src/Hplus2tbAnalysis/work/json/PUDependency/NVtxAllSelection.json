@@ -7,7 +7,7 @@
     "title": "NvtxAllSelections",
     "saveFormats": [".png", ".pdf", ".C"],
     "saveDir": "/publicweb/a/aattikis/Hplus2tbAnalysis/PUDependency",
-    "samples": ["JetHT_Run2016F", "JetHT_Run2016G", "QCD_Pt", "TT", "ZJetsToQQ_HT600toInf"],
+    "samples": ["JetHT_Run2016F", "JetHT_Run2016G", "QCD_Pt", "TT_ext3", "ZJetsToQQ_HT600toInf"],
     "rebinX": 2,
     "rebinY": "None",
     "xlabel": "Vertex Multiplicity",

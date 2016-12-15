@@ -80,7 +80,7 @@ kwargs = {
     "gridY"            : True,
     "cmsExtraText"     : "Preliminary", #"Preliminary" "Simulation"
     "removeLegend"     : False,
-    "moveLegend"       : {"dx": -0.05, "dy": +0.0, "dh": -0.1},
+    "moveLegend"       : {"dx": -0.55, "dy": -0.55, "dh": -0.1},
     "cutValue"         : 1.2,
     "cutLine"          : False,
     "cutBox"           : False,
