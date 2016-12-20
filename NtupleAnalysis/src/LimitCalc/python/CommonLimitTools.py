@@ -23,6 +23,7 @@ import time
 import random
 import shutil
 import subprocess
+import warnings
 
 from optparse import OptionParser
 import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
@@ -531,8 +532,8 @@ class LimitMultiCrabBase:
                     else:
                         rfname = os.path.join(self.datacardDirectory, rf)
                     if not os.path.isfile(rfname):
-                        raise Exception("ROOT file (for shapes) '%s' does not exist!" % rfname)
-
+#                        raise Exception("ROOT file (for shapes) '%s' does not exist!" % rfname)
+                        warnings.warn("ROOT file (for shapes) '%s' does not exist!" % rfname)
                     aux.addToDictList(self.rootfiles, mass, rfname)
 
     ## Create the multicrab task directory
@@ -549,7 +550,10 @@ class LimitMultiCrabBase:
         for d in [self.datacards, self.rootfiles]:
             for mass, files in d.iteritems():
                 for f in files:
-                    shutil.copy(f, self.dirname)
+                    if os.path.isfile(f):
+                        shutil.copy(f, self.dirname)
+                    else:
+                        warnings.warn("File '%s' was not copied into result directory, because the file does not exist!" % f)
         # Copy exe file only for LandS
         if os.path.exists(self.exe):
             shutil.copy(self.exe, self.dirname)
