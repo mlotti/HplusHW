@@ -44,7 +44,7 @@ validCMSSWversions = ["CMSSW_7_4_7"]
 workspacePattern = "combineWorkspaceM%s.root"
 workspaceOptionsBrLimitTemplate = "text2workspace.py %s -P HiggsAnalysis.CombinedLimit.ChargedHiggs:brChargedHiggs -o %s"%("%s",workspacePattern)
 workspaceOptionsSigmaBrLimit    = "text2workspace.py %s -o %s"%("%s",workspacePattern%"%s")
-taskDirprefix = "CombineMultiCrab"
+taskDirprefix = "CombineResults"
 ## Command line options for running Combine
 #asymptoticLimit = "combine -M Asymptotic --picky"
 #asymptoticLimitOptionExpectedOnly = " --run expected"
@@ -267,7 +267,9 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
         f.close()
 
         self._results = commonLimitTools.ResultContainer(self.opts.unblinded, self.dirname)
+        mass_point_counter = 1
         for mass in self.massPoints:
+            print "Processing mass point %s (point %d/%d)..." % (mass,mass_point_counter,len(self.massPoints))
             myResult = self.clsType.runCombine(mass)
             if myResult.failed:
                 if not quietStatus:
@@ -275,9 +277,11 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
             else:
                 self._results.append(myResult)
                 if not quietStatus:
-                    print "Processed successfully mass point %s" % mass
+                    print "Processed successfully mass point %s, the result is %s" % (mass,self._results.getResultString(mass))
+            mass_point_counter+=1
         if not quietStatus:
-            print
+            print ""
+            print "\033[92mSummary of the results:\033[00m"
             self._results.print2()
             fname = self._results.saveJson()
             print "Wrote results to %s" % fname
@@ -455,7 +459,7 @@ class LHCTypeAsymptotic:
 
     def _createMLFit(self, mass, fileName, datacardName, blindedMode):
         if self.opts.nomlfit:
-            print "skipping creation of ML fit scripts, to enable run with --mlfit"
+#            print "skipping creation of ML fit scripts, to enable run with --mlfit"
             return
           
         fname = fileName.replace("runCombine", "runCombineMLFit")
@@ -719,10 +723,11 @@ hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.As
 
     def _runMLFit(self, mass):
         if mass in self.mlfitScripts.keys() and not self.opts.nomlfit:
+            print "Running ML fits..."
             script = self.mlfitScripts[mass]
             self._run(script, "mlfit_m_%s_output.txt" % mass)
-        else:
-            print "Skipping ML fit for mass:",mass
+#        else:
+#            print "Skipping ML fit for mass:",mass
 
     def _runSignificance(self, mass):
         jsonFile = os.path.join(self.dirname, "significance.json")

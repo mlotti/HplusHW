@@ -23,7 +23,6 @@ import time
 import random
 import shutil
 import subprocess
-import warnings
 
 from optparse import OptionParser
 import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
@@ -54,8 +53,8 @@ class GeneralSettings():
         self.softwareId = mySoftwareId
 
         # Obtain mass points
-        if len(masspoints) == 0:
-            print "Auto-detecting mass points"
+#        if len(masspoints) == 0:
+#            print "Auto-detecting mass points"
         for key,value in self.datacardPatterns.iteritems():
             if len(masspoints) == 0:
                 self.massPoints[key] = obtainMassPoints(value, directory)
@@ -211,7 +210,7 @@ def createOptionParser(lepDefault=None, lhcDefault=None, lhcasyDefault=None, ful
 
     # Mu parameter selection
     parser.add_option("--brlimit", dest="brlimit", action="store_true", default=False, help="Calculate limit on Br(t->bH+)")
-    parser.add_option("--sigmabrlimit", dest="sigmabrlimit", action="store_true", default=False, help="Calculate limit on sigma(H+)xBr(t->bH+)")
+    parser.add_option("--sigmabrlimit", dest="sigmabrlimit", action="store_true", default=True, help="Calculate limit on sigma(H+)xBr(t->bH+)")
 
     # Datacard directories
     parser.add_option("-d", "--dir", dest="dirs", type="string", action="append", default=[],
@@ -283,9 +282,11 @@ def parseOptionParser(parser):
         raise Exception("Error: Please specify only one limit type: \n%s"%s)
     if opts.brlimit == opts.sigmabrlimit:
         if opts.brlimit:
-            raise Exception("Error: Please enable only --brlimit or --sigmabrlimit !")
+            opts.sigmabrlimit = False # if --brlimit is true, let it override --sigmabrlimit
+#            raise Exception("Error: Please enable only --brlimit or --sigmabrlimit !")
         else:
-            raise Exception("Error: Please enable --brlimit or --sigmabrlimit !")
+            opt.sigmabrlimit = True # if not specified, choose --sigmabrlimit
+#            raise Exception("Error: Please enable --brlimit or --sigmabrlimit !")
     if float(opts.injectSignalBRTop) > 0 or float(opts.injectSignalBRHplus) > 0:
         opts.injectSignal = True
     if opts.injectSignal:
@@ -390,9 +391,9 @@ class ResultContainer:
 
     ## Print the limits
     def print2(self):
-        print
+        print ""
         print "                  Expected"
-        print "Mass  Observed    Median       -2sigma     -1sigma     +1sigma     +2sigma"
+        print "Mass  Observed    Median       -2sigma     -1sigma        +1sigma     +2sigma"
         format = "%3s:  %-9s   %-10s   %-10s  %-10s  %-10s  %-10s"
         massIndex = [(int(self.results[i].mass), i) for i in range(len(self.results))]
         massIndex.sort()
@@ -404,7 +405,16 @@ class ResultContainer:
                 print format % (result.mass, result.observed, result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
             else:
                 print format % (result.mass, "BLINDED", result.expected, result.expectedMinus2Sigma, result.expectedMinus1Sigma, result.expectedPlus1Sigma, result.expectedPlus2Sigma)
-        print
+        print ""
+
+    def getResultString(self,mass):
+        for result in self.results:
+            if result.mass == mass:
+                if self.unblindedStatus:
+                    return "%.4f (observed) vs. %.4f (expected median)" % (result.observed, result.expected)
+                else:
+                    return "%.4f (expected median)" % result.expected
+    
 
     ## Store the results in a limits.json file
     #
@@ -533,7 +543,7 @@ class LimitMultiCrabBase:
                         rfname = os.path.join(self.datacardDirectory, rf)
                     if not os.path.isfile(rfname):
 #                        raise Exception("ROOT file (for shapes) '%s' does not exist!" % rfname)
-                        warnings.warn("ROOT file (for shapes) '%s' does not exist!" % rfname)
+                        print("\033[91mWarning:  ROOT file (for shapes) '%s' does not exist!\033[00m" % rfname)
                     aux.addToDictList(self.rootfiles, mass, rfname)
 
     ## Create the multicrab task directory
@@ -552,8 +562,8 @@ class LimitMultiCrabBase:
                 for f in files:
                     if os.path.isfile(f):
                         shutil.copy(f, self.dirname)
-                    else:
-                        warnings.warn("File '%s' was not copied into result directory, because the file does not exist!" % f)
+#                    else:
+#                        print("\033[91mWarning: File '%s' was not copied into result directory, because the file does not exist!\033[00m" % f)
         # Copy exe file only for LandS
         if os.path.exists(self.exe):
             shutil.copy(self.exe, self.dirname)
