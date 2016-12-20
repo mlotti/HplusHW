@@ -163,13 +163,16 @@ void Table::AddRowColumn(int iRow,
   bool bNewColumn = m_RowColumnToString[iRow].find( GetNumberOfColumns(iRow) ) == m_RowColumnToString[iRow].end();
   if (bNewColumn) iColumn = GetNumberOfColumns(iRow);
   else iColumn = GetNumberOfColumns(iRow)+1;
+  if (0) std::cout << "=== Table::AddRowColumn(): iColumn = " << iColumn << std::endl;
 
   // Save the row in a [index, string] map
   m_RowToString[iRow] += stringToSave;
+  if (0) std::cout << "=== Table::AddRowColumn(): m_RowToString["<<iRow<<"] = " << m_RowToString[iRow] << std::endl;
   
   // Save the new column in the [iRow, iColumn] map
   m_RowColumnToString[iRow][iColumn] = stringToSave;
-	  
+  if (0) std::cout << "=== Table::AddRowColumn(): m_RowColumnToString["<<iRow<<"]["<<iColumn<<"] = " << m_RowColumnToString[iRow][iColumn] << std::endl;
+
   return;
 }
 
@@ -830,5 +833,21 @@ std::string Table::GetTitleRow(void)
   row += m_RowColumnToString[-1][lastColumn];
   
   return row;
+
+}
+
+
+
+//****************************************************************************
+void Table::AppendToTitleRow(std::string newString)
+//****************************************************************************
+{
+
+  std::string titleRow    = m_RowToString[-1];
+  std::string newTitleRow = titleRow + newString;
+  // std::cout << "titleRow = " << titleRow << std::endl;
+  // std::cout << "newTitleRow = " << newTitleRow << std::endl;
+  m_RowToString[-1] = newTitleRow;
+  return;
 
 }

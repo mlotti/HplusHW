@@ -58,6 +58,7 @@ class TauDumper : public BaseDumper {
         FourVectorDumper *matchingJet;
         
         // Systematics variations for tau 4-vector
+        bool systVariations;
         FourVectorDumper *systTESup;
         FourVectorDumper *systTESdown;
         FourVectorDumper *systExtremeTESup;

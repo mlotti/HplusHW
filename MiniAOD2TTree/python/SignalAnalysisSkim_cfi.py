@@ -4,10 +4,16 @@ skim = cms.EDFilter("SignalAnalysisSkim",
     TriggerResults = cms.InputTag("TriggerResults::HLT"),
     HLTPaths       = cms.vstring(
 	"HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
-        "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_JetIdCleaned_v",
+        "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET90_v",
+        "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET110_v",
         "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
-        "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned_v",
+        "HLT_VLooseIsoPFTau120_Trk50_eta2p1_v",
+        "HLT_VLooseIsoPFTau140_Trk50_eta2p1_v",
+        "HLT_LooseIsoPFTau50_Trk30_eta2p1_v"
     ),
+# FIXME: Temporarily CaloMET to emulate trigger MET leg 09062016/SL
+    METCollection  = cms.InputTag("slimmedMETs"),
+
     # Taus
     TauCollection  = cms.InputTag("slimmedTaus"),
     TauPtCut       = cms.double(45.0),

@@ -6,6 +6,11 @@ or
 ./checkEOS.py --skipVerify --cleanAll
 or
 ./checkEOS.py --skipVerify --verbose --cleanAll
+or
+checkEOS.py -c -d /store/user/aattikis/CRAB3_TransferData/multicrab_Hplus2tbAnalysis_v8019_20161020T0152
+
+Clear a specific directory in EOS:
+checkEOS.py -d /store/user/aattikis/CRAB3_TransferData/multicrab_Hplus2tbAnalysis_v8019_20161020T0152/ST_t-channel_top_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8_TuneCUETP8M1/crab_ST_t_channel_top_4f_inclusiveDecays/161026_084523/0000/ -c
 
 Description:
 This script is used to check quota and delete files/directories on EOS.
@@ -22,6 +27,7 @@ https://twiki.cern.ch/twiki/bin/view/EOS/UserHowTo
 import os
 import sys
 import subprocess
+import socket
 
 from optparse import OptionParser
 
@@ -45,26 +51,24 @@ def Print(msg, printHeader=False):
     return
 
 
-def GetEosQuota(opts):
-
-    csh_cmd = "eos quota | grep ^user -A1 -B2"
-    Verbose(csh_cmd, True)
-
-    p = subprocess.Popen(['/bin/csh', '-c', csh_cmd], stdout=subprocess.PIPE)
-
-    # Use Popen with the communicate() method when you need pipes
-    cmd_out, cmd_err = p.communicate()
-    return cmd_out, cmd_err
+def GetHost():
+    return socket.gethostname()
 
 
 def GetEosContentsList(opts):
-
+    '''
+    '''
     pathPrefix = "/store/user/"
     userName   = os.getenv("USER")
     eosPath    = os.path.join(pathPrefix, userName, opts.dir)
 
     # Construct & Execute command
-    cmd     = "eos ls"
+    if "lxplus" in GetHost():
+        cmd = "eos ls"
+    elif "cmslpc" in GetHost():
+        cmd = "eosls"
+    else:
+        raise Exception("Unsupported hostname \"%s\"." % (GetHost()) )
     csh_cmd = cmd + " " + eosPath
     Verbose(csh_cmd, True)
 
@@ -80,14 +84,38 @@ def GetEosContentsList(opts):
     return fileList, eosPath
 
 
-def DeleteEosContents(fileList, eosPath, opts):
+def GetEosQuota(opts):
+    '''
+    '''
+    if "lxplus" in GetHost():
+        csh_cmd = "eos quota | grep ^user -A1 -B2"
+    elif "cmslpc" in GetHost():
+        csh_cmd = "eosquota"
+    else:
+        raise Exception("Unsupported hostname \"%s\"." % (GetHost()) )
 
+    Verbose(csh_cmd, True)
+    p = subprocess.Popen(['/bin/csh', '-c', csh_cmd], stdout=subprocess.PIPE)
+
+    # Use Popen with the communicate() method when you need pipes
+    cmd_out, cmd_err = p.communicate()
+    return cmd_out, cmd_err
+
+
+def DeleteEosContents(fileList, eosPath, opts):
+    '''
+    '''
     if len(fileList) < 1:
         Print("Nothing to delete!")
         return     
 
     # Define the delete command
-    cmd = "eos rm -r"
+    if "lxplus" in GetHost():
+        cmd = "eos rm -r"
+    elif "cmslpc" in GetHost():
+        cmd = "eosrm -r"
+    else:
+        raise Exception("Unsupported hostname \"%s\"." % (GetHost()) )
 
     # Foor-loop: All files on EOS
     printHeader = True
@@ -173,10 +201,19 @@ if __name__ == "__main__":
     '''
 
     parser = OptionParser(usage="Usage: %prog [options]")
-    parser.add_option("-v", "--verbose"   , dest="verbose"   , default=False, action="store_true", help="Verbose mode (for debugging)")
-    parser.add_option("-s", "--skipVerify", dest="skipVerify", default=False, action="store_true", help="Skip user confirmation when deleting files or dirs. Used with --cleanAll")
-    parser.add_option("-c", "--cleanAll"  , dest="cleanAll"  , default=False, action="store_true", help="Delete all file/dir found on EOS")
-    parser.add_option("-d", "--dir"       , dest="dir"       , default="CRAB3_TransferData", action="store", help="Dir to probe in EOS (default: CRAB3_TransferData")
+
+    parser.add_option("-v", "--verbose", dest="verbose", default=False, action="store_true", 
+                      help="Verbose mode (for debugging)")
+
+    parser.add_option("-s", "--skipVerify", dest="skipVerify", default=False, action="store_true", 
+                      help="Skip confirmation when deleting files/dirs. Used with --cleanAll")
+
+    parser.add_option("-c", "--cleanAll", dest="cleanAll", default=False, action="store_true", 
+                      help="Delete all file/dir found on EOS")
+
+    parser.add_option("-d", "--dir", dest="dir", default="CRAB3_TransferData", action="store", 
+                      help="Dir to probe in EOS [default: CRAB3_TransferData]")
+
     (opts, args) = parser.parse_args()
 
     if opts.skipVerify and not opts.cleanAll:

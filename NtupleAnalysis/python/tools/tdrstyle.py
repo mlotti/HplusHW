@@ -194,7 +194,13 @@ class TDRStyle:
     # \param onoff  If True (False), set the grid on (off)
     def setGrid(self, onoff):
         self.tdrStyle.SetPadGridX(onoff)
+        self.tdrStyle.SetPadGridY(onoff)
+
+    def setGridX(self, onoff):
         self.tdrStyle.SetPadGridX(onoff)
+
+    def setGridY(self, onoff):
+        self.tdrStyle.SetPadGridY(onoff)
 
     ## Set pretty palette style
     def setPalettePretty(self):

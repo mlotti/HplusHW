@@ -1,10 +1,15 @@
-## \package dataset
-# Dataset utilities and classes
-#
-# This package contains classes and utilities for dataset management.
-# There are also some functions and classes not directly related to
-# dataset management, but are placed here due to some dependencies.
+'''
+\package dataset
+Dataset utilities and classes
 
+This package contains classes and utilities for dataset management.
+There are also some functions and classes not directly related to
+dataset management, but are placed here due to some dependencies.
+'''
+
+#================================================================================================
+# Import modules
+#================================================================================================
 import glob, os, sys, re
 import math
 import copy
@@ -12,6 +17,8 @@ import time
 import StringIO
 import hashlib
 import array
+import socket
+from collections import OrderedDict
 
 import ROOT
 import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
@@ -22,7 +29,12 @@ import HiggsAnalysis.NtupleAnalysis.tools.crosssection as crosssection
 
 from sys import platform as _platform
 
+
+#================================================================================================
+# Global Definitions
+#================================================================================================
 _debugNAllEvents = False
+DEBUG = False
 
 # era name -> list of era parts in data dataset names
 _dataEras = {
@@ -44,26 +56,58 @@ _dataEras = {
     "Run2016D": ["_Run2016D"],
     "Run2016E": ["_Run2016E"],
     "Run2016F": ["_Run2016F"],
-    "Run2016": ["_Run2016B", "_Run2016C", "_Run2016D","_Run2016E","_Run2016F"]    
+    "Run2016": ["_Run2016B", "_Run2016C", "_Run2016D","_Run2016E","_Run2016F", "_Run2016G"]
 }
 
-## Construct DatasetManager from a list of MultiCRAB directory names.
-# 
-# \param multiDirs   List of strings or pairs of strings of the MultiCRAB
-#                    directories (relative to the working directory). If
-#                    the item of the list is pair of strings, the first
-#                    element is the directory, and the second element is
-#                    the postfix for the dataset names from that directory.
-# \param kwargs      Keyword arguments (forwarded to getDatasetsFromMulticrabCfg())
-#
-# \return DatasetManager object
+
+#================================================================================================
+# Function Definition
+#================================================================================================
+def Verbose(msg, printHeader=False):
+    '''
+    Calls Print() only if verbose options is set to true.                                                                                                                     
+    '''
+    if not DEBUG:
+        return
+    Print(msg, printHeader)
+    return
+
+
+def Print(msg, printHeader=True):
+    '''
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader==True:
+        print "=== ", fName
+        print "\t", msg
+    else:
+        print "\t", msg
+    return
+
+
 def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
+    '''
+    Construct DatasetManager from a list of MultiCRAB directory names.
+    
+    \param multiDirs:  List of strings or pairs of strings of the MultiCRAB
+    directories (relative to the working directory). If the item of the list
+    is pair of strings, the first element is the directory, and the second 
+    element is the postfix for the dataset names from that directory.
+
+    \param kwargs: Keyword arguments (forwarded to getDatasetsFromMulticrabCfg())
+    
+    \return DatasetManager object
+    '''
+    Verbose("getDatasetsFromMulticrabDirs()", True)
+    
     if "cfgfile" in kwargs:
         raise Exception("'cfgfile' keyword argument not allowed")
     if "namePostfix" in kwargs:
         raise Exception("'namePostfix' keyword argument not allowed")
 
     datasets = DatasetManager()
+    # For-loop: All multicrab directories
     for d in multiDirs:
         if isinstance(d, str):
             dset = getDatasetsFromMulticrabCfg(directory=d, **kwargs)
@@ -73,24 +117,28 @@ def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
 
     return datasets
 
-## Construct DatasetManager from a multicrab.cfg.
-#
-# \param kwargs   Keyword arguments (see below) 
-#
-# All keyword arguments are forwarded to readFromMulticrabCfg.
-#
-# All keyword arguments <b>except</b> the ones below are forwarded to
-# DatasetManagerCreator.createDatasetManager()
-# \li \a directory
-# \li \a cfgfile
-# \li \a excludeTasks
-# \li \a includeOnlyTasks
-# \li \a namePostfix
-#
-# \return DatasetManager object
-# 
-# \see dataset.readFromMulticrabCfg
+
 def getDatasetsFromMulticrabCfg(**kwargs):
+    '''
+    Construct DatasetManager from a multicrab.cfg.
+    
+    \param kwargs: Keyword arguments (see below) 
+    
+    All keyword arguments are forwarded to readFromMulticrabCfg.
+    
+    All keyword arguments <b>except</b> the ones below are forwarded to
+    DatasetManagerCreator.createDatasetManager()
+    \li \a directory
+    \li \a cfgfile
+    \li \a excludeTasks
+    \li \a includeOnlyTasks
+    \li \a namePostfix
+    \return DatasetManager object
+
+    \see dataset.readFromMulticrabCfg 
+    '''
+    Verbose("getDatasetsFromMulticrabCfg()", True)
+
     _args = copy.copy(kwargs)
     for argName in ["directory", "cfgfile", "excludeTasks", "includeOnlyTasks", "namePostfix"]:
         try:
@@ -101,32 +149,38 @@ def getDatasetsFromMulticrabCfg(**kwargs):
     managerCreator = readFromMulticrabCfg(**kwargs)
     return managerCreator.createDatasetManager(**_args)
 
-## Construct DatasetManagerConstructor from a multicrab.cfg.
-#
-# \param kwargs   Keyword arguments (see below) 
-#
-# <b>Keyword arguments</b>
-# \li \a opts              Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
-# \li \a directory         Directory where to look for \a cfgfile.
-# \li \a cfgfile           Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
-# \li \a excludeTasks      String, or list of strings, to specify regexps.
-#                          If a dataset name matches to any of the
-#                          regexps, Dataset object is not constructed for
-#                          that. Conflicts with \a includeOnlyTasks
-# \li \a includeOnlyTasks  String, or list of strings, to specify
-#                          regexps. Only datasets whose name matches
-#                          to any of the regexps are kept. Conflicts
-#                          with \a excludeTasks.
-# \li Rest are forwarded to readFromCrabDirs()
-#
-# \return DatasetManagerCreator object
-# 
-# The section names in multicrab.cfg are taken as the dataset names
-# in the DatasetManager object.
+
 def readFromMulticrabCfg(**kwargs):
-    opts = kwargs.get("opts", None)
+    '''
+    Construct DatasetManagerConstructor from a multicrab.cfg.
+
+    \param kwargs:   Keyword arguments (see below) 
+    
+    <b>Keyword arguments</b>
+    \li \a opts              Optional OptionParser object. Should have options added with addOptions() and multicrab.addOptions().
+    
+    \li \a directory         Directory where to look for \a cfgfile.
+    
+    \li \a cfgfile           Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
+    
+    \li \a excludeTasks      String, or list of strings, to specify regexps. If a dataset name matches to any of the 
+    regexps, Dataset object is not constructed for that. Conflicts with \a includeOnlyTasks
+
+    \li \a includeOnlyTasks  String, or list of strings, to specify regexps. Only datasets whose name matches
+    to any of the regexps are kept. Conflicts with \a excludeTasks.
+
+    \li Rest are forwarded to readFromCrabDirs()
+    
+    \return DatasetManagerCreator object
+ 
+    The section names in multicrab.cfg are taken as the dataset names
+    in the DatasetManager object.
+    '''
+    Verbose("readFromMulticrabCfg()", True)
+
+    opts     = kwargs.get("opts", None)
     taskDirs = []
-    dirname = ""
+    dirname  = ""
     if "directory" in kwargs or "cfgfile" in kwargs:
         _args = {}
         if "directory" in kwargs:
@@ -139,26 +193,33 @@ def readFromMulticrabCfg(**kwargs):
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
 
+    Verbose("Found the following task directories:\n\t%s" % ("\n\t".join(taskDirs) ) )
     taskDirs = aux.includeExcludeTasks(taskDirs, **kwargs)
     taskDirs.sort()
-
     managerCreator = readFromCrabDirs(taskDirs, baseDirectory=dirname, **kwargs)
     return managerCreator
 
-## Construct DatasetManager from a list of CRAB task directory names.
-# 
-# \param taskdirs     List of strings for the CRAB task directories (relative
-#                     to the working directory), forwarded to readFromCrabDirs()
-# \param kwargs       Keyword arguments (see below)
-#
-# All keyword arguments are forwarded to readFromCrabDirs().
-#
-# All keyword arguments <b>except</b> the ones below are forwarded to
-# DatasetManagerCreator.createDatasetManager()
-# \li \a namePostfix
-#
-# \see readFromCrabDirs()
+
 def getDatasetsFromCrabDirs(taskdirs, **kwargs):
+    '''
+    Construct DatasetManager from a list of CRAB task directory names.
+ 
+    \param taskdirs     List of strings for the CRAB task directories (relative
+    to the working directory), forwarded to readFromCrabDirs()
+
+    \param kwargs       Keyword arguments (see below)
+
+    All keyword arguments are forwarded to readFromCrabDirs().
+    
+    All keyword arguments <b>except</b> the ones below are forwarded to
+    DatasetManagerCreator.createDatasetManager()
+    
+    \li \a namePostfix
+
+    \see readFromCrabDirs()
+    '''
+    Verbose("getDatasetsFromCrabDirs()", True)
+
     _args = copy.copy(kwargs)
     for argName in ["namePostfix"]:
         try:
@@ -170,23 +231,32 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     return managerCreator.createDatasetManager(**_args)
 
 
-## Construct DatasetManagerCreator from a list of CRAB task directory names.
-# 
-# \param taskdirs     List of strings for the CRAB task directories (relative
-#                     to the working directory)
-# \param emptyDatasetsAsNone  If true, in case of no datasets return None instead of raising an Exception (default False)
-# \param kwargs       Keyword arguments (see below) 
-# 
-# <b>Keyword arguments</b>, all are also forwarded to readFromRootFiles()
-# \li \a opts         Optional OptionParser object. Should have options added with addOptions().
-# \li \a namePostfix  Postfix for the dataset names (default: '')
-#
-# \return DatasetManagerCreator object
-# 
-# The basename of the task directories are taken as the dataset names
-# in the DatasetManagerCreator object (e.g. for directory '../Foo',
-# 'Foo' will be the dataset name)
 def readFromCrabDirs(taskdirs, emptyDatasetsAsNone=False, **kwargs):
+    '''
+    Construct DatasetManagerCreator from a list of CRAB task directory names.
+ 
+    \param taskdirs     List of strings for the CRAB task directories (relative
+    to the working directory)
+
+    \param emptyDatasetsAsNone  If true, in case of no datasets return None instead 
+    of raising an Exception (default False)
+
+    \param kwargs       Keyword arguments (see below) 
+ 
+    <b>Keyword arguments</b>, all are also forwarded to readFromRootFiles()
+
+    \li \a opts         Optional OptionParser object. Should have options added with addOptions().
+
+    \li \a namePostfix  Postfix for the dataset names (default: '')
+
+    \return DatasetManagerCreator object
+ 
+    The basename of the task directories are taken as the dataset names
+    in the DatasetManagerCreator object (e.g. for directory '../Foo',
+    'Foo' will be the dataset name)
+    '''
+    Verbose("readFromCrabDirs()", True)
+
     inputFile = None
     if "opts" in kwargs:
         opts = kwargs["opts"]
@@ -205,13 +275,15 @@ def readFromCrabDirs(taskdirs, emptyDatasetsAsNone=False, **kwargs):
             files = glob.glob(os.path.join(resdir, inputFile))
         else:
             # crab3
-            files = glob.glob(os.path.join(d, "results", inputFile))
+            files = glob.glob(os.path.join(d, "results", inputFile))        
             name = name.replace("crab_", "")
         if len(files) == 0:
             print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, inputFile, os.path.join(d, "res"))
             noFiles = True
             continue
-
+        
+        # If the files are symbolic links store the target path. Otherwise leave unchanged
+        files = ConvertSymLinks(files)
         dlist.append( (name+postfix, files) )
 
     if noFiles:
@@ -225,41 +297,75 @@ def readFromCrabDirs(taskdirs, emptyDatasetsAsNone=False, **kwargs):
         if emptyDatasetsAsNone:
             return None
         raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
-
     return readFromRootFiles(dlist, **kwargs)
 
-## Construct DatasetManager from a list of CRAB task directory names.
-# 
-# \param rootFileList  List of (\a name, \a filenames) pairs (\a name
-#                      should be string, \a filenames can be string or
-#                      list of strings). \a name is taken as the
-#                      dataset name, and \a filenames as the path(s)
-#                      to the ROOT file(s).
-# \param kwargs        Keyword arguments, forwarded to readFromRootFiles() and dataset.Dataset.__init__()
-#
-# \return DatasetManager object
+
+def ConvertSymLinks(fileList):
+    '''
+    '''
+    Verbose("ConvertSymLinks()", True)
+    HOST = socket.gethostname()
+    bUseSymLinks = False
+    
+    if "fnal" in HOST:
+        prefix = "root://cmseos.fnal.gov//"
+    elif "lxplus" in HOST:
+        prefix = "root://eoscms.cern.ch//"
+    else:
+        prefix = ""
+
+    # If the file is symbolic link store the target path
+    for i, f in enumerate(fileList):
+        if not os.path.islink(f):
+            continue
+        bUseSymLinks = True
+        fileList[i] = prefix + os.path.realpath(f)
+
+    if bUseSymLinks:
+        Verbose("SymLinks detected. Appended the prefix \"%s\" to all ROOT file paths" % (prefix) )
+    return fileList
+
+
 def getDatasetsFromRootFiles(rootFileList, **kwargs):
+    '''
+    Construct DatasetManager from a list of CRAB task directory names.
+    
+    \param rootFileList  List of (\a name, \a filenames) pairs (\a name should be string, 
+    \a filenames can be string or  list of strings). \a name is taken as the  dataset name,
+    and \a filenames as the path(s)  to the ROOT file(s).
+    
+    \param kwargs        Keyword arguments, forwarded to readFromRootFiles() and dataset.Dataset.__init__()
+
+    \return DatasetManager object
+    '''
+    Verbose("getDatasetsFromRootFiles()", True)
+
     managerCreator = readFromRootFiles(rootFileList, **kwargs)
     return managerCreator.createDatasetManager(**kwargs)
 
-## Construct DatasetManagerCreator from a list of CRAB task directory names.
-# 
-# \param rootFileList  List of (\a name, \a filenames) pairs (\a name
-#                      should be string, \a filenames can be string or
-#                      list of strings). \a name is taken as the
-#                      dataset name, and \a filenames as the path(s)
-#                      to the ROOT file(s). Forwarded to DatasetManagerCreator.__init__()
-# \param kwargs        Keyword arguments (see below), all forwarded to DatasetManagerCreator.__init__()
-#
-# <b>Keyword arguments</b>
-# \li \a opts          Optional OptionParser object. Should have options added with addOptions().
-#
-# \return DatasetManagerCreator object
-#
-# If \a opts exists, and the \a opts.listAnalyses is set to True, list
-# all available analyses (with DatasetManagerCreator.printAnalyses()),
-# and exit.
+
 def readFromRootFiles(rootFileList, **kwargs):
+    '''
+    Construct DatasetManagerCreator from a list of CRAB task directory names.
+ 
+    \param rootFileList  List of (\a name, \a filenames) pairs (\a name
+    should be string, \a filenames can be string or list of strings). \a name is taken as the
+    dataset name, and \a filenames as the path(s) to the ROOT file(s). 
+    Forwarded to DatasetManagerCreator.__init__()
+    
+    \param kwargs        Keyword arguments (see below), all forwarded to DatasetManagerCreator.__init__()
+    
+    <b>Keyword arguments</b>
+    \li \a opts          Optional OptionParser object. Should have options added with addOptions().
+
+    \return DatasetManagerCreator object
+
+    If \a opts exists, and the \a opts.listAnalyses is set to True, list
+    all available analyses (with DatasetManagerCreator.printAnalyses()),
+    and exit.
+    '''
+    Verbose("readFromRootFiles()", True)
+    
     creator = DatasetManagerCreator(rootFileList, **kwargs)
     if "opts" in kwargs and kwargs["opts"].listAnalyses:
         creator.printAnalyses()
@@ -294,9 +400,16 @@ def addOptions(parser, analysisName=None, searchMode=None, dataEra=None, optimiz
                       help="List available analysis name information, and quit.")
     parser.add_option("--counterDir", "-c", dest="counterDir", type="string", default=None,
                       help="TDirectory name containing the counters, relative to the analysis directory (default: analysisDirectory+'/counters')")
+    return
 
-## Generic settings class
+
+#================================================================================================
+# Class Definition
+#================================================================================================
 class Settings:
+    '''
+    Generic settings class
+    '''
     def __init__(self, **defaults):
         self.data = copy.deepcopy(defaults)
 
@@ -327,10 +440,16 @@ class Settings:
     def clone(self, **kwargs):
         return copy.deepcopy(self)
 
-## Represents counter count value with uncertainty.
+
+#================================================================================================
+# Class Definition
+#================================================================================================
 class Count:
+    '''
+    Represents counter count value with uncertainty.
+    '''
     ## Constructor
-    def __init__(self, value, uncertainty=0.0, systUncertainty=0.0):
+    def __init__(self, value, uncertainty=0.0, systUncertainty=0.0):        
         self._value = value
         self._uncertainty = uncertainty
         self._systUncertainty = systUncertainty
@@ -389,8 +508,14 @@ class Count:
     ## \var _systUncertainty
     # Systematic uncertainty of the count
 
-## Represents counter count value with asymmetric uncertainties.
+
+#================================================================================================
+# Class Definition
+#================================================================================================
 class CountAsymmetric:
+    '''
+    Represents counter count value with asymmetric uncertainties.
+    '''
     def __init__(self, value, uncertaintyLow, uncertaintyHigh):
         self._value = value
         self._uncertaintyLow = uncertaintyLow
@@ -510,7 +635,7 @@ def _rescaleInfo(d):
 
     ret = {}
     for k, v in d.iteritems():
-        if k in ["isPileupReweighted"]:
+        if k in ["isPileupReweighted","isTopPtReweighted"]:
             ret[k] = v
         else:
             ret[k] = v*factor
@@ -618,37 +743,51 @@ def _mergeStackHelper(datasetList, nameList, task, allowMissingDatasets=False):
     return (selected, notSelected, firstIndex)
 
 
-## Helper class for obtaining histograms from TTree
-#
-# This class provides an easy way to get a histogram from a TTree. It
-# is inteded to be used with dataset.Dataset.getDatasetRootHisto()
-# such that instead of giving the name of the histogram, an object of
-# this class is given instead. dataset.Dataset.getDatasetRootHisto()
-# will then call the draw() method of this class for actually
-# producing the histogram.
-#
-# TreeDraw objects can easily be cloned from existing TreeDraw object
-# with the clone() method. This method allows overriding the
-# parameters given in constructor.
-#
-# Note that TreeDraw does not hold any results or TTree objects, only
-# the recipe to produce a histogram from a TTree.
+#================================================================================================
+# Class Definition
+#================================================================================================
 class TreeDraw:
-    ## Constructor
-    #
-    # \param tree       Path to the TTree object in a file
-    # \param varexp     Expression for the variable, if given it should also include the histogram name and binning explicitly.
-    # \param selection  Draw only those entries passing this selection
-    # \param weight     Weight the entries with this weight
-    # \param binLabelsX X-axis bin labels (optional)
-    # \param binLabelsY Y-axis bin labels (optional)
-    # \param binLabelsZ Z-axis bin labels (optional)
-    #
-    # If varexp is not given, the number of entries passing selection
-    # is counted (ignoring weight). In this case the returned TH1 has
-    # 1 bin, which contains the event count and the uncertainty of the
-    # event count (calculated as sqrt(N)).
+    '''
+    Helper class for obtaining histograms from TTree
+
+    This class provides an easy way to get a histogram from a TTree. It
+    is inteded to be used with dataset.Dataset.getDatasetRootHisto()
+    such that instead of giving the name of the histogram, an object of
+    this class is given instead. dataset.Dataset.getDatasetRootHisto()
+    will then call the draw() method of this class for actually
+    producing the histogram.
+    
+    TreeDraw objects can easily be cloned from existing TreeDraw object
+    with the clone() method. This method allows overriding the
+    parameters given in constructor.
+    
+    Note that TreeDraw does not hold any results or TTree objects, only
+    the recipe to produce a histogram from a TTree.
+    '''
     def __init__(self, tree, varexp="", selection="", weight="", binLabelsX=None, binLabelsY=None, binLabelsZ=None):
+        '''
+        Constructor
+        
+        \param tree       Path to the TTree object in a file
+
+        \param varexp     Expression for the variable, if given it should
+        also include the histogram name and binning explicitly.
+
+        \param selection  Draw only those entries passing this selection
+
+        \param weight     Weight the entries with this weight
+
+        \param binLabelsX X-axis bin labels (optional)
+
+        \param binLabelsY Y-axis bin labels (optional)
+
+        \param binLabelsZ Z-axis bin labels (optional)
+        
+        If varexp is not given, the number of entries passing selection
+        is counted (ignoring weight). In this case the returned TH1 has
+        1 bin, which contains the event count and the uncertainty of the
+        event count (calculated as sqrt(N)).
+        '''
         self.tree = tree
         self.varexp = varexp
         self.selection = selection
@@ -757,20 +896,27 @@ class TreeDraw:
     ## \var weight
     # Weight the entries with this weight
 
-## Helper class for running code for selected TTree entries
-#
-# A function is given to the constructor, the function is called for
-# each TTree entry passing the selection. The TTree object is given as
-# a parameter, leaf/branch data can then be read from it.
-#
-# Main use case: producing pickEvents list from a TTree
+#================================================================================================
+# Class Definition
+#================================================================================================
 class TreeScan:
-    ## Constructor
-    #
-    # \param tree       Path to the TTree object in a file
-    # \param function   Function to call for each TTree entry
-    # \param selection  Select only these TTree entries
+    '''
+    Helper class for running code for selected TTree entries
+
+    A function is given to the constructor, the function is called for
+    each TTree entry passing the selection. The TTree object is given as
+    a parameter, leaf/branch data can then be read from it.
+    
+    Main use case: producing pickEvents list from a TTree
+    '''
     def __init__(self, tree, function, selection=""):
+        '''
+        Constructor
+        
+        \param tree       Path to the TTree object in a file
+        \param function   Function to call for each TTree entry
+        \param selection  Select only these TTree entries
+        '''
         self.tree = tree
         self.function = function
         self.selection = selection
@@ -782,11 +928,14 @@ class TreeScan:
         args.update(kwargs)
         return TreeScan(**args)
 
-    ## Process TTree
-    #
-    # \param datasetName  Dataset object. Only needed for compatible interface with
-    #                     dataset.TreeDrawCompound
+
     def draw(self, dataset):
+        '''
+        Process TTree
+        
+        \param datasetName  Dataset object. Only needed for compatible interface with
+        dataset.TreeDrawCompound
+        '''
         rootFile = dataset.getRootFile()
         tree = rootFile.Get(self.tree)
         if tree == None:
@@ -805,17 +954,24 @@ class TreeScan:
     ## \var selection
     # Select only these TTree entries
 
-## Provides ability to have separate dataset.TreeDraws for different datasets
-#
-# One specifies a default dataset.TreeDraw, and the exceptions for that with a
-# map from string to dataset.TreeDraw.
+#================================================================================================
+# Class Definition
+#================================================================================================
 class TreeDrawCompound:
-    ## Constructor
-    #
-    # \param default     Default dataset.TreeDraw
-    # \param datasetMap  Dictionary for the overriding dataset.TreeDraw objects
-    #                    containing dataset names as keys, and TreeDraws as values.
+    '''
+    Provides ability to have separate dataset.TreeDraws for different datasets
+    
+    One specifies a default dataset.TreeDraw, and the exceptions for that with a
+    map from string to dataset.TreeDraw.
+    '''
     def __init__(self, default, datasetMap={}):
+        '''
+        Constructor
+    
+        \param default     Default dataset.TreeDraw
+        \param datasetMap  Dictionary for the overriding dataset.TreeDraw objects
+        containing dataset names as keys, and TreeDraws as values.        
+        '''
         self.default = default
         self.datasetMap = datasetMap
 
@@ -885,8 +1041,13 @@ def treeDrawToNumEntries(treeDraw):
         return _treeDrawToNumEntriesSingle(treeDraw)
 
 
-## Class to encapsulate shape/normalization systematics for plot creation
+#================================================================================================
+# Class Definition
+#================================================================================================
 class Systematics:
+    '''
+    Class to encapsulate shape/normalization systematics for plot creation
+    '''
     class OnlyForMC:
         pass
     class OnlyForPseudo:
@@ -979,16 +1140,24 @@ class Systematics:
             settings = settings.clone(**kwargs)
         return SystematicsHelper(name, settings)
 
-## Helper class to do the work for obtaining uncertainties from their sources for a requested histogram
-#
-# The object should be created with Systematics.histogram(), i.e. not
-# directly.
+#================================================================================================
+# Class Definition
+#================================================================================================
 class SystematicsHelper:
-    ## Constructor
-    #
-    # \param histoName   Name of the histogram to read
-    # \param settings    Settings object for systematic recipe
+    '''
+    Helper class to do the work for obtaining uncertainties from their 
+    sources for a requested histogram
+    
+    The object should be created with Systematics.histogram(), i.e. not
+    directly.
+    '''
     def __init__(self, histoName, settings):
+        '''
+        Constructor
+        
+        \param histoName   Name of the histogram to read
+        \param settings    Settings object for systematic recipe
+        '''
         self._histoName = histoName
         self._settings = settings
 
@@ -1253,8 +1422,17 @@ class RootHistoWithUncertainties:
         if name in self._shapeUncertainties.keys():
             raise Exception("Uncertainty '%s' has already been added!"%name)
         plusClone.Add(self._rootHisto, -1.0)
-        minusClone.Add(self._rootHisto, -1.0)
+        minusClone.Add(self._rootHisto, -1.0) # is this really correct? or should we have 'minusClone.Scale(-1)' afterwards to get this as "rootHisto - minus_band"?
         # Store
+        self._shapeUncertainties[name] = (plusClone, minusClone)
+
+    def addAbsoluteShapeUncertainty(self, name, th1Plus, th1Minus):
+        if name in self._shapeUncertainties.keys():
+            raise Exception("Uncertainty '%s' has already been added!"%name)
+        plusClone = aux.Clone(th1Plus)
+        minusClone = aux.Clone(th1Minus)
+        self._checkConsistency(name, plusClone)
+        self._checkConsistency(name, minusClone)
         self._shapeUncertainties[name] = (plusClone, minusClone)
 
     ## Remove superfluous shape variation uncertainties
@@ -2802,7 +2980,11 @@ class Dataset:
                 raise Exception("Could not find counter histogram, message: %s" % str(e))
             self.nAllEventsUnweighted = -1
         if not normalizationCheckStatus:
-            raise Exception("Error: dset=%s: Unweighted skimcounter is smaller than all events counter of analysis! Please check (this is known to happen when running PROOF on samples with negative generator weights."%self.name)
+            msg  = "Error: dset=%s: Unweighted skimcounter is smaller than all events counter of analysis!" % (self.name)
+            msg += "Please check (this is known to happen when running PROOF on samples with negative generator weights."
+            #raise Exception(msg)
+            Print(msg)
+            raw_input("\tPress any key to continue")
 
         self.nAllEventsWeighted = None
         self.nAllEvents = self.nAllEventsUnweighted
@@ -2908,7 +3090,8 @@ class Dataset:
     # counter, or creating a dataset without event counter at all.
     def setNAllEvents(self, nAllEvents):
         self.nAllEvents = nAllEvents
-
+        
+        
     ## Update number of all events (for normalization) to a pileup-reweighted value.
     #
     # \param era     Data era to use to pick the pile-up-reweighted all
@@ -2957,8 +3140,9 @@ class Dataset:
     def getNormFactor(self):
         nAllEvents = self.getNAllEvents()
         if nAllEvents == 0:
-            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateNAllEventsToPUWeighted() has not been called." % self.name)
-
+#            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateNAllEventsToPUWeighted() has not been called." % self.name)
+             print "Warning: all events == 0"
+             return 0
         return self.getCrossSection() / nAllEvents
 
     ## Check if a ROOT histogram exists in this dataset
@@ -3381,120 +3565,175 @@ class DatasetAddedMC(DatasetMerged):
         ret += "%s]),\n" % indent
         return ret
 
-## Collection of Dataset objects which are managed together.
-# 
-# Holds both an ordered list of Dataset objects, and a name->object
-# map for convenient access by dataset name.
-#
-# \todo The code structure could be simplified by getting rid of
-# dataset.DatasetRootHisto. This would mean that the MC normalisation
-# should be handled in dataset.DatasetManagager and dataset.Dataset,
-# with an interface similar to what dataset.DatasetRootHisto and
-# histograms.HistoManager provide now (i.e. user first sets the
-# normalisation scheme, and then asks histograms which are then
-# normalised as requested). dataset.Dataset and dataset.DatasetManager
-# should then return ROOT TH1s, with which user is free to do what
-# (s)he wants. histograms.HistoManager and histograms.HistoManagerImpl
-# could be merged, as it would take already-normalized histograms as
-# input (the input should still be histograms.Histo classes in order
-# to give user freedom to provide fully customized version of such
-# wrapper class if necessary). The interface of plots.PlotBase would
-# still accept TH1/TGraph, so no additional burden would appear for
-# the usual use cases with plots. The information of a histogram being
-# data/MC in histograms.Histo could also be removed (as it is
-# sometimes too restrictive), and the use in plots.PlotBase (and
-# deriving classes) could be transformed to identify the data/MC
-# datasets (for default formatting purposes) by the name of the
-# histograms (in the usual workflow the histograms have the dataset
-# name), with the possibility that user can easily modify the names of
-# data/MC histograms. This would bring more flexibility on that front,
-# and easier customization when necessary.
+
 class DatasetManager:
-    ## Constructor
-    #
-    # \param base    Directory (absolute/relative to current working
-    #                directory) where the luminosity JSON file is located (see
-    #                loadLuminosities())
-    #
-    # DatasetManager is constructed as empty
+    '''
+    Collection of Dataset objects which are managed together.
+    
+    Holds both an ordered list of Dataset objects, and a name->object
+    map for convenient access by dataset name.
+    
+    \todo The code structure could be simplified by getting rid of
+    dataset.DatasetRootHisto. This would mean that the MC normalisation
+    should be handled in dataset.DatasetManagager and dataset.Dataset,
+    with an interface similar to what dataset.DatasetRootHisto and
+    histograms.HistoManager provide now (i.e. user first sets the
+    normalisation scheme, and then asks histograms which are then
+    normalised as requested). dataset.Dataset and dataset.DatasetManager
+    should then return ROOT TH1s, with which user is free to do what
+    (s)he wants. histograms.HistoManager and histograms.HistoManagerImpl
+    could be merged, as it would take already-normalized histograms as
+    input (the input should still be histograms.Histo classes in order
+    to give user freedom to provide fully customized version of such
+    wrapper class if necessary). The interface of plots.PlotBase would
+    still accept TH1/TGraph, so no additional burden would appear for
+    the usual use cases with plots. The information of a histogram being
+    data/MC in histograms.Histo could also be removed (as it is
+    sometimes too restrictive), and the use in plots.PlotBase (and
+    deriving classes) could be transformed to identify the data/MC
+    datasets (for default formatting purposes) by the name of the
+    histograms (in the usual workflow the histograms have the dataset
+    name), with the possibility that user can easily modify the names of
+    data/MC histograms. This would bring more flexibility on that front,
+    and easier customization when necessary.
+    '''    
     def __init__(self, base=""):
-        self.datasets = []
+        '''
+        Constructor
+        
+         \param base    Directory (absolute/relative to current working
+         directory) where the luminosity JSON file is located (see loadLuminosities() )
+         
+         DatasetManager is constructed as empty
+         '''
+        Verbose("__init__()", True)
+
+        self.datasets   = []
         self.datasetMap = {}
         self._setBaseDirectory(base)
+        return
 
-    ## Populate the datasetMap member from the datasets list.
-    # 
-    # Intended only for internal use.
+
     def _populateMap(self):
+        '''
+        Populate the datasetMap member from the datasets list.
+        
+        Intended only for internal use.
+        '''
+        Verbose("_populateMap", True)
+
         self.datasetMap = {}
         for d in self.datasets:
+            Verbose("Adding %s to datasetMap" % (d.getName()), False)
             self.datasetMap[d.getName()] = d
+        return
+
 
     def _setBaseDirectory(self, base):
+        Verbose("_setBaseDirectory()", True)
         for d in self.datasets:
             d._setBaseDirectory(base)
-
-    ## Close all TFiles of the contained dataset.Dataset objects
-    #
-    # \see dataset.Dataset.close()
+        return
+          
+  
     def close(self):
+        '''
+        Close all TFiles of the contained dataset.Dataset objects
+        
+        \see dataset.Dataset.close()
+        '''
+        Verbose("close()", True)
+
         for d in self.datasets:
             d.close()
+        return
 
-    ## Append a Dataset object to the set.
-    # 
-    # \param dataset    Dataset object
-    # 
-    # The new Dataset must have a different name than the already existing ones.
+
     def append(self, dataset):
+        '''
+        Append a Dataset object to the set.
+        
+        \param dataset    Dataset object
+        
+        The new Dataset must have a different name than the already existing ones.
+        '''
+        Verbose("append()", True)
+
         if dataset.getName() in self.datasetMap:
             raise Exception("Dataset '%s' already exists in this DatasetManager" % dataset.getName())
 
         self.datasets.append(dataset)
         self.datasetMap[dataset.getName()] = dataset
+        return
 
-    ## Extend the set of Datasets from another DatasetManager object.
-    # 
-    # \param datasetmgr   DatasetManager object
-    # 
-    # Note that the dataset.Dataset objects of datasetmgr are appended to
-    # self by reference, i.e. the Dataset objects will be shared
-    # between them.
-    # """
+
     def extend(self, datasetmgr):
-        for d in datasetmgr.datasets:
-            self.append(d)
+        '''
+        Extend the set of Datasets from another DatasetManager object.
+        
+        \param datasetmgr   DatasetManager object
+        
+        Note that the dataset.Dataset objects of datasetmgr are appended to
+        self by reference, i.e. the Dataset objects will be shared
+        between them.
+        '''
+        Verbose("extend()", True)
 
-    ## Make a shallow copy of the DatasetManager object.
-    # 
-    # The dataset.Dataset objects are shared between the DatasetManagers.
-    #
-    # Useful e.g. if you want to have a subset of the dataset.Dataset objects
+        for d in datasetmgr.datasets:
+            Verbose("Appending %s to list of datasets" % (d.getName()), False)
+            self.append(d)
+        return
+
+
     def shallowCopy(self):
+        '''
+        Make a shallow copy of the DatasetManager object.
+        
+        The dataset.Dataset objects are shared between the DatasetManagers.
+        
+        Useful e.g. if you want to have a subset of the dataset.Dataset objects
+        '''
+        Verbose("shallowCopy()", True)
 
         copy = DatasetManager()
         copy.extend(self)
         return copy
 
-    ## Make a deep copy of the DatasetManager object.
-    # 
-    # Nothing is shared between the DatasetManagers.
-    #
-    # Useful e.g. if you want to have two sets of same datasets, but
-    # others are somehow modified (e.g. cross section)
+
     def deepCopy(self):
+        '''
+        Make a deep copy of the DatasetManager object.
+        
+        Nothing is shared between the DatasetManagers.
+        
+        Useful e.g. if you want to have two sets of same datasets, but
+        others are somehow modified (e.g. cross section)
+        '''
+        Verbose("deepCopy()", True)
+
         copy = DatasetManager()
         for d in self.datasets:
             copy.append(d.deepCopy())
         return copy
 
-    ## Set the centre-of-mass energy for all datasets
+
     def setEnergy(self, energy):
+        '''
+        Set the centre-of-mass energy for all datasets
+        '''
+        Verbose("setEnergy()", True)
+
         for d in self.datasets:
             d.setEnergy(energy)
+        return
+            
 
-    ## Get a list of centre-of-mass energies of the datasets
     def getEnergies(self):
+        '''
+        Get a list of centre-of-mass energies of the datasets
+        '''
+        Verbose("getEnergies()", True)
+
         tmp = {}
         for d in self.datasets:
             tmp[d.getEnergy()] = 1
@@ -3502,8 +3741,10 @@ class DatasetManager:
         energies.sort()
         return energies
 
+
     def hasDataset(self, name):
         return name in self.datasetMap
+
 
     def getDataset(self, name):
         return self.datasetMap[name]
@@ -3663,39 +3904,51 @@ class DatasetManager:
 
         for newName, nameList in toMerge.iteritems():
             self.merge(newName, nameList, *args, **kwargs)
+        return
 
-    ## Merge dataset.Dataset objects.
-    # 
-    # \param newName      Name of the merged dataset.DatasetMerged
-    # \param nameList     List of dataset.Dataset names to merge
-    # \param keepSources  If true, keep the original dataset.Dataset
-    #                     objects in the list of datasets. Otherwise
-    #                     they are removed, as they are now contained
-    #                     in the dataset.DatasetMerged object
-    # \param addition     Creates DatasetAddedMC instead of DatasetMerged
-    # \param allowMissingDatasets  If True, ignore error from missing dataset (warning is nevertheless printed)
-    #
-    # If nameList translates to only one dataset.Dataset, the
-    # dataset.Daataset object is renamed (i.e. dataset.DatasetMerged
-    # object is not created)
+
     def merge(self, newName, nameList, keepSources=False, addition=False, silent=False, allowMissingDatasets=False):
+        '''
+        Merge dataset.Dataset objects.
+    
+        \param newName      Name of the merged dataset.DatasetMerged
+
+        \param nameList     List of dataset.Dataset names to merge
+        
+        \param keepSources  If true, keep the original dataset.Dataset objects in the list of datasets. Otherwise
+        they are removed, as they are now contained in the dataset.DatasetMerged object
+
+        \param addition     Creates DatasetAddedMC instead of DatasetMerged
+
+        \param allowMissingDatasets  If True, ignore error from missing dataset (warning is nevertheless printed)
+    
+        If nameList translates to only one dataset.Dataset, the  dataset.Dataset object is renamed
+        (i.e. dataset.DatasetMerged object is not created)
+        '''
+        Verbose("merge()", True)
+
         (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge", allowMissingDatasets)
         if len(selected) == 0:
-            message = "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
+            message = "Dataset merge, no datasets '" +", ".join(nameList) + "' found. Not doing anything"
+
             if allowMissingDatasets:
                 if not silent:
                     print >> sys.stderr, message
+                    #Print(message, True)
             else:
                 raise Exception(message)
             return
         elif len(selected) == 1 and not keepSources:
             if not silent:
-                print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
+                message = "Dataset merge, one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"'. Renaming it to '%s'" % newName
+                print >> sys.stderr, message
+                #Print(message, True)
             self.rename(selected[0].getName(), newName)
             return
 
         if not keepSources:
             self.datasets = notSelected
+
         if addition:
             newDataset = DatasetAddedMC(newName, selected)
         else:
@@ -3704,27 +3957,33 @@ class DatasetManager:
         self.datasets.insert(firstIndex, newDataset)
         self._populateMap()
 
-    ## Load integrated luminosities from a JSON file.
-    # 
-    # \param fname   Path to the file (default: 'lumi.json'). If the
-    #                directory part of the path is empty, the file is
-    #                looked from the base directory (which defaults to
-    #                current directory)
-    # 
-    # The JSON file should be formatted like this:
-    # \verbatim
-    # '{
-    #    "dataset_name": value_in_pb,
-    #    "Mu_135821-144114": 2.863224758
-    #  }'
-    # \endverbatim
-    # Note: as setting the integrated luminosity for a merged dataset
-    # will fail (see dataset.DatasetMerged.setLuminosity()), loading
-    # luminosities must be done before merging the data datasets to
-    # one.
-    def loadLuminosities(self, fname="lumi.json"):
-        import json
 
+    def loadLuminosities(self, fname="lumi.json"):
+        '''
+        Load integrated luminosities from a JSON file.
+    
+        \param fname   Path to the file (default: 'lumi.json'). If the
+        directory part of the path is empty, the file is looked from the base
+        directory (which defaults to current directory)
+    
+        The JSON file should be formatted like this:
+        \verbatim
+        '{
+        "dataset_name": value_in_pb,
+        "Mu_135821-144114": 2.863224758
+        }'
+        \endverbatim
+
+        Note: as setting the integrated luminosity for a merged dataset
+        will fail (see dataset.DatasetMerged.setLuminosity()), loading
+        luminosities must be done before merging the data datasets to
+        one.
+        '''
+        Verbose("loadLuminosities()", True)
+
+        import json
+        
+        #For-loop: All datasets
         for d in self.datasets:
             jsonname = os.path.join(d.basedir, fname)
             if not os.path.exists(jsonname):
@@ -3732,10 +3991,28 @@ class DatasetManager:
                 for name in self.getDataDatasetNames():
                     self.getDataset(name).setLuminosity(1)
             else:
+                Verbose("Loading JSON file %s" % (jsonname), False)
                 data = json.load(open(jsonname))
-                for name, value in data.iteritems():
-                    if self.hasDataset(name):
-                        self.getDataset(name).setLuminosity(value)
+
+### Alexandros: Needs to be nested?
+#                # For-loop: All Dataset-Lumi pairs in dictionary
+#                for name, value in data.iteritems():
+#                    Print("%s has %s pb"  % (name, value), False)
+#                    if self.hasDataset(name):
+#                        Print("%s, setting lumi to %s" % (name, value), False)
+#                        self.getDataset(name).setLuminosity(value)
+#                    else:
+#                        Verbose("%s not in dataset map. Skipping ..." % (name), False)
+### Alexandros: Needs to be nested?
+
+        # For-loop: All Dataset-Lumi pairs in dictionary
+        for name, value in data.iteritems():
+            Verbose("%s has %s pb"  % (name, value), False)
+            if self.hasDataset(name):
+                Verbose("%s, setting lumi to %s" % (name, value), False)
+                self.getDataset(name).setLuminosity(value)
+            else:
+                Verbose("%s not in dataset map. Skipping ..." % (name), False)
 
 ####        if len(os.path.dirname(fname)) == 0:
 ####            fname = os.path.join(self.basedir, fname)
@@ -3747,8 +4024,34 @@ class DatasetManager:
 ####        for name, value in data.iteritems():
 ####            if self.hasDataset(name):
 ####                self.getDataset(name).setLuminosity(value)
+        return
+
+
+    def loadLumi(self, fname="lumi.json"):
+        '''
+        '''
+        Verbose("loadLumi()", True)
+
+        import json
+        jsonname = os.path.join(self.datasets[0].basedir, fname)
+        if not os.path.exists(jsonname):
+            raise Exception("Lumi JSON file '%s' does not exist. Have you set runMin/runMax and lumi in the analyzer?" % jsonname)
+        data = json.load(open(jsonname))
+        if self.datasets[0].getAnalysisName() in data:
+            return data[self.datasets[0].getAnalysisName()]
+        else:
+            lumi = 0
+            for ds in data.keys():
+                lumi += data[ds]
+            return lumi
+        return -1
+
 
     def loadRunRange(self, fname="runrange.json"):
+        '''
+        '''
+        Verbose("loadRunRangei()", True)
+
         import json
         jsonname = os.path.join(self.datasets[0].basedir, fname)
         if not os.path.exists(jsonname):
@@ -3756,15 +4059,153 @@ class DatasetManager:
         data = json.load(open(jsonname))
         return data[self.datasets[0].getAnalysisName()]
 
-    ## Update all event counts to the ones taking into account the pile-up reweighting
-    #
-    # \param kwargs     Keyword arguments (forwarded to dataset.Dataset.updateAllEventsToWeighted)
-    #
-    # Uses the table pileupReweightedAllEvents._weightedAllEvents
+
     def updateNAllEventsToPUWeighted(self, **kwargs):
+        '''
+        Update all event counts to the ones taking into account the pile-up reweighting
+        
+        \param kwargs     Keyword arguments (forwarded to dataset.Dataset.updateAllEventsToWeighted)
+        
+         Uses the table pileupReweightedAllEvents._weightedAllEvents
+        '''
+        Verbose("updateNAllEventsToPUWeighted()", True)
+
+        # For-loop: All datasets
         for dataset in self.datasets:
             dataset.updateNAllEventsToPUWeighted(**kwargs)
         #self.printInfo()
+        return
+
+
+    def PrintInfo(self):
+        '''
+        Alternativ to printInfo. 
+        Print a table with all datasets and their corresponding
+        cross-sections (MC) or luminosity (data)
+        '''
+        Verbose("PrintInfo()", True)
+
+        # Table setup
+        table   = []
+        table.append("")
+        align   = "{:<3} {:<50} {:>20} {:<3} {:>20} {:>15} {:<3}"
+        hLine   = "="*122
+        header  = align.format("#", "Dataset", "Cross Section", "", "Norm. Factor",  "Int. Lumi", "")
+        table.append(hLine)
+        table.append(header)
+        table.append(hLine)
+
+        # For-loop: All datasets
+        for index, d in enumerate(self.datasets):
+
+            name     = d.getName()
+            lumi     = ""
+            xs       = ""
+            normF    = ""
+            lumiUnit = ""
+            xsUnit   = ""
+
+            if d.isMC():
+                xsUnit = "pb"
+                xs     = d.getCrossSection()
+                normF  = d.getNormFactor()
+            else:
+                lumiUnit = "pb^-1"
+                lumi = d.getLuminosity()
+
+            line = align.format(index, name, xs, xsUnit, normF, lumi, lumiUnit)
+            table.append(line)
+
+        # Finalise the table
+        table.append(hLine)
+        table.append("")
+
+        # For loop: All rows
+        for row in table:
+            Print(row, False)
+        return
+
+
+    def PrintLuminosities(self):
+        '''
+        Print the luminosities of all datasets, in alphabetical order
+        in a nice formated table.
+        '''
+        Verbose("PrintLuminosities()", True)
+
+        table   = []
+        table.append("")
+        align   = "{:<3} {:<50} {:>20} {:<7}"
+        hLine   = "="*80
+        header  = align.format("#", "Dataset", "Luminosity", "")
+        table.append(hLine)
+        table.append(header)
+        table.append(hLine)
+        
+        index    = 0
+        intLumi  = 0
+        lumiUnit = "pb-1"
+
+        # For-loop: All datasets
+        for d in self.datasets:
+            if d.isMC():
+                continue
+            
+            index += 1
+            name   = d.getName()
+            lumi   = d.getLuminosity()
+            line = align.format(index, name, "%.3f"%lumi, lumiUnit) 
+            table.append(line)
+            intLumi+= lumi
+
+        # Finalise the table
+        lastLine = align.format("", "", "%.3f"%intLumi, lumiUnit) 
+        table.append(hLine)
+        table.append(lastLine)
+        table.append("")
+
+        # For loop: All rows
+        for row in table:
+            Print(row, False)
+        return
+
+
+    def PrintCrossSections(self):
+        '''
+        Print the cross-section of all datasets, in descending order
+        in a nice formated table.
+        '''
+        Verbose("PrintCrossSections()")
+        align  = "{:<3} {:<50} {:>24} {:>3} "
+        header = align.format("#", "Dataset", "Cross Section", "")
+        hLine  = "="*len(header)
+        table  = []
+        table.append(hLine)
+        table.append(header)            
+        table.append(hLine)
+
+        # For-loop: All datasets
+        myDatasets = {}
+        for d in self.datasets:
+            if d.isMC():
+                myDatasets[d.getName()] = d.getCrossSection()
+            else:
+                pass
+            # print d.getLuminosity()
+
+        index = 0
+        # For-loop: All keys in dataset-xsection map (sorted by descending xsection value)
+        for d in sorted(myDatasets, key=myDatasets.get, reverse=True):
+            xs = myDatasets[d]
+            index += 1
+            line = align.format(index, d, "%3f" % (xs), "pb")
+            table.append(line)
+        table.append(hLine)
+
+        # For-loop: All rows
+        for r in table:
+            Print(r, False)
+        return
 
 
     ## Format dataset information
@@ -3786,6 +4227,8 @@ class DatasetManager:
         c4skip = " "*(len(col4hdr)+2)
 
         out.write((c1fmt%col1hdr)+"  "+col2hdr+"  "+col3hdr+"  "+col4hdr+"\n")
+        
+        # For-loop: All datasets
         for dataset in self.datasets:
             line = (c1fmt % dataset.getName())
             if dataset.isMC():
@@ -3808,12 +4251,14 @@ class DatasetManager:
     def printInfo(self):
         print self.formatInfo()
 
+
     def formatDatasetTree(self):
         ret = "DatasetManager.datasets = [\n"
         for dataset in self.datasets:
             ret += dataset.formatDatasetTree(indent="  ")
         ret += "]"
         return ret
+
 
     def printDatasetTree(self):
         print self.formatDatasetTree()
@@ -3842,11 +4287,15 @@ class DatasetManager:
     # Directory (absolute/relative to current working directory) where
     # the luminosity JSON file is located (see loadLuminosities())
 
-## Precursor dataset, helper class for DatasetManagerCreator
-#
-# This holds the name, ROOT file, and data/MC status of a dataset.
+
 class DatasetPrecursor:
+    '''
+    Precursor dataset, helper class for DatasetManagerCreator
+    
+    This holds the name, ROOT file, and data/MC status of a dataset.
+    '''
     def __init__(self, name, filenames):
+        Verbose("__init__", True)
         self._name = name
         if isinstance(filenames, basestring):
             self._filenames = [filenames]
@@ -3860,8 +4309,12 @@ class DatasetPrecursor:
         self._pileup_down = None
         self._nAllEvents = 0.0
 
+        Verbose("Opening ROOT files", False)
         for name in self._filenames:
+
+            Verbose(name, False)
             rf = ROOT.TFile.Open(name)
+
             # Below is important to use '==' instead of 'is' to check for
             # null file
             if rf == None:
@@ -3975,28 +4428,32 @@ _analysisNameSkipList = [re.compile("^SystVar"), re.compile("configInfo"), re.co
 _analysisSearchModes = re.compile("_\d+to\d+_")
 _dataDataEra_re = re.compile("_Run201\d\S_")
 
-## Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
-#
-# The mai is to first create an object of this class to represent a
-# multicrab directory, and then create one or many DatasetManagers,
-# which then correspond to a single analysis directory within the ROOT
-# files.
+
 class DatasetManagerCreator:
-    ## Constructor
-    #
-    # \param rootFileList  List of (\a name, \a filenames) pairs (\a
-    #                      name should be string, \a filenames can be
-    #                      string or list of strings). \a name is taken
-    #                      as the dataset name, and \a filenames as the
-    #                      path(s) to the ROOT file(s).
-    # \param kwargs        Keyword arguments (see below)
-    #
-    # <b>Keyword arguments</b>
-    # \li \a baseDirectory    Base directory of the datasets (delivered later to DatasetManager._setBaseDirectory())
-    #
-    # Creates DatasetPrecursor objects for each ROOT file, reads the
-    # contents of first MC file to get list of available analyses.
+    '''
+    Class for listing contents of multicrab dirs, dataset ROOT files, and creating DatasetManager
+    The mai is to first create an object of this class to represent a
+    multicrab directory, and then create one or many DatasetManagers,
+    which then correspond to a single analysis directory within the ROOT
+    files.
+    '''
     def __init__(self, rootFileList, **kwargs):
+        '''
+        Constructor
+        
+        \param rootFileList  List of (\a name, \a filenames) pairs (\a
+        name should be string, \a filenames can be string or list of strings). 
+        \a name is taken as the dataset name, and \a filenames as the
+        path(s) to the ROOT file(s).
+
+        \param kwargs        Keyword arguments (see below)
+        
+        <b>Keyword arguments</b>
+        \li \a baseDirectory    Base directory of the datasets (delivered later to DatasetManager._setBaseDirectory())
+    
+        Creates DatasetPrecursor objects for each ROOT file, reads the
+        contents of first MC file to get list of available analyses.
+        '''
         self._precursors = [DatasetPrecursor(name, filenames) for name, filenames in rootFileList]
         self._baseDirectory = kwargs.get("baseDirectory", "")
         
@@ -4022,8 +4479,11 @@ class DatasetManagerCreator:
 
         self._dataDataEras = dataEras.keys()
         self._dataDataEras.sort()
+        return
+
 
     def _readAnalysisContent(self, precursor):
+        Verbose("_readAnalysisContent()", True)
         contents = aux.listDirectoryContent(precursor.getFiles()[0], lambda key: key.IsFolder())
 
         def skipItem(name):
@@ -4157,7 +4617,7 @@ class DatasetManagerCreator:
                 value = _args[name]
                 if value is not None:
                     parameters.append("%s='%s'" % (name, value))
-        print "Creating DatasetManager with", ", ".join(parameters)
+        Print("Creating DatasetManager with %s" % (", ".join(parameters)), True )
 
         # Create manager and datasets
         dataEra = _args.get("dataEra", None)
@@ -4217,9 +4677,8 @@ class DatasetManagerCreator:
         # Load luminosity automatically if the file exists
         lumiPath = self.getLumiFile()
         if os.path.exists(lumiPath):
-            print "Loading data luminosities from %s" % lumiPath
+            Print("Loading data luminosities from %s" % (lumiPath), True)
             manager.loadLuminosities()
-        
         return manager
 
     def getDatasetPrecursors(self):

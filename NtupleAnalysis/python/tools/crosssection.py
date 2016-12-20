@@ -1,33 +1,91 @@
 ## \package crosssection
-# Background and signal cross sections
-#
-# All cross sections are in pb
+''' 
+Description: 
+Background and signal cross sections (in pb)
 
-########################################
-# Background cross section table
+How to Compute Cross Sections with the GenXSecAnalyzer:
+The cross-sections found with this tool are those predicted by the respective generators. 
+There may be better estimates, coming from dedicated task forces, theory papers etc. 
+In general, you should refer to the GenXsecTaskForce Twiki to find the best estimates.
 
-## Cross section of a single process (physical dataset)
+First find tte path of a ROOT file for a given dataset "someFile.root", by searching 
+on DAS (for example, dataset=/WW_TuneCUETP8M1*/RunIISpring16MiniAODv2-*/* in https://cmsweb.cern.ch/das/)
+Download the dedicated analyzer and run on that single file:
+- curl https://raw.githubusercontent.com/syuvivida/generator/master/cross_section/runJob/ana.py  -o ana.py
+- cmsRun ana.py inputFiles="someFile.root" maxEvents=-1
+The last output line is the final cross section:
+"After filter: final cross section = X +- Y pb"
+
+To get the files for a given dataset:
+das_client --limit 0 --query "file dataset=<datasetName>"
+Example:
+das_client --limit 0 --query "file dataset=/QCD_bEnriched_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"
+das_client --limit 0 --query "file dataset=/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM"
+
+Example:
+cmsRun ana.py inputFiles="/store/mc/RunIISpring16MiniAODv2/QCD_bEnriched_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/70000/00DFB564-393F-E611-A97A-02163E012F6E.root" maxEvents=-1
+
+Links:
+https://twiki.cern.ch/twiki/bin/view/CMS/GenXsecTaskForce
+https://twiki.cern.ch/twiki/bin/view/CMS/HowToGenXSecAnalyzer#Running_the_GenXSecAnalyzer_on_a
+
+'''
+
+DEGUB = False
+def Verbose(msg, printHeader=False):
+    '''
+    Calls Print() only if verbose options is set to true.
+    '''
+
+    if not DEBUG:
+        return
+    Print(msg, printHeader)
+    return
+
+
+def Print(msg, printHeader=True):
+    '''
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader==True:
+        print "=== ", fName
+        print "\t", msg
+    else:
+        print "\t", msg
+    return
+
+
 class CrossSection:
-    ## Constructor
-    #
-    # \parma name              Name of the process
-    # \param energyDictionary  Dictionary of energy -> cross section (energy as string in TeV, cross section as float in pb)
+    '''
+    Cross section of a single process (physical dataset)
+    
+     Constructor
+    
+     \parma name              Name of the process
+     \param energyDictionary  Dictionary of energy -> cross section (energy as string in TeV, cross section as float in pb)
+     '''
     def __init__(self, name, energyDictionary):
         self.name = name
         for key, value in energyDictionary.iteritems():
             setattr(self, key, value)
 
-    ## Get cross section
-    #
-    # \param energy  Energy as string in TeV
     def get(self, energy):
+        '''
+        Get cross section
+        
+        \param energy  Energy as string in TeV
+        '''
         try:
             return getattr(self, energy)
         except AttributeError:
             raise Exception("No cross section set for process %s for energy %s" % (self.name, energy))
 
-## List of CrossSection objects
+
 class CrossSectionList:
+    '''
+    List of CrossSection objects
+    '''
     def __init__(self, *args):
         self.crossSections = args[:]
 
@@ -54,8 +112,12 @@ class CrossSectionList:
 # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
 # [14] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV / GenXSecAnalyzer
 # [15] McM
+# [16] https://twiki.cern.ch/twiki/bin/view/CMS/HowToGenXSecAnalyzer#Running_the_GenXSecAnalyzer_on_a
 
 backgroundCrossSections = CrossSectionList(
+    CrossSection("QCD_Pt_15to30", {
+            "13": 2237000000., # [12]
+            }),
     CrossSection("QCD_Pt_30to50", {
             "7": 5.312e+07, # [2]
             "8": 6.6285328e7, # [1]
@@ -162,12 +224,11 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("TTJets_Hadronic", {
             "8": 245.8* 114.0215/249.50, # [10], BR from [11]
             }),
-    CrossSection("TTJets", {
+    CrossSection("TTJets", {            
             "7": 172.0, # [10]
             "8": 245.8, # [10]
-            "13": 831.76, # [13] top mass 172.5, https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
+            "13": 6.639e+02, #6.639e+02 +- 8.237e+00 pb [16] (inputFiles="001AFDCE-C33B-E611-B032-0025905D1C54.root")            
             }),
-
     CrossSection("TT", {
             "7": 172.0, # [10]
             "8": 245.8, # [10]
@@ -243,7 +304,6 @@ backgroundCrossSections = CrossSectionList(
             "8": 214.0,
             }),
     # end W+Njets 
-
     CrossSection("DYJetsToLL_M_50", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
@@ -408,7 +468,56 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("ST_s_channel_4f_InclusiveDecays", {
             "13": 10.32, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
-)
+    ########################################### Added for H+->tb
+    CrossSection("QCD_bEnriched_HT100to200", {
+            "13": 1.318e+06, #1.318e+06 +- 6.249e+03 pb [16] (inputFiles="00356B59-2E1D-E611-BB0F-08606E15EABA.root")
+            }),
+    CrossSection("QCD_bEnriched_HT200to300", {
+            "13": 1.318e+06, # [16] (inputFiles="02A6676C-5942-E611-814D-842B2B7680C9.root")
+            }),
+    CrossSection("QCD_bEnriched_HT300to500", {
+            "13": 8.764e+04, #8.764e+04 +- 2.824e+02 pb [16] (inputFiles="02A6676C-5942-E611-814D-842B2B7680C9.root")
+            }),
+    CrossSection("QCD_bEnriched_HT500to700", {
+            "13": 1.598e+03, #1.598e+03 +- 7.620e+00 pb [16] (inputFiles="00DFB564-393F-E611-A97A-02163E012F6E.root")
+            }),
+    CrossSection("QCD_bEnriched_HT700to1000", {
+            "13": 3.197e+02, #3.197e+02 +- 1.518e+00 pb [16] (inputFiles="000E889E-0E1B-E611-A3D8-0025905C3E38.root")
+            }),
+    CrossSection("QCD_bEnriched_HT1000to1500", {
+            "13": 5.093e+01, #5.093e+01 +- 3.080e-01 pb [16] (inputFiles="16C63A43-591E-E611-BF07-008CFA197E84.root")
+            }),
+    CrossSection("QCD_bEnriched_HT1500to2000", {
+            "13": 4.383e+00, #4.383e+00 +- 1.492e-01 pb [16] (inputFiles="30A9A48A-7A3A-E611-B1B4-0050560210EC.root")
+            }),
+    CrossSection("QCD_bEnriched_HT2000toInf", {
+            "13": 7.858e-01, #7.858e-01 +- 8.107e-03 pb [16] (inputFiles="0A2A7965-611C-E611-931D-AC853D9DACE1.root")
+            }),
+    CrossSection("TTTT_ext1", {
+            "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16] (inputFiles="02262C1A-EC1C-E611-B7BF-A0369F310374.root")
+            }),
+    CrossSection("TTWJetsToQQ", {
+            "13": 4.034e-01, #4.034e-01 +- 2.493e-03 pb [16] (inputFiles="2211E19A-CC1E-E611-97CC-44A84225C911.root")
+            }),
+    CrossSection("TTZToQQ", {
+            "13": 5.297e-01, #5.297e-01 +- 7.941e-04 pb [16] (inputFiles="204FB864-5D1A-E611-9BA7-001E67A3F49D.root")
+            }),
+    CrossSection("WJetsToQQ_HT_600ToInf", {
+            "13": 9.936e+01, #9.936e+01 +- 4.407e-01 pb [16] (inputFiles="0EA1D6CA-931A-E611-BFCD-BCEE7B2FE01D.root")
+            }),
+    CrossSection("WWTo4Q", {
+            "13": 4.520e+01, #4.520e+01 +- 3.608e-02 pb [16] (inputFiles="0A4AE358-861F-E611-A48C-44A84225C851.root")
+            }),
+    CrossSection("ZJetsToQQ_HT600toInf", {
+            "13": 5.822e+02, #5.822e+02 +- 7.971e-02 pb [16] (inputFiles="0E546A76-E03A-E611-9259-0CC47A4DEDEE.root")
+            }),
+    CrossSection("ZZTo4Q", {
+            "13": 6.883e+00, #6.883e+00 +- 3.718e-02 pb [16] (inputFiles="024C4223-171B-E611-81E5-0025904E4064.root")
+            }),
+    CrossSection("ttbb_4FS_ckm_amcatnlo_madspin_pythia8", {
+            "13": 1.393e+01, #1.393e+01 +- 3.629e-02 pb [16] (inputFiles="0641890F-F72C-E611-9EA8-02163E014B5F.root")
+            }),   
+    )
 
 ## Set background process cross sections
 #
@@ -420,6 +529,7 @@ def setBackgroundCrossSections(datasets, doWNJetsWeighting=True, quietMode=False
 
 def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMode=False):
     value = backgroundCrossSections.crossSection(dataset.getName().replace("_ext",""), dataset.getEnergy())
+    value = backgroundCrossSections.crossSection(dataset.getName().replace("_ext3",""), dataset.getEnergy())
     if value is None:
         if "ChargedHiggs" in dataset.getName():
             value = 1.0 # Force signal xsection to 1 pb
@@ -439,15 +549,18 @@ def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMo
 
     if value is not None:
         dataset.setCrossSection(value)
-        msg = ""
+        msg      = ""
+        txtAlign = "{0:<10} {1:<40} {2:>15} {3:>20} {4:<5} {5:<50}"
         if value == 0:
-            msg = "  *** Note: to set non-zero xsection; edit NtupleAnalysis/python/tools/crossection.py ***"
+            msg = "\n*** Note: to set non-zero xsection; edit NtupleAnalysis/python/tools/crossection.py"
         if "ChargedHiggs" in dataset.getName():
-            msg = "  *** Note: signal is forced at the moment to 1 pb in NtupleAnalysis/python/tools/crossection.py ***"
+            #msg = "\n*** Note: signal is forced at the moment to 1 pb in NtupleAnalysis/python/tools/crossection.py"
+            msg = ""
         if not quietMode:
-            print "Setting %50s cross section to %10f pb %s" % (dataset.getName(), value, msg)
-#    else:
-#        print "Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy())
+            msg = txtAlign.format("Setting", dataset.getName(), "cross section to ", "%0.6f" %(value), "pb", msg)
+            Print(msg, False)
+    else:
+        Print("Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy()), True)
 
 
 ########################################
@@ -635,3 +748,4 @@ def printHplusCrossSections(tanbetas=[10, 20, 30, 40], mu=defaultMu, energy="7")
 if __name__ == "__main__":
     printHplusCrossSections(energy="7")
     printHplusCrossSections(energy="8")
+    printHplusCrossSections(energy="13")

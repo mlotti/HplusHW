@@ -16,6 +16,7 @@
 TauSelection::Data::Data() 
 : fRtau(-1.0),
   fIsGenuineTau(false),
+  fTauIDSF(1.0),
   fTauMisIDSF(1.0),
   fTauTriggerSF(1.0),
   fRtauAntiIsolatedTau(-1.0),
@@ -47,6 +48,9 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
   fTauNprongs(config.getParameter<int>("prongs")),
   fTauRtauCut(config.getParameter<float>("rtau")),
+  fVetoMode(false),
+  // tau identification SF
+  fTauIDSF(config.getParameter<float>("tauIdentificationSF")), 
   // tau misidentification SF
   fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
   fEToTauMisIDSFValue(assignTauMisIDSFValue(config, "E")),
@@ -57,11 +61,7 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   // tau trigger SF
   fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
-  cPassedTauSelection(fEventCounter.addCounter("passed tau selection ("+postfix+")")),
-  cPassedTauSelectionGenuine(fEventCounter.addCounter("passed tau selection and genuine ("+postfix+")")),
-  cPassedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple selected taus ("+postfix+")")),
-  cPassedAntiIsolatedTauSelection(fEventCounter.addCounter("passed anti-isolated tau selection ("+postfix+")")),
-  cPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple anti-isolated taus ("+postfix+")")),
+  cPassedTauSelection(fEventCounter.addCounter("Passed tau selection ("+postfix+")")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("tau selection ("+postfix+")", "All events")),
   cSubPassedTriggerMatching(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed trigger matching")),
@@ -76,12 +76,16 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   cSubPassedIsolation(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed isolation")),
   cSubPassedRtau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed Rtau")),
   cSubPassedAntiIsolation(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolation")),
-  cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated Rtau"))
+  cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated Rtau")),
+  cSubPassedTauSelectionGenuine(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed tau selection and genuine")),
+  cSubPassedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection ("+postfix+")", "multiple selected taus")),
+  cSubPassedAntiIsolatedTauSelection(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed anti-isolated tau selection")),
+  cSubPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection ("+postfix+")", "multiple anti-isolated taus"))
 { 
-  initialize(config);
-}
+  initialize(config, postfix);
+} 
 
-TauSelection::TauSelection(const ParameterSet& config)
+TauSelection::TauSelection(const ParameterSet& config, const std::string& postfix)
 : BaseSelection(),
   bApplyTriggerMatching(config.getParameter<bool>("applyTriggerMatching")),
   fTriggerTauMatchingCone(config.getParameter<float>("triggerMatchingCone")),
@@ -90,6 +94,7 @@ TauSelection::TauSelection(const ParameterSet& config)
   fTauLdgTrkPtCut(config.getParameter<float>("tauLdgTrkPtCut")),
   fTauNprongs(config.getParameter<int>("prongs")),
   fTauRtauCut(config.getParameter<float>("rtau")),
+  fVetoMode(false),
   // tau misidentification SF
   fEToTauMisIDSFRegion(assignTauMisIDSFRegion(config, "E")),
   fEToTauMisIDSFValue(assignTauMisIDSFValue(config, "E")),
@@ -100,11 +105,7 @@ TauSelection::TauSelection(const ParameterSet& config)
   // tau trigger SF
   fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
-  cPassedTauSelection(fEventCounter.addCounter("passed tau selection")),
-  cPassedTauSelectionGenuine(fEventCounter.addCounter("passed tau selection and genuine")),
-  cPassedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple selected taus")),
-  cPassedAntiIsolatedTauSelection(fEventCounter.addCounter("passed anti-isolated tau selection")),
-  cPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addCounter("multiple anti-isolated taus")),
+  cPassedTauSelection(fEventCounter.addCounter("Passed tau selection")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("tau selection", "All events")),
   cSubPassedTriggerMatching(fEventCounter.addSubCounter("tau selection", "Passed trigger matching")),
@@ -119,9 +120,13 @@ TauSelection::TauSelection(const ParameterSet& config)
   cSubPassedIsolation(fEventCounter.addSubCounter("tau selection", "Passed isolation")),
   cSubPassedRtau(fEventCounter.addSubCounter("tau selection", "Passed Rtau")),
   cSubPassedAntiIsolation(fEventCounter.addSubCounter("tau selection", "Passed anti-isolation")),
-  cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated Rtau"))
+  cSubPassedAntiIsolationRtau(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated Rtau")),
+  cSubPassedTauSelectionGenuine(fEventCounter.addSubCounter("tau selection", "Passed tau selection and genuine")),
+  cSubPassedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection", "multiple selected taus")),
+  cSubPassedAntiIsolatedTauSelection(fEventCounter.addSubCounter("tau selection", "Passed anti-isolated tau selection")),
+  cSubPassedAntiIsolatedTauSelectionMultipleTaus(fEventCounter.addSubCounter("tau selection", "multiple anti-isolated taus"))
 { 
-  initialize(config);
+  initialize(config, postfix);
   bookHistograms(new TDirectory());
 }
 
@@ -145,30 +150,33 @@ TauSelection::~TauSelection() {
   delete hNprongsMatrixForBmesonsAfterAntiIsolation;
 }
 
-void TauSelection::initialize(const ParameterSet& config) {
-  
+void TauSelection::initialize(const ParameterSet& config, const std::string& postfix) {
+  if (postfix.find("veto") != std::string::npos || postfix.find("Veto") != std::string::npos)
+    {
+      fVetoMode = true;
+    }
 }
 
 void TauSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "tauSelection_"+sPostfix);
-  hTriggerMatchDeltaR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR", "Trigger match #DeltaR", 60, 0, 3.);
-  hTauPtTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauPtTriggerMatched", "Tau pT, trigger matched", 40, 0, 400);
-  hTauEtaTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauEtaTriggerMatched", "Tau eta, trigger matched", 50, -2.5, 2.5);
-  hNPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauNpassed", "Number of passed taus", 20, 0, 20);
+  hTriggerMatchDeltaR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR"  , "Trigger match #DeltaR;#DeltaR", 60, 0, 3.);
+  hTauPtTriggerMatched  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauPtTriggerMatched" , "Tau pT, trigger matched;p_{T} (GeV/c)", 50, 0, 500.0);
+  hTauEtaTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauEtaTriggerMatched", "Tau eta, trigger matched;#eta", 50, -2.5, 2.5);
+  hNPassed              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauNpassed"          , "Number of passed taus;Number of taus", 10, 0, 10);
   // Resolutions
-  hPtResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution", "(reco pT - gen pT) / reco pT", 200, -1.0, 1.0);
-  hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", "(reco eta - gen eta) / reco eta", 200, -1.0, 1.0);
-  hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", "(reco phi - gen phi) / reco phi", 200, -1.0, 1.0);
+  hPtResolution  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ptResolution" , "(reco pT - gen pT) / reco pT;(p_{T}^{reco} - p_{T}^{gen})/p_{T}^{reco}", 200, -1.0, 1.0);
+  hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", "(reco eta - gen eta) / reco eta;(#eta^{reco} - #eta^{gen})/#eta^{reco}", 200, -1.0, 1.0);
+  hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", "(reco phi - gen phi) / reco phi;(#phi^{reco} - #phi^{gen})/#phi^{reco}", 200, -1.0, 1.0);
   // Isolation efficiency
-  hIsolPtBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore", "Tau pT before isolation is applied", 40, 0, 400);
-  hIsolEtaBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaBefore", "Tau eta before isolation is applied", 50, -2.5, 2.5);
-  hIsolVtxBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxBefore", "Nvertices before isolation is applied", 60, 0, 60);
-  hIsolPtAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtAfter", "Tau pT before isolation is applied", 40, 0, 400);
-  hIsolEtaAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaAfter", "Tau eta before isolation is applied", 50, -2.5, 2.5);
-  hIsolVtxAfter = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxAfter", "Nvertices before isolation is applied", 60, 0, 60);
-  hNprongsMatrixForAllAfterIsolation = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForAllAfterIsolation", ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
-  hNprongsMatrixForBmesonsAfterIsolation = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForBmesonsAfterIsolation", ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
-  hNprongsMatrixForAllAfterAntiIsolation = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForAllAfterAntiIsolation", ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
+  hIsolPtBefore  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore" , "Tau pT before isolation is applied;p_{T} (GeV/c)", 50, 0.0, 500.0);
+  hIsolEtaBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaBefore", "Tau eta before isolation is applied;#eta", 50, -2.5, 2.5);
+  hIsolVtxBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxBefore", "Nvertices before isolation is applied;Number of Vertices", 60, 0, 60);
+  hIsolPtAfter   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtAfter"  , "Tau pT before isolation is applied;p_{T} (GeV/c)", 50, 0.0, 500.0);
+  hIsolEtaAfter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaAfter" , "Tau eta before isolation is applied;#eta", 50, -2.5, 2.5);
+  hIsolVtxAfter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxAfter" , "Nvertices before isolation is applied;Number of Vertices", 60, 0, 60);
+  hNprongsMatrixForAllAfterIsolation         = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForAllAfterIsolation"        , ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
+  hNprongsMatrixForBmesonsAfterIsolation     = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForBmesonsAfterIsolation"    , ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
+  hNprongsMatrixForAllAfterAntiIsolation     = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForAllAfterAntiIsolation"    , ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
   hNprongsMatrixForBmesonsAfterAntiIsolation = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForBmesonsAfterAntiIsolation", ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);
 }
 
@@ -186,6 +194,7 @@ TauSelection::Data TauSelection::analyze(const Event& event) {
   TauSelection::Data data = privateAnalyze(event);
   // Send data to CommonPlots
   if (fCommonPlots != nullptr)
+    fCommonPlots->fillControlPlotsAtTauSelection(event, data);
     fCommonPlots->fillControlPlotsAfterTauSelection(event, data);
   // Return data
   return data;
@@ -335,6 +344,11 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
       }
     }
   }
+  // Set tau identification SF value to data object
+  if (event.isMC()) {
+    setTauIDSFValue(output);
+  }
+
   // Set tau misidentification SF value to data object
   if (event.isMC()) {
     setTauMisIDSFValue(output);
@@ -349,7 +363,7 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     }
   }
 
-  // Fill counters
+  // Fill sub-counters
   if (passedTriggerMatching)
     cSubPassedTriggerMatching.increment();
   if (passedDecayMode)
@@ -376,16 +390,24 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     cSubPassedAntiIsolation.increment();
   if (passedAntiIsolRtau)
     cSubPassedAntiIsolationRtau.increment();
-  if (output.fSelectedTaus.size() > 0)
-    cPassedTauSelection.increment();
-  if (output.fSelectedTaus.size() > 0 && output.isGenuineTau())
-    cPassedTauSelectionGenuine.increment();
+  if (output.fSelectedTaus.size() > 0 && output.isGenuineTau() )
+  cSubPassedTauSelectionGenuine.increment();
   if (output.fSelectedTaus.size() > 1)
-    cPassedTauSelectionMultipleTaus.increment();
+    cSubPassedTauSelectionMultipleTaus.increment();
   if (output.fAntiIsolatedTaus.size() > 0)
-    cPassedAntiIsolatedTauSelection.increment();
+    cSubPassedAntiIsolatedTauSelection.increment();
   if (output.fAntiIsolatedTaus.size() > 1)
-    cPassedAntiIsolatedTauSelectionMultipleTaus.increment();
+    cSubPassedAntiIsolatedTauSelectionMultipleTaus.increment();
+
+  // Fill counters
+  if (fVetoMode) {
+    if (output.fSelectedTaus.size() == 0)
+      cPassedTauSelection.increment();
+  } else {
+    if (output.fSelectedTaus.size() > 0)
+      cPassedTauSelection.increment();
+  }
+
   // Return data object
   return output;
 }
@@ -443,6 +465,14 @@ std::vector<float> TauSelection::assignTauMisIDSFValue(const ParameterSet& confi
 //   if (!result.size())
 //     throw hplus::Exception("config") << "Could not found " << label << "->tau misID SF in config!";
   return result;
+}
+
+void TauSelection::setTauIDSFValue(Data& data) {
+  if (data.hasIdentifiedTaus()) {
+    if (data.isGenuineTau()) {
+      data.fTauIDSF = fTauIDSF;
+    }
+  }
 }
 
 void TauSelection::setTauMisIDSFValue(Data& data) {

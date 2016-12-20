@@ -17,7 +17,7 @@ public:
   void setupBranches(BranchManager& mgr);
 
   std::vector<std::string> getDiscriminatorNames() const {
-    static std::vector<std::string> n = { std::string("Flag_CSCTightHalo2015Filter"), std::string("Flag_CSCTightHaloFilter"), std::string("Flag_EcalDeadCellTriggerPrimitiveFilter"), std::string("Flag_HBHENoiseFilter"), std::string("Flag_HBHENoiseIsoFilter"), std::string("Flag_eeBadScFilter"), std::string("Flag_goodVertices"), std::string("hbheIsoNoiseToken"), std::string("hbheNoiseTokenRun2Loose"), std::string("hbheNoiseTokenRun2Tight") };
+    static std::vector<std::string> n = { std::string("Flag_CSCTightHaloFilter"), std::string("Flag_EcalDeadCellTriggerPrimitiveFilter"), std::string("Flag_HBHENoiseFilter"), std::string("Flag_HBHENoiseIsoFilter"), std::string("Flag_eeBadScFilter"), std::string("Flag_globalTightHalo2016Filter"), std::string("Flag_goodVertices"), std::string("badChargedCandidateFilter"), std::string("badPFMuonFilter"), std::string("hbheIsoNoiseToken"), std::string("hbheNoiseTokenRun2Loose"), std::string("hbheNoiseTokenRun2Tight") };
     return n;
   }
 
@@ -29,7 +29,10 @@ public:
       [&](){ return this->passFlag_HBHENoiseFilter(); },
       [&](){ return this->passFlag_HBHENoiseIsoFilter(); },
       [&](){ return this->passFlag_eeBadScFilter(); },
+      [&](){ return this->passFlag_globalTightHalo2016Filter(); },
       [&](){ return this->passFlag_goodVertices(); },
+      [&](){ return this->passBadChargedCandidateFilter(); },
+      [&](){ return this->passBadPFMuonFilter(); },
       [&](){ return this->passHbheIsoNoiseToken(); },
       [&](){ return this->passHbheNoiseTokenRun2Loose(); },
       [&](){ return this->passHbheNoiseTokenRun2Tight(); }
@@ -43,7 +46,10 @@ public:
   bool passFlag_HBHENoiseFilter() const { return fFlag_HBHENoiseFilter->value(); }
   bool passFlag_HBHENoiseIsoFilter() const { return fFlag_HBHENoiseIsoFilter->value(); }
   bool passFlag_eeBadScFilter() const { return fFlag_eeBadScFilter->value(); }
+  bool passFlag_globalTightHalo2016Filter() const { return fFlag_globalTightHalo2016Filter->value(); }
   bool passFlag_goodVertices() const { return fFlag_goodVertices->value(); }
+  bool passBadChargedCandidateFilter() const { return fBadChargedCandidateFilter->value(); }
+  bool passBadPFMuonFilter() const { return fBadPFMuonFilter->value(); }
   bool passHbheIsoNoiseToken() const { return fHbheIsoNoiseToken->value(); }
   bool passHbheNoiseTokenRun2Loose() const { return fHbheNoiseTokenRun2Loose->value(); }
   bool passHbheNoiseTokenRun2Tight() const { return fHbheNoiseTokenRun2Tight->value(); }
@@ -55,7 +61,10 @@ protected:
   const Branch<bool> *fFlag_HBHENoiseFilter;
   const Branch<bool> *fFlag_HBHENoiseIsoFilter;
   const Branch<bool> *fFlag_eeBadScFilter;
+  const Branch<bool> *fFlag_globalTightHalo2016Filter;
   const Branch<bool> *fFlag_goodVertices;
+  const Branch<bool> *fBadChargedCandidateFilter;
+  const Branch<bool> *fBadPFMuonFilter;
   const Branch<bool> *fHbheIsoNoiseToken;
   const Branch<bool> *fHbheNoiseTokenRun2Loose;
   const Branch<bool> *fHbheNoiseTokenRun2Tight;

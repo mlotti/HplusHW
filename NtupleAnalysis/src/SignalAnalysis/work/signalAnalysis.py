@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 
-dataEras = ["2015"]
+dataEras = ["2016"]
 #dataEras = ["2015B","2015C"]
 searchModes = ["80to1000"]
 

@@ -10,12 +10,8 @@ histoLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
 #====== Trigger
 trg = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
-  triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80",
-               "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_JetIdCleaned",
-               "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120",
-               "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned",
-               #"HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120",
-               #"HLT_LooseIsoPFTau35_Trk20_Prong1_MET70",HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v1
+  L1ETM = 80,
+  triggerOR = ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET90"
                ],
   triggerOR2 = [],
 )
@@ -27,9 +23,12 @@ metFilter = PSet(
                     "Flag_HBHENoiseFilter",
                     "Flag_HBHENoiseIsoFilter",
                     "Flag_EcalDeadCellTriggerPrimitiveFilter",
-                    "Flag_CSCTightHalo2015Filter",
+#                    "Flag_CSCTightHaloFilter",
                     "Flag_eeBadScFilter",
-                    "Flag_goodVertices"]
+                    "Flag_goodVertices",
+                    "Flag_globalTightHalo2016Filter",
+                    "badPFMuonFilter",
+                    "badChargedCandidateFilter"]
 )
 
 #====== Tau selection
@@ -45,11 +44,11 @@ tauSelection = PSet(
   againstElectronDiscr = "againstElectronTightMVA6",
 #  againstElectronDiscr = "",
       againstMuonDiscr = "againstMuonLoose3",
-#        isolationDiscr = "byMediumIsolationMVA3oldDMwLT", #HIP old
-#        isolationDiscr = "byMediumIsolationMVA3newDMwLT", #HIP new
-        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits", #MIT
-          
+#        isolationDiscr = "byMediumIsolationMVA3oldDMwLT",
+        isolationDiscr = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
 )
+# tau identification scale factors
+scaleFactors.assignTauIdentificationSF(tauSelection)
 # tau misidentification scale factors
 scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
@@ -183,9 +182,11 @@ commonPlotsOptions = PSet(
              etaBins = PSet(nBins=60, axisMin=-3.0, axisMax=3.0),
              phiBins = PSet(nBins=72, axisMin=-3.1415926, axisMax=3.1415926),
         deltaPhiBins = PSet(nBins=18, axisMin=0., axisMax=180.), # used in 2D plots, i.e. putting high number of bins here will cause troubles
+        deltaRBins   = PSet(nBins=50, axisMin=0., axisMax=10.),
             rtauBins = PSet(nBins=55, axisMin=0., axisMax=1.1),
            njetsBins = PSet(nBins=20, axisMin=0., axisMax=20.),
              metBins = PSet(nBins=80, axisMin=0., axisMax=800.), # please use 10 GeV bin width because of QCD measurement
+             htBins = PSet(nBins=240, axisMin=0., axisMax=2400.), 
        bjetDiscrBins = PSet(nBins=20, axisMin=-1.0, axisMax=1.0),
    angularCuts1DBins = PSet(nBins=52, axisMin=0., axisMax=260.),
          topMassBins = PSet(nBins=60, axisMin=0., axisMax=600.),

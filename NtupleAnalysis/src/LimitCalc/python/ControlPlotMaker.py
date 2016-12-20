@@ -61,7 +61,10 @@ class ControlPlotMaker:
         # Make control plots
         print "\n"+ShellStyles.HighlightStyle()+"Generating control plots"+ShellStyles.NormalStyle()
         # Loop over mass points
-        for m in self._config.MassPoints:
+        massPoints = []
+        massPoints.extend(self._config.MassPoints)
+        massPoints.append(-1) # for plotting with no signal
+        for m in massPoints:
             print "... mass = %d GeV"%m
             # Initialize flow plot
             selectionFlow = SelectionFlowPlotMaker(self._opts, self._config, m)
@@ -80,7 +83,7 @@ class ControlPlotMaker:
                     # Loop over dataset columns to find histograms
                     myStackList = []
                     for c in self._datasetGroups:
-                        if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn() and not c.getControlPlotByIndex(i) == None:
+                        if (m < 0 or c.isActiveForMass(m,self._config)) and not c.typeIsEmptyColumn() and not c.getControlPlotByIndex(i) == None:
                             h = c.getControlPlotByIndex(i)["shape"].Clone()
                             if c.typeIsSignal():
                                 #print "signal:",c.getLabel()
@@ -150,12 +153,13 @@ class ControlPlotMaker:
                         myDataHisto.setIsDataMC(isData=True, isMC=False)
                         myStackList.insert(0, myDataHisto)
                         # Add signal
-                        mySignalLabel = "TTToHplus_M%d"%m
-                        if m > 179:
-                            mySignalLabel = "HplusTB_M%d"%m
-                        myHisto = histograms.Histo(hSignal,mySignalLabel)
-                        myHisto.setIsDataMC(isData=False, isMC=True)
-                        myStackList.insert(1, myHisto)
+                        if m > 0:
+                            mySignalLabel = "TTToHplus_M%d"%m
+                            if m > 179:
+                                mySignalLabel = "HplusTB_M%d"%m
+                            myHisto = histograms.Histo(hSignal,mySignalLabel)
+                            myHisto.setIsDataMC(isData=False, isMC=True)
+                            myStackList.insert(1, myHisto)
                         # Add data to selection flow plot
                         #if myBlindedStatus:
                         #    selectionFlow.addColumn(myCtrlPlot.flowPlotCaption,None,myStackList[1:])
@@ -186,10 +190,12 @@ class ControlPlotMaker:
                                 #del myParams["ylabelBinInfo"]
                             #del myParams["unit"]
                             #drawPlot2D(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
+
                         myStackPlot = plots.DataMCPlot2(myStackList)
                         myStackPlot.setLuminosity(self._luminosity)
                         myStackPlot.setEnergy("%d"%self._config.OptionSqrtS)
                         myStackPlot.setDefaultStyles()
+
                         # Tweak paramaters
                         if not "unit" in myParams.keys():
                             myParams["unit"] = ""
@@ -262,7 +268,10 @@ class ControlPlotMaker:
                         if not "opts2" in myParams.keys():
                             myParams["opts2"] = {"ymin": 0.5, "ymax": 1.5}
                         # Do plotting
-                        drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
+                        if m > 0:
+                            drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_M%d_%02d_%s"%(self._dirname,m,i,myCtrlPlot.title), **myParams)
+                        else:
+                            drawPlot(myStackPlot, "%s/DataDrivenCtrlPlot_%02d_%s"%(self._dirname,i,myCtrlPlot.title), **myParams)
 
             # Do selection flow plot
             selectionFlow.makePlot(self._dirname,m,len(self._config.ControlPlots),self._luminosity)

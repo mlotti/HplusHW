@@ -6,8 +6,8 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-dataVersion = "76Xmc"
-#dataVersion = "76Xdata"
+dataVersion = "80Xmc"
+#dataVersion = "80Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
@@ -28,8 +28,8 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#	'/store/data/Run2015D/Tau/MINIAOD/16Dec2015-v1/00000/F2BB6529-A3B0-E511-A786-6CC2173BC1D0.root'
-	'/store/mc/RunIIFall15MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext4-v1/60000/00C8EBD5-61D2-E511-8E2F-02163E016064.root'
+#       '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
+       '/store/mc/RunIISpring16MiniAODv2/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-120_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/80000/003E6DB6-1E42-E611-AFBB-D4AE526A023A.root'
     )
 )
 
@@ -48,6 +48,8 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Top_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")
+process.load("HiggsAnalysis/MiniAOD2TTree/METNoiseFilter_cfi")
+process.METNoiseFilter.triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess()))
 
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
@@ -69,12 +71,15 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
-	TriggerResults = cms.InputTag("TriggerResults::HLT"),
+	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
 	TriggerBits = cms.vstring(
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v",
-            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_JetIdCleaned_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET90_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET110_v",
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v",
-            "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_JetIdCleaned_v",
+            "HLT_VLooseIsoPFTau120_Trk50_eta2p1_v",
+            "HLT_VLooseIsoPFTau140_Trk50_eta2p1_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_v"
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
@@ -83,22 +88,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         ),
 	filter = cms.untracked.bool(False)
     ),
-    METNoiseFilter = cms.PSet(
-        triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())),
-        printTriggerResultsList = cms.untracked.bool(False),
-        filtersFromTriggerResults = cms.vstring(
-            "Flag_HBHENoiseFilter",
-            "Flag_HBHENoiseIsoFilter",
-            "Flag_CSCTightHaloFilter",
-            "Flag_CSCTightHalo2015Filter",
-            "Flag_EcalDeadCellTriggerPrimitiveFilter",
-            "Flag_goodVertices",
-            "Flag_eeBadScFilter",
-        ),
-        hbheNoiseTokenRun2LooseSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Loose'),
-        hbheNoiseTokenRun2TightSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
-        hbheIsoNoiseTokenSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHEIsoNoiseFilterResult'),
-    ),
+    METNoiseFilter = process.METNoiseFilter,
     Taus      = process.Taus,
     Electrons = process.Electrons,
     Muons     = process.Muons,
@@ -123,6 +113,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             branchname = cms.untracked.string("genParticles"),
             src = cms.InputTag("prunedGenParticles"),
             saveAllGenParticles = cms.untracked.bool(True),
+            saveGenBooleans     = cms.untracked.bool(False),
+            saveGenStatusFlags  = cms.untracked.bool(False),
 #            saveGenElectrons = cms.untracked.bool(True),
 #            saveGenMuons = cms.untracked.bool(True),
 #            saveGenTaus = cms.untracked.bool(True),
@@ -149,6 +141,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 process.load("HiggsAnalysis.MiniAOD2TTree.SignalAnalysisSkim_cfi")
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
+process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
 
 # === Setup customizations
 from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations

@@ -65,23 +65,13 @@ void BJetSelection::initialize(const ParameterSet& config) {
     throw hplus::Exception("config") << "b-tagging algorithm working point '" << sWorkingPoint
                                      << "' is not valid!\nValid values are: Loose, Medium, Tight";
   if (sAlgorithm == "pfCombinedInclusiveSecondaryVertexV2BJetTags") {
-    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation76X
+    // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X
     if (sWorkingPoint == "Loose")
       fDisriminatorValue = 0.460;
     else if (sWorkingPoint == "Medium")
       fDisriminatorValue = 0.800;
     else if (sWorkingPoint == "Tight")
       fDisriminatorValue = 0.935;
-/*
-  } else if (sAlgorithm == "pfCombinedSecondaryVertexBJetTags") {
-    // Run 1 legacy values
-    if (sWorkingPoint == "Loose")
-      fDisriminatorValue = 0.244;
-    else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.679;
-    else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.898;
-*/
   } else if (sAlgorithm == "pfCombinedMVA2BJetTags") {
     if (sWorkingPoint == "Loose")
       fDisriminatorValue = -0.715;
@@ -89,13 +79,13 @@ void BJetSelection::initialize(const ParameterSet& config) {
       fDisriminatorValue = 0.185;
     else if (sWorkingPoint == "Tight")
       fDisriminatorValue = 0.875;
-  } else if (sAlgorithm == "pfJetProbabilityBJetTags") {
+  } else if (sAlgorithm == "pfCombinedCvsLJetTags" || sAlgorithm == "pfCombinedCvsBJetTags") {
     if (sWorkingPoint == "Loose")
-      fDisriminatorValue = 0.245;
+      fDisriminatorValue = -0.17;
     else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.515;
+      fDisriminatorValue = 0.08;
     else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.760;    
+      fDisriminatorValue = 0.45;    
   }
   
   if (fDisriminatorValue < 0.0) {
@@ -106,10 +96,14 @@ void BJetSelection::initialize(const ParameterSet& config) {
 
 void BJetSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "bjetSelection_"+sPostfix);
-  hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetPt", "First b-jet pT", 40, 0, 400));
-  hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetPt", "Second b-jet pT", 40, 0, 400));
-  hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetEta", "First b-jet #eta", 50, -2.5, 2.5));
-  hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetEta", "Second b-jet #eta", 50, -2.5, 2.5));
+  hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetPt" , "First b-jet pT;p_{T} (GeV/c)" , 50, 0.0, 500.0) );
+  hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetPt", "Second b-jet pT;p_{T} (GeV/c)", 50, 0.0, 500.0) );
+  hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsThirdJetPt" , "Third b-jet pT;p_{T} (GeV/c)" , 50, 0.0, 500.0) );
+  hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFourthJetPt", "Fourth b-jet pT;p_{T} (GeV/c)", 50, 0.0, 500.0) );
+  hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetEta" , "First b-jet eta;#eta" , 50, -2.5, 2.5) );
+  hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetEta", "Second b-jet eta;#eta", 50, -2.5, 2.5) );
+  hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsThirdJetEta" , "Third b-jet eta;#eta" , 50, -2.5, 2.5) );
+  hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFourthJetEta", "Fourth b-jet eta;#eta", 50, -2.5, 2.5) );
   fBTagSFCalculator.bookHistograms(subdir, fHistoWrapper);
 }
 
@@ -170,7 +164,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   // Fill pt and eta of jets
   size_t i = 0;
   for (Jet jet: output.fSelectedBJets) {
-    if (i < 2) {
+    if (i < 4) {
       hSelectedBJetPt[i]->Fill(jet.pt());
       hSelectedBJetEta[i]->Fill(jet.eta());
     }

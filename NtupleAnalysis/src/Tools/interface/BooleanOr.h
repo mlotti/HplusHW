@@ -34,6 +34,8 @@ public:
     //    return fBranches.empty();
   }
 
+  bool value_SearchBranches(std::string triggerName) const;
+
 private:
   void throwEmpty() const;
 

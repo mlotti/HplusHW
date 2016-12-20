@@ -13,6 +13,8 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     inputCollections = psets;
     booked           = false;
 
+    systVariations = inputCollections[0].getParameter<bool>("systVariations");
+
     pt  = new std::vector<double>[inputCollections.size()];
     eta = new std::vector<double>[inputCollections.size()];    
     phi = new std::vector<double>[inputCollections.size()];    
@@ -36,17 +38,19 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
         edm::InputTag inputtag = inputCollections[i].getParameter<edm::InputTag>("src");
         jetToken[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtag);
 
-	edm::InputTag inputtagJESup = inputCollections[i].getParameter<edm::InputTag>("srcJESup");
-        jetJESup[i]   = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJESup);
+	if(systVariations){
+	  edm::InputTag inputtagJESup = inputCollections[i].getParameter<edm::InputTag>("srcJESup");
+          jetJESup[i]   = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJESup);
 
-        edm::InputTag inputtagJESdown = inputCollections[i].getParameter<edm::InputTag>("srcJESdown");
-        jetJESdown[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJESdown);
+          edm::InputTag inputtagJESdown = inputCollections[i].getParameter<edm::InputTag>("srcJESdown");
+          jetJESdown[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJESdown);
 
-        edm::InputTag inputtagJERup = inputCollections[i].getParameter<edm::InputTag>("srcJERup");
-        jetJERup[i]   = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJERup);
+          edm::InputTag inputtagJERup = inputCollections[i].getParameter<edm::InputTag>("srcJERup");
+          jetJERup[i]   = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJERup);
         
-        edm::InputTag inputtagJERdown = inputCollections[i].getParameter<edm::InputTag>("srcJERdown");
-        jetJERdown[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJERdown);
+          edm::InputTag inputtagJERdown = inputCollections[i].getParameter<edm::InputTag>("srcJERdown");
+          jetJERdown[i] = iConsumesCollector.consumes<edm::View<pat::Jet>>(inputtagJERdown);
+	}
     }
     
     useFilter = false;
@@ -70,11 +74,12 @@ JetDumper::JetDumper(edm::ConsumesCollector&& iConsumesCollector, std::vector<ed
     originatesFromUnknown = new std::vector<bool>[inputCollections.size()]; 
     
     MCjet = new FourVectorDumper[inputCollections.size()];
-    
-    systJESup = new FourVectorDumper[inputCollections.size()];
-    systJESdown = new FourVectorDumper[inputCollections.size()];
-    systJERup = new FourVectorDumper[inputCollections.size()];
-    systJERdown = new FourVectorDumper[inputCollections.size()];
+    if(systVariations){
+      systJESup = new FourVectorDumper[inputCollections.size()];
+      systJESdown = new FourVectorDumper[inputCollections.size()];
+      systJERup = new FourVectorDumper[inputCollections.size()];
+      systJERdown = new FourVectorDumper[inputCollections.size()];
+    }
 }
 
 JetDumper::~JetDumper(){}
@@ -120,10 +125,12 @@ void JetDumper::book(TTree* tree){
     
     MCjet[i].book(tree, name, "MCjet");
     
-    systJESup[i].book(tree, name, "JESup");
-    systJESdown[i].book(tree, name, "JESdown");
-    systJERup[i].book(tree, name, "JERup");
-    systJERdown[i].book(tree, name, "JERdown");
+    if(systVariations){
+      systJESup[i].book(tree, name, "JESup");
+      systJESdown[i].book(tree, name, "JESdown");
+      systJERup[i].book(tree, name, "JERup");
+      systJERdown[i].book(tree, name, "JERdown");
+    }
   }
 }
 
@@ -267,7 +274,7 @@ bool JetDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 }
                 
                 // Systematics
-                if (!iEvent.isRealData()) {
+                if (systVariations && !iEvent.isRealData()) {
 	          edm::Handle<edm::View<pat::Jet>> jetJESupHandle;
         	  iEvent.getByToken(jetJESup[ic], jetJESupHandle);
 
@@ -370,10 +377,12 @@ void JetDumper::reset(){
         
         MCjet[ic].reset();
         // Systematics
-        systJESup[ic].reset();
-        systJESdown[ic].reset();
-        systJERup[ic].reset();
-        systJERdown[ic].reset();
+	if(systVariations){
+          systJESup[ic].reset();
+          systJESdown[ic].reset();
+          systJERup[ic].reset();
+          systJERdown[ic].reset();
+	}
     }
     for(size_t ic = 0; ic < inputCollections.size()*nDiscriminators; ++ic){
         discriminators[ic].clear();

@@ -85,8 +85,9 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
             })
     
     dy = -0.1
-    
-    limit.BRassumption = "Assuming B(H^{+}#rightarrow#tau^{+}#nu_{#tau}) = 1"
+
+    limit.BRassumption = ""   
+    #limit.BRassumption = "Assuming B(H^{+}#rightarrow#tau^{+}#nu_{#tau}) = 1"
     #limit.BRassumption = "Assuming B(H^{+}#rightarrowt#bar{b}) = 1"
     if limit.BRassumption != "":
         dy -= 0.05

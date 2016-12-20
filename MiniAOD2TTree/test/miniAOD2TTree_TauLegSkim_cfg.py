@@ -4,8 +4,8 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-#dataVersion = "76Xmc"
-dataVersion = "76Xdata"
+#dataVersion = "80Xmc"
+dataVersion = "80Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion
@@ -25,12 +25,9 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-       '/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v4/000/258/174/00000/5E0232D4-F96C-E511-A1CD-02163E013388.root',
-#	'/store/mc/RunIIFall15MiniAODv2/DY2JetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/10000/044F8A3A-43B8-E511-8F98-0025904CF75A.root',
+       '/store/data/Run2016B/SingleMuon/MINIAOD/PromptReco-v2/000/273/150/00000/34A57FB8-D819-E611-B0A4-02163E0144EE.root',
     ),
     secondaryFileNames = cms.untracked.vstring(
-       '/store/data/Run2015D/SingleMuon/AOD/PromptReco-v4/000/258/174/00000/067F479F-F96C-E511-8BED-02163E01464A.root',
-       '/store/data/Run2015D/SingleMuon/AOD/PromptReco-v4/000/258/174/00000/0AAF1966-D76C-E511-AEBA-02163E0145C8.root',
     )
 )
 
@@ -63,6 +60,8 @@ process.load("HiggsAnalysis/MiniAOD2TTree/Electron_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Muon_cfi")
 process.load("HiggsAnalysis/MiniAOD2TTree/Jet_cfi")    
 process.load("HiggsAnalysis/MiniAOD2TTree/MET_cfi")    
+process.load("HiggsAnalysis/MiniAOD2TTree/METNoiseFilter_cfi")
+process.METNoiseFilter.triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())) 
 
 process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     OutputFileName = cms.string("miniaod2tree.root"),
@@ -84,24 +83,29 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
     Trigger = cms.PSet(
-	TriggerResults = cms.InputTag("TriggerResults::HLT"),
+	TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess())),
 #        TriggerResults = cms.InputTag("TriggerResults::HLT25NSV4L1V5"),
 #        TriggerResults = cms.InputTag("TriggerResults::TauHLT"),
 
 	TriggerBits = cms.vstring(
-	    "HLT_IsoMu16_eta2p1_CaloMET30_LooseIsoPFTau50_Trk30_eta2p1_v",
-	    "HLT_IsoMu16_eta2p1_CaloMET30_v",
-            "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_LooseIsoPFTau50_Trk30_eta2p1_v",
-            "HLT_IsoMu16_eta2p1_MET30_JetIdCleaned_v",
-            "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_v",
             "HLT_IsoMu16_eta2p1_MET30_v",
-            "HLT_IsoMu17_eta2p1_v",
+            "HLT_IsoMu16_eta2p1_MET30_LooseIsoPFTau50_Trk30_eta2p1_v",
             "HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v",
             "HLT_IsoMu17_eta2p1_LooseIsoPFTau20_SingleL1_v",
-            "HLT_IsoMu17_eta2p1_MediumIsoPFTau40_Trk1_eta2p1_Reg_v",
-            "HLT_IsoMu20_eta2p1_v",
-            "HLT_IsoMu24_eta2p1_v",
-            "HLT_IsoMu24_eta2p1_LooseIsoPFTau20_v"
+            "HLT_IsoMu19_eta2p1_LooseIsoPFTau20_v",
+            "HLT_IsoMu19_eta2p1_LooseIsoPFTau20_SingleL1_v",
+            "HLT_IsoMu19_eta2p1_MediumIsoPFTau32_Trk1_eta2p1_Reg_v",
+            "HLT_IsoMu18_v",
+            "HLT_IsoMu20_v",
+            "HLT_IsoMu21_eta2p1_LooseIsoPFTau20_SingleL1_v",
+            "HLT_IsoMu21_eta2p1_MediumIsoPFTau32_Trk1_eta2p1_Reg_v",
+            "HLT_IsoMu21_eta2p1_LooseIsoPFTau50_Trk30_eta2p1_SingleL1_v",
+            "HLT_IsoMu22_v",
+            "HLT_IsoMu22_eta2p1_v",
+            "HLT_IsoMu24_v",
+            "HLT_VLooseIsoPFTau120_Trk50_eta2p1_v",
+            "HLT_VLooseIsoPFTau140_Trk50_eta2p1_v",
+            "HLT_LooseIsoPFTau50_Trk30_eta2p1_v",
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 #        L1Extra = cms.InputTag("l1extraParticles:MET:HLT25NSV4L1V5"),
@@ -110,34 +114,24 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerMatch = cms.untracked.vstring(
 	    "LooseIsoPFTau50_Trk30_eta2p1",
 	    "LooseIsoPFTau20",
-            "MediumIsoPFTau40_Trk1_eta2p1_Reg",
+            "MediumIsoPFTau32_Trk1_eta2p1_Reg",
 	    "IsoMu16_eta2p1",
             "IsoMu17_eta2p1",
-            "IsoMu20_eta2p1"
+            "IsoMu19_eta2p1",
+            "IsoMu18",
+            "IsoMu20",
+            "IsoMu21_eta2p1",
+            "IsoMu22",
+            "IsoMu24",
 	),
 	filter = cms.untracked.bool(False)
     ),
-    METNoiseFilter = cms.PSet(
-        triggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getMETFilteringProcess())),
-        printTriggerResultsList = cms.untracked.bool(False),
-        filtersFromTriggerResults = cms.vstring(
-            "Flag_HBHENoiseFilter",
-            "Flag_HBHENoiseIsoFilter",
-            "Flag_CSCTightHaloFilter",
-            "Flag_CSCTightHalo2015Filter",
-            "Flag_EcalDeadCellTriggerPrimitiveFilter",
-            "Flag_goodVertices",
-            "Flag_eeBadScFilter",
-        ),
-        hbheNoiseTokenRun2LooseSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Loose'),
-        hbheNoiseTokenRun2TightSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHENoiseFilterResultRun2Tight'),
-        hbheIsoNoiseTokenSource = cms.InputTag('HBHENoiseFilterResultProducer','HBHEIsoNoiseFilterResult'),
-    ),
-    Taus      = process.Taus,
+    METNoiseFilter = process.METNoiseFilter,
+    Taus      = process.TausNoSysVariations,
 #    Electrons = process.Electrons,
     Muons     = process.Muons,
-    Jets      = process.Jets,
-    METs      = process.METs,
+    Jets      = process.JetsNoSysVariations,
+    METs      = process.METsNoSysVariations,
     GenWeights = cms.VPSet(
         cms.PSet(
             branchname = cms.untracked.string("GenWeights"),
@@ -153,6 +147,7 @@ process.skim.GenWeights = process.dump.GenWeights
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterMETFilters = cms.EDProducer("HplusEventCountProducer")
 process.skimCounterPassed     = cms.EDProducer("HplusEventCountProducer")
+process.skim.TriggerResults = cms.InputTag("TriggerResults::"+str(dataVersion.getTriggerProcess()))
 
 # === Setup customizations
 from HiggsAnalysis.MiniAOD2TTree.CommonFragments import produceCustomisations
