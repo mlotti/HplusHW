@@ -894,7 +894,7 @@ class TableProducer:
         signalColumn="CMS_Hptntj_Hp"
         if light:
             signalColumn="HW"
-        myColumnOrder = ["CMS_Hptntj_Hp",
+        myColumnOrder = [signalColumn,
                          "QCDandFakeTau",
                          "ttbar_t_genuine",
                          "W_t_genuine",
@@ -951,8 +951,8 @@ class TableProducer:
                            ["CMS_scale_VV", "diboson scale"],
                            ["CMS_pdf_VV", "diboson pdf"],
                            ["lumi_13TeV","luminosity (13 TeV)"],
-                           ["CMS_Hptntj_QCDbkg_templateFit","QCD template fit"],
-                           ["CMS_Hptntj_QCDkbg_metshape","QCD MET shape"]
+                           ["CMS_Hptntj_QCDbkg_templateFit","Fake tau template fit"],
+                           ["CMS_Hptntj_QCDkbg_metshape","Fake tau MET shape"]
                        ]
         # Make table
         myTable = []

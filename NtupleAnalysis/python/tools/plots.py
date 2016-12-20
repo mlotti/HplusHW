@@ -2617,7 +2617,7 @@ class PlotDrawer:
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2.0}
         self.optsLogDefault.update(optsLog)
-        self.optsLogxDefault = {"xmin": 5, "xmax": 6000}
+        self.optsLogxDefault = {"xmin": 5, "xmax": 10000}
         self.optsLogxDefault.update(optsLogx)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)
