@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import math
 from optparse import OptionParser
 
 import ROOT
@@ -26,7 +27,7 @@ def main(opts):
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    if not limits.isHeavyStatus:
+    if not opts.isHeavy:
         # Give more space for four digits on the y axis labels
         style.tdrStyle.SetPadLeftMargin(0.19)
         style.tdrStyle.SetTitleYOffset(1.6)
@@ -104,28 +105,26 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
     plot.setLegend(legend)
 
     name = "limitsBr"
-    ymin = 0
-    ymax = limits.getFinalstateYmaxBR()
+    ymin = opts.ymin-0.02
+    ymax = opts.ymax+0.02 #limits.getFinalstateYmaxBR() # this could be also used, in principle
     if opts.logx:
         name += "_logx"
     if log:
         name += "_log"
-        if limits.isHeavyStatus:
-            ymin = 1e-3
-            ymax = 10.0
-            if limit.BRassumption != "":
-                ymax = 10.0
+        if opts.isHeavy:
+            ymin = opts.ymin+1e-3
+            ymax = opts.ymax*10.0
         else:
-            ymin = 1e-3
-            ymax = 4e-2
-    if leptonicFS:
-        ymax = 10
+            ymin = opts.ymin+1e-3
+            ymax = opts.ymax
+#    if leptonicFS:
+#        ymax = 10
     if len(limits.mass) == 1:
         plot.createFrame(name, opts={"xmin": limits.mass[0]-5.0, "xmax": limits.mass[0]+5.0, "ymin": ymin, "ymax": ymax})
     else:
         plot.createFrame(name, opts={"ymin": ymin, "ymax": ymax})
     plot.frame.GetXaxis().SetTitle(limit.mHplus())
-    if limits.isHeavyStatus:
+    if opts.isHeavy:
         if limit.BRassumption != "":
             plot.frame.GetYaxis().SetTitle("95% CL limit for #sigma_{H^{+}} (pb)")
         else:
@@ -145,12 +144,12 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
     x = 0.51
     x = 0.45
     process = limit.process
-    if limits.isHeavyStatus:
+    if opts.isHeavy:
         process = limit.processHeavy
     histograms.addText(x, 0.88, process, size=size)
-    #histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
+    histograms.addText(x, 0.84, limits.getFinalstateText(), size=size)
     #histograms.addText(x, 0.84, "#tau_{h}+jets final state", size=size)
-    histograms.addText(x, 0.84, "#tau_{h}+jets and #mu#tau_{h} final states", size=size)
+    #histograms.addText(x, 0.84, "#tau_{h}+jets and #mu#tau_{h} final states", size=size)
     #histograms.addText(x, 0.84, "#tau_{h}+jets, #mu#tau_{h}, ee, e#mu, #mu#mu final states", size=size)
     if leptonicFS:
         histograms.addText(x, 0.84, "#mu#tau_{h}, ee, e#mu, #mu#mu final states", size=size)
@@ -246,6 +245,14 @@ if __name__ == "__main__":
                       help="Use parentheses for sigma and BR")
     parser.add_option("--excludedArea", dest="excludedArea", default=False, action="store_true",
                       help="Add excluded area as in MSSM exclusion plots")
-    parser.add_option("--logx", dest="logx", action="store_true", default=False, help="Plot x-axis (H+ mass) as logarithmic")                      
+    parser.add_option("--logx", dest="logx", action="store_true", default=False, 
+                      help="Plot x-axis (H+ mass) as logarithmic")     
+    parser.add_option("--heavy", dest="isHeavy", action="store_true", default=False, 
+                      help="Label y axis as sigma x BR (for heavy H+)")     
+    parser.add_option("--ymin", type="float", dest="ymin", action="store", default=0.0, 
+                      help="Minimum of y axis (default: 0.0)")     
+    parser.add_option("--ymax", type="float", dest="ymax", action="store", default=1.0, 
+                      help="Minimum of y axis (default: 1.0)")     
+                     
     (opts, args) = parser.parse_args()
     main(opts)
