@@ -89,77 +89,6 @@ kwargs = {
 
 
 hNames = [
-    "PUDependency/NvtxTrg",
-    "PUDependency/NvtxMETFilter",
-    "PUDependency/NvtxVtx",
-    "PUDependency/NvtxElectronVeto",
-    "PUDependency/NvtxMuonVeto",
-    "PUDependency/NvtxTauVeto",
-    "PUDependency/NvtxJetSelection",
-    "PUDependency/NvtxBtagging",
-    "PUDependency/NvtxMETSelection",
-    "PUDependency/NvtxAllSelections",
-    #"PUDependency/NvtxAllSelectionsWithProbabilisticBtag"
-    #
-    "eSelection_Veto/electronPtAll",
-    "eSelection_Veto/electronEtaAll",
-    "eSelection_Veto/electronPtPassed",
-    "eSelection_Veto/electronEtaPassed",
-    "eSelection_Veto/electronRelIsoAll",
-    "eSelection_Veto/electronRelIsoPassed",
-    ### "eSelection_Veto/electronRelIsoPassedPtEta",
-    ### "eSelection_Veto/electronRelIsoPassedPtEtaId",
-    "eSelection_Veto/ptResolution",
-    "eSelection_Veto/etaResolution",
-    "eSelection_Veto/phiResolution",
-    "eSelection_Veto/IsolPtBefore",
-    "eSelection_Veto/IsolEtaBefore",
-    "eSelection_Veto/IsolVtxBefore",
-    "eSelection_Veto/IsolRelIsoBefore",
-    "eSelection_Veto/IsolPtAfter",
-    "eSelection_Veto/IsolEtaAfter",
-    "eSelection_Veto/IsolVtxAfter",
-    "eSelection_Veto/IsolRelIsoAfter",
-    #
-    "muSelection_Veto/muonPtAll",
-    "muSelection_Veto/muonEtaAll",
-    "muSelection_Veto/muonRelIsoAll",
-    "muSelection_Veto/muonRelIsoPassed",
-    ### "muSelection_Veto/muonRelIsoPassedPtEta",
-    ### "muSelection_Veto/muonRelIsoPassedPtEtaId",
-    "muSelection_Veto/muonPtPassed" ,
-    "muSelection_Veto/muonRelIsoPassed",
-    "muSelection_Veto/muonRelIsoAll",
-    "muSelection_Veto/ptResolution" ,
-    "muSelection_Veto/etaResolution",
-    "muSelection_Veto/phiResolution",
-    "muSelection_Veto/IsolPtBefore" ,
-    "muSelection_Veto/IsolEtaBefore",
-    "muSelection_Veto/IsolVtxBefore",
-    "muSelection_Veto/IsolRelIsoBefore",
-    "muSelection_Veto/IsolPtAfter"  ,
-    "muSelection_Veto/IsolEtaAfter" ,
-    "muSelection_Veto/IsolVtxAfter" ,
-    "muSelection_Veto/IsolRelIsoAfter" ,
-    #
-    # "tauSelection_Veto/triggerMatchDeltaR", 
-    # "tauSelection_Veto/tauPtTriggerMatched",
-    # "tauSelection_Veto/tauEtaTriggerMatched",
-     "tauSelection_Veto/tauNpassed",
-     "tauSelection_Veto/ptResolution",
-     "tauSelection_Veto/etaResolution",
-     "tauSelection_Veto/phiResolution",
-     "tauSelection_Veto/IsolPtBefore",
-     "tauSelection_Veto/IsolEtaBefore",
-     "tauSelection_Veto/IsolVtxBefore",
-     "tauSelection_Veto/IsolPtAfter",
-     "tauSelection_Veto/IsolEtaAfter",
-     "tauSelection_Veto/IsolVtxAfter",
-     # "tauSelection_Veto/NprongsMatrixForAllAfterIsolation", #2D
-     # "tauSelection_Veto/NprongsMatrixForBmesonsAfterIsolation", #2D
-     # "tauSelection_Veto/NprongsMatrixForAllAfterAntiIsolation", #2D
-     # "tauSelection_Veto/NprongsMatrixForBmesonsAfterAntiIsolation", #2D
-     #
     "jetSelection_/jetPtAll",
     "jetSelection_/jetEtaAll",
     "jetSelection_/jetPtPassed",
@@ -178,17 +107,6 @@ hNames = [
     "jetSelection_/selectedJetsSixthJetEta",
     # "jetSelection_/JetMatchingToTauDeltaR",
     # "jetSelection_/JetMatchingToTauPtRatio",
-    #
-    "bjetSelection_/selectedBJetsFirstJetPt",
-    "bjetSelection_/selectedBJetsSecondJetPt",
-    "bjetSelection_/selectedBJetsThirdJetPt",
-    "bjetSelection_/selectedBJetsFourthJetPt",
-    "bjetSelection_/selectedBJetsFirstJetEta",
-    "bjetSelection_/selectedBJetsSecondJetEta",
-    "bjetSelection_/selectedBJetsThirdJetEta",
-    "bjetSelection_/selectedBJetsFourthJetEta",
-    #
-    "metSelection_/Met",
     ]
 
 
@@ -292,7 +210,8 @@ def main(hName, opts):
     # Create a comparison plot
     ratioOpts = {"ymin": 0.0, "ymax": 2.0}
     if kwargs.get("logY")==True:
-        canvOpts = {"xmin": 0.0, "xmax": 50.0, "ymin": 1e-1, "ymaxfactor": 10}
+        #canvOpts = {"xmin": 0.0, "xmax": 50.0, "ymin": 1e-1, "ymaxfactor": 10}
+        canvOpts = {"xmin": 0.0, "ymin": 1e-1, "ymaxfactor": 10}
     else:
         canvOpts = {"ymin": 0.0, "ymaxfactor": 1.2}
 

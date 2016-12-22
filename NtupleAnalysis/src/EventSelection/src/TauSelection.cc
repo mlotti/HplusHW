@@ -160,7 +160,7 @@ void TauSelection::initialize(const ParameterSet& config, const std::string& pos
 void TauSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "tauSelection_"+sPostfix);
   hTriggerMatchDeltaR   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR"  , "Trigger match #DeltaR;#DeltaR", 60, 0, 3.);
-  hTauPtTriggerMatched  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauPtTriggerMatched" , "Tau pT, trigger matched;p_{T} (GeV/c)", 40, 0, 400);
+  hTauPtTriggerMatched  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauPtTriggerMatched" , "Tau pT, trigger matched;p_{T} (GeV/c)", 50, 0, 500.0);
   hTauEtaTriggerMatched = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauEtaTriggerMatched", "Tau eta, trigger matched;#eta", 50, -2.5, 2.5);
   hNPassed              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "tauNpassed"          , "Number of passed taus;Number of taus", 10, 0, 10);
   // Resolutions
@@ -168,10 +168,10 @@ void TauSelection::bookHistograms(TDirectory* dir) {
   hEtaResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "etaResolution", "(reco eta - gen eta) / reco eta;(#eta^{reco} - #eta^{gen})/#eta^{reco}", 200, -1.0, 1.0);
   hPhiResolution = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "phiResolution", "(reco phi - gen phi) / reco phi;(#phi^{reco} - #phi^{gen})/#phi^{reco}", 200, -1.0, 1.0);
   // Isolation efficiency
-  hIsolPtBefore  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore" , "Tau pT before isolation is applied;p_{T} (GeV/c)", 40, 0, 400);
+  hIsolPtBefore  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtBefore" , "Tau pT before isolation is applied;p_{T} (GeV/c)", 50, 0.0, 500.0);
   hIsolEtaBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaBefore", "Tau eta before isolation is applied;#eta", 50, -2.5, 2.5);
   hIsolVtxBefore = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxBefore", "Nvertices before isolation is applied;Number of Vertices", 60, 0, 60);
-  hIsolPtAfter   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtAfter"  , "Tau pT before isolation is applied;p_{T} (GeV/c)", 40, 0, 400);
+  hIsolPtAfter   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolPtAfter"  , "Tau pT before isolation is applied;p_{T} (GeV/c)", 50, 0.0, 500.0);
   hIsolEtaAfter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolEtaAfter" , "Tau eta before isolation is applied;#eta", 50, -2.5, 2.5);
   hIsolVtxAfter  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "IsolVtxAfter" , "Nvertices before isolation is applied;Number of Vertices", 60, 0, 60);
   hNprongsMatrixForAllAfterIsolation         = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "NprongsMatrixForAllAfterIsolation"        , ";Simulated prongs;Reconstructed prongs", 4, 0, 4, 4, 0, 4);

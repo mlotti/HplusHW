@@ -36,10 +36,11 @@ kwargs = {
     "optMode"        : "",
     #"savePath"       : "/Users/attikis/latex/talks/post_doc.git/HPlus/HIG-XY-XYZ/2016/Kinematics_06September2016/figures/M_200/",
     #"savePath"       : None,
-    "savePath"       : os.getcwd() + "/Plots/",
-    "refDataset"     : "QCD-b",
-    "saveFormats"    : [".png"],
-    "normalizeTo"    : "Luminosity", #One", "XSection", "Luminosity"
+    "refDataset"     : "TT", #"ChargedHiggs_HplusTB_HplusToTB_M_500",
+    "savePath"       : os.getcwd() + "/Plots/TT_ext3", #M_500
+    #"savePath"       : "/publicweb/a/aattikis/EvtShapeVars/",
+    "saveFormats"    : [".png", ".pdf"],
+    "normalizeTo"    : "One", #One", "XSection", "Luminosity"
     "zMin"           : 1e-1,
     "zMax"           : None,
     "rebinX"         : 1,
@@ -73,14 +74,16 @@ hNames = [
     "BQuarkPair_dRMin_Phi1_Vs_Phi2",
     "BQuarkPair_dRMin_Pt1_Vs_Pt2",
     "BQuarkPair_dRMin_dEta_Vs_dPhi",
-#    "Htb_tbW_bqq_dRMax_dRap_Vs_dPhi",
-#    "gtt_tbW_bqq_dRMax_dRap_Vs_dPhi",
-    "tbWPlus_bqq_dRMax_dRap_Vs_dPhi",
-    "tbWMinus_bqq_dRMax_dRap_Vs_dPhi",
     "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta",
     "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi",
     "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass",
     "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass",
+    "S_Vs_Y",
+#    "Htb_tbW_bqq_dRMax_dRap_Vs_dPhi",
+#    "gtt_tbW_bqq_dRMax_dRap_Vs_dPhi",
+#    "tbWPlus_bqq_dRMax_dRap_Vs_dPhi",
+#    "tbWMinus_bqq_dRMax_dRap_Vs_dPhi",
+
 ]
 
 
@@ -112,7 +115,7 @@ def main(opts):
     intLumi     = GetLumi(datasetsMgr)
     datasetsMgr.updateNAllEventsToPUWeighted()
     datasetsMgr.PrintCrossSections()
-    datasetsMgr.PrintLuminosities()
+    #datasetsMgr.PrintLuminosities()
 
     # Set/Overwrite cross-sections
     for d in datasetsMgr.getAllDatasets():
@@ -129,7 +132,6 @@ def main(opts):
     
     # Print dataset information
     datasetsMgr.PrintInfo()
-
                   
     # For-loop: All Histogram names
     for counter, hName in enumerate(hNames):
@@ -183,7 +185,7 @@ def main(opts):
 
         # Customise text
         histograms.addStandardTexts(lumi=intLumi)
-        #histograms.addText(0.17, 0.95, plots._legendLabels[kwargs.get("refDataset")], 22)
+        # histograms.addText(0.17, 0.95, plots._legendLabels[kwargs.get("refDataset")], 22)
         histograms.addText(0.17, 0.88, plots._legendLabels[kwargs.get("refDataset")], 17)
         
         # Save canvas under custom dir

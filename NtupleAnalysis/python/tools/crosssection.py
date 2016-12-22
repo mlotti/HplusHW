@@ -8,7 +8,7 @@ The cross-sections found with this tool are those predicted by the respective ge
 There may be better estimates, coming from dedicated task forces, theory papers etc. 
 In general, you should refer to the GenXsecTaskForce Twiki to find the best estimates.
 
-First find tte path of a ROOT file for a given dataset "someFile.root", by searching 
+First find the path of a ROOT file for a given dataset "someFile.root", by searching 
 on DAS (for example, dataset=/WW_TuneCUETP8M1*/RunIISpring16MiniAODv2-*/* in https://cmsweb.cern.ch/das/)
 Download the dedicated analyzer and run on that single file:
 - curl https://raw.githubusercontent.com/syuvivida/generator/master/cross_section/runJob/ana.py  -o ana.py
@@ -19,8 +19,8 @@ The last output line is the final cross section:
 To get the files for a given dataset:
 das_client --limit 0 --query "file dataset=<datasetName>"
 Example:
-das_client --limit 0 --query "file dataset=/QCD_bEnriched_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM"
-das_client --limit 0 --query "file dataset=/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM"
+das_client.py --query "file dataset=/QCD_bEnriched_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM" --limit 1000
+das_client.py --limit 0 --query "file dataset=/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM" --limit 1000
 
 Example:
 cmsRun ana.py inputFiles="/store/mc/RunIISpring16MiniAODv2/QCD_bEnriched_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/70000/00DFB564-393F-E611-A97A-02163E012F6E.root" maxEvents=-1

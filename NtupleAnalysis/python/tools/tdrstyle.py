@@ -196,6 +196,12 @@ class TDRStyle:
         self.tdrStyle.SetPadGridX(onoff)
         self.tdrStyle.SetPadGridY(onoff)
 
+    def setGridX(self, onoff):
+        self.tdrStyle.SetPadGridX(onoff)
+
+    def setGridY(self, onoff):
+        self.tdrStyle.SetPadGridY(onoff)
+
     ## Set pretty palette style
     def setPalettePretty(self):
         self.tdrStyle.SetPalette(1)

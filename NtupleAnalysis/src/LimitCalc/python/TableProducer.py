@@ -758,7 +758,10 @@ class TableProducer:
                         HST = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.typeIsQCD():
                         if QCD == None:
-                            QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                            try:
+                                QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
+                            except AttributeError:
+                                raise Exception(ShellStyles.ErrorLabel()+"Did you create the pseudo-Multicrab containing the correctly normalized QCD background? Step 3) in the QCD background measurement instructions.")
                         else:
                             QCD.Add(c.getCachedShapeRootHistogramWithUncertainties())
                     elif c.typeIsEWK() or (c.typeIsEWKfake() and self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated"):
