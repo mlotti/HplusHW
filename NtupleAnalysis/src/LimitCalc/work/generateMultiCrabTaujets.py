@@ -4,10 +4,6 @@ import HiggsAnalysis.LimitCalc.LandSTools as lands
 import HiggsAnalysis.LimitCalc.CombineTools as combine
 import HiggsAnalysis.LimitCalc.CommonLimitTools as commonLimitTools
 
-lepType = True
-lhcType = True
-lhcTypeAsymptotic = True
-
 lepType = False
 lhcType = False
 lhcTypeAsymptotic = False
@@ -44,8 +40,8 @@ def main(opts, settings, myDir):
     postfix = "taujets"
 
 #    lepType = True
-    lhcType = True
-#    lhcTypeAsymptotic = True
+#    lhcType = True
+    lhcTypeAsymptotic = True
 
     crabScheduler = "arc"
     crabOptions = {
@@ -136,7 +132,7 @@ def main(opts, settings, myDir):
         elif opts.lhcType:
             raise Exception("LHC type Hybrid CLs not implemented yet for combine")
         elif opts.lhcTypeAsymptotic:
-            pfix = postfix+"_lhcasy"
+            pfix = postfix #+"_lhcasy"
             if opts.postfix != "":
                 pfix += "_"+opts.postfix
             combine.produceLHCAsymptotic(
@@ -164,7 +160,6 @@ if __name__ == "__main__":
         myDirs.append(".")
 
     for myDir in myDirs:
-        print "Considering directory:",myDir
         settings = commonLimitTools.GeneralSettings(myDir, opts.masspoints)
         print "The following masses are considered:",settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS)
         if not main(opts, settings, myDir):
@@ -172,3 +167,4 @@ if __name__ == "__main__":
             parser.print_help()
             print ""
             raise Exception("You forgot to specify limit calculation method as a command line parameter!")
+
