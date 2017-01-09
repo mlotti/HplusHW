@@ -185,7 +185,7 @@ commonPlotsOptions = PSet(
         deltaRBins   = PSet(nBins=50, axisMin=0., axisMax=10.),
             rtauBins = PSet(nBins=55, axisMin=0., axisMax=1.1),
            njetsBins = PSet(nBins=20, axisMin=0., axisMax=20.),
-             metBins = PSet(nBins=500, axisMin=0., axisMax=5000.), # please use 10 GeV bin width because of QCD measurement
+             metBins = PSet(nBins=80, axisMin=0., axisMax=800.), # please use 10 GeV bin width because of QCD measurement
              htBins = PSet(nBins=240, axisMin=0., axisMax=2400.), 
        bjetDiscrBins = PSet(nBins=20, axisMin=-1.0, axisMax=1.0),
    angularCuts1DBins = PSet(nBins=52, axisMin=0., axisMax=260.),
