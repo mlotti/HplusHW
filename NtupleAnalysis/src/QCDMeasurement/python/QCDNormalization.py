@@ -749,15 +749,14 @@ class QCDNormalizationManagerBase:
         # Make plot
         hFrame = ROOT.TH1F("frame","frame",len(keyList),0,len(keyList))
         for i in range(len(keyList)):
-
-            hFrame.GetXaxis().SetBinLabel(i+1, keyList[i].replace("lt","<").replace("eq","=").replace("to","-").replace("gt",">"))
+            binLabelText = getFormattedBinLabelString(keyList[i])
+            hFrame.GetXaxis().SetBinLabel(i+1,binLabelText)
 ## for 3-prongs
-        hFrame.SetMinimum(0.0005)
-        hFrame.SetMaximum(0.01)
+        # hFrame.SetMinimum(0.0005)
+        # hFrame.SetMaximum(0.01)
  ## original
-       # hFrame.SetMinimum(0.05)
-       # hFrame.SetMaximum(0.5)
-                        
+        hFrame.SetMinimum(0.05)
+        hFrame.SetMaximum(0.5)                 
         hFrame.GetYaxis().SetTitle("Normalization coefficient")
         hFrame.GetXaxis().SetLabelSize(20)
         c = ROOT.TCanvas()
