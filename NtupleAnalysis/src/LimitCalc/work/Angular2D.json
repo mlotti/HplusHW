@@ -1,0 +1,15 @@
+{
+    "title"           : "AngularPlane",
+    "histogram"       : "ForDataDrivenCtrlPlots/BackToBackAngularCutsJet1_2D",
+    "outputdir"       : "TestingPlots",
+    "samples"         : ["TT","QCDMeasurementMT","HplusTB_M200","HplusTB_M500"],
+    "rebinx"          : 5,
+    "rebiny"          : 5,
+    "xlabel"          : "#Delta#phi(#tau,MET) (^{o})",
+    "ylabel"          : "#Delta#phi(jet_{1},MET) (^{o})",
+    "divideByBinWidth": "False",
+    "logy"            : "False",
+    "logx"            : "False",
+    "drawStyle"       : "CONT1Z",
+    "opts"            : {"ymin": 0, "ymax": 180}
+}

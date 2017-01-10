@@ -13,7 +13,7 @@ class TTree;
 
 class EventSaver {
 public:
-  EventSaver(const ParameterSet& config, TList *outputList);
+  EventSaver(const ParameterSet& config, TList *outputList, std::string);
   ~EventSaver();
 
   void beginTree(TTree *tree);
