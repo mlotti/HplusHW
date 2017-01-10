@@ -15,7 +15,7 @@ namespace {
   }
 }
 
-EventSaver::EventSaver(const ParameterSet& config, TList *outputList):
+EventSaver::EventSaver(const ParameterSet& config, TList *outputList, std::string pOUT):
   fEnabled(isEnabled(config)),
   fSave(false),
   fPickEvents(isEnabled(config,"EventSaver.pickEvents")),
@@ -23,8 +23,10 @@ EventSaver::EventSaver(const ParameterSet& config, TList *outputList):
 {
   if(!fEnabled) return;
 
-  if(fPickEvents) fPickEventsFile = config.getParameter<std::string>("EventSaver.pickEventsFile","pickEvents.txt");
-
+  if(fPickEvents) {
+    if(pOUT[pOUT.length()-1] != '/') pOUT += "/";
+    fPickEventsFile = pOUT + config.getParameter<std::string>("EventSaver.pickEventsFile","pickEvents.txt");
+  }
   fEntryList = new TEntryList("entrylist", "List of selected entries");
   outputList->Add(fEntryList);
 }

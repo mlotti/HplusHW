@@ -289,7 +289,7 @@ class CellFormatTeX(CellFormatBase):
     ## Format a value and symmetric uncertainty
     def _formatValuePlusMinus(self, value, uncertainty):
         (v, u) = self._texify([value, uncertainty])
-        return v + " \\pm " + u
+        return v + " $\\pm$ " + u
 
     ## Format a value and asymmetric uncertainties
     def _formatValuePlusHighMinusLow(self, value, uncertaintyHigh, uncertaintyLow):
