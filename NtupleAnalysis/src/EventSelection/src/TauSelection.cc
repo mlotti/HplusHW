@@ -195,7 +195,7 @@ TauSelection::Data TauSelection::analyze(const Event& event) {
   // Send data to CommonPlots
   if (fCommonPlots != nullptr)
     fCommonPlots->fillControlPlotsAtTauSelection(event, data);
-    fCommonPlots->fillControlPlotsAfterTauSelection(event, data);
+//    fCommonPlots->fillControlPlotsAfterTauSelection(event, data); // filled in privateAnalyze
   // Return data
   return data;
 }
