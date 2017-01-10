@@ -85,6 +85,9 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 #================================================================================================
 PBARLENGTH  = 10
 
+# Recommended minimum bias xsection
+minBiasXsecNominal = 69200 #from https://twiki.cern.ch/twiki/bin/viewauth/CMS/POGRecipesICHEP2016
+
 # JSON files
 NormTagJSON     = "/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json"
 PileUpJSON_2016 = "/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/PileUp/pileup_latest.txt"
@@ -820,7 +823,7 @@ def main(opts, args):
             pass
 
         # PileUp [https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors]
-        minBiasXsec = 63000
+        minBiasXsec = minBiasXsecNominal
         Verbose("Task %s, creating Pileup ROOT files" % (task) )
         fOUT     = os.path.join(task, "results", "PileUp.root")
         hName = "pileup"

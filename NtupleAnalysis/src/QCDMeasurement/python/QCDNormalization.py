@@ -185,6 +185,36 @@ def getModifiedBinLabelString(binLabel):
     label = label.replace(" ","_")
     return label
 
+## Inverse bin label modification
+def getFormattedBinLabelString(binLabel):
+    label = binLabel
+    label = label.replace("taupT","tau p_{T}")
+    label = label.replace("tauPt","tau p_{T}")
+    label = label.replace("taueta","tau {#eta}")
+    label = label.replace("lt"," < ")
+    label = label.replace("gt"," > ")
+    label = label.replace("eq"," = ",)
+    label = label.replace("to","..")
+    if label[-1].isdigit():
+        label+=" GeV"
+    return label
+
+## Helper function to plot template names in a more understandable way
+def getFormattedTemplateName(name):
+    formattedNames = {'EWKFakeTaus_Baseline': '#splitline{EWK+t#bar{t} fake taus}{Baseline selection}', 
+                      'EWKGenuineTaus_Baseline': '#splitline{EWK+t#bar{t} genuine taus}{Baseline selection}', 
+                      'EWKFakeTaus_Inverted': '#splitline{EWK+t#bar{t} fake taus}{Inverted selection}',
+                      'EWKGenuineTaus_Inverted': '#splitline{EWK+t#bar{t} genuine taus}{Inverted selection}',
+                      'EWKInclusive_Baseline': '#splitline{EWK+t#bar{t} inclusive}{Baseline selection}',
+                      'EWKInclusive_Inverted': '#splitline{EWK+t#bar{t} inclusive}{Inverted selection}',
+                      'QCD_Baseline': '#splitline{Fake taus}{Baseline selection}',
+                      'QCD_Inverted': '#splitline{Fake taus}{Inverted selection}',
+                      'data': '#splitline{Data}{Baseline selection}'}
+    if name in formattedNames.keys():
+        return formattedNames[name]
+    else:
+        return name
+
 ## Template holder for QCD measurement normalization
 class QCDNormalizationTemplate:
     def __init__(self, name, plotDirName, quietMode=False):
@@ -381,7 +411,7 @@ class QCDNormalizationTemplate:
             self._normalizationFactor = integral
             self._histo.Scale(1.0 / self._normalizationFactor)
         
-    ## Make a plot of the histogram
+    ## Make a plot of the MET histogram
     def plot(self):
         if self._histo == None:
             raise Exception("Error: Please provide first the histogram with the 'setHistogram' method")
@@ -392,15 +422,16 @@ class QCDNormalizationTemplate:
         h = self._histo.Clone(self._histo.GetName()+"clone")
         h.Scale(self._normalizationFactor)
         plot.histoMgr.appendHisto(histograms.Histo(h,self._histo.GetName()))
-        plot.createFrame(self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.1, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
-        #plot.createFrame(self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.001, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
-        histograms.addStandardTexts(cmsTextPosition="outframe")
-        histograms.addText(0.36,0.89, "Integral = %d events"%int(self._histo.Integral()*self._normalizationFactor+0.5))
-        histograms.addText(0.36,0.84, self._name)
-        histograms.addText(0.36,0.79, self._binLabel)
+        plot.createFrame(self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.1, "ymaxfactor": 4.})
+        plot.getFrame().GetXaxis().SetTitle("E_{T}^{miss}")
+        plot.getFrame().GetYaxis().SetTitle("N_{events} / bin")
         plot.getPad().SetLogy(True)
         st = styles.getDataStyle().clone()
         st.append(styles.StyleFill(fillColor=ROOT.kYellow))
+        histograms.addStandardTexts(cmsTextPosition="outframe")
+        histograms.addText(0.48,0.85, getFormattedTemplateName(self._name))
+        histograms.addText(0.48,0.77, getFormattedBinLabelString(self._binLabel))
+        histograms.addText(0.48,0.72, "N_{events} = %d"%int(self._histo.Integral(0,-1)*self._normalizationFactor+0.5)) # round to closes integer
         plot.histoMgr.forHisto(self._histo.GetName(), st)
         #plot.setFileName("template_"+self._name.replace(" ","_")+"_"+self._binLabel)
         plot.draw()
@@ -502,11 +533,24 @@ class QCDNormalizationTemplate:
             if createPlot:
                 ROOT.gStyle.SetOptFit(0)
                 ROOT.gStyle.SetOptStat(0)
+                h.SetLineColor(ROOT.kBlack)
+                # fit QCD plots with blue, EWK+ttbar with green, everything else with red
+                if "EWK" in h.GetName():
+                    fit.SetLineColor(ROOT.kGreen+2)
+                elif "QCDinv" in h.GetName():
+                    fit.SetLineColor(ROOT.kBlue)
+                else:
+                    fit.SetLineColor(ROOT.kRed)
+                fit.SetLineWidth(2)
+                fit.SetLineStyle(2)
                 plot = plots.PlotBase()
                 plot.histoMgr.appendHisto(histograms.Histo(h,h.GetName()))
                 plot.histoMgr.appendHisto(histograms.Histo(fit, "fit"))
-                plot.createFrame(self._plotDirName+"/fit_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 1e-5, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
-                histograms.addText(0.36,0.84, self._name+", "+self._binLabel)
+                plot.createFrame(self._plotDirName+"/fit_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 1e-5, "ymaxfactor": 4.})
+                plot.getFrame().GetXaxis().SetTitle("E_{T}^{miss}")
+                plot.getFrame().GetYaxis().SetTitle("N_{events} (normalized to unity)")
+                histograms.addText(0.48,0.85, getFormattedTemplateName(self._name))
+                histograms.addText(0.48,0.77, getFormattedBinLabelString(self._binLabel))
                 plot.getPad().SetLogy(True)
                 histograms.addStandardTexts(cmsTextPosition="outframe")
                 plot.draw()
@@ -705,15 +749,14 @@ class QCDNormalizationManagerBase:
         # Make plot
         hFrame = ROOT.TH1F("frame","frame",len(keyList),0,len(keyList))
         for i in range(len(keyList)):
-
-            hFrame.GetXaxis().SetBinLabel(i+1, keyList[i].replace("lt","<").replace("eq","=").replace("to","-").replace("gt",">"))
+            binLabelText = getFormattedBinLabelString(keyList[i])
+            hFrame.GetXaxis().SetBinLabel(i+1,binLabelText)
 ## for 3-prongs
-        hFrame.SetMinimum(0.0005)
-        hFrame.SetMaximum(0.01)
+        # hFrame.SetMinimum(0.0005)
+        # hFrame.SetMaximum(0.01)
  ## original
-       # hFrame.SetMinimum(0.05)
-       # hFrame.SetMaximum(0.5)
-                        
+        hFrame.SetMinimum(0.05)
+        hFrame.SetMaximum(0.5)                 
         hFrame.GetYaxis().SetTitle("Normalization coefficient")
         hFrame.GetXaxis().SetLabelSize(20)
         c = ROOT.TCanvas()
@@ -819,7 +862,7 @@ class QCDNormalizationManagerBase:
             if item != None and item.isFittable():
                 item.doFit(fitOptions=fitOptions, createPlot=True)
 
-    ## Helper method to be called from parent class when calculating norm.coefficients
+    ## Helper method to plot fitted templates (called from parent class when calculating norm.coefficients)
     def _makePlot(self, binLabel, histogramDictionary={}):
         # Make plot
         ROOT.gStyle.SetOptFit(0)
@@ -830,8 +873,12 @@ class QCDNormalizationManagerBase:
                 print histogramDictionary
                 raise Exception("Error: Expected a dictionary of histograms")
             plot.histoMgr.appendHisto(histograms.Histo(histogramDictionary[k], k))
-        plot.createFrame(self._plotDirName+"/finalFit_"+"_"+binLabel, opts={"ymin": 1e-5, "ymaxfactor": 2., "xlabel":"MET (GeV)", "ylabel":"N_{events}"})
-        histograms.addText(0.36,0.84, "Fit to data, "+binLabel)
+        plot.createFrame(self._plotDirName+"/finalFit_"+binLabel, opts={"ymin": 1e-5, "ymaxfactor": 4.})
+        plot.getFrame().GetXaxis().SetTitle("E_{T}^{miss}")
+        plot.getFrame().GetYaxis().SetTitle("N_{events} (normalized to unity)")
+#        histograms.addText(0.36,0.84, "Final fit, "+binLabel)
+        histograms.addText(0.48,0.85, "Final fit")
+        histograms.addText(0.48,0.77, getFormattedBinLabelString(binLabel))
         plot.getPad().SetLogy(True)
         histograms.addStandardTexts(cmsTextPosition="outframe")
         plot.draw()
@@ -918,10 +965,14 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         dataTemplate.doFit(fitOptions)
         
         #===== Plot fitted functions
+        dataHisto.SetLineColor(ROOT.kBlack)
         funcData = dataTemplate.obtainFittedFunction(1.0, FITMIN, FITMAX)
         funcData.SetLineColor(ROOT.kRed)
+        funcData.SetLineStyle(2)
         funcQCD = qcdTemplate.obtainFittedFunction(dataTemplate.getFittedParameters()[1], FITMIN, FITMAX)
         funcQCD.SetLineColor(ROOT.kBlue)
+        funcQCD.SetLineWidth(2)
+        funcQCD.SetLineStyle(2)
         self._makePlot(binLabel,
                        {dataHisto.GetName(): dataHisto,
                         "fitted data": funcData,
@@ -1012,8 +1063,12 @@ class QCDNormalizationManagerExperimental1(QCDNormalizationManagerBase):
         #===== Plot fitted functions
         funcData = dataTemplate.obtainFittedFunction(1.0, FITMIN, FITMAX)
         funcData.SetLineColor(ROOT.kRed)
+        funcData.SetLineWidth(2)
+        funcData.SetLineStyle(2)
         funcQCD = qcdTemplate.obtainFittedFunction(dataTemplate.getFittedParameters()[1], FITMIN, FITMAX)
         funcQCD.SetLineColor(ROOT.kBlue)
+        funcQCD.SetLineWidth(2)
+        funcQCD.SetLineStyle(2)
         funcEWKfakes = ewkFakesTemplate.obtainFittedFunction(dataTemplate.getFittedParameters()[2], FITMIN, FITMAX)
         funcSum = FunctionSum(funcQCD, funcEWKfakes)
         funcQCDPlusEWKFakes = ROOT.TF1("QCDPlusEWKfakes"+binLabel, funcSum, FITMIN, FITMAX, 0)
