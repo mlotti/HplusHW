@@ -215,7 +215,7 @@ def GetLocalOrEOSPath(stdoutFile, opts):
 
     WARNING! If the file is copied locally it must then be removed
     '''
-    Verbose("GetLocalOrEOSCopy()", True)
+    Verbose("GetLocalOrEOSPath()", True)
     
     if "fnal" in socket.gethostname():
         return False, stdoutFile
@@ -427,7 +427,7 @@ def getHistogramFileEOS(stdoutFile, opts):
     localCopy, stdoutFile = GetLocalOrEOSPath(stdoutFile, opts)
 
     # Open the standard output file
-    # !Verbose("Opening log file %s" % (stdoutFile), True ) #fixme: is this really needed?
+    # Verbose("Opening log file %s" % (stdoutFile), True ) #fixme: is this really needed?
     # f = open(stdoutFile, "r")  #fixme: is this really needed?
     
     # Get the jobId with regular expression
@@ -1054,10 +1054,11 @@ def CheckThatFilesExist(taskName, fileList, opts):
 
     if nExist != nFiles:
         msg  = "%s, found %s ROOT files but expected %s. Have you already run this script? " % (taskName, nExist, nFiles)
-        msg += "Would you like to proceed with the merging anyway?"
-        # return False
-        return AskUser(msg, True)
-    
+        msg += "Would you like to proceed with the merging anyway? ALEX"
+        if opts.linksToEOS:
+            return False
+        else:
+            return AskUser(msg, True)
     else:
         return True
 

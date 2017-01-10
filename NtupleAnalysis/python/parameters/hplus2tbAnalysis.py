@@ -153,6 +153,33 @@ metSelection = PSet(
 
 
 #================================================================================================
+# Topology selection
+#================================================================================================
+topologySelection = PSet(
+    SphericityCutValue           = 10.0,   # 0.0 <= S <= 1.0
+    SphericityCutDirection       = "<=",  # options: ==, !=, <, <=, >, >=
+    AplanarityCutValue           = 10.0,   # 0.0 <= A <= 0.5
+    AplanarityCutDirection       = "<=",  
+    PlanarityCutValue            = 10.0,   # 0.0 <= P <= 0.5
+    PlanarityCutDirection        = "<=",  
+    CircularityCutValue          = 10.0,   # 0.0 <= C <= 0.5
+    CircularityCutDirection      = "<=",  
+    Y23CutValue                  = 10.0,   # 0.0 <= y23 <= 0.25
+    Y23CutDirection              = "<=",  
+    CparameterCutValue           = 10.0,   # 0.0 <= C <= 1.0
+    CparameterCutDirection       = "<=", 
+    DparameterCutValue           = 10.0,   # 0.0 <= D <= 1.0
+    DparameterCutDirection       = "<=",  
+    FoxWolframMomentCutValue     = 10.0,   # 0.0 <= H2 <= 1.0
+    FoxWolframMomentCutDirection = "<=", 
+    AlphaTCutValue               = 100000.0,   # 0.0 <= alphaT ~ 2.0 (alphaT->0.5 for perfectly balanced events)
+    AlphaTCutDirection           = "<=", 
+    CentralityCutValue           = 10.0,   # 0.0 <= Centrality ~ 1.0
+    CentralityCutDirection       = "<=",
+)
+
+
+#================================================================================================
 # HT selection
 #================================================================================================
 htSelection = PSet(
@@ -216,6 +243,7 @@ allSelections = PSet(
     TauSelection          = tauSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,
+    TopologySelection     = topologySelection,
     MuonSelection         = muVeto,
     Trigger               = trigger,
     Verbose               = verbose,
