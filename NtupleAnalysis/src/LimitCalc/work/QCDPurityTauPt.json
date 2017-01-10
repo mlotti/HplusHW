@@ -1,0 +1,17 @@
+{
+    "title"           : "Purity",
+    "histogram"       : "ForDataDrivenCtrlPlots/SelectedTau_pT_AfterStandardSelections_Purity",
+    "saveDir"         : "TestingPlots",
+    "samples"         : ["QCDMeasurementMT"],
+    "rebinx"          : 1,
+    "xlabel"          : "p_{T}^{#tau jet} (GeV/c)",
+    "ylabel"          : "Fake tau purity",
+    "divideByBinWidth": "False",
+    "logy"            : "False",
+    "logx"            : "False",
+    "drawStyle"       : "EP",
+    "markerStyle"     : 20,
+    "markerColor"     : 2,
+    "markerSize"      : 0.5,
+    "opts"            : {"xmin": 40, "ymin": 0, "ymax": 1.1}
+}
