@@ -147,11 +147,15 @@ void BTagEfficiencyAnalysis::process(Long64_t entry) {
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
   if (!tauData.hasIdentifiedTaus())
     return;
+  if (fEvent.isMC() && !tauData.isGenuineTau()) //if not genuine tau, reject the events (fake tau events are taken into account in QCDandFakeTau measurement)
+    return;
+
+//====== Tau ID SF
   if (fEvent.isMC()) {
-    fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
-    fEventWeight.multiplyWeight(tauData.getTauTriggerSF());
+    fEventWeight.multiplyWeight(tauData.getTauIDSF());
+//    cTauIDSFCounter.increment();
   }
-  
+
 //====== Fake tau SF
   if (fEvent.isMC()) {
     fEventWeight.multiplyWeight(tauData.getTauMisIDSF());
