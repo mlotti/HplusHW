@@ -270,13 +270,24 @@ class DatasetContainer:
             myParams["ylabel"] = "Events"
             myParams["log"] = False
             #myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
-            myParams["opts2"] = {"ymin": 0.7, "ymax":1.3}
+<<<<<<< HEAD
+            myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
             myParams["opts"] = {"ymin": 0.0}
+=======
+            myParams["opts2"] = {"ymin": 0.7, "ymax":1.3}
+            myParams["opts"] = {"ymin": 0.0, "xmax":1000.0}
+>>>>>>> public/master
             if opts.logx:
-                myParams["opts"] = {"ymin": 10.0, "xmax":10000.0}
+                myParams["opts"] = {"ymin": 10.0, "xmax":5000.0}
                 myParams["logx"] = True
             if opts.light:
+<<<<<<< HEAD
                 myParams["opts"] = {"ymin": 0.0, "xmax":1000.0}
+            else:
+                myParams["opts"] = {"ymin": 0.0, "xmax":6000.0}
+=======
+                myParams["opts"] = {"ymin": 0.0, "xmax":500.0}
+>>>>>>> public/master
             myParams["ratio"] = True
             myParams["ratioType"] = "errorScale"
             myParams["ratioYlabel"] = "Var./Nom."
@@ -367,8 +378,8 @@ if __name__ == "__main__":
     parser.add_option("--individual", dest="individual", action="store_true", default=False, help="Generates individual plots for shape ratios instead of one large plot")
     parser.add_option("--cardpattern", dest="cardPattern", action="store", default=None, help="Pattern of datacard with MM denoting mass value")
     parser.add_option("--rootfilepattern", dest="rootfilePattern", action="store", default=None, help="Pattern of root file with MM denoting mass value")
-    parser.add_option("--logx", dest="logx", action="store_true", default=False, help="Plot x-axis (mT) as logarithmic")
-    parser.add_option("--light", dest="light", action="store_true", default=False, help="Plot x-axis (mT) only up to 1000 GeV (good for light H+ analysis)")    
+    parser.add_option("--logx", dest="logx", action="store_true", default=False, help="Plot x-axis (mT) as logarithmic (good for heavy H+ analysis)")
+    parser.add_option("--light", dest="light", action="store_true", default=False, help="Plot x-axis (mT) only up to 500 GeV (good for light H+ analysis)")    
     (opts, args) = parser.parse_args()
     if opts.helpStatus:
         parser.print_help()

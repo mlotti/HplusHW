@@ -50,12 +50,11 @@ import histograms
 import styles
 import aux
 
-
 #================================================================================================
 # Global Definitions
 #================================================================================================
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
-_heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750, 1000, 2000, 3000]
+_heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 2000, 3000]
 _heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 500,  600,  700,  750, 1000, 2000, 3000]
 
 ## These MC datasets must be added together before any
@@ -2618,7 +2617,7 @@ class PlotDrawer:
         self.optsDefault.update(opts)
         self.optsLogDefault = {"ymin": 0.01, "ymaxfactor": 2.0}
         self.optsLogDefault.update(optsLog)
-        self.optsLogxDefault = {"xmin": 5, "xmax": 6000}
+        self.optsLogxDefault = {"xmin": 5, "xmax": 10000}
         self.optsLogxDefault.update(optsLogx)
         self.opts2Default = {"ymin": 0.5, "ymax": 1.5}
         self.opts2Default.update(opts2)

@@ -40,7 +40,7 @@ class Result:
         self._jobDir = None
         for dirname, dirnames, filenames in os.walk(basedir):
             for subdirname in dirnames:
-                if "LandSMultiCrab" in subdirname or "CombineMultiCrab" in subdirname:
+                if "LandSMultiCrab" in subdirname or "CombineMultiCrab" or "CombineResults" in subdirname:
                     self._jobDir = subdirname
 
     def _createAndSubmit(self):
@@ -55,8 +55,10 @@ class Result:
             myCommand = os.path.join(myPath, "generateMultiCrabCombination.py")
         if self._opts.brlimit:
             myCommand += " --brlimit"
-        if self._opts.sigmabrlimit:
-            myCommand += " --sigmabrlimit"
+        else:
+            myCommand += " --sigmabrlimit"       
+#        if self._opts.sigmabrlimit:
+#            myCommand += " --sigmabrlimit"
         myGridStatus = True
         if hasattr(self._opts, "lepType") and self._opts.lepType:
             myCommand += " --lep"
@@ -75,7 +77,7 @@ class Result:
             myCommand += " --significance"
         if self._opts.unblinded:
             myCommand += " --final"
-        print "Creating jobs with:",myCommand
+#        print "Creating jobs with:",myCommand
         os.system(myCommand)
         if myGridStatus:
             # asymptotic jobs are run on the fly
@@ -216,8 +218,11 @@ class Result:
             print line
         myFile.close()
 
+    def getBaseDir(self):
+        return self._basedir
+
 if __name__ == "__main__":
-    parser = commonLimitTools.createOptionParser(lepDefault=None, lhcDefault=False, lhcasyDefault=False, fullOptions=False)
+    parser = commonLimitTools.createOptionParser(lepDefault=None, lhcDefault=False, lhcasyDefault=True, fullOptions=False)
     parser.add_option("--printonly", dest="printonly", action="store_true", default=False, help="Print only the ready results")
     parser.add_option("--combination", dest="combination", action="store_true", default=False, help="Run combination instead of only taunu fully hadr.")
     opts = commonLimitTools.parseOptionParser(parser)
@@ -235,14 +240,20 @@ if __name__ == "__main__":
             raise Exception("Error: Could not find any sub directories starting with 'datacards_' below this directory!")
     myDirs.sort()
     myResults = []
+    dir_counter = 1
     for d in myDirs:
-        print "LimitOMatic: considering directory:",d
+        print "\n\033[93mLimitOMatic: Considering directory %s (directory %d/%d)\033[00m"%(d,dir_counter,len(myDirs))
         myResults.append(Result(opts,d))
+        print "\033[92mLimitOMatic: Directory %s (directory %d/%d) processed!\033[00m"%(d,dir_counter,len(myDirs))
+        dir_counter+=1       
 
     # Summary of results
-    print "\nSummary of results"
-    for r in myResults:
-        r.printResults()
+#    print "The results stored in the following directories:""
+#    for r in myResults:
+#        print(r.getBaseDir())
+
+#    for r in myResults:
+#        r.printResults()
 
     # Manual submitting of merge
     s = ""

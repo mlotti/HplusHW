@@ -36,15 +36,15 @@ import array
 import ROOT
 
 ## The Combine git tag to be used (see https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit)
-Combine_tag = "V03-05-00" # 06.02.2014
-validCMSSWversions = ["CMSSW_6_1_1"]
+Combine_tag = "v6.3.0" # 08.11.2016
+validCMSSWversions = ["CMSSW_7_4_7"]
 ## Common command-line options to Combine
 
 ## Command line options for creating Combine workspace
 workspacePattern = "combineWorkspaceM%s.root"
 workspaceOptionsBrLimitTemplate = "text2workspace.py %s -P HiggsAnalysis.CombinedLimit.ChargedHiggs:brChargedHiggs -o %s"%("%s",workspacePattern)
 workspaceOptionsSigmaBrLimit    = "text2workspace.py %s -o %s"%("%s",workspacePattern%"%s")
-taskDirprefix = "CombineMultiCrab"
+taskDirprefix = "CombineResults"
 ## Command line options for running Combine
 #asymptoticLimit = "combine -M Asymptotic --picky"
 #asymptoticLimitOptionExpectedOnly = " --run expected"
@@ -56,7 +56,7 @@ defaultNumberOfJobs = 20
 
 
 ## Default command line options for LHC-CLs (asymptotic, observed limit)
-lhcAsymptoticOptionsObserved = '-M Asymptotic --picky -v 2 --rRelAcc 0.001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001"' #--minimizerTolerance changed from 0.001 (used in 2014 paper) to 0.1 to make all mass points converge
+lhcAsymptoticOptionsObserved = '-M Asymptotic --picky -v 2 --rAbsAcc 0.001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001"' #--minimizerTolerance changed from 0.001 (used in 2014 paper) to 0.1 to make all mass points converge
 ## Default command line options for LHC-CLs (asymptotic, expected limit)
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
@@ -64,6 +64,7 @@ lhcAsymptoticRminSigmaBr = "0.0" # pb
 lhcAsymptoticRminBrLimit = "0.0" # plain number
 ## Default "Rmax" parameter for LHC-CLs (asymptotic)
 lhcAsymptoticRmaxSigmaBr = "1.0" # pb
+#lhcAsymptoticRmaxSigmaBr = "0.0312" # pb
 lhcAsymptoticRmaxBrLimit = "0.1" # plain number (updated to 0.05 from 0.03 in 2014 paper due to higher limits)
 
 ## Default command line options for observed significance
@@ -266,7 +267,9 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
         f.close()
 
         self._results = commonLimitTools.ResultContainer(self.opts.unblinded, self.dirname)
+        mass_point_counter = 1
         for mass in self.massPoints:
+            print "Processing mass point %s (point %d/%d)..." % (mass,mass_point_counter,len(self.massPoints))
             myResult = self.clsType.runCombine(mass)
             if myResult.failed:
                 if not quietStatus:
@@ -274,9 +277,11 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
             else:
                 self._results.append(myResult)
                 if not quietStatus:
-                    print "Processed successfully mass point %s" % mass
+                    print "Processed successfully mass point %s, the result is %s" % (mass,self._results.getResultString(mass))
+            mass_point_counter+=1
         if not quietStatus:
-            print
+            print ""
+            print "\033[92mSummary of the results:\033[00m"
             self._results.print2()
             fname = self._results.saveJson()
             print "Wrote results to %s" % fname
@@ -454,7 +459,7 @@ class LHCTypeAsymptotic:
 
     def _createMLFit(self, mass, fileName, datacardName, blindedMode):
         if self.opts.nomlfit:
-            print "skipping creation of ML fit scripts, to enable run with --mlfit"
+#            print "skipping creation of ML fit scripts, to enable run with --mlfit"
             return
           
         fname = fileName.replace("runCombine", "runCombineMLFit")
@@ -718,10 +723,11 @@ hadd higgsCombineinj_m{MASS}.Asymptotic.mH{MASS}.root higgsCombineinj_m{MASS}.As
 
     def _runMLFit(self, mass):
         if mass in self.mlfitScripts.keys() and not self.opts.nomlfit:
+            print "Running ML fits..."
             script = self.mlfitScripts[mass]
             self._run(script, "mlfit_m_%s_output.txt" % mass)
-        else:
-            print "Skipping ML fit for mass:",mass
+#        else:
+#            print "Skipping ML fit for mass:",mass
 
     def _runSignificance(self, mass):
         jsonFile = os.path.join(self.dirname, "significance.json")

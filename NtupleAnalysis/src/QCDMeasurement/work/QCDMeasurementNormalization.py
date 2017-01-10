@@ -29,7 +29,8 @@ analysis = "QCDMeasurement"
 #==== Set rebin factor for normalization plots 
 # Histograms are generated with 1 GeV bin width, i.e. putting 10 here means 
 # that the fit is done on 10 GeV bins
-_rebinFactor = 10
+_rebinFactor = 10 
+#_rebinFactor = 20 # changing to this can solve fitting problems by smoothing fluctuations
 
 print "Analysis name:", analysis
 
@@ -235,9 +236,10 @@ def main(argv, dsetMgr, moduleInfoString):
 
         # Note that the same function is used for QCD only and QCD+EWK fakes
         template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", norm=1), FITMIN, FITMAX)
-        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[0.0001, 0.001, 0.1, 0.0,  10, 0.0001, 0.001],
-                                                 defaultUpperLimit=[   200,    10,  10, 150, 100,      1, 0.05])
-        
+#        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[0.0001, 0.001, 0.1, 0.0,  10, 0.0001, 0.001],
+#                                                 defaultUpperLimit=[   200,    10,  10, 150, 100,      1, 0.05])
+        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, 0.1,  10,  10, 0.00001, 0.001], # new default limits to make fits more stable,
+                                                 defaultUpperLimit=[ 130, 20,  20, 200, 200,    0.01,   0.1]) # corresponding to the 7 free param. of the fit function        
         #===== Loop over tau pT bins
         for i,binStr in enumerate(bins):
             print "\n********************************"
