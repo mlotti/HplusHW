@@ -309,10 +309,12 @@ if __name__ == "__main__":
                                               calculateQCDNormalizationSyst=True, # buildQCDNormalizationSystModule uses these!
                                               normDataSrc=_generalOptions["normalizationDataSource"],
                                               normEWKSrc=_generalOptions["normalizationEWKSource"])
-                    #===== QCD normalization systematics
-                    nominalModule.buildQCDNormalizationSystModule(_generalOptions["dataSource"],
-                                                                  _generalOptions["EWKsource"])
-                    if False: #FIXME
+
+                    #===== QCD normalization systematics (add only if there are also other systematics as well) 
+                    if len(mySystematicsNames) > 0:
+                        nominalModule.buildQCDNormalizationSystModule(_generalOptions["dataSource"],
+                                                                      _generalOptions["EWKsource"])
+                    if False: #FIXME: add quark gluon weighting systematics!
                     
                         #===== Quark gluon weighting systematics
                         nominalModule.buildQCDQuarkGluonWeightingSystModule(_generalOptions["dataSource"],
