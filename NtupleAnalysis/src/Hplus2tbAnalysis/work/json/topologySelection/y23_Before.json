@@ -14,7 +14,7 @@
     "ylabel": "Events / %.2f",
     "divideByBinWidth": "False",
     "drawStyle": "COLZ",
-    "opts": {"xmin": 0.0, "xmax": 0.5, "ymin": 1e+0, "ymaxfactor": 10},
+    "opts": {"xmin": 0.0, "xmax": 0.25, "ymin": 1e+0, "ymaxfactor": 10},
     "ratioOpts": {"ymin": 0.0, "ymax": 2.0},
     "ratio": "True",
     "ratioYlabel": "Data/MC",

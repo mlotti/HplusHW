@@ -139,37 +139,37 @@ void TopologySelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "topologySelection_"+sPostfix);
 
   // Histograms (1D)
-  h_AlphaT_After            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AlphaT_After"           , ";#alpha_{T}"    , 25, 0.0,    1.0);
-  h_AlphaT_Before           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AlphaT_Before"          , ";#alpha_{T}"    , 25, 0.0,    1.0);
-  h_Aplanarity_After        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Aplanarity_After"       , ";Aplanarity"    , 25, 0.0,    0.5);
-  h_Aplanarity_Before       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Aplanarity_Before"      , ";Aplanarity"    , 25, 0.0,    0.5);
-  h_CParameter_After        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "CParameter_After"       , ";C"             , 20, 0.0,    1.0);
-  h_CParameter_Before       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "CParameter_Before"      , ";C"             , 20, 0.0,    1.0);
-  h_Centrality_After        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Centrality_After"       , ";Centrality"    , 20, 0.0,    1.0);
-  h_Centrality_Before       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Centrality_Before"      , ";Centrality"    , 20, 0.0,    1.0);
-  h_Circularity_After       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Circularity_After"      , ";Circularity"   , 20, 0.0,    1.0);
-  h_Circularity_Before      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Circularity_Before"     , ";Circularity"   , 20, 0.0,    1.0);
-  h_DParameter_After        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "DParameter_After"       , ";D"             , 20, 0.0,    1.0);
-  h_DParameter_Before       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "DParameter_Before"      , ";D"             , 20, 0.0,    1.0);
-  h_FoxWolframMoment_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "FoxWolframMoment_After" , ";H_{2}"         , 20, 0.0,    1.0);
-  h_FoxWolframMoment_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "FoxWolframMoment_Before", ";H_{2}"         , 20, 0.0,    1.0);
-  h_HT_After                = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "HT_After"               , ";H_{T}"         , 30, 0.0, 1500.0);
-  h_HT_Before               = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "HT_Before"              , ";H_{T}"         , 30, 0.0, 1500.0);
-  h_JT_After                = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "JT_After"               , ";J_{T}"         , 30, 0.0, 1500.0);
-  h_JT_Before               = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "JT_Before"              , ";J_{T}"         , 30, 0.0, 1500.0);
-  h_MHT_After               = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "MHT_After"              , ";MHT"           , 30, 0.0,  300.0);
-  h_MHT_Before              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "MHT_Before"             , ";MHT"           , 30, 0.0,  300.0);
-  h_Planarity_After         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Planarity_After"        , ";Planarity"     , 25, 0.0,    0.5);
-  h_Planarity_Before        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Planarity_Before"       , ";Planarity"     , 25, 0.0,    0.5);
-  h_SphericityT_After       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SphericityT_After"      , ";Sphericity_{T}", 20, 0.0,    1.00);
-  h_SphericityT_Before      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SphericityT_Before"     , ";Sphericity_{T}", 20, 0.0,    1.00);
-  h_Sphericity_After        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Sphericity_After"       , ";Sphericity"    , 20, 0.0,    1.00);
-  h_Sphericity_Before       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Sphericity_Before"      , ";Sphericity"    , 20, 0.0,    1.00);
-  h_Y_After                 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Y_After"                , ";Y"             , 50, 0.0,    0.50); 
-  h_Y_Before                = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Y_Before"               , ";Y"             , 50, 0.0,    0.50); 
-  h_y23_After               = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "y23_After"              , ";y_{23}"        , 25, 0.0,    0.25);
-  h_y23_Before              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "y23_Before"             , ";y_{23}"        , 25, 0.0,    0.25);
-
+  h_AlphaT_After            = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AlphaT_After"           , ";#alpha_{T}"    , 100, 0.0,    2.0);
+  h_AlphaT_Before           = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "AlphaT_Before"          , ";#alpha_{T}"    , 100, 0.0,    2.0);
+  h_Aplanarity_After        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Aplanarity_After"       , ";Aplanarity"    ,  25, 0.0,    0.5);
+  h_Aplanarity_Before       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Aplanarity_Before"      , ";Aplanarity"    ,  25, 0.0,    0.5);
+  h_CParameter_After        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "CParameter_After"       , ";C"             ,  20, 0.0,    1.0);
+  h_CParameter_Before       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "CParameter_Before"      , ";C"             ,  20, 0.0,    1.0);
+  h_Centrality_After        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Centrality_After"       , ";Centrality"    ,  20, 0.0,    1.0);
+  h_Centrality_Before       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Centrality_Before"      , ";Centrality"    ,  20, 0.0,    1.0);
+  h_Circularity_After       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Circularity_After"      , ";Circularity"   ,  20, 0.0,    1.0);
+  h_Circularity_Before      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Circularity_Before"     , ";Circularity"   ,  20, 0.0,    1.0);
+  h_DParameter_After        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "DParameter_After"       , ";D"             ,  20, 0.0,    1.0);
+  h_DParameter_Before       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "DParameter_Before"      , ";D"             ,  20, 0.0,    1.0);
+  h_FoxWolframMoment_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "FoxWolframMoment_After" , ";H_{2}"         ,  20, 0.0,    1.0);
+  h_FoxWolframMoment_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "FoxWolframMoment_Before", ";H_{2}"         ,  20, 0.0,    1.0);
+  h_HT_After                = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "HT_After"               , ";H_{T}"         ,  30, 0.0, 1500.0);
+  h_HT_Before               = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "HT_Before"              , ";H_{T}"         ,  30, 0.0, 1500.0);
+  h_JT_After                = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "JT_After"               , ";J_{T}"         ,  30, 0.0, 1500.0);
+  h_JT_Before               = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "JT_Before"              , ";J_{T}"         ,  30, 0.0, 1500.0);
+  h_MHT_After               = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "MHT_After"              , ";MHT"           ,  30, 0.0,  300.0);
+  h_MHT_Before              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "MHT_Before"             , ";MHT"           ,  30, 0.0,  300.0);
+  h_Planarity_After         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Planarity_After"        , ";Planarity"     ,  25, 0.0,    0.5);
+  h_Planarity_Before        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Planarity_Before"       , ";Planarity"     ,  25, 0.0,    0.5);
+  h_SphericityT_After       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SphericityT_After"      , ";Sphericity_{T}",  20, 0.0,    1.00);
+  h_SphericityT_Before      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SphericityT_Before"     , ";Sphericity_{T}",  20, 0.0,    1.00);
+  h_Sphericity_After        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Sphericity_After"       , ";Sphericity"    ,  20, 0.0,    1.00);
+  h_Sphericity_Before       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Sphericity_Before"      , ";Sphericity"    ,  20, 0.0,    1.00);
+  h_Y_After                 = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Y_After"                , ";Y"             ,  50, 0.0,    0.50); 
+  h_Y_Before                = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Y_Before"               , ";Y"             ,  50, 0.0,    0.50); 
+  h_y23_After               = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "y23_After"              , ";y_{23}"        ,  25, 0.0,    0.25);
+  h_y23_Before              = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "y23_Before"             , ";y_{23}"        ,  25, 0.0,    0.25);
+ 
   // Histograms (2D)
   h_S_Vs_Y_After  = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "S_Vs_Y_After" , ";Sphericity;Y=#frac{#sqrt{3}}{2}x(Q1-Q2)", 100, 0.0, 1.0, 50, 0.0, 0.5);
   h_S_Vs_Y_Before = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "S_Vs_Y_Before", ";Sphericity;Y=#frac{#sqrt{3}}{2}x(Q1-Q2)", 100, 0.0, 1.0, 50, 0.0, 0.5);

@@ -10,7 +10,7 @@
     "samples": ["JetHT_Run2016F", "JetHT_Run2016G", "QCD_Pt", "TT", "ZJetsToQQ_HT600toInf"],
     "rebinX": 1,
     "rebinY": "None",
-    "xlabel": "#H_{2}",
+    "xlabel": "H_{2}",
     "ylabel": "Events / %.2f",
     "divideByBinWidth": "False",
     "drawStyle": "COLZ",
