@@ -270,24 +270,13 @@ class DatasetContainer:
             myParams["ylabel"] = "Events"
             myParams["log"] = False
             #myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
-<<<<<<< HEAD
-            myParams["opts2"] = {"ymin": 0.0, "ymax":2.0}
-            myParams["opts"] = {"ymin": 0.0}
-=======
             myParams["opts2"] = {"ymin": 0.7, "ymax":1.3}
             myParams["opts"] = {"ymin": 0.0, "xmax":1000.0}
->>>>>>> public/master
             if opts.logx:
                 myParams["opts"] = {"ymin": 10.0, "xmax":5000.0}
                 myParams["logx"] = True
             if opts.light:
-<<<<<<< HEAD
-                myParams["opts"] = {"ymin": 0.0, "xmax":1000.0}
-            else:
-                myParams["opts"] = {"ymin": 0.0, "xmax":6000.0}
-=======
                 myParams["opts"] = {"ymin": 0.0, "xmax":500.0}
->>>>>>> public/master
             myParams["ratio"] = True
             myParams["ratioType"] = "errorScale"
             myParams["ratioYlabel"] = "Var./Nom."
@@ -417,5 +406,5 @@ if __name__ == "__main__":
     # Print signal table
     print "Max contracted uncertainty for signal:"
     for k in signalTable.keys():
-        print "Key: "+str(k)
+#        print "Key: "+str(k)
         print "%s, %.3f--%.3f"%(k, signalTable[k]["min"],signalTable[k]["max"])
