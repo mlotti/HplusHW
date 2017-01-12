@@ -93,7 +93,7 @@ void BJetSelection::initialize(const ParameterSet& config) {
     else if (sWorkingPoint == "Medium")
       fDisriminatorValue = 0.08;
     else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.45; 
+      fDisriminatorValue = -0.45; 
     // Note: Events selected by the Tight WP are not a subsample of the events selected by the Medium WP, but it is because they WP definition have different goals:
     // Loose to reduce b jets
     // Medium to reduce both b and light jets
