@@ -203,7 +203,7 @@ config = {
     },
     "80Xmc": {
         "simProcess": "SIM",
-        "triggerProcess": "HLT2",
+        "triggerProcess": "HLT",
         "recoProcess": "RECO",
         "metFilteringProcess": "PAT",
         "globalTag": "80X_mcRun2_asymptotic_2016_miniAODv2_v1",
