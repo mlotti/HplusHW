@@ -180,6 +180,18 @@ topologySelection = PSet(
 
 
 #================================================================================================
+# Top selection
+#================================================================================================
+topSelection = PSet(
+    ChiSqrCutValue     = 50.0,
+    ChiSqrCutDirection = "<=",    # options: ==, !=, <, <=, >, >=
+    MassW              = 80.385,
+    DiJetSigma         = 10.2,
+    TriJetSigma        = 27.2,
+)
+
+
+#================================================================================================
 # HT selection
 #================================================================================================
 htSelection = PSet(
@@ -244,6 +256,7 @@ allSelections = PSet(
     METFilter             = metFilter,
     METSelection          = metSelection,
     TopologySelection     = topologySelection,
+    TopSelection          = topSelection,
     MuonSelection         = muVeto,
     Trigger               = trigger,
     Verbose               = verbose,
