@@ -42,6 +42,7 @@ private:
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
   TopologySelection fTopologySelection;
+  TopSelection fTopSelection;
   Count cSelected;
     
   // Non-common histograms
@@ -72,6 +73,7 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
     fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cSelected(fEventCounter.addCounter("Selected Events"))
 { }
 
@@ -91,6 +93,7 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
   fTopologySelection.bookHistograms(dir);
+  fTopSelection.bookHistograms(dir);
   
   // Book non-common histograms
   const int nBinsPt   = cfg_PtBinSetting.bins();
@@ -280,6 +283,15 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   if (0) std::cout << "=== Topology selection" << std::endl;
   const TopologySelection::Data TopologyData = fTopologySelection.analyze(fEvent, jetData);
   if (!TopologyData.passedSelection()) return;
+
+
+  //================================================================================================
+  // 13) Top selection
+  //================================================================================================
+  if (0) std::cout << "=== Top selection" << std::endl;
+  const TopSelection::Data TopData = fTopSelection.analyze(fEvent, jetData, bjetData);
+  if (!TopData.passedSelection()) return;
+
 
   //================================================================================================
   // ?) HT selection

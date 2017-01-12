@@ -31,6 +31,7 @@ TopologySelection::Data::~Data() { }
 
 TopologySelection::TopologySelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
+  // Input parameters
   fSphericityCut(config, "SphericityCut"),
   fAplanarityCut(config, "AplanarityCut"),
   fPlanarityCut(config, "PlanarityCut"),
@@ -61,6 +62,7 @@ TopologySelection::TopologySelection(const ParameterSet& config, EventCounter& e
 
 TopologySelection::TopologySelection(const ParameterSet& config)
 : BaseSelection(),
+  // Input parameters
   fSphericityCut(config, "SphericityCut"),
   fAplanarityCut(config, "AplanarityCut"),
   fPlanarityCut(config, "PlanarityCut"),
@@ -258,7 +260,7 @@ TopologySelection::Data TopologySelection::privateAnalyze(const Event& event, co
   if ( !fCentralityCut.passedCut(output.fCentrality) ) return output;
   cSubPassedCentrality.increment();
 
-  // Passed all topology selection
+  // Passed all topology selection cuts
   output.bPassedSelection = true;
   cPassedTopologySelection.increment();
 
