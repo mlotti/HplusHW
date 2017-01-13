@@ -178,7 +178,9 @@ void SelectorImpl::SlaveBegin(TTree * /*tree*/) {
   // Otherwise use the fOutput list (unit tests)
   fBranchManager = new BranchManager();
   ParameterSet options(fOptionString.Data());
-  fEventSaver = new EventSaver(options, fOutput);
+  std::string pathOUT = out->GetTitle();
+  pathOUT = pathOUT.substr(0,pathOUT.rfind('/'));
+  fEventSaver = new EventSaver(options, fOutput, pathOUT);
   TDirectory::AddDirectory(kFALSE);
   TH1::AddDirectory(kFALSE);
   TIter next(fInput);

@@ -753,7 +753,7 @@ class Process:
 #                    print "DEBUG(PUreweighting,aname=%s): dataPU:%d:%f"%(aname,k+1, hDataPUs[aname].GetBinContent(k+1))
             inputList.Add(hDataPUs[aname])
         else:
-            n = 50
+            n = 100
             hFlat = ROOT.TH1F("dummyPU"+aname,"dummyPU"+aname,n,0,n)
             hFlat.SetName("PileUpData")
             for k in range(n):

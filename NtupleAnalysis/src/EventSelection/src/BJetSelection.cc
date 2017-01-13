@@ -64,28 +64,40 @@ void BJetSelection::initialize(const ParameterSet& config) {
   if (sWorkingPoint != "Loose" && sWorkingPoint != "Medium" && sWorkingPoint != "Tight")
     throw hplus::Exception("config") << "b-tagging algorithm working point '" << sWorkingPoint
                                      << "' is not valid!\nValid values are: Loose, Medium, Tight";
+
   if (sAlgorithm == "pfCombinedInclusiveSecondaryVertexV2BJetTags") {
-    // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80X
+    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco (Moriond17)
     if (sWorkingPoint == "Loose")
-      fDisriminatorValue = 0.460;
+      fDisriminatorValue = 0.5426;
     else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.800;
+      fDisriminatorValue = 0.8484;
     else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.935;
+      fDisriminatorValue = 0.9535;
   } else if (sAlgorithm == "pfCombinedMVA2BJetTags") {
     if (sWorkingPoint == "Loose")
-      fDisriminatorValue = -0.715;
+      fDisriminatorValue = -0.5884;
     else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.185;
+      fDisriminatorValue = 0.4432;
     else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.875;
-  } else if (sAlgorithm == "pfCombinedCvsLJetTags" || sAlgorithm == "pfCombinedCvsBJetTags") {
+      fDisriminatorValue = 0.9432;
+  } else if (sAlgorithm == "pfCombinedCvsLJetTags") {
+    if (sWorkingPoint == "Loose")
+      fDisriminatorValue = -0.48;
+    else if (sWorkingPoint == "Medium")
+      fDisriminatorValue = -0.1;
+    else if (sWorkingPoint == "Tight")
+      fDisriminatorValue = 0.69;    
+  } else if (sAlgorithm == "pfCombinedCvsBJetTags") {
     if (sWorkingPoint == "Loose")
       fDisriminatorValue = -0.17;
     else if (sWorkingPoint == "Medium")
       fDisriminatorValue = 0.08;
     else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.45;    
+      fDisriminatorValue = -0.45; 
+    // Note: Events selected by the Tight WP are not a subsample of the events selected by the Medium WP, but it is because they WP definition have different goals:
+    // Loose to reduce b jets
+    // Medium to reduce both b and light jets
+    // Tight to reduce light jets
   }
   
   if (fDisriminatorValue < 0.0) {
