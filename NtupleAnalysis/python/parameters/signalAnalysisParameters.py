@@ -83,6 +83,12 @@ jetSelection = PSet(
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
             jetIDDiscr = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
           jetPUIDDiscr = "", # does not work at the moment 
+            HTCutValue = 0.0,
+    HTCutDirection     = ">=",
+            JTCutValue = 0.0,
+    JTCutDirection     = ">=",
+           MHTCutValue = 0.0,
+    MHTCutDirection    = ">=",
 )
  
 #====== Angular cuts / collinear

@@ -113,13 +113,19 @@ muVeto = PSet(
 jetSelection = PSet(
     jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
     jetPtCut                 = 30.0,
-    jetEtaCut                =  5.0,
-    numberOfJetsCutValue     =  6,
+    jetEtaCut                = 5.0,
+    numberOfJetsCutValue     = 6,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
     jetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
     jetPUIDDiscr             = "",        # does not work at the moment 
-    tauMatchingDeltaR        = 0.4,       # todo: remove dependency
-    # jetLdgPtCuts             = [70.0, 50.0, 40.0],
+    tauMatchingDeltaR        = 0.4,
+    HTCutValue               = 0.0,
+    HTCutDirection           = ">=",
+    JTCutValue               = 0.0,
+    JTCutDirection           = ">=",
+    MHTCutValue              = 0.0,
+    MHTCutDirection          = ">=",
+    # jetLdgPtCuts           = [70.0, 50.0, 40.0],
 )
 
 #================================================================================================
