@@ -78,8 +78,8 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   const double minPt   = 0.0;
   const double maxPt   = 500.0;
   const int nBinsEta   = 50;
-  const double minEta  = -0.5;
-  const double maxEta  = +0.5;
+  const double minEta  = -5.0;
+  const double maxEta  = 5.0;
   const int nBinsM     = 50;
   const double minM    = 0.0;
   const double maxM    = 500.0;

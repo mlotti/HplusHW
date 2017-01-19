@@ -184,7 +184,7 @@ datasetsQCD_reHLT.append(Dataset('/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/R
 #================================================================================================ 
 datasetsSignalTB = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FChargedHiggs_HplusTB_HplusToTB*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
-# datasetsSignalTB.append(Dataset('', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTB.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-300_13TeV_amcatnlo_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 
 datasetsSignalTauNu = []
@@ -239,9 +239,9 @@ datasetsDY.append(Dataset('/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-herwi
 datasetsDY.append(Dataset('/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 
-datasetsDYToQQ = []
+datasetsDYJetsToQQ = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=150&instance=prod%2Fglobal&input=dataset%3D%2FDYJetsToQQ_*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
-datasetsDY.append(Dataset('/DYJetsToQQ_HT180_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsDYJetsToQQ.append(Dataset('/DYJetsToQQ_HT180_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 
 datasetsWJets = []
@@ -261,13 +261,17 @@ das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglo
 
 
 datasetsDiboson = []
+dasWZ = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWZ*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
+datasetsDiboson.append(Dataset('/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWZ))
+datasetsDiboson.append(Dataset('/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWZ))
 
 
 datasetsDibosonToQQ = []
 dasWZ = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWZ*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
 dasWW = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FWWTo4Q*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
 dasZZ = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FZZTo4Q*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
-# datasetsDibosonToQQ.append(Dataset('', dataVersion="80Xmc", dasQuery=das1))
+datasetsDibosonToQQ.append(Dataset('/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWZ))
+datasetsDibosonToQQ.append(Dataset('/WZ_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWZ))
 datasetsDibosonToQQ.append(Dataset('/WWTo4Q_13TeV-powheg/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasWW))
 datasetsDibosonToQQ.append(Dataset('/ZZTo4Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=dasZZ))
 
@@ -369,7 +373,7 @@ datasetsTTWJetsToQQ.append(Dataset('/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX
 datasetsTTTT = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTTTT*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
 #datasetsTTTT.append(Dataset('/TTTT_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
-datasetsTTTT.append(Dataset('TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das)) # new tune
+datasetsTTTT.append(Dataset('/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das)) # new tune
 
 
 datasetsTTBB = []
@@ -495,23 +499,21 @@ hplus2tbAnalysisDatasets.extend(datasetsJetHTData)
 hplus2tbAnalysisDatasets.extend(datasetsSignalTB_reHLT)
 hplus2tbAnalysisDatasets.extend(datasetsTop)
 hplus2tbAnalysisDatasets.extend(datasetsSingleTop)
-# hplus2tbAnalysisDatasets.extend(datasetsTTJets) #-ve weights
-hplus2tbAnalysisDatasets.extend(datasetsDYToQQ)
+hplus2tbAnalysisDatasets.extend(datasetsDYJetsToQQ)
 hplus2tbAnalysisDatasets.extend(datasetsWJetsToQQ)
 hplus2tbAnalysisDatasets.extend(datasetsZJetsToQQ_reHLT) # PUMoriond17 not ready yet
 hplus2tbAnalysisDatasets.extend(datasetsDibosonToQQ)
 hplus2tbAnalysisDatasets.extend(datasetsQCD)
 hplus2tbAnalysisDatasets.extend(datasetsQCD_HT)
 hplus2tbAnalysisDatasets.extend(datasetsQCDbEnriched)
+hplus2tbAnalysisDatasets.extend(datasetsTTWJetsToQQ)  
+hplus2tbAnalysisDatasets.extend(datasetsTTTT) 
+# hplus2tbAnalysisDatasets.extend(datasetsTTBB) # PUMoriond17 not ready yet 
+hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ)
 # hplus2tbAnalysisDatasets.extend(datasetsQCDMuEnriched)
 # hplus2tbAnalysisDatasets.extend(datasetsQCD_HT_BGenFilter) 
 # hplus2tbAnalysisDatasets.extend(datasetsQCD_HT_GenJets5) 
-hplus2tbAnalysisDatasets.extend(datasetsTTWJetsToQQ)  
-hplus2tbAnalysisDatasets.extend(datasetsTTTT_noReHLT) 
-# hplus2tbAnalysisDatasets.extend(datasetsTTBB) # PUMoriond17 not ready yet 
-hplus2tbAnalysisDatasets.extend(datasetsTTZToQQ)
-
-
+# hplus2tbAnalysisDatasets.extend(datasetsTTJets) #-ve weights
 
 
 #================================================================================================ 
