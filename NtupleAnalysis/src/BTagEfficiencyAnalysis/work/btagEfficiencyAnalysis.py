@@ -1,28 +1,23 @@
 #!/usr/bin/env python
+import sys
 
 dataEras = ["2016"]
 #dataEras = ["2015B","2015C"]
 searchModes = ["80to1000"]
 
-import sys
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 
 process = Process("BTagEfficiencyAnalysis")
-
-# Blaclist signal samples
-blacklist = ["ChargedHiggs_HplusTB","ChargedHiggs_TTToHplusBWB"]
-process.addDatasetsFromMulticrab(sys.argv[1],blacklist=blacklist)
 
 
 # Example of adding a dataset which has its files defined in data/<dataset_name>.txt file
 #process.addDatasets(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6"])
 
 # Example of adding datasets from a multicrab directory
-import sys
 if len(sys.argv) < 2:
     print "Usage: ./btagEfficiencyAnalysis.py <path-to-multicrab-directory>"
     sys.exit(0)
-process.addDatasetsFromMulticrab(sys.argv[1])
+process.addDatasetsFromMulticrab(sys.argv[1], blacklist=["ChargedHiggs"])
 
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
@@ -49,7 +44,7 @@ builder = AnalysisBuilder("BTagEfficiencyAnalysis",
                           dataEras,
                           searchModes,
                           #### Options ####
-                          usePUreweighting=False,
+                          usePUreweighting=True,
                           doSystematicVariations=False,
                           )
 builder.addVariation("BJetSelection.bjetDiscr", ["pfCombinedInclusiveSecondaryVertexV2BJetTags"])

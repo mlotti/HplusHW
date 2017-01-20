@@ -56,7 +56,7 @@ _dataEras = {
     "Run2016D": ["_Run2016D"],
     "Run2016E": ["_Run2016E"],
     "Run2016F": ["_Run2016F"],
-    "Run2016": ["_Run2016B", "_Run2016C", "_Run2016D","_Run2016E","_Run2016F", "_Run2016G"]
+    "Run2016": ["_Run2016B", "_Run2016C", "_Run2016D","_Run2016E","_Run2016F", "_Run2016G", "_Run2016H"]
 }
 
 
