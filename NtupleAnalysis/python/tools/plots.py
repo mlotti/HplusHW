@@ -131,6 +131,7 @@ _physicalToLogical.update({
         "DYJetsToLL_M_50_HT_200to400": "DYJetsToLL_M_50_HT_200to400",
         "DYJetsToLL_M_50_HT_400to600": "DYJetsToLL_M_50_HT_400to600",
         "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLL_M_50_HT_600toInf",
+        "DYJetsToQQ_HT180"           : "DYJetsToQQ_HT180",
         
         "QCD_Pt_15to30"    : "QCD_Pt_15to30",
         "QCD_Pt_30to50"    : "QCD_Pt_30to50",
@@ -156,7 +157,17 @@ _physicalToLogical.update({
         "QCD_bEnriched_HT1000to1500": "QCD_bEnriched_HT1000to1500",
         "QCD_bEnriched_HT1500to2000": "QCD_bEnriched_HT1500to2000",
         "QCD_bEnriched_HT2000toInf" : "QCD_bEnriched_HT2000toInf",
-        
+ 
+        "QCD_HT50to100"   : "QCD_HT50to100",
+        "QCD_HT100to200"  : "QCD_HT100to200",
+        "QCD_HT200to300"  : "QCD_HT200to300",
+        "QCD_HT300to500"  : "QCD_HT300to500",
+        "QCD_HT500to700"  : "QCD_HT500to700",
+        "QCD_HT700to1000" : "QCD_HT700to1000",
+        "QCD_HT1000to1500": "QCD_HT1000to1500",
+        "QCD_HT1500to2000": "QCD_HT1500to2000",
+        "QCD_HT2000toInf" : "QCD_HT2000toInf",
+       
         "QCD_Pt20_MuEnriched"          : "QCD_Pt20_MuEnriched",
         "QCD_Pt_50to80_MuEnrichedPt5"  : "QCD_Pt_50to80_MuEnrichedPt5",
         "QCD_Pt_80to120_MuEnrichedPt5" : "QCD_Pt_80to120_MuEnrichedPt5",
@@ -164,15 +175,19 @@ _physicalToLogical.update({
         "QCD_Pt_170to300_MuEnrichedPt5": "QCD_Pt_170to300_MuEnrichedPt5",
         "QCD_Pt_300to470_MuEnrichedPt5": "QCD_Pt_300to470_MuEnrichedPt5",
         
-        "ST_schannel_4f_leptonDecays"        : "ST_schannel_4f_leptonDecays",
-        "ST_tchannel_antitop_4f_leptonDecays": "ST_tchannel_antitop_4f_leptonDecays",
-        "ST_tchannel_top_4f_leptonDecays"    : "ST_tchannel_top_4f_leptonDecays",
-        "ST_tW_antitop_5f_inclusiveDecays"   : "ST_tW_antitop_5f_inclusiveDecays",
-        "ST_tW_top_5f_inclusiveDecays"       : "ST_tW_top_5f_inclusiveDecays",
-        
+        "ST_schannel_4f_leptonDecays"          : "ST_schannel_4f_leptonDecays",
+        "ST_tW_antitop_5f_inclusiveDecays"     : "ST_tW_antitop_5f_inclusiveDecays",
+        "ST_tW_antitop_5f_inclusiveDecays_ext1": "ST_tW_antitop_5f_inclusiveDecays_ext1",
+        "ST_tW_top_5f_inclusiveDecays"         : "ST_tW_top_5f_inclusiveDecays",
+        "ST_tW_top_5f_inclusiveDecays_ext1"    : "ST_tW_top_5f_inclusiveDecays_ext1",
+        "ST_tchannel_antitop_4f_leptonDecays"  : "ST_tchannel_antitop_4f_leptonDecays",
+        "ST_tchannel_top_4f_leptonDecays"      : "ST_tchannel_top_4f_leptonDecays",
+
         "WW": "WW",
         "WZ": "WZ",
         "ZZ": "ZZ",
+
+        "WZ_ext1": "WZ_ext1",
         })
 
 ## Map the datasets to be merged to the name of the merged dataset.
@@ -215,12 +230,24 @@ _datasetMerge = {
     "QCD_bEnriched_HT1000to1500": "QCD-b",
     "QCD_bEnriched_HT1500to2000": "QCD-b",
     "QCD_bEnriched_HT2000toInf" : "QCD-b",
+ 
+    "QCD_HT50to100"   : "QCD",
+    "QCD_HT100to200"  : "QCD",
+    "QCD_HT200to300"  : "QCD",
+    "QCD_HT300to500"  : "QCD",
+    "QCD_HT500to700"  : "QCD",
+    "QCD_HT700to1000" : "QCD",
+    "QCD_HT1000to1500": "QCD",
+    "QCD_HT1500to2000": "QCD",
+    "QCD_HT2000toInf" : "QCD",
 
     "ST_s_channel_4f_InclusiveDecays"        : "SingleTop",
+    "ST_tW_antitop_5f_inclusiveDecays"       : "SingleTop",
+    "ST_tW_antitop_5f_inclusiveDecays_ext1"  : "SingleTop",
+    "ST_tW_top_5f_inclusiveDecays"           : "SingleTop",
+    "ST_tW_top_5f_inclusiveDecays_ext1"      : "SingleTop",
     "ST_t_channel_antitop_4f_inclusiveDecays": "SingleTop",
     "ST_t_channel_top_4f_inclusiveDecays"    : "SingleTop",
-    "ST_tW_antitop_5f_inclusiveDecays"       : "SingleTop",
-    "ST_tW_top_5f_inclusiveDecays"           : "SingleTop",
 
     "TT"        : "TT",
     "TT_ext"    : "TT",
@@ -251,13 +278,15 @@ _datasetMerge = {
     "DYJetsToLL_M_50_HT_200to400": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_400to600": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_600toInf": "DYJetsToLLHT",
+    "DYJetsToQQ_HT180"           : "DYJetsToQQHT",
 
     # Diboson merge, comment this away to keep WW, WZ, ZZ samples separate
-    "WWTo4Q": "Diboson",
-    "ZZTo4Q": "Diboson",
-    "WW"    : "Diboson",
-    "WZ"    : "Diboson",
-    "ZZ"    : "Diboson",
+    "WWTo4Q" : "Diboson",
+    "ZZTo4Q" : "Diboson",
+    "WW"     : "Diboson",
+    "WZ_ext1": "Diboson",
+    "WZ"     : "Diboson",
+    "ZZ"     : "Diboson",
 
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8_ext1": "TTBB",
@@ -305,9 +334,10 @@ _datasetOrder.extend([
     "TTandSingleTop", #merged
     "DYJetsToLL",
     "DYJetsToLLHT",
+    "DYJetsToQQHT",
     "SingleTop",
-    "WJetsToQQ_HT_600ToInf", # Htb
     "Diboson",
+    "WJetsToQQ_HT_600ToInf", # Htb
     "WW",
     "WZ",
     "ZZ"
@@ -339,6 +369,7 @@ _legendLabels = {
     "TTandSingleTop": "t#bar{t}+single top",
     "DYJetsToLL"    : "Z/#gamma*+jets", #"DY+jets"
     "DYJetsToLLHT"  : "Z/#gamma*+jets",
+    "DYJetsToQQHT"  : "Z/#gamma*+jets",
 
     "WJetsToQQ_HT_600ToInf": "W+jets", #, 600 < H_{T} < Inf", # (W#rightarrowq#bar{q'})
     "ZJetsToQQ_HT600toInf" : "Z+jets", #, 600 < H_{T} < Inf", # (Z#rightarrowq#bar{q})
@@ -396,6 +427,16 @@ _legendLabels = {
     "QCD_bEnriched_HT1500to2000" : "QCD-b, 1500 < H_{T} < 2000",
     "QCD_bEnriched_HT2000toInf"  : "QCD-b, 2000 < H_{T} <  Inf",
 
+    "QCD_HT50to100"   : "QCD,   50 < H_{T} <   100",
+    "QCD_HT100to200"  : "QCD,  100 < H_{T} <   200",
+    "QCD_HT200to300"  : "QCD,  200 < H_{T} <   300",
+    "QCD_HT300to500"  : "QCD,  300 < H_{T} <   500",
+    "QCD_HT500to700"  : "QCD,  500 < H_{T} <   700",
+    "QCD_HT700to1000" : "QCD,  700 < H_{T} <  1000",
+    "QCD_HT1000to1500": "QCD, 1000 < H_{T} <  1500",
+    "QCD_HT1500to2000": "QCD, 1500 < H_{T} <  2000",
+    "QCD_HT2000toInf" : "QCD, 2000 < H_{T} <  Inf",
+
     "QCD_Pt20_MuEnriched"          : "QCD (#mu enr.), #hat{p}_{T} >  20",
     "QCD_Pt_50to80_MuEnrichedPt5"  : "QCD (#mu enr.),  50 > #hat{p}_{T} <  80",
     "QCD_Pt_80to120_MuEnrichedPt5" : "QCD (#mu enr.),  80 > #hat{p}_{T} < 120",
@@ -450,6 +491,7 @@ _plotStyles = {
 
     "DYJetsToLL"    : styles.dyStyle,
     "DYJetsToLLHT"  : styles.dyStyle,
+    "DYJetsToQQHT"  : styles.dyStyle,
     "Data"          : styles.dataStyle,
     "Diboson"       : styles.dibStyle,
     "EWK"           : styles.wStyle,
