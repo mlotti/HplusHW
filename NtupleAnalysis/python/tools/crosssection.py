@@ -439,7 +439,6 @@ backgroundCrossSections = CrossSectionList(
             "7": 1.44, # [5,6]
             "8": 1.76, # [8]
             }),
-            #################### modified
     CrossSection("ST_tW_antitop_5f_inclusiveDecays", {
             "13": 30.09, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
@@ -449,7 +448,6 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("ST_tW_antitop_5f_DS_inclusiveDecays", {
             "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
-            ############################### modified
     CrossSection("ST_tW_top_5f_inclusiveDecays", {
             "13": 30.11, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),

@@ -62,9 +62,25 @@ _heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 50
 ## statistics. The mapping is used in the
 ## mergeRenameReorderForDataMC() function.
 _physicalMcAdd = {
-    "TT": "TT",
+    "TT"    : "TT",
     "TT_ext": "TT",
+
+    "TTTT"      : "TTTT",
+    "TTTT_ext1" : "TTTT",
+
+    "WZ"     : "WZ",
+    "WZ_ext1": "WZ",
+
+    "ST_tW_antitop_5f_inclusiveDecays"     : "ST_tW_antitop_5f_inclusiveDecays",
+    "ST_tW_antitop_5f_inclusiveDecays_ext1": "ST_tW_antitop_5f_inclusiveDecays",
+
+    "ST_tW_top_5f_inclusiveDecays"     : "ST_tW_top_5f_inclusiveDecays",
+    "ST_tW_top_5f_inclusiveDecays_ext1": "ST_tW_top_5f_inclusiveDecays",
+
+    "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
+    "ttbb_4FS_ckm_amcatnlo_madspin_pythia8_ext1": "TTBB",
 }
+
 #for mass in _lightHplusMasses:
     #_physicalMcAdd["TTToHplusBWB_M%d_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
     #_physicalMcAdd["TTToHplusBWB_M%d_ext_Summer12"%mass] = "TTToHplusBWB_M%d_Summer12"%mass
@@ -177,9 +193,7 @@ _physicalToLogical.update({
         
         "ST_schannel_4f_leptonDecays"          : "ST_schannel_4f_leptonDecays",
         "ST_tW_antitop_5f_inclusiveDecays"     : "ST_tW_antitop_5f_inclusiveDecays",
-        "ST_tW_antitop_5f_inclusiveDecays_ext1": "ST_tW_antitop_5f_inclusiveDecays_ext1",
         "ST_tW_top_5f_inclusiveDecays"         : "ST_tW_top_5f_inclusiveDecays",
-        "ST_tW_top_5f_inclusiveDecays_ext1"    : "ST_tW_top_5f_inclusiveDecays_ext1",
         "ST_tchannel_antitop_4f_leptonDecays"  : "ST_tchannel_antitop_4f_leptonDecays",
         "ST_tchannel_top_4f_leptonDecays"      : "ST_tchannel_top_4f_leptonDecays",
 
@@ -187,7 +201,6 @@ _physicalToLogical.update({
         "WZ": "WZ",
         "ZZ": "ZZ",
 
-        "WZ_ext1": "WZ_ext1",
         })
 
 ## Map the datasets to be merged to the name of the merged dataset.
@@ -243,17 +256,15 @@ _datasetMerge = {
 
     "ST_s_channel_4f_InclusiveDecays"        : "SingleTop",
     "ST_tW_antitop_5f_inclusiveDecays"       : "SingleTop",
-    "ST_tW_antitop_5f_inclusiveDecays_ext1"  : "SingleTop",
-    "ST_tW_top_5f_inclusiveDecays"           : "SingleTop",
-    "ST_tW_top_5f_inclusiveDecays_ext1"      : "SingleTop",
+    "ST_tW_top_5f_inclusiveDecays"           : "SingleTop", 
     "ST_t_channel_antitop_4f_inclusiveDecays": "SingleTop",
     "ST_t_channel_top_4f_inclusiveDecays"    : "SingleTop",
 
-    "TT"        : "TT",
-    "TT_ext"    : "TT",
-    "TT_ext3"   : "TT",
-    "TTJets"    : "TTJets",    
-    "TTTT_ext1" : "TTTT",
+    "TT"      : "TT",
+    "TT_ext"  : "TT",
+    "TT_ext3" : "TT",
+    "TTJets"  : "TTJets",    
+    "TTTT"    : "TTTT",
     #"TTJets_FullLept": "TTJets",
     #"TTJets_SemiLept": "TTJets",
     #"TTJets_Hadronic": "TTJets",
@@ -281,15 +292,13 @@ _datasetMerge = {
     "DYJetsToQQ_HT180"           : "DYJetsToQQHT",
 
     # Diboson merge, comment this away to keep WW, WZ, ZZ samples separate
-    "WWTo4Q" : "Diboson",
-    "ZZTo4Q" : "Diboson",
-    "WW"     : "Diboson",
-    "WZ_ext1": "Diboson",
-    "WZ"     : "Diboson",
-    "ZZ"     : "Diboson",
+    "WWTo4Q": "Diboson",
+    "ZZTo4Q": "Diboson",
+    "WW"    : "Diboson",
+    "WZ"    : "Diboson",
+    "ZZ"    : "Diboson",
 
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
-    "ttbb_4FS_ckm_amcatnlo_madspin_pythia8_ext1": "TTBB",
 
     #"ChargedHiggs_HplusTB_HplusToTauNu_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
     #"ChargedHiggs_HplusTB_HplusToTauB_M_200": "ChargedHiggs_HplusTB_HplusToTauNu_M_200",
