@@ -550,6 +550,9 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("TTTT", {
             "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16]
             }),
+    CrossSection("TTTT_ext", {
+            "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16]
+            }),
     CrossSection("TTWJetsToQQ", {
             "13": 4.034e-01, #4.034e-01 +- 2.493e-03 pb [16] (inputFiles="2211E19A-CC1E-E611-97CC-44A84225C911.root")
             }),

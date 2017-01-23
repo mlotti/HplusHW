@@ -62,11 +62,11 @@ _heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 50
 ## statistics. The mapping is used in the
 ## mergeRenameReorderForDataMC() function.
 _physicalMcAdd = {
-    "TT"    : "TT",
-    "TT_ext": "TT",
+    #"TT"    : "TT",
+    "TT_ext": "TT", # covered by "TT"
 
-    "TTTT"      : "TTTT",
-    "TTTT_ext1" : "TTTT",
+    #"TTTT"      : "TTTT", # covered by "TT"
+    "TTTT_ext1" : "TTTT", # covered by "TT"
 
     "WZ"     : "WZ",
     "WZ_ext1": "WZ",
@@ -260,11 +260,11 @@ _datasetMerge = {
     "ST_t_channel_antitop_4f_inclusiveDecays": "SingleTop",
     "ST_t_channel_top_4f_inclusiveDecays"    : "SingleTop",
 
-    "TT"      : "TT",
+    # "TT"      : "TT",
     "TT_ext"  : "TT",
     "TT_ext3" : "TT",
     "TTJets"  : "TTJets",    
-    "TTTT"    : "TTTT",
+    # "TTTT"    : "TTTT",
     #"TTJets_FullLept": "TTJets",
     #"TTJets_SemiLept": "TTJets",
     #"TTJets_Hadronic": "TTJets",
@@ -343,17 +343,17 @@ _datasetOrder.extend([
     "TTandSingleTop", #merged
     "DYJetsToLL",
     "DYJetsToLLHT",
-    "DYJetsToQQHT",
+    "DYJetsToQQHT",  # Htb
     "SingleTop",
-    "Diboson",
     "WJetsToQQ_HT_600ToInf", # Htb
+    "TTZToQQ",     # Htb
+    "TTWJetsToQQ", # Htb
+    "Diboson",
     "WW",
     "WZ",
     "ZZ"
     "WWTo4Q",      # Htb
     "TTBB",        # Htb
-    "TTZToQQ",     # Htb
-    "TTWJetsToQQ", # Htb
     "TTTT",        # Htb
     ]) 
 
@@ -370,8 +370,8 @@ _legendLabels = {
     "TTJets"        : "t#bar{t}+jets",
     "TT"            : "t#bar{t}",
     "TTTT"          : "t#bar{t}t#bar{t}",
-    "TTWJetsToQQ"   : "W+t#bar{t}", # (W#rightarrowq#bar{q'})
-    "TTZToQQ"       : "Z+t#bar{t}", # (Z#rightarrowq#bar{q'})
+    "TTWJetsToQQ"   : "t#bar{t}+W", # (W#rightarrowq#bar{q'})
+    "TTZToQQ"       : "t#bar{t}+Z", # (Z#rightarrowq#bar{q'})
     "WWTo4Q"        : "WW",         # (W#rightarrowq#bar{q'})
     'ZZTo4Q'        : "ZZ",         # (Z#rightarrowq#bar{q})
     "TTBB"          : "t#bar{t}b#bar{b}",
