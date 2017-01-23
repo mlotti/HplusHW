@@ -344,9 +344,9 @@ _datasetOrder.extend([
     "DYJetsToLL",
     "DYJetsToLLHT",
     "DYJetsToQQHT",
+    "WJetsToQQ_HT_600ToInf", # Htb
     "SingleTop",
     "Diboson",
-    "WJetsToQQ_HT_600ToInf", # Htb
     "WW",
     "WZ",
     "ZZ"
