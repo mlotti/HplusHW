@@ -831,7 +831,7 @@ std::vector<float> TopologySelection::GetSphericityTensorEigenValues(const JetSe
       throw hplus::Exception("LogicError") << "Failure of requirement that Aplanarity (A) satisfies the inequality: 0.0 <= A <= 0.5. Found that A = " << output.fAplanarity;
     }
 
-  // Calculate the Aplanarity (0 <= P <= 0.5)
+  // Calculate the Planarity (0 <= P <= 0.5)
   output.fPlanarity  = (2.0/3.0)*(output.fSphericity-2*output.fAplanarity);
   if ( abs(output.fPlanarity-0.5) > 0.5 + 1e-4 )
     {
