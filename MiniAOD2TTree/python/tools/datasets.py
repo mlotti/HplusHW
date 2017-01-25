@@ -460,7 +460,7 @@ datasetsSignalTauNu_TRGdev.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500
 #================================================================================================ 
 tauLegDatasets = []
 tauLegDatasets.extend(datasetsMuonData)
-tauLegDatasets.extend(datasetsDY_reHLT)
+tauLegDatasets.extend(datasetsDY)
 # tauLegDatasets.extend(datasetsWJets_reHLT)
 # tauLegDatasets.extend(datasetsQCDMuEnriched_reHLT)
 # tauLegDatasets.extend(datasetsH125)
@@ -468,10 +468,11 @@ tauLegDatasets.extend(datasetsDY_reHLT)
 
 metLegDatasets = []
 metLegDatasets.extend(datasetsTauData)
-metLegDatasets.extend(datasetsDY_reHLT)
-metLegDatasets.extend(datasetsTop_reHLT)
-metLegDatasets.extend(datasetsWJets_reHLT)
-metLegDatasets.extend(datasetsQCD_reHLT)
+metLegDatasets.extend(datasetsDY)
+metLegDatasets.extend(datasetsTop)
+metLegDatasets.extend(datasetsSingleTop)
+metLegDatasets.extend(datasetsWJets)
+metLegDatasets.extend(datasetsQCD)
 
 
 signalAnalysisDatasets = []
