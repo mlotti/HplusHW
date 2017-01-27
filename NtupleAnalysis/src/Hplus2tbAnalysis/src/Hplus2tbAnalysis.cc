@@ -46,8 +46,8 @@ private:
   Count cSelected;
     
   // Non-common histograms
-  WrappedTH1 *hAssociatedTop_Pt;
-  WrappedTH1 *hAssociatedTop_Eta;
+  // WrappedTH1 *hAssociatedTop_Pt;
+  // WrappedTH1 *hAssociatedTop_Eta;
 
 };
 
@@ -96,16 +96,16 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fTopSelection.bookHistograms(dir);
   
   // Book non-common histograms
-  const int nBinsPt   = cfg_PtBinSetting.bins();
-  const double minPt  = cfg_PtBinSetting.min();
-  const double maxPt  = cfg_PtBinSetting.max();
+  // const int nBinsPt   = cfg_PtBinSetting.bins();
+  // const double minPt  = cfg_PtBinSetting.min();
+  // const double maxPt  = cfg_PtBinSetting.max();
   
-  const int nBinsEta  = cfg_EtaBinSetting.bins();
-  const double minEta = cfg_EtaBinSetting.min();
-  const double maxEta = cfg_EtaBinSetting.max();
+  // const int nBinsEta  = cfg_EtaBinSetting.bins();
+  // const double minEta = cfg_EtaBinSetting.min();
+  // const double maxEta = cfg_EtaBinSetting.max();
  
-  hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
+  // hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  // hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
   
   return;
 }
@@ -130,6 +130,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // GenParticle analysis
   //================================================================================================   
   if (0) std::cout << "=== GenParticles" << std::endl;
+
   // For-loop: GenParticles
   //  if (fEvent.isMC()) {
   //    
@@ -292,14 +293,6 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   const TopSelection::Data TopData = fTopSelection.analyze(fEvent, jetData, bjetData);
   if (!TopData.passedSelection()) return;
 
-
-  //================================================================================================
-  // ?) HT selection
-  //================================================================================================
-  // if (0) std::cout << "=== HT selection" << std::endl;
-  // const METSelection::Data HTData = fMETSelection.analyze(fEvent, nVertices);
-  // if (!HTData.passedSelection()) return;
-  
 
   //================================================================================================
   // All cuts passed

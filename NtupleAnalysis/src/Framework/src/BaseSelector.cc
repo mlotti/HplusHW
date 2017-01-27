@@ -54,9 +54,9 @@ void BaseSelector::setSkimCounters(TH1* hSkimCounters) {
 void BaseSelector::bookInternal(TDirectory *dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kInformative, dir, "Weighting");
   hNvtxBeforeVtxReweighting = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, 
-    "NvtxBeforeVtxReweighting", "NvtxBeforeVtxReweighting;N_{vertices};N_{events}", 60, 0, 60);
+    "NvtxBeforeVtxReweighting", "NvtxBeforeVtxReweighting;N_{vertices};N_{events}", 100, 0.0, 100.0);
   hNvtxAfterVtxReweighting = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, subdir, 
-    "NvtxAfterVtxReweighting", "NvtxAfterVtxReweighting;N_{vertices};N_{events}", 60, 0, 60);
+    "NvtxAfterVtxReweighting", "NvtxAfterVtxReweighting;N_{vertices};N_{events}", 100, 0.0, 100.0);
 }
 
 void BaseSelector::processInternal(Long64_t entry) {

@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 
 // Count
 Count::Count(EventCounter *ec, size_t counterIndex, size_t countIndex):
@@ -29,15 +30,15 @@ size_t EventCounter::Counter::getLabelIndex(const std::string& l) const {
   }
   return -1;
 }
-size_t EventCounter::Counter::insert(const std::string& label, double initialValue) {
+size_t EventCounter::Counter::insert(const std::string& label, int initialValue) {
   if(counter)
     throw std::logic_error("May not call addCounter() after setOutput()");
 
   size_t index = labels.size();
   labels.push_back(label);
-  values.push_back(0);
-  weights.push_back(initialValue);
-  weightsSquared.push_back(initialValue*initialValue);
+  values.push_back(initialValue);
+  weights.push_back(0);
+  weightsSquared.push_back(0);
   return index;
 }
 void EventCounter::Counter::incrementCount(size_t countIndex, double weight) {
@@ -90,7 +91,7 @@ EventCounter::~EventCounter() {}
 Count EventCounter::addCounter(const std::string& name, double initialValue) {
   if(fOutputHasBeenSet)
     throw std::logic_error("May not call addCounter() after setOutput()");
-
+  // std::cout << "=== EventCounter::addCounter\n\tAdding counter \"" << name << "\" with initial value " << initialValue << std::endl;
   size_t index = fCounters[0].insert(name, initialValue);
   return Count(this, 0, index);
 }
