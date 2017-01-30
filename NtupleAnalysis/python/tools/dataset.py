@@ -4317,7 +4317,7 @@ class DatasetPrecursor:
         Verbose("Opening ROOT files", False)
         for name in self._filenames:
 
-            Verbose(name, False)
+            Verbose("Opening ROOT file \"%s\"" % (name), False)
             rf = ROOT.TFile.Open(name)
 
             # Below is important to use '==' instead of 'is' to check for
