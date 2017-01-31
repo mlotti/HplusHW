@@ -35,53 +35,85 @@ public:
     Data();
     ~Data();
 
-    /// Status of passing event selection
+    // Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }
-    /// Obtain number of selected jets
+
+    // Obtain number of selected jets
     int getNumberOfSelectedJets() const { return fSelectedJets.size(); }
-    /// Obtain collection of selected jets
+
+    // Obtain collection of selected jets
     const std::vector<Jet>& getSelectedJets() const { return fSelectedJets; }
-    /// Obtain collection of all jets
+
+    // Obtain collection of all jets
     const std::vector<Jet>& getAllJets() const { return fAllJets; }
-    /// Check if jet matching to selected tau was a success
+
+    // Check if jet matching to selected tau was a success
     bool jetMatchedToTauFound() const { return (fJetMatchedToTau.size() > 0); }
-    /// Obtain jet matching to selected tau
+
+    // Obtain jet matching to selected tau
     const Jet& getJetMatchedToTau() const;
-    /// Obtain HT
+
+    // Obtain HT (scalar sum of the pt of selected jets)
     const double HT() const { return fHT; }
-    /// Obtain MHT
+
+    // Obtain JT (HT - Jet1_Et)
+    const double JT() const { return fJT; }
+    
+    // Obtain MHT vector (magnitude of -ve vector sum of the pt of selected jets)
     const math::XYZVectorD& MHT() const { return fMHT; }
-    /// Obtain minimum phi angle between a jet and (MHT-jet)
+
+    // Obtain MHT value (magnitude of -ve vector sum of the pt of selected jets)
+    double MHTvalue() const { return fMHTvalue; }
+
+    // Obtain minimum phi angle between a jet and (MHT-jet)
     const double minDeltaPhiJetMHT() const { return fMinDeltaPhiJetMHT; }
-    /// Obtain maximum phi angle between a jet and (MHT-jet)
+
+    // Obtain maximum phi angle between a jet and (MHT-jet)
     const double maxDeltaPhiJetMHT() const { return fMaxDeltaPhiJetMHT; }
-    /// Obtain minimum Delta R between a jet and (MHT-jet)
+
+    // Obtain minimum Delta R between a jet and (MHT-jet)
     const double minDeltaRJetMHT() const { return fMinDeltaRJetMHT; }
-    /// Obtain minimum Delta R between a jet and (MHT-jet)
+
+    // Obtain minimum Delta R between a jet and (MHT-jet)
     const double minDeltaRReversedJetMHT() const { return fMinDeltaRReversedJetMHT; }
     
     friend class JetSelection;
 
   private:
-    /// Boolean for passing selection
+    // Boolean for passing selection
     bool bPassedSelection;
-    /// All jets (needed for MET)
+
+    // All jets (needed for MET)
     std::vector<Jet> fAllJets;
-    /// Jet collection after all selections
+
+    // Jet collection after all selections
     std::vector<Jet> fSelectedJets;
-    /// Jet matched to tau
+
+    // Jet matched to tau
     std::vector<Jet> fJetMatchedToTau;
-    /// HT (scalar sum of jets)
+
+    // HT (scalar sum of the pt of selected jets)
     double fHT;
-    /// MHT (negative vector sum of jets)
+
+    // JT (HT - Jet1_Et)
+    double fJT;
+
+    // MHT vector (magnitude of -ve vector sum of the pt of selected jets)
     math::XYZVectorD fMHT;
-    /// Minimum phi angle between a jet and (MHT-jet)
+
+    // MHT value (magnitude of -ve vector sum of the pt of selected jets)
+    double fMHTvalue;
+
+    // Minimum phi angle between a jet and (MHT-jet)
     double fMinDeltaPhiJetMHT;
-    /// Maximum phi angle between a jet and (MHT-jet)
+
+    // Maximum phi angle between a jet and (MHT-jet)
     double fMaxDeltaPhiJetMHT;
-    /// Minimum Delta R between a jet and (MHT-jet)
+
+    // Minimum Delta R between a jet and (MHT-jet)
     double fMinDeltaRJetMHT;
-    /// Maximum Delta R between a jet and (MHT-jet)
+    
+    // Maximum Delta R between a jet and (MHT-jet)
     double fMinDeltaRReversedJetMHT;
   };
   
@@ -117,6 +149,9 @@ private:
   const float fJetEtaCut;
   const float fTauMatchingDeltaR;
   const DirectionalCut<int> fNumberOfJetsCut;
+  const DirectionalCut<double> fHTCut;
+  const DirectionalCut<double> fJTCut;
+  const DirectionalCut<double> fMHTCut;
   
   // Event counter for passing selection
   Count cPassedJetSelection;
@@ -128,7 +163,11 @@ private:
   Count cSubPassedEta;
   Count cSubPassedPt;
   Count cSubPassedJetCount;
-  // Histograms
+  Count cSubPassedHT;
+  Count cSubPassedJT;
+  Count cSubPassedMHT;
+
+  // Histograms (1D)
   WrappedTH1 *hJetPtAll;
   WrappedTH1 *hJetEtaAll;
   WrappedTH1 *hJetPtPassed;
@@ -137,6 +176,14 @@ private:
   std::vector<WrappedTH1*> hSelectedJetEta;
   WrappedTH1 *hJetMatchingToTauDeltaR;
   WrappedTH1 *hJetMatchingToTauPtRatio;
+  WrappedTH1 *hHTAll;
+  WrappedTH1 *hJTAll;
+  WrappedTH1 *hMHTAll;
+  WrappedTH1 *hHTPassed;
+  WrappedTH1 *hJTPassed;
+  WrappedTH1 *hMHTPassed;
+
+
 };
 
 #endif

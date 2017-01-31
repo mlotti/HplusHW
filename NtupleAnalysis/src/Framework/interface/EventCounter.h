@@ -49,7 +49,7 @@ private:
     bool contains(const std::string& l) const;
     size_t getLabelIndex(const std::string& l) const;
 
-    size_t insert(const std::string& label, double initialValue=0.0);
+    size_t insert(const std::string& label, int initialValue=0);
 
     void incrementCount(size_t countIndex, double weight);
     long int value(size_t countIndex);

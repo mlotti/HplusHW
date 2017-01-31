@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+import sys
 
-dataEras = ["2015"]
+dataEras = ["2016"]
 #dataEras = ["2015B","2015C"]
 searchModes = ["80to1000"]
 
@@ -8,19 +9,20 @@ from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 
 process = Process("BTagEfficiencyAnalysis")
 
+
 # Example of adding a dataset which has its files defined in data/<dataset_name>.txt file
 #process.addDatasets(["TTbar_HBWB_HToTauNu_M_160_13TeV_pythia6"])
 
 # Example of adding datasets from a multicrab directory
-import sys
 if len(sys.argv) < 2:
     print "Usage: ./btagEfficiencyAnalysis.py <path-to-multicrab-directory>"
     sys.exit(0)
-process.addDatasetsFromMulticrab(sys.argv[1])
+process.addDatasetsFromMulticrab(sys.argv[1], blacklist=["ChargedHiggs"])
 
 # Add config
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
 # Disable rtau
+allSelections.TauSelection.prongs = 1
 allSelections.TauSelection.rtau = 0.0
 allSelections.__setattr__("jetPtCutMin", 0.0)
 allSelections.__setattr__("jetPtCutMax", 99990.0)

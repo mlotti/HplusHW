@@ -288,7 +288,7 @@ void SelectorImpl::SlaveTerminate() {
   delete fBranchManager;
   if(fOutputFile) {
     fOutputFile->Write();
-    std::cout << "    Saved output file" << std::endl;
+    std::cout << "\tSaved output file       : " << fOutputFile->GetName() << std::endl;
     gROOT->GetListOfFiles()->Remove(fOutputFile);
     fOutputFile->Close();
     if(fProofFile) {
@@ -321,7 +321,8 @@ void SelectorImpl::printStatus() {
 
   if (fProcessed % fPrintStep == 0) {
     double myFraction = static_cast<double>(fProcessed) / static_cast<double>(fEntries);
-    std::cout << "\rProcessing ... ";
+    //std::cout << "\r\tProcessing ... ";
+    std::cout << "\r\t";
     
     Long64_t bytes = 0;
     double timeDiff = 1;
@@ -358,7 +359,7 @@ void SelectorImpl::printStatus() {
       int myMinutes = static_cast<int>(myTimeEstimate / 60);
       myTimeEstimate -= static_cast<double>(myMinutes * 60);
       int mySeconds = static_cast<int>(myTimeEstimate);
-      std::cout << "estimated time: ";
+      std::cout << "Estimated time          : ";
       if (myHours) {
         std::cout << std::setw(2) << std::setfill('0') << myHours << ":";
       }
@@ -376,7 +377,8 @@ void SelectorImpl::resetStatus() {
   if(!fPrintStatus) return;
 
   fStopwatch.Stop();
-  std::cout << "\r    Dataset processed (" << fProcessed << " entries). " << std::endl;
+  // std::cout << "\n\tDataset processed (" << fProcessed << " entries). " << std::endl;
+  std::cout << "\n\tTotal entries processed : " << fProcessed << std::endl;
   //fStopwatch.Print();
   fPrintStep = 20000;
 }

@@ -38,16 +38,16 @@ private:
   MuonSelection fMuonSelection;
   TauSelection fTauSelection;
   JetSelection fJetSelection;
-  // AngularCutsCollinear fAngularCutsCollinear;
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
   METSelection fMETSelection;
-  // AngularCutsBackToBack fAngularCutsBackToBack;
+  TopologySelection fTopologySelection;
+  TopSelection fTopSelection;
   Count cSelected;
     
   // Non-common histograms
-  WrappedTH1 *hAssociatedTop_Pt;
-  WrappedTH1 *hAssociatedTop_Eta;
+  // WrappedTH1 *hAssociatedTop_Pt;
+  // WrappedTH1 *hAssociatedTop_Eta;
 
 };
 
@@ -69,11 +69,11 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fMuonSelection(config.getParameter<ParameterSet>("MuonSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    // fAngularCutsCollinear(config.getParameter<ParameterSet>("AngularCutsCollinear"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
     fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    // fAngularCutsBackToBack(config.getParameter<ParameterSet>("AngularCutsBackToBack"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cSelected(fEventCounter.addCounter("Selected Events"))
 { }
 
@@ -90,22 +90,22 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fMuonSelection.bookHistograms(dir);
   fTauSelection.bookHistograms(dir);
   fJetSelection.bookHistograms(dir);
-  // fAngularCutsCollinear.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
-  // fAngularCutsBackToBack.bookHistograms(dir);
+  fTopologySelection.bookHistograms(dir);
+  fTopSelection.bookHistograms(dir);
   
   // Book non-common histograms
-  const int nBinsPt   = cfg_PtBinSetting.bins();
-  const double minPt  = cfg_PtBinSetting.min();
-  const double maxPt  = cfg_PtBinSetting.max();
+  // const int nBinsPt   = cfg_PtBinSetting.bins();
+  // const double minPt  = cfg_PtBinSetting.min();
+  // const double maxPt  = cfg_PtBinSetting.max();
   
-  const int nBinsEta  = cfg_EtaBinSetting.bins();
-  const double minEta = cfg_EtaBinSetting.min();
-  const double maxEta = cfg_EtaBinSetting.max();
+  // const int nBinsEta  = cfg_EtaBinSetting.bins();
+  // const double minEta = cfg_EtaBinSetting.min();
+  // const double maxEta = cfg_EtaBinSetting.max();
  
-  hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
+  // hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  // hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
   
   return;
 }
@@ -130,6 +130,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // GenParticle analysis
   //================================================================================================   
   if (0) std::cout << "=== GenParticles" << std::endl;
+
   // For-loop: GenParticles
   //  if (fEvent.isMC()) {
   //    
@@ -255,14 +256,6 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   if (0) std::cout << "=== BJet selection" << std::endl;
   const BJetSelection::Data bjetData = fBJetSelection.analyze(fEvent, jetData);
-
-  // Fill final shape plots with b tag efficiency applied as an event weight
-  //if (silentMETData.passedSelection()) {
-  // const AngularCutsBackToBack::Data silentBackToBackData = fAngularCutsBackToBack.silentAnalyze(fEvent, tauData.getSelectedTau(), jetData, silentMETData);
-  // if (silentBackToBackData.passedSelection()) {
-  // fCommonPlots.fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(fEvent, silentMETData, bjetData.getBTaggingPassProbability());
-  // }
-  // }
   if (!bjetData.passedSelection()) return;
 
 
@@ -285,14 +278,21 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   if (!METData.passedSelection()) return;
 
 
+  //================================================================================================
+  // 12) Topology selection
+  //================================================================================================
+  if (0) std::cout << "=== Topology selection" << std::endl;
+  const TopologySelection::Data TopologyData = fTopologySelection.analyze(fEvent, jetData);
+  if (!TopologyData.passedSelection()) return;
+
 
   //================================================================================================
-  // 12) HT selection
+  // 13) Top selection
   //================================================================================================
-  // if (0) std::cout << "=== HT selection" << std::endl;
-  // const METSelection::Data HTData = fMETSelection.analyze(fEvent, nVertices);
-  // if (!HTData.passedSelection()) return;
-  
+  if (0) std::cout << "=== Top selection" << std::endl;
+  const TopSelection::Data TopData = fTopSelection.analyze(fEvent, jetData, bjetData);
+  if (!TopData.passedSelection()) return;
+
 
   //================================================================================================
   // All cuts passed

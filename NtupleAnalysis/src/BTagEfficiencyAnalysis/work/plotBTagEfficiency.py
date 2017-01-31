@@ -170,7 +170,7 @@ def doPlot(name, dset, errorlevel, optimizationMode, lumi):
     myPlot.setEnergy("13")
     #myPlot.setDefaultStyles()
     myParams = {}
-    myParams["xlabel"] = "Jet p_{T}, GeV"
+    myParams["xlabel"] = "Jet p_{T} (GeV)"
     myParams["ylabel"] = "Probability for passing b tagging"
     myParams["log"] = True
     myParams["cmsExtraText"] = "Simulation"

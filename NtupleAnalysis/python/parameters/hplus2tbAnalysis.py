@@ -17,29 +17,7 @@ trigger = PSet(
   # No need to specify version numbers, they are automatically scanned in range 1--100 (remove the '_v' suffix)
     triggerOR = [
         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
-        # "HLT_PFHT450_SixJet40_BTagCSV_p056",
-        #"HLT_QuadJet45_DoubleBTagCSV_p087",
-        #"HLT_QuadPFJetBF",
-        #"HLT_PFHT300",
-        #"HLT_PFHT400",
-        #"HLT_PFHT475",
-        #"HLT_PFHT600",
-        #"HLT_PFHT650",
-        #"HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
-        #"HLT_PFHT450_SixJet40_BTagCSV_p056",
-        #"HLT_PFHT400_SixJet30",
-        #"HLT_PFHT450_SixJet40",
-        #"HLT_HT200",
-        #"HLT_HT275",
-        #"HLT_HT325",
-        #"HLT_HT425",
-        #"HLT_HT575",
-        #"HLT_HT650",
-        #"HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq200",
-        #"HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq460",
-        #"HLT_QuadPFJet_BTagCSV_p016_p11_VBF_Mqq240",
-        #"HLT_QuadPFJet_BTagCSV_p016_VBF_Mqq500",
-        #"HLT_QuadPFJet_VBF",
+        "HLT_PFHT450_SixJet40_BTagCSV_p056",
     ],
   triggerOR2 = [],
 )
@@ -55,7 +33,7 @@ trigger = PSet(
 tauSelection = PSet(
     applyTriggerMatching = False,
     triggerMatchingCone  = 0.1,  # DeltaR for matching offline tau with trigger tau
-    tauPtCut             = 60.0, # for heavy H+, overriden in signalAnalysis.py for light H+
+    tauPtCut             = 40.0, # for heavy H+, overriden in signalAnalysis.py for light H+
     tauEtaCut            = 2.1,  #
     tauLdgTrkPtCut       = 30.0, #
     prongs               = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
@@ -112,14 +90,20 @@ muVeto = PSet(
 #================================================================================================
 jetSelection = PSet(
     jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-    jetPtCut                 = 30.0,
-    jetEtaCut                =  5.0,
-    numberOfJetsCutValue     =  6,
+    jetPtCut                 = 40.0,
+    jetEtaCut                = 5.0,
+    numberOfJetsCutValue     = 7,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
     jetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
     jetPUIDDiscr             = "",        # does not work at the moment 
-    tauMatchingDeltaR        = 0.4,       # todo: remove dependency
-    # jetLdgPtCuts             = [70.0, 50.0, 40.0],
+    tauMatchingDeltaR        = 0.4,
+    HTCutValue               = 500.0,
+    HTCutDirection           = ">=",
+    JTCutValue               = 0.0,
+    JTCutDirection           = ">=",
+    MHTCutValue              = 0.0,
+    MHTCutDirection          = ">=",
+    # jetLdgPtCuts           = [70.0, 50.0, 40.0],
 )
 
 #================================================================================================
@@ -130,7 +114,7 @@ bjetSelection = PSet(
     jetEtaCut                 = 2.5,
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Loose",
-    numberOfBJetsCutValue     = 2,
+    numberOfBJetsCutValue     = 3,
     numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
 
@@ -143,8 +127,8 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 # MET selection
 #================================================================================================
 metSelection = PSet(
-    METCutValue                 = 100.0,
-    METCutDirection             = "<=",        # options: ==, !=, <, <=, >, >=
+    METCutValue                 = -1000.0,
+    METCutDirection             = ">",         # options: ==, !=, <, <=, >, >=
     METSignificanceCutValue     = -1000.0,
     METSignificanceCutDirection = ">",         # options: ==, !=, <, <=, >, >=
     METType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
@@ -153,15 +137,43 @@ metSelection = PSet(
 
 
 #================================================================================================
-# HT selection
+# Topology selection
 #================================================================================================
-htSelection = PSet(
-    HtCutValue                 = 300.0,
-    HtCutDirection             = ">=",        # options: ==, !=, <, <=, >, >=
-    HtSignificanceCutValue     = -1000.0,
-    HtSignificanceCutDirection = ">=",        # options: ==, !=, <, <=, >, >=
-    # HTType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
+topologySelection = PSet(
+    SphericityCutValue           = 100.0,   # 0.0 <= S <= 1.0
+    SphericityCutDirection       = "<=",    # options: ==, !=, <, <=, >, >=
+    AplanarityCutValue           = 100.0,   # 0.0 <= A <= 0.5
+    AplanarityCutDirection       = "<=",  
+    PlanarityCutValue            = 100.0,   # 0.0 <= P <= 0.5
+    PlanarityCutDirection        = "<=",  
+    CircularityCutValue          = 100.0,   # 0.0 <= C <= 0.5
+    CircularityCutDirection      = "<=",  
+    Y23CutValue                  = 100.0,   # 0.0 <= y23 <= 0.25
+    Y23CutDirection              = "<=",  
+    CparameterCutValue           = 100.0,   # 0.0 <= C <= 1.0
+    CparameterCutDirection       = "<=", 
+    DparameterCutValue           = 100.0,   # 0.0 <= D <= 1.0
+    DparameterCutDirection       = "<=",  
+    FoxWolframMomentCutValue     = 100.0,   # 0.0 <= H2 <= 1.0
+    FoxWolframMomentCutDirection = "<=", 
+    AlphaTCutValue               = 1000.0,  # 0.0 <= alphaT ~ 2.0 (alphaT->0.5 for perfectly balanced events)
+    AlphaTCutDirection           = "<=", 
+    CentralityCutValue           = 100.0,   # 0.0 <= Centrality ~ 1.0
+    CentralityCutDirection       = "<=",
 )
+
+
+#================================================================================================
+# Top selection
+#================================================================================================
+topSelection = PSet(
+    ChiSqrCutValue     = 0.0,
+    ChiSqrCutDirection = ">",    # options: ==, !=, <, <=, >, >=
+    MassW              = 80.385,
+    DiJetSigma         = 10.2,
+    TriJetSigma        = 27.2,
+)
+
 
 #================================================================================================
 # MET trigger SF
@@ -211,11 +223,12 @@ allSelections = PSet(
     CommonPlots           = commonPlotsOptions,
     ElectronSelection     = eVeto,
     HistogramAmbientLevel = histogramAmbientLevel,
-    HtSelection           = htSelection,
     JetSelection          = jetSelection,
     TauSelection          = tauSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,
+    TopologySelection     = topologySelection,
+    TopSelection          = topSelection,
     MuonSelection         = muVeto,
     Trigger               = trigger,
     Verbose               = verbose,

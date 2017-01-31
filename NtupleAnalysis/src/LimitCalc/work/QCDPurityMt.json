@@ -1,0 +1,17 @@
+{
+    "title"           : "Purity",
+    "histogram"       : "ForDataDrivenCtrlPlots/shapeTransverseMass_Purity",
+    "saveDir"         : "TestingPlots",
+    "samples"         : ["QCDMeasurementMT"],
+    "rebinx"          : 1,
+    "xlabel"          : "m_{T} (GeV/c^{2})",
+    "ylabel"          : "Fake tau purity",
+    "divideByBinWidth": "True",
+    "logy"            : "False",
+    "logx"            : "False",
+    "drawStyle"       : "EP",
+    "markerStyle"     : 20,
+    "markerColor"     : 2,
+    "markerSize"      : 0.5,
+    "opts"            : {"ymin": 0, "ymax": 1.1, "xmax": 700}
+}

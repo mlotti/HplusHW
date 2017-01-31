@@ -56,7 +56,7 @@ _dataEras = {
     "Run2016D": ["_Run2016D"],
     "Run2016E": ["_Run2016E"],
     "Run2016F": ["_Run2016F"],
-    "Run2016": ["_Run2016B", "_Run2016C", "_Run2016D","_Run2016E","_Run2016F", "_Run2016G"]
+    "Run2016": ["_Run2016B", "_Run2016C", "_Run2016D","_Run2016E","_Run2016F", "_Run2016G", "_Run2016H"]
 }
 
 
@@ -2962,6 +2962,8 @@ class Dataset:
         # The unweighted counters are allowed to not exist unless
         # weightedCounters are also enabled
         normalizationCheckStatus = True
+        nAllEvts  = 0
+        nPUReEvts = 0
         try:
             (counter, realName) = self.getRootHisto(self.counterDir+"/counter")
             ctr = _histoToCounter(counter)
@@ -2974,17 +2976,19 @@ class Dataset:
                     allEventsBin = i
             if allEventsBin != None and allEventsBin > 0:
                 if counter.GetBinContent(allEventsBin) < counter.GetBinContent(allEventsBin+1):
+                    nAllEvts  = counter.GetBinContent(allEventsBin)
+                    nPUReEvts = counter.GetBinContent(allEventsBin+1)
                     normalizationCheckStatus = False
         except HistogramNotFoundException, e:
             if not self._weightedCounters:
                 raise Exception("Could not find counter histogram, message: %s" % str(e))
             self.nAllEventsUnweighted = -1
         if not normalizationCheckStatus:
-            msg  = "Error: dset=%s: Unweighted skimcounter is smaller than all events counter of analysis!" % (self.name)
-            msg += "Please check (this is known to happen when running PROOF on samples with negative generator weights."
+            msg  = "Error in dset=%s: Base::AllEvents counter (=%s) is smaller than the Base::PUReweighting counter (=%s)" % (self.name, nAllEvts, nPUReEvts)
+            msg += "\n\tPlease check this (Know to happen when running PROOF on samples with negative generator weights)."
             #raise Exception(msg)
             Print(msg)
-            raw_input("\tPress any key to continue")
+            raw_input("\tPress any key to continue: ")
 
         self.nAllEventsWeighted = None
         self.nAllEvents = self.nAllEventsUnweighted
@@ -3105,6 +3109,7 @@ class Dataset:
         # Ignore if not MC
         if not self.isMC():
             return
+
         # Look at configInfo
         if not "isPileupReweighted" in self.info.keys():
             raise Exception("Key 'isPileupReweighted' missing in configinfo histogram!")
@@ -4312,7 +4317,7 @@ class DatasetPrecursor:
         Verbose("Opening ROOT files", False)
         for name in self._filenames:
 
-            Verbose(name, False)
+            Verbose("Opening ROOT file \"%s\"" % (name), False)
             rf = ROOT.TFile.Open(name)
 
             # Below is important to use '==' instead of 'is' to check for

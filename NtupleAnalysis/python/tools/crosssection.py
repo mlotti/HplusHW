@@ -113,6 +113,7 @@ class CrossSectionList:
 # [14] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV / GenXSecAnalyzer
 # [15] McM
 # [16] https://twiki.cern.ch/twiki/bin/view/CMS/HowToGenXSecAnalyzer#Running_the_GenXSecAnalyzer_on_a
+# [17] https://twiki.cern.ch/twiki/bin/view/CMS/SummaryTable1G25ns#DY_Z and https://arxiv.org/pdf/1105.0020v1.pdf
 
 backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt_15to30", {
@@ -208,7 +209,14 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WZ", {
             "7": 18.2, # [3]
             "8": 33.21, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
-            "13": 29.8 + 18.6, # [13] W+ Z/a* + W- Z/a*, MCFM 6.6 m(l+l-) > 40 GeV
+            #"13": 29.8 + 18.6, # [13] W+ Z/a* + W- Z/a*, MCFM 6.6 m(l+l-) > 40 GeV
+            "13": 28.55 + 18.19, # [17]
+            }),
+    CrossSection("WZ_ext1", {
+            "7": 18.2, # [3]
+            "8": 33.21, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
+            #"13": 29.8 + 18.6, # [13] W+ Z/a* + W- Z/a*, MCFM 6.6 m(l+l-) > 40 GeV
+            "13": 28.55 + 18.19, # [17]
             }),
     CrossSection("ZZ", {
             "7": 5.9, # [3]
@@ -398,6 +406,9 @@ backgroundCrossSections = CrossSectionList(
             "7": 0, # []      
             "8": 0.004527, # [1]
             }),
+    CrossSection("DYJetsToQQ_HT180", {
+            "13": 1.209e+03, # 1.209e+03 +- 1.302e+00 pb [16]
+            }),
     CrossSection("GluGluHToTauTau_M125", {
             "13": 1, # dummy value, not really needed as this sample is not merged with anything else
             }),
@@ -428,15 +439,19 @@ backgroundCrossSections = CrossSectionList(
             "7": 1.44, # [5,6]
             "8": 1.76, # [8]
             }),
-            #################### modified
     CrossSection("ST_tW_antitop_5f_inclusiveDecays", {
+            "13": 30.09, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            }),
+    CrossSection("ST_tW_antitop_5f_inclusiveDecays_ext1", {
             "13": 30.09, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_tW_antitop_5f_DS_inclusiveDecays", {
             "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
-            ############################### modified
     CrossSection("ST_tW_top_5f_inclusiveDecays", {
+            "13": 30.11, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            }),
+    CrossSection("ST_tW_top_5f_inclusiveDecays_ext1", {
             "13": 30.11, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_tW_top_5f_DS_inclusiveDecays", {
@@ -470,31 +485,73 @@ backgroundCrossSections = CrossSectionList(
             }),
     ########################################### Added for H+->tb
     CrossSection("QCD_bEnriched_HT100to200", {
-            "13": 1.318e+06, #1.318e+06 +- 6.249e+03 pb [16] (inputFiles="00356B59-2E1D-E611-BB0F-08606E15EABA.root")
+            "13": 1.318e+06, # 1.318e+06 +- 6.249e+03 pb [16] (only 1 input file used)
             }),
     CrossSection("QCD_bEnriched_HT200to300", {
-            "13": 1.318e+06, # [16] (inputFiles="02A6676C-5942-E611-814D-842B2B7680C9.root")
+            "13": 8.823e+04, # 8.823e+04 +- 3.818e+01 pb [16]
             }),
     CrossSection("QCD_bEnriched_HT300to500", {
-            "13": 8.764e+04, #8.764e+04 +- 2.824e+02 pb [16] (inputFiles="02A6676C-5942-E611-814D-842B2B7680C9.root")
+            "13": 8.764e+04, # 8.764e+04 +- 2.824e+02 pb [16] (only 1 input file used)
             }),
     CrossSection("QCD_bEnriched_HT500to700", {
-            "13": 1.598e+03, #1.598e+03 +- 7.620e+00 pb [16] (inputFiles="00DFB564-393F-E611-A97A-02163E012F6E.root")
+            "13": 1.596e+03, # 1.596e+03 +- 9.784e-01 pb [16]
             }),
     CrossSection("QCD_bEnriched_HT700to1000", {
-            "13": 3.197e+02, #3.197e+02 +- 1.518e+00 pb [16] (inputFiles="000E889E-0E1B-E611-A3D8-0025905C3E38.root")
+            "13": 3.213e+02, # 3.213e+02 +- 3.283e-01 pb [16]
             }),
     CrossSection("QCD_bEnriched_HT1000to1500", {
-            "13": 5.093e+01, #5.093e+01 +- 3.080e-01 pb [16] (inputFiles="16C63A43-591E-E611-BF07-008CFA197E84.root")
+            "13": 5.093e+01, # 5.093e+01 +- 3.080e-01 pb [16]
             }),
     CrossSection("QCD_bEnriched_HT1500to2000", {
-            "13": 4.383e+00, #4.383e+00 +- 1.492e-01 pb [16] (inputFiles="30A9A48A-7A3A-E611-B1B4-0050560210EC.root")
+            "13": 4.445e+00, # 4.445e+00 +- 1.886e-02 pb [16]
             }),
     CrossSection("QCD_bEnriched_HT2000toInf", {
-            "13": 7.858e-01, #7.858e-01 +- 8.107e-03 pb [16] (inputFiles="0A2A7965-611C-E611-931D-AC853D9DACE1.root")
+            "13": 7.847e-01, # 7.847e-01 +- 4.879e-03 pb [16]
             }),
-    CrossSection("TTTT_ext1", {
-            "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16] (inputFiles="02262C1A-EC1C-E611-B7BF-A0369F310374.root")
+    CrossSection("QCD_HT1500to2000_GenJets5", {
+            "13": 6.718e+01, # 6.718e+01 +- 4.535e-02 pb [16]
+            }),
+    CrossSection("QCD_HT2000toInf_GenJets5", {
+            "13": 1.446e+01, # 1.446e+01 +- 1.846e-02 pb [16]
+            }),
+    CrossSection("QCD_HT1000to1500_BGenFilter", {
+            "13": 1.894e+02, # 1.894e+02 +- 1.660e-01 pb [16]
+            }),
+    CrossSection("QCD_HT1500to2000_BGenFilter", {
+            "13": 2.035e+01, # 2.035e+01 +- 3.256e-02 pb [16]
+            }),
+    CrossSection("QCD_HT50to100", {
+            "13": 2.464e+08, # 2.464e+08 +- 1.081e+05 pb [16]
+            }),
+    CrossSection("QCD_HT100to200", {
+            "13": 2.803e+07, # 2.803e+07 +- 1.747e+04 pb [16]
+            }),
+    CrossSection("QCD_HT200to300", {
+            "13": 1.713e+06, # 1.713e+06 +- 8.202e+02 pb [16]
+            }),
+    CrossSection("QCD_HT300to500", {
+            "13": 3.475e+05, # 3.475e+05 +- 1.464e+02 pb [16]
+            }),
+    CrossSection("QCD_HT500to700", {
+            "13": 3.208e+04, # 3.208e+04 +- 1.447e+01 pb [16]
+            }),
+    CrossSection("QCD_HT700to1000", {
+            "13": 6.833e+03, # 6.833e+03 +- 1.668e+00 pb [16]
+            }),
+    CrossSection("QCD_HT1000to1500", {
+            "13": 1.208e+03, # 1.208e+03 +- 5.346e-01 pb [16]
+            }),
+    CrossSection("QCD_HT1500to2000", {
+            "13": 1.201e+02, # 1.201e+02 +- 5.823e-02 pb [16]
+            }),
+    CrossSection("QCD_HT2000toInf", {
+            "13": 2.526e+01, # 2.526e+01 +- 1.728e-02 pb [16]
+            }),
+    CrossSection("TTTT", {
+            "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16]
+            }),
+    CrossSection("TTTT_ext", {
+            "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16]
             }),
     CrossSection("TTWJetsToQQ", {
             "13": 4.034e-01, #4.034e-01 +- 2.493e-03 pb [16] (inputFiles="2211E19A-CC1E-E611-97CC-44A84225C911.root")

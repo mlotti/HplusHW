@@ -11,6 +11,8 @@ Usage (advanced):
 hplusPrintCounters.py --mainCounterOnly --noinfo --verbose --weighted --dataEra "Run2016" --mergeData
 hplusPrintCounters.py --dataEra "Run2016" --printInfo --mode "events" --mergeForDataMC --weighted
 hplusPrintCounters.py --dataEra "Run2016" --printInfo --mode "eff" --mergeForDataMC
+hplusPrintCounters.py --dataEra "Run2016" --printInfo --mergeForDataMC --mode "events" --weighted --includeTasks "QCD_Pt|TT_ext3|ZJets|Run2016G|Run2016F_PromptReco_v1_278801_278808" --mainCounterOnly
+
 
 Useful Links:
 https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsChFullyHadronic
@@ -325,5 +327,3 @@ if __name__ == "__main__":
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
     sys.exit(main(opts))
-
-#  LocalWords:  efficiencies spreadsgeet
