@@ -539,12 +539,22 @@ class LimitMultiCrabBase:
                     rfname = None
                     if "%s" in rf:
                         rfname = os.path.join(self.datacardDirectory, rf % mass)
+                        aux.addToDictList(self.rootfiles, mass, rfname)
                     else:
                         rfname = os.path.join(self.datacardDirectory, rf)
+                        aux.addToDictList(self.rootfiles, mass, rfname)
+                    # if root files are not found, try with 1pr and 3pr extensions in the name
                     if not os.path.isfile(rfname):
-#                        raise Exception("ROOT file (for shapes) '%s' does not exist!" % rfname)
-                        print("\033[91mWarning:  ROOT file (for shapes) '%s' does not exist!\033[00m" % rfname)
-                    aux.addToDictList(self.rootfiles, mass, rfname)
+                        rf_1pr = rf.replace(".root","_1pr.root")
+                        rf_3pr = rf.replace(".root","_3pr.root")
+                        rfname_1pr = os.path.join(self.datacardDirectory, rf_1pr % mass)
+                        rfname_3pr = os.path.join(self.datacardDirectory, rf_3pr % mass)
+                        aux.addToDictList(self.rootfiles, mass, rfname_1pr)
+                        aux.addToDictList(self.rootfiles, mass, rfname_3pr)     
+                        if not os.path.isfile(rfname_1pr) or not os.path.isfile(rfname_3pr):                   
+                        # if still not found, raise exception/warning
+#                            raise Exception("ROOT file (for shapes) '%s' does not exist!" % rfname)
+                            print("\033[91mWarning:  ROOT file (for shapes) '%s' does not exist!\033[00m" % rfname)
 
     ## Create the multicrab task directory
     #
