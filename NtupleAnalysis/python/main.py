@@ -514,23 +514,27 @@ class Process:
                 print "Skipping %s, no analyzers" % dset.getName()
                 continue
 
-            Print("Processing dataset (%d/%d): %s" % (ndset, len(self._datasets), dset.getName()) )
+            Print("Processing dataset (%d/%d)" % (ndset, len(self._datasets) ))
+            align= "{:<23} {:<1} {:<60}"
+            info = {}
+            info["Dataset"] = dset.getName()
             if dset.getDataVersion().isData():
                 lumivalue = "--- not available in lumi.json (or lumi.json not available) ---"
                 if dset.getName() in lumidata.keys():
                     lumivalue = lumidata[dset.getName()]
-                Print("Luminosity: %s fb-1" % (lumivalue), False)
-            Print("Using pileup weights: %s" % (usePUweights), False)
-            if useTopPtCorrection:
-                Print("Using top pt weights: True")
+                info["Luminosity"] = str(lumivalue) + " fb-1"
+            info["UsePUweights"] = usePUweights
+            info["UseTopPtCorrection"] = useTopPtCorrection
+            for key in info:
+                Print(align.format(key, ":", info[key]), False)
 
+            # Create dir for dataset ROOTT files   
             resDir = os.path.join(outputDir, dset.getName(), "res")
             resFileName = os.path.join(resDir, "histograms-%s.root"%dset.getName())
-
             os.makedirs(resDir)
 
             tchain = ROOT.TChain("Events")
-
+            # For-loop: All file names for dataset
             for f in dset.getFileNames():
                 tchain.Add(f)
             tchain.SetCacheLearnEntries(1000);
@@ -685,17 +689,33 @@ class Process:
                 readMbytes = float(readBytesStop-readBytesStart)/1024/1024
                 calls = " (%d calls)" % (readCallsStop-readCallsStart)
             realTime = timeStop-timeStart
-            print "    Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB%s, read speed %.2f MB/s" % (realTime, cpuTime, cpuTime/realTime*100, readMbytes, calls, readMbytes/realTime)
-	    print
-            realTimeTotal += realTime
-            cpuTimeTotal += cpuTime
+            align= "{:<23} {:<1} {:<60}"
+            info = {}
+            info["Real time"]    = "%.3f" % realTime + " s"
+            info["CPU time"]     = "%.3f" % cpuTime  + " s"
+            info["Read Percent"]= "%.3f" % (cpuTime/realTime*100) + " MB"
+            info["Read Size"]    = "%.3f" % (readMbytes) + " MB"
+            info["Read Calls"]   = "%s"   % (readCallsStop-readCallsStart)
+            info["Read Speed"]   = "%.3f" % (readMbytes/realTime) + " MB/s"
+            for key in info:
+                Print(align.format(key, ":", info[key]), False)
+
+            # Time accumulation
+            realTimeTotal   += realTime
+            cpuTimeTotal    += cpuTime
             readMbytesTotal += readMbytes
 
-        print
+        # Total time stats
         if len(self._datasets) > 1:
-            print "    Total: Real time %.2f, CPU time %.2f (%.1f %%), read %.2f MB, read speed %.2f MB/s" % (realTimeTotal, cpuTimeTotal, cpuTimeTotal/realTimeTotal*100, readMbytesTotal, readMbytesTotal/realTimeTotal)
-        print "    Results are in", outputDir
-
+            Print("Usage statistics", True)
+            total = {}
+            total["Real time"]  = "%.3f" % realTimeTotal + " s"
+            total["CPU time"]   = "%.3f" % cpuTimeTotal  + " s (%.1f %% of eal time)" % (cpuTimeTotal/realTimeTotal*100)
+            total["Read size"]  = "%.3f" % (readMbytesTotal) + " MB"
+            total["Read speed"] = "%.3f" % (readMbytes/realTime) + " MB/s"
+            for key in total:
+                Print(align.format(key, ":", total[key]), False)
+        Print("Results are in %s" % (outputDir), True)
         return outputDir
 
     ## Returns PU histograms for data
@@ -740,9 +760,13 @@ class Process:
                 raise Exception("Cannot determine PU spectrum for data!")
         return hPUs
  
-    ## Obtains PU histogram for MC
-    # Returns tuple of N(all events PU weighted) and status of enabling PU weights
     def _parsePUweighting(self, dset, analyzer, aname, hDataPUs, inputList):
+        '''
+        Obtains PU histogram for MC
+        Returns tuple of N(all events PU weighted) and status of enabling PU weights
+        '''
+        Verbose("_parsePUweighting()", True)
+
         if not dset.getDataVersion().isMC():
             return (0.0, False)
         hPUMC = None
@@ -765,31 +789,43 @@ class Process:
         hPUMC = dset.getPileUp("nominal").Clone()
         hPUMC.SetDirectory(None)
 
+        # Sanity checks: Integral and Binning
+        if hDataPUs[aname].Integral() == 0.0:
+            raise Exception("hDataPUs[%s].Integral() = %s! Make sure that the histogram \"configInfo/pileup\" of dataset \"%s\" is not empty!" % (aname, hDataPUs[aname].Integral(), dset.getName()) )
         if hPUMC.GetNbinsX() != hDataPUs[aname].GetNbinsX():
-            raise Exception("Pileup histogram dimension mismatch! data nPU has %d bins and MC nPU has %d bins"%(hDataPUs[aname].GetNbinsX(), hPUMC.GetNbinsX()))
+            raise Exception("Pileup histogram dimension mismatch! data nPU has %d bins and MC nPU has %d bins, for dataset \"%s\"!" % (hDataPUs[aname].GetNbinsX(), hPUMC.GetNbinsX(), dset.getName()) )
+
         hPUMC.SetName("PileUpMC")
 #        if _debugPUreweighting:
 #            for k in range(hPUMC.GetNbinsX()):
 #                print "Debug(PUreweighting): MCPU:%d:%f"%(k+1, hPUMC.GetBinContent(k+1))
         inputList.Add(hPUMC)
+
         if analyzer.exists("usePileupWeights"):
             usePUweights = analyzer.__getattr__("usePileupWeights")           
             if _debugPUreweighting:
-                print "Debug(PUreweighting,aname=%s): hDataPUs[aname].Integral(): %f"%(aname,hDataPUs[aname].Integral())                        
-                print "Debug(PUreweighting,aname=%s): hDataPUs[aname].Mean(): %f"%(aname,hDataPUs[aname].GetMean())                        
-            if hDataPUs[aname].Integral() > 0.0:
-                factor = hPUMC.Integral() / hDataPUs[aname].Integral()
-                for k in range(0, hPUMC.GetNbinsX()+2):
-                    if hPUMC.GetBinContent(k) > 0.0:
-                        w = hDataPUs[aname].GetBinContent(k) / hPUMC.GetBinContent(k) * factor
-                        nAllEventsPUWeighted += w * hPUMC.GetBinContent(k)
+                Print("Debug(PUreweighting,aname=%s): hDataPUs[aname].Integral(): %f"%(aname,hDataPUs[aname].Integral()), True)
+                Print("Debug(PUreweighting,aname=%s): hDataPUs[aname].Mean(): %f"%(aname,hDataPUs[aname].GetMean()), True)
+
+            # Apply PU-reweighting
+            factor = hPUMC.Integral() / hDataPUs[aname].Integral()
+            for k in range(0, hPUMC.GetNbinsX()+2):
+                if hPUMC.GetBinContent(k) > 0.0:
+                    w = hDataPUs[aname].GetBinContent(k) / hPUMC.GetBinContent(k) * factor
+                    nAllEventsPUWeighted += w * hPUMC.GetBinContent(k)
             if _debugPUreweighting:
-                print "Debug(PUreweighting,aname=%s): normalization factor: %f"%(aname,factor)                        
-                print "Debug(PUreweighting,aname=%s): nAllEventsPUWeighted: %f"%(aname,nAllEventsPUWeighted)                        
+                Print("Debug(PUreweighting, aname=%s): normalization factor: %f"%(aname,factor), True)
+                Print("Debug(PUreweighting, aname=%s): nAllEventsPUWeighted: %f"%(aname,nAllEventsPUWeighted), True)
+
         return (nAllEventsPUWeighted, usePUweights)
+
  
-    ## Sums the skim counters from input files and returns a pset containing them 
     def _getSkimCounterSum(self, datasetFilenameList):
+        '''
+        Sums the skim counters from input files and returns a pset containing them 
+        '''
+        Verbose("_getSkimCounterSum()", True)
+
         hSkimCounterSum = None
         for inname in datasetFilenameList:
             fIN = ROOT.TFile.Open(inname)

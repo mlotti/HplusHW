@@ -168,11 +168,13 @@ def main():
     #================================================================================================
     # Build analysis modules
     #================================================================================================
+    PrintOptions(opts)
     builder = AnalysisBuilder(prefix,
                               dataEras,
                               searchModes,
-                              usePUreweighting=not opts.noPUreweighting,
-                              doSystematicVariations=opts.systematics)
+                              usePUreweighting       = opts.usePUreweighting,
+                              useTopPtReweighting    = opts.useTopPtReweighting,
+                              doSystematicVariations = opts.doSystematics)
 
     # Perform variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])
@@ -211,7 +213,35 @@ def main():
         Print("Running process (no PROOF)")
         process.run()
 
-        
+
+#================================================================================================
+def PrintOptions(opts):
+    '''
+    '''
+    table    = []
+    msgAlign = "{:<30} {:<30} {:<30}"
+    title    =  msgAlign.format("Option", "Current Value", "Default Value")
+    hLine    = "="*len(title)
+    table.append(hLine)
+    table.append(title)
+    table.append(hLine)
+    table.append( msgAlign.format("mcrab" , opts.mcrab , "") )
+    table.append( msgAlign.format("jCores", opts.jCores, "") )
+    table.append( msgAlign.format("includeOnlyTasks", opts.includeOnlyTasks, "") )
+    table.append( msgAlign.format("excludeTasks", opts.excludeTasks, "") )
+    table.append( msgAlign.format("nEvts", opts.nEvts, NEVTS) )
+    table.append( msgAlign.format("verbose", opts.verbose, VERBOSE) )
+    table.append( msgAlign.format("histoLevel", opts.histoLevel, HISTOLEVEL) )
+    table.append( msgAlign.format("usePUreweighting", opts.usePUreweighting, PUREWEIGHT) )
+    table.append( msgAlign.format("useTopPtReweighting", opts.useTopPtReweighting, TOPPTREWEIGHT) )
+    table.append( msgAlign.format("doSystematics", opts.doSystematics, DOSYSTEMATICS) ) 
+    table.append( hLine )
+    
+    for i, line in enumerate(table):
+        Print(line, i==0)
+    return
+
+
 #================================================================================================      
 if __name__ == "__main__":
     '''
@@ -231,10 +261,13 @@ if __name__ == "__main__":
     '''
 
     # Default Values
-    VERBOSE     = False
-    PUREWEIGHT  = False
-    SYSTEMATICS = False
-    
+    VERBOSE = False
+    NEVTS = -1
+    HISTOLEVEL = "Debug"
+    PUREWEIGHT = True
+    TOPPTREWEIGHT = True
+    DOSYSTEMATICS = False
+
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
                       help="Path to the multicrab directory for input")
@@ -248,20 +281,23 @@ if __name__ == "__main__":
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
 
-    parser.add_option("-n", "--nEvts", dest="nEvts", action="store", type=int, default = -1,
-                      help="Number of events to run on")
+    parser.add_option("-n", "--nEvts", dest="nEvts", action="store", type=int, default = NEVTS,
+                      help="Number of events to run on (default: %s" % (NEVTS) )
 
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default = VERBOSE, 
                       help="Enable verbosity (for debugging) (default: %s)" % (VERBOSE))
 
-    parser.add_option("-h", "--histoLevel", dest="histoLevel", action="store", default = "Debug",
-                      help="Histogram ambient level (default: Debug)")
+    parser.add_option("-h", "--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
+                      help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
-    parser.add_option("--noPU", dest="noPUreweighting", action="store_true", default = PUREWEIGHT, 
+    parser.add_option("--noPU", dest="usePUreweighting", action="store_false", default = PUREWEIGHT, 
                       help="Do NOT apply Pileup re-weighting (default: %s)" % (PUREWEIGHT) )
 
-    parser.add_option("--systematics", dest="systematics", action="store_true", default = SYSTEMATICS, 
-                      help="Do systematics variations  (default: %s)" % (SYSTEMATICS) )
+    parser.add_option("--noTopPt", dest="useTopPtReweighting", action="store_false", default = TOPPTREWEIGHT, 
+                      help="Do NOT apply top-pt re-weighting (default: %s)" % (TOPPTREWEIGHT) )
+
+    parser.add_option("--doSystematics", dest="doSystematics", action="store_true", default = DOSYSTEMATICS, 
+                      help="Do systematics variations  (default: %s)" % (DOSYSTEMATICS) )
 
     (opts, args) = parser.parse_args()
 

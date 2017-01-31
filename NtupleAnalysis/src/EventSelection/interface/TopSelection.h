@@ -40,7 +40,13 @@ public:
     const math::XYZTLorentzVector Jet4P4() const { return fJet4_p4; } 
     const math::XYZTLorentzVector BJet1P4() const { return fBJet1_p4; } 
     const math::XYZTLorentzVector BJet2P4() const { return fBJet2_p4; } 
-    
+    // 4-momenta of dijet systems
+    const math::XYZTLorentzVector DiJet1P4() const {return fDiJet1_p4; }
+    const math::XYZTLorentzVector DiJet2P4() const {return fDiJet2_p4; }
+    // 4-momenta of trijet systems
+    const math::XYZTLorentzVector TriJet1P4() const {return fTriJet1_p4; }
+    const math::XYZTLorentzVector TriJet2P4() const {return fTriJet2_p4; }
+
     // Fit-related quantities
     const double ChiSqr() const { return fChiSqr; }
 
@@ -57,9 +63,18 @@ public:
     math::XYZTLorentzVector fJet4_p4;
     math::XYZTLorentzVector fBJet1_p4;
     math::XYZTLorentzVector fBJet2_p4;
+    // 4-momenta of dijet systems
+    math::XYZTLorentzVector fDiJet1_p4;
+    math::XYZTLorentzVector fDiJet2_p4;
+    // 4-momenta of trijet systems
+    math::XYZTLorentzVector fTriJet1_p4;
+    math::XYZTLorentzVector fTriJet2_p4;
 
     // Chi-squared value of "fit"
     double fChiSqr;
+
+    // 4-momenta of 3rd bjet (if exists)
+    math::XYZTLorentzVector fBJet3_p4;
 
   };
   
@@ -90,11 +105,11 @@ private:
   
     
   // Input parameters
-  const double fMassW;
-  const double fdiJetSigma;
-  const double ftriJetSigma;
-  const DirectionalCut<double> fChiSqrCut;
-  
+  const double cfg_MassW;
+  const double cfg_diJetSigma;
+  const double cfg_triJetSigma;
+  const DirectionalCut<double> cfg_ChiSqrCut;
+
   // Event counter for passing selection
   Count cPassedTopSelection;
 
@@ -102,11 +117,55 @@ private:
   Count cSubAll;
   Count cSubPassedChiSqCut;
 
+
   // Histograms (1D)
-  //  WrappedTH1 *hJetPtAll;
-  
+  // pt and eta of all jets involved (exept 3rd bjet)
+  WrappedTH1 *h_JetPtAll_Before;
+  WrappedTH1 *h_JetPtAll_After;
+  WrappedTH1 *h_JetEtaAll_Before;
+  WrappedTH1 *h_JetEtaAll_After;
+  // mass distributions of both tops
+  WrappedTH1 *h_TriJetMass_Before;
+  WrappedTH1 *h_TriJetMass_After;
+  // mass distribution of leading top
+  WrappedTH1 *h_LdgTriJetMass_Before;
+  WrappedTH1 *h_LdgTriJetMass_After;
+  // mass distribution of subleading top
+  WrappedTH1 *h_SubLdgTriJetMass_Before;
+  WrappedTH1 *h_SubLdgTriJetMass_After;
+  // mass distribution of closest top to the 3rd bjet
+  WrappedTH1 *h_ClosestTo3rdBJet_TriJetMass_Before;
+  WrappedTH1 *h_ClosestTo3rdBJet_TriJetMass_After;
+  // mass distribution of furthest top to the 3rd bjet
+  WrappedTH1 *h_FurthestTo3rdBJet_TriJetMass_Before;
+  WrappedTH1 *h_FurthestTo3rdBJet_TriJetMass_After;
+  // chi-square value of top fit
+  WrappedTH1 *h_ChiSqr_Before;
+  // mass distributions of both W
+  WrappedTH1 *h_DiJetMass_Before;
+  WrappedTH1 *h_DiJetMass_After;
+  // dR, dPhi, dEta of jets from same W
+  WrappedTH1 *h_DiJet_DR_Before;
+  WrappedTH1 *h_DiJet_DR_After;
+  WrappedTH1 *h_DiJet_DPhi_Before;
+  WrappedTH1 *h_DiJet_DPhi_After;
+  WrappedTH1 *h_DiJet_DEta_Before;
+  WrappedTH1 *h_DiJet_DEta_After;
+  // dR, dPhi, dEta of dijet(W) and the corresponding bjet from top
+  WrappedTH1 *h_DiJetBJet_DR_Before;
+  WrappedTH1 *h_DiJetBJet_DR_After;
+  WrappedTH1 *h_DiJetBJet_DPhi_Before;
+  WrappedTH1 *h_DiJetBJet_DPhi_After;
+  WrappedTH1 *h_DiJetBJet_DEta_Before;
+  WrappedTH1 *h_DiJetBJet_DEta_After;
+
   // Histograms (2D)
-  
+  // mass distributions of both tops Vs chi-square
+  WrappedTH2 *h_TriJetMass_Vs_ChiSqr_Before;
+  // pT distributions of both W Vs DR of Jets from W 
+  WrappedTH2 *h_DiJetPt_Vs_DiJetDR_Before;
+  WrappedTH2 *h_DiJetPt_Vs_DiJetDR_After;
+
 };
 
 #endif
