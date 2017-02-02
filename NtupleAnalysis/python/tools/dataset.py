@@ -2985,10 +2985,9 @@ class Dataset:
             self.nAllEventsUnweighted = -1
         if not normalizationCheckStatus:
             msg  = "Error in dset=%s: Base::AllEvents counter (=%s) is smaller than the Base::PUReweighting counter (=%s)" % (self.name, nAllEvts, nPUReEvts)
-            msg += "\n\tPlease check this (Know to happen when running PROOF on samples with negative generator weights)."
-            #raise Exception(msg)
             Print(msg)
             raw_input("\tPress any key to continue: ")
+            # raise Exception(msg)
 
         self.nAllEventsWeighted = None
         self.nAllEvents = self.nAllEventsUnweighted
@@ -4326,25 +4325,32 @@ class DatasetPrecursor:
                 raise Exception("Unable to open ROOT file '%s' for dataset '%s'" % (name, self._name))
             self._rootFiles.append(rf)
 
+            # Get the data version (e.g. 80Xdata or 80Xmc)
             dv = aux.Get(rf, "configInfo/dataVersion")
             if dv == None:
                 print "Unable to find 'configInfo/dataVersion' from ROOT file '%s', I have no idea if this file is data, MC, or pseudo" % name
-                continue
-                
+                continue                
             if self._dataVersion is None:
                 self._dataVersion = dv.GetTitle()
             else:
                 if self._dataVersion != dv.GetTitle():
                     raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
 
+            # Get the TTree
             isTree = aux.Get(rf, "Events") != None
             if isTree:
-                # pileup (nominal)
-#                pileup = aux.Get(rf, "pileup")
-#                if pileup == None:
-                pileup = aux.Get(rf, "configInfo/pileup")
+
+                # Get the "pileup" histogram under folder "configInfo"
+                puName = "configInfo/pileup"
+                pileup = aux.Get(rf, puName)
+
+                # Sanity checks
                 if pileup == None:
-                    print "Unable to find 'configInfo/pileup' from ROOT file '%s'" % name
+                    Print("Unable to find 'configInfo/pileup' from ROOT file '%s'" % name, True)
+                    sys.exit()
+                if (pileup.Integral() == 0):
+                    raise Exception("Empty pileup histogram \"%s\" in ROOT file \"%s\". Entries = \"%s\"." % (puName, rf.GetName(), pileup.GetEntries()) )
+
                 if self._pileup is None:
                     if pileup != None:
                         self._pileup = pileup
