@@ -34,7 +34,8 @@ _rebinFactor = 10
 
 print "Analysis name:", analysis
 
-selectOnlyBins = []#["Inclusive"] #["1"]
+#selectOnlyBins = [] #["1"]
+selectOnlyBins = ["Inclusive"]
 
 def usage():
     print "\n"
@@ -69,7 +70,7 @@ def main(argv, dsetMgr, moduleInfoString):
     # Read integrated luminosities of data dsetMgr from lumi.json
     dsetMgr.loadLuminosities()
     
-    print "\Datasets list (initial):\n"
+    print "Datasets list (initial):"
     print dsetMgr.getMCDatasetNames()
     print "\n"
 
@@ -80,8 +81,11 @@ def main(argv, dsetMgr, moduleInfoString):
     dsetMgr.remove(filter(lambda name: "DY3JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "DY4JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "WJetsToLNu_HT" in name, dsetMgr.getAllDatasetNames()))
+    # DEBUG TEST: remove one dataset at a time
+    dsetMgr.remove(filter(lambda name: "DYJetsToQQ" in name, dsetMgr.getAllDatasetNames()))
 
-    print "\Datasets after filter removals:\n"
+
+    print "Datasets after filter removals:"
     print dsetMgr.getMCDatasetNames()
     print "\n"
           
@@ -92,7 +96,7 @@ def main(argv, dsetMgr, moduleInfoString):
     # WW, WZ, ZZ to "Diboson"
     plots.mergeRenameReorderForDataMC(dsetMgr)
 
-    print "\Datasets after mergeRenameReorderForDataMC:\n"
+    print "Datasets after mergeRenameReorderForDataMC:"
     print dsetMgr.getMCDatasetNames()
     print "\n"
 
@@ -112,6 +116,9 @@ def main(argv, dsetMgr, moduleInfoString):
     #myMergeList.append("WJetsHT")
     myMergeList.append("WJets")
     myMergeList.append("DYJetsToLL")
+
+    if "DYJetsToQQHT" in dsetMgr.getMCDatasetNames():
+        myMergeList.append("DYJetsToQQHT")
 
     if "SingleTop" in dsetMgr.getMCDatasetNames():
         myMergeList.append("SingleTop")
@@ -159,7 +166,7 @@ def main(argv, dsetMgr, moduleInfoString):
         else:
             for hname in histonames:
                 binIndex = hname.replace("NormalizationMETBaselineTau"+HISTONAME,"")
-                print "DEBUG: We are looking for hisrogram "+COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex
+#                print "DEBUG: We are looking for hisrogram "+COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex
                 hDummy = dsetMgr.getDataset("Data").getDatasetRootHisto(COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex).getHistogram()
                 title = hDummy.GetTitle()
                 title = title.replace("METBaseline"+HISTONAME,"")
