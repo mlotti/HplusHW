@@ -2972,7 +2972,7 @@ class Dataset:
             (counter, realName) = self.getRootHisto(self.counterDir+"/weighted/counter")
             allEventsBin = None
             for i in range(counter.GetNbinsX()):
-                if counter.GetXaxis().GetBinLabel(i+1) == "Base::AllEvents":
+                if counter.GetXaxis().GetBinLabel(i) == "Base::AllEvents":
                     allEventsBin = i
             if allEventsBin != None and allEventsBin > 0:
                 if counter.GetBinContent(allEventsBin) < counter.GetBinContent(allEventsBin+1):
@@ -2985,10 +2985,9 @@ class Dataset:
             self.nAllEventsUnweighted = -1
         if not normalizationCheckStatus:
             msg  = "Error in dset=%s: Base::AllEvents counter (=%s) is smaller than the Base::PUReweighting counter (=%s)" % (self.name, nAllEvts, nPUReEvts)
-            msg += "\n\tPlease check this (Know to happen when running PROOF on samples with negative generator weights)."
-            #raise Exception(msg)
             Print(msg)
             raw_input("\tPress any key to continue: ")
+            # raise Exception(msg)
 
         self.nAllEventsWeighted = None
         self.nAllEvents = self.nAllEventsUnweighted
@@ -3137,26 +3136,35 @@ class Dataset:
             raise Exception("Number of all events is not set for dataset %s! The counter directory was not given, and setNallEvents() was not called." % self.name)
         return self.nAllEvents
 
-    ## Get the cross section normalization factor.
-    #
-    # The normalization factor is defined as crossSection/N(all
-    # events), so by multiplying the number of MC events with the
-    # factor one gets the corresponding cross section.
+    def getNAllUnweightedEvents(self):
+        if not hasattr(self, "nAllEventsUnweighted"):
+            raise Exception("Number of all unweighted events is not set for dataset %s! The counter directory was not given, and setNallEvents() was not called." % self.name)
+        return self.nAllEventsUnweighted
+
     def getNormFactor(self):
-        nAllEvents = self.getNAllEvents()
+        '''
+        Get the cross section normalization factor.
+       
+        The normalization factor is defined as:
+        crossSection/N(all events)
+        so by multiplying the number of MC events with the 
+        factor one gets the corresponding cross section.
+        '''
+        nAllEvents = self.getNAllUnweightedEvents()
         if nAllEvents == 0:
-#            raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateNAllEventsToPUWeighted() has not been called." % self.name)
-             print "Warning: all events == 0"
-             return 0
+            Print("WARNING! nAllEvents = %s" % (nAllEvents), True)
+            return 0
         return self.getCrossSection() / nAllEvents
 
-    ## Check if a ROOT histogram exists in this dataset
-    #
-    # \param name  Name (path) of the ROOT histogram
-    #
-    # If dataset.TreeDraw object is given, it is considered to always
-    # exist.
     def hasRootHisto(self, name, **kwargs):
+        '''
+        Check if a ROOT histogram exists in this dataset
+        
+        \param name  Name (path) of the ROOT histogram
+        
+        If dataset.TreeDraw object is given, it is considered to always
+        exist.
+        '''
         realName = self._translateName(name, **kwargs)
         if hasattr(realName, "draw"):
             return True
@@ -3173,24 +3181,26 @@ class Dataset:
                 return status
         return False
 
-    ## Get the dataset.DatasetRootHisto object for a named histogram.
-    # 
-    # \param name   Path of the histogram in the ROOT file
-    # \param modify Function to modify the histogram (use case is e.g. obtaining a slice of TH2 as TH1)
-    # \param kwargs Keyword arguments, forwarded to getRootHisto()
-    #
-    # \return dataset.DatasetRootHisto object containing the (unnormalized) TH1 and this Dataset
-    # 
-    # If dataset.TreeDraw object is given (or actually anything with
-    # draw() method), the draw() method is called by giving the
-    # Dataset object as parameters. The draw() method is expected to
-    # return a TH1 which is then returned.
-    #
-    # If dataset.SystematicsHelper object is given (or actually
-    # anything with addUncertainties() method), the addUncertainties()
-    # method of it is called with the Dataset and
-    # RootHistoWithUncertainties objects, and the modify function.
     def getDatasetRootHisto(self, name, modify=None, **kwargs):
+        '''
+        Get the dataset.DatasetRootHisto object for a named histogram.
+        
+        \param name   Path of the histogram in the ROOT file
+        \param modify Function to modify the histogram (use case is e.g. obtaining a slice of TH2 as TH1)
+        \param kwargs Keyword arguments, forwarded to getRootHisto()
+        
+        \return dataset.DatasetRootHisto object containing the (unnormalized) TH1 and this Dataset
+        
+        If dataset.TreeDraw object is given (or actually anything with
+        draw() method), the draw() method is called by giving the
+        Dataset object as parameters. The draw() method is expected to
+        return a TH1 which is then returned.
+        
+        If dataset.SystematicsHelper object is given (or actually
+        anything with addUncertainties() method), the addUncertainties()
+        method of it is called with the Dataset and
+        RootHistoWithUncertainties objects, and the modify function.
+         '''
         #h = None
         # if hasattr(name, "draw"):
         #     if len(kwargs) > 0:
@@ -3209,19 +3219,22 @@ class Dataset:
             name.addUncertainties(self, wrapper, modify)
         return DatasetRootHisto(wrapper, self) 
 
-    ## Get the directory content of a given directory in the ROOT file.
-    # 
-    # \param directory   Path of the directory in the ROOT file
-    # \param predicate   Append the directory name to the return list only if
-    #                    predicate returns true for the name. Predicate
-    #                    should be a function taking an object in the directory as an
-    #                    argument and returning a boolean.
-    # 
-    # \return List of names in the directory.
-    #
-    # If the dataset consists of multiple files, the listing of the
-    # first file is given.
     def getDirectoryContent(self, directory, predicate=None):
+        '''
+        Get the directory content of a given directory in the ROOT file.
+        
+        \param directory   Path of the directory in the ROOT file
+
+        \param predicate   Append the directory name to the return list only if
+        predicate returns true for the name. Predicate
+        should be a function taking an object in the directory as an
+        argument and returning a boolean.
+    
+        \return List of names in the directory.
+        
+        If the dataset consists of multiple files, the listing of the
+        first file is given.
+        '''
         (dirs, realDir) = self.getRootObjects(directory)
 
         # wrap the predicate
@@ -3233,9 +3246,11 @@ class Dataset:
 
     def _setBaseDirectory(self,base):
         self.basedir = base
-
-    ## Get the path of the multicrab directory where this dataset originates
+        
     def getBaseDirectory(self):
+        '''
+        Get the path of the multicrab directory where this dataset originates
+        '''
         return self.basedir
 
     def formatDatasetTree(self, indent):
@@ -4326,25 +4341,32 @@ class DatasetPrecursor:
                 raise Exception("Unable to open ROOT file '%s' for dataset '%s'" % (name, self._name))
             self._rootFiles.append(rf)
 
+            # Get the data version (e.g. 80Xdata or 80Xmc)
             dv = aux.Get(rf, "configInfo/dataVersion")
             if dv == None:
                 print "Unable to find 'configInfo/dataVersion' from ROOT file '%s', I have no idea if this file is data, MC, or pseudo" % name
-                continue
-                
+                continue                
             if self._dataVersion is None:
                 self._dataVersion = dv.GetTitle()
             else:
                 if self._dataVersion != dv.GetTitle():
                     raise Exception("Mismatch in dataVersion when creating multi-file DatasetPrecursor, got %s from file %s, and %s from %s" % (dataVersion, self._filenames[0], dv.GetTitle(), name))
 
+            # Get the TTree
             isTree = aux.Get(rf, "Events") != None
             if isTree:
-                # pileup (nominal)
-#                pileup = aux.Get(rf, "pileup")
-#                if pileup == None:
-                pileup = aux.Get(rf, "configInfo/pileup")
+
+                # Get the "pileup" histogram under folder "configInfo"
+                puName = "configInfo/pileup"
+                pileup = aux.Get(rf, puName)
+
+                # Sanity checks
                 if pileup == None:
-                    print "Unable to find 'configInfo/pileup' from ROOT file '%s'" % name
+                    Print("Unable to find 'configInfo/pileup' from ROOT file '%s'" % name, True)
+                    sys.exit()
+                if (pileup.Integral() == 0):
+                    raise Exception("Empty pileup histogram \"%s\" in ROOT file \"%s\". Entries = \"%s\"." % (puName, rf.GetName(), pileup.GetEntries()) )
+
                 if self._pileup is None:
                     if pileup != None:
                         self._pileup = pileup

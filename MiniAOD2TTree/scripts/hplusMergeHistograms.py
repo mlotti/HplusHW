@@ -532,12 +532,13 @@ def WalkEOSDir(taskName, pathOnEOS, opts): #fixme: bad code
     if "symbol lookup error" in dirContents[0]:
         raise Exception("%s.\n\t%s." % (cmd, dirContents[0]) )
 
-    Verbose("Walking the EOS directory %s with contents:\n\t%s" % (pathOnEOS, "\n\t".join(dirContents)))
+    #Verbose("Walking the EOS directory %s with contents:\n\t%s" % (pathOnEOS, "\n\t".join(dirContents)), False)
+    Verbose("Walking the EOS directory %s:" % (pathOnEOS), False)
 
     # A very, very dirty way to find the deepest directory where the ROOT files are located!
     if len(dirContents) == 1:
         subDir = dirContents[0]
-        Verbose("Found sub-directory %s under the EOS path %s!" % (subDir, pathOnEOS) )
+        Verbose("Found sub-directory %s under the EOS path %s" % (subDir, pathOnEOS) )
         pathOnEOS = WalkEOSDir(taskName, pathOnEOS + "/" + subDir, opts)
     else:
         rootFiles = []
@@ -596,8 +597,8 @@ def Execute(cmd):
     '''
     Executes a given command and return the output.
     '''
-    Verbose("Execute()", True)
-    Verbose("Executing command: %s" % (cmd))
+    Verbose("Execute()" , True)
+    Verbose("%s" % (cmd), False)
     p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 
     stdin  = p.stdin
@@ -606,7 +607,7 @@ def Execute(cmd):
     for line in stdout:
         ret.append(line.replace("\n", ""))
     stdout.close()
-    Verbose("Command %s returned:\n\t%s" % (cmd, "\n\t".join(ret)))
+    Verbose("\t%s" % ("\n\t".join(ret)) )
     return ret
 
 
@@ -664,7 +665,7 @@ def splitFiles(taskName, files, filesPerEntry, opts):
 
     # Default value is -1
     if filesPerEntry < 0:
-        maxsize = 2*GB
+        maxsize = opts.maxFileSize*GB
         sumsize = 0
         firstFile = 0
 
@@ -886,7 +887,7 @@ def delete(fileName, regexp, opts):
     # Example on LXPLUS:
     f = ROOT.TFile.Open("root://eoscms//eos/cms//store/user/attikis/CRAB3_TransferData/WZ_TuneCUETP8M1_13TeV-pythia8/crab_WZ/160921_141816/0000/histograms-WZ-1.root", "UPDATE") # works
     '''
-    Verbose("delete()", True)
+    Verbose("delete()", False)
     
     # Definitions
     prefix = ""
@@ -909,7 +910,7 @@ def delete(fileName, regexp, opts):
             dir = fIN.GetDirectory(keyName)
             if dir:
                 fIN.cd(keyName)
-                Verbose("Deleting folder matching %s in file %s." % (regexp, fileName) )
+                Verbose("Deleting folder \"%s\" in file %s." % (regexp, fileName) )
                 delFolder(regexp)
                 fIN.cd()
     delFolder(regexp)
@@ -969,6 +970,7 @@ def WritePileupHistos(fileName, opts):
 
     puFile = os.path.join(os.path.dirname(fileName), "PileUp.root")
     if FileExists(puFile, opts):
+        Verbose("Opening ROOT file \"%s\"" % (fileName), False)
         fIN     = ROOT.TFile.Open(prefix + puFile)
         hPU     = fIN.Get("pileup")
         hPUup   = fIN.Get("pileup_up")
@@ -977,14 +979,42 @@ def WritePileupHistos(fileName, opts):
         Print("%s not found in %s. Did you run hplusLumiCalc.py? Exit" % (puFile, os.path.dirname(fileName) ) )
         sys.exit()
 
+    # Sanity checks
+    if (hPU.Integral() == 0):
+        raise Exception("Empty pileup histogram \"%s\" in ROOT file \"%s\". Entries = \"%s\"." % (hPU.GetName(), fIN.GetName(), hPU.GetEntries()) )
+    if (hPUup.Integral() == 0):
+        raise Exception("Empty pileup histogram \"%s\" in ROOT file \"%s\". Entries = \"%s\"." % (hPUup.GetName(), fIN.GetName(), hPUup.GetEntries()) )
+    if (hPUdown.Integral() == 0):
+        raise Exception("Empty pileup histogram \"%s\" in ROOT file \"%s\". Entries = \"%s\"." % (hPUdown.GetName(), fIN.GetName(), hPUdown.GetEntries()) )
+
     # Now write the PU histograms in the input file
-    if hPU != None: #fixme: is this okay?
-        fOUT.cd("configInfo")
+    if hPU != None:
+        fOUT.cd("configInfo") 
+        Verbose("Writing \"configInfo/pileup\" histograms to ROOT file \"%s\"." % (fOUT.GetName()), False)
         hPU.Write("pileup", ROOT.TObject.kOverwrite)
         hPUup.Write("pileup_up", ROOT.TObject.kOverwrite)
         hPUdown.Write("pileup_down", ROOT.TObject.kOverwrite)
+    else:
+        raise Exception("Could not write the pileup histograms to the output ROOT file \"%s\". hPU == None" % (fOUT.GetName()) )
 
-    Verbose("Closing file %s." % (fileName) )
+    # Sanity checks (pileup histo)
+    if (hPU.Integral() == 0):
+        raise Exception("Empty pileup histogram \"%s\" in ROOT file \"%s\". Entries = \"%s\"." % (hPU.GetName(), fOUT.GetName(), hPU.GetEntries()) )
+
+    # Sanity checks (pileup histos in output ROOT file)
+    histos = []
+    histos.append("configInfo/pileup")
+    histos.append("configInfo/pileup_up")
+    histos.append("configInfo/pileup_down")
+    for h in histos:
+        histo = fOUT.Get(h)
+        if histo.Integral() == 0:
+            raise Exception("Empty pileup histogram \"%s\" in output ROOT file \"%s\"." % (h, fOUT.GetName()) )
+        else:
+            Verbose("The histogram \"%s\" in ROOT file \"%s\" has entries=\"%s\", mean=\"%s\", and integral=\"%s\"." % (histo.GetName(), fOUT.GetName(), histo.GetEntries(), histo.GetMean(), histo.Integral() ), False)
+
+    # Close the input/output ROOT files
+    Verbose("Closing ROOT file %s." % (fileName) )
     fOUT.Close()
     return
 
@@ -1201,7 +1231,7 @@ def GetFileOpenPrefix(opts):
     Verbose("Determining prefix for opening ROOT files for host %s" % (HOST) )
     if "fnal" in HOST:
         path_prefix = "root://cmseos.fnal.gov/"
-        # path_prefix = "" #fixme: iro
+        # path_prefix = "" #fixme
     elif "lxplus" in HOST:
         path_prefix = "root://eoscms.cern.ch//eos//cms/"
     else:
@@ -1525,10 +1555,10 @@ def DeleteFolders(filePath, foldersToDelete, opts):
     '''
     Verbose("DeleteFolders()")
     
-    Verbose("Deleting following folders in file %s:\n\t%s" % (filePath, "\n\t".join(foldersToDelete)) )
+    Verbose("Will delete the following folders:\n\t%s\n\tfrom file %s" % ("\n\t".join(foldersToDelete), filePath) )
     # For-loop: All folders to be deleted
     for folder in foldersToDelete:
-        Verbose("Deleting %s in file %s" % (folder, filePath) )    
+        Verbose("Deleting folder \"%s\"" % (folder) )
         delete(filePath, folder, opts)
     return
 
@@ -1850,10 +1880,11 @@ def main(opts, args):
         if opts.filesInEOS:
             taskNameEOS = key.replace(GetEOSHomeDir(opts) + "/", "").split("/")[0]
             taskName    = taskNameEOS.replace("-", "_")
-        Verbose("Merge files: %s\n\tSource files: %s" % (f, sourceFiles) )
+        Verbose("Merge file:\n\t%s" % (f), True)
+        Verbose("Source files:\n\t%s" % ("\n\t".join(sourceFiles)), False) 
 
         # Delete folders & Calculate the clean-time (in seconds)
-        Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), False)
+        Verbose("%s [from %d file(s)]" % (f, len(sourceFiles)), True)
         time_start = time.time()
         DeleteFolders(f, foldersToDelete, opts)
         time_end = time.time()
@@ -1921,6 +1952,7 @@ if __name__ == "__main__":
     FILESPERMERGE = -1
     FILESINEOS    = False
     SKIPVERIFY    = False
+    MAXFILESIZE   = 2.0
 
     parser = OptionParser(usage="Usage: %prog [options]")
     # multicrab.addOptions(parser)
@@ -1968,6 +2000,9 @@ if __name__ == "__main__":
 
     parser.add_option("-s", "--skipVerify", dest="skipVerify", default=SKIPVERIFY, action="store_true",
                       help="Do not probe the log-file tarball for a given jobId to determine the job status or exit code. [default: %s]" % (SKIPVERIFY))
+
+    parser.add_option("-m", "--maxFileSize", dest="maxFileSize", default=MAXFILESIZE, type="float",
+                      help="The maximum file size (in GB) allowed for each merged ROOT file. [default: %s]" % (MAXFILESIZE))
 
     (opts, args) = parser.parse_args()
 
