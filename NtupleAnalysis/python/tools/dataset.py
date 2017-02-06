@@ -3573,6 +3573,7 @@ class DatasetAddedMC(DatasetMerged):
     # Implementation is close to dataset.Dataset.getNormFactor()
     def getNormFactor(self):
         nAllEvents = sum([d.getNAllEvents() for d in self.datasets])
+        print "DEBUG: nAllEvents = %f for dataset %s"%(nAllEvents,self.name)
         if nAllEvents == 0:
             raise Exception("%s: Number of all events is 0.\nProbable cause is that the counters are weighted, the analysis job input was a skim, and the updateAllEventsToPUWeighted() has not been called." % self.name)
 

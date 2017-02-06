@@ -212,6 +212,12 @@ backgroundCrossSections = CrossSectionList(
             #"13": 29.8 + 18.6, # [13] W+ Z/a* + W- Z/a*, MCFM 6.6 m(l+l-) > 40 GeV
             "13": 28.55 + 18.19, # [17]
             }),
+    CrossSection("WZ_ext", {
+            "7": 18.2, # [3]
+            "8": 33.21, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
+            #"13": 29.8 + 18.6, # [13] W+ Z/a* + W- Z/a*, MCFM 6.6 m(l+l-) > 40 GeV
+            "13": 28.55 + 18.19, # [17]
+            }),
     CrossSection("WZ_ext1", {
             "7": 18.2, # [3]
             "8": 33.21, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
@@ -264,6 +270,9 @@ backgroundCrossSections = CrossSectionList(
             #"8": 36703.2, # [9], NNLO
             #}),
     CrossSection("WJetsToLNu", {
+            "13": 20508.9*3, # [13] 20508.9*3, McM for the MLM dataset: 5.069e4
+            }),
+    CrossSection("WJetsToLNu_ext", {
             "13": 20508.9*3, # [13] 20508.9*3, McM for the MLM dataset: 5.069e4
             }),
     CrossSection("WJetsToLNu_HT_100To200", {
@@ -457,6 +466,9 @@ backgroundCrossSections = CrossSectionList(
             "13": 35.85, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_tW_top_5f_inclusiveDecays", {
+            "13": 30.11, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
+            }),
+    CrossSection("ST_tW_top_5f_inclusiveDecays_ext", {
             "13": 30.11, # [13] https://twiki.cern.ch/twiki/bin/viewauth/CMS/SingleTopSigma
             }),
     CrossSection("ST_tW_top_5f_inclusiveDecays_ext1", {
