@@ -52,32 +52,36 @@ if ( $LOCATION == "lxplus" || $LOCATION == "lxbatch" || $LOCATION == "lpc" ) the
     echo "3) Look the new paths with 'scram tool list' and 'scram tool info'"
     echo "[See setup.csh for more details]"
 
-    # scram tool info gcc-cxxcompiler (Look for GCC_CXXCOMPILER_BASE)
-    set GCC_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/gcc/4.9.3 # CMSSW_7_6_5
+
+    ### scram tool info gcc-cxxcompiler (Look for GCC_CXXCOMPILER_BASE)
+    set GCC_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/gcc/4.9.3   # CMSSW_7_6_5
     #set GCC_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/gcc/5.3.0   # CMSSW_8_0_24
-    
-    # scram tool info root_interface (Look for ROOT_INTERFACE_BASE)
-    #setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc493/lcg/root/6.02.12-kpegke4 # CMSSW_7_6_5
-    setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc493/lcg/root/6.06.00 # (for files merged with CMSSW_8_0_24)
+
+    ### scram tool info root_interface (Look for ROOT_INTERFACE_BASE)
+    # setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc493/lcg/root/6.02.12-kpegke4   # CMSSW_7_6_5
+    setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc493/lcg/root/6.06.00
     #setenv ROOTSYS /cvmfs/cms.cern.ch/slc6_amd64_gcc530/lcg/root/6.06.00-ikhhed5   # CMSSW_8_0_24
-    
-    # scram tool info xrootd (Look for XROOTD_BASE)
-    set XROOTD_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/xrootd/4.0.4-kpegke2 # CMSSW_7_6_5
+
+    ### scram tool info xrootd (Look for XROOTD_BASE)
+    set XROOTD_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/xrootd/4.0.4-kpegke2   # CMSSW_7_6_5
     #set XROOTD_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/xrootd/4.4.1           # CMSSW_8_0_24
 
-    # scram tool info xz (Look for XZ_BASE)
-    set XZ_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/xz/5.2.1 # CMSSW_7_6_5
-    #set XZ_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/xz/5.2.1  # CMSSW_8_0_24
-    
-    # scram tool info python
-    set PYTHON_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/python/2.7.6-kpegke  # CMSSW_7_6_5
-    #set PYTHON_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/python/2.7.11-giojec2 # CMSSW_8_0_24
+    ### scram tool info xz (Look for XZ_BASE)den th
+    set XZ_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/xz/5.2.1    # CMSSW_7_6_5
+    #set XZ_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/xz/5.2.1    # CMSSW_8_0_24
 
-    # Set the run-time shared library loader (ld.so) an extra set of directories to look for when searching for shared libraries.
-    set LD_LIBRARY_PATH_APPEND=$ROOTSYS/lib:$GCC_BASE/lib64:$GCC_BASE/lib:$XROOTD_BASE/lib:$XZ_BASE/lib:$PYTHON_BASE/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external/libjpg/8b-cms/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external/libpng/1.6.16/lib
-    
-    # Tell the shell which directories to search for executable files
-    setenv PATH $ROOTSYS/bin:$GCC_BASE/bin:$XROOTD_BASE/bin:$PATH
+    ### scram tool info python (Look for PYTHON_BASE)
+    set PYTHON_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/python/2.7.6-kpegke     # CMSSW_7_6_5
+    #set PYTHON_BASE=/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/python/2.7.11-giojec2   # CMSSW_8_0_24
+
+    ### Set the run-time shared library loader (ld.so) an extra set of directories to look for when searching for shared libraries.
+    #set LD_LIBRARY_PATH_APPEND=$ROOTSYS/lib:$GCC_BASE/lib64:$GCC_BASE/lib:$XROOTD_BASE/lib:$XZ_BASE/lib:$PYTHON_BASE/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external/libjpg/8b-cms/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external/libpng/1.6.16/lib
+    #set LD_LIBRARY_PATH_APPEND=$ROOTSYS/lib:$GCC_BASw/lib64:$GCC_BASE/lib:$XROOTD_BASE/lib:$XZ_BASE/lib:$PYTHON_BASE/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/libjpg/8b-cms/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/libpng/1.6.16/lib:/uscms/home/${USER}/.local/lib/gcc493
+    set LD_LIBRARY_PATH_APPEND=$ROOTSYS/lib:$GCC_BASE/lib64:$GCC_BASE/lib:$XROOTD_BASE/lib:$XZ_BASE/lib:$PYTHON_BASE/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/libjpg/8b-cms/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/libpng/1.6.16/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc493/cms/cmssw/CMSSW_7_6_5/external/slc6_amd64_gcc493/lib/
+    #set LD_LIBRARY_PATH_APPEND=$ROOTSYS/lib:$GCC_BASE/lib64:$GCC_BASE/lib:$XROOTD_BASE/lib:$XZ_BASE/lib:$PYTHON_BASE/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_25/external/slc6_amd64_gcc530/lib/
+
+    ### Set the PATH (crucial update on 7 Feb 2017)
+    setenv PATH $PYTHON_BASE/bin:/$ROOTSYS/bin:$GCC_BASE/bin:$XROOTD_BASE/bin:$PATH
 
     if ($?PYTHONPATH) then
 	setenv PYTHONPATH "$ROOTSYS/lib:$PYTHONPATH"
