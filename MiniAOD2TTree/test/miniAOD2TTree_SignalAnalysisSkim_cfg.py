@@ -86,6 +86,12 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         TriggerMatch = cms.untracked.vstring(
             "LooseIsoPFTau50_Trk30_eta2p1",
         ),
+        TriggerPrescales = cms.untracked.PSet(
+            src   = cms.InputTag("patTrigger",""),
+            paths = cms.vstring(
+                "HLT_LooseIsoPFTau50_Trk30_eta2p1_v",
+            )
+        ),
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = process.METNoiseFilter,

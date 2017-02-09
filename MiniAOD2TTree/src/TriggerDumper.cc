@@ -16,6 +16,11 @@ TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const 
 
     trgMatchStr = inputCollection.getUntrackedParameter<std::vector<std::string> >("TriggerMatch",std::vector<std::string>());
     trgMatchDr = inputCollection.getUntrackedParameter<double>("TriggerMatchDR",0.1);
+
+    if(inputCollection.exists("TriggerPrescales")){
+      trgPrescaleToken = iConsumesCollector.consumes<pat::PackedTriggerPrescales>(inputCollection.getUntrackedParameter<edm::ParameterSet>("TriggerPrescales").getParameter<edm::InputTag>("src"));
+      trgPrescalePaths = inputCollection.getUntrackedParameter<edm::ParameterSet>("TriggerPrescales").getParameter<std::vector<std::string> >("paths");
+    }
 }
 TriggerDumper::~TriggerDumper(){}
 
@@ -88,6 +93,13 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
     for(size_t i = 0; i < trgMatchBranches.size(); ++i){
 	theTree->Branch(trgMatchBranches[i].c_str(),&trgdiscriminators[i]);
     }
+
+    int nTrgPrescales = trgPrescalePaths.size();
+    trgprescales = new std::vector<int>[nTrgPrescales];
+    for(size_t i = 0; i < trgPrescalePaths.size(); ++i){
+        std::string bname = trgPrescalePaths[i]+"x_prescale";
+        theTree->Branch(bname.c_str(),&trgprescales[i]);
+    }
 }
 
 bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -154,6 +166,21 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	        }
             }
 	}
+
+        if(iEvent.isRealData() && trgPrescalePaths.size() > 0){
+          edm::Handle<pat::PackedTriggerPrescales> trgPrescaleHandle;
+          iEvent.getByToken(trgPrescaleToken, trgPrescaleHandle);
+          if(trgPrescaleHandle.isValid()){
+            pat::PackedTriggerPrescales prescales = *trgPrescaleHandle.product();
+            prescales.setTriggerNames(names);
+            for(std::vector<std::string>::const_iterator i = trgPrescalePaths.begin(); i != trgPrescalePaths.end(); ++i){
+              int prescale = prescales.getPrescaleForName(*i,true);
+              trgprescales->push_back(prescale);
+              //std::cout << *i << " " << prescale << std::endl;
+            }
+
+          }
+        }
     }
 
     return filter();
@@ -184,6 +211,8 @@ void TriggerDumper::reset(){
       HLTTau_e.clear();
 
       for(int i = 0; i < nTrgDiscriminators; ++i) trgdiscriminators[i].clear();
+
+      trgprescales->clear();
     }
 }
 
