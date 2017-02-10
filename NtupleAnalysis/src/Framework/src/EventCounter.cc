@@ -42,7 +42,9 @@ size_t EventCounter::Counter::insert(const std::string& label, int initialValue)
   return index;
 }
 void EventCounter::Counter::incrementCount(size_t countIndex, double weight) {
-  values[countIndex] += 1;
+  short sign = 1;
+  if(weight < 0) sign = -1;
+  values[countIndex] += sign;
   weights[countIndex] += weight;
   weightsSquared[countIndex] += (weight*weight);
 }

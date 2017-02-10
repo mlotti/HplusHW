@@ -9,7 +9,7 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
     //prescaleWeight(iConfig.getParameter<edm::ParameterSet>("PrescaleProvider"), consumesCollector(), this),
     outputFileName(iConfig.getParameter<std::string>("OutputFileName")),
     PUInfoInputFileName(iConfig.getParameter<std::string>("PUInfoInputFileName")),
-    TopPtInputFileName(iConfig.getParameter<std::string>("TopPtInputFileName")),
+//    TopPtInputFileName(iConfig.getParameter<std::string>("TopPtInputFileName")),
     codeVersion(iConfig.getParameter<std::string>("CodeVersion")),
     dataVersion(iConfig.getParameter<std::string>("DataVersion")),
     cmEnergy(iConfig.getParameter<int>("CMEnergy")),
@@ -48,6 +48,11 @@ MiniAOD2TTreeFilter::MiniAOD2TTreeFilter(const edm::ParameterSet& iConfig) :
         metNoiseFilterDumper->book(Events);
     } else {
       std::cout << "Config: METNoiseFilter ignored, because 'METNoiseFilter' is missing from config" << std::endl;
+    }
+
+    TopPtInputFileName = "";
+    if (iConfig.exists("TopPtInputFileName")) {
+       TopPtInputFileName = iConfig.getParameter<std::string>("TopPtInputFileName");
     }
 
     tauDumper = 0;
@@ -170,6 +175,7 @@ bool MiniAOD2TTreeFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSet
     eventInfo->fill(iEvent,iSetup);
 
     bool accept = true;
+
     if (trgDumper) accept = accept && trgDumper->fill(iEvent,iSetup);
     if (metNoiseFilterDumper) accept = accept && metNoiseFilterDumper->fill(iEvent,iSetup);
     if (tauDumper) {
@@ -295,7 +301,7 @@ void MiniAOD2TTreeFilter::endJob(){
     }
 
 // copy top pt weight histogram from separate file (makes merging of root files so much easier)
-    if (PUInfoInputFileName.size()) {
+    if (TopPtInputFileName.size()) {
       TFile* fTopPt = TFile::Open(TopPtInputFileName.c_str());
       if (fTopPt) {
         // File open is successful

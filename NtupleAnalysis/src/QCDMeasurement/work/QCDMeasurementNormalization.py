@@ -34,7 +34,8 @@ _rebinFactor = 10
 
 print "Analysis name:", analysis
 
-selectOnlyBins = []#["Inclusive"] #["1"]
+#selectOnlyBins = [] #["1"]
+selectOnlyBins = ["Inclusive"]
 
 def usage():
     print "\n"
@@ -69,7 +70,7 @@ def main(argv, dsetMgr, moduleInfoString):
     # Read integrated luminosities of data dsetMgr from lumi.json
     dsetMgr.loadLuminosities()
     
-    print "\Datasets list (initial):\n"
+    print "Datasets list (initial):"
     print dsetMgr.getMCDatasetNames()
     print "\n"
 
@@ -80,8 +81,13 @@ def main(argv, dsetMgr, moduleInfoString):
     dsetMgr.remove(filter(lambda name: "DY3JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "DY4JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "WJetsToLNu_HT" in name, dsetMgr.getAllDatasetNames()))
+    # DEBUG TEST: remove one dataset at a time
+#    dsetMgr.remove(filter(lambda name: "DYJetsToQQ" in name, dsetMgr.getAllDatasetNames()))
+#    dsetMgr.remove(filter(lambda name: "DYJetsToLL" in name, dsetMgr.getAllDatasetNames()))
+#    dsetMgr.remove(filter(lambda name: "WZ" in name, dsetMgr.getAllDatasetNames()))
+#    dsetMgr.remove(filter(lambda name: "ST" in name, dsetMgr.getAllDatasetNames()))
 
-    print "\Datasets after filter removals:\n"
+    print "Datasets after filter removals:"
     print dsetMgr.getMCDatasetNames()
     print "\n"
           
@@ -92,7 +98,7 @@ def main(argv, dsetMgr, moduleInfoString):
     # WW, WZ, ZZ to "Diboson"
     plots.mergeRenameReorderForDataMC(dsetMgr)
 
-    print "\Datasets after mergeRenameReorderForDataMC:\n"
+    print "Datasets after mergeRenameReorderForDataMC:"
     print dsetMgr.getMCDatasetNames()
     print "\n"
 
@@ -103,26 +109,36 @@ def main(argv, dsetMgr, moduleInfoString):
     plots.mergeWHandHH(dsetMgr)
     # Merge MC EWK samples as one EWK sample
     myMergeList = []
+
+    # Always use TT (or TTJets) as a part of the EWK background
     if "TT" in dsetMgr.getMCDatasetNames():
         myMergeList.append("TT") # Powheg, no neg. weights -> large stats.
     else:
         myMergeList.append("TTJets") # Madgraph with negative weights
         print "Warning: using TTJets as input, but this is suboptimal. Please switch to the TT sample (much more stats.)."
 
-    #myMergeList.append("WJetsHT")
+    # Always use WJets as a part of the EWK background    
     myMergeList.append("WJets")
-    myMergeList.append("DYJetsToLL")
+
+    # For SY, single top and diboson, use only if available:
+    if "DYJetsToQQHT" in dsetMgr.getMCDatasetNames():
+        myMergeList.append("DYJetsToQQHT")
+
+    if "DYJetsToLL" in dsetMgr.getMCDatasetNames():
+        myMergeList.append("DYJetsToLL")
+    else:
+        print "Warning: ignoring DYJetsToLL sample (since merged sample does not exist) ..."
 
     if "SingleTop" in dsetMgr.getMCDatasetNames():
         myMergeList.append("SingleTop")
     else:
-        print "Warning: ignoring single top sample (since merged diboson sample does not exist) ..."
+        print "Warning: ignoring single top sample (since merged sample does not exist) ..."
 
 
     if "Diboson" in dsetMgr.getMCDatasetNames():
         myMergeList.append("Diboson")
     else:
-        print "Warning: ignoring diboson sample (since merged diboson sample does not exist) ..."
+        print "Warning: ignoring diboson sample (since merged sample does not exist) ..."
 
     for item in myMergeList:
         if not item in dsetMgr.getMCDatasetNames():
@@ -159,7 +175,7 @@ def main(argv, dsetMgr, moduleInfoString):
         else:
             for hname in histonames:
                 binIndex = hname.replace("NormalizationMETBaselineTau"+HISTONAME,"")
-                print "DEBUG: We are looking for hisrogram "+COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex
+#                print "DEBUG: We are looking for hisrogram "+COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex
                 hDummy = dsetMgr.getDataset("Data").getDatasetRootHisto(COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex).getHistogram()
                 title = hDummy.GetTitle()
                 title = title.replace("METBaseline"+HISTONAME,"")

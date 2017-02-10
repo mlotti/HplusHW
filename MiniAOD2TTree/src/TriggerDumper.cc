@@ -5,8 +5,9 @@
 
 TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
 : trgResultsToken(iConsumesCollector.consumes<edm::TriggerResults>(pset.getParameter<edm::InputTag>("TriggerResults"))),
-  trgObjectsToken(iConsumesCollector.consumes<pat::TriggerObjectStandAloneCollection>(pset.getParameter<edm::InputTag>("TriggerObjects"))),
-  trgL1ETMToken(iConsumesCollector.consumes<std::vector<l1extra::L1EtMissParticle>>(pset.getParameter<edm::InputTag>("L1Extra"))) {
+  trgObjectsToken(iConsumesCollector.consumes<pat::TriggerObjectStandAloneCollection>(pset.getParameter<edm::InputTag>("TriggerObjects")))
+//  trgL1ETMToken(iConsumesCollector.consumes<std::vector<l1extra::L1EtMissParticle>>(pset.getParameter<edm::InputTag>("L1Extra"))) 
+{
     inputCollection = pset;
     booked = false;
 
@@ -16,6 +17,11 @@ TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const 
 
     trgMatchStr = inputCollection.getUntrackedParameter<std::vector<std::string> >("TriggerMatch",std::vector<std::string>());
     trgMatchDr = inputCollection.getUntrackedParameter<double>("TriggerMatchDR",0.1);
+
+    if(inputCollection.exists("TriggerPrescales")){
+      trgPrescaleToken = iConsumesCollector.consumes<pat::PackedTriggerPrescales>(inputCollection.getUntrackedParameter<edm::ParameterSet>("TriggerPrescales").getParameter<edm::InputTag>("src"));
+      trgPrescalePaths = inputCollection.getUntrackedParameter<edm::ParameterSet>("TriggerPrescales").getParameter<std::vector<std::string> >("paths");
+    }
 }
 TriggerDumper::~TriggerDumper(){}
 
@@ -28,12 +34,17 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
     if(booked) return;
     booked = true;
 
-    theTree->Branch("L1MET_l1extra_x",&L1MET_l1extra_x);
-    theTree->Branch("L1MET_l1extra_y",&L1MET_l1extra_y);
+    //theTree->Branch("L1MET_l1extra_x",&L1MET_l1extra_x);
+    //theTree->Branch("L1MET_l1extra_y",&L1MET_l1extra_y);
     theTree->Branch("L1MET_x",&L1MET_x);
     theTree->Branch("L1MET_y",&L1MET_y);
     theTree->Branch("HLTMET_x",&HLTMET_x);
     theTree->Branch("HLTMET_y",&HLTMET_y);
+
+    theTree->Branch("L1Tau_pt",&L1Tau_pt);  
+    theTree->Branch("L1Tau_eta",&L1Tau_eta);
+    theTree->Branch("L1Tau_phi",&L1Tau_phi);
+    theTree->Branch("L1Tau_e",&L1Tau_e);
     
     theTree->Branch("HLTTau_pt",&HLTTau_pt);  
     theTree->Branch("HLTTau_eta",&HLTTau_eta);
@@ -88,9 +99,17 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
     for(size_t i = 0; i < trgMatchBranches.size(); ++i){
 	theTree->Branch(trgMatchBranches[i].c_str(),&trgdiscriminators[i]);
     }
+
+    int nTrgPrescales = trgPrescalePaths.size();
+    trgprescales = new std::vector<int>[nTrgPrescales];
+    for(size_t i = 0; i < trgPrescalePaths.size(); ++i){
+        std::string bname = trgPrescalePaths[i]+"x_prescale";
+        theTree->Branch(bname.c_str(),&trgprescales[i]);
+    }
 }
 
 bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
+    /*
     edm::Handle<std::vector<l1extra::L1EtMissParticle> > l1etmhandle;
     iEvent.getByToken(trgL1ETMToken, l1etmhandle);
     L1MET_l1extra_x = 0.0;
@@ -99,7 +118,7 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	L1MET_l1extra_x = l1etmhandle.product()->begin()->px();
 	L1MET_l1extra_y = l1etmhandle.product()->begin()->py();
     }
-
+    */
     edm::Handle<edm::TriggerResults> trgResultsHandle;
     iEvent.getByToken(trgResultsToken, trgResultsHandle);
     if(trgResultsHandle.isValid()){
@@ -130,13 +149,20 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 if(patTriggerObject.id(trigger::TriggerL1ETM)){
                     L1MET_x = patTriggerObject.p4().x(); 
                     L1MET_y = patTriggerObject.p4().y();
-                //std::cout << "Trigger L1ETM " << patTriggerObject.p4().Pt() << std::endl;
+                    std::cout << "Trigger L1ETM " << patTriggerObject.p4().Pt() << std::endl;
 		}
 	        if(patTriggerObject.id(trigger::TriggerMET)){
                     HLTMET_x = patTriggerObject.p4().x();
                     HLTMET_y = patTriggerObject.p4().y();
 		//std::cout << "Trigger MET " << patTriggerObject.p4().Pt() << std::endl;
 	        }
+                if(patTriggerObject.id(trigger::TriggerL1Tau)){
+                    L1Tau_pt.push_back(patTriggerObject.p4().Pt());  
+                    L1Tau_eta.push_back(patTriggerObject.p4().Eta());
+                    L1Tau_phi.push_back(patTriggerObject.p4().Phi());
+                    L1Tau_e.push_back(patTriggerObject.p4().E());
+                    std::cout << "Trigger L1 tau " << patTriggerObject.p4().Pt() << std::endl;
+                }
 	        if(patTriggerObject.id(trigger::TriggerTau)){
 
                     std::vector<std::string> pathNamesAll  = patTriggerObject.pathNames(false);
@@ -154,6 +180,21 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	        }
             }
 	}
+
+        if(iEvent.isRealData() && trgPrescalePaths.size() > 0){
+          edm::Handle<pat::PackedTriggerPrescales> trgPrescaleHandle;
+          iEvent.getByToken(trgPrescaleToken, trgPrescaleHandle);
+          if(trgPrescaleHandle.isValid()){
+            pat::PackedTriggerPrescales prescales = *trgPrescaleHandle.product();
+            prescales.setTriggerNames(names);
+            for(std::vector<std::string>::const_iterator i = trgPrescalePaths.begin(); i != trgPrescalePaths.end(); ++i){
+              int prescale = prescales.getPrescaleForName(*i,true);
+              trgprescales->push_back(prescale);
+              //std::cout << *i << " " << prescale << std::endl;
+            }
+
+          }
+        }
     }
 
     return filter();
@@ -178,12 +219,19 @@ void TriggerDumper::reset(){
       HLTMET_x = 0;
       HLTMET_y = 0;
 
+      L1Tau_pt.clear(); 
+      L1Tau_eta.clear();
+      L1Tau_phi.clear();
+      L1Tau_e.clear();
+
       HLTTau_pt.clear();
       HLTTau_eta.clear();
       HLTTau_phi.clear();
       HLTTau_e.clear();
 
       for(int i = 0; i < nTrgDiscriminators; ++i) trgdiscriminators[i].clear();
+
+      trgprescales->clear();
     }
 }
 

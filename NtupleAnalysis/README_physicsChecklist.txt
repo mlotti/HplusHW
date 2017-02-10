@@ -142,7 +142,7 @@ The full checklist follows:
 1.9. b tagging/mistagging
 1.9.1. Check that the b tag discriminators of interest and recommended by the BTV POG are included
     to the jet collections
-... Recommendations are at https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation76X  
+... Recommendations are at https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation  
 ... Files:
         MiniAOD2TTree/test/miniAOD2TTree_SignalAnalysisSkim_cfg.py
         MiniAOD2TTree/interface/JetDumper.h
@@ -151,7 +151,7 @@ The full checklist follows:
 1.10. MET
 1.10.1. Check that the MET types and uncertainties recommended by the JME POG are included
 ... Recommendations are (at least) at:
-        https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2015#ETmiss
+        https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2016#ETmiss
         https://twiki.cern.ch/twiki/bin/view/CMS/MissingET
         https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETRun2Corrections
 ... Several requests have been made for a centrally available tool to obtain the MET variations

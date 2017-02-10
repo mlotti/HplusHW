@@ -28,7 +28,9 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Framework/interface/TriggerNamesService.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
-
+//#include "DataFormats/L1Trigger/interface/BXVector.h"
+//#include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
+#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 
 class TriggerDumper {
     public:
@@ -54,17 +56,19 @@ class TriggerDumper {
 
 	TTree* theTree;
 
-	bool *iBit; 
-	int  *iCountAll;
-	int  *iCountPassed;
-	edm::ParameterSet inputCollection;
-	edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
+        bool *iBit; 
+        int  *iCountAll;
+        int  *iCountPassed;
+        edm::ParameterSet inputCollection;
+        edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
         edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trgObjectsToken;
+        edm::EDGetTokenT<pat::PackedTriggerPrescales> trgPrescaleToken;
         edm::EDGetTokenT<std::vector<l1extra::L1EtMissParticle>> trgL1ETMToken;
-	std::vector<std::string> triggerBits;
+        std::vector<std::string> triggerBits;
         std::vector<std::string> selectedTriggers;
-	std::vector<std::string> trgMatchStr;
-    	std::vector<std::string> trgMatchBranches;
+        std::vector<std::string> trgMatchStr;
+        std::vector<std::string> trgMatchBranches;
+        std::vector<std::string> trgPrescalePaths;
 	double trgMatchDr;
 
 	edm::TriggerNames names;
@@ -77,6 +81,11 @@ class TriggerDumper {
 	double HLTMET_x;
 	double HLTMET_y;
 
+        std::vector<double> L1Tau_pt; 
+        std::vector<double> L1Tau_eta;
+        std::vector<double> L1Tau_phi;
+        std::vector<double> L1Tau_e;
+
         std::vector<double> HLTTau_pt;
         std::vector<double> HLTTau_eta;
         std::vector<double> HLTTau_phi;
@@ -84,5 +93,6 @@ class TriggerDumper {
 
         int nTrgDiscriminators;
         std::vector<bool> *trgdiscriminators;
+        std::vector<int> *trgprescales;
 };
 #endif

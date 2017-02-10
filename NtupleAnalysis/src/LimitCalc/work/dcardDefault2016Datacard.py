@@ -9,7 +9,7 @@ HeavyMassPoints=[]
 if LightAnalysis:
     LightMassPoints=[80,90,100,120,140,150,155,160]
 else:
-    HeavyMassPoints=[180,200,220,250,300,350,400,500,750,1000,2000,3000]
+    HeavyMassPoints=[180,200,220,250,300,350,400,500,750,800,1000,2000,3000]
 
 #LightMassPoints=[120] # for control plots
 #HeavyMassPoints=[500] # for control plots
@@ -18,10 +18,9 @@ MassPoints=LightMassPoints[:]+HeavyMassPoints[:]
 
 ##############################################################################
 # Options
-OptionIncludeSystematics= True # Set to true if you produced multicrabs with doSystematics=True
-OptionDoControlPlots= not True #FIXME: if you want control plots, switch this to true!
+OptionIncludeSystematics=True # Set to true if you produced multicrabs with doSystematics=True
+OptionDoControlPlots=not True #FIXME: if you want control plots, switch this to true!
 OptionDoMergeEWKttbar = False #FIXME: if true, Wjets+DY+diboson into one background and for heavy H+, also merges ttbar and singleTop into one background
-
 BlindAnalysis=True
 OptionBlindThreshold=None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
 
@@ -189,7 +188,7 @@ for mass in HeavyMassPoints:
 
 #for i in range(0,len(myQCDShapeSystematics)):#if myQCDShapeSystematics[i].startswith("trg_CaloMET") and not "forQCD" in myQCDShapeSystematics[i]:#    myQCDShapeSystematics[i]=myQCDShapeSystematics[i]+"_forQCD"
 
-#myQCD=DataGroup(#label="QCDinv",#landsProcess=3,#validMassPoints=MassPoints,#datasetType="QCD inverted",#datasetDefinition="QCDinvertedmt",#nuisances=myQCDShapeSystematics[:]+["CMS_eff_b","CMS_Hptntj_topPtReweight","CMS_Hptntj_QCDkbg_metshape","xsect_ttbar_forQCD","CMS_Hptntj_QCDbkg_templateFit","lumi_13TeV_forQCD"],#shapeHistoName=shapeHistoName,
+#myQCD=DataGroup(#label="QCDinv",#landsProcess=3,#validMassPoints=MassPoints,#datasetType="QCD inverted",#datasetDefinition="QCDinvertedmt",#nuisances=myQCDShapeSystematics[:]+["CMS_eff_b","CMS_Hptntj_topPtReweight","CMS_Hptntj_QCDkbg_metshape","xsect_ttbar_forQCD","CMS_Hptntj_FakeTauBG_templateFit","lumi_13TeV_forQCD"],#shapeHistoName=shapeHistoName,
 #)
 #if OptionMassShape =="TransverseMass":#myQCD.setDatasetDefinition("QCDinvertedmt")
 #elif OptionMassShape =="FullMass":#myQCD.setDatasetDefinition("QCDinvertedinvmass")
@@ -200,8 +199,9 @@ myQCDSystematics+=["CMS_scale_ttbar_forQCD","CMS_pdf_ttbar_forQCD","CMS_mass_ttb
 #approximation 2: myLeptonVetoSystematics neglected for QCD
 
 if OptionIncludeSystematics: 
-    myQCDSystematics += ["CMS_eff_t_highpt"]
-    myQCDSystematics += ["CMS_Hptntj_QCDbkg_templateFit","CMS_Hptntj_QCDkbg_metshape"] #these can be used only if QCDMeasurement has been run with systematics
+    if not lightAnalysis:
+        myQCDSystematics += ["CMS_eff_t_highpt"]
+    myQCDSystematics += ["CMS_Hptntj_FakeTauBG_templateFit","CMS_Hptntj_QCDkbg_metshape"] #these can be used only if QCDMeasurement has been run with systematics
 
 labelPrefix="CMS_Hptntj_"
 if LightAnalysis:
@@ -312,19 +312,19 @@ if "CMS_eff_t_trg_data" in myShapeSystematics:
         distr="shapeQ", function="ShapeVariation", systVariation="TauTrgEffData"))
 else:
     Nuisances.append(Nuisance(id="CMS_eff_t_trg_data", label="APPROXIMATION for tau+MET trg tau part data eff.",
-        distr="lnN", function="Constant", value=0.015))
+        distr="lnN", function="Constant", value=0.03))
 if "CMS_eff_t_trg_MC" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_eff_t_trg_MC", label="tau+MET trg tau part MC eff.",
         distr="shapeQ", function="ShapeVariation", systVariation="TauTrgEffMC"))
 else:
     Nuisances.append(Nuisance(id="CMS_eff_t_trg_MC", label="APPROXIMATION for tau+MET trg tau part MC eff.",
-        distr="lnN", function="Constant", value=0.010))
+        distr="lnN", function="Constant", value=0.04))
 if "CMS_eff_met_trg_data" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_eff_met_trg_data", label="tau+MET trg MET data eff.",
         distr="shapeQ", function="ShapeVariation", systVariation="METTrgEffData"))
 else:
     Nuisances.append(Nuisance(id="CMS_eff_met_trg_data", label="APPROXIMATION for tau+MET trg MET data eff.",
-        distr="lnN", function="Constant", value=0.15))
+        distr="lnN", function="Constant", value=0.2))
 if "CMS_eff_met_trg_MC" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_eff_met_trg_MC", label="tau+MET trg MET MC eff.",
         distr="shapeQ", function="ShapeVariation", systVariation="METTrgEffMC"))
@@ -357,7 +357,7 @@ if "CMS_fake_b" in myShapeSystematics:
         distr="shapeQ", function="ShapeVariation", systVariation="BMistagSF"))
 else:
     Nuisances.append(Nuisance(id="CMS_fake_b", label="APPROXIMATION for b mistagging",
-        distr="lnN", function="Constant",value=0.05))
+        distr="lnN", function="Constant",value=0.02))
 
 # e->tau mis-ID
 #if "CMS_fake_eToTau" in myShapeSystematics:
@@ -400,7 +400,7 @@ if "CMS_scale_t" in myShapeSystematics:
         distr="shapeQ", function="ShapeVariation", systVariation="TauES"))
 else:
     Nuisances.append(Nuisance(id="CMS_scale_t", label="APPROXIMATION for tau ES",
-        distr="lnN", function="Constant", value=0.03))
+        distr="lnN", function="Constant", value=0.06))
 # jet ES
 if "CMS_scale_j" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_scale_j", label="Jet energy scale",
@@ -421,7 +421,7 @@ if "CMS_res_j" in myShapeSystematics:
         distr="shapeQ", function="ShapeVariation", systVariation="JER"))
 else:
     Nuisances.append(Nuisance(id="CMS_res_j", label="APPROXIMATION for CMS_res_j",
-        distr="lnN", function="Constant",value=0.03))
+        distr="lnN", function="Constant",value=0.04))
 
 #===== Top pt SF
 if "CMS_Hptntj_topPtReweight" in myShapeSystematics:
@@ -429,7 +429,7 @@ if "CMS_Hptntj_topPtReweight" in myShapeSystematics:
         distr="shapeQ", function="ShapeVariation", systVariation="TopPt"))
 else:
     Nuisances.append(Nuisance(id="CMS_Hptntj_topPtReweight", label="APPROXIMATION for top pT reweighting",
-        distr="lnN", function="Constant",value=0.20))
+        distr="lnN", function="Constant",value=0.25))
 
 #===== Pileup
 if "CMS_pileup" in myShapeSystematics:
@@ -539,7 +539,7 @@ Nuisances.append(Nuisance(id="lumi_13TeV_forQCD", label="lumi_13TeVnosity",
 
 #===== QCD measurement
 if OptionIncludeSystematics:
-    Nuisances.append(Nuisance(id="CMS_Hptntj_QCDbkg_templateFit", label="QCDInv: fit", 
+    Nuisances.append(Nuisance(id="CMS_Hptntj_FakeTauBG_templateFit", label="QCDInv: fit", 
         distr="lnN", function="Constant", value=0.03))
     Nuisances.append(Nuisance(id="CMS_Hptntj_QCDkbg_metshape", label="QCD met shape syst.",
         distr="shapeQ", function="QCDShapeVariation", systVariation="QCDNormSource"))
