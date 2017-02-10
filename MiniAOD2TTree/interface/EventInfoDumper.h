@@ -58,5 +58,6 @@ class EventInfoDumper {
         float topPtWeight; // Weight produced by TopPtProducer
 
 	bool bookLumiScalers;
+	bool bookTopPt;
 };
 #endif

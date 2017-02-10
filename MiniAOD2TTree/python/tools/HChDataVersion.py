@@ -208,6 +208,15 @@ config = {
         "metFilteringProcess": "RECO",
         "globalTag": "80X_dataRun2_Prompt_v16",
     },
+    "80XmcReHLT": {
+        "simProcess": "SIM",
+        "triggerProcess": "HLT2",
+        "recoProcess": "RECO",
+        "metFilteringProcess": "PAT",
+#        "globalTag": "80X_mcRun2_asymptotic_2016_miniAODv2_v1",
+        "globalTag": "80X_mcRun2_asymptotic_2016_TrancheIV_v6",
+        "signalTrigger": "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET80_v1",
+    },
     "80Xmc": {
         "simProcess": "SIM",
         "triggerProcess": "HLT",

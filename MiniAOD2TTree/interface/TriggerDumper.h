@@ -81,6 +81,11 @@ class TriggerDumper {
 	double HLTMET_x;
 	double HLTMET_y;
 
+        std::vector<double> L1Tau_pt; 
+        std::vector<double> L1Tau_eta;
+        std::vector<double> L1Tau_phi;
+        std::vector<double> L1Tau_e;
+
         std::vector<double> HLTTau_pt;
         std::vector<double> HLTTau_eta;
         std::vector<double> HLTTau_phi;

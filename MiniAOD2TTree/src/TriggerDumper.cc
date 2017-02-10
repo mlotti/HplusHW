@@ -5,8 +5,9 @@
 
 TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
 : trgResultsToken(iConsumesCollector.consumes<edm::TriggerResults>(pset.getParameter<edm::InputTag>("TriggerResults"))),
-  trgObjectsToken(iConsumesCollector.consumes<pat::TriggerObjectStandAloneCollection>(pset.getParameter<edm::InputTag>("TriggerObjects"))),
-  trgL1ETMToken(iConsumesCollector.consumes<std::vector<l1extra::L1EtMissParticle>>(pset.getParameter<edm::InputTag>("L1Extra"))) {
+  trgObjectsToken(iConsumesCollector.consumes<pat::TriggerObjectStandAloneCollection>(pset.getParameter<edm::InputTag>("TriggerObjects")))
+//  trgL1ETMToken(iConsumesCollector.consumes<std::vector<l1extra::L1EtMissParticle>>(pset.getParameter<edm::InputTag>("L1Extra"))) 
+{
     inputCollection = pset;
     booked = false;
 
@@ -33,12 +34,17 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
     if(booked) return;
     booked = true;
 
-    theTree->Branch("L1MET_l1extra_x",&L1MET_l1extra_x);
-    theTree->Branch("L1MET_l1extra_y",&L1MET_l1extra_y);
+    //theTree->Branch("L1MET_l1extra_x",&L1MET_l1extra_x);
+    //theTree->Branch("L1MET_l1extra_y",&L1MET_l1extra_y);
     theTree->Branch("L1MET_x",&L1MET_x);
     theTree->Branch("L1MET_y",&L1MET_y);
     theTree->Branch("HLTMET_x",&HLTMET_x);
     theTree->Branch("HLTMET_y",&HLTMET_y);
+
+    theTree->Branch("L1Tau_pt",&L1Tau_pt);  
+    theTree->Branch("L1Tau_eta",&L1Tau_eta);
+    theTree->Branch("L1Tau_phi",&L1Tau_phi);
+    theTree->Branch("L1Tau_e",&L1Tau_e);
     
     theTree->Branch("HLTTau_pt",&HLTTau_pt);  
     theTree->Branch("HLTTau_eta",&HLTTau_eta);
@@ -103,6 +109,7 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
 }
 
 bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
+    /*
     edm::Handle<std::vector<l1extra::L1EtMissParticle> > l1etmhandle;
     iEvent.getByToken(trgL1ETMToken, l1etmhandle);
     L1MET_l1extra_x = 0.0;
@@ -111,7 +118,7 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	L1MET_l1extra_x = l1etmhandle.product()->begin()->px();
 	L1MET_l1extra_y = l1etmhandle.product()->begin()->py();
     }
-
+    */
     edm::Handle<edm::TriggerResults> trgResultsHandle;
     iEvent.getByToken(trgResultsToken, trgResultsHandle);
     if(trgResultsHandle.isValid()){
@@ -142,13 +149,20 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 if(patTriggerObject.id(trigger::TriggerL1ETM)){
                     L1MET_x = patTriggerObject.p4().x(); 
                     L1MET_y = patTriggerObject.p4().y();
-                //std::cout << "Trigger L1ETM " << patTriggerObject.p4().Pt() << std::endl;
+                    std::cout << "Trigger L1ETM " << patTriggerObject.p4().Pt() << std::endl;
 		}
 	        if(patTriggerObject.id(trigger::TriggerMET)){
                     HLTMET_x = patTriggerObject.p4().x();
                     HLTMET_y = patTriggerObject.p4().y();
 		//std::cout << "Trigger MET " << patTriggerObject.p4().Pt() << std::endl;
 	        }
+                if(patTriggerObject.id(trigger::TriggerL1Tau)){
+                    L1Tau_pt.push_back(patTriggerObject.p4().Pt());  
+                    L1Tau_eta.push_back(patTriggerObject.p4().Eta());
+                    L1Tau_phi.push_back(patTriggerObject.p4().Phi());
+                    L1Tau_e.push_back(patTriggerObject.p4().E());
+                    std::cout << "Trigger L1 tau " << patTriggerObject.p4().Pt() << std::endl;
+                }
 	        if(patTriggerObject.id(trigger::TriggerTau)){
 
                     std::vector<std::string> pathNamesAll  = patTriggerObject.pathNames(false);
@@ -204,6 +218,11 @@ void TriggerDumper::reset(){
       L1MET_y = 0;
       HLTMET_x = 0;
       HLTMET_y = 0;
+
+      L1Tau_pt.clear(); 
+      L1Tau_eta.clear();
+      L1Tau_phi.clear();
+      L1Tau_e.clear();
 
       HLTTau_pt.clear();
       HLTTau_eta.clear();
