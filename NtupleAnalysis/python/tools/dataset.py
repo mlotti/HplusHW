@@ -2714,6 +2714,10 @@ class Dataset:
             if (((self.isMC() or self.isPseudo()) or (self.isData() and enableSystematicVariationForData)) and
                 self._systematicVariation is not None):
                 self._analysisDirectoryName += "_"+self._systematicVariation
+
+        # Convert to string (otherwise causes problems in certain PYTHON/ROOT envs)
+        self._analysisDirectoryName = str(self._analysisDirectoryName)
+        
         # Check that analysis directory exists
         for f in self.files:
             if aux.Get(f, self._analysisDirectoryName) == None:
@@ -2945,7 +2949,8 @@ class Dataset:
             raise Exception("Trying to read object %s from dataset %s, but the file is already closed!" % (name, self.name))
 
         for f in self.files:
-            o = aux.Get(f, realName)
+            # Convert to string (otherwise causes problems in certain PYTHON/ROOT envs)
+            o = aux.Get(f, str(realName))
             # below it is important to use '==' instead of 'is',
             # because null TObject == None, but is not None
             if o == None:
@@ -4690,7 +4695,7 @@ class DatasetManagerCreator:
         for precursor in precursors:
             if "optimizationMode" in _args.keys() and _args["optimizationMode"] == "":
                 del _args["optimizationMode"]
-            
+
             try:
                 if precursor.isData():
                     dset = Dataset(precursor.getName(), precursor.getFiles(), **_args)
