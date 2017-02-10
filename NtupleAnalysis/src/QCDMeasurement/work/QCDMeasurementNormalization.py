@@ -81,7 +81,7 @@ def main(argv, dsetMgr, moduleInfoString):
     dsetMgr.remove(filter(lambda name: "DY3JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "DY4JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "WJetsToLNu_HT" in name, dsetMgr.getAllDatasetNames()))
-    # DEBUG TEST: remove one dataset at a time
+    # DEBUG TEST: remove datasets to check change is behaviour
 #    dsetMgr.remove(filter(lambda name: "DYJetsToQQ" in name, dsetMgr.getAllDatasetNames()))
 #    dsetMgr.remove(filter(lambda name: "DYJetsToLL" in name, dsetMgr.getAllDatasetNames()))
 #    dsetMgr.remove(filter(lambda name: "WZ" in name, dsetMgr.getAllDatasetNames()))

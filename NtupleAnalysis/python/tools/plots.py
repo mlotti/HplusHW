@@ -63,12 +63,12 @@ _heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 50
 ## mergeRenameReorderForDataMC() function.
 _physicalMcAdd = {
     #"TT"    : "TT",
-    "TT_ext": "TT", # covered by "TT"
+    "TT_ext": "TT",
 
-    #"TTTT"      : "TTTT", # covered by "TT"
     "TTTT_ext1" : "TTTT", # covered by "TT"
 
     "WZ"     : "WZ",
+    "WZ_ext": "WZ",
     "WZ_ext1": "WZ",
 
     "ST_tW_antitop_5f_inclusiveDecays"     : "ST_tW_antitop_5f_inclusiveDecays",
@@ -81,6 +81,12 @@ _physicalMcAdd = {
 
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8_ext1": "TTBB",
+
+    "WJetsToLNu_ext":"WJetsToLNu",
+
+    "DYJetsToLL_M_50_ext"        : "DYJetsToLL_M_50",
+
+
 }
 
 #for mass in _lightHplusMasses:
@@ -263,8 +269,6 @@ _datasetMerge = {
     "ST_t_channel_top_4f_inclusiveDecays"    : "SingleTop",
 
     # "TT"      : "TT",
-    "TT_ext"  : "TT",
-    "TT_ext3" : "TT",
     "TTJets"  : "TTJets",    
     # "TTTT"    : "TTTT",
     #"TTJets_FullLept": "TTJets",
@@ -272,7 +276,6 @@ _datasetMerge = {
     #"TTJets_Hadronic": "TTJets",
 
     "WJetsToLNu": "WJets",
-    "WJetsToLNu_ext":"WJets",
     # "W1Jets"    : "WJets",
     # "W2Jets"    : "WJets",
     # "W3Jets"    : "WJets",
@@ -288,7 +291,6 @@ _datasetMerge = {
 
     "DYJetsToLL_M_10to50"        : "DYJetsToLLHT",
     "DYJetsToLL_M_50"            : "DYJetsToLL",
-    "DYJetsToLL_M_50_ext"        : "DYJetsToLL",
     "DYJetsToLL_M_50_HT_100to200": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_200to400": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_400to600": "DYJetsToLLHT",
@@ -300,7 +302,6 @@ _datasetMerge = {
     "ZZTo4Q": "Diboson",
     "WW"    : "Diboson",
     "WZ"    : "Diboson",
-    "WZ_ext": "Diboson",
     "ZZ"    : "Diboson",
 
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
@@ -462,7 +463,7 @@ _legendLabels = {
     "TToBLNu_t-channel" : "Single t (t channel)",
     "TToBLNu_tW-channel": "Single t (tW channel)",
     "T_t-channel"       : "Single t (t channel)",
-    "Tbar_t-channel"    : "Single #bar{t} (t channel)",
+    "Tbar_t-channel"    : "Single #ba_physicalMcAddr{t} (t channel)",
     "T_tW-channel"      : "Single t (tW channel)",
     "Tbar_tW-channel"   : "Single #bar{t} (tW channel)",
     "T_s-channel"       : "Single t (s channel)",
