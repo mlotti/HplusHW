@@ -33,8 +33,9 @@ from sys import platform as _platform
 #================================================================================================
 # Global Definitions
 #================================================================================================
-_debugNAllEvents = False
 DEBUG = False
+_debugNAllEvents = True
+_debugCounters = False
 
 # era name -> list of era parts in data dataset names
 _dataEras = {
@@ -2166,7 +2167,6 @@ class DatasetRootHistoCompoundBase(DatasetRootHistoBase):
                                 if hsum.getRootHisto().GetXaxis().GetBinLabel(i) == histo.getRootHisto().GetXaxis().GetBinLabel(j):
                                     nSuccess += 1
                                     hsum.getRootHisto().SetBinContent(i, hsum.getRootHisto().GetBinContent(i) + histo.getRootHisto().GetBinContent(j));
-                                    hsum.getRootHisto().SetBinError(i, math.sqrt(hsum.getRootHisto().GetBinError(i)**2 + histo.getRootHisto().GetBinError(j)**2));
                                     # Ignore uncertainties
                 if nSuccess == 0:
                     raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[i].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), histo.GetNbinsX()))
@@ -2962,21 +2962,30 @@ class Dataset:
     ## Read counters
     def _readCounters(self):
         self.counterDir = self._unweightedCounterDir
+        self.nAllEventsWeighted = None # value to be read from counters (if possible)
+        self.nAllEventsUnweighted = None  # value to be read from counters (if possible)
 
-        # Read unweighted counters
-        # The unweighted counters are allowed to not exist unless
-        # weightedCounters are also enabled
+        # Initialize for normalization check based on weighted counters
         normalizationCheckStatus = True
         nAllEvts  = 0
         nPUReEvts = 0
+
+        # Try to read unweighted counters
         try:
-            (counter, realName) = self.getRootHisto(self.counterDir+"/counter")
+            (counter, realName) = self.getRootHisto(self.counterDir+"/counter") #unweighted
             ctr = _histoToCounter(counter)
-            self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple
-            # Check normalization from weighted counters
-            (counter, realName) = self.getRootHisto(self.counterDir+"/weighted/counter")
+            self.nAllEventsUnweighted = ctr[0][1].value() # first counter, second element of the tuple, corresponds to ttree: skimCounterAll
+            if _debugCounters: # Debug print
+                print "DEBUG: Unweighted counters, Dataset name: "+self.getName()
+                for i in range(counter.GetNbinsX()+1):
+                    if counter.GetXaxis().GetBinLabel(i) == "Base::AllEvents":
+                        allEventsBin = i
+                    print "bin %d, label: %s, content: = %s"%(i, counter.GetXaxis().GetBinLabel(i), counter.GetBinContent(i))
+                print "\n\n"
+            # Normalization check (to spot e.g. PROOF problems), based on weighted counters
+            (counter, realName) = self.getRootHisto(self.counterDir+"/weighted/counter") # weighted
             allEventsBin = None
-            for i in range(counter.GetNbinsX()):
+            for i in range(counter.GetNbinsX()+1):
                 if counter.GetXaxis().GetBinLabel(i) == "Base::AllEvents":
                     allEventsBin = i
             if allEventsBin != None and allEventsBin > 0:
@@ -2984,29 +2993,38 @@ class Dataset:
                     nAllEvts  = counter.GetBinContent(allEventsBin)
                     nPUReEvts = counter.GetBinContent(allEventsBin+1)
                     normalizationCheckStatus = False
+            if _debugNAllEvents: # Debug print
+                print "DEBUG: self.nAllEventsUnweighted = "+str(self.nAllEventsUnweighted)
+        # If reading unweighted counters fail
         except HistogramNotFoundException, e:
             if not self._weightedCounters:
                 raise Exception("Could not find counter histogram, message: %s" % str(e))
             self.nAllEventsUnweighted = -1
+        # If normalization problem is spotted
         if not normalizationCheckStatus:
             msg  = "Error in dset=%s: Base::AllEvents counter (=%s) is smaller than the Base::PUReweighting counter (=%s)" % (self.name, nAllEvts, nPUReEvts)
             Print(msg)
             raw_input("\tPress any key to continue: ")
             # raise Exception(msg)
-
-        self.nAllEventsWeighted = None
-        self.nAllEvents = self.nAllEventsUnweighted
-
-        # Read weighted counters
+ 
+        # Try to read weighted counters
         if self._weightedCounters:
             self.counterDir = self._weightedCounterDir
             try:
-                (counter, realName) = self.getRootHisto(self.counterDir+"/counter")
+                (counter, realName) = self.getRootHisto(self.counterDir+"/counter") # weighted
                 ctr = _histoToCounter(counter)
-                self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple
-                self.nAllEvents = self.nAllEventsWeighted
+                self.nAllEventsWeighted = ctr[0][1].value() # first counter, second element of the tuple, corresponds to ttree: skimCounterAll
             except HistogramNotFoundException, e:
                 raise Exception("Could not find counter histogram, message: %s" % str(e))
+            if _debugNAllEvents: # Debug print
+                print "DEBUG: self.nAllEventsWeighted = "+str(self.nAllEventsWeighted)
+
+
+        # Set nAllEvents to unweighted value (corresponding to ttree: skimCounterAll)  
+        # The corresponding value in the weighted counter is 0, so we don't want to use that
+        self.nAllEvents = self.nAllEventsUnweighted
+        if _debugNAllEvents: # Debug print
+            print "DEBUG: self.nAllEvents = "+str(self.nAllEvents)
 
     def getName(self):
         return self.name

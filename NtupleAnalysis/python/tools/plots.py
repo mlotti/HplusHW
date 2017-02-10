@@ -72,9 +72,11 @@ _physicalMcAdd = {
     "WZ_ext1": "WZ",
 
     "ST_tW_antitop_5f_inclusiveDecays"     : "ST_tW_antitop_5f_inclusiveDecays",
+    "ST_tW_antitop_5f_inclusiveDecays_ext": "ST_tW_antitop_5f_inclusiveDecays",
     "ST_tW_antitop_5f_inclusiveDecays_ext1": "ST_tW_antitop_5f_inclusiveDecays",
 
     "ST_tW_top_5f_inclusiveDecays"     : "ST_tW_top_5f_inclusiveDecays",
+    "ST_tW_top_5f_inclusiveDecays_ext": "ST_tW_top_5f_inclusiveDecays",
     "ST_tW_top_5f_inclusiveDecays_ext1": "ST_tW_top_5f_inclusiveDecays",
 
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
@@ -270,6 +272,7 @@ _datasetMerge = {
     #"TTJets_Hadronic": "TTJets",
 
     "WJetsToLNu": "WJets",
+    "WJetsToLNu_ext":"WJets",
     # "W1Jets"    : "WJets",
     # "W2Jets"    : "WJets",
     # "W3Jets"    : "WJets",
@@ -285,6 +288,7 @@ _datasetMerge = {
 
     "DYJetsToLL_M_10to50"        : "DYJetsToLLHT",
     "DYJetsToLL_M_50"            : "DYJetsToLL",
+    "DYJetsToLL_M_50_ext"        : "DYJetsToLL",
     "DYJetsToLL_M_50_HT_100to200": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_200to400": "DYJetsToLLHT",
     "DYJetsToLL_M_50_HT_400to600": "DYJetsToLLHT",
@@ -296,6 +300,7 @@ _datasetMerge = {
     "ZZTo4Q": "Diboson",
     "WW"    : "Diboson",
     "WZ"    : "Diboson",
+    "WZ_ext": "Diboson",
     "ZZ"    : "Diboson",
 
     "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
