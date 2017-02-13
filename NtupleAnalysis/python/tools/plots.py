@@ -62,28 +62,31 @@ _heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 50
 ## statistics. The mapping is used in the
 ## mergeRenameReorderForDataMC() function.
 _physicalMcAdd = {
-    #"TT"    : "TT",
+    "TT"    : "TT",
     "TT_ext": "TT",
 
-    "TTTT_ext1" : "TTTT", # covered by "TT"
+    "TTTT"      : "TTTT", 
+    "TTTT_ext1" : "TTTT", 
 
     "WZ"     : "WZ",
-    "WZ_ext": "WZ",
+    "WZ_ext" : "WZ",
     "WZ_ext1": "WZ",
 
     "ST_tW_antitop_5f_inclusiveDecays"     : "ST_tW_antitop_5f_inclusiveDecays",
-    "ST_tW_antitop_5f_inclusiveDecays_ext": "ST_tW_antitop_5f_inclusiveDecays",
+    "ST_tW_antitop_5f_inclusiveDecays_ext" : "ST_tW_antitop_5f_inclusiveDecays",
     "ST_tW_antitop_5f_inclusiveDecays_ext1": "ST_tW_antitop_5f_inclusiveDecays",
 
-    "ST_tW_top_5f_inclusiveDecays"     : "ST_tW_top_5f_inclusiveDecays",
-    "ST_tW_top_5f_inclusiveDecays_ext": "ST_tW_top_5f_inclusiveDecays",
-    "ST_tW_top_5f_inclusiveDecays_ext1": "ST_tW_top_5f_inclusiveDecays",
+    "ST_tW_top_5f_inclusiveDecays"      : "ST_tW_top_5f_inclusiveDecays",
+    "ST_tW_top_5f_inclusiveDecays_ext"  : "ST_tW_top_5f_inclusiveDecays",
+    "ST_tW_top_5f_inclusiveDecays_ext1" : "ST_tW_top_5f_inclusiveDecays",
 
-    "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"     : "TTBB",
-    "ttbb_4FS_ckm_amcatnlo_madspin_pythia8_ext1": "TTBB",
+    "ttbb_4FS_ckm_amcatnlo_madspin_pythia8"      : "TTBB",
+    "ttbb_4FS_ckm_amcatnlo_madspin_pythia8_ext1" : "TTBB",
 
-    "WJetsToLNu_ext":"WJetsToLNu",
+    "WJetsToLNu"     : "WJetsToLNu",
+    "WJetsToLNu_ext" : "WJetsToLNu",
 
+    "DYJetsToLL_M_50"            : "DYJetsToLL_M_50",
     "DYJetsToLL_M_50_ext"        : "DYJetsToLL_M_50",
 
 
