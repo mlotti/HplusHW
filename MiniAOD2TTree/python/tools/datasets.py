@@ -68,7 +68,10 @@ datasetsMuonData.append(Dataset('/SingleMuon/Run2016H-PromptReco-v3/MINIAOD', da
 
 datasetsZeroBiasData = []
 das = ""
+datasetsZeroBiasData.append(Dataset('/ZeroBias/Run2016G-PromptReco-v1/MINIAOD', dataVersion="80Xdata", dasQuery=das, lumiMask=lumiMask))
+datasetsZeroBiasData.append(Dataset('/ZeroBias/Run2016H-PromptReco-v2/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask=lumiMask))
 datasetsZeroBiasData.append(Dataset('/ZeroBias/Run2016H-PromptReco-v3/MINIAOD', dataVersion="80Xdata2016H", dasQuery=das, lumiMask=lumiMask))
+
 
 
 #================================================================================================ 
@@ -257,6 +260,12 @@ datasetsDY.append(Dataset('/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythi
 datasetsDYJetsToQQ = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=150&instance=prod%2Fglobal&input=dataset%3D%2FDYJetsToQQ_*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
 datasetsDYJetsToQQ.append(Dataset('/DYJetsToQQ_HT180_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+
+datasetsZprime = []
+das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FDY*%2FRunII*16MiniAODv2-*_reHLT_*%2FMINIAODSIM"                                                                                                      
+datasetsZprime.append(Dataset('/ZprimeToTauTau_M-500_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsZprime.append(Dataset('/ZprimeToTauTau_M-1000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsZprime.append(Dataset('/ZprimeToTauTau_M-3000_TuneCUETP8M1_13TeV-pythia8-tauola/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 
 datasetsWJets = []
@@ -476,6 +485,7 @@ datasetsSignalTauNu_TRGdev.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500
 tauLegDatasets = []
 tauLegDatasets.extend(datasetsMuonData)
 tauLegDatasets.extend(datasetsDY)
+tauLegDatasets.extend(datasetsZprime)
 # tauLegDatasets.extend(datasetsWJets_reHLT)
 # tauLegDatasets.extend(datasetsQCDMuEnriched_reHLT)
 # tauLegDatasets.extend(datasetsH125)
