@@ -687,11 +687,20 @@ def UpdatePlotStyleFill(styleMap, namesToFilled):
 # datasets not in the plots._datasetOrder list are left at the end in
 # the same order they were originally.
 def mergeRenameReorderForDataMC(datasetMgr, keepSourcesMC=False):
+    # merge data
     datasetMgr.mergeData(allowMissingDatasets=True)
+    # check that _ext* datasets are defined to be added in _physicalMcAdd
+    for datasetName in datasetMgr.getAllDatasetNames():
+        if "_ext" in datasetName and datasetName not in _physicalMcAdd.keys():
+            print """\033[91mWARNING: %s is not defined to be merged into anything \
+in _physicalMcAdd (see python/tools/plots.py). This may lead to incorrect \
+normalization of background! \033[00m"""%datasetName
+            raw_input("Press Enter to continue...")
+    # merge XX_ext* datasets into XX datasets according to (_physicalMcAdd)
     datasetMgr.mergeMany(_physicalMcAdd, addition=True)
+    # rename the datasets (according to _physicalToLogical and _physicalToLogical)
     datasetMgr.renameMany(_physicalToLogical, silent=True)
-
-    datasetMgr.mergeMany(_datasetMerge, keepSources=keepSourcesMC)
+    datasetMgr.mergeMany(_physicalToLogical, keepSources=keepSourcesMC)
 
     mcNames = datasetMgr.getAllDatasetNames()
     newOrder = []
