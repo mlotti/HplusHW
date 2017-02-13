@@ -19,6 +19,7 @@ class TauLegSelection : public TrgBaseSelection {
 
  private:
   short fnprongs;
+  bool relaxedSelection;
 
   WrappedTH1 *hMuPt;
   WrappedTH1 *hTauPt;
@@ -29,6 +30,7 @@ class TauLegSelection : public TrgBaseSelection {
   Count cTauLegAll;
   Count cTauLegMu;
   Count cTauLegTau;
+  Count cTauLegCharge;
   Count cTauLegInvMass;
   Count cTauLegMt;
 };
@@ -37,6 +39,7 @@ TauLegSelection::TauLegSelection(const ParameterSet& setup, EventCounter& fEvent
   cTauLegAll(fEventCounter.addCounter("TauLeg:all")),
   cTauLegMu(fEventCounter.addCounter("TauLeg:mu")),
   cTauLegTau(fEventCounter.addCounter("TauLeg:tau")),
+  cTauLegCharge(fEventCounter.addCounter("TauLeg:charge")),
   cTauLegInvMass(fEventCounter.addCounter("TauLeg:invMass")),
   cTauLegMt(fEventCounter.addCounter("TauLeg:Mt"))
 {
@@ -44,6 +47,9 @@ TauLegSelection::TauLegSelection(const ParameterSet& setup, EventCounter& fEvent
   //  fHistoWrapper = histoWrapper;
   const ParameterSet& tauSelection = setup.getParameter<ParameterSet>("TauSelection");
   fnprongs = tauSelection.getParameter<int>("nprongs");
+  relaxedSelection = false;
+  relaxedSelection = tauSelection.getParameter<bool>("relaxedOfflineSelection");
+  //std::cout << "check relaxedSelection " << relaxedSelection<< std::endl;
   std::cout << "        Tau selection nprongs " << fnprongs << std::endl;
   std::vector<std::string> discrs = tauSelection.getParameter<std::vector<std::string> >("discriminators");
   for(std::string i: discrs) std::cout << "        Tau discriminators " << i << std::endl;
@@ -63,6 +69,7 @@ void TauLegSelection::print(){
   std::cout << "        Tau leg: all events    " << cTauLegAll.value() << std::endl;
   std::cout << "        Tau leg: mu selection  " << cTauLegMu.value() << std::endl;
   std::cout << "        Tau leg: tau selection " << cTauLegTau.value() << std::endl;
+  std::cout << "        Tau leg: muTau charge  " << cTauLegCharge.value() << std::endl;
   std::cout << "        Tau leg: muTauInvMass  " << cTauLegInvMass.value() << std::endl;
   std::cout << "        Tau leg: muMetMt       " << cTauLegMt.value() << std::endl;
 }
@@ -106,7 +113,8 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
   }
   if(ntaus != 1) return false;
 
-  if(selectedTau->charge() * selectedMuon->charge() != -1 ) return false;
+
+  //  if(selectedTau->charge() * selectedMuon->charge() != -1 ) return false;
 
   //  boost::optional<HLTTau> selectedHltTau;
   math::LorentzVectorT<double> selectedHltTau;
@@ -133,6 +141,11 @@ bool TauLegSelection::offlineSelection(Event& fEvent, Xvar xvar){
   if(fEvent.isMC() && abs(selectedTau->pdgId()) == 15) mcmatch = true;
   //if(fEvent.isMC())  std::cout << "check tau mc match " << selectedTau->pdgId() << std::endl;
   cTauLegTau.increment();
+
+  if(relaxedSelection) return true;
+
+  if(selectedTau->charge() * selectedMuon->charge() != -1 ) return false;
+  cTauLegCharge.increment();
 
   double muTauInvMass = (selectedMuon->p4() + selectedTau->p4()).M();
   if(xvar == pt) hInvM->Fill(muTauInvMass);
