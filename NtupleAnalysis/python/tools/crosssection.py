@@ -409,6 +409,15 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("DYJetsToQQ_HT180", {
             "13": 1.209e+03, # 1.209e+03 +- 1.302e+00 pb [16]
             }),
+    CrossSection("ZprimeToTauTau_M_500", {
+            "13": 5.739,
+            }),
+    CrossSection("ZprimeToTauTau_M_1000", {
+            "13": 3.862e-01,
+            }),
+    CrossSection("ZprimeToTauTau_M_3000", {
+            "13": 1.585e-03,
+            }),
     CrossSection("GluGluHToTauTau_M125", {
             "13": 1, # dummy value, not really needed as this sample is not merged with anything else
             }),
