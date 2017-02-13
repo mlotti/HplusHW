@@ -155,6 +155,7 @@ def analyze(analysis=None):
 
 #    datasetsDY = None
     datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL")
+    datasetsDY = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="DYJetsToLL|Zprime")
 #    datasets = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,excludeTasks="GluGluHToTauTau_M125|TTJets")
     datasetsH125 = None
 #    datasetsH125 = dataset.getDatasetsFromMulticrabDirs(paths,analysisName=analysis,includeOnlyTasks="GluGluHToTauTau_M125",emptyDatasetsAsNone=True)
@@ -201,8 +202,8 @@ def analyze(analysis=None):
         p = plots.PlotBase([histograms.HistoGraph(eff1, "eff1", "p", "P")])
 
 
-    fit("Data",p,eff1,20,200)
-    fit("MC",p,eff2,20,200)
+    fit("Data",p,eff1,20,500)
+    fit("MC",p,eff2,20,500)
     if isinstance(datasetsH125,dataset.DatasetManager):
         fit("H125",p,eff3,20,200)
 
@@ -238,6 +239,8 @@ def analyze(analysis=None):
         p.getFrame2().GetYaxis().SetTitleOffset(1.6)
 
     histograms.addText(0.5, 0.6, "LooseIsoPFTau50_Trk30_eta2p1", 17)
+#    histograms.addText(0.5, 0.6, "VLooseIsoPFTau120_Trk50_eta2p1", 17)
+#    histograms.addText(0.5, 0.6, "VLooseIsoPFTau140_Trk50_eta2p1", 17)
 #    label = analysis.split("_")[len(analysis.split("_")) -1]
     label = "2016"
 

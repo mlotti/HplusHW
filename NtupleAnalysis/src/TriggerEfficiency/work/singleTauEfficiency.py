@@ -28,8 +28,10 @@ binning = [20, 30, 40, 50, 60, 80, 100, 120, 200, 300, 400, 500]
 xLabel  = "#tau_{h} p_{T} (GeV/c)"
 yLabel  = "HLT tau efficiency"
 
+
+tauThreshold = "50"
 #tauThreshold = "120"
-tauThreshold = "140"
+#tauThreshold = "140"
 
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
@@ -39,8 +41,9 @@ eras["2016C"] = "SingleMuon_Run2016C"
 eras["2016D"] = "SingleMuon_Run2016D"
 eras["2016E"] = "SingleMuon_Run2016E"
 eras["2016ICHEP"] = "SingleMuon_Run2016B|SingleMuon_Run2016C|SingleMuon_Run2016D"
-eras["2016HIP"] = "SingleMuon_Run2016B|SingleMuon_Run2016C|SingleMuon_Run2016D|SingleMuon_Run2016E|SingleMuon_Run2016F_PromptReco_v1_277816_278800"
-eras["2016HIPFIXED"] = "SingleMuon_Run2016F_PromptReco_v1_278801_278808|SingleMuon_Run2016G|SingleMuon_Run2016H"
+eras["2016HIP"] = "SingleMuon_Run2016B|SingleMuon_Run2016C|SingleMuon_Run2016D|SingleMuon_Run2016E|277816_278800"
+eras["2016HIPFIXED"] = "278801_278808|SingleMuon_Run2016G|SingleMuon_Run2016H"
+eras["2016"] = "SingleMuon_Run2016"
 
 runmin = -1
 runmax = -1
@@ -86,6 +89,7 @@ def createAnalyzer(dataVersion,era):
                               "againstMuonTight3",
                               "againstElectronMediumMVA6"],
             nprongs = 1,
+            relaxedOfflineSelection = False,
         ),
         binning = binning,
         xLabel  = xLabel,
@@ -96,6 +100,8 @@ def createAnalyzer(dataVersion,era):
         if "2016" in era:
             a.Trigger.triggerOR = ["HLT_IsoMu22_eta2p1_vx"]
             a.Trigger.triggerOR2= ["HLT_VLooseIsoPFTau"+tauThreshold+"_Trk50_eta2p1_vx"]
+            if tauThreshold == "50":
+                a.Trigger.triggerOR2= ["HLT_LooseIsoPFTau50_Trk30_eta2p1_vx"]
 
         a.runMin  = runmin
         a.runMax  = runmax
@@ -103,6 +109,8 @@ def createAnalyzer(dataVersion,era):
         if "2016" in era:
             a.Trigger.triggerOR = ["HLT_IsoMu22_eta2p1_vx"]
             a.Trigger.triggerOR2= ["HLT_VLooseIsoPFTau"+tauThreshold+"_Trk50_eta2p1_vx"]
+            if tauThreshold == "50":
+                a.Trigger.triggerOR2= ["HLT_LooseIsoPFTau50_Trk30_eta2p1_vx"]
 
     return a
 
@@ -118,5 +126,5 @@ def addAnalyzer(era):
 
 #addAnalyzer("2016ICHEP")
 #addAnalyzer("2016HIP")
-addAnalyzer("2016HIPFIXED")
-
+#addAnalyzer("2016HIPFIXED")
+addAnalyzer("2016")

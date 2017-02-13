@@ -302,11 +302,6 @@ backgroundCrossSections = CrossSectionList(
             "8": 3531.9, # [9], NNLO
             "13": 2008.4*3.0 # [14]
             }),
-    CrossSection("DYJetsToLL_M_50_ext", {
-            "7": 3048.0, # [4], NNLO
-            "8": 3531.9, # [9], NNLO
-            "13": 1921.8*3.0  # [17]
-            }),
     CrossSection("DYJetsToLL_M_50_TauHLT", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
@@ -398,6 +393,15 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("DYJetsToQQ_HT180", {
             "13": 1.209e+03, # 1.209e+03 +- 1.302e+00 pb [16]
+            }),
+    CrossSection("ZprimeToTauTau_M_500", {
+            "13": 5.739,
+            }),
+    CrossSection("ZprimeToTauTau_M_1000", {
+            "13": 3.862e-01,
+            }),
+    CrossSection("ZprimeToTauTau_M_3000", {
+            "13": 1.585e-03,
             }),
     CrossSection("GluGluHToTauTau_M125", {
             "13": 1, # dummy value, not really needed as this sample is not merged with anything else
@@ -534,9 +538,6 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("TTTT", {
             "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16]
             }),
-    CrossSection("TTTT_ext", {
-            "13": 9.103e-03, #9.103e-03 +- 1.401e-05 pb [16]
-            }),
     CrossSection("TTWJetsToQQ", {
             "13": 4.034e-01, #4.034e-01 +- 2.493e-03 pb [16] (inputFiles="2211E19A-CC1E-E611-97CC-44A84225C911.root")
             }),
@@ -569,8 +570,8 @@ def setBackgroundCrossSections(datasets, doWNJetsWeighting=True, quietMode=False
         setBackgroundCrossSectionForDataset(dset, doWNJetsWeighting, quietMode)
 
 def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMode=False):
-    value = backgroundCrossSections.crossSection(dataset.getName().replace("_ext",""), dataset.getEnergy())
-    value = backgroundCrossSections.crossSection(dataset.getName().replace("_ext3",""), dataset.getEnergy())
+    datasetName = dataset.getName().split("_ext", 1)[0] #use only the first part of dataset name, before "_ext"
+    value = backgroundCrossSections.crossSection(datasetName, dataset.getEnergy())
     if value is None:
         if "ChargedHiggs" in dataset.getName():
             value = 1.0 # Force signal xsection to 1 pb

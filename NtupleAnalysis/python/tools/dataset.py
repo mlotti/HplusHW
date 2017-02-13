@@ -34,7 +34,7 @@ from sys import platform as _platform
 # Global Definitions
 #================================================================================================
 DEBUG = False
-_debugNAllEvents = True
+_debugNAllEvents = False
 _debugCounters = False
 
 # era name -> list of era parts in data dataset names
