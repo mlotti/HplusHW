@@ -8,6 +8,7 @@
 #include "DataFormat/interface/EventID.h"
 #include "DataFormat/interface/VertexInfo.h"
 #include "DataFormat/interface/METFilter.h"
+#include "DataFormat/interface/L1Tau.h"
 #include "DataFormat/interface/HLTTau.h"
 #include "DataFormat/interface/Tau.h"
 #include "DataFormat/interface/Jet.h"
@@ -64,6 +65,7 @@ public:
   const EventID& eventID() const { return fEventID; }
   const VertexInfo& vertexInfo() const { return fVertexInfo; }
   const METFilter& metFilter() const { return fMETFilter; }
+  const L1TauCollection& l1Taus() const { return fL1TauCollection; }
   const HLTTauCollection& triggerTaus() const { return fTriggerTauCollection; }
   const TauCollection& taus() const { return fTauCollection; }
   const JetCollection& jets() const { return fJetCollection; }
@@ -95,6 +97,7 @@ private:
   BooleanOr fTriggerOr;
   BooleanOr fTriggerOr2;
 
+  L1TauCollection fL1TauCollection;
   HLTTauCollection fTriggerTauCollection;
   TauCollection fTauCollection;
   JetCollection fJetCollection;
