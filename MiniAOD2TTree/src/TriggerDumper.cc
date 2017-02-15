@@ -149,7 +149,7 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 if(patTriggerObject.id(trigger::TriggerL1ETM)){
                     L1MET_x = patTriggerObject.p4().x(); 
                     L1MET_y = patTriggerObject.p4().y();
-                    std::cout << "Trigger L1ETM " << patTriggerObject.p4().Pt() << std::endl;
+                    //std::cout << "Trigger L1ETM " << patTriggerObject.p4().Pt() << std::endl;
 		}
 	        if(patTriggerObject.id(trigger::TriggerMET)){
                     HLTMET_x = patTriggerObject.p4().x();
@@ -161,7 +161,7 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                     L1Tau_eta.push_back(patTriggerObject.p4().Eta());
                     L1Tau_phi.push_back(patTriggerObject.p4().Phi());
                     L1Tau_e.push_back(patTriggerObject.p4().E());
-                    std::cout << "Trigger L1 tau " << patTriggerObject.p4().Pt() << std::endl;
+                    //std::cout << "Trigger L1 tau " << patTriggerObject.p4().Pt() << std::endl;
                 }
 	        if(patTriggerObject.id(trigger::TriggerTau)){
 
