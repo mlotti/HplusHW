@@ -62,6 +62,7 @@ TauSelection::TauSelection(const ParameterSet& config, EventCounter& eventCounte
   fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
   cPassedTauSelection(fEventCounter.addCounter("Passed tau selection ("+postfix+")")),
+  cPassedTauSelectionGenuine(fEventCounter.addCounter("Passed tau selection and genuine ("+postfix+")")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("tau selection ("+postfix+")", "All events")),
   cSubPassedTriggerMatching(fEventCounter.addSubCounter("tau selection ("+postfix+")", "Passed trigger matching")),
@@ -106,6 +107,7 @@ TauSelection::TauSelection(const ParameterSet& config, const std::string& postfi
   fTauTriggerSFReader(config.getParameterOptional<ParameterSet>("tauTriggerSF")),
   // Event counter for passing selection
   cPassedTauSelection(fEventCounter.addCounter("Passed tau selection")),
+  cPassedTauSelectionGenuine(fEventCounter.addCounter("Passed tau selection and genuine")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("tau selection", "All events")),
   cSubPassedTriggerMatching(fEventCounter.addSubCounter("tau selection", "Passed trigger matching")),
@@ -195,7 +197,7 @@ TauSelection::Data TauSelection::analyze(const Event& event) {
   // Send data to CommonPlots
   if (fCommonPlots != nullptr)
     fCommonPlots->fillControlPlotsAtTauSelection(event, data);
-//    fCommonPlots->fillControlPlotsAfterTauSelection(event, data); // filled in privateAnalyze
+    fCommonPlots->fillControlPlotsAfterTauSelection(event, data);
   // Return data
   return data;
 }
@@ -317,12 +319,8 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
       output.fIsGenuineTauAntiIsolatedTau = output.getAntiIsolatedTau().isGenuineTau();
     }
   }
-  if (fCommonPlots != nullptr) {
-    if (output.fSelectedTaus.size()) {
-      fCommonPlots->fillControlPlotsAfterTauSelection(event, output);
-    } else if (output.fAntiIsolatedTaus.size()) {
+  if (fCommonPlots != nullptr && output.fAntiIsolatedTaus.size()) {
       fCommonPlots->fillControlPlotsAfterAntiIsolatedTauSelection(event, output);
-    }
   }
   // Fill Nprongs matrix plots
   if (event.isMC()) {
@@ -404,8 +402,11 @@ TauSelection::Data TauSelection::privateAnalyze(const Event& event) {
     if (output.fSelectedTaus.size() == 0)
       cPassedTauSelection.increment();
   } else {
-    if (output.fSelectedTaus.size() > 0)
+    if (output.fSelectedTaus.size() > 0){          // if there are selected taus...
       cPassedTauSelection.increment();
+      if (!event.isMC() or output.fIsGenuineTau) // ...and they are genuine taus (for MC) or data
+        cPassedTauSelectionGenuine.increment();
+    }
   }
 
   // Return data object

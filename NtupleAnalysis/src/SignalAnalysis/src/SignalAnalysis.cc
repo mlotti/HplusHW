@@ -153,6 +153,7 @@ void SignalAnalysis::process(Long64_t entry) {
     return;
   if (fEvent.isMC() && !tauData.isGenuineTau()) //if not genuine tau, reject the events (fake tau events are taken into account in QCDandFakeTau measurement)
     return;
+  fCommonPlots.fillControlPlotsAfterTauSelection(fEvent, tauData);
 
 //====== Tau ID SF
   if (fEvent.isMC()) {
