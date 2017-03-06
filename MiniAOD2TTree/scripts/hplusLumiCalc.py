@@ -347,6 +347,8 @@ def Print(msg, printHeader=False):
 def GetRegularExpression(arg):
     Verbose("GetRegularExpression()", True)
     if isinstance(arg, basestring):
+        if arg[len(arg)-1:] == '/':
+            arg = arg[:len(arg)-1]
         arg = [arg]
     return [re.compile(a) for a in arg]
 
@@ -411,6 +413,8 @@ def isEmpty(taskdir, opts):
     If task directory is empty return True
     '''    
     Verbose("isEmpty()", True)
+    if opts.ignoreLogs:
+        return False
     if opts.transferToEOS:
         return False
     path  = os.path.join(taskdir, "results")
@@ -795,6 +799,12 @@ def main(opts, args):
     puFiles  = {}
     index    = -1
     lumiUnit = ""
+
+    # if lumi.joson already exists, load
+    f = open(opts.output, "r")
+    data = json.load(f)
+    f.close()
+
     # For-loop: All json files
     for task, jsonfile in files:
         index += 1
@@ -987,6 +997,9 @@ if __name__ == "__main__":
 
     parser.add_option("--transferToEOS", dest="transferToEOS", default=TRANSFERTOEOS, action="store_true",
                       help="The output ROOT files will be transfered to appropriate EOS paths [default: '%s']" % (TRANSFERTOEOS) )
+    parser.add_option("--ignore-logs", dest="ignoreLogs",default=False, action="store_true",
+                      help="Does not check the existence of log files. [default: False]")
+
 
     (opts, args) = parser.parse_args()
     opts.dirs.extend(args)
