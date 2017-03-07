@@ -396,6 +396,7 @@ void QCDMeasurement::process(Long64_t entry) {
 
 //====== Tau selection                                                                                                                                                                                                           
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
+  fCommonPlots.fillControlPlotsAfterTauSelection(fEvent, tauData);
   std::vector<float> myFactorisationInfo;
   if (tauData.isAntiIsolated()) {
     // There are only anti-isolated taus -> inverted
@@ -441,6 +442,7 @@ void QCDMeasurement::process(Long64_t entry) {
       fNormalizationSystematicsSignalRegion.fillControlPlotsAfterTauSelection(fEvent, tauData);
 
       cBaselineTauTauIDCounter.increment();
+      
       //====== Tau ID SF       
       if (fEvent.isMC()) {
 	fEventWeight.multiplyWeight(tauData.getTauIDSF());

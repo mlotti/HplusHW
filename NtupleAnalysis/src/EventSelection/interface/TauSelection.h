@@ -149,6 +149,7 @@ private:
   
   // Event counter for passing selection
   Count cPassedTauSelection;
+  Count cPassedTauSelectionGenuine;
   // Sub counters
   Count cSubAll;
   Count cSubPassedTriggerMatching;

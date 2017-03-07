@@ -74,8 +74,17 @@ void BaseSelector::processInternal(Long64_t entry) {
   if (fEvent.isMC() && fEvent.vertexInfo().branchesExist()) {
     hNvtxBeforeVtxReweighting->Fill(fEvent.vertexInfo().value());
     fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
-    //std::cout << "vtx: " << fPileupWeight.getWeight(fEvent) << std::endl;;
     hNvtxAfterVtxReweighting->Fill(fEvent.vertexInfo().value());
+
+  // test print to check that the PU reweighting works correctly
+  /*    std::cout << "Weighting one event by w = " << fPileupWeight.getWeight(fEvent) << ", now difference in N_vtx integral = after-before = "
+    <<  std::setprecision(8) << double(hNvtxAfterVtxReweighting->getHisto()->Integral(0,-1)) << " - " << double(hNvtxBeforeVtxReweighting->getHisto()->Integral(0,-1))
+    << " = " << double(hNvtxAfterVtxReweighting->getHisto()->Integral(0,-1)) - double(hNvtxBeforeVtxReweighting->getHisto()->Integral(0,-1)) 
+    << ", i.e. " << std::setprecision(3) << double((double(hNvtxAfterVtxReweighting->getHisto()->Integral(0,-1))
+    - double(hNvtxBeforeVtxReweighting->getHisto()->Integral(0,-1)))/(double(hNvtxBeforeVtxReweighting->getHisto()->Integral(0,-1))) - double(1.0))
+     << " percent" << std::endl;
+  */
+
   }
   cPileupWeighted.increment();
   
