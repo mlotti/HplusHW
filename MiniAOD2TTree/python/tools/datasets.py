@@ -431,6 +431,8 @@ datasetsTTZToQQ = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTTZToQQ*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
 datasetsTTZToQQ.append(Dataset('/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dasQuery=das))
 
+datasetsNeutrino = []
+datasetsNeutrino.append(Dataset('/SingleNeutrino/RunIIHighPUTrainsMiniAODv2-HighPUTrains_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dasQuery=das))
 
 #================================================================================================ 
 # Dataset definition (MC-RunIISpring16, noReHLT)
@@ -523,7 +525,8 @@ metLegDatasets.extend(datasetsQCD)
 
 l1Datasets = []
 l1Datasets.extend(datasetsZeroBiasData)
-
+l1Datasets.extend(datasetsNeutrino)
+l1Datasets.extend(datasetsQCD)
 
 signalAnalysisDatasets = []
 signalAnalysisDatasets.extend(datasetsTauData)
