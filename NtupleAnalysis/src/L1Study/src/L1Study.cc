@@ -26,6 +26,9 @@ private:
   Count cL1Tau;
   Count cTransverseMass;
 
+  WrappedTH1 *hNumPU;
+  WrappedTH1 *hDenPU;
+
   WrappedTH1 *hTransverseMass;
 };
 
@@ -58,6 +61,12 @@ L1Study::~L1Study(){
 
 void L1Study::book(TDirectory *dir) {
   //  selection->bookHistograms(dir);
+  hNumPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "NumeratorPU", "NumeratorPU", 11, 5, 60.);
+  hNumPU->GetXaxis()->SetTitle("nVtx");
+
+  hDenPU = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "DenominatorPU", "DenominatorPU", 11, 5, 60.);
+  hDenPU->GetXaxis()->SetTitle("nVtx");
+
   hTransverseMass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMasss", "TransverseMass", 200, 0, 800);
 }
 
@@ -68,6 +77,9 @@ void L1Study::setupBranches(BranchManager& branchManager) {
 void L1Study::process(Long64_t entry) {
 
   cAllEvents.increment();
+
+  double xvariable = fEvent.vertexInfo().value();
+  hDenPU->Fill(xvariable);
 
   //  if(!selection->passedRunRange(fEvent,this->isData())) return;
   //  cRunRange.increment();
@@ -93,8 +105,11 @@ void L1Study::process(Long64_t entry) {
   //  std::cout << "mT(tau.met) = " << myTransverseMass << std::endl;
   hTransverseMass->Fill(myTransverseMass);
                    
-  if(myTransverseMass < 50) return;
+  //  if(myTransverseMass < 50) return;
   cTransverseMass.increment();
+
+  hNumPU->Fill(xvariable);
+
 
   //  double l1Tau = fEvent.L1tau().et();
 

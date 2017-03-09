@@ -30,8 +30,8 @@ def getDatasetsForEras(dsets,era):
 
 def createAnalyzer(dataVersion,era):
     a = Analyzer("L1Study",
-        L1TauPt        = 50,
-        L1ETM          = 0,
+        L1TauPt        = 30,
+        L1ETM          = 70,
         TransverseMass = 50
     )
     a.runMin  = runmin
