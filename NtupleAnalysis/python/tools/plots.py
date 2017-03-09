@@ -85,10 +85,14 @@ _physicalMcAdd = {
 
     "WJetsToLNu"     : "WJetsToLNu",
     "WJetsToLNu_ext" : "WJetsToLNu",
+    "WJetsToLNu_ext1": "WJetsToLNu",
+    "WJetsToLNu_ext2": "WJetsToLNu",
 
     "DYJetsToLL_M_50"            : "DYJetsToLL_M_50",
     "DYJetsToLL_M_50_ext"        : "DYJetsToLL_M_50",
+    "DYJetsToLL_M_50_ext1"       : "DYJetsToLL_M_50",
 
+    "ChargedHiggs_HplusTB_HplusToTauNu_M_500_ext1" : "ChargedHiggs_HplusTB_HplusToTauNu_M_500",
 
 }
 
@@ -202,11 +206,10 @@ _physicalToLogical.update({
         "QCD_Pt_170to300_MuEnrichedPt5": "QCD_Pt_170to300_MuEnrichedPt5",
         "QCD_Pt_300to470_MuEnrichedPt5": "QCD_Pt_300to470_MuEnrichedPt5",
         
-        "ST_schannel_4f_leptonDecays"          : "ST_schannel_4f_leptonDecays",
-        "ST_tW_antitop_5f_inclusiveDecays"     : "ST_tW_antitop_5f_inclusiveDecays",
-        "ST_tW_top_5f_inclusiveDecays"         : "ST_tW_top_5f_inclusiveDecays",
-        "ST_tchannel_antitop_4f_leptonDecays"  : "ST_tchannel_antitop_4f_leptonDecays",
-        "ST_tchannel_top_4f_leptonDecays"      : "ST_tchannel_top_4f_leptonDecays",
+        "ST_tW_top_5f_inclusiveDecays"             : "ST_tW_top_5f_inclusiveDecays",
+        "ST_tW_antitop_5f_inclusiveDecays"         : "ST_tW_antitop_5f_inclusiveDecays",
+        "ST_t_channel_antitop_4f_inclusiveDecays"  : "ST_t_channel_antitop_4f_inclusiveDecays",
+        "ST_t_channel_top_4f_inclusiveDecays"         : "ST_t_channel_top_4f_inclusiveDecays",
 
         "WW": "WW",
         "WZ": "WZ",
@@ -697,10 +700,12 @@ in _physicalMcAdd (see python/tools/plots.py). This may lead to incorrect \
 normalization of background! \033[00m"""%datasetName
             raw_input("Press Enter to continue...")
     # merge XX_ext* datasets into XX datasets according to (_physicalMcAdd)
+    print "DEBUG: Datasets before _physicalMcAdd:"
+    print datasetMgr.getAllDatasetNames()
     datasetMgr.mergeMany(_physicalMcAdd, addition=True)
     # rename the datasets (according to _physicalToLogical and _physicalToLogical)
     datasetMgr.renameMany(_physicalToLogical, silent=True)
-    datasetMgr.mergeMany(_physicalToLogical, keepSources=keepSourcesMC)
+    datasetMgr.mergeMany(_datasetMerge, keepSources=keepSourcesMC)
 
     mcNames = datasetMgr.getAllDatasetNames()
     newOrder = []

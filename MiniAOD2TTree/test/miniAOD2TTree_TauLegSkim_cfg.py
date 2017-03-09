@@ -4,8 +4,8 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-#dataVersion = "80Xmc"
-dataVersion = "80Xdata"
+dataVersion = "80Xmc"
+#dataVersion = "80Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion
@@ -25,7 +25,8 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-       '/store/data/Run2016B/SingleMuon/MINIAOD/PromptReco-v2/000/273/150/00000/34A57FB8-D819-E611-B0A4-02163E0144EE.root',
+#       '/store/data/Run2016B/SingleMuon/MINIAOD/PromptReco-v2/000/273/150/00000/34A57FB8-D819-E611-B0A4-02163E0144EE.root',
+	'/store/mc/RunIISummer16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/120000/02A210D6-F5C3-E611-B570-008CFA197BD4.root'
     ),
     secondaryFileNames = cms.untracked.vstring(
     )
@@ -78,7 +79,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     ),
     EventInfo = cms.PSet(
 	PileupSummaryInfoSrc = process.PUInfo.PileupSummaryInfoSrc,
-	LumiScalersSrc = cms.InputTag("scalersRawToDigi"),
+#	LumiScalersSrc = cms.InputTag("scalersRawToDigi"),
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
         TopPtProducer = cms.InputTag("TopPtProducer"),
     ),
