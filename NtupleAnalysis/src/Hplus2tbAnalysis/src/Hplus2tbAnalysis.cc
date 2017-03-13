@@ -311,4 +311,6 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // Finalize
   //================================================================================================
   fEventSaver.save();
+
+  return;
 }

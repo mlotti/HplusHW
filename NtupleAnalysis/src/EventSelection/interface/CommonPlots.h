@@ -22,6 +22,7 @@ public:
     kHplus2tbAnalysis= 0,
     kEmbedding,
     kQCDMeasurement,
+    kFakeBMeasurement,
     kQCDNormalizationSystematicsSignalRegion, // Needed for obtaining normalization systematics to data-driven control plots
     kQCDNormalizationSystematicsControlRegion // Needed for obtaining normalization systematics to data-driven control plots
   };
