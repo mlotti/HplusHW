@@ -83,7 +83,14 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerMatch = cms.untracked.vstring(),
 	filter = cms.untracked.bool(False)
     ),
-    METNoiseFilter = process.METNoiseFilter
+    METNoiseFilter = process.METNoiseFilter,
+    GenWeights = cms.VPSet(  
+        cms.PSet(   
+            branchname = cms.untracked.string("GenWeights"),
+            src = cms.InputTag("generator"),
+            filter = cms.untracked.bool(False)
+        ) 
+    ),
 )
 
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")
