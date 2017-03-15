@@ -110,8 +110,8 @@ jetSelection = PSet(
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    jetPtCut                  = 30.0,
-    jetEtaCut                 = 2.5,
+    jetPtCut                  = 40.0,
+    jetEtaCut                 = 2.4,
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Loose",
     numberOfBJetsCutValue     = 3,
@@ -167,8 +167,8 @@ topologySelection = PSet(
 # Top selection
 #================================================================================================
 topSelection = PSet(
-    ChiSqrCutValue     = 0.0,
-    ChiSqrCutDirection = ">",    # options: ==, !=, <, <=, >, >=
+    ChiSqrCutValue     = -1.0,
+    ChiSqrCutDirection = ">=",    # options: ==, !=, <, <=, >, >=
     MassW              = 80.385,
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,

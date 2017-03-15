@@ -98,16 +98,16 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   h_JetPtAll_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetPtAll_After"   , ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
   h_JetEtaAll_Before  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetEtaAll_Before" , ";#eta", nBinsEta, minEta, maxEta);
   h_JetEtaAll_After   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetEtaAll_After"  , ";#eta", nBinsEta, minEta, maxEta);
-  h_TriJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "TriJetMass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_TriJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "TriJetMass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_LdgTriJetMass_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "LdgTriJetMass_Before"   ,";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_LdgTriJetMass_After     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "LdgTriJetMass_After"    ,";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_SubLdgTriJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "SubLdgTriJetMass_Before",";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_SubLdgTriJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "SubLdgTriJetMass_After" ,";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_ClosestTo3rdBJet_TriJetMass_Before  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ClosestTo3rdBJet_TriJetMass_Before" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_ClosestTo3rdBJet_TriJetMass_After   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ClosestTo3rdBJet_TriJetMass_After"  , ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_FurthestTo3rdBJet_TriJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FurthestTo3rdBJet_TriJetMass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_FurthestTo3rdBJet_TriJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FurthestTo3rdBJet_TriJetMass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
+  h_TriJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "TriJetMass_Before", ";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  h_TriJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "TriJetMass_After" , ";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  h_LdgTriJetMass_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "LdgTriJetMass_Before"   ,";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  h_LdgTriJetMass_After     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "LdgTriJetMass_After"    ,";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  h_SubLdgTriJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "SubLdgTriJetMass_Before",";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  h_SubLdgTriJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "SubLdgTriJetMass_After" ,";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  h_ClosestTo3rdBJet_TriJetMass_Before  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ClosestTo3rdBJet_TriJetMass_Before" , ";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  h_ClosestTo3rdBJet_TriJetMass_After   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ClosestTo3rdBJet_TriJetMass_After"  , ";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  h_FurthestTo3rdBJet_TriJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FurthestTo3rdBJet_TriJetMass_Before", ";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  h_FurthestTo3rdBJet_TriJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FurthestTo3rdBJet_TriJetMass_After" , ";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
   h_ChiSqr_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ChiSqr_Before"   , ";#chi^{2}"     ,    100,  0.0, 100.0);
   h_DiJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetMass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
   h_DiJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetMass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
@@ -129,7 +129,7 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   h_DiJetBJet_DEta_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetBJet_DEta_After" , "#Delta#eta(dijet,bjet)", nBinsdEta, mindEta, maxdEta);
 
   // Histograms (2D) 
-  h_TriJetMass_Vs_ChiSqr_Before = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "TriJetMass_Vs_ChiSqr_Before", ";M (GeV/c^{2}); #chi^{2}", nBinsM, minM, maxM, 100, 0.0, 100.0);
+  h_TriJetMass_Vs_ChiSqr_Before = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "TriJetMass_Vs_ChiSqr_Before", ";M (GeV/c^{2}); #chi^{2}", nBinsM*2, minM, maxM*2, 100, 0.0, 100.0);
   h_DiJetPt_Vs_DiJetDR_Before   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "DiJetPt_Vs_DiJetDR_Before"  , ";p_{T} (GeV/c);#Delta R(j_{1},j_{2}", nBinsPt, minPt, maxPt, nBinsdR, mindR, maxdR);
   h_DiJetPt_Vs_DiJetDR_After    = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "DiJetPt_Vs_DiJetDR_After"   , ";p_{T} (GeV/c);#Delta R(j_{1},j_{2}", nBinsPt, minPt, maxPt, nBinsdR, mindR, maxdR);
 

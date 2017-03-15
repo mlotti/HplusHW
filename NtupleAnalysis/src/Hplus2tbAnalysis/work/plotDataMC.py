@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 '''
+Generic scipt that plots TH1 histograms (Data, MC) with the ratio pad enabled.
 
 Usage (single plot):
 ./plotHistograms.py -m <pseudo_mcrab_directory> <jsonfile>
@@ -9,13 +10,26 @@ Usage (multiple plots):
 or
 ./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json json/AfterStandardSelections/*.json
 
+Usage (overwrite samples defined in JSON):
+./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json -i "JetHT|QCD_H"
+or
+./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json -e "QCD_b|Charged"
 
-Last Used:
-./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/BjetPt.json
-or
-./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/*.json
-or
-./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/*/*.json
+
+Frequently Used:
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/PUDependency/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/counters/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/counters/weighted/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/eSelection_Veto/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/muSelection_Veto/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/tauSelection_Veto/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/jetSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/bjetSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/metSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/topologySelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/topSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/AfterStandardSelections/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/AfterAllSelections/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
 '''
 
 #================================================================================================
@@ -72,19 +86,35 @@ def GetLumi(datasetsMgr):
 
 def GetDatasetsFromDir(opts, json):
     Verbose("Getting datasets")
-    
-    if len(json["samples"])<1:
-        Print("No samples defined in the JSON file. Exit", True)
-        print __doc__
-        sys.exit()
-    else:
+
+    if (opts.includeOnlyTasks):
         return dataset.getDatasetsFromMulticrabDirs([opts.mcrab], 
                                                     dataEra=json["dataEra"],
                                                     searchMode=json["searchMode"],
                                                     analysisName=json["analysis"],
-                                                    includeOnlyTasks="|".join(json["samples"]),
+                                                    includeOnlyTasks=opts.includeOnlyTasks,
                                                     optimizationMode=json["optMode"])
-    
+    elif (opts.excludeTasks):
+        return dataset.getDatasetsFromMulticrabDirs([opts.mcrab], 
+                                                    dataEra=json["dataEra"],
+                                                    searchMode=json["searchMode"],
+                                                    analysisName=json["analysis"],
+                                                    excludeTasks=opts.excludeTasks,
+                                                    optimizationMode=json["optMode"])
+    else:
+        #return process.addDatasetsFromMulticrab(opts.mcrab)
+        if len(json["samples"])<1:
+            Print("No samples defined in the JSON file. Exit", True)
+            print __doc__
+            sys.exit()
+        else:
+            return dataset.getDatasetsFromMulticrabDirs([opts.mcrab], 
+                                                        dataEra=json["dataEra"],
+                                                        searchMode=json["searchMode"],
+                                                        analysisName=json["analysis"],
+                                                        includeOnlyTasks="|".join(json["samples"]),
+                                                        optimizationMode=json["optMode"])
+        
 def Plot(jsonfile, opts):
     Verbose("Plotting")
 
@@ -242,6 +272,12 @@ if __name__ == "__main__":
 
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
+
+    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
+                      help="List of datasets in mcrab to include")
+
+    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
+                      help="List of datasets in mcrab to exclude")
 
     (opts, parseArgs) = parser.parse_args()
 

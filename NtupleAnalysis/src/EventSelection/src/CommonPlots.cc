@@ -113,18 +113,23 @@ CommonPlots::~CommonPlots() {
 void CommonPlots::book(TDirectory *dir, bool isData) { 
   fHistoSplitter.bookHistograms(dir);
   // Create directories for data driven control plots
+  std::string tausOrB = "Taus";
+  if ( (fAnalysisType == kFakeBMeasurement) || (fAnalysisType == kHplus2tbAnalysis) ) tausOrB = "B";
+
   std::string myLabel = "ForDataDrivenCtrlPlots";
-  std::string myFakeLabel = "ForDataDrivenCtrlPlotsEWKFakeTaus";
-  std::string myGenuineLabel = "ForDataDrivenCtrlPlotsEWKGenuineTaus";
+  std::string myFakeLabel = "ForDataDrivenCtrlPlotsEWKFake" + tausOrB;
+  std::string myGenuineLabel = "ForDataDrivenCtrlPlotsEWKGenuine" + tausOrB;
+
+  
   if (fAnalysisType == kQCDNormalizationSystematicsSignalRegion) {
     myLabel += "QCDNormalizationSignal";
-    myFakeLabel += "QCDNormalizationSignalEWKFakeTaus";
-    myGenuineLabel += "QCDNormalizationSignalEWKGenuineTaus";
+    myFakeLabel += "QCDNormalizationSignalEWKFake" + tausOrB;
+    myGenuineLabel += "QCDNormalizationSignalEWKGenuine" + tausOrB;
   }
   if (fAnalysisType == kQCDNormalizationSystematicsControlRegion) {
     myLabel += "QCDNormalizationControl";
-    myFakeLabel += "QCDNormalizationControlEWKFakeTaus";
-    myGenuineLabel += "QCDNormalizationControlEWKGenuineTaus";
+    myFakeLabel += "QCDNormalizationControlEWKFake" + tausOrB;
+    myGenuineLabel += "QCDNormalizationControlEWKGenuine" + tausOrB;
   }
   TDirectory* myCtrlDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myLabel);
   TDirectory* myCtrlEWKFakeTausDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);

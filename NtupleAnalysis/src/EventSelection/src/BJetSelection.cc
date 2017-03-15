@@ -181,6 +181,10 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   if (passedEta&&passedPt&&passedDisr)
     cSubPassedDiscriminator.increment();
 
+  // Sort jets by b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  output.fFailedBJetCandsSorted = output.fFailedBJetCands;
+  std::sort(output.fFailedBJetCandsSorted.begin(), output.fFailedBJetCandsSorted.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() > b.bjetDiscriminator();});
+
   //=== Apply cut on number of selected b jets
   if (!fNumberOfJetsCut.passedCut(output.getNumberOfSelectedBJets()))
     return output;
@@ -207,10 +211,6 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   // Calculate probability for passing b tag cut without actually applying the cut
   output.fBTaggingPassProbability = calculateBTagPassingProbability(iEvent, jetData);
   
-  // Sort jets by b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
-  output.fFailedBJetCandsSorted = output.fFailedBJetCands;
-  std::sort(output.fFailedBJetCandsSorted.begin(), output.fFailedBJetCandsSorted.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() < b.bjetDiscriminator();});
-
   // Return data object
   return output;
 }
