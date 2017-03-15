@@ -28,6 +28,8 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Framework/interface/TriggerNamesService.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
+#include "DataFormats/L1Trigger/interface/Tau.h"
+#include "DataFormats/L1Trigger/interface/EtSum.h"
 //#include "DataFormats/L1Trigger/interface/BXVector.h"
 //#include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
@@ -63,6 +65,8 @@ class TriggerDumper {
         edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
         edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trgObjectsToken;
         edm::EDGetTokenT<pat::PackedTriggerPrescales> trgPrescaleToken;
+        edm::EDGetTokenT<l1t::TauBxCollection> l1TausToken;
+        edm::EDGetTokenT<l1t::EtSumBxCollection> l1EtSumToken;
         edm::EDGetTokenT<std::vector<l1extra::L1EtMissParticle>> trgL1ETMToken;
         std::vector<std::string> triggerBits;
         std::vector<std::string> selectedTriggers;
@@ -78,6 +82,7 @@ class TriggerDumper {
         double L1MET_l1extra_y;
 	double L1MET_x;
         double L1MET_y;
+        bool bookL1EtSum;
 	double HLTMET_x;
 	double HLTMET_y;
 
@@ -85,6 +90,12 @@ class TriggerDumper {
         std::vector<double> L1Tau_eta;
         std::vector<double> L1Tau_phi;
         std::vector<double> L1Tau_e;
+
+        std::vector<double> L1IsoTau_pt;
+        std::vector<double> L1IsoTau_eta;
+        std::vector<double> L1IsoTau_phi;
+        std::vector<double> L1IsoTau_e;
+        bool bookL1Tau;
 
         std::vector<double> HLTTau_pt;
         std::vector<double> HLTTau_eta;

@@ -80,6 +80,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerBits = cms.vstring(
         ),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
+        L1TauObjects = cms.InputTag("caloStage2Digis:Tau"),
+        L1EtSumObjects = cms.InputTag("caloStage2Digis:EtSum"),
 	TriggerMatch = cms.untracked.vstring(),
 	filter = cms.untracked.bool(False)
     ),
