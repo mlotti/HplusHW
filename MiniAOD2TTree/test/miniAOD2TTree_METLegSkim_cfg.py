@@ -93,6 +93,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
+        L1TauObjects = cms.InputTag("caloStage2Digis:Tau"),
+        L1EtSumObjects = cms.InputTag("caloStage2Digis:EtSum"),
 	filter = cms.untracked.bool(False)
     ),
     METNoiseFilter = process.METNoiseFilter,

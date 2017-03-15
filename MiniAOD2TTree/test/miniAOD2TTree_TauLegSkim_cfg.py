@@ -112,6 +112,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 #        L1Extra = cms.InputTag("l1extraParticles:MET:HLT25NSV4L1V5"),
 #	L1Extra = cms.InputTag("l1extraParticles:MET:TauHLT"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
+        L1TauObjects = cms.InputTag("caloStage2Digis:Tau"),
+        L1EtSumObjects = cms.InputTag("caloStage2Digis:EtSum"),
 	TriggerMatch = cms.untracked.vstring(
 	    "LooseIsoPFTau50_Trk30_eta2p1",
 	    "LooseIsoPFTau20",
