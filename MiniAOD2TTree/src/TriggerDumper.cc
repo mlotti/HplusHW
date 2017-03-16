@@ -15,6 +15,7 @@ TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const 
     inputCollection = pset;
     booked = false;
     bookL1Tau = false;
+    bookL1Jet = false;
     bookL1EtSum = false;
 
     triggerBits = inputCollection.getParameter<std::vector<std::string> >("TriggerBits");
@@ -27,6 +28,11 @@ TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const 
     if(inputCollection.exists("L1TauObjects")){
       l1TausToken = iConsumesCollector.consumes<l1t::TauBxCollection>(pset.getParameter<edm::InputTag>("L1TauObjects"));
       bookL1Tau = true;
+    }
+
+    if(inputCollection.exists("L1JetObjects")){
+      l1JetsToken = iConsumesCollector.consumes<l1t::JetBxCollection>(pset.getParameter<edm::InputTag>("L1JetObjects"));
+      bookL1Jet = true;
     }
 
     if(inputCollection.exists("L1EtSumObjects")){
@@ -68,6 +74,12 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
       theTree->Branch("L1IsoTau_eta",&L1IsoTau_eta);
       theTree->Branch("L1IsoTau_phi",&L1IsoTau_phi);
       theTree->Branch("L1IsoTau_e",&L1IsoTau_e);
+    }
+    if(bookL1Jet){
+      theTree->Branch("L1Jet_pt",&L1Jet_pt);
+      theTree->Branch("L1Jet_eta",&L1Jet_eta);
+      theTree->Branch("L1Jet_phi",&L1Jet_phi);
+      theTree->Branch("L1Jet_e",&L1Jet_e);
     }
 
     theTree->Branch("HLTTau_pt",&HLTTau_pt);  
@@ -232,6 +244,20 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         }
         }
 
+        if(bookL1Jet){
+        edm::Handle<l1t::JetBxCollection> l1jets;
+        iEvent.getByToken(l1JetsToken, l1jets);
+        if(l1jets.isValid()) {
+          for(l1t::JetBxCollection::const_iterator i = l1jets->begin(); i != l1jets->end(); ++i) {
+            L1Jet_pt.push_back(i->pt());
+            L1Jet_eta.push_back(i->eta());
+            L1Jet_phi.push_back(i->phi());
+            L1Jet_e.push_back(i->energy());
+            //std::cout << "Trigger L1 jet (bx) " << i->pt() << std::endl;
+          }
+        }
+        }
+
         if(bookL1EtSum){
         edm::Handle<l1t::EtSumBxCollection> l1EtSum;
         iEvent.getByToken(l1EtSumToken, l1EtSum);
@@ -297,6 +323,11 @@ void TriggerDumper::reset(){
       L1IsoTau_eta.clear();
       L1IsoTau_phi.clear();
       L1IsoTau_e.clear();
+
+      L1Jet_pt.clear();
+      L1Jet_eta.clear();
+      L1Jet_phi.clear();
+      L1Jet_e.clear();
 
       HLTTau_pt.clear();
       HLTTau_eta.clear();
