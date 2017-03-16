@@ -1,17 +1,26 @@
 #!/usr/bin/env python
 '''
+Description:
 Generic scipt that plots most TH1 histograms produced by the
 FakeBMeasurement.cc class. 
+
+For the definition of the counter class see:
+HiggsAnalysis/NtupleAnalysis/scripts
+
+For more counter tricks and optios see also:
+HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
 ./plotFakeBAnalysis.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -v
-./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -i "JetHT|TT" 
-./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats/ --mcOnly --intLumi 100000
+./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -i "JetHT|TT" s
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats/ --mcOnly --intLumi --mergeEWK
+./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats/ --mcOnly --intLumi 100000
 
+Examples (tables):
+/plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats --noError --format %.3f --latex
 '''
 
 #================================================================================================ 
@@ -149,17 +158,27 @@ def main(opts):
     style = tdrstyle.TDRStyle()
     style.setOptStat(True)
 
+
+    #===============================
     # Do the plots
-    PurityTripletPlots(datasetsMgr, analysisType="")
-    PurityTripletPlots(datasetsMgr, analysisType="EWKFakeB")
-    PurityTripletPlots(datasetsMgr, analysisType="EWKGenuineB")
+    #===============================
+    # PurityTripletPlots(datasetsMgr, analysisType="")
+    # PurityTripletPlots(datasetsMgr, analysisType="EWKFakeB")
+    # PurityTripletPlots(datasetsMgr, analysisType="EWKGenuineB")
+
+    # OtherHistograms(datasetsMgr, analysisType="Baseline")
+    # OtherHistograms(datasetsMgr, analysisType="Inverted")
+
     # MtComparison(datasets)
     # MetComparisonBaselineVsInverted(datasets)
     # MetComparison(datasets)
     # TauPtComparison(datasets)
 
-    # Print counters
-    # doCounters(datasets)
+    #===============================
+    # Do the counters
+    #===============================
+    doCounters(datasetsMgr)
+
     return
 
 
@@ -176,11 +195,68 @@ except ImportError:
 def normalisationInclusive():
 
     norm_inc = QCDPlusEWKFakeTausNormalization["Inclusive"]
- #   normEWK_inc = QCDInvertedNormalization["inclusiveEWK"]
+    # normEWK_inc = QCDInvertedNormalization["inclusiveEWK"]
 
     print "inclusive norm", norm_inc
     return norm_inc
 
+
+def doCounters(datasetsMgr):
+    '''
+    '''
+    Verbose("Doing the counters")
+
+    # Definitions
+    eventCounter = counter.EventCounter(datasetsMgr)
+    ewkDatasets = ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+
+    if opts.mcOnly and opts.intLumi>-1.0:
+        eventCounter.normalizeMCToLuminosity(opts.intLumi)
+    else:
+        eventCounter.normalizeMCByLuminosity()
+        # eventCounter.normalizeMCByCrossSection()
+
+    # Print the counters
+    hLine    = "="*10
+    msg = " Main counter (MC normalized by collision data luminosity) "
+    print "\n" + hLine + msg + hLine
+
+    # Construct the table
+    mainTable = eventCounter.getMainCounterTable()
+    nRows    = mainTable.getNrows()
+    nColumns = mainTable.getNcolumns()
+    if not opts.mergeEWK:
+        mainTable.insertColumn(nColumns, counter.sumColumn("EWK", [mainTable.getColumn(name=name) for name in ewkDatasets]))
+
+    # Additional column (through inter-column operations)
+    mainTable.insertColumn(mainTable.getNcolumns(), counter.subtractColumn("Data-EWK", mainTable.getColumn(name="Data"), mainTable.getColumn(name="EWK") ) )
+    mainTable.insertColumn(mainTable.getNcolumns(), counter.divideColumn("QCD Purity", mainTable.getColumn(name="Data-EWK"), mainTable.getColumn(name="Data") ) )
+
+    
+    # Optional: Produce table in Text or LaTeX format?
+#    if opts.latex:
+#        cellFormat  = counter.CellFormatTeX(valueOnly=opts.valueOnly, valueFormat=opts.format)
+#        formatFunc = lambda table: table.format(counter.TableFormatLaTeX(cellFormat))
+#    else:
+#        cellFormat  = counter.CellFormatText(valueOnly=opts.valueOnly, valueFormat=opts.format)
+#        formatFunc = lambda table: table.format(counter.TableFormatText(cellFormat))
+
+    # Optional: Customise the table format
+    if opts.latex:
+        cellFormat = counter.CellFormatTeX(valueOnly=opts.valueOnly, valueFormat=opts.format)
+    else:
+        cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=opts.valueOnly, valueFormat=opts.format))
+        # cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=True))
+    print mainTable.format(cellFormat)
+
+    # print eventCounter.getSubCounterTable("TauSelection").format(cellFormat)
+    # print eventCounter.getSubCounterTable("e selection").format(cellFormat)
+    # print eventCounter.getSubCounterTable("mu selection").format(cellFormat)
+    # print eventCounter.getSubCounterTable("jet selection").format(cellFormat)
+    # print eventCounter.getSubCounterTable("angular cuts / Collinear").format(cellFormat)
+    # print eventCounter.getSubCounterTable("bjet selection").format(cellFormat)
+    # print eventCounter.getSubCounterTable("angular cuts / BackToBack").format(cellFormat)                                                                                                                                
+    return
 
 
 def PurityTripletPlots(datasetsMgr, analysisType=""):
@@ -191,7 +267,8 @@ def PurityTripletPlots(datasetsMgr, analysisType=""):
     - drawing styles ('HIST' for MC, 'EP' for data)
     - legend styles ('L' for MC, 'P' for data)
     '''
-    
+    Verbose("Plotting the Purity-Triplets for %s" % analysisType)
+
     analysisTypes = ["", "EWKFakeB", "EWKGenuineB"]
     if analysisType not in analysisTypes:
         raise Exception("Invalid analysis type \"%s\". Please select one of the following: %s" % (analysisType, "\"" + "\", \"".join(analysisTypes) + "\"") )
@@ -207,11 +284,11 @@ def PurityTripletPlots(datasetsMgr, analysisType=""):
     if opts.mergeEWK:
         _moveLegend = {"dx": -0.05, "dy": 0.0, "dh": -0.15}
     else:
-        _moveLegend = {"dx": -0.05, "dy": 0.0, "dh": 0.1},
+        _moveLegend = {"dx": -0.05, "dy": 0.0, "dh": 0.1}
 
     _kwargs = {"xlabel": "",
                "ylabel": "",
-               "rebinX": True,
+               "rebinX": 1,
                "rebinY": None,
                "ratioYlabel": "Data/MC",
                "ratio": False, 
@@ -302,6 +379,83 @@ def PurityTripletPlots(datasetsMgr, analysisType=""):
             Print("%s" % saveName + ext, i==0)
             p.saveAs(saveName, formats=saveFormats)
 
+    return
+
+
+def OtherHistograms(datasetsMgr, analysisType=""):
+    '''
+    Create data-MC comparison plot, with the default:
+    - legend labels (defined in plots._legendLabels)
+    - plot styles (defined in plots._plotStyles, and in styles)
+    - drawing styles ('HIST' for MC, 'EP' for data)
+    - legend styles ('L' for MC, 'P' for data)
+    '''
+    Verbose("Plotting all other histograms for %s" % analysisType)
+
+    analysisTypes = ["Baseline", "Inverted"]
+    if analysisType not in analysisTypes:
+        raise Exception("Invalid analysis type \"%s\". Please select one of the following: %s" % (analysisType, "\"" + "\", \"".join(analysisTypes) + "\"") )
+    else:
+        pass
+
+    # Definitions
+    histoNames  = []
+    histoKwargs = {}
+    saveFormats = [".png", ".pdf"]
+
+    # General Settings
+    if opts.mergeEWK:
+        _moveLegend = {"dx": -0.05, "dy": 0.0, "dh": -0.15}
+    else:
+        _moveLegend = {"dx": -0.05, "dy": 0.0, "dh": 0.1}
+
+    _kwargs = {"rebinX": 1,
+               "rebinY": None,
+               "ratioYlabel": "Data/MC",
+               "ratio": False, 
+               "stackMCHistograms": True,
+               "ratioInvert": False, 
+               "addMCUncertainty": False, 
+               "addLuminosityText": True,
+               "addCmsText": True,
+               "cmsExtraText": "Preliminary",
+               "opts": {"ymin": 2e-1, "ymaxfactor": 10},
+               "opts2": {"ymin": 0.0, "ymax": 2.0},
+               "log": True,
+               "errorBarsX": True, 
+               "moveLegend": _moveLegend,
+               "cutBox": {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True},
+               }
+
+    # Create/Draw the plots
+    histoNames.append("%sInverted_TopMassReco_LdgTrijetPt_AfterAllSelections"   % analysisType)
+    histoNames.append("%sInverted_TopMassReco_LdgTrijetM_AfterAllSelections"    % analysisType)
+    histoNames.append("%sInverted_TopMassReco_SubLdgTrijetPt_AfterAllSelections"% analysisType)
+    histoNames.append("%sInverted_TopMassReco_SubLdgTrijetM_AfterAllSelections" % analysisType)
+    histoNames.append("%sInverted_TopMassReco_LdgDijetPt_AfterAllSelections"    % analysisType)
+    histoNames.append("%sInverted_TopMassReco_LdgDijetM_AfterAllSelections"     % analysisType)
+    histoNames.append("%sInverted_TopMassReco_SubLdgDijetPt_AfterAllSelections" % analysisType)
+    histoNames.append("%sInverted_TopMassReco_SubLdgDijetM_AfterAllSelections " % analysisType)
+
+    # For-loop: All histograms in list
+    for histoName in histoNames:
+        saveName = os.path.join(opts.saveDir, histoName.replace("/", "_"))
+
+        if opts.mcOnly:
+            p = plots.MCPlot(datasetsMgr, histoName, normalizeToLumi=opts.intLumi)
+            kwargs_.pop("ratio", None)
+            kwargs_.pop("ratioYlabel", None)
+            kwargs_.pop("ratioInvert", None)
+            kwargs_.pop("opts2", None)
+            plots.drawPlot(p, saveName, **_kwargs) #the "**" unpacks the kwargs_ dictionary
+        else:
+            p = plots.DataMCPlot(datasetsMgr, histoName)
+            plots.drawPlot(p, saveName, **_kwargs) #the "**" unpacks the kwargs_ dictionary
+
+        # For-loop: All save formats
+        for i, ext in enumerate(saveFormats):
+            Print("%s" % saveName + ext, i==0)
+            p.saveAs(saveName, formats=saveFormats)
     return
     
 '''     
@@ -658,7 +812,7 @@ def PurityTripletPlots(datasetsMgr, analysisType=""):
 
 
                          
-def getHistos(datasets,name1, name2, name3):
+def getHistos(datasets, name1, name2, name3):
      drh1 = datasets.getDataset("TTJets").getDatasetRootHisto(name1)
      drh2 = datasets.getDataset("TTJets").getDatasetRootHisto(name2)
      drh3 = datasets.getDataset("TTJets").getDatasetRootHisto(name3)
@@ -667,7 +821,6 @@ def getHistos(datasets,name1, name2, name3):
      drh3.setName("transverseMass3JetCut")
      return [drh1, drh2, drh3]
 
-#mt = plots.PlotBase(getHistos("MetNoJetInHole", "MetJetInHole"))
 
 def MtComparison(datasets):
     mt = plots.PlotBase(getHistos(datasets,"ForQCDNormalization/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive", "ForQCDNormalizationEWKFakeTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive", "ForQCDNormalizationEWKGenuineTaus/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive"))
@@ -688,7 +841,6 @@ def MtComparison(datasets):
             "transverseMassTriangleCut": "Inverted Fake Taus",
             "transverseMass3JetCut": "Inverted Genuine Taus"
             })
-#    mt.histoMgr.setHistoDrawStyleAll("P")
 
     mt.appendPlotObject(histograms.PlotText(50, 1, "3-prong Taus", size=20))
     xlabel = "E_{T}^{miss} (GeV)"
@@ -696,9 +848,7 @@ def MtComparison(datasets):
     plots.drawPlot(mt, "MtComparison", xlabel=xlabel, ylabel=ylabel, rebinX=10, log=True,
                    createLegend={"x1": 0.4, "y1": 0.75, "x2": 0.8, "y2": 0.9},
                    ratio=False, opts2={"ymin": 0.5, "ymax": 1.5})
-          
-#    rtauGen(mt, "MetComparison", rebin=1, ratio=True, defaultStyles=False)
-
+    return
 
 
 def MetComparisonBaselineVsInverted(datasets):
@@ -707,10 +857,8 @@ def MetComparisonBaselineVsInverted(datasets):
     mt._setLegendStyles()
     st1 = styles.StyleCompound([styles.styles[2]])
     st2 = styles.StyleCompound([styles.styles[1]])
-    #st3 = styles.StyleCompound([styles.styles[3]])
     st1.append(styles.StyleLine(lineWidth=3))
     st2.append(styles.StyleLine(lineStyle=3, lineWidth=3))
-   # st2.append(styles.StyleLine(lineStyle=3, lineWidth=3))
     mt.histoMgr.forHisto("ForQCDNormalization/NormalizationMETBaselineTauAfterStdSelections/NormalizationMETBaselineTauAfterStdSelectionsInclusive", st1)
     mt.histoMgr.forHisto("ForQCDNormalization/NormalizationMETInvertedTauAfterStdSelections/NormalizationMETInvertedTauAfterStdSelectionsInclusive", st2)
  
@@ -718,7 +866,6 @@ def MetComparisonBaselineVsInverted(datasets):
             "NormalizationMETBaselineTauAfterStdSelectionsInclusive": "Baseline",
             "NormalizationMETInvertedTauAfterStdSelectionsInclusive": "Inverted",
              })
-#    mt.histoMgr.setHistoDrawStyleAll("P")
 
     mt.appendPlotObject(histograms.PlotText(50, 1, "1-prong Taus", size=20))
     xlabel = "E_{T}^{miss} (GeV)"
@@ -726,6 +873,7 @@ def MetComparisonBaselineVsInverted(datasets):
     plots.drawPlot(mt, "MetComparisonBaselineVsInverted", xlabel=xlabel, ylabel=ylabel, rebinX=1, log=True,
                    createLegend={"x1": 0.4, "y1": 0.75, "x2": 0.8, "y2": 0.9},
                    ratio=False, opts2={"ymin": 0.5, "ymax": 1.5})
+    return
 
 
 def MtComparisonBaseline(datasets):
@@ -755,23 +903,17 @@ def MtComparisonBaseline(datasets):
     plots.drawPlot(mt, "MtComparisonBaseline", xlabel=xlabel, ylabel=ylabel, rebinX=1, log=True,
                    createLegend={"x1": 0.4, "y1": 0.75, "x2": 0.8, "y2": 0.9},
                    ratio=False, opts2={"ymin": 0.5, "ymax": 1.5})
+    return
 
-
-
-
-             
-#    rtauGen(mt, "MetComparison", rebin=1, ratio=True, defaultStyles=False)
 
 def getHistos2(datasets,name1, name2):
      drh1 = datasets.getDataset("Data").getDatasetRootHisto(name1)
-     #drh2 = datasets.getDataset("TT_pythia8").getDatasetRootHisto("Met")
      drh2 = datasets.getDataset("Data").getDatasetRootHisto(name2)
 
      drh1.setName("Baseline")
      drh2.setName("Inverted")
      return [drh1, drh2]
 
-#mt = plots.PlotBase(getHistos("MetNoJetInHole", "MetJetInHole"))                                                                                                                                                                                                      
 
 def MetComparison(datasets):
     mt = plots.ComparisonPlot(*getHistos2(datasets,"Met","Met"))
@@ -800,134 +942,13 @@ def MetComparison(datasets):
 
 def getHistos3(datasets,name1, name2):
      drh1 = datasets.getDataset("TTJets").getDatasetRootHisto("tauPt")
-    # drh2 = datasets.getDataset("TT_pythia8").getDatasetRootHisto("tauPt")
      drh2 = datasets.getDataset("TTJets").getDatasetRootHisto("tauPt")
 
      drh1.setName("Taupt_madgraph")
      drh2.setName("Taupt_pythia8")
      return [drh1, drh2]
 
-def TauPtComparison(datasets):
-    mt = plots.ComparisonPlot(*getHistos3(datasets,"tauPt","tauPt"))
-                                                                                                                                                                                                                                                                       
-    mt._setLegendStyles()
-    st1 = styles.StyleCompound([styles.styles[2]])
-    st2 = styles.StyleCompound([styles.styles[1]])
-    st1.append(styles.StyleLine(lineWidth=3))
-    st2.append(styles.StyleLine(lineStyle=2, lineWidth=3))
-    mt.histoMgr.forHisto("Taupt_madgraph", st1)
-    mt.histoMgr.forHisto("Taupt_pythia8", st2)
-    mt.histoMgr.setHistoLegendLabelMany({
-            "Taupt_madgraph": "Tau pt from Madgraph",
-            "Taupt_pythia8": "Tau pt from Pythia8"
-            })
-    mt.histoMgr.setHistoDrawStyleAll("PE")
 
-    mt.appendPlotObject(histograms.PlotText(100, 0.01, "tt events", size=20))
-    xlabel = "p_{T}^{#tau jet} (GeV)"
-    ylabel = "Events / %.2f"
-    plots.drawPlot(mt, "TauPtComparison", xlabel=xlabel, ylabel=ylabel, rebinX=2, log=True,
-                   createLegend={"x1": 0.6, "y1": 0.75, "x2": 0.8, "y2": 0.9},
-                   ratio=False, opts2={"ymin": 0.5, "ymax": 50}, opts={"xmax": 800, "ymin":1, "ymax":1000000})
-
-
-
-
-
-
-def rtauGen(h, name, rebin=2, ratio=False, defaultStyles=True):
-    if defaultStyles:
-        h.setDefaultStyles()
-        h.histoMgr.forEachHisto(styles.generator())
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-
-
-    xlabel = "PF E_{T}^{miss} (GeV)"
-    ylabel = "Events / %.2f" % h.binWidth()
-    if "LeptonsInMt" in name:
-        xlabel = "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})"
-        ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
-    if "NoLeptonsRealTau" in name:
-        xlabel = "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})"
-        ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
-    if "Mass" in name:
-        xlabel = "m_{T}(#tau jet, E_{T}^{miss}) (GeV/c^{2})"
-        ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
-
-        
-    kwargs = {"ymin": 0.1, "ymax": 1000}
-    if "LeptonsInMt" in name: 
-        kwargs = {"ymin": 0., "xmax": 300}
-    if "NoLeptonsRealTau" in name: 
-        kwargs = {"ymin": 0., "xmax": 300}
-    if "Rtau" in name:
-        kwargs = {"ymin": 0.0001, "xmax": 1.1}   
-        kwargs = {"ymin": 0.1, "xmax": 1.1}     
-        h.getPad().SetLogy(True)
-
-#    kwargs["opts"] = {"ymin": 0, "xmax": 14, "ymaxfactor": 1.1}}
-    if ratio:
-        kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
-        kwargs["createRatio"] = True
-#    name = name+"_log"
-
-    h.createFrame(name, **kwargs)
-
-#    histograms.addText(0.65, 0.7, "BR(t #rightarrow bH^{#pm})=0.05", 20)
-    h.getPad().SetLogy(True)
-    
-    leg = histograms.createLegend(0.6, 0.75, 0.8, 0.9)
- 
-    if "LeptonsInMt" in name:
-        h.getPad().SetLogy(False)
-        leg = histograms.moveLegend(leg, dx=-0.18)
-        histograms.addText(0.5, 0.65, "TailKiller cut: Tight", 20)
-  
-    h.setLegend(leg)
-    plots._legendLabels["MetNoJetInHole"] = "Jets outside dead cells"
-    plots._legendLabels["MetJetInHole"] = "Jets within dead cells"
-    histograms.addText(300, 300, "p_{T}^{jet} > 50 GeV/c", 20)
-    kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
-    kwargs["createRatio"] = True
-#    if ratio:
-#        h.createFrameFraction(name, opts=opts, opts2=opts2)
-#    h.setLegend(leg)
-
-    common(h, xlabel, ylabel)
-
-
-
-def doCounters(datasets):
-    eventCounter = counter.EventCounter(datasets)
-    ewkDatasets = [
-        "WJets", "TTJets",
-#        "WJets",                                                                                                                      
-        "DYJetsToLL", "SingleTop", "Diboson"
-        ]
-
-#    if mcOnly:
-#        eventCounter.normalizeMCToLuminosity(mcOnlyLumi)
-#    else:
-    eventCounter.normalizeMCByLuminosity()
-
-    print "============================================================"
-    print "Main counter (MC normalized by collision data luminosity)"
-    mainTable = eventCounter.getMainCounterTable()
-#    mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
-    # Default                                                                                                                                                                                                                                                      
-#    cellFormat = counter.TableFormatText()                                                                                                                                                                                                                        
-    # No uncertainties                                                                                                                                                                                                                                             
-    cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=True))
-    print mainTable.format(cellFormat)
-    print eventCounter.getSubCounterTable("TauSelection").format(cellFormat)
-    print eventCounter.getSubCounterTable("e selection").format(cellFormat)
-    print eventCounter.getSubCounterTable("mu selection").format(cellFormat)
-    print eventCounter.getSubCounterTable("jet selection").format(cellFormat)
-    print eventCounter.getSubCounterTable("angular cuts / Collinear").format(cellFormat)
-    print eventCounter.getSubCounterTable("bjet selection").format(cellFormat)
-    print eventCounter.getSubCounterTable("angular cuts / BackToBack").format(cellFormat)                                                                                                                                
-# Common drawing function
 def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, addMCUncertainty=True, ratio=False, opts={}, opts2={}, moveLegend={}, textFunction=None, cutLine=None, cutBox=None):
     if cutLine != None and cutBox != None:
         raise Exception("Both cutLine and cutBox were given, only either one can exist")
@@ -981,18 +1002,18 @@ def drawPlot(h, name, xlabel, ylabel="Events / %.0f GeV/c", rebin=1, log=True, a
             h.addCutBoxAndLine(**box)
 
     common(h, xlabel, ylab, textFunction=textFunction)
+    return
 
 
-
-# Common formatting
 def common(h, xlabel, ylabel, addLuminosityText=True, textFunction=None):
+    '''
+    Common formatting
+    '''
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
-#    h.addStandardTexts(addLuminosityText=addLuminosityText)
-#    if textFunction != None:
-#        textFunction()
     h.save()
+    return
 
 
 #================================================================================================ 
@@ -1017,14 +1038,17 @@ if __name__ == "__main__":
     
     # Default Settings
     ANALYSISNAME = "FakeBMeasurement"
-    DATAERA      = "Run2016"
-    SEARCHMODE   = "80to1000"
     BATCHMODE    = True
-    MERGEEWK     = False
-    VERBOSE      = False
-    MCONLY       = False
+    DATAERA      = "Run2016"
+    FORMAT       = "%.2f"
     INTLUMI      = -1.0
+    LATEX        = False
+    MCONLY       = False
+    MERGEEWK     = False
+    NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
+    SEARCHMODE   = "80to1000"
+    VERBOSE      = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -1064,6 +1088,16 @@ if __name__ == "__main__":
 
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
+
+    parser.add_option("--latex", dest="latex", action="store_true", default=LATEX,
+                      help="The table formatting is in LaTeX instead of plain text (ready for generation)  [default: %s]" % (LATEX) )
+    
+    parser.add_option("--format", dest="format", default=FORMAT,
+                      help="The table value-format of strings [default: %s]" % (FORMAT) )
+
+    parser.add_option("--noError", dest="valueOnly", action="store_true", default=NOERROR,
+                      help="Don't print statistical errors in tables [default: %s]" % (NOERROR) )
+
 
     (opts, parseArgs) = parser.parse_args()
 
