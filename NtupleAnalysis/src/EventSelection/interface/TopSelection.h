@@ -43,9 +43,33 @@ public:
     // 4-momenta of dijet systems
     const math::XYZTLorentzVector DiJet1P4() const {return fDiJet1_p4; }
     const math::XYZTLorentzVector DiJet2P4() const {return fDiJet2_p4; }
+    // 4-momenta of leading dijet system
+    const math::XYZTLorentzVector getLdgDijetP4() const 
+    { 
+      if (fDiJet1_p4.pt() > fDiJet2_p4.pt()) return fDiJet1_p4; 
+      else return fDiJet2_p4; 
+    }
+    // 4-momenta of sub-leading dijet system
+    const math::XYZTLorentzVector getSubLdgDijetP4() const 
+    {
+      if (fDiJet2_p4.pt() > fDiJet1_p4.pt()) return fDiJet2_p4; 
+      else return fDiJet1_p4; // return a jet instead of p4?
+    }
     // 4-momenta of trijet systems
     const math::XYZTLorentzVector TriJet1P4() const {return fTriJet1_p4; }
     const math::XYZTLorentzVector TriJet2P4() const {return fTriJet2_p4; }
+    // 4-momenta of leading trijet system
+    const math::XYZTLorentzVector getLdgTrijetP4() const 
+    { 
+      if (fTriJet1_p4.pt() > fTriJet2_p4.pt()) return fTriJet1_p4; 
+      else return fTriJet2_p4; 
+    }
+    // 4-momenta of sub-leading trijet system
+    const math::XYZTLorentzVector getSubLdgTrijetP4() const
+    { 
+      if (fTriJet2_p4.pt() > fTriJet1_p4.pt()) return fTriJet2_p4; 
+      else return fTriJet1_p4; 
+    }
 
     // Fit-related quantities
     const double ChiSqr() const { return fChiSqr; }

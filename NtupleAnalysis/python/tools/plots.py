@@ -700,8 +700,8 @@ in _physicalMcAdd (see python/tools/plots.py). This may lead to incorrect \
 normalization of background! \033[00m"""%datasetName
             raw_input("Press Enter to continue...")
     # merge XX_ext* datasets into XX datasets according to (_physicalMcAdd)
-    print "DEBUG: Datasets before _physicalMcAdd:"
-    print datasetMgr.getAllDatasetNames()
+    # print "DEBUG: Datasets before _physicalMcAdd:"
+    # print datasetMgr.getAllDatasetNames()
     datasetMgr.mergeMany(_physicalMcAdd, addition=True)
     # rename the datasets (according to _physicalToLogical and _physicalToLogical)
     datasetMgr.renameMany(_physicalToLogical, silent=True)
