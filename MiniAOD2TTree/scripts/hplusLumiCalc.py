@@ -749,9 +749,10 @@ def main(opts, args):
 
     if not opts.truncate and os.path.exists(opts.output):
         Verbose("Opening OUTPUT file %s in \"r\"(read) mode" % (opts.output) )
-        f = open(opts.output, "r")
-        data = json.load(f)
-        f.close()
+	if os.path.exists(opts.output):
+            f = open(opts.output, "r")
+            data = json.load(f)
+            f.close()
     
     files = []
     # only if no explicit files, or some directories explicitly given
@@ -801,9 +802,10 @@ def main(opts, args):
     lumiUnit = ""
 
     # if lumi.joson already exists, load
-    f = open(opts.output, "r")
-    data = json.load(f)
-    f.close()
+    if os.path.exists(opts.output):
+        f = open(opts.output, "r")
+        data = json.load(f)
+        f.close()
 
     # For-loop: All json files
     for task, jsonfile in files:

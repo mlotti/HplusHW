@@ -91,7 +91,7 @@ muVeto = PSet(
 jetSelection = PSet(
     jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
     jetPtCut                 = 40.0,
-    jetEtaCut                = 5.0,
+    jetEtaCut                = 2.4,
     numberOfJetsCutValue     = 7,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
     jetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
