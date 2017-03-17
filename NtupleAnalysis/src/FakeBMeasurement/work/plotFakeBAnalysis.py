@@ -166,8 +166,8 @@ def main(opts):
     # PurityTripletPlots(datasetsMgr, analysisType="EWKFakeB")
     # PurityTripletPlots(datasetsMgr, analysisType="EWKGenuineB")
 
-    # OtherHistograms(datasetsMgr, analysisType="Baseline")
-    # OtherHistograms(datasetsMgr, analysisType="Inverted")
+    #OtherHistograms(datasetsMgr, analysisType="Baseline")
+    #OtherHistograms(datasetsMgr, analysisType="Inverted")
 
     # MtComparison(datasets)
     # MetComparisonBaselineVsInverted(datasets)
@@ -419,7 +419,7 @@ def OtherHistograms(datasetsMgr, analysisType=""):
                "addLuminosityText": True,
                "addCmsText": True,
                "cmsExtraText": "Preliminary",
-               "opts": {"ymin": 2e-1, "ymaxfactor": 10},
+               "opts": {"ymin": 2e-1, "ymaxfactor": 10}, #1.2
                "opts2": {"ymin": 0.0, "ymax": 2.0},
                "log": True,
                "errorBarsX": True, 
@@ -428,17 +428,58 @@ def OtherHistograms(datasetsMgr, analysisType=""):
                }
 
     # Create/Draw the plots
-    histoNames.append("%sInverted_TopMassReco_LdgTrijetPt_AfterAllSelections"   % analysisType)
-    histoNames.append("%sInverted_TopMassReco_LdgTrijetM_AfterAllSelections"    % analysisType)
-    histoNames.append("%sInverted_TopMassReco_SubLdgTrijetPt_AfterAllSelections"% analysisType)
-    histoNames.append("%sInverted_TopMassReco_SubLdgTrijetM_AfterAllSelections" % analysisType)
-    histoNames.append("%sInverted_TopMassReco_LdgDijetPt_AfterAllSelections"    % analysisType)
-    histoNames.append("%sInverted_TopMassReco_LdgDijetM_AfterAllSelections"     % analysisType)
-    histoNames.append("%sInverted_TopMassReco_SubLdgDijetPt_AfterAllSelections" % analysisType)
-    histoNames.append("%sInverted_TopMassReco_SubLdgDijetM_AfterAllSelections " % analysisType)
+    histoName = "%s_TopMassReco_LdgTrijetPt_AfterAllSelections" % analysisType
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["ylabel"] = "Events / %.0f"
+    histoNames.append(histoName)
+    histoKwargs[histoName] = kwargs
+
+    histoName = "%s_TopMassReco_LdgTrijetM_AfterAllSelections" % analysisType
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["ylabel"] = "Events / %.0f"
+    histoNames.append(histoName)
+    histoKwargs[histoName] = kwargs
+
+    histoName = "%s_TopMassReco_SubLdgTrijetPt_AfterAllSelections" % analysisType
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["ylabel"] = "Events / %.0f"
+    histoNames.append(histoName)
+    histoKwargs[histoName] = kwargs
+
+    histoName = "%s_TopMassReco_SubLdgTrijetM_AfterAllSelections" % analysisType
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["ylabel"] = "Events / %.0f"
+    histoNames.append(histoName)
+    histoKwargs[histoName] = kwargs
+
+    histoName = "%s_TopMassReco_LdgDijetPt_AfterAllSelections" % analysisType
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["ylabel"] = "Events / %.0f"
+    histoNames.append(histoName)
+    histoKwargs[histoName] = kwargs
+
+    histoName = "%s_TopMassReco_LdgDijetM_AfterAllSelections" % analysisType
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["ylabel"] = "Events / %.0f"
+    histoNames.append(histoName)
+    histoKwargs[histoName] = kwargs
+
+    histoName = "%s_TopMassReco_SubLdgDijetPt_AfterAllSelections" % analysisType
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["ylabel"] = "Events / %.0f"
+    histoNames.append(histoName)
+    histoKwargs[histoName] = kwargs
+
+    histoName = "%s_TopMassReco_SubLdgDijetM_AfterAllSelections" % analysisType
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["ylabel"] = "Events / %.0f"
+    histoNames.append(histoName)
+    histoKwargs[histoName] = kwargs
+
 
     # For-loop: All histograms in list
     for histoName in histoNames:
+        kwargs_  = histoKwargs[histoName]
         saveName = os.path.join(opts.saveDir, histoName.replace("/", "_"))
 
         if opts.mcOnly:
@@ -447,10 +488,10 @@ def OtherHistograms(datasetsMgr, analysisType=""):
             kwargs_.pop("ratioYlabel", None)
             kwargs_.pop("ratioInvert", None)
             kwargs_.pop("opts2", None)
-            plots.drawPlot(p, saveName, **_kwargs) #the "**" unpacks the kwargs_ dictionary
+            plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
         else:
             p = plots.DataMCPlot(datasetsMgr, histoName)
-            plots.drawPlot(p, saveName, **_kwargs) #the "**" unpacks the kwargs_ dictionary
+            plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
 
         # For-loop: All save formats
         for i, ext in enumerate(saveFormats):
