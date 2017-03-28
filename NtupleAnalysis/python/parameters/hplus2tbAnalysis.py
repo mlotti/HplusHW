@@ -110,10 +110,10 @@ jetSelection = PSet(
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    jetPtCut                  = 30.0,
-    jetEtaCut                 = 2.5,
+    jetPtCut                  = 40.0,
+    jetEtaCut                 = 2.4,
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
-    bjetDiscrWorkingPoint     = "Loose",
+    bjetDiscrWorkingPoint     = "Medium",
     numberOfBJetsCutValue     = 3,
     numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
