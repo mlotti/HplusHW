@@ -1,9 +1,14 @@
-## \package limit
-# Various tools for plotting BR/tanbeta limits
-#
-# Some of the settings depend on the \a forPaper boolean flag. All of
-# these are functions, so user can override the flag in a script.
+'''
+\package limit
+Various tools for plotting BR/tanbeta limits
 
+Some of the settings depend on the \a forPaper boolean flag. All of
+these are functions, so user can override the flag in a script.
+'''
+
+#================================================================================================ 
+# Import modules
+#================================================================================================ 
 import os
 import math
 import json
@@ -18,59 +23,42 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.histograms as histograms
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
-## Flag for stating if the plots are for paper (True) or not (False)
-#forPaper = False
+
+#================================================================================================ 
+# Global Definitions
+#================================================================================================ 
+verbose = False
+
+# Flag for stating if the plots are for paper (True) or not (False)
 forPaper = True
 
-## Unit for mass (GeV vs. GeV/c^2
-def massUnit():
-    if forPaper:
-        return "GeV"
-    return "GeV/c^{2}"
-
-## Label for branching fraction
+# Label for branching fraction
 BR = "#it{B}"
 
-## The label for the physics process
-process = "t #rightarrow H^{+}b, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
-#process = "t #rightarrow H^{+}b"
-processHeavy = "pp #rightarrow #bar{t}(b)H^{+}, H^{+} #rightarrow #tau^{+}#nu_{#tau}"
+# Label for H+ decay mode
+hplusDecayMode = "H^{+} #rightarrow #tau^{+}#nu_{#tau}"
+# hplusDecayMode = "H^{+} #rightarrow tb" #fixme: alexandros
+
+# The label for the physics process
+process            = "t #rightarrow H^{+}b, %s" % hplusDecayMode
+processHeavy       = "pp #rightarrow #bar{t}(b)H^{+}, %s" % hplusDecayMode
 processCombination = "pp #rightarrow #bar{t}(b)H^{+}"
 
-## Label for the H+->tau BR assumption
-#BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1"%BR
+# Label for the H+->tau BR assumption. fixme: alexandros (does not seem to work!)
 BRassumption = ""
+#BRassumption = "%s(H^{+} #rightarrow #tau#nu) = 1" % BR
 
-## Y axis label for the BR
+# Y axis label for the BR
 BRlimit = None
 
-## Y axis label for the sigma x BR
+# Y axis label for the sigma x BR
 sigmaBRlimit = None
 
-def useParentheses():
-    global BRlimit, sigmaBRlimit
-    BRlimit = "95%% CL limit on %s(t#rightarrowH^{+}b)#times%s(H^{+}#rightarrow#tau#nu)"%(BR,BR)
-    sigmaBRlimit = "95%% CL limit on #sigma(H^{+})#times%s(H^{+}#rightarrow#tau#nu) (pb)"%(BR)
-def useSubscript():
-    global BRlimit, sigmaBRlimit
-    BRlimit = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{H^{+}#rightarrow#tau#nu}"%(BR,BR)
-    sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{H^{+}#rightarrow#tau#nu} (pb)"%(BR)
-useSubscript()
-
-## Y axis label for the tanbeta
-#tanblimit = "95 % CL limit on tan #beta"
+# Y axis label for the tanbeta
 tanblimit = "tan #beta"
+#tanblimit = "95 % CL limit on tan #beta"
 
-## Label for m(H+)
-def mHplus():
-    return "m_{H^{+}} (%s)" % massUnit()
-
-## Label for m(A)
-def mA():
-    return "m_{A} (%s)" % massUnit()
-
-
-## Labels for the final states
+# Labels for the final states
 _finalstateLabels = {
     "taujets": "^{}#tau_{h}+jets",
     "etau"   : "e^{}#tau_{h}",
@@ -78,29 +66,96 @@ _finalstateLabels = {
     "emu"    : "e#mu",
 }
 
-## Default y axis maximum values for BR limit for the final states
+# Default y axis maximum values for BR limit for the final states
 _finalstateYmaxBR = {
-    "etau": 0.4,
-    "mutau": 0.4,
-    "emu": 0.8,
+    "etau"   : 0.4,
+    "mutau"  : 0.4,
+    "emu"    : 0.8,
     "default": 0.1,
 }
 
-## Default y axis maximum values for sigma x BR limit for the final states
+# Default y axis maximum values for sigma x BR limit for the final states
 _finalstateYmaxSigmaBR = {
-    "etau": 10.0, # FIXME
-    "mutau": 10.0, # FIXME
-    "emu": 10.0, # FIXME
-    "default": 1.0,
+    "etau"   : 10.0, # FIXME
+    "mutau"  : 10.0, # FIXME
+    "emu"    : 10.0, # FIXME
+    "default":  1.0,
 }
+
+
+#================================================================================================ 
+# Function Definitions
+#================================================================================================ 
+def Verbose(msg, printHeader=False):
+    '''
+    Calls Print() only if verbose options is set to true.
+    '''
+    if not verbose:
+        return
+    Print(msg, printHeader)
+    return
+
+
+def Print(msg, printHeader=True):
+    '''
+    Simple print function. If verbose option is enabled prints, otherwise does nothing.
+    '''
+    fName = __file__.split("/")[-1]
+    if printHeader:
+        print "=== ", fName
+    print "\t", msg
+    return
+
+
+def massUnit():
+    '''
+    Unit for mass (GeV vs. GeV/c^2
+    '''
+    if forPaper:
+        return "GeV"
+    return "GeV/c^{2}"
+
+
+def useParentheses():
+    global BRlimit, sigmaBRlimit
+    BRlimit      = "95%% CL limit on %s(t#rightarrowH^{+}b)#times%s(%s)" % (BR, BR, hplusDecayMode)
+    sigmaBRlimit = "95%% CL limit on #sigma(H^{+})#times%s(%s) (pb)" % (BR, hplusDecayMode)
+    return
+
+    
+def useSubscript():
+    global BRlimit, sigmaBRlimit
+    BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayMode)
+    sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayMode)
+    return
+
+useSubscript()
+
+def mHplus():
+    '''
+    Label for m(H+)
+    '''
+    label = "m_{H^{+}} (%s)" % massUnit()
+    return label
+
+
+def mA():
+    '''
+    Label for m(A)
+    '''
+    label = "m_{A} (%s)" % massUnit() 
+    return label
+
 
 def setExcludedStyle(graph):
     ci = ROOT.TColor.GetColor(156, 156, 156)
-#    ci = ROOT.TColor.GetColor(209, 209, 209)
+    # ci = ROOT.TColor.GetColor(209, 209, 209)
     graph.SetFillColorAlpha(ci, 0.3) # transparency
-#    graph.SetFillColorAlpha(ROOT.kViolet+6, 0.3) # transparency
-    #graph.SetLineWidth(0)
-    #graph.SetLineColor(ROOT.kBlack)
+    # graph.SetFillColorAlpha(ROOT.kViolet+6, 0.3) # transparency
+    # graph.SetLineWidth(0)
+    # graph.SetLineColor(ROOT.kBlack)
+    return
+
 
 def setObservedStyle(graph):
     graph.SetMarkerStyle(21)
@@ -108,50 +163,72 @@ def setObservedStyle(graph):
     graph.SetMarkerColor(ROOT.kBlack)
     graph.SetLineWidth(3)
     graph.SetLineColor(ROOT.kBlack)
+    return
     
-def setTheoreticalErrorStyle(graph):    
+
+def setTheoreticalErrorStyle(graph):
     graph.SetLineStyle(9)
     graph.SetLineWidth(2)
+    return
+
 
 def setExpectedStyle(graph):
     graph.SetLineStyle(2)
     graph.SetLineWidth(3)
     graph.SetLineColor(ROOT.kBlack)
     graph.SetMarkerStyle(20)
+    return
+
 
 def setExpectedGreenBandStyle(graph):
     graph.SetFillColor(ROOT.kGreen-3)
     setExpectedStyle(graph)
+    return
     
+
 def setExpectedYellowBandStyle(graph):
     graph.SetFillColor(ROOT.kYellow)
     setExpectedStyle(graph)
+    return
 
-## Class for reading the BR limits from the JSON file produced by
-## landsMergeHistograms.py
+
+#================================================================================================ 
+# Class Definition
+#================================================================================================ 
 class BRLimits:
-    ## Constructor
-    #
-    # \param directory          Path to the multicrab task directory with the JSON files
-    # \param excludeMassPoints  List of strings for mass points to exclude
+    '''
+    Class for reading the BR limits from the JSON file produced by
+    landsMergeHistograms.py
+    '''
     def __init__(self, directory=".", excludeMassPoints=[], limitsfile="limits.json", configfile="configuration.json"):
+        '''
+        Constructor
+
+        \param directory          Path to the multicrab task directory with the JSON files
+         
+        \param excludeMassPoints  List of strings for mass points to exclude
+        '''
         resultfile="limits.json"
         #configfile="configuration.json"
 
+        # Open limits file
+        msg = "Opening file '%s'" % (limitsfile)
+        Print(msg, True)
         f = open(os.path.join(directory, limitsfile), "r")
         limits = json.load(f)
         f.close()
 
         self.lumi = float(limits["luminosity"])
-
         self.mass = limits["masspoints"].keys()
         self.isHeavyStatus = False
+        
+        # Check if light or heavy H+
         for m in self.mass:
             if int(m) > 175:
                 self.isHeavyStatus = True
         members = ["mass"]
 
-        # sort mass
+        # Sort mass
         floatString = [(float(self.mass[i]), self.mass[i]) for i in range(len(self.mass))]
         floatString.sort()
         self.mass = [pair[1] for pair in floatString]
@@ -166,12 +243,12 @@ class BRLimits:
             if "observed_error" in firstMassPoint:
                 self.observedError = [limits["masspoints"][m]["observed_error"] for m in self.mass]
                 members.append("observedError")
-
-        self.expectedMedian = [limits["masspoints"][m]["expected"]["median"] for m in self.mass]
+        
+        self.expectedMedian = [limits["masspoints"][m]["expected"]["median"]  for m in self.mass]
         self.expectedMinus2 = [limits["masspoints"][m]["expected"]["-2sigma"] for m in self.mass]
         self.expectedMinus1 = [limits["masspoints"][m]["expected"]["-1sigma"] for m in self.mass]
-        self.expectedPlus1 = [limits["masspoints"][m]["expected"]["+1sigma"] for m in self.mass]
-        self.expectedPlus2 = [limits["masspoints"][m]["expected"]["+2sigma"] for m in self.mass]
+        self.expectedPlus1  = [limits["masspoints"][m]["expected"]["+1sigma"] for m in self.mass]
+        self.expectedPlus2  = [limits["masspoints"][m]["expected"]["+2sigma"] for m in self.mass]
         members.extend(["expected"+p for p in ["Median", "Minus2", "Minus1", "Plus1", "Plus2"]])
         if "median_error" in firstMassPoint["expected"]:
             self.expectedMedianError = [limits["masspoints"][m]["expected"]["median_error"] for m in self.mass]
@@ -186,7 +263,9 @@ class BRLimits:
             setattr(self, attr, [float(m) for m in getattr(self, attr)])
 
        
-        print "Opening file '%s' for input"%os.path.join(directory, configfile)
+        # Open configuration json file
+        msg = "Opening file '%s' for input" % (os.path.join(directory, configfile))
+        Print(msg, True)
         f = open(os.path.join(directory, configfile), "r")
         config = json.load(f)
         f.close()
@@ -206,17 +285,27 @@ class BRLimits:
             self.finalstates.append("mutau")
         if hasDatacard("_emu_"):
             self.finalstates.append("emu")
+        return
 
-    ## Get the integrated luminosity in 1/pb
+
     def getLuminosity(self):
+        '''
+        Get the integrated luminosity in 1/pb
+        '''
         return self.lumi
 
-    ## Get the list of final states
+
     def getFinalstates(self):
+        '''
+        Get the list of final states
+        '''
         return self.finalstates
 
-    ## Get the label of the final states
+
     def getFinalstateText(self):
+        '''
+        Get the label of the final states
+        '''
         if len(self.finalstates) <= 1:
             return "%s final state" % _finalstateLabels[self.finalstates[0]]
 
@@ -224,8 +313,11 @@ class BRLimits:
         ret += ", and %s final states" % _finalstateLabels[self.finalstates[-1]]
         return ret
 
-    ## Get the maximum value for Y axis for the BR limit
+
     def getFinalstateYmaxBR(self):
+        '''
+        Get the maximum value for Y axis for the BR limit
+        '''
         myObject = None
         if self.isHeavyStatus:
             myObject = _finalstateYmaxSigmaBR
@@ -240,8 +332,11 @@ class BRLimits:
             ymax = myObject["default"]
         return ymax
 
-    ## Print the BR limits
+
     def print2(self,unblindedStatus=False):
+        '''
+        Print the BR limits
+        '''
         print
         print "                  Expected"
         print "Mass  Observed    Median       -2sigma     -1sigma     +1sigma     +2sigma"
@@ -252,31 +347,94 @@ class BRLimits:
             else:
                 print format % (self.mass_string[i], "BLINDED", self.expectedMedian_string[i], self.expectedMinus2_string[i], self.expectedMinus1_string[i], self.expectedPlus1_string[i], self.expectedPlus2_string[i])
         print
+        return
+
+
+    def getLimitsTable(self, unblindedStatus=False, nDigits=5):
+        '''
+        Returns a table (list) with the BR limits
+        '''
+        width  = nDigits + 6
+        align  = "{:<8} {:>%s} {:>%s} {:>%s} {:>%s} {:>%s} {:>%s}" % (width, width, width, width, width, width)
+        header = align.format("Mass", "Observed", "Median", "-2sigma", "-1sigma", "+1sigma", "+2sigma")
+        hLine  = "="*len(header)
+
+        # Define precision
+        precision = "%%.%df" % nDigits
+
+        # Create the results table
+        table  = []
+        table.append(hLine)
+        table.append(header)
+        table.append(hLine)
+        for i in xrange(len(self.mass_string)):
+            mass = self.mass_string[i]
+            if unblindedStatus:
+                observed = self.observed_string[i]
+            else:
+                observed = "BLINDED"
+            median       = precision % (self.expectedMedian_string[i])
+            sigma2minus  = precision % (self.expectedMinus2_string[i])
+            sigma1minus  = precision % (self.expectedMinus1_string[i])
+            sigma1plus   = precision % (self.expectedPlus1_string[i])
+            sigma2plus   = precision % (self.expectedPlus2_string[i])
+
+            # Append results
+            row = align.format(mass, observed, median, sigma2minus, sigma1minus, sigma1plus, sigma2plus)
+            table.append(row)
+        table.append(hLine)
+        return table
+
+
+    def printLimits(self, unblindedStatus=False, nDigits=5):
+        '''
+        Print the BR limits table
+        '''
+        table = self.getLimitsTable(unblindedStatus, nDigits)
+        # Print limits (row by row)
+        for row in table:
+            print row
+        return
+
         
-    ## Save the table as tex format
-    def saveAsLatexTable(self,unblindedStatus=False):
-        myLightStatus = True
-        if float(self.mass[0]) > 179.0:
-	    myLightStatus = False
+    def isLightHPlus(self, mass):
+        isLight = True
+        if float(mass) > 179.0:
+	    isLight = False
+        return isLight
         
-        myDigits = 3
-        if myLightStatus:
-	    myDigits = 4
-        fstr = "%%.%df"%myDigits
-        
-        format = "%3s "
+
+    def saveAsLatexTable(self, unblindedStatus=False, nDigits=3):
+        '''
+        Save the table as tex format
+        '''        
+        myDigits = nDigits
+        isLightHplus  = self.isLightHPlus(self.mass[0])
+        if isLightHplus and nDigits==3:
+	    myDigits += 1
+
+        # Define precision of results
+        precision = "%%.%df" % myDigits
+        format    = "%3s "
+
+        # Five columns (+/-2sigma, +/-1sigma, median)
         for i in range(0,5):
-	    format += "& %s "%fstr 
+	    format += "& %s "%precision 
 	
+        # Blinded column
         if not unblindedStatus:
 	    format += "& Blinded "
 	else:
-	    format += "& %s "%fstr 
+	    format += "& %s " % precision 
+
+        # End-line character (\\)
         format += "\\\\ \n"
-        s = "% Table autocreated through tools.limits.saveAsLatexTable() \n"
+
+        # Add the LaTeX table contents
+        s  = "% Table autocreated by HiggsAnalysis.LimitCalc.limit.saveAsLatexTable() \n"
         s += "\\begin{tabular}{ c c c c c c c } \n"
         s += "\\hline \n"
-        if myLightStatus:
+        if isLightHplus:
 	    s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\BRtH\\times\\BRHtau$}\\\\ \n"
 	else:
 	    s += "\\multicolumn{7}{ c }{95\\% CL upper limit on $\\sigmaHplus\\times\\BRHtau$}\\\\ \n"
@@ -284,20 +442,38 @@ class BRLimits:
 	s += "\\mHpm & \\multicolumn{5}{ c }{Expected limit} & Observed \\\\ \\cline{2-6} \n"
 	s += "(GeV)   & $-2\\sigma$  & $-1\\sigma$ & median & +1$\\sigma$ & +2$\\sigma$  & limit \\\\ \n"
 	s += "\\hline \n"
+
+        # Get the limit values
         for i in xrange(len(self.mass_string)):
+            mass     = self.mass_string[i]
+            eMinus2  = float( precision % (self.expectedMinus2_string[i]) )
+            eMinus1  = float( precision % (self.expectedMinus1_string[i]) )
+            eMedian  = float( precision % (self.expectedMedian_string[i]) )
+            ePlus1   = float( precision % (self.expectedPlus1_string[i]) )
+            ePlus2   = float( precision % (self.expectedPlus2_string[i]) )
+            observed = float( self.observed_string[i]) 
             if unblindedStatus:
-                s += format % (self.mass_string[i], float(self.expectedMinus2_string[i]), float(self.expectedMinus1_string[i]), float(self.expectedMedian_string[i]), float(self.expectedPlus1_string[i]), float(self.expectedPlus2_string[i]), float(self.observed_string[i]))
+                s += format % (mass, eMinus2, eMinus1, eMedian, ePlus1, ePlus2, observed)
             else:
-                s += format % (self.mass_string[i], float(self.expectedMinus2_string[i]), float(self.expectedMinus1_string[i]), float(self.expectedMedian_string[i]), float(self.expectedPlus1_string[i]), float(self.expectedPlus2_string[i]))
+                s += format % (mass, eMinus2, eMinus1, eMedian, ePlus1, ePlus2)
 	s += "\\hline \n"
         s += "\\end{tabular} \n"
-        f = open("limitsTable.tex","w")
+
+        fileName = "limitsTable.tex"
+        openMode = "w"  
+        Verbose("Opening file '%s' in mode '%s'" % (fileName, openMode), True)
+        f = open(fileName, openMode)
         f.write(s)
         f.close()
+        Print("Wrote LaTeX table in file '%s'" % (fileName), True)
+        return
 
-    ## Divide the limits by another limit to obtain relative result
-    # \param refLimit  another BRLimits object
+
     def divideByLimit(self, refLimit):
+        '''
+        Divide the limits by another limit to obtain relative result
+        \param refLimit  another BRLimits object
+        '''
         def protectedDivide(num, denom):
             if denom == 0:
                 return 0.0
@@ -324,11 +500,14 @@ class BRLimits:
                 self.expectedMinus1[i] = 0.0
                 self.expectedPlus2[i] = 0.0
                 self.expectedPlus1[i] = 0.0
+        return
         
-    ## Construct TGraph for the observed limit
-    #
-    # \return TGraph of the observed limit, None if the observed limit does not exist
+
     def observedGraph(self):
+        '''
+        Construct TGraph for the observed limit
+        \return TGraph of the observed limit, None if the observed limit does not exist
+        '''
         if not hasattr(self, "observed"):
             return None
 
@@ -338,13 +517,15 @@ class BRLimits:
                          )
         setObservedStyle(gr)
         gr.SetName("Observed")
-
         return gr
 
-    ## Construct Graph for the toy MC stat error of the observed limit
-    #
-    # \return TGraph of the observed limit stat error, None if the observed limit does not exist
+
     def observedErrorGraph(self):
+        '''
+        Construct Graph for the toy MC stat error of the observed limit
+
+        \return TGraph of the observed limit stat error, None if the observed limit does not exist
+        '''
         if not hasattr(self, "observedError"):
             return None
 
@@ -358,14 +539,16 @@ class BRLimits:
         gr.SetLineWidth(3)
         gr.SetLineColor(ROOT.kBlack)
         gr.SetName("ObservedError")
-
         return gr
 
-    ## Helper function for the expected limits
-    #
-    # \param postfix   Postfix string for the record names in the JSON file
-    # \param sigma     Number for the sigma (0 for median, 1,-1, 2,-2)
+
     def _expectedGraph(self, postfix, sigma):
+        '''
+        Helper function for the expected limits
+        
+        \param postfix   Postfix string for the record names in the JSON file
+        \param sigma     Number for the sigma (0 for median, 1,-1, 2,-2)
+        '''
         massArray = array.array("d", self.mass)
         massErr = array.array("d", [0]*len(self.mass))
         if sigma == 0:
@@ -385,39 +568,46 @@ class BRLimits:
             gr.SetName("ExpectedMinus2Sigma"+postfix)
         else:
             raise Exception("Invalid value of sigma '%d', valid values are 0,1,2" % sigma)
-
         setExpectedStyle(gr)
-
         return gr
 
-    ## Construct TGraph for the expected limit
-    #
-    # \param sigma   Integer for the sigma band (0 for median, 1,-1, 2,-2)
-    #
-    # \return TGraph of the expexted limit
+
     def expectedGraph(self, sigma=0):
+        '''
+        Construct TGraph for the expected limit
+        
+        \param sigma   Integer for the sigma band (0 for median, 1,-1, 2,-2)
+        
+        \return TGraph of the expexted limit
+        '''
         return self._expectedGraph("", sigma)
 
-    ## Construct TGraph for the expected limit toy MC stat error
-    #
-    # \param sigma   Integer for the sigma band (0 for median, 1,-1, 2,-2)
-    #
-    # \return TGraph of the expexted limit stat error
+
     def expectedErrorGraph(self, sigma=0):
+        '''
+        Construct TGraph for the expected limit toy MC stat error
+        
+        \param sigma   Integer for the sigma band (0 for median, 1,-1, 2,-2)
+        
+        \return TGraph of the expexted limit stat error
+        '''
         if not hasattr(self, "expectedMedianError"):
             return None
         return self._expectedGraph("Error", sigma)
 
-    ## Construct TGraph for the expected +-1/2 sigma bands
-    #
-    # \param sigma   Integer for the sigma bands (1, 2)
-    #
-    # \return TGraph for the expected sigma bands
-    #
-    # The TGraph holds the sigma bands as the values. The values go
-    # first through the lower band in the increasing mass order, then
-    # the upper band in the decreasing mass order
+
     def expectedBandGraph(self, sigma):
+        '''
+        Construct TGraph for the expected +-1/2 sigma bands
+        
+        \param sigma   Integer for the sigma bands (1, 2)
+        
+        \return TGraph for the expected sigma bands
+        
+        The TGraph holds the sigma bands as the values. The values go
+        first through the lower band in the increasing mass order, then
+        the upper band in the decreasing mass order
+        '''
         massArray = array.array("d", self.mass)
         massErr = array.array("d", [0]*len(self.mass))
         if sigma == 1:
@@ -450,7 +640,6 @@ class BRLimits:
             gr.SetName("Expected2Sigma")
         else:
             raise Exception("Invalid value of sigma '%d', valid values are 0,1,2" % sigma)
-
         return gr
                                           
     # def expectedGraphNew(self, sigma=0):
@@ -482,19 +671,28 @@ class BRLimits:
 
     #     return gr
 
-## Class for reading ML fit output from the JSON file produced by landsReadMLFit.py
+
+#================================================================================================ 
+# Class Definition
+#================================================================================================ 
 class MLFitData:
+    '''
+    Class for reading ML fit output from the JSON file produced by landsReadMLFit.py
+    '''
     def __init__(self, directory="."):
         resultfile="mlfit.json"
 
         f = open(os.path.join(directory, resultfile))
         self.data = json.load(f)
         f.close()
+        return
+
 
     def massPoints(self):
         masses = self.data.keys()
         masses.sort()
         return masses
+
 
     def fittedGraph(self, mass, backgroundOnly=False, signalPlusBackground=False, heavyHplusMode=False):
         if not backgroundOnly and not signalPlusBackground:
@@ -533,8 +731,8 @@ class MLFitData:
         gr = ROOT.TGraphErrors(len(values),
                                array.array("d", values), array.array("d", yvalues),
                                array.array("d", uncertainties))
-
         return (gr, labels)
+
 
     def fittedGraphShapeStat(self, mass, backgroundOnly=False, signalPlusBackground=False):
         if not backgroundOnly and not signalPlusBackground:
@@ -613,6 +811,9 @@ class MLFitData:
         return (gr, labels, shapeStatNuisance)
 
 
+#================================================================================================ 
+# Class Definition
+#================================================================================================ 
 class SignificanceData:
     def __init__(self, directory="."):
         resultfile = "significance.json"
@@ -627,17 +828,23 @@ class SignificanceData:
         for m in self._masses:
             if int(m) > 175:
                 self._isHeavyStatus = True
+        return
+
 
     def isHeavyStatus(self):
         return self._isHeavyStatus
+
 
     def massPoints(self):
         return self._masses
 
     def lightExpectedSignal(self):
         return self._data["expectedSignalBrLimit"]
+
+
     def heavyExpectedSignal(self):
         return self._data["expectedSignalSigmaBr"]
+
 
     def _graph(self, expObs, pvalue):
         masses = self.massPoints()
@@ -652,17 +859,20 @@ class SignificanceData:
         gr.SetLineColor(ROOT.kBlack)
         return gr
 
+
     def expectedGraph(self, pvalue=False):
         gr = self._graph("expected", pvalue)
         gr.SetLineStyle(2)
         gr.SetMarkerStyle(20)
         return gr
 
+
     def observedGraph(self, pvalue=False):
         gr = self._graph("observed", pvalue)
         gr.SetMarkerStyle(21)
         gr.SetMarkerSize(1.5)
         return gr
+
     
     def fittedGraphShapeBinByBinHeavy(self, mass, backgroundOnly=False, signalPlusBackground=False):
         if not backgroundOnly and not signalPlusBackground:
@@ -703,28 +913,34 @@ class SignificanceData:
         return (gr, labels)
 
 
-## Remove mass points lower than 100
-#
-# \param graph   TGraph to operate
-# \param minX    Minimum value of mass hypotheses to keep
-#
-# Remove mass points lower than 100 since
-# statisticalFunctions.tanbForBR cannot handle them (they are unphysical)
-# also remove points lower than 115 since excluded by LEP
 def cleanGraph(graph, massPoint):
+    '''
+    Remove mass points lower than 100
+    
+    \param graph   TGraph to operate
+    \param minX    Minimum value of mass hypotheses to keep
+    
+    Remove mass points lower than 100 since
+    statisticalFunctions.tanbForBR cannot handle them (they are unphysical)
+    also remove points lower than 115 since excluded by LEP    
+    '''
     i=0
     while (i<graph.GetN()):
         if (graph.GetX()[i] > massPoint-0.01 and graph.GetX()[i] < massPoint+0.01):
             graph.RemovePoint(i)
         else:
-            i=i+1        
+            i=i+1
+    return
 
-## Construct observed - 1sigma theory uncertainty band
-#
-# \param graph   TGraph of the observed BR limit
-#
-# \return Clone of the TGraph for the -1sigma theory uncertainty band
+
 def getObservedMinus(graph,uncertainty):
+    '''
+    Construct observed - 1sigma theory uncertainty band
+    
+    \param graph   TGraph of the observed BR limit
+    
+    \return Clone of the TGraph for the -1sigma theory uncertainty band
+    '''
     curve = graph.Clone()
     curve.SetName(curve.GetName()+"TheoryMinus")
     for i in xrange(0, graph.GetN()):
@@ -734,12 +950,14 @@ def getObservedMinus(graph,uncertainty):
     print "todo: CHECK minus coefficient f(m)"
     return curve
 
-## Construct observed + 1sigma theory uncertainty band
-#
-# \param graph   TGraph of the observed BR limit
-#
-# \return Clone of the TGraph for the +1sigma theory uncertainty band
 def getObservedPlus(graph,uncertainty):
+    '''
+    Construct observed + 1sigma theory uncertainty band
+    
+    \param graph   TGraph of the observed BR limit
+    
+    \return Clone of the TGraph for the +1sigma theory uncertainty band
+    '''
     curve = graph.Clone()
     curve.SetName(curve.GetName()+"TheoryPlus")
     for i in xrange(0, graph.GetN()):
@@ -749,17 +967,20 @@ def getObservedPlus(graph,uncertainty):
     print "todo: CHECK plus coefficient f(m)"
     return curve
 
-## Create a TGraph for upper limit tanb y values from a TGraph with BR y values
-#
-# \param graph           TGraph for the BR limit
-# \param mymu            Value of mu
-# \param removeNotValid  Remove invalid points (points for which statisticalFunctions.tanbForBR() fails
-#
-# \return Clone of the TGraph for the tanb limit
-# 
-# Convention: begin with low mH, lower limit for 1/2s band
-# then go counterclockwise: increase mH, then switch to upper limit, decrease mH
+
 def graphToTanBeta(graph, mymu, removeNotValid=True):
+    '''
+    Create a TGraph for upper limit tanb y values from a TGraph with BR y values
+
+    \param graph           TGraph for the BR limit
+    \param mymu            Value of mu
+    \param removeNotValid  Remove invalid points (points for which statisticalFunctions.tanbForBR() fails
+    
+    \return Clone of the TGraph for the tanb limit
+    
+    Convention: begin with low mH, lower limit for 1/2s band
+    then go counterclockwise: increase mH, then switch to upper limit, decrease mH
+    '''
     # Don't modify the original
     graph = graph.Clone()
 
@@ -802,10 +1023,13 @@ def graphToTanBeta(graph, mymu, removeNotValid=True):
                 
     return graph
 
-## Convert from mH+ space to mA
-#
-# \param graph   TGraph with mH+ to be modified
+
 def graphToMa(graph):
+    '''
+    Convert from mH+ space to mA
+    
+    \param graph   TGraph with mH+ to be modified
+    '''
     for i in xrange(0, graph.GetN()):
         mH = graph.GetX()[i]
         tanb = graph.GetY()[i]
@@ -816,11 +1040,14 @@ def graphToMa(graph):
 	### mA = math.sqrt(mH*mH - mW*mW)
 	mA = BRdataInterface.get_mA(mH,tanb,200)
         graph.SetPoint(i, mA, tanb)
+    return
 
-## Convert from mA space to mH+
-#
-# \param graph   TGraph with mA to be modified
 def graphToMh(graph):
+    '''
+    Convert from mA space to mH+
+    
+    \param graph   TGraph with mA to be modified
+    '''
     print "File tools/limit.py, function graphToMh"
     print "Do not use until the mass calculation is fixed. This function should not be needed anyway. 20.6.2012/S.Lehti"
     sys.exit()
@@ -832,14 +1059,18 @@ def graphToMh(graph):
         print mA, mZ, i, graph.GetN()
         mH = math.sqrt(mA*mA + mW*mW)
         graph.SetPoint(i, mH, tanb)
+    return
 
-## Divide two TGraphs
-#
-# \param num    Numerator TGraph
-# \param denom  Denominator TGraph
-#
-# \return new TGraph as the ratio of the two TGraphs
+
 def divideGraph(num, denom):
+    '''
+    Divide two TGraphs
+    
+     \param num    Numerator TGraph
+     \param denom  Denominator TGraph
+     
+     \return new TGraph as the ratio of the two TGraphs
+     '''
     gr = ROOT.TGraph(num)
     for i in xrange(gr.GetN()):
         y = denom.GetY()[i]
@@ -849,25 +1080,31 @@ def divideGraph(num, denom):
         gr.SetPoint(i, gr.GetX()[i], val)
     return gr
 
-## Subtract two TGraphs
-#
-# \param minuend     Minuend TGraph
-# \param subtrahend  Subtrahend TGraph
-#
-# \return new TGraph as the difference of the two TGraphs
+
 def subtractGraph(minuend, subtrahend):
+    '''
+    Subtract two TGraphs
+    
+    \param minuend     Minuend TGraph
+    \param subtrahend  Subtrahend TGraph
+    
+    \return new TGraph as the difference of the two TGraphs
+    '''
     gr = ROOT.TGraph(minuend)
     for i in xrange(gr.GetN()):
         val = gr.GetY() - subtrahend.GetY()[i]
         gr.SetPoint(i, gr.GetX()[i], val)
     return gr
 
-## Returns a properly typeset label for MSSM scenario
-#
-# \param scenario   string of the scenario rootfile name
-#
-# \return string with the typeset name
+
 def getTypesetScenarioName(scenario):
+    '''
+    Returns a properly typeset label for MSSM scenario
+    
+    \param scenario   string of the scenario rootfile name
+    
+    \return string with the typeset name
+    '''
     myTruncatedScenario = scenario.replace("-LHCHXSWG","")
     if myTruncatedScenario == "lightstau":
         return "MSSM light stau"
@@ -889,10 +1126,13 @@ def getTypesetScenarioName(scenario):
         return "2HDM Type 2"
     raise Exception("The typeset name for scenario '%s' is not defined in tools/limit.py::getTypesetScenarioName()! Please add it."%scenario)
 
-## Remove graph points in the isomass region
-# \param gIsomass   TGraph containing isomass curve
-# \param g          TGraph to be checked for points in isomass region
+
 def truncateBeyondIsomass(gIsomass, g, debugStatus=False):
+    '''
+    Remove graph points in the isomass region
+    \param gIsomass   TGraph containing isomass curve
+    \param g          TGraph to be checked for points in isomass region
+    '''
     crossingData = []
     gCrossingIndices = []
     isomassCrossingIndices = []
@@ -1017,38 +1257,49 @@ def truncateBeyondIsomass(gIsomass, g, debugStatus=False):
     if debugStatus:
         for i in range(g.GetN()):
             print "After treatment: %d, %f, %f"%(i, g.GetX()[i], g.GetY()[i])
-        
-## Plots tan beta plot
-#
-# \param name    string of filename prefix for plot
-# \param graphs  dictionary of TGraph objects
-# \param luminosity luminosity for plot
-# \param finalstateText label of final state
-# \param xlabel  x-axis label
-# \param scenario name of scenario
+    return    
+    
 def doTanBetaPlotHeavy(name, graphs, luminosity, finalstateText, xlabel, scenario):
+    '''
+     Plots tan beta plot
+
+     \param name    string of filename prefix for plot
+     \param graphs  dictionary of TGraph objects
+     \param luminosity luminosity for plot
+     \param finalstateText label of final state
+     \param xlabel  x-axis label
+     \param scenario name of scenario
+     '''
     doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scenario, regime="heavy")
+    return
 
-## Plots tan beta plot
-#
-# \param name    string of filename prefix for plot
-# \param graphs  dictionary of TGraph objects
-# \param luminosity luminosity for plot
-# \param finalstateText label of final state
-# \param xlabel  x-axis label
-# \param scenario name of scenario
+
 def doTanBetaPlotLight(name, graphs, luminosity, finalstateText, xlabel, scenario):
+    '''
+    Plots tan beta plot
+    
+    \param name    string of filename prefix for plot
+    \param graphs  dictionary of TGraph objects
+    \param luminosity luminosity for plot
+    \param finalstateText label of final state
+    \param xlabel  x-axis label
+    \param scenario name of scenario
+    '''
     doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scenario, regime="light")
+    return
 
-## Plots tan beta plot
-#
-# \param name    string of filename prefix for plot
-# \param graphs  dictionary of TGraph objects
-# \param luminosity luminosity for plot
-# \param finalstateText label of final state
-# \param xlabel  x-axis label
-# \param scenario name of scenario
+
 def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scenario, regime):
+    '''
+    Plots tan beta plot
+    
+    \param name    string of filename prefix for plot
+    \param graphs  dictionary of TGraph objects
+    \param luminosity luminosity for plot
+    \param finalstateText label of final state
+    \param xlabel  x-axis label
+    \param scenario name of scenario
+    '''
     # Enable OpenGL for transparency
     #if opts.excludedArea:
     ROOT.gEnv.SetValue("OpenGL.CanvasPreferGL", 1)
@@ -1302,7 +1553,7 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
 #    histograms.addText(x-0.3, y+0.695, "^{}%s"%getTypesetScenarioName(scenario), size=size)
 #    histograms.addText(x-0.33, y+0.695, "^{}%s"%getTypesetScenarioName(scenario), size=size) # mhmaxup
 #    histograms.addText(x, y+0.93, "^{}%s"%getTypesetScenarioName(scenario), size=size)
-#    histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(H^{+}#rightarrow#tau#nu)", size=0.5*size)
+#    histograms.addText(0.2, 0.231, "Min "+limit.BR+"(t#rightarrowH^{+}b)#times"+limit.BR+"(%s)" % (decayMode), size=0.5*size)
 
     # Too small to be visible
 #    if not graphs["isomass"] == None:
@@ -1321,4 +1572,3 @@ def doTanBetaPlotGeneric(name, graphs, luminosity, finalstateText, xlabel, scena
     plot.save()
 
     print "Created",name
-    

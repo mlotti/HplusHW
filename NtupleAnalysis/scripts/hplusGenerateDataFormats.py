@@ -545,6 +545,7 @@ def main(opts, args):
     generateParticle(types, "Muon", {"ID": "ID"})
     generateParticle(types, "Electron", {"ID": "ID"})
     generateParticle(types, "GenJet", {})
+    generateParticle(types, "L1Tau", {})
     #generateParticle(types, "HLTTau", {})
     generateParticle(types, "PFcandidate", {})
     # HLTTau contains only generic momentum and pdgId information, no generation needed

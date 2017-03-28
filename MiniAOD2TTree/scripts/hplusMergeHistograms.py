@@ -529,6 +529,18 @@ def WalkEOSDir(taskName, pathOnEOS, opts): #fixme: bad code
     cmd = ConvertCommandToEOS("ls", opts) + " " + pathOnEOS
     Verbose(cmd)
     dirContents = Execute(cmd)
+
+    # Added this dirt code to fix problem with "ext1" datasets (WZ, WZ_ext1)
+    # Retured 2 directories (crab_WZ, crab_WZ_ext1)
+    if len(dirContents) > 1:
+        keep = "crab_" + taskName
+        for d in dirContents:
+            if "crab_" in d:
+                if d == keep:
+                    continue
+                else:
+                    dirContents.remove(d)
+
     if "symbol lookup error" in dirContents[0]:
         raise Exception("%s.\n\t%s." % (cmd, dirContents[0]) )
 
@@ -1141,14 +1153,15 @@ def GetIncludeExcludeDatasets(datasets, opts):
     Verbose("GetIncludeExcludeDatasets()", True)
 
     # Initialise lists
-    newDatasets = []
+    includeDatasets = []
+    excludeDatasets = []
  
     # Exclude datasets
     if opts.excludeTasks != "":
-        tmp = []
-        exclude = GetRegularExpression(opts.excludeTasks)
 
+        exclude = GetRegularExpression(opts.excludeTasks)
         Verbose("Will exclude the following tasks (using re) :%s" % (exclude) )
+
         # For-loop: All datasets/tasks
         for d in datasets:
             task  = d # GetBasename(d)
@@ -1161,15 +1174,14 @@ def GetIncludeExcludeDatasets(datasets, opts):
                     break
             if found:
                 continue
-            newDatasets.append(d)
-        return newDatasets
+            excludeDatasets.append(d)
 
     # Include datasets
     if opts.includeTasks != "":
-        tmp = []
-        include = GetRegularExpression(opts.includeTasks)
 
+        include = GetRegularExpression(opts.includeTasks)
         Verbose("Will include the following tasks (using re) :%s" % (opts.includeTasks) )
+
         # For-loop: All datasets/tasks
         for d in datasets:
             task  = d #GetBasename(d)
@@ -1181,10 +1193,18 @@ def GetIncludeExcludeDatasets(datasets, opts):
                     found = True
                     break
             if found:
-                newDatasets.append(d)
-        return newDatasets
+                includeDatasets.append(d)
 
-    return datasets
+    if opts.includeTasks != "" and opts.excludeTasks != "":
+        newList =  [x for x in includeDatasets if x in excludeDatasets]
+        #newList =  [x for x in includeDatasets if x not in excludeDatasets]
+        return newList 
+    elif opts.includeTasks != "":
+        return includeDatasets
+    elif opts.excludeTasks != "":
+        return excludeDatasets
+    else:
+        return datasets
 
 
 def GetXrdcpPrefix(opts):

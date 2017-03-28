@@ -4,8 +4,8 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-#dataVersion = "80Xmc"
-dataVersion = "80Xdata"
+dataVersion = "80Xmc"
+#dataVersion = "80Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion
@@ -25,7 +25,8 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-	'/store/data/Run2016H/ZeroBias/MINIAOD/PromptReco-v3/000/284/036/00000/C0BE85AC-589F-E611-8F78-02163E011EC2.root'
+	#'/store/data/Run2016H/ZeroBias/MINIAOD/PromptReco-v3/000/284/036/00000/C0BE85AC-589F-E611-8F78-02163E011EC2.root'
+	'/store/mc/RunIISummer16MiniAODv2/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/008761B6-F5B4-E611-AC01-0CC47A706D26.root'
     ),
     secondaryFileNames = cms.untracked.vstring(
     )
@@ -71,7 +72,7 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
     ),
     EventInfo = cms.PSet(
 	PileupSummaryInfoSrc = process.PUInfo.PileupSummaryInfoSrc,
-	LumiScalersSrc = cms.InputTag("scalersRawToDigi"),
+#	LumiScalersSrc = cms.InputTag("scalersRawToDigi"),
 	OfflinePrimaryVertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
     ),
     Trigger = cms.PSet(
@@ -79,10 +80,20 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
 	TriggerBits = cms.vstring(
         ),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
+        L1TauObjects = cms.InputTag("caloStage2Digis:Tau"),
+        L1JetObjects = cms.InputTag("caloStage2Digis:Jet"),
+        L1EtSumObjects = cms.InputTag("caloStage2Digis:EtSum"),
 	TriggerMatch = cms.untracked.vstring(),
 	filter = cms.untracked.bool(False)
     ),
-    METNoiseFilter = process.METNoiseFilter
+    METNoiseFilter = process.METNoiseFilter,
+    GenWeights = cms.VPSet(  
+        cms.PSet(   
+            branchname = cms.untracked.string("GenWeights"),
+            src = cms.InputTag("generator"),
+            filter = cms.untracked.bool(False)
+        ) 
+    ),
 )
 
 process.skimCounterAll        = cms.EDProducer("HplusEventCountProducer")

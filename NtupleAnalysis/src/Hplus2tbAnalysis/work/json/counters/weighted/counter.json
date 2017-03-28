@@ -26,7 +26,7 @@
     "ylabel": "Events",
     "divideByBinWidth": "False",
     "drawStyle": "COLZ",
-    "opts": {"xmin": 7.0, "xmax": 19.0, "ymin": 1e+0, "ymax": 1e9},
+    "opts": {"xmin": 2.0, "xmax": 19.0, "ymin": 1e+0, "ymax": 1e9},
     "ratioOpts": {"ymin": 0.0, "ymax": 2.0},
     "ratio": "True",
     "ratioYlabel": "Data/MC",

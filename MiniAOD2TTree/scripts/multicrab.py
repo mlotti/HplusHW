@@ -1452,6 +1452,9 @@ def GetRequestName(dataset):
     of the Data or MC sample used
     '''
     Verbose("GetRequestName()")
+
+    if len(dataset.getName()) > 0:
+	return dataset.getName()
     
     # Create compiled regular expression objects
     datadataset_re = re.compile("^/(?P<name>\S+?)/(?P<run>Run\S+?)/")

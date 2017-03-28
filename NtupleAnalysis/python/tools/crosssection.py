@@ -197,6 +197,9 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("QCD_Pt_470to600_MuEnrichedPt5", {
             "13": 7.921e+01, # 7.921e+01 +- 5.425e-02 [14]
     }),
+    CrossSection("SingleNeutrino", {
+            "13": 1.0, # Unknown. Dummy value.                                                                                                                                           
+    }),
     CrossSection("WW", {
             "7": 43.0, # [3]
             "8": 54.838, # [9], took value for CTEQ PDF since CTEQ6L1 was used in pythia simulation
@@ -250,6 +253,9 @@ backgroundCrossSections = CrossSectionList(
             #}),
     CrossSection("WJetsToLNu", {
             "13": 20508.9*3, # [13] 20508.9*3, McM for the MLM dataset: 5.069e4
+            }),
+    CrossSection("WJetsToLNu_HT_70To100", {
+            "13": 1.353e+03*1.2138, # [14] times NNLO/LO ratio of inclusive sample
             }),
     CrossSection("WJetsToLNu_HT_100To200", {
             "13": 1.293e+03*1.2138, # McM times NNLO/LO ratio of inclusive sample
@@ -393,6 +399,15 @@ backgroundCrossSections = CrossSectionList(
             }),
     CrossSection("DYJetsToQQ_HT180", {
             "13": 1.209e+03, # 1.209e+03 +- 1.302e+00 pb [16]
+            }),
+    CrossSection("ZprimeToTauTau_M_500", {
+            "13": 5.739,
+            }),
+    CrossSection("ZprimeToTauTau_M_1000", {
+            "13": 3.862e-01,
+            }),
+    CrossSection("ZprimeToTauTau_M_3000", {
+            "13": 1.585e-03,
             }),
     CrossSection("GluGluHToTauTau_M125", {
             "13": 1, # dummy value, not really needed as this sample is not merged with anything else

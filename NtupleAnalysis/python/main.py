@@ -792,8 +792,12 @@ class Process:
         # Sanity checks: Integral and Binning
         if hDataPUs[aname].Integral() == 0.0:
             raise Exception("hDataPUs[%s].Integral() = %s! Make sure that the histogram \"configInfo/pileup\" of dataset \"%s\" is not empty!" % (aname, hDataPUs[aname].Integral(), dset.getName()) )
+        else:
+            Verbose("hDataPUs[%s].GetMean() =  %s" % (aname, hDataPUs[aname].GetMean() ), False)
         if hPUMC.GetNbinsX() != hDataPUs[aname].GetNbinsX():
             raise Exception("Pileup histogram dimension mismatch! data nPU has %d bins and MC nPU has %d bins, for dataset \"%s\"!" % (hDataPUs[aname].GetNbinsX(), hPUMC.GetNbinsX(), dset.getName()) )
+        else:
+            Verbose("hPUMC.GetMean() =  %s" % (hPUMC.GetMean() ), False)
 
         hPUMC.SetName("PileUpMC")
 #        if _debugPUreweighting:

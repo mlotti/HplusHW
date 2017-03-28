@@ -112,14 +112,20 @@ def reproduceMETNoiseFilters(process):
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#A_tool_to_help_you_calculate_MET
 def reproduceMET(process,isdata):
 
-    from CondCore.DBCommon.CondDBSetup_cfi import *
+    from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
     import os
 
+    # https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
     if isdata:
-      era="Spring16_25nsV6_DATA"
+#      era="Spring16_25nsV6_DATA"
+       era="Summer16_23Sep2016AllV4_DATA"
     else:
-      era="Spring16_25nsV6_MC"
-    jerera="Spring16_25nsV6"
+#      era="Spring16_25nsV6_MC"
+      era="Summer16_23Sep2016V4_MC"
+
+    # https://github.com/cms-jet/JRDatabase/tree/master/SQLiteFiles
+#    jerera="Spring16_25nsV6"
+    jerera="Spring16_25nsV10"
 
 ##___________________________External JEC file________________________________||
  
@@ -172,24 +178,24 @@ def reproduceMET(process,isdata):
                   
         #######
         ### read the Puppi JER
-                
-        cms.PSet( 
-          record = cms.string('JetResolutionRcd'),
-          tag    = cms.string('JR_'+jerera+'_MC_PtResolution_AK4PFPuppi'),
-          label  = cms.untracked.string('AK4PFPuppi_pt')
-          ),
-        cms.PSet(
-          record = cms.string("JetResolutionRcd"),
-          tag = cms.string('JR_'+jerera+'_MC_PhiResolution_AK4PFPuppi'),
-          label= cms.untracked.string("AK4PFPuppi_phi")
-          ),
-        cms.PSet(
-          record = cms.string('JetResolutionScaleFactorRcd'),
-          tag    = cms.string('JR_'+jerera+'_MC_SF_AK4PFPuppi'),
-          label  = cms.untracked.string('AK4PFPuppi')
-          ),
-          
-        ) )
+
+#        cms.PSet( 
+#          record = cms.string('JetResolutionRcd'),
+#          tag    = cms.string('JR_'+jerera+'_MC_PtResolution_AK4PFPuppi'),
+#          label  = cms.untracked.string('AK4PFPuppi_pt')
+#          ),
+#        cms.PSet(
+#          record = cms.string("JetResolutionRcd"),
+#          tag = cms.string('JR_'+jerera+'_MC_PhiResolution_AK4PFPuppi'),
+#          label= cms.untracked.string("AK4PFPuppi_phi")
+#          ),
+#        cms.PSet(
+#          record = cms.string('JetResolutionScaleFactorRcd'),
+#          tag    = cms.string('JR_'+jerera+'_MC_SF_AK4PFPuppi'),
+#          label  = cms.untracked.string('AK4PFPuppi')
+#          ),
+        ) 
+    )
           
     process.es_prefer_jer = cms.ESPrefer("PoolDBESSource",'jer')
 

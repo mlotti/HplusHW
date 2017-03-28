@@ -13,6 +13,6 @@ class TransverseMass {
 public:
   /// Obtain the transverse mass
   static double reconstruct(const Tau& tau, const math::XYVectorD& met);
+  static double reconstruct(const math::XYVector tauptvec, const math::XYVectorD& met);
 };
-
 #endif

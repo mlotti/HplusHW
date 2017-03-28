@@ -24,7 +24,7 @@ if len(sys.argv) != 2:
 
 leg     = "taulegSelection"
 #binning = [20, 30, 40, 50, 60, 70, 80, 100, 120, 140, 160, 180, 200]
-binning = [20, 30, 40, 50, 60, 80, 100, 120, 200]
+binning = [20, 30, 40, 50, 60, 80, 100, 120, 200, 250, 300, 400, 500]
 xLabel  = "#tau-jet p_{T} (GeV/c)"
 yLabel  = "HLT tau efficiency"
 
@@ -36,8 +36,8 @@ eras["2016C"] = "SingleMuon_Run2016C"
 eras["2016D"] = "SingleMuon_Run2016D"
 eras["2016E"] = "SingleMuon_Run2016E"
 eras["2016ICHEP"] = "SingleMuon_Run2016B|SingleMuon_Run2016C|SingleMuon_Run2016D"
-eras["2016HIP"] = "SingleMuon_Run2016B|SingleMuon_Run2016C|SingleMuon_Run2016D|SingleMuon_Run2016E|SingleMuon_Run2016F_PromptReco_v1_277816_278800"
-eras["2016HIPFIXED"] = "SingleMuon_Run2016F_PromptReco_v1_278801_278808|SingleMuon_Run2016G"
+eras["2016HIP"] = "SingleMuon_Run2016B|SingleMuon_Run2016C|SingleMuon_Run2016D|SingleMuon_Run2016E|277816_278800"
+eras["2016HIPFIXED"] = "278801_278808|SingleMuon_Run2016G|SingleMuon_Run2016H"
 eras["2016"] = "SingleMuon_Run2016"
 runmin = -1
 runmax = -1
@@ -83,6 +83,7 @@ def createAnalyzer(dataVersion,era):
                               "againstMuonTight3",
                               "againstElectronMediumMVA6"],
             nprongs = 1,
+            relaxedOfflineSelection = False
         ),
         binning = binning,
         xLabel  = xLabel,

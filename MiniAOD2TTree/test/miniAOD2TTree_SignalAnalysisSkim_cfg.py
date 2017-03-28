@@ -6,8 +6,8 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 
 process = cms.Process("TTreeDump")
 
-dataVersion = "80Xmc"
-#dataVersion = "80Xdata"
+#dataVersion = "80Xmc"
+dataVersion = "80Xdata"
 
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
@@ -28,10 +28,9 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
+       '/store/data/Run2016H/Tau/MINIAOD/03Feb2017_ver2-v1/100000/00A17AC6-8AEB-E611-9A86-A0369F83627E.root',
 #       '/store/data/Run2016B/Tau/MINIAOD/PromptReco-v2/000/273/150/00000/64EFFDF2-D719-E611-A0C3-02163E01421D.root',
 #       '/store/mc/RunIISpring16MiniAODv2/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-120_13TeV_amcatnlo_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/80000/003E6DB6-1E42-E611-AFBB-D4AE526A023A.root'
-#        '/store/data/Run2016H/ZeroBias/MINIAOD/09Nov2016-v1/110000/005A69DB-CAA8-E611-86FE-0CC47ABB5178.root'
-	'/store/data/Run2016H/ZeroBias/MINIAOD/PromptReco-v3/000/284/036/00000/C0BE85AC-589F-E611-8F78-02163E011EC2.root',
     )
 )
 
@@ -84,6 +83,8 @@ process.dump = cms.EDFilter('MiniAOD2TTreeFilter',
             "HLT_LooseIsoPFTau50_Trk30_eta2p1_v"
         ),
 	L1Extra = cms.InputTag("l1extraParticles:MET"),
+	L1TauObjects = cms.InputTag("caloStage2Digis:Tau"),
+        L1EtSumObjects = cms.InputTag("caloStage2Digis:EtSum"),
 	TriggerObjects = cms.InputTag("selectedPatTrigger"),
         TriggerMatch = cms.untracked.vstring(
             "LooseIsoPFTau50_Trk30_eta2p1",
