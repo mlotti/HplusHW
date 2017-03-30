@@ -32,6 +32,7 @@ def exists(rootfile,histogram):
 def validate(fname):
 
     passed = True
+    error = ""
 
     fIN = ROOT.TFile.Open(fname)
 
@@ -40,11 +41,12 @@ def validate(fname):
     if len(keys) > 4:
         # not cleaned
         passed = False
+        error  = "not cleaned"
 
     # check pileup histogram
     if not exists(fIN,"configInfo/pileup"):
         passed = False
-
+        error  = "pileup histo"
 
     fIN.Close()
 
@@ -57,7 +59,7 @@ def validate(fname):
     if passed:
         report += '\033[92m Ok\033[0m'
     else:
-        report += "\033[91m FAILED\033[0m"
+        report += "\033[91m FAILED\033[0m ("+error+")"
     print report
 
 def main():
@@ -76,6 +78,8 @@ def main():
 
 
     if len(failedFiles) > 0:
+        print
+        print "Number of failed files =",len(failedFiles)
         print
         cmd = "rm "
         for f in failedFiles:
