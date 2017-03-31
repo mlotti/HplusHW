@@ -181,9 +181,13 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   if (passedEta&&passedPt&&passedDisr)
     cSubPassedDiscriminator.increment();
 
-  // Sort jets by b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
-  output.fFailedBJetCandsSorted = output.fFailedBJetCands;
-  std::sort(output.fFailedBJetCandsSorted.begin(), output.fFailedBJetCandsSorted.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() > b.bjetDiscriminator();});
+  // Sort jets by descending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  output.fFailedBJetCandsDescendingDiscr = output.fFailedBJetCands;
+  std::sort(output.fFailedBJetCandsDescendingDiscr.begin(), output.fFailedBJetCandsDescendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() > b.bjetDiscriminator();});
+
+  // Sort jets by ascending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  output.fFailedBJetCandsAscendingDiscr = output.fFailedBJetCands;
+  std::sort(output.fFailedBJetCandsAscendingDiscr.begin(), output.fFailedBJetCandsAscendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() < b.bjetDiscriminator();});
 
   //=== Apply cut on number of selected b jets
   if (!fNumberOfJetsCut.passedCut(output.getNumberOfSelectedBJets()))

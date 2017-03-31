@@ -53,7 +53,9 @@ public:
     /// Obtain collection of failed bjet candidates
     const std::vector<Jet>& getFailedBJetCands() const { return fFailedBJetCands; }
     /// Obtain collection of failed bjet candidates (sorted by discriminator value)
-    const std::vector<Jet>& getFailedBJetCandsSortedByDiscriminator() const { return fFailedBJetCandsSorted; }
+    const std::vector<Jet>& getFailedBJetCandsDescendingDiscr() const { return  fFailedBJetCandsDescendingDiscr; }
+    /// Obtain collection of failed bjet candidates (sorted by discriminator value)
+    const std::vector<Jet>& getFailedBJetCandsAscendingDiscr() const { return  fFailedBJetCandsAscendingDiscr; }
     /// Obtain the b-tagging event weight
     const double getBTaggingScaleFactorEventWeight() const { return fBTaggingScaleFactorEventWeight; }
     /// Obtain the probability for passing b tagging without applying the selection
@@ -72,8 +74,10 @@ public:
     std::vector<Jet> fSelectedBJets;
     /// All jets failing all the b-tagging criteria
     std::vector<Jet> fFailedBJetCands;
-    /// All jets failing all the b-tagging criteria (sorted by discriminator value)
-    std::vector<Jet> fFailedBJetCandsSorted;
+    /// All jets failing all the b-tagging criteria (sorted by descending discriminator value)
+    std::vector<Jet> fFailedBJetCandsDescendingDiscr; 
+    /// All jets failing all the b-tagging criteria (sorted by ascending discriminator value)
+    std::vector<Jet> fFailedBJetCandsAscendingDiscr;
 
   };
   
