@@ -16,8 +16,10 @@ Usage:
 Examples:
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -v
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -i "JetHT|TT" s
-./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats/ --mcOnly --intLumi --mergeEWK
+./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --latex --mergeEWK
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats/ --mcOnly --intLumi 100000
+./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK
+./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK --latex
 
 Examples (tables):
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats --noError --format %.3f --latex
@@ -223,8 +225,47 @@ def doCounters(datasetsMgr):
 
     # Construct the table
     mainTable = eventCounter.getMainCounterTable()
+
+    # Only keep selected rows?
+    rows = [
+        #"ttree: skimCounterAll",
+        #"ttree: skimCounterPassed",
+        #"Base::AllEvents", 
+        #"Base::PUReweighting",
+        #"Base::Prescale", 
+        #"Base::Weighted events with top pT",
+        #"Base::Weighted events for exclusive samples",
+        "All events",
+        "Passed trigger",
+        "passed METFilter selection ()",
+        "Passed PV",
+        "passed e selection (Veto)",
+        "passed mu selection (Veto)",
+        "Passed tau selection (Veto)",
+        #"Passed tau selection and genuine (Veto)",
+        "passed jet selection ()",
+        #"passed b-jet selection ()",
+        "passed light-jet selection ()",
+        "Baseline: passed b-jet selection",
+        "Baseline: b tag SF",
+        #"passed MET selection (Baseline)",
+        "passed topology selection (Baseline)",
+        "passed top selection (Baseline)",
+        "Baseline: selected events",
+        "Inverted: passed b-jet veto",
+        "Inverted: b tag SF",
+        "passed MET selection (Inverted)",
+        "passed topology selection (Inverted)",
+        "passed top selection (Inverted)",
+        "Inverted: selected events"
+        ]
+    mainTable.keepOnlyRows(rows)
+
+    # Get number of rows/columns
     nRows    = mainTable.getNrows()
     nColumns = mainTable.getNcolumns()
+
+    # Merge EWK into a new column?
     if not opts.mergeEWK:
         mainTable.insertColumn(nColumns, counter.sumColumn("EWK", [mainTable.getColumn(name=name) for name in ewkDatasets]))
 
@@ -232,21 +273,11 @@ def doCounters(datasetsMgr):
     mainTable.insertColumn(mainTable.getNcolumns(), counter.subtractColumn("Data-EWK", mainTable.getColumn(name="Data"), mainTable.getColumn(name="EWK") ) )
     mainTable.insertColumn(mainTable.getNcolumns(), counter.divideColumn("QCD Purity", mainTable.getColumn(name="Data-EWK"), mainTable.getColumn(name="Data") ) )
 
-    
     # Optional: Produce table in Text or LaTeX format?
-#    if opts.latex:
-#        cellFormat  = counter.CellFormatTeX(valueOnly=opts.valueOnly, valueFormat=opts.format)
-#        formatFunc = lambda table: table.format(counter.TableFormatLaTeX(cellFormat))
-#    else:
-#        cellFormat  = counter.CellFormatText(valueOnly=opts.valueOnly, valueFormat=opts.format)
-#        formatFunc = lambda table: table.format(counter.TableFormatText(cellFormat))
-
-    # Optional: Customise the table format
     if opts.latex:
-        cellFormat = counter.CellFormatTeX(valueOnly=opts.valueOnly, valueFormat=opts.format)
+        cellFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat=opts.format, withPrecision=opts.precision))
     else:
         cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=opts.valueOnly, valueFormat=opts.format))
-        # cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=True))
     print mainTable.format(cellFormat)
 
     # print eventCounter.getSubCounterTable("TauSelection").format(cellFormat)
@@ -1081,7 +1112,8 @@ if __name__ == "__main__":
     ANALYSISNAME = "FakeBMeasurement"
     BATCHMODE    = True
     DATAERA      = "Run2016"
-    FORMAT       = "%.2f"
+    FORMAT       = "%.3f"
+    PRECISION    = 3
     INTLUMI      = -1.0
     LATEX        = False
     MCONLY       = False
@@ -1135,6 +1167,9 @@ if __name__ == "__main__":
     
     parser.add_option("--format", dest="format", default=FORMAT,
                       help="The table value-format of strings [default: %s]" % (FORMAT) )
+
+    parser.add_option("--precision", dest="precision", type=int, default=PRECISION,
+                      help="The table value-precision [default: %s]" % (PRECISION) )
 
     parser.add_option("--noError", dest="valueOnly", action="store_true", default=NOERROR,
                       help="Don't print statistical errors in tables [default: %s]" % (NOERROR) )

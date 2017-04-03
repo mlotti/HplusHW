@@ -40,8 +40,8 @@ private:
   JetSelection fJetSelection;
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
-  LightJetSelection fLightJetSelection;
-  METSelection fMETSelection;
+  // LightJetSelection fLightJetSelection;
+  // METSelection fMETSelection;
   TopologySelection fTopologySelection;
   TopSelection fTopSelection;
   Count cSelected;
@@ -72,8 +72,8 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
-    fLightJetSelection(config.getParameter<ParameterSet>("LightJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    // fLightJetSelection(config.getParameter<ParameterSet>("LightJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    // fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cSelected(fEventCounter.addCounter("Selected Events"))
@@ -93,8 +93,8 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fTauSelection.bookHistograms(dir);
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
-  fLightJetSelection.bookHistograms(dir);
-  fMETSelection.bookHistograms(dir);
+  // fLightJetSelection.bookHistograms(dir);
+  // fMETSelection.bookHistograms(dir);
   fTopologySelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
   
@@ -276,17 +276,17 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================  
   // -) LightJet selection
   //================================================================================================
-  if (0) std::cout << "=== LightJet selection" << std::endl;
-  const LightJetSelection::Data ljetData = fLightJetSelection.analyze(fEvent, jetData, bjetData);
-  if (!ljetData.passedSelection()) return;
+  // if (0) std::cout << "=== LightJet selection" << std::endl;
+  // const LightJetSelection::Data ljetData = fLightJetSelection.analyze(fEvent, jetData, bjetData);
+  // if (!ljetData.passedSelection()) return;
 
 
   //================================================================================================
   // 11) MET selection
   //================================================================================================
-  if (0) std::cout << "=== MET selection" << std::endl;
-  const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
-  if (!METData.passedSelection()) return;
+  // if (0) std::cout << "=== MET selection" << std::endl;
+  // const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
+  // if (!METData.passedSelection()) return;
 
 
   //================================================================================================

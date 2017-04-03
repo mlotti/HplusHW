@@ -39,18 +39,18 @@ private:
   TauSelection fTauSelection;
   JetSelection fJetSelection;
   BJetSelection fBJetSelection;
-  LightJetSelection fLightJetSelection;
+  // LightJetSelection fLightJetSelection;
   // Baseline selection      
   Count cBaselineBTaggingCounter;
   Count cBaselineBTaggingSFCounter;
-  METSelection fBaselineMETSelection;
+  // METSelection fBaselineMETSelection;
   TopologySelection fBaselineTopologySelection;
   TopSelection fBaselineTopSelection;
   Count cBaselineSelected;
   // Inverted selection
   Count cInvertedBTaggingCounter;
   Count cInvertedBTaggingSFCounter;
-  METSelection fInvertedMETSelection;
+  // METSelection fInvertedMETSelection;
   TopologySelection fInvertedTopologySelection;
   TopSelection fInvertedTopSelection;
   Count cInvertedSelected;
@@ -108,18 +108,18 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     fTauSelection(config.getParameter<ParameterSet>("TauSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Veto"),
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    fLightJetSelection(config.getParameter<ParameterSet>("LightJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    // fLightJetSelection(config.getParameter<ParameterSet>("LightJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     // Baseline selection
     cBaselineBTaggingCounter(fEventCounter.addCounter("Baseline: passed b-jet selection")),
     cBaselineBTaggingSFCounter(fEventCounter.addCounter("Baseline: b tag SF")),
-    fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
+    // fBaselineMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     fBaselineTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     fBaselineTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Baseline"),
     cBaselineSelected(fEventCounter.addCounter("Baseline: selected events")),
     // Inverted selection
     cInvertedBTaggingCounter(fEventCounter.addCounter("Inverted: passed b-jet veto")),
     cInvertedBTaggingSFCounter(fEventCounter.addCounter("Inverted: b tag SF")),
-    fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
+    // fInvertedMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     fInvertedTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     fInvertedTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, "Inverted"),
     cInvertedSelected(fEventCounter.addCounter("Inverted: selected events"))
@@ -154,13 +154,15 @@ void FakeBMeasurement::book(TDirectory *dir) {
   fTauSelection.bookHistograms(dir);
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
-  fLightJetSelection.bookHistograms(dir);
+  // fLightJetSelection.bookHistograms(dir);
+
   // Baseline selection
-  fBaselineMETSelection.bookHistograms(dir);
+  // fBaselineMETSelection.bookHistograms(dir);
   fBaselineTopologySelection.bookHistograms(dir);
   fBaselineTopSelection.bookHistograms(dir);
+
   // Inverted selection
-  fInvertedMETSelection.bookHistograms(dir);
+  // fInvertedMETSelection.bookHistograms(dir);
   fInvertedTopologySelection.bookHistograms(dir);
   fInvertedTopSelection.bookHistograms(dir);
   
@@ -527,12 +529,12 @@ void FakeBMeasurement::process(Long64_t entry) {
   const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
 
 
-  //================================================================================================  
-  // 10) LightJet selection
-  //================================================================================================
-  if (0) std::cout << "=== LightJet selection" << std::endl;
-  const LightJetSelection::Data ljetData = fLightJetSelection.analyze(fEvent, jetData, bjetData);
-  if (!ljetData.passedSelection()) return;
+  // //================================================================================================  
+  // // 10) LightJet selection
+  // //================================================================================================
+  // if (0) std::cout << "=== LightJet selection" << std::endl;
+  // const LightJetSelection::Data ljetData = fLightJetSelection.analyze(fEvent, jetData, bjetData);
+  // if (!ljetData.passedSelection()) return;
 
 
   // There are no bjets passing our selection criteria
@@ -573,9 +575,9 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // 11) MET selection
   //================================================================================================
-  if (0) std::cout << "=== Baseline: MET selection" << std::endl;
-  const METSelection::Data METData = fBaselineMETSelection.analyze(fEvent, nVertices);
-  if (!METData.passedSelection()) return;
+  // if (0) std::cout << "=== Baseline: MET selection" << std::endl;
+  // const METSelection::Data METData = fBaselineMETSelection.analyze(fEvent, nVertices);
+  // if (!METData.passedSelection()) return;
 
 
   //================================================================================================
@@ -659,9 +661,9 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // 11) MET selection
   //================================================================================================
-  if (0) std::cout << "=== Inverted: MET selection" << std::endl;
-  const METSelection::Data METData = fInvertedMETSelection.analyze(fEvent, nVertices);
-  if (!METData.passedSelection()) return;
+  // if (0) std::cout << "=== Inverted: MET selection" << std::endl;
+  // const METSelection::Data METData = fInvertedMETSelection.analyze(fEvent, nVertices);
+  // if (!METData.passedSelection()) return;
 
 
   //================================================================================================
