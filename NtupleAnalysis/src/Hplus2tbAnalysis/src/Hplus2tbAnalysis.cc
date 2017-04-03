@@ -41,7 +41,7 @@ private:
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
   // LightJetSelection fLightJetSelection;
-  // METSelection fMETSelection;
+  METSelection fMETSelection;
   TopologySelection fTopologySelection;
   TopSelection fTopSelection;
   Count cSelected;
@@ -73,7 +73,7 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
     // fLightJetSelection(config.getParameter<ParameterSet>("LightJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
-    // fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
+    fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cSelected(fEventCounter.addCounter("Selected Events"))
@@ -94,7 +94,7 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
   // fLightJetSelection.bookHistograms(dir);
-  // fMETSelection.bookHistograms(dir);
+  fMETSelection.bookHistograms(dir);
   fTopologySelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
   
@@ -284,9 +284,9 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   // 11) MET selection
   //================================================================================================
-  // if (0) std::cout << "=== MET selection" << std::endl;
-  // const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
-  // if (!METData.passedSelection()) return;
+  if (0) std::cout << "=== MET selection" << std::endl;
+  const METSelection::Data METData = fMETSelection.analyze(fEvent, nVertices);
+  if (!METData.passedSelection()) return;
 
 
   //================================================================================================

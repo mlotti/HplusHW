@@ -245,7 +245,7 @@ def doCounters(datasetsMgr):
         #"Passed tau selection and genuine (Veto)",
         "passed jet selection ()",
         #"passed b-jet selection ()",
-        "passed light-jet selection ()",
+        #"passed light-jet selection ()",
         "Baseline: passed b-jet selection",
         "Baseline: b tag SF",
         #"passed MET selection (Baseline)",
@@ -254,7 +254,7 @@ def doCounters(datasetsMgr):
         "Baseline: selected events",
         "Inverted: passed b-jet veto",
         "Inverted: b tag SF",
-        "passed MET selection (Inverted)",
+        #"passed MET selection (Inverted)",
         "passed topology selection (Inverted)",
         "passed top selection (Inverted)",
         "Inverted: selected events"

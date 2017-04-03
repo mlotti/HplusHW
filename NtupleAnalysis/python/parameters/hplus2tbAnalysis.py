@@ -138,14 +138,14 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
 #================================================================================================
 # MET selection
 #================================================================================================
-# metSelection = PSet(
-#     METCutValue                 = -1000.0,
-#     METCutDirection             = ">",         # options: ==, !=, <, <=, >, >=
-#     METSignificanceCutValue     = -1000.0,
-#     METSignificanceCutDirection = ">",         # options: ==, !=, <, <=, >, >=
-#     METType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
-#     applyPhiCorrections          = False
-# )
+metSelection = PSet(
+    METCutValue                 = -1000.0,
+    METCutDirection             = ">",         # options: ==, !=, <, <=, >, >=
+    METSignificanceCutValue     = -1000.0,
+    METSignificanceCutDirection = ">",         # options: ==, !=, <, <=, >, >=
+    METType                     = "MET_Type1", # options: MET_Type1, MET_Type1_NoHF, MET_Puppi, GenMET, L1MET, HLTMET, CaloMET
+    applyPhiCorrections          = False
+)
 
 
 #================================================================================================
@@ -190,7 +190,7 @@ topSelection = PSet(
 #================================================================================================
 # MET trigger SF
 #================================================================================================
-# scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal")
+scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal")
 
 
 #================================================================================================
@@ -239,7 +239,7 @@ allSelections = PSet(
     # LightJetSelection     = ljetSelection,
     TauSelection          = tauSelection,
     METFilter             = metFilter,
-    # METSelection          = metSelection,
+    METSelection          = metSelection,
     TopologySelection     = topologySelection,
     TopSelection          = topSelection,
     MuonSelection         = muVeto,
