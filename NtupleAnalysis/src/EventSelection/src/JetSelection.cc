@@ -125,12 +125,12 @@ void JetSelection::bookHistograms(TDirectory* dir) {
   hSelectedJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedJetsSixthJetEta" , "Sixth jet #eta;#eta" , 50, -2.5, +2.5) );
   hJetMatchingToTauDeltaR  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetMatchingToTauDeltaR" , "#DeltaR(jet, #tau)", 40, 0, 2);
   hJetMatchingToTauPtRatio = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetMatchingToTauPtRatio", "jet pT / #tau pT", 40, 0, 2);
-  hHTAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "HTAll"    , ";H_{T}",  30, 0.0, 1500.0); 
-  hJTAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "JTAll"    , ";J_{T}",  30, 0.0, 1500.0); 
-  hMHTAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "MHTAll"   , ";MHT"  ,  30, 0.0,  300.0);
-  hHTPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "HTPassed" , ";H_{T}",  30, 0.0, 1500.0); 
-  hJTPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "JTPassed" , ";J_{T}",  30, 0.0, 1500.0); 
-  hMHTPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "MHTPassed", ";MHT"  ,  30, 0.0,  300.0);
+  hHTAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "HTAll"    , ";H_{T}",  30, 0.0, 1500.0); 
+  hJTAll     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JTAll"    , ";J_{T}",  30, 0.0, 1500.0); 
+  hMHTAll    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "MHTAll"   , ";MHT"  ,  30, 0.0,  300.0);
+  hHTPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "HTPassed" , ";H_{T}",  30, 0.0, 1500.0); 
+  hJTPassed  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JTPassed" , ";J_{T}",  30, 0.0, 1500.0); 
+  hMHTPassed = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "MHTPassed", ";MHT"  ,  30, 0.0,  300.0);
 
   return;
 }

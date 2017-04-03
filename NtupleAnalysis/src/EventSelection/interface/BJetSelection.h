@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 class ParameterSet;
 class CommonPlots;
@@ -18,6 +19,13 @@ class EventCounter;
 class HistoWrapper;
 class WrappedTH1;
 class WrappedTH2;
+
+// struct DiscComparator{
+//   bool operator() (const Jet a, const Jet b) const
+//   {
+//     return ( a.bjetDiscriminator() > b.bjetDiscriminator());
+//   }
+// };
 
 class BJetSelection: public BaseSelection {
 public:
@@ -33,12 +41,21 @@ public:
     // Here the object pointed-to must live longer than this object.
     Data();
     ~Data();
-    // Status of passing event selection
+ 
+    /// Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }
-    // Obtain number of selected jets
+    /// Obtain number of selected jets
     int getNumberOfSelectedBJets() const { return fSelectedBJets.size(); }
-    // Obtain collection of selected jets
+    /// Obtain collection of selected jets
     const std::vector<Jet>& getSelectedBJets() const { return fSelectedBJets; }
+    /// Obtain number of failed bjet candidates
+    int getNumberOfFailedBJetCands() const { return fFailedBJetCands.size(); }
+    /// Obtain collection of failed bjet candidates
+    const std::vector<Jet>& getFailedBJetCands() const { return fFailedBJetCands; }
+    /// Obtain collection of failed bjet candidates (sorted by discriminator value)
+    const std::vector<Jet>& getFailedBJetCandsDescendingDiscr() const { return  fFailedBJetCandsDescendingDiscr; }
+    /// Obtain collection of failed bjet candidates (sorted by discriminator value)
+    const std::vector<Jet>& getFailedBJetCandsAscendingDiscr() const { return  fFailedBJetCandsAscendingDiscr; }
     /// Obtain the b-tagging event weight
     const double getBTaggingScaleFactorEventWeight() const { return fBTaggingScaleFactorEventWeight; }
     /// Obtain the probability for passing b tagging without applying the selection
@@ -55,6 +72,12 @@ public:
     double fBTaggingPassProbability;
     /// BJet collection after all selections
     std::vector<Jet> fSelectedBJets;
+    /// All jets failing all the b-tagging criteria
+    std::vector<Jet> fFailedBJetCands;
+    /// All jets failing all the b-tagging criteria (sorted by descending discriminator value)
+    std::vector<Jet> fFailedBJetCandsDescendingDiscr; 
+    /// All jets failing all the b-tagging criteria (sorted by ascending discriminator value)
+    std::vector<Jet> fFailedBJetCandsAscendingDiscr;
 
   };
   

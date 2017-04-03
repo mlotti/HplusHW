@@ -40,6 +40,7 @@ private:
   JetSelection fJetSelection;
   BJetSelection fBJetSelection;
   Count cBTaggingSFCounter;
+  // LightJetSelection fLightJetSelection;
   METSelection fMETSelection;
   TopologySelection fTopologySelection;
   TopSelection fTopSelection;
@@ -71,6 +72,7 @@ Hplus2tbAnalysis::Hplus2tbAnalysis(const ParameterSet& config, const TH1* skimCo
     fJetSelection(config.getParameter<ParameterSet>("JetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fBJetSelection(config.getParameter<ParameterSet>("BJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     cBTaggingSFCounter(fEventCounter.addCounter("b tag SF")),
+    // fLightJetSelection(config.getParameter<ParameterSet>("LightJetSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fMETSelection(config.getParameter<ParameterSet>("METSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopologySelection(config.getParameter<ParameterSet>("TopologySelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
     fTopSelection(config.getParameter<ParameterSet>("TopSelection"), fEventCounter, fHistoWrapper, &fCommonPlots, ""),
@@ -91,6 +93,7 @@ void Hplus2tbAnalysis::book(TDirectory *dir) {
   fTauSelection.bookHistograms(dir);
   fJetSelection.bookHistograms(dir);
   fBJetSelection.bookHistograms(dir);
+  // fLightJetSelection.bookHistograms(dir);
   fMETSelection.bookHistograms(dir);
   fTopologySelection.bookHistograms(dir);
   fTopSelection.bookHistograms(dir);
@@ -270,6 +273,14 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   cBTaggingSFCounter.increment();
 
 
+  //================================================================================================  
+  // -) LightJet selection
+  //================================================================================================
+  // if (0) std::cout << "=== LightJet selection" << std::endl;
+  // const LightJetSelection::Data ljetData = fLightJetSelection.analyze(fEvent, jetData, bjetData);
+  // if (!ljetData.passedSelection()) return;
+
+
   //================================================================================================
   // 11) MET selection
   //================================================================================================
@@ -311,4 +322,6 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // Finalize
   //================================================================================================
   fEventSaver.save();
+
+  return;
 }

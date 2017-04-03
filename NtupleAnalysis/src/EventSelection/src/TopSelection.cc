@@ -12,18 +12,17 @@
 
 TopSelection::Data::Data()
 : bPassedSelection(false),
-  fJet1_p4(),
-  fJet2_p4(),
-  fJet3_p4(),
-  fJet4_p4(),
-  fBJet1_p4(),
-  fBJet2_p4(),
-  fDiJet1_p4(),
-  fDiJet2_p4(),
-  fTriJet1_p4(),
-  fTriJet2_p4(),
-  fChiSqr(-1.0),
-  fBJet3_p4()
+  fTrijet1Jet1(),
+  fTrijet1Jet2(),
+  fTrijet1BJet(),
+  fTrijet1Dijet_p4(),
+  fTrijet1_p4(), 
+  fTrijet2Jet1(),
+  fTrijet2Jet2(),
+  fTrijet2BJet(),
+  fTrijet2Dijet_p4(),
+  fTrijet2_p4(),
+  fChiSqr(-1.0)
 { }
 
 TopSelection::Data::~Data() { }
@@ -64,6 +63,57 @@ TopSelection::TopSelection(const ParameterSet& config)
 
 TopSelection::~TopSelection() {
   
+  delete hChiSqr_Before;
+  delete hChiSqr_After;
+  delete hTrijet1Mass_Before;
+  delete hTrijet2Mass_Before;
+  delete hTrijet1Mass_After;
+  delete hTrijet2Mass_After;
+  delete hTrijet1DijetMass_Before;
+  delete hTrijet2DijetMass_Before;
+  delete hTrijet1DijetMass_After;
+  delete hTrijet2DijetMass_After;
+  delete hTrijet1DijetDEta_Before;
+  delete hTrijet2DijetDEta_Before;
+  delete hTrijet1DijetDEta_After;
+  delete hTrijet2DijetDEta_After;
+  delete hTrijet1DijetDPhi_Before;
+  delete hTrijet2DijetDPhi_Before;
+  delete hTrijet1DijetDPhi_After;
+  delete hTrijet2DijetDPhi_After;
+  delete hTrijet1DijetDR_Before;
+  delete hTrijet2DijetDR_Before;
+  delete hTrijet1DijetDR_After;
+  delete hTrijet2DijetDR_After;
+  delete hTrijet1DijetBJetDR_Before;
+  delete hTrijet2DijetBJetDR_Before;
+  delete hTrijet1DijetBJetDR_After;
+  delete hTrijet2DijetBJetDR_After;
+  delete hTrijet1DijetBJetDPhi_Before;
+  delete hTrijet2DijetBJetDPhi_Before;
+  delete hTrijet1DijetBJetDPhi_After;
+  delete hTrijet2DijetBJetDPhi_After;
+  delete hTrijet1DijetBJetDEta_Before;
+  delete hTrijet2DijetBJetDEta_Before;
+  delete hTrijet1DijetBJetDEta_After;
+  delete hTrijet2DijetBJetDEta_After;
+  delete hLdgTrijetPt_Before;
+  delete hLdgTrijetPt_After;
+  delete hLdgTrijetMass_Before;
+  delete hLdgTrijetMass_After;
+  delete hSubldgTrijetPt_Before;
+  delete hSubldgTrijetPt_After;
+  delete hSubldgTrijetMass_Before;
+  delete hSubldgTrijetMass_After;
+  delete hTrijet1MassVsChiSqr_Before;
+  delete hTrijet2MassVsChiSqr_Before;
+  delete hTrijet1MassVsChiSqr_After;
+  delete hTrijet2MassVsChiSqr_After;
+  delete hTrijet1DijetPtVsDijetDR_Before;
+  delete hTrijet2DijetPtVsDijetDR_Before;
+  delete hTrijet1DijetPtVsDijetDR_After;
+  delete hTrijet2DijetPtVsDijetDR_After;
+
 }
 
 void TopSelection::initialize(const ParameterSet& config) {
@@ -71,15 +121,12 @@ void TopSelection::initialize(const ParameterSet& config) {
 }
 
 void TopSelection::bookHistograms(TDirectory* dir) {
-  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "topSelection_"+sPostfix);
+  TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kVital, dir, "topSelection_"+sPostfix);
 
   // Fixed binning
-  const int nBinsPt    = 50;
+  const int nBinsPt    = 80;
   const double minPt   = 0.0;
-  const double maxPt   = 500.0;
-  const int nBinsEta   = 50;
-  const double minEta  = -5.0;
-  const double maxEta  = 5.0;
+  const double maxPt   = 800.0;
   const int nBinsM     = 50;
   const double minM    = 0.0;
   const double maxM    = 500.0;
@@ -93,45 +140,58 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   const double mindR   = 0.0;
   const double maxdR   = 10.0;
 
-  // Histograms (1D) 
-  h_JetPtAll_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetPtAll_Before"  , "'p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_JetPtAll_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetPtAll_After"   , ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  h_JetEtaAll_Before  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetEtaAll_Before" , ";#eta", nBinsEta, minEta, maxEta);
-  h_JetEtaAll_After   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "JetEtaAll_After"  , ";#eta", nBinsEta, minEta, maxEta);
-  h_TriJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "TriJetMass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_TriJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "TriJetMass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_LdgTriJetMass_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "LdgTriJetMass_Before"   ,";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_LdgTriJetMass_After     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "LdgTriJetMass_After"    ,";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_SubLdgTriJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "SubLdgTriJetMass_Before",";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_SubLdgTriJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "SubLdgTriJetMass_After" ,";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_ClosestTo3rdBJet_TriJetMass_Before  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ClosestTo3rdBJet_TriJetMass_Before" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_ClosestTo3rdBJet_TriJetMass_After   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ClosestTo3rdBJet_TriJetMass_After"  , ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_FurthestTo3rdBJet_TriJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FurthestTo3rdBJet_TriJetMass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_FurthestTo3rdBJet_TriJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "FurthestTo3rdBJet_TriJetMass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_ChiSqr_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "ChiSqr_Before"   , ";#chi^{2}"     ,    100,  0.0, 100.0);
-  h_DiJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetMass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  h_DiJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetMass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
-  
-  // dR, dPhi, dEta of jets from same W
-  h_DiJet_DR_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJet_DR_Before"  , ";#Delta R(j_{1},j_{2})"  , nBinsdR  , mindR  , maxdR);
-  h_DiJet_DR_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJet_DR_After"   , ";#Delta R(j_{1},j_{2})"  , nBinsdR  , mindR  , maxdR);
-  h_DiJet_DPhi_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJet_DPhi_Before", ";#Delta#phi(j_{1},j_{2})", nBinsdPhi, mindPhi, maxdPhi);
-  h_DiJet_DPhi_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJet_DPhi_After" , ";#Delta#phi(j_{1},j_{2})", nBinsdPhi, mindPhi, maxdPhi);
-  h_DiJet_DEta_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJet_DEta_Before", ";#Delta#eta(j_{1},j_{2})", nBinsdEta, mindEta, maxdEta);
-  h_DiJet_DEta_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJet_DEta_After" , ";#Delta#eta(j_{1},j_{2})", nBinsdEta, mindEta, maxdEta);
-  
-  // dR, dPhi, dEta of dijet(W) and the corresponding bjet from top 
-  h_DiJetBJet_DR_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetBJet_DR_Before"  , "#Delta R(dijet,bjet)"  , nBinsdR  , mindR  , maxdR);
-  h_DiJetBJet_DR_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetBJet_DR_After"   , "#Delta R(dijet,bjet)"  , nBinsdR  , mindR  , maxdR);
-  h_DiJetBJet_DPhi_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetBJet_DPhi_Before", "#Delta#phi(dijet,bjet)", nBinsdPhi, mindPhi, maxdPhi);
-  h_DiJetBJet_DPhi_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetBJet_DPhi_After" , "#Delta#phi(dijet,bjet)", nBinsdPhi, mindPhi, maxdPhi);
-  h_DiJetBJet_DEta_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetBJet_DEta_Before", "#Delta#eta(dijet,bjet)", nBinsdEta, mindEta, maxdEta);
-  h_DiJetBJet_DEta_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "DiJetBJet_DEta_After" , "#Delta#eta(dijet,bjet)", nBinsdEta, mindEta, maxdEta);
-
+  // Histograms (1D)  - Delete in destructor
+  hChiSqr_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChiSqr_Before", ";#chi^{2}", 120,  0.0, 120.0);
+  hChiSqr_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChiSqr_After" , ";#chi^{2}", 120,  0.0, 120.0);
+  hTrijet1Mass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1Mass_Before", ";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  hTrijet2Mass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2Mass_Before", ";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  hTrijet1Mass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1Mass_After" , ";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  hTrijet2Mass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2Mass_After" , ";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  hTrijet1DijetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetMass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hTrijet2DijetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetMass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hTrijet1DijetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetMass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hTrijet2DijetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetMass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hTrijet1DijetDR_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetDR_Before"  , ";#Delta R(j_{1},j_{2})"  , nBinsdR  , mindR  , maxdR);
+  hTrijet2DijetDR_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetDR_Before"  , ";#Delta R(j_{1},j_{2})"  , nBinsdR  , mindR  , maxdR);
+  hTrijet1DijetDR_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetDR_After"   , ";#Delta R(j_{1},j_{2})"  , nBinsdR  , mindR  , maxdR);
+  hTrijet2DijetDR_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetDR_After"   , ";#Delta R(j_{1},j_{2})"  , nBinsdR  , mindR  , maxdR);
+  hTrijet1DijetDPhi_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetDPhi_Before", ";#Delta#phi(j_{1},j_{2})", nBinsdPhi, mindPhi, maxdPhi);
+  hTrijet2DijetDPhi_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetDPhi_Before", ";#Delta#phi(j_{1},j_{2})", nBinsdPhi, mindPhi, maxdPhi);
+  hTrijet1DijetDPhi_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetDPhi_After" , ";#Delta#phi(j_{1},j_{2})", nBinsdPhi, mindPhi, maxdPhi);
+  hTrijet2DijetDPhi_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetDPhi_After" , ";#Delta#phi(j_{1},j_{2})", nBinsdPhi, mindPhi, maxdPhi);
+  hTrijet1DijetDEta_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetDEta_Before", ";#Delta#eta(j_{1},j_{2})", nBinsdEta, mindEta, maxdEta);
+  hTrijet2DijetDEta_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetDEta_Before", ";#Delta#eta(j_{1},j_{2})", nBinsdEta, mindEta, maxdEta);
+  hTrijet1DijetDEta_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetDEta_After" , ";#Delta#eta(j_{1},j_{2})", nBinsdEta, mindEta, maxdEta);
+  hTrijet2DijetDEta_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetDEta_After" , ";#Delta#eta(j_{1},j_{2})", nBinsdEta, mindEta, maxdEta);
+  hTrijet1DijetBJetDEta_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetBJetDEta_Before", "#Delta#eta(jj,bjet)", nBinsdEta, mindEta, maxdEta);
+  hTrijet2DijetBJetDEta_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetBJetDEta_Before", "#Delta#eta(jj,bjet)", nBinsdEta, mindEta, maxdEta);
+  hTrijet1DijetBJetDEta_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetBJetDEta_After" , "#Delta#eta(jj,bjet)", nBinsdEta, mindEta, maxdEta);
+  hTrijet2DijetBJetDEta_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetBJetDEta_After" , "#Delta#eta(jj,bjet)", nBinsdEta, mindEta, maxdEta);
+  hTrijet1DijetBJetDPhi_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetBJetDPhi_Before", "#Delta#phi(jj,bjet)", nBinsdPhi, mindPhi, maxdPhi);
+  hTrijet2DijetBJetDPhi_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetBJetDPhi_Before", "#Delta#phi(jj,bjet)", nBinsdPhi, mindPhi, maxdPhi);
+  hTrijet1DijetBJetDPhi_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetBJetDPhi_After" , "#Delta#phi(jj,bjet)", nBinsdPhi, mindPhi, maxdPhi);
+  hTrijet2DijetBJetDPhi_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetBJetDPhi_After" , "#Delta#phi(jj,bjet)", nBinsdPhi, mindPhi, maxdPhi);
+  hTrijet1DijetBJetDR_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetBJetDR_Before"  , "#Delta R(jj,bjet)"  , nBinsdR  , mindR  , maxdR);
+  hTrijet2DijetBJetDR_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetBJetDR_Before"  , "#Delta R(jj,bjet)"  , nBinsdR  , mindR  , maxdR);
+  hTrijet1DijetBJetDR_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetBJetDR_After"   , "#Delta R(jj,bjet)"  , nBinsdR  , mindR  , maxdR);
+  hTrijet2DijetBJetDR_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetBJetDR_After"   , "#Delta R(jj,bjet)"  , nBinsdR  , mindR  , maxdR);
+  hLdgTrijetPt_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetPt_Before",";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetPt_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetPt_After" ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetMass_Before",";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  hLdgTrijetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetMass_After" ,";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  hSubldgTrijetPt_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetPt_Before",";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetPt_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetPt_After" ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetMass_Before",";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
+  hSubldgTrijetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetMass_After" ,";M (GeV/c^{2})", nBinsM*2, minM, maxM*2);
   // Histograms (2D) 
-  h_TriJetMass_Vs_ChiSqr_Before = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "TriJetMass_Vs_ChiSqr_Before", ";M (GeV/c^{2}); #chi^{2}", nBinsM, minM, maxM, 100, 0.0, 100.0);
-  h_DiJetPt_Vs_DiJetDR_Before   = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "DiJetPt_Vs_DiJetDR_Before"  , ";p_{T} (GeV/c);#Delta R(j_{1},j_{2}", nBinsPt, minPt, maxPt, nBinsdR, mindR, maxdR);
-  h_DiJetPt_Vs_DiJetDR_After    = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, "DiJetPt_Vs_DiJetDR_After"   , ";p_{T} (GeV/c);#Delta R(j_{1},j_{2}", nBinsPt, minPt, maxPt, nBinsdR, mindR, maxdR);
+  hTrijet1MassVsChiSqr_Before = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "Trijet1MassVsChiSqr_Before", ";M (GeV/c^{2}); #chi^{2}", nBinsM*2, minM, maxM*2, 100, 0.0, 100.0);
+  hTrijet2MassVsChiSqr_Before = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "Trijet2MassVsChiSqr_Before", ";M (GeV/c^{2}); #chi^{2}", nBinsM*2, minM, maxM*2, 100, 0.0, 100.0);
+  hTrijet1MassVsChiSqr_After  = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "Trijet1MassVsChiSqr_After" , ";M (GeV/c^{2}); #chi^{2}", nBinsM*2, minM, maxM*2, 100, 0.0, 100.0);
+  hTrijet2MassVsChiSqr_After  = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "Trijet2MassVsChiSqr_After" , ";M (GeV/c^{2}); #chi^{2}", nBinsM*2, minM, maxM*2, 100, 0.0, 100.0);
+  hTrijet1DijetPtVsDijetDR_Before = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "Trijet1DijetPtVsDijetDR_Before", ";p_{T} (GeV/c);#Delta R(j_{1},j_{2}", nBinsPt, minPt, maxPt, nBinsdR, mindR, maxdR);
+  hTrijet2DijetPtVsDijetDR_Before = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "Trijet2DijetPtVsDijetDR_Before", ";p_{T} (GeV/c);#Delta R(j_{1},j_{2}", nBinsPt, minPt, maxPt, nBinsdR, mindR, maxdR);
+  hTrijet1DijetPtVsDijetDR_After  = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "Trijet1DijetPtVsDijetDR_After" , ";p_{T} (GeV/c);#Delta R(j_{1},j_{2}", nBinsPt, minPt, maxPt, nBinsdR, mindR, maxdR);
+  hTrijet2DijetPtVsDijetDR_After  = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "Trijet2DijetPtVsDijetDR_After" , ";p_{T} (GeV/c);#Delta R(j_{1},j_{2}", nBinsPt, minPt, maxPt, nBinsdR, mindR, maxdR);
 
   return;
 }
@@ -140,185 +200,131 @@ TopSelection::Data TopSelection::silentAnalyze(const Event& event, const JetSele
   ensureSilentAnalyzeAllowed(event.eventID());
   // Disable histogram filling and counter
   disableHistogramsAndCounters();
-  Data myData = privateAnalyze(event, jetData, bjetData);
+  Data myData = privateAnalyze(event, jetData.getSelectedJets(), bjetData.getSelectedBJets());
   enableHistogramsAndCounters();
   return myData;
 }
 
+TopSelection::Data TopSelection::silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
+  ensureSilentAnalyzeAllowed(event.eventID());
+  // Disable histogram filling and counter
+  disableHistogramsAndCounters();
+  std::vector<Jet> bjets = bjetData.getFailedBJetCandsDescendingDiscr();
+  bjets.resize(3);
+  Data myData = privateAnalyzeWithoutBJets(event, jetData.getSelectedJets(), bjets );
+  enableHistogramsAndCounters();
+  return myData;
+}
+
+
 TopSelection::Data TopSelection::analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
   ensureAnalyzeAllowed(event.eventID());
-  TopSelection::Data data = privateAnalyze(event, jetData, bjetData);
-
+  TopSelection::Data data = privateAnalyze(event, jetData.getSelectedJets(), bjetData.getSelectedBJets());
   // Send data to CommonPlots
-  // if (fCommonPlots != nullptr) fCommonPlots->fillControlPlotsAtTopSelection(event, data);
-  
-  // Return data
+  // if (fCommonPlots != nullptr) fCommonPlots->fillControlPlotsAtTopSelection(event, data); //fixme
   return data;
 }
 
-TopSelection::Data TopSelection::privateAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
+TopSelection::Data TopSelection::analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
+  ensureAnalyzeAllowed(event.eventID());
+  std::vector<Jet> bjets = bjetData.getFailedBJetCandsDescendingDiscr();
+  bjets.resize(3);
+  TopSelection::Data data = privateAnalyze(event, jetData.getSelectedJets(), bjets);
+  // Send data to CommonPlots
+  // if (fCommonPlots != nullptr) fCommonPlots->fillControlPlotsAtTopSelection(event, data);
+  return data;
+}
+
+TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::vector<Jet> jets, const std::vector<Jet> bjets) {
   Data output;
   cSubAll.increment();
   
   // Initialise variables
-  double minChiSqr = -1.0;
-  unsigned int nUntaggedJets = jetData.getNumberOfSelectedJets() - bjetData.getNumberOfSelectedBJets();
+  std::vector<unsigned int> bjet1;
+  std::vector<unsigned int> bjet2;
+  std::vector<unsigned int> jet1;
+  std::vector<unsigned int> jet2;
+  std::vector<unsigned int> jet3;
+  std::vector<unsigned int> jet4;
 
-
-  // For-loop: Selected jets
-  for (auto jet1: jetData.getSelectedJets()) {
-
-    // Skip this jet if it is a b-jet and if there are enough untagged jets
-    if (matchesToBJet(jet1, bjetData) && nUntaggedJets >= 4) continue; 
-
-    // For-loop: Selected jets
-    for (auto jet2: jetData.getSelectedJets()) {
-      
-      // Skip this jet if it is a b-jet and if there are enough untagged jets
-      if (matchesToBJet(jet2, bjetData) && nUntaggedJets >= 4) continue;      
-
-      // Skip this jet if it matches jet1
-      if (sameJets(jet2, jet1)) continue;
-
-      // For-loop: Selected jets
-      for (auto jet3: jetData.getSelectedJets()) {
-	
-	// Skip this jet if it is a b-jet and if there are enough untagged jets
-	if (matchesToBJet(jet3, bjetData) && nUntaggedJets >= 4) continue;
-
-	// Skip this jet if it matches jet1 or jet2
-	if (sameJets(jet3, jet1) || sameJets(jet3, jet2)) continue;
-
-	// For-loop: Selected jets 
-	for (auto jet4: jetData.getSelectedJets()) {
-
-	  // Skip this jet if it is a b-jet and if there are enough untagged jets  
-	  if (matchesToBJet(jet4, bjetData) && nUntaggedJets >= 4) continue;
-
-	  // Skip this jet if it matches jet1 or jet2 or jet3
-	  if (sameJets(jet4, jet1) || sameJets(jet4, jet2) || sameJets(jet4, jet3)) continue;
-
-	  // For-loop: Selected b-jets
-	  for (auto bjet1: bjetData.getSelectedBJets()) {
-
-	    // Skip this jet if it matches jet1, jet2, jet3 or jet4
-	    if (sameJets(bjet1, jet1) || sameJets(bjet1, jet2) || 
-		sameJets(bjet1, jet3) || sameJets(bjet1, jet4)  ) continue;
-
-	    // For-loop: Selected b-jets
-	    for (auto bjet2: bjetData.getSelectedBJets()) {
-
-	      // Skip this jet if it matches jet1, jet2, jet3, jet4 or bjet1
-	      if (sameJets(bjet2, jet1) || sameJets(bjet2, jet2) ||
-		  sameJets(bjet2, jet3) || sameJets(bjet2, jet4) || sameJets(bjet2, bjet1) ) continue;
-	            
-	      // In case where b-tagged Jets are assigned to jet1-jet4, their b-Discriminator values 
-	      // must be worse than those of bjet1 and bjet2
-	      if (jet1.bjetDiscriminator() > bjet1.bjetDiscriminator() || jet1.bjetDiscriminator() > bjet2.bjetDiscriminator() ||
-		  jet2.bjetDiscriminator() > bjet1.bjetDiscriminator() || jet2.bjetDiscriminator() > bjet2.bjetDiscriminator() ||
-		  jet3.bjetDiscriminator() > bjet1.bjetDiscriminator() || jet3.bjetDiscriminator() > bjet2.bjetDiscriminator() ||
-		  jet4.bjetDiscriminator() > bjet1.bjetDiscriminator() || jet4.bjetDiscriminator() > bjet2.bjetDiscriminator()  ) {
-		continue; }
-	      
-	      // Construct chi-square variable using jets(1-4) and b-jets(1-2)
-              double ChiSqr = CalculateChiSqrForTriJetSystems(jet1, jet2, jet3, jet4, bjet1, bjet2);
-
-	      // Find the configuration that minimised chi-sqrt
-	      if (minChiSqr == -1 || ChiSqr < minChiSqr) {
-
-		minChiSqr = ChiSqr;
-		
-		// 4-momenta of the 3rd b-jet
-		math::XYZTLorentzVector BJet3_p4;
-		
-		// For-loop: Selected b-jets 
-		for (auto bjet3: bjetData.getSelectedBJets()) {
-		  
-		  // Skip this jet if it matches jet1, jet2, jet3, jet4, bjet1 or bjet2
-		  if (sameJets(bjet3, jet1)  || sameJets(bjet3, jet2)  ||
-		      sameJets(bjet3, jet3)  || sameJets(bjet3, jet4)  ||
-		      sameJets(bjet3, bjet1) || sameJets(bjet3, bjet2)  ) continue;
-
-		  // keep the b-jet with tha maximum pT               
-		  if (bjet3.pt() > BJet3_p4.pt()) BJet3_p4 = bjet3.p4();
-		}
-		
-		// Assign values
-                output.fJet1_p4    = jet1.p4();
-                output.fJet2_p4    = jet2.p4();
-                output.fJet3_p4    = jet3.p4();
-                output.fJet4_p4    = jet4.p4();
-                output.fBJet1_p4   = bjet1.p4();
-                output.fBJet2_p4   = bjet2.p4();
-		output.fDiJet1_p4  = jet1.p4() + jet2.p4();
-                output.fDiJet2_p4  = jet3.p4() + jet4.p4();
-                output.fTriJet1_p4 = jet1.p4() + jet2.p4() + bjet1.p4();
-                output.fTriJet2_p4 = jet3.p4() + jet4.p4() + bjet2.p4();
-                output.fChiSqr     = minChiSqr;
-		output.fBJet3_p4   = BJet3_p4;
-		
-	      }//eof: if (minChiSqr == -1 || ChiSqr < minChiSqr) {            
-	    } //eof: bjets2 loop
-	  } //eof: bjets1 loop
-	} //eof: jets4 loop
-      } //eof: jets3 loop
-    } //eof: jets2 loop
-  } //eof: jets1 loop
+  // std::cout << "\nnJets = " << jets.size() << ", \033[1;31mnBJets = " << bjets.size() << "\033[0m" << std::endl;
+  GetJetIndicesForChiSqrFit(jets, bjets, jet1, jet2, jet3, jet4, bjet1, bjet2);
   
+  double minChiSqr = 999999.9;
+  // For-loop: All jet indices
+  for (unsigned int index=0; index < jet1.size(); index++)
+    {
+      // Construct chi-square variable using jets(1-4) and b-jets(1-2)
+      unsigned int b1 = bjet1.at(index);
+      unsigned int b2 = bjet2.at(index);
+      unsigned int j1 = jet1.at(index);
+      unsigned int j2 = jet2.at(index);
+      unsigned int j3 = jet3.at(index);
+      unsigned int j4 = jet4.at(index);
+      double chiSqr   = CalculateChiSqrForTrijetSystems(jets.at(j1), jets.at(j2), jets.at(j3), jets.at(j4), jets.at(b1), jets.at(b2));
+      // std::cout << "chiSqr = " << chiSqr << " (minChiSqr = " << minChiSqr << ")" << std::endl;
+
+      // Find the configuration that minimised chi-squared
+      if (chiSqr < minChiSqr) {
+
+	// Assign the chi-squared value
+	minChiSqr = chiSqr;       
+	output.fChiSqr = minChiSqr;
+	// Assign Trijet-1
+	output.fTrijet1Jet1 = jets.at(j1);
+	output.fTrijet1Jet2 = jets.at(j2);
+	output.fTrijet1BJet = jets.at(b1);
+	output.fTrijet1Dijet_p4   = output.fTrijet1Jet1.p4() + output.fTrijet1Jet2.p4();
+	output.fTrijet1_p4  = output.fTrijet1Dijet_p4 + output.fTrijet1BJet.p4();
+	// Assign Trijet-2
+	output.fTrijet2Jet1 = jets.at(j3);
+	output.fTrijet2Jet2 = jets.at(j4);
+	output.fTrijet2BJet = jets.at(b2);
+	output.fTrijet2Dijet_p4   = output.fTrijet2Jet1.p4() + output.fTrijet2Jet2.p4();
+	output.fTrijet2_p4  = output.fTrijet2Dijet_p4 + output.fTrijet2BJet.p4();
+	
+      }
+
+    }
+
   // Fill Histograms (Before cuts)
-  h_JetPtAll_Before->Fill(output.fJet1_p4.pt());
-  h_JetPtAll_Before->Fill(output.fJet2_p4.pt());
-  h_JetPtAll_Before->Fill(output.fJet3_p4.pt());
-  h_JetPtAll_Before->Fill(output.fJet4_p4.pt());
-  h_JetPtAll_Before->Fill(output.fBJet1_p4.pt());
-  h_JetPtAll_Before->Fill(output.fBJet2_p4.pt());
-  h_JetEtaAll_Before->Fill(output.fJet1_p4.eta());
-  h_JetEtaAll_Before->Fill(output.fJet2_p4.eta());
-  h_JetEtaAll_Before->Fill(output.fJet3_p4.eta());
-  h_JetEtaAll_Before->Fill(output.fJet4_p4.eta());
-  h_JetEtaAll_Before->Fill(output.fBJet1_p4.eta());
-  h_JetEtaAll_Before->Fill(output.fBJet2_p4.eta());
-  h_TriJetMass_Before->Fill(output.fTriJet1_p4.mass());
-  h_TriJetMass_Before->Fill(output.fTriJet2_p4.mass());
-  // Leading/Ssubleading top
-  if (output.fTriJet1_p4.pt() > output.fTriJet2_p4.pt()) {
-    h_LdgTriJetMass_Before    ->Fill(output.fTriJet1_p4.mass());
-    h_SubLdgTriJetMass_Before ->Fill(output.fTriJet2_p4.mass());
-  }
-  else {
-    h_LdgTriJetMass_Before    ->Fill(output.fTriJet2_p4.mass());
-    h_SubLdgTriJetMass_Before ->Fill(output.fTriJet1_p4.mass());
-  }
-  // Closest/furthest top to the 3rd bjet
-  if (output.fBJet3_p4.pt() != 0) {
-    if ( ROOT::Math::VectorUtil::DeltaR(output.fTriJet1_p4, output.fBJet3_p4) < ROOT::Math::VectorUtil::DeltaR(output.fTriJet2_p4, output.fBJet3_p4)    ) {
-      h_ClosestTo3rdBJet_TriJetMass_Before  ->Fill(output.fTriJet1_p4.mass());
-      h_FurthestTo3rdBJet_TriJetMass_Before ->Fill(output.fTriJet2_p4.mass());
+  hChiSqr_Before->Fill( output.fChiSqr );
+  hTrijet1Mass_Before->Fill(output.fTrijet1_p4.mass());
+  hTrijet2Mass_Before->Fill(output.fTrijet2_p4.mass());
+  hTrijet1DijetMass_Before->Fill( output.fTrijet1Dijet_p4.mass() );
+  hTrijet2DijetMass_Before->Fill( output.fTrijet2Dijet_p4.mass() );
+  hTrijet1DijetDEta_Before->Fill( std::abs( output.fTrijet1Jet1.p4().eta() - output.fTrijet1Jet2.p4().eta() ) );
+  hTrijet2DijetDEta_Before->Fill( std::abs( output.fTrijet2Jet1.p4().eta() - output.fTrijet2Jet2.p4().eta() ) );
+  hTrijet1DijetDPhi_Before->Fill( std::abs( ROOT::Math::VectorUtil::DeltaPhi( output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4() ) ) );
+  hTrijet2DijetDPhi_Before->Fill( std::abs( ROOT::Math::VectorUtil::DeltaPhi( output.fTrijet2Jet1.p4(), output.fTrijet2Jet2.p4() ) ) );
+  hTrijet1DijetDR_Before  ->Fill( ROOT::Math::VectorUtil::DeltaR( output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4() ) );
+  hTrijet2DijetDR_Before  ->Fill( ROOT::Math::VectorUtil::DeltaR( output.fTrijet2Jet1.p4(), output.fTrijet2Jet2.p4() ) );
+  hTrijet1DijetBJetDEta_Before->Fill( std::abs( output.fTrijet1Dijet_p4.eta() - output.fTrijet1BJet.p4().eta() ) );
+  hTrijet2DijetBJetDEta_Before->Fill( std::abs( output.fTrijet2Dijet_p4.eta() - output.fTrijet2BJet.p4().eta() ) );
+  hTrijet1DijetBJetDPhi_Before->Fill( std::abs( ROOT::Math::VectorUtil::DeltaPhi( output.fTrijet1Dijet_p4, output.fTrijet1BJet.p4() ) ) );
+  hTrijet2DijetBJetDPhi_Before->Fill( std::abs( ROOT::Math::VectorUtil::DeltaPhi( output.fTrijet2Dijet_p4, output.fTrijet2BJet.p4() ) ) );
+  hTrijet1DijetBJetDR_Before  ->Fill( ROOT::Math::VectorUtil::DeltaR( output.fTrijet1Dijet_p4, output.fTrijet1BJet.p4() ) );
+  hTrijet2DijetBJetDR_Before  ->Fill( ROOT::Math::VectorUtil::DeltaR( output.fTrijet2Dijet_p4, output.fTrijet2BJet.p4() ) );
+  // Leading/Subleading tops
+  if (output.fTrijet1_p4.pt() > output.fTrijet2_p4.pt()) 
+    {
+      hLdgTrijetPt_Before->Fill(output.fTrijet1_p4.pt());
+      hLdgTrijetMass_Before->Fill(output.fTrijet1_p4.mass());
+      hSubldgTrijetPt_Before->Fill(output.fTrijet2_p4.pt());
+      hSubldgTrijetMass_Before->Fill(output.fTrijet2_p4.mass());
     }
-    else {
-      h_ClosestTo3rdBJet_TriJetMass_Before  ->Fill(output.fTriJet2_p4.mass());
-      h_FurthestTo3rdBJet_TriJetMass_Before ->Fill(output.fTriJet1_p4.mass());
+  else 
+    {
+      hLdgTrijetPt_Before->Fill(output.fTrijet2_p4.pt());
+      hLdgTrijetMass_Before->Fill(output.fTrijet2_p4.mass());
+      hSubldgTrijetPt_Before->Fill(output.fTrijet1_p4.pt());
+      hSubldgTrijetMass_Before->Fill(output.fTrijet1_p4.mass());
     }
-  }
-  h_ChiSqr_Before->Fill(output.fChiSqr);
-  h_DiJetMass_Before->Fill(output.fDiJet1_p4.mass());
-  h_DiJetMass_Before->Fill(output.fDiJet2_p4.mass());
-  h_DiJet_DR_Before  ->Fill(ROOT::Math::VectorUtil::DeltaR(output.fJet1_p4, output.fJet2_p4));
-  h_DiJet_DR_Before  ->Fill(ROOT::Math::VectorUtil::DeltaR(output.fJet3_p4, output.fJet4_p4));
-  h_DiJet_DPhi_Before->Fill(std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fJet1_p4, output.fJet2_p4)));
-  h_DiJet_DPhi_Before->Fill(std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fJet3_p4, output.fJet4_p4)));
-  h_DiJet_DEta_Before->Fill(std::abs(output.fJet1_p4.eta() - output.fJet2_p4.eta()));
-  h_DiJet_DEta_Before->Fill(std::abs(output.fJet3_p4.eta() - output.fJet4_p4.eta()));
-  h_DiJetBJet_DR_Before   ->Fill(ROOT::Math::VectorUtil::DeltaR(output.fDiJet1_p4, output.fBJet1_p4));
-  h_DiJetBJet_DR_Before   ->Fill(ROOT::Math::VectorUtil::DeltaR(output.fDiJet2_p4, output.fBJet2_p4));
-  h_DiJetBJet_DPhi_Before ->Fill(std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fDiJet1_p4, output.fBJet1_p4)));
-  h_DiJetBJet_DPhi_Before ->Fill(std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fDiJet2_p4, output.fBJet2_p4)));
-  h_DiJetBJet_DEta_Before ->Fill(std::abs(output.fDiJet1_p4.eta() - output.fBJet1_p4.eta()));
-  h_DiJetBJet_DEta_Before ->Fill(std::abs(output.fDiJet2_p4.eta() - output.fBJet2_p4.eta()));
-  h_TriJetMass_Vs_ChiSqr_Before ->Fill(output.fTriJet1_p4.mass(), output.fChiSqr);
-  h_TriJetMass_Vs_ChiSqr_Before ->Fill(output.fTriJet2_p4.mass(), output.fChiSqr);
-  h_DiJetPt_Vs_DiJetDR_Before ->Fill(output.fDiJet1_p4.pt(), ROOT::Math::VectorUtil::DeltaR(output.fJet1_p4, output.fJet2_p4));
-  h_DiJetPt_Vs_DiJetDR_Before ->Fill(output.fDiJet2_p4.pt(), ROOT::Math::VectorUtil::DeltaR(output.fJet3_p4, output.fJet4_p4));
+  // 2-D histos
+  hTrijet1MassVsChiSqr_Before->Fill( output.fTrijet1_p4.mass(), output.fChiSqr );
+  hTrijet2MassVsChiSqr_Before->Fill( output.fTrijet2_p4.mass(), output.fChiSqr );
+  hTrijet1DijetPtVsDijetDR_Before->Fill( output.fTrijet1Dijet_p4.pt(), ROOT::Math::VectorUtil::DeltaR(output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4() ) );
+  hTrijet2DijetPtVsDijetDR_Before->Fill( output.fTrijet2Dijet_p4.pt(), ROOT::Math::VectorUtil::DeltaR(output.fTrijet2Jet1.p4(), output.fTrijet2Jet2.p4() ) );
 
 
   // Apply cuts
@@ -326,55 +332,44 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const JetSel
   cSubPassedChiSqCut.increment();
 
   // Fill Histograms (After cuts)
-  h_JetPtAll_After->Fill(output.fJet1_p4.pt());
-  h_JetPtAll_After->Fill(output.fJet2_p4.pt());
-  h_JetPtAll_After->Fill(output.fJet3_p4.pt());
-  h_JetPtAll_After->Fill(output.fJet4_p4.pt());
-  h_JetPtAll_After->Fill(output.fBJet1_p4.pt());
-  h_JetPtAll_After->Fill(output.fBJet2_p4.pt());
-  h_JetEtaAll_After->Fill(output.fJet1_p4.eta());
-  h_JetEtaAll_After->Fill(output.fJet2_p4.eta());
-  h_JetEtaAll_After->Fill(output.fJet3_p4.eta());
-  h_JetEtaAll_After->Fill(output.fJet4_p4.eta());
-  h_JetEtaAll_After->Fill(output.fBJet1_p4.eta());
-  h_JetEtaAll_After->Fill(output.fBJet2_p4.eta());
-  h_TriJetMass_After->Fill(output.fTriJet1_p4.mass());
-  h_TriJetMass_After->Fill(output.fTriJet2_p4.mass());
-  if (output.fTriJet1_p4.pt() > output.fTriJet2_p4.pt()) {
-    h_LdgTriJetMass_After    ->Fill(output.fTriJet1_p4.mass());
-    h_SubLdgTriJetMass_After ->Fill(output.fTriJet2_p4.mass());
-  }
-  else {
-    h_LdgTriJetMass_After    ->Fill(output.fTriJet2_p4.mass());
-    h_SubLdgTriJetMass_After ->Fill(output.fTriJet1_p4.mass());
-  }
-  if (output.fBJet3_p4.pt() != 0) {
-    if ( ROOT::Math::VectorUtil::DeltaR(output.fTriJet1_p4, output.fBJet3_p4) < \
-	 ROOT::Math::VectorUtil::DeltaR(output.fTriJet2_p4, output.fBJet3_p4)    ) {
-      h_ClosestTo3rdBJet_TriJetMass_After  ->Fill(output.fTriJet1_p4.mass());
-      h_FurthestTo3rdBJet_TriJetMass_After ->Fill(output.fTriJet2_p4.mass());
+  hChiSqr_After->Fill( output.fChiSqr );
+  hTrijet1Mass_After->Fill( output.fTrijet1_p4.mass() );
+  hTrijet2Mass_After->Fill( output.fTrijet2_p4.mass() );
+  hTrijet1DijetMass_After->Fill( output.fTrijet1Dijet_p4.mass() );
+  hTrijet2DijetMass_After->Fill( output.fTrijet2Dijet_p4.mass() );
+  hTrijet1DijetDR_After  ->Fill( ROOT::Math::VectorUtil::DeltaR(output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4() ) );
+  hTrijet2DijetDR_After  ->Fill( ROOT::Math::VectorUtil::DeltaR(output.fTrijet1Jet2.p4(), output.fTrijet2Jet2.p4() ) );
+  hTrijet1DijetDPhi_After->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4() ) ) );
+  hTrijet2DijetDPhi_After->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fTrijet2Jet1.p4(), output.fTrijet2Jet2.p4() ) ) );
+  hTrijet1DijetDEta_After->Fill( std::abs(output.fTrijet1Jet1.p4().eta() - output.fTrijet1Jet2.p4().eta() ) );
+  hTrijet2DijetDEta_After->Fill( std::abs(output.fTrijet2Jet1.p4().eta() - output.fTrijet2Jet2.p4().eta() ) );
+  hTrijet1DijetBJetDEta_After->Fill( std::abs(output.fTrijet1Dijet_p4.eta() - output.fTrijet1BJet.p4().eta() ) );
+  hTrijet2DijetBJetDEta_After->Fill( std::abs(output.fTrijet2Dijet_p4.eta() - output.fTrijet2BJet.p4().eta() ) );
+  hTrijet1DijetBJetDPhi_After->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fTrijet1Dijet_p4, output.fTrijet1BJet.p4() ) ) );
+  hTrijet2DijetBJetDPhi_After->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fTrijet2Dijet_p4, output.fTrijet2BJet.p4() ) ) );
+  hTrijet1DijetBJetDR_After  ->Fill( ROOT::Math::VectorUtil::DeltaR(output.fTrijet1Dijet_p4, output.fTrijet1BJet.p4() ) );
+  hTrijet2DijetBJetDR_After  ->Fill( ROOT::Math::VectorUtil::DeltaR(output.fTrijet2Dijet_p4, output.fTrijet2BJet.p4() ) );
+  // Leading/Subleading tops
+  if (output.fTrijet1_p4.pt() > output.fTrijet2_p4.pt()) 
+    {
+      hLdgTrijetPt_After->Fill(output.fTrijet1_p4.pt());
+      hLdgTrijetMass_After->Fill(output.fTrijet1_p4.mass());
+      hSubldgTrijetPt_After->Fill(output.fTrijet2_p4.pt());
+      hSubldgTrijetMass_After->Fill(output.fTrijet2_p4.mass());
     }
-    else {
-      h_ClosestTo3rdBJet_TriJetMass_After  ->Fill(output.fTriJet2_p4.mass());
-      h_FurthestTo3rdBJet_TriJetMass_After ->Fill(output.fTriJet1_p4.mass());
+  else 
+    {
+      hLdgTrijetPt_After->Fill(output.fTrijet2_p4.pt());
+      hLdgTrijetMass_After->Fill(output.fTrijet2_p4.mass());
+      hSubldgTrijetPt_After->Fill(output.fTrijet1_p4.pt());
+      hSubldgTrijetMass_After->Fill(output.fTrijet1_p4.mass());
     }
-  }
-  h_DiJetMass_After ->Fill(output.fDiJet1_p4.mass());
-  h_DiJetMass_After ->Fill(output.fDiJet2_p4.mass());
-  h_DiJet_DR_After  ->Fill(ROOT::Math::VectorUtil::DeltaR(output.fJet1_p4, output.fJet2_p4));
-  h_DiJet_DR_After  ->Fill(ROOT::Math::VectorUtil::DeltaR(output.fJet3_p4, output.fJet4_p4));
-  h_DiJet_DPhi_After->Fill(std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fJet1_p4, output.fJet2_p4)));
-  h_DiJet_DPhi_After->Fill(std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fJet3_p4, output.fJet4_p4)));
-  h_DiJet_DEta_After->Fill(std::abs(output.fJet1_p4.eta() - output.fJet2_p4.eta()));
-  h_DiJet_DEta_After->Fill(std::abs(output.fJet3_p4.eta() - output.fJet4_p4.eta()));
-  h_DiJetBJet_DR_After  ->Fill(ROOT::Math::VectorUtil::DeltaR(output.fDiJet1_p4, output.fBJet1_p4));
-  h_DiJetBJet_DR_After  ->Fill(ROOT::Math::VectorUtil::DeltaR(output.fDiJet2_p4, output.fBJet2_p4));
-  h_DiJetBJet_DPhi_After->Fill(std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fDiJet1_p4, output.fBJet1_p4)));
-  h_DiJetBJet_DPhi_After->Fill(std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fDiJet2_p4, output.fBJet2_p4)));
-  h_DiJetBJet_DEta_After->Fill(std::abs(output.fDiJet1_p4.eta() - output.fBJet1_p4.eta()));
-  h_DiJetBJet_DEta_After->Fill(std::abs(output.fDiJet2_p4.eta() - output.fBJet2_p4.eta()));
-  h_DiJetPt_Vs_DiJetDR_After->Fill(output.fDiJet1_p4.pt(), ROOT::Math::VectorUtil::DeltaR(output.fJet1_p4, output.fJet2_p4));
-  h_DiJetPt_Vs_DiJetDR_After->Fill(output.fDiJet2_p4.pt(), ROOT::Math::VectorUtil::DeltaR(output.fJet3_p4, output.fJet4_p4));
+
+  // 2-D histos
+  hTrijet1MassVsChiSqr_After->Fill( output.fTrijet1_p4.mass(), output.fChiSqr );
+  hTrijet2MassVsChiSqr_After->Fill( output.fTrijet2_p4.mass(), output.fChiSqr );
+  hTrijet1DijetPtVsDijetDR_After->Fill( output.fTrijet1Dijet_p4.pt(), ROOT::Math::VectorUtil::DeltaR(output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4() ) );
+  hTrijet2DijetPtVsDijetDR_After->Fill( output.fTrijet2Dijet_p4.pt(), ROOT::Math::VectorUtil::DeltaR(output.fTrijet2Jet1.p4(), output.fTrijet2Jet2.p4() ) );
 
   // Passed all top selection cuts
   output.bPassedSelection = true;
@@ -385,25 +380,25 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const JetSel
 
 }
 
+bool TopSelection::areSameJets(const Jet& jet1, const Jet& jet2) {
+    float dR = ROOT::Math::VectorUtil::DeltaR(jet1.p4(), jet2.p4());
+    float dR_match = 0.1;
+    if (dR <= dR_match) return true;
+    else return false;
+}
 
-bool TopSelection::matchesToBJet(const Jet& jet, const BJetSelection::Data& bjetData) const {
-  for (auto bjet: bjetData.getSelectedBJets()) {
-    if (std::abs(jet.pt()-bjet.pt()) < 0.0001 && std::abs(jet.eta()-bjet.eta()) < 0.0001)
-      return true;
-  }
+
+bool TopSelection::isBJet(const Jet& jet, const std::vector<Jet>& bjets) {
+  
+  for (auto bjet: bjets)
+    {
+      if (areSameJets(jet, bjet))  return true;
+    }
   return false;
 }
 
 
-bool TopSelection::sameJets(const Jet& jet1, const Jet& jet2) {
-  if (std::abs(jet1.pt()-jet2.pt()) < 0.0001 && std::abs(jet1.eta()-jet2.eta()) < 0.0001)
-    return true;
-
-  return false;
-}
-
-
-double TopSelection::CalculateChiSqrForTriJetSystems(const Jet& jet1, 
+double TopSelection::CalculateChiSqrForTrijetSystems(const Jet& jet1, 
 						     const Jet& jet2,
 						     const Jet& jet3, 
 						     const Jet& jet4,
@@ -413,17 +408,132 @@ double TopSelection::CalculateChiSqrForTriJetSystems(const Jet& jet1,
   // Known mass of W-boson (default: 80.385)
   const double massW = cfg_MassW;
 
-  // Varianace of the gaussian fitting of the mass of the diJet system (default: 10.2)
-  const double diJetSigma = cfg_diJetSigma;
+  // 1-sigma of gaussian fit to the mass of the di-jets system (default: 10.2)
+  const double sigmaDijet = cfg_diJetSigma;
 
-  // Varianace of the gaussian fitting of the mass difference of the 2 triJet systems (default: 27.2)
-  const double triJetSigma = cfg_triJetSigma;
+  // 1- of the gaussian fitting of the mass difference of the 2 triJet systems (default: 27.2)
+  const double sigmaTrijet = cfg_triJetSigma;
 
   // Calculate the chi-sqruare of the two trijet systems
-  double a = pow(( (jet1.p4() + jet2.p4()).mass()  - massW),2)/pow(diJetSigma, 2);
-  double b = pow(( (jet3.p4() + jet4.p4()).mass()  - massW),2)/pow(diJetSigma, 2); 
-  double c = pow(( (jet1.p4() + jet2.p4() + bjet1.p4()).mass() - (jet3.p4() + jet4.p4() + bjet2.p4()).mass()),2)/pow(triJetSigma, 2);
-  double chiSqr = a + b + c;
+  double massDijet1  = (jet1.p4() + jet2.p4()).mass();
+  double massDijet2  = (jet3.p4() + jet4.p4()).mass();
+  double massTrijet1 = (jet1.p4() + jet2.p4() + bjet1.p4()).mass();
+  double massTrijet2 = (jet3.p4() + jet4.p4() + bjet2.p4()).mass();
 
-  return chiSqr;
+  double a = (massDijet1 - massW)/(sigmaDijet);
+  double b = (massDijet2 - massW)/(sigmaDijet); 
+  double c = (massTrijet1 - massTrijet2)/(sigmaTrijet);
+
+  // Calculate the chi-squared of the di-top system
+  double chiSq = pow(a,2) + pow(b,2) + pow(c,2);
+
+  return chiSq;
+}
+
+void TopSelection::GetJetIndicesForChiSqrFit(const std::vector<Jet> jets, 
+					     const std::vector<Jet> bjets,
+					     std::vector<unsigned int>& jet1,
+					     std::vector<unsigned int>& jet2,
+					     std::vector<unsigned int>& jet3,
+					     std::vector<unsigned int>& jet4,
+					     std::vector<unsigned int>& bjet1,
+					     std::vector<unsigned int>& bjet2)
+{
+  // For a given event with B bjets and J-B jets, the number of combinations should be:
+  // N = C(B, 2) x C(J-B, 4)  where C(n, r) = nCr
+  // For B=3, J=7 we have N =  6 combinations
+  // For B=3, J=8 we have N = 30 combinations
+
+  // Declare variables
+  const unsigned int nJets = jets.size();
+  const unsigned int nLightJets = jets.size() - bjets.size();
+  
+  // Safety measure in the case where there are not enough light-jets
+  // (i.e. non-bjets) to have 4 jets in the di-top reconstruction
+  // In these cases we might also use more than 2 bjets in the chi-square fit
+  // This does not necessarily mean we are using b-jets. These b-tagged jets
+  // might be c-flavour jets from W->cs decays.
+  const bool skipBJets = (nLightJets >= 4);
+
+  // For-loop: 6 nested loops to get 4 jets, 2 bjets
+  for (unsigned int b1=0; b1 < nJets; b1++){
+    // Consider only jets which are b-jets
+    if ( !isBJet(jets.at(b1), bjets) ) continue;
+
+    for (unsigned int b2=b1+1; b2 < nJets; b2++){
+      // Consider only jets which are b-jets
+      if ( !isBJet(jets.at(b2), bjets) ) continue;    
+
+      for (unsigned int j1 = 0; j1 < nJets; j1++){
+	// Consider only jets, not b-jets (if possible)
+	if ( isBJet(jets.at(j1), bjets)*skipBJets ) continue;
+	// Ensure jet is not the same as other used jets
+	if (j1 == b1 || j1 == b2) continue;
+
+	for (unsigned int j2=j1+1; j2 < nJets; j2++){
+	  // Consider only jets, not b-jets (if possible)
+	  if ( isBJet(jets.at(j2), bjets)*skipBJets ) continue;
+	  // Ensure jet is not the same as other used jets
+	  if (j2 == b1 || j2 == b2) continue;
+	  
+	  for (unsigned int j3=j2+1; j3 < nJets; j3++){
+	    // Consider only jets, not b-jets (if possible)
+	    if ( isBJet(jets.at(j3), bjets)*skipBJets ) continue;
+	    // Ensure jet is not the same as other used jets
+	    if (j3 == b1 || j3 == b2 || j3 == j1 || j3 == j2) continue;
+
+	    for (unsigned int j4=j3+1; j4 < nJets; j4++){
+	      // Consider only jets, not b-jets (if possible)
+	      if ( isBJet(jets.at(j4), bjets)*skipBJets ) continue;
+	      // Ensure jet is not the same as other used jets
+	      if (j4 == b1 || j4 == b2 || j4 == j1 || j4 == j2 || j4 == j3) continue;
+	      
+	      // Save this combination of jets/bjets for di-top reconstruction (4 jets, 2 bjets)
+	      bjet1.push_back(b1);
+	      bjet2.push_back(b2);
+	      jet1.push_back(j1);
+	      jet2.push_back(j2);
+	      jet3.push_back(j3);
+	      jet4.push_back(j4);
+	      
+	      // Save the same combination but with the b-jet positions swapped 
+	      // To account for fact that each b-jet can go with trijet1 or trijet2
+	      bjet1.push_back(b2);
+	      bjet2.push_back(b1);
+	      jet1.push_back(j1);
+	      jet2.push_back(j2);
+	      jet3.push_back(j3);
+	      jet4.push_back(j4);
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  // Sanity check:
+  if ( (bjet1.size() != bjet2.size()) || (bjet1.size() != jet1.size()) ||
+       (bjet1.size() != jet2.size())  || (bjet1.size() != jet3.size()) ||
+       (bjet1.size() != jet4.size()) )
+    {
+      throw hplus::Exception("logic") << "The jet/bjets vector sizes must be the same!";
+    }
+
+  if (0)
+    {
+      unsigned int combinations = 0;
+      for (unsigned int i = 0; i < bjet1.size(); i++, combinations++)
+	{
+	  std::cout << "  " << jet1.at(i) 
+		    << "  " << jet2.at(i)
+		    << "  " << jet3.at(i) 
+		    << "  " << jet4.at(i)
+		    << "  \033[1;31m" << bjet1.at(i)
+		    << "  \033[1;31m" << bjet2.at(i)
+		    << "\033[0m" << std::endl;
+	}
+      std::cout << "Combinations = " << combinations << std::endl;
+    }
+
+  return;
 }

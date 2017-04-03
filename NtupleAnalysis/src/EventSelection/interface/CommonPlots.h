@@ -22,6 +22,7 @@ public:
     kHplus2tbAnalysis= 0,
     kEmbedding,
     kQCDMeasurement,
+    kFakeBMeasurement,
     kQCDNormalizationSystematicsSignalRegion, // Needed for obtaining normalization systematics to data-driven control plots
     kQCDNormalizationSystematicsControlRegion // Needed for obtaining normalization systematics to data-driven control plots
   };
@@ -44,12 +45,16 @@ public:
   HistoSplitter& getHistoSplitter() { return fHistoSplitter; }
   /// Returns the histogram settings for pt histograms (usecase: QCD measurement)
   const HistogramSettings& getPtBinSettings() const { return fPtBinSettings; }
+  /// Returns the histogram settings for eta histograms (usecase: QCD measurement)
+  const HistogramSettings& getEtaBinSettings() const { return fEtaBinSettings; }
   /// Returns the histogram settings for MET bins (usecase: QCD measurement)
   const HistogramSettings& getMetBinSettings() const { return fMetBinSettings; }
   /// Returns the histogram settings for HT bins (usecase: Htb analysis)
   const HistogramSettings& getHtBinSettings() const { return fHtBinSettings; }
   /// Returns the histogram settings for Mt bins (usecase: QCD measurement)
   const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
+  /// Returns the histogram settings for Mt bins (usecase: QCD measurement)
+  const HistogramSettings& getBJetDiscBinSettings() const { return fBJetDiscriminatorBinSettings;}
 
   /** Special method for setting genuine tau status 
     * (it is usually set through TauSelection via CommonPlots::fillControlPlotsAfterTauSelection)

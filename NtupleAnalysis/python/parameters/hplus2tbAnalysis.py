@@ -124,6 +124,18 @@ scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection,
                                     direction              = "nominal")
 
 #================================================================================================
+# Light-Jet selection
+#================================================================================================
+# ljetSelection = PSet(
+#     jetPtCut                 = 40.0,
+#     jetEtaCut                = 2.4,
+#     numberOfJetsCutValue     = 0,
+#     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
+#     bjetMatchingDeltaR       = 0.1,
+# )
+
+
+#================================================================================================
 # MET selection
 #================================================================================================
 metSelection = PSet(
@@ -167,8 +179,8 @@ topologySelection = PSet(
 # Top selection
 #================================================================================================
 topSelection = PSet(
-    ChiSqrCutValue     = 0.0,
-    ChiSqrCutDirection = ">",    # options: ==, !=, <, <=, >, >=
+    ChiSqrCutValue     = -1.0,
+    ChiSqrCutDirection = ">=",    # options: ==, !=, <, <=, >, >=
     MassW              = 80.385,
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,
@@ -224,6 +236,7 @@ allSelections = PSet(
     ElectronSelection     = eVeto,
     HistogramAmbientLevel = histogramAmbientLevel,
     JetSelection          = jetSelection,
+    # LightJetSelection     = ljetSelection,
     TauSelection          = tauSelection,
     METFilter             = metFilter,
     METSelection          = metSelection,

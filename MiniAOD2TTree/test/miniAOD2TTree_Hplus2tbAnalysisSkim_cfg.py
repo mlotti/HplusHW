@@ -15,29 +15,25 @@ from HiggsAnalysis.MiniAOD2TTree.tools.HChOptions import getOptionsDataVersion
 maxEvents    = 5000
 maxWarnings  = 100
 reportEvery  = 100
-# dataVersion  = "80Xdata"
-# datasetFiles = ['/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/150/00000/66051AAF-D819-E611-BD3D-02163E011D55.root',
-#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/1E4ABD0D-DA19-E611-9396-02163E014258.root',
-#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/224967FC-D919-E611-9902-02163E0122C2.root',
-#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/28FAAD53-DA19-E611-BF0F-02163E01456A.root',
-#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/3A5F9A87-D919-E611-9CCE-02163E0138E1.root',
-#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/3EB12316-DA19-E611-AD3F-02163E012B1F.root',
-#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/4A968941-DA19-E611-AF6F-02163E011DF8.root',
-#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/5ADC50FC-D919-E611-88EF-02163E0122C2.root',
-#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/5CB64C01-DA19-E611-8344-02163E013630.root',
-#                 '/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/158/00000/5E8CA453-DA19-E611-A049-02163E01456A.root']
-
-dataVersion  = "80Xmc" 
+dataVersion  = "80Xdata"
 datasetFiles = [
-    #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root',
-    #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0806AB92-99BE-E611-9ECD-0025905A6138.root',
-    #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/165F54A0-A3BE-E611-B3F7-0025905A606A.root',
-    #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/18E31463-B3BE-E611-B6A3-0CC47A4D7678.root',
-    '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/0055B499-54B6-E611-9F86-FA163E1F94C5.root',
-    '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/02B77462-7CB5-E611-A061-0025905B8568.root',
-    '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/02CDB360-51B5-E611-A568-002590747E0E.root',
-    '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/0486046D-0BB6-E611-B533-002590D9D8C0.root',
-    ]
+    '/store/data/Run2016B/JetHT/MINIAOD/03Feb2017_ver2-v2/110000/003A92CA-6FED-E611-82CD-0025905B8590.root',
+    '/store/data/Run2016B/JetHT/MINIAOD/03Feb2017_ver2-v2/110000/0099149C-4EED-E611-8A63-0025905B85C6.root',
+    '/store/data/Run2016B/JetHT/MINIAOD/03Feb2017_ver2-v2/110000/00EADFD5-4DED-E611-AFAD-0CC47A4D7658.root',
+    '/store/data/Run2016B/JetHT/MINIAOD/03Feb2017_ver2-v2/110000/04037BCA-A6EC-E611-A7B1-0CC47A4D76C0.root',
+    '/store/data/Run2016B/JetHT/MINIAOD/03Feb2017_ver2-v2/110000/045EEFD5-4DED-E611-B5A5-0CC47A7C357E.root']
+
+#dataVersion  = "80Xmc" 
+#datasetFiles = [
+#    #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root',
+#    #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0806AB92-99BE-E611-9ECD-0025905A6138.root',
+#    #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/165F54A0-A3BE-E611-B3F7-0025905A606A.root',
+#    #'/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/18E31463-B3BE-E611-B6A3-0CC47A4D7678.root',
+#    '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/0055B499-54B6-E611-9F86-FA163E1F94C5.root',
+#    '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/02B77462-7CB5-E611-A061-0025905B8568.root',
+#    '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/02CDB360-51B5-E611-A568-002590747E0E.root',
+#    '/store/mc/RunIISummer16MiniAODv2/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/110000/0486046D-0BB6-E611-B533-002590D9D8C0.root',
+#    ]
     
 # For debugging purposes
 debug       = False

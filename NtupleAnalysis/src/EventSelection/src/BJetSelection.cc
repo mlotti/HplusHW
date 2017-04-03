@@ -142,35 +142,61 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   Data output;
   cSubAll.increment();
   bool passedEta = false;
-  bool passedPt = false;
+  bool passedPt  = false;
   bool passedDisr = false;
-  // Loop over muons
+
+  // Loop over selected jets
   for(const Jet& jet: jetData.getSelectedJets()) {
     // jet pt and eta cuts can differ from the jet selection
+
     //=== Apply cut on eta   
     if (std::fabs(jet.eta()) > fJetEtaCut)
-      continue;
+      {
+	output.fFailedBJetCands.push_back(jet);
+	continue;
+      }
     passedEta = true;  
+
     //=== Apply cut on pt
     if (jet.pt() < fJetPtCut)
-      continue;
+      {
+	output.fFailedBJetCands.push_back(jet);
+	continue;
+      }
     passedPt = true;
+
     //=== Apply discriminator
     if (!(jet.bjetDiscriminator() > fDisriminatorValue))
-      continue;
+      {
+	output.fFailedBJetCands.push_back(jet);
+	continue;
+      }
     passedDisr = true;
+
     // jet identified as b jet
     output.fSelectedBJets.push_back(jet);
   }
+
   // Fill counters so far
   if (passedEta&&passedPt&&passedDisr)
     cSubPassedDiscriminator.increment();
+
+  // Sort jets by descending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  output.fFailedBJetCandsDescendingDiscr = output.fFailedBJetCands;
+  std::sort(output.fFailedBJetCandsDescendingDiscr.begin(), output.fFailedBJetCandsDescendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() > b.bjetDiscriminator();});
+
+  // Sort jets by ascending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  output.fFailedBJetCandsAscendingDiscr = output.fFailedBJetCands;
+  std::sort(output.fFailedBJetCandsAscendingDiscr.begin(), output.fFailedBJetCandsAscendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() < b.bjetDiscriminator();});
+
   //=== Apply cut on number of selected b jets
   if (!fNumberOfJetsCut.passedCut(output.getNumberOfSelectedBJets()))
     return output;
+
   //=== Passed b-jet selection
   output.bPassedSelection = true;
   cPassedBJetSelection.increment();
+  // Sort bjets by pt (Sortign operator defined in Jet.h)
   std::sort(output.fSelectedBJets.begin(), output.fSelectedBJets.end());
   cSubPassedNBjets.increment();
   // Fill pt and eta of jets
