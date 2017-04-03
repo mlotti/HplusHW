@@ -52,7 +52,7 @@ public:
     }
     const math::XYZTLorentzVector getSubldgTrijet() const
     { 
-      if (fTrijet2_p4.pt() > fTrijet1_p4.pt()) return fTrijet2_p4; 
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet2_p4;
       else return fTrijet1_p4; 
     }
     // Leading/Subleading Dijets

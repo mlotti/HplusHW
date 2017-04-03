@@ -20,7 +20,7 @@ Examples:
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats/ --mcOnly --intLumi 100000
 
 Examples (tables):
-/plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats --noError --format %.3f --latex
+./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats --noError --format %.3f --latex
 '''
 
 #================================================================================================ 

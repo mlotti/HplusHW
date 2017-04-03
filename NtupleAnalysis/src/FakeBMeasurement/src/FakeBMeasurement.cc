@@ -536,7 +536,8 @@ void FakeBMeasurement::process(Long64_t entry) {
 
 
   // There are no bjets passing our selection criteria
-  if (bjetData.getNumberOfSelectedBJets() < 1)
+ //if (bjetData.getNumberOfSelectedBJets() < 1)
+  if (!bjetData.passedSelection())
     {
       doInvertedAnalysis(jetData, bjetData, nVertices);
     }
