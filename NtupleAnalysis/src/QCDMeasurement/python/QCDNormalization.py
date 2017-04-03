@@ -295,7 +295,7 @@ class QCDNormalizationTemplate:
             keys = [binLabel]
         else:
             print ""
-        print "... Fit parameter settings for '%s': (initial value / low bound / high bound)"%self._name
+        print "-Fit parameter settings for '%s': (initial value / low bound / high bound)"%self._name
         for k in keys:
             s = "      %s: "%k
             if k in self._fitParamInitialValues.keys():
@@ -396,11 +396,16 @@ class QCDNormalizationTemplate:
         self._histo = histogram
         self._binLabel = binLabel
         # Convert negative bins to zero but leave errors intact
+        convertedBins = 0
         for k in range(0, self._histo.GetNbinsX()+2):
             if self._histo.GetBinContent(k) < 0.0:
-                print "template '%s': converted in bin %d a negative value (%f) to zero."%(self._name, k, self._histo.GetBinContent(k))
                 self._histo.SetBinContent(k, 0.0)
                 self._histo.SetBinError(k, 1.0)
+                convertedBins += 1
+#                print "template '%s': converted in bin %d a negative value (%f) to zero."%(self._name, k, self._histo.GetBinContent(k))
+        if convertedBins > 0:
+            print "template '%s': %d negative value bins were converted to zero (%d bins in total)"%(self._name, convertedBins, self._histo.GetNbinsX())
+
         # Format bin label string
         self._binLabel = getModifiedBinLabelString(binLabel)
         # Calculate normalization factor and store the histogram normalized as area = 1
@@ -482,7 +487,7 @@ class QCDNormalizationTemplate:
             return
         else:
             if not self._quietMode:
-                print "\n- Fitting %s in bin %s"%(self._name, self._binLabel)
+                print "\n\033[1mFitting %s in bin %s\033[0m"%(self._name, self._binLabel)
                 self.printFitParamSettings(self._binLabel)
             # Define fit object
             fit = ROOT.TF1("fit"+self._name+self._binLabel, self._fitFunction, self._fitRangeMin, self._fitRangeMax, self._fitFunction.getNParam())
@@ -512,7 +517,7 @@ class QCDNormalizationTemplate:
             #h.Scale(1.0 / h.Integral(1, h.GetNbinsX()+1))
             # Do the fit
             if not self._quietMode:
-                print "... Using fit options:",fitOptions
+                print "-Using fit options:",fitOptions
             elif not "Q" in fitOptions:
                 fitOptions += " Q" # To suppress output
             if not "S" in fitOptions:
@@ -527,9 +532,15 @@ class QCDNormalizationTemplate:
             self._nEventsTotalErrorFromFitUp = orthogonalizer.getTotalFitParameterUncertaintyUp()
             self._nEventsTotalErrorFromFitDown = orthogonalizer.getTotalFitParameterUncertaintyDown()
             if not self._quietMode:
-                print "... Sanity check: Nevents in histogram = %.1f +- %.1f vs. fitted = %.1f + %.1f - %.1f"%(self.getNeventsFromHisto(False), self.getNeventsErrorFromHisto(False),
-                                                                                                               self._nEventsFromFit, self._nEventsTotalErrorFromFitUp, self._nEventsTotalErrorFromFitDown)
-            # Do a plot of the fit
+                print "\033[1mSummary of fit results:"
+                ratio = self.getNeventsFromHisto(False) / self._nEventsFromFit
+                print "    Nevents_fitted = %.1f + %.1f - %.1f"%(self._nEventsFromFit, self._nEventsTotalErrorFromFitUp, self._nEventsTotalErrorFromFitDown)
+                print "    Nevents_histo  = %.1f +- %.1f"%(self.getNeventsFromHisto(False), self.getNeventsErrorFromHisto(False))
+                print "    Ratio          = %.3f"%ratio
+                print "    Chi2 / NDf     = %.2f"%(fitResultObject.Chi2()/fitResultObject.Ndf())  
+                print "    P-value of fit = %.3e"%fitResultObject.Prob()   
+                print "\033[0m"
+                                                                                                                    # Do a plot of the fit
             if createPlot:
                 ROOT.gStyle.SetOptFit(0)
                 ROOT.gStyle.SetOptStat(0)
@@ -631,7 +642,7 @@ class QCDNormalizationManagerBase:
             wDown = w - wError
             if wDown < 0.0:
                 wDown = 0.0
-        lines.append("   w = nQCD/(nQCD+nEWKfakes) = %f +- %f"%(w, wError))
+        lines.append("\033[44m   QCD fraction = w = nQCD/(nQCD+nEWKfakes) = %f +- %f \033[0m\n"%(w, wError))
         # Calculate the combined normalization factor (f_fakes = w*f_QCD + (1-w)*f_EWKfakes)
         binLabel = self._templates[self._requiredTemplateList[0]].getBinLabel()
         fakeRate = None
@@ -829,6 +840,7 @@ class QCDNormalizationManagerBase:
         print "Obtained %d warnings and %d errors for the normalization"%(nWarnings, nErrors)
         if nWarnings > 0 or nErrors > 0:
             print "Please have a look at %s/QCDNormalisationDQM.png to see the origin of the warning(s) and error(s)"%self._plotDirName
+        print ""
 
     ## Checks that input is valid
     def _checkInputValidity(self, templatesToBeFitted):
@@ -888,8 +900,11 @@ class QCDNormalizationManagerBase:
     def _getSanityCheckTextForFractions(self, binLabel, label, fraction, fractionError, nBaseline, nCalculated):
         ratio = nBaseline / nCalculated
         lines = []
+        lines.append("    Sanity check for final fit:")
+        lines.append("        Nevents (baseline): %.1f"%nBaseline)
+        lines.append("        Nevents (fitted):   %.1f"%nCalculated)
+        lines.append("        Ratio:              %.3f"%ratio)
         lines.append("    Fitted %s fraction: %f +- %f"%(label, fraction, fractionError))
-        lines.append("      Sanity check: ratio = %.3f: baseline = %.1f vs. fitted = %.1f"%(ratio, nBaseline, nCalculated))
         self._commentLines.extend(lines)
         return lines
     
@@ -900,9 +915,10 @@ class QCDNormalizationManagerBase:
             item = self._templates[key]
             if item.isFittable():
                 ratio = item.getNeventsFromHisto(False) / item.getNeventsFromFit()
-                lines.append("... Template fit sanity check (%s): Ratio = %.3f: Nevents in histogram = %.1f +- %.1f vs. fitted = %.1f + %.1f - %.1f"%
-                    (item.getName(), ratio, item.getNeventsFromHisto(False), item.getNeventsErrorFromHisto(False),
-                     item.getNeventsFromFit(), item.getNeventsTotalErrorFromFit()[0], item.getNeventsTotalErrorFromFit()[1]))
+                lines.append("    Template fit sanity check, %s:"%item.getName())
+                lines.append("        Nevents (histo):  %.1f +- %.1f"%(item.getNeventsFromHisto(False),item.getNeventsErrorFromHisto(False)))
+                lines.append("        Nevents (fitted): %.1f + %.1f - %.1f"%(item.getNeventsFromFit(),item.getNeventsTotalErrorFromFit()[0],item.getNeventsTotalErrorFromFit()[1]))
+                lines.append("        Ratio:            %.3f "%ratio)
                 self._addDqmEntry(binLabel, "TmplFit::%s"%item.getName(), ratio-1, 0.03, 0.10)
         self._commentLines.extend(lines)
         return lines
@@ -910,7 +926,7 @@ class QCDNormalizationManagerBase:
     ## Helper method to be called from parent class when calculating norm.coefficients
     def _checkOverallNormalization(self, binLabel, value, err):
         lines = []
-        lines.append("    Fitted overall normalization factor for purity (should be 1.0) = %f +- %f"%(value, err))
+        lines.append("    Fitted norm. factor for purity (should be 1) = %f +- %f"%(value, err))
         self._addDqmEntry(binLabel, "OverallNormalization(par0)", value-1.0, 0.03, 0.10)
         self._commentLines.extend(lines)
         return lines
@@ -981,16 +997,17 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         #===== Handle results
         # should one divide the fractions with dataTemplate.getFittedParameters()[0] ??? (right now not because the correction is so small)
         nQCDFitted = dataTemplate.getFittedParameters()[1]*dataTemplate.getNeventsFromHisto(False)
-        print "\n- Results:"
-        lines = ["... Bin: %s"%binLabel]
+        lines = []
+        print "\n\033[44mResults of bin %s:"%binLabel
         self._commentLines.append("\nBin: %s"%binLabel)
         lines.extend(self._getSanityCheckTextForFit(binLabel))
-        lines.extend(self._getSanityCheckTextForFractions(binLabel, "QCD",
+        lines.extend(self._getSanityCheckTextForFractions(binLabel, "fake tau",
             dataTemplate.getFittedParameters()[1], dataTemplate.getFittedParameterErrors()[1],
             self._templates["QCD_Baseline"].getNeventsFromHisto(False), nQCDFitted))
         lines.extend(self._checkOverallNormalization(binLabel, dataTemplate.getFittedParameters()[0], dataTemplate.getFittedParameterErrors()[0]))
         for line in lines:
             print line
+        print "\033[0m",        
         
         #===== Normalization factor for QCD (from fit)
         qcdNormFactor = nQCDFitted / self._templates["QCD_Inverted"].getNeventsFromHisto(False)
@@ -1013,116 +1030,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         self._ewkFakesNormalization[binLabel] = ewkFakesNormFactor
         self._ewkFakesNormalizationError[binLabel] = ewkFakesNormFactorError
 
-## Invoke experimental algorithm (only for testing)
-#  1) w_QCD and w_EWKfake obtained from data-driven fit to data = a*(b*template_QCD + c*template_EWKfake + (1-b-c)*template_EWKtau)
-#  2) w_combined = a*w_QCD + (1-a)*w_EWKfake, a determined with MC for EWK fakes
-#  N_QCD can then be obtained with w_combined*(N_data - N_EWKtau)
-class QCDNormalizationManagerExperimental1(QCDNormalizationManagerBase):
-    def __init__(self, binLabels, resultDirName, moduleInfoString):
-        QCDNormalizationManagerBase.__init__(self, binLabels, resultDirName, moduleInfoString)
-        self._requiredTemplateList = ["EWKFakeTaus_Baseline", "EWKFakeTaus_Inverted",
-                                      "EWKGenuineTaus_Baseline", "EWKGenuineTaus_Inverted",
-                                      "QCD_Baseline", "QCD_Inverted"]
-    
-    ## Calculates the normalization coefficients for QCD and EWK fake taus
-    # \param dataHisto     ROOT histogram of the data distribution
-    # \param fitOptions    string containing the fit options (see TH1::Fit())
-    # \param FITMIN        float describing the minimum value for the fit range (valid only if "R" is included in fitOptions)
-    # \param FITMAX        float describing the maximum value for the fit range (valid only if "R" is included in fitOptions)
-    def calculateNormalizationCoefficients(self, dataHisto, fitOptions, FITMIN, FITMAX, **kwargs):
-        qcdTemplate = self._templates["QCD_Inverted"]
-        ewkFakesTemplate = self._templates["EWKFakeTaus_Baseline"]
-        ewkTausTemplate = self._templates["EWKGenuineTaus_Baseline"]
-        templatesToBeFitted = [qcdTemplate, ewkFakesTemplate, ewkTausTemplate]
-        self._checkInputValidity(templatesToBeFitted)
-        
-        #===== Fit templates
-        self._fitTemplates(fitOptions)
 
-        #===== Create a temporary template for data
-        print "\n- Fitting templates to data ***Experimental1***"
-        dataTemplate = QCDNormalizationTemplate("data")
-        binLabel = self._templates[self._requiredTemplateList[0]].getBinLabel()
-        dataTemplate.setHistogram(dataHisto, binLabel)
-        dataTemplate.plot()
-        dataTemplate.setFitter(FitFunction("FitDataWithQCDAndFakesAndGenuineTaus",
-                                           QCDFitFunction = qcdTemplate.getFitFunction(),
-                                           parQCD = qcdTemplate.getFittedParameters(),
-                                           QCDnorm = 1.0,
-                                           EWKFakeTausFitFunction = ewkFakesTemplate.getFitFunction(),
-                                           parEWKFakeTaus = ewkFakesTemplate.getFittedParameters(),
-                                           EWKFakeTausNorm = 1.0,
-                                           EWKGenuineTausFitFunction = ewkTausTemplate.getFitFunction(),
-                                           parEWKGenuineTaus = ewkTausTemplate.getFittedParameters(),
-                                           EWKGenuineTausNorm = 1.0),
-                               FITMIN, FITMAX)
-        #===== Do fit to data
-        dataTemplate.setDefaultFitParam(defaultInitialValue=[1.0, 0.90, 0.10], defaultLowerLimit=[0.0, 0.0, 0.0], defaultUpperLimit=[10.0, 1.0, 1.0])
-        dataTemplate.doFit(fitOptions)
-        
-        #===== Plot fitted functions
-        funcData = dataTemplate.obtainFittedFunction(1.0, FITMIN, FITMAX)
-        funcData.SetLineColor(ROOT.kRed)
-        funcData.SetLineWidth(2)
-        funcData.SetLineStyle(2)
-        funcQCD = qcdTemplate.obtainFittedFunction(dataTemplate.getFittedParameters()[1], FITMIN, FITMAX)
-        funcQCD.SetLineColor(ROOT.kBlue)
-        funcQCD.SetLineWidth(2)
-        funcQCD.SetLineStyle(2)
-        funcEWKfakes = ewkFakesTemplate.obtainFittedFunction(dataTemplate.getFittedParameters()[2], FITMIN, FITMAX)
-        funcSum = FunctionSum(funcQCD, funcEWKfakes)
-        funcQCDPlusEWKFakes = ROOT.TF1("QCDPlusEWKfakes"+binLabel, funcSum, FITMIN, FITMAX, 0)
-        funcQCDPlusEWKFakes.SetLineColor(ROOT.kMagenta+1)
-        funcQCDPlusEWKFakes.SetLineWidth(2)
-        funcQCDPlusEWKFakes.SetLineStyle(2)
-        self._makePlot(binLabel,
-                       {dataHisto.GetName(): dataHisto,
-                        "fitted data": funcData,
-                        "QCD template": funcQCD,
-                        "QCD+EWK fakes template": funcQCDPlusEWKFakes})
-        
-        #===== Handle results
-        # should one divide the fractions with dataTemplate.getFittedParameters()[0] ??? (right now not because the correction is so small)
-        nQCDFitted = dataTemplate.getFittedParameters()[1]*dataTemplate.getNeventsFromHisto(False)
-        nEWKFakeTausFitted = dataTemplate.getFittedParameters()[2]*dataTemplate.getNeventsFromHisto(False)
-        print "\n- Results:"
-        self._commentLines.append("\nBin: %s"%binLabel)
-        print self._getSanityCheckTextForFit(binLabel)
-        print self._getSanityCheckTextForFractions(binLabel, "QCD",
-            dataTemplate.getFittedParameters()[1], dataTemplate.getFittedParameterErrors()[1],
-            self._templates["QCD_Baseline"].getNeventsFromHisto(False), nQCDFitted)
-        print self._getSanityCheckTextForFractions(binLabel, "EWK fake taus",
-            dataTemplate.getFittedParameters()[2], dataTemplate.getFittedParameterErrors()[2],
-            self._templates["EWKFakeTaus_Baseline"].getNeventsFromHisto(False), nEWKFakeTausFitted)
-        print self._checkOverallNormalization(binLabel, dataTemplate.getFittedParameters()[0], dataTemplate.getFittedParameterErrors()[0])
-        
-        #===== Normalization factor for QCD
-        qcdNormFactor = nQCDFitted / self._templates["QCD_Inverted"].getNeventsFromHisto(False)
-        nQCDBaselineError = errorPropagation.errorPropagationForProduct(dataTemplate.getFittedParameters()[1], dataTemplate.getFittedParameterErrors()[1],
-                                                                        dataTemplate.getNeventsFromHisto(False), dataTemplate.getNeventsErrorFromHisto(False))
-        qcdNormFactorError = errorPropagation.errorPropagationForDivision(nQCDFitted, nQCDBaselineError,
-                                                                          self._templates["QCD_Inverted"].getNeventsFromHisto(False), self._templates["QCD_Inverted"].getNeventsErrorFromHisto(False))
-        self._qcdNormalization[binLabel] = qcdNormFactor
-        self._qcdNormalizationError[binLabel] = qcdNormFactorError
-        
-        #===== Normalization factor for EWK fake taus
-        ewkFakesNormFactor = None
-        ewkFakesNormFactorError = None
-        _ewkFakesNormFactorDenominatorFromFit = False
-        if _ewkFakesNormFactorDenominatorFromFit:
-            ewkFakesNormFactor = nEWKFakeTausFitted / self._templates["EWKFakeTaus_Inverted"].getNeventsFromHisto(False)
-            nEWKFakesBaselineError = errorPropagation.errorPropagationForProduct(dataTemplate.getFittedParameters()[2], dataTemplate.getFittedParameterErrors()[2],
-                                                                             dataTemplate.getNeventsFromHisto(False), dataTemplate.getNeventsErrorFromHisto(False))
-            ewkFakesNormFactorError = errorPropagation.errorPropagationForDivision(nEWKFakeTausFitted, nEWKFakesBaselineError,
-                                                                                  self._templates["EWKFakeTaus_Inverted"].getNeventsFromHisto(False), self._templates["EWKFakeTaus_Inverted"].getNeventsErrorFromHisto(False))
-        else:
-            ewkFakesNormFactor = self._templates["EWKFakeTaus_Baseline"].getNeventsFromHisto(False) / self._templates["EWKFakeTaus_Inverted"].getNeventsFromHisto(False)
-            ewkFakesNormFactorError = errorPropagation.errorPropagationForDivision(self._templates["EWKFakeTaus_Baseline"].getNeventsFromHisto(False), self._templates["EWKFakeTaus_Baseline"].getNeventsErrorFromHisto(False),
-                                                                                   self._templates["EWKFakeTaus_Inverted"].getNeventsFromHisto(False), self._templates["EWKFakeTaus_Inverted"].getNeventsErrorFromHisto(False))
-        #ewkFakesNormFactor = self._templates["EWKFakeTaus_Baseline"].getNeventsFromHisto(False) / self._templates["EWKFakeTaus_Inverted"].getNeventsFromHisto(False)
-        self._ewkFakesNormalization[binLabel] = ewkFakesNormFactor
-        self._ewkFakesNormalizationError[binLabel] = ewkFakesNormFactorError
-        
 # Unit tests
 if __name__ == "__main__":
     import unittest
