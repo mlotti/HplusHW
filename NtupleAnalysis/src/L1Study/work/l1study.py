@@ -30,9 +30,11 @@ def getDatasetsForEras(dsets,era):
 
 def createAnalyzer(dataVersion,era):
     a = Analyzer("L1Study",
-        L1TauPt        = 50,
-        L1ETM          = 0,
-        TransverseMass = 50
+        usePileupWeights = True,
+        L1TauPt        = 0,
+        L1ETM          = 120,
+        L1JetPt        = 0,
+        TransverseMass = 0
     )
     a.runMin  = runmin
     a.runMax  = runmax
@@ -41,7 +43,7 @@ def createAnalyzer(dataVersion,era):
 
 def addAnalyzer(era):
     process = Process(outputPrefix="L1Study")
-    process.addDatasetsFromMulticrab(sys.argv[1])
+    process.addDatasetsFromMulticrab(sys.argv[1],includeOnlyTasks="2016H")
     ds = getDatasetsForEras(process.getDatasets(),eras[era])
     process.setDatasets(ds)
     global runmin,runmax

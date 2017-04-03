@@ -1620,6 +1620,49 @@ def GetTaskLogFiles(taskName, opts):
 
     return stdoutFiles
         
+def GetTaskRootFiles(taskName, opts):
+    '''
+    Get all the miniaod*.root files for the given CRAB task
+    '''
+    Verbose("GetTaskRootFiles()", True)
+    if opts.filesInEOS:
+        Verbose("Task %s, converting path to EOS to get log files" % (taskName) )
+        tmp = ConvertPathToEOS(taskName, taskName, "log/", opts, isDir=True)
+        Verbose("Obtaining stdout files for task %s from %s" % (taskName, tmp), True)
+        rootFiles = glob.glob(tmp + "miniaod*.root")
+
+        Verbose("Found %s root files" % (len(rootFiles) ) )
+        # Sometimes glob doesn't work (for unknown reasons)
+
+        if len(rootFiles) < 1:
+            msg = "Task %s, could not obtain root files with glob." % (taskName)
+            msg += "\n\tTrying alternative method. If problems persist retry without setting the CRAB environment."
+            Verbose(msg, True)
+            cmd = ConvertCommandToEOS("ls", opts) + " " + tmp
+            Verbose(cmd)
+            dirContents = Execute(cmd)
+            stdoutFiles = dirContents
+            stdoutFiles = [tmp + f for f in dirContents if "miniaod*.root" in f]
+            Verbose("Task %s, found the following root files:\n\t%s" % (taskName, "\n\t".join(rootFiles) ) )
+    else:
+        rootFiles = glob.glob(os.path.join(taskName, "results", "miniaod*.root"))
+
+    if len(rootFiles) < 1:
+        #raise Exception("Task %s, could not obtain root files." % (taskName) )
+        Verbose("Task %s, could not obtain root files." % (taskName), False)
+
+    # Sort the list naturally (alphanumeric strings).
+    if 1:
+        rootFiles = natural_sort(rootFiles)
+        #print "\n\t".join(stdoutFiles)
+
+    # remove the path
+    filesWithoutPath = []
+    for f in rootFiles:
+        filesWithoutPath.append(os.path.basename(f))
+    return filesWithoutPath
+####    return rootFiles
+
 
 def GetPreexistingMergedFiles(taskPath, opts):
     '''
@@ -1742,6 +1785,8 @@ def main(opts, args):
 
         # Definitions
         files, missingFiles, exitedJobs = GetTaskOutputAndExitCodes(taskName, stdoutFiles, opts)
+        if opts.skipVerify:
+            files = GetTaskRootFiles(taskName, opts)
 
         # For Testing purposes
         if opts.test:

@@ -1,4 +1,6 @@
 #include "HiggsAnalysis/MiniAOD2TTree/interface/TriggerDumper.h"
+#include "DataFormats/L1Trigger/interface/BXVector.h"
+#include "DataFormats/L1Trigger/interface/L1Candidate.h"
 
 #include <regex>
 #include "Math/VectorUtil.h"
@@ -6,10 +8,15 @@
 TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const edm::ParameterSet& pset)
 : trgResultsToken(iConsumesCollector.consumes<edm::TriggerResults>(pset.getParameter<edm::InputTag>("TriggerResults"))),
   trgObjectsToken(iConsumesCollector.consumes<pat::TriggerObjectStandAloneCollection>(pset.getParameter<edm::InputTag>("TriggerObjects")))
+//  l1TausToken(iConsumesCollector.consumes<l1t::TauBxCollection>(pset.getParameter<edm::InputTag>("L1TauObjects"))),
+//  l1EtSumToken(iConsumesCollector.consumes<l1t::EtSumBxCollection>(pset.getParameter<edm::InputTag>("L1EtSumObjects")))
 //  trgL1ETMToken(iConsumesCollector.consumes<std::vector<l1extra::L1EtMissParticle>>(pset.getParameter<edm::InputTag>("L1Extra"))) 
 {
     inputCollection = pset;
     booked = false;
+    bookL1Tau = false;
+    bookL1Jet = false;
+    bookL1EtSum = false;
 
     triggerBits = inputCollection.getParameter<std::vector<std::string> >("TriggerBits");
     useFilter = inputCollection.getUntrackedParameter<bool>("filter",false);
@@ -17,6 +24,21 @@ TriggerDumper::TriggerDumper(edm::ConsumesCollector&& iConsumesCollector, const 
 
     trgMatchStr = inputCollection.getUntrackedParameter<std::vector<std::string> >("TriggerMatch",std::vector<std::string>());
     trgMatchDr = inputCollection.getUntrackedParameter<double>("TriggerMatchDR",0.1);
+
+    if(inputCollection.exists("L1TauObjects")){
+      l1TausToken = iConsumesCollector.consumes<l1t::TauBxCollection>(pset.getParameter<edm::InputTag>("L1TauObjects"));
+      bookL1Tau = true;
+    }
+
+    if(inputCollection.exists("L1JetObjects")){
+      l1JetsToken = iConsumesCollector.consumes<l1t::JetBxCollection>(pset.getParameter<edm::InputTag>("L1JetObjects"));
+      bookL1Jet = true;
+    }
+
+    if(inputCollection.exists("L1EtSumObjects")){
+      l1EtSumToken = iConsumesCollector.consumes<l1t::EtSumBxCollection>(pset.getParameter<edm::InputTag>("L1EtSumObjects"));
+      bookL1EtSum = true;
+    }
 
     if(inputCollection.exists("TriggerPrescales")){
       trgPrescaleToken = iConsumesCollector.consumes<pat::PackedTriggerPrescales>(inputCollection.getUntrackedParameter<edm::ParameterSet>("TriggerPrescales").getParameter<edm::InputTag>("src"));
@@ -34,18 +56,32 @@ void TriggerDumper::book(const edm::Run& iRun, HLTConfigProvider hltConfig){
     if(booked) return;
     booked = true;
 
-    //theTree->Branch("L1MET_l1extra_x",&L1MET_l1extra_x);
-    //theTree->Branch("L1MET_l1extra_y",&L1MET_l1extra_y);
-    theTree->Branch("L1MET_x",&L1MET_x);
-    theTree->Branch("L1MET_y",&L1MET_y);
-    theTree->Branch("HLTMET_x",&HLTMET_x);
-    theTree->Branch("HLTMET_y",&HLTMET_y);
+    if(bookL1EtSum){
+      //theTree->Branch("L1MET_l1extra_x",&L1MET_l1extra_x);
+      //theTree->Branch("L1MET_l1extra_y",&L1MET_l1extra_y);
+      theTree->Branch("L1MET_x",&L1MET_x);
+      theTree->Branch("L1MET_y",&L1MET_y);
+      theTree->Branch("HLTMET_x",&HLTMET_x);
+      theTree->Branch("HLTMET_y",&HLTMET_y);
+    }
+    if(bookL1Tau){
+      theTree->Branch("L1Tau_pt",&L1Tau_pt);  
+      theTree->Branch("L1Tau_eta",&L1Tau_eta);
+      theTree->Branch("L1Tau_phi",&L1Tau_phi);
+      theTree->Branch("L1Tau_e",&L1Tau_e);
 
-    theTree->Branch("L1Tau_pt",&L1Tau_pt);  
-    theTree->Branch("L1Tau_eta",&L1Tau_eta);
-    theTree->Branch("L1Tau_phi",&L1Tau_phi);
-    theTree->Branch("L1Tau_e",&L1Tau_e);
-    
+      theTree->Branch("L1IsoTau_pt",&L1IsoTau_pt);
+      theTree->Branch("L1IsoTau_eta",&L1IsoTau_eta);
+      theTree->Branch("L1IsoTau_phi",&L1IsoTau_phi);
+      theTree->Branch("L1IsoTau_e",&L1IsoTau_e);
+    }
+    if(bookL1Jet){
+      theTree->Branch("L1Jet_pt",&L1Jet_pt);
+      theTree->Branch("L1Jet_eta",&L1Jet_eta);
+      theTree->Branch("L1Jet_phi",&L1Jet_phi);
+      theTree->Branch("L1Jet_e",&L1Jet_e);
+    }
+
     theTree->Branch("HLTTau_pt",&HLTTau_pt);  
     theTree->Branch("HLTTau_eta",&HLTTau_eta);
     theTree->Branch("HLTTau_phi",&HLTTau_phi);
@@ -146,16 +182,19 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
         if(patTriggerObjects.isValid()){
 	    for (pat::TriggerObjectStandAlone patTriggerObject : *patTriggerObjects) {
 	        patTriggerObject.unpackPathNames(names);
+/*
                 if(patTriggerObject.id(trigger::TriggerL1ETM)){
                     L1MET_x = patTriggerObject.p4().x(); 
                     L1MET_y = patTriggerObject.p4().y();
-                    //std::cout << "Trigger L1ETM " << patTriggerObject.p4().Pt() << std::endl;
+                    std::cout << "Trigger L1ETM (pat) " << patTriggerObject.p4().Pt() << std::endl;
 		}
+*/
 	        if(patTriggerObject.id(trigger::TriggerMET)){
                     HLTMET_x = patTriggerObject.p4().x();
                     HLTMET_y = patTriggerObject.p4().y();
 		//std::cout << "Trigger MET " << patTriggerObject.p4().Pt() << std::endl;
 	        }
+/*
                 if(patTriggerObject.id(trigger::TriggerL1Tau)){
                     L1Tau_pt.push_back(patTriggerObject.p4().Pt());  
                     L1Tau_eta.push_back(patTriggerObject.p4().Eta());
@@ -163,6 +202,7 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                     L1Tau_e.push_back(patTriggerObject.p4().E());
                     //std::cout << "Trigger L1 tau " << patTriggerObject.p4().Pt() << std::endl;
                 }
+*/
 	        if(patTriggerObject.id(trigger::TriggerTau)){
 
                     std::vector<std::string> pathNamesAll  = patTriggerObject.pathNames(false);
@@ -180,6 +220,61 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	        }
             }
 	}
+
+        if(bookL1Tau){
+        edm::Handle<l1t::TauBxCollection> l1taus;
+        iEvent.getByToken(l1TausToken, l1taus);
+        if(l1taus.isValid()) {
+          for(l1t::TauBxCollection::const_iterator i = l1taus->begin(); i != l1taus->end(); ++i) {
+            L1Tau_pt.push_back(i->pt());
+            L1Tau_eta.push_back(i->eta());
+            L1Tau_phi.push_back(i->phi());
+            L1Tau_e.push_back(i->energy());
+            //std::cout << "Trigger L1 tau (bx) " << i->pt() << std::endl;
+
+            if(i->hwIso() > 0){
+              L1IsoTau_pt.push_back(i->pt());
+              L1IsoTau_eta.push_back(i->eta());
+              L1IsoTau_phi.push_back(i->phi());
+              L1IsoTau_e.push_back(i->energy());
+              //std::cout << "Trigger L1 IsoTau (bx) " << i->pt() << std::endl;
+            }
+
+          }
+        }
+        }
+
+        if(bookL1Jet){
+        edm::Handle<l1t::JetBxCollection> l1jets;
+        iEvent.getByToken(l1JetsToken, l1jets);
+        if(l1jets.isValid()) {
+          for(l1t::JetBxCollection::const_iterator i = l1jets->begin(); i != l1jets->end(); ++i) {
+            L1Jet_pt.push_back(i->pt());
+            L1Jet_eta.push_back(i->eta());
+            L1Jet_phi.push_back(i->phi());
+            L1Jet_e.push_back(i->energy());
+            //std::cout << "Trigger L1 jet (bx) " << i->pt() << std::endl;
+          }
+        }
+        }
+
+        if(bookL1EtSum){
+        edm::Handle<l1t::EtSumBxCollection> l1EtSum;
+        iEvent.getByToken(l1EtSumToken, l1EtSum);
+	if(l1EtSum.isValid() && l1EtSum.product()->size() > 0){
+          for (int ibx = l1EtSum->getFirstBX(); ibx <= l1EtSum->getLastBX(); ++ibx) {
+            for (l1t::EtSumBxCollection::const_iterator it=l1EtSum->begin(ibx); it!=l1EtSum->end(ibx); it++) {
+              int type = static_cast<int>( it->getType() );
+              if(type == l1t::EtSum::EtSumType::kMissingEt) {
+                L1MET_x = it->px();
+                L1MET_y = it->py();
+                //std::cout << "Trigger L1ETM (bx) " << it->et() << std::endl;
+              }
+            }
+          }
+        }
+        }
+
 
         if(iEvent.isRealData() && trgPrescalePaths.size() > 0){
           edm::Handle<pat::PackedTriggerPrescales> trgPrescaleHandle;
@@ -223,6 +318,16 @@ void TriggerDumper::reset(){
       L1Tau_eta.clear();
       L1Tau_phi.clear();
       L1Tau_e.clear();
+
+      L1IsoTau_pt.clear();
+      L1IsoTau_eta.clear();
+      L1IsoTau_phi.clear();
+      L1IsoTau_e.clear();
+
+      L1Jet_pt.clear();
+      L1Jet_eta.clear();
+      L1Jet_phi.clear();
+      L1Jet_e.clear();
 
       HLTTau_pt.clear();
       HLTTau_eta.clear();

@@ -433,6 +433,8 @@ datasetsTTZToQQ = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FTTZToQQ*%2FRunII*PUMoriond17_80X_mcRun2*%2FMINIAODSIM"
 datasetsTTZToQQ.append(Dataset('/TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dasQuery=das))
 
+datasetsNeutrino = []
+datasetsNeutrino.append(Dataset('/SingleNeutrino/RunIIHighPUTrainsMiniAODv2-HighPUTrains_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', dasQuery=das))
 
 #================================================================================================ 
 # Dataset definition (MC-RunIISpring16, noReHLT)
@@ -500,7 +502,11 @@ datasetsQCDbEnriched_noReHLT.append(Dataset('/QCD_bEnriched_HT2000toInf_TuneCUET
 #================================================================================================ 
 datasetsSignalTauNu_TRGdev = []
 das = "https://cmsweb.cern.ch/das/request?view=list&limit=50&instance=prod%2Fglobal&input=dataset%3D%2FChargedHiggs_*%2*%2/RAWAODSIM"
-datasetsSignalTauNu_TRGdev.append(Dataset('/ChargedHiggs_HplusTB_HplusToTB_M-500_13TeV_amcatnlo_pythia8/RunIISummer16DR80-FlatPU28to62HcalNZSRAWAODSIM_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/RAWAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTauNu_TRGdev.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-80_13TeV_amcatnlo_pythia8/PhaseIFall16MiniAOD-FlatPU28to62HcalNZSRAW_PhaseIFall16_81X_upgrade2017_realistic_v26-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTauNu_TRGdev.append(Dataset('/ChargedHiggs_TTToHplusBWB_HplusToTauNu_M-160_13TeV_amcatnlo_pythia8/PhaseIFall16MiniAOD-FlatPU28to62HcalNZSRAW_PhaseIFall16_81X_upgrade2017_realistic_v26-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTauNu_TRGdev.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-200_13TeV_amcatnlo_pythia8/PhaseIFall16MiniAOD-FlatPU28to62HcalNZSRAW_PhaseIFall16_81X_upgrade2017_realistic_v26-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTauNu_TRGdev.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-500_13TeV_amcatnlo_pythia8/PhaseIFall16MiniAOD-FlatPU28to62HcalNZSRAW_PhaseIFall16_81X_upgrade2017_realistic_v26-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
+datasetsSignalTauNu_TRGdev.append(Dataset('/ChargedHiggs_HplusTB_HplusToTauNu_M-1000_13TeV_amcatnlo_pythia8/PhaseIFall16MiniAOD-FlatPU28to62HcalNZSRAW_PhaseIFall16_81X_upgrade2017_realistic_v26-v1/MINIAODSIM', dataVersion="80Xmc", dasQuery=das))
 
 
 #================================================================================================ 
@@ -525,7 +531,8 @@ metLegDatasets.extend(datasetsQCD)
 
 l1Datasets = []
 l1Datasets.extend(datasetsZeroBiasData)
-
+l1Datasets.extend(datasetsNeutrino)
+l1Datasets.extend(datasetsQCD)
 
 signalAnalysisDatasets = []
 signalAnalysisDatasets.extend(datasetsTauData)
@@ -537,6 +544,7 @@ signalAnalysisDatasets.extend(datasetsDiboson)
 #signalAnalysisDatasets.extend(datasetsQCD)
 signalAnalysisDatasets.extend(datasetsSignalTauNu)
 #signalAnalysisDatasets.extend(datasetsSignalTB)
+####signalAnalysisDatasets.extend(datasetsSignalTauNu_TRGdev)
 
 #signalAnalysisDatasets.extend(datasetsDY_reHLT)
 #signalAnalysisDatasets.extend(datasetsTop_reHLT)
