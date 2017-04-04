@@ -316,7 +316,13 @@ wwStyle           = Style(ROOT.kMultiply, ROOT.kPink-9)
 wzStyle           = Style(ROOT.kMultiply, ROOT.kPink-7)
 zjetsStyle        = Style(ROOT.kFullCross, ROOT.kRed-7)
 zzStyle           = Style(ROOT.kMultiply, ROOT.kPink-5)
-fakeBStyle        = StyleCompound([StyleLine(lineColor=ROOT.kRed, lineStyle=ROOT.kDashed, lineWidth=3)])
+baselineStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
+                                   StyleLine(lineColor=ROOT.kRed, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kRed, fillStyle=1001)])
+invertedStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+                                   StyleLine(lineColor=ROOT.kBlue, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kBlue, fillStyle=1001)])
+
 
 
 styles = [ 
@@ -384,11 +390,11 @@ def getQCDFillStyle():
 def getQCDLineStyle():
     return qcdStyle
 
-def getFakeBFillStyle():
-    return fakeBFillStyle
+def getBaselineStyle():
+    return baselineStyle
 
-def getFakeBStyle():
-    return fakeBStyle
+def getInvertedStyle():
+    return invertedStyle
 
 def getSignalStyle():
     return signalStyle
