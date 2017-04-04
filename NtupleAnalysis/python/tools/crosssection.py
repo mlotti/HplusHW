@@ -308,6 +308,11 @@ backgroundCrossSections = CrossSectionList(
             "8": 3531.9, # [9], NNLO
             "13": 2008.4*3.0 # [14]
             }),
+    CrossSection("DYJetsToLL_M_50_HERWIGPP", {
+            "7": 3048.0, # [4], NNLO
+            "8": 3531.9, # [9], NNLO
+            "13": 2008.4*3.0 # [14]
+            }),
     CrossSection("DYJetsToLL_M_50_TauHLT", {
             "7": 3048.0, # [4], NNLO
             "8": 3531.9, # [9], NNLO
