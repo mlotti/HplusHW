@@ -203,9 +203,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
   const float fBDiscMin = fCommonPlots.getBJetDiscBinSettings().min();
   const float fBDiscMax = fCommonPlots.getBJetDiscBinSettings().max();
 
-  const int nMassBins  = 80;
-  const float fMassMin =   0.0;
-  const float fMassMax = 800.0;
+  const int nMassBins  = 150;
+  const float fMassMin = 0.0;
+  const float fMassMax = 1500.0;
 
   // Purity histograms [(Data-EWK)/Data]
   myInclusiveLabel = "FakeBPurity";
