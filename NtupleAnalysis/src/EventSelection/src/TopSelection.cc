@@ -65,14 +65,24 @@ TopSelection::~TopSelection() {
   
   delete hChiSqr_Before;
   delete hChiSqr_After;
+
   delete hTrijet1Mass_Before;
   delete hTrijet2Mass_Before;
   delete hTrijet1Mass_After;
   delete hTrijet2Mass_After;
+  delete hTrijet1Pt_Before;
+  delete hTrijet2Pt_Before;
+  delete hTrijet1Pt_After;
+  delete hTrijet2Pt_After;
+
   delete hTrijet1DijetMass_Before;
   delete hTrijet2DijetMass_Before;
   delete hTrijet1DijetMass_After;
   delete hTrijet2DijetMass_After;
+  delete hTrijet1DijetPt_Before;
+  delete hTrijet2DijetPt_Before;
+  delete hTrijet1DijetPt_After;
+  delete hTrijet2DijetPt_After;
   delete hTrijet1DijetDEta_Before;
   delete hTrijet2DijetDEta_Before;
   delete hTrijet1DijetDEta_After;
@@ -85,6 +95,7 @@ TopSelection::~TopSelection() {
   delete hTrijet2DijetDR_Before;
   delete hTrijet1DijetDR_After;
   delete hTrijet2DijetDR_After;
+
   delete hTrijet1DijetBJetDR_Before;
   delete hTrijet2DijetBJetDR_Before;
   delete hTrijet1DijetBJetDR_After;
@@ -97,14 +108,66 @@ TopSelection::~TopSelection() {
   delete hTrijet2DijetBJetDEta_Before;
   delete hTrijet1DijetBJetDEta_After;
   delete hTrijet2DijetBJetDEta_After;
+
   delete hLdgTrijetPt_Before;
   delete hLdgTrijetPt_After;
   delete hLdgTrijetMass_Before;
   delete hLdgTrijetMass_After;
+  delete hLdgTrijetJet1Pt_Before;
+  delete hLdgTrijetJet1Pt_After;
+  delete hLdgTrijetJet1Eta_Before;
+  delete hLdgTrijetJet1Eta_After;
+  delete hLdgTrijetJet1BDisc_Before;
+  delete hLdgTrijetJet1BDisc_After;
+  delete hLdgTrijetJet2Pt_Before;
+  delete hLdgTrijetJet2Pt_After;
+  delete hLdgTrijetJet2Eta_Before;
+  delete hLdgTrijetJet2Eta_After;
+  delete hLdgTrijetJet2BDisc_Before;
+  delete hLdgTrijetJet2BDisc_After;
+  delete hLdgTrijetBJetPt_Before;
+  delete hLdgTrijetBJetPt_After;
+  delete hLdgTrijetBJetEta_Before;
+  delete hLdgTrijetBJetEta_After;
+  delete hLdgTrijetBJetBDisc_Before;
+  delete hLdgTrijetBJetBDisc_After;
+  delete hLdgTrijetDiJetPt_Before;
+  delete hLdgTrijetDiJetPt_After;
+  delete hLdgTrijetDiJetEta_Before;
+  delete hLdgTrijetDiJetEta_After;
+  delete hLdgTrijetDiJetMass_Before;
+  delete hLdgTrijetDiJetMass_After;
+
   delete hSubldgTrijetPt_Before;
   delete hSubldgTrijetPt_After;
   delete hSubldgTrijetMass_Before;
   delete hSubldgTrijetMass_After;
+  delete hSubldgTrijetJet1Pt_Before;
+  delete hSubldgTrijetJet1Pt_After;
+  delete hSubldgTrijetJet1Eta_Before;
+  delete hSubldgTrijetJet1Eta_After;
+  delete hSubldgTrijetJet1BDisc_Before;
+  delete hSubldgTrijetJet1BDisc_After;
+  delete hSubldgTrijetJet2Pt_Before;
+  delete hSubldgTrijetJet2Pt_After;
+  delete hSubldgTrijetJet2Eta_Before;
+  delete hSubldgTrijetJet2Eta_After;
+  delete hSubldgTrijetJet2BDisc_Before;
+  delete hSubldgTrijetJet2BDisc_After;
+  delete hSubldgTrijetBJetPt_Before;
+  delete hSubldgTrijetBJetPt_After;
+  delete hSubldgTrijetBJetEta_Before;
+  delete hSubldgTrijetBJetEta_After;
+  delete hSubldgTrijetBJetBDisc_Before;
+  delete hSubldgTrijetBJetBDisc_After;
+  delete hSubldgTrijetDiJetPt_Before;
+  delete hSubldgTrijetDiJetPt_After;
+  delete hSubldgTrijetDiJetEta_Before;
+  delete hSubldgTrijetDiJetEta_After;
+  delete hSubldgTrijetDiJetMass_Before;
+  delete hSubldgTrijetDiJetMass_After;
+
+  // Histograms (2D)
   delete hTrijet1MassVsChiSqr_Before;
   delete hTrijet2MassVsChiSqr_Before;
   delete hTrijet1MassVsChiSqr_After;
@@ -139,18 +202,34 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   const int nBinsdR    = 50;
   const double mindR   = 0.0;
   const double maxdR   = 10.0;
+  const int  nBinsBDisc= fCommonPlots->getBJetDiscBinSettings().bins();
+  const float minBDisc = fCommonPlots->getBJetDiscBinSettings().min();
+  const float maxBDisc = fCommonPlots->getBJetDiscBinSettings().max();
+  const int  nBinsEta  = fCommonPlots->getEtaBinSettings().bins();
+  const float minEta   = fCommonPlots->getEtaBinSettings().min();
+  const float maxEta   = fCommonPlots->getEtaBinSettings().max();
 
   // Histograms (1D)  - Delete in destructor
   hChiSqr_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChiSqr_Before", ";#chi^{2}", 300,  0.0, 300.0);
   hChiSqr_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChiSqr_After" , ";#chi^{2}", 300,  0.0, 300.0);
+
   hTrijet1Mass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1Mass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
   hTrijet2Mass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2Mass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
   hTrijet1Mass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1Mass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
   hTrijet2Mass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2Mass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hTrijet1Pt_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1Pt_Before", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hTrijet2Pt_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2Pt_Before", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hTrijet1Pt_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1Pt_After" , ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hTrijet2Pt_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2Pt_After" , ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+
   hTrijet1DijetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetMass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
   hTrijet2DijetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetMass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
   hTrijet1DijetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetMass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
   hTrijet2DijetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetMass_After" , ";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hTrijet1DijetPt_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetPt_Before"  , ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hTrijet2DijetPt_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetPt_Before"  , ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hTrijet1DijetPt_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetPt_After"   , ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hTrijet2DijetPt_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetPt_After"   , ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
   hTrijet1DijetDR_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetDR_Before"  , ";#Delta R(j_{1},j_{2})"  , nBinsdR  , mindR  , maxdR);
   hTrijet2DijetDR_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetDR_Before"  , ";#Delta R(j_{1},j_{2})"  , nBinsdR  , mindR  , maxdR);
   hTrijet1DijetDR_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetDR_After"   , ";#Delta R(j_{1},j_{2})"  , nBinsdR  , mindR  , maxdR);
@@ -163,6 +242,7 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   hTrijet2DijetDEta_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetDEta_Before", ";#Delta#eta(j_{1},j_{2})", nBinsdEta, mindEta, maxdEta);
   hTrijet1DijetDEta_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetDEta_After" , ";#Delta#eta(j_{1},j_{2})", nBinsdEta, mindEta, maxdEta);
   hTrijet2DijetDEta_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetDEta_After" , ";#Delta#eta(j_{1},j_{2})", nBinsdEta, mindEta, maxdEta);
+
   hTrijet1DijetBJetDEta_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetBJetDEta_Before", ";#Delta#eta(jj,bjet)", nBinsdEta, mindEta, maxdEta);
   hTrijet2DijetBJetDEta_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetBJetDEta_Before", ";#Delta#eta(jj,bjet)", nBinsdEta, mindEta, maxdEta);
   hTrijet1DijetBJetDEta_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetBJetDEta_After" , ";#Delta#eta(jj,bjet)", nBinsdEta, mindEta, maxdEta);
@@ -175,14 +255,65 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   hTrijet2DijetBJetDR_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetBJetDR_Before"  , ";#Delta R(jj,bjet)"  , nBinsdR  , mindR  , maxdR);
   hTrijet1DijetBJetDR_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1DijetBJetDR_After"   , ";#Delta R(jj,bjet)"  , nBinsdR  , mindR  , maxdR);
   hTrijet2DijetBJetDR_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2DijetBJetDR_After"   , ";#Delta R(jj,bjet)"  , nBinsdR  , mindR  , maxdR);
-  hLdgTrijetPt_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetPt_Before"  ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  hLdgTrijetPt_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetPt_After"   ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  hLdgTrijetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetMass_Before",";M (GeV/c^{2})", nBinsM, minM, maxM);
-  hLdgTrijetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetMass_After" ,";M (GeV/c^{2})", nBinsM, minM, maxM);
-  hSubldgTrijetPt_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetPt_Before"  ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  hSubldgTrijetPt_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetPt_After"   ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  hSubldgTrijetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetMass_Before",";M (GeV/c^{2})", nBinsM, minM, maxM);
-  hSubldgTrijetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetMass_After" ,";M (GeV/c^{2})", nBinsM, minM, maxM);
+
+  hLdgTrijetPt_Before        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetPt_Before"       ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetPt_After         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetPt_After"        ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetMass_Before      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetMass_Before"     ,";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hLdgTrijetMass_After       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetMass_After"      ,";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hLdgTrijetJet1Pt_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet1Pt_Before"   ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetJet1Pt_After     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet1Pt_After"    ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetJet1Eta_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet1Eta_Before"  ,";#eta", nBinsEta, minEta, maxEta);
+  hLdgTrijetJet1Eta_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet1Eta_After"   ,";#eta", nBinsEta, minEta, maxEta);
+  hLdgTrijetJet1BDisc_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet1BDisc_Before",";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hLdgTrijetJet1BDisc_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet1BDisc_After" ,";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hLdgTrijetJet2Pt_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet2Pt_Before"   ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetJet2Pt_After     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet2Pt_After"    ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetJet2Eta_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet2Eta_Before"  ,";#eta", nBinsEta, minEta, maxEta);
+  hLdgTrijetJet2Eta_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet2Eta_After"   ,";#eta", nBinsEta, minEta, maxEta);
+  hLdgTrijetJet2BDisc_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet2BDisc_Before",";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hLdgTrijetJet2BDisc_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetJet2BDisc_After" ,";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hLdgTrijetBJetPt_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetBJetPt_Before"   ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetBJetPt_After     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetBJetPt_After"    ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetBJetEta_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetBJetEta_Before"  ,";#eta", nBinsEta, minEta, maxEta);
+  hLdgTrijetBJetEta_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetBJetEta_After"   ,";#eta", nBinsEta, minEta, maxEta);
+  hLdgTrijetBJetBDisc_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetBJetBDisc_Before",";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hLdgTrijetBJetBDisc_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetBJetBDisc_After" ,";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hLdgTrijetDiJetPt_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetPt_Before"  ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetDiJetPt_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetPt_After"   ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hLdgTrijetDiJetEta_Before  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetEta_Before" ,";#eta", nBinsEta, minEta, maxEta);
+  hLdgTrijetDiJetEta_After   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetEta_After"  ,";#eta", nBinsEta, minEta, maxEta);
+  hLdgTrijetDiJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetMass_Before",";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hLdgTrijetDiJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetMass_After" ,";M (GeV/c^{2})", nBinsM, minM, maxM);
+
+  hSubldgTrijetPt_Before        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetPt_Before"       ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetPt_After         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetPt_After"        ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetMass_Before      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetMass_Before"     ,";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hSubldgTrijetMass_After       = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetMass_After"      ,";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hSubldgTrijetJet1Pt_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet1Pt_Before"   ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetJet1Pt_After     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet1Pt_After"    ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetJet1Eta_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet1Eta_Before"  ,";#eta", nBinsEta, minEta, maxEta);
+  hSubldgTrijetJet1Eta_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet1Eta_After"   ,";#eta", nBinsEta, minEta, maxEta);
+  hSubldgTrijetJet1BDisc_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet1BDisc_Before",";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hSubldgTrijetJet1BDisc_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet1BDisc_After" ,";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hSubldgTrijetJet2Pt_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet2Pt_Before"   ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetJet2Pt_After     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet2Pt_After"    ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetJet2Eta_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet2Eta_Before"  ,";#eta", nBinsEta, minEta, maxEta);
+  hSubldgTrijetJet2Eta_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet2Eta_After"   ,";#eta", nBinsEta, minEta, maxEta);
+  hSubldgTrijetJet2BDisc_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet2BDisc_Before",";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hSubldgTrijetJet2BDisc_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetJet2BDisc_After" ,";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hSubldgTrijetBJetPt_Before    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetBJetPt_Before"   ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetBJetPt_After     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetBJetPt_After"    ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetBJetEta_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetBJetEta_Before"  ,";#eta", nBinsEta, minEta, maxEta);
+  hSubldgTrijetBJetEta_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetBJetEta_After"   ,";#eta", nBinsEta, minEta, maxEta);
+  hSubldgTrijetBJetBDisc_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetBJetBDisc_Before",";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hSubldgTrijetBJetBDisc_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetBJetBDisc_After" ,";b-tag discriminator",  nBinsBDisc, minBDisc, maxBDisc);
+  hSubldgTrijetDiJetPt_Before   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetPt_Before"  ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetDiJetPt_After    = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetPt_After"   ,";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
+  hSubldgTrijetDiJetEta_Before  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetEta_Before" ,";#eta", nBinsEta, minEta, maxEta);
+  hSubldgTrijetDiJetEta_After   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetEta_After"  ,";#eta", nBinsEta, minEta, maxEta);
+  hSubldgTrijetDiJetMass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetMass_Before",";M (GeV/c^{2})", nBinsM, minM, maxM);
+  hSubldgTrijetDiJetMass_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetMass_After" ,";M (GeV/c^{2})", nBinsM, minM, maxM);
+
   // Histograms (2D) 
   hTrijet1MassVsChiSqr_Before = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "Trijet1MassVsChiSqr_Before", ";M (GeV/c^{2}); #chi^{2}", nBinsM, minM, maxM, 300, 0.0, 300.0);
   hTrijet2MassVsChiSqr_Before = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "Trijet2MassVsChiSqr_Before", ";M (GeV/c^{2}); #chi^{2}", nBinsM, minM, maxM, 300, 0.0, 300.0);
@@ -209,8 +340,13 @@ TopSelection::Data TopSelection::silentAnalyzeWithoutBJets(const Event& event, c
   ensureSilentAnalyzeAllowed(event.eventID());
   // Disable histogram filling and counter
   disableHistogramsAndCounters();
-  std::vector<Jet> bjets = bjetData.getFailedBJetCandsDescendingDiscr();
-  bjets.resize(3);
+
+  // If there are some bjets use them
+  std::vector<Jet> bjets = bjetData.getSelectedBJets();
+  // Append the vector of all failed bjets (in descending B-discriminator value) to the end of the bjets vector
+  bjets.insert(bjets.end(), bjetData.getFailedBJetCandsDescendingDiscr().begin(), bjetData.getFailedBJetCandsDescendingDiscr().end());
+  // Now truncate the bjets vector 
+  bjets.resize(5);
   Data myData = privateAnalyzeWithoutBJets(event, jetData.getSelectedJets(), bjets );
   enableHistogramsAndCounters();
   return myData;
@@ -287,12 +423,17 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
 
     }
 
+  return output;
   // Fill Histograms (Before cuts)
   hChiSqr_Before->Fill( output.fChiSqr );
   hTrijet1Mass_Before->Fill(output.fTrijet1_p4.mass());
   hTrijet2Mass_Before->Fill(output.fTrijet2_p4.mass());
+  hTrijet1Pt_Before->Fill(output.fTrijet1_p4.pt());
+  hTrijet2Pt_Before->Fill(output.fTrijet2_p4.pt());
   hTrijet1DijetMass_Before->Fill( output.fTrijet1Dijet_p4.mass() );
   hTrijet2DijetMass_Before->Fill( output.fTrijet2Dijet_p4.mass() );
+  hTrijet1DijetPt_Before->Fill( output.fTrijet1Dijet_p4.pt() );
+  hTrijet2DijetPt_Before->Fill( output.fTrijet2Dijet_p4.pt() );
   hTrijet1DijetDEta_Before->Fill( std::abs( output.fTrijet1Jet1.p4().eta() - output.fTrijet1Jet2.p4().eta() ) );
   hTrijet2DijetDEta_Before->Fill( std::abs( output.fTrijet2Jet1.p4().eta() - output.fTrijet2Jet2.p4().eta() ) );
   hTrijet1DijetDPhi_Before->Fill( std::abs( ROOT::Math::VectorUtil::DeltaPhi( output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4() ) ) );
@@ -308,35 +449,95 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   // Leading/Subleading tops
   if (output.fTrijet1_p4.pt() > output.fTrijet2_p4.pt()) 
     {
-      hLdgTrijetPt_Before->Fill(output.fTrijet1_p4.pt());
-      hLdgTrijetMass_Before->Fill(output.fTrijet1_p4.mass());
-      hSubldgTrijetPt_Before->Fill(output.fTrijet2_p4.pt());
-      hSubldgTrijetMass_Before->Fill(output.fTrijet2_p4.mass());
+      // Leading
+      hLdgTrijetPt_Before       ->Fill(output.fTrijet1_p4.pt());
+      hLdgTrijetMass_Before     ->Fill(output.fTrijet1_p4.mass());
+      hLdgTrijetJet1Pt_Before   ->Fill(output.fTrijet1Jet1.eta());
+      hLdgTrijetJet1Eta_Before  ->Fill(output.fTrijet1Jet1.eta());
+      hLdgTrijetJet1BDisc_Before->Fill(output.fTrijet1Jet1.bjetDiscriminator());
+      hLdgTrijetJet2Pt_Before   ->Fill(output.fTrijet1Jet2.pt());
+      hLdgTrijetJet2Eta_Before  ->Fill(output.fTrijet1Jet2.eta());
+      hLdgTrijetJet2BDisc_Before->Fill(output.fTrijet1Jet2.bjetDiscriminator());
+      hLdgTrijetBJetPt_Before   ->Fill(output.fTrijet1BJet.pt());
+      hLdgTrijetBJetEta_Before  ->Fill(output.fTrijet1BJet.eta());
+      hLdgTrijetBJetBDisc_Before->Fill(output.fTrijet1BJet.bjetDiscriminator());
+      hLdgTrijetDiJetPt_Before  ->Fill(output.fTrijet1Dijet_p4.pt());
+      hLdgTrijetDiJetEta_Before ->Fill(output.fTrijet1Dijet_p4.eta());
+      hLdgTrijetDiJetMass_Before->Fill(output.fTrijet1Dijet_p4.mass());
+      // Subleading
+      hSubldgTrijetPt_Before       ->Fill(output.fTrijet2_p4.pt());
+      hSubldgTrijetMass_Before     ->Fill(output.fTrijet2_p4.mass());
+      hSubldgTrijetPt_Before       ->Fill(output.fTrijet2_p4.pt());
+      hSubldgTrijetMass_Before     ->Fill(output.fTrijet2_p4.mass());
+      hSubldgTrijetJet1Pt_Before   ->Fill(output.fTrijet2Jet1.eta());
+      hSubldgTrijetJet1Eta_Before  ->Fill(output.fTrijet2Jet1.eta());
+      hSubldgTrijetJet1BDisc_Before->Fill(output.fTrijet2Jet1.bjetDiscriminator());
+      hSubldgTrijetJet2Pt_Before   ->Fill(output.fTrijet2Jet2.pt());
+      hSubldgTrijetJet2Eta_Before  ->Fill(output.fTrijet2Jet2.eta());
+      hSubldgTrijetJet2BDisc_Before->Fill(output.fTrijet2Jet2.bjetDiscriminator());
+      hSubldgTrijetBJetPt_Before   ->Fill(output.fTrijet2BJet.pt());
+      hSubldgTrijetBJetEta_Before  ->Fill(output.fTrijet2BJet.eta());
+      hSubldgTrijetBJetBDisc_Before->Fill(output.fTrijet2BJet.bjetDiscriminator());
+      hSubldgTrijetDiJetPt_Before  ->Fill(output.fTrijet2Dijet_p4.pt());
+      hSubldgTrijetDiJetEta_Before ->Fill(output.fTrijet2Dijet_p4.eta());
+      hSubldgTrijetDiJetMass_Before->Fill(output.fTrijet2Dijet_p4.mass());
     }
   else 
     {
-      hLdgTrijetPt_Before->Fill(output.fTrijet2_p4.pt());
-      hLdgTrijetMass_Before->Fill(output.fTrijet2_p4.mass());
-      hSubldgTrijetPt_Before->Fill(output.fTrijet1_p4.pt());
-      hSubldgTrijetMass_Before->Fill(output.fTrijet1_p4.mass());
+      // Leading
+      hLdgTrijetPt_Before       ->Fill(output.fTrijet2_p4.pt());
+      hLdgTrijetMass_Before     ->Fill(output.fTrijet2_p4.mass());
+      hLdgTrijetJet1Pt_Before   ->Fill(output.fTrijet2Jet1.eta());
+      hLdgTrijetJet1Eta_Before  ->Fill(output.fTrijet2Jet1.eta());
+      hLdgTrijetJet1BDisc_Before->Fill(output.fTrijet2Jet1.bjetDiscriminator());
+      hLdgTrijetJet2Pt_Before   ->Fill(output.fTrijet2Jet2.pt());
+      hLdgTrijetJet2Eta_Before  ->Fill(output.fTrijet2Jet2.eta());
+      hLdgTrijetJet2BDisc_Before->Fill(output.fTrijet2Jet2.bjetDiscriminator());
+      hLdgTrijetBJetPt_Before   ->Fill(output.fTrijet2BJet.pt());
+      hLdgTrijetBJetEta_Before  ->Fill(output.fTrijet2BJet.eta());
+      hLdgTrijetBJetBDisc_Before->Fill(output.fTrijet2BJet.bjetDiscriminator());
+      hLdgTrijetDiJetPt_Before  ->Fill(output.fTrijet2Dijet_p4.pt());
+      hLdgTrijetDiJetEta_Before ->Fill(output.fTrijet2Dijet_p4.eta());
+      hLdgTrijetDiJetMass_Before->Fill(output.fTrijet2Dijet_p4.mass());
+      // Subleading
+      hSubldgTrijetPt_Before       ->Fill(output.fTrijet1_p4.pt());
+      hSubldgTrijetMass_Before     ->Fill(output.fTrijet1_p4.mass());
+      hSubldgTrijetJet1Pt_Before   ->Fill(output.fTrijet1Jet1.eta());
+      hSubldgTrijetJet1Eta_Before  ->Fill(output.fTrijet1Jet1.eta());
+      hSubldgTrijetJet1BDisc_Before->Fill(output.fTrijet1Jet1.bjetDiscriminator());
+      hSubldgTrijetJet2Pt_Before   ->Fill(output.fTrijet1Jet2.pt());
+      hSubldgTrijetJet2Eta_Before  ->Fill(output.fTrijet1Jet2.eta());
+      hSubldgTrijetJet2BDisc_Before->Fill(output.fTrijet1Jet2.bjetDiscriminator());
+      hSubldgTrijetBJetPt_Before   ->Fill(output.fTrijet1BJet.pt());
+      hSubldgTrijetBJetEta_Before  ->Fill(output.fTrijet1BJet.eta());
+      hSubldgTrijetBJetBDisc_Before->Fill(output.fTrijet1BJet.bjetDiscriminator());
+      hSubldgTrijetDiJetPt_Before  ->Fill(output.fTrijet1Dijet_p4.pt());
+      hSubldgTrijetDiJetEta_Before ->Fill(output.fTrijet1Dijet_p4.eta());
+      hSubldgTrijetDiJetMass_Before->Fill(output.fTrijet1Dijet_p4.mass());
     }
+
+
   // 2-D histos
   hTrijet1MassVsChiSqr_Before->Fill( output.fTrijet1_p4.mass(), output.fChiSqr );
   hTrijet2MassVsChiSqr_Before->Fill( output.fTrijet2_p4.mass(), output.fChiSqr );
   hTrijet1DijetPtVsDijetDR_Before->Fill( output.fTrijet1Dijet_p4.pt(), ROOT::Math::VectorUtil::DeltaR(output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4() ) );
   hTrijet2DijetPtVsDijetDR_Before->Fill( output.fTrijet2Dijet_p4.pt(), ROOT::Math::VectorUtil::DeltaR(output.fTrijet2Jet1.p4(), output.fTrijet2Jet2.p4() ) );
 
-
   // Apply cuts
   if ( !cfg_ChiSqrCut.passedCut(output.fChiSqr) ) return output;
   cSubPassedChiSqCut.increment();
+
 
   // Fill Histograms (After cuts)
   hChiSqr_After->Fill( output.fChiSqr );
   hTrijet1Mass_After->Fill( output.fTrijet1_p4.mass() );
   hTrijet2Mass_After->Fill( output.fTrijet2_p4.mass() );
+  hTrijet1Pt_After->Fill( output.fTrijet1_p4.pt() );
+  hTrijet2Pt_After->Fill( output.fTrijet2_p4.pt() );
   hTrijet1DijetMass_After->Fill( output.fTrijet1Dijet_p4.mass() );
   hTrijet2DijetMass_After->Fill( output.fTrijet2Dijet_p4.mass() );
+  hTrijet1DijetPt_After->Fill( output.fTrijet1Dijet_p4.pt() );
+  hTrijet2DijetPt_After->Fill( output.fTrijet2Dijet_p4.pt() );
   hTrijet1DijetDR_After  ->Fill( ROOT::Math::VectorUtil::DeltaR(output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4() ) );
   hTrijet2DijetDR_After  ->Fill( ROOT::Math::VectorUtil::DeltaR(output.fTrijet1Jet2.p4(), output.fTrijet2Jet2.p4() ) );
   hTrijet1DijetDPhi_After->Fill( std::abs(ROOT::Math::VectorUtil::DeltaPhi(output.fTrijet1Jet1.p4(), output.fTrijet1Jet2.p4() ) ) );
@@ -352,17 +553,67 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   // Leading/Subleading tops
   if (output.fTrijet1_p4.pt() > output.fTrijet2_p4.pt()) 
     {
-      hLdgTrijetPt_After->Fill(output.fTrijet1_p4.pt());
-      hLdgTrijetMass_After->Fill(output.fTrijet1_p4.mass());
-      hSubldgTrijetPt_After->Fill(output.fTrijet2_p4.pt());
-      hSubldgTrijetMass_After->Fill(output.fTrijet2_p4.mass());
+      // Leading
+      hLdgTrijetPt_After        ->Fill(output.fTrijet1_p4.pt());
+      hLdgTrijetMass_After      ->Fill(output.fTrijet1_p4.mass());
+      hLdgTrijetJet1Pt_After    ->Fill(output.fTrijet1Jet1.eta());
+      hLdgTrijetJet1Eta_After   ->Fill(output.fTrijet1Jet1.eta());
+      hLdgTrijetJet1BDisc_After ->Fill(output.fTrijet1Jet1.bjetDiscriminator());
+      hLdgTrijetJet2Pt_After    ->Fill(output.fTrijet1Jet2.pt());
+      hLdgTrijetJet2Eta_After   ->Fill(output.fTrijet1Jet2.eta());
+      hLdgTrijetJet2BDisc_After ->Fill(output.fTrijet1Jet2.bjetDiscriminator());
+      hLdgTrijetBJetPt_After    ->Fill(output.fTrijet1BJet.pt());
+      hLdgTrijetBJetEta_After   ->Fill(output.fTrijet1BJet.eta());
+      hLdgTrijetBJetBDisc_After ->Fill(output.fTrijet1BJet.bjetDiscriminator());
+      hLdgTrijetDiJetPt_After   ->Fill(output.fTrijet1Dijet_p4.pt());
+      hLdgTrijetDiJetEta_After  ->Fill(output.fTrijet1Dijet_p4.eta());
+      hLdgTrijetDiJetMass_After ->Fill(output.fTrijet1Dijet_p4.mass());
+      // Subleading
+      hSubldgTrijetJet1Pt_After    ->Fill(output.fTrijet2Jet1.eta());
+      hSubldgTrijetJet1Eta_After   ->Fill(output.fTrijet2Jet1.eta());
+      hSubldgTrijetJet1BDisc_After ->Fill(output.fTrijet2Jet1.bjetDiscriminator());
+      hSubldgTrijetJet2Pt_After    ->Fill(output.fTrijet2Jet2.pt());
+      hSubldgTrijetJet2Eta_After   ->Fill(output.fTrijet2Jet2.eta());
+      hSubldgTrijetJet2BDisc_After ->Fill(output.fTrijet2Jet2.bjetDiscriminator());
+      hSubldgTrijetBJetPt_After    ->Fill(output.fTrijet2BJet.pt());
+      hSubldgTrijetBJetEta_After   ->Fill(output.fTrijet2BJet.eta());
+      hSubldgTrijetBJetBDisc_After ->Fill(output.fTrijet2BJet.bjetDiscriminator());
+      hSubldgTrijetDiJetPt_After   ->Fill(output.fTrijet2Dijet_p4.pt());
+      hSubldgTrijetDiJetEta_After  ->Fill(output.fTrijet2Dijet_p4.eta());
+      hSubldgTrijetDiJetMass_After ->Fill(output.fTrijet2Dijet_p4.mass());
     }
   else 
     {
-      hLdgTrijetPt_After->Fill(output.fTrijet2_p4.pt());
-      hLdgTrijetMass_After->Fill(output.fTrijet2_p4.mass());
-      hSubldgTrijetPt_After->Fill(output.fTrijet1_p4.pt());
-      hSubldgTrijetMass_After->Fill(output.fTrijet1_p4.mass());
+      // Leading
+      hLdgTrijetPt_After        ->Fill(output.fTrijet2_p4.pt());
+      hLdgTrijetMass_After      ->Fill(output.fTrijet2_p4.mass());
+      hLdgTrijetJet1Pt_After    ->Fill(output.fTrijet2Jet1.eta());
+      hLdgTrijetJet1Eta_After   ->Fill(output.fTrijet2Jet1.eta());
+      hLdgTrijetJet1BDisc_After ->Fill(output.fTrijet2Jet1.bjetDiscriminator());
+      hLdgTrijetJet2Pt_After    ->Fill(output.fTrijet2Jet2.pt());
+      hLdgTrijetJet2Eta_After   ->Fill(output.fTrijet2Jet2.eta());
+      hLdgTrijetJet2BDisc_After ->Fill(output.fTrijet2Jet2.bjetDiscriminator());
+      hLdgTrijetBJetPt_After    ->Fill(output.fTrijet2BJet.pt());
+      hLdgTrijetBJetEta_After   ->Fill(output.fTrijet2BJet.eta());
+      hLdgTrijetBJetBDisc_After ->Fill(output.fTrijet2BJet.bjetDiscriminator());
+      hLdgTrijetDiJetPt_After   ->Fill(output.fTrijet2Dijet_p4.pt());
+      hLdgTrijetDiJetEta_After  ->Fill(output.fTrijet2Dijet_p4.eta());
+      hLdgTrijetDiJetMass_After ->Fill(output.fTrijet2Dijet_p4.mass());
+      // Subleading
+      hSubldgTrijetPt_After        ->Fill(output.fTrijet1_p4.pt());
+      hSubldgTrijetMass_After      ->Fill(output.fTrijet1_p4.mass());
+      hSubldgTrijetJet1Pt_After    ->Fill(output.fTrijet1Jet1.eta());
+      hSubldgTrijetJet1Eta_After   ->Fill(output.fTrijet1Jet1.eta());
+      hSubldgTrijetJet1BDisc_After ->Fill(output.fTrijet1Jet1.bjetDiscriminator());
+      hSubldgTrijetJet2Pt_After    ->Fill(output.fTrijet1Jet2.pt());
+      hSubldgTrijetJet2Eta_After   ->Fill(output.fTrijet1Jet2.eta());
+      hSubldgTrijetJet2BDisc_After ->Fill(output.fTrijet1Jet2.bjetDiscriminator());
+      hSubldgTrijetBJetPt_After    ->Fill(output.fTrijet1BJet.pt());
+      hSubldgTrijetBJetEta_After   ->Fill(output.fTrijet1BJet.eta());
+      hSubldgTrijetBJetBDisc_After ->Fill(output.fTrijet1BJet.bjetDiscriminator());
+      hSubldgTrijetDiJetPt_After   ->Fill(output.fTrijet1Dijet_p4.pt());
+      hSubldgTrijetDiJetEta_After  ->Fill(output.fTrijet1Dijet_p4.eta());
+      hSubldgTrijetDiJetMass_After ->Fill(output.fTrijet1Dijet_p4.mass());
     }
 
   // 2-D histos
@@ -376,7 +627,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   cPassedTopSelection.increment();
   
   // Return data object
-  return output;
+  // return output; //alex
 
 }
 

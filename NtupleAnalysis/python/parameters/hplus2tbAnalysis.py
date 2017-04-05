@@ -179,8 +179,8 @@ topologySelection = PSet(
 # Top selection
 #================================================================================================
 topSelection = PSet(
-    ChiSqrCutValue     = -1.0,
-    ChiSqrCutDirection = ">=",    # options: ==, !=, <, <=, >, >=
+    ChiSqrCutValue     = 10.0,
+    ChiSqrCutDirection = "<",    # options: ==, !=, <, <=, >, >=
     MassW              = 80.385,
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,
@@ -191,6 +191,15 @@ topSelection = PSet(
 # MET trigger SF
 #================================================================================================
 scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoint, "nominal")
+
+
+#================================================================================================
+# FakeB Measurement Options
+#================================================================================================
+fakeBMeasurement = PSet(
+    InvertedBjetsCutValue     = 2,
+    InvertedBjetsCutDirection = "==",    # options: ==, !=, <, <=, >, >=
+    )
 
 
 #================================================================================================
@@ -245,5 +254,6 @@ allSelections = PSet(
     MuonSelection         = muVeto,
     Trigger               = trigger,
     Verbose               = verbose,
+    FakeBMeasurement      = fakeBMeasurement,
 )
 

@@ -155,6 +155,7 @@ def main(opts):
     # Merge EWK samples
     if opts.mergeEWK:
         datasetsMgr.merge("EWK", ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"])
+        plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -180,11 +181,11 @@ def main(opts):
         for hName in getTopSelectionHistos():
             BaselineVsInvertedComparison(datasetsMgr, hName.split("/")[-1])
             counter+=1
-            if counter > 2:
-                break
+            #if counter > 5:
+            #    break
 
     # Do the Data/QCD/EWK plots 
-    if 1==0:
+    if 1==1:
         analysisTypes = ["Baseline", "Inverted"]
         for analysis in analysisTypes:
             for hName in getTopSelectionHistos(analysis):
@@ -586,10 +587,14 @@ def getTopSelectionHistos(analysisType="Baseline"):
         "topSelection_%s/Trijet1DijetDR_Before" % (analysisType),
         "topSelection_%s/Trijet1DijetMass_After" % (analysisType),
         "topSelection_%s/Trijet1DijetMass_Before" % (analysisType),
+        "topSelection_%s/Trijet1DijetPt_After" % (analysisType),
+        "topSelection_%s/Trijet1DijetPt_Before" % (analysisType),
         # "topSelection_%s/Trijet1DijetPtVsDijetDR_After" % (analysisType),  # TH2F
         # "topSelection_%s/Trijet1DijetPtVsDijetDR_Before" % (analysisType), # TH2F
         "topSelection_%s/Trijet1Mass_After" % (analysisType),
         "topSelection_%s/Trijet1Mass_Before" % (analysisType),
+        "topSelection_%s/Trijet1Pt_After" % (analysisType),
+        "topSelection_%s/Trijet1Pt_Before" % (analysisType),
         # "topSelection_%s/Trijet1MassVsChiSqr_After" % (analysisType),  # TH2F
         # "topSelection_%s/Trijet1MassVsChiSqr_Before" % (analysisType), # TH2F
         "topSelection_%s/Trijet2DijetBJetDEta_After" % (analysisType),
@@ -606,10 +611,14 @@ def getTopSelectionHistos(analysisType="Baseline"):
         "topSelection_%s/Trijet2DijetDR_Before" % (analysisType),
         "topSelection_%s/Trijet2DijetMass_After" % (analysisType),
         "topSelection_%s/Trijet2DijetMass_Before" % (analysisType),
+        "topSelection_%s/Trijet2DijetPt_After" % (analysisType),
+        "topSelection_%s/Trijet2DijetPt_Before" % (analysisType),
         # "topSelection_%s/Trijet2DijetPtVsDijetDR_After" % (analysisType),  # TH2F
         # "topSelection_%s/Trijet2DijetPtVsDijetDR_Before" % (analysisType), # TH2F
         "topSelection_%s/Trijet2Mass_After" % (analysisType),
         "topSelection_%s/Trijet2Mass_Before" % (analysisType),
+        "topSelection_%s/Trijet2Pt_After" % (analysisType),
+        "topSelection_%s/Trijet2Pt_Before" % (analysisType),
         #"topSelection_%s/Trijet2MassVsChiSqr_After" % (analysisType),  # TH2F
         #"topSelection_%s/Trijet2MassVsChiSqr_Before" % (analysisType), # TH2F
         ]
@@ -741,10 +750,15 @@ def BaselineVsInvertedComparison(datasetsMgr, histoName):
             })
 
     # Draw the histograms
+    _rebinX = 1
+    if "Mass" in histoName:
+        _rebinX = 2
+        Print("Rebin is set to %s for %s" % (_rebinX, histoName), True)
+
     plots.drawPlot(p, histoName,  
                    ylabel = "Events / %.0f",
                    log = True, 
-                   rebinX = 1, cmsExtraText = "Preliminary", 
+                   rebinX = _rebinX, cmsExtraText = "Preliminary", 
                    createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
                    opts  = {"ymin": 1e0, "ymaxfactor": 10},
                    opts2 = {"ymin": 0.6, "ymax": 1.4},
@@ -805,7 +819,7 @@ def DataEwkQcd(datasetsMgr, histoName, analysisType):
     # Apply histo styles
     p.histoMgr.forHisto(analysisType + "-Data", styles.getDataStyle() )
     p.histoMgr.forHisto(analysisType + "-QCD" , styles.getQCDLineStyle() )
-    p.histoMgr.forHisto(analysisType + "-EWK" , styles.stylesCompound[2]) #styles.getEWKStyle() )
+    p.histoMgr.forHisto(analysisType + "-EWK" , styles.getAltEWKStyle() )
 
     # Set draw style
     p.histoMgr.setHistoDrawStyle(analysisType + "-Data", "P")
@@ -824,12 +838,17 @@ def DataEwkQcd(datasetsMgr, histoName, analysisType):
             })
     
     # Draw the histograms
-    _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    #_cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    _rebinX = 1
+    if "Mass" in histoName:
+        _rebinX = 2
+        Print("Rebin is set to %s for %s" % (_rebinX, histoName), True)
+
     histoName += "_" + analysisType
     plots.drawPlot(p, histoName,  
                    ylabel = "Events / %.0f",
                    log = True, 
-                   rebinX = 1, cmsExtraText = "Preliminary", 
+                   rebinX = _rebinX, cmsExtraText = "Preliminary", 
                    createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
                    opts  = {"ymin": 1e0, "ymaxfactor": 10},
                    opts2 = {"ymin": 1e-5, "ymax": 1e0},

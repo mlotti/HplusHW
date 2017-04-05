@@ -152,14 +152,24 @@ private:
   // Histograms (1D)
   WrappedTH1 *hChiSqr_Before;
   WrappedTH1 *hChiSqr_After;
+
   WrappedTH1 *hTrijet1Mass_Before;
   WrappedTH1 *hTrijet2Mass_Before;
   WrappedTH1 *hTrijet1Mass_After;
   WrappedTH1 *hTrijet2Mass_After;
+  WrappedTH1 *hTrijet1Pt_Before;
+  WrappedTH1 *hTrijet2Pt_Before;
+  WrappedTH1 *hTrijet1Pt_After;
+  WrappedTH1 *hTrijet2Pt_After;
+
   WrappedTH1 *hTrijet1DijetMass_Before;
   WrappedTH1 *hTrijet2DijetMass_Before;
   WrappedTH1 *hTrijet1DijetMass_After;
   WrappedTH1 *hTrijet2DijetMass_After;
+  WrappedTH1 *hTrijet1DijetPt_Before;
+  WrappedTH1 *hTrijet2DijetPt_Before;
+  WrappedTH1 *hTrijet1DijetPt_After;
+  WrappedTH1 *hTrijet2DijetPt_After;
   WrappedTH1 *hTrijet1DijetDEta_Before;
   WrappedTH1 *hTrijet2DijetDEta_Before;
   WrappedTH1 *hTrijet1DijetDEta_After;
@@ -172,6 +182,7 @@ private:
   WrappedTH1 *hTrijet2DijetDR_Before;
   WrappedTH1 *hTrijet1DijetDR_After;
   WrappedTH1 *hTrijet2DijetDR_After;
+
   WrappedTH1 *hTrijet1DijetBJetDR_Before;
   WrappedTH1 *hTrijet2DijetBJetDR_Before;
   WrappedTH1 *hTrijet1DijetBJetDR_After;
@@ -184,14 +195,65 @@ private:
   WrappedTH1 *hTrijet2DijetBJetDEta_Before;
   WrappedTH1 *hTrijet1DijetBJetDEta_After;
   WrappedTH1 *hTrijet2DijetBJetDEta_After;
+
   WrappedTH1 *hLdgTrijetPt_Before;
   WrappedTH1 *hLdgTrijetPt_After;
   WrappedTH1 *hLdgTrijetMass_Before;
   WrappedTH1 *hLdgTrijetMass_After;
+  WrappedTH1 *hLdgTrijetJet1Pt_Before;
+  WrappedTH1 *hLdgTrijetJet1Pt_After;
+  WrappedTH1 *hLdgTrijetJet1Eta_Before;
+  WrappedTH1 *hLdgTrijetJet1Eta_After;
+  WrappedTH1 *hLdgTrijetJet1BDisc_Before;
+  WrappedTH1 *hLdgTrijetJet1BDisc_After;
+  WrappedTH1 *hLdgTrijetJet2Pt_Before;
+  WrappedTH1 *hLdgTrijetJet2Pt_After;
+  WrappedTH1 *hLdgTrijetJet2Eta_Before;
+  WrappedTH1 *hLdgTrijetJet2Eta_After;
+  WrappedTH1 *hLdgTrijetJet2BDisc_Before;
+  WrappedTH1 *hLdgTrijetJet2BDisc_After;
+  WrappedTH1 *hLdgTrijetBJetPt_Before;
+  WrappedTH1 *hLdgTrijetBJetPt_After;
+  WrappedTH1 *hLdgTrijetBJetEta_Before;
+  WrappedTH1 *hLdgTrijetBJetEta_After;
+  WrappedTH1 *hLdgTrijetBJetBDisc_Before;
+  WrappedTH1 *hLdgTrijetBJetBDisc_After;
+  WrappedTH1 *hLdgTrijetDiJetPt_Before;
+  WrappedTH1 *hLdgTrijetDiJetPt_After;
+  WrappedTH1 *hLdgTrijetDiJetEta_Before;
+  WrappedTH1 *hLdgTrijetDiJetEta_After;
+  WrappedTH1 *hLdgTrijetDiJetMass_Before;
+  WrappedTH1 *hLdgTrijetDiJetMass_After;
+
   WrappedTH1 *hSubldgTrijetPt_Before;
   WrappedTH1 *hSubldgTrijetPt_After;
   WrappedTH1 *hSubldgTrijetMass_Before;
   WrappedTH1 *hSubldgTrijetMass_After;
+  WrappedTH1 *hSubldgTrijetJet1Pt_Before;
+  WrappedTH1 *hSubldgTrijetJet1Pt_After;
+  WrappedTH1 *hSubldgTrijetJet1Eta_Before;
+  WrappedTH1 *hSubldgTrijetJet1Eta_After;
+  WrappedTH1 *hSubldgTrijetJet1BDisc_Before;
+  WrappedTH1 *hSubldgTrijetJet1BDisc_After;
+  WrappedTH1 *hSubldgTrijetJet2Pt_Before;
+  WrappedTH1 *hSubldgTrijetJet2Pt_After;
+  WrappedTH1 *hSubldgTrijetJet2Eta_Before;
+  WrappedTH1 *hSubldgTrijetJet2Eta_After;
+  WrappedTH1 *hSubldgTrijetJet2BDisc_Before;
+  WrappedTH1 *hSubldgTrijetJet2BDisc_After;
+  WrappedTH1 *hSubldgTrijetBJetPt_Before;
+  WrappedTH1 *hSubldgTrijetBJetPt_After;
+  WrappedTH1 *hSubldgTrijetBJetEta_Before;
+  WrappedTH1 *hSubldgTrijetBJetEta_After;
+  WrappedTH1 *hSubldgTrijetBJetBDisc_Before;
+  WrappedTH1 *hSubldgTrijetBJetBDisc_After;
+  WrappedTH1 *hSubldgTrijetDiJetPt_Before;
+  WrappedTH1 *hSubldgTrijetDiJetPt_After;
+  WrappedTH1 *hSubldgTrijetDiJetEta_Before;
+  WrappedTH1 *hSubldgTrijetDiJetEta_After;
+  WrappedTH1 *hSubldgTrijetDiJetMass_Before;
+  WrappedTH1 *hSubldgTrijetDiJetMass_After;
+
   // Histograms (2D)
   WrappedTH2 *hTrijet1MassVsChiSqr_Before;
   WrappedTH2 *hTrijet2MassVsChiSqr_Before;
