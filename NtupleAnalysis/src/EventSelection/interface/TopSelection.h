@@ -33,6 +33,7 @@ public:
     // Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }
     // Trijet-1
+    const std::vector<Jet>& getJetsUsedAsBJetsInFit() const { return fJetsUsedAsBJetsInFit;}
     const Jet getTrijet1Jet1() const { return fTrijet1Jet1; } 
     const Jet getTrijet1Jet2() const { return fTrijet1Jet2; } 
     const Jet getTrijet1BJet() const { return fTrijet1BJet; } 
@@ -68,17 +69,17 @@ public:
     }
 
     // Fit-related quantities
-    const std::vector<int> GetJetIndicesForChiSqrFit(const std::vector<Jet> jets, const std::vector<Jet> bjets,
-						     std::vector<unsigned int>& jet1 , std::vector<unsigned int>& jet2, 
-						     std::vector<unsigned int>& jet3 , std::vector<unsigned int>& jet4, 
-						     std::vector<unsigned int>& bjet1, std::vector<unsigned int>& bjet2);
     const double ChiSqr() const { return fChiSqr; }
-    
+    const unsigned int getNumberOfFits() const { return fNumberOfFits;}
+
     friend class TopSelection;
 
   private:
     /// Boolean for passing selection
     bool bPassedSelection;
+    /// Jets used in di-top fit
+    unsigned int fNumberOfFits;
+    std::vector<Jet> fJetsUsedAsBJetsInFit;
     /// Trijet-1
     Jet fTrijet1Jet1;
     Jet fTrijet1Jet2;
@@ -107,9 +108,11 @@ public:
   
   /// Use silentAnalyze if you do not want to fill histograms or increment counters
   Data silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  // silentAnalyze for FakeBMeasurement
   Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  // analyze for FakeBMeasurement
   Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
 
 private:
@@ -117,11 +120,13 @@ private:
   void initialize(const ParameterSet& config);
   /// The actual selection
   Data privateAnalyze(const Event& event, const std::vector<Jet> jets, const std::vector<Jet> bjets);
+  // The actual selection for FakeBMeasurement
   Data privateAnalyzeWithoutBJets(const Event& event, const std::vector<Jet> jets, const std::vector<Jet> bjets);
-  
+  // Returns true if the two jets are the same
   bool areSameJets(const Jet& jet1, const Jet& jet2);
+  // Return true if a selected jet matches a selected bjet
   bool isBJet(const Jet& jet1, const std::vector<Jet>& bjets);
-  
+  // Calculates the index combinations for the di-top fit
   void GetJetIndicesForChiSqrFit(const std::vector<Jet> jets,
 				 const std::vector<Jet> bjets,
 				 std::vector<unsigned int>& jet1,
@@ -130,13 +135,16 @@ private:
 				 std::vector<unsigned int>& jet4,
 				 std::vector<unsigned int>& bjet1,
 				 std::vector<unsigned int>& bjet2);
-
+  // Calculates the chi-squared of the di-top fit
   double CalculateChiSqrForTrijetSystems(const Jet& jet1, const Jet& jet2,
 					 const Jet& jet3, const Jet& jet4,
 					 const Jet& bjet1, const Jet& bjet2);
-  
-    
+ 
+  const std::vector<Jet> GetBJetsToBeUsedInFit(const BJetSelection::Data& bjetData,
+					       const unsigned int maxNumberOfBJetsToUse=3);
   // Input parameters
+  // Input parameters
+  int nSelectedBJets;
   const double cfg_MassW;
   const double cfg_diJetSigma;
   const double cfg_triJetSigma;
@@ -152,14 +160,28 @@ private:
   // Histograms (1D)
   WrappedTH1 *hChiSqr_Before;
   WrappedTH1 *hChiSqr_After;
+  WrappedTH1 *hNJetsUsedAsBJetsInFit_Before;
+  WrappedTH1 *hNJetsUsedAsBJetsInFit_After;
+  WrappedTH1 *hNumberOfFits_Before;
+  WrappedTH1 *hNumberOfFits_After;
+
   WrappedTH1 *hTrijet1Mass_Before;
   WrappedTH1 *hTrijet2Mass_Before;
   WrappedTH1 *hTrijet1Mass_After;
   WrappedTH1 *hTrijet2Mass_After;
+  WrappedTH1 *hTrijet1Pt_Before;
+  WrappedTH1 *hTrijet2Pt_Before;
+  WrappedTH1 *hTrijet1Pt_After;
+  WrappedTH1 *hTrijet2Pt_After;
+
   WrappedTH1 *hTrijet1DijetMass_Before;
   WrappedTH1 *hTrijet2DijetMass_Before;
   WrappedTH1 *hTrijet1DijetMass_After;
   WrappedTH1 *hTrijet2DijetMass_After;
+  WrappedTH1 *hTrijet1DijetPt_Before;
+  WrappedTH1 *hTrijet2DijetPt_Before;
+  WrappedTH1 *hTrijet1DijetPt_After;
+  WrappedTH1 *hTrijet2DijetPt_After;
   WrappedTH1 *hTrijet1DijetDEta_Before;
   WrappedTH1 *hTrijet2DijetDEta_Before;
   WrappedTH1 *hTrijet1DijetDEta_After;
@@ -172,6 +194,7 @@ private:
   WrappedTH1 *hTrijet2DijetDR_Before;
   WrappedTH1 *hTrijet1DijetDR_After;
   WrappedTH1 *hTrijet2DijetDR_After;
+
   WrappedTH1 *hTrijet1DijetBJetDR_Before;
   WrappedTH1 *hTrijet2DijetBJetDR_Before;
   WrappedTH1 *hTrijet1DijetBJetDR_After;
@@ -184,14 +207,65 @@ private:
   WrappedTH1 *hTrijet2DijetBJetDEta_Before;
   WrappedTH1 *hTrijet1DijetBJetDEta_After;
   WrappedTH1 *hTrijet2DijetBJetDEta_After;
+
   WrappedTH1 *hLdgTrijetPt_Before;
   WrappedTH1 *hLdgTrijetPt_After;
   WrappedTH1 *hLdgTrijetMass_Before;
   WrappedTH1 *hLdgTrijetMass_After;
+  WrappedTH1 *hLdgTrijetJet1Pt_Before;
+  WrappedTH1 *hLdgTrijetJet1Pt_After;
+  WrappedTH1 *hLdgTrijetJet1Eta_Before;
+  WrappedTH1 *hLdgTrijetJet1Eta_After;
+  WrappedTH1 *hLdgTrijetJet1BDisc_Before;
+  WrappedTH1 *hLdgTrijetJet1BDisc_After;
+  WrappedTH1 *hLdgTrijetJet2Pt_Before;
+  WrappedTH1 *hLdgTrijetJet2Pt_After;
+  WrappedTH1 *hLdgTrijetJet2Eta_Before;
+  WrappedTH1 *hLdgTrijetJet2Eta_After;
+  WrappedTH1 *hLdgTrijetJet2BDisc_Before;
+  WrappedTH1 *hLdgTrijetJet2BDisc_After;
+  WrappedTH1 *hLdgTrijetBJetPt_Before;
+  WrappedTH1 *hLdgTrijetBJetPt_After;
+  WrappedTH1 *hLdgTrijetBJetEta_Before;
+  WrappedTH1 *hLdgTrijetBJetEta_After;
+  WrappedTH1 *hLdgTrijetBJetBDisc_Before;
+  WrappedTH1 *hLdgTrijetBJetBDisc_After;
+  WrappedTH1 *hLdgTrijetDiJetPt_Before;
+  WrappedTH1 *hLdgTrijetDiJetPt_After;
+  WrappedTH1 *hLdgTrijetDiJetEta_Before;
+  WrappedTH1 *hLdgTrijetDiJetEta_After;
+  WrappedTH1 *hLdgTrijetDiJetMass_Before;
+  WrappedTH1 *hLdgTrijetDiJetMass_After;
+
   WrappedTH1 *hSubldgTrijetPt_Before;
   WrappedTH1 *hSubldgTrijetPt_After;
   WrappedTH1 *hSubldgTrijetMass_Before;
   WrappedTH1 *hSubldgTrijetMass_After;
+  WrappedTH1 *hSubldgTrijetJet1Pt_Before;
+  WrappedTH1 *hSubldgTrijetJet1Pt_After;
+  WrappedTH1 *hSubldgTrijetJet1Eta_Before;
+  WrappedTH1 *hSubldgTrijetJet1Eta_After;
+  WrappedTH1 *hSubldgTrijetJet1BDisc_Before;
+  WrappedTH1 *hSubldgTrijetJet1BDisc_After;
+  WrappedTH1 *hSubldgTrijetJet2Pt_Before;
+  WrappedTH1 *hSubldgTrijetJet2Pt_After;
+  WrappedTH1 *hSubldgTrijetJet2Eta_Before;
+  WrappedTH1 *hSubldgTrijetJet2Eta_After;
+  WrappedTH1 *hSubldgTrijetJet2BDisc_Before;
+  WrappedTH1 *hSubldgTrijetJet2BDisc_After;
+  WrappedTH1 *hSubldgTrijetBJetPt_Before;
+  WrappedTH1 *hSubldgTrijetBJetPt_After;
+  WrappedTH1 *hSubldgTrijetBJetEta_Before;
+  WrappedTH1 *hSubldgTrijetBJetEta_After;
+  WrappedTH1 *hSubldgTrijetBJetBDisc_Before;
+  WrappedTH1 *hSubldgTrijetBJetBDisc_After;
+  WrappedTH1 *hSubldgTrijetDiJetPt_Before;
+  WrappedTH1 *hSubldgTrijetDiJetPt_After;
+  WrappedTH1 *hSubldgTrijetDiJetEta_Before;
+  WrappedTH1 *hSubldgTrijetDiJetEta_After;
+  WrappedTH1 *hSubldgTrijetDiJetMass_Before;
+  WrappedTH1 *hSubldgTrijetDiJetMass_After;
+
   // Histograms (2D)
   WrappedTH2 *hTrijet1MassVsChiSqr_Before;
   WrappedTH2 *hTrijet2MassVsChiSqr_Before;

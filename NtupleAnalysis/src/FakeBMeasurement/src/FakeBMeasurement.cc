@@ -3,6 +3,7 @@
 #include "Framework/interface/makeTH.h"
 
 #include "EventSelection/interface/CommonPlots.h"
+#include "Tools/interface/DirectionalCut.h"
 #include "EventSelection/interface/EventSelections.h"
 
 #include "TDirectory.h"
@@ -23,6 +24,7 @@ private:
   // Input parameters
   const HistogramSettings cfg_PtBinSetting;
   const HistogramSettings cfg_EtaBinSetting;
+  const DirectionalCut<int> cfg_InvertedBjets;
 
   // Common plots
   CommonPlots fCommonPlots;
@@ -98,6 +100,7 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
   : BaseSelector(config, skimCounters),
     cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
     cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
+    cfg_InvertedBjets(config, "FakeBMeasurement.InvertedBjetsCut"),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kFakeBMeasurement, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("All events")),
     cTrigger(fEventCounter.addCounter("Passed trigger")),
@@ -130,7 +133,6 @@ FakeBMeasurement::~FakeBMeasurement() {
   // fCommonPlots.getHistoSplitter().deleteHistograms(hNormalizationBaselineTauAfterStdSelections);
   // fCommonPlots.getHistoSplitter().deleteHistograms(hMtBaselineTauAfterStdSelections);
 
-  // Purity histograms [(Data-EWK)/Data]
   delete hInverted_FailedBJetWithBestBDiscBDisc_AfterAllSelections;
   delete hInverted_FailedBJetWithBestBDiscPt_AfterAllSelections;
   delete hInverted_FailedBJetWithBestBDiscEta_AfterAllSelections;
@@ -138,6 +140,28 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_FailedBJetWithBestBDiscPartonFlavour_AfterAllSelections;
   delete hInverted_FailedBJetWithBestBDiscHadronFlavour_AfterAllSelections;
   delete hInverted_FailedBJetWithBestBDiscAncestry_AfterAllSelections;
+
+  // Baseline selection
+  delete hBaseline_TopMassReco_ChiSqr_AfterAllSelections;
+  delete hBaseline_TopMassReco_LdgTrijetPt_AfterAllSelections;
+  delete hBaseline_TopMassReco_LdgTrijetM_AfterAllSelections;
+  delete hBaseline_TopMassReco_SubLdgTrijetPt_AfterAllSelections;
+  delete hBaseline_TopMassReco_SubLdgTrijetM_AfterAllSelections;
+  delete hBaseline_TopMassReco_LdgDijetPt_AfterAllSelections;
+  delete hBaseline_TopMassReco_LdgDijetM_AfterAllSelections;
+  delete hBaseline_TopMassReco_SubLdgDijetPt_AfterAllSelections;
+  delete hBaseline_TopMassReco_SubLdgDijetM_AfterAllSelections;
+
+  // Inverted selection
+  delete hInverted_TopMassReco_ChiSqr_AfterAllSelections;
+  delete hInverted_TopMassReco_LdgTrijetPt_AfterAllSelections;
+  delete hInverted_TopMassReco_LdgTrijetM_AfterAllSelections;
+  delete hInverted_TopMassReco_SubLdgTrijetPt_AfterAllSelections;
+  delete hInverted_TopMassReco_SubLdgTrijetM_AfterAllSelections;
+  delete hInverted_TopMassReco_LdgDijetPt_AfterAllSelections;
+  delete hInverted_TopMassReco_LdgDijetM_AfterAllSelections;
+  delete hInverted_TopMassReco_SubLdgDijetPt_AfterAllSelections;
+  delete hInverted_TopMassReco_SubLdgDijetM_AfterAllSelections;
 
 }
 
@@ -178,34 +202,20 @@ void FakeBMeasurement::book(TDirectory *dir) {
   TDirectory* myNormGenuineBDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myNormalizationDirs = {myNormDir, myNormEWKFakeBDir, myNormGenuineBDir};
   
-  // Normalization bin settings
-  // const float fMetMin = fCommonPlots.getMetBinSettings().min();
-  // const float fMetMax = fCommonPlots.getMetBinSettings().max();
-  // const int nMetBins  = fMetMax-fMetMin; // Use 1 GeV bin width
-  // const int nMtBins   = fCommonPlots.getMtBinSettings().bins();
-  // const float fMtMin  = fCommonPlots.getMtBinSettings().min();
-  // const float fMtMax  = fCommonPlots.getMtBinSettings().max();
-
-  // if ((fMetMax-fMetMin) / nMetBins > 10.0) {
-  //   throw hplus::Exception("config") << "MET histogram bin width is larger than 10 GeV! This is not good for QCD measurement (edit python/parameters/signalAnalysisParameters.py)";
-  // }
-
   // Obtain binning
-  const int  nPtBins = fCommonPlots.getPtBinSettings().bins();
-  const float fPtMin = fCommonPlots.getPtBinSettings().min();
-  const float fPtMax = fCommonPlots.getPtBinSettings().max();
-
-  const int  nEtaBins = fCommonPlots.getEtaBinSettings().bins();
-  const float fEtaMin = fCommonPlots.getEtaBinSettings().min();
-  const float fEtaMax = fCommonPlots.getEtaBinSettings().max();
-
+  const int  nPtBins    = fCommonPlots.getPtBinSettings().bins();
+  const float fPtMin    = fCommonPlots.getPtBinSettings().min();
+  const float fPtMax    = fCommonPlots.getPtBinSettings().max();
+  const int  nEtaBins   = fCommonPlots.getEtaBinSettings().bins();
+  const float fEtaMin   = fCommonPlots.getEtaBinSettings().min();
+  const float fEtaMax   = fCommonPlots.getEtaBinSettings().max();
   const int  nBDiscBins = fCommonPlots.getBJetDiscBinSettings().bins();
   const float fBDiscMin = fCommonPlots.getBJetDiscBinSettings().min();
   const float fBDiscMax = fCommonPlots.getBJetDiscBinSettings().max();
+  const int nMassBins   = 150;
+  const float fMassMin  = 0.0;
+  const float fMassMax  = 1500.0;
 
-  const int nMassBins  = 150;
-  const float fMassMin = 0.0;
-  const float fMassMax = 1500.0;
 
   // Purity histograms [(Data-EWK)/Data]
   myInclusiveLabel = "FakeBPurity";
@@ -327,80 +337,7 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_TopMassReco_SubLdgDijetM_AfterAllSelections = 
     fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Inverted_TopMassReco_SubLdgDijetM_AfterAllSelections", ";M (GeV/c^{2});Events / %0.f GeV/c^{2}", nMassBins, fMassMin, fMassMax);
 
-	     
-  // Create shape histograms for baseline tau (inverted tau histograms are in common plots)
-  /*
-  histoSplitter.createShapeHistogramTriplet<TH1F>(true, HistoLevel::kInformative, myQCDPlotDirs,
-    hBaselineTauTransverseMass,
-    "BaselineTauShapeTransverseMass", ";m_{T} (GeV);N_{events}",
-    nMtBins, fMtMin, fMtMax);
-   
-  hTransverseMass_inverted_Bveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto", "TransverseMass_inverted_Bveto", 200, 0, 800);
-  hTransverseMass_baseline_Bveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto", "TransverseMass_baseline_Bveto", 200, 0, 800);
-  hTransverseMass_inverted_Bveto_BBveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto_BBveto", "TransverseMass_inverted_Bveto_BBveto", 200, 0, 800);
-  hTransverseMass_baseline_Bveto_BBveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto_BBveto", "TransverseMass_baseline_Bveto_BBveto", 200, 0, 800);
-  hTransverseMass_inverted_all =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_all", "TransverseMass_inverted_all", 200, 0, 800);
-  hTransverseMass_baseline_all =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_all", "TransverseMass_baseline_all", 200, 0, 800);
-  hTransverseMass_inverted_all_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_all_genuineTau", "TransverseMass_inverted_all_genuineTau", 200, 0, 800);
-  hTransverseMass_baseline_all_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_all_genuineTau", "TransverseMass_baseline_all_genuineTau", 200, 0, 800);
-  hTransverseMass_inverted_Bveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto_noMet", "TransverseMass_inverted_Bveto_noMet", 200, 0, 800);
-  hTransverseMass_baseline_Bveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto_noMet", "TransverseMass_baseline_Bveto_noMet", 200, 0, 800);
-  hTransverseMass_inverted_Bveto_BBveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto_BBveto_noMet", "TransverseMass_inverted_Bveto_BBveto_noMet", 200, 0, 800);
-  hTransverseMass_baseline_Bveto_BBveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto_BBveto_noMet", "TransverseMass_baseline_Bveto_BBveto_noMet", 200, 0, 800);
-  hTransverseMass_inverted_Bveto_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto_genuineTau", "TransverseMass_inverted_Bveto_genuineTau", 200, 0, 800);
-  hTransverseMass_baseline_Bveto_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto_genuineTau", "TransverseMass_baseline_Bveto_genuineTau", 200, 0, 800);
-  hTransverseMass_inverted_Bveto_genuineTau_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_Bveto_genuineTau_noMet", "TransverseMass_inverted_Bveto_genuineTau_noMet", 200, 0, 800);
-  hTransverseMass_baseline_Bveto_genuineTau_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_Bveto_genuineTau_noMet", "TransverseMass_baseline_Bveto_genuineTau_noMet", 200, 0, 800);
-
-  hTransverseMass_inverted_BBveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_BBveto", "TransverseMass_inverted_BBveto", 200, 0, 800);
-  hTransverseMass_baseline_BBveto =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_BBveto", "TransverseMass_baseline_BBveto", 200, 0, 800);
-  hTransverseMass_inverted_BBveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_BBveto_noMet", "TransverseMass_inverted_BBveto_noMet", 200, 0, 800);
-  hTransverseMass_baseline_BBveto_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_BBveto_noMet", "TransverseMass_baseline_BBveto_noMet", 200, 0, 800);
-  hTransverseMass_inverted_BBveto_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_BBveto_genuineTau", "TransverseMass_inverted_BBveto_genuineTau", 200, 0, 800);
-  hTransverseMass_baseline_BBveto_genuineTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_BBveto_genuineTau", "TransverseMass_baseline_BBveto_genuineTau", 200, 0, 800);
-
-  hTransverseMass_inverted_BBveto_genuineTau_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_inverted_BBveto_genuineTau_noMet", "TransverseMass_inverted_BBveto_genuineTau_noMet", 200, 0, 800);
-  hTransverseMass_baseline_BBveto_genuineTau_noMet =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TransverseMass_baseline_BBveto_genuineTau_noMet", "TransverseMass_baseline_BBveto_genuineTau_noMet", 200, 0, 800);
-  */
-
-  // Other histograms (testing etc.)
-  /*
-  hTauPt_inv_afterTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterTau", "TauPt_inv_afterTau", 200, 0, 1000);
-  hTauPt_inv_afterTau_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterTau_realTau", "TauPt_inv_afterTau_realTau", 200, 0, 1000); 
-
-  hTauPt_inv_afterJets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterJets", "TauPt_inv_afterJets", 200, 0, 1000);
-  hTauPt_inv_afterJets_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterJets_realTau", "TauPt_inv_afterJets_realTau", 200, 0, 1000); 
-
-  hTauPt_inv_afterBtag =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterBtag", "TauPt_inv_afterBtag", 200, 0, 1000);
-  hTauPt_inv_afterBtag_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_inv_afterBtag_realTau", "TauPt_inv_afterBtag_realTau", 200, 0, 1000);
-
-  hMet_inv_afterTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterTau", "Met_inv_afterTau", 200, 0, 1000);
-  hMet_inv_afterTau_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterTau_realTau", "Met_inv_afterTau_realTau", 200, 0, 1000); 
-
-  hMet_inv_afterJets =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterJets", "Met_inv_afterJets", 200, 0, 1000);
-  hMet_inv_afterJets_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterJets_realTau", "Met_inv_afterJets_realTau", 200, 0, 1000); 
-
-  hMet_inv_afterBtag =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterBtag", "Met_inv_afterBtag", 200, 0, 1000);
-  hMet_inv_afterBtag_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Met_inv_afterBtag_realTau", "Met_inv_afterBtag_realTau", 200, 0, 1000); 
-
-  hTauPt_baseline_afterTau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_baseline_afterTau", "TauPt_baseline_afterTau", 200, 0, 1000);
-  hTauPt_baseline_afterTau_realtau =  fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "TauPt_baseline_afterTau_realTau", "TauPt_baseline_afterTau_realTau", 200, 0, 1000); 
-  */
-
-
-  // Book non-common histograms
-  // const int nBinsPt   = cfg_PtBinSetting.bins();
-  // const double minPt  = cfg_PtBinSetting.min();
-  // const double maxPt  = cfg_PtBinSetting.max();
-  
-  // const int nBinsEta  = cfg_EtaBinSetting.bins();
-  // const double minEta = cfg_EtaBinSetting.min();
-  // const double maxEta = cfg_EtaBinSetting.max();
- 
-  // hAssociatedTop_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Pt", "Associated t pT;p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
-  // hAssociatedTop_Eta = fHistoWrapper.makeTH<TH1F>(HistoLevel::kInformative, dir, "associatedTop_Eta", "Associated t eta;#eta", nBinsEta, minEta, maxEta);
-  
-  return;
+return;
 }
 
 
@@ -528,24 +465,17 @@ void FakeBMeasurement::process(Long64_t entry) {
   // Disable histogram filling and counter with silent analyze
   const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
 
-
-  // //================================================================================================  
-  // // 10) LightJet selection
-  // //================================================================================================
-  // if (0) std::cout << "=== LightJet selection" << std::endl;
-  // const LightJetSelection::Data ljetData = fLightJetSelection.analyze(fEvent, jetData, bjetData);
-  // if (!ljetData.passedSelection()) return;
-
-
   // There are no bjets passing our selection criteria
- //if (bjetData.getNumberOfSelectedBJets() < 1)
-  if (!bjetData.passedSelection())
+  if ( bjetData.passedSelection() )
     {
-      doInvertedAnalysis(jetData, bjetData, nVertices);
+      doBaselineAnalysis(jetData, bjetData, nVertices);
     }
   else 
     {
-      doBaselineAnalysis(jetData, bjetData, nVertices);
+      if ( cfg_InvertedBjets.passedCut(bjetData.getNumberOfSelectedBJets()) )
+	{
+	  doInvertedAnalysis(jetData, bjetData, nVertices);
+	}
     }
 
   return;
@@ -691,28 +621,13 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Fill final plots
   //================================================================================================
-  // For-loop: Selected b-jets                                                                                                                                                                                             
-  if (0) 
-    {
-      for (auto bjet: bjetData.getFailedBJetCandsDescendingDiscr() ) 
-	{
-	  std::cout << "FAIL: b-discriminator = " << bjet.bjetDiscriminator() << ", pt = " << bjet.pt() << ", eta = " << bjet.eta() 
-		    << ", pdgId = " << bjet.pdgId() << ", hadronFlavour = " << bjet.hadronFlavour() << ", partonFlavour = " << bjet.hadronFlavour()
-		    << ", originatesFromW() = " << bjet.originatesFromW() << ", originatesFromZ() = " << bjet.originatesFromZ() 
-		    << ", originatesFromTop()  = " << bjet.originatesFromTop() << ", originatesFromChargedHiggs() = " << bjet.originatesFromChargedHiggs() 
-		    << ", originatesFromUnknown() = " << bjet.originatesFromUnknown() << std::endl;
-	}
-      std::cout << "\n" << std::endl;
-    }
-  
-
   Jet bjet= bjetData.getFailedBJetCandsDescendingDiscr()[0];
   bool isGenuineB = abs(bjet.pdgId() == 5); // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
-  int ancestryBit = pow(0, bjet.originatesFromZ())  
-    + pow(1, 2*bjet.originatesFromW())
-    + pow(2, 2*bjet.originatesFromTop())
-    + pow(3, 2*bjet.originatesFromChargedHiggs())
-    + pow(4, 2*bjet.originatesFromUnknown());
+  int ancestryBit = ( pow(2, 0)*bjet.originatesFromZ() +
+		      pow(2, 1)*bjet.originatesFromW() +
+		      pow(2, 2)*bjet.originatesFromTop() +
+		      pow(2, 3)*bjet.originatesFromChargedHiggs() +
+		      pow(2, 4)*bjet.originatesFromUnknown() );
 
   // For real data fill obth the histograms in inclusive and "FakeB" folders (but not "GenuineB")
   hInverted_FailedBJetWithBestBDiscBDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator());

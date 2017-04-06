@@ -23,6 +23,7 @@ Examples (tables):
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats --noError --format %.3f --latex
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK --latex -s
+./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK --latex -s --histoLevel Debug
 '''
 
 #================================================================================================ 
@@ -78,6 +79,12 @@ def GetLumi(datasetsMgr):
             lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
+
+
+def GetListOfEwkDatasets():
+    Verbose("Getting list of EWK datasets")
+    #return ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
 def GetDatasetsFromDir(opts):
@@ -142,7 +149,9 @@ def main(opts):
     datasetsMgr.PrintInfo()
 
     # Re-order datasets (different for inverted than default=baseline)
-    newOrder = ["Data", "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+    newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+    newOrder.extend(GetListOfEwkDatasets())
+
     if opts.mcOnly:
         newOrder.remove("Data")
     datasetsMgr.selectAndReorder(newOrder)
@@ -154,7 +163,8 @@ def main(opts):
 
     # Merge EWK samples
     if opts.mergeEWK:
-        datasetsMgr.merge("EWK", ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"])
+        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+        plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -162,147 +172,40 @@ def main(opts):
 
 
     # Do the Purity Triples
-    # PurityTripletPlots(datasetsMgr, analysisType="")
-    # PurityTripletPlots(datasetsMgr, analysisType="EWKFakeB")
-    # PurityTripletPlots(datasetsMgr, analysisType="EWKGenuineB")
-
+    if 0:
+        Print("Plotting Purity Triplet Histograms", True)
+        PurityTripletPlots(datasetsMgr, analysisType="")
+        PurityTripletPlots(datasetsMgr, analysisType="EWKFakeB")
+        PurityTripletPlots(datasetsMgr, analysisType="EWKGenuineB")
+        
     # Do the standard top-selections
-    # TopSelectionHistograms(datasetsMgr, analysisType="Baseline")
-    # TopSelectionHistograms(datasetsMgr, analysisType="Inverted")
+    if 0:
+        Print("Plotting Top Selection Histograms", True)
+        TopSelectionHistograms(datasetsMgr, analysisType="Baseline")
+        TopSelectionHistograms(datasetsMgr, analysisType="Inverted")
 
     # Do other histograms
-    # OtherHistograms(datasetsMgr, analysisType="Baseline")
-    # OtherHistograms(datasetsMgr, analysisType="Inverted")
+    if 0:
+        Print("Plotting Other Histograms", True)
+        OtherHistograms(datasetsMgr, analysisType="Baseline")
+        OtherHistograms(datasetsMgr, analysisType="Inverted")
 
-    # Do the Baseline Vs Inverted  histograms
-    if 1==1:
-        counter = 0
+    # Do the Baseline Vs Inverted histograms
+    if opts.mergeEWK:
         for hName in getTopSelectionHistos():
             BaselineVsInvertedComparison(datasetsMgr, hName.split("/")[-1])
-            counter+=1
-            if counter > 2:
-                break
+    else:
+        Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
 
-    # Do the Data/QCD/EWK plots 
-    if 1==0:
+    # Do the Data/QCD/EWK histograms
+    if opts.mergeEWK:
         analysisTypes = ["Baseline", "Inverted"]
         for analysis in analysisTypes:
             for hName in getTopSelectionHistos(analysis):
                 DataEwkQcd(datasetsMgr, hName.split("/")[-1], analysis)
-
-    # Print/Save the counters and sub-counters
-    # doCounters(datasetsMgr)
-
-    return
-
-
-def doCounters(datasetsMgr):
-    '''
-    Print values for counters and sub-counters (if -s option is invoked)
-
-    Options:
-    --latex (The table formatting is in LaTeX instead of plain text)
-    --format (The table value-format of strings)
-    --precision (The table value-precision)
-    --noError (Don't print statistical errors in tables)
-    --mergeEWK (Merge all EWK samples into a single sample called EWK)
-    -i (List of datasets in mcrab to include)
-    -e (List of datasets in mcrab to exclude)
-    '''
-    Verbose("Doing the counters")
-
-    # Definitions
-    eventCounter = counter.EventCounter(datasetsMgr)
-    ewkDatasets = ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
-
-    if opts.mcOnly and opts.intLumi>-1.0:
-        eventCounter.normalizeMCToLuminosity(opts.intLumi)
     else:
-        eventCounter.normalizeMCByLuminosity()
-        # eventCounter.normalizeMCByCrossSection()
+        Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
 
-    # Print the counters
-    hLine    = "="*10
-    msg = " Main counter (MC normalized by collision data luminosity) "
-    print "\n" + hLine + msg + hLine
-
-    # Construct the table
-    mainTable = eventCounter.getMainCounterTable()
-
-    # Only keep selected rows?
-    rows = [
-        #"ttree: skimCounterAll",
-        #"ttree: skimCounterPassed",
-        #"Base::AllEvents", 
-        #"Base::PUReweighting",
-        #"Base::Prescale", 
-        #"Base::Weighted events with top pT",
-        #"Base::Weighted events for exclusive samples",
-        "All events",
-        "Passed trigger",
-        "passed METFilter selection ()",
-        "Passed PV",
-        "passed e selection (Veto)",
-        "passed mu selection (Veto)",
-        "Passed tau selection (Veto)",
-        #"Passed tau selection and genuine (Veto)",
-        "passed jet selection ()",
-        #"passed b-jet selection ()",
-        #"passed light-jet selection ()",
-        "Baseline: passed b-jet selection",
-        "Baseline: b tag SF",
-        #"passed MET selection (Baseline)",
-        "passed topology selection (Baseline)",
-        "passed top selection (Baseline)",
-        "Baseline: selected events",
-        "Inverted: passed b-jet veto",
-        "Inverted: b tag SF",
-        #"passed MET selection (Inverted)",
-        "passed topology selection (Inverted)",
-        "passed top selection (Inverted)",
-        "Inverted: selected events"
-        ]
-    mainTable.keepOnlyRows(rows)
-
-    # Get number of rows/columns
-    nRows    = mainTable.getNrows()
-    nColumns = mainTable.getNcolumns()
-
-    # Merge EWK into a new column?
-    if not opts.mergeEWK:
-        mainTable.insertColumn(nColumns, counter.sumColumn("EWK", [mainTable.getColumn(name=name) for name in ewkDatasets]))
-
-    # Additional column (through inter-column operations)
-    mainTable.insertColumn(mainTable.getNcolumns(), counter.subtractColumn("Data-EWK", mainTable.getColumn(name="Data"), mainTable.getColumn(name="EWK") ) )
-    mainTable.insertColumn(mainTable.getNcolumns(), counter.divideColumn("QCD Purity", mainTable.getColumn(name="Data-EWK"), mainTable.getColumn(name="Data") ) )
-
-    # Optional: Produce table in Text or LaTeX format?
-    if opts.latex:
-        cellFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueOnly=opts.valueOnly, valueFormat=opts.format, withPrecision=opts.precision))
-    else:
-        cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=opts.valueOnly, valueFormat=opts.format))
-    print mainTable.format(cellFormat)
-
-    # Do sub-counters?
-    subcounters = [
-        "bjet selection ()",
-        "e selection (Veto)",
-        "jet selection ()",
-        "light-jet selection ()", 
-        "METFilter selection",
-        "METFilter selection ()", 
-        "mu selection (Veto)", 
-        "tau selection (Veto)",
-        "top selection (Baseline)",
-        "top selection (Inverted)",
-        "topology selection (Baseline)",
-        "topology selection (Inverted)"
-        ]
-
-    if opts.subcounters:
-        for sc in subcounters:
-            Print("\nSub-counter \"%s\"" % (sc), False)
-            print eventCounter.getSubCounterTable(sc).format(cellFormat)
     return
 
 
@@ -485,7 +388,8 @@ def OtherHistograms(datasetsMgr, analysisType=""):
     kwargs = copy.deepcopy(_kwargs)
     kwargs["ylabel"] = "Events / %.0f"
     kwargs["log"]    = False
-    kwargs["opts"]   = {"xmax": 700, "ymin": 2e-1, "ymaxfactor": 0.5}
+    kwargs["opts"]   = {"xmax": 700, "ymin": 2e-1, "ymaxfactor": 1.2}
+    kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     histoNames.append(histoName)
     histoKwargs[histoName] = kwargs
 
@@ -499,7 +403,8 @@ def OtherHistograms(datasetsMgr, analysisType=""):
     kwargs = copy.deepcopy(_kwargs)
     kwargs["ylabel"] = "Events / %.0f"
     kwargs["log"]    = False
-    kwargs["opts"]   = {"xmax": 700, "ymin": 2e-1, "ymaxfactor": 1.0}
+    kwargs["opts"]   = {"xmax": 700, "ymin": 2e-1, "ymaxfactor": 1.2}
+    kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     histoNames.append(histoName)
     histoKwargs[histoName] = kwargs
 
@@ -512,6 +417,7 @@ def OtherHistograms(datasetsMgr, analysisType=""):
     histoName = "%s_TopMassReco_LdgDijetM_AfterAllSelections" % analysisType
     kwargs = copy.deepcopy(_kwargs)
     kwargs["ylabel"] = "Events / %.0f"
+    kwargs["cutBox"] = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     histoNames.append(histoName)
     histoKwargs[histoName] = kwargs
 
@@ -524,6 +430,7 @@ def OtherHistograms(datasetsMgr, analysisType=""):
     histoName = "%s_TopMassReco_SubLdgDijetM_AfterAllSelections" % analysisType
     kwargs = copy.deepcopy(_kwargs)
     kwargs["ylabel"] = "Events / %.0f"
+    kwargs["cutBox"] = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     histoNames.append(histoName)
     histoKwargs[histoName] = kwargs
 
@@ -562,56 +469,116 @@ def getTopSelectionHistos(analysisType="Baseline"):
     IsBaselineOrInverted(analysisType)
 
     histoList = [        
-        
         "topSelection_%s/ChiSqr_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetMass_After" % (analysisType),
-        "topSelection_%s/LdgTrijetMass_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetPt_After" % (analysisType),
-        "topSelection_%s/LdgTrijetPt_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetMass_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetMass_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetPt_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetPt_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDEta_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDEta_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDPhi_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDPhi_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDR_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDR_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetDEta_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetDEta_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetDPhi_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetDPhi_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetDR_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetDR_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetMass_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetMass_Before" % (analysisType),
-        # "topSelection_%s/Trijet1DijetPtVsDijetDR_After" % (analysisType),  # TH2F
-        # "topSelection_%s/Trijet1DijetPtVsDijetDR_Before" % (analysisType), # TH2F
-        "topSelection_%s/Trijet1Mass_After" % (analysisType),
+        "topSelection_%s/ChiSqr_After" % (analysisType),
+        "topSelection_%s/NJetsUsedAsBJetsInFit_Before" % (analysisType),
+        "topSelection_%s/NJetsUsedAsBJetsInFit_After" % (analysisType),
+        "topSelection_%s/NumberOfFits_Before" % (analysisType),
+        "topSelection_%s/NumberOfFits_After" % (analysisType),
         "topSelection_%s/Trijet1Mass_Before" % (analysisType),
-        # "topSelection_%s/Trijet1MassVsChiSqr_After" % (analysisType),  # TH2F
-        # "topSelection_%s/Trijet1MassVsChiSqr_Before" % (analysisType), # TH2F
-        "topSelection_%s/Trijet2DijetBJetDEta_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDEta_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDPhi_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDPhi_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDR_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDR_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetDEta_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetDEta_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetDPhi_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetDPhi_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetDR_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetDR_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetMass_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetMass_Before" % (analysisType),
-        # "topSelection_%s/Trijet2DijetPtVsDijetDR_After" % (analysisType),  # TH2F
-        # "topSelection_%s/Trijet2DijetPtVsDijetDR_Before" % (analysisType), # TH2F
-        "topSelection_%s/Trijet2Mass_After" % (analysisType),
         "topSelection_%s/Trijet2Mass_Before" % (analysisType),
-        #"topSelection_%s/Trijet2MassVsChiSqr_After" % (analysisType),  # TH2F
-        #"topSelection_%s/Trijet2MassVsChiSqr_Before" % (analysisType), # TH2F
+        "topSelection_%s/Trijet1Mass_After" % (analysisType),
+        "topSelection_%s/Trijet2Mass_After" % (analysisType),
+        "topSelection_%s/Trijet1Pt_Before" % (analysisType),
+        "topSelection_%s/Trijet2Pt_Before" % (analysisType),
+        "topSelection_%s/Trijet1Pt_After" % (analysisType),
+        "topSelection_%s/Trijet2Pt_After" % (analysisType),
+        "topSelection_%s/Trijet1DijetMass_Before" % (analysisType),
+        "topSelection_%s/Trijet2DijetMass_Before" % (analysisType),
+        "topSelection_%s/Trijet1DijetMass_After" % (analysisType),
+        "topSelection_%s/Trijet2DijetMass_After" % (analysisType),
+        "topSelection_%s/Trijet1DijetPt_Before" % (analysisType),
+        "topSelection_%s/Trijet2DijetPt_Before" % (analysisType),
+        "topSelection_%s/Trijet1DijetPt_After" % (analysisType),
+        "topSelection_%s/Trijet2DijetPt_After" % (analysisType),
+        "topSelection_%s/Trijet1DijetDEta_Before" % (analysisType),
+        "topSelection_%s/Trijet2DijetDEta_Before" % (analysisType),
+        "topSelection_%s/Trijet1DijetDEta_After" % (analysisType),
+        "topSelection_%s/Trijet2DijetDEta_After" % (analysisType),
+        "topSelection_%s/Trijet1DijetDPhi_Before" % (analysisType),
+        "topSelection_%s/Trijet2DijetDPhi_Before" % (analysisType),
+        "topSelection_%s/Trijet1DijetDPhi_After" % (analysisType),
+        "topSelection_%s/Trijet2DijetDPhi_After" % (analysisType),
+        "topSelection_%s/Trijet1DijetDR_Before" % (analysisType),
+        "topSelection_%s/Trijet2DijetDR_Before" % (analysisType),
+        "topSelection_%s/Trijet1DijetDR_After" % (analysisType),
+        "topSelection_%s/Trijet2DijetDR_After" % (analysisType),
+        "topSelection_%s/Trijet1DijetBJetDR_Before" % (analysisType),
+        "topSelection_%s/Trijet2DijetBJetDR_Before" % (analysisType),
+        "topSelection_%s/Trijet1DijetBJetDR_After" % (analysisType),
+        "topSelection_%s/Trijet2DijetBJetDR_After" % (analysisType),
+        "topSelection_%s/Trijet1DijetBJetDPhi_Before" % (analysisType),
+        "topSelection_%s/Trijet2DijetBJetDPhi_Before" % (analysisType),
+        "topSelection_%s/Trijet1DijetBJetDPhi_After" % (analysisType),
+        "topSelection_%s/Trijet2DijetBJetDPhi_After" % (analysisType),
+        "topSelection_%s/Trijet1DijetBJetDEta_Before" % (analysisType),
+        "topSelection_%s/Trijet2DijetBJetDEta_Before" % (analysisType),
+        "topSelection_%s/Trijet1DijetBJetDEta_After" % (analysisType),
+        "topSelection_%s/Trijet2DijetBJetDEta_After" % (analysisType),
+        "topSelection_%s/LdgTrijetPt_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetPt_After" % (analysisType),
+        "topSelection_%s/LdgTrijetMass_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetMass_After" % (analysisType),
+        "topSelection_%s/LdgTrijetJet1Pt_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetJet1Pt_After" % (analysisType),
+        "topSelection_%s/LdgTrijetJet1Eta_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetJet1Eta_After" % (analysisType),
+        "topSelection_%s/LdgTrijetJet1BDisc_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetJet1BDisc_After" % (analysisType),
+        "topSelection_%s/LdgTrijetJet2Pt_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetJet2Pt_After" % (analysisType),
+        "topSelection_%s/LdgTrijetJet2Eta_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetJet2Eta_After" % (analysisType),
+        "topSelection_%s/LdgTrijetJet2BDisc_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetJet2BDisc_After" % (analysisType),
+        "topSelection_%s/LdgTrijetBJetPt_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetBJetPt_After" % (analysisType),
+        "topSelection_%s/LdgTrijetBJetEta_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetBJetEta_After" % (analysisType),
+        "topSelection_%s/LdgTrijetBJetBDisc_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetBJetBDisc_After" % (analysisType),
+        "topSelection_%s/LdgTrijetDiJetPt_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetDiJetPt_After" % (analysisType),
+        "topSelection_%s/LdgTrijetDiJetEta_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetDiJetEta_After" % (analysisType),
+        "topSelection_%s/LdgTrijetDiJetMass_Before" % (analysisType),
+        "topSelection_%s/LdgTrijetDiJetMass_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetPt_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetPt_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetMass_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetMass_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet1Pt_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet1Pt_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet1Eta_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet1Eta_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet1BDisc_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet1BDisc_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet2Pt_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet2Pt_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet2Eta_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet2Eta_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet2BDisc_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetJet2BDisc_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetBJetPt_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetBJetPt_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetBJetEta_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetBJetEta_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetBJetBDisc_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetBJetBDisc_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetDiJetPt_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetDiJetPt_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetDiJetEta_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetDiJetEta_After" % (analysisType),
+        "topSelection_%s/SubldgTrijetDiJetMass_Before" % (analysisType),
+        "topSelection_%s/SubldgTrijetDiJetMass_After" % (analysisType),
+        # "topSelection_%s/Trijet1MassVsChiSqr_Before" % (analysisType),
+        # "topSelection_%s/Trijet2MassVsChiSqr_Before" % (analysisType),
+        # "topSelection_%s/Trijet1MassVsChiSqr_After" % (analysisType),
+        # "topSelection_%s/Trijet2MassVsChiSqr_After" % (analysisType),
+        # "topSelection_%s/Trijet1DijetPtVsDijetDR_Before" % (analysisType),
+        # "topSelection_%s/Trijet2DijetPtVsDijetDR_Before" % (analysisType),
+        # "topSelection_%s/Trijet1DijetPtVsDijetDR_After" % (analysisType),
+        # "topSelection_%s/Trijet2DijetPtVsDijetDR_After" % (analysisType),
         ]
     return histoList
 
@@ -697,7 +664,7 @@ def getHistos(datasetsMgr, datasetName, name1, name2):
 
 
 def BaselineVsInvertedComparison(datasetsMgr, histoName):
-
+    
     p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, "Data", "topSelection_Baseline/%s" % histoName, "topSelection_Inverted/%s" % histoName))
     p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
@@ -717,9 +684,8 @@ def BaselineVsInvertedComparison(datasetsMgr, histoName):
     inverted_QCD.Add(inverted_EWK, -1)
 
     # Normalize histograms to unit area
-    if 1:
-        baseline_QCD.Scale(1.0/baseline_QCD.Integral())
-        inverted_QCD.Scale(1.0/inverted_QCD.Integral())
+    baseline_QCD.Scale(1.0/baseline_QCD.Integral())
+    inverted_QCD.Scale(1.0/inverted_QCD.Integral())
 
     # Create the final plot object
     p = plots.ComparisonManyPlot(baseline_QCD, [inverted_QCD], saveFormats=[]) #[".C", ".png", ".pdf"])
@@ -740,13 +706,18 @@ def BaselineVsInvertedComparison(datasetsMgr, histoName):
             "Inverted-QCD" : "Inverted (QCD)",
             })
 
-    # Draw the histograms
+    # Draw the histograms. FixMe
+    _rebinX = 1
+    if "Mass" or "ChiSqr" in histoName:
+        _rebinX = 2
+        Print("Rebin is set to %s for %s" % (_rebinX, histoName), True)
+
     plots.drawPlot(p, histoName,  
                    ylabel = "Events / %.0f",
                    log = True, 
-                   rebinX = 1, cmsExtraText = "Preliminary", 
+                   rebinX = _rebinX, cmsExtraText = "Preliminary", 
                    createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
-                   opts  = {"ymin": 1e0, "ymaxfactor": 10},
+                   opts  = {"ymin": 1e-4, "ymaxfactor": 1.2},
                    opts2 = {"ymin": 0.6, "ymax": 1.4},
                    ratio = True,
                    ratioInvert = False, 
@@ -799,13 +770,13 @@ def DataEwkQcd(datasetsMgr, histoName, analysisType):
     
     # Create the final plot object. The Data is treated as the reference histo. 
     # All other histograms are compared with respect to that. 
-    p = plots.ComparisonManyPlot(Data, [QCD, EWK])
+    p = plots.ComparisonManyPlot(Data, [QCD, EWK], saveFormats=[])
     p.setLuminosity(GetLumi(datasetsMgr))
 
     # Apply histo styles
     p.histoMgr.forHisto(analysisType + "-Data", styles.getDataStyle() )
     p.histoMgr.forHisto(analysisType + "-QCD" , styles.getQCDLineStyle() )
-    p.histoMgr.forHisto(analysisType + "-EWK" , styles.stylesCompound[2]) #styles.getEWKStyle() )
+    p.histoMgr.forHisto(analysisType + "-EWK" , styles.getAltEWKStyle() )
 
     # Set draw style
     p.histoMgr.setHistoDrawStyle(analysisType + "-Data", "P")
@@ -824,12 +795,17 @@ def DataEwkQcd(datasetsMgr, histoName, analysisType):
             })
     
     # Draw the histograms
-    _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    #_cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    _rebinX = 1
+    if "Mass" in histoName:
+        _rebinX = 2
+        Print("Rebin is set to %s for %s" % (_rebinX, histoName), True)
+
     histoName += "_" + analysisType
     plots.drawPlot(p, histoName,  
                    ylabel = "Events / %.0f",
                    log = True, 
-                   rebinX = 1, cmsExtraText = "Preliminary", 
+                   rebinX = _rebinX, cmsExtraText = "Preliminary", 
                    createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
                    opts  = {"ymin": 1e0, "ymaxfactor": 10},
                    opts2 = {"ymin": 1e-5, "ymax": 1e0},
@@ -888,6 +864,7 @@ if __name__ == "__main__":
     LATEX        = False
     MCONLY       = False
     MERGEEWK     = False
+    FRACTIONEWK  = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     SEARCHMODE   = "80to1000"
@@ -921,6 +898,9 @@ if __name__ == "__main__":
     parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
                       help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
 
+    parser.add_option("--fractionEWK", dest="fractionEWK", action="store_true", default=FRACTIONEWK, 
+                      help="The contribution of each sample to the total EWK  will also be calculated [default: %s]" % FRACTIONEWK)
+
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
     
@@ -951,14 +931,18 @@ if __name__ == "__main__":
     parser.add_option("--noError", dest="valueOnly", action="store_true", default=NOERROR,
                       help="Don't print statistical errors in tables [default: %s]" % (NOERROR) )
 
-
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
+    if len(sys.argv) < 2:
+        parser.print_help()
+        sys.exit(1)
+
     if opts.mcrab == None:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
-        print __doc__
-        sys.exit(0)
+        parser.print_help()
+        #print __doc__
+        sys.exit(1)
 
     # Call the main function
     main(opts)

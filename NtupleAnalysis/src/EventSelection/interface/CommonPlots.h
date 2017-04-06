@@ -55,6 +55,8 @@ public:
   const HistogramSettings& getMtBinSettings() const { return fMtBinSettings; }
   /// Returns the histogram settings for Mt bins (usecase: QCD measurement)
   const HistogramSettings& getBJetDiscBinSettings() const { return fBJetDiscriminatorBinSettings;}
+  /// Returns the histogram settings for Njets bins (usecase: FakeB measurement)
+  const HistogramSettings& getNjetsBinSettings() const { return fNjetsBinSettings;}
 
   /** Special method for setting genuine tau status 
     * (it is usually set through TauSelection via CommonPlots::fillControlPlotsAfterTauSelection)
