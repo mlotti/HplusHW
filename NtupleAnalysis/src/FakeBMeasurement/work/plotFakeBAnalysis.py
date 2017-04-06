@@ -81,6 +81,12 @@ def GetLumi(datasetsMgr):
     return lumi
 
 
+def GetListOfEwkDatasets():
+    Verbose("Getting list of EWK datasets")
+    #return ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+
+
 def GetDatasetsFromDir(opts):
     Verbose("Getting datasets")
     
@@ -143,7 +149,9 @@ def main(opts):
     datasetsMgr.PrintInfo()
 
     # Re-order datasets (different for inverted than default=baseline)
-    newOrder = ["Data", "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+    newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+    newOrder.extend(GetListOfEwkDatasets())
+
     if opts.mcOnly:
         newOrder.remove("Data")
     datasetsMgr.selectAndReorder(newOrder)
@@ -155,7 +163,7 @@ def main(opts):
 
     # Merge EWK samples
     if opts.mergeEWK:
-        datasetsMgr.merge("EWK", ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"])
+        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
         plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
     # Apply TDR style
@@ -164,11 +172,11 @@ def main(opts):
 
 
     # Do the Purity Triples
-    if 1:
+    if 0:
         Print("Plotting Purity Triplet Histograms", True)
-        #PurityTripletPlots(datasetsMgr, analysisType="")
+        PurityTripletPlots(datasetsMgr, analysisType="")
         PurityTripletPlots(datasetsMgr, analysisType="EWKFakeB")
-        #PurityTripletPlots(datasetsMgr, analysisType="EWKGenuineB")
+        PurityTripletPlots(datasetsMgr, analysisType="EWKGenuineB")
         
     # Do the standard top-selections
     if 0:
@@ -183,135 +191,21 @@ def main(opts):
         OtherHistograms(datasetsMgr, analysisType="Inverted")
 
     # Do the Baseline Vs Inverted histograms
-    if 0:
+    if opts.mergeEWK:
         for hName in getTopSelectionHistos():
             BaselineVsInvertedComparison(datasetsMgr, hName.split("/")[-1])
+    else:
+        Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
 
-    # Do the Data/QCD/EWK plots 
-    if 0:
+    # Do the Data/QCD/EWK histograms
+    if opts.mergeEWK:
         analysisTypes = ["Baseline", "Inverted"]
         for analysis in analysisTypes:
             for hName in getTopSelectionHistos(analysis):
                 DataEwkQcd(datasetsMgr, hName.split("/")[-1], analysis)
-                break
-
-    # Print/Save the counters and sub-counters
-    if 0:
-        doCounters(datasetsMgr)
-
-    return
-
-
-def doCounters(datasetsMgr):
-    '''
-    Print values for counters and sub-counters (if -s option is invoked)
-
-    Options:
-    --latex (The table formatting is in LaTeX instead of plain text)
-    --format (The table value-format of strings)
-    --precision (The table value-precision)
-    --noError (Don't print statistical errors in tables)
-    --mergeEWK (Merge all EWK samples into a single sample called EWK)
-    -i (List of datasets in mcrab to include)
-    -e (List of datasets in mcrab to exclude)
-    '''
-    Verbose("Doing the counters")
-
-    # Definitions
-    eventCounter = counter.EventCounter(datasetsMgr)
-    ewkDatasets = ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
-
-    if opts.mcOnly and opts.intLumi>-1.0:
-        eventCounter.normalizeMCToLuminosity(opts.intLumi)
     else:
-        eventCounter.normalizeMCByLuminosity()
-        # eventCounter.normalizeMCByCrossSection()
+        Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
 
-    # Print the counters
-    hLine    = "="*10
-    msg = " Main counter (MC normalized by collision data luminosity) "
-    print "\n" + hLine + msg + hLine
-
-    # Construct the table
-    mainTable = eventCounter.getMainCounterTable()
-
-    # Only keep selected rows?
-    rows = [
-        #"ttree: skimCounterAll",
-        #"ttree: skimCounterPassed",
-        #"Base::AllEvents", 
-        #"Base::PUReweighting",
-        #"Base::Prescale", 
-        #"Base::Weighted events with top pT",
-        #"Base::Weighted events for exclusive samples",
-        "All events",
-        "Passed trigger",
-        "passed METFilter selection ()",
-        "Passed PV",
-        "passed e selection (Veto)",
-        "passed mu selection (Veto)",
-        "Passed tau selection (Veto)",
-        #"Passed tau selection and genuine (Veto)",
-        "passed jet selection ()",
-        #"passed b-jet selection ()",
-        #"passed light-jet selection ()",
-        "Baseline: passed b-jet selection",
-        "Baseline: b tag SF",
-        #"passed MET selection (Baseline)",
-        "passed topology selection (Baseline)",
-        "passed top selection (Baseline)",
-        "Baseline: selected events",
-        "Inverted: passed b-jet veto",
-        "Inverted: b tag SF",
-        #"passed MET selection (Inverted)",
-        "passed topology selection (Inverted)",
-        "passed top selection (Inverted)",
-        "Inverted: selected events"
-        ]
-    mainTable.keepOnlyRows(rows)
-
-    # Get number of rows/columns
-    nRows    = mainTable.getNrows()
-    nColumns = mainTable.getNcolumns()
-
-    # Merge EWK into a new column?
-    if not opts.mergeEWK:
-        mainTable.insertColumn(nColumns, counter.sumColumn("EWK", [mainTable.getColumn(name=name) for name in ewkDatasets]))
-
-    # Additional column (through inter-column operations)
-    mainTable.insertColumn(mainTable.getNcolumns(), counter.subtractColumn("Data-EWK", mainTable.getColumn(name="Data"), mainTable.getColumn(name="EWK") ) )
-    mainTable.insertColumn(mainTable.getNcolumns(), counter.divideColumn("QCD Purity", mainTable.getColumn(name="Data-EWK"), mainTable.getColumn(name="Data") ) )
-
-    columnsToKeep = ["Data", "EWK", "QCD Purity"]
-    mainTable.keepOnlyColumns(columnsToKeep)
-
-    # Optional: Produce table in Text or LaTeX format?
-    if opts.latex:
-        cellFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueOnly=opts.valueOnly, valueFormat=opts.format, withPrecision=opts.precision))
-    else:
-        cellFormat = counter.TableFormatText(cellFormat=counter.CellFormatText(valueOnly=opts.valueOnly, valueFormat=opts.format, withPrecision=opts.precision))
-    print mainTable.format(cellFormat)
-
-    # Do sub-counters?
-    subcounters = [
-        "bjet selection ()",
-        "e selection (Veto)",
-        "jet selection ()",
-        #"light-jet selection ()", 
-        "METFilter selection",
-        "METFilter selection ()", 
-        "mu selection (Veto)", 
-        "tau selection (Veto)",
-        "top selection (Baseline)",
-        "top selection (Inverted)",
-        "topology selection (Baseline)",
-        "topology selection (Inverted)"
-        ]
-
-    if opts.subcounters:
-        for sc in subcounters:
-            Print("\nSub-counter \"%s\"" % (sc), False)
-            print eventCounter.getSubCounterTable(sc).format(cellFormat)
     return
 
 
@@ -577,6 +471,10 @@ def getTopSelectionHistos(analysisType="Baseline"):
     histoList = [        
         "topSelection_%s/ChiSqr_Before" % (analysisType),
         "topSelection_%s/ChiSqr_After" % (analysisType),
+        "topSelection_%s/NJetsUsedAsBJetsInFit_Before" % (analysisType),
+        "topSelection_%s/NJetsUsedAsBJetsInFit_After" % (analysisType),
+        "topSelection_%s/NumberOfFits_Before" % (analysisType),
+        "topSelection_%s/NumberOfFits_After" % (analysisType),
         "topSelection_%s/Trijet1Mass_Before" % (analysisType),
         "topSelection_%s/Trijet2Mass_Before" % (analysisType),
         "topSelection_%s/Trijet1Mass_After" % (analysisType),
@@ -766,7 +664,7 @@ def getHistos(datasetsMgr, datasetName, name1, name2):
 
 
 def BaselineVsInvertedComparison(datasetsMgr, histoName):
-
+    
     p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, "Data", "topSelection_Baseline/%s" % histoName, "topSelection_Inverted/%s" % histoName))
     p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
@@ -966,6 +864,7 @@ if __name__ == "__main__":
     LATEX        = False
     MCONLY       = False
     MERGEEWK     = False
+    FRACTIONEWK  = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     SEARCHMODE   = "80to1000"
@@ -999,6 +898,9 @@ if __name__ == "__main__":
     parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
                       help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
 
+    parser.add_option("--fractionEWK", dest="fractionEWK", action="store_true", default=FRACTIONEWK, 
+                      help="The contribution of each sample to the total EWK  will also be calculated [default: %s]" % FRACTIONEWK)
+
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
     
@@ -1029,14 +931,18 @@ if __name__ == "__main__":
     parser.add_option("--noError", dest="valueOnly", action="store_true", default=NOERROR,
                       help="Don't print statistical errors in tables [default: %s]" % (NOERROR) )
 
-
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
+    if len(sys.argv) < 2:
+        parser.print_help()
+        sys.exit(1)
+
     if opts.mcrab == None:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
-        print __doc__
-        sys.exit(0)
+        parser.print_help()
+        #print __doc__
+        sys.exit(1)
 
     # Call the main function
     main(opts)

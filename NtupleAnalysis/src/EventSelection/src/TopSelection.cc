@@ -12,6 +12,7 @@
 
 TopSelection::Data::Data()
 : bPassedSelection(false),
+  fNumberOfFits(0.0),
   fTrijet1Jet1(),
   fTrijet1Jet2(),
   fTrijet1BJet(),
@@ -42,6 +43,7 @@ TopSelection::TopSelection(const ParameterSet& config, EventCounter& eventCounte
     cSubPassedChiSqCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed chiSq cut"))
 {
   initialize(config);
+  nSelectedBJets = -1;
 }
 
 TopSelection::TopSelection(const ParameterSet& config)
@@ -65,6 +67,10 @@ TopSelection::~TopSelection() {
   
   delete hChiSqr_Before;
   delete hChiSqr_After;
+  delete hNJetsUsedAsBJetsInFit_Before;
+  delete hNJetsUsedAsBJetsInFit_After;
+  delete hNumberOfFits_Before;
+  delete hNumberOfFits_After;
 
   delete hTrijet1Mass_Before;
   delete hTrijet2Mass_Before;
@@ -208,10 +214,17 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   const int  nBinsEta  = fCommonPlots->getEtaBinSettings().bins();
   const float minEta   = fCommonPlots->getEtaBinSettings().min();
   const float maxEta   = fCommonPlots->getEtaBinSettings().max();
+  // const int nBinsJets  = fCommonPlots->getNjetsBinSettings().bins();
+  // const int minJets    = fCommonPlots->getNjetsBinSettings().min();
+  // const int maxJets    = fCommonPlots->getNjetsBinSettings().max();
 
   // Histograms (1D)  - Delete in destructor
   hChiSqr_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChiSqr_Before", ";#chi^{2}", 300,  0.0, 300.0);
   hChiSqr_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChiSqr_After" , ";#chi^{2}", 300,  0.0, 300.0);
+  hNJetsUsedAsBJetsInFit_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NJetsUsedAsBJetsInFit_Before", ";failed b-Jets Multiplicity;Events / %0.f GeV/c^{2}", 8, 0.0, 8.0);
+  hNJetsUsedAsBJetsInFit_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NJetsUsedAsBJetsInFit_After" , ";failed b-Jets Multiplicity;Events / %0.f GeV/c^{2}", 8, 0.0, 8.0);
+  hNumberOfFits_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NumberOfFits_Before", ";number of di-top fits;Events / %0.f GeV/c^{2}", 500, 0.0, 500.0);
+  hNumberOfFits_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NumberOfFits_After" , ";number of di-top fits;Events / %0.f GeV/c^{2}", 500, 0.0, 500.0);
 
   hTrijet1Mass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet1Mass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
   hTrijet2Mass_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "Trijet2Mass_Before", ";M (GeV/c^{2})", nBinsM, minM, maxM);
@@ -329,6 +342,8 @@ void TopSelection::bookHistograms(TDirectory* dir) {
 
 TopSelection::Data TopSelection::silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
   ensureSilentAnalyzeAllowed(event.eventID());
+  nSelectedBJets = bjetData.getSelectedBJets().size();
+
   // Disable histogram filling and counter
   disableHistogramsAndCounters();
   Data myData = privateAnalyze(event, jetData.getSelectedJets(), bjetData.getSelectedBJets());
@@ -338,24 +353,25 @@ TopSelection::Data TopSelection::silentAnalyze(const Event& event, const JetSele
 
 TopSelection::Data TopSelection::silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
   ensureSilentAnalyzeAllowed(event.eventID());
-  // Disable histogram filling and counter
-  disableHistogramsAndCounters();
+  nSelectedBJets = bjetData.getSelectedBJets().size();
 
-  // If there are some bjets use them
-  std::vector<Jet> bjets = bjetData.getSelectedBJets();
-  // Append the vector of all failed bjets (in descending B-discriminator value) to the end of the bjets vector
-  bjets.insert(bjets.end(), bjetData.getFailedBJetCandsDescendingDiscr().begin(), bjetData.getFailedBJetCandsDescendingDiscr().end());
-  // Now truncate the bjets vector 
-  bjets.resize(5);
-  Data myData = privateAnalyzeWithoutBJets(event, jetData.getSelectedJets(), bjets );
+  // Disable histogram filling and counter
+  disableHistogramsAndCounters();  
+  // Ready to analyze 
+  Data data = privateAnalyzeWithoutBJets(event, jetData.getSelectedJets(), GetBJetsToBeUsedInFit(bjetData, 3) );
+  // Re-enable histogram filling and counter
   enableHistogramsAndCounters();
-  return myData;
+  return data;
 }
 
 
 TopSelection::Data TopSelection::analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
   ensureAnalyzeAllowed(event.eventID());
+  nSelectedBJets = bjetData.getSelectedBJets().size();
+
+  // Ready to analyze
   TopSelection::Data data = privateAnalyze(event, jetData.getSelectedJets(), bjetData.getSelectedBJets());
+
   // Send data to CommonPlots
   // if (fCommonPlots != nullptr) fCommonPlots->fillControlPlotsAtTopSelection(event, data); //fixme
   return data;
@@ -363,9 +379,11 @@ TopSelection::Data TopSelection::analyze(const Event& event, const JetSelection:
 
 TopSelection::Data TopSelection::analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
   ensureAnalyzeAllowed(event.eventID());
-  std::vector<Jet> bjets = bjetData.getFailedBJetCandsDescendingDiscr();
-  bjets.resize(3);
-  TopSelection::Data data = privateAnalyze(event, jetData.getSelectedJets(), bjets);
+  nSelectedBJets = bjetData.getSelectedBJets().size();
+
+  // Ready to analyze
+  TopSelection::Data data = privateAnalyze(event, jetData.getSelectedJets(), GetBJetsToBeUsedInFit(bjetData, 3) );
+
   // Send data to CommonPlots
   // if (fCommonPlots != nullptr) fCommonPlots->fillControlPlotsAtTopSelection(event, data);
   return data;
@@ -376,6 +394,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   cSubAll.increment();
   
   // Initialise variables
+  output.fJetsUsedAsBJetsInFit = bjets;
   std::vector<unsigned int> bjet1;
   std::vector<unsigned int> bjet2;
   std::vector<unsigned int> jet1;
@@ -388,7 +407,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   
   double minChiSqr = 999999.9;
   // For-loop: All jet indices
-  for (unsigned int index=0; index < jet1.size(); index++)
+  for (unsigned int index=0; index < jet1.size(); index++, output.fNumberOfFits++)
     {
       // Construct chi-square variable using jets(1-4) and b-jets(1-2)
       unsigned int b1 = bjet1.at(index);
@@ -418,13 +437,14 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
 	output.fTrijet2BJet = jets.at(b2);
 	output.fTrijet2Dijet_p4   = output.fTrijet2Jet1.p4() + output.fTrijet2Jet2.p4();
 	output.fTrijet2_p4  = output.fTrijet2Dijet_p4 + output.fTrijet2BJet.p4();
-	
       }
 
     }
 
   // Fill Histograms (Before cuts)
   hChiSqr_Before->Fill( output.fChiSqr );
+  hNJetsUsedAsBJetsInFit_Before->Fill( output.fJetsUsedAsBJetsInFit.size() - nSelectedBJets );
+  hNumberOfFits_Before->Fill( output.fNumberOfFits );
   hTrijet1Mass_Before->Fill(output.fTrijet1_p4.mass());
   hTrijet2Mass_Before->Fill(output.fTrijet2_p4.mass());
   hTrijet1Pt_Before->Fill(output.fTrijet1_p4.pt());
@@ -529,6 +549,8 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
 
   // Fill Histograms (After cuts)
   hChiSqr_After->Fill( output.fChiSqr );
+  hNJetsUsedAsBJetsInFit_After->Fill( output.fJetsUsedAsBJetsInFit.size() - nSelectedBJets );
+  hNumberOfFits_After->Fill( output.fNumberOfFits );
   hTrijet1Mass_After->Fill( output.fTrijet1_p4.mass() );
   hTrijet2Mass_After->Fill( output.fTrijet2_p4.mass() );
   hTrijet1Pt_After->Fill( output.fTrijet1_p4.pt() );
@@ -679,6 +701,23 @@ double TopSelection::CalculateChiSqrForTrijetSystems(const Jet& jet1,
 
   return chiSq;
 }
+
+
+const std::vector<Jet> TopSelection::GetBJetsToBeUsedInFit(const BJetSelection::Data& bjetData, const unsigned int maxNumberOfBJetsToUse)
+{
+  // If there are some bjets use them
+  std::vector<Jet> bjetsForFit = bjetData.getSelectedBJets();
+
+  // Append the vector of all failed bjets (in descending B-discriminator value) to the end of the bjets vector
+  bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCandsDescendingDiscr().begin(), bjetData.getFailedBJetCandsDescendingDiscr().end());
+
+  // Now truncate the bjets vector 
+  bjetsForFit.resize(maxNumberOfBJetsToUse);
+
+  return bjetsForFit;
+}
+  
+
 
 void TopSelection::GetJetIndicesForChiSqrFit(const std::vector<Jet> jets, 
 					     const std::vector<Jet> bjets,

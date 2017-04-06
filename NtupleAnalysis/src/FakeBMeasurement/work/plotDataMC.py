@@ -84,6 +84,12 @@ def GetLumi(datasetsMgr):
     return lumi
 
 
+def GetListOfEWkDatasets():
+    Verbose("Getting list of EWK datasets")
+    #return ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+
+
 def GetDatasetsFromDir(opts, json):
     Verbose("Getting datasets")
 
@@ -149,7 +155,7 @@ def Plot(jsonfile, opts):
 
         # Merge EWK samples?
         if opts.mergeEWK:
-            datasetsMgr.merge("EWK", ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"])
+            datasetsMgr.merge("EWK", GetListOfEWkDatasets())
             plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Print dataset information
