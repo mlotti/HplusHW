@@ -221,8 +221,8 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   // Histograms (1D)  - Delete in destructor
   hChiSqr_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChiSqr_Before", ";#chi^{2}", 300,  0.0, 300.0);
   hChiSqr_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "ChiSqr_After" , ";#chi^{2}", 300,  0.0, 300.0);
-  hNJetsUsedAsBJetsInFit_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NJetsUsedAsBJetsInFit_Before", ";failed b-Jets Multiplicity;Events / %0.f GeV/c^{2}", 8, 0.0, 8.0);
-  hNJetsUsedAsBJetsInFit_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NJetsUsedAsBJetsInFit_After" , ";failed b-Jets Multiplicity;Events / %0.f GeV/c^{2}", 8, 0.0, 8.0);
+  hNJetsUsedAsBJetsInFit_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NJetsUsedAsBJetsInFit_Before", ";failed b-Jets Multiplicity;Events / %0.f GeV/c^{2}", 8, -0.5, 7.5);
+  hNJetsUsedAsBJetsInFit_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NJetsUsedAsBJetsInFit_After" , ";failed b-Jets Multiplicity;Events / %0.f GeV/c^{2}", 8, -0.5, 7.5);
   hNumberOfFits_Before = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NumberOfFits_Before", ";number of di-top fits;Events / %0.f GeV/c^{2}", 500, 0.0, 500.0);
   hNumberOfFits_After  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "NumberOfFits_After" , ";number of di-top fits;Events / %0.f GeV/c^{2}", 500, 0.0, 500.0);
 

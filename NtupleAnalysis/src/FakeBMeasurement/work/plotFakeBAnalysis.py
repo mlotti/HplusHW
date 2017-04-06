@@ -16,14 +16,8 @@ Usage:
 Examples:
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -v
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -i "JetHT|TT"
-./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --latex --mergeEWK
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats/ --mcOnly --intLumi 100000
 
-Examples (tables):
-./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats --noError --format %.3f --latex
-./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK
-./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK --latex -s
-./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK --latex -s --histoLevel Debug
 '''
 
 #================================================================================================ 
@@ -191,21 +185,33 @@ def main(opts):
         OtherHistograms(datasetsMgr, analysisType="Inverted")
 
     # Do the Baseline Vs Inverted histograms
-    if opts.mergeEWK:
-        for hName in getTopSelectionHistos():
-            BaselineVsInvertedComparison(datasetsMgr, hName.split("/")[-1])
-    else:
-        Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
+    if 0:
+        if opts.mergeEWK:
+            for hName in getTopSelectionHistos():
+                BaselineVsInvertedComparison(datasetsMgr, hName.split("/")[-1])
+        else:
+            Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
 
     # Do the Data/QCD/EWK histograms
-    if opts.mergeEWK:
-        analysisTypes = ["Baseline", "Inverted"]
-        for analysis in analysisTypes:
-            for hName in getTopSelectionHistos(analysis):
-                DataEwkQcd(datasetsMgr, hName.split("/")[-1], analysis)
-    else:
-        Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
+    if 0:
+        if opts.mergeEWK:
+            analysisTypes = ["Baseline", "Inverted"]
+            for analysis in analysisTypes:
+                for hName in getTopSelectionHistos(analysis):
+                    DataEwkQcd(datasetsMgr, hName.split("/")[-1], analysis)
+        else:
+            Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
 
+
+    if 1:
+        if opts.mergeEWK:
+            analysisTypes = ["Baseline", "Inverted"]
+            for analysis in analysisTypes:
+                for hName in getTopSelectionHistos(analysis):
+                    EWKvQCD(datasetsMgr, hName.split("/")[-1], analysis)
+        else:
+            Print("Cannot draw the EWKvQCD histograms without the option --mergeEWK. Exit", True)
+                    
     return
 
 
@@ -730,6 +736,83 @@ def BaselineVsInvertedComparison(datasetsMgr, histoName):
     return
 
 
+def EWKvQCD(datasetsMgr, histoName, analysisType=""):
+    '''
+    '''
+    Verbose("Plotting EWK Vs QCD unity-normalised histograms for %s" % analysisType)
+    # Sanity check
+    IsBaselineOrInverted(analysisType)
+
+    p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, "Data", "topSelection_Baseline/%s" % histoName, "topSelection_Inverted/%s" % histoName))
+    p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+
+    p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, "EWK", "topSelection_Baseline/%s" % histoName, "topSelection_Inverted/%s" % histoName) )
+    p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+
+    # Get Data histos    
+    data = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType+ " -Data")
+    # Get EWK histos
+    EWK = p2.histoMgr.getHisto(analysisType + "-EWK").getRootHisto().Clone(analysisType + "-EWK")
+    # Create QCD histos: QCD = Data-EWK
+    QCD = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType + "-QCD")
+    QCD.Add(EWK, -1)
+
+    # Normalize histograms to unit area
+    QCD.Scale(1.0/QCD.Integral())
+    EWK.Scale(1.0/EWK.Integral())
+
+    # Create the final plot object
+    p = plots.ComparisonManyPlot(QCD, [EWK], saveFormats=[]) #[".C", ".png", ".pdf"])
+    p.setLuminosity(GetLumi(datasetsMgr))
+        
+    # Apply styles
+    p.histoMgr.forHisto(analysisType + "-QCD" , styles.getQCDLineStyle() )
+    p.histoMgr.forHisto(analysisType + "-EWK" , styles.getAltEWKStyle() )
+
+    # Set draw style
+    p.histoMgr.setHistoDrawStyle(analysisType + "-QCD", "LP")
+    p.histoMgr.setHistoLegendStyle(analysisType + "-QCD", "LP")
+
+    # Set legend labels
+    p.histoMgr.setHistoLegendLabelMany({
+            analysisType + "-QCD" : analysisType + " (QCD)",
+            analysisType + "-EWK" : analysisType + " (EWK)",
+            })
+
+    # Draw the histograms. FixMe
+    _rebinX     = 1
+    _log        = True
+    _ymaxfactor = 1.2
+    _xmax = None
+    _cutBox = None
+    if "Mass" or "ChiSqr" in histoName:
+        _rebinX = 1
+        _log = False
+        _ymaxfactor = 1.2
+        _xmax = 800
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        Print("Rebin is set to %s for %s" % (_rebinX, histoName), True)
+
+    # Append analysisType to histogram name
+    histoName += "_" + analysisType
+    plots.drawPlot(p, histoName,  
+                   ylabel = "Events / %.0f",
+                   log = _log, 
+                   rebinX = _rebinX, cmsExtraText = "Preliminary", 
+                   createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
+                   opts  = {"xmax": _xmax, "ymin": 1e-4, "ymaxfactor": _ymaxfactor},
+                   opts2 = {"ymin": 0.6, "ymax": 1.4},
+                   ratio = True,
+                   ratioInvert = False, 
+                   ratioYlabel = "Ratio",
+                   cutBox = _cutBox,
+                   )
+    
+    # For-loop: All save formats
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "EWKvQCD") ) 
+    return
+
+
 def IsBaselineOrInverted(analysisType):
     analysisTypes = ["Baseline", "Inverted"]
     if analysisType not in analysisTypes:
@@ -857,14 +940,12 @@ if __name__ == "__main__":
     ANALYSISNAME = "FakeBMeasurement"
     BATCHMODE    = True
     DATAERA      = "Run2016"
-    FORMAT       = "%.3f"
     PRECISION    = 3
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
     MERGEEWK     = False
-    FRACTIONEWK  = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     SEARCHMODE   = "80to1000"
@@ -898,9 +979,6 @@ if __name__ == "__main__":
     parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
                       help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
 
-    parser.add_option("--fractionEWK", dest="fractionEWK", action="store_true", default=FRACTIONEWK, 
-                      help="The contribution of each sample to the total EWK  will also be calculated [default: %s]" % FRACTIONEWK)
-
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
     
@@ -910,26 +988,11 @@ if __name__ == "__main__":
     parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
                       help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
-    parser.add_option("-s", "--subcounters", dest="subcounters", action="store_true", default=SUBCOUNTERS, 
-                      help="Print also the sub-counters [default: %s]" % SUBCOUNTERS)
-
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
 
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
-
-    parser.add_option("--latex", dest="latex", action="store_true", default=LATEX,
-                      help="The table formatting is in LaTeX instead of plain text (ready for generation)  [default: %s]" % (LATEX) )
-    
-    parser.add_option("--format", dest="format", default=FORMAT,
-                      help="The table value-format of strings [default: %s]" % (FORMAT) )
-
-    parser.add_option("--precision", dest="precision", type=int, default=PRECISION,
-                      help="The table value-precision [default: %s]" % (PRECISION) )
-
-    parser.add_option("--noError", dest="valueOnly", action="store_true", default=NOERROR,
-                      help="Don't print statistical errors in tables [default: %s]" % (NOERROR) )
 
     (opts, parseArgs) = parser.parse_args()
 
