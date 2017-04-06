@@ -179,6 +179,9 @@ def DataMCPlot(datasetsMgr, json):
 
     # Draw a customised plot
     saveName = os.path.join(json["saveDir"], json["title"])
+    _moveLegend = json["moveLegend"]
+    if opts.mergeEWK:
+        _moveLegend = {"dx": -0.1, "dy": -0.36, "dh": -0.1}
     plots.drawPlot(p, 
                    saveName,                  
                    xlabel            = json["xlabel"], 
@@ -197,7 +200,7 @@ def DataMCPlot(datasetsMgr, json):
                    opts2             = json["ratioOpts"], 
                    log               = json["logY"]=="True", 
                    errorBarsX        = json["errorBarsX"]=="True", 
-                   moveLegend        = json["moveLegend"],
+                   moveLegend        = _moveLegend,
                    # cutLine           = json["cutValue"], #cannot have this and "cutBox" defined
                    cutBox            = {"cutValue": json["cutValue"], "fillColor": json["cutFillColour"], "box": json["cutBox"]=="True", "line": json["cutLine"]=="True", "greaterThan": json["cutGreaterThan"]=="True"},
                    xlabelsize        = xlabelSize,
@@ -281,7 +284,7 @@ if __name__ == "__main__":
     global opts
     BATCHMODE = True
     VERBOSE   = False
-    MERGEEWK  = True
+    MERGEEWK  = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")

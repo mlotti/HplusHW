@@ -602,28 +602,13 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Fill final plots
   //================================================================================================
-  // For-loop: Selected b-jets                                                                                                                                                                                             
-  if (0) 
-    {
-      for (auto bjet: bjetData.getFailedBJetCandsDescendingDiscr() ) 
-	{
-	  std::cout << "FAIL: b-discriminator = " << bjet.bjetDiscriminator() << ", pt = " << bjet.pt() << ", eta = " << bjet.eta() 
-		    << ", pdgId = " << bjet.pdgId() << ", hadronFlavour = " << bjet.hadronFlavour() << ", partonFlavour = " << bjet.hadronFlavour()
-		    << ", originatesFromW() = " << bjet.originatesFromW() << ", originatesFromZ() = " << bjet.originatesFromZ() 
-		    << ", originatesFromTop()  = " << bjet.originatesFromTop() << ", originatesFromChargedHiggs() = " << bjet.originatesFromChargedHiggs() 
-		    << ", originatesFromUnknown() = " << bjet.originatesFromUnknown() << std::endl;
-	}
-      std::cout << "\n" << std::endl;
-    }
-  
-
   Jet bjet= bjetData.getFailedBJetCandsDescendingDiscr()[0];
   bool isGenuineB = abs(bjet.pdgId() == 5); // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
-  int ancestryBit = pow(0, bjet.originatesFromZ())  
-    + pow(1, 2*bjet.originatesFromW())
-    + pow(2, 2*bjet.originatesFromTop())
-    + pow(3, 2*bjet.originatesFromChargedHiggs())
-    + pow(4, 2*bjet.originatesFromUnknown());
+  int ancestryBit = ( pow(2, 0)*bjet.originatesFromZ() +
+		      pow(2, 1)*bjet.originatesFromW() +
+		      pow(2, 2)*bjet.originatesFromTop() +
+		      pow(2, 3)*bjet.originatesFromChargedHiggs() +
+		      pow(2, 4)*bjet.originatesFromUnknown() );
 
   // For real data fill obth the histograms in inclusive and "FakeB" folders (but not "GenuineB")
   hInverted_FailedBJetWithBestBDiscBDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator());

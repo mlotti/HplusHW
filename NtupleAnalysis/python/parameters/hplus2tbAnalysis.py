@@ -198,7 +198,7 @@ scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoin
 #================================================================================================
 fakeBMeasurement = PSet(
     InvertedBjetsCutValue     = 2,
-    InvertedBjetsCutDirection = "==",    # options: ==, !=, <, <=, >, >=
+    InvertedBjetsCutDirection = "<=",    # options: ==, !=, <, <=, >, >=
     )
 
 

@@ -423,7 +423,6 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
 
     }
 
-  return output;
   // Fill Histograms (Before cuts)
   hChiSqr_Before->Fill( output.fChiSqr );
   hTrijet1Mass_Before->Fill(output.fTrijet1_p4.mass());
@@ -452,7 +451,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
       // Leading
       hLdgTrijetPt_Before       ->Fill(output.fTrijet1_p4.pt());
       hLdgTrijetMass_Before     ->Fill(output.fTrijet1_p4.mass());
-      hLdgTrijetJet1Pt_Before   ->Fill(output.fTrijet1Jet1.eta());
+      hLdgTrijetJet1Pt_Before   ->Fill(output.fTrijet1Jet1.pt());
       hLdgTrijetJet1Eta_Before  ->Fill(output.fTrijet1Jet1.eta());
       hLdgTrijetJet1BDisc_Before->Fill(output.fTrijet1Jet1.bjetDiscriminator());
       hLdgTrijetJet2Pt_Before   ->Fill(output.fTrijet1Jet2.pt());
@@ -469,7 +468,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
       hSubldgTrijetMass_Before     ->Fill(output.fTrijet2_p4.mass());
       hSubldgTrijetPt_Before       ->Fill(output.fTrijet2_p4.pt());
       hSubldgTrijetMass_Before     ->Fill(output.fTrijet2_p4.mass());
-      hSubldgTrijetJet1Pt_Before   ->Fill(output.fTrijet2Jet1.eta());
+      hSubldgTrijetJet1Pt_Before   ->Fill(output.fTrijet2Jet1.pt());
       hSubldgTrijetJet1Eta_Before  ->Fill(output.fTrijet2Jet1.eta());
       hSubldgTrijetJet1BDisc_Before->Fill(output.fTrijet2Jet1.bjetDiscriminator());
       hSubldgTrijetJet2Pt_Before   ->Fill(output.fTrijet2Jet2.pt());
@@ -487,7 +486,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
       // Leading
       hLdgTrijetPt_Before       ->Fill(output.fTrijet2_p4.pt());
       hLdgTrijetMass_Before     ->Fill(output.fTrijet2_p4.mass());
-      hLdgTrijetJet1Pt_Before   ->Fill(output.fTrijet2Jet1.eta());
+      hLdgTrijetJet1Pt_Before   ->Fill(output.fTrijet2Jet1.pt());
       hLdgTrijetJet1Eta_Before  ->Fill(output.fTrijet2Jet1.eta());
       hLdgTrijetJet1BDisc_Before->Fill(output.fTrijet2Jet1.bjetDiscriminator());
       hLdgTrijetJet2Pt_Before   ->Fill(output.fTrijet2Jet2.pt());
@@ -502,7 +501,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
       // Subleading
       hSubldgTrijetPt_Before       ->Fill(output.fTrijet1_p4.pt());
       hSubldgTrijetMass_Before     ->Fill(output.fTrijet1_p4.mass());
-      hSubldgTrijetJet1Pt_Before   ->Fill(output.fTrijet1Jet1.eta());
+      hSubldgTrijetJet1Pt_Before   ->Fill(output.fTrijet1Jet1.pt());
       hSubldgTrijetJet1Eta_Before  ->Fill(output.fTrijet1Jet1.eta());
       hSubldgTrijetJet1BDisc_Before->Fill(output.fTrijet1Jet1.bjetDiscriminator());
       hSubldgTrijetJet2Pt_Before   ->Fill(output.fTrijet1Jet2.pt());
@@ -556,7 +555,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
       // Leading
       hLdgTrijetPt_After        ->Fill(output.fTrijet1_p4.pt());
       hLdgTrijetMass_After      ->Fill(output.fTrijet1_p4.mass());
-      hLdgTrijetJet1Pt_After    ->Fill(output.fTrijet1Jet1.eta());
+      hLdgTrijetJet1Pt_After    ->Fill(output.fTrijet1Jet1.pt());
       hLdgTrijetJet1Eta_After   ->Fill(output.fTrijet1Jet1.eta());
       hLdgTrijetJet1BDisc_After ->Fill(output.fTrijet1Jet1.bjetDiscriminator());
       hLdgTrijetJet2Pt_After    ->Fill(output.fTrijet1Jet2.pt());
@@ -569,7 +568,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
       hLdgTrijetDiJetEta_After  ->Fill(output.fTrijet1Dijet_p4.eta());
       hLdgTrijetDiJetMass_After ->Fill(output.fTrijet1Dijet_p4.mass());
       // Subleading
-      hSubldgTrijetJet1Pt_After    ->Fill(output.fTrijet2Jet1.eta());
+      hSubldgTrijetJet1Pt_After    ->Fill(output.fTrijet2Jet1.pt());
       hSubldgTrijetJet1Eta_After   ->Fill(output.fTrijet2Jet1.eta());
       hSubldgTrijetJet1BDisc_After ->Fill(output.fTrijet2Jet1.bjetDiscriminator());
       hSubldgTrijetJet2Pt_After    ->Fill(output.fTrijet2Jet2.pt());
@@ -587,7 +586,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
       // Leading
       hLdgTrijetPt_After        ->Fill(output.fTrijet2_p4.pt());
       hLdgTrijetMass_After      ->Fill(output.fTrijet2_p4.mass());
-      hLdgTrijetJet1Pt_After    ->Fill(output.fTrijet2Jet1.eta());
+      hLdgTrijetJet1Pt_After    ->Fill(output.fTrijet2Jet1.pt());
       hLdgTrijetJet1Eta_After   ->Fill(output.fTrijet2Jet1.eta());
       hLdgTrijetJet1BDisc_After ->Fill(output.fTrijet2Jet1.bjetDiscriminator());
       hLdgTrijetJet2Pt_After    ->Fill(output.fTrijet2Jet2.pt());
@@ -602,7 +601,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
       // Subleading
       hSubldgTrijetPt_After        ->Fill(output.fTrijet1_p4.pt());
       hSubldgTrijetMass_After      ->Fill(output.fTrijet1_p4.mass());
-      hSubldgTrijetJet1Pt_After    ->Fill(output.fTrijet1Jet1.eta());
+      hSubldgTrijetJet1Pt_After    ->Fill(output.fTrijet1Jet1.pt());
       hSubldgTrijetJet1Eta_After   ->Fill(output.fTrijet1Jet1.eta());
       hSubldgTrijetJet1BDisc_After ->Fill(output.fTrijet1Jet1.bjetDiscriminator());
       hSubldgTrijetJet2Pt_After    ->Fill(output.fTrijet1Jet2.pt());
@@ -627,7 +626,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   cPassedTopSelection.increment();
   
   // Return data object
-  // return output; //alex
+  return output;
 
 }
 
