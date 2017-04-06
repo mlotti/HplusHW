@@ -23,19 +23,29 @@ import HiggsAnalysis.QCDMeasurement.QCDNormalization as QCDNormalization
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 
+### OPTIONS ###
+
 #==== Set analysis, data era, and search mode
 analysis = "QCDMeasurement"
 
 #==== Set rebin factor for normalization plots 
-# Histograms are generated with 1 GeV bin width, i.e. putting 10 here means 
-# that the fit is done on 10 GeV bins
-_rebinFactor = 10 
-#_rebinFactor = 20 # changing to this can solve fitting problems by smoothing fluctuations
+#     Histograms are generated with 1 GeV bin width, so 
+#     10 here means that the fit is done on 10 GeV bins
+#_rebinFactor = 10 
+_rebinFactor = 5 #can solve fitting problems by smoothing fluctuations
+
+#=== Set to true if you want to use HT binned WJets samples instead of inclusive
+useWJetsHT = not True
+
+#=== Set tau pT bins to be used
+selectOnlyBins = [] #["1"] # use all bins
+#selectOnlyBins = ["Inclusive"] # use only the inclusive bin
+
+
+#=== Set verbosity
+verbose = False
 
 print "Analysis name:", analysis
-
-#selectOnlyBins = [] #["1"]
-selectOnlyBins = ["Inclusive"]
 
 def usage():
     print "\n"
@@ -47,8 +57,9 @@ def treatNegativeBins(h, label):
     # Convert negative bins to zero but leave errors intact
     for k in range(0, h.GetNbinsX()+2):
         if h.GetBinContent(k) < 0.0:
-            print "histogram '%s': converted in bin %d a negative value (%f) to zero."%(label, k, h.GetBinContent(k))
             h.SetBinContent(k, 0.0)
+#            if verbose:
+#                print "histogram '%s': converted in bin %d a negative value (%f) to zero."%(label, k, h.GetBinContent(k))
 
 def main(argv, dsetMgr, moduleInfoString):
     COMBINEDHISTODIR = "ForQCDNormalization"
@@ -60,7 +71,7 @@ def main(argv, dsetMgr, moduleInfoString):
     dirs.append(sys.argv[1])
     
     # Check multicrab consistency
-    consistencyCheck.checkConsistencyStandalone(dirs[0],dsetMgr,name="QCD inverted")
+    # consistencyCheck.checkConsistencyStandalone(dirs[0],dsetMgr,name="QCD inverted") #FIXME needs to be updated
    
     # As we use weighted counters for MC normalisation, we have to
     # update the all event count to a separately defined value because
@@ -70,9 +81,9 @@ def main(argv, dsetMgr, moduleInfoString):
     # Read integrated luminosities of data dsetMgr from lumi.json
     dsetMgr.loadLuminosities()
     
-    print "Datasets list (initial):"
-    print dsetMgr.getMCDatasetNames()
-    print "\n"
+    if verbose:
+        print "Datasets list (initial):"
+        print dsetMgr.getMCDatasetNames()
 
     # Include only 120 mass bin of HW and HH dsetMgr
     dsetMgr.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, dsetMgr.getAllDatasetNames()))
@@ -80,16 +91,12 @@ def main(argv, dsetMgr, moduleInfoString):
     dsetMgr.remove(filter(lambda name: "DY2JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "DY3JetsToLL" in name, dsetMgr.getAllDatasetNames()))
     dsetMgr.remove(filter(lambda name: "DY4JetsToLL" in name, dsetMgr.getAllDatasetNames()))
-    dsetMgr.remove(filter(lambda name: "WJetsToLNu_HT" in name, dsetMgr.getAllDatasetNames()))
-    # DEBUG TEST: remove datasets to check change is behaviour
-#    dsetMgr.remove(filter(lambda name: "DYJetsToQQ" in name, dsetMgr.getAllDatasetNames()))
-#    dsetMgr.remove(filter(lambda name: "DYJetsToLL" in name, dsetMgr.getAllDatasetNames()))
-#    dsetMgr.remove(filter(lambda name: "WZ" in name, dsetMgr.getAllDatasetNames()))
-#    dsetMgr.remove(filter(lambda name: "ST" in name, dsetMgr.getAllDatasetNames()))
+    # Ignore DY dataset with HERWIG hadronization (it's only for testing)
+    dsetMgr.remove(filter(lambda name: "DYJetsToLL_M_50_HERWIGPP" in name, dsetMgr.getAllDatasetNames()), close=False)
 
-    print "Datasets after filter removals:"
-    print dsetMgr.getMCDatasetNames()
-    print "\n"
+    if verbose:
+        print "Datasets after filter removals:"
+        print dsetMgr.getMCDatasetNames()
           
         # Default merging nad ordering of data and MC dsetMgr
     # All data dsetMgr to "Data"
@@ -98,15 +105,25 @@ def main(argv, dsetMgr, moduleInfoString):
     # WW, WZ, ZZ to "Diboson"
     plots.mergeRenameReorderForDataMC(dsetMgr)
 
-    print "Datasets after mergeRenameReorderForDataMC:"
+    if verbose:
+        print "Datasets after mergeRenameReorderForDataMC:"
+        print dsetMgr.getMCDatasetNames()
+
+    # Only WJets/WJetsToLNu or WJetsToLNu_HT_* should be used (not both)
+    if useWJetsHT:
+        dsetMgr.remove(filter(lambda name: "WJets"==name, dsetMgr.getAllDatasetNames()), close=False)    
+    else:
+        dsetMgr.remove(filter(lambda name: "WJetsHT" in name, dsetMgr.getAllDatasetNames()), close=False)
+
+    print "Datasets used for EWK (after choosing between WJets or WJetsHT sample):"
     print dsetMgr.getMCDatasetNames()
-    print "\n"
 
     # Set BR(t->H) to 0.05, keep BR(H->tau) in 1
     xsect.setHplusCrossSectionsToBR(dsetMgr, br_tH=0.05, br_Htaunu=1)
 
     # Merge WH and HH dsetMgr to one (for each mass bin)
     plots.mergeWHandHH(dsetMgr)
+
     # Merge MC EWK samples as one EWK sample
     myMergeList = []
 
@@ -117,8 +134,11 @@ def main(argv, dsetMgr, moduleInfoString):
         myMergeList.append("TTJets") # Madgraph with negative weights
         print "Warning: using TTJets as input, but this is suboptimal. Please switch to the TT sample (much more stats.)."
 
-    # Always use WJets as a part of the EWK background    
-    myMergeList.append("WJets")
+    # Always use WJets as a part of the EWK background
+    if useWJetsHT:    
+        myMergeList.append("WJetsHT")
+    else:
+        myMergeList.append("WJets")
 
     # For SY, single top and diboson, use only if available:
     if "DYJetsToQQHT" in dsetMgr.getMCDatasetNames():
@@ -145,9 +165,9 @@ def main(argv, dsetMgr, moduleInfoString):
             raise Exception("Error: tried to use dataset '%s' as part of the merged EWK dataset, but the dataset '%s' does not exist!"%(item,item))
     dsetMgr.merge("EWK", myMergeList)
 
-    print "\nFinal dataset list:\n"
-    print dsetMgr.getMCDatasetNames()
-    print "\n"
+    if verbose:
+        print "\nFinal merged dataset list:\n"
+        print dsetMgr.getMCDatasetNames()
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -318,7 +338,7 @@ def main(argv, dsetMgr, moduleInfoString):
             manager.plotTemplates()
             
             #===== Fit individual templates to data
-            fitOptions = "R BLW" # RBLW
+            fitOptions = "R B L W M" # RBLWM
 
             manager.calculateNormalizationCoefficients(hmetBase_data, fitOptions, FITMIN, FITMAX)
             
@@ -342,7 +362,6 @@ def main(argv, dsetMgr, moduleInfoString):
 
         #===== Save normalization
         outFileName = "QCDNormalizationFactors_%s_%s.py"%(HISTONAME, moduleInfoString)
-        print argv[1],outFileName
         outFileFullName = os.path.join(argv[1],outFileName)
         manager.writeScaleFactorFile(outFileFullName, moduleInfoString)
 
