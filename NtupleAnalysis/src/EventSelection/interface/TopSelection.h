@@ -33,6 +33,7 @@ public:
     // Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }
     // Trijet-1
+    const std::vector<Jet>& getJetsUsedAsBJetsInFit() const { return fJetsUsedAsBJetsInFit;}
     const Jet getTrijet1Jet1() const { return fTrijet1Jet1; } 
     const Jet getTrijet1Jet2() const { return fTrijet1Jet2; } 
     const Jet getTrijet1BJet() const { return fTrijet1BJet; } 
@@ -68,17 +69,17 @@ public:
     }
 
     // Fit-related quantities
-    const std::vector<int> GetJetIndicesForChiSqrFit(const std::vector<Jet> jets, const std::vector<Jet> bjets,
-						     std::vector<unsigned int>& jet1 , std::vector<unsigned int>& jet2, 
-						     std::vector<unsigned int>& jet3 , std::vector<unsigned int>& jet4, 
-						     std::vector<unsigned int>& bjet1, std::vector<unsigned int>& bjet2);
     const double ChiSqr() const { return fChiSqr; }
-    
+    const unsigned int getNumberOfFits() const { return fNumberOfFits;}
+
     friend class TopSelection;
 
   private:
     /// Boolean for passing selection
     bool bPassedSelection;
+    /// Jets used in di-top fit
+    unsigned int fNumberOfFits;
+    std::vector<Jet> fJetsUsedAsBJetsInFit;
     /// Trijet-1
     Jet fTrijet1Jet1;
     Jet fTrijet1Jet2;
@@ -107,9 +108,11 @@ public:
   
   /// Use silentAnalyze if you do not want to fill histograms or increment counters
   Data silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  // silentAnalyze for FakeBMeasurement
   Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  // analyze for FakeBMeasurement
   Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
 
 private:
@@ -117,11 +120,13 @@ private:
   void initialize(const ParameterSet& config);
   /// The actual selection
   Data privateAnalyze(const Event& event, const std::vector<Jet> jets, const std::vector<Jet> bjets);
+  // The actual selection for FakeBMeasurement
   Data privateAnalyzeWithoutBJets(const Event& event, const std::vector<Jet> jets, const std::vector<Jet> bjets);
-  
+  // Returns true if the two jets are the same
   bool areSameJets(const Jet& jet1, const Jet& jet2);
+  // Return true if a selected jet matches a selected bjet
   bool isBJet(const Jet& jet1, const std::vector<Jet>& bjets);
-  
+  // Calculates the index combinations for the di-top fit
   void GetJetIndicesForChiSqrFit(const std::vector<Jet> jets,
 				 const std::vector<Jet> bjets,
 				 std::vector<unsigned int>& jet1,
@@ -130,13 +135,16 @@ private:
 				 std::vector<unsigned int>& jet4,
 				 std::vector<unsigned int>& bjet1,
 				 std::vector<unsigned int>& bjet2);
-
+  // Calculates the chi-squared of the di-top fit
   double CalculateChiSqrForTrijetSystems(const Jet& jet1, const Jet& jet2,
 					 const Jet& jet3, const Jet& jet4,
 					 const Jet& bjet1, const Jet& bjet2);
-  
-    
+ 
+  const std::vector<Jet> GetBJetsToBeUsedInFit(const BJetSelection::Data& bjetData,
+					       const unsigned int maxNumberOfBJetsToUse=3);
   // Input parameters
+  // Input parameters
+  int nSelectedBJets;
   const double cfg_MassW;
   const double cfg_diJetSigma;
   const double cfg_triJetSigma;
@@ -152,6 +160,10 @@ private:
   // Histograms (1D)
   WrappedTH1 *hChiSqr_Before;
   WrappedTH1 *hChiSqr_After;
+  WrappedTH1 *hNJetsUsedAsBJetsInFit_Before;
+  WrappedTH1 *hNJetsUsedAsBJetsInFit_After;
+  WrappedTH1 *hNumberOfFits_Before;
+  WrappedTH1 *hNumberOfFits_After;
 
   WrappedTH1 *hTrijet1Mass_Before;
   WrappedTH1 *hTrijet2Mass_Before;

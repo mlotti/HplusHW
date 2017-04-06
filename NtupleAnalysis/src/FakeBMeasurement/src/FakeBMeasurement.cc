@@ -133,7 +133,6 @@ FakeBMeasurement::~FakeBMeasurement() {
   // fCommonPlots.getHistoSplitter().deleteHistograms(hNormalizationBaselineTauAfterStdSelections);
   // fCommonPlots.getHistoSplitter().deleteHistograms(hMtBaselineTauAfterStdSelections);
 
-  // Purity histograms [(Data-EWK)/Data]
   delete hInverted_FailedBJetWithBestBDiscBDisc_AfterAllSelections;
   delete hInverted_FailedBJetWithBestBDiscPt_AfterAllSelections;
   delete hInverted_FailedBJetWithBestBDiscEta_AfterAllSelections;
@@ -141,6 +140,28 @@ FakeBMeasurement::~FakeBMeasurement() {
   delete hInverted_FailedBJetWithBestBDiscPartonFlavour_AfterAllSelections;
   delete hInverted_FailedBJetWithBestBDiscHadronFlavour_AfterAllSelections;
   delete hInverted_FailedBJetWithBestBDiscAncestry_AfterAllSelections;
+
+  // Baseline selection
+  delete hBaseline_TopMassReco_ChiSqr_AfterAllSelections;
+  delete hBaseline_TopMassReco_LdgTrijetPt_AfterAllSelections;
+  delete hBaseline_TopMassReco_LdgTrijetM_AfterAllSelections;
+  delete hBaseline_TopMassReco_SubLdgTrijetPt_AfterAllSelections;
+  delete hBaseline_TopMassReco_SubLdgTrijetM_AfterAllSelections;
+  delete hBaseline_TopMassReco_LdgDijetPt_AfterAllSelections;
+  delete hBaseline_TopMassReco_LdgDijetM_AfterAllSelections;
+  delete hBaseline_TopMassReco_SubLdgDijetPt_AfterAllSelections;
+  delete hBaseline_TopMassReco_SubLdgDijetM_AfterAllSelections;
+
+  // Inverted selection
+  delete hInverted_TopMassReco_ChiSqr_AfterAllSelections;
+  delete hInverted_TopMassReco_LdgTrijetPt_AfterAllSelections;
+  delete hInverted_TopMassReco_LdgTrijetM_AfterAllSelections;
+  delete hInverted_TopMassReco_SubLdgTrijetPt_AfterAllSelections;
+  delete hInverted_TopMassReco_SubLdgTrijetM_AfterAllSelections;
+  delete hInverted_TopMassReco_LdgDijetPt_AfterAllSelections;
+  delete hInverted_TopMassReco_LdgDijetM_AfterAllSelections;
+  delete hInverted_TopMassReco_SubLdgDijetPt_AfterAllSelections;
+  delete hInverted_TopMassReco_SubLdgDijetM_AfterAllSelections;
 
 }
 
@@ -182,21 +203,19 @@ void FakeBMeasurement::book(TDirectory *dir) {
   std::vector<TDirectory*> myNormalizationDirs = {myNormDir, myNormEWKFakeBDir, myNormGenuineBDir};
   
   // Obtain binning
-  const int  nPtBins = fCommonPlots.getPtBinSettings().bins();
-  const float fPtMin = fCommonPlots.getPtBinSettings().min();
-  const float fPtMax = fCommonPlots.getPtBinSettings().max();
-
-  const int  nEtaBins = fCommonPlots.getEtaBinSettings().bins();
-  const float fEtaMin = fCommonPlots.getEtaBinSettings().min();
-  const float fEtaMax = fCommonPlots.getEtaBinSettings().max();
-
+  const int  nPtBins    = fCommonPlots.getPtBinSettings().bins();
+  const float fPtMin    = fCommonPlots.getPtBinSettings().min();
+  const float fPtMax    = fCommonPlots.getPtBinSettings().max();
+  const int  nEtaBins   = fCommonPlots.getEtaBinSettings().bins();
+  const float fEtaMin   = fCommonPlots.getEtaBinSettings().min();
+  const float fEtaMax   = fCommonPlots.getEtaBinSettings().max();
   const int  nBDiscBins = fCommonPlots.getBJetDiscBinSettings().bins();
   const float fBDiscMin = fCommonPlots.getBJetDiscBinSettings().min();
   const float fBDiscMax = fCommonPlots.getBJetDiscBinSettings().max();
+  const int nMassBins   = 150;
+  const float fMassMin  = 0.0;
+  const float fMassMax  = 1500.0;
 
-  const int nMassBins  = 150;
-  const float fMassMin = 0.0;
-  const float fMassMax = 1500.0;
 
   // Purity histograms [(Data-EWK)/Data]
   myInclusiveLabel = "FakeBPurity";
@@ -318,7 +337,7 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_TopMassReco_SubLdgDijetM_AfterAllSelections = 
     fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "Inverted_TopMassReco_SubLdgDijetM_AfterAllSelections", ";M (GeV/c^{2});Events / %0.f GeV/c^{2}", nMassBins, fMassMin, fMassMax);
 
-  return;
+return;
 }
 
 
