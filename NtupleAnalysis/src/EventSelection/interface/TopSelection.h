@@ -77,7 +77,8 @@ public:
   private:
     /// Boolean for passing selection
     bool bPassedSelection;
-    /// Jets used in di-top fit
+    /// Fit properties
+    double fChiSqr;
     unsigned int fNumberOfFits;
     std::vector<Jet> fJetsUsedAsBJetsInFit;
     /// Trijet-1
@@ -92,8 +93,12 @@ public:
     Jet fTrijet2BJet;
     math::XYZTLorentzVector fTrijet2Dijet_p4;
     math::XYZTLorentzVector fTrijet2_p4;
-    // Chi-squared value of di-top fit
-    double fChiSqr;
+    // Tetrajet
+    Jet fTetrajetBJet;
+    math::XYZTLorentzVector fTetrajet1_p4;
+    math::XYZTLorentzVector fTetrajet2_p4;
+    math::XYZTLorentzVector fLdgTetrajet_p4;
+    math::XYZTLorentzVector fSubldgTetrajet_p4;
 
   };
   
@@ -139,8 +144,11 @@ private:
   double CalculateChiSqrForTrijetSystems(const Jet& jet1, const Jet& jet2,
 					 const Jet& jet3, const Jet& jet4,
 					 const Jet& bjet1, const Jet& bjet2);
+
+  const Jet GetTetrajetBjet(const std::vector<Jet> bjets, const Jet& bjet1, const Jet& bjet2);
+
  
-  const std::vector<Jet> GetBJetsToBeUsedInFit(const BJetSelection::Data& bjetData,
+  const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
 					       const unsigned int maxNumberOfBJetsToUse=3);
   // Input parameters
   // Input parameters
@@ -165,6 +173,37 @@ private:
   WrappedTH1 *hNumberOfFits_Before;
   WrappedTH1 *hNumberOfFits_After;
 
+  WrappedTH1 *hTetrajetBJetPt_Before;
+  WrappedTH1 *hTetrajetBJetEta_Before;
+  WrappedTH1 *hTetrajetBJetBDisc_Before;
+  WrappedTH1 *hTetrajetBJetPt_After;
+  WrappedTH1 *hTetrajetBJetEta_After;
+  WrappedTH1 *hTetrajetBJetBDisc_After;
+  WrappedTH1 *hTetrajet1Pt_Before;
+  WrappedTH1 *hTetrajet1Mass_Before;
+  WrappedTH1 *hTetrajet1Eta_Before;
+  WrappedTH1 *hTetrajet2Pt_Before;
+  WrappedTH1 *hTetrajet2Mass_Before;
+  WrappedTH1 *hTetrajet2Eta_Before;
+  WrappedTH1 *hLdgTetrajetPt_Before;
+  WrappedTH1 *hLdgTetrajetMass_Before;
+  WrappedTH1 *hLdgTetrajetEta_Before;
+  WrappedTH1 *hSubldgTetrajetPt_Before;
+  WrappedTH1 *hSubldgTetrajetMass_Before;
+  WrappedTH1 *hSubldgTetrajetEta_Before;
+  WrappedTH1 *hTetrajet1Pt_After;
+  WrappedTH1 *hTetrajet1Mass_After;
+  WrappedTH1 *hTetrajet1Eta_After;
+  WrappedTH1 *hTetrajet2Pt_After;
+  WrappedTH1 *hTetrajet2Mass_After;
+  WrappedTH1 *hTetrajet2Eta_After;
+  WrappedTH1 *hLdgTetrajetPt_After;
+  WrappedTH1 *hLdgTetrajetMass_After;
+  WrappedTH1 *hLdgTetrajetEta_After;
+  WrappedTH1 *hSubldgTetrajetPt_After;
+  WrappedTH1 *hSubldgTetrajetMass_After;
+  WrappedTH1 *hSubldgTetrajetEta_After;
+  
   WrappedTH1 *hTrijet1Mass_Before;
   WrappedTH1 *hTrijet2Mass_Before;
   WrappedTH1 *hTrijet1Mass_After;

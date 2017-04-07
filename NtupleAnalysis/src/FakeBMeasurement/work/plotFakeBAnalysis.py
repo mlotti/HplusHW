@@ -14,6 +14,7 @@ Usage:
 ./plotFakeBAnalysis.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
+./plotFakeBAnalysis.py -m old/FakeBMeasurement_170406_LE2Bjets --mergeEWK
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -v
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -i "JetHT|TT"
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats/ --mcOnly --intLumi 100000
@@ -78,7 +79,95 @@ def GetLumi(datasetsMgr):
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
     #return ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    print "fixme"
+    return ["TT"]
+
+def GetHistoKwargs(histoName):
+    '''
+    '''
+    Verbose("Creating a map of histoName <-> kwargs")
+
+    if "pt" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = None
+    elif "eta" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    elif "bdisc" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    elif "deta" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = None
+    elif "dphi" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = None
+    elif "dr" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = None
+    elif "dijetmass" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}        
+    elif "mass" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 1
+        _logY   = False
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    elif "numberoffits" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = None
+    elif "njets" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = _cutBox = {"cutValue": 3, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    elif "chisqr" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    else:
+        raise Exception("The kwargs have not been prepared for the histogram with name \"%s\"." % (histoName) )
+
+    # Customise options (main pad) for with/whitout logY scale 
+    if _logY:
+        _opts   = {"xmax": 500, "ymin": 2e-4, "ymaxfactor": 5}
+    else:
+        _opts   = {"xmax": 500.0, "ymin": 0.0, "ymaxfactor": 1.2} 
+    print "fixme"
+
+    # Define plotting options    
+    kwargs = {"ylabel": "Arbitrary Units / %s" % (_format),
+              "log"   : _logY,
+              "opts"  : _opts,
+              "opts2" : {"ymin": 0.0, "ymax": 2.0},
+              "rebinX": _rebin,
+              "ratio" : True, 
+              "cutBox": _cutBox,
+              "cmsExtraText": "Preliminary",
+              "ratioYlabel" : "Ratio",
+              "ratioInvert" : False, 
+              "addCmsText"  : True,
+              "createLegend": {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
+               }
+    return kwargs
 
 
 def GetDatasetsFromDir(opts):
@@ -208,6 +297,11 @@ def main(opts):
             analysisTypes = ["Baseline", "Inverted"]
             for analysis in analysisTypes:
                 for hName in getTopSelectionHistos(analysis):
+                    if "Trijet" not in hName:
+                        continue
+                    if "Mass" not in hName:
+                        print "fixme"
+                        continue
                     EWKvQCD(datasetsMgr, hName.split("/")[-1], analysis)
         else:
             Print("Cannot draw the EWKvQCD histograms without the option --mergeEWK. Exit", True)
@@ -749,10 +843,9 @@ def EWKvQCD(datasetsMgr, histoName, analysisType=""):
     p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, "EWK", "topSelection_Baseline/%s" % histoName, "topSelection_Inverted/%s" % histoName) )
     p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
-    # Get Data histos    
+    # Get histos    
     data = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType+ " -Data")
-    # Get EWK histos
-    EWK = p2.histoMgr.getHisto(analysisType + "-EWK").getRootHisto().Clone(analysisType + "-EWK")
+    EWK  = p2.histoMgr.getHisto(analysisType + "-EWK").getRootHisto().Clone(analysisType + "-EWK")
     # Create QCD histos: QCD = Data-EWK
     QCD = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType + "-QCD")
     QCD.Add(EWK, -1)
@@ -779,37 +872,16 @@ def EWKvQCD(datasetsMgr, histoName, analysisType=""):
             analysisType + "-EWK" : analysisType + " (EWK)",
             })
 
-    # Draw the histograms. FixMe
-    _rebinX     = 1
-    _log        = True
-    _ymaxfactor = 1.2
-    _xmax = None
-    _cutBox = None
-    if "Mass" or "ChiSqr" in histoName:
-        _rebinX = 1
-        _log = False
-        _ymaxfactor = 1.2
-        _xmax = 800
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        Print("Rebin is set to %s for %s" % (_rebinX, histoName), True)
-
     # Append analysisType to histogram name
-    histoName += "_" + analysisType
-    plots.drawPlot(p, histoName,  
-                   ylabel = "Events / %.0f",
-                   log = _log, 
-                   rebinX = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
-                   opts  = {"xmax": _xmax, "ymin": 1e-4, "ymaxfactor": _ymaxfactor},
-                   opts2 = {"ymin": 0.6, "ymax": 1.4},
-                   ratio = True,
-                   ratioInvert = False, 
-                   ratioYlabel = "Ratio",
-                   cutBox = _cutBox,
-                   )
-    
+    saveName = histoName + "_" + analysisType
+
+    # Draw the histograms
+    plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
+    # _kwargs = {"lessThan": True}
+    # p.addCutBoxAndLine(cutValue=200, fillColor=ROOT.kRed, box=False, line=True, ***_kwargs)
+
     # For-loop: All save formats
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "EWKvQCD") ) 
+    SavePlot(p, saveName, os.path.join(opts.saveDir, "EWKvQCD") ) 
     return
 
 
@@ -911,7 +983,12 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
 
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
-        Print("%s" % saveName + ext, i==0)
+        saveNameURL = saveName + ext
+        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        if not opts.noURL:
+            Print(saveName + ext, i==0)
+        else:
+            Print(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -946,6 +1023,7 @@ if __name__ == "__main__":
     LATEX        = False
     MCONLY       = False
     MERGEEWK     = False
+    NOURL        = True
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     SEARCHMODE   = "80to1000"
@@ -981,6 +1059,9 @@ if __name__ == "__main__":
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
+
+    parser.add_option("--noURL", dest="noURL", action="store_false", default=NOURL, 
+                      help="Do print the actual save path the histogram is saved (and not the URL) [default: %s]" % NOURL)
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
