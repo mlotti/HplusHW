@@ -145,7 +145,17 @@ private:
 					 const Jet& jet3, const Jet& jet4,
 					 const Jet& bjet1, const Jet& bjet2);
 
-  const Jet GetTetrajetBjet(const std::vector<Jet> bjets, const Jet& bjet1, const Jet& bjet2);
+  const Jet GetTetrajetBjet(const std::vector<Jet> bjets, 
+			    const Jet& bjet1, 
+			    const Jet& bjet2);
+
+  const math::XYZTLorentzVector GetTetrajetBjetP4(const std::vector<Jet> bjets, 
+						  const Jet& bjet1, 
+						  const Jet& bjet2,
+						  const Jet& jet1, 
+						  const Jet& jet2,
+						  const Jet& jet3, 
+						  const Jet& jet4);
 
  
   const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,

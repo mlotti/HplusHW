@@ -478,15 +478,18 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   for (unsigned int index=0; index < jet1.size(); index++, output.fNumberOfFits++)
     {
       // Construct chi-square variable using jets(1-4) and b-jets(1-2)
-      unsigned int b1 = bjet1.at(index);
-      unsigned int b2 = bjet2.at(index);
-      unsigned int j1 = jet1.at(index);
-      unsigned int j2 = jet2.at(index);
-      unsigned int j3 = jet3.at(index);
-      unsigned int j4 = jet4.at(index);
-      double chiSqr   = CalculateChiSqrForTrijetSystems(jets.at(j1), jets.at(j2), jets.at(j3), jets.at(j4), jets.at(b1), jets.at(b2));
-      // std::cout << "chiSqr = " << chiSqr << " (minChiSqr = " << minChiSqr << ")" << std::endl;
+      unsigned int b1  = bjet1.at(index);
+      unsigned int b2  = bjet2.at(index);
+      unsigned int j1  = jet1.at(index);
+      unsigned int j2  = jet2.at(index);
+      unsigned int j3  = jet3.at(index);
+      unsigned int j4  = jet4.at(index);
+      double chiSqr    = CalculateChiSqrForTrijetSystems(jets.at(j1), jets.at(j2), jets.at(j3), jets.at(j4), jets.at(b1), jets.at(b2));
+      math::XYZTLorentzVector tetrajetBjet_p4 = GetTetrajetBjetP4(bjets, jets.at(b1), jets.at(b2), jets.at(j1), jets.at(j2), jets.at(j3), jets.at(j4) );
 
+      // Ensure that this di-top combination leaves 1 bjet for the tetrajet reconstruction
+       if (tetrajetBjet_p4.pt() == 0) continue;
+ 
       // Find the configuration that minimised chi-squared
       if (chiSqr < minChiSqr) {
 
@@ -522,8 +525,11 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
 	  }
 
       }
-
     }
+  
+  // Sanity check: Did I get at least 1 successful fit?
+  if (minChiSqr == 999999.9) return output;
+  // std::cout << "=== minChiSqr= " << minChiSqr << std::endl;
 
   // Fill Histograms (Before cuts)
   hChiSqr_Before->Fill( output.fChiSqr );
@@ -835,9 +841,12 @@ const std::vector<Jet> TopSelection::GetBjetsToBeUsedInFit(const BJetSelection::
 }
   
 
-const Jet TopSelection::GetTetrajetBjet(const std::vector<Jet> bjets, const Jet& bjet1, const Jet& bjet2){
+const Jet TopSelection::GetTetrajetBjet(const std::vector<Jet> bjets, 
+					const Jet& bjet1, 
+					const Jet& bjet2){
 
   Jet tetrajetBjet;
+  math::XYZTLorentzVector tetrajetBjet_p4;
   for (auto bjet: bjets)
     {
       if (areSameJets(bjet, bjet1))  continue;
@@ -856,6 +865,35 @@ const Jet TopSelection::GetTetrajetBjet(const std::vector<Jet> bjets, const Jet&
 }
 
 
+ const math::XYZTLorentzVector TopSelection::GetTetrajetBjetP4(const std::vector<Jet> bjets, 
+							       const Jet& bjet1,
+							       const Jet& bjet2,
+							       const Jet& jet1, 
+							       const Jet& jet2,
+							       const Jet& jet3, 
+							       const Jet& jet4){
+
+   math::XYZTLorentzVector tetrajetBjet_p4;
+
+   // For-loop: All bjets
+   for (auto bjet: bjets)
+     {
+       // Skip the two b-jets used in the di-top fit
+       if (areSameJets(bjet, bjet1))  continue;
+       if (areSameJets(bjet, bjet2))  continue;
+       if (areSameJets(bjet,  jet1))  continue;
+       if (areSameJets(bjet,  jet2))  continue;
+       if (areSameJets(bjet,  jet3))  continue;
+       if (areSameJets(bjet,  jet4))  continue;
+       
+       // Keep the b-jet with the maximum pT   
+       if (bjet.pt()  > tetrajetBjet_p4.pt()) tetrajetBjet_p4 = bjet.p4();
+     }
+ 
+   return tetrajetBjet_p4;
+ }
+
+
 void TopSelection::GetJetIndicesForChiSqrFit(const std::vector<Jet> jets, 
 					     const std::vector<Jet> bjets,
 					     std::vector<unsigned int>& jet1,
@@ -872,14 +910,14 @@ void TopSelection::GetJetIndicesForChiSqrFit(const std::vector<Jet> jets,
 
   // Declare variables
   const unsigned int nJets = jets.size();
-  const unsigned int nLightJets = jets.size() - bjets.size();
+  // const unsigned int nLightJets = jets.size() - bjets.size();
   
   // Safety measure in the case where there are not enough light-jets
   // (i.e. non-bjets) to have 4 jets in the di-top reconstruction
   // In these cases we might also use more than 2 bjets in the chi-square fit
   // This does not necessarily mean we are using b-jets. These b-tagged jets
   // might be c-flavour jets from W->cs decays.
-  const bool skipBJets = (nLightJets >= 4);
+  // const bool skipBJets = (nLightJets >= 4);
 
   // For-loop: 6 nested loops to get 4 jets, 2 bjets
   for (unsigned int b1=0; b1 < nJets; b1++){
@@ -892,25 +930,29 @@ void TopSelection::GetJetIndicesForChiSqrFit(const std::vector<Jet> jets,
 
       for (unsigned int j1 = 0; j1 < nJets; j1++){
 	// Consider only jets, not b-jets (if possible)
-	if ( isBJet(jets.at(j1), bjets)*skipBJets ) continue;
+	//if ( isBJet(jets.at(j1), bjets)*skipBJets ) continue;
+	if ( isBJet(jets.at(j1), bjets) ) continue; //alex
 	// Ensure jet is not the same as other used jets
 	if (j1 == b1 || j1 == b2) continue;
 
 	for (unsigned int j2=j1+1; j2 < nJets; j2++){
 	  // Consider only jets, not b-jets (if possible)
-	  if ( isBJet(jets.at(j2), bjets)*skipBJets ) continue;
+	  // if ( isBJet(jets.at(j2), bjets)*skipBJets ) continue;
+	  if ( isBJet(jets.at(j2), bjets) ) continue; //alex
 	  // Ensure jet is not the same as other used jets
 	  if (j2 == b1 || j2 == b2) continue;
 	  
 	  for (unsigned int j3=j2+1; j3 < nJets; j3++){
 	    // Consider only jets, not b-jets (if possible)
-	    if ( isBJet(jets.at(j3), bjets)*skipBJets ) continue;
+	    // if ( isBJet(jets.at(j3), bjets)*skipBJets ) continue;
+	    if ( isBJet(jets.at(j3), bjets) ) continue; //alex
 	    // Ensure jet is not the same as other used jets
 	    if (j3 == b1 || j3 == b2 || j3 == j1 || j3 == j2) continue;
 
 	    for (unsigned int j4=j3+1; j4 < nJets; j4++){
 	      // Consider only jets, not b-jets (if possible)
-	      if ( isBJet(jets.at(j4), bjets)*skipBJets ) continue;
+	      // if ( isBJet(jets.at(j4), bjets)*skipBJets ) continue;
+	      if ( isBJet(jets.at(j4), bjets) ) continue; //alex
 	      // Ensure jet is not the same as other used jets
 	      if (j4 == b1 || j4 == b2 || j4 == j1 || j4 == j2 || j4 == j3) continue;
 	      
