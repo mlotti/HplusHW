@@ -79,9 +79,11 @@ def GetLumi(datasetsMgr):
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
     #return ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
-    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-    print "fixme"
-    return ["TT"]
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    #print "fixme"
+    #return ["TT"]
+
+
 
 def GetHistoKwargs(histoName):
     '''
@@ -148,9 +150,9 @@ def GetHistoKwargs(histoName):
 
     # Customise options (main pad) for with/whitout logY scale 
     if _logY:
-        _opts   = {"xmax": 500, "ymin": 2e-4, "ymaxfactor": 5}
+        _opts   = {"xmax": 1000, "ymin": 2e-4, "ymaxfactor": 5}
     else:
-        _opts   = {"xmax": 500.0, "ymin": 0.0, "ymaxfactor": 1.2} 
+        _opts   = {"xmax": 1000.0, "ymin": 0.0, "ymaxfactor": 1.2} 
     print "fixme"
 
     # Define plotting options    
@@ -806,7 +808,7 @@ def BaselineVsInvertedComparison(datasetsMgr, histoName):
             "Inverted-QCD" : "Inverted (QCD)",
             })
 
-    # Draw the histograms. FixMe
+    # Draw the histograms
     _rebinX = 1
     if "Mass" or "ChiSqr" in histoName:
         _rebinX = 2
