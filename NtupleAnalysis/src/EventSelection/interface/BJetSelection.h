@@ -103,8 +103,8 @@ private:
   /// Calculate probability to pass b tagging
   double calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData);
   // Input parameters
-  const float fJetPtCut;
-  const float fJetEtaCut;
+  const std::vector<float> fJetPtCuts;
+  const std::vector<float> fJetEtaCuts;
   const DirectionalCut<int> fNumberOfJetsCut;
   float fDisriminatorValue; // not a const because constructor sets it based on input string
   

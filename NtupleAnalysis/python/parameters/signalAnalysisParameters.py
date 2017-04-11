@@ -76,8 +76,8 @@ muVeto = PSet(
 #====== Jet selection
 jetSelection = PSet(
                jetType = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-              jetPtCut = 30.0,
-             jetEtaCut = 4.7,
+              jetPtCut = [30.0],
+             jetEtaCut = [4.7],
      tauMatchingDeltaR = 0.4,
   numberOfJetsCutValue = 3,
   numberOfJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
@@ -103,8 +103,8 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
  
 #====== B-jet selection
 bjetSelection = PSet(
-              jetPtCut = 30.0,
-             jetEtaCut = 2.5,
+              jetPtCut = [30.0],
+             jetEtaCut = [2.5],
              #bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
              bjetDiscr = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
  bjetDiscrWorkingPoint = "Loose",

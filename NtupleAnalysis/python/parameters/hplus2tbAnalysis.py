@@ -90,8 +90,8 @@ muVeto = PSet(
 #================================================================================================
 jetSelection = PSet(
     jetType                  = "Jets",    # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
-    jetPtCut                 = 40.0,
-    jetEtaCut                = 2.4,
+    jetPtCuts                = [40.0, 40.0, 40.0, 40.0, 40.0, 40.0, 30.0],
+    jetEtaCuts               = [2.4],
     numberOfJetsCutValue     = 7,
     numberOfJetsCutDirection = ">=",      # options: ==, !=, <, <=, >, >=
     jetIDDiscr               = "IDloose", # options: IDloose, IDtight, IDtightLeptonVeto
@@ -103,15 +103,14 @@ jetSelection = PSet(
     JTCutDirection           = ">=",
     MHTCutValue              = 0.0,
     MHTCutDirection          = ">=",
-    # jetLdgPtCuts           = [70.0, 50.0, 40.0],
 )
 
 #================================================================================================
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    jetPtCut                  = 40.0,
-    jetEtaCut                 = 2.4,
+    jetPtCuts                 = [40.0, 40.0, 30.0],
+    jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Medium",
     numberOfBJetsCutValue     = 3,

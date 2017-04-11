@@ -212,9 +212,9 @@ void FakeBMeasurement::book(TDirectory *dir) {
   const int  nBDiscBins = fCommonPlots.getBJetDiscBinSettings().bins();
   const float fBDiscMin = fCommonPlots.getBJetDiscBinSettings().min();
   const float fBDiscMax = fCommonPlots.getBJetDiscBinSettings().max();
-  const int nMassBins   = 150;
+  const int nMassBins   = 200;
   const float fMassMin  = 0.0;
-  const float fMassMax  = 1500.0;
+  const float fMassMax  = 2000.0;
 
 
   // Purity histograms [(Data-EWK)/Data]
@@ -621,13 +621,18 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Fill final plots
   //================================================================================================
-  Jet bjet= bjetData.getFailedBJetCandsDescendingDiscr()[0];
+  Jet bjet= bjetData.getFailedBJetCandsDescendingDiscr()[0]; // FIXME: ALEX Require all 3 bjets to be matched
+  // std::cout << "FIXME: In order to have a fake-B measurement I need to make sure that in EWK i have 3 mc-matched bjets! If not then what I measure is QCD. Then the EWK fake-b and EWK genuine-b would have to be measured from MC. If i measure fake-B then only EWK GENUINE-b must be taken from MC. This is ok if the fraction of EWK-FakeB is very small (e.g less than 5%)" << std::endl;
+
   bool isGenuineB = abs(bjet.pdgId() == 5); // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
   int ancestryBit = ( pow(2, 0)*bjet.originatesFromZ() +
 		      pow(2, 1)*bjet.originatesFromW() +
 		      pow(2, 2)*bjet.originatesFromTop() +
 		      pow(2, 3)*bjet.originatesFromChargedHiggs() +
 		      pow(2, 4)*bjet.originatesFromUnknown() );
+
+  // bool isGenuineB = isGenuineB1*isGenuineB2*isGenuineB3; FIXME! ALEX: This is what i should use as boolean
+  // See QCDMeasurement.cc
 
   // For real data fill obth the histograms in inclusive and "FakeB" folders (but not "GenuineB")
   hInverted_FailedBJetWithBestBDiscBDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator());

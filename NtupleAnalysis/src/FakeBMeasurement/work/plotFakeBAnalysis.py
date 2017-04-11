@@ -14,16 +14,11 @@ Usage:
 ./plotFakeBAnalysis.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
+./plotFakeBAnalysis.py -m old/FakeBMeasurement_170406_LE2Bjets --mergeEWK
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -v
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170315_FullStats/ -i "JetHT|TT"
-./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --latex --mergeEWK
 ./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats/ --mcOnly --intLumi 100000
 
-Examples (tables):
-./plotFakeBAnalysis.py -m FakeBMeasurement_170316_FullStats --noError --format %.3f --latex
-./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK
-./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK --latex -s
-./plotFakeBAnalysis.py -m FakeBMeasurement_170401_LE0Bjets/ --noError --format %.3f --precision 3 --mergeEWK --latex -s --histoLevel Debug
 '''
 
 #================================================================================================ 
@@ -85,6 +80,96 @@ def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
     #return ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
     return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    #print "fixme"
+    #return ["TT"]
+
+
+
+def GetHistoKwargs(histoName):
+    '''
+    '''
+    Verbose("Creating a map of histoName <-> kwargs")
+
+    if "pt" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = None
+    elif "eta" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    elif "bdisc" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    elif "deta" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = None
+    elif "dphi" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = None
+    elif "dr" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = None
+    elif "dijetmass" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}        
+    elif "mass" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 1
+        _logY   = False
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    elif "numberoffits" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = None
+    elif "njets" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = _cutBox = {"cutValue": 3, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    elif "chisqr" in histoName.lower():
+        _format = "%0.2f"
+        _rebin  = 1
+        _logY   = True
+        _cutBox = _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    else:
+        raise Exception("The kwargs have not been prepared for the histogram with name \"%s\"." % (histoName) )
+
+    # Customise options (main pad) for with/whitout logY scale 
+    if _logY:
+        _opts   = {"xmax": 1000, "ymin": 2e-4, "ymaxfactor": 5}
+    else:
+        _opts   = {"xmax": 1000.0, "ymin": 0.0, "ymaxfactor": 1.2} 
+    print "fixme"
+
+    # Define plotting options    
+    kwargs = {"ylabel": "Arbitrary Units / %s" % (_format),
+              "log"   : _logY,
+              "opts"  : _opts,
+              "opts2" : {"ymin": 0.0, "ymax": 2.0},
+              "rebinX": _rebin,
+              "ratio" : True, 
+              "cutBox": _cutBox,
+              "cmsExtraText": "Preliminary",
+              "ratioYlabel" : "Ratio",
+              "ratioInvert" : False, 
+              "addCmsText"  : True,
+              "createLegend": {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
+               }
+    return kwargs
 
 
 def GetDatasetsFromDir(opts):
@@ -191,21 +276,38 @@ def main(opts):
         OtherHistograms(datasetsMgr, analysisType="Inverted")
 
     # Do the Baseline Vs Inverted histograms
-    if opts.mergeEWK:
-        for hName in getTopSelectionHistos():
-            BaselineVsInvertedComparison(datasetsMgr, hName.split("/")[-1])
-    else:
-        Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
+    if 0:
+        if opts.mergeEWK:
+            for hName in getTopSelectionHistos():
+                BaselineVsInvertedComparison(datasetsMgr, hName.split("/")[-1])
+        else:
+            Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
 
     # Do the Data/QCD/EWK histograms
-    if opts.mergeEWK:
-        analysisTypes = ["Baseline", "Inverted"]
-        for analysis in analysisTypes:
-            for hName in getTopSelectionHistos(analysis):
-                DataEwkQcd(datasetsMgr, hName.split("/")[-1], analysis)
-    else:
-        Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
+    if 0:
+        if opts.mergeEWK:
+            analysisTypes = ["Baseline", "Inverted"]
+            for analysis in analysisTypes:
+                for hName in getTopSelectionHistos(analysis):
+                    DataEwkQcd(datasetsMgr, hName.split("/")[-1], analysis)
+        else:
+            Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
 
+
+    if 1:
+        if opts.mergeEWK:
+            analysisTypes = ["Baseline", "Inverted"]
+            for analysis in analysisTypes:
+                for hName in getTopSelectionHistos(analysis):
+                    if "Trijet" not in hName:
+                        continue
+                    if "Mass" not in hName:
+                        print "fixme"
+                        continue
+                    EWKvQCD(datasetsMgr, hName.split("/")[-1], analysis)
+        else:
+            Print("Cannot draw the EWKvQCD histograms without the option --mergeEWK. Exit", True)
+                    
     return
 
 
@@ -706,7 +808,7 @@ def BaselineVsInvertedComparison(datasetsMgr, histoName):
             "Inverted-QCD" : "Inverted (QCD)",
             })
 
-    # Draw the histograms. FixMe
+    # Draw the histograms
     _rebinX = 1
     if "Mass" or "ChiSqr" in histoName:
         _rebinX = 2
@@ -727,6 +829,61 @@ def BaselineVsInvertedComparison(datasetsMgr, histoName):
     
     # For-loop: All save formats
     SavePlot(p, histoName, os.path.join(opts.saveDir, "BaselineVsInverted") ) 
+    return
+
+
+def EWKvQCD(datasetsMgr, histoName, analysisType=""):
+    '''
+    '''
+    Verbose("Plotting EWK Vs QCD unity-normalised histograms for %s" % analysisType)
+    # Sanity check
+    IsBaselineOrInverted(analysisType)
+
+    p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, "Data", "topSelection_Baseline/%s" % histoName, "topSelection_Inverted/%s" % histoName))
+    p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+
+    p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, "EWK", "topSelection_Baseline/%s" % histoName, "topSelection_Inverted/%s" % histoName) )
+    p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+
+    # Get histos    
+    data = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType+ " -Data")
+    EWK  = p2.histoMgr.getHisto(analysisType + "-EWK").getRootHisto().Clone(analysisType + "-EWK")
+    # Create QCD histos: QCD = Data-EWK
+    QCD = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType + "-QCD")
+    QCD.Add(EWK, -1)
+
+    # Normalize histograms to unit area
+    QCD.Scale(1.0/QCD.Integral())
+    EWK.Scale(1.0/EWK.Integral())
+
+    # Create the final plot object
+    p = plots.ComparisonManyPlot(QCD, [EWK], saveFormats=[]) #[".C", ".png", ".pdf"])
+    p.setLuminosity(GetLumi(datasetsMgr))
+        
+    # Apply styles
+    p.histoMgr.forHisto(analysisType + "-QCD" , styles.getQCDLineStyle() )
+    p.histoMgr.forHisto(analysisType + "-EWK" , styles.getAltEWKStyle() )
+
+    # Set draw style
+    p.histoMgr.setHistoDrawStyle(analysisType + "-QCD", "LP")
+    p.histoMgr.setHistoLegendStyle(analysisType + "-QCD", "LP")
+
+    # Set legend labels
+    p.histoMgr.setHistoLegendLabelMany({
+            analysisType + "-QCD" : analysisType + " (QCD)",
+            analysisType + "-EWK" : analysisType + " (EWK)",
+            })
+
+    # Append analysisType to histogram name
+    saveName = histoName + "_" + analysisType
+
+    # Draw the histograms
+    plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
+    # _kwargs = {"lessThan": True}
+    # p.addCutBoxAndLine(cutValue=200, fillColor=ROOT.kRed, box=False, line=True, ***_kwargs)
+
+    # For-loop: All save formats
+    SavePlot(p, saveName, os.path.join(opts.saveDir, "EWKvQCD") ) 
     return
 
 
@@ -828,7 +985,12 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
 
     # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
-        Print("%s" % saveName + ext, i==0)
+        saveNameURL = saveName + ext
+        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        if not opts.noURL:
+            Print(saveName + ext, i==0)
+        else:
+            Print(saveNameURL, i==0)
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -857,14 +1019,13 @@ if __name__ == "__main__":
     ANALYSISNAME = "FakeBMeasurement"
     BATCHMODE    = True
     DATAERA      = "Run2016"
-    FORMAT       = "%.3f"
     PRECISION    = 3
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
     MERGEEWK     = False
-    FRACTIONEWK  = False
+    NOURL        = True
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     SEARCHMODE   = "80to1000"
@@ -898,11 +1059,11 @@ if __name__ == "__main__":
     parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
                       help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
 
-    parser.add_option("--fractionEWK", dest="fractionEWK", action="store_true", default=FRACTIONEWK, 
-                      help="The contribution of each sample to the total EWK  will also be calculated [default: %s]" % FRACTIONEWK)
-
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
+
+    parser.add_option("--noURL", dest="noURL", action="store_false", default=NOURL, 
+                      help="Do print the actual save path the histogram is saved (and not the URL) [default: %s]" % NOURL)
     
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
@@ -910,26 +1071,11 @@ if __name__ == "__main__":
     parser.add_option("--histoLevel", dest="histoLevel", action="store", default = HISTOLEVEL,
                       help="Histogram ambient level (default: %s)" % (HISTOLEVEL))
 
-    parser.add_option("-s", "--subcounters", dest="subcounters", action="store_true", default=SUBCOUNTERS, 
-                      help="Print also the sub-counters [default: %s]" % SUBCOUNTERS)
-
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
 
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
-
-    parser.add_option("--latex", dest="latex", action="store_true", default=LATEX,
-                      help="The table formatting is in LaTeX instead of plain text (ready for generation)  [default: %s]" % (LATEX) )
-    
-    parser.add_option("--format", dest="format", default=FORMAT,
-                      help="The table value-format of strings [default: %s]" % (FORMAT) )
-
-    parser.add_option("--precision", dest="precision", type=int, default=PRECISION,
-                      help="The table value-precision [default: %s]" % (PRECISION) )
-
-    parser.add_option("--noError", dest="valueOnly", action="store_true", default=NOERROR,
-                      help="Don't print statistical errors in tables [default: %s]" % (NOERROR) )
 
     (opts, parseArgs) = parser.parse_args()
 

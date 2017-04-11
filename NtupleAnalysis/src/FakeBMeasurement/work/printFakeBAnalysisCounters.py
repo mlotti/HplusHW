@@ -13,7 +13,7 @@ Usage:
 ./printFakeBAnalysisCounters.py -m <multicrab_dir> [opts]
 
 Commonly Used Commands:
-./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --fractionEWK --mergeEWK --valueFormat %.0f
+./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --fractionEWK --mergeEWK --valueFormat %.2f
 ./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --mergeEWK --valueFormat %.0f
 
 Examples:
@@ -78,7 +78,7 @@ def Verbose(msg, printHeader=True, verbose=False):
 
 
 def GetLumi(datasetsMgr):
-    Verbose("Determininig Integrated Luminosity")
+    Verbose("Determining Integrated Luminosity")
     
     lumi = 0.0
     for d in datasetsMgr.getAllDatasets():
@@ -88,6 +88,31 @@ def GetLumi(datasetsMgr):
             lumi += d.getLuminosity()
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
+
+
+    # Only keep selected rows
+def GetRowNameLaTeXDict():
+    Verbose("Creating row-name dictionary (oldname->new name)")
+    mapping = {
+        "Passed trigger"                      : "Trigger",
+        "passed METFilter selection ()"       : "MET filter",
+        "Passed PV"                           : "PV",
+        "passed e selection (Veto)"           : "\lE{\pm} Veto",
+        "passed mu selection (Veto)"          : "\lMu{\pm} Veto",
+        "Passed tau selection (Veto)"         : "\lTauJet Veto",
+        "passed jet selection ()"             : "Jets",
+        "Baseline: passed b-jet selection"    : "Baseline: \\bJets",
+        "Baseline: b tag SF"                  : "Baseline: \\bJets SF",
+        "passed topology selection (Baseline)": "Baseline: Topology",
+        "passed top selection (Baseline)"     : "Baseline: Top",
+        "Baseline: selected events"           : "Baseline: Selected",
+        "Inverted: passed b-jet veto"         : "Inverted: \\bJets",
+        "Inverted: b tag SF"                  : "Inverted: \\bJets SF",
+        "passed topology selection (Inverted)": "Inverted: Topology",
+        "passed top selection (Inverted)"     : "Inverted: Top",
+        "Inverted: selected events"           : "Inverted: Selected",
+        }
+    return mapping
 
 
 def GetListOfEwkDatasets():
@@ -247,8 +272,7 @@ def doCounters(datasetsMgr):
     columnsToKeep = ["Data", "EWK", "QCD Purity"]
     
     if opts.fractionEWK:
-        columnsToKeep = []
-        columnsToKeep = ["Data", "EWK"]
+        columnsToKeep = [] # columnsToKeep = ["Data", "EWK"]
         for d in  GetListOfEwkDatasets():
             columnName = d + "/EWK"
             mainTable.insertColumn(mainTable.getNcolumns(), counter.divideColumn(columnName, mainTable.getColumn(name=d), mainTable.getColumn(name="EWK") ) )
@@ -259,9 +283,10 @@ def doCounters(datasetsMgr):
     # Remove all columns that are not needed
     if opts.mergeEWK:
         mainTable.keepOnlyColumns(columnsToKeep)
-
+    
     # Optional: Produce table in Text or LaTeX format?
     if opts.latex:
+        mainTable.renameRows(GetRowNameLaTeXDict())
         cellFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueOnly = opts.valueOnly, 
                                                                     valueFormat = opts.valueFormat, 
                                                                     withPrecision = opts.withPrecision,
