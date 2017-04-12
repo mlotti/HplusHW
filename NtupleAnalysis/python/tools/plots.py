@@ -110,7 +110,11 @@ _physicalMcAdd = {
     "DYJetsToLL_M_50_ext1"       : "DYJetsToLL_M_50",
 
     "ChargedHiggs_HplusTB_HplusToTauNu_M_500_ext1" : "ChargedHiggs_HplusTB_HplusToTauNu_M_500",
-
+    "ChargedHiggs_HplusTB_HplusToTauNu_M_750_reHLT" : "ChargedHiggs_HplusTB_HplusToTauNu_M_750",
+    "ChargedHiggs_HplusTB_HplusToTauNu_M_800_reHLT" : "ChargedHiggs_HplusTB_HplusToTauNu_M_800",
+    "ChargedHiggs_HplusTB_HplusToTauNu_M_1000_reHLT" : "ChargedHiggs_HplusTB_HplusToTauNu_M_1000",
+    "ChargedHiggs_HplusTB_HplusToTauNu_M_2000_reHLT" : "ChargedHiggs_HplusTB_HplusToTauNu_M_2000",
+    "ChargedHiggs_HplusTB_HplusToTauNu_M_3000_reHLT" : "ChargedHiggs_HplusTB_HplusToTauNu_M_3000",
 }
 
 #for mass in _lightHplusMasses:
