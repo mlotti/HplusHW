@@ -31,8 +31,8 @@ const Jet& JetSelection::Data::getJetMatchedToTau() const {
 
 JetSelection::JetSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
-  fJetPtCut(config.getParameter<float>("jetPtCut")),
-  fJetEtaCut(config.getParameter<float>("jetEtaCut")),
+  fJetPtCuts(config.getParameter<std::vector<float>>("jetPtCuts")),
+  fJetEtaCuts(config.getParameter<std::vector<float>>("jetEtaCuts")),
   fTauMatchingDeltaR(config.getParameter<float>("tauMatchingDeltaR")),
   fNumberOfJetsCut(config, "numberOfJetsCut"),
   fHTCut(config, "HTCut"),
@@ -57,8 +57,8 @@ JetSelection::JetSelection(const ParameterSet& config, EventCounter& eventCounte
 
 JetSelection::JetSelection(const ParameterSet& config)
 : BaseSelection(),
-  fJetPtCut(config.getParameter<float>("jetPtCut")),
-  fJetEtaCut(config.getParameter<float>("jetEtaCut")),
+  fJetPtCuts(config.getParameter<std::vector<float>>("jetPtCuts")), 
+  fJetEtaCuts(config.getParameter<std::vector<float>>("jetEtaCuts")), 
   fTauMatchingDeltaR(config.getParameter<float>("tauMatchingDeltaR")),
   fNumberOfJetsCut(config, "numberOfJetsCut"),
   fHTCut(config, "HTCut"),
@@ -183,9 +183,15 @@ JetSelection::Data JetSelection::privateAnalyze(const Event& event, const math::
   bool passedDeltaRMatchWithTau = false;
   bool passedEta = false;
   bool passedPt  = false;
-  
-  // Loop over jets
+  unsigned int jet_index    = -1;
+  unsigned int ptCut_index  = 0;
+  unsigned int etaCut_index = 0;
+
+  // For-loop: All jets (pT-sorted)
   for(Jet jet: event.jets()) {
+    
+    // Jet index (for pT and eta cuts)
+    jet_index++;
 
     //=== Apply cut on jet ID
     if (!jet.jetIDDiscriminator())
@@ -210,18 +216,29 @@ JetSelection::Data JetSelection::privateAnalyze(const Event& event, const math::
     }
 
     //=== Apply cut on eta
-    if (std::fabs(jet.eta()) > fJetEtaCut)
+    const float jetEtaCut = fJetEtaCuts.at(etaCut_index);
+    // std::cout << jet_index << ") abs(eta)["<< etaCut_index << "] > " << jetEtaCut << " ( " << jet.eta() << ")" << std::endl;
+    if (std::fabs(jet.eta()) > jetEtaCut)
       continue;
     passedEta = true;
 
-    //=== Apply cut on pt
-    if (jet.pt() < fJetPtCut)
+
+    //=== Apply cut on pt   
+    const float jetPtCut = fJetPtCuts.at(ptCut_index);
+    // std::cout << jet_index << ") pT["<< ptCut_index << "] > " << jetPtCut << " GeV/c ( " << jet.pt() << ")" << std::endl;
+    if (jet.pt() < jetPtCut)
       continue;
     passedPt = true;
-    // Jet passed all cuts
+
+    // Jet passed all cuts   
     output.fSelectedJets.push_back(jet);
     hJetPtPassed->Fill(jet.pt());
     hJetEtaPassed->Fill(jet.eta());
+    // Increment cut index only. Cannot be bigger than the size of the cut list provided
+    if (ptCut_index  < fJetPtCuts.size()-1  ) ptCut_index++;
+    if (etaCut_index < fJetEtaCuts.size()-1 ) etaCut_index++;
+    // std::cout << jet_index+1 << ") pT = " << jet.pt() << std::endl;
+    // std::cout << jet_index+1 << ") |eta| = " << jet.eta() << std::endl;
   }
 
   // Fill counters so far
@@ -246,8 +263,10 @@ JetSelection::Data JetSelection::privateAnalyze(const Event& event, const math::
 
   // Calculate HT
   output.fHT = 0.0;
-  for(Jet jet: output.getSelectedJets()) {
-    output.fHT += jet.pt();
+  for(Jet jet: output.getSelectedJets()) 
+    {
+      // std::cout << "pT = " << jet.pt() << ", eta = " << jet.eta() << std::endl;
+      output.fHT += jet.pt();
   }
   if (tauPt > 0.0) output.fHT += tauPt;
   hHTAll->Fill(output.fHT);

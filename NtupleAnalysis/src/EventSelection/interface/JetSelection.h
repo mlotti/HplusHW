@@ -145,8 +145,8 @@ private:
   
   
   // Input parameters
-  const float fJetPtCut;
-  const float fJetEtaCut;
+  const std::vector<float> fJetPtCuts;
+  const std::vector<float> fJetEtaCuts;
   const float fTauMatchingDeltaR;
   const DirectionalCut<int> fNumberOfJetsCut;
   const DirectionalCut<double> fHTCut;

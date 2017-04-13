@@ -316,8 +316,19 @@ wwStyle           = Style(ROOT.kMultiply, ROOT.kPink-9)
 wzStyle           = Style(ROOT.kMultiply, ROOT.kPink-7)
 zjetsStyle        = Style(ROOT.kFullCross, ROOT.kRed-7)
 zzStyle           = Style(ROOT.kMultiply, ROOT.kPink-5)
+baselineStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
+                                   StyleLine(lineColor=ROOT.kRed, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kRed, fillStyle=1001)])
+invertedStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+                                   StyleLine(lineColor=ROOT.kBlue, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kBlue, fillStyle=3001)])
+altEwkStyle       = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kMagenta-2, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+                                   StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3),
+                                   StyleFill(fillColor=ROOT.kMagenta-2, fillStyle=3001)])
 
-styles = [
+
+
+styles = [ 
     Style(26, ROOT.kBlue),
     Style(27, ROOT.kRed),
     Style(23, ROOT.kGreen+2),
@@ -335,6 +346,25 @@ styles = [
     Style(25, ROOT.kBlack)
     ]
 
+stylesCompound = [ 
+    StyleCompound([
+            StyleMarker(markerSize=1.2, markerColor=ROOT.kBlack, markerSizes=None, markerStyle=ROOT.kFullCircle),
+            StyleLine(lineColor=ROOT.kBlack, lineStyle=ROOT.kSolid, lineWidth=3), 
+            StyleFill(fillColor=ROOT.kBlack, fillStyle=1001)]),
+    StyleCompound([
+            StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-2, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
+            StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kDashed, lineWidth=3), 
+            StyleFill(fillColor=ROOT.kOrange-2, fillStyle=1001)]),
+    StyleCompound([
+            StyleMarker(markerSize=1.2, markerColor=ROOT.kMagenta-2, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+            StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3),  #ROOT.kDashDotted
+            StyleFill(fillColor=ROOT.kMagenta-2, fillStyle=3001)]),
+    StyleCompound([
+            StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kFullCross),
+            StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kDotted, lineWidth=3), 
+            StyleFill(fillColor=ROOT.kGreen+2, fillStyle=1001)]),
+    ]
+
 
 def applyStyle(h, ind):
     styles[ind].apply(h)
@@ -345,11 +375,32 @@ def getDataStyle():
 def getEWKStyle():
     return ewkFillStyle
 
+def getAltEWKStyle():
+    return altEwkStyle
+
+def getEWKFillStyle():
+    return ewkFillStyle
+
+def getEWKLineStyle():
+    return ewkStyle
+
 def getEWKFakeStyle():
     return ewkfakeFillStyle
 
 def getQCDStyle():
     return qcdFillStyle
+
+def getQCDFillStyle():
+    return qcdFillStyle
+
+def getQCDLineStyle():
+    return qcdStyle
+
+def getBaselineStyle():
+    return baselineStyle
+
+def getInvertedStyle():
+    return invertedStyle
 
 def getSignalStyle():
     return signalStyle
