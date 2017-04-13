@@ -20,6 +20,7 @@ public:
   enum AnalysisType {
     kSignalAnalysis = 0,
     kHplus2tbAnalysis= 0,
+    kBTagEfficiencyAnalysis= 0,
     kEmbedding,
     kQCDMeasurement,
     kFakeBMeasurement,
