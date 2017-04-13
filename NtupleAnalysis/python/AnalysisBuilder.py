@@ -110,7 +110,7 @@ class AnalysisConfig:
                     direction = value.replace("BTagSF","").replace("BMistagSF","").replace("Minus","down").replace("Plus","up")
                     scaleFactors.setupBtagSFInformation(self._config.BJetSelection,
                                                         btagPayloadFilename="CSVv2.csv",
-                                                        btagEfficiencyFilename="btageff_TTJets.json",
+                                                        btagEfficiencyFilename="btageff_hybrid.json",
                                                         direction=direction,
                                                         variationInfo=variationType)
 		# top quarks
