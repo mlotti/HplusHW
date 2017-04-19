@@ -78,8 +78,8 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    #return ["TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    #return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    return ["TT", "TTTT"]
 
 
 def GetHistoKwargs(histoName):
@@ -135,11 +135,11 @@ def GetHistoKwargs(histoName):
     elif "njets" in histoName.lower():
         _format = "%0.0f"
         _rebin  = 1
-        _logY   = True
+        _logY   = True 
         _cutBox = _cutBox = {"cutValue": 3, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     elif "chisqr" in histoName.lower():
-        _format = "%0.2f"
-        _rebin  = 1
+        _format = "%0.0f"
+        _rebin  = 10
         _logY   = True
         _cutBox = _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     else:
@@ -274,17 +274,19 @@ def main(opts):
         OtherHistograms(datasetsMgr, analysisType="Inverted")
 
     # Do the Baseline Vs Inverted histograms
-    if 0:
+    if 1:
         if opts.mergeEWK:
             for hName in getTopSelectionHistos():
                 if "Mass" not in hName:                
                     continue
+                #if "NJets" not in hName:                
+                #    continue
                 BaselineVsInvertedComparison(datasetsMgr, hName.split("/")[-1])
         else:
             Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
 
     # Do the Data/QCD/EWK histograms
-    if 1:
+    if 0:
         if opts.mergeEWK:
             analysisTypes = ["Baseline", "Inverted"]
             for analysis in analysisTypes:
@@ -294,8 +296,8 @@ def main(opts):
                     DataEwkQcd(datasetsMgr, hName.split("/")[-1], analysis)
         else:
             Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
-
-
+        
+    # Do the template comparisons
     if 0:
         if opts.mergeEWK:
             analysisTypes = ["Baseline", "Inverted"]
@@ -303,7 +305,9 @@ def main(opts):
                 for hName in getTopSelectionHistos(analysis):
                     # if "Trijet" not in hName:
                     #     continue
-                    if "Mass" not in hName:
+                    #if "Mass" not in hName:
+                    #    continue
+                    if "ChiSqr" not in hName:
                         continue
                     EWKvQCD(datasetsMgr, hName.split("/")[-1], analysis)
         else:
@@ -837,21 +841,29 @@ def BaselineVsInvertedComparison(datasetsMgr, histoName):
 
     # Draw the histograms
     _rebinX = 1
+    _cutBox = None
+    _opts   = {"ymin": 8e-5, "ymaxfactor": 1.2}
+    if "ChiSqr" in histoName:
+        _rebinX = 10
     if "Mass" in histoName:
         _rebinX = 2
         Print("Rebin is set to %s for %s" % (_rebinX, histoName), True)
+        if "trijet" in histoName.lower():
+            _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        if "dijet" in histoName.lower():
+            _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     plots.drawPlot(p, histoName,  
                    ylabel = "Events / %.0f",
                    log = True, 
                    rebinX = _rebinX, cmsExtraText = "Preliminary", 
                    createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
-                   opts  = {"ymin": 8e-5, "ymaxfactor": 1.2},
+                   opts  = _opts, #{"ymin": 8e-5, "ymaxfactor": 1.2},
                    opts2 = {"ymin": 0.6, "ymax": 1.4},
                    ratio = True,
                    ratioInvert = False, 
                    ratioYlabel = "Ratio",
-                   cutBox = None,
+                   cutBox = _cutBox,
                    )
     # Save plot in all formats
     SavePlot(p, histoName, os.path.join(opts.saveDir, "BaselineVsInverted") ) 
@@ -981,24 +993,28 @@ def DataEwkQcd(datasetsMgr, histoName, analysisType):
             })
     
     # Draw the histograms
-    #_cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    _cutBox = None
     _rebinX = 1
     if "Mass" in histoName:
         _rebinX = 2
         Print("Rebin is set to %s for %s" % (_rebinX, histoName), True)
+        if "TrijetMass" in histoName:
+            _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        if "DijetMass" in histoName:
+            _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
 
     histoName += "_" + analysisType
     plots.drawPlot(p, histoName,  
                    ylabel = "Events / %.0f",
                    log = True, 
                    rebinX = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
+                   createLegend = {"x1": 0.80, "y1": 0.78, "x2": 0.92, "y2": 0.92},
                    opts  = {"ymin": 1e0, "ymaxfactor": 10},
                    opts2 = {"ymin": 1e-5, "ymax": 1e0},
                    ratio = True,
                    ratioInvert = False, 
                    ratioYlabel = "Ratio",
-                   cutBox = None
+                   cutBox = _cutBox,
                    )
 
     # Save plot in all formats

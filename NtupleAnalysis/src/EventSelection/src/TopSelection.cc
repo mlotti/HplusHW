@@ -419,14 +419,17 @@ TopSelection::Data TopSelection::silentAnalyze(const Event& event, const JetSele
   return myData;
 }
 
-TopSelection::Data TopSelection::silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
+TopSelection::Data TopSelection::silentAnalyzeWithoutBJets(const Event& event, 
+							   const JetSelection::Data& jetData,
+							   const BJetSelection::Data& bjetData,
+							   const unsigned int maxNumberOfBJetsInTopFit) {
   ensureSilentAnalyzeAllowed(event.eventID());
   nSelectedBJets = bjetData.getSelectedBJets().size();
 
   // Disable histogram filling and counter
   disableHistogramsAndCounters();  
   // Ready to analyze 
-  Data data = privateAnalyzeWithoutBJets(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, 3) );
+  Data data = privateAnalyzeWithoutBJets(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, maxNumberOfBJetsInTopFit) );
   // Re-enable histogram filling and counter
   enableHistogramsAndCounters();
   return data;
@@ -445,12 +448,15 @@ TopSelection::Data TopSelection::analyze(const Event& event, const JetSelection:
   return data;
 }
 
-TopSelection::Data TopSelection::analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData) {
+TopSelection::Data TopSelection::analyzeWithoutBJets(const Event& event, 
+						     const JetSelection::Data& jetData, 
+						     const BJetSelection::Data& bjetData,
+						     const unsigned int maxNumberOfBJetsInTopFit) {
   ensureAnalyzeAllowed(event.eventID());
   nSelectedBJets = bjetData.getSelectedBJets().size();
 
   // Ready to analyze
-  TopSelection::Data data = privateAnalyze(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, 3) );
+  TopSelection::Data data = privateAnalyze(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, maxNumberOfBJetsInTopFit) );
 
   // Send data to CommonPlots
   // if (fCommonPlots != nullptr) fCommonPlots->fillControlPlotsAtTopSelection(event, data);
@@ -826,7 +832,7 @@ double TopSelection::CalculateChiSqrForTrijetSystems(const Jet& jet1,
 }
 
 
-const std::vector<Jet> TopSelection::GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData, const unsigned int maxNumberOfBJetsToUse)
+const std::vector<Jet> TopSelection::GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData, const unsigned int maxNumberOfBJets)
 {
   // If there are some bjets use them
   std::vector<Jet> bjetsForFit = bjetData.getSelectedBJets();
@@ -835,7 +841,7 @@ const std::vector<Jet> TopSelection::GetBjetsToBeUsedInFit(const BJetSelection::
   bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCandsDescendingDiscr().begin(), bjetData.getFailedBJetCandsDescendingDiscr().end());
 
   // Now truncate the bjets vector 
-  bjetsForFit.resize(maxNumberOfBJetsToUse);
+  bjetsForFit.resize(maxNumberOfBJets);
 
   return bjetsForFit;
 }

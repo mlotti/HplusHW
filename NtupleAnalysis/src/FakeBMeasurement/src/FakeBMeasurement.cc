@@ -24,7 +24,10 @@ private:
   // Input parameters
   const HistogramSettings cfg_PtBinSetting;
   const HistogramSettings cfg_EtaBinSetting;
-  const DirectionalCut<int> cfg_InvertedBjets;
+  const DirectionalCut<int> cfg_NumberOfBJets;
+  const DirectionalCut<int> cfg_NumberOfInvertedBJets;
+  const float cfg_InvertedBJetsDiscriminatorValue;
+  const int cfg_MaxNumberOfBJetsInTopFit;
 
   // Common plots
   CommonPlots fCommonPlots;
@@ -100,7 +103,10 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
   : BaseSelector(config, skimCounters),
     cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
     cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
-    cfg_InvertedBjets(config, "FakeBMeasurement.InvertedBjetsCut"),
+    cfg_NumberOfBJets(config, "FakeBMeasurement.numberOfBJetsCut"),
+    cfg_NumberOfInvertedBJets(config, "FakeBMeasurement.numberOfInvertedBJetsCut"),
+    cfg_InvertedBJetsDiscriminatorValue(config.getParameter<float>("FakeBMeasurement.invertedBJetsDiscriminatorValue")),
+    cfg_MaxNumberOfBJetsInTopFit(config.getParameter<int>("FakeBMeasurement.maxNumberOfBJetsInTopFit")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kFakeBMeasurement, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("All events")),
     cTrigger(fEventCounter.addCounter("Passed trigger")),
@@ -355,24 +361,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
   cAllEvents.increment();
 
-
-  //================================================================================================   
-  // GenParticle analysis
-  //================================================================================================   
-  // For-loop: GenParticles
   //  if (fEvent.isMC()) {
-  //    
-  //    for (auto& p: fEvent.genparticles().getGenParticles()) 
-  //      {
-  //	
-  //	int genP_pdgId  = p.pdgId();
-  //	double genP_pt  = p.pt();
-  //	double genP_eta = p.eta();
-  //	// double genP_Status = p.status(); // PYTHIA8: http://home.thep.lu.se/~torbjorn/pythia81html/ParticleProperties.html
-  //    }
-  //	
-  //  }
-  
 
 
   //================================================================================================   
@@ -472,9 +461,21 @@ void FakeBMeasurement::process(Long64_t entry) {
     }
   else 
     {
-      if ( cfg_InvertedBjets.passedCut(bjetData.getNumberOfSelectedBJets()) )
+
+      int nInvertedBJets=0;
+      // Loop over selected jets
+      for(const Jet& jet: jetData.getSelectedJets()) {
+
+	//=== Apply discriminator  
+	if (!(jet.bjetDiscriminator() > cfg_InvertedBJetsDiscriminatorValue)) continue;
+	nInvertedBJets++;
+      }
+
+      bool passSelected = cfg_NumberOfBJets.passedCut(bjetData.getNumberOfSelectedBJets());
+      bool passInverted = cfg_NumberOfInvertedBJets.passedCut(nInvertedBJets);
+      if (passSelected * passInverted)
 	{
-	  doInvertedAnalysis(jetData, bjetData, nVertices);
+	  doInvertedAnalysis(jetData, bjetData, nVertices); 
 	}
     }
 
@@ -503,15 +504,7 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
 
 
   //================================================================================================
-  // 11) MET selection
-  //================================================================================================
-  // if (0) std::cout << "=== Baseline: MET selection" << std::endl;
-  // const METSelection::Data METData = fBaselineMETSelection.analyze(fEvent, nVertices);
-  // if (!METData.passedSelection()) return;
-
-
-  //================================================================================================
-  // 12) Topology selection
+  // 11) Topology selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: Topology selection" << std::endl;
   const TopologySelection::Data TopologyData = fBaselineTopologySelection.analyze(fEvent, jetData);
@@ -519,7 +512,7 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
 
 
   //================================================================================================
-  // 13) Top selection
+  // 12) Top selection
   //================================================================================================
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
   const TopSelection::Data TopData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData);
@@ -589,15 +582,7 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
 
 
   //================================================================================================
-  // 11) MET selection
-  //================================================================================================
-  // if (0) std::cout << "=== Inverted: MET selection" << std::endl;
-  // const METSelection::Data METData = fInvertedMETSelection.analyze(fEvent, nVertices);
-  // if (!METData.passedSelection()) return;
-
-
-  //================================================================================================
-  // 12) Topology selection
+  // 11) Topology selection
   //================================================================================================
   if (0) std::cout << "=== Inverted: Topology selection" << std::endl;
   const TopologySelection::Data TopologyData = fInvertedTopologySelection.analyze(fEvent, jetData);
@@ -605,10 +590,10 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
 
 
   //================================================================================================
-  // 13) Top selection
+  // 12) Top selection
   //================================================================================================
   if (0) std::cout << "=== Inverted: Top selection" << std::endl;
-  const TopSelection::Data TopData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData);
+  const TopSelection::Data TopData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData, cfg_MaxNumberOfBJetsInTopFit);
   if (!TopData.passedSelection()) return;
 
 
@@ -624,7 +609,9 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   Jet bjet= bjetData.getFailedBJetCandsDescendingDiscr()[0]; // FIXME: ALEX Require all 3 bjets to be matched
   // std::cout << "FIXME: In order to have a fake-B measurement I need to make sure that in EWK i have 3 mc-matched bjets! If not then what I measure is QCD. Then the EWK fake-b and EWK genuine-b would have to be measured from MC. If i measure fake-B then only EWK GENUINE-b must be taken from MC. This is ok if the fraction of EWK-FakeB is very small (e.g less than 5%)" << std::endl;
 
+  // For Data pdgId==0!
   bool isGenuineB = abs(bjet.pdgId() == 5); // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
+  // std::cout << "I should check if sample is MC here. isGenuineB = " << isGenuineB << std::endl;
   int ancestryBit = ( pow(2, 0)*bjet.originatesFromZ() +
 		      pow(2, 1)*bjet.originatesFromW() +
 		      pow(2, 2)*bjet.originatesFromTop() +
@@ -634,7 +621,7 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   // bool isGenuineB = isGenuineB1*isGenuineB2*isGenuineB3; FIXME! ALEX: This is what i should use as boolean
   // See QCDMeasurement.cc
 
-  // For real data fill obth the histograms in inclusive and "FakeB" folders (but not "GenuineB")
+  // For real data fill both the histograms in inclusive and "FakeB" folders (but not "GenuineB")
   hInverted_FailedBJetWithBestBDiscBDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator());
   hInverted_FailedBJetWithBestBDiscPt_AfterAllSelections->Fill(isGenuineB, bjet.pt());
   hInverted_FailedBJetWithBestBDiscEta_AfterAllSelections->Fill(isGenuineB, bjet.eta());
