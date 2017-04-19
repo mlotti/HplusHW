@@ -13,8 +13,8 @@ Usage:
 ./printFakeBAnalysisCounters.py -m <multicrab_dir> [opts]
 
 Commonly Used Commands:
-./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --fractionEWK --mergeEWK --valueFormat %.2f
-./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --mergeEWK --valueFormat %.0f
+./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --fractionEWK --mergeEWK --valueFormat %.2f --latex
+./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --mergeEWK --valueFormat %.0f --latex
 
 Examples:
 ./printFakeBAnalysisCounters.py -m <multicrab_dir> -i "JetHT|TT"

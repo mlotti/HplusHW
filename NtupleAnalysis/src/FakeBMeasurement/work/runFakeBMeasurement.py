@@ -164,6 +164,9 @@ def main():
     # Perform variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])
     # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [2, 1])
+    # builder.addVariation("FakeBMeasurement.invertedBJetsDiscriminatorValue", [0.5426, 0.35, 0.25])
+    # builder.addVariation("FakeBMeasurement.invertedBJetsDiscriminatorValue", [3, 4, 5])
 
     # Build the builder
     builder.build(process, allSelections)

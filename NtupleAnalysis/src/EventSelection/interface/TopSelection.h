@@ -114,11 +114,11 @@ public:
   /// Use silentAnalyze if you do not want to fill histograms or increment counters
   Data silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   // silentAnalyze for FakeBMeasurement
-  Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const unsigned int maxNumberOfBJetsInTopFit=3);
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   // analyze for FakeBMeasurement
-  Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const unsigned int maxNumberOfBJetsInTopFit=3);
 
 private:
   /// Initialisation called from constructor
@@ -159,7 +159,7 @@ private:
 
  
   const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
-					       const unsigned int maxNumberOfBJetsToUse=3);
+					       const unsigned int maxNumberOfBJets);
   // Input parameters
   // Input parameters
   int nSelectedBJets;
