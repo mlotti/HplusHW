@@ -43,7 +43,7 @@
     "removeLegend": "False",
     "moveLegend": {"dx": -0.05, "dy": 0.0, "dh": 0.1},
     "extraText": {"text": "", "x": 0.18, "y": 0.92, "size": 17},
-    "cutValue": 40.0,
+    "cutValue": 30.0,
     "cutFillColour": 16,
     "cutBox": "True",
     "cutLine": "True",
