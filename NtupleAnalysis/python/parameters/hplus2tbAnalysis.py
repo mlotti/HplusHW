@@ -183,6 +183,14 @@ topSelection = PSet(
     MassW              = 80.385,
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,
+    # Distance cut
+    dijetWithMaxDR_tetrajetBjet_dR_min          = +3.0, # Disable: 0.0, Default: +3.0
+    dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = +4.0, # Disable:-1.0, Default: +4.0
+    dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff   = -1.0, # Disable: 0.0, Default: -1.0
+    # Angular cut
+    dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
+    dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
+    dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
 )
 
 
