@@ -17,19 +17,19 @@ or
 
 
 Frequently Used:
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/PUDependency/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/counters/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/counters/weighted/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/eSelection_Veto/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/muSelection_Veto/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/tauSelection_Veto/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/jetSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/bjetSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/metSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/topologySelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/topSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/AfterStandardSelections/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
-./plotDataMC.py -m Hplus2tbAnalysis_170310_ReMiniAOD_Full json/AfterAllSelections/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/PUDependency/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
+./plotDataMC.py -m Hplus2tbAnalysis_* json/counters/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/counters/weighted/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
+./plotDataMC.py -m Hplus2tbAnalysis_* json/eSelection_Veto/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/muSelection_Veto/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/tauSelection_Veto/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/jetSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/bjetSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/metSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/topologySelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/topSelection/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/AfterStandardSelections/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
+./plotDataMC.py -m Hplus2tbAnalysis_* json/AfterAllSelections/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
 '''
 
 #================================================================================================

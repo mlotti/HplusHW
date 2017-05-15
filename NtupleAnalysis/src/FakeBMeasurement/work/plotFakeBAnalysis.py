@@ -87,11 +87,14 @@ def GetHistoKwargs(histoName):
     '''
     Verbose("Creating a map of histoName <-> kwargs")
 
+    _opts = {}
+
     if "pt" in histoName.lower():
         _format = "%0.0f"
-        _rebin  = 1
+        _rebin  = 2
         _logY   = True
         _cutBox = None
+        _opts["xmax"] = 800.0
     elif "eta" in histoName.lower():
         _format = "%0.2f"
         _rebin  = 1
@@ -121,7 +124,13 @@ def GetHistoKwargs(histoName):
         _format = "%0.0f"
         _rebin  = 1
         _logY   = True
-        _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}        
+        _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+    elif "tetrajetmass" in histoName.lower():
+        _format = "%0.0f"
+        _rebin  = 5
+        _logY   = True
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 3000.0
     elif "mass" in histoName.lower():
         _format = "%0.0f"
         _rebin  = 1
@@ -147,9 +156,15 @@ def GetHistoKwargs(histoName):
 
     # Customise options (main pad) for with/whitout logY scale 
     if _logY:
-        _opts   = {"ymin": 2e-4, "ymaxfactor": 5} #"xmax": 1000, 
+        _opts["ymin"] = 2e-4
+        _opts["ymaxfactor"] = 5
     else:
-        _opts   = {"ymin": 0.0, "ymaxfactor": 1.2}  #"xmax": 1000.0, 
+        _opts["ymin"] = 0.0
+        _opts["ymaxfactor"] = 1.2
+
+    # Draw the histograms
+    if "trijetmass" in histoName.lower(): #alex
+        _opts["xmax"] = 800.0
 
     # Define plotting options    
     kwargs = {"ylabel": "Arbitrary Units / %s" % (_format),
@@ -277,22 +292,20 @@ def main(opts):
     if 1:
         if opts.mergeEWK:
             for hName in getTopSelectionHistos():
-                if "Mass" not in hName:                
-                    continue
-                #if "NJets" not in hName:                
+                #if "Mass" not in hName:                
                 #    continue
                 BaselineVsInvertedComparison(datasetsMgr, hName.split("/")[-1])
         else:
             Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
 
     # Do the Data/QCD/EWK histograms
-    if 0:
+    if 1:
         if opts.mergeEWK:
             analysisTypes = ["Baseline", "Inverted"]
             for analysis in analysisTypes:
                 for hName in getTopSelectionHistos(analysis):
-                    if "Mass" not in hName:
-                        continue
+                    #if "Mass" not in hName:
+                    #    continue
                     DataEwkQcd(datasetsMgr, hName.split("/")[-1], analysis)
         else:
             Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
@@ -307,8 +320,8 @@ def main(opts):
                     #     continue
                     #if "Mass" not in hName:
                     #    continue
-                    if "ChiSqr" not in hName:
-                        continue
+                    #if "ChiSqr" not in hName:
+                    #    continue
                     EWKvQCD(datasetsMgr, hName.split("/")[-1], analysis)
         else:
             Print("Cannot draw the EWKvQCD histograms without the option --mergeEWK. Exit", True)
@@ -842,23 +855,28 @@ def BaselineVsInvertedComparison(datasetsMgr, histoName):
     # Draw the histograms
     _rebinX = 1
     _cutBox = None
-    _opts   = {"ymin": 8e-5, "ymaxfactor": 1.2}
+    _opts   = {"ymin": 8e-5, "ymaxfactor": 2.0}
+    if "Pt_" in histoName:
+        _rebinX = 5
     if "ChiSqr" in histoName:
         _rebinX = 10
     if "Mass" in histoName:
-        _rebinX = 2
+        _rebinX = 5
         Print("Rebin is set to %s for %s" % (_rebinX, histoName), True)
         if "trijet" in histoName.lower():
             _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "dijet" in histoName.lower():
             _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-
+    if "TetrajetMass" in histoName:
+        _opts   = {"ymin": 8e-5, "ymaxfactor": 2.0, "xmax": 3000.0}
+        #_rebinX *= 2
+                
     plots.drawPlot(p, histoName,  
                    ylabel = "Events / %.0f",
                    log = True, 
                    rebinX = _rebinX, cmsExtraText = "Preliminary", 
                    createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
-                   opts  = _opts, #{"ymin": 8e-5, "ymaxfactor": 1.2},
+                   opts  = _opts,
                    opts2 = {"ymin": 0.6, "ymax": 1.4},
                    ratio = True,
                    ratioInvert = False, 
@@ -915,7 +933,7 @@ def EWKvQCD(datasetsMgr, histoName, analysisType=""):
     # Append analysisType to histogram name
     saveName = histoName + "_" + analysisType
 
-    # Draw the histograms
+    # Draw the histograms #alex
     plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
     # _kwargs = {"lessThan": True}
     # p.addCutBoxAndLine(cutValue=200, fillColor=ROOT.kRed, box=False, line=True, ***_kwargs)
@@ -995,6 +1013,7 @@ def DataEwkQcd(datasetsMgr, histoName, analysisType):
     # Draw the histograms
     _cutBox = None
     _rebinX = 1
+    _opts   = {"ymin": 1e0, "ymaxfactor": 10}
     if "Mass" in histoName:
         _rebinX = 2
         Print("Rebin is set to %s for %s" % (_rebinX, histoName), True)
@@ -1009,7 +1028,7 @@ def DataEwkQcd(datasetsMgr, histoName, analysisType):
                    log = True, 
                    rebinX = _rebinX, cmsExtraText = "Preliminary", 
                    createLegend = {"x1": 0.80, "y1": 0.78, "x2": 0.92, "y2": 0.92},
-                   opts  = {"ymin": 1e0, "ymaxfactor": 10},
+                   opts  = _opts,
                    opts2 = {"ymin": 1e-5, "ymax": 1e0},
                    ratio = True,
                    ratioInvert = False, 
