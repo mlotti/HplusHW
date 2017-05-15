@@ -119,7 +119,7 @@ bjetSelection = PSet(
 
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
-                                    btagEfficiencyFilename = "btageff_hybrid.json",
+                                    btagEfficiencyFilename = "btageff_hybrid.json", #fixme: update this!
                                     direction              = "nominal")
 
 #================================================================================================
@@ -184,9 +184,9 @@ topSelection = PSet(
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,
     # Distance cut
-    dijetWithMaxDR_tetrajetBjet_dR_min          = +3.0, # Disable: 0.0, Default: +3.0
-    dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = +4.0, # Disable:-1.0, Default: +4.0
-    dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff   = -1.0, # Disable: 0.0, Default: -1.0
+    dijetWithMaxDR_tetrajetBjet_dR_min          =  0.0, # Disable: 0.0, Default: +3.0
+    dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = -1.0, # Disable:-1.0, Default: +4.0
+    dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff   =  0.0, # Disable: 0.0, Default: -1.0
     # Angular cut
     dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
     dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
@@ -204,11 +204,12 @@ scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoin
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    numberOfBJetsCutValue             = 2,
+    numberOfBJetsCutValue             = 0,
     numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
-    numberOfInvertedBJetsCutValue     = 1,
+    numberOfInvertedBJetsCutValue     = 3,
     numberOfInvertedBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
-    invertedBJetsDiscriminatorValue   = 0.5426,
+    invertedBJetDiscr                 = bjetSelection.bjetDiscr,
+    invertedBJetWorkingPoint          = "Loose",
     maxNumberOfBJetsInTopFit          = 3,
     )
 

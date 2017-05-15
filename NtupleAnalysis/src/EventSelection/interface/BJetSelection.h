@@ -94,6 +94,8 @@ public:
   Data silentAnalyze(const Event& event, const JetSelection::Data& jetData);
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData);
+  /// Obtain the discriminator value for a given algorithm and Working Point (WP)
+  const double getDiscriminatorWP(const std::string sAlgorithm, const std::string sWorkingPoint);
 
 private:
   /// Initialisation called from constructor
@@ -119,6 +121,7 @@ private:
   // Histograms
   std::vector<WrappedTH1*> hSelectedBJetPt;
   std::vector<WrappedTH1*> hSelectedBJetEta;
+  std::vector<WrappedTH1*> hSelectedBJetBDisc;
 };
 
 #endif

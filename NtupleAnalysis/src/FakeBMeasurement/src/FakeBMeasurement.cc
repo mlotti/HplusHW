@@ -5,6 +5,7 @@
 #include "EventSelection/interface/CommonPlots.h"
 #include "Tools/interface/DirectionalCut.h"
 #include "EventSelection/interface/EventSelections.h"
+#include "EventSelection/interface/BJetSelection.h"
 
 #include "TDirectory.h"
 
@@ -26,7 +27,8 @@ private:
   const HistogramSettings cfg_EtaBinSetting;
   const DirectionalCut<int> cfg_NumberOfBJets;
   const DirectionalCut<int> cfg_NumberOfInvertedBJets;
-  const float cfg_InvertedBJetsDiscriminatorValue;
+  const std::string cfg_InvertedBJetsDiscriminator;
+  const std::string cfg_InvertedBJetsDiscriminatorWP;
   const int cfg_MaxNumberOfBJetsInTopFit;
 
   // Common plots
@@ -105,7 +107,8 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
     cfg_NumberOfBJets(config, "FakeBMeasurement.numberOfBJetsCut"),
     cfg_NumberOfInvertedBJets(config, "FakeBMeasurement.numberOfInvertedBJetsCut"),
-    cfg_InvertedBJetsDiscriminatorValue(config.getParameter<float>("FakeBMeasurement.invertedBJetsDiscriminatorValue")),
+    cfg_InvertedBJetsDiscriminator(config.getParameter<std::string>("FakeBMeasurement.invertedBJetDiscr")),
+    cfg_InvertedBJetsDiscriminatorWP(config.getParameter<std::string>("FakeBMeasurement.invertedBJetWorkingPoint")),
     cfg_MaxNumberOfBJetsInTopFit(config.getParameter<int>("FakeBMeasurement.maxNumberOfBJetsInTopFit")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kFakeBMeasurement, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("All events")),
@@ -454,29 +457,38 @@ void FakeBMeasurement::process(Long64_t entry) {
   // Disable histogram filling and counter with silent analyze
   const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
 
-  // There are no bjets passing our selection criteria
+  // There are no bjets pasOBsing our selection criteria
   if ( bjetData.passedSelection() )
     {
       doBaselineAnalysis(jetData, bjetData, nVertices);
     }
   else 
     {
-
-      int nInvertedBJets=0;
-      // Loop over selected jets
-      for(const Jet& jet: jetData.getSelectedJets()) {
-
-	//=== Apply discriminator  
-	if (!(jet.bjetDiscriminator() > cfg_InvertedBJetsDiscriminatorValue)) continue;
-	nInvertedBJets++;
-      }
-
+      
+      // Apply requirent on selected b-jets 
       bool passSelected = cfg_NumberOfBJets.passedCut(bjetData.getNumberOfSelectedBJets());
-      bool passInverted = cfg_NumberOfInvertedBJets.passedCut(nInvertedBJets);
-      if (passSelected * passInverted)
+      if (!passSelected) return;
+      
+      // Apply requirement on inverted b-jets
+      int nInvertedBJets = 0;
+      float invertedBJetDiscr = fBJetSelection.getDiscriminatorWP(cfg_InvertedBJetsDiscriminator, cfg_InvertedBJetsDiscriminatorWP);
+      // float invertedBJetDiscrMax = fBJetSelection.getDiscriminatorWP(cfg_InvertedBJetsDiscriminator, "Medium");
+      
+      // For-loop over selected jets
+      for(const Jet& jet: jetData.getSelectedJets()) 
 	{
-	  doInvertedAnalysis(jetData, bjetData, nVertices); 
+	  
+	  //=== Apply discriminator WP cut
+	  if (jet.bjetDiscriminator() < invertedBJetDiscr) continue;
+	  nInvertedBJets++;
 	}
+      
+      // Apply inversion requirements 
+      bool passInverted = cfg_NumberOfInvertedBJets.passedCut(nInvertedBJets);     
+      if (!passInverted) return;
+
+      // Do the inverted analysis
+      doInvertedAnalysis(jetData, bjetData, nVertices); 
     }
 
   return;

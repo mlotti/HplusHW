@@ -54,6 +54,7 @@ BJetSelection::BJetSelection(const ParameterSet& config)
 BJetSelection::~BJetSelection() {
   for (auto p: hSelectedBJetPt) delete p;
   for (auto p: hSelectedBJetEta) delete p;
+  for (auto p: hSelectedBJetBDisc) delete p;
 }
 
 void BJetSelection::initialize(const ParameterSet& config) {
@@ -65,57 +66,42 @@ void BJetSelection::initialize(const ParameterSet& config) {
     throw hplus::Exception("config") << "b-tagging algorithm working point '" << sWorkingPoint
                                      << "' is not valid!\nValid values are: Loose, Medium, Tight";
 
-  if (sAlgorithm == "pfCombinedInclusiveSecondaryVertexV2BJetTags") {
-    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco (Moriond17)
-    if (sWorkingPoint == "Loose")
-      fDisriminatorValue = 0.5426;
-    else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.8484;
-    else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.9535;
-  } else if (sAlgorithm == "pfCombinedMVA2BJetTags") {
-    if (sWorkingPoint == "Loose")
-      fDisriminatorValue = -0.5884;
-    else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.4432;
-    else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.9432;
-  } else if (sAlgorithm == "pfCombinedCvsLJetTags") {
-    if (sWorkingPoint == "Loose")
-      fDisriminatorValue = -0.48;
-    else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = -0.1;
-    else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = 0.69;    
-  } else if (sAlgorithm == "pfCombinedCvsBJetTags") {
-    if (sWorkingPoint == "Loose")
-      fDisriminatorValue = -0.17;
-    else if (sWorkingPoint == "Medium")
-      fDisriminatorValue = 0.08;
-    else if (sWorkingPoint == "Tight")
-      fDisriminatorValue = -0.45; 
-    // Note: Events selected by the Tight WP are not a subsample of the events selected by the Medium WP, but it is because they WP definition have different goals:
-    // Loose to reduce b jets
-    // Medium to reduce both b and light jets
-    // Tight to reduce light jets
-  }
+  // Note: Events selected by the Tight WP are not a subsample of the events selected by the Medium WP, but it is because they WP definition have different goals:
+  // Loose to reduce b jets
+  // Medium to reduce both b and light jets
+  // Tight to reduce light jets
+  fDisriminatorValue = getDiscriminatorWP(sAlgorithm, sWorkingPoint);
   
-  if (fDisriminatorValue < 0.0) {
-    throw hplus::Exception("config") << "No discriminator value implemented in BJetSelection.cc constructor for algorithm '" << sAlgorithm
-                                     << "' and working point '" << sWorkingPoint << "'!";
-  }
+  if (fDisriminatorValue < 0.0)
+    {
+      throw hplus::Exception("config") << "No discriminator value implemented in BJetSelection.cc constructor for algorithm '" 
+				       << sAlgorithm << "' and working point '" << sWorkingPoint << "'!";
+    }
+
+  return;
 }
 
 void BJetSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "bjetSelection_"+sPostfix);
+
+  const int  nBinsBDisc= fCommonPlots->getBJetDiscBinSettings().bins();
+  const float minBDisc = fCommonPlots->getBJetDiscBinSettings().min();
+  const float maxBDisc = fCommonPlots->getBJetDiscBinSettings().max();
+
   hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetPt" , "First b-jet pT;p_{T} (GeV/c)" , 50, 0.0, 500.0) );
   hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetPt", "Second b-jet pT;p_{T} (GeV/c)", 50, 0.0, 500.0) );
   hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsThirdJetPt" , "Third b-jet pT;p_{T} (GeV/c)" , 50, 0.0, 500.0) );
   hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFourthJetPt", "Fourth b-jet pT;p_{T} (GeV/c)", 50, 0.0, 500.0) );
+
   hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetEta" , "First b-jet eta;#eta" , 50, -2.5, 2.5) );
   hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetEta", "Second b-jet eta;#eta", 50, -2.5, 2.5) );
   hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsThirdJetEta" , "Third b-jet eta;#eta" , 50, -2.5, 2.5) );
   hSelectedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFourthJetEta", "Fourth b-jet eta;#eta", 50, -2.5, 2.5) );
+
+  hSelectedBJetBDisc.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetBDisc" , "First b-jet BDisc;b-tag discriminator" , nBinsBDisc, minBDisc, maxBDisc) );
+  hSelectedBJetBDisc.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetBDisc", "Second b-jet BDisc;b-tag discriminator", nBinsBDisc, minBDisc, maxBDisc) );
+  hSelectedBJetBDisc.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsThirdJetBDisc" , "Third b-jet BDisc;b-tag discriminator" , nBinsBDisc, minBDisc, maxBDisc) );
+  hSelectedBJetBDisc.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFourthJetBDisc", "Fourth b-jet BDisc;b-tag discriminator", nBinsBDisc, minBDisc, maxBDisc) );
   fBTagSFCalculator.bookHistograms(subdir, fHistoWrapper);
 }
 
@@ -219,6 +205,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     if (i < 4) {
       hSelectedBJetPt[i]->Fill(jet.pt());
       hSelectedBJetEta[i]->Fill(jet.eta());
+      hSelectedBJetBDisc[i]->Fill(jet.bjetDiscriminator());
     }
     ++i;
   }
@@ -236,4 +223,47 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
 double BJetSelection::calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData) {
   // FIXME to be implemented
   return 1.0;
+}
+
+const double BJetSelection::getDiscriminatorWP(const std::string sAlgorithm, const std::string sWorkingPoint) {
+
+  // Decypher the actual discriminator value
+  if (sWorkingPoint != "Loose" && sWorkingPoint != "Medium" && sWorkingPoint != "Tight")
+    throw hplus::Exception("logic") << "b-tagging algorithm working point '" << sWorkingPoint
+				    << "' is not valid!\nValid values are: Loose, Medium, Tight";
+
+  // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco (Moriond17)
+  if (sAlgorithm == "pfCombinedInclusiveSecondaryVertexV2BJetTags") 
+    {
+      if (sWorkingPoint == "Loose") return +0.5426;
+      else if (sWorkingPoint == "Medium") return +0.8484;
+      else if (sWorkingPoint == "Tight") return +0.9535;
+    } 
+  else if (sAlgorithm == "pfCombinedMVA2BJetTags") 
+    {
+      if (sWorkingPoint == "Loose") return -0.5884;
+      else if (sWorkingPoint == "Medium") return +0.4432;
+      else if (sWorkingPoint == "Tight") return +0.9432;
+    }
+  else if (sAlgorithm == "pfCombinedCvsLJetTags") 
+    {
+      if (sWorkingPoint == "Loose") return-0.48;
+      else if (sWorkingPoint == "Medium") return -0.1;
+      else if (sWorkingPoint == "Tight") return +0.69;    
+    } 
+  else if (sAlgorithm == "pfCombinedCvsBJetTags") 
+    {
+      // Note: Events selected by the Tight WP are not a subsample of the events selected by the Medium WP, but it is because they WP definition have different goals:
+      // Loose to reduce b jets
+      // Medium to reduce both b and light jets
+      // Tight to reduce light jets
+      if (sWorkingPoint == "Loose") return -0.17;
+      else if (sWorkingPoint == "Medium") return +0.08;
+      else if (sWorkingPoint == "Tight") return -0.45; 
+    }
+
+  throw hplus::Exception("logic") << "Invalid b-tagging algorithm  '" << sAlgorithm << "' with working point (WP) '" << sWorkingPoint << "'."
+				  << "\nValid WP values are: Loose, Medium, Tight." 
+				  << "\nValid algorithms are: pfCombinedInclusiveSecondaryVertexV2BJetTags, pfCombinedMVA2BJetTags, pfCombinedCvsLJetTags, pfCombinedCvsBJetTags";
+  return -1e6;
 }
