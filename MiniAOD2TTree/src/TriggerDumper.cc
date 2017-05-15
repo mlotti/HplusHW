@@ -354,6 +354,11 @@ void TriggerDumper::reset(){
       HLTTau_phi.clear();
       HLTTau_e.clear();
 
+      HLTBJet_pt.clear();
+      HLTBJet_eta.clear();
+      HLTBJet_phi.clear();
+      HLTBJet_e.clear();
+
       for(int i = 0; i < nTrgDiscriminators; ++i) trgdiscriminators[i].clear();
 
       trgprescales->clear();
