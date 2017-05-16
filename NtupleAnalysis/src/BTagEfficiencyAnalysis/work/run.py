@@ -10,7 +10,7 @@ USAGE:
 ./run.py -m <path-to-multicrab-directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
 
 Example:
-./run.py -m <path-to-multicrab-directory> --analysisType HToTB
+./run.py -m <path-to-multicrab-directory> --analysisType HToTB -i 'JetHT|TT|QCD|WJets' -n -1
 ./run.py -m <path-to-multicrab-directory> -n 1000 -e "Charged"
 ./run.py -m <path-to-multicrab-directory> -n 1000 -i "QCD|TT|WJets"
 

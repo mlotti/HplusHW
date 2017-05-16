@@ -119,7 +119,8 @@ bjetSelection = PSet(
 
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
-                                    btagEfficiencyFilename = "btageff_hybrid.json", #fixme: update this!
+                                    #btagEfficiencyFilename = "btageff_hybrid.json", #old
+                                    btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
                                     direction              = "nominal")
 
 #================================================================================================
