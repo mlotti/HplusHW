@@ -20,7 +20,8 @@ if len(sys.argv) < 2:
 process.addDatasetsFromMulticrab(sys.argv[1], blacklist=["ChargedHiggs"])
 
 # Add config
-from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
+from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections  
+#from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections #fixme: alex
 # Disable rtau
 allSelections.TauSelection.prongs = 1
 allSelections.TauSelection.rtau = 0.0
