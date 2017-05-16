@@ -235,7 +235,6 @@ class Report:
         RESUBMITFAILED: The 'resubmit' action has failed.
         '''
         Verbose("GetTaskStatusStyle()", True)
-        
         # Remove all whitespace characters (space, tab, newline, etc.)
         status = ''.join(status.split())
         if status == "NEW":
@@ -266,7 +265,6 @@ class Report:
             status = "%s%s%s" % (colors.LIGHTRED, status, colors.WHITE)
         else:
             raise Exception("Unexpected task status %s." % (status) )
-
         return status
 
 
@@ -448,7 +446,6 @@ def GetTaskReports(datasetPath, opts):
         # Assess JOB success/failure for task
         Verbose("Retrieving files", True)
         idle, running, finished, transferring, failed, retrievedLog, retrievedOut, eosLog, eosOut = RetrievedFiles(datasetPath, result, dashboardURL, True, opts)
-        #idle, running, finished, transferring, failed, retrievedLog, retrievedOut, eosLog, eosOut = RetrievedFiles(datasetPath, result, dashboardURL, False, opts)
 
         # Get the task logs & output ?        
         Verbose("Getting task logs", True)
@@ -465,11 +462,7 @@ def GetTaskReports(datasetPath, opts):
         # Kill task which are active
         Verbose("Killing active tasks")
         KillTask(datasetPath)
-            
-        # Assess JOB success/failure for task (again)
-        if 0: #fixme: Is this really needed? Or it just slows things down?
-            Verbose("Retrieving Files (again)") 
-            idle, running, finished, transferring, failed, retrievedLog, retrievedOut, eosLog, eosOut = RetrievedFiles(datasetPath, result, dashboardURL, True, opts)
+        # Count retrieved/all jobs
         retrieved = min(finished, retrievedLog, retrievedOut)
         alljobs   = GetTotalJobsFromStatus(result)
 
@@ -1001,7 +994,7 @@ def RetrievedFiles(taskDir, crabResults, dashboardURL, printTable, opts):
     the logs and output files have been retrieved. Returns all these in form
     of lists. The list of tuple crabResults contains the jobId and its status.
     For example:
-    crabResults = [['finished', 1], ['finished', 2], ['finished', 3] ]
+    crabResults = [['finished', 1], ['finished', 2], ['finished', 3] ] #obsolete
     '''
     Verbose("RetrievedFiles()", True)
     
@@ -1038,9 +1031,9 @@ def RetrievedFiles(taskDir, crabResults, dashboardURL, printTable, opts):
             finished += 1
             # Count Output & Logfiles (EOS)
             if opts.filesInEOS:
-                taskDirEOS  = GetEOSDir(taskDir, opts)    
-                foundLogEOS = ExistsEOS(taskDirEOS, "log", "cmsRun_%i.log.tar.gz" % jobId, opts)
-                foundOutEOS = ExistsEOS(taskDirEOS, ""   , "miniaod2tree_%i.root" % jobId, opts)
+                taskDirEOS  = GetEOSDir(taskDir, opts)
+                foundLogEOS = ExistsEOS(taskDirEOS, "log", "cmsRun_%s.log.tar.gz" % jobId, opts)
+                foundOutEOS = ExistsEOS(taskDirEOS, ""   , "miniaod2tree_%s.root" % jobId, opts)
                 Verbose("foundLogEOS=%s , foundOutEOS=%s" % (foundLogEOS, foundOutEOS))
                 if foundLogEOS:
                     eosLog += 1
