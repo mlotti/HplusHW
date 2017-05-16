@@ -177,7 +177,7 @@ class Report:
         '''
         Constructor 
         '''
-        Verbose("class Report:__init__()")
+        Verbose("class Report:__init__()", True)
         self.name            = name
         self.allJobs         = str(allJobs)
         self.retrieved       = str(retrieved)
@@ -394,7 +394,9 @@ def GetTaskStatus(datasetPath):
     crabLog      = os.path.join(datasetPath, "crab.log")
     grepFile     = os.path.join(datasetPath, "grep.tmp")
     #stringToGrep = "Task status:"
-    stringToGrep = "Status on the CRAB server:"
+    #stringToGrep = "Status on the CRAB server:"
+    #stringToGrep = "Jobs status:"
+    stringToGrep  = "Status on the scheduler:"
     cmd          = "grep '%s' %s > %s" % (stringToGrep, crabLog, grepFile )
     status       = "UNKNOWN"
     
