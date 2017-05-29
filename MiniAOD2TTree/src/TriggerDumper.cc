@@ -173,10 +173,21 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                     iBit[i] = trgResultsHandle->accept(j);
                     iCountAll[i] += 1;
                     if(trgResultsHandle->accept(j)) iCountPassed[i] += 1;
-                    continue;
+                    break;
                 }
             }
         }
+
+        std::vector<std::string> trgMatchPaths;
+        for(size_t i = 0; i < trgMatchStr.size(); ++i){
+            std::regex match_re(trgMatchStr[i]);
+            for(size_t j = 0; j < trgResultsHandle->size(); ++j){
+                if (std::regex_search(names.triggerName(j), match_re)) {
+                  trgMatchPaths.push_back(names.triggerName(j));
+                }
+            }
+        }
+
 
     	L1MET_x  = 0;  
     	L1MET_y  = 0;
@@ -209,11 +220,9 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
                 }
 */
 	        if(patTriggerObject.id(trigger::TriggerTau)){
-
-                    std::vector<std::string> pathNamesAll  = patTriggerObject.pathNames(false);
 		    bool fired = false;
-                    for(size_t i = 0; i < pathNamesAll.size(); ++i){
-		      if(patTriggerObject.hasPathName( pathNamesAll[i], false, true )) fired = true;
+                    for(size_t i = 0; i < trgMatchPaths.size(); ++i){
+		      if(patTriggerObject.hasPathName( trgMatchPaths[i], false, true )) fired = true;
                     }
 		    if(fired){
                         HLTTau_pt.push_back(patTriggerObject.p4().Pt());
@@ -225,10 +234,9 @@ bool TriggerDumper::fill(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	        }
 
                 if(patTriggerObject.id(trigger::TriggerBJet)){
-                    std::vector<std::string> pathNamesAll  = patTriggerObject.pathNames(false);
                     bool fired = false;
-                    for(size_t i = 0; i < pathNamesAll.size(); ++i){
-                      if(patTriggerObject.hasPathName( pathNamesAll[i], false, true )) fired = true;
+                    for(size_t i = 0; i < trgMatchPaths.size(); ++i){
+                      if(patTriggerObject.hasPathName( trgMatchPaths[i], false, true )) fired = true;
                     }
                     if(fired){
                         HLTBJet_pt.push_back(patTriggerObject.p4().Pt());
