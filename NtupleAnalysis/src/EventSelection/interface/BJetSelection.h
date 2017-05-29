@@ -20,13 +20,6 @@ class HistoWrapper;
 class WrappedTH1;
 class WrappedTH2;
 
-// struct DiscComparator{
-//   bool operator() (const Jet a, const Jet b) const
-//   {
-//     return ( a.bjetDiscriminator() > b.bjetDiscriminator());
-//   }
-// };
-
 class BJetSelection: public BaseSelection {
 public:
     /**
@@ -78,7 +71,7 @@ public:
     std::vector<Jet> fFailedBJetCandsDescendingDiscr; 
     /// All jets failing all the b-tagging criteria (sorted by ascending discriminator value)
     std::vector<Jet> fFailedBJetCandsAscendingDiscr;
-
+  
   };
   
   // Main class
@@ -102,23 +95,36 @@ private:
   void initialize(const ParameterSet& config);
   /// The actual event selection
   Data privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData);
+  /// determine if bjet object is trigger matched (deltaR based)
+  bool passTrgMatching(const Jet& bjet, std::vector<math::LorentzVectorT<double>>& trgBJets) const;
+  
   /// Calculate probability to pass b tagging
   double calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData);
   // Input parameters
+  const bool bTriggerMatchingApply;
+  const float fTriggerMatchingCone;
   const std::vector<float> fJetPtCuts;
   const std::vector<float> fJetEtaCuts;
   const DirectionalCut<int> fNumberOfJetsCut;
+  const DirectionalCut<int> fTrgMatchesCut;
   float fDisriminatorValue; // not a const because constructor sets it based on input string
-  
+
   // Event counter for passing selection
   Count cPassedBJetSelection;
   // Sub counters
   Count cSubAll;
+  Count cSubPassedEta;
+  Count cSubPassedPt;
   Count cSubPassedDiscriminator;
+  Count cSubPassedTriggerMatching;
   Count cSubPassedNBjets;
   // Scalefactor calculator
   BTagSFCalculator fBTagSFCalculator;
   // Histograms
+  WrappedTH1* hTriggerMatchDeltaR;
+  WrappedTH1* hTriggerMatches;
+  std::vector<WrappedTH1*> hTriggerMatchedBJetPt;
+  std::vector<WrappedTH1*> hTriggerMatchedBJetEta;
   std::vector<WrappedTH1*> hSelectedBJetPt;
   std::vector<WrappedTH1*> hSelectedBJetEta;
   std::vector<WrappedTH1*> hSelectedBJetBDisc;

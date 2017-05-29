@@ -103,6 +103,8 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
  
 #====== B-jet selection
 bjetSelection = PSet(
+    triggerMatchingApply= False,
+    triggerMatchingCone = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
               jetPtCuts = [30.0],
              jetEtaCuts = [2.5],
              #bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
@@ -110,6 +112,9 @@ bjetSelection = PSet(
  bjetDiscrWorkingPoint  = "Loose",
  numberOfBJetsCutValue  = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+ trgMatchesCutValue        = 0,
+ trgMatchesCutDirection    = ">=", # options: ==, !=, <, <=, >, >=
+    
 )
 
 scaleFactors.setupBtagSFInformation(btagPset=bjetSelection, 

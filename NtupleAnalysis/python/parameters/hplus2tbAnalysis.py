@@ -109,12 +109,16 @@ jetSelection = PSet(
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
+    triggerMatchingApply      = True,
+    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
     jetPtCuts                 = [40.0, 40.0, 30.0],
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
     bjetDiscrWorkingPoint     = "Medium",
     numberOfBJetsCutValue     = 3,
     numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+    trgMatchesCutValue        = 1,
+    trgMatchesCutDirection    = ">=", # options: ==, !=, <, <=, >, >=
 )
 
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 

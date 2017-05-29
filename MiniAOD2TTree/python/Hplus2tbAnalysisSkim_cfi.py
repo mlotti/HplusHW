@@ -4,10 +4,10 @@ skim = cms.EDFilter("Hplus2tbAnalysisSkim",
     Verbose        = cms.bool(False),
     TriggerResults = cms.InputTag("TriggerResults::HLT"),
     HLTPaths       = cms.vstring(
-        "HLT_PFHT400_SixJet30_v", #Prescale 110 se lumi 1.35E+34
+        #"HLT_PFHT400_SixJet30_v", #Prescale 110 at inst. lumi 1.35E+34
         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056_v",
-        "HLT_PFHT450_SixJet40_v",
-        "HLT_PFHT450_SixJet40_BTagCSV_p056_v", #Prescale 26 se lumi 1.35E+34
+        #"HLT_PFHT450_SixJet40_v", #Prescale 26 at inst. lumi 1.35E+34
+        "HLT_PFHT450_SixJet40_BTagCSV_p056_v",
     ),
     # Vertex
     VertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),

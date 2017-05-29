@@ -6,7 +6,11 @@
 #include "DataFormat/interface/Event.h"
 #include "Framework/interface/HistoWrapper.h"
 #include "Framework/interface/Exception.h"
+#include "DataFormat/interface/HLTBJet.h"
 //#include "Framework/interface/makeTH.h"
+
+#include "Math/VectorUtil.h"
+#include <cmath>
 
 BJetSelection::Data::Data() 
 : bPassedSelection(false),
@@ -18,15 +22,21 @@ BJetSelection::Data::~Data() { }
 
 BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCounter, HistoWrapper& histoWrapper, CommonPlots* commonPlots, const std::string& postfix)
 : BaseSelection(eventCounter, histoWrapper, commonPlots, postfix),
+  bTriggerMatchingApply(config.getParameter<bool>("triggerMatchingApply")),
+  fTriggerMatchingCone(config.getParameter<float>("triggerMatchingCone")),
   fJetPtCuts(config.getParameter<std::vector<float>>("jetPtCuts")),
   fJetEtaCuts(config.getParameter<std::vector<float>>("jetEtaCuts")),
   fNumberOfJetsCut(config, "numberOfBJetsCut"),
+  fTrgMatchesCut(config, "trgMatchesCut"),
   fDisriminatorValue(-1.0),
   // Event counter for passing selection
   cPassedBJetSelection(fEventCounter.addCounter("passed b-jet selection ("+postfix+")")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "All events")),
+  cSubPassedEta(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed eta cut")),
+  cSubPassedPt(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed pt cut")),
   cSubPassedDiscriminator(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed discriminator")),
+  cSubPassedTriggerMatching(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed trigger matching")),
   cSubPassedNBjets(fEventCounter.addSubCounter("bjet selection ("+postfix+")", "Passed Nbjets")),
   fBTagSFCalculator(config)
 {
@@ -35,15 +45,21 @@ BJetSelection::BJetSelection(const ParameterSet& config, EventCounter& eventCoun
 
 BJetSelection::BJetSelection(const ParameterSet& config)
 : BaseSelection(),
+  bTriggerMatchingApply(config.getParameter<bool>("triggerMatchingApply")),
+  fTriggerMatchingCone(config.getParameter<float>("triggerMatchingCone")),
   fJetPtCuts(config.getParameter<std::vector<float>>("jetPtCuts")),
   fJetEtaCuts(config.getParameter<std::vector<float>>("jetEtaCuts")),
   fNumberOfJetsCut(config, "numberOfBJetsCut"),
+  fTrgMatchesCut(config, "trgMatchesCut"),
   fDisriminatorValue(-1.0),
   // Event counter for passing selection
   cPassedBJetSelection(fEventCounter.addCounter("passed b-jet selection")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("bjet selection", "All events")),
+  cSubPassedEta(fEventCounter.addSubCounter("bjet selection", "Passed eta cut")),
+  cSubPassedPt(fEventCounter.addSubCounter("bjet selection", "Passed pt cut")),
   cSubPassedDiscriminator(fEventCounter.addSubCounter("bjet selection", "Passed discriminator")),
+  cSubPassedTriggerMatching(fEventCounter.addSubCounter("bjet selection", "Passed trigger matching")),
   cSubPassedNBjets(fEventCounter.addSubCounter("bjet selection", "Passed Nbjets")),
   fBTagSFCalculator(config)
 {
@@ -52,6 +68,10 @@ BJetSelection::BJetSelection(const ParameterSet& config)
 }
 
 BJetSelection::~BJetSelection() {
+  delete hTriggerMatchDeltaR;
+  delete hTriggerMatches;
+  for (auto p: hTriggerMatchedBJetPt) delete p;
+  for (auto p: hTriggerMatchedBJetEta) delete p;
   for (auto p: hSelectedBJetPt) delete p;
   for (auto p: hSelectedBJetEta) delete p;
   for (auto p: hSelectedBJetBDisc) delete p;
@@ -61,6 +81,7 @@ void BJetSelection::initialize(const ParameterSet& config) {
   // Obtain algorithm and working point
   std::string sAlgorithm = config.getParameter<std::string>("bjetDiscr");
   std::string sWorkingPoint = config.getParameter<std::string>("bjetDiscrWorkingPoint");
+
   // Decypher the actual discriminator value
   if (sWorkingPoint != "Loose" && sWorkingPoint != "Medium" && sWorkingPoint != "Tight")
     throw hplus::Exception("config") << "b-tagging algorithm working point '" << sWorkingPoint
@@ -87,6 +108,14 @@ void BJetSelection::bookHistograms(TDirectory* dir) {
   const int  nBinsBDisc= fCommonPlots->getBJetDiscBinSettings().bins();
   const float minBDisc = fCommonPlots->getBJetDiscBinSettings().min();
   const float maxBDisc = fCommonPlots->getBJetDiscBinSettings().max();
+
+  hTriggerMatchDeltaR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR", "Trigger match #DeltaR;#DeltaR", 60, 0, 3.);
+  hTriggerMatches     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatches"    , "trigger-matched objects multiplicity; Multiplicity", 10, 0, 10.);
+  
+  hTriggerMatchedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedLdgBJetPt"   , "Ldg trigger matched b-jet pT;p_{T} (GeV/c)"   , 50, 0.0, 500.0) );
+  hTriggerMatchedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedSubldgBJetPt", "Subldg trigger matched b-jet pT;p_{T} (GeV/c)", 50, 0.0, 500.0) );
+  hTriggerMatchedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedLdgBJetEta"   , "Ldg trigger matched b-jet eta;#eta"   , 50, -2.5, 2.5) );
+  hTriggerMatchedBJetEta.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "triggerMatchedSubldgBJetEta", "Subldg trigger matched b-jet eta;#eta", 50, -2.5, 2.5) );
 
   hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsFirstJetPt" , "First b-jet pT;p_{T} (GeV/c)" , 50, 0.0, 500.0) );
   hSelectedBJetPt.push_back(fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "selectedBJetsSecondJetPt", "Second b-jet pT;p_{T} (GeV/c)", 50, 0.0, 500.0) );
@@ -127,20 +156,27 @@ BJetSelection::Data BJetSelection::analyze(const Event& event, const JetSelectio
 BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData) {
   Data output;
   cSubAll.increment();
-  bool passedEta = false;
-  bool passedPt  = false;
-  bool passedDisr = false;
-  unsigned int jet_index    = -1;
-  unsigned int ptCut_index  = 0;
-  unsigned int etaCut_index = 0;
+  bool passedTriggerMatching = false;
+  bool passedEta             = false;
+  bool passedPt              = false;
+  bool passedDisr            = false;
+  int jet_index              = -1;
+  int trgMatches             = 0;
+  unsigned int ptCut_index   = 0;
+  unsigned int etaCut_index  = 0;
+
+
+  // Cache vector of trigger bjet 4-momenta
+  std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta;
+  for (auto p: iEvent.triggerBJets()) myTriggerBJetMomenta.push_back(p.p4());
 
   // Loop over selected jets
   for(const Jet& jet: jetData.getSelectedJets()) {
-
-    // Jet index (for pT and eta cuts)
+    
+    // Jet index (for psT and eta cuts)
     // jet pt and eta cuts can differ from the jet selection
     jet_index++;
-
+    
     //=== Apply cut on eta   
     const float jetEtaCut = fJetEtaCuts.at(etaCut_index);
     if (std::fabs(jet.eta()) > jetEtaCut)
@@ -158,25 +194,53 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
 	continue;
       }
     passedPt = true;
-
+    
     //=== Apply discriminator
     if (!(jet.bjetDiscriminator() > fDisriminatorValue))
       {
 	output.fFailedBJetCands.push_back(jet);
 	continue;
       }
-    passedDisr = true;
+    passedDisr = true;    
+  
+    //=== Apply trigger matching (apply last to speed-up process)
+    if (!this->passTrgMatching(jet, myTriggerBJetMomenta))
+      {
+	output.fFailedBJetCands.push_back(jet);
+     	continue;
+      }
+    else
+      {
+	trgMatches++;
 
+	// Fill histograms for matched objects
+	if (trgMatches <= 2)
+	  {
+	    hTriggerMatchedBJetPt [trgMatches-1]->Fill(jet.pt());
+	    hTriggerMatchedBJetEta[trgMatches-1]->Fill(jet.eta());
+	  }
+      }
+  
     // jet identified as b jet
     output.fSelectedBJets.push_back(jet);
+    
     // Increment cut index only. Cannot be bigger than the size of the cut list provided
     if (ptCut_index  < fJetPtCuts.size()-1  ) ptCut_index++;
     if (etaCut_index < fJetEtaCuts.size()-1 ) etaCut_index++;
-  }
 
-  // Fill counters so far
-  if (passedEta&&passedPt&&passedDisr)
-    cSubPassedDiscriminator.increment();
+  }//eof jet loop
+
+  // Require exact number of bjet to be trigger-matched
+  if (fTrgMatchesCut.passedCut(trgMatches)) passedTriggerMatching = true;
+
+  // Fill sub-counters
+  if (passedEta) cSubPassedEta.increment();
+  if (passedPt) cSubPassedPt.increment();
+  if (passedDisr) cSubPassedDiscriminator.increment();
+  if (passedTriggerMatching) cSubPassedTriggerMatching.increment();
+
+  // Fill histograms for matched objects
+  hTriggerMatches->Fill(trgMatches);      
 
   // Sort jets by descending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
   output.fFailedBJetCandsDescendingDiscr = output.fFailedBJetCands;
@@ -189,17 +253,17 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   //=== Apply cut on number of selected b jets
   if (!fNumberOfJetsCut.passedCut(output.getNumberOfSelectedBJets()))
     return output;
+  cSubPassedNBjets.increment();
 
   //=== Passed b-jet selection
   output.bPassedSelection = true;
   cPassedBJetSelection.increment();
-  // Sort bjets by pt (Sortign operator defined in Jet.h)
+
+  // Sort bjets by pt (Sorting operator defined in Jet.h)
   std::sort(output.fSelectedBJets.begin(), output.fSelectedBJets.end());
-  cSubPassedNBjets.increment();
 
   // Fill pt and eta of jets
   size_t i = 0;
-  //std::cout << "\nSelected bjets:" << std::endl;
   for (Jet jet: output.fSelectedBJets) {
     //std::cout << "\tpT = " << jet.pt() << ", eta = " << jet.eta() << std::endl;
     if (i < 4) {
@@ -218,6 +282,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   
   // Return data object
   return output;
+  std::cout << "\n" << std::endl;
 }
 
 double BJetSelection::calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData) {
@@ -266,4 +331,30 @@ const double BJetSelection::getDiscriminatorWP(const std::string sAlgorithm, con
 				  << "\nValid WP values are: Loose, Medium, Tight." 
 				  << "\nValid algorithms are: pfCombinedInclusiveSecondaryVertexV2BJetTags, pfCombinedMVA2BJetTags, pfCombinedCvsLJetTags, pfCombinedCvsBJetTags";
   return -1e6;
+}
+
+bool BJetSelection::passTrgMatching(const Jet& bjet, std::vector<math::LorentzVectorT<double>>& trgBJets) const {
+  if (!bTriggerMatchingApply) return true;
+
+  // http://cmsdoxygen.web.cern.ch/cmsdoxygen/CMSSW_8_0_27/doc/html/da/d54/namespacetrigger.html
+  double myMinDeltaR = 9999.0;
+  double myDeltaR    = 9999.0;
+
+  // For-loop: All HLTBJets
+  for (auto& p: trgBJets) 
+    {
+      myDeltaR    = ROOT::Math::VectorUtil::DeltaR(p, bjet.p4());
+      myMinDeltaR = std::min(myMinDeltaR, myDeltaR);
+      
+      // if (myDeltaR < fTriggerMatchingCone)
+      // 	{
+      // 	  std::cout << "myMinDeltaR = " << myMinDeltaR << std::endl;
+      // 	  std::cout << "bjet-pt = " << bjet.p4().pt()  << ", trgBJet-pt = " << p.pt() << ", bjet-eta = " << bjet.p4().eta()  << ", trgBJet-eta = " << p.eta()  << std::endl;	
+      // 	}
+      
+    }
+  // Fill histograms
+  hTriggerMatchDeltaR->Fill(myMinDeltaR);
+
+  return (myMinDeltaR < fTriggerMatchingCone);
 }
