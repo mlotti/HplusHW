@@ -45,7 +45,7 @@ tauSelection = PSet(
 
 # tau identification scale factors
 scaleFactors.assignTauIdentificationSF(tauSelection)
-# tau misidentification scale factors
+# tau misidentification scale factorss
 scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
@@ -117,8 +117,6 @@ bjetSelection = PSet(
     bjetDiscrWorkingPoint     = "Medium",
     numberOfBJetsCutValue     = 3,
     numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
-    trgMatchesCutValue        = 1,
-    trgMatchesCutDirection    = ">=", # options: ==, !=, <, <=, >, >=
 )
 
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 

@@ -472,7 +472,6 @@ void FakeBMeasurement::process(Long64_t entry) {
       // Apply requirement on inverted b-jets
       int nInvertedBJets = 0;
       float invertedBJetDiscr = fBJetSelection.getDiscriminatorWP(cfg_InvertedBJetsDiscriminator, cfg_InvertedBJetsDiscriminatorWP);
-      // float invertedBJetDiscrMax = fBJetSelection.getDiscriminatorWP(cfg_InvertedBJetsDiscriminator, "Medium");
       
       // For-loop over selected jets
       for(const Jet& jet: jetData.getSelectedJets()) 

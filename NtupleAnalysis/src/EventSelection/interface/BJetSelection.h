@@ -106,7 +106,6 @@ private:
   const std::vector<float> fJetPtCuts;
   const std::vector<float> fJetEtaCuts;
   const DirectionalCut<int> fNumberOfJetsCut;
-  const DirectionalCut<int> fTrgMatchesCut;
   float fDisriminatorValue; // not a const because constructor sets it based on input string
 
   // Event counter for passing selection
@@ -116,13 +115,14 @@ private:
   Count cSubPassedEta;
   Count cSubPassedPt;
   Count cSubPassedDiscriminator;
-  Count cSubPassedTriggerMatching;
+  Count cSubPassedTrgMatching;
   Count cSubPassedNBjets;
   // Scalefactor calculator
   BTagSFCalculator fBTagSFCalculator;
   // Histograms
   WrappedTH1* hTriggerMatchDeltaR;
   WrappedTH1* hTriggerMatches;
+  WrappedTH1* hTriggerBJets;
   std::vector<WrappedTH1*> hTriggerMatchedBJetPt;
   std::vector<WrappedTH1*> hTriggerMatchedBJetEta;
   std::vector<WrappedTH1*> hSelectedBJetPt;

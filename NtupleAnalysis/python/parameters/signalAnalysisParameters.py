@@ -112,9 +112,6 @@ bjetSelection = PSet(
  bjetDiscrWorkingPoint  = "Loose",
  numberOfBJetsCutValue  = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
- trgMatchesCutValue        = 0,
- trgMatchesCutDirection    = ">=", # options: ==, !=, <, <=, >, >=
-    
 )
 
 scaleFactors.setupBtagSFInformation(btagPset=bjetSelection, 
