@@ -110,6 +110,16 @@ class TriggerDumper {
         std::vector<double> HLTTau_phi;
         std::vector<double> HLTTau_e;
 
+        //std::vector<double> HLTJet_pt;
+        //std::vector<double> HLTJet_eta;
+        //std::vector<double> HLTJet_phi;
+        //std::vector<double> HLTJet_e;
+
+        std::vector<double> HLTBJet_pt;
+        std::vector<double> HLTBJet_eta;
+        std::vector<double> HLTBJet_phi;
+        std::vector<double> HLTBJet_e;
+
         int nTrgDiscriminators;
         std::vector<bool> *trgdiscriminators;
         std::vector<int> *trgprescales;

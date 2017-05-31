@@ -10,29 +10,29 @@ For more counter tricks and optios see also:
 HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
-./printFakeBAnalysisCounters.py -m <multicrab_dir> [opts]
+./printCounters.py -m <pseudo-multicrab_dir> [opts]
 
 Commonly Used Commands:
-./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --fractionEWK --mergeEWK --valueFormat %.2f --latex
-./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --mergeEWK --valueFormat %.0f --latex
+./printCounters.py -m <pseudo-multicrab_dir> --fractionEWK --mergeEWK --valueFormat %.2f --latex
+./printCounters.py -m <pseudo-multicrab_dir> --mergeEWK --valueFormat %.0f --latex
 
 Examples:
-./printFakeBAnalysisCounters.py -m <multicrab_dir> -i "JetHT|TT"
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --noError --format %.3f --latex
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK --latex -s
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK --latex -s --histoLevel Debug
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --mcOnly --intLumi 100000
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --fractionEWK
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --subcounters
-./printFakeBAnalysisCounters.py -m <multicrab_dir> -i "2016B|TTTT"
-./printFakeBAnalysisCounters.py -m <multicrab_dir> -e "2016B|TTTT"
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --latex
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --valueFormat %.2f
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --withPrecision 3
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --valueOnly
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --uncertaintyFormat %.2f
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --uncertaintyPrecision 4
+./printCounters.py -m <multicrab_dir> -i "JetHT|TT"
+./printCounters.py -m <multicrab_dir> --noError --format %.3f --latex
+./printCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK
+./printCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK --latex -s
+./printCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK --latex -s --histoLevel Debug
+./printCounters.py -m <multicrab_dir> --mcOnly --intLumi 100000
+./printCounters.py -m <multicrab_dir> --fractionEWK
+./printCounters.py -m <multicrab_dir> --subcounters
+./printCounters.py -m <multicrab_dir> -i "2016B|TTTT"
+./printCounters.py -m <multicrab_dir> -e "2016B|TTTT"
+./printCounters.py -m <multicrab_dir> --latex
+./printCounters.py -m <multicrab_dir> --valueFormat %.2f
+./printCounters.py -m <multicrab_dir> --withPrecision 3
+./printCounters.py -m <multicrab_dir> --valueOnly
+./printCounters.py -m <multicrab_dir> --uncertaintyFormat %.2f
+./printCounters.py -m <multicrab_dir> --uncertaintyPrecision 4
 '''
 
 #================================================================================================ 
@@ -106,11 +106,11 @@ def GetRowNameLaTeXDict():
         "passed topology selection (Baseline)": "Baseline: Topology",
         "passed top selection (Baseline)"     : "Baseline: Top",
         "Baseline: selected events"           : "Baseline: Selected",
-        "Inverted: passed b-jet veto"         : "Inverted: \\bJets",
-        "Inverted: b tag SF"                  : "Inverted: \\bJets SF",
-        "passed topology selection (Inverted)": "Inverted: Topology",
-        "passed top selection (Inverted)"     : "Inverted: Top",
-        "Inverted: selected events"           : "Inverted: Selected",
+        "Baseline: passed b-jet veto"         : "Baseline: \\bJets",
+        "Baseline: b tag SF"                  : "Baseline: \\bJets SF",
+        "passed topology selection (Baseline)": "Baseline: Topology",
+        "passed top selection (Baseline)"     : "Baseline: Top",
+        "Baseline: selected events"           : "Baseline: Selected",
         }
     return mapping
 
@@ -172,12 +172,12 @@ def main(opts):
     # Print dataset information
     datasetsMgr.PrintInfo()
 
-    # Re-order datasets (different for inverted than default=baseline)
+    # Re-order datasets
     newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
     newOrder.extend(GetListOfEwkDatasets())
     if opts.mcOnly:
         newOrder.remove("Data")
-    datasetsMgr.selectAndReorder(newOrder)
+    #datasetsMgr.selectAndReorder(newOrder)
 
     # Merge EWK samples (done later on)
     #if opts.mergeEWK:
@@ -236,20 +236,21 @@ def doCounters(datasetsMgr):
         "Passed tau selection (Veto)",
         #"Passed tau selection and genuine (Veto)",
         "passed jet selection ()",
-        #"passed b-jet selection ()",
+        "passed b-jet selection ()",
         #"passed light-jet selection ()",
-        "Baseline: passed b-jet selection",
-        "Baseline: b tag SF",
+        #"Baseline: passed b-jet selection",
+        "passed b-jet selection",
+        "b tag SF",
         #"passed MET selection (Baseline)",
         "passed topology selection (Baseline)",
         "passed top selection (Baseline)",
-        "Baseline: selected events",
-        "Inverted: passed b-jet veto",
-        "Inverted: b tag SF",
-        #"passed MET selection (Inverted)",
-        "passed topology selection (Inverted)",
-        "passed top selection (Inverted)",
-        "Inverted: selected events"
+        "selected events",
+        "passed b-jet veto",
+        "b tag SF",
+        #"passed MET selection (Baseline)",
+        "passed topology selection (Baseline)",
+        "passed top selection (Baseline)",
+        "selected events"
         ]
     mainTable.keepOnlyRows(rows)
 
@@ -312,9 +313,9 @@ def doCounters(datasetsMgr):
         "mu selection (Veto)", 
         "tau selection (Veto)",
         "top selection (Baseline)",
-        "top selection (Inverted)",
+        "top selection (Baseline)",
         "topology selection (Baseline)",
-        "topology selection (Inverted)"
+        "topology selection (Baseline)"
         ]
 
     if opts.subcounters:
@@ -345,7 +346,7 @@ if __name__ == "__main__":
     '''
 
     # Default Settings
-    ANALYSISNAME    = "FakeBMeasurement"
+    ANALYSISNAME    = "Hplus2tbAnalysis" #"FakeBMeasurement"
     DATAERA         = "Run2016"
     SEARCHMODE      = "80to1000"
     VALUEFORMAT     = "%.6f"

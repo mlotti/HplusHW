@@ -219,7 +219,10 @@ def main():
     myModuleSelector.printSelectedCombinationCount()
     #for n in myNames:
     results = []
-    for era in myModuleSelector.getSelectedEras():
+    #for era in myModuleSelector.getSelectedEras(): #degug
+    for era in ["Run2016"]:
+        msg = "=== FIXME:\n\tRunning only over era \"%s\". The function myModuleSelector.getSelectedEras does not seem to work. Press any key to proceed" % (era)
+        raw_input(msg)
         for searchMode in myModuleSelector.getSelectedSearchModes():
             for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
                 dsetMgr = dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode)

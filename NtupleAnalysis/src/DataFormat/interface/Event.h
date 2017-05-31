@@ -12,6 +12,7 @@
 #include "DataFormat/interface/L1IsoTau.h"
 #include "DataFormat/interface/L1Jet.h"
 #include "DataFormat/interface/HLTTau.h"
+#include "DataFormat/interface/HLTBJet.h"
 #include "DataFormat/interface/Tau.h"
 #include "DataFormat/interface/Jet.h"
 #include "DataFormat/interface/GenJet.h"
@@ -71,6 +72,7 @@ public:
   const L1IsoTauCollection& l1IsoTaus() const { return fL1IsoTauCollection; }
   const L1JetCollection& l1Jets() const { return fL1JetCollection; }
   const HLTTauCollection& triggerTaus() const { return fTriggerTauCollection; }
+  const HLTBJetCollection& triggerBJets() const { return fTriggerBJetCollection; }
   const TauCollection& taus() const { return fTauCollection; }
   const JetCollection& jets() const { return fJetCollection; }
   const GenJetCollection& genjets() const { return fGenJetCollection; }
@@ -105,6 +107,7 @@ private:
   L1IsoTauCollection fL1IsoTauCollection;
   L1JetCollection fL1JetCollection;
   HLTTauCollection fTriggerTauCollection;
+  HLTBJetCollection fTriggerBJetCollection;
   TauCollection fTauCollection;
   JetCollection fJetCollection;
   GenJetCollection fGenJetCollection;

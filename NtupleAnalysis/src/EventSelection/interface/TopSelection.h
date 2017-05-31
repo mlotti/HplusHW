@@ -99,7 +99,10 @@ public:
     math::XYZTLorentzVector fTetrajet2_p4;
     math::XYZTLorentzVector fLdgTetrajet_p4;
     math::XYZTLorentzVector fSubldgTetrajet_p4;
-
+    // DijetWithMinDR
+    math::XYZTLorentzVector fDijetWithMinDR_p4;
+    // DijetWithMaxDR
+    math::XYZTLorentzVector fDijetWithMaxDR_p4;
   };
   
   // Main class
@@ -114,11 +117,11 @@ public:
   /// Use silentAnalyze if you do not want to fill histograms or increment counters
   Data silentAnalyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   // silentAnalyze for FakeBMeasurement
-  Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  Data silentAnalyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const unsigned int maxNumberOfBJetsInTopFit=3);
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
   // analyze for FakeBMeasurement
-  Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  Data analyzeWithoutBJets(const Event& event, const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const unsigned int maxNumberOfBJetsInTopFit=3);
 
 private:
   /// Initialisation called from constructor
@@ -144,28 +147,33 @@ private:
   double CalculateChiSqrForTrijetSystems(const Jet& jet1, const Jet& jet2,
 					 const Jet& jet3, const Jet& jet4,
 					 const Jet& bjet1, const Jet& bjet2);
-
-  const Jet GetTetrajetBjet(const std::vector<Jet> bjets, 
-			    const Jet& bjet1, 
-			    const Jet& bjet2);
-
-  const math::XYZTLorentzVector GetTetrajetBjetP4(const std::vector<Jet> bjets, 
-						  const Jet& bjet1, 
-						  const Jet& bjet2,
-						  const Jet& jet1, 
-						  const Jet& jet2,
-						  const Jet& jet3, 
-						  const Jet& jet4);
+  
+  const int GetTetrajetBjetIndex(const std::vector<Jet> bjets, 
+				 const Jet& bjet1, 
+				 const Jet& bjet2,
+				 const Jet& jet1, 
+				 const Jet& jet2,
+				 const Jet& jet3, 
+				 const Jet& jet4);
+  //const math::XYZTLorentzVector dijetWithMinDR_p4,
+  //				 const math::XYZTLorentzVector dijetWithMaxDR_p4);
+  
 
  
   const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
-					       const unsigned int maxNumberOfBJetsToUse=3);
+					       const unsigned int maxNumberOfBJets);
   // Input parameters
   // Input parameters
   int nSelectedBJets;
   const double cfg_MassW;
   const double cfg_diJetSigma;
   const double cfg_triJetSigma;
+  const double cfg_dijetWithMaxDR_tetrajetBjet_dR_min;
+  const double cfg_dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff;
+  const double cfg_dijetWithMaxDR_tetrajetBjet_dR_yIntercept;
+  const double cfg_dijetWithMaxDR_tetrajetBjet_dPhi_min;
+  const double cfg_dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff;
+  const double cfg_dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept;
   const DirectionalCut<double> cfg_ChiSqrCut;
 
   // Event counter for passing selection
@@ -316,6 +324,10 @@ private:
   WrappedTH1 *hSubldgTrijetDiJetMass_After;
 
   // Histograms (2D)
+  WrappedTH2 *hTetrajetBJetDijetWithMaxDR_TetrajetBJetDijetWithMinDR_DPhiVsDPhi_Before;
+  WrappedTH2 *hTetrajetBJetDijetWithMaxDR_TetrajetBJetDijetWithMinDR_DPhiVsDPhi_After;
+  WrappedTH2 *hTetrajetBJetDijetWithMaxDR_TetrajetBJetDijetWithMinDR_DRVsDR_Before;
+  WrappedTH2 *hTetrajetBJetDijetWithMaxDR_TetrajetBJetDijetWithMinDR_DRVsDR_After;
   WrappedTH2 *hTrijet1MassVsChiSqr_Before;
   WrappedTH2 *hTrijet2MassVsChiSqr_Before;
   WrappedTH2 *hTrijet1MassVsChiSqr_After;

@@ -45,7 +45,7 @@ tauSelection = PSet(
 
 # tau identification scale factors
 scaleFactors.assignTauIdentificationSF(tauSelection)
-# tau misidentification scale factors
+# tau misidentification scale factorss
 scaleFactors.assignTauMisidentificationSF(tauSelection, "eToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "muToTau", "full", "nominal")
 scaleFactors.assignTauMisidentificationSF(tauSelection, "jetToTau", "full", "nominal")
@@ -109,6 +109,8 @@ jetSelection = PSet(
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
+    triggerMatchingApply      = True,
+    triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
     jetPtCuts                 = [40.0, 40.0, 30.0],
     jetEtaCuts                = [2.4],
     bjetDiscr                 = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
@@ -119,7 +121,8 @@ bjetSelection = PSet(
 
 scaleFactors.setupBtagSFInformation(btagPset               = bjetSelection, 
                                     btagPayloadFilename    = "CSVv2.csv",
-                                    btagEfficiencyFilename = "btageff_hybrid.json",
+                                    #btagEfficiencyFilename = "btageff_hybrid.json", #old
+                                    btagEfficiencyFilename = "btageff_hybrid_HToTB.json",
                                     direction              = "nominal")
 
 #================================================================================================
@@ -183,6 +186,14 @@ topSelection = PSet(
     MassW              = 80.385,
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,
+    # Distance cut
+    dijetWithMaxDR_tetrajetBjet_dR_min          =  0.0, # Disable: 0.0, Default: +3.0
+    dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = -1.0, # Disable:-1.0, Default: +4.0
+    dijetWithMaxDR_tetrajetBjet_dR_slopeCoeff   =  0.0, # Disable: 0.0, Default: -1.0
+    # Angular cut
+    dijetWithMaxDR_tetrajetBjet_dPhi_min        = +2.5, # Disable: 0.0, Default: +2.5
+    dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept = +3.0, # Disable:-1.0, Default: +3.0
+    dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff = -1.0, # Disable: 0.0, Default: -1.0
 )
 
 
@@ -196,8 +207,13 @@ scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoin
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    InvertedBjetsCutValue     = 2,
-    InvertedBjetsCutDirection = "<=",    # options: ==, !=, <, <=, >, >=
+    numberOfBJetsCutValue             = 0,
+    numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
+    numberOfInvertedBJetsCutValue     = 3,
+    numberOfInvertedBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+    invertedBJetDiscr                 = bjetSelection.bjetDiscr,
+    invertedBJetWorkingPoint          = "Loose",
+    maxNumberOfBJetsInTopFit          = 3,
     )
 
 

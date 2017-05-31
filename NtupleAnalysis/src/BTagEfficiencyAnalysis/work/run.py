@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 '''
 INSTRUCTIONS:
-
+The required minimum input is a multiCRAB directory with at least one dataset. If successfull
+a pseudo multiCRAB with name "analysis_YYMMDD_HHMMSS/" will be created, inside which each
+dataset has its own directory with the results (ROOT files with histograms). These can be later
+used as input to plotting scripts to get the desired results.
 
 USAGE:
-./runFakeBMeasurement.py -m <multicrab_directory> -i "Keyword1|Keyword2|Keyword3"
-or
-./runFakeBMeasurement.py -m <multicrab_directory> -e "Keyword1|Keyword2|Keyword3" -n 100
-
+./run.py -m <path-to-multicrab-directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
 
 Example:
-./runFakeBMeasurement.py -m <multicrab_directory> -i "TT|ST_|2016B" -n -1
-./runFakeBMeasurement.py -m <multicrab_directory> -n 100 -h Vital
+./run.py -m <path-to-multicrab-directory> --analysisType HToTB -i 'JetHT|TT|QCD|WJets' -n -1
+./run.py -m <path-to-multicrab-directory> -n 1000 -e "Charged"
+./run.py -m <path-to-multicrab-directory> -n 1000 -i "QCD|TT|WJets"
 
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
@@ -21,7 +22,6 @@ The available ROOT options for the Error-Ignore-Level are (const Int_t):
         kWarning  =   2000
         kError    =   3000
         kBreak    =   4000
-
 
 HistoLevel:
 For the histogramAmbientLevel each DEEPER level is a SUBSET of the rest. 
@@ -42,14 +42,15 @@ import sys
 from optparse import OptionParser
 
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
-from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder    
+from HiggsAnalysis.NtupleAnalysis.AnalysisBuilder import AnalysisBuilder
+
 
 import ROOT
-
+    
 #================================================================================================
 # Options
 #================================================================================================
-prefix      = "FakeBMeasurement"
+prefix      = "BTagEfficiencyAnalysis"
 postfix     = ""
 dataEras    = ["2016"]
 searchModes = ["80to1000"]
@@ -65,7 +66,7 @@ def Verbose(msg, printHeader=False):
         return
 
     if printHeader:
-        print "=== runFakeBMeasurement.py:"
+        print "=== run.py:"
 
     if msg !="":
         print "\t", msg
@@ -74,11 +75,28 @@ def Verbose(msg, printHeader=False):
 
 def Print(msg, printHeader=True):
     if printHeader:
-        print "=== runFakeBMeasurement.py:"
+        print "=== run.py:"
 
     if msg !="":
         print "\t", msg
     return
+
+
+def AskUser(msg, printHeader=False):
+    '''
+    Prompts user for keyboard feedback to a certain question.
+    Returns true if keystroke is \"y\", false otherwise.
+    '''
+    Verbose("AskUser()", printHeader)
+
+    keystroke = raw_input("=== run.py:\n\t" +  msg + " (y/n): ")
+    if (keystroke.lower()) == "y":
+        return
+    elif (keystroke.lower()) == "n":
+        Print("EXIT!", True)
+        sys.exit()
+    else:
+        AskUser(msg)
 
 
 #================================================================================================
@@ -86,23 +104,21 @@ def Print(msg, printHeader=True):
 #================================================================================================
 def main():
 
-    # Require at least two arguments (script-name, path to multicrab)     
+    # Require at least two arguments (script-name, path to multicrab)      
     if len(sys.argv) < 2:
         Print("Not enough arguments passed to script execution. Printing docstring & EXIT.")
         print __doc__
         sys.exit(0)
     else:
         pass
-
+        
 
     # ================================================================================================
     # Setup the process
     # ================================================================================================
-    #from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix
-    #process = Process("QCDMeasurement"+obtainAnalysisSuffix(sys.argv))
     process = Process(prefix, postfix, opts.nEvts)
 
-
+            
     # ================================================================================================
     # Add the datasets (according to user options)
     # ================================================================================================
@@ -114,92 +130,76 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = ["ChargedHiggs", "QCD"]
-        Print("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
-        Print("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
-        # process.addDatasetsFromMulticrab(opts.mcrab, blacklist=myBlackList)
-        regex =  "|".join(myBlackList)
-        process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=regex)
+        Print("Adding all datasets from multiCRAB directory %s" % (opts.mcrab))
+        Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
+        process.addDatasetsFromMulticrab(opts.mcrab)
+
 
     # ================================================================================================
     # Selection customisations
     # ================================================================================================
-    from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections
+    if opts.analysisType == "HToTauNu":
+        from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import allSelections
+        # Disable rtau
+        allSelections.TauSelection.prongs = 1
+        allSelections.TauSelection.rtau = 0.0
+    elif opts.analysisType == "HToTB":
+        from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections
+    else:
+        raise Exception("Invalid analysis selection \"%s\"! Valid options are: %s" % (opts.analysisType, ", ".join(allowedAnalysis)))
     
+    # Jet cut values
+    allSelections.__setattr__("jetPtCutMin", 0.0)
+    allSelections.__setattr__("jetPtCutMax", 99990.0)
+    allSelections.__setattr__("jetEtaCutMin", -2.5)
+    allSelections.__setattr__("jetEtaCutMax", 2.5)
+    # for algo in ["combinedInclusiveSecondaryVertexV2BJetTags"]:
+    # for wp in ["Loose", "Medium", "Tight"]:
+    #    selections = allSelections.clone()
+    #    selections.BJetSelection.bjetDiscr = algo
+    #    selections.BJetSelection.bjetDiscrWorkingPoint = wp
+    #    suffix = "_%s_%s"%(algo,wp)
+    #    print "Added analyzer for algo/wp: %s"%suffix
+    #    process.addAnalyzer("BTagEfficiency"+suffix, Analyzer("BTagEfficiencyAnalysis", config=selections, silent=False))
+
+    # Set the analysis type
+    allSelections.__setattr__("AnalysisType", opts.analysisType)
+
     # Overwrite verbosity
     allSelections.verbose = opts.verbose
 
     # Overwrite histo ambient level (Options: Systematics, Vital, Informative, Debug)
     allSelections.histogramAmbientLevel = opts.histoLevel
-
-    # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
-    # DO NOT UNCOMMENT - CAUSES CRASH
-    # allSelections.CommonPlots.histogramSplitting = [
-    #    PSet(label="tauPt", binLowEdges=[60.0, 80.0, 100.0], useAbsoluteValues=False),
-    #   ]
-
-    # Bjet discriminator
-    # allSelections.BJetSelection.numberOfBJetsCutValue = 3
-    # allSelections.BJetSelection.numberOfBJetsCutDirection = ">="
-    # allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
-
-    # ================================================================================================
-    # Command Line Options
-    # ================================================================================================ 
-    # from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import applyAnalysisCommandLineOptions
-    # applyAnalysisCommandLineOptions(sys.argv, allSelections)
     
-
-    # ================================================================================================
+    #================================================================================================
     # Build analysis modules
-    # ================================================================================================
+    #================================================================================================
     PrintOptions(opts)
     builder = AnalysisBuilder(prefix,
                               dataEras,
                               searchModes,
+                              #### Options ####
                               usePUreweighting       = opts.usePUreweighting,
                               useTopPtReweighting    = opts.useTopPtReweighting,
                               doSystematicVariations = opts.doSystematics)
 
-    # Perform variations (e.g. for optimisation)
-    # builder.addVariation("METSelection.METCutValue", [100,120,140])
-    # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
-    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [2, 1])
-    # builder.addVariation("FakeBMeasurement.invertedBJetsDiscriminatorValue", [0.5426, 0.35, 0.25])
-    # builder.addVariation("FakeBMeasurement.invertedBJetsDiscriminatorValue", [3, 4, 5])
+    # ================================================================================================
+    # Add Analysis Variations
+    # ================================================================================================
+    builder.addVariation("BJetSelection.bjetDiscr", ["pfCombinedInclusiveSecondaryVertexV2BJetTags"])
+    builder.addVariation("BJetSelection.bjetDiscrWorkingPoint", ["Loose", "Medium", "Tight"])
 
+    # ================================================================================================
     # Build the builder
+    # ================================================================================================
     builder.build(process, allSelections)
-    
-    # ================================================================================================
-    # Example of adding an analyzer whose configuration depends on dataVersion
-    # ================================================================================================
-    # def createAnalyzer(dataVersion):
-    # a = Analyzer("ExampleAnalysis")
-    # if dataVersion.isMC():
-    # a.tauPtCut = 10
-    # else:
-    # a.tauPtCut = 20
-    # return a
-    # process.addAnalyzer("test2", createAnalyzer)
-    
-    # ================================================================================================
-    # Pick events
-    # ================================================================================================
-    # process.addOptions(EventSaver = PSet(enabled = True,pickEvents = True))
 
     # ================================================================================================
     # Run the analysis
     # ================================================================================================
-    # Run the analysis with PROOF? You can give proofWorkers=<N> as a parameter
-    if opts.jCores:
-        Print("Running process with PROOF (proofWorkes=%s)" % ( str(opts.jCores) ) )
-        process.run(proof=True, proofWorkers=opts.jCores)
-    else:
-        Print("Running process (no PROOF)")
-        process.run()
+    Print("Running process", True)
+    process.run()
 
-    return
 
 #================================================================================================
 def PrintOptions(opts):
@@ -213,7 +213,7 @@ def PrintOptions(opts):
     table.append(title)
     table.append(hLine)
     #table.append( msgAlign.format("mcrab" , opts.mcrab , "") )
-    table.append( msgAlign.format("jCores", opts.jCores, "") )
+    #table.append( msgAlign.format("jCores", opts.jCores, "") )
     table.append( msgAlign.format("includeOnlyTasks", opts.includeOnlyTasks, "") )
     table.append( msgAlign.format("excludeTasks", opts.excludeTasks, "") )
     table.append( msgAlign.format("nEvts", opts.nEvts, NEVTS) )
@@ -223,8 +223,8 @@ def PrintOptions(opts):
     table.append( msgAlign.format("useTopPtReweighting", opts.useTopPtReweighting, TOPPTREWEIGHT) )
     table.append( msgAlign.format("doSystematics", opts.doSystematics, DOSYSTEMATICS) ) 
     table.append( hLine )
-    
-    # Print("Will run on multicrab directory %s" % (opts.mcrab), True)
+
+    # Print("Will run on multicrab directory %s" % (opts.mcrab), True)     
     for i, line in enumerate(table):
         Print(line, i==0)
     return
@@ -249,19 +249,17 @@ if __name__ == "__main__":
     '''
 
     # Default Values
-    VERBOSE       = False
-    NEVTS         = -1
-    HISTOLEVEL    = "Debug" # 'Never', 'Systematics', 'Vital', 'Informative', 'Debug'
-    PUREWEIGHT    = True
-    TOPPTREWEIGHT = True
-    DOSYSTEMATICS = False
+    VERBOSE        = False
+    NEVTS          = -1
+    HISTOLEVEL     = "Debug"
+    PUREWEIGHT     = True
+    TOPPTREWEIGHT  = False
+    DOSYSTEMATICS  = False
+    EVENTSELECTION = "HToTauNu"
 
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
                       help="Path to the multicrab directory for input")
-
-    parser.add_option("-j", "--jCores", dest="jCores", action="store", type=int, 
-                      help="Number of CPU cores (PROOF workes) to use. (default: all available)")
 
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
@@ -287,7 +285,17 @@ if __name__ == "__main__":
     parser.add_option("--doSystematics", dest="doSystematics", action="store_true", default = DOSYSTEMATICS, 
                       help="Do systematics variations  (default: %s)" % (DOSYSTEMATICS) )
 
+    parser.add_option("-a","--analysisType", dest="analysisType", action="store", default = EVENTSELECTION,
+                      help="Add event selection \"HToTB\" or \"HToTauNu\"  (default: %s)" % (EVENTSELECTION) )
+
     (opts, args) = parser.parse_args()
+
+    allowedAnalysis = ["HToTB","HToTauNu"]
+    if opts.analysisType not in allowedAnalysis:
+        raise Exception("Invalid analysis selection \"%s\"! Valid options are: %s" % (opts.analysisType, ", ".join(allowedAnalysis)))
+    else:
+        msg = "Calculating b-tag SF for analysis-type \"%s\" using multicrab dir \"%s\". Proceed? " % (opts.analysisType, opts.mcrab)
+        AskUser(msg, True)
 
     if opts.mcrab == None:
         raise Exception("Please provide input multicrab directory with -m")
@@ -295,5 +303,5 @@ if __name__ == "__main__":
     allowedLevels = ['Never', 'Systematics', 'Vital', 'Informative', 'Debug']
     if opts.histoLevel not in allowedLevels:
         raise Exception("Invalid ambient histogram level \"%s\"! Valid options are: %s" % (opts.histoLevel, ", ".join(allowedLevels)))
-    
+
     main()

@@ -20,13 +20,6 @@ class HistoWrapper;
 class WrappedTH1;
 class WrappedTH2;
 
-// struct DiscComparator{
-//   bool operator() (const Jet a, const Jet b) const
-//   {
-//     return ( a.bjetDiscriminator() > b.bjetDiscriminator());
-//   }
-// };
-
 class BJetSelection: public BaseSelection {
 public:
     /**
@@ -78,7 +71,7 @@ public:
     std::vector<Jet> fFailedBJetCandsDescendingDiscr; 
     /// All jets failing all the b-tagging criteria (sorted by ascending discriminator value)
     std::vector<Jet> fFailedBJetCandsAscendingDiscr;
-
+  
   };
   
   // Main class
@@ -94,31 +87,47 @@ public:
   Data silentAnalyze(const Event& event, const JetSelection::Data& jetData);
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData);
+  /// Obtain the discriminator value for a given algorithm and Working Point (WP)
+  const double getDiscriminatorWP(const std::string sAlgorithm, const std::string sWorkingPoint);
 
 private:
   /// Initialisation called from constructor
   void initialize(const ParameterSet& config);
   /// The actual event selection
   Data privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData);
+  /// determine if bjet object is trigger matched (deltaR based)
+  bool passTrgMatching(const Jet& bjet, std::vector<math::LorentzVectorT<double>>& trgBJets) const;
+  
   /// Calculate probability to pass b tagging
   double calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData);
   // Input parameters
+  const bool bTriggerMatchingApply;
+  const float fTriggerMatchingCone;
   const std::vector<float> fJetPtCuts;
   const std::vector<float> fJetEtaCuts;
   const DirectionalCut<int> fNumberOfJetsCut;
   float fDisriminatorValue; // not a const because constructor sets it based on input string
-  
+
   // Event counter for passing selection
   Count cPassedBJetSelection;
   // Sub counters
   Count cSubAll;
+  Count cSubPassedEta;
+  Count cSubPassedPt;
   Count cSubPassedDiscriminator;
+  Count cSubPassedTrgMatching;
   Count cSubPassedNBjets;
   // Scalefactor calculator
   BTagSFCalculator fBTagSFCalculator;
   // Histograms
+  WrappedTH1* hTriggerMatchDeltaR;
+  WrappedTH1* hTriggerMatches;
+  WrappedTH1* hTriggerBJets;
+  std::vector<WrappedTH1*> hTriggerMatchedBJetPt;
+  std::vector<WrappedTH1*> hTriggerMatchedBJetEta;
   std::vector<WrappedTH1*> hSelectedBJetPt;
   std::vector<WrappedTH1*> hSelectedBJetEta;
+  std::vector<WrappedTH1*> hSelectedBJetBDisc;
 };
 
 #endif
