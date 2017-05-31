@@ -37,8 +37,8 @@ _rebinFactor = 5
 useWJetsHT = True
 
 #=== Set tau pT bins to be used
-#selectOnlyBins = [] #["1"] # use all bins
-selectOnlyBins = ["Inclusive"] # use only the inclusive bin
+selectOnlyBins = [] #["1"] # use all bins
+#selectOnlyBins = ["Inclusive"] # use only the inclusive bin
 
 
 #=== Set verbosity
