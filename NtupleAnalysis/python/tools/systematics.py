@@ -162,9 +162,9 @@ def getLuminosityUncertainty(year="2015"):
     elif year=="2015":
         return ScalarUncertaintyItem("lumi", 0.027) # for 13 TeV 2015, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/TWikiLUM
     elif year=="2016":
-        return ScalarUncertaintyItem("lumi", 0.062) # for 13 TeV 2016, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/TWikiLUM
+        return ScalarUncertaintyItem("lumi", 0.025) # for 13 TeV 2016, see https://twiki.cern.ch/twiki/bin/viewauth/CMS/TWikiLUM
     else:
-        return ScalarUncertaintyItem("lumi", 0.027) # default, here 13 TeV 2015
+        return ScalarUncertaintyItem("lumi", 0.025) # default, here 13 TeV 2016
 
 def getProbabilisticBtagUncertainty():
     return ScalarUncertaintyItem("probBtag", 0.5)
