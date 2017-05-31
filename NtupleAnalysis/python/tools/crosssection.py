@@ -254,6 +254,9 @@ backgroundCrossSections = CrossSectionList(
     CrossSection("WJetsToLNu", {
             "13": 20508.9*3, # [13] 20508.9*3, McM for the MLM dataset: 5.069e4
             }),
+    CrossSection("WJetsToLNu_HT_0To70", {
+            "13": 20508.9*3, # set to inclusive xsect as HT_0To70 is skimmed from the inclusive sample
+            }),
     CrossSection("WJetsToLNu_HT_70To100", {
             "13": 1.353e+03*1.2138, # [14] times NNLO/LO ratio of inclusive sample
             }),
