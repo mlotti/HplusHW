@@ -31,15 +31,14 @@ analysis = "QCDMeasurement"
 #==== Set rebin factor for normalization plots 
 #     Histograms are generated with 1 GeV bin width, so 
 #     10 here means that the fit is done on 10 GeV bins
-#_rebinFactor = 10 
-_rebinFactor = 5 #can solve fitting problems by smoothing fluctuations
+_rebinFactor = 5
 
 #=== Set to true if you want to use HT binned WJets samples instead of inclusive
-useWJetsHT = not True
+useWJetsHT = True
 
 #=== Set tau pT bins to be used
-selectOnlyBins = [] #["1"] # use all bins
-#selectOnlyBins = ["Inclusive"] # use only the inclusive bin
+#selectOnlyBins = [] #["1"] # use all bins
+selectOnlyBins = ["Inclusive"] # use only the inclusive bin
 
 
 #=== Set verbosity
@@ -270,12 +269,29 @@ def main(argv, dsetMgr, moduleInfoString):
         template_EWKInclusive_Baseline.setDefaultFitParam(defaultLowerLimit=[0.5,  90, 30, 0.0001],
                                                           defaultUpperLimit=[ 20, 150, 60,    1.0])
 
-        # Note that the same function is used for QCD only and QCD+EWK fakes
-        template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", norm=1), FITMIN, FITMAX)
+        # Fake tau and QCD
+        # Note that the same function is used for QCD only and QCD+EWK fakes (=Fake Tau)
+
+        # Old function, used until May 2017    
+#        template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", norm=1), FITMIN, FITMAX)
 #        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[0.0001, 0.001, 0.1, 0.0,  10, 0.0001, 0.001],
 #                                                 defaultUpperLimit=[   200,    10,  10, 150, 100,      1, 0.05])
-        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, 0.1,  10,  10, 0.00001, 0.001], # new default limits to make fits more stable,
-                                                 defaultUpperLimit=[ 130, 20,  20, 200, 200,    0.01,   0.1]) # corresponding to the 7 free param. of the fit function        
+#        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, 0.1,    0,  10,     0.0, 0.0001], # new default limits to make fits more stable,
+#                                                 defaultUpperLimit=[ 130, 20,  20,  200, 200,     1.0,    1.0]) # corresponding to the 7 free param. of the fit function        
+
+        # New dunction with one more d.o.f in Rayleigh distribution WARNING!!! UNSTABLE!!!
+#        template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionWithPeakShift", norm=1), FITMIN, FITMAX)
+#        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, -10,   0,  -20,  10,   0.0001, 0.0001], 
+#                                                 defaultUpperLimit=[ 130, 20,  10,  20,  200, 100,     1.0,   0.05]) 
+
+
+        # As the factor multiplicative for exponential function (p6 in QCDFunctionWithPeakShift tends to 0 in fitting, 
+        # we drop that term and use only this:
+        template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("RayleighShiftedPlusGaussian", norm=1), FITMIN, FITMAX)
+        template_QCD_Inverted.setDefaultFitParam(defaultLowerLimit=[ 30, 0.1, -10,   0,  -20,  10], 
+                                                 defaultUpperLimit=[ 130, 20,  10,  20,  200, 100])      
+
+
         #===== Loop over tau pT bins
         for i,binStr in enumerate(bins):
             print "\n********************************"
@@ -304,16 +320,17 @@ def main(argv, dsetMgr, moduleInfoString):
             histoName = FAKEHISTODIR+"/"+INVERTEDTAUHISTONAME+binStr
             hmetInverted_EWK_FakeTaus = plots.DataMCPlot(dsetMgr, histoName).histoMgr.getHisto("EWK").getRootHisto().Clone(histoName)
 
-            # Finalize histograms by rebinning
-            for histogram in [hmetBase_data, hmetInverted_data, hmetBase_EWK_GenuineTaus, hmetInverted_EWK_GenuineTaus, hmetBase_EWK_FakeTaus, hmetInverted_EWK_FakeTaus]:
-                 histogram.Rebin(_rebinFactor)
-
             #===== Obtain inclusive EWK histograms
             hmetBase_EWKinclusive = hmetBase_EWK_GenuineTaus.Clone("EWKinclusiveBase")
             hmetBase_EWKinclusive.Add(hmetBase_EWK_FakeTaus, 1.0)
             
             hmetInverted_EWKinclusive = hmetInverted_EWK_GenuineTaus.Clone("EWKinclusiveInv")
             hmetInverted_EWKinclusive.Add(hmetInverted_EWK_FakeTaus, 1.0)
+
+            # Finalize histograms by rebinning
+            for histogram in [hmetBase_data, hmetInverted_data, hmetBase_EWK_GenuineTaus, hmetInverted_EWK_GenuineTaus, hmetBase_EWKinclusive, hmetBase_EWK_FakeTaus, hmetInverted_EWK_FakeTaus, hmetInverted_EWKinclusive]:
+                 histogram.Rebin(_rebinFactor)
+
             
             #===== Obtain histograms for QCD (subtract MC EWK events from data)
             # QCD from baseline is usable only as a cross check
