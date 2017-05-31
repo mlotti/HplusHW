@@ -73,6 +73,14 @@ muVeto = PSet(
          muonIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
+#====== Muon selection (for embedding)
+muForEmbedding = PSet(
+             muonPtCut = 40.0,
+            muonEtaCut = 2.5,
+                muonID = "muIDTight", # options: muIDLoose, muIDMedium, muIDTight
+         muonIsolation = "tight", # for selecting, not vetoing
+)
+
 #====== Jet selection
 jetSelection = PSet(
                jetType  = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
@@ -211,6 +219,7 @@ allSelections = PSet(
           TauSelection = tauSelection,
      ElectronSelection = eVeto,
          MuonSelection = muVeto,
+      MuonForEmbedding = muForEmbedding,
           JetSelection = jetSelection,
   AngularCutsCollinear = angularCutsCollinear,
          BJetSelection = bjetSelection,

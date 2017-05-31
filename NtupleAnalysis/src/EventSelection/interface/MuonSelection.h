@@ -36,6 +36,7 @@ public:
     const std::vector<Muon>& getSelectedMuons() const { return fSelectedMuons; }
     const float getHighestSelectedMuonPt() const { return fHighestSelectedMuonPt; }
     const float getHighestSelectedMuonEta() const { return fHighestSelectedMuonEta; }
+    const float getHighestSelectedMuonPhi() const { return fHighestSelectedMuonPhi; }
     const float getHighestSelectedMuonPtBeforePtCut() const { return fHighestSelectedMuonPtBeforePtCut; }
     // FIXME: Add MC information if deemed necessary
 //     const bool eventContainsMuonFromCJet() const { return fHasMuonFromCjetStatus; }
@@ -48,6 +49,7 @@ public:
     /// pt and eta of highest pt muon passing the selection
     float fHighestSelectedMuonPt;
     float fHighestSelectedMuonEta;
+    float fHighestSelectedMuonPhi;
     float fHighestSelectedMuonPtBeforePtCut;
     /// MC info about non-isolated muons
     //bool fHasMuonFromCjetStatus;

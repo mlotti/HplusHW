@@ -9,7 +9,8 @@
 
 MuonSelection::Data::Data() 
 : fHighestSelectedMuonPt(0.0),
-  fHighestSelectedMuonEta(0.0) { }
+  fHighestSelectedMuonEta(0.0),
+  fHighestSelectedMuonPhi(0.0) { }
 
 MuonSelection::Data::~Data() { }
 
@@ -180,6 +181,7 @@ MuonSelection::Data MuonSelection::privateAnalyze(const Event& event) {
     if (muon.pt() > output.fHighestSelectedMuonPt) {
       output.fHighestSelectedMuonPt = muon.pt();
       output.fHighestSelectedMuonEta = muon.eta();
+      output.fHighestSelectedMuonPhi = muon.phi();
     }
     output.fSelectedMuons.push_back(muon);
 

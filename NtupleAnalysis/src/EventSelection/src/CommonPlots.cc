@@ -59,10 +59,17 @@ CommonPlots::~CommonPlots() {
   fHistoSplitter.deleteHistograms(hCtrlSelectedTauNProngsAfterStdSelections);
   fHistoSplitter.deleteHistograms(hCtrlSelectedTauRtauAfterStdSelections);
   fHistoSplitter.deleteHistograms(hCtrlSelectedTauSourceAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedMuonPtAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedMuonEtaAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedMuonPhiAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlSelectedMuonEtaPhiAfterStdSelections);
   fHistoSplitter.deleteHistograms(hCtrlNJetsAfterStdSelections);
   fHistoSplitter.deleteHistograms(hCtrlJetPtAfterStdSelections);
   fHistoSplitter.deleteHistograms(hCtrlJetEtaAfterStdSelections);
   fHistoSplitter.deleteHistograms(hCtrlJetEtaPhiAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlMETAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlMETPhiAfterStdSelections);
+  fHistoSplitter.deleteHistograms(hCtrlDeltaPhiTauMetAfterStdSelections);
   fHistoSplitter.deleteHistograms(hCtrlMET);
   fHistoSplitter.deleteHistograms(hCtrlMETPhi);
   fHistoSplitter.deleteHistograms(hCtrlNBJets);
@@ -209,7 +216,7 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNVerticesAfterStdSelections, 
     "NVertices_AfterStandardSelections", ";N_{vertices};N_{events}",
     fNVerticesBinSettings.bins(), fNVerticesBinSettings.min(), fNVerticesBinSettings.max());
-
+    // tau 
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSelectedTauPtAfterStdSelections, 
     "SelectedTau_pT_AfterStandardSelections", ";#tau p_{T}, GeV/c;N_{events}",
     fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
@@ -241,7 +248,21 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
   for (int i = 0; i < fHelper.getTauSourceBinCount(); ++i) {
     fHistoSplitter.SetBinLabel(hCtrlSelectedTauSourceAfterStdSelections, i+1, fHelper.getTauSourceBinLabel(i));
   }
-  
+    // muon
+  fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSelectedMuonPtAfterStdSelections, 
+    "SelectedMu_pT_AfterStandardSelections", ";#mu p_{T}, GeV/c;N_{events}",
+    fPtBinSettings.bins(), fPtBinSettings.min(), fPtBinSettings.max());
+  fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSelectedMuonEtaAfterStdSelections, 
+    "SelectedMu_eta_AfterStandardSelections", ";#mu #eta;N_{events}",
+    fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max());
+  fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSelectedMuonPhiAfterStdSelections, 
+    "SelectedMu_phi_AfterStandardSelections", ";#mu #phi;N_{events}",
+    fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+  fHistoSplitter.createShapeHistogramTriplet<TH2F>(fEnableGenuineTauHistograms, HistoLevel::kInformative, myDirs, hCtrlSelectedMuonEtaPhiAfterStdSelections, 
+    "SelectedMu_etaphi_AfterStandardSelections", ";#mu #eta;#mu #phi;",
+    fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max(),
+    fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    // jets  
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlNJetsAfterStdSelections, 
     "Njets_AfterStandardSelections", ";Number of selected jets;N_{events}",
     fNjetsBinSettings.bins(), fNjetsBinSettings.min(), fNjetsBinSettings.max());
@@ -255,8 +276,21 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
     "JetEtaPhi_AfterStandardSelections", ";Selected jets #eta;Selected jets #phi",
     fEtaBinSettings.bins(), fEtaBinSettings.min(), fEtaBinSettings.max(),
     fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max());
+    // MET
+  fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlMETAfterStdSelections, 
+    "MET_AfterStandardSelections", ";MET, GeV;N_{events}", 
+    fHtBinSettings.bins(), fHtBinSettings.min(), fHtBinSettings.max()); //FIXME: not filled anywhere
+  fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlMETPhiAfterStdSelections, 
+    "METPhi_AfterStandardSelections", ";MET #phi;N_{events}", 
+    fPhiBinSettings.bins(), fPhiBinSettings.min(), fPhiBinSettings.max()); //FIXME: not filled anywhere
+  fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlDeltaPhiTauMetAfterStdSelections, 
+    "DeltaPhiTauMet_AfterStdSelections", ";#Delta#phi(#tau,MET), {}^{#circ};N_{events}", 
+    36, 0, 180); //FIXME: not filled anywhere
+  fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlDeltaPhiMuMetAfterStdSelections, 
+    "DeltaPhiMuMet_AfterStdSelections", ";#Delta#phi(#mu,MET), {}^{#circ};N_{events}", 
+    36, 0, 180); //FIXME: not filled anywhere
 
-  // MET
+  // MET selection
   fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlMET, 
     "MET", ";MET, GeV;N_{events}", 
     fHtBinSettings.bins(), fHtBinSettings.min(), fHtBinSettings.max());
@@ -569,7 +603,7 @@ void CommonPlots::fillControlPlotsAfterMETTriggerScaleFactor(const Event& event)
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNjetsAfterJetSelectionAndMETSF, bIsGenuineTau, fJetData.getNumberOfSelectedJets());
 }
 
-void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau) {
+void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau, bool withMu) {
   // I.e. plots after standard selections
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNVerticesAfterStdSelections, bIsGenuineTau, iVertices);
 
@@ -602,6 +636,14 @@ void CommonPlots::fillControlPlotsAfterTopologicalSelections(const Event& event,
       }
     }// if (withoutTau == false)
   
+  if (withMu) // muons for embedding studies
+    {
+      fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedMuonPtAfterStdSelections, bIsGenuineTau, fMuonData.getHighestSelectedMuonPt());
+      fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedMuonEtaAfterStdSelections, bIsGenuineTau, fMuonData.getHighestSelectedMuonEta());
+      fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedMuonPhiAfterStdSelections, bIsGenuineTau, fMuonData.getHighestSelectedMuonPhi());
+      fHistoSplitter.fillShapeHistogramTriplet(hCtrlSelectedMuonEtaPhiAfterStdSelections, bIsGenuineTau, fMuonData.getHighestSelectedMuonEta(), fMuonData.getHighestSelectedMuonPhi());
+    }
+
   fHistoSplitter.fillShapeHistogramTriplet(hCtrlNJetsAfterStdSelections, bIsGenuineTau, fJetData.getNumberOfSelectedJets());
   for (auto& p: fJetData.getSelectedJets()) {
     fHistoSplitter.fillShapeHistogramTriplet(hCtrlJetPtAfterStdSelections, bIsGenuineTau, p.pt());

@@ -21,7 +21,8 @@ public:
     kSignalAnalysis = 0,
     kHplus2tbAnalysis= 0,
     kBTagEfficiencyAnalysis= 0,
-    kEmbedding,
+    kTauAnalysis,
+    kMuAnalysis,
     kQCDMeasurement,
     kFakeBMeasurement,
     kQCDNormalizationSystematicsSignalRegion, // Needed for obtaining normalization systematics to data-driven control plots
@@ -84,8 +85,9 @@ public:
   void fillControlPlotsAfterMETFilter(const Event& event);
   void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data);
   void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
+  //void fillControlPlotsAfterMuonSelection(const Event& event);
   void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
-  void fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau=false);
+  void fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau=false, bool withMu=false);
   void fillControlPlotsAfterAllSelections(const Event& event, bool withoutTau=false);
   void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight);
   //void fillControlPlotsAfterAllSelectionsWithFullMass(const Event& event, FullHiggsMassCalculator::Data& data);
@@ -181,12 +183,22 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauNProngsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauRtauAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauSourceAfterStdSelections;
+
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedMuonPtAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedMuonEtaAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSelectedMuonPhiAfterStdSelections;
+  HistoSplitter::SplittedTripletTH2s hCtrlSelectedMuonEtaPhiAfterStdSelections;
   
   HistoSplitter::SplittedTripletTH1s hCtrlNJetsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetEtaAfterStdSelections;
   HistoSplitter::SplittedTripletTH2s hCtrlJetEtaPhiAfterStdSelections;
   
+  HistoSplitter::SplittedTripletTH1s hCtrlMETAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMETPhiAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlDeltaPhiTauMetAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlDeltaPhiMuMetAfterStdSelections;
+
   // MET
   HistoSplitter::SplittedTripletTH1s hCtrlMET;
   HistoSplitter::SplittedTripletTH1s hCtrlMETPhi;
