@@ -1,7 +1,7 @@
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 
 DataCardName ='Default_13TeV'
-LightAnalysis = False # FIXME set True for light H+
+LightAnalysis = not True # FIXME set to True for light H+
 
 # Set mass points
 LightMassPoints=[]
@@ -18,9 +18,9 @@ MassPoints=LightMassPoints[:]+HeavyMassPoints[:]
 
 ##############################################################################
 # Options
-OptionIncludeSystematics = True # Include shape systematics (multicrabs must beproduced with doSystematics=True)
-OptionDoControlPlots = not True #FIXME: If you want control plots, switch this to true!
-OptionUseWJetsHT = not True # Use HT binned WJets samples instead of inclusive for WJets background
+OptionIncludeSystematics=True # Include shape systematics (multicrabs must beproduced with doSystematics=True)
+OptionDoControlPlots= not True #FIXME: If you want control plots, switch this to true!
+OptionUseWJetsHT = True # Use HT binned WJets samples instead of inclusive for WJets background
 OptionDoMergeEWKttbar = False #FIXME: if true, Wjets+DY+diboson into one background and for heavy H+, also merges ttbar and singleTop into one background
 BlindAnalysis=True
 OptionBlindThreshold=None # If signal exceeds this fraction of expected events, data is blinded; set to None to disable
@@ -92,7 +92,8 @@ FakeRateCounter="EWKfaketaus:SelectedEvents"
 # Shape histogram definitions
 shapeHistoName=None
 histoPathInclusive="ForDataDrivenCtrlPlots"
-histoPathGenuineTaus="ForDataDrivenCtrlPlotsEWKGenuineTaus"
+#histoPathGenuineTaus="ForDataDrivenCtrlPlotsEWKGenuineTaus"
+histoPathGenuineTaus="ForDataDrivenCtrlPlots" # genuine tau requirement already as part of event selection
 histoPathFakeTaus="ForDataDrivenCtrlPlotsEWKFakeTaus"
 
 if OptionMassShape =="TransverseMass":
@@ -141,7 +142,7 @@ if not LightAnalysis:
 myShapeSystematics.extend(myESSystematics)
 myShapeSystematics.extend(myBtagSystematics)
 myShapeSystematics.extend(myTopSystematics)
-#myShapeSystematics.extend(myPileupSystematics)
+myShapeSystematics.extend(myPileupSystematics)
 
 if not OptionIncludeSystematics:
     myShapeSystematics=[]
@@ -441,7 +442,7 @@ else:
 #===== Pileup
 if "CMS_pileup" in myShapeSystematics:
     Nuisances.append(Nuisance(id="CMS_pileup", label="CMS_pileup",
-        distr="shapeQ", function="ShapeVariation", systVariation="Pileup"))
+        distr="shapeQ", function="ShapeVariation", systVariation="PUWeight"))
 else:
     Nuisances.append(Nuisance(id="CMS_pileup", label="APPROXIMATION for CMS_pileup",
         distr="lnN", function="Constant",value=0.05))
