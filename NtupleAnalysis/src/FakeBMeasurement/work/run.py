@@ -4,14 +4,14 @@ INSTRUCTIONS:
 
 
 USAGE:
-./runFakeBMeasurement.py -m <multicrab_directory> -i "Keyword1|Keyword2|Keyword3"
+./run.py -m <multicrab_directory> -i "Keyword1|Keyword2|Keyword3"
 or
-./runFakeBMeasurement.py -m <multicrab_directory> -e "Keyword1|Keyword2|Keyword3" -n 100
+./run.py -m <multicrab_directory> -e "Keyword1|Keyword2|Keyword3" -n 100
 
 
 Example:
-./runFakeBMeasurement.py -m <multicrab_directory> -i "TT|ST_|2016B" -n -1
-./runFakeBMeasurement.py -m <multicrab_directory> -n 100 -h Vital
+./run.py -m <multicrab_directory> -i "TT|ST_|2016B" -n -1
+./run.py -m <multicrab_directory> -n 100 -h Vital
 
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
@@ -65,7 +65,7 @@ def Verbose(msg, printHeader=False):
         return
 
     if printHeader:
-        print "=== runFakeBMeasurement.py:"
+        print "=== run.py:"
 
     if msg !="":
         print "\t", msg
@@ -74,7 +74,7 @@ def Verbose(msg, printHeader=False):
 
 def Print(msg, printHeader=True):
     if printHeader:
-        print "=== runFakeBMeasurement.py:"
+        print "=== run.py:"
 
     if msg !="":
         print "\t", msg
@@ -162,12 +162,16 @@ def main():
                               doSystematicVariations = opts.doSystematics)
 
     # Perform variations (e.g. for optimisation)
-    # builder.addVariation("METSelection.METCutValue", [100,120,140])
-    # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
-    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [2, 1])
-    # builder.addVariation("FakeBMeasurement.invertedBJetsDiscriminatorValue", [0.5426, 0.35, 0.25])
-    # builder.addVariation("FakeBMeasurement.invertedBJetsDiscriminatorValue", [3, 4, 5])
-
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [1])
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "=="])
+    # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [3])
+    # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutDirection", [">="])
+    # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
+    # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
+    # builder.addVariation("FakeBMeasurement.maxNumberOfBJetsInTopFit", [3, 4, 5])
+    builder.addVariation("TopSelection.ChiSqrCutValue", [10, 15, 20, 25, 30])
+    #builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])
+    
     # Build the builder
     builder.build(process, allSelections)
     

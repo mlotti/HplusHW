@@ -97,7 +97,11 @@ private:
   Data privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData);
   /// determine if bjet object is trigger matched (deltaR based)
   bool passTrgMatching(const Jet& bjet, std::vector<math::LorentzVectorT<double>>& trgBJets) const;
-  
+  ///
+  void SortFailedBJetsCands(Data &output, std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta);
+  ///
+  void RandomlySortFailedBJetsCands(Data &output, std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta);
+
   /// Calculate probability to pass b tagging
   double calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData);
   // Input parameters
