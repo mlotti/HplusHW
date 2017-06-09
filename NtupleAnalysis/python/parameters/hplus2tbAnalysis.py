@@ -168,7 +168,7 @@ topologySelection = PSet(
     CparameterCutDirection       = "<=", 
     DparameterCutValue           = 100.0,   # 0.0 <= D <= 1.0
     DparameterCutDirection       = "<=",  
-    FoxWolframMomentCutValue     = 100.0,   # 0.0 <= H2 <= 1.0
+    FoxWolframMomentCutValue     =   0.5,   # 0.0 <= H2 <= 1.0
     FoxWolframMomentCutDirection = "<=", 
     AlphaTCutValue               = 1000.0,  # 0.0 <= alphaT ~ 2.0 (alphaT->0.5 for perfectly balanced events)
     AlphaTCutDirection           = "<=", 
@@ -207,9 +207,9 @@ scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoin
 # FakeB Measurement Options
 #================================================================================================
 fakeBMeasurement = PSet(
-    numberOfBJetsCutValue             = 0,
-    numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
-    numberOfInvertedBJetsCutValue     = 3,
+    numberOfBJetsCutValue             = 2,
+    numberOfBJetsCutDirection         = ">=", # options: ==, !=, <, <=, >, >=
+    numberOfInvertedBJetsCutValue     = 0,
     numberOfInvertedBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
     invertedBJetDiscr                 = bjetSelection.bjetDiscr,
     invertedBJetWorkingPoint          = "Loose",

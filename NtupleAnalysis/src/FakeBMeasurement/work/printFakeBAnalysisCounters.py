@@ -13,10 +13,14 @@ Usage:
 ./printFakeBAnalysisCounters.py -m <multicrab_dir> [opts]
 
 Commonly Used Commands:
-./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --fractionEWK --mergeEWK --valueFormat %.2f --latex
-./printFakeBAnalysisCounters.py -m FakeBMeasurement_170406_LE2Bjets --mergeEWK --valueFormat %.0f --latex
+./printFakeBAnalysisCounters.py -m <pseudo-mcrab> --fractionEWK --mergeEWK --valueFormat %.2f --latex
+./printFakeBAnalysisCounters.py -m <pseudo-mcrab> --mergeEWK --valueFormat %.0f --latex
+./printFakeBAnalysisCounters.py -m <pseudo-mcrab> --mergeEWK --valueFormat %.2f -o "OptNumberOfBJetsCutDirection<=NumberOfBJetsCutValue0MaxNumberOfBJetsInTopFit3"
+./printFakeBAnalysisCounters.py -m <pseudo-mcrab> --mergeEWK --valueFormat %.0f -o "OptChiSqrCutValue10FoxWolframMomentCutValue0p5"
 
 Examples:
+./printFakeBAnalysisCounters.py -m <multicrab_dir> --fractionEWK --mergeEWK --valueFormat %.2f -o "OptChiSqrCutValue20FoxWolframMomentCutValue0p5"
+./printFakeBAnalysisCounters.py -m <multicrab_dir>  --mergeEWK --valueFormat %.2f -o "OptChiSqrCutValue20FoxWolframMomentCutValue0p5"
 ./printFakeBAnalysisCounters.py -m <multicrab_dir> -i "JetHT|TT"
 ./printFakeBAnalysisCounters.py -m <multicrab_dir> --noError --format %.3f --latex
 ./printFakeBAnalysisCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK
@@ -128,19 +132,22 @@ def GetDatasetsFromDir(opts):
         datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
                                                         dataEra=opts.dataEra,
                                                         searchMode=opts.searchMode, 
-                                                        analysisName=opts.analysisName)
+                                                        analysisName=opts.analysisName,
+                                                        optimizationMode=opts.optMode)
     elif (opts.includeOnlyTasks):
         datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
                                                         dataEra=opts.dataEra,
                                                         searchMode=opts.searchMode,
                                                         analysisName=opts.analysisName,
-                                                        includeOnlyTasks=opts.includeOnlyTasks)
+                                                        includeOnlyTasks=opts.includeOnlyTasks,
+                                                        optimizationMode=opts.optMode)
     elif (opts.excludeTasks):
         datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
                                                         dataEra=opts.dataEra,
                                                         searchMode=opts.searchMode,
                                                         analysisName=opts.analysisName,
-                                                        excludeTasks=opts.excludeTasks)
+                                                        excludeTasks=opts.excludeTasks,
+                                                        optimizationMode=opts.optMode)    
     else:
         raise Exception("This should never be reached")
     return datasets
@@ -347,6 +354,7 @@ if __name__ == "__main__":
     # Default Settings
     ANALYSISNAME    = "FakeBMeasurement"
     DATAERA         = "Run2016"
+    OPTMODE         = ""
     SEARCHMODE      = "80to1000"
     VALUEFORMAT     = "%.6f"
     UNCERTFORMAT    = VALUEFORMAT
@@ -367,6 +375,9 @@ if __name__ == "__main__":
 
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
                       help="Path to the multicrab directory for input")
+
+    parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE,
+                      help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
 
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)

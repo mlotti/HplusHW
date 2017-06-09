@@ -316,15 +316,15 @@ wwStyle           = Style(ROOT.kMultiply, ROOT.kPink-9)
 wzStyle           = Style(ROOT.kMultiply, ROOT.kPink-7)
 zjetsStyle        = Style(ROOT.kFullCross, ROOT.kRed-7)
 zzStyle           = Style(ROOT.kMultiply, ROOT.kPink-5)
-baselineStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
+baselineStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullTriangleUp),
+                                   StyleLine(lineColor=ROOT.kBlue, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kBlue, fillStyle=1001)])
+invertedStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
                                    StyleLine(lineColor=ROOT.kRed, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kRed, fillStyle=1001)])
-invertedStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kBlue, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
-                                   StyleLine(lineColor=ROOT.kBlue, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kBlue, fillStyle=3001)])
 altEwkStyle       = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kMagenta-2, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
                                    StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3),
-                                   StyleFill(fillColor=ROOT.kMagenta-2, fillStyle=3001)])
+                                   StyleFill(fillColor=ROOT.kMagenta-2, fillStyle=1001)])
 
 
 

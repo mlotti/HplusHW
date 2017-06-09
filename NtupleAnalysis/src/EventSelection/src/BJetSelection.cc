@@ -170,7 +170,11 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   // Cache vector of trigger bjet 4-momenta
   std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta;
   
-  for (auto p: iEvent.triggerBJets()) myTriggerBJetMomenta.push_back(p.p4());
+  for (auto p: iEvent.triggerBJets()) 
+    {
+      // std::cout << "HLTBJet: pt eta phi = " <<  p.pt() << ", " << p.eta() << ", " << p.phi() << std::endl;      
+      myTriggerBJetMomenta.push_back(p.p4());
+    }
 
   // Loop over selected jets
   for(const Jet& jet: jetData.getSelectedJets()) {
@@ -179,10 +183,33 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     // jet pt and eta cuts can differ from the jet selection
     jet_index++;
     
+
+    //=== Apply cut on eta   
+    const float jetEtaCut = fJetEtaCuts.at(etaCut_index);
+    if (std::fabs(jet.eta()) > jetEtaCut) continue;
+    passedEta = true;  
+
+
+    //=== Apply cut on pt
+    const float jetPtCut = fJetPtCuts.at(ptCut_index);
+    if (jet.pt() < jetPtCut) continue;
+    passedPt = true;
+
+
+    //=== Apply discriminator. Save failed bjets
+    if (!(jet.bjetDiscriminator() > fDisriminatorValue))
+      {
+	output.fFailedBJetCands.push_back(jet);
+	continue;
+      }
+    else passedDiscr = true;    
+
+
     //=== Apply trigger matching
     if (!this->passTrgMatching(jet, myTriggerBJetMomenta)) continue;
     else
       {
+	
 	trgMatches++;
 	
 	// Fill histograms for matched objects
@@ -192,24 +219,6 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
 	    hTriggerMatchedBJetEta[trgMatches-1]->Fill(jet.eta());
 	  }
       }
-
-    //=== Apply cut on eta   
-    const float jetEtaCut = fJetEtaCuts.at(etaCut_index);
-    if (std::fabs(jet.eta()) > jetEtaCut) continue;
-    passedEta = true;  
-
-    //=== Apply cut on pt
-    const float jetPtCut = fJetPtCuts.at(ptCut_index);
-    if (jet.pt() < jetPtCut) continue;
-    passedPt = true;
-    
-    //=== Apply discriminator. Save failed bjets
-    if (!(jet.bjetDiscriminator() > fDisriminatorValue))
-      {
-	output.fFailedBJetCands.push_back(jet);
-	continue;
-      }
-    else passedDiscr = true;    
     
     // jet identified as b jet
     output.fSelectedBJets.push_back(jet);
@@ -220,39 +229,42 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
 
   }//eof jet loop
 
+
   // Fill histograms for matched objects
   hTriggerMatches->Fill(trgMatches);
   hTriggerBJets->Fill(nTrgBJets);
 
-  // Require number of trigger-matched bjets to be at least the number of trigger bjets
+  // Determine if trigger matching requirement is satisfied
   if (passedEta*passedPt*passedDiscr)
     {
       if (!bTriggerMatchingApply) passedTrgMatching = true;
       else passedTrgMatching = (trgMatches == nTrgBJets);
     }
-
-  // Require exact number of selected bjets
+  
+  // Determine if exact number of the selected bjets is found
   if (passedTrgMatching) 
     {
       if (fNumberOfJetsCut.passedCut(output.getNumberOfSelectedBJets())) passedNBjets = true;
     }
 
-  // Fill sub-counters
+
+  // Fill counters and sub-counters
   if (passedEta) cSubPassedEta.increment();
   if (passedPt) cSubPassedPt.increment();
   if (passedDiscr) cSubPassedDiscriminator.increment();
   if (passedTrgMatching) cSubPassedTrgMatching.increment();
-  if (passedNBjets) cSubPassedNBjets.increment();
+  if (passedNBjets)
+    {
+      cSubPassedNBjets.increment();
+      cPassedBJetSelection.increment();
+    }
   
+  // Sort failed bjets by descending/ascending b-discriminator value. Then place trg-matched objects first
+  // SortFailedBJetsCands(output, myTriggerBJetMomenta);
+  RandomlySortFailedBJetsCands(output, myTriggerBJetMomenta);
+
   //=== Apply cut on trigger-matched jets before saving failed jets
   if (!passedTrgMatching) return output;
-
-  // Sort jets by descending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
-  output.fFailedBJetCandsDescendingDiscr = output.fFailedBJetCands;
-  std::sort(output.fFailedBJetCandsDescendingDiscr.begin(), output.fFailedBJetCandsDescendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() > b.bjetDiscriminator();});
-  // Sort jets by ascending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
-  output.fFailedBJetCandsAscendingDiscr = output.fFailedBJetCands;
-  std::sort(output.fFailedBJetCandsAscendingDiscr.begin(), output.fFailedBJetCandsAscendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() < b.bjetDiscriminator();});
 
   //=== Apply cut on number of selected b jets
   if (!passedNBjets) return output;
@@ -260,16 +272,13 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   //=== Passed b-jet selection
   output.bPassedSelection = true;
 
-  // Fill the inclusive counter
-  cPassedBJetSelection.increment();
-
   // Sort bjets by pt (Sorting operator defined in Jet.h)
   std::sort(output.fSelectedBJets.begin(), output.fSelectedBJets.end());
 
   // Fill pt and eta of jets
   size_t i = 0;
   for (Jet jet: output.fSelectedBJets) {
-    //std::cout << "\tpT = " << jet.pt() << ", eta = " << jet.eta() << std::endl;
+
     if (i < 4) {
       hSelectedBJetPt[i]->Fill(jet.pt());
       hSelectedBJetEta[i]->Fill(jet.eta());
@@ -286,7 +295,6 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   
   // Return data object
   return output;
-  std::cout << "\n" << std::endl;
 }
 
 double BJetSelection::calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData) {
@@ -357,4 +365,53 @@ bool BJetSelection::passTrgMatching(const Jet& bjet, std::vector<math::LorentzVe
   return (myMinDeltaR < fTriggerMatchingCone);
 }
 
-//  LocalWords:  passedTrgMathcing
+void BJetSelection::SortFailedBJetsCands(Data &output, std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta)
+{
+  
+  // Copy the failed bjet candidates vector
+  output.fFailedBJetCandsDescendingDiscr = output.fFailedBJetCands;
+  output.fFailedBJetCandsAscendingDiscr  = output.fFailedBJetCands;
+
+  // Sort jets by descending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  std::sort(output.fFailedBJetCandsDescendingDiscr.begin(), output.fFailedBJetCandsDescendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() > b.bjetDiscriminator();});
+
+  // Now put the trg-matched objects in the front (irrespective of discriminator value)
+  for (auto it = output.fFailedBJetCandsDescendingDiscr.begin(); it != output.fFailedBJetCandsDescendingDiscr.end(); ++it) 
+    {
+      if (!this->passTrgMatching(*it, myTriggerBJetMomenta)) continue;
+      auto jet = *it;
+      output.fFailedBJetCandsDescendingDiscr.erase(it);
+      output.fFailedBJetCandsDescendingDiscr.insert(output.fFailedBJetCandsDescendingDiscr.begin(), jet);
+    }
+    
+  // Sort jets by ascending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  std::sort(output.fFailedBJetCandsAscendingDiscr.begin(), output.fFailedBJetCandsAscendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() < b.bjetDiscriminator();});
+
+  // Now put the trg-matched objects in the front (irrespective of discriminator value)
+  for (auto it = output.fFailedBJetCandsAscendingDiscr.begin(); it != output.fFailedBJetCandsAscendingDiscr.end(); ++it) 
+    {
+      if (!this->passTrgMatching(*it, myTriggerBJetMomenta)) continue;
+      auto jet = *it;
+      output.fFailedBJetCandsAscendingDiscr.erase(it);
+      output.fFailedBJetCandsAscendingDiscr.insert(output.fFailedBJetCandsAscendingDiscr.begin(), jet);
+    }
+
+  return;
+}
+
+
+void BJetSelection::RandomlySortFailedBJetsCands(Data &output, std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta)
+{
+  
+  // See: https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector
+
+  // Copy the failed bjet candidates vector
+  output.fFailedBJetCandsDescendingDiscr = output.fFailedBJetCands;
+  output.fFailedBJetCandsAscendingDiscr  = output.fFailedBJetCands;
+
+  // Random sort of jets, instead of the default sorting by discriminator
+  std::random_shuffle(output.fFailedBJetCandsDescendingDiscr.begin(), output.fFailedBJetCandsDescendingDiscr.end());
+  std::random_shuffle(output.fFailedBJetCandsAscendingDiscr.begin() , output.fFailedBJetCandsAscendingDiscr.end());
+
+  return;
+}
