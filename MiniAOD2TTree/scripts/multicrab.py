@@ -99,9 +99,11 @@ from CRABClient.UserUtilities import getUsernameFromSiteDB
 from CRABClient.ClientUtilities import LOGLEVEL_MUTE
 from CRABClient.UserUtilities import getConsoleLogLevel
 
-import HiggsAnalysis.MiniAOD2TTree.tools.git as git
-from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
-
+try:
+    import HiggsAnalysis.MiniAOD2TTree.tools.git as git
+    from HiggsAnalysis.MiniAOD2TTree.tools.datasets import *
+except:
+    from datasets import *
 
 #================================================================================================ 
 # Global Definitions
@@ -185,12 +187,12 @@ class Report:
         self.dataset         = self.name.split("/")[-1]
         self.dashboardURL    = dashboardURL
         self.status          = self.GetTaskStatusStyle(status)
-        self.finished        = finished
+        self.finished        = str(len(finished))
         self.failed          = failed
         self.idle            = idle
         self.transferring    = transferring
-        self.retrievedLog    = retrievedLog
-        self.retrievedOut    = retrievedOut
+        self.retrievedLog    = str(len(retrievedLog))
+        self.retrievedOut    = str(len(retrievedOut))
         self.eosLog          = eosLog
         self.eosOut          = eosOut
         return
@@ -601,7 +603,7 @@ def GetTaskOutput(taskPath, retrievedOut, finished):
     if retrievedOut == finished:
         return
     
-    if opts.get:
+    if opts.get or opts.out:
         if opts.ask:
             if AskUser("Retrieved output (%s) < finished (%s). Retrieve CRAB output?" % (retrievedOut, finished) ):
                 if "fnal" in GetHostname():
@@ -621,7 +623,19 @@ def GetTaskOutput(taskPath, retrievedOut, finished):
                 # the checksum validation seems to be causing trouble - CRAB can't autodetect whether to use it or not
                 result = crabCommand('getoutput', checksum="no", dir=taskPath)
             else:
-                result = crabCommand("getoutput", dir=taskPath)
+                finished_tmp = finished
+                if len(retrievedOut) > 0:
+                    finished_tmp = list(set(finished) - set(retrievedOut))
+                while len(finished_tmp) > 0:
+                    retrieveThese = finished_tmp[:500]
+                    finished_tmp = finished_tmp[500:]
+                    retrieveThese_str = ""
+                    for a in retrieveThese:
+                        retrieveThese_str+=a+','
+                    retrieveThese_str = retrieveThese_str[:len(retrieveThese_str)-1]
+                    result = crabCommand("getoutput", dir=taskPath, jobids=retrieveThese_str)
+
+                #result = crabCommand("getoutput", dir=taskPath)
             Touch(taskPath)
     else:
         Verbose("Retrieved output (%s) < finished (%s). To retrieve CRAB output relaunch script with --get option." % (retrievedOut, finished) )
@@ -1001,11 +1015,11 @@ def RetrievedFiles(taskDir, crabResults, dashboardURL, printTable, opts):
     Verbose("RetrievedFiles()", True)
     
     # Initialise variables
-    retrievedLog = 0
-    retrievedOut = 0
+    retrievedLog = []
+    retrievedOut = []
     eosLog       = 0
     eosOut       = 0
-    finished     = 0
+    finished     = []
     failed       = []
     transferring = 0
     running      = 0
@@ -1030,7 +1044,7 @@ def RetrievedFiles(taskDir, crabResults, dashboardURL, printTable, opts):
         Verbose("Investigating jobId=%s with status=%s" % (jobId, jobStatus))
         # Assess the jobs status individually
         if jobStatus == 'finished':
-            finished += 1
+            finished.append(jobId)
             # Count Output & Logfiles (EOS)
             if opts.filesInEOS:
                 taskDirEOS  = GetEOSDir(taskDir, opts)
@@ -1048,15 +1062,15 @@ def RetrievedFiles(taskDir, crabResults, dashboardURL, printTable, opts):
 
             # Count Output & Logfiles (local)
             foundLog = Exists(taskDir, "cmsRun_%s.log.tar.gz" % jobId) 
-            foundOut = Exists(taskDir, "miniaod2tree_%s.root" % jobId)
+            foundOut = Exists(taskDir, "\S+_%s.root" % jobId)
             if foundLog:
-                retrievedLog += 1
+                retrievedLog.append(jobId)
                 exitCode = CheckTaskReport(taskDir, jobId, opts)
                 if not exitCode == 0:
                     Verbose("Found failed job for task=%s with jobId=%s and exitCode=%s" % (taskDir, jobId, exitCode) )
                     failed.append( jobId )                    
             if foundOut:
-                retrievedOut += 1
+                retrievedOut.append(jobId)
             if foundLog and not foundOut:
                 missingOuts.append( jobId )
             if foundOut and not foundLog:
@@ -1105,12 +1119,12 @@ def GetReportTable(taskDir, nJobs, running, transferring, finished, unknown, fai
     nTotal    = str(nJobs)
     nRun      = str(running)
     nTransfer = str(transferring)
-    nFinish   = str(finished)
+    nFinish   = str(len(finished))
     nUnknown  = str(unknown)
     nFail     = str(len(failed))
     nIdle     = str(idle)
-    nLogs     = ''.join( str(retrievedLog).split() ) 
-    nOut      = ''.join( str(retrievedOut).split() )
+    nLogs     = str(len(retrievedLog))#''.join( str(retrievedLog).split() ) 
+    nOut      = str(len(retrievedOut))#''.join( str(retrievedOut).split() )
     nLogsEOS  = ''.join( str(eosLog).split() ) 
     nOutEOS   = ''.join( str(eosOut).split() )
     txtAlign  = "{:<25} {:>4} {:<1} {:<4}"
@@ -1203,13 +1217,19 @@ def Exists(dataset, filename):
     '''
     Verbose("Exists()", False)
 
-    fileName = os.path.join(dataset, "results", filename)
+#    fileName = os.path.join(dataset, "results", filename)
+    fileName = os.path.join(dataset, "results")
     cmd      = "ls " + fileName
 
     Verbose(cmd)
     files     = Execute("%s" % (cmd) ) #not used
-    firstFile = files[0] #not used
-    return os.path.exists(fileName)
+    file_re = re.compile(filename)
+    for f in files:
+        match = file_re.search(f)
+        if match:
+            return True
+    #firstFile = files[0] #not used
+    return os.path.exists(os.path.join(dataset, "results", filename))
 
 
 def ExistsEOS(dataset, subDir, fileName, opts):
@@ -1344,8 +1364,8 @@ def GetAnalysis():
     if match:
 	analysis = match.group("leg")
     else:
-        raise Exception("Could not determine the analysis type from the PSET %s" % (opts.pset) )
-
+	analysis = opts.pset[:len(opts.pset)-3]
+        ####raise Exception("Could not determine the analysis type from the PSET %s" % (opts.pset) )
     return analysis
 
 
@@ -1883,10 +1903,13 @@ if __name__ == "__main__":
                       help="Flag to check the status of all CRAB jobs [default: False")
 
     parser.add_option("--get", dest="get", default=False, action="store_true", 
-                      help="Get output of finished jobs [defaut: False]")
+                      help="Get output and log files of finished jobs [defaut: False]")
 
     parser.add_option("--log", dest="log", default=False, action="store_true", 
                       help="Get log files of finished jobs [defaut: False]")
+
+    parser.add_option("--out", dest="out", default=False, action="store_true",
+                      help="Get output files of finished jobs [defaut: False]")
 
     parser.add_option("--resubmit", dest="resubmit", default=False, action="store_true", 
                       help="Resubmit all failed jobs [defaut: False]")
@@ -1931,7 +1954,7 @@ if __name__ == "__main__":
 
     if opts.create == True:
         sys.exit( CreateJob(opts, args) )
-    elif opts.status == True or opts.get == True or opts.log == True or opts.resubmit == True or opts.kill == True:
+    elif opts.status == True or opts.get == True or opts.out == True or opts.log == True or opts.resubmit == True or opts.kill == True:
         if opts.dirName == "":
             raise Exception("Must provide a multiCRAB dir with the -d option!")            
         else:
