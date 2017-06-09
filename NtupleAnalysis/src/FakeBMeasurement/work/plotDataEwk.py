@@ -15,10 +15,10 @@ For more counter tricks and optios see also:
 HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
-./plotDataEwkQcd.py -m <pseudo_mcrab_directory> [opts]
+./plotDataEwk.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotDataEwkQcd.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170602_235941_BJetsEE2_TopChiSqrVar_H2Var --mergeEWK --histoLevel Vital -o OptChiSqrCutValue16FoxWolframMomentCutValue0p5
+./plotDataEwk.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170602_235941_BJetsEE2_TopChiSqrVar_H2Var --mergeEWK --histoLevel Vital -o OptChiSqrCutValue10FoxWolframMomentCutValue0p5
 '''
 
 #================================================================================================ 
@@ -248,7 +248,11 @@ def getTopSelectionHistos(histoLevel="Vital", analysisType="Baseline"):
                 hListFilter.append(h)
     elif histoLevel == "Debug":
         hListFilter = hList
+    else:
+        Print("Returning empty list!", True)
+        return []
     return hListFilter
+
 
 def GetDatasetsFromDir(opts):
     Verbose("Getting datasets")
@@ -337,35 +341,17 @@ def main(opts):
     style = tdrstyle.TDRStyle()
     style.setOptStat(True)
 
-    # Do the Purity Triples
-    if 0:
-        Print("Plotting Purity Triplet Histograms", True)
-        PurityTripletPlots(datasetsMgr, analysisType="")
-        PurityTripletPlots(datasetsMgr, analysisType="EWKFakeB")
-        PurityTripletPlots(datasetsMgr, analysisType="EWKGenuineB")
-        
     # Do the standard top-selections
-    if 1:
-        Print("Plotting Top Selection Histograms (Baseline)", True)
-        TopSelectionHistograms(datasetsMgr, analysisType="Baseline")
-        
-        #Print("Plotting Top Selection Histograms (Inverted)", True)
-        #TopSelectionHistograms(datasetsMgr, analysisType="Inverted")
+    analysisTypes = ["Baseline", "Inverted"]
+    for analysis in analysisTypes:
+        Print("Plotting Top Selection Histograms (%s)" % (analysis), True)
+        TopSelectionHistograms(opts, datasetsMgr, analysis)
 
     # Do Data-MC histograms
-    if 0:
-        Print("Plotting Other Histograms", True)
-        DataMCHistograms(datasetsMgr, analysisType="Baseline")
-        DataMCHistograms(datasetsMgr, analysisType="Inverted")
+    for analysis in analysisTypes:
+        Print("Plotting Other Histograms (%s)" % (analysis), True)
+        DataMCHistograms(datasetsMgr, analysis)
 
-    # Do the Data/QCD/EWK histograms
-    #if opts.mergeEWK:
-    #    analysisTypes = ["Baseline", "Inverted"]
-    #    for analysis in analysisTypes:
-    #        for hName in getTopSelectionHistos(opts.histoLevel, analysis):
-    #            DataEwkQcd(datasetsMgr, hName.split("/")[-1], analysis)
-    #else:
-    #    Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
     return
 
 
@@ -409,7 +395,7 @@ def PurityTripletPlots(datasetsMgr, analysisType=""):
                "cmsExtraText": "Preliminary",
                "opts": {"ymin": 2e-1, "ymaxfactor": 10},
                "opts2": {"ymin": 0.0, "ymax": 2.0},
-               "log": True,
+               "log": False,
                "errorBarsX": True, 
                "moveLegend": _moveLegend,
                "cutBox": {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
@@ -487,7 +473,6 @@ def PurityTripletPlots(datasetsMgr, analysisType=""):
 
         # Save plot in all formats
         SavePlot(p, saveName, os.path.join(opts.saveDir, folder) )
-
     return
 
 
@@ -594,7 +579,8 @@ def DataMCHistograms(datasetsMgr, analysisType=""):
     # For-loop: All histograms in list
     for histoName in histoNames:
         kwargs_  = histoKwargs[histoName]
-        saveName = os.path.join(opts.saveDir, histoName.replace("/", "_"))
+        #saveName = os.path.join(opts.saveDir, histoName.replace("/", "_"))
+        saveName = histoName.replace("/", "_")
 
         if opts.mcOnly:
             p = plots.MCPlot(datasetsMgr, histoName, normalizeToLumi=opts.intLumi)
@@ -607,15 +593,13 @@ def DataMCHistograms(datasetsMgr, analysisType=""):
             p = plots.DataMCPlot(datasetsMgr, histoName)
             plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
 
-        # For-loop: All save formats
-        for i, ext in enumerate(saveFormats):
-            Print("%s" % saveName + ext, i==0)
-            p.saveAs(saveName, formats=saveFormats)
+        # Save plot in all formats
+        SavePlot(p, saveName, os.path.join(opts.saveDir, "DataEwk") )
     return
 
 
 
-def TopSelectionHistograms(datasetsMgr, analysisType=""):
+def TopSelectionHistograms(opts, datasetsMgr, analysisType):
     '''
     Create data-MC comparison plot, with the default:
     - legend labels (defined in plots._legendLabels)
@@ -629,7 +613,7 @@ def TopSelectionHistograms(datasetsMgr, analysisType=""):
     IsBaselineOrInverted(analysisType)
 
     # Definitions
-    histoNames  = getTopSelectionHistos(analysisType)
+    histoNames  = getTopSelectionHistos(opts.histoLevel, analysisType)
     histoKwargs = {}
     saveFormats = [".png", ".pdf"] #[".C", ".png", ".pdf"]
 
@@ -679,8 +663,9 @@ def TopSelectionHistograms(datasetsMgr, analysisType=""):
             p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
             plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
 
-        # Save plot in all formats        
-        SavePlot(p, saveName, os.path.join(opts.saveDir, folder) )
+        # Save plot in all formats
+        SavePlot(p, histoName, os.path.join(opts.saveDir, "DataEwk") ) 
+        #SavePlot(p, histoName, os.path.join(opts.saveDir, analysisType) ) 
     return
     
                          
