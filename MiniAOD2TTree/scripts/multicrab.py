@@ -187,12 +187,12 @@ class Report:
         self.dataset         = self.name.split("/")[-1]
         self.dashboardURL    = dashboardURL
         self.status          = self.GetTaskStatusStyle(status)
-        self.finished        = finished
+        self.finished        = str(len(finished))
         self.failed          = failed
         self.idle            = idle
         self.transferring    = transferring
-        self.retrievedLog    = retrievedLog
-        self.retrievedOut    = retrievedOut
+        self.retrievedLog    = str(len(retrievedLog))
+        self.retrievedOut    = str(len(retrievedOut))
         self.eosLog          = eosLog
         self.eosOut          = eosOut
         return
@@ -936,11 +936,11 @@ def PrintTaskSummary(reportDict):
         idle       = '{0: >3}'.format(report.idle)
         allJobs    = '{0: <3}'.format(report.allJobs)
         running    = '{0: >3}'.format(report.running)
-        finished   = '{0: >3}'.format(len(report.finished))
+        finished   = '{0: >3}'.format(report.finished)
         transfer   = '{0: >3}'.format(report.transferring)
         failed     = '{0: >3}'.format(len(report.failed))
-        rLogs      = '{0: >3}'.format(len(report.retrievedLog))
-        rOutput    = '{0: >3}'.format(len(report.retrievedOut))
+        rLogs      = '{0: >3}'.format(report.retrievedLog)
+        rOutput    = '{0: >3}'.format(report.retrievedOut)
         rLogsEOS   = '{0: >3}'.format(report.eosLog)
         rOutputEOS = '{0: >3}'.format(report.eosOut)
         line = msgAlign.format(index, task,
@@ -1217,13 +1217,19 @@ def Exists(dataset, filename):
     '''
     Verbose("Exists()", False)
 
-    fileName = os.path.join(dataset, "results", filename)
+#    fileName = os.path.join(dataset, "results", filename)
+    fileName = os.path.join(dataset, "results")
     cmd      = "ls " + fileName
 
     Verbose(cmd)
     files     = Execute("%s" % (cmd) ) #not used
-    firstFile = files[0] #not used
-    return os.path.exists(fileName)
+    file_re = re.compile(filename)
+    for f in files:
+        match = file_re.search(f)
+        if match:
+            return True
+    #firstFile = files[0] #not used
+    return os.path.exists(os.path.join(dataset, "results", filename))
 
 
 def ExistsEOS(dataset, subDir, fileName, opts):
