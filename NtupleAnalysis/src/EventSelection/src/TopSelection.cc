@@ -474,7 +474,7 @@ TopSelection::Data TopSelection::analyzeWithoutBJets(const Event& event,
 						     const unsigned int maxNumberOfBJetsInTopFit) {
   ensureAnalyzeAllowed(event.eventID());
   nSelectedBJets = bjetData.getSelectedBJets().size();
-
+ 
   // Ready to analyze
   TopSelection::Data data = privateAnalyze(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, maxNumberOfBJetsInTopFit) );
 
@@ -569,7 +569,6 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
 	  }
       }
     }
-  
   // Sanity check: Did I get at least 1 successful fit?
   if (minChiSqr == 1e9) return output;
 
@@ -887,6 +886,9 @@ const std::vector<Jet> TopSelection::GetBjetsToBeUsedInFit(const BJetSelection::
   // Now truncate the bjets vector 
   if (bjetsForFit.size() > maxNumberOfBJets) bjetsForFit.resize(maxNumberOfBJets);
 
+  // std::cout << "bjetsForFit.size() = " << bjetsForFit.size() << std::endl;
+  // std::cout << "bjetData.getFailedBJetCandsDescendingDiscr().size() = " << bjetData.getFailedBJetCandsDescendingDiscr().size() << std::endl;
+
   return bjetsForFit;
 }
   
@@ -982,7 +984,7 @@ void TopSelection::GetJetIndicesForChiSqrFit(const std::vector<Jet> jets,
   // might be c-flavour jets from W->cs decays.
   // const bool skipBJets = (nLightJets >= 4);
 
-  // std::cout << "jets.size() = " << jets.size() << ", bjets.size() = " << bjets.size() << std::endl;
+  // std::cout << "=== GetJetIndicesForChiSqrFit()\n\tjets.size() = " << jets.size() << ", bjets.size() = " << bjets.size() << std::endl;
 
   // For-loop: 6 nested loops to get 4 jets, 2 bjets
   for (unsigned int b1=0; b1 < nJets; b1++){
@@ -1051,7 +1053,7 @@ void TopSelection::GetJetIndicesForChiSqrFit(const std::vector<Jet> jets,
 
   if (0)
     {
-      unsigned int combinations = 0;
+      unsigned int combinations = 1;
       for (unsigned int i = 0; i < bjet1.size(); i++, combinations++)
 	{
 	  std::cout << "  " << jet1.at(i) 
