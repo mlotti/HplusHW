@@ -195,21 +195,10 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     if (jet.pt() < jetPtCut) continue;
     passedPt = true;
 
-
-    //=== Apply discriminator. Save failed bjets
-    if (!(jet.bjetDiscriminator() > fDisriminatorValue))
-      {
-	output.fFailedBJetCands.push_back(jet);
-	continue;
-      }
-    else passedDiscr = true;    
-
-
-    //=== Apply trigger matching
+    //=== Apply trigger matching before saving failed candidates 
     if (!this->passTrgMatching(jet, myTriggerBJetMomenta)) continue;
     else
       {
-	
 	trgMatches++;
 	
 	// Fill histograms for matched objects
@@ -219,7 +208,15 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
 	    hTriggerMatchedBJetEta[trgMatches-1]->Fill(jet.eta());
 	  }
       }
-    
+
+    //=== Apply discriminator. Save failed bjets
+    if (!(jet.bjetDiscriminator() > fDisriminatorValue))
+      {
+	output.fFailedBJetCands.push_back(jet);
+	continue;
+      }
+    else passedDiscr = true;    
+      
     // jet identified as b jet
     output.fSelectedBJets.push_back(jet);
     
@@ -229,6 +226,15 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
 
   }//eof jet loop
 
+  // BTag SF should be applied before applying fNumberOfJetsCut (so that SF are applied in inverted method)
+  if (iEvent.isMC())
+    {
+      // Calculate and store b-jet scale factor weight and it's uncertainty
+      output.fBTaggingScaleFactorEventWeight = fBTagSFCalculator.calculateSF(jetData.getSelectedJets(), output.fSelectedBJets);
+  
+      // Calculate probability for passing b tag cut without actually applying the cut
+      output.fBTaggingPassProbability = calculateBTagPassingProbability(iEvent, jetData);  
+    }
 
   // Fill histograms for matched objects
   hTriggerMatches->Fill(trgMatches);
@@ -247,7 +253,6 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
       if (fNumberOfJetsCut.passedCut(output.getNumberOfSelectedBJets())) passedNBjets = true;
     }
 
-
   // Fill counters and sub-counters
   if (passedEta) cSubPassedEta.increment();
   if (passedPt) cSubPassedPt.increment();
@@ -260,8 +265,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     }
   
   // Sort failed bjets by descending/ascending b-discriminator value. Then place trg-matched objects first
-  // SortFailedBJetsCands(output, myTriggerBJetMomenta);
-  RandomlySortFailedBJetsCands(output, myTriggerBJetMomenta);
+  RandomlySortFailedBJetsCands(output, myTriggerBJetMomenta);   // SortFailedBJetsCands(output, myTriggerBJetMomenta);
 
   //=== Apply cut on trigger-matched jets before saving failed jets
   if (!passedTrgMatching) return output;
@@ -286,12 +290,6 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     }
     ++i;
   }
-  
-  // Calculate and store b-jet scale factor weight and it's uncertainty
-  output.fBTaggingScaleFactorEventWeight = fBTagSFCalculator.calculateSF(jetData.getSelectedJets(), output.fSelectedBJets);
-  
-  // Calculate probability for passing b tag cut without actually applying the cut
-  output.fBTaggingPassProbability = calculateBTagPassingProbability(iEvent, jetData);
   
   // Return data object
   return output;
