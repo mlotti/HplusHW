@@ -189,13 +189,20 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     if (std::fabs(jet.eta()) > jetEtaCut) continue;
     passedEta = true;  
 
-
     //=== Apply cut on pt
     const float jetPtCut = fJetPtCuts.at(ptCut_index);
     if (jet.pt() < jetPtCut) continue;
     passedPt = true;
 
-    //=== Apply trigger matching before saving failed candidates 
+    //=== Apply discriminator. Save failed bjets
+    if (!(jet.bjetDiscriminator() > fDisriminatorValue))
+      {
+	output.fFailedBJetCands.push_back(jet);
+	continue;
+      }
+    else passedDiscr = true;    
+      
+    //=== Apply trigger matching after saving failed candidates (any trg-matched jets will be given priority in output.fFailedBJetsCands later on)
     if (!this->passTrgMatching(jet, myTriggerBJetMomenta)) continue;
     else
       {
@@ -209,14 +216,6 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
 	  }
       }
 
-    //=== Apply discriminator. Save failed bjets
-    if (!(jet.bjetDiscriminator() > fDisriminatorValue))
-      {
-	output.fFailedBJetCands.push_back(jet);
-	continue;
-      }
-    else passedDiscr = true;    
-      
     // jet identified as b jet
     output.fSelectedBJets.push_back(jet);
     
@@ -265,7 +264,7 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     }
   
   // Sort failed bjets by descending/ascending b-discriminator value. Then place trg-matched objects first
-  RandomlySortFailedBJetsCands(output, myTriggerBJetMomenta);   // SortFailedBJetsCands(output, myTriggerBJetMomenta);
+  SortFailedBJetsCands(output, myTriggerBJetMomenta);
 
   //=== Apply cut on trigger-matched jets before saving failed jets
   if (!passedTrgMatching) return output;
@@ -369,47 +368,28 @@ void BJetSelection::SortFailedBJetsCands(Data &output, std::vector<math::Lorentz
   // Copy the failed bjet candidates vector
   output.fFailedBJetCandsDescendingDiscr = output.fFailedBJetCands;
   output.fFailedBJetCandsAscendingDiscr  = output.fFailedBJetCands;
+  output.fFailedBJetCandsShuffled        = output.fFailedBJetCands;
 
-  // Sort jets by descending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
+  // Sort by descending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
   std::sort(output.fFailedBJetCandsDescendingDiscr.begin(), output.fFailedBJetCandsDescendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() > b.bjetDiscriminator();});
 
-  // Now put the trg-matched objects in the front (irrespective of discriminator value)
-  for (auto it = output.fFailedBJetCandsDescendingDiscr.begin(); it != output.fFailedBJetCandsDescendingDiscr.end(); ++it) 
-    {
-      if (!this->passTrgMatching(*it, myTriggerBJetMomenta)) continue;
-      auto jet = *it;
-      output.fFailedBJetCandsDescendingDiscr.erase(it);
-      output.fFailedBJetCandsDescendingDiscr.insert(output.fFailedBJetCandsDescendingDiscr.begin(), jet);
-    }
-    
   // Sort jets by ascending b-discriminator value (http://en.cppreference.com/w/cpp/algorithm/sort)
   std::sort(output.fFailedBJetCandsAscendingDiscr.begin(), output.fFailedBJetCandsAscendingDiscr.end(), [](const Jet& a, const Jet& b){return a.bjetDiscriminator() < b.bjetDiscriminator();});
 
-  // Now put the trg-matched objects in the front (irrespective of discriminator value)
-  for (auto it = output.fFailedBJetCandsAscendingDiscr.begin(); it != output.fFailedBJetCandsAscendingDiscr.end(); ++it) 
+  // Sort randomly (https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector)
+  std::random_shuffle(output.fFailedBJetCandsShuffled.begin(), output.fFailedBJetCandsShuffled.end());
+
+  // Default sort: first all trg-matched objects (if any) then randomly
+  output.fFailedBJetCands = output.fFailedBJetCandsShuffled;
+  
+  // Now put the trg-matched objects in the front
+  for (auto it = output.fFailedBJetCands.begin(); it != output.fFailedBJetCands.end(); ++it) 
     {
       if (!this->passTrgMatching(*it, myTriggerBJetMomenta)) continue;
       auto jet = *it;
-      output.fFailedBJetCandsAscendingDiscr.erase(it);
-      output.fFailedBJetCandsAscendingDiscr.insert(output.fFailedBJetCandsAscendingDiscr.begin(), jet);
+      output.fFailedBJetCands.erase(it);
+      output.fFailedBJetCands.insert(output.fFailedBJetCands.begin(), jet);
     }
-
-  return;
-}
-
-
-void BJetSelection::RandomlySortFailedBJetsCands(Data &output, std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta)
-{
-  
-  // See: https://stackoverflow.com/questions/6926433/how-to-shuffle-a-stdvector
-
-  // Copy the failed bjet candidates vector
-  output.fFailedBJetCandsDescendingDiscr = output.fFailedBJetCands;
-  output.fFailedBJetCandsAscendingDiscr  = output.fFailedBJetCands;
-
-  // Random sort of jets, instead of the default sorting by discriminator
-  std::random_shuffle(output.fFailedBJetCandsDescendingDiscr.begin(), output.fFailedBJetCandsDescendingDiscr.end());
-  std::random_shuffle(output.fFailedBJetCandsAscendingDiscr.begin() , output.fFailedBJetCandsAscendingDiscr.end());
-
+    
   return;
 }

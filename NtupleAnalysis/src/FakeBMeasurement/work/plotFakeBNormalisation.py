@@ -164,7 +164,7 @@ def main(argv, dsetMgr, moduleInfoString):
         FITMAX = None
       
         #===== Infer binning information and labels
-        histonames = dsetMgr.getDataset("Data").getDirectoryContent(COMBINEDHISTODIR+"/NormalizationMETBaselineTau"+HISTONAME)
+        histonames = dsetMgr.getDataset("Data").getDirectoryContent(COMBINEDHISTODIR+"/NormalizationMETBaselineTau"+HISTONAME)  #alex: NormalizationMETBaselineTauAfterStdSelections contains MET at inversion point
         bins = []
         binLabels = []
         if histonames == None:
@@ -179,7 +179,6 @@ def main(argv, dsetMgr, moduleInfoString):
         else:
             for hname in histonames:
                 binIndex = hname.replace("NormalizationMETBaselineTau"+HISTONAME,"")
-#                print "DEBUG: We are looking for hisrogram "+COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex
                 hDummy = dsetMgr.getDataset("Data").getDatasetRootHisto(COMBINEDHISTODIR+"/"+BASELINETAUHISTONAME+binIndex).getHistogram()
                 title = hDummy.GetTitle()
                 title = title.replace("METBaseline"+HISTONAME,"")
@@ -196,6 +195,7 @@ def main(argv, dsetMgr, moduleInfoString):
                 else:
                     print "Skipping bin '%s' (%s) because it has no entries"%(binIndex, QCDNormalization.getModifiedBinLabelString(title))
         print "\nHistogram bins available",bins
+
         # Select bins by filter
         if len(selectOnlyBins) > 0:
             oldBinLabels = binLabels[:]
@@ -223,6 +223,7 @@ def main(argv, dsetMgr, moduleInfoString):
         
         #===== Create templates (EWK fakes, EWK genuine, QCD; data template is created by manager)
         # start from here
+
         template_EWKFakeTaus_Baseline = manager.createTemplate("EWKFakeTaus_Baseline")
         template_EWKFakeTaus_Inverted = manager.createTemplate("EWKFakeTaus_Inverted")
         template_EWKGenuineTaus_Baseline = manager.createTemplate("EWKGenuineTaus_Baseline")

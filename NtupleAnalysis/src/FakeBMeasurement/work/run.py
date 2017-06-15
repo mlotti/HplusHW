@@ -114,12 +114,15 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = ["ChargedHiggs", "QCD"]
+        myBlackList = []#["ChargedHiggs", "QCD"]
         Print("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
         Print("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
         # process.addDatasetsFromMulticrab(opts.mcrab, blacklist=myBlackList)
-        regex =  "|".join(myBlackList)
-        process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=regex)
+        if len(myBlackList) > 0:
+            regex = "|".join(myBlackList)
+            process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=regex)
+        else:
+            process.addDatasetsFromMulticrab(opts.mcrab)
 
     # ================================================================================================
     # Selection customisations
@@ -162,15 +165,15 @@ def main():
                               doSystematicVariations = opts.doSystematics)
 
     # Perform variations (e.g. for optimisation)
-    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [1])
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
     # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "=="])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [3])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutDirection", [">="])
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
     # builder.addVariation("FakeBMeasurement.maxNumberOfBJetsInTopFit", [3, 4, 5])
-    builder.addVariation("TopSelection.ChiSqrCutValue", [10, 15, 20, 25, 30])
-    #builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])
+    # builder.addVariation("TopSelection.ChiSqrCutValue", [10, 15, 20, 25, 30])
+    # builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])
     
     # Build the builder
     builder.build(process, allSelections)

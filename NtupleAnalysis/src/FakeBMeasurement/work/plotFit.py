@@ -11,10 +11,21 @@ For more counter tricks and optios see also:
 HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
-./plotEwkVsQCD.py -m <pseudo_mcrab_directory> [opts]
+./plotTemplates.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotEwkVsQCD.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170602_235941_BJetsEE2_TopChiSqrVar_H2Var --mergeEWK --histoLevel Vital
+./plotTemplates.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170602_235941_BJetsEE2_TopChiSqrVar_H2Var --mergeEWK --histoLevel Vital
+
+Fit options:
+https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-th1fit-method
+"R" Use the range specified in the function range
+"B" Use this option when you want to fix one or more parameters and the fitting function is a predefined one, 
+    like polN, expo, landau, gaus. Note that in case of pre-defined functions some default initial values and limits are set.
+"L" Use log likelihood method (default is chi-square method). To be used when the histogram represents counts
+"W" Set all weights to 1 for non empty bins; ignore error bars
+"M" Improve fit results, by using the IMPROVE algorithm of TMinuit.
+"Q" To suppress output (Quiet Mode)
+"S" To return fit results (see "HLTausAnalysis/NtupleAnalysis/src/Auxiliary/src/HistoTools.C")
 '''
 
 #================================================================================================ 
@@ -38,6 +49,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
+import HiggsAnalysis.FakeBMeasurement.QCDNormalization as QCDNormalization
 
 #================================================================================================ 
 # Function Definition
@@ -164,7 +176,7 @@ def GetHistoKwargs(histoName):
         _opts["ymaxfactor"] = 1.2
 
     # Draw the histograms
-    if "trijetmass" in histoName.lower(): #alex
+    if "trijetmass" in histoName.lower():
         _opts["xmax"] = 800.0
 
     # Define plotting options    
@@ -173,7 +185,7 @@ def GetHistoKwargs(histoName):
               "opts"  : _opts,
               "opts2" : {"ymin": 0.0, "ymax": 2.0},
               "rebinX": _rebin,
-              "ratio" : True, 
+              "ratio" : False, 
               "cutBox": _cutBox,
               "cmsExtraText": "Preliminary",
               "ratioYlabel" : "Ratio",
@@ -273,12 +285,13 @@ def main(opts):
 
     # Do the template comparisons
     if opts.mergeEWK:
-        analysisTypes = ["Baseline", "Inverted"]
-        for analysis in analysisTypes:
-            for hName in getTopSelectionHistos(opts.histoLevel, analysis):
-                EWKvQCD(datasetsMgr, hName.split("/")[-1], analysis)
+        for hName in getTopSelectionHistos(opts.histoLevel, "Baseline"):
+            if "ldgtrijetmass_before" not in hName.lower():
+                continue
+            PlotBaselineVsInvertedTemplates(datasetsMgr, hName.split("/")[-1], addQcdBaseline=True)
+
     else:
-        Print("Cannot draw the EWKvQCD histograms without the option --mergeEWK. Exit", True)
+        Print("Cannot draw the histograms without the option --mergeEWK. Exit", True)
     return
 
 
@@ -292,146 +305,29 @@ def getTopSelectionHistos(histoLevel="Vital", analysisType="Baseline"):
 
     # Entire list
     hList = [        
-        "topSelection_%s/ChiSqr_Before" % (analysisType),
-        "topSelection_%s/ChiSqr_After" % (analysisType),
-        "topSelection_%s/NJetsUsedAsBJetsInFit_Before" % (analysisType),
-        "topSelection_%s/NJetsUsedAsBJetsInFit_After" % (analysisType),
-        "topSelection_%s/NumberOfFits_Before" % (analysisType),
-        "topSelection_%s/NumberOfFits_After" % (analysisType),
-        "topSelection_%s/TetrajetBJetPt_Before" % (analysisType),
-        "topSelection_%s/TetrajetBJetPt_After" % (analysisType),
-        "topSelection_%s/TetrajetBJetEta_Before" % (analysisType),
-        "topSelection_%s/TetrajetBJetEta_After" % (analysisType),
-        "topSelection_%s/TetrajetBJetBDisc_Before" % (analysisType),
-        "topSelection_%s/TetrajetBJetBDisc_After" % (analysisType),
-        "topSelection_%s/Tetrajet1Pt_Before" % (analysisType),
         "topSelection_%s/Tetrajet1Mass_Before" % (analysisType),
-        "topSelection_%s/Tetrajet1Eta_Before" % (analysisType),
-        "topSelection_%s/Tetrajet1Pt_After" % (analysisType),
         "topSelection_%s/Tetrajet1Mass_After" % (analysisType),
-        "topSelection_%s/Tetrajet1Eta_After" % (analysisType),
-        "topSelection_%s/Tetrajet2Pt_Before" % (analysisType),
         "topSelection_%s/Tetrajet2Mass_Before" % (analysisType),
-        "topSelection_%s/Tetrajet2Eta_Before" % (analysisType),
-        "topSelection_%s/Tetrajet2Pt_After" % (analysisType),
         "topSelection_%s/Tetrajet2Mass_After" % (analysisType),
-        "topSelection_%s/Tetrajet2Eta_After" % (analysisType),
-        "topSelection_%s/LdgTetrajetPt_Before" % (analysisType),
         "topSelection_%s/LdgTetrajetMass_Before" % (analysisType),
-        "topSelection_%s/LdgTetrajetEta_Before" % (analysisType),
-        "topSelection_%s/LdgTetrajetPt_After" % (analysisType),
         "topSelection_%s/LdgTetrajetMass_After" % (analysisType),
-        "topSelection_%s/LdgTetrajetEta_After" % (analysisType),
-        "topSelection_%s/SubldgTetrajetPt_Before" % (analysisType),
         "topSelection_%s/SubldgTetrajetMass_Before" % (analysisType),
-        "topSelection_%s/SubldgTetrajetEta_Before" % (analysisType),
-        "topSelection_%s/SubldgTetrajetPt_After" % (analysisType),
         "topSelection_%s/SubldgTetrajetMass_After" % (analysisType),
-        "topSelection_%s/SubldgTetrajetEta_After" % (analysisType),
-        "topSelection_%s/Trijet1Mass_Before" % (analysisType),
         "topSelection_%s/Trijet2Mass_Before" % (analysisType),
         "topSelection_%s/Trijet1Mass_After" % (analysisType),
         "topSelection_%s/Trijet2Mass_After" % (analysisType),
-        "topSelection_%s/Trijet1Pt_Before" % (analysisType),
-        "topSelection_%s/Trijet2Pt_Before" % (analysisType),
-        "topSelection_%s/Trijet1Pt_After" % (analysisType),
-        "topSelection_%s/Trijet2Pt_After" % (analysisType),
         "topSelection_%s/Trijet1DijetMass_Before" % (analysisType),
         "topSelection_%s/Trijet2DijetMass_Before" % (analysisType),
         "topSelection_%s/Trijet1DijetMass_After" % (analysisType),
         "topSelection_%s/Trijet2DijetMass_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetPt_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetPt_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetPt_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetPt_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetDEta_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetDEta_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetDEta_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetDEta_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetDPhi_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetDPhi_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetDPhi_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetDPhi_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetDR_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetDR_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetDR_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetDR_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDR_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDR_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDR_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDR_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDPhi_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDPhi_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDPhi_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDPhi_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDEta_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDEta_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetBJetDEta_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetBJetDEta_After" % (analysisType),
-        "topSelection_%s/LdgTrijetPt_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetPt_After" % (analysisType),
         "topSelection_%s/LdgTrijetMass_Before" % (analysisType),
         "topSelection_%s/LdgTrijetMass_After" % (analysisType),
-        "topSelection_%s/LdgTrijetJet1Pt_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetJet1Pt_After" % (analysisType),
-        "topSelection_%s/LdgTrijetJet1Eta_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetJet1Eta_After" % (analysisType),
-        "topSelection_%s/LdgTrijetJet1BDisc_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetJet1BDisc_After" % (analysisType),
-        "topSelection_%s/LdgTrijetJet2Pt_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetJet2Pt_After" % (analysisType),
-        "topSelection_%s/LdgTrijetJet2Eta_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetJet2Eta_After" % (analysisType),
-        "topSelection_%s/LdgTrijetJet2BDisc_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetJet2BDisc_After" % (analysisType),
-        "topSelection_%s/LdgTrijetBJetPt_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetBJetPt_After" % (analysisType),
-        "topSelection_%s/LdgTrijetBJetEta_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetBJetEta_After" % (analysisType),
-        "topSelection_%s/LdgTrijetBJetBDisc_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetBJetBDisc_After" % (analysisType),
-        "topSelection_%s/LdgTrijetDiJetPt_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetDiJetPt_After" % (analysisType),
-        "topSelection_%s/LdgTrijetDiJetEta_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetDiJetEta_After" % (analysisType),
         "topSelection_%s/LdgTrijetDiJetMass_Before" % (analysisType),
         "topSelection_%s/LdgTrijetDiJetMass_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetPt_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetPt_After" % (analysisType),
         "topSelection_%s/SubldgTrijetMass_Before" % (analysisType),
         "topSelection_%s/SubldgTrijetMass_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet1Pt_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet1Pt_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet1Eta_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet1Eta_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet1BDisc_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet1BDisc_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet2Pt_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet2Pt_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet2Eta_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet2Eta_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet2BDisc_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetJet2BDisc_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetBJetPt_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetBJetPt_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetBJetEta_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetBJetEta_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetBJetBDisc_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetBJetBDisc_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetDiJetPt_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetDiJetPt_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetDiJetEta_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetDiJetEta_After" % (analysisType),
         "topSelection_%s/SubldgTrijetDiJetMass_Before" % (analysisType),
         "topSelection_%s/SubldgTrijetDiJetMass_After" % (analysisType),
-        # "topSelection_%s/Trijet1MassVsChiSqr_Before" % (analysisType),
-        # "topSelection_%s/Trijet2MassVsChiSqr_Before" % (analysisType),
-        # "topSelection_%s/Trijet1MassVsChiSqr_After" % (analysisType),
-        # "topSelection_%s/Trijet2MassVsChiSqr_After" % (analysisType),
-        # "topSelection_%s/Trijet1DijetPtVsDijetDR_Before" % (analysisType),
-        # "topSelection_%s/Trijet2DijetPtVsDijetDR_Before" % (analysisType),
-        # "topSelection_%s/Trijet1DijetPtVsDijetDR_After" % (analysisType),
-        # "topSelection_%s/Trijet2DijetPtVsDijetDR_After" % (analysisType),
         ]
 
     hListFilter = []
@@ -463,49 +359,145 @@ def getHistos(datasetsMgr, datasetName, name1, name2):
     return [h1, h2]
 
 
-def EWKvQCD(datasetsMgr, histoName, analysisType=""):
-    Verbose("Plotting EWK Vs QCD unity-normalised histograms for %s" % analysisType)
+def getHisto(datasetsMgr, datasetName, histoName, analysisType):
+    Verbose("getHisto()", True)
 
-    # Sanity check
-    IsBaselineOrInverted(analysisType)
+    h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
+    h1.setName(analysisType + "-" + datasetName)
+    return h1
 
-    p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, "Data", "topSelection_Baseline/%s" % histoName, "topSelection_Inverted/%s" % histoName))
+
+def PlotBaselineVsInvertedTemplates(datasetsMgr, histoName, addQcdBaseline=False):
+    Verbose("Plotting EWK Vs QCD unity-normalised histograms")
+
+    # Create comparison plot
+    p1 = plots.ComparisonPlot(
+        getHisto(datasetsMgr, "Data", "topSelection_Baseline/%s" % histoName, "Baseline"),
+        getHisto(datasetsMgr, "EWK" , "topSelection_Baseline/%s" % histoName, "Baseline")
+        )
     p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
-    p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, "EWK", "topSelection_Baseline/%s" % histoName, "topSelection_Inverted/%s" % histoName) )
+    p2 = plots.ComparisonPlot(
+        getHisto(datasetsMgr, "Data", "topSelection_Inverted/%s" % histoName, "Inverted"),
+        getHisto(datasetsMgr, "EWK" , "topSelection_Inverted/%s" % histoName, "Inverted")
+        )
     p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
-    # Get histos    
-    data = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType+ " -Data")
-    EWK  = p2.histoMgr.getHisto(analysisType + "-EWK").getRootHisto().Clone(analysisType + "-EWK")
+    # Get Baseline histos
+    Data_baseline = p1.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone("Baseline-EWK")
+    EWK_baseline  = p1.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone("Baseline-EWK")
+    QCD_baseline  = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline-QCD")
+
+    # Get Inverted histos
+    Data_inverted = p2.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted-Data")
+    EWK_inverted  = p2.histoMgr.getHisto("Inverted-EWK").getRootHisto().Clone("Inverted-EWK")
+    QCD_inverted  = p2.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted-QCD")
+
     # Create QCD histos: QCD = Data-EWK
-    QCD = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType + "-QCD")
-    QCD.Add(EWK, -1)
+    QCD_baseline.Add(EWK_baseline, -1)
+    QCD_inverted.Add(EWK_inverted, -1)
 
     # Normalize histograms to unit area
-    QCD.Scale(1.0/QCD.Integral())
-    EWK.Scale(1.0/EWK.Integral())
-
-    # Create the final plot object
-    p = plots.ComparisonManyPlot(QCD, [EWK], saveFormats=[]) #[".C", ".png", ".pdf"])
-    p.setLuminosity(GetLumi(datasetsMgr))
+    if 0:
+        EWK_baseline.Scale(1.0/EWK_baseline.Integral())    
+        EWK_inverted.Scale(1.0/EWK_inverted.Integral())
+        QCD_baseline.Scale(1.0/QCD_baseline.Integral())
+        QCD_inverted.Scale(1.0/QCD_inverted.Integral())
         
-    # Apply styles
-    p.histoMgr.forHisto(analysisType + "-QCD" , styles.getQCDLineStyle() )
-    p.histoMgr.forHisto(analysisType + "-EWK" , styles.getAltEWKStyle() )
+    # Create the final plot object
+    if addQcdBaseline:
+        compareHistos = [EWK_baseline, QCD_baseline]
+    else:
+        compareHistos = [EWK_baseline]
+    p = plots.ComparisonManyPlot(QCD_inverted, compareHistos, saveFormats=[])
+    p.setLuminosity(GetLumi(datasetsMgr))
 
-    # Set draw style
-    p.histoMgr.setHistoDrawStyle(analysisType + "-QCD", "LP")
-    p.histoMgr.setHistoLegendStyle(analysisType + "-QCD", "LP")
 
-    # Set legend labels
-    p.histoMgr.setHistoLegendLabelMany({
-            analysisType + "-QCD" : analysisType + " (QCD)",
-            analysisType + "-EWK" : analysisType + " (EWK)",
-            })
+    binLabels = ["Inclusive"]
+    moduleInfoString = ""
+    FITMIN = 0
+    FITMAX = 1500
+
+    manager = QCDNormalization.QCDNormalizationManagerDefault(binLabels, opts.mcrab, moduleInfoString)
+
+    #=========================================================================================
+    # Create templates (EWK fakes, EWK genuine, QCD; data template is created by manager)
+    #=========================================================================================
+    template_EWKFakeB_Baseline     = manager.createTemplate("EWKFakeB_Baseline")
+    template_EWKFakeB_Inverted     = manager.createTemplate("EWKFakeB_Inverted")
+    template_EWKInclusive_Baseline = manager.createTemplate("EWKInclusive_Baseline")
+    template_EWKInclusive_Inverted = manager.createTemplate("EWKInclusive_Inverted")
+    template_QCD_Baseline          = manager.createTemplate("QCD_Baseline")
+    template_QCD_Inverted          = manager.createTemplate("QCD_Inverted")
+        
+    #=========================================================================================
+    # Inclusive EWK
+    #=========================================================================================
+    template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=400, norm=1, rejectPoints=0), FITMIN, FITMAX)
+    template_EWKInclusive_Baseline.setDefaultFitParam(defaultInitialValue=None,
+                                                      defaultLowerLimit=[1e0, 165, 20, -1, 0], #constant, mean, sigma, n, alpha, 
+                                                      defaultUpperLimit=[1, 180, 50,  0, 1e6])
+
+    #=========================================================================================
+    # Note that the same function is used for QCD only and QCD+EWK fakes
+    #=========================================================================================
+    template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=500, norm=1), FITMIN, FITMAX)
+    template_QCD_Inverted.setDefaultFitParam(defaultInitialValue=None,
+                                             defaultLowerLimit=[0.0, 200, 50, 0, 0],
+                                             defaultUpperLimit=[0.5, 300, 70, 3, 6e-3])
+
+
+    #=========================================================================================
+    # Set histograms to the templates
+    #=========================================================================================
+    template_EWKFakeB_Baseline.setHistogram(EWK_baseline, "Inclusive")
+    template_EWKFakeB_Inverted.setHistogram(EWK_inverted, "Inclusive")
+    template_EWKInclusive_Baseline.setHistogram(EWK_baseline, "Inclusive")
+    template_EWKInclusive_Inverted.setHistogram(EWK_inverted, "Inclusive")
+    template_QCD_Baseline.setHistogram(QCD_baseline, "Inclusive")
+    template_QCD_Inverted.setHistogram(QCD_inverted, "Inclusive")
+
+    #=========================================================================================
+    # Make plots of templates
+    #=========================================================================================
+    manager.plotTemplates()
+    
+    #=========================================================================================
+    # Fit individual templates to histogram "data_baseline", with custom fit options
+    #=========================================================================================
+    fitOptions = "E R M Q"#"R B L W M"
+    manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN, FITMAX)
+            
+#    # Apply styles
+#    p.histoMgr.forHisto("Baseline-EWK", styles.getBaselineStyle() )
+#    if addQcdBaseline:
+#        OBp.histoMgr.forHisto("Baseline-QCD", styles.getInvertedLineStyle() )
+#    p.histoMgr.forHisto("Inverted-QCD", styles.getInvertedStyle() )
+#OB
+#    # Set draw style
+#    p.histoMgr.setHistoDrawStyle("Baseline-EWK"  , "AP")
+#    p.histoMgr.setHistoLegendStyle("Baseline-EWK", "LP")
+#    if addQcdBaseline:
+#        p.histoMgr.setHistoDrawStyle("Baseline-QCD"  , "HIST")
+#        p.histoMgr.setHistoLegendStyle("Baseline-QCD", "FL")
+#    p.histoMgr.setHistoDrawStyle("Inverted-QCD"  , "AP")
+#    p.histoMgr.setHistoLegendStyle("Inverted-QCD", "LP")
+#
+#    # Set legend labels
+#    if addQcdBaseline:
+#        p.histoMgr.setHistoLegendLabelMany({
+#                "Baseline-EWK" : "EWK (Baseline)",
+#                "Baseline-QCD" : "QCD (Baseline)",
+#                "Inverted-QCD" : "QCD (Inverted)",
+#                })
+#    else:
+#        p.histoMgr.setHistoLegendLabelMany({
+#                "Baseline-EWK" : "EWK (Baseline)",
+#                "Inverted-QCD" : "QCD (Inverted)",
+#                })
 
     # Append analysisType to histogram name
-    saveName = histoName + "_" + analysisType
+    saveName = histoName
 
     # Draw the histograms #alex
     plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
@@ -514,20 +506,11 @@ def EWKvQCD(datasetsMgr, histoName, analysisType=""):
     # p.addCutBoxAndLine(cutValue=200, fillColor=ROOT.kRed, box=False, line=True, ***_kwargs)
 
     # Save plot in all formats
-    SavePlot(p, saveName, os.path.join(opts.saveDir, "EWKvQCD"), saveFormats=[".png",] ) 
+    #SavePlot(p, saveName, os.path.join(opts.saveDir, "Templates") ) 
     return
 
 
-def IsBaselineOrInverted(analysisType):
-    analysisTypes = ["Baseline", "Inverted"]
-    if analysisType not in analysisTypes:
-        raise Exception("Invalid analysis type \"%s\". Please select one of the following: %s" % (analysisType, "\"" + "\", \"".join(analysisTypes) + "\"") )
-    else:
-        pass
-    return
-
-
-def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
 
     # Create the name under which plot will be saved
