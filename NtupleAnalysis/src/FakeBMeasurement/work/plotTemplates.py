@@ -213,71 +213,62 @@ def GetDatasetsFromDir(opts):
     
 
 def main(opts):
-    Verbose("main function")
+    
+    #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"] 
+    optModes = ["OptChiSqrCutValue250", "OptChiSqrCutValue150", "OptChiSqrCutValue200", "OptChiSqrCutValue180", "OptChiSqrCutValue300"]
 
-    comparisonList = ["AfterStdSelections"]
+    if opts.optMode != None:
+        optModes = [opts.Mode]
+        
+    # For-loop: All opt Mode
+    for opt in optModes:
+        opts.optMode = opt
 
-    # Setup & configure the dataset manager 
-    datasetsMgr = GetDatasetsFromDir(opts)
-    datasetsMgr.updateNAllEventsToPUWeighted()
-    datasetsMgr.loadLuminosities() # from lumi.json
-    if opts.verbose:
-        datasetsMgr.PrintCrossSections()
-        datasetsMgr.PrintLuminosities()
+        # Setup & configure the dataset manager 
+        datasetsMgr = GetDatasetsFromDir(opts)
+        datasetsMgr.updateNAllEventsToPUWeighted()
+        datasetsMgr.loadLuminosities() # from lumi.json
+        if opts.verbose:
+            datasetsMgr.PrintCrossSections()
+            datasetsMgr.PrintLuminosities()
 
-    # Check multicrab consistency
-    # consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="CorrelationAnalysis")
-
-    # Custom Filtering of datasets 
-    # datasetsMgr.remove(filter(lambda name: "HplusTB" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
-    # datasetsMgr.remove(filter(lambda name: "ST" in name, datasetsMgr.getAllDatasetNames()))
+        if 0:
+            datasetsMgr.remove(filter(lambda name: "ST" in name, datasetsMgr.getAllDatasetNames()))
                
-    # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-    plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
    
-    # Get Integrated Luminosity
-    if opts.mcOnly:
-        # Determine integrated lumi
-        if opts.intLumi < 0.0:
-            opts.intLumi = GetLumi(datasetsMgr)
+        # Get Integrated Luminosity
+        if 0:
+            datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
+
+        # Re-order datasets (different for inverted than default=baseline)
+        newOrder = ["Data"]
+        newOrder.extend(GetListOfEwkDatasets())
+        datasetsMgr.selectAndReorder(newOrder)
+
+        # Set/Overwrite cross-sections
+        for d in datasetsMgr.getAllDatasets():
+            if "ChargedHiggs" in d.getName():
+                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
+
+        # Merge EWK samples
+        if opts.mergeEWK:
+            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+            plots._plotStyles["EWK"] = styles.getAltEWKStyle()
         else:
-            pass
-        # Remove data datasets
-        datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
+            Print("Cannot draw the histograms without the option --mergeEWK. Exit", True)            
+                    
+        # Print dataset information
+        datasetsMgr.PrintInfo()
 
-    # Re-order datasets (different for inverted than default=baseline)
-    newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
-    newOrder.extend(GetListOfEwkDatasets())
+        # Apply TDR style
+        style = tdrstyle.TDRStyle()
+        style.setOptStat(True)
 
-    if opts.mcOnly:
-        newOrder.remove("Data")
-    datasetsMgr.selectAndReorder(newOrder)
-
-    # Set/Overwrite cross-sections                                                                                                                                                                                             
-    for d in datasetsMgr.getAllDatasets():
-        if "ChargedHiggs" in d.getName():
-            datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
-
-    # Merge EWK samples
-    if opts.mergeEWK:
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
-        plots._plotStyles["EWK"] = styles.getAltEWKStyle()
-
-    # Print dataset information
-    datasetsMgr.PrintInfo()
-
-    # Apply TDR style
-    style = tdrstyle.TDRStyle()
-    style.setOptStat(True)
-
-
-    # Do the template comparisons
-    if opts.mergeEWK:
+        # Do the template comparisons
         for hName in getTopSelectionHistos(opts.histoLevel, "Baseline"):
-            PlotBaselineVsInvertedTemplates(datasetsMgr, hName.split("/")[-1], addQcdBaseline=True)
-
-    else:
-        Print("Cannot draw the histograms without the option --mergeEWK. Exit", True)
+            PlotBaselineVsInvertedTemplates(datasetsMgr, hName.split("/")[-1], addQcdBaseline=False)
     return
 
 
@@ -430,14 +421,23 @@ def PlotBaselineVsInvertedTemplates(datasetsMgr, histoName, addQcdBaseline=False
 
     # _kwargs = {"lessThan": True}
     # p.addCutBoxAndLine(cutValue=200, fillColor=ROOT.kRed, box=False, line=True, ***_kwargs)
+    
+    # Add text
+    text = opts.optMode.replace("OptChiSqrCutValue", "#chi^{2} #leq ")
+    histograms.addText(0.21, 0.85, text)
 
     # Save plot in all formats
-    SavePlot(p, saveName, os.path.join(opts.saveDir, "Templates"), saveFormats = [".C", ".png"])
+    saveDir = os.path.join(opts.saveDir, "Templates", opts.optMode)
+    SavePlot(p, saveName, saveDir, saveFormats = [".C", ".png", ".pdf"])
     return
 
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+
+    # Check that path exists
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
 
     # Create the name under which plot will be saved
     saveName = os.path.join(saveDir, plotName.replace("/", "_"))
@@ -478,7 +478,7 @@ if __name__ == "__main__":
     ANALYSISNAME = "FakeBMeasurement"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
-    OPTMODE      = ""#"OptChiSqrCutValue25"
+    OPTMODE      = None#"OptChiSqrCutValue25"
     BATCHMODE    = True
     PRECISION    = 3
     INTLUMI      = -1.0

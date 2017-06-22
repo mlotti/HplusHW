@@ -367,7 +367,7 @@ void FakeBMeasurement::process(Long64_t entry) {
   if (0) std::cout << "\nentry = " << entry << std::endl;
 
   //================================================================================================   
-  // 1) Apply trigger 
+  // Apply trigger 
   //================================================================================================   
   if (0) std::cout << "=== Trigger" << std::endl;
   if ( !(fEvent.passTriggerDecision()) ) return;
@@ -378,7 +378,7 @@ void FakeBMeasurement::process(Long64_t entry) {
   fCommonPlots.fillControlPlotsAfterTrigger(fEvent);
 
   //================================================================================================   
-  // 2) MET filters (to remove events with spurious sources of fake MET)
+  // MET filters (to remove events with spurious sources of fake MET)
   //================================================================================================   
   if (0) std::cout << "=== MET Filter" << std::endl;
   const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
@@ -388,7 +388,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
 
   //================================================================================================   
-  // 3) Primarty Vertex (Check that a PV exists)
+  // Primarty Vertex (Check that a PV exists)
   //================================================================================================   
   if (0) std::cout << "=== Vertices" << std::endl;
   if (nVertices < 1) return;
@@ -398,7 +398,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
   
   //================================================================================================   
-  // 4) Trigger SF
+  // Trigger SF
   //================================================================================================   
   // if (0) std::cout << "=== MET Trigger SF" << std::endl;
   // const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
@@ -410,7 +410,7 @@ void FakeBMeasurement::process(Long64_t entry) {
   
 
   //================================================================================================   
-  // 5) Electron veto (Orthogonality)
+  // Electron veto (Orthogonality)
   //================================================================================================   
   if (0) std::cout << "=== Electron veto" << std::endl;
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
@@ -418,7 +418,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
 
   //================================================================================================
-  // 6) Muon veto (Orthogonality)
+  // Muon veto (Orthogonality)
   //================================================================================================
   if (0) std::cout << "=== Muon veto" << std::endl;
   const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
@@ -426,7 +426,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
 
   //================================================================================================   
-  // 7) Tau Veto (HToTauNu Orthogonality)
+  // Tau Veto (HToTauNu Orthogonality)
   //================================================================================================   
   if (0) std::cout << "=== Tau-Veto" << std::endl;
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
@@ -434,7 +434,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
 
   //================================================================================================
-  // 8) Jet selection
+  // Jets
   //================================================================================================
   if (0) std::cout << "=== Jet selection" << std::endl;
   const JetSelection::Data jetData = fJetSelection.analyzeWithoutTau(fEvent);
@@ -449,29 +449,19 @@ void FakeBMeasurement::process(Long64_t entry) {
   
 
   //================================================================================================  
-  // 9) BJet selection
+  // BJets
   //================================================================================================
   if (0) std::cout << "=== BJet selection" << std::endl;
   // Disable histogram filling and counter with silent analyze
   const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
-  // std::cout << "=== BJet selection (after silentAnalyze)\n\tbjetData.passedSelection() = " << bjetData.passedSelection() << ", bjetData.getNumberOfSelectedBJets() = " << bjetData.getNumberOfSelectedBJets() << std::endl;
 
-
-  // std::cout << "=== BJets:" << std::endl;
-  // for (auto &bjet: bjetData.getSelectedBJets()) 
-  //  {
-  //    std::cout << "\tpt , eta , bdisc = " << bjet.pt() << ", " << bjet.eta() << ", " << bjet.bjetDiscriminator() << std::endl;
-  //  }
-
-
-  // There are no bjets pasOBsing our selection criteria
+  // Baseline (Bjets criteria pass)
   if (bjetData.passedSelection())
     {
       doBaselineAnalysis(jetData, bjetData, nVertices);
     }
-  else 
+  else // Inverted (Bjets criteria fail)
     {
-      
       // Apply requirent on selected b-jets 
       bool passSelected = cfg_NumberOfBJets.passedCut(bjetData.getNumberOfSelectedBJets());
       if (!passSelected) return;
@@ -496,7 +486,6 @@ void FakeBMeasurement::process(Long64_t entry) {
       // Do the inverted analysis
       doInvertedAnalysis(jetData, bjetData, nVertices); 
     }
-
   return;
 }
 
@@ -511,7 +500,7 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
   cBaselineBTaggingCounter.increment();
 
   //================================================================================================  
-  // 10) BJet SF  
+  // BJet SF  
   //================================================================================================
   if (0) std::cout << "=== Baseline: BJet SF" << std::endl;
   if (fEvent.isMC()) 
@@ -523,19 +512,19 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
 
 
   //================================================================================================
-  // 11) Topology selection
-  //================================================================================================
-  if (0) std::cout << "=== Baseline: Topology selection" << std::endl;
-  const TopologySelection::Data TopologyData = fBaselineTopologySelection.analyze(fEvent, jetData);
-  if (!TopologyData.passedSelection()) return;
-
-
-  //================================================================================================
-  // 12) Top selection
+  // Top
   //================================================================================================
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
   const TopSelection::Data TopData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData);
   if (!TopData.passedSelection()) return;
+
+
+  //================================================================================================
+  // Topology
+  //================================================================================================
+  if (0) std::cout << "=== Baseline: Topology selection" << std::endl;
+  const TopologySelection::Data TopologyData = fBaselineTopologySelection.analyze(fEvent, jetData);
+  if (!TopologyData.passedSelection()) return;
 
 
   //================================================================================================
@@ -591,7 +580,7 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   cInvertedBTaggingCounter.increment();
 
   //================================================================================================  
-  // 10) BJet SF (if I have b-jets in the inverted region)
+  // BJet SF (if I have b-jets in the inverted region)
   //================================================================================================
   if (0) std::cout << "=== Inverted: BJet SF" << std::endl;
   if (fEvent.isMC()) 
@@ -601,22 +590,19 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   // std::cout << "\tSF = " << bjetData.getBTaggingScaleFactorEventWeight() << " (fEvent.isMC() = " << fEvent.isMC() << ")" << std::endl;
   cInvertedBTaggingSFCounter.increment();
 
+  //================================================================================================
+  // Top
+  //================================================================================================
+  if (0) std::cout << "=== Inverted: Top selection" << std::endl;
+  const TopSelection::Data TopData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData, cfg_MaxNumberOfBJetsInTopFit);
+  if (!TopData.passedSelection()) return;
 
   //================================================================================================
-  // 11) Topology selection
+  // Topology
   //================================================================================================
   if (0) std::cout << "=== Inverted: Topology selection" << std::endl;
   const TopologySelection::Data TopologyData = fInvertedTopologySelection.analyze(fEvent, jetData);
   if (!TopologyData.passedSelection()) return;
-
-
-  //================================================================================================
-  // 12) Top selection
-  //================================================================================================
-  if (0) std::cout << "=== Inverted: Top selection" << std::endl;
-    const TopSelection::Data TopData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData, cfg_MaxNumberOfBJetsInTopFit);
-  if (!TopData.passedSelection()) return;
-
 
   //================================================================================================
   // All cuts passed
@@ -626,7 +612,7 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
 
   //================================================================================================
   // Fill final plots
-  //================================================================================================
+   //================================================================================================
   // Need to figure out what to do here. Also, need protetion for cases where no bjet-cands are present (possible!)
   if (0)
     {

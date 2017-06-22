@@ -56,17 +56,17 @@ class colors:
     '''      
     
     colordict = {
-                'RED'     :'\033[91m',
-                'GREEN'   :'\033[92m',
-                'BLUE'    :'\033[34m',
-                'GRAY'    :'\033[90m',
-                'WHITE'   :'\033[00m',
-                'ORANGE'  :'\033[33m',
-                'CYAN'    :'\033[36m',
-                'PURPLE'  :'\033[35m',
-                'LIGHTRED':'\033[91m',
-                'PINK'    :'\033[95m',
-                'YELLOW'  :'\033[93m',
+                'RED'      :'\033[91m',
+                'GREEN'    :'\033[92m',
+                'BLUE'     :'\033[34m',
+                'GRAY'     :'\033[90m',
+                'WHITE'    :'\033[00m',
+                'ORANGE'   :'\033[33m',
+                'CYAN'     :'\033[36m',
+                'PURPLE'   :'\033[35m',
+                'LIGHTRED' :'\033[91m',
+                'PINK'     :'\033[95m',
+                'YELLOW'   :'\033[93m',
                 }
 
     if sys.stdout.isatty():
@@ -123,16 +123,14 @@ class FitFunction:
             "DoubleGaussian": 6,
             "SumFunction": 5,
             "RayleighFunction": 2,
-            #"QCDFunction": 7,
             "EWKFunctionInv": 4,
             "QCDEWKFunction": 7,
             "QCDFunctionFixed": 8,
             "FitDataWithQCDAndFakesAndGenuineTaus": 3,
             "FitDataWithQCDAndInclusiveEWK": 2,
             "FitDataWithFakesAndGenuineTaus": 2,
-            #
-            "EWKFunction": 5,
-            "QCDFunction": 5,
+            "EWKFunction": 10, #5
+            "QCDFunction": 7,
             "CrystalBall": 5,
         }
 
@@ -177,7 +175,7 @@ class FitFunction:
     def ErrorFunction(self,x,par):
         return 0.5*(1 + ROOT.TMath.Erf(par[0]*(x[0] - par[1])))
 
-    def ExpFunction(self,x,par):
+    def ExpFunction(self,x,par):        
         if (x[0] > 280 and x[0] < 300) or x[0] > 360:
             ROOT.TF1.RejectPoint()
             return 0
@@ -198,36 +196,135 @@ class FitFunction:
         return norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0]))))
 
     def BreitWigner(self, x, par):
+        '''
+        https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
+        https://root.cern.ch/doc/v606/group__PdfFunc.html#ga674162ea051bf687243264996d046f73
+
+        2 parameters: gamma, mu
+
+        breitwigner_pdf(x, gamma=Decay Width, mu=Resonance Mass)
+        '''
         return par[0]*ROOT.TMath.BreitWigner(x[0], par[1], par[2])
 
     def CrystalBall(self, x, par):
+        '''
+        https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
+
+        Predefined Probability Density Functions (PDF) in ROOT:
+        https://root.cern.ch/doc/v608/group__PdfFunc.html
+        https://root.cern.ch/doc/v606/group__PdfFunc.html#ga6d2dcba56ea7438dab7e47e8c06c83f6
+
+        4 parameters: alpha, N, sigma, mu
+
+        crystalball(x, alpha=Gaussian Tail, N=Normalisation, sigma=Mass Resolution, mu=Mass mean value)
+        '''
         return par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])
-                
-    #===== Composite functions for template fits
+
+    def LogNormal(self, x, par):
+        '''
+        https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
+        https://root.cern.ch/doc/v608/namespaceTMath.html#a0503deae555bc6c0766801e4642365d2
+
+        Computes the density of LogNormal distribution at point x.
+        Double_t TMath::LogNormal(Double_t x, Double_t sigma, Double_t theta = 0, Double_t m = 1)
+        
+        Variable X has lognormal distribution if Y=Ln(X) has normal distribution:
+        sigma = shape parameter (and is the standard deviation of the log of the distribution)
+        theta = location parameter, corresponds approximately to the most probable value. 
+        m     = scale parameter (and is also the median of the distribution)
+        '''
+        return par[0]*ROOT.TMath.LogNormal(x[0], par[1], par[2], par[3])
+
+
+    def LogNormalPDF(self, x, par):
+        '''
+        https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
+        https://root.cern.ch/doc/v608/group__PdfFunc.html#ga20ece8c1bb9f81af22ed65dba4a1b025
+
+        Probability density function of the lognormal distribution.
+        double ROOT::Math::lognormal_pdf(double x, double m, double s, double x0 = 0)
+        For detailed description see http://mathworld.wolfram.com/LogNormalDistribution.html
+
+        Parameters:
+        m  = scale parameter (and is also the median of the distribution)
+        s  = shape parameter (and is the standard deviation of the log of the distribution)
+        x0 = location parameter, corresponds approximately to the most probable value. 
+        For x0 = 0, sigma = 1, the x_mpv = -0.22278
+        '''
+        return par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2], par[3])
+    
+    def MyLogNormal(self, x, par):
+        '''
+        '''
+        return ROOT.TMath.Exp(-(ROOT.TMath.Log(x/par[1]))**2/(2*ROOT.TMath.Log(par[2]))**2)/(ROOT.TMath.Sqrt(2*ROOT.TMath.Pi()*ROOT.TMath.Log(par[2])*x))
+
     def QCDFunction(self, x, par, boundary, norm):
         '''
+        https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
+        
         x and par are standard root way to define the fit function
         from x only x[0] is used; it is the x-variable.        
         par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
         ''' 
-        if x[0] < boundary:
-            # return self._additionalNormFactor*norm*(self.RayleighFunction(x,par,1)+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
-            return self._additionalNormFactor*norm*par[0]*ROOT.TMath.Landau(x[0], par[1],par[2])
-        return self._additionalNormFactor*norm*par[3]*ROOT.TMath.Exp(-x[0]*par[4])
+#        if x[0] < boundary:
+#            return self._additionalNormFactor*norm*par[0]*ROOT.TMath.Landau(x[0], par[1],par[2])
+#        return self._additionalNormFactor*norm*par[3]*ROOT.TMath.Exp(-x[0]*par[4])
+        #return self._additionalNormFactor*norm*par[0]*ROOT.TMath.LogNormal(x[0], par[1], par[2], par[3])
+        #return self._additionalNormFactor*norm*par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2], par[3])
+        #return self._additionalNormFactor*norm*self.LogNormal(x, par)
+        #return self._additionalNormFactor*norm*self.LogNormalPDF(x, par) 
+        #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.lognormal_pdf(x[0], par[2], par[1]) + par[3]*ROOT.TMath.Exp(-x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], par[6]))
+        #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.LogNormal(x[0], par[1], par[2], par[3]) + par[4]*ROOT.TMath.Exp(-x[0]*par[5]) + (1-par[0]-par[4])*ROOT.TMath.Gaus(x[0], par[6], par[7]))
+
+        #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.LogNormal(x[0], par[1], par[2], par[3]) + par[4]*ROOT.TMath.Exp(x[0]*par[5]) + (1-par[0]-par[4])*ROOT.TMath.Gaus(x[0], par[6], par[7]))
+        return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.LogNormal(x[0], par[1], 0, par[2]) + par[3]*ROOT.TMath.Exp(x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], par[6]))
+        #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Exp(-(ROOT.TMath.Log(x[0]/par[1]))**2/(2*ROOT.TMath.Log(par[2]))**2)/(ROOT.TMath.Sqrt(2*ROOT.TMath.Pi()*ROOT.TMath.Log(par[2])*x[0])) + par[3]*ROOT.TMath.Exp(-x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], par[6]))
+    
 
     def EWKFunction(self,x, par, boundary, norm=1, rejectPoints=0):
         '''
         x and par are standard root way to define the fit function
         from x only x[0] is used; it is the x-variable.        
         par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
+        
+        Landau(x, mpv, widthParam), ROOT.TMath.Gaus(x[0], sigma, mean), ROOT.TMath.BreitWigner(x[0], decayWidth, mass)
         ''' 
-        return self._additionalNormFactor*norm*(self.CrystalBall(x, par))
+        # return self._additionalNormFactor*norm*(self.CrystalBall(x, par))
+        # return self._additionalNormFactor*norm*(par[0] * ROOT.TMath.Landau(x[0], par[1], par[2]) * ROOT.TMath.Gaus(x[0], par[1]) * ROOT.TMath.BreitWigner(x[0], par[2], par[1]))
+        # return self._additionalNormFactor*norm*(par[0] * ROOT.TMath.Landau(x[0], par[1], par[2]) * ROOT.TMath.Gaus(x[0], par[3], par[1]) * ROOT.TMath.BreitWigner(x[0], par[4], par[1]))
+        # if x[0] < boundary:
+        #     return self._additionalNormFactor*norm*( par[0] * ROOT.TMath.BreitWigner(x[0], par[2], par[1]) * ROOT.Math.crystalball_function(x[0], par[3], par[4], par[2], par[1]) )
+        # else:
+        #     return par[6]*ROOT.TMath.Exp(-x[0]*par[5])
+        #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Landau(x[0],par[1], par[2]))*(par[3]*ROOT.TMath.BreitWigner(x[0], par[4], par[5]))*(par[6]*ROOT.Math.crystalball_function(x[0], par[7], par[8], par[9], par[10]) )
+        #return self._additionalNormFactor*norm*( (par[0]*ROOT.TMath.Landau(x[0],par[1], par[2])) 
+        #                                         + (par[3]*ROOT.TMath.BreitWigner(x[0], par[4], par[5])) 
+        #                                         + (par[6]*ROOT.Math.crystalball_function(x[0], par[7], par[8], par[9], par[10]) ) 
+        #                                         )
+        #return self._additionalNormFactor*norm*( (par[0]*ROOT.TMath.Landau(x[0],par[1], par[2])) 
+        #                                         + (par[3]*ROOT.TMath.BreitWigner(x[0], par[4], par[5])) 
+        #                                         + (par[6]*ROOT.Math.crystalball_function(x[0], par[7], par[8], par[9], par[10]) ) 
+        #                                         )
 
-    def EWKFunctionInv(self,x,par,boundary,norm=1,rejectPoints=0):
+        #return self._additionalNormFactor*norm*par[0]*(ROOT.Math.crystalball_function(x[0], par[3], par[4], par[2], par[1]) 
+        #                                               + ROOT.TMath.BreitWigner(x[0], par[2], par[1])
+        #                                               + ROOT.TMath.Landau(x[0], par[1], par[2]) )
+
+        # Best so far:
+        return self._additionalNormFactor*norm*(par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])
+                                                       + par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7])
+                                                       + (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9]) )
+
+        #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])*par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7])
+        #                                               + (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9]) )                                                      
+
+
+    def EWKFunctionInv(self,x, par, boundary, norm=1, rejectPoints=0):
         if x[0] < boundary:
             return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Landau(x[0],par[1],par[2]))
         C = self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Landau(boundary,par[1],par[2]))*ROOT.TMath.Exp(boundary*par[3])
         return C*ROOT.TMath.Exp(-x[0]*par[3])
+
 
     def QCDEWKFunction(self,x,par,norm):
         if par[0]+par[1]*x[0] == 0.0:
@@ -238,22 +335,22 @@ class FitFunction:
         return self._additionalNormFactor*par[0]*(ROOT.TMath.Gaus(x[0],par[1],par[2],1)+par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1)+par[6]*ROOT.TMath.Exp(-par[7]*x[0]))
     
     #===== Composite functions for fitting data
-    ## QCD, fake taus, and genuine taus as separate templates
+    ## QCD, fake taus, and genuine b as separate templates
     def FitDataWithQCDAndFakesAndGenuineTaus(self, x, par,
-            QCDFitFunction, parQCD, QCDnorm,
-            EWKFakeTausFitFunction, parEWKFakeTaus, EWKFakeTausNorm,
-            EWKGenuineTausFitFunction, parEWKGenuineTaus, EWKGenuineTausNorm):
-        nQCD =            QCDFitFunction(x, parQCD, norm=QCDnorm)
-        nEWKFakeTaus =    EWKFakeTausFitFunction(x, parEWKFakeTaus, norm=EWKFakeTausNorm)
+                                             QCDFitFunction, parQCD, QCDnorm,
+                                             EWKFakeTausFitFunction, parEWKFakeTaus, EWKFakeTausNorm,
+                                             EWKGenuineTausFitFunction, parEWKGenuineTaus, EWKGenuineTausNorm):
+        nQCD = QCDFitFunction(x, parQCD, norm=QCDnorm)
+        nEWKFakeTaus = EWKFakeTausFitFunction(x, parEWKFakeTaus, norm=EWKFakeTausNorm)
         nEWKGenuineTaus = EWKGenuineTausFitFunction(x, parEWKGenuineTaus, norm=EWKGenuineTausNorm) 
         return par[0]*(par[1]*nQCD + par[2]*nEWKFakeTaus + (1.0 - par[1] - par[2])*nEWKGenuineTaus)
 
-    ## QCD and inclusive EWK as separate templates
-    def FitDataWithQCDAndInclusiveEWK(self, x, par,
-            QCDFitFunction, parQCD, QCDnorm,
-            EWKInclusiveFunction, parEWK, EWKNorm):
-        nQCD =            QCDFitFunction(x, parQCD, norm=QCDnorm)
-        nEWK =    EWKInclusiveFunction(x, parEWK, norm=EWKNorm)
+    def FitDataWithQCDAndInclusiveEWK(self, x, par, QCDFitFunction, parQCD, QCDnorm, EWKInclusiveFunction, parEWK, EWKNorm):
+        '''
+        QCD and inclusive EWK as separate templates
+        '''
+        nQCD = QCDFitFunction(x, parQCD, norm=QCDnorm)
+        nEWK = EWKInclusiveFunction(x, parEWK, norm=EWKNorm)
         return par[0]*(par[1]*nQCD + (1.0 - par[1])*nEWK)
 
     ## QCD and fake tau templates as one inclusive template
@@ -301,15 +398,15 @@ def getFormattedTemplateName(name):
     '''
     Helper function to plot template names in a more understandable wa
     '''
-    formattedNames = {'EWKFakeTaus_Baseline': '#splitline{EWK+t#bar{t} fake taus}{Baseline selection}', 
-                      'EWKGenuineTaus_Baseline': '#splitline{EWK+t#bar{t} genuine taus}{Baseline selection}', 
-                      'EWKFakeTaus_Inverted': '#splitline{EWK+t#bar{t} fake taus}{Inverted selection}',
-                      'EWKGenuineTaus_Inverted': '#splitline{EWK+t#bar{t} genuine taus}{Inverted selection}',
-                      'EWKInclusive_Baseline': '#splitline{EWK+t#bar{t} inclusive}{Baseline selection}',
-                      'EWKInclusive_Inverted': '#splitline{EWK+t#bar{t} inclusive}{Inverted selection}',
-                      'QCD_Baseline': '#splitline{Fake b}{Baseline selection}',
-                      'QCD_Inverted': '#splitline{Fake b}{Inverted selection}',
-                      'data': '#splitline{Data}{Baseline selection}'}
+    formattedNames = {'EWKFakeTaus_Baseline'   : '#splitline{EWK+t#bar{t} fake b-jets}{Baseline}', 
+                      'EWKGenuineTaus_Baseline': '#splitline{EWK+t#bar{t} genuine b-jets}{Baseline}', 
+                      'EWKFakeTaus_Inverted'   : '#splitline{EWK+t#bar{t} fake b-jets}{Inverted}',
+                      'EWKGenuineTaus_Inverted': '#splitline{EWK+t#bar{t} genuine b-jets}{Inverted}',
+                      'EWKInclusive_Baseline'  : '#splitline{EWK+t#bar{t}}{Baseline}',
+                      'EWKInclusive_Inverted'  : '#splitline{EWK+t#bar{t}}{Inverted}',
+                      'QCD_Baseline'           : '#splitline{Fake b}{Baseline}',
+                      'QCD_Inverted'           : '#splitline{Fake b}{Inverted}',
+                      'data'                   : '#splitline{Data}{Baseline}'}
     if name in formattedNames.keys():
         return formattedNames[name]
     else:
@@ -322,7 +419,7 @@ class QCDNormalizationTemplate:
     '''
     Template holder for QCD measurement normalization
     '''
-    def __init__(self, name, plotDirName, quietMode=False):
+    def __init__(self, name, plotDirName, quietMode=True):
         self._verbose     = False
         self._name        = name
         self._plotDirName = plotDirName
@@ -427,6 +524,7 @@ class QCDNormalizationTemplate:
         '''
         return self._fitParErrors
 
+
     def printFitParamSettings(self):
         '''
         Prints the parameter settings (for debugging or info)
@@ -448,7 +546,7 @@ class QCDNormalizationTemplate:
         rows     = []
         txtAlign = "{:^5} {:^12} {:>12} {:>12}"
         header   = txtAlign.format("Par", "Initial", "Low Bound", "High Bound")
-        hLine    = "="*45
+        hLine    = "="*50
         rows.append(hLine)
         rows.append(header)
         rows.append(hLine)
@@ -622,7 +720,7 @@ class QCDNormalizationTemplate:
         header = True
         for k in range(0, self._histo.GetNbinsX()+2):
             if self._histo.GetBinContent(k) < 0.0:
-                self.Print("Template '%s': converted in bin %d a negative value (%f) to zero."%(self._name, k, self._histo.GetBinContent(k)), header)
+                self.Verbose("Template '%s': converted in bin %d a negative value (%f) to zero."%(self._name, k, self._histo.GetBinContent(k)), header)
                 self._histo.SetBinContent(k, 0.0)
                 self._histo.SetBinError(k, 1.0)
                 header = False
@@ -717,34 +815,6 @@ class QCDNormalizationTemplate:
             self._fitParamUpperLimits[modifiedBinLabel] = upperLimit
         return
             
-    def PrintEventsInHistoAndFit(self):
-        self.Verbose("PrintEventsInHistoAndFit()")
-        if self._quietMode:
-            return
-        
-        # Definitions
-        align  = "{:<15} {:>20} {:>20} {:>20}"
-        header = align.format("Value", "Histogram", "Fitted", "Histogram-Fitted")
-        hLine  = "="*80
-        diff   = self.getNeventsFromHisto(False)-self._nEventsFromFit
-        diffErrorUp   = errorPropagation.errorPropagationForSum(self.getNeventsFromHisto(False), self.getNeventsErrorFromHisto(False),  self._nEventsFromFit, self._nEventsTotalErrorFromFitUp)
-        diffErrorDown = errorPropagation.errorPropagationForSum(self.getNeventsFromHisto(False), self.getNeventsErrorFromHisto(False),  self._nEventsFromFit, self._nEventsTotalErrorFromFitDown)
-
-        # Construct the table
-        rows = []
-        rows.append(hLine)
-        rows.append(header)
-        rows.append(hLine)
-        rows.append(align.format("Events"   , "%.1f" % self.getNeventsFromHisto(False)     , "%.1f" % self._nEventsFromFit, "%.1f" % (diff)))
-        rows.append(align.format("Error (+)", "%.1f" % self.getNeventsErrorFromHisto(False), "%.1f" % self._nEventsTotalErrorFromFitUp, "%.1f" % (diffErrorUp)))
-        rows.append(align.format("Error (-)", "%.1f" % self.getNeventsErrorFromHisto(False), "%.1f" % self._nEventsTotalErrorFromFitDown, "%.1f" % (diffErrorDown)))
-        rows.append("")
-
-        # Print information
-        for r in rows:
-            self.Print(r, False)
-        return
-
     def CreateTF1(self, prefix):
         self.Verbose("CreateTF1()")
 
@@ -761,8 +831,9 @@ class QCDNormalizationTemplate:
         rows.append("")
 
         # Print information
-        for r in rows:
-            self.Print(r, False)
+        if self._verbose:
+            for r in rows:
+                self.Print(r, False)
 
         # Create the function
         tf1 = ROOT.TF1(fName, self._fitFunction, self._fitRangeMin, self._fitRangeMax, self._fitFunction.getNParam())
@@ -777,54 +848,109 @@ class QCDNormalizationTemplate:
         https://root.cern.ch/doc/v608/classTFitResult.html
         '''
         self.Verbose("PrintFitResults()")
-        r.Print("V")
+        
+        # Sanity check
         if r.IsEmpty():
             raise Exception("Error: The TFitResultPtr is empty!")
 
+        # Print full information of fit including covariance matrix and correlation
+        if 0:
+            r.Print("V")
+
+        # Define the table format
         lines  = [] 
-        align  = "{:<15} {:>10} {:^4} {:<10} {:<20}"
-        header = align.format("Variable", "Value", "", "Error", "Description")
-        hLine  = "="*70
+        align  = "{:<15} {:>15} {:>15} {:^15} {:<60}"
+        header = align.format("Variable", "Value", "Error", "Error (%)", "Description")
+        hLine  = "="*120
         lines.append(hLine)
         lines.append(header)
         lines.append(hLine)
 
         # Get the information
-        chi2     = r.Chi2()
-        dof      = r.Ndf()
-        redChi2  = r.Chi2()/dof
-        edm      = r.Edm()
-        nCalls   = r.NCalls()
-        status   = r.Get().Status()
-        fParams  = r.NFreeParameters()
-        lines.append( align.format("Chi2"       , "%0.1f" % chi2   , "", "", "Fit value") )
-        lines.append( align.format("D.O.F"      , "%0.0f" % dof    , "", "", "Number of degrees of freedom") )
-        lines.append( align.format("Chi2/d.o.f" , "%0.1f" % redChi2, "", "", "Reduced chi2 (=1 for good fits)") )
-        lines.append( align.format("E.D.M"      , "%0.7f" % edm    , "", "", "Expected distance from minimum") )
-        lines.append( align.format("# Calls"    , "%0.0f" % nCalls , "", "", "Number of function calls to find minimum") )
-        lines.append( align.format("Free Params", "%0.0f" % fParams, "", "", "Total number of free parameters") )
+        chi2       = r.Chi2()
+        dof        = r.Ndf()
+        redChi2    = r.Chi2()/dof
+        edm        = r.Edm()
+        nCalls     = r.NCalls()
+        status     = r.Status() # See: https://root.cern.ch/root/html/ROOT__Minuit2__Minuit2Minimizer.html#ROOT__Minuit2__Minuit2Minimizer:Minimize
+        fParams    = r.NFreeParameters()
+        covMStatus = r.CovMatrixStatus()
+        isValid    = r.IsValid()
+        if isValid:
+            result = "TRUE"
+        else:
+            result = "FALSE"
+        nHisto     = self.getNeventsFromHisto(False)
+        nHistoUp   = self.getNeventsErrorFromHisto(False)
+        nHistoDown = self.getNeventsErrorFromHisto(False)
+        nFit       = self.getNeventsFromFit()
+        nFitUp     = self.getNeventsTotalErrorFromFit()[0]
+        nFitDown   = self.getNeventsTotalErrorFromFit()[1]
+        nDiff      = nHisto-nFit
+        nDiffUp    = errorPropagation.errorPropagationForSum(nHisto, nHistoUp  , nFit, nFitUp)
+        nDiffDown  = errorPropagation.errorPropagationForSum(nHisto, nHistoDown, nFit, nFitDown)
+        if nFit>0:
+            nRatio     = self.getNeventsFromHisto(False) / self.getNeventsFromFit()
+            nRatioUp   = errorPropagation.errorPropagationForDivision(nHisto, nHistoUp  , nFit, nFitUp)
+            nRatioDown = errorPropagation.errorPropagationForDivision(nHisto, nHistoDown, nFit, nFitDown)
+        else:
+            self.Verbose("Cannot divide by zero for item \"%s\%. Setting ratio to zero" % (key), True)
+            nRatio      = 0
+            nRatioUp    = 0
+            nRatioDown  = 0
+
+        # Construct the table
+        lines.append( align.format("Chi2"       , "%0.1f" % chi2      , "", "", "Fit value") )
+        lines.append( align.format("D.O.F"      , "%0.0f" % dof       , "", "", "Number of degrees of freedom") )
+        lines.append( align.format("Chi2/d.o.f" , "%0.1f" % redChi2   , "", "", "Reduced chi2 (=1 for good fits)") )
+        lines.append( align.format("E.D.M"      , "%0.7f" % edm       , "", "", "Expected distance from minimum") )
+        lines.append( align.format("# Calls"    , "%0.0f" % nCalls    , "", "", "Number of function calls to find minimum") )
+        lines.append( align.format("Free Params", "%0.0f" % fParams   , "", "", "Total number of free parameters") )
+        lines.append( align.format("Status"     , "%0.0f" % status    , "", "", "Minimizer status code") )
+        lines.append( align.format("Cov Matrix" , "%0.0f" % covMStatus, "", "", "0=not calculated, 1=approx, 2=made pos def, 3=accurate") )
+        lines.append( align.format("IsValid"    , "%s"    % (result)  , "", "", "True=Fit successful, False=Fit unsuccessful") )
+        lines.append( align.format("Fit Range"  , "%s-%s" % (self._fitRangeMin, self._fitRangeMax), "", "", "Lower/Upper bounds to fit the function") )
+        #lines.append("")
+
         # For-loop: All parameters
         for i, p in enumerate(r.Parameters()):
-            lines.append( align.format(r.GetParameterName(i), "%0.6f" % p, "+/-", "%0.6f" % r.Error(i) , "isBound = %s, isFixed = %s, " %  (r.IsParameterBound(i), r.IsParameterFixed(i)) ) )
+            pName   = r.GetParameterName(i)
+            pValue  = "%0.5f" % p
+            pError  = "%0.5f" % r.Error(i)
+            pErrorP = 0
+            if p != 0:
+                pErrorP = "%.2f" % ((r.Error(i)/p)*100)
+            isBound = r.IsParameterBound(i)
+            isFixed = r.IsParameterFixed(i)
+            lines.append( align.format(pName, pValue, pError, pErrorP, "isBound = %s, isFixed = %s" %  (isBound, isFixed) ) )
+        #lines.append("")
 
+        # Events Info
+        nHistoUpP = 0
+        if nHisto > 0:
+            nHistoUpP = (nHistoUp/nHisto)*100
+        nFitUpP = 0
+        if nFit > 0:
+            nFitUpP = (nFitUp/nFit)*100
+        nDiffUpP = 0
+        if nDiff > 0:
+            nDiffUpP = (nDiffUp/nDiff)*100
+        nRatioUpP = 0
+        if nRatio > 0:
+            nRatioUpP = (nRatioUp/nRatio)*100
+        lines.append(align.format("Events (Histo)", "%.3f" % nHisto,  "%.3f" % nHistoUp, "%.2f" % nHistoUpP, "Absolute uncertainty quoted (up=down)") )
+        lines.append(align.format("Events (Fit)"  , "%.3f" % nFit  ,  "%.3f" % nFitUp  , "%.2f" % nFitUpP  , "Total fit parameter uncertainty (up)") )
+        lines.append(align.format("Events (Diff)" , "%.3f" % nDiff ,  "%.3f" % nDiffUp , "%.2f" % nDiffUpP , "Error-propagation (up)") )
+        lines.append(align.format("Events (Ratio)", "%.3f" % nRatio,  "%.3f" % nRatioUp, "%.2f" % nRatioUp , "Error-propagation (up)") )
+        lines.append(hLine)
+        lines.append("")
         for l in lines:
             self.Print(l, False)
-            
-#Minimizer is Minuit / MigradImproved
-#NCalls                    =          701
-#p0                        =     0.180368   +/-   0.000320882   (limited)
-#p1                        =      254.726   +/-   0.237151      (limited)
-#p2                        =      65.4726   +/-   0.11007       (limited)
-#p3                        =     0.154747   +/-   0.00229182    (limited)
-#p4                        =   0.00570205   +/-   2.14755e-05   (limited)
 
-#        area        = fitResultObject.Parameter(0)
-#        areaError   = fitResultObject.ParError(0)
-#        mean        = fitResultObject.Parameter(1)
-#        meanError   = fitResultObject.ParError(1)
-#        sigma       = fitResultObject.Parameter(2)
-#        sigmaError  = fitResultObject.ParError(2)
-        sys.exit()
+        # Sanity check
+        if not isValid:
+            raise Exception("Error: The TFitResultPtr is not valid! The fit failed...")
+
         return
 
     def doFit(self, fitOptions="S", createPlot=True):
@@ -837,7 +963,8 @@ class QCDNormalizationTemplate:
         if self._fitFunction == None:
             return
         else:
-            if not self._quietMode:
+            #if not self._quietMode:
+            if self._verbose:
                 self.printFitParamSettings()
 
             # Define fit object
@@ -880,13 +1007,13 @@ class QCDNormalizationTemplate:
             self.Verbose("Create explicitly canvas to get rid of warning message")
             canvas = ROOT.TCanvas()
 
-            self.Print("Fitting function \"%s\" to histogram \"%s\" with fitOptions \"%s\"" % (fit.GetName(), h.GetName(), fitOptions) )
+            self.Verbose("Fitting function \"%s\" to histogram \"%s\" with fitOptions \"%s\"" % (fit.GetName(), h.GetName(), fitOptions) )
             print 
             fitResultObject = h.Fit(fit, fitOptions)
             if self._verbose:
                 fitResultObject.Print("V")
-            self.PrintFitResults(fitResultObject)
-
+            
+            self.Verbose("Storing fit parameters and their associated errors")
             self._fitParameters = fit.GetParameters()
             self._fitParErrors  = fit.GetParErrors()
             
@@ -898,20 +1025,27 @@ class QCDNormalizationTemplate:
             self._nEventsTotalErrorFromFitUp   = orthogonalizer.getTotalFitParameterUncertaintyUp()
             self._nEventsTotalErrorFromFitDown = orthogonalizer.getTotalFitParameterUncertaintyDown()
 
-            self.Print("Sanity check! Events in histogram \"%s\" and in fit function \"%s\"" % (self._histo.GetName(), fit.GetName()))
-            self.PrintEventsInHistoAndFit()
+            self.Print("Results of fitting function \"%s\" to histogram \"%s\" (binLabel=\"%s\")" % (self._fitFunction.getName(), self._histo.GetName(), self._binLabel), True) #self._name
+            self.PrintFitResults(fitResultObject)
                     
             # Do a plot of the fit
             if createPlot:
                 xTitle = "m_{jjb} (GeV/c^{2})"
-                yTitle = "Events (normalized to unity)"                
+                yTitle = "Events (normalized to unity)"
+                yLog   = False #alex
+                if yLog:
+                    yMaxFactor = 4
+                else:
+                    yMaxFactor = 1.1
+
                 ROOT.gStyle.SetOptFit(0)
                 ROOT.gStyle.SetOptStat(0)
                 h.SetLineColor(ROOT.kBlack)
+
                 # fit QCD plots with blue, EWK+ttbar with green, everything else with red
                 if "EWK" in h.GetName():
                     fit.SetLineColor(ROOT.kGreen+2)
-                elif "QCDinv" in h.GetName():
+                elif "QCD" in h.GetName():
                     fit.SetLineColor(ROOT.kBlue)
                 else:
                     fit.SetLineColor(ROOT.kRed)
@@ -919,13 +1053,15 @@ class QCDNormalizationTemplate:
                 fit.SetLineStyle(2)
                 plot = plots.PlotBase()
                 plot.histoMgr.appendHisto(histograms.Histo(h,h.GetName()))
+                h.SaveAs(self._plotDirName + "/" + h.GetName() + ".root")
+
                 plot.histoMgr.appendHisto(histograms.Histo(fit, "fit"))
-                plot.createFrame(self._plotDirName+"/fit_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 1e-5, "ymaxfactor": 4.})
+                plot.createFrame(self._plotDirName+"/fit_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 1e-5, "ymaxfactor": yMaxFactor})
                 plot.getFrame().GetXaxis().SetTitle(xTitle)
                 plot.getFrame().GetYaxis().SetTitle(yTitle)
-                histograms.addText(0.48,0.85, getFormattedTemplateName(self._name))
-                histograms.addText(0.48,0.77, getFormattedBinLabelString(self._binLabel))
-                plot.getPad().SetLogy(True)
+                histograms.addText(0.65, 0.85, getFormattedTemplateName(self._name))
+                histograms.addText(0.65 ,0.77, getFormattedBinLabelString(self._binLabel))
+                plot.getPad().SetLogy(yLog)
                 histograms.addStandardTexts(cmsTextPosition="outframe")
                 plot.draw()
                 plot.save()
@@ -943,12 +1079,20 @@ class QCDNormalizationManagerBase:
         self._verbose   = False
         self._templates = {}
         self._binLabels = binLabels
-        myPath = "%s/normalisationPlots" % resultDirName
+        myPath          = "%s/normalisationPlots" % resultDirName
+
+        # No optimisation mode
+        if moduleInfoString == "":
+            moduleInfoString = "Default" 
+        
         if not os.path.exists(myPath):
-            self.Print("Creating directory %s" % (myPath) )
+            self.Print("Creating directory %s" % (myPath), True )
             os.mkdir(myPath)
         self._plotDirName = "%s/normalisationPlots/%s" % (resultDirName, moduleInfoString)
+
+        # If already exists, Delete an entire directory tree
         if os.path.exists(self._plotDirName):
+            self.Print("Removing  directory tree %s" % (self._plotDirName), True )
             shutil.rmtree(self._plotDirName)
         os.mkdir(self._plotDirName)
         self._requiredTemplateList = []
@@ -1290,9 +1434,13 @@ class QCDNormalizationManagerBase:
         histograms.addStandardTexts(cmsTextPosition="outframe")
         plot.draw()
         plot.save()
+        return
 
-    ## Helper method to be called from parent class when calculating norm.coefficients
     def _getSanityCheckTextForFractions(self, binLabel, label, fraction, fractionError, nBaseline, nCalculated):
+        '''
+        Helper method to be called from parent class when calculating norm.coefficients
+        '''
+        self.Verbose("_getSanityCheckTextForFractions()", True)
         if nCalculated > 0:
             ratio = nBaseline / nCalculated
         else:
@@ -1301,7 +1449,15 @@ class QCDNormalizationManagerBase:
         lines.append("    Fitted %s fraction: %f +- %f"%(label, fraction, fractionError))
         lines.append("      Sanity check: ratio = %.3f: baseline = %.1f vs. fitted = %.1f"%(ratio, nBaseline, nCalculated))
         self._commentLines.extend(lines)
+
+        # Definitions
+        lines  = []  
+        align_ = "{:^80}" 
+        align  = "{:<15} {:>20} {:>20} {:>20} {:>20}"
+        header = align.format("Value", "Histogram", "Fitted", "Histogram-Fitted", "Ratio")
+        hLine  = "="*100
         return lines
+
     
     def _getSanityCheckTextForFit(self, binLabel):
         '''
@@ -1321,6 +1477,7 @@ class QCDNormalizationManagerBase:
             item = self._templates[key]
             if item.isFittable():
                 # Save info
+                name       = item.getName()
                 nHisto     = item.getNeventsFromHisto(False)
                 nHistoUp   = item.getNeventsErrorFromHisto(False)
                 nHistoDown = item.getNeventsErrorFromHisto(False)
@@ -1334,31 +1491,42 @@ class QCDNormalizationManagerBase:
                 ratioUp    = 0
                 ratioDown  = 0
                 if item.getNeventsFromFit()>0:
-                    self.Print("Cannot divide by zero. Setting ratio to zero", True)
                     ratio     = item.getNeventsFromHisto(False) / item.getNeventsFromFit()
                     ratioUp   = errorPropagation.errorPropagationForDivision(nHisto, nHistoUp  , nFit, nFitUp)
                     ratioDown = errorPropagation.errorPropagationForDivision(nHisto, nHistoDown, nFit, nFitDown)
+                else:
+                    self.Print("Cannot divide by zero for item \"%s\%. Setting ratio to zero" % (key), True)
 
                 # Construct the table
-                lines.append(align_.format("Bin: " + binLabel) )
+                #lines.append(align_.format("Bin: " + binLabel) )
+                lines.append( "{:^100}".format(name) )
                 lines.append(hLine)
                 lines.append(header)
                 lines.append(hLine)
-                lines.append(align.format("Events"   , "%.1f" % nHisto    , "%.1f" % nFit    , "%.1f" % diff    , "%.2f" % ratio    ) )
-                lines.append(align.format("Error (+)", "%.1f" % nHistoUp  , "%.1f" % nFitUp  , "%.1f" % diffUp  , "%.2f" % ratioUp  ) )
-                lines.append(align.format("Error (-)", "%.1f" % nHistoDown, "%.1f" % nFitDown, "%.1f" % diffDown, "%.2f" % ratioDown) )
+                lines.append(align.format("Events"   , "%.1f" % nHisto    , "%.1f" % nFit    , "%.1f" % diff    , "%.3f" % ratio    ) )
+                lines.append(align.format("Error (+)", "%.1f" % nHistoUp  , "%.1f" % nFitUp  , "%.1f" % diffUp  , "%.3f" % ratioUp  ) )
+                lines.append(align.format("Error (-)", "%.1f" % nHistoDown, "%.1f" % nFitDown, "%.1f" % diffDown, "%.3f" % ratioDown) )
                 lines.append("")
                 #lines.append("... Template fit sanity check (%s): Ratio = %.3f: Nevents in histogram = %.1f +- %.1f vs. fitted = %.1f + %.1f - %.1f"% (item.getName(), ratio, nHisto, nHistoUp, nFit, nFitUp, nFitDown))
                 self._addDqmEntry(binLabel, "TmplFit::%s"%item.getName(), ratio-1, 0.03, 0.10)
 
         self._commentLines.extend(lines)
-
         return lines
 
-    ## Helper method to be called from parent class when calculating norm.coefficients
-    def _checkOverallNormalization(self, binLabel, value, err):
+    def _checkOverallNormalization(self, binLabel, value, err): #iro-
+        '''
+        Helper method to be called from parent class when calculating norm.coefficients
+        '''
+        self.Verbose("_checkOverallNormalization()")
+
+        # Definitions
         lines = []
-        lines.append("    Fitted overall normalization factor for purity (should be 1.0) = %f +- %f"%(value, err))
+        msg   = "Fitted overall normalization factor for purity (should be 1.0) = %f +- %f"%(value, err)
+        lines.append(msg)
+        print colors.GREEN
+        self.Print(msg, True)
+        print colors.WHITE
+
         self._addDqmEntry(binLabel, "OverallNormalization(par0)", value-1.0, 0.03, 0.10)
         self._commentLines.extend(lines)
         return lines
@@ -1402,16 +1570,16 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         templatesToBeFitted = [qcdTemplate, ewkInclusiveTemplate]
         self._checkInputValidity(templatesToBeFitted)
         
-        self.Print("Fitting templates", True)
+        self.Verbose("Fitting templates", True)
         self._fitTemplates(fitOptions)
         
         #===== Create a temporary template for data
-        self.Print("Fitting templates to data (default method)", True)
+        self.Verbose("Fitting templates to data (default method)", True)
         dataTemplate = QCDNormalizationTemplate("data", self._plotDirName)
         binLabel = self._templates[self._requiredTemplateList[0]].getBinLabel()
         dataTemplate.setHistogram(dataHisto, binLabel)
         dataTemplate.plot()
-        dataTemplate.setFitter(FitFunction("FitDataWithQCDAndInclusiveEWK",
+        dataTemplate.setFitter(FitFunction("FitDataWithQCDAndInclusiveEWK", #iro-
                                            QCDFitFunction = qcdTemplate.getFitFunction(),
                                            parQCD = qcdTemplate.getFittedParameters(),
                                            QCDnorm = 1.0,
@@ -1441,25 +1609,27 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         # should one divide the fractions with dataTemplate.getFittedParameters()[0] ??? (right now not because the correction is so small)
         nQCDFitted = dataTemplate.getFittedParameters()[1]*dataTemplate.getNeventsFromHisto(False)
 
-
-        print "*"*100
-        align = "{:^100}"
-        print align.format("Results")
-        print "*"*100
+        #==== Store results in list
         lines = []
-
-        self._commentLines.append("\nBin: %s"%binLabel)
+        self.Verbose("Sanity Check: Text for fit")
         lines.extend(self._getSanityCheckTextForFit(binLabel))
 
-        lines.extend(self._getSanityCheckTextForFractions(binLabel, "QCD", 
-            dataTemplate.getFittedParameters()[1], dataTemplate.getFittedParameterErrors()[1],
-            self._templates["QCD_Baseline"].getNeventsFromHisto(False), nQCDFitted))
+        self.Verbose("Sanity Check: Text for Fractions")
+        fraction      = dataTemplate.getFittedParameters()[1]
+        fractionError = dataTemplate.getFittedParameterErrors()[1]
+        nBaseline     = self._templates["QCD_Baseline"].getNeventsFromHisto(False)
+        nCalculated   = nQCDFitted
+        lines.extend(self._getSanityCheckTextForFractions(binLabel, "QCD",  fraction, fractionError, nBaseline, nCalculated))
 
-        lines.extend(self._checkOverallNormalization(binLabel, dataTemplate.getFittedParameters()[0], dataTemplate.getFittedParameterErrors()[0]))
-        for line in lines:
-            print line
-        
+        self.Verbose("Sanity Check: Overall Normalization")
+        value = dataTemplate.getFittedParameters()[0]
+        error = dataTemplate.getFittedParameterErrors()[0]
+        lines.extend(self._checkOverallNormalization(binLabel, value, error) ) #iro-
 
+        #==== Print results line-by-line
+        if 0:
+            for line in lines:
+                print line
 
         #===== Normalization factor for QCD (from fit)
         qcdNormFactor = nQCDFitted / self._templates["QCD_Inverted"].getNeventsFromHisto(False)

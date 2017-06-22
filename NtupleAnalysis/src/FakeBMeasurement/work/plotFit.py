@@ -11,13 +11,15 @@ For more counter tricks and optios see also:
 HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
-./plotTemplates.py -m <pseudo_mcrab_directory> [opts]
+./plotFit.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotTemplates.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170602_235941_BJetsEE2_TopChiSqrVar_H2Var --mergeEWK --histoLevel Vital
+./plotFit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170602_235941_BJetsEE2_TopChiSqrVar_H2Var --mergeEWK --histoLevel Vital
+./plotFit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170619_020728_BJetsGE2_TopChiSqrVar_AllSamples --mergeEWK -o "OptChiSqrCutValue140" -e "QCD-b|Charged"
 
 Fit options:
 https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-th1fit-method
+"E" Better error estimation using MINOS technique
 "R" Use the range specified in the function range
 "B" Use this option when you want to fix one or more parameters and the fitting function is a predefined one, 
     like polN, expo, landau, gaus. Note that in case of pre-defined functions some default initial values and limits are set.
@@ -86,7 +88,8 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop"]#, "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    #return ["TT"]
 
 
 def GetHistoKwargs(histoName):
@@ -96,103 +99,37 @@ def GetHistoKwargs(histoName):
 
     _opts = {}
 
-    if "pt" in histoName.lower():
-        _format = "%0.0f GeV/c"
-        _rebin  = 2
-        _logY   = True
-        _cutBox = None
-        _opts["xmax"] = 800.0
-    elif "eta" in histoName.lower():
-        _format = "%0.2f"
-        _rebin  = 1
-        _logY   = True
-        _cutBox = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-    elif "bdisc" in histoName.lower():
-        _format = "%0.2f"
-        _rebin  = 1
-        _logY   = True
-        _cutBox = {"cutValue": 0.8484, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-    elif "deta" in histoName.lower():
-        _format = "%0.2f"
-        _rebin  = 1
-        _logY   = True
-        _cutBox = None
-    elif "dphi" in histoName.lower():
-        _format = "%0.2f"
-        _rebin  = 1
-        _logY   = True
-        _cutBox = None
-    elif "dr" in histoName.lower():
-        _format = "%0.2f"
-        _rebin  = 1
-        _logY   = True
-        _cutBox = None
-    elif "dijetmass" in histoName.lower():
-        _format = "%0.0f GeV/c^{2}"
-        _rebin  = 1
-        _logY   = True
-        _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-    elif "tetrajetmass" in histoName.lower():
-        _format = "%0.0f GeV/c^{2}"
-        _rebin  = 5
-        _logY   = True
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 3000.0
-    elif "tetrajet2mass" in histoName.lower():
-        _format = "%0.0f GeV/c^{2}"
-        _rebin  = 5
-        _logY   = True
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 3000.0
-    elif "mass" in histoName.lower():
+    if "mass" in histoName.lower():
         _format = "%0.0f GeV/c^{2}"
         _rebin  = 1
         _logY   = False
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-    elif "numberoffits" in histoName.lower():
-        _format = "%0.0f"
-        _rebin  = 1
-        _logY   = True
-        _cutBox = None
-    elif "njets" in histoName.lower():
-        _format = "%0.0f"
-        _rebin  = 1
-        _logY   = True 
-        _cutBox = _cutBox = {"cutValue": 3, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-    elif "chisqr" in histoName.lower():
-        _format = "%0.0f"
-        _rebin  = 10
-        _logY   = True
-        _cutBox = _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        #_opts["xmax"] = 800.0
     else:
         raise Exception("The kwargs have not been prepared for the histogram with name \"%s\"." % (histoName) )
 
     # Customise options (main pad) for with/whitout logY scale 
     if _logY:
-        _opts["ymin"] = 2e-4
+        _opts["ymin"] = 1e-5
         _opts["ymaxfactor"] = 5
     else:
         _opts["ymin"] = 0.0
         _opts["ymaxfactor"] = 1.2
 
-    # Draw the histograms
-    if "trijetmass" in histoName.lower():
-        _opts["xmax"] = 800.0
-
     # Define plotting options    
-    kwargs = {"ylabel": "Arbitrary Units / %s" % (_format),
-              "log"   : _logY,
-              "opts"  : _opts,
-              "opts2" : {"ymin": 0.0, "ymax": 2.0},
-              "rebinX": _rebin,
-              "ratio" : False, 
-              "cutBox": _cutBox,
+    kwargs = {"ylabel"      : "Arbitrary Units / %s" % (_format),
+              "log"         : _logY,
+              "opts"        : _opts,
+              "opts2"       : {"ymin": 0.0, "ymax": 2.0},
+              "rebinX"      : _rebin,
+              "ratio"       : False, 
+              "cutBox"      : _cutBox,
               "cmsExtraText": "Preliminary",
               "ratioYlabel" : "Ratio",
               "ratioInvert" : False, 
               "addCmsText"  : True,
               "createLegend": {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
-               }
+              }
     return kwargs
 
 
@@ -227,136 +164,81 @@ def GetDatasetsFromDir(opts):
 def main(opts):
     Verbose("main function")
 
-    comparisonList = ["AfterStdSelections"]
+    #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"]
+    optModes = ["OptChiSqrCutValue100"]
+    if opts.optMode != None:
+        optModes = [opts.Mode]
 
-    # Setup & configure the dataset manager 
-    datasetsMgr = GetDatasetsFromDir(opts)
-    datasetsMgr.updateNAllEventsToPUWeighted()
-    datasetsMgr.loadLuminosities() # from lumi.json
-    if opts.verbose:
-        datasetsMgr.PrintCrossSections()
-        datasetsMgr.PrintLuminosities()
+    # For-loop: All opt Mode
+    for opt in optModes:
+        opts.optMode = opt
 
-    # Check multicrab consistency
-    # consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="CorrelationAnalysis")
+        # Setup & configure the dataset manager 
+        datasetsMgr = GetDatasetsFromDir(opts)
+        datasetsMgr.updateNAllEventsToPUWeighted()
+        datasetsMgr.loadLuminosities() # from lumi.json
+        if opts.verbose:
+            datasetsMgr.PrintCrossSections()
+            datasetsMgr.PrintLuminosities()
 
-    # Custom Filtering of datasets 
-    # datasetsMgr.remove(filter(lambda name: "HplusTB" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
-    # datasetsMgr.remove(filter(lambda name: "ST" in name, datasetsMgr.getAllDatasetNames()))
-               
-    # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-    plots.mergeRenameReorderForDataMC(datasetsMgr) 
-   
-    # Get Integrated Luminosity
-    if opts.mcOnly:
-        # Determine integrated lumi
-        if opts.intLumi < 0.0:
-            opts.intLumi = GetLumi(datasetsMgr)
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        
+        # Remove datasets
+        datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
+        datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
+        datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
+        
+        # Re-order datasets (different for inverted than default=baseline)
+        newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+        newOrder.extend(GetListOfEwkDatasets())
+        datasetsMgr.selectAndReorder(newOrder)
+
+        # Set/Overwrite cross-sections
+        for d in datasetsMgr.getAllDatasets():
+            if "ChargedHiggs" in d.getName():
+                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
+
+        # Merge EWK samples
+        if opts.mergeEWK:
+            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+            plots._plotStyles["EWK"] = styles.getAltEWKStyle()
         else:
-            pass
-        # Remove data datasets
-        datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
-
-    # Re-order datasets (different for inverted than default=baseline)
-    newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
-    newOrder.extend(GetListOfEwkDatasets())
-
-    if opts.mcOnly:
-        newOrder.remove("Data")
-    datasetsMgr.selectAndReorder(newOrder)
-
-    # Set/Overwrite cross-sections                                                                                                                                                                                             
-    for d in datasetsMgr.getAllDatasets():
-        if "ChargedHiggs" in d.getName():
-            datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
-
-    # Merge EWK samples
-    if opts.mergeEWK:
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
-        plots._plotStyles["EWK"] = styles.getAltEWKStyle()
-
-    # Print dataset information
-    datasetsMgr.PrintInfo()
-
-    # Apply TDR style
-    style = tdrstyle.TDRStyle()
-    style.setOptStat(True)
-
-
-    # Do the template comparisons
-    if opts.mergeEWK:
-        for hName in getTopSelectionHistos(opts.histoLevel, "Baseline"):
-            if "ldgtrijetmass_before" not in hName.lower():
-                continue
-            PlotBaselineVsInvertedTemplates(datasetsMgr, hName.split("/")[-1], addQcdBaseline=True)
-
-    else:
-        Print("Cannot draw the histograms without the option --mergeEWK. Exit", True)
+            Print("Cannot draw the histograms without the option --mergeEWK. Exit", True)
+            sys.exit()
+            
+        # Print dataset information
+        datasetsMgr.PrintInfo()
+        
+        # Apply TDR style
+        style = tdrstyle.TDRStyle()
+        style.setOptStat(True)
+        
+        # Do the fit
+        hName = "topSelection_Baseline/LdgTrijetMass_After" #"topSelection_Baseline/LdgTrijetMass_Before"
+        PlotAndFitTemplates(datasetsMgr, hName.split("/")[-1], True, opts)
+        
     return
 
 
-def getTopSelectionHistos(histoLevel="Vital", analysisType="Baseline"):
-    '''
-    Returns the list of histograms created by
-    the TopSelection class
-    '''
-    
-    Verbose("Creating histogram list for %s" % analysisType, True)
-
-    # Entire list
-    hList = [        
-        "topSelection_%s/Tetrajet1Mass_Before" % (analysisType),
-        "topSelection_%s/Tetrajet1Mass_After" % (analysisType),
-        "topSelection_%s/Tetrajet2Mass_Before" % (analysisType),
-        "topSelection_%s/Tetrajet2Mass_After" % (analysisType),
-        "topSelection_%s/LdgTetrajetMass_Before" % (analysisType),
-        "topSelection_%s/LdgTetrajetMass_After" % (analysisType),
-        "topSelection_%s/SubldgTetrajetMass_Before" % (analysisType),
-        "topSelection_%s/SubldgTetrajetMass_After" % (analysisType),
-        "topSelection_%s/Trijet2Mass_Before" % (analysisType),
-        "topSelection_%s/Trijet1Mass_After" % (analysisType),
-        "topSelection_%s/Trijet2Mass_After" % (analysisType),
-        "topSelection_%s/Trijet1DijetMass_Before" % (analysisType),
-        "topSelection_%s/Trijet2DijetMass_Before" % (analysisType),
-        "topSelection_%s/Trijet1DijetMass_After" % (analysisType),
-        "topSelection_%s/Trijet2DijetMass_After" % (analysisType),
-        "topSelection_%s/LdgTrijetMass_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetMass_After" % (analysisType),
-        "topSelection_%s/LdgTrijetDiJetMass_Before" % (analysisType),
-        "topSelection_%s/LdgTrijetDiJetMass_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetMass_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetMass_After" % (analysisType),
-        "topSelection_%s/SubldgTrijetDiJetMass_Before" % (analysisType),
-        "topSelection_%s/SubldgTrijetDiJetMass_After" % (analysisType),
-        ]
-
-    hListFilter = []
-    if histoLevel == "Vital":
-        for h in hList:
-            if any(substring in h for substring in ["Pt", "BDisc", "Eta", "Dijet", "DiJet", "Fit", "Trijet1", "Trijet2", "Tetrajet1", "Tetrajet2", "ChiSqr"]):
-                continue
-            else:
-                hListFilter.append(h)
-    elif histoLevel == "Informative":
-        for h in hList:
-            if any(substring in h for substring in ["Pt", "BDisc", "Eta", "Dijet", "DiJet", "Fit", "Tetrajet1", "Tetrajet2"]):
-                continue
-            else:
-                hListFilter.append(h)
-    elif histoLevel == "Debug":
-        hListFilter = hList
-    return hListFilter
-
-
-def getHistos(datasetsMgr, datasetName, name1, name2):
+def getHistos(datasetsMgr, hName):
     Verbose("getHistos()", True)
 
-    h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(name1)
-    h1.setName("Baseline" + "-" + datasetName)
+    baseline = "topSelection_Baseline/"
+    inverted = "topSelection_Inverted/"
 
-    h2 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(name2)
-    h2.setName("Inverted" + "-" + datasetName)
-    return [h1, h2]
+    h1 = datasetsMgr.getDataset("Data").getDatasetRootHisto(baseline+histoName)
+    h1.setName("Baseline-Data")
+
+    h2 = datasetsMgr.getDataset("EWK").getDatasetRootHisto(baseline+histoName)
+    h2.setName("Baseline-EWK")
+
+    h3 = datasetsMgr.getDataset("Data").getDatasetRootHisto(inverted+histoName)
+    h3.setName("Inverted-Data")
+
+    h4 = datasetsMgr.getDataset("EWK").getDatasetRootHisto(baseline+histoName)
+    h4.setName("Inverted-EWK")
+    return [h1, h2, h3, h4]
 
 
 def getHisto(datasetsMgr, datasetName, histoName, analysisType):
@@ -367,8 +249,8 @@ def getHisto(datasetsMgr, datasetName, histoName, analysisType):
     return h1
 
 
-def PlotBaselineVsInvertedTemplates(datasetsMgr, histoName, addQcdBaseline=False):
-    Verbose("Plotting EWK Vs QCD unity-normalised histograms")
+def PlotAndFitTemplates(datasetsMgr, histoName, addQcdBaseline, opts):
+    Verbose("PlotAndFitTemplates()")
 
     # Create comparison plot
     p1 = plots.ComparisonPlot(
@@ -383,15 +265,16 @@ def PlotBaselineVsInvertedTemplates(datasetsMgr, histoName, addQcdBaseline=False
         )
     p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
+
     # Get Baseline histos
-    Data_baseline = p1.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone("Baseline-EWK")
-    EWK_baseline  = p1.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone("Baseline-EWK")
-    QCD_baseline  = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline-QCD")
+    Data_baseline = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline_Data")
+    EWK_baseline  = p1.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone("Baseline_EWK")
+    QCD_baseline  = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline_QCD")
 
     # Get Inverted histos
-    Data_inverted = p2.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted-Data")
-    EWK_inverted  = p2.histoMgr.getHisto("Inverted-EWK").getRootHisto().Clone("Inverted-EWK")
-    QCD_inverted  = p2.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted-QCD")
+    Data_inverted = p2.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted_Data")
+    EWK_inverted  = p2.histoMgr.getHisto("Inverted-EWK").getRootHisto().Clone("Inverted_EWK")
+    QCD_inverted  = p2.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted_QCD")
 
     # Create QCD histos: QCD = Data-EWK
     QCD_baseline.Add(EWK_baseline, -1)
@@ -413,8 +296,11 @@ def PlotBaselineVsInvertedTemplates(datasetsMgr, histoName, addQcdBaseline=False
     p.setLuminosity(GetLumi(datasetsMgr))
 
 
+    #=========================================================================================
+    # Start Fit process
+    #=========================================================================================
     binLabels = ["Inclusive"]
-    moduleInfoString = ""
+    moduleInfoString = opts.optMode
     FITMIN = 0
     FITMAX = 1500
 
@@ -433,18 +319,49 @@ def PlotBaselineVsInvertedTemplates(datasetsMgr, histoName, addQcdBaseline=False
     #=========================================================================================
     # Inclusive EWK
     #=========================================================================================
-    template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=400, norm=1, rejectPoints=0), FITMIN, FITMAX)
+    # par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4]) +
+    # par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7]) +
+    # (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9])
+
+    template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=200, norm=1, rejectPoints=0), FITMIN, FITMAX)
+    #template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=200, norm=1, rejectPoints=0), FITMIN, 800)
     template_EWKInclusive_Baseline.setDefaultFitParam(defaultInitialValue=None,
-                                                      defaultLowerLimit=[1e0, 165, 20, -1, 0], #constant, mean, sigma, n, alpha, 
-                                                      defaultUpperLimit=[1, 180, 50,  0, 1e6])
+                                                      #                   p0   p1     p2     p3     p4   p5    p6    p7      p8      p9
+                                                      defaultLowerLimit=[0.0, 150.0,  0.0, -5.0, 0.0, 0.0, 150.0,   0.0, 100.0,    0.0],
+                                                      defaultUpperLimit=[1.0, 300.0, 50.0,  0.0, 1.0, 1.0, 200.0, 100.0, 200.0,  100.0])
+                                                      #defaultLowerLimit=[0.0, 160.0,   0.0, -1.0, 0.0],
+                                                      #defaultUpperLimit=[1.0, 180.0,  60.0,  0.0, 1e6])
 
     #=========================================================================================
     # Note that the same function is used for QCD only and QCD+EWK fakes
     #=========================================================================================
-    template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=500, norm=1), FITMIN, FITMAX)
+    #par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2]) + par[3]*ROOT.TMath.Exp(-x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], part[6])
+    
+    # 0 =   0.8489  for coeff of lognorm
+    # 1 =   1.42978 for logshape
+    # 2 = 238.546   for logmean
+    #
+    # 3 =   0.047   for coeff of exp
+    # 4 =  -0.0048  for exp
+    #
+    # 5 =  45.486   for gaus sigma
+    # 6 = 204.6     for gaus mean
+
+    #my lognormal is of the form:
+    #lognorm(x,m0,k) = exp{-[log(x/m0)]^2/[2*log(k)]^2}/sqrt[2pi*log(k)*x]
+    #and differs than the Math::lognormal_pdf parametrization which takes as arguments lognormal(x,m,s,x0)
+    #where m = log(m0) and s=log(k)
+    #TMath::LogNormal  return Math::lognormal_pdf
+    #my exponential is   exp(x*a)  so the sign comes from the fit
+    #and my gaussian is exp[-0.5*mean*mean/(sigma*sigma)]
+
+    # Double_t LogNormal(x, sigma, theta = 0, m = 1)
+
+    #template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=350, norm=1), FITMIN, FITMAX)
+    template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=350, norm=1), 100, 800)
     template_QCD_Inverted.setDefaultFitParam(defaultInitialValue=None,
-                                             defaultLowerLimit=[0.0, 200, 50, 0, 0],
-                                             defaultUpperLimit=[0.5, 300, 70, 3, 6e-3])
+                                             defaultLowerLimit=[0.0, 0.0, 200.0, 0.0, -0.1, 200.0,  0.0],
+                                             defaultUpperLimit=[1.0, 2.0, 400.0, 0.1, +0.0, 300.0, 60.0])
 
 
     #=========================================================================================
@@ -465,45 +382,17 @@ def PlotBaselineVsInvertedTemplates(datasetsMgr, histoName, addQcdBaseline=False
     #=========================================================================================
     # Fit individual templates to histogram "data_baseline", with custom fit options
     #=========================================================================================
-    fitOptions = "E R M Q"#"R B L W M"
+    fitOptions = "R B L W M Q"
     manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN, FITMAX)
             
-#    # Apply styles
-#    p.histoMgr.forHisto("Baseline-EWK", styles.getBaselineStyle() )
-#    if addQcdBaseline:
-#        OBp.histoMgr.forHisto("Baseline-QCD", styles.getInvertedLineStyle() )
-#    p.histoMgr.forHisto("Inverted-QCD", styles.getInvertedStyle() )
-#OB
-#    # Set draw style
-#    p.histoMgr.setHistoDrawStyle("Baseline-EWK"  , "AP")
-#    p.histoMgr.setHistoLegendStyle("Baseline-EWK", "LP")
-#    if addQcdBaseline:
-#        p.histoMgr.setHistoDrawStyle("Baseline-QCD"  , "HIST")
-#        p.histoMgr.setHistoLegendStyle("Baseline-QCD", "FL")
-#    p.histoMgr.setHistoDrawStyle("Inverted-QCD"  , "AP")
-#    p.histoMgr.setHistoLegendStyle("Inverted-QCD", "LP")
-#
-#    # Set legend labels
-#    if addQcdBaseline:
-#        p.histoMgr.setHistoLegendLabelMany({
-#                "Baseline-EWK" : "EWK (Baseline)",
-#                "Baseline-QCD" : "QCD (Baseline)",
-#                "Inverted-QCD" : "QCD (Inverted)",
-#                })
-#    else:
-#        p.histoMgr.setHistoLegendLabelMany({
-#                "Baseline-EWK" : "EWK (Baseline)",
-#                "Inverted-QCD" : "QCD (Inverted)",
-#                })
-
     # Append analysisType to histogram name
     saveName = histoName
 
     # Draw the histograms #alex
     plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
 
-    # _kwargs = {"lessThan": True}
-    # p.addCutBoxAndLine(cutValue=200, fillColor=ROOT.kRed, box=False, line=True, ***_kwargs)
+    _kwargs = {"lessThan": True}
+    p.addCutBoxAndLine(cutValue=173.21, fillColor=ROOT.kRed, box=False, line=True, **_kwargs)
 
     # Save plot in all formats
     #SavePlot(p, saveName, os.path.join(opts.saveDir, "Templates") ) 
@@ -552,7 +441,7 @@ if __name__ == "__main__":
     ANALYSISNAME = "FakeBMeasurement"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
-    OPTMODE      = ""#"OptChiSqrCutValue25"
+    OPTMODE      = None
     BATCHMODE    = True
     PRECISION    = 3
     INTLUMI      = -1.0

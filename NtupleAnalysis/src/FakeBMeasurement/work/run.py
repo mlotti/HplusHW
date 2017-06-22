@@ -114,7 +114,7 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = []#["ChargedHiggs", "QCD"]
+        myBlackList = [] #QCD_bEnriched"] #["ChargedHiggs", "QCD-b"]
         Print("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
         Print("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
         # process.addDatasetsFromMulticrab(opts.mcrab, blacklist=myBlackList)
@@ -172,7 +172,7 @@ def main():
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
     # builder.addVariation("FakeBMeasurement.maxNumberOfBJetsInTopFit", [3, 4, 5])
-    # builder.addVariation("TopSelection.ChiSqrCutValue", [10, 15, 20, 25, 30])
+    builder.addVariation("TopSelection.ChiSqrCutValue", [50, 100, 150, 200])
     # builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])
     
     # Build the builder
