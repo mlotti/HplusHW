@@ -97,7 +97,8 @@ Taus_TauPOGRecommendation[0].discriminators = cms.vstring(
                 'byMediumCombinedIsolationDeltaBetaCorr3Hits',                                                                                                                                                                            
                 'byTightCombinedIsolationDeltaBetaCorr3Hits',                                                                                                                                                                             
                 'decayModeFinding',                                                                                                                                                                                                       
-                'decayModeFindingNewDMs'
+                'decayModeFindingNewDMs',
+                'byVLooseIsolationMVArun2v1DBoldDMwLT'
 )
 
 TausNoSysVariations = cms.VPSet()
