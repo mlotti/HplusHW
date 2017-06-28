@@ -452,7 +452,7 @@ if __name__ == "__main__":
             sys.exit(1)
     
     if  opts.fractionEWK and not opts.mergeEWK:
-        Print("In order to use --fractionEWK the --mergeEWK optionm must also be called.")
+        Print("In order to use --fractionEWK the --mergeEWK option must also be called.")
         #opts.mergeEWK = True
         sys.exit(1)
               

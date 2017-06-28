@@ -165,14 +165,14 @@ def main():
                               doSystematicVariations = opts.doSystematics)
 
     # Perform variations (e.g. for optimisation)
-    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
-    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "=="])
+    builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
+    builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "==", ">="])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [3])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutDirection", [">="])
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
     # builder.addVariation("FakeBMeasurement.maxNumberOfBJetsInTopFit", [3, 4, 5])
-    builder.addVariation("TopSelection.ChiSqrCutValue", [50, 100, 150, 200])
+    builder.addVariation("TopSelection.ChiSqrCutValue", [50, 100])
     # builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])
     
     # Build the builder
