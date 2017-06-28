@@ -49,7 +49,9 @@ public:
     const std::vector<Jet>& getFailedBJetCandsDescendingDiscr() const { return  fFailedBJetCandsDescendingDiscr; }
     /// Obtain collection of failed bjet candidates (sorted by discriminator value)
     const std::vector<Jet>& getFailedBJetCandsAscendingDiscr() const { return  fFailedBJetCandsAscendingDiscr; }
-    /// Obtain the b-tagging event weight
+    /// Obtain collection of failed bjet candidates (sorted in random 
+    const std::vector<Jet>& getFailedBJetCandsShuffled() const { return  fFailedBJetCandsShuffled; }
+    /// Obtain the b-tagging event weight 
     const double getBTaggingScaleFactorEventWeight() const { return fBTaggingScaleFactorEventWeight; }
     /// Obtain the probability for passing b tagging without applying the selection
     const double getBTaggingPassProbability() const { return fBTaggingPassProbability; }
@@ -65,12 +67,14 @@ public:
     double fBTaggingPassProbability;
     /// BJet collection after all selections
     std::vector<Jet> fSelectedBJets;
-    /// All jets failing all the b-tagging criteria
+    /// All jets failing all the b-tagging discr (trg-matched jets first, rest random)
     std::vector<Jet> fFailedBJetCands;
-    /// All jets failing all the b-tagging criteria (sorted by descending discriminator value)
+    /// All jets failing all the b-tagging discr cut (sorted by descending discriminator value)
     std::vector<Jet> fFailedBJetCandsDescendingDiscr; 
-    /// All jets failing all the b-tagging criteria (sorted by ascending discriminator value)
+    /// All jets failing all the b-tagging discr cut (sorted by ascending discriminator value)
     std::vector<Jet> fFailedBJetCandsAscendingDiscr;
+    /// All jets failing the b-tagging discr cut (sorted randomly)
+    std::vector<Jet> fFailedBJetCandsShuffled;
   
   };
   
@@ -97,10 +101,9 @@ private:
   Data privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData);
   /// determine if bjet object is trigger matched (deltaR based)
   bool passTrgMatching(const Jet& bjet, std::vector<math::LorentzVectorT<double>>& trgBJets) const;
-  ///
+  /// Sort the failed bjet candindates collections
   void SortFailedBJetsCands(Data &output, std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta);
-  ///
-  void RandomlySortFailedBJetsCands(Data &output, std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta);
+
 
   /// Calculate probability to pass b tagging
   double calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData);

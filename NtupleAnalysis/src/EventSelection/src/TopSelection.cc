@@ -497,6 +497,9 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   std::vector<unsigned int> jet4;
   double minChiSqr = 1e9;
 
+  // Sanity check
+  if (bjets.size() < 3) return output;
+
   if (0) std::cout << "\nnJets = " << jets.size() << ", \033[1;31mnBJets = " << bjets.size() << "\033[0m" << std::endl;
 
   // Get all combinatorics for fit-trials
@@ -881,13 +884,12 @@ const std::vector<Jet> TopSelection::GetBjetsToBeUsedInFit(const BJetSelection::
   std::vector<Jet> bjetsForFit = bjetData.getSelectedBJets();
 
   // Append the vector of all failed bjets (in descending B-discriminator value) to the end of the bjets vector
-  bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCandsDescendingDiscr().begin(), bjetData.getFailedBJetCandsDescendingDiscr().end()); 
+  bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCands().begin(), bjetData.getFailedBJetCands().end()); 
+  // bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCandsDescendingDiscr().begin(), bjetData.getFailedBJetCandsDescendingDiscr().end()); 
 
-  // Now truncate the bjets vector 
+
+  // Truncate the bjets vector to correct size
   if (bjetsForFit.size() > maxNumberOfBJets) bjetsForFit.resize(maxNumberOfBJets);
-
-  // std::cout << "bjetsForFit.size() = " << bjetsForFit.size() << std::endl;
-  // std::cout << "bjetData.getFailedBJetCandsDescendingDiscr().size() = " << bjetData.getFailedBJetCandsDescendingDiscr().size() << std::endl;
 
   return bjetsForFit;
 }

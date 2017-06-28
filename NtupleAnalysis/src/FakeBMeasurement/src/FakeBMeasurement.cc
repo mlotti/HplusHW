@@ -364,23 +364,21 @@ void FakeBMeasurement::process(Long64_t entry) {
 
   cAllEvents.increment();
 
-  //  if (fEvent.isMC()) {
-
+  if (0) std::cout << "\nentry = " << entry << std::endl;
 
   //================================================================================================   
-  // 1) Apply trigger 
+  // Apply trigger 
   //================================================================================================   
   if (0) std::cout << "=== Trigger" << std::endl;
   if ( !(fEvent.passTriggerDecision()) ) return;
-  
+
   cTrigger.increment();
   int nVertices = fEvent.vertexInfo().value();
   fCommonPlots.setNvertices(nVertices);
   fCommonPlots.fillControlPlotsAfterTrigger(fEvent);
 
-
   //================================================================================================   
-  // 2) MET filters (to remove events with spurious sources of fake MET)
+  // MET filters (to remove events with spurious sources of fake MET)
   //================================================================================================   
   if (0) std::cout << "=== MET Filter" << std::endl;
   const METFilterSelection::Data metFilterData = fMETFilterSelection.analyze(fEvent);
@@ -390,7 +388,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
 
   //================================================================================================   
-  // 3) Primarty Vertex (Check that a PV exists)
+  // Primarty Vertex (Check that a PV exists)
   //================================================================================================   
   if (0) std::cout << "=== Vertices" << std::endl;
   if (nVertices < 1) return;
@@ -400,7 +398,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
   
   //================================================================================================   
-  // 4) Trigger SF
+  // Trigger SF
   //================================================================================================   
   // if (0) std::cout << "=== MET Trigger SF" << std::endl;
   // const METSelection::Data silentMETData = fMETSelection.silentAnalyze(fEvent, nVertices);
@@ -412,7 +410,7 @@ void FakeBMeasurement::process(Long64_t entry) {
   
 
   //================================================================================================   
-  // 5) Electron veto (Orthogonality)
+  // Electron veto (Orthogonality)
   //================================================================================================   
   if (0) std::cout << "=== Electron veto" << std::endl;
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
@@ -420,7 +418,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
 
   //================================================================================================
-  // 6) Muon veto (Orthogonality)
+  // Muon veto (Orthogonality)
   //================================================================================================
   if (0) std::cout << "=== Muon veto" << std::endl;
   const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
@@ -428,7 +426,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
 
   //================================================================================================   
-  // 7) Tau Veto (HToTauNu Orthogonality)
+  // Tau Veto (HToTauNu Orthogonality)
   //================================================================================================   
   if (0) std::cout << "=== Tau-Veto" << std::endl;
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
@@ -436,7 +434,7 @@ void FakeBMeasurement::process(Long64_t entry) {
 
 
   //================================================================================================
-  // 8) Jet selection
+  // Jets
   //================================================================================================
   if (0) std::cout << "=== Jet selection" << std::endl;
   const JetSelection::Data jetData = fJetSelection.analyzeWithoutTau(fEvent);
@@ -451,20 +449,19 @@ void FakeBMeasurement::process(Long64_t entry) {
   
 
   //================================================================================================  
-  // 9) BJet selection
+  // BJets
   //================================================================================================
   if (0) std::cout << "=== BJet selection" << std::endl;
   // Disable histogram filling and counter with silent analyze
   const BJetSelection::Data bjetData = fBJetSelection.silentAnalyze(fEvent, jetData);
 
-  // There are no bjets pasOBsing our selection criteria
-  if ( bjetData.passedSelection() )
+  // Baseline (Bjets criteria pass)
+  if (bjetData.passedSelection())
     {
       doBaselineAnalysis(jetData, bjetData, nVertices);
     }
-  else 
+  else // Inverted (Bjets criteria fail)
     {
-      
       // Apply requirent on selected b-jets 
       bool passSelected = cfg_NumberOfBJets.passedCut(bjetData.getNumberOfSelectedBJets());
       if (!passSelected) return;
@@ -483,13 +480,12 @@ void FakeBMeasurement::process(Long64_t entry) {
 	}
       
       // Apply inversion requirements 
-      bool passInverted = cfg_NumberOfInvertedBJets.passedCut(nInvertedBJets);     
+      bool passInverted = cfg_NumberOfInvertedBJets.passedCut(nInvertedBJets);
       if (!passInverted) return;
 
       // Do the inverted analysis
       doInvertedAnalysis(jetData, bjetData, nVertices); 
     }
-
   return;
 }
 
@@ -497,37 +493,38 @@ void FakeBMeasurement::process(Long64_t entry) {
 void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
                                           const BJetSelection::Data& bjetData,
                                           const int nVertices){
-
   if (!bjetData.passedSelection()) return;
+  if (0) std::cout << "=== Baseline: bjetData.passedSelection() = " << bjetData.passedSelection() << std::endl;
 
   // Increment counter
   cBaselineBTaggingCounter.increment();
 
   //================================================================================================  
-  // 10) BJet SF  
+  // BJet SF  
   //================================================================================================
   if (0) std::cout << "=== Baseline: BJet SF" << std::endl;
   if (fEvent.isMC()) 
     {
       fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     }
+  // std::cout << "\tSF = " << bjetData.getBTaggingScaleFactorEventWeight() << " (fEvent.isMC() = " << fEvent.isMC() << ")" << std::endl;
   cBaselineBTaggingSFCounter.increment();
 
 
   //================================================================================================
-  // 11) Topology selection
-  //================================================================================================
-  if (0) std::cout << "=== Baseline: Topology selection" << std::endl;
-  const TopologySelection::Data TopologyData = fBaselineTopologySelection.analyze(fEvent, jetData);
-  if (!TopologyData.passedSelection()) return;
-
-
-  //================================================================================================
-  // 12) Top selection
+  // Top
   //================================================================================================
   if (0) std::cout << "=== Baseline: Top selection" << std::endl;
   const TopSelection::Data TopData = fBaselineTopSelection.analyze(fEvent, jetData, bjetData);
   if (!TopData.passedSelection()) return;
+
+
+  //================================================================================================
+  // Topology
+  //================================================================================================
+  if (0) std::cout << "=== Baseline: Topology selection" << std::endl;
+  const TopologySelection::Data TopologyData = fBaselineTopologySelection.analyze(fEvent, jetData);
+  if (!TopologyData.passedSelection()) return;
 
 
   //================================================================================================
@@ -552,7 +549,6 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Fill final plots
   //================================================================================================
-
   // Other histograms
   hBaseline_TopMassReco_ChiSqr_AfterAllSelections ->Fill(TopData.ChiSqr());
   hBaseline_TopMassReco_LdgTrijetPt_AfterAllSelections->Fill( TopData.getLdgTrijet().pt() );
@@ -577,36 +573,36 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
 void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
                                           const BJetSelection::Data& bjetData,
                                           const int nVertices){
+  if (bjetData.passedSelection()) return;
+  if (0) std::cout << "=== Inverted: bjetData.passedSelection() = " << bjetData.passedSelection() << std::endl;
   
   // Increment counter
   cInvertedBTaggingCounter.increment();
 
   //================================================================================================  
-  // 10) BJet SF (if I have b-jets in the inverted region)
+  // BJet SF (if I have b-jets in the inverted region)
   //================================================================================================
   if (0) std::cout << "=== Inverted: BJet SF" << std::endl;
   if (fEvent.isMC()) 
     {
       fEventWeight.multiplyWeight(bjetData.getBTaggingScaleFactorEventWeight());
     }
+  // std::cout << "\tSF = " << bjetData.getBTaggingScaleFactorEventWeight() << " (fEvent.isMC() = " << fEvent.isMC() << ")" << std::endl;
   cInvertedBTaggingSFCounter.increment();
 
-
   //================================================================================================
-  // 11) Topology selection
-  //================================================================================================
-  if (0) std::cout << "=== Inverted: Topology selection" << std::endl;
-  const TopologySelection::Data TopologyData = fInvertedTopologySelection.analyze(fEvent, jetData);
-  if (!TopologyData.passedSelection()) return;
-
-
-  //================================================================================================
-  // 12) Top selection
+  // Top
   //================================================================================================
   if (0) std::cout << "=== Inverted: Top selection" << std::endl;
   const TopSelection::Data TopData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData, cfg_MaxNumberOfBJetsInTopFit);
   if (!TopData.passedSelection()) return;
 
+  //================================================================================================
+  // Topology
+  //================================================================================================
+  if (0) std::cout << "=== Inverted: Topology selection" << std::endl;
+  const TopologySelection::Data TopologyData = fInvertedTopologySelection.analyze(fEvent, jetData);
+  if (!TopologyData.passedSelection()) return;
 
   //================================================================================================
   // All cuts passed
@@ -616,41 +612,46 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
 
   //================================================================================================
   // Fill final plots
-  //================================================================================================
-  Jet bjet= bjetData.getFailedBJetCandsDescendingDiscr()[0]; // FIXME: ALEX Require all 3 bjets to be matched
-  // std::cout << "FIXME: In order to have a fake-B measurement I need to make sure that in EWK i have 3 mc-matched bjets! If not then what I measure is QCD. Then the EWK fake-b and EWK genuine-b would have to be measured from MC. If i measure fake-B then only EWK GENUINE-b must be taken from MC. This is ok if the fraction of EWK-FakeB is very small (e.g less than 5%)" << std::endl;
-
-  // For Data pdgId==0!
-  bool isGenuineB = abs(bjet.pdgId() == 5); // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
-  // std::cout << "I should check if sample is MC here. isGenuineB = " << isGenuineB << std::endl;
-  int ancestryBit = ( pow(2, 0)*bjet.originatesFromZ() +
-		      pow(2, 1)*bjet.originatesFromW() +
-		      pow(2, 2)*bjet.originatesFromTop() +
-		      pow(2, 3)*bjet.originatesFromChargedHiggs() +
-		      pow(2, 4)*bjet.originatesFromUnknown() );
-
-  // bool isGenuineB = isGenuineB1*isGenuineB2*isGenuineB3; FIXME! ALEX: This is what i should use as boolean
-  // See QCDMeasurement.cc
-
-  // For real data fill both the histograms in inclusive and "FakeB" folders (but not "GenuineB")
-  hInverted_FailedBJetWithBestBDiscBDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator());
-  hInverted_FailedBJetWithBestBDiscPt_AfterAllSelections->Fill(isGenuineB, bjet.pt());
-  hInverted_FailedBJetWithBestBDiscEta_AfterAllSelections->Fill(isGenuineB, bjet.eta());
-  hInverted_FailedBJetWithBestBDiscPdgId_AfterAllSelections->Fill(isGenuineB, bjet.pdgId());
-  hInverted_FailedBJetWithBestBDiscPartonFlavour_AfterAllSelections->Fill(isGenuineB, bjet.partonFlavour());
-  hInverted_FailedBJetWithBestBDiscHadronFlavour_AfterAllSelections->Fill(isGenuineB, bjet.hadronFlavour());
-  hInverted_FailedBJetWithBestBDiscAncestry_AfterAllSelections->Fill(isGenuineB, ancestryBit);
-
-  // Other histograms
-  hInverted_TopMassReco_ChiSqr_AfterAllSelections ->Fill(TopData.ChiSqr());
-  hInverted_TopMassReco_LdgTrijetPt_AfterAllSelections->Fill( TopData.getLdgTrijet().pt() );
-  hInverted_TopMassReco_LdgTrijetM_AfterAllSelections ->Fill( TopData.getLdgTrijet().M() );
-  hInverted_TopMassReco_SubLdgTrijetPt_AfterAllSelections->Fill( TopData.getSubldgTrijet().pt() );
-  hInverted_TopMassReco_SubLdgTrijetM_AfterAllSelections ->Fill( TopData.getSubldgTrijet().M() );
-  hInverted_TopMassReco_LdgDijetPt_AfterAllSelections->Fill( TopData.getLdgDijet().pt() );
-  hInverted_TopMassReco_LdgDijetM_AfterAllSelections ->Fill( TopData.getLdgDijet().M() );
-  hInverted_TopMassReco_SubLdgDijetPt_AfterAllSelections->Fill( TopData.getSubldgDijet().pt() );
-  hInverted_TopMassReco_SubLdgDijetM_AfterAllSelections ->Fill( TopData.getSubldgDijet().M() );
+   //================================================================================================
+  // Need to figure out what to do here. Also, need protetion for cases where no bjet-cands are present (possible!)
+  if (0)
+    {
+      std::cout << "bjetData.getFailedBJetCands().size() " << bjetData.getFailedBJetCands().size() << std::endl;
+      Jet bjet= bjetData.getFailedBJetCands()[0]; // FIXME: ALEX Require all 3 bjets to be matched
+      // std::cout << "FIXME: In order to have a fake-B measurement I need to make sure that in EWK i have 3 mc-matched bjets! If not then what I measure is QCD. Then the EWK fake-b and EWK genuine-b would have to be measured from MC. If i measure fake-B then only EWK GENUINE-b must be taken from MC. This is ok if the fraction of EWK-FakeB is very small (e.g less than 5%)" << std::endl;
+      
+      // For Data pdgId==0!
+      bool isGenuineB = abs(bjet.pdgId() == 5); // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
+      // std::cout << "I should check if sample is MC here. isGenuineB = " << isGenuineB << std::endl;
+      int ancestryBit = ( pow(2, 0)*bjet.originatesFromZ() +
+			  pow(2, 1)*bjet.originatesFromW() +
+			  pow(2, 2)*bjet.originatesFromTop() +
+			  pow(2, 3)*bjet.originatesFromChargedHiggs() +
+			  pow(2, 4)*bjet.originatesFromUnknown() );
+      
+      // bool isGenuineB = isGenuineB1*isGenuineB2*isGenuineB3; FIXME! ALEX: This is what i should use as boolean
+      // See QCDMeasurement.cc
+      
+      // For real data fill both the histograms in inclusive and "FakeB" folders (but not "GenuineB")
+      hInverted_FailedBJetWithBestBDiscBDisc_AfterAllSelections->Fill(isGenuineB, bjet.bjetDiscriminator());
+      hInverted_FailedBJetWithBestBDiscPt_AfterAllSelections->Fill(isGenuineB, bjet.pt());
+      hInverted_FailedBJetWithBestBDiscEta_AfterAllSelections->Fill(isGenuineB, bjet.eta());
+      hInverted_FailedBJetWithBestBDiscPdgId_AfterAllSelections->Fill(isGenuineB, bjet.pdgId());
+      hInverted_FailedBJetWithBestBDiscPartonFlavour_AfterAllSelections->Fill(isGenuineB, bjet.partonFlavour());
+      hInverted_FailedBJetWithBestBDiscHadronFlavour_AfterAllSelections->Fill(isGenuineB, bjet.hadronFlavour());
+      hInverted_FailedBJetWithBestBDiscAncestry_AfterAllSelections->Fill(isGenuineB, ancestryBit);
+      
+      // Other histograms
+      hInverted_TopMassReco_ChiSqr_AfterAllSelections ->Fill(TopData.ChiSqr());
+      hInverted_TopMassReco_LdgTrijetPt_AfterAllSelections->Fill( TopData.getLdgTrijet().pt() );
+      hInverted_TopMassReco_LdgTrijetM_AfterAllSelections ->Fill( TopData.getLdgTrijet().M() );
+      hInverted_TopMassReco_SubLdgTrijetPt_AfterAllSelections->Fill( TopData.getSubldgTrijet().pt() );
+      hInverted_TopMassReco_SubLdgTrijetM_AfterAllSelections ->Fill( TopData.getSubldgTrijet().M() );
+      hInverted_TopMassReco_LdgDijetPt_AfterAllSelections->Fill( TopData.getLdgDijet().pt() );
+      hInverted_TopMassReco_LdgDijetM_AfterAllSelections ->Fill( TopData.getLdgDijet().M() );
+      hInverted_TopMassReco_SubLdgDijetPt_AfterAllSelections->Fill( TopData.getSubldgDijet().pt() );
+      hInverted_TopMassReco_SubLdgDijetM_AfterAllSelections ->Fill( TopData.getSubldgDijet().M() );
+    }
 
   // Save selected event ID for pick events
   fEventSaver.save();

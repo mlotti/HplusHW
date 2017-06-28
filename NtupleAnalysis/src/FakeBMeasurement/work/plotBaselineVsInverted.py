@@ -401,6 +401,9 @@ def BaselineVsInvertedComparison(datasetsMgr, histoName):
 
     if "Pt_" in histoName:
         _format = "%0.f GeV/c"
+        if "tetrajet" in histoName.lower():
+            _rebinX = 2
+            
     if "ChiSqr" in histoName:
         _format = "%0.1f"
         _rebinX = 10
