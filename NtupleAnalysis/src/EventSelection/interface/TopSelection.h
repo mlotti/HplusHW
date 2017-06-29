@@ -45,11 +45,20 @@ public:
     const Jet getTrijet2BJet() const { return fTrijet2BJet; } 
     const math::XYZTLorentzVector getTrijet2Dijet() const {return fTrijet2Dijet_p4; }
     const math::XYZTLorentzVector getTriJet2() const {return fTrijet2_p4; }
-    // Leading/Subleading Trijets
+    // Leading/Subleading Tetrajet
+    const math::XYZTLorentzVector getLdgTetrajet() const {return fLdgTetrajet_p4;}
+    const math::XYZTLorentzVector getSubldgTetrajet() const {return fSubldgTetrajet_p4;}
+    const Jet getTetrajetBJet() const {return fTetrajetBJet;}
+    // Leading/Subleading Trijet
     const math::XYZTLorentzVector getLdgTrijet() const 
     { 
       if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1_p4; 
       else return fTrijet2_p4; 
+    }
+    const Jet getLdgTrijetBJet() const 
+    { 
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1BJet;
+      else return fTrijet2BJet;
     }
     const math::XYZTLorentzVector getSubldgTrijet() const
     { 
@@ -59,12 +68,12 @@ public:
     // Leading/Subleading Dijets
     const math::XYZTLorentzVector getLdgDijet() const 
     { 
-      if (fTrijet1Dijet_p4.pt() > fTrijet1Dijet_p4.pt()) return fTrijet1Dijet_p4; 
+      if (fTrijet1Dijet_p4.pt() > fTrijet2Dijet_p4.pt()) return fTrijet1Dijet_p4; 
       else return fTrijet2Dijet_p4; 
     }
     const math::XYZTLorentzVector getSubldgDijet() const 
     {
-      if (fTrijet2Dijet_p4.pt() > fTrijet1Dijet_p4.pt()) return fTrijet2Dijet_p4; 
+      if (fTrijet1Dijet_p4.pt() > fTrijet2Dijet_p4.pt()) return fTrijet2Dijet_p4; 
       else return fTrijet1Dijet_p4;
     }
 
