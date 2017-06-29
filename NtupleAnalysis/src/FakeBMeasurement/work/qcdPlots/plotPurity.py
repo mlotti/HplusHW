@@ -15,10 +15,11 @@ For more counter tricks and optios see also:
 HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
-./plotDataEwk.py -m <pseudo_mcrab_directory> [opts]
+./plotPurity.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotDataEwk.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170602_235941_BJetsEE2_TopChiSqrVar_H2Var --mergeEWK --histoLevel Vital -o OptChiSqrCutValue10FoxWolframMomentCutValue0p5
+./plotPurity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170619_020728_BJetsGE2_TopChiSqrVar_QCDSamples -e "Charged|QCD" --mergeEWK --histoLevel Vital
+./plotPurity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170602_235941_BJetsEE2_TopChiSqrVar_H2Var --mergeEWK --histoLevel Vital -o OptChiSqrCutValue16FoxWolframMomentCutValue0p5
 '''
 
 #================================================================================================ 
@@ -341,17 +342,22 @@ def main(opts):
     style = tdrstyle.TDRStyle()
     style.setOptStat(True)
 
-    # Do the standard top-selections
-    analysisTypes = ["Baseline", "Inverted"]
+    # Do the Purity Triples analysisTypes = ["Baseline", "Inverted"]
+    analysisTypes = ["", "EWKFakeB", "EWKGenuineB"]
     for analysis in analysisTypes:
-        Print("Plotting Top Selection Histograms (%s)" % (analysis), True)
-        TopSelectionHistograms(opts, datasetsMgr, analysis)
+        Print("Plotting Purity Triplet Histograms (%s)" % (analysis), True)
+        PurityTripletPlots(datasetsMgr, analysisType=analysis)
 
-    # Do Data-MC histograms
-    for analysis in analysisTypes:
-        Print("Plotting Other Histograms (%s)" % (analysis), True)
-        DataMCHistograms(datasetsMgr, analysis)
-
+    return
+    # Do the Data/QCD/EWK histograms
+    if opts.mergeEWK:
+        analysisTypes = ["Baseline", "Inverted"]
+        for analysis in analysisTypes:
+            Print("Plotting DataEWkQcd Histograms (%s)" % (analysis), True)
+            for hName in getTopSelectionHistos(opts.histoLevel, analysis):
+                DataEwkQcd(datasetsMgr, hName.split("/")[-1], analysis)
+    else:
+        Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
     return
 
 
@@ -395,65 +401,56 @@ def PurityTripletPlots(datasetsMgr, analysisType=""):
                "cmsExtraText": "Preliminary",
                "opts": {"ymin": 2e-1, "ymaxfactor": 10},
                "opts2": {"ymin": 0.0, "ymax": 2.0},
-               "log": False,
+               "log": True,
                "errorBarsX": True, 
                "moveLegend": _moveLegend,
                "cutBox": {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
                }
 
     # Create/Draw the plots
-    histoNames.append("%s/Inverted_FailedBJetWithBestBDiscPt_AfterAllSelections" % folder)
+    histoNames.append("%s/Inverted_FailedBJetPt_AfterAllSelections" % folder)
     kwargs = copy.deepcopy(_kwargs)
     kwargs["xlabel"] = "jet p_{T} (GeV/c)"
     kwargs["ylabel"] = "Events / %.0f GeV/c"
     kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": True, "line": True, "greaterThan": True}
-    histoKwargs["%s/Inverted_FailedBJetWithBestBDiscPt_AfterAllSelections" % folder] = kwargs
+    histoKwargs["%s/Inverted_FailedBJetPt_AfterAllSelections" % folder] = kwargs
 
+    histoNames.append("%s/Inverted_FailedBJetEta_AfterAllSelections" % folder)
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["xlabel"] = "jet #eta"
+    kwargs["ylabel"] = "Events / %.2f"
+    histoKwargs["%s/Inverted_FailedBJetEta_AfterAllSelections" % folder] = kwargs
 
-    if opts.histoLevel == "Debug":
-        histoNames.append("%s/Inverted_FailedBJetWithBestBDiscEta_AfterAllSelections" % folder)
-        kwargs = copy.deepcopy(_kwargs)
-        kwargs["xlabel"] = "jet #eta"
-        kwargs["ylabel"] = "Events / %.2f"
-        histoKwargs["%s/Inverted_FailedBJetWithBestBDiscEta_AfterAllSelections" % folder] = kwargs
-        
-
-    histoNames.append("%s/Inverted_FailedBJetWithBestBDiscBDisc_AfterAllSelections" % folder)
+    histoNames.append("%s/Inverted_FailedBJetBDisc_AfterAllSelections" % folder)
     kwargs = copy.deepcopy(_kwargs)
     kwargs["xlabel"] = "jet b-tag discriminator"
     kwargs["ylabel"] = "Events / %.2f"
     kwargs["cutBox"] = {"cutValue": 0.8484, "fillColor": 16, "box": True, "line": True, "greaterThan": False}
-    histoKwargs["%s/Inverted_FailedBJetWithBestBDiscBDisc_AfterAllSelections" % folder] = kwargs
+    histoKwargs["%s/Inverted_FailedBJetBDisc_AfterAllSelections" % folder] = kwargs
         
-
-    histoNames.append("%s/Inverted_FailedBJetWithBestBDiscPdgId_AfterAllSelections" % folder)
+    histoNames.append("%s/Inverted_FailedBJetPdgId_AfterAllSelections" % folder)
     kwargs = copy.deepcopy(_kwargs)
     kwargs["xlabel"] = "jet pdgId"
     kwargs["ylabel"] = "Events / %.0f"
-    histoKwargs["%s/Inverted_FailedBJetWithBestBDiscPdgId_AfterAllSelections" % folder] = kwargs
+    histoKwargs["%s/Inverted_FailedBJetPdgId_AfterAllSelections" % folder] = kwargs
+    
+    histoNames.append("%s/Inverted_FailedBJetPartonFlavour_AfterAllSelections" % folder)
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["xlabel"] = "jet parton flavour"
+    kwargs["ylabel"] = "Events / %.0f"
+    histoKwargs["%s/Inverted_FailedBJetPartonFlavour_AfterAllSelections" % folder] = kwargs
+    
+    histoNames.append("%s/Inverted_FailedBJetHadronFlavour_AfterAllSelections" % folder)
+    kwargs = copy.deepcopy(_kwargs)
+    kwargs["xlabel"] = "jet hadron flavour"
+    kwargs["ylabel"] = "Events / %.0f"
+    histoKwargs["%s/Inverted_FailedBJetHadronFlavour_AfterAllSelections" % folder] = kwargs
 
-
-    if opts.histoLevel == "Debug":
-        histoNames.append("%s/Inverted_FailedBJetWithBestBDiscPartonFlavour_AfterAllSelections" % folder)
-        kwargs = copy.deepcopy(_kwargs)
-        kwargs["xlabel"] = "jet parton flavour"
-        kwargs["ylabel"] = "Events / %.0f"
-        histoKwargs["%s/Inverted_FailedBJetWithBestBDiscPartonFlavour_AfterAllSelections" % folder] = kwargs
-
-
-    if opts.histoLevel == "Debug":
-        histoNames.append("%s/Inverted_FailedBJetWithBestBDiscHadronFlavour_AfterAllSelections" % folder)
-        kwargs = copy.deepcopy(_kwargs)
-        kwargs["xlabel"] = "jet hadron flavour"
-        kwargs["ylabel"] = "Events / %.0f"
-        histoKwargs["%s/Inverted_FailedBJetWithBestBDiscHadronFlavour_AfterAllSelections" % folder] = kwargs
-
-
-    histoNames.append("%s/Inverted_FailedBJetWithBestBDiscAncestry_AfterAllSelections" % folder)
+    histoNames.append("%s/Inverted_FailedBJetAncestry_AfterAllSelections" % folder)
     kwargs = copy.deepcopy(_kwargs)
     kwargs["xlabel"] = "ancestor bit"
     kwargs["ylabel"] = "Events / %.0f"
-    histoKwargs["%s/Inverted_FailedBJetWithBestBDiscAncestry_AfterAllSelections" % folder] = kwargs
+    histoKwargs["%s/Inverted_FailedBJetAncestry_AfterAllSelections" % folder] = kwargs
 
 
     # For-loop: All histograms in list
@@ -472,7 +469,8 @@ def PurityTripletPlots(datasetsMgr, analysisType=""):
             plots.drawPlot(p, histoName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
 
         # Save plot in all formats
-        SavePlot(p, saveName, os.path.join(opts.saveDir, folder) )
+        SavePlot(p, saveName, os.path.join(opts.saveDir, folder), saveFormats = [".png"] )
+
     return
 
 
@@ -492,7 +490,7 @@ def DataMCHistograms(datasetsMgr, analysisType=""):
     # Definitions
     histoNames  = []
     histoKwargs = {}
-    saveFormats = [".png", ".pdf"] #[".C", ".png", ".pdf"]
+    saveFormats = [".png"] #[".C", ".png", ".pdf"]
 
     # General Settings
     if opts.mergeEWK:
@@ -579,8 +577,7 @@ def DataMCHistograms(datasetsMgr, analysisType=""):
     # For-loop: All histograms in list
     for histoName in histoNames:
         kwargs_  = histoKwargs[histoName]
-        #saveName = os.path.join(opts.saveDir, histoName.replace("/", "_"))
-        saveName = histoName.replace("/", "_")
+        saveName = os.path.join(opts.saveDir, histoName.replace("/", "_"))
 
         if opts.mcOnly:
             p = plots.MCPlot(datasetsMgr, histoName, normalizeToLumi=opts.intLumi)
@@ -593,8 +590,10 @@ def DataMCHistograms(datasetsMgr, analysisType=""):
             p = plots.DataMCPlot(datasetsMgr, histoName)
             plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
 
-        # Save plot in all formats
-        SavePlot(p, saveName, os.path.join(opts.saveDir, "DataEwk") )
+        # For-loop: All save formats
+        for i, ext in enumerate(saveFormats):
+            Print("%s" % saveName + ext, i==0)
+            p.saveAs(saveName, formats=saveFormats)
     return
 
 
@@ -615,7 +614,7 @@ def TopSelectionHistograms(opts, datasetsMgr, analysisType):
     # Definitions
     histoNames  = getTopSelectionHistos(opts.histoLevel, analysisType)
     histoKwargs = {}
-    saveFormats = [".png", ".pdf"] #[".C", ".png", ".pdf"]
+    saveFormats = [".png"] #[".C", ".png", ".pdf"]
 
     # General Settings
     if opts.mergeEWK:
@@ -663,9 +662,8 @@ def TopSelectionHistograms(opts, datasetsMgr, analysisType):
             p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
             plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
 
-        # Save plot in all formats
-        SavePlot(p, histoName, os.path.join(opts.saveDir, "DataEwk") ) 
-        #SavePlot(p, histoName, os.path.join(opts.saveDir, analysisType) ) 
+        # Save plot in all formats        
+        SavePlot(p, histoName, os.path.join(opts.saveDir, analysisType), saveFormats = [".png"] )
     return
     
                          
@@ -799,12 +797,16 @@ def DataEwkQcd(datasetsMgr, histoName, analysisType):
                    )
 
     # Save plot in all formats
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "DataEwkQcd") ) 
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "DataEwkQcd"), saveFormats = [".png"] )
     return
 
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".C", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+
+    # Check that path exists
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
 
     # Create the name under which plot will be saved
     saveName = os.path.join(saveDir, plotName.replace("/", "_"))

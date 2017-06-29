@@ -328,9 +328,26 @@ invertedStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
 altEwkStyle       = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kMagenta-2, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
                                    StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3),
                                    StyleFill(fillColor=ROOT.kMagenta-2, fillStyle=1001)])
+altEwkLineStyle   = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kMagenta-2, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+                                   StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3),
+                                   StyleFill(fillColor=ROOT.kMagenta-2, fillStyle=0)])
 invertedLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
-                                   StyleLine(lineColor=ROOT.kRed, lineStyle=ROOT.kSolid, lineWidth=0), 
-                                   StyleFill(fillColor=ROOT.kRed, fillStyle=3001)])
+                                   StyleLine(lineColor=ROOT.kRed, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kRed, fillStyle=0)])
+altQCDStyle       = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-2, markerSizes=None, markerStyle=ROOT.kFullDiamond),
+                                   StyleLine(lineColor=ROOT.kOrange-2, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kOrange-2, fillStyle=1001)])
+genuineBStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kGray+2, markerSizes=None, markerStyle=ROOT.kCircle),
+                                   StyleLine(lineColor=ROOT.kGray+2, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kGray+2, fillStyle=3001)])
+                                   #StyleFill(fillColor=ROOT.kAzure+2, fillStyle=3004)])
+fakeBStyle        = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kTeal-2, markerSizes=None, markerStyle=ROOT.kCircle),
+                                   StyleLine(lineColor=ROOT.kTeal-2, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kTeal-2, fillStyle=3005)])
+fakeBLineStyle    = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kTeal-2, markerSizes=None, markerStyle=ROOT.kCircle),
+                                   StyleLine(lineColor=ROOT.kTeal-2, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kTeal-2, fillStyle=0)])
+
 
 styles = [ 
     Style(26, ROOT.kBlue),
@@ -382,6 +399,9 @@ def getEWKStyle():
 def getAltEWKStyle():
     return altEwkStyle
 
+def getAltEWKLineStyle():
+    return altEwkLineStyle
+
 def getEWKFillStyle():
     return ewkFillStyle
 
@@ -390,6 +410,9 @@ def getEWKLineStyle():
 
 def getEWKFakeStyle():
     return ewkfakeFillStyle
+
+def getAltQCDStyle():
+    return altQCDStyle
 
 def getQCDStyle():
     return qcdFillStyle
@@ -405,6 +428,15 @@ def getBaselineStyle():
 
 def getBaselineLineStyle():
     return baselineLineStyle
+
+def getGenuineBStyle():
+    return genuineBStyle
+
+def getFakeBStyle():
+    return fakeBStyle
+
+def getFakeBLineStyle():
+    return fakeBLineStyle
 
 def getInvertedStyle():
     return invertedStyle

@@ -11,23 +11,10 @@ For more counter tricks and optios see also:
 HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
-./plotFit.py -m <pseudo_mcrab_directory> [opts]
+./plotFakeB_Templates.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotFit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170602_235941_BJetsEE2_TopChiSqrVar_H2Var --mergeEWK --histoLevel Vital
-./plotFit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170619_020728_BJetsGE2_TopChiSqrVar_AllSamples --mergeEWK -o "OptChiSqrCutValue140" -e "QCD-b|Charged"
-
-Fit options:
-https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-th1fit-method
-"E" Better error estimation using MINOS technique
-"R" Use the range specified in the function range
-"B" Use this option when you want to fix one or more parameters and the fitting function is a predefined one, 
-    like polN, expo, landau, gaus. Note that in case of pre-defined functions some default initial values and limits are set.
-"L" Use log likelihood method (default is chi-square method). To be used when the histogram represents counts
-"W" Set all weights to 1 for non empty bins; ignore error bars
-"M" Improve fit results, by using the IMPROVE algorithm of TMinuit.
-"Q" To suppress output (Quiet Mode)
-"S" To return fit results (see "HLTausAnalysis/NtupleAnalysis/src/Auxiliary/src/HistoTools.C")
+./plotFakeB_Templates.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --mergeEWK -e "QCD|Charged"
 '''
 
 #================================================================================================ 
@@ -51,7 +38,6 @@ import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
-import HiggsAnalysis.FakeBMeasurement.QCDNormalization as QCDNormalization
 
 #================================================================================================ 
 # Function Definition
@@ -88,8 +74,7 @@ def GetLumi(datasetsMgr):
 
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop"]#, "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-    #return ["TT"]
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
 def GetHistoKwargs(histoName):
@@ -97,41 +82,78 @@ def GetHistoKwargs(histoName):
     '''
     Verbose("Creating a map of histoName <-> kwargs")
 
-    _opts = {}
+    _opts   = {}
+    _xlabel = None
 
-    if "mass" in histoName.lower():
+    if "tetrajetm" in histoName.lower():
+        _rebin  = 5
+        _units  = "GeV/c^{2}"
         _format = "%0.0f GeV/c^{2}"
+        _xlabel = "m_{jjjb} (%s)" % (_units)
+        _logY   = True
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 2000.0
+    elif "trijetm" in histoName.lower():
         _rebin  = 1
+        _units  = "GeV/c^{2}"
+        _format = "%0.0f " + _units
+        _xlabel = "m_{jjb} (%s)" % _units
         _logY   = False
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        #_opts["xmax"] = 800.0
+        _opts["xmax"] = 800.0
     else:
         raise Exception("The kwargs have not been prepared for the histogram with name \"%s\"." % (histoName) )
 
     # Customise options (main pad) for with/whitout logY scale 
     if _logY:
-        _opts["ymin"] = 1e-5
+        _opts["ymin"] = 2e-4
         _opts["ymaxfactor"] = 5
     else:
         _opts["ymin"] = 0.0
         _opts["ymaxfactor"] = 1.2
 
+    # Draw the histograms
+    if "trijetmass" in histoName.lower():
+        _opts["xmax"] = 800.0
+
     # Define plotting options    
-    kwargs = {"ylabel"      : "Arbitrary Units / %s" % (_format),
-              "log"         : _logY,
-              "opts"        : _opts,
-              "opts2"       : {"ymin": 0.0, "ymax": 2.0},
-              "rebinX"      : _rebin,
-              "ratio"       : False, 
-              "cutBox"      : _cutBox,
-              "cmsExtraText": "Preliminary",
-              "ratioYlabel" : "Ratio",
-              "ratioInvert" : False, 
-              "addCmsText"  : True,
-              "createLegend": {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
-              }
+    kwargs = {
+        "xlabel": _xlabel,
+        "ylabel": "Arbitrary Units / %s" % (_format),
+        "log"   : _logY,
+        "opts"  : _opts,
+        "opts2" : {"ymin": 0.0, "ymax": 2.0},
+        "rebinX": _rebin,
+        "ratio" : False, 
+        "cutBox": _cutBox,
+        "cmsExtraText": "Preliminary",
+        "ratioYlabel" : "Ratio",
+        "ratioInvert" : False, 
+        "addCmsText"  : True,
+        "createLegend": {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
+               }
     return kwargs
 
+
+def GetHistoList(analysisType="Inverted", bType=""):
+    Verbose("Creating purity histo list  for %s" % analysisType)
+
+    IsBaselineOrInverted(analysisType)
+
+    bTypes = ["", "EWKFakeB", "EWKGenuineB"]
+    if bType not in bTypes:
+        raise Exception("Invalid analysis type \"%s\". Please select one of the following: %s" % (bType, "\"" + "\", \"".join(bTypes) + "\"") )
+
+    histoList = []
+    folder    = "ForFakeBMeasurement" + bType
+    histoList.append("%s/%s_TopMassReco_LdgTrijetM_AfterAllSelections" % (folder, analysisType) )
+    histoList.append("%s/%s_TopMassReco_LdgTetrajetMass_AfterAllSelections" % (folder, analysisType) )
+    if 0:
+        histoList.append("%s/%s_TopMassReco_SubldgTetrajetMass_AfterAllSelections" % (folder, analysisType) )
+        histoList.append("%s/%s_TopMassReco_SubLdgTrijetM_AfterAllSelections" % (folder, analysisType) )
+        histoList.append("%s/%s_TopMassReco_LdgDijetM_AfterAllSelections" % (folder, analysisType) )
+        histoList.append("%s/%s_TopMassReco_SubLdgDijetM_AfterAllSelections" % (folder, analysisType) )
+    return histoList
 
 def GetDatasetsFromDir(opts):
     Verbose("Getting datasets")
@@ -162,15 +184,14 @@ def GetDatasetsFromDir(opts):
     
 
 def main(opts):
-    Verbose("main function")
-
-    #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"]
-    #optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100", "OptChiSqrCutValue150", "OptChiSqrCutValue200"]
-    optModes = ["OptChiSqrCutValue100"]
+    
+    #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"] 
+    #optModes = ["OptChiSqrCutValue250", "OptChiSqrCutValue150", "OptChiSqrCutValue200", "OptChiSqrCutValue180", "OptChiSqrCutValue300"]
+    optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue150p0", "OptChiSqrCutValue200p0"]
 
     if opts.optMode != None:
-        optModes = [opts.Mode]
-
+        optModes = [opts.optMode]
+        
     # For-loop: All opt Mode
     for opt in optModes:
         opts.optMode = opt
@@ -183,16 +204,18 @@ def main(opts):
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
 
+        if 0:
+            datasetsMgr.remove(filter(lambda name: "ST" in name, datasetsMgr.getAllDatasetNames()))
+               
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
-        
-        # Remove datasets
-        datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
-        datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
-        datasetsMgr.remove(filter(lambda name: "Charged" in name, datasetsMgr.getAllDatasetNames()))
-        
+   
+        # Get Integrated Luminosity
+        if 0:
+            datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
+
         # Re-order datasets (different for inverted than default=baseline)
-        newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+        newOrder = ["Data"]
         newOrder.extend(GetListOfEwkDatasets())
         datasetsMgr.selectAndReorder(newOrder)
 
@@ -206,41 +229,29 @@ def main(opts):
             datasetsMgr.merge("EWK", GetListOfEwkDatasets())
             plots._plotStyles["EWK"] = styles.getAltEWKStyle()
         else:
-            Print("Cannot draw the histograms without the option --mergeEWK. Exit", True)
-            sys.exit()
-            
+            Print("Cannot draw the histograms without the option --mergeEWK. Exit", True)            
+                    
         # Print dataset information
         datasetsMgr.PrintInfo()
-        
+
         # Apply TDR style
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
-        
-        # Do the fit
-        hName = "topSelection_Baseline/LdgTrijetMass_After" #"topSelection_Baseline/LdgTrijetMass_Before"
-        PlotAndFitTemplates(datasetsMgr, hName.split("/")[-1], True, opts)
-        
+
+        # Do the template comparisons
+        for hName in GetHistoList(analysisType="Inverted", bType=""):
+            PlotTemplates(datasetsMgr, hName, analysisType="Inverted")
     return
 
-
-def getHistos(datasetsMgr, hName):
+def getHistos(datasetsMgr, datasetName, name1, name2):
     Verbose("getHistos()", True)
 
-    baseline = "topSelection_Baseline/"
-    inverted = "topSelection_Inverted/"
+    h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(name1)
+    h1.setName("Baseline" + "-" + datasetName)
 
-    h1 = datasetsMgr.getDataset("Data").getDatasetRootHisto(baseline+histoName)
-    h1.setName("Baseline-Data")
-
-    h2 = datasetsMgr.getDataset("EWK").getDatasetRootHisto(baseline+histoName)
-    h2.setName("Baseline-EWK")
-
-    h3 = datasetsMgr.getDataset("Data").getDatasetRootHisto(inverted+histoName)
-    h3.setName("Inverted-Data")
-
-    h4 = datasetsMgr.getDataset("EWK").getDatasetRootHisto(baseline+histoName)
-    h4.setName("Inverted-EWK")
-    return [h1, h2, h3, h4]
+    h2 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(name2)
+    h2.setName("Inverted" + "-" + datasetName)
+    return [h1, h2]
 
 
 def getHisto(datasetsMgr, datasetName, histoName, analysisType):
@@ -251,158 +262,99 @@ def getHisto(datasetsMgr, datasetName, histoName, analysisType):
     return h1
 
 
-def PlotAndFitTemplates(datasetsMgr, histoName, addQcdBaseline, opts):
-    Verbose("PlotAndFitTemplates()")
+def PlotTemplates(datasetsMgr, histoName, analysisType="Inverted"):                  
+    Verbose("Plotting EWK Vs QCD unity-normalised histograms")
 
     # Create comparison plot
     p1 = plots.ComparisonPlot(
-        getHisto(datasetsMgr, "Data", "topSelection_Baseline/%s" % histoName, "Baseline"),
-        getHisto(datasetsMgr, "EWK" , "topSelection_Baseline/%s" % histoName, "Baseline")
+        getHisto(datasetsMgr, "Data", histoName, "Baseline"),
+        getHisto(datasetsMgr, "Data", histoName, "Inverted")
         )
     p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
-
+    
+    defaultFolder  = "ForFakeBMeasurement"
+    # FIXME - First pseudo-multicrab had the Fake/Genuine boolean REVERSED
+    #genuineBFolder = "ForFakeBMeasurementEWKGenuineB"
+    genuineBFolder = "ForFakeBMeasurementEWKFakeB"
+    histoNameNew   = histoName.replace( defaultFolder, genuineBFolder)
     p2 = plots.ComparisonPlot(
-        getHisto(datasetsMgr, "Data", "topSelection_Inverted/%s" % histoName, "Inverted"),
-        getHisto(datasetsMgr, "EWK" , "topSelection_Inverted/%s" % histoName, "Inverted")
+        getHisto(datasetsMgr, "EWK", histoNameNew, "Baseline"),
+        getHisto(datasetsMgr, "EWK", histoNameNew, "Inverted")
         )
     p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
+    # Get EWKGenuineB histos
+    EWKGenuineB_baseline = p2.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone("Baseline-EWKGenuineB")
+    EWKGenuineB_inverted = p2.histoMgr.getHisto("Inverted-EWK").getRootHisto().Clone("Inverted-EWKGenuineB")
 
-    # Get Baseline histos
-    Data_baseline = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline_Data")
-    EWK_baseline  = p1.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone("Baseline_EWK")
-    QCD_baseline  = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline_QCD")
-
-    # Get Inverted histos
-    Data_inverted = p2.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted_Data")
-    EWK_inverted  = p2.histoMgr.getHisto("Inverted-EWK").getRootHisto().Clone("Inverted_EWK")
-    QCD_inverted  = p2.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted_QCD")
-
-    # Create QCD histos: QCD = Data-EWK
-    QCD_baseline.Add(EWK_baseline, -1)
-    QCD_inverted.Add(EWK_inverted, -1)
+    # Get FakeB histos
+    FakeB_baseline = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline-FakeB")
+    FakeB_baseline.Add(EWKGenuineB_baseline, -1)
+    FakeB_inverted = p1.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted-FakeB")
+    FakeB_inverted.Add(EWKGenuineB_inverted, -1)
 
     # Normalize histograms to unit area
-    if 0:
-        EWK_baseline.Scale(1.0/EWK_baseline.Integral())    
-        EWK_inverted.Scale(1.0/EWK_inverted.Integral())
-        QCD_baseline.Scale(1.0/QCD_baseline.Integral())
-        QCD_inverted.Scale(1.0/QCD_inverted.Integral())
-        
+    EWKGenuineB_baseline.Scale(1.0/EWKGenuineB_baseline.Integral())    
+    EWKGenuineB_inverted.Scale(1.0/EWKGenuineB_inverted.Integral())
+    FakeB_baseline.Scale(1.0/FakeB_baseline.Integral())
+    FakeB_inverted.Scale(1.0/FakeB_inverted.Integral())
+
     # Create the final plot object
-    if addQcdBaseline:
-        compareHistos = [EWK_baseline, QCD_baseline]
-    else:
-        compareHistos = [EWK_baseline]
-    p = plots.ComparisonManyPlot(QCD_inverted, compareHistos, saveFormats=[])
+    comparisonList = [EWKGenuineB_baseline]
+    p = plots.ComparisonManyPlot(FakeB_inverted, comparisonList, saveFormats=[])
     p.setLuminosity(GetLumi(datasetsMgr))
-
-
-    #=========================================================================================
-    # Start Fit process
-    #=========================================================================================
-    binLabels = ["Inclusive"]
-    moduleInfoString = opts.optMode
-    FITMIN = 0
-    FITMAX = 1500
-
-    manager = QCDNormalization.QCDNormalizationManagerDefault(binLabels, opts.mcrab, moduleInfoString)
-
-    #=========================================================================================
-    # Create templates (EWK fakes, EWK genuine, QCD; data template is created by manager)
-    #=========================================================================================
-    template_EWKFakeB_Baseline     = manager.createTemplate("EWKFakeB_Baseline")
-    template_EWKFakeB_Inverted     = manager.createTemplate("EWKFakeB_Inverted")
-    template_EWKInclusive_Baseline = manager.createTemplate("EWKInclusive_Baseline")
-    template_EWKInclusive_Inverted = manager.createTemplate("EWKInclusive_Inverted")
-    template_QCD_Baseline          = manager.createTemplate("QCD_Baseline")
-    template_QCD_Inverted          = manager.createTemplate("QCD_Inverted")
         
-    #=========================================================================================
-    # Inclusive EWK
-    #=========================================================================================
-    # par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4]) +
-    # par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7]) +
-    # (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9])
+    # Apply styles
+    p.histoMgr.forHisto("Baseline-EWKGenuineB", styles.getBaselineStyle() )
+    p.histoMgr.forHisto("Inverted-FakeB"      , styles.getInvertedStyle() )
 
-    #template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=200, norm=1, rejectPoints=0), FITMIN, FITMAX)
-    template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=200, norm=1, rejectPoints=0), FITMIN, 800)
-    template_EWKInclusive_Baseline.setDefaultFitParam(defaultInitialValue=None,
-                                                      #                   p0   p1     p2     p3     p4   p5    p6    p7      p8      p9
-                                                      #defaultLowerLimit=[0.0, 150.0,  0.0, -5.0, 0.0, 0.0, 150.0,   0.0, 100.0,    0.0],
-                                                      #defaultUpperLimit=[1.0, 300.0, 50.0,  0.0, 1.0, 1.0, 200.0, 100.0, 200.0,  100.0])
-                                                      defaultLowerLimit=[0.0, 160.0,   0.0, -1.0, 0.0],
-                                                      defaultUpperLimit=[1.0, 180.0,  60.0,  0.0, 1e6])
+    # Set draw style
+    p.histoMgr.setHistoDrawStyle("Baseline-EWKGenuineB", "AP")
+    p.histoMgr.setHistoDrawStyle("Inverted-FakeB"      , "HIST")
 
-    #=========================================================================================
-    # Note that the same function is used for QCD only and QCD+EWK fakes
-    #=========================================================================================
-    #par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2]) + par[3]*ROOT.TMath.Exp(-x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], part[6])
-    
-    # 0 =   0.8489  for coeff of lognorm
-    # 1 =   1.42978 for logshape
-    # 2 = 238.546   for logmean
-    #
-    # 3 =   0.047   for coeff of exp
-    # 4 =  -0.0048  for exp
-    #
-    # 5 =  45.486   for gaus sigma
-    # 6 = 204.6     for gaus mean
+    # Set legend style
+    p.histoMgr.setHistoLegendStyle("Baseline-EWKGenuineB", "LP")
+    p.histoMgr.setHistoDrawStyle("Inverted-FakeB"        , "AP")
 
-    #my lognormal is of the form:
-    #lognorm(x,m0,k) = exp{-[log(x/m0)]^2/[2*log(k)]^2}/sqrt[2pi*log(k)*x]
-    #and differs than the Math::lognormal_pdf parametrization which takes as arguments lognormal(x,m,s,x0)
-    #where m = log(m0) and s=log(k)
-    #TMath::LogNormal  return Math::lognormal_pdf
-    #my exponential is   exp(x*a)  so the sign comes from the fit
-    #and my gaussian is exp[-0.5*mean*mean/(sigma*sigma)]
+    # Set legend labels
+    p.histoMgr.setHistoLegendLabelMany({
+            "Baseline-EWKGenuineB": "GenuineB (EWK)", # (Baseline)
+            "Inverted-FakeB"      : "FakeB", # (Inverted)
+            })
 
-    # Double_t LogNormal(x, sigma, theta = 0, m = 1)
-
-    #template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=350, norm=1), FITMIN, FITMAX)
-    template_QCD_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=350, norm=1), 100, 800)
-    template_QCD_Inverted.setDefaultFitParam(defaultInitialValue=None,
-                                             defaultLowerLimit=[0.0, 0.0, 200.0, 0.0, -0.1, 200.0,  0.0],
-                                             defaultUpperLimit=[1.0, 2.0, 400.0, 0.1, +0.0, 300.0, 60.0])
-
-
-    #=========================================================================================
-    # Set histograms to the templates
-    #=========================================================================================
-    template_EWKFakeB_Baseline.setHistogram(EWK_baseline, "Inclusive")
-    template_EWKFakeB_Inverted.setHistogram(EWK_inverted, "Inclusive")
-    template_EWKInclusive_Baseline.setHistogram(EWK_baseline, "Inclusive")
-    template_EWKInclusive_Inverted.setHistogram(EWK_inverted, "Inclusive")
-    template_QCD_Baseline.setHistogram(QCD_baseline, "Inclusive")
-    template_QCD_Inverted.setHistogram(QCD_inverted, "Inclusive")
-
-    #=========================================================================================
-    # Make plots of templates
-    #=========================================================================================
-    manager.plotTemplates()
-    
-    #=========================================================================================
-    # Fit individual templates to histogram "data_baseline", with custom fit options
-    #=========================================================================================
-    fitOptions = "R B L W M Q"
-    manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN, FITMAX)
-            
     # Append analysisType to histogram name
     saveName = histoName
 
     # Draw the histograms #alex
     plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
 
-    _kwargs = {"lessThan": True}
-    p.addCutBoxAndLine(cutValue=173.21, fillColor=ROOT.kRed, box=False, line=True, **_kwargs)
+    # _kwargs = {"lessThan": True}
+    # p.addCutBoxAndLine(cutValue=200, fillColor=ROOT.kRed, box=False, line=True, ***_kwargs)
+    
+    # Add text
+    text = opts.optMode.replace("OptChiSqrCutValue", "#chi^{2} #leq ")
+    histograms.addText(0.21, 0.85, text)
 
     # Save plot in all formats
-    #SavePlot(p, saveName, os.path.join(opts.saveDir, "Templates") ) 
+    saveDir = os.path.join(opts.saveDir, "Templates", opts.optMode)
+    SavePlot(p, saveName, saveDir, saveFormats = [".C", ".png", ".pdf"])
     return
 
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
+def IsBaselineOrInverted(analysisType):
+    analysisTypes = ["Baseline", "Inverted"]
+    if analysisType not in analysisTypes:
+        raise Exception("Invalid analysis type \"%s\". Please select one of the following: %s" % (analysisType, "\"" + "\", \"".join(analysisTypes) + "\"") )
+    else:
+        pass
+    return
+
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+
+    # Check that path exists
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
 
     # Create the name under which plot will be saved
     saveName = os.path.join(saveDir, plotName.replace("/", "_"))
@@ -522,4 +474,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plotHistograms.py: Press any key to quit ROOT ...")
+        raw_input("=== plotFakeB_Templates.py: Press any key to quit ROOT ...")

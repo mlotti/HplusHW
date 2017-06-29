@@ -155,43 +155,48 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
     Verbose("main function")
+    
+    optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]
+    if opts.optMode != None:
+        optModes = [opts.optMode]
 
-    comparisonList = ["AfterStdSelections"]
+   # For-loop: All optimisation modes                                                                                                                                                                                             
+    for opt in optModes:
+        opts.optMode = opt
 
-    # Setup & configure the dataset manager 
-    datasetsMgr = GetDatasetsFromDir(opts)
-    datasetsMgr.updateNAllEventsToPUWeighted()
-    datasetsMgr.loadLuminosities() # from lumi.json
-    if opts.verbose:
-        datasetsMgr.PrintCrossSections()
-        datasetsMgr.PrintLuminosities()
+        # Setup & configure the dataset manager 
+        datasetsMgr = GetDatasetsFromDir(opts)
+        datasetsMgr.updateNAllEventsToPUWeighted()
+        datasetsMgr.loadLuminosities() # from lumi.json
+        
+        if opts.verbose:
+            datasetsMgr.PrintCrossSections()
+            datasetsMgr.PrintLuminosities()
 
-    # Check multicrab consistency
-    # consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="CorrelationAnalysis")
-
-    # Custom Filtering of datasets 
-    # datasetsMgr.remove(filter(lambda name: "HplusTB" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
-    # datasetsMgr.remove(filter(lambda name: "ST" in name, datasetsMgr.getAllDatasetNames()))
+        # Custom Filtering of datasets 
+        if 0:
+            datasetsMgr.remove(filter(lambda name: "HplusTB" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "ST" in name, datasetsMgr.getAllDatasetNames()))
                
-    # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-    plots.mergeRenameReorderForDataMC(datasetsMgr)
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr)
    
-    # Print dataset information
-    datasetsMgr.PrintInfo()
+        # Print dataset information
+        datasetsMgr.PrintInfo()
 
-    # Re-order datasets (different for inverted than default=baseline)
-    newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
-    newOrder.extend(GetListOfEwkDatasets())
-    if opts.mcOnly:
-        newOrder.remove("Data")
-    datasetsMgr.selectAndReorder(newOrder)
+        # Re-order datasets (different for inverted than default=baseline)
+        newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+        newOrder.extend(GetListOfEwkDatasets())
+        if opts.mcOnly:
+            newOrder.remove("Data")
+        datasetsMgr.selectAndReorder(newOrder)
 
-    # Merge EWK samples (done later on)
-    #if opts.mergeEWK:
-    #    datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+        # Merge EWK samples (done later on)
+        # if opts.mergeEWK:
+        #    datasetsMgr.merge("EWK", GetListOfEwkDatasets())
 
-    # Do default counters
-    doCounters(datasetsMgr)
+        # Do default counters
+        doCounters(datasetsMgr)
 
     return
 
@@ -452,7 +457,7 @@ if __name__ == "__main__":
             sys.exit(1)
     
     if  opts.fractionEWK and not opts.mergeEWK:
-        Print("In order to use --fractionEWK the --mergeEWK optionm must also be called.")
+        Print("In order to use --fractionEWK the --mergeEWK option must also be called.")
         #opts.mergeEWK = True
         sys.exit(1)
               
