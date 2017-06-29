@@ -15,13 +15,10 @@ For more counter tricks and optios see also:
 HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
-./plotDataEwkSignal.py -m <pseudo_mcrab_directory> [opts]
+./plotFakeB_Signal.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plotDataEwkSignal.py -m FakeBMeasurement_170621_150419_BJetsGE2_TopChiSqrVar_AllSamples/ -e "QCD|M_800|M_400|M_350|M_300|M_250|M_220|M_200|M_180|M_100" --mergeEWK
-./plotDataEwkSignal.py -m FakeBMeasurement_170621_150419_BJetsGE2_TopChiSqrVar_AllSamples/ -e "QCD" --mergeEWK
-./plotDataEwkSignal.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170602_235941_BJetsEE2_TopChiSqrVar_H2Var --mergeEWK --histoLevel Vital -o OptChiSqrCutValue10FoxWolframMomentCutValue0p5
-./plotDataEwkSignal.py -m FakeBMeasurement_170621_150419_BJetsGE2_TopChiSqrVar_AllSamples/ -e "QCD|M_800|M_400|M_350|M_300|M_250|M_220|M_200|M_180|M_100" --mergeEWK
+./plotFakeB_Signal.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples -e "QCD|M_800|M_400|M_350|M_300|M_250|M_220|M_200|M_180|M_100" --mergeEWK
 '''
 
 #================================================================================================ 
@@ -84,7 +81,7 @@ def GetListOfEwkDatasets():
     return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 
-def getTopSelectionHistos(histoLevel="Vital", analysisType="Baseline"):
+def GetHistoList(analysisType="Baseline"):
     '''
     Returns the list of histograms created by
     the TopSelection class
@@ -94,167 +91,10 @@ def getTopSelectionHistos(histoLevel="Vital", analysisType="Baseline"):
 
     # Entire list
     hList = [        
-        #"topSelection_%s/ChiSqr_Before" % (analysisType),
-        #"topSelection_%s/ChiSqr_After" % (analysisType),
-        #"topSelection_%s/NJetsUsedAsBJetsInFit_Before" % (analysisType),
-        #"topSelection_%s/NJetsUsedAsBJetsInFit_After" % (analysisType),
-        #"topSelection_%s/NumberOfFits_Before" % (analysisType),
-        #"topSelection_%s/NumberOfFits_After" % (analysisType),
-        #"topSelection_%s/TetrajetBJetPt_Before" % (analysisType),
-        #"topSelection_%s/TetrajetBJetPt_After" % (analysisType),
-        #"topSelection_%s/TetrajetBJetEta_Before" % (analysisType),
-        #"topSelection_%s/TetrajetBJetEta_After" % (analysisType),
-        #"topSelection_%s/TetrajetBJetBDisc_Before" % (analysisType),
-        #"topSelection_%s/TetrajetBJetBDisc_After" % (analysisType),
-        #"topSelection_%s/Tetrajet1Pt_Before" % (analysisType),
-        #"topSelection_%s/Tetrajet1Mass_Before" % (analysisType),
-        #"topSelection_%s/Tetrajet1Eta_Before" % (analysisType),
-        #"topSelection_%s/Tetrajet1Pt_After" % (analysisType),
-        #"topSelection_%s/Tetrajet1Mass_After" % (analysisType),
-        #"topSelection_%s/Tetrajet1Eta_After" % (analysisType),
-        #"topSelection_%s/Tetrajet2Pt_Before" % (analysisType),
-        #"topSelection_%s/Tetrajet2Mass_Before" % (analysisType),
-        #"topSelection_%s/Tetrajet2Eta_Before" % (analysisType),
-        #"topSelection_%s/Tetrajet2Pt_After" % (analysisType),
-        #"topSelection_%s/Tetrajet2Mass_After" % (analysisType),
-        #"topSelection_%s/Tetrajet2Eta_After" % (analysisType),
-        #"topSelection_%s/LdgTetrajetPt_Before" % (analysisType),
-        #"topSelection_%s/LdgTetrajetMass_Before" % (analysisType),
-        #"topSelection_%s/LdgTetrajetEta_Before" % (analysisType),
-        #"topSelection_%s/LdgTetrajetPt_After" % (analysisType),
-        #"topSelection_%s/LdgTetrajetMass_After" % (analysisType),
-        #"topSelection_%s/LdgTetrajetEta_After" % (analysisType),
-        #"topSelection_%s/SubldgTetrajetPt_Before" % (analysisType),
-        #"topSelection_%s/SubldgTetrajetMass_Before" % (analysisType),
-        #"topSelection_%s/SubldgTetrajetEta_Before" % (analysisType),
-        #"topSelection_%s/SubldgTetrajetPt_After" % (analysisType),
-        #"topSelection_%s/SubldgTetrajetMass_After" % (analysisType),
-        #"topSelection_%s/SubldgTetrajetEta_After" % (analysisType),
-        #"topSelection_%s/Trijet1Mass_Before" % (analysisType),
-        #"topSelection_%s/Trijet2Mass_Before" % (analysisType),
-        #"topSelection_%s/Trijet1Mass_After" % (analysisType),
-        #"topSelection_%s/Trijet2Mass_After" % (analysisType),
-        #"topSelection_%s/Trijet1Pt_Before" % (analysisType),
-        #"topSelection_%s/Trijet2Pt_Before" % (analysisType),
-        #"topSelection_%s/Trijet1Pt_After" % (analysisType),
-        #"topSelection_%s/Trijet2Pt_After" % (analysisType),
-        #"topSelection_%s/Trijet1DijetMass_Before" % (analysisType),
-        #"topSelection_%s/Trijet2DijetMass_Before" % (analysisType),
-        #"topSelection_%s/Trijet1DijetMass_After" % (analysisType),
-        #"topSelection_%s/Trijet2DijetMass_After" % (analysisType),
-        #"topSelection_%s/Trijet1DijetPt_Before" % (analysisType),
-        #"topSelection_%s/Trijet2DijetPt_Before" % (analysisType),
-        #"topSelection_%s/Trijet1DijetPt_After" % (analysisType),
-        #"topSelection_%s/Trijet2DijetPt_After" % (analysisType),
-        #"topSelection_%s/Trijet1DijetDEta_Before" % (analysisType),
-        #"topSelection_%s/Trijet2DijetDEta_Before" % (analysisType),
-        #"topSelection_%s/Trijet1DijetDEta_After" % (analysisType),
-        #"topSelection_%s/Trijet2DijetDEta_After" % (analysisType),
-        #"topSelection_%s/Trijet1DijetDPhi_Before" % (analysisType),
-        #"topSelection_%s/Trijet2DijetDPhi_Before" % (analysisType),
-        #"topSelection_%s/Trijet1DijetDPhi_After" % (analysisType),
-        #"topSelection_%s/Trijet2DijetDPhi_After" % (analysisType),
-        #"topSelection_%s/Trijet1DijetDR_Before" % (analysisType),
-        #"topSelection_%s/Trijet2DijetDR_Before" % (analysisType),
-        #"topSelection_%s/Trijet1DijetDR_After" % (analysisType),
-        #"topSelection_%s/Trijet2DijetDR_After" % (analysisType),
-        #"topSelection_%s/Trijet1DijetBJetDR_Before" % (analysisType),
-        #"topSelection_%s/Trijet2DijetBJetDR_Before" % (analysisType),
-        #"topSelection_%s/Trijet1DijetBJetDR_After" % (analysisType),
-        #"topSelection_%s/Trijet2DijetBJetDR_After" % (analysisType),
-        #"topSelection_%s/Trijet1DijetBJetDPhi_Before" % (analysisType),
-        #"topSelection_%s/Trijet2DijetBJetDPhi_Before" % (analysisType),
-        #"topSelection_%s/Trijet1DijetBJetDPhi_After" % (analysisType),
-        #"topSelection_%s/Trijet2DijetBJetDPhi_After" % (analysisType),
-        #"topSelection_%s/Trijet1DijetBJetDEta_Before" % (analysisType),
-        #"topSelection_%s/Trijet2DijetBJetDEta_Before" % (analysisType),
-        #"topSelection_%s/Trijet1DijetBJetDEta_After" % (analysisType),
-        #"topSelection_%s/Trijet2DijetBJetDEta_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetPt_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetPt_After" % (analysisType),
         "topSelection_%s/LdgTrijetMass_Before" % (analysisType),
         "topSelection_%s/LdgTrijetMass_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet1Pt_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet1Pt_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet1Eta_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet1Eta_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet1BDisc_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet1BDisc_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet2Pt_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet2Pt_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet2Eta_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet2Eta_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet2BDisc_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetJet2BDisc_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetBJetPt_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetBJetPt_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetBJetEta_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetBJetEta_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetBJetBDisc_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetBJetBDisc_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetDiJetPt_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetDiJetPt_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetDiJetEta_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetDiJetEta_After" % (analysisType),
-        #"topSelection_%s/LdgTrijetDiJetMass_Before" % (analysisType),
-        #"topSelection_%s/LdgTrijetDiJetMass_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetPt_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetPt_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetMass_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetMass_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet1Pt_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet1Pt_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet1Eta_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet1Eta_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet1BDisc_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet1BDisc_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet2Pt_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet2Pt_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet2Eta_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet2Eta_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet2BDisc_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetJet2BDisc_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetBJetPt_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetBJetPt_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetBJetEta_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetBJetEta_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetBJetBDisc_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetBJetBDisc_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetDiJetPt_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetDiJetPt_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetDiJetEta_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetDiJetEta_After" % (analysisType),
-        #"topSelection_%s/SubldgTrijetDiJetMass_Before" % (analysisType),
-        #"topSelection_%s/SubldgTrijetDiJetMass_After" % (analysisType),
-        ## "topSelection_%s/Trijet1MassVsChiSqr_Before" % (analysisType),
-        ## "topSelection_%s/Trijet2MassVsChiSqr_Before" % (analysisType),
-        ## "topSelection_%s/Trijet1MassVsChiSqr_After" % (analysisType),
-        ## "topSelection_%s/Trijet2MassVsChiSqr_After" % (analysisType),
-        ## "topSelection_%s/Trijet1DijetPtVsDijetDR_Before" % (analysisType),
-        ## "topSelection_%s/Trijet2DijetPtVsDijetDR_Before" % (analysisType),
-        ## "topSelection_%s/Trijet1DijetPtVsDijetDR_After" % (analysisType),
-        ## "topSelection_%s/Trijet2DijetPtVsDijetDR_After" % (analysisType),
         ]
-
-    hListFilter = []
-    if histoLevel == "Vital":
-        for h in hList:
-            if any(substring in h for substring in ["Fit", "1", "2", "Pt", "Eta", "BDisc", "Subldg", "Tetrajet", "Dijet", "DiJet"]):
-                continue
-            else:
-                hListFilter.append(h)
-    elif histoLevel == "Informative":
-        for h in hList:
-            if any(substring in h for substring in ["Eta", "Fit", "Tetrajet1", "Tetrajet2"]):
-                continue
-            else:
-                hListFilter.append(h)
-    elif histoLevel == "Debug":
-        hListFilter = hList
-    else:
-        Print("Returning empty list!", True)
-        return []
-    return hListFilter
+    return hList
 
 
 def GetDatasetsFromDir(opts):
@@ -286,76 +126,68 @@ def GetDatasetsFromDir(opts):
     
 
 def main(opts):
-    Verbose("main function")
 
-    comparisonList = ["AfterStdSelections"]
+    optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue150p0", "OptChiSqrCutValue200p0"]
 
-    # Setup & configure the dataset manager 
-    datasetsMgr = GetDatasetsFromDir(opts)
-    datasetsMgr.updateNAllEventsToPUWeighted()
-    datasetsMgr.loadLuminosities() # from lumi.json
+    if opts.optMode != None:
+        optModes = [opts.optMode]
+        
+    # For-loop: All opt Mode
+    for opt in optModes:
+        opts.optMode = opt
 
-    # Set/Overwrite cross-sections                                                                                                                                                                                             
-    for d in datasetsMgr.getAllDatasets():
-        if "ChargedHiggs" in d.getName():
-            print d.getName()
-            datasetsMgr.getDataset(d.getName()).setCrossSection(10.0)
+        # Setup & configure the dataset manager 
+        datasetsMgr = GetDatasetsFromDir(opts)
+        datasetsMgr.updateNAllEventsToPUWeighted()
+        datasetsMgr.loadLuminosities() # from lumi.json
 
-    if opts.verbose:
-        datasetsMgr.PrintCrossSections()
-        datasetsMgr.PrintLuminosities()
+        # Set/Overwrite cross-sections
+        for d in datasetsMgr.getAllDatasets():
+            if "ChargedHiggs" in d.getName():
+                print d.getName()
+                datasetsMgr.getDataset(d.getName()).setCrossSection(10.0)
+                
+        if opts.verbose:
+            datasetsMgr.PrintCrossSections()
+            datasetsMgr.PrintLuminosities()
 
-    # Check multicrab consistency
-    if 0:
-        consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="CorrelationAnalysis")
+        # Check multicrab consistency
+        if 0:
+            consistencyCheck.checkConsistencyStandalone(dirs[0],datasets,name="CorrelationAnalysis")
 
-    # Custom Filtering of datasets 
-    if 0:
-        datasetsMgr.remove(filter(lambda name: "ST" in name, datasetsMgr.getAllDatasetNames()))
+        # Custom Filtering of datasets 
+        if 0:
+            datasetsMgr.remove(filter(lambda name: "ST" in name, datasetsMgr.getAllDatasetNames()))
                
-    # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
-    plots.mergeRenameReorderForDataMC(datasetsMgr) 
+        # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
+        plots.mergeRenameReorderForDataMC(datasetsMgr) 
    
-    # Get Integrated Luminosity
-    if opts.mcOnly:
-        # Determine integrated lumi
-        if opts.intLumi < 0.0:
-            opts.intLumi = GetLumi(datasetsMgr)
-        else:
-            pass
-        # Remove data datasets
-        datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
+        # Re-order datasets (different for inverted than default=baseline)
+        newOrder = ["Data"]
+        newOrder.extend(["ChargedHiggs_HplusTB_HplusToTB_M_500"])
+        newOrder.extend(GetListOfEwkDatasets())
+        datasetsMgr.selectAndReorder(newOrder)
 
-    # Re-order datasets (different for inverted than default=baseline)
-    newOrder = ["Data"]
-    newOrder.extend(["ChargedHiggs_HplusTB_HplusToTB_M_500"])
-    newOrder.extend(GetListOfEwkDatasets())
-    datasetsMgr.selectAndReorder(newOrder)
+        # Merge EWK samples
+        if opts.mergeEWK:
+            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+            plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
-    if opts.mcOnly:
-        newOrder.remove("Data")
+        # Print dataset information
+        datasetsMgr.PrintInfo()
 
-    # Merge EWK samples
-    if opts.mergeEWK:
-        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
-        plots._plotStyles["EWK"] = styles.getAltEWKStyle()
+        # Apply TDR style
+        style = tdrstyle.TDRStyle()
+        style.setOptStat(True)
 
-
-    # Print dataset information
-    datasetsMgr.PrintInfo()
-
-    # Apply TDR style
-    style = tdrstyle.TDRStyle()
-    style.setOptStat(True)
-
-    # Do the standard top-selections
-    analysisTypes = ["Baseline", "Inverted"]
-    for analysis in analysisTypes:
-        Print("Plotting Top Selection Histograms (%s)" % (analysis), True)
-        TopSelectionHistograms(opts, datasetsMgr, analysis)
+        # Do the standard top-selections
+        analysisTypes = ["Baseline", "Inverted"]
+        for analysis in analysisTypes:
+            Print("Plotting Top Selection Histograms (%s)" % (analysis), True)
+            PlotSignal(datasetsMgr, analysis, opts)
 
     # Do Data-MC histograms
-    #for analysis in analysisTypes:
+    # for analysis in analysisTypes:
     #    Print("Plotting Other Histograms (%s)" % (analysis), True)
     #    DataMCHistograms(datasetsMgr, analysis)
     return
@@ -479,12 +311,12 @@ def DataMCHistograms(datasetsMgr, analysisType=""):
             plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
 
         # Save plot in all formats
-        SavePlot(p, saveName, os.path.join(opts.saveDir, "DataEwkSignal") )
+        SavePlot(p, saveName, os.path.join(opts.saveDir, "Signal", opts.optMode) )
     return
 
 
 
-def TopSelectionHistograms(opts, datasetsMgr, analysisType):
+def PlotSignal(datasetsMgr, analysisType, opts):
     '''
     Create data-MC comparison plot, with the default:
     - legend labels (defined in plots._legendLabels)
@@ -492,49 +324,55 @@ def TopSelectionHistograms(opts, datasetsMgr, analysisType):
     - drawing styles ('HIST' for MC, 'EP' for data)
     - legend styles ('L' for MC, 'P' for data)
     '''
-    Verbose("Plotting all topSelection histograms for %s" % analysisType)
+    Verbose("Plotting histograms for %s" % analysisType)
 
     # Sanity check
     IsBaselineOrInverted(analysisType)
 
     # Definitions
-    histoNames  = getTopSelectionHistos(opts.histoLevel, analysisType)
+    histoNames  = GetHistoList(analysisType)
     histoKwargs = {}
-    saveFormats = [".png", ".pdf"] #[".C", ".png", ".pdf"]
+    saveFormats = [".C", ".png", ".pdf"]
+
 
     # General Settings
-    if opts.mergeEWK:
-        _moveLegend = {"dx": -0.1, "dy": 0.0, "dh": -0.15}
-    else:
-        _moveLegend = {"dx": -0.1, "dy": 0.0, "dh": 0.1}
+    _moveLegend = {"dx": -0.1, "dy": 0.0, "dh": -0.15}
     logY = True
     if logY:
         _opts1 = {"ymin": 1.0, "ymaxfactor": 10}
     else:
         _opts1 = {"ymin": 0.0, "ymaxfactor": 1.2}
     _opts2 = {"ymin": 0.0, "ymax": 2.0},
-        
-    _kwargs = {"rebinX": 10,
-               "rebinY": None,
-               "ratioYlabel": "Data/MC",
-               "ratio": False, 
+    _kwargs = {"rebinX"           : 10,
+               "rebinY"           : None,
+               "ratioYlabel"      : "Data/MC",
+               "ratio"            : False, 
                "stackMCHistograms": True,
-               "ratioInvert": False, 
-               "addMCUncertainty": False, 
+               "ratioInvert"      : False, 
+               "addMCUncertainty" : False, 
                "addLuminosityText": True,
-               "addCmsText"  : True,
-               "cmsExtraText": "Preliminary",
-               "opts"        : _opts1,
-               "opts2"       : _opts2,
-               "log"         : logY,
-               "errorBarsX"  : True, 
-               "moveLegend"  : _moveLegend,
-               "cutBox"      : {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True},
-               "ylabel"      : "Events / %.0f",
+               "addCmsText"       : True,
+               "cmsExtraText"     : "Preliminary",
+               "opts"             : _opts1,
+               "opts2"            : _opts2,
+               "log"              : logY,
+               "errorBarsX"       : True, 
+               "moveLegend"       : _moveLegend,
+               "cutBox"           : {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True},
+               "ylabel"           : "Events / %.0f",
                }
 
     # Create/Draw the plots
     for histoName in histoNames:
+
+        if "trijetm" in histoName.lower():
+            units  = "GeV/c^{2}"
+            format = "%0.0f " + units
+            _kwargs["rebinX"] = 2
+            _kwargs["xlabel"] = "m_{jjb} (%s)" % units
+            _kwargs["ylabel"] =  "Events / %s" % (format)
+            _kwargs["cutBox"] = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            _kwargs["xmax"]   = 1500.0
         histoKwargs[histoName] = _kwargs
 
     # For-loop: All histograms in list
@@ -543,20 +381,12 @@ def TopSelectionHistograms(opts, datasetsMgr, analysisType):
         kwargs_  = histoKwargs[histoName]
         saveName = histoName.replace(folder + analysisType + "/", "")
 
-        if opts.mcOnly:
-            p = plots.MCPlot(datasetsMgr, histoName, normalizeToLumi=opts.intLumi, saveFormats=[])
-            kwargs_.pop("ratio", None)
-            kwargs_.pop("ratioYlabel", None)
-            kwargs_.pop("ratioInvert", None)
-            kwargs_.pop("opts2", None)
-            plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
-        else:
-            p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
-            plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
+        # Create the plot
+        p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
+        plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
 
         # Save plot in all formats
-        SavePlot(p, histoName, os.path.join(opts.saveDir, "DataEwkSignal") ) 
-        #SavePlot(p, histoName, os.path.join(opts.saveDir, analysisType) ) 
+        SavePlot(p, histoName, os.path.join(opts.saveDir, "Signal", opts.optMode) ) 
     return
     
                          
@@ -624,7 +454,7 @@ if __name__ == "__main__":
     ANALYSISNAME = "FakeBMeasurement"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
-    OPTMODE      = ""
+    OPTMODE      = None
     BATCHMODE    = True
     PRECISION    = 3
     INTLUMI      = -1.0

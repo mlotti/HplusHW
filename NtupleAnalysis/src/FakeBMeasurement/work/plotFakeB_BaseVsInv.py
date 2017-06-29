@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 '''
 Description:
-This scipt plots TH1 histograms produced by the
-FakeBMeasurement.cc class. These histograms
-are considered auxiliary to those created by
-plotEwkVsQcd.py and plotBaselineVsInverted.py 
-scripts. They show the QCD (or EWK) purity as a 
-function of a given variable.
+This scipt creates all histograms for comparing 
+Baseline and Inverted distributions of key variables, like
+the leading trijet mass, and its properties.
 
 For the definition of the counter class see:
 HiggsAnalysis/NtupleAnalysis/scripts
@@ -15,10 +12,11 @@ For more counter tricks and optios see also:
 HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
-./plotPurity.py -m <pseudo_mcrab_directory> [opts]
+./plotFakeB_BaseVsInv.py -m <pseudo_mcrab> [opts]
 
 Examples:
-./plotFakeB_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --mergeEWK -e 'QCD|Charged'
+./plotFakeB_BaseVsInv.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --mergeEWK -e "QCD|Charged" -o "OptChiSqrCutValue100p0"
+./plotFakeB_BaseVsInv.py -m <pseudo_mcrab> --mergeEWK --histoLevel Vital
 '''
 
 #================================================================================================ 
@@ -111,8 +109,7 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
 
-    #optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]
-    optModes = ["OptChiSqrCutValue100p0"]
+    optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]                                                                                                                                  
 
     if opts.optMode != None:
         optModes = [opts.optMode]
@@ -125,33 +122,35 @@ def main(opts):
         datasetsMgr = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
         datasetsMgr.loadLuminosities() # from lumi.json
-        
-        # Set/Overwrite cross-sections
-        for d in datasetsMgr.getAllDatasets():
-            if "ChargedHiggs" in d.getName():
-                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
-
         if opts.verbose:
             datasetsMgr.PrintCrossSections()
             datasetsMgr.PrintLuminosities()
-            
+
         # Custom Filtering of datasets 
         if 0:
-            datasetsMgr.remove(filter(lambda name: "Charged" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "HplusTB" in name and not "M_500" in name, datasetsMgr.getAllDatasetNames()))
                
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py) 
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
    
         # Re-order datasets (different for inverted than default=baseline)
-        if 0:
-            newOrder = ["Data"]
-            newOrder.extend(GetListOfEwkDatasets())
-            datasetsMgr.selectAndReorder(newOrder)
+        newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+        newOrder.extend(GetListOfEwkDatasets())
+        datasetsMgr.selectAndReorder(newOrder)
+
+        # Set/Overwrite cross-sections
+        for d in datasetsMgr.getAllDatasets():
+            if "ChargedHiggs" in d.getName():
+                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
+
+        # Sanity check
+        if not opts.mergeEWK:
+            Print("Cannot draw the Baseline Vs Inverted histograms without the option --mergeEWK. Exit", True)
+            sys.exit()
 
         # Merge EWK samples
-        if opts.mergeEWK:
-            datasetsMgr.merge("EWK", GetListOfEwkDatasets())
-            plots._plotStyles["EWK"] = styles.getAltEWKStyle()
+        datasetsMgr.merge("EWK", GetListOfEwkDatasets())
+        plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
         # Print dataset information
         datasetsMgr.PrintInfo()
@@ -160,12 +159,9 @@ def main(opts):
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
 
-        # Do the purity plots
-        if not opts.mergeEWK:        
-            Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
-            return
+        # Do the Baseline Vs Inverted histograms
         for hName in GetHistoList(analysisType="Inverted", bType=""):
-            PurityPlots(datasetsMgr, hName, "Inverted")
+            BaselineVsInvertedPlots(datasetsMgr, hName, analysisType="Inverted")
     return
 
 
@@ -179,15 +175,6 @@ def GetHistoList(analysisType="Inverted", bType=""):
         raise Exception("Invalid analysis type \"%s\". Please select one of the following: %s" % (bType, "\"" + "\", \"".join(bTypes) + "\"") )
 
     histoList = []
-
-    folder = "FakeBPurity" + bType
-    histoList.append("%s/%s_FailedBJetPt_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_FailedBJetEta_AfterAllSelections" % (folder, analysisType) )
-    histoList.append("%s/%s_FailedBJetBDisc_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_FailedBJetPdgId_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_FailedBJetPartonFlavour_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_FailedBJetHadronFlavour_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_FailedBJetAncestry_AfterAllSelections" % (folder, analysisType) )
 
     folder = "ForFakeBMeasurement" + bType
     histoList.append("%s/%s_TopMassReco_ChiSqr_AfterAllSelections" % (folder, analysisType) )
@@ -204,23 +191,145 @@ def GetHistoList(analysisType="Inverted", bType=""):
     histoList.append("%s/%s_TopMassReco_LdgTrijetM_AfterAllSelections" % (folder, analysisType) )
     histoList.append("%s/%s_TopMassReco_SubLdgTrijetPt_AfterAllSelections" % (folder, analysisType) )
     histoList.append("%s/%s_TopMassReco_SubLdgTrijetM_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_LdgDijetPt_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_LdgDijetM_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_SubLdgDijetPt_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_SubLdgDijetM_AfterAllSelections" % (folder, analysisType) )
+    histoList.append("%s/%s_TopMassReco_LdgDijetPt_AfterAllSelections" % (folder, analysisType) )
+    histoList.append("%s/%s_TopMassReco_LdgDijetM_AfterAllSelections" % (folder, analysisType) )
+    histoList.append("%s/%s_TopMassReco_SubLdgDijetPt_AfterAllSelections" % (folder, analysisType) )
+    histoList.append("%s/%s_TopMassReco_SubLdgDijetM_AfterAllSelections" % (folder, analysisType) )
     return histoList
 
 
-def getHistos(datasetsMgr, histoName, analysisType):
-    
-    datasetName = "Data"
-    h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
+def getHistos(datasetsMgr, datasetName, histoName, analysisType):
+
+    hName = histoName
+    h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(hName)
     h1.setName(analysisType + "-" + datasetName)
 
-    datasetName = "EWK"
-    h2 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
-    h2.setName(analysisType + "-" + datasetName)
+    if analysisType == "Inverted":
+        newType = "Baseline"
+    else:
+        newType = "Inverted"
+    
+    hName = histoName.replace(analysisType, newType)
+    h2 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(hName)
+    h2.setName(newType + "-" + datasetName)
     return [h1, h2]
+
+
+def BaselineVsInvertedPlots(datasetsMgr, histoName, analysisType="Inverted"):
+    
+    # Sanity check
+    IsBaselineOrInverted(analysisType)
+    
+    # Get the Data (Inclusive)
+    p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, "Data",  histoName, analysisType))
+    p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+
+    # Get the EWK (GenuineB)                              
+    defaultFolder  = "ForFakeBMeasurement"
+    # FIXME - First pseudo-multicrab had the Fake/Genuine boolean REVERSED
+    #genuineBFolder = "ForFakeBMeasurementEWKGenuineB"
+    genuineBFolder = "ForFakeBMeasurementEWKFakeB"
+    histoNameNew   = histoName.replace( defaultFolder, genuineBFolder)
+    p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, "EWK", histoNameNew, analysisType) )
+    p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+
+    # Get Data histos    
+    baseline_Data = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline-Data")
+    inverted_Data = p1.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted-Data")
+
+    # Get EWK histos
+    baseline_EWKGenuineB = p2.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone("Baseline-EWKGenuineB")
+    inverted_EWKGenuineB = p2.histoMgr.getHisto("Inverted-EWK").getRootHisto().Clone("Inverted-EWKGenuineB")
+
+    # Create FakeB histos: FakeB = Data-EWKGenuineB
+    baseline_FakeB = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline-FakeB")
+    baseline_FakeB.Add(baseline_EWKGenuineB, -1)
+    inverted_FakeB = p1.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted-FakeB")
+    inverted_FakeB.Add(inverted_EWKGenuineB, -1)
+
+    # Normalize histograms to unit area
+    baseline_FakeB.Scale(1.0/baseline_FakeB.Integral())
+    inverted_FakeB.Scale(1.0/inverted_FakeB.Integral())
+
+    # Create the final plot object
+    p = plots.ComparisonManyPlot(baseline_FakeB, [inverted_FakeB], saveFormats=[]) #[".C", ".png", ".pdf"])
+    p.setLuminosity(GetLumi(datasetsMgr))
+        
+    # Apply styles
+    p.histoMgr.forHisto("Baseline-FakeB" , styles.getBaselineStyle() )
+    p.histoMgr.forHisto("Inverted-FakeB" , styles.getInvertedStyle() )
+
+    # Set draw style
+    p.histoMgr.setHistoDrawStyle("Baseline-FakeB", "AP")
+    p.histoMgr.setHistoLegendStyle("Baseline-FakeB", "LP")
+    p.histoMgr.setHistoDrawStyle("Inverted-FakeB", "HIST")
+    p.histoMgr.setHistoLegendStyle("Inverted-FakeB", "F")
+    # p.histoMgr.setHistoLegendStyleAll("LP")
+
+    # Set legend labels
+    p.histoMgr.setHistoLegendLabelMany({
+            "Baseline-FakeB" : "FakeB (Baseline)",
+            "Inverted-FakeB" : "FakeB (Inverted)",
+            })
+
+    # Draw the histograms
+    _cutBox = None
+    _rebinX = 1
+    _opts   = {"ymin": 1e-4, "ymaxfactor": 2.0}
+    _format = "%0.0f"
+    _xlabel = None
+
+    if "dijetm" in histoName.lower():
+        _rebinX = 2
+        _units  = "GeV/c^{2}"
+        _format = "%0.0f " + _units
+        _xlabel = "m_{jj} (%s)" % (_units)
+        _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 400.0
+    if "trijetm" in histoName.lower():
+        _rebinX = 5
+        _units  = "GeV/c^{2}"
+        _format = "%0.0f " + _units
+        _xlabel = "m_{jjb} (%s)" % _units
+        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 1500.0
+    if "pt" in histoName.lower():
+        _rebinX = 2
+        _format = "%0.0f GeV/c"
+    if "eta" in histoName.lower():
+        _format = "%0.2f"
+        _cutBox = {"cutValue": 0., "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmin"] = -3.0
+        _opts["xmax"] = +3.0
+    if "deltaeta" in histoName.lower():
+        _format = "%0.2f"
+        _opts["xmin"] =  0.0
+        _opts["xmax"] = 6.0
+    if "bdisc" in histoName.lower():
+        _format = "%0.2f"
+    if "tetrajetm" in histoName.lower():
+        _rebinX = 10
+        _units  = "GeV/c^{2}"
+        _format = "%0.0f " + _units
+        _xlabel = "m_{jjjb} (%s)" % (_units)
+        _opts["xmax"] = 3500.0
+
+    plots.drawPlot(p, histoName,  
+                   xlabel       = _xlabel,
+                   ylabel       = "Arbitrary Units / %s" % (_format),
+                   log          = True, 
+                   rebinX       = _rebinX, cmsExtraText = "Preliminary", 
+                   createLegend = {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92},
+                   opts         = _opts,
+                   opts2        = {"ymin": 0.6, "ymax": 1.4},
+                   ratio        = True,
+                   ratioInvert  = False, 
+                   ratioYlabel  = "Ratio",
+                   cutBox       = _cutBox,
+                   )
+    # Save plot in all formats
+    SavePlot(p, histoName, os.path.join(opts.saveDir, "BaselineVsInverted", opts.optMode) ) 
+    return
 
 
 def IsBaselineOrInverted(analysisType):
@@ -232,132 +341,13 @@ def IsBaselineOrInverted(analysisType):
     return
 
 
-def PurityPlots(datasetsMgr, histoName, analysisType="Inverted"):
-    '''
-    Create plots with "FakeB=Data-EWKGenuineB"
-    '''
-    Verbose("Plotting histogram %s for Data, EWK, QCD for %s" % (histoName, analysisType), True)
-
-    # Sanity check
-    IsBaselineOrInverted(analysisType)
-
-    # FIXME - First pseudo-multicrab had the Fake/Genuine boolean REVERSED
-    defaultFolder  = "FakeBPurity" 
-    genuineBFolder = defaultFolder + "EWKFakeB"
-    fakeBFolder    = defaultFolder + "EWKGenuineB"
-
-    # Get histos (Data, EWK) for Inclusive
-    p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName, analysisType) )
-    p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
-
-    # Get histos (Data, EWK) for GenuineB
-    p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName.replace(defaultFolder, genuineBFolder), analysisType) )
-    p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
-
-    # Clone histograms 
-    Data        = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType + "-Data")
-    EWKGenuineB = p2.histoMgr.getHisto(analysisType + "-EWK").getRootHisto().Clone(analysisType + "-EWK")
-    FakeB       = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType + "-FakeB")
-
-    # Subtract EWKGEnuineB from Data to get FakeB
-    FakeB.Add(EWKGenuineB, -1)
-    
-    # Dos not work
-    # p1.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
-    # p2.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))
-
-    # Comparison plot. The first argument is the reference histo. All other histograms are compared with respect to that. 
-    FakeB_Purity, xMin, xMax = getPurityHisto(FakeB, Data, inclusiveBins=False, printValues=False)
-    EWKGenuineB_Purity, xMin, xMax = getPurityHisto(EWKGenuineB, Data, inclusiveBins=False, printValues=False)
-    p = plots.ComparisonManyPlot(FakeB_Purity, [EWKGenuineB_Purity], saveFormats=[])
-
-    # Apply histo styles
-    p.histoMgr.forHisto(analysisType + "-FakeB", styles.getInvertedLineStyle() )#styles.getFakeBLineStyle() )
-    p.histoMgr.forHisto(analysisType + "-EWK"  , styles.getAltEWKLineStyle() ) #styles.getAltEWKStyle() )
-
-    # Set draw style
-    p.histoMgr.setHistoDrawStyle(analysisType + "-FakeB", "HIST")
-    p.histoMgr.setHistoDrawStyle(analysisType + "-EWK"  , "HIST")
-
-    # Set legend style
-    p.histoMgr.setHistoLegendStyle(analysisType + "-FakeB", "L")
-    p.histoMgr.setHistoLegendStyle(analysisType + "-EWK"  , "L")
-
-    # p.histoMgr.setHistoLegendStyleAll("LP")
-
-    # Set legend labels
-    p.histoMgr.setHistoLegendLabelMany({
-            analysisType + "-FakeB" : "FakeB",
-            analysisType + "-EWK"   : "GenuineB (EWK)",
-            })
-    
-    # Draw the histograms
-    _cutBox = None
-    _rebinX = 1
-    _opts   = {"ymin": 1e-3, "ymaxfactor": 1.2}
-    _format = "%0.0f"
-    _opts["xmax"] = xMax
-    _xlabel = None
-
-    if "dijetm" in histoName.lower():
-        _units  = "GeV/c^{2}" 
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jj} (%s)" % (_units)
-        _cutBox = {"cutValue": 80.399, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-    if "trijetm" in histoName.lower():
-        _units  = "GeV/c^{2}" 
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjb} (%s)" % _units
-        _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 1500.0
-    if "pt" in histoName.lower():
-        _format = "%0.0f GeV/c" 
-    if "eta" in histoName.lower():
-        _format = "%0.2f" 
-        _cutBox = {"cutValue": 0., "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmin"] = -3.0
-        _opts["xmax"] = +3.0
-    if "deltaeta" in histoName.lower():
-        _format = "%0.2f" 
-        _opts["xmin"] =  0.0
-        _opts["xmax"] = 6.0
-    if "bdisc" in histoName.lower():
-        _format = "%0.2f" 
-    if "tetrajetm" in histoName.lower():
-        _units  = "GeV/c^{2}" 
-        _format = "%0.0f " + _units
-        _xlabel = "m_{jjjb} (%s)" % (_units)
-        _opts["xmax"] = 3500.0
-
-    # Do the plot
-    plots.drawPlot(p, 
-                   histoName,  
-                   xlabel        = _xlabel,
-                   ylabel        = "Purity / {0}".format(_format),
-                   log           = False, 
-                   rebinX        = _rebinX, # Can only Rebin BEFORE calculating purity
-                   cmsExtraText  = "Preliminary", 
-                   createLegend  = {"x1": 0.60, "y1": 0.80, "x2": 0.92, "y2": 0.92},
-                   opts          = _opts,
-                   opts2         = {"ymin": 1e-5, "ymax": 1e0},
-                   ratio         = False,
-                   ratioInvert   = False, 
-                   ratioYlabel   = "Ratio",
-                   cutBox        = _cutBox,
-                   )
-
-    # Save plot in all formats
-    SavePlot(p, histoName, os.path.join(opts.saveDir, "Purity", opts.optMode))#, saveFormats = [".png"] )
-    return
-
-
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".C", ".pdf"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
 
     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
-
+        
     # Create the name under which plot will be saved
     saveName = os.path.join(saveDir, plotName.replace("/", "_"))
 
@@ -372,75 +362,6 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".C", ".pdf"]):
         plot.saveAs(saveName, formats=saveFormats)
     return
 
-
-def getPurityHisto(histo, refHisto, inclusiveBins=False, printValues=False):
-    '''
-    Return the FakeB purity as a histogram with splitted bins on x-axis
-    '''
-
-    h = histo.Clone()
-    h.Reset("ICESM")
-    ROOT.SetOwnership(h, True)
-    
-    rows   = []
-    align  = "{:>10} {:>10} {:>10} {:>10} {:>10} {:>3} {:<10}"
-    hLine  = "="*70
-    header = align.format("Bin", "Bin-Center", "Numerator", "Denominator", "Purity", "", "Error")
-    rows.append(hLine)
-    rows.append("{:^55}".format(histo.GetName()) )
-    rows.append(header)
-    rows.append(hLine)
-
-    # For-loop: Bins
-    minPurity = 999.9
-    for j in range(1, refHisto.GetNbinsX()+1, 1):
-
-        # Get the numerator and denominator
-        if inclusiveBins:
-            nNumerator   = histo.Integral(j, histo.GetNbinsX()+1)
-            nDenominator = refHisto.Integral(j, refHisto.GetNbinsX()+1)
-        else:
-            nNumerator   = histo.GetBinContent(j)
-            nDenominator = refHisto.GetBinContent(j)
-
-        # Calculate purity and error. Assume binomial error
-        if (nDenominator > 0.0 and nNumerator > 0.0):
-            myPurity = ((nNumerator) / (nDenominator) )
-            myUncert = ROOT.TMath.Sqrt(myPurity * (1.0 - myPurity) / nDenominator)
-        else:
-            myPurity = 0.0
-            myUncert = 0.0
-            
-        # Sanity check!
-        if myPurity > 1.0 or myPurity < 0.0:
-            myPurity = 1.0
-            # raise Exception("Purity=%.1f/%.1f=%0.2f. This should never happen!" % (nNumerator, nDenominator, myPurity) )
-
-        if myPurity < minPurity:
-            minPurity = myPurity
-
-        if 0:
-            myPurity = myPurity*100
-            myUncert = myUncert*100
-
-        h.SetBinContent(j, myPurity)
-        h.SetBinError(j, myUncert)
-
-        row = align.format(j, "%.2f" % refHisto.GetXaxis().GetBinCenter(j), "%.1f" % nNumerator, "%.1f" % nDenominator, "%.2f" % (myPurity), "+/-", "%.3f" % (myUncert))
-        rows.append(row)
-
-    # Determine x-min and x-max
-    xMinBin = histo.FindFirstBinAbove(0) # histo.GetBinCenter(1)
-    xMaxBin = histo.FindLastBinAbove(minPurity) # histo.GetBinCenter(histo.GetNbinsX()+1)
-    xMin    = refHisto.GetXaxis().GetBinCenter(xMinBin)
-    xMax    = refHisto.GetXaxis().GetBinCenter(xMaxBin+1)
-
-    if printValues:
-        for r in rows:
-            print r
-
-    return h, xMin, xMax
-            
 
 #================================================================================================ 
 # Main
@@ -478,7 +399,7 @@ if __name__ == "__main__":
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
     VERBOSE      = False
-    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
+    HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")

@@ -328,6 +328,9 @@ invertedStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
 altEwkStyle       = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kMagenta-2, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
                                    StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3),
                                    StyleFill(fillColor=ROOT.kMagenta-2, fillStyle=1001)])
+altEwkLineStyle   = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kMagenta-2, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
+                                   StyleLine(lineColor=ROOT.kMagenta-2, lineStyle=ROOT.kSolid, lineWidth=3),
+                                   StyleFill(fillColor=ROOT.kMagenta-2, fillStyle=0)])
 invertedLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullTriangleDown),
                                    StyleLine(lineColor=ROOT.kRed, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kRed, fillStyle=0)])
@@ -395,6 +398,9 @@ def getEWKStyle():
 
 def getAltEWKStyle():
     return altEwkStyle
+
+def getAltEWKLineStyle():
+    return altEwkLineStyle
 
 def getEWKFillStyle():
     return ewkFillStyle
