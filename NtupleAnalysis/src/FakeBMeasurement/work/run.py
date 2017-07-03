@@ -114,7 +114,8 @@ def main():
         Print("If collision data are present, then vertex reweighting is done according to the chosen data era (era=2015C, 2015D, 2015) etc...")
         process.addDatasetsFromMulticrab(opts.mcrab, excludeTasks=opts.excludeTasks)
     else:
-        myBlackList = [] #QCD_bEnriched"] #["ChargedHiggs", "QCD-b"]
+        #myBlackList = [] #QCD_bEnriched"] #["ChargedHiggs", "QCD-b"]
+        myBlackList = ["M_800", "M_400", "M_350", "M_3000", "M_300", "M_250", "M_220","M_2000","M_200", "M_180","M_1000", "QCD_b"]
         Print("Adding all datasets from multiCRAB directory %s except %s" % (opts.mcrab, (",".join(myBlackList))) )
         Print("Vertex reweighting is done according to the chosen data era (%s)" % (",".join(dataEras)) )
         # process.addDatasetsFromMulticrab(opts.mcrab, blacklist=myBlackList)
@@ -165,14 +166,16 @@ def main():
                               doSystematicVariations = opts.doSystematics)
 
     # Perform variations (e.g. for optimisation)
-    builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
-    builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "==", ">="])
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "==", ">="])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [3])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutDirection", [">="])
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
     # builder.addVariation("FakeBMeasurement.maxNumberOfBJetsInTopFit", [3, 4, 5])
-    builder.addVariation("TopSelection.ChiSqrCutValue", [50, 100])
+    builder.addVariation("TopSelection.ChiSqrCutValue", [100])
+    # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40_BTagCSV_p056"]])
+    # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40_v"], ["HLT_PFHT400_SixJet30_v"]])
     # builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])
     
     # Build the builder

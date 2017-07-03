@@ -14,6 +14,7 @@ Usage:
 ./plotFakeB_Templates.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
+./plotFakeB_Templates.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar --mergeEWK -e "QCD|Charged" -o OptChiSqrCutValue100
 ./plotFakeB_Templates.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --mergeEWK -e "QCD|Charged"
 '''
 
@@ -187,7 +188,8 @@ def main(opts):
     
     #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"] 
     #optModes = ["OptChiSqrCutValue250", "OptChiSqrCutValue150", "OptChiSqrCutValue200", "OptChiSqrCutValue180", "OptChiSqrCutValue300"]
-    optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue150p0", "OptChiSqrCutValue200p0"]
+    #optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue150p0", "OptChiSqrCutValue200p0"]
+    optModes = ["OptChiSqrCutValue100"]
 
     if opts.optMode != None:
         optModes = [opts.optMode]
@@ -215,9 +217,10 @@ def main(opts):
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
 
         # Re-order datasets (different for inverted than default=baseline)
-        newOrder = ["Data"]
-        newOrder.extend(GetListOfEwkDatasets())
-        datasetsMgr.selectAndReorder(newOrder)
+        if 0:
+            newOrder = ["Data"]
+            newOrder.extend(GetListOfEwkDatasets())
+            datasetsMgr.selectAndReorder(newOrder)
 
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -247,10 +250,10 @@ def getHistos(datasetsMgr, datasetName, name1, name2):
     Verbose("getHistos()", True)
 
     h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(name1)
-    h1.setName("Baseline" + "-" + datasetName)
+    h1.setName("Baseline-" + datasetName)
 
     h2 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(name2)
-    h2.setName("Inverted" + "-" + datasetName)
+    h2.setName("Inverted-" + datasetName)
     return [h1, h2]
 
 
@@ -273,9 +276,8 @@ def PlotTemplates(datasetsMgr, histoName, analysisType="Inverted"):
     p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
     
     defaultFolder  = "ForFakeBMeasurement"
-    # FIXME - First pseudo-multicrab had the Fake/Genuine boolean REVERSED
-    #genuineBFolder = "ForFakeBMeasurementEWKGenuineB"
-    genuineBFolder = "ForFakeBMeasurementEWKFakeB"
+    genuineBFolder = defaultFolder + "EWKGenuineB"
+    fakeBFolder    = defaultFolder + "EWKFakeB"
     histoNameNew   = histoName.replace( defaultFolder, genuineBFolder)
     p2 = plots.ComparisonPlot(
         getHisto(datasetsMgr, "EWK", histoNameNew, "Baseline"),
@@ -298,7 +300,7 @@ def PlotTemplates(datasetsMgr, histoName, analysisType="Inverted"):
     EWKGenuineB_inverted.Scale(1.0/EWKGenuineB_inverted.Integral())
     FakeB_baseline.Scale(1.0/FakeB_baseline.Integral())
     FakeB_inverted.Scale(1.0/FakeB_inverted.Integral())
-
+    
     # Create the final plot object
     comparisonList = [EWKGenuineB_baseline]
     p = plots.ComparisonManyPlot(FakeB_inverted, comparisonList, saveFormats=[])
@@ -314,7 +316,7 @@ def PlotTemplates(datasetsMgr, histoName, analysisType="Inverted"):
 
     # Set legend style
     p.histoMgr.setHistoLegendStyle("Baseline-EWKGenuineB", "LP")
-    p.histoMgr.setHistoDrawStyle("Inverted-FakeB"        , "AP")
+    p.histoMgr.setHistoLegendStyle("Inverted-FakeB"        , "LP")
 
     # Set legend labels
     p.histoMgr.setHistoLegendLabelMany({

@@ -18,6 +18,7 @@ Usage:
 ./plotPurity.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
+./plotFakeB_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100  
 ./plotFakeB_Purity.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --mergeEWK -e 'QCD|Charged'
 '''
 
@@ -112,7 +113,7 @@ def GetDatasetsFromDir(opts):
 def main(opts):
 
     #optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]
-    optModes = ["OptChiSqrCutValue100p0"]
+    optModes = ["OptChiSqrCutValue100"]
 
     if opts.optMode != None:
         optModes = [opts.optMode]
@@ -241,10 +242,9 @@ def PurityPlots(datasetsMgr, histoName, analysisType="Inverted"):
     # Sanity check
     IsBaselineOrInverted(analysisType)
 
-    # FIXME - First pseudo-multicrab had the Fake/Genuine boolean REVERSED
     defaultFolder  = "FakeBPurity" 
-    genuineBFolder = defaultFolder + "EWKFakeB"
-    fakeBFolder    = defaultFolder + "EWKGenuineB"
+    genuineBFolder = defaultFolder + "EWKGenuineB"
+    fakeBFolder    = defaultFolder + "EWKFakeB"
 
     # Get histos (Data, EWK) for Inclusive
     p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName, analysisType) )

@@ -15,6 +15,7 @@ Usage:
 ./plotFakeB_BaseVsInv.py -m <pseudo_mcrab> [opts]
 
 Examples:
+./plotFakeB_BaseVsInv.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar --mergeEWK -e "QCD|Charged" -o "OptChiSqrCutValue100"
 ./plotFakeB_BaseVsInv.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --mergeEWK -e "QCD|Charged" -o "OptChiSqrCutValue100p0"
 ./plotFakeB_BaseVsInv.py -m <pseudo_mcrab> --mergeEWK --histoLevel Vital
 '''
@@ -109,7 +110,8 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
 
-    optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]                                                                                                                                  
+    #optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100", "OptChiSqrCutValue200"]
+    optModes = ["OptChiSqrCutValue100"]                                                                                                                             
 
     if opts.optMode != None:
         optModes = [opts.optMode]
@@ -226,9 +228,8 @@ def BaselineVsInvertedPlots(datasetsMgr, histoName, analysisType="Inverted"):
 
     # Get the EWK (GenuineB)                              
     defaultFolder  = "ForFakeBMeasurement"
-    # FIXME - First pseudo-multicrab had the Fake/Genuine boolean REVERSED
-    #genuineBFolder = "ForFakeBMeasurementEWKGenuineB"
-    genuineBFolder = "ForFakeBMeasurementEWKFakeB"
+    genuineBFolder = defaultFolder + "EWKGenuineB"
+    fakeBFolder    = defaultFolder + "EWKFakeB"
     histoNameNew   = histoName.replace( defaultFolder, genuineBFolder)
     p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, "EWK", histoNameNew, analysisType) )
     p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
@@ -241,9 +242,11 @@ def BaselineVsInvertedPlots(datasetsMgr, histoName, analysisType="Inverted"):
     baseline_EWKGenuineB = p2.histoMgr.getHisto("Baseline-EWK").getRootHisto().Clone("Baseline-EWKGenuineB")
     inverted_EWKGenuineB = p2.histoMgr.getHisto("Inverted-EWK").getRootHisto().Clone("Inverted-EWKGenuineB")
 
-    # Create FakeB histos: FakeB = Data-EWKGenuineB
+    # Get FakeB (Baseline): FakeB = Data-EWKGenuineB
     baseline_FakeB = p1.histoMgr.getHisto("Baseline-Data").getRootHisto().Clone("Baseline-FakeB")
     baseline_FakeB.Add(baseline_EWKGenuineB, -1)
+
+    # Get FakeB (Inverted): FakeB = Data-EWKGenuineB
     inverted_FakeB = p1.histoMgr.getHisto("Inverted-Data").getRootHisto().Clone("Inverted-FakeB")
     inverted_FakeB.Add(inverted_EWKGenuineB, -1)
 
@@ -261,8 +264,10 @@ def BaselineVsInvertedPlots(datasetsMgr, histoName, analysisType="Inverted"):
 
     # Set draw style
     p.histoMgr.setHistoDrawStyle("Baseline-FakeB", "AP")
-    p.histoMgr.setHistoLegendStyle("Baseline-FakeB", "LP")
     p.histoMgr.setHistoDrawStyle("Inverted-FakeB", "HIST")
+
+    # Set legend style
+    p.histoMgr.setHistoLegendStyle("Baseline-FakeB", "LP")
     p.histoMgr.setHistoLegendStyle("Inverted-FakeB", "F")
     # p.histoMgr.setHistoLegendStyleAll("LP")
 
