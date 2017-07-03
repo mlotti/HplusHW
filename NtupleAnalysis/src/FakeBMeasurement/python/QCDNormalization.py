@@ -129,7 +129,7 @@ class FitFunction:
             "FitDataWithQCDAndFakesAndGenuineTaus": 3,
             "FitDataWithQCDAndInclusiveEWK": 2,
             "FitDataWithFakesAndGenuineTaus": 2,
-            "EWKFunction": 10, #5
+            "EWKFunction": 9,#10, #5
             "QCDFunction": 7,
             "CrystalBall": 5,
         }
@@ -310,13 +310,20 @@ class FitFunction:
         #                                               + ROOT.TMath.BreitWigner(x[0], par[2], par[1])
         #                                               + ROOT.TMath.Landau(x[0], par[1], par[2]) )
 
+        return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Exp(x[0]*par[1]) + 
+                                                par[2]*ROOT.Math.crystalball_function(x[0], par[3], par[4], par[5], par[6]) +
+                                                (1-par[0]-par[2])*ROOT.TMath.Gaus(x[0], par[7], par[8])
+                                                )
+
+        #return self._additionalNormFactor*norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0]))))
+
         # Best so far:
-        return self._additionalNormFactor*norm*(par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])
-                                                       + par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7])
-                                                       + (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9]) )
+        #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])
+        #                                               + par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7])
+        #                                               + (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9]) )
 
         #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])*par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7])
-        #                                               + (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9]) )                                                      
+        #                                        + (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9]) )                                                      
 
 
     def EWKFunctionInv(self,x, par, boundary, norm=1, rejectPoints=0):
@@ -703,7 +710,7 @@ class QCDNormalizationTemplate:
         func = ROOT.TF1(self._name+"_"+self._binLabel, f, FITMIN, FITMAX, self._fitFunction.getNParam())
         for k in range(self._fitFunction.getNParam()):
             func.SetParameter(k, self._fitParameters[k])
-        func.SetLineWidth(2)
+        func.SetLineWidth(3)
         func.SetLineStyle(2)
         return func
     
@@ -1032,7 +1039,7 @@ class QCDNormalizationTemplate:
             if createPlot:
                 xTitle = "m_{jjb} (GeV/c^{2})"
                 yTitle = "Events (normalized to unity)"
-                yLog   = False #alex
+                yLog   = True
                 if yLog:
                     yMaxFactor = 4
                 else:
@@ -1049,7 +1056,7 @@ class QCDNormalizationTemplate:
                     fit.SetLineColor(ROOT.kBlue)
                 else:
                     fit.SetLineColor(ROOT.kRed)
-                fit.SetLineWidth(2)
+                fit.SetLineWidth(3)
                 fit.SetLineStyle(2)
                 plot = plots.PlotBase()
                 plot.histoMgr.appendHisto(histograms.Histo(h,h.GetName()))

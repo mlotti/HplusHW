@@ -170,10 +170,13 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
   // Cache vector of trigger bjet 4-momenta
   std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta;
   
-  for (auto p: iEvent.triggerBJets()) 
+  if (bTriggerMatchingApply)
     {
-      // std::cout << "HLTBJet: pt eta phi = " <<  p.pt() << ", " << p.eta() << ", " << p.phi() << std::endl;      
-      myTriggerBJetMomenta.push_back(p.p4());
+      for (auto p: iEvent.triggerBJets()) 
+	{
+	  // std::cout << "HLTBJet: pt eta phi = " <<  p.pt() << ", " << p.eta() << ", " << p.phi() << std::endl;      
+	  myTriggerBJetMomenta.push_back(p.p4());
+	}
     }
 
   // Loop over selected jets

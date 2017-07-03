@@ -65,7 +65,9 @@ private:
 
   void doInvertedAnalysis(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const int nVertices);
   void doBaselineAnalysis(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData, const int nVertices);
-  bool AllGenuineBsWereTagged(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData);
+  bool IsGenuineBEvent(const std::vector<Jet>& selectedBJets);
+  bool HasZeroUntaggedGenuineBJets(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData); // not used
+
 
   // Purity Triplets
   WrappedTH1Triplet* hInverted_FailedBJetBDisc_AfterAllSelections;
@@ -464,7 +466,7 @@ void FakeBMeasurement::book(TDirectory *dir) {
   hInverted_TopMassReco_SubLdgDijetM_AfterAllSelections = 
     fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myFakeBDirs, "Inverted_TopMassReco_SubLdgDijetM_AfterAllSelections", ";m_{jj} (GeV/c^{2});Events / %0.f GeV/c^{2}", nMassBins, fMassMin, fMassMax);
 
-return;
+  return;
 }
 
 
@@ -668,32 +670,30 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
   // Fill final plots
   //================================================================================================
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
-  bool isGenuineB = AllGenuineBsWereTagged(jetData, bjetData);
-
-  // FakeB Triplets (Baseline)
-  //  if (0){
-   hBaseline_TopMassReco_ChiSqr_AfterAllSelections ->Fill(isGenuineB,TopData.ChiSqr());
-   hBaseline_TopMassReco_LdgTetrajetPt_AfterAllSelections->Fill(isGenuineB, TopData.getLdgTetrajet().pt() );
-   hBaseline_TopMassReco_LdgTetrajetM_AfterAllSelections->Fill(isGenuineB, TopData.getLdgTetrajet().M() );
-   hBaseline_TopMassReco_SubldgTetrajetPt_AfterAllSelections->Fill(isGenuineB, TopData.getSubldgTetrajet().pt() );
-   hBaseline_TopMassReco_SubldgTetrajetM_AfterAllSelections->Fill(isGenuineB, TopData.getSubldgTetrajet().M() );
-   hBaseline_TopMassReco_TetrajetBJetPt_AfterAllSelections->Fill(isGenuineB, TopData.getTetrajetBJet().pt() );
-   hBaseline_TopMassReco_TetrajetBJetEta_AfterAllSelections->Fill(isGenuineB, TopData.getTetrajetBJet().eta() );
-   double dEta = std::abs( TopData.getTetrajetBJet().p4().eta() - TopData.getLdgTrijetBJet().p4().eta() );
-   double dPhi = std::abs( ROOT::Math::VectorUtil::DeltaPhi( TopData.getTetrajetBJet().p4(), TopData.getLdgTrijetBJet().p4() ) );
-   double dR = ROOT::Math::VectorUtil::DeltaR( TopData.getTetrajetBJet().p4(), TopData.getLdgTrijetBJet().p4()) ;
-   hBaseline_TopMassReco_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dEta);
-   hBaseline_TopMassReco_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dPhi);
-   hBaseline_TopMassReco_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dR);
-   hBaseline_TopMassReco_LdgTrijetPt_AfterAllSelections->Fill(isGenuineB, TopData.getLdgTrijet().pt() );
-   hBaseline_TopMassReco_LdgTrijetM_AfterAllSelections ->Fill(isGenuineB, TopData.getLdgTrijet().M() );
-   hBaseline_TopMassReco_SubLdgTrijetPt_AfterAllSelections->Fill(isGenuineB, TopData.getSubldgTrijet().pt() );
-   hBaseline_TopMassReco_SubLdgTrijetM_AfterAllSelections ->Fill(isGenuineB, TopData.getSubldgTrijet().M() );
-   hBaseline_TopMassReco_LdgDijetPt_AfterAllSelections->Fill(isGenuineB, TopData.getLdgDijet().pt() );
-   hBaseline_TopMassReco_LdgDijetM_AfterAllSelections ->Fill(isGenuineB, TopData.getLdgDijet().M() );
-   hBaseline_TopMassReco_SubLdgDijetPt_AfterAllSelections->Fill(isGenuineB, TopData.getSubldgDijet().pt() );
-   hBaseline_TopMassReco_SubLdgDijetM_AfterAllSelections ->Fill(isGenuineB, TopData.getSubldgDijet().M() );
-   //  }
+  bool isGenuineB = IsGenuineBEvent(bjetData.getSelectedBJets());
+  
+  // GenuineB or FakeB Triplets (Baseline)
+  hBaseline_TopMassReco_ChiSqr_AfterAllSelections ->Fill(isGenuineB,TopData.ChiSqr());
+  hBaseline_TopMassReco_LdgTetrajetPt_AfterAllSelections->Fill(isGenuineB, TopData.getLdgTetrajet().pt() );
+  hBaseline_TopMassReco_LdgTetrajetM_AfterAllSelections->Fill(isGenuineB, TopData.getLdgTetrajet().M() );
+  hBaseline_TopMassReco_SubldgTetrajetPt_AfterAllSelections->Fill(isGenuineB, TopData.getSubldgTetrajet().pt() );
+  hBaseline_TopMassReco_SubldgTetrajetM_AfterAllSelections->Fill(isGenuineB, TopData.getSubldgTetrajet().M() );
+  hBaseline_TopMassReco_TetrajetBJetPt_AfterAllSelections->Fill(isGenuineB, TopData.getTetrajetBJet().pt() );
+  hBaseline_TopMassReco_TetrajetBJetEta_AfterAllSelections->Fill(isGenuineB, TopData.getTetrajetBJet().eta() );
+  double dEta = std::abs( TopData.getTetrajetBJet().p4().eta() - TopData.getLdgTrijetBJet().p4().eta() );
+  double dPhi = std::abs( ROOT::Math::VectorUtil::DeltaPhi( TopData.getTetrajetBJet().p4(), TopData.getLdgTrijetBJet().p4() ) );
+  double dR = ROOT::Math::VectorUtil::DeltaR( TopData.getTetrajetBJet().p4(), TopData.getLdgTrijetBJet().p4()) ;
+  hBaseline_TopMassReco_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dEta);
+  hBaseline_TopMassReco_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dPhi);
+  hBaseline_TopMassReco_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections->Fill(isGenuineB, dR);
+  hBaseline_TopMassReco_LdgTrijetPt_AfterAllSelections->Fill(isGenuineB, TopData.getLdgTrijet().pt() );
+  hBaseline_TopMassReco_LdgTrijetM_AfterAllSelections ->Fill(isGenuineB, TopData.getLdgTrijet().M() );
+  hBaseline_TopMassReco_SubLdgTrijetPt_AfterAllSelections->Fill(isGenuineB, TopData.getSubldgTrijet().pt() );
+  hBaseline_TopMassReco_SubLdgTrijetM_AfterAllSelections ->Fill(isGenuineB, TopData.getSubldgTrijet().M() );
+  hBaseline_TopMassReco_LdgDijetPt_AfterAllSelections->Fill(isGenuineB, TopData.getLdgDijet().pt() );
+  hBaseline_TopMassReco_LdgDijetM_AfterAllSelections ->Fill(isGenuineB, TopData.getLdgDijet().M() );
+  hBaseline_TopMassReco_SubLdgDijetPt_AfterAllSelections->Fill(isGenuineB, TopData.getSubldgDijet().pt() );
+  hBaseline_TopMassReco_SubLdgDijetM_AfterAllSelections ->Fill(isGenuineB, TopData.getSubldgDijet().M() );
 
   // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, true);
   // fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTransverseMass, isGenuineTau, myTransverseMass);
@@ -728,6 +728,7 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Top
   //================================================================================================
+
   if (0) std::cout << "=== Inverted: Top selection" << std::endl;
   const TopSelection::Data TopData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData, cfg_MaxNumberOfBJetsInTopFit);
   if (!TopData.passedSelection()) return;
@@ -747,9 +748,9 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
 
   //================================================================================================
   // Fill final plots
-   //================================================================================================
+  //================================================================================================
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
-  bool isGenuineB = AllGenuineBsWereTagged(jetData, bjetData);
+  bool isGenuineB = IsGenuineBEvent(TopData.getJetsUsedAsBJetsInFit());
 
   // Get the failed bjet candidates randomly shuffled. Put any trg-matched objects in the front  
   Jet bjet= TopData.getJetsUsedAsBJetsInFit()[2];
@@ -771,8 +772,7 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   hInverted_FailedBJetHadronFlavour_AfterAllSelections->Fill(isGenuineB, bjet.hadronFlavour());
   hInverted_FailedBJetAncestry_AfterAllSelections->Fill(isGenuineB, ancestryBit);
 
-  // FakeB Triplets (Inverted)
-  //if (0){    
+  // GenuineB or FakeB Triplets (Inverted)
   hInverted_TopMassReco_ChiSqr_AfterAllSelections ->Fill(isGenuineB, TopData.ChiSqr());
   hInverted_TopMassReco_LdgTetrajetPt_AfterAllSelections->Fill(isGenuineB, TopData.getLdgTetrajet().pt() );
   hInverted_TopMassReco_LdgTetrajetM_AfterAllSelections->Fill(isGenuineB, TopData.getLdgTetrajet().M() );
@@ -794,7 +794,6 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   hInverted_TopMassReco_LdgDijetM_AfterAllSelections ->Fill(isGenuineB, TopData.getLdgDijet().M() );
   hInverted_TopMassReco_SubLdgDijetPt_AfterAllSelections->Fill(isGenuineB, TopData.getSubldgDijet().pt() );
   hInverted_TopMassReco_SubLdgDijetM_AfterAllSelections ->Fill(isGenuineB, TopData.getSubldgDijet().M() );
-  //  }
 
   // Save selected event ID for pick events
   fEventSaver.save();
@@ -802,8 +801,29 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   return;
 }
 
-bool FakeBMeasurement::AllGenuineBsWereTagged(const JetSelection::Data& jetData,
-					      const BJetSelection::Data& bjetData) 
+bool FakeBMeasurement::IsGenuineBEvent(const std::vector<Jet>& selectedBJets)
+{ 
+  if (!fEvent.isMC()) return false;
+  
+  unsigned int nFakes=0;
+
+  // For-loop: Selected BJets
+  for(const Jet& bjet: selectedBJets)
+    {
+
+      // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
+      bool isFakeB = (abs(bjet.pdgId()) != 5); // For data pdgId==0
+      if (isFakeB) nFakes++;
+
+    }
+  // std::cout << "BJets = " << selectedBJets().size() << ", Fakes = " << nFakes << std::endl;
+  
+  return (nFakes==0);
+}
+
+
+bool FakeBMeasurement::HasZeroUntaggedGenuineBJets(const JetSelection::Data& jetData,
+						   const BJetSelection::Data& bjetData) 
 { 
   if (!fEvent.isMC()) return false;
   
@@ -818,7 +838,7 @@ bool FakeBMeasurement::AllGenuineBsWereTagged(const JetSelection::Data& jetData,
       jet_index++;
 
       // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
-      bool isGenuine = abs(jet.pdgId() == 5); // For data pdgId==0
+      bool isGenuine = (abs(jet.pdgId()) == 5); // For data pdgId==0
       bool isTagged  = false;
       
       // For-loop: Selected bjets
