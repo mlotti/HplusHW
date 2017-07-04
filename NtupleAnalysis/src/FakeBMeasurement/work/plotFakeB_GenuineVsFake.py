@@ -137,9 +137,10 @@ def main(opts):
         plots.mergeRenameReorderForDataMC(datasetsMgr) 
    
         # Re-order datasets (different for inverted than default=baseline)
-        newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
-        newOrder.extend(GetListOfEwkDatasets())
-        datasetsMgr.selectAndReorder(newOrder)
+        if 0:
+            newOrder = ["Data"] #, "TT", "DYJetsToQQHT", "TTWJetsToQQ", "WJetsToQQ_HT_600ToInf", "SingleTop", "Diboson", "TTZToQQ", "TTTT"]
+            newOrder.extend(GetListOfEwkDatasets())
+            datasetsMgr.selectAndReorder(newOrder)
 
         # Set/Overwrite cross-sections
         for d in datasetsMgr.getAllDatasets():
@@ -162,11 +163,10 @@ def main(opts):
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
 
-
         # Do the plots
         for analysisType in ["Baseline", "Inverted"]:
             for hName in GetHistoList(analysisType, bType=""):
-                DoPlots(datasetsMgr, hName, analysisType)
+                DoPlots(datasetsMgr, hName, analysisType, "GenuineB")
     return
 
 
@@ -221,14 +221,18 @@ def getHistos(datasetsMgr, histoName, analysisType):
 
     h2 = datasetsMgr.getDataset("EWK").getDatasetRootHisto(histoName)
     h2.setName(analysisType + "-EWK")
-    return [h1, h2]
+
+    h3 = datasetsMgr.getDataset("QCD").getDatasetRootHisto(histoName)
+    h3.setName(analysisType + "-QCD")
+    return [h1, h2, h3]
 
 
-def DoPlots(datasetsMgr, histoName, analysisType="Inverted"):
+def DoPlots(datasetsMgr, histoName, analysisType="Inverted", bType = "GenuineB"):
     
-    # Sanity check
+    # Sanity checks
     IsBaselineOrInverted(analysisType)
-    
+    IsGenuineOrFake(bType)
+
     # Definitions
     defaultFolder = ""
     if "FakeBPurity" in histoName:
@@ -237,52 +241,76 @@ def DoPlots(datasetsMgr, histoName, analysisType="Inverted"):
         defaultFolder = "ForFakeBMeasurement"
     else:
         raise Exception("This should never happen")
-    genuineBFolder = defaultFolder + "EWKGenuineB"
-    fakeBFolder    = defaultFolder + "EWKFakeB"
 
-    # Get the EWK (GenuineB)
-    h1 = histoName.replace( defaultFolder, genuineBFolder)
-    p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, h1, analysisType))
-    p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+    # Define folders for inclusive/genuine/fakes
+    inclusiveFolder = defaultFolder
+    genuineFolder   = defaultFolder + "EWKGenuineB"
+    fakeFolder      = defaultFolder + "EWKFakeB"
+    inclusiveHisto  = histoName.replace( defaultFolder, inclusiveFolder)
+    genuineHisto    = histoName.replace( defaultFolder, genuineFolder)
+    fakeHisto       = histoName.replace( defaultFolder, fakeFolder)
 
-    # Get the EWK (FakeB)
-    h2 = histoName.replace( defaultFolder, fakeBFolder)
-    p2 = plots.ComparisonPlot(*getHistos(datasetsMgr, h2, analysisType) )
-    p2.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
+    # Get the inclusive histograms
+    p0 = plots.DataMCPlot(datasetsMgr, inclusiveHisto)
+    Data = p0.histoMgr.getHisto("Data").getRootHisto().Clone("Data")
 
-    # Get EWK histos
-    EWKGenuineB = p1.histoMgr.getHisto(analysisType + "-EWK").getRootHisto().Clone("EWKGenuineB")
-    EWKFakeB    = p2.histoMgr.getHisto(analysisType + "-EWK").getRootHisto().Clone("EWKFakeB")
+    # Get the genuine-b histograms
+    p1 = plots.DataMCPlot(datasetsMgr, genuineHisto)
+    EWKGenuineB = p1.histoMgr.getHisto("EWK").getRootHisto().Clone("EWKGenuineB")
+    QCDGenuineB = p1.histoMgr.getHisto("QCD").getRootHisto().Clone("QCDGenuineB")
+
+    # Get the fake-b histograms
+    p2 = plots.DataMCPlot(datasetsMgr, fakeHisto)
+    EWKFakeB = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWKFakeB")
+    QCDFakeB = p2.histoMgr.getHisto("QCD").getRootHisto().Clone("QCDFakeB")
 
     # Normalize histograms to unit area
     if 0:
+        Data.Scale(1.0/Data.Integral())
         EWKGenuineB.Scale(1.0/EWKGenuineB.Integral())
         EWKFakeB.Scale(1.0/EWKFakeB.Integral())
+        QCDGenuineB.Scale(1.0/QCDGenuineB.Integral())
+        QCDFakeB.Scale(1.0/EWKFakeB.Integral())
 
     # Create the final plot object
-    #p = plots.ComparisonManyPlot(EWKFakeB, [EWKGenuineB], saveFormats=[])
-    p = plots.ComparisonManyPlot(EWKGenuineB, [EWKFakeB], saveFormats=[])
+    comparisonList = [EWKGenuineB, QCDGenuineB, EWKFakeB, QCDFakeB]
+    p = plots.ComparisonManyPlot(Data, comparisonList, saveFormats=[])
     p.setLuminosity(GetLumi(datasetsMgr))
         
     # Apply styles
-    p.histoMgr.forHisto("EWKGenuineB" , styles.getGenuineBStyle() )
-    p.histoMgr.forHisto("EWKFakeB"    , styles.getFakeBLineStyle() )
+    p.histoMgr.forHisto("Data"        , styles.getDataStyle() )
+    p.histoMgr.forHisto("EWKGenuineB" , styles.getAltEWKStyle() ) #GenuineBStyle()
+    p.histoMgr.forHisto("QCDGenuineB" , styles.getQCDStyle() )
+    p.histoMgr.forHisto("EWKFakeB"    , styles.getGenuineBStyle() )
+    p.histoMgr.forHisto("QCDFakeB"    , styles.getFakeBStyle() )
 
     # Set draw style
-    p.histoMgr.setHistoDrawStyle("EWKGenuineB", "HIST")
+    p.histoMgr.setHistoDrawStyle("Data"       , "AP")
+    p.histoMgr.setHistoDrawStyle("EWKGenuineB", "AP")
+    p.histoMgr.setHistoDrawStyle("QCDGenuineB", "AP")
     p.histoMgr.setHistoDrawStyle("EWKFakeB"   , "AP")
+    p.histoMgr.setHistoDrawStyle("QCDFakeB"   , "AP")
 
     # Set legend style
-    p.histoMgr.setHistoLegendStyle("EWKGenuineB", "F")
+    p.histoMgr.setHistoLegendStyle("Data"       , "P")
+    p.histoMgr.setHistoLegendStyle("EWKGenuineB", "P")
+    p.histoMgr.setHistoLegendStyle("QCDGenuineB", "P")
     p.histoMgr.setHistoLegendStyle("EWKFakeB"   , "P")
+    p.histoMgr.setHistoLegendStyle("QCDFakeB"   , "P")
     # p.histoMgr.setHistoLegendStyleAll("LP")
 
     # Set legend labels
     p.histoMgr.setHistoLegendLabelMany({
-            #"EWKGenuineB": "EWK-GenuineB",
-            #"EWKFakeB"   : "EWK-FakeB",
-            "EWKGenuineB": "EWK-GenuineB (%s)" % (analysisType),
-            "EWKFakeB"   : "EWK-FakeB (%s)" % (analysisType),
+            "Data"       : "Data",
+            "EWKGenuineB": "EWK-GenuineB",
+            "QCDGenuineB": "QCD-GenuineB",
+            "EWKFakeB"   : "EWK-FakeB",
+            "QCDFakeB"   : "QCD-FakeB",
+            #"Data"       : "Data (%s)"         % (analysisType),
+            #"EWKGenuineB": "EWK-GenuineB (%s)" % (analysisType),
+            #"QCDGenuineB": "QCD-GenuineB (%s)" % (analysisType),
+            #"EWKFakeB"   : "EWK-FakeB (%s)"    % (analysisType),
+            #"QCDFakeB"   : "QCD-FakeB (%s)"    % (analysisType),
             })
 
     # Draw the histograms
@@ -335,11 +363,12 @@ def DoPlots(datasetsMgr, histoName, analysisType="Inverted"):
                    xlabel       = _xlabel,
                    ylabel       = "Arbitrary Units / %s" % (_format),
                    log          = True, 
-                   rebinX       = _rebinX, cmsExtraText = "Preliminary", 
-                   createLegend = {"x1": 0.42, "y1": 0.78, "x2": 0.92, "y2": 0.92},
+                   rebinX       = _rebinX, 
+                   cmsExtraText = "Preliminary", 
+                   createLegend = {"x1": 0.62, "y1": 0.72, "x2": 0.92, "y2": 0.92},
                    opts         = _opts,
-                   opts2        = {"ymin": 0.0, "ymax": 100}, #{"ymin": 0.6, "ymax": 1.4},
-                   ratio        = False,
+                   opts2        = {"ymin": 0.0, "ymax": 1.5}, #{"ymin": 0.6, "ymax": 1.4},
+                   ratio        = True,
                    ratioInvert  = False, 
                    ratioYlabel  = "Ratio",
                    cutBox       = _cutBox,
@@ -353,6 +382,14 @@ def IsBaselineOrInverted(analysisType):
     analysisTypes = ["Baseline", "Inverted"]
     if analysisType not in analysisTypes:
         raise Exception("Invalid analysis type \"%s\". Please select one of the following: %s" % (analysisType, "\"" + "\", \"".join(analysisTypes) + "\"") )
+    else:
+        pass
+    return
+
+def IsGenuineOrFake(bType):
+    analysisTypes = ["GenuineB", "FakeB"]
+    if bType not in analysisTypes:
+        raise Exception("Invalid b-type \"%s\". Please select one of the following: %s" % (analysisType, "\"" + "\", \"".join(analysisTypes) + "\"") )
     else:
         pass
     return

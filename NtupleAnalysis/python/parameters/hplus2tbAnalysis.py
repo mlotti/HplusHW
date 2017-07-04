@@ -18,8 +18,8 @@ trigger = PSet(
     triggerOR = [
         "HLT_PFHT400_SixJet30_DoubleBTagCSV_p056",
         "HLT_PFHT450_SixJet40_BTagCSV_p056",
-        #"HLT_PFHT400_SixJet30_v", #Prescale 110 at inst. lumi 1.35E+34
-        #"HLT_PFHT450_SixJet40_v", #Prescale 26 at inst. lumi 1.35E+34
+        #"HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
+        #"HLT_PFHT450_SixJet40", #Prescale 26 at inst. lumi 1.35E+34
     ],
   triggerOR2 = [],
 )
