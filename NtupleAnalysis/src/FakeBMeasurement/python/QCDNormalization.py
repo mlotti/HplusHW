@@ -253,11 +253,27 @@ class FitFunction:
         '''
         return par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2], par[3])
     
-    def MyLogNormal(self, x, par):
+    def RooLogNormal(self, x, par):
         '''
-        '''
-        return ROOT.TMath.Exp(-(ROOT.TMath.Log(x/par[1]))**2/(2*ROOT.TMath.Log(par[2]))**2)/(ROOT.TMath.Sqrt(2*ROOT.TMath.Pi()*ROOT.TMath.Log(par[2])*x))
+        https://root.cern.ch/doc/v608/classRooLognormal.html
 
+        The parametrization here is physics driven and differs from the ROOT::Math::lognormal_pdf(x,m,s,x0) with:
+        
+        m = log(m0)
+        s = log(k)
+        x0 = 0
+
+        The two parameters are:
+        m0  ...........: the median of the distribution
+        k=exp(sigma) ..: sigma is called the shape parameter in the TMath parametrization
+        '''
+        #return par[0]*ROOT.TMath.Exp(-(ROOT.TMath.Log(x[0]/par[1]))**2/(2*ROOT.TMath.Log(par[2]))**2)/(ROOT.TMath.Sqrt(2*ROOT.TMath.Pi()*ROOT.TMath.Log(par[2])*x[0]))
+        xv    = x[0]
+        ln_m0 = ROOT.TMath.Log(par[1])
+        ln_k  = ROOT.TMath.Abs(ROOT.TMath.Log(par[2]))
+        x0    = 0
+        return par[0]*ROOT.Math.lognormal_pdf(xv, ln_m0, ln_k, x0)
+    
     def QCDFunction(self, x, par, boundary, norm):
         '''
         https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
@@ -266,20 +282,10 @@ class FitFunction:
         from x only x[0] is used; it is the x-variable.        
         par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
         ''' 
-#        if x[0] < boundary:
-#            return self._additionalNormFactor*norm*par[0]*ROOT.TMath.Landau(x[0], par[1],par[2])
-#        return self._additionalNormFactor*norm*par[3]*ROOT.TMath.Exp(-x[0]*par[4])
-        #return self._additionalNormFactor*norm*par[0]*ROOT.TMath.LogNormal(x[0], par[1], par[2], par[3])
-        #return self._additionalNormFactor*norm*par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2], par[3])
-        #return self._additionalNormFactor*norm*self.LogNormal(x, par)
-        #return self._additionalNormFactor*norm*self.LogNormalPDF(x, par) 
-        #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.lognormal_pdf(x[0], par[2], par[1]) + par[3]*ROOT.TMath.Exp(-x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], par[6]))
-        #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.LogNormal(x[0], par[1], par[2], par[3]) + par[4]*ROOT.TMath.Exp(-x[0]*par[5]) + (1-par[0]-par[4])*ROOT.TMath.Gaus(x[0], par[6], par[7]))
-
-        #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.LogNormal(x[0], par[1], par[2], par[3]) + par[4]*ROOT.TMath.Exp(x[0]*par[5]) + (1-par[0]-par[4])*ROOT.TMath.Gaus(x[0], par[6], par[7]))
-        return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.LogNormal(x[0], par[1], 0, par[2]) + par[3]*ROOT.TMath.Exp(x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], par[6]))
-        #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Exp(-(ROOT.TMath.Log(x[0]/par[1]))**2/(2*ROOT.TMath.Log(par[2]))**2)/(ROOT.TMath.Sqrt(2*ROOT.TMath.Pi()*ROOT.TMath.Log(par[2])*x[0])) + par[3]*ROOT.TMath.Exp(-x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], par[6]))
-    
+        # if x[0] < boundary:
+        # return self._additionalNormFactor*norm*par[0]*ROOT.TMath.Landau(x[0], par[1],par[2])
+        #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2]) + par[3]*ROOT.TMath.Exp(x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], par[6]))
+        return self._additionalNormFactor*norm*(self.RooLogNormal(x, par) + par[3]*ROOT.TMath.Exp(x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], par[6]))
 
     def EWKFunction(self,x, par, boundary, norm=1, rejectPoints=0):
         '''
@@ -310,8 +316,10 @@ class FitFunction:
         #                                               + ROOT.TMath.BreitWigner(x[0], par[2], par[1])
         #                                               + ROOT.TMath.Landau(x[0], par[1], par[2]) )
 
-        return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Exp(x[0]*par[1]) + 
-                                                par[2]*ROOT.Math.crystalball_function(x[0], par[3], par[4], par[5], par[6]) +
+        return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Exp(x[0]*par[1]) 
+                                                + 
+                                                par[2]*ROOT.Math.crystalball_function(x[0], par[3], par[4], par[5], par[6]) # crystalball(x, alpha=Gaussian Tail, N=Normalisation, sigma=Mass Resolution, mu=Mass mean value)
+                                                +
                                                 (1-par[0]-par[2])*ROOT.TMath.Gaus(x[0], par[7], par[8])
                                                 )
 
@@ -472,6 +480,86 @@ class QCDNormalizationTemplate:
             raise Exception("Error: the fit function needs to be a FitFunction class!")
         if fitRangeMax < fitRangeMin:
             raise Exception("Error: fit range max value is smaller than the min value!")
+        return
+
+    def createFitPlot(self, h, fit, bSaveToFile=True):
+        '''
+        '''
+        xTitle = "m_{jjb} (GeV/c^{2})"
+        yTitle = "Events (normalized to unity)"
+        yLog   = False
+        fName  = self._plotDirName+"/fit_"+self._name.replace(" ","_")+"_"+self._binLabel
+        if yLog:
+            yMaxFactor = 4
+        else:
+            yMaxFactor = 1.1
+
+        # Disable fit/statistics box
+        ROOT.gStyle.SetOptFit(0)
+        ROOT.gStyle.SetOptStat(0)
+
+        # Customise fit function
+        if "ewk" in h.GetName().lower():
+            fit.SetLineColor(ROOT.kMagenta-2)
+            #fit.SetLineStyle(ROOT.kDotted)
+        elif "qcd" in h.GetName().lower():
+            fit.SetLineColor(ROOT.kOrange-2)
+            #fit.SetLineStyle(ROOT.kDashed)
+        elif "fakeb" in h.GetName().lower():
+            fit.SetLineColor(ROOT.kRed)
+            #fit.SetLineStyle(ROOT.kDashed)
+        else:
+            fit.SetLineColor(ROOT.kGray)
+            fit.SetLineColor(ROOT.kSolid)
+        fit.SetLineStyle(ROOT.kSolid)
+        fit.SetLineWidth(3)
+
+        # Create a plot base
+        plot = plots.PlotBase()
+        plot.histoMgr.appendHisto( histograms.Histo(h, h.GetName()) )
+        plot.histoMgr.appendHisto( histograms.Histo(fit, "fit") )
+        
+        # Customise histo and fit function
+        if "ewk" in h.GetName().lower():
+            plot.histoMgr.forHisto(h.GetName(), styles.getDataStyle() ) #styles.getAltEWKStyle() )
+        elif "qcd" in h.GetName().lower():
+            plot.histoMgr.forHisto(h.GetName(), styles.getDataStyle() ) #styles.getQCDStyle() )
+        elif "fakeb" in h.GetName().lower():
+            plot.histoMgr.forHisto(h.GetName(), styles.getDataStyle() ) #styles.getFakeBStyle() )
+        else:
+            fit.SetLineColor(ROOT.kGray)
+            fit.SetLineColor(ROOT.kSolid)
+        fit.SetLineWidth(3)
+        
+        # Overwrite some options
+        plot.histoMgr.setHistoDrawStyle(h.GetName(), "AP")
+
+        # Create frame
+        myOpts = {"ymin": 1e-5, "ymaxfactor": yMaxFactor}
+        plot.createFrame(fName, opts=myOpts)
+        plot.getFrame().GetXaxis().SetTitle(xTitle)
+        plot.getFrame().GetXaxis().SetRangeUser(0.0*self._fitRangeMin, 1.2*self._fitRangeMax)
+        plot.getFrame().GetYaxis().SetTitle(yTitle)
+
+        # Add text
+        histograms.addText(0.72, 0.85-0.08*0, getFormattedTemplateName(self._name))
+        histograms.addText(0.72 ,0.85-0.08*1, getFormattedBinLabelString(self._binLabel))
+        histograms.addStandardTexts(cmsTextPosition="outframe")
+
+        # Cut lines/boxes
+        _kwargs1 = {"lessThan": True}
+        _kwargs2 = {"lessThan": False}
+        plot.addCutBoxAndLine(cutValue=self._fitRangeMin, fillColor=ROOT.kGray, box=False, line=True, **_kwargs1)
+        plot.addCutBoxAndLine(cutValue=self._fitRangeMax, fillColor=ROOT.kGray, box=False, line=True, **_kwargs2)
+
+        # Draw and save plot
+        plot.getPad().SetLogy(yLog)
+        plot.draw()
+        plot.save()
+
+        if bSaveToFile:
+            fileName = self._plotDirName + "/" + h.GetName() + ".root"
+            h.SaveAs(fileName)
         return
 
     def reset(self):
@@ -764,13 +852,15 @@ class QCDNormalizationTemplate:
         plot.createFrame(self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.1, "ymaxfactor": 4.})
         plot.getFrame().GetXaxis().SetTitle(xTitle)
         plot.getFrame().GetYaxis().SetTitle(yTitle)
-        plot.getPad().SetLogy(True)
+        plot.getPad().SetLogy(False)
         st = styles.getDataStyle().clone()
         st.append(styles.StyleFill(fillColor=ROOT.kYellow))
+
         histograms.addStandardTexts(cmsTextPosition="outframe")
-        histograms.addText(0.48,0.85, getFormattedTemplateName(self._name))
-        histograms.addText(0.48,0.77, getFormattedBinLabelString(self._binLabel))
-        histograms.addText(0.48,0.72, "N_{events} = %d"%int(self._histo.Integral(0,-1)*self._normalizationFactor+0.5)) # round to closes integer
+        histograms.addText(0.72, 0.85-0.08*0, getFormattedTemplateName(self._name))
+        histograms.addText(0.72, 0.85-0.08*1, getFormattedBinLabelString(self._binLabel))
+        histograms.addText(0.72, 0.85-0.08*2, "Events = %d"%int(self._histo.Integral(0,-1)*self._normalizationFactor+0.5)) # round to closes integer
+
         plot.histoMgr.forHisto(self._histo.GetName(), st)
         #plot.setFileName("template_"+self._name.replace(" ","_")+"_"+self._binLabel)
         plot.draw()
@@ -901,7 +991,7 @@ class QCDNormalizationTemplate:
             nRatioUp   = errorPropagation.errorPropagationForDivision(nHisto, nHistoUp  , nFit, nFitUp)
             nRatioDown = errorPropagation.errorPropagationForDivision(nHisto, nHistoDown, nFit, nFitDown)
         else:
-            self.Verbose("Cannot divide by zero for item \"%s\%. Setting ratio to zero" % (key), True)
+            self.Verbose("Cannot divide by zero. Setting ratio to zero", True)
             nRatio      = 0
             nRatioUp    = 0
             nRatioDown  = 0
@@ -1002,7 +1092,7 @@ class QCDNormalizationTemplate:
 
             self.Verbose("Clone the histogram and normalize its area to unity (note also the under/overflow bins)")
             h = aux.Clone(self._histo)
-
+            
             # Do the fit
             if not self._quietMode:
                 self.Verbose("Using fit options: %s" % (fitOptions))
@@ -1035,44 +1125,9 @@ class QCDNormalizationTemplate:
             self.Print("Results of fitting function \"%s\" to histogram \"%s\" (binLabel=\"%s\")" % (self._fitFunction.getName(), self._histo.GetName(), self._binLabel), True) #self._name
             self.PrintFitResults(fitResultObject)
                     
-            # Do a plot of the fit
-            if createPlot:
-                xTitle = "m_{jjb} (GeV/c^{2})"
-                yTitle = "Events (normalized to unity)"
-                yLog   = True
-                if yLog:
-                    yMaxFactor = 4
-                else:
-                    yMaxFactor = 1.1
-
-                ROOT.gStyle.SetOptFit(0)
-                ROOT.gStyle.SetOptStat(0)
-                h.SetLineColor(ROOT.kBlack)
-
-                # fit QCD plots with blue, EWK+ttbar with green, everything else with red
-                if "EWK" in h.GetName():
-                    fit.SetLineColor(ROOT.kGreen+2)
-                elif "QCD" in h.GetName():
-                    fit.SetLineColor(ROOT.kBlue)
-                else:
-                    fit.SetLineColor(ROOT.kRed)
-                fit.SetLineWidth(3)
-                fit.SetLineStyle(2)
-                plot = plots.PlotBase()
-                plot.histoMgr.appendHisto(histograms.Histo(h,h.GetName()))
-                h.SaveAs(self._plotDirName + "/" + h.GetName() + ".root")
-
-                plot.histoMgr.appendHisto(histograms.Histo(fit, "fit"))
-                plot.createFrame(self._plotDirName+"/fit_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 1e-5, "ymaxfactor": yMaxFactor})
-                plot.getFrame().GetXaxis().SetTitle(xTitle)
-                plot.getFrame().GetYaxis().SetTitle(yTitle)
-                histograms.addText(0.65, 0.85, getFormattedTemplateName(self._name))
-                histograms.addText(0.65 ,0.77, getFormattedBinLabelString(self._binLabel))
-                plot.getPad().SetLogy(yLog)
-                histograms.addStandardTexts(cmsTextPosition="outframe")
-                plot.draw()
-                plot.save()
-        return
+            self.Print("Plotting histogram and fit  function")
+            self.createFitPlot(h, fit)
+            return
 
 
 #================================================================================================ 
@@ -1133,9 +1188,11 @@ class QCDNormalizationManagerBase:
             return
         self.Print(msg, printHeader)
         return
-  
-    ## Creates a QCDNormalizationTemplate and returns it
+
     def createTemplate(self, name):
+        '''
+        Creates a QCDNormalizationTemplate and returns it
+        '''
         if name in self._templates.keys():
             raise Exception("Error: A template with name '%s' has already been created!"%name)
         q = QCDNormalizationTemplate(name, self._plotDirName)
@@ -1292,10 +1349,11 @@ class QCDNormalizationManagerBase:
                 keyList.append(k)
         if "Inclusive" in keys:
             keyList.append("Inclusive")
+
         # Create graphs
-        gQCD = makeGraph(24, ROOT.kRed, keyList, self._qcdNormalization, self._qcdNormalizationError, self._qcdNormalizationError)
-        gFake = makeGraph(27, ROOT.kBlue, keyList, self._ewkFakesNormalization, self._ewkFakesNormalizationError, self._ewkFakesNormalizationError)
-        upError = {}
+        gQCD  = makeGraph(24, ROOT.kCyan  , keyList, self._qcdNormalization     , self._qcdNormalizationError     , self._qcdNormalizationError)
+        gFake = makeGraph(27, ROOT.kYellow, keyList, self._ewkFakesNormalization, self._ewkFakesNormalizationError, self._ewkFakesNormalizationError)
+        upError   = {}
         downError = {}
         for k in keys:
             upError[k] = self._combinedFakesNormalizationUp[k] - self._combinedFakesNormalization[k]
@@ -1337,8 +1395,10 @@ class QCDNormalizationManagerBase:
         ROOT.gErrorIgnoreLevel = backup
         print "Saved normalization coefficients into plot %s/QCDNormalisationCoefficients.png"%self._plotDirName
 
-    ## Create a DQM style plot
     def _generateDQMplot(self):
+        '''
+        Create a DQM style plot
+        '''
         # Check the uncertainties on the normalization factors
         for k in self._dqmKeys.keys():
             self._addDqmEntry(k, "norm.coeff.uncert::QCD", self._qcdNormalizationError[k], 0.03, 0.10)
@@ -1375,6 +1435,7 @@ class QCDNormalizationManagerBase:
         c.SetLeftMargin(0.2)
         c.SetRightMargin(0.2)
         h.Draw("colz")
+        
         backup = ROOT.gErrorIgnoreLevel
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
         for item in ["png", "C", "pdf"]:
@@ -1434,11 +1495,21 @@ class QCDNormalizationManagerBase:
         plot.createFrame(self._plotDirName+"/finalFit_"+binLabel, opts={"ymin": 1e-5, "ymaxfactor": 4.})
         plot.getFrame().GetXaxis().SetTitle(xTitle)
         plot.getFrame().GetYaxis().SetTitle(yTitle)
-#        histograms.addText(0.36,0.84, "Final fit, "+binLabel)
-        histograms.addText(0.48,0.85, "Final fit")
-        histograms.addText(0.48,0.77, getFormattedBinLabelString(binLabel))
-        plot.getPad().SetLogy(True)
+        plot.getFrame().GetXaxis().SetRangeUser(0.8*self._fitRangeMin, 1.2*self._fitRangeMax)
+        
+        # Add text
+        histograms.addText(0.72, 0.85-0.08*0, "Final Fit") #"Final fit, "+binLabel
+        histograms.addText(0.72, 0.85-0.08*1, getFormattedBinLabelString(binLabel))
         histograms.addStandardTexts(cmsTextPosition="outframe")
+
+        # Cut lines/boxes
+        _kwargs1 = {"lessThan": True}
+        _kwargs2 = {"lessThan": False}
+        plot.addCutBoxAndLine(cutValue=self._fitRangeMin, fillColor=ROOT.kGray, box=False, line=True, **_kwargs1)
+        plot.addCutBoxAndLine(cutValue=self._fitRangeMax, fillColor=ROOT.kGray, box=False, line=True, **_kwargs2)
+
+        # Draw and save plot
+        plot.getPad().SetLogy(True)
         plot.draw()
         plot.save()
         return
@@ -1502,7 +1573,7 @@ class QCDNormalizationManagerBase:
                     ratioUp   = errorPropagation.errorPropagationForDivision(nHisto, nHistoUp  , nFit, nFitUp)
                     ratioDown = errorPropagation.errorPropagationForDivision(nHisto, nHistoDown, nFit, nFitDown)
                 else:
-                    self.Print("Cannot divide by zero for item \"%s\%. Setting ratio to zero" % (key), True)
+                    self.Print("Cannot divide by zero. Setting ratio to zero", True)
 
                 # Construct the table
                 #lines.append(align_.format("Bin: " + binLabel) )
@@ -1570,13 +1641,16 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
                                       "EWKInclusive_Inverted",
                                       "QCD_Baseline", 
                                       "QCD_Inverted"]
-
+        
     def calculateNormalizationCoefficients(self, dataHisto, fitOptions, FITMIN, FITMAX, **kwargs):
+        '''
+        '''
         qcdTemplate = self._templates["QCD_Inverted"]
         ewkInclusiveTemplate = self._templates["EWKInclusive_Baseline"]
         templatesToBeFitted = [qcdTemplate, ewkInclusiveTemplate]
         self._checkInputValidity(templatesToBeFitted)
-        
+        self._fitRangeMin = FITMIN
+        self._fitRangeMax = FITMAX
         self.Verbose("Fitting templates", True)
         self._fitTemplates(fitOptions)
         
@@ -1586,7 +1660,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         binLabel = self._templates[self._requiredTemplateList[0]].getBinLabel()
         dataTemplate.setHistogram(dataHisto, binLabel)
         dataTemplate.plot()
-        dataTemplate.setFitter(FitFunction("FitDataWithQCDAndInclusiveEWK", #iro-
+        dataTemplate.setFitter(FitFunction("FitDataWithQCDAndInclusiveEWK",
                                            QCDFitFunction = qcdTemplate.getFitFunction(),
                                            parQCD = qcdTemplate.getFittedParameters(),
                                            QCDnorm = 1.0,
@@ -1601,7 +1675,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         #===== Plot fitted functions
         dataHisto.SetLineColor(ROOT.kBlack)
         funcData = dataTemplate.obtainFittedFunction(1.0, FITMIN, FITMAX)
-        funcData.SetLineColor(ROOT.kRed)
+        funcData.SetLineColor(ROOT.kPink)
         funcData.SetLineStyle(2)
         funcQCD = qcdTemplate.obtainFittedFunction(dataTemplate.getFittedParameters()[1], FITMIN, FITMAX)
         funcQCD.SetLineColor(ROOT.kBlue)
