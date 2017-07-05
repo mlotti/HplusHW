@@ -284,7 +284,6 @@ class FitFunction:
         https://root.cern.ch/doc/v608/classRooExponential.html
         https://root.cern.ch/doc/v608/RooExponential_8cxx_source.html
         '''
-
         xv = x[0]
         if decay:
             return const*ROOT.TMath.Exp(-exponent*xv);
@@ -371,6 +370,11 @@ class FitFunction:
         #                                        (1-par[0]-par[2])*ROOT.TMath.Gaus(x[0], par[7], par[8])
         #                                        )
 
+        if rejectPoints > 0:
+            if (x[0] > 216 and x[0] < 218):
+                ROOT.TF1.RejectPoint()
+                print "Rejecting point with value x=", x[0]
+                return 0    
         return self._additionalNormFactor*norm*(self.RooExponential(x, par[0], par[1], True)
                                                 + 
                                                 self.RooCBShape(x, par[2], par[3], par[4], par[5], par[6])
@@ -544,7 +548,7 @@ class QCDNormalizationTemplate:
         if yLog:
             yMaxFactor = 4
         else:
-            yMaxFactor = 1.1
+            yMaxFactor = 1.0
 
         # Disable fit/statistics box
         ROOT.gStyle.SetOptFit(0)
@@ -1000,6 +1004,19 @@ class QCDNormalizationTemplate:
         tf1 = ROOT.TF1(fName, self._fitFunction, self._fitRangeMin, self._fitRangeMax, self._fitFunction.getNParam())
         return tf1
 
+    def ChangeShellColour(self):
+        '''
+        Customise colour of printed output (makes spotting easier)
+        '''
+        self.Verbose("ChangeShellColour()")
+        if "qcd" or "fakeb" in self.getHisto().GetName().lower():
+            print colors.YELLOW #ORANGE #YELLOW
+        if "ewk" in self.getHisto().GetName().lower():
+            print colors.CYAN #BLUE #PURPLE
+        if "data" in self.getHisto().GetName().lower():
+            print colors.BOLD
+        return
+
     def PrintFitResults(self, r, fitOptions):
         '''
         Print information contained in the TFitResultPtr r
@@ -1020,20 +1037,10 @@ class QCDNormalizationTemplate:
         if 0:
             r.Print("V")
 
-        # Customise colour of printed output (makes spotting easier)
-        if "qcd" or "fakeb" in self.getHisto().GetName().lower():
-            print colors.YELLOW #ORANGE #YELLOW
-        if "ewk" in self.getHisto().GetName().lower():
-            print colors.CYAN #BLUE #PURPLE
-        if "data" in self.getHisto().GetName().lower():
-            print colors.BOLD
-
         # Print customly made tables
         self.PrintFitResultsGeneral(r, fitOptions)
         self.PrintFitResultsParameters(r)
         self.PrintFitResultsHistos(r)
-        print colors.WHITE
-
         return
 
     def PrintFitResultsGeneral(self, r, fitOptions):
@@ -1071,9 +1078,9 @@ class QCDNormalizationTemplate:
             result = "False"
 
         # Construct the table
+        lines.append( align.format("Chi2/D.O.F" , "%0.1f"  % redChi2   , "", "Reduced chi2 (=1 for good fits)") )
         lines.append( align.format("Chi2"       , "%0.1f"  % chi2      , "", "Fit value") )
         lines.append( align.format("D.O.F"      , "%0.0f"  % dof       , "", "Number of degrees of freedom") )
-        lines.append( align.format("Chi2/D.O.F" , "%0.1f"  % redChi2   , "", "Reduced chi2 (=1 for good fits)") )
         lines.append( align.format("E.D.M"      , "%0.10f" % edm       , "", "Expected distance from minimum") )
         lines.append( align.format("# Calls"    , "%0.0f"  % nCalls    , "", "Number of function calls to find minimum") )
         lines.append( align.format("Free Params", "%0.0f"  % fParams   , "", "Total number of free parameters") )
@@ -1102,11 +1109,11 @@ class QCDNormalizationTemplate:
 
         # Define the table format
         lines  = [] 
-        align  = "{:<10} {:>15} {:>15} {:>15} {:>15} {:^3} {:<15} {:^5} {:^5}"
+        align  = "{:<10} {:>15} {:^3} {:<15} {:<15} {:<15} {:<15} {:^5} {:^5}"
         if percentageError:
-            header = align.format("Variable", "Initian Value", "Low Limit", "Upper Limit", "Final Value", "+/-", "Error (%)", "Bound", "Fixed")
+            header = align.format("Variable", "Final Value", "+/-", "Error (%)", "Initian Value", "Low Limit", "Upper Limit", "Bound", "Fixed")
         else:
-            header = align.format("Variable", "Initian Value", "Low Limit", "Upper Limit", "Final Value", "+/-", "Error", "Bound", "Fixed")
+            header = align.format("Variable", "Final Value", "+/-", "Error", "Initian Value", "Low Limit", "Upper Limit", "Bound", "Fixed")
         hLine  = "="*120
         lines.append(hLine)
         lines.append(header)
@@ -1141,7 +1148,7 @@ class QCDNormalizationTemplate:
                 pError = pErrorPerc
             else:
                 pError = pErrorAbs
-            lines.append( align.format(pName, initValue, lowLimit, upLimit, pValue, "+/-", pError, isBound, isFixed) )
+            lines.append( align.format(pName, pValue, "+/-", pError, initValue, lowLimit, upLimit, isBound, isFixed) )
 
         lines.append(hLine)
         lines.append("")
@@ -1280,6 +1287,8 @@ class QCDNormalizationTemplate:
             self.Verbose("Create explicitly canvas to get rid of warning message")
             canvas = ROOT.TCanvas()
 
+            self.ChangeShellColour()
+
             self.Print("Fitting function \"%s\" to histogram \"%s\" with fitOptions \"%s\"" % (self._fitFunction.getName(), h.GetName(), fitOptions) ) #fit.GetName()
             fitResultObject = h.Fit(fit, fitOptions)
             if self._verbose:
@@ -1299,6 +1308,7 @@ class QCDNormalizationTemplate:
 
             self.Verbose("Results of fitting function \"%s\" to histogram \"%s\" (binLabel=\"%s\")" % (self._fitFunction.getName(), self._histo.GetName(), self._binLabel), True) #self._name
             self.PrintFitResults(fitResultObject, fitOptions)
+            #print colors.WHITE
                     
             self.Verbose("Plotting histogram and fit function")
             self.createFitPlot(h, fit)
@@ -1539,16 +1549,16 @@ class QCDNormalizationManagerBase:
         for i in range(len(keyList)):
             binLabelText = getFormattedBinLabelString(keyList[i])
             hFrame.GetXaxis().SetBinLabel(i+1,binLabelText)
-## for 3-prongs
-        # hFrame.SetMinimum(0.0005)
-        # hFrame.SetMaximum(0.01)
- ## original
+
         hFrame.SetMinimum(0.05)
         hFrame.SetMaximum(0.5)                 
         hFrame.GetYaxis().SetTitle("Normalization coefficient")
         hFrame.GetXaxis().SetLabelSize(20)
         c = ROOT.TCanvas()
         c.SetLogy()
+        c.SetGridx()
+        c.SetGridy()
+
         hFrame.Draw()
         gQCD.Draw("p same")
         gFake.Draw("p same")
@@ -1780,7 +1790,7 @@ class QCDNormalizationManagerBase:
         self._commentLines.extend(lines)
         return lines
 
-    def _checkOverallNormalization(self, binLabel, value, err): #iro-
+    def _checkOverallNormalization(self, binLabel, value, err):
         '''
         Helper method to be called from parent class when calculating norm.coefficients
         '''
@@ -1895,7 +1905,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         self.Verbose("Sanity Check: Overall Normalization")
         value = dataTemplate.getFittedParameters()[0]
         error = dataTemplate.getFittedParameterErrors()[0]
-        lines.extend(self._checkOverallNormalization(binLabel, value, error) ) #iro-
+        lines.extend(self._checkOverallNormalization(binLabel, value, error) ) 
 
         #==== Print results line-by-line
         if 0:
