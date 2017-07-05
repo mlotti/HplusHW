@@ -53,6 +53,7 @@ class colors:
     Useful Links:
     http://ozzmaker.com/add-colour-to-text-in-python/
     http://stackoverflow.com/questions/15580303/python-output-complex-line-with-floats-colored-by-value
+    https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
     '''      
     
     colordict = {
@@ -67,6 +68,7 @@ class colors:
                 'LIGHTRED' :'\033[91m',
                 'PINK'     :'\033[95m',
                 'YELLOW'   :'\033[93m',
+                'BOLD'     :'\033[;1m',
                 }
 
     if sys.stdout.isatty():
@@ -81,8 +83,9 @@ class colors:
         LIGHTRED = colordict['LIGHTRED']
         PINK     = colordict['PINK']
         YELLOW   = colordict['YELLOW']
+        BOLD     = colordict['BOLD']
     else:
-        RED, GREEN, BLUE, GRAY, WHITE, ORANGE, CYAN, PURPLE, LIGHTRED, PINK, YELLOW = '', '', '', '', '', '', '', '', '', '', ''
+        RED, GREEN, BLUE, GRAY, WHITE, ORANGE, CYAN, PURPLE, LIGHTRED, PINK, YELLOW, BOLD = '', '', '', '', '', '', '', '', '', '', '', ''
 
 
 #================================================================================================ 
@@ -129,9 +132,10 @@ class FitFunction:
             "FitDataWithQCDAndFakesAndGenuineTaus": 3,
             "FitDataWithQCDAndInclusiveEWK": 2,
             "FitDataWithFakesAndGenuineTaus": 2,
-            "EWKFunction": 9,#10, #5
-            "QCDFunction": 7,
-            "CrystalBall": 5,
+            "EWKFunction"   : 9,
+            "QCDFunction"   : 7,
+            "QCDFunctionAlt": 5,
+            "CrystalBall"   : 5,
         }
 
         if not functionName in nParams.keys():
@@ -253,9 +257,10 @@ class FitFunction:
         '''
         return par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2], par[3])
     
-    def RooLogNormal(self, x, par):
+    def RooLogNormal(self, x, const, median, sigma):
         '''
         https://root.cern.ch/doc/v608/classRooLognormal.html
+        https://root.cern.ch/doc/v608/RooLognormal_8cxx_source.html
 
         The parametrization here is physics driven and differs from the ROOT::Math::lognormal_pdf(x,m,s,x0) with:
         
@@ -269,10 +274,49 @@ class FitFunction:
         '''
         #return par[0]*ROOT.TMath.Exp(-(ROOT.TMath.Log(x[0]/par[1]))**2/(2*ROOT.TMath.Log(par[2]))**2)/(ROOT.TMath.Sqrt(2*ROOT.TMath.Pi()*ROOT.TMath.Log(par[2])*x[0]))
         xv    = x[0]
-        ln_m0 = ROOT.TMath.Log(par[1])
-        ln_k  = ROOT.TMath.Abs(ROOT.TMath.Log(par[2]))
+        ln_k  = ROOT.TMath.Abs(ROOT.TMath.Log(sigma))
+        ln_m0 = ROOT.TMath.Log(median)
         x0    = 0
-        return par[0]*ROOT.Math.lognormal_pdf(xv, ln_m0, ln_k, x0)
+        return const*ROOT.Math.lognormal_pdf(xv, ln_m0, ln_k, x0)
+    
+    def RooExponential(self, x, const, exponent, decay=False):
+        '''
+        https://root.cern.ch/doc/v608/classRooExponential.html
+        https://root.cern.ch/doc/v608/RooExponential_8cxx_source.html
+        '''
+
+        xv = x[0]
+        if decay:
+            return const*ROOT.TMath.Exp(-exponent*xv);
+        else:
+            return const*ROOT.TMath.Exp(exponent*xv);
+
+    def RooCBShape(self, x, const, m0, sigma, alpha, n):
+        '''
+        https://root.cern.ch/doc/master/classRooCBShape.html#ac81db429cde612e553cf61ec7c126ac1
+        https://root.cern.ch/doc/master/RooCBShape_8cxx_source.html
+        
+        par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])
+        '''
+        t = (x[0]-m0)/sigma;
+        if (alpha < 0):
+            t = -t
+        absAlpha = abs(alpha)
+        if (t >= -absAlpha):
+            return ROOT.TMath.Exp(-0.5*t*t)
+        else:
+            a = ROOT.TMath.Power(n/absAlpha,n)*ROOT.TMath.Exp(-0.5*absAlpha*absAlpha)
+            b = n/absAlpha - absAlpha;
+            return a/ROOT.TMath.Power(b - t, n)
+
+    def RooGaussian(self, x, const, mean, sigma):
+        '''
+        https://root.cern.ch/doc/master/classRooGaussian.html
+        https://root.cern.ch/doc/master/RooGaussian_8cxx_source.html
+        '''
+        arg = x[0] - mean;
+        sig = sigma
+        return const*ROOT.TMath.Exp(-0.5*arg*arg/(sig*sig)) ;
     
     def QCDFunction(self, x, par, boundary, norm):
         '''
@@ -283,10 +327,23 @@ class FitFunction:
         par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
         ''' 
         # if x[0] < boundary:
-        # return self._additionalNormFactor*norm*par[0]*ROOT.TMath.Landau(x[0], par[1],par[2])
-        #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2]) + par[3]*ROOT.TMath.Exp(x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], par[6]))
-        return self._additionalNormFactor*norm*(self.RooLogNormal(x, par) + par[3]*ROOT.TMath.Exp(x[0]*par[4]) + (1-par[0]-par[3])*ROOT.TMath.Gaus(x[0], par[5], par[6]))
+        return self._additionalNormFactor*norm*(self.RooLogNormal(x, par[0], par[1], par[2]) + 
+                                                self.RooExponential(x, par[3], par[4], True) +
+                                                self.RooGaussian(x, 1-par[0]-par[3], par[5], par[6])
+                                                )
 
+    def QCDFunctionAlt(self, x, par, boundary, norm):
+        '''
+        https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
+        
+        x and par are standard root way to define the fit function
+        from x only x[0] is used; it is the x-variable.        
+        par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
+        ''' 
+        # if x[0] < boundary:
+        #return self._additionalNormFactor*norm*(self.RooLogNormal(x, par[0], par[1], par[2]) + (1-par[0])*ROOT.TMath.Landau(x[0], par[3], par[4]))
+        return self._additionalNormFactor*norm*(self.RooLogNormal(x, par[0], par[1], par[2]) + self.RooGaussian(x, 1-par[0], par[3], par[4]) )
+    
     def EWKFunction(self,x, par, boundary, norm=1, rejectPoints=0):
         '''
         x and par are standard root way to define the fit function
@@ -302,37 +359,30 @@ class FitFunction:
         #     return self._additionalNormFactor*norm*( par[0] * ROOT.TMath.BreitWigner(x[0], par[2], par[1]) * ROOT.Math.crystalball_function(x[0], par[3], par[4], par[2], par[1]) )
         # else:
         #     return par[6]*ROOT.TMath.Exp(-x[0]*par[5])
-        #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Landau(x[0],par[1], par[2]))*(par[3]*ROOT.TMath.BreitWigner(x[0], par[4], par[5]))*(par[6]*ROOT.Math.crystalball_function(x[0], par[7], par[8], par[9], par[10]) )
-        #return self._additionalNormFactor*norm*( (par[0]*ROOT.TMath.Landau(x[0],par[1], par[2])) 
-        #                                         + (par[3]*ROOT.TMath.BreitWigner(x[0], par[4], par[5])) 
-        #                                         + (par[6]*ROOT.Math.crystalball_function(x[0], par[7], par[8], par[9], par[10]) ) 
-        #                                         )
-        #return self._additionalNormFactor*norm*( (par[0]*ROOT.TMath.Landau(x[0],par[1], par[2])) 
-        #                                         + (par[3]*ROOT.TMath.BreitWigner(x[0], par[4], par[5])) 
-        #                                         + (par[6]*ROOT.Math.crystalball_function(x[0], par[7], par[8], par[9], par[10]) ) 
-        #                                         )
-
         #return self._additionalNormFactor*norm*par[0]*(ROOT.Math.crystalball_function(x[0], par[3], par[4], par[2], par[1]) 
         #                                               + ROOT.TMath.BreitWigner(x[0], par[2], par[1])
         #                                               + ROOT.TMath.Landau(x[0], par[1], par[2]) )
 
-        return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Exp(x[0]*par[1]) 
+        # Last:
+        #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Exp(x[0]*par[1]) 
+        #                                        + 
+        #                                        par[2]*ROOT.Math.crystalball_function(x[0], par[3], par[4], par[5], par[6]) # crystalball(x, alpha=Gaussian Tail, N=Normalisation, sigma=Mass Resolution, mu=Mass mean value)
+        #                                        +
+        #                                        (1-par[0]-par[2])*ROOT.TMath.Gaus(x[0], par[7], par[8])
+        #                                        )
+
+        return self._additionalNormFactor*norm*(self.RooExponential(x, par[0], par[1], True)
                                                 + 
-                                                par[2]*ROOT.Math.crystalball_function(x[0], par[3], par[4], par[5], par[6]) # crystalball(x, alpha=Gaussian Tail, N=Normalisation, sigma=Mass Resolution, mu=Mass mean value)
+                                                self.RooCBShape(x, par[2], par[3], par[4], par[5], par[6])
                                                 +
-                                                (1-par[0]-par[2])*ROOT.TMath.Gaus(x[0], par[7], par[8])
+                                                self.RooGaussian(x, 1-par[0]-par[2], par[7], par[8]) 
                                                 )
 
         #return self._additionalNormFactor*norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0]))))
-
         # Best so far:
         #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])
         #                                               + par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7])
         #                                               + (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9]) )
-
-        #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])*par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7])
-        #                                        + (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9]) )                                                      
-
 
     def EWKFunctionInv(self,x, par, boundary, norm=1, rejectPoints=0):
         if x[0] < boundary:
@@ -485,6 +535,8 @@ class QCDNormalizationTemplate:
     def createFitPlot(self, h, fit, bSaveToFile=True):
         '''
         '''
+
+        # Customisations
         xTitle = "m_{jjb} (GeV/c^{2})"
         yTitle = "Events (normalized to unity)"
         yLog   = False
@@ -538,7 +590,8 @@ class QCDNormalizationTemplate:
         myOpts = {"ymin": 1e-5, "ymaxfactor": yMaxFactor}
         plot.createFrame(fName, opts=myOpts)
         plot.getFrame().GetXaxis().SetTitle(xTitle)
-        plot.getFrame().GetXaxis().SetRangeUser(0.0*self._fitRangeMin, 1.2*self._fitRangeMax)
+        #plot.getFrame().GetXaxis().SetRangeUser(0.0*self._fitRangeMin, 1.1*self._fitRangeMax)
+        plot.getFrame().GetXaxis().SetRangeUser(0.0*self._fitRangeMin, 800.0)
         plot.getFrame().GetYaxis().SetTitle(yTitle)
 
         # Add text
@@ -741,6 +794,12 @@ class QCDNormalizationTemplate:
             return self._histo.Integral(1, self._histo.GetNbinsX()+1)*self._normalizationFactor
         return
 
+    def getHisto(self):
+        '''
+        Returns the fitted histogram
+        '''
+        return self._histo
+
     def getNeventsErrorFromHisto(self, includeOverflowBins):
         '''
         Returns the absolute uncertainty in the number of events obtained from the histogram
@@ -754,6 +813,7 @@ class QCDNormalizationTemplate:
         else:
             a = self._histo.IntegralAndError(1, self._histo.GetNbinsX()+1, integralError)
         return float(integralError*ROOT.TMath.Sqrt(self._normalizationFactor))
+
     
     def getNeventsFromFit(self):
         '''
@@ -836,7 +896,7 @@ class QCDNormalizationTemplate:
 
     def plot(self):
         '''
-        Make a plot of the MET histogram
+        Make a plot of the  histogram
         '''
         if self._histo == None:
             raise Exception("Error: Please provide first the histogram with the 'setHistogram' method")
@@ -845,11 +905,15 @@ class QCDNormalizationTemplate:
             return
         xTitle = "m_{jjb} (GeV/c^{2})"
         yTitle = "Events / bin"
-        plot = plots.PlotBase()
-        h = self._histo.Clone(self._histo.GetName()+"clone")
+        plot   = plots.PlotBase()
+        fName  = self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel
+        h      = self._histo.Clone(self._histo.GetName()+"clone")
         h.Scale(self._normalizationFactor)
         plot.histoMgr.appendHisto(histograms.Histo(h,self._histo.GetName()))
-        plot.createFrame(self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel, opts={"ymin": 0.1, "ymaxfactor": 4.})
+
+        # Create frame
+        myOpts = {"ymin": 0.1, "ymaxfactor": 4.0}
+        plot.createFrame(fName, opts=myOpts)
         plot.getFrame().GetXaxis().SetTitle(xTitle)
         plot.getFrame().GetYaxis().SetTitle(yTitle)
         plot.getPad().SetLogy(False)
@@ -936,7 +1000,7 @@ class QCDNormalizationTemplate:
         tf1 = ROOT.TF1(fName, self._fitFunction, self._fitRangeMin, self._fitRangeMax, self._fitFunction.getNParam())
         return tf1
 
-    def PrintFitResults(self, r):
+    def PrintFitResults(self, r, fitOptions):
         '''
         Print information contained in the TFitResultPtr r
         
@@ -946,18 +1010,46 @@ class QCDNormalizationTemplate:
         '''
         self.Verbose("PrintFitResults()")
         
-        # Sanity check
+        # Sanity checks
         if r.IsEmpty():
             raise Exception("Error: The TFitResultPtr is empty!")
+        if not r.IsValid():
+            raise Exception("Error: The TFitResultPtr is not valid! The fit failed...")
 
         # Print full information of fit including covariance matrix and correlation
         if 0:
             r.Print("V")
 
+        # Customise colour of printed output (makes spotting easier)
+        if "qcd" or "fakeb" in self.getHisto().GetName().lower():
+            print colors.YELLOW #ORANGE #YELLOW
+        if "ewk" in self.getHisto().GetName().lower():
+            print colors.CYAN #BLUE #PURPLE
+        if "data" in self.getHisto().GetName().lower():
+            print colors.BOLD
+
+        # Print customly made tables
+        self.PrintFitResultsGeneral(r, fitOptions)
+        self.PrintFitResultsParameters(r)
+        self.PrintFitResultsHistos(r)
+        print colors.WHITE
+
+        return
+
+    def PrintFitResultsGeneral(self, r, fitOptions):
+        '''
+        Print information contained in the TFitResultPtr r
+        
+        See:
+        https://root.cern.ch/doc/v608/classROOT_1_1Fit_1_1FitResult.html#ac96273476383baba62ca1585b6bd4fda
+        https://root.cern.ch/doc/v608/classTFitResult.html
+        '''
+        self.Verbose("PrintFitResultsGeneral()")
+        
         # Define the table format
         lines  = [] 
-        align  = "{:<15} {:>15} {:>15} {:^15} {:<60}"
-        header = align.format("Variable", "Value", "Error", "Error (%)", "Description")
+        align  = "{:<15} {:>15} {:^3} {:<60}"
+        header = align.format("Variable", "Value", "", "Description")
         hLine  = "="*120
         lines.append(hLine)
         lines.append(header)
@@ -974,9 +1066,98 @@ class QCDNormalizationTemplate:
         covMStatus = r.CovMatrixStatus()
         isValid    = r.IsValid()
         if isValid:
-            result = "TRUE"
+            result = "True"
         else:
-            result = "FALSE"
+            result = "False"
+
+        # Construct the table
+        lines.append( align.format("Chi2"       , "%0.1f"  % chi2      , "", "Fit value") )
+        lines.append( align.format("D.O.F"      , "%0.0f"  % dof       , "", "Number of degrees of freedom") )
+        lines.append( align.format("Chi2/D.O.F" , "%0.1f"  % redChi2   , "", "Reduced chi2 (=1 for good fits)") )
+        lines.append( align.format("E.D.M"      , "%0.10f" % edm       , "", "Expected distance from minimum") )
+        lines.append( align.format("# Calls"    , "%0.0f"  % nCalls    , "", "Number of function calls to find minimum") )
+        lines.append( align.format("Free Params", "%0.0f"  % fParams   , "", "Total number of free parameters") )
+        lines.append( align.format("Status"     , "%0.0f"  % status    , "", "Minimizer status code") )
+        lines.append( align.format("Cov Matrix" , "%0.0f"  % covMStatus, "", "0=not calculated, 1=approx, 2=made pos def, 3=accurate") )
+        lines.append( align.format("IsValid"    , "%s"     % (result)  , "", "True=Fit successful, False=Fit unsuccessful") )
+        lines.append( align.format("Fit Range"  , "%s-%s"  % (self._fitRangeMin, self._fitRangeMax), "", "Lower/Upper bounds to fit the function") )
+        lines.append( align.format("Fit Options", "\"%s\""     % (fitOptions), "", "The fitting options") )
+        lines.append(hLine)
+        lines.append("")
+
+        # Print the table
+        for l in lines:
+            self.Print(l, False)
+        return
+
+    def PrintFitResultsParameters(self, r, percentageError=True):
+        '''
+        Print information contained in the TFitResultPtr r
+        
+        See:
+        https://root.cern.ch/doc/v608/classROOT_1_1Fit_1_1FitResult.html#ac96273476383baba62ca1585b6bd4fda
+        https://root.cern.ch/doc/v608/classTFitResult.html
+        '''
+        self.Verbose("PrintFitResultsParameters()")
+
+        # Define the table format
+        lines  = [] 
+        align  = "{:<10} {:>15} {:>15} {:>15} {:>15} {:^3} {:<15} {:^5} {:^5}"
+        if percentageError:
+            header = align.format("Variable", "Initian Value", "Low Limit", "Upper Limit", "Final Value", "+/-", "Error (%)", "Bound", "Fixed")
+        else:
+            header = align.format("Variable", "Initian Value", "Low Limit", "Upper Limit", "Final Value", "+/-", "Error", "Bound", "Fixed")
+        hLine  = "="*120
+        lines.append(hLine)
+        lines.append(header)
+        lines.append(hLine)
+            
+        # For-loop: All parameters
+        for i, p in enumerate(r.Parameters()):
+            pName     = r.GetParameterName(i)
+            pValue    = "%0.5f" % p
+            pErrorAbs = "%0.5f" % r.Error(i)
+            pErrorPerc= 0
+            if p != 0:
+                pErrorPerc = "%.2f" % ((r.Error(i)/p)*100)            
+            isBound   = r.IsParameterBound(i)
+            isFixed   = r.IsParameterFixed(i)
+            if self._fitParamInitialValues:
+                initValue = self._fitParamInitialValues["default"][i]
+            else:
+                initValue = "-"
+
+            if self._fitParamLowerLimits:
+                lowLimit  = self._fitParamLowerLimits["default"][i]
+            else:
+                lowLimit  = "-"
+
+            if self._fitParamUpperLimits:
+                upLimit   = self._fitParamUpperLimits["default"][i]
+            else:
+                upLimit   = "-"
+
+            if percentageError:
+                pError = pErrorPerc
+            else:
+                pError = pErrorAbs
+            lines.append( align.format(pName, initValue, lowLimit, upLimit, pValue, "+/-", pError, isBound, isFixed) )
+
+        lines.append(hLine)
+        lines.append("")
+        for l in lines:
+            self.Print(l, False)
+        return
+
+    def PrintFitResultsHistos(self, r, percentageError=False):
+        '''
+        Print information contained in the TFitResultPtr r
+        
+        See:
+        https://root.cern.ch/doc/v608/classROOT_1_1Fit_1_1FitResult.html#ac96273476383baba62ca1585b6bd4fda
+        https://root.cern.ch/doc/v608/classTFitResult.html
+        '''
+        self.Verbose("PrintFitResultsHistos()")
         nHisto     = self.getNeventsFromHisto(False)
         nHistoUp   = self.getNeventsErrorFromHisto(False)
         nHistoDown = self.getNeventsErrorFromHisto(False)
@@ -996,33 +1177,7 @@ class QCDNormalizationTemplate:
             nRatioUp    = 0
             nRatioDown  = 0
 
-        # Construct the table
-        lines.append( align.format("Chi2"       , "%0.1f" % chi2      , "", "", "Fit value") )
-        lines.append( align.format("D.O.F"      , "%0.0f" % dof       , "", "", "Number of degrees of freedom") )
-        lines.append( align.format("Chi2/d.o.f" , "%0.1f" % redChi2   , "", "", "Reduced chi2 (=1 for good fits)") )
-        lines.append( align.format("E.D.M"      , "%0.7f" % edm       , "", "", "Expected distance from minimum") )
-        lines.append( align.format("# Calls"    , "%0.0f" % nCalls    , "", "", "Number of function calls to find minimum") )
-        lines.append( align.format("Free Params", "%0.0f" % fParams   , "", "", "Total number of free parameters") )
-        lines.append( align.format("Status"     , "%0.0f" % status    , "", "", "Minimizer status code") )
-        lines.append( align.format("Cov Matrix" , "%0.0f" % covMStatus, "", "", "0=not calculated, 1=approx, 2=made pos def, 3=accurate") )
-        lines.append( align.format("IsValid"    , "%s"    % (result)  , "", "", "True=Fit successful, False=Fit unsuccessful") )
-        lines.append( align.format("Fit Range"  , "%s-%s" % (self._fitRangeMin, self._fitRangeMax), "", "", "Lower/Upper bounds to fit the function") )
-        #lines.append("")
-
-        # For-loop: All parameters
-        for i, p in enumerate(r.Parameters()):
-            pName   = r.GetParameterName(i)
-            pValue  = "%0.5f" % p
-            pError  = "%0.5f" % r.Error(i)
-            pErrorP = 0
-            if p != 0:
-                pErrorP = "%.2f" % ((r.Error(i)/p)*100)
-            isBound = r.IsParameterBound(i)
-            isFixed = r.IsParameterFixed(i)
-            lines.append( align.format(pName, pValue, pError, pErrorP, "isBound = %s, isFixed = %s" %  (isBound, isFixed) ) )
-        #lines.append("")
-
-        # Events Info
+        # Calculate Percentage Errors
         nHistoUpP = 0
         if nHisto > 0:
             nHistoUpP = (nHistoUp/nHisto)*100
@@ -1035,19 +1190,40 @@ class QCDNormalizationTemplate:
         nRatioUpP = 0
         if nRatio > 0:
             nRatioUpP = (nRatioUp/nRatio)*100
-        lines.append(align.format("Events (Histo)", "%.3f" % nHisto,  "%.3f" % nHistoUp, "%.2f" % nHistoUpP, "Absolute uncertainty quoted (up=down)") )
-        lines.append(align.format("Events (Fit)"  , "%.3f" % nFit  ,  "%.3f" % nFitUp  , "%.2f" % nFitUpP  , "Total fit parameter uncertainty (up)") )
-        lines.append(align.format("Events (Diff)" , "%.3f" % nDiff ,  "%.3f" % nDiffUp , "%.2f" % nDiffUpP , "Error-propagation (up)") )
-        lines.append(align.format("Events (Ratio)", "%.3f" % nRatio,  "%.3f" % nRatioUp, "%.2f" % nRatioUp , "Error-propagation (up)") )
+
+        # Use absolute or percentage errors?
+        if percentageError:
+            eHistoUp = nHistoUp
+            eFitUp   = nFitUp
+            eDiffUp  = nDiffUp
+            eRatioUp = nRatioUp
+        else:
+            eHistoUp = nHistoUpP
+            eFitUp   = nFitUpP
+            eDiffUp  = nDiffUpP
+            eRatioUp = nRatioUpP
+
+        # Define the table format
+        lines  = [] 
+        align  = "{:<15} {:>15} {:^3} {:<10} {:<60}"
+        if percentageError:
+            header = align.format("Variable", "Events", "+/-", "Error (%)", "Description")
+        else:
+            header = align.format("Variable", "Events", "+/-", "Error", "Description")
+        hLine  = "="*120
+        lines.append(hLine)
+        lines.append(header)
+        lines.append(hLine)
+        lines.append(align.format("Histogram"    , "%.3f" % nHisto, "+/-", "%.3f" % nHistoUp, "Absolute uncertainty quoted (up=down)") )
+        lines.append(align.format("Fit"          , "%.3f" % nFit  , "+/-", "%.3f" % nFitUp  , "Total fit parameter uncertainty (up)") )
+        lines.append(align.format("Histogram-Fit", "%.3f" % nDiff , "+/-", "%.3f" % nDiffUp , "Error-propagation (up)") )
+        lines.append(align.format("Histogram/Fit", "%.3f" % nRatio, "+/-", "%.3f" % nRatioUp, "Error-propagation (up)") )
         lines.append(hLine)
         lines.append("")
+
+        # Print the table
         for l in lines:
             self.Print(l, False)
-
-        # Sanity check
-        if not isValid:
-            raise Exception("Error: The TFitResultPtr is not valid! The fit failed...")
-
         return
 
     def doFit(self, fitOptions="S", createPlot=True):
@@ -1074,7 +1250,7 @@ class QCDNormalizationTemplate:
             if "default" in self._fitParamInitialValues.keys():
                 centralKey = "default"
             if centralKey != None:
-                for i in range(len(self._fitParamInitialValues[centralKey])):
+                for i in range(len(self._fitParamInitialValues[centralKey])):                    
                     fit.SetParameter(i, self._fitParamInitialValues[centralKey][i])
 
             # Set fit parameter ranges
@@ -1104,8 +1280,7 @@ class QCDNormalizationTemplate:
             self.Verbose("Create explicitly canvas to get rid of warning message")
             canvas = ROOT.TCanvas()
 
-            self.Verbose("Fitting function \"%s\" to histogram \"%s\" with fitOptions \"%s\"" % (fit.GetName(), h.GetName(), fitOptions) )
-            print 
+            self.Print("Fitting function \"%s\" to histogram \"%s\" with fitOptions \"%s\"" % (self._fitFunction.getName(), h.GetName(), fitOptions) ) #fit.GetName()
             fitResultObject = h.Fit(fit, fitOptions)
             if self._verbose:
                 fitResultObject.Print("V")
@@ -1122,10 +1297,10 @@ class QCDNormalizationTemplate:
             self._nEventsTotalErrorFromFitUp   = orthogonalizer.getTotalFitParameterUncertaintyUp()
             self._nEventsTotalErrorFromFitDown = orthogonalizer.getTotalFitParameterUncertaintyDown()
 
-            self.Print("Results of fitting function \"%s\" to histogram \"%s\" (binLabel=\"%s\")" % (self._fitFunction.getName(), self._histo.GetName(), self._binLabel), True) #self._name
-            self.PrintFitResults(fitResultObject)
+            self.Verbose("Results of fitting function \"%s\" to histogram \"%s\" (binLabel=\"%s\")" % (self._fitFunction.getName(), self._histo.GetName(), self._binLabel), True) #self._name
+            self.PrintFitResults(fitResultObject, fitOptions)
                     
-            self.Print("Plotting histogram and fit  function")
+            self.Verbose("Plotting histogram and fit function")
             self.createFitPlot(h, fit)
             return
 
@@ -1154,7 +1329,7 @@ class QCDNormalizationManagerBase:
 
         # If already exists, Delete an entire directory tree
         if os.path.exists(self._plotDirName):
-            self.Print("Removing  directory tree %s" % (self._plotDirName), True )
+            self.Verbose("Removing directory tree %s" % (self._plotDirName), True )
             shutil.rmtree(self._plotDirName)
         os.mkdir(self._plotDirName)
         self._requiredTemplateList = []
@@ -1480,22 +1655,35 @@ class QCDNormalizationManagerBase:
 
     ## Helper method to plot fitted templates (called from parent class when calculating norm.coefficients)
     def _makePlot(self, binLabel, histogramDictionary={}):
-        # Make plot
+
+        # Customisation
         xTitle = "m_{jjb} (GeV/c^{2})"
         yTitle = "Events (normalized to unity)"
-
+        yLog   = True
+        fName  = self._plotDirName + "/finalFit_" + binLabel
+        if yLog:
+            yMaxFactor = 4.0
+        else:
+            yMaxFactor = 1.1
+        
+        # Disable fit/statistics box
         ROOT.gStyle.SetOptFit(0)
         ROOT.gStyle.SetOptStat(0)
-        plot = plots.PlotBase()
+
+        plot  = plots.PlotBase()        
         for k in histogramDictionary.keys():
             if not (isinstance(histogramDictionary[k], ROOT.TH1) or isinstance(histogramDictionary[k], ROOT.TF1)):
                 print histogramDictionary
                 raise Exception("Error: Expected a dictionary of histograms")
             plot.histoMgr.appendHisto(histograms.Histo(histogramDictionary[k], k))
-        plot.createFrame(self._plotDirName+"/finalFit_"+binLabel, opts={"ymin": 1e-5, "ymaxfactor": 4.})
+            
+        # Create frame
+        myOpts = {"ymin": 1e-5, "ymaxfactor": yMaxFactor}
+        #myOpts = {"ymin": 0.1, "ymaxfactor": yMaxFactor}
+        plot.createFrame(fName, opts=myOpts)
         plot.getFrame().GetXaxis().SetTitle(xTitle)
         plot.getFrame().GetYaxis().SetTitle(yTitle)
-        plot.getFrame().GetXaxis().SetRangeUser(0.8*self._fitRangeMin, 1.2*self._fitRangeMax)
+        plot.getFrame().GetXaxis().SetRangeUser(0.0*self._fitRangeMin, 1.1*self._fitRangeMax)
         
         # Add text
         histograms.addText(0.72, 0.85-0.08*0, "Final Fit") #"Final fit, "+binLabel
@@ -1503,13 +1691,14 @@ class QCDNormalizationManagerBase:
         histograms.addStandardTexts(cmsTextPosition="outframe")
 
         # Cut lines/boxes
-        _kwargs1 = {"lessThan": True}
-        _kwargs2 = {"lessThan": False}
-        plot.addCutBoxAndLine(cutValue=self._fitRangeMin, fillColor=ROOT.kGray, box=False, line=True, **_kwargs1)
-        plot.addCutBoxAndLine(cutValue=self._fitRangeMax, fillColor=ROOT.kGray, box=False, line=True, **_kwargs2)
+        if yLog: # for unknown reason doesn't work for linear scale
+            _kwargs1 = {"lessThan": True}
+            _kwargs2 = {"lessThan": False}
+            plot.addCutBoxAndLine(cutValue=self._fitRangeMin, fillColor=ROOT.kGray, box=False, line=True, **_kwargs1)
+            plot.addCutBoxAndLine(cutValue=self._fitRangeMax, fillColor=ROOT.kGray, box=False, line=True, **_kwargs2)
 
         # Draw and save plot
-        plot.getPad().SetLogy(True)
+        plot.getPad().SetLogy(yLog)
         plot.draw()
         plot.save()
         return
@@ -1651,6 +1840,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         self._checkInputValidity(templatesToBeFitted)
         self._fitRangeMin = FITMIN
         self._fitRangeMax = FITMAX
+        self._fitOptions  = fitOptions
         self.Verbose("Fitting templates", True)
         self._fitTemplates(fitOptions)
         
