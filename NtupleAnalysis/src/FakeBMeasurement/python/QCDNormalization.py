@@ -257,7 +257,7 @@ class FitFunction:
         '''
         return par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2], par[3])
     
-    def RooLogNormal(self, x, const, median, sigma):
+    def RooLogNormal(self, x, median, sigma):
         '''
         https://root.cern.ch/doc/v608/classRooLognormal.html
         https://root.cern.ch/doc/v608/RooLognormal_8cxx_source.html
@@ -277,20 +277,16 @@ class FitFunction:
         ln_k  = ROOT.TMath.Abs(ROOT.TMath.Log(sigma))
         ln_m0 = ROOT.TMath.Log(median)
         x0    = 0
-        return const*ROOT.Math.lognormal_pdf(xv, ln_m0, ln_k, x0)
+        return ROOT.Math.lognormal_pdf(xv, ln_m0, ln_k, x0)
     
-    def RooExponential(self, x, const, exponent, decay=False):
+    def RooExponential(self, x, a):
         '''
         https://root.cern.ch/doc/v608/classRooExponential.html
         https://root.cern.ch/doc/v608/RooExponential_8cxx_source.html
         '''
-        xv = x[0]
-        if decay:
-            return const*ROOT.TMath.Exp(-exponent*xv);
-        else:
-            return const*ROOT.TMath.Exp(exponent*xv);
+        return ROOT.TMath.Exp(+a*x[0])
 
-    def RooCBShape(self, x, const, m0, sigma, alpha, n):
+    def RooCBShape(self, x, m0, sigma, alpha, n):
         '''
         https://root.cern.ch/doc/master/classRooCBShape.html#ac81db429cde612e553cf61ec7c126ac1
         https://root.cern.ch/doc/master/RooCBShape_8cxx_source.html
@@ -300,22 +296,24 @@ class FitFunction:
         t = (x[0]-m0)/sigma;
         if (alpha < 0):
             t = -t
+
         absAlpha = abs(alpha)
+
         if (t >= -absAlpha):
             return ROOT.TMath.Exp(-0.5*t*t)
         else:
             a = ROOT.TMath.Power(n/absAlpha,n)*ROOT.TMath.Exp(-0.5*absAlpha*absAlpha)
-            b = n/absAlpha - absAlpha;
+            b = (n/absAlpha) - absAlpha
             return a/ROOT.TMath.Power(b - t, n)
 
-    def RooGaussian(self, x, const, mean, sigma):
+    def RooGaussian(self, x, mean, sigma):
         '''
         https://root.cern.ch/doc/master/classRooGaussian.html
         https://root.cern.ch/doc/master/RooGaussian_8cxx_source.html
         '''
         arg = x[0] - mean;
         sig = sigma
-        return const*ROOT.TMath.Exp(-0.5*arg*arg/(sig*sig)) ;
+        return ROOT.TMath.Exp(-0.5*arg*arg/(sig*sig))
     
     def QCDFunction(self, x, par, boundary, norm):
         '''
@@ -326,9 +324,9 @@ class FitFunction:
         par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
         ''' 
         # if x[0] < boundary:
-        return self._additionalNormFactor*norm*(self.RooLogNormal(x, par[0], par[1], par[2]) + 
-                                                self.RooExponential(x, par[3], par[4], True) +
-                                                self.RooGaussian(x, 1-par[0]-par[3], par[5], par[6])
+        return self._additionalNormFactor*norm*(par[0]*self.RooLogNormal(x, par[1], par[2]) + 
+                                                par[3]*self.RooExponential(x, par[4]) +
+                                                (1-par[0]-par[3])*self.RooGaussian(x, par[5], par[6])
                                                 )
 
     def QCDFunctionAlt(self, x, par, boundary, norm):
@@ -341,7 +339,8 @@ class FitFunction:
         ''' 
         # if x[0] < boundary:
         #return self._additionalNormFactor*norm*(self.RooLogNormal(x, par[0], par[1], par[2]) + (1-par[0])*ROOT.TMath.Landau(x[0], par[3], par[4]))
-        return self._additionalNormFactor*norm*(self.RooLogNormal(x, par[0], par[1], par[2]) + self.RooGaussian(x, 1-par[0], par[3], par[4]) )
+        return self._additionalNormFactor*norm*(par[0]*self.RooLogNormal(x, par[1], par[2]) + 
+                                                (1-par[0])*self.RooGaussian(x, par[3], par[4]) )
     
     def EWKFunction(self,x, par, boundary, norm=1, rejectPoints=0):
         '''
@@ -351,38 +350,31 @@ class FitFunction:
         
         Landau(x, mpv, widthParam), ROOT.TMath.Gaus(x[0], sigma, mean), ROOT.TMath.BreitWigner(x[0], decayWidth, mass)
         ''' 
-        # return self._additionalNormFactor*norm*(self.CrystalBall(x, par))
-        # return self._additionalNormFactor*norm*(par[0] * ROOT.TMath.Landau(x[0], par[1], par[2]) * ROOT.TMath.Gaus(x[0], par[1]) * ROOT.TMath.BreitWigner(x[0], par[2], par[1]))
-        # return self._additionalNormFactor*norm*(par[0] * ROOT.TMath.Landau(x[0], par[1], par[2]) * ROOT.TMath.Gaus(x[0], par[3], par[1]) * ROOT.TMath.BreitWigner(x[0], par[4], par[1]))
         # if x[0] < boundary:
         #     return self._additionalNormFactor*norm*( par[0] * ROOT.TMath.BreitWigner(x[0], par[2], par[1]) * ROOT.Math.crystalball_function(x[0], par[3], par[4], par[2], par[1]) )
         # else:
         #     return par[6]*ROOT.TMath.Exp(-x[0]*par[5])
-        #return self._additionalNormFactor*norm*par[0]*(ROOT.Math.crystalball_function(x[0], par[3], par[4], par[2], par[1]) 
-        #                                               + ROOT.TMath.BreitWigner(x[0], par[2], par[1])
-        #                                               + ROOT.TMath.Landau(x[0], par[1], par[2]) )
 
-        # Last:
         #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Exp(x[0]*par[1]) 
         #                                        + 
-        #                                        par[2]*ROOT.Math.crystalball_function(x[0], par[3], par[4], par[5], par[6]) # crystalball(x, alpha=Gaussian Tail, N=Normalisation, sigma=Mass Resolution, mu=Mass mean value)
+        #                                        par[2]*ROOT.Math.crystalball_function(x[0], par[3], par[4], par[5], par[6]) 
         #                                        +
         #                                        (1-par[0]-par[2])*ROOT.TMath.Gaus(x[0], par[7], par[8])
         #                                        )
-
+        
         if rejectPoints > 0:
             if (x[0] > 216 and x[0] < 218):
                 ROOT.TF1.RejectPoint()
                 print "Rejecting point with value x=", x[0]
                 return 0    
-        return self._additionalNormFactor*norm*(self.RooExponential(x, par[0], par[1], True)
-                                                + 
-                                                self.RooCBShape(x, par[2], par[3], par[4], par[5], par[6])
-                                                +
-                                                self.RooGaussian(x, 1-par[0]-par[2], par[7], par[8]) 
+        #return self._additionalNormFactor*norm*(par[0]*self.RooCBShape(x, par[1], par[2], par[3], par[4]) +
+        #                                        par[5]*self.RooExponential(x, par[6]) +
+        #                                        (1-par[0]-par[5])*self.RooGaussian(x, par[7], par[8]) 
+        #                                        )
+        return 1*(par[0]*self.RooCBShape(x, par[1], par[2], par[3], par[4]) +
+                                                par[5]*self.RooExponential(x, par[6]) +
+                                                (1-par[0]-par[5])*self.RooGaussian(x, par[7], par[8]) 
                                                 )
-
-        #return self._additionalNormFactor*norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0]))))
         # Best so far:
         #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])
         #                                               + par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7])
@@ -1088,7 +1080,7 @@ class QCDNormalizationTemplate:
         lines.append( align.format("Cov Matrix" , "%0.0f"  % covMStatus, "", "0=not calculated, 1=approx, 2=made pos def, 3=accurate") )
         lines.append( align.format("IsValid"    , "%s"     % (result)  , "", "True=Fit successful, False=Fit unsuccessful") )
         lines.append( align.format("Fit Range"  , "%s-%s"  % (self._fitRangeMin, self._fitRangeMax), "", "Lower/Upper bounds to fit the function") )
-        lines.append( align.format("Fit Options", "\"%s\""     % (fitOptions), "", "The fitting options") )
+        lines.append( align.format("Fit Options", "\"%s\"" % (fitOptions), "", "The fitting options") )
         lines.append(hLine)
         lines.append("")
 
@@ -1109,7 +1101,7 @@ class QCDNormalizationTemplate:
 
         # Define the table format
         lines  = [] 
-        align  = "{:<10} {:>15} {:^3} {:<15} {:<15} {:<15} {:<15} {:^5} {:^5}"
+        align  = "{:<10} {:>10} {:^3} {:<10} {:^15} {:^15} {:^15} {:^5} {:^5}"
         if percentageError:
             header = align.format("Variable", "Final Value", "+/-", "Error (%)", "Initian Value", "Low Limit", "Upper Limit", "Bound", "Fixed")
         else:
@@ -1279,8 +1271,8 @@ class QCDNormalizationTemplate:
             # Do the fit
             if not self._quietMode:
                 self.Verbose("Using fit options: %s" % (fitOptions))
-            elif not "Q" in fitOptions:
-                fitOptions += " Q" # To suppress output
+            #elif not "Q" in fitOptions:
+            #    fitOptions += " Q" # To suppress output
             if not "S" in fitOptions:
                 fitOptions += " S" # To return fit results
 
@@ -1935,153 +1927,153 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
 
         
 # Unit tests
-if __name__ == "__main__":
-    import unittest
-    class TestFitFunction(unittest.TestCase):
-        def testNonExistingFitFunction(self):
-            with self.assertRaises(Exception):
-                FitFunction("dummy")
-        
-        def testGaussian(self):
-            f = FitFunction("Gaussian")
-            self.assertEqual(f([0],[1,0,1]), 0.3989422804014327)
-            
-    class TestQCDNormalizationTemplate(unittest.TestCase):
-        def _getGaussianHisto(self):
-            h = ROOT.TH1F("h","h",10,0,10)
-            h.SetBinContent(0, 27)
-            h.SetBinContent(1, 42)
-            h.SetBinContent(2, 87)
-            h.SetBinContent(3, 135)
-            h.SetBinContent(4, 213)
-            h.SetBinContent(5, 181)
-            h.SetBinContent(6, 134)
-            h.SetBinContent(7, 105)
-            h.SetBinContent(8, 46)
-            h.SetBinContent(9, 22)
-            h.SetBinContent(10, 7)
-            h.SetBinContent(11, 1)
-            return h
-      
-        def testInitialization(self):
-            q = QCDNormalizationTemplate("EWK testline", "dummy")
-            # Test initialization
-            with self.assertRaises(Exception):
-                q.getNeventsFromHisto(True)
-            with self.assertRaises(Exception):
-                q.getNeventsErrorFromHisto(True)
-            with self.assertRaises(Exception):
-                q.getNeventsFromFit()
-            with self.assertRaises(Exception):
-                q.getNeventsErrorFit()
-            self.assertEqual(q.getFitResults(), None)
-            with self.assertRaises(Exception):
-                q.plot()
-            with self.assertRaises(Exception):
-                q.doFit()
-        
-        def testEmptyHistogram(self):
-            q = QCDNormalizationTemplate("EWK testline", "dummy")
-            h = ROOT.TH1F("h","h",10,0,10)
-            q.setHistogram(h, "Inclusive bin")
-            with self.assertRaises(Exception):
-                q.doFit()
-            self.assertEqual(q.getNeventsFromHisto(True), 0.0)
-            self.assertEqual(q.getNeventsErrorFromHisto(True), ROOT.TMath.Sqrt(0.0))
-            h.Delete()
-        
-        def testFitWithoutFunction(self):
-            q = QCDNormalizationTemplate("EWK testline", "dummy")
-            h = self._getGaussianHisto()
-            q.setHistogram(h, "Inclusive bin")
-            self.assertLess(abs(q.getNeventsFromHisto(True)-1000.0),0.001)
-            self.assertLess(abs(q.getNeventsErrorFromHisto(True) - ROOT.TMath.Sqrt(1000.0)), 0.0001)
-            self.assertLess(abs(q.getNeventsFromHisto(False)-973.0),0.001)
-            self.assertLess(abs(q.getNeventsErrorFromHisto(False) - ROOT.TMath.Sqrt(973.0)), 0.0001)
-            self.assertEqual(q.getFitResults(), None)
-            with self.assertRaises(Exception):
-                q.getNeventsFromFit()
-            with self.assertRaises(Exception):
-                q.getNeventsErrorFit()
-            q.reset()
-            with self.assertRaises(Exception):
-                q.getNeventsFromHisto(True)
-            with self.assertRaises(Exception):
-                q.getNeventsErrorFromHisto(True)
-            with self.assertRaises(Exception):
-                q.getNeventsFromFit()
-            with self.assertRaises(Exception):
-                q.getNeventsErrorFit()
-
-        def testFitParams(self):
-            q = QCDNormalizationTemplate("EWK testline", "dummy")
-            # input format
-            with self.assertRaises(Exception):
-                q.setDefaultFitParam(defaultInitialValue=2)
-            with self.assertRaises(Exception):
-                q.setDefaultFitParam(defaultLowerLimit=2, defaultUpperLimit=[2])
-            with self.assertRaises(Exception):
-                q.setDefaultFitParam(defaultLowerLimit=[2],defaultUpperLimit=2)
-            with self.assertRaises(Exception):
-                q.setFitParamForBin("bin", initialValue=2)
-            with self.assertRaises(Exception):
-                q.setFitParamForBin("bin", lowerLimit=2, upperLimit=[2])
-            with self.assertRaises(Exception):
-                q.setFitParamForBin("bin", lowerlimit=[2], upperLimit=2)
-            # list length
-            with self.assertRaises(Exception):
-                q.setDefaultFitParam(defaultLowerLimit=[2])
-            with self.assertRaises(Exception):
-                q.setDefaultFitParam(defaultUpperLimit=[2])
-            with self.assertRaises(Exception):
-                q.setDefaultFitParam(defaultLowerLimit=[2], defaultUpperLimit=[2,3])
-            with self.assertRaises(Exception):
-                q.setFitParamForBin("bin", lowerLimit=[2])
-            with self.assertRaises(Exception):
-                q.setFitParamForBin("bin", upperLimit=[2])
-            with self.assertRaises(Exception):
-                q.setFitParamForBin("bin", lowerLimit=[2], upperLimit=[2,3])
-
-        def testSimpleFit(self):
-            _createPlots = False # To test plotting, set to True
-            q = QCDNormalizationTemplate("EWK testline", "dummy",quietMode=True)
-            h = self._getGaussianHisto()
-            q.setHistogram(h, "Inclusive bin")
-            # Test proper parameters to fitter setting
-            with self.assertRaises(Exception):
-                q.setFitter([], 0, 10)
-            with self.assertRaises(Exception):
-                q.setFitter(FitFunction("Gaussian"), 10, 0)
-            # Do fit (it fails with default parameters)
-            q.setFitter(FitFunction("Gaussian"), 0, 10)
-            if _createPlots:
-                q.plot()
-            q.doFit(fitOptions="S R L Q", createPlot=False)
-            self.assertEqual(q.getNeventsFromFit(), 0.)
-            self.assertEqual(q.getNeventsTotalErrorFromFit()[0], 0.)
-            self.assertEqual(q.getNeventsTotalErrorFromFit()[1], 0.)
-            # Reset
-            q.reset()
-            with self.assertRaises(Exception):
-                q.getNeventsFromFit()
-            with self.assertRaises(Exception):
-                q.getNeventsErrorFit()
-            # Set params (which do not affect anything)
-            q.setFitParamForBin("Non-inclusive bin", initialValue=[10,4,2])
-            q.setHistogram(h, "Inclusive bin")
-            q.doFit(fitOptions="S R L Q", createPlot=False)
-            self.assertEqual(q.getNeventsFromFit(), 0.)
-            self.assertEqual(q.getNeventsTotalErrorFromFit()[0], 0.)
-            self.assertEqual(q.getNeventsTotalErrorFromFit()[1], 0.)
-            # Set params (for bin)
-            q.reset()
-            q.setFitParamForBin("Inclusive bin", initialValue=[1,4,2], lowerLimit=[0.01, 0, 0], upperLimit=[100, 10, 10])
-            q.setHistogram(h, "Inclusive bin")
-            #q.printFitParamSettings()
-            q.doFit(fitOptions="S R L", createPlot=_createPlots)
-            self.assertLess(abs(q.getNeventsFromFit()-1), 0.01)
-            self.assertLess(abs(q.getNeventsTotalErrorFromFit()[0]-1.003), 0.1)
-            self.assertLess(abs(q.getNeventsTotalErrorFromFit()[1]-1.003), 0.1)
-            #q.printResults()
-
-    unittest.main()
+# if __name__ == "__main__":
+#     import unittest
+#     class TestFitFunction(unittest.TestCase):
+#         def testNonExistingFitFunction(self):
+#             with self.assertRaises(Exception):
+#                 FitFunction("dummy")
+#         
+#         def testGaussian(self):
+#             f = FitFunction("Gaussian")
+#             self.assertEqual(f([0],[1,0,1]), 0.3989422804014327)
+#             
+#     class TestQCDNormalizationTemplate(unittest.TestCase):
+#         def _getGaussianHisto(self):
+#             h = ROOT.TH1F("h","h",10,0,10)
+#             h.SetBinContent(0, 27)
+#             h.SetBinContent(1, 42)
+#             h.SetBinContent(2, 87)
+#             h.SetBinContent(3, 135)
+#             h.SetBinContent(4, 213)
+#             h.SetBinContent(5, 181)
+#             h.SetBinContent(6, 134)
+#             h.SetBinContent(7, 105)
+#             h.SetBinContent(8, 46)
+#             h.SetBinContent(9, 22)
+#             h.SetBinContent(10, 7)
+#             h.SetBinContent(11, 1)
+#             return h
+#       
+#         def testInitialization(self):
+#             q = QCDNormalizationTemplate("EWK testline", "dummy")
+#             # Test initialization
+#             with self.assertRaises(Exception):
+#                 q.getNeventsFromHisto(True)
+#             with self.assertRaises(Exception):
+#                 q.getNeventsErrorFromHisto(True)
+#             with self.assertRaises(Exception):
+#                 q.getNeventsFromFit()
+#             with self.assertRaises(Exception):
+#                 q.getNeventsErrorFit()
+#             self.assertEqual(q.getFitResults(), None)
+#             with self.assertRaises(Exception):
+#                 q.plot()
+#             with self.assertRaises(Exception):
+#                 q.doFit()
+#         
+#         def testEmptyHistogram(self):
+#             q = QCDNormalizationTemplate("EWK testline", "dummy")
+#             h = ROOT.TH1F("h","h",10,0,10)
+#             q.setHistogram(h, "Inclusive bin")
+#             with self.assertRaises(Exception):
+#                 q.doFit()
+#             self.assertEqual(q.getNeventsFromHisto(True), 0.0)
+#             self.assertEqual(q.getNeventsErrorFromHisto(True), ROOT.TMath.Sqrt(0.0))
+#             h.Delete()
+#         
+#         def testFitWithoutFunction(self):
+#             q = QCDNormalizationTemplate("EWK testline", "dummy")
+#             h = self._getGaussianHisto()
+#             q.setHistogram(h, "Inclusive bin")
+#             self.assertLess(abs(q.getNeventsFromHisto(True)-1000.0),0.001)
+#             self.assertLess(abs(q.getNeventsErrorFromHisto(True) - ROOT.TMath.Sqrt(1000.0)), 0.0001)
+#             self.assertLess(abs(q.getNeventsFromHisto(False)-973.0),0.001)
+#             self.assertLess(abs(q.getNeventsErrorFromHisto(False) - ROOT.TMath.Sqrt(973.0)), 0.0001)
+#             self.assertEqual(q.getFitResults(), None)
+#             with self.assertRaises(Exception):
+#                 q.getNeventsFromFit()
+#             with self.assertRaises(Exception):
+#                 q.getNeventsErrorFit()
+#             q.reset()
+#             with self.assertRaises(Exception):
+#                 q.getNeventsFromHisto(True)
+#             with self.assertRaises(Exception):
+#                 q.getNeventsErrorFromHisto(True)
+#             with self.assertRaises(Exception):
+#                 q.getNeventsFromFit()
+#             with self.assertRaises(Exception):
+#                 q.getNeventsErrorFit()
+# 
+#         def testFitParams(self):
+#             q = QCDNormalizationTemplate("EWK testline", "dummy")
+#             # input format
+#             with self.assertRaises(Exception):
+#                 q.setDefaultFitParam(defaultInitialValue=2)
+#             with self.assertRaises(Exception):
+#                 q.setDefaultFitParam(defaultLowerLimit=2, defaultUpperLimit=[2])
+#             with self.assertRaises(Exception):
+#                 q.setDefaultFitParam(defaultLowerLimit=[2],defaultUpperLimit=2)
+#             with self.assertRaises(Exception):
+#                 q.setFitParamForBin("bin", initialValue=2)
+#             with self.assertRaises(Exception):
+#                 q.setFitParamForBin("bin", lowerLimit=2, upperLimit=[2])
+#             with self.assertRaises(Exception):
+#                 q.setFitParamForBin("bin", lowerlimit=[2], upperLimit=2)
+#             # list length
+#             with self.assertRaises(Exception):
+#                 q.setDefaultFitParam(defaultLowerLimit=[2])
+#             with self.assertRaises(Exception):
+#                 q.setDefaultFitParam(defaultUpperLimit=[2])
+#             with self.assertRaises(Exception):
+#                 q.setDefaultFitParam(defaultLowerLimit=[2], defaultUpperLimit=[2,3])
+#             with self.assertRaises(Exception):
+#                 q.setFitParamForBin("bin", lowerLimit=[2])
+#             with self.assertRaises(Exception):
+#                 q.setFitParamForBin("bin", upperLimit=[2])
+#             with self.assertRaises(Exception):
+#                 q.setFitParamForBin("bin", lowerLimit=[2], upperLimit=[2,3])
+# 
+#         def testSimpleFit(self):
+#             _createPlots = True # To test plotting, set to True
+#             q = QCDNormalizationTemplate("EWK testline", "dummy",quietMode=True)
+#             h = self._getGaussianHisto()
+#             q.setHistogram(h, "Inclusive bin")
+#             # Test proper parameters to fitter setting
+#             with self.assertRaises(Exception):
+#                 q.setFitter([], 0, 10)
+#             with self.assertRaises(Exception):
+#                 q.setFitter(FitFunction("Gaussian"), 10, 0)
+#             # Do fit (it fails with default parameters)
+#             q.setFitter(FitFunction("Gaussian"), 0, 10)
+#             if _createPlots:
+#                 q.plot()
+#             q.doFit(fitOptions="S R L Q", createPlot=False)
+#             self.assertEqual(q.getNeventsFromFit(), 0.)
+#             self.assertEqual(q.getNeventsTotalErrorFromFit()[0], 0.)
+#             self.assertEqual(q.getNeventsTotalErrorFromFit()[1], 0.)
+#             # Reset
+#             q.reset()
+#             with self.assertRaises(Exception):
+#                 q.getNeventsFromFit()
+#             with self.assertRaises(Exception):
+#                 q.getNeventsErrorFit()
+#             # Set params (which do not affect anything)
+#             q.setFitParamForBin("Non-inclusive bin", initialValue=[10,4,2])
+#             q.setHistogram(h, "Inclusive bin")
+#             q.doFit(fitOptions="S R L Q", createPlot=False)
+#             self.assertEqual(q.getNeventsFromFit(), 0.)
+#             self.assertEqual(q.getNeventsTotalErrorFromFit()[0], 0.)
+#             self.assertEqual(q.getNeventsTotalErrorFromFit()[1], 0.)
+#             # Set params (for bin)
+#             q.reset()
+#             q.setFitParamForBin("Inclusive bin", initialValue=[1,4,2], lowerLimit=[0.01, 0, 0], upperLimit=[100, 10, 10])
+#             q.setHistogram(h, "Inclusive bin")
+#             #q.printFitParamSettings()
+#             q.doFit(fitOptions="S R L", createPlot=_createPlots)
+#             self.assertLess(abs(q.getNeventsFromFit()-1), 0.01)
+#             self.assertLess(abs(q.getNeventsTotalErrorFromFit()[0]-1.003), 0.1)
+#             self.assertLess(abs(q.getNeventsTotalErrorFromFit()[1]-1.003), 0.1)
+#             #q.printResults()
+# 
+#     unittest.main()

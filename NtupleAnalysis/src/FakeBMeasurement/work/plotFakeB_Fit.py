@@ -28,7 +28,7 @@ https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-
     like polN, expo, landau, gaus. Note that in case of pre-defined functions some default initial values and limits are set.
 "L" Use log likelihood method (default is chi-square method). To be used when the histogram represents counts
 "W" Set all weights to 1 for non empty bins; ignore error bars
-"M" Improve fit results, by using the IMPROVE algorithm of TMinuit.
+"M" More. Improve fit results, by using the IMPROVE algorithm of TMinuit.
 "Q" To suppress output (Quiet Mode)
 "S" To return fit results (see "HLTausAnalysis/NtupleAnalysis/src/Auxiliary/src/HistoTools.C")
 '''
@@ -324,42 +324,45 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-th1fit-method
     https://root.cern.ch/root/html/src/ROOT__Math__MinimizerOptions.h.html#a14deB
     '''
-    # ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Migrad")
-    # ROOT.Math.MinimizerOptions.SetDefaultStrategy(2) # Speed = 0, Balance = 1, Robustness = 2
-    # if 0:
-    #     ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Simplex")
-    #     ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Minimize")
-    #     ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "MigradImproved")
-    #     ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Scan")
-    #     ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Seek")
-    #     ROOT.Math.MinimizerOptions.SetDefaultErrorDef(1) #error definition (=1. for getting 1 sigma error for chi2 fits)
-    #     ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(1000000) # set maximum of function calls
-    #     ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(1000000) # set maximum iterations (one iteration can have many function calls)
-    #     ROOT.Math.MinimizerOptions.SetDefaultPrecision(-1)     # precision in the objective function calculation (value <= 0 means left to default)
-    #     ROOT.Math.MinimizerOptions.SetDefaultPrintLevel(1)     # None = -1, Reduced = 0, Normal = 1, ExtraForProblem = 2, Maximum = 3 
-    #     ROOT.Math.MinimizerOptions.SetDefaultTolerance(1e-03)  # Minuit/Minuit2 converge when the EDM is less a given tolerance. (default 1e-03)
-    # if 1:
-    #     hLine  = "="*40
-    #     title  = "{:^40}".format("Minimzer Options")
-    #     print "\t", hLine
-    #     print "\t", title
-    #     print "\t", hLine
-    #     minOpt = ROOT.Math.MinimizerOptions()
-    #     minOpt.Print()
-    #     print "\t", hLine, "\n"
+    if 0:
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Migrad")
+        ROOT.Math.MinimizerOptions.SetDefaultStrategy(2) # Speed = 0, Balance = 1, Robustness = 2
+        ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(1000000) # set maximum of function calls
+        ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(1000000) # set maximum iterations (one iteration can have many function calls)
+    if 0:
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Simplex")
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Minimize")
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "MigradImproved")
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Scan")
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Seek")
+        ROOT.Math.MinimizerOptions.SetDefaultErrorDef(1) #error definition (=1. for getting 1 sigma error for chi2 fits)
+        ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(1000000) # set maximum of function calls
+        ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(1000000) # set maximum iterations (one iteration can have many function calls)
+        ROOT.Math.MinimizerOptions.SetDefaultPrecision(-1)     # precision in the objective function calculation (value <= 0 means left to default)
+        ROOT.Math.MinimizerOptions.SetDefaultPrintLevel(1)     # None = -1, Reduced = 0, Normal = 1, ExtraForProblem = 2, Maximum = 3 
+        ROOT.Math.MinimizerOptions.SetDefaultTolerance(1e-03)  # Minuit/Minuit2 converge when the EDM is less a given tolerance. (default 1e-03)
+    if 0:
+        hLine  = "="*40
+        title  = "{:^40}".format("Minimzer Options")
+        print "\t", hLine
+        print "\t", title
+        print "\t", hLine
+        minOpt = ROOT.Math.MinimizerOptions()
+        minOpt.Print()
+        print "\t", hLine, "\n"
 
     #=========================================================================================
     # Start fit process
     #=========================================================================================
     binLabels = ["Inclusive"]
     moduleInfoString = opts.optMode
-    FITMIN  =  80
-    FITMAX  = 1000 #1000
-    manager = QCDNormalization.QCDNormalizationManagerDefault(binLabels, opts.mcrab, moduleInfoString)
+    FITMIN  =   80
+    FITMAX  = 1000
 
     #=========================================================================================
     # Create templates (EWK fakes, EWK genuine, QCD; data template is created by manager)
     #=========================================================================================
+    manager = QCDNormalization.QCDNormalizationManagerDefault(binLabels, opts.mcrab, moduleInfoString)
     template_EWKFakeB_Baseline     = manager.createTemplate("EWKFakeB_Baseline")
     template_EWKFakeB_Inverted     = manager.createTemplate("EWKFakeB_Inverted")
     template_EWKInclusive_Baseline = manager.createTemplate("EWKInclusive_Baseline")
@@ -368,31 +371,22 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     template_FakeB_Inverted        = manager.createTemplate("QCD_Inverted")
         
     #=======================================================================2==================
-    # Inclusive EWK
+    # EWK
     #=========================================================================================
-    par0 = [+3.1000e-04,   0.0,   0.1] # expo_norm
-    par1 = [+2.5600e-02,   0.0,   1.0] # expo_a
-    par2 = [+7.3000e-01,   0.0,   1.0] # cb_norm 
-    par3 = [+1.7580e+02, 150.0, 250.0] # cb_mean
-    par4 = [+2.7630e+01,   0.0,  50.0] # cb_sigma
-    par5 = [-3.8960e-01,  -1.0,   0.0] # cb_alpha
-    par6 = [+2.2040e+01,   0.0,  40.0] # cb_n
-    par7 = [+2.1230e+02, 200.0, 250.0] # gaus_mean
-    par8 = [+6.6100e+01,  20.0,  80.0] # gaus_sigma
+    par0 = [+7.1817e-01,   0.0,   1.0] # cb_norm 
+    par1 = [+1.7684e+02, 150.0, 200.0] # cb_mean
+    par2 = [+2.7287e+01,  20.0,  40.0] # cb_sigma
+    par3 = [-3.9174e-01,  -0.5,   0.0] # cb_alpha
+    par4 = [+2.5104e+01,   0.0,  50.0] # cb_n
+    par5 = [+7.4724e-05,   0.0,   1.0] # expo_norm
+    par6 = [-4.6848e-02,  -1.0,   0.0] # expo_a
+    par7 = [+2.1672e+02, 200.0, 250.0] # gaus_mean
+    par8 = [+6.3201e+01,  20.0,  80.0] # gaus_sigma
+
     template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=200, norm=1, rejectPoints=0), FITMIN, FITMAX)
     template_EWKInclusive_Baseline.setDefaultFitParam(defaultInitialValue = None, #[par0[0], par1[0], par2[0], par3[0], par4[0], par5[0], par6[0], par7[0], par8[0]],
-                                                      defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1], par5[1], par6[1], par7[1], par8[1]],
-                                                      defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2], par5[2], par6[2], par7[2], par8[2]])
-                                                      #defaultLowerLimit=[4.2278e-03, -1.0, 0.0, -0.1,  0.0,  0.0, 150.0, 200.0, 30.0],
-                                                      #defaultUpperLimit=[4.2278e-03, +0.0, 1.0,  0.0, 50.0, 50.0, 200.0, 250.0, 90.0])
-                                                      #defaultLowerLimit=[0.0,  0.0, 0.0, -0.1,  0.0, 150.0,  0.0, 200.0, 30.0],
-                                                      #defaultUpperLimit=[1.0, +1.0, 1.0,  0.0, 50.0, 200.0, 50.0, 250.0, 90.0])
-                                                      #defaultLowerLimit=[4.2278e-03, -2.5600e-02, 7.3043e-01, -3.8986e-01, 2.3260e+01, 2.7611e+01, 1.7777e+02, 2.1239e+02, 6.6367e+01],
-                                                      #defaultUpperLimit=[4.2278e-03, -2.5600e-02, 7.3043e-01, -3.8986e-01, 2.3260e+01, 2.7611e+01, 1.7777e+02, 2.1239e+02, 6.6367e+01])
-                                                      #defaultLowerLimit=[0.0, 150.0,  0.0, -5.0, 0.0, 0.0, 150.0,   0.0, 100.0,    0.0],
-                                                      #defaultUpperLimit=[1.0, 300.0, 50.0,  0.0, 1.0, 1.0, 200.0, 100.0, 200.0,  100.0])
-                                                      #defaultLowerLimit=[0.0, 160.0,   0.0, -1.0, 0.0],
-                                                      #defaultUpperLimit=[1.0, 180.0,  60.0,  0.0, 1e6])
+                                                      defaultLowerLimit   = [par0[1], par1[1], par2[0], par3[0], par4[1], par5[1], par6[1], par7[0], par8[1]],
+                                                      defaultUpperLimit   = [par0[2], par1[2], par2[0], par3[0], par4[2], par5[2], par6[2], par7[0], par8[2]])
 
     #=========================================================================================
     # Note that the same function is used for QCD only and QCD+EWK fakes
@@ -401,7 +395,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     par1 = [ 229.0  , 180.0, 250.0] # lognorm_mean
     par2 = [   1.5  ,   0.0,   3.0] # lognorm_shape
     par3 = [   0.03 ,   0.0,   1.0] # expo_norm
-    par4 = [   0.007,   0.0,   1.0] # expo_a
+    par4 = [  -0.007,  -1.0,   1.0] # expo_a
     par5 = [ 239.0  , 200.0, 300.0] # gaus_mean
     par6 = [  60.0  ,  20.0,  80.0] # gaus_sigma
     template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=350, norm=1), FITMIN, FITMAX)
@@ -448,26 +442,26 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     #=========================================================================================
     # Fit individual templates to histogram "data_baseline", with custom fit options
     #=========================================================================================
-    fitOptions = "R B L W Q 0 M"
-
+    fitOptions = "R B L W 0 Q M"
     manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN, FITMAX)
             
     # Append analysisType to histogram name
     saveName = "LdgTrijetM_AfterAllSelections"
 
-    # Draw the histograms #alex
+    # Draw the histograms
     plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
 
-    _kwargs = {"lessThan": True}
-    p.addCutBoxAndLine(cutValue=173.21, fillColor=ROOT.kRed, box=False, line=True, **_kwargs)
-
     # Save plot in all formats
-    SavePlot(p, saveName, os.path.join(opts.saveDir, "Templates") ) 
+    SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit") ) 
     return
 
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+
+     # Check that path exists
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
 
     # Create the name under which plot will be saved
     saveName = os.path.join(saveDir, plotName.replace("/", "_"))
