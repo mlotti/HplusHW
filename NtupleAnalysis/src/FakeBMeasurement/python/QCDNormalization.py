@@ -119,19 +119,20 @@ class FitFunction:
 
         # Dictionary of FitFunction <-> Parameters
         nParams = {
-            "Linear": 2,
-            "ErrorFunction": 2,
-            "ExpFunction": 2,
-            "Gaussian": 3,
-            "DoubleGaussian": 6,
-            "SumFunction": 5,
+            "Linear"          : 2,
+            "ErrorFunction"   : 2,
+            "ExpFunction"     : 2,
+            "Gaussian"        : 3,
+            "DoubleGaussian"  : 6,
+            "SumFunction"     : 5,
             "RayleighFunction": 2,
-            "EWKFunctionInv": 4,
-            "QCDEWKFunction": 7,
+            "EWKFunctionInv"  : 4,
+            "QCDEWKFunction"  : 7,
             "QCDFunctionFixed": 8,
             "FitDataWithQCDAndFakesAndGenuineTaus": 3,
-            "FitDataWithQCDAndInclusiveEWK": 2,
-            "FitDataWithFakesAndGenuineTaus": 2,
+            "FitDataWithQCDAndInclusiveEWK"       : 2,
+            "FitDataWithFakesAndGenuineTaus"      : 2,
+            # 
             "EWKFunction"   : 9,
             "QCDFunction"   : 7,
             "QCDFunctionAlt": 5,
@@ -257,27 +258,46 @@ class FitFunction:
         '''
         return par[0]*ROOT.Math.lognormal_pdf(x[0], par[1], par[2], par[3])
     
-    def RooLogNormal(self, x, median, sigma):
+    def RooLogNormal(self, x, m0, k):
         '''
         https://root.cern.ch/doc/v608/classRooLognormal.html
         https://root.cern.ch/doc/v608/RooLognormal_8cxx_source.html
 
-        The parametrization here is physics driven and differs from the ROOT::Math::lognormal_pdf(x,m,s,x0) with:
-        
-        m = log(m0)
-        s = log(k)
-        x0 = 0
+        RooFit Lognormal PDF. The two parameters are:
+        - m0 = median    [the median of the distribution]
+        - k = exp(sigma) [sigma is called the shape parameter in the TMath parametrization]
 
-        The two parameters are:
-        m0  ...........: the median of the distribution
-        k=exp(sigma) ..: sigma is called the shape parameter in the TMath parametrization
+        \begin{align}
+        \mathrm{Lognormal}(x,m_{0},k) = \frac{e^{(-\ln^2(x/m_0))/(2\ln^2(k))}}{\sqrt{2\pi \cdot \ln(k)\cdot x}}
+        \end{align}
+
+        The parametrization here is physics driven and differs from the ROOT::Math::lognormal_pdf(x, m, s, x0) with:
+        - m = log(m0)
+        - s = log(k)
+        - x0 = 0
+
+        Double_t RooLognormal::evaluate() const
+        {
+        Double_t xv = x;
+        Double_t ln_k = TMath::Abs(TMath::Log(k));
+        Double_t ln_m0 = TMath::Log(m0);
+        Double_t x0 = 0;
+        
+        Double_t ret = ROOT::Math::lognormal_pdf(xv,ln_m0,ln_k,x0);
+        return ret ;
+        }
+
+        #  ln(k)<1 would correspond to sigma < 0 in the parametrization
+        #  resulting by transforming a normal random variable in its
+        #  standard parametrization to a lognormal random variable
+        #  => treat ln(k) as -ln(k) for k<1
         '''
-        #return par[0]*ROOT.TMath.Exp(-(ROOT.TMath.Log(x[0]/par[1]))**2/(2*ROOT.TMath.Log(par[2]))**2)/(ROOT.TMath.Sqrt(2*ROOT.TMath.Pi()*ROOT.TMath.Log(par[2])*x[0]))
-        xv    = x[0]
-        ln_k  = ROOT.TMath.Abs(ROOT.TMath.Log(sigma))
-        ln_m0 = ROOT.TMath.Log(median)
+        xv = x[0]
+        ln_k  = ROOT.TMath.Abs(ROOT.TMath.Log(k))
+        ln_m0 = ROOT.TMath.Log(m0)
         x0    = 0
-        return ROOT.Math.lognormal_pdf(xv, ln_m0, ln_k, x0)
+        ret   = ROOT.Math.lognormal_pdf(xv, ln_m0, ln_k, x0)
+        return ret
     
     def RooExponential(self, x, a):
         '''
@@ -313,9 +333,10 @@ class FitFunction:
         '''
         arg = x[0] - mean;
         sig = sigma
+        # print "ROOT.TMath.Exp(-0.5*%s/(%s))" % (arg*arg, sig*sig) 
         return ROOT.TMath.Exp(-0.5*arg*arg/(sig*sig))
     
-    def QCDFunction(self, x, par, boundary, norm):
+    def QCDFunctionAlt(self, x, par, boundary, norm=1, rejectPoints=0):
         '''
         https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
         
@@ -323,25 +344,45 @@ class FitFunction:
         from x only x[0] is used; it is the x-variable.        
         par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
         ''' 
-        # if x[0] < boundary:
+        #if x[0] > boundary:
+        #    return
+
+        if rejectPoints > 0:
+            if (x[0] > 210 and x[0] < 220):
+                ROOT.TF1.RejectPoint()
+                print "Rejecting point with value x=", x[0]
+                return 0
+
         return self._additionalNormFactor*norm*(par[0]*self.RooLogNormal(x, par[1], par[2]) + 
-                                                par[3]*self.RooExponential(x, par[4]) +
+                                                (1-par[0])*self.RooGaussian(x, par[3], par[4])
+                                                )
+    
+    def QCDFunction(self, x, par, boundary, norm=1, rejectPoints=0):
+        '''
+        https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
+        
+        x and par are standard root way to define the fit function
+        from x only x[0] is used; it is the x-variable.        
+        par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
+        ''' 
+        #if x[0] > boundary:
+        #    return
+
+        if rejectPoints > 0:
+            if (x[0] > 216 and x[0] < 218):
+                ROOT.TF1.RejectPoint()
+                print "Rejecting point with value x=", x[0]
+                return 0
+
+        if par[2] < 0:
+            for i, p in enumerate(par):
+                print "p[%s] = %s" %(i, p)
+                return 0
+        return self._additionalNormFactor*norm*(par[0]*self.RooLogNormal(x, par[1], par[2]) + 
+                                                par[3]*self.RooExponential(x, par[4]) + # do not remove -ve sign from exponent
                                                 (1-par[0]-par[3])*self.RooGaussian(x, par[5], par[6])
                                                 )
 
-    def QCDFunctionAlt(self, x, par, boundary, norm):
-        '''
-        https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
-        
-        x and par are standard root way to define the fit function
-        from x only x[0] is used; it is the x-variable.        
-        par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
-        ''' 
-        # if x[0] < boundary:
-        #return self._additionalNormFactor*norm*(self.RooLogNormal(x, par[0], par[1], par[2]) + (1-par[0])*ROOT.TMath.Landau(x[0], par[3], par[4]))
-        return self._additionalNormFactor*norm*(par[0]*self.RooLogNormal(x, par[1], par[2]) + 
-                                                (1-par[0])*self.RooGaussian(x, par[3], par[4]) )
-    
     def EWKFunction(self,x, par, boundary, norm=1, rejectPoints=0):
         '''
         x and par are standard root way to define the fit function
@@ -350,35 +391,18 @@ class FitFunction:
         
         Landau(x, mpv, widthParam), ROOT.TMath.Gaus(x[0], sigma, mean), ROOT.TMath.BreitWigner(x[0], decayWidth, mass)
         ''' 
-        # if x[0] < boundary:
-        #     return self._additionalNormFactor*norm*( par[0] * ROOT.TMath.BreitWigner(x[0], par[2], par[1]) * ROOT.Math.crystalball_function(x[0], par[3], par[4], par[2], par[1]) )
-        # else:
-        #     return par[6]*ROOT.TMath.Exp(-x[0]*par[5])
+        #if x[0] < boundary:
+        #    return
 
-        #return self._additionalNormFactor*norm*(par[0]*ROOT.TMath.Exp(x[0]*par[1]) 
-        #                                        + 
-        #                                        par[2]*ROOT.Math.crystalball_function(x[0], par[3], par[4], par[5], par[6]) 
-        #                                        +
-        #                                        (1-par[0]-par[2])*ROOT.TMath.Gaus(x[0], par[7], par[8])
-        #                                        )
-        
         if rejectPoints > 0:
             if (x[0] > 216 and x[0] < 218):
                 ROOT.TF1.RejectPoint()
                 print "Rejecting point with value x=", x[0]
                 return 0    
-        #return self._additionalNormFactor*norm*(par[0]*self.RooCBShape(x, par[1], par[2], par[3], par[4]) +
-        #                                        par[5]*self.RooExponential(x, par[6]) +
-        #                                        (1-par[0]-par[5])*self.RooGaussian(x, par[7], par[8]) 
-        #                                        )
-        return 1*(par[0]*self.RooCBShape(x, par[1], par[2], par[3], par[4]) +
+        return self._additionalNormFactor*norm*(par[0]*self.RooCBShape(x, par[1], par[2], par[3], par[4]) +
                                                 par[5]*self.RooExponential(x, par[6]) +
                                                 (1-par[0]-par[5])*self.RooGaussian(x, par[7], par[8]) 
                                                 )
-        # Best so far:
-        #return self._additionalNormFactor*norm*(par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])
-        #                                               + par[5]*ROOT.TMath.BreitWigner(x[0], par[6], par[7])
-        #                                               + (1-par[0]-par[5])*ROOT.TMath.Landau(x[0], par[8], par[9]) )
 
     def EWKFunctionInv(self,x, par, boundary, norm=1, rejectPoints=0):
         if x[0] < boundary:
@@ -540,7 +564,7 @@ class QCDNormalizationTemplate:
         if yLog:
             yMaxFactor = 4
         else:
-            yMaxFactor = 1.0
+            yMaxFactor = 1.1
 
         # Disable fit/statistics box
         ROOT.gStyle.SetOptFit(0)
@@ -586,8 +610,7 @@ class QCDNormalizationTemplate:
         myOpts = {"ymin": 1e-5, "ymaxfactor": yMaxFactor}
         plot.createFrame(fName, opts=myOpts)
         plot.getFrame().GetXaxis().SetTitle(xTitle)
-        #plot.getFrame().GetXaxis().SetRangeUser(0.0*self._fitRangeMin, 1.1*self._fitRangeMax)
-        plot.getFrame().GetXaxis().SetRangeUser(0.0*self._fitRangeMin, 800.0)
+        plot.getFrame().GetXaxis().SetRangeUser(0.0*self._fitRangeMin, 1.1*self._fitRangeMax)
         plot.getFrame().GetYaxis().SetTitle(yTitle)
 
         # Add text
@@ -919,7 +942,8 @@ class QCDNormalizationTemplate:
         histograms.addStandardTexts(cmsTextPosition="outframe")
         histograms.addText(0.72, 0.85-0.08*0, getFormattedTemplateName(self._name))
         histograms.addText(0.72, 0.85-0.08*1, getFormattedBinLabelString(self._binLabel))
-        histograms.addText(0.72, 0.85-0.08*2, "Events = %d"%int(self._histo.Integral(0,-1)*self._normalizationFactor+0.5)) # round to closes integer
+        histograms.addText(0.72, 0.85-0.08*2, "N = %d" % int(self._histo.Integral(0,-1)*self._normalizationFactor+0.5)) # round to closest integer
+        #histograms.addText(0.72, 0.85-0.08*2, "Events = %d"%int(self._histo.Integral(0,-1)*self._normalizationFactor+0.5)) # round to closes integer
 
         plot.histoMgr.forHisto(self._histo.GetName(), st)
         #plot.setFileName("template_"+self._name.replace(" ","_")+"_"+self._binLabel)
@@ -1023,6 +1047,7 @@ class QCDNormalizationTemplate:
         if r.IsEmpty():
             raise Exception("Error: The TFitResultPtr is empty!")
         if not r.IsValid():
+            r.Print("V")
             raise Exception("Error: The TFitResultPtr is not valid! The fit failed...")
 
         # Print full information of fit including covariance matrix and correlation
@@ -1047,7 +1072,7 @@ class QCDNormalizationTemplate:
         
         # Define the table format
         lines  = [] 
-        align  = "{:<15} {:>15} {:^3} {:<60}"
+        align  = "{:<15} {:>20} {:^3} {:<60}"
         header = align.format("Variable", "Value", "", "Description")
         hLine  = "="*120
         lines.append(hLine)
@@ -1101,7 +1126,7 @@ class QCDNormalizationTemplate:
 
         # Define the table format
         lines  = [] 
-        align  = "{:<10} {:>10} {:^3} {:<10} {:^15} {:^15} {:^15} {:^5} {:^5}"
+        align  = "{:<10} {:>15} {:^3} {:<15} {:^15} {:^15} {:^15} {:^5} {:^5}"
         if percentageError:
             header = align.format("Variable", "Final Value", "+/-", "Error (%)", "Initian Value", "Low Limit", "Upper Limit", "Bound", "Fixed")
         else:

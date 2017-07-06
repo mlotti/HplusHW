@@ -280,13 +280,6 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     FakeB_baseline.Add(EWK_baseline, -1)
     FakeB_inverted.Add(EWK_inverted, -1)
 
-    # Normalize histograms to unit area
-    if 0:
-        FakeB_baseline.Scale(1.0/FakeB_baseline.Integral())
-        FakeB_inverted.Scale(1.0/FakeB_inverted.Integral())
-        EWK_baseline.Scale(1.0/EWK_baseline.Integral())    
-        EWK_inverted.Scale(1.0/EWK_inverted.Integral())
-        
     # Create the final plot object
     compareHistos = [EWK_baseline]
     p = plots.ComparisonManyPlot(FakeB_inverted, compareHistos, saveFormats=[])
@@ -326,22 +319,22 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     '''
     if 0:
         ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Migrad")
-        ROOT.Math.MinimizerOptions.SetDefaultStrategy(2) # Speed = 0, Balance = 1, Robustness = 2
-        ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(1000000) # set maximum of function calls
-        ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(1000000) # set maximum iterations (one iteration can have many function calls)
+        ROOT.Math.MinimizerOptions.SetDefaultStrategy(1) # Speed = 0, Balance = 1, Robustness = 2
+        ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(10000) # set maximum of function calls
+        ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(10000) # set maximum iterations (one iteration can have many function calls)
     if 0:
         ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Simplex")
         ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Minimize")
         ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "MigradImproved")
         ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Scan")
         ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Seek")
-        ROOT.Math.MinimizerOptions.SetDefaultErrorDef(1) #error definition (=1. for getting 1 sigma error for chi2 fits)
+        ROOT.Math.MinimizerOptions.SetDefaultErrorDef(1) # error definition (=1. for getting 1 sigma error for chi2 fits)
         ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(1000000) # set maximum of function calls
         ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(1000000) # set maximum iterations (one iteration can have many function calls)
-        ROOT.Math.MinimizerOptions.SetDefaultPrecision(-1)     # precision in the objective function calculation (value <= 0 means left to default)
-        ROOT.Math.MinimizerOptions.SetDefaultPrintLevel(1)     # None = -1, Reduced = 0, Normal = 1, ExtraForProblem = 2, Maximum = 3 
+        ROOT.Math.MinimizerOptions.SetDefaultPrecision(-1) # precision in the objective function calculation (value <= 0 means left to default)
+        ROOT.Math.MinimizerOptions.SetDefaultPrintLevel(1) # None = -1, Reduced = 0, Normal = 1, ExtraForProblem = 2, Maximum = 3 
         ROOT.Math.MinimizerOptions.SetDefaultTolerance(1e-03)  # Minuit/Minuit2 converge when the EDM is less a given tolerance. (default 1e-03)
-    if 0:
+    if 1:
         hLine  = "="*40
         title  = "{:^40}".format("Minimzer Options")
         print "\t", hLine
@@ -370,7 +363,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     template_FakeB_Baseline        = manager.createTemplate("QCD_Baseline")
     template_FakeB_Inverted        = manager.createTemplate("QCD_Inverted")
         
-    #=======================================================================2==================
+    #======================================================================2==================
     # EWK
     #=========================================================================================
     par0 = [+7.1817e-01,   0.0,   1.0] # cb_norm 
@@ -383,41 +376,38 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     par7 = [+2.1672e+02, 200.0, 250.0] # gaus_mean
     par8 = [+6.3201e+01,  20.0,  80.0] # gaus_sigma
 
-    template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=200, norm=1, rejectPoints=0), FITMIN, FITMAX)
-    template_EWKInclusive_Baseline.setDefaultFitParam(defaultInitialValue = None, #[par0[0], par1[0], par2[0], par3[0], par4[0], par5[0], par6[0], par7[0], par8[0]],
+    template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
+    template_EWKInclusive_Baseline.setDefaultFitParam(defaultInitialValue = None,
                                                       defaultLowerLimit   = [par0[1], par1[1], par2[0], par3[0], par4[1], par5[1], par6[1], par7[0], par8[1]],
                                                       defaultUpperLimit   = [par0[2], par1[2], par2[0], par3[0], par4[2], par5[2], par6[2], par7[0], par8[2]])
 
     #=========================================================================================
-    # Note that the same function is used for QCD only and QCD+EWK fakes
+    # FakeB/QCD
     #=========================================================================================
-    par0 = [   0.92 ,   0.0,   1.0] # lognorm_norm
-    par1 = [ 229.0  , 180.0, 250.0] # lognorm_mean
-    par2 = [   1.5  ,   0.0,   3.0] # lognorm_shape
-    par3 = [   0.03 ,   0.0,   1.0] # expo_norm
-    par4 = [  -0.007,  -1.0,   1.0] # expo_a
-    par5 = [ 239.0  , 200.0, 300.0] # gaus_mean
-    par6 = [  60.0  ,  20.0,  80.0] # gaus_sigma
-    template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=350, norm=1), FITMIN, FITMAX)
-    template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = [par0[0], par1[0], par2[0], par3[0], par4[0], par5[0], par6[0]],
-                                               defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1], par5[1], par6[1]],
-                                               defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2], par5[2], par6[2]]
-                                               )
-    
-    if 0:
-        par0 = [   0.92,   0.0,    1.0 ] # lognorm_norm
-        par1 = [ 234.4 , 200.0 , 250.0 ] # lognorm_mean
-        par2 = [   1.44,   1.0,    2.0 ] # lognorm_shape
-        par3 = [ 224.0 , 175.0 , 250.0 ] # gaus_mean
-        par4 = [  45.5 ,   0.0 , 100.0 ] # gaus_sigma
-        template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=350, norm=1), FITMIN, FITMAX)
-        template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None, #[ par0[0], par1[0], par2[0], par3[0], par4[0]],
-                                                   #defaultLowerLimit   = [ par0[0], par1[0], par2[0], par3[0], par4[1]],
-                                                   #defaultUpperLimit   = [ par0[0], par1[0], par2[0], par3[0], par4[2]]
-                                                   defaultLowerLimit   = [ par0[1], par1[1], par2[1], par3[1], par4[1]],
-                                                   defaultUpperLimit   = [ par0[2], par1[2], par2[2], par3[2], par4[2]]
-                                                   )
+    # par0 = [+9.2000e-01,   0.0 ,   1.0] # lognorm_norm
+    # par1 = [+2.3430e+02, 200.0 , 300.0] # lognorm_mean
+    # par2 = [+1.4270e+00,   1.0,    2.0] # lognorm_shape
+    # par3 = [+4.0000e-01,   0.0,    1.0] # expo_norm
+    # par4 = [-7.4439e-03,  -5.0,    0.0] # expo_a
+    # par5 = [+2.2297e+02, 200.0 , 300.0] # gaus_mean
+    # par6 = [+5.1798e+01,   0.0 , 100.0] # gaus_sigma
+    # 
+    # template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
+    # template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None,
+    #                                            defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1], par5[1], par6[1]],
+    #                                            defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2], par5[2], par6[2]])
 
+    par0 = [8.9743e-01,   0.0 ,   1.0] # lognorm_norm
+    par1 = [2.3242e+02, 100.0 , 500.0] # lognorm_mean
+    par2 = [1.4300e+00,   0.5,   10.0] # lognorm_shape
+    par3 = [2.2589e+02, 100.0 , 500.0] # gaus_mean
+    par4 = [4.5060e+01,   0.0 , 100.0] # gaus_sigma
+
+    template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=0, norm=1, rejectPoints=0), FITMIN, 800)
+    template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None,
+                                               defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] ],
+                                               defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] ])
+    
     #=========================================================================================
     # Set histograms to the templates
     #=========================================================================================
