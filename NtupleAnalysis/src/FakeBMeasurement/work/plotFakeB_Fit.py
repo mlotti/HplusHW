@@ -212,8 +212,8 @@ def main(opts):
         # Apply TDR style
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
-        style.setGridX(True)
-        style.setGridY(True)
+        style.setGridX(False)
+        style.setGridY(False)
         
         # Do the fit
         hName  = "%s/%s_TopMassReco_LdgTrijetM_AfterAllSelections"
@@ -269,7 +269,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     p4 = plots.DataMCPlot(datasetsMgr, histoName % (ewkFolder      , "Inverted") )
 
     # Get the histograms
-    Data_baseline  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline_Data")
+    Data_baseline  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Data") #also legend entry name
     FakeB_baseline = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline_FakeB")
     EWK_baseline   = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline_EWK")
     Data_inverted  = p3.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted_Data")
@@ -301,11 +301,13 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     # Set legend labels
     if doFakeB:
         p.histoMgr.setHistoLegendLabelMany({
+                "Baseline_Data": "Data",
                 "Baseline_EWKGenuineB": "EWK (GenuineB)",
                 "Inverted_FakeB"      : "Fake-b",
                 })
     else:
         p.histoMgr.setHistoLegendLabelMany({
+                "Baseline_Data": "Data",
                 "Baseline_EWK"  : "EWK",
                 "Inverted_FakeB": "QCD",
                 })
@@ -319,9 +321,9 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     '''
     if 0:
         ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Migrad")
-        ROOT.Math.MinimizerOptions.SetDefaultStrategy(1) # Speed = 0, Balance = 1, Robustness = 2
-        ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(10000) # set maximum of function calls
-        ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(10000) # set maximum iterations (one iteration can have many function calls)
+        ROOT.Math.MinimizerOptions.SetDefaultStrategy(2) # Speed = 0, Balance = 1, Robustness = 2
+        ROOT.Math.MinimizerOptions.SetDefaultMaxFunctionCalls(5000) # set maximum of function calls
+        ROOT.Math.MinimizerOptions.SetDefaultMaxIterations(5000) # set maximum iterations (one iteration can have many function calls)
     if 0:
         ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Simplex")
         ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit", "Minimize")
@@ -384,30 +386,32 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     #=========================================================================================
     # FakeB/QCD
     #=========================================================================================
-    # par0 = [+9.2000e-01,   0.0 ,   1.0] # lognorm_norm
-    # par1 = [+2.3430e+02, 200.0 , 300.0] # lognorm_mean
-    # par2 = [+1.4270e+00,   1.0,    2.0] # lognorm_shape
-    # par3 = [+4.0000e-01,   0.0,    1.0] # expo_norm
-    # par4 = [-7.4439e-03,  -5.0,    0.0] # expo_a
-    # par5 = [+2.2297e+02, 200.0 , 300.0] # gaus_mean
-    # par6 = [+5.1798e+01,   0.0 , 100.0] # gaus_sigma
-    # 
-    # template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
-    # template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None,
-    #                                            defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1], par5[1], par6[1]],
-    #                                            defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2], par5[2], par6[2]])
-
-    par0 = [8.9743e-01,   0.0 ,   1.0] # lognorm_norm
-    par1 = [2.3242e+02, 100.0 , 500.0] # lognorm_mean
-    par2 = [1.4300e+00,   0.5,   10.0] # lognorm_shape
-    par3 = [2.2589e+02, 100.0 , 500.0] # gaus_mean
-    par4 = [4.5060e+01,   0.0 , 100.0] # gaus_sigma
-
-    template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=0, norm=1, rejectPoints=0), FITMIN, 800)
-    template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None,
-                                               defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] ],
-                                               defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] ])
+    if 0:
+        par0 = [+9.2000e-01,   0.0 ,    1.0] # lognorm_norm
+        par1 = [+2.3430e+02, 200.0 , 1000.0] # lognorm_mean
+        par2 = [+1.4270e+00,   0.5,   100.0] # lognorm_shape
+        par3 = [+4.0000e-01,   0.0,     1.0] # expo_norm
+        par4 = [-7.4439e-03,  -5.0,     0.0] # expo_a
+        par5 = [+2.2297e+02, 100.0 ,  500.0] # gaus_mean
+        par6 = [+5.1798e+01,   0.0 ,  100.0] # gaus_sigma
+        
+        template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
+        template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None,
+                                                   defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1], par5[1], par6[1]],
+                                                   defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2], par5[2], par6[2]])
     
+    if 1:
+        par0 = [8.9743e-01,   0.0 ,    1.0] # lognorm_norm
+        par1 = [2.3242e+02, 300.0 , 1000.0] # lognorm_mean
+        par2 = [1.4300e+00,   0.5,    10.0] # lognorm_shape
+        par3 = [2.2589e+02, 100.0 ,  500.0] # gaus_mean
+        par4 = [4.5060e+01,   0.0 ,  100.0] # gaus_sigma
+
+        template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
+        template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None,
+                                                   defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] ],
+                                                   defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] ])
+        
     #=========================================================================================
     # Set histograms to the templates
     #=========================================================================================

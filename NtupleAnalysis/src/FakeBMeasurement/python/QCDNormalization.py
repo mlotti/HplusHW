@@ -481,7 +481,7 @@ def getFormattedBinLabelString(binLabel):
 
 def getFormattedTemplateName(name):
     '''
-    Helper function to plot template names in a more understandable wa
+    Helper function to plot template names in a more understandable way
     '''
     formattedNames = {'EWKFakeTaus_Baseline'   : '#splitline{EWK+t#bar{t} fake b-jets}{Baseline}', 
                       'EWKGenuineTaus_Baseline': '#splitline{EWK+t#bar{t} genuine b-jets}{Baseline}', 
@@ -557,10 +557,11 @@ class QCDNormalizationTemplate:
         '''
 
         # Customisations
-        xTitle = "m_{jjb} (GeV/c^{2})"
-        yTitle = "Events (normalized to unity)"
+        units  = "GeV/c^{2}"
+        xTitle = "m_{jjb} (%s)" % units
+        yTitle = "Events / %.0f %s" % (h.GetBinWidth(0), units) #"Events (normalized to unity)"
         yLog   = False
-        fName  = self._plotDirName+"/fit_"+self._name.replace(" ","_")+"_"+self._binLabel
+        fName  = self._plotDirName + "/fit_" + self._name.replace(" ","_") + "_" + self._binLabel
         if yLog:
             yMaxFactor = 4
         else:
@@ -590,7 +591,7 @@ class QCDNormalizationTemplate:
         plot = plots.PlotBase()
         plot.histoMgr.appendHisto( histograms.Histo(h, h.GetName()) )
         plot.histoMgr.appendHisto( histograms.Histo(fit, "fit") )
-        
+
         # Customise histo and fit function
         if "ewk" in h.GetName().lower():
             plot.histoMgr.forHisto(h.GetName(), styles.getDataStyle() ) #styles.getAltEWKStyle() )
@@ -922,28 +923,34 @@ class QCDNormalizationTemplate:
         if self._histo.GetEntries() == 0:
             print "Skipping plot for '%s' because it has zero entries."%self._name
             return
-        xTitle = "m_{jjb} (GeV/c^{2})"
-        yTitle = "Events / bin"
+
+        # Create histo
         plot   = plots.PlotBase()
         fName  = self._plotDirName+"/template_"+self._name.replace(" ","_")+"_"+self._binLabel
         h      = self._histo.Clone(self._histo.GetName()+"clone")
         h.Scale(self._normalizationFactor)
         plot.histoMgr.appendHisto(histograms.Histo(h,self._histo.GetName()))
 
+        # Customise histo
+        units  = "GeV/c^{2}"
+        xTitle = "m_{jjb} (%s)" % units
+        yTitle = "Events / %.0f %s" % (h.GetBinWidth(0), units) #"Events / bin"
+
         # Create frame
         myOpts = {"ymin": 0.1, "ymaxfactor": 4.0}
         plot.createFrame(fName, opts=myOpts)
         plot.getFrame().GetXaxis().SetTitle(xTitle)
         plot.getFrame().GetYaxis().SetTitle(yTitle)
-        plot.getPad().SetLogy(False)
+        plot.getFrame().GetXaxis().SetRangeUser(0.0, 1000.0*1.1) #caution: hardcoded
+        plot.getPad().SetLogy(True)
         st = styles.getDataStyle().clone()
         st.append(styles.StyleFill(fillColor=ROOT.kYellow))
 
         histograms.addStandardTexts(cmsTextPosition="outframe")
         histograms.addText(0.72, 0.85-0.08*0, getFormattedTemplateName(self._name))
         histograms.addText(0.72, 0.85-0.08*1, getFormattedBinLabelString(self._binLabel))
-        histograms.addText(0.72, 0.85-0.08*2, "N = %d" % int(self._histo.Integral(0,-1)*self._normalizationFactor+0.5)) # round to closest integer
-        #histograms.addText(0.72, 0.85-0.08*2, "Events = %d"%int(self._histo.Integral(0,-1)*self._normalizationFactor+0.5)) # round to closes integer
+        histograms.addText(0.72, 0.85-0.13, "N = %d" % int(self._histo.Integral(0,-1)*self._normalizationFactor+0.5)) # round to closest integer
+
 
         plot.histoMgr.forHisto(self._histo.GetName(), st)
         #plot.setFileName("template_"+self._name.replace(" ","_")+"_"+self._binLabel)
@@ -1679,13 +1686,18 @@ class QCDNormalizationManagerBase:
             item = self._templates[key]
             if item != None and item.isFittable():
                 item.doFit(fitOptions=fitOptions, createPlot=True)
+        return
 
-    ## Helper method to plot fitted templates (called from parent class when calculating norm.coefficients)
-    def _makePlot(self, binLabel, histogramDictionary={}):
-
+    def _makeFinalFitPlot(self, binLabel, histogramDictionary={}):
+        '''
+        Helper method to plot fitted templates
+        
+        called from parent class when calculating norm.coefficients
+        '''
         # Customisation
-        xTitle = "m_{jjb} (GeV/c^{2})"
-        yTitle = "Events (normalized to unity)"
+        units  = "GeV/c^{2}"
+        xTitle = "m_{jjb} (%s)" % units
+        #yTitle = "Events (normalized to unity) / %.0f %s" % (histogramDictionary.popitem().GetBinWidth(0), units)
         yLog   = True
         fName  = self._plotDirName + "/finalFit_" + binLabel
         if yLog:
@@ -1696,25 +1708,48 @@ class QCDNormalizationManagerBase:
         # Disable fit/statistics box
         ROOT.gStyle.SetOptFit(0)
         ROOT.gStyle.SetOptStat(0)
+        
+        # Creat plot object
+        plot  = plots.PlotBase()
 
-        plot  = plots.PlotBase()        
+        # Create legend
+        l = ROOT.TLegend(0.62, 0.79, 0.92, 0.92)
+        l.SetFillStyle(-1)
+        l.SetBorderSize(0)
+
+        # For-loop: All key-histogram pairs
         for k in histogramDictionary.keys():
-            if not (isinstance(histogramDictionary[k], ROOT.TH1) or isinstance(histogramDictionary[k], ROOT.TF1)):
+            objKey    = k
+            objHisto  = histogramDictionary[k]
+            histoName = objHisto.GetName()
+            #print "key = %s, histoName = %s" % (objKey, objHisto.GetName())
+            
+            # Sanity check
+            if not (isinstance(objHisto, ROOT.TH1) or isinstance(objHisto, ROOT.TF1)):
                 print histogramDictionary
                 raise Exception("Error: Expected a dictionary of histograms")
-            plot.histoMgr.appendHisto(histograms.Histo(histogramDictionary[k], k))
-            
+
+            # Append object for plotting
+            plot.histoMgr.appendHisto(histograms.Histo(objHisto, objKey))
+            if isinstance(objHisto, ROOT.TH1):
+                # Finalise y-title
+                yTitle = "Events / %.0f %s" % (objHisto.GetBinWidth(0), units)
+                
+                if "data" in histoName.lower():
+                    plot.histoMgr.setHistoDrawStyle(histoName  , "AP")
+                    plot.histoMgr.setHistoLegendStyle(histoName, "P")
+
         # Create frame
-        myOpts = {"ymin": 1e-5, "ymaxfactor": yMaxFactor}
-        #myOpts = {"ymin": 0.1, "ymaxfactor": yMaxFactor}
+        myOpts = {"ymin": 1e-5, "ymaxfactor": yMaxFactor, "createLegend": {"x1": 0.62, "y1": 0.78, "x2": 0.92, "y2": 0.92}}
+        plot.setLegend(l)
         plot.createFrame(fName, opts=myOpts)
         plot.getFrame().GetXaxis().SetTitle(xTitle)
         plot.getFrame().GetYaxis().SetTitle(yTitle)
         plot.getFrame().GetXaxis().SetRangeUser(0.0*self._fitRangeMin, 1.1*self._fitRangeMax)
         
         # Add text
-        histograms.addText(0.72, 0.85-0.08*0, "Final Fit") #"Final fit, "+binLabel
-        histograms.addText(0.72, 0.85-0.08*1, getFormattedBinLabelString(binLabel))
+        #histograms.addText(0.72, 0.85-0.08*0, "Final Fit") #"Final fit, "+binLabel
+        #histograms.addText(0.72, 0.85-0.08*1, getFormattedBinLabelString(binLabel))
         histograms.addStandardTexts(cmsTextPosition="outframe")
 
         # Cut lines/boxes
@@ -1891,17 +1926,19 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         
         #===== Plot fitted functions
         dataHisto.SetLineColor(ROOT.kBlack)
-        funcData = dataTemplate.obtainFittedFunction(1.0, FITMIN, FITMAX)
-        funcData.SetLineColor(ROOT.kPink)
-        funcData.SetLineStyle(2)
-        funcQCD = qcdTemplate.obtainFittedFunction(dataTemplate.getFittedParameters()[1], FITMIN, FITMAX)
-        funcQCD.SetLineColor(ROOT.kBlue)
-        funcQCD.SetLineWidth(2)
-        funcQCD.SetLineStyle(2)
-        self._makePlot(binLabel,
-                       {dataHisto.GetName(): dataHisto,
-                        "fitted data": funcData,
-                        "QCD template": funcQCD})
+
+        dataFit = dataTemplate.obtainFittedFunction(1.0, FITMIN, FITMAX)
+        dataFit.SetLineColor(ROOT.kBlue)
+        dataFit.SetLineStyle(ROOT.kSolid)
+        dataFit.SetLineWidth(3)
+
+        qcdFit = qcdTemplate.obtainFittedFunction(dataTemplate.getFittedParameters()[1], FITMIN, FITMAX)
+        qcdFit.SetLineColor(ROOT.kOrange)
+        qcdFit.SetLineWidth(3)
+        qcdFit.SetLineStyle(ROOT.kDashed)
+
+        histoDict = {dataHisto.GetName(): dataHisto, "Data Fit" : dataFit, "QCD Template": qcdFit}
+        self._makeFinalFitPlot(binLabel, histoDict)
 
         #===== Handle results
         # should one divide the fractions with dataTemplate.getFittedParameters()[0] ??? (right now not because the correction is so small)
@@ -1949,156 +1986,4 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
                                                                                    nFakeInverted, self._templates["EWKFakeB_Inverted"].getNeventsErrorFromHisto(False))
         self._ewkFakesNormalization[binLabel] = ewkFakesNormFactor
         self._ewkFakesNormalizationError[binLabel] = ewkFakesNormFactorError
-
-        
-# Unit tests
-# if __name__ == "__main__":
-#     import unittest
-#     class TestFitFunction(unittest.TestCase):
-#         def testNonExistingFitFunction(self):
-#             with self.assertRaises(Exception):
-#                 FitFunction("dummy")
-#         
-#         def testGaussian(self):
-#             f = FitFunction("Gaussian")
-#             self.assertEqual(f([0],[1,0,1]), 0.3989422804014327)
-#             
-#     class TestQCDNormalizationTemplate(unittest.TestCase):
-#         def _getGaussianHisto(self):
-#             h = ROOT.TH1F("h","h",10,0,10)
-#             h.SetBinContent(0, 27)
-#             h.SetBinContent(1, 42)
-#             h.SetBinContent(2, 87)
-#             h.SetBinContent(3, 135)
-#             h.SetBinContent(4, 213)
-#             h.SetBinContent(5, 181)
-#             h.SetBinContent(6, 134)
-#             h.SetBinContent(7, 105)
-#             h.SetBinContent(8, 46)
-#             h.SetBinContent(9, 22)
-#             h.SetBinContent(10, 7)
-#             h.SetBinContent(11, 1)
-#             return h
-#       
-#         def testInitialization(self):
-#             q = QCDNormalizationTemplate("EWK testline", "dummy")
-#             # Test initialization
-#             with self.assertRaises(Exception):
-#                 q.getNeventsFromHisto(True)
-#             with self.assertRaises(Exception):
-#                 q.getNeventsErrorFromHisto(True)
-#             with self.assertRaises(Exception):
-#                 q.getNeventsFromFit()
-#             with self.assertRaises(Exception):
-#                 q.getNeventsErrorFit()
-#             self.assertEqual(q.getFitResults(), None)
-#             with self.assertRaises(Exception):
-#                 q.plot()
-#             with self.assertRaises(Exception):
-#                 q.doFit()
-#         
-#         def testEmptyHistogram(self):
-#             q = QCDNormalizationTemplate("EWK testline", "dummy")
-#             h = ROOT.TH1F("h","h",10,0,10)
-#             q.setHistogram(h, "Inclusive bin")
-#             with self.assertRaises(Exception):
-#                 q.doFit()
-#             self.assertEqual(q.getNeventsFromHisto(True), 0.0)
-#             self.assertEqual(q.getNeventsErrorFromHisto(True), ROOT.TMath.Sqrt(0.0))
-#             h.Delete()
-#         
-#         def testFitWithoutFunction(self):
-#             q = QCDNormalizationTemplate("EWK testline", "dummy")
-#             h = self._getGaussianHisto()
-#             q.setHistogram(h, "Inclusive bin")
-#             self.assertLess(abs(q.getNeventsFromHisto(True)-1000.0),0.001)
-#             self.assertLess(abs(q.getNeventsErrorFromHisto(True) - ROOT.TMath.Sqrt(1000.0)), 0.0001)
-#             self.assertLess(abs(q.getNeventsFromHisto(False)-973.0),0.001)
-#             self.assertLess(abs(q.getNeventsErrorFromHisto(False) - ROOT.TMath.Sqrt(973.0)), 0.0001)
-#             self.assertEqual(q.getFitResults(), None)
-#             with self.assertRaises(Exception):
-#                 q.getNeventsFromFit()
-#             with self.assertRaises(Exception):
-#                 q.getNeventsErrorFit()
-#             q.reset()
-#             with self.assertRaises(Exception):
-#                 q.getNeventsFromHisto(True)
-#             with self.assertRaises(Exception):
-#                 q.getNeventsErrorFromHisto(True)
-#             with self.assertRaises(Exception):
-#                 q.getNeventsFromFit()
-#             with self.assertRaises(Exception):
-#                 q.getNeventsErrorFit()
-# 
-#         def testFitParams(self):
-#             q = QCDNormalizationTemplate("EWK testline", "dummy")
-#             # input format
-#             with self.assertRaises(Exception):
-#                 q.setDefaultFitParam(defaultInitialValue=2)
-#             with self.assertRaises(Exception):
-#                 q.setDefaultFitParam(defaultLowerLimit=2, defaultUpperLimit=[2])
-#             with self.assertRaises(Exception):
-#                 q.setDefaultFitParam(defaultLowerLimit=[2],defaultUpperLimit=2)
-#             with self.assertRaises(Exception):
-#                 q.setFitParamForBin("bin", initialValue=2)
-#             with self.assertRaises(Exception):
-#                 q.setFitParamForBin("bin", lowerLimit=2, upperLimit=[2])
-#             with self.assertRaises(Exception):
-#                 q.setFitParamForBin("bin", lowerlimit=[2], upperLimit=2)
-#             # list length
-#             with self.assertRaises(Exception):
-#                 q.setDefaultFitParam(defaultLowerLimit=[2])
-#             with self.assertRaises(Exception):
-#                 q.setDefaultFitParam(defaultUpperLimit=[2])
-#             with self.assertRaises(Exception):
-#                 q.setDefaultFitParam(defaultLowerLimit=[2], defaultUpperLimit=[2,3])
-#             with self.assertRaises(Exception):
-#                 q.setFitParamForBin("bin", lowerLimit=[2])
-#             with self.assertRaises(Exception):
-#                 q.setFitParamForBin("bin", upperLimit=[2])
-#             with self.assertRaises(Exception):
-#                 q.setFitParamForBin("bin", lowerLimit=[2], upperLimit=[2,3])
-# 
-#         def testSimpleFit(self):
-#             _createPlots = True # To test plotting, set to True
-#             q = QCDNormalizationTemplate("EWK testline", "dummy",quietMode=True)
-#             h = self._getGaussianHisto()
-#             q.setHistogram(h, "Inclusive bin")
-#             # Test proper parameters to fitter setting
-#             with self.assertRaises(Exception):
-#                 q.setFitter([], 0, 10)
-#             with self.assertRaises(Exception):
-#                 q.setFitter(FitFunction("Gaussian"), 10, 0)
-#             # Do fit (it fails with default parameters)
-#             q.setFitter(FitFunction("Gaussian"), 0, 10)
-#             if _createPlots:
-#                 q.plot()
-#             q.doFit(fitOptions="S R L Q", createPlot=False)
-#             self.assertEqual(q.getNeventsFromFit(), 0.)
-#             self.assertEqual(q.getNeventsTotalErrorFromFit()[0], 0.)
-#             self.assertEqual(q.getNeventsTotalErrorFromFit()[1], 0.)
-#             # Reset
-#             q.reset()
-#             with self.assertRaises(Exception):
-#                 q.getNeventsFromFit()
-#             with self.assertRaises(Exception):
-#                 q.getNeventsErrorFit()
-#             # Set params (which do not affect anything)
-#             q.setFitParamForBin("Non-inclusive bin", initialValue=[10,4,2])
-#             q.setHistogram(h, "Inclusive bin")
-#             q.doFit(fitOptions="S R L Q", createPlot=False)
-#             self.assertEqual(q.getNeventsFromFit(), 0.)
-#             self.assertEqual(q.getNeventsTotalErrorFromFit()[0], 0.)
-#             self.assertEqual(q.getNeventsTotalErrorFromFit()[1], 0.)
-#             # Set params (for bin)
-#             q.reset()
-#             q.setFitParamForBin("Inclusive bin", initialValue=[1,4,2], lowerLimit=[0.01, 0, 0], upperLimit=[100, 10, 10])
-#             q.setHistogram(h, "Inclusive bin")
-#             #q.printFitParamSettings()
-#             q.doFit(fitOptions="S R L", createPlot=_createPlots)
-#             self.assertLess(abs(q.getNeventsFromFit()-1), 0.01)
-#             self.assertLess(abs(q.getNeventsTotalErrorFromFit()[0]-1.003), 0.1)
-#             self.assertLess(abs(q.getNeventsTotalErrorFromFit()[1]-1.003), 0.1)
-#             #q.printResults()
-# 
-#     unittest.main()
+        return
