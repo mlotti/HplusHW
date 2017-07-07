@@ -337,8 +337,8 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
         ROOT.Math.MinimizerOptions.SetDefaultPrintLevel(1) # None = -1, Reduced = 0, Normal = 1, ExtraForProblem = 2, Maximum = 3 
         ROOT.Math.MinimizerOptions.SetDefaultTolerance(1e-03)  # Minuit/Minuit2 converge when the EDM is less a given tolerance. (default 1e-03)
     if 1:
-        hLine  = "="*40
-        title  = "{:^40}".format("Minimzer Options")
+        hLine  = "="*45
+        title  = "{:^45}".format("Minimzer Options")
         print "\t", hLine
         print "\t", title
         print "\t", hLine
@@ -350,9 +350,10 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     # Start fit process
     #=========================================================================================
     binLabels = ["Inclusive"]
+    FITMIN    =   80
+    FITMAX    = 1000
+    #moduleInfoString = opts.dataEra + "_" + opts.searchMode + "_" + opts.optMode
     moduleInfoString = opts.optMode
-    FITMIN  =   80
-    FITMAX  = 1000
 
     #=========================================================================================
     # Create templates (EWK fakes, EWK genuine, QCD; data template is created by manager)
@@ -386,32 +387,16 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     #=========================================================================================
     # FakeB/QCD
     #=========================================================================================
-    if 1:
-        par0 = [8.9743e-01,   0.0 ,    1.0] # lognorm_norm
-        par1 = [2.3242e+02, 300.0 , 1000.0] # lognorm_mean
-        par2 = [1.4300e+00,   0.5,    10.0] # lognorm_shape
-        par3 = [2.2589e+02, 100.0 ,  500.0] # gaus_mean
-        par4 = [4.5060e+01,   0.0 ,  100.0] # gaus_sigma
-
-        template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
-        template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None,
-                                                   defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] ],
-                                                   defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] ])
-
-    if 0:
-        par0 = [+9.2000e-01,   0.0 ,    1.0] # lognorm_norm
-        par1 = [+2.3430e+02, 200.0 , 1000.0] # lognorm_mean
-        par2 = [+1.4270e+00,   0.5,   100.0] # lognorm_shape
-        par3 = [+4.0000e-01,   0.0,     1.0] # expo_norm
-        par4 = [-7.4439e-03,  -5.0,     0.0] # expo_a
-        par5 = [+2.2297e+02, 100.0 ,  500.0] # gaus_mean
-        par6 = [+5.1798e+01,   0.0 ,  100.0] # gaus_sigma
-        
-        template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunction", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
-        template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None,
-                                                   defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1], par5[1], par6[1]],
-                                                   defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2], par5[2], par6[2]])
+    par0 = [8.9743e-01,   0.0 ,    1.0] # lognorm_norm
+    par1 = [2.3242e+02, 300.0 , 1000.0] # lognorm_mean
+    par2 = [1.4300e+00,   0.5,    10.0] # lognorm_shape
+    par3 = [2.2589e+02, 100.0 ,  500.0] # gaus_mean
+    par4 = [4.5060e+01,   0.0 ,  100.0] # gaus_sigma
     
+    template_FakeB_Inverted.setFitter(QCDNormalization.FitFunction("QCDFunctionAlt", boundary=0, norm=1, rejectPoints=0), FITMIN, FITMAX)
+    template_FakeB_Inverted.setDefaultFitParam(defaultInitialValue = None,
+                                               defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[1], par4[1] ],
+                                               defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[2], par4[2] ])    
         
     #=========================================================================================
     # Set histograms to the templates
@@ -439,6 +424,9 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     #=========================================================================================
     fitOptions = "R B L W 0 Q M"
     manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN, FITMAX)
+    
+    # Only for when the measurement is done in bins
+    # manager.writeScaleFactorFile("test", moduleInfoString)
             
     # Append analysisType to histogram name
     saveName = "LdgTrijetM_AfterAllSelections"
@@ -448,6 +436,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
 
     # Save plot in all formats
     SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit") ) 
+
     return
 
 
