@@ -318,7 +318,7 @@ class FitFunction:
         #  standard parametrization to a lognormal random variable
         #  => treat ln(k) as -ln(k) for k<1
         '''
-        xv = x[0]
+        xv    = x[0]
         ln_k  = ROOT.TMath.Abs(ROOT.TMath.Log(k))
         ln_m0 = ROOT.TMath.Log(m0)
         x0    = 0
@@ -339,7 +339,7 @@ class FitFunction:
         
         par[0]*ROOT.Math.crystalball_function(x[0], par[1], par[2], par[3], par[4])
         '''
-        t = (x[0]-m0)/sigma;
+        t = (x[0]-m0)/sigma
         if (alpha < 0):
             t = -t
 
@@ -356,6 +356,7 @@ class FitFunction:
         '''
         https://root.cern.ch/doc/master/classRooGaussian.html
         https://root.cern.ch/doc/master/RooGaussian_8cxx_source.html
+        http://www.nbi.dk/~petersen/Teaching/Stat2013/Week1/RootIntro.py
         '''
         arg = x[0] - mean;
         sig = sigma
@@ -365,7 +366,8 @@ class FitFunction:
     def QCDFunctionAlt(self, x, par, boundary, norm=1, rejectPoints=0):
         '''
         https://root.cern.ch/root/html524/ROOT__Math.html#TopOfPage
-        
+        http://www.nbi.dk/~petersen/Teaching/Stat2013/Week1/RootIntro.py        
+
         x and par are standard root way to define the fit function
         from x only x[0] is used; it is the x-variable.        
         par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
@@ -405,12 +407,13 @@ class FitFunction:
                 print "p[%s] = %s" %(i, p)
                 return 0
         return self._additionalNormFactor*norm*(par[0]*self.RooLogNormal(x, par[1], par[2]) + 
-                                                par[3]*self.RooExponential(x, par[4]) + # do not remove -ve sign from exponent
+                                                par[3]*self.RooExponential(x, par[4]) +
                                                 (1-par[0]-par[3])*self.RooGaussian(x, par[5], par[6])
                                                 )
 
     def EWKFunction(self,x, par, boundary, norm=1, rejectPoints=0):
         '''
+        http://www.nbi.dk/~petersen/Teaching/Stat2013/Week1/RootIntro.py
         x and par are standard root way to define the fit function
         from x only x[0] is used; it is the x-variable.        
         par contains the fitted parameters, you can give initial values, but the final ones come from the fitting.
@@ -1435,6 +1438,18 @@ class QCDNormalizationManagerBase:
         self.Print(msg, printHeader)
         return
 
+    def GetQCDNormalization(self, binLabel):
+        if binLabel in self._qcdNormalization.keys():
+            return self._qcdNormalization[binLabel]
+        else:
+            raise Exception("Error: _qcdNormalization dictionary has no key \"%s\"! "% (binLabel) )
+
+    def GetQCDNormalizationError(self, binLabel):
+        if binLabel in self._qcdNormalizationError.keys():
+            return self._qcdNormalizationError[binLabel]
+        else:
+            raise Exception("Error: _qcdNormalization dictionary has no key \"%s\"! "% (binLabel) )
+
     def createTemplate(self, name):
         '''
         Creates a QCDNormalizationTemplate and returns it
@@ -1929,7 +1944,6 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
     def calculateNormalizationCoefficients(self, dataHisto, fitOptions, FITMIN, FITMAX, **kwargs):
         '''
         '''
-        
         #===== Save options
         self._fitRangeMin = FITMIN
         self._fitRangeMax = FITMAX
@@ -1996,7 +2010,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         nQCDFitted = dataTemplate.getFittedParameters()[1]*dataTemplate.getNeventsFromHisto(False)
         lines.extend(self._getSanityCheckTextForFractions(binLabel, "QCD",  fraction, fractionError, nBaseline, nQCDFitted))
 
-        self.Print("Sanity Checl: Overall Normalization", False)
+        self.Print("Sanity Check: Overall Normalization", False)
         value = dataTemplate.getFittedParameters()[0]
         error = dataTemplate.getFittedParameterErrors()[0]
         lines.extend(self._checkOverallNormalization(binLabel, value, error) ) 
@@ -2044,7 +2058,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
             ewkFakesNormFactor      = nFakeBaseline / nFakeInverted
             ewkFakesNormFactorError = errorPropagation.errorPropagationForDivision(nFakeBaseline, nFakeBaselineError, nFakeInverted, nFakeInvertedError)
 
-        # Store the norm factors and their errors
+        # Store the norm factors and their errors (binLabel = "Inclusive")
         self._qcdNormalization[binLabel]           = qcdNormFactor
         self._qcdNormalizationError[binLabel]      = qcdNormFactorError
         self._ewkFakesNormalization[binLabel]      = ewkFakesNormFactor

@@ -256,11 +256,13 @@ def PurityPlots(datasetsMgr, histoName, analysisType="Inverted"):
 
     # Clone histograms 
     Data        = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType + "-Data")
+    EWK         = p1.histoMgr.getHisto(analysisType + "-EWK").getRootHisto().Clone(analysisType + "-EWK")
     EWKGenuineB = p2.histoMgr.getHisto(analysisType + "-EWK").getRootHisto().Clone(analysisType + "-EWK")
     FakeB       = p1.histoMgr.getHisto(analysisType + "-Data").getRootHisto().Clone(analysisType + "-FakeB")
 
     # Subtract EWKGEnuineB from Data to get FakeB
     FakeB.Add(EWKGenuineB, -1)
+    #FakeB.Add(EWK, -1)
     
     # Dos not work
     # p1.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(2))

@@ -3002,9 +3002,9 @@ class Dataset:
             self.nAllEventsUnweighted = -1
         # If normalization problem is spotted
         if not normalizationCheckStatus:
-            msg  = "Error in dset=%s: Base::AllEvents counter (=%s) is smaller than the Base::PUReweighting counter (=%s)" % (self.name, nAllEvts, nPUReEvts)
+            msg  = "WARNING! dset=%s\n\tBase::AllEvents counter (=%s) is smaller than the Base::PUReweighting counter (=%s)" % (self.name, nAllEvts, nPUReEvts)
             Print(msg)
-            raw_input("\tPress any key to continue: ")
+            # raw_input("\tPress any key to continue: ")
             # raise Exception(msg)
  
         # Try to read weighted counters
