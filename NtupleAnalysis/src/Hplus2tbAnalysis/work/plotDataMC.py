@@ -3,20 +3,24 @@
 Generic scipt that plots TH1 histograms (Data, MC) with the ratio pad enabled.
 
 Usage (single plot):
-./plotHistograms.py -m <pseudo_mcrab_directory> <jsonfile>
+./plotDataMC.py -m <pseudo_mcrab_directory> <jsonfile>
 
 Usage (multiple plots):
-./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json
+./plotDataMC.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json
 or
-./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json json/AfterStandardSelections/*.json
+./plotDataMC.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json json/AfterStandardSelections/*.json
 
 Usage (overwrite samples defined in JSON):
-./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json -i "JetHT|QCD_H"
+./plotDataMC.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json -i "JetHT|QCD_H"
 or
-./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json -e "QCD_b|Charged"
+./plotDataMC.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json -e "QCD_b|Charged"
 
 
-Frequently Used:
+Last Used:
+./plotDataMC.py -m Hplus2tbAnalysis_170712_141851_HLTBJetTrgMatchVar -o "" json/counters/weighted/counter.json -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
+./plotDataMC.py -m Hplus2tbAnalysis_170712_141851_HLTBJetTrgMatchVar -o "OptTriggerMatchingApplyFalse" json/counters/weighted/counter.json -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
+
+Previously Used:
 ./plotDataMC.py -m Hplus2tbAnalysis_* json/PUDependency/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
 ./plotDataMC.py -m Hplus2tbAnalysis_* json/counters/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
 ./plotDataMC.py -m Hplus2tbAnalysis_* json/counters/weighted/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
@@ -87,20 +91,25 @@ def GetLumi(datasetsMgr):
 def GetDatasetsFromDir(opts, json):
     Verbose("Getting datasets")
 
+    if opts.optMode == None:
+        optMode = json["optMode"]
+    else:
+        optMode = opts.optMode
+
     if (opts.includeOnlyTasks):
         return dataset.getDatasetsFromMulticrabDirs([opts.mcrab], 
                                                     dataEra=json["dataEra"],
                                                     searchMode=json["searchMode"],
                                                     analysisName=json["analysis"],
                                                     includeOnlyTasks=opts.includeOnlyTasks,
-                                                    optimizationMode=json["optMode"])
+                                                    optimizationMode=optMode)
     elif (opts.excludeTasks):
         return dataset.getDatasetsFromMulticrabDirs([opts.mcrab], 
                                                     dataEra=json["dataEra"],
                                                     searchMode=json["searchMode"],
                                                     analysisName=json["analysis"],
                                                     excludeTasks=opts.excludeTasks,
-                                                    optimizationMode=json["optMode"])
+                                                    optimizationMode=optMode)
     else:
         #return process.addDatasetsFromMulticrab(opts.mcrab)
         if len(json["samples"])<1:
@@ -113,7 +122,7 @@ def GetDatasetsFromDir(opts, json):
                                                         searchMode=json["searchMode"],
                                                         analysisName=json["analysis"],
                                                         includeOnlyTasks="|".join(json["samples"]),
-                                                        optimizationMode=json["optMode"])
+                                                        optimizationMode=optMode)
         
 def Plot(jsonfile, opts):
     Verbose("Plotting")
@@ -144,8 +153,16 @@ def Plot(jsonfile, opts):
             if "ChargedHiggs" in d.getName():
                 datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
 
+
+        # Remove all but one signal datasets
+        massPoints = ["180", "200", "220", "250", "300", "350", "400", "500", "800", "1000", "2000", "3000"]
+        massPoints.remove(opts.signal) #keep only 1 mass point
+        for m in massPoints:
+                datasetsMgr.remove(filter(lambda name: "M_" + m in name, datasetsMgr.getAllDatasetNames()))
+
         # Merge histograms (see NtupleAnalysis/python/tools/plots.py)
         plots.mergeRenameReorderForDataMC(datasetsMgr)
+        ReorderToShowSignal(datasetsMgr, opts)
 
         # Print dataset information
         datasetsMgr.PrintInfo()
@@ -157,9 +174,13 @@ def Plot(jsonfile, opts):
         DataMCPlot(datasetsMgr, j)
         return
 
-
 def DataMCPlot(datasetsMgr, json):
     Verbose("Creating Data-MC plot")
+
+    if opts.saveDir == None:
+        saveDir = json["saveDir"]
+    else: 
+        saveDir = json["saveDir"]
 
     # Create the Data-MC Plot
     p = plots.DataMCPlot(datasetsMgr, json["histogram"])
@@ -172,10 +193,9 @@ def DataMCPlot(datasetsMgr, json):
     if "ylabelsize" in json:
         ylabelSize = json["ylabelsize"]
 
-    # Draw a customised plot
-    saveName = os.path.join(json["saveDir"], json["title"])
+    # Draw a customised plot, os.path.join(opts.saveDir, "Fit")
     plots.drawPlot(p, 
-                   saveName,                  
+                   json["title"], #os.path.join(saveDir, json["title"])
                    xlabel            = json["xlabel"], 
                    ylabel            = json["ylabel"],
                    rebinX            = json["rebinX"],
@@ -206,11 +226,49 @@ def DataMCPlot(datasetsMgr, json):
     # Additional text
     histograms.addText(json["extraText"].get("x"), json["extraText"].get("y"), json["extraText"].get("text"), json["extraText"].get("size") )
 
-    # Save in all formats chosen by user
-    saveFormats = json["saveFormats"]
+    # Save in custom formats
+    SavePlot(p, json["title"], os.path.join(saveDir, opts.optMode), json["saveFormats"])
+    return
+
+def SavePlot(plot, plotName, saveDir, saveFormats = [".C", ".png", ".pdf"]):
+    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
+
+     # Check that path exists
+    if not os.path.exists(saveDir):
+        os.makedirs(saveDir)
+
+    # Create the name under which plot will be saved
+    saveName = os.path.join(saveDir, plotName.replace("/", "_"))
+
+    # For-loop: All save formats
     for i, ext in enumerate(saveFormats):
-        Print("%s" % saveName + ext, i==0)
-    p.saveAs(saveName, formats=saveFormats)
+        saveNameURL = saveName + ext
+        saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        if opts.url:
+            Print(saveNameURL, i==0)
+        else:
+            Print(saveName + ext, i==0)
+        plot.saveAs(saveName, formats=saveFormats)
+    return
+
+
+def ReorderToShowSignal(datasetMgr, opts):
+
+    signalSample = "ChargedHiggs_HplusTB_HplusToTB_M_" + opts.signal
+    # Get list of dataset names
+    names = datasetMgr.getAllDatasetNames()
+
+    # Return the index in the list of the first dataset whose name is datasetName
+    index = names.index(signalSample)
+
+    # Remove the dataset at the given position in the list, and return it
+    names.pop(index)
+
+    # Insert the dataset to the given position  (index) of the list
+    names.insert(1, signalSample)
+
+    # Select and reorder Datasets
+    datasetMgr.selectAndReorder(names)
     return
 
 
@@ -276,12 +334,19 @@ if __name__ == "__main__":
     global opts
     BATCHMODE = True
     VERBOSE   = False
+    OPTMODE   = None
+    URL       = True
+    SAVEDIR   = None #"/publicweb/a/aattikis/Hplus2tbAnalysis/"
+    SIGNAL    = "500"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]" , add_help_option=False,conflict_handler="resolve")
 
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store", 
-                      help="Path to the multicrab directory for input")
+                      help="Path to the multicrab directory for input")#, required=True)
+
+    parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE, 
+                      help="The optimization mode when analysis variation is enabled  [default: %s]" % OPTMODE)
 
     parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=BATCHMODE, 
                       help="Enables batch mode (canvas creation  NOT generates a window) [default: %s]" % BATCHMODE)
@@ -289,6 +354,15 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
+    parser.add_option("--signal", dest="signal", action="store", default = SIGNAL,
+                      help="Signal mass point to include in plot. (default: %s)" % (SIGNAL))
+
+    parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR,
+                      help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
+    
+    parser.add_option("--url", dest="url", action="store_true", default=URL,
+                      help="Don't print the actual save path the histogram is saved, but print the URL instead [default: %s]" % URL)
+    
     parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
                       help="List of datasets in mcrab to include")
 
@@ -307,4 +381,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plotHistograms.py: Press any key to quit ROOT ...")
+        raw_input("=== plotDataMC.py: Press any key to quit ROOT ...")

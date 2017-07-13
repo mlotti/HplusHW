@@ -252,6 +252,8 @@ def doCounters(datasetsMgr):
         "passed top selection (Baseline)",
         "selected events"
         ]
+
+    Print("Print only custom rows!", True)
     mainTable.keepOnlyRows(rows)
 
     # Get number of rows/columns
