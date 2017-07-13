@@ -2849,7 +2849,8 @@ class Dataset:
 
     ## Get the ParameterSet stored in the ROOT file
     def getParameterSet(self):
-        (objs, realNames) = self.getRootObjects("configInfo/parameterSet")
+        # (objs, realNames) = self.getRootObjects("configInfo/parameterSet") #obsolete? alexandros 12/07/2017
+        (objs, realNames) = self.getRootObjects("config")
         return objs[0].GetTitle()        
 
     def getDataVersion(self):
@@ -3002,10 +3003,10 @@ class Dataset:
             self.nAllEventsUnweighted = -1
         # If normalization problem is spotted
         if not normalizationCheckStatus:
-            msg  = "WARNING! dset=%s\n\tBase::AllEvents counter (=%s) is smaller than the Base::PUReweighting counter (=%s)" % (self.name, nAllEvts, nPUReEvts)
-            Print(msg)
-            # raw_input("\tPress any key to continue: ")
-            # raise Exception(msg)
+            msg  = "ERROR! dset=%s\n\tBase::AllEvents counter (=%s) is smaller than the Base::PUReweighting counter (=%s)" % (self.name, nAllEvts, nPUReEvts)
+            # Known issue which was thoroughly tested. Fraction events are inform user difference is 1 event or more
+            if (nAllEvts-nPUReEvts) >= 1.0:
+                raise Exception(msg)
  
         # Try to read weighted counters
         if self._weightedCounters:
