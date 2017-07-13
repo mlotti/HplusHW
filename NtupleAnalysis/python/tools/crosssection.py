@@ -614,7 +614,7 @@ def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMo
             msg = ""
         if not quietMode:
             msg = txtAlign.format("Setting", dataset.getName(), "cross section to ", "%0.6f" %(value), "pb", msg)
-            Print(msg, False)
+            # Print(msg, False)
     else:
         Print("Warning: no cross section for dataset %s with energy %s TeV (see python/tools/crosssection.py)" % (dataset.getName(), dataset.getEnergy()), True)
 
