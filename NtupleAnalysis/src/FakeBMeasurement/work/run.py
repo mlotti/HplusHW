@@ -126,27 +126,17 @@ def main():
             process.addDatasetsFromMulticrab(opts.mcrab)
 
     # ================================================================================================
-    # Selection customisations
+    # Overwrite Default Settings
     # ================================================================================================
     from HiggsAnalysis.NtupleAnalysis.parameters.hplus2tbAnalysis import allSelections
+
+    allSelections.verbose                     = opts.verbose
+    allSelections.histogramAmbientLevel       = opts.histoLevel
+    allSelections.TopSelection.ChiSqrCutValue = 100.0
+    #allSelections.Trigger.triggerOR            = ["HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
+    #                                              "HLT_PFHT450_SixJet40", #Prescale  26 at inst. lumi 1.35E+34
+    #                                              ]
     
-    # Overwrite verbosity
-    allSelections.verbose = opts.verbose
-
-    # Overwrite histo ambient level (Options: Systematics, Vital, Informative, Debug)
-    allSelections.histogramAmbientLevel = opts.histoLevel
-
-    # Set splitting of phase space (first bin is below first edge value and last bin is above last edge value)
-    # DO NOT UNCOMMENT - CAUSES CRASH
-    # allSelections.CommonPlots.histogramSplitting = [
-    #    PSet(label="tauPt", binLowEdges=[60.0, 80.0, 100.0], useAbsoluteValues=False),
-    #   ]
-
-    # Bjet discriminator
-    # allSelections.BJetSelection.numberOfBJetsCutValue = 3
-    # allSelections.BJetSelection.numberOfBJetsCutDirection = ">="
-    # allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
-
     # ================================================================================================
     # Command Line Options
     # ================================================================================================ 
@@ -165,15 +155,15 @@ def main():
                               useTopPtReweighting    = opts.useTopPtReweighting,
                               doSystematicVariations = opts.doSystematics)
 
-    # Perform variations (e.g. for optimisation)
-    builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
+    # Add variations (e.g. for optimisation)
+    # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
     # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "==", ">="])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [3])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutDirection", [">="])
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
     # builder.addVariation("FakeBMeasurement.maxNumberOfBJetsInTopFit", [3, 4, 5])
-    builder.addVariation("TopSelection.ChiSqrCutValue", [100])
+    # builder.addVariation("TopSelection.ChiSqrCutValue", [100])
     # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40_BTagCSV_p056"]])
     # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40"], ["HLT_PFHT400_SixJet30"]])
     # builder.addVariation("TopologySelection.FoxWolframMomentCutValue", [0.5, 0.7])
