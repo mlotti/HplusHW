@@ -216,7 +216,7 @@ def main(opts):
         style.setGridX(False)
         style.setGridY(False)
         
-        # Do the fit
+        # Do the fit on the histo after ALL selections (incl. topology cuts)
         hName  = "%s/%s_TopMassReco_LdgTrijetM_AfterAllSelections"
         PlotAndFitTemplates(datasetsMgr, hName, opts)
     return
@@ -427,7 +427,9 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN, FITMAX)
     
     # Only for when the measurement is done in bins
-    # manager.writeScaleFactorFile("test", moduleInfoString)
+    fileName = "QCDInvertedNormalizationFactors%s.py" % ( getModuleInfoString(opts) )
+    #fileName = os.path.join(opts.mcrab, "QCDInvertedNormalizationFactors.py")
+    manager.writeNormFactorFile(fileName, opts)
     
     # Alexandros Attikis
     '''
@@ -475,6 +477,13 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit") ) 
 
     return
+
+
+def getModuleInfoString(opts):
+    moduleInfoString = "_%s_%s" % (opts.dataEra, opts.searchMode)
+    if opts.optMode != None:
+        moduleInfoString += "_%s" % (opts.optMode)
+    return moduleInfoString
 
 
 def replaceQCDFromData(datasetMgr, datasetQCDdata):
