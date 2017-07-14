@@ -87,6 +87,23 @@ class PseudoMultiCrabCreator:
         # Done
         print ShellStyles.HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(self._myBaseDir,ShellStyles.NormalStyle())
 
+    def silentFinalize(self):
+        # Copy lumi.json file from input multicrab directory
+        if 0:
+            os.system("cp %s/lumi.json %s"%(self._inputMulticrabDir, self._myBaseDir))
+
+        # Create multicrab.cfg
+        f = open(os.path.join(self._myBaseDir, "multicrab.cfg"), "w")
+        f.write("# Ultimate pseudo-multicrab for fooling dataset.py, created by PseudoMultiCrabCreator\n")
+        
+        for item in self._mySubTitles:
+            f.write("[%s]\n"%(self._title + item))
+        f.close()
+        return
+
+    def getDirName(self):
+        return self._myBaseDir
+
     def _writeRootFileToDisk(self, subTitle):
         # Open root file
         myRootFile = ROOT.TFile("%s/%s/res/histograms-%s.root"%(self._myBaseDir,self._title+self._mySubTitles[-1],self._title+self._mySubTitles[-1]),"UPDATE")

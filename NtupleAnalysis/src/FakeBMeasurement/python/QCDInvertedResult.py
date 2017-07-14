@@ -18,6 +18,7 @@ import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 import HiggsAnalysis.NtupleAnalysis.tools.systematics as systematics
 import math
 import os
+import sys
 import ROOT
 
 
@@ -48,7 +49,7 @@ class QCDInvertedShape:
     Class for calculating the QCD factorised results
     Shape has to be a dataDrivenQCDCount object
     '''
-    def __init__(self, shape, moduleInfoString, normFactors, optionPrintPurityByBins=True, optionDoNQCDByBinHistograms=False, optionUseInclusiveNorm=False, verbose=False): #alex
+    def __init__(self, shape, moduleInfoString, normFactors, optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False, optionUseInclusiveNorm=False, verbose=False): #FIXME: Purity bin range
         self._resultCountObject = None # ExtendedCount object which contains the result
         self._resultShape       = None # TH1F which contains the final shape histogram for NQCD
         self._resultShapeEWK    = None # TH1F which contains the final shape histogram for EWK MC
@@ -149,7 +150,7 @@ class QCDInvertedShape:
             myShapeEwkSum.append(0.0)
             myShapeEwkSumUncert.append(0.0)
 
-        Print("Calculate results separately for each phase-space bin and then combine", True)
+        Verbose("Calculate results separately for each phase-space bin and then combine", True)
         # For-loop: All bins 
         for i in range(0, nSplitBins):
 
@@ -248,10 +249,10 @@ class QCDInvertedShape:
 
         # Construct info table (debugging)
         table = []
-        align  = "{:>8} {:>12} {:>10} {:^3} {:<10}"
-        header = align.format("Shape Bin", "Range", "Purity", "+/-", "Uncertainty")
-        hLine  = "="*50
-        table.append("{:^50}".format(shape.getHistoName()))
+        align  = "{:>7} {:^20} {:>10} {:^3} {:<10}"
+        header = align.format("Shape Bin", "Bin Range", "Purity", "+/-", "Uncertainty")
+        hLine  = "="*60
+        table.append("{:^60}".format(shape.getHistoName()))
         table.append(hLine)
         table.append(header)
         table.append(hLine)
@@ -280,7 +281,7 @@ class QCDInvertedShape:
         
             # Bin-range or overflow bin?
             if j < self._resultShape.GetNbinsX():
-                bin = "%.1f - %.1f" % (self._resultShape.GetXaxis().GetBinLowEdge(j), self._resultShape.GetXaxis().GetBinUpEdge(j) )
+                bin = "%.1f -> %.1f" % (self._resultShape.GetXaxis().GetBinLowEdge(j), self._resultShape.GetXaxis().GetBinUpEdge(j) )
             else:
                 bin = "> %.1f"   % (self._resultShape.GetXaxis().GetBinLowEdge(j) )
             table.append(align.format(j, bin, "%.3f" % myPurity, "+/-", "%.3f" % myPurityUncert))
@@ -423,13 +424,13 @@ class QCDInvertedResultManager:
         myObjects = dsetMgr.getDataset("Data").getDirectoryContent(dataPath)
         
         # Ignore unwanted histograms and those designed for HToTauNu
-        keywordList = ["BackToBackAngularCuts", "CollinearAngularCuts", "DeltaPhiTauMet", "MET", "SelectedMu", "SelectedTau", "shapeTransverseMass"]
+        keywordList = ["BackToBackAngularCuts", "CollinearAngularCuts", "DeltaPhiTauMet", "MET", "SelectedMu", "SelectedTau", "shapeTransverseMass", "JetEtaPhi"]
         ignoreList  = []
         for k in keywordList:
             ignoreList.extend(filter(lambda name: k in name, myObjects))
 
-        msg = "Ignoring a total of %s unwanted histograms and/or those designed for HToTauNu" % (len(ignoreList))
-        Print(ShellStyles.HighlightStyle() + msg + ShellStyles.NormalStyle(), True)
+        msg = "WARNING: Ignoring a total of %s unwanted histograms and/or those designed for HToTauNu" % (len(ignoreList))
+        Print(ShellStyles.WarningStyle() + msg + ShellStyles.NormalStyle(), True)
 
         # Update myObjects list with filtered results
         myObjects = list(x for x in myObjects if x not in ignoreList)
@@ -437,8 +438,8 @@ class QCDInvertedResultManager:
         # For-Loop: All  plots to consider
         for i, plotName in enumerate(myObjects, 1):
 
-            msg = "Histogram %d/%d: %s" % (i, len(myObjects), os.path.join(dataPath, plotName) )
-            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), True)
+            msg = "{:<9} {:>3} {:^1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%i" % len(myObjects), os.path.join(dataPath, plotName) )
+            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), i==1)
 
             # Ensure that histograms exist
             dataOk = self._sanityChecks(dsetMgr, dataPath, plotName) 
@@ -447,13 +448,12 @@ class QCDInvertedResultManager:
             # Obtain shape plots (the returned object is not owned)
             myShapeHisto = self._obtainShapeHistograms(i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors)
 
-            # Obtain plots for systematics coming from met shape difference for control plots
+            # Obtain plots for systematics coming from met shape difference for control plots #FIXME-Systematics
             if optionCalculateQCDNormalizationSyst:
                 if isinstance(myShapeHisto, ROOT.TH2):
                     print ShellStyles.WarningLabel()+"Skipping met shape uncertainty because histogram has more than 1 dimensions!"
                 else:
                     self._obtainQCDNormalizationSystHistograms(myShapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc)
-            print "1"*100
         return
 
     def _sanityChecks(self, dsetMgr, dirName, plotName):
@@ -512,8 +512,9 @@ class QCDInvertedResultManager:
         return myPlotHisto
 
     def _obtainQCDNormalizationSystHistograms(self, shapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc):
-        msg = "...Obtaining region transition systematics"
+        msg = "Obtaining region transition systematics"
         Print(ShellStyles.HighlightStyle() + msg + ShellStyles.NormalStyle(), True)
+
         myPlotSignalRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr=dsetMgr,
                                                                         dsetLabelData="Data",
                                                                         dsetLabelEwk="EWK",
@@ -521,6 +522,7 @@ class QCDInvertedResultManager:
                                                                         dataPath=normDataSrc+"QCDNormalizationSignal",
                                                                         ewkPath=normEWKSrc+"QCDNormalizationSignal",
                                                                         luminosity=luminosity)
+
         myPlotControlRegionShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr=dsetMgr,
                                                                          dsetLabelData="Data",
                                                                          dsetLabelEwk="EWK",
@@ -528,6 +530,7 @@ class QCDInvertedResultManager:
                                                                          dataPath=normDataSrc+"QCDNormalizationControl",
                                                                          ewkPath=normEWKSrc+"QCDNormalizationControl",
                                                                          luminosity=luminosity)
+
         myPlotRegionTransitionSyst = metSyst.SystematicsForMetShapeDifference(myPlotSignalRegionShape, 
                                                                               myPlotControlRegionShape, 
                                                                               shapeHisto, 

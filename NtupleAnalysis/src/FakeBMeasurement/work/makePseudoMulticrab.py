@@ -196,15 +196,26 @@ def Verbose(msg, printHeader=True, verbose=False):
     Print(msg, printHeader)
     return
 
+def getAvgProcessTimeForOneModule(myGlobalStartTime, myTotalModules):
+    return (time.time()-myGlobalStartTime)/float(myTotalModules)
+
+def getTotalElapsedTime(myGlobalStartTime):
+    return (time.time()-myGlobalStartTime)
 
 def printTimeEstimate(globalStart, localStart, nCurrent, nAll):
-    myLocalDelta = time.time() - localStart
-    myGlobalDelta = time.time() - globalStart
-    myEstimate = myGlobalDelta / float(nCurrent) * float(nAll-nCurrent)
-    s = "%02d:"%(myEstimate/60)
+    myLocalTime   = time.time()
+    myLocalDelta  = myLocalTime - localStart
+    myGlobalDelta = myLocalTime - globalStart
+    myEstimate    = myGlobalDelta / float(nCurrent) * float(nAll-nCurrent)
+    
+    # MAke estimate
+    s = "%02d:" % (myEstimate/60)
     myEstimate -= int(myEstimate/60)*60
     s += "%02d"%(myEstimate)
-    print "Module finished in %.1f s, estimated time to complete: %s"%(myLocalDelta, s)
+    
+    # Print info
+    Print("Module finished in: %.1f seconds" % (myLocalDelta), True)
+    Print("Estimated time to complete: %s" %  (s), False)
     return
 
 
@@ -402,16 +413,15 @@ def main():
                     if (n == 1):
                         if opts.verbose:
                             nominalModule.debug()
-                    
-                    doQCDNormalizationSyst=True
-                    Print("Building nominal module (calculateQCDNormalizationSyst = %s)" % (doQCDNormalizationSyst), True)
+                     
+                    doQCDNormalizationSyst=False #FIXME - Systematics
+                    Print("Building nominal module [calculateQCDNormalizationSyst = %s]" % (doQCDNormalizationSyst), True)
                     nominalModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors["nominal"], doQCDNormalizationSyst, opts.normDataSrc, opts.normEwkSrc)
 
                     if len(mySystematicsNames) > 0:
                         Print("Adding QCD normalization systematics (iff also other systematics  present) ", True)
                         nominalModule.buildQCDNormalizationSystModule(opts.dataSrc, opts.ewkSrc)
 
-                    print "2"*20
                     # FIXME: add quark gluon weighting systematics!
                     if 0: 
                         Print("Adding Quark/Gluon weighting systematics", True)
@@ -422,35 +432,41 @@ def main():
                                                                             calculateQCDNormalizationSyst=False,
                                                                             normDataSrc=_generalOptions["normalizationDataSource"],
                                                                             normEWKSrc=_generalOptions["normalizationEWKSource"])
-                    print "3"*20
-                    Print("Deleting nominal module", True)
+
+                    Verbose("Deleting nominal module", True)
                     nominalModule.delete()
-                    #===== Time estimate
+
+                    Verbose("Printing time estimate", True)
                     printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
-                    #===== Now do the rest of systematics variations
+
+                    Verbose("Now do the rest of systematics variations", True)
                     for syst in mySystematicsNames:
                         n += 1
                         print ShellStyles.CaptionStyle()+"Analyzing systematics variations %d/%d: %s/%s/%s%s"%(n,myTotalModules,myModuleInfoString,syst,shapeType,ShellStyles.NormalStyle())
                         myStartTime = time.time()
-                        systModule = ModuleBuilder(opts, myOutputCreator)
-                        systModule.createDsetMgr(multicrabDir=myMulticrabDir,
-                                                 era=era,
-                                                 searchMode=searchMode,
-                                                 optimizationMode=optimizationMode,
-                                                 systematicVariation=syst)
-                        systModule.buildModule(_generalOptions["dataSource"],
-                                               _generalOptions["EWKsource"],
-                                               myNormFactors["nominal"],
-                                               calculateQCDNormalizationSyst=False,
-                                               normDataSrc=_generalOptions["normalizationDataSource"],
-                                               normEWKSrc=_generalOptions["normalizationEWKSource"])
+                        systModule  = ModuleBuilder(opts, myOutputCreator)
+                        # Create dataset manager with given settings
+                        systModule.createDsetMgr(myMulticrabDir, era, searchMode, optimizationMode, systematicVariation=syst)
+
+                        # Build asystematics module
+                        systModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors["nominal"], False, opts.normDataSrc, opts.normEwkSrc)
                         printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
                         systModule.delete()
-        print "\nPseudo-multicrab ready for mass %s...\n"%shapeType
-    # Create rest of pseudo multicrab directory
-    myOutputCreator.finalize()
-    print "Average processing time of one module: %.1f s, total elapsed time: %.1f s"%((time.time()-myGlobalStartTime)/float(myTotalModules), (time.time()-myGlobalStartTime))
 
+        Verbose("Pseudo-multicrab ready for %s" % shapeType, True)
+
+    # Create rest of pseudo multicrab directory
+    myOutputCreator.silentFinalize() 
+    
+    # Print some timing statistics
+    Print("Average processing time per module was %.1f s" % getAvgProcessTimeForOneModule(myGlobalStartTime, myTotalModules), True)
+    Print("Total elapsed time was %.1f s" % getTotalElapsedTime(myGlobalStartTime), False)
+
+    msg = "SUCCESS: Created pseudo-multicrab directory for \"%s\":" % (shapeType)
+    Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), True)
+    Print(myOutputCreator.getDirName(), False)
+
+    return
 
 #================================================================================================ 
 # Main
@@ -592,8 +608,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Call the main function
-    #main(opts)
     main()
 
     if not opts.batchMode:
-        raw_input("=== plotHistograms.py: Press any key to quit ROOT ...")
+        raw_input("=== makePseudoMulticrab.py: Press any key to quit ROOT ...")
