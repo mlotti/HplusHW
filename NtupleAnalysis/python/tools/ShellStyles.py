@@ -34,8 +34,29 @@ def ErrorLabel():
 def HighlightAltStyle():
     '''
     https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-    From the colour-table in the link above:
-    47=bright white, 30=normal black, 44=bright blue
+
+    Foreground Code | 30 31 32 33 34 35 36 37
+    Background Code | 40 41 42 43 44 45 46 47
+    ==========================================
+                      B  R  G  Y  B  M  C  W    
+    RED   = "\033[1;31m"  
+    BLUE  = "\033[1;34m"
+    CYAN  = "\033[1;36m"
+    GREEN = "\033[0;32m"
+    RESET = "\033[0;0m"
+    BOLD    = "\033[;1m"
+    REVERSE = "\033[;7m"
     '''
-    # white text on white background
-    return "\033[0;47m\033[1;44m"
+    # cyan  text on white backround
+    #return "\033[;47m\033[1;36m"
+
+    # blue text on black backround
+    return "\033[;40m\033[1;34m"
+
+def SuccessStyle():
+    # green text on black backround
+    # return "\033[;40m\033[1;32m"
+    
+    # black text on green backround
+    return "\033[;40m\033[1;42m"
+

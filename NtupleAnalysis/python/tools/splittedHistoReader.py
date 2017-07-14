@@ -62,7 +62,9 @@ class SplittedHistoReader:
     def _splittingDoneWithMultipleHistograms(self, dsetMgr, dsetlabel, histoName):
         myNameList = histoName.split("/")
         myMultipleFileName = histoName+"/"+myNameList[len(myNameList)-1]+"0"
-        myMultipleFilesStatus = dsetMgr.getDataset(dsetlabel).hasRootHisto(histoName)
+        myMultipleFilesStatus = dsetMgr.getDataset(dsetlabel).hasRootHisto(myMultipleFileName)
+        # Spotted as bug by Alexandros, 14/07/2017 (notification email sent to Sami+Santeri)
+        # myMultipleFilesStatus = dsetMgr.getDataset(dsetlabel).hasRootHisto(histoName) 
         return myMultipleFilesStatus
 
     ## Returns a list of histograms (one per split bin, in the same order)
