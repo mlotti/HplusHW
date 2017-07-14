@@ -24,7 +24,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 import HiggsAnalysis.NtupleAnalysis.tools.dataset as dataset
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.analysisModuleSelector as analysisModuleSelector
-import HiggsAnalysis.QCDMeasurement.QCDInvertedResult as qcdInvertedResult
+import HiggsAnalysis.FakeBMeasurement.QCDInvertedResult as qcdInvertedResult
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.pseudoMultiCrabCreator as pseudoMultiCrabCreator
 
@@ -36,7 +36,6 @@ _generalOptions = {
     "normalizationSourcePrefix"  : "ForQCDNormalization/Normalization",
     "ewkSourceForQCDPlusFakeTaus": "ForDataDrivenCtrlPlotsEWKGenuineTaus",
     "ewkSourceForQCDOnly"        : "ForDataDrivenCtrlPlots",
-    "dataSource"                 : "ForDataDrivenCtrlPlots",
     }
 
 #================================================================================================ 
@@ -76,50 +75,53 @@ class ModuleBuilder:
         self._searchMode = searchMode
         self._optimizationMode = optimizationMode
         self._systematicVariation = systematicVariation
+
         # Construct info string of module
         self._moduleInfoString = "%s_%s_%s"%(era, searchMode, optimizationMode)
+
         # Obtain dataset manager
         self._dsetMgrCreator = dataset.readFromMulticrabCfg(directory=multicrabDir)
         self._dsetMgr = self._dsetMgrCreator.createDatasetManager(dataEra=era,searchMode=searchMode,optimizationMode=optimizationMode,systematicVariation=systematicVariation)
+
         # Do the usual normalisation
         self._dsetMgr.updateNAllEventsToPUWeighted()
         self._dsetMgr.loadLuminosities()
         plots.mergeRenameReorderForDataMC(self._dsetMgr)
         self._dsetMgr.merge("EWK", opts.ewkDatasets)
+
         # Obtain luminosity
         self._luminosity = self._dsetMgr.getDataset("Data").getLuminosity()
+        return
         
     def debug(self):
         self._dsetMgr.printDatasetTree()
         print "Luminosity = %f 1/fb"%(self._luminosity / 1000.0)
+        return
 
     def getModuleInfoString(self):
         return "%s_%s_%s" % (self._era, self._searchMode, self._optimizationMode)
 
-    def buildModule(self,
-                    dataPath,
-                    ewkPath, 
-                    normFactors,
-                    calculateQCDNormalizationSyst,
-                    normDataSrc=None,
-                    normEWKSrc=None):
+    def buildModule(self, dataPath, ewkPath, normFactors, calculateQCDNormalizationSyst, normDataSrc=None, normEWKSrc=None):
+        
         # Create containers for results
+        Verbose("Create containers for results", True)
         myModule = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr,
                                                                 self._era,
                                                                 self._searchMode,
                                                                 self._optimizationMode,
                                                                 self._systematicVariation)
-        # Obtain results
+        Verbose("Obtaining results", True)
         self._nominalResult = qcdInvertedResult.QCDInvertedResultManager(dataPath,
                                                                          ewkPath,
                                                                          self._dsetMgr,
                                                                          self._luminosity,
                                                                          self.getModuleInfoString(),
                                                                          normFactors,
-                                                                         optionCalculateQCDNormalizationSyst=calculateQCDNormalizationSyst,
-                                                                         normDataSrc=normDataSrc,
-                                                                         normEWKSrc=normEWKSrc,
-                                                                         optionUseInclusiveNorm=self._opts.useInclusiveNorm)
+                                                                         calculateQCDNormalizationSyst,
+                                                                         opts.normDataSrc,
+                                                                         opts.normEwkSrc,
+                                                                         self._opts.useInclusiveNorm,
+                                                                         opts.verbose)
         # Store results
         myModule.addPlots(self._nominalResult.getShapePlots(),
                           self._nominalResult.getShapePlotLabels())
@@ -263,13 +265,13 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     <pseudomulticrab_dir>. The autogenerated file file be place in the cwd (i.e. work/)
     '''
     # Find candidates for normalisation scripts
-    scriptList = getNormFactorFileList(dirName=multicrabDirName, fileBaseName=opts.normFactorsSource)
+    scriptList = getNormFactorFileList(dirName=multicrabDirName, fileBaseName=opts.normFactorsSrc)
 
     # Create a string with the module information used
     moduleInfoString = getModuleInfoString(era, searchMode, optimizationMode)
 
     # Construct source file name
-    src = getSourceFileName(multicrabDirName, opts.normFactorsSource % moduleInfoString)
+    src = getSourceFileName(multicrabDirName, opts.normFactorsSrc % moduleInfoString)
 
     # Check if normalization coefficients are suitable for the choses era
     Verbose("Reading normalisation factors from:\n\t%s" % src, True)
@@ -372,7 +374,7 @@ def main():
         myOutputCreator.initialize(shapeType)
         
         msg = "Creating dataset for shape \"%s\"%s" % (shapeType, ShellStyles.NormalStyle())
-        Print(ShellStyles.HighlightStyle() + msg, True)
+        Verbose(ShellStyles.HighlightStyle() + msg, True)
 
         # For-Loop over era, searchMode, and optimizationMode options
         for era in myModuleSelector.getSelectedEras():
@@ -396,32 +398,32 @@ def main():
                     # Create dataset manager with given settings
                     nominalModule = ModuleBuilder(opts, myOutputCreator)
                     nominalModule.createDsetMgr(myMulticrabDir, era, searchMode, optimizationMode)
-
-                    if (n == 1):
-                        nominalModule.debug()
-
-                    sys.exit()
-                    nominalModule.buildModule(_generalOptions["dataSource"],
-                                              _generalOptions["EWKsource"],
-                                              myNormFactors["nominal"],
-                                              calculateQCDNormalizationSyst=True, # buildQCDNormalizationSystModule uses these!
-                                              normDataSrc=_generalOptions["normalizationDataSource"],
-                                              normEWKSrc=_generalOptions["normalizationEWKSource"])
-
-                    #===== QCD normalization systematics (add only if there are also other systematics as well) 
-                    if len(mySystematicsNames) > 0:
-                        nominalModule.buildQCDNormalizationSystModule(_generalOptions["dataSource"],
-                                                                      _generalOptions["EWKsource"])
-                    if False: #FIXME: add quark gluon weighting systematics!
                     
-                        #===== Quark gluon weighting systematics
-                        nominalModule.buildQCDQuarkGluonWeightingSystModule(_generalOptions["dataSource"],
-                                                                            _generalOptions["EWKsource"],
+                    if (n == 1):
+                        if opts.verbose:
+                            nominalModule.debug()
+                    
+                    doQCDNormalizationSyst=True
+                    Print("Building nominal module (calculateQCDNormalizationSyst = %s)" % (doQCDNormalizationSyst), True)
+                    nominalModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors["nominal"], doQCDNormalizationSyst, opts.normDataSrc, opts.normEwkSrc)
+
+                    if len(mySystematicsNames) > 0:
+                        Print("Adding QCD normalization systematics (iff also other systematics  present) ", True)
+                        nominalModule.buildQCDNormalizationSystModule(opts.dataSrc, opts.ewkSrc)
+
+                    print "2"*20
+                    # FIXME: add quark gluon weighting systematics!
+                    if 0: 
+                        Print("Adding Quark/Gluon weighting systematics", True)
+                        nominalModule.buildQCDQuarkGluonWeightingSystModule(opts.dataSrc,
+                                                                            opts.ewkSrc,
                                                                             myNormFactors["FakeWeightingUp"],
                                                                             myNormFactors["FakeWeightingDown"],
                                                                             calculateQCDNormalizationSyst=False,
                                                                             normDataSrc=_generalOptions["normalizationDataSource"],
                                                                             normEWKSrc=_generalOptions["normalizationEWKSource"])
+                    print "3"*20
+                    Print("Deleting nominal module", True)
                     nominalModule.delete()
                     #===== Time estimate
                     printTimeEstimate(myGlobalStartTime, myStartTime, n, myTotalModules)
@@ -470,39 +472,45 @@ if __name__ == "__main__":
     dest............: The name of the attribute to be added to the object returned by parse_args().
     '''
 
-    # Parse command line options
-    #parser.add_option("--inclusiveonly", dest="useInclusiveNorm", action="store_true", default=False, help="Use only inclusive weight instead of binning")
-
     # Default Settings
     global opts
-    ANALYSISNAME = "FakeBMeasurement"
-    EWKDATASETS  = ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-    SEARCHMODES  = ["80to1000"]
-    DATAERAS     = ["Run2016"]
-    OPTMODE      = None
-    BATCHMODE    = True
-    PRECISION    = 3
-    INTLUMI      = -1.0
-    SUBCOUNTERS  = False
-    LATEX        = False
-    MCONLY       = False
-    MERGEEWK     = False
-    URL          = False
-    NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"
-    VERBOSE      = False
-    VARIATIONS   = False
-    TEST         = True
-    FACTORSOURCE = "QCDInvertedNormalizationFactors_%s.py"
+    ANALYSISNAME   = "FakeBMeasurement"
+    EWKDATASETS    = ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    SEARCHMODES    = ["80to1000"]
+    DATAERAS       = ["Run2016"]
+    OPTMODE        = None
+    BATCHMODE      = True
+    PRECISION      = 3
+    INTLUMI        = -1.0
+    SUBCOUNTERS    = False
+    LATEX          = False
+    MCONLY         = False
+    MERGEEWK       = False
+    URL            = False
+    NOERROR        = True
+    SAVEDIR        = "/publicweb/a/aattikis/FakeBMeasurement/"
+    VERBOSE        = False
+    VARIATIONS     = False
+    TEST           = True
+    FACTOR_SRC     = "QCDInvertedNormalizationFactors_%s.py"
+    DATA_SRC       = "ForDataDrivenCtrlPlots"
+    EWK_SRC        = "ForDataDrivenCtrlPlots"
+    NORM_DATA_SRC  = "ForDataDrivenCtrlPlots"
+    NORM_EWK_SRC   = "ForDataDrivenCtrlPlots"
+    INCLUSIVE_ONLY = True
+    MULTICRAB      = None
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
 
     parser.add_option("-m", "--mcrab", dest="mcrab", action="store",# required=True,
-                      help="Path to the multicrab directory for input")
+                      help="Path to the multicrab directory for input [default: %s]" % (MULTICRAB) )
 
-    parser.add_option("--normFactorsSource", dest="normFactorsSource", action="store", default=FACTORSOURCE,
-                      help="The python file (auto-generated) containing the normalisation factors. [defaults: %s]" % FACTORSOURCE)
+    parser.add_option("--inclusiveOnly", dest="useInclusiveNorm", action="store_true", default=INCLUSIVE_ONLY, 
+                      help="Use only inclusive weight instead of binning [default: %s]" % (INCLUSIVE_ONLY) )
+    
+    parser.add_option("--normFactorsSrc", dest="normFactorsSrc", action="store", default=FACTOR_SRC,
+                      help="The python file (auto-generated) containing the normalisation factors. [default: %s]" % FACTOR_SRC)
 
     parser.add_option("-l", "--list", dest="listVariations", action="store_true", default=VARIATIONS, 
                       help="Print a list of available variations [default: %s]" % VARIATIONS)
@@ -552,12 +560,24 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
-    #parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
-    #                  help="List of datasets in mcrab to include")
+    parser.add_option("-i", "--includeOnlyTasks", dest="includeOnlyTasks", action="store", 
+                      help="List of datasets in mcrab to include")
 
-    #parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
-    #                  help="List of datasets in mcrab to exclude")
+    parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
+                      help="List of datasets in mcrab to exclude")
 
+    parser.add_option("--dataSrc", dest="dataSrc", action="store", default=DATA_SRC,
+                      help="Source of Data histograms [default: %s" % (DATA_SRC) )
+
+    parser.add_option("--ewkSrc", dest="ewkSrc", action="store", default=EWK_SRC,
+                      help="Source of EWK histograms [default: %s" % (EWK_SRC) )
+
+    parser.add_option("--normDataSrc", dest="normDataSrc", action="store", default=NORM_DATA_SRC,
+                      help="Source of Data normalisation [default: %s" % (NORM_DATA_SRC) )
+                      
+    parser.add_option("--normEwkSrc", dest="normEwkSrc", action="store", default=NORM_EWK_SRC,
+                      help="Source of EWK normalisation [default: %s" % (NORM_EWK_SRC) )
+                      
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
