@@ -26,10 +26,10 @@ def TestPassedStyle():
     return "\033[1;32m"
 
 def WarningLabel():
-    return "%sWarning:%s "%(WarningStyle(),NormalStyle())
+    return "%sWARNING:%s "%(WarningStyle(),NormalStyle())
 
 def ErrorLabel():
-    return "%sError:%s "%(ErrorStyle(),NormalStyle())
+    return "%sERROR:%s "%(ErrorStyle(),NormalStyle())
 
 def HighlightAltStyle():
     '''

@@ -39,15 +39,50 @@ def Verbose(msg, printHeader=True, verbose=False):
     Print(msg, printHeader)
     return
 
+def IsTH1(h):
+    if not isinstance(h, ROOT.TH1):
+        msg = "ERROR! Expected object of type ROOT.TH1, got \"%s\" instead" % (type(h))
+        raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
+    else:
+        return
+
+def GetDecimalFormat(value):
+    if value == 0.0:
+        decFormat = "%.0f" % value
+    elif abs(value) >= 1.0:
+        decFormat = "%.0f" % value
+    elif abs(value) >= 0.1:
+        decFormat = "%.1f" % value
+    elif abs(value) >= 0.01:
+        decFormat = "%.2f" % value
+    elif abs(value) >= 0.001:
+        decFormat = "%.3f" % value
+    else:
+        decFormat = "%.4f" % value
+    return decFormat
+
+def GetTH1BinWidthString(myTH1, iBin):
+    IsTH1(myTH1)
+    
+    width = myTH1.GetBinWidth(iBin)
+    return GetDecimalFormat(width) + str(width)
+
+def GetTH1BinRangeString(myTH1, iBin):
+    IsTH1(myTH1)
+    
+    lowEdge   = myTH1.GetXaxis().GetBinLowEdge(iBin)
+    upEdge    = myTH1.GetXaxis().GetBinUpEdge(iBin)
+    rangeStr  = GetDecimalFormat(lowEdge)
+    rangeStr += " -> "
+    rangeStr += GetDecimalFormat(upEdge)
+    return rangeStr
+
 def PrintTH1Info(myTH1):
     '''
     Generic histogram prints detailed tabled
     with the properties of a ROOT.TH1 instance object
     '''
-    # Sanity check
-    if not isinstance(myTH1, ROOT.TH1):
-        msg = "ERROR! Cannot call PrintTH1Info() on an object which is not an instance of ROOT.TH1 (%s)" % (type(myTH1))
-        raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
+    IsTH1(myTH1)
 
     # Constuct the table
     table   = []
@@ -62,8 +97,9 @@ def PrintTH1Info(myTH1):
     # For-loop: All bins
     h = myTH1
     for j in range(0, myTH1.GetNbinsX()+1):
-        binWidth      = h.GetBinWidth(j)
-        binRange      = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
+        binWidth      = GetTH1BinWidthString(myTH1, j)
+        #binRange      = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
+        binRange      = GetTH1BinRangeString(myTH1, j)
         binContent    = "%.1f" % h.GetBinContent(j)
         binError      = "%.1f" % h.GetBinError(j)
         integralError = ROOT.Double(0.0)
@@ -272,7 +308,7 @@ class QCDInvertedShape:
                     Verbose("Calculating the result")
                     binContent = h.GetBinContent(j)
                     binRange   = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
-                    binWidth   = h.GetBinWidth(j)
+                    binWidth   = GetTH1BinWidthString(h, j)
                     binSum    += binContent
                     myResult   = binContent * wQCD
 
@@ -574,7 +610,7 @@ class QCDInvertedResultManager:
         
         Verbose("Initialise \"DataDrivenQCDShape\" type object", True)
         myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr,"Data", "EWK", plotName, dataPath, ewkPath, luminosity)
-        if self._verbose:
+        if 1:# self._verbose:
             PrintTH1Info(myShape.getIntegratedDataHisto())
         
         Verbose("Initialise \"QCDInvertedShape\" type object (Takes \"DataDrivenQCDShape\" type object as argument)", True)
