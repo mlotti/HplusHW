@@ -17,27 +17,48 @@ import ROOT
 ROOT.gROOT.SetBatch(True) # no flashing canvases
 
 #================================================================================================
+# TEMPORARY Function Definition
+#================================================================================================
+def _getInclusiveHistogramsFromSingleSource(dsetMgr, dsetlabel, histoName, luminosity):
+    myHistoList = []
+    myNameList  = histoName.split("/")
+    myMultipleFileNameStem = histoName
+    myDsetRootHisto = dsetMgr.getDataset(dsetlabel).getDatasetRootHisto(myMultipleFileNameStem)
+    if dsetMgr.getDataset(dsetlabel).isMC():
+        myDsetRootHisto.normalizeToLuminosity(luminosity)
+    h = myDsetRootHisto.getHistogram()
+    ROOT.SetOwnership(h, True)
+    myHistoList.append(h)
+    return myHistoList
+
+def Print(msg, printHeader=False):
+    fName = __file__.split("/")[-1]
+    if printHeader==True:
+        print "=== ", fName
+        print "\t", msg
+    else:
+        print "\t", msg
+    return
+
+#================================================================================================
 # Class Definition
 #================================================================================================
 class DataDrivenQCDShape:
     '''
     Container class for information of data and MC EWK at certain point of selection
     '''
-    def __init__(self, 
-                 dsetMgr, 
-                 dsetLabelData,
-                 dsetLabelEwk,
-                 histoName,
-                 dataPath,
-                 ewkPath,
-                 luminosity):
+    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, dataPath, ewkPath, luminosity):
         self._uniqueN = 0
         self._splittedHistoReader = splittedHistoReader.SplittedHistoReader(dsetMgr, dsetLabelData)
         self._histoName = histoName
         dataFullName    = os.path.join(dataPath, histoName)
         ewkFullName     = os.path.join(ewkPath, histoName)
-        self._dataList  = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, dataFullName, luminosity))
-        self._ewkList   = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, ewkFullName, luminosity))
+        msg = "Disabled call for getting splitted histograms. Getting \"Inclusive\" histogram only instead."
+        Print(ShellStyles.WarningLabel() + msg, True)
+        #self._dataList  = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, dataFullName, luminosity)) #FIXME: Does this work for Inclusive?
+        #self._ewkList   = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, ewkFullName, luminosity)) #FIXME: Does this work for Inclusive?
+        self._dataList  = list(_getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelData, dataFullName, luminosity))
+        self._ewkList   = list(_getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelEwk, ewkFullName, luminosity))
         return
 
     def delete(self):

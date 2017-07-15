@@ -21,7 +21,6 @@ import os
 import sys
 import ROOT
 
-
 #================================================================================================
 # Function Definition
 #================================================================================================
@@ -34,12 +33,47 @@ def Print(msg, printHeader=False):
         print "\t", msg
     return
 
-
 def Verbose(msg, printHeader=True, verbose=False):
     if not verbose:
         return
     Print(msg, printHeader)
     return
+
+def PrintTH1Info(myTH1):
+    '''
+    Generic histogram prints detailed tabled
+    with the properties of a ROOT.TH1 instance object
+    '''
+    # Sanity check
+    if not isinstance(myTH1, ROOT.TH1):
+        msg = "ERROR! Cannot call PrintTH1Info() on an object which is not an instance of ROOT.TH1 (%s)" % (type(myTH1))
+        raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
+
+    # Constuct the table
+    table   = []
+    align  = "{:>5} {:>10} {:^20} {:>15} {:^3} {:<10} {:>15} {:^3} {:<10}"
+    header = align.format("Bin", "Bin Width", "Bin Range", "Bin Content", "+/-", "Error", "Cum. Integral", "+/-", "Error")
+    hLine  = "="*100
+    table.append("{:^100}".format(myTH1.GetName()))
+    table.append(hLine)
+    table.append(header)
+    table.append(hLine)
+
+    # For-loop: All bins
+    h = myTH1
+    for j in range(0, myTH1.GetNbinsX()+1):
+        binWidth      = h.GetBinWidth(j)
+        binRange      = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
+        binContent    = "%.1f" % h.GetBinContent(j)
+        binError      = "%.1f" % h.GetBinError(j)
+        integralError = ROOT.Double(0.0)
+        integral      = h.IntegralAndError(0, j, integralError)
+        table.append(align.format(j, binWidth, binRange, binContent, "+/-", binError,"%.1f" % integral, "+/-", "%.1f" % integralError))
+    table.append(hLine)
+    for l in table:
+        Print(l)
+    return
+        
 
 #================================================================================================
 # Class Definition
@@ -47,17 +81,55 @@ def Verbose(msg, printHeader=True, verbose=False):
 class QCDInvertedShape:
     '''
     Class for calculating the QCD factorised results
+
     Shape has to be a dataDrivenQCDCount object
     '''
-    def __init__(self, shape, moduleInfoString, normFactors, optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False, optionUseInclusiveNorm=False, verbose=False): #FIXME: Purity bin range
+    def __init__(self, shape, moduleInfoString, normFactors, optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False, optionUseInclusiveNorm=False, verbose=False):
+        self._shape   = shape
+        self._verbose = verbose
+        self._moduleInfoString  = moduleInfoString
         self._resultCountObject = None # ExtendedCount object which contains the result
         self._resultShape       = None # TH1F which contains the final shape histogram for NQCD
         self._resultShapeEWK    = None # TH1F which contains the final shape histogram for EWK MC
         self._resultShapePurity = None # TH1F which contains the final shape histogram for QCD purity
-        self._histogramsList    = [] # List of TH1F histograms
-        self._optionUseInclusiveNorm = optionUseInclusiveNorm        
+        self._histogramsList    = []   # List of TH1F histograms
+        self._optionUseInclusiveNorm      = optionUseInclusiveNorm        
+        self._optionPrintPurityByBins     = optionPrintPurityByBins
+        self._optionDoNQCDByBinHistograms = optionDoNQCDByBinHistograms
         self._doCalculate(shape, moduleInfoString, normFactors, optionPrintPurityByBins, optionDoNQCDByBinHistograms)
-        self._verbose = verbose
+        return
+
+    def PrintSettings(self, printHistos):
+        '''
+        Mostly for debugging purposes
+        '''
+        if not self._verbose:
+            return
+        info   = []
+        align  = "{:<30} {:<50} {:<70}"
+        header = align.format("Variable", "Value", "Comment")
+        hLine  = "="*150
+        info.append("{:^150}".format(self._shape.getHistoName()))
+        info.append(hLine)
+        info.append(header)
+        info.append(hLine)
+        info.append(align.format("resultShape"                , self._resultShape.GetName()      , "Name of TH1F which contains the final shape histogram for NQCD"))
+        info.append(align.format("resultShapeEWK"             , self._resultShapeEWK.GetName()   , "Name of TH1F which contains the final shape histogram for EWK MC"))
+        info.append(align.format("resultShapePurity"          , self._resultShapePurity.GetName(), "Name of TH1F which contains the final shape histogram for QCD purity"))
+        info.append(align.format("histogramsList"             , len(self._histogramsList)        , "Length of list of TH1F histograms"))
+        info.append(align.format("moduleInfoString"           , self._moduleInfoString           , "Era, Mode, Optimization Mode, and Plot Name"))
+        info.append(align.format("verbose"                    , self._verbose                    , "Flag for increased verbosity (Debugging)"))
+        info.append(align.format("optionUseInclusiveNorm"     , self._optionUseInclusiveNorm     , "Flag for use of inclusive normalisation"))
+        info.append(align.format("optionPrintPurityByBins"    , self._optionPrintPurityByBins    , "Flag for printing QCD purity for given histo (bin-by-bin)"))
+        info.append(align.format("optionDoNQCDByBinHistograms", self._optionDoNQCDByBinHistograms, "Flag for doing QCD events bin-by-bin"))
+        info.append(hLine)
+        for i, line in enumerate(info):
+            Print(line, i==0)
+
+        if printHistos:
+            PrintTH1Info(self._resultShape)
+            PrintTH1Info(self._resultShapeEWK)
+            PrintTH1Info(self._resultShapePurity)
         return
 
     def delete(self):
@@ -101,22 +173,22 @@ class QCDInvertedShape:
         '''
         Calculates the result
         '''
-        # Calculate final shape in signal region (shape * w_QCD)
+        Verbose("Calculate final shape in signal region (shape * w_QCD) & initialize result containers", True)
         nSplitBins = shape.getNumberOfPhaseSpaceSplitBins()
 
-        # Initialize result containers
+        Verbose("Create Shape", True)
         self._resultShape = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
         self._resultShape.Reset()
         self._resultShape.SetTitle("NQCDFinal_Total_%s"%moduleInfoString)
         self._resultShape.SetName("NQCDFinal_Total_%s"%moduleInfoString)
 
-        # EWK
+        Verbose("Create EWK shape", True)
         self._resultShapeEWK = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
         self._resultShapeEWK.Reset()
         self._resultShapeEWK.SetTitle("NQCDFinal_EWK_%s"%moduleInfoString)
         self._resultShapeEWK.SetName("NQCDFinal_EWK_%s"%moduleInfoString)
 
-        # Purity
+        Verbose("Create Purity shape", True)
         self._resultShapePurity = aux.Clone(shape.getDataDrivenQCDHistoForSplittedBin(0))
         self._resultShapePurity.Reset()
         self._resultShapePurity.SetTitle("NQCDFinal_Purity_%s"%moduleInfoString)
@@ -174,17 +246,20 @@ class QCDInvertedShape:
 
             # Construct info table (debugging)
             table  = []
-            align  = "{:>10} {:>15} {:>15} {:>15} {:^3} {:>10} {:^3} {:>10}"
-            header = align.format("Shape Bin", "Bin Content", "NormFactor", "QCD", "+/-", "Data Stat.", "+/-", "EWK Stat.")
-            hLine  = "="*100
-            table.append("{:^100}".format(shape.getHistoName()))
+            align  = "{:>6} {:^10} {:^15} {:>10} {:>10} {:>10} {:^3} {:^8} {:^3} {:^8}"
+            header = align.format("Bin", "BinWidth", "BinRange", "Content", "NormFactor", "QCD", "+/-", "Data", "+/-", "EWK")
+            hLine  = "="*90
+            table.append("{:^90}".format(shape.getHistoName()))
             table.append(hLine)
             table.append(header)
             table.append(hLine)
-            
+
+            binSum    = 0.0
+            nBins     = h.GetNbinsX()
+            binWidth  = hData.GetBinWidth(0)
+            xMin      = hData.GetXaxis().GetBinCenter(0)
+            xMax      = hData.GetXaxis().GetBinCenter(nBins+1)
             # For-Loop: All bins in the shape histogram
-            binSum = 0.0
-            nBins  = h.GetNbinsX()
             for j in range(1, nBins+1):
 
                 # Initialise values
@@ -196,13 +271,15 @@ class QCDInvertedShape:
                 if abs(h.GetBinContent(j)) > 0.00001:
                     Verbose("Calculating the result")
                     binContent = h.GetBinContent(j)
+                    binRange   = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
+                    binWidth   = h.GetBinWidth(j)
                     binSum    += binContent
                     myResult   = binContent * wQCD
 
                     Verbose("Calculate abs. stat. uncert. for data and for MC EWK (Do not calculate here MC EWK syst.)", True)
                     myStatDataUncert = hData.GetBinError(j) * wQCD
                     myStatEwkUncert  = hEwk.GetBinError(j)  * wQCD
-                    table.append(align.format(j, "%0.1f" % binContent, wQCD, "%.1f" % myResult, "+/-", "%.1f" % myStatDataUncert, "+/-", "%.1f" % myStatEwkUncert))
+                    table.append(align.format(j, binWidth, binRange, "%0.1f" % binContent, wQCD, "%.1f" % myResult, "+/-", "%.1f" % myStatDataUncert, "+/-", "%.1f" % myStatEwkUncert))
 
                 # Get count object
                 myCountObject = extendedCount.ExtendedCount(myResult, [myStatDataUncert, myStatEwkUncert], myUncertaintyLabels)
@@ -232,13 +309,20 @@ class QCDInvertedShape:
             self._resultShape.SetBinError(j, math.sqrt(self._resultShape.GetBinError(j)))
 
         # Print detailed results in a formatted table
-        if 0:
-            print "NQCD Integral(%s) = %s "% ( shape.getHistoName(), self._resultCountObject.getResultStringFull("%.1f"))
         qcdResults = self._resultCountObject.getResultAndStatErrorsDict()
-        table.append(align.format("%s-%.0f" % (1, nBins), "%.1f" % binSum, wQCD, "%.1f" % qcdResults["value"], "+/-", "%.1f" % qcdResults["statData"], "+/-", "%.1f" % qcdResults["statEWK"]))
+        bins       = "%0.f-%.0f" % (1, nBins)
+        binRange   = "%.1f -> %.1f" % (xMin, xMax)
+        binSum     = "%.1f" % binSum
+        nQCD       = "%.1f" % qcdResults["value"]
+        dataStat   = "%.1f" % qcdResults["statData"]
+        ewkStat    = "%.1f" % qcdResults["statEWK"]
+        table.append(align.format(bins, binWidth, binRange, binSum, wQCD, nQCD, "+/-", dataStat, "+/-", ewkStat))
         table.append(hLine)
         for i, line in enumerate(table):
-            Verbose(line, i==0)
+            if i == len(table)-2:
+                Print(ShellStyles.TestPassedStyle()+line+ShellStyles.NormalStyle(), i==0)
+            else:
+                Print(line, i==0)
 
         if optionPrintPurityByBins:
             Verbose("Printing Shape Purity bin-by-bin.", True)
@@ -246,13 +330,12 @@ class QCDInvertedShape:
         return
 
     def PrintPurityByBins(self, nBins, shape, shapeDataSum, shapeDataSumUncert, shapeEwkSum, shapeEwkSumUncert):
-
         # Construct info table (debugging)
         table = []
-        align  = "{:>7} {:^20} {:>10} {:^3} {:<10}"
-        header = align.format("Shape Bin", "Bin Range", "Purity", "+/-", "Uncertainty")
-        hLine  = "="*60
-        table.append("{:^60}".format(shape.getHistoName()))
+        align  = "{:>6} {:^20} {:>10} {:^3} {:<10}"
+        header = align.format("Bin", "Range", "Purity", "+/-", "Uncertainty")
+        hLine  = "="*70
+        table.append("{:^70}".format(shape.getHistoName()))
         table.append(hLine)
         table.append(header)
         table.append(hLine)
@@ -281,10 +364,10 @@ class QCDInvertedShape:
         
             # Bin-range or overflow bin?
             if j < self._resultShape.GetNbinsX():
-                bin = "%.1f -> %.1f" % (self._resultShape.GetXaxis().GetBinLowEdge(j), self._resultShape.GetXaxis().GetBinUpEdge(j) )
+                binRange = "%.1f -> %.1f" % (self._resultShape.GetXaxis().GetBinLowEdge(j), self._resultShape.GetXaxis().GetBinUpEdge(j) )                
             else:
-                bin = "> %.1f"   % (self._resultShape.GetXaxis().GetBinLowEdge(j) )
-            table.append(align.format(j, bin, "%.3f" % myPurity, "+/-", "%.3f" % myPurityUncert))
+                binRange = "> %.1f"   % (self._resultShape.GetXaxis().GetBinLowEdge(j) )
+            table.append(align.format(j, binRange, "%.3f" % myPurity, "+/-", "%.3f" % myPurityUncert))
         table.append(hLine)
 
         #FIXME: shape.getDataDrivenQCDHistoForSplittedBin(0).GetBinWidth(1) =  Njets_Data_0dataDriven
@@ -294,8 +377,10 @@ class QCDInvertedShape:
             Print (line, i==0)
         return
         
-    ## Calculates the result for 2D histograms
     def _doCalculate2D(self, nSplitBins, shape, normFactors, optionPrintPurityByBins, optionDoNQCDByBinHistograms, myUncertaintyLabels):
+        '''
+        Calculates the result for 2D histograms
+        '''
         # Intialize counters for purity calculation in final shape binning
         myShapeDataSum = []
         myShapeDataSumUncert = []
@@ -321,7 +406,8 @@ class QCDInvertedShape:
                 wQCDLabel = "Inclusive"
             wQCD = 0.0
             if not wQCDLabel in normFactors.keys():
-                print ShellStyles.WarningLabel()+"No normalization factors available for bin '%s' when accessing histogram %s! Ignoring this bin..."%(wQCDLabel,shape.getHistoName())
+                msg = "No normalization factors available for bin '%s' when accessing histogram %s! Ignoring this bin..." % (wQCDLabel, shape.getHistoName())
+                print ShellStyles.WarningLabel() + msg
             else:
                 wQCD = normFactors[wQCDLabel]
             # Loop over bins in the shape histogram
@@ -422,24 +508,25 @@ class QCDInvertedResultManager:
 
         # Determine list of plots to consider
         myObjects = dsetMgr.getDataset("Data").getDirectoryContent(dataPath)
-        
+
         # Ignore unwanted histograms and those designed for HToTauNu
-        keywordList = ["BackToBackAngularCuts", "CollinearAngularCuts", "DeltaPhiTauMet", "MET", "SelectedMu", "SelectedTau", "shapeTransverseMass", "JetEtaPhi"]
+        keywordList = ["BackToBackAngularCuts", "CollinearAngularCuts", "DeltaPhiTauMet",
+                       "DeltaPhiMuMet", "MET", "SelectedMu", "SelectedTau", "shapeTransverseMass", "JetEtaPhi"]
         ignoreList  = []
         for k in keywordList:
             ignoreList.extend(filter(lambda name: k in name, myObjects))
 
-        msg = "WARNING: Ignoring a total of %s unwanted histograms and/or those designed for HToTauNu" % (len(ignoreList))
-        Print(ShellStyles.WarningStyle() + msg + ShellStyles.NormalStyle(), True)
+        msg = "Ignoring a total of %s unwanted histograms and/or those designed for HToTauNu" % (len(ignoreList))
+        Print(ShellStyles.WarningLabel() + msg, True)
 
         # Update myObjects list with filtered results
         myObjects = list(x for x in myObjects if x not in ignoreList)
-
+        
         # For-Loop: All  plots to consider
         for i, plotName in enumerate(myObjects, 1):
 
-            msg = "{:<9} {:>3} {:^1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%i" % len(myObjects), os.path.join(dataPath, plotName) )
-            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), i==1)
+            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%i:%s " % (len(myObjects), ShellStyles.NormalStyle()), os.path.join(dataPath, plotName) )
+            Print(ShellStyles.CaptionStyle() + msg, i==1)
 
             # Ensure that histograms exist
             dataOk = self._sanityChecks(dsetMgr, dataPath, plotName) 
@@ -485,10 +572,15 @@ class QCDInvertedResultManager:
     
     def _obtainShapeHistograms(self, i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors):
         
-        # Get the shape
-        myShape    = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr,"Data", "EWK", plotName, dataPath, ewkPath, luminosity)
+        Verbose("Initialise \"DataDrivenQCDShape\" type object", True)
+        myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr,"Data", "EWK", plotName, dataPath, ewkPath, luminosity)
+        if self._verbose:
+            PrintTH1Info(myShape.getIntegratedDataHisto())
+        
+        Verbose("Initialise \"QCDInvertedShape\" type object (Takes \"DataDrivenQCDShape\" type object as argument)", True)
         moduleInfo = self._moduleInfoString + "_" + plotName
         myPlot     = QCDInvertedShape(myShape, moduleInfo, normFactors, optionUseInclusiveNorm=self._useInclusiveNorm)
+        myPlot.PrintSettings(printHistos=True)
 
         myShape.delete()
         myPlotHisto = aux.Clone(myPlot.getResultShape(), "ctrlPlotShapeInManager")
