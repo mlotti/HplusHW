@@ -56,20 +56,20 @@ class PseudoMultiCrabCreator:
         myRootFile.Close()
         module.delete()
 
-    def _createBaseDirectory(self):
+    def _createBaseDirectory(self, prefix):
         if self._myBaseDir != None:
             return
         # Create directory structure
-        self._myBaseDir = os.path.join(self._inputMulticrabDir, "pseudoMulticrab_%s"%self._title)
+        self._myBaseDir = os.path.join(self._inputMulticrabDir, "%s%s" % (prefix, self._title) )
         if os.path.exists(self._myBaseDir):
             shutil.rmtree(self._myBaseDir)
         os.mkdir(self._myBaseDir)
 
-    def initialize(self, subTitle):
+    def initialize(self, subTitle, prefix="pseudoMulticrab_"):
         self._energy = None
         self._dataVersion = None
         #self._codeVersion = None
-        self._createBaseDirectory()
+        self._createBaseDirectory(prefix)
         self._mySubTitles.append(subTitle)
         self._currentSubTitle = subTitle
         os.mkdir("%s/%s"%(self._myBaseDir,self._title+subTitle))
@@ -130,9 +130,10 @@ class PseudoMultiCrabCreator:
 
 class PseudoMultiCrabModule:
     ## Constructor
-    def __init__(self, dsetMgr, era, searchMode, optimizationMode, systematicsVariation=None):
+    def __init__(self, dsetMgr, era, searchMode, optimizationMode, systematicsVariation=None, analysisName="signalAnalysis"):
         # Note that 'signalAnalysis' only matters for dataset.py to find the proper module
-        self._moduleName = "signalAnalysis_%s_%s"%(searchMode, era)
+        self._moduleName = "%s_%s_%s" % (analysisName, searchMode, era)
+        #self._moduleName = "signalAnalysis_%s_%s" % (searchMode, era)
         if optimizationMode != "" and optimizationMode != None:
             self._moduleName += "_%s"%optimizationMode
         if systematicsVariation != None:
