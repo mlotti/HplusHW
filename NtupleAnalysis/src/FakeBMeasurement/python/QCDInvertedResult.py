@@ -65,7 +65,7 @@ def GetTH1BinWidthString(myTH1, iBin):
     IsTH1(myTH1)
     
     width = myTH1.GetBinWidth(iBin)
-    return GetDecimalFormat(width) + str(width)
+    return GetDecimalFormat(width)# + str(width)
 
 def GetTH1BinRangeString(myTH1, iBin):
     IsTH1(myTH1)
@@ -120,7 +120,7 @@ class QCDInvertedShape:
 
     Shape has to be a dataDrivenQCDCount object
     '''
-    def __init__(self, shape, moduleInfoString, normFactors, optionPrintPurityByBins=False, optionDoNQCDByBinHistograms=False, optionUseInclusiveNorm=False, verbose=False):
+    def __init__(self, shape, moduleInfoString, normFactors, optionPrintPurityByBins=True, optionDoNQCDByBinHistograms=False, optionUseInclusiveNorm=False, verbose=False):
         self._shape   = shape
         self._verbose = verbose
         self._moduleInfoString  = moduleInfoString
@@ -283,7 +283,7 @@ class QCDInvertedShape:
             # Construct info table (debugging)
             table  = []
             align  = "{:>6} {:^10} {:^15} {:>10} {:>10} {:>10} {:^3} {:^8} {:^3} {:^8}"
-            header = align.format("Bin", "BinWidth", "BinRange", "Content", "NormFactor", "QCD", "+/-", "Data", "+/-", "EWK")
+            header = align.format("Bin", "Width", "Range", "Content", "NormFactor", "QCD", "+/-", "Data", "+/-", "EWK")
             hLine  = "="*90
             table.append("{:^90}".format(shape.getHistoName()))
             table.append(hLine)
@@ -356,13 +356,14 @@ class QCDInvertedShape:
         table.append(hLine)
         for i, line in enumerate(table):
             if i == len(table)-2:
-                Print(ShellStyles.TestPassedStyle()+line+ShellStyles.NormalStyle(), i==0)
+                Verbose(ShellStyles.TestPassedStyle()+line+ShellStyles.NormalStyle(), i==0)
             else:
-                Print(line, i==0)
+                Verbose(line, i==0)
 
         if optionPrintPurityByBins:
             Verbose("Printing Shape Purity bin-by-bin.", True)
-            self.PrintPurityByBins(nBins, shape, myShapeDataSum, myShapeDataSumUncert, myShapeEwkSum, myShapeEwkSumUncert)
+            if self._verbose:
+                self.PrintPurityByBins(nBins, shape, myShapeDataSum, myShapeDataSumUncert, myShapeEwkSum, myShapeEwkSumUncert)
         return
 
     def PrintPurityByBins(self, nBins, shape, shapeDataSum, shapeDataSumUncert, shapeEwkSum, shapeEwkSumUncert):
@@ -551,7 +552,7 @@ class QCDInvertedResultManager:
         ignoreList  = []
         for k in keywordList:
             ignoreList.extend(filter(lambda name: k in name, myObjects))
-
+            
         msg = "Ignoring a total of %s unwanted histograms and/or those designed for HToTauNu" % (len(ignoreList))
         Print(ShellStyles.WarningLabel() + msg, True)
 
@@ -561,8 +562,11 @@ class QCDInvertedResultManager:
         # For-Loop: All  plots to consider
         for i, plotName in enumerate(myObjects, 1):
 
-            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%i:%s " % (len(myObjects), ShellStyles.NormalStyle()), os.path.join(dataPath, plotName) )
-            Print(ShellStyles.CaptionStyle() + msg, i==1)
+            #msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%i:%s " % (len(myObjects), ShellStyles.NormalStyle()), os.path.join(dataPath, plotName) )
+            #Print(ShellStyles.CaptionStyle() + msg, i==1)
+            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(myObjects)), os.path.join(dataPath, plotName) )
+            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), i==1)
+
 
             # Ensure that histograms exist
             dataOk = self._sanityChecks(dsetMgr, dataPath, plotName) 
@@ -574,7 +578,8 @@ class QCDInvertedResultManager:
             # Obtain plots for systematics coming from met shape difference for control plots #FIXME-Systematics
             if optionCalculateQCDNormalizationSyst:
                 if isinstance(myShapeHisto, ROOT.TH2):
-                    print ShellStyles.WarningLabel()+"Skipping met shape uncertainty because histogram has more than 1 dimensions!"
+                    msg = "Skipping met shape uncertainty because histogram has more than 1 dimensions!"
+                    Print(ShellStyles.WarningLabel() + msg, True)
                 else:
                     self._obtainQCDNormalizationSystHistograms(myShapeHisto, dsetMgr, plotName, luminosity, normDataSrc, normEWKSrc)
         return
@@ -610,7 +615,7 @@ class QCDInvertedResultManager:
         
         Verbose("Initialise \"DataDrivenQCDShape\" type object", True)
         myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr,"Data", "EWK", plotName, dataPath, ewkPath, luminosity)
-        if 1:# self._verbose:
+        if self._verbose:
             PrintTH1Info(myShape.getIntegratedDataHisto())
         
         Verbose("Initialise \"QCDInvertedShape\" type object (Takes \"DataDrivenQCDShape\" type object as argument)", True)

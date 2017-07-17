@@ -427,55 +427,18 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN, FITMAX)
     
     # Only for when the measurement is done in bins
-    fileName = "QCDInvertedNormalizationFactors%s.py" % ( getModuleInfoString(opts) )
-    #fileName = os.path.join(opts.mcrab, "QCDInvertedNormalizationFactors.py")
+    fileName = os.path.join(opts.mcrab, "QCDInvertedNormalizationFactors%s.py"% ( getModuleInfoString(opts) ) )
     manager.writeNormFactorFile(fileName, opts)
     
-    # Alexandros Attikis
-    '''
-        # Todo: 
-        # = the currect script should write the norm factor to a file
-        # - write new script with 2 dataset managers: 1 for Hplus2tb measurement, 1 for FakeBMeasurement pseudomulticrabs
-        #   this script should read from a txt file the norm-factor of QCD and its error to scale the Inverted QCD data-driven to signa lregion
-        # - replace the QCD dataset with example code below
-        # - remember, i need the tetrajet mass to get the limits
+    if 0:
+        # Append analysisType to histogram name
+        saveName = "LdgTrijetM_AfterAllSelections"
         
-        # Only for when the measurement is done in bins
-        qcdNormFactor      = manager.GetQCDNormalization(binLabels[0])
-        qcdNormFactorError = manager.GetQCDNormalizationError(binLabels[0])
-        
-        # Plot the last distributions
-        names = datasetsMgr.getAllDatasetNames()
-        index = names.index("QCD")
-        names.pop(index)
-        names.insert(index, "Inverted " + bkgName)
-        datasetMgr.remove("QCD")
-        datasetMgr.append(datasetQCDdata)
-        datasetMgr.selectAndReorder(names)
-        p = plots.DataMCPlot(datasetsMgr, "topSelection_Baseline/LdgTrijetMass_After" )
-        # Data_baseline  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline Data") #also legend entry name
-        # FakeB_baseline = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline " + bkgName)
-        # EWK_baseline   = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("Baseline EWK")
-        # Data_inverted  = p3.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted Data")
-        # FakeB_inverted = p3.histoMgr.getHisto("Data").getRootHisto().Clone("Inverted " + bkgName)
-        # EWK_inverted   = p4.histoMgr.getHisto("EWK").getRootHisto().Clone("Inverted EWK")
-        # newOrder = ["Data"]
-        # newOrder.extend(GetListOfEwkDatasets())
-        # datasetsMgr.selectAndReorder(newOrder)
-        # p = plots.PlotBase([Data_baseline, QCD_inverted, EWK_baseline], saveFormats=[])
-        # print "qcdNormFactor +/- qcdNormFactorError = %s +/- %s" % (qcdNormFactor, qcdNormFactorError)
-        # raw_input("ALEX")
-    '''
+        # Draw the histograms
+        plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
 
-    # Append analysisType to histogram name
-    saveName = "LdgTrijetM_AfterAllSelections"
-
-    # Draw the histograms
-    plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
-
-    # Save plot in all formats
-    SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit") ) 
-
+        # Save plot in all formats
+        SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit") ) 
     return
 
 

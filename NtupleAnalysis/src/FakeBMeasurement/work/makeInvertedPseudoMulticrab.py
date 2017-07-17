@@ -2,10 +2,26 @@
 '''
 Description:
 
+Prerequisites:
+./plotQCD_Fit.py -m <pseudo_multicrab -e "QCD|Charged" --mergeEWK 
+
 Usage:
+./makeInvertedPseudoMultirab.py -m <same_pseudo_multicrab> [opts]
 
 Examples:
+1) Produces QCD normalization factors by running the fitting script:
+./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK
+./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue50
+./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100 
 
+2) Then either run on all modules (eras, search-modes, optimization modes) automatically
+./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK 
+or 
+Run on a single optimization mode:
+./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100
+
+Last Used:
+./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100
 '''
 #================================================================================================ 
 # Imports
@@ -113,7 +129,8 @@ class ModuleBuilder:
                                                                 self._era,
                                                                 self._searchMode,
                                                                 self._optimizationMode,
-                                                                self._systematicVariation)
+                                                                self._systematicVariation, 
+                                                                opts.analysisName)
         Verbose("Obtaining results", True)
         self._nominalResult = qcdInvertedResult.QCDInvertedResultManager(dataPath,
                                                                          ewkPath,
@@ -229,7 +246,7 @@ def getModuleInfoString(dataEra, searchMode, optimizationMode):
     return moduleInfoString
 
 
-def getSourceFileName(dirName, fileName):
+def getGetNormFactorsSrcFilename(dirName, fileName):
     src = os.path.join(dirName, fileName)
     if not os.path.exists(src):
         msg = "Normalisation factors ('%s') not found!\nRun script \"plotQCD_Fit.py\" to auto-generate the normalization factors python file." % src
@@ -285,7 +302,7 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     moduleInfoString = getModuleInfoString(era, searchMode, optimizationMode)
 
     # Construct source file name
-    src = getSourceFileName(multicrabDirName, opts.normFactorsSrc % moduleInfoString)
+    src = getGetNormFactorsSrcFilename(multicrabDirName, opts.normFactorsSrc % moduleInfoString)
 
     # Check if normalization coefficients are suitable for the choses era
     Verbose("Reading normalisation factors from:\n\t%s" % src, True)
@@ -358,7 +375,7 @@ def main():
     myModuleSelector.setPrimarySource(label=opts.analysisName, dsetMgrCreator=dsetMgrCreator)
 
     # Select modules
-    myModuleSelector.doSelect(opts)
+    myModuleSelector.doSelect(opts=None)#(opts=opts)
 
     # Loop over era/searchMode/optimizationMode combos
     myDisplayStatus = True
@@ -385,15 +402,28 @@ def main():
         _generalOptions["normalizationEWKSource"]  = "ForDataDrivenCtrlPlots"
 
         # Initialize
-        myOutputCreator.initialize(shapeType)
+        myOutputCreator.initialize(shapeType, prefix="")
         
         msg = "Creating dataset for shape \"%s\"%s" % (shapeType, ShellStyles.NormalStyle())
         Verbose(ShellStyles.HighlightStyle() + msg, True)
+        
+        # Get lists of settings
+        erasList   = myModuleSelector.getSelectedEras()
+        modesList  = myModuleSelector.getSelectedSearchModes()
+        optList    = myModuleSelector.getSelectedOptimizationModes()
+        # Fix the optimizationMode list by hand (remove duplicate entries, add default option)
+        optListFix = list(set(optList)) 
+        optListFix.append("")
 
         # For-Loop over era, searchMode, and optimizationMode options
-        for era in myModuleSelector.getSelectedEras():
-            for searchMode in myModuleSelector.getSelectedSearchModes():
-                for optimizationMode in myModuleSelector.getSelectedOptimizationModes():
+        for era in erasList:
+            for searchMode in modesList:
+                for optimizationMode in optListFix:
+
+                    # If an optimization mode is defined in options skip the rest
+                    if opts.optMode != None:
+                        if optimizationMode != opts.optMode:
+                            continue
 
                     # Obtain normalization factors
                     myNormFactors = importNormFactors(era, searchMode, optimizationMode, opts.mcrab)
@@ -403,8 +433,9 @@ def main():
                     iModule += 1
 
                     # Inform user of what is being processes
-                    msg = "Module %d/%d:%s %s/%s" % (iModule, myTotalModules, ShellStyles.NormalStyle(), myModuleInfoString, shapeType)
+                    msg = "Module %d/%d:%s %s/%s" % (iModule, myTotalModules, ShellStyles.NormalStyle(), myModuleInfoString, shapeType) #iro
                     Print(ShellStyles.CaptionStyle() + msg, True)
+                    #Print(ShellStyles.HighlightAltStyle() + msg, True)
 
                     # Keep time
                     myStartTime = time.time()
@@ -467,8 +498,8 @@ def main():
     Print("Average processing time per module was %.1f s" % getAvgProcessTimeForOneModule(myGlobalStartTime, myTotalModules), True)
     Print("Total elapsed time was %.1f s" % getTotalElapsedTime(myGlobalStartTime), False)
 
-    msg = "SUCCESS: Created pseudo-multicrab directory for \"%s\":" % (shapeType)
-    Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), True)
+    msg = "SUCCESS:%s Created pseudo-multicrab directory for shape type \"%s\":" % (ShellStyles.NormalStyle(), shapeType)
+    Print(ShellStyles.SuccessStyle() + msg, True)
     Print(myOutputCreator.getDirName(), False)
 
     return
@@ -545,7 +576,7 @@ if __name__ == "__main__":
     parser.add_option("--test", dest="test", action="store_true", default=TEST, 
                       help="Make short test by limiting number of syst. variations [default: %s]" % TEST)
 
-    parser.add_option("-o", "--optMode", dest="optimizationMode", type="string", default=OPTMODE, 
+    parser.add_option("-o", "--optMode", dest="optMode", type="string", default=OPTMODE, 
                       help="The optimization mode when analysis variation is enabled [default: %s]" % OPTMODE)
 
     parser.add_option("-b", "--batchMode", dest="batchMode", action="store_false", default=BATCHMODE, 
@@ -616,4 +647,4 @@ if __name__ == "__main__":
     main()
 
     if not opts.batchMode:
-        raw_input("=== makePseudoMulticrab.py: Press any key to quit ROOT ...")
+        raw_input("=== makeInvertedPseudoMulticrab.py: Press any key to quit ROOT ...")
