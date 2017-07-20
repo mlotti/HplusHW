@@ -30,6 +30,7 @@ public:
   };
 
   CommonPlots(const ParameterSet& config, const CommonPlots::AnalysisType type, HistoWrapper& histoWrapper);
+  CommonPlots(const ParameterSet& config, const CommonPlots::AnalysisType type, HistoWrapper& histoWrapper, bool test);
   ~CommonPlots();
 
   //Tau ID syst switches
@@ -59,11 +60,32 @@ public:
   const HistogramSettings& getBJetDiscBinSettings() const { return fBJetDiscriminatorBinSettings;}
   /// Returns the histogram settings for Njets bins (usecase: FakeB measurement)
   const HistogramSettings& getNjetsBinSettings() const { return fNjetsBinSettings;}
+  /// Returns the histogram settings for # Vertices historams
+  const HistogramSettings& getNVtxBinSettings() const { return fNVerticesBinSettings; }
+  /// Returns the histogram settings for Phi histograms
+  const HistogramSettings& getPhiBinSettings() const { return fPhiBinSettings; }
+  /// Returns the histogram settings for DeltaEta histograms
+  const HistogramSettings& getDeltaEtaBinSettings() const { return fDeltaEtaBinSettings; }
+  /// Returns the histogram settings for DeltaPhi histograms
+  const HistogramSettings& getDeltaPhiBinSettings() const { return fDeltaPhiBinSettings; }
+  /// Returns the histogram settings for DeltaR histograms
+  const HistogramSettings& getDeltaRBinSettings() const { return fDeltaRBinSettings; }
+  /// Returns the histogram settings for Rtau histograms
+  const HistogramSettings& getRtauBinSettings() const { return fRtauBinSettings; }
+  /// Returns the histogram settings for Angular Cuts (1D) histograms
+  const HistogramSettings& getAngularCuts1DBinSettings() const { return fAngularCuts1DSettings; }
+  /// Returns the histogram settings for W-mass histograms
+  const HistogramSettings& getWMassBinSettings() const { return fWMassBinSettings; }
+  /// Returns the histogram settings for Topmass histograms
+  const HistogramSettings& getTopMassBinSettings() const { return fTopMassBinSettings; }
+  /// Returns the histogram settings for InvMass histograms
+  const HistogramSettings& getInvMassBinSettings() const { return fInvmassBinSettings; }
 
   /** Special method for setting genuine tau status 
-    * (it is usually set through TauSelection via CommonPlots::fillControlPlotsAfterTauSelection)
-    */
+   * (it is usually set through TauSelection via CommonPlots::fillControlPlotsAfterTauSelection)
+   */
   void setGenuineTauStatus(const bool isGenuineTau) { bIsGenuineTau = isGenuineTau; };
+  void setGenuineBStatus(const bool isGenuineB) { bIsGenuineB = isGenuineB; };
   
   //===== unique filling methods (to be called inside the event selection routine only, i.e. (before a passing decision is done))
   void fillControlPlotsAtVertexSelection(const Event& event);
@@ -87,6 +109,13 @@ public:
   void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
   //void fillControlPlotsAfterMuonSelection(const Event& event);
   void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
+  void fillControlPlotsAfterBjetSelection(const Event& event, const BJetSelection::Data& data);
+  void fillControlPlotsAfterStandardSelections(const Event& event, 
+					       const JetSelection::Data& jetData, 
+					       const BJetSelection::Data& bjetData, 
+					       const TopologySelection::Data& topologyData,
+					       const TopSelection::Data& topData,
+					       bool bIsInverted);
   void fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau=false, bool withMu=false);
   void fillControlPlotsAfterAllSelections(const Event& event, bool withoutTau=false);
   void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight);
@@ -105,7 +134,7 @@ public:
 private:
   /// Returns true if anti-isolated taus need to be used (QCD measurement)
   const bool usesAntiIsolatedTaus() const { return fAnalysisType == kQCDMeasurement ||
-    fAnalysisType == kQCDNormalizationSystematicsControlRegion; }
+      fAnalysisType == kQCDNormalizationSystematicsControlRegion; }
   
 private:
   ///===== Config params
@@ -125,6 +154,7 @@ private:
   const HistogramSettings fPtBinSettings;
   const HistogramSettings fEtaBinSettings;
   const HistogramSettings fPhiBinSettings;
+  const HistogramSettings fDeltaEtaBinSettings;
   const HistogramSettings fDeltaPhiBinSettings;
   const HistogramSettings fDeltaRBinSettings;
   const HistogramSettings fRtauBinSettings;
@@ -133,10 +163,10 @@ private:
   const HistogramSettings fHtBinSettings;
   const HistogramSettings fBJetDiscriminatorBinSettings;
   const HistogramSettings fAngularCuts1DSettings;
-  //const HistogramSettings fTopMassBinSettings;
-  //const HistogramSettings fWMassBinSettings;
+  const HistogramSettings fWMassBinSettings;
+  const HistogramSettings fTopMassBinSettings;
+  const HistogramSettings fInvmassBinSettings;
   const HistogramSettings fMtBinSettings;
-  //const HistogramSettings fInvmassBinSettings;
 
   ///===== Histograms
   // NOTE: think before adding a histogram - they do slow down the analysis a lot
@@ -172,8 +202,7 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlCollinearAngularCutsJet4;
   
   // this is the point of "standard selections"
-  HistoSplitter::SplittedTripletTH1s hCtrlNVerticesAfterStdSelections;
-  
+  HistoSplitter::SplittedTripletTH1s hCtrlNVerticesAfterStdSelections;  
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauEtaAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauPhiAfterStdSelections;
@@ -183,21 +212,46 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauNProngsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauRtauAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauSourceAfterStdSelections;
-
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedMuonPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedMuonEtaAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedMuonPhiAfterStdSelections;
   HistoSplitter::SplittedTripletTH2s hCtrlSelectedMuonEtaPhiAfterStdSelections;
-  
   HistoSplitter::SplittedTripletTH1s hCtrlNJetsAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetPtAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetEtaAfterStdSelections;
   HistoSplitter::SplittedTripletTH2s hCtrlJetEtaPhiAfterStdSelections;
-  
+  HistoSplitter::SplittedTripletTH1s hCtrlNBJetsAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlBJetPtAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlBJetEtaAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlBDiscriminatorAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlMETAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlMETPhiAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlDeltaPhiTauMetAfterStdSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlDeltaPhiMuMetAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlHTAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlMHTAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSphericityAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlAplanarityAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlPlanarityAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlCircularityAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlThirdJetResolutionAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlFoxWolframMomentAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlCentralityAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlTopFitChiSqrAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetPtAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetMassAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetBJetPtAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetBJetEtaAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetPtAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetBJetPtAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetBJetEtaAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetMassAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTetrajetPtAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTetrajetMassAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTetrajetPtAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTetrajetMassAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlTetrajetBJetPtAfterStdSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlTetrajetBJetEtaAfterStdSelections;
 
   // MET
   HistoSplitter::SplittedTripletTH1s hCtrlMET;
@@ -217,8 +271,7 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlBackToBackAngularCutsJet4;
 
   // control plots after all selections
-  HistoSplitter::SplittedTripletTH1s hCtrlNVerticesAfterAllSelections;
-  
+  HistoSplitter::SplittedTripletTH1s hCtrlNVerticesAfterAllSelections;  
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauEtaAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauPhiAfterAllSelections;
@@ -229,7 +282,6 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauRtauAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauSourceAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlSelectedTauIPxyAfterAllSelections;
-
   HistoSplitter::SplittedTripletTH1s hCtrlNJetsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlJetEtaAfterAllSelections;
@@ -240,19 +292,14 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlMaxDeltaPhiJetMHTAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlMinDeltaRJetMHTAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlMinDeltaRReversedJetMHTAfterAllSelections;
-
   HistoSplitter::SplittedTripletTH1s hCtrlCollinearAngularCutsMinimumAfterAllSelections;
-
   HistoSplitter::SplittedTripletTH1s hCtrlMETAfterAllSelections;
-  HistoSplitter::SplittedTripletTH1s hCtrlMETPhiAfterAllSelections;
-  
+  HistoSplitter::SplittedTripletTH1s hCtrlMETPhiAfterAllSelections;  
   HistoSplitter::SplittedTripletTH1s hCtrlNBJetsAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlBJetPtAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlBJetEtaAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlBDiscriminatorAfterAllSelections;
-  
   HistoSplitter::SplittedTripletTH1s hCtrlBackToBackAngularCutsMinimumAfterAllSelections;
-
   HistoSplitter::SplittedTripletTH1s hCtrlDeltaPhiTauMetAfterAllSelections;
   
   // shape plots after all selections
@@ -273,12 +320,15 @@ private:
   TauSelection::Data fTauData;
   //FakeTauIdentifier::Data fFakeTauData;
   bool bIsGenuineTau;
+  bool bIsGenuineB;
   ElectronSelection::Data fElectronData;
   MuonSelection::Data fMuonData;
   JetSelection::Data fJetData;
   AngularCutsBackToBack::Data fCollinearAngularCutsData;
   BJetSelection::Data fBJetData;
   METSelection::Data fMETData;
+  TopologySelection::Data fTopologyData;
+  TopSelection::Data fTopData;
   AngularCutsCollinear::Data fBackToBackAngularCutsData;
 
   /// Helper

@@ -573,6 +573,7 @@ class QCDInvertedResultManager:
             ewkOk  = self._sanityChecks(dsetMgr, ewkPath, plotName)
 
             # Obtain shape plots (the returned object is not owned)
+            optionUseInclusiveNorm
             myShapeHisto = self._obtainShapeHistograms(i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors)
 
             # Obtain plots for systematics coming from met shape difference for control plots #FIXME-Systematics
@@ -614,7 +615,7 @@ class QCDInvertedResultManager:
     def _obtainShapeHistograms(self, i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors):
         
         Verbose("Initialise \"DataDrivenQCDShape\" type object", True)
-        myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr,"Data", "EWK", plotName, dataPath, ewkPath, luminosity)
+        myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr,"Data", "EWK", plotName, dataPath, ewkPath, luminosity, self._useInclusiveNorm)
         if self._verbose:
             PrintTH1Info(myShape.getIntegratedDataHisto())
         

@@ -39,6 +39,8 @@ public:
   virtual void fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data);
   virtual void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
   virtual void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
+  virtual void fillControlPlotsAfterBjetSelection(const Event& event, const BJetSelection::Data& data);
+  virtual void fillControlPlotsAfterStandardSelections(const Event& event);
   virtual void fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau=false);
   virtual void fillControlPlotsAfterAllSelections(const Event& event, bool withoutTau=false);
   virtual void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight);

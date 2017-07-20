@@ -353,12 +353,6 @@ def main():
     if len(opts.shape) == 0:
         raise Exception(ShellStyles.ErrorLabel()+"Provide a shape identifierwith --shape (for example MT)!"+ShellStyles.NormalStyle())
 
-    # Set EWK source depending on calculation mode
-    if opts.qcdonly:
-        _generalOptions["EWKsource"] = _generalOptions["ewkSourceForQCDOnly"] #alex
-    else:
-        _generalOptions["EWKsource"] = _generalOptions["ewkSourceForQCDPlusFakeTaus"] #alex
-
     # Obtain dsetMgrCreator and register it to module selector
     dsetMgrCreator = dataset.readFromMulticrabCfg(directory=myMulticrabDir)
 
@@ -398,8 +392,6 @@ def main():
     iModule = 0
     # For-loop: All Shapes
     for shapeType in opts.shape:
-        _generalOptions["normalizationDataSource"] = "ForDataDrivenCtrlPlots"
-        _generalOptions["normalizationEWKSource"]  = "ForDataDrivenCtrlPlots"
 
         # Initialize
         myOutputCreator.initialize(shapeType, prefix="")
@@ -570,9 +562,6 @@ if __name__ == "__main__":
     parser.add_option("--shape", dest="shape", action="store", default=["TrijetMass"], 
                       help="shape identifiers") # unknown use
 
-    parser.add_option("--qcdonly", dest="qcdonly", action="store_true", default=False, 
-                      help="Calculate QCD-only case instead of QCD+EWK fakes") # unknown use
-
     parser.add_option("--test", dest="test", action="store_true", default=TEST, 
                       help="Make short test by limiting number of syst. variations [default: %s]" % TEST)
 
@@ -643,6 +632,10 @@ if __name__ == "__main__":
         #print __doc__
         sys.exit(1)
 
+    if opts.useInclusiveNorm:
+        msg = "Will use only inclusive weight instead of binning (no splitted histograms)"
+        Print(ShellStyles.NoteLabel() + msg, True)
+            
     # Call the main function
     main()
 

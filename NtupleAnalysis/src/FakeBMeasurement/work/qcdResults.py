@@ -80,7 +80,6 @@ import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
 import HiggsAnalysis.NtupleAnalysis.tools.multicrabConsistencyCheck as consistencyCheck
 import HiggsAnalysis.FakeBMeasurement.QCDNormalization as QCDNormalization
-import QCDInvertedNormalizationFactors as fitResults
 
 
 #================================================================================================ 
@@ -281,23 +280,23 @@ def PlotHistos(datasetsMgrs, baseline_hName, inverted_hName, opts):
         
     # Create Data/MC plot
     p1 = plots.DataMCPlot(datasetMgrSR, baseline_hName)
-    p2 = plots.DataMCPlot(datasetMgrCR, inverted_hName)
-
-    # Get the histograms for SR
-    Data_SR = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Data_SR")
-    QCD_SR  = p1.histoMgr.getHisto("QCD").getRootHisto()
-    QCD_SR.Reset()
-
-    # Get the histograms for CR
-    Data_CR = p2.histoMgr.getHisto("Data").getRootHisto().Clone("Data_CR")
-    EWK_CR  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK_CR") 
-
-    QCD_CR  = p2.histoMgr.getHisto("Data").getRootHisto().Clone("QCD_Data")
-    QCD_CR.Add(EWK_CR, -1)    
-    QCD_CR.Scale(fitResults.QCDNormalization["Inclusive"])
-    
-    QCD_SR = QCD_CR.Clone("QCD")
-    #datasetMgrSR.getDataset("QCD").setRootHisto(QCD_SR)    
+#    p2 = plots.DataMCPlot(datasetMgrCR, inverted_hName)
+#
+#    # Get the histograms for SR
+#    Data_SR = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Data_SR")
+#    QCD_SR  = p1.histoMgr.getHisto("QCD").getRootHisto()
+#    QCD_SR.Reset()
+#
+#    # Get the histograms for CR
+#    Data_CR = p2.histoMgr.getHisto("Data").getRootHisto().Clone("Data_CR")
+#    EWK_CR  = p2.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK_CR") 
+#
+#    QCD_CR  = p2.histoMgr.getHisto("Data").getRootHisto().Clone("QCD_Data")
+#    QCD_CR.Add(EWK_CR, -1)    
+#    QCD_CR.Scale(fitResults.QCDNormalization["Inclusive"])
+#    
+#    QCD_SR = QCD_CR.Clone("QCD")
+#    #datasetMgrSR.getDataset("QCD").setRootHisto(QCD_SR)    
     
     # Switch QCD MC with QCD Measurement
     #datasetMgrSR.getDataset("QCD").setRootHisto(QCD_SR)
@@ -305,20 +304,20 @@ def PlotHistos(datasetsMgrs, baseline_hName, inverted_hName, opts):
 
     # replaceQCD(datasetMgrSR, datasetMgrCR, p2, QCD_SR, inverted_hName)
     #replaceQCDFromData(datasetMgrSR, datasetMgrCR.getDataset("Data"), datasetName="QCD")
-    if 0:
-        names = datasetMgrSR.getAllDatasetNames()
-        datasetMgrSR.remove(["QCD"])
-        datasetMgrSR.append(datasetMgrCR.getDataset("QCD").deepCopy())
-        datasetMgrSR.selectAndReorder(names)
+#    if 0:
+#        names = datasetMgrSR.getAllDatasetNames()
+#        datasetMgrSR.remove(["QCD"])
+#        datasetMgrSR.append(datasetMgrCR.getDataset("QCD").deepCopy())
+#        datasetMgrSR.selectAndReorder(names)
     
     # Apply styles
-    p1.histoMgr.forHisto("QCD", styles.getFakeBStyle() )
-    p1.histoMgr.setHistoDrawStyle("QCD"  , "HIST")
-    p1.histoMgr.setHistoLegendStyle("QCD", "F")
+    p1.histoMgr.forHisto("QCD-Data", styles.getFakeBStyle() )
+    p1.histoMgr.setHistoDrawStyle("QCD-Data"  , "HIST")
+    p1.histoMgr.setHistoLegendStyle("QCD-Data", "F")
     
     # Set legend labels
     p1.histoMgr.setHistoLegendLabelMany({
-            "QCD": "QCD (Data)",
+            "QCD-Data": "QCD (Data)",
             })
         
     # Customise histogram
@@ -377,7 +376,7 @@ def ReorderToShowSignal(datasetMgr, opts):
 def replaceQCD(datasetMgrSR, datasetMgrCR, p2, histoQCD, histoName):
 
     # Set the new QCD in the datasetMgr for CR
-    datasetMgrCR.rename("ChargedHiggs_HplusTB_HplusToTB_M_500", "QCD-Data")
+    datasetMgrCR.rename("FakeBMeasurement", "QCD-Data")
     QCD = p2.histoMgr.getHisto("QCD").getRootHisto()
     #QCD = p2.histoMgr.getHisto("QCD").getRootHisto()
     #Data_CR = p2.histoMgr.getHisto("Data").getRootHisto().Clone("Data_CR")
