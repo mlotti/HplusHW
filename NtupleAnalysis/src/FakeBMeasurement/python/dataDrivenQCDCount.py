@@ -47,18 +47,25 @@ class DataDrivenQCDShape:
     '''
     Container class for information of data and MC EWK at certain point of selection
     '''
-    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, dataPath, ewkPath, luminosity):
+    def __init__(self, dsetMgr, dsetLabelData, dsetLabelEwk, histoName, dataPath, ewkPath, luminosity,  optionUseInclusiveNorm):
         self._uniqueN = 0
         self._splittedHistoReader = splittedHistoReader.SplittedHistoReader(dsetMgr, dsetLabelData)
         self._histoName = histoName
+        self._optionUseInclusiveNorm = optionUseInclusiveNorm #ALEX-NEW
         dataFullName    = os.path.join(dataPath, histoName)
         ewkFullName     = os.path.join(ewkPath, histoName)
-        msg = "Disabled call for getting splitted histograms. Getting \"Inclusive\" histogram only instead."
-        Print(ShellStyles.WarningLabel() + msg, True)
-        #self._dataList  = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, dataFullName, luminosity)) #FIXME: Does this work for Inclusive?
-        #self._ewkList   = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk, ewkFullName, luminosity)) #FIXME: Does this work for Inclusive?
-        self._dataList  = list(_getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelData, dataFullName, luminosity))
-        self._ewkList   = list(_getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelEwk, ewkFullName, luminosity))
+
+        # ALEX - NEW 
+        if (self._optionUseInclusiveNorm):
+            msg = "Disabled call for getting splitted histograms. Getting \"Inclusive\" histogram only instead."
+            # Print(ShellStyles.WarningLabel() + msg, False)
+            self._dataList  = list(_getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelData, dataFullName, luminosity)) # was called by default
+            self._ewkList   = list(_getInclusiveHistogramsFromSingleSource(dsetMgr, dsetLabelEwk , ewkFullName , luminosity)) # was called by default
+        else:
+            msg = "This splitted histograms method is not validated! Use \"Inclusive\" histogram only instead."
+            Print(ShellStyles.WarningLabel() + msg, False)
+            self._dataList  = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelData, dataFullName, luminosity)) #FIXME: Does this work for Inclusive?
+            self._ewkList   = list(self._splittedHistoReader.getSplittedBinHistograms(dsetMgr, dsetLabelEwk , ewkFullName , luminosity)) #FIXME: Does this work for Inclusive?
         return
 
     def delete(self):

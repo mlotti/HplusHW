@@ -37,6 +37,8 @@ public:
  
     /// Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }
+    /// Status of GenuineB event (if false event is FakeB)
+    bool isGenuineB() const { return bIsGenuineB; }
     /// Obtain number of selected jets
     int getNumberOfSelectedBJets() const { return fSelectedBJets.size(); }
     /// Obtain collection of selected jets
@@ -61,6 +63,8 @@ public:
   private:
     /// Boolean for passing selection
     bool bPassedSelection;
+    // GenuineB = All selected b-jets are genuine, FakeB=At least one selected b-jet is not genuine
+    bool bIsGenuineB;
     /// b tagging scale factor event weight
     double fBTaggingScaleFactorEventWeight;
     /// Probability for passing b tagging 
@@ -103,7 +107,8 @@ private:
   bool passTrgMatching(const Jet& bjet, std::vector<math::LorentzVectorT<double>>& trgBJets) const;
   /// Sort the failed bjet candindates collections
   void SortFailedBJetsCands(Data &output, std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta);
-
+  /// Determine if event is GenuineB or FakeB  and store internally
+  bool _getIsGenuineB(bool bIsMC, const std::vector<Jet>& selectedBjets);
 
   /// Calculate probability to pass b tagging
   double calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData);
