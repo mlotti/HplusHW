@@ -174,7 +174,7 @@ def main():
     # Add variations (e.g. for optimisation)
     # builder.addVariation("METSelection.METCutValue", [100,120,140])
     # builder.addVariation("AngularCutsBackToBack.workingPoint", ["Loose","Medium","Tight"])
-    builder.addVariation("BJetSelection.triggerMatchingApply", [False])
+    # builder.addVariation("BJetSelection.triggerMatchingApply", [False])
     # builder.addVariation("TopSelection.ChiSqrCutValue", [5, 10, 15, 20])
 
     # Build the builder

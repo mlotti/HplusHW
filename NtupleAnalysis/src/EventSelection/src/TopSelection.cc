@@ -12,7 +12,7 @@
 
 TopSelection::Data::Data()
 : bPassedSelection(false),
-  fChiSqr(-1.0),
+  fChiSqr(1e9),
   fNumberOfFits(0.0),
   fJetsUsedAsBJetsInFit(),
   fTrijet1Jet1(),
@@ -489,6 +489,8 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   
   // Initialise variables
   output.fJetsUsedAsBJetsInFit = bjets;
+  output.bIsGenuineB = _getIsGenuineB(event.isMC(), output.fJetsUsedAsBJetsInFit);
+
   std::vector<unsigned int> bjet1;
   std::vector<unsigned int> bjet2;
   std::vector<unsigned int> jet1;
@@ -826,6 +828,20 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   // Return data object
   return output;
 
+}
+
+bool TopSelection::_getIsGenuineB(bool bIsMC, const std::vector<Jet>& selectedBjets){
+  if (!bIsMC) return false;
+
+  // GenuineB=All selected b-jets in the event are genuine (using jet-flavour from MC)
+  unsigned int nFakes=0;
+  for(const Jet& bjet: selectedBjets)
+    {
+      // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
+      bool isFakeB = (abs(bjet.pdgId()) != 5); // For data pdgId==0
+      if (isFakeB) nFakes++;
+    }
+  return (nFakes==0);
 }
 
 bool TopSelection::areSameJets(const Jet& jet1, const Jet& jet2) {
