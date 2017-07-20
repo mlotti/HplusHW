@@ -32,6 +32,8 @@ public:
 
     // Status of passing event selection
     bool passedSelection() const { return bPassedSelection; }
+    /// Status of GenuineB event (if false event is FakeB)
+    bool isGenuineB() const { return bIsGenuineB; }
     // Trijet-1
     const std::vector<Jet>& getJetsUsedAsBJetsInFit() const { return fJetsUsedAsBJetsInFit;}
     const Jet getTrijet1Jet1() const { return fTrijet1Jet1; } 
@@ -60,6 +62,11 @@ public:
       if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1BJet;
       else return fTrijet2BJet;
     }
+    const Jet getSubldgTrijetBJet() const 
+    { 
+      if (fTrijet1_p4.pt() < fTrijet2_p4.pt()) return fTrijet1BJet;
+      else return fTrijet2BJet;
+    }
     const math::XYZTLorentzVector getSubldgTrijet() const
     { 
       if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet2_p4;
@@ -86,6 +93,8 @@ public:
   private:
     /// Boolean for passing selection
     bool bPassedSelection;
+    // GenuineB = All selected b-jets are genuine, FakeB=At least one selected b-jet is not genuine
+    bool bIsGenuineB;
     /// Fit properties
     double fChiSqr;
     unsigned int fNumberOfFits;
@@ -164,9 +173,9 @@ private:
 				 const Jet& jet2,
 				 const Jet& jet3, 
 				 const Jet& jet4);
-  //const math::XYZTLorentzVector dijetWithMinDR_p4,
-  //				 const math::XYZTLorentzVector dijetWithMaxDR_p4);
-  
+
+  /// Determine if event is GenuineB or FakeB  and store internally
+  bool _getIsGenuineB(bool bIsMC, const std::vector<Jet>& selectedBjets);  
 
  
   const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
