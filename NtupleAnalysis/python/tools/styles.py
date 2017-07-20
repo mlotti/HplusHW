@@ -343,12 +343,12 @@ genuineBStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
 genuineBLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kCircle),
                                    StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kGreen+2, fillStyle=0)])
-fakeBStyle        = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kFullCross),
-                                   StyleLine(lineColor=ROOT.kRed, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kRed, fillStyle=3005)])
-fakeBLineStyle    = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kRed, markerSizes=None, markerStyle=ROOT.kCircle),
-                                   StyleLine(lineColor=ROOT.kRed, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kRed, fillStyle=0)])
+fakeBStyle        = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+1, markerSizes=None, markerStyle=ROOT.kFullCross),
+                                   StyleLine(lineColor=ROOT.kOrange+1, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kOrange+1, fillStyle=1001)]) #fillStyle=3005)])
+fakeBLineStyle    = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+1, markerSizes=None, markerStyle=ROOT.kCircle),
+                                   StyleLine(lineColor=ROOT.kOrange+1, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kOrange+1, fillStyle=0)])
 
 
 styles = [ 

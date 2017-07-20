@@ -1,6 +1,10 @@
 ## Collection of functions for adding colourful printing to shell via escapes
 # Note: to end the style, call ShellStyles.NormalStyle()
 
+def NoteStyle():
+    # White text on magent background, bold
+    return "\033[0;45m\033[1;37m"
+
 def WarningStyle():
     # White text on orange background, bold
     return "\033[0;43m\033[1;37m"
@@ -24,6 +28,10 @@ def NormalStyle():
 def TestPassedStyle():
     # green text, bold
     return "\033[1;32m"
+
+def NoteLabel():
+    # white text on magenta backround
+    return "%sNOTE:%s "% (NoteStyle() ,NormalStyle())
 
 def WarningLabel():
     return "%sWARNING:%s "%(WarningStyle(),NormalStyle())
