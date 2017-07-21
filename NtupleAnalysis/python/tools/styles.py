@@ -343,13 +343,15 @@ genuineBStyle     = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
 genuineBLineStyle = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kGreen+2, markerSizes=None, markerStyle=ROOT.kCircle),
                                    StyleLine(lineColor=ROOT.kGreen+2, lineStyle=ROOT.kSolid, lineWidth=3), 
                                    StyleFill(fillColor=ROOT.kGreen+2, fillStyle=0)])
-fakeBStyle        = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+1, markerSizes=None, markerStyle=ROOT.kFullCross),
-                                   StyleLine(lineColor=ROOT.kOrange+1, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kOrange+1, fillStyle=1001)]) #fillStyle=3005)])
-fakeBLineStyle    = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange+1, markerSizes=None, markerStyle=ROOT.kCircle),
-                                   StyleLine(lineColor=ROOT.kOrange+1, lineStyle=ROOT.kSolid, lineWidth=3), 
-                                   StyleFill(fillColor=ROOT.kOrange+1, fillStyle=0)])
-
+fakeBStyle        = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-3, markerSizes=None, markerStyle=ROOT.kFullCross),
+                                   StyleLine(lineColor=ROOT.kOrange-3, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kOrange-3, fillStyle=1001)]) #fillStyle=3005)])
+fakeBLineStyle    = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kOrange-3, markerSizes=None, markerStyle=ROOT.kCircle),
+                                   StyleLine(lineColor=ROOT.kOrange-3, lineStyle=ROOT.kSolid, lineWidth=3), 
+                                   StyleFill(fillColor=ROOT.kOrange-3, fillStyle=0)])
+signalStyleHToTB  = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.kRed-7, markerSizes=None, markerStyle=5),
+                                   StyleLine(lineColor=ROOT.kRed-7, lineStyle=ROOT.kDashDotted, lineWidth=4), 
+                                   StyleFill(fillColor=ROOT.kRed-7, fillStyle=0)])
 
 styles = [ 
     Style(26, ROOT.kBlue),
@@ -451,6 +453,9 @@ def getInvertedLineStyle():
 
 def getSignalStyle():
     return signalStyle
+
+def getSignalStyleHToTB():
+    return signalStyleHToTB
 
 def getErrorStyle():
     return errorStyle

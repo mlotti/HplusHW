@@ -3,25 +3,26 @@
 Description:
 
 Prerequisites:
-./plotQCD_Fit.py -m <pseudo_multicrab -e "QCD|Charged" --mergeEWK 
+./plotQCD_Fit.py -m <pseudo_multicrab> [opts]
 
 Usage:
 ./makeInvertedPseudoMultirab.py -m <same_pseudo_multicrab> [opts]
 
 Examples:
 1) Produces QCD normalization factors by running the fitting script:
-./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK
-./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue50
-./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100 
+./plotQCD_Fit.py -m FakeBMeasurement_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104631/ --url -o ""
 
 2) Then either run on all modules (eras, search-modes, optimization modes) automatically
-./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK 
+./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged"
 or 
 Run on a single optimization mode:
-./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100
+./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" -o OptChiSqrCutValue100
 
-Last Used:
-./makeInvertedPseudoMulticrab.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100
+3) Copy the new pseudo-dataset directory from the FakeBMEasurement pseudo-multicrab directory to a Hplus2tbAnalysis pseudo-multicrab directory:
+cp -rf ../../FakeBMeasurement/work/FakeBMeasurement_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104631/FakeBMeasurement/FakeBMeasurementTrijetMass Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648/ .
+
+4) Edit multicrab.cfg and add the new dataset. Its name can be found in FakeBMeasurementTrijetMass/multicrab.cfg
+
 '''
 #================================================================================================ 
 # Imports
@@ -130,7 +131,7 @@ class ModuleBuilder:
                                                                 self._searchMode,
                                                                 self._optimizationMode,
                                                                 self._systematicVariation, 
-                                                                opts.analysisName)
+                                                                opts.analysisNameSaveAs)
         Verbose("Obtaining results", True)
         self._nominalResult = qcdInvertedResult.QCDInvertedResultManager(dataPath,
                                                                          ewkPath,
@@ -405,13 +406,13 @@ def main():
         optList    = myModuleSelector.getSelectedOptimizationModes()
         # Fix the optimizationMode list by hand (remove duplicate entries, add default option)
         optListFix = list(set(optList)) 
-        optListFix.append("")
 
         # For-Loop over era, searchMode, and optimizationMode options
         for era in erasList:
             for searchMode in modesList:
                 for optimizationMode in optListFix:
-
+                    
+                    Verbose("era = %s, searchMode = %s, optMode = %s" % (era, searchMode, optimizationMode), True)
                     # If an optimization mode is defined in options skip the rest
                     if opts.optMode != None:
                         if optimizationMode != opts.optMode:
@@ -518,31 +519,31 @@ if __name__ == "__main__":
 
     # Default Settings
     global opts
-    ANALYSISNAME   = "FakeBMeasurement"
-    EWKDATASETS    = ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-    SEARCHMODES    = ["80to1000"]
-    DATAERAS       = ["Run2016"]
-    OPTMODE        = None
-    BATCHMODE      = True
-    PRECISION      = 3
-    INTLUMI        = -1.0
-    SUBCOUNTERS    = False
-    LATEX          = False
-    MCONLY         = False
-    MERGEEWK       = False
-    URL            = False
-    NOERROR        = True
-    SAVEDIR        = "/publicweb/a/aattikis/FakeBMeasurement/"
-    VERBOSE        = False
-    VARIATIONS     = False
-    TEST           = True
-    FACTOR_SRC     = "QCDInvertedNormalizationFactors_%s.py"
-    DATA_SRC       = "ForDataDrivenCtrlPlots"
-    EWK_SRC        = "ForDataDrivenCtrlPlots"
-    NORM_DATA_SRC  = "ForDataDrivenCtrlPlots"
-    NORM_EWK_SRC   = "ForDataDrivenCtrlPlots"
-    INCLUSIVE_ONLY = True
-    MULTICRAB      = None
+    ANALYSISNAME     = "FakeBMeasurement"
+    ANALYSISNAMESAVE = "Hplus2tbAnalysis"
+    EWKDATASETS      = ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
+    SEARCHMODES      = ["80to1000"]
+    DATAERAS         = ["Run2016"]
+    OPTMODE          = None
+    BATCHMODE        = True
+    PRECISION        = 3
+    INTLUMI          = -1.0
+    SUBCOUNTERS      = False
+    LATEX            = False
+    MCONLY           = False
+    URL              = False
+    NOERROR          = True
+    SAVEDIR          = "/publicweb/a/aattikis/FakeBMeasurement/"
+    VERBOSE          = False
+    VARIATIONS       = False
+    TEST             = True
+    FACTOR_SRC       = "QCDInvertedNormalizationFactors_%s.py"
+    DATA_SRC         = "ForDataDrivenCtrlPlots"
+    EWK_SRC          = "ForDataDrivenCtrlPlots"
+    NORM_DATA_SRC    = "ForDataDrivenCtrlPlots"
+    NORM_EWK_SRC     = "ForDataDrivenCtrlPlots"
+    INCLUSIVE_ONLY   = True
+    MULTICRAB        = None
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]", add_help_option=True, conflict_handler="resolve")
@@ -576,6 +577,9 @@ if __name__ == "__main__":
     
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
+    
+    parser.add_option("--analysisNameSaveAs", dest="analysisNameSaveAs", type="string", default=ANALYSISNAMESAVE,
+                      help="Name of folder that the new pseudo-dataset will be stored in [default: %s]" % ANALYSISNAMESAVE)
 
     parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
                       help="Plot only MC info [default: %s]" % MCONLY)
@@ -588,9 +592,6 @@ if __name__ == "__main__":
 
     parser.add_option("--dataEra", dest="era", default=DATAERAS, 
                       help="Override default dataEra [default: %s]" % ", ".join(DATAERAS) )
-
-    parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
-                      help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
