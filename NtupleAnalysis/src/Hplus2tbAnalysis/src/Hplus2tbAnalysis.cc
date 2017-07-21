@@ -196,7 +196,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   if (0) std::cout << "=== Topology selection" << std::endl;
   const TopologySelection::Data topologyData = fTopologySelection.analyze(fEvent, jetData);
-  if (!topologyData.passedSelection()) return; 
+  // if (!topologyData.passedSelection()) return; 
 
   //================================================================================================
   // 12) Top selection
