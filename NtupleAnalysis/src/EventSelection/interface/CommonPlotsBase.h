@@ -40,9 +40,16 @@ public:
   virtual void fillControlPlotsAfterAntiIsolatedTauSelection(const Event& event, const TauSelection::Data& data);
   virtual void fillControlPlotsAfterMETTriggerScaleFactor(const Event& event);
   virtual void fillControlPlotsAfterBjetSelection(const Event& event, const BJetSelection::Data& data);
-  virtual void fillControlPlotsAfterStandardSelections(const Event& event);
+  virtual void fillControlPlotsAfterStandardSelections(const Event& event,
+						       const JetSelection::Data& jetData, 
+						       const BJetSelection::Data& bjetData, 
+						       const METSelection::Data& METData, 
+						       const TopologySelection::Data& topologyData,
+						       const TopSelection::Data& topData,
+						       bool bIsInverted);
   virtual void fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau=false);
   virtual void fillControlPlotsAfterAllSelections(const Event& event, bool withoutTau=false);
+  virtual void fillControlPlotsAfterAllSelections(const Event& event, int isInverted);
   virtual void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight);
   //virtual void fillControlPlotsAfterAllSelectionsWithFullMass(const Event& event, FullHiggsMassCalculator::Data& data);
 

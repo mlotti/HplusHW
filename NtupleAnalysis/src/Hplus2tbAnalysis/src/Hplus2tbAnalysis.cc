@@ -213,7 +213,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Standard Selections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, topologyData, topData, false);
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, false);
   
   //================================================================================================
   // All Selections
@@ -227,7 +227,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================
   // Fill final plots
   //===============================================================================================
-  // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, true);
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
   
 
   //================================================================================================

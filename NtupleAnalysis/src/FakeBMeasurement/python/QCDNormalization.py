@@ -628,10 +628,11 @@ class QCDNormalizationTemplate:
             print h.GetName()
             raise Exception("Error: This should never be reached!")
 
-        # Create a plot base
+        # Create a plot base with the fit above the data points to make it visible!
         plot = plots.PlotBase()
-        plot.histoMgr.appendHisto( histograms.Histo(h, h.GetName()) )
         plot.histoMgr.appendHisto( histograms.Histo(fit, "fit") )
+        plot.histoMgr.appendHisto( histograms.Histo(h, h.GetName()) )
+
 
         # Customise histo and fit function
         if "ewk" in h.GetName().lower():

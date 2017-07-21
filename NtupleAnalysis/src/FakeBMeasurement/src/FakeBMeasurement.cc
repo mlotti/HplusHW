@@ -647,8 +647,8 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Baseline: Standard Selections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, topologyData, topData, false);
-  // FIXME: crashes trying to fill fHistoSplitter.fillShapeHistogramTriplet(hCtrlLdgTrijetBJetPtAfterStdSelections    , bIsGenuineB, topData.getLdgTrijetBJet().pt() );
+  // NB: CtrlPlotsAfterStandardSelections should only be called for Inverted!
+  // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, false);
 
   //================================================================================================
   // All Selections
@@ -662,8 +662,8 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Fill final plots
   //================================================================================================
-  // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, true);
-  // fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTransverseMass, isGenuineTau, myTransverseMass);
+  // NB: CtrlPlotsAfterAllSelections should only be called for Inverted!
+  // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent); NB: ONLY for Inverted!
 
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
   // bool isGenuineB = IsGenuineBEvent(bjetData.getSelectedBJets()); // FIXME: OBSOLETE!
@@ -747,8 +747,7 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Inverted: Standard Selections" << std::endl;
-  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, topologyData, topData, true);
-  // FIXME: crashes trying to fill fHistoSplitter.fillShapeHistogramTriplet(hCtrlLdgTrijetBJetPtAfterStdSelections    , bIsGenuineB, topData.getLdgTrijetBJet().pt() );
+  fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, true);
 
   //================================================================================================
   // All Selections
@@ -762,7 +761,7 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Fill final plots
   //================================================================================================
-  // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, true);
+  fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
   // fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTransverseMass, isGenuineTau, myTransverseMass);
 
   // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB

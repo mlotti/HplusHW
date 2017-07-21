@@ -12,13 +12,9 @@ HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
 ./plotQCD_Fit.py -m <pseudo_mcrab_directory> [opts]
-c
+
 Examples:
-./plotQCD_Fit.py -m -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar -e "QCD|Charged" --mergeEWK -o OptChiSqrCutValue100
-./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170629_102740_FakeBBugFix_TopChiSqrVar --mergeEWK -o OptChiSqrCutValue100 -e "QCD|Charged"
-./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170701_084855_NBJetsCutVar_AllSamples --mergeEWK -e "QCD|Charged" -o "OptNumberOfBJetsCutDirection>=ChiSqrCutValue100NumberOfBJetsCutValue1"
-./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170630_045528_IsGenuineBEventBugFix_TopChiSqrVar --mergeEWK -o OptChiSqrCutValue100 -e "QCD|Charged"
-./plotQCD_Fit.py -m /uscms_data/d3/aattikis/workspace/pseudo-multicrab/FakeBMeasurement_170627_124436_BJetsGE2_TopChiSqrVar_AllSamples --mergeEWK -o "OptChiSqrCutValue100p0" -e "QCD|Charged"
+./plotQCD_Fit.py -m FakeBMeasurement_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104631/ --url -o ""
 
 Fit options:
 https://root.cern.ch/root/htmldoc/guides/users-guide/FittingHistograms.html#the-th1fit-method
@@ -76,7 +72,6 @@ def Verbose(msg, printHeader=True, verbose=False):
     Print(msg, printHeader)
     return
 
-
 def GetLumi(datasetsMgr):
     Verbose("Determininig Integrated Luminosity")
     
@@ -89,12 +84,9 @@ def GetLumi(datasetsMgr):
     Verbose("Luminosity = %s (pb)" % (lumi), True)
     return lumi
 
-
 def GetListOfEwkDatasets():
     Verbose("Getting list of EWK datasets")
-    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop"]#, "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
-    #return ["TT"]
-
+    return ["TT", "WJetsToQQ_HT_600ToInf", "DYJetsToQQHT", "SingleTop", "TTWJetsToQQ", "TTZToQQ", "Diboson", "TTTT"]
 
 def GetHistoKwargs(histoName):
     '''
@@ -161,9 +153,7 @@ def main(opts):
     Verbose("main function")
 
     #optModes = ["", "OptChiSqrCutValue40", "OptChiSqrCutValue60", "OptChiSqrCutValue80", "OptChiSqrCutValue100", "OptChiSqrCutValue120", "OptChiSqrCutValue140"]
-    #optModes = ["", "OptChiSqrCutValue50", "OptChiSqrCutValue100", "OptChiSqrCutValue150", "OptChiSqrCutValue200"]
-    #optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]
-    optModes = ["OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0"]
+    optModes = [""]
 
     if opts.optMode != None:
         optModes = [opts.optMode]
@@ -193,11 +183,6 @@ def main(opts):
         newOrder.extend(GetListOfEwkDatasets())
         datasetsMgr.selectAndReorder(newOrder)
 
-        # Set/Overwrite cross-sections
-        for d in datasetsMgr.getAllDatasets():
-            if "ChargedHiggs" in d.getName():
-                datasetsMgr.getDataset(d.getName()).setCrossSection(1.0)
-
         # Sanity check
         if not opts.mergeEWK:
             Print("Cannot draw the histograms without the option --mergeEWK. Exit", True)
@@ -205,7 +190,6 @@ def main(opts):
 
         # Merge EWK samples
         datasetsMgr.merge("EWK", GetListOfEwkDatasets())
-        #plots._plotStyles["EWK"] = styles.getAltEWKStyle()
             
         # Print dataset information
         datasetsMgr.PrintInfo()
@@ -217,47 +201,18 @@ def main(opts):
         style.setGridY(False)
         
         # Do the fit on the histo after ALL selections (incl. topology cuts)
-        hName  = "%s/%s_TopMassReco_LdgTrijetM_AfterAllSelections"
-        PlotAndFitTemplates(datasetsMgr, hName, opts)
+        histoName  = "LdgTrijetMass_AfterStandardSelections" #"%s/%s_TopMassReco_LdgTrijetM_AfterAllSelections"
+        folderName = "ForDataDrivenCtrlPlots"
+        PlotAndFitTemplates(datasetsMgr, histoName, folderName, opts)
     return
 
-
-def getHistos(datasetsMgr, hName):
-    Verbose("getHistos()", True)
-
-    baseline = "topSelection_Baseline/"
-    inverted = "topSelection_Inverted/"
-
-    h1 = datasetsMgr.getDataset("Data").getDatasetRootHisto(baseline+histoName)
-    h1.setName("Baseline-Data")
-
-    h2 = datasetsMgr.getDataset("EWK").getDatasetRootHisto(baseline+histoName)
-    h2.setName("Baseline-EWK")
-
-    h3 = datasetsMgr.getDataset("Data").getDatasetRootHisto(inverted+histoName)
-    h3.setName("Inverted-Data")
-
-    h4 = datasetsMgr.getDataset("EWK").getDatasetRootHisto(baseline+histoName)
-    h4.setName("Inverted-EWK")
-    return [h1, h2, h3, h4]
-
-
-def getHisto(datasetsMgr, datasetName, histoName, analysisType):
-    Verbose("getHisto()", True)
-
-    h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
-    h1.setName(analysisType + "-" + datasetName)
-    return h1
-
-
-def PlotAndFitTemplates(datasetsMgr, histoName, opts):
+def PlotAndFitTemplates(datasetsMgr, histoName, folderName, opts, doFakeB = False):
     Verbose("PlotAndFitTemplates()")
 
     # Definitions
-    doFakeB = False
-    inclusiveFolder = "ForFakeBMeasurement"
-    genuineBFolder  = "ForFakeBMeasurement" + "EWKGenuineB"
-    fakeBFolder     = "ForFakeBMeasurement" + "EWKFakeB"
+    inclusiveFolder = folderName
+    genuineBFolder  = folderName + "EWKGenuineB"
+    fakeBFolder     = folderName + "EWKFakeB"
     if doFakeB:
         ewkFolder = genuineBFolder
         bkgName   = "FakeB"
@@ -266,11 +221,17 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
         bkgName   = "QCD"
 
     # Create the plotters
-    p1 = plots.DataMCPlot(datasetsMgr, histoName % (inclusiveFolder, "Baseline") )
-    p2 = plots.DataMCPlot(datasetsMgr, histoName % (ewkFolder      , "Baseline") )
-    p3 = plots.DataMCPlot(datasetsMgr, histoName % (inclusiveFolder, "Inverted") )
-    p4 = plots.DataMCPlot(datasetsMgr, histoName % (ewkFolder      , "Inverted") )
-
+    p1 = plots.DataMCPlot(datasetsMgr, "%s/%s" % (inclusiveFolder, histoName) )
+    p2 = plots.DataMCPlot(datasetsMgr, "%s/%s" % (ewkFolder      , histoName) )
+    p3 = plots.DataMCPlot(datasetsMgr, "%s/%s" % (inclusiveFolder, histoName) )
+    p4 = plots.DataMCPlot(datasetsMgr, "%s/%s" % (ewkFolder      , histoName) )
+    
+    if 0:
+        p1.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(2))
+        p2.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(2))
+        p3.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(2))
+        p4.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(2))
+        
     # Get the histograms
     Data_baseline  = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline Data") #also legend entry name
     FakeB_baseline = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Baseline " + bkgName)
@@ -430,10 +391,9 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     fileName = os.path.join(opts.mcrab, "QCDInvertedNormalizationFactors%s.py"% ( getModuleInfoString(opts) ) )
     manager.writeNormFactorFile(fileName, opts)
     
-    if 0:
-        # Append analysisType to histogram name
-        saveName = "LdgTrijetM_AfterAllSelections"
-        
+    if 1:
+        saveName = fileName.replace("/", "_")
+
         # Draw the histograms
         plots.drawPlot(p, saveName, **GetHistoKwargs(histoName) ) #the "**" unpacks the kwargs_ 
 
@@ -441,22 +401,18 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
         SavePlot(p, saveName, os.path.join(opts.saveDir, "Fit") ) 
     return
 
+def getHisto(datasetsMgr, datasetName, histoName, analysisType):
+    Verbose("getHisto()", True)
+
+    h1 = datasetsMgr.getDataset(datasetName).getDatasetRootHisto(histoName)
+    h1.setName(analysisType + "-" + datasetName)
+    return h1
 
 def getModuleInfoString(opts):
     moduleInfoString = "_%s_%s" % (opts.dataEra, opts.searchMode)
-    if opts.optMode != None:
+    if len(opts.optMode) > 0:
         moduleInfoString += "_%s" % (opts.optMode)
     return moduleInfoString
-
-
-def replaceQCDFromData(datasetMgr, datasetQCDdata):
-    names = datasetMgr.getAllDatasetNames()
-    index = names.index("QCD")
-    names.pop(index)
-    names.insert(index, datasetQCDdata.getName())
-    datasetMgr.remove("QCD")
-    datasetMgr.append(datasetQCDdata)
-    datasetMgr.selectAndReorder(names)
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
@@ -511,7 +467,7 @@ if __name__ == "__main__":
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
-    MERGEEWK     = False
+    MERGEEWK     = True
     URL          = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"

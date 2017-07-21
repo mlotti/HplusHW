@@ -132,7 +132,7 @@ def main():
 
     allSelections.verbose                     = opts.verbose
     allSelections.histogramAmbientLevel       = opts.histoLevel
-    allSelections.TopSelection.ChiSqrCutValue = 100.0
+    #allSelections.TopSelection.ChiSqrCutValue = 100.0
     #allSelections.Trigger.triggerOR            = ["HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
     #                                              "HLT_PFHT450_SixJet40", #Prescale  26 at inst. lumi 1.35E+34
     #                                              ]
@@ -156,6 +156,8 @@ def main():
                               doSystematicVariations = opts.doSystematics)
 
     # Add variations (e.g. for optimisation)
+    # builder.addVariation("FakeBMeasurement.prelimTopFitChiSqrCutValue", [100, 20])
+    # builder.addVariation("FakeBMeasurement.prelimTopFitChiSqrCutDirection", ["<=", "==", ">="])
     # builder.addVariation("FakeBMeasurement.numberOfBJetsCutValue", [0, 1])
     # builder.addVariation("FakeBMeasurement.numberOfBJetsCutDirection", ["<=", "==", ">="])
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutValue", [3])

@@ -107,7 +107,7 @@ jetSelection = PSet(
 # B-jet selection
 #================================================================================================
 bjetSelection = PSet(
-    triggerMatchingApply      = True,
+    triggerMatchingApply      = False,
     triggerMatchingCone       = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet
     jetPtCuts                 = [40.0, 40.0, 30.0],
     jetEtaCuts                = [2.4],
@@ -234,11 +234,11 @@ commonPlotsOptions = PSet(
     deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
     rtauBins          = PSet(nBins =  55, axisMin =  0.0, axisMax =    1.1), # HToTauNu
     njetsBins         = PSet(nBins =  18, axisMin =  0.0, axisMax =   18.0),
-    metBins           = PSet(nBins =  80, axisMin =  0.0, axisMax =  800.0), # 10 GeV bin width
+    metBins           = PSet(nBins =  80, axisMin =  0.0, axisMax =  400.0), #  5 GeV bin width
     htBins            = PSet(nBins = 500, axisMin =  0.0, axisMax = 5000.0), # 10 GeV bin width 
     bjetDiscrBins     = PSet(nBins = 120, axisMin =  0.0, axisMax =    1.2),
     angularCuts1DBins = PSet(nBins =  52, axisMin =  0.0, axisMax =  260.0), 
-    topMassBins       = PSet(nBins =1250, axisMin =  0.0, axisMax = 5000.0), # 5 GeV bin width 
+    topMassBins       = PSet(nBins = 400, axisMin =  0.0, axisMax = 2000.0), # 5 GeV bin width 
     wMassBins         = PSet(nBins = 250, axisMin =  0.0, axisMax = 1000.0), # 5 GeV bin width 
     mtBins            = PSet(nBins =1000, axisMin =  0.0, axisMax = 5000.0), # 5 GeV bin width
     invMassBins       = PSet(nBins =1250, axisMin =  0.0, axisMax = 5000.0), # 5 GeV bin width    

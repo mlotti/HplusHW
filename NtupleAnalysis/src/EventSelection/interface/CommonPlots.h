@@ -113,11 +113,13 @@ public:
   void fillControlPlotsAfterStandardSelections(const Event& event, 
 					       const JetSelection::Data& jetData, 
 					       const BJetSelection::Data& bjetData, 
+					       const METSelection::Data& METData, 
 					       const TopologySelection::Data& topologyData,
 					       const TopSelection::Data& topData,
-					       bool bIsInverted);
+					       bool bIsInverted); //HToTB-specific
   void fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau=false, bool withMu=false);
   void fillControlPlotsAfterAllSelections(const Event& event, bool withoutTau=false);
+  void fillControlPlotsAfterAllSelections(const Event& event, int isInverted);  //HToTB-specific
   void fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight);
   //void fillControlPlotsAfterAllSelectionsWithFullMass(const Event& event, FullHiggsMassCalculator::Data& data);
 
@@ -301,6 +303,28 @@ private:
   HistoSplitter::SplittedTripletTH1s hCtrlBDiscriminatorAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlBackToBackAngularCutsMinimumAfterAllSelections;
   HistoSplitter::SplittedTripletTH1s hCtrlDeltaPhiTauMetAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSphericityAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlAplanarityAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlPlanarityAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlCircularityAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlThirdJetResolutionAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlFoxWolframMomentAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlCentralityAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlTopFitChiSqrAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetPtAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetMassAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetBJetPtAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTrijetBJetEtaAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetPtAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetBJetPtAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetBJetEtaAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTrijetMassAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTetrajetPtAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlLdgTetrajetMassAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTetrajetPtAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlSubldgTetrajetMassAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlTetrajetBJetPtAfterAllSelections;
+  HistoSplitter::SplittedTripletTH1s hCtrlTetrajetBJetEtaAfterAllSelections;
   
   // shape plots after all selections
   HistoSplitter::SplittedTripletTH1s hShapeTransverseMass;
