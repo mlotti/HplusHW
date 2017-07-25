@@ -66,6 +66,11 @@ private:
   bool IsGenuineBEvent(const std::vector<Jet>& selectedBJets);
   bool HasZeroUntaggedGenuineBJets(const JetSelection::Data& jetData, const BJetSelection::Data& bjetData); // not used
 
+  // Normalisation Triplets
+  WrappedTH1Triplet* hBaseline_LdgTrijetMass_AfterStandardSelections;
+  WrappedTH1Triplet* hBaseline_LdgTrijetMass_AfterAllSelections;
+  WrappedTH1Triplet* hInverted_LdgTrijetMass_AfterStandardSelections;
+  WrappedTH1Triplet* hInverted_LdgTrijetMass_AfterAllSelections;
 
   // Purity Triplets
   WrappedTH1Triplet* hInverted_FailedBJetBDisc_AfterAllSelections;
@@ -160,6 +165,12 @@ FakeBMeasurement::~FakeBMeasurement() {
   // fCommonPlots.getHistoSplitter().deleteHistograms(hNormalizationBaselineTauAfterStdSelections);
   // fCommonPlots.getHistoSplitter().deleteHistograms(hMtBaselineTauAfterStdSelections);
 
+  // Normalization Triplets
+  delete hBaseline_LdgTrijetMass_AfterStandardSelections;
+  delete hBaseline_LdgTrijetMass_AfterAllSelections;
+  delete hInverted_LdgTrijetMass_AfterStandardSelections;
+  delete hInverted_LdgTrijetMass_AfterAllSelections;
+
   // Purity Triplets
   delete hInverted_FailedBJetBDisc_AfterAllSelections;
   delete hInverted_FailedBJetPt_AfterAllSelections;
@@ -234,6 +245,43 @@ void FakeBMeasurement::book(TDirectory *dir) {
   // ====== Normalization histograms
   // HistoSplitter histoSplitter = fCommonPlots.getHistoSplitter();
 
+  // Obtain binning
+  const int  nPtBins      = fCommonPlots.getPtBinSettings().bins();
+  const float fPtMin      = fCommonPlots.getPtBinSettings().min();
+  const float fPtMax      = fCommonPlots.getPtBinSettings().max();
+
+  const int  nEtaBins     = fCommonPlots.getEtaBinSettings().bins();
+  const float fEtaMin     = fCommonPlots.getEtaBinSettings().min();
+  const float fEtaMax     = fCommonPlots.getEtaBinSettings().max();
+
+  const int  nBDiscBins   = fCommonPlots.getBJetDiscBinSettings().bins();
+  const float fBDiscMin   = fCommonPlots.getBJetDiscBinSettings().min();
+  const float fBDiscMax   = fCommonPlots.getBJetDiscBinSettings().max();
+
+  const int nDEtaBins     = fCommonPlots.getDeltaEtaBinSettings().bins();
+  const double fDEtaMin   = fCommonPlots.getDeltaEtaBinSettings().min();
+  const double fDEtaMax   = fCommonPlots.getDeltaEtaBinSettings().max();
+
+  const int nDPhiBins     = fCommonPlots.getDeltaPhiBinSettings().bins();
+  const double fDPhiMin   = fCommonPlots.getDeltaPhiBinSettings().min();
+  const double fDPhiMax   = fCommonPlots.getDeltaPhiBinSettings().max();
+
+  const int nDRBins       = fCommonPlots.getDeltaRBinSettings().bins();
+  const double fDRMin     = fCommonPlots.getDeltaRBinSettings().min();
+  const double fDRMax     = fCommonPlots.getDeltaRBinSettings().max();
+
+  const int nWMassBins    = fCommonPlots.getWMassBinSettings().bins();
+  const float fWMassMin   = fCommonPlots.getWMassBinSettings().min();
+  const float fWMassMax   = fCommonPlots.getWMassBinSettings().max();
+
+  const int nTopMassBins  = fCommonPlots.getTopMassBinSettings().bins();
+  const float fTopMassMin = fCommonPlots.getTopMassBinSettings().min();
+  const float fTopMassMax = fCommonPlots.getTopMassBinSettings().max();
+
+  const int nInvMassBins  = fCommonPlots.getInvMassBinSettings().bins();
+  const float fInvMassMin = fCommonPlots.getInvMassBinSettings().min();
+  const float fInvMassMax = fCommonPlots.getInvMassBinSettings().max();
+
   // Create directories for normalization
   std::string myInclusiveLabel  = "ForFakeBNormalization";
   std::string myFakeLabel       = myInclusiveLabel+"EWKFakeB";
@@ -242,35 +290,22 @@ void FakeBMeasurement::book(TDirectory *dir) {
   TDirectory* myNormEWKFakeBDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myFakeLabel);
   TDirectory* myNormGenuineBDir = fHistoWrapper.mkdir(HistoLevel::kSystematics, dir, myGenuineLabel);
   std::vector<TDirectory*> myNormalizationDirs = {myNormDir, myNormEWKFakeBDir, myNormGenuineBDir};
-  
-  // Obtain binning
-  const int  nPtBins      = fCommonPlots.getPtBinSettings().bins();
-  const float fPtMin      = fCommonPlots.getPtBinSettings().min();
-  const float fPtMax      = fCommonPlots.getPtBinSettings().max();
-  const int  nEtaBins     = fCommonPlots.getEtaBinSettings().bins();
-  const float fEtaMin     = fCommonPlots.getEtaBinSettings().min();
-  const float fEtaMax     = fCommonPlots.getEtaBinSettings().max();
-  const int  nBDiscBins   = fCommonPlots.getBJetDiscBinSettings().bins();
-  const float fBDiscMin   = fCommonPlots.getBJetDiscBinSettings().min();
-  const float fBDiscMax   = fCommonPlots.getBJetDiscBinSettings().max();
-  const int nDEtaBins     = fCommonPlots.getDeltaEtaBinSettings().bins();
-  const double fDEtaMin   = fCommonPlots.getDeltaEtaBinSettings().min();
-  const double fDEtaMax   = fCommonPlots.getDeltaEtaBinSettings().max();
-  const int nDPhiBins     = fCommonPlots.getDeltaPhiBinSettings().bins();
-  const double fDPhiMin   = fCommonPlots.getDeltaPhiBinSettings().min();
-  const double fDPhiMax   = fCommonPlots.getDeltaPhiBinSettings().max();
-  const int nDRBins       = fCommonPlots.getDeltaRBinSettings().bins();
-  const double fDRMin     = fCommonPlots.getDeltaRBinSettings().min();
-  const double fDRMax     = fCommonPlots.getDeltaRBinSettings().max();
-  const int nWMassBins    = fCommonPlots.getWMassBinSettings().bins();
-  const float fWMassMin   = fCommonPlots.getWMassBinSettings().min();
-  const float fWMassMax   = fCommonPlots.getWMassBinSettings().max();
-  const int nTopMassBins  = fCommonPlots.getTopMassBinSettings().bins();
-  const float fTopMassMin = fCommonPlots.getTopMassBinSettings().min();
-  const float fTopMassMax = fCommonPlots.getTopMassBinSettings().max();
-  const int nInvMassBins  = fCommonPlots.getInvMassBinSettings().bins();
-  const float fInvMassMin = fCommonPlots.getInvMassBinSettings().min();
-  const float fInvMassMax = fCommonPlots.getInvMassBinSettings().max();
+
+  hBaseline_LdgTrijetMass_AfterStandardSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
+				      "Baseline_LdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hBaseline_LdgTrijetMass_AfterAllSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
+				      "Baseline_LdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hInverted_LdgTrijetMass_AfterStandardSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
+				      "Inverted_LdgTrijetMass_AfterStandardSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
+
+  hInverted_LdgTrijetMass_AfterAllSelections =
+    fHistoWrapper.makeTHTriplet<TH1F>(true, HistoLevel::kVital, myNormalizationDirs, 
+				      "Inverted_LdgTrijetMass_AfterAllSelections", ";m_{jjb} (GeV/c^{2});Events / %0.f GeV/c^{2}", nTopMassBins, fTopMassMin, fTopMassMax);
 
   // Purity histograms [(Data-EWK)/Data]
   myInclusiveLabel = "FakeBPurity";
@@ -642,11 +677,18 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
   // Apply preliminary chiSq cut
   bool passPrelimChiSq = cfg_PrelimTopFitChiSqr.passedCut(topData.ChiSqr());
   if (!passPrelimChiSq) return;
+
+  // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
+  bool isGenuineB = topData.isGenuineB();
+  // bool isGenuineB = bjetData.isGenuineB();
+  // bool isGenuineB = IsGenuineBEvent(topData.getJetsUsedAsBJetsInFit());
+  // bool isGenuineB = bjetData.isGenuineB(); // not correct for inverted
   
   //================================================================================================
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Baseline: Standard Selections" << std::endl;
+  hBaseline_LdgTrijetMass_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
   // NB: CtrlPlotsAfterStandardSelections should only be called for Inverted!
   // fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, false);
 
@@ -662,13 +704,8 @@ void FakeBMeasurement::doBaselineAnalysis(const JetSelection::Data& jetData,
   //================================================================================================
   // Fill final plots
   //================================================================================================
-  // NB: CtrlPlotsAfterAllSelections should only be called for Inverted!
-  // fCommonPlots.fillControlPlotsAfterAllSelections(fEvent); NB: ONLY for Inverted!
+  hBaseline_LdgTrijetMass_AfterAllSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
 
-  // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
-  // bool isGenuineB = IsGenuineBEvent(bjetData.getSelectedBJets()); // FIXME: OBSOLETE!
-  bool isGenuineB = bjetData.isGenuineB();
-  
   // GenuineB or FakeB Triplets (Baseline)
   hBaseline_TopMassReco_ChiSqr_AfterAllSelections ->Fill(isGenuineB, topData.ChiSqr());
   hBaseline_TopMassReco_LdgTetrajetPt_AfterAllSelections->Fill(isGenuineB, topData.getLdgTetrajet().pt() );
@@ -743,11 +780,17 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   bool passPrelimChiSq = cfg_PrelimTopFitChiSqr.passedCut(topData.ChiSqr());
   if (!passPrelimChiSq) return;
 
+  // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
+  bool isGenuineB = topData.isGenuineB();
+  // bool isGenuineB = IsGenuineBEvent(topData.getJetsUsedAsBJetsInFit());
+  // bool isGenuineB = bjetData.isGenuineB(); // not correct for inverted
+
   //================================================================================================
   // Standard Selections
   //================================================================================================
   if (0) std::cout << "=== Inverted: Standard Selections" << std::endl;
   fCommonPlots.fillControlPlotsAfterStandardSelections(fEvent, jetData, bjetData, METData, topologyData, topData, true);
+  hInverted_LdgTrijetMass_AfterStandardSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
 
   //================================================================================================
   // All Selections
@@ -762,11 +805,7 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   // Fill final plots
   //================================================================================================
   fCommonPlots.fillControlPlotsAfterAllSelections(fEvent, 1);
-  // fCommonPlots.getHistoSplitter().fillShapeHistogramTriplet(hBaselineTransverseMass, isGenuineTau, myTransverseMass);
-
-  // If 1 or more untagged genuine bjets are found the event is considered fakeB. Otherwise genuineB
-  bool isGenuineB = IsGenuineBEvent(topData.getJetsUsedAsBJetsInFit());
-  // bool isGenuineB = bjetData.isGenuineB(); // not correct for inverted
+  hInverted_LdgTrijetMass_AfterAllSelections->Fill(isGenuineB, topData.getLdgTrijet().M());
 
   // Get the failed bjet candidates randomly shuffled. Put any trg-matched objects in the front  
   Jet bjet= topData.getJetsUsedAsBJetsInFit()[2]; // FIXME: Do i need this?

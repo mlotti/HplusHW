@@ -256,8 +256,7 @@ def getGetNormFactorsSrcFilename(dirName, fileName):
         Verbose("Found src file for normalization factors:\n\t%s" % (src), True)
     return src
 
-
-def  getNormFactorFileList(dirName, fileBaseName):
+def getNormFactorFileList(dirName, fileBaseName):
     scriptList = []
 
     # For-loop: All items (files/dir) in directory
@@ -277,7 +276,8 @@ def  getNormFactorFileList(dirName, fileBaseName):
         msg = "ERROR! Found no normalization info files under dir %s" % dirName
         raise Exception(msg)
     else:
-        Print("Found %s norm-factor file(s):\n\t%s" % (  len(scriptList), "\n\t".join(os.path.join([os.path.join(dirName, s) for s in scriptList]))), True)
+        msg = "Found %s norm-factor file(s):\n\t%s" % (  len(scriptList), "\n\t".join(os.path.join([os.path.join(dirName, s) for s in scriptList])))
+        Print(ShellStyles.NoteLabel() + msg, True)
     return scriptList
 
 
@@ -324,17 +324,26 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     
     # Get the function definition
     myNormFactorsSafetyCheck = getattr(normFactorsImport, "QCDInvertedNormalizationSafetyCheck")
-
+    
     Verbose("Check that the era=%s, searchMode=%s, optimizationMode=%s info matches!" % (era, searchMode, optimizationMode) )
     myNormFactorsSafetyCheck(era, searchMode, optimizationMode)
 
     # Obtain normalization factors
     myNormFactorsImport = getattr(normFactorsImport, "QCDNormalization")
+    msg = "Disabled NormFactors Syst Var Fake Weighting Up/Down"
+    Print(ShellStyles.WarningLabel() + msg, True)    
     # myNormFactorsImportSystVarFakeWeightingDown = getattr(normFactorsImport, "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarDown") #FIXME
     # myNormFactorsImportSystVarFakeWeightingUp   = getattr(normFactorsImport, "QCDPlusEWKFakeTausNormalizationSystFakeWeightingVarUp")   #FIXME
 
     myNormFactors = {}
     myNormFactors["nominal"] = myNormFactorsImport
+    msg = "Obtained \"nominal\" QCD normalisation factors dictionary. The values are:\n"
+    for k in  myNormFactors["nominal"]:
+        msg += "\t" + k + " = " + str(myNormFactors["nominal"][k])
+    Print(ShellStyles.NoteLabel() + msg, True)
+
+    msg = "Disabled NormFactors Weighting Up/Down"
+    Print(ShellStyles.WarningLabel() + msg, True) 
     # myNormFactors["FakeWeightingDown"] = myNormFactorsImportSystVarFakeWeightingDown # FIXME 
     # myNormFactors["FakeWeightingUp"]   = myNormFactorsImportSystVarFakeWeightingUp   # FIXME
     return myNormFactors
@@ -350,7 +359,8 @@ def main():
     if opts.mcrab != None:
         myMulticrabDir = opts.mcrab
     if not os.path.exists("%s/multicrab.cfg" % myMulticrabDir):
-        raise Exception(ShellStyles.ErrorLabel()+"No multicrab directory found at path '%s'! Please check path or specify it with --mcrab!"%(myMulticrabDir)+ShellStyles.NormalStyle())
+        msg = "No multicrab directory found at path '%s'! Please check path or specify it with --mcrab!" % (myMulticrabDir)
+        raise Exception(ShellStyles.ErrorLabel() + msg + ShellStyles.NormalStyle())
     if len(opts.shape) == 0:
         raise Exception(ShellStyles.ErrorLabel()+"Provide a shape identifierwith --shape (for example MT)!"+ShellStyles.NormalStyle())
 
@@ -426,14 +436,13 @@ def main():
                     iModule += 1
 
                     # Inform user of what is being processes
-                    msg = "Module %d/%d:%s %s/%s" % (iModule, myTotalModules, ShellStyles.NormalStyle(), myModuleInfoString, shapeType) #iro
-                    Print(ShellStyles.CaptionStyle() + msg, True)
-                    #Print(ShellStyles.HighlightAltStyle() + msg, True)
+                    msg = "Module %d/%d:%s %s/%s" % (iModule, myTotalModules, ShellStyles.NormalStyle(), myModuleInfoString, shapeType)
+                    Print(ShellStyles.CaptionStyle() + msg, True) #ShellStyles.HighlightAltStyle()
 
                     # Keep time
                     myStartTime = time.time()
 
-                    # Create dataset manager with given settings
+                    Verbose("Create dataset manager with given settings", True)
                     nominalModule = ModuleBuilder(opts, myOutputCreator)
                     nominalModule.createDsetMgr(myMulticrabDir, era, searchMode, optimizationMode)
                     
@@ -441,7 +450,7 @@ def main():
                         if opts.verbose:
                             nominalModule.debug()
                      
-                    doQCDNormalizationSyst=False #FIXME - Systematics Di                    
+                    doQCDNormalizationSyst=False
                     msg = "Disabling systematics"
                     Print(ShellStyles.WarningLabel() + msg, True)
                     nominalModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors["nominal"], doQCDNormalizationSyst, opts.normDataSrc, opts.normEwkSrc)

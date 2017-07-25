@@ -427,7 +427,7 @@ def replaceQCDFromData(dMgr, dataDrivenDatasetName, newName="QCD-Data"):
     dMgr.selectAndReorder(names)
     return
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
+def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".C", ".eps"]):
     Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
 
     # Check that path exists

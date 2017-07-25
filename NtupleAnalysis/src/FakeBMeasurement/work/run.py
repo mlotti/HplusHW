@@ -132,11 +132,12 @@ def main():
 
     allSelections.verbose                     = opts.verbose
     allSelections.histogramAmbientLevel       = opts.histoLevel
-    #allSelections.TopSelection.ChiSqrCutValue = 100.0
     #allSelections.Trigger.triggerOR            = ["HLT_PFHT400_SixJet30", #Prescale 110 at inst. lumi 1.35E+34
     #                                              "HLT_PFHT450_SixJet40", #Prescale  26 at inst. lumi 1.35E+34
     #                                              ]
-    
+    #allSelections.FakeBMeasurement.numberOfBJetsCutValue     = 0
+    #allSelections.FakeBMeasurement.numberOfBJetsCutDirection = "<="
+
     # ================================================================================================
     # Command Line Options
     # ================================================================================================ 

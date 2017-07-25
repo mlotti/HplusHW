@@ -55,7 +55,7 @@ class DataDrivenQCDShape:
         dataFullName    = os.path.join(dataPath, histoName)
         ewkFullName     = os.path.join(ewkPath, histoName)
 
-        # ALEX - NEW 
+        # ALEX-NEW 
         if (self._optionUseInclusiveNorm):
             msg = "Disabled call for getting splitted histograms. Getting \"Inclusive\" histogram only instead."
             # Print(ShellStyles.WarningLabel() + msg, False)

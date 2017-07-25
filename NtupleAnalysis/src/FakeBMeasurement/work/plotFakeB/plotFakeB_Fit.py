@@ -426,8 +426,8 @@ def PlotAndFitTemplates(datasetsMgr, histoName, opts):
     manager.calculateNormalizationCoefficients(Data_baseline, fitOptions, FITMIN, FITMAX)
     
     # Only for when the measurement is done in bins
-    # manager.writeScaleFactorFile("test", moduleInfoString)
-            
+    #manager.writeScaleFactorFile("test", moduleInfoString)
+
     # Append analysisType to histogram name
     saveName = "LdgTrijetM_AfterAllSelections"
 

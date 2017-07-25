@@ -17,6 +17,7 @@ Instructions for using, call the following methods:
 #================================================================================================ 
 import ROOT
 ROOT.gROOT.SetBatch(True)
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.fitHelper as fitHelper
 import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
@@ -376,7 +377,7 @@ class FitFunction:
         #    return
 
         if rejectPoints > 0:
-            if (x[0] > 210 and x[0] < 220):
+            if (x[0] > 220 and x[0] < 226):
                 ROOT.TF1.RejectPoint()
                 print "Rejecting point with value x=", x[0]
                 return 0
@@ -1478,13 +1479,17 @@ class QCDNormalizationManagerBase:
                 self.Verbose("Plotting template %s" % (k), index==0)
         return
 
-    ## Resets bin results
     def resetBinResults(self):
+        '''
+        Resets bin results
+        '''
         for k in self._templates.keys():
             self._templates[k].reset()
 
-    ## Virtual method for calculating the individual norm. coefficients
     def calculateNormalizationCoefficients(self, dataHisto, fitOptions, FITMIN, FITMAX, **kwargs):
+        '''
+        Virtual method for calculating the individual norm. coefficients
+        '''
         print "calculateQCDNormalization needs to be implemented in parent class"
     
     def calculateCombinedNormalizationCoefficient(self, hQCD, hEWKfakes):
@@ -2095,7 +2100,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         nDataFitBaselineError = dataTemplate.getFittedParameterErrors()[1]
         nQCDInverted          = self._templates["QCD_Inverted"].getNeventsFromHisto(False)
         nQCDInvertedError     = self._templates["QCD_Inverted"].getNeventsErrorFromHisto(False)
-        nQCDBaseline          = self._templates["QCD_Baseline"].getNeventsFromHisto(False)
+        nQCDBaseline          = self._templates["QCD_Baseline"].getNeventsFromHisto(False) #ALEX-IRO-FIXME  nQCDBaseline = nQCDInverted
         nQCDBaselineError     = self._templates["QCD_Baseline"].getNeventsErrorFromHisto(False)
         nQCDFitBaseline       = dataTemplate.getFittedParameters()[1]*nDataBaseline
         nQCDFitBaselineError  = errorPropagation.errorPropagationForProduct(nDataFitBaseline, nDataFitBaselineError, nDataBaseline, nDataBaselineError)
@@ -2128,6 +2133,10 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         nDiffBaselineError = errorPropagation.errorPropagationForSum(nDataBaseline, nDataBaselineError, nBkgBaseline, nBkgBaselineError)
         nRatioBaseline     = (nDataBaseline)/(nBkgBaseline)
         nRatioBaselineError= errorPropagation.errorPropagationForDivision(nDataBaseline, nDataBaselineError, nBkgBaseline, nBkgBaselineError)
+
+        print "XENIOS"
+        # nRatioInverted     = (nDataInverted)/(nBkgInverted) #
+        # nRatioInvertedError= errorPropagation.errorPropagationForDivision(nDataInverted, nDataInvertedError, nBkgInverted, nBkgBaselineError)
         qcdPurity          = nQCDFitBaseline/nDataBaseline
         qcdPurityError     = errorPropagation.errorPropagationForDivision(nQCDFitBaseline, nQCDFitBaselineError, nDataBaseline, nDataBaselineError)
         ewkPurity          = nFakeBaseline/nDataBaseline
@@ -2141,21 +2150,21 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         lines.append(hLine)
         lines.append(header)
         lines.append(hLine)
-        lines.append(align.format("Data"      , "Baseline", "%.3f" % nDataBaseline     , "+/-", "%.3f" % nDataBaselineError     , "Histo"    , "Signal Region") )
+        lines.append(align.format("Data"      , "Baseline", "%.1f" % nDataBaseline     , "+/-", "%.1f" % nDataBaselineError     , "Histo"    , "Signal Region") )
         lines.append(align.format("Data"      , "Baseline", "%.5f" % nDataFitBaseline  , "+/-", "%.5f" % nDataFitBaselineError  , "Fit"      , "Fraction of QCD Events") )
-        lines.append(align.format("QCD"       , "Baseline", "%.3f" % nQCDBaseline      , "+/-", "%.3f" % nQCDBaselineError      , "Histo"    , "QCD = Data -EWK MC") )
-        lines.append(align.format("QCD"       , "Baseline", "%.3f" % nQCDFitBaseline   , "+/-", "%.3f" % nQCDFitBaselineError   , "Fit"      , "QCD Estimate (Fit)") )
+        lines.append(align.format("QCD"       , "Baseline", "%.1f" % nQCDBaseline      , "+/-", "%.1f" % nQCDBaselineError      , "Histo"    , "QCD = Data -EWK MC") )
+        lines.append(align.format("QCD"       , "Baseline", "%.1f" % nQCDFitBaseline   , "+/-", "%.1f" % nQCDFitBaselineError   , "Fit"      , "QCD Estimate (Fit)") )
         lines.append(align.format("QCD/QCDFit", "Baseline", "%.3f" % nQCDBaselineRatio , "+/-", "%.3f" % nQCDBaselineRatioError , "Composite", "QCD / QCD Estimate") )
-        lines.append(align.format("EWK"       , "Baseline", "%.3f" % nFakeBaseline     , "+/-", "%.3f" % nFakeBaselineError     , "Histo"    , "EWK Estimate (MC)") )
-        lines.append(align.format("QCD"       , "Inverted", "%.3f" % nQCDInverted      , "+/-", "%.3f" % nQCDInvertedError      , "Histo"    , "Divide \"QCD Baseline\" for \"NormFactor\"") )
-        lines.append(align.format("EWK"       , "Inverted", "%.3f" % nFakeInverted     , "+/-", "%.3f" % nFakeInvertedError     , "Histo"    , "Divide \"EWK Baseline\" for \"NormFactor\"") )    
-        lines.append(align.format("QCD"       , "Inverted", "%.6f" % qcdNormFactor     , "+/-", "%.6f" % qcdNormFactorError     , "Fit"      , "\"NormFactor\" to \"Baseline\" Region") )
-        lines.append(align.format("EWK"       , "Inverted", "%.6f" % ewkFakesNormFactor, "+/-", "%.6f" % ewkFakesNormFactorError, "Histo"    , "\"NormFactor\" to \"Baseline\" Region") ) 
-        lines.append(align.format("Bkg"       , "Baseline", "%.3f" % nBkgBaseline      , "+/-", "%.3f" % nBkgBaselineError      , "Composite", "QCD Fit + EWK MC") )
-        lines.append(align.format("Data-Bkg"  , "Baseline", "%.3f" % nDiffBaseline     , "+/-", "%.3f" % nDiffBaselineError     , "Composite", "Sanity Check") )
-        lines.append(align.format("Data/Bkg"  , "Baseline", "%.3f" % nRatioBaseline    , "+/-", "%.3f" % nRatioBaselineError    , "Composite", "Sanity Check") )
-        lines.append(align.format("QCD Purity", "Baseline", "%.5f" % (qcdPurity)       , "+/-", "%.5f" % qcdPurityError         , "Composite", "Sanity Check") )
-        lines.append(align.format("EWK Purity", "Baseline", "%.5f" % (ewkPurity)       , "+/-", "%.5f" % ewkPurityError         , "Composite", "Sanity Check") )
+        lines.append(align.format("EWK"       , "Baseline", "%.1f" % nFakeBaseline     , "+/-", "%.1f" % nFakeBaselineError     , "Histo"    , "EWK Estimate (MC)") )
+        lines.append(align.format("QCD"       , "Inverted", "%.1f" % nQCDInverted      , "+/-", "%.1f" % nQCDInvertedError      , "Histo"    , "Divide \"QCD Baseline\" for R=\"NormFactor\"") )
+        # lines.append(align.format("EWK"       , "Inverted", "%.1f" % nFakeInverted     , "+/-", "%.1f" % nFakeInvertedError     , "Histo"    , "Divide \"EWK Baseline\" for \"NormFactor\"") )
+        lines.append(align.format("QCD"       , "Inverted", "%.6f" % qcdNormFactor     , "+/-", "%.6f" % qcdNormFactorError     , "Fit"      , "R=\"NormFactor\" to \"Baseline\" Region") )
+        lines.append(align.format("EWK"       , "Inverted", "%.6f" % ewkFakesNormFactor, "+/-", "%.6f" % ewkFakesNormFactorError, "Histo"    , "R=\"NormFactor\" to \"Baseline\" Region") )
+        # lines.append(align.format("Bkg"       , "Baseline", "%.1f" % nBkgBaseline      , "+/-", "%.1f" % nBkgBaselineError      , "Composite", "QCD Fit + EWK MC") )
+        # lines.append(align.format("Data-Bkg"  , "Baseline", "%.1f" % nDiffBaseline     , "+/-", "%.1f" % nDiffBaselineError     , "Composite", "Sanity Check") )
+        # lines.append(align.format("Data/Bkg"  , "Baseline", "%.3f" % nRatioBaseline    , "+/-", "%.3f" % nRatioBaselineError    , "Composite", "Sanity Check") )
+        # lines.append(align.format("QCD Purity", "Baseline", "%.2f" % (qcdPurity)       , "+/-", "%.2f" % qcdPurityError         , "Composite", "Sanity Check") )
+        # lines.append(align.format("EWK Purity", "Baseline", "%.2f" % (ewkPurity)       , "+/-", "%.2f" % ewkPurityError         , "Composite", "Sanity Check") )
         lines.append(hLine)
         lines.append("")
         return lines
