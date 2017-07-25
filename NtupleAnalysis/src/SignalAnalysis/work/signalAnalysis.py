@@ -12,9 +12,9 @@ if len(sys.argv) < 2:
 from HiggsAnalysis.NtupleAnalysis.main import Process, PSet, Analyzer
 from HiggsAnalysis.NtupleAnalysis.parameters.signalAnalysisParameters import obtainAnalysisSuffix 
 process = Process("SignalAnalysis"+obtainAnalysisSuffix(sys.argv))
-blacklist = ["ChargedHiggs_TTToHplusBWB"]
-if lightAnalysis:
-    blacklist = ["ChargedHiggs_HplusTB"]
+blacklist = []
+#blacklist = ["ChargedHiggs_TTToHplusBWB"]
+#blacklist = ["ChargedHiggs_HplusTB"]
 process.addDatasetsFromMulticrab(sys.argv[1],blacklist=blacklist)
 
 # Add config
