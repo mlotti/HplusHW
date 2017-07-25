@@ -5,9 +5,6 @@ dataEras = ["2016"]
 #dataEras = ["2015B","2015C"]
 searchModes = ["80to1000"]
 
-lightAnalysis = False
-#lightAnalysis = True
-
 if len(sys.argv) < 2:
     print "Usage: ./exampleAnalysis.py <path-to-multicrab-directory> <1pr> <2pr> <3pr>"
     sys.exit(0)
@@ -28,20 +25,19 @@ allSelections.CommonPlots.histogramSplitting = [
   ]
 #===== Selection customisations
 allSelections.TauSelection.prongs = 1
-if lightAnalysis:
-    allSelections.TauSelection.tauPtCut = 50.0 #uncomment for light H+ (default 60.0 for heavy H+)
-    allSelections.METSelection.METCutValue = 80.0 #uncomment for light H+ (default 100.0 for heavy H+)
+allSelections.TauSelection.tauPtCut = 50.0 
+allSelections.METSelection.METCutValue = 90.0
 allSelections.AngularCutsBackToBack.cutValueJet1 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet2 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet3 = 40.0
 allSelections.AngularCutsBackToBack.cutValueJet4 = 40.0
+allSelections.TauSelection.rtau = 0.7
+allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
+
 #allSelections.AngularCutsCollinear.cutValueJet1 = 80.0
 #allSelections.AngularCutsCollinear.cutValueJet2 = 80.0
 #allSelections.AngularCutsCollinear.cutValueJet3 = 80.0
 #allSelections.AngularCutsCollinear.cutValueJet4 = 80.0
-
-#allSelections.TauSelection.rtau = 0.7
-#allSelections.BJetSelection.bjetDiscrWorkingPoint = "Medium"
 #allSelections.BJetSelection.numberOfBJetsCutValue = 0
 #allSelections.BJetSelection.numberOfBJetsCutDirection = "=="
 #setAngularCutsWorkingPoint(allSelections.AngularCutsCollinear, "Loose")
