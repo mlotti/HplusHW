@@ -35,13 +35,13 @@ def ResultStyle():
 
 def NoteLabel():
     # white text on magenta backround
-    return "%sNOTE:%s "% (NoteStyle() ,NormalStyle())
+    return "%sNOTE:%s "% (NoteStyle(), NormalStyle())
 
 def WarningLabel():
-    return "%sWARNING:%s "%(WarningStyle(),NormalStyle())
+    return "%sWARNING:%s "%(WarningStyle(), NormalStyle())
 
 def ErrorLabel():
-    return "%sERROR:%s "%(ErrorStyle(),NormalStyle())
+    return "%sERROR:%s "%(ErrorStyle(), NormalStyle())
 
 def HighlightAltStyle():
     '''
@@ -72,3 +72,6 @@ def SuccessStyle():
     # black text on green backround
     return "\033[;40m\033[1;42m"
 
+def SuccessLabel():
+    # black text on green backround
+    return "%sSUCCESS:%s " % (SuccessStyle(), NormalStyle())

@@ -35,6 +35,15 @@ import datetime
 #================================================================================================ 
 # Global Function Definitions
 #================================================================================================ 
+def Print(msg, printHeader=False):
+    fName = __file__.split("/")[-1]
+    if printHeader==True:
+        print "=== ", fName
+        print "\t", msg
+    else:
+        print "\t", msg
+    return
+
 def createLegend(xMin=0.62, yMin=0.79, xMax=0.92, yMax=0.92):
     l = ROOT.TLegend(xMin, yMin, xMax, yMax)
     l.SetFillStyle(-1)
@@ -683,6 +692,8 @@ class QCDNormalizationTemplate:
         if bSaveToFile:
             fileName = self._plotDirName + "/" + h.GetName() + ".root"
             fileName = fileName.replace(" ", "_")
+            msg = "Saving template \"%s\" to file %s" % (h.GetName(), fileName)
+            self.Print(ShellStyles.NoteLabel() + msg + ShellStyles.NormalStyle(), True)
             h.SaveAs(fileName)
         return
 
@@ -1094,12 +1105,20 @@ class QCDNormalizationTemplate:
         Customise colour of printed output (makes spotting easier)
         '''
         self.Verbose("ChangeShellColour()")
-        if "qcd" or "fakeb" in self.getHisto().GetName().lower():
+        hName = self.getHisto().GetName().lower()
+        
+        isQCD   = "qcd" or "fakeb" in hName
+        isEWK   = "ewk" in hName
+        isDaata = "data" in hName
+
+        if isQCD:
             print colors.YELLOW
-        if "ewk" in self.getHisto().GetName().lower():
+        elif isEWK:
             print colors.PURPLE
-        if "data" in self.getHisto().GetName().lower():
+        elif isData: 
             print colors.BOLD
+        else:
+            raise Exception("Error: Unexpected histogram name %s. Cannot decide SHELL colour" % (hName) )
         return
 
     def PrintFitResults(self, h, r, fitOptions):
@@ -1118,6 +1137,9 @@ class QCDNormalizationTemplate:
         if not r.IsValid():
             r.Print("V")
             raise Exception("Error: The TFitResultPtr is not valid! The fit failed...")
+        
+        msg = "Successfully fitted histogram \"%s\"!" % h.GetName()
+        self.Print(ShellStyles.NoteLabel() + msg, True)
 
         # Print full information of fit including covariance matrix and correlation
         if 0:
@@ -1153,32 +1175,38 @@ class QCDNormalizationTemplate:
         lines.append(hLine)
 
         # Get the information
-        chi2       = r.Chi2()
+        chi2       = "%0.1f"  % r.Chi2()
         dof        = r.Ndf()
+        dofStr     = "%0.0f"  % r.Ndf() 
         redChi2    = r.Chi2()/dof
-        edm        = r.Edm()
-        nCalls     = r.NCalls()
+        redChi2Str = "%0.1f"  % redChi2
+        edm        = "%0.1f"  % r.Edm()
+        nCalls     = "%0.0f"  % r.NCalls()
         status     = r.Status() # See: https://root.cern.ch/root/html/ROOT__Minuit2__Minuit2Minimizer.html#ROOT__Minuit2__Minuit2Minimizer:Minimize
-        fParams    = r.NFreeParameters()
-        covMStatus = r.CovMatrixStatus()
+        fParams    = "%0.0f"  % r.NFreeParameters()
+        covMStatus = "%0.0f"  % r.CovMatrixStatus()
         isValid    = r.IsValid()
         if isValid:
             result = "True"
         else:
             result = "False"
+        fitRangeStr= "%s-%s"  % (self._fitRangeMin, self._fitRangeMax)
+        fitFuncStr = self._fitFunction.getName()
+        fitOptsStr = "\"%s\"" % (fitOptions)
 
         # Construct the table
-        lines.append( align.format("Chi2/D.O.F" , "%0.1f"  % redChi2   , "", "Reduced chi2 (=1 for good fits)") )
-        lines.append( align.format("Chi2"       , "%0.1f"  % chi2      , "", "Fit value") )
-        lines.append( align.format("D.O.F"      , "%0.0f"  % dof       , "", "Number of degrees of freedom (i.e. histo bins)") )
-        lines.append( align.format("E.D.M"      , "%0.10f" % edm       , "", "Expected distance from minimum") )
-        lines.append( align.format("# Calls"    , "%0.0f"  % nCalls    , "", "Number of function calls to find minimum") )
-        lines.append( align.format("Free Params", "%0.0f"  % fParams   , "", "Total number of free parameters") )
-        lines.append( align.format("Status"     , "%0.0f"  % status    , "", "Minimizer status code") )
-        lines.append( align.format("Cov Matrix" , "%0.0f"  % covMStatus, "", "0=not calculated, 1=approx, 2=made pos def, 3=accurate") )
-        lines.append( align.format("IsValid"    , "%s"     % (result)  , "", "True=Fit successful, False=Fit unsuccessful") )
-        lines.append( align.format("Fit Range"  , "%s-%s"  % (self._fitRangeMin, self._fitRangeMax), "", "Lower/Upper bounds to fit the function") )
-        lines.append( align.format("Fit Options", "\"%s\"" % (fitOptions), "", "The fitting options") )
+        lines.append( align.format("Fit Function", fitFuncStr , "", "Custom Fit Function") )            
+        lines.append( align.format("Fit Range"   , fitRangeStr, "", "Lower/Upper bounds to fit the function") )
+        lines.append( align.format("Fit Options" , fitOptsStr , "", "The fitting options") )
+        lines.append( align.format("Chi2/D.O.F"  , redChi2Str , "", "Reduced chi2 (=1 for good fits)") )
+        lines.append( align.format("Chi2"        , chi2       , "", "Fit value") )
+        lines.append( align.format("D.O.F"       , dofStr     , "", "Number of degrees of freedom (i.e. histo bins)") )
+        lines.append( align.format("E.D.M"       , edm        , "", "Expected distance from minimum") )
+        lines.append( align.format("# Calls"     , nCalls     , "", "Number of function calls to find minimum") )
+        lines.append( align.format("Free Params" , fParams    , "", "Total number of free parameters") )
+        lines.append( align.format("Status"      , status     , "", "Minimizer status code") )
+        lines.append( align.format("Cov Matrix"  , covMStatus , "", "0=not calculated, 1=approx, 2=made pos def, 3=accurate") )
+        lines.append( align.format("IsValid"     , result     , "", "True=Fit successful, False=Fit unsuccessful") )
         lines.append(hLine)
         lines.append("")
 
@@ -1361,9 +1389,10 @@ class QCDNormalizationTemplate:
             self.Verbose("Create explicitly canvas to get rid of warning message")
             canvas = ROOT.TCanvas()
 
-            self.ChangeShellColour()
+            if 0:
+                self.ChangeShellColour()
 
-            self.Print("Fitting function \"%s\" to histogram \"%s\" with fitOptions \"%s\"" % (self._fitFunction.getName(), h.GetName(), fitOptions) ) #fit.GetName()
+            self.Verbose("Fitting function \"%s\" to histogram \"%s\" with fitOptions \"%s\"" % (self._fitFunction.getName(), h.GetName(), fitOptions) ) #fit.GetName()
             fitResultObject = h.Fit(fit, fitOptions)
             if self._verbose:
                 fitResultObject.Print("V")
@@ -1471,12 +1500,13 @@ class QCDNormalizationManagerBase:
    
     def plotTemplates(self):
         '''
-        Plots shapes of templates
+        Plots shapes of templates - OBSOLETE?
         '''
         self.Verbose("plotTemplates()")
         for index, k in enumerate(self._templates.keys()):
             if self._templates[k].hasHisto():
-                self.Verbose("Plotting template %s" % (k), index==0)
+                self.Verbose("Plotting template %s" % (k), index==0) 
+                # self._templates[k].plot() # requires fit-min and fit-max as input parameters
         return
 
     def resetBinResults(self):
@@ -1617,21 +1647,21 @@ class QCDNormalizationManagerBase:
         # s += "}\n"
         # s += "# Log of fake rate calculation:\n"
 
-        self.Print("Wrote fit results and comments in file %s" % filename, True)
+        self.Verbose("Writing results in file %s" % filename, True)
         fOUT = open(filename,"w")
         fOUT.write(s)
-
-        # START comments
         fOUT.write("'''\n")
         for l in self._commentLines:
             fOUT.write(l + "\n")
-        # END comments
         fOUT.write("'''\n")
         fOUT.close()
-        
+
+        msg = "Results written in file %s" % filename        
+        self.Print(ShellStyles.SuccessLabel() + msg + ShellStyles.NormalStyle(), True)
+
+        # FIXME: The two functions below currenty do not work (KeyError: 'Inclusive')
         if 0:
-            print "\nNormalization factors written to '%s'\n"%filename
-            self._generateCoefficientPlot()
+            self._generateCoefficientPlot() 
             self._generateDQMplot()
         return
 
@@ -2081,10 +2111,10 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         self._commentLines.extend(lines)
 
         #==== Print final results
-        print colors.GREEN
+        #print colors.GREEN
         for line in lines:
             self.Print(line)
-        print colors.WHITE
+        #print colors.WHITE
         return
 
     
@@ -2134,7 +2164,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         nRatioBaseline     = (nDataBaseline)/(nBkgBaseline)
         nRatioBaselineError= errorPropagation.errorPropagationForDivision(nDataBaseline, nDataBaselineError, nBkgBaseline, nBkgBaselineError)
 
-        print "XENIOS"
+        print "QCDNormalization.py: XENIOS"
         # nRatioInverted     = (nDataInverted)/(nBkgInverted) #
         # nRatioInvertedError= errorPropagation.errorPropagationForDivision(nDataInverted, nDataInvertedError, nBkgInverted, nBkgBaselineError)
         qcdPurity          = nQCDFitBaseline/nDataBaseline
@@ -2143,7 +2173,8 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         ewkPurityError     = errorPropagation.errorPropagationForDivision(nFakeBaseline, nFakeBaselineError, nDataBaseline, nDataBaselineError)
 
         # Definitions
-        lines  = ["{:^100}".format("FINAL RESULTS")]
+        lines  = []
+        #lines  = ["{:^100}".format("FINAL RESULTS")]
         align  = "{:<14} {:^10} {:>10} {:^3} {:<10} {:<10} {:<20}"
         header = align.format("Sample", "Region", "Value", "+/-", "Error", "Source", "Comment")
         hLine  = "="*100

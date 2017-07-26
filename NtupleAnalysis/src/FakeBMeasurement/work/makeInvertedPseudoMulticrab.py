@@ -500,10 +500,8 @@ def main():
     Print("Average processing time per module was %.1f s" % getAvgProcessTimeForOneModule(myGlobalStartTime, myTotalModules), True)
     Print("Total elapsed time was %.1f s" % getTotalElapsedTime(myGlobalStartTime), False)
 
-    msg = "SUCCESS:%s Created pseudo-multicrab directory for shape type \"%s\":" % (ShellStyles.NormalStyle(), shapeType)
-    Print(ShellStyles.SuccessStyle() + msg, True)
-    Print(myOutputCreator.getDirName(), False)
-
+    msg = "Created pseudo-multicrab %s for shape type \"%s\"" % (myOutputCreator.getDirName(), shapeType)
+    Print(ShellStyles.SuccessLabel() + msg, True)
     return
 
 #================================================================================================ 
