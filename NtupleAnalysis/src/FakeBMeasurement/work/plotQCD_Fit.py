@@ -245,7 +245,8 @@ def main(opts):
         removeList = ["QCD", "QCD-b", "Charged"]
         for d in removeList:
             datasetsMgr.remove(filter(lambda name: d in name, datasetsMgr.getAllDatasetNames()))
-        datasetsMgr.PrintInfo()
+        if 0:
+            datasetsMgr.PrintInfo()
         
         # Re-order datasets (different for inverted than default=baseline)
         newOrder = ["Data"]
@@ -355,7 +356,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
         ROOT.Math.MinimizerOptions.SetDefaultTolerance(1e-03)  # Minuit/Minuit2 converge when the EDM is less a given tolerance. (default 1e-03)
     if 1:
         hLine  = "="*45
-        title  = "{:^45}".format("Minimzer Options")
+        title  = "{:^45}".format("Minimizer Options")
         print "\t", hLine
         print "\t", title
         print "\t", hLine
@@ -388,10 +389,11 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     # EWK
     #=========================================================================================
     '''
-    Optimal fit (Chi2/D.O.F = 3.5)
+    Optimal fit (Chi2/D.O.F = 3.2)
     FITMIN  ;  80
     FITMAX  : 800
     BinWidth:  10 GeV/c^2
+    par3    : -3.9174e-01 (fixed)
     '''
     Print("Setting the fit-function to the EWK template", False)
     FITMIN_EWK =  80 
@@ -399,7 +401,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     par0 = [+7.1817e-01,   0.0,   1.0] # cb_norm 
     par1 = [+1.7684e+02, 150.0, 200.0] # cb_mean
     par2 = [+2.7287e+01,  20.0,  40.0] # cb_sigma (fixed for chiSq=2)
-    par3 = [-3.9174e-01,  -0.5,   0.0] # cb_alpha (fixed for chiSq=2)
+    par3 = [-3.9174e-01,  -1.0,   0.0] # cb_alpha (fixed for chiSq=2)
     par4 = [+2.5104e+01,   0.0,  50.0] # cb_n
     par5 = [+7.4724e-05,   0.0,   1.0] # expo_norm
     par6 = [-4.6848e-02,  -1.0,   0.0] # expo_a
@@ -407,8 +409,8 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     par8 = [+6.3201e+01,  20.0,  80.0] # gaus_sigma
     template_EWKInclusive_Baseline.setFitter(QCDNormalization.FitFunction("EWKFunction", boundary=0, norm=1, rejectPoints=0), FITMIN_EWK, FITMAX_EWK)
     template_EWKInclusive_Baseline.setDefaultFitParam(defaultInitialValue = None,
-                                                      defaultLowerLimit   = [par0[1], par1[1], par2[0], par3[0], par4[1], par5[1], par6[1], par7[0], par8[1]],
-                                                      defaultUpperLimit   = [par0[2], par1[2], par2[0], par3[0], par4[2], par5[2], par6[2], par7[0], par8[2]])
+                                                      defaultLowerLimit   = [par0[1], par1[1], par2[1], par3[0], par4[1], par5[1], par6[1], par7[1], par8[1]],
+                                                      defaultUpperLimit   = [par0[2], par1[2], par2[2], par3[0], par4[2], par5[2], par6[2], par7[2], par8[2]])
 
     #=========================================================================================
     # QCD
