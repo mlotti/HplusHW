@@ -104,9 +104,9 @@ void BJetSelection::initialize(const ParameterSet& config) {
 void BJetSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "bjetSelection_"+sPostfix);
 
-  const int  nBinsBDisc = 10;
-  const float minBDisc = 0.0;
-  const float maxBDisc = 10.0;
+  int  nBinsBDisc = 10;
+  float minBDisc = 0.0;
+  float maxBDisc = 10.0;
   if (fCommonPlots != nullptr) {  
     nBinsBDisc= fCommonPlots->getBJetDiscBinSettings().bins();
     minBDisc = fCommonPlots->getBJetDiscBinSettings().min();
