@@ -122,6 +122,9 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
 
+    print "This is superceded by plotDataDrivenPurity.py - If you want to use this think of a reason as to why you need it. EXIT"
+    sys.exit()
+
     #optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]
     optModes = ["OptChiSqrCutValue100"]
 
@@ -490,7 +493,7 @@ if __name__ == "__main__":
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
-    MERGEEWK     = False
+    MERGEEWK     = True
     URL          = False
     NOERROR      = True
     SAVEDIR      = "/publicweb/a/aattikis/FakeBMeasurement/"

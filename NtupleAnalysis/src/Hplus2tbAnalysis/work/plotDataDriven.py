@@ -379,11 +379,11 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
         # Create the plotting object
         p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
         
-#        test = True
-#        if test:
-#            hQCD = p.histoMgr.getHisto("QCD-Data").getRootHisto()
-#            hQCD.Scale(1/0.74998)
-#
+        test = False
+        if test:
+            hQCD = p.histoMgr.getHisto("QCD-Data").getRootHisto()
+            hQCD.Scale(0.74592) #QCD Purity
+
         # Apply QCD data-driven style
         p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_500", styles.getSignalStyleHToTB())
         p.histoMgr.forHisto(qcdDatasetName, styles.getAltQCDStyle())

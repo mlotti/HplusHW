@@ -86,16 +86,6 @@ import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.NtupleAnalysis.tools.pseudoMultiCrabCreator as pseudoMultiCrabCreator
 
 #================================================================================================ 
-# Global variables
-#================================================================================================ 
-_generalOptions = {
-    "normalizationPoint"         : "AfterStdSelections",
-    "normalizationSourcePrefix"  : "ForQCDNormalization/Normalization",
-    "ewkSourceForQCDPlusFakeTaus": "ForDataDrivenCtrlPlotsEWKGenuineTaus",
-    "ewkSourceForQCDOnly"        : "ForDataDrivenCtrlPlots",
-    }
-
-#================================================================================================ 
 # Class definition
 #================================================================================================ 
 class ModuleBuilder:
@@ -111,8 +101,10 @@ class ModuleBuilder:
         self._fakeWeightingPlusResult  = None
         self._fakeWeightingMinusResult = None
         
-    ## Clean up memory
     def delete(self):
+        '''
+        Clean up memory
+        '''
         if self._nominalResult != None:
             self._nominalResult.delete()
         if self._fakeWeightingPlusResult != None:
@@ -172,7 +164,8 @@ class ModuleBuilder:
                                                                 self._optimizationMode,
                                                                 self._systematicVariation, 
                                                                 opts.analysisNameSaveAs)
-        Verbose("Obtaining results", True)
+
+        Print("Obtaining results", True)
         self._nominalResult = qcdInvertedResult.QCDInvertedResultManager(dataPath,
                                                                          ewkPath,
                                                                          self._dsetMgr,
@@ -189,10 +182,12 @@ class ModuleBuilder:
         self._outputCreator.addModule(myModule)
     
     def buildQCDNormalizationSystModule(self, dataPath, ewkPath):
-        # Up variation of QCD normalization (i.e. ctrl->signal region transition)
-        # Note that only the source histograms for the shape uncert are stored
-        # because the result must be calculated after rebinning
-        # (and rebinning is no longer done here for flexibility reasons)
+        '''
+        Up variation of QCD normalization (i.e. ctrl->signal region transition)
+        Note that only the source histograms for the shape uncert are stored
+        because the result must be calculated after rebinning
+        (and rebinning is no longer done here for flexibility reasons)
+        '''
         mySystModule = pseudoMultiCrabCreator.PseudoMultiCrabModule(self._dsetMgr,
                                                                     self._era,
                                                                     self._searchMode,
@@ -389,6 +384,9 @@ def importNormFactors(era, searchMode, optimizationMode, multicrabDirName):
     return myNormFactors
 
 
+#================================================================================================ 
+# Main
+#================================================================================================ 
 def main():
     
     # Object for selecting data eras, search modes, and optimization modes
@@ -420,7 +418,7 @@ def main():
     myModuleSelector.setPrimarySource(label=opts.analysisName, dsetMgrCreator=dsetMgrCreator)
 
     # Select modules
-    myModuleSelector.doSelect(opts=None)#(opts=opts)
+    myModuleSelector.doSelect(opts=None) #FIXME: (opts=opts)
 
     # Loop over era/searchMode/optimizationMode combos
     myDisplayStatus = True
@@ -454,13 +452,11 @@ def main():
         erasList   = myModuleSelector.getSelectedEras()
         modesList  = myModuleSelector.getSelectedSearchModes()
         optList    = myModuleSelector.getSelectedOptimizationModes()
-        # Fix the optimizationMode list by hand (remove duplicate entries, add default option)
-        optListFix = list(set(optList)) 
 
         # For-Loop over era, searchMode, and optimizationMode options
         for era in erasList:
             for searchMode in modesList:
-                for optimizationMode in optListFix:
+                for optimizationMode in optList:
                     
                     Verbose("era = %s, searchMode = %s, optMode = %s" % (era, searchMode, optimizationMode), True)
                     # If an optimization mode is defined in options skip the rest
@@ -477,7 +473,7 @@ def main():
 
                     # Inform user of what is being processes
                     msg = "Module %d/%d:%s %s/%s" % (iModule, myTotalModules, ShellStyles.NormalStyle(), myModuleInfoString, shapeType)
-                    Print(ShellStyles.CaptionStyle() + msg, True) #ShellStyles.HighlightAltStyle()
+                    Print(ShellStyles.CaptionStyle() + msg, True)
 
                     # Keep time
                     myStartTime = time.time()
@@ -490,9 +486,10 @@ def main():
                         if opts.verbose:
                             nominalModule.debug()
                      
-                    doQCDNormalizationSyst=False
-                    msg = "Disabling systematics"
-                    Print(ShellStyles.WarningLabel() + msg, True)
+                    doQCDNormalizationSyst=False #FIXME
+                    if not doQCDNormalizationSyst:
+                        msg = "Disabling systematics"
+                        Print(ShellStyles.WarningLabel() + msg, True)
                     nominalModule.buildModule(opts.dataSrc, opts.ewkSrc, myNormFactors["nominal"], doQCDNormalizationSyst, opts.normDataSrc, opts.normEwkSrc)
 
                     if len(mySystematicsNames) > 0:
@@ -544,9 +541,6 @@ def main():
     Print(ShellStyles.SuccessLabel() + msg, True)
     return
 
-#================================================================================================ 
-# Main
-#================================================================================================ 
 if __name__ == "__main__":
     '''
     https://docs.python.org/3/library/argparse.html

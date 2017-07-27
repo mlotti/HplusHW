@@ -474,7 +474,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     manager.writeNormFactorFile(fileName, opts)
     
     # Not really needed to plot the histograms again
-    if 0:
+    if 1:
         saveName = fileName.replace("/", "_").replace(".py", "")
 
         # Draw the histograms

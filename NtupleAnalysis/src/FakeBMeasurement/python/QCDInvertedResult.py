@@ -89,7 +89,7 @@ def PrintTH1Info(myTH1):
     align  = "{:>5} {:>10} {:^20} {:>15} {:^3} {:<10} {:>15} {:^3} {:<10}"
     header = align.format("Bin", "Bin Width", "Bin Range", "Bin Content", "+/-", "Error", "Cum. Integral", "+/-", "Error")
     hLine  = "="*100
-    table.append("{:^100}".format(myTH1.GetName()))
+    #table.append("{:^100}".format(myTH1.GetName()))
     table.append(hLine)
     table.append(header)
     table.append(hLine)
@@ -106,6 +106,7 @@ def PrintTH1Info(myTH1):
         integral      = h.IntegralAndError(0, j, integralError, "")
         table.append(align.format(j, binWidth, binRange, binContent, "+/-", binError,"%.1f" % integral, "+/-", "%.1f" % integralError))
     table.append(hLine)
+    Print("{:^100}".format(myTH1.GetName()), True)
     for l in table:
         Print(l)
     return
@@ -257,8 +258,10 @@ class QCDInvertedShape:
             myShapeEwkSumUncert.append(0.0)
 
         Verbose("Calculate results separately for each phase-space bin and then combine", True)
-        # For-loop: All bins 
+        # For-loop: All measurement bins (e.g. tau pT bins for HToTauNu)
         for i in range(0, nSplitBins):
+            # N.B: The \"Inclusive\" value is in the zeroth bin
+
             Verbose("Get data-driven QCD, data, and MC EWK shape histogram for the phase-space bin", True)
             h     = shape.getDataDrivenQCDHistoForSplittedBin(i)
             hData = shape.getDataHistoForSplittedBin(i)
@@ -274,11 +277,9 @@ class QCDInvertedShape:
                 msg = "No normalization factors available for bin '%s' when accessing histogram %s! Ignoring this bin..." % (wQCDLabel,shape.getHistoName())
                 Print(ShellStyles.WarningLabel() + msg, True)
             else:
-                wQCD = normFactors[wQCDLabel]
-                msg = "Weighting bin \"%i\" (label=\"%s\")  with normFactor \"%s\"" % (i, wQCDLabel, wQCD)
-                Verbose(ShellStyles.NoteLabel() + msg, True)
-
-            Verbose("The QCD weight is wQCD = %s (label=%s)" % (wQCD, wQCDLabel), True)
+                wQCD = normFactors[wQCDLabel]                
+            msg = "Weighting bin \"%i\" (label=\"%s\")  with normFactor \"%s\"" % (i, wQCDLabel, wQCD)
+            Verbose(ShellStyles.NoteLabel() + msg, True)
 
             # Construct info table (debugging)
             table  = []
@@ -296,7 +297,7 @@ class QCDInvertedShape:
             xMin      = hData.GetXaxis().GetBinCenter(0)
             xMax      = hData.GetXaxis().GetBinCenter(nBins+1)
 
-            # For-Loop: All bins in the shape histogram
+            # For-Loop (nested): All bins in the shape histogram 
             for j in range(1, nBins+1):
 
                 # Initialise values
@@ -311,7 +312,7 @@ class QCDInvertedShape:
                     binRange   = "%.1f -> %.1f" % (h.GetXaxis().GetBinLowEdge(j), h.GetXaxis().GetBinUpEdge(j) )
                     binWidth   = GetTH1BinWidthString(h, j)
                     binSum    += binContent
-                    myResult   = binContent * wQCD
+                    myResult   = binContent * wQCD #apply  normalisation factor (transfer from CR to SR))
 
                     Verbose("Calculate abs. stat. uncert. for data and for MC EWK (Do not calculate here MC EWK syst.)", True)
                     myStatDataUncert = hData.GetBinError(j) * wQCD
@@ -331,7 +332,7 @@ class QCDInvertedShape:
                 binError   = self._resultShape.GetBinError(j) + myCountObject.statUncertainty()**2
                 Verbose("Setting bin %i to content %0.1f +/- %0.1f" % (j, binContent, binError), j==0)
                 self._resultShape.SetBinContent(j, binContent)
-                self._resultShape.SetBinError(j, binError) # Sum squared
+                self._resultShape.SetBinError(j, binError) # Sum squared (take sqrt outside loop on final squared sum)
                 
                 Verbose("Sum items for purity calculation", True)
                 myShapeDataSum[j-1]       += hData.GetBinContent(j)*wQCD
@@ -547,39 +548,42 @@ class QCDInvertedResultManager:
         self._verbose = verbose
 
         msg = "Obtaining final shape from data path \"%s\"" % (dataPath) 
-        Verbose(ShellStyles.HighlightStyle() + msg + ShellStyles.NormalStyle(), self._verbose)
+        Verbose(ShellStyles.HighlightStyle() + msg + ShellStyles.NormalStyle(), True)
 
         # Determine list of plots to consider
         myObjects = dsetMgr.getDataset("Data").getDirectoryContent(dataPath)
 
-        # Ignore unwanted histograms and those designed for HToTauNu
-        keywordList = ["JetEtaPhi"] #TH2 plots!
+        # Ignore unwanted histograms and those designed for HToTauNu 
+        keywordList = ["JetEtaPhi"]
         ignoreList  = []
         for k in keywordList:
             ignoreList.extend(filter(lambda name: k in name, myObjects))
             
-        msg = "Ignoring a total of %s unwanted histograms and/or those designed for HToTauNu" % (len(ignoreList))
+        msg = "Ignoring a total of %s histograms:" % (len(ignoreList))
         Print(ShellStyles.WarningLabel() + msg, True)
+        for hName in ignoreList:
+            print "\t", os.path.join(dataPath, hName) 
 
         # Update myObjects list with filtered results
         myObjects = list(x for x in myObjects if x not in ignoreList)
-
         
         # For-Loop: All plots to consider
         for i, plotName in enumerate(myObjects, 1):
-            #if "NVertices_AfterStandardSelections" not in plotName:
-            #    continue # ALEX-IRO-FIXME 
-                        
+            
+            #if "NBjets_AfterAllSelections" not in plotName:
+            if "LdgTrijetMass_AfterAllSelections" not in plotName:
+                continue #alex-iro-fixme
+
             msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(myObjects)), os.path.join(dataPath, plotName) )
-            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), i==1)#ShellStyles.CaptionStyle()
+            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), i==1)
 
             # Ensure that histograms exist
             dataOk = self._sanityChecks(dsetMgr, dataPath, plotName) 
             ewkOk  = self._sanityChecks(dsetMgr, ewkPath, plotName)
 
-            # Obtain shape plots (the returned object is not owned)
-            myShapeHisto = self._obtainShapeHistograms(i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors) #alex-iro-fixme
-
+            Verbose("Obtaining shape plots (the returned object is not owned)", True)
+            myShapeHisto = self._obtainShapeHistograms(i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors)
+            
             # Obtain plots for systematics coming from met shape difference for control plots #FIXME-Systematics
             if optionCalculateQCDNormalizationSyst:
                 if isinstance(myShapeHisto, ROOT.TH2):
@@ -616,17 +620,64 @@ class QCDInvertedResultManager:
             myRootObject.Delete()
         return myStatus
     
+    def PrintShapeInputSummary(self, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors):
+        # Inform user of input (debugging purposes)
+        lines = []
+        align = "{:<20} {:<60}"
+        hLine = "="*80
+        lines.append(hLine)
+        lines.append(align.format("Variable", "Value"))
+        lines.append(hLine)
+        lines.append(align.format("Data Histo", os.path.join(dataPath, plotName) ))
+        lines.append(align.format("EWK Histo" , os.path.join(ewkPath , plotName) ))
+        lines.append(align.format("Luminosity", luminosity))
+        lines.append(align.format("NormFactor", normFactors))
+        lines.append(hLine)
+        for l in lines:
+            Print(l, False)
+        # dsetMgr.PrintInfo()
+        return
+
+    def PrintShapePuritySummary(self, myShape):
+        # Inform user of Purity (debugging purposes)
+        lines = []
+        align = "{:>8} {:^3} {:^10} {:^3} {:^10}"
+        hLine = "="*40
+        lines.append(hLine)
+        lines.append(align.format("Purity", "+/-", "Uncertainty", "+/-", "Syst. Uncertainty"))
+        lines.append(hLine)
+        lines.append(align.format("%.2f" % myShape.getIntegratedPurity().value(), "+/-", "%.3f" % myShape.getIntegratedPurity().uncertainty(), "+/-", "%.3f" % myShape.getIntegratedPurity().systUncertainty() ) )
+        lines.append(align.format("%.2f" % myShape.getMinimumPurity().value()   , "+/-", "%.3f" % myShape.getMinimumPurity().uncertainty()   , "+/-", "%.3f" % myShape.getIntegratedPurity().systUncertainty() ) )
+        lines.append(hLine)
+        for l in lines:
+            Print(l, False)
+        return
+
     def _obtainShapeHistograms(self, i, dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors):
-        
-        Verbose("Initialise \"DataDrivenQCDShape\" type object", True)
-        myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr,"Data", "EWK", plotName, dataPath, ewkPath, luminosity, self._useInclusiveNorm)
+        Verbose("_obtainShapeHistograms()", True)
+
         if self._verbose:
-            PrintTH1Info(myShape.getIntegratedDataHisto())
+            self.PrintShapeInputSummary(dataPath, ewkPath, dsetMgr, plotName, luminosity, normFactors)
         
-        Verbose("Initialise \"QCDInvertedShape\" type object (Takes \"DataDrivenQCDShape\" type object as argument)", True)
+        Verbose("Obtain the (pre-normFactor) shape %s as \"DataDrivenQCDShape\" type object" % (plotName), True) 
+        myShape = dataDrivenQCDCount.DataDrivenQCDShape(dsetMgr, "Data", "EWK", plotName, dataPath, ewkPath, luminosity, self._useInclusiveNorm) #pre-normFactor
+
+        if self._verbose:
+            msg = "Printing TH1s (before NormFactors) of \"Data\", \"Data-Driven QCD\", \"EWK\",  and \"Bin-by\Bin Purity\" and \"Integrated Purity\""
+            Print(msg, True)
+            PrintTH1Info(myShape.getIntegratedDataHisto())
+            PrintTH1Info(myShape.getIntegratedDataDrivenQCDHisto()) #Data-EWK. NormFactor not applied
+            PrintTH1Info(myShape.getIntegratedEwkHisto())
+            PrintTH1Info(myShape.getPurityHisto())
+            PrintTH1Info(myShape.getIntegratedPurityForShapeHisto())
+
+        if self._verbose:
+            self.PrintShapePuritySummary(myShape)
+        
+        Verbose("Obtain the (post-normFactor) shape %s as \"QCDInvertedShape\" type object (Takes \"DataDrivenQCDShape\" type object as argument)" % (plotName), True)
         moduleInfo = self._moduleInfoString + "_" + plotName
         myPlot     = QCDInvertedShape(myShape, moduleInfo, normFactors, optionUseInclusiveNorm=self._useInclusiveNorm)
-        myPlot.PrintSettings(printHistos=self._verbose, verbose=self._verbose)
+        myPlot.PrintSettings(printHistos=self._verbose, verbose=self._verbose) _
 
         myShape.delete()
         myPlotHisto = aux.Clone(myPlot.getResultShape(), "ctrlPlotShapeInManager")
