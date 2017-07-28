@@ -387,7 +387,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5}#, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": yMin, "ymax": yMax}
         histoKwargs[h] = kwargs
     return histoKwargs
     

@@ -570,9 +570,9 @@ class QCDInvertedResultManager:
         # For-Loop: All plots to consider
         for i, plotName in enumerate(myObjects, 1):
             
-            #if "NBjets_AfterAllSelections" not in plotName:
-            if "LdgTrijetMass_AfterAllSelections" not in plotName:
-                continue #alex-iro-fixme
+            # For testing
+            #if "LdgTrijetMass_AfterAllSelections" not in plotName:
+            #    continue
 
             msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Histogram", "%i" % i, "/", "%s:" % (len(myObjects)), os.path.join(dataPath, plotName) )
             Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), i==1)
@@ -677,7 +677,7 @@ class QCDInvertedResultManager:
         Verbose("Obtain the (post-normFactor) shape %s as \"QCDInvertedShape\" type object (Takes \"DataDrivenQCDShape\" type object as argument)" % (plotName), True)
         moduleInfo = self._moduleInfoString + "_" + plotName
         myPlot     = QCDInvertedShape(myShape, moduleInfo, normFactors, optionUseInclusiveNorm=self._useInclusiveNorm)
-        myPlot.PrintSettings(printHistos=self._verbose, verbose=self._verbose) _
+        myPlot.PrintSettings(printHistos=self._verbose, verbose=self._verbose)
 
         myShape.delete()
         myPlotHisto = aux.Clone(myPlot.getResultShape(), "ctrlPlotShapeInManager")

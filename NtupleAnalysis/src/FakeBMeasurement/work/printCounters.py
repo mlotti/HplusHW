@@ -10,33 +10,33 @@ For more counter tricks and optios see also:
 HiggsAnalysis/NtupleAnalysis/scripts/hplusPrintCounters.py
 
 Usage:
-./printFakeBAnalysisCounters.py -m <multicrab_dir> [opts]
+./printCounters.py -m <multicrab_dir> [opts]
 
 Commonly Used Commands:
-./printFakeBAnalysisCounters.py -m <pseudo-mcrab> --fractionEWK --mergeEWK --valueFormat %.2f --latex
-./printFakeBAnalysisCounters.py -m <pseudo-mcrab> --mergeEWK --valueFormat %.0f --latex
-./printFakeBAnalysisCounters.py -m <pseudo-mcrab> --mergeEWK --valueFormat %.2f -o "OptNumberOfBJetsCutDirection<=NumberOfBJetsCutValue0MaxNumberOfBJetsInTopFit3"
-./printFakeBAnalysisCounters.py -m <pseudo-mcrab> --mergeEWK --valueFormat %.0f -o "OptChiSqrCutValue10FoxWolframMomentCutValue0p5"
+./printCounters.py -m <pseudo-mcrab> --fractionEWK --mergeEWK --valueFormat %.2f --latex
+./printCounters.py -m <pseudo-mcrab> --mergeEWK --valueFormat %.0f --latex
+./printCounters.py -m <pseudo-mcrab> --mergeEWK --valueFormat %.2f -o "OptNumberOfBJetsCutDirection<=NumberOfBJetsCutValue0MaxNumberOfBJetsInTopFit3"
+./printCounters.py -m <pseudo-mcrab> --mergeEWK --valueFormat %.0f -o "OptChiSqrCutValue10FoxWolframMomentCutValue0p5"
 
 Examples:
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --fractionEWK --mergeEWK --valueFormat %.2f -o "OptChiSqrCutValue20FoxWolframMomentCutValue0p5"
-./printFakeBAnalysisCounters.py -m <multicrab_dir>  --mergeEWK --valueFormat %.2f -o "OptChiSqrCutValue20FoxWolframMomentCutValue0p5"
-./printFakeBAnalysisCounters.py -m <multicrab_dir> -i "JetHT|TT"
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --noError --format %.3f --latex
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK --latex -s
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK --latex -s --histoLevel Debug
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --mcOnly --intLumi 100000
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --fractionEWK
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --subcounters
-./printFakeBAnalysisCounters.py -m <multicrab_dir> -i "2016B|TTTT"
-./printFakeBAnalysisCounters.py -m <multicrab_dir> -e "2016B|TTTT"
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --latex
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --valueFormat %.2f
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --withPrecision 3
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --valueOnly
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --uncertaintyFormat %.2f
-./printFakeBAnalysisCounters.py -m <multicrab_dir> --uncertaintyPrecision 4
+./printCounters.py -m <multicrab_dir> --fractionEWK --mergeEWK --valueFormat %.2f -o "OptChiSqrCutValue20FoxWolframMomentCutValue0p5"
+./printCounters.py -m <multicrab_dir>  --mergeEWK --valueFormat %.2f -o "OptChiSqrCutValue20FoxWolframMomentCutValue0p5"
+./printCounters.py -m <multicrab_dir> -i "JetHT|TT"
+./printCounters.py -m <multicrab_dir> --noError --format %.3f --latex
+./printCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK
+./printCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK --latex -s
+./printCounters.py -m <multicrab_dir> --noError --format %.3f --precision 3 --mergeEWK --latex -s --histoLevel Debug
+./printCounters.py -m <multicrab_dir> --mcOnly --intLumi 100000
+./printCounters.py -m <multicrab_dir> --fractionEWK
+./printCounters.py -m <multicrab_dir> --subcounters
+./printCounters.py -m <multicrab_dir> -i "2016B|TTTT"
+./printCounters.py -m <multicrab_dir> -e "2016B|TTTT"
+./printCounters.py -m <multicrab_dir> --latex
+./printCounters.py -m <multicrab_dir> --valueFormat %.2f
+./printCounters.py -m <multicrab_dir> --withPrecision 3
+./printCounters.py -m <multicrab_dir> --valueOnly
+./printCounters.py -m <multicrab_dir> --uncertaintyFormat %.2f
+./printCounters.py -m <multicrab_dir> --uncertaintyPrecision 4
 '''
 
 #================================================================================================ 
