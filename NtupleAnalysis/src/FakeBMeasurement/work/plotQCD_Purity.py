@@ -122,8 +122,6 @@ def GetDatasetsFromDir(opts):
 
 def main(opts):
 
-    print "This is superceded by plotDataDrivenPurity.py - If you want to use this think of a reason as to why you need it. EXIT"
-    sys.exit()
 
     #optModes = ["", "OptChiSqrCutValue50p0", "OptChiSqrCutValue100p0", "OptChiSqrCutValue200p0"]
     optModes = ["OptChiSqrCutValue100"]
@@ -174,58 +172,39 @@ def main(opts):
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
 
-        # Do the purity plots
-        if not opts.mergeEWK:        
-            Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
-            return
-        for hName in GetHistoList(analysisType="Inverted", bType=""):
-            PurityPlots(datasetsMgr, hName, "Inverted")
+        Print("Add \"_AfterStandardSelectionS\" histograms (CtrlPlots folder). The \"FakeBPurity\" histos are at this stage irrelevant! EXIT!", True)
+        sys.exit()
+
+
+        bType  = "" # ["", "EWKFakeB", "EWKGenuineB"]
+        folder = "FakeBPurity" + bType
+        hList  = datasetsMgr.getDataset("EWK").getDirectoryContent(folder)
+        for hName in hList:
+            PlotPurity(datasetsMgr, os.path.join(folder, hName))
+
     return
 
+#    folder = "ForFakeBMeasurement" + bType
+#    histoList.append("%s/%s_TopMassReco_ChiSqr_AfterAllSelections" % (folder, analysisType) )
+#    histoList.append("%s/%s_TopMassReco_LdgTetrajetPt_AfterAllSelections" % (folder, analysisType) )
+#    histoList.append("%s/%s_TopMassReco_LdgTetrajetMass_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_SubldgTetrajetPt_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_SubldgTetrajetMass_AfterAllSelections" % (folder, analysisType) )
+#    histoList.append("%s/%s_TopMassReco_TetrajetBJetPt_AfterAllSelections" % (folder, analysisType) )
+#    histoList.append("%s/%s_TopMassReco_TetrajetBJetEta_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections" % (folder, analysisType) )
+#    histoList.append("%s/%s_TopMassReco_LdgTrijetPt_AfterAllSelections" % (folder, analysisType) )
+#    histoList.append("%s/%s_TopMassReco_LdgTrijetM_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_SubLdgTrijetPt_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_SubLdgTrijetM_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_LdgDijetPt_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_LdgDijetM_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_SubLdgDijetPt_AfterAllSelections" % (folder, analysisType) )
+#    # histoList.append("%s/%s_TopMassReco_SubLdgDijetM_AfterAllSelections" % (folder, analysisType) )
 
-def GetHistoList(analysisType="Inverted", bType=""):
-    Verbose("Creating purity histo list  for %s" % analysisType)
-
-    IsBaselineOrInverted(analysisType)
-
-    bTypes = ["", "EWKFakeB", "EWKGenuineB"]
-    if bType not in bTypes:
-        raise Exception("Invalid analysis type \"%s\". Please select one of the following: %s" % (bType, "\"" + "\", \"".join(bTypes) + "\"") )
-
-    histoList = []
-
-    folder = "FakeBPurity" + bType
-    histoList.append("%s/%s_FailedBJetPt_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_FailedBJetEta_AfterAllSelections" % (folder, analysisType) )
-    histoList.append("%s/%s_FailedBJetBDisc_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_FailedBJetPdgId_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_FailedBJetPartonFlavour_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_FailedBJetHadronFlavour_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_FailedBJetAncestry_AfterAllSelections" % (folder, analysisType) )
-
-    folder = "ForFakeBMeasurement" + bType
-    histoList.append("%s/%s_TopMassReco_ChiSqr_AfterAllSelections" % (folder, analysisType) )
-    histoList.append("%s/%s_TopMassReco_LdgTetrajetPt_AfterAllSelections" % (folder, analysisType) )
-    histoList.append("%s/%s_TopMassReco_LdgTetrajetMass_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_SubldgTetrajetPt_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_SubldgTetrajetMass_AfterAllSelections" % (folder, analysisType) )
-    histoList.append("%s/%s_TopMassReco_TetrajetBJetPt_AfterAllSelections" % (folder, analysisType) )
-    histoList.append("%s/%s_TopMassReco_TetrajetBJetEta_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_DeltaEtaLdgTrijetBJetTetrajetBJet_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_DeltaPhiLdgTrijetBJetTetrajetBJet_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_DeltaRLdgTrijetBJetTetrajetBJet_AfterAllSelections" % (folder, analysisType) )
-    histoList.append("%s/%s_TopMassReco_LdgTrijetPt_AfterAllSelections" % (folder, analysisType) )
-    histoList.append("%s/%s_TopMassReco_LdgTrijetM_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_SubLdgTrijetPt_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_SubLdgTrijetM_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_LdgDijetPt_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_LdgDijetM_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_SubLdgDijetPt_AfterAllSelections" % (folder, analysisType) )
-    # histoList.append("%s/%s_TopMassReco_SubLdgDijetM_AfterAllSelections" % (folder, analysisType) )
-    return histoList
-
-
-def getHistos(datasetsMgr, histoName, analysisType):
+def getHistos(datasetsMgr, histoName):
     
     h1 = datasetsMgr.getDataset("Data").getDatasetRootHisto(histoName)
     h1.setName("Data")
@@ -244,14 +223,11 @@ def IsBaselineOrInverted(analysisType):
     return
 
 
-def PurityPlots(datasetsMgr, histoName, analysisType="Inverted"):
+def PlotPurity(datasetsMgr, histoName):
     '''
     Create plots with "FakeB=Data-EWKGenuineB"
     '''
-    Verbose("Plotting histogram %s for Data, EWK, QCD for %s" % (histoName, analysisType), True)
-
-    # Sanity check
-    IsBaselineOrInverted(analysisType)
+    Verbose("Plotting histogram %s for Data, EWK, QCD " % (histoName), True)
 
     # Which folder to use (redundant)
     defaultFolder  = "FakeBPurity" 
@@ -259,20 +235,20 @@ def PurityPlots(datasetsMgr, histoName, analysisType="Inverted"):
     fakeBFolder    = defaultFolder + "EWKFakeB"
 
     # Get histos (Data, EWK) for Inclusive
-    p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName, analysisType) )
+    p1 = plots.ComparisonPlot(*getHistos(datasetsMgr, histoName) )
     p1.histoMgr.normalizeMCToLuminosity(datasetsMgr.getDataset("Data").getLuminosity())
 
     # Clone histograms 
-    Data = p1.histoMgr.getHisto("Data").getRootHisto().Clone(analysisType + "-Data")
-    EWK  = p1.histoMgr.getHisto("EWK").getRootHisto().Clone(analysisType  + "-EWK")
-    QCD= p1.histoMgr.getHisto("Data").getRootHisto().Clone(analysisType + "-QCD")
+    Data = p1.histoMgr.getHisto("Data").getRootHisto().Clone("Data")
+    EWK  = p1.histoMgr.getHisto("EWK").getRootHisto().Clone("EWK")
+    QCD= p1.histoMgr.getHisto("Data").getRootHisto().Clone("QCD")
 
     # Get QCD = Data-EWK
     QCD.Add(EWK, -1)
 
     # Comparison plot. The first argument is the reference histo. All other histograms are compared with respect to that. 
     QCD_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(QCD, Data, inclusiveBins=False, printValues=False)
-    EWK_Purity  , xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(EWK  , Data, inclusiveBins=False, printValues=False)
+    EWK_Purity, xMin, xMax, binList, valueDict, upDict, downDict = getPurityHisto(EWK, Data, inclusiveBins=False, printValues=False)
 
     # Create TGraphs
     if 0:
@@ -281,25 +257,23 @@ def PurityPlots(datasetsMgr, histoName, analysisType="Inverted"):
         
     # Make the plots
     p = plots.ComparisonManyPlot(QCD_Purity, [EWK_Purity], saveFormats=[])
-    if 0:
-        p = plots.PlotBase([gQCD_Purity, gEWK_Purity], saveFormats=[]) #legend/styles all wrog
 
     # Apply histo styles
-    p.histoMgr.forHisto(analysisType + "-QCD", styles.getQCDLineStyle() )
-    p.histoMgr.forHisto(analysisType + "-EWK"  , styles.getAltEWKLineStyle() )
+    p.histoMgr.forHisto("QCD", styles.getQCDLineStyle() )
+    p.histoMgr.forHisto("EWK"  , styles.getAltEWKLineStyle() )
 
     # Set draw style
-    p.histoMgr.setHistoDrawStyle(analysisType + "-QCD", "P")
-    p.histoMgr.setHistoDrawStyle(analysisType + "-EWK", "P")
+    p.histoMgr.setHistoDrawStyle("QCD", "P")
+    p.histoMgr.setHistoDrawStyle("EWK", "P")
 
     # Set legend style
-    p.histoMgr.setHistoLegendStyle(analysisType + "-QCD", "P")
-    p.histoMgr.setHistoLegendStyle(analysisType + "-EWK", "P")
+    p.histoMgr.setHistoLegendStyle("QCD", "P")
+    p.histoMgr.setHistoLegendStyle("EWK", "P")
 
     # Set legend labels
     p.histoMgr.setHistoLegendLabelMany({
-            analysisType + "-QCD" : "QCD",
-            analysisType + "-EWK" : "EWK",
+            "QCD" : "QCD",
+            "EWK" : "EWK",
             })
     
     # Draw the histograms
@@ -486,7 +460,7 @@ if __name__ == "__main__":
     ANALYSISNAME = "FakeBMeasurement"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
-    OPTMODE      = None
+    OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
     INTLUMI      = -1.0
@@ -560,6 +534,10 @@ if __name__ == "__main__":
         parser.print_help()
         #print __doc__
         sys.exit(1)
+        
+    if not opts.mergeEWK:        
+        Print("Cannot draw the Data/QCD/EWK histograms without the option --mergeEWK. Exit", True)
+        sys.exit()
 
     # Call the main function
     main(opts)
