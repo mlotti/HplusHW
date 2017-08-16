@@ -189,7 +189,8 @@ def PurityHistograms(datasetsMgr, qcdDatasetName):
         p.histoMgr.setHistoDrawStyle(qcdDatasetName, "AP")
         p.histoMgr.setHistoLegendStyle(qcdDatasetName, "LP")
         p.histoMgr.setHistoLegendLabelMany({
-                qcdDatasetName: "QCD (Data)",
+                #qcdDatasetName: "QCD (Data)",
+                qcdDatasetName: "QCD",
                 })
 
         # Draw and save the plot

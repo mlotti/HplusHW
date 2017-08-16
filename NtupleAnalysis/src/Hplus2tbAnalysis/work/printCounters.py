@@ -254,7 +254,8 @@ def doCounters(datasetsMgr):
         ]
 
     Print("Print only custom rows!", True)
-    mainTable.keepOnlyRows(rows)
+    if 0:
+        mainTable.keepOnlyRows(rows)
 
     # Get number of rows/columns
     nRows    = mainTable.getNrows()

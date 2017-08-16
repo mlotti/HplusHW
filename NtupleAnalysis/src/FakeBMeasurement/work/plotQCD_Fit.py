@@ -302,11 +302,7 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     # Rebin the EWK-MC histo (significant fit improvement - opposite effect for QCD fit)
     EWK_baseline.RebinX(2)
     EWK_inverted.RebinX(2)
-
-    # No need to normalise
-    if 0:
-        EWK_baseline.Scale(1/EWK_baseline.Integral())
-        FakeB_inverted.Scale(1/FakeB_inverted.Integral())
+    FakeB_inverted.RebinX(1)
 
     # Create the final plot object
     compareHistos = [EWK_baseline]
@@ -422,9 +418,9 @@ def PlotAndFitTemplates(datasetsMgr, histoName, inclusiveFolder, opts):
     BinWidth:  5 GeV/c^2
     '''
     Print("Setting the fit-function to the QCD template", False)
-    FITMIN_QCD =   80
+    FITMIN_QCD =  120
     FITMAX_QCD = 1000
-    bPtochos   = False
+    bPtochos   = False #True
     if bPtochos:
         par0 = [9.55e-01,   0.0 ,    1.0] # lognorm_norm
         par1 = [2.33e+02,   0.0 , 1000.0] # lognorm_mean

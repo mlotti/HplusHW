@@ -167,11 +167,12 @@ class FitFunction:
             "QCDFunctionFixed": 8,
             "FitDataWithQCDAndFakesAndGenuineTaus": 3,
             "FitDataWithFakesAndGenuineTaus"      : 2,
-            # 
+            # HToTB
             "EWKFunction"         : 9,
             "QCDFunction"         : 7,
             "QCDFunctionAlt"      : 5,
             "FitDataWithQCDAndEWK": 2,
+            #"FitDataWithQCDAndEWK": 1, #xenios
             "CrystalBall"         : 5,
         }
 
@@ -476,6 +477,7 @@ class FitFunction:
         nQCD = fitFunctionQCD(x, parQCD, norm=normQCD)
         nEWK = fitFunctionEWK(x, parEWK, norm=normEWK)
         return par[0]*(par[1]*nQCD + (1.0 - par[1])*nEWK)
+        #return 1.0*(par[0]*nQCD + (1.0 - par[0])*nEWK) #xenios
 
     def FitDataWithFakesAndGenuineTaus(self, x, par,
             QCDAndFakesFitFunction, parQCDAndFakes, QCDAndFakesnorm,
@@ -1215,7 +1217,7 @@ class QCDNormalizationTemplate:
             self.Print(l, False)
         return lines
 
-    def PrintFitResultsParameters(self, r, percentageError=True):
+    def PrintFitResultsParameters(self, r, percentageError=False):
         '''
         Print information contained in the TFitResultPtr r
         
@@ -1515,12 +1517,6 @@ class QCDNormalizationManagerBase:
         '''
         for k in self._templates.keys():
             self._templates[k].reset()
-
-    def calculateNormalizationCoefficients(self, dataHisto, fitOptions, FITMIN, FITMAX, **kwargs):
-        '''
-        Virtual method for calculating the individual norm. coefficients
-        '''
-        print "calculateQCDNormalization needs to be implemented in parent class"
     
     def calculateCombinedNormalizationCoefficient(self, hQCD, hEWKfakes):
         '''
@@ -1879,6 +1875,11 @@ class QCDNormalizationManagerBase:
                     plot.histoMgr.setHistoDrawStyle(histoName  , "AP")
                     plot.histoMgr.setHistoLegendStyle(histoName, "P")
                     
+        # Re-order to have fit curves on top  (FIXME: hard-coded)
+        self.Verbose("Re-ordering histograms before drawing them", True)
+        newOrder = ["Data Fit", "QCD Template", "Baseline Data"]
+        plot.histoMgr.reorder(newOrder)
+        
         # Create frame
         myOpts = {"ymin": 1e-5, "ymaxfactor": yMaxFactor}
         plot.setLegend(createLegend())
