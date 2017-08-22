@@ -48,7 +48,7 @@ public:
     const math::XYZTLorentzVector getTrijet2Dijet() const {return fTrijet2Dijet_p4; }
     const math::XYZTLorentzVector getTriJet2() const {return fTrijet2_p4; }
     // Leading/Subleading Tetrajet
-    const math::XYZTLorentzVector getLdgTetrajet() const {return fLdgTetrajet_p4;}
+    const math::XYZTLorentzVector getLdgTetrajet() const {return fLdgTetrajet_p4;} // uses ldg-trijet and tetrajetBjet (NOT the tetrajet with largest pt)
     const math::XYZTLorentzVector getSubldgTetrajet() const {return fSubldgTetrajet_p4;}
     const Jet getTetrajetBJet() const {return fTetrajetBJet;}
     // Leading/Subleading Trijet

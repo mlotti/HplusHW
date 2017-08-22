@@ -432,7 +432,13 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
 	output.fTetrajetBJet = tetrajetBjet;
 	output.fTetrajet1_p4 = output.fTetrajetBJet.p4() + output.fTrijet1_p4;
 	output.fTetrajet2_p4 = output.fTetrajetBJet.p4() + output.fTrijet2_p4;
-	if (output.fTetrajet1_p4.pt() > output.fTetrajet2_p4.pt()) 
+
+	// Ldg here means use the LdgTrijet
+	output.fLdgTetrajet_p4    = output.getLdgTrijet()    + output.fTetrajetBJet.p4();
+	output.fSubldgTetrajet_p4 = output.getSubldgTrijet() + output.fTetrajetBJet.p4();
+		
+	/* // Get terrible mass 
+	   if (output.fTetrajet1_p4.pt() > output.fTetrajet2_p4.pt()) 
 	  {
 	    output.fLdgTetrajet_p4    = output.fTetrajet1_p4;
 	    output.fSubldgTetrajet_p4 = output.fTetrajet2_p4;
@@ -441,7 +447,7 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
 	  {
 	    output.fLdgTetrajet_p4    = output.fTetrajet2_p4;
 	    output.fSubldgTetrajet_p4 = output.fTetrajet1_p4;
-	  }
+	  }*/
       }
     }
   // Sanity check: Did I get at least 1 successful fit?

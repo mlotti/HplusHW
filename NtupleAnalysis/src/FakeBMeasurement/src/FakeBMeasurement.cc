@@ -29,8 +29,7 @@ private:
   const DirectionalCut<int> cfg_NumberOfInvertedBJets;
   const std::string cfg_InvertedBJetsDiscriminator;
   const std::string cfg_InvertedBJetsDiscriminatorWP;
-  const int cfg_MaxNumberOfBJetsInTopFit;
-
+  
   // Common plots
   CommonPlots fCommonPlots;
   // CommonPlots fNormalizationSystematicsSignalRegion;  // todo
@@ -171,7 +170,6 @@ FakeBMeasurement::FakeBMeasurement(const ParameterSet& config, const TH1* skimCo
     cfg_NumberOfInvertedBJets(config, "FakeBMeasurement.numberOfInvertedBJetsCut"),
     cfg_InvertedBJetsDiscriminator(config.getParameter<std::string>("FakeBMeasurement.invertedBJetDiscr")),
     cfg_InvertedBJetsDiscriminatorWP(config.getParameter<std::string>("FakeBMeasurement.invertedBJetWorkingPoint")),
-    cfg_MaxNumberOfBJetsInTopFit(config.getParameter<int>("FakeBMeasurement.maxNumberOfBJetsInTopFit")),
     fCommonPlots(config.getParameter<ParameterSet>("CommonPlots"), CommonPlots::kFakeBMeasurement, fHistoWrapper),
     cAllEvents(fEventCounter.addCounter("All events")),
     cTrigger(fEventCounter.addCounter("Passed trigger")),

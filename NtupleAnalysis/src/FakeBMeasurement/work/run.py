@@ -165,7 +165,6 @@ def main():
     # builder.addVariation("FakeBMeasurement.numberOfInvertedBJetsCutDirection", [">="])
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscr", "")
     # builder.addVariation("FakeBMeasurement.invertedBJetDiscrWorkingPoint", "Loose")
-    # builder.addVariation("FakeBMeasurement.maxNumberOfBJetsInTopFit", [3, 4, 5])
     # builder.addVariation("TopSelection.ChiSqrCutValue", [100])
     # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40_BTagCSV_p056"]])
     # builder.addVariation("Trigger.triggerOR", [["HLT_PFHT450_SixJet40"], ["HLT_PFHT400_SixJet30"]])
