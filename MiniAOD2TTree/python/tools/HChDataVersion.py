@@ -200,7 +200,8 @@ config = {
         "recoProcess": "RECO",
         "metFilteringProcess": "RECO",
 #        "globalTag": "80X_dataRun2_Prompt_ICHEP16JEC_v0",
-        "globalTag": "80X_dataRun2_2016SeptRepro_v7",
+#        "globalTag": "80X_dataRun2_2016SeptRepro_v7",
+	"globalTag": "80X_dataRun2_2016LegacyRepro_v4",
     },
     "80Xdata2016H": {
         "triggerProcess": "HLT",
