@@ -9,10 +9,10 @@ METs = cms.VPSet(
 #        branchname = cms.untracked.string("MET_Type1_NoHF"),
 #        src = cms.InputTag("slimmedMETsNoHF")
 #    ),
-    cms.PSet(
-        branchname = cms.untracked.string("MET_Puppi"),
-        src = cms.InputTag("slimmedMETsPuppi")
-    ),
+#    cms.PSet(
+#        branchname = cms.untracked.string("MET_Puppi"),
+#        src = cms.InputTag("slimmedMETsPuppi")
+#    ),
     cms.PSet(
         branchname = cms.untracked.string("MET_Type1_UnclusteredEnDown"),
         src = cms.InputTag("patPFMetT1UnclusteredEnDown")
