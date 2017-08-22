@@ -1016,7 +1016,7 @@ void FakeBMeasurement::doInvertedAnalysis(const JetSelection::Data& jetData,
   // 12) Top selection
   //================================================================================================
   if (0) std::cout << "=== Inverted: Top selection" << std::endl;
-  const TopSelection::Data topData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData, cfg_MaxNumberOfBJetsInTopFit);
+  const TopSelection::Data topData = fInvertedTopSelection.analyzeWithoutBJets(fEvent, jetData, bjetData);
   // if (!topData.passedSelection()) return;
   // Apply preliminary chiSq cut
   bool passPrelimChiSq = cfg_PrelimTopFitChiSqr.passedCut(topData.ChiSqr());

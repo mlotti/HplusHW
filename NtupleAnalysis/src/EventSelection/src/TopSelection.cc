@@ -48,6 +48,8 @@ TopSelection::TopSelection(const ParameterSet& config, EventCounter& eventCounte
     cfg_dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff")),
     cfg_dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept")), 
     cfg_ChiSqrCut(config, "ChiSqrCut"),
+    cfg_MaxJetsToUseInFit(config.getParameter<int>("MaxJetsToUseInFit")),
+    cfg_MaxBJetsToUseInFit(config.getParameter<int>("MaxBJetsToUseInFit")),
     // Event counter for passing selection
     cPassedTopSelection(fEventCounter.addCounter("passed top selection ("+postfix+")")),
     // Sub counters
@@ -71,6 +73,8 @@ TopSelection::TopSelection(const ParameterSet& config)
   cfg_dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff")),
   cfg_dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept")), 
   cfg_ChiSqrCut(config, "ChiSqrCut"),
+  cfg_MaxJetsToUseInFit(config.getParameter<int>("MaxJetsToUseInFit")),
+  cfg_MaxBJetsToUseInFit(config.getParameter<int>("MaxBJetsToUseInFit")),
   // Event counter for passing selection
   cPassedTopSelection(fEventCounter.addCounter("passed top selection")),
   // Sub counters
@@ -299,7 +303,7 @@ TopSelection::Data TopSelection::silentAnalyze(const Event& event, const JetSele
 
   // Disable histogram filling and counter
   disableHistogramsAndCounters();
-  Data myData = privateAnalyze(event, jetData.getSelectedJets(), bjetData.getSelectedBJets());
+  Data myData = privateAnalyze(event, GetJetsToBeUsedInFit(jetData, cfg_MaxJetsToUseInFit), GetBjetsToBeUsedInFit(bjetData, cfg_MaxBJetsToUseInFit) );
   enableHistogramsAndCounters();
   return myData;
 }
@@ -314,7 +318,7 @@ TopSelection::Data TopSelection::silentAnalyzeWithoutBJets(const Event& event,
   // Disable histogram filling and counter
   disableHistogramsAndCounters();  
   // Ready to analyze 
-  Data data = privateAnalyzeWithoutBJets(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, maxNumberOfBJetsInTopFit) );
+  Data data = privateAnalyzeWithoutBJets(event, GetJetsToBeUsedInFit(jetData, cfg_MaxJetsToUseInFit), GetBjetsToBeUsedInFit(bjetData, cfg_MaxBJetsToUseInFit) );
   // Re-enable histogram filling and counter
   enableHistogramsAndCounters();
   return data;
@@ -326,7 +330,7 @@ TopSelection::Data TopSelection::analyze(const Event& event, const JetSelection:
   nSelectedBJets = bjetData.getSelectedBJets().size();
 
   // Ready to analyze
-  TopSelection::Data data = privateAnalyze(event, jetData.getSelectedJets(), bjetData.getSelectedBJets());
+  TopSelection::Data data = privateAnalyze(event, GetJetsToBeUsedInFit(jetData, cfg_MaxJetsToUseInFit), GetBjetsToBeUsedInFit(bjetData, cfg_MaxBJetsToUseInFit) );
 
   // Send data to CommonPlots
   // if (fCommonPlots != nullptr) fCommonPlots->fillControlPlotsAtTopSelection(event, data); //fixme
@@ -337,14 +341,15 @@ TopSelection::Data TopSelection::analyzeWithoutBJets(const Event& event,
 						     const JetSelection::Data& jetData, 
 						     const BJetSelection::Data& bjetData,
 						     const unsigned int maxNumberOfBJetsInTopFit) {
+  // Used to be different but not identical to analyze!
   ensureAnalyzeAllowed(event.eventID());
   nSelectedBJets = bjetData.getSelectedBJets().size();
  
-  // Ready to analyze
-  TopSelection::Data data = privateAnalyze(event, jetData.getSelectedJets(), GetBjetsToBeUsedInFit(bjetData, maxNumberOfBJetsInTopFit) );
+  // Ready to analyze 
+  TopSelection::Data data = privateAnalyze(event, GetJetsToBeUsedInFit(jetData, cfg_MaxJetsToUseInFit), GetBjetsToBeUsedInFit(bjetData, cfg_MaxBJetsToUseInFit) );
 
   // Send data to CommonPlots
-  // if (fCommonPlots != nullptr) fCommonPlots->fillControlPlotsAtTopSelection(event, data);
+  // if (fCommonPlots != nullptr) fCommonPlots->fillControlPlotsAtTopSelection(event, data); //fixme
   return data;
 }
 
@@ -642,6 +647,17 @@ double TopSelection::CalculateChiSqrForTrijetSystems(const Jet& jet1,
   return chiSq;
 }
 
+const std::vector<Jet> TopSelection::GetJetsToBeUsedInFit(const JetSelection::Data& jetData,
+                                                          const unsigned int maxNumberOfJets)
+{
+  // Get the selected jets
+  std::vector<Jet> jetsForFit = jetData.getSelectedJets();
+
+  // Only resize if their size exceeds max allowed value
+  if (jetsForFit.size() > maxNumberOfJets) jetsForFit.resize(maxNumberOfJets);
+  return jetsForFit;
+}
+
 
 const std::vector<Jet> TopSelection::GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData, const unsigned int maxNumberOfBJets)
 {
@@ -649,9 +665,11 @@ const std::vector<Jet> TopSelection::GetBjetsToBeUsedInFit(const BJetSelection::
   std::vector<Jet> bjetsForFit = bjetData.getSelectedBJets();
 
   // Append the vector of all failed bjets (in descending B-discriminator value) to the end of the bjets vector
+  // Use case: QCD Measurement where we invert at least 1 b-jet => may have less than 3 b-jets available (min for di-top fit and inv mass) 
+  if (bjetsForFit.size() < maxNumberOfBJets)
+    {
   bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCands().begin(), bjetData.getFailedBJetCands().end()); 
-  // bjetsForFit.insert(bjetsForFit.end(), bjetData.getFailedBJetCandsDescendingDiscr().begin(), bjetData.getFailedBJetCandsDescendingDiscr().end()); 
-
+    }
 
   // Truncate the bjets vector to correct size
   if (bjetsForFit.size() > maxNumberOfBJets) bjetsForFit.resize(maxNumberOfBJets);

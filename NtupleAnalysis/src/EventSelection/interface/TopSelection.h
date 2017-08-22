@@ -178,9 +178,11 @@ private:
   bool _getIsGenuineB(bool bIsMC, const std::vector<Jet>& selectedBjets);  
 
  
+  const std::vector<Jet> GetJetsToBeUsedInFit(const JetSelection::Data& jetData,
+					      const unsigned int maxNumberOfJets);
+
   const std::vector<Jet> GetBjetsToBeUsedInFit(const BJetSelection::Data& bjetData,
 					       const unsigned int maxNumberOfBJets);
-  // Input parameters
   // Input parameters
   int nSelectedBJets;
   const double cfg_MassW;
@@ -193,6 +195,8 @@ private:
   const double cfg_dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff;
   const double cfg_dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept;
   const DirectionalCut<double> cfg_ChiSqrCut;
+  const int cfg_MaxJetsToUseInFit;
+  const int cfg_MaxBJetsToUseInFit;
 
   // Event counter for passing selection
   Count cPassedTopSelection;

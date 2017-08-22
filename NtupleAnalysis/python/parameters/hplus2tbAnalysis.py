@@ -183,6 +183,8 @@ topSelection = PSet(
     MassW              = 80.385,
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,
+    MaxJetsToUseInFit  = 8,
+    MaxBJetsToUseInFit = 3,
     # Distance cut
     dijetWithMaxDR_tetrajetBjet_dR_min          =  0.0, # Disable: 0.0, Default: +3.0
     dijetWithMaxDR_tetrajetBjet_dR_yIntercept   = -1.0, # Disable:-1.0, Default: +4.0
@@ -213,7 +215,6 @@ fakeBMeasurement = PSet(
     numberOfInvertedBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
     invertedBJetDiscr                 = bjetSelection.bjetDiscr,
     invertedBJetWorkingPoint          = "Loose",
-    maxNumberOfBJetsInTopFit          = 3,
     )
 
 
