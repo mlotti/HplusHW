@@ -105,9 +105,14 @@ void BJetSelection::initialize(const ParameterSet& config) {
 void BJetSelection::bookHistograms(TDirectory* dir) {
   TDirectory* subdir = fHistoWrapper.mkdir(HistoLevel::kDebug, dir, "bjetSelection_"+sPostfix);
 
-  const int  nBinsBDisc= fCommonPlots->getBJetDiscBinSettings().bins();
-  const float minBDisc = fCommonPlots->getBJetDiscBinSettings().min();
-  const float maxBDisc = fCommonPlots->getBJetDiscBinSettings().max();
+  int  nBinsBDisc = 10;
+  float minBDisc = 0.0;
+  float maxBDisc = 10.0;
+  if (fCommonPlots != nullptr) {  
+    nBinsBDisc= fCommonPlots->getBJetDiscBinSettings().bins();
+    minBDisc = fCommonPlots->getBJetDiscBinSettings().min();
+    maxBDisc = fCommonPlots->getBJetDiscBinSettings().max();
+  }
 
   hTriggerMatchDeltaR = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatchDeltaR", "Trigger match #DeltaR;#DeltaR", 60, 0, 3.);
   hTriggerMatches     = fHistoWrapper.makeTH<TH1F>(HistoLevel::kDebug, subdir, "triggerMatches"    , "trigger-matched objects multiplicity; Multiplicity", 20, 0, 20.);
