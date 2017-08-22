@@ -157,6 +157,13 @@ class ExtendedCount:
             s += " +- %s (%s)"%(formatStr, self._uncertaintyLabelList[i])%self._uncertaintyList[i]
         return s
 
+    def getResultAndStatErrorsDict(self):
+        results = {}
+        results["value"] = self.value()
+        for i in range(0, len(self._uncertaintyLabelList)):
+            results[self._uncertaintyLabelList[i]] = self._uncertaintyList[i]
+        return results
+
     def getResultStringShort(self, formatStr):
         s = "%s"%formatStr%self.value()
         s += " +- %s (stat.)"%formatStr%self.statUncertainty()

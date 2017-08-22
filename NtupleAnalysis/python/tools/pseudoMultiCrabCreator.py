@@ -56,20 +56,20 @@ class PseudoMultiCrabCreator:
         myRootFile.Close()
         module.delete()
 
-    def _createBaseDirectory(self):
+    def _createBaseDirectory(self, prefix):
         if self._myBaseDir != None:
             return
         # Create directory structure
-        self._myBaseDir = os.path.join(self._inputMulticrabDir, "pseudoMulticrab_%s"%self._title)
+        self._myBaseDir = os.path.join(self._inputMulticrabDir, "%s%s" % (prefix, self._title) )
         if os.path.exists(self._myBaseDir):
             shutil.rmtree(self._myBaseDir)
         os.mkdir(self._myBaseDir)
 
-    def initialize(self, subTitle):
+    def initialize(self, subTitle, prefix="pseudoMulticrab_"):
         self._energy = None
         self._dataVersion = None
         #self._codeVersion = None
-        self._createBaseDirectory()
+        self._createBaseDirectory(prefix)
         self._mySubTitles.append(subTitle)
         self._currentSubTitle = subTitle
         os.mkdir("%s/%s"%(self._myBaseDir,self._title+subTitle))
@@ -86,6 +86,23 @@ class PseudoMultiCrabCreator:
         f.close()
         # Done
         print ShellStyles.HighlightStyle()+"Created pseudo-multicrab directory %s%s"%(self._myBaseDir,ShellStyles.NormalStyle())
+
+    def silentFinalize(self):
+        # Copy lumi.json file from input multicrab directory
+        if 0:
+            os.system("cp %s/lumi.json %s"%(self._inputMulticrabDir, self._myBaseDir))
+
+        # Create multicrab.cfg
+        f = open(os.path.join(self._myBaseDir, "multicrab.cfg"), "w")
+        f.write("# Ultimate pseudo-multicrab for fooling dataset.py, created by PseudoMultiCrabCreator\n")
+        
+        for item in self._mySubTitles:
+            f.write("[%s]\n"%(self._title + item))
+        f.close()
+        return
+
+    def getDirName(self):
+        return self._myBaseDir
 
     def _writeRootFileToDisk(self, subTitle):
         # Open root file
@@ -113,9 +130,10 @@ class PseudoMultiCrabCreator:
 
 class PseudoMultiCrabModule:
     ## Constructor
-    def __init__(self, dsetMgr, era, searchMode, optimizationMode, systematicsVariation=None):
+    def __init__(self, dsetMgr, era, searchMode, optimizationMode, systematicsVariation=None, analysisName="signalAnalysis"):
         # Note that 'signalAnalysis' only matters for dataset.py to find the proper module
-        self._moduleName = "signalAnalysis_%s_%s"%(searchMode, era)
+        self._moduleName = "%s_%s_%s" % (analysisName, searchMode, era)
+        #self._moduleName = "signalAnalysis_%s_%s" % (searchMode, era)
         if optimizationMode != "" and optimizationMode != None:
             self._moduleName += "_%s"%optimizationMode
         if systematicsVariation != None:
