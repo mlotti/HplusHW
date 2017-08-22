@@ -7,9 +7,12 @@ Usage:
 
 Examples:
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url -o ""
+./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170817_025841/ --url --signalMass 500
+./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --url --signalMass 800
+./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url --signalMass 800
 
 Last Used:
-./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url --signalMass 800
+./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170817_025841/ --url --signalMass 500
 '''
 
 #================================================================================================ 
@@ -136,7 +139,7 @@ def main(opts):
 
         # Re-order datasets (different for inverted than default=baseline)
         newOrder = ["Data"]
-        newOrder.extend([opts.signalMass])
+        newOrder.extend(["ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass])
         newOrder.extend(["QCD-Data"])
         newOrder.extend(GetListOfEwkDatasets())
         datasetsMgr.selectAndReorder(newOrder)
@@ -233,7 +236,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["xlabel"] = "H_{T} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["rebinX"] = 5
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 4500, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 500.0, "xmax": 4100, "ymin": 1e+0, "ymaxfactor": 10}
         if "MHT" in h:
             units            = "GeV"
             kwargs["ylabel"] = "Events / %.0f " + units
@@ -258,6 +261,8 @@ def GetHistoKwargs(histoList, opts):
         if "FoxWolframMoment" in h:
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "H_{2}"
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": 1.01}
+            kwargs["cutBox"] = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "Centrality" in h:
             kwargs["ylabel"] = "Events / %.2f"
             kwargs["xlabel"] = "Centrality"
@@ -273,8 +278,8 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "LdgTrijetMass" in h:
-            startBlind       = 135 #v. sensitive to bin-width!
-            endBlind         = 205 #v. sensitive to bin-width!
+            startBlind       = 115 #135 v. sensitive to bin-width!
+            endBlind         = 225 #205 v. sensitive to bin-width!
             kwargs["rebinX"] = 4
             units            = "GeV/c^{2}"
             kwargs["ylabel"] = "Events / %.0f " + units
@@ -298,8 +303,8 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "SubldgTrijetMass" in h:
-            startBlind       = 150 #v. sensitive to bin-width!
-            endBlind         = 200 #v. sensitive to bin-width!
+            startBlind       = 115 #135 v. sensitive to bin-width!
+            endBlind         = 225 #205 v. sensitive to bin-width!
             kwargs["rebinX"] = 1
             units            = "GeV/c^{2}"
             kwargs["ylabel"] = "Events / %.0f " + units
@@ -323,7 +328,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "LdgTetrajetMass" in h:
-            startBlind       = 175  #v. sensitive to bin-width!
+            startBlind       = 135  # 175 v. sensitive to bin-width!
             endBlind         = 3000 #v. sensitive to bin-width!
             kwargs["rebinX"] = 4
             units            = "GeV/c^{2}"
@@ -339,7 +344,7 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "SubldgTetrajetMass" in h:
-            startBlind       = 180
+            startBlind       = 135  # 175 v. sensitive to bin-width!
             endBlind         = 3000
             kwargs["rebinX"] = 2
             units            = "GeV/c^{2}"
@@ -381,8 +386,9 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
 
     # For-loop: All histograms in list
     for histoName in histoPaths:
-        #if "TetrajetMass" not in histoName:
-        #    continue
+        
+        if "TrijetMass" not in histoName:
+            continue
         kwargs_  = histoKwargs[histoName]
         saveName = histoName.replace("/", "_")
 
@@ -390,7 +396,9 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
         p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
         
         # Apply QCD data-driven style
-        p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
+        
+        p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass, styles.getSignalStyleHToTB_M("%.0f" % opts.signalMass))
+        #p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
         p.histoMgr.forHisto(qcdDatasetName, styles.getAltQCDStyle())
         p.histoMgr.setHistoDrawStyle(qcdDatasetName, "HIST")
         p.histoMgr.setHistoLegendStyle(qcdDatasetName, "F")
@@ -536,7 +544,7 @@ if __name__ == "__main__":
                       help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
 
     parser.add_option("--signalMass", dest="signalMass", type=float, default=SIGNALMASS, 
-                      help="Mass value of signal to use [default: %s]" % SIGNALMASS)
+                     help="Mass value of signal to use [default: %s]" % SIGNALMASS)
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
@@ -572,12 +580,12 @@ if __name__ == "__main__":
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
     if opts.signalMass not in allowedMass:
-        Print("Invalid signal mass point (=%s) selected! Please select one of the following:" % (opts.signalMass), True)
+        Print("Invalid signal mass point (=%.0f) selected! Please select one of the following:" % (opts.signalMass), True)
         for m in allowedMass:
             Print(m, False)
         sys.exit()
-    else:
-        opts.signalMass = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
+    #else:
+    #    opts.signalMass = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
 
     # Call the main function
     main(opts)

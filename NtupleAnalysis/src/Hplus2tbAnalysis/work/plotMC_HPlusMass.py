@@ -9,6 +9,8 @@ Examples:
 ./plotMC_HPlusMass.py -m <peudo_mcrab> -o "" --url --normaliseToOne
 
 Last Used:
+./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --folder topologySelection_ --url --normaliseToOne
+./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --normaliseToOne --url
 ./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --normaliseToOne --url --signalMass 500
 ./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170724_072440/ --normaliseToOne --url --signalMass 500
 
@@ -167,12 +169,14 @@ def main(opts, signalMass):
         style.setGridY(False)
 
         # Do the topSelection histos
-        folder     = "topSelection_"
+        #folder     = "topSelection_"
+        folder     = opts.folder 
         histoList  = datasetsMgr.getDataset("QCD").getDirectoryContent(folder)
-        hList0     = [x for x in histoList if "TrijetMass" in x]
-        hList1     = [x for x in histoList if "TetrajetMass" in x]
-        hList2     = [x for x in histoList if "TetrajetBJetPt" in x]
-        histoPaths1 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
+        #hList0     = [x for x in histoList if "TrijetMass" in x]
+        #hList1     = [x for x in histoList if "TetrajetMass" in x]
+        #hList2     = [x for x in histoList if "TetrajetBJetPt" in x]
+        #histoPaths1 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
+        histoPaths1 = [os.path.join(folder, h) for h in histoList]
         
         folder     = "ForDataDrivenCtrlPlots"
         histoList  = datasetsMgr.getDataset("QCD").getDirectoryContent(folder)
@@ -183,6 +187,8 @@ def main(opts, signalMass):
 
         histoPaths = histoPaths1 + histoPaths2
         for h in histoPaths:
+            if "Vs" in h: # Skip TH2D
+                continue
             PlotMC(datasetsMgr, h, intLumi)
     return
 
@@ -209,15 +215,18 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _format = "%0.0f " + _units
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 805 #1005
     elif "tetrajetmass" in histo.lower():
-        _rebinX = 10 #4
+        _rebinX = 5 #10 #4
         logY    = False
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjbb} (%s)" % (_units)
         _format = "%0.0f " + _units
         _cutBox = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 2500.0 #3500.0
+        _opts["xmax"] = 1500 #2500.0 #3500.0
+        #_rebinX = 10
+        #_opts["xmax"] = 3500
     elif "tetrajetbjetpt" in histo.lower():
         _rebinX = 2
         logY    = False
@@ -225,7 +234,10 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _format = "%0.0f " + _units
         _xlabel = "p_{T}  (%s)" % (_units)
         _format = "%0.0f " + _units
-        _opts["xmax"] = 1000
+        _opts["xmax"] = 600
+    elif "foxwolframmoment" in histo.lower():
+        _format = "%0.1f"
+        _cutBox = {"cutValue": 0.5, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
     else:
         pass
 
@@ -243,7 +255,9 @@ def PlotMC(datasetsMgr, histo, intLumi):
         #_opts["ymaxfactor"] = yMaxFactor
         #_opts   = {"ymin": 1e0, "ymaxfactor": yMaxFactor, "xmax": None}
 
-    # Customise Dataset styling
+    # Customise styling
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
+
     p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
     p.histoMgr.setHistoDrawStyle("QCD", "HIST")
     p.histoMgr.setHistoLegendStyle("QCD", "F")
@@ -276,7 +290,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
     # Save plot in all formats    
     saveName = histo.split("/")[-1]
-    savePath = os.path.join(opts.saveDir, "InvMass", histo.split("/")[0], opts.optMode)
+    savePath = os.path.join(opts.saveDir, "HplusMasses", histo.split("/")[0], opts.optMode)
     SavePlot(p, saveName, savePath) 
     return
 
@@ -329,7 +343,8 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    SIGNALMASS   = [200, 500, 800, 2000]
+    #SIGNALMASS   = [200, 500, 800, 2000]
+    SIGNALMASS   = [300, 500, 800]#, 1000]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
@@ -340,6 +355,7 @@ if __name__ == "__main__":
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
+    FOLDER       = "topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -391,6 +407,9 @@ if __name__ == "__main__":
 
     parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", 
                       help="Normalise the histograms to one? [default: %s]" % (NORMALISE) )
+
+    parser.add_option("--folder", dest="folder", type="string", 
+                      help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
     (opts, parseArgs) = parser.parse_args()
 

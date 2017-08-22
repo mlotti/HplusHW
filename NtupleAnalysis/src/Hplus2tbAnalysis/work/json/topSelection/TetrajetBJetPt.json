@@ -21,7 +21,7 @@
     	        "ST_t", "TT", "TTZ", "WJets", "WW", "WZ", "ZZ", "DYJets"],
     "rebinX": 1,
     "rebinY": "None",
-    "xlabel": "p_{T} (GeV})",
+    "xlabel": "p_{T} (GeV)",
     "ylabel": "Events / %.0f GeV",
     "divideByBinWidth": "False",
     "drawStyle": "HIST",

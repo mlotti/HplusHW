@@ -286,7 +286,7 @@ def PlotBaselineVsInverted(datasetsMgr, hBaseline, hInverted):
         _rebinX = 4 #10
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
-        _xlabel = "m_{jjjb} (%s)" % (_units)
+        _xlabel = "m_{jjbb} (%s)" % (_units)
         _opts["xmax"] = 3000.0
         #_opts["xmax"] = 3500.0
 

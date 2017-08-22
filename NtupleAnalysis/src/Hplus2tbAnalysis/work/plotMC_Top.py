@@ -10,6 +10,7 @@ Examples:
 
 Last Used:
 ./plotMC_Top.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --normaliseToOne --url --signalMass 500
+./plotMC_Top.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --normaliseToOne --url --signalMass 500
 ./plotMC_Top.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170724_072440/ --normaliseToOne --url --signalMass 500
 
 '''
@@ -167,8 +168,7 @@ def main(opts):
         style.setGridY(False)
 
         # Do the topSelection histos
-        folder     = "topSelection_"
-        #folder     = "ForDataDrivenCtrlPlots"
+        folder     = opts.folder 
         histoList  = datasetsMgr.getDataset("QCD").getDirectoryContent(folder)
         histoPaths = [os.path.join(folder, h) for h in histoList]
         for h in histoPaths:
@@ -345,7 +345,8 @@ if __name__ == "__main__":
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
-
+    FOLDER       = "topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
+    
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
 
@@ -396,6 +397,9 @@ if __name__ == "__main__":
 
     parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", 
                       help="Normalise the histograms to one? [default: %s]" % (NORMALISE) )
+
+    parser.add_option("--folder", dest="folder", type="string", 
+                      help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
     (opts, parseArgs) = parser.parse_args()
 

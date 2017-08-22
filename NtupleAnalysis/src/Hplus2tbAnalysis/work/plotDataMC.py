@@ -14,13 +14,13 @@ Usage (overwrite samples defined in JSON):
 
 
 Last Used:
-./plotDataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933 -o "" -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200|FakeB" json/eSelection_Veto/*.json
-./plotDataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933 -o "" -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200|FakeB" json/*_Veto/*.json
-./plotDataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933 -o "" -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200|FakeB" json/jetSelection/*.json
-./plotDataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933 -o "" -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200|FakeB" json/bjetSelection/*
-./plotDataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933 -o "" -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200|FakeB" json/topologySelection/*.json
+./plotDataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170817_025841/ -o "" -e "QCD_b|QCD_HT50to100|QCD_HT100to200|FakeB" json/jetSelection/HT*.json
 
 Previously Used:
+./plotDataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933 -o "" -e "QCD_b|QCD_HT50to100|QCD_HT100to200|FakeB" json/*_Veto/*.json
+./plotDataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933 -o "" -e "QCD_b|QCD_HT50to100|QCD_HT100to200|FakeB" json/jetSelection/*.json --signal 500
+./plotDataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933 -o "" -e "QCD_b|QCD_HT50to100|QCD_HT100to200|FakeB" json/bjetSelection/* --signal 500
+./plotDataMC.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933 -o "" -e "QCD_b|QCD_HT50to100|QCD_HT100to200|FakeB" json/topologySelection/*.json --signal 500
 ./plotDataMC.py -m Hplus2tbAnalysis_* json/PUDependency/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
 ./plotDataMC.py -m Hplus2tbAnalysis_* json/counters/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200"
 ./plotDataMC.py -m Hplus2tbAnalysis_* json/counters/weighted/* -e "Charged|QCD_b|QCD_HT50to100|QCD_HT100to200" 
@@ -157,7 +157,7 @@ def Plot(jsonfile, opts):
         # Remove all but one signal datasets
         massPoints = ["180", "200", "220", "250", "300", "350", "400", "500", "800", "1000", "2000", "3000"]
         if opts.signal != None:
-            massPoints.remove(opts.signal) #keep only 1 mass point        
+            massPoints.remove("%.0f" % opts.signal) #keep only 1 mass point        
         for m in massPoints:
                 datasetsMgr.remove(filter(lambda name: "M_" + m in name, datasetsMgr.getAllDatasetNames()))
 
@@ -172,10 +172,10 @@ def Plot(jsonfile, opts):
         lumi = GetLumi(datasetsMgr)
         
         # Plot the histogram
-        DataMCPlot(datasetsMgr, j)
+        DataMCPlot(datasetsMgr, j, opts)
         return
 
-def DataMCPlot(datasetsMgr, json):
+def DataMCPlot(datasetsMgr, json, opts):
     Verbose("Creating Data-MC plot")
 
     if opts.saveDir == None:
@@ -184,7 +184,7 @@ def DataMCPlot(datasetsMgr, json):
         saveDir = json["saveDir"]
 
     # Create the Data-MC Plot
-    p = plots.DataMCPlot(datasetsMgr, json["histogram"])
+    p = plots.DataMCPlot(datasetsMgr, json["histogram"], saveFormats = [])
         
     # Label size (optional. Commonly Used in counters)
     xlabelSize = None
@@ -193,6 +193,10 @@ def DataMCPlot(datasetsMgr, json):
     ylabelSize = None
     if "ylabelsize" in json:
         ylabelSize = json["ylabelsize"]
+
+    # Customise style
+    if opts.signal != None:
+        p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % (opts.signal), styles.getSignalStyleHToTB_M("%.0f" % opts.signal))
 
     # Draw a customised plot, os.path.join(opts.saveDir, "Fit")
     plots.drawPlot(p, 
@@ -257,7 +261,7 @@ def ReorderToShowSignal(datasetMgr, opts):
     
     if opts.signal == None:
         return
-    signalSample = "ChargedHiggs_HplusTB_HplusToTB_M_" + opts.signal
+    signalSample = "ChargedHiggs_HplusTB_HplusToTB_M_%0.f" % (opts.signal)
     # Get list of dataset names
     names = datasetMgr.getAllDatasetNames()
 
@@ -357,7 +361,7 @@ if __name__ == "__main__":
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true", default=VERBOSE, 
                       help="Enables verbose mode (for debugging purposes) [default: %s]" % VERBOSE)
 
-    parser.add_option("--signal", dest="signal", action="store", type="string", default = SIGNAL,
+    parser.add_option("--signal", dest="signal", action="store", type=float, default = SIGNAL,
                       help="Signal mass point to include in plot. (default: %s)" % (SIGNAL))
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR,

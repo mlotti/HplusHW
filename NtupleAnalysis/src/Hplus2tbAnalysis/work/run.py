@@ -205,7 +205,7 @@ def main():
         Print("Running process with PROOF (proofWorkes=%s)" % ( str(opts.jCores) ) )
         process.run(proof=True, proofWorkers=opts.jCores)
     else:
-        Print("Running process (no PROOF)")
+        Print("Running process")
         process.run()
 
 
