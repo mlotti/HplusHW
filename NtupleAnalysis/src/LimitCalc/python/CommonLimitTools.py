@@ -545,13 +545,24 @@ class LimitMultiCrabBase:
                         aux.addToDictList(self.rootfiles, mass, rfname)
                     # if root files are not found, try with 1pr and 3pr extensions in the name
                     if not os.path.isfile(rfname):
-                        rf_1pr = rf.replace(".root","_1pr.root")
-                        rf_3pr = rf.replace(".root","_3pr.root")
+                        # 1+2 b-jets
+#                        rf_1pr = rf.replace(".root","_2bjets.root")
+#                        rf_3pr = rf.replace(".root","_1bjet.root")
+                        # 0+1 b-jets
+#                        rf_1pr = rf.replace(".root","_1bjets.root")
+#                        rf_3pr = rf.replace(".root","_0bjets.root")
+                        rf_1pr = rf.replace(".root","_0bjet.root")
+                        rf_3pr = rf.replace(".root","_1bjet.root")
+                        rf_extra = rf.replace(".root","_2bjets.root")
+                        
                         rfname_1pr = os.path.join(self.datacardDirectory, rf_1pr % mass)
                         rfname_3pr = os.path.join(self.datacardDirectory, rf_3pr % mass)
+                        rfname_extra = os.path.join(self.datacardDirectory, rf_extra % mass)
                         aux.addToDictList(self.rootfiles, mass, rfname_1pr)
                         aux.addToDictList(self.rootfiles, mass, rfname_3pr)     
-                        if not os.path.isfile(rfname_1pr) or not os.path.isfile(rfname_3pr):                   
+                        aux.addToDictList(self.rootfiles, mass, rfname_extra)     
+                       
+                        if not os.path.isfile(rfname_1pr) or not os.path.isfile(rfname_3pr) or not os.path.isfile(rfname_extra):                   
                         # if still not found, raise exception/warning
 #                            raise Exception("ROOT file (for shapes) '%s' does not exist!" % rfname)
                             print("\033[91mWarning:  ROOT file (for shapes) '%s' does not exist!\033[00m" % rfname)
