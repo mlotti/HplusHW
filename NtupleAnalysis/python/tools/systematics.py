@@ -255,6 +255,7 @@ _dataDrivenCtrlPlotBinning = {
     "MinDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "MaxDeltaPhiTauJet_AfterAllSelections": [0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180],
     "NVertices_AfterAllSelections": None,
+    "LdgTetrajetMass_AfterAllSelections": [0,20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500,600,700,800,900,1000,1500,2000,3000,4000], # for H+ -> tb analysis
 }
 # Add EWK fake tau shape definitions
 for key in _dataDrivenCtrlPlotBinning.keys():
