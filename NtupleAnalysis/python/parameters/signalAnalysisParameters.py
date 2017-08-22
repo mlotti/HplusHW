@@ -40,7 +40,7 @@ tauSelection = PSet(
         tauLdgTrkPtCut = 30.0,
 #                prongs = 13,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
                 prongs = 1,    # options: 1, 2, 3, 12, 13, 23, 123 or -1 (all)
-                  rtau = 0.0,   # to disable set to 0.0
+                  rtau = 0.7,   # to disable set to 0.0
   againstElectronDiscr = "againstElectronTightMVA6",
 #  againstElectronDiscr = "",
       againstMuonDiscr = "againstMuonLoose3",
@@ -73,6 +73,14 @@ muVeto = PSet(
          muonIsolation = "veto", # loosest possible for vetoing ("veto"), "tight" for selecting
 )
 
+#====== Muon selection (for embedding)
+muForEmbedding = PSet(
+             muonPtCut = 40.0,
+            muonEtaCut = 2.5,
+                muonID = "muIDTight", # options: muIDLoose, muIDMedium, muIDTight
+         muonIsolation = "tight", # for selecting, not vetoing
+)
+
 #====== Jet selection
 jetSelection = PSet(
                jetType  = "Jets", # options: Jets (AK4PFCHS), JetsPuppi (AK4Puppi)
@@ -103,11 +111,13 @@ enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
  
 #====== B-jet selection
 bjetSelection = PSet(
+    triggerMatchingApply= False,
+    triggerMatchingCone = 0.1,  # DeltaR for matching offline bjet with trigger::TriggerBjet 
               jetPtCuts = [30.0],
              jetEtaCuts = [2.5],
              #bjetDiscr = "combinedInclusiveSecondaryVertexV2BJetTags",
              bjetDiscr  = "pfCombinedInclusiveSecondaryVertexV2BJetTags",
- bjetDiscrWorkingPoint  = "Loose",
+ bjetDiscrWorkingPoint  = "Medium",
  numberOfBJetsCutValue  = 1,
  numberOfBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
 )
@@ -121,7 +131,7 @@ scaleFactors.setupBtagSFInformation(btagPset=bjetSelection,
 
 #====== MET selection
 metSelection = PSet(
-           METCutValue = 100.0, #for heavy H+, overriden in signalAnalysis.py for light H+
+           METCutValue = 90.0,
        METCutDirection = ">", # options: ==, !=, <, <=, >, >=
   METSignificanceCutValue = -1000.0,
   METSignificanceCutDirection = ">", # options: ==, !=, <, <=, >, >=
@@ -135,10 +145,10 @@ scaleFactors.assignMETTriggerSF(metSelection, bjetSelection.bjetDiscrWorkingPoin
 angularCutsBackToBack = PSet(
        nConsideredJets = 3,    # Number of highest-pt jets to consider (excluding jet corresponding to tau)
 enableOptimizationPlots = True, # 2D histograms for optimizing angular cuts
-        cutValueJet1 = 0.0,   # Cut value in degrees (circular cut)
-        cutValueJet2 = 0.0,   # Cut value in degrees (circular cut)
-        cutValueJet3 = 0.0,   # Cut value in degrees (circular cut)
-        cutValueJet4 = 0.0,   # Cut value in degrees (circular cut)
+        cutValueJet1 = 40.0,   # Cut value in degrees (circular cut)
+        cutValueJet2 = 40.0,   # Cut value in degrees (circular cut)
+        cutValueJet3 = 40.0,   # Cut value in degrees (circular cut)
+        cutValueJet4 = 40.0,   # Cut value in degrees (circular cut)
 )
 #====== Experimental
 jetCorrelations = PSet (
@@ -211,6 +221,7 @@ allSelections = PSet(
           TauSelection = tauSelection,
      ElectronSelection = eVeto,
          MuonSelection = muVeto,
+      MuonForEmbedding = muForEmbedding,
           JetSelection = jetSelection,
   AngularCutsCollinear = angularCutsCollinear,
          BJetSelection = bjetSelection,

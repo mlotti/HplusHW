@@ -745,6 +745,7 @@ class TableProducer:
             Embedding = None
             EWKFakes = None
             # Loop over columns to obtain RootHistoWithUncertainties objects
+            containsQCDdataset = False
             for c in self._datasetGroups:
                 if c.isActiveForMass(m,self._config) and not c.typeIsEmptyColumn():
                     # Find out what type the column is
@@ -757,6 +758,7 @@ class TableProducer:
                     elif c.getLabel().startswith("HST") or c.getLabel().startswith("CMS_Hptntj_HST"):
                         HST = c.getCachedShapeRootHistogramWithUncertainties().Clone()
                     elif c.typeIsQCD():
+                        containsQCDdataset = True
                         if QCD == None:
                             try:
                                 QCD = c.getCachedShapeRootHistogramWithUncertainties().Clone()
@@ -791,8 +793,11 @@ class TableProducer:
                 HW.Add(HST)
             # From this line on, HW includes all signal
             # Calculate expected yield
-            TotalExpected = QCD.Clone()
-            TotalExpected.Add(Embedding)
+            if containsQCDdataset:
+                TotalExpected = QCD.Clone()
+                TotalExpected.Add(Embedding)
+            else:
+                TotalExpected = Embedding.Clone()
             if not self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 if EWKFakes != None:
                     TotalExpected.Add(EWKFakes)
@@ -807,7 +812,8 @@ class TableProducer:
             else:
                 myOutput += "Signal, mH+=%3d GeV, sigma x Br=1 pb: %s"%(m,getResultString(HW,formatStr,myPrecision))
             myOutput += "Backgrounds:\n"
-            myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
+            if containsQCDdataset:
+                myOutput += "                           Multijets: %s"%getResultString(QCD,formatStr,myPrecision)
             if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 myOutput += "                           MC EWK+tt: %s"%getResultString(Embedding,formatStr,myPrecision)
             else:
@@ -847,7 +853,8 @@ class TableProducer:
             myOutputLatex += "  \\hline\n"
             myOutputLatex += "  HH+HW, $\\mHplus = %3d\\GeVcc             & %s \\\\ \n"%(m,getLatexResultString(HW,formatStr,myPrecision))
             myOutputLatex += "  \\hline\n"
-            myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n"%getLatexResultString(QCD,formatStr,myPrecision)
+            if containsQCDdataset:
+                myOutputLatex += "  Multijet background (data-driven)       & %s \\\\ \n"%getLatexResultString(QCD,formatStr,myPrecision)
             if self._config.OptionGenuineTauBackgroundSource == "MC_FakeAndGenuineTauNotSeparated":
                 myOutputLatex += "  MC EWK+\\ttbar                           & %s \\\\ \n"%getLatexResultString(Embedding,formatStr,myPrecision)
             else:

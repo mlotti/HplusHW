@@ -20,13 +20,6 @@ class HistoWrapper;
 class WrappedTH1;
 class WrappedTH2;
 
-// struct DiscComparator{
-//   bool operator() (const Jet a, const Jet b) const
-//   {
-//     return ( a.bjetDiscriminator() > b.bjetDiscriminator());
-//   }
-// };
-
 class BJetSelection: public BaseSelection {
 public:
     /**
@@ -56,7 +49,9 @@ public:
     const std::vector<Jet>& getFailedBJetCandsDescendingDiscr() const { return  fFailedBJetCandsDescendingDiscr; }
     /// Obtain collection of failed bjet candidates (sorted by discriminator value)
     const std::vector<Jet>& getFailedBJetCandsAscendingDiscr() const { return  fFailedBJetCandsAscendingDiscr; }
-    /// Obtain the b-tagging event weight
+    /// Obtain collection of failed bjet candidates (sorted in random 
+    const std::vector<Jet>& getFailedBJetCandsShuffled() const { return  fFailedBJetCandsShuffled; }
+    /// Obtain the b-tagging event weight 
     const double getBTaggingScaleFactorEventWeight() const { return fBTaggingScaleFactorEventWeight; }
     /// Obtain the probability for passing b tagging without applying the selection
     const double getBTaggingPassProbability() const { return fBTaggingPassProbability; }
@@ -72,13 +67,15 @@ public:
     double fBTaggingPassProbability;
     /// BJet collection after all selections
     std::vector<Jet> fSelectedBJets;
-    /// All jets failing all the b-tagging criteria
+    /// All jets failing all the b-tagging discr (trg-matched jets first, rest random)
     std::vector<Jet> fFailedBJetCands;
-    /// All jets failing all the b-tagging criteria (sorted by descending discriminator value)
+    /// All jets failing all the b-tagging discr cut (sorted by descending discriminator value)
     std::vector<Jet> fFailedBJetCandsDescendingDiscr; 
-    /// All jets failing all the b-tagging criteria (sorted by ascending discriminator value)
+    /// All jets failing all the b-tagging discr cut (sorted by ascending discriminator value)
     std::vector<Jet> fFailedBJetCandsAscendingDiscr;
-
+    /// All jets failing the b-tagging discr cut (sorted randomly)
+    std::vector<Jet> fFailedBJetCandsShuffled;
+  
   };
   
   // Main class
@@ -94,31 +91,50 @@ public:
   Data silentAnalyze(const Event& event, const JetSelection::Data& jetData);
   /// analyze does fill histograms and incrementes counters
   Data analyze(const Event& event, const JetSelection::Data& jetData);
+  /// Obtain the discriminator value for a given algorithm and Working Point (WP)
+  const double getDiscriminatorWP(const std::string sAlgorithm, const std::string sWorkingPoint);
 
 private:
   /// Initialisation called from constructor
   void initialize(const ParameterSet& config);
   /// The actual event selection
   Data privateAnalyze(const Event& iEvent, const JetSelection::Data& jetData);
+  /// determine if bjet object is trigger matched (deltaR based)
+  bool passTrgMatching(const Jet& bjet, std::vector<math::LorentzVectorT<double>>& trgBJets) const;
+  /// Sort the failed bjet candindates collections
+  void SortFailedBJetsCands(Data &output, std::vector<math::LorentzVectorT<double>> myTriggerBJetMomenta);
+
+
   /// Calculate probability to pass b tagging
   double calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData);
   // Input parameters
+  const bool bTriggerMatchingApply;
+  const float fTriggerMatchingCone;
   const std::vector<float> fJetPtCuts;
   const std::vector<float> fJetEtaCuts;
   const DirectionalCut<int> fNumberOfJetsCut;
   float fDisriminatorValue; // not a const because constructor sets it based on input string
-  
+
   // Event counter for passing selection
   Count cPassedBJetSelection;
   // Sub counters
   Count cSubAll;
+  Count cSubPassedEta;
+  Count cSubPassedPt;
   Count cSubPassedDiscriminator;
+  Count cSubPassedTrgMatching;
   Count cSubPassedNBjets;
   // Scalefactor calculator
   BTagSFCalculator fBTagSFCalculator;
   // Histograms
+  WrappedTH1* hTriggerMatchDeltaR;
+  WrappedTH1* hTriggerMatches;
+  WrappedTH1* hTriggerBJets;
+  std::vector<WrappedTH1*> hTriggerMatchedBJetPt;
+  std::vector<WrappedTH1*> hTriggerMatchedBJetEta;
   std::vector<WrappedTH1*> hSelectedBJetPt;
   std::vector<WrappedTH1*> hSelectedBJetEta;
+  std::vector<WrappedTH1*> hSelectedBJetBDisc;
 };
 
 #endif

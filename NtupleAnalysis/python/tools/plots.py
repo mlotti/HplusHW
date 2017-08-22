@@ -55,7 +55,7 @@ import aux
 #================================================================================================
 _lightHplusMasses        = [ 80,  90, 100, 120, 140, 150, 155, 160]
 _heavyHplusMasses        = [180, 200, 220, 250, 300, 350, 400, 500, 600, 700, 750,  800, 1000, 2000, 3000]
-_heavyHplusToTBbarMasses = [180, 200, 220, 240, 250, 260, 280, 300, 350, 400, 500,  600,  700,  750, 1000, 2000, 3000]
+_heavyHplusToTBbarMasses = [180, 200, 220, 250, 300, 350, 400, 500, 600, 800, 1000, 2000, 3000]
 
 ## These MC datasets must be added together before any
 ## merging/renaming. They are split to two datasets just for more
@@ -88,6 +88,8 @@ _physicalMcAdd = {
     "WJetsToLNu_ext1": "WJetsToLNu",
     "WJetsToLNu_ext2": "WJetsToLNu",
 
+    "WJetsToLNu_HT_0To70"          : "WJetsToLNu_HT_0To70",
+    "WJetsToLNu_HT_0To70_ext2"     : "WJetsToLNu_HT_0To70",
     "WJetsToLNu_HT_100To200"       : "WJetsToLNu_HT_100To200",
     "WJetsToLNu_HT_100To200_ext1"  : "WJetsToLNu_HT_100To200",
     "WJetsToLNu_HT_100To200_ext2"  : "WJetsToLNu_HT_100To200",
@@ -152,8 +154,8 @@ for mass in _lightHplusMasses:
 for mass in _heavyHplusMasses:
     _physicalToLogical["ChargedHiggs_HplusTB_HplusToTauNu_M_%d"%(mass)] = "HplusTB_M%d"%mass
 
-#for mass in _heavyHplusToTBbarMasses:
-    #_physicalToLogical["HplusToTBbar_M%d_%s"%(mass, mcEra)] = "HplusToTBbar_M%d" % mass
+for mass in _heavyHplusToTBbarMasses:
+    _physicalToLogical["ChargedHiggs_HplusTB_HplusToTB_M%d"%(mass)] = "HplusToTBbar_M%d" % mass
 
 _physicalToLogical.update({
         "TTJets"         : "TTJets",
@@ -169,6 +171,8 @@ _physicalToLogical.update({
         # "W2Jets"    : "W2Jets",
         # "W3Jets"    : "W3Jets",
         # "W4Jets"    : "W4Jets",
+        "WJetsToLNu_HT_0To70"  : "WJetsToLNu_HT_0To70",
+        "WJetsToLNu_HT_70To100"  : "WJetsToLNu_HT_70To100",
         "WJetsToLNu_HT_100To200"  : "WJetsToLNu_HT_100To200",
         "WJetsToLNu_HT_200To400"  : "WJetsToLNu_HT_200To400",
         "WJetsToLNu_HT_400To600"  : "WJetsToLNu_HT_400To600",
@@ -307,6 +311,7 @@ _datasetMerge = {
     # "W2Jets"    : "WJets",
     # "W3Jets"    : "WJets",
     # "W4Jets"    : "WJets",
+    "WJetsToLNu_HT_0To70"   : "WJetsHT",
     "WJetsToLNu_HT_70To100"   : "WJetsHT",
     "WJetsToLNu_HT_100To200"  : "WJetsHT",
     "WJetsToLNu_HT_200To400"  : "WJetsHT",

@@ -41,7 +41,7 @@ config.JobType.inputFiles = ['Summer16_23Sep2016AllV4_DATA_JEC.db','Summer16_23S
 #config.JobType.disableAutomaticOutputCollection
 #config.JobType.eventsPerLumi
 #config.JobType.allowUndistributedCMSSW
-#config.JobType.maxMemoryMB
+config.JobType.maxMemoryMB = 4000
 #config.JobType.maxJobRuntimeMin
 #config.JobType.numCores
 #config.JobType.priority

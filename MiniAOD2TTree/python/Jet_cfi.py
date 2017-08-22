@@ -33,26 +33,25 @@ Jets = cms.VPSet(
 #           "pileupJetId:fullDiscriminant"
         ),
     ),
-#    cms.PSet(
-#        branchname = cms.untracked.string("JetsPuppi"),
-##        src = cms.InputTag("patJetsReapplyJECPuppi"), # made from ak4PFJets
-#        src = cms.InputTag("updatedPatJetsUpdatedJECPuppi"),
-#        srcJES = cms.InputTag("shiftedPatJetEnDown"),   
-#        srcJER = cms.InputTag("shiftedPatJetResDown"),
-##        jecPayload = JECpayloadAK4PFPuppi.payload,
-#        discriminators = cms.vstring(
-#            "pfJetBProbabilityBJetTags",
-#            "pfJetProbabilityBJetTags",
-#            #"pfCombinedSecondaryVertexBJetTags",
-#            #"pfCombinedInclusiveSecondaryVertexBJetTags",
-#            #"combinedInclusiveSecondaryVertexV2BJetTags", # for 72x
-#            "pfCombinedInclusiveSecondaryVertexV2BJetTags", # for 74x
-#            "pfCombinedMVABJetTag", # Does not work
-#        ),
-#        userFloats = cms.vstring(
-##           "pileupJetId:fullDiscriminant"
-#        ),
-#    )
+    cms.PSet(
+        branchname = cms.untracked.string("JetsPuppi"),
+#        src = cms.InputTag("patJetsReapplyJECPuppi"), # made from ak4PFJets
+        src        = cms.InputTag("updatedPatJetsUpdatedJECPuppi"),
+        srcJESup   = cms.InputTag("shiftedPatJetEnUp"),
+        srcJESdown = cms.InputTag("shiftedPatJetEnDown"),
+        srcJERup   = cms.InputTag("shiftedPatJetResUp"),
+        srcJERdown = cms.InputTag("shiftedPatJetResDown"),
+#        jecPayload = JECpayloadAK4PFPuppi.payload,
+        discriminators = cms.vstring(
+            "pfCombinedInclusiveSecondaryVertexV2BJetTags",
+            "pfCombinedMVAV2BJetTags", 
+            "pfCombinedCvsLJetTags", 
+            "pfCombinedCvsBJetTags"
+         ),
+        userFloats = cms.vstring(
+#           "pileupJetId:fullDiscriminant"
+        ),
+    )
 )
 
 

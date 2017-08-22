@@ -71,9 +71,9 @@ void BaseSelector::processInternal(Long64_t entry) {
   cBaseAllEvents.increment(); 
   
   //====== PU reweighting
-  if (fEvent.isMC() && fEvent.vertexInfo().branchesExist()) {
+  if (fEvent.vertexInfo().branchesExist()) {
     hNvtxBeforeVtxReweighting->Fill(fEvent.vertexInfo().value());
-    fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
+    if (fEvent.isMC()) fEventWeight.multiplyWeight(fPileupWeight.getWeight(fEvent));
     hNvtxAfterVtxReweighting->Fill(fEvent.vertexInfo().value());
 
   // test print to check that the PU reweighting works correctly

@@ -56,7 +56,9 @@ class FitFunction:
             "DoubleGaussian": 6,
             "SumFunction": 5,
             "RayleighFunction": 2,
+            "RayleighShiftedPlusGaussian": 6,
             "QCDFunction": 7,
+            "QCDFunctionWithPeakShift": 8,
             "EWKFunction": 4,
             "EWKFunctionInv": 4,
             "QCDEWKFunction": 7,
@@ -114,10 +116,22 @@ class FitFunction:
         if par[0]+par[1]*x[0] == 0.0:
             return 0
         return norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0])*(par[0]))))
+
+    def RayleighFunctionShifted(self,x,par,norm):
+        if par[0]+par[1]*x[0] == 0.0:
+            return 0
+        return norm*(par[1]*x[0]/((par[0])*(par[0]))*ROOT.TMath.Exp(-x[0]*x[0]/(2*(par[0]*par[0]+2*par[2]*par[0]*x[0]+par[2]*par[2]*x[0]*x[0]))))
                 
     #===== Composite functions for template fits
     def QCDFunction(self,x,par,norm):
         return self._additionalNormFactor*norm*(self.RayleighFunction(x,par,1)+par[2]*ROOT.TMath.Gaus(x[0],par[3],par[4],1)+par[5]*ROOT.TMath.Exp(-par[6]*x[0]))
+
+    def QCDFunctionWithPeakShift(self,x,par,norm):
+#        return self._additionalNormFactor*norm*(self.RayleighFunctionShifted(x,par,1)+par[3]*ROOT.TMath.Exp(-par[4]*x[0]))
+        return self._additionalNormFactor*norm*(self.RayleighFunctionShifted(x,par,1)+par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1)+par[6]*ROOT.TMath.Exp(-par[7]*x[0]))
+
+    def RayleighShiftedPlusGaussian(self,x,par,norm):
+        return self._additionalNormFactor*norm*(self.RayleighFunctionShifted(x,par,1)+par[3]*ROOT.TMath.Gaus(x[0],par[4],par[5],1))
 
     def EWKFunction(self,x,par,boundary,norm=1,rejectPoints=0):
         if x[0] < boundary:
