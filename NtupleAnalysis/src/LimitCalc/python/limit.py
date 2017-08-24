@@ -37,7 +37,7 @@ BR = "#it{B}"
 
 # Label for H+ decay mode
 hplusDecayMode = "H^{+} #rightarrow #tau^{+}#nu_{#tau}"
-# hplusDecayMode = "H^{+} #rightarrow tb" #fixme: alexandros
+# hplusDecayMode = "H^{+} #rightarrow t#bar{b}" # FIXME: Uncomment for Hplus2tb analysis
 
 # The label for the physics process
 process            = "t #rightarrow H^{+}b, %s" % hplusDecayMode
