@@ -402,7 +402,7 @@ _legendLabels = {
     "EWK"      : "EWK",
     "Diboson"  : "Diboson",
     "SingleTop": "Single t",
-    "QCD"      : "QCD",
+    "QCD"      : "Mis-ID. #tau_{h} (data)",
     "QCD-b"    : "QCD (b enr.)",
     "QCDdata"  : "Mis-ID. #tau_{h} (data)", #"QCD (data driven)"
 
@@ -1122,7 +1122,7 @@ def _createRatioHistosErrorScale(histo1, histo2, ytitle, numeratorStatSyst=True,
                 # denominator is missing an item
                 trueBin = bin + self.binOffset
                 xval = self._gr.GetX()[trueBin]
-                epsilon = 1e-3 * xval # to allow floating-point difference between TGraph and TH1
+                epsilon = 1e-3 * abs(xval) # to allow floating-point difference between TGraph and TH1
                 if xval+epsilon < xcenter:
                     self.binOffset -= 1
                     return
