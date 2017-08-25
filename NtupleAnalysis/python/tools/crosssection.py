@@ -587,7 +587,7 @@ def setBackgroundCrossSectionForDataset(dataset, doWNJetsWeighting=True, quietMo
     datasetName = dataset.getName().split("_ext", 1)[0] #use only the first part of dataset name, before "_ext"
     value = backgroundCrossSections.crossSection(datasetName, dataset.getEnergy())
     if value is None:
-        if "ChargedHiggs" in dataset.getName():
+        if "ChargedHiggs" in dataset.getName() or "HplusToTauNu" in dataset.getName():
             value = 1.0 # Force signal xsection to 1 pb
         else:
             for wnJets in ["W1Jets", "W2Jets", "W3Jets", "W4Jets"]:
