@@ -487,10 +487,10 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 						       fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
 
       fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlLdgTrijetTopMassWMassRatioAfterStdSelections,
-						       "LdgTrijetTopMassWMassRatioAfterStdSelections", ";R_{32}", 100 , 0.0, 10.0);
+						       "LdgTrijetTopMassWMassRatioAfterStandardSelections", ";R_{32}", 100 , 0.0, 10.0);
 
       fHistoSplitter.createShapeHistogramTriplet<TH2F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlLdgTrijetPt_Vs_LdgTrijetDijetPtAfterStdSelections, 
-						       "LdgTrijetPt_Vs_LdgTrijetDijetPtAfterStdSelections" ,";p_{T} (GeV/c);p_{T} (GeV/c)",
+						       "LdgTrijetPt_Vs_LdgTrijetDijetPtAfterStandardSelections" ,";p_{T} (GeV/c);p_{T} (GeV/c)",
 						       2*fPtBinSettings.bins(), fPtBinSettings.min(), 2*fPtBinSettings.max(), 
 						       2*fPtBinSettings.bins(), fPtBinSettings.min(), 2*fPtBinSettings.max());
       
@@ -515,10 +515,10 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 						       fTopMassBinSettings.bins(), fTopMassBinSettings.min(), fTopMassBinSettings.max());
 
       fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSubldgTrijetTopMassWMassRatioAfterStdSelections,
-						       "SubldgTrijetTopMassWMassRatioAfterStdSelections", ";R_{32}", 100 , 0.0, 10.0);
+						       "SubldgTrijetTopMassWMassRatioAfterStandardSelections", ";R_{32}", 100 , 0.0, 10.0);
 
       fHistoSplitter.createShapeHistogramTriplet<TH2F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlSubldgTrijetPt_Vs_SubldgTrijetDijetPtAfterStdSelections, 
-						       "SubldgTrijetPt_Vs_SubldgTrijetDijetPtAfterStdSelections" ,";p_{T} (GeV/c);p_{T} (GeV/c)",
+						       "SubldgTrijetPt_Vs_SubldgTrijetDijetPtAfterStandardSelections" ,";p_{T} (GeV/c);p_{T} (GeV/c)",
 						       2*fPtBinSettings.bins(), fPtBinSettings.min(), 2*fPtBinSettings.max(), 
 						       2*fPtBinSettings.bins(), fPtBinSettings.min(), 2*fPtBinSettings.max());
 
@@ -594,7 +594,7 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
 						       "LdgTrijetTopMassWMassRatioAfterAllSelections", ";R_{32}", 100 , 0.0, 10.0);
 
       fHistoSplitter.createShapeHistogramTriplet<TH2F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlLdgTrijetPt_Vs_LdgTrijetDijetPtAfterAllSelections, 
-						       "LdgTrijetPt_Vs_SubldgTrijetDijetPtAfterAllSelections" ,";p_{T} (GeV/c);p_{T} (GeV/c)",
+						       "LdgTrijetPt_Vs_LdgTrijetDijetPtAfterAllSelections" ,";p_{T} (GeV/c);p_{T} (GeV/c)",
 						       2*fPtBinSettings.bins(), fPtBinSettings.min(), 2*fPtBinSettings.max(), 
 						       2*fPtBinSettings.bins(), fPtBinSettings.min(), 2*fPtBinSettings.max());
       
@@ -682,11 +682,11 @@ void CommonPlots::book(TDirectory *dir, bool isData) {
   if (!hplus2tb)
     {
       fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlDeltaPhiTauMetAfterStdSelections, 
-						       "DeltaPhiTauMet_AfterStdSelections", ";#Delta#phi(#tau,MET), {}^{#circ};N_{events}", 
+						       "DeltaPhiTauMet_AfterStandardSelections", ";#Delta#phi(#tau,MET), {}^{#circ};N_{events}", 
 						       36, 0, 180); //FIXME: not filled anywhere
       
       fHistoSplitter.createShapeHistogramTriplet<TH1F>(fEnableGenuineTauHistograms, HistoLevel::kSystematics, myDirs, hCtrlDeltaPhiMuMetAfterStdSelections, 
-						       "DeltaPhiMuMet_AfterStdSelections", ";#Delta#phi(#mu,MET), {}^{#circ};N_{events}", 
+						       "DeltaPhiMuMet_AfterStandardSelections", ";#Delta#phi(#mu,MET), {}^{#circ};N_{events}", 
 						       36, 0, 180); //FIXME: not filled anywhere
     }// if (!hplus2tb)
   
