@@ -126,6 +126,8 @@ TopSelection::~TopSelection() {
   delete hTrijet1DijetBJetDEta;
   delete hTrijet2DijetBJetDEta;
   delete hLdgTrijetPt;
+  delete hLdgTrijetTopMassWMassRatio;
+  delete hLdgTrijetPt_Vs_LdgTrijetDijetPt;
   delete hLdgTrijetJet1Pt;
   delete hLdgTrijetJet1Eta;
   delete hLdgTrijetJet1BDisc;
@@ -139,6 +141,8 @@ TopSelection::~TopSelection() {
   delete hLdgTrijetDiJetEta;
   delete hLdgTrijetDiJetMass;
   delete hSubldgTrijetPt;
+  delete hSubldgTrijetTopMassWMassRatio;
+  delete hSubldgTrijetPt_Vs_SubldgTrijetDijetPt;
   delete hSubldgTrijetMass;
   delete hSubldgTrijetJet1Pt;
   delete hSubldgTrijetJet1Eta;
@@ -264,6 +268,9 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   hLdgTrijetDiJetPt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetPt"  ,";p_{T} (GeV/c)", nPtBins     , fPtMin     , fPtMax);
   hLdgTrijetDiJetEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetEta" ,";#eta"         , nEtaBins    , fEtaMin    , fEtaMax);
   hLdgTrijetDiJetMass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetDiJetMass",";M (GeV/c^{2})", nWMassBins  , fWMassMin  , fWMassMax);
+  hLdgTrijetTopMassWMassRatio      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "LdgTrijetTopMassWMassRatio"       ,";R_{32}", 100 , 0.0, 10.0);
+  hLdgTrijetPt_Vs_LdgTrijetDijetPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "LdgTrijetPt_Vs_LdgTrijetDijetPt"  ,";p_{T} (GeV/c);p_{T} (GeV/c)",
+								nPtBins, fPtMin, fPtMax, nPtBins, fPtMin, fPtMax);
 
   hSubldgTrijetPt        = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetPt"       ,";p_{T} (GeV/c)", nPtBins     , fPtMin     , fPtMax);
   hSubldgTrijetMass      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetMass"     ,";M (GeV/c^{2})", nTopMassBins, fTopMassMin, fTopMassMax);
@@ -279,6 +286,9 @@ void TopSelection::bookHistograms(TDirectory* dir) {
   hSubldgTrijetDiJetPt   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetPt"  ,";p_{T} (GeV/c)", nPtBins     , fPtMin     , fPtMax);
   hSubldgTrijetDiJetEta  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetEta" ,";#eta"         , nEtaBins    , fEtaMin    , fEtaMax);
   hSubldgTrijetDiJetMass = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetDiJetMass",";M (GeV/c^{2})", nWMassBins  , fWMassMin  , fWMassMax);
+  hSubldgTrijetTopMassWMassRatio         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, subdir, "SubldgTrijetTopMassWMassRatio"       ,";R_{32}", 100 , 0.0, 10.0);
+  hSubldgTrijetPt_Vs_SubldgTrijetDijetPt = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, subdir, "SubldgTrijetPt_Vs_SubldgTrijetDijetPt",";p_{T} (GeV/c);p_{T} (GeV/c)",
+								nPtBins, fPtMin, fPtMax, nPtBins, fPtMin, fPtMax);
 
   // Histograms (2D) 
   hTetrajetBJetDijetWithMaxDR_TetrajetBJetDijetWithMinDR_DPhiVsDPhi = fHistoWrapper.makeTH<TH2F>(HistoLevel::kDebug, subdir, 
@@ -477,7 +487,13 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   hTrijet2DijetBJetDPhi->Fill( std::abs( ROOT::Math::VectorUtil::DeltaPhi( output.fTrijet2Dijet_p4, output.fTrijet2BJet.p4() ) ) );
   hTrijet1DijetBJetDR  ->Fill( ROOT::Math::VectorUtil::DeltaR( output.fTrijet1Dijet_p4, output.fTrijet1BJet.p4() ) );
   hTrijet2DijetBJetDR  ->Fill( ROOT::Math::VectorUtil::DeltaR( output.fTrijet2Dijet_p4, output.fTrijet2BJet.p4() ) );
+
   // Leading/Subleading tops
+  hLdgTrijetTopMassWMassRatio->Fill(output.getLdgTrijetTopMassWMassRatio());
+  hLdgTrijetPt_Vs_LdgTrijetDijetPt->Fill(output.getLdgTrijet().pt(), output.getLdgTrijetDijet().pt());
+  hSubldgTrijetTopMassWMassRatio->Fill(output.getSubldgTrijetTopMassWMassRatio());
+  hSubldgTrijetPt_Vs_SubldgTrijetDijetPt->Fill(output.getSubldgTrijet().pt(), output.getSubldgTrijetDijet().pt());
+
   if (output.fTrijet1_p4.pt() > output.fTrijet2_p4.pt()) 
     {
       // Leading

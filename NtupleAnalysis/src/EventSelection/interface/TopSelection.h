@@ -62,16 +62,42 @@ public:
       if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1BJet;
       else return fTrijet2BJet;
     }
-    const Jet getSubldgTrijetBJet() const 
+    const math::XYZTLorentzVector getLdgTrijetDijet() const
     { 
-      if (fTrijet1_p4.pt() < fTrijet2_p4.pt()) return fTrijet1BJet;
-      else return fTrijet2BJet;
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet1Dijet_p4;
+      else return fTrijet2Dijet_p4;
     }
+    const double getLdgTrijetTopMassWMassRatio() const
+    { 
+      double R = -1.0;
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) R = fTrijet1_p4.mass()/fTrijet1Dijet_p4.mass();
+      else R = fTrijet2_p4.mass()/fTrijet2Dijet_p4.mass();
+      return R;
+    }
+
     const math::XYZTLorentzVector getSubldgTrijet() const
     { 
       if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet2_p4;
       else return fTrijet1_p4; 
     }
+    const Jet getSubldgTrijetBJet() const 
+    { 
+      if (fTrijet1_p4.pt() < fTrijet2_p4.pt()) return fTrijet1BJet;
+      else return fTrijet2BJet;
+    } 
+    const math::XYZTLorentzVector getSubldgTrijetDijet() const
+    { 
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) return fTrijet2Dijet_p4;
+      else return fTrijet1Dijet_p4;
+    }
+    const double getSubldgTrijetTopMassWMassRatio() const
+    { 
+      double R = -1.0;
+      if (fTrijet1_p4.pt() > fTrijet2_p4.pt()) R = fTrijet2_p4.mass()/fTrijet2Dijet_p4.mass();
+      else R = fTrijet1_p4.mass()/fTrijet1Dijet_p4.mass();
+      return R;
+    }
+
     // Leading/Subleading Dijets
     const math::XYZTLorentzVector getLdgDijet() const 
     { 
@@ -251,6 +277,7 @@ private:
 
   WrappedTH1 *hLdgTrijetPt;
   WrappedTH1 *hLdgTrijetMass;
+  WrappedTH1 *hLdgTrijetTopMassWMassRatio;
   WrappedTH1 *hLdgTrijetJet1Pt;
   WrappedTH1 *hLdgTrijetJet1Eta;
   WrappedTH1 *hLdgTrijetJet1BDisc;
@@ -265,6 +292,7 @@ private:
   WrappedTH1 *hLdgTrijetDiJetMass;
 
   WrappedTH1 *hSubldgTrijetPt;
+  WrappedTH1 *hSubldgTrijetTopMassWMassRatio;
   WrappedTH1 *hSubldgTrijetMass;
   WrappedTH1 *hSubldgTrijetJet1Pt;
   WrappedTH1 *hSubldgTrijetJet1Eta;
@@ -286,7 +314,8 @@ private:
   WrappedTH2 *hTrijet2MassVsChiSqr;
   WrappedTH2 *hTrijet1DijetPtVsDijetDR;
   WrappedTH2 *hTrijet2DijetPtVsDijetDR;
-
+  WrappedTH2 *hLdgTrijetPt_Vs_LdgTrijetDijetPt;
+  WrappedTH2 *hSubldgTrijetPt_Vs_SubldgTrijetDijetPt;
 };
 
 #endif
