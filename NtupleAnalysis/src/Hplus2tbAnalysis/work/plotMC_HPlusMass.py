@@ -7,12 +7,15 @@ Usage:
 
 Examples:
 ./plotMC_HPlusMass.py -m <peudo_mcrab> -o "" --url --normaliseToOne
+./plotMC_HPlusMass.py -m <peudo_mcrab> --folder topologySelection_ --url --normaliseToOne
+./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url
+./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
+./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
 
 Last Used:
-./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --folder topologySelection_ --url --normaliseToOne
-./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --normaliseToOne --url
-./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170810_022933/ --normaliseToOne --url --signalMass 500
-./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170724_072440/ --normaliseToOne --url --signalMass 500
+./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --url --mergeEWK
+./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --folder ""
+./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --folder topSelection_ --url --normaliseToOne
 
 '''
 
@@ -136,28 +139,36 @@ def main(opts, signalMass):
         if 1:
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "SingleTop" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "DYJetsToQQHT" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "TTZToQQ" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "TTWJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
-            datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "WJetsToQQ" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "Diboson" in name, datasetsMgr.getAllDatasetNames()))
+            #datasetsMgr.remove(filter(lambda name: "TTTT" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "FakeBMeasurementTrijetMass" in name, datasetsMgr.getAllDatasetNames()))
             #datasetsMgr.remove(filter(lambda name: "M_" in name and "M_" + str(opts.signalMass) not in name, datasetsMgr.getAllDatasetNames()))
-
-        # Re-order datasets
-        if 1:
-            newOrder = ["TT", "QCD"]
-            for m in signalMass:
-                newOrder.insert(0, m)
-            #newOrder.extend(GetListOfEwkDatasets())
-            datasetsMgr.selectAndReorder(newOrder)
 
         # Merge EWK samples
         if opts.mergeEWK:
             datasetsMgr.merge("EWK", GetListOfEwkDatasets())
             plots._plotStyles["EWK"] = styles.getAltEWKStyle()
+
+        # Re-order datasets
+        datasetOrder = []
+        for d in datasetsMgr.getAllDatasets():
+            if "M_" in d.getName():
+                if d not in signalMass:
+                    continue
+            datasetOrder.append(d.getName())
+            #newOrder = ["TT", "QCD"]
+            #newOrder = ["TT", "QCD"]
+        for m in signalMass:
+            #newOrder.insert(0, m)
+            datasetOrder.insert(0, m)
+            #datasetsMgr.selectAndReorder(newOrder)
+        datasetsMgr.selectAndReorder(datasetOrder)
 
         # Print dataset information
         datasetsMgr.PrintInfo()
@@ -169,17 +180,18 @@ def main(opts, signalMass):
         style.setGridY(False)
 
         # Do the topSelection histos
-        #folder     = "topSelection_"
-        folder     = opts.folder 
-        histoList  = datasetsMgr.getDataset("QCD").getDirectoryContent(folder)
-        #hList0     = [x for x in histoList if "TrijetMass" in x]
-        #hList1     = [x for x in histoList if "TetrajetMass" in x]
-        #hList2     = [x for x in histoList if "TetrajetBJetPt" in x]
-        #histoPaths1 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
-        histoPaths1 = [os.path.join(folder, h) for h in histoList]
+        folder      = opts.folder 
+        histoPaths1 = []
+        if folder != "":
+            histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
+            # hList0     = [x for x in histoList if "TrijetMass" in x]
+            # hList1     = [x for x in histoList if "TetrajetMass" in x]
+            # hList2     = [x for x in histoList if "TetrajetBJetPt" in x]
+            # histoPaths1 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
+            histoPaths1 = [os.path.join(folder, h) for h in histoList]
         
         folder     = "ForDataDrivenCtrlPlots"
-        histoList  = datasetsMgr.getDataset("QCD").getDirectoryContent(folder)
+        histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
         hList0     = [x for x in histoList if "TrijetMass" in x]
         hList1     = [x for x in histoList if "TetrajetMass" in x]
         hList2     = [x for x in histoList if "TetrajetBjetPt" in x]
@@ -205,7 +217,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
     _rebinX = 1
     _format = "%0.0f"
     _xlabel = None
-    logY    = True
+    logY    = False
     _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
 
     if "trijetmass" in histo.lower():
@@ -216,15 +228,24 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 805 #1005
+    elif "ht" in histo.lower():
+        _rebinX = 2
+        logY    = False
+        _units  = "GeV"
+        _format = "%0.0f " + _units
+        _xlabel = "H_{T} (%s)" % _units
+        _cutBox = {"cutValue": 500, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        #_opts["xmin"] = 500
+        _opts["xmax"] = 2000
     elif "tetrajetmass" in histo.lower():
-        _rebinX = 5 #10 #4
+        _rebinX = 5 #5 #10 #4
         logY    = False
         _units  = "GeV/c^{2}"
         _format = "%0.0f " + _units
         _xlabel = "m_{jjbb} (%s)" % (_units)
         _format = "%0.0f " + _units
         _cutBox = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 1500 #2500.0 #3500.0
+        _opts["xmax"] = 1500 #3500.0
         #_rebinX = 10
         #_opts["xmax"] = 3500
     elif "tetrajetbjetpt" in histo.lower():
@@ -258,16 +279,14 @@ def PlotMC(datasetsMgr, histo, intLumi):
     # Customise styling
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetLineStyle(ROOT.kSolid))
 
-    p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
-    p.histoMgr.setHistoDrawStyle("QCD", "HIST")
-    p.histoMgr.setHistoLegendStyle("QCD", "F")
+    if "QCD" in datasetsMgr.getAllDatasets():
+        p.histoMgr.forHisto("QCD", styles.getQCDFillStyle() )
+        p.histoMgr.setHistoDrawStyle("QCD", "HIST")
+        p.histoMgr.setHistoLegendStyle("QCD", "F")
 
-    p.histoMgr.setHistoDrawStyle("TT", "AP")
-    p.histoMgr.setHistoLegendStyle("TT", "LP")
-
-    #p.histoMgr.setHistoDrawStyle("TTZToQQ", "AP")
-    #p.histoMgr.setHistoLegendStyle("TTZToQQ", "LP")
-
+    if "TT" in datasetsMgr.getAllDatasets():
+        p.histoMgr.setHistoDrawStyle("TT", "AP")
+        p.histoMgr.setHistoLegendStyle("TT", "LP")
 
     # Customise style
     signalM = []
@@ -344,7 +363,8 @@ if __name__ == "__main__":
     BATCHMODE    = True
     PRECISION    = 3
     #SIGNALMASS   = [200, 500, 800, 2000]
-    SIGNALMASS   = [300, 500, 800]#, 1000]
+    SIGNALMASS   = [300, 500, 800, 1000]
+    #SIGNALMASS   = [200, 500, 800, 1000, 2000, 3000]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
@@ -355,7 +375,7 @@ if __name__ == "__main__":
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
-    FOLDER       = "topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
+    FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -408,7 +428,7 @@ if __name__ == "__main__":
     parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true", 
                       help="Normalise the histograms to one? [default: %s]" % (NORMALISE) )
 
-    parser.add_option("--folder", dest="folder", type="string", 
+    parser.add_option("--folder", dest="folder", type="string", default = FOLDER,
                       help="ROOT file folder under which all histograms to be plotted are located [default: %s]" % (FOLDER) )
 
     (opts, parseArgs) = parser.parse_args()

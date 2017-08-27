@@ -12,6 +12,7 @@ Examples:
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url --signalMass 800
 
 Last Used:
+./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --url --signalMass 800
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170817_025841/ --url --signalMass 500
 '''
 
@@ -166,11 +167,12 @@ def GetHistoKwargs(histoList, opts):
     key   = histogramName
     value = kwargs
     '''
-
+    
     histoKwargs = {}
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
     if opts.mergeEWK:
         _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": -0.12}    
+    logY = True
 
     _kwargs = {
         "ylabel"           : "Events / %.0f",
@@ -186,12 +188,16 @@ def GetHistoKwargs(histoList, opts):
         "cmsExtraText"     : "Preliminary",
         "opts"             : {"ymin": 2e-1, "ymaxfactor": 10}, #1.2
         "opts2"            : {"ymin": 0.0, "ymax": 2.0},
-        "log"              : True,
+        "log"              : logY,
         "moveLegend"       : _moveLegend,
         }
 
     for h in histoList:
         kwargs = copy.deepcopy(_kwargs)
+        if "met" in h.lower():
+            units            = "GeV/c"
+            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["xlabel"] = "E_{T}^{miss} (%s)" % units
         if "NVertices" in h:
             kwargs["ylabel"] = "Events / %.0f"
             kwargs["xlabel"] = "Vertices"
@@ -365,7 +371,16 @@ def GetHistoKwargs(histoList, opts):
             kwargs["xlabel"] = "#eta"
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": -2.5, "xmax": +2.5, "ymin": 1e+0, "ymaxfactor": 10}
-        #else:
+        if "TopMassWMassRatio" in h:
+            kwargs["ylabel"] = "Events / %.1f"
+            kwargs["xlabel"] = "R_{3/2}"
+            #kwargs["cutBox"] = {"cutValue": (173.21/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            kwargs["cutBox"] = {"cutValue": (172.5/80.385), "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            #kwargs["cutBox"] = {"cutValue": 2.1, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+            #kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": 1.2}
+            kwargs["opts"]   = {"xmin": 0, "xmax": +10.0, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["log"]    = True#False
+
         histoKwargs[h] = kwargs
     return histoKwargs
     
@@ -386,9 +401,23 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
 
     # For-loop: All histograms in list
     for histoName in histoPaths:
-        
-        if "TrijetMass" not in histoName:
+        if "Vs" in histoName:
             continue
+
+        # Not used in this analysis (yet)
+        if "MHT" in histoName:
+            continue
+
+        # By definition of the Inverted sample the following histoscannot agree!
+        if "NBjets_" in histoName:
+            continue
+        if "BJetPt_" in histoName:
+            continue
+        if "_BJetEta_" in histoName:
+            continue
+        if "_BtagDiscriminator_" in histoName:
+            continue
+
         kwargs_  = histoKwargs[histoName]
         saveName = histoName.replace("/", "_")
 
