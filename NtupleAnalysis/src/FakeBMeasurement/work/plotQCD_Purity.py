@@ -271,7 +271,8 @@ def PlotPurity(datasetsMgr, histoName):
     _format = "%0.0f"
     _opts["xmax"] = xMax
     _xlabel = None
-
+    _ylabel = "Purity / %.0f"
+        
     if "dijetm" in histoName.lower():
         _units  = "GeV/c^{2}" 
         _format = "%0.0f " + _units
@@ -306,7 +307,7 @@ def PlotPurity(datasetsMgr, histoName):
     plots.drawPlot(p, 
                    histoName,  
                    xlabel        = _xlabel,
-                   ylabel        = "Purity",
+                   ylabel        = _ylabel,
                    log           = False, 
                    cmsExtraText  = "Preliminary", 
                    createLegend  = {"x1": 0.80, "y1": 0.80, "x2": 0.92, "y2": 0.92},

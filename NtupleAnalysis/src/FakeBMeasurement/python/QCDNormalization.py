@@ -171,8 +171,7 @@ class FitFunction:
             "EWKFunction"         : 9,
             "QCDFunction"         : 7,
             "QCDFunctionAlt"      : 5,
-            "FitDataWithQCDAndEWK": 2,
-            #"FitDataWithQCDAndEWK": 1, #xenios
+            "FitDataWithQCDAndEWK": 2, # p[0]: Overall normalisation factor (!= 1 if fit range is finite), p[1]: fraction of QCD events
             "CrystalBall"         : 5,
         }
 
@@ -472,12 +471,26 @@ class FitFunction:
 
     def FitDataWithQCDAndEWK(self, x, par, fitFunctionQCD, parQCD, normQCD, fitFunctionEWK, parEWK, normEWK):
         '''
-        QCD and  EWK (inclusive) as separate templates
+        The QCD and EWK (inclusive) as linear combination of templates.
+
+        Use this function to fit the Baseline data (normalised to one). 
+        If the fit range used is the entire plot range then only 1 free fit
+        parameter is required; the fraction of QCD events
+        N = 1.0*[f*QCD + (1-f)*EWK]
+        
+        However, if the fit range is finite then a second free fit parameter 
+        is required to represent the overall normalisation of the fit; to 
+        account for the fact that not all the are is fitted. In that case we
+        have:
+        N = A*[f*QCD + (1-f)*EWK]
+        where A is the overall normalisation factor. 
+
+        What we want at the end of the data is the correct fraction of QCD events
+        in the fitted curve.
         '''
         nQCD = fitFunctionQCD(x, parQCD, norm=normQCD)
         nEWK = fitFunctionEWK(x, parEWK, norm=normEWK)
         return par[0]*(par[1]*nQCD + (1.0 - par[1])*nEWK)
-        #return 1.0*(par[0]*nQCD + (1.0 - par[0])*nEWK) #xenios
 
     def FitDataWithFakesAndGenuineTaus(self, x, par,
             QCDAndFakesFitFunction, parQCDAndFakes, QCDAndFakesnorm,
@@ -2165,7 +2178,7 @@ class QCDNormalizationManagerDefault(QCDNormalizationManagerBase):
         nRatioBaseline     = (nDataBaseline)/(nBkgBaseline)
         nRatioBaselineError= errorPropagation.errorPropagationForDivision(nDataBaseline, nDataBaselineError, nBkgBaseline, nBkgBaselineError)
 
-        print "QCDNormalization.py: XENIOS"
+        print "QCDNormalization.py: Purity calculation"
         # nRatioInverted     = (nDataInverted)/(nBkgInverted) #
         # nRatioInvertedError= errorPropagation.errorPropagationForDivision(nDataInverted, nDataInvertedError, nBkgInverted, nBkgBaselineError)
         qcdPurity          = nQCDFitBaseline/nDataBaseline
