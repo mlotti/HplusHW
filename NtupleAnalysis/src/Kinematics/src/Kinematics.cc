@@ -54,8 +54,10 @@ private:
   // Input parameters
   const double cfg_Verbose;
   const ParameterSet PSet_JetSelection;
-  const double cfg_JetPtCut;
-  const double cfg_JetEtaCut;
+  const std::vector<float> cfg_JetPtCuts;
+  const std::vector<float> cfg_JetEtaCuts;
+  // const double cfg_JetPtCut;
+  // const double cfg_JetEtaCut;
   const DirectionalCut<int> cfg_JetNumberCut;
   const ParameterSet PSet_ElectronSelection;
   const double cfg_ElectronPtCut;
@@ -263,8 +265,10 @@ Kinematics::Kinematics(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_Verbose(config.getParameter<bool>("verbose")),
     PSet_JetSelection(config.getParameter<ParameterSet>("JetSelection")),
-    cfg_JetPtCut(config.getParameter<float>("JetSelection.jetPtCut")),
-    cfg_JetEtaCut(config.getParameter<float>("JetSelection.jetEtaCut")),
+    cfg_JetPtCuts(config.getParameter<std::vector<float>>("JetSelection.jetPtCuts")),
+    cfg_JetEtaCuts(config.getParameter<std::vector<float>>("JetSelection.jetEtaCuts")),
+    // cfg_JetPtCut(config.getParameter<float>("JetSelection.jetPtCut")),
+    // cfg_JetEtaCut(config.getParameter<float>("JetSelection.jetEtaCut")),
     cfg_JetNumberCut(config, "JetSelection.numberOfJetsCut"),
     PSet_ElectronSelection(config.getParameter<ParameterSet>("ElectronSelection")),
     cfg_ElectronPtCut(config.getParameter<float>("ElectronSelection.electronPtCut")),  
@@ -272,12 +276,12 @@ Kinematics::Kinematics(const ParameterSet& config, const TH1* skimCounters)
     PSet_MuonSelection(config.getParameter<ParameterSet>("MuonSelection")),
     cfg_MuonPtCut(config.getParameter<float>("MuonSelection.muonPtCut")),
     cfg_MuonEtaCut(config.getParameter<float>("MuonSelection.muonEtaCut")),
-    PSet_HtSelection(config.getParameter<ParameterSet>("HtSelection")),
-    cfg_HtCut(config, "HtSelection.HtCut"),
+    PSet_HtSelection(config.getParameter<ParameterSet>("JetSelection")),
+    cfg_HtCut(config, "JetSelection.HTCut"),
     cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
     cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
     cfg_PhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.phiBins")),
-    cfg_MassBinSetting(config.getParameter<ParameterSet>("CommonPlots.invmassBins")),
+    cfg_MassBinSetting(config.getParameter<ParameterSet>("CommonPlots.invMassBins")),
     cfg_DeltaEtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaEtaBins")),
     cfg_DeltaPhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaPhiBins")),
     cfg_DeltaRBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaRBins")),
@@ -296,12 +300,12 @@ void Kinematics::book(TDirectory *dir) {
   cuts.AddRowColumn(2, "Cut Direction");
   cuts.AddRowColumn(3, "Cut Value");
   //  
-  cuts.AddRowColumn(0, auxTools.ToString(cfg_JetPtCut) );
+  // cuts.AddRowColumn(0, auxTools.ToString(cfg_JetPtCuts) ); //fixme
   cuts.AddRowColumn(0, auxTools.ToString(cfg_ElectronPtCut) );
   cuts.AddRowColumn(0, auxTools.ToString(cfg_MuonPtCut) );
   cuts.AddRowColumn(0, "-");
   //
-  cuts.AddRowColumn(1, auxTools.ToString(cfg_JetEtaCut) );
+  // cuts.AddRowColumn(1, auxTools.ToString(cfg_JetEtaCut) );
   cuts.AddRowColumn(1, auxTools.ToString(cfg_ElectronEtaCut) );
   cuts.AddRowColumn(1, auxTools.ToString(cfg_MuonEtaCut) );
   cuts.AddRowColumn(1, "-");
@@ -309,12 +313,12 @@ void Kinematics::book(TDirectory *dir) {
   cuts.AddRowColumn(2, PSet_JetSelection.getParameter<string>("numberOfJetsCutDirection") );
   cuts.AddRowColumn(2, "=<" );
   cuts.AddRowColumn(2, "=<" );
-  cuts.AddRowColumn(2, PSet_HtSelection.getParameter<string>("HtCutDirection") );
+  cuts.AddRowColumn(2, PSet_HtSelection.getParameter<string>("HTCutDirection") );
   //
   cuts.AddRowColumn(3, auxTools.ToString(PSet_JetSelection.getParameter<int>("numberOfJetsCutValue")) );
   cuts.AddRowColumn(3, "0" );
   cuts.AddRowColumn(3, "0" );
-  cuts.AddRowColumn(3, PSet_HtSelection.getParameter<string>("HtCutValue") );
+  cuts.AddRowColumn(3, PSet_HtSelection.getParameter<string>("HTCutValue") );
   //
   std::cout << "\n" << std::endl;
   if (cfg_Verbose) cuts.Print();
@@ -582,30 +586,44 @@ void Kinematics::process(Long64_t entry) {
   ///////////////////////////////////////////////////////////////////////////
   // GenJets Calculations
   /////////////////////////////////////////////////////////////////////////// 
-  if(0) std::cout << "=== GenJets" << std::endl;
+  if (0) std::cout << "=== GenJets" << std::endl;
 
   std::vector<math::XYZTLorentzVector> selJets_p4;
   int nSelJets = 0;
   double genJ_HT = 0.0;
 
   // For-loop: GenJets
-  for(GenJet j: fEvent.genjets()) {
+  unsigned int jet_index   = -1;
+  unsigned int ptCut_index  = 0;
+  unsigned int etaCut_index = 0;
+  for(GenJet jet: fEvent.genjets()) {
 
+    // Jet index (for pT and eta cuts)
+    jet_index++;
+
+    // Get basic values 
     math::XYZTLorentzVector genJ_p4;
-    genJ_p4 = j.p4();
-    double genJ_pt     = j.pt();
-    double genJ_eta    = j.eta();
+    genJ_p4 = jet.p4();
+    double genJ_pt     = jet.pt();
+    double genJ_eta    = jet.eta();
 
     // Apply selection cuts
+    const float cfg_JetPtCut  = cfg_JetPtCuts.at(ptCut_index);
+    const float cfg_JetEtaCut = cfg_JetEtaCuts.at(etaCut_index);
+
+    // std::cout << jet_index << ") pT[" << ptCut_index << "] > " << cfg_JetPtCut << " GeV/c ( " << jet.pt() << ")" << std::endl;
     if (genJ_pt < cfg_JetPtCut) continue;
     if (std::abs(genJ_eta) > cfg_JetEtaCut) continue;
-    
+
+    // Increment cut index only. Cannot be bigger than the size of the cut list provided
+    if (ptCut_index  < cfg_JetPtCuts.size()-1  ) ptCut_index++;
+    if (etaCut_index < cfg_JetEtaCuts.size()-1  ) etaCut_index++;
+
     // Do calculations
     nSelJets++;
     selJets_p4.push_back( genJ_p4 );
     genJ_HT += genJ_pt;
   }
- 
 
   ///////////////////////////////////////////////////////////////////////////
   // Lepton Veto & Primary Vertex
@@ -636,7 +654,7 @@ void Kinematics::process(Long64_t entry) {
     else continue;
 
   }
-  
+
 
   ///////////////////////////////////////////////////////////////////////////
   // Preselection Cuts (python/parameters/hplus2tbAnalysis.py)
@@ -1053,21 +1071,37 @@ void Kinematics::process(Long64_t entry) {
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   // B-quarks (pT sorted)
   //////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (0) std::cout << "=== BQuarks" << std::endl;
+  if (0) std::cout << "=== BQuark cuts" << std::endl;
   std::sort( bQuarks_p4.begin(), bQuarks_p4.end(), PtComparator() );  
   
   std::vector<math::XYZTLorentzVector> selBQuarks_p4;
+  unsigned int bQuark_index  = -1;
+  ptCut_index   = 0;
+  etaCut_index  = 0;
+
   // For-loop: All  BQuarks
   for (auto i = bQuarks_p4.begin(); i != bQuarks_p4.end(); ++i) {
-    
+
+    // Jet index (for pT and eta cuts)
+    bQuark_index++;
+
+    // std::cout << "*** ptCut_index = " << ptCut_index << ", etaCut_index = " << etaCut_index << std::endl;
+
     // Apply selection cuts
+    // const float cfg_JetPtCut  = cfg_JetPtCuts.at(ptCut_index);
+    const float cfg_JetEtaCut = cfg_JetEtaCuts.at(etaCut_index);
+
+    // if (i->Pt() < cfg_JetPtCut) continue;
     if (i->Pt() < 15.0) continue;
     if (std::abs(i->Eta()) > cfg_JetEtaCut) continue;
     
     // Save this BQuark
     selBQuarks_p4.push_back(*i);
+
+    // Increment cut index only. Cannot be bigger than the size of the cut list provided
+    if (ptCut_index  < cfg_JetPtCuts.size()-1  ) ptCut_index++;
+    if (etaCut_index  < cfg_JetEtaCuts.size()-1  ) etaCut_index++;
   }
-  
 
   // Fill histos
   h_BQuarks_N->Fill(bQuarks_p4.size());

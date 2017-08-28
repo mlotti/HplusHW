@@ -140,7 +140,8 @@ def main(opts):
 
         # Re-order datasets (different for inverted than default=baseline)
         newOrder = ["Data"]
-        newOrder.extend(["ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass])
+        if opts.signalMass != 0:
+            newOrder.extend(["ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass])
         newOrder.extend(["QCD-Data"])
         newOrder.extend(GetListOfEwkDatasets())
         datasetsMgr.selectAndReorder(newOrder)
@@ -334,14 +335,16 @@ def GetHistoKwargs(histoList, opts):
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
         if "LdgTetrajetMass" in h:
-            startBlind       = 135  # 175 v. sensitive to bin-width!
-            endBlind         = 3000 #v. sensitive to bin-width!
+            ROOT.gStyle.SetNdivisions(5, "X")
+            startBlind       = 150  # 135 v. sensitive to bin-width!
+            endBlind         = 2500 #v. sensitive to bin-width!
             kwargs["rebinX"] = 4
             units            = "GeV/c^{2}"
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "m_{jjbb} (%s)"  % units
             kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
             kwargs["opts"]   = {"xmin": 0.0, "xmax": endBlind, "ymin": 1e+0, "ymaxfactor": 10}
+            #kwargs["opts"]   = {"xmin": 0.0, "xmax": 2000, "ymin": 1e+0, "ymaxfactor": 10}
             if "AllSelections" in h:
                 kwargs["blindingRangeString"] = "%s-%s" % (startBlind, endBlind)
                 kwargs["moveBlindedText"]     = {"dx": -0.22, "dy": +0.08, "dh": -0.12}
@@ -390,17 +393,29 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
     # Definitions
     histoNames  = []
     saveFormats = [".png"] #[".C", ".png", ".pdf"]
+
+    # Get list of histograms
     dataPath    = "ForDataDrivenCtrlPlots"
     allHistos   = datasetsMgr.getDataset(qcdDatasetName).getDirectoryContent(dataPath)
     histoList   = [h for h in allHistos if "StandardSelections" in h]
     histoList.extend([h for h in allHistos if "AllSelections" in h])
     histoList   = [h for h in histoList if "_MCEWK" not in h]
     histoList   = [h for h in histoList if "_Purity" not in h]
-    histoPaths  = [dataPath+"/"+h for h in histoList]
+    histoPaths  = [dataPath + "/" + h for h in histoList]
+
+    # Get histogram<->kwargs dictionary 
     histoKwargs = GetHistoKwargs(histoPaths, opts)
 
     # For-loop: All histograms in list
     for histoName in histoPaths:
+
+        if opts.signalMass == 0:
+            if "LdgTrijetMass" in histoName:
+                continue
+            
+            if "LdgTetrajetMass" in histoName:
+                continue
+
         if "Vs" in histoName:
             continue
 
@@ -425,8 +440,8 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
         p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
         
         # Apply QCD data-driven style
-        
-        p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass, styles.getSignalStyleHToTB_M("%.0f" % opts.signalMass))
+        if opts.signalMass != 0:
+            p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass, styles.getSignalStyleHToTB_M("%.0f" % opts.signalMass))
         #p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
         p.histoMgr.forHisto(qcdDatasetName, styles.getAltQCDStyle())
         p.histoMgr.setHistoDrawStyle(qcdDatasetName, "HIST")
@@ -534,7 +549,7 @@ if __name__ == "__main__":
     SUBCOUNTERS  = False
     LATEX        = False
     MCONLY       = False
-    SIGNALMASS   = 500
+    SIGNALMASS   = 0
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
@@ -608,13 +623,11 @@ if __name__ == "__main__":
 
     # Sanity check
     allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
-    if opts.signalMass not in allowedMass:
+    if opts.signalMass!=0 and opts.signalMass not in allowedMass:
         Print("Invalid signal mass point (=%.0f) selected! Please select one of the following:" % (opts.signalMass), True)
         for m in allowedMass:
             Print(m, False)
         sys.exit()
-    #else:
-    #    opts.signalMass = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
 
     # Call the main function
     main(opts)

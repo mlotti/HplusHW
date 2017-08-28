@@ -197,16 +197,18 @@ def GetHistoKwargs(histoList):
     yMax        = 800
     zMin        =   1
     zMax        = 1e5
+    normToOne   = True
+    print "WARNING! Normalisation does not work. Switch to using MCPlot and DataMCPlot instead of plotbase (use if)"
 
     _kwargs = {
         "xlabel"           : labelX,
         "ylabel"           : labelY,
         "rebinX"           : 1,
         "rebinY"           : 1,
-        "normalizeToOne"   : True,
+        "normalizeToOne"   : normToOne,
         "stackMCHistograms": False,
-        "addMCUncertainty" : True,
-        "addLuminosityText": True,
+        "addMCUncertainty" : False,
+        "addLuminosityText": (not normToOne),
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         "logX"             : logX,
@@ -243,14 +245,14 @@ def Plot2d(datasetsMgr, histoName, kwargs, opts):
 
     # Create the plotting object
     p = plots.PlotBase(datasetRootHistos=[refHisto], saveFormats=kwargs.get("saveFormats"))
-    p.setLuminosity(opts.intLumi)
+    p.setDrawOptions(**kwargs)
 
     # Create the MC Plot with selected normalization ("normalizeToOne", "normalizeByCrossSection", "normalizeToLumi") 
     # p = plots.MCPlot(datasetsMgr, [refHisto], normalizeToLumi=opts.intLumi, **kwargs)
     # p.normalizeMCToLuminosity(opts.intLumi)
     # p = plots.MCPlot(datasetsMgr, [refHisto], **kwargs)
     
-    # Customise axes (before drawing histo)
+    # Customise axes (before drawing histo)    
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetTitle(kwargs.get("xlabel")))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetTitle(kwargs.get("ylabel")))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs.get("rebinX")))
@@ -296,7 +298,10 @@ def Plot2d(datasetsMgr, histoName, kwargs, opts):
     p.draw()
 
     # Add canvas text
-    histograms.addStandardTexts(lumi=opts.intLumi)
+    if kwargs.get("addLuminosityText"):
+        histograms.addStandardTexts(lumi=opts.intLumi)
+    else:
+        histograms.addStandardTexts()
     histograms.addText(0.17, 0.88, plots._legendLabels[dataset], 17)
 
     # Save the plots
