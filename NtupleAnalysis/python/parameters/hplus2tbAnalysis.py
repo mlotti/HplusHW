@@ -230,7 +230,7 @@ commonPlotsOptions = PSet(
     ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax =  500.0),
     etaBins           = PSet(nBins =  50, axisMin = -5.0, axisMax =    5.0),
     phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax =    3.2),
-    deltaEtaBins      = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
+    deltaEtaBins      = PSet(nBins = 100, axisMin =  0.0, axisMax =   10.0),
     deltaPhiBins      = PSet(nBins =  32, axisMin =  0.0, axisMax =    3.2),
     deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
     rtauBins          = PSet(nBins =  55, axisMin =  0.0, axisMax =    1.1), # HToTauNu

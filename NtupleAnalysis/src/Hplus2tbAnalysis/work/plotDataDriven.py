@@ -12,6 +12,7 @@ Examples:
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_HLTBJetTrgMatch_TopCut10_H2Cut0p5_170720_104648 --url --signalMass 800
 
 Last Used:
+./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170827_075947/ --url
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --url --signalMass 800
 ./plotDataDriven.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170817_025841/ --url --signalMass 500
 '''
@@ -284,6 +285,11 @@ def GetHistoKwargs(histoList, opts):
             units = "GeV/c"
             kwargs["ylabel"] = "Events / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
+        if "LdgTrijetDijetPt" in h:
+            units = "GeV/c"
+            kwargs["ylabel"] = "Events / %.0f " + units
+            kwargs["xlabel"] = "p_{T} (%s)"  % units
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": 700.0, "ymin": 1e+0, "ymaxfactor": 10}
         if "LdgTrijetMass" in h:
             startBlind       = 115 #135 v. sensitive to bin-width!
             endBlind         = 225 #205 v. sensitive to bin-width!
