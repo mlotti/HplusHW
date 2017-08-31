@@ -1,7 +1,6 @@
 // -*- c++ -*-
 #include "Framework/interface/BaseSelector.h"
 #include "Framework/interface/makeTH.h"
-
 // User
 #include "Auxiliary/interface/Table.h"
 #include "Auxiliary/interface/Tools.h"
@@ -16,8 +15,11 @@
 #include "TMatrixDSym.h"
 #include "TMatrixDSymEigen.h"
 
+typedef Particle<ParticleCollection<double> > genParticle;
+
 struct PtComparator
 {
+  bool operator() (const genParticle p1, const genParticle p2) const { return ( p1.pt() > p2.pt() ); }
   bool operator() (const math::XYZTLorentzVector p1, const math::XYZTLorentzVector p2) const { return ( p1.pt() > p2.pt() ); }
 };
 
@@ -33,6 +35,9 @@ public:
   virtual void setupBranches(BranchManager& branchManager) override;
   /// Called for each event
   virtual void process(Long64_t entry) override;  
+  virtual vector<genParticle> GetGenParticles(const vector<genParticle> genParticles, double ptCut, double etaCut, const int pdgId, const bool isLastCopy=true, const bool hasNoDaughters=false);
+  virtual vector<GenJet> GetGenJets(const GenJetCollection& genJets, std::vector<float> ptCut, std::vector<float> etaCut);
+  virtual vector<GenJet> GetGenJets(const vector<GenJet> genJets, std::vector<float> ptCut, std::vector<float> etaCut, vector<genParticle> genParticlesToMatch);
   virtual TMatrixDSym ComputeMomentumTensor(std::vector<math::XYZTLorentzVector> jets, double r = 2.0); 
   virtual TMatrixDSym ComputeMomentumTensor2D(std::vector<math::XYZTLorentzVector> jets);
   virtual vector<float> GetMomentumTensorEigenValues(std::vector<math::XYZTLorentzVector> jets,
@@ -53,20 +58,38 @@ public:
 private:
   // Input parameters
   const double cfg_Verbose;
-  const ParameterSet PSet_JetSelection;
-  const std::vector<float> cfg_JetPtCuts;
-  const std::vector<float> cfg_JetEtaCuts;
-  // const double cfg_JetPtCut;
-  // const double cfg_JetEtaCut;
-  const DirectionalCut<int> cfg_JetNumberCut;
   const ParameterSet PSet_ElectronSelection;
   const double cfg_ElectronPtCut;
   const double cfg_ElectronEtaCut;
   const ParameterSet PSet_MuonSelection;
   const double cfg_MuonPtCut;
   const double cfg_MuonEtaCut;
+  const ParameterSet PSet_TauSelection;
+  const double cfg_TauPtCut;
+  const double cfg_TauEtaCut;
+  const ParameterSet PSet_JetSelection;
+  const std::vector<float> cfg_JetPtCuts;
+  const std::vector<float> cfg_JetEtaCuts;
+  const DirectionalCut<int> cfg_JetNumberCut;
   const ParameterSet PSet_HtSelection;
   const DirectionalCut<float> cfg_HtCut;
+  const ParameterSet PSet_BJetSelection;
+  const std::vector<float> cfg_BJetPtCuts;
+  const std::vector<float> cfg_BJetEtaCuts;
+  const DirectionalCut<int> cfg_BJetNumberCut;
+  // METSelection PSet_METSelection;
+  TopologySelection PSet_TopologySelection;
+  const DirectionalCut<double> cfg_SphericityCut;
+  const DirectionalCut<double> cfg_AplanarityCut;
+  const DirectionalCut<double> cfg_PlanarityCut;
+  const DirectionalCut<double> cfg_CircularityCut;
+  const DirectionalCut<double> cfg_Y23Cut;
+  const DirectionalCut<double> cfg_CparameterCut;
+  const DirectionalCut<double> cfg_DparameterCut;
+  const DirectionalCut<double> cfg_FoxWolframMomentCut;
+  const DirectionalCut<double> cfg_AlphaTCut;
+  const DirectionalCut<double> cfg_CentralityCut;
+  // TopSelection PSet_TopSelection;
   const HistogramSettings cfg_PtBinSetting;
   const HistogramSettings cfg_EtaBinSetting;
   const HistogramSettings cfg_PhiBinSetting;
@@ -79,10 +102,15 @@ private:
   
   // Counters
   Count cAllEvents;  
-  Count cSubNoPreselections;
-  Count cSubPassedLeptonVeto;
-  Count cSubPassedJetsCut;
-  Count cSubPassedHtCut;
+  Count cTrigger;
+  Count cElectronVeto;
+  Count cMuonVeto;
+  Count cTauVeto;
+  Count cJetSelection;
+  Count cBJetSelection;
+  Count cTopologySelection;
+  Count cTopSelection;
+  Count cSelected;
   
   // Event Variables
   WrappedTH1 *h_genMET_Et;
@@ -177,11 +205,7 @@ private:
   WrappedTH1 *h_BQuarkPair_dRMin_jet2_dPhi;
 
   // GenJets
-  WrappedTH1 *h_GenJet_N_NoPreselections;
-  WrappedTH1 *h_GenJet_N_AfterLeptonVeto;
-  WrappedTH1 *h_GenJet_N_AfterLeptonVetoNJetsCut;
-  WrappedTH1 *h_GenJet_N_AfterPreselections;  
-
+  WrappedTH1 *h_GenJets_N;
   WrappedTH1 *h_GenJet1_Pt;
   WrappedTH1 *h_GenJet2_Pt;
   WrappedTH1 *h_GenJet3_Pt;
@@ -264,20 +288,38 @@ REGISTER_SELECTOR(Kinematics);
 Kinematics::Kinematics(const ParameterSet& config, const TH1* skimCounters)
   : BaseSelector(config, skimCounters),
     cfg_Verbose(config.getParameter<bool>("verbose")),
-    PSet_JetSelection(config.getParameter<ParameterSet>("JetSelection")),
-    cfg_JetPtCuts(config.getParameter<std::vector<float>>("JetSelection.jetPtCuts")),
-    cfg_JetEtaCuts(config.getParameter<std::vector<float>>("JetSelection.jetEtaCuts")),
-    // cfg_JetPtCut(config.getParameter<float>("JetSelection.jetPtCut")),
-    // cfg_JetEtaCut(config.getParameter<float>("JetSelection.jetEtaCut")),
-    cfg_JetNumberCut(config, "JetSelection.numberOfJetsCut"),
     PSet_ElectronSelection(config.getParameter<ParameterSet>("ElectronSelection")),
     cfg_ElectronPtCut(config.getParameter<float>("ElectronSelection.electronPtCut")),  
     cfg_ElectronEtaCut(config.getParameter<float>("ElectronSelection.electronEtaCut")),
     PSet_MuonSelection(config.getParameter<ParameterSet>("MuonSelection")),
     cfg_MuonPtCut(config.getParameter<float>("MuonSelection.muonPtCut")),
     cfg_MuonEtaCut(config.getParameter<float>("MuonSelection.muonEtaCut")),
+    PSet_TauSelection(config.getParameter<ParameterSet>("TauSelection")),
+    cfg_TauPtCut(config.getParameter<float>("TauSelection.tauPtCut")),
+    cfg_TauEtaCut(config.getParameter<float>("TauSelection.tauEtaCut")),
+    PSet_JetSelection(config.getParameter<ParameterSet>("JetSelection")),
+    cfg_JetPtCuts(config.getParameter<std::vector<float>>("JetSelection.jetPtCuts")),
+    cfg_JetEtaCuts(config.getParameter<std::vector<float>>("JetSelection.jetEtaCuts")),
+    cfg_JetNumberCut(config, "JetSelection.numberOfJetsCut"),
     PSet_HtSelection(config.getParameter<ParameterSet>("JetSelection")),
     cfg_HtCut(config, "JetSelection.HTCut"),
+    PSet_BJetSelection(config.getParameter<ParameterSet>("BJetSelection")),
+    cfg_BJetPtCuts(config.getParameter<std::vector<float>>("BJetSelection.jetPtCuts")),
+    cfg_BJetEtaCuts(config.getParameter<std::vector<float>>("BJetSelection.jetEtaCuts")),
+    cfg_BJetNumberCut(config, "BJetSelection.numberOfBJetsCut"),
+    // PSet_METSelection(config.getParameter<ParameterSet>("METSelection")),
+    PSet_TopologySelection(config.getParameter<ParameterSet>("TopologySelection")),
+    cfg_SphericityCut(config, "TopologySelection.SphericityCut"),
+    cfg_AplanarityCut(config, "TopologySelection.AplanarityCut"),
+    cfg_PlanarityCut(config, "TopologySelection.PlanarityCut"),
+    cfg_CircularityCut(config, "TopologySelection.CircularityCut"),
+    cfg_Y23Cut(config, "TopologySelection.Y23Cut"),
+    cfg_CparameterCut(config, "TopologySelection.CparameterCut"),
+    cfg_DparameterCut(config, "TopologySelection.DparameterCut"),
+    cfg_FoxWolframMomentCut(config, "TopologySelection.FoxWolframMomentCut"),
+    cfg_AlphaTCut(config, "TopologySelection.AlphaTCut"),
+    cfg_CentralityCut(config, "TopologySelection.CentralityCut"),
+    // PSet_TopSelection(config.getParameter<ParameterSet>("TopSelection")),
     cfg_PtBinSetting(config.getParameter<ParameterSet>("CommonPlots.ptBins")),
     cfg_EtaBinSetting(config.getParameter<ParameterSet>("CommonPlots.etaBins")),
     cfg_PhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.phiBins")),
@@ -286,44 +328,19 @@ Kinematics::Kinematics(const ParameterSet& config, const TH1* skimCounters)
     cfg_DeltaPhiBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaPhiBins")),
     cfg_DeltaRBinSetting(config.getParameter<ParameterSet>("CommonPlots.deltaRBins")),
     cAllEvents(fEventCounter.addCounter("All events")),
-    cSubNoPreselections(fEventCounter.addSubCounter("Preselections", "All Events")),
-    cSubPassedLeptonVeto(fEventCounter.addSubCounter("Preselections", "Lepton Veto")),
-    cSubPassedJetsCut(fEventCounter.addSubCounter("Preselections", "Jets Cut")),
-    cSubPassedHtCut(fEventCounter.addSubCounter("Preselections","HT Cut"))
+    cTrigger(fEventCounter.addCounter("Trigger")),
+    cElectronVeto(fEventCounter.addCounter("e-veto")),
+    cMuonVeto(fEventCounter.addCounter("#mu-veto")),
+    cTauVeto(fEventCounter.addCounter("#tau-veto")),
+    cJetSelection(fEventCounter.addCounter("Jets + H_{T}")),
+    cBJetSelection(fEventCounter.addCounter("b-jets")),
+    cTopologySelection(fEventCounter.addCounter("Topology")),
+    cTopSelection(fEventCounter.addCounter("Top")),
+    cSelected(fEventCounter.addCounter("All Selections"))
 { }
 
 void Kinematics::book(TDirectory *dir) {
 
-  Table cuts("Variable | Jets | Electron | Muon | HT", "Text"); //LaTeX or Text
-  cuts.AddRowColumn(0, "Pt (GeV/c)");
-  cuts.AddRowColumn(1, "Eta");
-  cuts.AddRowColumn(2, "Cut Direction");
-  cuts.AddRowColumn(3, "Cut Value");
-  //  
-  // cuts.AddRowColumn(0, auxTools.ToString(cfg_JetPtCuts) ); //fixme
-  cuts.AddRowColumn(0, auxTools.ToString(cfg_ElectronPtCut) );
-  cuts.AddRowColumn(0, auxTools.ToString(cfg_MuonPtCut) );
-  cuts.AddRowColumn(0, "-");
-  //
-  // cuts.AddRowColumn(1, auxTools.ToString(cfg_JetEtaCut) );
-  cuts.AddRowColumn(1, auxTools.ToString(cfg_ElectronEtaCut) );
-  cuts.AddRowColumn(1, auxTools.ToString(cfg_MuonEtaCut) );
-  cuts.AddRowColumn(1, "-");
-  //
-  cuts.AddRowColumn(2, PSet_JetSelection.getParameter<string>("numberOfJetsCutDirection") );
-  cuts.AddRowColumn(2, "=<" );
-  cuts.AddRowColumn(2, "=<" );
-  cuts.AddRowColumn(2, PSet_HtSelection.getParameter<string>("HTCutDirection") );
-  //
-  cuts.AddRowColumn(3, auxTools.ToString(PSet_JetSelection.getParameter<int>("numberOfJetsCutValue")) );
-  cuts.AddRowColumn(3, "0" );
-  cuts.AddRowColumn(3, "0" );
-  cuts.AddRowColumn(3, PSet_HtSelection.getParameter<string>("HTCutValue") );
-  //
-  std::cout << "\n" << std::endl;
-  if (cfg_Verbose) cuts.Print();
-
-  
   // Fixed binning
   const int nBinsPt   = 4*cfg_PtBinSetting.bins();
   const double minPt  = cfg_PtBinSetting.min();
@@ -474,11 +491,7 @@ void Kinematics::book(TDirectory *dir) {
   h_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass = fHistoWrapper.makeTH<TH2F>(HistoLevel::kVital, dir, "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass", ";#Delta#eta(j_{3},j_{4});M(j_{3},j_{4}) (GeV/c^{2})", nBinsdEta, mindEta, maxdEta, nBinsM, minM, maxM);
   
   // GenJets
-  h_GenJet_N_NoPreselections         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet_N_NoPreselections"        , ";N (selected jets)" , 20, 0.0, 20.0);
-  h_GenJet_N_AfterLeptonVeto         = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet_N_AfterLeptonVeto"        , ";N (selected jets)" , 20, 0.0, 20.0);
-  h_GenJet_N_AfterLeptonVetoNJetsCut = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet_N_AfterLeptonVetoNJetsCut", ";N (selected jets)" , 20, 0.0, 20.0);
-  h_GenJet_N_AfterPreselections      = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet_N_AfterPreselections"     , ";N (selected jets)" , 20, 0.0, 20.0);
-  //
+  h_GenJets_N   = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJets_N" , ";genJet multiplicity" , 30, 0.0, 30.0);
   h_GenJet1_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet1_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
   h_GenJet2_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet2_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
   h_GenJet3_Pt  = fHistoWrapper.makeTH<TH1F>(HistoLevel::kVital, dir, "GenJet3_Pt", ";p_{T} (GeV/c)", nBinsPt, minPt, maxPt);
@@ -583,106 +596,129 @@ void Kinematics::process(Long64_t entry) {
   // Initialise MCTools object
   MCTools mcTools(fEvent);
 
-  ///////////////////////////////////////////////////////////////////////////
-  // GenJets Calculations
-  /////////////////////////////////////////////////////////////////////////// 
-  if (0) std::cout << "=== GenJets" << std::endl;
-
-  std::vector<math::XYZTLorentzVector> selJets_p4;
-  int nSelJets = 0;
-  double genJ_HT = 0.0;
-
-  // For-loop: GenJets
-  unsigned int jet_index   = -1;
-  unsigned int ptCut_index  = 0;
-  unsigned int etaCut_index = 0;
-  for(GenJet jet: fEvent.genjets()) {
-
-    // Jet index (for pT and eta cuts)
-    jet_index++;
-
-    // Get basic values 
-    math::XYZTLorentzVector genJ_p4;
-    genJ_p4 = jet.p4();
-    double genJ_pt  = jet.pt();
-    double genJ_eta = jet.eta();
-
-    // Apply selection cuts
-    const float cfg_JetPtCut  = cfg_JetPtCuts.at(ptCut_index);
-    const float cfg_JetEtaCut = cfg_JetEtaCuts.at(etaCut_index);
-
-    // std::cout << jet_index << ") pT[" << ptCut_index << "] > " << cfg_JetPtCut << " GeV/c ( " << jet.pt() << ")" << std::endl;
-    if (genJ_pt < cfg_JetPtCut) continue;
-    if (std::abs(genJ_eta) > cfg_JetEtaCut) continue;
-
-    // Increment cut index only. Cannot be bigger than the size of the cut list provided
-    if (ptCut_index  < cfg_JetPtCuts.size()-1  ) ptCut_index++;
-    if (etaCut_index < cfg_JetEtaCuts.size()-1  ) etaCut_index++;
-
-    // Do calculations
-    nSelJets++;
-    selJets_p4.push_back( genJ_p4 );
-    genJ_HT += genJ_pt;
-  }
-
-  ///////////////////////////////////////////////////////////////////////////
-  // Lepton Veto & Primary Vertex
-  ///////////////////////////////////////////////////////////////////////////
-  if (0) std::cout << "=== Lepton Veto & Primary Vertex" << std::endl;
-  int nElectrons = 0;
-  int nMuons     = 0;
-  ROOT::Math::XYZPoint pv;
-
-  // For-loop: All genParticles
-  for (auto& p: fEvent.genparticles().getGenParticles()) {
-
-    // Find leptons for vetoing
-    if (!p.isLastCopy()) continue;
-    if( !mcTools.IsLepton(p.pdgId()) ) continue;
-
-    // mcTools.PrintGenParticle(p);
-    // mcTools.PrintGenDaughters(p);
-
-    if ( std::abs(p.pdgId()) == 11)
-      {		      
-	if ( (p.pt() >= cfg_ElectronPtCut) && ( std::abs(p.eta()) <= cfg_ElectronEtaCut) ) nElectrons++;
-      }
-    else if ( std::abs(p.pdgId()) == 13)
-      {
-	if ( (p.pt() >= cfg_MuonPtCut) && ( std::abs(p.eta()) <= cfg_MuonEtaCut) ) nMuons++;
-      }
-    else continue;
-
-  }
+  //================================================================================================
+  // 1) Apply trigger
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== Trigger" << std::endl;
+  if ( !(fEvent.passTriggerDecision()) ) return;
+  cTrigger.increment();
 
 
-  ///////////////////////////////////////////////////////////////////////////
-  // Preselection Cuts (python/parameters/hplus2tbAnalysis.py)
-  ///////////////////////////////////////////////////////////////////////////
-  if (0) std::cout << "=== Preselection Cuts" << std::endl;
-  cSubNoPreselections.increment();
-  h_GenJet_N_NoPreselections->Fill(nSelJets);
+  //================================================================================================
+  // 2) MET filters (to remove events with spurious sources of fake MET)       
+  //================================================================================================
+  // nothing to do
 
-  // Lepton Veto
-  if ( nElectrons > 0 ) return;
-  if ( nMuons > 0 ) return;
-  cSubPassedLeptonVeto.increment();
-  h_GenJet_N_AfterLeptonVeto->Fill(nSelJets);
+  //================================================================================================
+  // 3) Primarty Vertex (Check that a PV exists)
+  //================================================================================================
+  // nothing to do
 
-  // Jet Selection
-  if ( !cfg_JetNumberCut.passedCut(nSelJets) ) return;  
-  cSubPassedJetsCut.increment();
-  h_GenJet_N_AfterLeptonVetoNJetsCut->Fill(nSelJets);
-    
+  //================================================================================================
+  // 4) Electron veto (fully hadronic + orthogonality)  
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== Electron veto" << std::endl;
+  vector<genParticle> selectedElectrons = GetGenParticles(fEvent.genparticles().getGenParticles(), cfg_ElectronPtCut, cfg_ElectronEtaCut, 11, true, false);
+  if (0)
+    {
+      std::cout << "\nnElectrons = " << selectedElectrons.size() << std::endl;
+      for (auto& p: selectedElectrons) std::cout << "\tpT = " << p.pt() << " (GeV/c), eta = " << p.eta() << ", phi = " << p.phi() << " (rads)" << std::endl;
+    }
+  if ( selectedElectrons.size() > 0 ) return;
+  cElectronVeto.increment();
+
+
+  //================================================================================================
+  // 5) Muon veto (fully hadronic + orthogonality)  
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== Muon veto" << std::endl;
+  vector<genParticle> selectedMuons = GetGenParticles(fEvent.genparticles().getGenParticles(), cfg_MuonPtCut, cfg_MuonEtaCut, 13, true, false);
+  if (cfg_Verbose)
+    {
+      std::cout << "\nnMuons = " << selectedMuons.size() << std::endl;
+      for (auto& p: selectedMuons) std::cout << "\tpT = " << p.pt() << " (GeV/c), eta = " << p.eta() << ", phi = " << p.phi() << " (rads)" << std::endl;
+    }
+  if ( selectedMuons.size() > 0 ) return;
+  cMuonVeto.increment();
+
+
+  //================================================================================================
+  // 6) Tau veto (HToTauNu orthogonality)  
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== Tau veto" << std::endl;
+  vector<genParticle> selectedTaus = GetGenParticles(fEvent.genparticles().getGenParticles(), cfg_TauPtCut, cfg_TauEtaCut, 15, true, false);
+  if (0)
+    {
+      std::cout << "\nnTaus = " << selectedTaus.size() << std::endl;
+      for (auto& p: selectedTaus) std::cout << "\tpT = " << p.pt() << " (GeV/c), eta = " << p.eta() << ", phi = " << p.phi() << " (rads)" << std::endl;
+      std::cout << "" << std::endl;
+    }
+  if ( selectedTaus.size() > 0 ) return;
+  cTauVeto.increment();
+
+
+  //================================================================================================
+  // 7) Jet Selection
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== Jet Selection" << std::endl;
+  vector<GenJet> selectedJets = GetGenJets(fEvent.genjets(), cfg_JetPtCuts, cfg_JetEtaCuts);
+  if (0)
+    {
+      std::cout << "\nnJets = " << selectedJets.size() << std::endl;
+      for (auto& p: selectedJets) std::cout << "\tpT = " << p.pt() << " (GeV/c), eta = " << p.eta() << ", phi = " << p.phi() << " (rads)" << std::endl;
+      std::cout << "" << std::endl;
+    }
+  if (!cfg_JetNumberCut.passedCut(selectedJets.size())) return;
+
   // HT Selection
+  double genJ_HT = 0.0;
+  std::vector<math::XYZTLorentzVector> selJets_p4;
+  math::XYZTLorentzVector jet_p4;
+  for(auto jet: selectedJets) 
+    {
+        jet_p4 = jet.p4();
+      genJ_HT += jet.pt();
+      selJets_p4.push_back( jet_p4 );
+    }
+
   if ( !cfg_HtCut.passedCut(genJ_HT) ) return;
-  cSubPassedHtCut.increment();
-  h_GenJet_N_AfterPreselections->Fill(nSelJets);  
+  cJetSelection.increment();
+
+  //================================================================================================
+  // 8) BJet Selection
+  //================================================================================================
+  if (cfg_Verbose) std::cout << "=== BJet Selection" << std::endl;
+  vector<genParticle> selectedBQuarks = GetGenParticles(fEvent.genparticles().getGenParticles(), 10, 3, 5, true, false);
+  std::sort( selectedBQuarks.begin(), selectedBQuarks.end(), PtComparator() );
+  if (0) for (auto& p: selectedBQuarks) mcTools.PrintGenParticle(p);
+
+  // Match b-quarks with GenJets
+  vector<GenJet> selectedBJets = GetGenJets(selectedJets, cfg_BJetPtCuts, cfg_BJetEtaCuts, selectedBQuarks);
+  if (cfg_Verbose)
+    {
+      std::cout << "\nnBJets = " << selectedBJets.size() << std::endl;
+      for (auto& p: selectedBJets) std::cout << "\tpT = " << p.pt() << " GeV/c, eta = " << p.eta() << ", phi = " << p.phi() << " (rads)" << std::endl;
+      std::cout << "" << std::endl;
+    }
+  if (!cfg_BJetNumberCut.passedCut(selectedBJets.size())) return;
+  cBJetSelection.increment();
 
 
-  ///////////////////////////////////////////////////////////////////////////
-  // Event-Shape Variables
-  ///////////////////////////////////////////////////////////////////////////
+  //================================================================================================
+  // 9) BJet SF
+  //================================================================================================
+  // nothing to do
+  
+
+  //================================================================================================
+  // 10) MET selection 
+  //================================================================================================
+  // nothing to do
+
+
+  //================================================================================================
+  // 11) Topology selection 
+  //================================================================================================
   float C, D, H2;
   float Circularity;
   float y23, Sphericity, SphericityT, Aplanarity, Planarity, Y; // functions to return values when properly implemented
@@ -691,6 +727,37 @@ void Kinematics::process(Long64_t entry) {
   vector<float> b = GetMomentumTensorEigenValues2D(selJets_p4, Circularity);
   vector<float> c = GetSphericityTensorEigenValues(selJets_p4, y23, Sphericity, SphericityT, Aplanarity, Planarity, Y);
   double alphaT   = GetAlphaT(selJets_p4, HT, JT, MHT, Centrality);
+  
+  // Apply cuts
+  if ( !cfg_CparameterCut.passedCut(C) ) return;
+  if ( !cfg_DparameterCut.passedCut(D) ) return;
+  if ( !cfg_FoxWolframMomentCut.passedCut(H2) ) return;
+  if ( !cfg_CircularityCut.passedCut(Circularity) ) return;
+  if ( !cfg_Y23Cut.passedCut(y23) ) return;
+  if ( !cfg_SphericityCut.passedCut(Sphericity) ) return;
+  if ( !cfg_AplanarityCut.passedCut(Aplanarity) ) return;
+  if ( !cfg_PlanarityCut.passedCut(Planarity) ) return;
+  if ( !cfg_CentralityCut.passedCut(Centrality) ) return;
+  if ( !cfg_AlphaTCut.passedCut(alphaT) ) return;
+  cTopologySelection.increment();
+
+
+  //================================================================================================
+  // 12) Top selection 
+  //================================================================================================
+  cTopSelection.increment();
+
+  //================================================================================================
+  // Standard Selections    
+  //================================================================================================
+
+
+  //================================================================================================
+  // All Selections
+  //================================================================================================
+  cSelected.increment();
+
+  h_GenJets_N->Fill(selectedJets.size());
 
   // Fill Histograms
   h_y23         ->Fill(y23);
@@ -1073,11 +1140,11 @@ void Kinematics::process(Long64_t entry) {
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   if (0) std::cout << "=== BQuark cuts" << std::endl;
   std::sort( bQuarks_p4.begin(), bQuarks_p4.end(), PtComparator() );  
-  
+   
   std::vector<math::XYZTLorentzVector> selBQuarks_p4;
   unsigned int bQuark_index  = -1;
-  ptCut_index   = 0;
-  etaCut_index  = 0;
+  unsigned int ptCut_index   = 0;
+  unsigned int etaCut_index  = 0;
 
   // For-loop: All b-quarks
   for (auto i = bQuarks_p4.begin(); i != bQuarks_p4.end(); ++i) {
@@ -1088,6 +1155,9 @@ void Kinematics::process(Long64_t entry) {
     // Apply selection cuts
     const float cfg_JetPtCut  = cfg_JetPtCuts.at(ptCut_index);
     const float cfg_JetEtaCut = cfg_JetEtaCuts.at(etaCut_index);
+
+    // New
+    //if (fNumberOfJetsCut.passedCut(output.getNumberOfSelectedBJets())) passedNBjets = true;
 
     // if (i->Pt() < 15.0) continue;
     if (i->Pt() < cfg_JetPtCut) continue;
@@ -1495,9 +1565,9 @@ vector<float> Kinematics::GetMomentumTensorEigenValues(std::vector<math::XYZTLor
 vector<float> Kinematics::GetMomentumTensorEigenValues2D(std::vector<math::XYZTLorentzVector> jets,
 							 float &Circularity){
 
-  // For Circularity, the momentum tensor is the 2×2 submatrix of Mjk, normalized by the sum of pT instead by the sum of
+  // For Circularity, the momentum tensor is the 2¡Á2 submatrix of Mjk, normalized by the sum of pT instead by the sum of
   // This matrix has two eigenvalues Qi with 0 < Q1 < Q2. The following definition for the circularity C has been used:
-  //  C = 2 × min (Q1,Q2) / (Q1 +Q2)
+  //  C = 2 ¡Á min (Q1,Q2) / (Q1 +Q2)
   // The circularity C is especially interesting for hadron colliders because it only uses the momentum values in x and y direction transverse
   // to the beam line. So C is a two dimensional event shape variable and is therefore independent from a boost along z. 
   // In addition, the normalization by the sum of the particle momenta makes C highly independent from energy calibration effects  (systematic uncertainty).
@@ -1536,7 +1606,7 @@ vector<float> Kinematics::GetMomentumTensorEigenValues2D(std::vector<math::XYZTL
       vars.AddRowColumn(0, "Circularity");
       vars.AddRowColumn(0, auxTools.ToString(Circularity) );
       vars.AddRowColumn(0, "0.0 <= C <= 1.0 ");
-      vars.AddRowColumn(0, "C = 2 × min (Q1,Q2)/(Q1+Q2)");
+      vars.AddRowColumn(0, "C = 2 ¡Á min (Q1,Q2)/(Q1+Q2)");
       vars.Print();
     }
   
@@ -1686,7 +1756,6 @@ vector<float> Kinematics::GetSphericityTensorEigenValues(std::vector<math::XYZTL
   return eigenvalues;
   
 }
-
 
 TMatrixDSym Kinematics::ComputeMomentumTensor(std::vector<math::XYZTLorentzVector> jets, double r)
 {
@@ -2001,3 +2070,129 @@ double Kinematics::GetAlphaT(std::vector<math::XYZTLorentzVector> jets,
 
   return AlphaT;
 }
+
+vector<GenJet> Kinematics::GetGenJets(const vector<GenJet> genJets, std::vector<float> ptCuts, std::vector<float> etaCuts, vector<genParticle> genParticlesToMatch)
+{
+  /*
+    Jet-Flavour Definitions (https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools)
+
+    Algorithmic definition: (NOTE: Algorithmic definition is used by default for all b-tagging purposes)
+    - Try to find the parton that most likely determines the properties of the jet and assign that flavour as the true flavour
+    - Here, the ¡°final state¡± partons (after showering, radiation) are analyzed (within ¦¤R < 0.3 of the reconstructed jet axis). 
+    Partons selected for the algorithmic definition are those partons that don't have other partons as daughters, 
+    without any explicit requirement on their status (for Pythia6 these are status=2 partons).
+    - Jets from radiation are matched with full efficiency
+    -If there is a b/c within the jet cone: label as b/c
+    -Otherwise: assign flavour of the hardest parton
+   */
+
+  // Definitions
+  std::vector<GenJet> jets;
+  unsigned int jet_index   = -1;
+  unsigned int ptCut_index  = 0;
+  unsigned int etaCut_index = 0;
+
+  // For-loop: All genParticles
+  for (auto& p: genParticlesToMatch) 
+    {
+      
+      // Comparison variables
+      double dR   = 1e6;
+      double dPt  = 1e6;
+      double dEta = 1e6;
+      double dPhi = 1e6;
+	  
+      // For-loop: All Generated Jets
+      for (auto jet: genJets) 
+	{
+	  
+	  // Jet index (for pT and eta cuts)
+	  jet_index++;
+	  
+	  dPt  = jet.pt() - p.pt();
+	  dEta = jet.eta() - p.eta();
+	  dPhi = jet.phi() - p.phi();
+       	  dR   = ROOT::Math::VectorUtil::DeltaR(jet.p4(), p.p4());
+      
+	  // Fail to match
+	  if (dR > 0.3) continue;
+	  
+	  // Apply cuts after the matching
+	  const float ptCut  = ptCuts.at(ptCut_index);
+	  const float etaCut = etaCuts.at(etaCut_index);
+	  if (jet.pt() < ptCut) continue;
+	  if (std::abs(jet.eta()) > etaCut) continue;
+	  
+	  // Save this particle
+	  jets.push_back(jet);
+	  if (0) std::cout << "dR = " << dR << ": dPt = " << dPt << ", dEta = " << dEta << ", dPhi = " << dPhi << std::endl;
+
+	  // Increment cut index only. Cannot be bigger than the size of the cut list provided
+	  if (ptCut_index  < ptCuts.size()-1  ) ptCut_index++;
+	  if (etaCut_index < etaCuts.size()-1  ) etaCut_index++;
+	  break;
+	}
+    }
+  if (0) std::cout << "bjets.size() = " << jets.size() << std::endl;
+  return jets;
+}
+
+vector<GenJet> Kinematics::GetGenJets(const GenJetCollection& genJets, std::vector<float> ptCuts, std::vector<float> etaCuts)
+{
+  std::vector<GenJet> jets;
+
+  // Definitions
+  unsigned int jet_index   = -1;
+  unsigned int ptCut_index  = 0;
+  unsigned int etaCut_index = 0;
+
+  // For-loop: All Generated Jets
+  for (auto jet: genJets) 
+    {
+
+      // Jet index (for pT and eta cuts)
+      jet_index++;
+      
+      // Apply cuts
+      const float ptCut  = ptCuts.at(ptCut_index);
+      const float etaCut = etaCuts.at(etaCut_index);
+      if (jet.pt() < ptCut) continue;
+      if (std::abs(jet.eta()) > etaCut) continue;
+
+      // Save this particle
+      jets.push_back(jet);
+
+      // Increment cut index only. Cannot be bigger than the size of the cut list provided
+      if (ptCut_index  < ptCuts.size()-1  ) ptCut_index++;
+      if (etaCut_index < etaCuts.size()-1  ) etaCut_index++;
+    }
+  return jets;
+}
+
+vector<genParticle> Kinematics::GetGenParticles(const vector<genParticle> genParticles, double ptCut, double etaCut, const int pdgId, const bool isLastCopy, const bool hasNoDaughters)
+  {
+  
+  std::vector<genParticle> particles;
+
+  // For-loop: All genParticles
+  for (auto& p: genParticles) 
+    {
+      // Find last copy of a given particle
+      if (isLastCopy) if (!p.isLastCopy()) continue;      
+
+      // Commonly enables for parton-based jet flavour definition
+      if (hasNoDaughters) if (p.daughters().size() > 0) continue;
+
+      // Consider only particles
+      if (std::abs(p.pdgId()) != pdgId) continue;
+      
+      // Apply cuts
+      if ( p.pt() < ptCut ) continue;
+      if (std::abs(p.eta()) > etaCut) continue;
+      
+      // Save this particle
+      particles.push_back(p);
+    }
+  return particles;
+  }
+
