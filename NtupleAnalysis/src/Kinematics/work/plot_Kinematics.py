@@ -242,7 +242,7 @@ def GetHistoKwargs(histo, opts):
         kwargs["xlabel"] = "H_{T} (%s)"  % units
         kwargs["cutBox"] = {"cutValue": 500.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["rebinX"] = 1
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": 3000, "ymin": 1e+0, "ymaxfactor": 10}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 2000, "ymin": 1e+0, "ymaxfactor": 10}
         ROOT.gStyle.SetNdivisions(5, "X")
 
     if "MHT" in histo:
@@ -322,26 +322,36 @@ def GetHistoKwargs(histo, opts):
         units            = "GeV/c"
         kwargs["ylabel"] = yLabel + " / %.0f " + units
         kwargs["xlabel"] = "p_{T} (%s)"  % units
-        kwargs["cutBox"] = {"cutValue": 30.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
+        kwargs["cutBox"] = {"cutValue": 40.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         if "GenJet1" in histo:
+            kwargs["xlabel"] = "jet_{1} p_{T} (%s)"  % units
             kwargs["opts"]   = {"xmin": 0, "xmax": 1000, "ymin": 1e+0, "ymaxfactor": 10}
         if "GenJet2" in histo:
+            kwargs["xlabel"] = "jet_{2} p_{T} (%s)"  % units
             kwargs["opts"]   = {"xmin": 0, "xmax": 600, "ymin": 1e+0, "ymaxfactor": 10}
         if "GenJet3" in histo:
+            kwargs["xlabel"] = "jet_{3} p_{T} (%s)"  % units
             kwargs["opts"]   = {"xmin": 0, "xmax": 400, "ymin": 1e+0, "ymaxfactor": 10}
         if "GenJet4" in histo:
+            kwargs["xlabel"] = "jet_{4} p_{T} (%s)"  % units
             kwargs["opts"]   = {"xmin": 0, "xmax": 300, "ymin": 1e+0, "ymaxfactor": 10}
         if "GenJet5" in histo:
+            kwargs["xlabel"] = "jet_{5} p_{T} (%s)"  % units
             kwargs["opts"]   = {"xmin": 0, "xmax": 200, "ymin": 1e+0, "ymaxfactor": 10}
         if "GenJet6" in histo:
+            kwargs["xlabel"] = "jet_{6} p_{T} (%s)"  % units
             kwargs["opts"]   = {"xmin": 0, "xmax": 150, "ymin": 1e+0, "ymaxfactor": 10}
         if "BQuark1" in histo:
+            kwargs["xlabel"] = "b_{1} p_{T} (%s)"  % units
             kwargs["opts"]   = {"xmin": 0, "xmax": 600, "ymin": 1e+0, "ymaxfactor": 10}
         if "BQuark2" in histo:
+            kwargs["xlabel"] = "b_{2} p_{T} (%s)"  % units
             kwargs["opts"]   = {"xmin": 0, "xmax": 300, "ymin": 1e+0, "ymaxfactor": 10}
         if "BQuark3" in histo:
+            kwargs["xlabel"] = "b_{3} p_{T} (%s)"  % units
             kwargs["opts"]   = {"xmin": 0, "xmax": 200, "ymin": 1e+0, "ymaxfactor": 10}
         if "BQuark4" in histo:
+            kwargs["xlabel"] = "b_{4} p_{T} (%s)"  % units
             kwargs["opts"]   = {"xmin": 0, "xmax": 100, "ymin": 1e+0, "ymaxfactor": 10}
         if "MaxPt" in histo:
             kwargs["log"]    = True
@@ -358,7 +368,7 @@ def GetHistoKwargs(histo, opts):
             units            = "GeV/c"
             kwargs["ylabel"] = yLabel + " / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1500.0}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1000.0}
         if "dRMinDiJet_NoBJets" in histo:
             units            = "GeV/c"
             kwargs["ylabel"] = yLabel + " / %.0f " + units
@@ -608,8 +618,11 @@ def GetHistoKwargs(histo, opts):
         kwargs["opts"]   = {"xmin": 0, "xmax": 800}
 
         if "MaxTriJetPt_Mass" in histo:
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +2000.0}
-            
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1000.0}
+            kwargs["log"]    = False
+            #kwargs["opts"]   = {"xmin": 0.0, "xmax": +3000.0}
+            #kwargs["log"]    = True
+
         if "dRMinDiJet_NoBJets_Mass" in histo:
             kwargs["opts"]   = {"xmin": 0.0, "xmax": +400.0}
 
@@ -708,7 +721,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
         savePath = os.path.join(opts.saveDir, opts.optMode)
     else:
         savePath = os.path.join(opts.saveDir, histo.split("/")[0], opts.optMode)
-    SavePlot(p, saveName, savePath, [".png"]) 
+    SavePlot(p, saveName, savePath, [".png", ".pdf"]) 
     return
 
 
@@ -773,7 +786,7 @@ if __name__ == "__main__":
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug'
     NORMALISE    = False
-    FOLDER       = "" #"topSelection_" #"ForDataDrivenCtrlPlots" #"topologySelection_"
+    FOLDER       = "TH1" #"TH2"
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
