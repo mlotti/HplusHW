@@ -6,7 +6,7 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 #================================================================================================
 # General parameters
 #================================================================================================
-verbose               = False
+verbose               = True
 histogramAmbientLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
 
 #================================================================================================

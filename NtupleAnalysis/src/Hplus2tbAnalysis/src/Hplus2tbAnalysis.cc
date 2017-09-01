@@ -138,14 +138,14 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   fCommonPlots.fillControlPlotsAtVertexSelection(fEvent);
   
   //================================================================================================   
-  // 4) Electron veto (Orthogonality)
+  // 4) Electron veto (Fully hadronic + orthogonality)
   //================================================================================================   
   if (0) std::cout << "=== Electron veto" << std::endl;
   const ElectronSelection::Data eData = fElectronSelection.analyze(fEvent);
   if (eData.hasIdentifiedElectrons()) return;
 
   //================================================================================================
-  // 5) Muon veto (Orthogonality)
+  // 5) Muon veto (Fully hadronic + orthogonality)
   //================================================================================================
   if (0) std::cout << "=== Muon veto" << std::endl;
   const MuonSelection::Data muData = fMuonSelection.analyze(fEvent);
@@ -154,7 +154,7 @@ void Hplus2tbAnalysis::process(Long64_t entry) {
   //================================================================================================   
   // 6) Tau Veto (HToTauNu Orthogonality)
   //================================================================================================   
-  if (0) std::cout << "=== Tau-Veto" << std::endl;
+  if (0) std::cout << "=== Tau Veto" << std::endl;
   const TauSelection::Data tauData = fTauSelection.analyze(fEvent);
   if (tauData.hasIdentifiedTaus() ) return;
 

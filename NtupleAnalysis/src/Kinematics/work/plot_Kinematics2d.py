@@ -7,17 +7,17 @@ Useful Link:
 https://nixtricks.wordpress.com/2011/03/03/simple-loops-in-csh-ortcsh/
 
 Usage:
-./plot2d.py -m <pseudo_mcrab_directory> [opts]
+./plot_Kinematics2d.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plot2d.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170826_073257/ -i M_1000 --url    
-./plot2d.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170826_073257/ -e "JetHT|QCD| --url -mergeEWK
-./plot2d.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170826_073257/ -i "TT|WJets|ST_|TTZ|TTW|DY|WZ|WW|ZZ" --url --mergeEWK
-
+./plot_Kinematics2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
 
 Last Used:
+./plot_Kinematics2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
+
+Obsolete:
 foreach x ( 180 200 220 250 300 350 400 500 800 1000 2000 3000 )
-./plot2d.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170826_073257/ -i M_$x --url
+./plot_Kinematics2d.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170826_073257/ -i M_$x --url
 end
 
 '''
@@ -42,45 +42,27 @@ import HiggsAnalysis.NtupleAnalysis.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.NtupleAnalysis.tools.styles as styles
 import HiggsAnalysis.NtupleAnalysis.tools.plots as plots
 import HiggsAnalysis.NtupleAnalysis.tools.crosssection as xsect
-#import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
 
 #================================================================================================ 
 # Function Definition
 #================================================================================================ 
-def Print(msg, printHeader=False):
-    fName = __file__.split("/")[-1]
-    if printHeader==True:
-        print "=== ", fName
-        print "\t", msg
-    else:
-        print "\t", msg
-    return
-
-def Verbose(msg, printHeader=True, verbose=False):
-    if not opts.verbose:
-        return
-    Print(msg, printHeader)
-    return
-
 def GetLumi(datasetsMgr):
-    Verbose("Determininig Integrated Luminosity")
-    
+    '''
+    '''
     lumi = 0.0
     for d in datasetsMgr.getAllDatasets():
         if d.isMC():
             continue
         else:
+            #print "dataset = %s, lumi = %s" % (d.getName(), lumi)
             lumi += d.getLuminosity()
-    Verbose("Luminosity = %s (pb)" % (lumi), True)
+    #print "Luminosity = %s (pb)" % (lumi), True)
     return lumi
 
 def GetListOfEwkDatasets():
-    Verbose("Getting list of EWK datasets")
     return  ["TT", "WJetsToQQ_HT_600ToInf", "SingleTop", "DYJetsToQQHT", "TTZToQQ",  "TTWJetsToQQ", "Diboson", "TTTT"]
 
 def GetDatasetsFromDir(opts):
-    Verbose("Getting datasets")
-    
     if (not opts.includeOnlyTasks and not opts.excludeTasks):
         datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
                                                         dataEra=opts.dataEra,
@@ -104,11 +86,18 @@ def GetDatasetsFromDir(opts):
     else:
         raise Exception("This should never be reached")
     return datasets
+
+def GetAllDatasetsFromDir(opts):
+    datasets = dataset.getDatasetsFromMulticrabDirs([opts.mcrab],
+                                                    dataEra=opts.dataEra,
+                                                    searchMode=opts.searchMode, 
+                                                    analysisName=opts.analysisName,
+                                                    optimizationMode=opts.optMode)
+    return datasets
     
 def main(opts):
 
     optModes = [""]
-
     if opts.optMode != None:
         optModes = [opts.optMode]
         
@@ -117,12 +106,11 @@ def main(opts):
         opts.optMode = opt
 
         # Quick and dirty way to get total int lumi
-        opts2 = copy.deepcopy(opts)
-        opts2.includeOnlyTasks = ""
-        allDatasetsMgr = GetDatasetsFromDir(opts2)
+        allDatasetsMgr = GetAllDatasetsFromDir(opts)
         allDatasetsMgr.updateNAllEventsToPUWeighted()
         allDatasetsMgr.loadLuminosities() # from lumi.json
-        opts.intLumi = GetLumi(allDatasetsMgr)/2
+        plots.mergeRenameReorderForDataMC(allDatasetsMgr) 
+        opts.intLumi = GetLumi(allDatasetsMgr)
 
         # Setup & configure the dataset manager 
         datasetsMgr    = GetDatasetsFromDir(opts)
@@ -158,8 +146,7 @@ def main(opts):
         # Do 2D histos
         histoNames  = []
         saveFormats = [".png"] #[".C", ".png", ".pdf"]
-        allHistos   = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
-        histoList   = [h for h in allHistos if "_Vs_" in h]
+        histoList   = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
         histoPaths  = [opts.folder +"/" + h for h in histoList]
         histoKwargs = GetHistoKwargs(histoPaths)
 
@@ -167,9 +154,15 @@ def main(opts):
         ROOT.gStyle.SetNdivisions(5, "X")
         ROOT.gStyle.SetNdivisions(5, "Y")
 
-        # For-loop: All histograms in list        
-        for histoName in histoPaths:
-            Plot2d(datasetsMgr, histoName, histoKwargs[histoName], opts)
+        # For-loop: All datasets
+        for d in datasetsMgr.getAllDatasetNames():
+            # For-loop: All histogram
+            for histoName in histoPaths:
+                Plot2d(datasetsMgr, d, histoName, histoKwargs[histoName], opts)
+                for o in gROOT.GetListOfCanvases():
+                    # print o.GetName()
+                    o.SetName(o.GetName() + "_" + d)
+
     return
 
 def GetHistoKwargs(histoList):
@@ -192,16 +185,14 @@ def GetHistoKwargs(histoList):
     gridY       = True
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
     xMin        =   0
-    xMax        = 800
+    xMax        =  10
     yMin        =   0
-    yMax        = 800
+    yMax        =  10
     zMin        =   1
     zMax        = 1e5
     normToOne   = True
-    print "WARNING! Normalisation does not work. Switch to using MCPlot and DataMCPlot instead of plotbase (use if)"
-    raw_input("Press key to continue ..."
 
-    _kwargs = {
+    kwargs = {
         "xlabel"           : labelX,
         "ylabel"           : labelY,
         "rebinX"           : 1,
@@ -209,7 +200,7 @@ def GetHistoKwargs(histoList):
         "normalizeToOne"   : normToOne,
         "stackMCHistograms": False,
         "addMCUncertainty" : False,
-        "addLuminosityText": (not normToOne),
+        "addLuminosityText": True, #(not normToOne),
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         "logX"             : logX,
@@ -226,39 +217,68 @@ def GetHistoKwargs(histoList):
         }
     
     for h in histoList:
-        histoKwargs[h] = _kwargs
+
+        if "TH2_S_Vs_Y" in h:
+            pass
+        if "TH2_BQuarkPair_dRMin_Eta1_Vs_Eta2" in h:
+            pass
+        if "TH2_BQuarkPair_dRMin_Phi1_Vs_Phi2" in h:
+            pass
+        if "TH2_BQuarkPair_dRMin_Pt1_Vs_Pt2" in h:
+            pass
+        if "TH2_BQuarkPair_dRMin_dEta_Vs_dPhi" in h:
+            pass
+        if "TH2_Jet1Jet2_dEta_Vs_Jet3Jet4_dEta" in h:
+            pass
+        if "TH2_Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi" in h:
+            pass
+        if "TH2_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass" in h:
+            pass
+        if "TH2_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass" in h:
+            pass
+        if "TH2_MaxDiJetMass_dEta_Vs_dPhi" in h:
+            pass
+        if "TH2_MaxDiJetMass_dRap_Vs_dPhi" in h:
+            pass
+        if "BQuark1_BQuark2_dEta_Vs_dPhi" in h:
+            print "*"*100
+            kwargs["xmax"] = 5
+        if "TH2_BQuark1_BQuark3_dEta_Vs_dPhi" in h:
+            pass
+        if "TH2_BQuark1_BQuark4_dEta_Vs_dPhi" in h:
+            pass
+        if "TH2_BQuark2_BQuark3_dEta_Vs_dPhi" in h:
+            pass
+        if "TH2_BQuark2_BQuark4_dEta_Vs_dPhi" in h:
+            pass
+        if "TH2_BQuark3_BQuark4_dEta_Vs_dPhi" in h:
+            pass
+        histoKwargs[h] = kwargs
     return histoKwargs
     
-def GetHisto(datasetsMgr, histoName):
-    dataset = datasetsMgr.getAllDatasetNames()[0]
+def GetHisto(datasetsMgr, dataset, histoName):
     h = datasetsMgr.getDataset(dataset).getDatasetRootHisto(histoName)
     return h
 
-def Plot2d(datasetsMgr, histoName, kwargs, opts):
-    Verbose("Plotting Data-MC Histograms")
-
+def Plot2d(datasetsMgr, dataset, histoName, kwargs, opts):
+    '''
+    '''
     # Definitions
-    dataset  = datasetsMgr.getAllDatasetNames()[0]
     saveName = histoName.replace("/", "_")
     
     # Get Histos for the plotter object
-    refHisto = GetHisto(datasetsMgr, histoName)
+    refHisto = GetHisto(datasetsMgr, dataset, histoName)
 
     # Create the plotting object
     p = plots.PlotBase(datasetRootHistos=[refHisto], saveFormats=kwargs.get("saveFormats"))
-    p.setDrawOptions(**kwargs)
+    p.histoMgr.normalizeMCToLuminosity(opts.intLumi)
 
-    # Create the MC Plot with selected normalization ("normalizeToOne", "normalizeByCrossSection", "normalizeToLumi") 
-    # p = plots.MCPlot(datasetsMgr, [refHisto], normalizeToLumi=opts.intLumi, **kwargs)
-    # p.normalizeMCToLuminosity(opts.intLumi)
-    # p = plots.MCPlot(datasetsMgr, [refHisto], **kwargs)
-    
     # Customise axes (before drawing histo)    
-    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetTitle(kwargs.get("xlabel")))
-    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetTitle(kwargs.get("ylabel")))
+    if 0:
+        p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetTitle(kwargs.get("xlabel")))
+        p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetTitle(kwargs.get("ylabel")))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs.get("rebinX")))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinY(kwargs.get("rebinY")))
-
 
     # Create a frame                                                                                                                                                             
     fOpts = {"ymin": 0.0, "ymaxfactor": 1.0}
@@ -275,12 +295,12 @@ def Plot2d(datasetsMgr, histoName, kwargs, opts):
 
     # Customise Legend
     moveLegend = {"dx": -0.1, "dy": +0.0, "dh": -0.1}
-    p.setLegend(histograms.moveLegend(histograms.createLegend(), **moveLegend))
+    p.setLegend(histograms.moveLegend(histograms.createLegend(), **kwargs.get("moveLegend")))
     p.removeLegend()
 
     # Customise histogram (after frame is created)
-    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetZaxis().SetTitle("Arbitrary Units"))
-    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetZaxis().SetTitleOffset(1.3))
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetZaxis().SetTitle("Events"))
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetZaxis().SetTitleOffset(1.4))
     #ROOT.gPad.RedrawAxis()
 
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetMinimum(kwargs.get("zmin")))    
@@ -289,12 +309,19 @@ def Plot2d(datasetsMgr, histoName, kwargs, opts):
     # Drawing style    
     p.histoMgr.setHistoDrawStyle(dataset, "COLZ")
     p.histoMgr.setHistoDrawStyleAll("COLZ")
-    p.histoMgr.setHistoLegendStyle(dataset, "F")
-    if "FakeB" in dataset:
-        p.histoMgr.setHistoLegendLabelMany({
-                dataset: "QCD (Data)",
-                })
 
+    # The lines below do nothing since the Legend is disabled
+    if 0:
+        p.histoMgr.setHistoLegendStyle(dataset, "F")
+        if "FakeB" in dataset:
+            p.histoMgr.setHistoLegendLabelMany({
+                    dataset: "QCD (Data)",
+                    })
+        if dataset == "QCD":
+            p.histoMgr.setHistoLegendLabelMany({
+                    dataset: "QCD (MC)",
+                    })
+            
     # Draw the plot
     p.draw()
 
@@ -303,10 +330,15 @@ def Plot2d(datasetsMgr, histoName, kwargs, opts):
         histograms.addStandardTexts(lumi=opts.intLumi)
     else:
         histograms.addStandardTexts()
-    histograms.addText(0.17, 0.88, plots._legendLabels[dataset], 17)
+
+    # Add dataset name on the canvas
+    if dataset == "QCD":
+        histograms.addText(0.17, 0.88, "QCD (H_{T} binned)", 27)
+    else:
+        histograms.addText(0.17, 0.88, plots._legendLabels[dataset], 27)
 
     # Save the plots
-    SavePlot(p, saveName, os.path.join(opts.saveDir, dataset, opts.optMode) )
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.analysisName, opts.folder, dataset, opts.optMode) )
     return
 
 def HasKeys(keyList, **kwargs):
@@ -318,7 +350,6 @@ def HasKeys(keyList, **kwargs):
 def SetLogAndGrid(p, **kwargs):
     '''
     '''
-    #HasKeys(["createRatio", "logX", "logY", "gridX", "gridY"], **kwargs)
     HasKeys(["logX", "logY", "gridX", "gridY"], **kwargs)
     ratio = kwargs.get("createRatio")
     logX  = kwargs.get("logX")
@@ -345,9 +376,7 @@ def SetLogAndGrid(p, **kwargs):
         p.getPad().SetGridy(gridY)
     return
 
-def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
-    Verbose("Saving the plot in %s formats: %s" % (len(saveFormats), ", ".join(saveFormats) ) )
-
+def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]):
     # Check that path exists
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
@@ -359,10 +388,13 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png", ".pdf"]):
     for i, ext in enumerate(saveFormats):
         saveNameURL = saveName + ext
         saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
+        if i==0:
+            print "=== plot_Kinematics2d.py:"
+
         if opts.url:
-            Print(saveNameURL, i==0)
+            print "\t", saveNameURL
         else:
-            Print(saveName + ext, i==0)
+            print "\t", saveName + ext
         plot.saveAs(saveName, formats=saveFormats)
     return
 
@@ -388,7 +420,7 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "Hplus2tbAnalysis"
+    ANALYSISNAME = "Kinematics"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = None
@@ -400,10 +432,11 @@ if __name__ == "__main__":
     MERGEEWK     = False
     URL          = False
     NOERROR      = True
-    SAVEDIR      = "/publicweb/a/aattikis/TH2/"
+    SAVEDIR      = "/publicweb/a/aattikis/"
     VERBOSE      = False
     HISTOLEVEL   = "Vital" # 'Vital' , 'Informative' , 'Debug' 
-    FOLDER       = "ForDataDrivenCtrlPlots" #"topSelection_"  #"topologySelection_"
+    FOLDER       = "TH2"
+    NORMALISE    = False
 
     # Define the available script options
     parser = OptionParser(usage="Usage: %prog [options]")
@@ -453,6 +486,10 @@ if __name__ == "__main__":
     parser.add_option("-e", "--excludeTasks", dest="excludeTasks", action="store", 
                       help="List of datasets in mcrab to exclude")
 
+    parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true",
+                      help="Normalise the histograms to one? [default: %s]" % (NORMALISE) )
+    #"normalizeToOne", "normalizeByCrossSection", "normalizeToLumi"
+
     (opts, parseArgs) = parser.parse_args()
 
     # Require at least two arguments (script-name, path to multicrab)
@@ -470,4 +507,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plot2d.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_Kinematics2d.py: Press any key to quit ROOT ...")

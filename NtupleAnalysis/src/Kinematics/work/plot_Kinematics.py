@@ -14,6 +14,7 @@ Examples:
 ./plot_Kinematics.py -m Kinematics_170828_082301/ -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --url --mergeEWK --normaliseToOne
 
 Last Used:
+./plot_Kinematics.py -m Kinematics_FullStats_170831_085353 -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --url --mergeEWK --normaliseToOne  
 ./plot_Kinematics.py -m Kinematics_170830_060219 -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --url --mergeEWK --normaliseToOne
 
 '''
@@ -601,7 +602,8 @@ def GetHistoKwargs(histo, opts):
         units            = ""
         kwargs["ylabel"] = yLabel + " / %.0f"
         kwargs["xlabel"] = "b-quark multiplicity"
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": +10.0}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +14.0}
+        kwargs["log"]    = True
 
     if "GenJet_N" in histo:
         units            = ""
