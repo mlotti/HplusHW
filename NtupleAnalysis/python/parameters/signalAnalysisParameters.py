@@ -209,7 +209,7 @@ commonPlotsOptions = PSet(
          topMassBins = PSet(nBins=60, axisMin=0., axisMax=600.),
            wMassBins = PSet(nBins=60, axisMin=0., axisMax=300.),
               mtBins = PSet(nBins=1000, axisMin=0., axisMax=5000.), # 5 GeV bin width for tail fitter
-         invmassBins = PSet(nBins=500, axisMin=0., axisMax=5000.),
+         invMassBins = PSet(nBins=500, axisMin=0., axisMax=5000.),
   # Enable/Disable some debug-level plots
        enablePUDependencyPlots = True,
 )
