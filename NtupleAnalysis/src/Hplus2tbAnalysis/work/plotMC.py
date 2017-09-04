@@ -2,20 +2,20 @@
 '''
 
 Usage (single plot):
-./plotHistograms.py -m <pseudo_mcrab_directory> <jsonfile>
+./plotMC.py -m <pseudo_mcrab_directory> <jsonfile>
 
 Usage (multiple plots):
-./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json
+./plotMC.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json
 or
-./plotHistograms.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json json/AfterStandardSelections/*.json
+./plotMC.py -m <pseudo_mcrab_directory> json/AfterAllSelections/*.json json/AfterStandardSelections/*.json
 
 
 Last Used:
-./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/BjetPt.json
+./plotMC.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/BjetPt.json
 or
-./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/*.json
+./plotMC.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/*.json
 or
-./plotHistograms.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/*/*.json
+./plotMC.py -m Hplus2tbAnalysis_161128_082955/ json/AfterAllSelections/*/*.json
 '''
 
 #================================================================================================
@@ -131,11 +131,13 @@ def MCPlot(datasetsMgr, json):
     Verbose("Creating MC plot")
         
     # Create the MC Plot with selected normalization ("normalizeToOne", "normalizeByCrossSection", "normalizeToLumi")
-    if json["normalization"]=="normalizeToLumi":
+    #if json["normalization"]=="normalizeToLumi":
+    if 0:
         kwargs = {}
         p = plots.MCPlot(datasetsMgr, json["histogram"], normalizeToLumi=float(json["luminosity"]), **kwargs)
     else:
-        kwargs = {json["normalization"]: True}
+        #kwargs = {json["normalization"]: True}
+        kwargs = {"normalizeToOne": True}
         p = plots.MCPlot(datasetsMgr, json["histogram"], **kwargs)
 
     # Label size (optional. Commonly Used in counters)
@@ -155,8 +157,8 @@ def MCPlot(datasetsMgr, json):
                    rebinX            = json["rebinX"],
                    rebinY            = json["rebinY"], 
                    stackMCHistograms = json["stackMCHistograms"]=="True", 
-                   addMCUncertainty  = json["addMCUncertainty"]=="True" and json["normalization"]!="normalizeToOne",
-                   addLuminosityText = json["normalization"]=="normalizeToLumi",
+                   addMCUncertainty  = False, #json["addMCUncertainty"]=="True" and json["normalization"]!="normalizeToOne",
+                   addLuminosityText = False,
                    addCmsText        = json["addCmsText"]=="True",
                    cmsExtraText      = json["cmsExtraText"],
                    opts              = json["opts"],
@@ -255,4 +257,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plotHistograms.py: Press any key to quit ROOT ...")
+        raw_input("=== plotMC.py: Press any key to quit ROOT ...")

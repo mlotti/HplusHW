@@ -32,7 +32,16 @@ void CommonPlotsBase::fillControlPlotsAfterTrigger(const Event& event) { }
 void CommonPlotsBase::fillControlPlotsAfterMETFilter(const Event& event) { }
 void CommonPlotsBase::fillControlPlotsAfterTauSelection(const Event& event, const TauSelection::Data& data) { }
 void CommonPlotsBase::fillControlPlotsAfterMETTriggerScaleFactor(const Event& event) { }
+void CommonPlotsBase::fillControlPlotsAfterBjetSelection(const Event& event, const BJetSelection::Data& data){ }
+void CommonPlotsBase::fillControlPlotsAfterStandardSelections(const Event& event,
+							      const JetSelection::Data& jetData,
+							      const BJetSelection::Data& bjetData,
+							      const METSelection::Data& METData,
+							      const TopologySelection::Data& topologyData,
+							      const TopSelection::Data& topData,
+							      bool bIsInverted){ }
 void CommonPlotsBase::fillControlPlotsAfterTopologicalSelections(const Event& event, bool withoutTau) { }
 void CommonPlotsBase::fillControlPlotsAfterAllSelections(const Event& event, bool withoutTau) { }
+void CommonPlotsBase::fillControlPlotsAfterAllSelections(const Event& event, int isInverted) { }
 void CommonPlotsBase::fillControlPlotsAfterAllSelectionsWithProbabilisticBtag(const Event& event, const METSelection::Data& metData, double btagWeight) { }
 //void CommonPlotsBase::fillControlPlotsAfterAllSelectionsWithFullMass(const Event& event, FullHiggsMassCalculator::Data& data) { }

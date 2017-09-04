@@ -36,8 +36,8 @@ import array
 import ROOT
 
 ## The Combine git tag to be used (see https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit)
-Combine_tag = "v6.3.0" # 08.11.2016
-validCMSSWversions = ["CMSSW_7_4_7"]
+Combine_tag = "v7.0.1" # 31.8.2017
+validCMSSWversions = ["/CMSSW_8_0_26_patch1"]
 ## Common command-line options to Combine
 
 ## Command line options for creating Combine workspace
@@ -54,8 +54,11 @@ taskDirprefix = "CombineResults"
 ## Default number of crab jobs
 defaultNumberOfJobs = 20
 
-## Default command line options for LHC-CLs (asymptotic, observed limit)
-lhcAsymptoticOptionsObserved = '-M Asymptotic --picky -v 2 --rAbsAcc 0.001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --minimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001"' #--minimizerTolerance changed from 0.001 (used in 2014 paper) to 0.1 to make all mass points converge
+## Default command line options for LHC-CLs (asymptotic, observed limit) 
+## NB! # For final limits, one should consider using --cminDefaultMinimizerStrategy 1: it is slower and more error-prone but more accurate 
+lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 2 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001"'
+# If you use Barlow-Beeston-lite approach for statistical uncertainties, uncomment the next line:
+# lhcAsymptoticOptionsObserved += " --X-rtd MINIMIZER_analytic"
 ## Default command line options for LHC-CLs (asymptotic, expected limit)
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
 ## Default "Rmin" parameter for LHC-CLs (asymptotic)
@@ -909,8 +912,8 @@ def parseSignificanceOutput(mass, outputFileName=None, outputString=None):
 # \return number of matches found
 def parseResultFromCombineOutput(dirname, result, mass):
     # Find combine output root file
-    possibleNames = ["higgsCombineobs_m%s.Asymptotic.mH%s.root"%(mass,mass),
-                      "higgsCombineblinded_m%s.Asymptotic.mH%s.root"%(mass,mass),
+    possibleNames = ["higgsCombineobs_m%s.AsymptoticLimits.mH%s.root"%(mass,mass),
+                      "higgsCombineblinded_m%s.AsymptoticLimits.mH%s.root"%(mass,mass),
                     ]
     name = None
     for n in possibleNames:

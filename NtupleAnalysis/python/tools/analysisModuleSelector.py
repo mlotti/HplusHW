@@ -104,6 +104,17 @@ class AnalysisModuleSelector:
             print "Will run over %d modules (%d eras x %d searchModes x %d optimizationModes)" % (count, len(self.getSelectedEras()), len(self.getSelectedSearchModes()), len(self.getSelectedOptimizationModes()))
         return count
 
+    def getSelectedCombinationCountIndividually(self):
+        count        = self.getSelectedCombinationCount()
+        nEras        = len(self.getSelectedEras())
+        nSearchModes = len(self.getSelectedSearchModes())
+        nOptModes    = len(self.getSelectedOptimizationModes())
+        if self._disableSystematicsList:
+            nSysVars = 0
+        else:
+            nSysVars = len(self.getSelectedSystematicVariations())
+        return count, nEras, nSearchModes, nOptModes, nSysVars
+
     def iterSelectedCombinations(self):
         def gen3(lst1, lst2, lst3):
             for x1 in lst1:

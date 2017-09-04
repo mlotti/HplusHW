@@ -21,7 +21,7 @@
     	        "ST_t", "TT", "TTZ", "WJets", "WW", "WZ", "ZZ", "DYJets"],
     "rebinX": 1,
     "rebinY": "None",
-    "xlabel": "jet_{6} p_{T} (GeV/c)",
+    "xlabel": "jet_{7} p_{T} (GeV/c)",
     "ylabel": "Events / %.0f / GeV/c",
     "divideByBinWidth": "False",
     "drawStyle": "COLZ",

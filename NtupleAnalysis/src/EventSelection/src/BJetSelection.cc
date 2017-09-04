@@ -14,6 +14,7 @@
 
 BJetSelection::Data::Data() 
 : bPassedSelection(false),
+  bIsGenuineB(false),
   fBTaggingScaleFactorEventWeight(1.0),
   fBTaggingPassProbability((1.0))
 { }
@@ -298,8 +299,26 @@ BJetSelection::Data BJetSelection::privateAnalyze(const Event& iEvent, const Jet
     ++i;
   }
   
+  // Store GenuineB boolean (=All selected b-jets are genuine)
+  output.bIsGenuineB = _getIsGenuineB(iEvent.isMC(), output.fSelectedBJets);
+  
   // Return data object
   return output;
+}
+
+
+bool BJetSelection::_getIsGenuineB(bool bIsMC, const std::vector<Jet>& selectedBjets){
+  if (!bIsMC) return false;
+
+  // GenuineB=All selected b-jets in the event are genuine (using jet-flavour from MC)
+  unsigned int nFakes=0;
+  for(const Jet& bjet: selectedBjets)
+    {
+      // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#Jet_flavour_in_PAT
+      bool isFakeB = (abs(bjet.pdgId()) != 5); // For data pdgId==0
+      if (isFakeB) nFakes++;
+    }
+  return (nFakes==0);
 }
 
 double BJetSelection::calculateBTagPassingProbability(const Event& iEvent, const JetSelection::Data& jetData) {
