@@ -13,6 +13,8 @@ Examples:
 ./plot_Kinematics2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
 
 Last Used:
+./plot_Kinematics2d.py -m Kinematics_StdSelections_TopCut100_AllSelections_NoTrgMatch__H2Cut0p5_NoTopMassCut_170831_085353/ --url -i "QCD|TT"
+./plot_Kinematics2d.py -m Kinematics_StdSelections_TopCut100_AllSelections_NoTrgMatch__H2Cut0p5_NoTopMassCut_170831_085353/ -i "TT" --url
 ./plot_Kinematics2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
 
 Obsolete:
@@ -148,33 +150,31 @@ def main(opts):
         saveFormats = [".png"] #[".C", ".png", ".pdf"]
         histoList   = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
         histoPaths  = [opts.folder +"/" + h for h in histoList]
-        histoKwargs = GetHistoKwargs(histoPaths)
+        #histoKwargs = GetHistoKwargs(histoPaths)
 
         # Axes divisions!
         ROOT.gStyle.SetNdivisions(5, "X")
         ROOT.gStyle.SetNdivisions(5, "Y")
 
-        # For-loop: All datasets
-        for d in datasetsMgr.getAllDatasetNames():
-            if d is not "EWK":
-                continue
+        # For-loop: All histogram
+        for histoName in histoPaths:
 
-            # For-loop: All histogram
-            for histoName in histoPaths:
-                #if "BQuark1_BQuark2_dEta_Vs_dPhi" not in histoName:
+            myKwargs = GetHistoKwargs(histoName)
+            
+            # For-loop: All datasets
+            for d in datasetsMgr.getAllDatasetNames():
+                #if d != "TT":
                 #    continue
-                kwargs = histoKwargs[histoName]
 
-                Plot2d(datasetsMgr, d, histoName, kwargs, opts)
+                Plot2d(datasetsMgr, d, histoName, myKwargs, opts)
                 
                 # Avoid replacing canvas with same name warning
                 for o in gROOT.GetListOfCanvases():
                     # print o.GetName()
                     o.SetName(o.GetName() + "_" + d)
-
     return
 
-def GetHistoKwargs(histoList):
+def GetHistoKwargs(histoName):
     '''
     Dictionary with 
     key   = histogramName
@@ -189,8 +189,8 @@ def GetHistoKwargs(histoList):
     logZ        = False
     rebinX      = 1
     rebinY      = 1
-    labelX      = "m_{jjb} p_{T} (GeV/c)"
-    labelY      = "m_{jj} p_{T} (GeV/c)"
+    labelX      = None
+    labelY      = None
     gridX       = True
     gridY       = True
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
@@ -224,63 +224,107 @@ def GetHistoKwargs(histoList):
         "ymin"             : yMin,
         "ymax"             : yMax,
         "zmin"             : zMin,
-        "zmax"             : zMax,        
+        "zmax"             : zMax,
         }
     
-    for h in histoList:
-        print h
-        if "S_Vs_Y" in h:
-            pass
-        elif "BQuarkPair_dRMin_Eta1_Vs_Eta2" in h:
-            kwargs["xmin"] = -5.0
-            kwargs["xmax"] = +5.0
-            kwargs["ymin"] = -5.0
-            kwargs["ymax"] = +5.0
-            kwargs["zMin"] = 1e0
-            kwargs["logZ"] = True
-        elif "BQuarkPair_dRMin_Phi1_Vs_Phi2" in h:
-            pass
-        elif "BQuarkPair_dRMin_Pt1_Vs_Pt2" in h:
-            kwargs["xmax"] = 800.0
-            kwargs["ymax"] = 800.0
-            kwargs["zMin"] = 1e0
-            kwargs["logZ"] = True
-        elif "BQuarkPair_dRMin_dEta_Vs_dPhi" in h:
-            pass
-        elif "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta" in h:
-            pass
-        elif "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi" in h:
-            pass
-        elif "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass" in h:
-            kwargs["xmax"] = 5.0
-            kwargs["ymax"] = 2000.0
-            kwargs["zMin"] = 1e0    
-            kwargs["logZ"] = True
-        elif "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass" in h:
-            pass
-        elif "MaxDiJetMass_dEta_Vs_dPhi" in h:
-            pass
-        elif "MaxDiJetMass_dRap_Vs_dPhi" in h:
-            pass
-        elif "BQuark1_BQuark2_dEta_Vs_dPhi" in h:
-            kwargs["xmax"] = 5.0
-            kwargs["zMin"] = 1e0
-            kwargs["ymax"] = 3.2
-            kwargs["logZ"] = True        
-        elif "BQuark1_BQuark3_dEta_Vs_dPhi" in h:
-            pass
-        elif "BQuark1_BQuark4_dEta_Vs_dPhi" in h:
-            pass
-        elif "BQuark2_BQuark3_dEta_Vs_dPhi" in h:
-            pass
-        elif "BQuark2_BQuark4_dEta_Vs_dPhi" in h:
-            pass
-        elif "BQuark3_BQuark4_dEta_Vs_dPhi" in h:
-            pass
-        else:
-            raise Exception("Unexpected histogram with name \"%s\"" % h)
-        histoKwargs[h] = kwargs
-    return histoKwargs
+    h = histoName.replace("TH2/", "")
+    kwargs["name"] = h
+
+    if "S_Vs_Y" in h:
+        kwargs["logZ"] = True
+    elif "BQuarkPair_dRMin_Eta1_Vs_Eta2" in h:
+        kwargs["xmin"] = -5.0
+        kwargs["xmax"] = 5.0
+        kwargs["ymin"] = -5.0
+        kwargs["ymax"] = 5.0
+        kwargs["zMin"] = 1e0
+        kwargs["logZ"] = True
+    elif "BQuarkPair_dRMin_Phi1_Vs_Phi2" in h:
+        kwargs["logZ"] = True
+    elif "BQuarkPair_dRMin_Pt1_Vs_Pt2" in h:
+        kwargs["xmax"] = 500.0
+        kwargs["ymax"] = 300.0
+        kwargs["zMin"] = 1e0
+        kwargs["logZ"] = True
+    elif "BQuarkPair_dRMin_dEta_Vs_dPhi" in h:
+        kwargs["rebinX"] = 1
+        kwargs["rebinY"] = 1
+        kwargs["xmax"] = 3.0
+        kwargs["ymax"] = 3.2
+        kwargs["zMin"] = 1e0    
+        kwargs["logZ"] = True
+    elif "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta" in h:
+        kwargs["rebinX"] = 1
+        kwargs["rebinY"] = 1
+        kwargs["xmax"] = 5.0
+        kwargs["ymax"] = 5.0
+        kwargs["zMin"] = 1e0    
+        kwargs["logZ"] = True
+    elif "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi" in h:
+        kwargs["xmax"] = 3.2
+        kwargs["ymax"] = 3.2
+    elif "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass" in h:
+        #kwargs["rebinX"] = 1
+        kwargs["rebinY"] = 4
+        kwargs["xmax"] = 5.0
+        kwargs["ymax"] = 2000.0
+        kwargs["zMin"] = 1e0    
+        kwargs["logZ"] = True
+    elif "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass" in h:
+        kwargs["rebinX"] = 1
+        kwargs["rebinY"] = 1
+        kwargs["xmax"] = 5.0
+        kwargs["ymax"] = 2000.0
+        kwargs["zMin"] = 1e0    
+        kwargs["logZ"] = True
+    elif "MaxDiJetMass_dEta_Vs_dPhi" in h:
+        kwargs["rebinX"] = 1
+        kwargs["rebinY"] = 1
+        kwargs["xmax"] = 5.0
+        kwargs["ymax"] = 3.2
+        kwargs["zMin"] = 1e0    
+        kwargs["logZ"] = True
+    elif "MaxDiJetMass_dRap_Vs_dPhi" in h:
+        kwargs["rebinX"] = 1
+        kwargs["rebinY"] = 1
+        kwargs["xmax"] = 5.0
+        kwargs["ymax"] = 3.2
+        kwargs["zMin"] = 1e0    
+        kwargs["logZ"] = True
+    elif "BQuark1_BQuark2_dEta_Vs_dPhi" in h:
+        kwargs["xmax"] = 5.0
+        kwargs["zMin"] = 1e0
+        kwargs["ymax"] = 3.2
+        kwargs["logZ"] = True        
+    elif "BQuark1_BQuark3_dEta_Vs_dPhi" in h:
+        kwargs["xmax"] = 5.0
+        kwargs["ymax"] = 3.2
+        kwargs["logZ"] = True
+    elif "BQuark1_BQuark4_dEta_Vs_dPhi" in h:
+        kwargs["xmax"] = 5.0
+        kwargs["ymax"] = 3.2
+        kwargs["logZ"] = True
+    elif "BQuark2_BQuark3_dEta_Vs_dPhi" in h:
+        kwargs["xmax"] = 5.0
+        kwargs["ymax"] = 3.2
+        kwargs["logZ"] = True
+    elif "BQuark2_BQuark4_dEta_Vs_dPhi" in h:
+        kwargs["xmax"] = 5.0
+        kwargs["ymax"] = 3.2
+        kwargs["logZ"] = True
+    elif "BQuark3_BQuark4_dEta_Vs_dPhi" in h:
+        kwargs["xmax"] = 5.0
+        kwargs["ymax"] = 3.2
+        kwargs["logZ"] = True
+    else:
+        raise Exception("Unexpected histogram with name \"%s\"" % h)
+
+    if 0:
+        for k in kwargs:
+            print "%s = %s" % (k, kwargs[k])
+        sys.exit()
+
+    return kwargs
     
 def GetHisto(datasetsMgr, dataset, histoName):
     h = datasetsMgr.getDataset(dataset).getDatasetRootHisto(histoName)
@@ -290,7 +334,7 @@ def Plot2d(datasetsMgr, dataset, histoName, kwargs, opts):
     '''
     '''
     # Definitions
-    saveName = histoName.replace("/", "_")
+    saveName = histoName.replace("/", "_")    
     
     # Get Histos for the plotter object
     refHisto = GetHisto(datasetsMgr, dataset, histoName)
@@ -300,15 +344,17 @@ def Plot2d(datasetsMgr, dataset, histoName, kwargs, opts):
     p.histoMgr.normalizeMCToLuminosity(opts.intLumi)
 
     # Customise axes (before drawing histo)    
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs.get("rebinX")))
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinY(kwargs.get("rebinY")))
     if 0:
         p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetTitle(kwargs.get("xlabel")))
         p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetTitle(kwargs.get("ylabel")))
+        # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetTitle( h.getRootHisto().GetXaxis().GetTitle() + "%0.1f" ))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetRangeUser(kwargs.get("xmin"), kwargs.get("xmax")))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetRangeUser(kwargs.get("ymin"), kwargs.get("ymax")))
-    print kwargs.get("ymax")
+
+    #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetRangeUser(kwargs.get("ymin"), kwargs.get("ymax")))
     #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetZaxis().SetRangeUser(kwargs.get("zmin"), kwargs.get("zmax")))
-    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs.get("rebinX")))
-    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinY(kwargs.get("rebinY")))
 
     # Create a frame                                                                                                                                                             
     fOpts = {"ymin": 0.0, "ymaxfactor": 1.0}
