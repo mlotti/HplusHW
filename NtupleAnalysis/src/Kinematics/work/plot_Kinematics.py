@@ -161,10 +161,11 @@ def main(opts, signalMass):
 
 
         # Re-order datasets (different for inverted than default=baseline)
+        newOrder = []
         if opts.mergeEWK:
             newOrder = ["EWK", "QCD"]
         else:
-            newOrder = extend(GetListOfEwkDatasets())
+            newOrder.extend(GetListOfEwkDatasets())
             newOrder.append("QCD")
         for d in datasetsMgr.getAllDatasetNames():
             if "ChargedHiggs" in d:
@@ -227,6 +228,17 @@ def GetHistoKwargs(histo, opts):
         "cutBox"           : {"cutValue": 0.0, "fillColor": 16, "box": False, "line": False, "greaterThan": True}
         }
 
+    if "eta" in histo.lower(): 
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        kwargs["xlabel"] = "#eta"
+        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": -5.0, "xmax": +5.0}#, "ymin": 1e+0, "ymaxfactor": 10}
+
+    if "deta" in histo.lower(): 
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        kwargs["xlabel"] = "#Delta#eta"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
+
     if "met_et" in histo.lower():
         units            = "GeV/c"
         format           = "%0.0f " + units
@@ -280,7 +292,7 @@ def GetHistoKwargs(histo, opts):
 
     if "planarity" in histo.lower():
         kwargs["ylabel"] = yLabel + " / %.2f"
-        kwargs["xlabel"] = "Aplanarity"
+        kwargs["xlabel"] = "Planarity"
 
     if "aplanarity" in histo.lower():
         kwargs["ylabel"] = yLabel + " / %.2f"
@@ -364,6 +376,7 @@ def GetHistoKwargs(histo, opts):
         if "BQuarkPair_dRMin" in histo:
             kwargs["opts"]   = {"xmin": 0, "xmax": 500}#, "ymin": 1e+0, "ymaxfactor": 10}
         if "MaxDiJetMass" in histo:
+            kwargs["rebinX"] = 2
             kwargs["opts"]   = {"xmin": 0, "xmax": 600}#, "ymin": 1e+0, "ymaxfactor": 10}
         if "MaxTriJetPt" in histo:
             units            = "GeV/c"
@@ -374,53 +387,43 @@ def GetHistoKwargs(histo, opts):
             units            = "GeV/c"
             kwargs["ylabel"] = yLabel + " / %.0f " + units
             kwargs["xlabel"] = "p_{T} (%s)"  % units
-            kwargs["opts"]   = {"xmin": 0, "xmax": 2000, "ymin": 1e+0, "ymaxfactor": 10}
+            kwargs["opts"]   = {"xmin": 0, "xmax": 800, "ymin": 1e+0, "ymaxfactor": 10}
         if "BQuarkPair_dR" in histo:
             kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +500.0}
 
-    if "eta" in histo.lower(): 
+#    if "eta" in histo.lower(): 
+#        kwargs["ylabel"] = yLabel + " / %.1f"
+#        kwargs["xlabel"] = "#eta"
+#        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+#        kwargs["opts"]   = {"xmin": -5.0, "xmax": +5.0}#, "ymin": 1e+0, "ymaxfactor": 10}
+#
+#        if "dEta" in histo:
+#            #kwargs["ylabel"] = yLabel + " / %.2f"
+#            kwargs["xlabel"] = "#Delta#eta"
+#            kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
+                
+    if "MaxMass_Eta" in histo:
         kwargs["ylabel"] = yLabel + " / %.1f"
         kwargs["xlabel"] = "#eta"
-        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": -5.0, "xmax": +5.0}#, "ymin": 1e+0, "ymaxfactor": 10}
 
-        if "dEta" in histo:
-            #kwargs["ylabel"] = yLabel + " / %.2f"
-            kwargs["xlabel"] = "#Delta#eta"
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
+    if "MaxDiJetMass_Eta" in histo:
+        kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        kwargs["opts"]   = {"xmin": -5.0, "xmax": +5.0}
 
-        if "MaxMass_Eta" in histo:
-            kwargs["opts"]   = {"xmin": -5.0, "xmax": +5.0}#, "ymin": 1e+0, "ymaxfactor": 10}
+    if "MaxDiJetMass_dEta" in histo:
+        kwargs["rebinX"]     = 2
+        kwargs["xlabel"]     = "#Delta#eta"
+        kwargs["opts"]      = {"xmin": 0.0, "xmax": +5.0}
+        kwargs["moveLegend"] = {"dx": -0.53, "dy": 0.0, "dh": -0.1}
 
-        if "dRMin_dEta" in histo or "dRMin_jet1_dEta" in histo or "dRMin_jet2_dEta" in histo:
-            kwargs["xlabel"] = "#Delta#eta"
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
-            #kwargs["log"]    = True
+    if "MaxTriJetPt_dEtaMin" == histo:
+        kwargs["xlabel"] = "#Delta#eta"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.5}
+        
+    if "dRMinDiJet_NoBJets_Eta" in histo:
+        kwargs["opts"]   = {"xmin": -3.0, "xmax": +3.0}
             
-        if "MaxDiJetMass_Eta" in histo:
-            kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-            kwargs["opts"]   = {"xmin": -5.0, "xmax": +5.0}
-
-        if "MaxDiJetMass_dEta" in histo:
-            #kwargs["ylabel"] = yLabel + " / %.2f"
-            kwargs["xlabel"] = "#Delta#eta"
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
-            # kwargs["moveLegend"] = {"dx": -0.53, "dy": -0.5, "dh": -0.1}
-            kwargs["moveLegend"] = {"dx": -0.53, "dy": 0.0, "dh": -0.1}
-
-        if "MaxTriJetPt_dEtaMin" == histo:
-            kwargs["xlabel"] = "#Delta#eta"
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.5}
-
-        if "dRMinDiJet_NoBJets_Eta" in histo:
-            kwargs["opts"]   = {"xmin": -3.0, "xmax": +3.0}
-            
-        if "dRMinDiJet_NoBJets_dEta" == histo:
-            kwargs["xlabel"] = "#Delta#eta"
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": 2.0}
-            kwargs["log"]    = True
-
     if "phi" in histo.lower():
         units            = "rads"
         kwargs["xlabel"] = "#phi (%s)" % units
@@ -428,7 +431,7 @@ def GetHistoKwargs(histo, opts):
 
         if "dPhi" in histo:
             kwargs["xlabel"] = "#Delta#phi (%s)" % units
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.2}
         
         if "BQuarkPair_dRMin" in histo:
             kwargs["opts"]   = {"xmin": -3.2, "xmax": +3.2}
@@ -443,14 +446,14 @@ def GetHistoKwargs(histo, opts):
             kwargs["opts"]   = {"xmin": -3.2, "xmax": +3.2}
 
         if "MaxTriJetPt_dPhiAverage" == histo:
-            kwargs["xlabel"] = "#Delta#phi (%s)" % units
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +2.0}
-            #kwargs["log"]    = True
-
+            kwargs["xlabel"] = "#bar{#Delta#phi} (%s)" % units
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.2}
+            kwargs["log"]    = True
+            
         if "MaxTriJetPt_dPhiMin" == histo:
             kwargs["xlabel"] = "#Delta#phi (%s)" % units
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.0}
-            #kwargs["log"]    = True
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.2}
+            kwargs["log"]    = True
 
         if "dRMin_Phi" in histo:
             kwargs["xlabel"] = "#phi (%s)" % units
@@ -467,8 +470,14 @@ def GetHistoKwargs(histo, opts):
 
         if "dRMinDiJet_NoBJets_dPhi" == histo:
             kwargs["xlabel"] = "#Delta#phi (%s)" % units
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +2.0}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.2}
             kwargs["log"]    = True
+
+    if "dRMinDiJet_NoBJets_dEta" in histo:
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        kwargs["xlabel"] = "#Delta#eta"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": 3.0}
+        kwargs["log"]    = True
 
     if "MaxMass_M" in histo:
         kwargs["rebinX"] = 2
@@ -479,11 +488,12 @@ def GetHistoKwargs(histo, opts):
         kwargs["opts"]   = {"xmin": 0, "xmax": 1500}
 
     if "MaxPt_M" in histo:
+        kwargs["rebinX"] = 4
         units            = "GeV/c^{2}"
         kwargs["ylabel"] = yLabel + " / %.0f " + units
         kwargs["xlabel"] = "M (%s)"  % units
         kwargs["log"]    = True
-        kwargs["opts"]   = {"xmin": 0, "xmax": 1000}
+        kwargs["opts"]   = {"xmin": 0, "xmax": 1200}
 
     if "MaxPt_dR" in histo:
         kwargs["ylabel"] = yLabel + " / %.1f"
@@ -491,7 +501,24 @@ def GetHistoKwargs(histo, opts):
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +6.0}
 
-    if "BQuarkPair_dR" == histo:
+    if "BQuarkPair_dEta" in histo:
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        kwargs["xlabel"] = "#Delta#eta"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
+
+    if "BQuarkPair_dEtaAverage" in histo:
+        kwargs["rebinX"] = 2
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        kwargs["xlabel"] = "#bar{#Delta#eta}"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
+
+    if "BQuarkPair_dPhiAverage" in histo:
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        units            = "rads"
+        kwargs["xlabel"] = "#bar{#Delta#phi} (%s)" % units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.2}
+
+    if "BQuarkPair_dR" in histo:
         kwargs["ylabel"] = yLabel + " / %.1f"
         kwargs["xlabel"] = "#DeltaR"
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
@@ -499,7 +526,7 @@ def GetHistoKwargs(histo, opts):
 
     if "BQuarkPair_dRAverage" in histo:
         kwargs["ylabel"] = yLabel + " / %.1f"
-        kwargs["xlabel"] = "#DeltaR"
+        kwargs["xlabel"] = "#bar{#DeltaR}"
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +6.0}
 
@@ -507,7 +534,31 @@ def GetHistoKwargs(histo, opts):
         kwargs["ylabel"] = yLabel + " / %.1f"
         kwargs["xlabel"] = "#DeltaR"
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": +6.0}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +4.0}
+
+    if "BQuarkPair_dRMin_jet1_dPhi" == histo:
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        units            = "rads"
+        kwargs["xlabel"] = "#Delta#phi (%s)" % units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.2}
+
+    if "BQuarkPair_dRMin_jet1_dEta" in histo:
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        kwargs["xlabel"] = "#Delta#eta"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
+        kwargs["log"]   = True
+
+    if "BQuarkPair_dRMin_jet2_dPhi" in histo:
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        units            = "rads"
+        kwargs["xlabel"] = "#Delta#phi (%s)" % units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.2}
+
+    if "BQuarkPair_dRMin_jet2_dEta" in histo:
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        kwargs["xlabel"] = "#Delta#eta"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
+        kwargs["log"]   = True
 
     if "BQuarkPair_MaxPt_jet1_dR" in histo:
         kwargs["ylabel"] = yLabel + " / %.1f"
@@ -559,14 +610,14 @@ def GetHistoKwargs(histo, opts):
 
     if "MaxTriJetPt_dRAverage" == histo:
         kwargs["ylabel"] = yLabel + " / %.1f"
-        kwargs["xlabel"] = "#DeltaR"
+        kwargs["xlabel"] = "#bar{#DeltaR}"
         kwargs["cutBox"] = {"cutValue": 0.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
 
     if "dRMinDiJet_NoBJets_dR" in histo:
         kwargs["ylabel"] = yLabel + " / %.1f"
         kwargs["xlabel"] = "#DeltaR"
-        kwargs["opts"]   = {"xmin": 0.0, "xmax": +2.0}
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
         kwargs["log"]    = True
                 
     if "BQuarkPair_MaxMass_dR" in histo:
@@ -620,13 +671,14 @@ def GetHistoKwargs(histo, opts):
         kwargs["opts"]   = {"xmin": 0, "xmax": 800}
 
         if "MaxTriJetPt_Mass" in histo:
+            kwargs["rebinX"] = 4
             kwargs["opts"]   = {"xmin": 0.0, "xmax": +1000.0}
             kwargs["log"]    = False
             #kwargs["opts"]   = {"xmin": 0.0, "xmax": +3000.0}
             #kwargs["log"]    = True
 
         if "dRMinDiJet_NoBJets_Mass" in histo:
-            kwargs["opts"]   = {"xmin": 0.0, "xmax": +400.0}
+            kwargs["opts"]   = {"xmin": 0.0, "xmax": +800.0}
 
         if "MaxDiJetMass_Mass" in histo:
             kwargs["opts"]   = {"xmin": 0.0, "xmax": +2000.0}
@@ -642,6 +694,37 @@ def GetHistoKwargs(histo, opts):
         kwargs["ylabel"] = yLabel + " / %.2f"
         kwargs["rebinX"] = 1
         kwargs["opts"]   = {"xmin": 0.0, "xmax": +1.5}
+
+    if "BQuarkPair_dRMin_Pt" in histo:
+        kwargs["rebinX"] = 1
+        units            = "GeV/c"
+        kwargs["ylabel"] = yLabel + " / %.0f " + units
+        kwargs["xlabel"] = "p_{T} (%s)"  % units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +600.0}
+
+    if "BQuarkPair_dRMin_dEta" in histo:
+        kwargs["rebinX"] = 2
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        kwargs["xlabel"] = "#Delta#eta"
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +5.0}
+
+    if "BQuarkPair_dRMin_dPhi" in histo:
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        units            = "rads"
+        kwargs["xlabel"] = "#Delta#phi (%s)" % units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.2}
+
+    if "BQuarkPair_dRMin_jet1_dPhi" in histo:
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        units            = "rads"
+        kwargs["xlabel"] = "#Delta#phi (%s)" % units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.2}
+
+    if "BQuarkPair_dRMin_jet2_dPhi" in histo:
+        kwargs["ylabel"] = yLabel + " / %.1f"
+        units            = "rads"
+        kwargs["xlabel"] = "#Delta#phi (%s)" % units
+        kwargs["opts"]   = {"xmin": 0.0, "xmax": +3.2}
 
     if opts.normaliseToOne:
         yMin = 1e-5

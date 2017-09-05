@@ -156,9 +156,18 @@ def main(opts):
 
         # For-loop: All datasets
         for d in datasetsMgr.getAllDatasetNames():
+            if d is not "EWK":
+                continue
+
             # For-loop: All histogram
             for histoName in histoPaths:
-                Plot2d(datasetsMgr, d, histoName, histoKwargs[histoName], opts)
+                #if "BQuark1_BQuark2_dEta_Vs_dPhi" not in histoName:
+                #    continue
+                kwargs = histoKwargs[histoName]
+
+                Plot2d(datasetsMgr, d, histoName, kwargs, opts)
+                
+                # Avoid replacing canvas with same name warning
                 for o in gROOT.GetListOfCanvases():
                     # print o.GetName()
                     o.SetName(o.GetName() + "_" + d)
@@ -176,19 +185,20 @@ def GetHistoKwargs(histoList):
     
     # Defaults
     logX        = False
-    rebinX      = 1
-    labelX      = "m_{jjb} p_{T} (GeV/c)"
     logY        = False
-    gridX       = True
+    logZ        = False
+    rebinX      = 1
     rebinY      = 1
+    labelX      = "m_{jjb} p_{T} (GeV/c)"
     labelY      = "m_{jj} p_{T} (GeV/c)"
+    gridX       = True
     gridY       = True
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
-    xMin        =   0
-    xMax        =  10
-    yMin        =   0
-    yMax        =  10
-    zMin        =   1
+    xMin        = 0
+    xMax        = 5
+    yMin        = 0
+    yMax        = 5
+    zMin        = 1e0
     zMax        = 1e5
     normToOne   = True
 
@@ -205,6 +215,7 @@ def GetHistoKwargs(histoList):
         "cmsExtraText"     : "Preliminary",
         "logX"             : logX,
         "logY"             : logY,
+        "logZ"             : logZ,
         "moveLegend"       : _moveLegend,
         "gridX"            : gridX,
         "gridY"            : gridY,
@@ -217,42 +228,57 @@ def GetHistoKwargs(histoList):
         }
     
     for h in histoList:
-
-        if "TH2_S_Vs_Y" in h:
+        print h
+        if "S_Vs_Y" in h:
             pass
-        if "TH2_BQuarkPair_dRMin_Eta1_Vs_Eta2" in h:
+        elif "BQuarkPair_dRMin_Eta1_Vs_Eta2" in h:
+            kwargs["xmin"] = -5.0
+            kwargs["xmax"] = +5.0
+            kwargs["ymin"] = -5.0
+            kwargs["ymax"] = +5.0
+            kwargs["zMin"] = 1e0
+            kwargs["logZ"] = True
+        elif "BQuarkPair_dRMin_Phi1_Vs_Phi2" in h:
             pass
-        if "TH2_BQuarkPair_dRMin_Phi1_Vs_Phi2" in h:
+        elif "BQuarkPair_dRMin_Pt1_Vs_Pt2" in h:
+            kwargs["xmax"] = 800.0
+            kwargs["ymax"] = 800.0
+            kwargs["zMin"] = 1e0
+            kwargs["logZ"] = True
+        elif "BQuarkPair_dRMin_dEta_Vs_dPhi" in h:
             pass
-        if "TH2_BQuarkPair_dRMin_Pt1_Vs_Pt2" in h:
+        elif "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta" in h:
             pass
-        if "TH2_BQuarkPair_dRMin_dEta_Vs_dPhi" in h:
+        elif "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi" in h:
             pass
-        if "TH2_Jet1Jet2_dEta_Vs_Jet3Jet4_dEta" in h:
+        elif "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass" in h:
+            kwargs["xmax"] = 5.0
+            kwargs["ymax"] = 2000.0
+            kwargs["zMin"] = 1e0    
+            kwargs["logZ"] = True
+        elif "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass" in h:
             pass
-        if "TH2_Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi" in h:
+        elif "MaxDiJetMass_dEta_Vs_dPhi" in h:
             pass
-        if "TH2_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass" in h:
+        elif "MaxDiJetMass_dRap_Vs_dPhi" in h:
             pass
-        if "TH2_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass" in h:
+        elif "BQuark1_BQuark2_dEta_Vs_dPhi" in h:
+            kwargs["xmax"] = 5.0
+            kwargs["zMin"] = 1e0
+            kwargs["ymax"] = 3.2
+            kwargs["logZ"] = True        
+        elif "BQuark1_BQuark3_dEta_Vs_dPhi" in h:
             pass
-        if "TH2_MaxDiJetMass_dEta_Vs_dPhi" in h:
+        elif "BQuark1_BQuark4_dEta_Vs_dPhi" in h:
             pass
-        if "TH2_MaxDiJetMass_dRap_Vs_dPhi" in h:
+        elif "BQuark2_BQuark3_dEta_Vs_dPhi" in h:
             pass
-        if "BQuark1_BQuark2_dEta_Vs_dPhi" in h:
-            print "*"*100
-            kwargs["xmax"] = 5
-        if "TH2_BQuark1_BQuark3_dEta_Vs_dPhi" in h:
+        elif "BQuark2_BQuark4_dEta_Vs_dPhi" in h:
             pass
-        if "TH2_BQuark1_BQuark4_dEta_Vs_dPhi" in h:
+        elif "BQuark3_BQuark4_dEta_Vs_dPhi" in h:
             pass
-        if "TH2_BQuark2_BQuark3_dEta_Vs_dPhi" in h:
-            pass
-        if "TH2_BQuark2_BQuark4_dEta_Vs_dPhi" in h:
-            pass
-        if "TH2_BQuark3_BQuark4_dEta_Vs_dPhi" in h:
-            pass
+        else:
+            raise Exception("Unexpected histogram with name \"%s\"" % h)
         histoKwargs[h] = kwargs
     return histoKwargs
     
@@ -277,6 +303,10 @@ def Plot2d(datasetsMgr, dataset, histoName, kwargs, opts):
     if 0:
         p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetTitle(kwargs.get("xlabel")))
         p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetTitle(kwargs.get("ylabel")))
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetRangeUser(kwargs.get("xmin"), kwargs.get("xmax")))
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetRangeUser(kwargs.get("ymin"), kwargs.get("ymax")))
+    print kwargs.get("ymax")
+    #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetZaxis().SetRangeUser(kwargs.get("zmin"), kwargs.get("zmax")))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs.get("rebinX")))
     p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinY(kwargs.get("rebinY")))
 
@@ -350,30 +380,20 @@ def HasKeys(keyList, **kwargs):
 def SetLogAndGrid(p, **kwargs):
     '''
     '''
-    HasKeys(["logX", "logY", "gridX", "gridY"], **kwargs)
-    ratio = kwargs.get("createRatio")
+    HasKeys(["logX", "logY", "logZ", "gridX", "gridY"], **kwargs)
     logX  = kwargs.get("logX")
     logY  = kwargs.get("logY")
     logZ  = kwargs.get("logZ")
     gridX = kwargs.get("gridX")
     gridY = kwargs.get("gridY")
 
-    if ratio:
-        p.getPad1().SetLogx(logX)
-        p.getPad1().SetLogy(logY)
-        p.getPad2().SetLogx(logX)
-        p.getPad2().SetLogy(logY)
-        p.getPad1().SetGridx(gridX)
-        p.getPad1().SetGridy(gridY)
-        p.getPad2().SetGridx(gridX)
-        p.getPad2().SetGridy(gridY)
-    else:
-        p.getPad().SetLogx(logX)
-        p.getPad().SetLogy(logY)
-        if logZ != None:
-            p.getPad().SetLogz(logZ)
-        p.getPad().SetGridx(gridX)
-        p.getPad().SetGridy(gridY)
+    p.getPad().SetLogx(logX)
+    p.getPad().SetLogy(logY)
+    p.getPad().SetGridx(gridX)
+    p.getPad().SetGridy(gridY)
+    if logZ != None:
+        p.getPad().SetLogz(logZ)
+
     return
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]):
