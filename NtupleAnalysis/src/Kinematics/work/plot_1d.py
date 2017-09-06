@@ -4,18 +4,18 @@ Description:
 Generate all TH1 generated from the Kinematics analyzer (GEN-level info).
 
 Usage:
-./plot_Kinematics.py -m <pseudo_mcrab> [opts]
+./plot_1d.py -m <pseudo_mcrab> [opts]
 
 Examples:
-./plot_Kinematics.py -m <peudo_mcrab> -o "" --url --normaliseToOne
-./plot_Kinematics.py -m Kinematics_170828_082301/ -i 'TT' --url --normaliseToOne
-./plot_Kinematics.py -m Kinematics_170828_082301/ -e "QCD_b|M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|M_1000|M_2000" --url --mergeEWK
-./plot_Kinematics.py -m Kinematics_170828_082301/ -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --mergeEWK --url
-./plot_Kinematics.py -m Kinematics_170828_082301/ -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --url --mergeEWK --normaliseToOne
+./plot_1d.py -m <peudo_mcrab> -o "" --url --normaliseToOne
+./plot_1d.py -m Kinematics_170828_082301/ -i 'TT' --url --normaliseToOne
+./plot_1d.py -m Kinematics_170828_082301/ -e "QCD_b|M_180|M_200|M_220|M_250|M_300|M_350|M_400|M_500|M_1000|M_2000" --url --mergeEWK
+./plot_1d.py -m Kinematics_170828_082301/ -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --mergeEWK --url
+./plot_1d.py -m Kinematics_170828_082301/ -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --url --mergeEWK --normaliseToOne
 
 Last Used:
-./plot_Kinematics.py -m Kinematics_FullStats_170831_085353 -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --url --mergeEWK --normaliseToOne  
-./plot_Kinematics.py -m Kinematics_170830_060219 -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --url --mergeEWK --normaliseToOne
+./plot_1d.py -m Kinematics_FullStats_170831_085353 -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --url --mergeEWK --normaliseToOne  
+./plot_1d.py -m Kinematics_170830_060219 -e "QCD_b|M_180|M_200|M_220|M_250|M_350|M_400|M_1000|M_2000|M_3000" --url --mergeEWK --normaliseToOne
 
 '''
 
@@ -954,4 +954,4 @@ if __name__ == "__main__":
     main(opts, signalMass)
 
     if not opts.batchMode:
-        raw_input("=== plot_Kinematics.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_1d.py: Press any key to quit ROOT ...")

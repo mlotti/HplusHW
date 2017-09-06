@@ -352,23 +352,29 @@ fakeBLineStyle    = StyleCompound([StyleMarker(markerSize=1.2, markerColor=ROOT.
 signalStyleHToTB  = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kRed-7, markerSizes=None, markerStyle=4),
                                    StyleLine(lineColor=ROOT.kRed-7, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kRed-7, fillStyle=0)])
-signalStyleHToTB300 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kAzure, markerSizes=None, markerStyle=4),
-                                   StyleLine(lineColor=ROOT.kAzure, lineStyle=ROOT.kDashed, lineWidth=5), 
-                                   StyleFill(fillColor=ROOT.kAzure, fillStyle=0)])
-signalStyleHToTB500 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kTeal+3, markerSizes=None, markerStyle=4),
-                                   StyleLine(lineColor=ROOT.kTeal+3, lineStyle=ROOT.kDashed, lineWidth=5), 
+signalFillStyleHToTB  = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kYellow-7, markerSizes=None, markerStyle=4),
+                                   StyleLine(lineColor=ROOT.kYellow-7, lineStyle=ROOT.kSolid, lineWidth=1), 
+                                   StyleFill(fillColor=ROOT.kYellow-7, fillStyle=10001)])
+signalStyleHToTB200 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kPink-2, markerSizes=None, markerStyle=4),
+                                   StyleLine(lineColor=ROOT.kPink-2, lineStyle=ROOT.kDashed, lineWidth=4), 
+                                   StyleFill(fillColor=ROOT.kPink-2, fillStyle=0)])
+signalStyleHToTB300 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kTeal+3, markerSizes=None, markerStyle=4),
+                                   StyleLine(lineColor=ROOT.kTeal+3, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kTeal+3, fillStyle=0)])
-signalStyleHToTB800 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kRed-4, markerSizes=None, markerStyle=4),
-                                   StyleLine(lineColor=ROOT.kRed-4, lineStyle=ROOT.kDashed, lineWidth=5), 
-                                   StyleFill(fillColor=ROOT.kRed-4, fillStyle=0)])
-signalStyleHToTB1000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kCyan+1, markerSizes=None, markerStyle=4),
-                                   StyleLine(lineColor=ROOT.kCyan+1, lineStyle=ROOT.kDashed, lineWidth=5), 
-                                   StyleFill(fillColor=ROOT.kCyan+1, fillStyle=0)])
+signalStyleHToTB500 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kAzure-1, markerSizes=None, markerStyle=4),
+                                   StyleLine(lineColor=ROOT.kAzure-1, lineStyle=ROOT.kDashed, lineWidth=4), 
+                                   StyleFill(fillColor=ROOT.kAzure-1, fillStyle=0)])
+signalStyleHToTB800 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kSpring-4, markerSizes=None, markerStyle=4),
+                                   StyleLine(lineColor=ROOT.kSpring-4, lineStyle=ROOT.kDashed, lineWidth=4), 
+                                   StyleFill(fillColor=ROOT.kSpring-4, fillStyle=0)])
+signalStyleHToTB1000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kYellow-7, markerSizes=None, markerStyle=4),
+                                   StyleLine(lineColor=ROOT.kYellow-7, lineStyle=ROOT.kDashed, lineWidth=4), 
+                                   StyleFill(fillColor=ROOT.kYellow-7, fillStyle=0)])
 signalStyleHToTB2000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kViolet-9, markerSizes=None, markerStyle=4),
-                                   StyleLine(lineColor=ROOT.kViolet-9, lineStyle=ROOT.kDashed, lineWidth=5), 
+                                   StyleLine(lineColor=ROOT.kViolet-9, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kViolet-9, fillStyle=0)])
 signalStyleHToTB3000 = StyleCompound([StyleMarker(markerSize=0, markerColor=ROOT.kRed+2, markerSizes=None, markerStyle=4),
-                                   StyleLine(lineColor=ROOT.kRed+2, lineStyle=ROOT.kDashed, lineWidth=5), 
+                                   StyleLine(lineColor=ROOT.kRed+2, lineStyle=ROOT.kDashed, lineWidth=4), 
                                    StyleFill(fillColor=ROOT.kRed+2, fillStyle=0)])
 
 styles = [ 
@@ -475,7 +481,11 @@ def getSignalStyle():
 def getSignalStyleHToTB():
     return signalStyleHToTB
 
+def getSignalStyleHToTB():
+    return signalFillStyleHToTB
+
 def getSignalStyleHToTB_M(mass):
+
     if mass == "200":
         return signalStyleHToTB200
     elif mass == "300":
@@ -483,7 +493,7 @@ def getSignalStyleHToTB_M(mass):
     elif mass == "500":
         return signalStyleHToTB500
     elif mass == "800":
-        return signalStyleHToTB800
+          return signalStyleHToTB800
     elif mass == "1000":
         return signalStyleHToTB1000
     elif mass == "2000":
@@ -492,7 +502,7 @@ def getSignalStyleHToTB_M(mass):
         return signalStyleHToTB3000
     else:
         print "Invalid mass point \"%s\". Returning default style" % (mass)
-        return signalStyleHToTB500        
+    return signalStyleHToTB500        
 
 def getErrorStyle():
     return errorStyle

@@ -7,19 +7,19 @@ Useful Link:
 https://nixtricks.wordpress.com/2011/03/03/simple-loops-in-csh-ortcsh/
 
 Usage:
-./plot_Kinematics2d.py -m <pseudo_mcrab_directory> [opts]
+./plot_2d.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plot_Kinematics2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
+./plot_2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
 
 Last Used:
-./plot_Kinematics2d.py -m Kinematics_StdSelections_TopCut100_AllSelections_NoTrgMatch__H2Cut0p5_NoTopMassCut_170831_085353/ --url -i "QCD|TT"
-./plot_Kinematics2d.py -m Kinematics_StdSelections_TopCut100_AllSelections_NoTrgMatch__H2Cut0p5_NoTopMassCut_170831_085353/ -i "TT" --url
-./plot_Kinematics2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
+./plot_2d.py -m Kinematics_StdSelections_TopCut100_AllSelections_NoTrgMatch__H2Cut0p5_NoTopMassCut_170831_085353/ --url -i "QCD|TT"
+./plot_2d.py -m Kinematics_StdSelections_TopCut100_AllSelections_NoTrgMatch__H2Cut0p5_NoTopMassCut_170831_085353/ -i "TT" --url
+./plot_2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
 
 Obsolete:
 foreach x ( 180 200 220 250 300 350 400 500 800 1000 2000 3000 )
-./plot_Kinematics2d.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170826_073257/ -i M_$x --url
+./plot_2d.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170826_073257/ -i M_$x --url
 end
 
 '''
@@ -237,63 +237,67 @@ def GetHistoKwargs(histoName):
         kwargs["xmax"] = 5.0
         kwargs["ymin"] = -5.0
         kwargs["ymax"] = 5.0
-        kwargs["zMin"] = 1e0
+        kwargs["zMin"] = 1e-1
         kwargs["logZ"] = True
     elif "BQuarkPair_dRMin_Phi1_Vs_Phi2" in h:
         kwargs["logZ"] = True
     elif "BQuarkPair_dRMin_Pt1_Vs_Pt2" in h:
         kwargs["xmax"] = 500.0
         kwargs["ymax"] = 300.0
-        kwargs["zMin"] = 1e0
+        kwargs["zMin"] = 1e-1
         kwargs["logZ"] = True
     elif "BQuarkPair_dRMin_dEta_Vs_dPhi" in h:
         kwargs["rebinX"] = 1
         kwargs["rebinY"] = 1
         kwargs["xmax"] = 3.0
         kwargs["ymax"] = 3.2
-        kwargs["zMin"] = 1e0    
+        kwargs["zMin"] = 1e-1    
         kwargs["logZ"] = True
     elif "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta" in h:
-        kwargs["rebinX"] = 1
-        kwargs["rebinY"] = 1
-        kwargs["xmax"] = 5.0
-        kwargs["ymax"] = 5.0
-        kwargs["zMin"] = 1e0    
+        kwargs["rebinX"] = 2
+        kwargs["rebinY"] = 2
+        kwargs["xmax"] = 1.0
+        kwargs["ymax"] = 1.0
+        kwargs["zMin"] = 1e-1    
         kwargs["logZ"] = True
     elif "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi" in h:
-        kwargs["xmax"] = 3.2
-        kwargs["ymax"] = 3.2
+        kwargs["rebinX"] = 1
+        kwargs["rebinY"] = 1
+        kwargs["xmax"] = 5.0 #3.2
+        kwargs["ymax"] = 5.0 #3.2
+        kwargs["zMin"] = 1e-1
+        kwargs["logZ"] = True
     elif "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass" in h:
-        #kwargs["rebinX"] = 1
+        kwargs["rebinX"] = 2
         kwargs["rebinY"] = 4
         kwargs["xmax"] = 5.0
         kwargs["ymax"] = 2000.0
-        kwargs["zMin"] = 1e0    
+        kwargs["zMin"] = 1e-1    
         kwargs["logZ"] = True
     elif "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass" in h:
         kwargs["rebinX"] = 1
-        kwargs["rebinY"] = 1
+        kwargs["rebinY"] = 4
         kwargs["xmax"] = 5.0
         kwargs["ymax"] = 2000.0
-        kwargs["zMin"] = 1e0    
+        kwargs["zMin"] = 1e-1    
         kwargs["logZ"] = True
     elif "MaxDiJetMass_dEta_Vs_dPhi" in h:
         kwargs["rebinX"] = 1
         kwargs["rebinY"] = 1
         kwargs["xmax"] = 5.0
         kwargs["ymax"] = 3.2
-        kwargs["zMin"] = 1e0    
+        kwargs["zMin"] = 1e-1    
         kwargs["logZ"] = True
     elif "MaxDiJetMass_dRap_Vs_dPhi" in h:
         kwargs["rebinX"] = 1
         kwargs["rebinY"] = 1
         kwargs["xmax"] = 5.0
         kwargs["ymax"] = 3.2
-        kwargs["zMin"] = 1e0    
+        kwargs["zMin"] = 1e-1    
         kwargs["logZ"] = True
     elif "BQuark1_BQuark2_dEta_Vs_dPhi" in h:
         kwargs["xmax"] = 5.0
-        kwargs["zMin"] = 1e0
+        kwargs["zMin"] = 1e-1
         kwargs["ymax"] = 3.2
         kwargs["logZ"] = True        
     elif "BQuark1_BQuark3_dEta_Vs_dPhi" in h:
@@ -303,18 +307,22 @@ def GetHistoKwargs(histoName):
     elif "BQuark1_BQuark4_dEta_Vs_dPhi" in h:
         kwargs["xmax"] = 5.0
         kwargs["ymax"] = 3.2
+        kwargs["zMin"] = 1e-1
         kwargs["logZ"] = True
     elif "BQuark2_BQuark3_dEta_Vs_dPhi" in h:
         kwargs["xmax"] = 5.0
         kwargs["ymax"] = 3.2
+        kwargs["zMin"] = 1e-1
         kwargs["logZ"] = True
     elif "BQuark2_BQuark4_dEta_Vs_dPhi" in h:
         kwargs["xmax"] = 5.0
         kwargs["ymax"] = 3.2
+        kwargs["zMin"] = 1e-1
         kwargs["logZ"] = True
     elif "BQuark3_BQuark4_dEta_Vs_dPhi" in h:
         kwargs["xmax"] = 5.0
         kwargs["ymax"] = 3.2
+        kwargs["zMin"] = 1e-1
         kwargs["logZ"] = True
     else:
         raise Exception("Unexpected histogram with name \"%s\"" % h)
@@ -455,7 +463,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]):
         saveNameURL = saveName + ext
         saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
         if i==0:
-            print "=== plot_Kinematics2d.py:"
+            print "=== plot_2d.py:"
 
         if opts.url:
             print "\t", saveNameURL
@@ -573,4 +581,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plot_Kinematics2d.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_2d.py: Press any key to quit ROOT ...")

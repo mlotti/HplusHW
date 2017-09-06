@@ -31,7 +31,8 @@ public:
     ~Data();
 
     // Status of passing event selection
-    bool passedSelection() const { return bPassedSelection; }
+    //    bool passedSelection() const { return bPassedSelection; } //fixme: add preliniminary chiSq cut
+    bool passedSelection() const { return bPassedSelection; } 
     /// Status of GenuineB event (if false event is FakeB)
     bool isGenuineB() const { return bIsGenuineB; }
     // Trijet-1
@@ -221,6 +222,8 @@ private:
   const double cfg_dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff;
   const double cfg_dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept;
   const DirectionalCut<double> cfg_ChiSqrCut;
+  const DirectionalCut<double> cfg_LowLdgTrijetMassCut;
+  const DirectionalCut<double> cfg_HighLdgTrijetMassCut;
   const int cfg_MaxJetsToUseInFit;
   const int cfg_MaxBJetsToUseInFit;
 
@@ -230,6 +233,8 @@ private:
   // Sub counters
   Count cSubAll;
   Count cSubPassedChiSqCut;
+  Count cSubPassedLowLdgTrijetMassCut;
+  Count cSubPassedHighLdgTrijetMassCut;
 
   // Histograms (1D)
   WrappedTH1 *hChiSqr;

@@ -180,6 +180,10 @@ topologySelection = PSet(
 topSelection = PSet(
     ChiSqrCutValue     = 10.0,
     ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
+    LowLdgTrijetMassCutValue      = 150.0,
+    LowLdgTrijetMassCutDirection  = ">=",
+    HighLdgTrijetMassCutValue      = 210.0,
+    HighLdgTrijetMassCutDirection  = "<=",
     MassW              = 80.385,
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,

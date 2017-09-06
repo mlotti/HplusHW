@@ -48,13 +48,17 @@ TopSelection::TopSelection(const ParameterSet& config, EventCounter& eventCounte
     cfg_dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff")),
     cfg_dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept")), 
     cfg_ChiSqrCut(config, "ChiSqrCut"),
+    cfg_LowLdgTrijetMassCut(config, "LowLdgTrijetMassCut"),
+    cfg_HighLdgTrijetMassCut(config, "HighLdgTrijetMassCut"),
     cfg_MaxJetsToUseInFit(config.getParameter<int>("MaxJetsToUseInFit")),
     cfg_MaxBJetsToUseInFit(config.getParameter<int>("MaxBJetsToUseInFit")),
     // Event counter for passing selection
     cPassedTopSelection(fEventCounter.addCounter("passed top selection ("+postfix+")")),
     // Sub counters
     cSubAll(fEventCounter.addSubCounter("top selection ("+postfix+")", "All events")),
-    cSubPassedChiSqCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed chiSq cut"))
+    cSubPassedChiSqCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed chiSq cut")),
+    cSubPassedLowLdgTrijetMassCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed low ldg trijet mass cut")),
+    cSubPassedHighLdgTrijetMassCut(fEventCounter.addSubCounter("top selection ("+postfix+")", "Passed high ldg trijet mass cut"))
 {
   initialize(config);
   nSelectedBJets = -1;
@@ -73,13 +77,17 @@ TopSelection::TopSelection(const ParameterSet& config)
   cfg_dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_slopeCoeff")),
   cfg_dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept(config.getParameter<float>("dijetWithMaxDR_tetrajetBjet_dPhi_yIntercept")), 
   cfg_ChiSqrCut(config, "ChiSqrCut"),
+  cfg_LowLdgTrijetMassCut(config, "LowLdgTrijetMassCut"),
+  cfg_HighLdgTrijetMassCut(config, "HighLdgTrijetMassCut"),
   cfg_MaxJetsToUseInFit(config.getParameter<int>("MaxJetsToUseInFit")),
   cfg_MaxBJetsToUseInFit(config.getParameter<int>("MaxBJetsToUseInFit")),
   // Event counter for passing selection
   cPassedTopSelection(fEventCounter.addCounter("passed top selection")),
   // Sub counters
   cSubAll(fEventCounter.addSubCounter("top selection", "All events")),
-  cSubPassedChiSqCut(fEventCounter.addSubCounter("top selection", "Passed a cut"))
+  cSubPassedChiSqCut(fEventCounter.addSubCounter("top selection", "Passed chiSq cut")),
+  cSubPassedLowLdgTrijetMassCut(fEventCounter.addSubCounter("top selection", "Passed low ldg trijet mass cut")),
+  cSubPassedHighLdgTrijetMassCut(fEventCounter.addSubCounter("top selection", "Passed high ldg trijet mass cut"))
 {
   initialize(config);
   bookHistograms(new TDirectory());
@@ -596,6 +604,16 @@ TopSelection::Data TopSelection::privateAnalyze(const Event& event, const std::v
   // Apply cuts
   if ( !cfg_ChiSqrCut.passedCut(output.fChiSqr) ) return output;
   cSubPassedChiSqCut.increment();
+
+  double ldgTopMass = -1.0; //fixme: use getldgtrijet method
+  if (output.fTrijet1_p4.pt() > output.fTrijet2_p4.pt()) ldgTopMass = output.fTrijet1_p4.mass();
+  else ldgTopMass = output.fTrijet2_p4.mass();
+
+  if ( !cfg_LowLdgTrijetMassCut.passedCut(ldgTopMass) ) return output;
+  cSubPassedLowLdgTrijetMassCut.increment();
+
+  if ( !cfg_HighLdgTrijetMassCut.passedCut(ldgTopMass) ) return output;
+  cSubPassedHighLdgTrijetMassCut.increment();
 
   // Passed all top selection cuts
   output.bPassedSelection = true;
