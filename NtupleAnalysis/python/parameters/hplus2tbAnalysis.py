@@ -213,10 +213,12 @@ if 0:
 fakeBMeasurement = PSet(
     prelimTopFitChiSqrCutValue        = 100.0,
     prelimTopFitChiSqrCutDirection    =  "<",   # options: ==, !=, <, <=, >, >=
+    #
     numberOfBJetsCutValue             = 2,
-    numberOfBJetsCutDirection         = ">=", # options: ==, !=, <, <=, >, >=
+    numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
+    #
     numberOfInvertedBJetsCutValue     = 0,
-    numberOfInvertedBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+    numberOfInvertedBJetsCutDirection = ">", # options: ==, !=, <, <=, >, >=
     invertedBJetDiscr                 = bjetSelection.bjetDiscr,
     invertedBJetWorkingPoint          = "Loose",
     )
