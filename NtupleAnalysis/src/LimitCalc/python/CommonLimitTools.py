@@ -1,18 +1,23 @@
-## \package CommonLimitTools
-# Python interface common for LandS and Combine and running them with multicrab
-#
-# The interface for casual user is provided by the functions
-# generateMultiCrab() (for LEP-CLs and LHC-CLs) and
-# produceLHCAsymptotic (for LHC-CLs asymptotic).
-#
-# The multicrab configuration generation saves various parameters to
-# taskdir/configuration.json, to be used in by landsMergeHistograms.py
-# script. The script uses tools from this module, which write the
-# limit results to taskdir/limits.json. I preferred simple text format
-# over ROOT files due to the ability to read/modify the result files
-# easily. Since the amount of information in the result file is
-# relatively small, the performance penalty should be negligible.
+'''
+\package CommonLimitTools
 
+Python interface common for LandS and Combine and running them with multicrab
+
+The interface for casual user is provided by the functions
+generateMultiCrab() (for LEP-CLs and LHC-CLs) and
+produceLHCAsymptotic (for LHC-CLs asymptotic).
+
+The multicrab configuration generation saves various parameters to
+taskdir/configuration.json, to be used in by landsMergeHistograms.py
+script. The script uses tools from this module, which write the
+limit results to taskdir/limits.json. I preferred simple text format
+over ROOT files due to the ability to read/modify the result files
+easily. Since the amount of information in the result file is
+relatively small, the performance penalty should be negligible.
+'''
+#================================================================================================
+# Imports
+#================================================================================================
 import os
 import re
 import sys
@@ -29,6 +34,35 @@ import HiggsAnalysis.NtupleAnalysis.tools.multicrab as multicrab
 #import multicrabWorkflows
 import HiggsAnalysis.NtupleAnalysis.tools.git as git
 import HiggsAnalysis.NtupleAnalysis.tools.aux as aux
+
+
+#================================================================================================
+# Temporary Global variables
+#================================================================================================
+VERBOSE = False
+ 
+#================================================================================================
+# Function Definition
+#================================================================================================
+def Verbose(msg, printHeader=False):
+    #if not opts.verbose:
+    if not VERBOSE:
+        return
+
+    if printHeader:
+        print "=== CommonLimitTools.py:"
+
+    if msg !="":
+        print "\t", msg
+    return
+
+def Print(msg, printHeader=True):
+    if printHeader:
+        print "=== CommonLimitTools.py:"
+
+    if msg !="":
+        print "\t", msg
+    return
 
 
 class GeneralSettings():
@@ -60,13 +94,17 @@ class GeneralSettings():
                 self.massPoints[key] = obtainMassPoints(value, directory)
             else:
                 self.massPoints[key] = masspoints
+        return
+
 
     def setSoftware(self, software):
         for key in self.datacardPatterns:
             self.datacardPatterns[key] = self.datacardPatterns[key]%(software,"%s")
         for key in self.rootfilePatterns:
             self.rootfilePatterns[key] = self.rootfilePatterns[key]%(software,"%s")
-        print "Limit calculation software set to: %s"%software
+        Verbose("Limit calculation software set to \"%s\"" % software, True)
+        return
+
 
     def checkPatterns(self):
         for key in self.datacardPatterns:
@@ -113,9 +151,11 @@ class LimitSoftwareType:
 
 class LimitProcessType:
     TAUJETS = 0
-
-## Returns the software to which the datacards are compatible to
+    
 def getSoftware(directory="."):
+    '''
+    Returns the software to which the datacards are compatible to
+    '''
     mySoftware = {}
     mySoftware[LimitSoftwareType.LANDS] = "lands"
     mySoftware[LimitSoftwareType.COMBINE] = "combine"
@@ -129,7 +169,7 @@ def getSoftware(directory="."):
     for item in myList:
         for key,value in mySoftware.iteritems():
             if item.endswith(".txt") and "%s_datacard"%value in item:
-                print "Datacards for limit calculation software '%s' auto-detected"%value
+                Verbose("Datacards for limit calculation software '%s' auto-detected" % value, True)
                 return (key,value)
               
     
@@ -567,13 +607,18 @@ class LimitMultiCrabBase:
 #                            raise Exception("ROOT file (for shapes) '%s' does not exist!" % rfname)
                             print("\033[91mWarning:  ROOT file (for shapes) '%s' does not exist!\033[00m" % rfname)
 
-    ## Create the multicrab task directory
-    #
-    # \param postfix   Additional string to be included in the directory name
     def _createMultiCrabDir(self, prefix, postfix):
+        '''
+        Create the multicrab task directory
+        
+        \param postfix   Additional string to be included in the directory name
+        '''
         if len(postfix) > 0:
             prefix += "_"+postfix
+
         self.dirname = multicrab.createTaskDir(prefix=prefix, path=self.datacardDirectory)
+        msg = "Creating task directory %s" % (self.dirname)
+        Print(msg, True)
         self.clsType.setDirectory(self.dirname)
 
     ## Copy input files for LandS/Combine (datacards, rootfiles) to the multicrab directory
@@ -588,25 +633,35 @@ class LimitMultiCrabBase:
         # Copy exe file only for LandS
         if os.path.exists(self.exe):
             shutil.copy(self.exe, self.dirname)
+        return
 
-    ## Write  shell scripts to the multicrab directory
+
     def writeScripts(self):
+        '''
+        Write  shell scripts to the multicrab directory
+        '''
+        # For-loop: All datacard files
         for mass, datacardFiles in self.datacards.iteritems():
+            msg = "Accessing datacard \"%s\" for mass point \"%s\"" % (datacardFiles[0], mass)
+            Verbose(msg, True)
             self.clsType.createScripts(mass, datacardFiles)
         if self.opts.unblinded:
             return self.clsType.obsAndExpScripts
         else:
             return self.clsType.blindedScripts
+        return
 
-    ## Write crab.cfg to the multicrab directory
-    # \param crabScheduler      CRAB scheduler to use
-    # \param crabOptions        Dictionary for specifying additional CRAB
-    #                           options. The keys correspond to the
-    #                           sections in crab.cfg. The values are lists
-    #                           containing lines to be appended to the
-    #                           section.
-    # \param outputFile         list of output files
     def writeCrabCfg(self, crabScheduler, crabOptions, outputFile):
+        '''
+        Write crab.cfg to the multicrab directory
+        \param crabScheduler      CRAB scheduler to use
+        
+        \param crabOptions        Dictionary for specifying additional CRAB
+        options. The keys correspond to the sections in crab.cfg. The values are lists
+        containing lines to be appended to the section.
+        
+        \param outputFile         list of output files
+        '''
         filename = os.path.join(self.dirname, "crab.cfg")
         fOUT = open(filename,'w')
         fOUT.write("[CRAB]\n")
@@ -726,4 +781,3 @@ class LimitMultiCrabBase:
 #class ParseLandsOutput:
 #def parseLandsMLOutput(outputFileName):
 #class LandSInstaller:
-

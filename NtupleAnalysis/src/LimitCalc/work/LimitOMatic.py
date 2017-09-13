@@ -1,8 +1,28 @@
 #! /usr/bin/env python
+'''
+DESCRIPTION:
+This is the swiss pocket knife for running Lands/Combine on large array of datacards
 
-# This is the swiss pocket knife for running Lands/Combine on large array of datacards
-# Author: Lauri Wendland
 
+INSTRUCTIONS:
+
+
+USAGE:
+./LimitOMatic.py --sigmabrlimit --lhcasy --dir <datacard_dir> [opts]
+
+
+
+Example:
+./LimitOMatic.py --sigmabrlimit --lhcasy --dir datacards_combine_170904_144807_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_example3__MC_FakeAndGenuineTauNotSeparated/ --verbose
+
+
+Last Used:
+./LimitOMatic.py --sigmabrlimit --lhcasy --dir datacards_combine_170904_144807_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_example3__MC_FakeAndGenuineTauNotSeparated/ --verbose
+
+'''
+#================================================================================================ 
+# Imports
+#================================================================================================ 
 import os
 import sys
 import select
@@ -10,92 +30,172 @@ import pty
 import subprocess
 import json
 from optparse import OptionParser
+import re
 
+import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.LimitCalc.CommonLimitTools as commonLimitTools
 
+#================================================================================================ 
+# Class Definition
+#================================================================================================ 
+def Verbose(msg, printHeader=False):
+    #if not opts.verbose:
+    if opts.verbose <= 2:
+        return
+    
+    if printHeader:
+        print "=== LimitOMatic.py:"
+        
+    if msg !="":
+        print "\t", msg
+    return
+
+def Print(msg, printHeader=True):
+    if printHeader:
+        print "=== LimitOMatic.py:"
+        
+    if msg !="":
+        print "\t", msg
+    return
+
+def atoi(text):
+    return int(text) if text.isdigit() else text
+
+def natural_keys(text):
+    '''
+    alist.sort(key=natural_keys) sorts in human order
+    http://nedbatchelder.com/blog/200712/human_sorting.html
+    (See Toothy's implementation in the comments)
+    '''
+    return [ atoi(c) for c in re.split('(\d+)', text) ]
+
+
+#================================================================================================ 
+# Class Definition
+#================================================================================================ 
 class Result:
     def __init__(self, opts, basedir):
-        self._opts = opts
-        self._basedir = basedir
-        self._allRetrieved = False
+        self._opts            = opts
+        self._basedir         = basedir
+        self._allRetrieved    = False
         self._limitCalculated = False
-        self._output = ""
+        self._output          = ""
         self._findJobDir(basedir)
         if self._jobDir == None:
             if self._opts.printonly:
-                print "Error: need to create and submit jobs first! Skipping ..."
+                msg =  "Need to create and submit jobs first! Skipping ..."
+                Print(ShellStyles.ErrorLabel()  + msg, True)
             else:
+                msg = "Creating and submitting " + basedir
+                Verbose(msg, True)
                 self._createAndSubmit()
         else:
-            # Check if limits have already been calculated
-            if os.path.exists("%s/%s/limits.json"%(self._basedir,self._jobDir)):
-                print "Limit already calculated, skipping ..."
+            msg = "Check if limits have already been calculated ..."
+            Verbose(msg, True)
+
+            lumiPath = "%s/%s/limits.json" % (self._basedir, self._jobDir) 
+            if os.path.exists(lumiPath):
+                msg = "Limit already calculated! Skipping ..."
+                Print(ShellStyles.NoteLabel()  + msg, False)
                 self._limitCalculated = True
             else:
+                msg = "Creating and submitting " + basedir
+                Verbose(msg, True)
                 self._createAndSubmit()
                 #if not self._opts.printonly and not self._opts.lhcTypeAsymptotic:
                 #    self._getOutput()
+        return
 
     def _findJobDir(self, basedir):
         self._jobDir = None
+
+        counter = 0
+        # For-loop: All sub-directories & files inside basedir
         for dirname, dirnames, filenames in os.walk(basedir):
+            nSubDirs = len(dirnames)
+            nFiles   = len(filenames)
+            msg      = "Found %s sub-directories and %s files under %s" % (nSubDirs, nFiles, dirname)
+            Verbose(msg, counter==0)
+
+            # For-loop: All directories inside basedir            
             for subdirname in dirnames:
                 if "LandSMultiCrab" in subdirname or "CombineMultiCrab" or "CombineResults" in subdirname:
                     self._jobDir = subdirname
+                else:
+                    pass
+            counter += 1
+        return
 
     def _createAndSubmit(self):
         # Go to base directory
         os.chdir(self._basedir)
+
         # Create jobs
         myPath = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis/src/LimitCalc/work")
         if not os.path.exists(myPath):
-            raise Exception("Error: Could not find directory '%s'!"%myPath)
+            raise Exception("Error: Could not find directory '%s'!" % myPath)
+
         myCommand = os.path.join(myPath, "generateMultiCrabTaujets.py")
         if self._opts.combination:
             myCommand = os.path.join(myPath, "generateMultiCrabCombination.py")
+
         if self._opts.brlimit:
             myCommand += " --brlimit"
         else:
-            myCommand += " --sigmabrlimit"       
-#        if self._opts.sigmabrlimit:
-#            myCommand += " --sigmabrlimit"
+            myCommand += " --sigmabrlimit"
+
         myGridStatus = True
         if hasattr(self._opts, "lepType") and self._opts.lepType:
             myCommand += " --lep"
             raise Exception("The LEP type CLs is no longer supported. Please use --lhcasy (asymptotic LHC-type CLs.")
+
         if hasattr(self._opts, "lhcType") and self._opts.lhcType:
             myCommand += " --lhc"
             raise Exception("The LHC type CLs is no longer supported. Please use --lhcasy (asymptotic LHC-type CLs.")
+
         if hasattr(self._opts, "lhcTypeAsymptotic") and self._opts.lhcTypeAsymptotic:
             myCommand += " --lhcasy"
             myGridStatus = False
+
         if myGridStatus:
             myCommand += " --create"
+
         if not self._opts.nomlfit:
             myCommand += " --mlfit"
+
         if self._opts.significance:
             myCommand += " --significance"
+
         if self._opts.unblinded:
             myCommand += " --final"
-#        print "Creating jobs with:",myCommand
+
+        #msg = "Creating jobs with command:\n\t%s" % myCommand
+        msg =  myCommand
+        Verbose(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle() , True)
         os.system(myCommand)
+
+        # asymptotic jobs are run on the fly
         if myGridStatus:
-            # asymptotic jobs are run on the fly
+            
             # Change to job directory
             self._findJobDir(".")
             if self._jobDir == None:
                 raise Exception("Error: Could not find 'LandSMultiCrab' or 'CombineMultiCrab' in a sub directory name under the base directory '%s'!"%self._basedir)
             os.chdir(self._jobDir)
+
             # Submit jobs
-            print "Submitting jobs"
-            proc = subprocess.Popen(["multicrab","-submit all"], stdout=subprocess.PIPE)
+            msg = "Submitting multicrab jobs" 
+            Verbose(msg, True)
+            proc = subprocess.Popen(["multicrab", "-submit all"], stdout=subprocess.PIPE)
             (out, err) = proc.communicate()
             print out
+
         # Change directory back
         s = self._backToTopLevel()
         if len(s) > 1:
             os.chdir(s)
-        #print "current dir =",os.getcwd()
+        # print "current dir =",os.getcwd()
+        return
 
     def _getOutput(self):
         # Go to job directory
@@ -185,19 +285,27 @@ class Result:
         return out
 
     def printResults(self):
-        print "\n"+self._basedir
+        '''
+        Print the results for all mass points:
+        mass,  observed median, -2sigma, -1sigma, +1sigma, +2sigma, Rel. errors in same order
+        '''
+        Print(self._basedir, True)
         if not self._limitCalculated:
-            print "Results not yet retrieved"
+            Print("Results not yet retrieved. Return", True)
             return
-        myFile = open("%s/%s/limits.json"%(self._basedir,self._jobDir),"r")
-        myResults = json.load(myFile)
+
+        # Open json file to read the results
+        myFile     = open("%s/%s/limits.json"%(self._basedir,self._jobDir),"r")
+        myResults  = json.load(myFile)
         masspoints = myResults["masspoints"]
-        myKeys = ["median","-2sigma","-1sigma","+1sigma","+2sigma"]
-        line = "mass  obs.      "
+        myKeys     = ["median","-2sigma","-1sigma","+1sigma","+2sigma"]
+        line       = "mass  obs.      "
         for item in myKeys:
-            line += "%9s "%item
+            line += "%9s " % item
         print line+"   Rel. errors in same order"
-        for k in sorted(masspoints.keys()):
+
+        key=natural_keys
+        for k in sorted(masspoints.keys(), key=natural_keys):
             line = "%4d "%int(k)
             if self._opts.unblinded:
                 line += " %9.5f"%float(masspoints[k]["observed"])
@@ -221,10 +329,39 @@ class Result:
     def getBaseDir(self):
         return self._basedir
 
+
 if __name__ == "__main__":
+    '''
+    https://docs.python.org/3/library/argparse.html
+
+    name or flags...: Either a name or a list of option strings, e.g. foo or -f, --foo.
+    action..........: The basic type of action to be taken when this argument is encountered at the command line.
+    nargs...........: The number of command-line arguments that should be consumed.
+    const...........: A constant value required by some action and nargs selections.
+    default.........: The value produced if the argument is absent from the command line.
+    type............: The type to which the command-line argument should be converted.
+    choices.........: A container of the allowable values for the argument.
+    required........: Whether or not the command-line option may be omitted (optionals only).
+    help............: A brief description of what the argument does.
+    metavar.........: A name for the argument in usage messages.
+    dest............: The name of the attribute to be added to the object returned by parse_args().
+    '''
+    
+    # Default Values
+    VERBOSE     = 0 #-1 to 4
+    PRINTONLY   = False
+    COMBINATION = False
     parser = commonLimitTools.createOptionParser(lepDefault=None, lhcDefault=False, lhcasyDefault=True, fullOptions=False)
-    parser.add_option("--printonly", dest="printonly", action="store_true", default=False, help="Print only the ready results")
-    parser.add_option("--combination", dest="combination", action="store_true", default=False, help="Run combination instead of only taunu fully hadr.")
+
+    parser.add_option("--printonly", dest="printonly", action="store_true", default=PRINTONLY, 
+                      help="Print only the ready results [default = %s]" % PRINTONLY)
+
+    parser.add_option("--combination", dest="combination", action="store_true", default=COMBINATION, 
+                      help="Run combination instead of only taunu fully hadr.")
+
+    parser.add_option("-v", "--verbose", dest="verbose", default = VERBOSE,
+                      help="Enable verbosity (for debugging) 0-4 (-1 = very quiet; 0 = quiet, 1 = verbose, 2+ = debug) [default = %s]" % VERBOSE)
+
     opts = commonLimitTools.parseOptionParser(parser)
 
     # Obtain directory list
@@ -239,21 +376,27 @@ if __name__ == "__main__":
         if len(myDirs) == 0:
             raise Exception("Error: Could not find any sub directories starting with 'datacards_' below this directory!")
     myDirs.sort()
-    myResults = []
+    myResults   = []
     dir_counter = 1
-    for d in myDirs:
-        print "\n\033[93mLimitOMatic: Considering directory %s (directory %d/%d)\033[00m"%(d,dir_counter,len(myDirs))
-        myResults.append(Result(opts,d))
-        print "\033[92mLimitOMatic: Directory %s (directory %d/%d) processed!\033[00m"%(d,dir_counter,len(myDirs))
-        dir_counter+=1       
 
-    # Summary of results
-#    print "The results stored in the following directories:""
-#    for r in myResults:
-#        print(r.getBaseDir())
+    # For-loop: All datacard directories
+    for counter, d in enumerate(myDirs, 1):
+        msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Directory", "%i" % counter, "/", "%i:" % len(myDirs), "%s" % d)
+        Print(ShellStyles.HighlightAltStyle()  + msg + ShellStyles.NormalStyle(), counter==1)
+        myResults.append(Result(opts, d))
+        #print "\033[92mLimitOMatic: Directory %s (directory %d/%d) processed!\033[00m"%(d,counter,len(myDirs))
 
-#    for r in myResults:
-#        r.printResults()
+    # Inform user of success
+    msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Directory", "%i" % counter, "/", "%i:" % len(myDirs), "Success")
+    Print(ShellStyles.SuccessStyle()  + msg + ShellStyles.NormalStyle(), False)
+
+    Verbose("The results are stored in the following directories:", True)
+    for r in myResults:
+        Print(r.getBaseDir(), False)
+
+    Verbose("Printing results for all directories:", True)
+    for r in myResults:
+        r.printResults()
 
     # Manual submitting of merge
     s = ""
@@ -262,3 +405,4 @@ if __name__ == "__main__":
     if s != "":
         print "\nRun the following to merge the root files (then rerun this script to see the summary of results)"
         print s
+
