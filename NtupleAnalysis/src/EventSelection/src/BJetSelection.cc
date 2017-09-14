@@ -415,13 +415,17 @@ void BJetSelection::SortFailedBJetsCands(Data &output, std::vector<math::Lorentz
   std::random_shuffle(output.fFailedBJetCandsShuffled.begin(), output.fFailedBJetCandsShuffled.end());
 
   // Default sort: first all trg-matched objects (if any) then randomly
-  output.fFailedBJetCands = output.fFailedBJetCandsShuffled; // I suspect that this is what causes the systematic drift in tetrajetM closure test)
+  // output.fFailedBJetCands = output.fFailedBJetCandsShuffled; // I suspect that this is what causes the systematic drift in tetrajetM closure test)
+
   // Bjetness sort: first put jets with highest discriminator value
-  // output.fFailedBJetCands = output.fFailedBJetCandsDescendingDiscr; // I suspect that this is even worse than using "output.fFailedBJetCandsShuffled"
+  output.fFailedBJetCands = output.fFailedBJetCandsDescendingDiscr; // I suspect that this is even worse than using "output.fFailedBJetCandsShuffled"
+
   // Bjetness sort: first put jets with highest discriminator value
   // output.fFailedBJetCands = output.fFailedBJetCandsAscendingDiscr; // I suspect that this is even worse than using "output.fFailedBJetCandsShuffled"
+
   // Pt sort: first put jets with lowest pt value
   // output.fFailedBJetCands = output.fFailedBJetCandsAscendingPt;
+
   // Pt sort: first put jets with highest pt value
   // output.fFailedBJetCands = output.fFailedBJetCandsDescendingPt;
 

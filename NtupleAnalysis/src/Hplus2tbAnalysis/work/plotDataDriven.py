@@ -137,13 +137,20 @@ def main(opts):
         # Replace QCD MC with QCD-DataDriven
         qcdDatasetName    = "FakeBMeasurementTrijetMass"
         qcdDatasetNameNew = "QCD-Data"
-        replaceQCDFromData(datasetsMgr, qcdDatasetName, qcdDatasetNameNew)
+        if opts.mcQCD:
+            pass
+        else:
+            replaceQCDFromData(datasetsMgr, qcdDatasetName, qcdDatasetNameNew)
 
         # Re-order datasets (different for inverted than default=baseline)
         newOrder = ["Data"]
         if opts.signalMass != 0:
-            newOrder.extend(["ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass])
-        newOrder.extend(["QCD-Data"])
+            signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
+            newOrder.extend([signal])
+        if opts.mcQCD:
+            newOrder.extend(["QCD"])
+        else:
+            newOrder.extend(["QCD-Data"])
         newOrder.extend(GetListOfEwkDatasets())
         datasetsMgr.selectAndReorder(newOrder)
         
@@ -180,7 +187,7 @@ def GetHistoKwargs(histoList, opts):
         "ylabel"           : "Events / %.0f",
         "rebinX"           : 1,
         "rebinY"           : None,
-        "ratioYlabel"      : "Data/MC",
+        "ratioYlabel"      : "Data/Bkg",
         "ratio"            : True, 
         "stackMCHistograms": True,
         "ratioInvert"      : False, 
@@ -402,7 +409,7 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
 
     # Get list of histograms
     dataPath    = "ForDataDrivenCtrlPlots"
-    allHistos   = datasetsMgr.getDataset(qcdDatasetName).getDirectoryContent(dataPath)
+    allHistos   = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(dataPath)
     histoList   = [h for h in allHistos if "StandardSelections" in h]
     histoList.extend([h for h in allHistos if "AllSelections" in h])
     histoList   = [h for h in histoList if "_MCEWK" not in h]
@@ -414,6 +421,12 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
 
     # For-loop: All histograms in list
     for histoName in histoPaths:
+
+        #if "LdgTetrajetMass" not in histoName:
+        #    continue
+
+        if "JetEtaPhi" in histoName:
+            continue
 
         if opts.signalMass == 0:
             if "LdgTrijetMass" in histoName:
@@ -444,24 +457,36 @@ def DataMCHistograms(datasetsMgr, qcdDatasetName):
 
         # Create the plotting object
         p = plots.DataMCPlot(datasetsMgr, histoName, saveFormats=[])
-        
+
         # Apply QCD data-driven style
         if opts.signalMass != 0:
-            p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass, styles.getSignalStyleHToTB_M("%.0f" % opts.signalMass))
+            signal = "ChargedHiggs_HplusTB_HplusToTB_M_%.0f" % opts.signalMass
+            mHPlus = "%s" % int(opts.signalMass)
+            p.histoMgr.forHisto(signal, styles.getSignalStyleHToTB_M(mHPlus))
+
         #p.histoMgr.forHisto(opts.signalMass, styles.getSignalStyleHToTB())
-        p.histoMgr.forHisto(qcdDatasetName, styles.getAltQCDStyle())
-        p.histoMgr.setHistoDrawStyle(qcdDatasetName, "HIST")
-        p.histoMgr.setHistoLegendStyle(qcdDatasetName, "F")
-        p.histoMgr.setHistoLegendLabelMany({
-                qcdDatasetName: "QCD (Data)",
-                })
+        if opts.mcQCD:
+            pass
+        else:
+            p.histoMgr.forHisto(qcdDatasetName, styles.getAltQCDStyle())
+            p.histoMgr.setHistoDrawStyle(qcdDatasetName, "HIST")
+            p.histoMgr.setHistoLegendStyle(qcdDatasetName, "F")
+
+        if not opts.mcQCD:
+            p.histoMgr.setHistoLegendLabelMany({
+                    qcdDatasetName: "QCD (Data)",
+                    })
+        else:
+            p.histoMgr.setHistoLegendLabelMany({
+                    "QCD": "QCD (MC)",
+                    })            
 
         # Apply blinding of signal region
         if "blindingRangeString" in kwargs_:
             startBlind = float(kwargs_["blindingRangeString"].split("-")[1])
             endBlind   = float(kwargs_["blindingRangeString"].split("-")[0])
             plots.partiallyBlind(p, maxShownValue=startBlind, minShownValue=endBlind, invert=True, moveBlindedText=kwargs_["moveBlindedText"])
-                
+
         # Draw and save the plot
         plots.drawPlot(p, saveName, **kwargs_) #the "**" unpacks the kwargs_ dictionary
         SavePlot(p, saveName, os.path.join(opts.saveDir, opts.optMode) )
@@ -546,6 +571,7 @@ if __name__ == "__main__":
     
     # Default Settings
     ANALYSISNAME = "Hplus2tbAnalysis"
+    MCQCD        = False
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = None
@@ -577,6 +603,9 @@ if __name__ == "__main__":
 
     parser.add_option("--analysisName", dest="analysisName", type="string", default=ANALYSISNAME,
                       help="Override default analysisName [default: %s]" % ANALYSISNAME)
+
+    parser.add_option("--mcQCD", dest="mcQCD", action="store_true", default=MCQCD,
+                      help="Do not replace QCD MC with Data-Driven QCD Background Estiomation [default: %s]" % MCQCD)
 
     parser.add_option("--mcOnly", dest="mcOnly", action="store_true", default=MCONLY,
                       help="Plot only MC info [default: %s]" % MCONLY)

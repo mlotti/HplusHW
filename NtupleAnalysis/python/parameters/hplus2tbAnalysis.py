@@ -180,6 +180,10 @@ topologySelection = PSet(
 topSelection = PSet(
     ChiSqrCutValue     = 10.0,
     ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
+    LowLdgTrijetMassCutValue      = 150.0,
+    LowLdgTrijetMassCutDirection  = ">=",
+    HighLdgTrijetMassCutValue      = 210.0,
+    HighLdgTrijetMassCutDirection  = "<=",
     MassW              = 80.385,
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,
@@ -209,10 +213,12 @@ if 0:
 fakeBMeasurement = PSet(
     prelimTopFitChiSqrCutValue        = 100.0,
     prelimTopFitChiSqrCutDirection    =  "<",   # options: ==, !=, <, <=, >, >=
+    #
     numberOfBJetsCutValue             = 2,
-    numberOfBJetsCutDirection         = ">=", # options: ==, !=, <, <=, >, >=
+    numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
+    #
     numberOfInvertedBJetsCutValue     = 0,
-    numberOfInvertedBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+    numberOfInvertedBJetsCutDirection = ">", # options: ==, !=, <, <=, >, >=
     invertedBJetDiscr                 = bjetSelection.bjetDiscr,
     invertedBJetWorkingPoint          = "Loose",
     )

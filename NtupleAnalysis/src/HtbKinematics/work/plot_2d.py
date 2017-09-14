@@ -7,17 +7,18 @@ Useful Link:
 https://nixtricks.wordpress.com/2011/03/03/simple-loops-in-csh-ortcsh/
 
 Usage:
-./plot_Kinematics2d.py -m <pseudo_mcrab_directory> [opts]
+./plot_2d.py -m <pseudo_mcrab_directory> [opts]
 
 Examples:
-./plot_Kinematics2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
+./plot_2d.py -m HtbKinematics_170831_085353 --url --mergeEWK -e "JetHT"
 
 Last Used:
-./plot_Kinematics2d.py -m Kinematics_FullStats_170831_085353 --url --mergeEWK -e "JetHT"
+./plot_2d.py -m HtbKinematics_170906_023508 --url
+./plot_2d.py -m Kinematics_StdSelections_TopCut100_AllSelections_NoTrgMatch__H2Cut0p5_NoTopMassCut_170831_085353/ --url -i "QCD|TT"
 
 Obsolete:
 foreach x ( 180 200 220 250 300 350 400 500 800 1000 2000 3000 )
-./plot_Kinematics2d.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170826_073257/ -i M_$x --url
+./plot_2d.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_170826_073257/ -i M_$x --url
 end
 
 '''
@@ -105,13 +106,6 @@ def main(opts):
     for opt in optModes:
         opts.optMode = opt
 
-        # Quick and dirty way to get total int lumi
-        allDatasetsMgr = GetAllDatasetsFromDir(opts)
-        allDatasetsMgr.updateNAllEventsToPUWeighted()
-        allDatasetsMgr.loadLuminosities() # from lumi.json
-        plots.mergeRenameReorderForDataMC(allDatasetsMgr) 
-        opts.intLumi = GetLumi(allDatasetsMgr)
-
         # Setup & configure the dataset manager 
         datasetsMgr    = GetDatasetsFromDir(opts)
         datasetsMgr.updateNAllEventsToPUWeighted()
@@ -141,31 +135,38 @@ def main(opts):
         style = tdrstyle.TDRStyle()
         style.setOptStat(True)
         style.setWide(True, 0.15)
-        # style.setPadRightMargin()#0.13)
+# style.setPadRightMargin()#0.13)
 
         # Do 2D histos
         histoNames  = []
         saveFormats = [".png"] #[".C", ".png", ".pdf"]
         histoList   = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(opts.folder)
         histoPaths  = [opts.folder +"/" + h for h in histoList]
-        histoKwargs = GetHistoKwargs(histoPaths)
+        #histoKwargs = GetHistoKwargs(histoPaths)
 
         # Axes divisions!
         ROOT.gStyle.SetNdivisions(5, "X")
         ROOT.gStyle.SetNdivisions(5, "Y")
 
-        # For-loop: All datasets
-        for d in datasetsMgr.getAllDatasetNames():
-            # For-loop: All histogram
-            for histoName in histoPaths:
-                Plot2d(datasetsMgr, d, histoName, histoKwargs[histoName], opts)
+        # For-loop: All histogram
+        for histoName in histoPaths:
+
+            myKwargs = GetHistoKwargs(histoName)
+            
+            # For-loop: All datasets
+            for d in datasetsMgr.getAllDatasetNames():
+                #if "M_500" not in d:
+                #    continue
+
+                Plot2d(datasetsMgr, d, histoName, myKwargs, opts)
+                
+                # Avoid replacing canvas with same name warning
                 for o in gROOT.GetListOfCanvases():
                     # print o.GetName()
                     o.SetName(o.GetName() + "_" + d)
-
     return
 
-def GetHistoKwargs(histoList):
+def GetHistoKwargs(histoName):
     '''
     Dictionary with 
     key   = histogramName
@@ -176,19 +177,20 @@ def GetHistoKwargs(histoList):
     
     # Defaults
     logX        = False
-    rebinX      = 1
-    labelX      = "m_{jjb} p_{T} (GeV/c)"
     logY        = False
-    gridX       = True
+    logZ        = False
+    rebinX      = 1
     rebinY      = 1
-    labelY      = "m_{jj} p_{T} (GeV/c)"
+    labelX      = None
+    labelY      = None
+    gridX       = True
     gridY       = True
     _moveLegend = {"dx": -0.1, "dy": -0.01, "dh": 0.1}
-    xMin        =   0
-    xMax        =  10
-    yMin        =   0
-    yMax        =  10
-    zMin        =   1
+    xMin        = 0
+    xMax        = 5
+    yMin        = 0
+    yMax        = 5
+    zMin        = 1e0
     zMax        = 1e5
     normToOne   = True
 
@@ -200,11 +202,12 @@ def GetHistoKwargs(histoList):
         "normalizeToOne"   : normToOne,
         "stackMCHistograms": False,
         "addMCUncertainty" : False,
-        "addLuminosityText": True, #(not normToOne),
+        "addLuminosityText": False,
         "addCmsText"       : True,
         "cmsExtraText"     : "Preliminary",
         "logX"             : logX,
         "logY"             : logY,
+        "logZ"             : logZ,
         "moveLegend"       : _moveLegend,
         "gridX"            : gridX,
         "gridY"            : gridY,
@@ -213,48 +216,121 @@ def GetHistoKwargs(histoList):
         "ymin"             : yMin,
         "ymax"             : yMax,
         "zmin"             : zMin,
-        "zmax"             : zMax,        
+        "zmax"             : zMax,
         }
     
-    for h in histoList:
+    h = histoName.replace("TH2/", "")
+    kwargs["name"] = h
 
-        if "TH2_S_Vs_Y" in h:
-            pass
-        if "TH2_BQuarkPair_dRMin_Eta1_Vs_Eta2" in h:
-            pass
-        if "TH2_BQuarkPair_dRMin_Phi1_Vs_Phi2" in h:
-            pass
-        if "TH2_BQuarkPair_dRMin_Pt1_Vs_Pt2" in h:
-            pass
-        if "TH2_BQuarkPair_dRMin_dEta_Vs_dPhi" in h:
-            pass
-        if "TH2_Jet1Jet2_dEta_Vs_Jet3Jet4_dEta" in h:
-            pass
-        if "TH2_Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi" in h:
-            pass
-        if "TH2_Jet1Jet2_dEta_Vs_Jet1Jet2_Mass" in h:
-            pass
-        if "TH2_Jet3Jet4_dEta_Vs_Jet3Jet4_Mass" in h:
-            pass
-        if "TH2_MaxDiJetMass_dEta_Vs_dPhi" in h:
-            pass
-        if "TH2_MaxDiJetMass_dRap_Vs_dPhi" in h:
-            pass
-        if "BQuark1_BQuark2_dEta_Vs_dPhi" in h:
-            print "*"*100
-            kwargs["xmax"] = 5
-        if "TH2_BQuark1_BQuark3_dEta_Vs_dPhi" in h:
-            pass
-        if "TH2_BQuark1_BQuark4_dEta_Vs_dPhi" in h:
-            pass
-        if "TH2_BQuark2_BQuark3_dEta_Vs_dPhi" in h:
-            pass
-        if "TH2_BQuark2_BQuark4_dEta_Vs_dPhi" in h:
-            pass
-        if "TH2_BQuark3_BQuark4_dEta_Vs_dPhi" in h:
-            pass
-        histoKwargs[h] = kwargs
-    return histoKwargs
+    if "Jet1Jet2_dEta_Vs_Jet3Jet4_dEta" in h:
+        kwargs["rebinX"]  = 1
+        kwargs["rebinY"] =  1
+        kwargs["xmin"]   = -5.0
+        kwargs["xmax"]   =  5.0
+        kwargs["ymin"]   = -5.0
+        kwargs["ymax"]   =  5.0
+        kwargs["zMin"]   =  1e-1
+        kwargs["logZ"]   = True
+    elif "BQuark1_BQuark2_dEta_Vs_dPhi" in h:
+        kwargs["rebinX"] =  1
+        kwargs["rebinY"] =  1
+        kwargs["xmin"]   = -5.0
+        kwargs["xmax"]   =  5.0
+        kwargs["ymin"]   =  0.0
+        kwargs["ymax"]   =  3.2
+        kwargs["zMin"]   =  1e-1
+        kwargs["logZ"]   = True
+    elif "BQuark1_BQuark3_dEta_Vs_dPhi" in h:
+        kwargs["rebinX"] =  1
+        kwargs["rebinY"] =  1
+        kwargs["xmin"]   = -5.0
+        kwargs["xmax"]   =  5.0
+        kwargs["ymin"]   =  0.0
+        kwargs["ymax"]   =  3.2
+        kwargs["zMin"]   =  1e-1
+        kwargs["logZ"]   = True
+    elif "BQuark1_BQuark4_dEta_Vs_dPhi" in h:
+        kwargs["rebinX"] =  1
+        kwargs["rebinY"] =  1
+        kwargs["xmin"]   = -5.0
+        kwargs["xmax"]   =  5.0
+        kwargs["ymin"]   =  0.0
+        kwargs["ymax"]   =  3.2
+        kwargs["zMin"]   =  1e-1
+        kwargs["logZ"]   = True
+    elif "BQuark2_BQuark3_dEta_Vs_dPhi" in h:
+        kwargs["rebinX"] =  1
+        kwargs["rebinY"] =  1
+        kwargs["xmin"]   = -5.0
+        kwargs["xmax"]   =  5.0
+        kwargs["ymin"]   =  0.0
+        kwargs["ymax"]   =  3.2
+        kwargs["zMin"]   =  1e-1
+        kwargs["logZ"]   = True
+    elif "BQuark2_BQuark4_dEta_Vs_dPhi" in h:
+        kwargs["rebinX"] =  1
+        kwargs["rebinY"] =  1
+        kwargs["xmin"]   = -5.0
+        kwargs["xmax"]   =  5.0
+        kwargs["ymin"]   =  0.0
+        kwargs["ymax"]   =  3.2
+        kwargs["zMin"]   =  1e-1
+        kwargs["logZ"]   = True
+    elif "BQuark3_BQuark4_dEta_Vs_dPhi" in h:
+        kwargs["rebinX"] =  1
+        kwargs["rebinY"] =  1
+        kwargs["xmin"]   = -5.0
+        kwargs["xmax"]   =  5.0
+        kwargs["ymin"]   =  0.0
+        kwargs["ymax"]   =  3.2
+        kwargs["zMin"]   =  1e-1
+        kwargs["logZ"]   = True
+    elif "Jet1Jet2_dEta_Vs_Jet1Jet2_Mass" in h:
+        kwargs["rebinX"] =    1
+        kwargs["rebinY"] =    2
+        kwargs["xmin"]   =   -5.0
+        kwargs["xmax"]   =    5.0
+        kwargs["ymin"]   =    0.0
+        kwargs["ymax"]   = 1000.0
+        kwargs["zMin"]   =    1e-1
+        kwargs["logZ"]   = True
+    elif "Jet1Jet2_dPhi_Vs_Jet3Jet4_dPhi" in h:
+        kwargs["rebinX"] =    1
+        kwargs["rebinY"] =    1
+        kwargs["xmin"]   =    0.0
+        kwargs["xmax"]   =    3.2
+        kwargs["ymin"]   =    0.0
+        kwargs["ymax"]   =    3.2
+        kwargs["zMin"]   =    1e-1
+        kwargs["logZ"]   = True
+    elif "Jet3Jet4_dEta_Vs_Jet3Jet4_Mass" in h:
+        kwargs["rebinX"] =    1
+        kwargs["rebinY"] =    1
+        kwargs["xmin"]   =    0.0
+        kwargs["xmax"]   =    5.0
+        kwargs["ymin"]   =    0.0
+        kwargs["ymax"]   = 1000.0
+        kwargs["zMin"]   =    1e-1
+        kwargs["logZ"]   = True
+    elif "BQuarkPair_dRMin_Pt1_Vs_Pt2" in h:
+        kwargs["rebinX"] =    1
+        kwargs["rebinY"] =    1
+        kwargs["xmin"]   =    0.0
+        kwargs["xmax"]   = 500.0
+        kwargs["ymin"]   =    0.0
+        kwargs["ymax"]   = 500.0
+        kwargs["zMin"]   =    1e-1
+        kwargs["logZ"]   = True
+    else:
+        # raise Exception("Unexpected histogram with name \"%s\"" % h)
+        pass
+
+    if 0:
+        for k in kwargs:
+            print "%s = %s" % (k, kwargs[k])
+        sys.exit()
+
+    return kwargs
     
 def GetHisto(datasetsMgr, dataset, histoName):
     h = datasetsMgr.getDataset(dataset).getDatasetRootHisto(histoName)
@@ -264,21 +340,28 @@ def Plot2d(datasetsMgr, dataset, histoName, kwargs, opts):
     '''
     '''
     # Definitions
-    saveName = histoName.replace("/", "_")
+    saveName = histoName.replace("/", "_")    
     
     # Get Histos for the plotter object
     refHisto = GetHisto(datasetsMgr, dataset, histoName)
 
     # Create the plotting object
     p = plots.PlotBase(datasetRootHistos=[refHisto], saveFormats=kwargs.get("saveFormats"))
-    p.histoMgr.normalizeMCToLuminosity(opts.intLumi)
+    if 0:
+        p.histoMgr.normalizeMCToLuminosity(opts.intLumi)
 
     # Customise axes (before drawing histo)    
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs.get("rebinX")))
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinY(kwargs.get("rebinY")))
     if 0:
         p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetTitle(kwargs.get("xlabel")))
         p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetTitle(kwargs.get("ylabel")))
-    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinX(kwargs.get("rebinX")))
-    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().RebinY(kwargs.get("rebinY")))
+        # p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetTitle( h.getRootHisto().GetXaxis().GetTitle() + "%0.1f" ))
+    p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetXaxis().SetRangeUser(kwargs.get("xmin"), kwargs.get("xmax")))
+    #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetRangeUser(kwargs.get("ymin"), kwargs.get("ymax")))
+
+    #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetYaxis().SetRangeUser(kwargs.get("ymin"), kwargs.get("ymax")))
+    #p.histoMgr.forEachHisto(lambda h: h.getRootHisto().GetZaxis().SetRangeUser(kwargs.get("zmin"), kwargs.get("zmax")))
 
     # Create a frame                                                                                                                                                             
     fOpts = {"ymin": 0.0, "ymaxfactor": 1.0}
@@ -338,7 +421,7 @@ def Plot2d(datasetsMgr, dataset, histoName, kwargs, opts):
         histograms.addText(0.17, 0.88, plots._legendLabels[dataset], 27)
 
     # Save the plots
-    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.analysisName, opts.folder, dataset, opts.optMode) )
+    SavePlot(p, saveName, os.path.join(opts.saveDir, opts.analysisName, opts.folder, dataset, opts.optMode), [".png", ".pdf"] )
     return
 
 def HasKeys(keyList, **kwargs):
@@ -350,30 +433,20 @@ def HasKeys(keyList, **kwargs):
 def SetLogAndGrid(p, **kwargs):
     '''
     '''
-    HasKeys(["logX", "logY", "gridX", "gridY"], **kwargs)
-    ratio = kwargs.get("createRatio")
+    HasKeys(["logX", "logY", "logZ", "gridX", "gridY"], **kwargs)
     logX  = kwargs.get("logX")
     logY  = kwargs.get("logY")
     logZ  = kwargs.get("logZ")
     gridX = kwargs.get("gridX")
     gridY = kwargs.get("gridY")
 
-    if ratio:
-        p.getPad1().SetLogx(logX)
-        p.getPad1().SetLogy(logY)
-        p.getPad2().SetLogx(logX)
-        p.getPad2().SetLogy(logY)
-        p.getPad1().SetGridx(gridX)
-        p.getPad1().SetGridy(gridY)
-        p.getPad2().SetGridx(gridX)
-        p.getPad2().SetGridy(gridY)
-    else:
-        p.getPad().SetLogx(logX)
-        p.getPad().SetLogy(logY)
-        if logZ != None:
-            p.getPad().SetLogz(logZ)
-        p.getPad().SetGridx(gridX)
-        p.getPad().SetGridy(gridY)
+    p.getPad().SetLogx(logX)
+    p.getPad().SetLogy(logY)
+    p.getPad().SetGridx(gridX)
+    p.getPad().SetGridy(gridY)
+    if logZ != None:
+        p.getPad().SetLogz(logZ)
+
     return
 
 def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]):
@@ -389,7 +462,7 @@ def SavePlot(plot, plotName, saveDir, saveFormats = [".png"]):
         saveNameURL = saveName + ext
         saveNameURL = saveNameURL.replace("/publicweb/a/aattikis/", "http://home.fnal.gov/~aattikis/")
         if i==0:
-            print "=== plot_Kinematics2d.py:"
+            print "=== plot_2d.py:"
 
         if opts.url:
             print "\t", saveNameURL
@@ -420,7 +493,7 @@ if __name__ == "__main__":
     '''
     
     # Default Settings
-    ANALYSISNAME = "Kinematics"
+    ANALYSISNAME = "HtbKinematics"
     SEARCHMODE   = "80to1000"
     DATAERA      = "Run2016"
     OPTMODE      = None
@@ -487,8 +560,7 @@ if __name__ == "__main__":
                       help="List of datasets in mcrab to exclude")
 
     parser.add_option("-n", "--normaliseToOne", dest="normaliseToOne", action="store_true",
-                      help="Normalise the histograms to one? [default: %s]" % (NORMALISE) )
-    #"normalizeToOne", "normalizeByCrossSection", "normalizeToLumi"
+                      help="Normalise the histograms to one? [default: %s]" % (NORMALISE) )   #"normalizeToOne", "normalizeByCrossSection", "normalizeToLumi"
 
     (opts, parseArgs) = parser.parse_args()
 
@@ -507,4 +579,4 @@ if __name__ == "__main__":
     main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plot_Kinematics2d.py: Press any key to quit ROOT ...")
+        raw_input("=== plot_2d.py: Press any key to quit ROOT ...")

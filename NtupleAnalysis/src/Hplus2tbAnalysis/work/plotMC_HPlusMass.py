@@ -220,7 +220,15 @@ def PlotMC(datasetsMgr, histo, intLumi):
     logY    = False
     _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
 
-    if "trijetmass" in histo.lower():
+    if "ChiSqr" in histo:
+        _rebinX = 1
+        logY    = True
+        _units  = ""
+        _format = "%0.1f " + _units
+        _xlabel = "#chi^{2}"
+        _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
+        _opts["xmax"] = 100
+    elif "trijetmass" in histo.lower():
         _rebinX = 4
         logY    = False
         _units  = "GeV/c^{2}"
