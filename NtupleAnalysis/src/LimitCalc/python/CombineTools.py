@@ -95,34 +95,34 @@ def natural_keys(text):
 #================================================================================================ 
 # Options
 #================================================================================================ 
-## The Combine git tag to be used (see https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit)
+# The Combine git tag to be used (see https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit)
 Combine_tag = "v7.0.1" # 31.8.2017
 validCMSSWversions = ["/CMSSW_8_0_26_patch1"]
 
-## Common command-line options to Combine
-
-## Command line options for creating Combine workspace
+# Command line options for creating Combine workspace
 workspacePattern = "combineWorkspaceM%s.root"
 workspaceOptionsBrLimitTemplate = "text2workspace.py %s -P HiggsAnalysis.CombinedLimit.ChargedHiggs:brChargedHiggs -o %s"%("%s",workspacePattern)
 workspaceOptionsSigmaBrLimit    = "text2workspace.py %s -o %s"%("%s",workspacePattern%"%s")
 taskDirprefix = "CombineResults"
 
-## Command line options for running Combine
+# Command line options for running Combine
 if 0:
     asymptoticLimit = "combine -M Asymptotic --picky"
     asymptoticLimitOptionExpectedOnly = " --run expected"
 
 #hybridLimit = "combine -M HybridNew --freq --hintMethod Asymptotic" # --testStat LHC
 
-## Default number of crab jobs
+# Default number of crab jobs
 defaultNumberOfJobs = 20
 
 ## Default command line options for LHC-CLs (asymptotic, observed limit) 
 ## NB! # For final limits, one should consider using --cminDefaultMinimizerStrategy 1: it is slower and more error-prone but more accurate 
 Verbose("Edit #1", True)
+
 #lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 2 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001"' #default
-#lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.1 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' # xenios - WORKS!
-lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 2 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' # xenios - TESTING
+lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.1 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' # xenios - WORKS!
+#lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 2 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' # xenios - TESTING
+
 
 # If you use Barlow-Beeston-lite approach for statistical uncertainties, uncomment the next line:
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
@@ -462,6 +462,10 @@ class LHCTypeAsymptotic:
         self.opts = opts
         self.brlimit = opts.brlimit
         self.sigmabrlimit = opts.sigmabrlimit
+        
+        # print "*"*100
+        # print "opts.htb = ", opts.htb
+        # print "*"*100
 
         self.optionsObservedAndExpected = aux.ValuePerMass(aux.ifNotNoneElse(optionsObservedAndExpected, lhcAsymptoticOptionsObserved))
         self.optionsBlinded = aux.ValuePerMass(aux.ifNotNoneElse(optionsBlinded, lhcAsymptoticOptionsBlinded))

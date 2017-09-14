@@ -11,14 +11,12 @@ USAGE:
 ./LimitOMatic.py --sigmabrlimit --lhcasy --dir <datacard_dir> [opts]
 
 
-
 Example:
 ./LimitOMatic.py --sigmabrlimit --lhcasy --dir datacards_combine_170904_144807_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_example3__MC_FakeAndGenuineTauNotSeparated/ --verbose
 
 
 Last Used:
-./LimitOMatic.py --sigmabrlimit --lhcasy --dir datacards_combine_170904_144807_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_example3__MC_FakeAndGenuineTauNotSeparated/ --verbose
-
+./LimitOMatic.py --sigmabrlimit --lhcasy --dir datacards_test4b
 '''
 #================================================================================================ 
 # Imports
@@ -34,6 +32,7 @@ import re
 
 import HiggsAnalysis.NtupleAnalysis.tools.ShellStyles as ShellStyles
 import HiggsAnalysis.LimitCalc.CommonLimitTools as commonLimitTools
+
 
 #================================================================================================ 
 # Class Definition
@@ -100,7 +99,7 @@ class Result:
                 self._limitCalculated = True
             else:
                 msg = "Creating and submitting " + basedir
-                Verbose(msg, True)
+                Print(msg, True)
                 self._createAndSubmit()
                 #if not self._opts.printonly and not self._opts.lhcTypeAsymptotic:
                 #    self._getOutput()
@@ -129,6 +128,7 @@ class Result:
     def _createAndSubmit(self):
         # Go to base directory
         os.chdir(self._basedir)
+        Verbose("Current working directory is %s" % os.getcwd(), True)
 
         # Create jobs
         myPath = os.path.join(os.getenv("HIGGSANALYSIS_BASE"), "NtupleAnalysis/src/LimitCalc/work")
@@ -366,16 +366,21 @@ if __name__ == "__main__":
     VERBOSE     = 0 #-1 to 4
     PRINTONLY   = False
     COMBINATION = False
+    HToTB       = False
+
     parser = commonLimitTools.createOptionParser(lepDefault=None, lhcDefault=False, lhcasyDefault=True, fullOptions=False)
 
     parser.add_option("--printonly", dest="printonly", action="store_true", default=PRINTONLY, 
-                      help="Print only the ready results [default = %s]" % PRINTONLY)
+                      help = "Print only the ready results [default = %s]" % PRINTONLY)
 
     parser.add_option("--combination", dest="combination", action="store_true", default=COMBINATION, 
-                      help="Run combination instead of only taunu fully hadr.")
+                      help = "Run combination instead of only taunu fully hadr.")
 
     parser.add_option("-v", "--verbose", dest="verbose", default = VERBOSE,
-                      help="Enable verbosity (for debugging) 0-4 (-1 = very quiet; 0 = quiet, 1 = verbose, 2+ = debug) [default = %s]" % VERBOSE)
+                      help = "Enable verbosity (for debugging) 0-4 (-1 = very quiet; 0 = quiet, 1 = verbose, 2+ = debug) [default = %s]" % VERBOSE)
+
+    parser.add_option("--htb", dest="htb", default = HToTB,
+                      help = "Use default setting for H->tb (and not H->tau nu) [default = %s]" % HToTB)
 
     opts = commonLimitTools.parseOptionParser(parser)
 
@@ -383,7 +388,10 @@ if __name__ == "__main__":
     myDirs = opts.dirs[:]
     if len(myDirs) == 0 or (len(myDirs) == 1 and myDirs[0] == "."):
         myDirs = []
+
+        # For-loop: All dirpath, dirnames and filenames in currect working directory
         for dirname, dirnames, filenames in os.walk('.'):
+            # For-loop: All sub-directories
             for subdirname in dirnames:
                 #if "LandSMultiCrab" in subdirname:
                 if "datacards_" in subdirname:
