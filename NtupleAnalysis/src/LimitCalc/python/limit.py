@@ -36,12 +36,13 @@ forPaper = True
 BR = "#it{B}"
 
 # Label for H+ decay mode
-hplusDecayMode = "H^{+} #rightarrow #tau^{+}#nu_{#tau}"
-# hplusDecayMode = "H^{+} #rightarrow t#bar{b}" # FIXME: Uncomment for Hplus2tb analysis
+hplusDecayMode    = "H^{+} #rightarrow #tau^{+}#nu_{#tau}"
+hplusDecayModeHtb = "H^{+} #rightarrow t#bar{b}"
 
 # The label for the physics process
 process            = "t #rightarrow H^{+}b, %s" % hplusDecayMode
 processHeavy       = "pp #rightarrow #bar{t}(b)H^{+}, %s" % hplusDecayMode
+processHeavyHtb    = "pp #rightarrow #bar{t}(b)H^{+}, %s" % hplusDecayModeHtb
 processCombination = "pp #rightarrow #bar{t}(b)H^{+}"
 
 # Label for the H+->tau BR assumption. fixme: alexandros (does not seem to work!)
@@ -123,10 +124,14 @@ def useParentheses():
     return
 
     
-def useSubscript():
+def useSubscript(HToTB=False):
     global BRlimit, sigmaBRlimit
-    BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayMode)
-    sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayMode)
+    if HToTB:
+        BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayMode)
+        sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayMode)
+    else:
+        BRlimit      = "95%% CL limit on %s_{t#rightarrowH^{+}b}#times%s_{%s}" % (BR, BR, hplusDecayModeHtb)
+        sigmaBRlimit = "95%% CL limit on #sigma_{H^{+}}#times%s_{%s} (pb)" % (BR, hplusDecayModeHtb)
     return
 
 useSubscript()
@@ -312,6 +317,26 @@ class BRLimits:
         ret = ", ".join([_finalstateLabels[x] for x in self.finalstates[:-1]])
         ret += ", and %s final states" % _finalstateLabels[self.finalstates[-1]]
         return ret
+
+
+    def getYMax(self):
+        yMax = -1
+
+        # For-loop: All mass points
+        for y in self.expectedPlus2:
+            if y > yMax:
+                yMax = y
+        return yMax
+
+
+    def getYMin(self):
+        yMin = 1e6
+
+        # For-loop: All mass points
+        for y in self.expectedMinus2:
+            if y < yMin:
+                yMin = y
+        return yMin
 
 
     def getFinalstateYmaxBR(self):

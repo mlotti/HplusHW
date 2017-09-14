@@ -12,8 +12,12 @@ cd datacards_test4b/CombineResults_taujets_170913_192047
 ../../plotBRLimit_Hplus2tb.py 
 
 
+EXAMPLES:
+../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY && cp *.png ~/public/html/Combine/. 
+../../plotBRLimit_Hplus2tb.py --excludedArea --gridX --gridY --unblinded --cutLine 500 && cp *.png ~/public/html/Combine/
+
 Last Used:
-../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 && cp *.png ~/public/html/Combine/. 
+../../plotBRLimit_Hplus2tb.py --excludedArea --cutLine 500 --gridX --gridY && cp *.png ~/public/html/Combine/. 
 
 '''
 #================================================================================================
@@ -85,18 +89,15 @@ def main(opts):
     if opts.parentheses:
         limit.useParentheses()
     
-    # Do the limit plot
+    # Do the limit plots
     doBRlimit(limits, opts.unblinded, opts, logy=False)
-
-    # Do the limit plot (logy)
     doBRlimit(limits, opts.unblinded, opts, logy=True)
-
-    # Do the limit error plot
     doLimitError(limits, opts.unblinded)
 
     # Print the Limits
     limits.printLimits(unblindedStatus=opts.unblinded, nDigits=opts.digits)
-    # limits.print2(unblindedStatus=opts.unblinded)
+    print
+    limits.print2(unblindedStatus=opts.unblinded)
     
     # Save the Limits in a LaTeX table file
     limits.saveAsLatexTable(unblindedStatus=opts.unblinded, nDigits=opts.digits)

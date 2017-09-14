@@ -284,6 +284,47 @@ class Result:
             (out,err) = proc.communicate()
         return out
 
+
+    def printResults2(self, unblindedStatus=False, nDigits=5):
+        #xenios
+        '''
+        Returns a table (list) with the BR limits
+        '''
+        width  = nDigits + 6
+        align  = "{:<8} {:>%s} {:>%s} {:>%s} {:>%s} {:>%s} {:>%s}" % (width, width, width, width, width, width)
+        header = align.format("Mass", "Observed", "Median", "-2sigma", "-1sigma", "+1sigma", "+2sigma")
+        hLine  = "="*len(header)
+
+        # Define precision
+        precision = "%%.%df" % nDigits
+
+        # Create the results table
+        table  = []
+        table.append(hLine)
+        table.append(header)
+        table.append(hLine)
+        for i in xrange(len(self.mass_string)):
+            mass = self.mass_string[i]
+            if unblindedStatus:
+                observed = self.observed_string[i]
+            else:
+                observed = "BLINDED"
+            median       = precision % (self.expectedMedian_string[i])
+            sigma2minus  = precision % (self.expectedMinus2_string[i])
+            sigma1minus  = precision % (self.expectedMinus1_string[i])
+            sigma1plus   = precision % (self.expectedPlus1_string[i])
+            sigma2plus   = precision % (self.expectedPlus2_string[i])
+
+            # Append results
+            row = align.format(mass, observed, median, sigma2minus, sigma1minus, sigma1plus, sigma2plus)
+            table.append(row)
+
+        table.append(hLine)
+        # Print limits (row by row)
+        for row in table:
+            print row
+        return
+
     def printResults(self):
         '''
         Print the results for all mass points:
@@ -420,6 +461,9 @@ if __name__ == "__main__":
     Print("Printing results for all directories:", True)
     for r in myResults:
         r.printResults()
+    
+    print
+    r.printResults2()
 
     # Manual submitting of merge
     s = ""
