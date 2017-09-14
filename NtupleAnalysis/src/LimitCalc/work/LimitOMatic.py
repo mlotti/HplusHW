@@ -11,12 +11,14 @@ USAGE:
 ./LimitOMatic.py --sigmabrlimit --lhcasy --dir <datacard_dir> [opts]
 
 
-Example:
+EXAMPLE:
 ./LimitOMatic.py --sigmabrlimit --lhcasy --dir datacards_combine_170904_144807_Hplus2tb_13TeV_LdgTetrajetMass_Run2016_80to1000_nominal_example3__MC_FakeAndGenuineTauNotSeparated/ --verbose
 
 
-Last Used:
+LAST USED:
 ./LimitOMatic.py --sigmabrlimit --lhcasy --dir datacards_test4b
+./LimitOMatic.py --sigmabrlimit --lhcasy --dir datacards_test4_noLumi/ --precision 2
+
 '''
 #================================================================================================ 
 # Imports
@@ -285,48 +287,93 @@ class Result:
         return out
 
 
-    def printResults2(self, unblindedStatus=False, nDigits=5):
-        #xenios
+    def printResults(self, unblindedStatus=False, nDigits=3):
+        '''
+        Print the results table with the BR limits
+        '''
+        for row in self.getResultsTable(unblindedStatus, nDigits):
+            Print(row)
+        print
+        return
+
+
+    def getResultsTable(self, unblindedStatus=False, nDigits=3):
         '''
         Returns a table (list) with the BR limits
         '''
-        width  = nDigits + 6
-        align  = "{:<8} {:>%s} {:>%s} {:>%s} {:>%s} {:>%s} {:>%s}" % (width, width, width, width, width, width)
-        header = align.format("Mass", "Observed", "Median", "-2sigma", "-1sigma", "+1sigma", "+2sigma")
-        hLine  = "="*len(header)
+        # Open json file to read the results
+        filePath   = "%s/%s/limits.json" % (self._basedir,self._jobDir)
+        fileMode   = "r"
+        jsonFile   = open(filePath, fileMode)
+        myResults  = json.load(jsonFile)
 
-        # Define precision
-        precision = "%%.%df" % nDigits
+        # Definitions
+        masspoints = myResults["masspoints"]
+        myKeys     = ["expected","-2sigma","-1sigma","+1sigma","+2sigma"]
+        width      = nDigits + 6
+        format     = "{:>8} {:>%s} {:>%s} {:>%s} {:>%s} {:>%s} {:>%s}" 
+        titleFormat= "{:^8} {:>%s} {:>%s} {:>%s} {:>%s} {:>%s} {:>%s}" 
+        align      = format % (width, width, width, width, width, width)
+        titleAlign = titleFormat % (width, width, width, width, width, width)
+        header     = titleAlign.format("Mass", "Observed", "Median", "-2sigma", "-1sigma", "+1sigma", "+2sigma")
+        hLine      = "="*len(header)
+        precision  = "%%.%df" % nDigits
 
         # Create the results table
         table  = []
+        totalWidth = 18 + 6*width
+        wString    = "{:^%s}" % totalWidth
+        table.append(wString.format(self._basedir))
         table.append(hLine)
         table.append(header)
         table.append(hLine)
-        for i in xrange(len(self.mass_string)):
-            mass = self.mass_string[i]
-            if unblindedStatus:
-                observed = self.observed_string[i]
-            else:
-                observed = "BLINDED"
-            median       = precision % (self.expectedMedian_string[i])
-            sigma2minus  = precision % (self.expectedMinus2_string[i])
-            sigma1minus  = precision % (self.expectedMinus1_string[i])
-            sigma1plus   = precision % (self.expectedPlus1_string[i])
-            sigma2plus   = precision % (self.expectedPlus2_string[i])
 
-            # Append results
-            row = align.format(mass, observed, median, sigma2minus, sigma1minus, sigma1plus, sigma2plus)
+        # For-loop: From small to high mass values
+        for i, k in enumerate(sorted(masspoints.keys(), key=natural_keys), 1):
+            
+            # Get the mass point
+            mass = k
+            
+            # Get the expected/observed limit
+            if self._opts.unblinded:
+                observed = precision % float(masspoints[k]["observed"])
+                expected = precision % float(masspoints[k]["expected"])
+            else:
+                observed = "blinded"
+                expected = precision % float(masspoints[k]["expected"]["median"])
+
+            # Get the 1 and 2 sigma bands 
+            sigma2minus = precision % float(masspoints[k]["expected"]["-2sigma"])
+            sigma1minus = precision % float(masspoints[k]["expected"]["-1sigma"])
+            sigma1plus  = precision % float(masspoints[k]["expected"]["+1sigma"])
+            sigma2plus  = precision % float(masspoints[k]["expected"]["+2sigma"])
+
+            # For-loop: All variable types(expected, -2sigma, -1sigma, +1sigma, +2sigma)
+
+            for item in myKeys:
+                if "%s_error"%item in masspoints[k]["expected"]:
+                    print "%s_error" % item
+                    a = float(masspoints[k]["expected"]["%s_error"%item])
+                    b = float(masspoints[k]["expected"][item])
+                    r = 0.0
+                    print 
+                    if b > 0:
+                        r = a/b
+            row = align.format(mass, observed, expected, sigma2minus, sigma1minus, sigma1plus, sigma2plus)
             table.append(row)
 
         table.append(hLine)
-        # Print limits (row by row)
-        for row in table:
-            print row
-        return
 
-    def printResults(self):
+        # Close json file
+        jsonFile.close()
+
+        return table
+
+
+    def printResultsAlt(self):
         '''
+        Was printResults() but now superceded by a new version. Kept as legacy
+
         Print the results for all mass points:
         mass,  observed median, -2sigma, -1sigma, +1sigma, +2sigma, Rel. errors in same order
         '''
@@ -408,6 +455,7 @@ if __name__ == "__main__":
     PRINTONLY   = False
     COMBINATION = False
     HToTB       = False
+    PRECISION   = 2
 
     parser = commonLimitTools.createOptionParser(lepDefault=None, lhcDefault=False, lhcasyDefault=True, fullOptions=False)
 
@@ -418,10 +466,13 @@ if __name__ == "__main__":
                       help = "Run combination instead of only taunu fully hadr.")
 
     parser.add_option("-v", "--verbose", dest="verbose", default = VERBOSE,
-                      help = "Enable verbosity (for debugging) 0-4 (-1 = very quiet; 0 = quiet, 1 = verbose, 2+ = debug) [default = %s]" % VERBOSE)
+                      help = "Enable verbosity (-1=very quiet; 0=quiet, 1=verbose, 2+=debug) [default = %s]" % VERBOSE)
 
     parser.add_option("--htb", dest="htb", default = HToTB,
                       help = "Use default setting for H->tb (and not H->tau nu) [default = %s]" % HToTB)
+
+    parser.add_option("--precision", dest="precision", type="int", default = PRECISION,
+                      help = "Define precision to be used for tabulated results [default = %s]" % PRECISION)
 
     opts = commonLimitTools.parseOptionParser(parser)
 
@@ -458,12 +509,14 @@ if __name__ == "__main__":
         msg = str(i) + ") " + r.getBaseDir()
         Verbose(msg, False)
 
-    Print("Printing results for all directories:", True)
-    for r in myResults:
-        r.printResults()
-    
-    print
-    r.printResults2()
+    if 0:
+        Print("Printing results for all directories:", True)
+        for r in myResults:
+            r.printResultsAlt()
+    else:
+        Print("Printing results for all directories:", True)    
+        r.printResults(unblindedStatus=opts.unblinded, nDigits=opts.precision)
+
 
     # Manual submitting of merge
     s = ""
