@@ -519,22 +519,28 @@ class ResultContainer:
         return fname
 
 
-## Base class to generate (LEP-CLs, LHC-CLs) multicrab configuration, or run (LHC-CLs asymptotic)
-#
-# The class is not intended to be used directly by casual user, but
-# from generateMultiCrab() and produceLHCAsymptotic()
 class LimitMultiCrabBase:
-    ## Constructor
-    #
-    # \param directory          Datacard directory
-    # \param massPoints         List of mass points to calculate the limit for
-    # \param datacardPatterns   List of datacard patterns to include in the
-    #                           limit calculation
-    # \param rootfilePatterns   List of shape ROOT file patterns to include
-    #                           in the limit calculation
-    # \param clsType            Object defining the CLs flavour (should be either
-    #                           LEPType, or LHCType).
+    '''
+    Base class to generate (LEP-CLs, LHC-CLs) multicrab configuration, or run (LHC-CLs asymptotic)
+    
+    The class is not intended to be used directly by casual user, but
+    from generateMultiCrab() and produceLHCAsymptotic()
+    '''
+
     def __init__(self, opts, directory, massPoints, datacardPatterns, rootfilePatterns, clsType):
+        '''
+        Constructor
+        
+        \param directory          Datacard directory
+
+        \param massPoints         List of mass points to calculate the limit
+
+        \param datacardPatterns   List of datacard patterns to include in the limit calculation
+
+        \param rootfilePatterns   List of shape ROOT file patterns to include in the limit calculation
+
+        \param clsType            Object defining the CLs flavour (either LEPType or LHCType).
+        '''
         self.opts = opts
         self.datacardDirectory = directory
         self.massPoints = massPoints
@@ -699,11 +705,13 @@ class LimitMultiCrabBase:
 
         fOUT.close()
 
-    ## Write multicrab.cfg to the multicrab directory
-    #
-    # \param numberOfJobs   ValuePerMass object holding the information
-    #                       of number of crab jobs (per mass point)
     def writeMultiCrabCfg(self, numberOfJobs):
+        '''
+        Write multicrab.cfg to the multicrab directory
+        
+        \param numberOfJobs   ValuePerMass object holding the information
+        of number of crab jobs (per mass point)
+        '''
         filename = os.path.join(self.dirname, "multicrab.cfg")
         fOUT = open(filename,'w')
         fOUT.write("[COMMON]\n")

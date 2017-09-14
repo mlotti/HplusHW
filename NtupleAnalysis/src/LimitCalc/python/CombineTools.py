@@ -121,7 +121,8 @@ defaultNumberOfJobs = 20
 ## NB! # For final limits, one should consider using --cminDefaultMinimizerStrategy 1: it is slower and more error-prone but more accurate 
 Verbose("Edit #1", True)
 #lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 2 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=0.1 --cminFallbackAlgo "Minuit,0:0.001"' #default
-lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.1 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' # xenios - testing
+#lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 0 --rAbsAcc 0.1 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' # xenios - WORKS!
+lhcAsymptoticOptionsObserved = '-M AsymptoticLimits -v 3 --cminDefaultMinimizerStrategy 2 --rAbsAcc 0.0001 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_BOUND --cminDefaultMinimizerTolerance=1.0' # xenios - TESTING
 
 # If you use Barlow-Beeston-lite approach for statistical uncertainties, uncomment the next line:
 lhcAsymptoticOptionsBlinded = lhcAsymptoticOptionsObserved + " --run blind"
@@ -363,20 +364,21 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
         self._results = commonLimitTools.ResultContainer(self.opts.unblinded, self.dirname)
         
         # For-loop: All mass points to run combine on
-#        for counter, mass in enumerate(self.massPoints, 1):
-#            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Mass Point", "%i" % counter, "/", "%i:" % len(self.massPoints), "m = %s GeV" % mass)
-#            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle() , True)
-#
-#            # myResult = self.clsType.runCombine(mass) #xenios - tmp
-#            if myResult.failed:
-#                if not quietStatus:
-#                    msg = "Fit failed for mass point %s, skipping ..." % mass
-#                    Print(ShellStyles.WarningLabel()  + msg, True)
-#            else:
-#                self._results.append(myResult)
-#                msg = "Processed successfully mass point %s, the result is %s" % (mass,self._results.getResultString(mass)) 
-#                if not quietStatus:
-#                    Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), False)
+        for counter, mass in enumerate(self.massPoints, 1):
+            msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Mass Point", "%i" % counter, "/", "%i:" % len(self.massPoints), "m = %s GeV" % mass)
+            Print(ShellStyles.HighlightAltStyle() + msg + ShellStyles.NormalStyle(), counter==1)
+
+            myResult = self.clsType.runCombine(mass)
+            if myResult.failed:
+                if not quietStatus:
+                    msg = "Fit failed for mass point %s, skipping ..." % mass
+                    Print(ShellStyles.WarningLabel()  + msg, True)
+            else:
+                self._results.append(myResult)
+                #msg = "Processed successfully mass point %s, the result is %s" % (mass,self._results.getResultString(mass)) 
+                msg = "The result is %s" % (self._results.getResultString(mass))
+                if not quietStatus:
+                    Print(ShellStyles.SuccessStyle() + msg + ShellStyles.NormalStyle(), False)
 
         if 1: #not quietStatus:
             msg = "Summary of the results:"
@@ -384,20 +386,31 @@ class MultiCrabCombine(commonLimitTools.LimitMultiCrabBase):
 
             self._results.print2()
             fname = self._results.saveJson()
-            print jsonPath
-            print "Wrote results to %s" % fname
 
-    ## Return result container (ResultContainer object)
+        Print("Wrote results to %s" % fname, True)
+        return
+
+
     def getResults(self):
-         return self._results
+        '''
+        Return result container (ResultContainer object)
+        '''
+        return self._results
 
-## Adds to the commands list the necessary commands and returns the input datacard name
-#
-# \brlimit               Boolean, set to true to calculate Br limit on light charged Higgs
-# \param mass            String for the mass point
-# \param datacardFiles   List of strings for datacard file names of the mass point
-# \param commands        List of strings of the commands to run Combine
+
 def _addCombinePreparationCommands(brlimit,datacardFiles,mass,commands):
+    '''
+    Adds to the commands list the necessary commands and returns the input datacard name
+    
+    \brlimit               Boolean, set to true to calculate Br limit on light charged Higgs
+
+    \param mass            String for the mass point
+
+    \param datacardFiles   List of strings for datacard file names of the mass point
+
+    \param commands        List of strings of the commands to run Combine
+    '''
+
     # Join datacards if necessary
     myInputName = datacardFiles[0]
     if len(datacardFiles) > 1:
@@ -410,40 +423,42 @@ def _addCombinePreparationCommands(brlimit,datacardFiles,mass,commands):
         myInputName = myNewInputName
     return myInputName
 
-## Definition of the LHC-type CLs (with the asymptotic treatment of nuisance parameters)
-#
-# The method itself is described in the CMS-NOTE-2011-005 appendix A.1.3.
-#
-# At the moment running the asymptotic limit is so fast that running
-# it via crab would be waste of time and resources from everybodys
-# point of view. Instead, the LandS is run at the "multicrab
-# configuration generation" stage. To have similar usage to the other
-# CLs flavours, the results are stored in a multicrab task directory.
-#
-# Because no crab is involved, the user interface is different. This
-# is achieved with the produceLHCAsymptotic() function instead of the
-# generateMultiCrab().
+
 class LHCTypeAsymptotic:
-    ## Constructor
-    #
-    # \param optionsObserved  Command line options for LandS for the
-    #                         observed limit. String, dictionary (see
-    #                         ValuePerMass), or None for default
-    #                         (lhcAsymptoticOptionsObserved)
-    # \param optionsExpected  Command line options for LandS for the
-    #                         expected limit. String, dictionary (see
-    #                         ValuePerMass), or None for default
-    #                         (lhcAsymptoticOptionsExpected)
-    # \param rMin             The \a --rMin parameter for LandS. String,
-    #                         dictionary (see ValuePerMass), or None for
-    #                         default (lhcAsymptoticRmin)
-    # \param rMax             The \a --rMax parameter for LandS. String,
-    #                         dictionary (see ValuePerMass), or None for
-    #                         default (lhcAsymptoticRmax)
-    #
-    # Note: if you add any parameters to the constructor, add the
-    # parameters to the clone() method correspondingly.
+    '''
+    Definition of the LHC-type CLs (with the asymptotic treatment of nuisance parameters)
+    
+    The method itself is described in the CMS-NOTE-2011-005 appendix A.1.3.
+    
+    At the moment running the asymptotic limit is so fast that running
+    it via crab would be waste of time and resources from everybodys
+    point of view. Instead, the LandS is run at the "multicrab
+    configuration generation" stage. To have similar usage to the other
+    CLs flavours, the results are stored in a multicrab task directory.
+    
+    Because no crab is involved, the user interface is different. This
+    is achieved with the produceLHCAsymptotic() function instead of the
+    generateMultiCrab().
+    '''
     def __init__(self, opts, optionsObservedAndExpected=None, optionsBlinded=None, rMin=None, rMax=None):
+        '''
+        Constructor
+        
+        \param optionsObserved  Command line options for LandS for the observed limit. 
+        String, dictionary (see ValuePerMass), or None for default (lhcAsymptoticOptionsObserved)
+
+        \param optionsExpected  Command line options for LandS for the expected limit. 
+        String, dictionary (see ValuePerMass), or None for default (lhcAsymptoticOptionsExpected)
+
+        \param rMin             The \a --rMin parameter for LandS. 
+        String, dictionary (see ValuePerMass), or None for default (lhcAsymptoticRmin)
+
+        \param rMax             The \a --rMax parameter for LandS. 
+        String, dictionary (see ValuePerMass), or None for default (lhcAsymptoticRmax)
+                                
+        Note: if you add any parameters to the constructor, add the parameters to the clone()
+        method correspondingly.
+        '''
         self.opts = opts
         self.brlimit = opts.brlimit
         self.sigmabrlimit = opts.sigmabrlimit
@@ -468,29 +483,42 @@ class LHCTypeAsymptotic:
         self.signalInjectionScripts = {}
 
         self.configuration = {}
+        return
 
-    ## Return the name of the CLs flavour (for serialization to configuration.json)
+
     def name(self):
+        '''
+        Return the name of the CLs flavour (for serialization to configuration.json)
+        '''
         return "LHCAsymptotic"
 
-    ## Return human-readable name of the CLs flavour
     def nameHuman(self):
+        '''
+        Return human-readable name of the CLs flavour
+        '''
         return "LHC-type asymptotic"
 
-    ## Get the configuration dictionary for serialization.
-    #
-    # LHC-type asymptotic CLs does not need any specific information to be stored
+
     def getConfiguration(self, mcconf):
+        '''
+        Get the configuration dictionary for serialization.
+        
+         LHC-type asymptotic CLs does not need any specific information to be stored
+         '''
         self.multicrabConfiguration = mcconf
         return self.configuration
 
-    ## Clone the object, possibly overriding some options
-    #
-    # \param kwargs   Keyword arguments, can be any of the arguments of
-    #                 __init__(), with the same meaning.
+
     def clone(self, **kwargs):
+        '''
+        Clone the object, possibly overriding some options
+        
+        \param kwargs   Keyword arguments, can be any of the arguments of
+        __init__(), with the same meaning.
+        '''
         args = aux.updateArgs(kwargs, self, ["opts", "optionsObservedAndExpected", "optionsBlinded", "rMin", "rMax"])
         return LHCTypeAsymptotic(**args)
+
 
     def setDirectory(self, dirname):
         '''
@@ -500,6 +528,7 @@ class LHCTypeAsymptotic:
         '''
         self.dirname = dirname
         return
+
 
     def createScripts(self, mass, datacardFiles):
         '''
@@ -517,6 +546,7 @@ class LHCTypeAsymptotic:
         if self.opts.injectSignal:
             self._createInjection(mass, datacardFiles)
         return
+
 
     def _createObsAndExp(self, mass, datacardFiles):
         '''

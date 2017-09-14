@@ -20,14 +20,15 @@ import HiggsAnalysis.LimitCalc.limit as limit
 #================================================================================================
 # Function definition
 #================================================================================================
-#def Verbose(msg, printHeader=False):
-#    '''
-#    Calls Print() only if verbose options is set to true.
-#    '''
-#    if not opts.verbose:
-#        return
-#    Print(msg, printHeader)
-#    return
+def Verbose(msg, printHeader=False):
+    '''
+    Calls Print() only if verbose options is set to true.
+    '''
+    if not opts.verbose:
+        return
+    Print(msg, printHeader)
+    return
+
 
 def Print(msg, printHeader=True):
     '''
@@ -146,12 +147,17 @@ def doBRlimit(limits, unblindedStatus, opts, log=False):
     name = "limitsBr"
     ymin = 0
     ymax = limits.getFinalstateYmaxBR() #fixme: alexandros
+
+    s = tdrstyle.TDRStyle()
+    s.setGridX(True)
+    s.setGridY(True)
+
     if opts.logx:
         name += "_logx"
     if log:
         name += "_log"
         if limits.isHeavyStatus:
-            ymin = 1e-1
+            ymin = 1e-2
             ymax = 10.0
             if limit.BRassumption != "":
                 ymax = 10.0

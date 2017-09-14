@@ -50,7 +50,7 @@ def Verbose(msg, printHeader=False):
         print "\t", msg
     return
 
-def Print(msg, printHeader=True):
+def Print(msg, printHeader=False):
     if printHeader:
         print "=== LimitOMatic.py:"
         
@@ -95,8 +95,8 @@ class Result:
 
             lumiPath = "%s/%s/limits.json" % (self._basedir, self._jobDir) 
             if os.path.exists(lumiPath):
-                msg = "Limit already calculated! Skipping ..."
-                Print(ShellStyles.NoteLabel()  + msg, False)
+                msg = "File \"%s\" already exists!\n\tThe limit has already been calculated.\n\tSkipping ..." % (lumiPath)
+                Print(ShellStyles.NoteStyle()  + msg + ShellStyles.NormalStyle(), True)
                 self._limitCalculated = True
             else:
                 msg = "Creating and submitting " + basedir
@@ -289,24 +289,33 @@ class Result:
         Print the results for all mass points:
         mass,  observed median, -2sigma, -1sigma, +1sigma, +2sigma, Rel. errors in same order
         '''
-        Print(self._basedir, True)
+        msg = "{:^120}".format(self._basedir)
+        Print(msg)
         if not self._limitCalculated:
-            Print("Results not yet retrieved. Return", True)
+            Verbose("Results not yet retrieved. Return", True)
             return
 
         # Open json file to read the results
-        myFile     = open("%s/%s/limits.json"%(self._basedir,self._jobDir),"r")
+        filePath   = "%s/%s/limits.json" % (self._basedir,self._jobDir)
+        fileMode   = "r"
+        myFile     = open(filePath, fileMode)
         myResults  = json.load(myFile)
         masspoints = myResults["masspoints"]
         myKeys     = ["median","-2sigma","-1sigma","+1sigma","+2sigma"]
         line       = "mass  obs.      "
+        
+        # Print columns names
+        hLine = "="*120
+        Print(hLine)
         for item in myKeys:
             line += "%9s " % item
-        print line+"   Rel. errors in same order"
+        line += "   Rel. errors in same order"
+        Print(line)
+        Print(hLine)
 
-        key=natural_keys
-        for k in sorted(masspoints.keys(), key=natural_keys):
-            line = "%4d "%int(k)
+        # For-loop: From small to high mass values
+        for i, k in enumerate(sorted(masspoints.keys(), key=natural_keys), 1):
+            line = "%4d " % int(k)
             if self._opts.unblinded:
                 line += " %9.5f"%float(masspoints[k]["observed"])
             else:
@@ -323,8 +332,14 @@ class Result:
                     line += " %9.4f"%(r)
                 else:
                     line += "      n.a."
-            print line
+            Print(line, False)
+
+        # Close json file
         myFile.close()
+        Print(hLine)
+        print
+        return
+
 
     def getBaseDir(self):
         return self._basedir
@@ -384,25 +399,26 @@ if __name__ == "__main__":
         msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Directory", "%i" % counter, "/", "%i:" % len(myDirs), "%s" % d)
         Print(ShellStyles.HighlightAltStyle()  + msg + ShellStyles.NormalStyle(), counter==1)
         myResults.append(Result(opts, d))
-        #print "\033[92mLimitOMatic: Directory %s (directory %d/%d) processed!\033[00m"%(d,counter,len(myDirs))
 
-    # Inform user of success
-    msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Directory", "%i" % counter, "/", "%i:" % len(myDirs), "Success")
-    Print(ShellStyles.SuccessStyle()  + msg + ShellStyles.NormalStyle(), False)
+        # Inform user of success
+        msg = "{:<9} {:>3} {:<1} {:<3} {:<50}".format("Directory", "%i" % counter, "/", "%i:" % len(myDirs), "Success")
+        Print(ShellStyles.SuccessStyle()  + msg + ShellStyles.NormalStyle(), True)
 
-    Verbose("The results are stored in the following directories:", True)
-    for r in myResults:
-        Print(r.getBaseDir(), False)
+    Verbose("The results are stored in the following directories:", counter==1)
+    for i, r in enumerate(myResults, 1):
+        msg = str(i) + ") " + r.getBaseDir()
+        Verbose(msg, False)
 
-    Verbose("Printing results for all directories:", True)
+    Print("Printing results for all directories:", True)
     for r in myResults:
         r.printResults()
 
     # Manual submitting of merge
     s = ""
     for r in myResults:
-        s += r._output
-    if s != "":
-        print "\nRun the following to merge the root files (then rerun this script to see the summary of results)"
-        print s
+       s += r._output
 
+    if s != "":
+        msg = "Run the following to merge the root files (then rerun this script to see the summary of results)"
+        Print(msg, True)
+        print s
