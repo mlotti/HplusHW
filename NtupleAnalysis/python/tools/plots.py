@@ -402,7 +402,7 @@ _legendLabels = {
     "EWK"      : "EWK",
     "Diboson"  : "Diboson",
     "SingleTop": "Single t",
-    "QCD"      : "Mis-ID. #tau_{h} (data)",
+    "QCD"      : "QCD", #"Mis-ID. #tau_{h} (data)",
     "QCD-b"    : "QCD (b enr.)",
     "QCDdata"  : "Mis-ID. #tau_{h} (data)", #"QCD (data driven)"
 
