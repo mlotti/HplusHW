@@ -47,6 +47,10 @@ public:
     int getNumberOfFailedBJetCands() const { return fFailedBJetCands.size(); }
     /// Obtain collection of failed bjet candidates
     const std::vector<Jet>& getFailedBJetCands() const { return fFailedBJetCands; }
+    /// Obtain collection of failed bjet candidates (sorted by pt value)
+    const std::vector<Jet>& getFailedBJetCandsDescendingPt() const { return fFailedBJetCandsDescendingPt; }
+    /// Obtain collection of failed bjet candidates (sorted by pt value)
+    const std::vector<Jet>& getFailedBJetCandsAscendingPt() const { return fFailedBJetCandsAscendingPt; }
     /// Obtain collection of failed bjet candidates (sorted by discriminator value)
     const std::vector<Jet>& getFailedBJetCandsDescendingDiscr() const { return  fFailedBJetCandsDescendingDiscr; }
     /// Obtain collection of failed bjet candidates (sorted by discriminator value)
@@ -73,6 +77,10 @@ public:
     std::vector<Jet> fSelectedBJets;
     /// All jets failing all the b-tagging discr (trg-matched jets first, rest random)
     std::vector<Jet> fFailedBJetCands;
+    /// All jets failing all the b-tagging discr cut (sorted by descending pt value)
+    std::vector<Jet> fFailedBJetCandsDescendingPt; 
+    /// All jets failing all the b-tagging discr cut (sorted by ascending pt value)
+    std::vector<Jet> fFailedBJetCandsAscendingPt; 
     /// All jets failing all the b-tagging discr cut (sorted by descending discriminator value)
     std::vector<Jet> fFailedBJetCandsDescendingDiscr; 
     /// All jets failing all the b-tagging discr cut (sorted by ascending discriminator value)

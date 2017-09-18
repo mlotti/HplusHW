@@ -3,19 +3,17 @@
 Description:
 
 Usage:
-./plotMC_HPlusMass.py -m <pseudo_mcrab> [opts]
+./plotMC_Folder.py -m <pseudo_mcrab> [opts]
 
 Examples:
-./plotMC_HPlusMass.py -m <peudo_mcrab> -o "" --url --normaliseToOne
-./plotMC_HPlusMass.py -m <peudo_mcrab> --folder topologySelection_ --url --normaliseToOne
-./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url
-./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
-./plotMC_HPlusMass.py -m <peudo_mcrab> --normaliseToOne --url --signalMass 500
+./plotMC_Folder.py -m <peudo_mcrab> -o "" --url --normaliseToOne
+./plotMC_Folder.py -m <peudo_mcrab> --folder topologySelection_ --url --normaliseToOne
+./plotMC_Folder.py -m <peudo_mcrab> --normaliseToOne --url
 
 Last Used:
-./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --url --mergeEWK
-./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --folder ""
-./plotMC_HPlusMass.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --folder topSelection_ --url --normaliseToOne
+./plotMC_Folder.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --url --mergeEWK
+./plotMC_Folder.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --normaliseToOne --folder ""
+./plotMC_Folder.py -m Hplus2tbAnalysis_StdSelections_TopCut100_AllSelections_NoTrgMatch_TopCut10_H2Cut0p5_InvMassFix_170822_074229/ --folder topSelection_ --url --normaliseToOne
 
 '''
 
@@ -105,7 +103,7 @@ def GetDatasetsFromDir(opts):
     return datasets
     
 
-def main(opts, signalMass):
+def main(opts):
 
     optModes = ["OptChiSqrCutValue100"]                                                                                                                             
 
@@ -136,7 +134,7 @@ def main(opts, signalMass):
         intLumi = datasetsMgr.getDataset("Data").getLuminosity()
 
         # Remove datasets
-        if 1:
+        if 0:
             datasetsMgr.remove(filter(lambda name: "Data" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "QCD-b" in name, datasetsMgr.getAllDatasetNames()))
             datasetsMgr.remove(filter(lambda name: "QCD" in name, datasetsMgr.getAllDatasetNames()))
@@ -155,21 +153,6 @@ def main(opts, signalMass):
             datasetsMgr.merge("EWK", GetListOfEwkDatasets())
             plots._plotStyles["EWK"] = styles.getAltEWKStyle()
 
-        # Re-order datasets
-        datasetOrder = []
-        for d in datasetsMgr.getAllDatasets():
-            if "M_" in d.getName():
-                if d not in signalMass:
-                    continue
-            datasetOrder.append(d.getName())
-            #newOrder = ["TT", "QCD"]
-            #newOrder = ["TT", "QCD"]
-        for m in signalMass:
-            #newOrder.insert(0, m)
-            datasetOrder.insert(0, m)
-            #datasetsMgr.selectAndReorder(newOrder)
-        datasetsMgr.selectAndReorder(datasetOrder)
-
         # Print dataset information
         datasetsMgr.PrintInfo()
 
@@ -183,21 +166,10 @@ def main(opts, signalMass):
         folder      = opts.folder 
         histoPaths1 = []
         if folder != "":
-            histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
-            # hList0     = [x for x in histoList if "TrijetMass" in x]
-            # hList1     = [x for x in histoList if "TetrajetMass" in x]
-            # hList2     = [x for x in histoList if "TetrajetBJetPt" in x]
-            # histoPaths1 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
+            histoList  = datasetsMgr.getDataset(datasetsMgr.getAllDatasetNames()[0]).getDirectoryContent(folder)
             histoPaths1 = [os.path.join(folder, h) for h in histoList]
-        
-        folder     = "ForDataDrivenCtrlPlots"
-        histoList  = datasetsMgr.getDataset(datasetOrder[0]).getDirectoryContent(folder)
-        hList0     = [x for x in histoList if "TrijetMass" in x]
-        hList1     = [x for x in histoList if "TetrajetMass" in x]
-        hList2     = [x for x in histoList if "TetrajetBjetPt" in x]
-        histoPaths2 = [os.path.join(folder, h) for h in hList0+hList1+hList2]
 
-        histoPaths = histoPaths1 + histoPaths2
+        histoPaths = histoPaths1 #+ histoPaths2
         for h in histoPaths:
             if "Vs" in h: # Skip TH2D
                 continue
@@ -220,15 +192,7 @@ def PlotMC(datasetsMgr, histo, intLumi):
     logY    = False
     _opts   = {"ymin": 1e-3, "ymaxfactor": 1.0}
 
-    if "ChiSqr" in histo:
-        _rebinX = 1
-        logY    = True
-        _units  = ""
-        _format = "%0.1f " + _units
-        _xlabel = "#chi^{2}"
-        _cutBox = {"cutValue": 10.0, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        _opts["xmax"] = 100
-    elif "trijetmass" in histo.lower():
+    if "trijetmass" in histo.lower():
         _rebinX = 4
         logY    = False
         _units  = "GeV/c^{2}"
@@ -236,15 +200,6 @@ def PlotMC(datasetsMgr, histo, intLumi):
         _xlabel = "m_{jjb} (%s)" % _units
         _cutBox = {"cutValue": 173.21, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
         _opts["xmax"] = 805 #1005
-    elif "ht" in histo.lower():
-        _rebinX = 2
-        logY    = False
-        _units  = "GeV"
-        _format = "%0.0f " + _units
-        _xlabel = "H_{T} (%s)" % _units
-        _cutBox = {"cutValue": 500, "fillColor": 16, "box": False, "line": True, "greaterThan": True}
-        #_opts["xmin"] = 500
-        _opts["xmax"] = 2000
     elif "tetrajetmass" in histo.lower():
         _rebinX = 5 #5 #10 #4
         logY    = False
@@ -296,13 +251,6 @@ def PlotMC(datasetsMgr, histo, intLumi):
         p.histoMgr.setHistoDrawStyle("TT", "AP")
         p.histoMgr.setHistoLegendStyle("TT", "LP")
 
-    # Customise style
-    signalM = []
-    for m in signalMass:
-        signalM.append(m.rsplit("M_")[-1])
-    for m in signalM:
-        p.histoMgr.forHisto("ChargedHiggs_HplusTB_HplusToTB_M_%s" %m, styles.getSignalStyleHToTB_M(m))
-
     plots.drawPlot(p, 
                    histo,  
                    xlabel       = _xlabel,
@@ -317,7 +265,8 @@ def PlotMC(datasetsMgr, histo, intLumi):
 
     # Save plot in all formats    
     saveName = histo.split("/")[-1]
-    savePath = os.path.join(opts.saveDir, "HplusMasses", histo.split("/")[0], opts.optMode)
+    #savePath = os.path.join(opts.saveDir, opts.folder, histo.split("/")[0], opts.optMode)
+    savePath = os.path.join(opts.saveDir, histo.split("/")[0], opts.optMode)
     SavePlot(p, saveName, savePath) 
     return
 
@@ -370,9 +319,6 @@ if __name__ == "__main__":
     OPTMODE      = ""
     BATCHMODE    = True
     PRECISION    = 3
-    #SIGNALMASS   = [200, 500, 800, 2000]
-    SIGNALMASS   = [300, 500, 800, 1000]
-    #SIGNALMASS   = [200, 500, 800, 1000, 2000, 3000]
     INTLUMI      = -1.0
     SUBCOUNTERS  = False
     LATEX        = False
@@ -411,9 +357,6 @@ if __name__ == "__main__":
 
     parser.add_option("--mergeEWK", dest="mergeEWK", action="store_true", default=MERGEEWK, 
                       help="Merge all EWK samples into a single sample called \"EWK\" [default: %s]" % MERGEEWK)
-
-    #parser.add_option("--signalMass", dest="signalMass", type=float, default=SIGNALMASS, 
-                      #help="Mass value of signal to use [default: %s]" % SIGNALMASS)
 
     parser.add_option("--saveDir", dest="saveDir", type="string", default=SAVEDIR, 
                       help="Directory where all pltos will be saved [default: %s]" % SAVEDIR)
@@ -456,14 +399,8 @@ if __name__ == "__main__":
     if opts.mergeEWK:
         Print("Merging EWK samples into a single Datasets \"EWK\"", True)
 
-    # Sanity check
-    allowedMass = [180, 200, 220, 250, 300, 350, 400, 500, 800, 1000, 2000, 3000]
-    signalMass = []
-    for m in sorted(SIGNALMASS, reverse=True):
-        signalMass.append("ChargedHiggs_HplusTB_HplusToTB_M_%.f" % m)
-
     # Call the main function
-    main(opts, signalMass)
+    main(opts)
 
     if not opts.batchMode:
-        raw_input("=== plotMC_HPlusMass.py: Press any key to quit ROOT ...")
+        raw_input("=== plotMC_Folder.py: Press any key to quit ROOT ...")

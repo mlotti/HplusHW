@@ -113,8 +113,7 @@ class TDRStyle:
         self.tdrStyle.SetPadBottomMargin(0.13)
         #self.tdrStyle.SetPadLeftMargin(0.13)
         self.tdrStyle.SetPadLeftMargin(0.16)
-        self.tdrStyle.SetPadRightMargin(self.rightMargin) # default
-        #self.tdrStyle.SetPadRightMargin(0.13)
+        self.tdrStyle.SetPadRightMargin(self.rightMargin) # default    
 
         # Based on the new example myMacro.C, increase top margin
         # slightly
@@ -222,14 +221,19 @@ class TDRStyle:
     ## Widen the default canvas and pad widths to be able to draw with "*Z" draw styles
     #
     # \param onoff  If True (False), make the canvas and pad wider (normal)     
-    def setWide(self, onoff):
+    def setWide(self, onoff, percIncrease=0.08):
+        factor = 1+percIncrease
         if onoff:
-            self.tdrStyle.SetCanvasDefW(int(1.08*self.canvasW))
-            self.tdrStyle.SetPadRightMargin(0.08+self.rightMargin)
+            self.tdrStyle.SetCanvasDefW(int(factor*self.canvasW))
+            self.tdrStyle.SetPadRightMargin(percIncrease+self.rightMargin)
         else:
             self.tdrStyle.SetCanvasDefW(self.canvasW)
             self.tdrStyle.SetPadRightMargin(self.rightMargin)
 
+    # Decrease the canvas right margin (use-case: TH2)
+    def setPadRightMargin(newMargin=0.05):
+        self.tdrStyle.SetPadRightMargin(newMargin)
+        return
 
     ## Set OptStat
     def setOptStat(self, stat):

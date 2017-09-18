@@ -6,7 +6,7 @@ import HiggsAnalysis.NtupleAnalysis.parameters.scaleFactors as scaleFactors
 #================================================================================================
 # General parameters
 #================================================================================================
-verbose               = False
+verbose               = True
 histogramAmbientLevel = "Debug"  # Options: Systematics, Vital, Informative, Debug
 
 #================================================================================================
@@ -180,6 +180,10 @@ topologySelection = PSet(
 topSelection = PSet(
     ChiSqrCutValue     = 10.0,
     ChiSqrCutDirection =  "<",   # options: ==, !=, <, <=, >, >=
+    LowLdgTrijetMassCutValue      = 150.0,
+    LowLdgTrijetMassCutDirection  = ">=",
+    HighLdgTrijetMassCutValue      = 210.0,
+    HighLdgTrijetMassCutDirection  = "<=",
     MassW              = 80.385,
     DiJetSigma         = 10.2,
     TriJetSigma        = 27.2,
@@ -209,10 +213,12 @@ if 0:
 fakeBMeasurement = PSet(
     prelimTopFitChiSqrCutValue        = 100.0,
     prelimTopFitChiSqrCutDirection    =  "<",   # options: ==, !=, <, <=, >, >=
+    #
     numberOfBJetsCutValue             = 2,
-    numberOfBJetsCutDirection         = ">=", # options: ==, !=, <, <=, >, >=
+    numberOfBJetsCutDirection         = "==", # options: ==, !=, <, <=, >, >=
+    #
     numberOfInvertedBJetsCutValue     = 0,
-    numberOfInvertedBJetsCutDirection = ">=", # options: ==, !=, <, <=, >, >=
+    numberOfInvertedBJetsCutDirection = ">", # options: ==, !=, <, <=, >, >=
     invertedBJetDiscr                 = bjetSelection.bjetDiscr,
     invertedBJetWorkingPoint          = "Loose",
     )
@@ -230,7 +236,7 @@ commonPlotsOptions = PSet(
     ptBins            = PSet(nBins =  50, axisMin =  0.0, axisMax =  500.0),
     etaBins           = PSet(nBins =  50, axisMin = -5.0, axisMax =    5.0),
     phiBins           = PSet(nBins =  64, axisMin = -3.2, axisMax =    3.2),
-    deltaEtaBins      = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
+    deltaEtaBins      = PSet(nBins = 100, axisMin =  0.0, axisMax =   10.0),
     deltaPhiBins      = PSet(nBins =  32, axisMin =  0.0, axisMax =    3.2),
     deltaRBins        = PSet(nBins =  50, axisMin =  0.0, axisMax =   10.0),
     rtauBins          = PSet(nBins =  55, axisMin =  0.0, axisMax =    1.1), # HToTauNu

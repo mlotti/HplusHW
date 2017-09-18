@@ -13,16 +13,16 @@ a time most probably you are I/O -limited. The limit is how much memory one proc
 
 
 USAGE:
-./runAnalysis.py -m <multicrab_directory> -j <numOfCores> -i <DatasetName>
+./run.py -m <multicrab_directory> -j <numOfCores> -i <DatasetName>
 or
-./runAnalysis.py -m <multicrab_directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
+./run.py -m <multicrab_directory> -n 10 -e "Keyword1|Keyword2|Keyword3"
 
 Example:
-./runAnalysis.py -m /multicrab_CMSSW752_Default_07Jan2016/
-./runAnalysis.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
-./runAnalysis.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
-./runAnalysis.py -m <multicrab-directory> -e TT_extOB
-./runAnalysis.py -m <multicrab_directory> -n 10 -e "QCD_bEnriched_HT300|2016|ST_"
+./run.py -m /multicrab_CMSSW752_Default_07Jan2016/
+./run.py -m multicrab_CMSSW752_Default_07Jan2016/ -j 16
+./run.py -m multicrab_Hplus2tbAnalysis_v8014_20160818T1956 -n 1000 -e QCD
+./run.py -m <multicrab-directory> -e TT_extOB
+./run.py -m <multicrab_directory> -n 10 -e "QCD_bEnriched_HT300|2016|ST_"
 
 ROOT:
 The available ROOT options for the Error-Ignore-Level are (const Int_t):
@@ -76,7 +76,7 @@ def Verbose(msg, printHeader=False):
         return
 
     if printHeader:
-        print "=== runAnalysis.py:"
+        print "=== run.py:"
 
     if msg !="":
         print "\t", msg
@@ -85,7 +85,7 @@ def Verbose(msg, printHeader=False):
 
 def Print(msg, printHeader=True):
     if printHeader:
-        print "=== runAnalysis.py:"
+        print "=== run.py:"
 
     if msg !="":
         print "\t", msg
