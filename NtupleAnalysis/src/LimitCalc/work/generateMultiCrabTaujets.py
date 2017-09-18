@@ -161,7 +161,8 @@ if __name__ == "__main__":
 
     for myDir in myDirs:
         settings = commonLimitTools.GeneralSettings(myDir, opts.masspoints)
-        print "The following masses are considered:",settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS)
+        if 0:
+            print "The following masses are considered:",settings.getMassPoints(commonLimitTools.LimitProcessType.TAUJETS)
         if not main(opts, settings, myDir):
             print ""
             parser.print_help()

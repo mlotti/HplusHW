@@ -1,0 +1,3 @@
+[submodule "CombinedLimit"]
+	path = CombinedLimit
+	url = https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git
